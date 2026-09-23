@@ -99,8 +99,8 @@ diagnosticmetaClass <- R6::R6Class(
         # between runs, so the same banner accumulated once per run cycle.
         # Notices now render into a dedicated always-visible `notices` Html
         # item, rebuilt from scratch each run.
-        # library-audit 2026-09-16 OncoPath [INFO] REJECTED: no native notice element - type: Notice fails the
-        #   .r.yaml schema, type: Notification builds no results object (guide section 13)
+        # library-audit 2026-09-22 OncoPath [LOW] REJECTED: Notice renders single-line plain text and dynamic
+        #   insert() in .run() accumulates across runs (Group$remove cannot drop items) (guide section 13)
         .addNotice = function(type, title, content) {
             private$.noticeList[[length(private$.noticeList) + 1]] <- list(
                 type = type,
@@ -259,6 +259,18 @@ diagnosticmetaClass <- R6::R6Class(
                 private$.populateInterpretation()
             else self$results$interpretation$setContent("")
 
+            # Fixed row structure for likelihood ratio reference guide
+            private$.populateLikelihoodRatioGuide()
+
+            # Pre-scaffold fixed row structure for predictive values table across benchmark prevalences
+            prevalences <- c(0.05, 0.10, 0.20, 0.50)
+            for (prev in prevalences) {
+                self$results$predictiveValues$addRow(
+                    rowKey = paste0("p_", as.integer(prev * 100)),
+                    values = list(prevalence = prev, ppv = NA_real_, npv = NA_real_)
+                )
+            }
+
             # The three plot-explanation panels are static interpretation
             # guides: populate them here so a data change can never leave
             # a visible-but-empty titled panel behind.
@@ -373,11 +385,30 @@ diagnosticmetaClass <- R6::R6Class(
             all_provided <- !is.null(study_var) && !is.null(tp_var) &&
                           !is.null(fp_var) && !is.null(fn_var) && !is.null(tn_var)
 
+            # library-audit 2026-09-22 OncoPath [MEDIUM] DONE: setting up an analysis is not an error.
+            #   Nothing assigned emits no notice - the instructions panel already names every variable
+            #   and what it is for. A partial selection gets an INFO naming the boxes that are still
+            #   empty. The red ERROR that used to sit here greeted every user the moment they opened
+            #   the analysis, telling them they had done something wrong (guide section 25).
+            #   Each sentence is a whole translatable unit joined with paste(), not a spliced noun
+            #   phrase, so it can be inflected correctly in every language.
             if (!all_provided) {
-                # Show instructions if any variables are missing
                 self$results$instructions$setVisible(TRUE)
-                private$.addNotice("ERROR", .("Variables required"),
-                    .("Select the study identifier and the TP, FP, FN and TN count variables to run the meta-analysis."))
+                n_set <- sum(!vapply(list(study_var, tp_var, fp_var, fn_var, tn_var),
+                                     is.null, logical(1)))
+                if (n_set > 0L) {
+                    still_empty <- c(
+                        if (is.null(study_var)) .("Study identifier is still empty."),
+                        if (is.null(tp_var)) .("True positives is still empty."),
+                        if (is.null(fp_var)) .("False positives is still empty."),
+                        if (is.null(fn_var)) .("False negatives is still empty."),
+                        if (is.null(tn_var)) .("True negatives is still empty.")
+                    )
+                    private$.addNotice("INFO", .("Keep going - a few variables to add"),
+                        paste(c(still_empty,
+                                .("Fill them in and the meta-analysis will appear.")),
+                              collapse = " "))
+                }
                 return()
             }
 
@@ -667,6 +698,11 @@ diagnosticmetaClass <- R6::R6Class(
             # Populate individual studies table
             if (self$options$show_individual_studies) {
                 private$.populateIndividualStudies(meta_data)
+            }
+
+            # Populate predictive values table
+            if (isTRUE(self$options$show_interpretation)) {
+                private$.populatePredictiveValues()
             }
 
             # Every result item is gated by an option, so switching off the one
@@ -1209,9 +1245,7 @@ diagnosticmetaClass <- R6::R6Class(
                 return()
             }
 
-            {
-
-                hsroc_table <- self$results$hsrocresults
+            hsroc_table <- self$results$hsrocresults
                 # Blank the rows scaffolded in .init() rather than deleting them.
                 for (blank_key in c("theta", "taus_sq", "auc"))
                     hsroc_table$setRow(rowKey = blank_key, values = list(
@@ -1506,7 +1540,6 @@ diagnosticmetaClass <- R6::R6Class(
                         .("Proportional-hazards SROC coefficient format is not supported")
                     )
                 }
-            }
         },
         
         .performHeterogeneityAnalysis = function(analysis_data) {
@@ -1523,9 +1556,7 @@ diagnosticmetaClass <- R6::R6Class(
                 return()
             }
 
-            {
-
-                analysis_data$sens <- analysis_data$tp / (analysis_data$tp + analysis_data$fn)
+            analysis_data$sens <- analysis_data$tp / (analysis_data$tp + analysis_data$fn)
                 analysis_data$spec <- analysis_data$tn / (analysis_data$tn + analysis_data$fp)
 
                 analysis_data$logit_sens <- stats::qlogis(analysis_data$sens)
@@ -1663,7 +1694,6 @@ diagnosticmetaClass <- R6::R6Class(
                     sprintf(.("Univariate auxiliary models used %s estimation."),
                             private$.methodTitle(self$options$method))
                 )
-            }
         },
         
         .performMetaRegression = function(meta_data, analysis_data) {
@@ -1734,6 +1764,22 @@ diagnosticmetaClass <- R6::R6Class(
                 self$results$metaregression$setNote("constant_covariate",
                     .("Meta-regression not run: the covariate takes the same value in every study, so it cannot explain any between-study variation."))
                 return()
+            }
+
+            cov_levels <- unique(stats::na.omit(as.character(analysis_data$covariate)))
+            n_param <- if (is.factor(analysis_data$covariate) || is.character(analysis_data$covariate))
+                max(length(cov_levels) - 1, 1) else 1
+            resid_df <- nrow(analysis_data) - n_param - 1
+
+            if (nrow(analysis_data) < 10 * n_param && resid_df >= 1) {
+                private$.addNotice(
+                    "WARNING",
+                    .("Meta-regression power caution"),
+                    sprintf(
+                        .("Meta-regression on %d studies with %d covariate parameter(s) (%d residual df) has limited statistical power. The Cochrane DTA Handbook recommends at least 10 studies per covariate parameter. Treat meta-regression coefficients as exploratory."),
+                        nrow(analysis_data), n_param, resid_df
+                    )
+                )
             }
 
             if (requireNamespace("metafor", quietly = TRUE)) {
@@ -2014,9 +2060,7 @@ diagnosticmetaClass <- R6::R6Class(
                 return()
             }
 
-            {
-
-                if (nrow(analysis_data) < 10) {
+            if (nrow(analysis_data) < 10) {
                     private$.addNotice("WARNING", .("Publication bias caution"), sprintf(
                         .("Deeks' test is unreliable with fewer than 10 studies (k = %d here); treat the asymmetry result as descriptive only."),
                         nrow(analysis_data)))
@@ -2160,7 +2204,6 @@ diagnosticmetaClass <- R6::R6Class(
                     }
                     bias_table$setNote("deeks_method", note)
                 }
-            }
         },
         
         .populateForestPlot = function(meta_data) {
@@ -2267,6 +2310,8 @@ diagnosticmetaClass <- R6::R6Class(
             pooled_spec_ci <- c(NA_real_, NA_real_)
 
             if (is.data.frame(state)) {
+                # render-state: .pooled_sensitivity
+                # render-state: .pooled_specificity
                 meta_data <- state
                 pooled_sens <- private$.pooled_sensitivity
                 pooled_spec <- private$.pooled_specificity
@@ -2734,7 +2779,7 @@ diagnosticmetaClass <- R6::R6Class(
                     ggplot2::labs(
                         title = .("Summary ROC Plot"),
                         subtitle = subtitle_txt,
-                        caption = state$curve_note,
+                        caption = if (!is.null(state$curve_note)) paste(strwrap(state$curve_note, width = 70), collapse = "\n") else NULL,
                         size = .("Sample Size")
                     ) +
                     ggtheme +
@@ -2835,9 +2880,14 @@ diagnosticmetaClass <- R6::R6Class(
                                              pcf[2, 3], stats::df.residual(pfit), pcf[2, 4])
                         # The table calls its verdict descriptive past a quarter
                         # zero-cell studies; say the same beside the line.
-                        if (n_zero_plot / nrow(meta_data) > 0.25)
+                        if (n_zero_plot / nrow(meta_data) > 0.25) {
                             fit_label <- paste(fit_label,
                                 .("- descriptive only: too many zero cells for a valid asymmetry test"))
+                        } else if (nrow(meta_data) < 10) {
+                            fit_label <- paste0(fit_label, " ", sprintf(
+                                .("(k = %d < 10: low statistical power, descriptive only)"),
+                                nrow(meta_data)))
+                        }
                     } else {
                         # an intercept-only fit would draw a meaningless flat line
                         fit_line <- NULL
@@ -2860,7 +2910,7 @@ diagnosticmetaClass <- R6::R6Class(
                         subtitle = if (length(sub_parts) > 0)
                             paste(sub_parts, collapse = "\n") else NULL,
                         x = .("Log Diagnostic Odds Ratio"),
-                        y = expression(1/sqrt("effective sample size"))
+                        y = expression(1 / sqrt("effective sample size"))
                     ) +
                     ggtheme +
                     ggplot2::theme(
@@ -3061,43 +3111,7 @@ diagnosticmetaClass <- R6::R6Class(
             </ul>
             
             <h4>Likelihood Ratios for Clinical Decision-Making</h4>
-            <table style='border-collapse: collapse; width: 100%; margin: 10px 0;'>
-                <tr style='background-color: rgba(33, 33, 33, 0.06); color: inherit;'>
-                    <th style='border: 1px solid #ddd; padding: 8px;'>Likelihood Ratio</th>
-                    <th style='border: 1px solid #ddd; padding: 8px;'>Value Range</th>
-                    <th style='border: 1px solid #ddd; padding: 8px;'>Clinical Interpretation</th>
-                </tr>
-                <tr>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>Positive LR</td>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>&gt;10</td>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>Strong evidence FOR disease when test positive</td>
-                </tr>
-                <tr>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>Positive LR</td>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>5-10</td>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>Moderate evidence for disease</td>
-                </tr>
-                <tr>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>Positive LR</td>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>2-5</td>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>Weak evidence for disease</td>
-                </tr>
-                <tr>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>Negative LR</td>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>&lt;0.1</td>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>Strong evidence AGAINST disease when test negative</td>
-                </tr>
-                <tr>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>Negative LR</td>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>0.1-0.2</td>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>Moderate evidence against disease</td>
-                </tr>
-                <tr>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>Negative LR</td>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>0.2-0.5</td>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>Weak evidence against disease</td>
-                </tr>
-            </table>
+            <p>Refer to the <em>Likelihood Ratios for Clinical Decision-Making</em> table below for standard interpretation ranges for positive and negative likelihood ratios.</p>
             
             <h4>Diagnostic Odds Ratio (DOR)</h4>
             <ul>
@@ -3169,30 +3183,7 @@ diagnosticmetaClass <- R6::R6Class(
             </ul>
             
             <h4>Predictive Values in Clinical Practice:</h4>
-            <p><strong>Important:</strong> Sensitivity and specificity are test characteristics, but clinicians need predictive values that depend on disease prevalence in their population.</p>
-            
-            <table style='border-collapse: collapse; width: 100%; margin: 10px 0;'>
-                <tr style='background-color: rgba(33, 33, 33, 0.06); color: inherit;'>
-                    <th style='border: 1px solid #ddd; padding: 8px;'>Disease Prevalence</th>
-                    <th style='border: 1px solid #ddd; padding: 8px;'>PPV (Sen=90%, Spe=80%)</th>
-                    <th style='border: 1px solid #ddd; padding: 8px;'>NPV (Sen=90%, Spe=80%)</th>
-                </tr>
-                <tr>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>5%</td>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>19%</td>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>99%</td>
-                </tr>
-                <tr>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>20%</td>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>53%</td>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>97%</td>
-                </tr>
-                <tr>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>50%</td>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>82%</td>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>89%</td>
-                </tr>
-            </table>
+            <p><strong>Important:</strong> Sensitivity and specificity are test characteristics, but clinicians need predictive values that depend on disease prevalence in their population. See the <em>Predictive Values by Prevalence</em> table below for estimated PPV and NPV across typical prevalence settings based on the pooled accuracy of this meta-analysis.</p>
             
             <h3> Reporting Recommendations</h3>
             
@@ -3213,6 +3204,69 @@ diagnosticmetaClass <- R6::R6Class(
             "
             
             self$results$interpretation$setContent(private$.renderSymbols(html))
+        },
+
+        # library-audit 2026-09-22 OncoPath [MEDIUM] DONE: reference tables belong in Table results, not hand-built HTML (guide section 26)
+        .populateLikelihoodRatioGuide = function() {
+            table <- self$results$likelihoodRatioGuide
+            lr_guide <- list(
+                list(type = .("Positive LR"), range = ">10", interp = .("Strong evidence FOR disease when test positive")),
+                list(type = .("Positive LR"), range = "5-10", interp = .("Moderate evidence for disease")),
+                list(type = .("Positive LR"), range = "2-5", interp = .("Weak evidence for disease")),
+                list(type = .("Negative LR"), range = "<0.1", interp = .("Strong evidence AGAINST disease when test negative")),
+                list(type = .("Negative LR"), range = "0.1-0.2", interp = .("Moderate evidence against disease")),
+                list(type = .("Negative LR"), range = "0.2-0.5", interp = .("Weak evidence against disease"))
+            )
+            for (i in seq_along(lr_guide)) {
+                table$setRow(rowNo = i, values = list(
+                    lr_type = lr_guide[[i]]$type,
+                    range = lr_guide[[i]]$range,
+                    interpretation = lr_guide[[i]]$interp
+                ))
+            }
+        },
+
+        # library-audit 2026-09-22 OncoPath [MEDIUM] DONE: computed clinical tables belong in Table results, derived from pooled estimates (guide section 26)
+        .populatePredictiveValues = function() {
+            table <- self$results$predictiveValues
+
+            sens <- private$.pooled_sensitivity
+            spec <- private$.pooled_specificity
+
+            has_estimates <- !is.null(sens) && !is.null(spec) &&
+                             is.finite(sens) && is.finite(spec) &&
+                             sens >= 0 && sens <= 1 && spec >= 0 && spec <= 1
+
+            prevalences <- c(0.05, 0.10, 0.20, 0.50)
+            for (i in seq_along(prevalences)) {
+                prev <- prevalences[i]
+                if (has_estimates) {
+                    denom_ppv <- (sens * prev) + ((1 - spec) * (1 - prev))
+                    denom_npv <- ((1 - sens) * prev) + (spec * (1 - prev))
+                    ppv <- if (denom_ppv > 0) (sens * prev) / denom_ppv else NA_real_
+                    npv <- if (denom_npv > 0) (spec * (1 - prev)) / denom_npv else NA_real_
+                } else {
+                    ppv <- NA_real_
+                    npv <- NA_real_
+                }
+                table$setRow(rowKey = paste0("p_", as.integer(prev * 100)), values = list(
+                    prevalence = prev,
+                    ppv = ppv,
+                    npv = npv
+                ))
+            }
+
+            if (has_estimates) {
+                table$setNote("explanation", sprintf(
+                    .("Sensitivity and specificity are test characteristics; predictive values depend on disease prevalence. Values calculated from pooled sensitivity (%s%%) and specificity (%s%%)."),
+                    jmvcore::format(sens * 100, digits = 1),
+                    jmvcore::format(spec * 100, digits = 1)
+                ))
+            } else {
+                table$setNote("explanation",
+                    .("Pooled sensitivity and specificity estimates are unavailable; predictive values cannot be computed.")
+                )
+            }
         },
 
         # Enhanced data validation with user-friendly warnings
@@ -3459,8 +3513,17 @@ diagnosticmetaClass <- R6::R6Class(
             # sensitivity of 90.4% with a 95% CI of 71-97% was reported as
             # "excellent ... will detect 90 out of 100 patients", which the
             # interval does not support.
-            band_key <- function(x) if (x >= 90) "excellent" else if (x >= 80) "good"
-                                else if (x >= 70) "moderate" else "limited"
+            band_key <- function(x) {
+                if (x >= 90) {
+                    "excellent"
+                } else if (x >= 80) {
+                    "good"
+                } else if (x >= 70) {
+                    "moderate"
+                } else {
+                    "limited"
+                }
+            }
 
             # TRUE when the interval spans more than one performance band, i.e.
             # the data cannot distinguish "excellent" from something worse.
@@ -3599,7 +3662,7 @@ diagnosticmetaClass <- R6::R6Class(
                         lr_neg),
                     if (lr_neg < 0.1) {
                         sprintf(.("A negative result substantially decreases disease probability (divides pre-test odds by %.1fx)."),
-                                1/lr_neg)
+                                1 / lr_neg)
                     } else if (lr_neg <= 0.2) {
                         .("A negative result moderately decreases disease probability.")
                     } else {
@@ -3894,6 +3957,12 @@ diagnosticmetaClass <- R6::R6Class(
                         <li><strong>Confidence region (dashed):</strong> how precisely the POOLED point is estimated. It shrinks as more studies are added.</li>
                         <li><strong>Prediction region (dotted):</strong> where the accuracy of a FUTURE study in a new setting is expected to fall. It includes between-study heterogeneity and does NOT shrink with more studies.</li>
                     </ul>
+                </div>
+
+                <div style='background-color: rgba(33, 99, 235, 0.08); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
+                    <h5>Model Choice: Random vs Fixed Effects</h5>
+                    <p><strong>REML (Random Effects, Default):</strong> Estimates between-study variance (\u03C4\u00B2) to construct the SROC regression curve and prediction region. Recommended for diagnostic meta-analysis because test thresholds and patient populations inherently vary across studies.</p>
+                    <p><strong>Fixed Effects:</strong> Assumes every study shares the exact same sensitivity and specificity (\u03C4\u00B2 = 0). Under this assumption, the SROC curve and prediction region are undefined, and confidence intervals are narrower by construction.</p>
                 </div>
 
                 <div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>

@@ -52,7 +52,7 @@ children:
         label: Analysis Configuration
       - type: ComboBox
         name: clinicalMode
-        label: Analysis level
+        label: Guidance level
       - type: ComboBox
         name: direction
         label: Classification direction

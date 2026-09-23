@@ -67,9 +67,17 @@ test_that("kendallW option calculates Kendall's W", {
     kendallW = TRUE
   )
   expect_s3_class(result, "agreementResults")
-  # Not just "an object came back": factor raters used to reach irr::kendall as a
-  # CHARACTER matrix, which ranks the labels rather than the levels.
-  expect_false(is.na(result$kendallWTable$asDF$w[1]))
+  # Kendall's W ranks the ratings, so an UNORDERED factor has no defensible rank
+  # order and the analysis refuses rather than ranking arbitrary level codes.
+  expect_true(is.na(result$kendallWTable$asDF$w[1]))
+  expect_true("error" %in% names(result$kendallWTable$notes))
+
+  # On an ORDERED factor the rank order is declared, so it computes.
+  d_ord <- agreement_threeRater
+  for (v in c("Rater1", "Rater2", "Rater3"))
+    d_ord[[v]] <- factor(d_ord[[v]], levels = levels(d_ord[[v]]), ordered = TRUE)
+  ord <- agreement(data = d_ord, vars = c("Rater1", "Rater2", "Rater3"), kendallW = TRUE)
+  expect_false(is.na(ord$kendallWTable$asDF$w[1]))
 })
 
 test_that("robinsonA option calculates Robinson's A", {
@@ -79,8 +87,15 @@ test_that("robinsonA option calculates Robinson's A", {
     robinsonA = TRUE
   )
   expect_s3_class(result, "agreementResults")
-  # Returned an all-NA row for every factor rater until the coercion fix.
-  expect_false(is.na(result$robinsonATable$asDF$robinsonA[1]))
+  # Robinson's A treats the ratings as numbers; an unordered factor is refused.
+  expect_true(is.na(result$robinsonATable$asDF$robinsonA[1]))
+  expect_true("error" %in% names(result$robinsonATable$notes))
+
+  d_ord <- agreement_threeRater
+  for (v in c("Rater1", "Rater2", "Rater3"))
+    d_ord[[v]] <- factor(d_ord[[v]], levels = levels(d_ord[[v]]), ordered = TRUE)
+  ord <- agreement(data = d_ord, vars = c("Rater1", "Rater2", "Rater3"), robinsonA = TRUE)
+  expect_false(is.na(ord$robinsonATable$asDF$robinsonA[1]))
 })
 
 test_that("meanSpearman option calculates Mean Spearman Rho", {
@@ -91,8 +106,14 @@ test_that("meanSpearman option calculates Mean Spearman Rho", {
     meanSpearman = TRUE
   )
   expect_s3_class(result, "agreementResults")
-  # Returned an all-NA row for every factor rater until the coercion fix.
-  expect_false(is.na(result$meanSpearmanTable$asDF$meanRho[1]))
+  # Spearman's rho ranks the ratings; an unordered factor is refused.
+  expect_true(is.na(result$meanSpearmanTable$asDF$meanRho[1]))
+
+  d_ord <- agreement_ordinal
+  for (v in c("PathologistA", "PathologistB"))
+    d_ord[[v]] <- factor(d_ord[[v]], levels = levels(d_ord[[v]]), ordered = TRUE)
+  ord <- agreement(data = d_ord, vars = c("PathologistA", "PathologistB"), meanSpearman = TRUE)
+  expect_false(is.na(ord$meanSpearmanTable$asDF$meanRho[1]))
 })
 
 # Weighted Kappa Options

@@ -448,6 +448,16 @@ plan_module <- function(m, routes, index, reg, ignore = character()) {
   keep_hit <- files$dest[dirname(files$dest) == "R" & grepl(.PLAN_KEEP_R, basename(files$dest))]
   if (length(keep_hit)) errors <- c(errors, paste0(m$name, ": would overwrite hand-maintained file(s): ", paste(keep_hit, collapse = ", ")))
 
+  # A prune_imports entry is a standing "delete this Import" order, applied with no check
+  # that the module still manages without it. Re-derive it here, against the files this run
+  # actually ships, so a stale entry is a PLAN error -- reported by --dry-run, nothing written.
+  # See prune_conflicts() in _updateModules_utils.R for what it does and does not cover.
+  clash <- prune_conflicts(m$prune_imports, files$src[dirname(files$dest) == "R"])
+  if (length(clash))
+    errors <- c(errors, paste0(m$name, ": prune_imports would remove ", paste(clash, collapse = ", "),
+                               ", which shipped R code uses -- delete the entry from ",
+                               "_updateModules_config.yaml (do NOT drop the import tag/call instead)"))
+
   h <- list.files(file.path(dir, "R"), "\\.h\\.R$")
   orphan_h <- file.path("R", h[!sub("\\.h\\.R$", "", h) %in% analyses])
   delete <- sort(c(setdiff(.plan_managed_files(dir, isTRUE(modes$copy_vignettes)), files$dest), orphan_h))

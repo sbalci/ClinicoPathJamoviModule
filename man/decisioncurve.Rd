@@ -46,7 +46,6 @@ decisioncurve(
   harmFalseTreatment = 500,
   showStandardizedNetBenefit = FALSE,
   multiModelComparison = FALSE,
-  comparisonMethod = "bootstrap",
   showDecisionConsequences = FALSE,
   resourceUtilization = FALSE,
   showRelativeUtility = FALSE
@@ -210,12 +209,6 @@ net benefit per 100 patients.}
 \item{multiModelComparison}{Perform exploratory pairwise bootstrap
 comparisons between all models. Inference is approximate and conditional on
 the selected threshold range.}
-
-\item{comparisonMethod}{Statistical method for comparing decision curves
-between models. Only the case-resampling bootstrap is implemented.
-Permutation and integral-difference options were previously offered here
-but had no code behind them: selecting either produced an empty p-value and
-the literal text "Bootstrap required" in the results table.}
 
 \item{showDecisionConsequences}{Show detailed table of decision
 consequences (TP, FP, TN, FN) at selected thresholds.}

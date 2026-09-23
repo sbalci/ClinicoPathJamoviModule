@@ -100,7 +100,7 @@ children:
         children:
           - type: TextBox
             name: props
-            label: ''
+            label: "Proportions (comma-separated, sum to 1)"
             format: string
             stretchFactor: 2
             fitToGrid: true
@@ -117,5 +117,5 @@ children:
               children:
                 - type: TextBox
                   name: alpha
-                  label: ''
+                  label: "Alpha (0-1)"
                   format: number

@@ -847,7 +847,7 @@ lassologisticBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "lassologistic",
-                version = c(1,0,81),
+                version = c(1,0,83),
                 options = options,
                 results = lassologisticResults$new(options=options),
                 data = data,
@@ -863,9 +863,9 @@ lassologisticBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' LASSO Logistic Regression
 #'
 #' Performs LASSO-penalized logistic regression for variable selection in 
-#' binary
-#' classification problems. Ideal for diagnostic pathology studies that build
-#' classifiers (e.g., tumor type A vs B) with automatic feature selection.
+#' binary classification problems. Ideal for diagnostic pathology studies that 
+#' build classifiers (e.g., tumor type A vs B) with automatic feature 
+#' selection.
 #' 
 #' @param data The data as a data frame.
 #' @param outcome Binary outcome variable to classify. Can be factor or

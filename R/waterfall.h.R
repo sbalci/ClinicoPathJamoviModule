@@ -489,7 +489,7 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `name`="percent", 
                         `title`="Percentage", 
                         `type`="number", 
-                        `format`="percent")),
+                        `format`="pc")),
                 clearWith=list(
                     "patientID",
                     "responseVar",

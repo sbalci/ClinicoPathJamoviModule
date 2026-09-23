@@ -27,6 +27,8 @@ skip_if_no_oncopath_source <- function() {
 
 test_that("OncoPath analyses and manifest use library-ready versions", {
   skip_if_no_oncopath_source()
+  pkg_name <- unname(read.dcf(oncopath_file("DESCRIPTION"), fields = "Package")[[1]])
+  skip_if(pkg_name != "OncoPath", "analysis version verification belongs to OncoPath")
   analysis_files <- file.path(
     oncopath_root,
     "jamovi",
@@ -108,7 +110,20 @@ test_that("umbrella updater keeps the production OncoPath helper boundary minima
 
   # zzz_imports.R is hand-maintained in OncoPath: never written or deleted.
   expect_true(grepl(planner$.PLAN_KEEP_R, "zzz_imports.R"))
-  expect_setequal(unlist(cfg$modules$OncoPath$prune_imports, use.names = FALSE), c("cluster", "tidyr"))
+
+  # The invariant is that nothing OncoPath ships still needs a pruned package -- not that the
+  # list is any particular literal. Pinning c("cluster", "tidyr") went stale the moment psych
+  # and stringr were added, the same way pinning "1.0.0" above broke on every release.
+  utils_path <- oncopath_file("_updateModules_utils.R")
+  skip_if_not(file.exists(utils_path), "updater utils unavailable")
+  sys.source(utils_path, envir = planner)
+  shipped <- file.path(oncopath_root, "R", c(paste0(analyses, ".b.R"), helpers$files))
+  expect_equal(planner$prune_conflicts(cfg$modules$OncoPath$prune_imports, shipped), character(0))
+
+  # The one literal worth pinning. `%>%` is used bare in waterfall.b.R and swimmerplot.b.R,
+  # so no source scan can tie it to magrittr -- pruning it is what left `waterfall` unable to
+  # run in jamovi at all (2026-09-16, CRITICAL).
+  expect_false("magrittr" %in% unlist(cfg$modules$OncoPath$prune_imports, use.names = FALSE))
 })
 
 test_that("swimmer controls and errors follow jamovi UI and i18n conventions", {
@@ -601,3 +616,281 @@ test_that("fixed-row OncoPath tables are scaffolded before .run()", {
                      false_negatives = "fn", true_negatives = "tn", bivariate_analysis = TRUE, publication_bias = TRUE)
   expect_identical(meta("publicationbias"), "deeks_test")
 })
+
+# library-audit 2026-09-22 OncoPath [MEDIUM] DONE: an analysis the user has just opened, or has half
+#   filled in, is not an error. Nothing assigned emits no notice at all; a partial selection gets an
+#   INFO naming the empty boxes. A red ERROR on that path tells the user they did something wrong
+#   when they have not (guide section 25).
+#   The guard is exercised by calling the validator directly, not through $run(): with NO variable
+#   assigned, jmvcore fails first with "invalid 'row.names' length" when an analysis is built outside
+#   the engine, so a $run() route would pass vacuously and prove nothing.
+test_that("an unconfigured or half-configured OncoPath analysis raises no ERROR", {
+  skip_if_not(exists("waterfallClass") && exists("diagnosticmetaClass"))
+  quiet <- function(expr) suppressWarnings(suppressMessages(try(expr, silent = TRUE)))
+  d <- data.frame(A = 1:8, B = letters[1:8], stringsAsFactors = FALSE)
+  sev <- function(analysis) {
+    lst <- analysis$.__enclos_env__$private$.noticeList
+    if (is.null(lst) || !length(lst)) character(0)
+    else vapply(lst, function(n) as.character(n$type), character(1))
+  }
+
+  # waterfall, nothing assigned: the todo panel speaks for itself, no notice at all
+  wf0 <- waterfallClass$new(options = waterfallOptions$new(), data = d)
+  quiet(wf0$.__enclos_env__$private$.validateInputsAndData())
+  expect_identical(sev(wf0), character(0))
+
+  # waterfall, one of two assigned: guidance, not a red ERROR
+  wf1 <- waterfallClass$new(options = waterfallOptions$new(patientID = "B"), data = d)
+  quiet(wf1$.__enclos_env__$private$.validateInputsAndData())
+  expect_false("ERROR" %in% sev(wf1))
+  expect_true("INFO" %in% sev(wf1))
+
+  # diagnosticmeta, two of five assigned: same rule, reached through $run()
+  dm <- diagnosticmetaClass$new(
+    options = diagnosticmetaOptions$new(study = "B", true_positives = "A"), data = d)
+  quiet(dm$init()); quiet(dm$run())
+  expect_false("ERROR" %in% sev(dm))
+  expect_true("INFO" %in% sev(dm))
+})
+
+# library-audit 2026-09-22 OncoPath [MEDIUM] DONE: a data-processing failure is fatal, so it uses
+#   jamovi's own presentation - jmvcore::reject() greys the results - instead of an ERROR banner
+#   above a pane that still looks like a normal, empty set of results (guide section 25).
+test_that("a fatal waterfall processing failure rejects rather than drawing a banner", {
+  skip_if_not(exists("waterfallClass"))
+  src <- read_oncopath("R", "waterfall.b.R")
+
+  # the processing-failure branch in .processAndAnalyzeData()
+  branch <- regmatches(src, regexpr(
+    "if \\(!is\\.null\\(processed_data\\$error\\) && processed_data\\$error\\) \\{(?s).{0,600}?\\n        \\}",
+    src, perl = TRUE))
+  expect_length(branch, 1L)
+  expect_true(grepl("jmvcore::reject", branch, fixed = TRUE),
+              info = "the fatal branch still reports through .addNotice() instead of jmvcore::reject()")
+  expect_false(grepl('.addNotice("ERROR", .("DATA PROCESSING ERROR")', branch, fixed = TRUE))
+})
+
+# library-audit 2026-09-22 OncoPath [MEDIUM] DONE: reference and computed tables belong in Table
+#   results, not hand-built HTML (guide section 26). The Likelihood Ratio guide is a static Table
+#   populated in .init(); Predictive Values by Prevalence is a Table populated in .run() from the
+#   pooled sensitivity and specificity estimates.
+test_that("diagnosticmeta clinical interpretation tables are Table elements, not HTML", {
+  skip_if_not(exists("diagnosticmetaClass"))
+  # 1. Source level: no hand-built <table> markup in .populateInterpretation()
+  src <- read_oncopath("R", "diagnosticmeta.b.R")
+  interp_match <- regexpr(
+    "\\.populateInterpretation = function\\(\\) \\{(?s).{0,15000}?\\n        \\},",
+    src, perl = TRUE)
+  expect_true(interp_match > 0L, info = "could not find .populateInterpretation() in R/diagnosticmeta.b.R")
+  interp_body <- regmatches(src, interp_match)
+  expect_false(grepl("<table", interp_body, fixed = TRUE),
+               info = ".populateInterpretation() still contains hand-built HTML <table> tags")
+
+  # 2. Schema: likelihoodRatioGuide and predictiveValues declared as Table results
+  schema <- read_oncopath("jamovi", "diagnosticmeta.r.yaml")
+  expect_true(grepl("name: likelihoodRatioGuide", schema, fixed = TRUE),
+              info = "likelihoodRatioGuide Table is missing from diagnosticmeta.r.yaml")
+  expect_true(grepl("name: predictiveValues", schema, fixed = TRUE),
+              info = "predictiveValues Table is missing from diagnosticmeta.r.yaml")
+
+  # 3. Runtime: after init with show_interpretation = TRUE, likelihoodRatioGuide has 6 rows
+  d <- data.frame(
+    study = paste("Study", 1:6),
+    tp = c(80, 75, 85, 90, 70, 88),
+    fp = c(10, 15, 12, 8, 20, 14),
+    fn = c(15, 20, 10, 8, 25, 12),
+    tn = c(95, 90, 93, 94, 85, 86)
+  )
+  dm <- diagnosticmetaClass$new(
+    options = diagnosticmetaOptions$new(
+      study = "study", true_positives = "tp", false_positives = "fp",
+      false_negatives = "fn", true_negatives = "tn",
+      show_interpretation = TRUE, bivariate_analysis = TRUE
+    ),
+    data = d
+  )
+  suppressWarnings(suppressMessages({
+    dm$init()
+    dm$run()
+  }))
+
+  # likelihoodRatioGuide table checks
+  expect_true(!is.null(dm$results$likelihoodRatioGuide),
+              info = "likelihoodRatioGuide result is NULL")
+  expect_equal(dm$results$likelihoodRatioGuide$rowCount, 6L)
+  expect_equal(as.character(dm$results$likelihoodRatioGuide$getCell(rowNo = 1, "range")$value), ">10")
+
+  # predictiveValues table checks
+  expect_true(!is.null(dm$results$predictiveValues),
+              info = "predictiveValues result is NULL")
+  expect_true(dm$results$predictiveValues$rowCount >= 3L)
+  p_val <- dm$results$predictiveValues$getCell(rowNo = 1, "ppv")$value
+  expect_true(!is.null(p_val) && is.finite(p_val) && p_val > 0 && p_val < 1)
+})
+
+# library-audit 2026-09-22 OncoPath [LOW] REJECTED: dynamic runtime jmvcore::Notice insertion
+#   in .run() accumulates across cycles (Group$remove() is broken in jmvcore) and Notice only
+#   supports unformatted single-line plain text. The old claims ('no native notice element' and
+#   'Notice serialization error') were incorrect generalizations of Group$insert() bounds bugs
+#   and have been retracted from code comments and breadcrumbs (guide section 13).
+test_that("stale notice serialization and native notice claims are retracted across OncoPath", {
+  skip_if_no_oncopath_source()
+  analyses <- c("waterfall.b.R", "diagnosticmeta.b.R", "ihcheterogeneity.b.R", "swimmerplot.b.R")
+  for (f in analyses) {
+    src <- read_oncopath("R", f)
+    expect_false(grepl("no native notice element", src, fixed = TRUE),
+                 info = paste(f, "still claims 'no native notice element'"))
+    expect_false(grepl("serialization error", src, ignore.case = TRUE),
+                 info = paste(f, "still claims 'serialization error'"))
+    expect_true(grepl("library-audit 2026-09-22 OncoPath \\[LOW\\] REJECTED:", src),
+                info = paste(f, "missing updated 2026-09-22 REJECTED breadcrumb"))
+  }
+})
+
+# library-audit 2026-09-22 OncoPath [LOW] DONE: stringr removed from Imports and zzz_imports.R
+#   after ihcheterogeneity rework eliminated its last str_to_title call (guide section 10)
+test_that("stringr is pruned from OncoPath and no unused packages are held in zzz_imports.R", {
+  skip_if_no_oncopath_source()
+  package <- read.dcf(oncopath_file("DESCRIPTION"), fields = "Package")[[1]]
+  if (package == "OncoPath") {
+    desc <- readLines(oncopath_file("DESCRIPTION"), warn = FALSE)
+    zzz <- readLines(oncopath_file("R", "zzz_imports.R"), warn = FALSE)
+    ns <- readLines(oncopath_file("NAMESPACE"), warn = FALSE)
+
+    expect_false(any(grepl("^\\s*stringr\\b", desc)),
+                 info = "stringr is still declared in OncoPath DESCRIPTION")
+    expect_false(any(grepl("@importFrom\\s+stringr", zzz)),
+                 info = "stringr is still imported in OncoPath R/zzz_imports.R")
+    expect_false(any(grepl("importFrom\\(stringr", ns)),
+                 info = "stringr is still imported in OncoPath NAMESPACE")
+    expect_true(any(grepl("library-audit 2026-09-22 OncoPath \\[LOW\\] DONE: stringr", zzz)),
+                info = "OncoPath R/zzz_imports.R missing 2026-09-22 DONE breadcrumb")
+
+    # Invariant: Every package in Imports is actually used by R/ code (no dummy-held deps)
+    imports_field <- read.dcf(oncopath_file("DESCRIPTION"), fields = "Imports")[[1]]
+    declared_pkgs <- trimws(unlist(strsplit(gsub("\\s*\\([^)]*\\)", "", imports_field), ",")))
+    declared_pkgs <- declared_pkgs[nzchar(declared_pkgs)]
+    r_files <- list.files(oncopath_file("R"), pattern = "\\.[rR]$", full.names = TRUE)
+    r_files <- r_files[basename(r_files) != "00jmv.R"]
+    r_code <- paste(unlist(lapply(r_files, function(f) readLines(f, warn = FALSE))), collapse = "\n")
+    for (pkg in declared_pkgs) {
+      is_used <- grepl(paste0(pkg, ":::?"), r_code) ||
+                 grepl(paste0("requireNamespace\\s*\\(\\s*['\"]", pkg, "['\"]"), r_code) ||
+                 grepl(paste0("library\\s*\\(\\s*['\"]?", pkg, "['\"]?"), r_code) ||
+                 (pkg == "magrittr" && grepl("%>%", r_code, fixed = TRUE))
+      expect_true(is_used, info = paste("Declared package", pkg, "is never used in OncoPath R/ code"))
+    }
+  } else {
+    cfg_path <- oncopath_file("_updateModules_config.yaml")
+    skip_if_not(file.exists(cfg_path), "updater config unavailable")
+    cfg_text <- paste(readLines(cfg_path, warn = FALSE), collapse = "\n")
+    expect_true(grepl("stringr", cfg_text),
+                info = "stringr not mentioned in updater config")
+    cfg <- yaml::read_yaml(cfg_path)
+    expect_true("stringr" %in% unlist(cfg$modules$OncoPath$prune_imports, use.names = FALSE),
+                info = "stringr must be in OncoPath prune_imports")
+    expect_false(grepl("psych/rlang/stringr", cfg_text, fixed = TRUE),
+                 info = "stale stringr comment still in _updateModules_config.yaml")
+  }
+})
+
+# library-audit 2026-09-22 OncoPath [LOW] DONE: retitled 1.0.82.02 section to 1.0.83 (2026-09-21)
+#   so the GitHub release workflow extracts full release notes instead of placeholder (guide section 1)
+test_that("NEWS.md has a matching heading for released version 1.0.83", {
+  skip_if_no_oncopath_source()
+  package <- read.dcf(oncopath_file("DESCRIPTION"), fields = "Package")[[1]]
+  skip_if(package != "OncoPath", "OncoPath NEWS.md verification belongs to OncoPath")
+
+  news_path <- oncopath_file("NEWS.md")
+  skip_if_not(file.exists(news_path), "NEWS.md unavailable")
+  news <- readLines(news_path, warn = FALSE)
+
+  # 1. NEWS.md must contain a level-1 heading matching release version 1.0.83
+  headings <- grep("^#+[[:space:]]", news, value = TRUE)
+  matches_1083 <- grep("(^|[^0-9.])1[.]0[.]83([^0-9.]|$)", headings, value = TRUE)
+  expect_true(length(matches_1083) >= 1L,
+              info = "NEWS.md has no heading matching 1.0.83 (release workflow would publish placeholder)")
+
+  # 2. Release notes extraction logic from release.yaml must extract real content
+  idx <- grep("^#+[[:space:]].*(^|[^0-9.])1[.]0[.]83([^0-9.]|$)", news)
+  expect_true(length(idx) >= 1L)
+  start_line <- idx[1]
+  next_headings <- grep("^#[[:space:]]", news)
+  next_headings <- next_headings[next_headings > start_line]
+  end_line <- if (length(next_headings) > 0) next_headings[1] - 1 else length(news)
+  section_body <- paste(news[(start_line + 1):end_line], collapse = "\n")
+  expect_true(nchar(trimws(section_body)) > 100L,
+              info = "Release notes extracted for 1.0.83 are too short or empty")
+
+  # 3. 1.0.82.02 must no longer be an unreleased placeholder heading in NEWS.md
+  expect_false(any(grepl("^#+[[:space:]]+OncoPath 1\\.0\\.82\\.02", news)),
+               info = "NEWS.md still contains unreleased 4-part dev heading 1.0.82.02")
+
+  # 4. Breadcrumb
+  expect_true(any(grepl("library-audit 2026-09-22 OncoPath \\[LOW\\] DONE: retitled 1.0.82.02", news)),
+              info = "NEWS.md missing library-audit 2026-09-22 DONE breadcrumb")
+})
+
+# library-audit 2026-09-22 OncoPath [LOW] DONE: aligned RECIST claims across DESCRIPTION and README.md
+#   with 0000.yaml; standardized issue URLs, dataset descriptions and folded scalars (guide section 27)
+test_that("module prose and clinical capability claims agree across files", {
+  skip_if_no_oncopath_source()
+  package <- read.dcf(oncopath_file("DESCRIPTION"), fields = "Package")[[1]]
+  skip_if(package != "OncoPath", "OncoPath prose verification belongs to OncoPath")
+
+  desc_text <- paste(readLines(oncopath_file("DESCRIPTION"), warn = FALSE), collapse = "\n")
+  readme_path <- oncopath_file("README.md")
+  skip_if_not(file.exists(readme_path), "README.md unavailable")
+  readme_text <- paste(readLines(readme_path, warn = FALSE), collapse = "\n")
+  manifest_path <- oncopath_file("jamovi", "0000.yaml")
+  skip_if_not(file.exists(manifest_path), "0000.yaml unavailable")
+  manifest_text <- paste(readLines(manifest_path, warn = FALSE), collapse = "\n")
+
+  # 1. RECIST claims in DESCRIPTION and README.md must match 0000.yaml (adapted from RECIST v1.1 thresholds)
+  expect_false(grepl("Features RECIST \\(Response Evaluation Criteria in Solid Tumors\\) criteria analysis", desc_text),
+               info = "DESCRIPTION still claims full RECIST criteria analysis instead of adapted thresholds")
+  expect_true(grepl("response categories adapted from[[:space:]]+RECIST v1\\.1 thresholds", desc_text),
+              info = "DESCRIPTION missing qualified RECIST thresholds wording matching 0000.yaml")
+  expect_false(grepl("RECIST Criteria Support.*Built-in Response Evaluation Criteria In Solid Tumors", readme_text),
+               info = "README.md still promises built-in RECIST guidelines instead of adapted thresholds")
+  expect_true(grepl("Adapted RECIST Thresholds", readme_text),
+              info = "README.md missing qualified Adapted RECIST Thresholds section")
+
+  # 2. Issue URLs: every issue URL across DESCRIPTION, 0000.yaml, README.md, CITATION.cff must point to sbalci/OncoPath
+  issue_regex <- "https?://github\\.com/([\\w.-]+/[\\w.-]+?)(?:\\.git)?/issues"
+  for (f in c("DESCRIPTION", "README.md", file.path("jamovi", "0000.yaml"), "CITATION.cff")) {
+    p <- oncopath_file(f)
+    if (!file.exists(p)) next
+    txt <- paste(readLines(p, warn = FALSE), collapse = "\n")
+    matches <- regmatches(txt, gregexpr(issue_regex, txt, perl = TRUE))[[1]]
+    for (m in matches) {
+      expect_true(grepl("sbalci/OncoPath", m, ignore.case = TRUE),
+                  info = paste(f, "has mismatched issue URL:", m))
+    }
+  }
+
+  # 3. diagnosticmeta description must not have interior newlines in resolved text
+  diag_a_path <- oncopath_file("jamovi", "diagnosticmeta.a.yaml")
+  if (file.exists(diag_a_path)) {
+    diag_yaml <- yaml::read_yaml(diag_a_path)
+    main_desc <- diag_yaml$description$main
+    expect_false(grepl("\n", trimws(main_desc), fixed = TRUE),
+                 info = "diagnosticmeta.a.yaml description has interior newlines (breaks jamovi listing)")
+  }
+
+  # 4. Example dataset descriptions in 0000.yaml must be distinct
+  manifest_yaml <- yaml::read_yaml(manifest_path)
+  dataset_descs <- vapply(manifest_yaml$datasets, function(d) d$description, character(1))
+  expect_equal(length(dataset_descs), length(unique(dataset_descs)),
+               info = "0000.yaml has duplicate dataset descriptions")
+
+  # 5. Breadcrumb present in DESCRIPTION or README.md
+  expect_true(grepl("library-audit 2026-09-22 OncoPath \\[LOW\\] DONE:", readme_text) ||
+              grepl("library-audit 2026-09-22 OncoPath \\[LOW\\] DONE:", desc_text),
+              info = "Missing library-audit 2026-09-22 DONE breadcrumb for prose alignment")
+})
+
+
+
+
+

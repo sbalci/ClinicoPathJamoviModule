@@ -292,6 +292,9 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "biopsy4",
                     "biopsies",
                     "spatial_id",
+                    "cv_threshold",
+                    "correlation_threshold",
+                    "bias_margin",
                     "analysis_type",
                     "sample_size_planning")))
             self$add(jmvcore::Html$new(
@@ -351,7 +354,7 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 options=options,
                 name="summary",
                 title="Summary (Plain-Language)",
-                visible=FALSE,
+                visible="(showSummary)",
                 clearWith=list(
                     "wholesection",
                     "biopsy1",
@@ -368,7 +371,7 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 options=options,
                 name="glossary",
                 title="Statistical Glossary",
-                visible=FALSE))
+                visible="(showGlossary)"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="reproducibilitytable",
@@ -586,7 +589,7 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 options=options,
                 name="spatialanalysistable",
                 title="Spatial Heterogeneity Analysis",
-                visible="(spatial_id)",
+                visible="(length(spatial_id) > 0)",
                 clearWith=list(
                     "wholesection",
                     "biopsy1",
@@ -745,7 +748,7 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 title="Spatial Heterogeneity Visualization",
                 width=600,
                 height=400,
-                visible="(show_variability_plots || analysis_type:variability || analysis_type:comprehensive)",
+                visible="(length(spatial_id) > 0 && (show_variability_plots || analysis_type:variability || analysis_type:comprehensive))",
                 clearWith=list(
                     "wholesection",
                     "biopsy1",

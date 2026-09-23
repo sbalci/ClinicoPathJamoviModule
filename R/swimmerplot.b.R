@@ -27,10 +27,9 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
     "swimmerplotClass",
     inherit = swimmerplotBase,
     private = list(
-        # Notice collection helpers. A single Preformatted (plain-text) output item:
-        # avoids both the jmvcore::Notice serialization error and any HTML in
-        # notices (project convention:
-        # notice content must be plain text). ====
+        # Notice collection helpers. A single Preformatted (plain-text) output item.
+        # library-audit 2026-09-22 OncoPath [LOW] REJECTED: Notice renders single-line plain text;
+        #   Preformatted avoids HTML and accumulates safely across run cycles (guide section 13)
         .noticeList = list(),
         # Which numeric censoring convention the data turned out to use, so the
         # run can state the assumption instead of making it silently.
@@ -2344,7 +2343,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
                 # Check for data type mismatch (Date/Time selected but numeric data)
                 if (isTRUE(validation_result$data_type_mismatch)) {
-                    # REPLACED Notice with HTML to prevent serialization errors
+                    # Notice rendered via HTML guidance panel and ERROR notice
                     # Escape user-derived example values before HTML interpolation
                     safe_examples <- if (!is.null(validation_result$examples)) {
                         htmltools::htmlEscape(as.character(validation_result$examples))
@@ -2404,9 +2403,13 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                         "</div>"
                     )
                     self$results$instructions$setContent(error_msg)
-                    # Surface via the ERROR-notice channel too, then return early so the
-                    # tailored guidance above is preserved. Previously this stop()-ed into
-                    # the generic outer error handler, which overwrote the specific message.
+                    # library-audit 2026-09-22 OncoPath [MEDIUM] DEFERRED: this is the same
+                    #   fatal-via-banner shape as waterfall's processing failure, which now calls
+                    #   jmvcore::reject(). It cannot here: .run() wraps this whole block in a
+                    #   catch-all tryCatch(error=) at the "Validate and process data" step, and that
+                    #   handler does not re-raise, so a reject() condition would be swallowed and the
+                    #   analysis would report success (guide sections 16 and 25). Revisit when that
+                    #   catch-all is narrowed to the third-party calls that need it.
                     private$.addNotice('ERROR', .("Data validation error"),
                                        as.character(validation_result$message))
                     return()

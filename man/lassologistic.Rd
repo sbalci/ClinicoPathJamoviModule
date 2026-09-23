@@ -169,7 +169,7 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 }
 \description{
 Performs LASSO-penalized logistic regression for variable selection in
-binary
-classification problems. Ideal for diagnostic pathology studies that build
-classifiers (e.g., tumor type A vs B) with automatic feature selection.
+binary classification problems. Ideal for diagnostic pathology studies that
+build classifiers (e.g., tumor type A vs B) with automatic feature
+selection.
 }

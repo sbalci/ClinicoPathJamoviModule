@@ -54,8 +54,8 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .nCapped = 0L,
 
         # Add a notice to the collection
-        # library-audit 2026-09-16 OncoPath [INFO] REJECTED: no native notice element - type: Notice fails the
-        #   .r.yaml schema, type: Notification builds no results object (guide section 13)
+        # library-audit 2026-09-22 OncoPath [LOW] REJECTED: Notice renders single-line plain text and dynamic
+        #   insert() in .run() accumulates across runs (Group$remove cannot drop items) (guide section 13)
         .addNotice = function(type, title, content) {
           private$.noticeList[[length(private$.noticeList) + 1]] <- list(
             type = type,
@@ -1543,9 +1543,21 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         }
 
         ## Validate required inputs ----
+        # library-audit 2026-09-22 OncoPath [MEDIUM] DONE: setting up an analysis is not an error.
+        #   Nothing assigned emits no notice - the todo panel below already says what to select. A
+        #   partial selection gets an INFO naming the box that is still empty. The red ERROR that
+        #   used to sit here fired on open, before the user had done anything (guide section 25).
         if (is.null(self$options$patientID) || is.null(self$options$responseVar)) {
-          private$.addNotice("ERROR", .("Variables required"),
-            .("Select a Patient ID and a Response Value variable to run the analysis."))
+          if (!is.null(self$options$patientID) || !is.null(self$options$responseVar)) {
+            still_empty <- c(
+              if (is.null(self$options$patientID)) .("Patient ID is still empty."),
+              if (is.null(self$options$responseVar)) .("Response Value is still empty.")
+            )
+            private$.addNotice("INFO", .("Keep going - a few variables to add"),
+              paste(c(still_empty,
+                      .("Fill them in and the waterfall plot will appear.")),
+                    collapse = " "))
+          }
           if (!isTRUE(self$options$enableGuidedMode)) {
             todo <- paste0(todo,
                            paste0("<br><br>",
@@ -1732,12 +1744,17 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # A processing error ends the run here, before the method disclaimers (they
         # describe results that were not produced). One ERROR notice; the guided
         # panel is updated so it no longer says results will appear.
+        # library-audit 2026-09-22 OncoPath [MEDIUM] DONE: a processing failure is fatal, so it uses
+        #   jamovi's own presentation for one - jmvcore::reject() greys the results and shows an
+        #   analysis-level error - instead of an ERROR banner above a pane that still looks like a
+        #   normal, if empty, set of results. The guided panel is still updated, before the reject.
+        #   "{}" + msg= keeps the message out of the format template: it carries data-dependent text
+        #   and a literal brace in it would otherwise be read as a placeholder (guide section 25).
         if (!is.null(processed_data$error) && processed_data$error) {
-          private$.addNotice("ERROR", .("DATA PROCESSING ERROR"), processed_data$message)
           if (isTRUE(self$options$enableGuidedMode)) {
             private$.generateGuidedAnalysis(problem = processed_data$message)
           }
-          return(NULL)
+          jmvcore::reject("{}", msg = as.character(processed_data$message))
         }
 
         # One factual statement of what the categories are and are not. It replaces
@@ -2432,13 +2449,13 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           # Extract counts from metrics$summary
           n_cr <- metrics$summary$n[metrics$summary$category == "CR"]
           n_pr <- metrics$summary$n[metrics$summary$category == "PR"]
-          n_sd <- metrics$summary$n[metrics$summary$category == "SD"]
+          n_stable <- metrics$summary$n[metrics$summary$category == "SD"]
           n_pd <- metrics$summary$n[metrics$summary$category == "PD"]
 
           # Ensure we have numeric values (default to 0 if missing)
           if (length(n_cr) == 0) n_cr <- 0
           if (length(n_pr) == 0) n_pr <- 0
-          if (length(n_sd) == 0) n_sd <- 0
+          if (length(n_stable) == 0) n_stable <- 0
           if (length(n_pd) == 0) n_pd <- 0
 
           # Use uppercase ORR and DCR, ensure they are numeric
@@ -2455,7 +2472,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           }
 
           dcr_text <- if (!is.na(dcr)) {
-            sprintf(.("%.1f%% (%d of %d evaluable patients achieved response or stable disease)"), dcr, n_cr + n_pr + n_sd, n_eval)
+            sprintf(.("%.1f%% (%d of %d evaluable patients achieved response or stable disease)"), dcr, n_cr + n_pr + n_stable, n_eval)
           } else {
             .("Not available (insufficient data)")
           }
@@ -2486,7 +2503,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # translated "patients" cannot be inflected in other languages.
             "<li>", sprintf(.("Complete response: n = %d (%.1f%%)"), n_cr, pct_eval(n_cr)), "</li>",
             "<li>", sprintf(.("Partial response: n = %d (%.1f%%)"), n_pr, pct_eval(n_pr)), "</li>",
-            "<li>", sprintf(.("Stable disease: n = %d (%.1f%%)"), n_sd, pct_eval(n_sd)), "</li>",
+            "<li>", sprintf(.("Stable disease: n = %d (%.1f%%)"), n_stable, pct_eval(n_stable)), "</li>",
             "<li>", sprintf(.("Progressive disease: n = %d (%.1f%%)"), n_pd, pct_eval(n_pd)), "</li>",
             if (n_unknown > 0) paste0("<li>", sprintf(.("Unknown / not evaluable: n = %d (excluded from percentages)"), n_unknown), "</li>") else "",
             "</ul>",

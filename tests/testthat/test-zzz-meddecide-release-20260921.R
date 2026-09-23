@@ -107,6 +107,8 @@ test_that("no fabricated constant stands in for an undefined statistic", {
 })
 
 
+# library-audit 2026-09-16 meddecide [LOW] DONE: a .() msgid is a whole translatable unit -
+#   leading/trailing spaces, commas and colons are assembled outside it, never inside.
 test_that("no .() msgid carries a braced \\u{XXXX} escape or stray padding", {
     # A braced escape is resolved by R at parse time but stored literally in the catalog,
     # so the lookup can never match and the string is permanently untranslatable.

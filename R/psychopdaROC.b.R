@@ -272,9 +272,9 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
       .runSummaryHead = NULL, # Fixed part of the Analysis Status box, built in .run(); see .renderRunSummary
       .assumedPositiveClass = NULL, # Set when no positive class was chosen and one was guessed
       .delongUsedFallback = FALSE, # TRUE when the pROC DeLong path failed and the local fallback ran; the table note reports which
-      .modeInstructionsHtml = "", # Instructions written by .applyClinicalModeSettings(); the
-      # preset block runs straight afterwards and writes the SAME Html item, so it has to
-      # prepend this rather than overwrite it (only the last setContent() of a run survives).
+      .modeInstructionsHtml = "", # Guidance text built by .applyClinicalModeSettings() and
+      # appended to Procedure Notes by .run(). It is NOT written to `instructions`: .init()
+      # overwrites that item and .run() hides it once variables are chosen.
       .CONFIDENCE_LEVEL = 0.95, # Default confidence level for tests
 
       # ============================================================================
@@ -450,7 +450,12 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         } else {
           private$.modeInstructionsHtml <- ""
         }
-        self$results$instructions$setContent(private$.modeInstructionsHtml)
+        # Deliberately no setContent() here. This used to write `instructions`, which
+        # .init() overwrites with the getting-started panel three lines later and .run()
+        # then hides as soon as variables are chosen -- so every word of the text above,
+        # including the cutpoint-optimism caveat, was computed and thrown away. The caller
+        # in .run() appends it to Procedure Notes, which stays visible.
+        invisible(private$.modeInstructionsHtml)
       },
 
       # Clinical interpretation helpers
@@ -2025,13 +2030,15 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         # hidden here and never restored, so those four options computed a plot
         # and silently threw it away. The declarative form cannot drift.
 
-        # Apply clinical mode configuration.
         # The clinical use-case preset option was REMOVED: its handler wrote
         # guidance into self$results$instructions from .init(), which is then
         # overwritten, so all four presets were a byte-identical no-op (confirmed
         # by full-output diff). The text it tried to show said itself that it
         # changed no analysis setting, so nothing was lost. Use Method / Metric.
-        private$.applyClinicalModeSettings()
+        #
+        # .applyClinicalModeSettings() was called HERE and had exactly the same defect:
+        # the getting-started setContent() below overwrote it. It is now called from
+        # .run(), which appends its text to Procedure Notes.
 
         # Initialize advanced plot states (enable rendering when data is ready)
         # These plots have renderFun defined in .r.yaml but need setState to activate
@@ -2538,9 +2545,18 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
             )
           }
 
+          # Guidance for the selected level. This is the only place the Guidance Level
+          # option has any effect, and Procedure Notes is always visible -- unlike
+          # `instructions`, where this text used to be written and immediately discarded.
+          # For the Basic level it carries the cutpoint-optimism caveat; the per-method
+          # version of that caveat is also footnoted on the Results table itself by
+          # .noteCutpointOptimism(), so it reaches the user at every level.
+          private$.applyClinicalModeSettings()
+
           # Close notes
           procedureNotes <- paste0(
             procedureNotes,
+            private$.modeInstructionsHtml,
             "<hr /></body></html>"
           )
           self$results$procedureNotes$setContent(procedureNotes)
@@ -2621,7 +2637,9 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           "<ul>",
           "<li><strong>Seed:</strong> ", self$options$seed, "</li>",
           "<li><strong>Positive Class:</strong> ", jmvcore::htmlEscape(positiveClass), " (Prevalence: ", round(prevalence * 100, 1), "%)</li>",
-          "<li><strong>Analysis Mode:</strong> ", tools::toTitleCase(self$options$clinicalMode), "</li>",
+          # "Analysis Mode" implied the option changed what was computed; it only chooses
+          # which guidance paragraph appears in Procedure Notes.
+          "<li><strong>Guidance Level:</strong> ", tools::toTitleCase(self$options$clinicalMode), "</li>",
           "</ul>"
         )
         on.exit(private$.renderRunSummary(), add = TRUE)
@@ -3192,8 +3210,13 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
               }
             )
 
-            # Display results
-            self$results$delongTest$setVisible(visible = TRUE)
+            # No setVisible() here. delongTest already carries `visible: (delongTest)` in
+            # jamovi/psychopdaroc.r.yaml, and an imperative setVisible(TRUE) overrides that
+            # binding with no counterpart to undo it -- so once the panel had been shown it
+            # stayed on screen after the user unticked the option. Same defect, and the same
+            # declarative fix, as criterionPlot / prevalencePlot / dotPlot /
+            # precisionRecallPlot (see the .init() note). `delongTest` is now in both items'
+            # clearWith so the stale content goes with it.
 
             # Add methodology note
             self$results$delongComparisonTable$setNote(
@@ -5798,6 +5821,17 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           init = FALSE
         )
         self$results$bayesianROCTable$setNote("seed", jmvcore::format(.("Random seed: {seed}"), seed = self$options$seed), init = FALSE)
+        # What the interval brackets. The prior weighting is applied to the resampled AUCs
+        # themselves (w * AUC* + (1 - w) * prior), and a percentile interval of an affine
+        # transform is that transform of the percentile interval - so the width is the AUC
+        # bootstrap width multiplied by w = n / (n + precision). Labelled "95% CI" it looked
+        # like an unusually precise confidence interval for the AUC; it is neither that nor a
+        # credible interval, it is an interval for the weighted quantity in the column beside it.
+        self$results$bayesianROCTable$setNote(
+          key = "interval_scope",
+          note = .("The interval brackets the Weighted Bootstrap AUC in the column beside it, not the AUC itself. The prior is treated as a fixed, known number, so the weighting multiplies the estimate and the interval width alike by n / (n + prior precision): with a prior precision of 20 and 100 complete cases the interval is 83% as wide as the bootstrap interval for the AUC, and it narrows further as you raise the precision. Read the AUC Summary table for an interval that refers to the AUC itself."),
+          init = FALSE
+        )
 
         y <- as.numeric(data[[private$.escapeVar(self$options$classVar)]] == positiveClass)
 
@@ -6326,10 +6360,15 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           se_aucs[i] <- fit[2]
         }
 
-        # Remove missing values
+        # Remove missing values. `vars` MUST be filtered by the same index: it is the label
+        # vector for the forest plot below, and leaving it at full length either aborted the
+        # plot (data.frame() refuses 5 labels against 3 estimates) or, whenever the lengths
+        # happened to be multiples, silently recycled the estimates and printed each AUC
+        # under the wrong marker's name.
         valid_idx <- !is.na(aucs) & !is.na(se_aucs)
         aucs <- aucs[valid_idx]
         se_aucs <- se_aucs[valid_idx]
+        vars <- vars[valid_idx]
 
         if (length(aucs) < 3) {
           return()

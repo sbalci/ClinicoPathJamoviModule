@@ -43,6 +43,19 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
         .fmtBound = function(x)
             base::format(x, digits = 7, scientific = FALSE, trim = TRUE),
 
+        # Expected agreement-pattern counts run from ~1e-06 to a few dozen, and signif() pasted
+        # straight into a sentence renders the small end as "2.4e-06" in prose aimed at
+        # pathologists -- 64 of 120 swept designs did exactly that here, because this file was
+        # the one kappaSize backend with no formatter at all. scientific = FALSE stops the
+        # notation; the floor only stops the tail growing unreadably long. Identical to
+        # R/kappaSizePower.b.R:.fmtCount and R/kappaSizeCI.b.R:.fmtCount, same floor and same
+        # wording, so the three analyses word the same caveat the same way.
+        .fmtCount = function(x) {
+            if (!isTRUE(is.finite(x))) return(.("unavailable"))
+            if (x < 0.0001) return(.("below 0.0001"))
+            base::format(signif(x, 2), scientific = FALSE, trim = TRUE)
+        },
+
         # Notes panel, same shape as the two siblings: warnings first, then the method.
         # `sparse_*` carry the Cochran-rule verdict plus the numbers behind it so the notice
         # can say how sparse, not just that it is.
@@ -70,6 +83,37 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                     .fmt(
                         .("The expected lower bound is {bound}, at or below zero, so even if the study observes the anticipated kappa it will not be able to rule out agreement no better than chance. Enrol more subjects, add raters, or relax the significance level."),
                         bound = private$.fmtBound(kappaL_val))))
+            } else if (has_bound && kappaL_val < 0.40) {
+                # A positive bound is not automatically a usable one. Below 0.40 the study
+                # excludes only chance-level agreement and everything the module elsewhere
+                # labels slight or fair (Landis and Koch 1977 cut-points 0.20/0.40/0.60/0.80,
+                # the same scale R/agreement.b.R grades kappa on), so it cannot underwrite a
+                # reliability claim. Amber, not red: the design is weak, not broken.
+                #
+                # The remedy is NOT the same in both halves of this block. The bound is a
+                # confidence limit around kappa0 and approaches it from below without ever
+                # reaching it (measured on kappaSize::FixedNBinary, kappa0 = 0.30, props
+                # 0.30/0.70, 2 raters, alpha 0.05: 0.062 at n = 50, 0.130 at n = 100, 0.224 at
+                # n = 500, 0.262 at n = 2000, 0.288 at n = 20000, 0.296 at n = 200000; six
+                # raters and alpha 0.20 buy 0.008 more at most, and over 200 random designs
+                # the bound never once reached kappa0). So when the anticipated kappa0 is
+                # itself under 0.40 NO sample size, rater count or alpha can lift the bound
+                # past 0.40, and "enrol more subjects" is advice the reader cannot act on -
+                # which is exactly the case that fires most often. Say what actually binds.
+                # `<=`, not `<`: the search steps DOWN from kappa0, so kappaL <= kappa0 - 0.001
+                # always. At kappa0 exactly 0.40 the bound tops out at 0.398 even at n = 1e6 (the
+                # compiled maximum), so no reachable design clears 0.40 and the "enrol more
+                # subjects" branch would be just as unfollowable as it is below 0.40.
+                remedy <- if (self$options$kappa0 <= 0.40)
+                    .("The bound is a confidence limit around the anticipated kappa and approaches it from below without ever reaching it, so while the anticipated kappa is itself 0.40 or below no sample size, number of raters or significance level can lift the bound past 0.40; the anticipated agreement, not the number of subjects, is what binds here.")
+                else
+                    .("Enrol more subjects, add raters, or relax the significance level.")
+                warn <- paste0(warn, block(warn_div,
+                    .("This design cannot support a reliability claim."),
+                    .fmt(
+                        .("The expected lower bound is {bound}. The study excludes agreement below that value but leaves everything above it open, and on the Landis and Koch scale a bound under 0.40 is no better than fair agreement. These subjects can therefore show that agreement exceeds chance, but cannot establish moderate or better reliability even if the raters perform exactly as anticipated."),
+                        bound = private$.fmtBound(kappaL_val)),
+                    remedy))
             }
 
             # Sparse goodness-of-fit cells (see kappaSizeGofCells), judged by Cochran's rule: no expected
@@ -85,7 +129,8 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                     .("Sparse categories."),
                     .fmt(
                         .("At this sample size the agreement-pattern cells (for example, exactly k of the raters calling the finding present, or all raters agreeing on one category) are too sparse at the reported lower bound: the smallest expected count is {min} and {below} of {total} cells are below 5. The calculation rests on a large-sample chi-square approximation, so the bound shown is less dependable here."),
-                        min = signif(sparse_min, 2), below = sparse_below5, total = sparse_total),
+                        min = private$.fmtCount(sparse_min), below = sparse_below5,
+                        total = sparse_total),
                     remedy))
             }
 
@@ -104,7 +149,15 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 # agreement-pattern cells the chi-square divides by. The two can and do
                 # disagree, so say which is which rather than leaving the reader to guess
                 # whether they are seeing one problem or two.
-                .("If the Analysis result panel also prints 'At least one expected cell count is less than five', that is a separate and looser check: kappaSize applies it to the outcome category prevalences you entered (for a binary outcome, to the prevalence of the finding alone). The Sparse categories warning above is the check that matters for the bound, because it is on the agreement-pattern cells the chi-square actually divides by, and those empty out long before any category prevalence does. Seeing one warning without the other is expected."))
+                #
+                # The cross-reference to the Sparse categories block is CONDITIONAL. It used to
+                # be part of the sentence above and so shipped in every Notes panel, including
+                # the ones with no such block - a dangling "the warning above" pointing at
+                # nothing, and a panel that says "Sparse categories" to a user whose design is
+                # perfectly dense.
+                .("If the Analysis result panel also prints 'At least one expected cell count is less than five', that is a separate and looser check: kappaSize applies it to the outcome category prevalences you entered (for a binary outcome, to the prevalence of the finding alone), not to the agreement-pattern cells the chi-square actually divides by, and those empty out long before any category prevalence does. Seeing one warning without the other is expected."),
+                if (isTRUE(sparse_cells))
+                    .("The warning above is the check that matters for the bound, because it is the one computed on those agreement-pattern cells."))
 
             paste0(warn, info)
         },

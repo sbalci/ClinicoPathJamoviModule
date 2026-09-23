@@ -77,7 +77,7 @@ items:
         - name: percent
           title: "Percentage"
           type: number
-          format: percent
+          format: pc
       clearWith:
          - patientID
          - responseVar
@@ -161,6 +161,8 @@ items:
       renderFun: .waterfallplot
       # library-audit 2026-09-16 OncoPath [LOW] REJECTED: .annotationTrack() reads self$data at render;
       #   without the flag the tracks vanish on resize/.omv reopen/export (guide section 15)
+      # library-audit 2026-09-22 OncoPath [INFO] DONE: reviewer confirmed requiresData: true is correct
+      #   trade-off; lifting patient covariates into image state noted for future overhaul (guide section 15)
       requiresData: true
       visible: (showWaterfallPlot)
       clearWith:

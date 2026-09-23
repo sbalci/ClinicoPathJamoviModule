@@ -139,6 +139,64 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 if (length(off) == 0) NA_real_ else as.numeric(min(off))
             },
 
+            # Which of these ratings are continuous MEASUREMENTS rather than
+            # category codes. One definition, shared by the headline router, by the
+            # per-statistic guards and by the bootstrap, so one variable always gets
+            # one answer.
+            #
+            # A rating is continuous when it is numeric AND carries a continuous
+            # signal - a non-integer value anywhere, or more than 20 distinct values.
+            # Both halves are load-bearing:
+            #
+            #   class alone is enough ON THE jamovi GUI PATH, where a Continuous
+            #   column arrives numeric and a Nominal/Ordinal one arrives as a factor.
+            #
+            #   The value test is the fallback for the R path, where there IS no
+            #   measurement level to read. `vars` is type: Variables with no
+            #   permitted:/suggested:, the generated wrapper does not coerce it to
+            #   factor (it does coerce conditionVariable and friends), and
+            #   marshalData is skipped entirely when data= is supplied. So in
+            #   testthat, vignettes, @examples and every agreement() call, an
+            #   integer-coded rating arrives as a plain numeric vector. Dropping the
+            #   fallback is what cost data/histopathology.rda its Cohen's kappa
+            #   (0.8205535 on Rater 1 x Rater 2, n = 249): plain numeric 0/1 columns,
+            #   classified continuous, ten tables reduced to a note.
+            #
+            # The distinct-value term is a property of the SAMPLE, so the original
+            # complaint - the same variable changing statistic as n grows - is
+            # mitigated rather than eliminated: a real continuous measurement
+            # essentially always has non-integer values, which resampling cannot
+            # remove, so only an integer-valued continuous measure with few distinct
+            # values is still ambiguous. The notes name the remedy for that case
+            # (declare the variable Nominal/Ordinal, or wrap it in factor() in R).
+            .continuousRatingNames = function(ratings) {
+                if (length(ratings) == 0) return(character(0))
+                isCont <- vapply(ratings, function(x) {
+                    if (!is.numeric(x) || is.factor(x)) return(FALSE)
+                    any(x != floor(x), na.rm = TRUE) ||
+                        length(unique(stats::na.omit(x))) > 20
+                }, logical(1))
+                # An UNNAMED list - .populateLevelInfo and .calculatePairwiseKappa
+                # pass a bare list(column) - has names(ratings) NULL, and NULL[isCont]
+                # is NULL, so .ratingsAreContinuous() silently returned FALSE for every
+                # such caller and their guards were dead code. Fall back to positional
+                # names so the boolean is right and any displayed name is still sensible.
+                nms <- names(ratings)
+                if (is.null(nms)) nms <- paste0("variable ", seq_along(ratings))
+                nms[isCont]
+            },
+
+            # any(), not all(): every categorical statistic here - kappa, Light's
+            # kappa, the marginal-homogeneity tests, Gwet's AC - needs EVERY rater on
+            # the same categorical scale, so ONE continuous rater among factors is
+            # already the wrong estimand. Under all() that frame routed categorical
+            # and irr::kappa2 coerced the measurement to character, agreeing on about
+            # n pseudo-categories and returning a near-zero kappa. The router names
+            # the offending variables in the results.
+            .ratingsAreContinuous = function(ratings) {
+                length(private$.continuousRatingNames(ratings)) > 0
+            },
+
             # Degrees of freedom for the marginal-homogeneity tests, computed from the
             # square table rather than scraped out of irr's label.
             #
@@ -258,7 +316,9 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 # Weight description
                 # The separators stay OUTSIDE the msgid: a leading space inside a
                 # msgid does not survive the catalog.
-                if (wght == "equal") {
+        if (!is.finite(kappa_val)) {
+            weight_desc <- ""
+        } else if (wght == "equal") {
                     weight_desc <- paste0(" ", .("with linear weights"))
                 } else if (wght == "squared") {
                     weight_desc <- paste0(" ", .("with squared weights"))
@@ -308,9 +368,9 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     if (!is.finite(kappa_val)) {
                         .("Kappa could not be computed for these data, so no consistency statement can be made. Check the notes on the results table for the reason.")
                     } else if (kappa_val >= 0.60) {
-                        paste0(.("Agreement is substantial or higher on the Landis &amp; Koch scale - that phrase labels the size of the number, it is not a verdict on any particular use. Kappa is chance-corrected, so it is not the share of cases the raters matched on: that share is the Agreement % shown above, always the higher of the two once kappa is read as a percentage."), " ", ci_pointer)
+                        paste0(.("Agreement is substantial or higher on the Landis &amp; Koch scale - that phrase labels the size of the number, it is not a verdict on any particular use. Kappa is chance-corrected, so it is not the share of cases the raters matched on: that share is the Agreement % shown above, and with three or more raters that column counts only the cases they ALL matched on, which can sit below kappa."), " ", ci_pointer)
                     } else if (kappa_val >= 0.40) {
-                        paste0(.("A kappa between 0.40 and 0.60 means the raters agreed moderately more often than chance alone would produce. It is not the proportion of cases they matched on - that is the Agreement % above, always the higher of the two once kappa is read as a percentage. A rare rating category can also hold kappa down while raw matching stays high; any low-prevalence note under the table flags that."), " ", ci_pointer)
+                        paste0(.("A kappa between 0.40 and 0.60 means the raters agreed moderately more often than chance alone would produce. It is not the proportion of cases they matched on - that is the Agreement % above, which with three or more raters counts only the cases they ALL matched on. A rare rating category can also hold kappa down while raw matching stays high; any low-prevalence note under the table flags that."), " ", ci_pointer)
                     } else {
                         paste0(.("A kappa below 0.40 means the raters agreed little more often than chance alone would produce, so in these data one rater's category does not reliably predict another's. Before reading that as a rater problem, look at the Data Summary: when nearly all cases fall into one category, kappa can be low even though the raters matched on most cases - compare it with the Agreement % above."), " ", ci_pointer)
                     }, "</p>
@@ -548,6 +608,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         <tr><td style='padding: 2px 0;'>0.61 - 0.80</td><td style='padding: 2px 0;'>Substantial agreement</td></tr>
                         <tr><td style='padding: 2px 0;'>0.81 - 1.00</td><td style='padding: 2px 0;'>Almost perfect agreement</td></tr>
                         </table>
+                        <p style='margin: 8px 0 0 0; font-size: 11px; color: inherit;'>Note: These interpretation cutoffs follow Landis &amp; Koch (1977) for Cohen's Kappa. Different coefficient families originate from distinct statistical traditions (e.g., Krippendorff 2004 for Alpha, Cicchetti 1994 / Koo &amp; Li 2016 for ICC) with different benchmark thresholds.</p>
                     </div>
                 </div>
             </div>
@@ -613,7 +674,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         plot.subtitle = ggplot2::element_text(hjust = 0.5)
                     )
 
-                # Add proportional bias trend line if requested
+                # Add the exploratory difference-mean trend line if requested
                 if (prop_bias) {
                     p <- p + ggplot2::geom_smooth(method = "lm", se = TRUE, color = "darkgreen", linewidth = 0.8)
                 }
@@ -921,7 +982,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         <ul style='margin: 0 0 10px 0; padding-left: 20px;'>
                             <li><strong>Detect systematic bias</strong> - Does one rater consistently measure higher/lower?</li>
                             <li><strong>Identify outliers</strong> - Cases with unusually large disagreement</li>
-                            <li><strong>Check proportional bias</strong> - Does disagreement increase with measurement size?</li>
+                            <li><strong>Inspect difference-mean trends</strong> - Does disagreement vary with measurement size? Treat the fitted trend as exploratory because unequal method precision can also create it</li>
                             <li><strong>Define acceptable limits</strong> - What range of disagreement is clinically acceptable?</li>
                         </ul>
                         <p style='margin: 0; padding: 10px; background-color: rgba(155, 155, 155, 0.06); border-left: 3px solid #333; font-size: 13px; color: inherit;'>
@@ -1088,16 +1149,6 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     self$results$lightKappaTable$setNote(
                         "error",
                         .("Light's kappa requires at least 3 raters. You have selected only 2 raters. Use Cohen's kappa instead.")
-                    )
-                    return()
-                }
-
-                # Validate data is categorical
-                if (any(sapply(ratings, is.numeric)) && !any(sapply(ratings, is.factor)) &&
-                    max(sapply(ratings, function(x) length(unique(na.omit(x))))) > 20) {
-                    self$results$lightKappaTable$setNote(
-                        "error",
-                        .("Light's kappa requires categorical data. Your data appears to be continuous. Use ICC instead.")
                     )
                     return()
                 }
@@ -1341,8 +1392,50 @@ agreementClass <- if (requireNamespace("jmvcore")) {
             .calculateFinn = function(ratings) {
                 # Calculate Finn coefficient for categorical agreement
 
-                # Get number of rating categories from user option
+                # Number of rating categories on the SCALE.
+                #
+                # This was taken from self$options$finnLevels alone, which defaults to
+                # 3. Finn's coefficient is 1 - MSe / ((s^2 - 1) / 12): the denominator
+                # is the variance of a uniform random rating on an s-point scale, so s
+                # is not cosmetic, it IS the chance baseline. Left at the default on a
+                # binary scale the analysis reported +0.400 and "Fair agreement" where
+                # irr::finn(s.levels = 2) gives -0.600 - worse than chance. A default
+                # flipped the sign of the conclusion.
+                #
+                # When every rater variable is a factor the declared levels ARE the
+                # scale (unused levels included), so read s from them and tell the user
+                # when the option disagreed. Only genuinely numeric ratings, where the
+                # scale cannot be recovered from the data, still fall back to the option.
                 n_levels <- self$options$finnLevels
+                finn_levels_source <- "option"
+                finn_shared_levels <- NULL
+                if (all(vapply(ratings, is.factor, logical(1)))) {
+                    lv_list <- lapply(ratings, levels)
+                    lv_list <- lv_list[order(-lengths(lv_list))]
+                    finn_shared_levels <- Reduce(union, lv_list)
+                    compatible_order <- vapply(lv_list, function(lv) {
+                        identical(finn_shared_levels[finn_shared_levels %in% lv], lv)
+                    }, logical(1))
+                    if (!all(compatible_order)) {
+                        self$results$finnTable$setNote(
+                            "error",
+                            .("Finn's coefficient requires one common category order across raters. The selected variables declare conflicting level orders; set every variable to the same ordered scale before running Finn's coefficient.")
+                        )
+                        return()
+                    }
+                    if (length(finn_shared_levels) >= 2) {
+                        if (!identical(as.integer(n_levels), length(finn_shared_levels))) {
+                            self$results$finnTable$setNote(
+                                "levels_from_data",
+                                sprintf(.("Number of Rating Categories was set to %1$d, but the rater variables declare a %2$d-category scale. Finn's coefficient divides by the variance of a uniform rating on an s-point scale, so s changes the value and can change its sign; the declared %3$d-category scale was used. If the scale really does have %4$d categories, add the unused ones as levels of the rater variables."),
+                                    as.integer(n_levels), length(finn_shared_levels),
+                                    length(finn_shared_levels), as.integer(n_levels))
+                            )
+                        }
+                        n_levels <- length(finn_shared_levels)
+                        finn_levels_source <- "data"
+                    }
+                }
 
                 # Get model type
                 model_type <- self$options$finnModel
@@ -1358,15 +1451,24 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 # Validate data is categorical or can be treated as categorical
                 # Convert factors to numeric for finn() function
-                ratings_numeric <- as.data.frame(lapply(ratings, function(x) {
-                    if (is.factor(x)) {
-                        as.numeric(x)
-                    } else if (is.numeric(x)) {
-                        x
-                    } else {
-                        as.numeric(as.factor(x))
-                    }
-                }))
+                # as.numeric(factor) column by column gives the same label a different
+                # code whenever two columns declare different level sets, so the raters
+                # were compared on scales that did not line up. Recode every column
+                # against the one shared level set instead.
+                ratings_numeric <- if (!is.null(finn_shared_levels)) {
+                    as.data.frame(lapply(ratings, function(x)
+                        match(as.character(x), finn_shared_levels)))
+                } else {
+                    as.data.frame(lapply(ratings, function(x) {
+                        if (is.factor(x)) {
+                            as.numeric(x)
+                        } else if (is.numeric(x)) {
+                            x
+                        } else {
+                            as.numeric(as.factor(x))
+                        }
+                    }))
+                }
 
                 # Remove rows with missing data
                 complete_idx <- complete.cases(ratings_numeric)
@@ -1384,7 +1486,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 actual_max <- max(ratings_clean, na.rm = TRUE)
                 actual_min <- min(ratings_clean, na.rm = TRUE)
 
-                if (actual_max > n_levels || actual_min < 1) {
+                if (identical(finn_levels_source, "option") && (actual_max > n_levels || actual_min < 1)) {
                     self$results$finnTable$setNote(
                         "warning",
                         sprintf(.("Data range (%1$d to %2$d) may not match specified number of categories (%3$d). Ensure your rating categories are coded as 1 to %4$d."), round(actual_min), round(actual_max), n_levels, n_levels)
@@ -3032,26 +3134,26 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 # What is TDI?
                 html <- paste0(html, "<h3>What is Total Deviation Index (TDI)?</h3>")
                 html <- paste0(
-                    html, "<p>The <strong>Total Deviation Index (TDI)</strong> quantifies the limits within which ",
-                    "a specified proportion (e.g., 90%) of differences between two measurement methods will fall. ",
-                    "It provides a single numerical index for assessing whether two methods achieve acceptable agreement ",
-                    "based on predefined clinically relevant criteria.</p>"
+                    html, "<p>This analysis reports an <strong>empirical Total Deviation Index (TDI)</strong>: the selected ",
+                    "quantile (for example, the 90th percentile) of the observed absolute differences between two methods. ",
+                    "It is an unconditional summary of the sampled case mix in the original measurement units. It does not ",
+                    "model how variability changes with magnitude and is not, by itself, an equivalence or regulatory test.</p>"
                 )
 
                 # Key Features
                 html <- paste0(html, "<h3>Key Features</h3>")
                 html <- paste0(html, "<ul>")
                 html <- paste0(
-                    html, "<li><strong>Coverage Probability:</strong> Specifies the percentage of measurements that must fall ",
-                    "within acceptable limits (typically 90% or 95%)</li>"
+                    html, "<li><strong>Empirical coverage target:</strong> Selects which quantile of the observed absolute ",
+                    "differences is reported (typically 90% or 95%)</li>"
                 )
                 html <- paste0(
                     html, "<li><strong>Acceptable Limit:</strong> User-defined threshold for maximum allowable difference ",
                     "in original measurement units</li>"
                 )
                 html <- paste0(
-                    html, "<li><strong>Regulatory Compliance:</strong> Widely used in medical device validation and method ",
-                    "comparison studies required by FDA and other agencies</li>"
+                    html, "<li><strong>Scope:</strong> A descriptive comparison with a prespecified limit; formal validation ",
+                    "requires a study design, estimand and decision rule appropriate to the intended use</li>"
                 )
                 html <- paste0(html, "<li><strong>Interpretability:</strong> Direct comparison to clinical acceptability criteria</li>")
                 html <- paste0(html, "</ul>")
@@ -3061,24 +3163,23 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 html <- paste0(html, "<p><strong>Decision Rule:</strong></p>")
                 html <- paste0(html, "<ul>")
                 html <- paste0(
-                    html, '<li>If the <strong>upper confidence bound of the TDI <= Acceptable Limit</strong>: the ',
-                    '<span style="color: green;"><strong>equivalence criterion is met</strong></span> - the specified ',
-                    "proportion of differences falls within acceptable bounds. A point estimate inside the limit whose ",
-                    "upper bound is outside it is inconclusive, not a pass</li>"
+                    html, '<li>If the <strong>upper bootstrap confidence bound of the empirical TDI <= Acceptable Limit</strong>: ',
+                    "the observed criterion is met for this sample and case mix. This is descriptive evidence, not proof ",
+                    "that the methods are interchangeable</li>"
                 )
                 html <- paste0(
                     html, '<li>If <strong>TDI > Acceptable Limit</strong>: the <span style="color: red;">',
-                    "<strong>equivalence criterion is not met</strong></span> - too many differences exceed acceptable bounds</li>"
+                    "<strong>observed criterion is not met</strong></span> at the selected empirical coverage target</li>"
                 )
                 html <- paste0(html, "</ul>")
 
                 # When to Use
                 html <- paste0(html, "<h3>When to Use TDI</h3>")
-                html <- paste0(html, "<p><strong>Essential for:</strong></p>")
+                html <- paste0(html, "<p><strong>Useful as a descriptive companion for:</strong></p>")
                 html <- paste0(html, "<ul>")
                 html <- paste0(html, "<li>Medical device validation (manual vs. automated instruments)</li>")
                 html <- paste0(html, "<li>Laboratory method comparison (old vs. new assay platforms)</li>")
-                html <- paste0(html, "<li>Biomarker assay validation with regulatory requirements</li>")
+                html <- paste0(html, "<li>Biomarker assay method-comparison studies</li>")
                 html <- paste0(html, "<li>Imaging modality comparison (different scanners, readers, software)</li>")
                 html <- paste0(html, "<li>Quality control when acceptable limits are predefined</li>")
                 html <- paste0(html, "</ul>")
@@ -3092,8 +3193,8 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 html <- paste0(html, "<ul>")
                 html <- paste0(html, "<li><strong>Acceptable Limit:</strong> 5 mm (clinical decision threshold)</li>")
                 html <- paste0(html, "<li><strong>Coverage:</strong> 90% of differences should be <=5 mm</li>")
-                html <- paste0(html, '<li><strong>Result:</strong> If TDI = 3.8 mm and its upper bound is also below 5 mm \u{2192} <span style="color: green;">equivalence criterion met</span></li>')
-                html <- paste0(html, '<li><strong>Result:</strong> If TDI = 6.2 mm \u{2192} <span style="color: red;">equivalence criterion not met</span></li>')
+                html <- paste0(html, '<li><strong>Result:</strong> If TDI = 3.8 mm and its upper bound is also below 5 mm \u{2192} <span style="color: green;">observed criterion met</span></li>')
+                html <- paste0(html, '<li><strong>Result:</strong> If TDI = 6.2 mm \u{2192} <span style="color: red;">observed criterion not met</span></li>')
                 html <- paste0(html, "<li><strong>What it reports:</strong> the criterion is met or not met at the stated limit and coverage; it does not by itself settle whether one measurement method may take the place of the other in practice</li>")
                 html <- paste0(html, "</ul>")
 
@@ -3139,8 +3240,9 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 # Statistical Details
                 html <- paste0(html, "<h3>Statistical Details</h3>")
                 html <- paste0(
-                    html, "<p><strong>Calculation:</strong> TDI represents the radius of a tolerance interval that captures ",
-                    "the specified proportion of absolute differences between methods.</p>"
+                    html, "<p><strong>Calculation:</strong> The estimate is the requested empirical quantile of the absolute ",
+                    "paired differences. Its interval is a case-resampling percentile-bootstrap interval. Neither calculation ",
+                    "adjusts for case mix or models heteroscedasticity.</p>"
                 )
                 html <- paste0(html, "<p><strong>Requirements:</strong></p>")
                 html <- paste0(html, "<ul>")
@@ -3237,6 +3339,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         # Calculate TDI for all pairwise combinations
                         tdiTable <- self$results$tdiTable
                         rater_names <- colnames(ratings)
+                        tdiTable$setNote(
+                            "scope",
+                            .("This is an unconditional empirical quantile of the observed absolute differences with a case-resampling percentile-bootstrap interval. It does not model heteroscedasticity, adjust for case mix, predict a guaranteed proportion of future measurements, or by itself establish method equivalence or regulatory acceptability.")
+                        )
 
                         # Seeded like every other bootstrap here; the TDI interval used to
                         # change on every re-run.
@@ -3320,12 +3426,12 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                 if (meets_criteria) {
                                     if (ci_upper <= acceptable_limit) {
                                         interp <- sprintf(
-                                            "Equivalence criterion met - %.0f%% of differences <=%.1f (limit: %.1f), and the upper confidence bound is also within the limit.",
+                                            "Observed criterion met - the empirical %.0fth percentile of absolute differences is %.1f (limit: %.1f), and its upper bootstrap confidence bound is also within the limit. This is not, by itself, an equivalence conclusion.",
                                             coverage * 100, tdi_estimate, acceptable_limit
                                         )
                                     } else {
                                         interp <- sprintf(
-                                            "Equivalence NOT demonstrated - the TDI point estimate (%.1f) is within the limit (%.1f) but its upper confidence bound (%.1f) is not. Lin's criterion requires the upper bound to fall inside the limit.",
+                                            "Observed criterion inconclusive - the empirical TDI (%.1f) is within the limit (%.1f), but its upper bootstrap confidence bound (%.1f) is not.",
                                             tdi_estimate, acceptable_limit, ci_upper
                                         )
                                     }
@@ -3334,12 +3440,12 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                     pct_over <- if (acceptable_limit > 0) (margin / acceptable_limit) * 100 else NA
                                     if (!is.na(pct_over)) {
                                         interp <- sprintf(
-                                            "Equivalence criterion NOT met - TDI=%.1f exceeds the acceptable limit (%.1f) by %.1f (%.0f%%).",
+                                            "Observed criterion not met - empirical TDI=%.1f exceeds the prespecified limit (%.1f) by %.1f (%.0f%%).",
                                             tdi_estimate, acceptable_limit, margin, pct_over
                                         )
                                     } else {
                                         interp <- sprintf(
-                                            "Equivalence criterion NOT met - TDI=%.1f exceeds the acceptable limit (%.1f) by %.1f.",
+                                            "Observed criterion not met - empirical TDI=%.1f exceeds the prespecified limit (%.1f) by %.1f.",
                                             tdi_estimate, acceptable_limit, margin
                                         )
                                     }
@@ -3589,13 +3695,16 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             return()
                         }
 
-                        # Check if data is categorical
-                        is_categorical <- all(sapply(ratings_complete, function(x) is.factor(x) || is.character(x)))
+                        # One definition for categorical-vs-continuous, shared with the headline
+                        # kappa (private$.continuousRatingNames). The class-only test that used to
+                        # stand here read histopathology's numeric 0/1 raters as continuous and
+                        # refused this output in the same run that printed Cohen's kappa 0.8206.
+                        is_categorical <- !private$.ratingsAreContinuous(ratings_complete)
 
                         if (!is_categorical) {
                             self$results$specificAgreementTable$setNote(
                                 "error",
-                                .("Specific agreement requires categorical data. Use TDI or Lin's CCC for continuous data.")
+                                .("Specific agreement requires categorical data. At least one selected variable is a continuous measurement. Use TDI or Lin's CCC instead. If these numbers are category codes rather than measurements, set the variables to Nominal or Ordinal - or wrap them in factor() when calling from R - and specific agreement will be computed.")
                             )
                             return()
                         }
@@ -3973,11 +4082,14 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             return()
                         }
 
-                        # Check if data is categorical
-                        is_categorical <- all(sapply(ratings_complete, function(x) is.factor(x) || is.character(x)))
+                        # One definition for categorical-vs-continuous, shared with the headline
+                        # kappa (private$.continuousRatingNames). The class-only test that used to
+                        # stand here read histopathology's numeric 0/1 raters as continuous and
+                        # refused this output in the same run that printed Cohen's kappa 0.8206.
+                        is_categorical <- !private$.ratingsAreContinuous(ratings_complete)
 
                         if (!is_categorical) {
-                            self$results$agreementHeatmapPlot$setError("Agreement heatmap requires categorical data. Use Bland-Altman plot for continuous data.")
+                            self$results$agreementHeatmapPlot$setError("Agreement heatmap requires categorical data. At least one selected variable is a continuous measurement. Use the Bland-Altman plot instead. If these numbers are category codes rather than measurements, set the variables to Nominal or Ordinal - or wrap them in factor() when calling from R - and the heatmap will be drawn.")
                             return()
                         }
 
@@ -4280,8 +4392,11 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         plot_type <- self$options$raterProfileType
                         show_points <- self$options$raterProfileShowPoints
 
-                        # Check if data is categorical
-                        is_categorical <- all(sapply(ratings, function(x) is.factor(x) || is.character(x)))
+                        # One definition for categorical-vs-continuous, shared with the headline
+                        # kappa (private$.continuousRatingNames). The class-only test that used to
+                        # stand here read histopathology's numeric 0/1 raters as continuous and
+                        # refused this output in the same run that printed Cohen's kappa 0.8206.
+                        is_categorical <- !private$.ratingsAreContinuous(ratings)
 
                         # Prepare data in long format
                         rater_names <- names(ratings)
@@ -4396,8 +4511,11 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             return()
                         }
 
-                        # Determine if data is categorical
-                        is_categorical <- all(sapply(ratings, function(x) is.factor(x) || is.character(x)))
+                        # One definition for categorical-vs-continuous, shared with the headline
+                        # kappa (private$.continuousRatingNames). The class-only test that used to
+                        # stand here read histopathology's numeric 0/1 raters as continuous and
+                        # refused this output in the same run that printed Cohen's kappa 0.8206.
+                        is_categorical <- !private$.ratingsAreContinuous(ratings)
 
                         # Calculate agreement for each subgroup
                         subgroup_levels <- unique(subgroup[!is.na(subgroup)])
@@ -4774,8 +4892,11 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         linkage <- self$options$clusterLinkage
                         k <- self$options$nClusters
 
-                        # Check if data is categorical
-                        is_categorical <- all(sapply(ratings, function(x) is.factor(x) || is.character(x)))
+                        # One definition for categorical-vs-continuous, shared with the headline
+                        # kappa (private$.continuousRatingNames). The class-only test that used to
+                        # stand here read histopathology's numeric 0/1 raters as continuous and
+                        # refused this output in the same run that printed Cohen's kappa 0.8206.
+                        is_categorical <- !private$.ratingsAreContinuous(ratings)
 
                         n_raters <- ncol(ratings)
                         rater_names <- names(ratings)
@@ -5059,8 +5180,11 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         linkage <- self$options$caseClusterLinkage
                         k <- self$options$nCaseClusters
 
-                        # Check if data is categorical
-                        is_categorical <- all(sapply(ratings, function(x) is.factor(x) || is.character(x)))
+                        # One definition for categorical-vs-continuous, shared with the headline
+                        # kappa (private$.continuousRatingNames). The class-only test that used to
+                        # stand here read histopathology's numeric 0/1 raters as continuous and
+                        # refused this output in the same run that printed Cohen's kappa 0.8206.
+                        is_categorical <- !private$.ratingsAreContinuous(ratings)
 
                         n_cases <- nrow(ratings)
                         n_raters <- ncol(ratings)
@@ -6236,22 +6360,30 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 )
             },
             .populateRaterBiasExplanation = function() {
-                # Provide educational content about Rater Bias Test
+                # Provide educational content about directional discordance.
 
                 html_content <- "
             <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>
                 <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h3 style='margin: 0 0 10px 0; color: inherit;'>What is the Rater Bias Test?</h3>
+                    <h3 style='margin: 0 0 10px 0; color: inherit;'>What is the Directional Discordance Test?</h3>
                     <p style='margin: 0; color: inherit;'>
-                        The Rater Bias Test uses a <strong>chi-square test</strong> to detect whether raters have
-                        <strong>systematically different rating patterns</strong>. It tests the null hypothesis that
-                        all raters use the rating categories with equal frequency.
+                        The directional discordance test asks whether, on the cases where two raters disagree, the
+                        disagreements run <strong>one way more often than the other</strong> - whether one
+                        rater is consistently the higher scorer. It compares the total number of
+                        &quot;rater 1 higher&quot; cases with the total number of &quot;rater 2 higher&quot;
+                        cases in a single chi-square on 1 degree of freedom. It needs exactly two raters and
+                        both variables must be declared Ordinal with the same clinical scale order.<br><br>
+                        <strong>It is not a test of marginal homogeneity.</strong> It does not test whether
+                        the two raters used each category at the same overall rate: opposing shifts in
+                        different categories cancel out and the test returns p = 1. Use the
+                        <strong>Bhapkar</strong> or <strong>Stuart-Maxwell</strong> test in this section for
+                        that hypothesis.
                     </p>
                 </div>
 
                 <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: inherit;'>When to Use This Test</h4>
-                    <p style='margin: 0 0 10px 0;'><strong>Essential for quality control when:</strong></p>
+                    <p style='margin: 0 0 10px 0;'><strong>Potentially useful as a pairwise screen on an ordinal scale when:</strong></p>
                     <ul style='margin: 0; padding-left: 20px;'>
                         <li><strong>Rater training</strong> - Identifying trainees who are systematically too lenient or strict</li>
                         <li><strong>Performance monitoring</strong> - Detecting drift in rater behavior over time</li>
@@ -6270,21 +6402,22 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         </tr>
                         <tr>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>p >= 0.05</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>No significant bias detected - raters use categories similarly</td>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>No net direction in the disagreements. This does <em>not</em> establish that the raters use the categories at the same rates - check Bhapkar for that</td>
                         </tr>
                         <tr>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>p < 0.05</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Significant bias detected - raters have systematically different patterns</td>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>One rater is the higher scorer significantly more often than the other when they disagree</td>
                         </tr>
                         <tr>
                             <td style='padding: 8px;'><strong>p < 0.001</strong></td>
-                            <td style='padding: 8px;'>Strong evidence of bias - investigate individual rater frequencies</td>
+                            <td style='padding: 8px;'>A strong one-directional pattern - investigate the individual rater frequencies to see which categories drive it</td>
                         </tr>
                     </table>
                 </div>
 
                 <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Common Bias Patterns in Pathology</h4>
+                    <h4 style='margin: 0 0 10px 0; color: inherit;'>Patterns Requiring Follow-up</h4>
+                    <p style='margin: 0 0 10px 0;'>The one-df test only detects the net direction of discordances. It does not distinguish the mechanisms below; use the contingency table and marginal-homogeneity tests to identify them.</p>
                     <table style='width: 100%; border-collapse: collapse; font-size: 13px;'>
                         <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Pattern</th>
@@ -6312,13 +6445,16 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: inherit;'>Clinical Example</h4>
                     <p style='margin: 0; padding: 10px; background: rgba(155, 155, 155, 0.12); color: inherit; border-radius: 4px; font-size: 13px;'>
-                        <strong>Scenario:</strong> Three pathologists grade 50 tumor samples as G1/G2/G3.<br><br>
-                        <strong>Pathologist A:</strong> 45% G1, 40% G2, 15% G3<br>
-                        <strong>Pathologist B:</strong> 20% G1, 60% G2, 20% G3<br>
-                        <strong>Pathologist C:</strong> 15% G1, 40% G2, 45% G3<br><br>
-                        <strong>Result: p < 0.001</strong> - Strong evidence of systematic bias. Pathologist A is lenient
-                        (favors low grades), Pathologist C is strict (favors high grades). This requires investigation
-                        and potentially retraining before they can reliably grade cases.
+                        <strong>Scenario:</strong> Two pathologists grade 50 tumor samples as G1/G2/G3.
+                        They disagree on 18 cases. On 15 of them Pathologist B gave the higher grade; on 3
+                        of them Pathologist A did.<br><br>
+                        <strong>Result: p &lt; 0.001</strong> - when these two disagree, B is almost always the
+                        higher scorer. That is a directional difference worth a calibration session.<br><br>
+                        <strong>What it does not tell you:</strong> if instead B over-called G2 at A's expense
+                        and A over-called G3 at B's expense, the two directions would cancel and this test
+                        would return p = 1 even though the two pathologists use the grades quite differently.
+                        Enable the <strong>Bhapkar</strong> test for that question. This test needs exactly
+                        two raters; with three or more, compare them pairwise or use the rater profile plots.
                     </p>
                 </div>
 
@@ -6326,7 +6462,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     <h4 style='margin: 0 0 10px 0; color: inherit;'>Important Considerations</h4>
                     <ul style='margin: 0; padding-left: 20px; font-size: 13px;'>
                         <li><strong>Sample size matters:</strong> Test has limited power with small samples (< 30 cases)</li>
-                        <li><strong>Bias \u{2260} Poor agreement:</strong> Raters can be biased but still agree (all systematically lenient)</li>
+                        <li><strong>Bias is not the same as poor agreement:</strong> Raters can be biased but still agree (all systematically lenient)</li>
                         <li><strong>Clinical context:</strong> Some bias may be acceptable (e.g., erring on side of caution)</li>
                         <li><strong>Training intervention:</strong> Significant bias often correctable with feedback and training</li>
                         <li><strong>Follow-up:</strong> After detecting bias, examine individual rater frequency distributions</li>
@@ -6336,18 +6472,23 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; color: inherit;'>
                     <h4 style='margin: 0 0 10px 0; color: inherit;'>Relationship to Agreement Measures</h4>
                     <p style='margin: 0; font-size: 13px;'>
-                        Rater bias is <strong>independent from agreement</strong>. You can have:<br><br>
-                         <strong>High agreement + no bias detected:</strong> Best case among these four<br>
-                         <strong>High agreement + Bias:</strong> All raters systematically lenient/strict together<br>
-                         <strong>Low agreement + no bias detected:</strong> Random disagreement with no systematic pattern found<br>
-                         <strong>Low agreement + Bias:</strong> Both random and systematic errors present
+                        Net direction and agreement answer different questions. A non-significant result only says
+                        that upper- and lower-direction discordances balance in aggregate; it does not establish
+                        absence of bias or equal category use. A significant result says one rater is more often
+                        higher when the pair disagrees, but the contingency table is still needed to identify the
+                        categories involved and judge clinical importance.
                     </p>
                 </div>
 
                 <div style='margin-top: 15px; padding: 10px; background-color: rgba(88, 88, 88, 0.06); border-radius: 4px; color: inherit;'>
                     <p style='margin: 0; font-size: 12px; color: inherit;'>
-                        <strong>Reference:</strong> Stuart, A. A. (1955). A test for homogeneity of the marginal distributions
-                        in a two-way classification. <em>Biometrika</em>, 42(3/4), 412-416.
+                        <strong>What is computed:</strong> (U - L)<sup>2</sup> / (U + L) on 1 df, where U and L
+                        are the total counts above and below the diagonal of the two-rater table
+                        (<code>irr::rater.bias</code>). This is a McNemar-style test of net direction.<br>
+                        <strong>For marginal homogeneity</strong> - the hypothesis that both raters used every
+                        category at the same rate - use the Bhapkar or Stuart-Maxwell test in this same section:
+                        Stuart, A. (1955). A test for homogeneity of the marginal distributions in a two-way
+                        classification. <em>Biometrika</em>, 42(3/4), 412-416.
                     </p>
                 </div>
             </div>
@@ -6356,24 +6497,32 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 self$results$raterBiasExplanation$setContent(html_content)
             },
             .calculateRaterBias = function(ratings) {
-                # Test for systematic rater bias using chi-square test
-                # Detects if raters have different marginal distributions
-
-                # Validate data is categorical
-                if (any(sapply(ratings, is.numeric)) && !any(sapply(ratings, is.factor)) &&
-                    max(sapply(ratings, function(x) length(unique(na.omit(x))))) > 20) {
-                    self$results$raterBiasTable$setNote(
-                        "error",
-                        .("Rater Bias Test requires categorical data. Your data appears to be continuous.")
-                    )
-                    return()
-                }
+                # Test whether two ordinal raters' disagreements have a net direction.
 
                 # irr::rater.bias only works with exactly 2 raters
                 if (ncol(ratings) != 2) {
                     self$results$raterBiasTable$setNote(
                         "error",
-                        sprintf(.("Rater Bias Test requires exactly 2 raters. You have %d. For 3+ raters, use Rater Profile Plots or marginal tests."), ncol(ratings))
+                        sprintf(.("The directional discordance test requires exactly 2 raters. You have %d. For 3+ raters, use pairwise analyses or rater profile plots."), ncol(ratings))
+                    )
+                    return()
+                }
+
+                # Upper/lower triangular counts only have a scientific meaning when
+                # category order is part of the measurement scale. A nominal factor's
+                # internal level order is an implementation detail; its result can
+                # reverse merely by reordering categories.
+                if (!all(vapply(ratings, is.ordered, logical(1)))) {
+                    self$results$raterBiasTable$setNote(
+                        "ordinal_required",
+                        .("The directional discordance test was not run because both rater variables must be declared Ordinal with the same clinical scale order. For nominal categories use Bhapkar or Stuart-Maxwell to compare marginal distributions.")
+                    )
+                    return()
+                }
+                if (!identical(levels(ratings[[1]]), levels(ratings[[2]]))) {
+                    self$results$raterBiasTable$setNote(
+                        "scale_mismatch",
+                        .("The directional discordance test was not run because the two ordinal variables do not declare exactly the same category levels in the same order. Harmonize their clinical scale definitions before comparing higher versus lower ratings.")
                     )
                     return()
                 }
@@ -6385,7 +6534,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 if (nrow(ratings_clean) < 2) {
                     self$results$raterBiasTable$setNote(
                         "error",
-                        .("Insufficient complete cases for Rater Bias Test. At least 2 cases required.")
+                        .("Insufficient complete cases for the directional discordance test. At least 2 cases are required.")
                     )
                     return()
                 }
@@ -6400,33 +6549,59 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     )
                 }
 
-                # Calculate Rater Bias Test
+                # Calculate directional discordance statistic.
                 tryCatch(
                     {
-                        # irr::rater.bias returns chi-square statistic, df, p-value
+                        # irr::rater.bias is NOT a test of marginal homogeneity.
+                        #
+                        # Its statistic is (U - L)^2 / (U + L) on ONE degree of
+                        # freedom, where U and L are the TOTAL counts above and below
+                        # the diagonal: a McNemar-style test of whether the raters
+                        # disagree in one direction more often than the other. It says
+                        # nothing about equality of all the marginal frequencies, and
+                        # it returns p = 1 whenever U = L no matter how far apart the
+                        # margins are. Constructed 3x3 counterexample: row margins
+                        # (50, 20, 50) against column margins (50, 50, 20) with 30
+                        # discordances each way gives chi-square 0, p = 1, while
+                        # Stuart-Maxwell on the same table gives p = 9.4e-14. Labelled
+                        # "marginal homogeneity" it reported "No significant bias
+                        # detected" for a table whose category usage had shifted
+                        # completely - a silent conclusion reversal. Call it what it
+                        # is, and send the general question to Bhapkar and
+                        # Stuart-Maxwell, which this analysis already offers.
+                        #
+                        # There is also no $parameter member on the returned object
+                        # (stat.name is the string "Chisq(1)"), so df read NULL and the
+                        # column printed blank; the df of the statistic actually run
+                        # is 1, always.
                         bias_result <- irr::rater.bias(ratings_clean)
 
                         # Populate table
                         self$results$raterBiasTable$setRow(rowNo = 1, values = list(
-                            method = "Chi-square test for marginal homogeneity",
+                            method = .("Directional discordance test (1 df)"),
                             chisq = bias_result$statistic,
-                            df = bias_result$parameter,
+                            df = 1L,
                             p = bias_result$p.value
                         ))
+
+                        self$results$raterBiasTable$setNote(
+                            "scope",
+                            .("What this tests: whether disagreements run one way more often than the other - how often rater 1 scored higher than rater 2, against how often rater 2 scored higher than rater 1. Direction is read from the category order shown in the Data Summary, so the result is only meaningful if that order is the scale order. This is a single degree of freedom and it is NOT a test that the two raters used the categories at the same overall rates: when the two directions cancel out, this test returns p = 1 even though the raters' category usage differs sharply. For that question enable the Bhapkar or Stuart-Maxwell test above, which compare all the marginal frequencies at once.")
+                        )
 
                         # Add interpretation note
                         if (bias_result$p.value >= 0.05) {
                             # The verdict a clinician actually reads was a bare English literal spliced
                             # into an otherwise translated sentence, so a Turkish user got a Turkish
                             # sentence with an English conclusion in it. The msgid is the literal itself.
-                            interp <- .("No significant bias detected")
-                            detail <- .("No systematic lenient/strict rating pattern was detected. Absence of a detected pattern is not evidence that none exists; it only means none was detected in these data. Inspect the marginal frequency distributions directly.")
+                            interp <- .("No significant net direction detected")
+                            detail <- .("Disagreements did not run one way more often than the other. This does NOT mean the two raters used the categories at the same rates - a shift in one category can be cancelled by a shift in another and still return p = 1 here. Inspect the marginal frequency distributions directly, or run the Bhapkar test.")
                         } else if (bias_result$p.value >= 0.01) {
-                            interp <- .("Significant bias detected")
-                            detail <- .("Raters have systematically different rating patterns (p < .05). Examine individual rater frequency distributions to identify which raters are lenient/strict.")
+                            interp <- .("Significant net direction detected")
+                            detail <- .("Disagreements ran one way more often than the other (p < .05): one rater tends to score higher than the other when they disagree. Examine the individual rater frequency distributions to see which one and by how much.")
                         } else {
-                            interp <- .("Strong evidence of bias")
-                            detail <- .("Raters have markedly different rating patterns (p < .01): at least one rater assigns the categories at systematically different rates than the others, over and above case-level disagreement. This test compares how often each rater used each category, not which cases they disagreed on, so it does not identify which rater differs or in which direction - the individual rater frequency distributions show that.")
+                            interp <- .("Strong evidence of a net direction")
+                            detail <- .("Disagreements ran one way markedly more often than the other (p < .01): when the two raters differ, one of them is consistently the higher scorer. This is a net direction over all the discordant cases, so it does not say which categories are involved - the individual rater frequency distributions show that.")
                         }
 
                         self$results$raterBiasTable$setNote(
@@ -6445,7 +6620,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     error = function(e) {
                         self$results$raterBiasTable$setNote(
                             "error",
-                            sprintf(.("Error calculating Rater Bias Test: %s"), jmvcore::htmlEscape(e$message))
+                            sprintf(.("Error calculating the directional discordance test: %s"), jmvcore::htmlEscape(e$message))
                         )
                     }
                 )
@@ -6506,10 +6681,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Less powerful alternative</td>
                         </tr>
                         <tr>
-                            <td style='padding: 8px;'><strong>Rater Bias</strong></td>
-                            <td style='padding: 8px;'>2+</td>
-                            <td style='padding: 8px;'>2+</td>
-                            <td style='padding: 8px;'>Test all raters simultaneously</td>
+                            <td style='padding: 8px;'><strong>Directional discordance</strong></td>
+                            <td style='padding: 8px;'>2 (paired)</td>
+                            <td style='padding: 8px;'>2+ ordered</td>
+                            <td style='padding: 8px;'>Net higher/lower direction; not marginal homogeneity</td>
                         </tr>
                     </table>
                     <p style='margin: 10px 0 0 0; font-size: 13px;'>
@@ -6637,17 +6812,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 if (ncol(ratings) != 2) {
                     self$results$bhapkarTable$setNote(
                         "error",
-                        sprintf(.("Bhapkar test requires exactly 2 raters. You have selected %d raters. For multiple raters, use Rater Bias Test instead."), ncol(ratings))
-                    )
-                    return()
-                }
-
-                # Validate data is categorical
-                if (any(sapply(ratings, is.numeric)) && !any(sapply(ratings, is.factor)) &&
-                    max(sapply(ratings, function(x) length(unique(na.omit(x))))) > 20) {
-                    self$results$bhapkarTable$setNote(
-                        "error",
-                        .("Bhapkar test requires categorical data. Your data appears to be continuous.")
+                        sprintf(.("Bhapkar test requires exactly 2 raters. You selected %d; for three or more raters use prespecified pairwise comparisons or inspect rater-profile distributions."), ncol(ratings))
                     )
                     return()
                 }
@@ -6950,17 +7115,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 if (ncol(ratings) != 2) {
                     self$results$stuartMaxwellTable$setNote(
                         "error",
-                        sprintf(.("Stuart-Maxwell test requires exactly 2 raters. You have selected %d raters. For multiple raters, use Rater Bias Test instead."), ncol(ratings))
-                    )
-                    return()
-                }
-
-                # Validate data is categorical
-                if (any(sapply(ratings, is.numeric)) && !any(sapply(ratings, is.factor)) &&
-                    max(sapply(ratings, function(x) length(unique(na.omit(x))))) > 20) {
-                    self$results$stuartMaxwellTable$setNote(
-                        "error",
-                        .("Stuart-Maxwell test requires categorical data. Your data appears to be continuous.")
+                        sprintf(.("Stuart-Maxwell test requires exactly 2 raters. You selected %d; for three or more raters use prespecified pairwise comparisons or inspect rater-profile distributions."), ncol(ratings))
                     )
                     return()
                 }
@@ -7246,12 +7401,17 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     reference_ratings <- reference_ratings[[1]]
                 }
 
-                # Validate data is categorical
-                if (any(sapply(ratings, is.numeric)) && !any(sapply(ratings, is.factor))) {
+                # The reference rater is a SEPARATE variable: the is_continuous gate
+                # in .run() is computed on `vars` only, so a continuous reference
+                # still reached Cohen's kappa here. Same one definition, and the guard
+                # lives with the computation rather than at the single call site.
+                if (private$.ratingsAreContinuous(list(reference_ratings))) {
                     self$results$pairwiseKappaTable$setNote(
-                        "warning",
-                        .("Pairwise kappa is designed for categorical data. Your data appears to be continuous.")
+                        "type_error",
+                        sprintf(.("Pairwise Kappa requires categorical data. The reference rater '%s' is a continuous measurement, so there is no category for the raters to agree on. Consider ICC or Lin's CCC instead. If these numbers are category codes rather than measurements, set the variable to Nominal or Ordinal - or wrap it in factor() when calling from R - and Pairwise Kappa will be computed."),
+                                self$options$referenceRater)
                     )
+                    return()
                 }
 
                 # Get rater names
@@ -8177,15 +8337,23 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 # irr::iota expects a list of matrices, one per variable
                 # In our simplified implementation, we treat each column as one dimension
 
-                # Check data type
-                has_numeric <- any(sapply(ratings, is.numeric))
-                has_factor <- any(sapply(ratings, is.factor)) || any(sapply(ratings, is.character))
-
-                # Determine scale data type
-                if (all(sapply(ratings, is.numeric))) {
+                # Determine scale data type from the SAME categorical-vs-continuous
+                # decision as the headline kappa (private$.continuousRatingNames).
+                # all(is.numeric) sent histopathology's numeric 0/1 raters down the
+                # quantitative branch while every other table treated them as
+                # categories. irr::iota's nominal branch factors each column itself,
+                # so numeric category codes need no conversion here.
+                if (private$.ratingsAreContinuous(ratings)) {
+                    if (!all(sapply(ratings, is.numeric))) {
+                        self$results$iotaTable$setNote(
+                            "error",
+                            .("Iota requires all variables to be the same type (all numeric OR all categorical). Your data contains mixed types.")
+                        )
+                        return()
+                    }
                     scale_data <- "quantitative"
                     data_desc <- "quantitative (continuous)"
-                } else if (all(sapply(ratings, is.factor)) || all(sapply(ratings, function(x) is.factor(x) || is.character(x)))) {
+                } else {
                     scale_data <- "nominal"
                     data_desc <- "nominal (categorical)"
                     # Convert character columns to factors
@@ -8194,12 +8362,6 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             ratings[[i]] <- as.factor(ratings[[i]])
                         }
                     }
-                } else {
-                    self$results$iotaTable$setNote(
-                        "error",
-                        .("Iota requires all variables to be the same type (all numeric OR all categorical). Your data contains mixed types.")
-                    )
-                    return()
                 }
 
                 # For Iota, create list of matrices - simplified implementation
@@ -8437,7 +8599,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             } else if (q_from_scale) {
                                 sprintf(.("PABAK uses q = %d, the number of categories defined on the rating scale."), as.integer(n_cat))
                             } else {
-                                sprintf(.("PABAK uses q = %d, the number of categories observed in these data: the rating variables are not factors, so the intended scale is unknown. If the scale has categories that never occur here, set the variables' measure type to Nominal or Ordinal so the full scale is used."), as.integer(n_cat))
+                                sprintf(.("PABAK uses q = %d, the number of categories observed in these data: the rating variables are not factors, so the intended scale is unknown. If the scale has categories that never occur here, set the variables' measure type to Nominal or Ordinal - or wrap them in factor() with the full set of levels when calling from R - so the full scale is used."), as.integer(n_cat))
                             }
                         )
 
@@ -8666,8 +8828,17 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         }
 
                         if (is.numeric(var_data)) {
-                            data_type <- "Numeric (continuous)"
-                            note <- "Consider Bland-Altman instead of kappa"
+                            # Ask the routing helper, not the class: every numeric
+                            # column used to be labelled continuous, so the table told
+                            # the reader to avoid kappa for histopathology's 0/1 raters
+                            # two panes above a Cohen's kappa of 0.8206.
+                            if (private$.ratingsAreContinuous(list(var_data))) {
+                                data_type <- "Numeric (continuous)"
+                                note <- "Consider Bland-Altman instead of kappa"
+                            } else {
+                                data_type <- "Numeric (category codes)"
+                                note <- "Treated as categories; set the variable to Nominal/Ordinal, or wrap it in factor(), to make that explicit"
+                            }
                         } else {
                             data_type <- "Character/Other"
                             note <- "Convert to factor for kappa analysis"
@@ -8736,6 +8907,16 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 sd_diff <- sd(diff, na.rm = TRUE)
 
                 # Limits of Agreement (LoA)
+                #
+                # baConfidenceLevel is the COVERAGE of the limits, not a confidence
+                # level for them: mean(D) +/- z * SD(D) is the interval expected to
+                # contain that proportion of future differences if the differences are
+                # normal. Changing it from 0.95 to 0.99 moves the limits themselves
+                # outward, it does not tighten or widen an interval around fixed
+                # limits. The option title and the note below both say so, because a
+                # user who reads "confidence" will change it expecting only the
+                # uncertainty statement to change and will instead change the
+                # acceptability verdict.
                 conf_level <- self$options$baConfidenceLevel
                 z_value <- qnorm((1 + conf_level) / 2)
                 lower_loa <- mean_diff - z_value * sd_diff
@@ -8747,6 +8928,11 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 # +/-0.49 SD at n = 50 (verified). The analysis already warns about
                 # small n for kappa, so silence here reads as "these limits are fine".
                 n_pairs <- length(diff)
+                self$results$blandAltmanStats$setNote(
+                    "loa_coverage",
+                    sprintf(.("The limits of agreement are mean difference +/- %1$.2f x SD, the range expected to contain %2$.0f%% of differences between the two methods when the differences are normally distributed. That percentage is a coverage proportion, not a confidence level: raising it widens the limits themselves rather than expressing more uncertainty about fixed limits."),
+                        z_value, conf_level * 100)
+                )
                 if (n_pairs >= 3 && n_pairs < 50 && is.finite(sd_diff)) {
                     loa_halfwidth <- stats::qt(0.975, n_pairs - 1) * sd_diff *
                         sqrt(1 / n_pairs + z_value^2 / (2 * (n_pairs - 1)))
@@ -8757,12 +8943,12 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     )
                 }
 
-                # Test for proportional bias (if requested)
+                # Exploratory difference-on-mean trend (if requested)
                 #
                 # The handler was `error = function(e) NULL`, so a failed lm()
                 # left propBiasP blank with no explanation. An empty p-value
                 # cell in a table whose other cells are filled reads as "no
-                # proportional bias", which is the opposite of "not tested".
+                # a difference-mean trend", which is the opposite of "not tested".
                 # Record the reason and put it on the table.
                 prop_bias_p <- NA
                 prop_bias_err <- NULL
@@ -8825,11 +9011,28 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 # A blank cell must never be left to speak for itself: say which
                 # statistic is missing and why.
+                # The proportional-bias p-value is the slope of the differences
+                # D = X - Y regressed on their mean M = (X + Y) / 2. That regressor is
+                # built out of the same two measurements as the response, so under
+                # X = T + e1, Y = T + e2 with no proportional bias at all,
+                # Cov(D, M) = (Var(e1) - Var(e2)) / 2: unequal precision alone puts a
+                # slope there. Simulated, 50 replicates of n = 1000 with SD(e1) = 1 and
+                # SD(e2) = 4 and no bias in the generating model, the test rejected at
+                # p < 0.05 in 50 of 50. A more precise assay compared with a less
+                # precise one is therefore declared proportionally biased for the wrong
+                # reason, and this is a property of the construction, not of the data.
+                if (self$options$proportionalBias && !is.na(prop_bias_p)) {
+                    self$results$blandAltmanStats$setNote(
+                        "prop_bias_assumption",
+                        .("This exploratory test regresses the paired difference on the pair mean. Because the mean is built from the same two measurements as the difference, a non-zero slope also appears whenever the methods differ in precision, even without magnitude-dependent bias. A significant result therefore means 'difference-mean association or unequal precision', not proven proportional bias. Confirm it with replicated measurements or a justified errors-in-variables model before making a proportional-bias claim.")
+                    )
+                }
+
                 if (!is.null(prop_bias_err)) {
                     self$results$blandAltmanStats$setNote(
                         "prop_bias_failed",
                         sprintf(
-                            .("The proportional-bias test could not be computed (%s), so its p-value cell is empty. An empty cell is NOT evidence that bias is absent - read the slope of the differences against their mean on the Bland-Altman plot."),
+                            .("The exploratory difference-mean slope could not be computed (%s), so its p-value cell is empty. An empty cell is NOT evidence that a magnitude-related pattern is absent; inspect the Bland-Altman plot."),
                             jmvcore::htmlEscape(prop_bias_err)
                         )
                     )
@@ -10290,9 +10493,12 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         # categorical - producing no ICC for those replicates and
                         # silently dropping the ICC row from the table at exactly the
                         # study sizes most common in pathology.
-                        is_categorical_fixed <- all(vapply(ratings, function(x)
-                            is.factor(x) || is.character(x) ||
-                            length(unique(stats::na.omit(x))) <= 20, logical(1)))
+                        #
+                        # Deciding it once fixes the between-replicate drift; using
+                        # the shared .ratingsAreContinuous() test fixes the second
+                        # half, where the bootstrap could substitute an ICC row for
+                        # the kappa the headline table had just computed.
+                        is_categorical_fixed <- !private$.ratingsAreContinuous(ratings)
 
                         # One category set for the WHOLE bootstrap. Coding each rater
                         # column independently with as.numeric(factor(x)) gave the
@@ -11241,8 +11447,8 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Mean \u{00B1} 1.96 SD; 95% of differences fall within these limits</td>
                         </tr>
                         <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Proportional Bias (p)</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>If significant, the difference between methods depends on the measurement magnitude</td>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Difference-Mean Slope (p)</strong></td>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Exploratory OLS test of a zero slope. A significant result can reflect a magnitude-related difference or unequal method precision; it is not, alone, proof of proportional bias</td>
                         </tr>
                         <tr>
                             <td style='padding: 8px;'><strong>Normality test</strong></td>
@@ -11623,32 +11829,38 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         private$.populateLevelInfo(ratings)
                     }
 
-                    # Detect whether data is continuous (numeric, non-factor) ----
-                    is_continuous <- all(sapply(ratings, function(x) is.numeric(x) && !is.factor(x) && !is.ordered(x)))
-                    n_unique_vals <- max(sapply(ratings, function(x) length(unique(na.omit(x)))))
+                    # Is kappa meaningful for these variables? ----
+                    #
+                    # One definition, .continuousRatingNames(): numeric class AND a
+                    # continuous signal in the values. See that helper for why the
+                    # value test cannot be dropped - there is no measurement level on
+                    # the R path, and histopathology's 0/1 raters are plain numeric.
+                    #
+                    # The same test backs Light's kappa, Bhapkar, Stuart-Maxwell and
+                    # the bootstrap CI, so the interval always describes the statistic
+                    # that was shown.
+                    continuous_names <- private$.continuousRatingNames(ratings)
+                    is_continuous <- length(continuous_names) > 0
 
-                    # Skip kappa for continuous data - kappa is only meaningful for categorical/ordinal data
-                    if (is_continuous && n_unique_vals > 20) {
+                    if (is_continuous) {
                         # Kappa is not computed for continuous measurements, but the table is
                         # left visible: hiding it also hid the only place this table can say
                         # why, so the result simply vanished. Say it in the table instead.
                         self$results$irrtable$setRow(rowNo = 1, values = list(
-                            method = "Kappa not computed (continuous data)",
+                            method = .("Kappa not computed (continuous data)"),
                             subjects = sum(stats::complete.cases(ratings)),
                             raters = ncol(ratings)
                         ))
+                        # Name them: with any() routing, a frame can be mixed, and
+                        # "one of your variables" is not actionable without the name.
+                        self$results$irrtable$setNote(
+                            "continuous_vars",
+                            sprintf(.("Read as continuous measurements: %s."),
+                                    paste(continuous_names, collapse = ", "))
+                        )
                         self$results$irrtable$setNote(
                             "continuous",
-                            sprintf(
-                                paste0(
-                                    "Cohen's/Fleiss' kappa was not computed: every selected variable is numeric ",
-                                    "with up to %d distinct values, so these are measurements rather than ",
-                                    "categories and there is no category for the raters to agree on. Use ICC, ",
-                                    "Lin's CCC, Bland-Altman limits of agreement, TDI or Krippendorff's alpha ",
-                                    "for continuous ratings."
-                                ),
-                                n_unique_vals
-                            )
+                            .("Cohen's/Fleiss' kappa was not computed: at least one selected variable is a continuous measurement, so there is no category for the raters to agree on. Use ICC, Lin's CCC, Bland-Altman limits of agreement, TDI or Krippendorff's alpha instead. If these numbers are category codes rather than measurements, change the variables to Nominal or Ordinal - or wrap them in factor() when calling from R - and kappa will be computed.")
                         )
 
                         # Check if any continuous-appropriate analyses are enabled
@@ -11663,7 +11875,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                 "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>
                         <div style='background-color: rgba(255, 202, 33, 0.23); border: 2px solid #856404; padding: 20px; margin-bottom: 20px; color: inherit;'>
                         <h2 style='margin: 0 0 10px 0; font-size: 18px; color: inherit;'>Continuous Data Detected</h2>
-                        <p style='margin: 0; font-size: 14px; color: inherit;'>Your variables have many unique values (>20), indicating continuous measurements. Cohen's/Fleiss' Kappa requires categorical data and has been skipped.</p>
+                        <p style='margin: 0; font-size: 14px; color: inherit;'>At least one variable you selected is a continuous measurement. Cohen's/Fleiss' Kappa requires categorical data, so it has been skipped. If these numbers are category codes, set the variables to Nominal or Ordinal, or wrap them in factor() when calling from R.</p>
                         </div>
 
                         <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #0d6efd; padding: 15px; margin-bottom: 20px; color: inherit;'>
@@ -11718,9 +11930,16 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                 result2 <- list(value = NA, stat.name = "Kappa", statistic = NA, p.value = NA)
                             }
 
-                            # >=3 raters: Fleiss kappa ----
+                        # >=3 raters: Fleiss kappa ----
                         } else if (length(self$options$vars) >= 3) {
-                            if (nrow(na.omit(ratings)) > 0) {
+                            if (!identical(wght, "unweighted")) {
+                                # Do not silently substitute unweighted Fleiss kappa.
+                                # Keep the analysis alive because weighted all-pairs
+                                # Cohen kappa is valid and may have been requested.
+                                result2 <- list(
+                                    method = .("Fleiss' kappa not computed (weights requested)"),
+                                    value = NA_real_, statistic = NA_real_, p.value = NA_real_)
+                            } else if (nrow(na.omit(ratings)) > 0) {
                                 result2 <- irr::kappam.fleiss(ratings = ratings, exact = exct, detail = TRUE)
                             } else {
                                 result2 <- list(value = NA, stat.name = "Kappa", statistic = NA, p.value = NA)
@@ -11742,7 +11961,8 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         table2 <- self$results$irrtable
 
                         n_complete_cases <- sum(stats::complete.cases(ratings))
-                        if (n_complete_cases < 30) {
+                        if (n_complete_cases < 30 &&
+                            !(ncol(ratings) >= 3 && !identical(wght, "unweighted"))) {
                             table2$setNote(
                                 "small_sample",
                                 sprintf(.("Only %d complete cases. Kappa and its interval are unstable below about 30 cases, and a single discordant case can move kappa by several hundredths; treat the value as provisional."), n_complete_cases)
@@ -11806,8 +12026,16 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                 # any sign that uncertainty was attempted.
                                 table2$setNote("ci_method", .("No confidence interval could be computed for this kappa: the asymptotic standard error (vcd::Kappa) was unavailable for these data, most often because a rating category is unused by one rater and the agreement table is degenerate. The z and p-value shown test H0: kappa = 0 and cannot be turned into an interval."))
                             }
-                        } else if (!is.null(ratings) && ncol(ratings) > 2) {
+                        } else if (!is.null(ratings) && ncol(ratings) > 2 &&
+                                   identical(wght, "unweighted")) {
                             table2$setNote("ci_multi", .("No confidence interval is shown: for three or more raters this row reports Fleiss'/Conger's kappa, for which only the null-hypothesis test statistic is available here. The All-Pairs Kappa table reports each rater pair with a confidence interval."))
+                        }
+
+                        if (ncol(ratings) >= 3 && !identical(wght, "unweighted")) {
+                            table2$setNote(
+                                "weights_unsupported",
+                                .("No headline kappa is reported: Fleiss' kappa for three or more raters is unweighted, so applying the selected weights would require a different coefficient and silently showing unweighted Fleiss kappa would not answer the request. Choose Unweighted for Fleiss' kappa, use ordinal Krippendorff's alpha or weighted Gwet's AC2, or enable All-Pairs Kappa for weighted Cohen kappa between each rater pair.")
+                            )
                         }
 
                         # irr::kappam.fleiss returns -Inf when 3+ raters all use a
@@ -11816,12 +12044,50 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         # chance)" - the opposite of what the data show. Kappa is
                         # genuinely undefined here: with no variation there is no
                         # chance-agreement baseline to correct against.
+                        #
+                        # The 2-rater path does NOT return -Inf for the same degenerate
+                        # data: irr::kappa2() computes (Po - Pe) / (1 - Pe) with Pe = 1
+                        # and returns NaN. is.na(NaN) is TRUE, so `!is.na(kappa_out)`
+                        # made this guard skip exactly that case and the user was shown
+                        # a blank-looking cell with no way to tell a failed analysis
+                        # from a statistic that does not exist for their data.
+                        # NaN is kept in the cell - it is the honest value and cannot be
+                        # mistaken for a computed number - and only the note is added;
+                        # +/-Inf is still blanked, because a negative infinity is graded
+                        # "worse than chance", the opposite of what the data show.
                         kappa_out <- result2[["value"]]
-                        if (!is.null(kappa_out) && !is.na(kappa_out) && !is.finite(kappa_out)) {
+                        if (!is.null(kappa_out) && length(kappa_out) == 1 &&
+                            (is.nan(kappa_out) || (!is.na(kappa_out) && !is.finite(kappa_out)))) {
+                            # NA, not NaN. One undefined quantity must have ONE presentation:
+                            # the 3+ rater path already blanked it, so leaving NaN here showed
+                            # the same degenerate data as "NaN" with two rater columns and as an
+                            # empty cell with three. "NaN" is developer jargon in a pathology
+                            # report, and the note below says everything it said.
                             kappa_out <- NA_real_
                             z_stat <- NA_real_
                             p_val <- NA_real_
-                            table2$setNote("undefined_kappa", .("Kappa is undefined for these data: the raters used only one category, so there is no variation against which to define chance agreement. Observed agreement is reported above and is the meaningful summary here."))
+                            # Those notes describe columns that are now empty. ci_method ends
+                            # "The z and p-value shown test H0: kappa = 0", ci_multi says "only
+                            # the null-hypothesis test statistic is available here", and
+                            # small_sample warns that "kappa and its interval are unstable" -
+                            # all three describe quantities this row no longer carries. Blanking
+                            # z and p without clearing them would leave a footnote pointing at
+                            # nothing; undefined_kappa below explains the whole row.
+                            table2$setNote("ci_method", NULL)
+                            table2$setNote("ci_multi", NULL)
+                            table2$setNote("small_sample", NULL)
+                            # Distinguish the Pe = 1 cause (one category used by
+                            # everyone) from any other zero denominator, so the note
+                            # states the rule that actually applied.
+                            used_categories <- unique(unlist(
+                                lapply(ratings, function(x) as.character(x)[!is.na(x)]),
+                                use.names = FALSE))
+                            table2$setNote("undefined_kappa",
+                                if (length(used_categories) == 1) {
+                                    .("Kappa is undefined for these data, and this is not a failed analysis: every case was placed in the same single category by every rater, so agreement expected by chance is already 100% and the chance correction has nothing to work on (kappa divides by 1 minus expected agreement, which is zero here). The Agreement % in this table is still meaningful and is the summary to report. A chance-corrected coefficient needs at least two categories to actually be used.")
+                                } else {
+                                    .("Kappa is undefined for these data, and this is not a failed analysis: there is too little variation across the rating categories to define a chance-agreement baseline, so kappa divides by zero. The Agreement % in this table is still meaningful and is the summary to report.")
+                                })
                         }
 
                         table2$setRow(rowNo = 1, values = list(
@@ -11835,6 +12101,21 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             z = z_stat,
                             p = p_val
                         ))
+
+                        # Agreement % is irr::agree(), whose default tolerance = 0
+                        # counts a case as agreement only when EVERY rater gave the
+                        # same category. With two raters that is the ordinary match
+                        # rate; from three raters up it is the unanimity rate, which
+                        # is a different and much stricter quantity - on Fleiss'
+                        # published six-rater data it reads 16.67% where the mean
+                        # pairwise agreement is 55.56%. The column header cannot say
+                        # which of the two it is, so the table does.
+                        if (ncol(ratings) >= 3) {
+                            table2$setNote(
+                                "peragree_unanimity",
+                                .("Agreement % counts a case as agreement only when ALL raters chose the same category (the unanimity rate), not the average agreement between pairs of raters. With several raters it is therefore much stricter than a pairwise figure and can fall below kappa. For pairwise agreement see the All Pairwise Kappa table.")
+                            )
+                        }
 
                         # Add note if exact kappa was used (no statistical test)
                         if (exct && length(self$options$vars) >= 3) {
@@ -12035,7 +12316,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     }
 
                     # Weighted Kappa Guide (if using weights) ----
-                    if (wght != "unweighted" && !(is_continuous && n_unique_vals > 20)) {
+                    if (wght != "unweighted" && !is_continuous) {
                         weight_guide <- private$.createWeightedKappaGuide(wght)
                         self$results$weightedKappaGuide$setContent(weight_guide)
                     }
@@ -12229,10 +12510,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     private$.populateLightKappaExplanation()
                 }
                 if (self$options$lightKappa) {
-                    if (is_continuous && n_unique_vals > 20) {
+                    if (is_continuous) {
                         self$results$lightKappaTable$setNote(
                             "type_error",
-                            .("Light's Kappa requires categorical data. Your data appears to be continuous. Consider using ICC or Lin's CCC instead.")
+                            .("Light's Kappa requires categorical data. At least one selected variable is a continuous measurement, so there is no category for the raters to agree on. Consider using ICC or Lin's CCC instead. If these numbers are category codes rather than measurements, set the variables to Nominal or Ordinal - or wrap them in factor() when calling from R - and Light's kappa will be computed.")
                         )
                     } else {
                         private$.calculateLightKappa(ratings)
@@ -12246,13 +12527,14 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     private$.populateFinnExplanation()
                 }
                 if (self$options$finn) {
-                    if (is_continuous && n_unique_vals > 20) {
+                    if (is_continuous) {
                         self$results$finnTable$setNote(
                             "type_error",
-                            .("Finn Coefficient is designed for categorical/ordinal data. Your data appears to be continuous. Results may not be meaningful.")
+                            .("Finn's coefficient requires a finite rating scale. The selected variables are continuous, so no coefficient was computed; set genuinely coded ratings to Ordinal or Nominal - or wrap them in factor() when calling from R - or use ICC/Lin's CCC for measurements.")
                         )
+                    } else {
+                        private$.calculateFinn(ratings)
                     }
-                    private$.calculateFinn(ratings)
                 }
 
                 private$.checkpoint()
@@ -12287,69 +12569,69 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 private$.checkpoint()
 
-                # Rater Bias Test (if requested) ----
+                # Directional discordance and marginal homogeneity tests ----
                 if (self$options$raterBias || self$options$showRaterBiasGuide || self$options$bhapkar || self$options$showBhapkarGuide || self$options$stuartMaxwell || self$options$showStuartMaxwellGuide) {
-                    if (is_continuous && n_unique_vals > 20) {
+                    if (is_continuous) {
                         if (self$options$raterBias) {
                             self$results$raterBiasTable$setNote(
                                 "type_error",
-                                .("Rater Bias test requires categorical data. Your data appears to be continuous.")
+                                .("The directional discordance test requires an ordered categorical scale. At least one selected variable is a continuous measurement, so there are no rating categories to be discordant on. Use Bland-Altman limits of agreement for systematic bias between measurements. If these numbers are category codes rather than measurements, set the variables to Ordinal - or wrap them in factor(..., ordered = TRUE) when calling from R - and the test will be computed.")
                             )
                         }
                         if (self$options$bhapkar) {
                             self$results$bhapkarTable$setNote(
                                 "type_error",
-                                .("Bhapkar test requires categorical data. Your data appears to be continuous.")
+                                .("Bhapkar test requires categorical data. At least one selected variable is a continuous measurement, so there are no category margins to compare. If these numbers are category codes rather than measurements, set the variables to Nominal or Ordinal - or wrap them in factor() when calling from R - and the Bhapkar test will be computed.")
                             )
                         }
                         if (self$options$stuartMaxwell) {
                             self$results$stuartMaxwellTable$setNote(
                                 "type_error",
-                                .("Stuart-Maxwell test requires categorical data. Your data appears to be continuous.")
+                                .("Stuart-Maxwell test requires categorical data. At least one selected variable is a continuous measurement, so there are no category margins to compare. If these numbers are category codes rather than measurements, set the variables to Nominal or Ordinal - or wrap them in factor() when calling from R - and the Stuart-Maxwell test will be computed.")
                             )
                         }
                     } else {
                         self$results$raterBiasHeading$setVisible(TRUE)
                     }
                 }
-                if (self$options$showRaterBiasGuide && !(is_continuous && n_unique_vals > 20)) {
+                if (self$options$showRaterBiasGuide && !is_continuous) {
                     private$.populateRaterBiasExplanation()
                 }
-                if (self$options$raterBias && !(is_continuous && n_unique_vals > 20)) {
+                if (self$options$raterBias && !is_continuous) {
                     private$.calculateRaterBias(ratings)
                 }
 
                 private$.checkpoint()
 
                 # Bhapkar Test (if requested) ----
-                if (self$options$showBhapkarGuide && !(is_continuous && n_unique_vals > 20)) {
+                if (self$options$showBhapkarGuide && !is_continuous) {
                     private$.populateBhapkarExplanation()
                 }
-                if (self$options$bhapkar && !(is_continuous && n_unique_vals > 20)) {
+                if (self$options$bhapkar && !is_continuous) {
                     private$.calculateBhapkar(ratings)
                 }
 
                 private$.checkpoint()
 
                 # Stuart-Maxwell Test (if requested) ----
-                if (self$options$showStuartMaxwellGuide && !(is_continuous && n_unique_vals > 20)) {
+                if (self$options$showStuartMaxwellGuide && !is_continuous) {
                     private$.populateStuartMaxwellExplanation()
                 }
-                if (self$options$stuartMaxwell && !(is_continuous && n_unique_vals > 20)) {
+                if (self$options$stuartMaxwell && !is_continuous) {
                     private$.calculateStuartMaxwell(ratings)
                 }
 
                 private$.checkpoint()
 
                 # Pairwise Kappa Analysis (if requested) ----
-                if (self$options$showPairwiseKappaGuide && !(is_continuous && n_unique_vals > 20)) {
+                if (self$options$showPairwiseKappaGuide && !is_continuous) {
                     private$.populatePairwiseKappaExplanation()
                 }
                 if (self$options$pairwiseKappa) {
-                    if (is_continuous && n_unique_vals > 20) {
+                    if (is_continuous) {
                         self$results$pairwiseKappaTable$setNote(
                             "type_error",
-                            .("Pairwise Kappa requires categorical data. Your data appears to be continuous. Consider using ICC or Lin's CCC instead.")
+                            .("Pairwise Kappa requires categorical data. At least one selected variable is a continuous measurement, so there is no category for the raters to agree on. Consider using ICC or Lin's CCC instead. If these numbers are category codes rather than measurements, set the variables to Nominal or Ordinal - or wrap them in factor() when calling from R - and Pairwise Kappa will be computed.")
                         )
                     } else {
                         # Get reference rater data
@@ -12372,10 +12654,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     private$.populateAllPairsKappaExplanation()
                 }
                 if (self$options$allPairsKappa) {
-                    if (is_continuous && n_unique_vals > 20) {
+                    if (is_continuous) {
                         self$results$allPairsKappaTable$setNote(
                             "type_error",
-                            .("All-Pairs Kappa requires categorical data. Your data appears to be continuous. Consider ICC or Lin's CCC instead.")
+                            .("All-Pairs Kappa requires categorical data. At least one selected variable is a continuous measurement, so there is no category for the raters to agree on. Consider ICC or Lin's CCC instead. If these numbers are category codes rather than measurements, set the variables to Nominal or Ordinal - or wrap them in factor() when calling from R - and All-Pairs Kappa will be computed.")
                         )
                     } else {
                         private$.calculateAllPairsKappa(ratings)
@@ -12389,10 +12671,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     private$.populateItemModalAgreementExplanation()
                 }
                 if (self$options$itemModalCategoryAgreement) {
-                    if (is_continuous && n_unique_vals > 20) {
+                    if (is_continuous) {
                         self$results$itemModalAgreementTable$setNote(
                             "type_error",
-                            .("Item-modal agreement requires categorical data. Your data appears to be continuous.")
+                            .("Item-modal agreement requires categorical data. At least one selected variable is a continuous measurement, so there is no modal category to agree on. If these numbers are category codes rather than measurements, set the variables to Nominal or Ordinal - or wrap them in factor() when calling from R - and item-modal agreement will be computed.")
                         )
                     } else {
                         private$.calculateItemModalAgreement(ratings)
@@ -12403,37 +12685,37 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 # Gwet's AC1/AC2 (if requested) ----
                 if (self$options$gwet || self$options$showGwetGuide || self$options$pabak || self$options$showPABAKGuide) {
-                    if (is_continuous && n_unique_vals > 20) {
+                    if (is_continuous) {
                         if (self$options$gwet) {
                             self$results$gwetTable$setNote(
                                 "type_error",
-                                .("Gwet's AC requires categorical data. Your data appears to be continuous. Consider using ICC or Lin's CCC instead.")
+                                .("Gwet's AC requires categorical data. At least one selected variable is a continuous measurement, so there is no category for the raters to agree on. Consider using ICC or Lin's CCC instead. If these numbers are category codes rather than measurements, set the variables to Nominal or Ordinal - or wrap them in factor() when calling from R - and Gwet's AC will be computed.")
                             )
                         }
                         if (self$options$pabak) {
                             self$results$pabakTable$setNote(
                                 "type_error",
-                                .("PABAK requires categorical data. Your data appears to be continuous.")
+                                .("PABAK requires categorical data. At least one selected variable is a continuous measurement, so there are no categories whose prevalence could be unbalanced. If these numbers are category codes rather than measurements, set the variables to Nominal or Ordinal - or wrap them in factor() when calling from R - and PABAK will be computed.")
                             )
                         }
                     } else {
                         self$results$gwetHeading$setVisible(TRUE)
                     }
                 }
-                if (self$options$showGwetGuide && !(is_continuous && n_unique_vals > 20)) {
+                if (self$options$showGwetGuide && !is_continuous) {
                     private$.populateGwetExplanation()
                 }
-                if (self$options$gwet && !(is_continuous && n_unique_vals > 20)) {
+                if (self$options$gwet && !is_continuous) {
                     private$.calculateGwetAC(ratings)
                 }
 
                 private$.checkpoint()
 
                 # PABAK & Prevalence/Bias Indices (if requested) ----
-                if (self$options$showPABAKGuide && !(is_continuous && n_unique_vals > 20)) {
+                if (self$options$showPABAKGuide && !is_continuous) {
                     private$.populatePABAKExplanation()
                 }
-                if (self$options$pabak && !(is_continuous && n_unique_vals > 20)) {
+                if (self$options$pabak && !is_continuous) {
                     private$.calculatePABAK(ratings)
                 }
 

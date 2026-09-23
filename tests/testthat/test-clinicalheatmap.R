@@ -1,3 +1,7 @@
+# Do not source() R/*.h.R / R/*.b.R here: a source() preamble detaches the package namespace,
+# jmvcore's .() helper leaves scope and any .() string dies with `could not find function "."`
+# (project reference test-source-preamble-breaks-dot-translate). The package provides these.
+
 # Test file for clinicalheatmap function
 # Tests core heatmap functionality, data preparation, annotations, and error handling
 
@@ -6,9 +10,6 @@ library(jmvcore)
 library(tidyheatmaps)
 library(dplyr)
 
-# Source the files
-source("../../R/clinicalheatmap.h.R")
-source("../../R/clinicalheatmap.b.R")
 
 # Define . function if not exists
 if (!exists(".")) . <- function(x, ...) x

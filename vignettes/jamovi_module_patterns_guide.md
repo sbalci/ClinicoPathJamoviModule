@@ -158,6 +158,14 @@ default branch cannot silently change what a build pulls in.
   `Imports` is the canonical place to declare what your code depends on.
 - Best practice going forward: **list every real run-time dependency in `Imports`**, and add
   a `Remotes:` entry only for those not available on CRAN.
+- **Never derive a dependency list while an analysis is parked.** A `T`/`P`/`D` suffix on
+  `menuGroup:` routes an analysis out of the module, so the packages only it calls stop
+  having a caller and read as unused. `prune_imports` in `_updateModules_config.yaml` is a
+  standing DELETE order - the only way to remove an Import - so recording that reading makes
+  a temporary routing state permanent, and the analysis cannot run when it returns. Check
+  `grep -l 'menuGroup: <module>[TPD]' jamovi/*.a.yaml` first; run
+  `python3 tools/promotion_screen.py --no-git` to see which parked analyses a module's
+  existing entries would break (0 shipped / 54 parked, 2026-09-23). Review guide sections 19 and 29.
 
 ---
 

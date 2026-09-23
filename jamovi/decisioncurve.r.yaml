@@ -507,7 +507,6 @@ items:
         - thresholdMax
         - thresholdStep
         - multiModelComparison
-        - comparisonMethod
         - bootReps
         - ciLevel
         - seed

@@ -22,11 +22,11 @@ enhancedROC <- function(...) {
 # - Convex hull
 # - Tied score handling
 # - Kernel smoothing
-# - Extended calibration (spline, E/O ratio, Nam-D'Agostino, etc.)
-# - Bootstrap extensions (cutoff CI, partial AUC CI)
+# - Extended calibration (spline, E/O ratio, calibration density)
+# - Bootstrap extensions (partial AUC CI, stratified, method)
 # - Multi-class OVO strategy & weighted averaging
 # - Clinical impact (NNT, clinical utility curve, decision impact)
-# - Validation extensions (optimism correction, net benefit, etc.)
+# - Validation extensions (bootstrap, cross-validation, decision impact curves)
 # - Clinical presets (all variants)
 # - Comprehensive output mode
 
@@ -37,6 +37,23 @@ data(enhancedroc_biomarker, package = "ClinicoPath")
 data(enhancedroc_comparative, package = "ClinicoPath")
 data(enhancedroc_calibration, package = "ClinicoPath")
 data(enhancedroc_multiclass, package = "ClinicoPath")
+
+# ---------------------------------------------------------------------------
+# Thirteen blocks that used to live in this file passed arguments that no longer
+# exist. The 14 options below were never implemented and are now commented out in
+# BOTH jamovi/enhancedROC.a.yaml and jamovi/enhancedROC.u.yaml, so jamovi ships no
+# control that produces no output and the R wrapper does not accept them either.
+# Calling one is an "unused argument" error, not a feature under test.
+# The full contract (a.yaml, u.yaml, backend) is asserted in
+# test-enhancedROC-release-review.R; this is the guard for THIS file's call sites.
+test_that("no test in this file sets an option that was never implemented", {
+  removed <- c(
+    "harrellCIndex", "unoCStatistic", "namDagostino", "greenwoodNam",
+    "calibrationBelt", "optimismCorrection", "externalValidation", "transportability",
+    "bootstrapCutoffCI", "modelUpdating", "netBenefitRegression", "incidentDynamic",
+    "cumulativeDynamic", "competingRisksConcordance")
+  expect_equal(intersect(removed, names(formals(ClinicoPath::enhancedROC))), character(0))
+})
 
 # ═══════════════════════════════════════════════════════════
 # CROC ANALYSIS
@@ -221,45 +238,6 @@ test_that("enhancedROC calculates E/O ratio", {
   expect_s3_class(result, "enhancedROCResults")
 })
 
-test_that("enhancedROC performs Nam-D'Agostino test", {
-  result <- enhancedROC(
-    data = enhancedroc_calibration,
-    outcome = "outcome",
-    positiveClass = "Event",
-    predictors = "predictor1",
-    calibrationAnalysis = TRUE,
-    namDagostino = TRUE
-  )
-
-  expect_s3_class(result, "enhancedROCResults")
-})
-
-test_that("enhancedROC performs Greenwood-Nam-D'Agostino test", {
-  result <- enhancedROC(
-    data = enhancedroc_calibration,
-    outcome = "outcome",
-    positiveClass = "Event",
-    predictors = "predictor1",
-    calibrationAnalysis = TRUE,
-    greenwoodNam = TRUE
-  )
-
-  expect_s3_class(result, "enhancedROCResults")
-})
-
-test_that("enhancedROC displays calibration belt", {
-  result <- enhancedROC(
-    data = enhancedroc_calibration,
-    outcome = "outcome",
-    positiveClass = "Event",
-    predictors = "predictor1",
-    calibrationAnalysis = TRUE,
-    calibrationBelt = TRUE
-  )
-
-  expect_s3_class(result, "enhancedROCResults")
-})
-
 test_that("enhancedROC displays calibration density", {
   result <- enhancedROC(
     data = enhancedroc_calibration,
@@ -288,8 +266,6 @@ test_that("enhancedROC performs comprehensive calibration analysis", {
     splineCalibration = TRUE,
     splineKnots = 4,
     eoRatio = TRUE,
-    namDagostino = TRUE,
-    calibrationBelt = TRUE,
     calibrationDensity = TRUE
   )
 
@@ -300,7 +276,7 @@ test_that("enhancedROC performs comprehensive calibration analysis", {
 # BOOTSTRAP EXTENSIONS
 # ═══════════════════════════════════════════════════════════
 
-test_that("enhancedROC computes bootstrap CI for optimal cutoff", {
+test_that("enhancedROC bootstraps the AUC while Youden picks the cutoff", {
   result <- enhancedROC(
     data = enhancedroc_biomarker,
     outcome = "disease_status",
@@ -308,7 +284,6 @@ test_that("enhancedROC computes bootstrap CI for optimal cutoff", {
     predictors = "biomarker1",
     useBootstrap = TRUE,
     bootstrapSamples = 200,
-    bootstrapCutoffCI = TRUE,
     youdenOptimization = TRUE
   )
 
@@ -402,6 +377,14 @@ test_that("enhancedROC performs multi-class ROC with OVO + weighted", {
   )
 
   expect_s3_class(result, "enhancedROCResults")
+
+  # Hand-Till OVO averages over class PAIRS, so there is no prevalence-weighted
+  # version of it. Ticking "weighted" must say so rather than quietly report the
+  # unweighted value; rgba(202, 138, 4, 0.12) is .renderNotices()'s WARNING panel.
+  notices <- paste(result$results$notices$content, collapse = " ")
+  expect_match(notices, "Weighted Averaging Is Not Available with the One-vs-One Strategy",
+               fixed = TRUE)
+  expect_match(notices, "rgba(202, 138, 4, 0.12)", fixed = TRUE)
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -510,33 +493,6 @@ test_that("enhancedROC performs internal validation with both methods", {
   expect_s3_class(result, "enhancedROCResults")
 })
 
-test_that("enhancedROC applies optimism correction", {
-  result <- enhancedROC(
-    data = enhancedroc_biomarker,
-    outcome = "disease_status",
-    positiveClass = "Disease",
-    predictors = c("biomarker1", "biomarker2"),
-    internalValidation = TRUE,
-    validationMethod = "bootstrap",
-    optimismCorrection = TRUE
-  )
-
-  expect_s3_class(result, "enhancedROCResults")
-})
-
-test_that("enhancedROC enables external validation framework", {
-  result <- enhancedROC(
-    data = enhancedroc_biomarker,
-    outcome = "disease_status",
-    positiveClass = "Disease",
-    predictors = c("biomarker1", "biomarker2"),
-    internalValidation = TRUE,
-    externalValidation = TRUE
-  )
-
-  expect_s3_class(result, "enhancedROCResults")
-})
-
 test_that("enhancedROC plots decision impact curves", {
   result <- enhancedROC(
     data = enhancedroc_biomarker,
@@ -545,109 +501,6 @@ test_that("enhancedROC plots decision impact curves", {
     predictors = "biomarker1",
     internalValidation = TRUE,
     decisionImpactCurves = TRUE
-  )
-
-  expect_s3_class(result, "enhancedROCResults")
-})
-
-test_that("enhancedROC performs net benefit regression", {
-  result <- enhancedROC(
-    data = enhancedroc_biomarker,
-    outcome = "disease_status",
-    positiveClass = "Disease",
-    predictors = "biomarker1",
-    internalValidation = TRUE,
-    netBenefitRegression = TRUE
-  )
-
-  expect_s3_class(result, "enhancedROCResults")
-})
-
-test_that("enhancedROC performs model updating analysis", {
-  result <- enhancedROC(
-    data = enhancedroc_biomarker,
-    outcome = "disease_status",
-    positiveClass = "Disease",
-    predictors = c("biomarker1", "biomarker2"),
-    internalValidation = TRUE,
-    modelUpdating = TRUE
-  )
-
-  expect_s3_class(result, "enhancedROCResults")
-})
-
-test_that("enhancedROC assesses transportability", {
-  result <- enhancedROC(
-    data = enhancedroc_biomarker,
-    outcome = "disease_status",
-    positiveClass = "Disease",
-    predictors = c("biomarker1", "biomarker2"),
-    internalValidation = TRUE,
-    transportability = TRUE
-  )
-
-  expect_s3_class(result, "enhancedROCResults")
-})
-
-# ═══════════════════════════════════════════════════════════
-# SURVIVAL CONCORDANCE OPTIONS
-# ═══════════════════════════════════════════════════════════
-
-test_that("enhancedROC calculates Harrell's C-Index", {
-  result <- enhancedROC(
-    data = enhancedroc_biomarker,
-    outcome = "disease_status",
-    positiveClass = "Disease",
-    predictors = "biomarker1",
-    harrellCIndex = TRUE
-  )
-
-  expect_s3_class(result, "enhancedROCResults")
-})
-
-test_that("enhancedROC calculates Uno's C-statistic", {
-  result <- enhancedROC(
-    data = enhancedroc_biomarker,
-    outcome = "disease_status",
-    positiveClass = "Disease",
-    predictors = "biomarker1",
-    unoCStatistic = TRUE
-  )
-
-  expect_s3_class(result, "enhancedROCResults")
-})
-
-test_that("enhancedROC calculates incident/dynamic AUC", {
-  result <- enhancedROC(
-    data = enhancedroc_biomarker,
-    outcome = "disease_status",
-    positiveClass = "Disease",
-    predictors = "biomarker1",
-    incidentDynamic = TRUE
-  )
-
-  expect_s3_class(result, "enhancedROCResults")
-})
-
-test_that("enhancedROC calculates cumulative/dynamic AUC", {
-  result <- enhancedROC(
-    data = enhancedroc_biomarker,
-    outcome = "disease_status",
-    positiveClass = "Disease",
-    predictors = "biomarker1",
-    cumulativeDynamic = TRUE
-  )
-
-  expect_s3_class(result, "enhancedROCResults")
-})
-
-test_that("enhancedROC calculates competing risks concordance", {
-  result <- enhancedROC(
-    data = enhancedroc_biomarker,
-    outcome = "disease_status",
-    positiveClass = "Disease",
-    predictors = "biomarker1",
-    competingRisksConcordance = TRUE
   )
 
   expect_s3_class(result, "enhancedROCResults")
@@ -830,7 +683,6 @@ test_that("enhancedROC validation + calibration combined", {
     calibrationMetrics = TRUE,
     internalValidation = TRUE,
     validationMethod = "bootstrap",
-    optimismCorrection = TRUE,
     rocCurve = TRUE,
     aucTable = TRUE
   )
@@ -874,7 +726,6 @@ test_that("enhancedROC kitchen sink: all non-conflicting advanced features", {
     useBootstrap = TRUE,
     bootstrapSamples = 200,
     bootstrapMethod = "percentile",
-    bootstrapCutoffCI = TRUE,
     stratifiedBootstrap = TRUE,
     # Comparison
     pairwiseComparisons = TRUE,

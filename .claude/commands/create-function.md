@@ -209,7 +209,8 @@ python3 tools/theme_safe_html.py       # opaque light-theme background (dark-mod
 grep -oh "&[a-zA-Z][a-zA-Z0-9]\{1,12\};" R/<fn>.b.R | sort -u   # only &lt; &gt; &amp; &quot; &apos; are safe
 grep -n "setVisible(FALSE)" R/<fn>.b.R # every hit must be OPTION-driven, never a failure signal
 grep -n "^\s*warning(" R/<fn>.b.R      # jamovi never shows R warnings to the user
-grep -n "addRow(rowKey" R/<fn>.b.R     # a fixed / option-determined row set belongs in .init()
+python3 tools/release_gate.py | grep "fixed rows built"   # a table whose whole row set is fixed belongs in .init() (bare grep = 620 unreadable hits; blind to a loop-index rowKey)
+grep -n "set\.seed(" R/<fn>.b.R        # one R process per session: use withr::local_seed() so the seed does not leak into the next analysis
 grep -n "visible: *( *!" jamovi/<fn>.r.yaml   # a leading "!" is silently ALWAYS VISIBLE
 grep -nE '\.\(\s*"[[:space:],;:.]|\.\(\s*"[^"]*[[:space:]]"\s*[,)]' R/<fn>.b.R   # separator/padding inside .()
 grep -nE '^\s*(type: *(File|Text)|mode: *vector)\s*$' jamovi/<fn>.a.yaml jamovi/<fn>.r.yaml; grep -n '^minApp' jamovi/0000.yaml   # File/Text need module-wide minApp: 28.3.0 (Text table columns are false hits); vector = bounded-mark plots only
@@ -267,6 +268,17 @@ Checklist:
       (forest, bar, flow diagram, nomogram), never scatter/QQ/jitter/large KM/heatmap. Setup
       and gating: [Installing Current jmvtools and jmvcore](../../vignettes/jamovi_module_patterns_guide.md#installing-current-jmvtools-and-jmvcore),
       [Version Gating: minApp](../../vignettes/jamovi_module_patterns_guide.md#version-gating-minapp).
+- [ ] **An unconfigured analysis is not an error** — opening an analysis with no variables selected
+      must return quietly behind the welcome/instructions panel without emitting an ERROR notice.
+      A partial selection gets an INFO notice naming the empty boxes. A fatal data processing
+      failure calls `jmvcore::reject()`, never an ERROR notice banner followed by `return(NULL)` (§25).
+- [ ] **Tabular data belongs in a `type: Table` result in `.r.yaml`**, not hand-built HTML `<table>`
+      markup. Hand-crafted HTML tables break dark themes, lose Copy/Copy LaTeX grid operations, and
+      cannot be translated (§26).
+- [ ] **Metadata self-consistency** — `description: main:` must be one `>` folded paragraph with no
+      blank lines (`tools/release_gate.py` `check_description_newlines`); bug-report URL must match
+      across `DESCRIPTION`, `jamovi/0000.yaml`, and `README.md`; example datasets must have distinct
+      descriptions (§27).
 
 ## Response Format
 

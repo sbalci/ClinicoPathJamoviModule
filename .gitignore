@@ -107,3 +107,5 @@ quality-reports/
 literature/*-local.md
 development-ideas/
 development-scripts/
+TODO-audit.md
+tests/*.md 

@@ -375,16 +375,20 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 list(background = background, references = references)
             },
             .run = function() {
-                # Reset notices for new analysis run
+                # Notices are rendered on EVERY exit path (completion, the welcome-state
+                # return(), and each jmvcore::reject() below), so a validation abort never
+                # leaves the previous run's "Important Information" panel on screen.
                 private$.noticeList <- list()
+                on.exit(private$.renderNotices(), add = TRUE)
                 private$.diagLines <- character(0)
                 private$.boot_cache <- NULL
                 private$.preset_info <- NULL
                 self$results$clinical_summary$setContent("")
 
-                # .init() sees only the initial option values. Refresh this optional
-                # panel on every run so switching it on after analysis creation does not
-                # reveal an empty result item.
+                # .init() sees only the initial option values. Refresh this optional panel's
+                # CONTENT on every run so switching it on after analysis creation does not
+                # reveal an empty result item. Its visibility is owned by the .r.yaml
+                # `visible: (showMethodGuide)` binding, not by this call.
                 private$.showMethodGuide()
 
                 # Preset advisory: after the reset above, so it survives to be rendered.
@@ -728,6 +732,19 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                         .("Confidence limits are Wilson score intervals for the observed proportion meeting the reference rule.")
                     }
                 )
+                # Latent-class replicates are warm-started from the full-sample fit and run a
+                # SINGLE EM pass (.bootstrapAll passes probs_start = results$model$probs with
+                # n_starts = 1L), not the 30-start search the primary fit uses. Repeating that
+                # search per replicate would be 30 x nboot poLCA fits, so the warm start stays
+                # -- but the note must say so rather than imply an independent refit.
+                # setNote() with NULL is how a note is REMOVED: the table keeps its notes
+                # between runs, so this must be written unconditionally or the warm-start
+                # caveat survives a switch to another method or to bootstrap off.
+                table$setNote(
+                    "boot_warm_start",
+                    if (isTRUE(self$options$bootstrap) && identical(method, "latent_class"))
+                        .("Each latent-class resample is fitted with a single EM run started from the full-sample solution, not from the multi-start random search used for the primary fit. The interval is therefore conditional on that solution: it does not propagate label-switching or local-optimum variability and is likely anti-conservative, that is, too narrow.")
+                )
                 table$setRow(rowNo = 1, values = list(
                     estimate = prevalence,
                     ci_lower = ci_lower,
@@ -772,6 +789,15 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     else
                         sprintf(jmvcore::.("%.0f%% intervals are Wilson score intervals for agreement with the observed reference rule."),
                                 conf_pct)
+                )
+                # See .populatePrevalence: latent-class replicates reuse the full-sample
+                # solution as their single EM start, so "refitting the model on each" above
+                # must not be read as an independent multi-start refit.
+                table$setNote(
+                    "boot_warm_start",
+                    if (isTRUE(self$options$bootstrap) &&
+                        identical(self$options$method, "latent_class"))
+                        .("Each latent-class resample is fitted with a single EM run started from the full-sample solution, not from the multi-start random search used for the primary fit. The interval is therefore conditional on that solution: it does not propagate label-switching or local-optimum variability and is likely anti-conservative, that is, too narrow.")
                 )
 
                 # These two "methods" build the reference standard out of the very tests

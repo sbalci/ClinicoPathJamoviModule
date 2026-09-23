@@ -186,7 +186,7 @@ children:
           - type: CheckBox
             name: showLinCCCGuide
   - type: CollapseBox
-    label: Total Deviation Index (TDI) [Continuous] (Acceptable Limits)
+    label: Empirical TDI [Continuous] (Prespecified Difference Limit)
     collapsed: true
     children:
       - type: LayoutBox
@@ -429,7 +429,7 @@ children:
           - type: CheckBox
             name: showItemModalGuide
   - type: CollapseBox
-    label: Rater Bias Test [Categorical] (Quality Control)
+    label: Directional Discordance [Ordinal] (2 Raters)
     collapsed: true
     children:
       - type: LayoutBox

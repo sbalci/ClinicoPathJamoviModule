@@ -171,7 +171,7 @@ Apply this **in addition** to the framework above. Create, review, or refactor n
 
 Respect `$ARG_notices_mode` and `$ARG_notice_insert_position`:
 
-- `auto` (default): ERROR/STRONG_WARNING at top (`insert(1, ...)`), contextual WARNING before related table, INFO at bottom (`insert(999, ...)`).
+- `auto` (default): ERROR/STRONG_WARNING at top (`insert(1, ...)` on a non-empty results tree), contextual WARNING before the related table, INFO at bottom (`self$results$add(...)` — never `insert(999, ...)`, which corrupts the tree; review guide §13).
 - `top`/`mid`/`bottom`: prefer requested band while keeping ERROR at top.
 
 ### C. Content rules
@@ -209,7 +209,7 @@ for (n in notices_in_priority) { self$results$insert(position, n); position <- p
 ```r
 ok <- jmvcore::Notice$new(options=self$options, name='analysisComplete', type=jmvcore::NoticeType$INFO)
 ok$setContent(sprintf('Analysis completed using %d observations.', nrow(self$data)))
-self$results$insert(999, ok)
+self$results$add(ok)   # append; insert(999, ...) corrupts the results tree - review guide §13
 ```
 
 

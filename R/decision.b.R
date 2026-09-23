@@ -35,9 +35,12 @@ decisionClass <- if (requireNamespace("jmvcore"))
             # Constants for maintainability
             NOMOGRAM_LABEL_SIZE = 14/5,
 
-            # TODO [i18n] jamovi/i18n/ is bootstrapped and all 106 translatable
-            #   strings from this file are in catalog.pot, but only 2 of them are
-            #   translated in tr.po. Finish the Turkish catalog before release.
+            # TODO [i18n] Measured 2026-09-23: 315 msgids reference this file in
+            #   jamovi/i18n/tr.po and 295 carry a Turkish msgstr; 20 are still
+            #   empty (mostly the zero-cell / epiR-failure notices and the
+            #   Youden interpretation strings). Finish those before release.
+            #   (An older note here claimed 106 strings and 2 translations - it
+            #   predated the catalog work and was wrong by 2026-09.)
             #
             # The 2026-05-14 audit TODO that stood here was re-verified 2026-08-29:
             # its report file is gone and 5 of its 6 items were already false or
@@ -1982,12 +1985,24 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     # The rows are the fixed statistic set scaffolded in .init(); clearing them here
                     # would delete the scaffold and make the table appear only once epiR returns.
                     # Blank the values instead, so a failed epiR leaves empty cells, not a missing table.
+                    #
+                    # statsnames is re-set with the same label it already holds, purely for
+                    # its side effect: Cell$setValue() resets that cell's footnotes. .init()
+                    # runs before the previous run's results are restored from protobuf, and
+                    # Cell$fromProtoBuf() brings the old footnotes back, so the statsnames
+                    # footnotes added below would otherwise pile up one copy per run and would
+                    # never disappear when the user unticks Explanatory footnotes (fnote is
+                    # not in this table's clearWith). The est/lower/upper cells already
+                    # self-clear this way; statsnames was the only column left out.
+                    epir_labels <- private$.epirStatLabels()
                     for (key in private$.epirRatioStats())
                         self$results$epirTable_ratio$setRow(rowKey = key,
-                            values = list(est = NA_real_, lower = NA_real_, upper = NA_real_))
+                            values = list(statsnames = unname(epir_labels[[key]]),
+                                          est = NA_real_, lower = NA_real_, upper = NA_real_))
                     for (key in private$.epirNumberStats())
                         self$results$epirTable_number$setRow(rowKey = key,
-                            values = list(est = NA_real_, lower = NA_real_, upper = NA_real_))
+                            values = list(statsnames = unname(epir_labels[[key]]),
+                                          est = NA_real_, lower = NA_real_, upper = NA_real_))
 
                     # With a population prior supplied, the main table's PPV/NPV are Bayes
                     # values at that prior while these rows are exact binomial quantities

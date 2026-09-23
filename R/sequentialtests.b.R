@@ -1470,8 +1470,16 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                 post_test1_neg_prob <- post_test1_neg_odds / (1 + post_test1_neg_odds)
 
                 test2_nlr <- (1 - plotData$Test2_Sens) / plotData$Test2_Spec
+                test2_plr <- plotData$Test2_Sens / (1 - plotData$Test2_Spec)
                 post_test2_neg_odds <- post_test1_neg_odds * test2_nlr
                 post_test2_neg_prob <- post_test2_neg_odds / (1 + post_test2_neg_odds)
+                # The subgroup that is retested and then crosses over: T1+/T2- under
+                # serial_positive, T1-/T2+ under serial_negative. It shares the FINAL class with
+                # the branch that stopped at test 1, and it is the higher-risk half of it.
+                cross_pos_neg_odds <- post_test1_pos_odds * test2_nlr
+                cross_pos_neg_prob <- cross_pos_neg_odds / (1 + cross_pos_neg_odds)
+                cross_neg_pos_odds <- post_test1_neg_odds * test2_plr
+                cross_neg_pos_prob <- cross_neg_pos_odds / (1 + cross_neg_pos_odds)
                 positive_path <- .("Positive Path")
                 negative_path <- .("Negative Path")
 
@@ -1485,6 +1493,20 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                 # subjects stop. `step_labels` replaces the hardcoded three-label x axis, which
                 # was per-plot wrong (it read "After Test 1" over the combined parallel PPV) and
                 # made the dropped `Step` column dead data.
+                #
+                # Stopping each branch where its subjects stop leaves a SECOND discrepancy that
+                # the caption below has to own: the truncated branch is only PART of its final
+                # class, so its endpoint is not the pooled figure the tables report. On the
+                # teaching example (prev 20%, both tests 60/70) serial_positive's final-negative
+                # class is {T1-} at P(D) = 12.50% with weight 0.7477 plus {T1+,T2-} at 22.22%
+                # with weight 0.2523, which mix to the tabled 1 - NPV = 14.95%; the retested
+                # crossover subgroup is 21.6% of the cohort and is drawn nowhere. serial_negative
+                # is the mirror image: {T1+} at 33.33% (weight 0.625) plus {T1-,T2+} at 22.22%
+                # (weight 0.375) mix to the tabled PPV = 29.17%. Shipping the plotted number and
+                # the tabled number in the same pane without saying they answer different
+                # questions is what made this a defect; the plotted values are correct for the
+                # subgroup they describe, so the caption names the subgroup rather than the plot
+                # being bent to match the table.
                 if (plotData$Strategy == "serial_positive") {
                     # Only test-1 positives receive test 2; test-1 negatives stop at test 1.
                     prob_data <- data.frame(
@@ -1494,6 +1516,10 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                         x = c(1, 2, 3, 1, 2)
                     )
                     step_labels <- c(.("Pre-test"), .("After Test 1"), .("After Test 2 (+)"))
+                    truncation_note <- sprintf(
+                        .("%1$s ends at the first-test-negative subgroup: P(disease | Test 1 negative) = %2$.1f%%. That is not the pooled final-negative figure in the tables, 1 - combined NPV = %3$.1f%%, which also averages in the Test 1 positive / Test 2 negative subgroup (P(disease) = %4$.1f%%). Those subjects are classified negative but are not drawn here."),
+                        negative_path, post_test1_neg_prob * 100,
+                        (1 - plotData$Combined_NPV) * 100, cross_pos_neg_prob * 100)
                 } else if (plotData$Strategy == "serial_negative") {
                     # Only test-1 negatives receive test 2; test-1 positives stop at test 1.
                     prob_data <- data.frame(
@@ -1503,6 +1529,10 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                         x = c(1, 2, 1, 2, 3)
                     )
                     step_labels <- c(.("Pre-test"), .("After Test 1"), .("After Test 2 (-)"))
+                    truncation_note <- sprintf(
+                        .("%1$s ends at the first-test-positive subgroup: P(disease | Test 1 positive) = %2$.1f%%. That is not the pooled final-positive figure in the tables, combined PPV = %3$.1f%%, which also averages in the Test 1 negative / Test 2 positive subgroup (P(disease) = %4$.1f%%). Those subjects are classified positive but are not drawn here."),
+                        positive_path, post_test1_pos_prob * 100,
+                        plotData$Combined_PPV * 100, cross_neg_pos_prob * 100)
                 } else {
                     # Parallel testing: both tests are applied at once, so there is no
                     # intermediate step. The third point merely repeated the second.
@@ -1513,7 +1543,13 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                         x = c(1, 2, 1, 2)
                     )
                     step_labels <- c(.("Pre-test"), .("After Both Tests"))
+                    # Nothing is truncated: both endpoints ARE the pooled tabled values. (The
+                    # positive one is still a mixture of {T1+,T2+}, {T1+,T2-} and {T1-,T2+}, but
+                    # the plot shows the mixture, not one of its parts, so nothing contradicts.)
+                    truncation_note <- NULL
                 }
+                if (!is.null(truncation_note))
+                    truncation_note <- paste(strwrap(truncation_note, width = 95), collapse = "\n")
 
                 prob_plot <- ggplot2::ggplot(
                     prob_data,
@@ -1534,7 +1570,8 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                                 strategy = if (is.null(plotData$StrategyLabel)) plotData$Strategy else plotData$StrategyLabel,
                                 prevalence = sprintf("%.1f%%", plotData$Prevalence * 100))),
                         x = .("Testing Stage"), y = .("Disease Probability (%)"),
-                        color = "", linetype = ""
+                        color = "", linetype = "",
+                        caption = truncation_note
                     ) +
                     ggplot2::theme_minimal() +
                     ggtheme +
@@ -1551,7 +1588,10 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                     ggplot2::scale_linetype_manual(
                         values = stats::setNames(
                             c("solid", "dashed"), c(positive_path, negative_path))) +
-                    ggplot2::theme(legend.position = "bottom") +
+                    # Left-aligned and smaller: the caption is a sentence, not a credit line,
+                    # and ggplot's default right-aligns it at the body font size.
+                    ggplot2::theme(legend.position = "bottom",
+                                   plot.caption = ggplot2::element_text(hjust = 0, size = 8)) +
                     ggplot2::ylim(0, max(prob_data$Probability) * 1.2)
 
                 print(prob_plot)
@@ -1768,10 +1808,13 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                 return(TRUE)
             },
 
-            # Notice collection helpers. A single Preformatted (plain-text) output item:
-            # avoids BOTH the jmvcore::Notice serialization error from
-            # self$results$insert(999, Notice) AND any HTML in notices (project convention:
-            # notice content must be plain text). ====
+            # Notice collection helpers. A single Preformatted (plain-text) output item, so the
+            # whole set renders with no HTML (project convention: notice content must be plain
+            # text). NOTE (corrected 2026-09-23): jmvcore::Notice itself serializes fine. The
+            # "attempt to apply non-function" crash once blamed on it came from
+            # self$results$insert(999, ...) -- Group$insert() has no bounds check, so it pads the
+            # results tree with NULLs and the next traversal calls NULL$asProtoBuf(). An Html
+            # element at the same index fails identically. Use $add(), never insert(999, ...). ====
             # Teaching examples. This table MUST match SEQUENTIAL_PRESET_CONFIGS in
             # jamovi/js/sequentialtests.events.js -- the JavaScript applies examples in the GUI,
             # this applies them for callers from R, and a regression test compares the two.

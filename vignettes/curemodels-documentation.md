@@ -214,7 +214,7 @@ The class stores intermediate results in private fields to share across methods:
 
 ### HTML Notice System
 
-The function uses the project-wide HTML notice pattern (replacing the deprecated `insert(999, Notice)` approach that causes protobuf serialization errors). Three severity levels with distinct colors:
+The function uses the project-wide HTML notice pattern (replacing the deprecated `insert(999, Notice)` approach that triggers jmvcore's insert bounds-check bug; see jamovi Library Review Guide §13). Three severity levels with distinct colors:
 
 | Type | Color | Background | Use |
 |------|-------|-----------|-----|

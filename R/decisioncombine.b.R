@@ -379,19 +379,24 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 # the explanation rather than an empty pane. It depends on no data.
                 private$.renderAboutPanels()
 
-                # .run() has three early returns (failed validation, failed data prep, and
-                # incomplete variable selection). Rendering only at the bottom meant every
+                # .run() has two early returns (failed validation and failed data prep --
+                # incomplete variable selection is now one of the validation errors, see
+                # below). Rendering only at the bottom meant every
                 # notice explaining WHY the analysis stopped -- "Missing Level",
                 # "No Complete Cases", every validation error -- was collected and then
                 # discarded, leaving the user with a blank analysis and no message. on.exit
                 # covers every exit path, including ones added later.
                 on.exit(private$.renderNotices(), add = TRUE)
 
-                # Check if we have minimum required variables
-                if (!private$.hasRequiredVars()) {
-                    return()
-                }
-
+                # A .hasRequiredVars() pre-gate used to sit here, returning FALSE silently
+                # on exactly the first five conditions .validateInputs() re-tests with an
+                # ERROR notice each. The early return fired first, so those five notices
+                # could never be shown: a user who picked a gold standard but no positive
+                # level got a blank analysis and no message, while the sentence telling
+                # them which control to fill in shipped to translators unreachable. Same
+                # defect the duplicate block in .prepareData() had -- a defensive guard is
+                # only defensive if it can fire. Validation now owns the decision.
+                #
                 # Step 1: Validate inputs (will stop on errors)
                 validation_result <- private$.validateInputs()
                 if (!validation_result) {
@@ -423,10 +428,17 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     private$.populateFrequencyTables(data_prep)
                 }
 
-                # Step 6: Populate recommendation (if requested)
-                if (self$options$showRecommendation) {
-                    private$.populateRecommendation()
-                }
+                # Step 6: Rank the candidate rules. Runs on EVERY run, not only when
+                # showRecommendation is ticked, because two of its guards are clinical
+                # rather than cosmetic: "Positive Levels May Be Inverted" and "No Rule
+                # Performs Better Than Chance" are the only detectors of a swapped
+                # positive level, which silently inverts every number this analysis
+                # prints. With the ranking box off by default, nothing detected it in the
+                # configuration almost everyone uses. The table itself stays gated --
+                # .clearDynamicResults() hides it and .populateRecommendation() re-shows it
+                # only when the option is on -- and the method is called exactly once per
+                # .run(), so neither notice can be emitted twice.
+                private$.populateRecommendation()
 
                 # Step 7: Add pattern to data (if requested)
                 # House idiom for a pure Output item (R/ctdnadynamics.b.R:139): gate on
@@ -443,42 +455,26 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
 
                 # Notices are rendered by the on.exit handler registered above.
             },
-            .hasRequiredVars = function() {
-                # Check if minimum required variables are selected
-                # Returns FALSE to silently skip analysis, not throw error
-
-                if (is.null(self$data) || nrow(self$data) == 0) {
-                    return(FALSE)
-                }
-
-                if (length(self$options$gold) == 0 || self$options$gold == "") {
-                    return(FALSE)
-                }
-
-                if (is.null(self$options$goldPositive) || self$options$goldPositive == "") {
-                    return(FALSE)
-                }
-
-                if (length(self$options$test1) == 0 || self$options$test1 == "") {
-                    return(FALSE)
-                }
-
-                if (is.null(self$options$test1Positive) || self$options$test1Positive == "") {
-                    return(FALSE)
-                }
-
-                return(TRUE)
-            },
             .validateInputs = function() {
                 # Strict validation with clear error messages using HTML notices
                 # Returns TRUE if validation passes, FALSE otherwise
 
-                if (is.null(self$data) || nrow(self$data) == 0) {
-                    private$.addNotice(
-                        "ERROR",
-                        .("No Data"),
-                        .("No data are available. Load data before running the analysis.")
-                    )
+                # Variable selection is checked BEFORE the empty-data check. self$data
+                # contains only the columns named by the options, so with nothing selected
+                # it is a 0-column frame whose nrow() is 0 -- the "No Data" branch would
+                # then greet every freshly opened analysis with "Load data before running
+                # the analysis" while the data were loaded and only the controls empty.
+                # None of the four checks below touches self$data.
+                #
+                # Empty state: nothing chosen at all. A freshly opened analysis must not
+                # greet the user with a red ERROR before they have configured anything, so
+                # return quietly here and let the instructions panel speak. The checks
+                # below then only fire once the user has STARTED choosing -- a partial
+                # selection (a gold standard with no positive level, say) is the case that
+                # genuinely needs telling, because nothing on screen says which control is
+                # still empty.
+                if (!private$.optionSelected(self$options$gold) &&
+                    !private$.optionSelected(self$options$test1)) {
                     return(FALSE)
                 }
 
@@ -514,6 +510,15 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                         "ERROR",
                         .("No Test 1 Positive Level"),
                         .("Select the positive level for Test 1.")
+                    )
+                    return(FALSE)
+                }
+
+                if (is.null(self$data) || nrow(self$data) == 0) {
+                    private$.addNotice(
+                        "ERROR",
+                        .("No Data"),
+                        .("No data are available. Load data before running the analysis.")
                     )
                     return(FALSE)
                 }
@@ -1117,10 +1122,16 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 )
                 self$results$combinationTable$setNote(
                     "haldane",
-                    # The note must state the rule the code now applies: the correction is
-                    # also withheld when a DISEASE margin is structurally empty, and the
-                    # three ratios are blanked there rather than manufactured from the 0.5.
-                    jmvcore::.("LR+, LR- and the diagnostic odds ratio are computed with a Haldane-Anscombe 0.5 continuity correction when a cell is zero, so they stay finite; sensitivity, specificity, PPV and NPV on the same row use the observed counts. The two therefore need not agree exactly at a zero cell. The correction repairs a sampling zero, not a structural one, so it is withheld and the three ratios are left blank whenever a whole margin is empty: a pattern that no patient exhibits, and any sample in which every case is disease-present or every case is disease-absent.")
+                    # The note must state the rule the code ACTUALLY applies, per branch.
+                    # It used to say the three ratios are "left blank whenever a whole
+                    # margin is empty", lumping the test and disease margins together --
+                    # but only the DISEASE-margin branch blanks all three. On an empty
+                    # TEST margin the code deliberately keeps the determinate ratio: a
+                    # pattern no patient exhibits (tp + fp = 0) prints LR- exactly 1.00,
+                    # verified on a fixture where test2 copies test1 so "+/-" and "-/+"
+                    # are empty. A reader told all three were blank would have read that
+                    # 1.00 as a corrected number.
+                    jmvcore::.("LR+, LR- and the diagnostic odds ratio are computed with a Haldane-Anscombe 0.5 continuity correction when a cell is zero, so they stay finite; sensitivity, specificity, PPV and NPV on the same row use the observed counts. The two therefore need not agree exactly at a zero cell. The correction repairs a sampling zero, not a structural one, so it is withheld whenever a whole margin is empty, and what is then left blank differs between the two kinds of empty margin. On a pattern that no patient exhibits, LR+ and the odds ratio are 0/0 and are left blank, while LR- is exactly 1 and is shown as such: any other result leaves the odds unchanged. The mirror case, a row with no test-negative patients, blanks LR- and the odds ratio and shows LR+ as exactly 1. In a sample where every case is disease-present, or every case is disease-absent, sensitivity or specificity cannot be estimated at all, so all three ratios are left blank in every row.")
                 )
                 # sequentialtests warns about conditional independence in five places because
                 # it DERIVES combined performance from marginal sensitivity and specificity.
@@ -1777,7 +1788,18 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 }
             },
             .populateRecommendation = function() {
+                # Called on every .run(), not only when showRecommendation is ticked: the
+                # two STRONG_WARNINGs below are the analysis's only detectors of a
+                # reversed positive level. Only the table is gated, at the setVisible()
+                # near the end of this method.
                 combTable <- self$results$combinationTable
+                # Defensive only, and carrying no notice for that reason: .run() calls
+                # .analyzeCombinations() immediately before this, every branch of which
+                # adds at least one row, and .validateInputs() has already guaranteed at
+                # least four complete cases -- so .analyzeSinglePattern()'s own skip
+                # branches (non-2x2 table, negative/NA counts, all-zero counts) are
+                # themselves unreachable. An unreachable message would still be extracted
+                # into catalog.pot and handed to translators.
                 if (combTable$rowCount == 0) {
                     return()
                 }
@@ -1803,10 +1825,6 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 # the ratio estimates, and .assessSparseCounts() reports it separately.
                 candidates <- table_df
                 candidates <- candidates[is.finite(candidates$youden), , drop = FALSE]
-                candidates$n_diseased <- candidates$tp + candidates$fn
-                candidates$n_healthy <- candidates$fp + candidates$tn
-                candidates <- candidates[
-                    candidates$n_diseased >= 10 & candidates$n_healthy >= 10, , drop = FALSE]
 
                 # De-duplication keeps whichever row comes first, and the exhaustive
                 # patterns are added to the table before the named strategies. That made
@@ -1825,12 +1843,56 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                                       candidates$fn, candidates$tn, sep = "|")),
                     , drop = FALSE
                 ]
+
+                # Inverted-positive-level guard, asked of every estimable rule BEFORE the
+                # eligibility filter below. Relabelling symmetry: flip a test's positive
+                # level and the same 2x2s reappear with the labels reversed, so an
+                # all-negative pattern scores best while Parallel, Serial and Majority all
+                # go to or below chance. That is a data-entry error, not a ranking-precision
+                # question, and it is worst in exactly the small series the >= 10/>= 10
+                # eligibility filter discards -- run it earlier and it also fires when no
+                # ranking is produced at all.
+                if (nrow(candidates) > 0) {
+                    top_row <- candidates[which.max(candidates$youden), , drop = FALSE]
+                    named_rows <- candidates$rowType %in%
+                        c(.("Strategy"), .("Single test"))
+                    # The second disjunct must test BOTH halves of what the notice claims:
+                    # named strategies at or below chance WHILE an exact pattern does better.
+                    # Without the third term it also fires on a no-information sample (every
+                    # rule at exactly chance, positive levels perfectly correct), where it
+                    # contradicts the "No Rule Performs Better Than Chance" notice shown
+                    # beside it and tells the reader to re-check a level assignment that is fine.
+                    if (isTRUE(grepl("^-(/-)*$", top_row$pattern)) ||
+                        (any(named_rows) && all(candidates$youden[named_rows] <= 0) &&
+                         any(candidates$youden[!named_rows] > 0))) {
+                        private$.addNotice(
+                            "STRONG_WARNING",
+                            .("Positive Levels May Be Inverted"),
+                            .("The rule that separates the two groups best in this sample is one that calls a patient positive when the tests are negative; or every named strategy (Parallel, Serial, Majority) performs at or below chance while an exact result pattern does not. Both are the signature of a reversed positive level: the arithmetic still works, but the sensitivity and specificity reported for each rule are then swapped, and the best-performing rule is one no clinician can apply. Check the level chosen as positive for the reference standard and for each test before interpreting any of these results.")
+                        )
+                    }
+                }
+
+                # Eligibility for the ranking itself is gated on the two REFERENCE-GROUP
+                # sizes; see the note above on why the smallest-cell rule of thumb is wrong
+                # here.
+                candidates$n_diseased <- candidates$tp + candidates$fn
+                candidates$n_healthy <- candidates$fp + candidates$tn
+                candidates <- candidates[
+                    candidates$n_diseased >= 10 & candidates$n_healthy >= 10, , drop = FALSE]
+
                 if (nrow(candidates) == 0) {
-                    private$.addNotice(
-                        "WARNING",
-                        .("Strategy Ranking Unavailable"),
-                        .("No candidate rule has an estimable Youden index with at least 10 disease-present and 10 disease-absent cases. Youden's J needs both reference groups to be reasonably sized before a ranking means anything.")
-                    )
+                    # Unlike the guard below, this one reports only that the ranking
+                    # feature cannot run. A user who did not ask for a ranking does not
+                    # need telling it is unavailable, and sample sparsity is already
+                    # reported on its own terms by .assessSparseCounts().
+                    if (isTRUE(self$options$showRecommendation)) {
+                        private$.addNotice(
+                            "WARNING",
+                            .("Strategy Ranking Unavailable"),
+                            .("No candidate rule has an estimable Youden index with at least 10 disease-present and 10 disease-absent cases. Youden's J needs both reference groups to be reasonably sized before a ranking means anything.")
+                        )
+                    }
                     return()
                 }
 
@@ -1850,17 +1912,13 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 # sample's group sizes, identical in every row, so the gate admits all rules
                 # or none. This is a guard against a degenerate sample, not a common path.
                 n_estimable <- nrow(candidates)
-                # Keep the PRE-filter frame: the "positive levels may be inverted" guard
-                # below asks whether every named strategy is at or below chance, and that
-                # question can only be answered before the youden > 0 cut removes them.
-                eligible <- candidates
                 candidates <- candidates[candidates$youden > 0, , drop = FALSE]
                 if (nrow(candidates) == 0) {
                     private$.addNotice(
                         "STRONG_WARNING",
                         .("No Rule Performs Better Than Chance"),
                         .fmt(
-                            .("None of the {n} eligible candidate rules has a Youden's J above zero, so none discriminates better than chance in this sample and no rule is ranked. A rule with a negative Youden's J is anti-predictive: its result would have to be reversed to carry information. Review the positive-level assignments for the reference standard and each test before interpreting these results."),
+                            .("None of the {n} candidate rules that could be scored has a Youden's J above zero: in this sample no single test, result pattern or combination strategy separates disease-present from disease-absent cases better than chance. A rule with a negative Youden's J is anti-predictive - its result would have to be reversed to carry information. Review the level chosen as positive for the reference standard and for each test, then treat the sensitivity and specificity in the tables above as uninformative until that is settled."),
                             n = n_estimable
                         )
                     )
@@ -1966,32 +2024,6 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                         .("The observed results involve a trade-off between sensitivity and specificity.")
                     )
                 }
-                # Relabelling symmetry: flip every test's positive level and the same 2x2s
-                # reappear with the labels reversed, so an all-negative pattern wins while
-                # Parallel, Serial and Majority all go negative and are stripped by the
-                # youden > 0 filter. The result is a headline naming a rule no clinician can
-                # apply -- "call it positive when every test is negative" -- with nothing to
-                # flag it. The existing "no rule beats chance" notice names this failure mode
-                # but fires only when every J is exactly zero, so it cannot catch this.
-                #
-                # The second disjunct used to be evaluated on `candidates`, i.e. AFTER the
-                # youden > 0 cut -- so every surviving row had youden > 0 and
-                # all(youden <= 0) could only be TRUE on an empty selection, where
-                # any(named_rows) is FALSE. The condition could never fire, and exactly the
-                # case it was written for (a MIXED winner such as "+/-" with every named
-                # strategy at or below chance) passed silently. Ask it of `eligible`, the
-                # frame that still contains those rows.
-                winner_all_negative <- grepl("^-(/-)*$", best_pattern$pattern)
-                named_rows <- eligible$rowType %in% c(.("Strategy"), .("Single test"))
-                if (isTRUE(winner_all_negative) ||
-                    (any(named_rows) && all(eligible$youden[named_rows] <= 0))) {
-                    private$.addNotice(
-                        "STRONG_WARNING",
-                        .("Positive Levels May Be Inverted"),
-                        .("The highest-ranked rule is an all-negative result pattern, or every named strategy performs at or below chance while an exact pattern does not. Both are the signature of a reversed positive level: if the level chosen as positive for one or more tests is actually the negative result, the arithmetic still works but the winning rule reads as \"call the patient positive when the tests are negative\", which is not a rule anyone can apply. Check the positive level selected for the reference standard and for each test before interpreting this ranking.")
-                    )
-                }
-
                 rationale_parts <- c(
                     rationale_parts,
                     .("This sample-dependent ranking is an analytical summary, not a clinical guide or validated recommendation.")

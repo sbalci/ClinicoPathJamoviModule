@@ -1,9 +1,11 @@
+# Do not source() R/*.h.R / R/*.b.R here: a source() preamble detaches the package namespace,
+# jmvcore's .() helper leaves scope and any .() string dies with `could not find function "."`
+# (project reference test-source-preamble-breaks-dot-translate). The package provides these.
+jjpubrOptions <- getFromNamespace("jjpubrOptions", "ClinicoPath")
+jjpubrClass   <- getFromNamespace("jjpubrClass",   "ClinicoPath")
 
 test_that("jjpubr works", {
   skip_if_not_installed('jmvReadWrite')
-    # Source the files
-    source("../../R/jjpubr.h.R")
-    source("../../R/jjpubr.b.R")
 
     # Create test data
     set.seed(123)

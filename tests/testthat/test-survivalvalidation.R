@@ -1,11 +1,11 @@
+# Do not source() R/*.h.R / R/*.b.R here: a source() preamble detaches the package namespace,
+# jmvcore's .() helper leaves scope and any .() string dies with `could not find function "."`
+# (project reference test-source-preamble-breaks-dot-translate). The package provides these.
 
 context("Survival Model Validation")
 
 library(testthat)
 
-# Source the module files globally
-source("../../R/survivalvalidation.h.R")
-source("../../R/survivalvalidation.b.R")
 
 get_synthetic_data <- function(n=100, seed=123) {
   set.seed(seed)

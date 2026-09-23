@@ -167,46 +167,59 @@ test_that("comparison options explain themselves instead of silently doing nothi
 })
 
 
-test_that("unimplemented options are documented but not exposed in the GUI", {
-    # 19 options reach the public R wrapper and man/enhancedROC.Rd described them as working
-    # features ("Calculate Harrell's concordance index for time-to-event outcomes"), while the
-    # backend only lists them in a "planned features" notice. None has a UI control, so this
-    # affects R callers and the help page rather than the jamovi GUI.
-    a_yaml <- paste(readLines("../../jamovi/enhancedroc.a.yaml", warn = FALSE), collapse = "\n")
-    # splineCalibration / splineKnots were implemented on 2026-09-02 and are no longer listed.
-    unimplemented <- c("harrellCIndex", "unoCStatistic", "incidentDynamic", "cumulativeDynamic",
-                       "competingRisksConcordance", "eoRatio",
-                       "namDagostino", "greenwoodNam", "calibrationBelt", "calibrationDensity",
-                       "optimismCorrection", "externalValidation", "decisionImpactCurves",
-                       "netBenefitRegression", "modelUpdating", "transportability",
-                       "bootstrapPartialAUC", "bootstrapCutoffCI")
-    for (o in unimplemented) {
-        blk <- regmatches(a_yaml, regexpr(sprintf("(?s)    - name: %s\\n.*?(?=\\n    - name: |\\Z)", o),
-                                          a_yaml, perl = TRUE))
-        expect_true(nzchar(blk), label = paste("found block for", o))
-        expect_match(blk, "NOT YET IMPLEMENTED", info = o)
-    }
-    # These options DO have live controls in jamovi/enhancedROC.u.yaml (they always did; the
-    # earlier assertion that they had none was red at HEAD). The backend therefore has to warn
-    # when one is ticked - see the "Selected Features Produced No Output" notice in .run() -
-    # so every one of them must be in that list.
-    b_r <- paste(readLines("../../R/enhancedROC.b.R", warn = FALSE), collapse = "\n")
-    for (o in unimplemented)
-        expect_true(grepl(sprintf("self$options$%s)) unimplemented <- c(unimplemented", o), b_r,
-                          fixed = TRUE), info = o)
-    # ...and the two spline options, now implemented, must NOT be in it.
-    expect_false(grepl("splineCalibration)) unimplemented", b_r, fixed = TRUE))
+test_that("the never-implemented options are gone from the whole option surface", {
+    # 19 of these reached the public R wrapper and man/enhancedROC.Rd described them as working
+    # features ("Calculate Harrell's concordance index for time-to-event outcomes") while the
+    # backend only listed them in a "planned features" notice. Four were then implemented for
+    # real; the remaining 14 are commented out in BOTH jamovi/enhancedROC.a.yaml and
+    # jamovi/enhancedROC.u.yaml. That is a STRONGER contract than the old "documented as NOT YET
+    # IMPLEMENTED" one this test used to assert: jamovi now offers no control that produces no
+    # output, and an R caller cannot set them either.
+    #
+    # Trap: a plain grep for "- name: harrellCIndex" MATCHES the commented-out line, because
+    # "#     - name: harrellCIndex" contains "    - name: harrellCIndex" as a substring. Comment
+    # lines are therefore stripped before anything is concluded about what is live.
+    removed <- c("harrellCIndex", "unoCStatistic", "namDagostino", "greenwoodNam",
+                 "calibrationBelt", "optimismCorrection", "externalValidation",
+                 "transportability", "bootstrapCutoffCI", "modelUpdating",
+                 "netBenefitRegression", "incidentDynamic", "cumulativeDynamic",
+                 "competingRisksConcordance")
+    # implemented on 2026-09-02/09-03 and deliberately still live
+    live <- c("decisionImpactCurves", "eoRatio", "calibrationDensity", "bootstrapPartialAUC")
 
-    res <- run_er(data = er_data(), predictors = "m1", harrellCIndex = TRUE)
-    n <- notices_of(res)
-    expect_match(n, "not yet implemented")
-    expect_match(n, "Selected Features Produced No Output")
-    # .renderNotices signals severity by colour rather than a text label, so assert on the
-    # WARNING palette (#ca8a04 on #fefce8) -- it used to be filed at INFO.
-    raw <- paste(res$results$notices$content, collapse = " ")
-    block <- sub(".*(<div[^>]*>(?:(?!<div).)*Selected Features Produced No Output).*", "\\1",
-                 raw, perl = TRUE)
-    expect_match(block, "#ca8a04", fixed = TRUE)
+    no_comments <- function(path)
+        grep("^[[:space:]]*#", readLines(path, warn = FALSE), value = TRUE, invert = TRUE)
+
+    # 1. not a formal argument of the exported wrapper
+    wrapper <- names(formals(ClinicoPath::enhancedROC))
+    expect_equal(intersect(removed, wrapper), character(0))
+
+    # 2. not a live option in the analysis definition
+    a_live <- no_comments("../../jamovi/enhancedROC.a.yaml")
+    a_opts <- sub("^    - name: ", "", grep("^    - name: [A-Za-z0-9_]+$", a_live, value = TRUE))
+    expect_equal(intersect(removed, a_opts), character(0))
+
+    # 3. no live control in the UI definition
+    u_live <- paste(no_comments("../../jamovi/enhancedROC.u.yaml"), collapse = "\n")
+    for (o in removed)
+        expect_false(grepl(paste0("name: ", o), u_live, fixed = TRUE), label = paste("u.yaml", o))
+
+    # 4. and never referenced by the backend. self$options$<name> RAISES for an option that does
+    #    not exist, so a single leftover reference would break .run() outright rather than
+    #    degrade quietly -- which is why the "unimplemented <- c(unimplemented, ...)" collector
+    #    this test used to require had to go with them.
+    b_r <- paste(no_comments("../../R/enhancedROC.b.R"), collapse = "\n")
+    for (o in removed)
+        expect_false(grepl(paste0("options$", o), b_r, fixed = TRUE), label = paste("b.R", o))
+    expect_false(grepl("unimplemented <- c(unimplemented", b_r, fixed = TRUE))
+
+    # The four survivors are live everywhere and are actually read.
+    for (o in live) {
+        expect_true(o %in% wrapper, label = paste(o, "in wrapper"))
+        expect_true(o %in% a_opts, label = paste(o, "live in .a.yaml"))
+        expect_true(grepl(paste0("options$", o), b_r, fixed = TRUE),
+                    label = paste(o, "read by backend"))
+    }
 })
 
 
@@ -225,13 +238,13 @@ test_that("the output states which way each marker was read", {
 
 
 test_that("every declared option is read by the backend", {
-    a_yaml <- readLines("../../jamovi/enhancedroc.a.yaml", warn = FALSE)
+    a_yaml <- readLines("../../jamovi/enhancedROC.a.yaml", warn = FALSE)
     declared <- sub("^    - name: ", "", grep("^    - name: [A-Za-z0-9_]+$", a_yaml, value = TRUE))
     # `data` is the Data option; `nntCalculation` gates a column declaratively via a .r.yaml
-    # visible: expression; `splineKnots` configures splineCalibration, which is itself flagged
-    # NOT YET IMPLEMENTED, so there is nothing to read it yet.
-    declared <- setdiff(declared, c("data", "nntCalculation", "splineKnots"))
-    backend <- paste(readLines("../../R/enhancedroc.b.R", warn = FALSE), collapse = "\n")
+    # visible: expression. `splineKnots` used to be excused here because splineCalibration was
+    # unimplemented -- it is implemented now, so splineKnots must be read like anything else.
+    declared <- setdiff(declared, c("data", "nntCalculation"))
+    backend <- paste(readLines("../../R/enhancedROC.b.R", warn = FALSE), collapse = "\n")
     unread <- declared[!vapply(declared, function(o)
         grepl(paste0("options\\$", o, "\\b"), backend), logical(1))]
     expect_equal(unread, character(0))

@@ -23,9 +23,9 @@ psychopdaROC <- function(...) {
 library(testthat)
 library(jmvcore)
 
-# Source required files
-if (file.exists("../../R/utils.R")) source("../../R/utils.R")
-if (file.exists("../../R/psychopdaROC-nri-idi.R")) source("../../R/psychopdaROC-nri-idi.R")
+# No source() of R/utils.R or R/psychopdaROC-nri-idi.R: nothing they define is referenced here,
+# and a source() preamble detaches the package namespace, taking jmvcore's .() helper out of
+# scope (project reference test-source-preamble-breaks-dot-translate).
 
 # ═══════════════════════════════════════════════════════════
 # Helper: Create test data for advanced features

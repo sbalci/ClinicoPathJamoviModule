@@ -40,23 +40,19 @@ decisioncalculatorOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
             private$..TP <- jmvcore::OptionNumber$new(
                 "TP",
                 TP,
-                default=90,
-                min=0)
+                default=90)
             private$..TN <- jmvcore::OptionNumber$new(
                 "TN",
                 TN,
-                default=80,
-                min=0)
+                default=80)
             private$..FP <- jmvcore::OptionNumber$new(
                 "FP",
                 FP,
-                default=30,
-                min=0)
+                default=30)
             private$..FN <- jmvcore::OptionNumber$new(
                 "FN",
                 FN,
-                default=20,
-                min=0)
+                default=20)
             private$..pp <- jmvcore::OptionBool$new(
                 "pp",
                 pp,
@@ -106,23 +102,19 @@ decisioncalculatorOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
             private$..tp1 <- jmvcore::OptionNumber$new(
                 "tp1",
                 tp1,
-                default=100,
-                min=0)
+                default=100)
             private$..fp1 <- jmvcore::OptionNumber$new(
                 "fp1",
                 fp1,
-                default=40,
-                min=0)
+                default=40)
             private$..tn1 <- jmvcore::OptionNumber$new(
                 "tn1",
                 tn1,
-                default=70,
-                min=0)
+                default=70)
             private$..fn1 <- jmvcore::OptionNumber$new(
                 "fn1",
                 fn1,
-                default=10,
-                min=0)
+                default=10)
             private$..cutoff2 <- jmvcore::OptionString$new(
                 "cutoff2",
                 cutoff2,
@@ -130,23 +122,19 @@ decisioncalculatorOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
             private$..tp2 <- jmvcore::OptionNumber$new(
                 "tp2",
                 tp2,
-                default=80,
-                min=0)
+                default=80)
             private$..fp2 <- jmvcore::OptionNumber$new(
                 "fp2",
                 fp2,
-                default=15,
-                min=0)
+                default=15)
             private$..tn2 <- jmvcore::OptionNumber$new(
                 "tn2",
                 tn2,
-                default=95,
-                min=0)
+                default=95)
             private$..fn2 <- jmvcore::OptionNumber$new(
                 "fn2",
                 fn2,
-                default=30,
-                min=0)
+                default=30)
 
             self$.addOption(private$..TP)
             self$.addOption(private$..TN)
@@ -694,7 +682,7 @@ decisioncalculatorBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             super$initialize(
                 package = "ClinicoPath",
                 name = "decisioncalculator",
-                version = c(1,0,81),
+                version = c(1,0,83),
                 options = options,
                 results = decisioncalculatorResults$new(options=options),
                 data = data,
@@ -712,11 +700,11 @@ decisioncalculatorBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' Medical Decision Calculator for diagnostic test evaluation when you have 
 #' the four key counts: True Positives (TP), False Positives (FP), True 
 #' Negatives (TN), and False Negatives (FN). Calculates comprehensive 
-#' diagnostic performance metrics including sensitivity, specificity, 
-#' positive and negative predictive values, likelihood ratios, and 
-#' post-test probabilities. Supports confidence interval estimation and 
-#' Fagan nomogram visualization for educational interpretation. Presets and
-#' examples are illustrative only and are not clinical guides.
+#' diagnostic performance metrics including sensitivity, specificity, positive 
+#' and negative predictive values, likelihood ratios, and post-test 
+#' probabilities. Supports confidence interval estimation and Fagan nomogram 
+#' visualization for educational interpretation. Presets and examples are 
+#' illustrative only and are not clinical guides.
 #' 
 #'
 #' @examples

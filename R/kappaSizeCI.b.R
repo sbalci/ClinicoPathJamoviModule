@@ -189,11 +189,18 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
 
         # Expected counts run from ~3e-06 to a few dozen, and signif() pasted straight into a
-        # sentence renders the small end as "8.9e-06" in prose aimed at pathologists. Rounding
-        # to fixed decimals instead would print "0.000", which is worse; say "below 0.01".
+        # sentence renders the small end as "8.9e-06" in prose aimed at pathologists.
+        # scientific = FALSE already prevents that, so the only job left for a floor is to stop
+        # the tail growing unreadably long. It used to be 0.01, justified as beating a rounded
+        # "0.000" -- but nothing here rounds to fixed decimals, so that justification never
+        # applied, and 0.01 is far too high: the default six-rater binary design's smallest cell
+        # is 0.013 (see .sparseVerdict below), i.e. right on the old floor, and anything under
+        # it -- a pattern effectively never observed -- read as "below 0.01", a figure that also
+        # covers a comfortable 0.009. Same floor and same wording as R/kappaSizePower.b.R and
+        # R/kappaSizeFixedN.b.R, so the three analyses word the same caveat the same way.
         .fmtCount = function(x) {
             if (!isTRUE(is.finite(x))) return(.("unavailable"))
-            if (x < 0.01) return(.("below 0.01"))
+            if (x < 0.0001) return(.("below 0.0001"))
             base::format(signif(x, 2), scientific = FALSE, trim = TRUE)
         },
 
@@ -673,8 +680,11 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
 
         # Build methodology (INFO) and large-sample (WARNING) notices as HTML.
-        # Rendered via a dedicated Html output rather than jmvcore::Notice objects
-        # to avoid the notice serialization / no-newline limitations in jamovi.
+        # Rendered via a dedicated Html output rather than jmvcore::Notice objects because
+        # Notice content renders as escaped plain text and accepts no newlines, and these
+        # panels are multi-line. NOTE (corrected 2026-09-23): Notice serializes fine -- the
+        # "attempt to apply non-function" crash once blamed on it was Group$insert() having no
+        # bounds check. Use $add(), never insert(999, ...).
         .buildNotices = function(required_n, sparse_cells = FALSE,
                                  sparse_min = NA_real_, sparse_below5 = NA_integer_,
                                  sparse_total = NA_integer_,

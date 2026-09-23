@@ -17,6 +17,14 @@
 - **Date**: 2026-08-29
 - **Summary**: Comprehensive documentation suite created & verified against active schemas and backend implementation.
 
+- **Date**: 2026-09-22
+- **Summary**: Removed 14 options that were never implemented and are now commented out of
+  `jamovi/enhancedROC.a.yaml` / `.u.yaml`. They are not options, not UI controls and not
+  wrapper arguments - passing one to `ClinicoPath::enhancedROC()` is an "unused argument"
+  error. Do not re-add them from an older copy of this table: `harrellCIndex`, `unoCStatistic`, `namDagostino`, `greenwoodNam`, `calibrationBelt`, `optimismCorrection`, `externalValidation`, `transportability`, `bootstrapCutoffCI`, `modelUpdating`, `netBenefitRegression`, `incidentDynamic`, `cumulativeDynamic`, `competingRisksConcordance`.
+  Optimism-corrected performance is available through `internalValidation` with
+  `validationMethod = "bootstrap"`.
+
 ## 2. Options Reference (`.a.yaml`)
 
 | Option | Type | Default | Description |
@@ -35,7 +43,6 @@
 | `bootstrapSamples` | `Integer` | `1000` | Bootstrap Samples |
 | `useBootstrap` | `Bool` | `FALSE` | Use bootstrap |
 | `bootstrapMethod` | `List` | `bca` | Bootstrap Method |
-| `bootstrapCutoffCI` | `Bool` | `FALSE` | Bootstrap CI for optimal cutoff |
 | `bootstrapPartialAUC` | `Bool` | `FALSE` | Bootstrap CI for partial AUC |
 | `stratifiedBootstrap` | `Bool` | `FALSE` | Stratified bootstrap |
 | `seed` | `Integer` | `0` | Random Seed |
@@ -81,9 +88,6 @@
 | `splineCalibration` | `Bool` | `FALSE` | Spline calibration curves |
 | `splineKnots` | `Integer` | `4` | Number of Knots |
 | `eoRatio` | `Bool` | `FALSE` | E/O ratio |
-| `namDagostino` | `Bool` | `FALSE` | Nam-D'Agostino test |
-| `greenwoodNam` | `Bool` | `FALSE` | Greenwood-Nam-D'Agostino test |
-| `calibrationBelt` | `Bool` | `FALSE` | Calibration belt |
 | `calibrationDensity` | `Bool` | `FALSE` | Calibration density plot |
 | `multiClassROC` | `Bool` | `FALSE` | Multi-class ROC analysis |
 | `multiClassStrategy` | `List` | `ovr` | Multi-Class Strategy |
@@ -92,19 +96,9 @@
 | `nntCalculation` | `Bool` | `FALSE` | Number needed to test/Treat |
 | `clinicalUtilityCurve` | `Bool` | `FALSE` | Clinical utility curve |
 | `decisionImpactTable` | `Bool` | `FALSE` | Decision impact table |
-| `harrellCIndex` | `Bool` | `FALSE` | Harrell's C-index |
-| `unoCStatistic` | `Bool` | `FALSE` | Uno's C-statistic |
-| `incidentDynamic` | `Bool` | `FALSE` | Incident/Dynamic AUC |
-| `cumulativeDynamic` | `Bool` | `FALSE` | Cumulative/Dynamic AUC |
-| `competingRisksConcordance` | `Bool` | `FALSE` | Competing risks concordance |
 | `internalValidation` | `Bool` | `FALSE` | Internal validation |
 | `validationMethod` | `List` | `bootstrap` | Validation Method |
-| `optimismCorrection` | `Bool` | `FALSE` | Optimism correction |
-| `externalValidation` | `Bool` | `FALSE` | External validation framework |
 | `decisionImpactCurves` | `Bool` | `FALSE` | Decision impact curves |
-| `netBenefitRegression` | `Bool` | `FALSE` | Net benefit regression |
-| `modelUpdating` | `Bool` | `FALSE` | Model updating analysis |
-| `transportability` | `Bool` | `FALSE` | Transportability analysis |
 
 ## 3. Results Definition (`.r.yaml`)
 

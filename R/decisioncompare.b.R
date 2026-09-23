@@ -1640,12 +1640,21 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 # Record whether any comparison reached significance (for honest report
-                # wording in the always-visible clinical summary panel).
+                # wording in the always-visible clinical summary panel). Three states:
+                # TRUE (a test ran and reached significance), FALSE (a test ran and did
+                # not), NA (NO comparison was computable at all). NA must not collapse to
+                # FALSE: any(NA < 0.05, na.rm = TRUE) is FALSE, and the report panels then
+                # printed "did not reveal a statistically significant difference" about a
+                # test that was never performed.
                 sig_pvals <- p_adjusted
                 if (!is.null(private$.cochran_pvalue)) {
                     sig_pvals <- c(sig_pvals, private$.cochran_pvalue)
                 }
-                private$.any_significant_comparison <- any(sig_pvals < private$P_THRESHOLD_SIGNIFICANT, na.rm = TRUE)
+                private$.any_significant_comparison <- if (!any(!is.na(sig_pvals))) {
+                    NA
+                } else {
+                    any(sig_pvals < private$P_THRESHOLD_SIGNIFICANT, na.rm = TRUE)
+                }
 
                 # Second pass: populate table with adjusted p-values, reusing cached tests
                 for (i in seq_along(test_pairs)) {
@@ -2325,7 +2334,14 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     paste(private$.safeHtmlOutput(test_names), collapse = ", "),
                     n_cases,
                     denominator_text,
-                    if (n_tests >= 2 && self$options$statComp) jmvcore::.("Paired comparisons used the common determinate rows. Diagnostic correctness was compared with McNemar's test, using an exact binomial p-value when fewer than 25 discordant pairs were available.") else ""
+                    # A methods sentence must not describe a test that never ran: when no
+                    # pair was computable (.any_significant_comparison is NA) say so instead.
+                    if (!(n_tests >= 2 && self$options$statComp))
+                        ""
+                    else if (identical(private$.any_significant_comparison, NA))
+                        jmvcore::.("No paired statistical comparison between the tests could be computed for these data, so none is reported.")
+                    else
+                        jmvcore::.("Paired comparisons used the common determinate rows. Diagnostic correctness was compared with McNemar's test, using an exact binomial p-value when fewer than 25 discordant pairs were available.")
                 )
 
                 return(methods)
@@ -2357,6 +2373,13 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         jmvcore::.("Statistical comparison (McNemar's/Cochran's test) revealed a statistically significant difference in test performance (detailed results in the comparison tables).")
                     } else if (isFALSE(private$.any_significant_comparison)) {
                         jmvcore::.("Statistical comparison (McNemar's/Cochran's test) did not reveal a statistically significant difference in test performance (detailed results in the comparison tables).")
+                    } else if (identical(private$.any_significant_comparison, NA)) {
+                        # NA = no pair was computable, so there is no result to report.
+                        # A null result here would assert a test that never ran. The cause
+                        # is not asserted: a pair drops out when no case is determinate for
+                        # both tests and the reference standard, but also if the test call
+                        # itself fails, and the notice panel carries the actual reason.
+                        jmvcore::.("No statistical comparison between the tests could be computed for these data, so no McNemar's or Cochran's test result is available; the reason is given in the Important Information panel. These data therefore say nothing about whether the tests differ.")
                     } else {
                         jmvcore::.("Statistical comparisons between tests are reported in the comparison tables above.")
                     }
@@ -2487,6 +2510,17 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         recommendations,
                         '<p style="background-color: rgba(216, 33, 50, 0.18); padding: 10px; border-radius: 4px; color: inherit;">',
                         sprintf(jmvcore::.("<strong>Caution:</strong> No statistically significant difference was detected between the tests compared. %s is named here only because it had the highest observed balanced accuracy in this sample; the data neither establish that it outperforms the others nor establish that the tests are equivalent, since a non-significant result may simply reflect limited power. The confidence intervals above show how large a real difference remains compatible with these data.</p>"),
+                            best_test_safe)
+                    )
+                } else if (length(test_results) >= 2 && self$options$statComp &&
+                    identical(private$.any_significant_comparison, NA)) {
+                    # No comparison was computable. Silence here would leave the panel
+                    # naming a single test with nothing to say that it was never tested
+                    # against the others.
+                    recommendations <- paste0(
+                        recommendations,
+                        '<p style="background-color: rgba(216, 33, 50, 0.18); padding: 10px; border-radius: 4px; color: inherit;">',
+                        sprintf(jmvcore::.("<strong>Caution:</strong> No statistical comparison between the tests could be computed for these data, so no test of one test against another was performed; the reason is given in the Important Information panel. %s is named here only because it had the highest observed balanced accuracy in this sample, and these data say nothing about whether the tests differ.</p>"),
                             best_test_safe)
                     )
                 }
@@ -2862,6 +2896,10 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                                 jmvcore::.("among the three tests. This is not evidence that they perform equally: with this sample size a clinically important accuracy difference could go undetected, and no test of one test against another across a pre-specified equivalence margin was performed. (If requested, the criterion column in the Overall Percent Agreement table compares each test with a user-specified descriptive OPA threshold; it is not a noninferiority comparison between tests or clinical guidance.) The confidence intervals for the paired differences in the Differences with 95% Confidence Intervals table show how large a difference remains compatible with these data.</p>")
                             )
                         }
+                    } else if (length(mcnemar_table$rowKeys) == 0) {
+                        # Nothing in the table at all: no Cochran row AND no pairwise row,
+                        # so the sentence below would point at comparisons that do not exist.
+                        html <- paste0(html, "<p>", jmvcore::.("No statistical comparison between the tests could be computed for these data: neither the global Cochran's Q test nor any pairwise McNemar test produced a result. The reason is given in the Important Information panel, and these data say nothing about whether the tests differ."), "</p>")
                     } else {
                         # Without this the whole 3-test branch was skipped and the box was
                         # emitted containing only its heading.
@@ -2914,6 +2952,11 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                                 jmvcore::.("This is not evidence that the two tests are equivalent: McNemar's test uses only the discordant pairs, so with few discordances it has little power to detect a real difference. Check the confidence interval for the accuracy difference to see how large a difference remains compatible with these data.</p>")
                             )
                         }
+                    } else {
+                        # No McNemar row means the pair was not computable at all. Without
+                        # this the box was emitted containing only its heading -- the same
+                        # failure the three-test branch above guards against.
+                        html <- paste0(html, "<p>", jmvcore::.("No McNemar result is available for these two tests; the reason is given in the Important Information panel. No statistical comparison was performed, so these data say nothing about whether the tests differ."), "</p>")
                     }
                 }
 
@@ -2975,6 +3018,10 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         }
 
                         html <- paste0(html, report)
+                    } else if (length(mcnemar_table$rowKeys) == 0) {
+                        # No row at all: do not tell the author to report pairwise
+                        # comparisons that were never computed.
+                        html <- paste0(html, jmvcore::.("No statistical comparison between the tests could be computed for these data: neither the global Cochran's Q test nor any pairwise McNemar test produced a result; the reason is given in the Important Information panel. Report the per-test performance only."))
                     } else {
                         # Same empty-box failure as in .generateSummary().
                         html <- paste0(html, jmvcore::.("The global Cochran's Q test could not be computed for these data; the reason is given in the Important Information panel. Report the pairwise comparisons and their confidence intervals instead."))
@@ -3034,6 +3081,12 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         }
 
                         html <- paste0(html, report)
+                    } else {
+                        # Same empty-box failure as in .generateSummary(): no McNemar row
+                        # means the comparison was never computed, and this panel is
+                        # offered as manuscript text, so it must say so rather than
+                        # render blank.
+                        html <- paste0(html, jmvcore::.("No statistical comparison between these two tests could be computed; the reason is given in the Important Information panel. Report the per-test performance only."))
                     }
                 }
 

@@ -401,6 +401,12 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 # guidance they carried is now a note on the Test Parameters table, where it is
                 # actually read (see .updateTestParametersTable).
 
+                # The narrower, marginal-dependent Frechet range is deliberately NOT enforced
+                # either: a value inside -1 to 1 but unattainable with the entered sensitivities
+                # is truncated to its bound and reported (.calculateDependentTestProbabilities),
+                # so e.g. rho = -0.5 with Sens 0.80 / 0.70 (attainable range -0.33 to +0.76) is a
+                # legitimate request, not an error.
+
                 # Clinical validity checks
                 if (test1_sens + test1_spec < 1.1) {
                     private$.addNotice(.("Test 1 has low discriminatory power (sensitivity plus specificity below 1.1, i.e. a Youden index below 0.1). Check its likelihood ratios in the results table: an operating point close to the chance diagonal can still give an informative LR+ or LR- when sensitivity and specificity are very unequal."), "warning")
@@ -1268,7 +1274,7 @@ cotestClass <- if (requireNamespace("jmvcore"))
   <li>P(Test1\u2212 and Test2\u2212 | Disease\u2212) = P(Test1\u2212 | Disease\u2212) \u00D7 P(Test2\u2212 | Disease\u2212) = Spec\u2081 \u00D7 Spec\u2082</li>
 </ul>
 
-<p><strong>Dependent Tests:</strong> When tests are dependent, we adjust these probabilities using a correlation parameter (denoted as \u03C1 or \u03C8) that runs from \u22121 through 0 (independence) to +1. Positive values describe tests that tend to err together; negative values describe tests that compensate for each other\'s errors, so that one tends to be positive where the other is negative. Both are permitted here, though the attainable range is narrower than [\u22121, +1] and depends on the sensitivities and specificities entered \u2014 values outside it are truncated, and the analysis says so:</p>
+<p><strong>Dependent Tests:</strong> When tests are dependent, we adjust these probabilities using a correlation parameter (denoted as \u03C1 or \u03C8) that runs from \u22121 through 0 (independence) to +1. Positive values describe tests that tend to err together; negative values describe tests that compensate for each other\'s errors, so that one tends to be positive where the other is negative. Both are permitted here, though the attainable range is narrower than \u22121 to +1 and depends on the sensitivities and specificities entered \u2014 values outside it are truncated, and the analysis says so:</p>
 <ul>
   <li>P(Test1+ and Test2+ | Disease+) = (Sens\u2081 \u00D7 Sens\u2082) + \u03C1<sub>pos</sub> \u00D7 \u221A(Sens\u2081 \u00D7 (1\u2212Sens\u2081) \u00D7 Sens\u2082 \u00D7 (1\u2212Sens\u2082))</li>
   <li>P(Test1+ and Test2+ | Disease\u2212) = ((1\u2212Spec\u2081) \u00D7 (1\u2212Spec\u2082)) + \u03C1<sub>neg</sub> \u00D7 \u221A((1\u2212Spec\u2081) \u00D7 Spec\u2081 \u00D7 (1\u2212Spec\u2082) \u00D7 Spec\u2082)</li>

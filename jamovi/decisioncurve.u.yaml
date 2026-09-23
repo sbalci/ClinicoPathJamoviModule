@@ -207,10 +207,6 @@ children:
           - type: CheckBox
             name: multiModelComparison
             label: Enhanced pairwise comparison
-          - type: ComboBox
-            name: comparisonMethod
-            label: Test method (bootstrap only)
-            enable: (compareModels || multiModelComparison)
           - type: CheckBox
             name: weightedAUC
             label: Average net benefit table

@@ -142,7 +142,15 @@ test_that("meddecide updater manifest includes all translation catalogs", {
     unlist(config$modules$meddecide$i18n_files, use.names = FALSE),
     c("catalog.pot", "en.po", "tr.po")
   )
-  expect_true(isTRUE(config$modes$copy_i18n_files))
+  # The `modes: copy_i18n_files` gate was removed once the copy became unconditional
+  # in _updateModules_plan.R, so asserting the flag tested a key that no longer exists
+  # (isTRUE(NULL) is FALSE). Assert the actual guarantee: the plan copies i18n_files
+  # for every module, with no mode to switch it off.
+  expect_null(config$modes$copy_i18n_files)
+  # config_path is already resolved to the umbrella, which is the only tree that
+  # holds the updater sources -- the generated module has neither file.
+  plan_src <- readLines(file.path(dirname(config_path), "_updateModules_plan.R"), warn = FALSE)
+  expect_true(any(grepl("for (f in unlist(m$i18n_files))", plan_src, fixed = TRUE)))
 })
 
 test_that("meddecide Boolean controls use state labels rather than action labels", {
@@ -249,7 +257,7 @@ test_that("meddecide sources do not request whole dependency namespaces", {
       "decisioncombine.b.R",
       "enhancedROC.b.R",
       "psychopdaroc.b.R",
-      "nomogrammer.r"
+      "utils-nomogrammer.R"
     )
   )
   source_text <- paste(

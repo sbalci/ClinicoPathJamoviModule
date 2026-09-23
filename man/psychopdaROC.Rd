@@ -92,10 +92,11 @@ options on slow bootstrap or cutpoint analyses.}
 
 \item{run}{.}
 
-\item{clinicalMode}{Select the complexity level of analysis: Basic -
-Essential ROC metrics for clinical decision making Advanced - Additional
-statistical comparisons and metrics Comprehensive - Full research-grade
-analysis with all options}
+\item{clinicalMode}{Selects which guidance notes are shown in the Procedure
+Notes panel. Basic explains the AUC bands and warns that a cutpoint
+searched on these data is optimistic; Advanced and Comprehensive give a
+shorter research framing. This option does not switch any analysis on or
+off - every optional analysis has its own checkbox.}
 
 \item{data}{The data as a data frame.}
 

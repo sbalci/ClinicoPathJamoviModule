@@ -29,10 +29,11 @@ args:
     required: false
     default: true
   insert_position:
-    description: Preferred band for insertions (top, mid, bottom, auto)
+    description: Preferred band for insertions. top -> insert(1, n) on a non-empty results tree;
+      bottom -> add(n). There is no numeric "bottom" index - see guide section 13.
     required: false
     default: auto
-    enum: [top, mid, bottom, auto]
+    enum: [top, bottom, auto]
   patch_format:
     description: Output patch format (unified or context)
     required: false
@@ -55,7 +56,7 @@ Audit `R/SANITIZED_FN.b.R` for missing/weak **jamovi Notices** and propose **min
 - Missing **STRONG_WARNING** for reliability threats (assumption violations, few events, extreme prevalence)
 - Missing **WARNING** for milder concerns (imputation performed, ties handling, convergence retries)
 - Missing **INFO** summarizing key run parameters/sample sizes
-- Positioning &amp; naming (unique `name=...`; ERROR at top; INFO at bottom)
+- Positioning &amp; naming (unique `name=...`; ERROR at top via `insert(1, n)`; INFO at bottom via `add(n)`)
 
 ## Behavior
 1. **Normalize** to `SANITIZED_FN` (strip paths/suffixes .a.yaml/.b.R/.r.yaml/.u.yaml).
@@ -67,7 +68,13 @@ Audit `R/SANITIZED_FN.b.R` for missing/weak **jamovi Notices** and propose **min
 4. **Synthesize notices** with correct `NoticeType`, wording, and **insert band** based on `insert_position` (or `auto`), ensuring that each notice message is a **single-line, plain-text string** (no `\n` or other newline characters).
 5. **Generate patches** (unified diff) that:
    - Insert `jmvcore::Notice$new(...)` with deterministic, unique names
-   - Add `self$results$insert(1|mid|999, notice)` calls
+   - Place each notice with `self$results$insert(1, notice)` for the top or `self$results$add(notice)` for the bottom.
+     **Never pass a sentinel index.** `jmvcore::Group$insert()` has no bounds check: any index above
+     `length(self$results$items)` slices `.items[index:length(.items)]`, R's `:` counts DOWN, and the results
+     tree is padded with `NULL`s until the next traversal dies with `attempt to apply non-function` from the
+     serialization path. `insert(999, ...)` written into this file in 2025-11 spread to 321 call sites and
+     produced the crashes then misdiagnosed as "Notice objects cannot be serialized"
+     ([guide section 13](../../vignettes/jamovi_library_review_guide.md#13-notices-the-native-element-and-the-insert-trap)).
    - Never remove or downgrade existing Html results; Html blocks (or, in a module with `minApp: 28.3.0`, a `type: Text` result) hold rich, multi-line explanations, while notices act as concise, single-line banners pointing to them
    - Keep code idempotent by guarding with minimal helper blocks if needed
 6. If `apply=true`, write the patches; otherwise, emit patch text only. Patches **must not** introduce newline characters inside `notice$setContent()` strings.
@@ -144,7 +151,7 @@ Audit `R/SANITIZED_FN.b.R` for missing/weak **jamovi Notices** and propose **min
 +    {
 +        n <- jmvcore::Notice$new(options=self$options, name='analysisComplete', type=jmvcore::NoticeType$INFO)
 +        n$setContent(sprintf('Analysis completed on %d rows%s.', nrow(self$data), if (!is.null(self$options$weights)) ' (weights applied)' else ''))
-+        self$results$insert(999, n)
++        self$results$add(n)   # append; NEVER insert(999, n) - see guide section 13
 +    }
 ```
 

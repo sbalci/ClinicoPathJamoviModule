@@ -186,7 +186,6 @@ bootstrap_roc <- enhancedROC(
   useBootstrap = TRUE,
   bootstrapSamples = 1000,
   bootstrapMethod = "bca", # Bias-corrected and accelerated (most accurate)
-  bootstrapCutoffCI = TRUE,
   rocCurve = TRUE,
   showConfidenceBands = TRUE,
   aucTable = TRUE
@@ -349,7 +348,6 @@ internal_validation_roc <- enhancedROC(
   predictors = c("biomarker1", "biomarker2", "clinical_risk_score"),
   internalValidation = TRUE,
   validationMethod = "bootstrap",
-  optimismCorrection = TRUE,
   useBootstrap = TRUE,
   bootstrapSamples = 500,
   rocCurve = TRUE,
@@ -386,7 +384,6 @@ publication_roc <- enhancedROC(
   useBootstrap = TRUE,
   bootstrapSamples = 2000,
   bootstrapMethod = "bca",
-  bootstrapCutoffCI = TRUE,
 
   # Comparative analysis
   pairwiseComparisons = TRUE,

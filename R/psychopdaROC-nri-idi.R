@@ -212,6 +212,39 @@ computeNRI <- function(new_values, ref_values, actual,
                     fit_warning = TRUE))
     }
 
+    # Denominator that counts exactly the cases the numerators counted. DEFENSIVE ONLY --
+    # this changes no number any psychopdaROC user can see, and was never a wrong result.
+    #
+    # Every count below is taken with na.rm = TRUE, so a case with a missing predicted
+    # probability is dropped from the numerator; sum(events) would have kept it in the
+    # denominator. But psychopdaROC.b.R (the only caller, via bootstrapNRI) filters to
+    # complete cases before it calls -- complete.cases(var_values, ref_values,
+    # actual_binary) -- and raw_to_prob() returns NA only where its input is NA or where
+    # the glm fails outright (all-NA, already rejected just above). So on that path
+    # `usable` is all TRUE and n_events == sum(events) identically, for bootstrap
+    # replicates too, since they resample already-complete data. Verified 2026-09-23: NRI
+    # identical to the old denominator on cc-filtered input.
+    #
+    # It is kept because bootstrapNRI() and raw_to_prob() are exported, so a direct or
+    # future caller may pass vectors with gaps, and then the mask is the correct
+    # denominator. The n_events == 0 branch is unreachable from bootstrapNRI for the same
+    # reason (an all-TRUE mask makes it exactly the sum(events) == 0 guard above), and its
+    # warning is doubly inert there because bootstrapNRI passes warn = FALSE.
+    #
+    # cut() below returns NA exactly where the probability is NA (probabilities are clamped
+    # to [0,1] and the breaks span it), so this one mask serves both branches.
+    usable <- !is.na(new_probs) & !is.na(ref_probs)
+    n_events <- sum(events & usable, na.rm = TRUE)
+    n_non_events <- sum(non_events & usable, na.rm = TRUE)
+    if (n_events == 0L || n_non_events == 0L) {
+        if (isTRUE(warn)) {
+            warning("computeNRI: one outcome group has no case with a predicted probability from both models, so the NRI is undefined.",
+                    call. = FALSE)
+        }
+        return(list(nri = NA, event_nri = NA, non_event_nri = NA,
+                    fit_warning = fit_warning))
+    }
+
     if (is.null(thresholds) || length(thresholds) == 0) {
         # Continuous NRI
         up_events <- sum(new_probs[events] > ref_probs[events], na.rm = TRUE)
@@ -220,10 +253,10 @@ computeNRI <- function(new_values, ref_values, actual,
         down_non_events <- sum(new_probs[non_events] < ref_probs[non_events], na.rm = TRUE)
 
         # Calculate proportions
-        p_up_events <- up_events / sum(events)
-        p_down_events <- down_events / sum(events)
-        p_up_non_events <- up_non_events / sum(non_events)
-        p_down_non_events <- down_non_events / sum(non_events)
+        p_up_events <- up_events / n_events
+        p_down_events <- down_events / n_events
+        p_up_non_events <- up_non_events / n_non_events
+        p_down_non_events <- down_non_events / n_non_events
 
     } else {
         # Categorical NRI
@@ -248,10 +281,10 @@ computeNRI <- function(new_values, ref_values, actual,
         move_down_non_event <- sum(as.numeric(new_cats[non_events]) < as.numeric(ref_cats[non_events]), na.rm = TRUE)
 
         # Calculate proportions
-        p_up_events <- move_up_event / sum(events)
-        p_down_events <- move_down_event / sum(events)
-        p_up_non_events <- move_up_non_event / sum(non_events)
-        p_down_non_events <- move_down_non_event / sum(non_events)
+        p_up_events <- move_up_event / n_events
+        p_down_events <- move_down_event / n_events
+        p_up_non_events <- move_up_non_event / n_non_events
+        p_down_non_events <- move_down_non_event / n_non_events
     }
 
     # Calculate NRI components

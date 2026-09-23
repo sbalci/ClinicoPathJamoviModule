@@ -5,6 +5,262 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-09-23 — a measurement taken while an analysis is parked is not a measurement of the module
+
+### A clean module read as six unused dependencies and eight test failures
+
+- **Failure mode:** `agreement` was moved to `menuGroup: meddecideT` so it could be worked on in
+  isolation. `_updateModules.R` then stopped shipping it and deleted its files from
+  `../meddecide`, and every instrument that reads the module reported the consequences as
+  defects. `release_gate.py --root ../meddecide` said `Imports: 31 checked, 6 unused` — so the six
+  packages only `agreement` calls (`DescTools`, `irrCAC`, `lme4`, `lmerTest`, `psych`, `vcd`) were
+  added to `prune_imports` and their `@importFrom` tags deleted from the sibling's
+  hand-maintained `R/zzz_imports.R`. The sibling test suite said eight failures — seven of them
+  `cannot open the connection` from `readLines(file.path(root, "R", "agreement.b.R"))`, because
+  the audit test's analysis list is a hard-coded snapshot of membership. Nothing in either output
+  named the cause. `prune_imports` is a standing DELETE order, the only way to remove an Import,
+  so a reading taken during a temporary routing state was written into permanent config.
+
+- **Detection signal:** `prune_conflicts()` — the plan-time guard added the previous day
+  (2026-09-22, below) — raised `prune_imports would remove DescTools, irrCAC, lme4, lmerTest, vcd,
+  which shipped R code uses` the moment `menuGroup: meddecide` was restored, and `--dry-run`
+  reported it before anything was written. The guard worked exactly as designed. What it cannot
+  do is fire at *authoring* time: while the analysis is parked the entry is genuinely correct for
+  what the module ships, so the collision is invisible until someone promotes. It also does not
+  read `R/zzz_imports.R`, so the deleted tags were nobody's finding. The 2026-09-22 note recorded
+  "all 17 current entries across four modules are clean"; that was true, and was measured against
+  *shipped* files only — the question nobody had asked was what the entries do to the *parked*ate
+  ones.
+
+- **Prevention rule:** nothing may be derived from which analyses a module holds today —
+  membership is one `menuGroup:` line per analysis and changes without notice. Derive it, never
+  record it; where it must be recorded, record the condition under which the record expires.
+  A test names its analyses by listing `jamovi/*.a.yaml`, or guards each read with
+  `skip_if_not(file.exists(f), "<name> does not ship in this module")` — a skip naming the
+  analysis is diagnostic, `cannot open the connection` is not. Before adding a `prune_imports`
+  entry, check `grep -l 'menuGroup: <module>[TPD]' jamovi/*.a.yaml`: if anything is parked, the
+  Imports you are reading are a snapshot. Enforced by `tools/promotion_screen.py`, which now
+  counts a pruned package a parked analysis calls as a promotion blocker and prints the list;
+  guide §29. Measured 2026-09-23: **0 shipped, 54 parked** — meddecide 29, OncoPath 17,
+  jsurvival 4, ClinicoPathDescriptives 3. Every one is a plan error waiting for whoever removes
+  that analysis's suffix.
+
+- **Two things the sweep itself taught.** (1) A hand-written sweep matching `<Group>[TPD]$` found
+  30 collisions; the detector matching `(?:Extra)?[DPT]+$` found 54. The 24 it missed were all
+  `...ExtraD` groups. Reconcile a detector against a hand list *in both directions* before
+  trusting either. (2) Deciding "unused" needs the parser or a whole-file masker, never a
+  line-at-a-time one. On `R/agreement.b.R`, `psych::` appears 7 times raw; a line-at-a-time
+  string/comment masker still reports 1, because `:7616` (`<code>psych::cohen.kappa()</code>`)
+  sits inside a multi-line HTML string whose own line carries no quote character. A whole-file
+  masker and R's parser both report 0. That single false positive is the difference between
+  "psych is prunable" (true, and it stayed pruned) and "psych is used" (false).
+
+---
+
+## 2026-09-23 — library audit round 4 (meddecide): a grep with 620 hits is not a check
+
+### A table appeared empty and then jumped — the third audit in a row to say so
+
+- **Failure mode:** a table whose whole row set is known before the data is seen
+  (`epiR::epi.tests()` always returns LR+, LR-, DOR, Youden, NNDx) was declared `rows: 0` and
+  built with `addRow()` inside `.run()`. jamovi draws the empty header first and restructures
+  when the computation returns, so the user watches the table jump on every run. The rule
+  against it — review guide §6 — has been written since round 1 (2026-07-13), and meddecide was
+  told about the same class in **all three** of its audits: MEDIUM, MEDIUM, then LOW.
+
+- **Detection signal:** the library reviewer (`2026-09-16 meddecide` [LOW]), three times.
+  Locally, pre-submission checklist item 5 was `grep -n "addRow(rowKey *= *[\"']" R/*.b.R` —
+  **620 hits across the umbrella**, because almost every hit is one extra *conditional* row
+  added to a table that already has an `.init()` skeleton, which is correct and does not blink.
+  An unreadable check is an absent check; this is the same failure the `.()` padding grep had in
+  round 3 (200 hits, 14 real).
+
+- **Prevention rule:** change the **unit**, not the pattern. `check_init_row_structure` in
+  `tools/release_gate.py` asks the question of the *table*: no `rows:` in the `.r.yaml`, nothing
+  reachable from `.init()` (following `private$.helper()` calls transitively) names it, and
+  **every** `addRow()` it receives uses a literal string `rowKey` — the proof that the row set
+  was known when the code was written. That is **1 shipped hit** across all five modules
+  (`OncoPath waterfall::responseDurationTable`) and 57 promotion-debt hits, against 8 shipped
+  from a call-level probe of which 6 were the benign conditional-row shape. Guide §6 "Enforce
+  it"; the checklist item and the `create-function` / `release-review-function` templates now
+  call the gate instead of the grep. **Known blind spot, documented at every copy:** a loop index
+  over a fixed-length result (`for (i in 1:nrow(res)) addRow(rowKey = i)`) is not a literal key,
+  and that is precisely the shape this report named — a 0 here is not proof.
+
+### A seed set for one bootstrap stayed set for the whole session
+
+- **Failure mode:** every analysis in a jamovi session runs in one R process. `agreement` and
+  `lassologistic` called `set.seed(seed_val)` and never restored the RNG state, so the next
+  analysis the user added — resampling without a seed of its own, because it had no reason to —
+  drew from a deterministic stream and returned the same "random" bootstrap CI on every run.
+  Nothing errors; the numbers just stop being random. One module was using three idioms at once:
+  `withr::local_seed()`, a hand-rolled `.Random.seed` save/restore, and the bare call.
+
+- **Detection signal:** the library reviewer (`2026-09-16 meddecide` [LOW]). No local check, and
+  no rule anywhere — the response filed at the time cited the review guide for a section that
+  did not exist.
+
+- **Prevention rule:** seed scoped to the function — `withr::local_seed()` — never globally;
+  and show the seed beside any result that depends on it. Guide §28; enforced by
+  `check_bare_set_seed` (WARN, 0 shipped across all five modules), which blanks strings and
+  comments first so generated R code in an `.asSource()` template is not a false hit.
+
+---
+
+## 2026-09-22 — `prune_imports` was an unchecked standing order
+
+### A config list deleted dependencies the code still needed, and only users found out
+
+- **Failure mode:** `prune_configured_module_imports()` deletes each configured package from a
+  generated submodule's DESCRIPTION **unconditionally** — the list says "remove P" and P is
+  removed, whether or not the module still needs it. It exists because
+  `sync_namespace_with_description()` is add-only: nothing else can ever remove a stale Import
+  from a sibling repo's persistent DESCRIPTION. That makes every entry a claim about the code
+  that silently expires the moment a newly shipped analysis starts using the package.
+  It expired once already: `magrittr` was pruned from OncoPath (2026-09-16), `%>%` vanished
+  from the generated DESCRIPTION, and `waterfall` could not run in jamovi at all.
+
+- **Detection signal:** none at the time. Since then three checks in `verify_module()` block
+  the module before install (undeclared `pkg::`, "prune_imports still imported", bare-symbol
+  resolution) — but all three run *after* apply, prepare and document, i.e. after the sibling
+  working tree has been rewritten, and all three are skipped entirely under
+  `modes$extended: false`, which still lets the prune itself run. The user's question — "if I
+  add another function they may need, doesn't that cause a problem?" — was the real signal.
+
+- **Prevention rule:** a standing instruction is re-derived from reality on every run, as early
+  as the data allows. `prune_conflicts()` (`_updateModules_utils.R`) now re-checks every entry
+  at **plan** time against the umbrella sources the module is about to ship, so a stale entry is
+  a plan error that `--dry-run` reports before anything is written. A `requireNamespace()`-gated
+  use counts as a use: jamovi installs Imports and never Suggests, so pruning a guarded package
+  does not make the capability optional, it makes it dead. Measured against the real config, all
+  17 current entries across four modules are clean — the guard costs nothing today.
+  Its limits are stated in its own comment: it cannot see the `magrittr` shape itself (a bare
+  symbol with no tag names no package, so no source scan can find it); that class stays with the
+  bare-symbol check in `verify_module()`, which has a real NAMESPACE to resolve against.
+  Secondary fix: the "prune_imports still imported" message used to say *"remove its
+  @import/@importFrom tag"* — advice that is exactly backwards when the config is the stale side.
+  It now names both remedies and says not to assume the config is right.
+  Tests: eight cases in `tests/testthat/test-update-modules-plan.R`, plus the OncoPath audit
+  test, whose pinned `c("cluster", "tidyr")` had already gone stale against the working tree and
+  is now the invariant (`prune_conflicts()` returns nothing) plus the one literal worth keeping:
+  `magrittr` must never enter that list.
+
+- **What the adversarial review of the new guard found (65 agents, 25 confirmed findings).**
+  Two mattered here. (1) A `pkg::` call in a **formals default** — `function(x, engine =
+  DescTools::CCC)` — was invisible: formals are a pairlist, not a call, so the walker stepped
+  over them. That was a hole in `scan_r_package_usage` itself, so it blinded the new plan guard
+  AND the long-standing `pkg::`-declaration check in `verify_module()`. Fixed in the walker, so
+  both gain at once; all five submodules stay clean and all 17 prune entries still pass. Trap
+  worth remembering: a parameter with no default is the empty symbol, and `for (d in
+  as.list(formals))` raises *"argument 'd' is missing, with no default"* — index straight into
+  `is.call()`, never bind it. (2) A grep implementation of this guard would have been wrong:
+  over all umbrella `R/`, 15 of 17 entries have a `P::` hit (the umbrella carries every draft),
+  and even scoped to shipped files, `robustbase` and `psych` hit **comment lines only**. Parsing
+  with `keep.source = FALSE` is what makes the guard usable; there is a regression test for it.
+
+---
+
+## 2026-09-22 — library audit round 5 (OncoPath): an inferred cause, believed for ten months
+
+### Users saw `attempt to apply non-function` and we blamed the wrong object
+
+- **Failure mode:** `jmvcore::Group$insert(index, item)` has no bounds check. For any index above
+  `length(items)` it evaluates `.items[index:length(.items)]`; R's `:` counts DOWN, so both slices
+  run off the end and the results tree fills with `NULL`. The next traversal calls
+  `NULL$asProtoBuf()` — which is exactly `attempt to apply non-function`, arriving through the
+  serialization path. Measured on jmvcore 2.7.38 against a real `waterfall` run: 21 items,
+  `insert(999,)` → 1978 items / 1955 `NULL`s; `insert(22,)` → 1 `NULL`. **A `jmvcore::Html` at the
+  same index fails identically** — the element type is irrelevant. `insert(1, ...)` into an *empty*
+  group is the same bug (`1:0` is `c(1, 0)`).
+
+  What we concluded instead, in 2025-12: *"ALL dynamically inserted `jmvcore::Notice` objects cause
+  serialization errors."* `R/survival.b.R` had ten notices — nine at index 1 or 2, one at 999.
+  Removing the `insert(1, ...)` did not help (the 999 was still live), removing all ten did, and
+  the wrong lesson was drawn from the difference. The claim had in fact been written into
+  `CLAUDE.md` as mechanism on 2025-11-16, **six weeks before the incident it purports to explain**,
+  and six later write-ups in `tests/*.md` each cite `CLAUDE.md` as their authority. None tested it.
+  Cost: `jmvcore::Notice` was abandoned for hand-rolled HTML — **80 `.addNotice()` helpers,
+  1,408 call sites, 0 uses of the native element** — and the false mechanism propagated into
+  `CLAUDE.md`, three guides, five command files, a template library and a code breadcrumb the
+  jamovi library reviewer reads.
+
+- **Detection signal:** the library reviewer (`2026-09-22 OncoPath` [LOW]) — correcting *their own*
+  earlier advice, and reading our breadcrumb to do it. Every local check missed it because nothing
+  tested the claim: it was documentation agreeing with itself. `.claude/commands/fix-notices.md`
+  had taught `self$results$insert(999, n)` since 2025-11-14, and the pattern spread to 321 call
+  sites at index 999 before the first crash.
+
+- **Prevention rule:** an inferred cause is labelled as inferred until it is measured, and a fix
+  that removes N things at once has not identified which one mattered. Enforced by
+  `tools/release_gate.py` `check_sentinel_insert` (**FAIL**; 0 hits in the umbrella and all five
+  siblings the day it was written) plus the corrected teaching sites; guide §13.
+
+### A WARN that is red in every module is a broken check
+
+- **Failure mode:** `check_news` warned that `NEWS.md` had no heading for the `DESCRIPTION`
+  version, in all five siblings, forever. But `.github/workflows/release.yaml` publishes nothing at
+  all for a four-component version, which is what the updater writes on every regeneration. Four of
+  the five warnings were about a file the release pipeline never opens, and they buried the fifth —
+  OncoPath at 1.0.83, genuinely about to publish a release whose body would read `Release 1.0.83.`
+  It had already happened 14 times in 16 workflow-era releases.
+- **Detection signal:** the reviewer supplied the consequence we had not traced (the extractor's
+  `(^|[^0-9.])<version>([^0-9.]|$)` regex and its placeholder fallback). The gate itself had been
+  reporting the symptom since 2026-09-18 and was skimmed, exactly as a permanently red line is.
+- **Prevention rule:** a detector must ask the question that matches the thing that breaks. Rewritten
+  to mirror the workflow's own cascade — silent on dev builds, and it names the placeholder body it
+  would publish. 5/5 red → 1/5. Related: the heading must be written **before** the version bump,
+  because the workflow skips a version whose tag exists, so a release cannot be re-cut.
+
+### Fixing the third instance is not sweeping the class
+
+- **Failure mode:** `diagnosticmeta` and `waterfall` greet a user with a red
+  `ERROR: Variables required` the moment the analysis is opened, before anything has been chosen.
+  Round 1 raised the fatal half of this class, round 2 the empty-state half; both were marked DONE.
+  Round 2's fix moved the banners into a new `notices` channel and re-created them there
+  (`0dbd3d348`), and `48b8edb13` — **one day before this audit** — fixed `swimmerplot` alone and
+  wrote the reasoning the reviewer then quoted back at us.
+- **Detection signal:** the reviewer, at three named sites. A class sweep found **7 empty-state and
+  9 fatal-via-banner shipped hits** across the five modules — including `swimmerplot`'s own second
+  instance, which the reviewer missed while holding swimmerplot up as the model.
+- **Prevention rule:** guide §25, with the empty-state / fatal split and the two detector
+  refinements (measured: 53% false positives without them, 0/15 with). Not gated yet, and the guide
+  says why rather than shipping a noisy gate.
+
+### Tabular data rendered as raw HTML ignores results theme and loses user interactions
+
+- **Failure mode:** reference tables in `diagnosticmeta` were rendered inside HTML blocks using raw
+  `<table style="...">` markup with fixed `#ddd` borders and light headers. They ignore jamovi's
+  dark results theme, cannot be copied as LaTeX or tabular data (Copy outputs raw markup rather than
+  a grid), and cannot be translated via `.()`.
+- **Detection signal:** the reviewer (`2026-09-22 OncoPath` [MEDIUM]). The sweep found 97 shipped
+  `<table>` blocks across five modules (33 computed, 25 static grids, 27 prose, 12 exempt help).
+- **Prevention rule:** tabular data belongs in a `type: Table` result in `.r.yaml`, with static rows
+  in `.init()` and computed values in `.run()`. Reserve `type: Html` solely for complex packages with
+  mature HTML rendering engines (gt/gtsummary) or empty-state layouts. Guide §26.
+
+### Module self-description contradictions propagate through separate authorship channels
+
+- **Failure mode:** capability claims (RECIST v1.1 compliance vs adaptation) differed between
+  `DESCRIPTION`, `README.md` and `jamovi/0000.yaml`; bug-report URLs pointed to different repositories;
+  `diagnosticmeta.a.yaml` used a `|` literal block scalar so description lines were rendered with
+  awkward paragraph breaks; example datasets shared identical descriptions.
+- **Detection signal:** the reviewer (`2026-09-22 OncoPath` [LOW]).
+- **Prevention rule:** single source of truth for repository URLs, folded `>` block scalars for
+  analysis descriptions, distinct dataset descriptions, and aligned clinical standard qualifications.
+  Enforced by `check_description_newlines`, `check_issue_urls`, and `check_dataset_descriptions` in
+  `tools/release_gate.py`; guide §27.
+
+### Declared-but-unused dependencies left behind after refactoring
+
+- **Failure mode:** `stringr` remained declared in `DESCRIPTION` `Imports:` and `R/zzz_imports.R`
+  after its sole call (`str_to_title()`) was removed in a refactor. The `@importFrom` tag hid the
+  staleness from `R CMD check`, forcing every user install to resolve and load an unused package.
+- **Detection signal:** the reviewer (`2026-09-22 OncoPath` [LOW]); `check_unused_imports` in
+  `tools/release_gate.py` (which also found `psych`).
+- **Prevention rule:** remove unused dependencies from `DESCRIPTION` and `R/zzz_imports.R`; guide §10.
+
+---
+
 ## 2026-09-20 — routing an analysis out of a module took its imports with it
 
 `Rscript _updateModules.R` stopped OncoPath at verify: `called but not resolvable from the

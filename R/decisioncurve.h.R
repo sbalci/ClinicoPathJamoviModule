@@ -46,7 +46,6 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             harmFalseTreatment = 500,
             showStandardizedNetBenefit = FALSE,
             multiModelComparison = FALSE,
-            comparisonMethod = "bootstrap",
             showDecisionConsequences = FALSE,
             resourceUtilization = FALSE,
             showRelativeUtility = FALSE, ...) {
@@ -266,12 +265,6 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "multiModelComparison",
                 multiModelComparison,
                 default=FALSE)
-            private$..comparisonMethod <- jmvcore::OptionList$new(
-                "comparisonMethod",
-                comparisonMethod,
-                options=list(
-                    "bootstrap"),
-                default="bootstrap")
             private$..showDecisionConsequences <- jmvcore::OptionBool$new(
                 "showDecisionConsequences",
                 showDecisionConsequences,
@@ -325,7 +318,6 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..harmFalseTreatment)
             self$.addOption(private$..showStandardizedNetBenefit)
             self$.addOption(private$..multiModelComparison)
-            self$.addOption(private$..comparisonMethod)
             self$.addOption(private$..showDecisionConsequences)
             self$.addOption(private$..resourceUtilization)
             self$.addOption(private$..showRelativeUtility)
@@ -371,7 +363,6 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         harmFalseTreatment = function() private$..harmFalseTreatment$value,
         showStandardizedNetBenefit = function() private$..showStandardizedNetBenefit$value,
         multiModelComparison = function() private$..multiModelComparison$value,
-        comparisonMethod = function() private$..comparisonMethod$value,
         showDecisionConsequences = function() private$..showDecisionConsequences$value,
         resourceUtilization = function() private$..resourceUtilization$value,
         showRelativeUtility = function() private$..showRelativeUtility$value),
@@ -416,7 +407,6 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..harmFalseTreatment = NA,
         ..showStandardizedNetBenefit = NA,
         ..multiModelComparison = NA,
-        ..comparisonMethod = NA,
         ..showDecisionConsequences = NA,
         ..resourceUtilization = NA,
         ..showRelativeUtility = NA)
@@ -985,7 +975,6 @@ decisioncurveResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "thresholdMax",
                     "thresholdStep",
                     "multiModelComparison",
-                    "comparisonMethod",
                     "bootReps",
                     "ciLevel",
                     "seed",
@@ -1099,7 +1088,7 @@ decisioncurveBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "decisioncurve",
-                version = c(1,0,81),
+                version = c(1,0,83),
                 options = options,
                 results = decisioncurveResults$new(options=options),
                 data = data,
@@ -1238,11 +1227,6 @@ decisioncurveBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param multiModelComparison Perform exploratory pairwise bootstrap
 #'   comparisons between all models. Inference is approximate and conditional on
 #'   the selected threshold range.
-#' @param comparisonMethod Statistical method for comparing decision curves
-#'   between models. Only the case-resampling bootstrap is implemented.
-#'   Permutation and integral-difference options were previously offered here
-#'   but had no code behind them: selecting either produced an empty p-value and
-#'   the literal text "Bootstrap required" in the results table.
 #' @param showDecisionConsequences Show detailed table of decision
 #'   consequences (TP, FP, TN, FN) at selected thresholds.
 #' @param resourceUtilization Project tests, treatments, unnecessary
@@ -1320,7 +1304,6 @@ decisioncurve <- function(
     harmFalseTreatment = 500,
     showStandardizedNetBenefit = FALSE,
     multiModelComparison = FALSE,
-    comparisonMethod = "bootstrap",
     showDecisionConsequences = FALSE,
     resourceUtilization = FALSE,
     showRelativeUtility = FALSE) {
@@ -1382,7 +1365,6 @@ decisioncurve <- function(
         harmFalseTreatment = harmFalseTreatment,
         showStandardizedNetBenefit = showStandardizedNetBenefit,
         multiModelComparison = multiModelComparison,
-        comparisonMethod = comparisonMethod,
         showDecisionConsequences = showDecisionConsequences,
         resourceUtilization = resourceUtilization,
         showRelativeUtility = showRelativeUtility)

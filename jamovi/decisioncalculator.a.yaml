@@ -8,13 +8,13 @@ version: '1.0.83'
 jas: '1.2'
 
 description:
-    main: |
-        Medical Decision Calculator for diagnostic test evaluation when you have 
-        the four key counts: True Positives (TP), False Positives (FP), True 
-        Negatives (TN), and False Negatives (FN). Calculates comprehensive 
-        diagnostic performance metrics including sensitivity, specificity, 
-        positive and negative predictive values, likelihood ratios, and 
-        post-test probabilities. Supports confidence interval estimation and 
+    main: >
+        Medical Decision Calculator for diagnostic test evaluation when you have
+        the four key counts: True Positives (TP), False Positives (FP), True
+        Negatives (TN), and False Negatives (FN). Calculates comprehensive
+        diagnostic performance metrics including sensitivity, specificity,
+        positive and negative predictive values, likelihood ratios, and
+        post-test probabilities. Supports confidence interval estimation and
         Fagan nomogram visualization for educational interpretation. Presets and
         examples are illustrative only and are not clinical guides.
     R:
@@ -32,11 +32,15 @@ description:
 
 
 options:
+    # The four counts (and the illustrative cut-off counts below) carry no `min:`.
+    # jmvcore validates options before .run(), so a `min: 0` hard-rejects a negative
+    # value with a raw "TP must be between 0 and Inf (is -10)" and makes the backend's
+    # "Negative counts detected" ERROR notice unreachable dead code. Without it the
+    # value reaches .run() and the user - GUI or R - gets the clinical notice instead.
     - name: TP
       title: 'True Positive (TP)'
       type: Number
       default: 90
-      min: 0
       description:
           ui: >
             Number of reference-positive cases with a positive test result.
@@ -47,7 +51,6 @@ options:
       title: 'True Negative (TN)'
       type: Number
       default: 80
-      min: 0
       description:
           ui: >
             Number of reference-negative cases with a negative test result.
@@ -58,7 +61,6 @@ options:
       title: 'False Positive (FP)'
       type: Number
       default: 30
-      min: 0
       description:
           ui: >
             Number of reference-negative cases with a positive test result.
@@ -69,7 +71,6 @@ options:
       title: 'False Negative (FN)'
       type: Number
       default: 20
-      min: 0
       description:
           ui: >
             Number of reference-positive cases with a negative test result.
@@ -208,7 +209,6 @@ options:
       title: 'TP (Cut-off 1)'
       type: Number
       default: 100
-      min: 0
       description:
           ui: Reference-positive participants testing positive in illustrative scenario 1.
           R: True-positive frequency for illustrative scenario 1.
@@ -217,7 +217,6 @@ options:
       title: 'FP (Cut-off 1)'
       type: Number
       default: 40
-      min: 0
       description:
           ui: Reference-negative participants testing positive in illustrative scenario 1.
           R: False-positive frequency for illustrative scenario 1.
@@ -226,7 +225,6 @@ options:
       title: 'TN (Cut-off 1)'
       type: Number
       default: 70
-      min: 0
       description:
           ui: Reference-negative participants testing negative in illustrative scenario 1.
           R: True-negative frequency for illustrative scenario 1.
@@ -235,7 +233,6 @@ options:
       title: 'FN (Cut-off 1)'
       type: Number
       default: 10
-      min: 0
       description:
           ui: Reference-positive participants testing negative in illustrative scenario 1.
           R: False-negative frequency for illustrative scenario 1.
@@ -254,7 +251,6 @@ options:
       title: 'TP (Cut-off 2)'
       type: Number
       default: 80
-      min: 0
       description:
           ui: Reference-positive participants testing positive in illustrative scenario 2.
           R: True-positive frequency for illustrative scenario 2.
@@ -263,7 +259,6 @@ options:
       title: 'FP (Cut-off 2)'
       type: Number
       default: 15
-      min: 0
       description:
           ui: Reference-negative participants testing positive in illustrative scenario 2.
           R: False-positive frequency for illustrative scenario 2.
@@ -272,7 +267,6 @@ options:
       title: 'TN (Cut-off 2)'
       type: Number
       default: 95
-      min: 0
       description:
           ui: Reference-negative participants testing negative in illustrative scenario 2.
           R: True-negative frequency for illustrative scenario 2.
@@ -281,7 +275,6 @@ options:
       title: 'FN (Cut-off 2)'
       type: Number
       default: 30
-      min: 0
       description:
           ui: Reference-positive participants testing negative in illustrative scenario 2.
           R: False-negative frequency for illustrative scenario 2.

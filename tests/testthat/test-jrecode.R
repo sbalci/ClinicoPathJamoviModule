@@ -1,10 +1,13 @@
+# Do not source() R/*.h.R / R/*.b.R here: a source() preamble detaches the package namespace,
+# jmvcore's .() helper leaves scope and any .() string dies with `could not find function "."`
+# (project reference test-source-preamble-breaks-dot-translate). The package provides these.
+jrecodeOptions <- getFromNamespace("jrecodeOptions", "ClinicoPath")
+jrecodeClass   <- getFromNamespace("jrecodeClass",   "ClinicoPath")
 
 test_that("jrecode basic functionality works", {
   skip_if_not_installed('jmvReadWrite')
   skip_if_not_installed("jmvcore")
 
-  source("../../R/jrecode.h.R")
-  source("../../R/jrecode.b.R")
   library(dplyr)
   data(iris)
 
@@ -43,8 +46,6 @@ test_that("jrecode basic functionality works", {
 test_that("jrecode handles alternative separators", {
   skip_if_not_installed("jmvcore")
 
-  source("../../R/jrecode.h.R")
-  source("../../R/jrecode.b.R")
   data(iris)
 
   # Test with semicolon separator
@@ -78,8 +79,6 @@ test_that("jrecode handles alternative separators", {
 test_that("jrecode handles else_level options correctly", {
   skip_if_not_installed("jmvcore")
 
-  source("../../R/jrecode.h.R")
-  source("../../R/jrecode.b.R")
   data(iris)
 
   # Test copy (default)
@@ -131,8 +130,6 @@ test_that("jrecode handles else_level options correctly", {
 test_that("jrecode validates rules and shows notices", {
   skip_if_not_installed("jmvcore")
 
-  source("../../R/jrecode.h.R")
-  source("../../R/jrecode.b.R")
   data(iris)
 
   # Test invalid format
@@ -166,8 +163,6 @@ test_that("jrecode validates rules and shows notices", {
 test_that("jrecode handles quotes in input", {
   skip_if_not_installed("jmvcore")
 
-  source("../../R/jrecode.h.R")
-  source("../../R/jrecode.b.R")
   data(iris)
 
   # Test with quotes
@@ -189,8 +184,6 @@ test_that("jrecode handles quotes in input", {
 test_that("jrecode generates valid R code", {
   skip_if_not_installed("jmvcore")
 
-  source("../../R/jrecode.h.R")
-  source("../../R/jrecode.b.R")
   data(iris)
 
   options <- jrecodeOptions$new(
@@ -220,8 +213,6 @@ test_that("jrecode generates valid R code", {
 test_that("jrecode handles empty rules gracefully", {
   skip_if_not_installed("jmvcore")
 
-  source("../../R/jrecode.h.R")
-  source("../../R/jrecode.b.R")
   data(iris)
 
   options <- jrecodeOptions$new(
@@ -242,8 +233,6 @@ test_that("jrecode handles empty rules gracefully", {
 test_that("jrecode auto-populates rules with available levels when empty", {
   skip_if_not_installed("jmvcore")
 
-  source("../../R/jrecode.h.R")
-  source("../../R/jrecode.b.R")
   data(iris)
 
   options <- jrecodeOptions$new(
@@ -265,8 +254,6 @@ test_that("jrecode auto-populates rules with available levels when empty", {
 test_that("jrecode gracefully handles missing variable selections", {
   skip_if_not_installed("jmvcore")
 
-  source("../../R/jrecode.h.R")
-  source("../../R/jrecode.b.R")
   data(iris)
 
   options <- jrecodeOptions$new(
@@ -284,8 +271,6 @@ test_that("jrecode gracefully handles missing variable selections", {
 test_that("jrecode shows instructions when no variable selected", {
   skip_if_not_installed("jmvcore")
 
-  source("../../R/jrecode.h.R")
-  source("../../R/jrecode.b.R")
   data(iris)
 
   options <- jrecodeOptions$new(
@@ -304,8 +289,6 @@ test_that("jrecode shows instructions when no variable selected", {
 test_that("jrecode variable name validation works", {
   skip_if_not_installed("jmvcore")
 
-  source("../../R/jrecode.h.R")
-  source("../../R/jrecode.b.R")
   data(iris)
 
   # Test invalid variable name
@@ -329,8 +312,6 @@ test_that("jrecode variable name validation works", {
 test_that("jrecode handles grouping/collapsing levels", {
   skip_if_not_installed("jmvcore")
 
-  source("../../R/jrecode.h.R")
-  source("../../R/jrecode.b.R")
   data(iris)
 
   # Test collapsing multiple levels to one

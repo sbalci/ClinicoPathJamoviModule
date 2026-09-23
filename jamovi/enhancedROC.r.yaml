@@ -17,6 +17,9 @@ items:
                - predictors
                - detectImbalance
                - analysisType
+               - imbalanceThreshold
+               - recommendPRC
+               - showImbalanceWarning
 
           - name: instructions
             title: Instructions
@@ -25,6 +28,7 @@ items:
             clearWith:
                 - outcome
                 - predictors
+                - clinicalContext
 
           # Imbalance Metrics Table
           - name: imbalanceMetrics
@@ -73,6 +77,7 @@ items:
                 - outcome
                 - predictors
                 - positiveClass
+                - direction
             rows: 1
             columns:
                 - name: predictor
@@ -111,6 +116,10 @@ items:
                 - internalValidation
                 - validationMethod
                 - bootstrapSamples
+                - clinicalContext
+                - seed
+                - direction
+                - confidenceLevel
             description: Plain language summary of key findings
 
           # Clinical Report Sentences
@@ -122,6 +131,21 @@ items:
                 - outcome
                 - predictors
                 - positiveClass
+                - clinicalContext
+                - direction
+                - confidenceLevel
+                - useBootstrap
+                - bootstrapMethod
+                - bootstrapSamples
+                - stratifiedBootstrap
+                - seed
+                - youdenOptimization
+                - sensitivityThreshold
+                - specificityThreshold
+                - clinicalPresets
+                - analysisType
+                - pairwiseComparisons
+                - comparisonMethod
             description: Copy-ready clinical report sentences for publications and reports
 
           # AUC Summary Table
@@ -141,6 +165,7 @@ items:
                 - bootstrapSamples
                 - stratifiedBootstrap
                 - seed
+                - clinicalContext
 
             columns:
                 - name: predictor
@@ -180,6 +205,10 @@ items:
                 - predictors
                 - positiveClass
                 - comparisonMethod
+                - clinicalContext
+                - bootstrapSamples
+                - seed
+                - direction
 
             columns:
                 - name: predictor1
@@ -216,6 +245,13 @@ items:
                 - outcome
                 - predictors
                 - positiveClass
+                - direction
+                - comparisonMethod
+                - seed
+                - youdenOptimization
+                - sensitivityThreshold
+                - specificityThreshold
+                - clinicalPresets
 
             columns:
                 - name: metric
@@ -260,6 +296,9 @@ items:
                 - predictors
                 - positiveClass
                 - comparisonMethod
+                - bootstrapSamples
+                - seed
+                - direction
 
             columns:
                 - name: test_name
@@ -294,6 +333,7 @@ items:
                 - sensitivityThreshold
                 - specificityThreshold
                 - clinicalPresets
+                - clinicalContext
 
             columns:
                 - name: predictor
@@ -393,6 +433,7 @@ items:
                 - sensitivityThreshold
                 - specificityThreshold
                 - clinicalPresets
+                - confidenceLevel
 
             columns:
                 - name: predictor
@@ -406,14 +447,14 @@ items:
                   type: number
                   format: zto
                 - name: sensitivity_ci
-                  title: 'Sensitivity 95% CI'
+                  title: 'Sensitivity CI'
                   type: text
                 - name: specificity
                   title: 'Specificity'
                   type: number
                   format: zto
                 - name: specificity_ci
-                  title: 'Specificity 95% CI'
+                  title: 'Specificity CI'
                   type: text
                 - name: accuracy
                   title: 'Accuracy'
@@ -441,6 +482,7 @@ items:
                 - sensitivityThreshold
                 - specificityThreshold
                 - clinicalPresets
+                - clinicalContext
 
             columns:
                 - name: predictor
@@ -490,6 +532,7 @@ items:
                 - stratifiedBootstrap
                 - confidenceLevel
                 - seed
+                - clinicalContext
 
             columns:
                 - name: predictor
@@ -539,6 +582,7 @@ items:
                 - predictors
                 - positiveClass
                 - crocAlpha
+                - direction
 
             columns:
                 - name: predictor
@@ -573,6 +617,7 @@ items:
                 - outcome
                 - predictors
                 - positiveClass
+                - direction
 
             columns:
                 - name: predictor
@@ -607,6 +652,9 @@ items:
                 - outcome
                 - predictors
                 - positiveClass
+                - clinicalContext
+                - direction
+                - analysisType
 
             columns:
                 - name: measure
@@ -631,6 +679,7 @@ items:
                 - outcome
                 - predictors
                 - positiveClass
+                - clinicalContext
 
           # Statistical Methods
           - name: methodsExplanation
@@ -662,6 +711,10 @@ items:
                 - plotTheme
                 - plotWidth
                 - plotHeight
+                - youdenOptimization
+                - sensitivityThreshold
+                - specificityThreshold
+                - clinicalPresets
             width: 600
             height: 600
 
@@ -702,6 +755,10 @@ items:
                 - plotTheme
                 - plotWidth
                 - plotHeight
+                - youdenOptimization
+                - sensitivityThreshold
+                - specificityThreshold
+                - clinicalPresets
             width: 600
             height: 600
 
@@ -762,6 +819,10 @@ items:
                 - positiveClass
                 - plotWidth
                 - plotHeight
+                - youdenOptimization
+                - sensitivityThreshold
+                - specificityThreshold
+                - clinicalPresets
             width: 600
             height: 600
 
@@ -818,6 +879,7 @@ items:
                 - brierScore
                 - calibrationMetrics
                 - eoRatio
+                - direction
             columns:
                 - name: predictor
                   title: 'Predictor'
@@ -883,6 +945,7 @@ items:
                 - predictors
                 - positiveClass
                 - hlGroups
+                - direction
             columns:
                 - name: predictor
                   title: 'Predictor'
@@ -932,10 +995,17 @@ items:
             description: AUC values for each class in multi-class analysis
             visible: (multiClassROC)
             clearWith:
+                - direction
                 - outcome
                 - predictors
                 - positiveClass
                 - multiClassStrategy
+                - useBootstrap
+                - bootstrapMethod
+                - bootstrapSamples
+                - stratifiedBootstrap
+                - confidenceLevel
+                - seed
             columns:
                 - name: class
                   title: 'Class'
@@ -968,6 +1038,7 @@ items:
             description: Averaged AUC across all classes
             visible: (multiClassROC)
             clearWith:
+                - direction
                 - outcome
                 - predictors
                 - positiveClass
@@ -1020,6 +1091,7 @@ items:
                 - positiveClass
                 - useObservedPrevalence
                 - prevalence
+                - direction
             columns:
                 - name: predictor
                   title: 'Predictor'
@@ -1063,6 +1135,7 @@ items:
                 - positiveClass
                 - useObservedPrevalence
                 - prevalence
+                - direction
             columns:
                 - name: predictor
                   title: 'Predictor'

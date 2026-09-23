@@ -102,28 +102,14 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 }
 \description{
 Analyzes how diagnostic accuracy changes when applying two tests in
-sequence,
-comparing three different testing strategies: serial positive
-(confirmation),
-serial negative (exclusion), and parallel testing. Provides comprehensive
-analysis including population flow, cost implications, and diagnostic
-plots.
-}
-\details{
-The named scenarios and their values are teaching examples only, not
-clinical
-guidance or validated diagnostic pathways. Replace all example parameters
-with
-estimates applicable to the intended population before interpreting
-results.
-
-This analysis is particularly useful for:
-\itemize{
-\item Exploring how diagnostic strategies behave under explicit assumptions
-\item Comparing hypothetical test sequences for teaching or planning
-\item Understanding trade-offs between sensitivity and specificity
-\item Illustrating expected testing volume and cost under user-supplied
-assumptions
-\item Teaching sequential testing concepts and Bayesian probability
-}
+sequence, comparing three different testing strategies: serial positive
+(confirmation), serial negative (exclusion), and parallel testing. Provides
+comprehensive analysis including population flow, cost implications, and
+diagnostic plots, so you can explore how diagnostic strategies behave under
+explicit assumptions, compare hypothetical test sequences, weigh trade-offs
+between sensitivity and specificity, and illustrate expected testing volume
+and cost under user-supplied assumptions. The named scenarios and their
+values are teaching examples only, not clinical guidance or validated
+diagnostic pathways. Replace all example parameters with estimates
+applicable to the intended population before interpreting results.
 }

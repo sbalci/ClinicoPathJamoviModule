@@ -207,7 +207,11 @@ get_base_packages <- function() {
 # lexical control flow. A use is optional only inside the true branch of a positive
 # requireNamespace("pkg") check, or after a terminal negative guard such as
 # `if (!requireNamespace("pkg")) return()` in the same block.
-scan_r_package_usage <- function(r_dir) {
+#
+# `files` scans an explicit set of R sources instead of a module's R/ directory, so the
+# planner can ask "does this module use package P?" of the umbrella files it is ABOUT to
+# ship, before anything is written. Everything else is identical.
+scan_r_package_usage <- function(r_dir = NULL, files = NULL) {
   required <- character(0)
   guarded <- character(0)
   parse_errors <- character(0)
@@ -217,7 +221,11 @@ scan_r_package_usage <- function(r_dir) {
     used = character(0),
     parse_errors = parse_errors
   )
-  if (!dir.exists(r_dir)) return(empty)
+  if (is.null(files)) {
+    if (is.null(r_dir) || !dir.exists(r_dir)) return(empty)
+    files <- list.files(r_dir, pattern = "\\.[Rr]$", full.names = TRUE)
+  }
+  if (length(files) == 0L) return(empty)
 
   call_name <- function(expr) {
     if (!is.call(expr)) return(NA_character_)
@@ -398,6 +406,17 @@ scan_r_package_usage <- function(r_dir) {
       record_package(literal_package_arg(expr), active_guards)
     }
 
+    # A function's formals are a pairlist, not a call, so the generic recursion at the
+    # bottom walks straight past a default like `engine = DescTools::CCC` and the package
+    # is never recorded. Walk the default VALUES explicitly. A parameter with no default is
+    # the empty symbol: index it straight into is.call(), never `for (d in ...)` or any other
+    # binding, or referencing that variable raises "argument 'd' is missing, with no default".
+    if (identical(head, as.name("function")) && length(expr) >= 2 && is.pairlist(expr[[2]])) {
+      defaults <- as.list(expr[[2]])
+      for (i in seq_along(defaults))
+        if (is.call(defaults[[i]])) walk(defaults[[i]], active_guards)
+    }
+
     if (identical(head, as.name("if"))) {
       condition <- expr[[2]]
       walk_condition(condition, active_guards)
@@ -437,8 +456,7 @@ scan_r_package_usage <- function(r_dir) {
     invisible(NULL)
   }
 
-  r_files <- list.files(r_dir, pattern = "\\.[Rr]$", full.names = TRUE)
-  for (f in r_files) {
+  for (f in files) {
     parsed <- tryCatch(
       parse(f, keep.source = FALSE),
       error = function(e) {
@@ -568,6 +586,38 @@ prune_configured_module_imports <- function(module_dir, packages) {
         paste(removable, collapse = ", "), "\n", sep = "")
   }
   invisible(removable)
+}
+
+# Which prune_imports entries are WRONG for the set of files a module is about to ship.
+#
+# prune_configured_module_imports() above deletes unconditionally: the config says "remove P"
+# and P is removed, whether or not the module still needs it. That is fine while the list is
+# accurate and silently catastrophic the moment it is not. `magrittr` was pruned from OncoPath
+# on 2026-09-16; `%>%` vanished from the generated DESCRIPTION and `waterfall` could not run in
+# jamovi at all. Every local check passed, because ~/.Rprofile attaches magrittr in the sibling
+# repos and R CMD check only NOTEs an undeclared bare symbol.
+#
+# So the list is re-derived against reality on every run, at PLAN time, over the umbrella
+# sources the module will actually ship (`files`) rather than a generated module directory --
+# `--dry-run` reports it and nothing is written. A `guarded` use counts as a use: jamovi
+# installs Imports and never Suggests, so pruning a requireNamespace()-gated package does not
+# make it optional, it makes that capability dead for every user.
+#
+# COVERS: `P::f()`, `P:::f()`, `library(P)`, `require(P)`, and `@import P` / `@importFrom P f`
+# roxygen tags in a shipped file.
+# DOES NOT COVER: a bare symbol with no tag anywhere -- the magrittr shape itself. Nothing in
+# the source names the package, so no source scan can find it. That class is caught downstream
+# by the bare-symbol resolution in verify_module(), which has the generated NAMESPACE to
+# resolve against; it blocks before install, just later and after the sibling tree is touched.
+prune_conflicts <- function(prune, files) {
+  prune <- unlist(prune, use.names = FALSE)
+  if (length(prune) == 0L || length(files) == 0L) return(character(0))
+  usage <- scan_r_package_usage(files = files)
+  tagged <- unlist(lapply(files, function(f) {
+    tags <- grep("^\\s*#'\\s*@import(From)?\\s", readLines(f, warn = FALSE), value = TRUE)
+    sub("^\\s*#'\\s*@import(From)?\\s+([A-Za-z0-9._]+).*$", "\\2", tags)
+  }), use.names = FALSE)
+  sort(intersect(prune, unique(c(usage$used, tagged))))
 }
 
 # Add Imports the usage scan cannot see.
@@ -836,7 +886,10 @@ verify_module <- function(mp, guard_template) {
   left <- intersect(mp$description$prune_imports, c(imported, imports))
   if (length(left))
     problems <- c(problems, paste0("prune_imports still imported: ", paste(left, collapse = ", "),
-                                   " -- remove its @import/@importFrom tag (usually R/zzz_imports.R)"))
+                                   " -- the config and the code disagree. If the module needs it,",
+                                   " delete the prune_imports entry; if it does not, remove the",
+                                   " @import/@importFrom tag (usually R/zzz_imports.R). Do not",
+                                   " assume the config is the correct side."))
 
   guard <- new.env()
   for (e in parse(guard_template, keep.source = FALSE))

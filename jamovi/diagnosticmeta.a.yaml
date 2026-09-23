@@ -1,13 +1,13 @@
 ---
 name: diagnosticmeta
 title: Diagnostic Test Meta-Analysis for Pathology
-menuGroup: OncoPath
+menuGroup: OncoPathT
 menuSubgroup: Meta-Analysis
 version: '1.0.83'
 jas: '1.2'
 
 description:
-    main: |
+    main: >
         Comprehensive meta-analysis of diagnostic test accuracy studies designed for
         pathology research. Performs bivariate random-effects modeling, proportional-hazards SROC analysis,
         meta-regression, and publication bias assessment for AI algorithm validation

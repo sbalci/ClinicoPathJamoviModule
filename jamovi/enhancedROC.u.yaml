@@ -241,7 +241,6 @@ children:
             enable: (detectImbalance)
           - type: CheckBox
             name: showImbalanceWarning
-            enable: (detectImbalance)
           - type: CheckBox
             name: recommendPRC
             enable: (detectImbalance)

@@ -1,5 +1,16 @@
 # Swimmer Plot Serialization Error - FINAL FIX
 
+> **Superseded 2026-09-22 — the diagnosis in this document is wrong.** The crash recorded here was
+> real and was observed in the jamovi app. Its stated cause was not. `jmvcore::Notice` serializes
+> correctly; the failure came from `self$results$insert(N, ...)` with `N` greater than the number of
+> results items — `jmvcore::Group$insert()` has no bounds check, R’s `:` counts down, the results
+> tree fills with `NULL`s and the next traversal dies with `attempt to apply non-function`. A
+> `jmvcore::Html` at the same index fails identically. The file removed here held nine valid indices
+> and one `insert(999, ...)`; removing all of them at once is why the wrong conclusion was drawn.
+> Kept as the primary record of what was observed. Full account and the experiment:
+> `vignettes/jamovi_library_review_guide.md` §13.
+
+
 ## Final Problem Identified
 Even after commenting out `self$results$insert()` calls, the serialization error persisted because **Notice objects were still being created** using `jmvcore::Notice$new()`.
 

@@ -27,14 +27,17 @@ items:
       title: Clinical Interpretation
       type: Table
       rows: 0
-      visible: (clinicalMode:basic || clinicalMode:advanced || clinicalMode:comprehensive)
+      # Was `visible: (clinicalMode:basic || clinicalMode:advanced || clinicalMode:comprehensive)`,
+      # which lists every level the option has and so was a tautology dressed up as a gate.
+      # clinicalMode is dropped from clearWith too: nothing in this table's contents
+      # depends on it.
+      visible: true
       clearWith:
           - dependentVars
           - classVar
           - positiveClass
           - subGroup
           - direction
-          - clinicalMode
       columns:
         - name: variable
           title: Test
@@ -285,11 +288,15 @@ items:
       type: Table
       rows: 0
       visible: (delongTest)
+      # delongTest itself must be in clearWith: without it, unticking and re-ticking the
+      # option never clears the table, and addRow() (which has no duplicate-key check)
+      # appends a second copy of every pairwise comparison.
       clearWith:
         - dependentVars
         - classVar
         - positiveClass
         - direction
+        - delongTest
       columns:
         - name: comparison
           title: Comparison
@@ -323,6 +330,7 @@ items:
         - classVar
         - positiveClass
         - direction
+        - delongTest
       refs:
         - DeLong1988
 
@@ -674,12 +682,15 @@ items:
           title: Weighted Bootstrap AUC
           type: number
           format: zto
+        # NOT "95% Bootstrap CI": these are the 2.5/97.5 percentiles of the PRIOR-WEIGHTED
+        # resampled AUCs, so they bracket the Weighted Bootstrap AUC beside them and are
+        # narrower than an interval for the AUC by the factor n / (n + prior precision).
         - name: credible_lower
-          title: 95% Bootstrap CI Lower
+          title: 95% Interval Lower (weighted AUC)
           type: number
           format: zto
         - name: credible_upper
-          title: 95% Bootstrap CI Upper
+          title: 95% Interval Upper (weighted AUC)
           type: number
           format: zto
         - name: bayes_factor

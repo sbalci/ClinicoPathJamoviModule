@@ -47,14 +47,14 @@
 # ==============================================
 
 
-new_version: "1.0.83.01"
-new_date: "2026-09-21"
+new_version: "1.0.83.03"
+new_date: "2026-09-23"
 quick: false
 TEST: true
 jjstatsplot: false
 jsurvival: false
 ClinicoPathDescriptives: false
-OncoPath: false
+OncoPath: true
 meddecide: true
 ClinicoPath: false
 
@@ -99,6 +99,14 @@ umbrella_only_suffixes: ["D", "P"]
 # R/data-*.R, jamovi/i18n catalogs, data/*.csv and data/*.omv are never touched.
 # .omv example analyses are made in the submodule and never copied from the umbrella
 # (an .omv in data_files is skipped with a warning).
+#
+# prune_imports: the ONLY way to remove a stale Import (the NAMESPACE->DESCRIPTION sync only
+# ever adds). Every entry is a claim that the module no longer needs that package, and the
+# planner re-checks it on each run against the files that module ships -- a package still used
+# via pkg::, library()/require(), a roxygen @import tag, or under requireNamespace() is a PLAN
+# ERROR. If one fires because you added a function that needs the package, DELETE THE ENTRY;
+# never drop the tag or the call to silence it. Pruning a package that is only requireNamespace()-
+# gated is still wrong: jamovi installs Imports and never Suggests, so the capability just dies.
 modules:
   jjstatsplot:
     directory: "/Users/serdarbalci/Documents/GitHub/jjstatsplot"
@@ -122,6 +130,14 @@ modules:
       # collide ("replacing previous import"). The analyses now call
       # jmvcore::htmlEscape, so htmltools is no longer a meddecide dependency.
       - "htmltools"
+      # library-audit 2026-09-16 meddecide [LOW] DONE: prune only what NO shipped analysis
+      #   calls. DescTools/irrCAC/lme4/lmerTest/vcd were listed here on 2026-09-23 while
+      #   `agreement` was parked in menuGroup meddecideT (JamoviTest); `agreement` is back
+      #   in meddecide and calls all five, so pruning them would ship a module whose
+      #   interrater analysis cannot run. prune_conflicts() caught it at plan time.
+      #   `psych` stays: its every mention in agreement.b.R is a comment or a user-facing
+      #   string saying the result agrees with psych::cohen.kappa -- not one call.
+      - "psych"
     i18n_files:
       - "catalog.pot"
       - "en.po"
@@ -233,13 +249,15 @@ modules:
     # OncoPath owns a hand-maintained R/zzz_imports.R (never written or deleted by the
     # updater). OncoPath's pkg:: calls all sit inside R6 method bodies, which R CMD
     # check's installed-namespace scanner cannot walk -- without the @importFrom tags,
-    # ggrepel/grDevices/grid/patchwork/psych/rlang/stringr/survival/utils are reported
+    # ggrepel/grDevices/grid/patchwork/rlang/survival/utils are reported
     # as unused Imports even though every one of them is called at runtime.
     # These remain legitimate umbrella dependencies but have no production
     # OncoPath call site. document() removes their stale NAMESPACE directives.
     prune_imports:
       - "cluster"
       - "tidyr"
+      - "psych"
+      - "stringr"
       # magrittr is NOT pruned: waterfall.b.R and swimmerplot.b.R use %>% 114
       # times. Pruning it stripped the pipe from the generated DESCRIPTION, and
       # with no importFrom anywhere `waterfall` could not run in jamovi at all

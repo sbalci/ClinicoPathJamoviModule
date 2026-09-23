@@ -1,149 +1,960 @@
 # ClinicoPathDescriptives
 
+```text
+/check-module ClinicoPathDescriptives
+/check-module ClinicoPathDescriptives --profile release
+/audit-module ClinicoPathDescriptives
+/library-audit learn '2026-09-16 ClinicoPathDescriptives.md'
+/library-audit implement '2026-09-16 ClinicoPathDescriptives.md'
+/library-audit status '2026-09-16 ClinicoPathDescriptives.md'
+```
+
 ## Descriptives
 
-- reportcat
-- summarydata
-- tableone
+### reportcat
+
+```text
+/fix-function reportcat --apply
+
+/validate-function reportcat depth=exhaustive
+/independent-reviewer reportcat
+/check-function reportcat --profile release
+/check-function-full reportcat
+/review-function reportcat
+/release-review-function reportcat
+/security-audit-function reportcat
+```
+
+### summarydata
+
+```text
+/fix-function summarydata --apply
+
+/validate-function summarydata depth=exhaustive
+/independent-reviewer summarydata
+/check-function summarydata --profile release
+/check-function-full summarydata
+/review-function summarydata
+/release-review-function summarydata
+/security-audit-function summarydata
+```
+
+### tableone
+
+```text
+/fix-function tableone --apply
+
+/validate-function tableone depth=exhaustive
+/independent-reviewer tableone
+/check-function tableone --profile release
+/check-function-full tableone
+/review-function tableone
+/release-review-function tableone
+/security-audit-function tableone
+```
 
 ## Data Quality
 
-- benford
-- checkdata
-- dataquality
-- outlierdetection
+### benford
+
+```text
+/fix-function benford --apply
+
+/validate-function benford depth=exhaustive
+/independent-reviewer benford
+/check-function benford --profile release
+/check-function-full benford
+/review-function benford
+/release-review-function benford
+/security-audit-function benford
+```
+
+### checkdata
+
+```text
+/fix-function checkdata --apply
+
+/validate-function checkdata depth=exhaustive
+/independent-reviewer checkdata
+/check-function checkdata --profile release
+/check-function-full checkdata
+/review-function checkdata
+/release-review-function checkdata
+/security-audit-function checkdata
+```
+
+### dataquality
+
+```text
+/fix-function dataquality --apply
+
+/validate-function dataquality depth=exhaustive
+/independent-reviewer dataquality
+/check-function dataquality --profile release
+/check-function-full dataquality
+/review-function dataquality
+/release-review-function dataquality
+/security-audit-function dataquality
+```
+
+### outlierdetection
+
+```text
+/fix-function outlierdetection --apply
+
+/validate-function outlierdetection depth=exhaustive
+/independent-reviewer outlierdetection
+/check-function outlierdetection --profile release
+/check-function-full outlierdetection
+/review-function outlierdetection
+/release-review-function outlierdetection
+/security-audit-function outlierdetection
+```
 
 ## Descriptive Plots
 
-- agepyramid
-- alluvial
-- vartree
-- venn
+### agepyramid
+
+```text
+/fix-function agepyramid --apply
+
+/validate-function agepyramid depth=exhaustive
+/independent-reviewer agepyramid
+/check-function agepyramid --profile release
+/check-function-full agepyramid
+/review-function agepyramid
+/release-review-function agepyramid
+/security-audit-function agepyramid
+```
+
+### alluvial
+
+```text
+/fix-function alluvial --apply
+
+/validate-function alluvial depth=exhaustive
+/independent-reviewer alluvial
+/check-function alluvial --profile release
+/check-function-full alluvial
+/review-function alluvial
+/release-review-function alluvial
+/security-audit-function alluvial
+```
+
+### vartree
+
+```text
+/fix-function vartree --apply
+
+/validate-function vartree depth=exhaustive
+/independent-reviewer vartree
+/check-function vartree --profile release
+/check-function-full vartree
+/review-function vartree
+/release-review-function vartree
+/security-audit-function vartree
+```
+
+### venn
+
+```text
+/fix-function venn --apply
+
+/validate-function venn depth=exhaustive
+/independent-reviewer venn
+/check-function venn --profile release
+/check-function-full venn
+/review-function venn
+/release-review-function venn
+/security-audit-function venn
+```
 
 ## Comparisons
 
-- chisqposttest
-- crosstable
+### chisqposttest
+
+```text
+/fix-function chisqposttest --apply
+
+/validate-function chisqposttest depth=exhaustive
+/independent-reviewer chisqposttest
+/check-function chisqposttest --profile release
+/check-function-full chisqposttest
+/review-function chisqposttest
+/release-review-function chisqposttest
+/security-audit-function chisqposttest
+```
+
+### crosstable
+
+```text
+/fix-function crosstable --apply
+
+/validate-function crosstable depth=exhaustive
+/independent-reviewer crosstable
+/check-function crosstable --profile release
+/check-function-full crosstable
+/review-function crosstable
+/release-review-function crosstable
+/security-audit-function crosstable
+```
 
 ## Data Preparation
 
-- categorize
+### categorize
+
+```text
+/fix-function categorize --apply
+
+/validate-function categorize depth=exhaustive
+/independent-reviewer categorize
+/check-function categorize --profile release
+/check-function-full categorize
+/review-function categorize
+/release-review-function categorize
+/security-audit-function categorize
+```
 
 # jjstatsplot
 
+```text
+/check-module jjstatsplot
+/check-module jjstatsplot --profile release
+/audit-module jjstatsplot
+/library-audit learn '2026-09-16 jjstatsplot.md'
+/library-audit implement '2026-09-16 jjstatsplot.md'
+/library-audit status '2026-09-16 jjstatsplot.md'
+```
+
 ## All-In-One
 
-- statsplot2
+### statsplot2
+
+```text
+/fix-function statsplot2 --apply
+
+/validate-function statsplot2 depth=exhaustive
+/independent-reviewer statsplot2
+/check-function statsplot2 --profile release
+/check-function-full statsplot2
+/review-function statsplot2
+/release-review-function statsplot2
+/security-audit-function statsplot2
+```
 
 ## Categorical × Categorical
 
-- jjbarstats
-- jjpiestats
-- jjsegmentedtotalbar
+### jjbarstats
+
+```text
+/fix-function jjbarstats --apply
+
+/validate-function jjbarstats depth=exhaustive
+/independent-reviewer jjbarstats
+/check-function jjbarstats --profile release
+/check-function-full jjbarstats
+/review-function jjbarstats
+/release-review-function jjbarstats
+/security-audit-function jjbarstats
+```
+
+### jjpiestats
+
+```text
+/fix-function jjpiestats --apply
+
+/validate-function jjpiestats depth=exhaustive
+/independent-reviewer jjpiestats
+/check-function jjpiestats --profile release
+/check-function-full jjpiestats
+/review-function jjpiestats
+/release-review-function jjpiestats
+/security-audit-function jjpiestats
+```
+
+### jjsegmentedtotalbar
+
+```text
+/fix-function jjsegmentedtotalbar --apply
+
+/validate-function jjsegmentedtotalbar depth=exhaustive
+/independent-reviewer jjsegmentedtotalbar
+/check-function jjsegmentedtotalbar --profile release
+/check-function-full jjsegmentedtotalbar
+/review-function jjsegmentedtotalbar
+/release-review-function jjsegmentedtotalbar
+/security-audit-function jjsegmentedtotalbar
+```
 
 ## Categorical × Continuous
 
-- advancedraincloud
-- jjbetweenstats
-- jjdotchart
-- jjdotplotstats
-- jjwithinstats
-- lollipop
-- raincloud
+### advancedraincloud
+
+```text
+/fix-function advancedraincloud --apply
+
+/validate-function advancedraincloud depth=exhaustive
+/independent-reviewer advancedraincloud
+/check-function advancedraincloud --profile release
+/check-function-full advancedraincloud
+/review-function advancedraincloud
+/release-review-function advancedraincloud
+/security-audit-function advancedraincloud
+```
+
+### jjbetweenstats
+
+```text
+/fix-function jjbetweenstats --apply
+
+/validate-function jjbetweenstats depth=exhaustive
+/independent-reviewer jjbetweenstats
+/check-function jjbetweenstats --profile release
+/check-function-full jjbetweenstats
+/review-function jjbetweenstats
+/release-review-function jjbetweenstats
+/security-audit-function jjbetweenstats
+```
+
+### jjdotchart
+
+```text
+/fix-function jjdotchart --apply
+
+/validate-function jjdotchart depth=exhaustive
+/independent-reviewer jjdotchart
+/check-function jjdotchart --profile release
+/check-function-full jjdotchart
+/review-function jjdotchart
+/release-review-function jjdotchart
+/security-audit-function jjdotchart
+```
+
+### jjdotplotstats
+
+```text
+/fix-function jjdotplotstats --apply
+
+/validate-function jjdotplotstats depth=exhaustive
+/independent-reviewer jjdotplotstats
+/check-function jjdotplotstats --profile release
+/check-function-full jjdotplotstats
+/review-function jjdotplotstats
+/release-review-function jjdotplotstats
+/security-audit-function jjdotplotstats
+```
+
+### jjwithinstats
+
+```text
+/fix-function jjwithinstats --apply
+
+/validate-function jjwithinstats depth=exhaustive
+/independent-reviewer jjwithinstats
+/check-function jjwithinstats --profile release
+/check-function-full jjwithinstats
+/review-function jjwithinstats
+/release-review-function jjwithinstats
+/security-audit-function jjwithinstats
+```
+
+### lollipop
+
+```text
+/fix-function lollipop --apply
+
+/validate-function lollipop depth=exhaustive
+/independent-reviewer lollipop
+/check-function lollipop --profile release
+/check-function-full lollipop
+/review-function lollipop
+/release-review-function lollipop
+/security-audit-function lollipop
+```
+
+### raincloud
+
+```text
+/fix-function raincloud --apply
+
+/validate-function raincloud depth=exhaustive
+/independent-reviewer raincloud
+/check-function raincloud --profile release
+/check-function-full raincloud
+/review-function raincloud
+/release-review-function raincloud
+/security-audit-function raincloud
+```
 
 ## Continuous × Continuous
 
-- hullplot
-- jjcorrmat
-- jjscatterstats
+### hullplot
+
+```text
+/fix-function hullplot --apply
+
+/validate-function hullplot depth=exhaustive
+/independent-reviewer hullplot
+/check-function hullplot --profile release
+/check-function-full hullplot
+/review-function hullplot
+/release-review-function hullplot
+/security-audit-function hullplot
+```
+
+### jjcorrmat
+
+```text
+/fix-function jjcorrmat --apply
+
+/validate-function jjcorrmat depth=exhaustive
+/independent-reviewer jjcorrmat
+/check-function jjcorrmat --profile release
+/check-function-full jjcorrmat
+/review-function jjcorrmat
+/release-review-function jjcorrmat
+/security-audit-function jjcorrmat
+```
+
+### jjscatterstats
+
+```text
+/fix-function jjscatterstats --apply
+
+/validate-function jjscatterstats depth=exhaustive
+/independent-reviewer jjscatterstats
+/check-function jjscatterstats --profile release
+/check-function-full jjscatterstats
+/review-function jjscatterstats
+/release-review-function jjscatterstats
+/security-audit-function jjscatterstats
+```
 
 ## Distribution
 
-- jjhistostats
-- jjridges
-- jwaffle
+### jjhistostats
+
+```text
+/fix-function jjhistostats --apply
+
+/validate-function jjhistostats depth=exhaustive
+/independent-reviewer jjhistostats
+/check-function jjhistostats --profile release
+/check-function-full jjhistostats
+/review-function jjhistostats
+/release-review-function jjhistostats
+/security-audit-function jjhistostats
+```
+
+### jjridges
+
+```text
+/fix-function jjridges --apply
+
+/validate-function jjridges depth=exhaustive
+/independent-reviewer jjridges
+/check-function jjridges --profile release
+/check-function-full jjridges
+/review-function jjridges
+/release-review-function jjridges
+/security-audit-function jjridges
+```
+
+### jwaffle
+
+```text
+/fix-function jwaffle --apply
+
+/validate-function jwaffle depth=exhaustive
+/independent-reviewer jwaffle
+/check-function jwaffle --profile release
+/check-function-full jwaffle
+/review-function jwaffle
+/release-review-function jwaffle
+/security-audit-function jwaffle
+```
 
 ## Lines / Network
 
-- linechart
-- jjarcdiagram
+### linechart
+
+```text
+/fix-function linechart --apply
+
+/validate-function linechart depth=exhaustive
+/independent-reviewer linechart
+/check-function linechart --profile release
+/check-function-full linechart
+/review-function linechart
+/release-review-function linechart
+/security-audit-function linechart
+```
+
+### jjarcdiagram
+
+```text
+/fix-function jjarcdiagram --apply
+
+/validate-function jjarcdiagram depth=exhaustive
+/independent-reviewer jjarcdiagram
+/check-function jjarcdiagram --profile release
+/check-function-full jjarcdiagram
+/review-function jjarcdiagram
+/release-review-function jjarcdiagram
+/security-audit-function jjarcdiagram
+```
 
 # jsurvival
 
+```text
+/check-module jsurvival
+/check-module jsurvival --profile release
+/audit-module jsurvival
+/library-audit learn '2026-09-15 jsurvival.md'
+/library-audit implement '2026-09-15 jsurvival.md'
+/library-audit status '2026-09-15 jsurvival.md'
+```
+
 ## ClinicoPath Survival
 
-- multisurvival
-- singlearm
-- survival
-- survivalcont
+### multisurvival
+
+```text
+/fix-function multisurvival --apply
+
+/validate-function multisurvival depth=exhaustive
+/independent-reviewer multisurvival
+/check-function multisurvival --profile release
+/check-function-full multisurvival
+/review-function multisurvival
+/release-review-function multisurvival
+/security-audit-function multisurvival
+```
+
+### singlearm
+
+```text
+/fix-function singlearm --apply
+
+/validate-function singlearm depth=exhaustive
+/independent-reviewer singlearm
+/check-function singlearm --profile release
+/check-function-full singlearm
+/review-function singlearm
+/release-review-function singlearm
+/security-audit-function singlearm
+```
+
+### survival
+
+```text
+/fix-function survival --apply
+
+/validate-function survival depth=exhaustive
+/independent-reviewer survival
+/check-function survival --profile release
+/check-function-full survival
+/review-function survival
+/release-review-function survival
+/security-audit-function survival
+```
+
+### survivalcont
+
+```text
+/fix-function survivalcont --apply
+
+/validate-function survivalcont depth=exhaustive
+/independent-reviewer survivalcont
+/check-function survivalcont --profile release
+/check-function-full survivalcont
+/review-function survivalcont
+/release-review-function survivalcont
+/security-audit-function survivalcont
+```
 
 ## Data Preparation
 
-- datetimeconverter
-- outcomeorganizer
-- timeinterval
+### datetimeconverter
+
+```text
+/fix-function datetimeconverter --apply
+
+/validate-function datetimeconverter depth=exhaustive
+/independent-reviewer datetimeconverter
+/check-function datetimeconverter --profile release
+/check-function-full datetimeconverter
+/review-function datetimeconverter
+/release-review-function datetimeconverter
+/security-audit-function datetimeconverter
+```
+
+### outcomeorganizer
+
+```text
+/fix-function outcomeorganizer --apply
+
+/validate-function outcomeorganizer depth=exhaustive
+/independent-reviewer outcomeorganizer
+/check-function outcomeorganizer --profile release
+/check-function-full outcomeorganizer
+/review-function outcomeorganizer
+/release-review-function outcomeorganizer
+/security-audit-function outcomeorganizer
+```
+
+### timeinterval
+
+```text
+/fix-function timeinterval --apply
+
+/validate-function timeinterval depth=exhaustive
+/independent-reviewer timeinterval
+/check-function timeinterval --profile release
+/check-function-full timeinterval
+/review-function timeinterval
+/release-review-function timeinterval
+/security-audit-function timeinterval
+```
 
 ## General Statistics
 
-- oddsratio
+### oddsratio
+
+```text
+/fix-function oddsratio --apply
+
+/validate-function oddsratio depth=exhaustive
+/independent-reviewer oddsratio
+/check-function oddsratio --profile release
+/check-function-full oddsratio
+/review-function oddsratio
+/release-review-function oddsratio
+/security-audit-function oddsratio
+```
 
 ## Penalized Cox-Regression
 
-- lassocox
+### lassocox
+
+```text
+/fix-function lassocox --apply
+
+/validate-function lassocox depth=exhaustive
+/independent-reviewer lassocox
+/check-function lassocox --profile release
+/check-function-full lassocox
+/review-function lassocox
+/release-review-function lassocox
+/security-audit-function lassocox
+```
 
 # meddecide
 
+```text
+/check-module meddecide
+/check-module meddecide --profile release
+/audit-module meddecide
+/library-audit learn '2026-09-16 meddecide.md'
+/library-audit implement '2026-09-16 meddecide.md'
+/library-audit status '2026-09-16 meddecide.md'
+```
+
 ## Agreement
 
-- agreement
+### agreement
+
+```text
+/fix-function agreement --apply
+
+/validate-function agreement depth=exhaustive
+/independent-reviewer agreement
+/check-function agreement --profile release
+/check-function-full agreement
+/review-function agreement
+/release-review-function agreement
+/security-audit-function agreement
+```
 
 ## Decision
 
-- decision
-- decisioncombine
-- decisioncompare
-- nogoldstandard
+### decision
+
+```text
+/fix-function decision --apply
+
+/validate-function decision depth=exhaustive
+/independent-reviewer decision
+/check-function decision --profile release
+/check-function-full decision
+/review-function decision
+/release-review-function decision
+/security-audit-function decision
+```
+
+### decisioncombine
+
+```text
+/fix-function decisioncombine --apply
+
+/validate-function decisioncombine depth=exhaustive
+/independent-reviewer decisioncombine
+/check-function decisioncombine --profile release
+/check-function-full decisioncombine
+/review-function decisioncombine
+/release-review-function decisioncombine
+/security-audit-function decisioncombine
+```
+
+### decisioncompare
+
+```text
+/fix-function decisioncompare --apply
+
+/validate-function decisioncompare depth=exhaustive
+/independent-reviewer decisioncompare
+
+/check-function decisioncompare --profile release
+/check-function-full decisioncompare
+/review-function decisioncompare
+/release-review-function decisioncompare
+/security-audit-function decisioncompare
+```
+
+### nogoldstandard
+
+```text
+/fix-function nogoldstandard --apply
+
+/validate-function nogoldstandard depth=exhaustive
+/independent-reviewer nogoldstandard
+
+/check-function nogoldstandard --profile release
+/check-function-full nogoldstandard
+/review-function nogoldstandard
+/release-review-function nogoldstandard
+/security-audit-function nogoldstandard
+```
 
 ## Decision Calculators
 
-- cotest
-- decisioncalculator
-- sequentialtests
+### cotest
+
+```text
+/fix-function cotest --apply
+
+/validate-function cotest depth=exhaustive
+/independent-reviewer cotest
+/check-function cotest --profile release
+/check-function-full cotest
+/review-function cotest
+/release-review-function cotest
+/security-audit-function cotest
+```
+
+### decisioncalculator
+
+```text
+/fix-function decisioncalculator --apply
+
+/validate-function decisioncalculator depth=exhaustive
+/independent-reviewer decisioncalculator
+/check-function decisioncalculator --profile release
+/check-function-full decisioncalculator
+/review-function decisioncalculator
+/release-review-function decisioncalculator
+/security-audit-function decisioncalculator
+```
+
+### sequentialtests
+
+```text
+/fix-function sequentialtests --apply
+
+/validate-function sequentialtests depth=exhaustive
+/independent-reviewer sequentialtests
+/check-function sequentialtests --profile release
+/check-function-full sequentialtests
+/review-function sequentialtests
+/release-review-function sequentialtests
+/security-audit-function sequentialtests
+```
 
 ## ROC
 
-- enhancedROC
-- psychopdaROC
+### enhancedROC
+
+```text
+/fix-function enhancedROC --apply
+
+/validate-function enhancedROC depth=exhaustive
+/independent-reviewer enhancedROC
+/check-function enhancedROC --profile release
+/check-function-full enhancedROC
+/review-function enhancedROC
+/release-review-function enhancedROC
+/security-audit-function enhancedROC
+```
+
+### psychopdaROC
+
+```text
+/fix-function psychopdaROC --apply
+
+/validate-function psychopdaROC depth=exhaustive
+/independent-reviewer psychopdaROC
+/check-function psychopdaROC --profile release
+/check-function-full psychopdaROC
+/review-function psychopdaROC
+/release-review-function psychopdaROC
+/security-audit-function psychopdaROC
+```
 
 ## Prediction Models
 
-- lassologistic
+### lassologistic
+
+```text
+/fix-function lassologistic --apply
+
+/validate-function lassologistic depth=exhaustive
+/independent-reviewer lassologistic
+/check-function lassologistic --profile release
+/check-function-full lassologistic
+/review-function lassologistic
+/release-review-function lassologistic
+/security-audit-function lassologistic
+```
 
 ## Decision Curve Analysis
 
-- decisioncurve
+### decisioncurve
+
+```text
+/fix-function decisioncurve --apply
+
+/validate-function decisioncurve depth=exhaustive
+/independent-reviewer decisioncurve
+/check-function decisioncurve --profile release
+/check-function-full decisioncurve
+/review-function decisioncurve
+/release-review-function decisioncurve
+/security-audit-function decisioncurve
+```
 
 ## Power (menuGroup: Power)
 
-- kappaSizeCI
-- kappaSizeFixedN
-- kappaSizePower
+### kappaSizeCI
+
+```text
+/fix-function kappaSizeCI --apply
+
+/validate-function kappaSizeCI depth=exhaustive
+/independent-reviewer kappaSizeCI
+/check-function kappaSizeCI --profile release
+/check-function-full kappaSizeCI
+/review-function kappaSizeCI
+/release-review-function kappaSizeCI
+/security-audit-function kappaSizeCI
+```
+
+### kappaSizeFixedN
+
+```text
+/fix-function kappaSizeFixedN --apply
+
+/validate-function kappaSizeFixedN depth=exhaustive
+/independent-reviewer kappaSizeFixedN
+/check-function kappaSizeFixedN --profile release
+/check-function-full kappaSizeFixedN
+/review-function kappaSizeFixedN
+/release-review-function kappaSizeFixedN
+/security-audit-function kappaSizeFixedN
+```
+
+### kappaSizePower
+
+```text
+/fix-function kappaSizePower --apply
+
+/validate-function kappaSizePower depth=exhaustive
+/independent-reviewer kappaSizePower
+/check-function kappaSizePower --profile release
+/check-function-full kappaSizePower
+/review-function kappaSizePower
+/release-review-function kappaSizePower
+/security-audit-function kappaSizePower
+```
 
 # OncoPath
 
+```text
+/check-module OncoPath
+/check-module OncoPath --profile release
+/audit-module OncoPath
+/library-audit learn '2026-09-22 OncoPath.md'
+/library-audit implement '2026-09-22 OncoPath.md'
+/library-audit status '2026-09-22 OncoPath.md'
+```
+
 ## IHC Heterogeneity
 
-- ihcheterogeneity
+### ihcheterogeneity
+
+```text
+/validate-function ihcheterogeneity depth=exhaustive
+/independent-reviewer ihcheterogeneity
+/check-function ihcheterogeneity --profile release
+/check-function-full ihcheterogeneity
+/review-function ihcheterogeneity
+/release-review-function ihcheterogeneity
+/security-audit-function ihcheterogeneity
+/fix-function ihcheterogeneity --apply
+```
 
 ## Diagnostic Meta-Analysis
 
-- diagnosticmeta
+### diagnosticmeta
+
+```text
+/validate-function diagnosticmeta depth=exhaustive
+/independent-reviewer diagnosticmeta
+/check-function diagnosticmeta --profile release
+/check-function-full diagnosticmeta
+/review-function diagnosticmeta
+/release-review-function diagnosticmeta
+/security-audit-function diagnosticmeta
+/fix-function diagnosticmeta --apply
+```
 
 ## Visualization
 
-- swimmerplot
+### swimmerplot
 
-- waterfall
+```text
+/validate-function swimmerplot depth=exhaustive
+/independent-reviewer swimmerplot
+/check-function swimmerplot --profile release
+/check-function-full swimmerplot
+/review-function swimmerplot
+/release-review-function swimmerplot
+/security-audit-function swimmerplot
+/fix-function swimmerplot --apply
+```
+
+### waterfall
+
+```text
+/validate-function waterfall depth=exhaustive
+/independent-reviewer waterfall
+/check-function waterfall --profile release
+/check-function-full waterfall
+/review-function waterfall
+/release-review-function waterfall
+/security-audit-function waterfall
+/fix-function waterfall --apply
+```
+
 
 # check articles
 
@@ -2889,6 +3700,7 @@ no validation against established packages. Regression tests appended to `test-c
 ### /review-function 2026-09-05
 
 **Fixed**: hardcoded `set.seed(42)` in `.calculatePhiCI()` replaced by a `seed` Integer option (default 42, `.a.yaml`
+
 - `.u.yaml` TextBox enabled by `phiCI` + `posthocTable` clearWith); `is.null()` fallback keeps 42 until
 `jmvtools::prepare()` regenerates the header and wrapper. Unused `total_comparisons` assignment removed from
 `.robustPairwiseTestsChunked()`.
@@ -5098,7 +5910,6 @@ other nine were fixed here. Each carries a regression test in
 `tests/testthat/test-diagnosticmeta-audit-fixes.R`; six of the new blocks fail on the pre-fix backend.
 The three `USER:` items below are unchanged and still required.
 
-
 29 of the 40 findings from the 2026-09-18 OncoPath audit were fixed (see NEWS, and
 `tests/testthat/test-diagnosticmeta-release-fixes.R`). These eleven remain open; none is a wrong number, all
 are presentation or interpretation defects. Evidence for each is in
@@ -5443,8 +6254,8 @@ passes.
       binomial intervals (every field verified against Crossref), and item-level `refs:` on the five
       items that actually report a method - plot, summary, advancedMetrics, groupComparisonTest,
       copyReadyReport. The other 13 items stay ref-free deliberately.
-- [x] **F3** `STRONG_WARNING` printed as `WARNING: `, so the level had no effect in the output. Now
-      `STRONG WARNING: `, matching the two siblings that already distinguish it. `": "` is composed
+- [x] **F3** `STRONG_WARNING` printed as `WARNING:`, so the level had no effect in the output. Now
+      `STRONG WARNING:`, matching the two siblings that already distinguish it. `": "` is composed
       OUTSIDE `.()` because the bare words are existing msgids already translated (HATA / GÜÇLÜ UYARI /
       UYARI / NOT) - putting the colon inside would have minted new msgids shipping with empty msgstrs.
 - [x] **F4** `advancedMetrics` accumulated duplicate rows on repeated `.init()`. The `rowCount == 0`
@@ -5537,6 +6348,7 @@ every non-minor finding handed to a separate agent told to refute it: **23 findi
 now fixed. 180 blocks / 519 assertions pass; the 7 new blocks all fail against the pre-fix snapshot.
 
 **Correctness**
+
 - [x] **Mixed `Date` + `POSIXct` destroyed person-time.** `.asNumericTime()` returned each class's own
       raw epoch unit - DAYS for Date, SECONDS for POSIXct - and all six call sites compare a start
       against an end. Measured **104,106,728 months reported beside a correct Mean Duration of 2.5**;
@@ -5566,6 +6378,7 @@ now fixed. 180 blocks / 519 assertions pass; the 7 new blocks all fail against t
       claiming the order matched the plot.
 
 **Reconciliation and disclosure** - all verified cases where two numbers on one page disagreed
+
 - [x] Summary table: Mean Duration and Total Person-Time are on different definitions (9.33 x 3 = 28
       against a reported 22 on a gapped fixture) and the table carried no note at all unless a response
       variable was selected. It now always carries units and the definition difference.
@@ -5587,6 +6400,7 @@ now fixed. 180 blocks / 519 assertions pass; the 7 new blocks all fail against t
       also carries Clopper-Pearson intervals. Named, with the log-log difference called out.
 
 **Performance** - `n = 10 000` went from **91.6 s to 3.7 s**
+
 - [x] The data.table fast path split its own finished one-row-per-patient aggregate into n one-row
       tables purely so the shared `bind_rows()` could reassemble them - 70% of the whole run.
 - [x] `segment_duration` was computed for every row and read by nothing; removing it orphaned
@@ -5600,6 +6414,7 @@ now fixed. 180 blocks / 519 assertions pass; the 7 new blocks all fail against t
       handler now blanks what it may have written.
 
 **i18n**
+
 - [x] `R/utils-followup.R` has 72 string literals and zero `.()`, and its English `reason` was pasted
       onto a translated sentence. It cannot call `.()` (a file-level helper has no `self`), so it now
       returns a `reason_code` and the R6 caller picks the translated wording. `reason` is kept, so the
@@ -5614,6 +6429,7 @@ now fixed. 180 blocks / 519 assertions pass; the 7 new blocks all fail against t
       OYO and I will switch all of them instead.** Also `Odds Oranı (OO)` -> `(OR)`.
 
 **Not fixed, deliberately**
+
 - [ ] `private$.checkpoint()` is still absent. The review measured 43-116 s runs, but the data.table fix
       took `n = 10 000` to 3.7 s, so the case is much weaker - and every candidate site sits inside the
       catch-all `tryCatch`, which would swallow the restart (it is an error-class condition). Worth
@@ -5627,6 +6443,7 @@ now fixed. 180 blocks / 519 assertions pass; the 7 new blocks all fail against t
 ### swimmerplot — release review (2026-09-21): READY AFTER MINOR ACTIONS
 
 Gate results for promotion out of `OncoPathT`:
+
 - `tools/promotion_screen.py`: **swimmerplot debt = 0**, and it ranks **1st of 40** candidates
   (score 14.45, wired 1.00, 21 test files, 9 vignettes, 6 refs). Nothing it carries would fail the
   gate on promotion.
@@ -5810,6 +6627,7 @@ All 15 production analyses. Fixes applied umbrella-side; regression guards in
 against pre-fix source).
 
 **Fixed this pass**
+
 - [x] `lassologistic` / `agreement`: Output columns written positionally — a row filter saved every
       prediction and every consensus/level-of-agreement label onto a different patient.
       `setRowNums(rownames(...))` at lassologistic:166,354 and agreement:8253,8494.
@@ -5834,6 +6652,7 @@ against pre-fix source).
 - [x] `2026-09-16 meddecide.md` audit: 15 findings / 0 responses → 10 done, 2 partial, 3 deferred, 0 open.
 
 **USER — blocked on you**
+
 - [ ] `Rscript _updateModules.R meddecide` was **held**: the tree had unrelated in-flight edits
       (`_build_site.R`, `.Rbuildignore`, `_updateModules_utils.R`, `new_version` 1.0.82.07→1.0.83).
       Until it runs, the shipped module still fails the gate on 4 malformed `format: zto;pvalue`
@@ -5842,6 +6661,7 @@ against pre-fix source).
 - [ ] Run the 96 testthat files against an `R CMD INSTALL` of the working tree, not `load_all()`.
 
 **Decisions needed**
+
 - [ ] `enhancedROC` ships 20 live checkboxes that compute nothing (b.R:487-506), all confirmed tickable.
       Removing them means removing the `.a.yaml` options too — `prepare()` re-adds any control whose
       option survives — which breaks saved `.omv`.
@@ -5889,6 +6709,7 @@ Report: `quality-reports/meddecide-check-module-20260921/REPORT.md` (Round 2 sec
 - [x] Round-1 omission of mine: the Fisher-z switch on mean r / mean ρ now carries a table note.
 
 **USER — still blocked on you (unchanged)**
+
 - [ ] `Rscript _updateModules.R meddecide` still HELD — the tree still carries unrelated in-flight
       work (`_build_site.R`, `.Rbuildignore`, `_updateModules_utils.R`, `new_version`).
       Nothing above reaches users until it runs; the shipped module still fails the gate.
@@ -5896,3 +6717,131 @@ Report: `quality-reports/meddecide-check-module-20260921/REPORT.md` (Round 2 sec
 - [ ] Run the 96 testthat files against an `R CMD INSTALL` of the working tree.
 - [ ] Review the 5 newly implemented enhancedROC analyses on real data before release — they are
       new user-visible statistics, not repairs.
+
+### meddecide — outstanding after the 2026-09-21 validation + fix pass
+
+Deliberately recorded here rather than as `# TODO` comments: the jamovi library reviewer counts
+TODO/FIXME markers in the shipped module as an audit finding (`[INFO] Three TODO markers`,
+2026-09-16). The 15 shipped meddecide backends still carry exactly those 3 and no more.
+
+**Needs `/update-refs` — method citations with no key in `jamovi/00refs.yaml`.**
+`agreement` gained 8 method refs this pass (LandisKoch1977, Krippendorff2004, Shrout1979,
+McGraw1996, Koo2016, BlandAltman1986, BlandAltman1999, agresti2013 — all verified to resolve).
+These have no key and were left uncited rather than invented, because a `refs:` key absent from
+`00refs.yaml` fails the compile:
+
+- [ ] Gwet (2008), Br J Math Stat Psychol 61:29–48 — for `gwetTable` (only the `irrCAC` *software*
+      key exists today, which is the very defect VAL-agreement-02 reports)
+- [ ] Lin (1989), Biometrics 45:255–268 — `linCCCTable`
+- [ ] Lin (2000) / McBride — the Total Deviation Index
+- [ ] Byrt, Bishop & Carlin (1993), J Clin Epidemiol 46:423–429 — PABAK
+- [ ] Kendall & Babington Smith (1939) — `kendallWTable`. The existing `Kendall` key is the R
+      *package*; citing it would repeat the software-instead-of-method defect
+- [ ] Robinson (1957), Finn (1970), Light (1971), Janson & Olsson's iota
+- [ ] Walter, Eliasziw & Donner (1998) — the ICC arm of `agreementSampleSizeTable`. `Bonett2002`
+      exists and is also ICC sample size, but it is a *different formula*; citing it would
+      attribute the displayed numbers to a method the code does not run
+
+**Disclosure gap (same family as the notes fixed this pass).**
+
+- [ ] `agreement`: the kappa Wald upper limit is clamped at 1 and the `ci_method` note does not
+      say so. At kappa = 0.70 on the validation fixture the unclamped upper is 1.0114 and the
+      table shows 1.000. Clamping is correct (kappa is bounded; `psych::cohen.kappa` clamps
+      identically) — it is the silence that is the gap.
+
+**Low, from the fix verifiers (each traced, none a wrong number).**
+
+- [ ] `agreement:6152`: the sibling guard for `interIntraRaterInterTable` uses
+      `!is.na(x) && !is.finite(x)`, and `is.na(NaN)` is TRUE, so a NaN kappa would skip blanking
+      there. Latent — `kappam.fleiss` returns Inf, not NaN, on degenerate data. Widen to
+      `is.nan(x) || (!is.na(x) && !is.finite(x))` for symmetry with the path fixed this pass.
+- [ ] `enhancedROC:5075`: the interpretation word grades the macro AUC while the number beside it
+      is now the Hand-Till pairwise mean — two quantities in one cell.
+- [ ] `lassologistic:1971`: the degenerate-score headline is keyed on `cutoff_collapsed`, so the
+      collapsed-AND-inverted case renders the collapsed wording.
+- [ ] `kappaSizePower:214`: the `outcome == 2L` remedy in the new rare-category block is
+      unreachable (swept 5 rater counts × 9 prevalences × 16 kappa pairs).
+- [ ] `test-kappasizeci-release-review.R:187`: the narrowed `src[start]` window assumes a msgid
+      stays on one source line; `R/kappaSizeCI.b.R:450` is >400 characters, so an ordinary re-wrap
+      would break the test.
+
+**Still blocked on regeneration** (unchanged): `../meddecide` carries none of this.
+
+---
+
+## 2026-09-22 — `agreement` independent-review repairs
+
+Seven S1 findings from `development-ideas/agreement-independent-review-2026-09-21.md` were
+repaired. `development-scripts/audit_agreement.R` now exits 0 (10/10 PASS, every check
+rewritten from a hardcoded verdict into a live assertion), and
+`tests/testthat/test-agreement-independent-review.R` adds 51 expectations across 8 blocks.
+The 11 direct `test-agreement*.R` suites pass 412/412 with no skips. Remediation detail is
+in §8 of the review report.
+
+**Design decisions, not defects — these need a call before anyone implements them.**
+
+- [ ] `agreement`: the proportional-bias test regresses D = X − Y on M = (X + Y)/2, whose
+      regressor is built from the same two measurements as the response. Under no proportional
+      bias with SD(e1) = 1 and SD(e2) = 4 it rejects in **50 of 50** simulated replicates
+      (n = 1000). The existing statistic is now explicitly labelled as an exploratory
+      difference-mean association, not a proportional-bias test. A Deming / errors-in-variables
+      regression would need a user-supplied variance ratio — a new option and assumption.
+- [x] `agreement`: weighted Fleiss kappa is not available. For 3+ raters a weighted request now
+      leaves the headline Fleiss estimate blank with an explicit note, while preserving valid
+      weighted all-pairs Cohen kappa and naming ordinal Krippendorff alpha / weighted Gwet AC2.
+- [ ] `agreement`: TDI's heteroscedasticity claim was removed from the description rather than
+      the estimator upgraded. A magnitude-conditional TDI (Lin's regression-based form) is a
+      real feature request, not a correction.
+
+**Citations still missing** (narrows the 2026-09-21 list — most are now defined *and* cited).
+
+- [ ] `/update-refs agreement`: **Walter1998** (ICC sample size), **Kendall1939** (Kendall's W),
+      **Finn1970**, **McBride2005** (TDI/CCC bands) are neither defined in `jamovi/00refs.yaml`
+      nor cited. `Gwet2008`, `Lin1989`, `Byrt1993`, `Krippendorff2004`, `Cohen1960/1968`,
+      `Fleiss1971`, `LandisKoch1977`, `Shrout1979`, `McGraw1996`, `Koo2016` and
+      `BlandAltman1986/1999` are done.
+
+**Audit findings not individually worked through.**
+
+- [ ] The independent review's **46 S2, 38 S3 and 6 S4** findings. The seven S1s and the S2/S3
+      items named in §8.2 (Finn default, proportional-bias confound, LoA coverage label, TDI
+      claims, the long-vs-wide data description) are closed; the rest are audit output left as
+      proposals.
+
+**i18n — a consequence of this pass.**
+
+- [ ] `jmvtools::i18nUpdate()` has not been run. Rewriting a `.()` msgid orphans its
+      translation, and several were rewritten here: both Landis & Koch summary sentences, the
+      three rater-bias interpretation strings, and the continuous-data note (which was a bare
+      English literal and is now wrapped). Turkish falls back to English for those until the
+      catalog is re-keyed.
+
+**Found while fixing, already repaired.**
+
+- Three tests in `test-agreement-arguments.R` (`kendallW`, `robinsonA`, `meanSpearman`) had been
+  failing on `master` since some earlier commit. They were not flaky and not caused by this
+  pass: all three rank the ratings, a later guard correctly refuses **unordered** factors with
+  an explanatory note, and the tests still asserted the pre-guard contract ("a value comes back
+  for any factor"). Rewritten to assert both arms — refusal plus note on a nominal factor, a
+  finite value on an ordered one. A committed guard contradicting a committed test is worth a
+  sweep: other analyses may carry the same shape.
+
+**Two more stale test references, found and fixed in the same pass.**
+
+- `test-meddecide-library-audit.R:145` asserted `config$modes$copy_i18n_files` is TRUE. That
+  key no longer exists in `_updateModules_config.yaml`, and `isTRUE(NULL)` is FALSE, so the
+  test failed. It was not a regression: the copy became **unconditional** in
+  `_updateModules_plan.R:382`, so the flag was redundant and removed. The assertion now checks
+  the guarantee (the plan loops over `m$i18n_files` with no gate) rather than the removed key.
+- `test-meddecide-library-audit.R:255` read `R/nomogrammer.r`, renamed to
+  `R/utils-nomogrammer.R` under the `utils-<topic>.R` helper convention. `readLines()` errored,
+  which **aborted the whole `test_that` block** — so the "do not request whole dependency
+  namespaces" sweep had stopped covering any file at all, silently. Path fixed; the file now
+  reports 101 pass / 0 fail, up from 98 pass / 1 fail / 1 error.
+
+Three stale-test failures in one pass, all the same shape: a test that outlived the code it
+described. Worth a sweep of the other `test-*-library-audit.R` and `test-zzz-*` files for
+hardcoded paths and config keys — an erroring block reports as one failure while silently
+testing nothing.
+
+**Still blocked on regeneration** (unchanged): `../meddecide` carries none of this.

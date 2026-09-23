@@ -9,7 +9,7 @@ version: '1.0.83'
 jas: '1.2'
 
 description:
-    main: |
+    main: >
         Performs LASSO-penalized logistic regression for variable selection in binary
         classification problems. Ideal for diagnostic pathology studies that build
         classifiers (e.g., tumor type A vs B) with automatic feature selection.

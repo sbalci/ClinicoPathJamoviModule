@@ -482,3 +482,41 @@ test_that("the cut-off verdict reports whether the accuracy intervals overlap", 
                           function(n) n$note, character(1)), collapse = " ")
     expect_match(notes, "four summary counts per scenario cannot supply that")
 })
+
+
+test_that("an invalid cut-off scenario does not blank the summary panel or the nomogram", {
+    # The optional cut-off comparison used to `return()` out of .run(), so one bad
+    # scenario frequency also threw away summary/about/assumptions/glossary and left
+    # plot1 without a state -- an empty Fagan nomogram -- even though every primary
+    # table above had already been filled.
+    r <- decisioncalculator(TP = TP0, TN = TN0, FP = FP0, FN = FN0,
+                            multiplecuts = TRUE,
+                            tp1 = -10, fp1 = 40, tn1 = 70, fn1 = 10,
+                            showSummary = TRUE, showAbout = TRUE)
+
+    expect_gt(nchar(r$summary$content), 0)
+    expect_false(is.null(r$plot1$state))
+    # downstream of the early return, and the primary tables are unaffected
+    expect_gt(nchar(r$about$content), 0)
+    expect_equal(r$ratioTable$asDF$Sens[1], TP0 / (TP0 + FN0), tolerance = 1e-12)
+    # the omission is explained rather than silent
+    expect_match(notices_of(r), "must be non-negative finite numbers")
+    expect_match(notices_of(r), "The rest of the analysis is unaffected")
+})
+
+
+test_that("fractional counts skip only the epiR interval tables", {
+    # NOT a regression guard for the early-return defect above, despite the similar
+    # shape: the pre-fix build passes the first two assertions here too, because
+    # fractional counts never entered the block that carried the `return()`. Measured
+    # on the installed pre-fix build: nchar(summary) = 3057, plot1$state non-NULL.
+    # What this test does pin is the BLAST RADIUS of the `epir_ok == FALSE` path --
+    # the two interval tables blank and nothing else does. Guarding the genuine
+    # epiR-absent early return needs a namespace mock, which this does not do.
+    r <- decisioncalculator(TP = 90.5, TN = 80.5, FP = 30.5, FN = 20.5,
+                            ci = TRUE, showSummary = TRUE)
+
+    expect_gt(nchar(r$summary$content), 0)
+    expect_false(is.null(r$plot1$state))
+    expect_true(all(is.na(r$epirTable_ratio$asDF$est)))
+})

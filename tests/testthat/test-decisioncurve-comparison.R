@@ -21,7 +21,6 @@ test_that("decisioncurve creates valid bootstrap comparisons", {
         outcomePositive = "1",
         models = c("mod1", "mod2"),
         compareModels = TRUE,
-        comparisonMethod = "bootstrap",
         bootReps = 100,
         decisionRuleVar = NULL,
         decisionRulePositive = NULL

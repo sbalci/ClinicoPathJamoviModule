@@ -1475,6 +1475,22 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 sprintf(paste0("%.", digits, "f"), x)
             },
 
+            # ── The scale factor of the per-SD zero rule, in ONE place ─────
+            #
+            # |beta| * sd(column of the FITTED matrix) is the per-standard-
+            # deviation effect (see ZERO_TOL in .fitLasso). It must come from the
+            # matrix the model was fitted on, never from data$X_sd: X_sd holds the
+            # ORIGINAL SDs, and under standardize = TRUE data$X is already scaled,
+            # so the two are INVERSES of each other and the relationship flips
+            # with the option. .populateVariableImportance used X_sd and so could
+            # call a term non-zero that the coefficient table called zero, and
+            # vice versa. Both sites route through here so they cannot drift again.
+            .fitColSDs = function(fit_X) {
+                sds <- apply(fit_X, 2, stats::sd)
+                sds[!is.finite(sds) | sds == 0] <- 1
+                sds
+            },
+
             # ── Probabilities from a glmnet fit, under ONE selection rule ───
             #
             # Both .fitLasso and .bootstrapValidation go through this, so the
@@ -1499,8 +1515,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # differ between a resample and the original), which is exactly
                     # the "two estimators in one table" defect this helper exists to
                     # prevent. Which coefficients are zero is a property of the fit.
-                    sds <- apply(fit_X, 2, stats::sd)
-                    sds[!is.finite(sds) | sds == 0] <- 1
+                    sds <- private$.fitColSDs(fit_X)
                     keep <- keep & abs(b) * sds > zero_tol
                 }
                 b[!keep] <- 0
@@ -1944,20 +1959,50 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 cutoff_collapsed <- is.finite(score_min) && isTRUE(perf$cutoff <= score_min)
                 score_inverted <- !is.na(perf$auc) && perf$auc < 0.5
                 if (cutoff_collapsed || score_inverted) {
-                    reason <- if (score_inverted)
-                        sprintf(.("The score's AUC is %.3f, below 0.500: higher total scores are associated with FEWER events, so this score runs backwards."), perf$auc)
+                    # The note has to describe the rule the code ACTUALLY applied,
+                    # in BOTH branches. The old fixed tail asserted "sensitivity
+                    # 1.000 with specificity 0.000 ... an artefact of calling every
+                    # patient positive" whichever branch fired. That is true only
+                    # when the cut point collapsed to the minimum. A U-shaped score
+                    # reaches score_inverted WITHOUT collapsing (e.g. AUC 0.400 with
+                    # the Youden cut at the top of the range), and the table then
+                    # shows sensitivity 0.400 with specificity 1.000 - the exact
+                    # opposite of what the note claimed. Each branch now names its
+                    # own failure and quotes the sensitivity/specificity on screen.
+                    sens_txt <- private$.fmtNum(perf$sensitivity)
+                    spec_txt <- private$.fmtNum(perf$specificity)
+                    detail <- if (cutoff_collapsed)
+                        sprintf(.("No cut point separated the two groups, so the search settled on the lowest possible total score and every patient is classified positive: the sensitivity of %1$s with a specificity of %2$s shown here is an artefact of that, not evidence of a sensitive score."),
+                            sens_txt, spec_txt)
                     else
-                        .("No cut point separated the two groups, so the search settled on the lowest possible total score, which classifies every patient as positive.")
+                        sprintf(.("The Youden search did find a cut point (%1$s and above, sensitivity %2$s, specificity %3$s), but the score points the wrong way, so calling the high scores high risk inverts the real risk."),
+                            as.character(perf$cutoff), sens_txt, spec_txt)
+                    # Headline and AUC sentence are separate msgids so the inverted
+                    # case is not described as "does not discriminate" - it does
+                    # discriminate, backwards.
+                    headline <- if (cutoff_collapsed)
+                        .("This scoring system does not discriminate.")
+                    else
+                        .("This scoring system runs backwards.")
+                    auc_txt <- if (score_inverted)
+                        sprintf(.("The score's AUC is %.3f, below 0.500: higher total scores are associated with FEWER events."), perf$auc)
+                    else
+                        NULL
+                    reason <- paste(c(headline, auc_txt, detail), collapse = " ")
                     perf_table$setNote("score_degenerate", sprintf(
-                        .("This scoring system does not discriminate. %s A sensitivity of 1.000 with a specificity of 0.000 here is an artefact of calling every patient positive, not evidence of a sensitive score, and the risk groups in the Score-to-Probability Lookup table are not meaningful. Do not publish or apply this score."),
+                        .("%s The risk groups in the Score-to-Probability Lookup table are not meaningful either. Do not publish or apply this score."),
                         reason))
                     self$results$lookupTable$setNote("score_degenerate", sprintf(
-                        .("The score cut point is degenerate: %s Every row's risk group below is therefore unreliable."),
+                        .("%s Every row's risk group below is therefore unreliable."),
                         reason))
                     private$.addNotice(
-                        "STRONG_WARNING", .("Scoring System Does Not Discriminate"),
+                        "STRONG_WARNING",
+                        if (cutoff_collapsed)
+                            .("Scoring System Does Not Discriminate")
+                        else
+                            .("Scoring System Runs Backwards"),
                         sprintf(
-                            .("%s The Scoring System Performance figures and the High/Low risk labels in the lookup table are artefacts of a collapsed cut point, not measurements of a working score."),
+                            .("%s The Scoring System Performance figures and the High/Low risk labels in the lookup table are not measurements of a working score."),
                             reason)
                     )
                 }
@@ -2220,9 +2265,19 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Same per-SD zero rule as the coefficient table (see ZERO_TOL in .fitLasso):
                 # an exact `!= 0` counted coordinate-descent residues of 1e-16 as inclusions.
-                sds <- if (!is.null(data$X_sd)) data$X_sd[rownames(all_coefs)] else rep(1, nrow(all_coefs))
-                sds[!is.finite(sds) | sds == 0] <- 1
-                inclusion_prop <- rowMeans(abs(all_coefs) * sds > 1e-10)
+                # Scale factor and ridge exemption both come from the shared rule, so this
+                # panel and the coefficient table agree on which terms are non-zero.
+                if (isTRUE(fit$alpha > 0)) {
+                    sds <- private$.fitColSDs(data$X)[rownames(all_coefs)]
+                    # .fitColSDs already sanitises its own values; this second pass
+                    # catches the NA a rowname that is not a column of data$X would
+                    # produce. Not redundant - do not delete.
+                    sds[!is.finite(sds) | sds == 0] <- 1
+                    inclusion_prop <- rowMeans(abs(all_coefs) * sds > 1e-10)
+                } else {
+                    # Ridge never writes a zero, so every finite coefficient counts.
+                    inclusion_prop <- rowMeans(is.finite(all_coefs))
+                }
                 max_abs <- apply(abs(all_coefs), 1, max)
 
                 imp_df <- data.frame(

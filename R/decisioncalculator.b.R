@@ -9,10 +9,13 @@
 decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
     R6::R6Class("decisioncalculatorClass",
         inherit = decisioncalculatorBase, private = list(
-            # Notice collection helpers. A single Preformatted (plain-text) output item:
-            # avoids BOTH the jmvcore::Notice serialization error from
-            # self$results$insert(999, Notice) AND any HTML in notices (project convention:
-            # notice content must be plain text). ====
+            # Notice collection helpers. A single Preformatted (plain-text) output item,
+            # so the whole set renders in severity order with no HTML (project convention:
+            # notice content must be plain text). NOTE (corrected 2026-09-22): jmvcore::Notice
+            # itself serializes fine; the "attempt to apply non-function" crash blamed on it
+            # was Group$insert() having no bounds check. Use $add(), never insert(999, ...).
+            # Invalid counts are reported HERE rather than by rejecting the option, which is
+            # why jamovi/decisioncalculator.a.yaml gives the counts no `min:`. ====
             .noticeList = list(),
             # A results item that may not exist in the compiled .h.R yet. jmvcore raises
             # rather than returning NULL, so a bare self$results$x would crash every run
@@ -670,21 +673,48 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     for (key in private$.epirNumberStats())
                         epirTable_number$setRow(rowKey = key, values = blank)
 
-                    if (!fractional_counts) {
-                        if (!requireNamespace("epiR", quietly = TRUE)) {
-                            private$.addNotice(
-                                "ERROR",
-                                .("epiR package missing"),
-                                .("The epiR package is required for confidence intervals. Install it or disable confidence intervals.")
-                            )
-                            return()
-                        }
+                    # Confidence intervals are an OPTIONAL extra. A missing epiR, or an
+                    # error inside it, used to `return()` out of .run() -- which threw away
+                    # the summary/about/assumptions/glossary panels and left plot1 without a
+                    # state, so the Fagan nomogram came up blank with no explanation, even
+                    # though every table above had already been filled successfully. Both
+                    # now only skip the two interval tables.
+                    epir_ok <- !fractional_counts &&
+                        requireNamespace("epiR", quietly = TRUE)
 
-                        epirresult2 <- epiR::epi.tests(dat = table3) |>
-                            summary() |>
-                            as.data.frame() |>
-                            tibble::rownames_to_column(var = "statsabv")
+                    if (!fractional_counts && !epir_ok) {
+                        private$.addNotice(
+                            "ERROR",
+                            .("epiR package missing"),
+                            .("The epiR package is required for confidence intervals. Install it or disable confidence intervals. The two interval tables are left blank; every other result on this page is unaffected.")
+                        )
+                    }
 
+                    epirresult2 <- NULL
+                    if (epir_ok) {
+                        # Wrap ONLY the third-party call, so that a failure inside epiR
+                        # cannot discard the tables already populated above. Nothing here
+                        # raises jmvcore::reject() or a checkpoint restart.
+                        epirresult2 <- tryCatch(
+                            epiR::epi.tests(dat = table3) |>
+                                summary() |>
+                                as.data.frame() |>
+                                tibble::rownames_to_column(var = "statsabv"),
+                            error = function(e) {
+                                private$.addNotice(
+                                    "ERROR",
+                                    .("Confidence intervals could not be computed"),
+                                    .fmt(
+                                        .("epiR could not compute confidence intervals for this table: {error}. The two interval tables are left blank; the point estimates above are unaffected."),
+                                        error = conditionMessage(e)
+                                    )
+                                )
+                                NULL
+                            }
+                        )
+                    }
+
+                    if (!is.null(epirresult2)) {
                         stat_labels <- private$.epirStatLabels()
                         epirresult2$statsnames <- unname(stat_labels[epirresult2$statistic])
 
@@ -869,12 +899,28 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                         self$options$cutoff2
                     )
 
-                    # Skip table population if validation failed
+                    # The cut-off scenarios are an OPTIONAL extra. This used to `return()`
+                    # out of .run(), so one bad scenario frequency also blanked the
+                    # summary/about/assumptions/glossary panels and left plot1 without a
+                    # state (an empty Fagan nomogram) -- with nothing on screen to say why.
+                    # Skip only the comparison table; calculate_cutoff_metrics() has already
+                    # raised a notice naming the offending scenario and its frequencies.
                     if (is.null(cutoff1_metrics) || is.null(cutoff2_metrics)) {
-                        private$.addNotice("ERROR", .("Cut-off validation failed"), .("The cut-off comparison cannot be performed because at least one scenario has invalid frequencies."))
-                        return()
+                        bad <- c(self$options$cutoff1, self$options$cutoff2)[
+                            c(is.null(cutoff1_metrics), is.null(cutoff2_metrics))]
+                        private$.addNotice(
+                            "ERROR",
+                            .("Cut-off validation failed"),
+                            .fmt(
+                                .("The cut-off comparison is omitted because these scenarios have invalid frequencies: {scenarios}. The rest of the analysis is unaffected."),
+                                scenarios = paste(bad, collapse = ", ")
+                            )
+                        )
                     }
+                }
 
+                if (self$options$multiplecuts &&
+                    !is.null(cutoff1_metrics) && !is.null(cutoff2_metrics)) {
                     # Rows are created in .init(); only the computed cells are set here.
                     multipleCutoffTable$setRow(
                         rowKey = 1,

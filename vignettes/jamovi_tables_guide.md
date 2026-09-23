@@ -491,6 +491,21 @@ test.** It aborts on the happy path at runtime. Any table whose rows move into
 `.init()` needs a test that actually *runs* the analysis and asserts `rowCount` —
 see `tests/testthat/test-zzz-init-row-structure-runtime.R`.
 
+#### Checking it: `release_gate.py` → `check_init_row_structure`
+
+A bare `grep "addRow(rowKey"` is useless here — 620 hits umbrella-wide, almost all of
+them one extra *conditional* row added to a table that already has an `.init()`
+skeleton, which is fine and does not blink. The gate asks the question at the **table**
+level instead: no `rows:` in the `.r.yaml`, nothing reachable from `.init()` names the
+table, and every `addRow()` it gets uses a literal string `rowKey`. That is 1 shipped
+hit across all five modules (2026-09-23).
+
+It is **blind to a loop index** — `for (i in 1:nrow(res)) tbl$addRow(rowKey = i, ...)`
+over a result whose length is always the same. That is the exact shape the 2026-09-16
+meddecide audit found in `decision.b.R` (an `epiR::epi.tests()` table that is always
+LR+, LR-, DOR, Youden, NNDx). When you write a loop like that, answer the question in
+the table above yourself; the check will not do it for you.
+
 #### `deleteRows()` at the top of a population method is a tell
 
 It exists to stop rows accumulating across runs, and it becomes unnecessary once
@@ -1316,81 +1331,17 @@ self$results$customFormattedTable$setContent(html_content)
 
 ### Custom HTML Generation
 
-#### Manual HTML Creation
-```r
-# Create custom HTML table
-create_custom_html_table <- function(data, title) {
-    
-    # Start HTML structure
-    html <- paste0(
-        '<div class="custom-table-container">',
-        '<h3 class="table-title">', title, '</h3>',
-        '<table class="custom-results-table">'
-    )
-    
-    # Add header
-    html <- paste0(html, '<thead><tr>')
-    for (col_name in names(data)) {
-        html <- paste0(html, '<th>', col_name, '</th>')
-    }
-    html <- paste0(html, '</tr></thead>')
-    
-    # Add body
-    html <- paste0(html, '<tbody>')
-    for (i in seq_len(nrow(data))) {
-        html <- paste0(html, '<tr>')
-        for (j in seq_len(ncol(data))) {
-            cell_value <- data[i, j]
-            # Add conditional formatting
-            if (is.numeric(cell_value) && cell_value < 0.05) {
-                html <- paste0(html, '<td class="significant">', 
-                              format(cell_value, digits = 3), '</td>')
-            } else {
-                html <- paste0(html, '<td>', cell_value, '</td>')
-            }
-        }
-        html <- paste0(html, '</tr>')
-    }
-    html <- paste0(html, '</tbody></table></div>')
-    
-    # Add CSS styling
-    css <- '
-    <style>
-    .custom-table-container { margin: 20px 0; }
-    .table-title { color: #333; font-weight: bold; margin-bottom: 10px; }
-    .custom-results-table { 
-        width: 100%; 
-        border-collapse: collapse; 
-        font-family: Arial, sans-serif;
-    }
-    .custom-results-table th, .custom-results-table td { 
-        border: 1px solid #ddd; 
-        padding: 8px 12px; 
-        text-align: left; 
-    }
-    .custom-results-table th { 
-        background-color: #f2f2f2; 
-        font-weight: bold; 
-    }
-    .custom-results-table .significant { 
-        background-color: #fff3cd; 
-        font-weight: bold; 
-    }
-    </style>'
-    
-    return(paste0(css, html))
-}
+#### Tabular Data Belongs in a `Table` Result (Not Raw HTML)
 
-# Use custom HTML table
-analysis_results <- data.frame(
-    Variable = c("Age", "Sex", "Treatment"),
-    Coefficient = c(0.123, -0.456, 0.789),
-    `P-value` = c(0.023, 0.001, 0.234)
-)
+Do **not** generate manual HTML `<table>` elements for tabular data results. Hand-crafted HTML tables ignore jamovi's dark results theme (fixed light-theme borders like `#ddd` and pastel backgrounds become unreadable or stark), cannot be copied as data grids or LaTeX (`Copy` puts raw HTML markup on the clipboard instead of a spreadsheet grid), and bypass localization (`.()`).
 
-html_table <- create_custom_html_table(analysis_results, "Regression Results")
-self$results$customFormattedTable$setContent(html_table)
-```
+Tabular data must be declared as a `type: Table` element in `.r.yaml`, with static rows scaffolded in `.init()` and computed values populated in `.run()`. Use `setNote()` for table footnotes.
+
+Reserve `type: Html` solely for:
+1. Complex tables from dedicated R packages with their own mature HTML rendering engines (e.g., `gtsummary` or `kableExtra`), or
+2. Non-tabular empty-state and instructional panels (quick-start guides, glossaries, format diagrams).
+
+See [jamovi Library Review Guide §26](jamovi_library_review_guide.md#26-rule-tabular-data-belongs-in-a-table-result).
 
 ---
 

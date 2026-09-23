@@ -159,22 +159,31 @@ agreement(
 )
 }
 \arguments{
-\item{data}{The data as a data frame. The data should be in long format,
-where each row is a unique observation.}
+\item{data}{The data as a data frame in WIDE format: one row per case and
+one column per rater or method, holding that rater's score for that case.
+(Not long format - do not stack the raters into a single column.)}
 
-\item{vars}{A string naming the variable from \code{data} that contains the
-diagnosis given by the observer.}
+\item{vars}{The variables in \code{data} holding the ratings, one per rater
+or method. Each selected variable is one rater's column of scores across
+the cases.}
 
-\item{baConfidenceLevel}{Confidence level for Bland-Altman limits of
-agreement (LoA). Typically 0.95 for 95 percent confidence intervals.}
+\item{baConfidenceLevel}{Proportion of differences the Bland-Altman limits
+of agreement are meant to contain, conventionally 0.95, giving mean
+difference +/- 1.96 SD. This is a coverage proportion for future
+differences, NOT a confidence level for the limits: raising it moves the
+limits outward rather than widening an interval around fixed limits.}
 
 \item{confLevel}{Confidence level for confidence intervals in ICC, CCC,
 bootstrap CIs, and other agreement statistics. Default is 0.95 (95 percent
 CI).}
 
-\item{proportionalBias}{Test whether the difference between raters changes
-systematically with the magnitude of measurement (proportional bias). Uses
-linear regression of difference vs. mean.}
+\item{proportionalBias}{Fit an exploratory ordinary least-squares trend of
+the paired difference against the pair mean. The p-value tests whether that
+slope is zero; it is not, by itself, a valid general test of proportional
+bias because unequal method precision can create a slope even when neither
+method has magnitude-dependent bias. Confirm an apparent trend with
+replicated measurements or an errors-in-variables model before calling it
+proportional bias.}
 
 \item{showBlandAltmanGuide}{Show educational guide explaining Bland-Altman
 limits of agreement for method comparison studies.}
@@ -308,26 +317,30 @@ calculates all pairwise CCCs for 3+ raters.}
 \item{showLinCCCGuide}{Show educational guide and clinical use cases for
 Lin's Concordance Correlation Coefficient before running analysis.}
 
-\item{tdi}{Total Deviation Index (TDI) quantifies the limits within which a
-specified proportion of differences between two measurement methods will
-fall. Unlike Bland-Altman which assumes constant variability, TDI accounts
-for heteroscedastic errors (variance increasing with magnitude). Provides a
-single index for acceptable agreement based on predefined clinically
-acceptable limits. Essential for medical device validation, laboratory
-method comparison, and biomarker assay validation where regulatory agencies
-require demonstration that a specified percentage of measurements fall
-within acceptable limits. Requires 2 raters/methods. Particularly useful
-when establishing equivalence between manual and automated measurements or
-between different measurement platforms.}
+\item{tdi}{Total Deviation Index (TDI): the boundary within which the
+requested proportion of absolute differences between two measurement
+methods fall. Computed here as the empirical quantile of the absolute
+differences, with a case-resampling bootstrap interval. It is a single
+number summarising how far apart the two methods get, and it is useful
+alongside Bland-Altman when the differences are not normal. Note the scope:
+this estimator is unconditional, so it does NOT model variability as a
+function of magnitude and does not adjust for the case mix of the sample -
+a different spread of values gives a different TDI for the same two
+methods. Use it as a descriptive summary of the observed comparison, not on
+its own as a demonstration of equivalence or of regulatory acceptability,
+which require a prespecified design and acceptance criterion. Requires 2
+raters/methods.}
 
-\item{tdiCoverage}{The proportion of differences that should fall within
-TDI limits (default: 90 percent). Common values: 90 percent for general
-agreement, 95 percent for stringent requirements. This defines what
-percentage of future measurements must fall within acceptable limits.}
+\item{tdiCoverage}{Quantile of the observed absolute differences to report
+(default: 90 percent). Common descriptive targets are 90 or 95 percent.
+This is an unconditional empirical target for the sampled case mix, not a
+prediction guarantee for future measurements.}
 
 \item{tdiLimit}{Maximum acceptable difference between methods in original
-units. Example: For tumor size, 5mm might be clinically acceptable. TDI
-should be smaller than this limit for methods to be considered equivalent.}
+units. Example: For tumor size, 5mm might be clinically acceptable. Compare
+the empirical TDI and its bootstrap interval with this prespecified
+descriptive limit. Passing it does not, by itself, establish method
+equivalence.}
 
 \item{showTDIGuide}{Show educational guide and clinical use cases for Total
 Deviation Index before running analysis.}
@@ -353,10 +366,14 @@ data. Variance-based agreement measure especially useful when variance
 between raters is low (i.e., agreement is high). Alternative to traditional
 kappa-based measures. Works with ordered categorical ratings.}
 
-\item{finnLevels}{The number of different rating categories for Finn
-coefficient calculation (e.g., 3 for low/medium/high, 5 for 5-point Likert
-scale). Must specify the total number of distinct categories in your rating
-scale.}
+\item{finnLevels}{The number of categories on the rating scale, used by the
+Finn coefficient as its chance baseline (the variance of a uniform rating
+on an s-point scale), so it changes the value and can change its sign. When
+the rater variables are nominal or ordinal this is read from their declared
+levels instead and a note reports any disagreement; this option is only
+consulted for numeric ratings, where the scale cannot be recovered from the
+data. Count every category on the scale, including any that no case
+happened to receive.}
 
 \item{finnModel}{Model specification for Finn coefficient. One-way: only
 subjects are random effects (each subject may be rated by different
@@ -409,14 +426,21 @@ than exact concordance.}
 \item{showMeanSpearmanGuide}{Show educational guide and clinical use cases
 for Mean Spearman Rho before running analysis.}
 
-\item{raterBias}{Tests whether raters have systematically different rating
-patterns (e.g., one rater is more lenient/strict than others). Uses
-chi-square test to detect if marginal frequencies differ significantly
-across raters. Essential quality control tool to identify raters who
-consistently over-diagnose or under-diagnose compared to their peers.}
+\item{raterBias}{Tests whether the disagreements between two raters run in
+one direction more often than the other, i.e. whether one rater is
+consistently the higher scorer on the cases where they differ. A single
+chi-square on 1 degree of freedom comparing the total counts above and
+below the diagonal of the two-rater table (\code{irr::rater.bias}).
+Requires exactly 2 raters and both variables must be declared Ordinal,
+because "higher" is otherwise undefined. This is NOT a test of marginal
+homogeneity: opposing shifts in different categories cancel out and it
+returns p = 1 even when the two raters use the categories at quite
+different rates. Use \code{bhapkar} or \code{stuartMaxwell} for that
+hypothesis.}
 
-\item{showRaterBiasGuide}{Show educational guide for detecting systematic
-rater bias in quality control.}
+\item{showRaterBiasGuide}{Show an educational guide to the two-rater
+ordinal directional discordance test, including its distinction from
+marginal homogeneity.}
 
 \item{bhapkar}{Bhapkar test for marginal homogeneity between two raters
 with multiple categories. More powerful alternative to Stuart-Maxwell test.

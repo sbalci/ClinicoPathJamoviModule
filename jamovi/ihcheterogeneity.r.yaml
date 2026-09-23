@@ -20,6 +20,9 @@ items:
         - biopsy4
         - biopsies
         - spatial_id
+        - cv_threshold
+        - correlation_threshold
+        - bias_margin
         - analysis_type
         - sample_size_planning
 
@@ -81,7 +84,7 @@ items:
     - name: summary
       title: Summary (Plain-Language)
       type: Html
-      visible: false
+      visible: (showSummary)
       description: Natural-language summary of heterogeneity analysis results
       clearWith:
         - wholesection
@@ -99,7 +102,7 @@ items:
     - name: glossary
       title: Statistical Glossary
       type: Html
-      visible: false
+      visible: (showGlossary)
       description: Definitions of key statistical terms used in the analysis
 
     - name: reproducibilitytable
@@ -292,7 +295,7 @@ items:
     - name: spatialanalysistable
       title: Spatial Heterogeneity Analysis
       type: Table
-      visible: (spatial_id)
+      visible: (length(spatial_id) > 0)
       description: Variability across spatial regions
       clearWith:
         - wholesection
@@ -440,7 +443,7 @@ items:
       description: Spatial distribution of biomarker values
       width: 600
       height: 400
-      visible: (show_variability_plots || analysis_type:variability || analysis_type:comprehensive)
+      visible: (length(spatial_id) > 0 && (show_variability_plots || analysis_type:variability || analysis_type:comprehensive))
       clearWith:
         - wholesection
         - biopsy1

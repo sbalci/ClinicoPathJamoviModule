@@ -820,14 +820,13 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 name="clinicalInterpretationTable",
                 title="Clinical Interpretation",
                 rows=0,
-                visible="(clinicalMode:basic || clinicalMode:advanced || clinicalMode:comprehensive)",
+                visible=TRUE,
                 clearWith=list(
                     "dependentVars",
                     "classVar",
                     "positiveClass",
                     "subGroup",
-                    "direction",
-                    "clinicalMode"),
+                    "direction"),
                 columns=list(
                     list(
                         `name`="variable", 
@@ -1106,7 +1105,8 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "dependentVars",
                     "classVar",
                     "positiveClass",
-                    "direction"),
+                    "direction",
+                    "delongTest"),
                 columns=list(
                     list(
                         `name`="comparison", 
@@ -1145,7 +1145,8 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "dependentVars",
                     "classVar",
                     "positiveClass",
-                    "direction"),
+                    "direction",
+                    "delongTest"),
                 refs=list(
                     "DeLong1988")))
             self$add(jmvcore::Array$new(
@@ -1500,12 +1501,12 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                         `format`="zto"),
                     list(
                         `name`="credible_lower", 
-                        `title`="95% Bootstrap CI Lower", 
+                        `title`="95% Interval Lower (weighted AUC)", 
                         `type`="number", 
                         `format`="zto"),
                     list(
                         `name`="credible_upper", 
-                        `title`="95% Bootstrap CI Upper", 
+                        `title`="95% Interval Upper (weighted AUC)", 
                         `type`="number", 
                         `format`="zto"),
                     list(
@@ -1893,7 +1894,7 @@ psychopdaROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "psychopdaROC",
-                version = c(1,0,81),
+                version = c(1,0,83),
                 options = options,
                 results = psychopdaROCResults$new(options=options),
                 data = data,
@@ -1915,10 +1916,11 @@ psychopdaROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   Run button. Useful for skipping intermediate recomputes while adjusting
 #'   options on slow bootstrap or cutpoint analyses.
 #' @param run .
-#' @param clinicalMode Select the complexity level of analysis: Basic -
-#'   Essential ROC metrics for clinical decision making Advanced - Additional
-#'   statistical comparisons and metrics Comprehensive - Full research-grade
-#'   analysis with all options
+#' @param clinicalMode Selects which guidance notes are shown in the Procedure
+#'   Notes panel. Basic explains the AUC bands and warns that a cutpoint
+#'   searched on these data is optimistic; Advanced and Comprehensive give a
+#'   shorter research framing. This option does not switch any analysis on or
+#'   off - every optional analysis has its own checkbox.
 #' @param data The data as a data frame.
 #' @param dependentVars Test variable(s) to be evaluated for classification
 #'   performance. Multiple variables can be selected for comparison.

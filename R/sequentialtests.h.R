@@ -606,7 +606,7 @@ sequentialtestsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             super$initialize(
                 package = "ClinicoPath",
                 name = "sequentialtests",
-                version = c(1,0,81),
+                version = c(1,0,83),
                 options = options,
                 results = sequentialtestsResults$new(options=options),
                 data = data,
@@ -622,27 +622,16 @@ sequentialtestsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' Sequential Testing Analysis
 #'
 #' Analyzes how diagnostic accuracy changes when applying two tests in 
-#' sequence,
-#' comparing three different testing strategies: serial positive 
-#' (confirmation),
-#' serial negative (exclusion), and parallel testing. Provides comprehensive
-#' analysis including population flow, cost implications, and diagnostic 
-#' plots.
-#' 
-#' The named scenarios and their values are teaching examples only, not 
-#' clinical
-#' guidance or validated diagnostic pathways. Replace all example parameters 
-#' with
-#' estimates applicable to the intended population before interpreting 
-#' results.
-#' 
-#' This analysis is particularly useful for:
-#' - Exploring how diagnostic strategies behave under explicit assumptions
-#' - Comparing hypothetical test sequences for teaching or planning
-#' - Understanding trade-offs between sensitivity and specificity
-#' - Illustrating expected testing volume and cost under user-supplied 
-#' assumptions
-#' - Teaching sequential testing concepts and Bayesian probability
+#' sequence, comparing three different testing strategies: serial positive 
+#' (confirmation), serial negative (exclusion), and parallel testing. Provides 
+#' comprehensive analysis including population flow, cost implications, and 
+#' diagnostic plots, so you can explore how diagnostic strategies behave under 
+#' explicit assumptions, compare hypothetical test sequences, weigh trade-offs 
+#' between sensitivity and specificity, and illustrate expected testing volume 
+#' and cost under user-supplied assumptions. The named scenarios and their 
+#' values are teaching examples only, not clinical guidance or validated 
+#' diagnostic pathways. Replace all example parameters with estimates 
+#' applicable to the intended population before interpreting results.
 #' 
 #' @param preset Select a teaching example or use custom values. Examples load
 #'   rounded, hypothetical parameters chosen only to demonstrate how each

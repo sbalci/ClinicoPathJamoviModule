@@ -136,6 +136,8 @@ A results object containing:
 \code{results$srocplot} \tab \tab \tab \tab \tab an image \cr
 \code{results$funnelplot} \tab \tab \tab \tab \tab an image \cr
 \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
+\code{results$likelihoodRatioGuide} \tab \tab \tab \tab \tab a table \cr
+\code{results$predictiveValues} \tab \tab \tab \tab \tab a table \cr
 \code{results$forestplot_explanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$srocplot_explanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$funnelplot_explanation} \tab \tab \tab \tab \tab a html \cr
@@ -149,10 +151,8 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 }
 \description{
 Comprehensive meta-analysis of diagnostic test accuracy studies designed
-for
-pathology research. Performs bivariate random-effects modeling,
-proportional-hazards SROC analysis,
-meta-regression, and publication bias assessment for AI algorithm
-validation
-and biomarker diagnostic accuracy synthesis.
+for pathology research. Performs bivariate random-effects modeling,
+proportional-hazards SROC analysis, meta-regression, and publication bias
+assessment for AI algorithm validation and biomarker diagnostic accuracy
+synthesis.
 }

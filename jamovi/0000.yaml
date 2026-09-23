@@ -1396,15 +1396,15 @@ analyses:
     menuSubgroup: Decision Calculators
     menuTitle: Medical Decision Calculator
     menuSubtitle: Sensitivity, Specificity, PPV, NPV, ...
-    description: |
-      Medical Decision Calculator for diagnostic test evaluation when you have 
-      the four key counts: True Positives (TP), False Positives (FP), True 
-      Negatives (TN), and False Negatives (FN). Calculates comprehensive 
-      diagnostic performance metrics including sensitivity, specificity, 
-      positive and negative predictive values, likelihood ratios, and 
-      post-test probabilities. Supports confidence interval estimation and 
-      Fagan nomogram visualization for educational interpretation. Presets and
-      examples are illustrative only and are not clinical guides.
+    description: >
+      Medical Decision Calculator for diagnostic test evaluation when you have
+      the four key counts: True Positives (TP), False Positives (FP), True
+      Negatives (TN), and False Negatives (FN). Calculates comprehensive
+      diagnostic performance metrics including sensitivity, specificity,
+      positive and negative predictive values, likelihood ratios, and post-test
+      probabilities. Supports confidence interval estimation and Fagan nomogram
+      visualization for educational interpretation. Presets and examples are
+      illustrative only and are not clinical guides.
     ribbon: analyses
     category: analyses
   - title: Analysis Without Gold Standard
@@ -1505,19 +1505,12 @@ analyses:
     menuSubtitle: Combine and evaluate test patterns
     description: >
       Systematic evaluation of diagnostic test combinations. Analyzes all
-      possible
-
-      test result patterns (2-test: 4 patterns, 3-test: 8 patterns) against a
-      gold
-
-      standard and summarizes named parallel, serial, and majority strategies.
-
-      Calculates sensitivity, specificity, predictive values, likelihood ratios,
-
-      accuracy, and uncertainty intervals. Descriptive rankings are
-      sample-dependent
-
-      analytical summaries, not clinical guides or validated recommendations.
+      possible test result patterns (2-test: 4 patterns, 3-test: 8 patterns)
+      against a gold standard and summarizes named parallel, serial, and
+      majority strategies. Calculates sensitivity, specificity, predictive
+      values, likelihood ratios, accuracy, and uncertainty intervals.
+      Descriptive rankings are sample-dependent analytical summaries, not
+      clinical guides or validated recommendations.
     ribbon: analyses
     category: analyses
   - title: Screening Test Calculator
@@ -1565,17 +1558,19 @@ analyses:
     menuTitle: Sequential Testing Analysis
     menuSubgroup: Decision Calculators
     menuSubtitle: Sequential Test Analysis
-    description: >-
+    description: >
       Analyzes how diagnostic accuracy changes when applying two tests in
-      sequence,
-
-      comparing three different testing strategies: serial positive
-      (confirmation),
-
-      serial negative (exclusion), and parallel testing. Provides comprehensive
-
-      analysis including population flow, cost implications, and diagnostic
-      plots.
+      sequence, comparing three different testing strategies: serial positive
+      (confirmation), serial negative (exclusion), and parallel testing.
+      Provides comprehensive analysis including population flow, cost
+      implications, and diagnostic plots, so you can explore how diagnostic
+      strategies behave under explicit assumptions, compare hypothetical test
+      sequences, weigh trade-offs between sensitivity and specificity, and
+      illustrate expected testing volume and cost under user-supplied
+      assumptions. The named scenarios and their values are teaching examples
+      only, not clinical guidance or validated diagnostic pathways. Replace all
+      example parameters with estimates applicable to the intended population
+      before interpreting results.
     ribbon: analyses
     category: analyses
   - title: Decision Curve Analysis
@@ -2459,7 +2454,7 @@ analyses:
     name: ihcheterogeneity
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPath
+    menuGroup: OncoPathT
     menuTitle: IHC Heterogeneity Analysis
     menuSubgroup: IHC Analysis
     description: >
@@ -2650,19 +2645,14 @@ analyses:
     name: diagnosticmeta
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPath
+    menuGroup: OncoPathT
     menuTitle: Diagnostic Test Meta-Analysis for Pathology
     description: >
       Comprehensive meta-analysis of diagnostic test accuracy studies designed
-      for
-
-      pathology research. Performs bivariate random-effects modeling,
-      proportional-hazards SROC analysis,
-
-      meta-regression, and publication bias assessment for AI algorithm
-      validation
-
-      and biomarker diagnostic accuracy synthesis.
+      for pathology research. Performs bivariate random-effects modeling,
+      proportional-hazards SROC analysis, meta-regression, and publication bias
+      assessment for AI algorithm validation and biomarker diagnostic accuracy
+      synthesis.
     menuSubgroup: Meta-Analysis
   - title: Classification Performance Metrics for Digital Pathology
     name: mlpathology
@@ -4627,10 +4617,10 @@ analyses:
     menuSubgroup: ROC
     menuTitle: Clinical ROC Analysis
     menuSubtitle: Clinical ROC analysis with diagnostic metrics and optimal cutoffs
-    description: |
-      Clinical ROC analysis toolkit for comprehensive diagnostic performance 
-      evaluation. Includes ROC curve analysis, Youden Index optimization, 
-      sensitivity/specificity analysis, optimal cutoff determination, and 
+    description: >
+      Clinical ROC analysis toolkit for comprehensive diagnostic performance
+      evaluation. Includes ROC curve analysis, Youden Index optimization,
+      sensitivity/specificity analysis, optimal cutoff determination, and
       comparative ROC analysis. Essential for biomarker validation, diagnostic
       test evaluation, and clinical decision support in medical research.
   - title: Enhanced Frequency Analysis with BlueSky Integration
@@ -5516,11 +5506,9 @@ analyses:
     menuSubtitle: Penalized feature selection for binary classification
     description: >
       Performs LASSO-penalized logistic regression for variable selection in
-      binary
-
-      classification problems. Ideal for diagnostic pathology studies that build
-
-      classifiers (e.g., tumor type A vs B) with automatic feature selection.
+      binary classification problems. Ideal for diagnostic pathology studies
+      that build classifiers (e.g., tumor type A vs B) with automatic feature
+      selection.
   - title: Leave-One-Center-Out Cross-Validation
     name: leaveonecenterout
     ns: ClinicoPath

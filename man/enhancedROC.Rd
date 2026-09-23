@@ -91,13 +91,19 @@ enhancedROC(
 
 \item{direction}{Direction of the predictor-outcome relationship. The
 default is "Higher values indicate positive outcome" because it is a stated
-hypothesis rather than an estimate. "Auto" picks the orientation that gives
-the larger AUC from the same data that supply the AUC, which truncates the
-null distribution at 0.5 and biases every AUC upward (for n = 20 the AUC
-expected under no association is about 0.59, not 0.50); it can also
-silently invert a marker and report 0.825 where the un-inverted reading is
-0.175. Use "Auto" only for exploratory screening of markers whose direction
-is genuinely unknown, and say so.}
+hypothesis rather than an estimate. "Auto" reads the orientation off the
+same data that supply the AUC - pROC compares the two groups' median values
+\itemize{
+\item so the direction is fitted rather than assumed, and every AUC is biased
+upward (for n = 20 the AUC expected under no association is about 0.60, not
+0.50, and exceeds 0.60 in roughly 45 of every 100 markers carrying no
+information at all). It is not floored at 0.5 either: a median split can
+disagree with the ranks, so about 12 of those 100 null markers are still
+reported below 0.5. "Auto" can also silently invert a marker and report
+0.825 where the un-inverted reading is 0.175. Use "Auto" only for
+exploratory screening of markers whose direction is genuinely unknown, and
+say so.
+}}
 
 \item{youdenOptimization}{Find the optimal cutoff by maximising the Youden
 index (sensitivity + specificity - 1), subject to the minimum
@@ -191,8 +197,9 @@ PRC when appropriate}
 \item{imbalanceThreshold}{Ratio threshold for imbalance detection (e.g.,
 3.0 means 3:1 or 1:3 ratio)}
 
-\item{showImbalanceWarning}{Display warning message when class imbalance is
-detected}
+\item{showImbalanceWarning}{Add the explanatory detail to the
+class-imbalance warning. The warning itself is always shown when imbalance
+is detected; this only controls how much it explains.}
 
 \item{recommendPRC}{Recommend using Precision-Recall curves when imbalance
 is detected}
@@ -280,9 +287,8 @@ levels}
 \item{multiClassAveraging}{Method for averaging AUC across classes. Both
 averages are reported side by side for the One-vs-Rest strategy: Macro
 weights every class equally, Weighted weights each class by how many cases
-it contains. The One-vs-One (Hand-Till) strategy reports only its own
-unweighted average over class pairs, which is what that statistic is
-defined as.}
+it contains. The One-vs-One strategy reports only its own unweighted
+average over class pairs, which is what that statistic is defined as.}
 
 \item{clinicalImpact}{Calculate clinical impact metrics (NNT, NND, clinical
 utility)}

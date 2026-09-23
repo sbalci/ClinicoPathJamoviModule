@@ -49,7 +49,7 @@ This directory contains comprehensive guides for jamovi module development in th
 
 **Created:** 2026-08-20
 **Source:** The real audit reports in `jamovi-library-audit/` (ClinicoPathDescriptives,
-jsurvival, meddecide, OncoPath, jjstatsplot — rounds 2026-07-13, 2026-08-17/18, 2026-09-15 and 2026-09-16),
+jsurvival, meddecide, OncoPath, jjstatsplot — rounds 2026-07-13, 2026-08-17/18, 2026-09-15, 2026-09-16 and 2026-09-22),
 plus the same reviewer's audits of four OTHER modules — MetaJam, snowRMM, CompositeSEM and jYS
 (2026-09-15 to 2026-09-21) — which is where §20–§23 come from. Reading an audit of someone else's
 module is the cheapest way to find a class of defect before it is found in ours.
@@ -67,14 +67,14 @@ module is the cheapest way to find a class of defect before it is found in ours.
 3. Render functions must NULL-guard `image$state`
 4. HTML output must be theme-safe (dark mode)
 5. `setVisible(FALSE)` is not an error mechanism
-6. Row structure that isn't result-dependent belongs in `.init()`
+6. Row structure that isn't result-dependent belongs in `.init()` — raised against meddecide in **all three** of its audits, because the rule existed and the detector did not; now `check_init_row_structure`, which judges the *table* rather than the `addRow()` call (620 unreadable grep hits → 1)
 7. No named HTML entities except the structural five
 8. `warning()` is invisible to jamovi users
 9. Translatable strings are whole sentences
 10. Every package used must be declared — including base packages
 11. Dead code must not reference a schema that no longer exists
 12. UI label conventions
-13. **The `type: Notice` trap** — it does not compile (still absent from the jmvtools 28.3.1 results schema); re-test after every jmvtools upgrade
+13. **Notices: the native element, and the `insert()` trap** — `type: Notice` in `.r.yaml` does not compile (still absent from the jmvtools 28.3.1 schema), but `jmvcore::Notice` at run time DOES work. The crash we blamed on it for ten months was `Group$insert()`'s missing bounds check
 14. Encoding review findings as tests
 15. `requiresData` is a contract with `self$data` at render time
 16. Never wrap `jmvcore::reject()` in a catch-all `tryCatch`
@@ -86,6 +86,10 @@ module is the cheapest way to find a class of defect before it is found in ours.
 22. **A user's column name is not a regular expression** — `.stripPrefix()` / `startsWith()` / `fixed = TRUE`
 23. **Plot colours come from jamovi's palette** — `jmvcore::colorPalette(n, theme$palette)`
 24. **Where the debt actually lives: promotion, not release**
+25. **An unconfigured analysis is not an error** — nothing selected: silence; partly selected: INFO naming the empty boxes; fatal: `jmvcore::reject()`, never a banner
+26. **Tabular data belongs in a `Table` result** — HTML loses the theme, Copy, Copy Latex and `.()`
+27. **The module's own prose must agree with itself** — capability claims, one bug-report URL, `>` not `|` in `description: main:`, distinct dataset descriptions
+28. **Seeding the RNG must not outlive the function that did it** — one R process per jamovi session, so a bare `set.seed()` leaves the *next* analysis resampling from a fixed stream; `withr::local_seed()`
 
 **Tooling that goes with it:**
 - `tools/check_state_guards.py` — exits 1 on any unguarded `image$state` read
@@ -93,6 +97,9 @@ module is the cheapest way to find a class of defect before it is found in ours.
 - `tests/testthat/test-zzz-results-rendering-contract.R` — the same rules as tests
 - `tests/testthat/test-zzz-column-formats.R` — §21 as a test; fails on a shipped malformed
   `format:` and reports the unshipped count as promotion debt
+- `tools/release_gate.py` — `check_sentinel_insert` (§13, FAIL), `check_description_newlines`,
+  `check_issue_urls`, `check_dataset_descriptions` (§27), and `check_news`, which mirrors the
+  release workflow's own version cascade rather than warning on dev builds it never publishes
 - `tools/release_gate.py` — every rule that can be mechanised; FAILs on a shipped hit and prints
   the rest as `promotion debt`. New: `check_column_formats` (§21), `check_fabricated_stats` (§20),
   `check_state_payload` (§17, with a measured `# state-payload:` waiver)

@@ -24,6 +24,9 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         .analysisData = NULL,
         .analysisOutcomes = NULL,
         .outcomePositive = NULL,
+        # Per-run memo of the pairwise bootstrap comparison, shared by the two comparison
+        # tables (see .bootstrapComparisonCached). Reset in .run().
+        .bootCompCache = NULL,
 
         # The positive outcome level actually used by the analysis. Falls back to the raw
         # option only before .run() has resolved it (e.g. an early return).
@@ -462,7 +465,13 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     content = narrow_msg
                 )
                 private$.renderNotices()
-                stop(narrow_msg, call. = FALSE)
+                # jmvcore::reject() rather than a bare stop(): it is the documented entry
+                # point and is what the rest of the module uses. It is NOT a behaviour change
+                # -- reject() IS stop(createError(...)) and createError() ends with
+                # error$code <- NULL, so the two conditions are identical (measured:
+                # simpleError/error/condition, same message, conditionCall NULL in both,
+                # same field names). The bare stop() already carried this message verbatim.
+                jmvcore::reject(narrow_msg)
             }
 
             return(thresholds)
@@ -552,7 +561,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 private$.renderNotices()
                 # The banner replaces the pane that holds the notice above, so it has to carry
                 # the message itself -- "Validation failed" told the clinician nothing.
-                stop(msg, call. = FALSE)
+                jmvcore::reject(msg)
             }
 
             if (min_thresh <= 0 || max_thresh >= 1) {
@@ -563,7 +572,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 )
                 private$.addNotice(type = "ERROR", title = .("Threshold Out of Bounds"), content = msg)
                 private$.renderNotices()
-                stop(msg, call. = FALSE)
+                jmvcore::reject(msg)
             }
             
             # Context-neutral guidance for unusual ranges. There is no universally valid
@@ -703,6 +712,56 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         # rather than taking quantiles of the pooled replicates, which understates the
         # interval width.
 
+        # The seed the user asked for, with the documented fallback. Every note that prints
+        # "seed N" and every substream below reads it here, so the number on screen is always
+        # the number the draws came from.
+        .seedValue = function() {
+            s <- self$options$seed
+            if (is.null(s) || is.na(s)) 42L else as.integer(s)
+        },
+
+        # Each stochastic consumer draws from its OWN substream derived from that seed.
+        # Before this, .run() seeded once and every bootstrap continued the same stream, so
+        # what a consumer drew depended on which OTHER consumers had run ahead of it: ticking
+        # "Confidence intervals" consumed bootReps x n_models resamples before the comparison
+        # tables and moved their p-values, though nothing about the comparison had changed --
+        # while the table note promised that the same seed reproduces the numbers exactly.
+        #
+        # stream: a fixed id per consumer (1 model CIs, 2 clinical-rule CI, 3 pairwise
+        # comparisons). index: position within the consumer (model number, pair number), so
+        # adding a model cannot shift an earlier model's draws either. Streams sit 100000
+        # apart and the seed option maxes out at 999999, so no two (stream, index) pairs
+        # collide within a run.
+        .bootSeed = function(stream, index = 0L) {
+            private$.seedValue() + as.integer(stream) * 100000L + as.integer(index)
+        },
+
+        # Both comparison tables bootstrap the SAME pair with the same inputs and the same
+        # derived seed (stream 3, pair index), so the second one recomputes a byte-identical
+        # answer. With 5 models and bootReps = 10000 that is 200000 resamples where 100000
+        # suffice. Memoised per .run() (.bootCompCache is cleared there with the other
+        # analysis state), keyed on everything that can change the result: the pair, the
+        # substream index, the replicate count and the threshold grid.
+        .bootstrapComparisonCached = function(m1, m2, pair_index, pred1, pred2, outcomes,
+                                              thresholds, n_boot) {
+            key <- paste(m1, m2, pair_index, n_boot,
+                         length(thresholds), thresholds[1], thresholds[length(thresholds)],
+                         sep = "|")
+            hit <- private$.bootCompCache[[key]]
+            if (!is.null(hit))
+                return(hit)
+
+            res <- withr::with_seed(
+                private$.bootSeed(3L, pair_index),
+                private$.calculateBootstrapComparison(
+                    pred1, pred2, outcomes, thresholds, private$.positiveLevel(),
+                    n_boot = n_boot
+                )
+            )
+            private$.bootCompCache[[key]] <- res
+            res
+        },
+
         # Bootstrap confidence intervals with enhanced error handling and progress reporting
         .calculateBootstrapCI = function(predictions, outcomes, thresholds, positive_outcome, n_boot = 1000) {
 
@@ -715,7 +774,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 )
                 private$.addNotice(type = "ERROR", title = .("Bootstrap CI Calculation Error"), content = msg)
                 private$.renderNotices()
-                stop(msg, call. = FALSE)
+                jmvcore::reject(msg)
             }
 
             if (n_boot < 100) {
@@ -1036,6 +1095,8 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             private$.treatAllNB <- NULL
             private$.analysisData <- NULL
             private$.analysisOutcomes <- NULL
+            # Never serve a pairwise bootstrap from a previous data set or option set.
+            private$.bootCompCache <- list()
 
             # ...and the IMAGE STATE with them. Clearing only the private fields is not enough
             # now that the renderers rehydrate from state: jamovi persists image state across
@@ -1054,9 +1115,9 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             # in two of them. A clinician who reruns an analysis must get the same numbers.
             # withr::local_seed() restores the caller's RNG state when .run() exits, so neither an
             # R-API user's stream nor the next analysis in the shared jamovi process is disturbed.
-            seed_val <- self$options$seed
-            if (is.null(seed_val) || is.na(seed_val)) seed_val <- 42
-            withr::local_seed(seed_val)
+            # This is the floor: each bootstrap consumer additionally re-seeds its own substream
+            # via private$.bootSeed(), so one consumer cannot shift another's draws.
+            withr::local_seed(private$.seedValue())
 
             # Check if required packages are available
             required_packages <- c("ggplot2", "dplyr", "tidyr")
@@ -1473,9 +1534,15 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
                 # Add confidence intervals if requested
                 if (self$options$confidenceIntervals || self$options$showNetBenefitCI) {
-                    ci_results <- private$.calculateBootstrapCI(
-                        predictions, outcomes, thresholds, outcome_positive,
-                        self$options$bootReps
+                    # Own substream per model (see .bootSeed): this model's interval does not
+                    # depend on how many models precede it, nor the p-values below on whether
+                    # this box is ticked at all.
+                    ci_results <- withr::with_seed(
+                        private$.bootSeed(1L, i),
+                        private$.calculateBootstrapCI(
+                            predictions, outcomes, thresholds, outcome_positive,
+                            self$options$bootReps
+                        )
                     )
                     model_plot_data$ci_lower <- ci_results$lower
                     model_plot_data$ci_upper <- ci_results$upper
@@ -1543,9 +1610,12 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 # The rule is a strategy like any model and its curve carries the same
                 # sampling uncertainty; it used to be the only curve drawn without a band.
                 if (self$options$confidenceIntervals || self$options$showNetBenefitCI) {
-                    rule_ci <- private$.calculateBootstrapCI(
-                        rule_pred, outcomes, thresholds, outcome_positive,
-                        self$options$bootReps
+                    rule_ci <- withr::with_seed(
+                        private$.bootSeed(2L),
+                        private$.calculateBootstrapCI(
+                            rule_pred, outcomes, thresholds, outcome_positive,
+                            self$options$bootReps
+                        )
                     )
                     rule_plot_data$ci_lower <- rule_ci$lower
                     rule_plot_data$ci_upper <- rule_ci$upper
@@ -1949,12 +2019,15 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             # tests can be Holm-adjusted before any "Significant Difference" verdict is
             # printed - this table used to declare significance from an unadjusted p while
             # the comparisonTable beside it adjusted the same family.
+            # combn() enumerates the pairs in the same order as the nested loops in
+            # .performModelComparison(), so pair number p means the same pair in both tables
+            # and both can seed the same substream for it (see .bootSeed).
             pairs <- combn(model_names, 2, simplify = FALSE)
             rows <- list()
-            capped <- FALSE
             skipped <- character(0)
 
-            for (pair in pairs) {
+            for (p in seq_along(pairs)) {
+                pair <- pairs[[p]]
                 m1 <- pair[1]
                 m2 <- pair[2]
 
@@ -1981,15 +2054,15 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 mean_diff <- mean(diff, na.rm = TRUE)
                 median_diff <- median(diff, na.rm = TRUE)
 
-                n_boot <- self$options$bootReps
-                n_boot_used <- min(n_boot, 1000)   # capped for performance
-                if (n_boot_used < n_boot) capped <- TRUE
-
                 private$.checkpoint()
 
-                res_boot <- private$.calculateBootstrapComparison(
-                    pred1, pred2, outcomes, thresholds, private$.positiveLevel(),
-                    n_boot = n_boot_used
+                # Full bootReps, like the comparisonTable beside it. This table used to cap
+                # silently at 1000, so the two tables on the same screen tested the same
+                # pairs with different numbers of resamples. Whichever table runs first pays
+                # for the resampling; the other reads the memo (see .bootstrapComparisonCached).
+                res_boot <- private$.bootstrapComparisonCached(
+                    m1, m2, p, pred1, pred2, outcomes,
+                    thresholds, self$options$bootReps
                 )
 
                 rows[[length(rows) + 1]] <- list(
@@ -2041,19 +2114,13 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             table$setNote(
                 "method",
                 paste(
-                    .fmt(.('Exploratory mean difference in net benefit across the selected threshold range, with an approximate case-resampling bootstrap p-value Holm-adjusted across all {k} pairwise comparisons (seed {seed}).'),
+                    .fmt(.('Exploratory mean difference in net benefit across the selected threshold range, with an approximate case-resampling bootstrap p-value from {reps} resamples, Holm-adjusted across all {k} pairwise comparisons (seed {seed}).'),
+                         reps = self$options$bootReps,
                          k = length(rows),
-                         seed = if (is.null(self$options$seed) || is.na(self$options$seed)) 42 else self$options$seed),
+                         seed = private$.seedValue()),
                     .("This is not a confirmatory test and depends on giving every threshold equal weight.")
                 )
             )
-            if (capped) {
-                table$setNote(
-                    "cap",
-                    .fmt(.('Bootstrap replications for this table are capped at 1000 for speed; the {n} you requested are not used for this table.'),
-                         n = self$options$bootReps)
-                )
-            }
         },
 
         .populateBenefitRangeTable = function() {
@@ -2265,10 +2332,16 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             rows <- list()
             skipped <- character(0)
 
+            # Counts every pair, skipped ones included, in the same order as the combn() in
+            # .performEnhancedModelComparison(); it is the substream index, so both tables
+            # resample a given pair identically (see .bootSeed).
+            pair_no <- 0L
+
             for (i in 1:(length(model_names) - 1)) {
                 for (j in (i + 1):length(model_names)) {
                     model1_name <- model_names[i]
                     model2_name <- model_names[j]
+                    pair_no <- pair_no + 1L
 
                     # Find corresponding variables
                     idx1 <- which(model_vars_map == model1_name)
@@ -2299,14 +2372,11 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     )
                     wauc_diff <- wauc1 - wauc2
 
-                    # Reuse bootReps from options
-                    n_boot <- self$options$bootReps
-
                     private$.checkpoint()
 
-                    res_boot <- private$.calculateBootstrapComparison(
-                        pred1, pred2, outcomes, thresholds, private$.positiveLevel(),
-                        n_boot = n_boot
+                    res_boot <- private$.bootstrapComparisonCached(
+                        model1_name, model2_name, pair_no, pred1, pred2, outcomes,
+                        thresholds, self$options$bootReps
                     )
 
                     rows[[length(rows) + 1]] <- list(
@@ -2339,7 +2409,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 paste(
                     .fmt(.('Exploratory bootstrap comparison of average net benefit under each decision curve, {reps} resamples, seed {seed}.'),
                          reps = self$options$bootReps,
-                         seed = if (is.null(self$options$seed) || is.na(self$options$seed)) 42 else self$options$seed),
+                         seed = private$.seedValue()),
                     .fmt(.('Intervals are {level}% percentile intervals and p-values are approximate; results depend on the selected threshold range and equal weighting of its thresholds.'),
                          level = sprintf("%.0f", self$options$ciLevel * 100)),
                     .("Re-running with the same seed reproduces these numbers exactly.")
@@ -2615,7 +2685,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     # the bands are bootstrap intervals: name the seed that drew them
                     ggplot2::labs(caption = paste(c(caption, band_text,
                         jmvcore::format(.("Random seed: {seed}"),
-                            seed = if (is.null(self$options$seed) || is.na(self$options$seed)) 42 else self$options$seed)),
+                            seed = private$.seedValue())),
                         collapse = " "))
                 }
             }

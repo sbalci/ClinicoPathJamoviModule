@@ -103,6 +103,11 @@ items:
           - wght
           - exct
           - confLevel
+      refs:
+          - Cohen1960
+          - Cohen1968
+          - Fleiss1971
+          - LandisKoch1977
 
 
     - name:  contingencyTableHeading
@@ -161,6 +166,8 @@ items:
           # proportionalBias is on, so without this the plot kept the old image
           # when the option was toggled.
           - proportionalBias
+      refs:
+          - BlandAltman1986
 
     - name: agreementHeatmapPlot
       title: 'Agreement Heatmap (Confusion Matrix)'
@@ -209,7 +216,7 @@ items:
           title: 'Upper LoA'
           type: number
         - name: propBiasP
-          title: 'Proportional Bias (p)'
+          title: 'Difference-Mean Slope (p)'
           type: number
           format: zto,pvalue
           visible: (proportionalBias)
@@ -224,6 +231,9 @@ items:
           - vars
           - baConfidenceLevel
           - proportionalBias
+      refs:
+          - BlandAltman1986
+          - BlandAltman1999
 
 
 
@@ -286,6 +296,8 @@ items:
           - nBoot
           - confLevel
           - seed
+      refs:
+          - Krippendorff2004
 
     - name: krippExplanation
       title: "About Krippendorff's Alpha"
@@ -332,6 +344,8 @@ items:
           format: zto,pvalue
       clearWith:
           - vars
+      refs:
+          - LandisKoch1977
 
     - name: lightKappaExplanation
       title: "About Light's Kappa"
@@ -502,7 +516,7 @@ items:
           - showMeanSpearmanGuide
 
     - name: raterBiasHeading
-      title: Marginal Homogeneity Tests
+      title: Directional Discordance and Marginal Homogeneity Tests
       type:  Preformatted
       visible: (raterBias || showRaterBiasGuide || bhapkar || showBhapkarGuide || stuartMaxwell || showStuartMaxwellGuide)
       clearWith:
@@ -514,7 +528,7 @@ items:
           - showStuartMaxwellGuide
 
     - name: raterBiasTable
-      title: "Rater Bias Test Results"
+      title: "Directional Discordance Test (ordinal, 2 raters)"
       type: Table
       visible: (raterBias)
       rows: 1
@@ -536,7 +550,7 @@ items:
           - vars
 
     - name: raterBiasExplanation
-      title: "About Rater Bias Test"
+      title: "About Directional Discordance Test"
       type: Html
       visible: (showRaterBiasGuide)
       clearWith:
@@ -572,6 +586,8 @@ items:
           type: text
       clearWith:
           - vars
+      refs:
+          - agresti2013
 
     - name: bhapkarExplanation
       title: "About Bhapkar Test"
@@ -610,6 +626,8 @@ items:
           type: text
       clearWith:
           - vars
+      refs:
+          - agresti2013
 
     - name: stuartMaxwellExplanation
       title: "About Stuart-Maxwell Test"
@@ -881,6 +899,9 @@ items:
       clearWith:
           - vars
           - clusterVariable
+      refs:
+          - Shrout1979
+          - McGraw1996
 
     - name: homogeneityTestTable
       title: "Cluster Homogeneity Test Results"
@@ -1199,6 +1220,8 @@ items:
           - vars
           - gwetWeights
           - confLevel
+      refs:
+          - Gwet2008
 
     - name: gwetExplanation
       title: "About Gwet's AC Coefficient"
@@ -1237,6 +1260,8 @@ items:
       clearWith:
           - vars
           - wght
+      refs:
+          - Byrt1993
 
     - name: pabakExplanation
       title: "About PABAK & Prevalence/Bias Indices"
@@ -1297,6 +1322,10 @@ items:
           - vars
           - iccType
           - confLevel
+      refs:
+          - Shrout1979
+          - McGraw1996
+          - Koo2016
 
     - name: iccExplanation
       title: "About Intraclass Correlation Coefficient (ICC)"
@@ -1375,6 +1404,8 @@ items:
       clearWith:
           - vars
           - confLevel
+      refs:
+          - Lin1989
 
     - name: linCCCExplanation
       title: "About Lin's Concordance Correlation Coefficient"
@@ -1384,7 +1415,7 @@ items:
           - showLinCCCGuide
 
     - name: tdiTable
-      title: "Total Deviation Index (TDI) - Acceptable Agreement Limits"
+      title: "Empirical Total Deviation Index (TDI)"
       type: Table
       visible: (tdi)
       rows: 0
@@ -1406,7 +1437,7 @@ items:
           title: 'Acceptable Limit'
           type: number
         - name: meets_criteria
-          title: 'Acceptable?'
+          title: 'Observed Criterion?'
           type: text
         - name: ci_lower
           title: '95% CI Lower'
@@ -1712,6 +1743,8 @@ items:
           - wght
           - exct
           - confLevel
+      refs:
+          - LandisKoch1977
 
     - name: about
       title: "About This Analysis"
@@ -1908,6 +1941,9 @@ items:
           - subgroupVariable
           - confLevel
           - subgroupMinCases
+      refs:
+          - LandisKoch1977
+          - Koo2016
 
     - name: subgroupForestPlotImage
       title: 'Forest Plot of Agreement by Subgroup'

@@ -83,7 +83,14 @@ enhancedROCClass <- R6::R6Class(
 
         # Render collected notices as HTML
         .renderNotices = function() {
+            # An empty list must CLEAR the panel, not leave it alone: the Html item keeps
+            # whatever the PREVIOUS run wrote until something overwrites it. Every early return
+            # in .run()/.prepareData() adds a notice first, so this branch is reached only via
+            # the on.exit() registered in .run() - a throw raised before the first .addNotice().
+            # That is exactly the case where the last run's ERROR panel would otherwise stand
+            # above tables computed from new options.
             if (length(private$.noticeList) == 0) {
+                self$results$results$notices$setContent("")
                 return()
             }
 
@@ -200,6 +207,16 @@ enhancedROCClass <- R6::R6Class(
             for (imgName in private$.plotImageNames()) {
                 self$results$results$get(imgName)$setSize(plot_w, plot_h)
             }
+
+            # The sensitivity/specificity limits are Clopper-Pearson intervals at the user's
+            # Confidence level (see .calculateBinomialCI()), so the heading has to say which
+            # level rather than the hard-coded "95%" it used to carry.
+            conf_pct <- format(self$options$confidenceLevel %||% 95)
+            diagTable <- self$results$results$diagnosticPerformance
+            diagTable$getColumn("sensitivity_ci")$setTitle(
+                .fmt(.("Sensitivity {pct}% CI"), pct = conf_pct))
+            diagTable$getColumn("specificity_ci")$setTitle(
+                .fmt(.("Specificity {pct}% CI"), pct = conf_pct))
         },
 
         .plotImageNames = function() {
@@ -323,6 +340,12 @@ enhancedROCClass <- R6::R6Class(
         .run = function() {
             # Reset notice list, instructions, summary, and preset config at start of every run
             private$.noticeList <- list()
+            # Notices are rendered on EVERY exit path: the early returns below, normal
+            # completion, and any stop() raised after the last .addNotice() - a throw inside
+            # private$.publishPlotStates(), say. Such a run used to skip the tail call entirely
+            # and leave the PREVIOUS run's panel on screen above tables it did not produce.
+            # Same idiom as R/stagemigration.b.R.
+            on.exit(private$.renderNotices(), add = TRUE)
             private$.instructionsHtml <- private$.getInstructions()
             private$.presetConfig <- NULL
             private$.presetNoticeShown <- FALSE
@@ -365,7 +388,6 @@ enhancedROCClass <- R6::R6Class(
                     title = .("Missing Variables"),
                     content = .("Please select an outcome variable and at least one predictor variable for ROC analysis. \u2022 Outcome variable: required (binary/factor). \u2022 Predictor variables: at least one numeric variable required for ROC curve calculation.")
                 )
-                private$.renderNotices()
                 return()
             }
 
@@ -375,7 +397,6 @@ enhancedROCClass <- R6::R6Class(
             # Prepare and validate data
             analysisData <- private$.prepareData()
             if (is.null(analysisData)) {
-                private$.renderNotices()
                 return()
             }
 
@@ -401,9 +422,16 @@ enhancedROCClass <- R6::R6Class(
                 )
             }
 
-            # Check for class imbalance
+            # Check for class imbalance. Detection is unconditional: a display checkbox may
+            # decide whether a panel is SHOWN, never whether a condition that invalidates the
+            # AUC is LOOKED FOR. detectImbalance and showImbalanceWarning both default to false,
+            # so a 20:1 outcome used to produce an AUC, a confidence interval and an optimal
+            # cut-point with no caution anywhere on the page. The metrics table this fills is
+            # still `visible: (detectImbalance)`, so nothing new appears unless asked for -
+            # only the notice is now guaranteed. The precision-recall panel stays opt-in: it is
+            # extra computation for an extra table, not a safety check.
+            private$.checkClassImbalance(analysisData)
             if (self$options$detectImbalance) {
-                private$.checkClassImbalance(analysisData)
                 private$.populatePrecisionRecall(analysisData)
             }
 
@@ -518,7 +546,7 @@ enhancedROCClass <- R6::R6Class(
                 private$.addNotice(
                     type = "WARNING",
                     title = .("Weighted Averaging Is Not Available with the One-vs-One Strategy"),
-                    content = .("The Hand-Till one-vs-one AUC is defined as an unweighted average over class PAIRS, so there is no prevalence-weighted version of it and none was computed; the Multi-Class Average AUC table reports the Hand-Till value instead. Choose the One-vs-Rest strategy if you want a prevalence-weighted average.")
+                    content = .("The one-vs-one pairwise AUC is defined as an unweighted average over class PAIRS, so there is no prevalence-weighted version of it and none was computed; the Multi-Class Average AUC table reports the unweighted pairwise value instead. Choose the One-vs-Rest strategy if you want a prevalence-weighted average.")
                 )
             }
 
@@ -572,9 +600,6 @@ enhancedROCClass <- R6::R6Class(
             }
 
             private$.publishPlotStates()
-
-            # Render all collected notices as HTML (must be last step)
-            private$.renderNotices()
         },
         .prepareData = function() {
             # Validate data using enhanced error handling if available.
@@ -948,7 +973,7 @@ enhancedROCClass <- R6::R6Class(
                         # This prevents AUC inversion for biomarkers where higher values indicate disease
                         direction_param <- self$options$direction
                         if (direction_param == "auto") {
-                            direction <- "auto" # Let pROC::roc() auto-detect based on AUC maximization
+                            direction <- "auto" # pROC picks "<" or ">" by comparing the two groups' medians
                         } else if (direction_param == "higher") {
                             direction <- "<" # pROC: "<" means controls < cases (higher values = positive)
                         } else if (direction_param == "lower") {
@@ -1054,11 +1079,6 @@ enhancedROCClass <- R6::R6Class(
                         # Surface the auto-detected direction for clinical safety
                         if (direction_param == "auto") {
                             dir_label <- if (roc_obj$direction == "<") "higher predictor values classify as positive (disease)" else "lower predictor values classify as positive (disease)"
-                            # Auto-detection picks whichever direction MAXIMISES the AUC, so the
-                            # reported AUC can never fall below 0.5 no matter how uninformative
-                            # -- or how inverted -- the predictor is. A marker whose true
-                            # discrimination is 0.20 is reported as 0.80. That consequence, not
-                            # just the chosen direction, is what the reader needs.
                             # Quantify the upward bias at THIS sample size.
                             #
                             # pROC's direction = "auto" compares the two groups' MEDIANS; it does
@@ -1068,8 +1088,10 @@ enhancedROCClass <- R6::R6Class(
                             # direction is read from the same data used to compute the AUC, the
                             # result is still biased upward, and badly so in small samples --
                             # simulating a marker with no information at all gives a mean reported
-                            # AUC of 0.593 at n = 20 and 0.565 at n = 40, against 0.502 with the
-                            # direction fixed in advance, exceeding 0.60 in 43% of runs at n = 20.
+                            # AUC of about 0.60 at n = 20 and about 0.57 at n = 40, against 0.50
+                            # with the direction fixed in advance, and exceeds 0.60 in roughly 45
+                            # of every 100 runs at n = 20 (1000 reps; the same figures the
+                            # Direction option's description quotes).
                             # 0.5 + se * sqrt(2/pi) with the Hanley-McNeil null standard error is
                             # a close approximation to that mean (0.606 at n = 20, 0.515 at
                             # n = 1000) and is what is quoted below. This bias is what turns a null
@@ -1118,10 +1140,15 @@ enhancedROCClass <- R6::R6Class(
                         n_negative <- sum(roc_obj$response == levels(roc_obj$response)[1])
                         prevalence <- n_positive / n_obs
 
-                        # Per-class event count guard
+                        # Per-class event count guard. ERROR, not STRONG_WARNING: the clinical
+                        # threshold checklist puts fewer than 10 events in a class at ERROR, and
+                        # the pane this sits above is a full results pane - AUC, confidence
+                        # interval and an optimal cut-point - computed from as few as 4 events in
+                        # a 200-patient dataset. None of those quantities means anything there,
+                        # so the banner has to read as a stop sign rather than a caution.
                         if (n_positive < 10 || n_negative < 10) {
                             private$.addNotice(
-                                type = "STRONG_WARNING",
+                                type = "ERROR",
                                 title = sprintf(.("Low Per-Class Count: %s"), predictor),
                                 content = sprintf(.("Very few events in one or both classes for %1$s: %2$s positive, %3$s negative. ROC estimates, confidence intervals, and optimal cutoffs are unreliable with fewer than 10 events per class. Collect more data before drawing clinical conclusions."), predictor, n_positive, n_negative)
                             )
@@ -2576,8 +2603,12 @@ enhancedROCClass <- R6::R6Class(
                 recommendation = recommendation
             ))
 
-            # Generate Notice if imbalanced (replaces HTML warning)
-            if (is_imbalanced && self$options$showImbalanceWarning) {
+            # Generate Notice if imbalanced (replaces HTML warning). DETECTION is never gated by
+            # a display option: `showImbalanceWarning` used to sit in this condition with
+            # `default: false`, so a 20:1 outcome produced an AUC, a confidence interval and an
+            # optimal cut-point with no caution anywhere on the page. That checkbox now decides
+            # only how much the warning EXPLAINS; the warning itself always fires.
+            if (is_imbalanced) {
                 # Determine notice type based on severity
                 notice_type <- if (ratio_value >= 10) {
                     "STRONG_WARNING"
@@ -2587,17 +2618,30 @@ enhancedROCClass <- R6::R6Class(
                     "WARNING"
                 }
 
-                # Build concise, single-line notice content
-                prc_recommendation <- if (self$options$recommendPRC) {
-                    " \u{2022} Consider using Precision-Recall Curve (PRC) analysis instead of ROC for more reliable performance assessment with imbalanced data."
+                # Both clauses were untranslated English spliced through %s, so a translated
+                # notice carried an English sentence mid-line. Translate the whole clause, and
+                # keep the leading separator OUTSIDE .() - a leading space in a msgid does not
+                # survive the catalog.
+                prc_recommendation <- paste0(" \u2022 ", if (self$options$recommendPRC) {
+                    .("Consider using Precision-Recall Curve (PRC) analysis instead of ROC for more reliable performance assessment with imbalanced data.")
                 } else {
-                    " \u{2022} Interpret ROC results cautiously given class imbalance."
+                    .("Interpret ROC results cautiously given class imbalance.")
+                })
+
+                # The explanatory bullets are what `showImbalanceWarning` now controls.
+                imbalance_detail <- if (isTRUE(self$options$showImbalanceWarning)) {
+                    paste0(" ", .("\u2022 ROC curves may be optimistic because specificity is dominated by the majority class. \u2022 A high AUC may mask poor minority-class performance."))
+                } else {
+                    ""
                 }
 
                 private$.addNotice(
                     type = notice_type,
                     title = .("Class Imbalance Detected"),
-                    content = sprintf(.("Class imbalance detected: %1$s ratio (%2$s positive, %3$s negative, prevalence %4$s%%). \u2022 %5$s. \u2022 ROC curves may be optimistic because specificity is dominated by majority class. \u2022 High AUC may mask poor minority class performance.%6$s"), ratio_text, n_positive, n_negative, round(prevalence * 100, 1), severity, prc_recommendation)
+                    content = paste0(
+                        sprintf(.("Class imbalance detected: %1$s ratio (%2$s positive, %3$s negative, prevalence %4$s%%). \u2022 %5$s.%6$s"), ratio_text, n_positive, n_negative, round(prevalence * 100, 1), severity, prc_recommendation),
+                        imbalance_detail
+                    )
                 )
             }
         },
@@ -2945,8 +2989,14 @@ enhancedROCClass <- R6::R6Class(
             }
         },
         .calculateBinomialCI = function(successes, n) {
-            # Exact (Clopper-Pearson) confidence interval
-            bt <- suppressWarnings(binom.test(successes, n))
+            # Exact (Clopper-Pearson) confidence interval at the level the user asked for.
+            # binom.test()'s conf.level defaults to 0.95, so omitting it printed 95% limits for
+            # sensitivity and specificity in the same table as an AUC interval that DID honour
+            # the Confidence level option - a user who set 99% got a silently mixed table with
+            # no indication which column was which. The column titles carry the level too; see
+            # the getColumn()$setTitle() calls in .init().
+            conf <- (self$options$confidenceLevel %||% 95) / 100
+            bt <- suppressWarnings(binom.test(successes, n, conf.level = conf))
             return(bt$conf.int)
         },
         .computePRMetrics = function(scores, labels, positive_label, roc_direction = "<") {
@@ -3785,6 +3835,13 @@ enhancedROCClass <- R6::R6Class(
                     TRUE
                 },
                 error = function(e) {
+                    # .checkpoint() signals a restart by stop()ping with a condition carrying
+                    # code == "restart" (jmvcore::createError("restarting", "restart")). It is
+                    # called inside the confidence-band loop above, and .checkpointCB is still
+                    # live while .createImage() runs, so this handler sees it -- and would turn
+                    # "the user changed an option, abandon this render" into a permanent
+                    # "ROC Curve Plot Error ... restarting" panel. Re-raise it untouched.
+                    if (identical(e$code, "restart")) stop(e)
                     # A renderer cannot raise a notice - see .plotMessage().
                     private$.plotMessage(
                         ggtheme,
@@ -4916,7 +4973,9 @@ enhancedROCClass <- R6::R6Class(
         # One-vs-rest ROCs share one reading of the marker. With direction "auto" chosen
         # per class, an ordinal outcome and a monotone marker force the middle class's AUC
         # to be >= 0.5 whichever way it points, inflating the macro average. Use the user's
-        # direction, or the direction that separates the extreme levels when it is "auto".
+        # direction, or, when it is "auto", the direction that separates the outcome's FIRST
+        # and LAST factor levels. Those are the extremes only for an ordered outcome; for a
+        # nominal one they are just the alphabetically first and last, so the pick is arbitrary.
         .ovrDirection = function(outcome, pred_vals) {
             opt <- self$options$direction %||% "auto"
             if (identical(opt, "higher")) return("<")
@@ -4928,6 +4987,53 @@ enhancedROCClass <- R6::R6Class(
             tryCatch(.quietly(pROC::roc(response = resp, predictor = pred_vals[ext],
                                         direction = "auto", quiet = TRUE))$direction,
                      error = function(e) "<")
+        },
+
+        # One-vs-one AUCs: one AUC per class pair, every pair read in the SAME declared
+        # direction. Shared by both multi-class branches so the number quoted in the
+        # One-vs-Rest table is the same statistic the One-vs-One table prints. It used to be
+        # taken from pROC::multiclass.roc(), which orients each pair with "auto".
+        #
+        # This is deliberately NOT pROC's number, and it is deliberately no longer called
+        # Hand and Till's M anywhere the user can see. Hand and Till define M against a
+        # classifier's own per-class probabilities; with a bare marker that scoring rule has to
+        # be supplied from outside, and pROC's "auto" supplies it per pair by comparing the two
+        # groups' MEDIANS - literally `direction == "auto" && median(controls) <= median(cases)`
+        # in pROC:::roc.default. That orientation is fitted to the same data that then supply the
+        # AUC, so it is biased upward: the exact behaviour the binary path raises a STRONG notice
+        # about. It is NOT floored at 0.5, because a median split can disagree with the rank
+        # statistic (measured on lognormal noise, n = 60, 3 classes: per-pair auto AUCs
+        # 0.4750 / 0.4600 / 0.3950, multiclass.roc() = 0.4433; and on 3000 null binary samples at
+        # n = 20, auto still reported below 0.5 in 12 per cent of runs, min 0.35). Taking the
+        # orientation from the user's Direction instead makes the estimate honest rather than
+        # merely different, at the cost that it falls below 0.5 when the marker reads backwards.
+        # Because it can, it is labelled "one-vs-one pairwise AUC", not "Hand-Till".
+        #
+        # The price of one declared direction: a marker that orders the classes
+        # non-monotonically averages toward 0.5 even when single pairs separate strongly
+        # (measured: pairs 0.9500 / 0.4750 / 0.0025 -> mean 0.4758, which .interpretAUC() calls
+        # "Below chance", for a marker that tells B from A at 0.95 and B from C at 0.9975 read
+        # the other way). Both callers therefore print the RANGE of pair AUCs beside the mean,
+        # and the avgTable "ovo_definition" note explains it.
+        #
+        # Column order follows combn(levels(outcome), 2), which is what the One-vs-One row
+        # loop below also uses, so pair i here is pair i there.
+        # min()/max() without na.rm print "pairs range NA to NA" beside a finite mean the
+        # moment ONE pair fails; with na.rm an all-NA vector returns -Inf/Inf plus a warning.
+        # Report the range of the pairs that actually computed, or NA when none did.
+        .pairRange = function(x) {
+            x <- x[is.finite(x)]
+            if (!length(x)) c(NA_real_, NA_real_) else c(min(x), max(x))
+        },
+
+        .pairwiseAUCs = function(outcome, pred_vals, direction) {
+            pairs <- combn(levels(outcome), 2)
+            vapply(seq_len(ncol(pairs)), function(i) {
+                keep <- outcome %in% pairs[, i]
+                resp <- factor(outcome[keep], levels = pairs[, i])
+                as.numeric(pROC::roc(response = resp, predictor = pred_vals[keep],
+                                     direction = direction, quiet = TRUE)$auc)
+            }, numeric(1))
         },
 
         .populateMultiClassROC = function() {
@@ -4944,7 +5050,12 @@ enhancedROCClass <- R6::R6Class(
             avgTable <- self$results$results$multiClassAverage
             avgTable$setNote(
                 "weighted",
-                .("Weighted AUC averages the one-vs-rest AUCs in proportion to how many cases each class contains; Macro AUC weights every class equally. The One-vs-One (Hand-Till) strategy is defined as an unweighted average over class PAIRS, so no weighted value is given for it."))
+                .("Weighted AUC averages the one-vs-rest AUCs in proportion to how many cases each class contains; Macro AUC weights every class equally. The One-vs-One strategy is defined as an unweighted average over class PAIRS, so no weighted value is given for it."))
+            # Says why this is not the figure pROC::multiclass.roc() prints, why it is not
+            # called Hand and Till's M, and what one declared direction costs: see .pairwiseAUCs().
+            avgTable$setNote(
+                "ovo_definition",
+                .("The one-vs-one pairwise AUC averages the AUC of every class pair, reading all pairs in ONE direction: the one set under Direction, or, when Direction is auto, the one that separates the outcome's first and last factor levels (the extremes only if the outcome is ordered \u2014 for an unordered outcome those are merely the alphabetically first and last levels, so the orientation is arbitrary and Direction should be set explicitly). A pair below 0.5 separates that pair in the opposite order to the one declared. Because the pairs are averaged unweighted, a marker that orders the classes non-monotonically averages toward 0.5 even when single pairs separate strongly, so read the range of pair AUCs printed beside the mean rather than the mean alone. This is not the figure pROC's multiclass.roc() prints: that function orients each pair by comparing the two groups' median values on these same data, which biases it upward but does not floor it at 0.5 either."))
             # Declared `rows: 1` in the .r.yaml, but this method loops over predictors. Writing
             # setRow(rowNo = 1) inside that loop meant each predictor overwrote the last, so the
             # panel silently showed whichever marker happened to sit last in the Predictor
@@ -4972,6 +5083,11 @@ enhancedROCClass <- R6::R6Class(
                 return()
             }
 
+            # The direction note used to be written with setNote() INSIDE this loop, so with
+            # two predictors the last one's direction silently overwrote the first's while the
+            # note still claimed it held for every marker. Collect them and write once, below.
+            dir_by_pred <- character(0)
+
             for (predictor in private$.predictors) {
                 tryCatch(
                     {
@@ -4979,27 +5095,11 @@ enhancedROCClass <- R6::R6Class(
                         data <- private$.analysisData
                         pred_vals <- data[[predictor]]
 
-                        # Run Multi-class ROC
-                        mc_roc <- .quietly(pROC::multiclass.roc(
-                            response = outcome,
-                            predictor = pred_vals,
-                            levels = levels(outcome)
-                        ))
-
-                        # Hand-Till pairwise AUC from pROC::multiclass.roc
-                        mc_auc_val <- as.numeric(mc_roc$auc)
-                        mc_interp <- private$.interpretAUC(mc_auc_val)
-
                         # If we want One-vs-Rest, compute OVR macro average separately
                         if (self$options$multiClassStrategy == "ovr") {
                             ovr_aucs <- numeric(nlevels(outcome))
                             ovr_dir <- private$.ovrDirection(outcome, pred_vals)
-                            tryCatch(aucTable$setNote(
-                                "ovr_direction",
-                                sprintf(.("One-vs-rest curves read %1$s values of each marker as indicating the class, the same way for every class (%2$s)."),
-                                        if (identical(ovr_dir, "<")) .("higher") else .("lower"),
-                                        if (identical(self$options$direction, "auto")) .("chosen from the two extreme outcome levels because Direction is set to auto") else .("as specified by Direction")),
-                                init = FALSE), error = function(e) NULL)
+                            dir_by_pred[[predictor]] <- ovr_dir
                             for (j in seq_along(levels(outcome))) {
                                 lvl <- levels(outcome)[j]
                                 # Create binary outcome: Class vs Rest
@@ -5049,20 +5149,35 @@ enhancedROCClass <- R6::R6Class(
                             class_n <- as.numeric(table(outcome)[levels(outcome)])
                             ovr_weighted_auc <- stats::weighted.mean(ovr_aucs, w = class_n, na.rm = TRUE)
                             ovr_interp <- private$.interpretAUC(ovr_macro_auc)
+                            # Same computation as the One-vs-One branch below (same helper,
+                            # same direction), so the two panels can no longer print two
+                            # different numbers under one name.
+                            ovr_pair_aucs <- private$.pairwiseAUCs(outcome, pred_vals, ovr_dir)
+                            ht_quote <- mean(ovr_pair_aucs, na.rm = TRUE)
+                            ovr_pair_range <- private$.pairRange(ovr_pair_aucs)
                             avgTable$addRow(rowKey = private$.escapeVar(predictor), values = list(
                                 averaging_method = paste0(predictor, ": ", .("OVR Macro Average")),
                                 macro_auc = ovr_macro_auc,
-                                # This column used to be filled with the Hand-Till PAIRWISE AUC,
-                                # which is an unweighted statistic over class pairs - printing it
-                                # under a "Weighted AUC" heading mislabelled it. The Hand-Till
-                                # value is still reported, correctly named, in the interpretation
-                                # cell; this is now the actual prevalence-weighted average.
+                                # This column used to be filled with the PAIRWISE AUC, which is
+                                # an unweighted statistic over class pairs - printing it under a
+                                # "Weighted AUC" heading mislabelled it. The pairwise value is
+                                # still reported, correctly named, in the interpretation cell;
+                                # this is now the actual prevalence-weighted average.
                                 weighted_auc = ovr_weighted_auc,
-                                interpretation = paste0(ovr_interp, " (Hand-Till pairwise: ", round(mc_auc_val, 3), ")")
+                                # paste0() around a translated word left the parenthetical
+                                # untranslatable and unnamed; the msgid is now a literal and
+                                # says which statistic the number is. Not named "Hand-Till": it
+                                # is oriented by the declared Direction, see .pairwiseAUCs().
+                                # The range goes with the mean because this panel prints no
+                                # per-pair rows: without it, a non-monotone marker's collapse
+                                # toward 0.5 is invisible here.
+                                interpretation = sprintf(
+                                    .("%1$s (one-vs-one pairwise AUC, unweighted mean over class pairs: %2$.3f; pairs range %3$.3f to %4$.3f)"),
+                                    ovr_interp, ht_quote, ovr_pair_range[1], ovr_pair_range[2])
                             ))
                         } else {
-                            # One-vs-One (Pairwise) - Hand-Till method
-                            # Hand-Till is DEFINED as an unweighted average over class PAIRS, so
+                            # One-vs-One (Pairwise)
+                            # It is DEFINED as an unweighted average over class PAIRS, so
                             # there is no prevalence weighting of it that is the same statistic.
                             # The summary row is now written AFTER the pair loop and from the
                             # pairwise AUCs actually shown, instead of from pROC's own
@@ -5073,36 +5188,21 @@ enhancedROCClass <- R6::R6Class(
 
                             # Per-pair AUC breakdown
                             # direction = "auto" was hard-coded here, so the user's Direction
-                            # setting was silently discarded and every pairwise AUC was forced
-                            # to at least 0.5 by picking the orientation that maximises it on
-                            # the same data - the exact bias the binary path raises a STRONG
-                            # notice about. Use the same resolution as the one-vs-rest branch:
+                            # setting was silently discarded and every pairwise AUC was oriented
+                            # by pROC from the same data it is computed on (a median comparison,
+                            # not an AUC maximisation, so not floored at 0.5 either) - the exact
+                            # fitted-orientation bias the binary path raises a STRONG notice
+                            # about. Use the same resolution as the one-vs-rest branch:
                             # one orientation for all pairs, honouring Direction, and for
-                            # "auto" derived once from the extreme outcome levels.
+                            # "auto" derived once from the outcome's first and last factor
+                            # levels (arbitrary unless the outcome is ordered).
                             pair_dir <- private$.ovrDirection(outcome, pred_vals)
-                            tryCatch(aucTable$setNote(
-                                "ovo_direction",
-                                .fmt(.("One-vs-one curves read {dir} values of each marker as indicating the later class of the pair, the same way for every pair ({why})."),
-                                     dir = if (identical(pair_dir, "<")) .("higher") else .("lower"),
-                                     why = if (identical(self$options$direction, "auto")) .("chosen from the two extreme outcome levels because Direction is set to auto") else .("as specified by Direction")),
-                                init = FALSE), error = function(e) NULL)
+                            dir_by_pred[[predictor]] <- pair_dir
                             pairs <- combn(levels(outcome), 2)
-                            pair_aucs <- numeric(ncol(pairs))
+                            pair_aucs <- private$.pairwiseAUCs(outcome, pred_vals, pair_dir)
                             for (i in seq_len(ncol(pairs))) {
                                 class1 <- pairs[1, i]
                                 class2 <- pairs[2, i]
-
-                                # Subset data
-                                subset_idx <- outcome %in% c(class1, class2)
-                                subset_outcome <- factor(outcome[subset_idx], levels = c(class1, class2))
-                                subset_pred <- pred_vals[subset_idx]
-
-                                roc_obj <- pROC::roc(
-                                    response = subset_outcome, predictor = subset_pred,
-                                    direction = pair_dir, quiet = TRUE
-                                )
-
-                                pair_aucs[i] <- as.numeric(roc_obj$auc)
 
                                 row <- list(
                                     class = if (length(private$.predictors) > 1)
@@ -5119,11 +5219,17 @@ enhancedROCClass <- R6::R6Class(
                             }
 
                             ht_auc <- mean(pair_aucs, na.rm = TRUE)
+                            pair_range <- private$.pairRange(pair_aucs)
                             avgTable$addRow(rowKey = private$.escapeVar(predictor), values = list(
-                                averaging_method = paste0(predictor, ": ", .("Hand-Till Pairwise")),
+                                averaging_method = paste0(predictor, ": ", .("One-vs-One Pairwise")),
                                 macro_auc = ht_auc,
                                 weighted_auc = NA,
-                                interpretation = private$.interpretAUC(ht_auc)
+                                # The bucket word describes the unweighted mean, which collapses
+                                # toward 0.5 for a non-monotone marker; the range is what tells
+                                # the reader whether that is what happened. See .pairwiseAUCs().
+                                interpretation = sprintf(
+                                    .("%1$s (pairs range %2$.3f to %3$.3f)"),
+                                    private$.interpretAUC(ht_auc), pair_range[1], pair_range[2])
                             ))
                         }
                     },
@@ -5131,6 +5237,34 @@ enhancedROCClass <- R6::R6Class(
                         private$.addNotice(type = "WARNING", title = sprintf(.("Multi-Class ROC Error: %s"), predictor), content = sprintf(.("Multi-class ROC analysis failed for %1$s: %2$s"), predictor, e$message))
                     }
                 )
+            }
+
+            # One note for the whole table, written after every predictor has resolved its
+            # direction. Two markers can resolve differently under Direction = auto, so the
+            # note names them when they disagree instead of quoting whichever ran last.
+            if (length(dir_by_pred)) {
+                word_higher <- .("higher")
+                word_lower <- .("lower")
+                dir_words <- ifelse(dir_by_pred == "<", word_higher, word_lower)
+                why <- if (identical(self$options$direction, "auto"))
+                    .("chosen from the outcome's first and last factor levels because Direction is set to auto; for an unordered outcome those are merely the alphabetically first and last levels, so the orientation is arbitrary")
+                else
+                    .("as specified by Direction")
+                same_dir <- length(unique(dir_words)) == 1L
+                per_marker <- paste(paste0(names(dir_by_pred), ": ", dir_words), collapse = "; ")
+                note_key <- if (identical(self$options$multiClassStrategy, "ovr")) "ovr_direction" else "ovo_direction"
+                note_txt <- if (identical(note_key, "ovr_direction")) {
+                    if (same_dir)
+                        sprintf(.("One-vs-rest curves read %1$s values of every marker as indicating the class, the same way for every class (%2$s)."), dir_words[[1]], why)
+                    else
+                        sprintf(.("One-vs-rest curves read each marker the same way for every class, but the markers do not all read the same way (%1$s). The orientation was %2$s."), per_marker, why)
+                } else {
+                    if (same_dir)
+                        sprintf(.("One-vs-one curves read %1$s values of every marker as indicating the later class of the pair, the same way for every pair (%2$s)."), dir_words[[1]], why)
+                    else
+                        sprintf(.("One-vs-one curves read each marker the same way for every pair, but the markers do not all read the same way (%1$s). The orientation was %2$s."), per_marker, why)
+                }
+                tryCatch(aucTable$setNote(note_key, note_txt, init = FALSE), error = function(e) NULL)
             }
         },
         .plotMultiClassROC = function(image, ggtheme, theme, ...) {
@@ -5171,7 +5305,7 @@ enhancedROCClass <- R6::R6Class(
 
                     if (self$options$multiClassStrategy == "ovo") {
                         # Do NOT simply advise switching to OVR: that changes the estimand, not
-                        # just the picture. OVO reports the Hand-Till pairwise AUC over class
+                        # just the picture. OVO reports the pairwise AUC over class
                         # pairs; OVR reports the macro average of one-vs-rest AUCs, which
                         # penalises an intermediate class. The two differ materially on the same
                         # data, so the trade-off has to be stated, not hidden behind "switch to".
@@ -5183,7 +5317,7 @@ enhancedROCClass <- R6::R6Class(
                                 "AUC values in the tables are unaffected. Switching to One-vs-Rest ",
                                 "would draw the curves, but it also changes the reported statistic: ",
                                 "OVR reports the macro average of one-vs-rest AUCs rather than the ",
-                                "Hand-Till pairwise AUC, and the two do not agree."
+                                "one-vs-one pairwise AUC, and the two do not agree."
                             )
                         ))
                     }
@@ -5306,7 +5440,15 @@ enhancedROCClass <- R6::R6Class(
                             private$.addNotice(
                                 type = "STRONG_WARNING",
                                 title = sprintf(.("Values Read as Risks: %s"), predictor),
-                                content = sprintf(.("Every value of %s falls between 0 and 1, so they are being used directly as predicted risks rather than modelled. Net benefit, NNT and the decision-impact rows below therefore assume this column already IS a calibrated probability of the outcome. If it is a measurement that merely happens to lie in that range, rescale it or these figures will not mean what they say."), predictor)
+                                # Two complete sentences per branch rather than an untranslated
+                                # English clause spliced through %s. The ">" branch must say the
+                                # values were INVERTED: the panel silently used 1 - x as the risk,
+                                # matching the wording already used by the calibration panel.
+                                content = if (identical(roc_dir, ">")) {
+                                    sprintf(.("Every value of %s falls between 0 and 1, so they are being used directly as predicted risks rather than modelled, inverted to 1 minus the value because lower values indicate the positive class. Net benefit, NNT and the decision-impact rows below therefore assume this column already IS a calibrated probability, read that way round. If it is a measurement that merely happens to lie in that range, rescale it or these figures will not mean what they say."), predictor)
+                                } else {
+                                    sprintf(.("Every value of %s falls between 0 and 1, so they are being used directly as predicted risks rather than modelled. Net benefit, NNT and the decision-impact rows below therefore assume this column already IS a calibrated probability of the outcome. If it is a measurement that merely happens to lie in that range, rescale it or these figures will not mean what they say."), predictor)
+                                }
                             )
                         } else {
                             # The OPPOSITE branch - the common one for any raw marker - had no

@@ -451,11 +451,18 @@ test_that("Turkish msgstrs that reword count sentences keep the counts on their 
                             if (length(hit)) hit[[1]]$msgstr else NA_character_ }
     # sprintf() fills conversions in English order; a reworded Turkish sentence
     # must use %n$ markers or the counts land on the wrong nouns.
-    dm <- tr_of("Meta-regression on %d studies with a covariate contributing %d model parameter(s) (%d residual degrees of freedom). The usual recommendation is at least 10 studies per covariate, so estimates may be unstable and confidence intervals unreliable. Report this as exploratory only.")
-    expect_false(is.na(dm))
-    out <- sprintf(dm, 12L, 3L, 9L)
-    expect_match(out, "3 model parametresine", fixed = TRUE)
-    expect_match(out, "12 \u00e7al\u0131\u015fma")
+    ihc_decomp <- tr_of("Two-way random-effects decomposition (value = case + method + error) on %d cases measured by %d methods; components sum to the total variance.")
+    expect_false(is.na(ihc_decomp))
+    out_decomp <- sprintf(ihc_decomp, 30L, 3L)
+    expect_match(out_decomp, "3 y\u00f6ntemle", fixed = TRUE)
+    expect_match(out_decomp, "30 vaka", fixed = TRUE)
+
+    ihc_regions <- tr_of("We analysed %d cases, each measured in up to %d regions, to see how well regional measurements represent the biomarker expression of a case.")
+    expect_false(is.na(ihc_regions))
+    out_regions <- sprintf(ihc_regions, 50L, 4L)
+    expect_match(out_regions, "4 b\u00f6lgede", fixed = TRUE)
+    expect_match(out_regions, "50 vakay\u0131", fixed = TRUE)
+
     sw <- tr_of("Study included %d patients with %d timeline observations. Median observed duration was %.1f %s (range: %.1f to %.1f %s).")
     expect_false(is.na(sw))
     out <- sprintf(sw, 40L, 170L, 5.5, "ay", 1, 9, "ay")

@@ -268,6 +268,8 @@ diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         srocplot = function() private$.items[["srocplot"]],
         funnelplot = function() private$.items[["funnelplot"]],
         interpretation = function() private$.items[["interpretation"]],
+        likelihoodRatioGuide = function() private$.items[["likelihoodRatioGuide"]],
+        predictiveValues = function() private$.items[["predictiveValues"]],
         forestplot_explanation = function() private$.items[["forestplot_explanation"]],
         srocplot_explanation = function() private$.items[["srocplot_explanation"]],
         funnelplot_explanation = function() private$.items[["funnelplot_explanation"]]),
@@ -282,6 +284,7 @@ diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "ClinicoPathJamoviModule",
                     "mada",
                     "metafor",
+                    "Reitsma2005",
                     "CochraneDTAHandbook2023",
                     "DeeksMacaskillIrwig2005",
                     "ZwindermanBossuyt2008",
@@ -337,6 +340,9 @@ diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 name="bivariateresults",
                 title="Bivariate Meta-Analysis Results",
                 visible="(bivariate_analysis)",
+                refs=list(
+                    "Reitsma2005",
+                    "mada"),
                 clearWith=list(
                     "study",
                     "true_positives",
@@ -377,6 +383,9 @@ diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 name="hsrocresults",
                 title="Proportional-Hazards SROC Model Results",
                 visible="(hsroc_analysis)",
+                refs=list(
+                    "HollingBoehningBoehning2012",
+                    "mada"),
                 clearWith=list(
                     "study",
                     "true_positives",
@@ -515,6 +524,8 @@ diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 name="publicationbias",
                 title="Publication Bias Assessment",
                 visible="(publication_bias)",
+                refs=list(
+                    "DeeksMacaskillIrwig2005"),
                 clearWith=list(
                     "study",
                     "true_positives",
@@ -668,6 +679,56 @@ diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 name="interpretation",
                 title="Clinical Interpretation and Guidelines",
                 visible="(show_interpretation)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="likelihoodRatioGuide",
+                title="Likelihood Ratios for Clinical Decision-Making",
+                visible="(show_interpretation)",
+                rows=6,
+                columns=list(
+                    list(
+                        `name`="lr_type", 
+                        `title`="Likelihood Ratio", 
+                        `type`="text"),
+                    list(
+                        `name`="range", 
+                        `title`="Value Range", 
+                        `type`="text"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Clinical Interpretation", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="predictiveValues",
+                title="Predictive Values by Prevalence",
+                visible="(show_interpretation)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="prevalence", 
+                        `title`="Prevalence", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="ppv", 
+                        `title`="PPV", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="npv", 
+                        `title`="NPV", 
+                        `type`="number", 
+                        `format`="pc")),
+                clearWith=list(
+                    "study",
+                    "true_positives",
+                    "false_positives",
+                    "false_negatives",
+                    "true_negatives",
+                    "method",
+                    "zero_cell_correction",
+                    "confidence_level")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="forestplot_explanation",
@@ -708,12 +769,10 @@ diagnosticmetaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' Diagnostic Test Meta-Analysis for Pathology
 #'
 #' Comprehensive meta-analysis of diagnostic test accuracy studies designed 
-#' for
-#' pathology research. Performs bivariate random-effects modeling, 
-#' proportional-hazards SROC analysis,
-#' meta-regression, and publication bias assessment for AI algorithm 
-#' validation
-#' and biomarker diagnostic accuracy synthesis.
+#' for pathology research. Performs bivariate random-effects modeling, 
+#' proportional-hazards SROC analysis, meta-regression, and publication bias 
+#' assessment for AI algorithm validation and biomarker diagnostic accuracy 
+#' synthesis.
 #' 
 #' @param data the data as a data frame
 #' @param study Variable containing unique study identifiers
@@ -794,6 +853,8 @@ diagnosticmetaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   \code{results$srocplot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$funnelplot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$likelihoodRatioGuide} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$predictiveValues} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$forestplot_explanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$srocplot_explanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$funnelplot_explanation} \tab \tab \tab \tab \tab a html \cr

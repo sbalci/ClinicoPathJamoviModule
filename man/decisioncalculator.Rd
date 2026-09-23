@@ -121,11 +121,11 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 Medical Decision Calculator for diagnostic test evaluation when you have
 the four key counts: True Positives (TP), False Positives (FP), True
 Negatives (TN), and False Negatives (FN). Calculates comprehensive
-diagnostic performance metrics including sensitivity, specificity,
-positive and negative predictive values, likelihood ratios, and
-post-test probabilities. Supports confidence interval estimation and
-Fagan nomogram visualization for educational interpretation. Presets and
-examples are illustrative only and are not clinical guides.
+diagnostic performance metrics including sensitivity, specificity, positive
+and negative predictive values, likelihood ratios, and post-test
+probabilities. Supports confidence interval estimation and Fagan nomogram
+visualization for educational interpretation. Presets and examples are
+illustrative only and are not clinical guides.
 }
 \examples{
 \donttest{
