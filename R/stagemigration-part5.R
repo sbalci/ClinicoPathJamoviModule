@@ -653,7 +653,7 @@ stagemigrationPart5 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         # Basic validation
                         if (nrow(data) < 100) {
                             private$.addNotice("STRONG_WARNING", .("Cure model analysis not run"),
-                                jmvcore::format(.("Sample size ({n}) is below the minimum of 100 needed for stable cure fraction estimates."), n = sprintf("%d", nrow(data))))
+                                .fmt(.("Sample size ({n}) is below the minimum of 100 needed for stable cure fraction estimates."), n = sprintf("%d", nrow(data))))
                             return(NULL)
                         }
 

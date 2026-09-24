@@ -675,7 +675,7 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
             # reports them, not only on the main table.
             seeded <- (!is.null(original_n) && original_n != nrow(analysis_data)) ||
                 any(outlier_results$method %in% c("mcd", "ics"))
-            seed_html <- if (seeded) paste0("<p><em>", jmvcore::htmlEscape(jmvcore::format(
+            seed_html <- if (seeded) paste0("<p><em>", jmvcore::htmlEscape(.fmt(
                 .("Random seed: {seed}"), seed = if (is.null(self$options$seed)) 123 else self$options$seed)), "</em></p>")
 
             if (self$options$show_outlier_table) {

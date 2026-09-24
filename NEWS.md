@@ -1,5 +1,307 @@
 # ClinicoPath News
 
+## Unreleased — `agreement` pathologist grading analysis (module 1.0.81.01)
+
+### NEW — Pathologist Grading Analysis (ordinal and categorical ratings)
+
+A new section for the questions a pathology department asks after the headline kappa. It reads
+every observed rating, so a case is kept when some pathologists did not read it.
+
+- **Study design and category distribution**: cases, pathologists and ratings per case, whether
+  every pathologist is linked to the others through shared cases, and how often each pathologist
+  used each grade.
+- **Per-pathologist agreement**: exact agreement and mean pairwise kappa with colleagues, plus a
+  boundary table: at each grade boundary, how much more often this pathologist calls a case at or
+  above it than the colleagues who read the same cases (difference in proportions, t interval).
+- **Grading tendency per pathologist**: a cumulative-probit mixed model with a random case effect
+  gives each pathologist's shift relative to the panel average. It comes with a Holm-adjusted test,
+  a likelihood-ratio test that all grade alike, and a forest plot.
+- **Model-based agreement**: the latent ICC and the model-based kappa of Nelson & Edwards (2015,
+  Stat Med 34:3116), from a cumulative-probit model with crossed case and pathologist effects and,
+  optionally, an institution effect. The implementation reproduces the paper's Holmquist example.
+- **Every model-based number is gated by simulation.** The limits come from a simulation grid
+  (`development-scripts/validate_agreement_ordinal_grid.R`: |bias| ≤ 0.02, interval coverage
+  checked at 200 replicates per cell):
+  - model-based kappa from 50 cases, 3 pathologists and a median of 3 ratings per case;
+  - latent ICC from 50 cases (100 when not every pathologist read every case);
+  - intervals from 100 cases and 3 pathologists, labelled conservative (coverage 92–99.5%);
+  - grading tendency from 50 cases and 3 pathologists (4 with two categories, 6 when one category
+    holds half the ratings).
+
+  Case minimums count only cases read by at least two pathologists. Outside these limits a
+  number is left empty, with a note that gives the reason. Binary calls and data where one
+  category holds 50% or more get no latent model.
+- **Large panels:** the grading tendency is not fitted above 100,000 ratings × pathologists
+  (for example 500 cases × 15 pathologists), because its fit grows with every pathologist and
+  would take minutes. A note says so; the boundary table covers the same question.
+- Example dataset `agreement_grading` (150 biopsies, 6 pathologists, ISUP grade groups, 3
+  institutions, 15% of readings missing).
+- Uses `ordinal` and `irrCAC`, both already in the umbrella's Imports; the meddecide module needs
+  them when this analysis ships.
+
+### BREAKING — kappa for three or more raters uses every observed rating
+
+- **Headline Fleiss' / Conger's kappa** is computed with irrCAC (Gwet 2014) on every observed
+  rating. `irr::kappam.fleiss` dropped any case with a missing rating, so one absent reader threw
+  away the other readers' ratings of that slide. It now also comes with a standard error, a t
+  interval and a two-sided p. The values are identical on complete data.
+- **The bootstrap table and the hierarchical per-institution table** use the same statistic, so
+  they agree with the headline on incomplete data. They also honour "exact" (Conger). The
+  per-institution kappas for three or more raters and the stratified kappa now have confidence
+  intervals.
+- **The binary latent-variable (glmer) route in the hierarchical section is withdrawn.** Its
+  Laplace fit underestimated the latent ICC (about 0.19 too low with 2 raters). The case,
+  pathologist and institution variances of categorical ratings now come from Model-based agreement.
+- An empty rater column no longer turns Conger's (exact) kappa into NaN, and an Agreement %
+  that no case can supply (no case read by every rater) is left empty with a note.
+- **What changes for you:** a saved `.omv` whose ratings have missing values shows a different
+  kappa for three or more raters. A hierarchical analysis of binary ratings loses its variance
+  tables, and each table points to the new section instead.
+
+
+## Unreleased — `agreement` categorical multi-centre agreement and a deep audit (module 1.0.81.01)
+
+### NEW — hierarchical agreement now works on categorical ratings
+
+The Hierarchical / Multilevel section refused factor ratings, so all five of its tables were empty
+on grades, subtypes and positive/negative calls - including its own example dataset,
+`agreement_hierarchical`. Categorical ratings now get:
+
+- **Per-cluster kappa**: Cohen's kappa for two raters (with a confidence interval, honouring the
+  weighting and the interval method) or Fleiss' kappa for three or more (every observed rating,
+  with an interval), within each institution.
+- **Stratified kappa**: the per-institution kappas averaged with weights equal to each
+  institution's number of cases (Barlow, Lai & Azen, 1991), shown beside the pooled kappa that
+  ignores institution. Institutions that differ in case mix move a pooled kappa without any change
+  in how well the raters agree; the stratified value is agreement within institution.
+- Categorical ratings get no variance decomposition in this section; each of those tables points to
+  Model-based agreement in the Pathologist Grading Analysis, which fits the case, pathologist and
+  institution variances with an ordinal model (see above).
+
+### BREAKING — the hierarchical ICC is now estimated within institution
+
+- **Overall ICC(2,1)** is case variance / (case + rater + residual). It was case variance / total
+  variance, which put the institution effect in the denominator only, so the overall value sat
+  below every per-institution value when institutions differed in level. The column is retitled
+  from "Overall ICC(1)", which named the one-way model.
+- **ICC(2,k)** no longer divides the institution variance by the number of institutions: each case
+  belongs to one institution, so nothing is averaged over institutions.
+- **The G-coefficient row is removed.** Its formula assumed every case was rated in every
+  institution.
+- **The "Shrinkage estimates" option and its "Shrinkage Kappa" column are removed.** The column
+  held a hand-weighted blend of two ICCs, not a shrinkage estimate and not a kappa.
+- **What changes for you:** a saved `.omv` with continuous hierarchical ratings shows a different
+  overall ICC, and loses the G-coefficient row and the shrinkage column.
+
+### BREAKING — other results that change
+
+- **Simple majority is now strict (more than half),** as its label always said. A 2-1-1 split among
+  four raters is a plurality and no longer receives a consensus label; a note gives the count.
+- **The bootstrap table's Krippendorff row uses the Data type you selected,** like the main
+  Krippendorff table. It silently switched to ordinal for ordered raters, so the two tables printed
+  different values under one name.
+- **Krippendorff (ordinal/interval/ratio), weighted Gwet's AC2 and Robinson's A now place every
+  rater on one merged category order.** When two raters declare different subsets of a grade scale,
+  the scale was assembled in the order the variables were selected (G1 < G3 < G2). Where the
+  declarations do not determine an order, Krippendorff and Robinson's A decline and say why, and
+  Gwet's AC2 falls back to AC1.
+
+### Corrected
+
+- The paired-agreement and Robinson's A bootstraps, case clustering, consensus and level-of-agreement
+  calculations can now be cancelled; before, a large run froze the results pane.
+- Bootstrap resamples that fail are counted and disclosed in the paired comparison, as they already
+  were in the bootstrap CI table. The BCa acceleration from a subsampled jackknife is rescaled; it
+  was up to sqrt(n / 200) times too large above 200 cases.
+- Per-class precision, recall and F1 with no denominator are shown empty, not as 0.000, and leave
+  the macro average.
+- An item-modal category whose cases all agree to the same degree gets no interval, instead of a
+  zero-width one claiming perfect precision.
+- Finn's coefficient warns when the declared number of categories is larger than the data use - the
+  direction that silently raised "Poor" to "Outstanding".
+- The small-sample note on the headline kappa quotes the coverage of the interval method in use and
+  names the Fisher z option.
+- The marginal-homogeneity sparse warning counts discordant cases instead of the smallest single
+  cell, which is zero on almost any table with three or more categories.
+- The sample-size calculator runs before any rater is selected; its table was left empty.
+- A reference rater also selected under Raters is no longer compared with itself (a kappa = 1 row).
+- ICC, Lin's CCC and TDI say when they have read 0/1 or 1-5 category codes as measurements.
+- Stale results no longer survive option changes in 12 tables and the subgroup forest plot, which
+  kept its old image (and the old confidence percentage) when the level changed.
+- The replicate-count, multiple-testing and ICC-type controls are enabled wherever they are used.
+- Test-retest and pooled inter-rater rows say which reads they are computed from.
+
+## Unreleased — `agreement` clustering metric, labels and a module-wide engine-freeze fix (module 1.0.81.01)
+
+### BREAKING — rater clustering now groups readers by agreement, not by correlation
+
+`clusterDistance` defaulted to **Correlation (1 − r)**, which is invariant to location and scale:
+two readers who differ by a constant are identical to it. Measured on five readers of a Ki-67-like
+marker, the reader who read 25 points high sat **nearer** to the reference (distance 0.005) than the
+reference's own concordant twin (0.008), and the two over-readers were clustered with the accurate
+ones at "similarity" 0.985. In an agreement module a systematic offset *is* the disagreement.
+
+- The new default is **Concordance (1 − Lin's CCC)**, which is bounded, is essentially independent
+  of the number of cases, and is the only candidate tested that recovered the intended grouping.
+  Euclidean was rejected on measurement: for an identical offset it grows 3.4× (Euclidean) and
+  10.6× (Manhattan) as n goes 20 → 200, so it partly ranks rater pairs by how many cases were rated.
+- `caseClusterDistance` defaults to **Euclidean**. Lin's CCC is deliberately *not* offered for case
+  clustering: a case's profile has only as many points as there are raters, and at two raters
+  1 − CCC is undefined for every case pair.
+- **Correlation on the case path is now refused below three raters.** Through two points the
+  correlation is always ±1, so the distance matrix held only 0 and 2 and the clustering was decided
+  by the sign of a single product.
+- Correlation remains available on both options — ranking agreement is a legitimate question — and
+  the offset disclosure note now fires only when you choose it.
+- **What changes for you:** a saved `.omv` that never set the metric explicitly will re-cluster.
+  Cluster membership can change (that is the fix); cluster *numbering* is a deterministic function
+  of membership, and k-means is unaffected because it never used the metric.
+
+### BREAKING — one name per coefficient
+
+Five displayed cells named the same coefficient three different ways. Every displayed kappa label
+now comes from one authority and uses the κ vocabulary: `Cohen's Kappa (linear weights)` →
+`Linear-weighted κ`, the headline `Cohen's Kappa for 2 Raters (Weights: unweighted)` → `Cohen's κ`,
+and the same in the bootstrap, subgroup, paired, intra/inter-rater and sample-size tables. Several
+of those cells were previously bare English and untranslated in every locale.
+
+### Corrected
+
+- **Selecting "Benjamini-Hochberg (FDR)" in the Mixed-Effects Comparison errored the analysis.**
+  The option level is `bh`, but it was passed straight to `p.adjust()`, whose method names are
+  `holm`/`hochberg`/`hommel`/`bonferroni`/`BH`/`BY`/`fdr`/`none` — so `match.arg()` rejected it and
+  the user got no result at all. One of the two correction sites mapped the level correctly and the
+  other did not; both now share one helper. The note also names the correction in words
+  ("the Benjamini-Hochberg (FDR) correction") instead of printing the internal option level.
+- **Notes no longer survive a re-run.** An "influential case" warning quoting ratings of
+  `99999, 99999` persisted onto clean data, and the headline table could assert that kappa was not
+  computed for continuous measurements while printing a kappa of 0.069. Both fixed by clearing at
+  the top of the run.
+- **`jmvcore::format()` replaced by the guarded `.fmt()` wrapper across the module** — 430 call
+  sites in 34 files. `jmvcore::format()` re-scans from position 1 after every substitution, so a
+  value containing its own placeholder loops forever; the loop does not poll R's interrupt handler,
+  so inside jamovi it **freezes the analysis engine** instead of raising an error. Behaviour is
+  otherwise byte-identical.
+- **`singlearm`:** the generic failure message now names the failing stage ("An error occurred
+  during data_processing.") instead of swallowing it ("An error occurred during ."). `context` is a
+  real argument of `jmvcore::format` and was consuming the value rather than substituting it.
+- **`agreement`:** plot error messages, the Krippendorff footnote and the cluster-homogeneity
+  conclusion were bare English and are now translatable.
+- **`agreement` (`/check-function --profile release`, then an adversarial review of that pass):**
+  the new *Kappa interval method* option now reaches every Cohen's kappa interval built from the
+  asymptotic standard error: the main table with two raters, All-Pairs Kappa, Agreement by
+  Subgroup and both inter/intra-rater tables. The intra-rater table used to rebuild its own Wald
+  interval and ignored the setting, although the option's description said otherwise. The
+  inter-rater table's note now says which scale was used, and it no longer calls its p-value a
+  null-SE test; that p divides kappa by the same standard error as the interval. The *Confidence
+  interval for each pair* description no longer claims a Fisher-z interval from `irr::kappa2`. The
+  two hierarchical tables no longer declare `95% CI` columns that were never filled. The *Random
+  seed* box moved from the Sample Size panel, which never uses it, to the first panel, now titled
+  *General Options*. The library listing has a real description and an R example.
+- **`agreement`: Gwet's AC p-value is two-sided whatever irrCAC version is installed.**
+  `irrCAC::gwet.ac1.raw()` returns a one-sided p, `1 - pt(AC / SE, n - 1)`, in irrCAC 1.4 and a
+  two-sided one in irrCAC 1.0. The table showed the 1.4 value as *p-value* beside two-sided kappa
+  tests, so a strongly negative AC read p = 1. The p is now recomputed from the coefficient and SE
+  on n - 1 degrees of freedom. The coefficient, SE and interval are unchanged.
+- **`agreement`: Light's kappa no longer shows a p-value.** The one from `irr::kappam.light()` rests
+  on a variance formula that is not a standard error for Light's kappa. Measured on irr 0.85, it is
+  undefined (NaN) with three raters and four balanced categories, and p = 0.51 at kappa 0.87 with five
+  raters on a binary scale. The column is removed and a note explains why; the All-Pairs Kappa table
+  gives each pair its own interval and test.
+- **`agreement`: the cluster homogeneity test for continuous ratings is labelled as what it tests,
+  and its p-value is boundary-corrected.** The likelihood ratio test compares the mixed model with and
+  without an institution random intercept, so it asks whether institutions differ in average rating
+  level. It used to conclude "agreement differs by institution". Because a variance cannot be negative,
+  the p-value is now half the naive chi-square value (Stram and Lee, 1994), as in the new
+  categorical route.
+- **`agreement`: the directional discordance test needs 3 complete pairs.** `irr::rater.bias()` reads a
+  square input as a table of counts, so 2 cases x 2 raters was scored as a 2 x 2 count table. The
+  guard also counted rows with only one rating, which the test itself drops.
+- **`agreement`: smaller corrections.** All-Pairs Kappa rows are keyed by column position, so raters
+  named `A` and `B__C` no longer collide with `A__B` and `C` and silently lose a row. The summary panel
+  says "not available" instead of printing `-Inf`, `NaN` or `NA` as the kappa. The influential-case
+  note no longer tells users that TDI and the Bland-Altman limits are driven to their ceiling; they use
+  only differences between raters. The weighted-kappa guide says the quadratic penalty grows
+  quadratically, not exponentially. It also says its bands are *adapted from* Landis and Koch, who put a
+  cut-point value in the band below. The About panel no longer says the data must be categorical. The
+  descriptions of *Exact kappa* (Conger's exact kappa, which has no p-value), *All-pairs Cohen's kappa*
+  and *Confidence intervals* (both at the chosen level, not 95 percent), *Plain-language summary*, and
+  three guide checkboxes now match what the analysis does. Five method and term cells are translatable.
+
+## Unreleased — `agreement` (Interrater Reliability) correctness pass (module 1.0.81.01)
+
+An independent audit of `agreement` found 16 defects; these are the fixes, plus what a review of
+the fixes themselves then found. **No agreement coefficient changed value.** What changed is which
+coefficient gets computed, what it is called, which uncertainty is attached to it, and what the
+module says about all three.
+
+### Corrected results
+
+- **BREAKING — Iota is no longer described as multivariate agreement.** The option, the table title
+  and the guide promised a single index "across all variables" — tumour size + grade + mitotic
+  count — but the backend has only ever passed one variable, so every column in the box was read as
+  another *rater*. A user following the guide's own worked example (2 pathologists x 3 parameters)
+  was shown **0.044, "Poor agreement"**, where the multivariate iota for that design is **0.880**;
+  on the method's published example it showed 0.024 against a published 0.755. The coefficient is
+  correct for what it actually computes, so the number is unchanged and the claims are gone: the
+  feature is now titled *Iota coefficient (single variable)*, the always-`1` **Variables column is
+  removed**, and a note states that for nominal ratings it is numerically Conger's exact kappa (the
+  Exact kappa option) and that the multivariate form is not computed here.
+- **Weighted kappa could be weighted on a fabricated category order.** When two rater columns
+  declared different category sets — one never used "Focal", the other never used "Diffuse", which
+  is what jamovi produces from a CSV — the merged scale depended on which variable was selected
+  first. Weighted kappa now falls back to unweighted, with a note, when the declared categories do
+  not determine one order. Affects the headline table, All-Pairs Kappa, the reference-rater table,
+  the subgroup table, the bootstrap CI and the test-retest table.
+- **All-Pairs Kappa scored each rater pair on its own scale.** Every pair re-derived its category
+  order from just those two raters, so one pair could be weighted on a different scale from the
+  next in the same table. All pairs now use the order declared by all rater columns together.
+- **The Paired Agreement Comparison ignored the Weighting option** and always reported unweighted
+  Cohen's kappa, so the same two raters carried two different "Cohen's Kappa" values in one output.
+  It also differenced a Cohen's kappa against a Fleiss' kappa when the two conditions had different
+  numbers of raters, labelling the row "Cohen's Kappa". Unequal panels now drop the kappa row with
+  an explanation and keep the comparable percent-agreement row.
+- **"Avg Within-Cluster Similarity" showed unbounded negative numbers** (down to −227.8) under the
+  Euclidean and Manhattan metrics, because a raw distance was subtracted from 1. It is now a
+  bounded similarity; no cluster assignment changes.
+- **Confidence levels are honoured and labelled.** Several tables built an interval at the level you
+  chose and headed it "95% CI", and `irr::icc` intervals ignored the setting entirely. Fourteen
+  tables now title their CI columns from the confidence level, the ICC calls pass it, and the ICC /
+  Lin's CCC / bootstrap tables no longer print "95% CI Lower" under a "90% CI" span.
+- **Table notes truncated mid-sentence** when a rater column or category label contained square
+  brackets ("Reader 2 [AI]", "Focal [<10%]"), silently dropping the rest of the warning. Also fixed
+  where the mean Pearson and mean Spearman notes lost their correlation range this way.
+
+### Honest labels and disclosure
+
+- **One interpretation scale per coefficient.** The same kappa could read "moderate" in the summary
+  and "Fair" in the test-retest table — "Fair" meaning 0.20–0.40 in one and 0.40–0.60 in the other.
+  Kappa-family coefficients now use Landis & Koch (1977) and ICCs use Koo & Li (2016) throughout,
+  each named in a note. Quantitative iota is graded on the ICC scale it belongs to. Boundary
+  convention stated: a value exactly on a cut-point takes the higher band.
+- **Unsourced bands are labelled as conventions**, and where a source exists it is now cited: the
+  mean Pearson / mean Spearman note previously claimed the cut-points were this module's invention
+  when a widely used rule of thumb exists (Mukaka 2012 added); Finn's bands now credit Cicchetti
+  (1994) for the part that is his. Guide panels were rewritten so they no longer contradict their
+  own tables at the boundaries.
+- **The F1 "Interpretation" column is removed** from Per-Class Classification Metrics. F1 has no
+  conventional bands, and the macro-average row was reusing that column for an accuracy percentage;
+  the accuracy is now a table note.
+- **Agreement by subgroup** now states that it does not test whether agreement differs between
+  subgroups, that kappa depends on each subgroup's case mix, and whether every interval in the run
+  overlaps. Subgroups are ordered by declared factor level.
+- **Sample size** now warns when the chi-square cells at the required N break Cochran's rule (the
+  sibling `kappaSizePower` already did, for the same number), says the calculation is for
+  *unweighted* kappa, and gives its own translated message for 7+ raters instead of the upstream
+  package's English.
+- **The rater variance decomposition** accepts ordered factors, refuses when the category order is
+  undetermined, no longer reports a clamped negative variance as a flat 0 %, and no longer
+  prescribes training on the strength of a boundary estimate.
+- **Rater clustering** discloses that the default correlation distance removes systematic offsets —
+  naming the raters and the size of the gap it ignored — and that the distance choice has no effect
+  on categorical ratings.
+- Notes no longer persist from one run into the next, so a failed run cannot show the previous
+  run's numbers.
 
 ## Unreleased — plot themes and palettes (module 1.0.81.01)
 

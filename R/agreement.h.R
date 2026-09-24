@@ -9,6 +9,7 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             vars = NULL,
             baConfidenceLevel = 0.95,
             confLevel = 0.95,
+            kappaCIMethod = "wald",
             proportionalBias = FALSE,
             showBlandAltmanGuide = FALSE,
             blandAltmanPlot = FALSE,
@@ -22,6 +23,11 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             wght = "unweighted",
             exct = FALSE,
             showLevelInfo = FALSE,
+            gradingDesign = FALSE,
+            perPathologist = FALSE,
+            severityModel = FALSE,
+            latentModel = FALSE,
+            showGradingGuide = FALSE,
             kripp = FALSE,
             krippMethod = "nominal",
             bootstrap = FALSE,
@@ -82,7 +88,6 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             iccHierarchical = FALSE,
             clusterSpecificKappa = TRUE,
             varianceDecomposition = TRUE,
-            shrinkageEstimates = FALSE,
             testClusterHomogeneity = TRUE,
             clusterRankings = FALSE,
             showHierarchicalGuide = FALSE,
@@ -128,7 +133,7 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             showSubgroupGuide = FALSE,
             raterClustering = FALSE,
             clusterMethod = "hierarchical",
-            clusterDistance = "correlation",
+            clusterDistance = "ccc",
             clusterLinkage = "average",
             nClusters = 3,
             showDendrogram = TRUE,
@@ -136,7 +141,7 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             showRaterClusterGuide = FALSE,
             caseClustering = FALSE,
             caseClusterMethod = "hierarchical",
-            caseClusterDistance = "correlation",
+            caseClusterDistance = "euclidean",
             caseClusterLinkage = "average",
             nCaseClusters = 3,
             showCaseDendrogram = TRUE,
@@ -179,6 +184,13 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 default=0.95,
                 min=0.8,
                 max=0.99)
+            private$..kappaCIMethod <- jmvcore::OptionList$new(
+                "kappaCIMethod",
+                kappaCIMethod,
+                options=list(
+                    "wald",
+                    "fisherz"),
+                default="wald")
             private$..proportionalBias <- jmvcore::OptionBool$new(
                 "proportionalBias",
                 proportionalBias,
@@ -241,6 +253,26 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..showLevelInfo <- jmvcore::OptionBool$new(
                 "showLevelInfo",
                 showLevelInfo,
+                default=FALSE)
+            private$..gradingDesign <- jmvcore::OptionBool$new(
+                "gradingDesign",
+                gradingDesign,
+                default=FALSE)
+            private$..perPathologist <- jmvcore::OptionBool$new(
+                "perPathologist",
+                perPathologist,
+                default=FALSE)
+            private$..severityModel <- jmvcore::OptionBool$new(
+                "severityModel",
+                severityModel,
+                default=FALSE)
+            private$..latentModel <- jmvcore::OptionBool$new(
+                "latentModel",
+                latentModel,
+                default=FALSE)
+            private$..showGradingGuide <- jmvcore::OptionBool$new(
+                "showGradingGuide",
+                showGradingGuide,
                 default=FALSE)
             private$..kripp <- jmvcore::OptionBool$new(
                 "kripp",
@@ -519,10 +551,6 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "varianceDecomposition",
                 varianceDecomposition,
                 default=TRUE)
-            private$..shrinkageEstimates <- jmvcore::OptionBool$new(
-                "shrinkageEstimates",
-                shrinkageEstimates,
-                default=FALSE)
             private$..testClusterHomogeneity <- jmvcore::OptionBool$new(
                 "testClusterHomogeneity",
                 testClusterHomogeneity,
@@ -765,11 +793,12 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "clusterDistance",
                 clusterDistance,
                 options=list(
+                    "ccc",
                     "correlation",
                     "euclidean",
                     "manhattan",
                     "agreement"),
-                default="correlation")
+                default="ccc")
             private$..clusterLinkage <- jmvcore::OptionList$new(
                 "clusterLinkage",
                 clusterLinkage,
@@ -812,11 +841,11 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "caseClusterDistance",
                 caseClusterDistance,
                 options=list(
-                    "correlation",
                     "euclidean",
                     "manhattan",
+                    "correlation",
                     "agreement"),
-                default="correlation")
+                default="euclidean")
             private$..caseClusterLinkage <- jmvcore::OptionList$new(
                 "caseClusterLinkage",
                 caseClusterLinkage,
@@ -927,6 +956,7 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..vars)
             self$.addOption(private$..baConfidenceLevel)
             self$.addOption(private$..confLevel)
+            self$.addOption(private$..kappaCIMethod)
             self$.addOption(private$..proportionalBias)
             self$.addOption(private$..showBlandAltmanGuide)
             self$.addOption(private$..blandAltmanPlot)
@@ -940,6 +970,11 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..wght)
             self$.addOption(private$..exct)
             self$.addOption(private$..showLevelInfo)
+            self$.addOption(private$..gradingDesign)
+            self$.addOption(private$..perPathologist)
+            self$.addOption(private$..severityModel)
+            self$.addOption(private$..latentModel)
+            self$.addOption(private$..showGradingGuide)
             self$.addOption(private$..kripp)
             self$.addOption(private$..krippMethod)
             self$.addOption(private$..bootstrap)
@@ -1000,7 +1035,6 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..iccHierarchical)
             self$.addOption(private$..clusterSpecificKappa)
             self$.addOption(private$..varianceDecomposition)
-            self$.addOption(private$..shrinkageEstimates)
             self$.addOption(private$..testClusterHomogeneity)
             self$.addOption(private$..clusterRankings)
             self$.addOption(private$..showHierarchicalGuide)
@@ -1081,6 +1115,7 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         vars = function() private$..vars$value,
         baConfidenceLevel = function() private$..baConfidenceLevel$value,
         confLevel = function() private$..confLevel$value,
+        kappaCIMethod = function() private$..kappaCIMethod$value,
         proportionalBias = function() private$..proportionalBias$value,
         showBlandAltmanGuide = function() private$..showBlandAltmanGuide$value,
         blandAltmanPlot = function() private$..blandAltmanPlot$value,
@@ -1094,6 +1129,11 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         wght = function() private$..wght$value,
         exct = function() private$..exct$value,
         showLevelInfo = function() private$..showLevelInfo$value,
+        gradingDesign = function() private$..gradingDesign$value,
+        perPathologist = function() private$..perPathologist$value,
+        severityModel = function() private$..severityModel$value,
+        latentModel = function() private$..latentModel$value,
+        showGradingGuide = function() private$..showGradingGuide$value,
         kripp = function() private$..kripp$value,
         krippMethod = function() private$..krippMethod$value,
         bootstrap = function() private$..bootstrap$value,
@@ -1154,7 +1194,6 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         iccHierarchical = function() private$..iccHierarchical$value,
         clusterSpecificKappa = function() private$..clusterSpecificKappa$value,
         varianceDecomposition = function() private$..varianceDecomposition$value,
-        shrinkageEstimates = function() private$..shrinkageEstimates$value,
         testClusterHomogeneity = function() private$..testClusterHomogeneity$value,
         clusterRankings = function() private$..clusterRankings$value,
         showHierarchicalGuide = function() private$..showHierarchicalGuide$value,
@@ -1234,6 +1273,7 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..vars = NA,
         ..baConfidenceLevel = NA,
         ..confLevel = NA,
+        ..kappaCIMethod = NA,
         ..proportionalBias = NA,
         ..showBlandAltmanGuide = NA,
         ..blandAltmanPlot = NA,
@@ -1247,6 +1287,11 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..wght = NA,
         ..exct = NA,
         ..showLevelInfo = NA,
+        ..gradingDesign = NA,
+        ..perPathologist = NA,
+        ..severityModel = NA,
+        ..latentModel = NA,
+        ..showGradingGuide = NA,
         ..kripp = NA,
         ..krippMethod = NA,
         ..bootstrap = NA,
@@ -1307,7 +1352,6 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..iccHierarchical = NA,
         ..clusterSpecificKappa = NA,
         ..varianceDecomposition = NA,
-        ..shrinkageEstimates = NA,
         ..testClusterHomogeneity = NA,
         ..clusterRankings = NA,
         ..showHierarchicalGuide = NA,
@@ -1396,6 +1440,14 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         contingencyTable = function() private$.items[["contingencyTable"]],
         ratingCombinationsTable = function() private$.items[["ratingCombinationsTable"]],
         contingencyTableExplanation = function() private$.items[["contingencyTableExplanation"]],
+        gradingHeading = function() private$.items[["gradingHeading"]],
+        designSummaryTable = function() private$.items[["designSummaryTable"]],
+        categoryDistributionTable = function() private$.items[["categoryDistributionTable"]],
+        pathologistTable = function() private$.items[["pathologistTable"]],
+        boundaryTable = function() private$.items[["boundaryTable"]],
+        severityPlot = function() private$.items[["severityPlot"]],
+        latentModelTable = function() private$.items[["latentModelTable"]],
+        gradingGuide = function() private$.items[["gradingGuide"]],
         blandAltmanHeading = function() private$.items[["blandAltmanHeading"]],
         blandAltman = function() private$.items[["blandAltman"]],
         agreementHeatmapPlot = function() private$.items[["agreementHeatmapPlot"]],
@@ -1552,7 +1604,7 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     list(
                         `name`="peragree", 
                         `title`="Agreement %", 
-                        `type`="integer"),
+                        `type`="number"),
                     list(
                         `name`="kappa", 
                         `title`="Kappa", 
@@ -1580,11 +1632,15 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "vars",
                     "wght",
                     "exct",
-                    "confLevel"),
+                    "confLevel",
+                    "kappaCIMethod"),
                 refs=list(
                     "Cohen1960",
                     "Cohen1968",
                     "Fleiss1971",
+                    "Conger1980",
+                    "Gwet2008",
+                    "irrCAC",
                     "LandisKoch1977")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
@@ -1620,6 +1676,206 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="contingencyTableExplanation",
                 title="About Contingency Table & Rating Combinations",
                 visible="(sft && showAbout)"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="gradingHeading",
+                title="Pathologist Grading Analysis",
+                visible="(gradingDesign || perPathologist || severityModel || latentModel || showGradingGuide)",
+                clearWith=list(
+                    "gradingDesign",
+                    "perPathologist",
+                    "severityModel",
+                    "latentModel",
+                    "showGradingGuide")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="designSummaryTable",
+                title="Study Design",
+                visible="(gradingDesign)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="item", 
+                        `title`="Design Feature", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="text")),
+                clearWith=list(
+                    "vars",
+                    "clusterVariable")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="categoryDistributionTable",
+                title="Category Distribution by Pathologist",
+                visible="(gradingDesign)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="pathologist", 
+                        `title`="Pathologist", 
+                        `type`="text"),
+                    list(
+                        `name`="n", 
+                        `title`="Ratings", 
+                        `type`="integer")),
+                clearWith=list(
+                    "vars")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="pathologistTable",
+                title="Per-Pathologist Agreement and Grading Tendency",
+                visible="(perPathologist || severityModel)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="pathologist", 
+                        `title`="Pathologist", 
+                        `type`="text"),
+                    list(
+                        `name`="cases_read", 
+                        `title`="Cases Read", 
+                        `type`="integer", 
+                        `visible`="(perPathologist)"),
+                    list(
+                        `name`="pct_exact", 
+                        `title`="Exact agreement with colleagues %", 
+                        `type`="number", 
+                        `visible`="(perPathologist)"),
+                    list(
+                        `name`="mean_kappa", 
+                        `title`="Mean pairwise kappa", 
+                        `type`="number", 
+                        `visible`="(perPathologist)"),
+                    list(
+                        `name`="shift", 
+                        `title`="Grading tendency", 
+                        `type`="number", 
+                        `visible`="(severityModel)"),
+                    list(
+                        `name`="se", 
+                        `title`="SE", 
+                        `type`="number", 
+                        `visible`="(severityModel)"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="95% CI Lower", 
+                        `type`="number", 
+                        `visible`="(severityModel)"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="95% CI Upper", 
+                        `type`="number", 
+                        `visible`="(severityModel)"),
+                    list(
+                        `name`="p_holm", 
+                        `title`="p (Holm)", 
+                        `type`="number", 
+                        `format`="zto,pvalue", 
+                        `visible`="(severityModel)"),
+                    list(
+                        `name`="tendency", 
+                        `title`="Tendency", 
+                        `type`="text", 
+                        `visible`="(severityModel)")),
+                clearWith=list(
+                    "vars",
+                    "confLevel"),
+                refs=list(
+                    "Nelson2015",
+                    "ordinal",
+                    "holm1979")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="boundaryTable",
+                title="Boundary Excess over Colleagues",
+                visible="(perPathologist)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="pathologist", 
+                        `title`="Pathologist", 
+                        `type`="text", 
+                        `combineBelow`=TRUE),
+                    list(
+                        `name`="boundary", 
+                        `title`="Boundary", 
+                        `type`="text"),
+                    list(
+                        `name`="n", 
+                        `title`="Shared Cases", 
+                        `type`="integer"),
+                    list(
+                        `name`="excess", 
+                        `title`="Excess over colleagues", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="95% CI Lower", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="95% CI Upper", 
+                        `type`="number")),
+                clearWith=list(
+                    "vars",
+                    "confLevel")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="severityPlot",
+                title="Grading Tendency per Pathologist",
+                width=600,
+                height=400,
+                renderFun=".severityPlot",
+                requiresData=FALSE,
+                visible="(severityModel)",
+                refs=list(
+                    "Nelson2015",
+                    "ordinal")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="latentModelTable",
+                title="Model-Based Agreement (Latent Probit Model)",
+                visible="(latentModel)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="quantity", 
+                        `title`="Quantity", 
+                        `type`="text"),
+                    list(
+                        `name`="estimate", 
+                        `title`="Estimate", 
+                        `type`="number"),
+                    list(
+                        `name`="se", 
+                        `title`="SE", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="95% CI Lower", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="95% CI Upper", 
+                        `type`="number")),
+                clearWith=list(
+                    "vars",
+                    "clusterVariable",
+                    "confLevel"),
+                refs=list(
+                    "Nelson2015",
+                    "ordinal")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="gradingGuide",
+                title="About the Pathologist Grading Analysis",
+                visible="(showGradingGuide)",
+                clearWith=list(
+                    "showGradingGuide"),
+                refs=list(
+                    "Nelson2015")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="blandAltmanHeading",
@@ -1812,12 +2068,7 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     list(
                         `name`="kappa", 
                         `title`="Kappa", 
-                        `type`="number"),
-                    list(
-                        `name`="p", 
-                        `title`="p-value", 
-                        `type`="number", 
-                        `format`="zto,pvalue")),
+                        `type`="number")),
                 clearWith=list(
                     "vars"),
                 refs=list(
@@ -1876,7 +2127,9 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "vars",
                     "finnLevels",
-                    "finnModel")))
+                    "finnModel"),
+                refs=list(
+                    "Finn1970")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="finnExplanation",
@@ -1921,7 +2174,9 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="number", 
                         `format`="zto,pvalue")),
                 clearWith=list(
-                    "vars")))
+                    "vars"),
+                refs=list(
+                    "Kendall1939")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="kendallWExplanation",
@@ -1968,7 +2223,9 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "vars",
                     "nBoot",
                     "seed",
-                    "confLevel")))
+                    "confLevel"),
+                refs=list(
+                    "Robinson1957")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="robinsonAExplanation",
@@ -2012,7 +2269,10 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `title`="Interpretation", 
                         `type`="text")),
                 clearWith=list(
-                    "vars")))
+                    "vars"),
+                refs=list(
+                    "Spearman1904",
+                    "Mukaka2012")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="meanSpearmanExplanation",
@@ -2057,7 +2317,9 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="number", 
                         `format`="zto,pvalue")),
                 clearWith=list(
-                    "vars")))
+                    "vars"),
+                refs=list(
+                    "agresti2013")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="raterBiasExplanation",
@@ -2195,7 +2457,11 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "vars",
                     "referenceRater",
-                    "rankRaters")))
+                    "rankRaters",
+                    "wght"),
+                refs=list(
+                    "Cohen1960",
+                    "LandisKoch1977")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="pairwiseKappaExplanation",
@@ -2265,7 +2531,11 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "wght",
                     "allPairsCI",
                     "multipleTestCorrection",
-                    "confLevel")))
+                    "confLevel",
+                    "kappaCIMethod"),
+                refs=list(
+                    "Cohen1960",
+                    "LandisKoch1977")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="allPairsKappaExplanation",
@@ -2347,18 +2617,18 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     list(
                         `name`="overall_kappa", 
                         `title`="Overall Kappa", 
-                        `type`="number"),
-                    list(
-                        `name`="ci_lower", 
-                        `title`="95% CI Lower", 
-                        `type`="number"),
-                    list(
-                        `name`="ci_upper", 
-                        `title`="95% CI Upper", 
                         `type`="number")),
                 clearWith=list(
                     "vars",
-                    "clusterVariable")))
+                    "clusterVariable",
+                    "wght",
+                    "exct",
+                    "kappaCIMethod",
+                    "confLevel"),
+                refs=list(
+                    "Shrout1979",
+                    "McGraw1996",
+                    "Barlow1991")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="clusterSpecificTable",
@@ -2391,11 +2661,6 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `title`="95% CI Upper", 
                         `type`="number"),
                     list(
-                        `name`="shrinkage_kappa", 
-                        `title`="Shrinkage Kappa", 
-                        `type`="number", 
-                        `visible`="(shrinkageEstimates)"),
-                    list(
                         `name`="rank", 
                         `title`="Rank", 
                         `type`="integer", 
@@ -2403,8 +2668,15 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "vars",
                     "clusterVariable",
-                    "shrinkageEstimates",
-                    "clusterRankings")))
+                    "clusterRankings",
+                    "confLevel",
+                    "wght",
+                    "exct",
+                    "kappaCIMethod"),
+                refs=list(
+                    "Shrout1979",
+                    "McGraw1996",
+                    "Barlow1991")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="varianceDecompositionTable",
@@ -2435,7 +2707,10 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="text")),
                 clearWith=list(
                     "vars",
-                    "clusterVariable")))
+                    "clusterVariable"),
+                refs=list(
+                    "Shrout1979",
+                    "McGraw1996")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="hierarchicalICCTable",
@@ -2450,14 +2725,6 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     list(
                         `name`="icc_value", 
                         `title`="ICC", 
-                        `type`="number"),
-                    list(
-                        `name`="ci_lower", 
-                        `title`="95% CI Lower", 
-                        `type`="number"),
-                    list(
-                        `name`="ci_upper", 
-                        `title`="95% CI Upper", 
                         `type`="number"),
                     list(
                         `name`="interpretation", 
@@ -2499,7 +2766,11 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="text")),
                 clearWith=list(
                     "vars",
-                    "clusterVariable")))
+                    "clusterVariable"),
+                refs=list(
+                    "Shrout1979",
+                    "McGraw1996",
+                    "Stram1994")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="hierarchicalExplanation",
@@ -2564,7 +2835,11 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "vars",
                     "conditionVariable",
-                    "multipleTestCorrection")))
+                    "multipleTestCorrection",
+                    "confLevel"),
+                refs=list(
+                    "Shrout1979",
+                    "McGraw1996")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="mixedEffectsVarianceTable",
@@ -2595,7 +2870,10 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="text")),
                 clearWith=list(
                     "vars",
-                    "conditionVariable")))
+                    "conditionVariable"),
+                refs=list(
+                    "Shrout1979",
+                    "McGraw1996")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="mixedEffectsExplanation",
@@ -2659,11 +2937,7 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     list(
                         `name`="support", 
                         `title`="Support", 
-                        `type`="integer"),
-                    list(
-                        `name`="interpretation", 
-                        `title`="Interpretation", 
-                        `type`="text")),
+                        `type`="integer")),
                 clearWith=list(
                     "vars",
                     "confusionNormalize")))
@@ -2695,11 +2969,11 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="number"),
                     list(
                         `name`="ci_lower", 
-                        `title`="95% CI Lower", 
+                        `title`="Lower", 
                         `type`="number"),
                     list(
                         `name`="ci_upper", 
-                        `title`="95% CI Upper", 
+                        `title`="Upper", 
                         `type`="number"),
                     list(
                         `name`="boot_bias", 
@@ -2714,7 +2988,9 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "nBoot",
                     "confLevel",
                     "seed",
-                    "iccType")))
+                    "iccType",
+                    "wght",
+                    "krippMethod")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="bootstrapCIExplanation",
@@ -2747,7 +3023,8 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="text")),
                 clearWith=list(
                     "vars",
-                    "predictionColumn")))
+                    "predictionColumn",
+                    "tieBreaker")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="concordanceF1PerClassTable",
@@ -2778,7 +3055,8 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="integer")),
                 clearWith=list(
                     "vars",
-                    "predictionColumn")))
+                    "predictionColumn",
+                    "tieBreaker")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="concordanceF1Explanation",
@@ -2841,7 +3119,8 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "gwetWeights",
                     "confLevel"),
                 refs=list(
-                    "Gwet2008")))
+                    "Gwet2008",
+                    "LandisKoch1977")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="gwetExplanation",
@@ -2932,11 +3211,11 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="number"),
                     list(
                         `name`="ci_lower", 
-                        `title`="95% CI Lower", 
+                        `title`="Lower", 
                         `type`="number"),
                     list(
                         `name`="ci_upper", 
-                        `title`="95% CI Upper", 
+                        `title`="Upper", 
                         `type`="number"),
                     list(
                         `name`="f_value", 
@@ -3006,7 +3285,10 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `title`="Interpretation", 
                         `type`="text")),
                 clearWith=list(
-                    "vars")))
+                    "vars"),
+                refs=list(
+                    "Pearson1895",
+                    "Mukaka2012")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="meanPearsonExplanation",
@@ -3035,11 +3317,11 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="number"),
                     list(
                         `name`="ci_lower", 
-                        `title`="95% CI Lower", 
+                        `title`="Lower", 
                         `type`="number"),
                     list(
                         `name`="ci_upper", 
-                        `title`="95% CI Upper", 
+                        `title`="Upper", 
                         `type`="number"),
                     list(
                         `name`="pearson_r", 
@@ -3185,7 +3467,10 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `title`="Interpretation", 
                         `type`="text")),
                 clearWith=list(
-                    "vars")))
+                    "vars"),
+                refs=list(
+                    "Shrout1979",
+                    "McGraw1996")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="maxwellREExplanation",
@@ -3240,7 +3525,14 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "vars",
                     "interIntraSeparator",
-                    "confLevel")))
+                    "confLevel",
+                    "kappaCIMethod",
+                    "wght"),
+                refs=list(
+                    "Shrout1979",
+                    "Koo2016",
+                    "Cohen1960",
+                    "LandisKoch1977")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="interIntraRaterInterTable",
@@ -3288,7 +3580,13 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "vars",
                     "interIntraSeparator",
-                    "confLevel")))
+                    "confLevel",
+                    "kappaCIMethod"),
+                refs=list(
+                    "Shrout1979",
+                    "Koo2016",
+                    "Cohen1960",
+                    "LandisKoch1977")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="interIntraRaterExplanation",
@@ -3299,7 +3597,7 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Table$new(
                 options=options,
                 name="iotaTable",
-                title="Iota Coefficient Results (Multivariate Agreement)",
+                title="Iota Coefficient Results (Single Variable)",
                 visible="(iota)",
                 rows=1,
                 columns=list(
@@ -3316,10 +3614,6 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `title`="Raters", 
                         `type`="integer"),
                     list(
-                        `name`="variables", 
-                        `title`="Variables", 
-                        `type`="integer"),
-                    list(
                         `name`="iota_value", 
                         `title`="Iota", 
                         `type`="number"),
@@ -3327,6 +3621,11 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `name`="interpretation", 
                         `title`="Interpretation", 
                         `type`="text")),
+                refs=list(
+                    "Janson2001",
+                    "Conger1980",
+                    "LandisKoch1977",
+                    "Koo2016"),
                 clearWith=list(
                     "vars",
                     "iotaStandardize",
@@ -3445,7 +3744,8 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "vars",
                     "wght",
                     "exct",
-                    "confLevel"),
+                    "confLevel",
+                    "kappaCIMethod"),
                 refs=list(
                     "LandisKoch1977")))
             self$add(jmvcore::Html$new(
@@ -3556,7 +3856,8 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "simpleThreshold",
                     "loaThresholds",
                     "loaHighThreshold",
-                    "loaLowThreshold")))
+                    "loaLowThreshold",
+                    "tieBreaker")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="computedVariablesInfo",
@@ -3565,7 +3866,15 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "consensusVar",
                     "loaVariable",
-                    "loaOutput")))
+                    "loaOutput",
+                    "consensusName",
+                    "consensusRule",
+                    "loaVariableName",
+                    "detailLevel",
+                    "simpleThreshold",
+                    "loaThresholds",
+                    "loaHighThreshold",
+                    "loaLowThreshold")))
             self$add(jmvcore::Output$new(
                 options=options,
                 name="consensusVar",
@@ -3656,7 +3965,9 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "vars",
                     "subgroupVariable",
                     "confLevel",
-                    "subgroupMinCases"),
+                    "kappaCIMethod",
+                    "subgroupMinCases",
+                    "wght"),
                 refs=list(
                     "LandisKoch1977",
                     "Koo2016")))
@@ -3668,10 +3979,9 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 height=450,
                 renderFun=".subgroupForestPlot",
                 visible="(agreementBySubgroup && subgroupForestPlot)",
-                clearWith=list(
-                    "vars",
-                    "subgroupVariable",
-                    "subgroupMinCases")))
+                refs=list(
+                    "LandisKoch1977",
+                    "Koo2016")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="subgroupExplanation",
@@ -3728,7 +4038,9 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "vars",
                     "clusterDistance",
-                    "clusterLinkage")))
+                    "clusterLinkage",
+                    "nClusters",
+                    "clusterMethod")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="raterClusterHeatmap",
@@ -3788,7 +4100,9 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "vars",
                     "caseClusterDistance",
-                    "caseClusterLinkage")))
+                    "caseClusterLinkage",
+                    "nCaseClusters",
+                    "caseClusterMethod")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="caseClusterHeatmap",
@@ -3831,7 +4145,8 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "conditionBVars",
                     "pairedBootN",
                     "confLevel",
-                    "seed"),
+                    "seed",
+                    "wght"),
                 columns=list(
                     list(
                         `name`="metric", 
@@ -3870,7 +4185,10 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     list(
                         `name`="interpretation", 
                         `title`="Interpretation", 
-                        `type`="text"))))
+                        `type`="text")),
+                refs=list(
+                    "Cohen1960",
+                    "agresti2013")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="pairedAgreementExplanation",
@@ -3899,7 +4217,9 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     list(
                         `name`="value", 
                         `title`="Value", 
-                        `type`="text"))))
+                        `type`="text")),
+                refs=list(
+                    "Walter1998")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="agreementSampleSizeExplanation",
@@ -3931,7 +4251,23 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Interrater Reliability
 #'
-#' Function for Interrater Reliability.
+#' Agreement between two or more raters who scored the same cases. Cohen's 
+#' kappa for two raters (unweighted, or linear or quadratic weighted for 
+#' ordinal grades) with a confidence interval, and Fleiss' or Conger's exact 
+#' kappa for three or more; optional Krippendorff's alpha, Gwet's AC, PABAK, 
+#' ICC, Lin's concordance, Bland-Altman limits, marginal homogeneity tests, 
+#' per-rater and per-subgroup agreement, rater and case clustering, consensus 
+#' and agreement-level variables, and sample size for an agreement study.
+#' 
+#'
+#' @examples
+#' \donttest{
+#' # Two raters scoring the same 250 cases as 0 or 1
+#' agreement(
+#'     data = histopathology,
+#'     vars = c("Rater 1", "Rater 2"),
+#'     sft = TRUE)
+#'}
 #' @param data The data as a data frame in WIDE format: one row per case and
 #'   one column per rater or method, holding that rater's score for that case.
 #'   (Not long format - do not stack the raters into a single column.)
@@ -3946,6 +4282,22 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param confLevel Confidence level for confidence intervals in ICC, CCC,
 #'   bootstrap CIs, and other agreement statistics. Default is 0.95 (95 percent
 #'   CI).
+#' @param kappaCIMethod Scale on which the confidence interval for Cohen's
+#'   kappa is built. Wald is kappa plus or minus z times the non-null asymptotic
+#'   standard error, clamped to the range minus one to one; it is symmetric and
+#'   reproduces the limits printed by psych::cohen.kappa. Fisher z applies the
+#'   arc-tangent transform, builds the interval on that scale with the
+#'   delta-method standard error, and transforms back; the limits are asymmetric
+#'   and cannot fall outside the range minus one to one. In simulation the Wald
+#'   interval covered the true kappa about 85 to 95 percent of the time between
+#'   20 and 100 cases, while the Fisher z interval held close to its nominal
+#'   level at every sample size when kappa was moderate and the categories
+#'   balanced, but under-covered when one category was rare (about 88 percent at
+#'   20 to 30 cases with a 10 percent positive rate) and when kappa was very
+#'   high (88 to 93 percent up to 50 cases). The setting applies to every table
+#'   that builds a Cohen's kappa interval from the asymptotic standard error:
+#'   the main table with two raters, All-Pairs Kappa, Agreement by Subgroup and
+#'   the inter/intra-rater tables. Bootstrap intervals are not affected.
 #' @param proportionalBias Fit an exploratory ordinary least-squares trend of
 #'   the paired difference against the pair mean. The p-value tests whether that
 #'   slope is zero; it is not, by itself, a valid general test of proportional
@@ -3992,13 +4344,35 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   disagreements (G1 vs G2) receive partial credit. Squared weights: Larger
 #'   disagreements (G1 vs G3) are penalized more heavily. Use 'Unweighted' for
 #'   nominal categories with no inherent order.
-#' @param exct Use exact p-value calculation instead of normal approximation.
-#'   Recommended for small sample sizes (< 30 cases) with 3 or more raters.
-#'   Note: Not applicable for 2-rater analysis (use Cohen's kappa).
+#' @param exct Report Conger's (1980) exact kappa instead of Fleiss' kappa for
+#'   3 or more raters. Its chance-agreement term uses each rater's own category
+#'   proportions, so the coefficient differs from Fleiss' kappa, and no z
+#'   statistic or p-value is available for it. Not applicable with 2 raters.
 #' @param showLevelInfo Display information about how categorical levels are
 #'   currently ordered in your variables. Essential for weighted kappa analysis
 #'   to ensure ordinal levels are properly ordered (e.g., G1 → G2 → G3 for tumor
 #'   grades).
+#' @param gradingDesign Show the reading design (cases, pathologists, ratings
+#'   per case and per pathologist, whether every pathologist is linked through
+#'   shared cases) and the distribution of categories used by each pathologist.
+#'   Every observed rating is used; incomplete cases are not dropped.
+#' @param perPathologist For each pathologist, the exact agreement with
+#'   colleagues who read the same cases, the mean pairwise Cohen kappa, and the
+#'   boundary table showing how much more often this pathologist calls a case at
+#'   or above each grade than the colleagues who read the same cases.
+#' @param severityModel Cumulative-probit mixed model with a random case
+#'   effect and one fixed effect per pathologist (ordinal package). Each
+#'   pathologist's grading tendency is shown relative to the panel average, with
+#'   a Holm-adjusted p-value and a plot. Ordinal ratings only.
+#' @param latentModel Cumulative-probit mixed model with crossed random
+#'   effects for case and pathologist (Nelson and Edwards 2015). Reports the
+#'   case, pathologist and (when a cluster variable is set) institution
+#'   variances, the latent ICC(2,1) and the Nelson-Edwards model-based kappa.
+#'   Ordinal ratings only; the table refuses designs too small for the estimates
+#'   to be trusted.
+#' @param showGradingGuide Show a plain-language guide to the pathologist
+#'   grading tables: what each one answers, when to use which, and the design
+#'   limits.
 #' @param kripp Alternative reliability measure that handles missing data and
 #'   supports various data types. Useful when raters didn't rate all cases or
 #'   when comparing different measurement levels.
@@ -4081,19 +4455,23 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   equivalence.
 #' @param showTDIGuide Show educational guide and clinical use cases for Total
 #'   Deviation Index before running analysis.
-#' @param iota Iota coefficient for multivariate interrater agreement.
-#'   Measures agreement when raters assess multiple variables simultaneously
-#'   (e.g., tumor size + grade + mitotic count). Unlike ICC which analyzes one
-#'   variable at a time, Iota provides a single chance-corrected agreement index
-#'   across all variables. Supports both quantitative (continuous) and nominal
-#'   (categorical) data. Reduces to Fleiss' kappa for single categorical
-#'   variable.
-#' @param iotaStandardize Z-standardize quantitative variables before
-#'   computing Iota. Recommended when variables are on different scales (e.g.,
-#'   tumor size in mm vs. Ki-67 percentage). Ensures each variable contributes
-#'   equally to the overall agreement measure.
-#' @param showIotaGuide Show educational guide explaining the Iota coefficient
-#'   for multivariate agreement assessment.
+#' @param iota Iota coefficient (Janson & Olsson, 2001) for the selected rater
+#'   columns, computed as ONE variable rated by all of them. Supports
+#'   quantitative (continuous) and nominal (categorical) ratings. For nominal
+#'   ratings it is numerically identical to Conger's exact kappa, which the
+#'   'Exact kappa (3+ raters)' option also reports. The multivariate form of
+#'   iota - several variables scored by the same raters, summarised in one
+#'   coefficient - is NOT computed by this analysis, because no option here can
+#'   say which columns belong to which variable; enter the rater columns of one
+#'   variable at a time.
+#' @param iotaStandardize Z-standardize the quantitative ratings before
+#'   computing Iota. Standardization exists to equalise the contribution of
+#'   several variables to a multivariate iota. This analysis computes iota for a
+#'   single variable, where standardizing is an affine rescaling that leaves the
+#'   coefficient unchanged, so this setting has no effect on the reported value.
+#' @param showIotaGuide Show the educational guide explaining the Iota
+#'   coefficient, what this analysis computes with it, and when to prefer kappa
+#'   or ICC instead.
 #' @param finn Finn coefficient for interrater reliability of categorical
 #'   data. Variance-based agreement measure especially useful when variance
 #'   between raters is low (i.e., agreement is high). Alternative to traditional
@@ -4218,12 +4596,17 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param showPairwiseKappaGuide Show educational guide for pairwise kappa
 #'   analysis against a reference rater.
 #' @param allPairsKappa For studies with 3+ raters, compute Cohen's kappa,
-#'   observed agreement, standard error, 95 percent CI, z, and p-value for every
-#'   rater pair (C(k,2) rows). Reproduces the conventional pairwise agreement
-#'   table reported in interobserver reliability studies. Honors the 'wght'
-#'   (weights) and 'multipleTestCorrection' options.
-#' @param allPairsCI Compute Fisher-z 95 percent CI for each pairwise kappa
-#'   using the analytical standard error returned by irr::kappa2.
+#'   observed agreement, standard error, a confidence interval at the chosen
+#'   confidence level, z, and p-value for every rater pair (C(k,2) rows).
+#'   Reproduces the conventional pairwise agreement table reported in
+#'   interobserver reliability studies. Honors the 'wght' (weights) and
+#'   'multipleTestCorrection' options.
+#' @param allPairsCI Show the confidence interval columns of the All-Pairs
+#'   Kappa table. Each interval is built at the chosen confidence level from the
+#'   non-null asymptotic standard error (vcd::Kappa), on the scale set by 'Kappa
+#'   interval method'. When vcd::Kappa cannot return a finite standard error for
+#'   a pair, that row falls back to the irr::kappa2 null-hypothesis standard
+#'   error and a footnote says so.
 #' @param showAllPairsKappaGuide Show educational guide for all-pairs kappa:
 #'   when to report the full pairwise table versus average (Light's) or overall
 #'   (Fleiss') kappa.
@@ -4234,36 +4617,47 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   cytology). Cases with no unique mode (ties) are excluded.
 #' @param showItemModalGuide Show educational guide for per-category
 #'   item-modal agreement.
-#' @param hierarchicalKappa Enable hierarchical (multilevel) kappa analysis
-#'   for nested data structures (e.g., pathologists nested within institutions,
-#'   readers nested within centers). Accounts for clustering effects and
-#'   provides institution/cluster-specific agreement estimates. Essential for
-#'   multi-center reliability studies.
-#' @param clusterVariable Variable defining clusters/institutions/centers. For
-#'   example, hospital ID, institution name, or scanner ID. Raters are nested
-#'   within these clusters.
-#' @param iccHierarchical Calculate intraclass correlation coefficients for
-#'   hierarchical data. ICC(1): between-cluster agreement, ICC(2): reliability
-#'   of cluster means, ICC(3): within-cluster agreement. Decomposes variance
-#'   into cluster-level and rater-level components.
-#' @param clusterSpecificKappa Calculate kappa separately for each
-#'   cluster/institution to identify sites with poor agreement. Useful for
-#'   quality control in multi-center studies.
-#' @param varianceDecomposition Decompose total variance into between-cluster
-#'   and within-cluster components. Large between-cluster variance indicates
-#'   institutional heterogeneity. Comparison informs whether issues are local or
-#'   systematic.
-#' @param shrinkageEstimates Calculate shrinkage estimates for
-#'   cluster-specific kappas. Shrinks extreme estimates toward overall mean,
-#'   providing more stable estimates for small clusters. Recommended when
-#'   cluster sizes vary substantially.
-#' @param testClusterHomogeneity Test whether agreement is homogeneous across
-#'   clusters (null hypothesis: all clusters have equal kappa). Significant
-#'   result indicates heterogeneity requiring investigation.
-#' @param clusterRankings Rank clusters/institutions by agreement performance
-#'   with confidence intervals. Identifies best and worst performing sites. Use
-#'   cautiously to avoid unfair comparisons when cluster sizes differ
-#'   substantially.
+#' @param hierarchicalKappa Agreement for multi-centre designs in which every
+#'   case belongs to one cluster (institution, centre or scanner) and the same
+#'   raters score the cases. Categorical ratings get cluster-specific kappa and
+#'   a stratified kappa (the cluster kappas weighted by cluster size, Barlow,
+#'   Lai and Azen 1991) shown beside the pooled kappa. Continuous ratings get
+#'   the within-cluster ICC(2,1) and ICC(2,k) from a linear mixed model. For
+#'   categorical ratings the case, pathologist and institution variances come
+#'   from the model-based agreement of the pathologist grading analysis (an
+#'   ordinal mixed model), not from this section.
+#' @param clusterVariable Variable giving the cluster (for example hospital,
+#'   institution or scanner ID) that each case belongs to. Each case must belong
+#'   to exactly one cluster; the same raters may score cases from every cluster.
+#'   Used by the hierarchical kappa and, when set, by the model-based agreement
+#'   of the pathologist grading analysis, which then adds an institution
+#'   variance to the latent model.
+#' @param iccHierarchical Intraclass correlations for the hierarchical design,
+#'   estimated within cluster: ICC(2,1), the absolute-agreement reliability of a
+#'   single rater, and ICC(2,k), that of the mean of the raters, from a linear
+#'   mixed model. Continuous ratings only; for categorical ratings the latent
+#'   ICC is reported by the model-based agreement of the pathologist grading
+#'   analysis.
+#' @param clusterSpecificKappa Agreement within each cluster separately, to
+#'   see whether it is similar across sites: Cohen's or Fleiss' kappa for
+#'   categorical ratings, the ICC for continuous ratings. Useful for quality
+#'   control in multi-centre studies.
+#' @param varianceDecomposition Share of the rating variance due to cases,
+#'   raters, clusters and residual error, from a linear mixed model. Continuous
+#'   ratings only; for categorical ratings the variances are estimated by the
+#'   model-based agreement of the pathologist grading analysis.
+#' @param testClusterHomogeneity Likelihood ratio test for the institution
+#'   (cluster) random effect: the linear mixed model for continuous ratings
+#'   fitted with and without an institution term. It tests whether the cases'
+#'   mean scores differ between institutions (case mix or site-level scoring,
+#'   which this design cannot separate), not whether agreement (kappa or ICC)
+#'   differs between them; read the cluster-specific estimates for that. The
+#'   p-value is boundary-corrected, half the usual chi-square value, because a
+#'   variance cannot be negative (Stram and Lee, 1994).
+#' @param clusterRankings Rank clusters by their cluster-specific agreement.
+#'   Read each rank beside that cluster's confidence interval: with small
+#'   clusters, neighbouring ranks are rarely distinguishable, and ranking sites
+#'   of very different size invites unfair comparison.
 #' @param showHierarchicalGuide Show educational guide for
 #'   hierarchical/multilevel kappa in multi-center studies.
 #' @param conditionVariable Variable distinguishing measurement conditions
@@ -4277,10 +4671,9 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   estimate with CI, variance components, and ICC. More powerful than paired
 #'   t-tests or Wilcoxon tests when data has a crossed rater x case x condition
 #'   design (e.g., Dy et al. 2024 Ki-67 AI study).
-#' @param multipleTestCorrection Correction method for multiple comparisons
-#'   when testing agreement across multiple strata or clusters. Applied to
-#'   cluster-specific p-values in the hierarchical analysis and to per-condition
-#'   comparisons when multiple conditions are present.
+#' @param multipleTestCorrection Correction for multiple comparisons, applied
+#'   to the pairwise p-values of the All-Pairs Kappa table and to the
+#'   fixed-effect p-values of the Mixed-Effects Condition Comparison.
 #' @param showMixedEffectsGuide Show educational guide for mixed-effects
 #'   condition comparison in AI validation studies.
 #' @param confusionMatrix Display a formal N×N confusion matrix comparing
@@ -4337,16 +4730,16 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   every category in your data, identifying which specific
 #'   diagnoses/classifications have strong agreement and which may need improved
 #'   training or criteria clarification.
-#' @param specificConfidenceIntervals Calculate 95 percent confidence
-#'   intervals for specific agreement indices using Wilson score method.
-#'   Recommended for publication and when sample sizes vary across categories.
-#'   Helps distinguish true differences in category-specific agreement from
-#'   random variation.
+#' @param specificConfidenceIntervals Calculate confidence intervals at the
+#'   chosen confidence level for specific agreement indices, using the Wilson
+#'   score method. Recommended for publication and when sample sizes vary across
+#'   categories. Helps distinguish true differences in category-specific
+#'   agreement from random variation.
 #' @param showSpecificAgreementGuide Show educational guide and clinical use
 #'   cases for Specific Agreement Indices before running analysis.
 #' @param showSummary Display a natural-language interpretation of results
-#'   with color-coded agreement levels and clinical guidance. Recommended for
-#'   reports and presentations.
+#'   with the Landis and Koch agreement level and clinical guidance. Recommended
+#'   for reports and presentations.
 #' @param showAbout Display an explanatory panel describing what this analysis
 #'   does, when to use it, and how to interpret results.
 #' @param consensusName Name of the new computed variable containing consensus
@@ -4405,7 +4798,9 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param raterProfileShowPoints Overlay individual rating observations on
 #'   box/violin plots. Useful for smaller datasets (N < 100) to show actual data
 #'   distribution. Not recommended for large datasets due to overplotting.
-#' @param showRaterProfileGuide .
+#' @param showRaterProfileGuide Show the educational guide explaining what a
+#'   rater profile plot shows, how to read a systematic shift between raters,
+#'   and when to prefer a coefficient instead.
 #' @param agreementBySubgroup Calculate agreement statistics separately for
 #'   each level of a subgroup variable (e.g., tumor type, disease stage,
 #'   specimen type, difficulty level). Generates forest plot showing kappa/ICC
@@ -4427,7 +4822,10 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   calculate agreement statistics. Subgroups with fewer cases will be excluded
 #'   with a warning message. Default: 10 cases (reasonable for kappa
 #'   estimation).
-#' @param showSubgroupGuide .
+#' @param showSubgroupGuide Show the educational guide listing when stratified
+#'   agreement is useful (tumor type, stage or grade, case difficulty,
+#'   anatomical site). The table's own note explains that kappa depends on each
+#'   subgroup's case mix and that subgroups are not compared with each other.
 #' @param raterClustering Cluster raters based on their rating patterns to
 #'   identify groups of raters with similar rating behavior. For continuous
 #'   data: clustering based on correlation or Euclidean distance of ratings. For
@@ -4444,24 +4842,36 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   raters into K distinct clusters. Requires specifying number of clusters.
 #'   Best when number of groups is known a priori (e.g., 2 training cohorts, 3
 #'   experience levels).
-#' @param clusterDistance For continuous data: - Correlation: Groups raters
-#'   with similar relative rating patterns (recommended for most cases) -
-#'   Euclidean: Groups raters with similar absolute rating values - Manhattan:
-#'   Like Euclidean but less sensitive to outliers For categorical data: -
-#'   Agreement-based: Distance = 1 - pairwise agreement proportion Correlation
-#'   is recommended for most applications as it captures rating pattern
-#'   similarity regardless of systematic shifts (one rater consistently 10
-#'   percent higher).
+#' @param clusterDistance Distance used to compare raters. Concordance (1 -
+#'   Lin's CCC) is the default: Lin's concordance correlation coefficient is the
+#'   correlation multiplied by a bias factor, so it falls both when two raters
+#'   scatter around each other and when one reads consistently higher or on a
+#'   wider scale. Two raters are close only when their numbers are
+#'   interchangeable, which is what agreement means. The similarity column is
+#'   then the concordance coefficient itself, on -1 to 1. Correlation (1 - r),
+#'   pattern only: groups raters whose case-to-case ranking agrees. It removes
+#'   systematic offsets, so two raters can share a cluster while one reads
+#'   consistently higher than the other; it measures association, not absolute
+#'   agreement. Choose it when the question is about ranking rather than about
+#'   interchangeable values. Euclidean and Manhattan: raw distance between the
+#'   two raters' readings. Both see a systematic offset, but their size grows
+#'   with the number of cases, so the similarity column is rescaled by the
+#'   largest distance in the analysis and ranks raters within this dataset only.
+#'   Manhattan is less affected by a single extreme case. Exact Agreement: 1
+#'   minus the proportion of cases scored identically. This is the distance used
+#'   for categorical ratings whatever is selected here; on continuous
+#'   measurements it counts exact equality only.
 #' @param clusterLinkage How to measure distance between clusters: - Average:
 #'   Distance between cluster means (balanced, recommended for most cases) -
 #'   Complete: Maximum distance between any two points (compact clusters) -
 #'   Single: Minimum distance between any two points (can create chain-like
 #'   clusters) - Ward: Minimizes within-cluster variance (tends to create
 #'   equal-sized clusters)
-#' @param nClusters Number of clusters to create for k-means clustering.
-#'   Consider: number of training cohorts, experience levels, or institutions.
-#'   For hierarchical clustering, this is ignored but dendrogram can be cut at
-#'   any height.
+#' @param nClusters Number of clusters to form. K-means partitions the raters
+#'   into this many clusters; hierarchical clustering cuts the dendrogram into
+#'   this many branches. Consider the number of training cohorts, experience
+#'   levels or institutions. A value larger than one less than the number of
+#'   raters is reduced, and the table says so.
 #' @param showDendrogram Display hierarchical clustering dendrogram showing
 #'   rater groupings at all similarity levels. Height of joins indicates
 #'   dissimilarity. Raters joined at lower heights are more similar. Useful for
@@ -4471,20 +4881,37 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   with cluster memberships annotated. Helps visualize which raters are most
 #'   similar and validates cluster assignments. For continuous data: correlation
 #'   matrix. For categorical data: agreement matrix.
-#' @param showRaterClusterGuide .
+#' @param showRaterClusterGuide Show the educational guide explaining how
+#'   raters are grouped and how to read the dendrogram and similarity heatmap.
 #' @param caseClustering Perform clustering of cases based on rating patterns
 #'   across raters. Identifies groups of cases that received similar ratings.
 #' @param caseClusterMethod Hierarchical: Creates a dendrogram showing nested
 #'   groupings at all similarity levels. K-means: Partitions cases into K
 #'   distinct clusters (continuous data only).
-#' @param caseClusterDistance Correlation (1 - r): Based on correlation
-#'   between rating vectors (continuous). Euclidean: Straight-line distance in
-#'   rating space. Manhattan: City-block distance (sum of absolute differences).
-#'   Agreement-Based: Proportion of disagreeing raters (categorical).
+#' @param caseClusterDistance Distance used to compare cases. Euclidean is the
+#'   default: straight-line distance between two cases' rating vectors, which
+#'   sees the level of the ratings, so cases are grouped when the raters gave
+#'   them similar numbers. The similarity column is the distance rescaled by the
+#'   largest distance in the analysis and ranks cases within this dataset only.
+#'   Manhattan: the same, from absolute differences, and less affected by one
+#'   extreme rater. Correlation (1 - r), profile shape only: groups cases whose
+#'   rating profile across raters has the same shape. It ignores the level of
+#'   the ratings, so cases of very different magnitude are grouped together. A
+#'   case's profile has only as many points as there are raters, so this needs
+#'   at least three raters; with two, the correlation between any two cases is
+#'   exactly +1 or -1 and the analysis stops with a message. Exact Agreement: 1
+#'   minus the proportion of raters who gave two cases the same value. This is
+#'   the distance used for categorical ratings whatever is selected here. Lin's
+#'   concordance coefficient is deliberately not offered for cases: it would be
+#'   estimated from as many points as there are raters, typically three to six,
+#'   which is too few.
 #' @param caseClusterLinkage Average: Uses average distance between all pairs.
 #'   Complete: Uses maximum distance between pairs. Single: Uses minimum
 #'   distance between pairs. Ward: Minimizes within-cluster variance.
-#' @param nCaseClusters Number of clusters to create for k-means clustering.
+#' @param nCaseClusters Number of clusters to form. K-means partitions the
+#'   cases into this many clusters; hierarchical clustering cuts the dendrogram
+#'   into this many branches. A value larger than one less than the number of
+#'   cases is reduced, and the table says so.
 #' @param showCaseDendrogram Display hierarchical clustering dendrogram for
 #'   cases.
 #' @param showCaseClusterHeatmap Display similarity matrix heatmap with
@@ -4495,7 +4922,9 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   agreement (kappa and percent agreement) between two conditions (e.g.,
 #'   manual vs AI-assisted scoring of the same cases).
 #' @param conditionBVars Rater columns for the second condition (e.g.,
-#'   AI-assisted). The main rater variables serve as Condition A.
+#'   AI-assisted). The main rater variables serve as Condition A. Give Condition
+#'   B the same number of rater columns as Condition A; otherwise only percent
+#'   agreement is comparable and no kappa row is shown.
 #' @param pairedBootN Number of bootstrap replications for paired comparison
 #'   test.
 #' @param showPairedAgreementGuide Show educational guide for comparing
@@ -4507,7 +4936,8 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   Common choices - 0.4 (moderate), 0.6 (substantial).
 #' @param ssKappaAlt The kappa (or ICC) value under the alternative
 #'   hypothesis. This is the minimum clinically meaningful agreement.
-#' @param ssNRaters Planned number of raters in the study.
+#' @param ssNRaters Planned number of raters in the study. Kappa calculations
+#'   support 2 to 6 raters; the ICC calculation has no upper limit.
 #' @param ssNCategories Number of rating categories (e.g., 4 for HER2
 #'   0/1+/2+/3+).
 #' @param ssAlpha Type I error rate (two-sided).
@@ -4526,6 +4956,14 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$contingencyTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$ratingCombinationsTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$contingencyTableExplanation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$gradingHeading} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$designSummaryTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$categoryDistributionTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$pathologistTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$boundaryTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$severityPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$latentModelTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$gradingGuide} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$blandAltmanHeading} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$blandAltman} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$agreementHeatmapPlot} \tab \tab \tab \tab \tab an image \cr
@@ -4647,6 +5085,7 @@ agreement <- function(
     vars = NULL,
     baConfidenceLevel = 0.95,
     confLevel = 0.95,
+    kappaCIMethod = "wald",
     proportionalBias = FALSE,
     showBlandAltmanGuide = FALSE,
     blandAltmanPlot = FALSE,
@@ -4660,6 +5099,11 @@ agreement <- function(
     wght = "unweighted",
     exct = FALSE,
     showLevelInfo = FALSE,
+    gradingDesign = FALSE,
+    perPathologist = FALSE,
+    severityModel = FALSE,
+    latentModel = FALSE,
+    showGradingGuide = FALSE,
     kripp = FALSE,
     krippMethod = "nominal",
     bootstrap = FALSE,
@@ -4720,7 +5164,6 @@ agreement <- function(
     iccHierarchical = FALSE,
     clusterSpecificKappa = TRUE,
     varianceDecomposition = TRUE,
-    shrinkageEstimates = FALSE,
     testClusterHomogeneity = TRUE,
     clusterRankings = FALSE,
     showHierarchicalGuide = FALSE,
@@ -4766,7 +5209,7 @@ agreement <- function(
     showSubgroupGuide = FALSE,
     raterClustering = FALSE,
     clusterMethod = "hierarchical",
-    clusterDistance = "correlation",
+    clusterDistance = "ccc",
     clusterLinkage = "average",
     nClusters = 3,
     showDendrogram = TRUE,
@@ -4774,7 +5217,7 @@ agreement <- function(
     showRaterClusterGuide = FALSE,
     caseClustering = FALSE,
     caseClusterMethod = "hierarchical",
-    caseClusterDistance = "correlation",
+    caseClusterDistance = "euclidean",
     caseClusterLinkage = "average",
     nCaseClusters = 3,
     showCaseDendrogram = TRUE,
@@ -4822,6 +5265,7 @@ agreement <- function(
         vars = vars,
         baConfidenceLevel = baConfidenceLevel,
         confLevel = confLevel,
+        kappaCIMethod = kappaCIMethod,
         proportionalBias = proportionalBias,
         showBlandAltmanGuide = showBlandAltmanGuide,
         blandAltmanPlot = blandAltmanPlot,
@@ -4835,6 +5279,11 @@ agreement <- function(
         wght = wght,
         exct = exct,
         showLevelInfo = showLevelInfo,
+        gradingDesign = gradingDesign,
+        perPathologist = perPathologist,
+        severityModel = severityModel,
+        latentModel = latentModel,
+        showGradingGuide = showGradingGuide,
         kripp = kripp,
         krippMethod = krippMethod,
         bootstrap = bootstrap,
@@ -4895,7 +5344,6 @@ agreement <- function(
         iccHierarchical = iccHierarchical,
         clusterSpecificKappa = clusterSpecificKappa,
         varianceDecomposition = varianceDecomposition,
-        shrinkageEstimates = shrinkageEstimates,
         testClusterHomogeneity = testClusterHomogeneity,
         clusterRankings = clusterRankings,
         showHierarchicalGuide = showHierarchicalGuide,

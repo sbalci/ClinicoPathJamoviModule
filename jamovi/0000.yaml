@@ -149,7 +149,7 @@ analyses:
   - title: 'Treatment Response: Patient-Level Burden'
     name: waterfall
     ns: ClinicoPath
-    menuGroup: OncoPath
+    menuGroup: OncoPathT
     menuSubgroup: Patient Follow-Up Plots
     menuTitle: 'Treatment Response: Patient-Level Burden'
     description: >
@@ -198,7 +198,7 @@ analyses:
   - title: Swimmer Plot
     name: swimmerplot
     ns: ClinicoPath
-    menuGroup: OncoPath
+    menuGroup: OncoPathT
     menuSubgroup: Patient Follow-Up Plots
     menuTitle: Swimmer Plot
     description: >
@@ -1371,10 +1371,17 @@ analyses:
   - title: Interrater Reliability
     name: agreement
     ns: ClinicoPath
-    menuGroup: meddecide
+    menuGroup: meddecideT
     menuSubgroup: Agreement
     menuTitle: Interrater Reliability
-    description: Function for Interrater Reliability.
+    description: >
+      Agreement between two or more raters who scored the same cases. Cohen's
+      kappa for two raters (unweighted, or linear or quadratic weighted for
+      ordinal grades) with a confidence interval, and Fleiss' or Conger's exact
+      kappa for three or more; optional Krippendorff's alpha, Gwet's AC, PABAK,
+      ICC, Lin's concordance, Bland-Altman limits, marginal homogeneity tests,
+      per-rater and per-subgroup agreement, rater and case clustering, consensus
+      and agreement-level variables, and sample size for an agreement study.
     ribbon: analyses
     category: analyses
   - title: Medical Decision

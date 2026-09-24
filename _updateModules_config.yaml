@@ -47,8 +47,8 @@
 # ==============================================
 
 
-new_version: "1.0.83.03"
-new_date: "2026-09-23"
+new_version: "1.0.83.04"
+new_date: "2026-09-24"
 quick: false
 TEST: true
 jjstatsplot: false
@@ -155,6 +155,10 @@ modules:
       - "comprehensive_dca_data.rda"
       - "dca_test.rda"
       - "dca_test_data.rda"
+      # agreement is parked (menuGroup: meddecideT), so its example data do not ship yet. When it
+      # is promoted, uncomment: the Pathologist Grading Analysis example (6 pathologists x 150
+      # biopsies, ISUP grade groups, incomplete design, known truth; data-raw/generate_agreement_grading_data.R).
+      # - "agreement_grading.rda"
   jsurvival:
     directory: "/Users/serdarbalci/Documents/GitHub/jsurvival"
     menu_groups: ["Survival"]

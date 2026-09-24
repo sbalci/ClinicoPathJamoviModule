@@ -2102,7 +2102,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             .bootstrapValidation = function(data, fit) {
                 table <- self$results$validationTable
                 B <- self$options$bootstrapN
-                table$setNote("seed", jmvcore::format(.("Random seed: {seed}"), seed = self$options$random_seed))
+                table$setNote("seed", .fmt(.("Random seed: {seed}"), seed = self$options$random_seed))
 
                 alpha_val <- fit$alpha
 

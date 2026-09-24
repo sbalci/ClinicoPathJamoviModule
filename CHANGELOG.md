@@ -5,6 +5,303 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-09-24 — explanatory text drifted from the limits it explains (`agreement` grading section)
+
+### The guide and the refusal sentences quoted figures the gates never used
+
+- **Failure mode:** the simulation grid was rerun and `AGREEMENT_LATENT_GATES` updated, but the
+  guide still said "model-based kappa from 30 cases", "intervals only with 4 pathologists" and
+  "a median of 6 ratings per case", against gates of 50 cases, 3 pathologists and never shown.
+  The refusal for 3-pathologist intervals quoted 85-91% coverage, but that was measured at 30-50
+  cases. At 100 or more cases, 3 pathologists covered 0.922-0.979, so the limit itself was set
+  on evidence from the wrong region. The skew sentence blamed a 70% result on every share from
+  50% up, when κ_m passed at 58%.
+- **Detection signal:** an adversarial review that read every sentence against the constants and
+  against `summary_latent.csv`, not against the code.
+- **Prevention rule:** a number that explains a gate is built from the gate's constant
+  (`sprintf(.(…), G$…)`), never typed. A simulation figure quoted to a user names the cell region
+  it came from. When a limit moves, re-derive every quoted figure from the summary file. The
+  pinned-constants test says which texts assume which constants.
+
+### The all-ratings kappa fix reached the headline and missed three siblings
+
+- **Failure mode:** the headline Fleiss/Conger moved to every observed rating
+  (`.fleissAllRatings`). The bootstrap row (same label), the hierarchical per-institution kappa
+  and the bootstrap percent agreement still dropped cases, or counted a single rating as
+  agreement. On incomplete data each printed a different number under the headline's name.
+- **Detection signal:** the review; tests now compare each sibling with the headline on data
+  with missing ratings (`test-agreement-fixes-2026-09-24.R`).
+- **Prevention rule:** same as the entry below. After changing how a statistic is computed,
+  `grep` for every other site that prints it under the same label, and test them against the
+  headline on the input that exposed the difference (here, missing ratings).
+
+### The grid checked validity at study sizes up to 200 x 10; nobody timed 1000 x 20
+
+- **Failure mode:** the grading-tendency fit (`clmm`, one fixed effect per pathologist) scales with
+  ratings x pathologists: 14 s at 300 x 10, 439 s at 1000 x 20, with no guard and no warning. The
+  simulation grid had never gone above 200 cases or 10 raters, so the tests only ever saw fast fits.
+- **Detection signal:** a runtime reviewer that stress-tested sizes beyond the grid.
+- **Prevention rule:** for any model fitted inside an analysis, time it at the largest study a
+  user plausibly has, not just at the validation sizes, and add a pre-fit ceiling with a note
+  when the fit cannot be made fast. The same reviewer found that single-read cases counted toward
+  the case minimums: a gate must count what the simulation counted.
+
+### A section's tests reported 0 pass, 3 skip, and looked green
+
+- **Failure mode:** `test-agreement-grading-section.R` uses `skip_on_cran()`. When run through
+  `testthat::test_file()` from `Rscript`, `NOT_CRAN` is unset, so every block was skipped and the
+  file printed no failures.
+- **Detection signal:** a per-file skip count in the suite runner.
+- **Prevention rule:** set `Sys.setenv(NOT_CRAN = "true")` in any runner outside
+  `devtools::test()`, and treat a skip count above zero as something to explain.
+
+---
+
+## 2026-09-24 — a fix applied to one member of a family is the dominant failure in `agreement`
+
+### Eleven defects were the SAME shape: correct at one site, missed at its siblings
+
+- **Failure mode:** `/check-function-full agreement` found that most of its defects were fixes
+  applied to one member of a family and not to the others. `.checkpoint()` was in 3 of 4
+  `nBoot`/`pairedBootN` loops, so the fourth froze the pane uncancellably at up to 10,000
+  replicates. The `dropped_replicates` disclosure was in 1 of 2 bootstrap tables.
+  `.mergeDeclaredLevels()` was used by 2 of 4 scale-building sites; Gwet AC2 and Krippendorff
+  built their ordinal scale from the column-order union, so G1 < G3 < G2. The
+  `vapply(as.character)` factor-code fix was at 3 of 6 row conversions. The `.init()` retitle of
+  mislabelled ICC columns covered 2 of 3. Finn's scale-size guard protected the factor path and
+  not coded-numeric ratings, where `finnLevels = 10` turned 0.000 "Poor" into 0.919
+  "Outstanding" in silence. The 0/0-to-`NA` rule was fixed in one per-class F1 table and not the
+  other.
+- **Detection signal:** reading each sibling after finding the first. A parallel sweep per defect
+  class found siblings the audit had missed: Robinson's A's bootstrap and three per-case loops had
+  no checkpoint, a fourth naive union sat in `.calculateBootstrapCI`, and Robinson's A and case
+  clustering had error handlers that would swallow a restart.
+- **Prevention rule:** after fixing any defect, state its CLASS and sweep every member before
+  closing, preferably with a whole-file mechanical check. Two now exist for this file: every
+  `.checkpoint()` inside a `tryCatch` must sit under a handler that re-raises
+  `code == "restart"`, and every `self$options$X` read must name an option in `.a.yaml`. The
+  second caught a read of a non-existent `caseClusterHeatmap` option minutes after it was
+  written; jmvcore raises on it.
+
+### A formula oracle is not a truth oracle
+
+- **Failure mode:** the new binary route's latent-scale ICC matched a direct `lme4::glmer` refit
+  to 1e-5, so the implementation was right, but the NUMBER was wrong. glmer's Laplace
+  approximation shrinks the case variance with few ratings per case. In simulation the latent ICC
+  ran -0.19 low at 2 raters, -0.08 at 3, -0.05 at 4 and -0.02 at 5
+  (`development-scripts/validate_agreement_latent_icc_bias.R`), and 2 raters is the commonest
+  pathology design.
+- **Detection signal:** one simulated dataset came back 0.507 against a true 0.556. It was
+  quantified before being dismissed as noise.
+- **Prevention rule:** a new estimator gets two checks, never one. Check the formula against an
+  independent call, and check recovery against simulated truth across the design range users will
+  hit. The route is now withheld below 5 raters, with the measured figures in its note.
+
+### Tests that pinned the defect
+
+- **Failure mode:** three existing tests asserted the old wrong behaviour and failed only when it
+  was fixed. `test-agreement-itemmodal.R` asserted the zero-width `[1, 1]` interval, a fabricated
+  claim of perfect precision. `test-agreement-release-review.R` asserted the min-single-cell
+  sparse note, which fires on nearly every 3x3 table. VAL-agreement-06 asserted that categorical
+  ratings fill no hierarchical table. Separately, 136 of 269 agreement `test_that` blocks were
+  smoke-only (`expect_s3_class`), including the block that loads `agreement_perfect` and asserts
+  nothing about its kappa.
+- **Detection signal:** the full-suite run after the fix, compared against a baseline taken before
+  any edit (744 pass / 0 fail).
+- **Prevention rule:** take the baseline first. Read every newly failing test before touching it,
+  because a test that pins a defect is updated to the corrected contract with the reason in a
+  comment, not deleted. Run every new regression test against the UNFIXED code too: all 18 new ones
+  failed there, which is the only evidence they guard anything.
+
+---
+
+## 2026-09-23 — a new option can change a table's numbers without being one of its dependencies
+
+### `kappaCIMethod` reached five tables and was in none of their `clearWith` lists
+
+- **Failure mode:** the *Kappa interval method* option (added the same day) changes the limits in
+  five tables through one shared helper, `.pairKappaWithCI()`. No `.r.yaml` item named it under
+  `clearWith`, so in jamovi a user switching Wald to Fisher z kept the old interval on screen until
+  the re-run overwrote it. (Row duplication could not follow here: the reset block at the top of
+  `.run()` calls `deleteRows()` on every `rows: 0` table. An earlier draft of this entry said
+  otherwise; an adversarial review of the pass caught it.)
+  Every test passed: the R wrapper builds a fresh results object per call, so a missing
+  `clearWith` is invisible to testthat by construction.
+
+- **Detection signal:** `/check-function agreement --profile release`. The option inventory
+  records, per option, whether the `.r.yaml` mentions it anywhere (`visible:` or `clearWith`);
+  `kappaCIMethod` was the only computational option with no `.r.yaml` reference at all. That
+  column, not a test, found it.
+
+- **Prevention rule:** an option is either cosmetic or a dependency. When a new option is read by
+  a method that writes into a table, add it to that table's `clearWith` in the same edit, and
+  trace the helper to every *consumer of its output*, not every caller. This pass traced the five
+  callers of `.pairKappaWithCI()` and still got two things wrong: the intra-rater caller took the
+  helper's SE and rebuilt its own Wald interval, so the option never reached that table although
+  the description now said it did; and the subgroup forest plot and the summary panel draw the
+  same interval without being callers at all, so they kept stale limits. A release gate check for "option read by a
+  table-writing method but absent from that table's `clearWith`" is filed in TODO.md.
+
+- **Same pass, same shape:** two tables declared CI columns that `.init()` hid unconditionally
+  and `.run()` never filled — a structural fact expressed as a runtime toggle. The declarative
+  form (no column) removed eleven lines and a `setVisible(FALSE)` that the review checklist
+  reads as a failure signal.
+
+- **Same pass, `check_external`:** `irrCAC::gwet.ac1.raw()` in irrCAC 1.4 (CRAN 2026-04-27)
+  returns a ONE-SIDED p, `1 - pt(AC/SE, n-1)`; irrCAC 1.0 (CRAN 2019-09-23, the only earlier
+  release) returned the two-sided `2*(1-pt(|AC/SE|, n-1))`. The analysis displayed the 1.4 value
+  as *p-value* beside two-sided kappa tests. The validation suite pinned Gwet's *coefficient*
+  against irrCAC and never its p. Found by deparsing the installed 1.4 function; the package ships
+  no NEWS. Rule: when a table cell comes straight from an upstream field, pin every displayed
+  cell (estimate, SE, interval, p), and read the upstream formula for the p once.
+
+- **The first fix was wrong too, and its test could not tell.** The pass folded irrCAC's value,
+  `2 * min(p, 1 - p)`. That is right on 1.4 and doubles the p on 1.0, and `DESCRIPTION` does not
+  pin irrCAC. The fix now recomputes the two-sided p from the coefficient and SE, which both
+  versions return. The pass's regression test compared `2 * min(p1, 1 - p1)` with the module on a
+  fixture where AC/SE was 13: `1 - pt(13, 66)` is exactly 0 in double precision, so the test
+  compared 0 with 0 and passed against the unfixed code as well. **Prevention rule: before a
+  p-value regression test is credited, compute the old and the new value on its fixture and
+  assert they differ** (`expect_gt(abs(new - old), tol)`). A strong-signal fixture underflows
+  every p to 0, and every p-value transform agrees at 0. Pick a fixture with the statistic near
+  1 to 3, and add one on the other side of zero when the transform has a sign.
+
+---
+
+## 2026-09-23 — a bad argument in a vignette was hiding a bug in the analysis
+
+### Correcting a test input revealed a defect that errored a whole feature
+
+- **Failure mode:** `agreement`'s Mixed-Effects Comparison passed the
+  `multipleTestCorrection` OPTION LEVEL straight into `stats::p.adjust()`. Those are two different
+  vocabularies: the level for Benjamini-Hochberg is `bh`, while `p.adjust()`'s methods are
+  `holm`/`hochberg`/`hommel`/`bonferroni`/`BH`/`BY`/`fdr`/`none`. So selecting
+  "Benjamini-Hochberg (FDR)" reached `match.arg()` and **errored the whole analysis** — the user got
+  no result, not a wrong one. The sibling call site in the same file mapped the level through a
+  `switch()` correctly; only one of the two did.
+
+- **Detection signal:** nothing in the module. The shipped vignette had been calling the analysis
+  with `multipleTestCorrection = "BH"` — an *invalid option level*, which jamovi's own option layer
+  rejected first. That rejection masked the backend bug completely. The defect only appeared when
+  the vignette was corrected to pass the real level `bh`, and the error moved one layer down from
+  the option validator to `p.adjust()`. Two wrongs had been cancelling for as long as both existed.
+
+- **Prevention rule:** **an invalid input in a test or a vignette is not a cosmetic problem — it is
+  a blindfold.** When a fixture supplies a value the schema rejects, every layer behind that
+  validator goes untested, and the document that was supposed to demonstrate the feature is
+  demonstrating the error message instead. Fix invalid fixture arguments when you find them, and
+  re-run: the interesting failures are the ones that appear afterwards. Related: `error = TRUE` in a
+  knitr chunk turns every failure into rendered output, so "render succeeded" says nothing about
+  whether the document is correct. Check the rendered artefact for `Error`, not the exit status —
+  this vignette re-knitted "successfully" at one point into 135 KB of cascading errors, down from
+  2.5 MB, because a data path did not resolve.
+
+- **Second rule:** **an option level is not an API argument.** Wherever a `type: List` level is
+  handed to a third-party function, the mapping belongs in one named helper that both ends share.
+  Two call sites, one mapped and one not, is the shape this defect always takes.
+
+---
+
+## 2026-09-23 — a green suite can be green because it stopped looking
+
+### Three vacuous guards, found only because something forced them to be re-read
+
+- **Failure mode:** across three rounds of work on `agreement`, three separate checks reported
+  success while testing nothing. (1) `IR2-07b` in the acceptance harness was written with the
+  literal string `"PASS"` in its result column; it reported PASS while its observed value was `NA`,
+  and had never compared anything. (2) A neighbouring assertion compared six cells that were all
+  `NA` on both sides — `all.equal(NA, NA)` is `TRUE`, so it passed vacuously; the fixture had
+  drifted onto the variance boundary where the fix correctly blanks those cells. (3)
+  `test-benford-release-review.R` walks benford's AST for `jmvcore::format` calls — the moment the
+  module-wide sweep converted all 47 of them, that walk would find zero, `problems` would be
+  `character(0)`, and the test would have gone green **because its subject no longer existed**.
+  Nobody would have noticed: the file's name and its passing status would both look right.
+
+- **Detection signal:** none of the three was caught by running the suite — running the suite is
+  what produced the false green. (1) was caught by reading the matrix CSV and noticing an
+  `observed` column that said `NA` next to a `PASS`. (2) was caught by asking why (1)'s fixture had
+  no numbers in it. (3) was caught by an agent scoping the sweep, which asked what each existing
+  test would still be testing *after* the change it was about to make.
+
+- **Prevention rule:** **a check that can only be read as passing is not a check.** Three concrete
+  habits, all of which paid here. Never write a literal verdict into a result table — compute it
+  from the comparison, so the row can go red. Before crediting any numeric agreement, require the
+  compared values to be finite; `all.equal` treats `NA == NA` as agreement, and so does
+  `all(is.na(x))` on a zero-length vector. And when a change removes the thing a test searches for,
+  the test is part of the change: retarget it in the same pass, or it becomes a permanent
+  false green.
+
+- **Second rule, same pass:** **when a mechanical sweep is proposed, the deliverable is the trap
+  list, not the sweep.** A 430-site rewrite across 34 files was safe as a one-line `sed` for 429 of
+  them — but only because a scoping pass first enumerated the call shapes and found the three that
+  were not: a `do.call` form that would have *errored* at runtime under a token swap, a call
+  passing `context =`, which is a real formal of `jmvcore::format` and was silently swallowing the
+  value instead of substituting it (a live bug the sweep would have preserved byte-for-byte), and
+  `R/utils.R` itself, where the swap would have turned the wrapper's own delegation into infinite
+  recursion. The same pass measured that the guard test's glob `R/*.b.R` had been blind to 13 live
+  calls in `R/stagemigration-part*.R` the whole time.
+
+- **Third rule:** **prove provenance before claiming it.** The sweep's verification run showed 9
+  failures across 231 files. Two were genuinely exposed by the work; the rest were pre-existing —
+  but that was established by swapping the pre-sweep sources back in and re-running the identical
+  harness, not by reasoning about byte-identity. One of the nine looked like a regression
+  (`pathagreement-wiring`, 0 failures before, 1 after) and was not: it passes in isolation and in a
+  six-file harness both before and after, and only fails inside a 231-file batch. A large batch is
+  evidence about the batch.
+
+---
+
+## 2026-09-23 — a fix pass needs its own adversarial review, because it writes new defects
+
+### The `agreement` remediation closed 16 findings and introduced a BLOCKING one
+
+- **Failure mode:** closing the audit's FIX-07 meant letting the rater variance decomposition
+  accept ordered factors. It did that by merging both rater columns' declared levels with
+  `lv_list[order(-lengths(lv_list))]` then `Reduce(union, lv_list)`. When neither column's level
+  set contains the other — an `Absent < Focal < Diffuse` scale where rater A never used Focal and
+  rater B never used Diffuse, which is exactly what jamovi produces from a CSV — the merged order
+  is **not determined by the data**. It depends on which variable the user dropped into the box
+  first. Measured on one dataset: `vars = c("RA","RB")` reported *"Most of the disagreement is a
+  systematic offset between raters"* (systematic share 0.70) and `vars = c("RB","RA")` reported
+  *"No systematic rater offset is identifiable in these data"*. A second fixture moved the rater
+  component 20-fold. The `ordinal_codes` note truthfully printed the fabricated order, so the
+  disclosure was present and the number was still wrong. The pre-fix code refused non-numeric
+  ratings outright, so this failure mode did not exist before the fix.
+
+- **Detection signal:** not the acceptance harness. `development-scripts/audit_agreement_2026-09-23.R`
+  went 16 CONFIRMED-DEFECT → 29/29 PASS and the 11 `test-agreement*` suites went 517 → 616 passing,
+  with the defect live the whole time. It was found by an adversarial review run **after** the
+  fixes, by a reviewer told to assume the fix was wrong, which built the degenerate level sets on
+  purpose. Three of the four reviewers also caught majors: a quantitative iota graded on the kappa
+  scale beside an ICC panel grading the same number differently; a note asserting Pearson publishes
+  no interpretive bands when a widely cited medical rule of thumb does; and three tables rendering
+  `90% CI` as a span over columns still titled `95% CI Lower`.
+
+- **Prevention rule:** **a fix pass is a change, and changes get reviewed — by someone who did not
+  design them.** A green acceptance harness proves the reported defects are closed; it says nothing
+  about what the fix wrote. Budget an adversarial pass over the fix diff, with the reviewers told to
+  assume it is wrong, and give at least one of them the pre-fix source so it can A/B replay every
+  result table. That reviewer diffed 45 tables at 1e-10 against the pre-fix build and separated
+  "this pass broke it" from "this was already broken" — a distinction no amount of after-the-fact
+  reading recovers.
+
+- **Second rule, from the same pass:** **a merged ordinal scale must be unique, not merely
+  consistent.** The old check asked whether each column's order *contradicted* the merge; the
+  failing cases were *underdetermined*, not contradictory, and passed it. The condition to test is
+  nestedness by inclusion — every level set a subsequence of the largest — which makes the merged
+  order unique. The same helper backed weighted kappa in six other places, so one fabricated scale
+  could reach the headline coefficient; fixing it at the helper also surfaced a latent bug where
+  All-Pairs Kappa let every rater pair re-derive its own scale.
+
+- **Third rule:** **a hard-coded verdict in a test harness is not a test.** `IR2-07b` in the audit
+  script was written with the literal string `"PASS"` in the result column. It reported PASS while
+  its observed value was `NA` — it had never compared anything. `all.equal(NA, NA)` is `TRUE`, so a
+  neighbouring assertion was passing vacuously too. Every verdict in a harness is computed from the
+  comparison, and any comparison that can see `NA` needs a finiteness guard before its result is
+  credited.
+
+---
+
 ## 2026-09-23 — a measurement taken while an analysis is parked is not a measurement of the module
 
 ### A clean module read as six unused dependencies and eight test failures

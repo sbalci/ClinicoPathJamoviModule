@@ -1,7 +1,7 @@
 ---
 name: waterfall
 title: 'Treatment Response: Patient-Level Burden'
-menuGroup: OncoPath
+menuGroup: OncoPathT
 menuSubgroup: 'Patient Follow-Up Plots'
 menuSubtitle: 'Waterfall and SpiderPlot: One burden value per patient or visit'
 version: '1.0.83'
@@ -79,8 +79,8 @@ options:
             positive values = tumor growth (poor response). Example: -30 means 30 percent decrease.
           jamovi: >
             Response variable: tumor measurements or percentage changes from baseline.
-            • Raw measurements: actual tumor sizes (mm, cm, sum of diameters)
-            • Percentage changes: pre-calculated changes (-30 = 30 percent shrinkage = good response)
+            - Raw measurements: actual tumor sizes (mm, cm, sum of diameters)
+            - Percentage changes: pre-calculated changes (-30 = 30 percent shrinkage = good response)
             Tip: Use percentage format if changes already calculated, raw format for actual measurements.
 
 
@@ -96,9 +96,9 @@ options:
             Required for spider plot and raw measurement processing. Baseline should be time = 0.
           jamovi: >
             Time point of measurement for tracking response over time.
-            • Examples: months from baseline, weeks from treatment start
-            • Required for: Spider plot visualization and raw measurement processing
-            • Format: Baseline = 0, follow-up = positive numbers (1, 2, 3, etc.)
+            - Examples: months from baseline, weeks from treatment start
+            - Required for: Spider plot visualization and raw measurement processing
+            - Format: Baseline = 0, follow-up = positive numbers (1, 2, 3, etc.)
             Tip: Spider plots show treatment response trajectories over time.
 
     - name: groupVar
@@ -131,8 +131,8 @@ options:
             or 'percentage' for pre-calculated percentage changes from baseline
           jamovi: >
             Choose your data format:
-            • Percentage Changes: Pre-calculated changes from baseline (-30 = 30 percent shrinkage)
-            • Raw Measurements: Actual tumor sizes (requires Time Variable for baseline calculation)
+            - Percentage Changes: Pre-calculated changes from baseline (-30 = 30 percent shrinkage)
+            - Raw Measurements: Actual tumor sizes (requires Time Variable for baseline calculation)
             Most oncology studies use percentage changes. Use raw measurements only if you have
             actual tumor measurements and want automatic percentage calculation.
 
@@ -168,7 +168,7 @@ options:
             the right, following the standard oncology waterfall convention.
           jamovi: >
             Direction for the response sort. Conventional = worst (highest) on the
-            left, best (lowest/most negative) on the right — the standard oncology
+            left, best (lowest/most negative) on the right -- the standard oncology
             waterfall layout.
 
     - name: showBaseline
@@ -233,7 +233,7 @@ options:
             non-missing value is used and conflicting values are reported.
           jamovi: >
             Optional per-patient RECIST category (CR/PR/SD/PD). When supplied it
-            overrides the category computed from the % value — e.g., a shrinking
+            overrides the category computed from the % value -- e.g., a shrinking
             tumor can still be PD due to a new lesion. Affects coloring and metrics.
 
     - name: showCategoryLabels
@@ -280,8 +280,8 @@ options:
             and Partial Response (PR) cutoffs.
           jamovi: >
             Show RECIST v1.1 threshold lines on plots:
-            • -30 percent line: Partial Response (PR) cutoff - tumor shrinkage threshold
-            • +20 percent line: Progressive Disease (PD) cutoff - tumor growth threshold
+            - -30 percent line: Partial Response (PR) cutoff - tumor shrinkage threshold
+            - +20 percent line: Progressive Disease (PD) cutoff - tumor growth threshold
             Recommended: Keep enabled for clinical interpretation
 
     - name: labelOutliers
@@ -484,9 +484,9 @@ options:
             Generate publication-ready result sentences with statistical details
           jamovi: >
             Generate copy-ready sentences for manuscripts and reports:
-            • Auto-filled with your results (ORR, DCR, confidence intervals)
-            • Publication-ready language following oncology standards
-            • Copy-paste directly into manuscripts or clinical reports
+            - Auto-filled with your results (ORR, DCR, confidence intervals)
+            - Publication-ready language following oncology standards
+            - Copy-paste directly into manuscripts or clinical reports
             Recommended for publication or clinical documentation
 
     - name: showClinicalSignificance
@@ -499,9 +499,9 @@ options:
             compatible with the data (exact confidence interval) and a sample-size note.
           jamovi: >
             Add clinical significance context to results:
-            • The range of response rates compatible with the data (exact confidence interval)
-            • A reminder to compare with the rate expected in your tumour type and setting
-            • Sample size assessment
+            - The range of response rates compatible with the data (exact confidence interval)
+            - A reminder to compare with the rate expected in your tumour type and setting
+            - Sample size assessment
 
     - name: showConfidenceIntervals
       title: Confidence intervals for clinical metrics
@@ -512,9 +512,9 @@ options:
             Calculate and display exact binomial confidence intervals for ORR and DCR
           jamovi: >
             Add statistical confidence intervals to clinical metrics:
-            • Exact binomial CIs for ORR and DCR (more accurate than normal approximation)
-            • Helps assess precision of response rate estimates
-            • Essential for clinical trial reporting
+            - Exact binomial CIs for ORR and DCR (more accurate than normal approximation)
+            - Helps assess precision of response rate estimates
+            - Essential for clinical trial reporting
             Recommended: Keep enabled for statistical rigor
 
     - name: enableGuidedMode
@@ -526,9 +526,9 @@ options:
             Enable step-by-step guidance for new users
           jamovi: >
             Enable guided mode with step-by-step instructions:
-            • Walks through variable selection and options
-            • Provides contextual help and best practice recommendations
-            • Includes misuse detection and warnings
+            - Walks through variable selection and options
+            - Provides contextual help and best practice recommendations
+            - Includes misuse detection and warnings
             Recommended for new users or complex analyses
 
     - name: showExplanations
@@ -541,10 +541,10 @@ options:
             data requirements, and key assumptions/limitations
           jamovi: >
             Show detailed explanations at the bottom of results:
-            • What this analysis does (waterfall and spider plots)
-            • When to use this analysis (clinical trials, response monitoring)
-            • Data requirements (patient ID, response data, time variable)
-            • Key assumptions and limitations (RECIST thresholds, baseline handling)
+            - What this analysis does (waterfall and spider plots)
+            - When to use this analysis (clinical trials, response monitoring)
+            - Data requirements (patient ID, response data, time variable)
+            - Key assumptions and limitations (RECIST thresholds, baseline handling)
             Recommended for new users or when documenting analysis methods
 
     - name: showResponseDuration
@@ -558,9 +558,9 @@ options:
             still in response at last follow-up), which the naive median understates.
           jamovi: >
             Add a dedicated efficacy table with:
-            • Median time to first response (RECIST PR or better)
-            • Kaplan-Meier median duration of response (censoring-aware)
-            • Number of responders and events
+            - Median time to first response (RECIST PR or better)
+            - Kaplan-Meier median duration of response (censoring-aware)
+            - Number of responders and events
             Requires a time variable and raw (per-visit) input.
 
     - name: addResponseCategory

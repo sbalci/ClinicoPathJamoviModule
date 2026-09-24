@@ -85,18 +85,6 @@ items:
          - inputType
          - responseCategoryVar
 
-
-    # - name: summaryTable_explanation
-    #   title: summaryTable
-    #   type: Html
-    #   clearWith:
-    #      - patientID
-    #      - responseVar
-    #      - timeVar
-    #      - inputType
-
-
-
     - name: personTimeTable
       title: Person-Time Analysis
       type: Table
@@ -406,11 +394,6 @@ items:
          # the override rewrites exported categories; without this entry the
          # isNotFilled() guard keeps a stale column after the override changes
          - responseCategoryVar
-
-
-    # - name: mydataview
-    #   title: mydataview
-    #   type: Preformatted
 
 
     # Notice outputs converted to HTML to avoid serialization errors

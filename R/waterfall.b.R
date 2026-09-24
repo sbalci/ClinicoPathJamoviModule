@@ -2105,17 +2105,33 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             rdt <- self$results$responseDurationTable
             if (s$n_responders == 0) {
               rdt$setNote("none", .("No patient reached a response (PR or better, <= -30%) after baseline, so time to response and duration of response are not estimable."))
+              rdt$setNote("dor", NULL)
+              rdt$setNote("needs_time", NULL)
+              rdt$setRow(rowKey = "ttr", values = list(
+                metric = .("Median time to first response (TTR)"),
+                value = NaN,
+                detail = ""))
+              rdt$setRow(rowKey = "dor_naive", values = list(
+                metric = .("Median duration of response (naive)"),
+                value = NaN,
+                detail = ""))
+              rdt$setRow(rowKey = "dor_km", values = list(
+                metric = .("Median duration of response (Kaplan-Meier)"),
+                value = NaN,
+                detail = ""))
             } else {
-              rdt$addRow(rowKey = "ttr", values = list(
+              rdt$setNote("none", NULL)
+              rdt$setNote("needs_time", NULL)
+              rdt$setRow(rowKey = "ttr", values = list(
                 metric = .("Median time to first response (TTR)"),
                 value = s$median_time_to_response,
                 detail = sprintf(.("RECIST PR or better; n=%d responders"), s$n_responders)))
-              rdt$addRow(rowKey = "dor_naive", values = list(
+              rdt$setRow(rowKey = "dor_naive", values = list(
                 metric = .("Median duration of response (naive)"),
                 value = s$median_duration_of_response,
                 detail = sprintf(.("Ignores censoring; n=%d with duration data"),
                                  s$n_with_duration_data)))
-              rdt$addRow(rowKey = "dor_km", values = list(
+              rdt$setRow(rowKey = "dor_km", values = list(
                 metric = .("Median duration of response (Kaplan-Meier)"),
                 value = s$km_median_duration_of_response,
                 detail = if (s$n_responders < 2)
@@ -2135,8 +2151,20 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
               rdt$setNote("override",
                 sprintf(.("%d responder(s) by category override have no measured response time and are not included here."),
                         s$n_responders_without_time))
+            } else {
+              rdt$setNote("override", NULL)
             }
           }
+        } else if (isTRUE(self$options$showResponseDuration) &&
+                   !is.null(self$results$responseDurationTable)) {
+          rdt <- self$results$responseDurationTable
+          rdt$setNote("needs_time", .("A Time Variable is required to compute time to response and duration of response."))
+          rdt$setNote("none", NULL)
+          rdt$setNote("dor", NULL)
+          rdt$setNote("override", NULL)
+          rdt$setRow(rowKey = "ttr", values = list(value = NaN, detail = ""))
+          rdt$setRow(rowKey = "dor_naive", values = list(value = NaN, detail = ""))
+          rdt$setRow(rowKey = "dor_km", values = list(value = NaN, detail = ""))
         }
 
         # Person-time ----
@@ -2583,6 +2611,17 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           self$results$enhancedClinicalMetrics$addRow(rowKey = 1, values = list())
           self$results$enhancedClinicalMetrics$addRow(rowKey = 2, values = list())
         }
+        if (self$results$responseDurationTable$rowCount == 0) {
+          self$results$responseDurationTable$addRow(
+            rowKey = "ttr",
+            values = list(metric = .("Median time to first response (TTR)")))
+          self$results$responseDurationTable$addRow(
+            rowKey = "dor_naive",
+            values = list(metric = .("Median duration of response (naive)")))
+          self$results$responseDurationTable$addRow(
+            rowKey = "dor_km",
+            values = list(metric = .("Median duration of response (Kaplan-Meier)")))
+        }
       },
 
       # Refactored run method ----
@@ -2607,9 +2646,9 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # jamovi reuses this instance, and Table$addRow() never checks for an
         # existing rowKey, so a re-run that does not trip clearWith doubled
         # every row in the addRow-populated tables. Clear them here, once;
-        # summaryTable and enhancedClinicalMetrics keep their .init() skeleton
+        # summaryTable, enhancedClinicalMetrics and responseDurationTable keep their .init() skeleton
         # and are filled with setRow.
-        for (tbl in c("clinicalMetrics", "responseDurationTable", "personTimeTable",
+        for (tbl in c("clinicalMetrics", "personTimeTable",
                       "groupComparisonTable", "groupComparisonTest")) {
           self$results[[tbl]]$deleteRows()
         }
@@ -2883,7 +2922,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 size = 3
               )
             # the interval is a bootstrap: name the seed that drew it
-            p <- p + ggplot2::labs(caption = jmvcore::format(.("Random seed: {seed}"), seed = seed_val))
+            p <- p + ggplot2::labs(caption = .fmt(.("Random seed: {seed}"), seed = seed_val))
           }, error = function(e) {
             # No CI annotation; say so on the plot (notices are already rendered
             # by the time a renderer runs, and jamovi hides warning()).

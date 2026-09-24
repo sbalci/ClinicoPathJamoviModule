@@ -18,36 +18,6 @@ const events = {
         } else if (val > 0.99) {
             ui.baConfidenceLevel.setValue(0.99);
         }
-    },
-
-    // Validate cluster count
-    onChange_nClusters: function(ui) {
-        let val = ui.nClusters.value();
-        if (val < 2) {
-            ui.nClusters.setValue(2);
-        } else if (val > 10) {
-            ui.nClusters.setValue(10);
-        }
-    },
-
-    // Validate case cluster count
-    onChange_nCaseClusters: function(ui) {
-        let val = ui.nCaseClusters.value();
-        if (val < 2) {
-            ui.nCaseClusters.setValue(2);
-        } else if (val > 20) {
-            ui.nCaseClusters.setValue(20);
-        }
-    },
-
-    // Validate minimum subgroup cases
-    onChange_subgroupMinCases: function(ui) {
-        let val = ui.subgroupMinCases.value();
-        if (val < 5) {
-            ui.subgroupMinCases.setValue(5);
-        } else if (val > 100) {
-            ui.subgroupMinCases.setValue(100);
-        }
     }
 };
 

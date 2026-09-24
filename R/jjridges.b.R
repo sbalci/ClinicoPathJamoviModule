@@ -2147,7 +2147,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             tests_table$deleteRows()
             # Cliff's delta has a bootstrap confidence interval
             tests_table$setNote("seed", if (identical(private$.option("effsize_type"), "cliff_delta"))
-                jmvcore::format(.("Random seed: {seed}"), seed = self$options$seed))
+                .fmt(.("Random seed: {seed}"), seed = self$options$seed))
 
             # Reset the assumption-switch accumulator for this run
             private$.assumptionSwitches <- character(0)

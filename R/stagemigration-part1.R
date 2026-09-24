@@ -1996,7 +1996,7 @@ stagemigrationPart1 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 }
                 # The former code read idi_bootstrap$idi_ci$percent and idi_bootstrap$boot_results,
                 # fields the bootstrap helper never returned, so the CI and p-value were always blank.
-                table$setNote("method", jmvcore::format(.("Censoring-weighted (IPCW) IDI at {timePoint} months: {nEvents} patients with an event by then, {nNonEvents} still event-free, {censoredBeforeT} censored earlier (contribute through the weights). CI and p-value use a bootstrap SE with the predicted risks held fixed."), timePoint = format(idi_results$time_point), nEvents = sprintf("%d", idi_results$n_events), nNonEvents = sprintf("%d", idi_results$n_non_events), censoredBeforeT = sprintf("%d", idi_results$censored_before_t)))
+                table$setNote("method", .fmt(.("Censoring-weighted (IPCW) IDI at {timePoint} months: {nEvents} patients with an event by then, {nNonEvents} still event-free, {censoredBeforeT} censored earlier (contribute through the weights). CI and p-value use a bootstrap SE with the predicted risks held fixed."), timePoint = format(idi_results$time_point), nEvents = sprintf("%d", idi_results$n_events), nNonEvents = sprintf("%d", idi_results$n_non_events), censoredBeforeT = sprintf("%d", idi_results$censored_before_t)))
 
                 # Dynamic interpretation based on IDI value
                 interpretation <- if (idi_results$idi > 0.02) {
@@ -2438,7 +2438,7 @@ stagemigrationPart1 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     }
 
                     if (is_generic) {
-                        table$setNote("cancerGeneric", jmvcore::format(.("Cancer-specific guidance has not been curated for {cancerLabel}; general staging-validation guidance and default thresholds are shown."), cancerLabel = cancer_label))
+                        table$setNote("cancerGeneric", .fmt(.("Cancer-specific guidance has not been curated for {cancerLabel}; general staging-validation guidance and default thresholds are shown."), cancerLabel = cancer_label))
                     }
                 }
             },

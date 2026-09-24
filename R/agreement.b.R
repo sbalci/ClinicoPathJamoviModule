@@ -38,18 +38,38 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     tbl <- self$results[[nm]]
                     if (is.null(tbl)) next
                     for (col in c("ci_lower", "ci_upper"))
-                        tbl$getColumn(col)$setSuperTitle(paste0(conf_pct, "% CI"))
+                        tbl$getColumn(col)$setSuperTitle(sprintf(.("%s%% CI"), conf_pct))
                 }
 
                 # CI columns titled individually
                 for (nm in c("gwetTable", "allPairsKappaTable", "itemModalAgreementTable",
                              "tdiTable", "specificAgreementTable", "subgroupAgreementTable",
                              "interIntraRaterIntraTable", "interIntraRaterInterTable",
-                             "robinsonATable", "pairedAgreementTable")) {
+                             "robinsonATable", "pairedAgreementTable",
+                             "clusterSpecificTable", "mixedEffectsTable",
+                             "pathologistTable", "boundaryTable", "latentModelTable")) {
                     tbl <- self$results[[nm]]
                     if (is.null(tbl)) next
-                    tbl$getColumn("ci_lower")$setTitle(paste0(conf_pct, "% CI Lower"))
-                    tbl$getColumn("ci_upper")$setTitle(paste0(conf_pct, "% CI Upper"))
+                    tbl$getColumn("ci_lower")$setTitle(sprintf(.("%s%% CI Lower"), conf_pct))
+                    tbl$getColumn("ci_upper")$setTitle(sprintf(.("%s%% CI Upper"), conf_pct))
+                }
+
+                # The hierarchical block reports INTRACLASS CORRELATIONS, but the
+                # .r.yaml titles them kappa, so a reader can quote an ICC as a
+                # chance-corrected agreement coefficient. Two tables are affected:
+                #   hierarchicalOverallTable$overall_kappa  = sigma2_case / (sigma2_case + sigma2_rater + sigma2_resid)
+                #   clusterSpecificTable$kappa              = irr::icc(...)$value
+                # Neither is a kappa. Retitled at run time because the values are
+                # right and only the labels are wrong.
+                hier_tbl <- self$results$hierarchicalOverallTable
+                if (!is.null(hier_tbl)) {
+                    hier_tbl$setTitle(.("Hierarchical Agreement - Overall (Mixed-Effects ICC)"))
+                    hier_tbl$getColumn("overall_kappa")$setTitle(.("Overall ICC(2,1)"))
+                }
+                cl_tbl <- self$results$clusterSpecificTable
+                if (!is.null(cl_tbl)) {
+                    cl_tbl$setTitle(.("Cluster-Specific Agreement (ICC per Cluster)"))
+                    cl_tbl$getColumn("kappa")$setTitle(.("ICC"))
                 }
 
                 # Fixed-row tables: every row is laid down here; .run() only fills the values.
@@ -96,9 +116,8 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     hierarchicalICCTable = list(
                         show = isTRUE(o$hierarchicalKappa) && isTRUE(o$iccHierarchical),
                         column = "icc_type",
-                        rows = c(icc1 = .("ICC(1) - Single Rating"),
-                                 icc2 = .("ICC(2) - Mean of k Ratings"),
-                                 g_coeff = .("G-coefficient"))),
+                        rows = c(icc1 = .("ICC(2,1) - Single Rater"),
+                                 icc2 = .("ICC(2,k) - Mean of k Raters"))),
                     mixedEffectsVarianceTable = list(
                         show = isTRUE(o$mixedEffectsComparison),
                         column = "component",
@@ -114,10 +133,108 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     agreementSampleSizeTable = list(
                         show = isTRUE(o$agreementSampleSize),
                         column = "parameter",
-                        rows = ss_rows))
+                        rows = ss_rows),
+                    designSummaryTable = list(
+                        show = isTRUE(o$gradingDesign),
+                        column = "item",
+                        rows = c(cases = .("Cases rated"),
+                                 pathologists = .("Pathologists"),
+                                 ratings = .("Ratings (every observed rating)"),
+                                 per_case = .("Ratings per case (min / median / max)"),
+                                 per_pathologist = .("Cases per pathologist (min / median / max)"),
+                                 cases_lt2 = .("Cases with fewer than 2 ratings"),
+                                 connected = .("Pathologists linked through shared cases"),
+                                 categories = .("Categories"),
+                                 scale = .("Scale"),
+                                 model_scope = .("What this design permits"))),
+                    latentModelTable = list(
+                        show = isTRUE(o$latentModel),
+                        column = "quantity",
+                        rows = c(case_var = .("Case variance"),
+                                 rater_var = .("Pathologist variance"),
+                                 if (!is.null(o$clusterVariable)) c(cluster_var = .("Institution variance")),
+                                 residual = .("Residual (fixed at 1 by the probit link)"),
+                                 rho = .("Latent ICC(2,1)"),
+                                 kappa_m = .("Model-based kappa (Nelson & Edwards)"))))
             },
+            # ONE kappa vocabulary for the whole analysis. Five displayed cells named the
+            # same coefficient three different ways - "Cohen's \u03BA" on the paired table,
+            # "Cohen's Kappa (linear weights)" one screen away in the bootstrap table, and
+            # irr's own untranslated "Cohen's Kappa for 2 Raters (Weights: equal)" on the
+            # headline row - so a reader could not tell whether two tables reported the
+            # same statistic. Every displayed kappa label now comes from here.
+            #   n_raters    2 -> Cohen, 3+ -> Fleiss/Conger (irr::kappam.fleiss)
+            #   irr_weight  the weighting that ACTUALLY ran, never self$options$wght
+            #   exact       irr::kappam.fleiss(exact = TRUE)
+            .kappaLabel = function(n_raters, irr_weight = "unweighted", exact = FALSE) {
+                if (!identical(as.integer(n_raters), 2L))
+                    return(if (isTRUE(exact)) .("Fleiss' \u03BA (exact)") else .("Fleiss' \u03BA"))
+                switch(irr_weight,
+                    equal   = .("Linear-weighted \u03BA"),
+                    squared = .("Quadratic-weighted \u03BA"),
+                    .("Cohen's \u03BA"))
+            },
+            # ONE label for Krippendorff's alpha, built from the level of
+            # measurement the USER selected, so the headline table and the bootstrap
+            # CI table can never print two different statistics under one name.
+            # .calculateBootstrapCI used to auto-select "ordinal" whenever any rater
+            # was an ordered factor while the headline table honoured
+            # self$options$krippMethod (default "nominal"): with ordered raters and
+            # default options the two tables reported different numbers, both
+            # labelled "Krippendorff's Alpha", with nothing on screen to say why.
+            .krippMethodLabel = function() {
+                m <- self$options$krippMethod
+                nm <- switch(m,
+                    nominal  = .("nominal"),
+                    ordinal  = .("ordinal"),
+                    interval = .("interval"),
+                    ratio    = .("ratio"),
+                    m)
+                .fmt(.("Krippendorff's Alpha ({method})"), method = nm)
+            },
+            # ONE mapping from the multipleTestCorrection OPTION LEVEL to a
+            # stats::p.adjust() method name, plus the label a user should read.
+            # These are two different vocabularies and conflating them is a live
+            # defect: p.adjust()'s methods are holm/hochberg/hommel/bonferroni/BH/
+            # BY/fdr/none, so the level `bh` reaches match.arg() and errors. Both
+            # call sites route through here so they cannot drift apart again.
+            .pAdjustMethod = function(level) {
+                switch(level,
+                    bonferroni = list(method = "bonferroni", label = .("Bonferroni")),
+                    bh         = list(method = "BH",         label = .("Benjamini-Hochberg (FDR)")),
+                    holm       = list(method = "holm",       label = .("Holm")),
+                    list(method = "none", label = .("none"))
+                )
+            },
+
             .ssMetricLabel = function() {
-                switch(self$options$ssMetric, kappa = "Cohen's Kappa", fleiss = "Fleiss' Kappa", "ICC")
+                switch(self$options$ssMetric,
+                    kappa  = private$.kappaLabel(2L),
+                    fleiss = private$.kappaLabel(3L),
+                    .("ICC"))
+            },
+
+            # Table$setNote() runs the ALREADY-COMPOSED note back through
+            # options$translate(), and jmvcore 2.7.38's Translator falls through to an
+            # UNANCHORED regexec("(.*) \\[(.*)\\]", text) for any string that is not
+            # itself a catalog msgid - which a composed note never is. The greedy first
+            # group then truncates the note at the LAST " [", so a rater column named
+            # "Reader E [AI]", an ordered level "G2 [moderate]" or a category
+            # "Focal [<10%]" silently cuts the sentence off mid-clause and loses the
+            # warning it was written to carry. jmvcore::htmlEscape() does NOT escape
+            # brackets. Sanitise the interpolated VALUE, never the finished sentence:
+            # rewriting " [" in the composed string would corrupt legitimate wording.
+            #
+            # Scope, measured 2026-09-23 against jmvcore 2.7.38: ONLY Table$setNote()
+            # re-translates. ResultsElement$setError(), Cell$addFootnote() and
+            # Table$setRow()/Cell$setValue() store the string verbatim, so they need no
+            # sanitising - verified end to end by sending a payload containing " [" through
+            # all four, with setNote() on the same live table as a positive control that DID
+            # truncate. Do not add .noteSafe() to those paths. Translate the TEMPLATE (a
+            # catalog msgid, with no brackets) and never the composed sentence.
+            .noteSafe = function(x) {
+                if (is.null(x)) return(x)
+                chartr("[]", "()", as.character(x))
             },
             # jmvcore has no "column exists" check: the contingency and rating-combination
             # tables add their data-driven columns in .run(), so every re-run appended the
@@ -128,15 +245,20 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 invisible(NULL)
             },
 
-            # Smallest off-diagonal (discordant) cell of the 2-rater cross-table. The
-            # marginal-homogeneity chi-squares are driven by those cells, so sparse
-            # discordant cells - not a small total n - are what breaks the approximation.
-            .minDiscordantCell = function(r) {
+            # Number of DISCORDANT cases in the 2-rater cross-table (off-diagonal total).
+            # Marginal-homogeneity tests rest entirely on these cases - concordant ones
+            # carry no information - so their count, not the total n, decides whether the
+            # chi-square approximation holds. This used to return the smallest single
+            # off-diagonal cell, which is structurally 0 on almost any table with three
+            # or more categories (non-adjacent grades are rarely confused), so the
+            # sparse note fired on nearly every table and said nothing. The per-cell
+            # rule of 5 is a Pearson expected-count heuristic that does not apply here.
+            .discordantTotal = function(r) {
                 if (ncol(r) != 2) return(NA_real_)
-                lv <- sort(unique(c(as.character(r[[1]]), as.character(r[[2]]))))
-                tab <- table(factor(as.character(r[[1]]), levels = lv), factor(as.character(r[[2]]), levels = lv))
-                off <- tab[row(tab) != col(tab)]
-                if (length(off) == 0) NA_real_ else as.numeric(min(off))
+                a <- as.character(r[[1]])
+                b <- as.character(r[[2]])
+                ok <- !is.na(a) & !is.na(b)
+                as.numeric(sum(a[ok] != b[ok]))
             },
 
             # Which of these ratings are continuous MEASUREMENTS rather than
@@ -144,8 +266,8 @@ agreementClass <- if (requireNamespace("jmvcore")) {
             # per-statistic guards and by the bootstrap, so one variable always gets
             # one answer.
             #
-            # A rating is continuous when it is numeric AND carries a continuous
-            # signal - a non-integer value anywhere, or more than 20 distinct values.
+            # A rating is continuous when it is numeric AND its VALUES cannot be a
+            # rating scale - a non-integer value anywhere, or a magnitude above 10.
             # Both halves are load-bearing:
             #
             #   class alone is enough ON THE jamovi GUI PATH, where a Continuous
@@ -162,19 +284,32 @@ agreementClass <- if (requireNamespace("jmvcore")) {
             #   (0.8205535 on Rater 1 x Rater 2, n = 249): plain numeric 0/1 columns,
             #   classified continuous, ten tables reduced to a note.
             #
-            # The distinct-value term is a property of the SAMPLE, so the original
-            # complaint - the same variable changing statistic as n grows - is
-            # mitigated rather than eliminated: a real continuous measurement
-            # essentially always has non-integer values, which resampling cannot
-            # remove, so only an integer-valued continuous measure with few distinct
-            # values is still ambiguous. The notes name the remedy for that case
-            # (declare the variable Nominal/Ordinal, or wrap it in factor() in R).
+            # The magnitude term replaced a distinct-value count (> 20 distinct). That
+            # count was a property of the SAMPLE, and worse, it read a MEASUREMENT as
+            # category codes whenever the measurement happened to be whole-numbered
+            # and small: two pathologists' Ki-67 percentages over 15 cases (3 to 70,
+            # 15 distinct) came back as "Cohen's Kappa for 2 Raters", kappa = -0.0090,
+            # p = 0.6964, while ICC(2,1) was 0.9840 and Lin's CCC 0.9829 on the same
+            # numbers. A rating scale has nowhere to put a code above 10 - Gleason
+            # 6-10 is the widest in routine use, and Allred 0-8, ISUP 1-5, HER2 0-3,
+            # Nottingham 3-9 all sit inside it - while a measurement (percentage,
+            # count, size, concentration) almost always runs past it or carries a
+            # fraction. The test takes abs(), so a -1/0/1 change code is still read as codes.
+            #
+            # What stays ambiguous is a whole-number measurement that never exceeds
+            # 10 (mitoses per 10 HPF, say): it is still read as category codes, and
+            # nothing in the data can say otherwise. The Level Information table
+            # labels such a column "Numeric (category codes)" - that is the only
+            # place this decision is visible to the reader, so keep it there.
             .continuousRatingNames = function(ratings) {
                 if (length(ratings) == 0) return(character(0))
                 isCont <- vapply(ratings, function(x) {
                     if (!is.numeric(x) || is.factor(x)) return(FALSE)
-                    any(x != floor(x), na.rm = TRUE) ||
-                        length(unique(stats::na.omit(x))) > 20
+                    # na.omit once: max(abs()) on an all-NA column is -Inf with a
+                    # warning, and an empty rating is not evidence of a measurement.
+                    v <- stats::na.omit(x)
+                    if (length(v) == 0) return(FALSE)
+                    any(v != floor(v)) || max(abs(v)) > 10
                 }, logical(1))
                 # An UNNAMED list - .populateLevelInfo and .calculatePairwiseKappa
                 # pass a bare list(column) - has names(ratings) NULL, and NULL[isCont]
@@ -196,6 +331,123 @@ agreementClass <- if (requireNamespace("jmvcore")) {
             .ratingsAreContinuous = function(ratings) {
                 length(private$.continuousRatingNames(ratings)) > 0
             },
+
+            # Distance between two raters for clustering: 1 - Lin's concordance
+            # correlation coefficient, bounded on [0, 2].
+            #
+            # This is the DEFAULT metric because 1 - r cannot see a systematic offset at
+            # all. Measured on a 60-case fixture: the reader who read 25 points high sat
+            # at correlation distance 0.005 from the reference while the reference's own
+            # genuinely concordant twin sat at 0.008 - the offset reader was NEARER than
+            # the concordant one. Lin's coefficient is the correlation multiplied by a
+            # bias factor, so it falls on scatter AND on an offset or scale shift, and it
+            # is essentially free of the number of cases (1 - CCC 0.249 -> 0.303 -> 0.337
+            # as n goes 20 -> 60 -> 200 for the same +25 offset, against 3.4x for
+            # euclidean and 10.6x for manhattan over the same range). That is why it needs
+            # no rescale-by-maximum and its similarity column is comparable across
+            # datasets.
+            #
+            # POPULATION (n) divisors: that is Lin (1989), and it reproduces
+            # DescTools::CCC(x, y)$rho.c$est to 1e-12, whereas the sd()-based (n - 1) form
+            # used in .calculateLinCCC differs by 0.0039 on the same pair. DescTools is
+            # not called here because only the point estimate is wanted, once per pair.
+            .cccDistance = function(x, y) {
+                ok <- stats::complete.cases(x, y)
+                x <- x[ok]
+                y <- y[ok]
+                n <- length(x)
+                if (n < 3) return(NA_real_)
+                mx <- mean(x)
+                my <- mean(y)
+                vx <- sum((x - mx)^2) / n
+                vy <- sum((y - my)^2) / n
+                cxy <- sum((x - mx) * (y - my)) / n
+                den <- vx + vy + (mx - my)^2
+                if (!is.finite(den)) return(NA_real_)
+                # den == 0 is the 0/0 corner: both raters recorded a single value and the
+                # SAME one, i.e. they are identical, so the distance is 0. Returning NA or
+                # 1 here would push two identical raters into different clusters.
+                if (den <= 0) return(0)
+                max(0, min(2, 1 - (2 * cxy / den)))
+            },
+
+            # Influence screen for the continuous agreement measures.
+            #
+            # ICC, mean Pearson r, Lin's CCC, Robinson's A, TDI and the Bland-Altman
+            # limits all weigh a between-case spread against a within-case spread, so ONE
+            # extreme case inflates the numerator and pushes every one of them to its
+            # ceiling at the same time. Measured on two pathologists' Ki-67, 20 cases,
+            # deliberately unrelated: ICC(2,1) -0.3295, Lin's CCC -0.3080, Robinson's A
+            # 0.3460, verdict "Poor concordance". Substituting the legacy missing-data
+            # sentinel 99999 into ONE case for BOTH raters gives ICC 0.999999 ("Excellent
+            # reliability"), CCC 0.999999 ("Almost perfect concordance") and A 1.000000
+            # ("Excellent agreement") on data with no relationship in it at all. 99999,
+            # 9999 and -9999 survive in real exports, so this is not a contrived input.
+            #
+            # The statistic is the share of the BETWEEN-case sum of squares carried by the
+            # single most deviant case, computed on the per-case rater means - the one
+            # summary all six measures share, and the same decomposition .robinsonA() uses.
+            # It is reported RELATIVE to its own attainable maximum, (n - 1) / n, which is
+            # the value reached when one case carries everything. That ratio is
+            # dimensionless and free of n, so one cut-off serves every sample size.
+            #
+            # Cut-off 0.95, chosen by measurement, 2000 draws per cell:
+            #
+            #                         n=10   n=20   n=50  n=100  n=300
+            #   99999 sentinel        100%   100%   100%   100%   100%   <- must fire
+            #   same, one rater only  100%   100%   100%   100%   100%   <- must fire
+            #   one value typed 100x  100%   100%  99.7%  96.5%  87.4%   <- must fire
+            #   log-normal marker     4.9%   1.1%   0.2%   0.1%   0.0%   <- must not
+            #   heavier log-normal    8.1%   3.7%   0.8%   0.4%   0.1%   <- must not
+            #   bimodal Ki-67        26.3%   4.7%   0.0%   0.0%   0.0%   <- must not
+            #   normal, uniform         0%     0%     0%     0%     0%
+            #   Gleason 6-10 codes      0%     0%     0%     0%     0%
+            #
+            # A Grubbs-derived cut-off was tried first and rejected: it fired on 15 to 31%
+            # of clean log-normal samples and, unlike the ratio above, the rate did NOT
+            # fall with n (29.6% at n = 40, 14.4% at n = 100). Log-normal is the ordinary
+            # shape of an IHC or serum marker, so that would have been noise on a quarter
+            # of real analyses.
+            #
+            # The one weak cell is a strongly bimodal marker at n = 10, where a single case
+            # genuinely can carry nearly all the between-case variance; the note is an
+            # advisory and changes no number, so a false positive there costs a sentence.
+            #
+            # The distinct-case-means guard keeps this off numeric-coded CATEGORIES: a 0/1
+            # frame with a single positive case sits at the maximum share but has only two
+            # distinct case means, and that data already carries the low-prevalence note.
+            #
+            # Between-case only: two raters who disagree wildly on a case whose MEAN is
+            # unremarkable are a within-case problem this screen does not see.
+            .dominantCaseNote = function(ratings) {
+                tryCatch({
+                    num <- ratings[vapply(ratings, is.numeric, logical(1))]
+                    if (length(num) < 2) return(NULL)
+                    num <- num[stats::complete.cases(num), , drop = FALSE]
+                    n <- nrow(num)
+                    if (n < 5) return(NULL)
+                    case_means <- rowMeans(num)
+                    if (length(unique(case_means)) < 4) return(NULL)
+                    d2 <- (case_means - mean(case_means))^2
+                    ss_between <- sum(d2)
+                    if (ss_between < .Machine$double.eps) return(NULL)
+                    share <- max(d2) / ss_between
+                    rel <- share / ((n - 1) / n)
+                    if (!is.finite(rel) || rel <= 0.95) return(NULL)
+                    # The ratings are named rather than the row number: self$data is the
+                    # FILTERED frame, so its row positions do not identify a spreadsheet
+                    # row, whereas a value of 99999 identifies itself. They come from
+                    # as.numeric(), so they cannot carry the "<" that would truncate this
+                    # note in jamovi's HTML allow-list - no escaping needed here.
+                    worst <- as.numeric(num[which.max(d2), ])
+                    sprintf(
+                        .("One case contributes %1$.0f%% of the between-case variance (its ratings: %2$s), which is almost all of what a single case can carry. When every rater gave the case the same extreme value, ICC, mean Pearson r, Lin's CCC and Robinson's A are driven toward their ceiling, so the interpretation label beside them describes that one case, not agreement in this sample; TDI and the Bland-Altman limits use only the differences between raters and are unaffected. When only one rater gave it, every one of these statistics is distorted. Check the case for an out-of-range value or a legacy missing-data code such as 99999, 9999 or -9999, then re-run without it and report whether the results hold."),
+                        share * 100,
+                        paste(as.character(signif(worst, 6)), collapse = ", ")
+                    )
+                }, error = function(e) NULL)
+            },
+
 
             # Degrees of freedom for the marginal-homogeneity tests, computed from the
             # square table rather than scraped out of irr's label.
@@ -247,7 +499,17 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 n_subjects <- result1[["subjects"]]
                 n_raters <- result1[["raters"]]
                 perc_agree <- round(result1[["value"]], 1)
-                kappa_val <- round(result2[["value"]], 3)
+                agree_txt <- if (length(perc_agree) == 1L && is.finite(perc_agree)) paste0(perc_agree, "%") else .("not available")
+                # Band the RAW kappa; round only for what is printed. Rounding first
+                # moved kappa = 0.599774873366 to 0.600, which then passed the
+                # >= 0.60 test below and told the reader "substantial or higher on the
+                # Landis & Koch scale" for a value that sits under the 0.60 boundary
+                # that same sentence names. Measured on the 2x2 table
+                # matrix(c(29, 12, 20, 339), 2, byrow = TRUE).
+                kappa_raw <- result2[["value"]]
+                kappa_val <- round(kappa_raw, 3)
+                # The table blanks an undefined kappa; the panel printed -Inf, NaN or NA.
+                kappa_txt <- if (length(kappa_raw) == 1L && is.finite(kappa_raw)) kappa_val else .("not available")
                 p_val <- result2[["p.value"]]
                 method <- result2[["method"]]
 
@@ -258,11 +520,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 # Confidence-interval pointer used by the sentences below.
                 #
-                # ci_lo/ci_hi reach the Interrater Reliability table ONLY when there
-                # are exactly 2 raters (non-null ASE from vcd::Kappa via
-                # .pairKappaWithCI). With 3+ raters the row carries
-                # Fleiss'/Conger's kappa and both CI cells are blank, and the
-                # 2-rater path can also fail. The old text told every reader to
+                # ci_lo/ci_hi come from vcd::Kappa's non-null ASE (2 raters, via
+                # .pairKappaWithCI) or from Gwet's subject-sampling SE (3+ raters,
+                # unweighted, via .fleissAllRatings). Either can fail, and weighted
+                # 3+ raters have no headline kappa at all. The old text told every reader to
                 # "read the confidence interval", which sent the Fleiss user to an
                 # empty cell. Only name the interval when one was actually written.
                 have_ci <- length(ci_lo) == 1L && length(ci_hi) == 1L &&
@@ -274,27 +535,27 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     ci_pointer <- sprintf(
                         .("The Confidence Interval columns of the table above put that range at %1$.3f to %2$.3f for these data."),
                         ci_lo, ci_hi)
-                } else if (!is.null(n_raters) && !is.na(n_raters) && n_raters >= 3) {
-                    ci_pointer <- .("No interval is shown beside this kappa: with three or more raters the row reports Fleiss'/Conger's kappa, for which only the test against zero is available here. The All-Pairs Kappa table, if you switch it on together with its confidence intervals, reports every rater pair separately with an interval.")
                 } else {
                     ci_pointer <- .("No interval could be computed for this kappa, so the table above carries the point estimate only and says nothing about how precisely this sample pins it down.")
                 }
 
-                # Interpret kappa (Landis & Koch, 1977)
-                if (!is.finite(kappa_val)) {
+                # Interpret kappa (Landis & Koch, 1977). Compare kappa_raw, never the
+                # rounded kappa_val: a kappa just under a cut-point rounds onto it and
+                # buys a band it did not earn (0.599774873366 -> 0.600 -> "substantial").
+                if (!is.finite(kappa_raw)) {
                     # The verdict a clinician actually reads was a bare English literal spliced
                     # into an otherwise translated sentence, so a Turkish user got a Turkish
                     # sentence with an English conclusion in it. The msgid is the literal itself.
                     interp <- .("not available - kappa could not be computed for these data")
-                } else if (kappa_val < 0) {
+                } else if (kappa_raw < 0) {
                     interp <- .("poor agreement (worse than chance)")
-                } else if (kappa_val < 0.20) {
+                } else if (kappa_raw < 0.20) {
                     interp <- .("slight agreement")
-                } else if (kappa_val < 0.40) {
+                } else if (kappa_raw < 0.40) {
                     interp <- .("fair agreement")
-                } else if (kappa_val < 0.60) {
+                } else if (kappa_raw < 0.60) {
                     interp <- .("moderate agreement")
-                } else if (kappa_val < 0.80) {
+                } else if (kappa_raw < 0.80) {
                     interp <- .("substantial agreement")
                 } else {
                     interp <- .("almost perfect agreement")
@@ -313,21 +574,13 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     sig_text <- sprintf("p = %.3f", p_val)
                 }
 
-                # Weight description
-                # The separators stay OUTSIDE the msgid: a leading space inside a
-                # msgid does not survive the catalog.
-        if (!is.finite(kappa_val)) {
-            weight_desc <- ""
-        } else if (wght == "equal") {
-                    weight_desc <- paste0(" ", .("with linear weights"))
-                } else if (wght == "squared") {
-                    weight_desc <- paste0(" ", .("with squared weights"))
-                } else {
-                    weight_desc <- ""
-                }
-
-                # Exact kappa note
-                exact_note <- if (exct) paste0(" ", .("using exact calculation")) else ""
+                # `method` now comes from private$.kappaLabel(), which already names the
+                # weighting and the exact form, so the " with linear weights" /
+                # " using exact calculation" suffixes that used to be appended here would
+                # print it twice ("Linear-weighted \u03BA with linear weights"). They were
+                # also derived from self$options$wght rather than the weighting that ran,
+                # so they claimed weights on a run where .kappa2Ordered() had dropped them
+                # for an ambiguous category order.
 
                 # Build summary with consistent styling
                 html_output <- paste0(
@@ -343,33 +596,36 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     <tr>
                         <td style='border: 1px solid #ccc; padding: 10px; background-color: rgba(155, 155, 155, 0.06); color: inherit;'>
                         <strong>", .("Raw Agreement"), "</strong><br>
-                        <span style='font-size: 18px;'>", perc_agree, "%</span>
+                        <span style='font-size: 18px;'>", agree_txt, "</span>
                         </td>
                         <td style='border: 1px solid #ccc; padding: 10px; background-color: rgba(155, 155, 155, 0.06); color: inherit;'>
                         <strong>", .("Kappa"), " (\u{03BA})</strong><br>
-                        <span style='font-size: 18px;'>", kappa_val, "</span>
+                        <span style='font-size: 18px;'>", kappa_txt, "</span>
                         </td>
                     </tr>
                     </table>
 
-                    <p style='margin: 10px 0;'><strong>", .("Method:"), "</strong> ", method, exact_note, weight_desc, "</p>
+                    <p style='margin: 10px 0;'><strong>", .("Method:"), "</strong> ", method, "</p>
                     <p style='margin: 10px 0;'><strong>", .("Statistical test:"), "</strong> ", sig_text, " ", .("for the null hypothesis that agreement is no better than chance (kappa = 0). A small p-value only rules out zero agreement; it does not say how large the agreement is. The size of kappa answers that, and the interval around kappa says how precisely these cases pin it down."), " ", ci_pointer, "</p>
                     <p style='margin: 10px 0;'><strong>", .("Interpretation:"), "</strong> ", interp, "</p>
 
                     <div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 12px; margin: 15px 0; color: inherit;'>
                         <p style='margin: 0 0 8px 0; font-weight: bold;'>", .("Clinical Meaning"), "</p>
                         <p style='margin: 0; font-size: 14px;'>",
-                    # The Landis & Koch chain above guards is.na(kappa_val); this
+                    # The Landis & Koch chain above guards is.na(kappa_raw); this
                     # block did not, so a bare if (NA >= 0.60) threw "missing value
                     # where TRUE/FALSE needed" and took the ENTIRE analysis down -
                     # not just this panel. Reachable whenever kappa is undefined:
                     # weighted kappa on nominal data, exact kappa with 2 raters, a
                     # single rating category, or Fleiss returning a non-finite value.
-                    if (!is.finite(kappa_val)) {
+                    # Branch on kappa_raw for the same reason as that chain: the
+                    # rounded kappa_val crosses 0.60 at 0.5995 and this paragraph
+                    # would then claim "substantial or higher" for a moderate kappa.
+                    if (!is.finite(kappa_raw)) {
                         .("Kappa could not be computed for these data, so no consistency statement can be made. Check the notes on the results table for the reason.")
-                    } else if (kappa_val >= 0.60) {
+                    } else if (kappa_raw >= 0.60) {
                         paste0(.("Agreement is substantial or higher on the Landis &amp; Koch scale - that phrase labels the size of the number, it is not a verdict on any particular use. Kappa is chance-corrected, so it is not the share of cases the raters matched on: that share is the Agreement % shown above, and with three or more raters that column counts only the cases they ALL matched on, which can sit below kappa."), " ", ci_pointer)
-                    } else if (kappa_val >= 0.40) {
+                    } else if (kappa_raw >= 0.40) {
                         paste0(.("A kappa between 0.40 and 0.60 means the raters agreed moderately more often than chance alone would produce. It is not the proportion of cases they matched on - that is the Agreement % above, which with three or more raters counts only the cases they ALL matched on. A rare rating category can also hold kappa down while raw matching stays high; any low-prevalence note under the table flags that."), " ", ci_pointer)
                     } else {
                         paste0(.("A kappa below 0.40 means the raters agreed little more often than chance alone would produce, so in these data one rater's category does not reliably predict another's. Before reading that as a rater problem, look at the Data Summary: when nearly all cases fall into one category, kappa can be low even though the raters matched on most cases - compare it with the Agreement % above."), " ", ci_pointer)
@@ -426,7 +682,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     <ul style='margin: 5px 0 15px 20px;'>
                         <li>At least 2 rater variables (columns)</li>
                         <li>Same cases rated by all raters</li>
-                        <li>Categorical or ordinal data</li>
+                        <li>Categorical or ordinal ratings for kappa; continuous measurements are analysed with ICC, Lin's CCC, TDI and the Bland-Altman limits instead</li>
                         <li>Matching category levels across raters</li>
                     </ul>
 
@@ -558,7 +814,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 <ul style='font-size: 13px; line-height: 1.8; margin: 10px 0;'>
                 <li>Adjacent disagreements receive <b>much more credit</b> than linear (0.94 vs 0.75)</li>
                 <li>Distant disagreements are <b>heavily penalized</b></li>
-                <li>Penalty increases <b>exponentially</b> with distance</li>
+                <li>Penalty increases <b>quadratically</b> with distance</li>
                 <li>Weighted kappa will be <b>substantially higher</b> than unweighted when disagreements cluster near the diagonal</li>
                 <li><b>Special property:</b> Squared weights equal the intraclass correlation coefficient under certain conditions</li>
                 </ul>"
@@ -599,16 +855,17 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     </div>
 
                     <div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 12px; margin: 15px 0; color: inherit;'>
-                        <p style='margin: 0 0 8px 0; font-weight: bold;'>Interpretation Guidelines (Landis & Koch, 1977)</p>
+                        <p style='margin: 0 0 8px 0; font-weight: bold;'>Interpretation Guidelines (adapted from Landis &amp; Koch, 1977)</p>
                         <table style='width: 100%; font-size: 13px;'>
+                        <!-- Endpoints mirror the strict less-than chain in .createSummary; the old 0.21/0.41/0.61 rows disagreed with the code at every boundary, so a kappa of exactly 0.20 read Fair in the verdict and Slight here. -->
                         <tr><td style='padding: 2px 0;'>&lt; 0.00</td><td style='padding: 2px 0;'>Poor agreement</td></tr>
-                        <tr><td style='padding: 2px 0;'>0.00 - 0.20</td><td style='padding: 2px 0;'>Slight agreement</td></tr>
-                        <tr><td style='padding: 2px 0;'>0.21 - 0.40</td><td style='padding: 2px 0;'>Fair agreement</td></tr>
-                        <tr><td style='padding: 2px 0;'>0.41 - 0.60</td><td style='padding: 2px 0;'>Moderate agreement</td></tr>
-                        <tr><td style='padding: 2px 0;'>0.61 - 0.80</td><td style='padding: 2px 0;'>Substantial agreement</td></tr>
-                        <tr><td style='padding: 2px 0;'>0.81 - 1.00</td><td style='padding: 2px 0;'>Almost perfect agreement</td></tr>
+                        <tr><td style='padding: 2px 0;'>0.00 to &lt; 0.20</td><td style='padding: 2px 0;'>Slight agreement</td></tr>
+                        <tr><td style='padding: 2px 0;'>0.20 to &lt; 0.40</td><td style='padding: 2px 0;'>Fair agreement</td></tr>
+                        <tr><td style='padding: 2px 0;'>0.40 to &lt; 0.60</td><td style='padding: 2px 0;'>Moderate agreement</td></tr>
+                        <tr><td style='padding: 2px 0;'>0.60 to &lt; 0.80</td><td style='padding: 2px 0;'>Substantial agreement</td></tr>
+                        <tr><td style='padding: 2px 0;'>0.80 to 1.00</td><td style='padding: 2px 0;'>Almost perfect agreement</td></tr>
                         </table>
-                        <p style='margin: 8px 0 0 0; font-size: 11px; color: inherit;'>Note: These interpretation cutoffs follow Landis &amp; Koch (1977) for Cohen's Kappa. Different coefficient families originate from distinct statistical traditions (e.g., Krippendorff 2004 for Alpha, Cicchetti 1994 / Koo &amp; Li 2016 for ICC) with different benchmark thresholds.</p>
+                        <p style='margin: 8px 0 0 0; font-size: 11px; color: inherit;'>Note: These cutoffs are adapted from Landis &amp; Koch (1977), who put a value exactly on a cut-point (0.20, 0.40, 0.60, 0.80) in the band below; this analysis puts it in the band above. Different coefficient families originate from distinct statistical traditions (e.g., Krippendorff 2004 for Alpha, Cicchetti 1994 / Koo &amp; Li 2016 for ICC) with different benchmark thresholds.</p>
                     </div>
                 </div>
             </div>
@@ -1112,19 +1369,19 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             <td style='padding: 5px; border-bottom: 1px solid #ddd;'>Slight agreement</td>
                         </tr>
                         <tr>
-                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>0.20 - 0.40</td>
+                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>0.20 to &lt; 0.40</td>
                             <td style='padding: 5px; border-bottom: 1px solid #ddd;'>Fair agreement</td>
                         </tr>
                         <tr>
-                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>0.40 - 0.60</td>
+                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>0.40 to &lt; 0.60</td>
                             <td style='padding: 5px; border-bottom: 1px solid #ddd;'>Moderate agreement</td>
                         </tr>
                         <tr>
-                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>0.60 - 0.80</td>
+                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>0.60 to &lt; 0.80</td>
                             <td style='padding: 5px; border-bottom: 1px solid #ddd;'>Substantial agreement</td>
                         </tr>
                         <tr>
-                            <td style='padding: 5px; font-weight: bold;'>0.80 - 1.00</td>
+                            <td style='padding: 5px; font-weight: bold;'>0.80 to 1.00</td>
                             <td style='padding: 5px;'>Almost perfect agreement</td>
                         </tr>
                     </table>
@@ -1172,12 +1429,20 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                         # Populate table
                         self$results$lightKappaTable$setRow(rowNo = 1, values = list(
-                            method = "Light's Kappa (average of pairwise kappas)",
+                            method = .("Light's Kappa (average of pairwise kappas)"),
                             subjects = light_result$subjects,
                             raters = light_result$raters,
-                            kappa = light_result$value,
-                            p = light_result$p.value
+                            kappa = light_result$value
                         ))
+                        # irr::kappam.light's p.value is not shown. Its variance term,
+                        # chanceP / (ns * (1 - chanceP)) with chanceP built from a product of
+                        # disagreement counts, is not a standard error for Light's kappa.
+                        # Measured on irr 0.85: NaN with 3 raters and 4 balanced categories,
+                        # and p = 0.51 at kappa 0.87 with 5 binary raters.
+                        self$results$lightKappaTable$setNote(
+                            "no_p",
+                            .("No p-value is reported. The p-value from irr::kappam.light rests on a variance formula that is not a valid standard error for Light's kappa: it is undefined with three raters and four or more balanced categories, and it can call strong agreement among four or more raters on a binary scale non-significant. Light's kappa is the mean of the pairwise Cohen's kappas; the All-Pairs Kappa table gives each pair its own interval and test.")
+                        )
 
                         # Add interpretation note
                         kappa_val <- light_result$value
@@ -1219,7 +1484,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     error = function(e) {
                         self$results$lightKappaTable$setNote(
                             "error",
-                            sprintf(.("Error calculating Light's kappa: %s"), jmvcore::htmlEscape(e$message))
+                            sprintf(.("Error calculating Light's kappa: %s"), private$.noteSafe(jmvcore::htmlEscape(e$message)))
                         )
                     }
                 )
@@ -1356,22 +1621,23 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             <td style='padding: 5px; border-bottom: 1px solid #ddd;'>Poor agreement</td>
                         </tr>
                         <tr>
-                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>0.40 - 0.60</td>
+                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>0.40 to &lt; 0.60</td>
                             <td style='padding: 5px; border-bottom: 1px solid #ddd;'>Fair agreement</td>
                         </tr>
                         <tr>
-                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>0.60 - 0.75</td>
+                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>0.60 to &lt; 0.75</td>
                             <td style='padding: 5px; border-bottom: 1px solid #ddd;'>Good agreement</td>
                         </tr>
                         <tr>
-                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>0.75 - 0.90</td>
+                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>0.75 to &lt; 0.90</td>
                             <td style='padding: 5px; border-bottom: 1px solid #ddd;'>Excellent agreement</td>
                         </tr>
                         <tr>
-                            <td style='padding: 5px; font-weight: bold;'>0.90 - 1.00</td>
+                            <td style='padding: 5px; font-weight: bold;'>0.90 to 1.00</td>
                             <td style='padding: 5px;'>Outstanding agreement</td>
                         </tr>
                     </table>
+                    <p style='margin: 10px 0 0 0; font-size: 13px;'>Finn (1970) proposed no interpretive bands for this coefficient himself. The 0.40, 0.60 and 0.75 cut-points follow the Cicchetti (1994) reliability convention, which was written for the ICC and for kappa rather than for Finn's coefficient; the split at 0.90 into Excellent and Outstanding is this module's own. They are not the Landis &amp; Koch (1977) kappa bands or the Koo &amp; Li (2016) ICC bands used elsewhere in this analysis, so the same number is described differently there.</p>
                     <p style='margin: 10px 0 0 0; font-size: 13px;'>
                         <strong>Statistical test:</strong> F-test evaluates if agreement is significantly better than chance.
                         Significant p-value (< 0.05) indicates reliable agreement beyond random variation.
@@ -1427,7 +1693,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         if (!identical(as.integer(n_levels), length(finn_shared_levels))) {
                             self$results$finnTable$setNote(
                                 "levels_from_data",
-                                sprintf(.("Number of Rating Categories was set to %1$d, but the rater variables declare a %2$d-category scale. Finn's coefficient divides by the variance of a uniform rating on an s-point scale, so s changes the value and can change its sign; the declared %3$d-category scale was used. If the scale really does have %4$d categories, add the unused ones as levels of the rater variables."),
+                                sprintf(.("Number of rating categories was set to %1$d, but the rater variables declare a %2$d-category scale. Finn's coefficient divides by the variance of a uniform rating on an s-point scale, so s changes the value and can change its sign; the declared %3$d-category scale was used. If the scale really does have %4$d categories, add the unused ones as levels of the rater variables."),
                                     as.integer(n_levels), length(finn_shared_levels),
                                     length(finn_shared_levels), as.integer(n_levels))
                             )
@@ -1486,10 +1752,24 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 actual_max <- max(ratings_clean, na.rm = TRUE)
                 actual_min <- min(ratings_clean, na.rm = TRUE)
 
-                if (identical(finn_levels_source, "option") && (actual_max > n_levels || actual_min < 1)) {
+                # Two-sided, because only one direction was ever disclosed. Measured on
+                # 3-category coded-numeric ratings (values 1..3): finnLevels = 2 gives
+                # Finn -1.667 WITH this warning, but finnLevels = 5 gives 0.667 "Good",
+                # 10 gives 0.919 "Outstanding" and 20 gives 0.980 "Outstanding", all in
+                # silence - the guard caught only the direction that DEFLATES the
+                # coefficient, which is already self-evident from a negative value, and
+                # said nothing in the direction that inflates "Poor" into "Outstanding".
+                # The factor path is protected above (n_levels is overridden from the
+                # declared levels, with a levels_from_data note); this is the
+                # coded-numeric path - a pathologist who typed grades 1/2/3 into a column
+                # without setting its measure type.
+                if (identical(finn_levels_source, "option") &&
+                    (actual_max != n_levels || actual_min != 1)) {
                     self$results$finnTable$setNote(
                         "warning",
-                        sprintf(.("Data range (%1$d to %2$d) may not match specified number of categories (%3$d). Ensure your rating categories are coded as 1 to %4$d."), round(actual_min), round(actual_max), n_levels, n_levels)
+                        sprintf(.("The ratings run from %1$d to %2$d, but the number of rating categories is set to %3$d. Finn's coefficient divides by the variance of a uniform rating on an s-point scale, so this setting moves the value in both directions: set larger than the scale the ratings actually use, it pulls the coefficient towards 1 and can turn poor agreement into outstanding agreement; set smaller, it deflates the coefficient and can drive it negative. Set it to the number of categories the rating scale really has, or declare the rater variables as ordinal factors carrying all their levels, in which case the scale is read from the data and this setting is ignored."),
+
+                            as.integer(round(actual_min)), as.integer(round(actual_max)), as.integer(n_levels))
                     )
                 }
 
@@ -1546,11 +1826,25 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             "interpretation",
                             sprintf(.("%1$s. The accompanying F-test (p = %2$.3f) only asks whether agreement exceeds chance, which is rarely the question of interest; judge adequacy from the coefficient itself and its precision, not from the p-value. The variance-based approach is especially useful when rater variance is low."), interp, finn_result$p.value)
                         )
+
+                        # Softened for the same reason as the correlation notes, but
+                        # only as far as the evidence goes. CHECKED against the code
+                        # above: 0.40 / 0.60 / 0.75 with poor / fair / good / excellent
+                        # IS Cicchetti's (1994) published reliability convention, so
+                        # "not a standard" was wrong about the first four bands. The
+                        # fifth cut-point (0.90, "Outstanding") splits Cicchetti's
+                        # single 0.75-to-1.00 excellent band and is this module's own,
+                        # so that part of the old sentence stands. Cicchetti wrote for
+                        # ICC and kappa, not for Finn's r - say that too.
+                        self$results$finnTable$setNote(
+                            "scale",
+                            .("The labels use the 0.40, 0.60, 0.75 and 0.90 cut-points. Finn (1970) proposed no interpretive bands for this coefficient himself. The first three follow the Cicchetti (1994) reliability convention, which was written for the ICC and for kappa rather than for Finn's coefficient; the split at 0.90 into Excellent and Outstanding is this module's own. These are not the Landis & Koch (1977) kappa bands or the Koo & Li (2016) ICC bands used elsewhere in this analysis, so the same number is described differently there; report the coefficient itself.")
+                        )
                     },
                     error = function(e) {
                         self$results$finnTable$setNote(
                             "error",
-                            sprintf(.("Error calculating Finn coefficient: %1$s. Ensure data are categorical and properly coded (1 to %2$d)."), jmvcore::htmlEscape(e$message), n_levels)
+                            sprintf(.("Error calculating Finn coefficient: %1$s. Ensure data are categorical and properly coded (1 to %2$d)."), private$.noteSafe(jmvcore::htmlEscape(e$message)), n_levels)
                         )
                     }
                 )
@@ -1584,23 +1878,23 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     <h4 style='margin: 0 0 10px 0; color: inherit;'>Interpreting Kendall's W</h4>
                     <table style='width: 100%; border-collapse: collapse;'>
                         <tr>
-                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>W = 0.00 - 0.20</td>
+                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>W = 0.00 to &lt; 0.20</td>
                             <td style='padding: 5px; border-bottom: 1px solid #ddd;'>Very weak agreement (essentially random)</td>
                         </tr>
                         <tr>
-                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>W = 0.21 - 0.40</td>
+                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>W = 0.20 to &lt; 0.40</td>
                             <td style='padding: 5px; border-bottom: 1px solid #ddd;'>Weak agreement</td>
                         </tr>
                         <tr>
-                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>W = 0.41 - 0.60</td>
+                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>W = 0.40 to &lt; 0.60</td>
                             <td style='padding: 5px; border-bottom: 1px solid #ddd;'>Moderate agreement</td>
                         </tr>
                         <tr>
-                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>W = 0.61 - 0.80</td>
+                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>W = 0.60 to &lt; 0.80</td>
                             <td style='padding: 5px; border-bottom: 1px solid #ddd;'>Strong agreement</td>
                         </tr>
                         <tr>
-                            <td style='padding: 5px; font-weight: bold;'>W = 0.81 - 1.00</td>
+                            <td style='padding: 5px; font-weight: bold;'>W = 0.80 to 1.00</td>
                             <td style='padding: 5px;'>Very strong agreement (nearly unanimous)</td>
                         </tr>
                     </table>
@@ -1704,6 +1998,13 @@ agreementClass <- if (requireNamespace("jmvcore")) {
             .calculateKendallW = function(ratings) {
                 # Calculate Kendall's coefficient of concordance (W) for ordinal/ranking data
 
+                # Notes persist across runs of one analysis object (jmvcore has no
+                # R-side clearWith and Table has no reset), so a band or disclosure note
+                # written on a success path survives into a later failed run. Clear every
+                # key this function writes, then let each branch write only its own.
+                for (nk in c("error", "interpretation", "listwise", "scale"))
+                    self$results$kendallWTable$setNote(nk, NULL)
+
                 # Validate data is numeric or an ORDERED factor.
                 #
                 # `is.factor(x)` used to be accepted here, and the conversion below
@@ -1751,7 +2052,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                         # Populate table
                         self$results$kendallWTable$setRow(rowNo = 1, values = list(
-                            method = "Kendall's W (coefficient of concordance)",
+                            method = .("Kendall's W (coefficient of concordance)"),
                             subjects = kendall_result$subjects,
                             raters = kendall_result$raters,
                             w = kendall_result$value,
@@ -1780,16 +2081,20 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                         # Add interpretation note
                         w_val <- kendall_result$value
-                        if (w_val <= 0.20) {
+                        # `<` at every boundary, not `<=`: every sibling band chain in
+                        # this file opens its interval at the cut-point, so W = 0.20
+                        # exactly used to read "Very weak" while a kappa of 0.20 reads
+                        # "Fair". Cut-points and words are unchanged.
+                        if (w_val < 0.20) {
                             # The verdict a clinician actually reads was a bare English literal spliced
                             # into an otherwise translated sentence, so a Turkish user got a Turkish
                             # sentence with an English conclusion in it. The msgid is the literal itself.
                             interp <- .("Very weak agreement (essentially random)")
-                        } else if (w_val <= 0.40) {
+                        } else if (w_val < 0.40) {
                             interp <- .("Weak agreement")
-                        } else if (w_val <= 0.60) {
+                        } else if (w_val < 0.60) {
                             interp <- .("Moderate agreement")
-                        } else if (w_val <= 0.80) {
+                        } else if (w_val < 0.80) {
                             interp <- .("Strong agreement")
                         } else {
                             interp <- .("Very strong agreement")
@@ -1810,11 +2115,15 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                 sprintf(.("Interpretation: %1$s. Chi-square test: %2$s, indicating agreement not significantly different from chance."), interp, p_text)
                             }
                         )
+                        self$results$kendallWTable$setNote(
+                            "scale",
+                            .("The labels use the 0.20, 0.40, 0.60 and 0.80 cut-points, half-open, so a W landing exactly on a cut-point takes the higher band: W = 0.20 reads Weak. Kendall (1939) publishes no interpretive bands for W, so these are a display convention of this module and not a standard; report the coefficient itself.")
+                        )
                     },
                     error = function(e) {
                         self$results$kendallWTable$setNote(
                             "error",
-                            sprintf(.("Error calculating Kendall's W: %s"), jmvcore::htmlEscape(e$message))
+                            sprintf(.("Error calculating Kendall's W: %s"), private$.noteSafe(jmvcore::htmlEscape(e$message)))
                         )
                     }
                 )
@@ -1886,6 +2195,11 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 # Calculate Robinson's A coefficient for ordinal agreement
                 # Based on proportion of concordant pairs
 
+                # Every return() below leaves a note, and notes persist across runs of
+                # one analysis object, so clear this calculator's own keys first.
+                for (nk in c("error", "interpretation", "scale_order"))
+                    self$results$robinsonATable$setNote(nk, NULL)
+
                 # Validate data is ordinal or numeric.
                 #
                 # The note already said "ordered-factor", but the test accepted any
@@ -1922,7 +2236,44 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 # all-NA row, and Kendall's W ranked the LABELS lexicographically
                 # (0.497 instead of 0.570 on a 12-level scale - correct only while
                 # every level is a single character).
-                ratings_matrix <- vapply(ratings_clean, as.numeric, numeric(nrow(ratings_clean)))
+                # as.numeric() column by column gives PER-COLUMN level codes: the
+                # same grade gets a different number in two raters whenever they
+                # declare different level sets. A = 1 - SS_within / SS_total is a
+                # CROSS-column decomposition, so those codes make raters disagree
+                # arithmetically where they agreed clinically. Put every ordered
+                # column on ONE declared order (private$.mergeDeclaredLevels, via
+                # .orderedLevelsInfo) and refuse when the declarations do not
+                # determine one, exactly as the variance decomposition does.
+                # Continuous columns already share a scale and are left alone; the
+                # two kinds cannot be mixed, because a position on a category scale
+                # and a measurement in real units are not the same quantity.
+                is_num_col <- vapply(ratings_clean, function(x)
+                    is.numeric(x) && !is.factor(x), logical(1))
+                is_ord_col <- vapply(ratings_clean, is.ordered, logical(1))
+
+                if (all(is_num_col)) {
+                    self$results$robinsonATable$setNote("scale_order", NULL)
+                    ratings_matrix <- vapply(ratings_clean, as.numeric, numeric(nrow(ratings_clean)))
+                } else if (all(is_ord_col)) {
+                    lv_info <- private$.orderedLevelsInfo(ratings_clean)
+                    if (isTRUE(lv_info$ambiguous)) {
+                        self$results$robinsonATable$setNote(
+                            "scale_order",
+                            .("Robinson's A weighs the spread within a case against the spread between cases, so every rater has to sit on one common category order, and the selected rater variables do not determine one. Either they contradict each other, or - more often - they simply never place some pair of categories relative to each other: if one variable declares Absent and Diffuse and another declares Absent and Focal, nothing in either declaration says whether Focal comes before or after Diffuse. Merging them would invent an order, and A would then depend on which rater variable was selected first. Declare the same full set of categories, in the same sequence, on every rater variable and run again.")
+                        )
+                        return()
+                    }
+                    self$results$robinsonATable$setNote("scale_order", NULL)
+                    ratings_matrix <- vapply(ratings_clean, function(x)
+                        as.numeric(match(as.character(x), lv_info$levels)),
+                        numeric(nrow(ratings_clean)))
+                } else {
+                    self$results$robinsonATable$setNote(
+                        "scale_order",
+                        .("Robinson's A needs one common scale for every rater. Use rater columns that are all continuous measurements, or all ordered factors declaring the same categories in the same order. Continuous and ordered-factor columns cannot be mixed here, because a position on a category scale and a measurement in real units are not the same quantity.")
+                    )
+                    return()
+                }
 
                 n_raters <- ncol(ratings_matrix)
                 n_subjects <- nrow(ratings_matrix)
@@ -1938,6 +2289,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         if (is.null(seed_val)) seed_val <- 42
                         withr::local_seed(seed_val)
                         boot_a <- vapply(seq_len(n_boot), function(b) {
+                            # Up to 10,000 refits: the only nBoot consumer that had no
+                            # cancellation point (its siblings in TDI, the bootstrap CI
+                            # and the Krippendorff bootstrap all have one).
+                            if (b %% 50L == 0L) private$.checkpoint()
                             idx <- sample.int(n_subjects, replace = TRUE)
                             private$.robinsonA(ratings_matrix[idx, , drop = FALSE])
                         }, numeric(1))
@@ -1976,9 +2331,13 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         )
                     },
                     error = function(e) {
+                        # A .checkpoint() restart arrives here as an error carrying
+                        # code = "restart"; re-raise it so a cancel restarts the analysis
+                        # instead of becoming an error footnote.
+                        if (identical(e$code, "restart")) stop(e)
                         self$results$robinsonATable$setNote(
                             "error",
-                            sprintf(.("Error calculating Robinson's A: %s"), jmvcore::htmlEscape(e$message))
+                            sprintf(.("Error calculating Robinson's A: %s"), private$.noteSafe(jmvcore::htmlEscape(e$message)))
                         )
                     }
                 )
@@ -2185,6 +2544,13 @@ agreementClass <- if (requireNamespace("jmvcore")) {
             .calculateMeanSpearman = function(ratings) {
                 # Calculate mean Spearman rho across all rater pairs
 
+                # Notes persist across runs of one analysis object (jmvcore has no
+                # R-side clearWith and Table has no reset), so a band or disclosure note
+                # written on a success path survives into a later failed run. Clear every
+                # key this function writes, then let each branch write only its own.
+                for (nk in c("averaging", "error", "interpretation", "pairwise", "scale"))
+                    self$results$meanSpearmanTable$setNote(nk, NULL)
+
                 # Validate data is numeric or ordinal
                 # An UNORDERED factor has no scale: ranking it ranks alphabetical level
                 # codes, so a nominal variable (tumour type) yielded a plausible-looking rho
@@ -2299,15 +2665,29 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         ))
 
                         # Add interpretation note
-                        range_text <- sprintf("[%.3f, %.3f]", min_rho, max_rho)
+                        # No square brackets around the range: Table$setNote() runs the
+                        # COMPOSED note through the translator again, and jmvcore's
+                        # msgctxt regex "(.*) \\[(.*)\\]" is UNANCHORED - a bracketed
+                        # value anywhere in the note truncated it at " [", so the range
+                        # and everything after it never reached the user.
                         self$results$meanSpearmanTable$setNote(
                             "interpretation",
-                            sprintf(.("Interpretation: %1$s (Mean \u03C1 = %2$.3f). Pairwise correlations range from %3$s, indicating %4$s among rater pairs. High positive correlations indicate raters rank cases similarly."), interp, mean_rho, range_text, if (max_rho - min_rho < 0.20) .("consistent agreement") else .("variability in agreement")) # both branches were bare English spliced into a translated sentence
+                            sprintf(.("Interpretation: %1$s (Mean \u03C1 = %2$.3f). Pairwise correlations range from %3$.3f to %4$.3f, indicating %5$s among rater pairs. High positive correlations indicate raters rank cases similarly."), interp, mean_rho, min_rho, max_rho, if (max_rho - min_rho < 0.20) .("consistent agreement") else .("variability in agreement")) # both branches were bare English spliced into a translated sentence
                         )
 
                         # Disclose the per-pair n: each correlation uses only the cases
                         # both of its raters scored, so the counts differ between pairs
                         # and none of them need equal the Subjects column.
+                        # NOT "a convention of this module": a published rule of
+                        # thumb with these cut-points (Hinkle, Wiersma & Jurs,
+                        # reproduced for medical research by Mukaka 2012) is in wide
+                        # use. What has NOT been byte-verified is that its wording is
+                        # identical to ours, so the note cites Mukaka as a guide of
+                        # this kind and stops short of claiming these bands ARE his.
+                        self$results$meanSpearmanTable$setNote(
+                            "scale",
+                            .("The labels use the 0.30, 0.50, 0.70 and 0.90 cut-points. Spearman (1904) proposed no interpretive bands for the coefficient himself; cut-points of this kind come from a widely used rule of thumb for correlation strength, of the sort Mukaka (2012) sets out for medical research. Several such conventions are in circulation and they disagree with one another, so report the coefficient itself and say which convention you are reading it against.")
+                        )
                         self$results$meanSpearmanTable$setNote(
                             "pairwise",
                             sprintf(.("Each correlation uses the cases that <b>both</b> raters in that pair scored (pairwise deletion), so the number of cases behind each one ranges from %1$d to %2$d. Subjects counts the cases rated by at least two raters."),
@@ -2317,7 +2697,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     error = function(e) {
                         self$results$meanSpearmanTable$setNote(
                             "error",
-                            sprintf(.("Error calculating Mean Spearman Rho: %s"), jmvcore::htmlEscape(e$message))
+                            sprintf(.("Error calculating Mean Spearman Rho: %s"), private$.noteSafe(jmvcore::htmlEscape(e$message)))
                         )
                     }
                 )
@@ -2511,6 +2891,13 @@ agreementClass <- if (requireNamespace("jmvcore")) {
             .calculateMeanPearson = function(ratings) {
                 # Calculate mean Pearson correlation across all rater pairs
 
+                # Notes persist across runs of one analysis object (jmvcore has no
+                # R-side clearWith and Table has no reset), so a band or disclosure note
+                # written on a success path survives into a later failed run. Clear every
+                # key this function writes, then let each branch write only its own.
+                for (nk in c("averaging", "error", "interpretation", "pairwise", "scale"))
+                    self$results$meanPearsonTable$setNote(nk, NULL)
+
                 # Validate data is numeric
                 if (!all(sapply(ratings, function(x) is.numeric(x)))) {
                     self$results$meanPearsonTable$setNote(
@@ -2612,15 +2999,25 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         ))
 
                         # Add interpretation note
-                        range_text <- sprintf("[%.3f, %.3f]", min_r, max_r)
+                        # See meanSpearmanTable: brackets in a composed note are eaten
+                        # by jmvcore's unanchored msgctxt regex inside setNote().
                         self$results$meanPearsonTable$setNote(
                             "interpretation",
-                            sprintf(.("Interpretation: %1$s (Mean r = %2$.3f). Pairwise correlations range from %3$s, indicating %4$s among rater pairs. High correlations indicate measurements vary together linearly. Note: Correlation measures association, not absolute agreement."), interp, mean_r, range_text, if (max_r - min_r < 0.20) .("consistent correlation") else .("variability in correlation")) # both branches were bare English spliced into a translated sentence
+                            sprintf(.("Interpretation: %1$s (Mean r = %2$.3f). Pairwise correlations range from %3$.3f to %4$.3f, indicating %5$s among rater pairs. High correlations indicate measurements vary together linearly. Note: Correlation measures association, not absolute agreement."), interp, mean_r, min_r, max_r, if (max_r - min_r < 0.20) .("consistent correlation") else .("variability in correlation")) # both branches were bare English spliced into a translated sentence
                         )
 
                         # Disclose the per-pair n: each correlation uses only the cases
                         # both of its raters scored, so the counts differ between pairs
                         # and none of them need equal the Subjects column.
+                        # See meanSpearmanTable: these cut-points are NOT unique to
+                        # this module - they are a widely used correlation rule of
+                        # thumb - but the exact wording has not been byte-verified
+                        # against Mukaka (2012), so the note cites him as a guide, not
+                        # as the source of these particular bands.
+                        self$results$meanPearsonTable$setNote(
+                            "scale",
+                            .("The labels use the 0.30, 0.50, 0.70 and 0.90 cut-points. Pearson (1895) proposed no interpretive bands for the coefficient himself; cut-points of this kind come from a widely used rule of thumb for correlation strength, of the sort Mukaka (2012) sets out for medical research. Several such conventions are in circulation and they disagree with one another, so report the coefficient itself and say which convention you are reading it against.")
+                        )
                         self$results$meanPearsonTable$setNote(
                             "pairwise",
                             sprintf(.("Each correlation uses the cases that <b>both</b> raters in that pair scored (pairwise deletion), so the number of cases behind each one ranges from %1$d to %2$d. Subjects counts the cases rated by at least two raters."),
@@ -2630,7 +3027,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     error = function(e) {
                         self$results$meanPearsonTable$setNote(
                             "error",
-                            sprintf(.("Error calculating Mean Pearson Correlation: %s"), jmvcore::htmlEscape(e$message))
+                            sprintf(.("Error calculating Mean Pearson Correlation: %s"), private$.noteSafe(jmvcore::htmlEscape(e$message)))
                         )
                     }
                 )
@@ -2683,27 +3080,27 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Large deviation from the line of identity</td>
                         </tr>
                         <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>0.40 - 0.70</strong></td>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>0.40 to &lt; 0.70</strong></td>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Fair</td>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Appreciable deviation from the line of identity</td>
                         </tr>
                         <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>0.70 - 0.90</strong></td>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>0.70 to &lt; 0.90</strong></td>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Moderate</td>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Moderate deviation from the line of identity</td>
                         </tr>
                         <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>0.90 - 0.95</strong></td>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>0.90 to &lt; 0.95</strong></td>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Good</td>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Small deviation from the line of identity</td>
                         </tr>
                         <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>0.95 - 0.99</strong></td>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>0.95 to &lt; 0.99</strong></td>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Substantial</td>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Very small deviation from the line of identity</td>
                         </tr>
                         <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>&gt; 0.99</strong></td>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>0.99 to 1.00</strong></td>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Almost perfect</td>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Negligible deviation from the line of identity</td>
                         </tr>
@@ -2990,7 +3387,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                                 # Guard against zero variance
                                 if (sd_x < .Machine$double.eps || sd_y < .Machine$double.eps) {
-                                    cccTable$addRow(rowKey = comparison_name, list(
+                                    cccTable$addRow(rowKey = paste0(i, "_", j), list(
                                         comparison = comparison_name,
                                         subjects = n_cases,
                                         ccc = NA_real_,
@@ -3083,7 +3480,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                     interp <- .("Almost perfect concordance")
                                 }
 
-                                cccTable$addRow(rowKey = comparison_name, list(
+                                cccTable$addRow(rowKey = paste0(i, "_", j), list(
                                     comparison = comparison_name,
                                     subjects = n_cases,
                                     ccc = ccc,
@@ -3121,7 +3518,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     error = function(e) {
                         self$results$linCCCTable$setNote(
                             "error",
-                            sprintf(.("Error calculating Lin's CCC: %s"), jmvcore::htmlEscape(e$message))
+                            sprintf(.("Error calculating Lin's CCC: %s"), private$.noteSafe(jmvcore::htmlEscape(e$message)))
                         )
                     }
                 )
@@ -3349,7 +3746,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         tdi_seed <- self$options$seed
                         if (is.null(tdi_seed)) tdi_seed <- 42
                         withr::local_seed(tdi_seed)
-                        tdiTable$setNote("seed", jmvcore::format(.("Random seed: {seed}"), seed = tdi_seed))
+                        tdiTable$setNote("seed", .fmt(.("Random seed: {seed}"), seed = tdi_seed))
                         tdiTable$setNote("pairwise", .("Each row uses the cases that <b>both</b> raters in that pair scored (pairwise-complete), so the Subjects count can differ between rows. Rows with fewer than 10 paired observations are omitted."))
 
                         for (i in 1:(n_raters - 1)) {
@@ -3451,7 +3848,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                     }
                                 }
 
-                                tdiTable$addRow(rowKey = comparison_name, list(
+                                tdiTable$addRow(rowKey = paste0(i, "_", j), list(
                                     comparison = comparison_name,
                                     # This pair's own complete-pair count, not the
                                     # listwise-complete count shared by every row.
@@ -3474,7 +3871,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         if (identical(e$code, "restart")) stop(e)
                         self$results$tdiTable$setNote(
                             "error",
-                            sprintf(.("Error calculating TDI: %s"), jmvcore::htmlEscape(e$message))
+                            sprintf(.("Error calculating TDI: %s"), private$.noteSafe(jmvcore::htmlEscape(e$message)))
                         )
                     }
                 )
@@ -3525,19 +3922,19 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 html <- paste0(html, "<p><strong>Specific Agreement Values:</strong></p>")
                 html <- paste0(html, "<ul>")
                 html <- paste0(
-                    html, '<li><strong>>0.90:</strong> <span style="color: green;">Excellent</span> - ',
+                    html, '<li><strong>0.90 to 1.00:</strong> <span style="color: green;">Excellent</span> - ',
                     "category has strong agreement between raters</li>"
                 )
                 html <- paste0(
-                    html, '<li><strong>0.75-0.90:</strong> <span style="color: orange;">Good</span> - ',
+                    html, '<li><strong>0.75 to &lt;0.90:</strong> <span style="color: orange;">Good</span> - ',
                     "acceptable agreement, monitor for improvement</li>"
                 )
                 html <- paste0(
-                    html, '<li><strong>0.60-0.75:</strong> <span style="color: orange;">Fair</span> - ',
+                    html, '<li><strong>0.60 to &lt;0.75:</strong> <span style="color: orange;">Fair</span> - ',
                     "category needs attention, consider additional training</li>"
                 )
                 html <- paste0(
-                    html, '<li><strong><0.60:</strong> <span style="color: red;">Poor</span> - ',
+                    html, '<li><strong>&lt;0.60:</strong> <span style="color: red;">Poor</span> - ',
                     "unreliable for this category, requires intervention</li>"
                 )
                 html <- paste0(html, "</ul>")
@@ -3657,6 +4054,13 @@ agreementClass <- if (requireNamespace("jmvcore")) {
             .calculateSpecificAgreement = function(ratings) {
                 # Calculate category-specific agreement indices
 
+                # Notes persist across runs of one analysis object (jmvcore has no
+                # R-side clearWith and Table has no reset), so a band or disclosure note
+                # written on a success path survives into a later failed run. Clear every
+                # key this function writes, then let each branch write only its own.
+                for (nk in c("ci_approx", "collapsed", "error", "info", "scale"))
+                    self$results$specificAgreementTable$setNote(nk, NULL)
+
                 tryCatch(
                     {
                         # Get user options
@@ -3723,7 +4127,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             if (!(positive_category %in% all_levels)) {
                                 self$results$specificAgreementTable$setNote(
                                     "error",
-                                    sprintf(.("Specified positive category '%1$s' not found in data. Available: %2$s"), positive_category, paste(all_levels, collapse = ", "))
+                                    sprintf(.("Specified positive category '%1$s' not found in data. Available: %2$s"), private$.noteSafe(positive_category), paste(private$.noteSafe(all_levels), collapse = ", "))
                                 )
                                 return()
                             }
@@ -3836,7 +4240,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                         type_label <- category
                                     }
 
-                                    saTable$addRow(rowKey = paste(pair_name, category, sep = "_"), list(
+                                    saTable$addRow(rowKey = paste(i, j, match(category, categories_to_analyze), sep = "_"), list(
                                         category = type_label,
                                         rater_pair = pair_name,
                                         n_both_positive = both_positive,
@@ -3854,13 +4258,17 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         if (nzchar(positive_category) && length(categories_to_analyze) >= 2) {
                             self$results$specificAgreementTable$setNote(
                                 "info",
-                                sprintf(.("PSA (Positive Specific Agreement) for '%s' and NSA (Negative Specific Agreement) for other categories. Large PSA-NSA differences suggest systematic diagnostic bias."), positive_category)
+                                sprintf(.("PSA (Positive Specific Agreement) for '%s' and NSA (Negative Specific Agreement) for other categories. Large PSA-NSA differences suggest systematic diagnostic bias."), private$.noteSafe(positive_category))
                             )
                         }
+                        self$results$specificAgreementTable$setNote(
+                            "scale",
+                            .("The labels use the 0.60, 0.75 and 0.90 cut-points. No published source defines interpretive bands for specific agreement, so these are a display convention of this module and not a standard; report the proportion itself.")
+                        )
                         if (collapse_negative) {
                             self$results$specificAgreementTable$setNote(
                                 "collapsed",
-                                sprintf(.("To report negative specific agreement, every category other than '%1$s' was collapsed into a single negative category. NSA therefore describes agreement on 'not %2$s' as a whole, not on any individual category; tick 'all categories' to see each one separately."), positive_category, positive_category)
+                                sprintf(.("To report negative specific agreement, every category other than '%1$s' was collapsed into a single negative category. NSA therefore describes agreement on 'not %2$s' as a whole, not on any individual category; tick 'all categories' to see each one separately."), private$.noteSafe(positive_category), private$.noteSafe(positive_category))
                             )
                         }
 
@@ -3880,7 +4288,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     error = function(e) {
                         self$results$specificAgreementTable$setNote(
                             "error",
-                            sprintf(.("Error calculating specific agreement: %s"), jmvcore::htmlEscape(e$message))
+                            sprintf(.("Error calculating specific agreement: %s"), private$.noteSafe(jmvcore::htmlEscape(e$message)))
                         )
                     }
                 )
@@ -4073,12 +4481,12 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         n_raters <- ncol(ratings_complete)
 
                         if (n_cases < 10) {
-                            self$results$agreementHeatmapPlot$setError("Agreement heatmap requires at least 10 complete observations.")
+                            self$results$agreementHeatmapPlot$setError(.("Agreement heatmap requires at least 10 complete observations."))
                             return()
                         }
 
                         if (n_raters < 2) {
-                            self$results$agreementHeatmapPlot$setError("Agreement heatmap requires at least 2 raters.")
+                            self$results$agreementHeatmapPlot$setError(.("Agreement heatmap requires at least 2 raters."))
                             return()
                         }
 
@@ -4089,7 +4497,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         is_categorical <- !private$.ratingsAreContinuous(ratings_complete)
 
                         if (!is_categorical) {
-                            self$results$agreementHeatmapPlot$setError("Agreement heatmap requires categorical data. At least one selected variable is a continuous measurement. Use the Bland-Altman plot instead. If these numbers are category codes rather than measurements, set the variables to Nominal or Ordinal - or wrap them in factor() when calling from R - and the heatmap will be drawn.")
+                            self$results$agreementHeatmapPlot$setError(.("Agreement heatmap requires categorical data. At least one selected variable is a continuous measurement. Use the Bland-Altman plot instead. If these numbers are category codes rather than measurements, set the variables to Nominal or Ordinal - or wrap them in factor() when calling from R - and the heatmap will be drawn."))
                             return()
                         }
 
@@ -4115,7 +4523,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         ))
                     },
                     error = function(e) {
-                        self$results$agreementHeatmapPlot$setError(sprintf("Error generating heatmap: %s", jmvcore::htmlEscape(e$message)))
+                        self$results$agreementHeatmapPlot$setError(sprintf(.("Error generating heatmap: %s"), jmvcore::htmlEscape(e$message)))
                     }
                 )
             },
@@ -4440,7 +4848,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         ))
                     },
                     error = function(e) {
-                        self$results$raterProfilePlot$setError(sprintf("Error generating rater profile plot: %s", jmvcore::htmlEscape(e$message)))
+                        self$results$raterProfilePlot$setError(sprintf(.("Error generating rater profile plot: %s"), jmvcore::htmlEscape(e$message)))
                     }
                 )
             },
@@ -4497,6 +4905,15 @@ agreementClass <- if (requireNamespace("jmvcore")) {
             .calculateAgreementBySubgroup = function(ratings) {
                 tryCatch(
                     {
+                        # Notes persist across runs of one analysis object (jmvcore has no
+                        # R-side clearWith and Table has no reset). Clear every key this
+                        # function can write, then let each branch write only its own -
+                        # otherwise a run that yields no rows still carries the previous
+                        # run's interval-overlap sentence and its skipped-subgroup counts.
+                        for (nk in c("error", "scale", "scale_ambiguous", "skipped",
+                                     "ci_null_se", "numeric", "comparison"))
+                            self$results$subgroupAgreementTable$setNote(nk, NULL)
+
                         subgroup_var <- self$options$subgroupVariable
                         min_cases <- self$options$subgroupMinCases
 
@@ -4507,7 +4924,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         # Get subgroup variable from data
                         subgroup <- self$data[[subgroup_var]]
                         if (is.null(subgroup)) {
-                            self$results$subgroupAgreementTable$setNote("error", sprintf(.("Subgroup variable '%s' not found"), subgroup_var))
+                            self$results$subgroupAgreementTable$setNote("error", sprintf(.("Subgroup variable '%s' not found"), private$.noteSafe(subgroup_var)))
                             return()
                         }
 
@@ -4518,7 +4935,16 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         is_categorical <- !private$.ratingsAreContinuous(ratings)
 
                         # Calculate agreement for each subgroup
-                        subgroup_levels <- unique(subgroup[!is.na(subgroup)])
+                        # Order the table and the forest plot by the subgroup variable's
+                        # DECLARED level order. unique() returned order of appearance in
+                        # the data, so an ordinal site/grade variable came out scrambled
+                        # whenever the first rows happened to be sorted differently, and
+                        # the forest plot inherited it. factor() on a factor keeps the
+                        # declared order and drops unobserved levels; on a character or
+                        # numeric column it gives a stable sorted order. `for` already
+                        # handed out characters (R coerces a factor), so as.character(level)
+                        # and `subgroup == level` below are unaffected.
+                        subgroup_levels <- levels(factor(subgroup[!is.na(subgroup)]))
                         result_rows <- list()
                         forest_data <- data.frame()
                         # Subgroups below min_cases were `next`-skipped with no count
@@ -4530,6 +4956,19 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         # format identically but are not the same method, so the
                         # table has to say which one ran.
                         used_null_se <- FALSE
+                        # Weighted kappa needs ONE category order, and these columns
+                        # may not declare one (see .mergeDeclaredLevels). Decided once
+                        # on the full rater columns: nestedness is hereditary, so if
+                        # the whole set determines an order every subgroup does too,
+                        # and a per-subgroup test would let the statistic in this
+                        # column change with the categories a site happened to use.
+                        subgroup_lv <- private$.orderedLevelsInfo(ratings)
+                        scale_ambiguous <- !identical(self$options$wght, "unweighted") &&
+                            is_categorical && ncol(ratings) == 2 &&
+                            isTRUE(subgroup_lv$ambiguous)
+                        # Set when .guardICCResult() had to alter what irr::icc returned
+                        # for at least one subgroup; disclosed once under the table.
+                        icc_guard_msg <- NULL
 
                         for (level in subgroup_levels) {
                             # Subset data for this subgroup
@@ -4544,7 +4983,13 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             n_cases <- nrow(sub_ratings)
                             n_raters <- ncol(sub_ratings)
                             agreement_stat <- NA_real_
-                            stat_type <- "Not estimable"
+                            stat_type <- .("Not estimable")
+                            # The Statistic column is DISPLAYED and was also BRANCHED ON
+                            # (identical(stat_type, "ICC(2,1)")) to choose Koo & Li over
+                            # Landis & Koch below. Translating it without this untranslated
+                            # family tag would grade an ICC on the kappa bands in every
+                            # non-English locale - invisible to an English test run.
+                            stat_family <- "none"
                             ci_lower <- NA_real_
                             ci_upper <- NA_real_
 
@@ -4560,7 +5005,13 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                     # the same column as weighted rows, labelled
                                     # identically, and looked like the worst performer
                                     # for a purely numerical reason.
-                                    irr_w_sub <- if (identical(self$options$wght, "equal")) {
+                                    irr_w_sub <- if (scale_ambiguous) {
+                                        # Weights dropped, not laid over a guessed
+                                        # scale. Downgraded HERE rather than inside
+                                        # .kappa2Ordered() alone so the Statistic
+                                        # column below names the kappa that ran.
+                                        "unweighted"
+                                    } else if (identical(self$options$wght, "equal")) {
                                         "equal"
                                     } else if (identical(self$options$wght, "squared")) {
                                         "squared"
@@ -4570,7 +5021,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                     kappa_result <- tryCatch(
                                         {
                                             if (n_raters == 2) {
-                                                private$.kappa2Ordered(sub_ratings, irr_w_sub)
+                                                private$.kappa2Ordered(sub_ratings, irr_w_sub, subgroup_lv)
                                             } else {
                                                 irr::kappam.fleiss(sub_ratings)
                                             }
@@ -4579,15 +5030,8 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                     )
                                     if (!is.null(kappa_result)) {
                                         agreement_stat <- kappa_result$value
-                                        stat_type <- if (n_raters != 2) {
-                                            "Fleiss' Kappa"
-                                        } else if (identical(irr_w_sub, "equal")) {
-                                            "Cohen's Kappa (linear weights)"
-                                        } else if (identical(irr_w_sub, "squared")) {
-                                            "Cohen's Kappa (squared weights)"
-                                        } else {
-                                            "Cohen's Kappa"
-                                        }
+                                        stat_type <- private$.kappaLabel(n_raters, irr_w_sub)
+                                        stat_family <- "kappa"
 
                                         # Confidence interval.
                                         #
@@ -4605,7 +5049,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                             kc_sub <- tryCatch(
                                                 private$.pairKappaWithCI(
                                                     sub_ratings[stats::complete.cases(sub_ratings), , drop = FALSE],
-                                                    irr_w_sub),
+                                                    irr_w_sub, subgroup_lv),
                                                 error = function(e) NULL)
                                             if (!is.null(kc_sub) && !is.na(kc_sub$ci_lower)) {
                                                 # Take the POINT ESTIMATE from the same call as
@@ -4618,6 +5062,16 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                                 ci_lower <- kc_sub$ci_lower
                                                 ci_upper <- kc_sub$ci_upper
                                                 got_ci <- TRUE
+                                                # .pairKappaWithCI() may itself have
+                                                # fallen back to irr::kappa2's null SE
+                                                # when vcd::Kappa had no finite ASE.
+                                                # Only the branch below used to set the
+                                                # flag, so such a subgroup was printed
+                                                # beside true ASE intervals with nothing
+                                                # to tell them apart and no note.
+                                                if (identical(kc_sub$method, "irr-fallback")) {
+                                                    used_null_se <- TRUE
+                                                }
                                             }
                                         }
                                         if (!got_ci) {
@@ -4634,7 +5088,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                         }
                                     } else {
                                         agreement_stat <- NA
-                                        stat_type <- "Kappa (error)"
+                                        stat_type <- .("Kappa could not be computed")
                                         ci_lower <- NA
                                         ci_upper <- NA
                                     }
@@ -4642,15 +5096,23 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             } else {
                                 # Use ICC for continuous data
                                 if (requireNamespace("irr", quietly = TRUE)) {
-                                    icc_result <- tryCatch(irr::icc(sub_ratings, model = "twoway", type = "agreement"), error = function(e) NULL)
+                                    icc_result <- private$.guardICCResult(tryCatch(irr::icc(sub_ratings, model = "twoway", type = "agreement",
+                                                                                                        conf.level = self$options$confLevel), error = function(e) NULL))
                                     if (!is.null(icc_result)) {
+                                        if (!is.null(icc_result$guardNote))
+                                            icc_guard_msg <- icc_result$guardNote
                                         agreement_stat <- icc_result$value
                                         stat_type <- "ICC(2,1)"
-                                        ci_lower <- icc_result$lbound
-                                        ci_upper <- icc_result$ubound
+                                        stat_family <- "icc"
+                                        # A suppressed bound comes back NULL from the guard,
+                                        # and the forest-plot data.frame() below would DROP a
+                                        # NULL column and break its rbind. This table already
+                                        # writes NA for a missing bound, so convert.
+                                        ci_lower <- if (is.null(icc_result$lbound)) NA_real_ else icc_result$lbound
+                                        ci_upper <- if (is.null(icc_result$ubound)) NA_real_ else icc_result$ubound
                                     } else {
                                         agreement_stat <- NA
-                                        stat_type <- "ICC (error)"
+                                        stat_type <- .("ICC could not be computed")
                                         ci_lower <- NA
                                         ci_upper <- NA
                                     }
@@ -4670,7 +5132,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             # scale, named, for the whole analysis.
                             interpretation <- if (is.na(agreement_stat)) {
                                 .("Error calculating agreement")
-                            } else if (identical(stat_type, "ICC(2,1)")) {
+                            } else if (identical(stat_family, "icc")) {
                                 # An ICC is not graded on the Landis & Koch kappa
                                 # bands; use the Koo & Li (2016) bands that the
                                 # main ICC table already uses, or the same ICC
@@ -4680,27 +5142,15 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                 # ICC(2,1) means within-subject variance exceeds
                                 # between-subject variance, and Koo & Li has no
                                 # such band.
-                                if (agreement_stat < 0.50) {
-                                    "Poor"
-                                } else if (agreement_stat < 0.75) {
-                                    "Moderate"
-                                } else if (agreement_stat < 0.90) {
-                                    "Good"
-                                } else {
-                                    "Excellent"
-                                }
-                            } else if (agreement_stat < 0) {
-                                "Worse than chance"
-                            } else if (agreement_stat < 0.20) {
-                                "Slight"
-                            } else if (agreement_stat < 0.40) {
-                                "Fair"
-                            } else if (agreement_stat < 0.60) {
-                                "Moderate"
-                            } else if (agreement_stat < 0.80) {
-                                "Substantial"
+                                #
+                                # Both scales now live in private$.kappaBandLabel()
+                                # and private$.iccBandLabel(), which every table in
+                                # this analysis that grades one of the two families
+                                # calls; the words are unchanged here, but they are
+                                # translated now where they used to be bare English.
+                                private$.iccBandLabel(agreement_stat)
                             } else {
-                                "Almost perfect"
+                                private$.kappaBandLabel(agreement_stat)
                             }
 
                             # Add row to table
@@ -4732,10 +5182,8 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         for (row in result_rows) {
                             table$addRow(rowKey = row$subgroup, values = row)
                         }
-                        table$setNote(
-                            "scale",
-                            .("Interpretation labels follow Landis & Koch (1977) for kappa and Koo & Li (2016) for ICC(2,1); the two scales are not interchangeable, so read the label together with the statistic named in the Statistic column.")
-                        )
+                        table$setNote("scale", private$.bandScaleNote())
+                        private$.noteScaleAmbiguity(table, scale_ambiguous)
                         if (length(skipped_levels) > 0) {
                             table$setNote(
                                 "skipped",
@@ -4743,7 +5191,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                     .("%1$d of %2$d subgroups are not shown because they have fewer than %3$d complete cases: %4$s. This table is therefore not a complete breakdown of the data."),
                                     length(skipped_levels), length(subgroup_levels),
                                     as.integer(min_cases),
-                                    paste(skipped_levels, collapse = ", ")
+                                    paste(private$.noteSafe(skipped_levels), collapse = ", ")
                                 )
                             )
                         }
@@ -4752,6 +5200,36 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                 "ci_null_se",
                                 .("At least one interval in this table was built from the null-hypothesis standard error (kappa divided by its H0 test statistic) because the non-null asymptotic standard error from vcd::Kappa was unavailable for that subgroup. Null-SE intervals are too narrow when kappa is high, so treat them as optimistic; three or more raters always use this fallback.")
                             )
+                        }
+                        if (!is.null(icc_guard_msg)) {
+                            table$setNote("numeric", icc_guard_msg)
+                        }
+
+                        # The table grades each subgroup with a word from the Landis & Koch
+                        # scale, which invites a between-subgroup comparison the table never
+                        # makes. Say so, and say what THIS run's intervals actually do. Every
+                        # pair of intervals overlaps if and only if the largest lower bound is
+                        # at or below the smallest upper bound (1-D Helly), so no pairwise
+                        # loop is needed.
+                        if (length(result_rows) > 0) {
+                            lo <- vapply(result_rows, function(r) as.numeric(r[["ci_lower"]])[1], numeric(1))
+                            hi <- vapply(result_rows, function(r) as.numeric(r[["ci_upper"]])[1], numeric(1))
+                            has_ci <- is.finite(lo) & is.finite(hi)
+                            n_ci <- sum(has_ci)
+                            cmp_note <- .("This table estimates agreement inside each subgroup separately. It does not test whether agreement differs between subgroups, and nothing here is adjusted for the number of subgroups compared. A subgroup's statistic also depends on that subgroup's case mix: kappa falls when one rating category dominates, and ICC falls when the cases within a subgroup are alike, so two subgroups whose raters behave identically can still differ for that reason alone.")
+                            if (n_ci >= 2) {
+                                run_txt <- if (max(lo[has_ci]) <= min(hi[has_ci])) {
+                                    sprintf(.("In this run every confidence interval overlaps every other one (%1$d of %2$d rows carry an interval). Overlapping intervals are consistent with a single underlying level of agreement, but they do not establish one."),
+                                        n_ci, length(result_rows))
+                                } else {
+                                    sprintf(.("In this run at least one pair of confidence intervals does not overlap (%1$d of %2$d rows carry an interval). Non-overlap is not a test of difference: the comparison was not planned, the number of subgroups is not adjusted for, and a gap can be produced by differing case mix alone."),
+                                        n_ci, length(result_rows))
+                                }
+                                # Two newlines: setNote collapses a single one.
+                                cmp_note <- paste0(cmp_note, "\n\n", run_txt)
+                            }
+                            cmp_note <- paste(cmp_note, .("To compare subgroups formally, prespecify the comparison and adjust for the number of subgroups; as prevalence-adjusted alternatives to kappa this analysis also offers PABAK (two raters) and Gwet's AC1/AC2."))
+                            table$setNote("comparison", cmp_note)
                         }
 
                         # Store forest plot state
@@ -4762,7 +5240,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         }
                     },
                     error = function(e) {
-                        self$results$subgroupAgreementTable$setNote("error", sprintf(.("Error in subgroup analysis: %s"), jmvcore::htmlEscape(e$message)))
+                        self$results$subgroupAgreementTable$setNote("error", sprintf(.("Error in subgroup analysis: %s"), private$.noteSafe(jmvcore::htmlEscape(e$message))))
                     }
                 )
             },
@@ -4909,7 +5387,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         # With as many clusters as raters every rater is alone: nothing is grouped, and the
                         # dendrogram's rect.hclust() stops with "k must be between 2 and n-1".
                         if (k > n_raters - 1) {
-                            self$results$raterClusterTable$setNote("k_capped", jmvcore::format(
+                            self$results$raterClusterTable$setNote("k_capped", .fmt(
                                 .("{requested} clusters were requested for {n} raters; {used} were used, the most that still places some raters together."),
                                 requested = k, n = n_raters, used = n_raters - 1))
                             k <- n_raters - 1
@@ -4920,7 +5398,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         # kmeans() starts from random centres: unseeded, a rerun could regroup the raters.
                         withr::local_seed(self$options$seed)
                         self$results$raterClusterTable$setNote("seed", if (identical(method, "kmeans"))
-                            jmvcore::format(.("Random seed: {seed}"), seed = self$options$seed))
+                            .fmt(.("Random seed: {seed}"), seed = self$options$seed))
 
                         # Compute distance matrix
                         if (is_categorical || distance_metric == "agreement") {
@@ -4940,8 +5418,31 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             }
                             dist_obj <- as.dist(dist_matrix)
                         } else {
-                            # For continuous: use correlation or Euclidean
-                            if (distance_metric == "correlation") {
+                            # For continuous: concordance, correlation or Euclidean
+                            if (distance_metric == "ccc") {
+                                # 1 - Lin's CCC, pair by pair (see private$.cccDistance).
+                                dist_matrix <- matrix(0, n_raters, n_raters)
+                                for (i in 1:(n_raters - 1)) {
+                                    for (j in (i + 1):n_raters) {
+                                        dist_matrix[i, j] <- dist_matrix[j, i] <-
+                                            private$.cccDistance(ratings[[i]], ratings[[j]])
+                                    }
+                                }
+                                # An NA must never reach hclust(): measured, it stops with
+                                # "NA/NaN/Inf in foreign function call (arg 10)", which the
+                                # outer handler would report as a bare "Error in rater
+                                # clustering" with no clue as to cause. Substitute 1 - no
+                                # concordance at all, the most distant two raters can be
+                                # without reading in opposite directions. It cannot invent
+                                # similarity, and it is disclosed.
+                                n_undefined <- sum(is.na(dist_matrix[upper.tri(dist_matrix)]))
+                                self$results$raterClusterTable$setNote("undefined_ccc",
+                                    if (n_undefined > 0) .fmt(
+                                        .("{n} rater pair(s) shared fewer than 3 complete cases, so no concordance coefficient could be computed for them. They were treated as having no concordance at all (similarity 0.00), which is the most distant any pair of raters can be without reading in opposite directions."),
+                                        n = n_undefined))
+                                dist_matrix[is.na(dist_matrix)] <- 1
+                                dist_obj <- as.dist(dist_matrix)
+                            } else if (distance_metric == "correlation") {
                                 cor_matrix <- cor(ratings, use = "pairwise.complete.obs")
                                 dist_matrix <- 1 - cor_matrix
                                 dist_obj <- as.dist(dist_matrix)
@@ -4953,6 +5454,39 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                 dist_matrix <- as.matrix(dist_obj)
                             }
                         }
+
+                        # 1 - d is a similarity only where d is ALREADY a dissimilarity on [0, 1]:
+                        # correlation gives 1 - (1 - r) = r, the agreement metric 1 - (1 - p) = p.
+                        # A Euclidean or Manhattan distance is raw and unbounded and grows with the
+                        # number of cases, so the column headed "Avg Within-Cluster Similarity"
+                        # printed -37.5637 and -227.800 on 5 raters x 60 cases, and a LARGER
+                        # distance read as a MORE NEGATIVE "similarity". Rescale by the largest
+                        # distance present: the furthest-apart pair becomes 0, identical raters 1.
+                        # dist_obj - the only thing hclust() and cutree() see - is NOT touched, so
+                        # no cluster assignment can move. This is display only.
+                        rescaled <- !is_categorical && distance_metric %in% c("euclidean", "manhattan")
+                        if (rescaled) {
+                            d_max <- suppressWarnings(max(dist_matrix[is.finite(dist_matrix)]))
+                            dist_matrix <- if (is.finite(d_max) && d_max > 0)
+                                dist_matrix / d_max else dist_matrix * 0
+                        }
+                        self$results$raterClusterTable$setNote("similarity_scale", if (rescaled)
+                            .("Under the Euclidean and Manhattan metrics the similarity is the distance rescaled by the largest distance among these raters: 1.00 means identical ratings and 0.00 is the most distant pair in this analysis. It ranks raters within this dataset only and is not comparable with another dataset or with the correlation and agreement metrics.")
+                        else if (!is_categorical && identical(distance_metric, "ccc"))
+                            .("The similarity shown is Lin's concordance correlation coefficient between the two raters: 1.00 means their readings are interchangeable, 0.00 means no concordance at all, and a negative value means they move in opposite directions. It falls when two raters scatter around each other and also when one reads consistently higher or on a wider scale, so unlike a correlation it is comparable across datasets."))
+
+                        # The user's distance choice was silently ignored for categorical ratings
+                        # (correlation, euclidean and manhattan gave byte-identical tables), and the
+                        # agreement metric on continuous ratings clustered on exact decimal ties -
+                        # 1.7 percent of cases on the audit fixture - with no warning either way.
+                        self$results$raterClusterTable$setNote("metric_ignored",
+                            if (is_categorical && !identical(distance_metric, "agreement"))
+                                .("These ratings are categorical, so the distance used is 1 minus the proportion of cases on which two raters chose the same category. The Concordance, Correlation, Euclidean and Manhattan settings apply to continuous measurements and leave this table unchanged."))
+                        self$results$raterClusterTable$setNote("exact_match",
+                            if (!is_categorical && identical(distance_metric, "agreement"))
+                                .fmt(.("The agreement-based metric counts exact equality only, and these ratings are continuous. A pair of raters recorded exactly the same value on {pct} percent of the cases on average, and every near miss counts as complete disagreement. Use the Euclidean or Manhattan metric to cluster continuous ratings by how close the values are."),
+                                    pct = base::format(round(100 * mean(1 - dist_matrix[upper.tri(dist_matrix)]), 1),
+                                                       nsmall = 1, trim = TRUE)))
 
                         # Perform clustering
                         if (method == "hierarchical") {
@@ -5006,6 +5540,55 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             }
                         }
 
+                        # Correlation distance is 1 - r, so it removes any systematic offset: two
+                        # readers 25 Ki-67 points apart on every case sat in ONE cluster at
+                        # similarity 0.98. The default is NO LONGER correlation - it is 1 - Lin's
+                        # CCC, which sees that offset (2026-09-23; this reverses the earlier "keep
+                        # the default, it would silently re-cluster saved analyses" decision, which
+                        # was made before the offset blindness was measured against a concordant
+                        # twin). So this disclosure now fires only for the user who deliberately
+                        # chooses correlation, and it says what that metric removed.
+                        #
+                        # Two gates, both required: |mean difference| >= 0.25 * pooled SD (material)
+                        # AND paired t >= 3 (distinguishable from sampling noise). Measured over 300
+                        # no-offset draws per cell, the magnitude gate ALONE fires on 28-65% of
+                        # noisy small samples (n = 10-20, rater error 20-30 on a 0-90 scale); both
+                        # gates together fire on 0.0-4.0% of them and on 0.0% at n >= 60 with
+                        # ordinary rater error, with no loss of real-offset detection.
+                        offset_note <- NULL
+                        if (!is_categorical && identical(distance_metric, "correlation")) {
+                            rater_means <- colMeans(ratings, na.rm = TRUE)
+                            pooled_sd <- stats::sd(unlist(ratings, use.names = FALSE), na.rm = TRUE)
+                            worst <- 0
+                            hi <- NA_integer_
+                            lo <- NA_integer_
+                            if (is.finite(pooled_sd) && pooled_sd > 0) {
+                                for (i in 1:(n_raters - 1)) {
+                                    for (j in (i + 1):n_raters) {
+                                        if (cluster_assign[i] != cluster_assign[j]) next
+                                        dv <- stats::na.omit(ratings[[i]] - ratings[[j]])
+                                        if (length(dv) < 3) next
+                                        gap <- abs(mean(dv))
+                                        if (!is.finite(gap) || gap <= worst) next
+                                        if (gap < 0.25 * pooled_sd) next
+                                        se <- stats::sd(dv) / sqrt(length(dv))
+                                        # se == 0 is a perfectly constant offset: t is infinite, keep it.
+                                        if (is.finite(se) && se > 0 && gap / se < 3) next
+                                        worst <- gap
+                                        hi <- if (rater_means[i] >= rater_means[j]) i else j
+                                        lo <- if (rater_means[i] >= rater_means[j]) j else i
+                                    }
+                                }
+                            }
+                            if (worst > 0)
+                                offset_note <- .fmt(
+                                    .("Correlation distance removes systematic offsets, so raters who rank the cases the same way are grouped together however far apart their readings are. Here {high} and {low} share a cluster although {high} reads on average {diff} units higher than {low}, which is {sds} times the pooled standard deviation of all ratings. The Concordance (1 - Lin's CCC) metric, which is the default, groups raters only when their readings are interchangeable."),
+                                    high = private$.noteSafe(rater_names[hi]), low = private$.noteSafe(rater_names[lo]),
+                                    diff = base::format(round(worst, 2), nsmall = 2, trim = TRUE),
+                                    sds  = base::format(round(worst / pooled_sd, 2), nsmall = 2, trim = TRUE))
+                        }
+                        self$results$raterClusterTable$setNote("offset_blind", offset_note)
+
                         # Populate table
                         table <- self$results$raterClusterTable
                         cluster_sizes <- table(cluster_assign)
@@ -5030,7 +5613,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         }
                     },
                     error = function(e) {
-                        self$results$raterClusterTable$setNote("error", sprintf(.("Error in rater clustering: %s"), jmvcore::htmlEscape(e$message)))
+                        self$results$raterClusterTable$setNote("error", sprintf(.("Error in rater clustering: %s"), private$.noteSafe(jmvcore::htmlEscape(e$message))))
                     }
                 )
             },
@@ -5167,7 +5750,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 # Which cases are drawn was a random draw: name the seed that made it.
                 if (isTRUE(plotState$subsampled))
-                    graphics::mtext(jmvcore::format(.("Random seed: {seed}"), seed = self$options$seed),
+                    graphics::mtext(.fmt(.("Random seed: {seed}"), seed = self$options$seed),
                                     side = 1, line = 3, adj = 1, cex = 0.7)
 
                 return(TRUE)
@@ -5200,7 +5783,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                         # Same limit as for raters: k must leave at least two cases in one cluster.
                         if (k > n_cases - 1) {
-                            self$results$caseClusterTable$setNote("k_capped", jmvcore::format(
+                            self$results$caseClusterTable$setNote("k_capped", .fmt(
                                 .("{requested} clusters were requested for {n} cases; {used} were used, the most that still places some cases together."),
                                 requested = k, n = n_cases, used = n_cases - 1))
                             k <- n_cases - 1
@@ -5211,19 +5794,34 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         # kmeans() starts from random centres, and over 200 cases the heatmap shows a random
                         # subsample: unseeded, a rerun could regroup the cases or show different ones.
                         withr::local_seed(self$options$seed)
-                        self$results$caseClusterTable$setNote("seed", if (identical(method, "kmeans"))
-                            jmvcore::format(.("Random seed: {seed}"), seed = self$options$seed))
+                        # The heatmap's 200-case subsample is drawn under EITHER method, so
+                        # the seed is shown whenever k-means runs or the subsample does.
+                        self$results$caseClusterTable$setNote("seed",
+                            if (identical(method, "kmeans") ||
+                                (isTRUE(self$options$showCaseClusterHeatmap) && nrow(ratings) > 200))
+                                .fmt(.("Random seed: {seed}"), seed = self$options$seed))
 
                         # Compute distance matrix between cases
                         if (is_categorical || distance_metric == "agreement") {
                             # For categorical: use agreement-based distance
                             dist_matrix <- matrix(0, n_cases, n_cases)
+                            # Each case's ratings as labels, converted ONCE. unlist() keeps
+                            # labels only when EVERY column is a factor; with one factor and
+                            # one numeric column it drops to integer level CODES, so the
+                            # distance compared "2" with "G2" and called them different
+                            # (same fix as the consensus and level-of-agreement paths).
+                            # Converting inside the pair loop cost two conversions per PAIR,
+                            # about a million at 1000 cases, for 1000 distinct rows.
+                            case_labels <- lapply(seq_len(n_cases), function(k)
+                                vapply(ratings[k, , drop = FALSE], as.character, character(1)))
                             for (i in 1:(n_cases - 1)) {
+                                # O(n^2/2) pairs - 499,500 at 1000 cases. Checkpoint on
+                                # the outer loop only, so the check stays negligible.
+                                if (i %% 25L == 0L) private$.checkpoint()
+                                case_i <- case_labels[[i]]
                                 for (j in (i + 1):n_cases) {
-                                    # Calculate proportion of raters that agree on this case pair
-                                    # This measures similarity of rating patterns
-                                    case_i <- as.character(unlist(ratings[i, ]))
-                                    case_j <- as.character(unlist(ratings[j, ]))
+                                    # Proportion of raters giving both cases the same rating
+                                    case_j <- case_labels[[j]]
                                     valid_pairs <- !is.na(case_i) & !is.na(case_j)
 
                                     if (sum(valid_pairs) > 0) {
@@ -5239,6 +5837,17 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         } else {
                             # For continuous: use correlation or Euclidean
                             if (distance_metric == "correlation") {
+                                # A case's profile has one point per rater, so with two raters the
+                                # correlation between any two cases is exactly +1 or -1: measured,
+                                # |r| >= 0.99 on 100.0 percent of 780 case pairs at 2 raters (8.6
+                                # percent at 3, 0.1 percent at 5). The distance matrix then holds
+                                # only 0 and 2 and the grouping is decided by the sign of a single
+                                # product. Refuse rather than cluster a coin flip; a silent
+                                # fallback to euclidean is the pattern this audit already punished.
+                                if (n_raters < 3) {
+                                    self$results$caseClusterTable$setNote("error", .("Correlation distance compares a case's rating profile across raters, and with two raters that profile has two points, so the correlation between any two cases is exactly +1 or -1 and the metric cannot separate them. Choose the Euclidean or Manhattan metric, or add a third rater."))
+                                    return()
+                                }
                                 # Correlation between rating vectors across raters
                                 # No fallback here: a cor() failure used to be replaced by an
                                 # all-zero matrix, so every distance became 1 and clustering ran on
@@ -5263,6 +5872,34 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                 dist_matrix <- as.matrix(dist_obj)
                             }
                         }
+
+                        # Mirror of the rater path. 1 - d is a similarity only where d is ALREADY a
+                        # dissimilarity on [0, 1]; a Euclidean or Manhattan distance between two
+                        # cases is raw and unbounded, so the column headed "Avg Within-Cluster
+                        # Similarity" printed large negative numbers and a LARGER distance read as a
+                        # MORE NEGATIVE "similarity". Rescale by the largest distance present.
+                        # dist_obj - the only thing hclust() and cutree() see - is NOT touched, so
+                        # no cluster assignment can move. This is display only.
+                        rescaled <- !is_categorical && distance_metric %in% c("euclidean", "manhattan")
+                        if (rescaled) {
+                            d_max <- suppressWarnings(max(dist_matrix[is.finite(dist_matrix)]))
+                            dist_matrix <- if (is.finite(d_max) && d_max > 0)
+                                dist_matrix / d_max else dist_matrix * 0
+                        }
+                        self$results$caseClusterTable$setNote("similarity_scale", if (rescaled)
+                            .("Under the Euclidean and Manhattan metrics the similarity is the distance rescaled by the largest distance among these cases: 1.00 means identical ratings and 0.00 is the most distant pair in this analysis. It ranks cases within this dataset only and is not comparable with another dataset or with the correlation and agreement metrics."))
+
+                        # The user's distance choice is silently ignored for categorical ratings,
+                        # and the agreement metric on continuous ratings clusters on exact decimal
+                        # ties. Both were unannounced; say which one is in force.
+                        self$results$caseClusterTable$setNote("metric_ignored",
+                            if (is_categorical && !identical(distance_metric, "agreement"))
+                                .("These ratings are categorical, so the distance used is 1 minus the proportion of raters who gave two cases the same category. The Correlation, Euclidean and Manhattan settings apply to continuous measurements and leave this table unchanged."))
+                        self$results$caseClusterTable$setNote("exact_match",
+                            if (!is_categorical && identical(distance_metric, "agreement"))
+                                .fmt(.("The agreement-based metric counts exact equality only, and these ratings are continuous. A pair of cases received exactly the same value from {pct} percent of the raters on average, and every near miss counts as complete disagreement. Use the Euclidean or Manhattan metric to cluster continuous ratings by how close the values are."),
+                                    pct = base::format(round(100 * mean(1 - dist_matrix[upper.tri(dist_matrix)]), 1),
+                                                       nsmall = 1, trim = TRUE)))
 
                         # Perform clustering
                         if (method == "hierarchical") {
@@ -5320,6 +5957,32 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                 cluster_similarities[i] <- NA
                             }
                         }
+
+                        # Mirror of the rater disclosure. Correlation distance between two CASES
+                        # compares the shape of their rating profile across raters, never the level,
+                        # so cases of very different magnitude always land together: over 200
+                        # no-offset draws the widest within-cluster gap in case means was 2.98 to
+                        # 3.40 pooled SD every single time. There is no threshold that separates
+                        # signal from noise here, so this is stated as a property of the metric,
+                        # with the measured gap, whenever correlation runs on continuous ratings.
+                        level_note <- NULL
+                        if (!is_categorical && identical(distance_metric, "correlation")) {
+                            case_means <- rowMeans(ratings, na.rm = TRUE)
+                            pooled_sd <- stats::sd(unlist(ratings, use.names = FALSE), na.rm = TRUE)
+                            worst <- 0
+                            for (cl in unique(cluster_assign)) {
+                                idx <- which(cluster_assign == cl)
+                                if (length(idx) < 2) next
+                                gap <- max(case_means[idx], na.rm = TRUE) - min(case_means[idx], na.rm = TRUE)
+                                if (is.finite(gap) && gap > worst) worst <- gap
+                            }
+                            if (worst > 0 && is.finite(pooled_sd) && pooled_sd > 0)
+                                level_note <- .fmt(
+                                    .("Correlation distance compares the shape of a case's ratings across raters, not their level, so cases rated alike in pattern are grouped together however far apart their values are. The widest gap between two case averages inside one cluster here is {diff} units, which is {sds} times the pooled standard deviation of all ratings. The Euclidean metric, which is the default, and the Manhattan metric group cases by absolute value."),
+                                    diff = base::format(round(worst, 2), nsmall = 2, trim = TRUE),
+                                    sds  = base::format(round(worst / pooled_sd, 2), nsmall = 2, trim = TRUE))
+                        }
+                        self$results$caseClusterTable$setNote("offset_blind", level_note)
 
                         # Populate table (limit to first 1000 rows for performance)
                         table <- self$results$caseClusterTable
@@ -5379,7 +6042,11 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         }
                     },
                     error = function(e) {
-                        self$results$caseClusterTable$setNote("error", sprintf(.("Error in case clustering: %s"), jmvcore::htmlEscape(e$message)))
+                        # A .checkpoint() restart arrives here as an error carrying
+                        # code = "restart"; re-raise it so a cancel restarts the analysis
+                        # instead of becoming an error footnote.
+                        if (identical(e$code, "restart")) stop(e)
+                        self$results$caseClusterTable$setNote("error", sprintf(.("Error in case clustering: %s"), private$.noteSafe(jmvcore::htmlEscape(e$message))))
                     }
                 )
             },
@@ -5417,12 +6084,15 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Random share</th>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Pattern</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Typical action</th>
+                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>What it points to</th>
                         </tr>
                         <tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'>below 0.30</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>Mostly systematic offsets</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>Calibration, standardisation, bias correction</td></tr>
                         <tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'>0.30 to 0.70</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>Mixed</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>Calibration plus training</td></tr>
                         <tr><td style='padding: 8px;'>above 0.70</td><td style='padding: 8px;'>Mostly random</td><td style='padding: 8px;'>Training, protocols, replicate reads</td></tr>
                     </table>
+                    <p style='margin: 10px 0 0 0; font-size: 13px;'>
+                        These cut-points are this module's display convention for describing the share in words - they have no published source and no diagnostic status, so read the share and the two variance components rather than the row you land in.
+                    </p>
                     <p style='margin: 10px 0 0 0; font-size: 13px;'>
                         <strong>Worked example:</strong> four pathologists score Ki-67 (0 to 100%) on 60 cases manually and with software that reads about 6 points lower.
                         Rater component 9.1, residual 3.2, between-case variance 140: random share 0.26, so most of the disagreement is the offset and a calibration factor is the first fix.
@@ -5455,6 +6125,11 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                         n_cases <- nrow(ratings_complete)
                         n_raters <- ncol(ratings_complete)
+
+                        # Notes persist between runs and each branch below writes only
+                        # its own, so a stale one would be read beside a new row.
+                        for (nk in c("error", "ordinal_codes", "numeric_codes", "scale", "scale_order", "boundary", "bands", "components"))
+                            self$results$maxwellRETable$setNote(nk, NULL)
 
                         if (n_cases < 5) {
                             self$results$maxwellRETable$setRow(rowNo = 1, list(
@@ -5494,10 +6169,73 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             return()
                         }
 
-                        # Check that data is numeric
-                        is_all_numeric <- all(sapply(ratings_complete, function(x) is.numeric(x) && !is.factor(x)))
+                        # Every rater has to sit on ONE common numeric scale: the rater
+                        # component IS the spread of the rater means, so codes that do not
+                        # line up across columns fabricate an offset. Ordered factors carry
+                        # that scale in their declared levels, so recode them against the
+                        # shared level set the way .calculateFinn does. Per-column
+                        # as.numeric() (the .calculateKendallW conversion) gives the same
+                        # label a different code whenever two columns declare different
+                        # levels - harmless for W, which only ranks within a column, but
+                        # not here (measured on one 4-grade scale with a level dropped from
+                        # one column: random share 0.9680 per-column vs 1.0000 shared).
+                        is_num <- vapply(ratings_complete, function(x) is.numeric(x) && !is.factor(x), logical(1))
+                        is_ord <- vapply(ratings_complete, is.ordered, logical(1))
 
-                        if (!is_all_numeric) {
+                        if (all(is_ord)) {
+                            # One shared order, and only when the declarations
+                            # determine one - see private$.mergeDeclaredLevels(). The
+                            # rater component IS the spread of the rater means along
+                            # that order, so an order nothing in the data fixes makes
+                            # this entire table depend on which variable was dropped
+                            # into the box first: measured on 60 cases with rater A
+                            # never using Focal and rater B never using Diffuse, the
+                            # same data read "Systematic offsets account for more of
+                            # the disagreement than random noise does" one way round
+                            # and "No systematic rater offset is identifiable in these
+                            # data" the other. Refuse instead of picking one.
+                            merged <- private$.mergeDeclaredLevels(
+                                lapply(ratings_complete, levels))
+                            shared_levels <- merged$levels
+
+                            if (isTRUE(merged$ambiguous)) {
+                                self$results$maxwellRETable$setNote(
+                                    "scale_order",
+                                    .("The variance decomposition places every rater on one common category order, and the selected variables do not determine one. Either they contradict each other, or - more often - they simply never place some pair of categories relative to each other: if one variable declares Absent and Diffuse and another declares Absent and Focal, nothing in either declaration says whether Focal comes before or after Diffuse. Merging them would invent an order, and the rater offset this table reports would then depend on which variable was selected first. Set every rater variable to the same ordered scale, declaring the same full set of categories in the same sequence, and run again.")
+                                )
+                                self$results$maxwellRETable$setRow(rowNo = 1, list(
+                                    method = .("Variance decomposition"),
+                                    subjects = n_cases,
+                                    raters = n_raters,
+                                    re_value = NA,
+                                    systematic_prop = NA,
+                                    random_prop = NA,
+                                    total_variance = NA,
+                                    systematic_var = NA,
+                                    random_var = NA,
+                                    interpretation = .("Cannot compute: the rater variables do not determine one category order")
+                                ))
+                                return()
+                            }
+
+                            # match() gives positions 1..k. The decomposition is
+                            # location-invariant, so these reproduce the user's own integer
+                            # codes exactly (measured bit-identical: raw rater variance
+                            # 0.00976217, random share 0.9919909 under both codings).
+                            ratings_complete[] <- lapply(ratings_complete, function(x)
+                                as.numeric(match(as.character(x), shared_levels)))
+
+                            self$results$maxwellRETable$setNote(
+                                "ordinal_codes",
+                                sprintf(.("Ordered rater columns were scored by their position on the shared category order (%1$s, lowest first). The decomposition treats those positions as equally spaced, so a one-step disagreement counts the same wherever it falls on the scale; if your scale's steps are not equal, read the variance components as ordinal distances rather than as measurement units."),
+                                    paste(private$.noteSafe(shared_levels), collapse = ", "))
+                            )
+
+                        } else if (!all(is_num)) {
+                            self$results$maxwellRETable$setNote(
+                                "scale",
+                                .("The variance decomposition splits disagreement into a rater offset and residual noise, which needs one common numeric scale for every rater. Use rater columns that are all continuous, or all ordered factors declaring the same categories in the same order. An unordered (nominal) variable has no scale for an offset to sit on: set its measure type to Ordinal if its categories really do run from low to high, otherwise use Fleiss' kappa or Krippendorff's alpha. Continuous and ordered-factor columns cannot be mixed here because the two scales are not in the same units.")
+                            )
                             self$results$maxwellRETable$setRow(rowNo = 1, list(
                                 method = .("Variance decomposition"),
                                 subjects = n_cases,
@@ -5508,12 +6246,23 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                 total_variance = NA,
                                 systematic_var = NA,
                                 random_var = NA,
-                                # The verdict a clinician actually reads was a bare English literal spliced
-                                # into an otherwise translated sentence, so a Turkish user got a Turkish
-                                # sentence with an English conclusion in it. The msgid is the literal itself.
-                                interpretation = .("The variance decomposition requires continuous or ordinal numeric ratings")
+                                interpretation = .("Cannot compute: the ratings must be all continuous or all ordered factors")
                             ))
                             return()
+                        } else if (length(private$.continuousRatingNames(ratings_complete)) == 0) {
+                            # All-numeric, but the same router that decides the headline
+                            # coefficient (private$.continuousRatingNames) reads these
+                            # values as CATEGORY CODES, not measurements. Refusing them
+                            # would break the common integer-coded ordinal scale, and the
+                            # R path carries no measure type to tell an ordinal code from
+                            # a nominal one - so the branch computes and discloses instead.
+                            # Without this the module was inconsistent with itself: the
+                            # factor form of a nominal scale is refused two branches up,
+                            # while its own integer codes were decomposed in silence.
+                            self$results$maxwellRETable$setNote(
+                                "numeric_codes",
+                                .("These rater columns are numeric but every value is a whole number no greater than 10, which is what a rating scale looks like rather than a measurement. The decomposition has treated them as an equal-interval scale, so one step between adjacent codes counts the same everywhere. That is reasonable for an ordinal grade recorded as 1, 2, 3 and meaningless for nominal categories that merely happen to be numbered, and nothing in the data distinguishes the two. If these codes are nominal, read Fleiss' kappa or Krippendorff's alpha instead of this table.")
+                            )
                         }
 
                         # Two-way (case + rater) variance decomposition. The one-way by-rater
@@ -5534,7 +6283,13 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         MS_resid <- SS_resid / ((n_cases - 1) * (n_raters - 1))
                         MS_case <- SS_case / (n_cases - 1)
 
-                        systematic_var <- max(0, (MS_rater - MS_resid) / n_cases)   # rater (offset) component
+                        # Keep the unclamped moment estimate: a share built from a
+                        # component truncated at its boundary is 0%/100% by construction,
+                        # not by measurement, so the shares are withheld and the raw value
+                        # disclosed instead. The arithmetic itself is unchanged.
+                        raw_rater_var <- (MS_rater - MS_resid) / n_cases
+                        rater_at_boundary <- raw_rater_var <= 0
+                        systematic_var <- max(0, raw_rater_var)                    # truncated moment estimate
                         random_var <- MS_resid                                     # residual component
                         case_var <- max(0, (MS_case - MS_resid) / n_raters)         # true between-case variance
                         total_var_components <- systematic_var + random_var        # disagreement variance
@@ -5559,34 +6314,53 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             return()
                         }
 
-                        # Random share of the disagreement variance
-                        re_value <- random_var / total_var_components
-
-                        # Proportions
-                        systematic_prop <- systematic_var / total_var_components
-                        random_prop <- random_var / total_var_components
-
-                        # Interpretation
-                        if (re_value < 0.30) {
-                            # The verdict a clinician actually reads was a bare English literal spliced
-                            # into an otherwise translated sentence, so a Turkish user got a Turkish
-                            # sentence with an English conclusion in it. The msgid is the literal itself.
-                            interp <- .("Predominantly systematic disagreement (rater offsets) - consider calibration/standardization")
-                        } else if (re_value < 0.50) {
-                            interp <- .("Mixed (systematic > random) - combined intervention needed")
-                        } else if (re_value < 0.70) {
-                            interp <- .("Mixed (random > systematic) - focus on training and protocols")
+                        if (rater_at_boundary) {
+                            re_value <- NA
+                            systematic_prop <- NA
+                            random_prop <- NA
+                            interp <- .("No systematic rater offset is identifiable in these data: the estimate is at its lower boundary, so the systematic and random shares are not reported")
+                            self$results$maxwellRETable$setNote(
+                                "boundary",
+                                sprintf(.("The method-of-moments estimate of the rater (systematic) variance is %1$.4g. A variance cannot be negative, so it was truncated to 0: these data carry no evidence of a systematic offset between raters, which is not the same as showing the offset is exactly zero. The systematic and random shares are left empty because a share taken from a truncated component is 0%% and 100%% by construction rather than by measurement. What is measured here is the residual (random) variance, %2$.4g."),
+                                    raw_rater_var, random_var)
+                            )
                         } else {
-                            interp <- .("Predominantly random disagreement - improve consistency through training")
+                            # Random share of the disagreement variance, and its split
+                            re_value <- random_var / total_var_components
+                            systematic_prop <- systematic_var / total_var_components
+                            random_prop <- random_var / total_var_components
+
+                            if (re_value < 0.30) {
+                                interp <- .("Most of the disagreement is a systematic offset between raters rather than random noise")
+                            } else if (re_value < 0.50) {
+                                interp <- .("Systematic offsets account for more of the disagreement than random noise does")
+                            } else if (re_value < 0.70) {
+                                interp <- .("Random noise accounts for more of the disagreement than systematic offsets do")
+                            } else {
+                                interp <- .("Most of the disagreement is random noise rather than a systematic offset between raters")
+                            }
+
+                            # The cut-points are this module's display convention: a
+                            # literature search found no published source for them, so the
+                            # note says so and the verdicts describe rather than prescribe.
+                            self$results$maxwellRETable$setNote(
+                                "bands",
+                                .("The sentence in the Interpretation column splits the random share at 0.30, 0.50 and 0.70. These cut-points are this module's convention for putting the share into words; no published source defines them and they carry no diagnostic status. Read the share itself and the two variance components beside it, not the label. A low random share implies the disagreement is an offset that a calibration factor or a shared reference set can remove; a high one implies it is case-by-case noise, which instead points to protocol standardisation, training, or averaging replicate reads.")
+                            )
                         }
 
-                        self$results$maxwellRETable$setNote(
-                            "components",
-                            sprintf(
-                                .("Two-way decomposition (case + rater). Disagreement variance = rater component %1$.4g + residual %2$.4g. The true between-case variance, %3$.4g, is reported here but excluded from the shares: it is signal, not disagreement. Shares of disagreement: systematic %4$.1f%%, random %5$.1f%%."),
-                                systematic_var, random_var, case_var, 100 * systematic_prop, 100 * random_prop
-                            )
+                        # The shares clause is appended only off the boundary; kept in the
+                        # one msgid it would reprint "systematic 0.0%, random 100.0%" there
+                        # and hand back the number the row deliberately withholds.
+                        components_msg <- sprintf(
+                            .("Two-way decomposition (case + rater). Disagreement variance = rater component %1$.4g + residual %2$.4g. The true between-case variance, %3$.4g, is reported here but left out of that total: it is signal, not disagreement."),
+                            systematic_var, random_var, case_var
                         )
+                        if (!rater_at_boundary)
+                            components_msg <- paste0(components_msg, " ",
+                                sprintf(.("Shares of disagreement: systematic %1$.1f%%, random %2$.1f%%."),
+                                    100 * systematic_prop, 100 * random_prop))
+                        self$results$maxwellRETable$setNote("components", components_msg)
 
                         self$results$maxwellRETable$setRow(rowNo = 1, list(
                             method = .("Two-way variance decomposition of disagreement"),
@@ -5604,7 +6378,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     error = function(e) {
                         self$results$maxwellRETable$setNote(
                             "error",
-                            sprintf(.("Error in the variance decomposition: %s"), jmvcore::htmlEscape(e$message))
+                            sprintf(.("Error in the variance decomposition: %s"), private$.noteSafe(jmvcore::htmlEscape(e$message)))
                         )
                     }
                 )
@@ -5665,37 +6439,25 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         <li><strong>Continuous Data:</strong> Intraclass Correlation Coefficient (ICC) for each rater</li>
                         <li><strong>Inter-Rater:</strong> Overall agreement metric across all raters and time points</li>
                     </ul>
-                    <table style='width: 100%; border-collapse: collapse; margin-top: 15px;'>
-                        <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Reliability Value</th>
-                            <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Interpretation</th>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>&lt; 0.40</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Poor reliability - additional training needed</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>0.40 - 0.60</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Fair reliability - caution in interpretation</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>0.60 - 0.75</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Good reliability - acceptable for most purposes</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>0.75 - 0.90</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Excellent reliability - high quality</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>&gt; 0.90</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Outstanding reliability</td>
-                        </tr>
-                    </table>
-                    <p style='margin: 10px 0 0 0; font-size: 13px;'>
-                        Note: these bands are a different convention from the Landis &amp; Koch (1977) bands quoted in the
-                        Analysis Summary and from the Koo &amp; Li (2016) ICC bands used in the ICC table. The same value will
-                        be described differently by each convention, so state which one you are reporting.
-                    </p>
+                    <p style='margin: 15px 0 5px 0;'><strong>Kappa</strong> (Landis &amp; Koch, 1977)</p>
+<table style='width: 100%; border-collapse: collapse;'>
+<tr><td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>&lt; 0.00</td><td style='padding: 5px; border-bottom: 1px solid #ddd;'>Worse than chance</td></tr>
+<tr><td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>0.00 to &lt; 0.20</td><td style='padding: 5px; border-bottom: 1px solid #ddd;'>Slight</td></tr>
+<tr><td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>0.20 to &lt; 0.40</td><td style='padding: 5px; border-bottom: 1px solid #ddd;'>Fair</td></tr>
+<tr><td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>0.40 to &lt; 0.60</td><td style='padding: 5px; border-bottom: 1px solid #ddd;'>Moderate</td></tr>
+<tr><td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>0.60 to &lt; 0.80</td><td style='padding: 5px; border-bottom: 1px solid #ddd;'>Substantial</td></tr>
+<tr><td style='padding: 5px; font-weight: bold;'>0.80 to 1.00</td><td style='padding: 5px;'>Almost perfect</td></tr>
+</table>
+<p style='margin: 15px 0 5px 0;'><strong>ICC(2,1)</strong> (Koo &amp; Li, 2016)</p>
+<table style='width: 100%; border-collapse: collapse;'>
+<tr><td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>&lt; 0.50</td><td style='padding: 5px; border-bottom: 1px solid #ddd;'>Poor</td></tr>
+<tr><td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>0.50 to &lt; 0.75</td><td style='padding: 5px; border-bottom: 1px solid #ddd;'>Moderate</td></tr>
+<tr><td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>0.75 to &lt; 0.90</td><td style='padding: 5px; border-bottom: 1px solid #ddd;'>Good</td></tr>
+<tr><td style='padding: 5px; font-weight: bold;'>0.90 to 1.00</td><td style='padding: 5px;'>Excellent</td></tr>
+</table>
+<p style='margin: 10px 0 0 0; font-size: 13px;'>
+    The Intra-Rater and Inter-Rater tables use whichever of these two scales matches the statistic named in their Statistic column, and the Analysis Summary, the ICC table and the subgroup table use the same two. The scales are not interchangeable: a kappa of 0.45 is Moderate, an ICC of 0.45 is Poor. State which coefficient you are reporting.
+</p>
                 </div>
 
                 <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin-bottom: 20px; color: inherit;'>
@@ -5921,8 +6683,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         if (length(parsed) < 2) {
                             self$results$interIntraRaterIntraTable$setNote(
                                 "error",
-                                sprintf(.("Need at least 2 columns with separator '%1$s' in their names. Found %2$d. Example: Rater1%3$sTime1, Rater1%4$sTime2"), separator, length(parsed), separator, separator)
+                                sprintf(.("Need at least 2 columns with separator '%1$s' in their names. Found %2$d. Example: Rater1%3$sTime1, Rater1%4$sTime2"), private$.noteSafe(separator), length(parsed), private$.noteSafe(separator), private$.noteSafe(separator))
                             )
+                            self$results$interIntraRaterIntraTable$setNote("scale", NULL)
+                            self$results$interIntraRaterInterTable$setNote("scale", NULL)
                             return()
                         }
 
@@ -5938,11 +6702,30 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                 "error",
                                 .("No rater has multiple time points. Each rater needs at least 2 time points for test-retest analysis.")
                             )
+                            self$results$interIntraRaterIntraTable$setNote("scale", NULL)
+                            self$results$interIntraRaterInterTable$setNote("scale", NULL)
                             return()
                         }
 
                         # Calculate intra-rater reliability (test-retest for each rater)
                         intraTable <- self$results$interIntraRaterIntraTable
+                        # One place, both tables: past the two early returns above, so
+                        # the note only appears when rows will. Those returns clear it
+                        # again, or a run that failed would still carry the scale note
+                        # a previous successful run left behind.
+                        intraTable$setNote("scale", private$.bandScaleNote())
+                        self$results$interIntraRaterInterTable$setNote(
+                            "scale", private$.bandScaleNote())
+                        # Which SE produced the intervals in this table. One note key is
+                        # shared by every rater row, so a per-row note would be silently
+                        # overwritten by the last rater; flag it here and say it once
+                        # after the loop, the way the subgroup table already does.
+                        intra_used_null_se <- FALSE
+                        # Set when a weighted kappa had to fall back to unweighted
+                        # because that rater's two time points declare no single
+                        # category order. Per pair, like the flag above: the columns
+                        # differ from rater to rater.
+                        intra_scale_ambiguous <- FALSE
 
                         for (rater in valid_raters) {
                             rater_cols <- sapply(rater_data[[rater]], function(x) x$original)
@@ -5993,31 +6776,23 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                 # Continuous data - use ICC(2,1)
                                 data_matrix <- cbind(data1, data2)
                                 if (requireNamespace("irr", quietly = TRUE)) {
-                                    icc_result <- tryCatch(
-                                        irr::icc(data_matrix, model = "twoway", type = "agreement", unit = "single"),
+                                    # .guardICCResult() passes NULL straight through, so
+                                    # the is.null() branch below still catches a failed fit.
+                                    icc_result <- private$.guardICCResult(tryCatch(
+                                        irr::icc(data_matrix, model = "twoway", type = "agreement", unit = "single",
+                                                 conf.level = self$options$confLevel),
                                         error = function(e) NULL
-                                    )
+                                    ))
 
                                     if (!is.null(icc_result)) {
+                                        if (!is.null(icc_result$guardNote))
+                                            intraTable$setNote("numeric", icc_result$guardNote)
                                         icc_value <- icc_result$value
                                         ci_lower <- icc_result$lbound
                                         ci_upper <- icc_result$ubound
                                         p_value <- icc_result$p.value
 
-                                        if (icc_value < 0.40) {
-                                            # The verdict a clinician actually reads was a bare English literal spliced
-                                            # into an otherwise translated sentence, so a Turkish user got a Turkish
-                                            # sentence with an English conclusion in it. The msgid is the literal itself.
-                                            interp <- .("Poor")
-                                        } else if (icc_value < 0.60) {
-                                            interp <- .("Fair")
-                                        } else if (icc_value < 0.75) {
-                                            interp <- .("Good")
-                                        } else if (icc_value < 0.90) {
-                                            interp <- .("Excellent")
-                                        } else {
-                                            interp <- .("Outstanding")
-                                        }
+                                        interp <- private$.iccBandLabel(icc_value)
 
                                         intraTable$addRow(rowKey = rater, list(
                                             rater = rater,
@@ -6089,8 +6864,53 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                     # .pairKappaWithCI); irr::kappa2()$statistic is the
                                     # H0:kappa=0 z, whose implied SE (kappa/z) is the NULL
                                     # SE and yields too-narrow CIs.
-                                    irr_weight <- if (is_ordinal) "squared" else "unweighted"
-                                    stat_name <- if (is_ordinal) "Weighted \u{03BA}" else "Cohen's \u{03BA}"
+                                    #
+                                    # The weighting the user chose must apply HERE too.
+                                    # self$options$wght was never read on this path, so this
+                                    # table always reported the QUADRATIC-weighted kappa:
+                                    # with Linear Weights selected the headline table showed
+                                    # the linear kappa and this one the quadratic, both
+                                    # labelled kappa, in the same run; and the DEFAULT,
+                                    # Unweighted, still returned a weighted statistic
+                                    # (measured: 0.8803828 for all three settings, against a
+                                    # hand unweighted 0.8779744). Same three-branch mapping
+                                    # as the headline table's irr_w so the two cannot
+                                    # diverge again. The is_ordinal guard stays OUTERMOST:
+                                    # weights must never reach an unordered scale, where the
+                                    # distance between categories is meaningless.
+                                    irr_weight <- if (!is_ordinal) {
+                                        "unweighted"
+                                    } else if (identical(self$options$wght, "equal")) {
+                                        "equal"
+                                    } else if (identical(self$options$wght, "squared")) {
+                                        "squared"
+                                    } else {
+                                        "unweighted"
+                                    }
+                                    # Name the weighting that actually ran, not just
+                                    # "Weighted": the value differs by weighting and this
+                                    # column is the reader's only way to tell which one
+                                    # produced it. These were bare English literals, so the
+                                    # Statistic column stayed English in every locale.
+                                    if (!identical(irr_weight, "unweighted") &&
+                                        isTRUE(private$.orderedLevelsInfo(
+                                            list(data1, data2))$ambiguous)) {
+                                        irr_weight <- "unweighted"
+                                        intra_scale_ambiguous <- TRUE
+                                    }
+                                    stat_name <- private$.kappaLabel(2L, irr_weight)
+                                    # Say when the request was overridden instead of dropping
+                                    # it in silence. Cleared on the else branch: a note left
+                                    # from a previous run would assert an override that did
+                                    # not happen this time.
+                                    if (!is_ordinal && !identical(self$options$wght, "unweighted")) {
+                                        intraTable$setNote(
+                                            "weight_override",
+                                            .("Weighted kappa was requested but these ratings are not an ordered factor with three or more categories, so unweighted Cohen's kappa is reported here. Weights assume a distance between categories, which a nominal scale (tumour type, mutation class) does not have. Set the variable's measure type to Ordinal to obtain the weighted statistic.")
+                                        )
+                                    } else {
+                                        intraTable$setNote("weight_override", NULL)
+                                    }
 
                                     kc <- private$.pairKappaWithCI(
                                         data.frame(t1 = data1, t2 = data2),
@@ -6099,30 +6919,36 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                     kappa_value <- kc$kappa
                                     p_value <- kc$p
 
-                                    # Confidence interval from the ASE, honoring confLevel
+                                    # Confidence interval from .pairKappaWithCI(), at confLevel
+                                    # and on the scale kappaCIMethod selects.
+                                    # That is normally vcd::Kappa's non-null ASE, but it
+                                    # is irr::kappa2's NULL SE (kappa / z) whenever vcd
+                                    # returned no finite ASE - too narrow at high kappa.
+                                    # This comment used to say "from the ASE" flatly and
+                                    # the table said nothing at all, so a test-retest
+                                    # kappa of 1.00 could carry a fallback interval that
+                                    # looked exactly like a real one. Record which ran -
+                                    # inside the branch that actually builds an interval,
+                                    # so a rater with no interval cannot raise the flag
+                                    # and make the table disclose an interval it never
+                                    # printed.
                                     ci_lower <- NA_real_
                                     ci_upper <- NA_real_
                                     if (!is.na(kc$se) && kc$se > 0 && is.finite(kappa_value)) {
-                                        zc <- stats::qnorm(1 - (1 - self$options$confLevel) / 2)
-                                        ci_lower <- max(-1, kappa_value - zc * kc$se)
-                                        ci_upper <- min(1, kappa_value + zc * kc$se)
+                                        if (identical(kc$method, "irr-fallback")) {
+                                            intra_used_null_se <- TRUE
+                                        }
+
+                                        # Take the helper's interval. Rebuilding a Wald one
+                                        # here ignored kappaCIMethod, so this table disagreed
+                                        # with the headline, inter-rater, subgroup and
+                                        # All-Pairs tables for the same pair of readings.
+                                        ci_lower <- kc$ci_lower
+                                        ci_upper <- kc$ci_upper
                                     }
 
                                     # Interpretation
-                                    if (kappa_value < 0.40) {
-                                        # The verdict a clinician actually reads was a bare English literal spliced
-                                        # into an otherwise translated sentence, so a Turkish user got a Turkish
-                                        # sentence with an English conclusion in it. The msgid is the literal itself.
-                                        interp <- .("Poor")
-                                    } else if (kappa_value < 0.60) {
-                                        interp <- .("Fair")
-                                    } else if (kappa_value < 0.75) {
-                                        interp <- .("Good")
-                                    } else if (kappa_value < 0.90) {
-                                        interp <- .("Excellent")
-                                    } else {
-                                        interp <- .("Outstanding")
-                                    }
+                                    interp <- private$.kappaBandLabel(kappa_value)
 
                                     intraTable$addRow(rowKey = rater, list(
                                         rater = rater,
@@ -6154,6 +6980,29 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             }
                         }
 
+                        private$.noteScaleAmbiguity(intraTable, intra_scale_ambiguous)
+
+                        # Time Points is the FULL read count, but the coefficient beside
+                        # it compares only rater_cols[1] and rater_cols[2]. A rater with
+                        # three reads showed "Time Points: 3" next to a two-read kappa
+                        # with no disclosure anywhere. The statistic is unchanged; what
+                        # was missing is the sentence saying which pair it came from.
+                        if (any(rater_timepoints[valid_raters] > 2)) {
+                            intraTable$setNote(
+                                "pair_used",
+                                .("Time Points is the number of reads that rater made, but the coefficient, its confidence interval and its p-value are computed from that rater's FIRST TWO time points only; later reads do not contribute. For a rater with three or more reads, report this as a first-versus-second test-retest figure, not as an overall intra-rater coefficient over all reads.")
+                            )
+                        } else {
+                            intraTable$setNote("pair_used", NULL)
+                        }
+
+                        if (intra_used_null_se) {
+                            intraTable$setNote(
+                                "ci_null_se",
+                                .("At least one interval in this table was built from the null-hypothesis standard error (kappa divided by its H0 test statistic) because the non-null asymptotic standard error from vcd::Kappa was unavailable for that rater, most often because a rating category is unused at one time point and the agreement table is near-degenerate. Null-SE intervals are too narrow when kappa is high, so treat them as optimistic.")
+                            )
+                        }
+
                         # Calculate inter-rater reliability across all columns
                         # Use the same approach as overall agreement calculation
                         failing_phase <- "inter"
@@ -6166,6 +7015,19 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                         n_cases <- nrow(inter_ratings)
                         n_raters <- ncol(inter_ratings)
+
+                        # This row pools every rater x time-point COLUMN as an
+                        # independent rater, so "N Raters" is a count of reads and a
+                        # rater's repeated reads - which are correlated - enter
+                        # kappam.fleiss()/ICC(2,1) as if they were separate people. That
+                        # biases the coefficient upward. The method cell said "All Raters
+                        # x Time Points" and nothing said the independence assumption is
+                        # violated.
+                        self$results$interIntraRaterInterTable$setNote(
+                            "pooling",
+                            sprintf(.("This row pools every rater \u00D7 time-point column as though it were a separate rater: N Raters counts %1$d reads made by %2$d raters, not %1$d raters. Repeated reads by the same rater are correlated, which violates the independence assumption behind Fleiss' kappa and ICC(2,1) and generally makes inter-rater agreement look better than it is. Treat this as a descriptive summary over all reads; for a defensible inter-rater coefficient, restrict the analysis to one time point per rater."),
+                                as.integer(n_raters), as.integer(length(rater_data)))
+                        )
 
                         if (n_cases < 5) {
                             self$results$interIntraRaterInterTable$setRow(rowNo = 1, list(
@@ -6191,24 +7053,16 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         if (is_all_numeric) {
                             # Use ICC for continuous data
                             if (requireNamespace("irr", quietly = TRUE)) {
-                                icc_result <- irr::icc(inter_ratings, model = "twoway", type = "agreement", unit = "single")
+                                icc_result <- private$.guardICCResult(
+                                    irr::icc(inter_ratings, model = "twoway", type = "agreement", unit = "single",
+                                             conf.level = self$options$confLevel))
 
-                                # Interpretation
+                                # Interpretation. .guardICCResult() passes NULL straight
+                                # through on a failed fit, so icc_value can be NULL here;
+                                # the helper's length() test absorbs it rather than
+                                # erroring on `if (NULL < 0.50)`.
                                 icc_value <- icc_result$value
-                                if (icc_value < 0.40) {
-                                    # The verdict a clinician actually reads was a bare English literal spliced
-                                    # into an otherwise translated sentence, so a Turkish user got a Turkish
-                                    # sentence with an English conclusion in it. The msgid is the literal itself.
-                                    interp <- .("Poor")
-                                } else if (icc_value < 0.60) {
-                                    interp <- .("Fair")
-                                } else if (icc_value < 0.75) {
-                                    interp <- .("Good")
-                                } else if (icc_value < 0.90) {
-                                    interp <- .("Excellent")
-                                } else {
-                                    interp <- .("Outstanding")
-                                }
+                                interp <- private$.iccBandLabel(icc_value)
 
                                 self$results$interIntraRaterInterTable$setRow(rowNo = 1, list(
                                     method = "Inter-Rater Reliability (All Raters \u{00D7} Time Points)",
@@ -6221,6 +7075,9 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                     p = icc_result$p.value,
                                     interpretation = interp
                                 ))
+
+                                if (!is.null(icc_result$guardNote))
+                                    self$results$interIntraRaterInterTable$setNote("numeric", icc_result$guardNote)
                             }
                         } else {
                             # Use Fleiss' Kappa or Light's Kappa for categorical data
@@ -6238,7 +7095,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                                 kappa_value <- kappa_result$value
                                 p_value <- kappa_result$p.value
-                                stat_label <- .("Fleiss' \u03BA")
+                                stat_label <- private$.kappaLabel(n_raters)
                                 ci_lower <- NA_real_
                                 ci_upper <- NA_real_
                                 kc_inter <- NULL
@@ -6260,7 +7117,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                         p_value <- kc_inter$p
                                         ci_lower <- kc_inter$ci_lower
                                         ci_upper <- kc_inter$ci_upper
-                                        stat_label <- .("Cohen's \u03BA")
+                                        stat_label <- private$.kappaLabel(2L)
                                     }
                                 }
 
@@ -6282,23 +7139,9 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                     )
                                 }
 
-                                # Interpretation
-                                if (is.na(kappa_value)) {
-                                    interp <- .("Not estimable")
-                                } else if (kappa_value < 0.40) {
-                                    # The verdict a clinician actually reads was a bare English literal spliced
-                                    # into an otherwise translated sentence, so a Turkish user got a Turkish
-                                    # sentence with an English conclusion in it. The msgid is the literal itself.
-                                    interp <- .("Poor")
-                                } else if (kappa_value < 0.60) {
-                                    interp <- .("Fair")
-                                } else if (kappa_value < 0.75) {
-                                    interp <- .("Good")
-                                } else if (kappa_value < 0.90) {
-                                    interp <- .("Excellent")
-                                } else {
-                                    interp <- .("Outstanding")
-                                }
+                                # Interpretation. The helper returns "Not estimable" for
+                                # NA and for the non-finite kappa the guard above converts.
+                                interp <- private$.kappaBandLabel(kappa_value)
 
                                 # Confidence interval.
                                 #
@@ -6312,17 +7155,42 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                 #
                                 # With 2 columns the statistic is Cohen's kappa, and
                                 # .pairKappaWithCI() gives the non-null ASE from
-                                # vcd::Kappa (agrees with psych::cohen.kappa). With 3+
-                                # columns it is Fleiss'/Conger's kappa, for which irr
-                                # offers only the null-SE test; rather than invent an
-                                # interval we leave it blank and say so - the same choice
-                                # the main irrtable already makes.
+                                # vcd::Kappa (agrees with psych::cohen.kappa) - or, for
+                                # a near-degenerate table where vcd has no finite ASE,
+                                # its irr::kappa2 null-SE fallback. The note below says
+                                # which of the two ran; it used to name the vcd ASE
+                                # either way. With 3+ columns it is Fleiss'/Conger's
+                                # kappa, for which irr offers only the null-SE test;
+                                # rather than invent an interval we leave it blank and
+                                # say so - the same choice the main irrtable already
+                                # makes.
                                 if (n_raters == 2) {
                                     if (!is.null(kc_inter) && !is.na(kc_inter$ci_lower)) {
+                                        # Same event, same words as the headline table:
+                                        # a reader comparing the two must not be told
+                                        # one used vcd's ASE and the other the fallback
+                                        # when a single computation served both.
                                         self$results$interIntraRaterInterTable$setNote(
                                             "ci_method",
-                                            sprintf(.("%.0f%% confidence interval from the non-null asymptotic standard error (vcd::Kappa), which agrees with psych::cohen.kappa. The p-value tests H0: kappa = 0 and uses the null standard error, so it is not derived from this interval."),
-                                                100 * self$options$confLevel)
+                                            if (identical(kc_inter$method, "irr-fallback")) {
+                                                if (!requireNamespace("vcd", quietly = TRUE)) {
+                                                    sprintf(.("%.0f%% confidence interval via the irr::kappa2 fallback (approximate, built from the null-hypothesis standard error). Install the 'vcd' package to enable the more accurate ASE-based interval. A null-SE interval is too narrow when kappa is high, so treat it as optimistic."),
+                                                        100 * self$options$confLevel)
+                                                } else {
+                                                    sprintf(.("%.0f%% confidence interval via the irr::kappa2 fallback (approximate, built from the null-hypothesis standard error): vcd::Kappa could not return a finite SE for this (near-degenerate) table. A null-SE interval is too narrow when kappa is high, so treat it as optimistic."),
+                                                        100 * self$options$confLevel)
+                                                }
+                                            } else if (identical(self$options$kappaCIMethod, "fisherz")) {
+                                                sprintf(.("%.0f%% confidence interval from the non-null asymptotic standard error (vcd::Kappa), applied on the Fisher z (arc-tangent) scale and transformed back, so the limits are asymmetric about kappa and do not match psych::cohen.kappa. The p-value is a Wald test of H0: kappa = 0 that divides kappa by the same standard error."),
+                                                    100 * self$options$confLevel)
+                                            } else {
+                                                # p here is kc_inter$p = 2 * pnorm(-|kappa / ASE|) with
+                                                # the same non-null ASE; the headline table's p is
+                                                # irr::kappa2's null-SE test. The note used to give this
+                                                # table the headline's sentence.
+                                                sprintf(.("%.0f%% confidence interval from the non-null asymptotic standard error (vcd::Kappa), which agrees with psych::cohen.kappa. The p-value is a Wald test of H0: kappa = 0 that divides kappa by the same standard error."),
+                                                    100 * self$options$confLevel)
+                                            }
                                         )
                                     }
                                 } else {
@@ -6354,7 +7222,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         }
                         failed_table$setNote(
                             "error",
-                            sprintf(.("Error calculating Inter/Intra-Rater Reliability: %s"), jmvcore::htmlEscape(e$message))
+                            sprintf(.("Error calculating Inter/Intra-Rater Reliability: %s"), private$.noteSafe(jmvcore::htmlEscape(e$message)))
                         )
                     }
                 )
@@ -6527,25 +7395,29 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     return()
                 }
 
-                # Prepare data - remove rows with all missing values
-                complete_idx <- rowSums(!is.na(ratings)) > 0
-                ratings_clean <- ratings[complete_idx, , drop = FALSE]
+                # Two-rater test: irr::rater.bias tabulates the pairs with table(),
+                # which drops any case missing either rating, so only complete pairs
+                # are scored and only they count toward the guard below.
+                ratings_clean <- ratings[stats::complete.cases(ratings), , drop = FALSE]
 
-                if (nrow(ratings_clean) < 2) {
+                # irr::rater.bias dispatches on shape: a SQUARE input is read as a
+                # c x c count table, so exactly 2 cases x 2 raters would be scored
+                # as a 2 x 2 contingency table of counts. Refuse below 3 cases.
+                if (nrow(ratings_clean) < 3) {
                     self$results$raterBiasTable$setNote(
                         "error",
-                        .("Insufficient complete cases for the directional discordance test. At least 2 cases are required.")
+                        .("Insufficient complete cases for the directional discordance test. At least 3 cases are required.")
                     )
                     return()
                 }
 
                 # Sparse discordant cells break the chi-square approximation (and make the
                 # test singular); say so before running it, so the note survives a failure.
-                sparse_min <- private$.minDiscordantCell(ratings_clean)
-                if (is.finite(sparse_min) && sparse_min < 5) {
+                n_discordant <- private$.discordantTotal(ratings_clean)
+                if (is.finite(n_discordant) && n_discordant < 10) {
                     self$results$raterBiasTable$setNote(
                         "sparse",
-                        sprintf(.("Sparse discordant cells: the smallest off-diagonal count is %d. The chi-square approximation needs roughly 5 or more in each discordant cell; collapse categories or read the p-value cautiously."), as.integer(sparse_min))
+                        sprintf(.("Only %d discordant cases - cases the two raters placed in different categories. This test rests entirely on those cases, and its chi-square approximation is unreliable with fewer than about 10; read the p-value cautiously."), as.integer(n_discordant))
                     )
                 }
 
@@ -6620,7 +7492,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     error = function(e) {
                         self$results$raterBiasTable$setNote(
                             "error",
-                            sprintf(.("Error calculating the directional discordance test: %s"), jmvcore::htmlEscape(e$message))
+                            sprintf(.("Error calculating the directional discordance test: %s"), private$.noteSafe(jmvcore::htmlEscape(e$message)))
                         )
                     }
                 )
@@ -6841,11 +7713,11 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 # Sparse discordant cells break the chi-square approximation (and make the
                 # test singular); say so before running it, so the note survives a failure.
-                sparse_min <- private$.minDiscordantCell(ratings_clean)
-                if (is.finite(sparse_min) && sparse_min < 5) {
+                n_discordant <- private$.discordantTotal(ratings_clean)
+                if (is.finite(n_discordant) && n_discordant < 10) {
                     self$results$bhapkarTable$setNote(
                         "sparse",
-                        sprintf(.("Sparse discordant cells: the smallest off-diagonal count is %d. The chi-square approximation needs roughly 5 or more in each discordant cell; collapse categories or read the p-value cautiously."), as.integer(sparse_min))
+                        sprintf(.("Only %d discordant cases - cases the two raters placed in different categories. This test rests entirely on those cases, and its chi-square approximation is unreliable with fewer than about 10; read the p-value cautiously."), as.integer(n_discordant))
                     )
                 }
 
@@ -6882,7 +7754,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             )
                         }
                         self$results$bhapkarTable$setRow(rowNo = 1, values = list(
-                            method = "Bhapkar test for marginal homogeneity",
+                            method = .("Bhapkar test for marginal homogeneity"),
                             subjects = bhapkar_result$subjects,
                             raters = bhapkar_result$raters,
                             chisq = bhapkar_result$statistic,
@@ -6926,7 +7798,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     error = function(e) {
                         self$results$bhapkarTable$setNote(
                             "error",
-                            sprintf(.("Error calculating Bhapkar test: %s"), jmvcore::htmlEscape(e$message))
+                            sprintf(.("Error calculating Bhapkar test: %s"), private$.noteSafe(jmvcore::htmlEscape(e$message)))
                         )
                     }
                 )
@@ -7144,11 +8016,11 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 # Sparse discordant cells break the chi-square approximation (and make the
                 # test singular); say so before running it, so the note survives a failure.
-                sparse_min <- private$.minDiscordantCell(ratings_clean)
-                if (is.finite(sparse_min) && sparse_min < 5) {
+                n_discordant <- private$.discordantTotal(ratings_clean)
+                if (is.finite(n_discordant) && n_discordant < 10) {
                     self$results$stuartMaxwellTable$setNote(
                         "sparse",
-                        sprintf(.("Sparse discordant cells: the smallest off-diagonal count is %d. The chi-square approximation needs roughly 5 or more in each discordant cell; collapse categories or read the p-value cautiously."), as.integer(sparse_min))
+                        sprintf(.("Only %d discordant cases - cases the two raters placed in different categories. This test rests entirely on those cases, and its chi-square approximation is unreliable with fewer than about 10; read the p-value cautiously."), as.integer(n_discordant))
                     )
                 }
 
@@ -7189,7 +8061,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             )
                         }
                         self$results$stuartMaxwellTable$setRow(rowNo = 1, values = list(
-                            method = "Stuart-Maxwell test for marginal homogeneity",
+                            method = .("Stuart-Maxwell test for marginal homogeneity"),
                             subjects = stuart_result$subjects,
                             raters = stuart_result$raters,
                             chisq = stuart_result$statistic,
@@ -7238,7 +8110,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     error = function(e) {
                         self$results$stuartMaxwellTable$setNote(
                             "error",
-                            sprintf(.("Error calculating Stuart-Maxwell test: %s"), jmvcore::htmlEscape(e$message))
+                            sprintf(.("Error calculating Stuart-Maxwell test: %s"), private$.noteSafe(jmvcore::htmlEscape(e$message)))
                         )
                     }
                 )
@@ -7278,26 +8150,12 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Agreement Level</th>
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>What the value says about this rater</th>
                         </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>&#x3BA; < 0.40</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Poor to fair</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Grades land on the reference category little more often than chance would produce</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>0.40-0.60</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Moderate</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Clearly better than chance, but disagreement with the reference is still common</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>0.60-0.75</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Substantial</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Grades track the reference well beyond chance; disagreements concentrate on a minority of cases</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px;'><strong>&#x3BA; > 0.75</strong></td>
-                            <td style='padding: 8px;'>Excellent</td>
-                            <td style='padding: 8px;'>Close alignment with the reference rater on this case set; no training gap is indicated by this comparison</td>
-                        </tr>
+<tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>&#x3BA; &lt; 0.00</strong></td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>Worse than chance</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>Grades land on the reference category LESS often than chance alone would produce; check for a reversed or mismapped category</td></tr>
+<tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>0.00 to &lt; 0.20</strong></td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>Slight</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>Barely better than chance; this rater and the reference are not measuring the same thing</td></tr>
+<tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>0.20 to &lt; 0.40</strong></td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>Fair</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>Better than chance, but disagreement with the reference is the common case</td></tr>
+<tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>0.40 to &lt; 0.60</strong></td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>Moderate</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>Clearly better than chance, but disagreement with the reference is still frequent</td></tr>
+<tr><td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>0.60 to &lt; 0.80</strong></td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>Substantial</td><td style='padding: 8px; border-bottom: 1px solid #ddd;'>Grades track the reference well beyond chance; disagreements concentrate on a minority of cases</td></tr>
+<tr><td style='padding: 8px;'><strong>&#x3BA; 0.80 to 1.00</strong></td><td style='padding: 8px;'>Almost perfect</td><td style='padding: 8px;'>Close alignment with the reference rater on this case set; no training gap is indicated by this comparison</td></tr>
                     </table>
                 </div>
 
@@ -7401,6 +8259,26 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     reference_ratings <- reference_ratings[[1]]
                 }
 
+                # A reference rater that is also selected under Raters was compared with
+                # itself: a row with kappa = 1.000 that the average-kappa note then
+                # folded in. Compare it only with the other raters, and say so.
+                ref_name <- self$options$referenceRater
+                self_pair <- !is.null(ref_name) && ref_name %in% colnames(ratings)
+                if (self_pair)
+                    ratings <- ratings[, colnames(ratings) != ref_name, drop = FALSE]
+                self$results$pairwiseKappaTable$setNote("ref_in_raters",
+                    if (self_pair)
+                        .fmt(.("The reference rater {name} is also selected under Raters, so it is compared only with the other raters, not with itself."),
+                             name = private$.noteSafe(jmvcore::htmlEscape(ref_name)))
+                    else NULL)
+                if (ncol(ratings) == 0) {
+                    self$results$pairwiseKappaTable$setNote(
+                        "error",
+                        .("The only rater selected is the reference rater itself. Select at least one other rater to compare with the reference.")
+                    )
+                    return()
+                }
+
                 # The reference rater is a SEPARATE variable: the is_continuous gate
                 # in .run() is computed on `vars` only, so a continuous reference
                 # still reached Cohen's kappa here. Same one definition, and the guard
@@ -7409,7 +8287,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     self$results$pairwiseKappaTable$setNote(
                         "type_error",
                         sprintf(.("Pairwise Kappa requires categorical data. The reference rater '%s' is a continuous measurement, so there is no category for the raters to agree on. Consider ICC or Lin's CCC instead. If these numbers are category codes rather than measurements, set the variable to Nominal or Ordinal - or wrap it in factor() when calling from R - and Pairwise Kappa will be computed."),
-                                self$options$referenceRater)
+                                private$.noteSafe(self$options$referenceRater))
                     )
                     return()
                 }
@@ -7420,13 +8298,26 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 # Store results for ranking
                 kappa_results <- list()
-                ref_irr_weight <- if (identical(self$options$wght, "equal")) {
+                # Weights need ONE declared category order across the reference and
+                # every rater; when the declarations do not fix one, drop the weights
+                # rather than lay them over a guessed scale (see
+                # .mergeDeclaredLevels). Nestedness is hereditary, so testing all the
+                # columns at once covers every reference-vs-rater pair.
+                ref_lv <- private$.orderedLevelsInfo(
+                    c(as.list(ratings), list(reference_ratings)))
+                ref_scale_ambiguous <- !identical(self$options$wght, "unweighted") &&
+                    isTRUE(ref_lv$ambiguous)
+                ref_irr_weight <- if (ref_scale_ambiguous) {
+                    "unweighted"
+                } else if (identical(self$options$wght, "equal")) {
                     "equal"
                 } else if (identical(self$options$wght, "squared")) {
                     "squared"
                 } else {
                     "unweighted"
                 }
+                private$.noteScaleAmbiguity(
+                    self$results$pairwiseKappaTable, ref_scale_ambiguous)
 
                 # Calculate kappa for each rater vs reference
                 for (i in 1:n_raters) {
@@ -7464,7 +8355,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     # the table note below says which weighting ran).
                     tryCatch(
                         {
-                            kappa_result <- private$.kappa2Ordered(pairwise_clean, ref_irr_weight)
+                            kappa_result <- private$.kappa2Ordered(pairwise_clean, ref_irr_weight, ref_lv)
 
                             kappa_results[[rater_name]] <- list(
                                 rater = rater_name,
@@ -7535,22 +8426,15 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             sprintf("Error: %s", jmvcore::htmlEscape(result$error))
                         )
                     } else if (!is.na(result$kappa)) {
-                        # Add interpretation
-                        kappa_val <- result$kappa
-                        if (kappa_val < 0.40) {
-                            # The verdict a clinician actually reads was a bare English literal spliced
-                            # into an otherwise translated sentence, so a Turkish user got a Turkish
-                            # sentence with an English conclusion in it. The msgid is the literal itself.
-                            interp <- .("Poor to fair agreement with the reference rater")
-                        } else if (kappa_val < 0.60) {
-                            interp <- .("Moderate agreement with the reference rater")
-                        } else if (kappa_val < 0.75) {
-                            interp <- .("Substantial agreement with the reference rater")
-                        } else {
-                            interp <- .("Excellent agreement with the reference rater")
-                        }
+                        # Add interpretation. Sentence form, so "Worse than chance"
+                        # and "Not estimable" both read correctly where the old prose
+                        # form would have produced "Worse than chance agreement with
+                        # the reference rater".
+                        interp <- private$.kappaBandLabel(result$kappa)
 
-                        pairwise_table$addFootnote(rowKey = result$rater, col = "kappa", interp)
+                        pairwise_table$addFootnote(
+                            rowKey = result$rater, col = "kappa",
+                            sprintf(.("Agreement with the reference rater: %1$s"), interp))
                     }
                 }
 
@@ -7565,6 +8449,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         sprintf(.("Average kappa across %1$d raters: %2$.3f. Raters are compared individually against the reference rater using Cohen's kappa. These are point estimates against a single reference rater whose own reliability is unknown, and no confidence intervals are shown here, so apparent differences between raters may reflect sampling variation alone; any ranking shown is not a measure of individual competence."), n_valid, mean_kappa)
                     )
                 }
+                pairwise_table$setNote(
+                    "scale",
+                    .("Labels beside each kappa follow Landis & Koch (1977): below 0 worse than chance, then slight below 0.20, fair below 0.40, moderate below 0.60, substantial below 0.80, and almost perfect at 0.80 and above.")
+                )
                 # Name the weighting, so this table cannot be read as unweighted when
                 # the headline table is weighted (or the other way round).
                 if (!identical(ref_irr_weight, "unweighted")) {
@@ -7632,23 +8520,140 @@ agreementClass <- if (requireNamespace("jmvcore")) {
             # (z = kappa/se, ci = kappa +/- z*se). irr::kappa2() is kept as a
             # fallback for degenerate tables where vcd::Kappa() cannot return a
             # finite ASE (e.g. perfect agreement).
-            # ONE declared-order category scale for a rater pair.
+            # ONE declared-order category scale for a set of rater columns, and an
+            # `ambiguous` flag saying whether the declarations determine it at all.
             #
             # union(levels(x), levels(y)) is not enough: with x = {G1,G3} and
             # y = {G1,G2,G3} it returns G1,G3,G2 and puts the middle grade at the
-            # end of the ordinal scale. Start from the LONGER declared set (the one
-            # that actually spells the scale out) and append anything the other
-            # column adds. For a non-factor column as.factor() orders numerically,
-            # which is also the declared order.
+            # end of the ordinal scale. Starting from the LONGER declared set fixes
+            # that case and only that case. A merged total order over the union is
+            # UNIQUE if and only if every pair of levels is ordered by at least one
+            # column; the cheap sufficient condition is NESTEDNESS BY INCLUSION -
+            # sort the declared sets by decreasing length and require every shorter
+            # one to be a SUBSEQUENCE of the longest (same membership AND the same
+            # relative order). The longest is then the merged scale, and no other
+            # order is consistent with what the variables declare.
+            #
+            # Anything else is UNDERDETERMINED, not merely awkward, and the union is
+            # then decided by COLUMN ORDER. Absent<Diffuse (rater A never used Focal)
+            # beside Absent<Focal (rater B never used Diffuse) places Focal and
+            # Diffuse against Absent and against nothing else: the same 60 cases gave
+            # "Systematic offsets account for more of the disagreement than random
+            # noise does" with vars = c(RA, RB) and "No systematic rater offset is
+            # identifiable in these data" with vars = c(RB, RA), and a second pair
+            # moved the rater variance component 20-fold (0.01731 vs 0.34808). The
+            # flag lets each caller decide: refuse (the variance decomposition, whose
+            # entire output is that component) or drop to unweighted kappa
+            # (everything that only needs the weights).
+            #
+            # Nestedness is hereditary, so a collection that passes has every subset
+            # passing too - a caller may test all its columns once and trust each
+            # pair. `levels` keeps the historical union so a caller that only wants
+            # something to recode against is unchanged; when ambiguous is FALSE the
+            # union IS the longest set, so no well-formed result moves.
+            .mergeDeclaredLevels = function(lv_list) {
+                lv_list <- lv_list[lengths(lv_list) > 0]
+                if (length(lv_list) == 0)
+                    return(list(levels = character(0), ambiguous = FALSE))
+                lv_list <- lv_list[order(-lengths(lv_list))]
+                base <- lv_list[[1]]
+                nested <- vapply(lv_list[-1], function(lv)
+                    all(lv %in% base) && identical(lv, base[base %in% lv]),
+                    logical(1))
+                list(levels = Reduce(union, lv_list), ambiguous = !all(nested))
+            },
+            # For a non-factor column as.factor() orders numerically, which is also
+            # the declared order.
+            .orderedLevelsInfo = function(sub) {
+                private$.mergeDeclaredLevels(
+                    lapply(sub, function(x) levels(as.factor(x))))
+            },
             .orderedLevels = function(sub) {
-                l1 <- levels(as.factor(sub[[1]]))
-                l2 <- levels(as.factor(sub[[2]]))
-                if (length(l2) > length(l1)) {
-                    tmp <- l1
-                    l1 <- l2
-                    l2 <- tmp
+                private$.orderedLevelsInfo(sub)$levels
+            },
+            # Headline Fleiss (exact = FALSE) / Conger (exact = TRUE) kappa for 3+
+            # raters on EVERY observed rating, via irrCAC (Gwet 2014, ch. 2 and 5).
+            # A case with 2+ ratings enters observed agreement; every case with 1+
+            # rating enters the category prevalences (chance agreement) and the SE.
+            # On complete data the value equals irr::kappam.fleiss (verified in
+            # test-agreement-fleiss-allcells.R).
+            #
+            # irrCAC trims and upper-cases character ratings and labels, so "a" and
+            # "A" would merge, and sorts labels alphabetically unless given
+            # categ.labels. Both are avoided by recoding every column to its position
+            # in the declared level set (.orderedLevelsInfo) and passing those
+            # positions as categ.labels: a numeric matrix is compared as-is.
+            #
+            # irrCAC 1.4 rounds coeff.val and coeff.se to 5 dp; the coefficient is
+            # rebuilt unrounded from its pa and pe, the SE is used as returned.
+            # Its p.value is ONE-sided, 1 - pt(kappa / se, n - 1) (read from the
+            # 1.4 source; 1.0 was two-sided), so it is not read: the two-sided p is
+            # recomputed on the same n - 1 df, as the Gwet AC table does. The SE is
+            # Gwet's subject-sampling SE with the raters treated as fixed (N = Inf);
+            # the interval is irrCAC's kappa -/+ t(n - 1) * SE, upper limit capped at 1.
+            # n = cases with at least one rating (all-missing rows are dropped: they
+            # would divide 0 by 0 in the prevalences).
+            .fleissAllRatings = function(ratings, exact, conf) {
+                lv <- private$.orderedLevelsInfo(ratings)$levels
+                codes <- as.matrix(as.data.frame(lapply(ratings, function(x)
+                    match(as.character(x), lv))))
+                codes <- codes[rowSums(!is.na(codes)) > 0, , drop = FALSE]
+                # A rater with no ratings has no marginal distribution, and Conger's
+                # chance agreement is built from rater marginals: irrCAC returns pe = NaN.
+                # The column carries no rating either way, so drop it.
+                codes <- codes[, colSums(!is.na(codes)) > 0, drop = FALSE]
+                fit <- if (isTRUE(exact))
+                    irrCAC::conger.kappa.raw(codes, weights = "unweighted",
+                        categ.labels = seq_along(lv), conflev = conf, N = Inf)
+                else
+                    irrCAC::fleiss.kappa.raw(codes, weights = "unweighted",
+                        categ.labels = seq_along(lv), conflev = conf, N = Inf)
+                n <- nrow(codes)
+                # Fewer than two categories in use: chance agreement is 1 and kappa is
+                # undefined. irrCAC substitutes pe = 1e-15 when only one label is
+                # declared and returns kappa = 1, so decide it here.
+                if (length(unique(codes[!is.na(codes)])) < 2) {
+                    kappa <- NaN
+                } else {
+                    kappa <- (fit$est$pa - fit$est$pe) / (1 - fit$est$pe)
                 }
-                union(l1, l2)
+                se <- fit$est$coeff.se
+                ok <- is.finite(kappa) && length(se) == 1L && is.finite(se) && se > 0 && n >= 2
+                stat <- if (ok) kappa / se else NA_real_
+                crit <- if (ok) stats::qt(1 - (1 - conf) / 2, n - 1) else NA_real_
+                list(value = kappa,
+                     se = if (ok) se else NA_real_,
+                     statistic = stat,
+                     p.value = if (ok) 2 * stats::pt(-abs(stat), n - 1) else NA_real_,
+                     ci_lower = if (ok) kappa - crit * se else NA_real_,
+                     ci_upper = if (ok) min(1, kappa + crit * se) else NA_real_,
+                     subjects = n,
+                     ratings = sum(!is.na(codes)),
+                     complete = sum(stats::complete.cases(codes)))
+            },
+            # Said wherever a weighted kappa silently became an unweighted one
+            # because the columns declare no single scale. Same shape as the other
+            # weight_override notes, so the wording does not drift between tables.
+            .scaleAmbiguousNote = function() {
+                .("Weighted kappa was requested, but the rater variables declare different category sets that do not place every category relative to every other one - so there is no single scale for the weights to sit on, and unweighted Cohen's kappa is reported here instead. Weights assume a distance between categories, and a distance needs one agreed order; merging the declarations would invent one, and the answer would then depend on the order the variables were selected. Declare the same full set of categories, in the same order, on every rater variable and run again to obtain the weighted statistic.")
+            },
+            # The mirror of the headline table's numeric_as_codes note. ICC, Lin's CCC
+            # and TDI are dispatched on is.numeric() alone, so a 0/1 or 1-5 column that
+            # the kappa table reads as CATEGORY CODES is read here as a measurement,
+            # and a TDI "acceptable limit" verdict was printed for nominal codes with
+            # nothing on screen to say so. Self-clearing: NULL when nothing applies.
+            .noteCodedNumeric = function(table, cols) {
+                table$setNote("coded_numeric",
+                    if (length(cols) > 0)
+                        .fmt(.("Read as measurements, although they look like category codes: {cols}. These numeric columns hold only whole numbers no greater than 10, and this coefficient treats the distances between those numbers as real. That is fine for scores on an interval scale; if they are grades or categories, use kappa, Krippendorff's alpha or Gwet's AC instead."),
+                             cols = paste(private$.noteSafe(jmvcore::htmlEscape(cols)), collapse = ", "))
+                    else NULL)
+            },
+            .noteScaleAmbiguity = function(table, ambiguous) {
+                # Cleared on the FALSE branch: a note left by a previous run would
+                # assert an override that did not happen this time.
+                table$setNote("scale_ambiguous",
+                    if (isTRUE(ambiguous)) private$.scaleAmbiguousNote() else NULL)
             },
 
             # irr::kappa2() with the ordinal weights on the DECLARED scale order.
@@ -7665,10 +8670,28 @@ agreementClass <- if (requireNamespace("jmvcore")) {
             # Verified: this reproduces vcd::Kappa(weights=) to machine precision,
             # so the point estimate and the vcd-based interval are one statistic.
             # Unweighted kappa is order-invariant, so leave it untouched.
-            .kappa2Ordered = function(sub, irr_weight) {
+            # A declared order that is not determined by the data would put the
+            # weight matrix on an invented scale, so weights are DROPPED rather than
+            # laid over a guess. Refusing would kill analyses that run today;
+            # unweighted kappa is order-invariant and still answers the question. The
+            # flag comes back so the caller can say so (private$.noteScaleAmbiguity).
+            # `lv_info` lets a caller that holds MORE columns than this pair supply
+            # the scale they determine together. Two raters who each used a different
+            # two grades determine nothing on their own, but a third rater declaring
+            # the full scale settles it - and a per-pair derivation would then drop
+            # the weights for that one pair and leave an all-pairs table with two
+            # different statistics in one column. Default NULL keeps every existing
+            # caller deriving it from `sub`, exactly as before.
+            .kappa2Ordered = function(sub, irr_weight, lv_info = NULL) {
+                scale_ambiguous <- FALSE
                 if (!identical(irr_weight, "unweighted")) {
-                    lv <- private$.orderedLevels(sub)
-                    if (length(lv) >= 2) {
+                    if (is.null(lv_info))
+                        lv_info <- private$.orderedLevelsInfo(sub)
+                    lv <- lv_info$levels
+                    if (isTRUE(lv_info$ambiguous)) {
+                        scale_ambiguous <- TRUE
+                        irr_weight <- "unweighted"
+                    } else if (length(lv) >= 2) {
                         sub <- as.data.frame(
                             lapply(sub, function(x) {
                                 m <- match(as.character(x), lv)
@@ -7680,9 +8703,11 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         )
                     }
                 }
-                irr::kappa2(ratings = sub, weight = irr_weight)
+                res <- irr::kappa2(ratings = sub, weight = irr_weight)
+                res$scale_ambiguous <- scale_ambiguous
+                res
             },
-            .pairKappaWithCI = function(sub, irr_weight) {
+            .pairKappaWithCI = function(sub, irr_weight, lv_info = NULL) {
                 a <- as.character(sub[[1]])
                 b <- as.character(sub[[2]])
                 peragree <- mean(a == b)
@@ -7699,7 +8724,18 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 # the Landis & Koch moderate/substantial boundary. Unweighted kappa
                 # is order-invariant, so this only bites the weighted option - which
                 # is exactly the option chosen for an ordinal scale.
-                lv_declared <- private$.orderedLevels(sub)
+                # See .kappa2Ordered(): NULL means "derive it from this pair".
+                if (is.null(lv_info))
+                    lv_info <- private$.orderedLevelsInfo(sub)
+                lv_declared <- lv_info$levels
+                # Same underdetermination guard as .kappa2Ordered(). vcd::Kappa lays
+                # its weight matrix over the table in the order given here, so an
+                # order the declarations do not fix would fabricate the distances
+                # between grades. Drop to unweighted and report it upward.
+                scale_ambiguous <- !identical(irr_weight, "unweighted") &&
+                    isTRUE(lv_info$ambiguous)
+                if (scale_ambiguous)
+                    irr_weight <- "unweighted"
                 # Unobserved declared categories are dropped before the table is
                 # formed, which COLLAPSES the ordinal spacing: with G3 never used, a
                 # G2-vs-G4 disagreement is scored as one step instead of two and the
@@ -7710,6 +8746,50 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 # kappa and an interval belonging to different statistics on one row.
                 # `unused_levels` is returned so the caller can disclose the collapse.
                 lv_observed <- lv_declared[lv_declared %in% c(a, b)]
+
+                # How the interval is built. Both branches use the SAME non-null
+                # asymptotic standard error; only the scale it is applied on differs.
+                #
+                # "wald"    kappa +- z * ASE, clamped to [-1, 1]. Symmetric, and it
+                #           reproduces the limits psych::cohen.kappa prints - which is
+                #           why it is the default and why several tests pin it. Its
+                #           coverage is below nominal at pathology sample sizes.
+                # "fisherz" atanh is the variance-stabilising transform for a
+                #           correlation-like coefficient on [-1, 1]; the delta method
+                #           gives SE(atanh k) = ASE / (1 - k^2). Back-transforming with
+                #           tanh cannot leave [-1, 1], so no clamp is needed - the
+                #           clamp exists because an unclamped Wald interval once
+                #           reported an upper limit of 1.18.
+                #
+                # Coverage of the nominal 95% interval, 20,000 replicates per cell,
+                # MC SE 0.0015 (development-scripts/validate_agreement_coverage.R):
+                #
+                #                                n=20   n=30   n=50   n=100
+                #   3 balanced cats, k=0.64 Wald  .897   .930   .929   .946
+                #                        Fisher-z .953   .949   .948   .950
+                #   2 cats, 10% pos, k=0.61 Wald  .875   .849   .895   .932
+                #                        Fisher-z .879   .884   .944   .950
+                #   3 cats, k=0.94          Wald  .886   .957   .977   .922
+                #                        Fisher-z .880   .933   .932   .952
+                #
+                # Fisher-z roughly halves the mean departure from nominal (.040 -> .021
+                # over those twelve cells) and is clearly better in the two common
+                # conditions, but it is NOT uniformly better: at k = 0.94 with n = 30
+                # or 50 it is worse, and Wald's .957/.977 there is the clamp at 1
+                # truncating the upper limit rather than a correctly covering interval.
+                # That is why this is an option and not a silent replacement.
+                build_ci <- function(kappa, se, zc) {
+                    if (!is.finite(kappa) || !is.finite(se) || se <= 0) {
+                        return(c(NA_real_, NA_real_))
+                    }
+                    if (identical(self$options$kappaCIMethod, "fisherz") &&
+                        abs(kappa) < 1) {
+                        z0 <- atanh(kappa)
+                        sz <- se / (1 - kappa^2)
+                        return(c(tanh(z0 - zc * sz), tanh(z0 + zc * sz)))
+                    }
+                    c(max(-1, kappa - zc * se), min(1, kappa + zc * se))
+                }
 
                 run_vcd <- function(lv) {
                     if (length(lv) < 2) {
@@ -7737,16 +8817,18 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             }
                             z <- kappa / ase
                             zc <- stats::qnorm(1 - (1 - self$options$confLevel) / 2)
-                            # Kappa is bounded by [-1, 1]; an unclamped Wald
-                            # interval reported an upper limit of 1.18, which is
-                            # not a possible value. The sibling inter/intra path
-                            # already clamps - do the same here.
+                            # Kappa is bounded by [-1, 1]; an unclamped Wald interval
+                            # reported an upper limit of 1.18, which is not a possible
+                            # value. build_ci() clamps on the Wald branch and cannot
+                            # leave the range at all on the Fisher-z branch.
+                            ci_b <- build_ci(kappa, ase, zc)
                             list(
                                 kappa = kappa, se = ase,
-                                ci_lower = max(-1, kappa - zc * ase),
-                                ci_upper = min(1, kappa + zc * ase),
+                                ci_lower = ci_b[1],
+                                ci_upper = ci_b[2],
                                 z = z, p = 2 * stats::pnorm(-abs(z)),
                                 peragree = peragree, method = "vcd",
+                                scale_ambiguous = scale_ambiguous,
                                 unused_levels = setdiff(lv_declared, c(a, b))
                             )
                         },
@@ -7766,7 +8848,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 # above documents and fixes for the vcd branch - so the fallback
                 # printed a weighted kappa computed on a scrambled scale (verified
                 # 0.854 -> 0.753 on Absent/Focal/Diffuse).
-                kres <- tryCatch(private$.kappa2Ordered(sub, irr_weight),
+                kres <- tryCatch(private$.kappa2Ordered(sub, irr_weight, lv_info),
                     error = function(e) NULL
                 )
                 if (is.null(kres) || is.na(kres$value)) {
@@ -7775,6 +8857,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         ci_lower = NA_real_, ci_upper = NA_real_,
                         z = NA_real_, p = NA_real_,
                         peragree = peragree, method = "failed",
+                        scale_ambiguous = scale_ambiguous,
                         unused_levels = character(0)
                     ))
                 }
@@ -7785,17 +8868,16 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     NA_real_
                 }
                 zc <- stats::qnorm(1 - (1 - self$options$confLevel) / 2)
-                ci <- if (!is.na(se)) {
-                    raw <- kres$value + c(-1, 1) * zc * se
-                    c(max(-1, raw[1]), min(1, raw[2]))
-                } else {
-                    c(NA_real_, NA_real_)
-                }
+                # Same builder as the vcd branch, so a fallback interval is never a
+                # differently-scaled statistic sitting in the same two columns. The SE
+                # is still the wrong (null) SE and the caller still says so.
+                ci <- build_ci(kres$value, se, zc)
                 list(
                     kappa = kres$value, se = se,
                     ci_lower = ci[1], ci_upper = ci[2],
                     z = kres$statistic, p = kres$p.value,
                     peragree = peragree, method = "irr-fallback",
+                    scale_ambiguous = scale_ambiguous,
                     unused_levels = setdiff(lv_declared, c(a, b))
                 )
             },
@@ -7813,13 +8895,23 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 rater_names <- colnames(ratings)
                 n_raters <- ncol(ratings)
                 wght <- self$options$wght
-                irr_weight <- if (identical(wght, "equal")) {
+                # One test over ALL the rater columns rather than one per pair:
+                # nestedness is hereditary, so a set that determines an order has
+                # every pair determining one, and the "Weights:" note below then
+                # describes every row of the table instead of most of them.
+                allpairs_lv <- private$.orderedLevelsInfo(ratings)
+                allpairs_scale_ambiguous <- !identical(wght, "unweighted") &&
+                    isTRUE(allpairs_lv$ambiguous)
+                irr_weight <- if (allpairs_scale_ambiguous) {
+                    "unweighted"
+                } else if (identical(wght, "equal")) {
                     "equal"
                 } else if (identical(wght, "squared")) {
                     "squared"
                 } else {
                     "unweighted"
                 }
+                private$.noteScaleAmbiguity(tbl, allpairs_scale_ambiguous)
 
                 pairs <- utils::combn(n_raters, 2, simplify = FALSE)
                 rows <- list()
@@ -7830,7 +8922,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     sub <- ratings[, c(a, b), drop = FALSE]
                     sub <- sub[stats::complete.cases(sub), , drop = FALSE]
                     n_pair <- nrow(sub)
-                    key <- paste(rater_names[a], rater_names[b], sep = "__")
+                    # Row key from column POSITIONS. Pasting the names with "__" gave
+                    # ("A", "B__C") and ("A__B", "C") one key, and the second row replaced
+                    # the first. rater_a and rater_b still show the names verbatim.
+                    key <- paste(a, b, sep = "_")
 
                     if (n_pair < 5) {
                         rows[[key]] <- list(
@@ -7843,7 +8938,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         next
                     }
 
-                    kc <- private$.pairKappaWithCI(sub, irr_weight)
+                    # The scale comes from ALL the rater columns, not from this
+                    # pair: every row of this table is then the same statistic on the
+                    # same scale, which is what the single "Weights:" note claims.
+                    kc <- private$.pairKappaWithCI(sub, irr_weight, allpairs_lv)
 
                     if (is.na(kc$kappa)) {
                         rows[[key]] <- list(
@@ -7883,12 +8981,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 corr <- self$options$multipleTestCorrection
                 if (!identical(corr, "none") && length(rows) > 1) {
                     pvals <- vapply(rows, function(r) r$p, numeric(1))
-                    method <- switch(corr,
-                        bonferroni = "bonferroni",
-                        bh         = "BH",
-                        holm       = "holm",
-                        "none"
-                    )
+                    method <- private$.pAdjustMethod(corr)$method
                     if (!identical(method, "none")) {
                         padj <- stats::p.adjust(pvals, method = method)
                         for (k in seq_along(rows)) rows[[k]]$p_adj <- padj[k]
@@ -7948,8 +9041,12 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 </div>
                 <p style='font-size: 0.9em; color: inherit;'>
                     Cases with no unique mode (ties) are excluded and reported in a footnote.
-                    95% CIs are normal-approximation Wald intervals on the case-level mean
-                    agreement, bounded to [0, 1].
+                    Confidence intervals are normal-approximation Wald intervals on the
+                    case-level mean agreement, bounded to the range 0 to 1, at the confidence level
+                    set in the options. No interval is shown for a category whose cases
+                    carry no spread in their within-case agreement rate (one case, or
+                    several cases that all agree to the same degree): the standard error
+                    would be zero and the interval would claim perfect precision.
                 </p>
             </div>"
                 self$results$itemModalAgreementExplanation$setContent(html_content)
@@ -8006,13 +9103,23 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 cats <- sort(unique(modes))
                 zc <- stats::qnorm(1 - (1 - self$options$confLevel) / 2)
+                # se = 0 produced a zero-width interval: a category backed by ONE case,
+                # or by several cases that happen to share the same within-case agreement
+                # rate, printed "Mean Agreement 1.00, 95% CI 1.00 to 1.00" - a claim of
+                # perfect precision that was never estimated and that looks exactly like
+                # a real interval. Leave the interval empty and say why once.
+                degenerate_se <- FALSE
 
                 for (cat in cats) {
                     idx <- which(modes == cat)
                     m <- mean(agrees[idx])
-                    se <- if (length(idx) > 1) stats::sd(agrees[idx]) / sqrt(length(idx)) else 0
-                    ci <- m + c(-1, 1) * zc * se
-                    ci <- pmax(0, pmin(1, ci))
+                    se <- if (length(idx) > 1) stats::sd(agrees[idx]) / sqrt(length(idx)) else NA_real_
+                    if (isTRUE(se > 0)) {
+                        ci <- pmax(0, pmin(1, m + c(-1, 1) * zc * se))
+                    } else {
+                        degenerate_se <- TRUE
+                        ci <- c(NA_real_, NA_real_)
+                    }
                     tbl$addRow(rowKey = cat, values = list(
                         category       = as.character(cat),
                         n_cases        = length(idx),
@@ -8020,6 +9127,16 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         ci_lower       = ci[1],
                         ci_upper       = ci[2]
                     ))
+                }
+
+                if (degenerate_se) {
+                    tbl$setNote(
+                        "no_ci",
+                        sprintf(.("An empty confidence interval means the interval is not estimable for that category, not that it is zero-width: the category is backed by a single case, or by cases that all share the same within-case agreement rate, so the between-case standard error is zero. The mean agreement shown is still the observed value. %.0f%% intervals are Wald intervals on the case-level mean, bounded to the range 0 to 1."),
+                            100 * self$options$confLevel)
+                    )
+                } else {
+                    tbl$setNote("no_ci", NULL)
                 }
 
                 if (n_ties > 0) {
@@ -8155,15 +9272,15 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             <td style='padding: 5px; border-bottom: 1px solid #ddd;'>Poor reliability</td>
                         </tr>
                         <tr>
-                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>0.50 - 0.75</td>
+                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>0.50 to &lt; 0.75</td>
                             <td style='padding: 5px; border-bottom: 1px solid #ddd;'>Moderate reliability</td>
                         </tr>
                         <tr>
-                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>0.75 - 0.90</td>
+                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>0.75 to &lt; 0.90</td>
                             <td style='padding: 5px; border-bottom: 1px solid #ddd;'>Good reliability</td>
                         </tr>
                         <tr>
-                            <td style='padding: 5px; font-weight: bold;'>ICC > 0.90</td>
+                            <td style='padding: 5px; font-weight: bold;'>0.90 to 1.00</td>
                             <td style='padding: 5px;'>Excellent reliability</td>
                         </tr>
                     </table>
@@ -8188,6 +9305,132 @@ agreementClass <- if (requireNamespace("jmvcore")) {
             "
 
                 self$results$iccExplanation$setContent(html_content)
+            },
+            # One interpretation scale per coefficient family, named wherever a word
+            # is shown (2026-09-23, IR-2606: kappa 0.5567 read "moderate agreement"
+            # in the summary and "Fair" in the Intra-Rater table, and "Fair" meant
+            # 0.20-0.40 in one table of that same output and 0.40-0.60 in another).
+            #
+            # These two helpers are the REFERENCE definition, not the only copy. Five
+            # band chains remain inline because they show a suffixed sentence rather
+            # than a bare word, which a helper returning "Slight" cannot supply: the
+            # headline summary in .run() ("slight agreement", lower case, inside a
+            # sentence), lightKappaTable and gwetTable ("Slight agreement"), and - on
+            # the Koo & Li ICC scale - iccTable ("Poor reliability") and
+            # robinsonATable ("Poor agreement"). Their cut-points and words agree with
+            # the helpers today and have to be moved in step; nothing enforces that,
+            # so check all six sites when a band changes. Kendall's W has its own
+            # five-band scale and is NOT one of these.
+            #
+            # Both scales are HALF-OPEN at every cut-point (`<`, never `<=`), so a
+            # value landing exactly on a boundary takes the higher band; the published
+            # two-decimal tables leave 0.20-0.21 undefined, so a convention is needed
+            # and .bandScaleNote() states this one.
+            #
+            # An ICC is NOT on this scale - send it to .iccBandLabel(). Neither are
+            # Finn's r, Lin's CCC, a correlation or an F1 score; those keep their own
+            # bands and disclose them in a note.
+            #
+            # The negative test comes FIRST and must stay first: "worse than chance"
+            # is a chance-corrected concept, and a kappa of -0.15 falling through to
+            # the 0.20 test would be graded "Slight".
+            .kappaBandLabel = function(value) {
+                if (length(value) != 1L || !is.finite(value))
+                    return(.("Not estimable"))
+                if (value < 0)    return(.("Worse than chance"))
+                if (value < 0.20) return(.("Slight"))
+                if (value < 0.40) return(.("Fair"))
+                if (value < 0.60) return(.("Moderate"))
+                if (value < 0.80) return(.("Substantial"))
+                .("Almost perfect")
+            },
+            # Koo & Li (2016) for the ICC. Their scale has NO negative band: a
+            # negative ICC(2,1) means within-subject variance exceeds between-subject
+            # variance, which is Poor, not "worse than chance". The length() test is
+            # load-bearing - .guardICCResult() passes NULL straight through, so a
+            # failed fit reaches this helper as NULL, and `if (NULL < 0.50)` errors.
+            .iccBandLabel = function(value) {
+                if (length(value) != 1L || !is.finite(value))
+                    return(.("Not estimable"))
+                if (value < 0.50) return(.("Poor"))
+                if (value < 0.75) return(.("Moderate"))
+                if (value < 0.90) return(.("Good"))
+                .("Excellent")
+            },
+            # The same sentence on every table that can show either family, so the
+            # catalog carries one msgid and the wording cannot drift between tables.
+            # Originally written for subgroupAgreementTable; reused verbatim.
+            .bandScaleNote = function() {
+                .("Interpretation labels follow Landis & Koch (1977) for kappa and Koo & Li (2016) for ICC(2,1); the two scales are not interchangeable, so read the label together with the statistic named in the Statistic column. The bands are half-open, so a value landing exactly on a cut-point takes the higher band: kappa = 0.20 reads Fair and an ICC of 0.75 reads Good. The published tables quote two-decimal ranges (Fair is 0.21 to 0.40) and leave the gap between the bands undefined, so a value on the boundary has to be assigned by convention.")
+            },
+            .guardICCResult = function(icc) {
+                # irr::icc() builds its mean squares from raw sums of squares, so a
+                # rating column whose values span many orders of magnitude - a Ki-67
+                # percentage sitting beside a 1e12 sentinel, say - loses the residual
+                # sum of squares to floating-point cancellation and returns numbers
+                # that contradict one another. Measured on irr 0.85 with
+                # a = c(1e-12, 1, 1e12, 5, 7, 9, 11, 13) against the same column with
+                # one value changed, model = "twoway", type = "agreement":
+                #   value  = 1 + 2.22e-16  (OUTSIDE the [-1, 1] parameter space)
+                #   Fvalue = -6.52e+15     (impossible for a ratio of mean squares)
+                #   lbound = 1 + 1.33e-15  ABOVE ubound = 1 (the interval is inverted)
+                # and p = 1. irr signals none of it and psych::ICC agrees with the bad
+                # answer, so the defect is inherited rather than ours - but it reached
+                # the table unguarded. A single value of 1e9 or larger in a
+                # percentage-scaled column is enough to flip F negative.
+                #
+                # Every consumer of irr::icc() in this file routes through here, so the
+                # screen lives in ONE place: clamp the coefficient back into the
+                # parameter space, suppress the cells irr has contradicted instead of
+                # printing them, and hand the caller a sentence to show. The sentence is
+                # the whole point - a clamped 1.000 looks exactly like a real 1.000 on
+                # the page, and that invisible difference is what this guard exists for.
+                #
+                # This screens only what irr contradicts on its own terms. Whether ONE
+                # case is driving the estimate is a different question, answered by the
+                # influence screen; keep the two notes disjoint and say nothing here
+                # about which case is at fault.
+                #
+                # No square brackets in the msgids below: when a msgid is missing from
+                # the catalog jmvcore's Translator falls through to
+                # regexec("(.*) \\[(.*)\\]", text) and keeps only group 1, so " [-1, 1]"
+                # would silently truncate the sentence at "outside the".
+                if (is.null(icc))
+                    return(NULL)
+
+                problems <- character(0)
+
+                val <- icc$value
+                if (!is.null(val) && is.finite(val) && (val > 1 || val < -1)) {
+                    icc$value <- max(-1, min(1, val))
+                    problems <- c(problems, .("the coefficient fell outside the -1 to 1 parameter space and has been clamped to the nearest bound"))
+                }
+
+                lo <- icc$lbound
+                hi <- icc$ubound
+                if (!is.null(lo) && !is.null(hi) && is.finite(lo) && is.finite(hi) && lo > hi) {
+                    icc$lbound <- NULL
+                    icc$ubound <- NULL
+                    problems <- c(problems, .("the confidence interval came back inverted, with the lower bound above the upper bound, and has been suppressed"))
+                }
+
+                fval <- icc$Fvalue
+                if (!is.null(fval) && (!is.finite(fval) || fval < 0)) {
+                    # Drop the element rather than set NA: jmvcore renders a NULL cell
+                    # blank, and the degrees of freedom stay because they are correct
+                    # whatever happened to the mean squares.
+                    icc$Fvalue <- NULL
+                    icc$p.value <- NULL
+                    problems <- c(problems, .("the F statistic came back negative, which a ratio of mean squares cannot be, so F and its p value have been suppressed"))
+                }
+
+                if (length(problems) > 0)
+                    icc$guardNote <- sprintf(
+                        .("Numerically unreliable at this data scale: %s. This happens when the rating values span many orders of magnitude, so the residual variance is lost to floating-point rounding. Check the ratings for sentinel or placeholder codes such as 999 or 1e12, check for a unit mix-up between columns, and rescale to one unit before reading these numbers."),
+                        paste(problems, collapse = "; ")
+                    )
+
+                icc
             },
             .calculateICC = function(ratings) {
                 # Calculate Intraclass Correlation Coefficient for continuous data
@@ -8257,13 +9500,16 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 # Calculate ICC
                 tryCatch(
                     {
-                        icc_result <- irr::icc(
+                        # Screen the return value before anything reads it: at extreme
+                        # data scales irr::icc hands back an out-of-range coefficient, a
+                        # negative F and an inverted interval without raising anything.
+                        icc_result <- private$.guardICCResult(irr::icc(
                             ratings_clean,
                             model = model_param,
                             type = type_param,
                             unit = unit_param,
                             conf.level = self$options$confLevel
-                        )
+                        ))
 
                         # Determine model name for display
                         model_names <- list(
@@ -8289,6 +9535,13 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             p = icc_result$p.value
                         ))
 
+                        # Say so whenever the guard had to alter what irr::icc returned.
+                        # A clamped 1.000 is indistinguishable from a real one on the
+                        # page, so this note is the only thing that makes the difference
+                        # visible. Separate key from "interpretation" so both show.
+                        if (!is.null(icc_result$guardNote))
+                            self$results$iccTable$setNote("numeric", icc_result$guardNote)
+
                         # Add interpretation note
                         icc_val <- icc_result$value
                         if (icc_val < 0.50) {
@@ -8312,30 +9565,39 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     error = function(e) {
                         self$results$iccTable$setNote(
                             "error",
-                            sprintf(.("Error calculating ICC: %s"), jmvcore::htmlEscape(e$message))
+                            sprintf(.("Error calculating ICC: %s"), private$.noteSafe(jmvcore::htmlEscape(e$message)))
                         )
                     }
                 )
             },
             .calculateIota = function(ratings) {
-                # Calculate Iota coefficient for multivariate interrater agreement
-                # Iota measures agreement across multiple variables/dimensions simultaneously
+                # SCOPE: this computes the SINGLE-VARIABLE iota. irr::iota takes one
+                # matrix PER VARIABLE; nothing in this analysis's option schema can name
+                # a second variable, so ratings_list below has exactly one element and
+                # every selected column is a RATER of that one variable. The multivariate
+                # form of Janson & Olsson (2001) is NOT computed here - see the "scope"
+                # note and .populateIotaExplanation(). Do not restore any multivariate
+                # wording without also building ratings_list with one element per variable.
 
-                n_vars <- ncol(ratings)
+                # Notes persist between runs, so clear every key this method can set;
+                # each branch below re-sets only the notes it means to show.
+                for (note_key in c("error", "scope", "info", "scale", "missing", "standardize"))
+                    self$results$iotaTable$setNote(note_key, NULL)
+
+                n_raters <- ncol(ratings)   # rater columns of ONE variable, not variables
                 n_cases <- nrow(ratings)
 
-                # Iota requires at least 2 variables (dimensions) to be meaningful
-                if (n_vars < 2) {
+                # iota needs at least two raters of the variable
+                if (n_raters < 2) {
                     self$results$iotaTable$setNote(
                         "error",
-                        .("Iota coefficient requires multiple variables (raters) for multivariate analysis. Select at least 2 rater columns. For single-variable agreement, use ICC or Kappa instead.")
+                        .("Iota needs at least two rater columns for one variable. Select two or more raters, or use ICC for continuous ratings and kappa for categorical ratings.")
                     )
                     return()
                 }
 
-                # Prepare data for irr::iota
-                # irr::iota expects a list of matrices, one per variable
-                # In our simplified implementation, we treat each column as one dimension
+                # Prepare data for irr::iota. It expects a list of matrices, one per
+                # variable; this analysis always passes exactly one.
 
                 # Determine scale data type from the SAME categorical-vs-continuous
                 # decision as the headline kappa (private$.continuousRatingNames).
@@ -8352,10 +9614,8 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         return()
                     }
                     scale_data <- "quantitative"
-                    data_desc <- "quantitative (continuous)"
                 } else {
                     scale_data <- "nominal"
-                    data_desc <- "nominal (categorical)"
                     # Convert character columns to factors
                     for (i in seq_along(ratings)) {
                         if (is.character(ratings[[i]])) {
@@ -8364,7 +9624,8 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     }
                 }
 
-                # For Iota, create list of matrices - simplified implementation
+                # One element by design: this is the single-variable iota (see header).
+                # No option can supply a second variable.
                 ratings_list <- list(as.matrix(ratings))
 
                 # Calculate Iota
@@ -8376,122 +9637,238 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             standardize = self$options$iotaStandardize && scale_data == "quantitative"
                         )
 
-                        # Populate table
-                        method_text <- sprintf("Iota (%s data)", data_desc)
-                        if (self$options$iotaStandardize && scale_data == "quantitative") {
-                            method_text <- paste0(method_text, " - standardized")
-                        }
+                        # No " - standardized" suffix: with one variable, standardizing
+                        # is an affine rescale, so the value is identical to within
+                        # 1e-15 - far below the displayed precision, though NOT
+                        # bit-identical (max |difference| = 1.33e-15 over 200 random
+                        # draws through irr::iota directly, and identical() was FALSE
+                        # on several of them). The suffix advertised an effect the
+                        # reader cannot see at any printed digit.
+                        method_text <- if (scale_data == "quantitative")
+                            .("Iota, quantitative ratings, one variable")
+                        else
+                            .("Iota, nominal ratings, one variable")
 
                         # Interpret Iota value
                         iota_val <- iota_result$value
-                        if (iota_val < 0.40) {
-                            # The verdict a clinician actually reads was a bare English literal spliced
-                            # into an otherwise translated sentence, so a Turkish user got a Turkish
-                            # sentence with an English conclusion in it. The msgid is the literal itself.
-                            interp <- .("Poor agreement")
-                        } else if (iota_val < 0.60) {
-                            interp <- .("Fair agreement")
-                        } else if (iota_val < 0.75) {
-                            interp <- .("Good agreement")
-                        } else if (iota_val < 0.90) {
-                            interp <- .("Very good agreement")
-                        } else {
-                            interp <- .("Excellent agreement")
-                        }
+                        # Iota publishes no bands of its own, so it borrows a scale -
+                        # but WHICH scale depends on scale_data, because the two
+                        # branches are different statistics wearing one name.
+                        #
+                        #   nominal      iota IS Conger's exact kappa (agrees to 1e-9
+                        #                on our fixtures), so the Landis & Koch kappa
+                        #                bands apply to it directly.
+                        #   quantitative iota is a variance-ratio reliability
+                        #                coefficient that tracks ICC(2,1) to three
+                        #                decimals across six noise levels (measured
+                        #                against irr::icc). Grading it on the kappa
+                        #                scale put "Almost perfect" (iota 0.8563)
+                        #                beside iccTable's "Good" for ICC 0.858 in ONE
+                        #                output, and "Fair" (0.2996) beside "Poor"
+                        #                (0.3023) in another. Use the ICC bands so the
+                        #                two panels of one output agree.
+                        #
+                        # .bandScaleNote() is NOT used here: it points the reader at a
+                        # "Statistic column" iotaTable does not have, and offers both
+                        # scales when only one is in force. The bespoke note below
+                        # names the scale this run actually used.
+                        interp <- if (scale_data == "quantitative")
+                            private$.iccBandLabel(iota_val)
+                        else
+                            private$.kappaBandLabel(iota_val)
 
                         self$results$iotaTable$setRow(rowNo = 1, values = list(
                             method = method_text,
                             subjects = iota_result$subjects,
                             raters = iota_result$raters,
-                            variables = length(ratings_list),
                             iota_value = iota_val,
                             interpretation = interp
                         ))
 
+                        # The pointer to Conger's exact kappa has to follow the rater
+                        # count: the Exact kappa option REJECTS the whole analysis
+                        # below 3 raters ("Exact kappa requires at least 3 raters"),
+                        # so sending a 2-rater user there breaks their run, and the
+                        # equal number is already on screen as Cohen's kappa.
+                        self$results$iotaTable$setNote(
+                            "scope",
+                            if (n_raters < 3)
+                                .("Every selected column is read as another rater of ONE variable, so this is the single-variable iota over your rater columns. For nominal (categorical) ratings with two raters it is numerically identical to Cohen's kappa, which the main agreement table already reports; the Exact kappa (3+ raters) option needs three or more raters and will stop the analysis here. The multivariate form of iota - several variables scored by the same raters - is not computed by this analysis.")
+                            else
+                                .("Every selected column is read as another rater of ONE variable, so this is the single-variable iota over your rater columns. For nominal (categorical) ratings it is numerically identical to Conger's exact kappa, which the Exact kappa (3+ raters) option also reports. The multivariate form of iota - several variables scored by the same raters - is not computed by this analysis.")
+                        )
+
+                        self$results$iotaTable$setNote(
+                            "scale",
+                            if (scale_data == "quantitative")
+                                .("For continuous ratings iota is a variance-ratio reliability coefficient rather than a chance-corrected kappa, and it stays close to ICC(2,1), so the Interpretation label uses the Koo & Li (2016) ICC bands - the same scale as the ICC table in this analysis, so the two panels describe one reliability with one word. Iota is not an ICC and no benchmark has been published for iota itself; the bands are borrowed. They are half-open, so a value landing exactly on a cut-point takes the higher band: 0.75 reads Good.")
+                            else
+                                .("For one nominal variable iota is numerically Conger's exact kappa, so the Interpretation label uses the Landis & Koch (1977) kappa bands, the same scale as the kappa tables in this analysis. The bands are half-open, so a value landing exactly on a cut-point takes the higher band: 0.20 reads Fair. The published table quotes two-decimal ranges (Fair is 0.21 to 0.40) and leaves the gap between the bands undefined, so a value on the boundary has to be assigned by convention.")
+                        )
+
+                        # The Standardize checkbox stays enabled in the UI, so say here
+                        # - where a jamovi user will actually see it - that it cannot
+                        # move this number. The admission in the R help never reaches them.
+                        self$results$iotaTable$setNote(
+                            "standardize",
+                            .("The Standardize quantitative ratings option does not change the value above. Standardizing is an affine rescaling of the rating columns, and an affine rescaling leaves a single-variable iota unchanged; the option exists for the multivariate form of iota, which is not computed by this analysis. It is never applied to nominal ratings.")
+                        )
+
                         # Add informational note
                         note_text <- sprintf(
-                            "Iota coefficient: %.3f (%s). Iota is chance-corrected and ranges from 0 (no agreement) to 1 (perfect agreement).",
+                            .("Iota = %1$.3f (%2$s). Iota is chance-corrected: 0 is the agreement expected by chance and 1 is perfect agreement. irr::iota returns a point estimate only, so no confidence interval and no p-value are available."),
                             iota_val, interp
                         )
 
-                        if (scale_data == "quantitative" && self$options$iotaStandardize) {
-                            note_text <- paste0(note_text, " Variables were z-standardized before analysis.")
-                        }
-
                         self$results$iotaTable$setNote("info", note_text)
+
+                        # A non-finite iota used to reach `if (NA < 0.40)` and raise
+                        # "missing value where TRUE/FALSE needed"; the band helper
+                        # absorbs that into a quiet "Not estimable" beside a Cases
+                        # count that says the coefficient came from every row. Name the
+                        # cause instead. irr::iota has no incomplete-design theory -
+                        # Krippendorff's alpha does, so point there.
+                        if (length(iota_val) != 1L || !is.finite(iota_val)) {
+                            n_complete <- sum(stats::complete.cases(ratings))
+                            self$results$iotaTable$setNote(
+                                "missing",
+                                if (n_complete < n_cases)
+                                    sprintf(.("Iota could not be computed. %1$d of the %2$d cases are missing at least one rating, and iota is defined only for a complete design (every rater scores every case). The Cases column counts the rows that were submitted, not the rows the coefficient was estimated from. Restrict the data to the %3$d complete cases, or use Krippendorff's alpha, which is defined for incomplete designs."),
+                                        as.integer(n_cases - n_complete), as.integer(n_cases), as.integer(n_complete))
+                                else
+                                    .("Iota could not be computed from these ratings although no case is missing a rating. Check that every selected column is a rating of the same variable and that the ratings vary between cases: iota is undefined when there is no between-case variation to compare the disagreement against.")
+                            )
+                        }
                     },
                     error = function(e) {
                         self$results$iotaTable$setNote(
                             "error",
-                            sprintf(.("Error calculating Iota: %s"), jmvcore::htmlEscape(e$message))
+                            sprintf(.("Error calculating Iota: %s"), private$.noteSafe(jmvcore::htmlEscape(e$message)))
                         )
                     }
                 )
             },
             .populateIotaExplanation = function() {
-                # Generate comprehensive explanation of Iota coefficient
+                # Guide panel for iota. SCOPE: this analysis computes the SINGLE-VARIABLE
+                # iota - every selected column is read as another rater of one variable
+                # (ratings_list is list(as.matrix(ratings)) in .calculateIota). The
+                # multivariate form of Janson & Olsson (2001) needs one matrix per
+                # variable and no option here can supply a second variable, so no claim
+                # about several variables may appear in this panel.
 
                 html_content <- "
-                <div style='font-family: Arial, sans-serif; max-width: 900px; padding: 20px;'>
+                <div style='font-family: Arial, sans-serif; max-width: 900px; line-height: 1.6; padding: 20px;'>
                     <h3 style='color: inherit; border-bottom: 2px solid #333; padding-bottom: 10px;'>
-                        Iota Coefficient for Multivariate Interrater Agreement
+                        Iota Coefficient (Single Variable)
                     </h3>
 
-                    <div style='background-color: rgba(33, 159, 43, 0.1); padding: 15px; border-left: 4px solid #4CAF50; margin: 20px 0; color: inherit;'>
-                        <h4 style='margin: 0 0 10px 0; color: inherit;'>What is Iota?</h4>
-                        <p style='margin: 0; line-height: 1.6;'>
-                            Iota (\u{03B9}) is a <strong>chance-corrected agreement index</strong> for multivariate observations. Unlike ICC which
-                            analyzes one variable at a time, Iota assesses <strong>overall agreement across multiple variables simultaneously</strong>.
+                    <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin: 20px 0; color: inherit;'>
+                        <h4 style='margin: 0 0 10px 0; color: inherit;'>What is the Iota Coefficient?</h4>
+                        <p style='margin: 0; color: inherit;'>
+                            Iota (Janson &amp; Olsson, 2001) is a <strong>chance-corrected agreement index</strong>.
+                            It weighs the disagreement actually observed between raters against the disagreement
+                            expected if they had rated independently: 0 is chance-level agreement, 1 is perfect
+                            agreement. What sets it apart from kappa is that it is defined for
+                            <strong>categorical</strong> and for <strong>continuous</strong> ratings with the same formula.
                         </p>
                     </div>
 
-                    <div style='background-color: rgba(255, 169, 33, 0.14); padding: 15px; border-left: 4px solid #FF9800; margin: 20px 0; color: inherit;'>
-                        <h4 style='margin: 0 0 10px 0; color: inherit;'>Clinical Pathology Use Cases</h4>
+                    <div style='background-color: rgba(255, 169, 33, 0.14); border-left: 4px solid #FF9800; padding: 15px; margin: 20px 0; color: inherit;'>
+                        <h4 style='margin: 0 0 10px 0; color: inherit;'>What this analysis computes - and what it does not</h4>
+                        <p style='margin: 0 0 10px 0;'>
+                            Every column you select is read as <strong>another rater of one variable</strong>.
+                            The number reported is therefore the <strong>single-variable</strong> iota over your
+                            rater columns, and the Cases and Raters columns describe that layout.
+                        </p>
+                        <p style='margin: 0;'>
+                            The <strong>multivariate</strong> form of iota - several variables, say tumor size,
+                            grade and mitotic count, scored by the same raters and summarised in one coefficient -
+                            is <strong>not computed by this analysis</strong>. Nothing in this dialog can say which
+                            columns belong to which variable. Entering the columns of several variables side by
+                            side does <strong>not</strong> produce the multivariate coefficient: it produces the
+                            single-variable iota of a table whose &quot;raters&quot; are really different
+                            measurements, and that number does not describe your study. For the multivariate
+                            form, call <code>irr::iota()</code> in R with one matrix per variable.
+                        </p>
+                    </div>
 
-                        <p style='margin: 0 0 10px 0; font-weight: bold;'>1. Comprehensive Tumor Assessment (Multiple Parameters):</p>
-                        <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>
-                            <li><strong>Scenario:</strong> Two pathologists evaluate colorectal adenocarcinomas</li>
-                            <li><strong>Variables:</strong> Tumor size (mm), histologic grade (1-3), mitotic count (per 10 HPF), percentage of necrosis, lymphovascular invasion score</li>
-                            <li><strong>Why Iota:</strong> Single value captures overall diagnostic concordance across all tumor characteristics</li>
-                            <li><strong>Advantage:</strong> More clinically relevant than separate ICC for each variable</li>
-                        </ul>
+                    <div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #333; padding: 15px; margin: 20px 0; color: inherit;'>
+                        <h4 style='margin: 0 0 10px 0; color: inherit;'>Which coefficient should you use?</h4>
+                        <table style='width: 100%; border-collapse: collapse; font-size: 13px;'>
+                            <tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'>
+                                <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Your ratings</th>
+                                <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Preferred index</th>
+                                <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Why</th>
+                            </tr>
+                            <tr>
+                                <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Unordered categories, 3 or more raters</td>
+                                <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Exact kappa</strong> (Conger)</td>
+                                <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Iota for one nominal variable <em>is</em> Conger's exact kappa - the same number under another name, and that option also gives you the rest of the kappa output</td>
+                            </tr>
+                            <tr>
+                                <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Ordered categories (G1, G2, G3)</td>
+                                <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Weighted kappa</strong></td>
+                                <td style='padding: 8px; border-bottom: 1px solid #ddd;'>iota treats G1 vs G3 as no worse than G1 vs G2; weighted kappa gives partial credit for adjacent grades</td>
+                            </tr>
+                            <tr>
+                                <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Continuous measurements</td>
+                                <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>ICC(2,1) or ICC(3,1)</strong></td>
+                                <td style='padding: 8px; border-bottom: 1px solid #ddd;'>the standard for continuous agreement, with an explicit model for rater effects and a confidence interval; the iota table has neither</td>
+                            </tr>
+                            <tr>
+                                <td style='padding: 8px;'>Missing ratings, or raters who did not all see every case</td>
+                                <td style='padding: 8px;'><strong>Krippendorff's alpha</strong></td>
+                                <td style='padding: 8px;'>alpha is defined for incomplete designs; iota is not</td>
+                            </tr>
+                        </table>
+                        <p style='margin: 10px 0 0 0; font-size: 12px; color: inherit;'>
+                            <strong>So when is iota the right choice here?</strong> When your ratings are continuous
+                            and you want a chance-corrected index that does not assume the variance components of
+                            an ICC model. For categorical ratings, prefer the kappa family: you get the same
+                            number plus its standard error, test and interpretation.
+                        </p>
+                    </div>
 
-                        <p style='margin: 0 0 10px 0; font-weight: bold;'>2. IHC Biomarker Panels (Breast Cancer Subtyping):</p>
-                        <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>
-                            <li><strong>Scenario:</strong> Quality control study comparing pathologists' IHC scoring</li>
-                            <li><strong>Variables:</strong> ER Allred score (0-8), PR Allred score (0-8), HER2 score (0-3+), Ki-67 percentage (0-100)</li>
-                            <li><strong>Why Iota:</strong> Accounts for biological correlation between biomarkers (ER and PR often concordant)</li>
-                            <li><strong>What it reports:</strong> the joint reproducibility of the marker panel across raters; it does not address whether the markers are correctly classified against a reference</li>
-                        </ul>
-
-                        <p style='margin: 0 0 10px 0; font-weight: bold;'>3. Digital Pathology Validation (Multi-Feature Assessment):</p>
-                        <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>
-                            <li><strong>Scenario:</strong> Validating AI algorithm vs. expert pathologists on prostate biopsies</li>
-                            <li><strong>Variables:</strong> Gleason pattern 3 percentage, pattern 4 percentage, pattern 5 percentage, cribriform pattern presence, perineural invasion extent</li>
-                            <li><strong>Why Iota:</strong> Multivariate assessment matches clinical workflow where multiple features inform Gleason score</li>
-                            <li><strong>Application:</strong> Quantifies multivariate agreement between the algorithm and expert readers; a validation conclusion needs a prespecified acceptance threshold and a reference standard, neither of which the coefficient supplies</li>
-                        </ul>
-
-                        <p style='margin: 0 0 10px 0; font-weight: bold;'>4. Multi-Organ Biopsy Agreement (Transplant Pathology):</p>
-                        <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>
-                            <li><strong>Scenario:</strong> Two pathologists assess kidney transplant biopsies (Banff criteria)</li>
-                            <li><strong>Variables:</strong> Interstitial inflammation (i score 0-3), tubulitis (t score 0-3), arteritis (v score 0-3), glomerulitis (g score 0-3), peritubular capillaritis (ptc score 0-3)</li>
-                            <li><strong>Why Iota:</strong> Banff classification requires integration of multiple morphologic features</li>
-                            <li><strong>Clinical Relevance:</strong> Accurate rejection grading determines immunosuppression management</li>
-                        </ul>
-
-                        <p style='margin: 0 0 10px 0; font-weight: bold;'>5. Cytology Adequacy Assessment (Thyroid FNA):</p>
-                        <ul style='margin: 0; padding-left: 20px; line-height: 1.6;'>
-                            <li><strong>Scenario:</strong> Comparing cytotechnologist and cytopathologist assessments</li>
-                            <li><strong>Variables:</strong> Number of follicular cell groups, cellularity score (1-4), colloid amount (0-3), macrophage count category</li>
-                            <li><strong>Why Iota:</strong> Adequacy depends on multiple interdependent morphologic criteria</li>
-                            <li><strong>Benefit:</strong> Single reliability metric for training and quality assurance programs</li>
+                    <div style='background-color: rgba(211, 47, 47, 0.10); border-left: 4px solid #D32F2F; padding: 15px; margin: 20px 0; color: inherit;'>
+                        <h4 style='margin: 0 0 10px 0; color: inherit;'>Limits you should know before quoting the number</h4>
+                        <ul style='margin: 0; padding-left: 20px;'>
+                            <li><strong>No confidence interval, no p-value.</strong> <code>irr::iota()</code> returns a point estimate only, so this table shows one number with no measure of its precision. A point estimate from 20 cases and one from 500 look identical here.</li>
+                            <li><strong>For categorical ratings it duplicates an existing result.</strong> It equals Conger's exact kappa, the <em>Exact kappa (3+ raters)</em> option. Switching both on prints one number twice under two names.</li>
+                            <li><strong>Standardizing does nothing in this scope.</strong> Standardization exists to equalise the contribution of several variables. With one variable it is an affine rescaling, which leaves the coefficient unchanged.</li>
+                            <li><strong>One measurement type only.</strong> All selected columns must be numeric, or all must be categorical; a mixed selection is rejected.</li>
+                            <li><strong>A label is not a verdict.</strong> The word beside the number names the size of the number on a published scale. Whether that is good enough depends on the decision the rating drives, not on the scale.</li>
                         </ul>
                     </div>
 
                     <div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 15px; color: inherit;'>
-                        <h4 style='margin: 0 0 10px 0;'>Interpretation</h4>
-                        <p><strong>< 0.40:</strong> Poor | <strong>0.40-0.60:</strong> Fair | <strong>0.60-0.75:</strong> Good | <strong>0.75-0.90:</strong> Very good | <strong>> 0.90:</strong> Excellent</p>
+                        <h4 style='margin: 0 0 10px 0; color: inherit;'>Interpretation labels - which scale applies</h4>
+                        <p style='margin: 0 0 5px 0;'>
+                            <strong>Nominal ratings</strong> (iota is Conger's exact kappa) - Landis &amp; Koch (1977):
+                        </p>
+                        <p style='margin: 0;'>
+                            <strong>&lt; 0.00:</strong> Worse than chance |
+                            <strong>0.00 to &lt; 0.20:</strong> Slight |
+                            <strong>0.20 to &lt; 0.40:</strong> Fair |
+                            <strong>0.40 to &lt; 0.60:</strong> Moderate |
+                            <strong>0.60 to &lt; 0.80:</strong> Substantial |
+                            <strong>0.80 to 1.00:</strong> Almost perfect
+                        </p>
+                        <p style='margin: 10px 0 5px 0;'>
+                            <strong>Continuous ratings</strong> (iota is a variance-ratio coefficient close to ICC(2,1)) - Koo &amp; Li (2016):
+                        </p>
+                        <p style='margin: 0;'>
+                            <strong>&lt; 0.50:</strong> Poor |
+                            <strong>0.50 to &lt; 0.75:</strong> Moderate |
+                            <strong>0.75 to &lt; 0.90:</strong> Good |
+                            <strong>0.90 to 1.00:</strong> Excellent
+                        </p>
+                        <p style='margin: 10px 0 0 0; font-size: 11px; color: inherit;'>
+                            Iota publishes no bands of its own, so each branch borrows the scale of the statistic it
+                            coincides with: for one nominal variable iota IS a kappa, and for continuous ratings it
+                            stays close to ICC(2,1). Grading the continuous case on the kappa scale is what used to put
+                            &quot;Almost perfect&quot; beside the ICC table's &quot;Good&quot; for the same reliability in one output. The
+                            bands are half-open, so a value landing exactly on a cut-point takes the higher band.
+                        </p>
                     </div>
                 </div>
             "
@@ -8652,7 +10029,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     error = function(e) {
                         self$results$pabakTable$setNote(
                             "error",
-                            sprintf(.("Error calculating PABAK: %s"), jmvcore::htmlEscape(e$message))
+                            sprintf(.("Error calculating PABAK: %s"), private$.noteSafe(jmvcore::htmlEscape(e$message)))
                         )
                     }
                 )
@@ -8685,6 +10062,28 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 # For categorical data, need to convert factors to character/numeric
                 ratings_matrix <- as.matrix(ratings_clean)
 
+                # ONE shared category order for the weighted coefficient.
+                #
+                # The union this used to take inside the tryCatch below
+                # (unique(unlist(lapply(., levels)))) is decided by COLUMN ORDER
+                # whenever the declarations do not place every category relative to
+                # every other one, so the reported AC2 moved when the rater variables
+                # were selected in a different order. Merge the declarations properly
+                # (private$.mergeDeclaredLevels, via .orderedLevelsInfo) and, when
+                # they determine no single order, drop to AC1 - which is
+                # order-invariant - rather than lay a weight matrix over an invented
+                # scale. Same downgrade .kappa2Ordered() makes for weighted kappa.
+                gwet_lv <- private$.orderedLevelsInfo(ratings_clean)
+                gwet_scale_ambiguous <- !identical(weights, "unweighted") &&
+                    isTRUE(gwet_lv$ambiguous)
+                self$results$gwetTable$setNote(
+                    "scale_ambiguous",
+                    if (gwet_scale_ambiguous)
+                        .("Weighted Gwet's AC2 was requested, but the rater variables declare different category sets that do not place every category relative to every other one - so there is no single scale for the weights to sit on, and unweighted Gwet's AC1 is reported here instead. Weights assume a distance between categories, and a distance needs one agreed order; merging the declarations would invent one, and the answer would then depend on the order the rater variables were selected. Declare the same full set of categories, in the same order, on every rater variable and run again to obtain the weighted coefficient.")
+                    else NULL)
+                if (gwet_scale_ambiguous)
+                    weights <- "unweighted"
+
                 # Determine method name
                 if (weights == "unweighted") {
                     method_name <- "Gwet's AC1 (unweighted)"
@@ -8711,11 +10110,15 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         # ordinal distances are the real ones.
                         categ_order <- NULL
                         if (!identical(weight_param, "unweighted")) {
-                            lv <- unique(unlist(lapply(ratings_clean, function(x)
-                                if (is.factor(x)) levels(x) else NULL)))
-                            present <- unique(as.character(unlist(ratings_clean)))
+                            # Restricted to the categories actually present, because
+                            # irrCAC's linear/quadratic weights are 1 - |i-j|/(k-1):
+                            # carrying a declared-but-unused category would change k
+                            # and therefore every distance. Subsetting a determined
+                            # total order preserves that order.
+                            present <- unique(unlist(lapply(ratings_clean, as.character)))
                             present <- present[!is.na(present)]
-                            if (!is.null(lv) && length(lv) > 0)
+                            lv <- gwet_lv$levels
+                            if (length(lv) > 0)
                                 categ_order <- lv[lv %in% present]
                         }
                         result <- if (!is.null(categ_order) && length(categ_order) > 1) {
@@ -8738,7 +10141,17 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         # Extract results (irrCAC >= 1.0 field names)
                         coef <- result$est$coeff.val
                         se <- result$est$coeff.se
-                        p_value <- result$est$p.value
+                        # Two-sided p for H0: AC = 0, recomputed from the coefficient and
+                        # SE on n - 1 df, as irrCAC computes its own. irrCAC's p.value is
+                        # not read: it is two-sided in irrCAC 1.0 (CRAN 2019) and ONE-sided,
+                        # 1 - pt(AC / SE, n - 1), in 1.4 (CRAN 2026), and DESCRIPTION does
+                        # not pin a version. Every other p in this analysis is two-sided.
+                        t_ac <- coef / se
+                        p_value <- if (length(t_ac) == 1L && is.finite(t_ac)) {
+                            2 * stats::pt(-abs(t_ac), df = nrow(ratings_matrix) - 1)
+                        } else {
+                            NA_real_
+                        }
 
                         # Parse conf.int string like "(-0.751,1)"
                         ci_str <- gsub("[\\(\\)]", "", result$est$conf.int)
@@ -8778,13 +10191,13 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                         self$results$gwetTable$setNote(
                             "interpretation",
-                            sprintf(.("Interpretation: %s. Gwet's AC is more robust than kappa when dealing with high agreement rates or unbalanced categories."), interp)
+                            sprintf(.("Interpretation: %1$s. The labels use the Landis & Koch (1977) kappa benchmarks, the same scale as the kappa tables in this analysis. Gwet's AC is more robust than kappa when agreement is high or the categories are unbalanced."), interp)
                         )
                     },
                     error = function(e) {
                         self$results$gwetTable$setNote(
                             "error",
-                            sprintf(.("Error calculating Gwet's AC: %s"), jmvcore::htmlEscape(e$message))
+                            sprintf(.("Error calculating Gwet's AC: %s"), private$.noteSafe(jmvcore::htmlEscape(e$message)))
                         )
                     }
                 )
@@ -8992,7 +10405,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     error = function(e) {
                         normality_err <<- sprintf(
                             .("The Shapiro-Wilk test of the differences failed (%s). Normality of the differences is therefore UNTESTED, and the Limits of Agreement below assume it."),
-                            jmvcore::htmlEscape(conditionMessage(e))
+                            private$.noteSafe(jmvcore::htmlEscape(conditionMessage(e)))
                         )
                     }
                 )
@@ -9033,7 +10446,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         "prop_bias_failed",
                         sprintf(
                             .("The exploratory difference-mean slope could not be computed (%s), so its p-value cell is empty. An empty cell is NOT evidence that a magnitude-related pattern is absent; inspect the Bland-Altman plot."),
-                            jmvcore::htmlEscape(prop_bias_err)
+                            private$.noteSafe(jmvcore::htmlEscape(prop_bias_err))
                         )
                     )
                 }
@@ -9121,11 +10534,23 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 consensus <- character(n_cases)
 
                 # Calculate threshold based on rule
+                # "Simple Majority (>50 percent)" is what jamovi/agreement.a.yaml
+                # advertises, but the test below was >=, so a 4-rater 2-1-1 split
+                # (agree_prop exactly 0.50) passed as a majority - and because the mode
+                # IS unique there, .modalValue() never reached the tie-break either. A
+                # plurality was written into the user's consensus column, which is then
+                # used as a reference standard. Majority is strict; supermajority
+                # (>=75 percent) and unanimous (100 percent) are correct with >= and are
+                # deliberately left alone. k/(2k) is exactly 0.5 in floating point, so
+                # the equality count below is exact.
                 threshold <- switch(consensus_rule,
-                    "majority" = 0.5, # >50%
+                    "majority" = 0.5, # strictly >50%, see strict_threshold below
                     "supermajority" = 0.75, # >=75%
                     "unanimous" = 1.0 # 100%
                 )
+                strict_threshold <- identical(consensus_rule, "majority")
+                n_half_split <- 0L
+
 
                 # One declared rating scale for the whole loop, so the tie-break knows
                 # which category is "lowest". Also replaces unlist(ratings[i, ]),
@@ -9145,6 +10570,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 # Calculate for each case
                 for (i in 1:n_cases) {
+                    if (i %% 200L == 0L) private$.checkpoint()
                     row_ratings <- vapply(ratings[i, , drop = FALSE], as.character, character(1))
                     row_ratings <- row_ratings[!is.na(row_ratings)]
 
@@ -9161,7 +10587,9 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     agree_prop <- max_freq / length(row_ratings)
 
                     # Check if consensus meets threshold
-                    if (agree_prop >= threshold) {
+                    if (strict_threshold && agree_prop == threshold) n_half_split <- n_half_split + 1L
+                    if (if (strict_threshold) agree_prop > threshold else agree_prop >= threshold) {
+
                         # Mode + tie-break now live in private$.modalValue(), shared
                         # with the concordance path so both obey tieBreaker. The
                         # declared scale goes with it so "lowest" means lowest grade,
@@ -9172,6 +10600,12 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         consensus[i] <- NA
                     }
                 }
+
+                self$results$consensusTable$setNote(
+                    "majority_strict",
+                    if (n_half_split > 0L)
+                        sprintf(.("Simple majority is strict: the modal category must hold more than half of a case's ratings. In %d case(s) it held exactly half - for example a 2-1-1 split among four raters - which is a plurality, not a majority, so those cases were left without a consensus label (an empty cell in the consensus variable). Choose a different rule, or resolve those cases by review, if a plurality should count as consensus."), n_half_split)
+                    else NULL)
 
                 # Populate consensus summary table
                 consensus_no_na <- consensus[!is.na(consensus)]
@@ -9305,6 +10739,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 # Calculate agreement proportion for each case
                 for (i in 1:n_cases) {
+                    if (i %% 200L == 0L) private$.checkpoint()
                     # as.character, not unlist(): unlist() returns labels only when
                     # EVERY selected column is a factor. With one factor and one
                     # numeric column it coerced to level CODES, so the Modal Rating
@@ -9360,8 +10795,11 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         category_order <- c("All Agreed", "Majority Agreed", "No Agreement")
 
                         for (category in category_order) {
-                            if (category %in% names(category_counts)) {
-                                count <- as.integer(category_counts[category])
+                            # Every category of the chosen scheme gets a row, 0 included:
+                            # dropping an empty one made "no case had No Agreement" (good
+                            # news) indistinguishable from "that category does not exist".
+                            {
+                                count <- if (category %in% names(category_counts)) as.integer(category_counts[category]) else 0L
                                 pct <- count / n_cases
 
                                 # Interpretation text for simple mode
@@ -9468,8 +10906,11 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         category_order <- c("Absolute", "High", "Moderate", "Low", "Poor")
 
                         for (category in category_order) {
-                            if (category %in% names(category_counts)) {
-                                count <- as.integer(category_counts[category])
+                            # Every category of the chosen scheme gets a row, 0 included:
+                            # dropping an empty one made "no case had No Agreement" (good
+                            # news) indistinguishable from "that category does not exist".
+                            {
+                                count <- if (category %in% names(category_counts)) as.integer(category_counts[category]) else 0L
                                 pct <- count / n_cases
 
                                 # Interpretation text for detailed mode
@@ -9554,16 +10995,283 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     private$.updateComputedVariablesInfo()
                 }
             },
+            # An early return from either feature below leaves EVERY table that feature
+            # owns empty, not just the one the message landed on. The fixed-row tables
+            # still show the rows .init() scaffolded (private$.fixedRowTables()) with
+            # all-NA cells, and clusterSpecificTable shows no rows at all - a blank
+            # table carrying no note is indistinguishable from a computation that ran
+            # and found nothing. So the reason goes on every owned table, from one
+            # place. Table lists come from jamovi/agreement.r.yaml: the items guarded by
+            # visible: (hierarchicalKappa ...) and visible: (mixedEffectsComparison).
+            .hierarchicalBlankNote = function(note) {
+                for (nm in c("hierarchicalOverallTable", "clusterSpecificTable",
+                             "varianceDecompositionTable", "hierarchicalICCTable",
+                             "homogeneityTestTable")) {
+                    self$results[[nm]]$setNote("error", note)
+                }
+                invisible(NULL)
+            },
+            .mixedEffectsBlankNote = function(note) {
+                for (nm in c("mixedEffectsTable", "mixedEffectsVarianceTable")) {
+                    self$results[[nm]]$setNote("error", note)
+                }
+                invisible(NULL)
+            },
+            # Plain-language reading of one variance component's share of the total in
+            # the linear (continuous) decomposition. The cluster is a per-CASE attribute
+            # (each case sits in one institution), so the cluster component is how far
+            # the cases' mean scores differ between institutions - case mix or
+            # site-level scoring, which this design cannot tell apart.
+            .interpretVarianceComponent = function(key, proportion) {
+                    # The verdict a clinician reads was a bare English literal in
+                    # an otherwise translated table; the msgid is the literal itself.
+                    pct <- round(proportion * 100, 1)
+                    if (key == "case") {
+                        if (pct > 50) {
+                            return(.("Scores driven by true case differences (desirable)"))
+                        }
+                        if (pct > 20) {
+                            return(.("Moderate case-level variation"))
+                        }
+                        return(.("Low case-level variation; other sources dominate"))
+                    } else if (key == "rater") {
+                        if (pct > 30) {
+                            return(.("Substantial rater bias; calibration needed"))
+                        }
+                        if (pct > 10) {
+                            return(.("Moderate rater effects"))
+                        }
+                        return(.("Minimal rater bias"))
+                    } else if (key == "cluster") {
+                        if (pct > 30) {
+                            return(.("The cases' mean scores differ considerably between institutions, which reflects case mix or site-level scoring; this design cannot separate the two."))
+                        }
+                        if (pct > 10) {
+                            return(.("The cases' mean scores differ moderately between institutions, which reflects case mix or site-level scoring; this design cannot separate the two."))
+                        }
+                        return(.("The cases' mean scores differ little between institutions."))
+                    } else {
+                        if (pct > 50) {
+                            return(.("High unexplained variability; consider additional factors"))
+                        }
+                        if (pct > 30) {
+                            return(.("Moderate residual noise"))
+                        }
+                        return(.("Low residual noise (good)"))
+                    }
+            },
+            # Hierarchical agreement for CATEGORICAL ratings (added 2026-09-24).
+            #
+            # The decomposition in .calculateHierarchicalKappa is a LINEAR mixed model,
+            # so it refused factor ratings outright - including the six rater columns
+            # of the bundled example dataset agreement_hierarchical - and all five
+            # tables came back empty. Pathology grading is overwhelmingly categorical,
+            # so the advertised design (raters crossed with cases, cases nested in
+            # institutions) was the one that did not work. This route reports:
+            #
+            #   Per institution: Cohen's kappa for two raters (non-null vcd ASE through
+            #     .pairKappaWithCI, on ONE declared scale shared by every institution so
+            #     a weighted kappa means the same thing in each), Fleiss'/Conger's kappa
+            #     for three or more - the headline's statistic, .fleissAllRatings(), on
+            #     every observed rating, with Gwet's SE and interval.
+            #   Overall: the STRATIFIED kappa, the per-institution kappas averaged with
+            #     weights equal to each institution's number of cases used. Barlow,
+            #     Lai & Azen (1991, Stat Med 10:1465-72) compared equal, size and
+            #     inverse-variance weights and found size weighting "moderately
+            #     efficient under most conditions"; the estimator assumes a common
+            #     kappa across strata, which the per-institution table lets a reader
+            #     check. It is agreement WITHIN institution - the categorical
+            #     counterpart of the within-institution ICC(2,1) the continuous route
+            #     reports - and the pooled kappa that ignores institution is quoted
+            #     beside it, because institutions that differ in case mix move a pooled
+            #     kappa without any change in how well the raters agree.
+            #   No variance decomposition here: the three decomposition tables point to
+            #     Model-based agreement (latentModel), the ordinal cumulative-probit
+            #     model with case, pathologist and institution variances. A linear model
+            #     on category codes would invent distances between the categories.
+            .calculateHierarchicalCategorical = function(ratings, cluster_vec) {
+                # Two raters: Cohen's kappa needs both ratings of a case. Three or more:
+                # every case with a rating, as the headline does (.fleissAllRatings).
+                rated <- if (ncol(ratings) == 2) stats::complete.cases(ratings)
+                         else rowSums(!is.na(ratings)) > 0
+                ok <- !is.na(cluster_vec) & rated
+                ratings <- ratings[ok, , drop = FALSE]
+                cluster_fac <- droplevels(factor(cluster_vec[ok]))
+                cluster_chr <- as.character(cluster_fac)
+                cluster_labels <- levels(cluster_fac)
+                n_raters <- ncol(ratings)
+                n_cases <- nrow(ratings)
+
+                if (length(cluster_labels) < 2 || n_cases < 2) {
+                    private$.hierarchicalBlankNote(.("Fewer than two institutions have rated cases, so there is nothing to compare across institutions. Check the cluster variable and the missing ratings."))
+                    return(invisible(NULL))
+                }
+
+                wght <- self$options$wght
+                irr_w <- if (identical(wght, "equal")) "equal"
+                         else if (identical(wght, "squared")) "squared"
+                         else "unweighted"
+                exact <- isTRUE(self$options$exct)
+                # One declared scale for every institution, so a weighted kappa sits on
+                # the same distances in each and the per-institution values are comparable.
+                lv_info <- private$.orderedLevelsInfo(ratings)
+                weights_blocked <- n_raters >= 3 && !identical(irr_w, "unweighted")
+                label_weight <- if (isTRUE(lv_info$ambiguous)) "unweighted" else irr_w
+                kappa_label <- private$.kappaLabel(n_raters, label_weight, exact)
+
+                no_kappa <- function(method, n)
+                    list(n = n, kappa = NA_real_, se = NA_real_,
+                         ci = c(NA_real_, NA_real_), method = method)
+                cluster_kappa <- function(sub) {
+                    n <- nrow(sub)
+                    if (n < 2) return(no_kappa("too_few", n))
+                    if (n_raters == 2) {
+                        kc <- tryCatch(private$.pairKappaWithCI(sub, irr_w, lv_info),
+                            error = function(e) NULL)
+                        if (is.null(kc) || !is.finite(kc$kappa)) return(no_kappa("undefined", n))
+                        return(list(n = n, kappa = kc$kappa, se = kc$se,
+                                    ci = c(kc$ci_lower, kc$ci_upper), method = kc$method))
+                    }
+                    if (weights_blocked) return(no_kappa("weights", n))
+                    if (sum(rowSums(!is.na(sub)) >= 2) < 2) return(no_kappa("too_few", n))
+                    fk <- tryCatch(private$.fleissAllRatings(sub, exact, self$options$confLevel),
+                        error = function(e) NULL)
+                    if (is.null(fk) || !is.finite(fk$value)) return(no_kappa("undefined", n))
+                    list(n = n, kappa = fk$value, se = fk$se,
+                         ci = c(fk$ci_lower, fk$ci_upper), method = "gwet")
+                }
+
+                res <- vector("list", length(cluster_labels))
+                names(res) <- cluster_labels
+                for (j in seq_along(cluster_labels)) {
+                    if (j %% 25L == 0L) private$.checkpoint()
+                    res[[j]] <- cluster_kappa(ratings[cluster_chr == cluster_labels[j], , drop = FALSE])
+                }
+                kap <- vapply(res, function(r) r$kappa, numeric(1))
+                nn <- vapply(res, function(r) as.numeric(r$n), numeric(1))
+                ses <- vapply(res, function(r) r$se, numeric(1))
+                methods <- vapply(res, function(r) r$method, character(1))
+                use <- is.finite(kap)
+
+                # --- Overall: stratified kappa beside the pooled one ---
+                strat <- if (sum(use) >= 2) sum(nn[use] * kap[use]) / sum(nn[use]) else NA_real_
+                strat_ci <- c(NA_real_, NA_real_)
+                if (is.finite(strat) &&
+                    all(methods[use] %in% c("vcd", "gwet")) && all(is.finite(ses[use]))) {
+                    # Independent strata: Var = sum(n_s^2 * SE_s^2) / (sum n_s)^2.
+                    se_s <- sqrt(sum(nn[use]^2 * ses[use]^2)) / sum(nn[use])
+                    zc <- stats::qnorm(1 - (1 - self$options$confLevel) / 2)
+                    strat_ci <- if (identical(self$options$kappaCIMethod, "fisherz") && abs(strat) < 1) {
+                        z0 <- atanh(strat)
+                        sz <- se_s / (1 - strat^2)
+                        c(tanh(z0 - zc * sz), tanh(z0 + zc * sz))
+                    } else {
+                        c(max(-1, strat - zc * se_s), min(1, strat + zc * se_s))
+                    }
+                }
+                pooled <- cluster_kappa(ratings)$kappa
+
+                hier_tbl <- self$results$hierarchicalOverallTable
+                hier_tbl$setTitle(.("Hierarchical Agreement - Overall (Stratified Kappa)"))
+                hier_tbl$getColumn("overall_kappa")$setTitle(.fmt(.("Stratified {kappa}"), kappa = kappa_label))
+                hier_tbl$setRow(rowNo = 1, values = list(
+                    method = .fmt(.("Stratified {kappa}: case-weighted mean of the per-institution values"), kappa = kappa_label),
+                    cases = n_cases,
+                    raters = n_raters,
+                    clusters = length(cluster_labels),
+                    overall_kappa = strat
+                ))
+                if (weights_blocked) {
+                    hier_tbl$setNote("model", .("No kappa is reported: Fleiss' kappa for three or more raters is unweighted, so applying the selected weights would require a different coefficient, and silently showing unweighted Fleiss' kappa would not answer the request. Choose Unweighted to obtain the per-institution and stratified Fleiss' kappa."))
+                } else if (!is.finite(strat)) {
+                    hier_tbl$setNote("model", .("No stratified kappa: fewer than two institutions have a defined kappa. The cluster-specific table says why each institution's row is empty."))
+                } else {
+                    stratified <- if (is.finite(pooled))
+                        sprintf(.("Stratified kappa averages the per-institution kappas with weights equal to each institution's number of cases used (Barlow, Lai and Azen, 1991). It measures agreement within institution and assumes agreement is similar across institutions - read the cluster-specific table to judge that. The pooled kappa over all %1$d cases, ignoring institution, is %2$.3f; institutions that differ in case mix or rating prevalence move a pooled kappa without any change in how well the raters agree, so the stratified value is the one to report as reader agreement."), n_cases, pooled)
+                    else
+                        .("Stratified kappa averages the per-institution kappas with weights equal to each institution's number of cases used (Barlow, Lai and Azen, 1991). It measures agreement within institution and assumes agreement is similar across institutions - read the cluster-specific table to judge that.")
+                    interval <- if (all(is.finite(strat_ci)))
+                        sprintf(.("Its %1$.0f%% confidence interval is %2$.3f to %3$.3f, combining the per-institution standard errors as independent strata."),
+                                100 * self$options$confLevel, strat_ci[1], strat_ci[2])
+                    else
+                        .("No interval is shown for it: at least one institution's kappa had no non-null standard error.")
+                    hier_tbl$setNote("model", paste(stratified, interval))
+                }
+
+                # --- Per institution ---
+                if (isTRUE(self$options$clusterSpecificKappa)) {
+                    cl_tbl <- self$results$clusterSpecificTable
+                    cl_tbl$setTitle(.("Cluster-Specific Agreement (Kappa per Cluster)"))
+                    cl_tbl$getColumn("kappa")$setTitle(kappa_label)
+                    ranks <- rank(-kap, na.last = "keep", ties.method = "min")
+                    for (j in seq_along(cluster_labels)) {
+                        r <- res[[j]]
+                        cl_tbl$addRow(rowKey = j, values = list(
+                            cluster = cluster_labels[j],
+                            n_cases = as.integer(r$n),
+                            n_raters = n_raters,
+                            kappa = r$kappa,
+                            ci_lower = r$ci[1],
+                            ci_upper = r$ci[2],
+                            rank = if (isTRUE(self$options$clusterRankings) && is.finite(ranks[j])) as.integer(ranks[j]) else NA
+                        ))
+                    }
+                    cl_tbl$setNote("ci",
+                        if (n_raters >= 3 && !weights_blocked)
+                            .("For three or more raters each institution's kappa uses every observed rating, as in the headline table, with the same standard error and t interval (Gwet 2014).")
+                        else if (any(methods == "irr-fallback"))
+                            .("At least one interval was built from the null-hypothesis standard error, because vcd::Kappa returned no finite asymptotic standard error for that institution (most often a category unused there). Such intervals are too narrow when kappa is high, so treat them as optimistic.")
+                        else NULL)
+                    n_undef <- sum(methods == "undefined")
+                    cl_tbl$setNote("undefined",
+                        if (n_undef > 0)
+                            sprintf(.("Kappa is undefined for %d institution(s), shown as an empty cell: every rating there fell in one category, so chance agreement is complete and kappa has no denominator. This is a property of those cases, not a failed analysis."), n_undef)
+                        else NULL)
+                    small <- cluster_labels[nn >= 2 & nn < 10]
+                    cl_tbl$setNote("small_clusters",
+                        if (length(small) > 0)
+                            sprintf(.("Fewer than 10 cases in %1$d institution(s): %2$s. A kappa from so few cases can move by a tenth or more with a single case, so compare those rows with caution."),
+                                    length(small), paste(private$.noteSafe(small), collapse = ", "))
+                        else NULL)
+                    private$.noteScaleAmbiguity(cl_tbl,
+                        n_raters == 2 && !identical(irr_w, "unweighted") && isTRUE(lv_info$ambiguous))
+                }
+
+                # --- Decomposition: moved to the ordinal engine ---
+                # The binary lme4::glmer route that used to sit here was withdrawn
+                # 2026-09-24: its Laplace fit shrank the case variance (latent ICC about
+                # 0.19 too low with 2 raters; development-scripts/validate_agreement_latent_icc_bias.R)
+                # and it could not handle more than two categories. The case, pathologist
+                # and institution variances of categorical ratings now come from the
+                # cumulative-probit model under latentModel (R/agreement-latent.R), which
+                # takes the same clusterVariable. The notes are set whether or not the
+                # option is ticked: a hidden table's note is harmless.
+                self$results$varianceDecompositionTable$setNote("error", .("For categorical ratings the case, pathologist and institution variances are estimated by an ordinal mixed model: tick Model-based agreement in the Pathologist Grading Analysis section, which uses the same cluster variable. It covers ordered grades; binary calls and ratings in which one category dominates are outside its validated range, and that section says why."))
+                self$results$hierarchicalICCTable$setNote("error", .("For categorical ratings the latent ICC and the model-based kappa are reported by Model-based agreement in the Pathologist Grading Analysis section, which fits the case, pathologist and institution variances with an ordinal mixed model. It covers ordered grades; binary calls and ratings in which one category dominates are outside its validated range, and that section says why."))
+                self$results$homogeneityTestTable$setNote("error", .("For categorical ratings the institution variance is estimated by Model-based agreement in the Pathologist Grading Analysis section, which fits the case, pathologist and institution variances with an ordinal mixed model; read the cluster-specific kappas to see whether agreement itself differs between institutions. It covers ordered grades; binary calls and ratings in which one category dominates are outside its validated range, and that section says why."))
+                invisible(NULL)
+            },
             .calculateHierarchicalKappa = function(ratings, cluster_data) {
                 # Hierarchical/Multilevel Kappa Analysis
                 # Uses lme4 mixed-effects models for variance decomposition
 
+                # Notes persist across runs of one analysis object (jmvcore has no
+                # R-side clearWith and Table has no reset), so a disclosure written on a
+                # success path survives into a later failed run. Clear every key this
+                # function writes, then let each branch write only its own.
+                for (nk in c("error", "model", "model_note", "small_clusters"))
+                    self$results$hierarchicalOverallTable$setNote(nk, NULL)
+                for (nk in c("error", "info", "scale"))
+                    self$results$hierarchicalICCTable$setNote(nk, NULL)
+                for (nk in c("error", "numeric", "ci", "undefined", "small_clusters", "scale_ambiguous"))
+                    self$results$clusterSpecificTable$setNote(nk, NULL)
+                self$results$varianceDecompositionTable$setNote("error", NULL)
+                self$results$homogeneityTestTable$setNote("error", NULL)
+                self$results$homogeneityTestTable$setNote("info", NULL)
+
                 # --- Validate cluster variable ---
                 if (is.null(cluster_data) || ncol(cluster_data) == 0) {
-                    self$results$hierarchicalOverallTable$setNote(
-                        "error",
-                        .("Please select a cluster/institution variable to perform hierarchical analysis.")
-                    )
+                    private$.hierarchicalBlankNote(.("Please select a cluster/institution variable to perform hierarchical analysis."))
                     return()
                 }
 
@@ -9577,10 +11285,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 n_clusters <- length(cluster_levels)
 
                 if (n_clusters < 2) {
-                    self$results$hierarchicalOverallTable$setNote(
-                        "error",
-                        .("Cluster variable must have at least 2 distinct levels for hierarchical analysis.")
-                    )
+                    private$.hierarchicalBlankNote(.("Cluster variable must have at least 2 distinct levels for hierarchical analysis."))
                     return()
                 }
 
@@ -9598,19 +11303,19 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 long_df$cluster <- factor(long_df$cluster)
 
                 if (nrow(long_df) < 10) {
-                    self$results$hierarchicalOverallTable$setNote(
-                        "error",
-                        .("Insufficient complete observations for hierarchical analysis after removing missing data.")
-                    )
+                    private$.hierarchicalBlankNote(.("Insufficient complete observations for hierarchical analysis after removing missing data."))
                     return()
                 }
 
-                # Mixed-effects decomposition below is valid for continuous numeric scores
+                # Mixed-effects decomposition below is valid for continuous numeric scores.
+                # The note used to send categorical users to "cluster-specific kappa", which
+                # is the table this same return leaves empty. Per-cluster kappa with a
+                # confidence interval is a feature this analysis already has - Agreement by
+                # Subgroup, with the cluster variable as the subgroup variable - so name that.
                 if (!all(sapply(ratings, is.numeric))) {
-                    self$results$hierarchicalOverallTable$setNote(
-                        "error",
-                        .("Hierarchical mixed-effects decomposition currently requires continuous numeric ratings. For categorical ratings, use standard/cluster-specific kappa analyses.")
-                    )
+                    # Categorical ratings take their own route: per-institution and
+                    # stratified kappa; the decomposition belongs to latentModel.
+                    private$.calculateHierarchicalCategorical(ratings, cluster_vec)
                     return()
                 }
 
@@ -9649,10 +11354,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                 list(model = m, ok = TRUE)
                             },
                             error = function(e2) {
-                                self$results$hierarchicalOverallTable$setNote(
-                                    "error",
-                                    sprintf(.("Mixed model fitting failed: %s. Data may have insufficient variability."), jmvcore::htmlEscape(e2$message))
-                                )
+                                private$.hierarchicalBlankNote(sprintf(.("Mixed model fitting failed: %s. Data may have insufficient variability."), private$.noteSafe(jmvcore::htmlEscape(e2$message))))
                                 list(model = NULL, ok = FALSE)
                             }
                         )
@@ -9674,33 +11376,44 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 sigma2_total <- sigma2_case + sigma2_rater + sigma2_cluster + sigma2_resid
 
                 if (sigma2_total < 1e-12) {
-                    self$results$hierarchicalOverallTable$setNote(
-                        "error",
-                        .("Total variance is effectively zero; all scores appear identical.")
-                    )
+                    private$.hierarchicalBlankNote(.("Total variance is effectively zero; all scores appear identical."))
                     return()
                 }
 
                 # --- Step 1: Overall hierarchical agreement table ---
-                icc1 <- sigma2_case / sigma2_total
+                # ICC(2,1): two-way random effects, absolute agreement, single rater,
+                # estimated WITHIN institution. The centre component is in neither the
+                # numerator (a centre-wide offset is shared by every case at that centre,
+                # so it cannot help tell two of its cases apart) nor the denominator (it is
+                # constant within a centre, so it contributes no variance to an observed
+                # score once the centre is fixed). It is also confounded with centre
+                # case-mix - with each case rated inside one centre only, a real case-mix
+                # difference and an institution-level measurement bias imply the same
+                # covariance - so it cannot be credited as true signal. This makes the
+                # value the pooled counterpart of the per-cluster
+                # irr::icc(twoway, agreement, single) values in clusterSpecificTable:
+                # the two tables now report one estimand.
+                den_single <- sigma2_case + sigma2_rater + sigma2_resid
+                icc1 <- if (den_single > 1e-12) sigma2_case / den_single else NA_real_
 
-                # CI for this variance-ratio estimate is not directly available from intercept CIs
-                ci_lower <- NA
-                ci_upper <- NA
-
+                # No interval is written for icc1. The intercept CIs lme4 reports are
+                # for the mean, not for this variance ratio. A profile or parametric
+                # bootstrap interval on the variance components is possible
+                # (lme4::confint.merMod) but is not implemented here, so rather than
+                # write NA into a column headed "95% CI" - which reads as "not
+                # reported" instead of "not computed", and names a confidence level
+                # this table never used - .init() hides both CI columns.
                 self$results$hierarchicalOverallTable$setRow(rowNo = 1, values = list(
-                    method = "Mixed-Effects ICC (hierarchical agreement proxy)",
+                    method = .("Mixed-Effects ICC (hierarchical agreement proxy)"),
                     cases = n_cases,
                     raters = n_raters,
                     clusters = n_clusters,
-                    overall_kappa = icc1,
-                    ci_lower = ci_lower,
-                    ci_upper = ci_upper
+                    overall_kappa = icc1
                 ))
 
                 self$results$hierarchicalOverallTable$setNote(
                     "model",
-                    sprintf(.("Model: score ~ 1 + (1|case) + (1|rater) + (1|cluster); %s observations; ICC(1) = case variance / total variance. 95%% CI is not shown because intercept CIs are not valid for this variance ratio."), nrow(long_df))
+                    sprintf(.("Model: score ~ 1 + (1|case) + (1|rater) + (1|cluster); %s observations. The reported value is ICC(2,1) = case variance / (case + rater + residual variance), the absolute-agreement reliability of a single rater within an institution; the institutional variance component is treated as measurement noise and is excluded from both numerator and denominator, so this is the pooled counterpart of the per-cluster ICC values below. It is an intraclass correlation for continuous scores, not a chance-corrected kappa, and must not be reported as one. No confidence interval is shown: the model's intercept intervals do not apply to this variance ratio."), nrow(long_df))
                 )
 
                 # Warn about small clusters
@@ -9709,7 +11422,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 if (length(small_clusters) > 0) {
                     self$results$hierarchicalOverallTable$setNote(
                         "small_clusters",
-                        sprintf(.("Warning: %1$s cluster(s) have fewer than 3 cases. Estimates may be unstable: %2$s"), length(small_clusters), paste(small_clusters, collapse = ", "))
+                        sprintf(.("Warning: %1$s cluster(s) have fewer than 3 cases. Estimates may be unstable: %2$s"), length(small_clusters), paste(private$.noteSafe(small_clusters), collapse = ", "))
                     )
                 }
 
@@ -9717,42 +11430,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 if (self$options$varianceDecomposition) {
                     var_table <- self$results$varianceDecompositionTable
 
-                    interpret_component <- function(key, proportion) {
-                        pct <- round(proportion * 100, 1)
-                        if (key == "case") {
-                            if (pct > 50) {
-                                return("Scores driven by true case differences (desirable)")
-                            }
-                            if (pct > 20) {
-                                return("Moderate case-level variation")
-                            }
-                            return("Low case-level variation; other sources dominate")
-                        } else if (key == "rater") {
-                            if (pct > 30) {
-                                return("Substantial rater bias; calibration needed")
-                            }
-                            if (pct > 10) {
-                                return("Moderate rater effects")
-                            }
-                            return("Minimal rater bias")
-                        } else if (key == "cluster") {
-                            if (pct > 30) {
-                                return("Large institutional differences; protocol harmonization needed")
-                            }
-                            if (pct > 10) {
-                                return("Moderate cluster effects")
-                            }
-                            return("Minimal institutional variation")
-                        } else {
-                            if (pct > 50) {
-                                return("High unexplained variability; consider additional factors")
-                            }
-                            if (pct > 30) {
-                                return("Moderate residual noise")
-                            }
-                            return("Low residual noise (good)")
-                        }
-                    }
+                    interpret_component <- private$.interpretVarianceComponent
 
                     # Keys match the rows .init() scaffolded (private$.fixedRowTables())
                     components <- list(
@@ -9786,54 +11464,59 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 if (self$options$iccHierarchical) {
                     icc_table <- self$results$hierarchicalICCTable
 
-                    # ICC(1): Single rating reliability
-                    icc1_val <- sigma2_case / sigma2_total
+                    # Both rows condition on institution, for the reason given at icc1.
+                    # ICC(2,1): reliability of ONE rater's score.
+                    icc1_val <- icc1
 
-                    # ICC(2): Reliability of mean ratings (averaged over k raters), including cluster variance
-                    icc2_val <- sigma2_case / (sigma2_case + sigma2_cluster / n_clusters + sigma2_rater / n_raters + sigma2_resid / n_raters)
+                    # ICC(2,k): reliability of the MEAN of the k raters. Only the facets
+                    # actually averaged over are divided by k. The previous formula also
+                    # divided the cluster component by n_clusters, which would require
+                    # every case to be measured in every institution; cluster is constant
+                    # within case in long_df, so each case sits in exactly one centre and
+                    # there is no cluster averaging to divide by. k = 1 reproduces ICC(2,1).
+                    den_mean <- sigma2_case + (sigma2_rater + sigma2_resid) / n_raters
+                    icc2_val <- if (den_mean > 1e-12) sigma2_case / den_mean else NA_real_
 
-                    # G-coefficient: Universe score variance / expected observed variance
-                    g_coeff <- sigma2_case / (sigma2_case + sigma2_rater / n_raters +
-                        sigma2_cluster / n_clusters + sigma2_resid / (n_raters * n_clusters))
+                    # The G-coefficient row is gone. The shipped formula divided
+                    # sigma2_cluster by n_clusters and the residual by
+                    # n_raters * n_clusters, i.e. it asserted each case was measured
+                    # n_raters x n_clusters times when it was measured n_raters times.
+                    # Its defensible replacement under this design is NOT a duplicate of
+                    # ICC(2,k): it is the relative-decision coefficient ICC(3,k), which
+                    # drops the rater main effect from the error term and is therefore
+                    # always >= ICC(2,k). It is not shown because a diagnostic
+                    # reproducibility study asks about ABSOLUTE agreement, and a second
+                    # Koo & Li-graded number that is always the larger of the two is the
+                    # one that ends up quoted.
 
-                    interpret_icc <- function(val) {
-                        if (is.na(val) || !is.finite(val)) {
-                            return("Not estimable")
-                        }
-                        if (val >= 0.9) {
-                            return("Excellent reliability")
-                        }
-                        if (val >= 0.75) {
-                            return("Good reliability")
-                        }
-                        if (val >= 0.5) {
-                            return("Moderate reliability")
-                        }
-                        if (val >= 0.0) {
-                            return("Poor reliability")
-                        }
-                        return("Negative (problematic)")
-                    }
+                    # This table used to carry a FOURTH ICC scale of its own, in bare
+                    # untranslated English, with an invented "Negative (problematic)"
+                    # band. It now shares private$.iccBandLabel() with the ICC table,
+                    # the inter/intra tables and the subgroup table.
 
                     # Keys match the rows .init() scaffolded (private$.fixedRowTables())
                     icc_rows <- list(
                         icc1 = icc1_val,
-                        icc2 = icc2_val,
-                        g_coeff = g_coeff
+                        icc2 = icc2_val
                     )
 
+                    # No interval is computed for these variance ratios (lme4::confint
+                    # on the variance components is the future path), so the table
+                    # declares no CI columns; the same holds for hierarchicalOverallTable.
                     for (key in names(icc_rows)) {
                         icc_table$setRow(rowKey = key, values = list(
                             icc_value = icc_rows[[key]],
-                            ci_lower = NA,
-                            ci_upper = NA,
-                            interpretation = interpret_icc(icc_rows[[key]])
+                            interpretation = private$.iccBandLabel(icc_rows[[key]])
                         ))
                     }
 
                     icc_table$setNote(
                         "info",
-                        sprintf(.("ICC(1): reliability of a single rating; ICC(2): reliability of the mean of %1$s raters; G-coefficient: generalizability across raters and clusters (%2$s raters, %3$s clusters)."), n_raters, n_raters, n_clusters)
+                        sprintf(.("ICC(2,1) is the absolute-agreement reliability of a single rater's score and ICC(2,k) that of the mean of %s raters; both are estimated within institution, meaning the institutional (cluster) variance component is treated as measurement noise rather than as true case-to-case variation and is credited as signal in neither. With a single rater ICC(2,k) equals ICC(2,1)."), n_raters)
+                    )
+                    icc_table$setNote(
+                        "scale",
+                        .("Interpretation labels follow Koo & Li (2016): below 0.50 poor, below 0.75 moderate, below 0.90 good, and 0.90 or above excellent. This is the same ICC scale the ICC, inter/intra-rater and subgroup tables use.")
                     )
                 }
 
@@ -9842,6 +11525,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     cluster_table <- self$results$clusterSpecificTable
 
                     cluster_kappas <- list()
+                    # Set when .guardICCResult() had to alter what irr::icc returned for
+                    # any cluster. Declared OUTSIDE the loop: inside it, the flag would
+                    # reset on every cluster and the note below would see only the last.
+                    icc_guard_msg <- NULL
                     cluster_labels <- levels(long_df$cluster)
 
                     for (cl in cluster_labels) {
@@ -9862,9 +11549,18 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                         tryCatch(
                             {
-                                icc_res <- irr::icc(cl_ratings, model = "twoway", type = "agreement", unit = "single")
+                                icc_res <- private$.guardICCResult(
+                                    irr::icc(cl_ratings, model = "twoway", type = "agreement", unit = "single",
+                                             conf.level = self$options$confLevel))
                                 kappa_val <- icc_res$value
-                                kappa_ci <- c(icc_res$lbound, icc_res$ubound)
+                                if (!is.null(icc_res$guardNote))
+                                    icc_guard_msg <- icc_res$guardNote
+                                # The guard DROPS an inverted bound, and c(NULL, NULL) is
+                                # zero-length - keep the pair two long or kappa_ci[2] comes
+                                # back NULL and the row loses a column it thinks it wrote.
+                                kappa_ci <- c(
+                                    if (is.null(icc_res$lbound)) NA_real_ else icc_res$lbound,
+                                    if (is.null(icc_res$ubound)) NA_real_ else icc_res$ubound)
                             },
                             error = function(e) {
                                 # Leave as NA when cluster-specific ICC is not estimable
@@ -9875,23 +11571,6 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             kappa = kappa_val, ci_lower = kappa_ci[1],
                             ci_upper = kappa_ci[2], n = n_cl
                         )
-                    }
-
-                    # Compute shrinkage estimates from random effects (BLUPs)
-                    shrinkage_values <- rep(NA, n_clusters)
-                    if (self$options$shrinkageEstimates && "cluster" %in% names(lme4::ranef(model))) {
-                        re_cluster <- lme4::ranef(model)$cluster
-                        for (j in seq_along(cluster_labels)) {
-                            cl <- cluster_labels[j]
-                            if (cl %in% rownames(re_cluster)) {
-                                raw_k <- cluster_kappas[[cl]]$kappa
-                                if (!is.na(raw_k)) {
-                                    cl_n <- cluster_kappas[[cl]]$n
-                                    shrinkage_factor <- cl_n / (cl_n + n_raters)
-                                    shrinkage_values[j] <- icc1 * (1 - shrinkage_factor) + raw_k * shrinkage_factor
-                                }
-                            }
-                        }
                     }
 
                     # Rank clusters by kappa (if requested)
@@ -9912,10 +11591,12 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             kappa = ck$kappa,
                             ci_lower = ck$ci_lower,
                             ci_upper = ck$ci_upper,
-                            shrinkage_kappa = shrinkage_values[j],
                             rank = if (self$options$clusterRankings && !is.na(ranks[j])) as.integer(ranks[j]) else NA
                         ))
                     }
+
+                    if (!is.null(icc_guard_msg))
+                        cluster_table$setNote("numeric", icc_guard_msg)
                 }
 
                 # --- Step 5: Homogeneity test ---
@@ -9948,16 +11629,32 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                 p_val <- as.numeric(lr_test[2, "Pr(>Chisq)"])
                             }
 
+                            # All four of these are DISPLAYED cells and all four were bare
+                            # English, so this table stayed untranslated in every locale.
+                            # Measured 2026-09-23: Table$setRow()/Cell$setValue() does NOT
+                            # re-translate the stored string, so the composed sentence below
+                            # needs no .noteSafe() - only the msgid template is translated.
+                            # Boundary test: the institution variance cannot be negative, so
+                            # under H0 the statistic is a 50:50 mixture of chi-square(0) and
+                            # chi-square(1) (Stram and Lee, 1994) and the p-value is half the
+                            # naive chi-square(1) value that anova() returns.
+                            if (!is.na(chi_sq) && !is.na(df_val) && df_val == 1) {
+                                p_val <- if (chi_sq > 0) 0.5 * stats::pchisq(chi_sq, df = 1, lower.tail = FALSE) else 1
+                            }
+                            p_txt <- if (is.na(p_val)) NA_character_ else if (p_val < 0.001) "< 0.001" else sprintf("= %.3f", p_val)
+                            # This tests the institution random INTERCEPT: whether institutions
+                            # differ in average rating level. It used to conclude "agreement
+                            # differs by institution", a hypothesis this statistic does not test.
                             conclusion <- if (!is.na(p_val) && p_val < 0.05) {
-                                "Significant heterogeneity across clusters (p < 0.05); agreement differs by institution."
+                                sprintf(.("The institutions differ in their average rating tendency (p %s): at some institutions the raters as a group rate higher or lower. This is a difference in rating level, not in how well the raters agree - read the cluster-specific estimates for that."), p_txt)
                             } else if (!is.na(p_val)) {
-                                sprintf("No significant cluster heterogeneity detected (p = %.3f, %d clusters). Failing to reject the null does not establish that agreement is similar across clusters; read the per-cluster estimates and their confidence intervals.", p_val, n_clusters)
+                                sprintf(.("No evidence that the institutions differ in their average rating tendency (p %1$s, %2$d institutions). With few institutions this test has little power, and it says nothing about whether agreement differs - read the cluster-specific estimates for that."), p_txt, n_clusters)
                             } else {
-                                "Test result inconclusive."
+                                .("Test result inconclusive.")
                             }
 
                             homo_table$setRow(rowNo = 1, values = list(
-                                test_name = "Likelihood Ratio Test (cluster effect)",
+                                test_name = .("Likelihood ratio test for the institution variance (boundary-corrected)"),
                                 statistic = if (!is.na(chi_sq)) chi_sq else NA,
                                 df = if (!is.na(df_val)) as.integer(df_val) else NA,
                                 p_value = if (!is.na(p_val)) p_val else NA,
@@ -9966,16 +11663,16 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                             homo_table$setNote(
                                 "info",
-                                .("Compares full model (with cluster random effect) to reduced model (without). Significant p-value indicates heterogeneous agreement across clusters.")
+                                .("Compares the mixed model with and without an institution random intercept, so it tests whether institutions differ in their average rating, not whether agreement differs between them. A variance cannot be negative, so under the null hypothesis the statistic follows an equal mixture of chi-square distributions with 0 and 1 degrees of freedom, and the p-value is half the usual one (Stram and Lee, 1994).")
                             )
                         },
                         error = function(e) {
                             homo_table$setRow(rowNo = 1, values = list(
-                                test_name = "Likelihood Ratio Test",
+                                test_name = .("Likelihood ratio test for the institution variance"),
                                 statistic = NA,
                                 df = NA,
                                 p_value = NA,
-                                conclusion = paste0("Test could not be computed: ", jmvcore::htmlEscape(e$message))
+                                conclusion = sprintf(.("Test could not be computed: %s"), jmvcore::htmlEscape(e$message))
                             ))
                         }
                     )
@@ -9987,42 +11684,46 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 html <- "<div style='font-family: Arial, sans-serif; padding: 15px; line-height: 1.6;'>"
 
                 html <- paste0(html, "
-                <h3 style='color: inherit; margin-top: 0;'>Hierarchical/Multilevel Kappa Analysis</h3>
+                <h3 style='color: inherit; margin-top: 0;'>Hierarchical/Multilevel Agreement</h3>
 
                 <div style='background-color: rgba(155, 155, 155, 0.06); padding: 12px; border-left: 4px solid #333; margin-bottom: 15px; color: inherit;'>
                     <strong>What is it?</strong><br/>
-                    Hierarchical kappa extends standard kappa to account for nested data structures where raters
-                    are grouped within clusters (institutions, centers, scanners). It decomposes agreement into
-                    between-cluster and within-cluster components, providing more accurate estimates when clustering exists.
+                    Agreement for a design in which every case belongs to one cluster (institution, centre,
+                    scanner) and the same raters score the cases. It reports agreement WITHIN cluster, so that
+                    clusters which differ in case mix do not masquerade as better or worse agreement, and it shows
+                    each cluster separately so you can see whether agreement is similar across them.
                 </div>
 
                 <h4 style='color: inherit; margin-top: 20px;'>When to Use</h4>
                 <ul>
-                    <li><strong>Multi-center trials</strong>: Pathologists nested within hospitals</li>
-                    <li><strong>Multi-scanner studies</strong>: Radiologists nested within imaging centers</li>
-                    <li><strong>Training programs</strong>: Residents nested within training sites</li>
-                    <li><strong>Quality control</strong>: Identifying institutions with poor agreement</li>
+                    <li><strong>Multi-centre reader studies</strong>: cases from several hospitals scored by the same pathologists</li>
+                    <li><strong>Multi-scanner studies</strong>: images from several imaging centres</li>
+                    <li><strong>Quality control</strong>: identifying institutions where agreement is lower</li>
                 </ul>
 
-                <h4 style='color: inherit; margin-top: 20px;'>Key Components</h4>
+                <h4 style='color: inherit; margin-top: 20px;'>Categorical ratings (grades, subtypes, positive/negative)</h4>
                 <ul>
-                    <li><strong>Overall Hierarchical Kappa</strong>: Population-level agreement accounting for clustering</li>
-                    <li><strong>Cluster-Specific Estimates</strong>: Kappa for each institution/center</li>
-                    <li><strong>Variance Decomposition</strong>: Between-cluster vs within-cluster variance</li>
-                    <li><strong>Homogeneity Testing</strong>: Are all clusters performing equally?</li>
-                    <li><strong>Shrinkage Estimates</strong>: Stabilized estimates for small clusters</li>
+                    <li><strong>Cluster-specific kappa</strong>: Cohen's kappa (2 raters, with a confidence interval) or Fleiss' kappa (3 or more raters) within each cluster</li>
+                    <li><strong>Stratified kappa</strong>: the cluster kappas averaged with weights equal to each cluster's number of cases (Barlow, Lai and Azen, 1991) - agreement within cluster, shown beside the pooled kappa that ignores clusters</li>
+                    <li><strong>Variance components</strong>: the variance decomposition, hierarchical ICC and cluster test tables stay empty for categorical ratings. Tick <em>Model-based agreement</em> in the Pathologist Grading Analysis section instead: an ordinal mixed model that estimates the case, pathologist and institution variances, the latent ICC and a model-based kappa</li>
                 </ul>
 
-                <h4 style='color: inherit; margin-top: 20px;'>Interpreting Variance Components</h4>
+                <h4 style='color: inherit; margin-top: 20px;'>Continuous ratings (measurements, scores)</h4>
                 <ul>
-                    <li><strong>High between-cluster variance</strong>: Institutional differences (protocols, training)</li>
-                    <li><strong>High within-cluster variance</strong>: Local rater disagreement</li>
-                    <li><strong>Shrinkage</strong>: Pulls extreme cluster estimates toward overall mean</li>
+                    <li><strong>Overall ICC(2,1) and ICC(2,k)</strong>: within-cluster absolute-agreement reliability of one rater and of the mean of the raters, from a linear mixed model; intraclass correlations, not kappas</li>
+                    <li><strong>Cluster-specific ICC</strong>: the same ICC within each cluster</li>
+                    <li><strong>Variance decomposition</strong>: the share of score variance due to cases, raters, clusters and residual error</li>
+                </ul>
+
+                <h4 style='color: inherit; margin-top: 20px;'>Reading the Cluster Test</h4>
+                <ul>
+                    <li>The homogeneity test (continuous ratings) asks whether the cases' <em>mean scores</em> differ between clusters. Each case belongs to one cluster, so a difference can come from case mix or from site-level scoring, and this design cannot tell them apart. It does not test whether <em>agreement</em> differs; compare the cluster-specific values and their intervals for that</li>
+                    <li>With only a few clusters, any between-cluster variance and any test of it rest on very little information</li>
                 </ul>
 
                 <div style='background-color: rgba(155, 155, 155, 0.06); padding: 12px; border-left: 4px solid #333; margin-top: 15px; color: inherit;'>
-                    <strong>Note:</strong> Full hierarchical analysis is computationally intensive and requires sufficient
-                    data within each cluster (typically >=10 cases per cluster recommended).
+                    <strong>Note:</strong> Each cluster needs enough cases for its own estimate - a kappa from fewer than
+                    10 cases can move by a tenth or more with a single case.
                 </div>
             </div>")
 
@@ -10033,10 +11734,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 # Model: score ~ condition + (1|rater_id) + (1|case_id)
 
                 if (is.null(condition_data) || ncol(condition_data) == 0) {
-                    self$results$mixedEffectsTable$setNote(
-                        "error",
-                        .("Please select a condition variable (e.g., AI vs Manual) for mixed-effects comparison.")
-                    )
+                    private$.mixedEffectsBlankNote(.("Please select a condition variable (e.g., AI vs Manual) for mixed-effects comparison."))
                     return()
                 }
 
@@ -10045,10 +11743,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 n_conditions <- length(condition_levels)
 
                 if (n_conditions < 2) {
-                    self$results$mixedEffectsTable$setNote(
-                        "error",
-                        .("Condition variable must have at least 2 levels (e.g., 'AI' and 'Manual').")
-                    )
+                    private$.mixedEffectsBlankNote(.("Condition variable must have at least 2 levels (e.g., 'AI' and 'Manual')."))
                     return()
                 }
 
@@ -10056,10 +11751,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 # coded as their level indices and fitted anyway, which produces a "difference"
                 # between conditions that depends only on the alphabetical order of the labels.
                 if (!all(vapply(ratings, is.numeric, logical(1)))) {
-                    self$results$mixedEffectsTable$setNote(
-                        "error",
-                        .("The mixed-effects comparison requires continuous numeric ratings. For categorical ratings, compare conditions with the paired agreement test or the subgroup analysis instead.")
-                    )
+                    private$.mixedEffectsBlankNote(.("The mixed-effects comparison requires continuous numeric ratings. For categorical ratings, compare conditions with the paired agreement test or the subgroup analysis instead."))
                     return()
                 }
 
@@ -10080,10 +11772,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 long_df$condition <- factor(long_df$condition)
 
                 if (nrow(long_df) < 10) {
-                    self$results$mixedEffectsTable$setNote(
-                        "error",
-                        .("Insufficient complete observations for mixed-effects analysis.")
-                    )
+                    private$.mixedEffectsBlankNote(.("Insufficient complete observations for mixed-effects analysis."))
                     return()
                 }
 
@@ -10120,10 +11809,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                 list(model = m, ok = TRUE)
                             },
                             error = function(e2) {
-                                self$results$mixedEffectsTable$setNote(
-                                    "error",
-                                    sprintf(.("Model fitting failed: %s"), jmvcore::htmlEscape(e2$message))
-                                )
+                                private$.mixedEffectsBlankNote(sprintf(.("Model fitting failed: %s"), private$.noteSafe(jmvcore::htmlEscape(e2$message))))
                                 list(model = NULL, ok = FALSE)
                             }
                         )
@@ -10146,11 +11832,11 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 # fallback has to be disclosed too.
                 ci_method_used <- "profile"
                 ci_vals <- tryCatch(
-                    confint(model, parm = "beta_", method = "profile"),
+                    confint(model, parm = "beta_", level = self$options$confLevel, method = "profile"),
                     error = function(e) {
                         ci_method_used <<- "Wald"
                         tryCatch(
-                            confint(model, parm = "beta_", method = "Wald"),
+                            confint(model, parm = "beta_", level = self$options$confLevel, method = "Wald"),
                             error = function(e2) {
                                 ci_method_used <<- "none"
                                 NULL
@@ -10190,8 +11876,12 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 for (i in seq_len(nrow(coefs))) {
                     term <- term_names[i]
-                    display_term <- gsub("^condition", "Condition: ", term)
-                    if (term == "(Intercept)") display_term <- paste0("Intercept (ref: ", levels(long_df$condition)[1], ")")
+                    display_term <- if (startsWith(term, "condition")) {
+                        sprintf(.("Condition: %s"), substring(term, nchar("condition") + 1L))
+                    } else {
+                        term
+                    }
+                    if (term == "(Intercept)") display_term <- sprintf(.("Intercept (ref: %s)"), levels(long_df$condition)[1])
 
                     ci_lo <- if (!is.null(ci_vals) && i <= nrow(ci_vals)) ci_vals[i, 1] else NA
                     ci_hi <- if (!is.null(ci_vals) && i <= nrow(ci_vals)) ci_vals[i, 2] else NA
@@ -10222,14 +11912,23 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 if (self$options$multipleTestCorrection != "none" && nrow(coefs) > 1) {
                     adjust_idx <- which(term_names != "(Intercept)")
                     if (length(adjust_idx) >= 1) {
-                        adj_p <- p.adjust(raw_p[adjust_idx], method = self$options$multipleTestCorrection)
+                        # The OPTION LEVEL is not a p.adjust() method name. p.adjust's
+                        # methods are holm/hochberg/hommel/bonferroni/BH/BY/fdr/none, so
+                        # the level `bh` raises "'arg' should be one of ..." from
+                        # match.arg() and errors the whole analysis - a user who picks
+                        # "Benjamini-Hochberg (FDR)" gets no result at all. The sibling
+                        # site in .calculateAllPairsKappa already maps through a switch;
+                        # this one passed the raw level straight through. Map here too,
+                        # and keep the two in step.
+                        corr_me <- private$.pAdjustMethod(self$options$multipleTestCorrection)
+                        adj_p <- stats::p.adjust(raw_p[adjust_idx], method = corr_me$method)
                         # Update table with adjusted p-values (contrasts only)
                         for (k in seq_along(adjust_idx)) {
                             me_table$setCell(rowKey = adjust_idx[k], col = "p_value", value = adj_p[k])
                         }
                         me_table$setNote(
                             "correction",
-                            sprintf(.("P-values adjusted using %1$s correction for %2$s comparisons (intercept excluded)."), self$options$multipleTestCorrection, length(adj_p))
+                            sprintf(.("P-values adjusted using the %1$s correction for %2$s comparisons (intercept excluded)."), corr_me$label, length(adj_p))
                         )
                     }
                 }
@@ -10244,31 +11943,33 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 if (sigma2_total > 1e-12) {
                     interpret_var <- function(key, prop) {
+                        # The verdict a clinician reads was a bare English literal in
+                        # an otherwise translated table; the msgid is the literal itself.
                         pct <- round(prop * 100, 1)
                         if (key == "case") {
                             if (pct > 50) {
-                                return("Scores driven by true case differences (desirable)")
+                                return(.("Scores driven by true case differences (desirable)"))
                             }
                             if (pct > 20) {
-                                return("Moderate case-level variation")
+                                return(.("Moderate case-level variation"))
                             }
-                            return("Low case-level variation")
+                            return(.("Low case-level variation"))
                         } else if (key == "rater") {
                             if (pct > 30) {
-                                return("Substantial rater bias; calibration needed")
+                                return(.("Substantial rater bias; calibration needed"))
                             }
                             if (pct > 10) {
-                                return("Moderate rater effects")
+                                return(.("Moderate rater effects"))
                             }
-                            return("Minimal rater bias")
+                            return(.("Minimal rater bias"))
                         } else {
                             if (pct > 50) {
-                                return("High unexplained variability")
+                                return(.("High unexplained variability"))
                             }
                             if (pct > 30) {
-                                return("Moderate residual noise")
+                                return(.("Moderate residual noise"))
                             }
-                            return("Low residual noise (good)")
+                            return(.("Low residual noise (good)"))
                         }
                     }
 
@@ -10300,7 +12001,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 ref_level <- levels(long_df$condition)[1]
                 me_table$setNote(
                     "model",
-                    sprintf(.("Model: score ~ condition + (1|case) + (1|rater); %1$s observations; %2$s raters; %3$s cases; %4$s conditions. Reference level: '%5$s'."), nrow(long_df), n_raters, n_cases, n_conditions, ref_level)
+                    sprintf(.("Model: score ~ condition + (1|case) + (1|rater); %1$s observations; %2$s raters; %3$s cases; %4$s conditions. Reference level: '%5$s'."), nrow(long_df), n_raters, n_cases, n_conditions, private$.noteSafe(ref_level))
                 )
             },
             .populateMixedEffectsExplanation = function() {
@@ -10330,11 +12031,25 @@ agreementClass <- if (requireNamespace("jmvcore")) {
             .calculateConfusionMatrix = function(ratings) {
                 tryCatch(
                     {
+                        # Notes persist across runs of one analysis object (jmvcore has no
+                        # R-side clearWith and Table has no reset), so a disclosure written on a
+                        # success path survives into a later failed run. Clear every key this
+                        # function writes, then let each branch write only its own.
+                        for (nk in c("error", "insufficient", "raters_used", "norm", "raters"))
+                            self$results$confusionMatrixTable$setNote(nk, NULL)
+                        self$results$perClassMetricsTable$setNote("accuracy", NULL)
+
+                        # Behaviour disclosure, not an error - it used to share the
+                        # "error" key with the handler below, so a genuine error in the
+                        # same run silently replaced it. Cleared on the 2-rater branch so
+                        # it cannot survive from a previous run.
                         if (ncol(ratings) != 2) {
                             self$results$confusionMatrixTable$setNote(
-                                "error",
+                                "raters_used",
                                 .("Confusion matrix requires exactly 2 raters. Only the first 2 selected variables are used.")
                             )
+                        } else {
+                            self$results$confusionMatrixTable$setNote("raters_used", NULL)
                         }
                         r1 <- ratings[[1]]
                         r2 <- ratings[[2]]
@@ -10375,7 +12090,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         }
 
                         rater_names <- colnames(ratings)
-                        table$setNote("raters", sprintf(.("Reference: %1$s, Predicted: %2$s. N = %3$s complete cases."), rater_names[1], rater_names[2], length(r1)))
+                        table$setNote("raters", sprintf(.("Reference: %1$s, Predicted: %2$s. N = %3$s complete cases."), private$.noteSafe(rater_names[1]), private$.noteSafe(rater_names[2]), length(r1)))
                         if (norm_type == "row") {
                             table$setNote("norm", .("Proportions are row-normalized (recall per reference class)."))
                         } else if (norm_type == "column") {
@@ -10384,56 +12099,64 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                         # Per-class metrics
                         metrics_table <- self$results$perClassMetricsTable
+                        # NA, not 0, when the denominator is empty - the same rule the
+                        # concordance F1 table already follows below. A class the second
+                        # rater never assigned has UNDEFINED precision; printing 0.000
+                        # made "never assigned" indistinguishable from "assigned and
+                        # always wrong", which are opposite findings about a rater, and it
+                        # dragged the macro average down with a number nobody measured.
                         for (cls in all_levels) {
                             tp <- cm[cls, cls]
                             fp <- sum(cm[, cls]) - tp
                             fn <- sum(cm[cls, ]) - tp
                             support <- as.integer(sum(cm[cls, ]))
-                            prec <- if ((tp + fp) > 0) tp / (tp + fp) else 0
-                            rec <- if ((tp + fn) > 0) tp / (tp + fn) else 0
-                            f1 <- if ((prec + rec) > 0) 2 * prec * rec / (prec + rec) else 0
-                            interp <- if (f1 >= 0.9) {
-                                "Excellent"
-                            } else if (f1 >= 0.8) {
-                                "Good"
-                            } else if (f1 >= 0.7) {
-                                "Moderate"
-                            } else if (f1 >= 0.5) {
-                                "Fair"
-                            } else {
-                                "Poor"
-                            }
+                            prec <- if ((tp + fp) > 0) tp / (tp + fp) else NA_real_
+                            rec <- if ((tp + fn) > 0) tp / (tp + fn) else NA_real_
+                            f1 <- if (isTRUE((prec + rec) > 0)) 2 * prec * rec / (prec + rec) else NA_real_
                             metrics_table$addRow(rowKey = cls, values = list(
                                 class_label = cls, n = as.integer(tp), precision = prec,
-                                recall = rec, f1 = f1, support = support, interpretation = interp
+                                recall = rec, f1 = f1, support = support
                             ))
                         }
 
-                        # Macro-average
+                        # Macro-average. Same rule as the per-class rows: an undefined
+                        # class contributes nothing instead of contributing a 0 that was
+                        # never measured, so the average is taken over the classes where
+                        # the quantity exists.
                         all_prec <- sapply(all_levels, function(cls) {
                             tp <- cm[cls, cls]
                             fp <- sum(cm[, cls]) - tp
-                            if ((tp + fp) > 0) tp / (tp + fp) else 0
+                            if ((tp + fp) > 0) tp / (tp + fp) else NA_real_
                         })
                         all_rec <- sapply(all_levels, function(cls) {
                             tp <- cm[cls, cls]
                             fn <- sum(cm[cls, ]) - tp
-                            if ((tp + fn) > 0) tp / (tp + fn) else 0
+                            if ((tp + fn) > 0) tp / (tp + fn) else NA_real_
                         })
                         all_f1 <- sapply(seq_along(all_levels), function(k) {
                             p <- all_prec[k]
                             r <- all_rec[k]
-                            if ((p + r) > 0) 2 * p * r / (p + r) else 0
+                            if (isTRUE((p + r) > 0)) 2 * p * r / (p + r) else NA_real_
                         })
+                        mean_defined <- function(x) if (any(!is.na(x))) mean(x, na.rm = TRUE) else NA_real_
                         metrics_table$addRow(rowKey = "macro_avg", values = list(
-                            class_label = "Macro Average", n = as.integer(sum(diag(cm))),
-                            precision = mean(all_prec), recall = mean(all_rec), f1 = mean(all_f1),
-                            support = as.integer(sum(cm)),
-                            interpretation = paste0("Overall accuracy: ", round(sum(diag(cm)) / sum(cm) * 100, 1), "%")
+                            class_label = .("Macro Average"), n = as.integer(sum(diag(cm))),
+                            precision = mean_defined(all_prec), recall = mean_defined(all_rec),
+                            f1 = mean_defined(all_f1),
+                            support = as.integer(sum(cm))
                         ))
+                        metrics_table$setNote("undefined", if (anyNA(c(all_prec, all_rec, all_f1))) .("An empty cell means the quantity is undefined for that class, not zero: precision has no denominator when the second rater never assigned the class, and recall has no denominator when the first rater never assigned it. The Macro Average is taken over the classes where each quantity is defined, so it can rest on fewer classes than the table lists - read it beside the Support column.") else NULL)
+
+                        # The Interpretation column used to carry an F1 band word on the
+                        # class rows and an accuracy PERCENTAGE on this one - two
+                        # different quantities in one column. The column is gone; the
+                        # accuracy is not.
+                        metrics_table$setNote("accuracy", sprintf(
+                            .("Overall accuracy, the share of cases the two raters placed in the same class, is %1$.1f%%. No verbal grade is shown for F1: it has no published interpretive bands, and precision and recall are printed beside it."),
+                            100 * sum(diag(cm)) / sum(cm)))
                     },
                     error = function(e) {
-                        self$results$confusionMatrixTable$setNote("error", sprintf(.("Confusion matrix error: %s"), jmvcore::htmlEscape(e$message)))
+                        self$results$confusionMatrixTable$setNote("error", sprintf(.("Confusion matrix error: %s"), private$.noteSafe(jmvcore::htmlEscape(e$message))))
                     }
                 )
             },
@@ -10508,21 +12231,57 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         all_categories <- sort(unique(as.character(unlist(
                             lapply(ratings, as.character)))))
                         all_categories <- all_categories[!is.na(all_categories)]
-                        # honour the declared factor order when there is one
-                        lv_all <- unique(unlist(lapply(ratings, function(x)
-                            if (is.factor(x)) levels(x) else NULL)))
-                        if (!is.null(lv_all) && length(lv_all) > 0)
+                        # Honour the declared factor order, merged into ONE total
+                        # order rather than appended column by column: the naive
+                        # union here was decided by the order the rater variables
+                        # were selected (private$.mergeDeclaredLevels, reached via
+                        # .orderedLevelsInfo). It also covers non-factor columns,
+                        # which the old union silently left on alphabetical order.
+                        lv_all <- private$.orderedLevelsInfo(ratings)$levels
+                        if (length(lv_all) > 0)
                             all_categories <- lv_all[lv_all %in% all_categories]
 
-                        # Krippendorff's level of measurement must follow the data,
-                        # not be hard-coded: alpha for an ordinal scale differs from
-                        # the nominal value.
-                        kripp_method <- if (any(vapply(ratings, is.ordered, logical(1))))
-                            "ordinal" else "nominal"
+                        # The level of measurement the USER selected, so this table
+                        # and the headline Krippendorff table are one statistic.
+                        #
+                        # This auto-selected "ordinal" whenever any rater was an
+                        # ordered factor while the headline table used
+                        # self$options$krippMethod verbatim (default "nominal"), so
+                        # with ordered raters and default options the two tables
+                        # printed DIFFERENT numbers, both labelled "Krippendorff's
+                        # Alpha", with nothing on screen to say why. The option wins:
+                        # it is the user's declared intent, it is what the headline
+                        # table honours, and the row label below now names it.
+                        kripp_method <- self$options$krippMethod
 
                         # The kappa weighting the user chose, used in every resample
                         # and named in the row label so the two can never drift apart.
-                        boot_irr_weight <- if (identical(self$options$wght, "equal")) {
+                        # Whether the declared levels determine one category order is
+                        # a property of the columns, which resampling does not change,
+                        # so decide it once here rather than 1000 times inside
+                        # compute_metrics - and downgrade before the row label below
+                        # is built from boot_irr_weight.
+                        boot_lv <- private$.orderedLevelsInfo(ratings)
+                        boot_scale_ambiguous <- !identical(self$options$wght, "unweighted") &&
+                            is_categorical_fixed && n_raters == 2 &&
+                            isTRUE(boot_lv$ambiguous)
+                        private$.noteScaleAmbiguity(
+                            self$results$bootstrapCITable, boot_scale_ambiguous)
+                        # Same refusal the headline Krippendorff table makes: for the
+                        # ordinal/interval/ratio methods the category codes ARE the
+                        # metric, and an order that nothing in the declarations fixes
+                        # would make alpha depend on which rater variable was selected
+                        # first. Drop the row rather than publish an invented scale.
+                        kripp_scale_ambiguous <- isTRUE(boot_lv$ambiguous) &&
+                            !identical(kripp_method, "nominal")
+                        self$results$bootstrapCITable$setNote(
+                            "kripp_scale_order",
+                            if (kripp_scale_ambiguous)
+                                .("No bootstrap interval is reported for Krippendorff's alpha here: the selected data type scores each category by its position on one common category order, and the rater variables do not declare one. Declare the same full set of categories, in the same sequence, on every rater variable, or choose the Nominal data type, which only asks whether two ratings are the same and needs no order.")
+                            else NULL)
+                        boot_irr_weight <- if (boot_scale_ambiguous) {
+                            "unweighted"
+                        } else if (identical(self$options$wght, "equal")) {
                             "equal"
                         } else if (identical(self$options$wght, "squared")) {
                             "squared"
@@ -10530,14 +12289,18 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             "unweighted"
                         }
 
+                        boot_exact <- isTRUE(self$options$exct)
+                        conf <- self$options$confLevel
+
                         # Helper: compute agreement metrics
                         compute_metrics <- function(boot_ratings) {
                             result <- list()
-                            n_agree <- sum(apply(boot_ratings, 1, function(x) {
-                                x <- x[!is.na(x)]
-                                length(unique(x)) == 1
-                            }))
-                            result$pct_agreement <- n_agree / nrow(boot_ratings)
+                            # Complete cases, as the headline's irr::agree(): a case with
+                            # one rating used to count as agreement, which inflated this row
+                            # on incomplete data.
+                            cc <- boot_ratings[stats::complete.cases(boot_ratings), , drop = FALSE]
+                            n_agree <- sum(apply(cc, 1, function(x) length(unique(x)) == 1))
+                            result$pct_agreement <- if (nrow(cc) > 0) n_agree / nrow(cc) else NA_real_
                             is_categorical <- is_categorical_fixed
                             if (is_categorical) {
                                 char_ratings <- as.data.frame(lapply(boot_ratings, as.character), stringsAsFactors = FALSE)
@@ -10553,20 +12316,25 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                             # did not contain the headline estimate.
                                             # Same fix the ICC path got: follow the
                                             # user's option, and say so in the label.
-                                            result$kappa <- private$.kappa2Ordered(boot_ratings, boot_irr_weight)$value
+                                            result$kappa <- private$.kappa2Ordered(boot_ratings, boot_irr_weight, boot_lv)$value
                                         },
                                         error = function(e) NULL
                                     )
                                 } else {
+                                    # The headline statistic, on every observed rating
+                                    # and honouring exct: irr::kappam.fleiss dropped each
+                                    # case with any missing rating and ignored exct, so
+                                    # this row bootstrapped a different kappa under the
+                                    # headline's name.
                                     tryCatch(
                                         {
-                                            result$kappa <- irr::kappam.fleiss(char_ratings)$value
+                                            result$kappa <- private$.fleissAllRatings(boot_ratings, boot_exact, conf)$value
                                         },
                                         error = function(e) NULL
                                     )
                                 }
                                 result$kripp_alpha <- NA
-                                tryCatch(
+                                if (!kripp_scale_ambiguous) tryCatch(
                                     {
                                         # Code against the SHARED category set so a
                                         # category means the same thing in every
@@ -10592,10 +12360,16 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                         # measures ICC got a different statistic under
                                         # their own label.
                                         icc_spec <- private$.iccSpecForBootstrap()
-                                        icc_result <- irr::icc(boot_ratings,
+                                        icc_result <- private$.guardICCResult(irr::icc(boot_ratings,
                                             model = icc_spec$model, type = icc_spec$type,
-                                            unit = icc_spec$unit)
+                                            unit = icc_spec$unit))
                                         result$icc <- icc_result$value
+                                        # Carried out so the OBSERVED fit can disclose the
+                                        # clamp once. Noting it per replicate would be noise;
+                                        # the percentile/BCa interval is read off the clamped
+                                        # distribution either way, which is what keeps the
+                                        # published bounds inside the parameter space.
+                                        result$icc_guard_note <- icc_result$guardNote
                                     },
                                     error = function(e) NULL
                                 )
@@ -10606,6 +12380,12 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         }
 
                         obs <- compute_metrics(ratings)
+
+                        # The ICC this table prints as the point estimate was clamped or
+                        # had a cell suppressed; say so once here rather than let a
+                        # clamped 1.000 sit beside a real one.
+                        if (!is.null(obs$icc_guard_note))
+                            self$results$bootstrapCITable$setNote("numeric", obs$icc_guard_note)
 
                         seed_val <- self$options$seed
                         if (is.null(seed_val)) seed_val <- 42
@@ -10663,7 +12443,6 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         jack_msgs <- character(0)
 
                         # BCa CI helper with explicit metric_name parameter
-                        conf <- self$options$confLevel
                         bca_ci <- function(obs_val, boot_dist, metric_name, alpha = 1 - conf) {
                             boot_dist <- boot_dist[!is.na(boot_dist)]
                             if (length(boot_dist) < 50) {
@@ -10705,6 +12484,20 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             denom_a <- 6 * sum(jack_diff^2, na.rm = TRUE)^1.5
                             a_hat <- if (abs(denom_a) < .Machine$double.eps) 0 else sum(jack_diff^3, na.rm = TRUE) / denom_a
                             if (is.na(a_hat) || is.infinite(a_hat)) a_hat <- 0
+                            # Rescale the acceleration for a SUBSAMPLED jackknife.
+                            # Every leave-one-out deviation is O(1/n_cases) because each
+                            # fit drops one case from the FULL data, but the sums above
+                            # run over only m = length(jack_vals) of them. Both sum(d^3)
+                            # and sum(d^2) scale with m, so
+                            #   a_hat = S3 / (6 * S2^1.5)  ~  m^(-1/2)
+                            # where the full jackknife gives n^(-1/2). At n = 2000 and
+                            # m = 200 that is sqrt(10) = 3.16x too large, and BOTH BCa
+                            # endpoints are shifted too far. Multiplying by sqrt(m/n)
+                            # recovers the full-jackknife value in expectation. It is
+                            # exactly 1 when nothing was subsampled or dropped, so the
+                            # n_cases <= 200 path is unchanged, and using the SURVIVING
+                            # count also corrects for failed leave-one-out replicates.
+                            a_hat <- a_hat * sqrt(length(jack_vals) / n_cases)
 
                             z_alpha <- qnorm(c(alpha / 2, 1 - alpha / 2))
                             denom_lower <- 1 - a_hat * (z0 + z_alpha[1])
@@ -10739,16 +12532,8 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         # translation catalog, so a warning could not be matched to the
                         # row it was about.
                         lbl_pct <- .("Percent Agreement")
-                        lbl_kappa <- if (n_raters != 2) {
-                            .("Fleiss' Kappa")
-                        } else if (identical(boot_irr_weight, "equal")) {
-                            .("Cohen's Kappa (linear weights)")
-                        } else if (identical(boot_irr_weight, "squared")) {
-                            .("Cohen's Kappa (squared weights)")
-                        } else {
-                            .("Cohen's Kappa")
-                        }
-                        lbl_kripp <- .("Krippendorff's Alpha")
+                        lbl_kappa <- private$.kappaLabel(n_raters, boot_irr_weight, boot_exact)
+                        lbl_kripp <- private$.krippMethodLabel()
                         lbl_icc <- private$.iccSpecForBootstrap()$label
 
                         ci_pct <- tryCatch(bca_ci(obs$pct_agreement, boot_pct, "pct_agreement"), error = function(e) pct_ci(obs$pct_agreement, boot_pct))
@@ -10807,7 +12592,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                 sprintf(
                                     .("Some bootstrap resamples could not be computed and were dropped rather than replaced, so the interval for those rows rests on fewer than %1$d resamples: %2$s. This usually means a resample contained only one rating category. Intervals from a depleted bootstrap distribution are less reliable than the resample count above suggests."),
                                     as.integer(n_boot),
-                                    paste(sprintf("%s (%d)", names(dropped), as.integer(dropped)), collapse = ", ")
+                                    paste(sprintf("%s (%d)", private$.noteSafe(names(dropped)), as.integer(dropped)), collapse = ", ")
                                 )
                             )
                         }
@@ -10815,15 +12600,15 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         if (jack_n < n_cases) {
                             table$setNote(
                                 "jackknife",
-                                sprintf(.("The BCa acceleration uses a random subsample of %1$d of the %2$d cases for the leave-one-out step (drawn from the same seed). It previously used the first %3$d rows, which made the interval depend on the sort order of the data."),
-                                    as.integer(jack_n), as.integer(n_cases), as.integer(jack_n))
+                                sprintf(.("The BCa acceleration uses a random subsample of %1$d of the %2$d cases for the leave-one-out step (drawn from the same seed), and is then rescaled by the square root of the ratio of leave-one-out replicates used to the %2$d cases. Without that rescaling the acceleration comes out about sqrt(%2$d/%1$d) times too large - each leave-one-out deviation is set by the full case count while the sums run over the subsample only - and both interval endpoints are shifted too far."),
+                                    as.integer(jack_n), as.integer(n_cases))
                             )
                         }
                         if (length(jack_msgs) > 0) {
                             table$setNote(
                                 "jackknife_failed",
                                 sprintf(.("Some leave-one-out replicates could not be computed and were dropped rather than replaced by the observed value (%s). Where too few survived, the row falls back to a percentile interval - the CI method column says which was used."),
-                                    paste(unique(jack_msgs), collapse = ", "))
+                                    paste(private$.noteSafe(unique(jack_msgs)), collapse = ", "))
                             )
                         }
                     },
@@ -10832,12 +12617,13 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         # arrives as an error carrying code = "restart". Re-raise it
                         # before writing anything.
                         if (identical(e$code, "restart")) stop(e)
-                        self$results$bootstrapCITable$setNote("error", sprintf(.("Bootstrap CI error: %s"), jmvcore::htmlEscape(e$message)))
+                        self$results$bootstrapCITable$setNote("error", sprintf(.("Bootstrap CI error: %s"), private$.noteSafe(jmvcore::htmlEscape(e$message))))
                     }
                 )
             },
             .populateBootstrapCIExplanation = function() {
-                html <- "<div style='font-family: Arial, sans-serif; max-width: 700px; line-height: 1.5;'>
+                conf_pct <- round(100 * self$options$confLevel)
+                html <- paste0("<div style='font-family: Arial, sans-serif; max-width: 700px; line-height: 1.5;'>
                 <h3>Bootstrap Confidence Intervals</h3>
                 <p>Bootstrap CIs are computed by resampling cases with replacement and recomputing
                 each agreement metric. The BCa (Bias-Corrected and Accelerated) method adjusts for
@@ -10845,14 +12631,17 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 <h4>Interpreting Results</h4>
                 <ul>
                     <li><strong>Boot SE</strong>: Standard deviation of bootstrap distribution</li>
-                    <li><strong>95% CI</strong>: Range containing the true metric with 95% confidence</li>
+                    <li><strong>", conf_pct, "% CI</strong>: an interval from a procedure that captures the true value in about ", conf_pct, "% of repeated studies. It does not mean the true value lies in this particular interval with ", conf_pct, "% probability</li>
                     <li><strong>Bias</strong>: Mean bootstrap estimate minus observed; large bias suggests instability</li>
                 </ul>
                 <div style='background-color: rgba(155, 155, 155, 0.06); padding: 12px; border-left: 4px solid #333; margin-top: 15px; color: inherit;'>
-                    <strong>Recommendation:</strong> Use bootstrap CIs when reporting agreement metrics in publications.
-                    They are distribution-free and provide more robust coverage than analytical CIs.
+                    <strong>When to prefer them:</strong> bootstrap intervals make no normal-approximation
+                    assumption, which helps for bounded, skewed statistics such as a kappa near 1. They are not
+                    automatically better than the analytical intervals: with few cases or a rare category a resample
+                    can miss a category, and the interval can be too narrow. Read any dropped-resample note under the
+                    table, and report which interval method you used (the CI Method column says).
                 </div>
-            </div>"
+            </div>")
                 self$results$bootstrapCIExplanation$setContent(html)
             },
             .calculateConcordanceF1 = function(ratings) {
@@ -10889,13 +12678,19 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             return()
                         }
 
-                        all_classes <- sort(unique(c(as.character(predictions), as.character(unlist(annotators)))))
+                        # lapply(, as.character) before unlist(): unlist() over a mixed
+                        # factor/numeric data frame returns level CODES, which would put
+                        # "1"/"2" into the class list instead of the rating labels.
+                        all_classes <- sort(unique(c(as.character(predictions), unlist(lapply(annotators, as.character)))))
                         all_classes <- all_classes[!is.na(all_classes)]
 
                         # Concordance: prediction matches ANY annotator
                         concordance_match <- sapply(seq_len(n_valid), function(i) {
                             pred <- as.character(predictions[i])
-                            refs <- as.character(unlist(annotators[i, ]))
+                            # vapply, not unlist(): unlist() over a mixed factor/numeric
+                            # row returns level codes, so `pred %in% refs` compared a
+                            # label against "1"/"2" and concordance read as 0.
+                            refs <- vapply(annotators[i, , drop = FALSE], as.character, character(1))
                             refs <- refs[!is.na(refs)]
                             pred %in% refs
                         })
@@ -10909,7 +12704,9 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         # the alphabet. Route through the same .modalValue() the
                         # consensus-variable feature uses, so the user's tie-break
                         # choice applies here too and an unresolved tie yields NA
-                        # (dropped by the na.rm means below) instead of a guess.
+                        # instead of a guess. Those NAs are no longer simply dropped by
+                        # an na.rm mean: they define the strict denominator, which is
+                        # reported beside the strict accuracy below.
                         tie_breaker <- self$options$tieBreaker
                         # The declared scale must travel with the labels: as.character()
                         # strips the factor levels, and without them .modalValue() falls
@@ -10944,18 +12741,46 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                         strict_match <- as.character(predictions) == consensus
                         concordance_accuracy <- mean(concordance_match, na.rm = TRUE)
-                        strict_accuracy <- mean(strict_match, na.rm = TRUE)
+
+                        # Strict accuracy is only DEFINED on the cases the references
+                        # resolved to a consensus label, so it has its own denominator.
+                        # With two reference annotators and the default tieBreaker =
+                        # "exclude" every disagreement is a tie, so that denominator is
+                        # exactly the subset where the references already agreed - the
+                        # easy cases, by construction. The two were subtracted anyway and
+                        # the gap printed as "% improvement over strict consensus", which
+                        # compared two different case sets (measured on a 20-case 3-rater
+                        # fixture: 1.00 over 20 cases against 1.00 over 11, reported as
+                        # one number, with the n row still reading "20 cases evaluated").
+                        # Difference them only when the two case sets
+                        # coincide; otherwise state both n's and difference nothing.
+                        strict_eligible <- !is.na(consensus)
+                        n_strict <- sum(strict_eligible)
+                        strict_accuracy <- if (n_strict > 0) mean(strict_match[strict_eligible]) else NA_real_
+                        comparable <- n_strict == n_valid && n_strict > 0
 
                         table <- self$results$concordanceF1Table
                         table$setRow(rowKey = "conc_acc", values = list(
                             value = concordance_accuracy,
-                            comparison = paste0("vs Strict: ", round(strict_accuracy, 4)),
-                            interpretation = paste0(round((concordance_accuracy - strict_accuracy) * 100, 1), "% improvement over strict consensus")
+                            comparison = sprintf(.("All %d valid cases"), as.integer(n_valid)),
+                            interpretation = if (comparable)
+                                sprintf(.("%1$.1f percentage points above strict accuracy (%2$.4f), same %3$d cases"),
+                                    (concordance_accuracy - strict_accuracy) * 100, strict_accuracy, as.integer(n_valid))
+                            else
+                                sprintf(.("Not comparable with strict accuracy: strict is defined on only %1$d of these %2$d cases, so the two are not differenced here"),
+                                    as.integer(n_strict), as.integer(n_valid))
                         ))
                         table$setRow(rowKey = "strict_acc", values = list(
                             value = strict_accuracy,
-                            comparison = "Majority consensus",
-                            interpretation = if (strict_accuracy >= 0.9) "Excellent" else if (strict_accuracy >= 0.8) "Good" else if (strict_accuracy >= 0.7) "Moderate" else "Needs improvement"
+                            comparison = sprintf(.("Majority consensus, %d cases"), as.integer(n_strict)),
+                            # The verdict a clinician reads was four bare English literals
+                            # in an otherwise translated table, behind an unguarded
+                            # comparison that errors once strict_accuracy can be NA.
+                            interpretation = if (is.na(strict_accuracy)) .("No case had a resolved reference consensus")
+                                else if (strict_accuracy >= 0.9) .("Excellent")
+                                else if (strict_accuracy >= 0.8) .("Good")
+                                else if (strict_accuracy >= 0.7) .("Moderate")
+                                else .("Needs improvement")
                         ))
 
                         # Mean annotator agreement
@@ -10984,17 +12809,31 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         }
                         table$setRow(rowKey = "n_info", values = list(
                             value = length(ref_cols),
-                            comparison = paste0("Prediction: rater ", pred_col),
-                            interpretation = paste0(n_valid, " cases evaluated")
+                            comparison = sprintf(.("Prediction: rater %d"), as.integer(pred_col)),
+                            # One table, two denominators: the concordance figures use
+                            # every valid case, the strict figures only those with a
+                            # resolved consensus. A bare "N cases evaluated" hid the split
+                            # and read as the denominator of every row above.
+                            interpretation = sprintf(.("%1$d cases evaluated for concordance; %2$d of them have a resolved reference consensus and carry the strict figures"),
+                                as.integer(n_valid), as.integer(n_strict))
                         ))
 
                         # Per-class concordance F1
                         per_class_table <- self$results$concordanceF1PerClassTable
+                        # "Improvement" named two different quantities in one analysis: an
+                        # absolute gap in percentage points on the accuracy rows and a
+                        # relative change here. Retitled at runtime through
+                        # Column$setTitle so jamovi/agreement.r.yaml - and with it every
+                        # generated .h.R - stays untouched. The column NAME is unchanged,
+                        # so the addRow() key below still resolves.
+                        per_class_table$getColumn("improvement")$setTitle(.("Relative F1 Change"))
                         for (cls in all_classes) {
                             conc_tp <- sum(as.character(predictions) == cls & concordance_match)
                             conc_fp <- sum(as.character(predictions) == cls & !concordance_match)
                             any_annotator_cls <- sapply(seq_len(n_valid), function(i) {
-                                refs <- as.character(unlist(annotators[i, ]))
+                                # vapply, not unlist(): see the concordance_match loop
+                                # above - unlist() on a mixed row gives factor codes.
+                                refs <- vapply(annotators[i, , drop = FALSE], as.character, character(1))
                                 cls %in% refs[!is.na(refs)]
                             })
                             conc_fn <- sum(any_annotator_cls & as.character(predictions) != cls)
@@ -11013,7 +12852,12 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             strict_prec <- if ((strict_tp + strict_fp) > 0) strict_tp / (strict_tp + strict_fp) else NA_real_
                             strict_rec <- if ((strict_tp + strict_fn) > 0) strict_tp / (strict_tp + strict_fn) else NA_real_
                             strict_f1 <- if (isTRUE((strict_prec + strict_rec) > 0)) 2 * strict_prec * strict_rec / (strict_prec + strict_rec) else NA_real_
-                            improvement <- if (isTRUE(strict_f1 > 0)) (conc_f1 - strict_f1) / strict_f1 else NA_real_
+                            # Same denominator trap as the accuracy rows: conc_f1 counts
+                            # every valid case, strict_f1 only the cases with a resolved
+                            # consensus (na.rm above). The ratio is a like-for-like change
+                            # only when those case sets coincide; otherwise the cell stays
+                            # empty and the note below says why.
+                            improvement <- if (comparable && isTRUE(strict_f1 > 0)) (conc_f1 - strict_f1) / strict_f1 else NA_real_
 
                             per_class_table$addRow(rowKey = cls, values = list(
                                 class_label = cls, concordance_f1 = conc_f1, strict_f1 = strict_f1,
@@ -11021,13 +12865,14 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             ))
                         }
 
-                        per_class_table$setNote("undefined", .("An empty F1 or improvement cell means the quantity is undefined for that class, not zero: the class was never predicted (precision has no denominator), never present in the references (recall has no denominator), or its strict F1 is 0 so the relative improvement has no base."))
+                        per_class_table$setNote("undefined", .("An empty cell means the quantity is undefined for that class, not zero: the class was never predicted (precision has no denominator), never present in the references (recall has no denominator), its strict F1 is 0 so the relative change has no base, or the two F1 columns rest on different case sets - concordance F1 uses every valid case, strict F1 only the cases with a resolved reference consensus - which leaves their ratio meaningless. Relative F1 Change is (concordance F1 - strict F1) / strict F1, a relative change; the accuracy rows above report an absolute gap in percentage points instead."))
 
                         rater_names <- colnames(ratings)
-                        table$setNote("method", sprintf(.("Prediction column: %1$s. Reference annotators: %2$s."), rater_names[pred_col], paste(rater_names[ref_cols], collapse = ", ")))
+                        table$setNote("method", sprintf(.("Prediction column: %1$s. Reference annotators: %2$s."), private$.noteSafe(rater_names[pred_col]), paste(private$.noteSafe(rater_names[ref_cols]), collapse = ", ")))
+                        table$setNote("scale", .("The word beside strict accuracy uses the 0.70, 0.80 and 0.90 cut-points. No published source defines interpretive bands for an accuracy, so these are a display convention of this module and not a standard; report the accuracy itself."))
                     },
                     error = function(e) {
-                        self$results$concordanceF1Table$setNote("error", sprintf(.("Concordance F1 error: %s"), jmvcore::htmlEscape(e$message)))
+                        self$results$concordanceF1Table$setNote("error", sprintf(.("Concordance F1 error: %s"), private$.noteSafe(jmvcore::htmlEscape(e$message))))
                     }
                 )
             },
@@ -11047,57 +12892,129 @@ agreementClass <- if (requireNamespace("jmvcore")) {
             .calculatePairedAgreementComparison = function(ratings_A) {
                 tryCatch(
                     {
+                        # Notes persist across runs of one analysis object (jmvcore has no
+                        # R-side clearWith and Table has no reset), and both early returns
+                        # below are reached before the per-branch NULL writes further down.
+                        # Clear the whole key set once, here, so a failed run cannot show a
+                        # previous successful run's case count and bootstrap description.
+                        for (nk in c("error", "kappa_panel", "kappa_na", "scale_mismatch",
+                                     "weight_override", "info", "p_floor",
+                                     "dropped_replicates"))
+                            self$results$pairedAgreementTable$setNote(nk, NULL)
+
                         condB_vars <- self$options$conditionBVars
                         if (is.null(condB_vars) || length(condB_vars) < 2) {
                             self$results$pairedAgreementTable$setNote("error", .("Select at least 2 rater variables for Condition B."))
                             return()
                         }
 
-                        ratings_B <- data.frame(
-                            lapply(condB_vars, function(v) as.character(self$data[[v]])),
-                            stringsAsFactors = FALSE
-                        )
-                        colnames(ratings_B) <- condB_vars
+                        # Keep the DECLARED factor levels. as.character() here put
+                        # both conditions on an ALPHABETICAL scale, which is exactly
+                        # the scrambled-scale bug .kappa2Ordered() exists to prevent:
+                        # with Absent/Focal/Diffuse it reads the scale as
+                        # Absent/Diffuse/Focal, and the quadratic-weighted Cohen kappa
+                        # comes out 0.532258064516 instead of 0.589041095890
+                        # (measured). Only the pairwise equality test needs characters,
+                        # and it converts per pair below.
+                        ratings_B <- self$data[, condB_vars, drop = FALSE]
 
-                        # Ensure type consistency: convert A to character as well
-                        ratings_A_char <- data.frame(
-                            lapply(ratings_A, as.character),
-                            stringsAsFactors = FALSE
-                        )
-                        colnames(ratings_A_char) <- colnames(ratings_A)
-
-                        complete <- complete.cases(ratings_A_char) & complete.cases(ratings_B)
-                        ratings_A <- ratings_A_char[complete, , drop = FALSE]
+                        complete <- complete.cases(ratings_A) & complete.cases(ratings_B)
+                        ratings_A <- ratings_A[complete, , drop = FALSE]
                         ratings_B <- ratings_B[complete, , drop = FALSE]
                         n_cases <- nrow(ratings_A)
 
+                        table <- self$results$pairedAgreementTable
+
                         if (n_cases < 10) {
-                            self$results$pairedAgreementTable$setNote("error", sprintf(.("Too few complete cases (%s). Need at least 10."), n_cases))
+                            table$setNote("error", sprintf(.("Too few complete cases (%s). Need at least 10."), n_cases))
                             return()
                         }
+
+                        # What coefficient, on what scale, under what weighting.
+                        #
+                        # Cohen's kappa and Fleiss' kappa assume different models of
+                        # chance agreement (Fleiss generalises Scott's pi), so
+                        # differencing them has no estimand. A kappa row therefore
+                        # exists only when both conditions carry the same number of
+                        # raters. Mean pairwise percent agreement IS comparable across
+                        # panel sizes and is always shown.
+                        same_panel <- ncol(ratings_A) == ncol(ratings_B)
+                        both_cohen <- same_panel && ncol(ratings_A) == 2L
+
+                        # The weighting the user chose must apply HERE too: irr::kappa2()
+                        # was called with no weight=, so Condition A carried the
+                        # unweighted kappa while the headline table showed the weighted
+                        # one, both labelled "Cohen's Kappa". Same three-branch mapping
+                        # as the headline's irr_w, and the same OUTERMOST is_ordinal
+                        # guard as the intra-rater table: weights must never reach an
+                        # unordered scale. BOTH conditions must qualify, because the two
+                        # cells of one row have to be the same coefficient.
+                        lv_A <- unique(unlist(lapply(ratings_A, function(x) levels(as.factor(x)))))
+                        lv_B <- unique(unlist(lapply(ratings_B, function(x) levels(as.factor(x)))))
+                        is_ordinal <- all(vapply(c(as.list(ratings_A), as.list(ratings_B)), is.ordered, logical(1))) &&
+                            length(union(lv_A, lv_B)) >= 3
+                        # BOTH conditions are tested, and one ambiguous condition
+                        # disarms the weights for both: the row DIFFERENCES the two
+                        # cells, so they have to be the same statistic.
+                        paired_scale_ambiguous <- !identical(self$options$wght, "unweighted") &&
+                            both_cohen && is_ordinal &&
+                            (isTRUE(private$.orderedLevelsInfo(ratings_A)$ambiguous) ||
+                                isTRUE(private$.orderedLevelsInfo(ratings_B)$ambiguous))
+                        private$.noteScaleAmbiguity(table, paired_scale_ambiguous)
+                        irr_weight <- if (!both_cohen || !is_ordinal || paired_scale_ambiguous) {
+                            "unweighted"
+                        } else if (identical(self$options$wght, "equal")) {
+                            "equal"
+                        } else if (identical(self$options$wght, "squared")) {
+                            "squared"
+                        } else {
+                            "unweighted"
+                        }
+                        # Name the weighting that actually ran: the value differs by
+                        # weighting and this column is the reader's only way to tell
+                        # which one produced it.
+                        stat_name <- private$.kappaLabel(if (both_cohen) 2L else 3L, irr_weight)
 
                         compute_pct_agree <- function(mat) {
                             n_raters <- ncol(mat)
                             if (n_raters < 2) {
-                                return(NA)
+                                return(NA_real_)
                             }
                             pairs <- combn(n_raters, 2)
-                            mean(apply(pairs, 2, function(p) mean(mat[, p[1]] == mat[, p[2]], na.rm = TRUE)))
+                            # as.character per pair: `==` on two factors whose declared
+                            # level sets differ is an ERROR ("level sets of factors are
+                            # different"), not a warning.
+                            mean(apply(pairs, 2, function(p)
+                                mean(as.character(mat[[p[1]]]) == as.character(mat[[p[2]]]), na.rm = TRUE)))
                         }
 
                         compute_kappa <- function(mat) {
                             tryCatch(
                                 {
-                                    if (ncol(mat) == 2) irr::kappa2(mat)$value else irr::kappam.fleiss(mat)$value
+                                    # .kappa2Ordered() recodes both columns against ONE
+                                    # declared-order scale, as the headline table and
+                                    # .calculateAgreementBySubgroup already do. No
+                                    # lv_info is passed, so the scale is re-derived per
+                                    # call and a resample is scored on the categories it
+                                    # contains - as irr itself does. (.calculateBootstrapCI
+                                    # now pins its scale to the original columns instead;
+                                    # for ordered factors, which is the only case that
+                                    # reaches weights, subsetting keeps every declared
+                                    # level and the two behave identically.)
+                                    if (ncol(mat) == 2) {
+                                        private$.kappa2Ordered(mat, irr_weight)$value
+                                    } else {
+                                        irr::kappam.fleiss(mat)$value
+                                    }
                                 },
-                                error = function(e) NA
+                                error = function(e) NA_real_
                             )
                         }
 
                         pct_A <- compute_pct_agree(ratings_A)
                         pct_B <- compute_pct_agree(ratings_B)
-                        kappa_A <- compute_kappa(ratings_A)
-                        kappa_B <- compute_kappa(ratings_B)
+                        kappa_A <- if (same_panel) compute_kappa(ratings_A) else NA_real_
+                        kappa_B <- if (same_panel) compute_kappa(ratings_B) else NA_real_
 
                         n_boot <- self$options$pairedBootN
                         seed_val <- self$options$seed
@@ -11108,14 +13025,21 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         boot_kappa_diff <- numeric(n_boot)
 
                         for (b in seq_len(n_boot)) {
+                            # Up to 10,000 replicates, each refitting kappa twice
+                            # (.kappa2Ordered / irr::kappam.fleiss): the pane froze with
+                            # no way to cancel. The enclosing handler re-raises the
+                            # restart. Placed at the top of the body, OUTSIDE
+                            # compute_kappa()'s own tryCatch(error = NA_real_), which
+                            # would otherwise swallow it and turn a cancel into a
+                            # dropped replicate.
+                            if (b %% 50L == 0L) private$.checkpoint()
                             idx <- sample(n_cases, replace = TRUE)
                             boot_A <- ratings_A[idx, , drop = FALSE]
                             boot_B <- ratings_B[idx, , drop = FALSE]
                             boot_pct_diff[b] <- compute_pct_agree(boot_B) - compute_pct_agree(boot_A)
-                            boot_kappa_diff[b] <- compute_kappa(boot_B) - compute_kappa(boot_A)
+                            if (same_panel)
+                                boot_kappa_diff[b] <- compute_kappa(boot_B) - compute_kappa(boot_A)
                         }
-
-                        table <- self$results$pairedAgreementTable
 
                         # A bootstrap p-value can never be 0: its resolution is bounded
                         # by the number of resamples. 2*min(mean(d<=0), mean(d>=0))
@@ -11134,47 +13058,118 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                            (1 + sum(d >= 0)) / (nb + 1)))
                         }
 
+                        # One interpretation helper for both rows. These were four bare
+                        # English literals, written out twice, so the column stayed
+                        # English in every locale.
+                        interp_of <- function(d, p) {
+                            if (is.na(p) || is.na(d)) {
+                                .("Not estimable")
+                            } else if (p < alpha) {
+                                if (d > 0) .("Significant improvement") else .("Significant decrease")
+                            } else {
+                                .("No significant difference")
+                            }
+                        }
+
                         pct_diff <- pct_B - pct_A
                         pct_ci <- quantile(boot_pct_diff, c(alpha / 2, 1 - alpha / 2), na.rm = TRUE)
                         pct_p <- boot_p(boot_pct_diff)
-                        pct_interp <- if (is.na(pct_p)) {
-                            "Not estimable"
-                        } else if (pct_p < alpha) {
-                            if (pct_diff > 0) "Significant improvement" else "Significant decrease"
-                        } else {
-                            "No significant difference"
-                        }
 
                         table$addRow(rowKey = "pct_agree", values = list(
-                            metric = "Percent Agreement", condition_a = pct_A, condition_b = pct_B,
+                            metric = .("Percent Agreement"), condition_a = pct_A, condition_b = pct_B,
                             difference = pct_diff, ci_lower = pct_ci[1], ci_upper = pct_ci[2],
-                            p_value = pct_p, interpretation = pct_interp
+                            p_value = pct_p, interpretation = interp_of(pct_diff, pct_p)
                         ))
 
-                        if (!is.na(kappa_A) && !is.na(kappa_B)) {
-                            kappa_diff <- kappa_B - kappa_A
-                            kappa_ci <- quantile(boot_kappa_diff, c(alpha / 2, 1 - alpha / 2), na.rm = TRUE)
-                            kappa_p <- boot_p(boot_kappa_diff)
-                            kappa_interp <- if (is.na(kappa_p)) {
-                                "Not estimable"
-                            } else if (kappa_p < alpha) {
-                                if (kappa_diff > 0) "Significant improvement" else "Significant decrease"
+                        if (!same_panel) {
+                            table$setNote("kappa_panel", sprintf(.("Kappa is not reported. Condition A has %1$s rater columns and Condition B has %2$s: two raters give Cohen's kappa and three or more give Fleiss' kappa, which assume different models of chance agreement, so the difference between them measures nothing. Percent agreement above is the mean over all rater pairs and stays comparable across panel sizes. Give both conditions the same number of rater columns to compare kappa."), ncol(ratings_A), ncol(ratings_B)))
+                        } else {
+                            table$setNote("kappa_panel", NULL)
+                            if (is.na(kappa_A) || is.na(kappa_B)) {
+                                # The row used to vanish: tryCatch(error = NA) plus
+                                # `if (!is.na(kappa_A) && !is.na(kappa_B))` removed the
+                                # whole line with no message, so the output looked as
+                                # though kappa was never asked for. Omitted keys render
+                                # as empty cells.
+                                table$addRow(rowKey = "kappa", values = list(
+                                    metric = stat_name, interpretation = .("Not estimable")
+                                ))
+                                table$setNote("kappa_na", .("Kappa could not be computed for at least one condition, so its cells are left empty. This happens when a condition has only one category among the complete cases, or when a rater column does not vary. Percent agreement above is unaffected."))
                             } else {
-                                "No significant difference"
+                                table$setNote("kappa_na", NULL)
+                                kappa_diff <- kappa_B - kappa_A
+                                kappa_ci <- quantile(boot_kappa_diff, c(alpha / 2, 1 - alpha / 2), na.rm = TRUE)
+                                kappa_p <- boot_p(boot_kappa_diff)
+                                table$addRow(rowKey = "kappa", values = list(
+                                    metric = stat_name, condition_a = kappa_A, condition_b = kappa_B,
+                                    difference = kappa_diff, ci_lower = kappa_ci[1], ci_upper = kappa_ci[2],
+                                    p_value = kappa_p, interpretation = interp_of(kappa_diff, kappa_p)
+                                ))
                             }
-                            kappa_label <- if (ncol(ratings_A) == 2) "Cohen's Kappa" else "Fleiss' Kappa"
-                            table$addRow(rowKey = "kappa", values = list(
-                                metric = kappa_label, condition_a = kappa_A, condition_b = kappa_B,
-                                difference = kappa_diff, ci_lower = kappa_ci[1], ci_upper = kappa_ci[2],
-                                p_value = kappa_p, interpretation = kappa_interp
-                            ))
+                        }
+
+                        if (same_panel && !setequal(lv_A, lv_B)) {
+                            table$setNote("scale_mismatch", sprintf(.("Condition A and Condition B do not use the same category scale (A: %1$s; B: %2$s). Kappa depends on how many categories there are and, when weighted, on their spacing, so the two coefficients do not rest on a common footing. Recode both conditions onto one scale before reading the kappa row."),
+                                private$.noteSafe(jmvcore::htmlEscape(paste(lv_A, collapse = ", "))),
+                                private$.noteSafe(jmvcore::htmlEscape(paste(lv_B, collapse = ", ")))))
+                        } else {
+                            table$setNote("scale_mismatch", NULL)
+                        }
+
+                        # NOT when the weights were dropped because the declared
+                        # category orders do not determine one scale: the scale_ambiguous
+                        # note already says that, and this sentence would give the reader
+                        # a different and false reason (the variables ARE ordinal here).
+                        # NOT REACHABLE TODAY: the headline analysis rejects
+                        # weighted kappa on unordered factors before paired agreement
+                        # runs, so this first branch cannot fire on a nominal scale.
+                        # Kept because it becomes live if that rejection is relaxed.
+                        # The sibling branch (3+ raters -> Fleiss) IS reachable.
+                        if (both_cohen && !paired_scale_ambiguous &&
+                            !identical(self$options$wght, "unweighted") &&
+                            identical(irr_weight, "unweighted")) {
+                            table$setNote("weight_override", .("Weighted kappa was requested but the rater variables are not ordered factors with three or more categories, so unweighted Cohen's kappa is reported here. Weights assume a distance between categories, which a nominal scale (tumour type, mutation class) does not have. Set every rater variable in both conditions to Ordinal to obtain the weighted statistic."))
+                        } else if (same_panel && !both_cohen && !identical(self$options$wght, "unweighted")) {
+                            table$setNote("weight_override", .("Weighted kappa was requested, but with three or more raters per condition the coefficient is Fleiss' kappa, which has no weighted form. Weights apply only to Cohen's kappa for two raters."))
+                        } else {
+                            table$setNote("weight_override", NULL)
+                        }
+
+                        # A replicate whose metric could not be computed came back NA and
+                        # was dropped in silence: boot_p() recomputes nb from the
+                        # survivors and quantile(..., na.rm = TRUE) does the same for the
+                        # CI, so a p-value resting on 50 surviving resamples printed
+                        # exactly like one resting on all 2000. Disclose the attrition
+                        # per metric, as bootstrapCITable already does.
+                        dropped_paired <- c(
+                            stats::setNames(sum(is.na(boot_pct_diff)), .("Percent Agreement")),
+                            if (same_panel && !is.na(kappa_A) && !is.na(kappa_B))
+                                stats::setNames(sum(is.na(boot_kappa_diff)), stat_name)
+                            else NULL
+                        )
+                        dropped_paired <- dropped_paired[dropped_paired > 0]
+                        if (length(dropped_paired) > 0) {
+                            table$setNote(
+                                "dropped_replicates",
+                                sprintf(
+                                    .("Some bootstrap resamples could not be computed and were dropped rather than replaced, so the p-value and confidence interval for those rows rest on fewer than %1$d resamples: %2$s. This usually means a resample contained only one rating category. Figures from a depleted bootstrap distribution are less reliable than the resample count below suggests."),
+                                    as.integer(n_boot),
+                                    paste(sprintf("%s (%d)", private$.noteSafe(names(dropped_paired)), as.integer(dropped_paired)), collapse = ", ")
+                                )
+                            )
                         }
 
                         table$setNote("info", sprintf(.("Bootstrap test with %1$s replications (seed = %2$s). N = %3$s cases."), n_boot, seed_val, n_cases))
                         table$setNote("p_floor", sprintf(.("The smallest p-value %1$s resamples can produce is %2$.4f. A p-value at that floor means no resample fell on the other side, not that the difference is certain."), n_boot, 2 / (n_boot + 1)))
                     },
                     error = function(e) {
-                        self$results$pairedAgreementTable$setNote("error", sprintf(.("Paired agreement error: %s"), jmvcore::htmlEscape(e$message)))
+                        # A .checkpoint() restart is control flow, not a failure: it
+                        # arrives as an error carrying code = "restart". Re-raise it
+                        # before writing anything, exactly as the bootstrap CI handler
+                        # does. Without this the checkpoint added to the loop above
+                        # would be caught here and shown as "Paired agreement error".
+                        if (identical(e$code, "restart")) stop(e)
+                        self$results$pairedAgreementTable$setNote("error", sprintf(.("Paired agreement error: %s"), private$.noteSafe(jmvcore::htmlEscape(e$message))))
                     }
                 )
             },
@@ -11193,6 +13188,14 @@ agreementClass <- if (requireNamespace("jmvcore")) {
             .calculateAgreementSampleSize = function() {
                 tryCatch(
                     {
+                        # jmvcore has NO R-side handling of clearWith and Table has no
+                        # reset method, so a note written on one run survives into the
+                        # next run of the same analysis object. Clear every key this
+                        # function can write, then let each branch write only its own -
+                        # otherwise a guard's "error" sits beside a later, valid result.
+                        for (nk in c("error", "info", "props", "unweighted", "sparse"))
+                            self$results$agreementSampleSizeTable$setNote(nk, NULL)
+
                         metric <- self$options$ssMetric
                         k0 <- self$options$ssKappaNull
                         k1 <- self$options$ssKappaAlt
@@ -11240,6 +13243,34 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                 self$results$agreementSampleSizeTable$setNote(
                                     "error",
                                     .("Validated kappa sample size formulas are currently available for 2 to 5 categories.")
+                                )
+                                return()
+                            }
+
+                            # kappaSize::Power{Binary,3,4,5}Cats stop() outside 2-6 raters and
+                            # outside the OPEN interval (0,1) for either kappa (read out of
+                            # body(kappaSize::Power3Cats)). The option ranges are deliberately
+                            # wider - ssNRaters max 100 and ssKappaNull min 0 are legitimate ICC
+                            # inputs, and a jamovi min/max cannot depend on ssMetric - so the
+                            # kappa engines' own limits are stated here. Without these two guards
+                            # the outer tryCatch relays the package's untranslated English
+                            # ("Sorry, this function is designed for between 2 to 6 raters.").
+                            # These are the complete set reachable under the declared .a.yaml
+                            # ranges: alpha 0.001-0.2, power 0.5-0.999 and props = rep(1/q, q)
+                            # can never breach the engines' other checks.
+                            if (n_raters > 6) {
+                                self$results$agreementSampleSizeTable$setNote(
+                                    "error",
+                                    .fmt(.("The validated kappa sample size formulas cover 2 to 6 raters, but {raters} were requested. Enter 6 or fewer raters, or size the study by another method; the ICC option accepts more raters but needs ratings that can be treated as numeric."),
+                                         raters = n_raters)
+                                )
+                                return()
+                            }
+
+                            if (k0 <= 0 || k0 >= 1 || k1 <= 0 || k1 >= 1) {
+                                self$results$agreementSampleSizeTable$setNote(
+                                    "error",
+                                    .("Both kappa values must lie strictly between 0 and 1. A kappa of 0 (chance agreement) or 1 (perfect agreement) cannot serve as a hypothesis value for this method; enter for example 0.40 under H0 and 0.70 under H1.")
                                 )
                                 return()
                             }
@@ -11321,7 +13352,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         # the msgid at run time, so neither fragment was ever in the catalog
                         # and a translator saw an unintelligible "%s. Assumes %sTwo-sided".
                         table$setNote("info", if (metric == "icc") {
-                                jmvcore::format(
+                                .fmt(
                                     .("Formula: Walter, Eliasziw & Donner (1998). Assumes {raters} raters. Two-sided test."),
                                     raters = n_raters)
                             } else {
@@ -11342,10 +13373,42 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                 sprintf(.("This calculation assumes all %1$d categories are <b>equally common</b> (each %2$.0f%% of cases). Pathology grading distributions are rarely balanced, and the required sample size rises steeply as they skew: for a 3-category scale at kappa 0.40 vs 0.60 with 2 raters, equal thirds need about 106 cases, a 70/20/10 split about 155, and an 85/10/5 split about 264. Treat the number above as a <b>lower bound</b> and inflate it for the expected prevalence of your categories."),
                                     as.integer(n_cat), 100 / n_cat)
                             )
+
+                            # The headline kappa of this analysis can be linear- or
+                            # squared-weighted (option `wght`); this sample size cannot.
+                            table$setNote(
+                                "unweighted",
+                                .("This sample size is for <b>unweighted</b> kappa: categories are treated as nominal and every disagreement counts the same. It does not apply to weighted kappa for ordered grades, so if the Weighted kappa option is set to linear or squared weights, either analyse the study unweighted as well or size it with a dedicated weighted-kappa method.")
+                            )
+
+                            # Cochran's rule on the agreement-pattern cells the goodness-of-fit
+                            # chi-square actually divides by - the same rule and the same shared
+                            # closed form as the sibling kappaSizePower (R/kappaSizePower.b.R and
+                            # R/utils-kappasize.R): no expected count below 1, at most one cell in
+                            # five below 5. Measured, Fleiss / 3 categories / 4 raters / kappa0
+                            # 0.40: N = 18 gives cells (12, 2, 2, 2), so 3 of 4 are below 5.
+                            # The sibling's second, MARGINAL check is deliberately not ported:
+                            # props here is always rep(1/q, q), so there is no rare category for
+                            # it to find that the rule below does not already catch.
+                            #
+                            # KEEP IN SYNC: the first sentence below is copied BYTE-FOR-BYTE from
+                            # the "At the required sample size the agreement-pattern cells ..."
+                            # msgid in R/kappaSizePower.b.R, so the two share one catalog entry.
+                            # Nothing enforces it - edit both files or neither.
+                            e_cells <- kappaSizeGofCells(n_cat, n_raters, props, k0) * n_required
+                            if (any(e_cells < 1) || mean(e_cells < 5) > 0.2) {
+                                table$setNote("sparse", paste0(
+                                    .fmt(
+                                        .("At the required sample size the agreement-pattern cells (for example, exactly k of the raters calling the finding present, or all raters agreeing on one category) are too sparse: the smallest expected count is {min} and {below} of {total} cells are below 5. The calculation rests on a large-sample chi-square approximation, so the sample size shown is less dependable here."),
+                                        min = base::format(signif(min(e_cells), 2), scientific = FALSE, trim = TRUE),
+                                        below = sum(e_cells < 5), total = length(e_cells)),
+                                    " ",
+                                    .("Fewer raters, fewer rating categories, or a larger study would each leave more cases in every agreement pattern.")))
+                            }
                         }
                     },
                     error = function(e) {
-                        self$results$agreementSampleSizeTable$setNote("error", sprintf(.("Sample size error: %s"), jmvcore::htmlEscape(e$message)))
+                        self$results$agreementSampleSizeTable$setNote("error", sprintf(.("Sample size error: %s"), private$.noteSafe(jmvcore::htmlEscape(e$message))))
                     }
                 )
             },
@@ -11444,7 +13507,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         </tr>
                         <tr>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Limits of Agreement (LoA)</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Mean \u{00B1} 1.96 SD; 95% of differences fall within these limits</td>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Mean \u00B1 1.96 SD; 95% of differences fall within these limits</td>
                         </tr>
                         <tr>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Difference-Mean Slope (p)</strong></td>
@@ -11461,8 +13524,8 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     <h4 style='margin: 0 0 10px 0; color: inherit;'>Clinical Decision Rule</h4>
                     <p style='margin: 0; font-style: italic;'>
                         The key question is: \u{201C}Are the limits of agreement clinically acceptable?\u{201D} For example,
-                        if two Ki-67 scoring methods have LoA of \u{00B1}5%, and the clinical threshold is 20%,
-                        a \u{00B1}5% discrepancy could change treatment decisions for patients near the cutoff.
+                        if two Ki-67 scoring methods have LoA of \u00B15%, and the clinical threshold is 20%,
+                        a \u00B15% discrepancy could change treatment decisions for patients near the cutoff.
                         Clinical context - not statistical significance - determines acceptability.
                     </p>
                 </div>
@@ -11654,6 +13717,506 @@ agreementClass <- if (requireNamespace("jmvcore")) {
             "
                 self$results$pabakExplanation$setContent(html_content)
             },
+            # ---- Pathologist grading analysis (model-based ordinal agreement) ----
+            # Numbers come from the pure helpers in R/agreement-latent.R (validated against
+            # Nelson & Edwards 2015, Table 5); this layer decides what the design permits,
+            # fills the tables and writes every sentence.
+
+            # Scale of the rater columns, one answer for the whole section:
+            #   all ordered factors                        -> ordinal (declared order)
+            #   all numeric category codes (whole, <= 10)  -> ordinal (sorted values)
+            #   otherwise, 2 categories used               -> binary
+            #   otherwise                                  -> nominal
+            #   any continuous measurement                 -> continuous (section does not apply)
+            .gradingScale = function(ratings) {
+                if (private$.ratingsAreContinuous(ratings))
+                    return(list(scale = "continuous", levels = character(0),
+                                ambiguous = FALSE, codes = FALSE))
+                is_num <- vapply(ratings, function(x) is.numeric(x) && !is.factor(x), logical(1))
+                if (all(is_num)) {
+                    v <- sort(unique(stats::na.omit(unlist(ratings, use.names = FALSE))))
+                    return(list(scale = "ordinal", levels = as.character(v),
+                                ambiguous = FALSE, codes = TRUE))
+                }
+                info <- private$.orderedLevelsInfo(ratings)
+                if (all(vapply(ratings, is.ordered, logical(1))))
+                    return(list(scale = "ordinal", levels = info$levels,
+                                ambiguous = isTRUE(info$ambiguous), codes = FALSE))
+                used <- unique(stats::na.omit(unlist(lapply(ratings, as.character), use.names = FALSE)))
+                used <- used[nzchar(trimws(used))]
+                list(scale = if (length(used) == 2L) "binary" else "nominal",
+                     levels = info$levels, ambiguous = isTRUE(info$ambiguous), codes = FALSE)
+            },
+
+            # What the design permits comes from ONE place, agreement_latent_gate() in
+            # R/agreement-latent.R (limits in AGREEMENT_LATENT_GATES, from the simulation grid
+            # of development-scripts/validate_agreement_ordinal_grid.R). This layer adds only
+            # the refusals the gate cannot see - an undetermined category order, a single
+            # category, and a direction for UNORDERED two-category ratings - and turns each
+            # untranslated reason code into one sentence. `what` = model, rho, ci or severity.
+            .gradingLatentScale = function(sc, design) {
+                if (identical(sc$scale, "nominal")) "nominal"
+                else if (design$C_used == 2L) "binary"
+                else "ordinal"
+            },
+            .gradingPreRefusal = function(sc, design, what) {
+                if (isTRUE(sc$ambiguous))
+                    return(if (identical(what, "severity"))
+                        .("The grading tendency places every pathologist on one common category order, and the selected rater variables do not determine one, so it is not computed. Declare the same full set of categories, in the same sequence, on every rater variable and run again.")
+                    else
+                        .("The model-based agreement places every pathologist on one common category order, and the selected rater variables do not determine one, so it is not computed. Declare the same full set of categories, in the same sequence, on every rater variable and run again."))
+                if (design$C_used < 2L)
+                    return(.("Only one category was used, so there is nothing to model."))
+                if (identical(what, "severity") && identical(sc$scale, "binary"))
+                    return(.("The grading tendency needs ordered categories (a higher and a lower grade); these two categories are unordered, so it is not computed. If one category is the higher one (for example positive over negative), set the rater variables to Ordinal."))
+                NULL
+            },
+            .gradingReason = function(code, what, design, max_share, detail = NULL) {
+                G <- AGREEMENT_LATENT_GATES
+                # The count the gate compared: cases read by at least two pathologists.
+                lt2 <- sum(design$n_cases_lt2)
+                n <- design$n_cases - lt2
+                J <- design$n_raters
+                med <- unname(design$per_case[["median"]])
+                pct <- 100 * max_share
+                sev <- identical(what, "severity")
+                txt <- switch(code,
+                    nominal_scale = if (sev)
+                        .("The grading tendency needs ordered categories (a higher and a lower grade); these ratings are nominal, so it is not computed. If the categories have a natural order, set the rater variables to Ordinal.")
+                    else
+                        .("The model-based agreement needs ordered categories (at least three grades); these ratings are nominal, so it is not computed. Fleiss' kappa and Krippendorff's alpha remain valid for nominal ratings."),
+                    disconnected = sprintf(if (sev)
+                        .("The pathologists fall into %d groups that share no cases, so their grading tendencies cannot be compared on one scale; the model is not fitted.")
+                    else
+                        .("The pathologists fall into %d groups that share no cases, so pathologist and case variation cannot be separated; the model is not fitted."),
+                        as.integer(design$n_components)),
+                    too_few_raters = if (sev) {
+                        # Same minimum the gate applied (agreement_severity_min_raters), so the
+                        # sentence cannot quote a different limit from the one that refused.
+                        sev_scale <- if (identical(as.integer(design$C_used), 2L)) "binary" else "ordinal"
+                        need <- agreement_severity_min_raters(sev_scale, max_share)
+                        if (identical(sev_scale, "binary"))
+                            sprintf(.("With two categories at least %1$d pathologists are needed for the grading tendency; this study has %2$d. With fewer, its behaviour was not checked in simulation."), need, J)
+                        else if (need > G$severity_min_raters)
+                            sprintf(.("One category holds %1$.0f%% of all ratings. When one category holds %2$.0f%% or more, at least %3$d pathologists are needed for the grading tendency, because with fewer its intervals were too narrow in simulation; this study has %4$d."), pct, 100 * G$skew_share, need, J)
+                        else
+                            sprintf(.("At least %1$d pathologists are needed for the grading tendency; this study has %2$d."), need, J)
+                    }
+                    else if (identical(what, "ci"))
+                        sprintf(.("Confidence intervals need at least %1$d pathologists; this study has %2$d, so none is shown."), G$rho_ci_min_raters, J)
+                    else
+                        sprintf(.("At least %1$d pathologists are needed for the latent model; this study has %2$d."), G$kappa_m_min_raters, J),
+                    too_few_ratings_per_case = sprintf(.("The latent model needs a median of at least %1$s ratings per case; this study has %2$s."),
+                        as.character(G$kappa_m_min_per_case), as.character(med)),
+                    too_few_cases = if (sev)
+                        sprintf(.("At least %1$d cases are needed for the grading tendency; this study has %2$d."), G$severity_min_cases, n)
+                    else if (identical(what, "rho"))
+                        sprintf(.("At least %1$d cases are needed for the latent ICC; this study has %2$d."), G$rho_min_cases, n)
+                    else if (identical(what, "ci"))
+                        sprintf(.("Confidence intervals need at least %1$d cases; this study has %2$d. With fewer cases the interval was too narrow in some simulated designs (the nominal 95%% interval covered the true value in as few as 85%% of studies), so none is shown."), G$rho_ci_min_cases, n)
+                    else if (design$C_used == 2L)
+                        sprintf(.("With two categories at least %1$d cases are needed for the latent model; this study has %2$d."), G$binary_min_cases, n)
+                    else
+                        sprintf(.("At least %1$d cases are needed for the model-based kappa and %2$d for the latent ICC; this study has %3$d."), G$kappa_m_min_cases, G$rho_min_cases, n),
+                    too_few_cases_incomplete = sprintf(.("Not every pathologist read every case, and in that design at least %1$d cases are needed for the latent ICC (with 50 it was biased downward in simulation); this study has %2$d."),
+                        as.integer(G$rho_min_cases_incomplete), n),
+                    skewed = if (identical(what, "rho"))
+                        sprintf(.("One category holds %1$.0f%% of all ratings. The latent ICC was biased in simulation when one category held 58%% of the ratings (downward) and when one held 70%% (upward), by up to 0.03, so from %2$.0f%% it is not shown, nor are the confidence intervals built from it."), pct, 100 * G$skew_share)
+                    else if (!is.finite(G$kappa_m_min_cases_skewed))
+                        sprintf(.("One category holds %1$.0f%% of all ratings. The model-based kappa was biased upward in simulation when one category held 70%% of the ratings (by 0.02 to 0.07, at 50 and at 100 cases), though not when one held 58%%; it is withheld from %2$.0f%% to keep a margin below the tested failure. The headline kappa, the per-pathologist tables and the boundary table remain valid."), pct, 100 * G$skew_share)
+                    else
+                        sprintf(.("One category holds %1$.0f%% of all ratings; at %2$.0f%% or more at least %3$d cases are needed for the model-based kappa, and this study has %4$d."), pct, 100 * G$skew_share, as.integer(G$kappa_m_min_cases_skewed), n),
+                    binary_needs_more_raters = if (!is.finite(G$binary_min_per_case))
+                        .("With two categories the latent model is not computed: in simulation its estimates were biased at every design tested, whatever the number of cases or pathologists, because the approximation used to fit it underestimates agreement for binary calls. The headline kappa, the per-pathologist tables and the boundary table remain valid.")
+                    else
+                        sprintf(.("With two categories the latent model needs a median of at least %1$s ratings per case, because its approximation is biased with fewer ratings per case whatever the number of cases; this study has %2$s."),
+                            as.character(G$binary_min_per_case), as.character(med)),
+                    fit_failed = sprintf(if (sev) .("The grading-tendency model could not be fitted: %s.")
+                                         else .("The latent model could not be fitted: %s."),
+                                         private$.noteSafe(jmvcore::htmlEscape(if (is.null(detail)) "" else detail))),
+                    not_converged = if (sev)
+                        .("The grading-tendency model did not converge (the optimiser stopped away from a maximum), so no tendency is shown.")
+                    else
+                        .("The latent model did not converge (the optimiser stopped away from a maximum), so no estimate is shown."),
+                    boundary = .("No confidence interval is available: the case or pathologist variance was estimated at zero, the edge of its range, where the interval method does not hold."),
+                    se_unavailable = .("No confidence interval is available: the standard error of the latent ICC could not be computed from this fit."),
+                    too_large = sprintf(.("The grading tendency was not fitted: its model gains a parameter for every pathologist, and %1$d ratings from %2$d pathologists would take minutes to fit. The boundary table and the per-pathologist agreement answer the same question without a model."),
+                        as.integer(design$n_ratings), J),
+                    hessian_not_pd = if (sev)
+                        .("Standard errors could not be computed from this fit (the information matrix is not positive definite), so the intervals, p-values and tendency are left empty.")
+                    else
+                        .("No confidence interval is available: the information matrix of this fit is not positive definite, so its standard errors cannot be computed."),
+                    .("This estimate is not available for this design."))
+                if (code %in% c("too_few_cases", "too_few_cases_incomplete") && lt2 > 0)
+                    txt <- paste(txt, sprintf(.("Only cases read by at least two pathologists count; %d cases here were read by one."), as.integer(lt2)))
+                txt
+            },
+
+            .calculatePathologistGrading = function(ratings, cluster_data) {
+                o <- self$options
+                des_tbl <- self$results$designSummaryTable
+                dist_tbl <- self$results$categoryDistributionTable
+                path_tbl <- self$results$pathologistTable
+                bnd_tbl <- self$results$boundaryTable
+                lat_tbl <- self$results$latentModelTable
+                conf <- o$confLevel
+
+                sc <- private$.gradingScale(ratings)
+                if (identical(sc$scale, "continuous")) {
+                    msg <- .("The pathologist grading analysis is for categories and grades; at least one rater variable is a continuous measurement, so it is not computed. Use ICC or Lin's CCC for measurements.")
+                    for (tbl in list(des_tbl, dist_tbl, path_tbl, bnd_tbl, lat_tbl))
+                        tbl$setNote("continuous", msg)
+                    return(invisible(NULL))
+                }
+
+                long <- tryCatch(agreement_long_frame(ratings, sc$levels),
+                                 agreement_unknown_labels = function(e) NULL)
+                if (is.null(long) || nrow(long) == 0) {
+                    msg <- .("No ratings could be read from the selected rater variables, so the pathologist grading analysis is not computed.")
+                    for (tbl in list(des_tbl, dist_tbl, path_tbl, bnd_tbl, lat_tbl))
+                        tbl$setNote("no_ratings", msg)
+                    return(invisible(NULL))
+                }
+                design <- agreement_design_summary(long)
+                max_share <- max(as.vector(table(long$y))) / nrow(long)
+                ordinal_scale <- identical(sc$scale, "ordinal")
+                # Design-only gate call (no fits supplied): a reason of NA means "may fit".
+                latent_scale <- private$.gradingLatentScale(sc, design)
+                gate0 <- agreement_latent_gate(design, latent_scale, max_share)
+                pre_sev <- private$.gradingPreRefusal(sc, design, "severity")
+                pre_lat <- private$.gradingPreRefusal(sc, design, "model")
+                can_sev <- is.null(pre_sev) && is.na(gate0$reason_severity)
+                can_kappa <- is.null(pre_lat) && is.na(gate0$reason_model)
+                can_rho <- is.null(pre_lat) && is.na(gate0$reason_rho)
+                can_ci <- is.null(pre_lat) && is.na(gate0$reason_ci)
+
+                # Design summary ----
+                if (isTRUE(o$gradingDesign)) {
+                    three <- function(x) paste(as.character(x[["min"]]), as.character(x[["median"]]),
+                                               as.character(x[["max"]]), sep = " / ")
+                    cats <- sprintf(.("%1$d used of %2$d declared"), design$C_used, design$C_declared)
+                    if (length(design$categories_unused))
+                        cats <- sprintf(.("%1$s (not used: %2$s)"), cats,
+                                        paste(design$categories_unused, collapse = ", "))
+                    scale_txt <- switch(sc$scale,
+                        ordinal = if (isTRUE(sc$codes)) .("Ordinal (whole-number codes)")
+                                  else if (isTRUE(sc$ambiguous)) .("Ordered categories, but the rater variables do not declare one common order")
+                                  else .("Ordinal (ordered categories)"),
+                        binary = .("Binary (two unordered categories)"),
+                        .("Nominal (unordered categories)"))
+                    permitted <- c(
+                        if (can_sev) .("Grading tendency"),
+                        if (can_kappa) .("Model-based kappa"),
+                        if (can_rho) .("Latent ICC"),
+                        if (can_ci) .("Confidence intervals for the model-based estimates"))
+                    scope <- if (length(permitted) == 0)
+                        .("Model-free tables only; the notes under the model tables give the reason.")
+                    else if (can_sev && can_kappa && can_rho && can_ci)
+                        .("Every model-based estimate, with confidence intervals.")
+                    else
+                        paste(permitted, collapse = "; ")
+                    vals <- list(
+                        cases = as.character(design$n_cases),
+                        pathologists = as.character(design$n_raters),
+                        ratings = as.character(design$n_ratings),
+                        per_case = three(design$per_case),
+                        per_pathologist = three(design$per_rater),
+                        cases_lt2 = as.character(design$n_cases_lt2),
+                        connected = if (isTRUE(design$connected)) .("Yes") else
+                            sprintf(.("No (%d separate groups)"), design$n_components),
+                        categories = cats,
+                        scale = scale_txt,
+                        model_scope = scope)
+                    for (key in names(vals))
+                        des_tbl$setRow(rowKey = key, values = list(value = vals[[key]]))
+                    des_tbl$setNote("every_cell", .("Every observed rating is used: a case is kept even when some pathologists did not read it. Cases with fewer than 2 ratings carry no agreement information."))
+
+                    # Category distribution: count and percent per category, declared order
+                    lv <- levels(long$y)
+                    for (k in seq_along(lv)) {
+                        nm_n <- paste0("cat", k, "_n")
+                        nm_p <- paste0("cat", k, "_pct")
+                        private$.addColumnOnce(dist_tbl, nm_n, "n", "integer")
+                        private$.addColumnOnce(dist_tbl, nm_p, "%", "number")
+                        for (nm in c(nm_n, nm_p)) {
+                            col <- dist_tbl$getColumn(nm)
+                            col$setSuperTitle(lv[k])
+                            col$setVisible(TRUE)
+                        }
+                    }
+                    # Columns left from an earlier run with more categories
+                    for (cl in dist_tbl$columns) {
+                        k <- suppressWarnings(as.integer(sub("^cat([0-9]+)_(n|pct)$", "\\1", cl$name)))
+                        if (!is.na(k) && k > length(lv)) cl$setVisible(FALSE)
+                    }
+                    add_dist <- function(key, label, y) {
+                        counts <- as.vector(table(factor(as.character(y), levels = lv)))
+                        vals <- list(pathologist = label, n = length(y))
+                        for (k in seq_along(lv)) {
+                            vals[[paste0("cat", k, "_n")]] <- counts[k]
+                            vals[[paste0("cat", k, "_pct")]] <- if (length(y)) 100 * counts[k] / length(y) else NA_real_
+                        }
+                        dist_tbl$addRow(rowKey = key, values = vals)
+                    }
+                    for (j in seq_along(names(ratings))) {
+                        r <- names(ratings)[j]
+                        add_dist(paste0("r", j), r, long$y[as.character(long$rater) == r])
+                    }
+                    add_dist("all", .("All pathologists"), long$y)
+                    dist_tbl$setNote("percent", .("Percent is of that pathologist's own ratings; missing ratings are not counted as a category."))
+                }
+
+                # Per-pathologist rows (vars order) ----
+                show_path <- isTRUE(o$perPathologist) || isTRUE(o$severityModel)
+                if (show_path) {
+                    for (j in seq_along(names(ratings)))
+                        path_tbl$addRow(rowKey = paste0("r", j),
+                                        values = list(pathologist = names(ratings)[j]))
+                }
+                row_of <- function(r) paste0("r", match(r, names(ratings)))
+
+                if (isTRUE(o$perPathologist)) {
+                    classical <- tryCatch(agreement_pathologist_classical(long), error = function(e) NULL)
+                    if (is.null(classical)) {
+                        path_tbl$setNote("classical_error", .("The exact agreement and pairwise kappa could not be computed for these ratings."))
+                    } else {
+                        for (i in seq_len(nrow(classical)))
+                            path_tbl$setRow(rowKey = row_of(classical$rater[i]), values = list(
+                                cases_read = as.integer(classical$cases_read[i]),
+                                pct_exact = classical$pct_exact[i],
+                                mean_kappa = classical$mean_kappa[i]))
+                        path_tbl$setNote("classical", .("Exact agreement pools every pair of readings this pathologist shares with a colleague on the same case. Mean pairwise kappa averages unweighted Cohen's kappa over the colleagues who read at least 2 of the same cases, leaving out a colleague for whom kappa is undefined (every shared case in one category). Neither is adjusted for how difficult each pathologist's cases were."))
+                    }
+
+                    # An undetermined category order has no boundaries: one row per category.
+                    by_boundary <- ordinal_scale && !isTRUE(sc$ambiguous)
+                    bnd <- agreement_boundary_table(long, ordinal = by_boundary, conf = conf)
+                    for (i in seq_len(nrow(bnd)))
+                        bnd_tbl$addRow(rowKey = paste0("b", i), values = list(
+                            pathologist = bnd$rater[i], boundary = bnd$boundary[i],
+                            n = as.integer(bnd$n[i]), excess = bnd$excess[i],
+                            ci_lower = bnd$lower[i], ci_upper = bnd$upper[i]))
+                    bnd_tbl$setNote("excess", if (by_boundary)
+                        .("Excess over colleagues: how much more often this pathologist calls a case at or above the boundary grade than the colleagues who read the same cases, as a difference in proportions (0.10 = 10 percentage points more often). Negative values mean less often.")
+                    else
+                        .("Excess over colleagues: how much more often this pathologist assigns the category than the colleagues who read the same cases, as a difference in proportions (0.10 = 10 percentage points more often). The categories are unordered, or their order is not determined, so each row is one category rather than a boundary."))
+                    bnd_tbl$setNote("per_cell", .("Each interval is a t interval for that row alone, not a simultaneous interval over the table; with many rows, some will exclude 0 by chance."))
+                }
+
+                # Grading tendency (fixed pathologist effects, random case) ----
+                if (isTRUE(o$severityModel)) {
+                    # A refused or failed fit must not leave the previous run's plot standing.
+                    self$results$severityPlot$setState(NULL)
+                    if (!is.null(pre_sev)) {
+                        path_tbl$setNote("refuse_severity", pre_sev)
+                    } else if (!can_sev) {
+                        path_tbl$setNote("refuse_severity", private$.gradingReason(
+                            gate0$reason_severity, "severity", design, max_share))
+                    } else {
+                        private$.checkpoint()
+                        sev <- agreement_fit_severity(long, nAGQ = 1, conf = conf)
+                        gate1 <- agreement_latent_gate(design, latent_scale, max_share, severity = sev)
+                        if (!is.na(gate1$reason_severity))
+                            path_tbl$setNote("refuse_severity", private$.gradingReason(
+                                gate1$reason_severity, "severity", design, max_share,
+                                detail = attr(sev, "error")))
+                        if (isTRUE(gate1$show_severity)) {
+                            show_ci <- isTRUE(gate1$show_severity_ci)
+                            for (i in seq_len(nrow(sev))) {
+                                p <- sev$p_holm[i]
+                                tendency <- if (!isTRUE(gate1$show_severity_labels) || !is.finite(p)) NA_character_
+                                    else if (p < 0.05 && sev$shift[i] > 0) .("Grades higher than the panel average")
+                                    else if (p < 0.05 && sev$shift[i] < 0) .("Grades lower than the panel average")
+                                    else .("No evidence of a difference")
+                                path_tbl$setRow(rowKey = row_of(sev$rater[i]), values = list(
+                                    shift = sev$shift[i],
+                                    se = if (show_ci) sev$se[i] else NA_real_,
+                                    ci_lower = if (show_ci) sev$lower[i] else NA_real_,
+                                    ci_upper = if (show_ci) sev$upper[i] else NA_real_,
+                                    p_holm = if (show_ci) p else NA_real_,
+                                    tendency = tendency))
+                            }
+                            path_tbl$setNote("shift", .("Grading tendency is on the latent probit scale, in units of the within-case residual standard deviation, and is relative to the panel average (the tendencies sum to zero): 0 = grades like the average of this panel. Because it is relative, one strong over-grader makes every other pathologist look lower."))
+                            if (show_ci)
+                                path_tbl$setNote("holm", .("p (Holm) is adjusted for the number of pathologists (Holm). The Tendency column uses p (Holm) < 0.05, whatever the confidence level set for the intervals."))
+                            lrt <- attr(sev, "lrt")
+                            if (!is.null(lrt) && is.finite(lrt[["p"]]))
+                                path_tbl$setNote("lrt", if (lrt[["p"]] < 0.001)
+                                    sprintf(.("Likelihood-ratio test that all pathologists grade alike: chi-square = %1$.2f, df = %2$d, p < 0.001."),
+                                            lrt[["stat"]], as.integer(lrt[["df"]]))
+                                else
+                                    sprintf(.("Likelihood-ratio test that all pathologists grade alike: chi-square = %1$.2f, df = %2$d, p = %3$.3f."),
+                                            lrt[["stat"]], as.integer(lrt[["df"]]), lrt[["p"]]))
+                            path_tbl$setNote("sev_model", sprintf(.("Model: cumulative-probit mixed model with a random case effect and one fixed effect per pathologist (ordinal::clmm, Laplace approximation), fitted to %d ratings."),
+                                                                  nrow(long)))
+                            if (show_ci) {
+                                state <- data.frame(pathologist = as.character(sev$rater),
+                                                    shift = sev$shift, lower = sev$lower, upper = sev$upper,
+                                                    stringsAsFactors = FALSE)
+                                self$results$severityPlot$setState(state)
+                            }
+                        }
+                    }
+                }
+
+                # Latent model (crossed random case and pathologist effects) ----
+                if (isTRUE(o$latentModel)) {
+                    if (!is.null(pre_lat)) {
+                        lat_tbl$setNote("refuse_model", pre_lat)
+                        return(invisible(NULL))
+                    }
+                    if (!can_kappa) {
+                        lat_tbl$setNote("refuse_model", private$.gradingReason(
+                            gate0$reason_model, "model", design, max_share))
+                        return(invisible(NULL))
+                    }
+
+                    use_cluster <- FALSE
+                    long_fit <- long
+                    if (!is.null(cluster_data)) {
+                        long_cl <- tryCatch(agreement_long_frame(ratings, sc$levels, cluster = cluster_data[[1]]),
+                                            agreement_cluster_missing = function(e) NULL,
+                                            agreement_cluster_length = function(e) NULL)
+                        n_cl <- if (is.null(long_cl)) 0L else nlevels(long_cl$cluster)
+                        if (is.null(long_cl)) {
+                            lat_tbl$setNote("cluster", .("Some rated cases have no institution value, so the model was fitted without the institution variance."))
+                        } else if (n_cl < 3) {
+                            lat_tbl$setNote("cluster", sprintf(.("The institution variance needs at least 3 institutions; this study has %d, so the model was fitted without it."), n_cl))
+                        } else {
+                            use_cluster <- TRUE
+                            long_fit <- long_cl
+                        }
+                    }
+
+                    private$.checkpoint()
+                    fit <- agreement_fit_latent(long_fit, cluster = use_cluster)
+                    rci <- agreement_rho_ci(fit, conf)
+                    gate2 <- agreement_latent_gate(design, latent_scale, max_share, fit = fit, rho_ci = rci)
+                    if (!is.na(gate2$reason_model)) {
+                        lat_tbl$setNote("refuse_model", private$.gradingReason(
+                            gate2$reason_model, "model", design, max_share, detail = fit$error))
+                        return(invisible(NULL))
+                    }
+                    if (!is.na(gate2$reason_rho))
+                        lat_tbl$setNote("refuse_rho", private$.gradingReason(gate2$reason_rho, "rho", design, max_share))
+                    else if (!is.na(gate2$reason_ci))
+                        lat_tbl$setNote("refuse_ci", private$.gradingReason(gate2$reason_ci, "ci", design, max_share))
+
+                    C_used <- fit$C_used
+                    kci <- agreement_kappa_m_ci(rci, C_used)
+                    show_ci <- isTRUE(gate2$show_ci)
+
+                    var_row <- function(key, s2, comp) {
+                        sd_se <- if (!is.null(fit$se_sd) && comp %in% names(fit$se_sd)) fit$se_sd[[comp]] else NA_real_
+                        se <- 2 * sqrt(s2) * sd_se
+                        lat_tbl$setRow(rowKey = key, values = list(
+                            estimate = s2, se = if (is.finite(se)) se else NA_real_))
+                    }
+                    var_row("case_var", fit$s2_case, "case")
+                    var_row("rater_var", fit$s2_rater, "rater")
+                    if (use_cluster) {
+                        var_row("cluster_var", fit$s2_cluster, "cluster")
+                        if (isTRUE(fit$boundary_cluster))
+                            lat_tbl$setNote("cluster_zero", .("The institution variance was estimated at zero: the institutions do not differ detectably in case grade, so the model is in effect the one without an institution term."))
+                    }
+                    lat_tbl$setRow(rowKey = "residual", values = list(estimate = 1))
+                    if (isTRUE(gate2$show_rho))
+                        lat_tbl$setRow(rowKey = "rho", values = list(
+                            estimate = rci$rho,
+                            se = if (show_ci) rci$se_rho else NA_real_,
+                            ci_lower = if (show_ci) rci$lower else NA_real_,
+                            ci_upper = if (show_ci) rci$upper else NA_real_))
+                    if (isTRUE(gate2$show_kappa_m))
+                        lat_tbl$setRow(rowKey = "kappa_m", values = list(
+                            estimate = kci$kappa,
+                            se = if (show_ci) kci$se else NA_real_,
+                            ci_lower = if (show_ci) kci$lower else NA_real_,
+                            ci_upper = if (show_ci) kci$upper else NA_real_))
+
+                    # Shown only in the region AGREEMENT_LATENT_GATES allows (>= 100 cases, >= 3
+                    # pathologists): every simulated failure there was OVER-coverage, so the label
+                    # is "conservative", with the measured range. Two things that region did not
+                    # vary - the confidence level and an institution term - are said when they apply.
+                    lat_tbl$setNote("ci_conservative", if (show_ci)
+                        .("These intervals may be conservative: in simulation with at least 100 cases and 3 pathologists, the 95% interval covered the true value in 92 to 99.5% of studies (mean 95.4%), so it is never much too narrow and sometimes wider than necessary.")
+                    else NULL)
+                    lat_tbl$setNote("ci_level", if (show_ci && abs(conf - 0.95) > 1e-9)
+                        .("Only 95% intervals were checked in simulation; intervals at other confidence levels were not.")
+                    else NULL)
+                    lat_tbl$setNote("ci_cluster", if (show_ci && use_cluster)
+                        .("The interval checks were run without an institution term; with one, the intervals have not been checked in simulation.")
+                    else NULL)
+                    lat_tbl$setNote("about", if (use_cluster)
+                        .("Case variance: how much the cases differ in their true grade within an institution; institution variance: how much the institutions differ; pathologist variance: how much the pathologists differ in their grading level. All are on the latent probit scale, where the residual variance is fixed at 1. Latent ICC(2,1) = (case + institution variance) / (case + institution + pathologist variance + 1): the correlation between the latent readings of two randomly chosen pathologists on the same case, the same quantity as without the institution term.")
+                    else
+                        .("Case variance: how much the cases differ in their true grade; pathologist variance: how much the pathologists differ in their grading level. Both are on the latent probit scale, where the residual variance is fixed at 1. Latent ICC(2,1) = case variance / (case + pathologist variance + 1): the correlation between the latent readings of two randomly chosen pathologists on the same case."))
+                    lat_tbl$setNote("kappa_m", sprintf(.("Model-based kappa (Nelson and Edwards 2015) is chance-corrected with %d equally likely categories, so it does not depend on how common each grade is in this sample and is usually lower than Fleiss' kappa. It is not Fleiss' kappa and should not be reported as one; the latent ICC is the better number for comparing grading systems."), as.integer(C_used)))
+                    lat_tbl$setNote("association", .("The association (weighted) kappa of Nelson and Edwards is a function of the latent ICC alone, so it adds nothing to it and is not shown."))
+                    lat_tbl$setNote("variance_ci", .("Intervals for the variances are not shown: their coverage was not checked in simulation, and Wald intervals for a variance near zero are unreliable. The SE is a delta-method standard error."))
+                    lat_tbl$setNote("model", sprintf(
+                        if (use_cluster)
+                            .("Model: cumulative-probit mixed model with crossed random effects for case and pathologist and a random effect for institution (ordinal::clmm, Laplace approximation), fitted to %1$d ratings in %2$d categories used.")
+                        else
+                            .("Model: cumulative-probit mixed model with crossed random effects for case and pathologist (ordinal::clmm, Laplace approximation), fitted to %1$d ratings in %2$d categories used."),
+                        as.integer(fit$n), as.integer(C_used)))
+                }
+                invisible(NULL)
+            },
+
+            .severityPlot = function(image, ggtheme, theme, ...) {
+                state <- image$state
+                if (is.null(state) || !is.data.frame(state) || nrow(state) == 0)
+                    return(FALSE)
+                state$pathologist <- factor(state$pathologist, levels = rev(unique(state$pathologist)))
+                p <- ggplot2::ggplot(state, ggplot2::aes(x = shift, y = pathologist)) +
+                    ggplot2::geom_vline(xintercept = 0, linetype = "dashed", colour = "grey50") +
+                    ggplot2::geom_errorbar(ggplot2::aes(xmin = lower, xmax = upper), width = 0.2,
+                                           orientation = "y") +
+                    ggplot2::geom_point(size = 3) +
+                    ggtheme +
+                    ggplot2::labs(
+                        x = .("Grading tendency (latent SD units, 0 = panel average)"),
+                        y = NULL,
+                        subtitle = sprintf(.("Points with %.0f%% confidence intervals; right of 0 = grades higher than the panel average"),
+                                           100 * self$options$confLevel))
+                print(p)
+                TRUE
+            },
+
+            .populateGradingGuide = function() {
+                G <- AGREEMENT_LATENT_GATES
+                p <- function(x) paste0("<p style='margin: 6px 0; color: inherit;'>", x, "</p>")
+                h <- function(x) paste0("<h4 style='color: inherit; margin: 14px 0 4px 0;'>", x, "</h4>")
+                html <- paste0(
+                    "<div style='font-family: Arial, sans-serif; padding: 12px; line-height: 1.5; color: inherit;'>",
+                    h(.("What this section answers")),
+                    p(.("A headline kappa says how well the panel agrees as a whole. This section asks the questions a pathology department asks next: how the study was read, whether any pathologist grades systematically higher or lower than colleagues, at which grade boundary the difference lies, and how much of the variation between readings comes from the cases rather than from the pathologists.")),
+                    h(.("Which table for which question")),
+                    p(.("Study design: how many cases each pathologist read and whether every pathologist is linked to the others through shared cases. Check it first; every model-based number depends on it.")),
+                    p(.("Category distribution: how often each pathologist used each category. A pathologist who rarely uses the top grade shows up here before any model is fitted.")),
+                    p(.("Per-pathologist agreement: exact agreement and mean pairwise kappa with colleagues. Model-free and easy to explain, but not adjusted for case difficulty.")),
+                    p(.("Boundary excess: at each grade boundary, how much more often this pathologist calls a case at or above it than colleagues who read the same cases. It shows where a difference in grading lies.")),
+                    p(.("Grading tendency (mixed model): each pathologist's tendency to grade higher or lower, adjusted for which cases they read, relative to the panel average, with a Holm-adjusted test. Use it for quality assurance, not as a ranking.")),
+                    p(.("Model-based agreement: the latent ICC and the model-based kappa of Nelson and Edwards (2015), which describe the grading system and a population of pathologists rather than these particular readers. The model-based kappa does not depend on how common each grade is, so it is lower than Fleiss' kappa and must not be quoted as Fleiss' kappa.")),
+                    h(.("Design limits and why")),
+                    p(.("The model-based numbers were checked in simulation and are shown only where the checks passed. A refused number is left empty and the note under the table says why.")),
+                    p(sprintf(.("Model-based kappa: at least %1$d pathologists, a median of %2$s ratings per case and %3$d cases. Latent ICC: %4$d cases, or %5$d when not every pathologist read every case. Their confidence intervals: %6$d cases and %7$d pathologists; in simulation these intervals were, if anything, wider than necessary."),
+                              G$kappa_m_min_raters, as.character(G$kappa_m_min_per_case), G$kappa_m_min_cases,
+                              G$rho_min_cases, G$rho_min_cases_incomplete, G$rho_ci_min_cases, G$rho_ci_min_raters)),
+                    p(sprintf(.("Grading tendency: at least %1$d cases and %2$d pathologists. With two ordered categories it needs %3$d pathologists, and with three or more categories of which one holds %5$.0f%% or more of the ratings it needs %4$d, because with fewer its intervals were too narrow in simulation."),
+                              G$severity_min_cases, G$severity_min_raters, G$severity_min_raters_binary,
+                              G$severity_min_raters_skewed, 100 * G$skew_share)),
+                    # Written for the two limits that are Inf today (never shown); the pinned-constants
+                    # test in test-agreement-latent-helpers.R fails first if either becomes finite.
+                    p(sprintf(.("When one category holds %.0f%% or more of all ratings, neither the model-based kappa nor the latent ICC is shown: in simulation they were biased when one category dominated. With only two categories the model-based agreement is not computed at all: its approximation was biased at every design tested."),
+                              100 * G$skew_share)),
+                    p(.("Unordered (nominal) categories have no higher or lower grade, so the grading tendency and the model-based agreement are not computed for them; the design, distribution, per-pathologist and category tables still are.")),
+                    h(.("Reference")),
+                    p(.("Nelson KP, Edwards D. Measures of agreement between many raters for ordinal classifications. Statistics in Medicine 2015;34(23):3116-3132. doi:10.1002/sim.6546.")),
+                    "</div>")
+                self$results$gradingGuide$setContent(html)
+            },
+
             .run = function() {
                 # TODO (UX, file-wide): error reporting throughout this file uses
                 # `self$results$<table>$setNote("error", .("..."))` + `return()` rather
@@ -11682,9 +14245,18 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                              "linCCCTable", "tdiTable", "interIntraRaterIntraTable", "specificAgreementTable",
                              "levelInfoTable", "consensusTable", "loaTable", "loaDetailTable",
                              "subgroupAgreementTable", "raterClusterTable", "caseClusterTable",
-                             "pairedAgreementTable")) {
+                             "pairedAgreementTable", "categoryDistributionTable",
+                             "pathologistTable", "boundaryTable")) {
                     tbl <- tryCatch(self$results[[nm]], error = function(e) NULL)
-                    if (!is.null(tbl)) tbl$deleteRows()
+                    if (is.null(tbl)) next
+                    tbl$deleteRows()
+                    # jmvcore 2.7.38 Table$deleteRows() clears .rowKeys and the columns but
+                    # NOT .rowNames, which addRow() recomputes wholesale from .rowKeys. So a
+                    # table emptied here and left empty by this run keeps the PREVIOUS run's
+                    # row names, and $asDF then fails with "invalid 'row.names' length"
+                    # (measured: rowCount 0, rowKeys 0, rowNames 2). Clear it to match.
+                    tryCatch(tbl$.__enclos_env__$private$.rowNames <- list(),
+                             error = function(e) NULL)
                 }
 
                 # The scaffolded tables keep their .init() rows, but jamovi restores the previous
@@ -11698,6 +14270,35 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     blank <- as.list(rep(NA, length(cols)))
                     names(blank) <- cols
                     for (key in tbl$rowKeys) tbl$setRow(rowKey = key, values = blank)
+                }
+
+                # Notes persist across runs of ONE analysis object (jmvcore has no R-side
+                # clearWith and Table has no reset). The notes below are written at .run()
+                # LEVEL - after the per-table calculators have finished - so a calculator
+                # cannot clear them without racing the later write. Clear them here instead:
+                # this is the only placement that nothing can race (nothing writes them
+                # before this point) and the only one that also covers the early returns
+                # further down, which used to leave last run's note standing over an empty
+                # table.
+                # Measured 2026-09-23 on one analysis object run twice with the data swapped,
+                # which is what the jamovi engine does: without this, a clean re-run still
+                # printed "One case contributes 95% of the between-case variance (its
+                # ratings: 99999, 99999)" against data containing no 99999, and a run
+                # switched from continuous to categorical still printed "kappa was not
+                # computed: continuous measurement" above a printed kappa of 0.069.
+                # Every key is cleared rather than an enumerated list: the hand-listed set
+                # was already incomplete (irrtable's "ci_multi" was missing from it), and a
+                # key added below would silently rejoin the bug.
+                # WARNING: this assumes nothing writes a note to these tables BEFORE .run().
+                # True today - .init() sets no notes at all. Move a note write into .init()
+                # (or a postInit) and this loop will silently eat it.
+                for (nm in c("irrtable", "iccTable", "meanPearsonTable", "linCCCTable",
+                             "robinsonATable", "tdiTable", "blandAltmanStats",
+                             "designSummaryTable", "categoryDistributionTable",
+                             "pathologistTable", "boundaryTable", "latentModelTable")) {
+                    tbl <- tryCatch(self$results[[nm]], error = function(e) NULL)
+                    if (is.null(tbl)) next
+                    for (k in names(tbl$notes)) tbl$setNote(k, NULL)
                 }
 
                 # Validate input ----
@@ -11776,6 +14377,19 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     if (self$options$showPairwiseKappaGuide) private$.populatePairwiseKappaExplanation()
                     if (self$options$showGwetGuide) private$.populateGwetExplanation()
                     if (self$options$showPABAKGuide) private$.populatePABAKExplanation()
+                    if (self$options$showGradingGuide) private$.populateGradingGuide()
+
+                    # The agreement sample size calculator is a pure DESIGN calculation:
+                    # it reads the ssXxx options only and never touches self$data or the
+                    # rater columns (verified against .calculateAgreementSampleSize and
+                    # its helper private$.ssMetricLabel). It nonetheless sat below this
+                    # early return, while .init() scaffolded its nine label rows from
+                    # private$.fixedRowTables() and the branch above already printed its
+                    # explanatory guide - so a user who ticked "Agreement study sample
+                    # size" before selecting any raters got the guide plus a fully
+                    # labelled, permanently empty table. Run it here, where it belongs.
+                    if (self$options$agreementSampleSize)
+                        private$.calculateAgreementSampleSize()
 
                     return()
                 } else {
@@ -11842,6 +14456,27 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     continuous_names <- private$.continuousRatingNames(ratings)
                     is_continuous <- length(continuous_names) > 0
 
+                    # The routing decision is a guess whenever the column is numeric,
+                    # and the guess is wrong for a whole-number MEASUREMENT that never
+                    # exceeds 10 (mitoses per 10 HPF, tumour size in whole cm, Ki-67 in
+                    # an indolent cohort): those still get kappa. Until now the only
+                    # place that decision appeared was the Level Information table,
+                    # which is off by default, so a reader had no way to see that a
+                    # measurement had been chopped into categories. Name it here, next
+                    # to the kappa it produced.
+                    coded_numeric <- names(ratings)[vapply(ratings, function(x)
+                        is.numeric(x) && !is.factor(x), logical(1))]
+                    coded_numeric <- setdiff(coded_numeric, continuous_names)
+                    if (!is_continuous && length(coded_numeric) > 0) {
+                        self$results$irrtable$setNote(
+                            "numeric_as_codes",
+                            sprintf(.("Read as category codes, not measurements: %s. These columns are numeric and every value is a whole number no greater than 10, which is what a rating scale looks like, so kappa was computed on them. If they are measurements (a percentage, a count, a size), kappa is the wrong coefficient - use ICC, Lin's CCC or the Bland-Altman limits instead."),
+                                    paste(private$.noteSafe(jmvcore::htmlEscape(coded_numeric)), collapse = ", "))
+                        )
+                    } else {
+                        self$results$irrtable$setNote("numeric_as_codes", NULL)
+                    }
+
                     if (is_continuous) {
                         # Kappa is not computed for continuous measurements, but the table is
                         # left visible: hiding it also hid the only place this table can say
@@ -11856,7 +14491,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         self$results$irrtable$setNote(
                             "continuous_vars",
                             sprintf(.("Read as continuous measurements: %s."),
-                                    paste(continuous_names, collapse = ", "))
+                                    paste(private$.noteSafe(continuous_names), collapse = ", "))
                         )
                         self$results$irrtable$setNote(
                             "continuous",
@@ -11926,6 +14561,17 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                 # declared-order scale; verified to reproduce
                                 # vcd::Kappa exactly, so the row is now one statistic.
                                 result2 <- private$.kappa2Ordered(ratings, wght)
+                                # Headline Method cell. irr's own untranslated
+                                # "Cohen's Kappa for 2 Raters (Weights: equal)" was a third
+                                # name for the coefficient the paired and bootstrap tables
+                                # call something else; the rater count it spelled out is
+                                # already in this table's Raters column. Name the weighting
+                                # that RAN - .kappa2Ordered() drops the weights when the
+                                # category order is ambiguous. Set ONLY on the computed
+                                # branches: the empty-data fallback has no `method` element
+                                # (R drops NULL list members) and that cell must stay unset.
+                                result2$method <- private$.kappaLabel(
+                                    2L, if (isTRUE(result2$scale_ambiguous)) "unweighted" else wght)
                             } else {
                                 result2 <- list(value = NA, stat.name = "Kappa", statistic = NA, p.value = NA)
                             }
@@ -11939,8 +14585,19 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                 result2 <- list(
                                     method = .("Fleiss' kappa not computed (weights requested)"),
                                     value = NA_real_, statistic = NA_real_, p.value = NA_real_)
-                            } else if (nrow(na.omit(ratings)) > 0) {
-                                result2 <- irr::kappam.fleiss(ratings = ratings, exact = exct, detail = TRUE)
+                            } else if (any(rowSums(!is.na(ratings)) >= 2)) {
+                                # Was irr::kappam.fleiss(), which drops every case with
+                                # ANY missing rating. In a pathology panel one absent
+                                # reader then threw away the other readers' ratings of
+                                # that slide. irrCAC implements Gwet's (2014)
+                                # generalisation that uses every observed rating and on
+                                # complete data equals irr's Fleiss (exact = FALSE) and
+                                # Conger (exact = TRUE) kappa - see .fleissAllRatings().
+                                result2 <- private$.fleissAllRatings(
+                                    ratings, exct, self$options$confLevel)
+                                # Keeps the "(exact value)" disclosure that irr's string
+                                # carried; "for m Raters" is already the Raters column.
+                                result2$method <- private$.kappaLabel(ncol(ratings), "unweighted", exct)
                             } else {
                                 result2 <- list(value = NA, stat.name = "Kappa", statistic = NA, p.value = NA)
                             }
@@ -11949,6 +14606,14 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                         # Percentage agreement ----
                         result1 <- irr::agree(ratings)
+                        # irr::agree() uses complete cases only; with none (an empty rater
+                        # column, or a design where nobody reads every case) it returns NaN,
+                        # now beside a valid all-ratings kappa. Blank it and say why.
+                        if (!is.finite(result1[["value"]])) {
+                            result1[["value"]] <- NA
+                            self$results$irrtable$setNote("peragree_empty",
+                                .("Agreement % is empty: it counts only cases rated by every rater, and no case was."))
+                        }
                         if (!is.na(result1[["value"]]) && result1[["value"]] > 100) {
                             result1[["value"]] <- NA
                             self$results$irrtable$setNote(
@@ -11960,17 +14625,74 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         # Populate main results table ----
                         table2 <- self$results$irrtable
 
+                        # .kappa2Ordered() drops the weights when the rater columns
+                        # declare no single category order (see .mergeDeclaredLevels).
+                        # The Method cell already reads "Weights: unweighted" because
+                        # it comes from irr itself; this says WHY and what to change.
+                        private$.noteScaleAmbiguity(table2, isTRUE(result2$scale_ambiguous))
+
                         n_complete_cases <- sum(stats::complete.cases(ratings))
-                        if (n_complete_cases < 30 &&
+                        # Threshold raised from 30 to 50, and the vague word "unstable"
+                        # replaced by the measured number. The interval is a Wald
+                        # interval on the untransformed kappa and it does not hold its
+                        # nominal level at these sizes. Coverage of the nominal 95%
+                        # interval, 20,000 replicates per cell (MC SE 0.0015):
+                        #
+                        #                              n=20   n=30   n=50   n=100
+                        #   3 balanced cats, k=0.64     .897   .930   .929   .946
+                        #   2 cats, 10% positive, k=.61 .875   .849   .895   .932
+                        #   3 cats, k=0.94              .886   .957   .977   .922
+                        #
+                        # The 30-to-50 band carried the largest shortfall and used to
+                        # get no warning at all. (The k=0.94 row over-covers because the
+                        # clamp at 1 truncates the upper limit, not because the interval
+                        # is right there.) Reproduce with
+                        # development-scripts/validate_agreement_coverage.R.
+                        # 3+ raters, unweighted: the headline is .fleissAllRatings() on
+                        # every observed rating, so its n is the cases with a rating,
+                        # not the complete cases, and its interval is irrCAC's t
+                        # interval - the Cohen coverage figures below do not describe it.
+                        fleiss_all <- ncol(ratings) >= 3 && identical(wght, "unweighted") &&
+                            !is.null(result2[["subjects"]])
+                        if (fleiss_all) {
+                            # Subjects is the n the kappa (and its SE) used; Agreement %
+                            # stays on complete cases, which the missing note says.
+                            result1[["subjects"]] <- result2[["subjects"]]
+                            if (result2[["subjects"]] < 50) {
+                                table2$setNote(
+                                    "small_sample",
+                                    sprintf(.("Only %d cases. Kappa and its interval are unreliable in this range: a single discordant case can move kappa by several hundredths, and the interval is a large-sample approximation whose coverage has not been checked at this size. Treat the value and its interval as provisional."), result2[["subjects"]])
+                                )
+                            }
+                            if (any(is.na(ratings))) {
+                                table2$setNote(
+                                    "missing",
+                                    sprintf(.("%1$d of %2$d cases have at least one missing rating. Kappa uses every observed rating: %3$d ratings from %4$d cases, where a case rated only once counts toward the chance-agreement term but not toward observed agreement. Agreement %% uses only the %5$d complete cases."),
+                                            sum(!stats::complete.cases(ratings)), nrow(ratings),
+                                            result2[["ratings"]], result2[["subjects"]],
+                                            n_complete_cases)
+                                )
+                            }
+                        } else if (n_complete_cases < 50 &&
                             !(ncol(ratings) >= 3 && !identical(wght, "unweighted"))) {
+                            # The coverage figures quoted must be those of the interval
+                            # method actually in use. Wald stays the default (it matches
+                            # psych::cohen.kappa and several tests pin it - a deliberate
+                            # decision, re-confirmed 2026-09-24), so the Wald sentence names
+                            # the Fisher z option as the remedy; the Fisher z sentence
+                            # quotes Fisher z's own, better but still imperfect, figures.
                             table2$setNote(
                                 "small_sample",
-                                sprintf(.("Only %d complete cases. Kappa and its interval are unstable below about 30 cases, and a single discordant case can move kappa by several hundredths; treat the value as provisional."), n_complete_cases)
+                                if (identical(self$options$kappaCIMethod, "fisherz"))
+                                    sprintf(.("Only %d complete cases. Kappa and its interval are unreliable in this range: a single discordant case can move kappa by several hundredths. In simulation below 50 cases the nominal 95%% Fisher z interval covered the true kappa about 88 to 95%% of the time - close to nominal when the categories are balanced, short of it when one rating category is rare. Treat the value and its interval as provisional."), n_complete_cases)
+                                else
+                                    sprintf(.("Only %d complete cases. Kappa and its interval are unreliable in this range: a single discordant case can move kappa by several hundredths, and in simulation below 50 cases the nominal 95%% Wald interval covered the true kappa only about 85 to 93%% of the time, worst when one rating category is rare. The Fisher z interval method (Kappa interval method option) came closer to nominal coverage in most simulated conditions. Treat the value and its interval as provisional."), n_complete_cases)
                             )
                         }
 
-                        # Note: Exact kappa (Conger's) does not provide z-statistic or p-value
-                        # Only Fleiss' formulation allows testing H0: Kappa=0
+                        # 2 raters: irr's null-SE z for H0: kappa = 0. 3+ raters: Wald
+                        # kappa / SE with the two-sided p from .fleissAllRatings() -
+                        # Fleiss and Conger (exact) both have one now.
                         z_stat <- if (!is.null(result2[["statistic"]])) result2[["statistic"]] else NA
                         p_val <- if (!is.null(result2[["p.value"]])) result2[["p.value"]] else NA
 
@@ -11986,9 +14708,8 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         # implemented in .pairKappaWithCI (it matches
                         # psych::cohen.kappa exactly). Reuse it for the 2-rater case.
                         #
-                        # For 3+ raters the statistic is Fleiss'/Conger's kappa, for
-                        # which irr returns only the null-SE test; rather than invent
-                        # an interval we leave it blank and say why.
+                        # For 3+ raters (unweighted) the interval is irrCAC's, from
+                        # Gwet's subject-sampling SE - see .fleissAllRatings().
                         ci_lo <- NA_real_
                         ci_hi <- NA_real_
                         if (!is.null(ratings) && ncol(ratings) == 2) {
@@ -12003,9 +14724,36 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             if (!is.null(kc) && !is.na(kc$ci_lower)) {
                                 ci_lo <- kc$ci_lower
                                 ci_hi <- kc$ci_upper
-                                table2$setNote("ci_method", sprintf(
-                                    .("%.0f%% confidence interval from the non-null asymptotic standard error (vcd::Kappa), which agrees with psych::cohen.kappa. The z and p-value test H0: kappa = 0 and use the null standard error, so z is not kappa divided by the interval's standard error."),
-                                    100 * self$options$confLevel))
+                                # Name the SE that ACTUALLY ran, not the one we prefer.
+                                # .pairKappaWithCI() falls back to irr::kappa2's null SE
+                                # (kappa / z) whenever vcd::Kappa returns no finite ASE,
+                                # and reports which happened in $method precisely so the
+                                # caller can disclose it. This note used to claim the
+                                # non-null vcd ASE unconditionally: on 20 perfectly
+                                # agreeing cases with one rare category vcd's ASE is
+                                # exactly 0, the printed interval [0.562, 1] came from
+                                # the null SE 0.2236, and every clause of the sentence
+                                # was false. Measured fallback rate (20,000 replicates,
+                                # development-scripts/validate_agreement_coverage.R):
+                                # 9.5% of studies at n = 20 with a 10% positive rate,
+                                # 3.6% at n = 30, 0.5% at n = 50. The All-Pairs table
+                                # has always disclosed this; say the same thing here.
+                                table2$setNote("ci_method", if (identical(kc$method, "irr-fallback")) {
+                                    if (!requireNamespace("vcd", quietly = TRUE)) {
+                                        sprintf(.("%.0f%% confidence interval via the irr::kappa2 fallback (approximate, built from the null-hypothesis standard error). Install the 'vcd' package to enable the more accurate ASE-based interval. A null-SE interval is too narrow when kappa is high, so treat it as optimistic."),
+                                            100 * self$options$confLevel)
+                                    } else {
+                                        sprintf(.("%.0f%% confidence interval via the irr::kappa2 fallback (approximate, built from the null-hypothesis standard error): vcd::Kappa could not return a finite SE for this (near-degenerate) table. A null-SE interval is too narrow when kappa is high, so treat it as optimistic."),
+                                            100 * self$options$confLevel)
+                                    }
+                                } else if (identical(self$options$kappaCIMethod, "fisherz")) {
+                                    sprintf(.("%.0f%% confidence interval from the non-null asymptotic standard error (vcd::Kappa), applied on the Fisher z (arc-tangent) scale and transformed back. The limits are asymmetric about kappa and therefore do NOT match the symmetric limits printed by psych::cohen.kappa. The z and p-value test H0: kappa = 0 and use the null standard error, so z is not kappa divided by the interval's standard error."),
+                                        100 * self$options$confLevel)
+                                } else {
+                                    sprintf(.("%.0f%% confidence interval from the non-null asymptotic standard error (vcd::Kappa), which agrees with psych::cohen.kappa. The z and p-value test H0: kappa = 0 and use the null standard error, so z is not kappa divided by the interval's standard error."),
+                                        100 * self$options$confLevel)
+                                })
+
                                 # Disclose the scale the weights were laid over. The
                                 # ordinal weights use only the categories that occur
                                 # in the data, so an unused middle grade makes the two
@@ -12013,10 +14761,11 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                 # kappa comes out slightly higher than the declared
                                 # scale would give. Silent before; say it once.
                                 if (!identical(wght, "unweighted") &&
+                                    !isTRUE(kc$scale_ambiguous) &&
                                     length(kc$unused_levels) > 0) {
                                     table2$setNote("weight_scale", sprintf(
                                         .("Weighted kappa is computed over the categories that actually occur: %s never appear in these data and are not part of the weight matrix, so two grades either side of an unused one count as adjacent. Expect a slightly higher weighted kappa than the full declared scale would give."),
-                                        paste(jmvcore::htmlEscape(kc$unused_levels), collapse = ", ")))
+                                        paste(private$.noteSafe(jmvcore::htmlEscape(kc$unused_levels)), collapse = ", ")))
                                 }
                             } else {
                                 # Only the success branch set a note, so a failed
@@ -12026,9 +14775,17 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                 # any sign that uncertainty was attempted.
                                 table2$setNote("ci_method", .("No confidence interval could be computed for this kappa: the asymptotic standard error (vcd::Kappa) was unavailable for these data, most often because a rating category is unused by one rater and the agreement table is degenerate. The z and p-value shown test H0: kappa = 0 and cannot be turned into an interval."))
                             }
-                        } else if (!is.null(ratings) && ncol(ratings) > 2 &&
-                                   identical(wght, "unweighted")) {
-                            table2$setNote("ci_multi", .("No confidence interval is shown: for three or more raters this row reports Fleiss'/Conger's kappa, for which only the null-hypothesis test statistic is available here. The All-Pairs Kappa table reports each rater pair with a confidence interval."))
+                        } else if (fleiss_all) {
+                            # Replaces the old "ci_multi" note, which said no interval
+                            # existed for 3+ raters (irr's kappam.fleiss has no SE).
+                            ci_lo <- result2[["ci_lower"]]
+                            ci_hi <- result2[["ci_upper"]]
+                            table2$setNote("ci_method", if (is.finite(ci_lo)) {
+                                sprintf(.("%1$.0f%% confidence interval from Gwet's subject-sampling standard error (irrCAC), which treats these raters as fixed: it reflects the sampling of cases, not of pathologists, and a new panel of raters would add uncertainty it does not show. The interval is kappa plus or minus the t quantile on %2$d degrees of freedom times that SE, with the upper limit capped at 1. The z column is kappa divided by the same SE and its p-value is two-sided against t on %2$d degrees of freedom."),
+                                    100 * self$options$confLevel, as.integer(result2[["subjects"]] - 1L))
+                            } else {
+                                .("No confidence interval could be computed for this kappa: Gwet's subject-sampling standard error is zero or unavailable, as it is when every rater gives every case the same category or fewer than two cases were rated.")
+                            })
                         }
 
                         if (ncol(ratings) >= 3 && !identical(wght, "unweighted")) {
@@ -12066,15 +14823,13 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             kappa_out <- NA_real_
                             z_stat <- NA_real_
                             p_val <- NA_real_
-                            # Those notes describe columns that are now empty. ci_method ends
-                            # "The z and p-value shown test H0: kappa = 0", ci_multi says "only
-                            # the null-hypothesis test statistic is available here", and
+                            # Those notes describe columns that are now empty. ci_method
+                            # describes an interval and a z that are now blank, and
                             # small_sample warns that "kappa and its interval are unstable" -
                             # all three describe quantities this row no longer carries. Blanking
                             # z and p without clearing them would leave a footnote pointing at
                             # nothing; undefined_kappa below explains the whole row.
                             table2$setNote("ci_method", NULL)
-                            table2$setNote("ci_multi", NULL)
                             table2$setNote("small_sample", NULL)
                             # Distinguish the Pe = 1 cause (one category used by
                             # everyone) from any other zero denominator, so the note
@@ -12117,13 +14872,9 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             )
                         }
 
-                        # Add note if exact kappa was used (no statistical test)
-                        if (exct && length(self$options$vars) >= 3) {
-                            table2$setNote(
-                                "exact_note",
-                                .("Note: Exact Kappa (Conger, 1980) does not provide statistical test. Use Fleiss' Kappa for hypothesis testing (H0: Kappa=0).")
-                            )
-                        }
+                        # The "exact_note" (Conger's kappa has no test) was retired
+                        # with irr::kappam.fleiss: irrCAC gives Conger's kappa the
+                        # same SE, interval and test as Fleiss'.
 
                         # Imbalanced-prevalence (kappa-paradox) advisory ----
                         # A rare rating category can make kappa paradoxically low despite high
@@ -12149,7 +14900,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                             # kappa, silently lost on the datasets that
                                             # need it (e.g. a "<1%" category).
                                             paste(sprintf("%s: n=%d",
-                                                jmvcore::htmlEscape(names(rare)),
+                                                private$.noteSafe(jmvcore::htmlEscape(names(rare))),
                                                 as.integer(rare)),
                                                 collapse = "; "
                                             )
@@ -12309,10 +15060,6 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                 )
                             }
                         }
-                    } else {
-                        # Hide both frequency tables when sft is disabled
-                        self$results$contingencyTable$setVisible(FALSE)
-                        self$results$ratingCombinationsTable$setVisible(FALSE)
                     }
 
                     # Weighted Kappa Guide (if using weights) ----
@@ -12345,6 +15092,18 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 private$.checkpoint()
 
+                # Pathologist grading analysis (if requested) ----
+                if (self$options$showGradingGuide) private$.populateGradingGuide()
+                if (self$options$gradingDesign || self$options$perPathologist ||
+                    self$options$severityModel || self$options$latentModel) {
+                    grading_cluster <- NULL
+                    if (!is.null(self$options$clusterVariable))
+                        grading_cluster <- jmvcore::select(mydata, self$options$clusterVariable)
+                    private$.calculatePathologistGrading(ratings, grading_cluster)
+                }
+
+                private$.checkpoint()
+
                 # Krippendorff's Alpha (if requested) ----
                 if (self$options$kripp || self$options$showKrippGuide) {
                     self$results$krippTableHeading$setVisible(TRUE)
@@ -12353,28 +15112,54 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     private$.populateKrippExplanation()
                 }
                 if (self$options$kripp) {
+                    # scale_order is written only when the ratings are not numeric, so
+                    # a note from a factor-rated run would otherwise survive into a
+                    # later numeric-rated one.
+                    for (nk in c("scale_order", "method_choice"))
+                        self$results$krippTable$setNote(nk, NULL)
                     # Convert ratings data frame to matrix
                     ratings_matrix <- as.matrix(ratings)
 
                     # Ensure numeric conversion if needed
+                    kripp_ok <- TRUE
                     if (!is.numeric(ratings_matrix)) {
-                        # Preserve original factor level ordering (critical for ordinal method)
-                        all_levels <- NULL
-                        for (col_idx in seq_len(ncol(ratings))) {
-                            col_data <- ratings[[col_idx]]
-                            if (is.factor(col_data) || is.ordered(col_data)) {
-                                if (is.null(all_levels)) {
-                                    all_levels <- levels(col_data)
-                                } else {
-                                    new_levels <- setdiff(levels(col_data), all_levels)
-                                    all_levels <- c(all_levels, new_levels)
-                                }
-                            }
-                        }
+                        # ONE shared category order, merged properly - see
+                        # private$.mergeDeclaredLevels().
+                        #
+                        # This appended each column's unseen levels with setdiff(),
+                        # so the order was decided by COLUMN ORDER whenever the
+                        # declarations do not place every category relative to every
+                        # other one: declare Absent/Diffuse on one rater and
+                        # Absent/Focal on another and nothing says whether Focal comes
+                        # before or after Diffuse. For the ordinal, interval and ratio
+                        # methods those codes ARE the metric, so alpha moved when the
+                        # rater variables were dropped into the box in a different
+                        # order. Refuse there, exactly as the variance decomposition
+                        # does; nominal alpha only asks whether two codes are equal,
+                        # so it is order-invariant and still runs.
+                        lv_info <- private$.orderedLevelsInfo(ratings)
+                        all_levels <- lv_info$levels
+                        kripp_ordered_metric <- !identical(self$options$krippMethod, "nominal")
+                        kripp_scale_ambiguous <- isTRUE(lv_info$ambiguous) && kripp_ordered_metric
 
-                        if (!is.null(all_levels)) {
+                        self$results$krippTable$setNote(
+                            "scale_order",
+                            if (kripp_scale_ambiguous)
+                                .("Krippendorff's alpha for an ordinal, interval or ratio scale scores each category by its position on one common category order, and the selected rater variables do not determine one. Either they contradict each other, or - more often - they simply never place some pair of categories relative to each other: if one variable declares Absent and Diffuse and another declares Absent and Focal, nothing in either declaration says whether Focal comes before or after Diffuse. Merging them would invent an order, and the alpha reported here would then depend on which rater variable was selected first. Declare the same full set of categories, in the same sequence, on every rater variable and run again, or choose the Nominal data type, which only asks whether two ratings are the same and needs no order.")
+                            else NULL)
+
+                        if (kripp_scale_ambiguous) {
+                            kripp_ok <- FALSE
+                            self$results$krippTable$setRow(rowNo = 1, values = list(
+                                method = private$.krippMethodLabel(),
+                                subjects = nrow(ratings_matrix),
+                                raters = ncol(ratings_matrix),
+                                alpha = NA,
+                                interpretation = .("Cannot compute: the rater variables do not determine one category order")
+                            ))
+                        } else if (length(all_levels) > 0) {
                             ratings_matrix <- matrix(
-                                as.numeric(factor(ratings_matrix, levels = all_levels)),
+                                match(as.character(ratings_matrix), all_levels),
                                 nrow = nrow(ratings_matrix),
                                 ncol = ncol(ratings_matrix)
                             )
@@ -12388,8 +15173,18 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         }
                     }
 
+                    # Scoring ordered rater variables under the nominal method is a
+                    # legitimate choice, but a silent one - say which level of
+                    # measurement was actually used.
+                    self$results$krippTable$setNote(
+                        "method_choice",
+                        if (identical(self$options$krippMethod, "nominal") &&
+                            any(vapply(ratings, is.ordered, logical(1))))
+                            .("One or more rater variables is an ordered factor, but the data type for Krippendorff's alpha is set to Nominal, so alpha counts every disagreement equally here - a one-grade disagreement and a three-grade disagreement weigh the same. Set the data type to Ordinal if the distance between categories should count.")
+                        else NULL)
+
                     # Add error handling
-                    tryCatch(
+                    if (kripp_ok) tryCatch(
                         {
                             # Calculate Krippendorff's alpha
                             kripp_result <- irr::kripp.alpha(
@@ -12399,7 +15194,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                             # Initialize values list for table
                             values_list <- list(
-                                method = paste0("Krippendorff's Alpha (", self$options$krippMethod, ")"),
+                                method = private$.krippMethodLabel(),
                                 subjects = nrow(ratings_matrix),
                                 raters = ncol(ratings_matrix),
                                 alpha = kripp_result$value
@@ -12462,7 +15257,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                             # Populate results table
                             krippTable <- self$results$krippTable
-                            krippTable$setNote("seed", if (self$options$bootstrap) jmvcore::format(.("Random seed: {seed}"), seed = seed_val))
+                            krippTable$setNote("seed", if (self$options$bootstrap) .fmt(.("Random seed: {seed}"), seed = seed_val))
                             krippTable$setRow(rowNo = 1, values = values_list)
                         },
                         error = function(e) {
@@ -12475,7 +15270,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             # Handle any errors that occur during calculation
                             # Initialize values list for error case
                             values_list <- list(
-                                method = paste0("Krippendorff's Alpha (", self$options$krippMethod, ")"),
+                                method = private$.krippMethodLabel(),
                                 subjects = nrow(ratings_matrix),
                                 raters = ncol(ratings_matrix),
                                 alpha = NA,
@@ -12495,7 +15290,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             krippTable$setRow(rowNo = 1, values = values_list)
 
                             # Add error message as footnote
-                            krippTable$addFootnote(rowNo = 1, col = "alpha", paste0("Error calculating Krippendorff's alpha: ", jmvcore::htmlEscape(e$message)))
+                            krippTable$addFootnote(rowNo = 1, col = "alpha", sprintf(.("Error calculating Krippendorff's alpha: %s"), jmvcore::htmlEscape(e$message)))
                         }
                     )
                 }
@@ -12527,6 +15322,13 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     private$.populateFinnExplanation()
                 }
                 if (self$options$finn) {
+                    # Notes persist across runs of one analysis object (jmvcore has no
+                    # R-side clearWith and Table has no reset). type_error is written
+                    # here and the rest inside .calculateFinn, so the clear belongs at
+                    # the one point both branches pass through.
+                    for (nk in c("error", "interpretation", "levels_from_data", "scale",
+                                 "type_error", "warning"))
+                        self$results$finnTable$setNote(nk, NULL)
                     if (is_continuous) {
                         self$results$finnTable$setNote(
                             "type_error",
@@ -12628,6 +15430,12 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     private$.populatePairwiseKappaExplanation()
                 }
                 if (self$options$pairwiseKappa) {
+                    # Notes persist across runs of one analysis object (jmvcore has no
+                    # R-side clearWith and Table has no reset). Two of these keys are
+                    # written here and three inside .calculatePairwiseKappa, so the
+                    # clear belongs at the one point both paths pass through.
+                    for (nk in c("error", "type_error", "summary", "scale", "weighting", "ref_in_raters"))
+                        self$results$pairwiseKappaTable$setNote(nk, NULL)
                     if (is_continuous) {
                         self$results$pairwiseKappaTable$setNote(
                             "type_error",
@@ -12685,6 +15493,11 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 # Gwet's AC1/AC2 (if requested) ----
                 if (self$options$gwet || self$options$showGwetGuide || self$options$pabak || self$options$showPABAKGuide) {
+                    # Notes persist across runs of one analysis object, and both the
+                    # type_error branch and .calculateGwetAC write here, so clear at
+                    # the one point both pass through - as the Finn block does.
+                    for (nk in c("error", "interpretation", "scale_ambiguous", "type_error"))
+                        self$results$gwetTable$setNote(nk, NULL)
                     if (is_continuous) {
                         if (self$options$gwet) {
                             self$results$gwetTable$setNote(
@@ -12730,6 +15543,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 }
                 if (self$options$icc) {
                     private$.calculateICC(ratings)
+                    private$.noteCodedNumeric(self$results$iccTable, coded_numeric)
                 }
 
                 private$.checkpoint()
@@ -12750,6 +15564,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 }
                 if (self$options$linCCC) {
                     private$.calculateLinCCC(ratings)
+                    private$.noteCodedNumeric(self$results$linCCCTable, coded_numeric)
                 }
 
                 private$.checkpoint()
@@ -12760,6 +15575,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 }
                 if (self$options$tdi) {
                     private$.calculateTDI(ratings)
+                    private$.noteCodedNumeric(self$results$tdiTable, coded_numeric)
                 }
 
                 private$.checkpoint()
@@ -12911,6 +15727,37 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 }
                 if (self$options$blandAltmanPlot) {
                     private$.populateBlandAltman(ratings)
+                }
+
+                private$.checkpoint()
+
+                # Influential-case advisory for the continuous measures ----
+                # One extreme case - an out-of-range value, or a legacy missing-data
+                # sentinel such as 99999 - drives ICC, Lin's CCC, Robinson's A, TDI and
+                # the Bland-Altman limits to their ceilings together, and each of them
+                # then prints an "Excellent"/"Almost perfect" label for it. The screen is
+                # therefore computed ONCE, here, after the last of the five has been
+                # populated, and attached to whichever of them the user asked for.
+                #
+                # Deliberately NOT gated on is_continuous: .continuousRatingNames() reads
+                # whole-number Ki-67 percentages at n = 20 as categorical (no fractional
+                # value, 20 distinct or fewer), which is exactly the realistic sentinel
+                # case, so that gate would skip the data this exists for.
+                # meanSpearman is deliberately absent: it is rank-based, so the same
+                # 99999 sentinel moves mean Pearson r from -0.399 to 0.999998 but moves
+                # Spearman's rho only to -0.147. meanPearson IS included for that reason.
+                if (self$options$icc || self$options$meanPearson || self$options$linCCC ||
+                    self$options$robinsonA || self$options$tdi ||
+                    self$options$blandAltmanPlot) {
+                    dominant_note <- private$.dominantCaseNote(ratings)
+                    if (!is.null(dominant_note)) {
+                        if (self$options$icc) self$results$iccTable$setNote("influential_case", dominant_note)
+                        if (self$options$meanPearson) self$results$meanPearsonTable$setNote("influential_case", dominant_note)
+                        if (self$options$linCCC) self$results$linCCCTable$setNote("influential_case", dominant_note)
+                        if (self$options$robinsonA) self$results$robinsonATable$setNote("influential_case", dominant_note)
+                        if (self$options$tdi) self$results$tdiTable$setNote("influential_case", dominant_note)
+                        if (self$options$blandAltmanPlot) self$results$blandAltmanStats$setNote("influential_case", dominant_note)
+                    }
                 }
 
                 private$.checkpoint()

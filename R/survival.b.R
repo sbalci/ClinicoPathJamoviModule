@@ -338,7 +338,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
             # .run() fills them with setRow()
             .calibrationMetricLabels = function(t = "...") {
                 c(slope = .("Calibration slope"),
-                  meancal = jmvcore::format(.("Mean calibration (observed - predicted at t = {t})"), t = t),
+                  meancal = .fmt(.("Mean calibration (observed - predicted at t = {t})"), t = t),
                   mae = .("Mean absolute difference across risk groups"),
                   cindex = .("C-index (Discrimination)"))
             },
@@ -872,7 +872,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                   n_excluded_landmark <- n_before_landmark - nrow(cleanData)
                   if (n_excluded_landmark > 0) {
                       self$results$medianTable$setNote("landmark",
-                          jmvcore::format(.("Landmark analysis at {time} {unit}: {n} patients excluded (events/censoring before landmark). All times are measured FROM the landmark, not from study entry, and all estimates are conditional on being event-free at the landmark; they are not comparable with unlandmarked survival times."), 
+                          .fmt(.("Landmark analysis at {time} {unit}: {n} patients excluded (events/censoring before landmark). All times are measured FROM the landmark, not from study entry, and all estimates are conditional on being event-free at the landmark; they are not comparable with unlandmarked survival times."), 
                               time = self$options$landmark,
                               unit = self$options$timetypeoutput,
                               n = n_excluded_landmark))
@@ -1090,7 +1090,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             count = n_events
                         ))
                     self$results$medianTable$setNote("lowevents",
-                        jmvcore::format(.("Caution: Only {count} events detected. Results may be unreliable. Consider increasing sample size or simplifying the model."), count = n_events))
+                        .fmt(.("Caution: Only {count} events detected. Results may be unreliable. Consider increasing sample size or simplifying the model."), count = n_events))
                 } else if (n_events >= 20 && n_events < 50) {
                     private$.addHtmlMessage(
                         "warning",
@@ -1100,7 +1100,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             count = n_events
                         ))
                     self$results$medianTable$setNote("moderateevents",
-                        jmvcore::format(.("Note: {count} events detected. Adequate for basic KM/Cox but limited for complex models (calibration, RCS, bootstrap)."), count = n_events))
+                        .fmt(.("Note: {count} events detected. Adequate for basic KM/Cox but limited for complex models (calibration, RCS, bootstrap)."), count = n_events))
                 }
 
                 # Run Analysis ----
@@ -2835,9 +2835,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 labelled_data <- private$.getData()
                 original_names_mapping <- labelled_data$original_names_mapping
                 title2 <- .survivalDisplayName(self$options$explanatory, original_names_mapping)
-                table$setTitle(jmvcore::format(.("Weighted Log-Rank Tests - {title}"), title = title2))
+                table$setTitle(.fmt(.("Weighted Log-Rank Tests - {title}"), title = title2))
 
-                table$setNote("tests", jmvcore::format(.("All tests compare survival distributions across levels of {title}. These are members of the Fleming-Harrington G-rho family (survival::survdiff): rho=0 is the standard log-rank test (equal weight at all time points); larger rho weights early events more heavily (weights = S(t)^rho). When survival curves cross or the proportional hazards assumption is violated, different rho values may yield different conclusions."), title = title2))
+                table$setNote("tests", .fmt(.("All tests compare survival distributions across levels of {title}. These are members of the Fleming-Harrington G-rho family (survival::survdiff): rho=0 is the standard log-rank test (equal weight at all time points); larger rho weights early events more heavily (weights = S(t)^rho). When survival curves cross or the proportional hazards assumption is violated, different rho values may yield different conclusions."), title = title2))
                 table$setNote("petopeto",
                     .("survival::survdiff(rho=1) is exactly the Peto-Peto modification of the Gehan-Wilcoxon test (weights = Kaplan-Meier S(t)). The Gehan-Breslow (weights = number at risk) and Tarone-Ware (weights = sqrt of number at risk) tests use different weights and cannot be produced by survdiff()."))
 
@@ -2957,7 +2957,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     seed_val <- self$options$seed
                     if (is.null(seed_val)) seed_val <- 42
                     withr::local_seed(seed_val)
-                    table$setNote("seed", jmvcore::format(.("Random seed: {seed}"), seed = seed_val))
+                    table$setNote("seed", .fmt(.("Random seed: {seed}"), seed = seed_val))
                     # Pre-initialise to NA so failed bootstrap draws stay NA
                     # without needing `<<-` from the error handler below.
                     optimism_values <- rep(NA_real_, n_boot)
@@ -3070,7 +3070,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     original_names_mapping <- labelled_data$original_names_mapping
                     title2 <- .survivalDisplayName(self$options$explanatory, original_names_mapping)
 
-                    table$setTitle(jmvcore::format(.("Bootstrap Internal Validation - {title}"), title = title2))
+                    table$setTitle(.fmt(.("Bootstrap Internal Validation - {title}"), title = title2))
 
                     # Interpretation note
                     interp <- ifelse(
@@ -3093,7 +3093,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                     table$setNote("interpretation", paste0(
                         interp, slope_interp, " ",
-                        jmvcore::format(.("Based on {n} successful bootstrap resamples."), n = length(valid_optimism))
+                        .fmt(.("Based on {n} successful bootstrap resamples."), n = length(valid_optimism))
                     ))
 
                     # Populate explanation if summaries enabled
@@ -3105,7 +3105,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     }
 
                 }, error = function(e) {
-                    table$setNote("error", jmvcore::format(.("Bootstrap validation failed: {message}"), message = htmltools::htmlEscape(e$message)))
+                    table$setNote("error", .fmt(.("Bootstrap validation failed: {message}"), message = htmltools::htmlEscape(e$message)))
                 })
             }
 
@@ -5128,7 +5128,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     }
 
                     cal_table$setNote("time",
-                        jmvcore::format(.("Calibration assessed at t = {t}. N = {n} patients in {k} risk groups."), 
+                        .fmt(.("Calibration assessed at t = {t}. N = {n} patients in {k} risk groups."), 
                             t = round(cal_time, 1),
                             n = sum(!is.na(pred_surv)),
                             k = length(group_pred)))
@@ -5305,7 +5305,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     ))
 
                     table$setNote("info",
-                        jmvcore::format(.("Null hypothesis: linear effect of {var}. Natural splines with {df} degrees of freedom."), 
+                        .fmt(.("Null hypothesis: linear effect of {var}. Natural splines with {df} degrees of freedom."), 
                             var = rcs_var,
                             df = n_knots - 1))
 
@@ -5543,7 +5543,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 fit <- tryCatch(fitOne(dist), error = function(e) e)
                 if (inherits(fit, "error")) {
                     self$results$parametricModelSummary$setNote("fit",
-                        jmvcore::format(.("Parametric fit failed: {message}"), message = conditionMessage(fit)))
+                        .fmt(.("Parametric fit failed: {message}"), message = conditionMessage(fit)))
                     return()
                 }
 
@@ -5564,7 +5564,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         ci_lower = res[i, "L95%"], ci_upper = res[i, "U95%"], pvalue = pv
                     ))
                 }
-                smy$setNote("modelfit", jmvcore::format(.("{dist} model - AIC {aic}, BIC {bic}, log-likelihood {loglik}{cov}"), 
+                smy$setNote("modelfit", .fmt(.("{dist} model - AIC {aic}, BIC {bic}, log-likelihood {loglik}{cov}"), 
                         dist = private$.distLabel(dist),
                         aic = round(AIC(fit), 1),
                         bic = round(BIC(fit), 1),
@@ -5793,7 +5793,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                         cox_adjusted <- survival::coxph(.asSurvivalFormula(paste(private$.buildSurvFormula(mytime, myoutcome), "~", rhs)), data = mydata)
 
-                        heading_text <- jmvcore::format(.("Age-Stratified Cox Model\nAge groups: {groups}\nN = {n}"), 
+                        heading_text <- .fmt(.("Age-Stratified Cox Model\nAge groups: {groups}\nN = {n}"), 
                                 groups = paste(levels(mydata$age_group), collapse = ", "),
                                 n = nrow(mydata))
                         self$results$ageAdjustedCoxHeading$setContent(heading_text)

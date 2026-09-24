@@ -770,8 +770,9 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             # and two slots sharing a name collapsed into one table row, so two
             # different columns of 10 events read as one "Surgery" of 20.
             n_slots <- 5
-            assigned <- vapply(seq_len(n_slots), function(i)
-                !is.null(self$options[[paste0("milestone", i, "Date")]]), TRUE)
+            assigned <- vapply(seq_len(n_slots), function(i) {
+                !is.null(self$options[[paste0("milestone", i, "Date")]])
+            }, TRUE)
             slot_names <- vapply(seq_len(n_slots), function(i) {
                 nm <- self$options[[paste0("milestone", i, "Name")]]
                 if (is.null(nm)) "" else trimws(as.character(nm))
@@ -1890,6 +1891,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
         },
 
         .classifyCensoring = function(x) {
+            private$.censor_coding <- NULL
             v <- tolower(trimws(as.character(x)))
             num <- suppressWarnings(as.numeric(v))
 
@@ -2260,6 +2262,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             # produces zero notices must clear the previous run's text, which
             # only .addNotice() used to do.
             private$.noticeList <- list()
+            private$.censor_coding <- NULL
             private$.renderNotices()
 
             # `instructions` has no clearWith rule covering every trigger, so an
@@ -2540,6 +2543,8 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                         laneWidth = self$options$laneWidth,
                         markerSize = self$options$markerSize,
                         theme = self$options$plotTheme,
+                        colorPalette = self$options$colorPalette,
+                        customReferenceDate = self$options$customReferenceDate,
                         showLegend = self$options$showLegend,
                         referenceLines = self$options$referenceLines,
                         customReferenceTime = self$options$customReferenceTime
@@ -3082,7 +3087,8 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             est_txt <- if (is.finite(est)) sprintf("%.2f", est) else .("not estimable (a zero cell)")
             # Level names come from the user's data and this string is a table
             # CELL, which jamovi renders with renderMode = "rich".
-            g2 <- jmvcore::htmlEscape(lv[2]); g1 <- jmvcore::htmlEscape(lv[1])
+            g2 <- jmvcore::htmlEscape(lv[2])
+            g1 <- jmvcore::htmlEscape(lv[1])
             if (is.null(ci) || !any(is.finite(ci)))
                 return(sprintf(.("Fisher's exact test, OR (%s vs %s) = %s"),
                                g2, g1, est_txt))
@@ -3672,8 +3678,9 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             }
 
             # Apply color palette (colorblind-safe options)
-            if (!is.null(self$options$colorPalette) && self$options$colorPalette != "default") {
-                if (self$options$colorPalette == "jamovi") {
+            color_pal <- opts$colorPalette %||% self$options$colorPalette
+            if (!is.null(color_pal) && color_pal != "default") {
+                if (color_pal == "jamovi") {
                     # Library-review rule: offer the global jamovi palette so a
                     # figure matches the rest of the user's output. `theme` is a
                     # parameter of every render function and carries the palette
@@ -3685,11 +3692,11 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     cols <- jmvcore::colorPalette(max(n_lv, 1L), pal %||% "jmv", "color")
                     p <- p + ggplot2::scale_color_manual(values = unname(cols))
                     p <- p + ggplot2::scale_fill_manual(values = unname(cols))
-                } else if (self$options$colorPalette == "viridis") {
+                } else if (color_pal == "viridis") {
                     # Viridis palette - perceptually uniform and colorblind-safe
                     p <- p + ggplot2::scale_color_viridis_d(option = "D", end = 0.9)
                     p <- p + ggplot2::scale_fill_viridis_d(option = "D", end = 0.9)
-                } else if (self$options$colorPalette == "contrast") {
+                } else if (color_pal == "contrast") {
                     # High contrast palette (Okabe-Ito colorblind-safe palette).
                     # It has exactly 8 colours, and a manual scale ERRORS when
                     # the data has more levels ("Insufficient values in manual
@@ -3709,7 +3716,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                         p <- p + ggplot2::scale_color_manual(values = contrast_colors)
                         p <- p + ggplot2::scale_fill_manual(values = contrast_colors)
                     }
-                } else if (self$options$colorPalette == "monochrome") {
+                } else if (color_pal == "monochrome") {
                     # Monochrome with varying shades for grayscale publications
                     p <- p + ggplot2::scale_color_grey(start = 0.2, end = 0.8)
                     p <- p + ggplot2::scale_fill_grey(start = 0.2, end = 0.8)
@@ -3785,7 +3792,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 if (is_date_scale) {
                     # Prefer an explicit custom reference date if provided (string)
                     cref <- NULL
-                    cref_str <- tryCatch(self$options$customReferenceDate, error = function(e) NULL)
+                    cref_str <- opts$customReferenceDate %||% tryCatch(self$options$customReferenceDate, error = function(e) NULL)
                     if (!is.null(cref_str)) {
                         cref <- private$.parseCustomReferenceDate(cref_str)
                     }

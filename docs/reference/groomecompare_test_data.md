@@ -198,6 +198,7 @@ See `vignette("groomecompare-examples")` for comprehensive examples.
 
 Basic usage:
 
+
     data(groomecompare_test)
     library(ClinicoPath)
 

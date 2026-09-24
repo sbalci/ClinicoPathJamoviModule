@@ -2684,7 +2684,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     ggplot2::guides(fill = "none") +
                     # the bands are bootstrap intervals: name the seed that drew them
                     ggplot2::labs(caption = paste(c(caption, band_text,
-                        jmvcore::format(.("Random seed: {seed}"),
+                        .fmt(.("Random seed: {seed}"),
                             seed = private$.seedValue())),
                         collapse = " "))
                 }

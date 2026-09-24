@@ -702,7 +702,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
 
                 # the fit statistics come from the same seeded multi-start search
                 seed_note <- if (isTRUE(self$options$bootstrap) || identical(self$options$method, "latent_class"))
-                    jmvcore::format(.("Random seed: {seed}"), seed = private$.seedValue())
+                    .fmt(.("Random seed: {seed}"), seed = private$.seedValue())
                 for (nm in c("model_fit", "conditional_dependence")) {
                     t <- private$.resultsItem(nm)
                     if (!is.null(t)) t$setNote("seed", seed_note)
@@ -710,7 +710,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
 
                 table <- self$results$prevalence
                 # bootstrap resamples and the latent-class random starts both draw from the seed
-                table$setNote("seed", if (isTRUE(self$options$bootstrap) || identical(self$options$method, "latent_class")) jmvcore::format(.("Random seed: {seed}"), seed = private$.seedValue()))
+                table$setNote("seed", if (isTRUE(self$options$bootstrap) || identical(self$options$method, "latent_class")) .fmt(.("Random seed: {seed}"), seed = private$.seedValue()))
                 if (latent_method) {
                     table$setNote(
                         "meaning",
@@ -770,7 +770,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 # bootstrap percentile interval. State both.
                 conf_pct <- 100 * (1 - self$options$alpha)
                 # the bootstrap note below already names the seed
-                table$setNote("seed", if (!isTRUE(self$options$bootstrap) && identical(self$options$method, "latent_class")) jmvcore::format(.("Random seed: {seed}"), seed = private$.seedValue()))
+                table$setNote("seed", if (!isTRUE(self$options$bootstrap) && identical(self$options$method, "latent_class")) .fmt(.("Random seed: {seed}"), seed = private$.seedValue()))
                 table$setNote(
                     "ci_provenance",
                     if (isTRUE(self$options$bootstrap))
@@ -967,7 +967,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                         # rowKey stays language-independent; the displayed label was a
                         # bare English "vs" spliced between the two test names.
                         pair_key <- paste(a, "vs", b)
-                        pair <- jmvcore::format(.("{a} vs {b}"), a = a, b = b)
+                        pair <- .fmt(.("{a} vs {b}"), a = a, b = b)
                         if (bvr > THRESHOLD) flagged <- c(flagged, pair)
                         if (!is.null(table)) table$addRow(rowKey = pair_key, values = list(
                             pair = pair,
@@ -2441,7 +2441,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
 
                         table$addRow(rowKey = paste0(test1, "_", test2), values = list(
                             # was a bare English "vs" spliced between two test names
-                            test_pair = jmvcore::format(.("{a} vs {b}"), a = test1, b = test2),
+                            test_pair = .fmt(.("{a} vs {b}"), a = test1, b = test2),
                             kappa = res$kappa,
                             p_value = res$p_value,
                             agreement = res$agreement

@@ -400,20 +400,6 @@ test_that("varianceDecomposition - variance components", {
   }, NA)
 })
 
-test_that("shrinkageEstimates - empirical Bayes estimates", {
-  test_data <- create_test_data()
-
-  expect_error({
-    result <- agreement(
-      data = test_data$binary,
-      vars = c("r1", "r2", "r3"),
-      hierarchicalKappa = TRUE,
-      clusterVariable = "cluster",
-      shrinkageEstimates = TRUE
-    )
-  }, NA)
-})
-
 test_that("testClusterHomogeneity - test cluster homogeneity", {
   test_data <- create_test_data()
 

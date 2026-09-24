@@ -144,7 +144,7 @@ captionSeedMatters <- function(type, design, k = 2L, bfmessage = FALSE) {
 #' @noRd
 #' @keywords internal
 addSeedCaption <- function(plot, self, seed) {
-    text <- jmvcore::format(.("Random seed: {seed}"), seed = seed)
+    text <- .fmt(.("Random seed: {seed}"), seed = seed)
     if (inherits(plot, "patchwork"))
         return(plot + patchwork::plot_annotation(caption = text))
     old <- plot$labels$caption

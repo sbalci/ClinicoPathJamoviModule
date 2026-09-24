@@ -326,11 +326,16 @@ test_that("the analysis does not claim RECIST v1.1 compliance", {
   # The summary table was titled "Response Categories Based on RECIST v1.1
   # Criteria" and the description said "following RECIST criteria", while the
   # analysis's own notices state it is NOT RECIST-compliant.
-  rl <- yaml::read_yaml("../../jamovi/waterfall.r.yaml")
+  read_utf8_yaml <- function(path) {
+    con <- file(path, encoding = "UTF-8")
+    on.exit(close(con))
+    yaml::read_yaml(text = paste(readLines(con, warn = FALSE), collapse = "\n"))
+  }
+  rl <- read_utf8_yaml("../../jamovi/waterfall.r.yaml")
   summary_item <- Filter(function(i) identical(i$name, "summaryTable"), rl$items)[[1]]
   expect_false(grepl("Based on RECIST", summary_item$title, fixed = TRUE))
 
-  al <- yaml::read_yaml("../../jamovi/waterfall.a.yaml")
+  al <- read_utf8_yaml("../../jamovi/waterfall.a.yaml")
   expect_match(al$description$main, "NOT a RECIST v1.1 implementation")
 })
 
@@ -415,14 +420,14 @@ test_that("a cohort with zero evaluable patients completes and explains itself",
   expect_false(grepl("NA%", rr_txt(res, "clinicalSummary"), fixed = TRUE))
 })
 
-test_that("notices are delivered even when the run aborts early", {
-  # Processing error path (all responses missing) returns before the end of
-  # .run(); the on.exit(renderNotices) must still deliver what accumulated.
+test_that("fatal processing errors reject with an informative message", {
+  # Processing error path (all responses missing) triggers jmvcore::reject()
+  # per library-audit 2026-09-22.
   d <- data.frame(pid = paste0("P", 1:12), resp = NA_real_)
-  res <- ClinicoPath::waterfall(data = d, patientID = "pid", responseVar = "resp")
-  # (method disclaimers are not shown when nothing was computed; the error is)
-  expect_match(rr_txt(res), "DATA PROCESSING ERROR")
-  expect_match(rr_txt(res), "missing response values")
+  expect_error(
+    ClinicoPath::waterfall(data = d, patientID = "pid", responseVar = "resp"),
+    "No patients with valid response data found"
+  )
 })
 
 test_that("non-fatal validation warnings reach the notices panel", {

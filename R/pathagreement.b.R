@@ -122,7 +122,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 } else character())
                 group_size <- max(10, floor(n / 5))
                 trend_keys <- vapply(seq_len(ceiling(n / group_size)), function(i) {
-                    jmvcore::format(
+                    .fmt(
                         .("Cases {start}-{end}"),
                         start = (i - 1) * group_size + 1,
                         end = min(i * group_size, n)
@@ -131,7 +131,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 add("agreementTrendTable", if (self$options$agreementTrendAnalysis) trend_keys else character())
                 sample_keys <- if (length(cats) %in% 2:5) {
                     vapply(sort(unique(c(2, 3, min(max(raters, 2), 6)))), function(x) {
-                        jmvcore::format(.("{count} raters"), count = x)
+                        .fmt(.("{count} raters"), count = x)
                     }, character(1))
                 } else .("Not available")
                 add("sampleSizeTable", if (self$options$sampleSizePlanning) sample_keys else character())
@@ -389,7 +389,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                         private$.accumulateMessage(.("Rater clustering needs at least 5 cases, so it was skipped."))
                     } else {
                         if (!self$options$autoSelectGroups && self$options$nStyleGroups > private$.styleGroupCount()) {
-                            private$.accumulateMessage(jmvcore::format(
+                            private$.accumulateMessage(.fmt(
                                 .("{groups} style groups were requested for {raters} raters; {used} were used, the most possible without every rater forming its own group."),
                                 groups = self$options$nStyleGroups, raters = private$.n_raters, used = private$.styleGroupCount()
                             ))
@@ -547,7 +547,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     missing_prop <- (original_n - final_n) / original_n
                     if (missing_prop > 0.2) {
                         private$.accumulateMessage(
-                            jmvcore::format(.("High missing data: {pct}% of cases were excluded from analyses that require jointly complete ratings. Pairwise Cohen analyses use cases observed for each pair, and Krippendorff's alpha uses cases with at least two observed ratings. Complete-case results may be biased."), pct = sprintf("%.1f", missing_prop * 100)),
+                            .fmt(.("High missing data: {pct}% of cases were excluded from analyses that require jointly complete ratings. Pairwise Cohen analyses use cases observed for each pair, and Krippendorff's alpha uses cases with at least two observed ratings. Complete-case results may be biased."), pct = sprintf("%.1f", missing_prop * 100)),
                             severity = "strong_warning"
                         )
                     }
@@ -861,7 +861,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                         table$setRow(
                             rowKey = paste0("cohens_", i, "_", j),
                             values = list(
-                                method = jmvcore::format(
+                                method = .fmt(
                                     .("Cohen's Kappa: {first} vs {second}"),
                                     first = nm[i], second = nm[j]
                                 ),
@@ -878,7 +878,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 }
                 table$setNote(
                     "pairwise_n",
-                    jmvcore::format(
+                    .fmt(
                         .("Pairwise available-case analysis used every case rated by both members of a pair. Pair-specific sample sizes: {counts}."),
                         counts = paste(pair_sizes, collapse = "; ")
                     )
@@ -918,7 +918,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 z_value <- if (is.na(se_value) || se_value <= 0) NA else alpha_value / se_value
 
                 table$setRow(rowKey = "krippendorff", values = list(
-                    method = jmvcore::format(
+                    method = .fmt(
                         .("Krippendorff's Alpha ({level})"),
                         level = stringr::str_to_title(kripp_method)
                     ),
@@ -1041,7 +1041,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                         type = .("ICC Error"),
                         icc_value = NaN, ci_lower = NaN, ci_upper = NaN, f_value = NaN, p = NaN,
                         interpretation = if (inherits(res, "error")) {
-                            jmvcore::format(.("ICC calculation failed: {reason}"), reason = conditionMessage(res))
+                            .fmt(.("ICC calculation failed: {reason}"), reason = conditionMessage(res))
                         } else {
                             .("ICC calculation failed.")
                         }
@@ -1075,7 +1075,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                         data_type = kripp_method,
                         alpha = NaN,
                         interpretation = if (inherits(res, "error")) {
-                            jmvcore::format(.("Krippendorff's alpha could not be calculated: {reason}"), reason = conditionMessage(res))
+                            .fmt(.("Krippendorff's alpha could not be calculated: {reason}"), reason = conditionMessage(res))
                         } else {
                             .("Krippendorff's alpha could not be calculated for these data.")
                         }
@@ -1130,9 +1130,9 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                             .("The BCa interval for Krippendorff's alpha could not be estimated from the leave-one-case-out values, so a percentile interval was reported.")
                         )
                     }
-                    kripp_table$setNote("boot", jmvcore::format(
-                        .("{data_note} 95% {method} bootstrap interval from {resamples} case resamples (seed {seed})."),
-                        data_note = private$.krippDataNote(), method = interval_method,
+                    kripp_table$setNote("boot", .fmt(
+                        .("{dataNote} 95% {method} bootstrap interval from {resamples} case resamples (seed {seed})."),
+                        dataNote = private$.krippDataNote(), method = interval_method,
                         resamples = n_boot, seed = self$options$seed
                     ))
                 } else {
@@ -1305,7 +1305,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                         }
                     } else {
                         n_agreeing[i] <- max_count
-                        agreement_levels[i] <- jmvcore::format(.("Insufficient ({agreeing}/{raters})"), agreeing = max_count, raters = n_raters)
+                        agreement_levels[i] <- .fmt(.("Insufficient ({agreeing}/{raters})"), agreeing = max_count, raters = n_raters)
                     }
                 }
 
@@ -1351,7 +1351,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
 
                     style_table$setRow(rowKey = rater_names[i], values = list(
                         rater = rater_names[i],
-                        style_group = jmvcore::format(
+                        style_group = .fmt(
                             .("Style {group}"),
                             group = style_groups[i]
                         ),
@@ -1502,9 +1502,9 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     }
 
                     style_summary_table$addRow(
-                        rowKey = jmvcore::format(.("Style {group}"), group = group),
+                        rowKey = .fmt(.("Style {group}"), group = group),
                         values = list(
-                            style_group = jmvcore::format(.("Style {group}"), group = group),
+                            style_group = .fmt(.("Style {group}"), group = group),
                             n_members = n_members,
                             members = member_names,
                             avg_within_agreement = avg_agreement,
@@ -1573,7 +1573,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                         group_mode <- names(sort(table(group_diag), decreasing = TRUE))[1]
                         group_diagnoses_str <- c(
                             group_diagnoses_str,
-                            jmvcore::format(
+                            .fmt(
                                 .("Style {group}: {rating}"),
                                 group = group,
                                 rating = group_mode
@@ -1818,7 +1818,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
             .krippDataNote = function() {
                 dm <- private$.kripp_data_matrix
                 partial <- sum(!stats::complete.cases(dm))
-                jmvcore::format(
+                .fmt(
                     .("Krippendorff's alpha used {cases} cases with at least two observed ratings, including {partial} partially rated cases."),
                     cases = nrow(dm), partial = partial
                 )
@@ -1835,7 +1835,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
 
             .noteKrippDowngrade = function(res, level) {
                 if (isTRUE(res$downgraded)) {
-                    private$.accumulateMessage(jmvcore::format(
+                    private$.accumulateMessage(.fmt(
                         .("{scale} Krippendorff's alpha needs numeric categories; these categories are labels, so ordinal distances were used."),
                         scale = stringr::str_to_title(level)
                     ))
@@ -1853,7 +1853,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 rows <- private$.keptRows()
                 labels <- vapply(
                     rows,
-                    function(row) jmvcore::format(.("Case {row}"), row = row),
+                    function(row) .fmt(.("Case {row}"), row = row),
                     character(1)
                 )
                 id <- self$options$caseID
@@ -1932,7 +1932,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 tbl$setNote("p", .("Each p-value tests kappa = 0 for one pair and is not adjusted for multiple comparisons; judge pairs by their kappa and confidence interval."))
                 tbl$setNote(
                     "pairwise_n",
-                    jmvcore::format(
+                    .fmt(
                         .("Pairwise available-case analysis used every case rated by both members of a pair. Pair-specific sample sizes: {counts}."),
                         counts = paste(paste0(res$pair, ": ", res$cases), collapse = "; ")
                     )
@@ -2542,7 +2542,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                             if (length(group_members) > 0) {
                                 x_center <- mean(group_members)
                                 y_top <- max(dend_data$segments$y, na.rm = TRUE)
-                                group_name <- jmvcore::format(.("Group {group}"), group = group)
+                                group_name <- .fmt(.("Group {group}"), group = group)
                                 group_labels <- rbind(group_labels, data.frame(
                                     x = x_center, y = y_top * 1.05,
                                     label = group_name,
@@ -2567,7 +2567,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     ) +
                     labs(
                         title = .("Diagnostic Style Dendrogram"),
-                        subtitle = jmvcore::format(
+                        subtitle = .fmt(
                             .("Hierarchical clustering of {count} pathologists"),
                             count = length(rater_names)
                         ),
@@ -3079,13 +3079,13 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 if (length(inconsistent_vars) > 0) {
-                    private$.accumulateMessage(jmvcore::format(
+                    private$.accumulateMessage(.fmt(
                         .("The following raters have different factor levels than the first rater: {raters}. This may affect agreement calculations."),
                         raters = paste(inconsistent_vars, collapse = ", ")
                     ), severity = "strong_warning")
                 }
                 if (length(inconsistent_order_vars) > 0) {
-                    private$.accumulateMessage(jmvcore::format(
+                    private$.accumulateMessage(.fmt(
                         .("The following raters use a different category order than the first rater: {raters}. Methods that require an ordinal scale will not use ordinal scoring."),
                         raters = paste(inconsistent_order_vars, collapse = ", ")
                     ), severity = "strong_warning")
@@ -3094,7 +3094,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 # Check for sufficient data
                 complete_cases <- sum(complete.cases(vdata[var_names]))
                 if (complete_cases < 10) {
-                    private$.accumulateMessage(jmvcore::format(
+                    private$.accumulateMessage(.fmt(
                         .("Very few complete cases (n={n}). Results may be unreliable."),
                         n = complete_cases
                     ), severity = "strong_warning")
@@ -3105,7 +3105,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     var_data <- vdata[[var_name]]
                     empty_levels <- levels(var_data)[!levels(var_data) %in% var_data]
                     if (length(empty_levels) > 0) {
-                        private$.accumulateMessage(jmvcore::format(
+                        private$.accumulateMessage(.fmt(
                             .("Rater {rater} has categories that were never used: {unused}. Confirm that the declared category scale is correct before interpreting weighted analyses."),
                             rater = var_name, unused = paste(empty_levels, collapse = ", ")
                         ))
@@ -3125,7 +3125,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     unique_values <- length(unique(var_data[!is.na(var_data)]))
                     if (unique_values < 2) {
                         private$.accumulateMessage(
-                            jmvcore::format(.("Rater {rater} used only 1 category. Results for metrics requiring category variation may be unreliable."), rater = var_name),
+                            .fmt(.("Rater {rater} used only 1 category. Results for metrics requiring category variation may be unreliable."), rater = var_name),
                             severity = "strong_warning"
                         )
                     }
@@ -3172,7 +3172,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     welcome_html <- paste0(
                         welcome_html,
                         "<div style='font-weight: bold; margin-bottom: 10px; color: #2e7d32;'>",
-                        jmvcore::format(
+                        .fmt(
                             .("[READY] {count} rater variables selected"),
                             count = n_vars
                         ),
@@ -3183,7 +3183,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     welcome_html <- paste0(
                         welcome_html,
                         "<div style='margin-bottom: 10px;'>",
-                        jmvcore::format(
+                        .fmt(
                             .("[ ] Rater variables: {count}/2 minimum"),
                             count = n_vars
                         ),
@@ -3360,7 +3360,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     "<div style='background-color: rgba(33, 159, 33, 0.1); border-left: 4px solid #2e7d32; padding: 15px; margin-bottom: 15px; color: inherit;'>",
                     .("<h4 style='margin: 0 0 10px 0; color: #2e7d32; font-size: 16px;'>Clinical summary</h4>"),
                     "<p style='margin: 0; font-size: 14px;'>",
-                    jmvcore::format(
+                    .fmt(
                         .("Inter-rater agreement analysis of <strong>{raters} raters</strong> evaluating <strong>{cases} cases</strong> using <strong>{categories} categories</strong>."),
                         raters = private$.n_raters,
                         cases = private$.n_cases,
@@ -3375,7 +3375,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     if (!is.na(overall_agreement)) {
                         paste0(
                             "<p style='margin: 0 0 10px 0; font-size: 14px;'>",
-                            jmvcore::format(
+                            .fmt(
                                 .("<strong>Complete agreement (all raters identical):</strong> {pct}%"),
                                 pct = round(overall_agreement, 1)
                             ),
@@ -3441,7 +3441,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 method_name_html <- jmvcore::htmlEscape(method_name)
                 estimate_label <- if (grepl("Krippendorff", method_name, fixed = TRUE)) "\u{03B1}" else "\u{03BA}"
                 main_sentence <- if (!is.na(kappa_val) && is.na(pair)) {
-                    jmvcore::format(
+                    .fmt(
                         .("Inter-rater agreement among {raters} raters evaluating {cases} cases was {interpretation} ({symbol} = {estimate}{ci}{p})."),
                         raters = private$.n_raters,
                         cases = private$.n_cases,
@@ -3452,7 +3452,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                         p = p_text
                     )
                 } else if (!is.na(kappa_val)) {
-                    jmvcore::format(
+                    .fmt(
                         .("Agreement between {pair} was {interpretation} ({symbol} = {estimate}{ci}{p}) across {cases} cases. This is one of several rater pairs ({raters} raters in total); report the pairwise results rather than this pair alone."),
                         pair = pair_html,
                         interpretation = tolower(interpretation),
@@ -3464,7 +3464,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                         raters = private$.n_raters
                     )
                 } else {
-                    jmvcore::format(
+                    .fmt(
                         .("Inter-rater agreement could not be reliably calculated for the {raters} raters evaluating {cases} cases. Data quality or sample size may be insufficient."),
                         raters = private$.n_raters,
                         cases = private$.n_cases
@@ -3473,13 +3473,13 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
 
                 # Add overall agreement if available
                 overall_sentence <- if (!is.na(overall_agreement)) {
-                    jmvcore::format(.("All raters gave the same rating in {pct}% of cases."), pct = sprintf("%.1f", overall_agreement))
+                    .fmt(.("All raters gave the same rating in {pct}% of cases."), pct = sprintf("%.1f", overall_agreement))
                 } else {
                     ""
                 }
 
                 # Add method-specific information
-                method_sentence <- jmvcore::format(
+                method_sentence <- .fmt(
                     .("Agreement was assessed using {method}."),
                     method = method_name_html
                 )
@@ -3487,7 +3487,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 # Clinical recommendation based on kappa value
                 recommendation <- if (!is.na(kappa_val)) {
                     band <- private$.interpretKappa(kappa_val)
-                    jmvcore::format(
+                    .fmt(
                         .("By the Landis and Koch (1977) convention this is {band} agreement; whether it is adequate depends on the confidence interval, the prevalence of each category and the clinical consequence of a disagreement."),
                         band = tolower(band)
                     )
@@ -3661,7 +3661,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     "<div style='background-color: rgba(33, 152, 239, 0.13); border-left: 4px solid #1976d2; padding: 15px; margin-bottom: 15px; color: inherit;'>",
                     .("<h3 style='margin: 0 0 10px 0; color: #1976d2; font-size: 18px;'>Weighted kappa guide</h3>"),
                     "<p style='margin: 0; font-size: 14px; color: inherit;'>",
-                    jmvcore::format(
+                    .fmt(
                         .("You selected <strong>{weighting}</strong>. The sections below explain when and why to use each weighting scheme."),
                         weighting = weighting_label
                     ),
@@ -3670,7 +3670,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     .("<h4 style='margin: 0 0 12px 0; color: #2e7d32; font-size: 16px;'>Weighting schemes explained</h4>"),
                     "<div style='margin-bottom: 15px;'>",
                     "<h5 style='margin: 0 0 8px 0; color: #1976d2; font-size: 14px;'>",
-                    jmvcore::format(
+                    .fmt(
                         .("Linear/equal weighting ({status})"),
                         status = linear_status
                     ),
@@ -3687,7 +3687,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     "</div></div>",
                     "<div style='margin-bottom: 15px;'>",
                     "<h5 style='margin: 0 0 8px 0; color: #1976d2; font-size: 14px;'>",
-                    jmvcore::format(
+                    .fmt(
                         .("Quadratic/squared weighting ({status})"),
                         status = squared_status
                     ),
@@ -3908,7 +3908,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
 
                     },
                     error = function(e) {
-                        error_msg <- jmvcore::format(
+                        error_msg <- .fmt(
                             .("Error calculating Gwet's coefficients: {error}. Ensure the ratings have adequate variability and complete cases."),
                             error = e$message
                         )
@@ -3982,15 +3982,15 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 # AC2 is AC1 with ordinal weights; it says nothing about rater
                 # heterogeneity, which the old note claimed.
                 switch(type,
-                    "AC1" = jmvcore::format(
+                    "AC1" = .fmt(
                         .("{interpretation} (less affected by prevalence than kappa)"),
                         interpretation = interpretation
                     ),
-                    "AC2" = jmvcore::format(
+                    "AC2" = .fmt(
                         .("{interpretation} (ordinal weights give partial credit for near-miss ratings)"),
                         interpretation = interpretation
                     ),
-                    jmvcore::format(
+                    .fmt(
                         .("{interpretation} (unweighted: identical to AC1 for nominal ratings)"),
                         interpretation = interpretation
                     )
@@ -4020,7 +4020,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
 
                     },
                     error = function(e) {
-                        error_msg <- jmvcore::format(
+                        error_msg <- .fmt(
                             .("Error calculating PABAK: {error}. Ensure at least two raters and complete ratings are available."),
                             error = e$message
                         )
@@ -4101,17 +4101,17 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 if (!is.na(standard_kappa)) {
                     difference <- pabak_value - standard_kappa
                     return(if (abs(difference) < 0.05) {
-                        jmvcore::format(
+                        .fmt(
                             .("{interpretation} (similar to standard kappa)"),
                             interpretation = base_interpretation
                         )
                     } else if (difference > 0.05) {
-                        jmvcore::format(
+                        .fmt(
                             .("{interpretation} (higher than standard kappa; prevalence bias may be present)"),
                             interpretation = base_interpretation
                         )
                     } else {
-                        jmvcore::format(
+                        .fmt(
                             .("{interpretation} (lower than standard kappa; review the category distribution)"),
                             interpretation = base_interpretation
                         )
@@ -4144,7 +4144,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                         sample_size_table$setNote("method", .("Cases needed so the 95% confidence interval for kappa has the target half-width (Rotondi and Donner 2012, kappaSize), assuming the category proportions observed in these data. Supported for 2 to 6 raters."))
                     },
                     error = function(e) {
-                        error_msg <- jmvcore::format(
+                        error_msg <- .fmt(
                             .("Error in sample size planning: {error}. Check that the target kappa and precision are within their allowed ranges."),
                             error = e$message
                         )
@@ -4182,7 +4182,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 if (is.null(size_fun)) {
                     results[[.("Not available")]] <- list(
                         n_required = "-",
-                        recommendation = jmvcore::format(
+                        recommendation = .fmt(
                             .("Sample size planning supports 2 to 5 rating categories; these data have {categories}."),
                             categories = n_categories
                         )
@@ -4200,9 +4200,9 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                         )$n,
                         error = function(e) NA
                     )
-                    results[[jmvcore::format(.("{count} raters"), count = raters)]] <- list(
-                        n_required = if (is.na(n)) "-" else jmvcore::format(.("{cases} cases"), cases = n),
-                        recommendation = jmvcore::format(
+                    results[[.fmt(.("{count} raters"), count = raters)]] <- list(
+                        n_required = if (is.na(n)) "-" else .fmt(.("{cases} cases"), cases = n),
+                        recommendation = .fmt(
                             .("95% CI for kappa {kappa}: {lower} to {upper}; category proportions {props}"),
                             kappa = kappa0, lower = round(lower, 3), upper = round(upper, 3), props = prop_text
                         )
@@ -4233,7 +4233,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
 
                     },
                     error = function(e) {
-                        error_msg <- jmvcore::format(
+                        error_msg <- .fmt(
                             .("Error in bias analysis: {error}. Ensure multiple raters use more than one rating category."),
                             error = e$message
                         )
@@ -4318,11 +4318,11 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 if (abs(max_diff_value) < 0.1) {
                     return(.("No clear systematic tendency"))
                 } else if (max_diff_value > 0) {
-                    return(jmvcore::format(
+                    return(.fmt(
                         .("Over-diagnoses '{category}'"), category = max_diff_category
                     ))
                 } else {
-                    return(jmvcore::format(
+                    return(.fmt(
                         .("Under-diagnoses '{category}'"), category = max_diff_category
                     ))
                 }
@@ -4333,15 +4333,15 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 if (bias_score < 0.1) {
                     return(.("Excellent consistency with consensus"))
                 } else if (bias_score < 0.2) {
-                    return(jmvcore::format(
+                    return(.fmt(
                         .("Minor calibration may be needed. {tendency}"), tendency = tendency
                     ))
                 } else if (bias_score < 0.3) {
-                    return(jmvcore::format(
+                    return(.fmt(
                         .("Consider targeted training. {tendency}"), tendency = tendency
                     ))
                 } else {
-                    return(jmvcore::format(
+                    return(.fmt(
                         .("Substantial recalibration may be needed. {tendency}"), tendency = tendency
                     ))
                 }
@@ -4357,7 +4357,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                         if (!is.null(sequence_var)) {
                             sequence_values <- self$data[[sequence_var]][private$.keptRows()]
                             if (anyNA(sequence_values)) {
-                                private$.accumulateMessage(jmvcore::format(
+                                private$.accumulateMessage(.fmt(
                                     .("The trend sequence variable '{variable}' has missing values. Those cases were placed after cases with observed sequence values, while preserving their dataset order."),
                                     variable = sequence_var
                                 ))
@@ -4383,7 +4383,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                                 .("No trend sequence variable was selected; the current dataset row order was used.")
                             )
                         } else {
-                            trend_table$setNote("order", jmvcore::format(
+                            trend_table$setNote("order", .fmt(
                                 .("Cases were ordered by '{variable}'; ties preserve their dataset order."),
                                 variable = sequence_var
                             ))
@@ -4394,7 +4394,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                         )
                     },
                     error = function(e) {
-                        error_msg <- jmvcore::format(
+                        error_msg <- .fmt(
                             .("Error in trend analysis: {error}. Ensure the rows are in the intended case order and contain enough complete ratings."),
                             error = e$message
                         )
@@ -4427,7 +4427,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
 
                     group_agreements[i] <- group_agreement$percent
 
-                    group_name <- jmvcore::format(
+                    group_name <- .fmt(
                         .("Cases {start}-{end}"), start = start_idx, end = end_idx
                     )
 
@@ -4547,7 +4547,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 }
                 list(
                     direction = direction,
-                    significance = jmvcore::format(
+                    significance = .fmt(
                         .("Spearman rho = {rho}, p = {pvalue}, across the ordered case sequence"),
                         rho = sprintf("%.2f", rho), pvalue = format.pval(ct$p.value, digits = 2)
                     )
@@ -4577,7 +4577,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
 
                     },
                     error = function(e) {
-                        error_msg <- jmvcore::format(
+                        error_msg <- .fmt(
                             .("Error in difficulty analysis: {error}. Ensure multiple raters and complete case ratings are available."),
                             error = e$message
                         )
@@ -4659,7 +4659,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                         return(.("Split opinion"))
                     }
                 } else {
-                    return(jmvcore::format(
+                    return(.fmt(
                         .("Multi-way disagreement ({count} different ratings)"),
                         count = n_categories
                     ))
@@ -4692,13 +4692,13 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                         }
 
                         stability_table$setNote("index", .("Stability index = |bootstrap mean / bootstrap SE|. It is small whenever the statistic is close to zero, even when estimated precisely, so read the bootstrap SE and interval rather than the index alone."))
-                        stability_table$setNote("interval", jmvcore::format(
+                        stability_table$setNote("interval", .fmt(
                             .("Confidence intervals use the selected {method} case-bootstrap method; BCa uses leave-one-case-out estimates to adjust for bias and skewness."),
                             method = if (self$options$bootstrapCIType == "bca") .("BCa") else .("percentile")
                         ))
                     },
                     error = function(e) {
-                        error_msg <- jmvcore::format(
+                        error_msg <- .fmt(
                             .("Error in stability analysis: {error}. Ensure enough complete cases are available for bootstrap resampling."),
                             error = e$message
                         )
@@ -4781,7 +4781,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                         )
                         ci <- interval$ci
                         fallback_used <- fallback_used || isTRUE(interval$fallback)
-                        interpretation <- jmvcore::format(
+                        interpretation <- .fmt(
                             .("95% {method} bootstrap interval {lower} to {upper}"),
                             method = interval$method,
                             lower = sprintf("%.3f", ci[1]), upper = sprintf("%.3f", ci[2])
@@ -4908,7 +4908,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 data_summary <- private$.summarizeCurrentData()
 
                 explanations <- c(
-                    jmvcore::format(
+                    .fmt(
                         .("<strong>Your dataset:</strong> {cases} cases rated by {raters} raters across {categories} categories."),
                         cases = data_summary$n_cases,
                         raters = data_summary$n_raters,
@@ -5106,7 +5106,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 subtitle <- if (is.null(trend) || identical(trend, "Calculating...")) {
                     .("Pairwise agreement in consecutive case groups")
                 } else {
-                    jmvcore::format(.("Trend: {direction}"), direction = trend)
+                    .fmt(.("Trend: {direction}"), direction = trend)
                 }
                 ggplot2::ggplot(df, ggplot2::aes(x = group, y = agreement, group = 1)) +
                     ggplot2::geom_line(linewidth = 0.9, colour = "#2166ac") +
@@ -5187,7 +5187,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     ggplot2::coord_cartesian(xlim = c(0, 1)) +
                     ggplot2::labs(
                         title = .("Case Difficulty Distribution"),
-                        subtitle = jmvcore::format(.("Share of raters differing from the modal rating, {cases} cases"), cases = nrow(df)),
+                        subtitle = .fmt(.("Share of raters differing from the modal rating, {cases} cases"), cases = nrow(df)),
                         x = .("Difficulty score (0 = full consensus)"),
                         y = .("Cases")
                     ) +
@@ -5466,7 +5466,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     )
 
                     table$addRow(rowKey = k, values = list(
-                        style_group = jmvcore::format(.("Group {group}"), group = k),
+                        style_group = .fmt(.("Group {group}"), group = k),
                         n_raters = n_raters,
                         rater_names = member_names,
                         within_agreement = within_agreement,
@@ -5524,7 +5524,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                         )
 
                         table$addRow(rowKey = paste0(k, "_", category), values = list(
-                            style_group = jmvcore::format(.("Group {group}"), group = k),
+                            style_group = .fmt(.("Group {group}"), group = k),
                             category = category,
                             frequency = freq,
                             percentage = pct,
@@ -5615,7 +5615,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                             g2_mode <- names(which.max(table(group2_diagnoses)))
                             group_patterns <- c(
                                 group_patterns,
-                                jmvcore::format(
+                                .fmt(
                                     .("Group {group1}: {rating1} vs group {group2}: {rating2}"),
                                     group1 = k1,
                                     rating1 = g1_mode,
@@ -5753,9 +5753,9 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     return(.("Association could not be tested"))
                 }
                 sig_text <- if (p_value < 0.05) {
-                    jmvcore::format(.("p = {p}"), p = format.pval(p_value, digits = 2, eps = 0.001))
+                    .fmt(.("p = {p}"), p = format.pval(p_value, digits = 2, eps = 0.001))
                 } else {
-                    jmvcore::format(.("not significant, p = {p}"), p = format.pval(p_value, digits = 2))
+                    .fmt(.("not significant, p = {p}"), p = format.pval(p_value, digits = 2))
                 }
                 effect_text <- if (length(effect_size) != 1 || is.na(effect_size)) {
                     ""
@@ -5841,7 +5841,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 if (self$options$bootstrap) {
                     boot <- private$.referenceBootstrap(dm, reference, groups)
                     intervals <- boot$intervals
-                    note <- jmvcore::format(
+                    note <- .fmt(
                         .("95% {method} conditional intervals use {resamples} case bootstrap resamples (seed {seed}). All ratings for a case are sampled together. The observed raters and style groups are held fixed; these intervals do not include uncertainty from selecting the groups or sampling new raters."),
                         method = if (self$options$bootstrapCIType == "bca") .("BCa") else .("percentile"),
                         resamples = boot$reps, seed = self$options$seed
@@ -5861,7 +5861,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                         mean(as.character(x) == reference)
                     }, numeric(1))) * 100
                     table$addRow(rowKey = k, values = list(
-                        style_group = jmvcore::format(.("Group {group}"), group = k),
+                        style_group = .fmt(.("Group {group}"), group = k),
                         kappa_vs_reference = kappas[k],
                         agreement_percent = agreement, ci_lower = intervals[1, k],
                         ci_upper = intervals[2, k], accuracy_level = private$.interpretKappa(kappas[k])
@@ -5898,7 +5898,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 html <- paste0(
                     html,
                     "<p>",
-                    jmvcore::format(
+                    .fmt(
                         .("Analysis identified <strong>{count} diagnostic style groups</strong> using hierarchical clustering with {distance}."),
                         count = n_clusters,
                         distance = distance_label
@@ -6077,7 +6077,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
 
                 # Use base R plot
                 plot(hc,
-                    main = jmvcore::format(
+                    main = .fmt(
                         .("Hierarchical Clustering Dendrogram ({groups} groups)"),
                         groups = k
                     ),
@@ -6126,7 +6126,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
 
                 # Add average silhouette width
                 avg_sil <- mean(sil[, "sil_width"])
-                mtext(jmvcore::format(
+                mtext(.fmt(
                     .("Average silhouette width: {width}"),
                     width = sprintf("%.3f", avg_sil)
                 ),

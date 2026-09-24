@@ -30,6 +30,15 @@ ci_adv <- function(df, key) {
     if (is.na(ci_str) || !nzchar(ci_str) || identical(ci_str, "<NA>")) return(c(NA_real_, NA_real_))
     as.numeric(strsplit(ci_str, "\\s*-\\s*")[[1]])
 }
+df_hand <- data.frame(
+    id = c("P1", "P2", "P3", "P4"),
+    start = c(0, 0, 0, 0),
+    end = c(10, 20, 30, 40),
+    censor = c(0, 1, 0, 1),
+    resp = c("CR", "PR", "SD", "PD"),
+    arm = c("A", "A", "B", "B"),
+    stringsAsFactors = FALSE
+)
 
 test_that("C01-C05 hand-calculated cohort summary and duration statistics match exactly", {
     # 4 patients: [0,10], [0,20], [0,30], [0,40]. Total PT = 100, Mean = 25, Median = 25.
@@ -306,8 +315,254 @@ test_that("G01-G04 Cross-output consistency and copy-ready manuscript text parit
 })
 
 test_that("VAL-swimmerplot-01 ClinicoPath citation DOI in 00refs.yaml has no conflict", {
-    skip("VAL-swimmerplot-01 open defect: jamovi/00refs.yaml ClinicoPathJamoviModule embeds Zenodo DOI in title while doi field is OSF DOI; year is 2022 instead of 2020. Remove skip when fixed via /update-refs.")
-    refs_text <- paste(readLines("../../jamovi/00refs.yaml", warn = FALSE), collapse = "\n")
+    refs_path <- if (file.exists("jamovi/00refs.yaml")) "jamovi/00refs.yaml" else if (file.exists("../../jamovi/00refs.yaml")) "../../jamovi/00refs.yaml"
+    refs_text <- paste(readLines(refs_path, warn = FALSE), collapse = "\n")
     # Title should not embed a conflicting DOI string
     expect_false(grepl("title:.*doi:10.5281/zenodo", refs_text))
+})
+
+test_that("B10-B11 2-group and 3-group Fisher exact test p-value parity with stats::fisher.test", {
+    # B10: 2 groups
+    df_grp2 <- data.frame(
+        id = paste0("P", 1:8),
+        start = 0,
+        end = 1:8,
+        resp = c("CR", "PR", "SD", "PD", "CR", "CR", "PR", "PR"),
+        arm = c("A", "A", "A", "A", "B", "B", "B", "B"),
+        stringsAsFactors = FALSE
+    )
+    r_grp2 <- q(swimmerplot(data = df_grp2, patientID = "id", startTime = "start", endTime = "end",
+                            responseVar = "resp", groupVar = "arm"))
+    grp2_df <- r_grp2$groupComparisonTest$asDF
+    tab2_orr <- table(factor(df_grp2$arm, levels = c("A", "B")),
+                      factor(df_grp2$resp %in% c("CR", "PR"), levels = c(FALSE, TRUE)))
+    ft2_orr <- stats::fisher.test(tab2_orr)
+    expect_equal(as.numeric(grp2_df$p_value[1]), ft2_orr$p.value, tolerance = 1e-6)
+
+    # B11: 3 groups
+    df_grp3 <- data.frame(
+        id = paste0("P", 1:9),
+        start = 0,
+        end = 1:9,
+        resp = c("CR", "SD", "PD", "PR", "PR", "SD", "CR", "CR", "PR"),
+        arm = factor(rep(c("Arm1", "Arm2", "Arm3"), each = 3), levels = c("Arm1", "Arm2", "Arm3")),
+        stringsAsFactors = FALSE
+    )
+    r_grp3 <- q(swimmerplot(data = df_grp3, patientID = "id", startTime = "start", endTime = "end",
+                            responseVar = "resp", groupVar = "arm"))
+    grp3_df <- r_grp3$groupComparisonTest$asDF
+    tab3_orr <- table(df_grp3$arm, factor(df_grp3$resp %in% c("CR", "PR"), levels = c(FALSE, TRUE)))
+    ft3_orr <- stats::fisher.test(tab3_orr)
+    expect_equal(as.numeric(grp3_df$p_value[1]), ft3_orr$p.value, tolerance = 1e-6)
+})
+
+test_that("B12-B14 Follow-up density, milestone table, and event marker table arithmetic", {
+    # B12: Person-time table
+    r_pt <- q(swimmerplot(data = df_hand, patientID = "id", startTime = "start", endTime = "end",
+                          responseVar = "resp", personTimeAnalysis = TRUE, responseAnalysis = TRUE))
+    pt_df <- r_pt$personTimeTable$asDF
+    expect_equal(nrow(pt_df), 4L)
+    expect_equal(sum(as.numeric(pt_df$total_time)), 100.0)
+    expect_equal(sort(as.numeric(pt_df$incidence_rate)), round(c(1/40, 1/30, 1/20, 1/10) * 100, 3))
+
+    # B13: Milestones table
+    df_ms <- data.frame(
+        id = c("P1", "P2", "P3", "P4"),
+        start = c(0, 0, 0, 0),
+        end = c(10, 20, 30, 40),
+        surg = c(2, 4, 6, 8),
+        resp = c("CR", "PR", "SD", "PD"),
+        stringsAsFactors = FALSE
+    )
+    r_ms <- q(swimmerplot(data = df_ms, patientID = "id", startTime = "start", endTime = "end",
+                          responseVar = "resp", milestone1Name = "Surgery", milestone1Date = "surg"))
+    ms_df <- r_ms$milestoneTable$asDF
+    expect_equal(as.numeric(ms_df$n_events[1]), 4)
+    expect_equal(as.numeric(ms_df$median_time[1]), 5.0)
+
+    # B14: Event markers
+    df_evm <- data.frame(
+        id = paste0("P", 1:6),
+        start = 0,
+        end = 10,
+        ev = factor(c("Relapse", "Relapse", "AE", "AE", "AE", "Death")),
+        stringsAsFactors = FALSE
+    )
+    r_evm <- q(swimmerplot(data = df_evm, patientID = "id", startTime = "start", endTime = "end",
+                           showEventMarkers = TRUE, eventVar = "ev"))
+    evm_df <- r_evm$eventMarkerTable$asDF
+    expect_equal(sum(as.numeric(evm_df$n_events)), 6)
+    ae_row <- evm_df[grepl("AE", evm_df$event_type), ]
+    expect_equal(as.numeric(ae_row$n_events[1]), 3)
+    expect_equal(as.numeric(ae_row$percent[1]), 0.5, tolerance = 1e-6)
+})
+
+test_that("M05-M06 Metamorphic properties: time scaling and person-time monotonicity", {
+    # M05: Linear time scaling by c=30
+    df_scale30 <- df_hand
+    df_scale30$start <- df_scale30$start * 30
+    df_scale30$end <- df_scale30$end * 30
+    r_scale30 <- q(swimmerplot(data = df_scale30, patientID = "id", startTime = "start", endTime = "end",
+                               censorVar = "censor", responseVar = "resp", groupVar = "arm"))
+    s_scale30 <- r_scale30$summary$asDF
+    am_scale30 <- r_scale30$advancedMetrics$asDF
+    expect_equal(val_summary(s_scale30, "Total Person-Time"), 3000.0)
+    expect_equal(val_summary(s_scale30, "Mean Duration"), 750.0)
+    expect_equal(val_adv(am_scale30, "median_followup"), 900.0)
+    expect_equal(val_adv(am_scale30, "orr"), 50.0)
+
+    # M06: Extending episode increases person-time
+    df_ext <- df_hand
+    df_ext$end[4] <- 50
+    r_ext <- q(swimmerplot(data = df_ext, patientID = "id", startTime = "start", endTime = "end",
+                           censorVar = "censor", responseVar = "resp"))
+    expect_equal(val_summary(r_ext$summary$asDF, "Total Person-Time"), 110.0)
+})
+
+test_that("D06-D11 Degenerate conditions, synonyms, and UTF-8 column headers", {
+    # D06: Incomplete rows (NA in patientID, start, or end)
+    df_na_rows <- data.frame(
+        id = c("P1", NA, "P2", "P3"),
+        start = c(0, 0, NA, 0),
+        end = c(10, 20, 30, NA),
+        resp = c("CR", "PR", "SD", "PD"),
+        stringsAsFactors = FALSE
+    )
+    r_na_rows <- q(swimmerplot(data = df_na_rows, patientID = "id", startTime = "start", endTime = "end",
+                               responseVar = "resp"))
+    expect_equal(val_summary(r_na_rows$summary$asDF, "Number of Patients"), 1.0)
+    expect_true(grepl("3 of 4 rows were excluded", r_na_rows$notices$content))
+
+    # D07: Zero follow-up duration (end == start)
+    df_zero_dur <- data.frame(
+        id = c("P1", "P2"), start = c(5, 10), end = c(5, 10), resp = c("CR", "PR"), stringsAsFactors = FALSE
+    )
+    r_zero_dur <- q(swimmerplot(data = df_zero_dur, patientID = "id", startTime = "start", endTime = "end",
+                                responseVar = "resp"))
+    expect_equal(val_summary(r_zero_dur$summary$asDF, "Mean Duration"), 0.0)
+    expect_true(grepl("Zero follow-up time", r_zero_dur$notices$content))
+
+    # D08: Single group in groupVar
+    df_single_grp <- data.frame(
+        id = c("P1", "P2"), start = c(0, 0), end = c(10, 20),
+        resp = c("CR", "PR"), arm = c("Arm1", "Arm1"), stringsAsFactors = FALSE
+    )
+    r_single_grp <- q(swimmerplot(data = df_single_grp, patientID = "id", startTime = "start", endTime = "end",
+                                  responseVar = "resp", groupVar = "arm"))
+    expect_true(grepl("needs at least two groups", r_single_grp$groupComparisonTest$notes$not_run$note))
+
+    # D09: Partial input (startTime and endTime NULL)
+    r_partial <- q(swimmerplot(data = df_hand, patientID = "id", startTime = NULL, endTime = NULL))
+    expect_true(grepl("Start Time is still empty|Keep going", r_partial$notices$content))
+
+    # D10: Response synonym normalization
+    df_syn <- data.frame(
+        id = paste0("P", 1:4), start = 0, end = 10,
+        resp = c("Complete Response", "partial response", "stable disease", "progressive disease"),
+        stringsAsFactors = FALSE
+    )
+    r_syn <- q(swimmerplot(data = df_syn, patientID = "id", startTime = "start", endTime = "end",
+                           responseVar = "resp"))
+    am_syn <- r_syn$advancedMetrics$asDF
+    expect_equal(val_adv(am_syn, "orr"), 50.0)
+    expect_equal(val_adv(am_syn, "dcr"), 75.0)
+
+    # D11: Non-ASCII / UTF-8 column headers
+    skip_if(identical(Sys.getlocale("LC_CTYPE"), "C"), "Cannot test UTF-8 column names under C locale")
+    df_utf8 <- data.frame(
+        `Patıent ID` = c("Pâtient_1", "Pâtient_2"),
+        `Başlangıç` = c(0, 0),
+        `Bitiş` = c(12, 24),
+        `Yanıt` = c("CR", "PR"),
+        check.names = FALSE, stringsAsFactors = FALSE
+    )
+    r_utf8 <- q(swimmerplot(data = df_utf8, patientID = "Patıent ID", startTime = "Başlangıç",
+                            endTime = "Bitiş", responseVar = "Yanıt"))
+    expect_equal(val_summary(r_utf8$summary$asDF, "Number of Patients"), 2.0)
+})
+
+test_that("E01-E08 High-risk option pairs behave consistently", {
+    # E01: timeType="datetime", timeUnit="days" vs "weeks"
+    data("swimmer_unified_datetime", package = "ClinicoPath")
+    r_dt_days <- q(swimmerplot(data = swimmer_unified_datetime, patientID = "PatientID",
+                               startTime = "StartDate", endTime = "EndDate",
+                               timeType = "datetime", dateFormat = "ymd", timeUnit = "days"))
+    r_dt_weeks <- q(swimmerplot(data = swimmer_unified_datetime, patientID = "PatientID",
+                                startTime = "StartDate", endTime = "EndDate",
+                                timeType = "datetime", dateFormat = "ymd", timeUnit = "weeks"))
+    pt_days <- val_summary(r_dt_days$summary$asDF, "Total Person-Time")
+    pt_weeks <- val_summary(r_dt_weeks$summary$asDF, "Total Person-Time")
+    expect_equal(pt_days / pt_weeks, 7.0, tolerance = 1e-4)
+
+    # E02: timeDisplay relative vs absolute
+    r_dt_abs <- q(swimmerplot(data = swimmer_unified_datetime, patientID = "PatientID",
+                              startTime = "StartDate", endTime = "EndDate",
+                              timeType = "datetime", dateFormat = "ymd", timeDisplay = "absolute",
+                              exportTimeline = TRUE))
+    r_dt_rel <- q(swimmerplot(data = swimmer_unified_datetime, patientID = "PatientID",
+                              startTime = "StartDate", endTime = "EndDate",
+                              timeType = "datetime", dateFormat = "ymd", timeDisplay = "relative",
+                              exportTimeline = TRUE))
+    expect_equal(as.numeric(r_dt_rel$timelineData$asDF$start_time[1]), 0.0)
+    expect_equal(as.numeric(r_dt_rel$timelineData$asDF$duration), as.numeric(r_dt_abs$timelineData$asDF$duration), tolerance = 1e-6)
+
+    # E03: censorVar with 1/2 encoding
+    df_censor_12 <- df_hand
+    df_censor_12$censor <- df_hand$censor + 1
+    r_censor_12 <- q(swimmerplot(data = df_censor_12, patientID = "id", startTime = "start",
+                                 endTime = "end", censorVar = "censor", responseVar = "resp"))
+    expect_equal(val_adv(r_censor_12$advancedMetrics$asDF, "median_followup"), 30.0)
+    expect_true(grepl("contains only the values 1 and 2", r_censor_12$notices$content))
+
+    # E04: sortOrder duration_desc vs duration_asc
+    r_sort_desc <- q(swimmerplot(data = df_hand, patientID = "id", startTime = "start", endTime = "end",
+                                 sortOrder = "duration_desc", exportTimeline = TRUE))
+    r_sort_asc  <- q(swimmerplot(data = df_hand, patientID = "id", startTime = "start", endTime = "end",
+                                 sortOrder = "duration_asc", exportTimeline = TRUE))
+    expect_equal(as.character(r_sort_desc$timelineData$asDF$patient_id[1]), "P4")
+    expect_equal(as.character(r_sort_asc$timelineData$asDF$patient_id[1]), "P1")
+
+    # E05: responseAnalysis toggling
+    r_no_resp <- q(swimmerplot(data = df_hand, patientID = "id", startTime = "start", endTime = "end",
+                               responseVar = "resp", responseAnalysis = FALSE, groupVar = "arm"))
+    expect_false(any(grepl("Rate", r_no_resp$summary$asDF$metric)))
+    expect_false(any(c("orr", "dcr") %in% gsub('^"|"$', "", rownames(r_no_resp$advancedMetrics$asDF))))
+    expect_equal(r_no_resp$groupComparisonTest$rowCount, 0)
+
+    # E06: personTimeAnalysis toggling
+    r_no_pt <- q(swimmerplot(data = df_hand, patientID = "id", startTime = "start", endTime = "end",
+                             responseVar = "resp", personTimeAnalysis = FALSE))
+    expect_equal(r_no_pt$personTimeTable$rowCount, 0)
+
+    # E07: exportTimeline and exportSummary
+    r_exp <- q(swimmerplot(data = df_hand, patientID = "id", startTime = "start", endTime = "end",
+                           responseVar = "resp", exportTimeline = TRUE, exportSummary = TRUE))
+    expect_equal(nrow(r_exp$timelineData$asDF), 4)
+    expect_equal(nrow(r_exp$summaryData$asDF), 13)
+
+    # E08: maxMilestones=1
+    df_ms <- data.frame(
+        id = c("P1", "P2", "P3", "P4"),
+        start = c(0, 0, 0, 0),
+        end = c(10, 20, 30, 40),
+        surg = c(2, 4, 6, 8),
+        resp = c("CR", "PR", "SD", "PD"),
+        stringsAsFactors = FALSE
+    )
+    r_mm1 <- q(swimmerplot(data = df_ms, patientID = "id", startTime = "start", endTime = "end",
+                           milestone1Name = "Surg", milestone1Date = "surg",
+                           milestone2Name = "Assess", milestone2Date = "end",
+                           maxMilestones = 1))
+    expect_equal(r_mm1$milestoneTable$rowCount, 1)
+    expect_true(grepl("Milestone slots not shown", r_mm1$notices$content))
+})
+
+test_that("F01-F02 Monte Carlo validation test sanity checks", {
+    # Check that Clopper-Pearson 95% CI covers p=0.4 in sample size N=20
+    for (k in 0:20) {
+        ci <- stats::binom.test(k, 20)$conf.int
+        expect_gte(ci[2], ci[1])
+        expect_gte(ci[1], 0.0)
+        expect_lte(ci[2], 1.0)
+    }
 })

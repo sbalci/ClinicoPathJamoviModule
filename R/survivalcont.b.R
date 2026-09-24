@@ -216,7 +216,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
             .landmarkNote = function(tbl, results) {
                 offset <- results$landmark_offset
                 if (is.null(offset) || !is.finite(offset) || offset <= 0) return(invisible(NULL))
-                tbl$setNote("landmark", jmvcore::format(.("Times are measured from the landmark at {offset} {unit}, not from diagnosis; add {offset} to express a time as time from diagnosis."), offset = round(offset, 2), unit = self$options$timetypeoutput))
+                tbl$setNote("landmark", .fmt(.("Times are measured from the landmark at {offset} {unit}, not from diagnosis; add {offset} to express a time as time from diagnosis."), offset = round(offset, 2), unit = self$options$timetypeoutput))
                 invisible(NULL)
             },
 
@@ -796,7 +796,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                             private$.addHtmlMessage(
                                 "error",
                                 .("Numeric dates are not epoch seconds"),
-                                jmvcore::format(.("The numeric date columns hold values too small to be Unix epoch seconds (the largest is {max_val}, which is January 1970). They look like day counts, as produced by an R Date column or an Excel serial date. Numeric dates must be seconds since 1970-01-01 -- use the DateTime Converter's corrected_datetime_numeric output, or supply the dates as text (e.g. \"2024-01-15\") and set the matching input time type."), max_val = base::format(max(abs(epoch_vals)), big.mark = ",")))
+                                .fmt(.("The numeric date columns hold values too small to be Unix epoch seconds (the largest is {maxVal}, which is January 1970). They look like day counts, as produced by an R Date column or an Excel serial date. Numeric dates must be seconds since 1970-01-01 -- use the DateTime Converter's corrected_datetime_numeric output, or supply the dates as text (e.g. \"2024-01-15\") and set the matching input time type."), maxVal = base::format(max(abs(epoch_vals)), big.mark = ",")))
                             return(NULL)
                         }
                         mydata[["start"]] <- as.POSIXct(mydata[[dxdate]], origin="1970-01-01", tz="UTC")
@@ -1975,7 +1975,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
                 coxTable$setNote(
                     "scale",
-                    jmvcore::format(.("Hazard ratios are unadjusted and correspond to a one-unit increase in '{var}'. The model assumes a linear association with log hazard and proportional hazards over time."), var = self$options$contexpl)
+                    .fmt(.("Hazard ratios are unadjusted and correspond to a one-unit increase in '{var}'. The model assumes a linear association with log hazard and proportional hazards over time."), var = self$options$contexpl)
                 )
 
                 data_frame <- tCox_df
@@ -2123,7 +2123,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
                 # Simple plain text title (table titles don't render HTML)
                 rescutTable$setTitle(
-                    jmvcore::format(.("{var} Optimal Cut-off Analysis"), var = self$options$contexpl)
+                    .fmt(.("{var} Optimal Cut-off Analysis"), var = self$options$contexpl)
                 )
 
                 # Add plain text interpretation note if cutoff was found
@@ -2131,7 +2131,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     cutoff_value <- rescut_summary[1, "cutpoint"]
                     variable_name <- self$options$contexpl
 
-                    clinical_note <- jmvcore::format(.("The data-derived cut-off point for {variable_name} is {cutoff_value}; it separates lower and higher marker values in this dataset."), variable_name = variable_name, cutoff_value = round(cutoff_value, 2))
+                    clinical_note <- .fmt(.("The data-derived cut-off point for {variableName} is {cutoffValue}; it separates lower and higher marker values in this dataset."), variableName = variable_name, cutoffValue = round(cutoff_value, 2))
 
                     # Set table note with plain text (notes don't render HTML)
                     rescutTable$setNote("clinical", clinical_note)
@@ -2362,9 +2362,9 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 dropped <- utimes[utimes > max_observed]
                 utimes <- utimes[utimes <= max_observed]
                 if (length(dropped) > 0)
-                    self$results$survTable$setNote("horizon", jmvcore::format(.("Time point(s) {dropped} omitted: they exceed the longest observed follow-up ({max} {unit}). Survival cannot be estimated beyond the data."), dropped = paste(dropped, collapse = ", "), max = round(max_observed, 2), unit = self$options$timetypeoutput))
+                    self$results$survTable$setNote("horizon", .fmt(.("Time point(s) {dropped} omitted: they exceed the longest observed follow-up ({max} {unit}). Survival cannot be estimated beyond the data."), dropped = paste(dropped, collapse = ", "), max = round(max_observed, 2), unit = self$options$timetypeoutput))
                 if (length(utimes) == 0) {
-                    self$results$survTable$setNote("horizon", jmvcore::format(.("No survival time point could be reported: every requested time exceeds the longest observed follow-up ({max} {unit}). Choose earlier time points."), max = round(max_observed, 2), unit = self$options$timetypeoutput))
+                    self$results$survTable$setNote("horizon", .fmt(.("No survival time point could be reported: every requested time exceeds the longest observed follow-up ({max} {unit}). Choose earlier time points."), max = round(max_observed, 2), unit = self$options$timetypeoutput))
                     self$results$survTableSummary$setContent("")
                     return()
                 }
@@ -3251,7 +3251,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         private$.addHtmlMessage(
                             "warning",
                             .("Tree-based cut-points unavailable"),
-                            jmvcore::format(.("The survival tree produced no usable split for '{var}'. Quantile cut-points are shown instead. This usually means the tree found no split meeting the complexity and minimum group-size criteria."), var = mycontexpl))
+                            .fmt(.("The survival tree produced no usable split for '{var}'. Quantile cut-points are shown instead. This usually means the tree found no split meeting the complexity and minimum group-size criteria."), var = mycontexpl))
                     }
 
                     if (length(cutoffs) > num_cuts) {

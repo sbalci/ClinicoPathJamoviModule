@@ -3259,8 +3259,8 @@ diagnosticmetaClass <- R6::R6Class(
             if (has_estimates) {
                 table$setNote("explanation", sprintf(
                     .("Sensitivity and specificity are test characteristics; predictive values depend on disease prevalence. Values calculated from pooled sensitivity (%s%%) and specificity (%s%%)."),
-                    jmvcore::format(sens * 100, digits = 1),
-                    jmvcore::format(spec * 100, digits = 1)
+                    .fmt(sens * 100, digits = 1),
+                    .fmt(spec * 100, digits = 1)
                 ))
             } else {
                 table$setNote("explanation",

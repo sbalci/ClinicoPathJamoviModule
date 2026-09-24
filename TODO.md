@@ -1,3 +1,274 @@
+# agreement (meddecide) — deferred from the 2026-09-23 correctness pass
+
+Everything the independent audit found is fixed and verified (audit harness 29/29, suites 616 pass).
+These are the items deliberately NOT done, each with the reason and what it would take.
+
+## 2026-09-24 `/check-function-full` pass — decisions taken and items deferred
+
+Fixed and verified in this pass: hierarchical ICC(2,1)/ICC(2,k) now condition on institution and
+the G-coefficient row and fabricated "Shrinkage Kappa" column are gone; a new categorical
+hierarchical route (per-cluster kappa, stratified kappa per Barlow, Lai & Azen 1991, and a probit
+GLMM latent-scale decomposition for binary ratings with 5+ raters); Krippendorff, Gwet AC2 and
+Robinson's A scale ordering; four missing `.checkpoint()`s and two handlers that swallowed the
+restart; bootstrap attrition disclosure; BCa acceleration rescaled for the subsampled jackknife;
+strict simple majority; per-class 0/0 as NA; zero-width item-modal CI; 3 factor-code sites; Finn
+two-sided scale disclosure; 12 `clearWith` gaps; 3 `enable:` drifts; sample-size calculator
+reachable with no raters; the sparse-table rule; positional rowKeys. 18 new regression tests in
+`test-agreement-fixes-2026-09-24.R`, each confirmed to FAIL on the unfixed code.
+
+### Decisions taken with the maintainer (2026-09-24)
+
+- **Wald stays the default kappa interval** (VAL-agreement-13 stays open, its test skipped). The
+  small-sample note now quotes the coverage of the method actually in use and names Fisher z as
+  the remedy. Revisit the default at the next breaking change: it changes every saved analysis
+  and the tests that pin `psych::cohen.kappa` limits.
+- **icc1 changed value**: sigma2_case / (case + rater + residual), within institution, replacing
+  sigma2_case / sigma2_total. Accepted because the analysis is parked (`meddecideT`).
+
+### Deferred
+
+- ~~Ordinal ratings get no hierarchical decomposition~~ - done: Model-based agreement in the
+  Pathologist Grading Analysis (`ordinal::clmm`, case/pathologist/institution variances).
+- ~~Binary latent-scale decomposition below 5 raters~~ - superseded: the binary glmer route is
+  withdrawn; binary latent models are never shown (see the grading-analysis list below).
+- **`multipleTestCorrection` sits in the Mixed-Effects box** but now also serves All-Pairs Kappa
+  (its `enable:` was fixed); the control is hard to find from the All-Pairs box.
+- **Lin's CCC fallback variance** (used only if `DescTools::CCC()` errors) keeps only the first
+  term of Lin's asymptotic variance and divides by n, not n - 2.
+- **Subgroup table, 3+ raters**: the interval uses the null-hypothesis SE (disclosed, too narrow at
+  high kappa).
+- **Test-retest uses the first two time points** and pooled inter-rater treats reads as raters -
+  both now disclosed; averaging over all timepoint pairs, or restricting to one read per rater,
+  would change the statistic.
+- **Plot palettes**: none of the 8 renderers offers jamovi's global palette
+  (`jmvcore::colorPalette`, review guide §23) - a module-wide design decision.
+- **Smoke-only suites remain**: `test-agreement-comprehensive.R`, `-integration.R`, `-basic.R`
+  and `test-agreement.R` assert only that the analysis ran (`test-agreement-edge-cases.R` now
+  checks kappa = 1, -1, ICC = 1 and an `irr` oracle).
+
+## 2026-09-24 Pathologist Grading Analysis — deferred
+
+Shipped in this pass, parked under `menuGroup: meddecideT`: the grading section, the all-ratings
+Fleiss/Conger headline and its bootstrap and hierarchical siblings. Simulation limits are in
+`AGREEMENT_LATENT_GATES` (`R/agreement-latent.R`).
+
+- **Skewed data get no latent model.** When one category holds 50% or more, κ_m and the latent
+  ICC are refused. The ICC is biased at 58% and at 70%; κ_m only at 70%, so 50% is a conservative
+  cutoff for κ_m. A skew-robust estimator (adaptive quadrature, or a Bayesian fit) would be needed.
+  The grid did not test shares between 58% and 70%.
+- **Binary calls get no latent model** (bias -0.028 to -0.053 in every tested design, which is the
+  Laplace approximation). The same estimator change would fix it.
+- **Interval coverage was simulated at 95% only and without an institution term.** Both cases are
+  disclosed in notes (`ci_level`, `ci_cluster`). Extend `validate_agreement_ordinal_grid.R` to
+  cover them.
+- **Numeric-coded grades in the hierarchical section** (1-5 stored as numbers) still go to the
+  linear mixed model, while the grading section reads them as ordinal codes. This predates the
+  pass. Route whole-number codes up to 10 the same way `.gradingScale()` does.
+- **Shipping `agreement_grading`**: uncomment `agreement_grading.rda` under meddecide
+  `data_files` in `_updateModules_config.yaml` when agreement leaves `meddecideT`. Make the `.omv`
+  example in the meddecide repo, not the umbrella.
+- **Grading-tendency runtime ceiling** (`AGREEMENT_SEVERITY_MAX_WORK` = 100,000 ratings x
+  pathologists; about a minute on the dev Mac). Warm starts, ucminf and quadrature did not speed
+  up `clmm` with one fixed effect per rater. An opt-in "fit anyway" option, or a faster
+  estimator validated against the grid, would lift it.
+- **Empty rater column**: the headline says 5 raters while the grading section says 4
+  pathologists, and the empty rater's per-pathologist row is blank with no note.
+- **Cluster variable with some missing values**: the latent model drops the institution term
+  entirely (a note says so) instead of fitting it on the cases that have one.
+- **Severity non-convergence on ordinary data**: 2 of 25 simulated 120 x 4 datasets were refused
+  as "did not converge". `.agreement_convergence` is what keeps their near-zero SEs off screen,
+  so keep it as a hard gate.
+- **Severity at 4 pathologists on skewed data** failed narrowly (400-replicate rerun: borderline).
+  It stays at 6 because the failure is in the harmful direction (false flags). Revisit with more
+  replicates if 4-reader panels ask for it.
+
+## Feature decisions, not defects
+
+- **Multivariate iota.** The feature was rescoped to the single-variable coefficient because nothing
+  in the 153-option schema can name a second variable. Building it properly means a rater x variable
+  input (one `Variables` group per variable) and `ratings_list` with one element each — then
+  `irr::iota` reproduces Janson & Olsson (2001) Table 1 = 0.7550. Decide whether the feature is
+  wanted before building it; the coefficient the module computes today is legitimate and now
+  honestly labelled.
+- **`iotaStandardize` is a measured no-op** for a single variable (verified over 5 seeds; irr divides
+  each LIST ELEMENT by its own sd, which for one element is an affine rescale that iota is invariant
+  to). Kept, with the UI and a note saying so, because removing it would strand saved `.omv` files.
+  At the next breaking change: remove it, or keep it as the hook for the multivariate feature.
+- **`clusterDistance` default stays `correlation`.** Correlation distance is blind to systematic
+  offsets, which in an agreement module is arguably the wrong default — two readers 25 Ki-67 points
+  apart cluster together at similarity 0.98. Changing a default silently re-clusters every saved
+  analysis, so this pass added a computed disclosure naming the raters and the gap instead. The
+  alternative (default to a metric that sees offsets) is a product call.
+- **No Cochran Q for subgroup heterogeneity.** Specified but deliberately not shipped: a usable ASE
+  exists only on the two-rater `vcd` rows, so a Q would either drop rows silently or mislabel its
+  coverage; and because kappa is prevalence-dependent, a significant Q is fully producible by case
+  mix — the exact inference the new note exists to block. Full spec is in the round-1 design brief
+  if it is ever wanted, and it should be gated behind a simulation of its size at n = 20–50 per
+  subgroup first.
+
+## Known ceilings, recorded not fixed
+
+- **Clustered pathology data.** The whole analysis treats one row as one independent case. Multiple
+  blocks, cores, slides or lesions per patient are analysed as independent, so every kappa, ICC and
+  bootstrap interval is too narrow. No guard, no note. Module-wide, pre-existing.
+- **Bracketed values in notes.** Fixed inside `agreement` with a value-sanitising helper, but the
+  root cause is `jmvcore`: `Table$setNote()` re-translates the already-composed string and the
+  Translator's msgctxt regex is unanchored, so any bracket in an interpolated value truncates the
+  note. Other analyses in this module have the same exposure. Either sweep them or raise it upstream.
+- ~~**`$setError()` and `$addFootnote()`**~~ **SETTLED 2026-09-23 by measurement against jmvcore
+  2.7.38 — they do NOT truncate.** Only `Table$setNote()` calls `options$translate()`;
+  `ResultsElement$setError()`, `Cell$addFootnote()` and `Table$setRow()`/`Cell$setValue()` store the
+  string verbatim. Verified end to end with a bracketed payload on all four paths, with `setNote()`
+  as a positive control on the same live table (it truncated, they did not). No sanitiser is needed
+  there and adding one would mislead the next reader — the scope is now recorded in a comment above
+  the helper. What those sites DID have wrong was bare English outside `.()`; that is fixed.
+- ~~**`.run()`-level `influential_case` notes never cleared**~~ **FIXED 2026-09-23.** It was worse
+  than recorded: measured on one analysis object run twice with the data swapped (what the jamovi
+  engine does), the note survived onto clean data still quoting ratings of `99999, 99999`, and the
+  same pattern left the headline table asserting kappa was not computed for continuous measurements
+  over a printed kappa of 0.069. One clear block at the top of `.run()`, placed where nothing can
+  race a later write.
+- **Bootstrap resamples re-derive the weighted-kappa scale**, so a resample missing a category is
+  scored on a collapsed scale. Same in `irr::kappa2` itself; fixing it needs a scale argument on the
+  shared helper.
+- ~~**Label vocabulary split**~~ **FIXED 2026-09-23.** One `private$.kappaLabel()` authority now
+  feeds every displayed kappa label (headline, intra/inter-rater, paired, bootstrap, subgroup,
+  sample size). Note the trap that had to be handled: `subgroupAgreementTable`'s `stat_type` was
+  both displayed AND branched on to choose Koo & Li versus Landis & Koch bands, so the label had to
+  be decoupled from the branch key first — otherwise an ICC would be graded on the kappa scale in
+  every non-English locale.
+- **`clusterSpecificTable` / `mixedEffectsTable`** now honour `confLevel`; the rest of the
+  hierarchical / mixed-effects family is still owned by the open VAL-agreement-06/-07 findings in
+  `development-ideas/agreement-validation-2026-09-23.md`.
+
+- **Release gate: option-to-`clearWith` dependency check.** `kappaCIMethod` reached five tables
+  through `.pairKappaWithCI()` and sat in none of their `clearWith` lists (found by
+  `/check-function agreement --profile release`, 2026-09-23; fixed). testthat cannot see this
+  class at all. Add a `release_gate.py` check: for each `.r.yaml` item, the options read by the
+  method(s) that write it (following `private$` calls) minus the item's `clearWith` should be
+  empty, or the difference listed as a WARN. The unit must be the item that DISPLAYS the value,
+  not the caller of the helper: the adversarial review found the subgroup forest plot and the
+  summary panel drawing the same interval without calling `.pairKappaWithCI()` at all.
+- **Adversarial review of the release pass (2026-09-24): 180 findings still unverified.** Full
+  record, with the claim, evidence and proposed fix for each, in
+  `development-ideas/agreement-check-function-release-2026-09-24.md`. 35 were confirmed by
+  refutation votes before the account hit its weekly limit; the rest were never judged. The
+  confirmed ones in the release pass's own work are fixed; the parallel `/check-function-full`
+  session of the same morning took several others (consensus majority, per-class F1, item-modal
+  CI, shrinkage, Krippendorff bootstrap scale, clearWith lists). Triage the remainder with
+  `/validate-function agreement` before the next release; do not treat them as defects unread.
+- **Release profile: `defaults_false` deliberately not applied, `align_labelled_logic` not
+  applicable.** 15 Bool options stay `default: true`, and none computes anything on a fresh
+  analysis. Eleven sit behind a parent that defaults to false in their `visible:` rule
+  (`clusterSpecificKappa`, `varianceDecomposition`, `testClusterHomogeneity` behind
+  `hierarchicalKappa`; `showLoaTable` behind `loaVariable`; `subgroupForestPlot` behind
+  `agreementBySubgroup`; the four dendrogram and heatmap toggles behind the two clustering
+  options; `allPairsCI` only shows columns of the `allPairsKappa` table). The other four are read
+  only inside their parent's branch (`heatmapShowPercentages`, `heatmapShowCounts` under
+  `agreementHeatmap`; `specificAllCategories`, `specificConfidenceIntervals` under
+  `specificAgreement`), and `iotaStandardize` is a measured no-op. Flipping them would strip
+  output from saved analyses for no compute saved. Labelled parity with `oddsratio` does not
+  apply: `agreement` never cleans or renames variables, so there is no label map to restore.
+- **Release profile: `check_external` scope.** Compared against installed signatures, help pages
+  and CRAN NEWS or source (2026-09-23): `irr` 0.85, `irrCAC` 1.4 (and the 1.0 source), `vcd`
+  1.4-14, `DescTools` 0.99.60, `kappaSize` 1.2, `lme4` 2.0-6, `lmerTest` 3.2-1, `withr` 3.0.3.
+  Not compared: `psych` (every mention is a comment or a string), the plotting stack. Calls match
+  their signatures. What is still missing is a value-parity test for five displayed cells that
+  come straight from upstream: the `DescTools::CCC` interval, the `kappaSize::Power*` sample size,
+  the `irr::kappam.light` value, and the `irr::bhapkar` and `irr::stuart.maxwell.mh` statistics.
+  Add one test each.
+- **About panel and weighted-kappa guide are untranslated.** `.createAboutPanel()` and
+  `.createWeightedKappaGuide()` hold about sixty bare English sentences, headings and cells, and
+  none is in the catalog. Confirmed by the adversarial review; left for `/prepare-translation
+  agreement` because it is a mechanical i18n pass over two large HTML literals, not a check fix.
+
+## Module-wide, surfaced by this pass but not caused by it
+
+- ~~**29 `.b.R` files still call `jmvcore::format()` directly**~~ **SWEPT 2026-09-23.** 430 call
+  sites in 34 files converted to the guarded `.fmt()`; `tests/testthat/test-zzz-fmt-substitution-loop.R`
+  is green and its glob was widened from `R/*.b.R` to `R/*.R`, which had been blind to 13 live calls
+  in `R/stagemigration-part*.R`. Two live bugs were found inside the sweep: `survivalPower`'s
+  `do.call(jmvcore::format, ...)` would have ERRORED under a token swap, and `singlearm` was passing
+  `context =`, which is a real formal of `jmvcore::format`, so the value was consumed instead of
+  substituted. Byte-identity of every other changed line was proven against a pre-sweep snapshot.
+- **STILL OPEN, and deliberately not shipped: a module-wide `.fmt` AST guard.** Promoting the
+  benford-style AST walk (placeholder with no argument, argument with no placeholder) to run over
+  every file reports **20 pre-existing findings** in analyses outside that pass's remit, so shipping
+  it would land a permanently RED test. The check is written and was measured; it needs those 20
+  fixed first. Until then `test-benford-release-review.R` carries the retargeted single-file
+  version — note it was about to go green-but-empty, because its AST walk matched only
+  `jmvcore::format` and the sweep removed every one of them.
+
+## Pre-existing module failures, measured 2026-09-23 (NOT caused by the .fmt sweep)
+
+Established by swapping the pre-sweep sources back in and re-running the identical harness. All
+counts are identical before and after, so none of these is a regression from that work.
+
+- `test-multisurvival-render-without-data.R` — "adjusted curves redraw from state alone" (1 fail)
+- `test-outcomeorganizer-guidance-notices.R` — 2 fails, both "expected not to throw"
+- `test-singlearm-release-review.R` — "the Kaplan-Meier median path is untouched by the guard" (1)
+- `test-survivalcont-verification.R` — 2 fails (minimum-p exhaustiveness; small-sample cut-offs)
+- `test-waterfall-edge-cases.R` — 1 ERROR, "an all-missing cohort says why nothing was produced";
+  note `waterfall` was being edited by someone else throughout, so check with them first.
+- `test-pathagreement-wiring.R` — **not a failure: batch-order pollution.** 37 pass / 0 fail in
+  isolation and in a six-file harness, both pre- and post-sweep; fails only inside a 231-file
+  `test_dir` batch. Whatever it is, it is order-dependent, not source-dependent.
+
+FIXED in the same pass, and previously red: the two unsubstituted-`{placeholder}` leaks in
+`oddsratio` and `outcomeorganizer` (see the underscore note below).
+
+- **Underscored placeholders — swept exhaustively 2026-09-23.** `jmvcore::format()` (and therefore
+  `.fmt()`) silently leaves `{a_b}` unreplaced, so literal braces ship to the user. A 2026-08-22
+  sweep for this was explicitly recorded as incomplete. A parser-based sweep (not a grep — a brace
+  in a comment or a `glue()` call is not a bug) found **7 call sites in 5 files**: `dataquality`,
+  `oddsratio` (2), `outcomeorganizer`, `pathagreement`, `survivalcont` (2). All renamed to
+  underscore-free placeholders. The detector is
+  `development-scripts/`-adjacent and worth keeping: parse every `R/*.R`, walk for `.fmt` calls,
+  and flag any `{name_with_underscore}` in the template.
+
+## Documentation drift
+
+- **Iota multivariate claim - FULLY CLOSED 2026-09-23, both repos.** Umbrella: `docs/reference/
+  agreement.{html,md}`, `docs/reference/index.{html,md}`, `docs/search.json` and `docs/llms.txt`
+  regenerated with a TARGETED pkgdown build (`build_reference(topics="agreement")` +
+  `build_llm_docs()` + `build_search()`), deliberately NOT a full site rebuild, so `docs/index.html`
+  was not re-rendered from the in-flight `README.Rmd`. meddecide: regenerated with
+  `Rscript _updateModules.R meddecide` (naming the module keeps OncoPath/JamoviTest, where the
+  unfinished work lives, untouched), which fixed the SHIPPED module code - the claim was live there,
+  not just in a vignette. Its pkgdown artefacts got the same targeted treatment, and
+  `vignettes/clinicopath-descriptives-agreement-comprehensive.html` was re-knitted.
+  NOTE for whoever maintains that vignette: it cannot be knitted inside meddecide, because it reads
+  `../data-raw/non-rda/*.csv` (20 files, 216 KB) and does `devtools::load_all("../")` - both resolve
+  only from the UMBRELLA's `vignettes/`. It was knitted there and the HTML copied across. Either
+  vendor those CSVs into meddecide or keep knitting it from the umbrella; today it is silently
+  un-reproducible in the repo that ships it.
+
+- **`jamovi/i18n/tr.po`: 377 agreement msgids are untranslated.** Measured: 1,003 msgids reference
+  `R/agreement.b.R` / `agreement/options/*` / `agreement/results/*` / `agreement/ui*`, of which 377
+  have no translation (`msgattrib`/`msggrep` count; a raw parse of `tr.po` says 379, the 2 extra
+  being entries `msgattrib --no-obsolete` drops). 133 msgids are new in this pass and all 133 are
+  untranslated. The earlier "~80 new msgids" undercounted by roughly a factor of two - size the job
+  from these numbers.
+  Runtime falls back to English, which is correct behaviour, not a defect. No owner is documented for
+  Turkish: `vignettes/jamovi_i18n_guide.md` section 9 points at jamovi's community Weblate, and
+  `i18n-plans/agreement-tr-translation-plan.md` is a template whose "Suggested Turkish" column is
+  still the English identity string. Hand-off recipe - GNU gettext lives in `/opt/homebrew/bin` and
+  is NOT on the default PATH:
+
+  ```bash
+  export PATH=/opt/homebrew/bin:$PATH
+  msgattrib --untranslated --no-obsolete jamovi/i18n/tr.po \
+    | msggrep -N 'R/agreement.b.R' -N 'agreement/options/*' -N 'agreement/results/*' -N 'agreement/ui*' - \
+    > i18n-plans/agreement-tr-missing.po     # measured 2026-09-23: 377 entries, 2347 lines, ~77 KB
+  # after translation, merge back (measured: 34,145 entries preserved, 0 existing translations lost)
+  msgcat --use-first i18n-plans/agreement-tr-filled.po jamovi/i18n/tr.po -o /tmp/tr.merged.po \
+    && mv /tmp/tr.merged.po jamovi/i18n/tr.po
+  msgfmt -c -o /dev/null jamovi/i18n/tr.po
+  python3 tools/release_gate.py              # check_i18n_po_formats must stay PASS
+  ```
+
+  Then run `jmvtools::i18nUpdate()` to renormalise ordering and references.
+
 # ClinicoPathDescriptives
 
 ```text

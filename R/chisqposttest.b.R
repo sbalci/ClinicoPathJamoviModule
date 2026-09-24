@@ -1680,7 +1680,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (identical(self$options$testSelection, "fisher")) {
                 fisher_omnibus <- private$.fisherOmnibusPvalue(contTable)
                 if (identical(fisher_omnibus$method, "fisher_mc"))
-                    self$results$chisqTable$setNote("seed", jmvcore::format(.("Random seed: {seed}"), seed = self$options$seed))
+                    self$results$chisqTable$setNote("seed", .fmt(.("Random seed: {seed}"), seed = self$options$seed))
                 if (!is.null(fisher_omnibus))
                     omnibus_values <- list(
                         stat = if (identical(fisher_omnibus$method, "fisher_mc"))
@@ -2007,7 +2007,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 else
                     self$results$posthocTable$setNote("phici", NULL)
                 # the bootstrap interval and any Monte Carlo p-value both depend on the seed
-                self$results$posthocTable$setNote("seed", if (self$options$phiCI || fisher_mc_used) jmvcore::format(.("Random seed: {seed}"), seed = self$options$seed))
+                self$results$posthocTable$setNote("seed", if (self$options$phiCI || fisher_mc_used) .fmt(.("Random seed: {seed}"), seed = self$options$seed))
 
                 # A two-level variable is deliberately not split into pairs: its one
                 # pair is the whole table, i.e. the omnibus test reported above.
@@ -2048,7 +2048,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # these rows carry the same p-values and interval as the tables above
             mc_used <- length(pairwise_results) > 0 &&
                 any(vapply(pairwise_results, function(x) identical(x$test_used, "fisher_mc"), logical(1)))
-            self$results$exportTable$setNote("seed", if (self$options$phiCI || mc_used) jmvcore::format(.("Random seed: {seed}"), seed = self$options$seed))
+            self$results$exportTable$setNote("seed", if (self$options$phiCI || mc_used) .fmt(.("Random seed: {seed}"), seed = self$options$seed))
 
             export_data <- list()
             row_index <- 1

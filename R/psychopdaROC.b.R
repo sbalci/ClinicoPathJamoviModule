@@ -1362,7 +1362,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         # AUC variance (Hanley & McNeil 1982). .warnUser() de-duplicates, so the repeated
         # calls to this method for the same variable produce one message.
         if (pos_count < 10 || neg_count < 10) {
-          private$.warnUser(jmvcore::format(
+          private$.warnUser(.fmt(
             .("'{var}' was analysed with only {pos} positive and {neg} negative case(s). Below about 10 per class the AUC, its confidence interval and the selected cutpoint are unstable; treat these results as exploratory."),
             var = var, pos = pos_count, neg = neg_count))
         }
@@ -1579,7 +1579,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         private$.noteCutpointOptimism(resultsTable)
         # the bootstrap-metric methods choose the cutpoint over random resamples
         resultsTable$setNote("seed", if (self$options$method %in% c("maximize_boot_metric", "minimize_boot_metric"))
-          jmvcore::format(.("Random seed: {seed}"), seed = self$options$seed), init = FALSE)
+          .fmt(.("Random seed: {seed}"), seed = self$options$seed), init = FALSE)
         # This is the table that actually shows PPV/NPV, and it is visible by
         # default -- so the prevalence caveat belongs here, not only inside the
         # optional Fixed Sensitivity/Specificity panel.
@@ -2966,7 +2966,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
               fixedImage <- self$results$fixedSensSpecROC$get(key = var)
               # A msgid must be a literal. `.(paste(...))` is evaluated first, so the
               # compiler extracts nothing and the title can never be translated.
-              fixedImage$setTitle(jmvcore::format(
+              fixedImage$setTitle(.fmt(
                 if (identical(self$options$fixedAnalysisType, "sensitivity"))
                   .("Fixed Sensitivity ROC: {var}") else .("Fixed Specificity ROC: {var}"),
                 var = var))
@@ -3581,7 +3581,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         if (self$options$partialAUC) {
           # Checkpoint before expensive partial AUC calculations
           private$.checkpoint()
-          self$results$partialAUCTable$setNote("seed", if (self$options$bootstrapCI) jmvcore::format(.("Random seed: {seed}"), seed = self$options$seed), init = FALSE)
+          self$results$partialAUCTable$setNote("seed", if (self$options$bootstrapCI) .fmt(.("Random seed: {seed}"), seed = self$options$seed), init = FALSE)
 
           # Table visibility is controlled by YAML: visible: (partialAUC)
 
@@ -3656,7 +3656,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         if (self$options$bootstrapCI) {
           # Checkpoint before expensive bootstrap calculations
           private$.checkpoint()
-          self$results$bootstrapCITable$setNote("seed", jmvcore::format(.("Random seed: {seed}"), seed = self$options$seed), init = FALSE)
+          self$results$bootstrapCITable$setNote("seed", .fmt(.("Random seed: {seed}"), seed = self$options$seed), init = FALSE)
 
           # Table visibility is controlled by YAML: visible: (bootstrapCI)
 
@@ -3702,7 +3702,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                     # A silently dropped row read to the user as "this marker was not
                     # eligible" rather than "this marker errored". Route it through the
                     # Analysis Status box, which is always visible.
-                    private$.warnUser(jmvcore::format(
+                    private$.warnUser(.fmt(
                       .("Bootstrap CI for {param} of '{var}' could not be added to the table ({msg})."),
                       param = param, var = var, msg = conditionMessage(e)))
                   }
@@ -3821,8 +3821,8 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
             jmvcore::reject("Please specify at least two dependent variables to calculate IDI/NRI.")
           }
           # both are bootstrap estimates
-          if (self$options$calculateIDI) self$results$idiTable$setNote("seed", jmvcore::format(.("Random seed: {seed}"), seed = self$options$seed), init = FALSE)
-          if (self$options$calculateNRI) self$results$nriTable$setNote("seed", jmvcore::format(.("Random seed: {seed}"), seed = self$options$seed), init = FALSE)
+          if (self$options$calculateIDI) self$results$idiTable$setNote("seed", .fmt(.("Random seed: {seed}"), seed = self$options$seed), init = FALSE)
+          if (self$options$calculateNRI) self$results$nriTable$setNote("seed", .fmt(.("Random seed: {seed}"), seed = self$options$seed), init = FALSE)
 
           # IDI/NRI does not support subgroup analysis
           if (!is.null(self$options$subGroup) && self$options$subGroup != "") {
@@ -3946,7 +3946,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
               # NRI - so the analysis silently switched method under an unchanged heading.
               # Categorical and continuous NRI routinely differ by a factor of two or more.
               if (length(thresholds) < length(tokens)) {
-                private$.warnUser(jmvcore::format(
+                private$.warnUser(.fmt(
                   .("Only {kept} of the {given} NRI risk threshold(s) entered could be read as a number strictly between 0 and 1. Enter them as comma-separated proportions, for example: 0.2, 0.5"),
                   kept = length(thresholds), given = length(tokens)))
               }
@@ -3956,7 +3956,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
             self$results$nriTable$setNote(
               key = "nri_variant",
               note = if (length(thresholds) > 0) {
-                jmvcore::format(
+                .fmt(
                   .("Categorical NRI, using risk category boundaries at {thr}."),
                   thr = paste(thresholds, collapse = ", "))
               } else {
@@ -5551,7 +5551,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
               },
               error = function(e) {
                 # Was silent: the comparison simply vanished from the table.
-                private$.warnUser(jmvcore::format(
+                private$.warnUser(.fmt(
                   .("Effect sizes for '{var1}' vs '{var2}' could not be computed ({msg}), so that comparison is omitted."),
                   var1 = var1, var2 = var2, msg = conditionMessage(e)))
               }
@@ -5795,7 +5795,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
             error = function(e) {
               # Was silent: the marker dropped out of this table while still appearing in
               # the AUC table above it, with no reason given.
-              private$.warnUser(jmvcore::format(
+              private$.warnUser(.fmt(
                 .("Power analysis for '{var}' failed ({msg}), so it has no row in the Power Analysis table."),
                 var = var, msg = conditionMessage(e)))
             }
@@ -5820,7 +5820,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           note = .("This analysis resamples the data by the bootstrap and shrinks the result towards the prior AUC. It does not run MCMC and it does not produce a Bayesian posterior: the interval shown is a bootstrap percentile interval, not a credible interval. The Bootstrap Evidence Ratio is a resampling frequency - the number of bootstrap resamples whose AUC exceeded 0.5, divided by one plus the number that did not - and is not a Bayes factor, because no marginal likelihood is computed. Do not read it against Bayes factor evidence thresholds. For genuine Bayesian inference use dedicated software such as Stan or JAGS."),
           init = FALSE
         )
-        self$results$bayesianROCTable$setNote("seed", jmvcore::format(.("Random seed: {seed}"), seed = self$options$seed), init = FALSE)
+        self$results$bayesianROCTable$setNote("seed", .fmt(.("Random seed: {seed}"), seed = self$options$seed), init = FALSE)
         # What the interval brackets. The prior weighting is applied to the resampled AUCs
         # themselves (w * AUC* + (1 - w) * prior), and a percentile interval of an affine
         # transform is that transform of the percentile interval - so the width is the AUC
@@ -5889,12 +5889,12 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                 # return() abandons every remaining variable and next silently skips them all
                 # (both verified). The reporting block is gated instead.
                 if (n_kept < 50) {
-                  private$.warnUser(jmvcore::format(
+                  private$.warnUser(.fmt(
                     .("Only {kept} of {total} bootstrap resamples for '{var}' contained both outcome classes, which is too few for a stable interval, so no bootstrap AUC summary is reported for it."),
                     kept = n_kept, total = n_boot, var = var))
                 } else {
                 if (n_degenerate > 0) {
-                  private$.warnUser(jmvcore::format(
+                  private$.warnUser(.fmt(
                     .("{n} of {total} bootstrap resamples for '{var}' contained only one outcome class and were dropped; the bootstrap AUC summary uses the remaining {kept}."),
                     n = n_degenerate, total = n_boot, kept = n_kept, var = var))
                 }
@@ -5967,7 +5967,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
             error = function(e) {
               # Was silent: the marker dropped out of this table while still appearing in
               # the AUC table above it, with no reason given.
-              private$.warnUser(jmvcore::format(
+              private$.warnUser(.fmt(
                 .("Bayesian ROC analysis for '{var}' failed ({msg}), so it has no row in the Bayesian table."),
                 var = var, msg = conditionMessage(e)))
             }
@@ -6242,7 +6242,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
             error = function(e) {
               # Was silent: the marker dropped out of this table while still appearing in
               # the AUC table above it, with no reason given.
-              private$.warnUser(jmvcore::format(
+              private$.warnUser(.fmt(
                 .("Clinical utility analysis for '{var}' failed ({msg}), so it has no row in the Clinical Utility table."),
                 var = var, msg = conditionMessage(e)))
             }
@@ -6348,7 +6348,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
               c(auc_i, se_i)
             },
             error = function(e) {
-              private$.warnUser(jmvcore::format(
+              private$.warnUser(.fmt(
                 .("Meta-analysis: marker {var} was excluded because its AUC could not be estimated ({msg})."),
                 var = var, msg = conditionMessage(e)
               ))
@@ -6880,7 +6880,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           error = function(e) {
             # Say why the plot is missing; hiding it left the user with a silent gap.
             self$results$metaAnalysisWarning$setContent(paste0(
-              "<p>", jmvcore::htmlEscape(jmvcore::format(
+              "<p>", jmvcore::htmlEscape(.fmt(
                 .("The meta-analysis forest plot could not be built: {msg}"),
                 msg = conditionMessage(e))), "</p>"))
             self$results$metaAnalysisWarning$setVisible(TRUE)
@@ -6950,7 +6950,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
             # the whole block was dead: the user ticked Meta-Analysis with two markers and
             # got no table, no warning and no explanation. .warnUser() feeds the
             # always-visible Analysis Status box.
-            private$.warnUser(jmvcore::format(
+            private$.warnUser(.fmt(
               .("Meta-analysis requires at least 3 test variables; {n} selected. Add more test variables to enable it."),
               n = num_vars))
           }

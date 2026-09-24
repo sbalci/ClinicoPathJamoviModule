@@ -16,7 +16,12 @@ test_that("all-identical ratings give mean agreement 1 for every category", {
     tab <- res$itemModalAgreementTable$asDF
     expect_true(nrow(tab) >= 1)
     expect_true(all(tab$mean_agreement == 1))
-    expect_true(all(tab$ci_lower == 1 & tab$ci_upper == 1))
+    # Every case agrees to the same degree, so the between-case SE is zero. This used
+    # to assert the resulting [1, 1] interval - a claim of perfect precision that was
+    # never estimated. Since 2026-09-24 the interval is left empty and a note says why.
+    expect_true(all(is.na(tab$ci_lower) & is.na(tab$ci_upper)))
+    notes <- vapply(res$itemModalAgreementTable$notes, function(n) n$note, character(1))
+    expect_true("no_ci" %in% names(notes) && nzchar(notes[["no_ci"]]))
 })
 
 test_that("a single dominant modal category yields one row", {

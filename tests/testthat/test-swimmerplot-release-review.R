@@ -748,3 +748,29 @@ test_that("the large-data path returns the same group labels as the standard pat
   or_of <- function(x) sub(".*OR \\(B vs A\\) = ([0-9.]+).*", "\\1", x)
   expect_equal(or_of(lab_big), or_of(lab_small))
 })
+
+test_that("the plot state options are fully self-contained including palette and custom reference date", {
+  d <- data.frame(
+    id = c("P1", "P2"),
+    start = c("2020-01-01", "2020-02-01"),
+    end = c("2020-06-01", "2020-07-01"),
+    resp = c("CR", "PR"),
+    stringsAsFactors = FALSE
+  )
+  res <- suppressWarnings(swimmerplot(
+    data = d,
+    patientID = "id",
+    startTime = "start",
+    endTime = "end",
+    responseVar = "resp",
+    timeType = "datetime",
+    dateFormat = "ymd",
+    colorPalette = "viridis",
+    referenceLines = "custom",
+    customReferenceDate = "2020-04-01"
+  ))
+  st <- res$plot$state
+  expect_false(is.null(st))
+  expect_equal(st$options$colorPalette, "viridis")
+  expect_equal(st$options$customReferenceDate, "2020-04-01")
+})

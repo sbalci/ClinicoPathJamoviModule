@@ -71,7 +71,7 @@ test_that("confLevel is honoured by the headline interval", {
   expect_gt(a99, a95)
 })
 
-test_that("three or more raters explain why no interval is shown", {
+test_that("three or more raters report an interval for Fleiss' kappa", {
   skip_if_not_installed("irr")
   set.seed(5); n <- 90; lv <- c("A", "B", "C")
   base <- factor(sample(lv, n, TRUE), levels = lv)
@@ -80,9 +80,13 @@ test_that("three or more raters explain why no interval is shown", {
   d <- data.frame(r1 = base, r2 = jit(), r3 = jit())
 
   got <- ClinicoPath::agreement(data = d, vars = c("r1", "r2", "r3"))$irrtable$asDF
-  # Fleiss'/Conger's kappa: irr supplies only the null-hypothesis test, so
-  # rather than invent an SE the interval is left blank and explained.
-  if ("ci_lower" %in% names(got)) expect_true(is.na(got$ci_lower[1]))
+  # CONTRACT CHANGED 2026-09-24: this used to pin a BLANK interval, because
+  # irr::kappam.fleiss has no SE. The headline now comes from irrCAC, whose
+  # Gwet subject-sampling SE gives an interval (oracles in
+  # test-agreement-fleiss-allcells.R), so the interval must be present and
+  # bracket kappa.
+  expect_true(is.finite(got$ci_lower[1]) && is.finite(got$ci_upper[1]))
+  expect_true(got$ci_lower[1] < got$kappa[1] && got$kappa[1] < got$ci_upper[1])
   expect_true(is.finite(got$kappa[1]))
 })
 
@@ -423,11 +427,21 @@ test_that("small samples and sparse discordant cells are flagged on the tables t
   d <- agr_fixture(n = 20)
   res <- agreement(data = d, vars = c("r1", "r2"), bhapkar = TRUE)
   expect_match(agr_note(res$irrtable, "small_sample"), "Only 20 complete cases", fixed = TRUE)
-  # a 3x3 table whose off-diagonal cells are all 1-3 (sparse) but non-zero (Bhapkar stays estimable)
-  cnt <- matrix(c(12, 2, 1,  3, 10, 2,  1, 2, 9), 3, byrow = TRUE, dimnames = list(c("a", "b", "c"), c("a", "b", "c")))
-  idx <- which(cnt > 0, arr.ind = TRUE)
-  d2 <- data.frame(r1 = factor(rep(rownames(cnt)[idx[, 1]], cnt[idx])), r2 = factor(rep(colnames(cnt)[idx[, 2]], cnt[idx])))
-  res2 <- agreement(data = d2, vars = c("r1", "r2"), bhapkar = TRUE)
-  expect_match(agr_note(res2$bhapkarTable, "sparse"), "smallest off-diagonal count is 1", fixed = TRUE)
+  from_counts <- function(cnt) {
+    idx <- which(cnt > 0, arr.ind = TRUE)
+    data.frame(r1 = factor(rep(rownames(cnt)[idx[, 1]], cnt[idx])), r2 = factor(rep(colnames(cnt)[idx[, 2]], cnt[idx])))
+  }
+  lv <- list(c("a", "b", "c"), c("a", "b", "c"))
+  # Since 2026-09-24 the rule is the number of DISCORDANT cases (the test rests on them
+  # alone), not the smallest single off-diagonal cell, which is 0 or 1 on almost any
+  # table with three or more categories. This table has off-diagonal cells of 1-3 but
+  # 11 discordant cases, so it is no longer flagged, and Bhapkar stays estimable.
+  cnt <- matrix(c(12, 2, 1,  3, 10, 2,  1, 2, 9), 3, byrow = TRUE, dimnames = lv)
+  res2 <- agreement(data = from_counts(cnt), vars = c("r1", "r2"), bhapkar = TRUE)
+  expect_false("sparse" %in% names(res2$bhapkarTable$notes))
   expect_false(is.na(res2$bhapkarTable$asDF$chisq[1]))
+  # Six discordant cases: flagged, with the count.
+  cnt3 <- matrix(c(12, 1, 1,  1, 10, 1,  1, 1, 9), 3, byrow = TRUE, dimnames = lv)
+  res3 <- agreement(data = from_counts(cnt3), vars = c("r1", "r2"), bhapkar = TRUE)
+  expect_match(agr_note(res3$bhapkarTable, "sparse"), "Only 6 discordant cases", fixed = TRUE)
 })

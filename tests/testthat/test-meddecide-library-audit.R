@@ -824,7 +824,7 @@ test_that("fixed-row tables across meddecide are scaffolded before .run()", {
                    varianceDecomposition = TRUE, iccHierarchical = TRUE, mixedEffectsComparison = TRUE,
                    multiAnnotatorConcordance = TRUE, agreementSampleSize = TRUE)
   expect_identical(ag("varianceDecompositionTable"), c("case", "rater", "cluster", "residual", "total"))
-  expect_identical(ag("hierarchicalICCTable"), c("icc1", "icc2", "g_coeff"))
+  expect_identical(ag("hierarchicalICCTable"), c("icc1", "icc2"))
   expect_identical(ag("mixedEffectsVarianceTable"), c("case", "rater", "residual"))
   expect_identical(ag("concordanceF1Table"), c("conc_acc", "strict_acc", "annotator_agree", "n_info"))
   expect_identical(ag("agreementSampleSizeTable"),

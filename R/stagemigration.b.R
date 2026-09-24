@@ -1415,7 +1415,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 } else {
                     upstaging <- NA_integer_
                     downstaging <- NA_integer_
-                    private$.addNotice("WARNING", .("Direction of migration not determined"), jmvcore::format(
+                    private$.addNotice("WARNING", .("Direction of migration not determined"), .fmt(
                         .("The two staging systems use different stage labels (original only: {onlyOld}; new only: {onlyNew}), so whether a change is up or down cannot be read from the data. Upstaging and downstaging are not reported; every patient whose label changed counts as migrated. Recode both variables to one shared, ordered set of labels to obtain them."),
                         onlyOld = if (length(dirn$only_old)) paste(dirn$only_old, collapse = ", ") else "none",
                         onlyNew = if (length(dirn$only_new)) paste(dirn$only_new, collapse = ", ") else "none"
@@ -1884,10 +1884,10 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                             new_roc = new_roc_obj
                                         )
                                     } else {
-                                        private$.addNotice("INFO", .("Time-dependent ROC"), jmvcore::format(.("The AUC at {t} months could not be estimated."), t = t))
+                                        private$.addNotice("INFO", .("Time-dependent ROC"), .fmt(.("The AUC at {t} months could not be estimated."), t = t))
                                     }
                                 } else {
-                                    private$.addNotice("INFO", .("Time-dependent ROC"), jmvcore::format(.("The AUC at {t} months was not estimated: only {includePatients} patients and {eventAtTime} events are informative at that time."), t = t, includePatients = sprintf("%d", sum(include_patients)), eventAtTime = sprintf("%d", sum(event_at_time[include_patients]))))
+                                    private$.addNotice("INFO", .("Time-dependent ROC"), .fmt(.("The AUC at {t} months was not estimated: only {includePatients} patients and {eventAtTime} events are informative at that time."), t = t, includePatients = sprintf("%d", sum(include_patients)), eventAtTime = sprintf("%d", sum(event_at_time[include_patients]))))
                                 }
                             }
                         }
@@ -3568,11 +3568,11 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Check for analysis type mismatches and inform users
                 if (!isStandard && (self$options$calculateNRI || self$options$calculateIDI || self$options$performROCAnalysis)) {
-                    private$.addNotice("INFO", .("Analysis type"), jmvcore::format(.("NRI, IDI and time-dependent ROC analysis need the 'standard' analysis type or higher. The current type is '{analysisType}', so these outputs were not computed."), analysisType = analysisType))
+                    private$.addNotice("INFO", .("Analysis type"), .fmt(.("NRI, IDI and time-dependent ROC analysis need the 'standard' analysis type or higher. The current type is '{analysisType}', so these outputs were not computed."), analysisType = analysisType))
                 }
 
                 if (!isComprehensive && (self$options$performDCA || self$options$performBootstrap)) {
-                    private$.addNotice("INFO", .("Analysis type"), jmvcore::format(.("Decision curve analysis and bootstrap validation need the 'comprehensive' or 'publication' analysis type. The current type is '{analysisType}', so these outputs were not computed."), analysisType = analysisType))
+                    private$.addNotice("INFO", .("Analysis type"), .fmt(.("Decision curve analysis and bootstrap validation need the 'comprehensive' or 'publication' analysis type. The current type is '{analysisType}', so these outputs were not computed."), analysisType = analysisType))
                 }
 
                 # NRI analysis (requires standard+ analysis type and Cox models)
@@ -3705,7 +3705,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 private$.addNotice(
                     "INFO", .("Analysis complete"),
-                    jmvcore::format(.("Stage migration analysis completed for {totalN} patients with {totalEvents} events. Review the statistical comparisons and clinical interpretation below."), totalN = sprintf("%d", as.integer(total_n)), totalEvents = sprintf("%d", as.integer(total_events))))
+                    .fmt(.("Stage migration analysis completed for {totalN} patients with {totalEvents} events. Review the statistical comparisons and clinical interpretation below."), totalN = sprintf("%d", as.integer(total_n)), totalEvents = sprintf("%d", as.integer(total_events))))
             }
         )
     )

@@ -1028,7 +1028,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     table$deleteRows()
     # Bayesian estimates are posterior draws: name the seed they came from
     table$setNote("seed", if (identical(options_data$typestatistics, "bayes"))
-        jmvcore::format(.("Random seed: {seed}"), seed = private$.bayesSeed()))
+        .fmt(.("Random seed: {seed}"), seed = private$.bayesSeed()))
     private$.pair_n <- integer(0)
     private$.n_valid_pairs <- 0L
 
