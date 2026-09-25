@@ -390,14 +390,17 @@ test_that("the mixed-effects comparison refuses categorical ratings instead of c
   expect_equal(nrow(res$mixedEffectsTable$asDF), 0)
 })
 
-test_that("the TDI bootstrap interval is reproducible and follows the seed", {
+test_that("the TDI interval is reproducible and needs no seed", {
+  # Since 2026-09-25 the interval is the distribution-free order-statistic interval, not a
+  # percentile bootstrap (whose upper bound under-covered), so it is identical under any seed.
   set.seed(2)
   d <- data.frame(a = rnorm(60, 10, 2)); d$b <- d$a + rnorm(60, 0, 1)
   t1 <- agreement(data = d, vars = c("a", "b"), tdi = TRUE, nBoot = 200)$tdiTable$asDF
-  t2 <- agreement(data = d, vars = c("a", "b"), tdi = TRUE, nBoot = 200)$tdiTable$asDF
   t3 <- agreement(data = d, vars = c("a", "b"), tdi = TRUE, nBoot = 200, seed = 7)$tdiTable$asDF
-  expect_equal(t1$ci_lower, t2$ci_lower)                    # was: unseeded, different every run
-  expect_false(isTRUE(all.equal(t1$ci_lower, t3$ci_lower)))
+  expect_equal(t1$ci_lower, t3$ci_lower)
+  expect_equal(t1$ci_upper, t3$ci_upper)
+  v <- sort(abs(d$a - d$b)); cdf <- pbinom(0:60, 60, 0.9)
+  expect_equal(t1$ci_upper, v[which(cdf >= 0.975)[1]])
 })
 
 test_that("the paired comparison interval follows confLevel", {
@@ -417,10 +420,16 @@ test_that("the bootstrap ICC row is labelled with the chosen ICC model", {
   expect_true("ICC(3,1)" %in% tb$metric)                     # was: fixed "ICC (two-way, agreement)"
 })
 
-test_that("weighted kappa on nominal data is a structured error, not an NA row", {
+test_that("weighted kappa on nominal data reports unweighted kappa with a note, not an NA row", {
+  # Was a reject() of the whole analysis (2026-09-25: it also stopped ICC, Bland-Altman
+  # and the sample-size calculator). Still never an NA row: the kappa that applies is shown.
   d <- agr_fixture()
   d$r1 <- factor(as.character(d$r1)); d$r2 <- factor(as.character(d$r2))   # unordered
-  expect_error(agreement(data = d, vars = c("r1", "r2"), wght = "equal"), "Weighted kappa requires ordinal")
+  res <- agreement(data = d, vars = c("r1", "r2"), wght = "equal")
+  unw <- agreement(data = d, vars = c("r1", "r2"))
+  expect_equal(res$irrtable$asDF$kappa, unw$irrtable$asDF$kappa)
+  expect_true(is.finite(res$irrtable$asDF$kappa))
+  expect_match(agr_note(res$irrtable, "weight_override"), "nominal", fixed = TRUE)
 })
 
 test_that("small samples and sparse discordant cells are flagged on the tables they affect", {

@@ -32,6 +32,9 @@ decisionClass <- if (requireNamespace("jmvcore"))
         private = list(
             .n_complete_cases = NA_integer_,
             .n_level_excluded = 0L,
+            # Sign of the observed Youden's index; set in .run() before any narrative is
+            # built and read by every .lrBand() call (NULL outside a run = no guard).
+            .youdenDirection = NULL,
             # Constants for maintainability
             NOMOGRAM_LABEL_SIZE = 14/5,
 
@@ -61,6 +64,123 @@ decisionClass <- if (requireNamespace("jmvcore"))
             },
             .epirRatioStats = function() c("se", "sp", "pv.pos", "pv.neg"),
             .epirNumberStats = function() c("lr.pos", "lr.neg", "diag.or", "youden", "nndx"),
+
+            # One likelihood-ratio band for every panel. The Clinical Summary, the
+            # Clinical Interpretation panel and the copy-ready report used to band the
+            # same number three ways (> 10 in one, >= 10 in two), and all three tested
+            # `lr == 1` on a derived double, so a table that is exactly uninformative in
+            # rationals (sens 1/3, spec 2/3 -> LR+ 0.99999999999999989) was reported as
+            # "evidence AGAINST disease ... level inverted". Bands follow Jaeschke et al.
+            # (1994): > 10 / < 0.1 large, 5-10 / 0.1-0.2 moderate, 2-5 / 0.2-0.5 small,
+            # 1-2 / 0.5-1 minimal. `tol` keeps a derived value that is a boundary in
+            # rationals on the boundary's side.
+            #
+            # The band is decided on the value AS PRINTED (two decimals, the precision of
+            # every narrative panel), so "2.00" can never sit beside the band below 2.
+            # `direction` is the sign of the observed Youden's index (TP*TN - FP*FN): a
+            # ratio computed from the zero-cell corrected table can land on the other side
+            # of 1 from the observed data (TP 0, FP 1, FN 5, TN 19 gives LR+ 1.17 while
+            # sensitivity is 0), and that is reported as "unstable", not as a direction.
+            .lrBand = function(lr, side = c("pos", "neg"), direction = NULL) {
+                side <- match.arg(side)
+                if (length(lr) != 1 || !is.finite(lr)) return("na")
+                lr <- as.numeric(sprintf("%.2f", lr))
+                tol <- 1e-8
+                if (abs(lr - 1) <= tol) return("none")
+                if (!is.null(direction) && length(direction) == 1 && is.finite(direction)) {
+                    points_up <- if (side == "pos") lr > 1 else lr < 1
+                    if ((direction > 0 && !points_up) || (direction < 0 && points_up) || direction == 0)
+                        return("unstable")
+                }
+                if (side == "pos") {
+                    if (lr < 1) return("against")
+                    if (lr > 10 * (1 + tol)) return("large")
+                    if (lr >= 5 * (1 - tol)) return("moderate")
+                    if (lr >= 2 * (1 - tol)) return("small")
+                    return("minimal")
+                }
+                if (lr > 1) return("against")
+                if (lr < 0.1 * (1 - tol)) return("large")
+                if (lr <= 0.2 * (1 + tol)) return("moderate")
+                if (lr <= 0.5 * (1 + tol)) return("small")
+                "minimal"
+            },
+
+            # One discrimination band for the summary word, the interpretation panel and
+            # the notices. For a binary test the area under the ROC curve is
+            # (sens + spec) / 2 = (1 + Youden) / 2, so the conventional AUC bands of
+            # Hosmer, Lemeshow & Sturdivant (2013, section 5.2.4) apply directly:
+            # 0.5 none, below 0.7 poor, 0.7 acceptable, 0.8 excellent, 0.9 outstanding.
+            # The summary word used to be "moderate" whenever sens OR spec reached 0.70,
+            # which called a worse-than-chance test (sens .75, spec .20) "moderate".
+            .discriminationBand = function(sens, spec) {
+                if (length(sens) != 1 || length(spec) != 1 || is.na(sens) || is.na(spec)) return("na")
+                tol <- 1e-8
+                # Banded as printed (three decimals, as in the Clinical Interpretation
+                # panel and the notices), so a printed 0.400 is never called poor.
+                j <- as.numeric(sprintf("%.3f", sens + spec - 1))
+                if (j < -tol) return("worse")
+                if (abs(j) <= tol) return("none")
+                auc <- (1 + j) / 2
+                if (auc >= 0.9 - tol) return("outstanding")
+                if (auc >= 0.8 - tol) return("excellent")
+                if (auc >= 0.7 - tol) return("acceptable")
+                "poor"
+            },
+
+            # Wilson score interval, no continuity correction (Wilson 1927).
+            .wilsonCI = function(x, n, z = stats::qnorm(0.975)) {
+                p <- x / n
+                centre <- (p + z^2 / (2 * n)) / (1 + z^2 / n)
+                half <- z * sqrt(p * (1 - p) / n + z^2 / (4 * n^2)) / (1 + z^2 / n)
+                c(max(0, centre - half), min(1, centre + half))
+            },
+
+            # Youden's index = TP/n1 - FP/n0 is a difference between two INDEPENDENT
+            # binomial proportions (true-positive rate in the diseased, false-positive rate
+            # in the non-diseased). Interval: Agresti & Caffo (2000) - add one success and
+            # one failure to each group and take the Wald interval of the adjusted
+            # difference, clamped to [-1, 1]; the estimate stays the observed index.
+            # Chosen by exact coverage (enumeration over all tables): epiR's sum of the two
+            # Clopper-Pearson bounds covers about 99.7% under a 95% label; Newcombe's hybrid
+            # score interval (tried first) falls to 0.88 when sensitivity and specificity
+            # are both high and the groups small (0.98/0.98, n 20+20) - the region accurate
+            # tests occupy; Agresti-Caffo stays at or above 0.935 over sensitivity and
+            # specificity 0.50-0.98, n 15-50, mildly conservative when both are high.
+            .youdenCI = function(tp, n1, fp, n0, z = stats::qnorm(0.975)) {
+                q1 <- (tp + 1) / (n1 + 2)
+                q2 <- (fp + 1) / (n0 + 2)
+                se <- sqrt(q1 * (1 - q1) / (n1 + 2) + q2 * (1 - q2) / (n0 + 2))
+                c(est = tp / n1 - fp / n0,
+                  lower = max(-1, q1 - q2 - z * se),
+                  upper = min(1, q1 - q2 + z * se))
+            },
+
+            # Number needed to diagnose = 1 / Youden's index. 1/J is decreasing on J > 0
+            # and undefined at J <= 0, so the interval is the inverse of the Youden
+            # interval only while that interval is above 0. epiR took
+            # min/max(1/lower, 1/upper), which for a Youden interval crossing 0 printed
+            # e.g. 6.67 (-3.08 to 1.73): an interval excluding its own estimate.
+            # Returns NA where the quantity is undefined or unbounded.
+            # The confidence set for 1/J is {1/j : j in (L, U), j > 0}: (1/U, 1/L) when
+            # L > 0, and (1/U, +Inf) when L <= 0 < U - still a valid lower bound even when
+            # the point estimate J <= 0 has no inverse.
+            .nndxFromYouden = function(y) {
+                est <- if (is.finite(y[["est"]]) && y[["est"]] > 0) 1 / y[["est"]] else NA_real_
+                lower <- if (is.finite(y[["upper"]]) && y[["upper"]] > 0) 1 / y[["upper"]] else NA_real_
+                upper <- if (is.finite(est) && is.finite(y[["lower"]]) && y[["lower"]] > 0) 1 / y[["lower"]] else NA_real_
+                c(est = est, lower = lower, upper = upper)
+            },
+
+            # Log-scale likelihood-ratio interval (Simel, Samsa & Matchar 1991), the same
+            # formula epiR::epi.tests() uses, for the copy-ready report when the CI
+            # tables are not requested. a = TP, b = FP, c = FN, d = TN.
+            .lrPosCI = function(a, b, c, d, z = stats::qnorm(0.975)) {
+                est <- (a / (a + c)) / (b / (b + d))
+                se <- sqrt(1 / a - 1 / (a + c) + 1 / b - 1 / (b + d))
+                if (!is.finite(est) || !is.finite(se) || est <= 0) return(NULL)
+                exp(log(est) + c(-1, 1) * z * se)
+            },
 
             # library-audit 2026-09-16 meddecide [LOW] DONE (same class): rawContingency has a fixed row set, so .init()
             # scaffolds the rows and .run() fills them with setRow()
@@ -421,8 +541,12 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 }
                 
                 # Convert to factors and recode in single pipeline
-                mydata[[testVar]] <- forcats::as_factor(mydata[[testVar]])
-                mydata[[goldVar]] <- forcats::as_factor(mydata[[goldVar]])
+                # droplevels(): a level emptied by the missing-value removal above stayed in
+                # levels(), was then inferred as the negative level, and the run was refused
+                # as "not dichotomous" although both variables are binary. (An explicit-NA
+                # level with members survives droplevels() and is handled just below.)
+                mydata[[testVar]] <- droplevels(forcats::as_factor(mydata[[testVar]]))
+                mydata[[goldVar]] <- droplevels(forcats::as_factor(mydata[[goldVar]]))
 
                 # An explicit NA level (addNA()) survives naOmit and is.na(), but means
                 # "status unknown" -- scoring it as disease-absent silently biases every
@@ -475,24 +599,44 @@ decisionClass <- if (requireNamespace("jmvcore"))
                                        else if (length(test_candidates) == 1) test_candidates[[1]]
                                        else NA_character_
 
+                # Zero candidates and several candidates are different failures. With zero
+                # (every other level emptied by the exclusions above) the old message still
+                # said the variable had "more than one level besides" the positive one and
+                # listed "()".
                 if (is.na(gold_negative_level)) {
-                    private$.addNotice(
-                        type = "ERROR",
-                        title = .("Choose which gold-standard level means disease absent"),
-                        content = .fmt(.('The gold standard has more than one level besides "{pos}" ({lvls}), so the disease-absent level cannot be inferred. Select it under Disease absent level. Levels you do not name are excluded from the analysis rather than counted as disease-absent.'),
-                                       pos = self$options$goldPositive,
-                                       lvls = paste(gold_candidates, collapse = ", "))
-                    )
+                    if (length(gold_candidates) == 0)
+                        private$.addNotice(
+                            type = "ERROR",
+                            title = .("The gold standard has only one level among the analysed cases"),
+                            content = .fmt(.('Every analysed case has the gold-standard level "{pos}", so there are no disease-absent cases to estimate specificity from. Check the data, any exclusions reported above, and the level selection.'),
+                                           pos = self$options$goldPositive)
+                        )
+                    else
+                        private$.addNotice(
+                            type = "ERROR",
+                            title = .("Choose which gold-standard level means disease absent"),
+                            content = .fmt(.('The gold standard has more than one level besides "{pos}" ({lvls}), so the disease-absent level cannot be inferred. Select it under Disease absent level. Levels you do not name are excluded from the analysis rather than counted as disease-absent.'),
+                                           pos = self$options$goldPositive,
+                                           lvls = paste(gold_candidates, collapse = ", "))
+                        )
                     return(NULL)
                 }
                 if (is.na(test_negative_level)) {
-                    private$.addNotice(
-                        type = "ERROR",
-                        title = .("Choose which test level means a negative result"),
-                        content = .fmt(.('The test has more than one level besides "{pos}" ({lvls}), so the test-negative level cannot be inferred. Select it under Test negative level. Levels you do not name are excluded from the analysis rather than counted as negative.'),
-                                       pos = self$options$testPositive,
-                                       lvls = paste(test_candidates, collapse = ", "))
-                    )
+                    if (length(test_candidates) == 0)
+                        private$.addNotice(
+                            type = "ERROR",
+                            title = .("The test has only one level among the analysed cases"),
+                            content = .fmt(.('Every analysed case has the test level "{pos}", so there are no negative test results to compare. Check the data, any exclusions reported above, and the level selection.'),
+                                           pos = self$options$testPositive)
+                        )
+                    else
+                        private$.addNotice(
+                            type = "ERROR",
+                            title = .("Choose which test level means a negative result"),
+                            content = .fmt(.('The test has more than one level besides "{pos}" ({lvls}), so the test-negative level cannot be inferred. Select it under Test negative level. Levels you do not name are excluded from the analysis rather than counted as negative.'),
+                                           pos = self$options$testPositive,
+                                           lvls = paste(test_candidates, collapse = ", "))
+                        )
                     return(NULL)
                 }
 
@@ -575,7 +719,20 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     )
                     return(NULL)
                 }
-                
+
+                # The "at least 4 cases" rule in .validateCategoricalInputs() counts raw
+                # rows, before missing values and unselected levels are removed, so a
+                # 6-row sheet with 3 Equivocal rows reached the tables with n = 3.
+                if (nrow(mydata) < 4) {
+                    private$.addNotice(
+                        type = "ERROR",
+                        title = .fmt(.("Insufficient data after exclusions: {n} cases analysed"),
+                                     n = sprintf("%d", nrow(mydata))),
+                        content = .("At least 4 cases are required for diagnostic test analysis once missing values and unselected levels have been removed.")
+                    )
+                    return(NULL)
+                }
+
                 # Check for zero cells that would cause division by zero
                 if (any(test_table == 0)) {
                     private$.addNotice(
@@ -590,37 +747,42 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
             # Enhanced diagnostic accuracy interpretation helper
             .getDiagnosticInterpretation = function(lr_pos, lr_neg, sens, spec) {
-                # Likelihood ratio interpretations based on clinical guidelines
-                lr_pos_interp <- dplyr::case_when(
-                    is.na(lr_pos) ~ .("Positive likelihood ratio unavailable due to data limitations"),
-                    lr_pos >= 10 ~ .("Large and often conclusive increase in probability of disease"),
-                    lr_pos >= 5 ~ .("Moderate increase in probability of disease"),
-                    lr_pos >= 2 ~ .("Small but potentially important increase in probability"),
-                    lr_pos > 1 ~ .("Minimal increase in probability of disease"),
-                    lr_pos == 1 ~ .("Uninformative: a positive result leaves the probability of disease unchanged"),
-                    TRUE ~ .("Decreases probability of disease (test may be flawed)")
-                )
-                
-                lr_neg_interp <- dplyr::case_when(
-                    is.na(lr_neg) ~ .("Negative likelihood ratio unavailable due to data limitations"),
-                    lr_neg <= 0.1 ~ .("Large and often conclusive decrease in probability of disease"),
-                    lr_neg <= 0.2 ~ .("Moderate decrease in probability of disease"),
-                    lr_neg <= 0.5 ~ .("Small but potentially important decrease in probability"),
-                    lr_neg < 1 ~ .("Minimal decrease in probability of disease"),
-                    lr_neg == 1 ~ .("Uninformative: a negative result leaves the probability of disease unchanged"),
-                    TRUE ~ .("Increases probability of disease (test may be flawed)")
-                )
-                
-                # Overall test utility based on Youden's Index
+                # Likelihood ratio interpretations: Jaeschke et al. (1994) bands, via the
+                # one classifier every panel shares (.lrBand).
+                lr_pos_interp <- switch(private$.lrBand(lr_pos, "pos", private$.youdenDirection),
+                    na = .("Positive likelihood ratio unavailable due to data limitations"),
+                    unstable = .("No reliable direction: this likelihood ratio rests on a zero count, and the continuity correction puts it on the other side of 1 from the observed data"),
+                    large = .("Large and often conclusive increase in probability of disease"),
+                    moderate = .("Moderate increase in probability of disease"),
+                    small = .("Small but potentially important increase in probability"),
+                    minimal = .("Minimal increase in probability of disease"),
+                    none = .("Uninformative: a positive result leaves the probability of disease unchanged"),
+                    against = .("Decreases probability of disease (test may be flawed)"))
+
+                lr_neg_interp <- switch(private$.lrBand(lr_neg, "neg", private$.youdenDirection),
+                    na = .("Negative likelihood ratio unavailable due to data limitations"),
+                    unstable = .("No reliable direction: this likelihood ratio rests on a zero count, and the continuity correction puts it on the other side of 1 from the observed data"),
+                    large = .("Large and often conclusive decrease in probability of disease"),
+                    moderate = .("Moderate decrease in probability of disease"),
+                    small = .("Small but potentially important decrease in probability"),
+                    minimal = .("Minimal decrease in probability of disease"),
+                    none = .("Uninformative: a negative result leaves the probability of disease unchanged"),
+                    against = .("Increases probability of disease (test may be flawed)"))
+
+                # Discrimination: Hosmer, Lemeshow & Sturdivant (2013) AUC bands, applied
+                # through AUC = (1 + Youden) / 2. These bands used to be Youden cut-offs
+                # 0.8 / 0.6 / 0.4 named Excellent / Good / Fair / Poor with no source.
                 youden_index <- if (is.na(sens) || is.na(spec)) NA_real_ else sens + spec - 1
-                test_utility <- dplyr::case_when(
-                    is.na(youden_index) ~ .("Insufficient data to evaluate discriminatory power"),
-                    youden_index >= 0.8 ~ .("Excellent discriminatory power (Youden's index 0.80 or above)"),
-                    youden_index >= 0.6 ~ .("Good discriminatory power (Youden's index 0.60 to 0.79)"),
-                    youden_index >= 0.4 ~ .("Fair discriminatory power (Youden's index 0.40 to 0.59)"),
-                    TRUE ~ .("Poor discriminatory power (Youden's index below 0.40)")
-                )
-                
+                test_utility <- switch(private$.discriminationBand(sens, spec),
+                    na = .("Insufficient data to evaluate discriminatory power"),
+                    # Half-open ranges: "0.80 to 0.89" left 0.795 outside every label.
+                    outstanding = .("Outstanding discrimination (equivalent AUC 0.90 or above; Youden's index 0.80 or above)"),
+                    excellent = .("Excellent discrimination (equivalent AUC 0.80 to below 0.90; Youden's index 0.60 to below 0.80)"),
+                    acceptable = .("Acceptable discrimination (equivalent AUC 0.70 to below 0.80; Youden's index 0.40 to below 0.60)"),
+                    poor = .("Poor discrimination (equivalent AUC above 0.50 and below 0.70; Youden's index above 0 and below 0.40)"),
+                    none = .("No discrimination (Youden's index 0, equivalent AUC 0.50)"),
+                    worse = .("Worse than chance (Youden's index below 0): check the level chosen as test-positive"))
+
                 return(list(
                     lr_pos_interp = lr_pos_interp,
                     lr_neg_interp = lr_neg_interp,
@@ -672,13 +834,18 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 # Get clinical benchmarks for enhanced interpretation
                 benchmarks <- private$.addClinicalBenchmarks(sens, spec, lr_pos, lr_neg)
 
-                # Determine test quality
-                test_quality <- dplyr::case_when(
-                    !is.na(sens) && !is.na(spec) && sens >= 0.9 && spec >= 0.9 ~ .("excellent"),
-                    !is.na(sens) && !is.na(spec) && sens >= 0.8 && spec >= 0.8 ~ .("good"), 
-                    (!is.na(sens) && sens >= 0.7) || (!is.na(spec) && spec >= 0.7) ~ .("moderate"),
-                    TRUE ~ .("limited")
-                )
+                # Test quality word: the same discrimination band as the Clinical
+                # Interpretation panel and the notices (.discriminationBand). It used to be
+                # "moderate" whenever sens OR spec reached 0.70, so a test that labels
+                # nearly everyone positive - worse than chance - read as "moderate".
+                test_quality <- switch(private$.discriminationBand(sens, spec),
+                    outstanding = .("outstanding"),
+                    excellent = .("excellent"),
+                    acceptable = .("acceptable"),
+                    poor = .("poor"),
+                    none = .("no"),
+                    worse = .("worse-than-chance"),
+                    na = .("undetermined"))
 
                 # Describe the discrimination profile (no use recommendation is made)
                 primary_utility <- dplyr::case_when(
@@ -701,7 +868,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
                 sample_text <- if (!is.na(total_pop)) .fmt(.("{n} cases analyzed"), n = total_pop) else .("Sample size not available")
 
-                summary_template <- .("<div style='margin: 15px; padding: 15px; border-left: 5px solid #4CAF50; background-color: rgba(114, 184, 33, 0.1); color: inherit;'><h3 style='color: inherit; margin-top: 0;'>Clinical Summary</h3><p style='font-size: 16px;'><strong>Analysis:</strong> Diagnostic test performance evaluation comparing {testname} against gold standard {goldname}.</p><p><strong>Sample:</strong> {sample}. Predictive values below are computed at a disease prevalence of {prev}.</p><p><strong>Test Performance:</strong> The test shows <strong>{quality}</strong> discriminatory ability with sensitivity of <strong>{sens}</strong> (<em>{sensnote}</em>) and specificity of <strong>{spec}</strong> (<em>{specnote}</em>).</p><p><strong>Discrimination Profile:</strong> {profile}.</p><p><strong>Likelihood Ratios:</strong> Positive LR: {lrpos} (<em>{lrposnote}</em>), Negative LR: {lrneg} (<em>{lrnegnote}</em>)</p><p><strong>Key Findings:</strong> Predictive values are post-test probabilities. After a positive result the probability of disease is the positive predictive value (PPV {ppv}). After a negative result the probability of disease is <strong>{postneg}</strong>, and the probability of being disease-free is the negative predictive value (NPV {npv}).</p></div>")
+                summary_template <- .("<div style='margin: 15px; padding: 15px; border-left: 5px solid #4CAF50; background-color: rgba(114, 184, 33, 0.1); color: inherit;'><h3 style='color: inherit; margin-top: 0;'>Clinical Summary</h3><p style='font-size: 16px;'><strong>Analysis:</strong> Diagnostic test performance evaluation comparing {testname} against gold standard {goldname}.</p><p><strong>Sample:</strong> {sample}. Predictive values below are computed at a disease prevalence of {prev}.</p><p><strong>Test Performance:</strong> By the conventional rule of thumb for the area under the ROC curve (Hosmer, Lemeshow and Sturdivant 2013), the test shows <strong>{quality}</strong> discrimination (equivalent AUC {auc}), with sensitivity of <strong>{sens}</strong> (<em>{sensnote}</em>) and specificity of <strong>{spec}</strong> (<em>{specnote}</em>).</p><p><strong>Discrimination Profile:</strong> {profile}.</p><p><strong>Likelihood Ratios:</strong> Positive LR: {lrpos} (<em>{lrposnote}</em>), Negative LR: {lrneg} (<em>{lrnegnote}</em>)</p><p><strong>Key Findings:</strong> Predictive values are post-test probabilities. After a positive result the probability of disease is the positive predictive value (PPV {ppv}). After a negative result the probability of disease is <strong>{postneg}</strong>, and the probability of being disease-free is the negative predictive value (NPV {npv}).</p></div>")
 
                 # Only the NA arm can fire: a zero cell triggers the Haldane-Anscombe 0.5
                 # correction before the LRs are formed, so neither LR is ever Inf here,
@@ -719,7 +886,9 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     summary_template,
                     testname = test_name_safe, goldname = gold_name_safe,
                     sample = sample_text, prev = prevalence_text,
-                    quality = test_quality, sens = sens_text, sensnote = benchmarks$sens_quality,
+                    quality = test_quality,
+                    auc = if (is.na(sens) || is.na(spec)) .("not available") else sprintf("%.3f", (sens + spec) / 2),
+                    sens = sens_text, sensnote = benchmarks$sens_quality,
                     spec = spec_text, specnote = benchmarks$spec_quality,
                     profile = primary_utility,
                     lrpos = lr_pos_safe, lrposnote = benchmarks$lr_pos_interpretation,
@@ -733,7 +902,9 @@ decisionClass <- if (requireNamespace("jmvcore"))
             # Generate copy-ready report template
             .generateReportTemplate = function(sens, spec, ppv, npv, lr_pos, lr_neg,
                                              sens_ci = NULL, spec_ci = NULL, test_name, gold_name,
-                                             prevalence = NA_real_) {
+                                             prevalence = NA_real_, n_total = NA_real_,
+                                             n_diseased = NA_real_, n_healthy = NA_real_,
+                                             ppv_ci = NULL, npv_ci = NULL, lr_pos_ci = NULL) {
                 # Create confidence interval text if available
                 ci_text <- if (!is.null(sens_ci) && !is.null(spec_ci)) {
                     .fmt(.("(95% CI: sensitivity {sens}, specificity {spec})"),
@@ -742,23 +913,32 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 } else {
                     ""
                 }
-                
-                # Determine clinical interpretation
-                interpretation <- dplyr::case_when(
-                    is.na(lr_pos) ~ .("likelihood ratio unavailable due to data limitations"),
-                    lr_pos >= 10 ~ .("strong evidence for disease when positive"),
-                    lr_pos >= 5 ~ .("moderate evidence for disease when positive"),
-                    lr_pos >= 2 ~ .("weak evidence for disease when positive"),
-                    lr_pos > 1 ~ .("minimal evidence for disease when positive"),
-                    lr_pos == 1 ~ .("no change in the probability of disease"),
+                # STARD 2015 item 24: estimates of diagnostic accuracy and their precision. No square
+                # brackets here: jmvcore's translator splits a string at " [" (msgctxt).
+                pct_ci <- function(ci) if (is.null(ci) || length(ci) != 2 || anyNA(ci)) ""
+                                       else sprintf(" (95%% CI %.1f-%.1f%%)", 100 * ci[1], 100 * ci[2])
+                lr_ci_text <- if (is.null(lr_pos_ci) || length(lr_pos_ci) != 2 || anyNA(lr_pos_ci)) ""
+                              else sprintf(" (95%% CI %.2f-%.2f)", lr_pos_ci[1], lr_pos_ci[2])
+
+                # Band from the shared classifier (.lrBand), so this sentence, the Clinical
+                # Summary and the Clinical Interpretation panel always agree.
+                interpretation <- switch(private$.lrBand(lr_pos, "pos", private$.youdenDirection),
+                    na = .("likelihood ratio unavailable due to data limitations"),
+                    unstable = .("no reliable evidence either way, because it rests on a zero count and the continuity correction puts it on the other side of 1 from the observed data"),
+                    large = .("strong evidence for disease when positive"),
+                    moderate = .("moderate evidence for disease when positive"),
+                    small = .("weak evidence for disease when positive"),
+                    minimal = .("minimal evidence for disease when positive"),
+                    none = .("no change in the probability of disease"),
                     # An LR+ below 1 points the other way. Calling that "minimal evidence
                     # for disease" in text a clinician pastes into a chart inverts the
                     # finding.
-                    TRUE ~ .("evidence AGAINST disease when positive, which usually means the level chosen as test-positive is inverted")
-                )
-                
-                # Generate template
-                template_string <- .("<div style='margin: 15px; padding: 15px; border: 2px dashed #2196F3; background-color: rgba(33, 152, 239, 0.13); color: inherit;'><h3 style='color: inherit; margin-top: 0;'>Copy-Ready Clinical Report</h3><div style='background: rgba(255, 255, 255, 0.06); color: inherit; padding: 10px; border-radius: 5px; font-family: Arial, sans-serif;'><p><strong>DIAGNOSTIC TEST EVALUATION</strong></p><p>We evaluated the diagnostic performance of {testname} compared to the gold standard {goldname}. The test demonstrated a sensitivity of {sens} and specificity of {spec} {ci}. At a disease prevalence of {prev}, the positive predictive value was {ppv} and the negative predictive value was {npv}. The positive likelihood ratio of {lr} provides {interp}.</p></div><p style='font-size: 12px; color: inherit; opacity: 0.75;'><em>Copy the text above for your clinical report. Modify as needed for your specific context.</em></p></div>")
+                    against = .("evidence AGAINST disease when positive, which usually means the level chosen as test-positive is inverted"))
+
+                # Generate template. It states N and both arms (STARD 2015 item 23: the cross
+                # tabulation behind the estimates): a manuscript sentence
+                # without its denominator cannot be checked (STARD 2015).
+                template_string <- .("<div style='margin: 15px; padding: 15px; border: 2px dashed #2196F3; background-color: rgba(33, 152, 239, 0.13); color: inherit;'><h3 style='color: inherit; margin-top: 0;'>Copy-Ready Clinical Report</h3><div style='background: rgba(255, 255, 255, 0.06); color: inherit; padding: 10px; border-radius: 5px; font-family: Arial, sans-serif;'><p><strong>DIAGNOSTIC TEST EVALUATION</strong></p><p>We evaluated the diagnostic performance of {testname} compared to the gold standard {goldname} in {n} cases ({npos} with and {nneg} without the target condition). The test demonstrated a sensitivity of {sens} and specificity of {spec} {ci}. At a disease prevalence of {prev}, the positive predictive value was {ppv}{ppvci} and the negative predictive value was {npv}{npvci}. The positive likelihood ratio of {lr}{lrci} provides {interp}.</p></div><p style='font-size: 12px; color: inherit; opacity: 0.75;'><em>Copy the text above for your clinical report. Modify as needed for your specific context.</em></p></div>")
 
                 # Escape user-derived variable names before HTML interpolation
                 test_name_safe <- private$.safeHtmlOutput(test_name)
@@ -767,6 +947,9 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 template <- .fmt(
                     template_string,
                     testname = test_name_safe, goldname = gold_name_safe,
+                    n = sprintf("%d", as.integer(n_total)),
+                    npos = sprintf("%d", as.integer(n_diseased)),
+                    nneg = sprintf("%d", as.integer(n_healthy)),
                     sens = sprintf("%.1f%%", sens * 100),
                     spec = sprintf("%.1f%%", spec * 100),
                     ci = ci_text,
@@ -774,8 +957,13 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     # were computed at; the sentence quoted them bare.
                     prev = sprintf("%.1f%%", if (is.finite(prevalence)) prevalence * 100 else NA_real_),
                     ppv = sprintf("%.1f%%", ppv * 100),
+                    ppvci = pct_ci(ppv_ci),
                     npv = sprintf("%.1f%%", npv * 100),
-                    lr = sprintf("%.1f", lr_pos),
+                    npvci = pct_ci(npv_ci),
+                    # Two decimals, as in the Clinical Summary: at one decimal LR+ 1.96
+                    # printed "2.0" beside the band for LR+ below 2.
+                    lr = sprintf("%.2f", lr_pos),
+                    lrci = lr_ci_text,
                     interp = interpretation
                 )
 
@@ -800,7 +988,13 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         type = "STRONG_WARNING",
                         title = .fmt(.("Very low disease prevalence observed in this sample ({pct})"),
                                                 pct = sprintf("%.1f%%", 100 * prevalence)),
-                        content = .("Positive predictive value is unstable at this prevalence and will not transfer to a population with a different one. Sensitivity and specificity are unaffected. Consider supplying a population prior under Population Prevalence Settings.")
+                        # No "consider supplying a prior" when one is already supplied, and the
+                        # prevalence-independence of Se/Sp stated as the assumption it is
+                        # (it holds arithmetically; case mix can still change them).
+                        content = if (isTRUE(self$options$pp))
+                            .("Positive predictive value is unstable at this prevalence. The main table uses the population prevalence you supplied. Sensitivity and specificity do not depend on prevalence arithmetically, but they can differ with case mix.")
+                        else
+                            .("Positive predictive value is unstable at this prevalence and will not transfer to a population with a different one. Sensitivity and specificity do not depend on prevalence arithmetically, but they can differ with case mix. Consider supplying a population prior under Population Prevalence Settings.")
                     )
                 }
 
@@ -846,7 +1040,12 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     "</ul>",
 
                     "<h4 style='color: inherit;'>", .("Data Requirements"), "</h4>",
-                    "<p>", .("Required data: Cases with both test results and true disease status (gold standard). Both variables must be categorical (factor), each with exactly 2 levels, minimum 4 cases (preferably 30+)."), "</p>",
+                    # The old text said "preferably 30+" while the sample-size notices said
+                    # 100; neither figure had a source. What decides precision is the number
+                    # of diseased cases (for sensitivity) and disease-free cases (for
+                    # specificity), which is what Buderer (1996) plans from.
+                    "<p>", .("Required data: Cases with both test results and true disease status (gold standard). Both variables must be categorical (factor), each with a positive and a negative level; any other level is excluded, and at least 4 cases must remain after exclusions."), "</p>",
+                    "<p>", .("How many cases are enough depends on the precision you need: sensitivity is estimated from the diseased cases only and specificity from the disease-free cases only, so plan the sample size from the confidence-interval width you need at the expected prevalence (Buderer 1996), and read the confidence intervals rather than the point estimates."), "</p>",
 
                     "<h4 style='color: inherit;'>", .("Key Output Measures"), "</h4>",
                     "<ul>",
@@ -860,16 +1059,22 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     
                     "<h4 style='color: inherit;'>", .("Clinical Interpretation Guidelines"), "</h4>",
                     "<div style='background-color: rgba(33, 159, 33, 0.1); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
-                    "<strong>", .("Excellent Tests"), ":</strong><br>",
-                    "\u{2022} ", .("Sensitivity >90% excellent for ruling OUT disease"), "<br>",
-                    "\u{2022} ", .("Specificity >90% excellent for ruling IN disease"), "<br>",
+                    # "Excellent Tests" / "excellent for ruling OUT" stated SnNout and SpPin
+                    # unqualified, and "excellent" now names an AUC band as well.
+                    "<strong>", .("Rules of thumb"), ":</strong><br>",
+                    "\u{2022} ", .("Sensitivity above 90%: a negative result argues against disease, provided specificity is not low"), "<br>",
+                    "\u{2022} ", .("Specificity above 90%: a positive result argues for disease, provided sensitivity is not low"), "<br>",
                     "\u{2022} ", .("LR+ >10 strong evidence FOR disease, LR+ 5-10 moderate, LR+ 2-5 weak but useful"), "<br>",
                     "\u{2022} ", .("LR- <0.1 strong evidence AGAINST disease, LR- 0.1-0.2 moderate, LR- 0.2-0.5 weak"), "<br>",
                     "</div>",
+                    # SnNout / SpPin stated without their caveat invite ruling out on a
+                    # sensitive but non-specific test (Pewsner et al. 2004).
+                    "<p>", .("The sensitivity and specificity rules of thumb (SnNout: a negative result on a highly sensitive test rules out; SpPin: a positive result on a highly specific test rules in) can mislead when the other property is low. Judge how far a result moves the probability from its likelihood ratio instead (Pewsner et al. 2004)."), "</p>",
+                    "<p>", .("Likelihood-ratio bands follow Jaeschke, Guyatt and Sackett (1994). Discrimination bands follow Hosmer, Lemeshow and Sturdivant (2013), applied to a binary test through AUC = (sensitivity + specificity) / 2."), "</p>",
 
                     "<h4 style='color: inherit;'>", .("Analysis Options Explained"), "</h4>",
                     "<ul>",
-                    "<li><strong>", .("95% Confidence Intervals"), ":</strong> ", .("Provides uncertainty estimates using the epiR package. These intervals describe the observed sample; when a population prevalence is supplied they do not apply to the prior-adjusted predictive values in the main table."), "</li>",
+                    "<li><strong>", .("95% Confidence Intervals"), ":</strong> ", .("Provides uncertainty estimates: exact Clopper-Pearson intervals for sensitivity, specificity and the predictive values and log-scale intervals for the likelihood ratios and the diagnostic odds ratio (computed by the epiR package), and the Agresti-Caffo interval for Youden's index, from which the number needed to diagnose interval follows. These intervals describe the observed sample; when a population prevalence is supplied they do not apply to the prior-adjusted predictive values in the main table."), "</li>",
                     "<li><strong>", .("Explanatory Footnotes"), ":</strong> ", .("Adds detailed clinical interpretation help to all result tables."), "</li>",
                     "<li><strong>", .("Raw Data Tables"), ":</strong> ", .("Displays original contingency tables and missing data summaries for verification."), "</li>",
                     "<li><strong>", .("Population Prevalence"), ":</strong> ", .("Use when your study sample doesn't represent the target population prevalence. Affects PPV/NPV calculations using Bayes' theorem. Enter as proportion (e.g., 0.05 for 5%, 0.15 for 15%). Common ranges: rare diseases (0.001-0.01), common conditions (0.05-0.30)."), "</li>",
@@ -919,19 +1124,19 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     private$.addNotice(
                         type = "STRONG_WARNING",
                         title = .fmt(.("Very small sample size: n = {n} (< 20 cases)"), n = total_n),
-                        content = .("With fewer than 20 cases each proportion rests on a handful of patients, so one reclassified case moves sensitivity or specificity by several percentage points and the 95% confidence intervals (enable the 95% CI option) will be very wide. Read the intervals rather than the point estimates; diagnostic accuracy studies usually need on the order of 100 cases before the intervals narrow usefully.")
+                        content = .("With fewer than 20 cases each proportion rests on a handful of patients, so one reclassified case moves sensitivity or specificity by several percentage points and the 95% confidence intervals (enable the 95% CI option) will be very wide. Read the intervals rather than the point estimates. How many cases are enough depends on the precision you need at the expected prevalence (Buderer 1996), not on a fixed total.")
                     )
                 } else if (total_n < 50) {
                     private$.addNotice(
                         type = "WARNING",
                         title = .fmt(.("Small sample size: n = {n} (< 50 cases)"), n = total_n),
-                        content = .("Interpret results with caution. Confidence intervals may be wide. Minimum recommended: 100 cases for robust estimates.")
+                        content = .("Interpret results with caution: the confidence intervals will be wide. Whether the sample is large enough depends on the precision you need for sensitivity and specificity at the expected prevalence (Buderer 1996); read the intervals.")
                     )
                 } else if (total_n < 100) {
                     private$.addNotice(
                         type = "INFO",
                         title = .fmt(.("Sample size: n = {n}"), n = total_n),
-                        content = .("For robust diagnostic test evaluation, 100+ cases recommended. Current sample provides preliminary estimates.")
+                        content = .("Check the confidence intervals: sensitivity rests on the diseased cases only and specificity on the disease-free cases only, so either can be imprecise even when the total looks adequate (Buderer 1996).")
                     )
                 }
 
@@ -976,26 +1181,29 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
                 youden <- sens + spec - 1
                 auc <- (sens + spec) / 2
+                # Same classifier as the Clinical Summary word and the Clinical
+                # Interpretation panel, so the three can never disagree about one test.
+                band <- private$.discriminationBand(sens, spec)
 
-                if (youden < 0) {
+                if (band == "worse") {
                     private$.addNotice(
                         type = "ERROR",
                         title = .fmt(.("This test performs worse than chance (Youden's index {j}, equivalent AUC {auc})"),
-                                     j = sprintf("%.2f", youden), auc = sprintf("%.2f", auc)),
+                                     j = sprintf("%.3f", youden), auc = sprintf("%.3f", auc)),
                         content = .("Sensitivity plus specificity is below 1, so a positive result argues AGAINST disease and a negative result argues for it. The usual cause is that the level chosen under Test positive level is the wrong one; swapping it would give the mirror-image performance. Check the level selection before reading any number in these tables.")
                     )
-                } else if (youden == 0) {
+                } else if (band == "none") {
                     private$.addNotice(
                         type = "STRONG_WARNING",
-                        title = .("This test is uninformative (Youden's index 0.00, equivalent AUC 0.50)"),
+                        title = .("This test is uninformative (Youden's index 0.000, equivalent AUC 0.500)"),
                         content = .("Sensitivity plus specificity is exactly 1, which is what a coin toss achieves. Both likelihood ratios equal 1 and the post-test probability equals the pre-test probability, whatever the result.")
                     )
-                } else if (auc < 0.7) {
+                } else if (band == "poor") {
                     private$.addNotice(
                         type = "STRONG_WARNING",
                         title = .fmt(.("Poor discrimination (Youden's index {j}, equivalent AUC {auc})"),
-                                     j = sprintf("%.2f", youden), auc = sprintf("%.2f", auc)),
-                        content = .("An equivalent area under the curve below 0.70 is conventionally read as poor discrimination. Confirm that the level chosen under Test positive level is the one you meant, then interpret the predictive values with care: at this level of discrimination they are driven mainly by prevalence.")
+                                     j = sprintf("%.3f", youden), auc = sprintf("%.3f", auc)),
+                        content = .("An equivalent area under the curve below 0.70 is conventionally read as poor discrimination (Hosmer, Lemeshow and Sturdivant 2013). Confirm that the level chosen under Test positive level is the one you meant, then interpret the predictive values with care: at this level of discrimination they are driven mainly by prevalence.")
                     )
                 }
 
@@ -1027,22 +1235,28 @@ decisionClass <- if (requireNamespace("jmvcore"))
                                            else if (spec >= 0.80) .("up to 1 disease-free case in 5 flagged positive in this sample")
                                            else .("more than 1 disease-free case in 5 flagged positive in this sample")
 
-                # Likelihood ratio benchmarks
-                benchmarks$lr_pos_interpretation <- if (!is.finite(lr_pos)) .("Cannot be calculated: LR+ is sensitivity / (1 - specificity), and one of those is not estimable here")
-                                                    else if (lr_pos > 10) .("Strong evidence for disease")
-                                                    else if (lr_pos > 5) .("Moderate evidence for disease")
-                                                    else if (lr_pos > 2) .("Weak evidence for disease")
-                                                    else if (lr_pos > 1) .("Minimal evidence for disease")
-                                                    else if (lr_pos == 1) .("Uninformative: a positive result does not change the probability of disease")
-                                                    else .("Points AGAINST disease when positive: the test-positive level may be inverted")
+                # Likelihood ratio benchmarks: the shared classifier (.lrBand). This block
+                # used > 10 / > 5 / > 2 where the other two panels used >= 10 / >= 5 / >= 2,
+                # so LR+ = 10 was "Moderate" here and "strong" in the report.
+                benchmarks$lr_pos_interpretation <- switch(private$.lrBand(lr_pos, "pos", private$.youdenDirection),
+                    na = .("Cannot be calculated: LR+ is sensitivity / (1 - specificity), and one of those is not estimable here"),
+                    unstable = .("Unreliable: rests on a zero count, and the continuity correction points the other way from the observed data"),
+                    large = .("Strong evidence for disease"),
+                    moderate = .("Moderate evidence for disease"),
+                    small = .("Weak evidence for disease"),
+                    minimal = .("Minimal evidence for disease"),
+                    none = .("Uninformative: a positive result does not change the probability of disease"),
+                    against = .("Points AGAINST disease when positive: the test-positive level may be inverted"))
 
-                benchmarks$lr_neg_interpretation <- if (!is.finite(lr_neg)) .("Cannot be calculated: LR- is (1 - sensitivity) / specificity, and one of those is not estimable here")
-                                                    else if (lr_neg < 0.1) .("Strong evidence against disease")
-                                                    else if (lr_neg < 0.2) .("Moderate evidence against disease")
-                                                    else if (lr_neg < 0.5) .("Weak evidence against disease")
-                                                    else if (lr_neg < 1) .("Minimal evidence against disease")
-                                                    else if (lr_neg == 1) .("Uninformative: a negative result does not change the probability of disease")
-                                                    else .("Points TOWARD disease when negative: the test-positive level may be inverted")
+                benchmarks$lr_neg_interpretation <- switch(private$.lrBand(lr_neg, "neg", private$.youdenDirection),
+                    na = .("Cannot be calculated: LR- is (1 - sensitivity) / specificity, and one of those is not estimable here"),
+                    unstable = .("Unreliable: rests on a zero count, and the continuity correction points the other way from the observed data"),
+                    large = .("Strong evidence against disease"),
+                    moderate = .("Moderate evidence against disease"),
+                    small = .("Weak evidence against disease"),
+                    minimal = .("Minimal evidence against disease"),
+                    none = .("Uninformative: a negative result does not change the probability of disease"),
+                    against = .("Points TOWARD disease when negative: the test-positive level may be inverted"))
 
                 return(benchmarks)
             },
@@ -1085,8 +1299,8 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     },
                     PPV = .("Positive Predictive Value: Probability of disease given a positive test. This IS the post-test probability of disease. Depends on prevalence, sensitivity and specificity."),
                     NPV = .("Negative Predictive Value: Probability of being healthy given a negative test. This IS the post-test probability of health. Depends on prevalence, sensitivity and specificity."),
-                    LRP = .("Positive Likelihood Ratio: How much more likely a positive result is in diseased vs healthy patients. >10 = strong evidence, >5 = moderate, >2 = weak but potentially useful."),
-                    LRN = .("Negative Likelihood Ratio: How much more likely a negative result is in diseased vs healthy patients. <0.1 = strong evidence against disease, <0.2 = moderate, <0.5 = weak.")
+                    LRP = .("Positive Likelihood Ratio: How much more likely a positive result is in diseased vs healthy patients. Above 10 = strong evidence, 5-10 = moderate, 2-5 = weak but potentially useful (Jaeschke et al. 1994)."),
+                    LRN = .("Negative Likelihood Ratio: How much more likely a negative result is in diseased vs healthy patients. Below 0.1 = strong evidence against disease, 0.1-0.2 = moderate, 0.2-0.5 = weak (Jaeschke et al. 1994).")
                 )
 
                 # Vectorized footnote application for better performance
@@ -1100,7 +1314,8 @@ decisionClass <- if (requireNamespace("jmvcore"))
             .generateAllContent = function(sens, spec, ppv, npv, lr_pos, lr_neg,
                                          prior_prob, total_pop, test_name, gold_name,
                                          sens_ci = NULL, spec_ci = NULL,
-                                         continuity_used = FALSE) {
+                                         continuity_used = FALSE,
+                                         report_extras = list()) {
 
                 results <- list(
                     clinical_summary = "",
@@ -1198,7 +1413,13 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         sens_ci = sens_ci, spec_ci = spec_ci,
                         test_name = test_name,
                         gold_name = gold_name,
-                        prevalence = prior_prob
+                        prevalence = prior_prob,
+                        n_total = total_pop,
+                        n_diseased = report_extras$n_diseased %||% NA_real_,
+                        n_healthy = report_extras$n_healthy %||% NA_real_,
+                        ppv_ci = report_extras$ppv_ci,
+                        npv_ci = report_extras$npv_ci,
+                        lr_pos_ci = report_extras$lr_pos_ci
                     )
                 }, error = function(e) {
                     fallback_template <- .("<div style='margin: 15px; padding: 15px; border: 2px dashed #2196F3; background-color: rgba(33, 152, 239, 0.13); color: inherit;'><h3 style='color: inherit; margin-top: 0;'>Copy-Ready Clinical Report</h3><p>Diagnostic test evaluation shows sensitivity of {sens} and specificity of {spec}.</p></div>")
@@ -1210,22 +1431,34 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     )
                 })
 
-                # The likelihood ratio quoted in these two blocks comes from the
-                # Haldane-Anscombe corrected table whenever a cell is zero, while the
-                # sensitivity and specificity beside it come from the observed counts.
-                # The report block is explicitly labelled "Copy-Ready Clinical Report",
-                # so a sentence pairing "specificity 100.0%" with a finite likelihood
-                # ratio becomes a permanent claim in a manuscript unless the correction
-                # travels with it. Appended, not interpolated: feeding a translated
-                # sentence into a {placeholder} can hang jmvcore::format.
+                # The likelihood ratio quoted in these two blocks can come from the
+                # Haldane-Anscombe corrected table on a zero cell, while the sensitivity and
+                # specificity beside it come from the observed counts. The report block is
+                # labelled "Copy-Ready Clinical Report", so the qualifying sentences have to
+                # sit INSIDE the copied box: appended after it they were below "Copy the text
+                # above" and never reached the manuscript. Spliced in with sub(), not
+                # interpolated: a translated sentence inside a {placeholder} can hang
+                # jmvcore::format. If a translation changed the markup, fall back to appending.
+                in_report_box <- function(html, extra) {
+                    anchor <- "</p></div><p style='font-size: 12px"
+                    if (grepl(anchor, html, fixed = TRUE))
+                        sub(anchor, paste0("</p>", extra, "</div><p style='font-size: 12px"), html, fixed = TRUE)
+                    else paste0(html, extra)
+                }
+                para <- function(text) paste0("<p style='font-size: 13px; color: inherit;'><em>",
+                                              private$.safeHtmlOutput(text), "</em></p>")
                 if (isTRUE(continuity_used)) {
-                    cc_sentence <- paste0(
-                        "<p style='margin: 0 15px 15px 15px; font-size: 13px; color: inherit;'><em>",
-                        private$.safeHtmlOutput(.("A cell of the 2x2 table was zero. Sensitivity, specificity and the predictive values above are computed from the observed counts; the likelihood ratios are computed from the Haldane-Anscombe corrected table (0.5 added to every cell), without which they would be undefined. Quote both facts together.")),
-                        "</em></p>")
-                    results$report_template <- paste0(results$report_template, cc_sentence)
+                    cc_sentence <- para(.("A cell of the 2x2 table was zero. Sensitivity, specificity and the predictive values above are computed from the observed counts. A likelihood ratio whose formula contains the zero count is computed from the Haldane-Anscombe corrected table (0.5 added to every cell), because on the observed counts it would be zero or infinite. Quote both facts together."))
+                    results$report_template <- in_report_box(results$report_template, cc_sentence)
                     results$natural_summary <- paste0(results$natural_summary, cc_sentence)
                 }
+
+                # With a population prior the report's PPV/NPV are Bayes values at that
+                # prior, which carry no interval here (the sample intervals belong to the
+                # sample-prevalence values). Said inside the copied text.
+                if (isTRUE(report_extras$pp))
+                    results$report_template <- in_report_box(results$report_template, para(
+                        .("The predictive values above are computed by Bayes' theorem at the population prevalence you supplied, not at the prevalence observed in this sample, so no confidence interval is given for them.")))
 
                 return(results)
             }
@@ -1521,7 +1754,11 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 # Validate sample size and provide clinical guidance
                 private$.validateSampleSize(conf_table)
 
-                # Apply Haldane-Anscombe correction for zero cells to stabilize LR/OR
+                # Apply Haldane-Anscombe correction for zero cells to stabilize LR/OR.
+                # CONDITIONAL use: 0.5 is added to every cell only when some cell is zero.
+                # Haldane (1956) and Anscombe (1956) add 1/2 unconditionally to logits;
+                # applying it to likelihood ratios and the DOR on a zero cell is the
+                # convention Glas et al. (2003, p. 1131) describe, not Haldane's own result.
                 conf_table_cc <- conf_table
                 continuity_used <- FALSE
                 if (any(conf_table == 0)) {
@@ -1723,32 +1960,25 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
 
 
-                # Calculate likelihood ratios with proper statistical handling (use continuity-corrected counts when needed)
+                # Likelihood ratios. On a zero cell only a ratio whose OWN formula contains
+                # the zero count is taken from the Haldane-Anscombe corrected table: LR+ uses
+                # TP and FP, LR- uses FN and TN. Correcting a ratio that is well defined on
+                # the observed counts moved it for nothing - TP 20, FP 2, FN 0, TN 19 has an
+                # observed LR+ of 10.5 ("large") that the blanket correction turned into 8.59
+                # ("moderate"), under a note saying it would otherwise be undefined.
+                lrp_cc_used <- isTRUE(continuity_used) && (TP == 0 || FP == 0)
+                lrn_cc_used <- isTRUE(continuity_used) && (FN == 0 || TN == 0)
                 if (is.na(Sens) || is.na(Spec)) {
                     LRP <- NA
                     LRN <- NA
                 } else {
-                    sens_cc <- TPc / (TPc + FNc)
-                    spec_cc <- TNc / (TNc + FPc)
-
-                    # LR+ = Sensitivity / (1 - Specificity)
-                    LRP <- if (spec_cc < 1) {
-                        sens_cc / (1 - spec_cc)
-                    } else if (sens_cc == 1 && spec_cc == 1) {
-                        NA  # Perfect test - undefined
-                    } else {
-                        Inf
-                    }
-
-                    # LR- = (1 - Sensitivity) / Specificity
-                    LRN <- if (spec_cc > 0) {
-                        (1 - sens_cc) / spec_cc
-                    } else if (sens_cc == 1 && spec_cc == 1) {
-                        NA
-                    } else {
-                        Inf
-                    }
+                    LRP <- if (lrp_cc_used) (TPc / (TPc + FNc)) / (FPc / (FPc + TNc)) else Sens / (1 - Spec)
+                    LRN <- if (lrn_cc_used) (FNc / (TPc + FNc)) / (TNc / (FPc + TNc)) else (1 - Sens) / Spec
                 }
+                # Sign of the observed Youden's index, from the counts (exact integers): the
+                # direction every likelihood-ratio sentence must agree with (.lrBand).
+                youden_direction <- sign(TP * TN - FP * FN)
+                private$.youdenDirection <- youden_direction
 
                 # .validateLikelihoodRatios() used to run here. It replaced a
                 # non-finite LR with a fabricated finite one (sens / max(1 - spec, 0.001),
@@ -1764,7 +1994,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     private$.addNotice(
                         type = "INFO",
                         title = .("Continuity correction applied"),
-                        content = .("A cell of the 2x2 table is zero. The positive and negative likelihood ratios, the diagnostic odds ratio and the Fagan nomogram are computed from the Haldane-Anscombe corrected table (0.5 added to every cell), because those quantities are undefined when a cell is empty. Sensitivity, specificity, accuracy and the predictive values are computed from the observed counts and are unchanged. The two sets therefore do not reconcile exactly: a finite likelihood ratio can sit beside a specificity of 100%.")
+                        content = .("A cell of the 2x2 table is zero. A likelihood ratio whose formula contains the zero count, and the diagnostic odds ratio, are computed from the Haldane-Anscombe corrected table (0.5 added to every cell), because on the observed counts they would be zero or infinite. The other likelihood ratio, sensitivity, specificity, accuracy and the predictive values use the observed counts, and the Fagan nomogram is drawn with the likelihood ratios shown in the table. The two sets therefore do not reconcile exactly: a finite likelihood ratio can sit beside a specificity of 100%.")
                     )
                 }
 
@@ -1823,7 +2053,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     if (!is.finite(PostTestProbDisease) || !is.finite(PostTestProbHealthy))
                         ratioTable$setNote("prior_ppv_na", .("A predictive value is left blank where Bayes' theorem is undefined at this prior, which happens when no case can produce the corresponding test result in this sample."))
                     ratioTable$setNote("prior_ppv", .fmt(
-                        .("Predictive values are computed by Bayes' theorem at the population prior of {prior} that you supplied, NOT at this sample's observed prevalence of {observed}. Sensitivity and specificity are unaffected by prevalence; PPV and NPV are not."),
+                        .("Predictive values are computed by Bayes' theorem at the population prior of {prior} that you supplied, NOT at this sample's observed prevalence of {observed}. Sensitivity and specificity are carried over unchanged, which assumes the target population has the same case mix (spectrum) as this sample; PPV and NPV are recomputed."),
                         prior = sprintf("%.1f%%", 100 * PriorProb),
                         observed = sprintf("%.1f%%", 100 * PrevalenceD)))
                 } else {
@@ -1837,7 +2067,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 # the table, not only in the notices pane: a reader who sees Spec 100.0%
                 # next to a finite LR+ will otherwise assume one of them is a typo.
                 if (isTRUE(continuity_used))
-                    ratioTable$setNote("continuity", .("A cell of the 2x2 table is zero. Sensitivity, specificity, accuracy and the predictive values are computed from the observed counts; the likelihood ratios are computed from the Haldane-Anscombe corrected table (0.5 added to every cell), because they are undefined when a cell is empty. A finite likelihood ratio beside a specificity of 100% reflects that correction, not the observed data."))
+                    ratioTable$setNote("continuity", .("A cell of the 2x2 table is zero. Sensitivity, specificity, accuracy and the predictive values are computed from the observed counts. A likelihood ratio whose formula contains the zero count is computed from the Haldane-Anscombe corrected table (0.5 added to every cell), because on the observed counts it would be zero or infinite. A finite likelihood ratio beside a specificity of 100% reflects that correction, not the observed data."))
 
                 # Sample accuracy stays on the observed 2x2 even when a population
                 # prior is supplied -- it is a property of THIS sample's case mix, not a
@@ -1904,9 +2134,23 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     }
                     sens_ci <- exact_ci(TP, TP + FN)
                     spec_ci <- exact_ci(TN, TN + FP)
+                    # Report extras (STARD 2015): N, both arms, and an interval for every
+                    # quoted estimate. PPV/NPV intervals exist only at the sample
+                    # prevalence; with a population prior the report says so instead. The
+                    # LR+ interval uses the same (corrected, when a cell is zero) counts as
+                    # the LR+ it sits beside.
+                    report_extras <- list(
+                        n_diseased = DiseaseP,
+                        n_healthy = DiseaseN,
+                        pp = isTRUE(pp),
+                        ppv_ci = if (isTRUE(pp)) NULL else exact_ci(TP, TP + FP),
+                        npv_ci = if (isTRUE(pp)) NULL else exact_ci(TN, TN + FN),
+                        lr_pos_ci = if (lrp_cc_used) private$.lrPosCI(TPc, FPc, FNc, TNc)
+                                    else private$.lrPosCI(TP, FP, FN, TN))
 
                     content_results <- private$.generateAllContent(Sens, Spec, PPV_report, NPV_report, LRP, LRN,
                                                                   PriorProb, TotalPop, test_label, gold_label,
+                                                                  report_extras = report_extras,
                                                                   sens_ci = sens_ci, spec_ci = spec_ci,
                                                                   continuity_used = continuity_used)
                 }
@@ -2003,6 +2247,10 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         self$results$epirTable_number$setRow(rowKey = key,
                             values = list(statsnames = unname(epir_labels[[key]]),
                                           est = NA_real_, lower = NA_real_, upper = NA_real_))
+                    # Conditional notes are re-derived below on every run; a note from a
+                    # previous run must not outlive the numbers it explained.
+                    for (key in c("nndx_undefined", "nndx_unbounded"))
+                        self$results$epirTable_number$setNote(key, NULL)
 
                     # With a population prior supplied, the main table's PPV/NPV are Bayes
                     # values at that prior while these rows are exact binomial quantities
@@ -2013,7 +2261,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     # when the off-by-default Explanatory footnotes box is ticked.
                     if (isTRUE(self$options$pp))
                         self$results$epirTable_ratio$setNote("pv_prevalence", .fmt(
-                            .("The predictive values in this table are computed at the prevalence observed in this sample ({observed}), not at the population prior of {prior} used for the predictive values in the main table above. The intervals here belong to these estimates, not to those. Sensitivity and specificity are unaffected by prevalence."),
+                            .("The predictive values in this table are computed at the prevalence observed in this sample ({observed}), not at the population prior of {prior} used for the predictive values in the main table above. The intervals here belong to these estimates, not to those. Sensitivity and specificity are the same in both tables."),
                             observed = sprintf("%.1f%%", 100 * PrevalenceD),
                             prior = sprintf("%.1f%%", 100 * PriorProb)))
 
@@ -2066,7 +2314,10 @@ decisionClass <- if (requireNamespace("jmvcore"))
                                     # into them made this pane contradict both the Se/Sp in
                                     # the table above it and the Youden in the Clinical
                                     # Interpretation panel (Se+Sp-1).
-                                    cc_stats <- c("lr.pos", "lr.neg", "diag.or")
+                                    # Only the rows whose own formula contains the zero count
+                                    # (the same rule as the main table: LR+ on TP/FP, LR- on
+                                    # FN/TN; the DOR uses every cell).
+                                    cc_stats <- c(if (lrp_cc_used) "lr.pos", if (lrn_cc_used) "lr.neg", "diag.or")
                                     if (!is.null(epir_detail_cc) && nrow(epir_number) > 0) {
                                         m <- match(epir_number$statistic, epir_detail_cc$statistic)
                                         keep <- !is.na(m) & epir_number$statistic %in% cc_stats
@@ -2074,6 +2325,25 @@ decisionClass <- if (requireNamespace("jmvcore"))
                                             epir_number[keep, c("est", "lower", "upper")] <-
                                                 epir_detail_cc[m[keep], c("est", "lower", "upper")]
                                     }
+
+                                    # Youden's index and NNDx: not epiR's. epiR's Youden interval
+                                    # adds the two Clopper-Pearson bounds (99.8% coverage in
+                                    # simulation, labelled 95%), and its NNDx interval takes
+                                    # min/max of 1/bounds, which excludes its own estimate
+                                    # whenever the Youden interval crosses 0 (6.67 shown as
+                                    # -3.08 to 1.73) and prints a negative "number" for an
+                                    # inverted test. Agresti-Caffo for Youden (a difference
+                                    # of two independent proportions, see .youdenCI), NNDx by
+                                    # inversion, NA where undefined or unbounded. Observed
+                                    # counts: the zero-cell correction is for ratios only.
+                                    youden_ci <- private$.youdenCI(TP, TP + FN, FP, FP + TN)
+                                    nndx_ci <- private$.nndxFromYouden(youden_ci)
+                                    iy <- which(epir_number$statistic == "youden")
+                                    if (length(iy) == 1)
+                                        epir_number[iy, c("est", "lower", "upper")] <- as.list(unname(youden_ci))
+                                    ix <- which(epir_number$statistic == "nndx")
+                                    if (length(ix) == 1)
+                                        epir_number[ix, c("est", "lower", "upper")] <- as.list(unname(nndx_ci))
 
                                     # Values are written by rowKey, so each row's statistic has to
                                     # travel with the data.
@@ -2174,14 +2444,43 @@ decisionClass <- if (requireNamespace("jmvcore"))
                                                       upper = data_frame$upper[i]))
                             }
 
+                            # Always-on (setNote, not the off-by-default footnotes): the
+                            # Youden and NNDx intervals are not epiR's, and a blank NNDx
+                            # cell needs its reason on screen.
+                            epirTable_number$setNote("youden_method", .("Youden's index interval: Agresti-Caffo interval for the difference between the true-positive and false-positive rates (one positive and one negative result added to each group). Number needed to diagnose = 1 / Youden's index; its interval is the inverse of the positive part of the Youden interval."))
+                            nndx_row <- epirresult_number[epirresult_number_stats == "nndx", , drop = FALSE]
+                            nndx_key <- if (nrow(nndx_row) != 1) "none"
+                                        else if (is.na(nndx_row$est) && is.na(nndx_row$lower)) "absent"
+                                        else if (is.na(nndx_row$est)) "no_estimate"
+                                        else if (is.na(nndx_row$upper)) "unbounded"
+                                        else "none"
+                            epirTable_number$setNote("nndx_undefined", switch(nndx_key,
+                                absent = .("The number needed to diagnose is not shown: Youden's index and its whole confidence interval are at or below 0."),
+                                no_estimate = .("Youden's index is 0 or below in this sample, so the number needed to diagnose has no point estimate. Its confidence interval starts at the lower limit shown and has no upper bound."),
+                                NULL))
+                            epirTable_number$setNote("nndx_unbounded", if (identical(nndx_key, "unbounded"))
+                                .("The upper limit of the number needed to diagnose is not shown: the Youden's index interval includes 0, so the interval for its inverse has no upper bound.") else NULL)
+                            # The LR / DOR rows of THIS table come from the corrected table on a
+                            # zero cell too; the note used to live only on the main ratio table.
+                            epirTable_number$setNote("continuity", if (isTRUE(continuity_used))
+                                .("A cell of the 2x2 table is zero. A likelihood ratio whose formula contains the zero count, and the diagnostic odds ratio, are computed from the Haldane-Anscombe corrected table (0.5 added to every cell), because on the observed counts they would be zero or infinite. The other rows use the observed counts.") else NULL)
+
                             if (self$options$fnote) {
                                 # These rows are ordered LR+, LR-, DOR, Youden, NNDx. Attaching by
                                 # row number described LR+ as the diagnostic odds ratio.
                                 number_notes <- c(
                                     `lr.pos` = .("How much more likely a positive result is in a diseased than in a healthy patient. >10 is strong evidence FOR disease, 5-10 moderate, 2-5 weak."),
                                     `lr.neg` = .("How much more likely a negative result is in a diseased than in a healthy patient. <0.1 is strong evidence AGAINST disease, 0.1-0.2 moderate, 0.2-0.5 weak."),
-                                    `diag.or` = .("How much more likely will the test make a correct diagnosis than an incorrect diagnosis in patients with the disease."),
-                                    `nndx` = .("Number of patients that need to be tested to give one correct positive test."),
+                                    # The old text (epiR's help wording) described TP/FN - the odds
+                                    # of a correct result in the diseased only - not the DOR.
+                                    `diag.or` = .("Diagnostic odds ratio: the odds of a positive test in patients with the disease divided by the odds of a positive test in patients without it, equal to LR+ / LR- (Glas et al. 2003)."),
+                                    # epiR's wording ("to give one correct positive test") is not
+                                    # the definition, and "patients WITH the disease examined per
+                                    # correct detection" (Linn & Grunau's abstract shorthand) is
+                                    # 1/sensitivity. NND = 1/J: n * sens - n * (1 - spec) = 1 at
+                                    # n = NND. Origin Bandolier (1996); Linn & Grunau (2006) note
+                                    # that it ignores prevalence.
+                                    `nndx` = .("Number needed to diagnose = 1 / Youden's index: testing this many patients with the disease and the same number without it yields, on average, one more true-positive than false-positive result (Bandolier 1996; Linn and Grunau 2006). It does not depend on prevalence, so it says little about how the test performs in a particular clinical setting."),
                                     `youden` = .("Youden's index is the difference between the true positive rate and the false positive rate. Youden's index ranges from -1 to +1 with values closer to 1 if both sensitivity and specificity are high (i.e. close to 1).")
                                 )
 
@@ -2206,8 +2505,20 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     # it are already Haldane-Anscombe corrected; pass the proportions
                     # from the same corrected table so the plot is self-consistent
                     # rather than clamping to an arbitrary epsilon.
-                    sens_plot <- if (isTRUE(continuity_used)) TPc / (TPc + FNc) else Sens
-                    spec_plot <- if (isTRUE(continuity_used)) TNc / (TNc + FPc) else Spec
+                    sens_plot <- Sens
+                    spec_plot <- Spec
+                    if (isTRUE(continuity_used)) {
+                        # nomogrammer re-derives both ratios from Sens/Spec and rejects 0 and
+                        # 1. Back-solve the proportions whose ratios ARE the table's LR+ and
+                        # LR- (spec = (LR+ - 1)/(LR+ - LR-), sens = LR+ (1 - spec)), so the
+                        # figure quotes the same likelihood ratios as the tables; fall back
+                        # to the corrected proportions when no such pair exists.
+                        sp_b <- (LRP - 1) / (LRP - LRN)
+                        se_b <- LRP * (1 - sp_b)
+                        ok_b <- all(is.finite(c(se_b, sp_b))) && se_b > 0 && se_b < 1 && sp_b > 0 && sp_b < 1
+                        sens_plot <- if (ok_b) se_b else TPc / (TPc + FNc)
+                        spec_plot <- if (ok_b) sp_b else TNc / (TNc + FPc)
+                    }
 
                     plotData1 <- list(
                         "Prevalence" = PriorProb,
@@ -2347,7 +2658,16 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     # FALSE: Verbose = TRUE cat()s a seven-line untranslated English
                     # block to stdout on every render, resize and .omv reopen. The same
                     # numbers are already drawn on the nomogram.
-                    Verbose = FALSE
+                    Verbose = FALSE,
+                    # jamovi's global theme (nomogrammer layers its structural theme on
+                    # top of it), and the figure's own text translated here: nomogrammer
+                    # is file-level, so `.()` cannot run inside it. Same as cotest.b.R.
+                    Theme = ggtheme,
+                    Title = .("Fagan Nomogram"),
+                    PriorLabel = .("Prior\nProb.\n(%)"),
+                    PosteriorLabel = .("Posterior\nProb.\n(%)"),
+                    DetailLabels = c(prevalence = .("Prevalence"), plr = .("PLR"), nlr = .("NLR"),
+                                     post_pos = .("Post(+)"), post_neg = .("Post(-)"))
                 )
 
                 print(plot1)

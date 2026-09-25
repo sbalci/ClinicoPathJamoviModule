@@ -72,11 +72,12 @@ test_that("FIX-02 categorical hierarchical: stratified Fleiss kappa on the shipp
     expect_identical(as.integer(cs$rank), as.integer(rank(-per[cs$cluster], ties.method = "min")))
 
     # Categorical ratings: no decomposition in this block (contract changed 2026-09-24,
-    # when the binary glmer route was retired); each table points to the ordinal engine.
-    for (nm in c("varianceDecompositionTable", "hierarchicalICCTable", "homogeneityTestTable")) {
-        n <- agreement_notes(r[[nm]])
-        expect_true(length(n) > 0 && grepl("Model-based agreement", n[["error"]], fixed = TRUE), info = nm)
-    }
+    # when the binary glmer route was retired). Since 2026-09-25 the three linear-model
+    # tables are hidden and ONE note on the overall table points to the ordinal engine.
+    for (nm in c("varianceDecompositionTable", "hierarchicalICCTable", "homogeneityTestTable"))
+        expect_false(r[[nm]]$visible, info = nm)
+    expect_match(agreement_notes(r$hierarchicalOverallTable)[["categorical_route"]],
+                 "Model-based agreement", fixed = TRUE)
 })
 
 test_that("FIX-03 categorical hierarchical, two raters: per-cluster weighted Cohen kappa matches vcd", {
@@ -132,16 +133,15 @@ test_that("FIX-04 binary hierarchical: decomposition tables point to Model-based
     nn <- as.numeric(table(b$site)[names(per)])
     expect_equal(r$hierarchicalOverallTable$asDF$overall_kappa[1], sum(nn * per) / sum(nn), tolerance = 1e-10)
 
-    # Retired route: no numbers, one pointer note per table.
-    expect_true(all(is.na(r$hierarchicalICCTable$asDF$icc_value)))
-    expect_true(all(is.na(r$varianceDecompositionTable$asDF$variance)))
-    expect_true(all(is.na(r$homogeneityTestTable$asDF$statistic)))
+    # Retired route: the three tables are hidden (2026-09-25), one pointer on the overall table.
     for (nm in c("varianceDecompositionTable", "hierarchicalICCTable", "homogeneityTestTable"))
-        expect_true(grepl("Model-based agreement", agreement_notes(r[[nm]])[["error"]], fixed = TRUE), info = nm)
+        expect_false(r[[nm]]$visible, info = nm)
+    route <- agreement_notes(r$hierarchicalOverallTable)[["categorical_route"]]
+    expect_match(route, "Model-based agreement", fixed = TRUE)
 
     # Binary calls are outside the latent model's validated range (grid v2, 2026-09-24: biased at every
     # tested design), so the pointer says so and the target refuses with a sentence - never a number.
-    expect_true(grepl("binary calls", agreement_notes(r$varianceDecompositionTable)[["error"]], fixed = TRUE))
+    expect_true(grepl("binary calls", route, fixed = TRUE))
     lt <- r$latentModelTable
     expect_true(all(is.na(lt$asDF$estimate[vapply(lt$rowKeys, as.character, "") %in% c("rho", "kappa_m")])))
     expect_true(grepl("With two categories the latent model is not computed",
@@ -483,7 +483,7 @@ test_that("bootstrap kappa for 3+ raters is the headline statistic (every rating
         expect_identical(grepl("exact", bt$metric[row], fixed = TRUE), ex)
         # Percent agreement: complete cases, as the headline (irr::agree). A case with one
         # rating used to count as agreement.
-        pct <- bt$estimate[bt$metric == "Percent Agreement"]
+        pct <- bt$estimate[bt$metric == "Proportion of exact agreement"]
         expect_equal(100 * pct, r$irrtable$asDF$peragree[1], tolerance = 1e-10)
     }
 })

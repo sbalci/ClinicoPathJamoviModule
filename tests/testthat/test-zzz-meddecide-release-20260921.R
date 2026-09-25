@@ -45,17 +45,19 @@ test_that("ICC sample size follows Walter, Eliasziw & Donner (1998), not a Wald 
 })
 
 
-test_that("mean correlation across rater pairs is averaged on the Fisher-z scale", {
-    # An arithmetic mean of r is biased downward, and the bias grows with the spread of
-    # the pairwise values -- r = (.30, .95) averaged .625 against .790 on the z scale.
+test_that("mean correlation across rater pairs is the plain arithmetic mean", {
+    # Superseded 2026-09-25 (release review): the Fisher-z mean this test used to demand
+    # fell back to the arithmetic mean only when a pair reached |r| = 1, so one adjacent
+    # swap moved (0.9999, 0.608, 0.605) from 0.972 to (1, 0.608, 0.605) = 0.739. The plain
+    # mean has no such jump, and for Spearman without ties it equals (mW - 1) / (m - 1).
     fz <- function(r) tanh(mean(atanh(pmin(pmax(r, -0.999999), 0.999999))))
-    expect_equal(round(fz(c(0.30, 0.95)), 3), 0.790)
-    expect_true(fz(c(0.50, 0.90, 0.95)) > mean(c(0.50, 0.90, 0.95)))
+    expect_gt(fz(c(0.9999, 0.608, 0.605)) - mean(c(1, 0.608, 0.605)), 0.2)   # the jump
 
     src <- read_b("agreement")
-    expect_length(grep("tanh(mean(atanh(", src, fixed = TRUE), 2)   # mean_r and mean_rho
-    expect_false(any(grepl("^\\s*mean_r <- mean\\(pairwise_r\\)", src)))
-    expect_false(any(grepl("^\\s*mean_rho <- mean\\(pairwise_rho\\)", src)))
+    code <- src[!grepl("^\\s*#", src)]
+    expect_length(grep("tanh(mean(atanh(", code, fixed = TRUE), 0)
+    expect_true(any(grepl("^\\s*mean_r <- mean\\(pairwise_r\\)", src)))
+    expect_true(any(grepl("^\\s*mean_rho <- mean\\(pairwise_rho\\)", src)))
 })
 
 
@@ -186,7 +188,7 @@ test_that("weighted kappa is computed on the declared ordinal scale", {
     skip_if_not_installed("irr"); skip_if_not_installed("vcd")
     src <- readLines(file.path(ROOT, "R", "agreement.b.R"), warn = FALSE)
     expect_true(any(grepl(".kappa2Ordered = function", src, fixed = TRUE)))
-    expect_true(any(grepl(".orderedLevels = function", src, fixed = TRUE)))
+    expect_true(any(grepl(".orderedLevelsInfo = function", src, fixed = TRUE)))
     expect_false(any(grepl("as.data.frame(lapply(ratings_k, function(x)", src, fixed = TRUE)),
                  info = "per-column as.integer() recoding is back")
 

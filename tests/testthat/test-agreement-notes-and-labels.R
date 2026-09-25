@@ -203,7 +203,7 @@ test_that("the weighting and the rater count decide the name, and nothing else d
                    paste0("Quadratic-weighted ", KAPPA))
   expect_identical(lbl(vars = c("P_1", "P_2", "Q_1")), paste0("Fleiss' ", KAPPA))
   expect_identical(lbl(vars = c("P_1", "P_2", "Q_1"), exct = TRUE),
-                   paste0("Fleiss' ", KAPPA, " (exact)"))
+                   paste0("Conger's ", KAPPA, " (exact)"))
 })
 
 # ---- the subgroup trap: a translated label must not regrade an ICC -----------
@@ -229,7 +229,9 @@ test_that("a continuous subgroup run is graded on the ICC bands, not the kappa b
   icc_words   <- vapply(stat, kl_icc_band, "")
   kappa_words <- vapply(stat, lk_kappa_band, "")
   expect_false(any(icc_words == kappa_words))
-  expect_identical(as.character(df$interpretation), icc_words)
+  # The point-estimate band leads the label; "(CI spans ...)" follows when the interval
+  # crosses a Koo & Li boundary (fix pass 2026-09-25).
+  expect_identical(sub(" \\(CI spans .*\\)$", "", as.character(df$interpretation)), icc_words)
 
   # The note has to say which scale was used, or the words are unattributable.
   expect_true(grepl("Koo & Li", note_text(tb), fixed = TRUE))

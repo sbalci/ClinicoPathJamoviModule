@@ -92,6 +92,7 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             clusterRankings = FALSE,
             showHierarchicalGuide = FALSE,
             conditionVariable = NULL,
+            caseIdVariable = NULL,
             mixedEffectsComparison = FALSE,
             multipleTestCorrection = "none",
             showMixedEffectsGuide = FALSE,
@@ -572,6 +573,17 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 permitted=list(
                     "factor"),
                 default=NULL)
+            private$..caseIdVariable <- jmvcore::OptionVariable$new(
+                "caseIdVariable",
+                caseIdVariable,
+                suggested=list(
+                    "nominal",
+                    "id"),
+                permitted=list(
+                    "factor",
+                    "numeric",
+                    "id"),
+                default=NULL)
             private$..mixedEffectsComparison <- jmvcore::OptionBool$new(
                 "mixedEffectsComparison",
                 mixedEffectsComparison,
@@ -1039,6 +1051,7 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..clusterRankings)
             self$.addOption(private$..showHierarchicalGuide)
             self$.addOption(private$..conditionVariable)
+            self$.addOption(private$..caseIdVariable)
             self$.addOption(private$..mixedEffectsComparison)
             self$.addOption(private$..multipleTestCorrection)
             self$.addOption(private$..showMixedEffectsGuide)
@@ -1198,6 +1211,7 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         clusterRankings = function() private$..clusterRankings$value,
         showHierarchicalGuide = function() private$..showHierarchicalGuide$value,
         conditionVariable = function() private$..conditionVariable$value,
+        caseIdVariable = function() private$..caseIdVariable$value,
         mixedEffectsComparison = function() private$..mixedEffectsComparison$value,
         multipleTestCorrection = function() private$..multipleTestCorrection$value,
         showMixedEffectsGuide = function() private$..showMixedEffectsGuide$value,
@@ -1356,6 +1370,7 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..clusterRankings = NA,
         ..showHierarchicalGuide = NA,
         ..conditionVariable = NA,
+        ..caseIdVariable = NA,
         ..mixedEffectsComparison = NA,
         ..multipleTestCorrection = NA,
         ..showMixedEffectsGuide = NA,
@@ -2070,9 +2085,11 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `title`="Kappa", 
                         `type`="number")),
                 clearWith=list(
+                    "wght",
                     "vars"),
                 refs=list(
-                    "LandisKoch1977")))
+                    "LandisKoch1977",
+                    "Light1971")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="lightKappaExplanation",
@@ -2129,7 +2146,8 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "finnLevels",
                     "finnModel"),
                 refs=list(
-                    "Finn1970")))
+                    "Finn1970",
+                    "Cicchetti1994")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="finnExplanation",
@@ -2835,6 +2853,7 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "vars",
                     "conditionVariable",
+                    "caseIdVariable",
                     "multipleTestCorrection",
                     "confLevel"),
                 refs=list(
@@ -2870,7 +2889,8 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="text")),
                 clearWith=list(
                     "vars",
-                    "conditionVariable"),
+                    "conditionVariable",
+                    "caseIdVariable"),
                 refs=list(
                     "Shrout1979",
                     "McGraw1996")))
@@ -2920,7 +2940,7 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="text"),
                     list(
                         `name`="n", 
-                        `title`="N", 
+                        `title`="Agreements (TP)", 
                         `type`="integer"),
                     list(
                         `name`="precision", 
@@ -2984,6 +3004,7 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `title`="CI Method", 
                         `type`="text")),
                 clearWith=list(
+                    "exct",
                     "vars",
                     "nBoot",
                     "confLevel",
@@ -3397,7 +3418,9 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "tdiLimit",
                     "confLevel",
                     "nBoot",
-                    "seed")))
+                    "seed"),
+                refs=list(
+                    "Lin2000")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="tdiExplanation",
@@ -4219,7 +4242,9 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `title`="Value", 
                         `type`="text")),
                 refs=list(
-                    "Walter1998")))
+                    "Walter1998",
+                    "donnerEliasziwKappaGOF",
+                    "rotondiDonnerKappaCI")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="agreementSampleSizeExplanation",
@@ -4308,9 +4333,9 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param showBlandAltmanGuide Show educational guide explaining Bland-Altman
 #'   limits of agreement for method comparison studies.
 #' @param blandAltmanPlot Generate Bland-Altman plot for continuous agreement
-#'   analysis. Displays mean difference and limits of agreement between the
-#'   first two raters. Only applicable when raters provide continuous
-#'   measurements (e.g., tumor size in mm).
+#'   analysis. Displays the mean difference and limits of agreement between two
+#'   raters; it needs exactly two rater variables. Only applicable when raters
+#'   provide continuous measurements (e.g., tumor size in mm).
 #' @param agreementHeatmap Generate heatmap visualization of agreement
 #'   patterns for categorical data. Creates confusion matrices showing how each
 #'   rater pair's classifications correspond. Color-coded cells reveal agreement
@@ -4319,10 +4344,14 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   Shows where raters agree strongly, where they consistently disagree, and
 #'   which category confusions are most common. Particularly valuable for
 #'   multi-category classifications with complex disagreement patterns.
-#' @param heatmapColorScheme Color palette for heatmap visualization. Blue-Red
-#'   highlights diagonal agreement with strong contrast. Traffic light uses
-#'   intuitive color coding. Viridis is perceptually uniform and
-#'   colorblind-safe. Grayscale for black-and-white printing.
+#' @param heatmapColorScheme Colour palette for the heatmap. Every scheme
+#'   shows the share of all cases in a cell on a fixed 0 to 100 percent scale,
+#'   so colour means frequency, on or off the diagonal, not agreement.
+#'   Blue-White-Red: blue for empty or rare cells, white at half of all cases,
+#'   red above half. Traffic light: red for few cases through green for many, so
+#'   a crowded off-diagonal cell is green too. Viridis is perceptually uniform
+#'   and colorblind-safe (dark purple few, yellow many). Grayscale for
+#'   black-and-white printing (light few, dark many).
 #' @param heatmapShowPercentages Display percentage values within heatmap
 #'   cells (percentage of total cases). Helps interpret relative frequency of
 #'   each rater combination. Essential when comparing heatmaps with different
@@ -4434,7 +4463,9 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param tdi Total Deviation Index (TDI): the boundary within which the
 #'   requested proportion of absolute differences between two measurement
 #'   methods fall. Computed here as the empirical quantile of the absolute
-#'   differences, with a case-resampling bootstrap interval. It is a single
+#'   differences, with a distribution-free order-statistic confidence interval;
+#'   a finite upper limit needs at least 36 pairs at 90 percent coverage and a
+#'   95 percent confidence level, and more at higher settings. It is a single
 #'   number summarising how far apart the two methods get, and it is useful
 #'   alongside Bland-Altman when the differences are not normal. Note the scope:
 #'   this estimator is unconditional, so it does NOT model variability as a
@@ -4450,9 +4481,9 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   prediction guarantee for future measurements.
 #' @param tdiLimit Maximum acceptable difference between methods in original
 #'   units. Example: For tumor size, 5mm might be clinically acceptable. Compare
-#'   the empirical TDI and its bootstrap interval with this prespecified
-#'   descriptive limit. Passing it does not, by itself, establish method
-#'   equivalence.
+#'   the empirical TDI and the upper limit of its interval with this
+#'   prespecified descriptive limit. Passing it does not, by itself, establish
+#'   method equivalence.
 #' @param showTDIGuide Show educational guide and clinical use cases for Total
 #'   Deviation Index before running analysis.
 #' @param iota Iota coefficient (Janson & Olsson, 2001) for the selected rater
@@ -4497,20 +4528,22 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param showLightKappaGuide Show educational guide explaining when Light's
 #'   Kappa is preferred for 3+ rater studies.
 #' @param kendallW Kendall's coefficient of concordance (W) measures agreement
-#'   among raters when rating or ranking ordinal data. W ranges from 0 (no
-#'   agreement) to 1 (perfect agreement). Particularly useful for ranked data,
-#'   severity scores, and ordinal grading systems where you want to know if
-#'   raters rank cases in similar order.
+#'   among raters when rating or ranking ordinal data. W ranges from 0 to 1
+#'   (perfect agreement); raters who agree no better than chance score about
+#'   1/m. Particularly useful for ranked data, severity scores, and ordinal
+#'   grading systems where you want to know if raters rank cases in similar
+#'   order.
 #' @param showKendallWGuide Show educational guide explaining Kendall's W for
 #'   ordinal concordance and ranking agreement.
 #' @param robinsonA Robinson's A (1957) is an agreement coefficient for
 #'   ordinal or numeric ratings: 1 minus the within-case variance divided by the
-#'   total variance. It ranges from 0 to 1 (perfect agreement), with 0
-#'   indicating agreement no better than chance. Alternative to weighted kappa
-#'   that directly measures the degree of ordinal association between raters.
-#'   Particularly useful when ordinal categories have meaningful rank order
-#'   (e.g., disease severity stages, tumor grades). Less affected by marginal
-#'   distribution imbalances than kappa-based measures.
+#'   total variance. It reaches 1 at perfect agreement; raters who agree no
+#'   better than chance score about 1/m (0.5 for two raters), so the label is
+#'   read from the chance-corrected value (mA - 1)/(m - 1). Alternative to
+#'   weighted kappa that penalises systematic offsets between raters, not only
+#'   disagreement in order. Particularly useful when ordinal categories have
+#'   meaningful rank order (e.g., disease severity stages, tumor grades). Less
+#'   affected by marginal distribution imbalances than kappa-based measures.
 #' @param showRobinsonAGuide Show educational guide and clinical use cases for
 #'   Robinson's A before running analysis.
 #' @param meanSpearman Mean Spearman Rho calculates the average rank
@@ -4663,14 +4696,20 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param conditionVariable Variable distinguishing measurement conditions
 #'   (e.g., AI-assisted vs. conventional, pre-training vs. post-training).
 #'   Enables mixed-effects comparison that accounts for rater and case random
-#'   effects. Each case-rater pair should have one observation per condition
-#'   level.
+#'   effects. Each data row is treated as a separate case unless a case ID
+#'   variable is given.
+#' @param caseIdVariable Identifies the case on each row of the mixed-effects
+#'   condition comparison. Give it when the same case was measured under each
+#'   condition on separate rows: rows sharing an ID are then one case in the
+#'   model (a random intercept per case), so the conditions are compared within
+#'   case. Without it every row is a separate case and the comparison is between
+#'   cases.
 #' @param mixedEffectsComparison Fit a linear mixed model to compare
 #'   measurement conditions while accounting for rater and case random effects.
 #'   Model: score ~ condition + (1|rater) + (1|case). Provides condition effect
-#'   estimate with CI, variance components, and ICC. More powerful than paired
-#'   t-tests or Wilcoxon tests when data has a crossed rater x case x condition
-#'   design (e.g., Dy et al. 2024 Ki-67 AI study).
+#'   estimate with CI, variance components, and ICC. Give a case ID variable
+#'   when a case was measured under each condition on separate rows; without it
+#'   each row is one case and the comparison is between cases.
 #' @param multipleTestCorrection Correction for multiple comparisons, applied
 #'   to the pairwise p-values of the All-Pairs Kappa table and to the
 #'   fixed-effect p-values of the Mixed-Effects Condition Comparison.
@@ -4749,9 +4788,13 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   category with >50 percent of votes. Supermajority requires >=75 percent
 #'   agreement. Unanimous requires 100 percent agreement. Cases not meeting
 #'   threshold are set to NA in consensus variable.
-#' @param tieBreaker How to handle ties when no single category meets the
-#'   consensus threshold (e.g., 2-2 split with 4 raters). Exclude = set
-#'   consensus to NA for tied cases. First = use first category that appears.
+#' @param tieBreaker How to break a tie between equally frequent categories
+#'   (e.g., a 2-2 split with 4 raters) in the modal rating of Case Agreement and
+#'   in the reference label of the multi-annotator concordance. Lowest and
+#'   highest are read on the declared category order. It does not change the
+#'   consensus variable: a majority, a supermajority or unanimity cannot tie, so
+#'   a split case gets no consensus label under any setting. Exclude = leave
+#'   tied cases without a label. First = use first category that appears.
 #'   Lowest/Highest = use min/max of tied categories.
 #' @param loaVariable Calculate the agreement level for each case. Choose
 #'   between Simple (3 categories) or Detailed (5 categories) classification.
@@ -4828,12 +4871,13 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   subgroup's case mix and that subgroups are not compared with each other.
 #' @param raterClustering Cluster raters based on their rating patterns to
 #'   identify groups of raters with similar rating behavior. For continuous
-#'   data: clustering based on correlation or Euclidean distance of ratings. For
-#'   categorical data: clustering based on agreement patterns or confusion
-#'   matrices. Essential for identifying subgroups of raters who rate similarly,
-#'   detecting outlier raters, understanding rater training backgrounds, and
-#'   optimizing panel composition. Reveals whether raters form natural groups
-#'   (e.g., experienced vs. novice, different training backgrounds) or rate
+#'   data: clustering on the distance chosen under Distance (1 minus Lin's CCC
+#'   by default, or correlation, Euclidean or Manhattan). For categorical data:
+#'   clustering on the proportion of cases on which two raters disagree.
+#'   Essential for identifying subgroups of raters who rate similarly, detecting
+#'   outlier raters, understanding rater training backgrounds, and optimizing
+#'   panel composition. Reveals whether raters form natural groups (e.g.,
+#'   experienced vs. novice, different training backgrounds) or rate
 #'   independently. Useful for targeted training interventions and understanding
 #'   sources of disagreement.
 #' @param clusterMethod Hierarchical clustering: Creates dendrogram showing
@@ -4879,8 +4923,9 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   relationships.
 #' @param showClusterHeatmap Display heatmap of pairwise rater similarities
 #'   with cluster memberships annotated. Helps visualize which raters are most
-#'   similar and validates cluster assignments. For continuous data: correlation
-#'   matrix. For categorical data: agreement matrix.
+#'   similar and validates cluster assignments. For continuous data the
+#'   similarity is the one the chosen distance implies (Lin's CCC by default).
+#'   For categorical data it is the proportion of cases two raters agree on.
 #' @param showRaterClusterGuide Show the educational guide explaining how
 #'   raters are grouped and how to read the dendrogram and similarity heatmap.
 #' @param caseClustering Perform clustering of cases based on rating patterns
@@ -4944,9 +4989,11 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param ssPower Target power (1 - Type II error rate).
 #' @param showSampleSizeGuide Show educational guide for planning agreement
 #'   study sample size.
-#' @param seed Random seed for the reproducible bootstrap resampling used in
-#'   the agreement analyses. Change this value to obtain a different bootstrap
-#'   draw; the default (42) reproduces the previous fixed behaviour.
+#' @param seed Random seed for everything random in this analysis: the
+#'   bootstrap resampling, the k-means starting centres of rater and case
+#'   clustering, and the random subsample the case-cluster heatmap draws above
+#'   200 cases. Change this value to obtain a different draw; the default (42)
+#'   reproduces the previous fixed behaviour.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$welcome} \tab \tab \tab \tab \tab a html \cr
@@ -5168,6 +5215,7 @@ agreement <- function(
     clusterRankings = FALSE,
     showHierarchicalGuide = FALSE,
     conditionVariable = NULL,
+    caseIdVariable = NULL,
     mixedEffectsComparison = FALSE,
     multipleTestCorrection = "none",
     showMixedEffectsGuide = FALSE,
@@ -5245,6 +5293,7 @@ agreement <- function(
     if ( ! missing(referenceRater)) referenceRater <- jmvcore::resolveQuo(jmvcore::enquo(referenceRater))
     if ( ! missing(clusterVariable)) clusterVariable <- jmvcore::resolveQuo(jmvcore::enquo(clusterVariable))
     if ( ! missing(conditionVariable)) conditionVariable <- jmvcore::resolveQuo(jmvcore::enquo(conditionVariable))
+    if ( ! missing(caseIdVariable)) caseIdVariable <- jmvcore::resolveQuo(jmvcore::enquo(caseIdVariable))
     if ( ! missing(subgroupVariable)) subgroupVariable <- jmvcore::resolveQuo(jmvcore::enquo(subgroupVariable))
     if ( ! missing(conditionBVars)) conditionBVars <- jmvcore::resolveQuo(jmvcore::enquo(conditionBVars))
     if (missing(data))
@@ -5254,6 +5303,7 @@ agreement <- function(
             `if`( ! missing(referenceRater), referenceRater, NULL),
             `if`( ! missing(clusterVariable), clusterVariable, NULL),
             `if`( ! missing(conditionVariable), conditionVariable, NULL),
+            `if`( ! missing(caseIdVariable), caseIdVariable, NULL),
             `if`( ! missing(subgroupVariable), subgroupVariable, NULL),
             `if`( ! missing(conditionBVars), conditionBVars, NULL))
 
@@ -5348,6 +5398,7 @@ agreement <- function(
         clusterRankings = clusterRankings,
         showHierarchicalGuide = showHierarchicalGuide,
         conditionVariable = conditionVariable,
+        caseIdVariable = caseIdVariable,
         mixedEffectsComparison = mixedEffectsComparison,
         multipleTestCorrection = multipleTestCorrection,
         showMixedEffectsGuide = showMixedEffectsGuide,

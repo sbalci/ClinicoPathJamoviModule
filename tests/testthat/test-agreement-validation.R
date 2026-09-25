@@ -134,12 +134,15 @@ test_that("VAL-agreement-C02 weighted kappa is on the declared ordinal scale, an
     agreement(data = d, vars = c("R1","R2"), wght = "squared")))
   expect_equal(as.numeric(r$irrtable$asDF$kappa[1]), expected, tolerance = 1e-6)
 
-  # and weighted kappa must REFUSE unordered factors rather than rank level codes
+  # and weighted kappa must never rank the level codes of unordered factors. Since
+  # 2026-09-25 that request reports the UNWEIGHTED kappa with a note (it used to reject()
+  # the whole analysis, taking ICC and Bland-Altman down with it).
   dn <- data.frame(R1 = factor(a, levels = lv), R2 = factor(bc, levels = lv))
-  expect_error(
-    suppressWarnings(suppressMessages(
-      agreement(data = dn, vars = c("R1","R2"), wght = "squared"))),
-    regexp = "[Oo]rdinal")
+  rn <- suppressWarnings(suppressMessages(
+    agreement(data = dn, vars = c("R1","R2"), wght = "squared")))
+  expect_equal(as.numeric(rn$irrtable$asDF$kappa[1]),
+               unname(vcd::Kappa(table(dn$R1, dn$R2))$Unweighted["value"]), tolerance = 1e-6)
+  expect_true("weight_override" %in% names(rn$irrtable$notes))
 })
 
 test_that("VAL-agreement-C01 metamorphic invariants hold", {
@@ -450,9 +453,12 @@ test_that("VAL-agreement-06 hierarchical kappa fills what it can on categorical 
   expect_equal(unname(cs$kappa), unname(per[as.character(cs$cluster)]), tolerance = 1e-8)
   expect_true(is.finite(r$hierarchicalOverallTable$asDF$overall_kappa[1]))
   expect_true(nn(r$hierarchicalOverallTable))
-  expect_true(nn(r$varianceDecompositionTable))
-  expect_true(nn(r$hierarchicalICCTable))
-  expect_true(nn(r$homogeneityTestTable))
+  # Since 2026-09-25 the three tables that need a variance decomposition are hidden on
+  # this route and the overall table carries the explanation for all of them.
+  expect_true("categorical_route" %in% names(r$hierarchicalOverallTable$notes))
+  expect_false(r$varianceDecompositionTable$visible)
+  expect_false(r$hierarchicalICCTable$visible)
+  expect_false(r$homogeneityTestTable$visible)
 })
 
 test_that("VAL-agreement-07 the hierarchical overall value is labelled as the ICC it is", {

@@ -170,9 +170,11 @@ test_that("Input validation works correctly", {
     "must be between 0 and 1"
   )
   
-  # Test equal PLR and NLR (uninformative test)
+  # Test equal PLR and NLR (uninformative test). Plr = Nlr = 1 is the only equal pair that
+  # passes the range checks (Plr >= 1, Nlr <= 1); Nlr = 2 failed the Nlr range check first,
+  # on HEAD as well (found 2026-09-25).
   expect_error(
-    nomogrammer(Prevalence = 0.3, Plr = 2.0, Nlr = 2.0),
+    nomogrammer(Prevalence = 0.3, Plr = 1.0, Nlr = 1.0),
     "uninformative test"
   )
   
@@ -207,9 +209,13 @@ test_that("Warning messages work correctly", {
     "PLR < 1"
   )
   
+  # NLR > 1 needs Youden < 0, which also gives PLR < 1, so both warnings fire. (Sens 0.9 /
+  # Spec 0.1 gives NLR = 0.1 / 0.1 = 1 exactly and no warning - the old input.)
   expect_warning(
-    nomogrammer(Prevalence = 0.3, Sens = 0.9, Spec = 0.1),  # Very low specificity  
-    "NLR > 1"
+    expect_warning(
+      nomogrammer(Prevalence = 0.3, Sens = 0.9, Spec = 0.05),  # Very low specificity
+      "NLR > 1"),
+    "PLR < 1"
   )
 })
 
@@ -237,9 +243,10 @@ test_that("Optional parameters work correctly", {
   )
   expect_s3_class(plot_labels, "ggplot")
   
-  # Test Verbose option (should not throw error, but hard to test output directly)
-  expect_silent(
-    plot_verbose <- nomogrammer(Prevalence = 0.3, Sens = 0.9, Spec = 0.8, Verbose = TRUE)
+  # Verbose = TRUE prints its summary by design, so it cannot be silent
+  expect_output(
+    plot_verbose <- nomogrammer(Prevalence = 0.3, Sens = 0.9, Spec = 0.8, Verbose = TRUE),
+    "Fagan Nomogram Results"
   )
   expect_s3_class(plot_verbose, "ggplot")
   
@@ -347,15 +354,16 @@ test_that("Plot structure is correct", {
   # Test that plot is a ggplot object
   expect_s3_class(plot_test, "ggplot")
   
-  # Test that plot has required components
-  expect_true("data" %in% names(plot_test))
-  expect_true("layers" %in% names(plot_test))
-  expect_true("scales" %in% names(plot_test))
-  expect_true("theme" %in% names(plot_test))
+  # Test that plot has required components. ggplot2 >= 4 builds S7 objects, so names() no
+  # longer lists them (failed on HEAD under ggplot2 4.0.3); `$` still works.
+  expect_true(is.data.frame(plot_test$data))
+  expect_gt(length(plot_test$layers), 0)
+  expect_false(is.null(plot_test$scales))
+  expect_false(is.null(plot_test$theme))
   
   # Test plot build (should not error)
   expect_silent(built_plot <- ggplot_build(plot_test))
-  expect_true("data" %in% names(built_plot))
+  expect_true(is.list(built_plot$data))
   
   # Test plot data structure
   plot_data <- built_plot$data

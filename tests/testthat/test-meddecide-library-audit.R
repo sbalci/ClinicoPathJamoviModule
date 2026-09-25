@@ -780,8 +780,10 @@ test_that("fixed epiR rows are scaffolded in .init() and footnotes follow their 
   note_of <- function(key) dec$results$epirTable_number$getCell(rowKey = key, col = "statsnames")$footnotes
   expect_match(note_of("lr.pos"), "positive result", fixed = TRUE)
   expect_match(note_of("lr.neg"), "negative result", fixed = TRUE)
-  expect_match(note_of("diag.or"), "correct diagnosis", fixed = TRUE)
-  expect_match(note_of("nndx"), "need to be tested", fixed = TRUE)
+  # 2026-09-25 (decision VAL-decision-09): the DOR and NNDx notes now give the Glas et al.
+  # (2003) and Linn & Grunau (2006) definitions; the old epiR-help wording was wrong.
+  expect_match(note_of("diag.or"), "odds of a positive test in patients with the disease", fixed = TRUE)
+  expect_match(note_of("nndx"), "one more true-positive than false-positive", fixed = TRUE)
 
   # decisioncompare shows one epiR table per test, all with the same fixed statistic set
   d2 <- d

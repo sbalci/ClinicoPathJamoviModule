@@ -18,6 +18,7 @@ refs:
         title: "Diagnostic tests 1: Sensitivity and specificity"
         publisher: BMJ
         volume: 308
+        issue: 6943
         pages: 1552
         doi: 10.1136/bmj.308.6943.1552
         url: "https://doi.org/10.1136/bmj.308.6943.1552"
@@ -230,7 +231,7 @@ refs:
 
     ClinicoPathJamoviModule:
         type: software
-        author: Serdar Balci
+        author: "Balci, S."
         year: 2020
         title: "ClinicoPath jamovi Module"
         publisher: "[R package]. Retrieved from https://github.com/sbalci/ClinicoPathJamoviModule"
@@ -408,9 +409,10 @@ refs:
         type: article
         author: "Deeks, J. J., & Altman, D. G."
         year: 2004
-        title: "Diagnostic tests 4: Likelihood ratios"
+        title: "Diagnostic tests 4: likelihood ratios"
         publisher: BMJ
         volume: 329
+        issue: 7458
         pages: 168-169
         doi: 10.1136/bmj.329.7458.168
         url: "https://doi.org/10.1136/bmj.329.7458.168"
@@ -458,12 +460,15 @@ refs:
 
     DiagnosticTests:
         type: article
-        author: Stites EC, Wilen CB.
+        author: "Stites, E. C., & Wilen, C. B."
         year: 2020
         title: The Interpretation of SARS-CoV-2 Diagnostic Tests
-        publisher: Med (N Y).
+        publisher: Med
+        volume: 1
+        issue: 1
+        pages: 78-89
         doi: 10.1016/j.medj.2020.08.001
-        url: "https://www.cell.com/med/fulltext/S2666-6340(20)30016-7"
+        url: "https://doi.org/10.1016/j.medj.2020.08.001"
 
     DiagrammeR:
         type: software
@@ -569,8 +574,8 @@ refs:
 
     Fagan:
         type: software
-        author: Adam Chekroud
-        year: 2020
+        author: "Chekroud, A. M., & Schwartz, A."
+        year: 2016
         title: "nomogrammer: Fagan's nomograms with ggplot2"
         publisher: GitHub
         url: "https://github.com/achekroud/nomogrammer"
@@ -579,20 +584,21 @@ refs:
         type: article
         author: Fagan, T. J.
         year: 1975
-        title: Nomogram for Bayes theorem
+        title: "Nomogram for Bayes's theorem"
         publisher: New England Journal of Medicine
         volume: 293
+        issue: 5
         pages: 257
         doi: 10.1056/NEJM197507312930513
         url: "https://doi.org/10.1056/NEJM197507312930513"
 
     Fagan2:
-        type: article
-        author: Simon, S.
-        year: 2020
+        type: webpage
+        author: "Simon, S."
+        year: 2005
         title: "StATS: What is a Fagan nomogram?"
-        publisher: P.Mean Consulting
-        url: "http://www.pmean.com/definitions/fagan.htm"
+        publisher: "P.Mean (originally StATS, Children's Mercy Hospital)"
+        url: "http://www.pmean.com/08/definitions/fagan.htm"
 
     Faul2007:
         type: article
@@ -874,6 +880,30 @@ refs:
         pages: 255-268
         doi: 10.2307/2532051
         url: "https://doi.org/10.2307/2532051"
+
+    Lin2000:
+        type: article
+        author: "Lin, L. I."
+        year: 2000
+        title: Total deviation index for measuring individual agreement with applications in laboratory performance and bioequivalence
+        publisher: Statistics in Medicine
+        volume: 19
+        issue: 2
+        pages: 255-270
+        doi: "10.1002/(SICI)1097-0258(20000130)19:2<255::AID-SIM293>3.0.CO;2-8"
+        url: "https://pubmed.ncbi.nlm.nih.gov/10641028/"
+
+    Light1971:
+        type: article
+        author: "Light, R. J."
+        year: 1971
+        title: "Measures of response agreement for qualitative data: Some generalizations and alternatives"
+        publisher: Psychological Bulletin
+        volume: 76
+        issue: 5
+        pages: 365-377
+        doi: 10.1037/h0031643
+        url: "https://doi.org/10.1037/h0031643"
 
     LachinAndFoulkes1986:
         type: article
@@ -2113,10 +2143,11 @@ refs:
 
     epiR:
         type: software
-        author: Mark Stevenson with contributions from Telmo Nunes, Cord Heuer, Jonathon Marshall, Javier Sanchez, Ron Thornton, Jeno Reiczigel, Jim Robison-Cox, Paola Sebastiani, Peter Solymos, Kazuki Yoshida, Geoff Jones, Sarah Pirikahu, Simon Firestone, Ryan Kyle, Johann Popp, Mathew Jay and Charles Reynard.
-        year: 2020
-        title: "epiR: Tools for the Analysis of Epidemiological Data."
+        author: "Stevenson, M., & Sergeant, E."
+        year: 2026
+        title: "epiR: Tools for the Analysis of Epidemiological Data"
         publisher: "[R package]. Retrieved from https://CRAN.R-project.org/package=epiR"
+        doi: 10.32614/CRAN.package.epiR
         url: "https://CRAN.R-project.org/package=epiR"
 
     epitools:
@@ -2221,10 +2252,11 @@ refs:
 
     forcats:
         type: software
-        author: Hadley Wickham and Posit Software, PBC
+        author: "Wickham, H."
         year: 2025
         title: "forcats: Tools for Working with Categorical Variables (Factors)"
         publisher: "[R package]. Retrieved from https://CRAN.R-project.org/package=forcats"
+        doi: 10.32614/CRAN.package.forcats
         url: "https://CRAN.R-project.org/package=forcats"
 
     foreach:
@@ -2847,7 +2879,7 @@ refs:
 
     jaeschke1994:
         type: article
-        author: Jaeschke, R., Guyatt, G. H., Sackett, D. L., et al.
+        author: "Jaeschke, R., Guyatt, G. H., & Sackett, D. L."
         year: 1994
         title: Users' guides to the medical literature. III. How to use an article about a diagnostic test. B. What are the results and will they help me in caring for my patients?
         publisher: JAMA
@@ -4724,4 +4756,104 @@ refs:
         doi: "10.1002/(SICI)1097-0258(19980115)17:1<101::AID-SIM727>3.0.CO;2-E"
         url: "https://pubmed.ncbi.nlm.nih.gov/9463853/"
 
+    AltmanBland1994b:
+        type: article
+        author: "Altman, D. G., & Bland, J. M."
+        year: 1994
+        title: "Diagnostic tests 2: Predictive values"
+        publisher: BMJ
+        volume: 309
+        issue: 6947
+        pages: 102
+        doi: 10.1136/bmj.309.6947.102
+        url: "https://doi.org/10.1136/bmj.309.6947.102"
+
+    Simel1991:
+        type: article
+        author: "Simel, D. L., Samsa, G. P., & Matchar, D. B."
+        year: 1991
+        title: "Likelihood ratios with confidence: sample size estimation for diagnostic test studies"
+        publisher: Journal of Clinical Epidemiology
+        volume: 44
+        issue: 8
+        pages: 763-770
+        doi: "10.1016/0895-4356(91)90128-v"
+        url: "https://doi.org/10.1016/0895-4356(91)90128-v"
+
+    Glas2003:
+        type: article
+        author: "Glas, A. S., Lijmer, J. G., Prins, M. H., et al."
+        year: 2003
+        title: "The diagnostic odds ratio: a single indicator of test performance"
+        publisher: Journal of Clinical Epidemiology
+        volume: 56
+        issue: 11
+        pages: 1129-1135
+        doi: "10.1016/s0895-4356(03)00177-x"
+        url: "https://doi.org/10.1016/s0895-4356(03)00177-x"
+
+    bandolier1996:
+        type: webpage
+        author: Bandolier
+        year: 1996
+        title: "How good is that test? II"
+        publisher: "Bandolier 27 (May 1996), item 2"
+        url: "https://web.archive.org/web/20060101084309/http://www.jr2.ox.ac.uk/bandolier/band27/b27-2.html"
+
+    LinnGrunau2006:
+        type: article
+        author: "Linn, S., & Grunau, P. D."
+        year: 2006
+        title: "New patient-oriented summary measure of net total gain in certainty for dichotomous diagnostic tests"
+        publisher: "Epidemiologic Perspectives & Innovations"
+        volume: 3
+        issue: 1
+        pages: 11
+        doi: 10.1186/1742-5573-3-11
+        url: "https://doi.org/10.1186/1742-5573-3-11"
+
+    anscombe1956:
+        type: article
+        author: "Anscombe, F. J."
+        year: 1956
+        title: "On estimating binomial response relations"
+        publisher: Biometrika
+        volume: 43
+        issue: "3-4"
+        pages: 461-464
+        doi: 10.1093/biomet/43.3-4.461
+        url: "https://doi.org/10.1093/biomet/43.3-4.461"
+
+    HosmerLemeshow2013:
+        type: book
+        author: "Hosmer, D. W., Lemeshow, S., & Sturdivant, R. X."
+        year: 2013
+        title: "Applied Logistic Regression (3rd ed.)"
+        publisher: Wiley
+        doi: 10.1002/9781118548387
+        url: "https://doi.org/10.1002/9781118548387"
+
+    Pewsner2004:
+        type: article
+        author: "Pewsner, D., Battaglia, M., Minder, C., et al."
+        year: 2004
+        title: 'Ruling a diagnosis in or out with "SpPIn" and "SnNOut": a note of caution'
+        publisher: BMJ
+        volume: 329
+        issue: 7459
+        pages: 209-213
+        doi: 10.1136/bmj.329.7459.209
+        url: "https://doi.org/10.1136/bmj.329.7459.209"
+
+    AgrestiCaffo2000:
+        type: article
+        author: "Agresti, A., & Caffo, B."
+        year: 2000
+        title: "Simple and effective confidence intervals for proportions and differences of proportions result from adding two successes and two failures"
+        publisher: The American Statistician
+        volume: 54
+        issue: 4
+        pages: 280-288
+        doi: 10.1080/00031305.2000.10474560
+        url: "https://doi.org/10.1080/00031305.2000.10474560"
 ...

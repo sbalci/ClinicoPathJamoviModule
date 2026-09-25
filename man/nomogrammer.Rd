@@ -17,7 +17,9 @@ nomogrammer(
   Theme = NULL,
   Title = "Fagan Nomogram",
   PriorLabel = "Prior\\nProb.\\n(\%)",
-  PosteriorLabel = "Posterior\\nProb.\\n(\%)"
+  PosteriorLabel = "Posterior\\nProb.\\n(\%)",
+  DetailLabels = c(prevalence = "Prevalence", plr = "PLR", nlr = "NLR", post_pos =
+    "Post(+)", post_neg = "Post(-)")
 )
 }
 \arguments{
@@ -57,6 +59,10 @@ string; this function is file-level, so it cannot translate one itself.}
 \item{PriorLabel}{Character. Name of the left (prior probability) axis.}
 
 \item{PosteriorLabel}{Character. Name of the right (posterior probability) axis.}
+
+\item{DetailLabels}{Named character vector with the words used in the \code{Detail} text:
+\code{prevalence}, \code{plr}, \code{nlr}, \code{post_pos}, \code{post_neg}. Callers inside a
+jamovi analysis pass translated strings (this function cannot translate them itself).}
 }
 \value{
 A ggplot2 object containing the Fagan nomogram. The plot shows:

@@ -25,6 +25,11 @@ items:
     - name: notices
       title: 'Important Information'
       type: Html
+      refs:
+          - HosmerLemeshow2013
+          - Buderer1996
+          - haldane1956
+          - anscombe1956
       clearWith:
         - gold
         - newtest
@@ -278,6 +283,14 @@ items:
           - testPositive
           - goldNegative
           - testNegative
+      refs:
+          - AltmanBland1994
+          - AltmanBland1994b
+          - DeeksAltman2004
+          - jaeschke1994
+          - Glas2003
+          - haldane1956
+          - anscombe1956
 
     - name: missingDataSummary
       title: 'Data Quality Summary'
@@ -380,7 +393,9 @@ items:
           - goldNegative
           - testNegative
           - ci
-      refs: epiR
+      refs:
+          - epiR
+          - ClopperPearson1934
 
 
     - name: epirTable_number
@@ -414,7 +429,14 @@ items:
           - goldNegative
           - testNegative
           - ci
-      refs: epiR
+      refs:
+          - epiR
+          - Simel1991
+          - Glas2003
+          - youden1950
+          - AgrestiCaffo2000
+          - bandolier1996
+          - LinnGrunau2006
 
     # - name:  plotcontent
     #   title: plotcontent
@@ -452,6 +474,7 @@ items:
           - goldNegative
           - testNegative
       refs:
+          - Fagan1975
           - Fagan
           - Fagan2
 
@@ -468,6 +491,10 @@ items:
         - testPositive
         - goldNegative
         - testNegative
+      refs:
+          - jaeschke1994
+          - HosmerLemeshow2013
+          - AltmanBland1994b
 
     - name: clinicalInterpretation
       title: 'Clinical Interpretation Guide'
@@ -480,6 +507,11 @@ items:
         - testPositive
         - goldNegative
         - testNegative
+      refs:
+          - jaeschke1994
+          - DeeksAltman2004
+          - HosmerLemeshow2013
+          - youden1950
 
     - name: reportTemplate
       title: 'Copy-Ready Report'
@@ -492,6 +524,10 @@ items:
         - testPositive
         - goldNegative
         - testNegative
+      refs:
+          - STARD2015
+          - ClopperPearson1934
+          - Simel1991
 
     - name: aboutAnalysis
       title: 'About This Analysis'
@@ -504,6 +540,11 @@ items:
         - testPositive
         - goldNegative
         - testNegative
+      refs:
+          - jaeschke1994
+          - HosmerLemeshow2013
+          - Pewsner2004
+          - Buderer1996
 
     # Misclassified Cases Analysis ----
 

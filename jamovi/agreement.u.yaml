@@ -30,8 +30,6 @@ children:
           - type: TextBox
             name: confLevel
             format: number
-            events:
-              change: ./agreement.events::onChange_confLevel
           - type: ComboBox
             name: kappaCIMethod
           - type: TextBox
@@ -356,6 +354,14 @@ children:
                 children:
                   - type: VariablesListBox
                     name: conditionVariable
+                    maxItemCount: 1
+                    isTarget: true
+                    enable: (mixedEffectsComparison)
+              - type: TargetLayoutBox
+                label: Case ID (same case on several rows)
+                children:
+                  - type: VariablesListBox
+                    name: caseIdVariable
                     maxItemCount: 1
                     isTarget: true
                     enable: (mixedEffectsComparison)

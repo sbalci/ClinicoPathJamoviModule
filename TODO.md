@@ -3,6 +3,136 @@
 Everything the independent audit found is fixed and verified (audit harness 29/29, suites 616 pass).
 These are the items deliberately NOT done, each with the reason and what it would take.
 
+**2026-09-25 `/fix-function agreement --apply` (second pass, afternoon) — DONE.**
+Scope: the defects the earlier passes deferred, plus the regeneration step they left to the user.
+menuGroup already `meddecideT`. Peer session (security audit) handed the files over.
+- [x] Baseline: 27 files, 1961 pass / 4 fail (stale zzz) / 1 err (FIX-18: no `LANG` in the Bash tool, κ in r.yaml) / 1 skip; release gate 0 agreement hits
+- [x] Bland-Altman exact fit (B = 2A): slope p printed 3e-283 with no note; now a relative residual-SD check
+- [x] Hierarchical ICC(2,k): k = harmonic mean of ratings per case, not the number of rater columns
+- [x] Lin's CCC fallback: full Lin (2000) asymptotic variance on n - 2; point estimate on n divisors (matched DescTools to 1e-10)
+- [x] B7 remainder: subgroup and inter/intra ICC labels say "(CI spans X to Y)" (`.iccBandWithCI`); the hierarchical ICC table has no CI, so nothing to span
+- [x] Heatmap colour keys (agreement, rater and case similarity) via `.drawHeatmapKey`; truncation caption moved to the top. Rendered and inspected
+- [x] Empty rater column named in the grading section (pathologist and design tables)
+- [x] PABAK guide: PI/BI marked 2x2 only (the q-category PABAK row was already right; example re-derived: 0.640 / 0.85 / 0.90)
+- [x] Continuous-data panel lists all 11 analyses the gate counts (6 were missing)
+- [x] Dead locals (codetools): 11 deleted; per-class F1 note corrected (F1 empty only when TP = FP = FN = 0)
+- [x] All-Pairs footnote strings (4) wrapped in `.()`
+- [x] Stale zzz assertions (4) rewritten to pin the plain-mean decision and `.orderedLevelsInfo`
+- [x] Verify (see Results)
+- **Results.** New `test-agreement-fixes-2026-09-25-pm.R`: 7 tests, 25 expectations; the 6 fix tests fail on a pre-fix copy (swapped in and restored), the noisy-slope control passes on both. `notes-and-labels` updated for the CI suffix. Full suite (27 files, `LANG=en_US.UTF-8`): 2008 pass / 0 fail / 0 err / 1 known skip. `prepare()`: only `agreement.h.R` (version back to 1.0.83 = `.a.yaml`) and `00jmv.R` (Light1971, Lin2000 refs). `document()`: `agreement.Rd` already current. Release gate: identical to baseline except one more orphaned msgid (advisory, i18n pass). Theme/state-guard/duplicate-name checks: no agreement hits.
+- **Codex review (CLI 0.155.1, gpt-6-astra) of this pass's hunks:** 5 of 7 clean. P3 fixed: the CCC fallback's u overflowed near 1e80 (now sqrt(sd_x sd_y (n-1)/n); test red on the previous form). P2 kept by decision: the exact-fit guard treats relative scatter below 1.5e-8 (all.equal's tolerance, same as the constant-difference check) as exact; the comment says so. Suite after: new file 8 tests / 26 expectations, green.
+- **For the user:** the header said `version = c(1,0,84)` but `jamovi/agreement.a.yaml` says `1.0.83` (as at HEAD); `prepare()` followed the yaml. If 1.0.84 was intended, bump `version:` in the `.a.yaml` and re-run `prepare()`.
+- Still open from the lists below: D10 i18n (`/prepare-translation agreement`), numeric-coded grades in the hierarchical section, sibling defects (`modalitycomparison`, `pathagreement`), Proportional Bland-Altman slope construction caveat stays as disclosed.
+
+**2026-09-25 `/release-review-function agreement` — DONE: ready after the regeneration step (see Results).** Four read-only verifiers
+settled the 178 unjudged leads of `development-ideas/agreement-check-function-release-2026-09-24.md`
+(about 80 confirmed, the rest already fixed or i18n). Plan:
+- [x] Baseline: 18 agreement files + 5 zzz contracts, 1559 pass / 0 fail / 1 known skip
+- [x] Oracle check of the headline estimators (vcd, psych, irrCAC, DescTools, kappaSize, hand)
+- [x] Root fix: `.run()` blanks every rows: 1 table and clears every table's notes (stale-output class)
+- [x] Critical: contingency `make.names` merge (L476); Krippendorff single category + bootstrap coding + irr complete-data bias (L482, R1, R5); tie-break scale order (L458/L437); LoA quantile bands (L349)
+- [x] Group plots/clustering/subgroup (L326, L395, L325, L329, L332, L331, L403, L402, L404, L406, L400, L399) - merged, 12 tests red on base; plus heatmapColorScheme wording, case self-correlation diagonal, case-cluster guide
+- [x] Group coefficients (L380, L320, L379, L377, L388, L385, L386, L410, L333, L411, L408/9, L337, L417, L419, L420, L422, L423, L427, L407, L373-5) - merged, 20 tests red on base; plus the ICC-table guard call
+- [x] Group panels (L436, L441, L443, L442, L444, L445, L447, L462, L463, L466, L467, L472, L471, L484/5, R8) - merged, 16 tests red on base; includes the CRITICAL caseIdVariable (1|case_id:condition) term (p 0.0084 -> 0.2072 = paired t) and the model note case count
+- [x] yaml descriptions/refs (L489, L491, L492, R7, TDI text, L493, L497 + Light1971/Lin2000 in 00refs); L459; L477; L439/L440
+- [x] Statistics review of the fix pass: #5 partial-full band, #6 Stuart-Maxwell generalized inverse, per-class order; #4 slice scale (All-Pairs, institutions done; subgroup after merge)
+- [x] Routed to fixer agents: Critical caseIdVariable case:condition term (panels); Fisher-z mean, Kendall negative band, TDI text (coef)
+- [x] Verify: red on pre-fix snapshot, green now; full agreement suite; gates
+- **Results.** 4 new test files, 72 blocks / 333 expectations: 69 blocks red on the pre-fix file, the other 3 are value-parity tests of behaviour that was already right (L500). Full suite: 22 agreement files + 5 zzz contracts, 1892 pass / 0 fail / 0 err / 1 known skip (baseline 1559). release_gate `--root .`: output identical before and after (3 pre-existing FAILs in other analyses, 0 agreement hits). lintr: 21 style lints, 0 bug-class. Static gates (state guards, duplicate names, theme, entities, warning/set.seed/insert, `.()` padding and brackets, underscored placeholders): clean.
+- **Needs the user:** `jmvtools::prepare()` then `devtools::document()` - `.a.yaml` (version 1.0.84, descriptions, colour-scheme titles), `.r.yaml` (refs) and `00refs.yaml` (Light1971, Lin2000) changed; `man/agreement.Rd` was already stale (no `caseIdVariable`). The analysis stays in `meddecideT` until you move it.
+- Deferred: i18n (D10) to `/prepare-translation agreement` (this pass added about 40 msgids and orphaned about 15)
+- Deferred (Minor, found by the fixers, not fixed) - ALL DONE in the afternoon `/fix-function` pass above: hierarchical ICC(2,k) uses k = ncol(ratings) when raters are missing per case; an exact proportional Bland-Altman relation (B = 2A) prints slope p = 0 with no exact-fit note; the PABAK guide gives 2x2-only prevalence/bias formulas (check what the table computes for q > 2); the continuous-data panel's Recommended Analyses list omits Kendall's W, Robinson's A, mean Spearman, hierarchical and mixed-effects; B7 (Koo & Li bands on the CI) reached only the main ICC table - subgroup, intra-rater and hierarchical ICC labels still band the point estimate; the heatmaps have no colour key (the guides now spell out the mapping).
+
+**2026-09-25 `/security-audit-function agreement` — done (0 HIGH, 0 MEDIUM; 5 LOW + 1 hygiene fixed).**
+No code-execution sink: no eval/parse/get/system/deserialization, and every model formula is a
+literal over internal column names. Tests: `test-agreement-security-2026-09-25.R` (7 tests, fail on
+the pre-fix file); full agreement suite 23 files, 0 fail / 1 known skip.
+- [x] `.noteSafe()` now HTML-escapes; the 45 callers that escaped first were unwrapped, 26 that did
+  not are now escaped (rater names, category labels, `specificPositiveCategory`, `interIntraSeparator`)
+- [x] Case clustering refuses more than 5000 cases (dense n x n matrix in an R double loop)
+- [x] Deleted the false "TODO (security, forward-looking)" in `.calculateSpecificAgreement`
+- [x] Found by the verification sweep, then approved: `jmvcore::htmlEscape(e$message)` went to sinks
+  that show plain text (jamovi's client renders `setError` with `textContent`), so a `<` or `&` printed
+  as `&lt;` / `&amp;`. Now passed unescaped: `agreementHeatmapPlot$setError` (L4724),
+  `raterProfilePlot$setError` (L5062), `homogeneityTestTable` cell `conclusion` (L12474).
+- ~~Open (i18n): the All-Pairs footnote strings at L9460, L9476, L9495, L9497 have no `.()`.~~ - done.
+- Open (forward-looking): L15228 clears jmvcore's private `.rowNames` through `.__enclos_env__`;
+  re-check it on each jmvcore upgrade.
+- Open (unverified): column titles set from rater names and labels (L15982, L15987, L16050) are not
+  escaped; check how jamovi renders column titles before changing them.
+- ~~Pre-existing, not caused by this pass: `test-zzz-meddecide-release-20260921.R` has 4 stale source~~ (done, afternoon fix pass)
+  assertions (expects `.orderedLevels = function` and two `tanh(mean(atanh(` lines; the source now has
+  `.orderedLevelsInfo` and plain `mean(pairwise_r)`). Same result on the pre-fix file.
+
+**2026-09-24 `/review-function` (read-only): NOT_READY. All seven blocking and most major findings fixed 2026-09-25 (below).** Seven blocking defects (irr Stuart-Maxwell
+drops equal-marginal categories; `kappa2` without `sort.levels`; intra-rater `union()` level order;
+subgroup/institution weighted kappa on the observed scale; paired comparison on continuous data;
+macro-F1 drops TP = 0 classes; Robinson's A banded like an ICC), plus 21 major findings, each with
+evidence and a one-line fix, in `development-ideas/agreement-review-function-2026-09-24.md`. It also
+settles about 40 of the 180 unverified leads below.
+
+**2026-09-25 `/fix-function agreement --apply`: done.** 31 regression tests in
+`test-agreement-fixes-2026-09-25.R`. Each fails on the pre-fix files (checked by swapping them
+back in) and passes now.
+- [x] S1 category order: A1 `sort.levels`, B1 intra-rater merge, C2 declared scale, A12 nominal weights, A15 note tokens, D7 (no `reject()`)
+- [x] S2 marginal homogeneity: A2/A3 Stuart-Maxwell and A4 Bhapkar on the square table (`.marginalHomogeneity`)
+- [x] S3 continuous routing: C1, A6, D2, D3, D4 (frequency tables, LoA, consensus, bootstrap proportion), B14
+- [x] S4 bands: B2 and B3 chance-corrected, B4 perfect pair, B5 negative mean, B7 CI span, B8
+- [x] S5 other majors: A5, A7, A8, A9, A10/A11, C3 (disclosed), C4, D1, D5, D6, B6 (order-statistic TDI bound)
+- [x] S6 minors: A17, A18, B9, B10, B12, B13, B15, C5, C6, C7, C8/D13, D8, D16, D17, D18, D19
+- [x] Verify: `prepare()` (only `agreement.h.R` changed), agreement suite plus zzz contracts
+  (21 files, 1471+ pass, 0 fail, 1 known skip), lintr (style only), release gate (0 agreement hits)
+
+**Codex review of this pass (2026-09-25, via `npx -y codex-mcp-server`): 4 P2 findings, all fixed**
+with tests CX1-CX4. (1) Consensus and level-of-agreement columns went stale when the ratings
+turned continuous. (2) Bland-Altman kept the previous limits and plot after the new
+under-3-pairs return. (3) The intra-rater table still weighted a nominal time point. (4) Kendall's
+W label used (mW - 1)/(m - 1), which is wrong with tied grades.
+
+**Codex review, round 2: 3 P2 findings on this pass's own code, all fixed** (CX5-CX7).
+(5) A constant rater made Kendall's mean correlation skip pairs. (6) Refusing nominal
+Krippendorff left the previous bootstrap interval and seed. (7) Numeric grade codes lost their
+weights in the test-retest table.
+
+**Codex review, round 3: 1 P2 finding, fixed (CX8).** The test-retest statistic was chosen
+after dropping incomplete pairs, so a measurement whose only fractional value sat in an
+incomplete row was read as category codes.
+
+**Codex review, round 4: 2 P2 findings, both fixed** (CX9, CX10). (9) The paired comparison
+dropped the weights for numeric grade codes; `private$.hasOrder()` is now shared with the
+intra-rater table. (10) A rerun on measurements kept the previous dataset's consensus and
+agreement-level notes.
+
+**Codex review, round 5: 2 P2 findings with one root cause, fixed** (CX11-CX13).
+`.orderedLevelsInfo()` merged each NUMERIC column's observed values as if they were declared
+scales, so {0,2,3} against {0,1,3} was "ambiguous" and the weights were dropped. That hit the
+headline interval, the paired bootstrap resamples, and the test-retest merge, which had the same
+flaw. Numeric columns now take the sorted union of their values and are never ambiguous.
+
+**Maintainer decisions (2026-09-25), all implemented, with tests in the Round 2 block and the
+NEWS.md entry. Breaking changes were accepted.**
+- [x] C3: new `caseIdVariable` option. Rows sharing an ID are one case in the mixed model; the note
+  says whether the comparison is within or between cases.
+- [x] B11: Lin's CCC is pairwise-complete, like TDI.
+- [x] A13/A14: Gwet's q is the declared scale; ratings are recoded to positions (no upper-case merge).
+- [x] C9: "ICC(2,1), within institution" and "Latent ICC(2,1), across institutions".
+- [x] A16: the "first" tie-break follows rater order; item-modal and per-class rows use declared order.
+- [x] D9: the heatmap and profile plots use declared order; NA is dropped; the heatmap state holds
+  the pair tables.
+- [x] D14: the categorical hierarchical route hides the three linear-model tables, and one note sits
+  on the overall table. `.run()` resets their visibility each run.
+
+**Still open:**
+- **D10: i18n.** 38 guide panels, the welcome, About and weighted-kappa panels, and the plot
+  labels have no `.()`. Use `/prepare-translation agreement`, which also refreshes
+  `catalog.pot`: 13 msgids replaced in this pass are orphaned (release_gate advisory).
+- ~~**Unused locals:** 6, found by codetools (listed in the review).~~ - done (11 deleted, afternoon fix pass).
+- **Sibling, `modalitycomparison.b.R:248` (menuGroup `meddecideExtraD`).** Calls
+  `irr::kappa2(weight = "equal")` on factors, so the linear weights sit on the alphabetical
+  order. Same defect and fix as A1.
+- **Sibling, `pathagreement.b.R:712`.** Numeric position codes are safe below 10 categories;
+  from 10, irr's character sort misorders them (1, 10, 2, ...).
+
 ## 2026-09-24 `/check-function-full` pass — decisions taken and items deferred
 
 Fixed and verified in this pass: hierarchical ICC(2,1)/ICC(2,k) now condition on institution and
@@ -33,8 +163,8 @@ reachable with no raters; the sparse-table rule; positional rowKeys. 18 new regr
   withdrawn; binary latent models are never shown (see the grading-analysis list below).
 - **`multipleTestCorrection` sits in the Mixed-Effects box** but now also serves All-Pairs Kappa
   (its `enable:` was fixed); the control is hard to find from the All-Pairs box.
-- **Lin's CCC fallback variance** (used only if `DescTools::CCC()` errors) keeps only the first
-  term of Lin's asymptotic variance and divides by n, not n - 2.
+- ~~**Lin's CCC fallback variance** (used only if `DescTools::CCC()` errors) keeps only the first
+  term of Lin's asymptotic variance and divides by n, not n - 2.~~ - done (afternoon fix pass).
 - **Subgroup table, 3+ raters**: the interval uses the null-hypothesis SE (disclosed, too narrow at
   high kappa).
 - **Test-retest uses the first two time points** and pooled inter-rater treats reads as raters -
@@ -71,8 +201,8 @@ Fleiss/Conger headline and its bootstrap and hierarchical siblings. Simulation l
   pathologists; about a minute on the dev Mac). Warm starts, ucminf and quadrature did not speed
   up `clmm` with one fixed effect per rater. An opt-in "fit anyway" option, or a faster
   estimator validated against the grid, would lift it.
-- **Empty rater column**: the headline says 5 raters while the grading section says 4
-  pathologists, and the empty rater's per-pathologist row is blank with no note.
+- ~~**Empty rater column**: the headline says 5 raters while the grading section says 4
+  pathologists, and the empty rater's per-pathologist row is blank with no note.~~ - done: a note names it (afternoon fix pass).
 - **Cluster variable with some missing values**: the latent model drops the institution term
   entirely (a note says so) instead of fitting it on the cases that have one.
 - **Severity non-convergence on ordinary data**: 2 of 25 simulated 120 x 4 datasets were refused

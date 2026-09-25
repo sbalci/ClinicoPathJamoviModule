@@ -124,9 +124,14 @@ test_that("epirTable_number footnotes describe the row they sit on", {
                    "Diagnostic odds ratio"))
     expect_length(notes, nrow(num))
     expect_match(notes[1], "positive result is in a diseased")
-    expect_false(grepl("correct diagnosis than an incorrect diagnosis", notes[1]))
-    expect_match(notes[3], "correct diagnosis than an incorrect diagnosis")
-    expect_match(notes[5], "number of patients that need to be tested", ignore.case = TRUE)
+    expect_false(grepl("Diagnostic odds ratio", notes[1]))
+    # 2026-09-25 (validate-function VAL-decision-09): the DOR note used epiR's help wording,
+    # "how much more likely will the test make a correct diagnosis than an incorrect
+    # diagnosis in patients with the disease" - that is TP/FN in the diseased only. It now
+    # gives the Glas et al. (2003) definition; the NNDx note gives Linn & Grunau's (2006).
+    expect_match(notes[3], "odds of a positive test in patients with the disease divided by the odds")
+    expect_false(grepl("correct diagnosis than an incorrect diagnosis", notes[3]))
+    expect_match(notes[5], "one more true-positive than false-positive result", fixed = TRUE)
 })
 
 

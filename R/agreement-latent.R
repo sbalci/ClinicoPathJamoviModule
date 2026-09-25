@@ -87,7 +87,8 @@ agreement_severity_min_raters <- function(scale, max_share) {
 #' @param ratings data.frame, one column per rater, cells are category labels or NA.
 #' @param levels character, the declared category order.
 #' @param cluster optional vector (length nrow(ratings)): the institution of each case.
-#' @return data.frame(case, rater, y [ordered], cluster [if given]); case = row position.
+#' @return data.frame(case, rater, y, cluster), where y is an ordered factor and cluster is
+#'   present only when `cluster` is given; case = row position.
 #'   Errors are classed conditions whose message is a code: agreement_unknown_labels
 #'   (field `labels`), agreement_cluster_length, agreement_cluster_missing.
 #' @noRd
@@ -214,7 +215,7 @@ agreement_design_summary <- function(long) {
 #' Nelson-Edwards model-based kappa_m for latent ICC rho and C categories
 #'
 #' Composite Gauss-Legendre (8 panels x 16 nodes) of the arcsine-substituted
-#' bivariate-normal integral; accurate to ~1e-12 for rho in [0, 0.9999].
+#' bivariate-normal integral; accurate to ~1e-12 for 0 <= rho <= 0.9999.
 #' @param rho numeric vector; rho = 0 -> 0, rho >= 1 -> 1, rho < 0 or NA -> NA.
 #' @param C integer >= 2.
 #' @noRd

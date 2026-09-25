@@ -5,6 +5,223 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-09-25 — `/validate-function decision` + `/fix-function decision`: numbers inherited, bands on doubles
+
+### An interval taken from a dependency without checking what it is
+
+- **Failure mode:** decision showed epiR's Youden and NNDx intervals. The Youden interval is the
+  sum of the two Clopper-Pearson bounds, with 99.7% exact coverage under a "95%" label. The NNDx
+  interval takes min/max of 1/bounds, so whenever the Youden interval crossed 0 it printed an
+  interval that excluded its own estimate (6.67 shown as -3.08 to 1.73). An inverted test got a
+  negative "number needed". Parity with epiR passed throughout, because parity was all it tested.
+- **Detection signal:** a within-run invariant (every interval contains its estimate), then
+  coverage simulation: 3.7% for NNDx at se .60 / sp .55, n 25+25.
+- **Prevention rule:** agreement with the wrapped package (EXEC-WIRE) proves plumbing, not
+  validity. Every displayed interval gets a containment invariant and a coverage check against an
+  independent method. Youden's index is a difference of two independent proportions (now the
+  Agresti-Caffo interval, see below). NNDx is the inverse of the positive part of that interval.
+
+### A narrative band tested `== 1` on a derived double
+
+- **Failure mode:** sens 1/3, spec 2/3 gives LR+ = 0.99999999999999989. Three panels banded the
+  same LR with `==`, `>` and `>=` in different places. An exactly uninformative test read
+  "evidence AGAINST disease ... level inverted", and LR+ = 10 was "moderate" in one panel and
+  "strong" in the other two.
+- **Detection signal:** brute force over all rational-uninformative tables up to n = 40 (917
+  mis-banded), and an exact-boundary fixture (LR+ = 0.625/0.0625).
+- **Prevention rule:** one classifier per concept (`.lrBand`, `.discriminationBand`), shared by
+  every panel. Compare derived values to a boundary with a tolerance, and cite the convention in
+  the classifier (Jaeschke 1994; Hosmer, Lemeshow & Sturdivant 2013).
+
+### A replacement interval judged on the wrong part of the parameter space
+
+- **Failure mode:** the first replacement for epiR's Youden interval (Newcombe hybrid score) was
+  judged on a sensitivity/FPR grid of 0.05-0.95, where it averaged 0.95. The adversarial review
+  enumerated sensitivity = specificity = 0.98 at n 20+20 and found coverage of 0.88. That is the
+  corner accurate tests occupy. Agresti-Caffo stays at or above 0.935 there and everywhere else
+  in 0.50-0.98, n 15-50. Separately, a single-point simulation (0.927 against 0.95 +/- 0.015)
+  looked like an implementation defect but was the method's exact coverage at that point
+  (0.9377, identical to DescTools).
+- **Detection signal:** exact enumeration over every (TP, FP) table, grid restricted to where
+  diagnostic tests sit, three methods side by side.
+- **Prevention rule:** judge an approximate interval by exact coverage (mean and minimum) over
+  the region the analysis will actually see. For accuracy statistics that means sensitivity and
+  specificity up to 0.98 at small n. At a single point, the oracle is the method's exact
+  coverage there, not the nominal level.
+
+### A ggplot scale limit deleted the line it was meant to frame
+
+- **Failure mode:** `scale_y_continuous(limits = )` in the shared nomogram helper censored any
+  post-test probability below 0.317% to NA. The negative-result pathway then vanished for a
+  strong rule-out test at 5% prevalence, and for every prior at the 0.1% UI minimum.
+- **Detection signal:** `ggplot_build()` layer data had one finite point in the negative group,
+  confirmed by looking at the rendered PNG.
+- **Prevention rule:** axis limits must contain every plotted endpoint (widen them), or use
+  `coord_cartesian()`, which clips without deleting. Assert the number of finite points per
+  group in the layer data.
+
+### Two tooling traps met on the way
+
+- `.claude/completions/update_refs.sh` counts packages in commented-out code
+  (`#     htmlTable::htmlTable()`) and added `htmlTable` to decision's refs. Review what it adds
+  and revert false positives.
+- Two footnotes copied verbatim from epiR's help page were wrong definitions (DOR, NNDx), and
+  two tests pinned the wrong wording. When a text fix lands, grep `tests/` for the old sentence
+  in the same pass.
+
+---
+
+## 2026-09-25 — `/fix-function agreement` (afternoon): guards that tested a symptom
+
+### An exact-fit guard waited for a NaN that never came
+
+- **Failure mode:** the Bland-Altman slope guard treated a p-value as "no test" only when it was
+  not finite. For B = 2A the residuals are rounding error and `summary.lm()` returns a finite
+  p = 3e-283, which printed "< .001" under the proportional-bias caveat.
+- **Detection signal:** a deferred lead ("exact relation prints p = 0 with no note"), reproduced
+  in two lines of base R before any edit.
+- **Prevention rule:** decide "degenerate" from the data (relative residual SD against machine
+  precision), never from what the downstream routine happens to return. Test the degenerate case
+  with an input that produces a finite, tiny p-value, not only one that produces NaN.
+
+### A source-grep test pinned a decision that was later reversed
+
+- **Failure mode:** `test-zzz-meddecide-release-20260921.R` required the Fisher-z mean of pairwise
+  correlations. The release review replaced it with the plain mean, on purpose (the Fisher-z form
+  jumped at |r| = 1), and the test failed for a day as "pre-existing".
+- **Detection signal:** 4 failures in the zzz contract file on an otherwise green suite.
+- **Prevention rule:** when a pass reverses a documented decision, grep `tests/` for the old
+  decision's source pattern in the same pass and rewrite that test to pin the new one.
+
+### A test error that was the shell's locale
+
+- **Failure mode:** FIX-18 errored in a batch run. The Bash tool starts Rscript with no `LANG`,
+  so `yaml::read_yaml()` fails on the κ in `agreement.r.yaml`.
+- **Detection signal:** the error disappeared under `LANG=en_US.UTF-8`, and the file is unchanged
+  from HEAD in that region.
+- **Prevention rule:** test drivers set `LANG`/`LC_ALL` to UTF-8. Re-run a lone error in isolation
+  before counting it as a regression.
+
+---
+
+## 2026-09-25 — release review of `agreement`: the same lesson, relearned the same day
+
+### I checked Krippendorff's alpha against the routine the analysis calls
+
+- **Failure mode:** my headline oracle script compared the Krippendorff table with
+  `irr::kripp.alpha`, which is what the table calls, and reported OK. irr divides each case's pairs
+  by m_u − 1 only when the matrix holds an NA, and by 1 on complete data, so alpha with 3+ raters
+  was off (0.4355 against 0.4374). It also returns 1 for a single category.
+- **Detection signal:** a read-only verifier computed the coincidence-matrix formula by hand and
+  cross-checked it with `irrCAC::krippen.alpha.raw`.
+- **Prevention rule:** in any verification script, the oracle line must not call the function that
+  the analysis calls. Grep the script for the analysis's own `pkg::fn` before trusting an OK.
+
+### `make.names()` used as a column id merged two categories
+
+- **Failure mode:** the frequency table keyed columns by `make.names(label)`. "ER+" and "ER-" both
+  map to `ER.`, so one column showed the second category's counts.
+- **Detection signal:** a lead from the adversarial review, reproduced with ER-/ER+.
+- **Prevention rule:** give data-driven columns positional ids (`c1`, `c2`, …) and put the label in
+  the title. Refresh titles on every run, because the column outlives the run.
+
+### A hand-listed reset set drifted from the tables it had to cover
+
+- **Failure mode:** `.run()` cleared notes on 12 named tables. Twenty `rows: 1` tables and the
+  All-Pairs, Item-Modal, Pairwise, bootstrap and inter-rater notes were not in the list.
+- **Detection signal:** the stale-output class kept reappearing in leads, one table at a time.
+- **Prevention rule:** derive reset sets from `self$results$items`, never list them. A new table
+  then cannot miss the reset.
+
+### A new option changed the unit of analysis, and the model did not follow
+
+- **Failure mode:** `caseIdVariable` linked a case's rows across conditions, but the mixed model
+  kept `(1|case_id) + (1|rater)` with no case-by-condition term. It treated the three ratings of one
+  case under one condition as independent replicates. Type I error was 0.175 at nominal 0.05.
+- **Detection signal:** a statistical reviewer simulated null data and compared the result with a
+  paired t-test on the case means.
+- **Prevention rule:** before shipping an option that changes what a case is, simulate the null
+  Type I error, and compare with the simplest valid test of the same hypothesis.
+
+### Quantile cut-points over data with a point mass at the ceiling
+
+- **Failure mode:** quartiles of agreement percentages included the unanimous cases. With a quarter
+  or more of cases at 100%, the upper quartile was 100%. Every band then shifted, and "Poor" was
+  written into the dataset for cases where 4 of 6 raters agreed.
+- **Detection signal:** a verifier counted band sizes by hand on a realistic 6-rater fixture.
+- **Prevention rule:** take data-driven cut-points only over the cases the cut-points actually sort.
+
+### `factor(x, lv, TRUE)` is `labels = TRUE`, not `ordered = TRUE`
+
+- **Failure mode:** my test fixtures built factors with levels "TRUE1", "TRUE2" and no order.
+- **Detection signal:** a control expectation, placed before the assertion, failed.
+- **Prevention rule:** always name `ordered =`, and put a control expectation in every fixture test.
+
+---
+
+## 2026-09-25 — the wrapped library was treated as the oracle (`agreement` fix pass)
+
+### Three irr routines were wrong, and a parity test on easy data said they matched
+
+- **Failure mode:**
+  - `irr::stuart.maxwell.mh` drops every category with equal marginals and pairs categories by
+    position on a non-square table. It printed X² = 4.00, p = 0.046 where the test gives 0.145,
+    p = 0.930.
+  - `irr::kappa2` without `sort.levels = TRUE` puts levels in the order the two raters used them,
+    so weighted kappa read 0.370 instead of 0.213.
+  - `irr::finn`'s two-way model uses the one-way df.
+  - The 2026-09-23 validation recorded "Stuart-Maxwell matches DescTools", but its fixture had
+    no category with equal marginals.
+- **Detection signal:** a reviewer searched 20,000 random tables for the ones where the two
+  implementations disagree, instead of checking one table.
+- **Prevention rule:**
+  - A package the analysis calls is not an oracle for it. Compare against an independent
+    implementation or the formula, on a fixture built to hit the edge: equal marginals, a category
+    one rater never used, raters using different level sets.
+  - Before crediting a match, run the test against the old code and see it fail.
+
+### Removing a hard stop exposed every path it had been shielding
+
+- **Failure mode:** the 2-rater headline used `reject()` for weights on unordered factors.
+  Replacing it with a note would have let subgroup, bootstrap and hierarchical kappa lay weights
+  over the alphabetical order. They had never seen that input. The paired comparison even
+  carried a comment saying its guard was "NOT REACHABLE TODAY".
+- **Detection signal:** `grep self$options$wght` after the change, looking for readers that
+  lacked their own guard.
+- **Prevention rule:** before relaxing a `reject()` or an early return, list every later reader
+  of the input it filtered out, and give each one the guard (here `private$.wghtEffective()`).
+
+### Interpretation bands copied from the ICC onto coefficients whose chance level is 1/m
+
+- **Failure mode:** Robinson's A and Kendall's W are about 1/m for raters who agree no better than
+  chance, not 0. On ICC-style bands, 46% of pairs of independent raters read "Moderate agreement".
+- **Detection signal:** a simulation of independent raters, run through the labels.
+- **Prevention rule:** before banding a coefficient, simulate independent raters and check the
+  label they get. Band the chance-corrected form, (mA − 1)/(m − 1) or (mW − 1)/(m − 1).
+
+### A new refusal path left the previous run's output in place
+
+- **Failure mode:** four of the fixes added early returns or refusals: Bland-Altman below 3
+  pairs, Krippendorff on measurements, consensus and level of agreement on measurements. Each
+  wrote its note but left cells, plot state, a seed note or dataset columns from the previous run,
+  because jamovi restores a table's cells and keeps state on the same analysis object. Tests on a
+  fresh object pass, and the stale output only appears on a rerun.
+- **Detection signal:** two Codex review passes (`npx -y codex-mcp-server`), which reran one
+  analysis object with the data swapped.
+- **Prevention rule:** every new early return or refusal blanks everything the success path
+  writes (cells, state, notes, Output columns), preferably once at the top of the function. Test
+  it with the rerun-with-swapped-data pattern (`agr_rerun_with`, `rerun25`), not a fresh call.
+
+### `cor(x, x)` is not exactly 1
+
+- **Failure mode:** a perfect pair returned 1 − 2e-16. It passed an `abs(r) >= 1` check and its
+  Fisher z of 18.7 set the mean correlation to 0.99.
+- **Detection signal:** the new regression test failed on the fixed code.
+- **Prevention rule:** compare against 1 with a tolerance (`1 - sqrt(.Machine$double.eps)`)
+  wherever a transform has a singularity at the boundary.
+
+---
+
 ## 2026-09-24 — explanatory text drifted from the limits it explains (`agreement` grading section)
 
 ### The guide and the refusal sentences quoted figures the gates never used

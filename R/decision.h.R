@@ -233,6 +233,11 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="notices",
                 title="Important Information",
+                refs=list(
+                    "HosmerLemeshow2013",
+                    "Buderer1996",
+                    "haldane1956",
+                    "anscombe1956"),
                 clearWith=list(
                     "gold",
                     "newtest",
@@ -435,7 +440,15 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "goldPositive",
                     "testPositive",
                     "goldNegative",
-                    "testNegative")))
+                    "testNegative"),
+                refs=list(
+                    "AltmanBland1994",
+                    "AltmanBland1994b",
+                    "DeeksAltman2004",
+                    "jaeschke1994",
+                    "Glas2003",
+                    "haldane1956",
+                    "anscombe1956")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="missingDataSummary",
@@ -486,7 +499,9 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "goldNegative",
                     "testNegative",
                     "ci"),
-                refs="epiR"))
+                refs=list(
+                    "epiR",
+                    "ClopperPearson1934")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="epirTable_number",
@@ -522,7 +537,14 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "goldNegative",
                     "testNegative",
                     "ci"),
-                refs="epiR"))
+                refs=list(
+                    "epiR",
+                    "Simel1991",
+                    "Glas2003",
+                    "youden1950",
+                    "AgrestiCaffo2000",
+                    "bandolier1996",
+                    "LinnGrunau2006")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot1",
@@ -542,6 +564,7 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "goldNegative",
                     "testNegative"),
                 refs=list(
+                    "Fagan1975",
                     "Fagan",
                     "Fagan2")))
             self$add(jmvcore::Html$new(
@@ -555,7 +578,11 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "goldPositive",
                     "testPositive",
                     "goldNegative",
-                    "testNegative")))
+                    "testNegative"),
+                refs=list(
+                    "jaeschke1994",
+                    "HosmerLemeshow2013",
+                    "AltmanBland1994b")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="clinicalInterpretation",
@@ -567,7 +594,12 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "goldPositive",
                     "testPositive",
                     "goldNegative",
-                    "testNegative")))
+                    "testNegative"),
+                refs=list(
+                    "jaeschke1994",
+                    "DeeksAltman2004",
+                    "HosmerLemeshow2013",
+                    "youden1950")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="reportTemplate",
@@ -579,7 +611,11 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "goldPositive",
                     "testPositive",
                     "goldNegative",
-                    "testNegative")))
+                    "testNegative"),
+                refs=list(
+                    "STARD2015",
+                    "ClopperPearson1934",
+                    "Simel1991")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="aboutAnalysis",
@@ -591,7 +627,12 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "goldPositive",
                     "testPositive",
                     "goldNegative",
-                    "testNegative")))
+                    "testNegative"),
+                refs=list(
+                    "jaeschke1994",
+                    "HosmerLemeshow2013",
+                    "Pewsner2004",
+                    "Buderer1996")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="misclassifiedHeading",

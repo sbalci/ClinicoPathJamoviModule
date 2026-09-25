@@ -13,10 +13,12 @@ test_that("Visual plot generation works correctly", {
   plot_basic <- nomogrammer(Prevalence = 0.3, Sens = 0.9, Spec = 0.8)
   
   expect_s3_class(plot_basic, "ggplot")
-  expect_true("data" %in% names(plot_basic))
-  expect_true("layers" %in% names(plot_basic))
-  expect_true("scales" %in% names(plot_basic))
-  expect_true("theme" %in% names(plot_basic))
+  # ggplot2 >= 4 builds S7 objects: names() no longer lists data/layers/scales/theme
+  # (failed 2026-09-25 under ggplot2 4.0.3 on the unmodified helper too). `$` still works.
+  expect_true(is.data.frame(plot_basic$data))
+  expect_gt(length(plot_basic$layers), 0)
+  expect_false(is.null(plot_basic$scales))
+  expect_false(is.null(plot_basic$theme))
   
   # Test 2: Plot with all features
   plot_full <- nomogrammer(

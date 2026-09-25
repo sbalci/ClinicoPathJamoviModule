@@ -520,9 +520,11 @@ items:
           title: "Kappa"
           type: number
       clearWith:
+          - wght
           - vars
       refs:
           - LandisKoch1977
+          - Light1971
 
     - name: lightKappaExplanation
       title: "About Light's Kappa"
@@ -571,6 +573,7 @@ items:
           - finnModel
       refs:
           - Finn1970
+          - Cicchetti1994
 
     - name: finnExplanation
       title: "About Finn Coefficient"
@@ -1186,6 +1189,7 @@ items:
       clearWith:
           - vars
           - conditionVariable
+          - caseIdVariable
           - multipleTestCorrection
           - confLevel
       refs:
@@ -1217,6 +1221,7 @@ items:
       clearWith:
           - vars
           - conditionVariable
+          - caseIdVariable
       refs:
           - Shrout1979
           - McGraw1996
@@ -1260,7 +1265,7 @@ items:
           title: 'Class'
           type: text
         - name: 'n'
-          title: 'N'
+          title: 'Agreements (TP)'
           type: integer
         - name: precision
           title: 'Precision (PPV)'
@@ -1313,6 +1318,7 @@ items:
           title: 'CI Method'
           type: text
       clearWith:
+          - exct
           - vars
           - nBoot
           - confLevel
@@ -1669,6 +1675,8 @@ items:
           - confLevel
           - nBoot
           - seed
+      refs:
+          - Lin2000
 
     - name: tdiExplanation
       title: "About Total Deviation Index (TDI)"
@@ -2430,6 +2438,8 @@ items:
           type: text
       refs:
           - Walter1998
+          - donnerEliasziwKappaGOF
+          - rotondiDonnerKappaCI
 
     - name: agreementSampleSizeExplanation
       title: "About Agreement Sample Size"
