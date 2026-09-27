@@ -214,7 +214,6 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Medical Decision",
                 refs=list(
                     "ClinicoPathJamoviModule",
-                    "DiagnosticTests",
                     "epiR",
                     "forcats"))
             self$add(jmvcore::Html$new(
@@ -237,7 +236,13 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "HosmerLemeshow2013",
                     "Buderer1996",
                     "haldane1956",
-                    "anscombe1956"),
+                    "anscombe1956",
+                    "ClopperPearson1934",
+                    "youden1950",
+                    "AltmanBland1994b",
+                    "UsherSmith2016",
+                    "STARD2015",
+                    "Schuetz2012"),
                 clearWith=list(
                     "gold",
                     "newtest",
@@ -309,7 +314,7 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Table$new(
                 options=options,
                 name="cTable",
-                title="Recoded Data for Decision Test Statistics",
+                title="2x2 Table",
                 rows=0,
                 columns=list(
                     list(
@@ -318,11 +323,11 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="text"),
                     list(
                         `name`="GP", 
-                        `title`="Gold Positive", 
+                        `title`="Reference Positive", 
                         `type`="number"),
                     list(
                         `name`="GN", 
-                        `title`="Gold Negative", 
+                        `title`="Reference Negative", 
                         `type`="number"),
                     list(
                         `name`="Total", 
@@ -352,11 +357,11 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="number"),
                     list(
                         `name`="DiseaseP", 
-                        `title`="Diseased", 
+                        `title`="Reference Positive", 
                         `type`="number"),
                     list(
                         `name`="DiseaseN", 
-                        `title`="Healthy", 
+                        `title`="Reference Negative", 
                         `type`="number"),
                     list(
                         `name`="TestP", 
@@ -368,11 +373,11 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="number"),
                     list(
                         `name`="TestT", 
-                        `title`="True Test", 
+                        `title`="Agree with Reference", 
                         `type`="number"),
                     list(
                         `name`="TestW", 
-                        `title`="Wrong Test", 
+                        `title`="Disagree with Reference", 
                         `type`="number")),
                 clearWith=list(
                     "pp",
@@ -382,7 +387,9 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "goldPositive",
                     "testPositive",
                     "goldNegative",
-                    "testNegative")))
+                    "testNegative"),
+                refs=list(
+                    "Ying2020")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="ratioTable",
@@ -446,9 +453,11 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "AltmanBland1994b",
                     "DeeksAltman2004",
                     "jaeschke1994",
-                    "Glas2003",
                     "haldane1956",
-                    "anscombe1956")))
+                    "anscombe1956",
+                    "Alberg2004",
+                    "UsherSmith2016",
+                    "Pewsner2004")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="missingDataSummary",
@@ -464,7 +473,7 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Table$new(
                 options=options,
                 name="epirTable_ratio",
-                title="EpiR Table Ratios",
+                title="Sensitivity, Specificity and Predictive Values with 95% CI",
                 visible="(ci)",
                 rows=0,
                 columns=list(
@@ -501,7 +510,9 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ci"),
                 refs=list(
                     "epiR",
-                    "ClopperPearson1934")))
+                    "ClopperPearson1934",
+                    "AltmanBland1994b",
+                    "Pewsner2004")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="epirTable_number",
@@ -543,8 +554,10 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "Glas2003",
                     "youden1950",
                     "AgrestiCaffo2000",
-                    "bandolier1996",
-                    "LinnGrunau2006")))
+                    "LinnGrunau2006",
+                    "jaeschke1994",
+                    "haldane1956",
+                    "anscombe1956")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot1",
@@ -565,8 +578,7 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "testNegative"),
                 refs=list(
                     "Fagan1975",
-                    "Fagan",
-                    "Fagan2")))
+                    "Fagan")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="naturalLanguageSummary",
@@ -582,7 +594,9 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 refs=list(
                     "jaeschke1994",
                     "HosmerLemeshow2013",
-                    "AltmanBland1994b")))
+                    "AltmanBland1994b",
+                    "haldane1956",
+                    "anscombe1956")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="clinicalInterpretation",
@@ -599,11 +613,14 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "jaeschke1994",
                     "DeeksAltman2004",
                     "HosmerLemeshow2013",
-                    "youden1950")))
+                    "youden1950",
+                    "AltmanBland1994b",
+                    "haldane1956",
+                    "anscombe1956")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="reportTemplate",
-                title="Copy-Ready Report",
+                title="Copy-Ready Results Paragraph",
                 visible="(showReportTemplate)",
                 clearWith=list(
                     "gold",
@@ -615,7 +632,11 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 refs=list(
                     "STARD2015",
                     "ClopperPearson1934",
-                    "Simel1991")))
+                    "Simel1991",
+                    "jaeschke1994",
+                    "haldane1956",
+                    "anscombe1956",
+                    "AltmanBland1994b")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="aboutAnalysis",
@@ -632,7 +653,14 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "jaeschke1994",
                     "HosmerLemeshow2013",
                     "Pewsner2004",
-                    "Buderer1996")))
+                    "Buderer1996",
+                    "ClopperPearson1934",
+                    "Simel1991",
+                    "Glas2003",
+                    "AgrestiCaffo2000",
+                    "AltmanBland1994b",
+                    "Ying2020",
+                    "Valenstein1990")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="misclassifiedHeading",
@@ -685,7 +713,7 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="integer"),
                     list(
                         `name`="gold_value", 
-                        `title`="True Status", 
+                        `title`="Reference Result", 
                         `type`="text"),
                     list(
                         `name`="test_value", 
@@ -711,7 +739,7 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="integer"),
                     list(
                         `name`="gold_value", 
-                        `title`="True Status", 
+                        `title`="Reference Result", 
                         `type`="text"),
                     list(
                         `name`="test_value", 
@@ -759,7 +787,7 @@ decisionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "decision",
-                version = c(1,0,83),
+                version = c(1,0,84),
                 options = options,
                 results = decisionResults$new(options=options),
                 data = data,
@@ -779,7 +807,7 @@ decisionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #' @param data The data as a data frame. The data frame should contain the
 #'   variables specified in the 'variables' option.
-#' @param gold The gold standard reference variable representing true disease
+#' @param gold The reference standard variable, used as each case's disease
 #'   status.
 #' @param goldPositive The level indicating presence of disease in the gold
 #'   standard variable.
@@ -802,6 +830,9 @@ decisionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param pprob Population disease prevalence as a proportion between 0.001
 #'   and 0.999.
 #' @param od Boolean selection whether to show original data frequency tables.
+#'   The raw data outputs (rawContingency, rawCounts and missingDataSummary) are
+#'   filled only when this is TRUE, so R code that reads them must set od =
+#'   TRUE.
 #' @param fnote Boolean selection whether to show detailed explanatory
 #'   footnotes.
 #' @param ci Boolean selection whether to calculate and display 95 percent
@@ -812,7 +843,7 @@ decisionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param showClinicalInterpretation Boolean selection whether to show the
 #'   clinical interpretation guide.
 #' @param showReportTemplate Boolean selection whether to show the copy-ready
-#'   report template.
+#'   results paragraph.
 #' @param showAboutAnalysis Boolean selection whether to show the about
 #'   analysis section.
 #' @param showMisclassified Boolean selection whether to show detailed

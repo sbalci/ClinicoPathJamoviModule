@@ -32,7 +32,7 @@ test_that("a single-level gold standard reports why the analysis stopped", {
     )
 
     expect_gt(nchar(res$notices$content), 0)
-    expect_match(notices_of(res), "exactly 2 levels")
+    expect_match(notices_of(res), "no cases at its positive or its negative level")
 })
 
 test_that("identical positive and negative levels report an error", {

@@ -645,13 +645,20 @@ test_that("every seed-dependent meddecide result shows the seed that drew it", {
                                              "Positive", "Negative"), levels = c("Negative", "Positive"))
   d$t1 <- test(0.85, 0.90); d$t2 <- test(0.75, 0.85); d$t3 <- test(0.80, 0.80)
 
-  # agreement: Krippendorff bootstrap, TDI, and k-means rater and case clustering
+  # agreement: Krippendorff bootstrap and k-means rater and case clustering. Interval alpha: the
+  # ratings are measurements, and Nominal alpha on measurements is refused (no bootstrap runs).
   ag <- run("agreement", data.frame(r1 = m1, r2 = m1 + stats::rnorm(n, 0, 0.3), r3 = m1 + stats::rnorm(n, 0, 0.6)),
-            vars = c("r1", "r2", "r3"), seed = 777, kripp = TRUE, bootstrap = TRUE, nBoot = 100, tdi = TRUE,
+            vars = c("r1", "r2", "r3"), seed = 777, kripp = TRUE, krippMethod = "interval",
+            bootstrap = TRUE, nBoot = 100, tdi = TRUE,
             raterClustering = TRUE, clusterMethod = "kmeans", nClusters = 2,
             caseClustering = TRUE, caseClusterMethod = "kmeans", nCaseClusters = 2)
-  for (t in c("krippTable", "tdiTable", "raterClusterTable", "caseClusterTable"))
+  for (t in c("krippTable", "raterClusterTable", "caseClusterTable"))
     expect_true(shown %in% notes(ag$results[[t]]), info = paste("agreement", t))
+  # TDI's interval is a distribution-free order-statistic bound: nothing is resampled, so no seed
+  expect_false(shown %in% notes(ag$results$tdiTable))
+  nominal <- run("agreement", data.frame(r1 = m1, r2 = m1 + 0.2, r3 = m1 - 0.2)[1:30, ],
+                 vars = c("r1", "r2", "r3"), seed = 777, kripp = TRUE, bootstrap = TRUE, nBoot = 100)
+  expect_false(shown %in% notes(nominal$results$krippTable))
   hier <- run("agreement", data.frame(r1 = m1, r2 = m1 + 0.1, r3 = m1 - 0.1)[1:30, ],
               vars = c("r1", "r2", "r3"), seed = 777, raterClustering = TRUE, clusterMethod = "hierarchical")
   expect_false(shown %in% notes(hier$results$raterClusterTable))

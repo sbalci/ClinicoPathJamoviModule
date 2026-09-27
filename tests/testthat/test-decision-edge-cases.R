@@ -299,3 +299,29 @@ test_that("decision handles all output options with small sample", {
   )
   expect_s3_class(result, "decisionResults")
 })
+
+test_that("decision: names with spaces, punctuation and Unicode; an empty dataset", {
+  # Column and level names reach data[[ ]], dplyr's .data[[ ]], table() and the notes
+  # verbatim. TP 45, FP 10, FN 6, TN 59, counted by hand.
+  pos <- "Malignant/High-grade"; neg <- "Benign <20%"
+  tpos <- "IHC ≥ 2+"; tneg <- "IHC 0-1+"
+  d <- data.frame(g = factor(rep(c(pos, pos, neg, neg), c(45, 6, 10, 59))),
+                  t = factor(rep(c(tpos, tneg, tpos, tneg), c(45, 6, 10, 59))))
+  names(d) <- c("Final diagnosis (biopsy)", "IHC score ç/≥ A+B")
+  run <- function(data) decision(data = data, gold = names(d)[1], goldPositive = pos,
+                                 goldNegative = neg, newtest = names(d)[2],
+                                 testPositive = tpos, testNegative = tneg,
+                                 od = TRUE, showMisclassified = TRUE)
+  r <- run(d)
+  rt <- as.data.frame(r$ratioTable)
+  expect_equal(rt$Sens, 45 / 51)
+  expect_equal(rt$Spec, 59 / 69)
+  raw <- as.data.frame(r$rawContingency)
+  expect_equal(raw$test_level, c(tpos, tneg, "Total"))
+  expect_equal(raw$gold_pos, c(45, 6, 51))
+  expect_equal(nrow(as.data.frame(r$falsePositiveTable)), 10)
+  expect_equal(nrow(as.data.frame(r$falseNegativeTable)), 6)
+
+  r0 <- run(d[0, ])
+  expect_match(r0$notices$content, "No data available for analysis", fixed = TRUE)
+})

@@ -592,14 +592,6 @@ refs:
         doi: 10.1056/NEJM197507312930513
         url: "https://doi.org/10.1056/NEJM197507312930513"
 
-    Fagan2:
-        type: webpage
-        author: "Simon, S."
-        year: 2005
-        title: "StATS: What is a Fagan nomogram?"
-        publisher: "P.Mean (originally StATS, Children's Mercy Hospital)"
-        url: "http://www.pmean.com/08/definitions/fagan.htm"
-
     Faul2007:
         type: article
         author: "Faul, F., Erdfelder, E., Lang, A.-G., & Buchner, A."
@@ -4792,14 +4784,6 @@ refs:
         doi: "10.1016/s0895-4356(03)00177-x"
         url: "https://doi.org/10.1016/s0895-4356(03)00177-x"
 
-    bandolier1996:
-        type: webpage
-        author: Bandolier
-        year: 1996
-        title: "How good is that test? II"
-        publisher: "Bandolier 27 (May 1996), item 2"
-        url: "https://web.archive.org/web/20060101084309/http://www.jr2.ox.ac.uk/bandolier/band27/b27-2.html"
-
     LinnGrunau2006:
         type: article
         author: "Linn, S., & Grunau, P. D."
@@ -4856,4 +4840,63 @@ refs:
         pages: 280-288
         doi: 10.1080/00031305.2000.10474560
         url: "https://doi.org/10.1080/00031305.2000.10474560"
+
+    UsherSmith2016:
+        type: article
+        author: "Usher-Smith, J. A., Sharp, S. J., & Griffin, S. J."
+        year: 2016
+        title: "The spectrum effect in tests for risk prediction, screening, and diagnosis"
+        publisher: BMJ
+        volume: 353
+        pages: i3139
+        doi: 10.1136/bmj.i3139
+        url: "https://doi.org/10.1136/bmj.i3139"
+
+    Ying2020:
+        type: article
+        author: "Ying, G.-S., Maguire, M. G., Glynn, R. J., & Rosner, B."
+        year: 2020
+        title: "Calculating sensitivity, specificity, and predictive values for correlated eye data"
+        publisher: Investigative Ophthalmology & Visual Science
+        volume: 61
+        issue: 11
+        pages: 29
+        doi: 10.1167/iovs.61.11.29
+        url: "https://doi.org/10.1167/iovs.61.11.29"
+
+    Alberg2004:
+        type: article
+        author: "Alberg, A. J., Park, J. W., Hager, B. W., et al."
+        year: 2004
+        title: 'The use of "overall accuracy" to evaluate the validity of screening or diagnostic tests'
+        publisher: Journal of General Internal Medicine
+        volume: 19
+        issue: "5 Pt 1"
+        pages: 460-465
+        doi: 10.1111/j.1525-1497.2004.30091.x
+        url: "https://doi.org/10.1111/j.1525-1497.2004.30091.x"
+
+    Valenstein1990:
+        type: article
+        author: "Valenstein, P. N."
+        year: 1990
+        title: "Evaluating diagnostic tests with imperfect standards"
+        publisher: American Journal of Clinical Pathology
+        volume: 93
+        issue: 2
+        pages: 252-258
+        doi: 10.1093/ajcp/93.2.252
+        url: "https://doi.org/10.1093/ajcp/93.2.252"
+
+    Schuetz2012:
+        type: article
+        author: "Schuetz, G. M., Schlattmann, P., & Dewey, M."
+        year: 2012
+        title: "Use of 3x2 tables with an intention to diagnose approach to assess clinical performance of diagnostic tests: meta-analytical evaluation of coronary CT angiography studies"
+        publisher: BMJ
+        volume: 345
+        pages: e6717
+        doi: 10.1136/bmj.e6717
+        url: "https://doi.org/10.1136/bmj.e6717"
+
 ...

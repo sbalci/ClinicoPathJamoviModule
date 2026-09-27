@@ -138,7 +138,13 @@ test_that("C65-C68 guard thresholds fire on the stated side of the boundary", {
   expect_no_match(val_notices(val_run(val_mk(6, 10, 4, 80))), "Few cases in one arm", fixed = TRUE)
   expect_match(val_notices(val_run(val_mk(40, 95, 9, 856))), "Very low disease prevalence observed in this sample (4.9%)", fixed = TRUE)
   expect_no_match(val_notices(val_run(val_mk(40, 95, 10, 855))), "Very low disease prevalence", fixed = TRUE)
-  expect_match(val_notices(val_run(val_mk(15, 16, 5, 4))), "This test performs worse than chance", fixed = TRUE)
+  # Youden -0.05 whose Agresti-Caffo interval (about -0.30 to 0.21) includes 0: no evidence either
+  # way, so the "no discrimination" warning, not the inverted-levels ERROR (2026-09-27)
+  near_zero <- val_notices(val_run(val_mk(15, 16, 5, 4)))
+  expect_match(near_zero, "No evidence that this test discriminates", fixed = TRUE)
+  expect_no_match(near_zero, "performs worse than chance", fixed = TRUE)
+  # Youden -0.55, interval wholly below 0: the ERROR
+  expect_match(val_notices(val_run(val_mk(5, 16, 15, 4))), "This test performs worse than chance", fixed = TRUE)
   expect_match(val_notices(val_run(val_mk(10, 10, 20, 20))), "This test is uninformative", fixed = TRUE)
 })
 
@@ -219,17 +225,18 @@ test_that("C54 VAL-decision-02: the summary never calls a poor or worse-than-cha
                fixed = TRUE)
 })
 
-test_that("C55 LR bands are decided at the printed two decimals, in every panel", {
+test_that("C55 LR bands are decided at the printed three significant figures, in every panel", {
   # LR+ = (26/29)/(7/39) = 4.995 prints 5.00: Jaeschke's 5-10 band, "moderate"
   r <- val_run(val_mk(26, 7, 3, 32), showNaturalLanguage = TRUE, showClinicalInterpretation = TRUE,
                showReportTemplate = TRUE)
   expect_match(val_strip(r$naturalLanguageSummary$content), "Positive LR: 5.00 ( Moderate evidence for disease )", fixed = TRUE)
   expect_match(val_strip(r$clinicalInterpretation$content), "Positive LR (5.00): Moderate increase", fixed = TRUE)
-  expect_match(val_strip(r$reportTemplate$content), "provides moderate evidence for disease when positive", fixed = TRUE)
-  # LR- = (9/100)/(90/100) = 0.1 exactly: "0.1 to 0.2" -> moderate
+  expect_match(val_strip(r$reportTemplate$content), "suggests moderate evidence for disease when positive", fixed = TRUE)
+  # LR- = (9/100)/(90/100) = 0.1 exactly: "0.1 to 0.2" -> moderate. Printed at three
+  # significant figures since the independent review 2026-09-25 (F1), so "0.100", not "0.10".
   r9 <- val_run(val_mk(91, 10, 9, 90), showNaturalLanguage = TRUE, showClinicalInterpretation = TRUE)
-  expect_match(val_strip(r9$naturalLanguageSummary$content), "Negative LR: 0.10 ( Moderate evidence against disease )", fixed = TRUE)
-  expect_match(val_strip(r9$clinicalInterpretation$content), "Negative LR (0.10): Moderate decrease", fixed = TRUE)
+  expect_match(val_strip(r9$naturalLanguageSummary$content), "Negative LR: 0.100 ( Moderate evidence against disease )", fixed = TRUE)
+  expect_match(val_strip(r9$clinicalInterpretation$content), "Negative LR (0.100): Moderate decrease", fixed = TRUE)
 })
 
 test_that("C55 a corrected LR on the wrong side of 1 from the observed data has no stated direction", {
@@ -260,7 +267,7 @@ test_that("C55 VAL-decision-04: every panel puts LR+ = 10 in the same band (Jaes
 
 test_that("C63 VAL-decision-05: the report's printed LR and its band agree", {
   txt <- val_strip(val_run(val_mk(49, 25, 51, 75), showReportTemplate = TRUE)$reportTemplate$content)
-  expect_no_match(txt, "likelihood ratio of 2.0 provides minimal", fixed = TRUE)
+  expect_no_match(txt, "likelihood ratio of 2.0 suggests minimal", fixed = TRUE)
   expect_match(txt, "likelihood ratio of 1.96", fixed = TRUE)
 })
 
@@ -273,7 +280,9 @@ test_that("C62 VAL-decision-06: the copy-ready report states N, both arms and an
   expect_match(txt, sprintf("negative predictive value was 85.7%% (95%% CI %.1f-%.1f%%)", 100 * cnv[1], 100 * cnv[2]), fixed = TRUE)
   lr <- (12 / 17) / (3 / 33); se <- sqrt(1 / 12 - 1 / 17 + 1 / 3 - 1 / 33)
   ci <- lr * exp(c(-1, 1) * stats::qnorm(0.975) * se)
-  expect_match(txt, sprintf("likelihood ratio of %.2f (95%% CI %.2f-%.2f)", lr, ci[1], ci[2]), fixed = TRUE)
+  # lr = 7.7647, ci = 2.5291-23.8384; printed at three significant figures (review 2026-09-25, F1)
+  expect_equal(c(lr, ci), c(7.764705882, 2.529139796, 23.838404482), tolerance = 1e-9)
+  expect_match(txt, "likelihood ratio of 7.76 (95% CI 2.53-23.8)", fixed = TRUE)
   # With a population prior the report says, INSIDE the copied text, that its predictive
   # values carry no interval
   txp <- val_strip(val_run(val_mk(12, 3, 5, 30), showReportTemplate = TRUE, pp = TRUE, pprob = 0.1)$reportTemplate$content)

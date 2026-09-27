@@ -5,6 +5,311 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-09-27 — `/release-review-function decision`: five passes changed the numbers, none said so
+
+### Numbers changed with no version bump and no release note
+
+- **Failure mode:** the 09-25, 09-26 and 09-27 passes changed displayed numbers:
+  - levels are excluded instead of pooled;
+  - only one likelihood ratio is corrected;
+  - Youden's index has an Agresti-Caffo interval.
+
+  None of them bumped the analysis `version:` or wrote a NEWS entry. The last shipped meddecide
+  copy was `1.0.83`, and the umbrella still said `1.0.83` while behaving differently. The newest
+  `decision` release note was from August.
+- **Detection signal:** the release review compared `git -C ../meddecide show
+  <last>^:jamovi/decision.a.yaml` against the umbrella, and grepped NEWS.md for the changed
+  behaviours. `release_gate.py` checks only that the package version agrees across files, so it
+  stayed green.
+- **Prevention rule:**
+  - A pass that changes a displayed number, a verdict or a default bumps the `.a.yaml`
+    `version:`.
+  - The same pass adds its user-facing entry to NEWS.md. CHANGELOG.md is for developers and
+    does not replace it.
+  - Before a release verdict, compare the analysis version with the last shipped submodule copy.
+
+### A recorded recipe that had never run as written
+
+- **Failure mode:** the memory recipe that runs `release_gate.py` with one parked analysis counted
+  as shipped died with `NameError: __file__`. It exited 1 before any check ran, so a diff against
+  the normal run looked like a finding.
+- **Detection signal:** the traceback in the diff.
+- **Prevention rule:** run a recipe once before saving it, and check its exit status before reading
+  a diff of its output. The recipe is fixed.
+
+## 2026-09-27 — `/check-function-full decision` + fixes: an invariant asserted from the check's message, not its code
+
+### "Unreachable" was argued from what a check says it catches
+
+- **Failure mode:** the audit called the NA guards on sensitivity, specificity and the predictive
+  values unreachable because `.prepareAnalysisData()` refuses anything but a 2x2 table. But the
+  recoded factor levels were fixed before the joint filter that drops the OTHER variable's
+  unselected levels. So an emptied margin kept its level, and the table was still 2x2. Gold
+  `N,N,N,N,P` against test `P,N,P,N,E` loses its only disease-present case with `E`. The analysis
+  ran on and showed a blank sensitivity beside a specificity. With no positive test at all, it
+  printed LR+ = LR- = 1.00 from the corrected table. The first cut of the fix deleted the guards
+  and turned those blanks into `NaN`.
+- **Detection signal:** a second-model review (Codex) asked to verify the reachability claim built
+  a static counterexample. Re-running it on the original and on the edited code showed both
+  outputs.
+- **Prevention rule:**
+  - Before deleting a guard as unreachable, construct the input that would reach it, one per
+    exclusion path (missing values, explicit NA level, each variable's unselected levels, their
+    combination), and run it on the old code.
+  - A check that tests a SHAPE (`dim == c(2, 2)`) only guarantees non-empty margins if the levels
+    were re-derived after the last row filter (`droplevels()`).
+
+### Notices rendered in the order the code raised them
+
+- **Failure mode:** the notices panel showed notices in insertion order. The worse-than-chance
+  ERROR ("check the level selection before reading any number") is raised late in `.run()`, so it
+  sat below missing-data warnings and a sample-size note.
+- **Detection signal:** a differential run with an inverted test and a few missing rows, reading
+  the rendered severity words in order.
+- **Prevention rule:** a notice collector sorts by severity at render time (stable `order()`),
+  whatever order the validators run in. A test asserts the rendered order, not only that the
+  ERROR is present.
+
+### A translation that adds the percent sign the value already has
+
+- **Failure mode:** 9 Turkish msgstrs wrote `%{pct}` (Turkish puts `%` before the number), but
+  `{pct}` is filled with `sprintf("%.1f%%")`. Turkish users saw "(%12.3%)" in the exclusion summary,
+  the prevalence notices and the misclassification panel. Every English test passed.
+- **Detection signal:** a mechanical msgid/msgstr check: placeholders, HTML tags, sprintf
+  conversions, newlines, and no `%` next to a placeholder that carries its own. It was run over
+  the existing translations, not only the new ones.
+- **Prevention rule:**
+  - When a placeholder's value is pre-formatted with its unit, the msgstr must not add the unit.
+  - Validate every translation of the analysis, old and new, before writing `tr.po`.
+  - Then run the analysis under the real Turkish catalog (`tools/i18n_rebuild_json.R` into a temp
+    tree, injected into `jmvcore`'s `.i18n` cache) and scan for `NaN`/`Inf`, `…` (unfilled
+    placeholder) and doubled percent signs.
+
+### A sort that turned "above" into "below"
+
+- **Failure mode:** once the notices were sorted by severity, three ERRORs still ended "Check the
+  data, any exclusions reported above". The exclusion WARNINGs they point to now render BELOW them.
+  The order test passed because it checked severities, not what the text says about position.
+- **Detection signal:** an adversarial review of the fix, reading the rendered notices on the
+  error paths. Two independent skeptics reproduced it.
+- **Prevention rule:** when you change the order of rendered items, grep their texts for
+  positional words (above, below, following, preceding) and make them position-free.
+
+### A bare word as a msgid is shared with every analysis that uses it
+
+- **Failure mode:** decision filled its discrimination word with `.("no")`. jjdotplotstats uses
+  the same msgid in "with {adjustment} adjustment". Translating it for decision ("sıfır", zero)
+  put a Turkish word meaning "zero" into jjdotplotstats' still-English sentence.
+- **Detection signal:** a catalog review listed every previously empty msgstr the session filled
+  and checked each one's `#:` sources.
+- **Prevention rule:**
+  - Before filling a msgstr, check every `#:` source of that msgid.
+  - Give short band or role words an analysis-specific msgid ("chance-level", not "no").
+  - The jamovi string extractor also reads `.("...")` inside R comments, so do not quote a `.()`
+    call in a comment.
+
+### A stale test read as a missing seed
+
+- **Failure mode:** `test-meddecide-library-audit.R` expected "Random seed: 777" under
+  agreement's Krippendorff and TDI tables. The 2026-09 agreement fixes changed both on purpose,
+  and the test was not updated:
+  - TDI's percentile bootstrap became a distribution-free order-statistic interval, so there is no
+    resampling and no seed to show.
+  - Nominal alpha on continuous measurements is now refused, so the test's continuous data never
+    reached the bootstrap.
+
+  The failure looked like a code defect in a module the session had not touched.
+- **Detection signal:** reading the code at each asserted table and running both data types. The
+  seed note appears with Interval alpha, and TDI has no random part.
+- **Prevention rule:**
+  - A deliberate change that removes randomness or refuses an input updates every test that
+    asserts the old random output.
+  - A seed assertion states the option that makes the random part run (`krippMethod = "interval"`)
+    and asserts no seed where nothing is random.
+
+### A mutation harness that replaced the wrong copy
+
+- **Failure mode:** mutants of `agreement.b.R` loaded with `sys.source()` into the namespace
+  passed the seed test. The test builds `agreementClass` directly, and under `load_all()` it finds
+  the copy exported into `package:ClinicoPath`, not the namespace copy.
+- **Detection signal:** two mutants that should fail both passed. That is too clean to trust.
+- **Prevention rule:**
+  - Replace a class in the namespace AND in `package:ClinicoPath` when a test references it by
+    name.
+  - Treat "every mutant passed" as a harness bug until one mutant is shown to fail.
+
+### Two bands of one scale shared a Turkish word
+
+- **Failure mode:** the shared msgid "Fair" was translated "Orta", the same word as "Moderate".
+  In agreement's and pathagreement's kappa Interpretation column, Turkish users could not tell the
+  Landis-Koch Fair band (0.20-0.40) from Moderate (0.40-0.60). The new notes that say "0.20 reads
+  Makul" named a label that never appeared.
+- **Detection signal:** the skeptics of an independent fidelity review rejected a proposed
+  correction because the new string was fine. Both pointed to the existing shared entry instead.
+- **Prevention rule:** after a translation pass, list distinct short English labels that share a
+  Turkish msgstr. Any pair from one scale (a band function, a `switch()`) is a defect. Check every
+  `#:` caller of the shared msgid before changing it ("Makul" also fits the Excellent/Good/Fair/Poor
+  scales of checkdata, enhancedROC, psychopdaROC and riverplot).
+
+### A complete catalog does not mean translated output
+
+- **Failure mode:** after agreement's catalog reached 1294/1295 translated entries, a Turkish run
+  still showed an English interpretation table. Its 37 guide panels are hard-coded HTML string
+  literals: 38 blocks, about 12,000 words, never inside a translation call. The extractor never
+  sees them, and no catalog measure counts them.
+- **Detection signal:** running the analysis under the real Turkish catalog and counting which
+  English sentences still appear verbatim: 2 of 352, and one of them was a guide sentence.
+- **Prevention rule:** measure translation coverage on the rendered output, not only on the
+  catalog. A long plain string literal assigned to an HTML variable in a `.b.R` is untranslatable
+  by construction. Filed as a TODO (i18n) at `.populateGwetExplanation`.
+
+### Severity from the sign of a point estimate
+
+- **Failure mode:** decision raised its ERROR "worse than chance… check the level selection before
+  reading any number" whenever Youden's index was below 0. A coin-flip test at -0.005 (n = 201,
+  Agresti-Caffo interval -0.142 to 0.132) got it; the same test at +0.005 got a warning.
+- **Detection signal:** a parallel read-only `/review-function decision` in another session, which
+  probed both sides of 0 with mirror fixtures.
+- **Prevention rule:** a notice that claims a direction ("worse than", "inverted") is keyed on an
+  interval that excludes the null, not on the estimate's sign. When the interval includes the
+  null, say "no evidence" and report both sides alike.
+
+### A copy-ready paragraph without its exclusions
+
+- **Failure mode:** the manuscript paragraph gave only the analysed n ("in 67 cases"). The 13
+  excluded cases (3 missing, 10 at an unselected level) went unmentioned, although the exclusion
+  notices tell the user to report them (STARD 2015).
+- **Detection signal:** the same parallel review, reading the paragraph against the notices shown
+  beside it.
+- **Prevention rule:** text meant to be pasted into a manuscript carries its own denominators: the
+  total, and the excluded cases with their reasons.
+
+### A mutant that the render test could not see
+
+- **Failure mode:** the first Fagan render test asserted `file.size > 5000` after
+  `image$saveAs()`. `saveAs()` writes a blank canvas of about 5 KB even when the renderer returns
+  `FALSE`, so a mutant that drew nothing passed.
+- **Detection signal:** running every new test against a mutant of its fix.
+- **Prevention rule:** measure the empty baseline of an image before choosing a size threshold.
+  The nomogram is about 70 KB, so assert well above the blank canvas.
+
+## 2026-09-26 — `/check-function decision --profile release`: generated docs that outlived the code
+
+- **Failure mode:** the 2026-08-29 `/document-function` output (`vignettes/decision-documentation.md`,
+  `testing_decision.md`) still listed five pre-rename titles (e.g. "Copy-Ready Report", "EpiR Table
+  Ratios") after the 09-25/26 review, and ticked "translation plans completed". At the time 112 of
+  327 `.()` strings were missing from `catalog.pot` and 125 had no Turkish translation.
+- **Detection signal:** the release profile's documentation-completeness step; the stale titles
+  were found by diffing the docs' tables against the `.r.yaml`, the i18n gap by comparing the file's
+  `.()` literals with `catalog.pot` and `tr.po` using `tools/release_gate.py`'s own parsers.
+- **Prevention rule:** a review that renames an option or output also greps
+  `vignettes/<fn>*documentation.md` and `testing_<fn>.md`. A checklist box is ticked only on a
+  measurement made that day, never carried over from a generator's template.
+
+## 2026-09-26 — `/independent-reviewer decision` + repair: rounding that is fair in one direction only, and trusting a documented contract
+
+### A precision rule in absolute decimals applied to a ratio-scale quantity
+
+- **Failure mode:** the previous day's repair banded likelihood ratios "on the printed value" at two
+  decimals. That keeps 0.05% relative precision at LR+ 10 but only 5% at LR- 0.1, so LR- 0.0969
+  printed "0.10" and read "moderate" while its reciprocal, 10.3, read "strong".
+- **Detection signal:** an independent audit fixture sitting just below a boundary (0.0969), plus a
+  metamorphic check: swapping both positive levels must mirror the band.
+- **Prevention rule:** round ratio-scale quantities to significant figures, not decimals. Test every
+  band on both sides of 1 through the level-swap mirror. Put fixtures just inside each boundary,
+  not only on it.
+
+### A repair changed which table feeds a number and silently broke an identity stated elsewhere
+
+- **Failure mode:** correcting only the likelihood ratio whose formula contains the zero cell was
+  right. But the DOR stayed on the corrected table, so on a one-sided zero cell the displayed DOR
+  no longer equalled LR+/LR- (115.5 vs 126.2). A footnote still said it did.
+- **Detection signal:** a cross-output invariant (DOR = LR+/LR-) run on the zero-cell fixture, not
+  only on clean tables.
+- **Prevention rule:** after changing which inputs feed any displayed number, re-run every
+  cross-output identity on the degenerate fixtures and grep the text that asserts the identity.
+  Cover both mirror cases (LR+-only and LR--only corrected); a mutant that breaks one side passed
+  the first version of the tests.
+
+### Validation checked the numbers, not what the screen fails to say
+
+- **Failure mode:** 363 passing checks, yet the default output never named which level was
+  "positive". Inverting both levels mirrors every headline and no guard fires. The
+  one-row-per-patient assumption was also never stated.
+- **Detection signal:** searching the default visible output for the chosen level names, after
+  first confirming the searched text was not empty.
+- **Prevention rule:** an audit includes "what the user cannot see" checks: coding definitions shown
+  by default, and design assumptions the data cannot reveal disclosed.
+
+### The repair itself: a documented contract that the client does not honour, and a known trap re-learned
+
+- **Failure mode:** four defects in the first version of the fix.
+  1. `format: sf:3` was added so the table would match the narrative, per the documented token
+     list. jamovi 28.3 reads only log10/pvalue/zto/pc from a column format, so it did nothing.
+  2. Entity-escaping user labels in a `setNote()` made them show literally (`&lt;20%`), because
+     the note renderer escapes `&` itself.
+  3. Bracketed names ("Histology [final]") truncated the note. This trap was already in memory.
+  4. `sprintf` was replaced with `formatC`, which follows `OutDec`, so a comma locale sent every
+     narrative panel to its fallback text.
+- **Detection signal:** an adversarial review that ran jamovi's own client JavaScript and note
+  renderer. Each new test was then checked with a mutant.
+- **Prevention rule:**
+  - Verify any rendering claim against the renderer (client code, jsdom), not the guide.
+  - Before touching an API (`setNote`, `.fmt`), read the memory entries that name it.
+  - When swapping a formatting function, pin `decimal.mark`.
+  - A regression test counts only once a mutant of the fix makes it fail.
+
+### Wording that was true when written stops being true when the code around it changes
+
+- **Failure mode:** a review of every visible string, rendered across 12 scenarios, found
+  sentences that the code no longer honoured:
+  - The "uninformative" notice said sensitivity + specificity is "exactly 1" and that both LRs
+    equal 1, but it fires on a three-decimal Youden, so LR+ 1.67 could appear beside it.
+  - The zero-cell notice warned of "infinite likelihood ratios" that the correction had
+    already made finite.
+  - The missing-data notice gave an N that later exclusions made wrong.
+  - One-sided bands ("more than 1 in 5 missed") were given even at 0% sensitivity.
+  - The "Copy-Ready Clinical Report" invited pasting study estimates into a patient report.
+- **Detection signal:** reviewers read the RENDERED output per scenario, not the source. Two
+  skeptics then checked each finding, and the same concept was compared across panels.
+- **Prevention rule:**
+  - When a number or rule changes, grep every sentence that describes it.
+  - Prefer exact figures ("27 of 258 missed") over bands.
+  - Name what a panel is for, and what it is not for.
+  - Re-render all scenarios after rewording, because new text can mislead too.
+
+### References on an always-visible item are listed on every run
+
+- **Failure mode:** jamovi lists the references of every visible item. The notices panel is
+  always visible, so its YAML references were listed even when no notice cited them. A user
+  copying the reference list would cite Haldane-Anscombe with no zero cell, or Schuetz with no
+  exclusion.
+- **Prevention rule:** give each notice its own references (`.addNotice(refs = )`) and
+  `setRefs()` the panel from the notices shown. Drop a correction's references from items when
+  the correction did not run. `setRefs()` is serialized each run and never restored, so it is
+  what jamovi lists.
+
+### A claim that cannot be sourced may simply be wrong
+
+- **Failure mode:** About and the `pprob` help gave "rare diseases (0.001-0.01)" as a typical
+  range. No source supports it, and rare-disease definitions put the threshold near 0.0005 (EU:
+  under 5 per 10,000).
+- **Detection signal:** a literature agent tasked with citing the sentence found only sources
+  that contradict it.
+- **Prevention rule:** when adding references, treat "no source found" as a finding about the
+  claim. Remove or correct the claim; never leave it unreferenced or cite something adjacent.
+
+### Existence is not appropriateness
+
+- **Failure mode:** a same-day reference audit graded every reference as existing and on topic.
+  An adversarial vote (three lenses per reference) still found four placements a reviewer would
+  reject:
+  - a SARS-CoV-2 review as the general reference;
+  - two web pages duplicating archival sources;
+  - a DOR paper on a table that shows no DOR.
+- **Prevention rule:** judge each reference against the output item it is attached to, and against
+  the stronger sources already cited there.
+
 ## 2026-09-25 — `/validate-function decision` + `/fix-function decision`: numbers inherited, bands on doubles
 
 ### An interval taken from a dependency without checking what it is

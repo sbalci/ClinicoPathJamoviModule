@@ -1122,6 +1122,16 @@ agreementClass <- if (requireNamespace("jmvcore")) {
             },
             .populateGwetExplanation = function() {
                 # Provide educational content about Gwet's AC coefficient
+                #
+                # TODO (i18n): this guide and the other explanation panels in this file (38
+                # hard-coded HTML string literals, about 12,000 English words, measured
+                # 2026-09-27) are plain strings, not translation calls, so jamovi's extractor
+                # never sees them and they render in English in every language, while the rest
+                # of agreement is fully translated in tr.po. Fix: one translation call per
+                # sentence or table cell, markup kept outside the msgid, then
+                # jmvtools::i18nUpdate() and translate. Example: the Kendall's W guide hard-codes
+                # "Very weak agreement (essentially random)", which is translated where the
+                # results table uses it.
 
                 html_content <- "
             <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.6;'>

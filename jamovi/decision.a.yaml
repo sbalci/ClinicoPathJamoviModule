@@ -32,10 +32,11 @@ options:
       permitted: [ factor ]
       description:
           ui: >
-            The gold standard reference variable (true disease status). 
-            This should be the most reliable test or diagnosis available (e.g., biopsy, final diagnosis).
+            The reference standard, used as each case's disease status. Use the most
+            reliable method available (e.g., biopsy, final diagnosis). All estimates treat it
+            as error-free, so errors in it can bias them.
           R: >
-            The gold standard reference variable representing true disease status.
+            The reference standard variable, used as each case's disease status.
 
 
     - name: goldPositive
@@ -128,8 +129,7 @@ options:
       max: 0.999
       description:
           ui: >
-            Known disease prevalence in the target population (as proportion: 0.0-1.0).
-            Examples: rare diseases (0.001-0.01), common conditions (0.05-0.20).
+            Known disease prevalence in the target population, as a proportion from 0.001 to 0.999.
             This affects post-test probabilities and predictive values.
           R: >
             Population disease prevalence as a proportion between 0.001 and 0.999.
@@ -141,10 +141,13 @@ options:
       default: false
       description:
           ui: >
-            Display the original contingency tables and raw data summaries.
+            Display the 2x2 table and level-combination counts of the analysed cases, and a summary
+            of the cases excluded for missing values or unselected levels.
             Useful for verifying data entry and understanding the underlying counts.
           R: >
-            Boolean selection whether to show original data frequency tables.
+            Boolean selection whether to show original data frequency tables. The raw data
+            outputs (rawContingency, rawCounts and missingDataSummary) are filled only when this
+            is TRUE, so R code that reads them must set od = TRUE.
 
     - name: fnote
       title: Explanatory footnotes
@@ -152,8 +155,8 @@ options:
       default: false
       description:
           ui: >
-            Add detailed explanatory footnotes to all tables with clinical interpretation guidance.
-            Helpful for understanding what each statistic means and how to interpret the results.
+            Add footnotes that define the main statistics. Some also give rules of thumb,
+            such as the likelihood-ratio bands of Jaeschke et al. (1994).
           R: >
             Boolean selection whether to show detailed explanatory footnotes.
 
@@ -163,8 +166,10 @@ options:
       default: false
       description:
           ui: >
-            Calculate and display 95 percent confidence intervals for all diagnostic statistics.
-            Provides uncertainty estimates around point estimates of sensitivity, specificity, etc.
+            Display two tables of 95 percent confidence intervals for sensitivity, specificity,
+            predictive values, likelihood ratios, diagnostic odds ratio, Youden's index and number
+            needed to diagnose. Their predictive values use the sample prevalence, even when a
+            population prevalence is supplied.
           R: >
             Boolean selection whether to calculate and display 95 percent confidence intervals.
 
@@ -186,8 +191,8 @@ options:
       default: false
       description:
           ui: >
-            Display a natural language clinical summary of the diagnostic test performance.
-            Provides an easy-to-understand interpretation of results for clinical use.
+            Display a plain-language summary of the results, with rule-of-thumb descriptions.
+            It is not a recommendation for an individual patient.
           R: >
             Boolean selection whether to show the natural language clinical summary.
 
@@ -197,21 +202,22 @@ options:
       default: false
       description:
           ui: >
-            Display detailed clinical interpretation with likelihood ratio guidance.
-            Helps understand the clinical significance of test results.
+            Display sensitivity, specificity, Youden's index and the likelihood ratios, and the
+            pre-test and post-test probabilities of disease at the sample or entered population
+            prevalence. Youden's index and the likelihood ratios carry rule-of-thumb labels.
           R: >
             Boolean selection whether to show the clinical interpretation guide.
 
     - name: showReportTemplate
-      title: "Copy-ready report"
+      title: "Copy-ready results paragraph"
       type: Bool
       default: false
       description:
           ui: >
-            Generate a copy-ready clinical report template for documentation.
-            Formatted text that can be copied directly into clinical reports.
+            Display a draft results paragraph for a manuscript or study report.
+            It gives study-level estimates, not wording for a patient report.
           R: >
-            Boolean selection whether to show the copy-ready report template.
+            Boolean selection whether to show the copy-ready results paragraph.
 
     - name: showAboutAnalysis
       title: "About this analysis"
@@ -230,10 +236,9 @@ options:
       default: false
       description:
           ui: >
-            Display detailed tables of false positive and false negative cases.
-            Helps identify patterns in diagnostic errors and understand which cases
-            are being misclassified by the test. Inspired by Orange Data Mining's
-            interactive confusion matrix feature, adapted for static jamovi output.
+            Display tables of the false positive and false negative cases (where the test
+            disagrees with the reference standard), with their row numbers so the records
+            can be reviewed.
           R: >
             Boolean selection whether to show detailed misclassified cases tables.
 

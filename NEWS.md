@@ -1,5 +1,71 @@
 # ClinicoPath News
 
+## Unreleased — `decision` (Medical Decision) review fixes: exclusions, intervals, likelihood ratios, wording (module 1.0.81.01, analysis 1.0.84)
+
+Each numeric change below was checked against an independent calculation (hand formulas,
+`binom.test`, `DescTools::BinomDiffCI(method = "ac")`, `epiR::epi.tests`). A saved `.omv` can show
+different numbers or wording than before.
+
+### BREAKING — numbers that change
+
+- **Levels other than the two you select are excluded, never counted as negative.** An
+  "Equivocal" or "Atypical" gold-standard level used to be pooled into the disease-absent arm.
+  With 40 Benign cases (35 test-negative) and 10 Equivocal cases (all test-positive), specificity
+  read 35/50 = 70.0% instead of 35/40 = 87.5%. The negative level is inferred only for a
+  two-level variable. With three or more levels you must choose it, and the excluded cases are
+  counted in the notices, the Data Quality Summary and the copy-ready paragraph.
+- **Only the likelihood ratio that contains the zero count is continuity-corrected.** A table with
+  TP 20, FP 2, FN 0, TN 19 has an observed LR+ of 10.5 ("large"). Correcting every ratio turned it
+  into 8.59 ("moderate"). The diagnostic odds ratio is still taken from the corrected table, and
+  a note says when it therefore need not equal LR+ / LR-.
+- **Youden's index has an Agresti-Caffo 95% interval.** The previous interval (epiR's sum of the
+  two Clopper-Pearson bounds) covered about 99.7% of the time under a 95% label.
+- **The number needed to diagnose interval is the inverse of the positive part of the Youden
+  interval.** It used to print intervals that excluded their own estimate (6.67, shown as -3.08
+  to 1.73) and a negative "number" for an inverted test. Where the quantity is undefined or has no
+  upper bound, the cell is blank and a note says why.
+- **A reference or test level emptied by the exclusions stops the analysis.** Gold N,N,N,N,P
+  against test P,N,P,N,E lost its only disease-present case with "E". The analysis then showed a
+  blank sensitivity beside a specificity. Now an error explains that no 2x2 table can be formed.
+- **An explicit missing level (`addNA()`) is excluded rather than scored as negative**, and the
+  minimum of 4 cases is counted after all exclusions.
+
+### BREAKING — labels, verdicts and notices that change
+
+- **One likelihood-ratio band for every panel** (Jaeschke et al. 1994), decided on the value as
+  printed at three significant figures. LR+ = 10 was "moderate" in one panel and "strong" in two.
+  LR- 0.0969 printed "0.10" and read "moderate" while its reciprocal, 10.3, read "strong". An
+  exactly uninformative table (sensitivity 1/3, specificity 2/3) read "evidence AGAINST disease".
+  A corrected ratio that points the other way from the observed data now reads "unstable".
+- **The discrimination word follows the Hosmer-Lemeshow AUC bands** through AUC =
+  (sensitivity + specificity) / 2. It used to be "moderate" whenever sensitivity or specificity
+  reached 0.70, which called a worse-than-chance test (0.75 / 0.20) moderate.
+- **"Worse than chance" is an error only when the Youden interval lies wholly below 0.** A
+  coin-flip test at Youden -0.005 (n = 201, interval -0.142 to 0.132) drew that error, while
+  +0.005 drew a warning. An interval that includes 0 now reads "no evidence of discrimination",
+  whichever side of 0 the estimate falls.
+- **Notices are listed most severe first.**
+- **Sensitivity and specificity are described by exact counts** ("6 of 48 diseased cases missed")
+  instead of one-sided bands, which described 0% sensitivity as "more than 1 in 5 missed".
+
+### NEW
+
+- The 2x2 table names the levels behind "Reference Positive" and "Test Positive". Inverting both
+  level choices mirrors every headline number, and nothing else on screen can reveal it.
+- An always-shown note under the counts: each row must be a different, independent patient.
+- The copy-ready paragraph (formerly "Copy-Ready Clinical Report") is meant for a manuscript or
+  study report, not a patient report. It states N, both arms and the excluded cases with their
+  reasons, and it gives intervals for PPV, NPV and LR+. With a population prevalence it explains
+  why its predictive values have no interval.
+- References are listed only for the notices actually shown. Haldane (1956) and Anscombe (1956)
+  are listed only when the zero-cell correction ran.
+- Every translatable string has a Turkish translation.
+
+### Corrected
+
+- The Fagan nomogram's negative-result line no longer disappears for a strong rule-out test at
+  low prevalence. A post-test probability below 0.32% used to be dropped from the plot.
+
 ## Unreleased — `agreement` review fixes: category order, marginal homogeneity, labels (module 1.0.81.01)
 
 Every change below was checked against an independent calculation. A saved `.omv` can show

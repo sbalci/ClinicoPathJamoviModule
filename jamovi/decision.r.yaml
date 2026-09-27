@@ -21,7 +21,8 @@ items:
         - goldNegative
         - testNegative
 
-    # Notice outputs converted to HTML to avoid serialization errors
+    # An Html panel, not jmvcore::Notice items: the notices here run to several
+    # sentences, and Notice content renders as single-line plain text.
     - name: notices
       title: 'Important Information'
       type: Html
@@ -30,6 +31,12 @@ items:
           - Buderer1996
           - haldane1956
           - anscombe1956
+          - ClopperPearson1934
+          - youden1950
+          - AltmanBland1994b
+          - UsherSmith2016
+          - STARD2015
+          - Schuetz2012
       clearWith:
         - gold
         - newtest
@@ -42,21 +49,6 @@ items:
         - ci
         - showMisclassified
         - maxCasesShow
-
-    # - name:  todo
-    #   title: To Do
-    #   type:  Html
-
-    # - name:  text1
-    #   title: Original Data
-    #   type:  Preformatted
-    #   visible: (od)
-
-
-    # - name:  text2
-    #   title: Original Data
-    #   type:  Html
-    #   visible: (od)
 
     - name: rawContingency
       title: Analysed Contingency Table
@@ -107,38 +99,8 @@ items:
         - goldNegative
         - testNegative
 
-    # - name:  text2
-    #   title: Original Data
-    #   type:  Preformatted
-
-    # - name:  text3
-    #   title: Preformatted
-    #   type:  Preformatted
-
-
-    # - name:  text2
-    #   title: Decision Tests
-    #   type:  Preformatted
-    #   refs: caret
-
-
-
-    # - name:  origTable
-    #   title: 'Original Table'
-    #   type: Table
-    #   rows: (newtest)
-    #   columns:
-    #     - name: goldPositive
-    #       title: ''
-    #       type: text
-    #       content: ($key)
-
-
-
-
-
     - name:  cTable
-      title: 'Recoded Data for Decision Test Statistics'
+      title: '2x2 Table'
       type: Table
       rows: 0
       columns:
@@ -146,10 +108,10 @@ items:
           title: ''
           type: text
         - name: GP
-          title: 'Gold Positive'
+          title: 'Reference Positive'
           type: number
         - name: GN
-          title: 'Gold Negative'
+          title: 'Reference Negative'
           type: number
         - name: Total
           title: 'Total'
@@ -161,36 +123,6 @@ items:
           - testPositive
           - goldNegative
           - testNegative
-
-
-    # - name:  cTable2
-    #   title: 'Recoded Data for Decision Test Statistics 2'
-    #   type: Table
-    #   rows: 0
-    #   columns:
-    #     - name: newtest
-    #       title: ''
-    #       type: text
-    #     - name: GP
-    #       title: 'Gold Positive'
-    #       type: number
-    #     - name: GN
-    #       title: 'Gold Negative'
-    #       type: number
-    #     - name: Total
-    #       title: 'Total'
-    #       type: number
-
-
-
-
-
-    # - name:  nTable2
-    #   title: nTable2
-    #   type: Preformatted
-
-
-
 
     - name:  nTable
       title: 'n'
@@ -205,10 +137,10 @@ items:
           title: 'Total'
           type: number
         - name: DiseaseP
-          title: 'Diseased'
+          title: 'Reference Positive'
           type: number
         - name: DiseaseN
-          title: 'Healthy'
+          title: 'Reference Negative'
           type: number
         - name: TestP
           title: 'Positive Tests'
@@ -217,10 +149,10 @@ items:
           title: 'Negative Tests'
           type: number
         - name: TestT
-          title: 'True Test'
+          title: 'Agree with Reference'
           type: number
         - name: TestW
-          title: 'Wrong Test'
+          title: 'Disagree with Reference'
           type: number
       clearWith:
           - pp
@@ -231,7 +163,8 @@ items:
           - testPositive
           - goldNegative
           - testNegative
-
+      refs:
+          - Ying2020
 
     - name:  ratioTable
       title: ''
@@ -269,11 +202,9 @@ items:
         - name: LRP
           title: Positive Likelihood Ratio
           type: number
-          # format: pc
         - name: LRN
           title: Negative Likelihood Ratio
           type: number
-          # format: pc
       clearWith:
           - pp
           - pprob
@@ -288,9 +219,11 @@ items:
           - AltmanBland1994b
           - DeeksAltman2004
           - jaeschke1994
-          - Glas2003
           - haldane1956
           - anscombe1956
+          - Alberg2004
+          - UsherSmith2016
+          - Pewsner2004
 
     - name: missingDataSummary
       title: 'Data Quality Summary'
@@ -304,64 +237,8 @@ items:
         - goldNegative
         - testNegative
 
-
-    # - name:  ratioTable2
-    #   title: ''
-    #   type: Table
-    #   swapRowsColumns: true
-    #   rows:  1
-    #   columns:
-    #     - name: tablename
-    #       title: ''
-    #       type: text
-    #     - name: Sens
-    #       title: 'Sensitivity'
-    #       type: number
-    #       format: pc
-    #     - name: Spec
-    #       title: 'Specificity'
-    #       type: number
-    #       format: pc
-    #     - name: AccurT
-    #       title: 'Accuracy'
-    #       type: number
-    #       format: pc
-    #     - name: PrevalenceD
-    #       title: 'Prevalence'
-    #       type: number
-    #       format: pc
-    #     - name: PPV
-    #       title: 'Positive Predictive Value'
-    #       type: number
-    #       format: pc
-    #     - name: NPV
-    #       title: 'Negative Predictive Value'
-    #       type: number
-    #       format: pc
-    #     - name: PostTestProbDisease
-    #       title: 'Post-test Disease Probability'
-    #       type: number
-    #       format: pc
-    #     - name: PostTestProbHealthy
-    #       title: 'Post-test Health Probability'
-    #       type: number
-    #       format: pc
-    #     - name: LRP
-    #       title: Positive Likelihood Ratio
-    #       type: number
-    #       # format: pc
-    #     - name: LRN
-    #       title: Negative Likelihood Ratio
-    #       type: number
-    #       # format: pc
-    #   clearWith:
-    #       - pp
-    #       - pprob
-
-
-
     - name: epirTable_ratio
-      title: 'EpiR Table Ratios'
+      title: 'Sensitivity, Specificity and Predictive Values with 95% CI'
       type: Table
       visible: (ci)
       rows: 0
@@ -396,11 +273,11 @@ items:
       refs:
           - epiR
           - ClopperPearson1934
-
+          - AltmanBland1994b
+          - Pewsner2004
 
     - name: epirTable_number
       title: ''
-      # title: 'EpiR Table Numbers'
       type: Table
       visible: (ci)
       rows: 0
@@ -435,26 +312,10 @@ items:
           - Glas2003
           - youden1950
           - AgrestiCaffo2000
-          - bandolier1996
           - LinnGrunau2006
-
-    # - name:  plotcontent
-    #   title: plotcontent
-    #   type:  Preformatted
-
-    # - name:  text3
-    #   title: Matrix Details
-    #   type:  Preformatted
-
-
-    # - name:  text4
-    #   title: Medical Decision Deneme
-    #   type:  Preformatted
-
-
-    # - name:  text5
-    #   title: Medical Decision epiR
-    #   type:  Preformatted
+          - jaeschke1994
+          - haldane1956
+          - anscombe1956
 
     - name: plot1
       title: 'Fagan nomogram'
@@ -476,10 +337,7 @@ items:
       refs:
           - Fagan1975
           - Fagan
-          - Fagan2
 
-
-      
     - name: naturalLanguageSummary
       title: 'Clinical Summary'
       type: Html
@@ -495,6 +353,8 @@ items:
           - jaeschke1994
           - HosmerLemeshow2013
           - AltmanBland1994b
+          - haldane1956
+          - anscombe1956
 
     - name: clinicalInterpretation
       title: 'Clinical Interpretation Guide'
@@ -512,9 +372,12 @@ items:
           - DeeksAltman2004
           - HosmerLemeshow2013
           - youden1950
+          - AltmanBland1994b
+          - haldane1956
+          - anscombe1956
 
     - name: reportTemplate
-      title: 'Copy-Ready Report'
+      title: 'Copy-Ready Results Paragraph'
       type: Html
       visible: (showReportTemplate)
       clearWith:
@@ -528,6 +391,10 @@ items:
           - STARD2015
           - ClopperPearson1934
           - Simel1991
+          - jaeschke1994
+          - haldane1956
+          - anscombe1956
+          - AltmanBland1994b
 
     - name: aboutAnalysis
       title: 'About This Analysis'
@@ -545,6 +412,13 @@ items:
           - HosmerLemeshow2013
           - Pewsner2004
           - Buderer1996
+          - ClopperPearson1934
+          - Simel1991
+          - Glas2003
+          - AgrestiCaffo2000
+          - AltmanBland1994b
+          - Ying2020
+          - Valenstein1990
 
     # Misclassified Cases Analysis ----
 
@@ -594,7 +468,7 @@ items:
           title: 'Row'
           type: integer
         - name: gold_value
-          title: 'True Status'
+          title: 'Reference Result'
           type: text
         - name: test_value
           title: 'Test Result'
@@ -617,7 +491,7 @@ items:
           title: 'Row'
           type: integer
         - name: gold_value
-          title: 'True Status'
+          title: 'Reference Result'
           type: text
         - name: test_value
           title: 'Test Result'
@@ -656,10 +530,8 @@ items:
         - goldNegative
         - testNegative
 
-
 refs:
     - ClinicoPathJamoviModule
-    - DiagnosticTests
     - epiR
     - forcats
 ...

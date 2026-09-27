@@ -123,7 +123,7 @@ test_that("epirTable_number footnotes describe the row they sit on", {
                  c("Positive likelihood ratio", "Negative likelihood ratio",
                    "Diagnostic odds ratio"))
     expect_length(notes, nrow(num))
-    expect_match(notes[1], "positive result is in a diseased")
+    expect_match(notes[1], "positive result is in a patient with the disease")
     expect_false(grepl("Diagnostic odds ratio", notes[1]))
     # 2026-09-25 (validate-function VAL-decision-09): the DOR note used epiR's help wording,
     # "how much more likely will the test make a correct diagnosis than an incorrect
