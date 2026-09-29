@@ -1,3 +1,61 @@
+.classicalSurvivalPower_lf_power <- function(sample_size, design) {
+    if (length(sample_size) != 1L || !is.finite(sample_size) || sample_size <= 0) {
+        stop("Sample size must be a positive finite number.")
+    }
+    numeric_parameters <- c("lambda1", "lambda2", "Ts", "Tr", "eta", "ratio", "alpha")
+    if (any(!vapply(design[numeric_parameters], function(x) {
+        length(x) == 1L && is.numeric(x) && is.finite(x)
+    }, logical(1))) ||
+        length(design$entry) != 1L || !design$entry %in% c("unif", "expo") ||
+        length(design$sided) != 1L || !design$sided %in% c(1, 2)) {
+        stop("Invalid Lachin-Foulkes design parameters.")
+    }
+    if (design$lambda1 <= 0 || design$lambda2 <= 0 ||
+        design$lambda1 == design$lambda2 || design$Ts < design$Tr ||
+        design$Tr <= 0 || design$ratio <= 0 || design$eta < 0 ||
+        design$alpha <= 0 || design$alpha >= 1 ||
+        (design$entry == "expo" && (!is.finite(design$gamma) || design$gamma == 0))) {
+        stop("Invalid Lachin-Foulkes design parameters.")
+    }
+
+    at_beta <- function(beta) {
+        result <- do.call(gsDesign::nSurvival, c(design, list(beta = beta)))
+        if (length(result$n) != 1L || !is.finite(result$n) || result$n < 0 ||
+            length(result$nEvents) != 1L || !is.finite(result$nEvents)) {
+            stop("Lachin-Foulkes sample size or events are not finite.")
+        }
+        result
+    }
+
+    # In nSurvival's risk-ratio formula, sqrt(n) is affine in qnorm(1-beta).
+    # Find the zero of that affine expression to exclude the second root
+    # produced by squaring it at very low power.
+    half <- at_beta(0.5)
+    quarter <- at_beta(0.25)
+    slope <- (sqrt(quarter$n) - sqrt(half$n)) / qnorm(0.75)
+    if (!is.finite(slope) || slope <= 0 || half$n <= 0) {
+        stop("Cannot invert the Lachin-Foulkes design for these parameters.")
+    }
+    upper_beta <- pnorm(sqrt(half$n) / slope)
+    lower_beta <- .Machine$double.eps
+    if (upper_beta <= 0.5 || upper_beta >= 1 ||
+        sample_size > at_beta(lower_beta)$n) {
+        stop("Sample size is outside the numerically solvable Lachin-Foulkes power range.")
+    }
+    if (sample_size == half$n) {
+        beta <- 0.5
+    } else {
+        beta <- uniroot(
+            function(b) at_beta(b)$n - sample_size,
+            interval = c(lower_beta, upper_beta),
+            tol = 1e-10
+        )$root
+    }
+    result <- at_beta(beta)
+    list(beta = beta, power = 1 - beta, events = sample_size * result$nEvents / result$n,
+         result = result)
+}
+
 #' @title Survival Analysis Power & Sample Size
 #' @description
 #' Power analysis and sample size calculation for survival studies using Lachin-Foulkes
@@ -204,13 +262,8 @@ classicalSurvivalPowerClass <- if (requireNamespace("jmvcore", quietly = TRUE)) 
                         result_object = result
                     )
                 } else if (calc_type == "power") {
-                    # For power calculation, we need to modify the approach
-                    # Use the sample size input and calculate effective beta
                     sample_size <- self$options$sample_size_input
-
-                    # This is an approximation - in practice, you'd need iterative methods
-                    # For demonstration, we'll calculate what the study would achieve
-                    result <- gsDesign::nSurvival(
+                    solved <- .classicalSurvivalPower_lf_power(sample_size, list(
                         lambda1 = lambda1,
                         lambda2 = lambda2,
                         Ts = Ts,
@@ -218,31 +271,25 @@ classicalSurvivalPowerClass <- if (requireNamespace("jmvcore", quietly = TRUE)) 
                         eta = eta,
                         ratio = ratio,
                         alpha = alpha,
-                        beta = beta,
                         sided = sided,
                         entry = entry,
                         gamma = gamma
-                    )
-
-                    # Approximate power adjustment based on sample size ratio
-                    power_adjustment <- sample_size / result$n
-                    estimated_power <- min(0.99, 1 - beta * (1 / power_adjustment))
+                    ))
 
                     private$.results_data <- list(
                         method = "Lachin-Foulkes",
-                        calculation = "Power (Estimated)",
+                        calculation = "Power",
                         sample_size = sample_size,
-                        events = round(result$nEvents * power_adjustment),
-                        power = estimated_power,
+                        events = solved$events,
+                        power = solved$power,
                         hazard_ratio = lambda2 / lambda1,
                         control_hazard = lambda1,
                         treatment_hazard = lambda2,
                         study_duration = Ts,
                         accrual_duration = Tr,
                         alpha = alpha,
-                        beta = 1 - estimated_power,
-                        result_object = result,
-                        note = "Power estimated based on sample size ratio"
+                        beta = solved$beta,
+                        result_object = solved$result
                     )
                 } else {
                     # gsDesign::nSurvival only answers sample size / power for the
@@ -350,11 +397,14 @@ classicalSurvivalPowerClass <- if (requireNamespace("jmvcore", quietly = TRUE)) 
 
                 # Key results
                 if (!is.null(data$sample_size)) {
-                    summary_html <- paste0(summary_html, "<p><strong>Required Sample Size:</strong> ", round(data$sample_size), " patients</p>")
+                    n_label <- if (identical(data$calculation, "Power")) "Entered Sample Size" else "Required Sample Size"
+                    summary_html <- paste0(summary_html, "<p><strong>", n_label, ":</strong> ", round(data$sample_size), " patients</p>")
                 }
 
                 if (!is.null(data$events)) {
-                    summary_html <- paste0(summary_html, "<p><strong>Required Events:</strong> ", round(data$events), " events</p>")
+                    events_label <- if (identical(data$method, "Lachin-Foulkes") &&
+                        identical(data$calculation, "Power")) "Expected Events" else "Required Events"
+                    summary_html <- paste0(summary_html, "<p><strong>", events_label, ":</strong> ", round(data$events), " events</p>")
                 }
 
                 summary_html <- paste0(summary_html, "<p><strong>Statistical Power:</strong> ", round(data$power * 100, 1), "%</p>")
@@ -543,7 +593,7 @@ classicalSurvivalPowerClass <- if (requireNamespace("jmvcore", quietly = TRUE)) 
                     )
 
                 # Add current point if applicable
-                if (private$.results_data$calculation %in% c("Sample Size", "Power (Estimated)", "Power")) {
+                if (private$.results_data$calculation %in% c("Sample Size", "Power")) {
                     current_point <- data.frame(
                         sample_size = private$.results_data$sample_size %||% private$.results_data$calculated_sample_size,
                         power = private$.results_data$power
@@ -688,8 +738,7 @@ classicalSurvivalPowerClass <- if (requireNamespace("jmvcore", quietly = TRUE)) 
                     {
                         for (i in seq_along(sample_sizes)) {
                             if (private$.results_data$method == "Lachin-Foulkes") {
-                                # Use gsDesign for power calculation
-                                temp_result <- gsDesign::nSurvival(
+                                powers[i] <- .classicalSurvivalPower_lf_power(sample_sizes[i], list(
                                     lambda1 = self$options$hazard_control,
                                     lambda2 = self$options$hazard_treatment,
                                     Ts = self$options$study_duration,
@@ -697,14 +746,10 @@ classicalSurvivalPowerClass <- if (requireNamespace("jmvcore", quietly = TRUE)) 
                                     eta = self$options$dropout_rate,
                                     ratio = self$options$allocation_ratio,
                                     alpha = self$options$alpha,
-                                    beta = self$options$beta,
                                     sided = private$.sided_num(),
                                     entry = self$options$entry_type,
                                     gamma = if (self$options$entry_type == "expo") self$options$gamma else NA
-                                )
-                                # Approximate power based on sample size ratio
-                                power_ratio <- sample_sizes[i] / temp_result$n
-                                powers[i] <- min(0.99, 1 - self$options$beta * (1 / power_ratio))
+                                ))$power
                             } else {
                                 # Schoenfeld method - calculate events needed then approximate sample size relationship
                                 hr <- private$.results_data$hazard_ratio
