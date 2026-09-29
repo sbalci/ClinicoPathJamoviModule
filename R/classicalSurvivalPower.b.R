@@ -573,14 +573,14 @@ classicalSurvivalPowerClass <- if (requireNamespace("jmvcore", quietly = TRUE)) 
                 }
 
                 # Create power curve plot
-                p <- ggplot2::ggplot(power_data, ggplot2::aes(x = sample_size, y = power)) +
+                p <- ggplot2::ggplot(power_data, ggplot2::aes(x = amount, y = power)) +
                     ggplot2::geom_line(color = "#1f77b4", size = 1.2) +
                     ggplot2::geom_hline(yintercept = 0.8, linetype = "dashed", color = "#ff7f0e", alpha = 0.7) +
                     ggplot2::geom_hline(yintercept = 0.9, linetype = "dashed", color = "#2ca02c", alpha = 0.7) +
                     ggplot2::labs(
                         title = paste("Power Curve -", private$.results_data$method, "Method"),
                         subtitle = paste("Hazard Ratio:", round(private$.results_data$hazard_ratio, 3)),
-                        x = "Sample Size",
+                        x = if (private$.results_data$method == "Schoenfeld") "Number of Events" else "Sample Size",
                         y = "Statistical Power",
                         caption = "Dashed lines: 80% (orange) and 90% (green) power thresholds"
                     ) +
@@ -593,12 +593,12 @@ classicalSurvivalPowerClass <- if (requireNamespace("jmvcore", quietly = TRUE)) 
                     )
 
                 # Add current point if applicable
-                if (private$.results_data$calculation %in% c("Sample Size", "Power")) {
+                if (private$.results_data$calculation %in% c("Sample Size", "Power", "Number of Events", "Sample Size (Events-Based)")) {
                     current_point <- data.frame(
-                        sample_size = private$.results_data$sample_size %||% private$.results_data$calculated_sample_size,
+                        amount = if (private$.results_data$method == "Schoenfeld") private$.results_data$events else private$.results_data$sample_size,
                         power = private$.results_data$power
                     )
-                    if (!is.null(current_point$sample_size)) {
+                    if (length(current_point$amount) == 1L && is.finite(current_point$amount)) {
                         p <- p + ggplot2::geom_point(
                             data = current_point,
                             color = "#d62728",
@@ -607,10 +607,11 @@ classicalSurvivalPowerClass <- if (requireNamespace("jmvcore", quietly = TRUE)) 
                         ) +
                             ggplot2::annotate(
                                 "text",
-                                x = current_point$sample_size,
+                                x = current_point$amount,
                                 y = current_point$power + 0.05,
                                 label = paste(
-                                    "Current:", round(current_point$sample_size), "subjects,",
+                                    "Current:", round(current_point$amount),
+                                    if (private$.results_data$method == "Schoenfeld") "events," else "subjects,",
                                     scales::percent(current_point$power, accuracy = 0.1), "power"
                                 ),
                                 hjust = 0.5,
@@ -705,12 +706,13 @@ classicalSurvivalPowerClass <- if (requireNamespace("jmvcore", quietly = TRUE)) 
                     return(NULL)
                 }
 
-                # Determine sample size range
+                # The range denotes subjects for Lachin-Foulkes and events for Schoenfeld.
                 range_str <- self$options$power_plot_range
+                schoenfeld <- private$.results_data$method == "Schoenfeld"
                 if (range_str == "auto" || is.null(range_str) || range_str == "") {
                     # Auto-determine range based on current calculation
-                    if (!is.null(private$.results_data$sample_size)) {
-                        center <- private$.results_data$sample_size
+                    center <- if (schoenfeld) private$.results_data$events else private$.results_data$sample_size
+                    if (!is.null(center) && is.finite(center)) {
                         min_n <- max(10, round(center * 0.3))
                         max_n <- round(center * 2)
                     } else {
@@ -729,16 +731,20 @@ classicalSurvivalPowerClass <- if (requireNamespace("jmvcore", quietly = TRUE)) 
                     }
                 }
 
-                # Generate sample size sequence
-                sample_sizes <- seq(min_n, max_n, length.out = 50)
-                powers <- numeric(length(sample_sizes))
+                if (!is.finite(min_n) || !is.finite(max_n) || min_n <= 0 || max_n <= min_n) return(NULL)
+                amounts <- seq(min_n, max_n, length.out = 50)
+                if (schoenfeld && identical(self$options$calculation_type, "power") &&
+                    private$.results_data$events >= min_n && private$.results_data$events <= max_n) {
+                    amounts[which.min(abs(amounts - private$.results_data$events))] <- private$.results_data$events
+                }
+                powers <- numeric(length(amounts))
 
                 # Calculate power for each sample size
                 tryCatch(
                     {
-                        for (i in seq_along(sample_sizes)) {
+                        for (i in seq_along(amounts)) {
                             if (private$.results_data$method == "Lachin-Foulkes") {
-                                powers[i] <- .classicalSurvivalPower_lf_power(sample_sizes[i], list(
+                                powers[i] <- .classicalSurvivalPower_lf_power(amounts[i], list(
                                     lambda1 = self$options$hazard_control,
                                     lambda2 = self$options$hazard_treatment,
                                     Ts = self$options$study_duration,
@@ -751,25 +757,18 @@ classicalSurvivalPowerClass <- if (requireNamespace("jmvcore", quietly = TRUE)) 
                                     gamma = if (self$options$entry_type == "expo") self$options$gamma else NA
                                 ))$power
                             } else {
-                                # Schoenfeld method - calculate events needed then approximate sample size relationship
-                                hr <- private$.results_data$hazard_ratio
-                                events_needed <- gsDesign::nEvents(
-                                    hr = hr,
+                                powers[i] <- gsDesign::nEvents(
+                                    hr = private$.results_data$hazard_ratio,
                                     alpha = self$options$alpha,
-                                    beta = self$options$beta,
                                     ratio = self$options$allocation_ratio,
-                                    sided = private$.sided_num()
-                                )$n[1]
-
-                                # Approximate power based on events (assuming ~50% event rate)
-                                approx_events <- sample_sizes[i] * 0.5
-                                z_value <- sqrt(approx_events / events_needed) * (qnorm(1 - self$options$alpha / private$.sided_num()) + qnorm(1 - self$options$beta))
-                                powers[i] <- pnorm(z_value - qnorm(1 - self$options$alpha / private$.sided_num()))
+                                    sided = private$.sided_num(),
+                                    n = amounts[i], tbl = TRUE
+                                )$Power[1]
                             }
                         }
 
                         data.frame(
-                            sample_size = sample_sizes,
+                            amount = amounts,
                             power = pmax(0, pmin(1, powers))
                         )
                     },
@@ -826,10 +825,11 @@ classicalSurvivalPowerClass <- if (requireNamespace("jmvcore", quietly = TRUE)) 
                     curve_count <- if (!is.null(power_data)) nrow(power_data) else 0
                     summary_html <- paste0(summary_html, "<p><strong>Power curve:</strong> ", curve_count, " points computed</p>")
                     # The 'Power Curve Analysis' pane is only shown when show_power_plot is on.
+                    axis <- if (private$.results_data$method == "Schoenfeld") "Number of events" else "Sample size"
                     detail <- if (isTRUE(self$options$show_power_plot)) {
-                        "Sample size versus power, plotted in 'Power Curve Analysis' above."
+                        paste0(axis, " versus power, plotted in 'Power Curve Analysis' above.")
                     } else {
-                        "Sample size versus power; tick 'Show Power Curve Plot' to display the curve."
+                        paste0(axis, " versus power; tick 'Show Power Curve Plot' to display the curve.")
                     }
                     summary_html <- paste0(summary_html, "<p style='margin-left: 20px; opacity: 0.75;'>", detail, "</p>")
                 }
