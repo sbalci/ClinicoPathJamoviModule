@@ -335,7 +335,9 @@ mixedcoxClass <- if (requireNamespace('jmvcore'))
           coxme_fit <- coxme::coxme(
             formula = full_formula,
             data = prepared_data$data,
-            sparse = self$options$sparse_matrix
+            control = coxme::coxme.control(
+              sparse = if (self$options$sparse_matrix) c(50, 0.02) else c(Inf, 0)
+            )
           )
           
           # Extract results
@@ -450,7 +452,7 @@ mixedcoxClass <- if (requireNamespace('jmvcore'))
               coef_val <- model_results$fixed_effects[i, "coef"]
               se_val <- model_results$fixed_effects[i, "se(coef)"]
               z_val <- model_results$fixed_effects[i, "z"]
-              p_val <- model_results$fixed_effects[i, "Pr(>|z|)"]
+              p_val <- model_results$fixed_effects[i, "p"]
               hr_val <- exp(coef_val)
               
               fixed_table$addRow(list(

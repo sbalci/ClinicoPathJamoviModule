@@ -66,6 +66,11 @@ test_that("mixedcox fits and unsupported plot switches are rejected", {
                            show_model_comparison = TRUE)
   expect_true(nrow(as.data.frame(with_options$fixedEffectsTable)) >= 1L)
   expect_false(is.null(with_options$modelComparison))
+  dense_fit <- mixedcox(data, elapsedtime = "time", outcome = "status",
+                        outcomeLevel = "event", continuous_effects = "x",
+                        cluster_var = "cluster", sparse_matrix = FALSE,
+                        show_model_comparison = FALSE)
+  expect_true(nrow(as.data.frame(dense_fit$fixedEffectsTable)) >= 1L)
   expect_error(mixedcox(data, elapsedtime = "time", outcome = "status",
                         outcomeLevel = "event", continuous_effects = "x",
                         cluster_var = "cluster", fixed_effects_plot = TRUE))
