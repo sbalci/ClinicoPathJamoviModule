@@ -55,3 +55,84 @@ test_that('classicalSurvivalPower analysis works', {
   expect_true(file.exists(omv_path))
 })
 
+lf_design <- function(sided = 1, entry = "unif", gamma = NA_real_) {
+  list(lambda1 = 0.083, lambda2 = 0.042, Ts = 24, Tr = 12,
+       eta = 0, ratio = 1, alpha = 0.025, sided = sided,
+       entry = entry, gamma = gamma)
+}
+
+test_that("Lachin-Foulkes sample size and solved power round trip", {
+  skip_if_not_installed("gsDesign")
+  for (design in list(lf_design(), lf_design(sided = 2),
+                      lf_design(entry = "expo", gamma = 0.1))) {
+    for (target_beta in c(0.2, 0.1, 0.01)) {
+      required <- do.call(gsDesign::nSurvival, c(design, list(beta = target_beta)))
+      actual <- .classicalSurvivalPower_lf_power(required$n, design)
+      expect_equal(actual$power, 1 - target_beta, tolerance = 1e-7)
+      expect_equal(actual$result$n, required$n, tolerance = 1e-5)
+      expect_equal(actual$events, required$nEvents, tolerance = 1e-5)
+    }
+  }
+})
+
+test_that("Lachin-Foulkes solved power and the curve rise with sample size", {
+  skip_if_not_installed("gsDesign")
+  design <- lf_design()
+  n80 <- do.call(gsDesign::nSurvival, c(design, list(beta = 0.2)))$n
+  sizes <- seq(n80 / 2, 2 * n80, length.out = 50)
+  powers <- vapply(sizes, function(n) {
+    .classicalSurvivalPower_lf_power(n, design)$power
+  }, numeric(1))
+  expect_true(all(diff(powers) > 0))
+  expect_equal(.classicalSurvivalPower_lf_power(n80, design)$power, 0.8,
+               tolerance = 1e-7)
+  expect_gt(powers[50], 0.8)
+  expect_lt(powers[1], 0.8)
+})
+
+test_that("Lachin-Foulkes inverse handles low power and invalid boundaries", {
+  skip_if_not_installed("gsDesign")
+  design <- lf_design()
+  n40 <- do.call(gsDesign::nSurvival, c(design, list(beta = 0.6)))$n
+  expect_equal(.classicalSurvivalPower_lf_power(n40, design)$power, 0.4,
+               tolerance = 1e-7)
+  expect_error(.classicalSurvivalPower_lf_power(0, design), "positive finite")
+  expect_error(.classicalSurvivalPower_lf_power(Inf, design), "positive finite")
+  expect_error(.classicalSurvivalPower_lf_power(10, modifyList(design,
+    list(lambda2 = design$lambda1))), "Invalid Lachin-Foulkes")
+  expect_error(.classicalSurvivalPower_lf_power(10, modifyList(design,
+    list(Ts = 5))), "Invalid Lachin-Foulkes")
+  expect_error(.classicalSurvivalPower_lf_power(10, modifyList(design,
+    list(entry = "expo", gamma = 0))), "Invalid Lachin-Foulkes")
+  numerical_limit <- do.call(gsDesign::nSurvival,
+    c(design, list(beta = .Machine$double.eps)))$n
+  expect_error(.classicalSurvivalPower_lf_power(2 * numerical_limit, design),
+               "outside the numerically solvable")
+})
+
+test_that("Lachin-Foulkes jamovi power uses the inverse and Schoenfeld stays intact", {
+  skip_if_not_installed("gsDesign")
+  skip_if_not_installed("jmvcore")
+  design <- lf_design()
+  required <- do.call(gsDesign::nSurvival, c(design, list(beta = 0.1)))
+  model <- classicalSurvivalPower(
+    calculation_type = "power", method = "lachin_foulkes",
+    sample_size_input = required$n, show_interpretation = FALSE,
+    export_power_curve = TRUE
+  )
+  expect_match(model$results$power_results$content, "Statistical Power:</strong> 90")
+  expect_match(model$results$power_results$content, "Expected Events")
+  expect_false(grepl("Power (Estimated)", model$results$power_results$content,
+                     fixed = TRUE))
+  expect_match(model$results$export_summary$content, "Power curve:</strong> 50 points")
+
+  schoenfeld <- classicalSurvivalPower(
+    calculation_type = "power", method = "schoenfeld",
+    events_input = 50, show_interpretation = FALSE
+  )
+  expected <- gsDesign::nEvents(hr = 0.6, alpha = 0.025, ratio = 1,
+                                sided = 1, n = 50, tbl = TRUE)$Power[1]
+  expect_match(schoenfeld$results$power_results$content,
+               paste0("Statistical Power:</strong> ", round(expected * 100, 1)),
+               fixed = TRUE)
+})
