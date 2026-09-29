@@ -247,7 +247,7 @@ options:
       default: false
       description:
         R: Whether to display power curve visualization.
-        jamovi: Show interactive power curves and sample size relationships.
+        jamovi: Plot power against sample size for Lachin-Foulkes or number of events for Schoenfeld.
 
     - name: show_timeline_plot
       title: "Show Study Timeline Plot"
@@ -258,12 +258,12 @@ options:
         jamovi: Show study design timeline with accrual and follow-up periods.
 
     - name: power_plot_range
-      title: "Power Plot Sample Size Range"
+      title: "Power Plot Range (Sample Size or Events)"
       type: String
       default: "auto"
       description:
-        R: Sample size range for power plots (format 'min,max' or 'auto').
-        jamovi: Specify sample size range for power curves (e.g., '50,500' or 'auto').
+        R: Sample size range for Lachin-Foulkes or event-count range for Schoenfeld (format 'min,max' or 'auto').
+        jamovi: Specify subjects for Lachin-Foulkes or events for Schoenfeld (e.g., '50,500' or 'auto').
 
     - name: export_results
       title: "Summarise Results for Reporting"
