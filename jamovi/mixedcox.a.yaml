@@ -224,21 +224,6 @@ options:
 
 # Model Options ----
 
-    - name: correlation_structure
-      title: 'Correlation Structure'
-      type: List
-      options:
-        - title: Unstructured
-          name: unstructured
-        - title: Compound Symmetry
-          name: compound_symmetry
-        - title: AR(1)
-          name: ar1
-      default: unstructured
-      description:
-        R: >
-          Correlation structure for random effects.
-
     - name: sparse_matrix
       title: 'Use Sparse Matrix Methods'
       type: Bool
@@ -247,144 +232,13 @@ options:
         R: >
           Use sparse matrix methods for computational efficiency with large datasets.
 
-    - name: optimization_method
-      title: 'Optimization Method'
-      type: List
-      options:
-        - title: Penalized Likelihood
-          name: penalized
-        - title: Laplace Approximation
-          name: laplace
-        - title: Adaptive Gaussian Quadrature
-          name: agq
-      default: penalized
-      description:
-        R: >
-          Method for optimizing the mixed-effects model likelihood.
-
-# Model Assessment ----
-
-    - name: likelihood_ratio_test
-      title: 'Likelihood Ratio Test'
-      type: Bool
-      default: true
-      description:
-        R: >
-          Perform likelihood ratio test comparing mixed-effects vs standard Cox model.
-
-    - name: random_effects_significance
-      title: 'Test Random Effects Significance'
-      type: Bool
-      default: true
-      description:
-        R: >
-          Test significance of random effects using appropriate methods.
-
     - name: icc_calculation
-      title: 'Calculate Intracluster Correlation'
+      title: 'Show Approximate Latent-Scale Variance Fraction'
       type: Bool
       default: true
       description:
         R: >
-          Calculate intracluster correlation coefficient (ICC).
-
-# Model Diagnostics ----
-
-    - name: residual_analysis
-      title: 'Residual Analysis'
-      type: Bool
-      default: false
-      description:
-        R: >
-          Perform residual analysis for mixed-effects Cox model.
-
-    - name: influence_diagnostics
-      title: 'Influence Diagnostics'
-      type: Bool
-      default: false
-      description:
-        R: >
-          Calculate influence diagnostics for clusters and observations.
-
-    - name: random_effects_prediction
-      title: 'Predict Random Effects'
-      type: Bool
-      default: false
-      description:
-        R: >
-          Predict random effects (BLUPs) for each cluster.
-
-# Plotting Options ----
-
-    - name: fixed_effects_plot
-      title: 'Fixed Effects Forest Plot'
-      type: Bool
-      default: true
-      description:
-        R: >
-          Generate forest plot for fixed effects coefficients.
-
-    - name: random_effects_plot
-      title: 'Random Effects Plot'
-      type: Bool
-      default: false
-      description:
-        R: >
-          Generate plots for random effects distribution.
-
-    - name: cluster_survival_plot
-      title: 'Cluster-Specific Survival Curves'
-      type: Bool
-      default: false
-      description:
-        R: >
-          Generate survival curves for selected clusters.
-
-    - name: n_clusters_plot
-      title: 'Number of Clusters to Plot'
-      type: Integer
-      min: 1
-      max: 20
-      default: 5
-      description:
-        R: >
-          Number of clusters to display in cluster-specific plots.
-
-# Advanced Options ----
-
-    - name: variance_components
-      title: 'Estimate Variance Components'
-      type: Bool
-      default: true
-      description:
-        R: >
-          Estimate and display variance components for random effects.
-
-    - name: confidence_intervals
-      title: 'Confidence Intervals'
-      type: Bool
-      default: true
-      description:
-        R: >
-          Calculate confidence intervals for fixed and random effects.
-
-    - name: bootstrap_variance
-      title: 'Bootstrap Variance Estimation'
-      type: Bool
-      default: false
-      description:
-        R: >
-          Use bootstrap methods for variance estimation.
-
-    - name: bootstrap_samples
-      title: 'Bootstrap Samples'
-      type: Integer
-      min: 100
-      max: 1000
-      default: 500
-      description:
-        R: >
-          Number of bootstrap samples for variance estimation.
+          Show an approximate latent-scale variance fraction for a random-intercept model (not a measured intracluster correlation).
 
 # Output Options ----
 
@@ -410,30 +264,6 @@ options:
       default: true
       description:
         R: >
-          Display comparison between mixed-effects and standard Cox models.
-
-    - name: show_cluster_summary
-      title: 'Show Cluster Summary'
-      type: Bool
-      default: false
-      description:
-        R: >
-          Display summary statistics by cluster.
-
-    - name: showSummaries
-      title: "Show Natural Language Summaries"
-      type: Bool
-      default: false
-      description: >-
-        Display natural language summaries alongside tables and plots for
-        interpretation of mixed-effects Cox regression results.
-
-    - name: showExplanations
-      title: "Show Analysis Explanations"
-      type: Bool
-      default: false
-      description: >-
-        Display detailed explanations of mixed-effects Cox regression methods
-        and interpretation guidelines.
+          Display the fitted mixed and standard Cox log-likelihoods and their descriptive likelihood-ratio statistic; no significance test is provided.
 
 ...

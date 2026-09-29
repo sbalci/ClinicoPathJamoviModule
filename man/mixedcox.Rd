@@ -21,29 +21,11 @@ mixedcox(
   random_slope_var = NULL,
   nested_clustering = FALSE,
   nested_cluster_var = NULL,
-  correlation_structure = "unstructured",
   sparse_matrix = TRUE,
-  optimization_method = "penalized",
-  likelihood_ratio_test = TRUE,
-  random_effects_significance = TRUE,
   icc_calculation = TRUE,
-  residual_analysis = FALSE,
-  influence_diagnostics = FALSE,
-  random_effects_prediction = FALSE,
-  fixed_effects_plot = TRUE,
-  random_effects_plot = FALSE,
-  cluster_survival_plot = FALSE,
-  n_clusters_plot = 5,
-  variance_components = TRUE,
-  confidence_intervals = TRUE,
-  bootstrap_variance = FALSE,
-  bootstrap_samples = 500,
   show_fixed_effects = TRUE,
   show_random_effects = TRUE,
-  show_model_comparison = TRUE,
-  show_cluster_summary = FALSE,
-  showSummaries = FALSE,
-  showExplanations = FALSE
+  show_model_comparison = TRUE
 )
 }
 \arguments{
@@ -93,69 +75,20 @@ includes slopes.}
 \item{nested_cluster_var}{Higher-level clustering variable for nested
 structures.}
 
-\item{correlation_structure}{Correlation structure for random effects.}
-
 \item{sparse_matrix}{Use sparse matrix methods for computational efficiency
 with large datasets.}
 
-\item{optimization_method}{Method for optimizing the mixed-effects model
-likelihood.}
-
-\item{likelihood_ratio_test}{Perform likelihood ratio test comparing
-mixed-effects vs standard Cox model.}
-
-\item{random_effects_significance}{Test significance of random effects
-using appropriate methods.}
-
-\item{icc_calculation}{Calculate intracluster correlation coefficient
-(ICC).}
-
-\item{residual_analysis}{Perform residual analysis for mixed-effects Cox
-model.}
-
-\item{influence_diagnostics}{Calculate influence diagnostics for clusters
-and observations.}
-
-\item{random_effects_prediction}{Predict random effects (BLUPs) for each
-cluster.}
-
-\item{fixed_effects_plot}{Generate forest plot for fixed effects
-coefficients.}
-
-\item{random_effects_plot}{Generate plots for random effects distribution.}
-
-\item{cluster_survival_plot}{Generate survival curves for selected
-clusters.}
-
-\item{n_clusters_plot}{Number of clusters to display in cluster-specific
-plots.}
-
-\item{variance_components}{Estimate and display variance components for
-random effects.}
-
-\item{confidence_intervals}{Calculate confidence intervals for fixed and
-random effects.}
-
-\item{bootstrap_variance}{Use bootstrap methods for variance estimation.}
-
-\item{bootstrap_samples}{Number of bootstrap samples for variance
-estimation.}
+\item{icc_calculation}{Show an approximate latent-scale intercept variance
+fraction; this is not an observed-event ICC.}
 
 \item{show_fixed_effects}{Display table of fixed effects estimates.}
 
 \item{show_random_effects}{Display summary of random effects variance
 components.}
 
-\item{show_model_comparison}{Display comparison between mixed-effects and
-standard Cox models.}
-
-\item{show_cluster_summary}{Display summary statistics by cluster.}
-
-\item{showSummaries}{Display natural language summaries alongside tables
-and plots for interpretation of mixed-effects Cox regression results.}
-
-\item{showExplanations}{Display detailed explanations of mixed-effects Cox
-regression methods and interpretation guidelines.}
+\item{show_model_comparison}{Display the mixed and standard Cox
+log-likelihoods and descriptive likelihood-ratio statistic without an
+inferential p-value.}
 }
 \value{
 A results object containing:
@@ -164,24 +97,7 @@ A results object containing:
 \code{results$modelSummary} \tab \tab \tab \tab \tab a html \cr
 \code{results$fixedEffectsTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$randomEffectsSummary} \tab \tab \tab \tab \tab a html \cr
-\code{results$varianceTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$iccTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$modelComparison} \tab \tab \tab \tab \tab a html \cr
-\code{results$likelihoodRatioTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$clusterSummaryTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$randomEffectsPredTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$diagnosticsTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$fixedEffectsPlot} \tab \tab \tab \tab \tab an image \cr
-\code{results$randomEffectsPlot} \tab \tab \tab \tab \tab an image \cr
-\code{results$clusterSurvivalPlot} \tab \tab \tab \tab \tab an image \cr
-\code{results$residualPlot} \tab \tab \tab \tab \tab an image \cr
-\code{results$analysisSummary} \tab \tab \tab \tab \tab a html \cr
-\code{results$methodExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$clusteringExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$randomEffectsExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$iccExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$modelSelectionExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$bootstrapTable} \tab \tab \tab \tab \tab a table \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

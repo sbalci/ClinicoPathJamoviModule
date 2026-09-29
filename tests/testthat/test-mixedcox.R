@@ -1,84 +1,72 @@
+test_that("mixedcox exposes only implemented options and populated results", {
+  skip_if_not_installed("yaml")
 
-test_that('mixedcox analysis works', {
-  skip_if_not_installed('jmvReadWrite')
+  analysis <- yaml::read_yaml(testthat::test_path("..", "..", "jamovi", "mixedcox.a.yaml"))
+  results <- yaml::read_yaml(testthat::test_path("..", "..", "jamovi", "mixedcox.r.yaml"))
+  ui <- yaml::read_yaml(testthat::test_path("..", "..", "jamovi", "mixedcox.u.yaml"))
 
-  # Synthetic data generation
-  set.seed(123)
-  n <- 50
-  data <- data.frame(
-    elapsedtime = runif(n, 1, 100),
-    dxdate = runif(n, 1, 100),
-    fudate = runif(n, 1, 100),
-    outcome = sample(c('A', 'B'), n, replace = TRUE),
-    fixed_effects1 = sample(c('A', 'B'), n, replace = TRUE),
-    fixed_effects2 = sample(c('A', 'B'), n, replace = TRUE),
-    fixed_effects3 = sample(c('A', 'B'), n, replace = TRUE),
-    continuous_effects1 = runif(n, 1, 100),
-    continuous_effects2 = runif(n, 1, 100),
-    continuous_effects3 = runif(n, 1, 100),
-    cluster_var = sample(c('A', 'B'), n, replace = TRUE),
-    random_slope_var = sample(c('A', 'B'), n, replace = TRUE),
-    nested_cluster_var = sample(c('A', 'B'), n, replace = TRUE)
+  offered <- vapply(analysis$options, `[[`, "", "name")
+  output <- vapply(results$items, `[[`, "", "name")
+  unsupported <- c(
+    "correlation_structure", "optimization_method", "random_effects_significance",
+    "influence_diagnostics", "random_effects_prediction", "n_clusters_plot",
+    "confidence_intervals", "bootstrap_variance", "bootstrap_samples",
+    "residual_analysis", "fixed_effects_plot", "random_effects_plot",
+    "cluster_survival_plot", "variance_components", "show_cluster_summary",
+    "showSummaries", "showExplanations", "likelihood_ratio_test"
   )
-
-  # Run analysis
-  expect_no_error({
-    model <- mixedcox(
-      data = data,
-    elapsedtime = 'elapsedtime',
-    tint = FALSE,
-    dxdate = 'dxdate',
-    fudate = 'fudate',
-    timetypedata = 'ymd',
-    timetypeoutput = 'months',
-    outcome = 'outcome',
-    fixed_effects = c('fixed_effects1', 'fixed_effects2', 'fixed_effects3'),
-    continuous_effects = c('continuous_effects1', 'continuous_effects2', 'continuous_effects3'),
-    cluster_var = 'cluster_var',
-    random_effects = 'intercept',
-    random_slope_var = 'random_slope_var',
-    nested_clustering = FALSE,
-    nested_cluster_var = 'nested_cluster_var',
-    correlation_structure = 'unstructured',
-    sparse_matrix = TRUE,
-    optimization_method = 'penalized',
-    likelihood_ratio_test = TRUE,
-    random_effects_significance = TRUE,
-    icc_calculation = TRUE,
-    residual_analysis = FALSE,
-    influence_diagnostics = FALSE,
-    random_effects_prediction = FALSE,
-    fixed_effects_plot = TRUE,
-    random_effects_plot = FALSE,
-    cluster_survival_plot = FALSE,
-    n_clusters_plot = 5,
-    variance_components = TRUE,
-    confidence_intervals = TRUE,
-    bootstrap_variance = FALSE,
-    bootstrap_samples = 100,
-    show_fixed_effects = TRUE,
-    show_random_effects = TRUE,
-    show_model_comparison = TRUE,
-    show_cluster_summary = FALSE,
-    showSummaries = FALSE,
-    showExplanations = FALSE,
-    outcomeLevel = NULL
-    )
-  })
-
-  # Verify and Export OMV
-  expect_true(is.list(model))
-  expect_true(inherits(model, 'jmvcoreClass'))
-
-  # Define output path
-  omv_path <- file.path('omv_output', 'mixedcox.omv')
-  if (!dir.exists('omv_output')) dir.create('omv_output')
-
-  # Attempt to write OMV
-  expect_no_error({
-    jmvReadWrite::write_omv(model, omv_path)
-  })
-
-  expect_true(file.exists(omv_path))
+  expect_false(any(unsupported %in% offered))
+  expect_setequal(offered, c(
+    "data", "elapsedtime", "tint", "dxdate", "fudate", "timetypedata",
+    "timetypeoutput", "outcome", "outcomeLevel", "fixed_effects",
+    "continuous_effects", "cluster_var", "random_effects", "random_slope_var",
+    "nested_clustering", "nested_cluster_var", "sparse_matrix",
+    "icc_calculation", "show_fixed_effects", "show_random_effects",
+    "show_model_comparison"
+  ))
+  expect_setequal(output, c("todo", "modelSummary", "fixedEffectsTable",
+                           "randomEffectsSummary", "modelComparison"))
+  # No image can be enabled until its renderer actually creates an image.
+  expect_false(any(vapply(results$items, function(item) item$type == "Image", FALSE)))
+  expect_false(any(grepl("_plot$|residual_analysis", offered)))
+  expect_false(grepl("fixed_effects_plot|random_effects_plot|cluster_survival_plot",
+                     paste(capture.output(str(ui)), collapse = " ")))
 })
 
+test_that("mixedcox fits and unsupported plot switches are rejected", {
+  skip_if_not_installed("coxme")
+  skip_if_not_installed("jmvcore")
+
+  set.seed(2409)
+  n <- 240
+  cluster <- factor(rep(seq_len(12), each = n / 12))
+  x <- rnorm(n)
+  frailty <- rep(rnorm(12, sd = 0.5), each = n / 12)
+  event_time <- rexp(n, rate = exp(0.5 * x + frailty) / 20)
+  censor_time <- rexp(n, rate = 1 / 35)
+  data <- data.frame(
+    time = pmin(event_time, censor_time),
+    status = factor(ifelse(event_time <= censor_time, "event", "censored"),
+                    levels = c("censored", "event")),
+    x = x, cluster = cluster
+  )
+
+  fit <- mixedcox(data, elapsedtime = "time", outcome = "status",
+                  outcomeLevel = "event", continuous_effects = "x",
+                  cluster_var = "cluster", icc_calculation = FALSE,
+                  show_model_comparison = FALSE)
+  expect_true(nrow(as.data.frame(fit$fixedEffectsTable)) >= 1L)
+  expect_null(fit$fixedEffectsPlot)
+  expect_null(fit$residualPlot)
+  expect_null(fit$iccTable)
+
+  with_options <- mixedcox(data, elapsedtime = "time", outcome = "status",
+                           outcomeLevel = "event", continuous_effects = "x",
+                           cluster_var = "cluster", icc_calculation = TRUE,
+                           show_model_comparison = TRUE)
+  expect_true(nrow(as.data.frame(with_options$fixedEffectsTable)) >= 1L)
+  expect_false(is.null(with_options$modelComparison))
+  expect_error(mixedcox(data, elapsedtime = "time", outcome = "status",
+                        outcomeLevel = "event", continuous_effects = "x",
+                        cluster_var = "cluster", fixed_effects_plot = TRUE))
+})

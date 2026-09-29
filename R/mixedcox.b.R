@@ -12,7 +12,6 @@
 #' - Random intercepts for cluster-specific baseline hazards
 #' - Random slopes for cluster-specific covariate effects
 #' - Nested clustering structures (e.g., patients within hospitals)
-#' - Multiple correlation structures for random effects
 #' 
 #' \strong{Clinical Applications:}
 #' - Multi-center clinical trials with hospital effects
@@ -22,9 +21,8 @@
 #' 
 #' \strong{Statistical Features:}
 #' - Variance components estimation for random effects
-#' - Intracluster correlation coefficient (ICC) calculation
-#' - Likelihood ratio tests for random effects significance
-#' - Bootstrap variance estimation for complex models
+#' - Approximate latent-scale random-intercept variance fraction
+#' - Descriptive comparison with a standard Cox model
 #' 
 #' @seealso \code{\link{mixedcox}} for the main user interface function
 #' @importFrom R6 R6Class
@@ -46,7 +44,6 @@ mixedcoxClass <- if (requireNamespace('jmvcore'))
       .icc_values = NULL,
       
       # Constants for analysis
-      DEFAULT_OPTIMIZATION = "penalized",
       MIN_CLUSTERS = 5,
       MIN_OBS_PER_CLUSTER = 2,
       
@@ -107,36 +104,19 @@ mixedcoxClass <- if (requireNamespace('jmvcore'))
         if (is.null(model_results)) return()
         
         # Fit standard Cox model for comparison
-        if (self$options$likelihood_ratio_test || self$options$show_model_comparison) {
+        if (self$options$show_model_comparison) {
           standard_results <- private$.fitStandardCox(prepared_data)
           private$.standard_cox <- standard_results
+          if (is.null(standard_results)) {
+            self$results$modelComparison$setContent(
+              "<p>Standard Cox fit unavailable; model comparison could not be calculated.</p>"
+            )
+          }
         }
         
         # Display results
         private$.displayResults(model_results, prepared_data)
         
-        # Generate plots if requested
-        if (self$options$fixed_effects_plot) {
-          private$.plotFixedEffects()
-        }
-        
-        if (self$options$random_effects_plot) {
-          private$.plotRandomEffects()
-        }
-        
-        if (self$options$cluster_survival_plot) {
-          private$.plotClusterSurvival(prepared_data)
-        }
-        
-        # Generate summaries if requested
-        if (self$options$showSummaries) {
-          private$.generateSummaries(model_results)
-        }
-        
-        # Generate explanations if requested
-        if (self$options$showExplanations) {
-          private$.generateExplanations()
-        }
       },
       
       # Input validation
@@ -217,6 +197,10 @@ mixedcoxClass <- if (requireNamespace('jmvcore'))
           all_vars <- c(time_col, self$options$outcome, self$options$cluster_var, fixed_vars)
           if (self$options$nested_clustering && !is.null(self$options$nested_cluster_var)) {
             all_vars <- c(all_vars, self$options$nested_cluster_var)
+          }
+          if (self$options$random_effects != "intercept" &&
+              !is.null(self$options$random_slope_var)) {
+            all_vars <- c(all_vars, self$options$random_slope_var)
           }
 
           # TODO (jamovify): consider `jmvcore::naOmit(data[all_vars])` instead of `complete.cases` +
@@ -360,7 +344,7 @@ mixedcoxClass <- if (requireNamespace('jmvcore'))
           
           # Calculate ICC if possible
           icc_value <- NULL
-          if (self$options$icc_calculation) {
+          if (self$options$icc_calculation && self$options$random_effects != "slope") {
             icc_value <- private$.calculateICC(variance_components)
           }
           
@@ -449,7 +433,9 @@ mixedcoxClass <- if (requireNamespace('jmvcore'))
           
           if (!is.null(model_results$icc)) {
             model_text <- paste0(model_text, 
-              "<p><b>Intracluster Correlation:</b> ", round(model_results$icc, 4), "</p>"
+            "<p><b>Approximate latent-scale intercept variance fraction:</b> ",
+            round(model_results$icc, 4),
+            " (intercept variance / [intercept variance + pi^2/3]; not an observed-event ICC)</p>"
             )
           }
           
@@ -508,13 +494,13 @@ mixedcoxClass <- if (requireNamespace('jmvcore'))
           # Model comparison
           if (self$options$show_model_comparison && !is.null(private$.standard_cox)) {
             lr_test_stat <- 2 * (model_results$loglik[2] - private$.standard_cox$loglik[2])
-            lr_p_value <- 1 - pchisq(lr_test_stat, df = 1)  # Simplified df
             
             comparison_text <- paste0(
               "<h3>Model Comparison</h3>",
               "<p><b>Standard Cox Log-likelihood:</b> ", round(private$.standard_cox$loglik[2], 4), "</p>",
               "<p><b>Mixed-Effects Cox Log-likelihood:</b> ", round(model_results$loglik[2], 4), "</p>",
-              "<p><b>Likelihood Ratio Test:</b> \u{03C7}\u{00B2} = ", round(lr_test_stat, 4), ", p = ", round(lr_p_value, 4), "</p>"
+              "<p><b>Descriptive likelihood-ratio statistic:</b> 2 &times; log-likelihood difference = ",
+              round(lr_test_stat, 4), " (no p-value; variance-component boundary and model structure require a calibrated test)</p>"
             )
             
             self$results$modelComparison$setContent(comparison_text)
@@ -523,98 +509,6 @@ mixedcoxClass <- if (requireNamespace('jmvcore'))
         }, error = function(e) {
           # Silently handle display errors
         })
-      },
-      
-      # Plot fixed effects
-      .plotFixedEffects = function() {
-        # TODO (stub): all three plot methods (`.plotFixedEffects`, `.plotRandomEffects` at ~L545,
-        # `.plotClusterSurvival` at ~L556) only call `setState(NULL)` and do nothing else. The
-        # corresponding image renderers in `.r.yaml` (fixedEffectsPlot, randomEffectsPlot,
-        # clusterSurvivalPlot) currently show empty placeholders to the user despite the option
-        # toggles being enabled. Either implement them (forest plot of fixed effects with HRs/95%CI;
-        # caterpillar/dotplot of BLUPs from `coxme::ranef()`; cluster-stratified KM via
-        # `survival::survfit(prepared_data$surv ~ cluster, data = ...)`) or remove the corresponding
-        # `*_plot` options from `.a.yaml`/`.u.yaml`/`.r.yaml` so the UI does not advertise features
-        # that don't exist.
-        if (!is.null(private$.coxme_model)) {
-          # This would create fixed effects forest plot
-          # Implementation depends on plotting infrastructure
-          # For now, return placeholder
-          self$results$fixedEffectsPlot$setState(NULL)
-        }
-      },
-      
-      # Plot random effects
-      .plotRandomEffects = function() {
-        if (!is.null(private$.variance_components)) {
-          # This would create random effects distribution plot
-          # Implementation depends on plotting infrastructure
-          # For now, return placeholder
-          self$results$randomEffectsPlot$setState(NULL)
-        }
-      },
-      
-      # Plot cluster-specific survival curves
-      .plotClusterSurvival = function(prepared_data) {
-        if (!is.null(private$.coxme_model)) {
-          # This would create cluster-specific survival curves
-          # Implementation depends on plotting infrastructure
-          # For now, return placeholder
-          self$results$clusterSurvivalPlot$setState(NULL)
-        }
-      },
-
-      # Render residual analysis plot
-      # renderFun referenced by `residualPlot` in mixedcox.r.yaml. The residual
-      # plot is not yet implemented (no state is ever set for this image), so this
-      # renderer is intentionally a no-op returning FALSE. It exists so the
-      # declared renderFun resolves to a real method - otherwise, when a user
-      # enables `residual_analysis` and the image becomes visible, jamovi would
-      # invoke a missing method and raise "attempt to apply non-function".
-      # TODO (stub): implement alongside the other plot stubs (see .plotFixedEffects).
-      .plotResiduals = function(image, ggtheme, theme, ...) {
-        return(FALSE)
-      },
-
-      # Generate natural language summaries
-      .generateSummaries = function(model_results) {
-        summary_text <- paste0(
-          "<h3>Analysis Summary</h3>",
-          "<p>Mixed-effects Cox regression identified significant clustering within the data. ",
-          "The model accounts for correlation among ", model_results$n_obs, " observations ",
-          "clustered within ", model_results$n_clusters, " groups. "
-        )
-        
-        if (!is.null(model_results$icc) && model_results$icc > 0.05) {
-          summary_text <- paste0(summary_text,
-            "The intracluster correlation of ", round(model_results$icc, 3), 
-            " indicates substantial clustering effects that justify the mixed-effects approach."
-          )
-        }
-        
-        summary_text <- paste0(summary_text, "</p>")
-        
-        self$results$analysisSummary$setContent(summary_text)
-      },
-      
-      # Generate methodology explanations
-      .generateExplanations = function() {
-        explanation_text <- paste0(
-          "<h3>Mixed-Effects Cox Regression Methods</h3>",
-          "<p><b>Random Effects:</b> Account for unobserved heterogeneity between clusters.</p>",
-          "<p><b>Clustering:</b> Observations within clusters are more similar than between clusters.</p>",
-          "<p><b>ICC:</b> Intracluster correlation quantifies the proportion of variation due to clustering.</p>",
-          "<p><b>Mixed Models:</b> Combine fixed effects (population average) with random effects (cluster-specific).</p>"
-        )
-        
-        self$results$methodExplanation$setContent(explanation_text)
       }
-
-      # TODO: output variables (cluster BLUPs, fitted values) are not implemented.
-      # To add them: coxme::ranef(private$.coxme_model) joined back to row order via
-      # prepared_data$data[[cluster_var]], and predict(private$.coxme_model, type = "lp").
-      # Needs a `type: Output` option in .a.yaml + a matching item in .r.yaml + an Output
-      # control in .u.yaml, all sharing ONE name (jmvcore::Output$enabled resolves the
-      # gating option by the result item's own name). See jamovi/survival.* for the shape.
     )
   )

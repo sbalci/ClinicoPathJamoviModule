@@ -20,7 +20,6 @@ The mixedcoxClass implements mixed-effects Cox regression methods with:
 \item Random intercepts for cluster-specific baseline hazards
 \item Random slopes for cluster-specific covariate effects
 \item Nested clustering structures (e.g., patients within hospitals)
-\item Multiple correlation structures for random effects
 }
 
 \strong{Clinical Applications:}
@@ -34,9 +33,8 @@ The mixedcoxClass implements mixed-effects Cox regression methods with:
 \strong{Statistical Features:}
 \itemize{
 \item Variance components estimation for random effects
-\item Intracluster correlation coefficient (ICC) calculation
-\item Likelihood ratio tests for random effects significance
-\item Bootstrap variance estimation for complex models
+\item Approximate latent-scale intercept variance fraction
+\item Descriptive comparison with a standard Cox model
 }
 }
 \seealso{

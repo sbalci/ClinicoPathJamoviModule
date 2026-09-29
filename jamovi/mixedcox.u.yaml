@@ -97,24 +97,8 @@ children:
     label: Model Options
     collapsed: true
     children:
-      - type: Label
-        label: Correlation Structure
-        children:
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: ComboBox
-                name: correlation_structure
-      - type: Label
-        label: Optimization Settings
-        children:
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: ComboBox
-                name: optimization_method
-              - type: CheckBox
-                name: sparse_matrix
+      - type: CheckBox
+        name: sparse_matrix
   - type: CollapseBox
     label: Advanced Elapsed Time Options
     collapsed: true
@@ -181,108 +165,16 @@ children:
     label: Model Assessment
     collapsed: true
     children:
-      - type: Label
-        label: Statistical Tests
-        children:
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: CheckBox
-                name: likelihood_ratio_test
-              - type: CheckBox
-                name: random_effects_significance
-              - type: CheckBox
-                name: icc_calculation
-      - type: Label
-        label: Model Validation
-        children:
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: CheckBox
-                name: bootstrap_variance
-              - type: TextBox
-                name: bootstrap_samples
-                format: number
-                enable: (bootstrap_variance)
-  - type: CollapseBox
-    label: Model Diagnostics
-    collapsed: true
-    children:
-      - type: Label
-        label: Diagnostic Options
-        children:
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: CheckBox
-                name: residual_analysis
-              - type: CheckBox
-                name: influence_diagnostics
-              - type: CheckBox
-                name: random_effects_prediction
-  - type: CollapseBox
-    label: Plots
-    collapsed: true
-    children:
-      - type: Label
-        label: Effect Plots
-        children:
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: CheckBox
-                name: fixed_effects_plot
-              - type: CheckBox
-                name: random_effects_plot
-                enable: (random_effects_prediction)
-      - type: Label
-        label: Survival Plots
-        children:
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: CheckBox
-                name: cluster_survival_plot
-              - type: TextBox
-                name: n_clusters_plot
-                format: number
-                enable: (cluster_survival_plot)
+      - type: CheckBox
+        name: icc_calculation
+        enable: (random_effects != 'slope')
   - type: CollapseBox
     label: Output Options
     collapsed: true
     children:
-      - type: Label
-        label: Display Options
-        children:
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: CheckBox
-                name: show_fixed_effects
-              - type: CheckBox
-                name: show_random_effects
-              - type: CheckBox
-                name: show_model_comparison
-              - type: CheckBox
-                name: show_cluster_summary
-      - type: Label
-        label: Advanced Output
-        children:
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: CheckBox
-                name: variance_components
-              - type: CheckBox
-                name: confidence_intervals
-      - type: Label
-        label: Educational Content
-        children:
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: CheckBox
-                name: showExplanations
-              - type: CheckBox
-                name: showSummaries
+      - type: CheckBox
+        name: show_fixed_effects
+      - type: CheckBox
+        name: show_random_effects
+      - type: CheckBox
+        name: show_model_comparison

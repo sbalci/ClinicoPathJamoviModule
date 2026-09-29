@@ -21,29 +21,11 @@ mixedcoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             random_slope_var = NULL,
             nested_clustering = FALSE,
             nested_cluster_var = NULL,
-            correlation_structure = "unstructured",
             sparse_matrix = TRUE,
-            optimization_method = "penalized",
-            likelihood_ratio_test = TRUE,
-            random_effects_significance = TRUE,
             icc_calculation = TRUE,
-            residual_analysis = FALSE,
-            influence_diagnostics = FALSE,
-            random_effects_prediction = FALSE,
-            fixed_effects_plot = TRUE,
-            random_effects_plot = FALSE,
-            cluster_survival_plot = FALSE,
-            n_clusters_plot = 5,
-            variance_components = TRUE,
-            confidence_intervals = TRUE,
-            bootstrap_variance = FALSE,
-            bootstrap_samples = 500,
             show_fixed_effects = TRUE,
             show_random_effects = TRUE,
-            show_model_comparison = TRUE,
-            show_cluster_summary = FALSE,
-            showSummaries = FALSE,
-            showExplanations = FALSE, ...) {
+            show_model_comparison = TRUE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -161,86 +143,14 @@ mixedcoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 permitted=list(
                     "factor"),
                 default=NULL)
-            private$..correlation_structure <- jmvcore::OptionList$new(
-                "correlation_structure",
-                correlation_structure,
-                options=list(
-                    "unstructured",
-                    "compound_symmetry",
-                    "ar1"),
-                default="unstructured")
             private$..sparse_matrix <- jmvcore::OptionBool$new(
                 "sparse_matrix",
                 sparse_matrix,
-                default=TRUE)
-            private$..optimization_method <- jmvcore::OptionList$new(
-                "optimization_method",
-                optimization_method,
-                options=list(
-                    "penalized",
-                    "laplace",
-                    "agq"),
-                default="penalized")
-            private$..likelihood_ratio_test <- jmvcore::OptionBool$new(
-                "likelihood_ratio_test",
-                likelihood_ratio_test,
-                default=TRUE)
-            private$..random_effects_significance <- jmvcore::OptionBool$new(
-                "random_effects_significance",
-                random_effects_significance,
                 default=TRUE)
             private$..icc_calculation <- jmvcore::OptionBool$new(
                 "icc_calculation",
                 icc_calculation,
                 default=TRUE)
-            private$..residual_analysis <- jmvcore::OptionBool$new(
-                "residual_analysis",
-                residual_analysis,
-                default=FALSE)
-            private$..influence_diagnostics <- jmvcore::OptionBool$new(
-                "influence_diagnostics",
-                influence_diagnostics,
-                default=FALSE)
-            private$..random_effects_prediction <- jmvcore::OptionBool$new(
-                "random_effects_prediction",
-                random_effects_prediction,
-                default=FALSE)
-            private$..fixed_effects_plot <- jmvcore::OptionBool$new(
-                "fixed_effects_plot",
-                fixed_effects_plot,
-                default=TRUE)
-            private$..random_effects_plot <- jmvcore::OptionBool$new(
-                "random_effects_plot",
-                random_effects_plot,
-                default=FALSE)
-            private$..cluster_survival_plot <- jmvcore::OptionBool$new(
-                "cluster_survival_plot",
-                cluster_survival_plot,
-                default=FALSE)
-            private$..n_clusters_plot <- jmvcore::OptionInteger$new(
-                "n_clusters_plot",
-                n_clusters_plot,
-                min=1,
-                max=20,
-                default=5)
-            private$..variance_components <- jmvcore::OptionBool$new(
-                "variance_components",
-                variance_components,
-                default=TRUE)
-            private$..confidence_intervals <- jmvcore::OptionBool$new(
-                "confidence_intervals",
-                confidence_intervals,
-                default=TRUE)
-            private$..bootstrap_variance <- jmvcore::OptionBool$new(
-                "bootstrap_variance",
-                bootstrap_variance,
-                default=FALSE)
-            private$..bootstrap_samples <- jmvcore::OptionInteger$new(
-                "bootstrap_samples",
-                bootstrap_samples,
-                min=100,
-                max=1000,
-                default=500)
             private$..show_fixed_effects <- jmvcore::OptionBool$new(
                 "show_fixed_effects",
                 show_fixed_effects,
@@ -253,18 +163,6 @@ mixedcoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "show_model_comparison",
                 show_model_comparison,
                 default=TRUE)
-            private$..show_cluster_summary <- jmvcore::OptionBool$new(
-                "show_cluster_summary",
-                show_cluster_summary,
-                default=FALSE)
-            private$..showSummaries <- jmvcore::OptionBool$new(
-                "showSummaries",
-                showSummaries,
-                default=FALSE)
-            private$..showExplanations <- jmvcore::OptionBool$new(
-                "showExplanations",
-                showExplanations,
-                default=FALSE)
 
             self$.addOption(private$..elapsedtime)
             self$.addOption(private$..tint)
@@ -281,29 +179,11 @@ mixedcoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..random_slope_var)
             self$.addOption(private$..nested_clustering)
             self$.addOption(private$..nested_cluster_var)
-            self$.addOption(private$..correlation_structure)
             self$.addOption(private$..sparse_matrix)
-            self$.addOption(private$..optimization_method)
-            self$.addOption(private$..likelihood_ratio_test)
-            self$.addOption(private$..random_effects_significance)
             self$.addOption(private$..icc_calculation)
-            self$.addOption(private$..residual_analysis)
-            self$.addOption(private$..influence_diagnostics)
-            self$.addOption(private$..random_effects_prediction)
-            self$.addOption(private$..fixed_effects_plot)
-            self$.addOption(private$..random_effects_plot)
-            self$.addOption(private$..cluster_survival_plot)
-            self$.addOption(private$..n_clusters_plot)
-            self$.addOption(private$..variance_components)
-            self$.addOption(private$..confidence_intervals)
-            self$.addOption(private$..bootstrap_variance)
-            self$.addOption(private$..bootstrap_samples)
             self$.addOption(private$..show_fixed_effects)
             self$.addOption(private$..show_random_effects)
             self$.addOption(private$..show_model_comparison)
-            self$.addOption(private$..show_cluster_summary)
-            self$.addOption(private$..showSummaries)
-            self$.addOption(private$..showExplanations)
         }),
     active = list(
         elapsedtime = function() private$..elapsedtime$value,
@@ -321,29 +201,11 @@ mixedcoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         random_slope_var = function() private$..random_slope_var$value,
         nested_clustering = function() private$..nested_clustering$value,
         nested_cluster_var = function() private$..nested_cluster_var$value,
-        correlation_structure = function() private$..correlation_structure$value,
         sparse_matrix = function() private$..sparse_matrix$value,
-        optimization_method = function() private$..optimization_method$value,
-        likelihood_ratio_test = function() private$..likelihood_ratio_test$value,
-        random_effects_significance = function() private$..random_effects_significance$value,
         icc_calculation = function() private$..icc_calculation$value,
-        residual_analysis = function() private$..residual_analysis$value,
-        influence_diagnostics = function() private$..influence_diagnostics$value,
-        random_effects_prediction = function() private$..random_effects_prediction$value,
-        fixed_effects_plot = function() private$..fixed_effects_plot$value,
-        random_effects_plot = function() private$..random_effects_plot$value,
-        cluster_survival_plot = function() private$..cluster_survival_plot$value,
-        n_clusters_plot = function() private$..n_clusters_plot$value,
-        variance_components = function() private$..variance_components$value,
-        confidence_intervals = function() private$..confidence_intervals$value,
-        bootstrap_variance = function() private$..bootstrap_variance$value,
-        bootstrap_samples = function() private$..bootstrap_samples$value,
         show_fixed_effects = function() private$..show_fixed_effects$value,
         show_random_effects = function() private$..show_random_effects$value,
-        show_model_comparison = function() private$..show_model_comparison$value,
-        show_cluster_summary = function() private$..show_cluster_summary$value,
-        showSummaries = function() private$..showSummaries$value,
-        showExplanations = function() private$..showExplanations$value),
+        show_model_comparison = function() private$..show_model_comparison$value),
     private = list(
         ..elapsedtime = NA,
         ..tint = NA,
@@ -360,29 +222,11 @@ mixedcoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..random_slope_var = NA,
         ..nested_clustering = NA,
         ..nested_cluster_var = NA,
-        ..correlation_structure = NA,
         ..sparse_matrix = NA,
-        ..optimization_method = NA,
-        ..likelihood_ratio_test = NA,
-        ..random_effects_significance = NA,
         ..icc_calculation = NA,
-        ..residual_analysis = NA,
-        ..influence_diagnostics = NA,
-        ..random_effects_prediction = NA,
-        ..fixed_effects_plot = NA,
-        ..random_effects_plot = NA,
-        ..cluster_survival_plot = NA,
-        ..n_clusters_plot = NA,
-        ..variance_components = NA,
-        ..confidence_intervals = NA,
-        ..bootstrap_variance = NA,
-        ..bootstrap_samples = NA,
         ..show_fixed_effects = NA,
         ..show_random_effects = NA,
-        ..show_model_comparison = NA,
-        ..show_cluster_summary = NA,
-        ..showSummaries = NA,
-        ..showExplanations = NA)
+        ..show_model_comparison = NA)
 )
 
 mixedcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -393,24 +237,7 @@ mixedcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         modelSummary = function() private$.items[["modelSummary"]],
         fixedEffectsTable = function() private$.items[["fixedEffectsTable"]],
         randomEffectsSummary = function() private$.items[["randomEffectsSummary"]],
-        varianceTable = function() private$.items[["varianceTable"]],
-        iccTable = function() private$.items[["iccTable"]],
-        modelComparison = function() private$.items[["modelComparison"]],
-        likelihoodRatioTable = function() private$.items[["likelihoodRatioTable"]],
-        clusterSummaryTable = function() private$.items[["clusterSummaryTable"]],
-        randomEffectsPredTable = function() private$.items[["randomEffectsPredTable"]],
-        diagnosticsTable = function() private$.items[["diagnosticsTable"]],
-        fixedEffectsPlot = function() private$.items[["fixedEffectsPlot"]],
-        randomEffectsPlot = function() private$.items[["randomEffectsPlot"]],
-        clusterSurvivalPlot = function() private$.items[["clusterSurvivalPlot"]],
-        residualPlot = function() private$.items[["residualPlot"]],
-        analysisSummary = function() private$.items[["analysisSummary"]],
-        methodExplanation = function() private$.items[["methodExplanation"]],
-        clusteringExplanation = function() private$.items[["clusteringExplanation"]],
-        randomEffectsExplanation = function() private$.items[["randomEffectsExplanation"]],
-        iccExplanation = function() private$.items[["iccExplanation"]],
-        modelSelectionExplanation = function() private$.items[["modelSelectionExplanation"]],
-        bootstrapTable = function() private$.items[["bootstrapTable"]]),
+        modelComparison = function() private$.items[["modelComparison"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -495,56 +322,6 @@ mixedcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "random_effects",
                     "random_slope_var",
                     "nested_clustering")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="varianceTable",
-                title="Variance Components Details",
-                visible="(variance_components)",
-                rows=0,
-                columns=list(
-                    list(
-                        `name`="component", 
-                        `title`="Component", 
-                        `type`="text"),
-                    list(
-                        `name`="variance", 
-                        `title`="Variance", 
-                        `type`="number"),
-                    list(
-                        `name`="std_dev", 
-                        `title`="Std. Dev.", 
-                        `type`="number"),
-                    list(
-                        `name`="proportion", 
-                        `title`="Proportion", 
-                        `type`="number")),
-                clearWith=list(
-                    "cluster_var",
-                    "random_effects",
-                    "variance_components")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="iccTable",
-                title="Intracluster Correlation Coefficient",
-                visible="(icc_calculation)",
-                rows=0,
-                columns=list(
-                    list(
-                        `name`="cluster_level", 
-                        `title`="Cluster Level", 
-                        `type`="text"),
-                    list(
-                        `name`="icc_value", 
-                        `title`="ICC", 
-                        `type`="number"),
-                    list(
-                        `name`="interpretation", 
-                        `title`="Interpretation", 
-                        `type`="text")),
-                clearWith=list(
-                    "cluster_var",
-                    "nested_clustering",
-                    "icc_calculation")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="modelComparison",
@@ -553,276 +330,8 @@ mixedcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "cluster_var",
                     "random_effects",
-                    "likelihood_ratio_test")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="likelihoodRatioTable",
-                title="Likelihood Ratio Test for Random Effects",
-                visible="(likelihood_ratio_test)",
-                rows=0,
-                columns=list(
-                    list(
-                        `name`="model", 
-                        `title`="Model", 
-                        `type`="text"),
-                    list(
-                        `name`="df", 
-                        `title`="df", 
-                        `type`="integer"),
-                    list(
-                        `name`="loglik", 
-                        `title`="Log-likelihood", 
-                        `type`="number"),
-                    list(
-                        `name`="chisq", 
-                        `title`="\u03C7\u00B2", 
-                        `type`="number"),
-                    list(
-                        `name`="p_value", 
-                        `title`="P-value", 
-                        `type`="number", 
-                        `format`="zto,pvalue")),
-                clearWith=list(
-                    "likelihood_ratio_test",
-                    "random_effects")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="clusterSummaryTable",
-                title="Cluster Summary Statistics",
-                visible="(show_cluster_summary)",
-                rows=0,
-                columns=list(
-                    list(
-                        `name`="cluster_id", 
-                        `title`="Cluster", 
-                        `type`="text"),
-                    list(
-                        `name`="n_observations", 
-                        `title`="N Obs", 
-                        `type`="integer"),
-                    list(
-                        `name`="n_events", 
-                        `title`="N Events", 
-                        `type`="integer"),
-                    list(
-                        `name`="event_rate", 
-                        `title`="Event Rate", 
-                        `type`="number"),
-                    list(
-                        `name`="median_time", 
-                        `title`="Median Time", 
-                        `type`="number")),
-                clearWith=list(
-                    "cluster_var",
-                    "show_cluster_summary")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="randomEffectsPredTable",
-                title="Predicted Random Effects (BLUPs)",
-                visible="(random_effects_prediction)",
-                rows=0,
-                columns=list(
-                    list(
-                        `name`="cluster_id", 
-                        `title`="Cluster", 
-                        `type`="text"),
-                    list(
-                        `name`="intercept", 
-                        `title`="Random Intercept", 
-                        `type`="number"),
-                    list(
-                        `name`="slope", 
-                        `title`="Random Slope", 
-                        `type`="number"),
-                    list(
-                        `name`="se_intercept", 
-                        `title`="SE (Intercept)", 
-                        `type`="number"),
-                    list(
-                        `name`="se_slope", 
-                        `title`="SE (Slope)", 
-                        `type`="number")),
-                clearWith=list(
-                    "random_effects_prediction",
-                    "cluster_var",
-                    "random_effects")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="diagnosticsTable",
-                title="Model Diagnostics",
-                visible="(residual_analysis)",
-                rows=0,
-                columns=list(
-                    list(
-                        `name`="diagnostic", 
-                        `title`="Diagnostic", 
-                        `type`="text"),
-                    list(
-                        `name`="value", 
-                        `title`="Value", 
-                        `type`="number"),
-                    list(
-                        `name`="interpretation", 
-                        `title`="Interpretation", 
-                        `type`="text")),
-                clearWith=list(
-                    "residual_analysis",
-                    "influence_diagnostics")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="fixedEffectsPlot",
-                title="Fixed Effects Forest Plot",
-                width=600,
-                height=450,
-                renderFun=".plotFixedEffects",
-                requiresData=TRUE,
-                visible="(fixed_effects_plot)",
-                clearWith=list(
-                    "fixed_effects",
-                    "continuous_effects",
-                    "confidence_intervals")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="randomEffectsPlot",
-                title="Random Effects Distribution",
-                width=600,
-                height=450,
-                renderFun=".plotRandomEffects",
-                requiresData=TRUE,
-                visible="(random_effects_plot)",
-                clearWith=list(
-                    "cluster_var",
-                    "random_effects",
-                    "random_effects_prediction")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="clusterSurvivalPlot",
-                title="Cluster-Specific Survival Curves",
-                width=600,
-                height=450,
-                renderFun=".plotClusterSurvival",
-                requiresData=TRUE,
-                visible="(cluster_survival_plot)",
-                clearWith=list(
-                    "cluster_var",
-                    "n_clusters_plot",
-                    "outcome",
-                    "elapsedtime")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="residualPlot",
-                title="Residual Analysis",
-                width=600,
-                height=450,
-                renderFun=".plotResiduals",
-                requiresData=TRUE,
-                visible="(residual_analysis)",
-                clearWith=list(
-                    "residual_analysis",
-                    "cluster_var")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="analysisSummary",
-                title="Analysis Summary",
-                visible="(showSummaries)",
-                clearWith=list(
-                    "cluster_var",
-                    "random_effects",
-                    "icc_calculation")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="methodExplanation",
-                title="Mixed-Effects Cox Regression Methods",
-                visible="(showExplanations)",
-                clearWith=list(
-                    "random_effects",
-                    "correlation_structure")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="clusteringExplanation",
-                title="Understanding Clustering in Survival Analysis",
-                visible="(showExplanations)",
-                clearWith=list(
-                    "cluster_var",
-                    "nested_clustering")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="randomEffectsExplanation",
-                title="Understanding Random Effects",
-                visible="(show_random_effects && showExplanations)",
-                clearWith=list(
-                    "random_effects",
-                    "variance_components")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="iccExplanation",
-                title="Understanding Intracluster Correlation",
-                visible="(icc_calculation && showExplanations)",
-                clearWith=list(
-                    "icc_calculation",
-                    "cluster_var")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="modelSelectionExplanation",
-                title="Understanding Mixed vs Standard Cox Models",
-                visible="(show_model_comparison && showExplanations)",
-                clearWith=list(
-                    "likelihood_ratio_test",
                     "show_model_comparison")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="bootstrapTable",
-                title="Bootstrap Validation Results",
-                visible="(bootstrap_variance)",
-                rows=0,
-                columns=list(
-                    list(
-                        `name`="parameter", 
-                        `title`="Parameter", 
-                        `type`="text"),
-                    list(
-                        `name`="original", 
-                        `title`="Original", 
-                        `type`="number"),
-                    list(
-                        `name`="bias", 
-                        `title`="Bias", 
-                        `type`="number"),
-                    list(
-                        `name`="bootstrap_se", 
-                        `title`="Bootstrap SE", 
-                        `type`="number"),
-                    list(
-                        `name`="ci_lower", 
-                        `title`="95% CI Lower", 
-                        `type`="number"),
-                    list(
-                        `name`="ci_upper", 
-                        `title`="95% CI Upper", 
-                        `type`="number")),
-                clearWith=list(
-                    "bootstrap_variance",
-                    "bootstrap_samples")))}))
 
-mixedcoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
-    "mixedcoxBase",
-    inherit = jmvcore::Analysis,
-    public = list(
-        initialize = function(options, data=NULL, datasetId="", analysisId="", revision=0) {
-            super$initialize(
-                package = "ClinicoPath",
-                name = "mixedcox",
-                version = c(0,0,1),
-                options = options,
-                results = mixedcoxResults$new(options=options),
-                data = data,
-                datasetId = datasetId,
-                analysisId = analysisId,
-                revision = revision,
-                pause = NULL,
-                completeWhenFilled = FALSE,
-                requiresMissings = FALSE,
-                weightsSupport = 'auto')
         }))
 
 #' Mixed-Effects Cox Regression
@@ -863,71 +372,20 @@ mixedcoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   (e.g., patients within hospitals).
 #' @param nested_cluster_var Higher-level clustering variable for nested
 #'   structures.
-#' @param correlation_structure Correlation structure for random effects.
 #' @param sparse_matrix Use sparse matrix methods for computational efficiency
 #'   with large datasets.
-#' @param optimization_method Method for optimizing the mixed-effects model
-#'   likelihood.
-#' @param likelihood_ratio_test Perform likelihood ratio test comparing
-#'   mixed-effects vs standard Cox model.
-#' @param random_effects_significance Test significance of random effects
-#'   using appropriate methods.
-#' @param icc_calculation Calculate intracluster correlation coefficient
-#'   (ICC).
-#' @param residual_analysis Perform residual analysis for mixed-effects Cox
-#'   model.
-#' @param influence_diagnostics Calculate influence diagnostics for clusters
-#'   and observations.
-#' @param random_effects_prediction Predict random effects (BLUPs) for each
-#'   cluster.
-#' @param fixed_effects_plot Generate forest plot for fixed effects
-#'   coefficients.
-#' @param random_effects_plot Generate plots for random effects distribution.
-#' @param cluster_survival_plot Generate survival curves for selected
-#'   clusters.
-#' @param n_clusters_plot Number of clusters to display in cluster-specific
-#'   plots.
-#' @param variance_components Estimate and display variance components for
-#'   random effects.
-#' @param confidence_intervals Calculate confidence intervals for fixed and
-#'   random effects.
-#' @param bootstrap_variance Use bootstrap methods for variance estimation.
-#' @param bootstrap_samples Number of bootstrap samples for variance
-#'   estimation.
+#' @param icc_calculation Show an approximate latent-scale intercept variance fraction; this is not an observed-event ICC.
 #' @param show_fixed_effects Display table of fixed effects estimates.
 #' @param show_random_effects Display summary of random effects variance
 #'   components.
-#' @param show_model_comparison Display comparison between mixed-effects and
-#'   standard Cox models.
-#' @param show_cluster_summary Display summary statistics by cluster.
-#' @param showSummaries Display natural language summaries alongside tables
-#'   and plots for interpretation of mixed-effects Cox regression results.
-#' @param showExplanations Display detailed explanations of mixed-effects Cox
-#'   regression methods and interpretation guidelines.
+#' @param show_model_comparison Display the mixed and standard Cox log-likelihoods and descriptive likelihood-ratio statistic without an inferential p-value.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$modelSummary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$fixedEffectsTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$randomEffectsSummary} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$varianceTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$iccTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$modelComparison} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$likelihoodRatioTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$clusterSummaryTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$randomEffectsPredTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$diagnosticsTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$fixedEffectsPlot} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$randomEffectsPlot} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$clusterSurvivalPlot} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$residualPlot} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$analysisSummary} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$methodExplanation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$clusteringExplanation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$randomEffectsExplanation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$iccExplanation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$modelSelectionExplanation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$bootstrapTable} \tab \tab \tab \tab \tab a table \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -954,29 +412,11 @@ mixedcox <- function(
     random_slope_var = NULL,
     nested_clustering = FALSE,
     nested_cluster_var = NULL,
-    correlation_structure = "unstructured",
     sparse_matrix = TRUE,
-    optimization_method = "penalized",
-    likelihood_ratio_test = TRUE,
-    random_effects_significance = TRUE,
     icc_calculation = TRUE,
-    residual_analysis = FALSE,
-    influence_diagnostics = FALSE,
-    random_effects_prediction = FALSE,
-    fixed_effects_plot = TRUE,
-    random_effects_plot = FALSE,
-    cluster_survival_plot = FALSE,
-    n_clusters_plot = 5,
-    variance_components = TRUE,
-    confidence_intervals = TRUE,
-    bootstrap_variance = FALSE,
-    bootstrap_samples = 500,
     show_fixed_effects = TRUE,
     show_random_effects = TRUE,
-    show_model_comparison = TRUE,
-    show_cluster_summary = FALSE,
-    showSummaries = FALSE,
-    showExplanations = FALSE) {
+    show_model_comparison = TRUE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("mixedcox requires jmvcore to be installed (restart may be required)")
@@ -1023,29 +463,11 @@ mixedcox <- function(
         random_slope_var = random_slope_var,
         nested_clustering = nested_clustering,
         nested_cluster_var = nested_cluster_var,
-        correlation_structure = correlation_structure,
         sparse_matrix = sparse_matrix,
-        optimization_method = optimization_method,
-        likelihood_ratio_test = likelihood_ratio_test,
-        random_effects_significance = random_effects_significance,
         icc_calculation = icc_calculation,
-        residual_analysis = residual_analysis,
-        influence_diagnostics = influence_diagnostics,
-        random_effects_prediction = random_effects_prediction,
-        fixed_effects_plot = fixed_effects_plot,
-        random_effects_plot = random_effects_plot,
-        cluster_survival_plot = cluster_survival_plot,
-        n_clusters_plot = n_clusters_plot,
-        variance_components = variance_components,
-        confidence_intervals = confidence_intervals,
-        bootstrap_variance = bootstrap_variance,
-        bootstrap_samples = bootstrap_samples,
         show_fixed_effects = show_fixed_effects,
         show_random_effects = show_random_effects,
-        show_model_comparison = show_model_comparison,
-        show_cluster_summary = show_cluster_summary,
-        showSummaries = showSummaries,
-        showExplanations = showExplanations)
+        show_model_comparison = show_model_comparison)
 
     analysis <- mixedcoxClass$new(
         options = options,
@@ -1055,4 +477,3 @@ mixedcox <- function(
 
     analysis$results
 }
-
