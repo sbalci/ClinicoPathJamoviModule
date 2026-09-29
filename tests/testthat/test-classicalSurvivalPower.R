@@ -136,3 +136,21 @@ test_that("Lachin-Foulkes jamovi power uses the inverse and Schoenfeld stays int
                paste0("Statistical Power:</strong> ", round(expected * 100, 1)),
                fixed = TRUE)
 })
+
+test_that("Schoenfeld curve agrees with the entered events and increases", {
+  skip_if_not_installed("gsDesign")
+  skip_if_not_installed("jmvcore")
+  model <- classicalSurvivalPower(
+    calculation_type = "power", method = "schoenfeld", events_input = 50,
+    power_plot_range = "25,100", export_power_curve = TRUE,
+    show_interpretation = FALSE
+  )
+  private <- model$.__enclos_env__$private
+  curve <- private$.generate_power_curve_data()
+  main_power <- private$.results_data$power
+  expect_equal(nrow(curve), 50L)
+  expect_true(any(curve$amount == 50))
+  expect_equal(curve$power[curve$amount == 50], main_power, tolerance = 1e-10)
+  expect_true(all(diff(curve$power) > 0))
+  expect_match(model$results$export_summary$content, "Number of events versus power")
+})
