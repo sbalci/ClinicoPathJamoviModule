@@ -48,15 +48,21 @@ jobs:
           # Save the package cache even when a later step fails or times out.
           cache: always
 
-      - uses: r-lib/actions/check-r-package@v2
-        with:
-          # Tests run from the source tree below: many read jamovi/ and R/, which the
-          # built tarball does not contain.
-          build_args: 'c("--no-manual", "--no-build-vignettes")'
-          args: 'c("--no-manual", "--no-vignettes", "--no-examples", "--no-tests")'
-          error-on: '"error"'
-          upload-results: true
-          artifact-name: pr-r-check-results
+      # A full R CMD check does not fit this job: installing the ~850-file package alone
+      # took over 13 minutes on a warm runner. Full checks stay in the manual
+      # R-CMD-check.yaml workflow; here the package must load with its real NAMESPACE
+      # (catches parse errors, broken generated headers and undefined exports).
+      - name: Load the package
+        if: ${{ !cancelled() && steps.dependencies.outcome == 'success' }}
+        run: |
+          pkgload::load_all(".", export_all = FALSE, helpers = FALSE, quiet = TRUE)
+          pkg <- read.dcf("DESCRIPTION", fields = "Package")[[1]]
+          declared <- parseNamespaceFile(basename(getwd()), dirname(getwd()))$exports
+          # pkgload only warns about undefined exports; R's namespaceExport() rule makes them fatal.
+          missing <- declared[!vapply(declared, exists, logical(1), envir = asNamespace(pkg))]
+          if (length(missing)) stop("NAMESPACE exports objects that R/ does not define: ", toString(missing), call. = FALSE)
+          cat("Package loads; all", length(declared), "exports resolve\n")
+        shell: Rscript {0}
 
       - name: Tests for the analyses this PR changes
         # The full suite (~880 files) does not fit a PR check; run the test files of every
