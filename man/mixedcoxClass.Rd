@@ -33,8 +33,8 @@ The mixedcoxClass implements mixed-effects Cox regression methods with:
 \strong{Statistical Features:}
 \itemize{
 \item Variance components estimation for random effects
-\item Approximate latent-scale intercept variance fraction
-\item Descriptive comparison with a standard Cox model
+\item Approximate variance fraction on the latent log-hazard scale
+\item Likelihood-ratio comparison with a standard Cox model
 }
 }
 \seealso{

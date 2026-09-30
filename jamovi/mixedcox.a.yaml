@@ -197,12 +197,15 @@ options:
     - name: random_slope_var
       title: 'Random Slope Variable'
       type: Variable
-      suggested: [ ordinal, nominal, continuous ]
-      permitted: [ factor, numeric ]
+      suggested: [ continuous ]
+      permitted: [ numeric ]
       default: NULL
       description:
         R: >
-          Variable for random slopes when random_effects includes slopes.
+          Numeric variable whose effect varies between clusters when
+          random_effects includes slopes (coxme cannot fit random slopes for
+          categorical variables). It is added to the fixed effects if it is not
+          already there, so the cluster slopes vary around a population slope.
 
     - name: nested_clustering
       title: 'Nested Clustering'
@@ -210,7 +213,9 @@ options:
       default: false
       description:
         R: >
-          Whether to model nested clustering structure (e.g., patients within hospitals).
+          Whether to model nested clustering structure (e.g., patients within
+          hospitals). Used only with random_effects = "intercept"; it is
+          ignored, with a note, for random-slope models.
 
     - name: nested_cluster_var
       title: 'Nested Cluster Variable'
@@ -220,7 +225,8 @@ options:
       default: NULL
       description:
         R: >
-          Higher-level clustering variable for nested structures.
+          Higher-level clustering variable for nested structures (random
+          intercept models only).
 
 # Model Options ----
 
@@ -230,7 +236,11 @@ options:
       default: true
       description:
         R: >
-          Use sparse matrix methods for computational efficiency with large datasets.
+          Use coxme's sparse approximation for the random-effect variance
+          matrix (coxme.control(sparse = c(50, 0.02)), the coxme default). It
+          is an approximation that can change the estimates slightly, and it
+          has no effect for clustering variables with fewer than 50 levels.
+          When false, the full (non-sparse) matrix is always used.
 
     - name: icc_calculation
       title: 'Show Approximate Latent-Scale Variance Fraction'
@@ -238,7 +248,13 @@ options:
       default: true
       description:
         R: >
-          Show an approximate latent-scale variance fraction for a random-intercept model (not a measured intracluster correlation).
+          Show an approximate variance fraction on the latent log-hazard scale,
+          sigma^2 / (sigma^2 + pi^2/6), where pi^2/6 is the variance of the
+          standard extreme-value error of a proportional-hazards model. Nested
+          models use both variance components; intercept-and-slope models
+          report it at a slope-variable value of 0. It is not an intracluster
+          correlation of observed event times and is not shown for
+          random-slope-only models.
 
 # Output Options ----
 
@@ -264,6 +280,10 @@ options:
       default: true
       description:
         R: >
-          Display the fitted mixed and standard Cox log-likelihoods and their descriptive likelihood-ratio statistic; no significance test is provided.
+          Display the standard Cox and mixed-effects (integrated) log partial
+          likelihoods and their likelihood-ratio statistic, truncated at 0.
+          When the model has a single variance component, a boundary-corrected
+          p-value (half the chi-square(1) tail probability) is shown; models
+          with several variance parameters get no p-value.
 
 ...

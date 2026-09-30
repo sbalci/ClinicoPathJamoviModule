@@ -123,11 +123,8 @@ mixedcoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "random_slope_var",
                 random_slope_var,
                 suggested=list(
-                    "ordinal",
-                    "nominal",
                     "continuous"),
                 permitted=list(
-                    "factor",
                     "numeric"),
                 default=NULL)
             private$..nested_clustering <- jmvcore::OptionBool$new(
@@ -257,24 +254,41 @@ mixedcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "outcome",
                     "outcomeLevel",
                     "elapsedtime",
+                    "tint",
+                    "dxdate",
+                    "fudate",
+                    "timetypedata",
+                    "timetypeoutput",
                     "fixed_effects",
                     "continuous_effects",
                     "cluster_var",
                     "random_effects",
-                    "fudate",
-                    "dxdate",
-                    "tint")))
+                    "random_slope_var",
+                    "nested_clustering",
+                    "nested_cluster_var",
+                    "sparse_matrix")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="modelSummary",
                 title="Mixed-Effects Cox Model Summary",
                 clearWith=list(
-                    "cluster_var",
-                    "random_effects",
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "tint",
+                    "dxdate",
+                    "fudate",
+                    "timetypedata",
+                    "timetypeoutput",
                     "fixed_effects",
                     "continuous_effects",
-                    "outcome",
-                    "elapsedtime")))
+                    "cluster_var",
+                    "random_effects",
+                    "random_slope_var",
+                    "nested_clustering",
+                    "nested_cluster_var",
+                    "sparse_matrix",
+                    "icc_calculation")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="fixedEffectsTable",
@@ -306,32 +320,98 @@ mixedcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     list(
                         `name`="hazard_ratio", 
                         `title`="Hazard Ratio", 
+                        `type`="number"),
+                    list(
+                        `name`="hr_lower", 
+                        `title`="Lower", 
+                        `superTitle`="95% CI (HR)", 
+                        `type`="number"),
+                    list(
+                        `name`="hr_upper", 
+                        `title`="Upper", 
+                        `superTitle`="95% CI (HR)", 
                         `type`="number")),
                 clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "tint",
+                    "dxdate",
+                    "fudate",
+                    "timetypedata",
+                    "timetypeoutput",
                     "fixed_effects",
                     "continuous_effects",
                     "cluster_var",
-                    "random_effects")))
+                    "random_effects",
+                    "random_slope_var",
+                    "nested_clustering",
+                    "nested_cluster_var",
+                    "sparse_matrix")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="randomEffectsSummary",
                 title="Random Effects Variance Components",
                 visible="(show_random_effects)",
                 clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "tint",
+                    "dxdate",
+                    "fudate",
+                    "timetypedata",
+                    "timetypeoutput",
+                    "fixed_effects",
+                    "continuous_effects",
                     "cluster_var",
                     "random_effects",
                     "random_slope_var",
-                    "nested_clustering")))
+                    "nested_clustering",
+                    "nested_cluster_var",
+                    "sparse_matrix")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="modelComparison",
                 title="Model Comparison: Mixed vs Standard Cox",
                 visible="(show_model_comparison)",
                 clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "tint",
+                    "dxdate",
+                    "fudate",
+                    "timetypedata",
+                    "timetypeoutput",
+                    "fixed_effects",
+                    "continuous_effects",
                     "cluster_var",
                     "random_effects",
-                    "show_model_comparison")))
+                    "random_slope_var",
+                    "nested_clustering",
+                    "nested_cluster_var",
+                    "sparse_matrix")))}))
 
+mixedcoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
+    "mixedcoxBase",
+    inherit = jmvcore::Analysis,
+    public = list(
+        initialize = function(options, data=NULL, datasetId="", analysisId="", revision=0) {
+            super$initialize(
+                package = "ClinicoPath",
+                name = "mixedcox",
+                version = c(0,0,1),
+                options = options,
+                results = mixedcoxResults$new(options=options),
+                data = data,
+                datasetId = datasetId,
+                analysisId = analysisId,
+                revision = revision,
+                pause = NULL,
+                completeWhenFilled = FALSE,
+                requiresMissings = FALSE,
+                weightsSupport = 'auto')
         }))
 
 #' Mixed-Effects Cox Regression
@@ -366,19 +446,35 @@ mixedcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param cluster_var Variable defining clusters (e.g., hospital, patient,
 #'   family). Observations within the same cluster are assumed correlated.
 #' @param random_effects Type of random effects to include in the model.
-#' @param random_slope_var Variable for random slopes when random_effects
-#'   includes slopes.
+#' @param random_slope_var Numeric variable whose effect varies between
+#'   clusters when random_effects includes slopes (coxme cannot fit random
+#'   slopes for categorical variables). It is added to the fixed effects if it
+#'   is not already there, so the cluster slopes vary around a population slope.
 #' @param nested_clustering Whether to model nested clustering structure
-#'   (e.g., patients within hospitals).
+#'   (e.g., patients within hospitals). Used only with random_effects =
+#'   "intercept"; it is ignored, with a note, for random-slope models.
 #' @param nested_cluster_var Higher-level clustering variable for nested
-#'   structures.
-#' @param sparse_matrix Use sparse matrix methods for computational efficiency
-#'   with large datasets.
-#' @param icc_calculation Show an approximate latent-scale intercept variance fraction; this is not an observed-event ICC.
+#'   structures (random intercept models only).
+#' @param sparse_matrix Use coxme's sparse approximation for the random-effect
+#'   variance matrix (coxme.control(sparse = c(50, 0.02)), the coxme default).
+#'   It is an approximation that can change the estimates slightly, and it has
+#'   no effect for clustering variables with fewer than 50 levels. When false,
+#'   the full (non-sparse) matrix is always used.
+#' @param icc_calculation Show an approximate variance fraction on the latent
+#'   log-hazard scale, sigma^2 / (sigma^2 + pi^2/6), where pi^2/6 is the
+#'   variance of the standard extreme-value error of a proportional-hazards
+#'   model. Nested models use both variance components; intercept-and-slope
+#'   models report it at a slope-variable value of 0. It is not an intracluster
+#'   correlation of observed event times and is not shown for random-slope-only
+#'   models.
 #' @param show_fixed_effects Display table of fixed effects estimates.
 #' @param show_random_effects Display summary of random effects variance
 #'   components.
-#' @param show_model_comparison Display the mixed and standard Cox log-likelihoods and descriptive likelihood-ratio statistic without an inferential p-value.
+#' @param show_model_comparison Display the standard Cox and mixed-effects
+#'   (integrated) log partial likelihoods and their likelihood-ratio statistic,
+#'   truncated at 0. When the model has a single variance component, a
+#'   boundary-corrected p-value (half the chi-square(1) tail probability) is
+#'   shown; models with several variance parameters get no p-value.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -477,3 +573,4 @@ mixedcox <- function(
 
     analysis$results
 }
+

@@ -12,24 +12,41 @@ items:
           - outcome
           - outcomeLevel
           - elapsedtime
+          - tint
+          - dxdate
+          - fudate
+          - timetypedata
+          - timetypeoutput
           - fixed_effects
           - continuous_effects
           - cluster_var
           - random_effects
-          - fudate
-          - dxdate
-          - tint
+          - random_slope_var
+          - nested_clustering
+          - nested_cluster_var
+          - sparse_matrix
 
     - name: modelSummary
       title: 'Mixed-Effects Cox Model Summary'
       type: Html
       clearWith:
-          - cluster_var
-          - random_effects
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - tint
+          - dxdate
+          - fudate
+          - timetypedata
+          - timetypeoutput
           - fixed_effects
           - continuous_effects
-          - outcome
-          - elapsedtime
+          - cluster_var
+          - random_effects
+          - random_slope_var
+          - nested_clustering
+          - nested_cluster_var
+          - sparse_matrix
+          - icc_calculation
 
     - name: fixedEffectsTable
       title: 'Fixed Effects Coefficients'
@@ -56,30 +73,75 @@ items:
         - name: hazard_ratio
           title: "Hazard Ratio"
           type: number
+        - name: hr_lower
+          title: "Lower"
+          superTitle: "95% CI (HR)"
+          type: number
+        - name: hr_upper
+          title: "Upper"
+          superTitle: "95% CI (HR)"
+          type: number
       clearWith:
+        - outcome
+        - outcomeLevel
+        - elapsedtime
+        - tint
+        - dxdate
+        - fudate
+        - timetypedata
+        - timetypeoutput
         - fixed_effects
         - continuous_effects
         - cluster_var
         - random_effects
+        - random_slope_var
+        - nested_clustering
+        - nested_cluster_var
+        - sparse_matrix
 
     - name: randomEffectsSummary
       title: 'Random Effects Variance Components'
       type: Html
       visible: (show_random_effects)
       clearWith:
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - tint
+          - dxdate
+          - fudate
+          - timetypedata
+          - timetypeoutput
+          - fixed_effects
+          - continuous_effects
           - cluster_var
           - random_effects
           - random_slope_var
           - nested_clustering
+          - nested_cluster_var
+          - sparse_matrix
 
     - name: modelComparison
       title: 'Model Comparison: Mixed vs Standard Cox'
       type: Html
       visible: (show_model_comparison)
       clearWith:
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - tint
+          - dxdate
+          - fudate
+          - timetypedata
+          - timetypeoutput
+          - fixed_effects
+          - continuous_effects
           - cluster_var
           - random_effects
-          - show_model_comparison
+          - random_slope_var
+          - nested_clustering
+          - nested_cluster_var
+          - sparse_matrix
 
 refs:
     - ClinicoPathJamoviModule

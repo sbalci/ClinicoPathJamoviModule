@@ -72,7 +72,7 @@ children:
                     name: random_slope_var
                     maxItemCount: 1
                     isTarget: true
-                    enable: (random_effects == 'slope' || random_effects == 'both')
+                    enable: (random_effects:slope || random_effects:both)
       - type: Label
         label: Nested Clustering
         children:
@@ -81,6 +81,7 @@ children:
             children:
               - type: CheckBox
                 name: nested_clustering
+                enable: (random_effects:intercept)
               - type: VariableSupplier
                 persistentItems: false
                 stretchFactor: 1
@@ -92,7 +93,7 @@ children:
                         name: nested_cluster_var
                         maxItemCount: 1
                         isTarget: true
-                        enable: (nested_clustering)
+                        enable: (random_effects:intercept && nested_clustering)
   - type: CollapseBox
     label: Model Options
     collapsed: true
@@ -157,17 +158,13 @@ children:
                         enable: (tint)
                       - type: ComboBox
                         name: timetypeoutput
-      - type: Label
-        label: Calculated Time to Data
-        fitToGrid: true
-        children: []
   - type: CollapseBox
     label: Model Assessment
     collapsed: true
     children:
       - type: CheckBox
         name: icc_calculation
-        enable: (random_effects != 'slope')
+        enable: (!random_effects:slope)
   - type: CollapseBox
     label: Output Options
     collapsed: true

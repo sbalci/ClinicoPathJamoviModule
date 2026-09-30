@@ -78,11 +78,31 @@ effects.</p>
 <span>  random_slope_var <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  nested_clustering <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  nested_cluster_var <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  correlation_structure <span class="op">=</span> <span class="st">"unstructured"</span>,</span>
 <span>  sparse_matrix <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  optimization_method <span class="op">=</span> <span class="st">"penalized"</span>,</span>
+<span>  likelihood_ratio_test <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  random_effects_significance <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  icc_calculation <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  residual_analysis <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  influence_diagnostics <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  random_effects_prediction <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  fixed_effects_plot <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  random_effects_plot <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  cluster_survival_plot <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  n_clusters_plot <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>  variance_components <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  confidence_intervals <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  bootstrap_variance <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  bootstrap_samples <span class="op">=</span> <span class="fl">500</span>,</span>
 <span>  show_fixed_effects <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  show_random_effects <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  show_model_comparison <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  show_model_comparison <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  show_cluster_summary <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  showSummaries <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  showExplanations <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  addClusterEffects <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  addFittedValues <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -168,28 +188,86 @@ includes slopes.</p></dd>
 structures.</p></dd>
 
 
+<dt id="arg-correlation-structure">correlation_structure<a class="anchor" aria-label="anchor" href="#arg-correlation-structure"></a></dt>
+<dd><p>Correlation structure for random effects.</p></dd>
+
 
 <dt id="arg-sparse-matrix">sparse_matrix<a class="anchor" aria-label="anchor" href="#arg-sparse-matrix"></a></dt>
 <dd><p>Use sparse matrix methods for computational efficiency
 with large datasets.</p></dd>
 
 
+<dt id="arg-optimization-method">optimization_method<a class="anchor" aria-label="anchor" href="#arg-optimization-method"></a></dt>
+<dd><p>Method for optimizing the mixed-effects model
+likelihood.</p></dd>
 
+
+<dt id="arg-likelihood-ratio-test">likelihood_ratio_test<a class="anchor" aria-label="anchor" href="#arg-likelihood-ratio-test"></a></dt>
+<dd><p>Perform likelihood ratio test comparing
+mixed-effects vs standard Cox model.</p></dd>
+
+
+<dt id="arg-random-effects-significance">random_effects_significance<a class="anchor" aria-label="anchor" href="#arg-random-effects-significance"></a></dt>
+<dd><p>Test significance of random effects
+using appropriate methods.</p></dd>
 
 
 <dt id="arg-icc-calculation">icc_calculation<a class="anchor" aria-label="anchor" href="#arg-icc-calculation"></a></dt>
-<dd><p>Show an approximate latent-scale intercept variance fraction; this is not an observed-event ICC.</p></dd>
+<dd><p>Calculate intracluster correlation coefficient
+(ICC).</p></dd>
 
 
+<dt id="arg-residual-analysis">residual_analysis<a class="anchor" aria-label="anchor" href="#arg-residual-analysis"></a></dt>
+<dd><p>Perform residual analysis for mixed-effects Cox
+model.</p></dd>
 
 
+<dt id="arg-influence-diagnostics">influence_diagnostics<a class="anchor" aria-label="anchor" href="#arg-influence-diagnostics"></a></dt>
+<dd><p>Calculate influence diagnostics for clusters
+and observations.</p></dd>
 
 
+<dt id="arg-random-effects-prediction">random_effects_prediction<a class="anchor" aria-label="anchor" href="#arg-random-effects-prediction"></a></dt>
+<dd><p>Predict random effects (BLUPs) for each
+cluster.</p></dd>
 
 
+<dt id="arg-fixed-effects-plot">fixed_effects_plot<a class="anchor" aria-label="anchor" href="#arg-fixed-effects-plot"></a></dt>
+<dd><p>Generate forest plot for fixed effects
+coefficients.</p></dd>
 
 
+<dt id="arg-random-effects-plot">random_effects_plot<a class="anchor" aria-label="anchor" href="#arg-random-effects-plot"></a></dt>
+<dd><p>Generate plots for random effects distribution.</p></dd>
 
+
+<dt id="arg-cluster-survival-plot">cluster_survival_plot<a class="anchor" aria-label="anchor" href="#arg-cluster-survival-plot"></a></dt>
+<dd><p>Generate survival curves for selected
+clusters.</p></dd>
+
+
+<dt id="arg-n-clusters-plot">n_clusters_plot<a class="anchor" aria-label="anchor" href="#arg-n-clusters-plot"></a></dt>
+<dd><p>Number of clusters to display in cluster-specific
+plots.</p></dd>
+
+
+<dt id="arg-variance-components">variance_components<a class="anchor" aria-label="anchor" href="#arg-variance-components"></a></dt>
+<dd><p>Estimate and display variance components for
+random effects.</p></dd>
+
+
+<dt id="arg-confidence-intervals">confidence_intervals<a class="anchor" aria-label="anchor" href="#arg-confidence-intervals"></a></dt>
+<dd><p>Calculate confidence intervals for fixed and
+random effects.</p></dd>
+
+
+<dt id="arg-bootstrap-variance">bootstrap_variance<a class="anchor" aria-label="anchor" href="#arg-bootstrap-variance"></a></dt>
+<dd><p>Use bootstrap methods for variance estimation.</p></dd>
+
+
+<dt id="arg-bootstrap-samples">bootstrap_samples<a class="anchor" aria-label="anchor" href="#arg-bootstrap-samples"></a></dt>
+<dd><p>Number of bootstrap samples for variance
+estimation.</p></dd>
 
 
 <dt id="arg-show-fixed-effects">show_fixed_effects<a class="anchor" aria-label="anchor" href="#arg-show-fixed-effects"></a></dt>
@@ -202,17 +280,37 @@ components.</p></dd>
 
 
 <dt id="arg-show-model-comparison">show_model_comparison<a class="anchor" aria-label="anchor" href="#arg-show-model-comparison"></a></dt>
-<dd><p>Display the mixed and standard Cox log-likelihoods and descriptive likelihood-ratio statistic without an inferential p-value.</p></dd>
+<dd><p>Display comparison between mixed-effects and
+standard Cox models.</p></dd>
 
 
+<dt id="arg-show-cluster-summary">show_cluster_summary<a class="anchor" aria-label="anchor" href="#arg-show-cluster-summary"></a></dt>
+<dd><p>Display summary statistics by cluster.</p></dd>
 
 
+<dt id="arg-showsummaries">showSummaries<a class="anchor" aria-label="anchor" href="#arg-showsummaries"></a></dt>
+<dd><p>Display natural language summaries alongside tables
+and plots for interpretation of mixed-effects Cox regression results.</p></dd>
 
+
+<dt id="arg-showexplanations">showExplanations<a class="anchor" aria-label="anchor" href="#arg-showexplanations"></a></dt>
+<dd><p>Display detailed explanations of mixed-effects Cox
+regression methods and interpretation guidelines.</p></dd>
+
+
+<dt id="arg-addclustereffects">addClusterEffects<a class="anchor" aria-label="anchor" href="#arg-addclustereffects"></a></dt>
+<dd><p>Add predicted random effects (BLUPs) as new
+variables to dataset.</p></dd>
+
+
+<dt id="arg-addfittedvalues">addFittedValues<a class="anchor" aria-label="anchor" href="#arg-addfittedvalues"></a></dt>
+<dd><p>Add fitted values from mixed-effects model to
+dataset.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A results object containing:</p><table class="table table"><tr><td><code>results$todo</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$modelSummary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$fixedEffectsTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$randomEffectsSummary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$modelComparison</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
+    <p>A results object containing:</p><table class="table table"><tr><td><code>results$todo</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$modelSummary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$fixedEffectsTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$randomEffectsSummary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$varianceTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$iccTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$modelComparison</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$likelihoodRatioTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$clusterSummaryTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$randomEffectsPredTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$diagnosticsTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$fixedEffectsPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$randomEffectsPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$clusterSurvivalPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$residualPlot</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$analysisSummary</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$methodExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$clusteringExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$randomEffectsExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$iccExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$modelSelectionExplanation</code></td><td></td><td></td><td></td><td></td><td>a html</td></tr><tr><td><code>results$bootstrapTable</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$calculatedtime</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr><tr><td><code>results$clusterEffectsOutput</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr><tr><td><code>results$fittedValuesOutput</code></td><td></td><td></td><td></td><td></td><td>an output</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
 <p><code>results$fixedEffectsTable$asDF</code></p>
 <p><code>as.data.frame(results$fixedEffectsTable)</code></p>
     </div>

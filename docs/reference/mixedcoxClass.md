@@ -22,6 +22,8 @@ The mixedcoxClass implements mixed-effects Cox regression methods with:
 
 - Nested clustering structures (e.g., patients within hospitals)
 
+- Multiple correlation structures for random effects
+
 **Clinical Applications:**
 
 - Multi-center clinical trials with hospital effects
@@ -36,9 +38,11 @@ The mixedcoxClass implements mixed-effects Cox regression methods with:
 
 - Variance components estimation for random effects
 
-- Approximate latent-scale intercept variance fraction
+- Intracluster correlation coefficient (ICC) calculation
 
-- Descriptive comparison with a standard Cox model
+- Likelihood ratio tests for random effects significance
+
+- Bootstrap variance estimation for complex models
 
 ## See also
 

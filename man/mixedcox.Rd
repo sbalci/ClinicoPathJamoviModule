@@ -66,29 +66,42 @@ family). Observations within the same cluster are assumed correlated.}
 
 \item{random_effects}{Type of random effects to include in the model.}
 
-\item{random_slope_var}{Variable for random slopes when random_effects
-includes slopes.}
+\item{random_slope_var}{Numeric variable whose effect varies between
+clusters when random_effects includes slopes (coxme cannot fit random
+slopes for categorical variables). It is added to the fixed effects if it
+is not already there, so the cluster slopes vary around a population slope.}
 
 \item{nested_clustering}{Whether to model nested clustering structure
-(e.g., patients within hospitals).}
+(e.g., patients within hospitals). Used only with random_effects =
+"intercept"; it is ignored, with a note, for random-slope models.}
 
 \item{nested_cluster_var}{Higher-level clustering variable for nested
-structures.}
+structures (random intercept models only).}
 
-\item{sparse_matrix}{Use sparse matrix methods for computational efficiency
-with large datasets.}
+\item{sparse_matrix}{Use coxme's sparse approximation for the random-effect
+variance matrix (coxme.control(sparse = c(50, 0.02)), the coxme default).
+It is an approximation that can change the estimates slightly, and it has
+no effect for clustering variables with fewer than 50 levels. When false,
+the full (non-sparse) matrix is always used.}
 
-\item{icc_calculation}{Show an approximate latent-scale intercept variance
-fraction; this is not an observed-event ICC.}
+\item{icc_calculation}{Show an approximate variance fraction on the latent
+log-hazard scale, sigma^2 / (sigma^2 + pi^2/6), where pi^2/6 is the
+variance of the standard extreme-value error of a proportional-hazards
+model. Nested models use both variance components; intercept-and-slope
+models report it at a slope-variable value of 0. It is not an intracluster
+correlation of observed event times and is not shown for random-slope-only
+models.}
 
 \item{show_fixed_effects}{Display table of fixed effects estimates.}
 
 \item{show_random_effects}{Display summary of random effects variance
 components.}
 
-\item{show_model_comparison}{Display the mixed and standard Cox
-log-likelihoods and descriptive likelihood-ratio statistic without an
-inferential p-value.}
+\item{show_model_comparison}{Display the standard Cox and mixed-effects
+(integrated) log partial likelihoods and their likelihood-ratio statistic,
+truncated at 0. When the model has a single variance component, a
+boundary-corrected p-value (half the chi-square(1) tail probability) is
+shown; models with several variance parameters get no p-value.}
 }
 \value{
 A results object containing:
