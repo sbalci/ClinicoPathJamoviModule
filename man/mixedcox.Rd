@@ -11,7 +11,6 @@ mixedcox(
   dxdate = NULL,
   fudate = NULL,
   timetypedata = "ymd",
-  timetypeoutput = "months",
   outcome = NULL,
   outcomeLevel,
   fixed_effects = NULL,
@@ -35,8 +34,12 @@ contain survival variables, fixed effects, and clustering variables.}
 \item{elapsedtime}{The numeric variable representing follow-up time until
 the event or censoring.}
 
-\item{tint}{If true, survival time will be calculated from diagnosis and
-follow-up dates.}
+\item{tint}{If true, survival time is calculated in days from the diagnosis
+and follow-up dates, and the elapsed-time variable is not used. Rows with
+an empty or missing date are excluded and counted in a note; a non-blank
+date that does not have the selected layout (4-digit year, with '-', '/' or
+'.' between the parts) stops the analysis with a message, because a wrong
+day-month order would otherwise give wrong survival times.}
 
 \item{dxdate}{Date of diagnosis or start of follow-up. Required if tint =
 true.}
@@ -46,9 +49,6 @@ true.}
 
 \item{timetypedata}{Specifies the format of date variables in the input
 data.}
-
-\item{timetypeoutput}{The units in which survival time is reported in the
-output.}
 
 \item{outcome}{The outcome variable indicating event status (e.g., death,
 recurrence).}
@@ -78,11 +78,17 @@ is not already there, so the cluster slopes vary around a population slope.}
 \item{nested_cluster_var}{Higher-level clustering variable for nested
 structures (random intercept models only).}
 
-\item{sparse_matrix}{Use coxme's sparse approximation for the random-effect
-variance matrix (coxme.control(sparse = c(50, 0.02)), the coxme default).
-It is an approximation that can change the estimates slightly, and it has
-no effect for clustering variables with fewer than 50 levels. When false,
-the full (non-sparse) matrix is always used.}
+\item{sparse_matrix}{Use coxme's sparse approximation for the random
+intercept (coxme.control(sparse = c(50, 0.02)), the coxme default): when
+the grouping has at least 50 levels, the second-derivative terms between
+groups that each hold 2 percent or less of the rows are treated as zero. It
+is an approximation that can change the estimates slightly. With nested
+clustering the grouping is the (higher-level, cluster) pairs and more than
+50 of them are needed, so a clustering variable with few levels (for
+example wards numbered 1 to 5 in every hospital) is still approximated when
+it is nested in enough higher-level units. Random-slope-only models are
+never approximated. When false, the full (non-sparse) matrix is always
+used.}
 
 \item{icc_calculation}{Show an approximate variance fraction on the latent
 log-hazard scale, sigma^2 / (sigma^2 + pi^2/6), where pi^2/6 is the
@@ -100,8 +106,10 @@ components.}
 \item{show_model_comparison}{Display the standard Cox and mixed-effects
 (integrated) log partial likelihoods and their likelihood-ratio statistic,
 truncated at 0. When the model has a single variance component, a
-boundary-corrected p-value (half the chi-square(1) tail probability) is
-shown; models with several variance parameters get no p-value.}
+boundary-corrected p-value from the 50:50 mixture of chi-square(0) and
+chi-square(1) is shown (half the chi-square(1) tail probability, or 1 when
+the statistic is 0); models with several variance parameters get no
+p-value.}
 }
 \value{
 A results object containing:

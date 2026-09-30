@@ -11,7 +11,6 @@ mixedcoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             dxdate = NULL,
             fudate = NULL,
             timetypedata = "ymd",
-            timetypeoutput = "months",
             outcome = NULL,
             outcomeLevel = NULL,
             fixed_effects = NULL,
@@ -61,15 +60,6 @@ mixedcoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "mdy",
                     "dmy"),
                 default="ymd")
-            private$..timetypeoutput <- jmvcore::OptionList$new(
-                "timetypeoutput",
-                timetypeoutput,
-                options=list(
-                    "days",
-                    "weeks",
-                    "months",
-                    "years"),
-                default="months")
             private$..outcome <- jmvcore::OptionVariable$new(
                 "outcome",
                 outcome,
@@ -166,7 +156,6 @@ mixedcoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..dxdate)
             self$.addOption(private$..fudate)
             self$.addOption(private$..timetypedata)
-            self$.addOption(private$..timetypeoutput)
             self$.addOption(private$..outcome)
             self$.addOption(private$..outcomeLevel)
             self$.addOption(private$..fixed_effects)
@@ -188,7 +177,6 @@ mixedcoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         dxdate = function() private$..dxdate$value,
         fudate = function() private$..fudate$value,
         timetypedata = function() private$..timetypedata$value,
-        timetypeoutput = function() private$..timetypeoutput$value,
         outcome = function() private$..outcome$value,
         outcomeLevel = function() private$..outcomeLevel$value,
         fixed_effects = function() private$..fixed_effects$value,
@@ -209,7 +197,6 @@ mixedcoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..dxdate = NA,
         ..fudate = NA,
         ..timetypedata = NA,
-        ..timetypeoutput = NA,
         ..outcome = NA,
         ..outcomeLevel = NA,
         ..fixed_effects = NA,
@@ -258,7 +245,6 @@ mixedcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "dxdate",
                     "fudate",
                     "timetypedata",
-                    "timetypeoutput",
                     "fixed_effects",
                     "continuous_effects",
                     "cluster_var",
@@ -279,7 +265,6 @@ mixedcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "dxdate",
                     "fudate",
                     "timetypedata",
-                    "timetypeoutput",
                     "fixed_effects",
                     "continuous_effects",
                     "cluster_var",
@@ -339,7 +324,6 @@ mixedcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "dxdate",
                     "fudate",
                     "timetypedata",
-                    "timetypeoutput",
                     "fixed_effects",
                     "continuous_effects",
                     "cluster_var",
@@ -361,7 +345,6 @@ mixedcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "dxdate",
                     "fudate",
                     "timetypedata",
-                    "timetypeoutput",
                     "fixed_effects",
                     "continuous_effects",
                     "cluster_var",
@@ -383,7 +366,6 @@ mixedcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "dxdate",
                     "fudate",
                     "timetypedata",
-                    "timetypeoutput",
                     "fixed_effects",
                     "continuous_effects",
                     "cluster_var",
@@ -426,16 +408,18 @@ mixedcoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   contain survival variables, fixed effects, and clustering variables.
 #' @param elapsedtime The numeric variable representing follow-up time until
 #'   the event or censoring.
-#' @param tint If true, survival time will be calculated from diagnosis and
-#'   follow-up dates.
+#' @param tint If true, survival time is calculated in days from the diagnosis
+#'   and follow-up dates, and the elapsed-time variable is not used. Rows with
+#'   an empty or missing date are excluded and counted in a note; a non-blank
+#'   date that does not have the selected layout (4-digit year, with '-', '/' or
+#'   '.' between the parts) stops the analysis with a message, because a wrong
+#'   day-month order would otherwise give wrong survival times.
 #' @param dxdate Date of diagnosis or start of follow-up. Required if tint =
 #'   true.
 #' @param fudate Follow-up date or date of last observation. Required if tint
 #'   = true.
 #' @param timetypedata Specifies the format of date variables in the input
 #'   data.
-#' @param timetypeoutput The units in which survival time is reported in the
-#'   output.
 #' @param outcome The outcome variable indicating event status (e.g., death,
 #'   recurrence).
 #' @param outcomeLevel The level of outcome considered as the event.
@@ -455,11 +439,17 @@ mixedcoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   "intercept"; it is ignored, with a note, for random-slope models.
 #' @param nested_cluster_var Higher-level clustering variable for nested
 #'   structures (random intercept models only).
-#' @param sparse_matrix Use coxme's sparse approximation for the random-effect
-#'   variance matrix (coxme.control(sparse = c(50, 0.02)), the coxme default).
-#'   It is an approximation that can change the estimates slightly, and it has
-#'   no effect for clustering variables with fewer than 50 levels. When false,
-#'   the full (non-sparse) matrix is always used.
+#' @param sparse_matrix Use coxme's sparse approximation for the random
+#'   intercept (coxme.control(sparse = c(50, 0.02)), the coxme default): when
+#'   the grouping has at least 50 levels, the second-derivative terms between
+#'   groups that each hold 2 percent or less of the rows are treated as zero. It
+#'   is an approximation that can change the estimates slightly. With nested
+#'   clustering the grouping is the (higher-level, cluster) pairs and more than
+#'   50 of them are needed, so a clustering variable with few levels (for
+#'   example wards numbered 1 to 5 in every hospital) is still approximated when
+#'   it is nested in enough higher-level units. Random-slope-only models are
+#'   never approximated. When false, the full (non-sparse) matrix is always
+#'   used.
 #' @param icc_calculation Show an approximate variance fraction on the latent
 #'   log-hazard scale, sigma^2 / (sigma^2 + pi^2/6), where pi^2/6 is the
 #'   variance of the standard extreme-value error of a proportional-hazards
@@ -473,8 +463,10 @@ mixedcoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param show_model_comparison Display the standard Cox and mixed-effects
 #'   (integrated) log partial likelihoods and their likelihood-ratio statistic,
 #'   truncated at 0. When the model has a single variance component, a
-#'   boundary-corrected p-value (half the chi-square(1) tail probability) is
-#'   shown; models with several variance parameters get no p-value.
+#'   boundary-corrected p-value from the 50:50 mixture of chi-square(0) and
+#'   chi-square(1) is shown (half the chi-square(1) tail probability, or 1 when
+#'   the statistic is 0); models with several variance parameters get no
+#'   p-value.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -498,7 +490,6 @@ mixedcox <- function(
     dxdate = NULL,
     fudate = NULL,
     timetypedata = "ymd",
-    timetypeoutput = "months",
     outcome = NULL,
     outcomeLevel,
     fixed_effects = NULL,
@@ -549,7 +540,6 @@ mixedcox <- function(
         dxdate = dxdate,
         fudate = fudate,
         timetypedata = timetypedata,
-        timetypeoutput = timetypeoutput,
         outcome = outcome,
         outcomeLevel = outcomeLevel,
         fixed_effects = fixed_effects,

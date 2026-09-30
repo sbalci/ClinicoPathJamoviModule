@@ -16,7 +16,6 @@ items:
           - dxdate
           - fudate
           - timetypedata
-          - timetypeoutput
           - fixed_effects
           - continuous_effects
           - cluster_var
@@ -37,7 +36,6 @@ items:
           - dxdate
           - fudate
           - timetypedata
-          - timetypeoutput
           - fixed_effects
           - continuous_effects
           - cluster_var
@@ -89,7 +87,6 @@ items:
         - dxdate
         - fudate
         - timetypedata
-        - timetypeoutput
         - fixed_effects
         - continuous_effects
         - cluster_var
@@ -111,7 +108,6 @@ items:
           - dxdate
           - fudate
           - timetypedata
-          - timetypeoutput
           - fixed_effects
           - continuous_effects
           - cluster_var
@@ -133,7 +129,6 @@ items:
           - dxdate
           - fudate
           - timetypedata
-          - timetypeoutput
           - fixed_effects
           - continuous_effects
           - cluster_var

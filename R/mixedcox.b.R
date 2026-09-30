@@ -126,8 +126,10 @@ mixedcoxClass <- if (requireNamespace('jmvcore'))
       
       # Input validation
       .validateInputs = function() {
-        has_time <- !is.null(self$options$elapsedtime) || 
-                   (self$options$tint && !is.null(self$options$dxdate) && !is.null(self$options$fudate))
+        # With dates ticked, time comes only from the two dates; elapsedtime is ignored
+        tint <- self$options$tint
+        has_time <- if (tint) !is.null(self$options$dxdate) && !is.null(self$options$fudate) else
+          !is.null(self$options$elapsedtime)
         has_outcome <- !is.null(self$options$outcome)
         has_cluster <- !is.null(self$options$cluster_var)
         has_fixed <- !is.null(self$options$fixed_effects) || !is.null(self$options$continuous_effects)
@@ -142,7 +144,9 @@ mixedcoxClass <- if (requireNamespace('jmvcore'))
         
         if (!result$valid) {
           missing_items <- c()
-          if (!has_time) missing_items <- c(missing_items, "Time variable")
+          if (!has_time) missing_items <- c(missing_items, if (tint) paste0(
+            "Diagnosis Date and Follow-up Date ('Using Dates to Calculate Survival Time' ",
+            "is ticked, so Time Elapsed is not used)") else "Time variable")
           if (!has_outcome) missing_items <- c(missing_items, "Outcome variable")
           if (!has_cluster) missing_items <- c(missing_items, "Clustering variable")
           if (!has_fixed) missing_items <- c(missing_items, "Fixed effects variables")
@@ -158,16 +162,35 @@ mixedcoxClass <- if (requireNamespace('jmvcore'))
       
       # Prepare data for analysis
       .prepareData = function() {
+        # Read before the catch-all below, so that a date-format reject() reaches
+        # jamovi's error state instead of being swallowed
+        time_from_dates <- if (self$options$tint) private$.calculateTimeFromDates()
         tryCatch({
           data <- self$data
           opts <- self$options
-          
-          # Survival time, from the time variable or from dates
+          notes <- character()
+
+          # Survival time, from the time variable or from dates. A row with a blank
+          # date gets an NA time and is dropped with the other incomplete rows.
           if (opts$tint) {
-            time <- private$.calculateTimeFromDates()
-            if (is.null(time)) return(NULL)
+            time <- time_from_dates
+            if (!is.null(opts$elapsedtime)) notes <- c(notes, paste0(
+              "Survival time was calculated from the dates; the Time Elapsed variable '",
+              opts$elapsedtime, "' was not used."))
+            if (any(is.na(time))) notes <- c(notes, paste0(
+              sum(is.na(time)), " row(s) with a missing diagnosis or follow-up date were excluded."))
           } else {
-            time <- data[[opts$elapsedtime]]
+            # An integer time with value labels arrives as a factor carrying 'values'
+            time <- jmvcore::toNumeric(data[[opts$elapsedtime]])
+          }
+          # A negative time (follow-up before diagnosis) is a data error; a time of 0 is kept
+          negative <- which(time < 0)
+          if (length(negative) > 0) {
+            time[negative] <- NA
+            notes <- c(notes, paste0(
+              length(negative), " row(s) with a negative survival time (",
+              if (opts$tint) "follow-up date before the diagnosis date" else "negative Time Elapsed",
+              ") were excluded."))
           }
           event <- data[[opts$outcome]] == opts$outcomeLevel
 
@@ -183,7 +206,6 @@ mixedcoxClass <- if (requireNamespace('jmvcore'))
             }
           }
           
-          notes <- character()
           fixed_vars <- c(opts$fixed_effects, opts$continuous_effects)
           # Without its fixed effect a random slope is centred on 0, and the slope
           # variance absorbs the population slope.
@@ -228,16 +250,22 @@ mixedcoxClass <- if (requireNamespace('jmvcore'))
           for (id in fixed_ids[fixed_vars %in% c(opts$continuous_effects, slope_var)]) {
             model_data[[id]] <- jmvcore::toNumeric(model_data[[id]])
           }
+          # Ordinal variables arrive as ordered factors, which R codes with polynomial
+          # contrasts (.L, .Q). Unordered, each level is compared with the first level.
+          model_data[] <- lapply(model_data, function(x) if (is.ordered(x)) factor(x, ordered = FALSE) else x)
 
           # TODO (jamovify): consider `jmvcore::naOmit(model_data)` instead of `complete.cases` +
           # boolean indexing - preserves jamovi column attributes (measureType, values, labels) that
           # downstream coxme/survival modeling may rely on for labelled-factor handling.
           complete_rows <- complete.cases(model_data) & !is.na(time) & !is.na(event)
-          
+          # Both stops below show the notes, which say how many rows were dropped and why
+          notes_html <- paste(sprintf("<p><i>Note: %s</i></p>", htmltools::htmlEscape(notes)), collapse = "")
+
           if (sum(complete_rows) < 50) {  # Minimum for mixed-effects models
-            self$results$todo$setContent(
-              "<h3>Insufficient Data</h3><p>Too few complete observations for mixed-effects Cox regression.</p>"
-            )
+            self$results$todo$setContent(paste0(
+              "<h3>Insufficient Data</h3><p>Too few complete observations for mixed-effects Cox ",
+              "regression (found ", sum(complete_rows), "; at least 50 are needed).</p>", notes_html
+            ))
             return(NULL)
           }
           
@@ -252,7 +280,7 @@ mixedcoxClass <- if (requireNamespace('jmvcore'))
             self$results$todo$setContent(paste0(
               "<h3>Insufficient Clusters</h3><p>Need at least ", private$MIN_CLUSTERS,
               " clusters with complete data for mixed-effects modeling (found ",
-              length(cluster_sizes), ").</p>"
+              length(cluster_sizes), ").</p>", notes_html
             ))
             return(NULL)
           }
@@ -278,7 +306,7 @@ mixedcoxClass <- if (requireNamespace('jmvcore'))
           ))
           
         }, error = function(e) {
-          # TODO (UX): file-wide pattern - `.prepareData` / `.calculateTimeFromDates` / `.fitMixedCox`
+          # TODO (UX): file-wide pattern - `.prepareData` / `.fitMixedCox`
           # surface validation + runtime errors by writing raw HTML into `self$results$todo`. This
           # mixes the "instructions" surface with the "error" surface and bypasses jamovi's structured
           # error UI. Prefer `jmvcore::reject(...)` for user-facing failures so the analysis is marked
@@ -293,51 +321,59 @@ mixedcoxClass <- if (requireNamespace('jmvcore'))
         })
       },
 
-      # Calculate time from dates
+      # Survival time in days from the two dates; the unit is immaterial, as the Cox
+      # partial likelihood depends only on the order of the times. A blank or NA date
+      # is missing: its row gets an NA time and is dropped. Any other date that does not
+      # read in the selected format stops the run, because a partial read is not a few
+      # bad cells: Day-Month-Year text read as Month-Day-Year (or the reverse) still
+      # reads every date whose day is 12 or less, with day and month swapped. No
+      # catch-all here or in the caller, so reject() reaches jamovi's error state.
       .calculateTimeFromDates = function() {
-        tryCatch({
-          dx_dates <- self$data[[self$options$dxdate]]
-          fu_dates <- self$data[[self$options$fudate]]
-          
-          # Parse dates based on format
-          format_map <- list(
-            "ymd" = "%Y-%m-%d",
-            "mdy" = "%m/%d/%Y", 
-            "dmy" = "%d/%m/%Y"
-          )
-          
-          format_str <- format_map[[self$options$timetypedata]]
-          
-          dx_parsed <- as.Date(dx_dates, format = format_str)
-          fu_parsed <- as.Date(fu_dates, format = format_str)
-          
-          if (any(is.na(dx_parsed)) || any(is.na(fu_parsed))) {
-            self$results$todo$setContent(
-              "<h3>Date Parse Error</h3><p>Unable to parse dates. Check date format.</p>"
-            )
-            return(NULL)
-          }
-          
-          time_diff <- as.numeric(fu_parsed - dx_parsed)
-          
-          # Convert to requested output units
-          time_units <- self$options$timetypeoutput
-          if (time_units == "weeks") {
-            time_diff <- time_diff / 7
-          } else if (time_units == "months") {
-            time_diff <- time_diff / 30.44
-          } else if (time_units == "years") {
-            time_diff <- time_diff / 365.25
-          }
-          
-          return(time_diff)
-          
-        }, error = function(e) {
-          self$results$todo$setContent(paste0(
-            "<h3>Date Calculation Error</h3><p>", htmltools::htmlEscape(e$message), "</p>"
-          ))
-          return(NULL)
-        })
+        type <- self$options$timetypedata
+        cols <- self$data[c(self$options$dxdate, self$options$fudate)]
+        # A number reads in no layout: Excel day serials and SPSS seconds are not dates here
+        if (any(vapply(cols, function(x) is.numeric(x) && !inherits(x, c("Date", "POSIXt")), logical(1)))) {
+          private$.clearModelOutputs()
+          jmvcore::reject("{}", code = NULL, paste0(
+            "Date Parse Error: the diagnosis or follow-up date variable holds numbers, not dates. ",
+            "Dates must be text such as 2016-12-31; or give the survival time in 'Time Elapsed'."))
+        }
+        # [\h\v] also strips the non-breaking space that pasting from Excel or Word leaves
+        text <- lapply(cols, function(x) trimws(as.character(x), whitespace = "[\\h\\v]"))
+        blank <- lapply(text, function(x) is.na(x) | !nzchar(x))
+        # The WHOLE value must have the selected layout: a 4-digit year, '-', '/' or '.' between
+        # the parts, optionally a time after a space. strptime reads only a prefix, so without
+        # this '13-04-2016' passed as Year-Month-Day (year 13) and '12/31/16' as year 16.
+        pattern <- c(ymd = "^([0-9]{4})[-/.]([0-9]{1,2})[-/.]([0-9]{1,2})( .*)?$",
+                     mdy = "^([0-9]{1,2})[-/.]([0-9]{1,2})[-/.]([0-9]{4})( .*)?$",
+                     dmy = "^([0-9]{1,2})[-/.]([0-9]{1,2})[-/.]([0-9]{4})( .*)?$")[[type]]
+        iso <- c(ymd = "\\1-\\2-\\3", mdy = "\\3-\\1-\\2", dmy = "\\3-\\2-\\1")[[type]]
+        read_text <- function(t) {
+          ok <- !is.na(t) & grepl(pattern, t)
+          out <- rep(NA_character_, length(t))
+          out[ok] <- sub(pattern, iso, t[ok])
+          as.Date(out, format = "%Y-%m-%d")
+        }
+        # A Date or date-time column (from R) is already a date
+        dates <- Map(function(x, t) if (inherits(x, c("Date", "POSIXt"))) as.Date(x) else read_text(t),
+                     cols, text)
+        unread <- unlist(Map(function(t, b, d) t[!b & is.na(d)], text, blank, dates), use.names = FALSE)
+
+        if (length(unread) > 0) {
+          private$.clearModelOutputs()
+          # "{}" passes the text through jmvcore's formatter unchanged ({x} in a value would not be)
+          jmvcore::reject("{}", code = NULL, paste0(
+            "Date Parse Error: ", length(unread), " of ", sum(!unlist(blank)),
+            " non-blank dates could not be read as ",
+            c(ymd = "Year-Month-Day", mdy = "Month-Day-Year", dmy = "Day-Month-Year")[[type]],
+            " (for example ", paste0("'", utils::head(unique(unread), 3), "'", collapse = ", "),
+            "). Check 'Time Type in Data': it expects ",
+            c(ymd = "2016-12-31", mdy = "12/31/2016", dmy = "31/12/2016")[[type]],
+            ", and Day-Month-Year and Month-Day-Year are easily swapped. The year needs 4 digits; ",
+            "'-', '/' or '.' may separate the parts. A missing date should be empty or set as a missing value."))
+        }
+
+        as.numeric(dates[[2]] - dates[[1]])
       },
       
       # Random-effect term: (1 | g), (x | g), (1 + x | g) or (1 | h/g)
@@ -578,14 +614,16 @@ mixedcoxClass <- if (requireNamespace('jmvcore'))
                                   slope = 1,
                                   both = 3)
             if (n_re_params == 1) {
-              # One variance tested at its boundary of 0: 50:50 mixture of chi-square(0)
-              # and chi-square(1) (Self & Liang 1987)
-              p_value <- 0.5 * stats::pchisq(lr_stat, df = 1, lower.tail = FALSE)
+              # One variance tested at its boundary of 0: 50:50 mixture of chi-square(0),
+              # a point mass at 0, and chi-square(1) (Self & Liang 1987). P(T >= 0) = 1;
+              # for t > 0, P(T >= t) = P(chi-square(1) >= t) / 2.
+              p_value <- if (lr_stat > 0) 0.5 * stats::pchisq(lr_stat, df = 1, lower.tail = FALSE) else 1
               p_text <- paste0(
                 "<p><b>Boundary-corrected p-value:</b> ",
                 if (p_value < 0.001) "&lt; 0.001" else sprintf("%.3f", p_value),
-                " (half the \u03c7\u00b2(1) tail probability, because the variance is tested ",
-                "at its boundary of 0)</p>"
+                " (the variance is tested at its boundary of 0, so the statistic is referred to ",
+                "a 50:50 mixture of \u03c7\u00b2(0) and \u03c7\u00b2(1): half the \u03c7\u00b2(1) ",
+                "tail probability, or 1 when the statistic is 0)</p>"
               )
             } else {
               p_text <- paste0(

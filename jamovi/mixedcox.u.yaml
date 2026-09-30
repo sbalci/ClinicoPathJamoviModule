@@ -156,8 +156,6 @@ children:
                       - type: ComboBox
                         name: timetypedata
                         enable: (tint)
-                      - type: ComboBox
-                        name: timetypeoutput
   - type: CollapseBox
     label: Model Assessment
     collapsed: true
