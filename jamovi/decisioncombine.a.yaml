@@ -1,7 +1,7 @@
 ---
 name: decisioncombine
 title: Combine Medical Decision Tests
-menuGroup: meddecide
+menuGroup: meddecideT
 menuSubgroup: Decision
 menuSubtitle: Combine and evaluate test patterns
 version: '1.0.83'
@@ -11,7 +11,8 @@ description:
     main: >
         Systematic evaluation of diagnostic test combinations. Analyzes all possible
         test result patterns (2-test: 4 patterns, 3-test: 8 patterns) against a gold
-        standard and summarizes named parallel, serial, and majority strategies.
+        standard, each test alone, and parallel and serial strategies (with three tests
+        also for every pair of tests, and a majority rule).
         Calculates sensitivity, specificity, predictive values, likelihood ratios,
         accuracy, and uncertainty intervals. Descriptive rankings are sample-dependent
         analytical summaries, not clinical guides or validated recommendations.
@@ -166,7 +167,8 @@ options:
       default: false
       description:
           ui: >
-            Display heatmap showing all metrics for all test patterns with color-coded performance values.
+            Display a color-coded heatmap of prevalence, sensitivity, specificity, PPV, NPV,
+            accuracy and balanced accuracy for each row, or of one metric selected under Filters.
           R: >
             Boolean to display heatmap visualization.
 
@@ -196,9 +198,10 @@ options:
       default: false
       description:
           ui: >
-            Rank eligible exact-pattern rules and named parallel, serial, and majority
-            strategies descriptively by observed Youden's J. This sample-dependent summary
-            is not a clinical guide or validated recommendation.
+            Rank eligible exact-pattern rules, each test alone, and the parallel, serial,
+            pairwise and majority strategies descriptively by observed Youden's J. This
+            sample-dependent summary is not a clinical guide or validated recommendation.
+            It needs at least two tests: one test gives one rule, so nothing is ranked.
           R: >
             Boolean to show the descriptive candidate-rule ranking table.
 
@@ -213,9 +216,9 @@ options:
       type: Output
       description:
           ui: >
-            Add a new column to the dataset containing the test combination pattern for each case (e.g., "+/+", "+/-", "-/-").
+            Add a new column to the dataset containing the test combination pattern (e.g., "+/+", "+/-", "-/-") for each case with every selected test observed, including cases without a reference-standard result.
           R: >
-            Output variable receiving the combined test pattern for each case.
+            Output variable receiving the combined test pattern for each case with every selected test observed.
 
     - name: showAbout
       title: About this analysis
@@ -262,11 +265,13 @@ options:
           ui: >
             Select one metric, or use the plot-specific default metric set. The bar chart
             defaults to sensitivity, specificity, PPV, NPV, and accuracy; the heatmap also
-            includes prevalence, balanced accuracy, and Youden's J. The forest plot
-            supports sensitivity, specificity, PPV, NPV, accuracy, LR+, LR-, and diagnostic
-            OR, for which confidence intervals are available. Unsupported forest selections
-            produce an explanatory notice rather than silently showing other statistics. The
-            decision-space plot has fixed sensitivity and specificity axes and is unaffected.
+            includes prevalence and balanced accuracy. In these two plots Youden's J, LR+,
+            LR- and the diagnostic OR are drawn only when selected on their own. The forest
+            plot's default set is sensitivity, specificity, PPV, NPV, accuracy, LR+, LR- and
+            diagnostic OR, and it supports each of them alone; selecting prevalence, balanced accuracy or Youden's J (whose 95% confidence
+            interval is in the combination table) produces an explanatory notice rather than
+            silently showing other statistics. The decision-space plot has fixed sensitivity
+            and specificity axes and is unaffected.
           R: >
             Character indicating which statistic to display in the plots; `all` uses each
             plot's default metric set.
@@ -288,8 +293,8 @@ options:
           ui: >
             Filter the bar chart, heatmap and forest plot by pattern type: all patterns, all
             tests positive (+/+, +/+/+), all tests negative (-/-, -/-/-), or mixed/discordant
-            patterns. Named strategy rows are not result patterns and are excluded whenever a
-            specific pattern type is selected. The performance tables always show every
+            patterns. Single-test and strategy rows are not result patterns and are excluded
+            whenever a specific pattern type is selected. The performance tables always show every
             pattern, and the decision-space plot always shows every row so patterns remain
             comparable.
           R: >

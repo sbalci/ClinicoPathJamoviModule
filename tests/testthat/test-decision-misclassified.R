@@ -165,3 +165,42 @@ test_that("saveClassifications writes each label against its own spreadsheet row
     # the alignment check above rather than pass it by coincidence.
     expect_false(identical(values, TRUTH[seq_along(values)]))
 })
+
+test_that("decision: a restart requested at a table checkpoint escapes .run()", {
+    # jamovi signals "the user changed an option" through private$.checkpoint(), which
+    # stop()s with code "restart". The FP/FN loops run inside a tryCatch that must
+    # re-raise it; swallowed, it became a red "Technical details: restarting" notice and
+    # the stale run finished. The loops checkpoint with flush = FALSE (no per-row
+    # re-serialisation of the results tree), which also makes this reachable without
+    # RProtoBuf: a flushing checkpoint cannot run outside jamovi.
+    d <- data.frame(g = factor(rep(c("D", "H"), c(40, 60))),
+                    t = factor(c(rep(c("P", "N"), c(30, 10)), rep(c("P", "N"), c(12, 48)))))
+    make <- function(...) {
+        a <- decisionClass$new(options = decisionOptions$new(gold = "g", goldPositive = "D",
+                                                             newtest = "t", testPositive = "P", ...),
+                               data = d)
+        a$init()
+        a
+    }
+    for (opts in list(list(showMisclassified = TRUE), list(od = TRUE))) {
+        a <- do.call(make, opts)
+        p <- a$.__enclos_env__$private
+        calls <- 0L
+        p$.checkpointCB <- function(results) { calls <<- calls + 1L; "restart" }
+        err <- tryCatch({ p$.run(); NULL }, error = function(e) e)
+        expect_identical(err$code, "restart", info = names(opts))
+        expect_equal(calls, 1L, info = names(opts))
+        titles <- vapply(p$.noticeList, `[[`, "", "title")
+        expect_false("Error in misclassified cases analysis" %in% titles, info = names(opts))
+    }
+
+    # Engine says continue: every row checkpoints and the tables fill (12 FP, 10 FN).
+    a <- make(showMisclassified = TRUE)
+    p <- a$.__enclos_env__$private
+    seen <- 0L
+    p$.checkpointCB <- function(results) { seen <<- seen + 1L; NULL }
+    p$.run()
+    expect_equal(seen, 22L)
+    expect_equal(nrow(as.data.frame(a$results$falsePositiveTable)), 12L)
+    expect_equal(nrow(as.data.frame(a$results$falseNegativeTable)), 10L)
+})

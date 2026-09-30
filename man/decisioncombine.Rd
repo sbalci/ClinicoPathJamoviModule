@@ -76,10 +76,12 @@ the bar chart, heatmap and forest plot (default: all).}
 \value{
 A results object containing:
 \tabular{llllll}{
-\code{results$combinationTable} \tab \tab \tab \tab \tab Counts and diagnostic performance metrics for each test combination pattern and clinical strategy, including prevalence, balanced accuracy, Youden's J, likelihood ratios, and diagnostic odds ratios \cr
+\code{results$welcome} \tab \tab \tab \tab \tab a html \cr
+\code{results$notices} \tab \tab \tab \tab \tab a html \cr
+\code{results$combinationTable} \tab \tab \tab \tab \tab Counts and diagnostic performance metrics for each test combination pattern, each test alone and each combination strategy, including prevalence, balanced accuracy, Youden's J with its Agresti-Caffo 95 percent confidence interval, likelihood ratios, and diagnostic odds ratios \cr
 \code{results$combinationTableCI} \tab \tab \tab \tab \tab Wilson score 95 percent confidence intervals for sensitivity, specificity, PPV, NPV and accuracy, shown as percentages to match the combination table above. Likelihood ratios and the diagnostic odds ratio are unbounded ratios rather than proportions, so they appear in their own table below. \cr
 \code{results$combinationTableCIRatios} \tab \tab \tab \tab \tab Log-scale 95 percent confidence intervals for LR+, LR- and the diagnostic odds ratio. These are ratios on an unbounded scale, so they are reported separately from the proportions above rather than sharing a column with them. \cr
-\code{results$goldFreqTable} \tab \tab \tab \tab \tab Frequency distribution of the gold standard (reference) test showing counts and percentages for each level \cr
+\code{results$goldFreqTable} \tab \tab \tab \tab \tab Counts and percentages of disease-present and disease-absent cases (the reference standard dichotomised at the chosen positive level) among the complete cases used for the combination table \cr
 \code{results$crossTabTable} \tab \tab \tab \tab \tab Cross-tabulation showing how test combination patterns align with gold standard results \cr
 \code{results$individualTest1$test1Contingency} \tab \tab \tab \tab \tab a table \cr
 \code{results$individualTest1$test1Stats} \tab \tab \tab \tab \tab a table \cr
@@ -88,14 +90,13 @@ A results object containing:
 \code{results$individualTest3$test3Contingency} \tab \tab \tab \tab \tab a table \cr
 \code{results$individualTest3$test3Stats} \tab \tab \tab \tab \tab a table \cr
 \code{results$barPlot} \tab \tab \tab \tab \tab Grouped bar chart comparing sensitivity, specificity, PPV, NPV, and accuracy across test combinations \cr
-\code{results$heatmapPlot} \tab \tab \tab \tab \tab Color-coded heatmap showing all diagnostic metrics for each test pattern \cr
-\code{results$forestPlot} \tab \tab \tab \tab \tab Forest plot displaying 95 percent confidence intervals for key diagnostic metrics \cr
+\code{results$heatmapPlot} \tab \tab \tab \tab \tab Color-coded heatmap of prevalence, sensitivity, specificity, PPV, NPV, accuracy and balanced accuracy for each pattern by default, or of one selected metric \cr
+\code{results$forestPlot} \tab \tab \tab \tab \tab Forest plot of 95 percent confidence intervals: proportions on a 0 to 100 percent axis, and LR+, LR- and the diagnostic odds ratio on a log axis with a dashed reference line at 1 \cr
 \code{results$decisionTreePlot} \tab \tab \tab \tab \tab Decision-space scatter plot positioning each test pattern by its sensitivity and specificity, with point size scaled by Youden's J \cr
-\code{results$recommendationTable} \tab \tab \tab \tab \tab Sample-dependent descriptive ranking of eligible exact-pattern rules and named testing strategies by observed Youden index; this is not a clinical guide or validated recommendation \cr
+\code{results$recommendationTable} \tab \tab \tab \tab \tab Sample-dependent descriptive ranking of eligible exact-pattern rules, single tests and named testing strategies by observed Youden index; this is not a clinical guide or validated recommendation \cr
 \code{results$addedPattern} \tab \tab \tab \tab \tab an output \cr
 \code{results$about} \tab \tab \tab \tab \tab a html \cr
 \code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
-\code{results$notices} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -107,11 +108,12 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \description{
 Systematic evaluation of diagnostic test combinations. Analyzes all
 possible test result patterns (2-test: 4 patterns, 3-test: 8 patterns)
-against a gold standard and summarizes named parallel, serial, and majority
-strategies. Calculates sensitivity, specificity, predictive values,
-likelihood ratios, accuracy, and uncertainty intervals. Descriptive
-rankings are sample-dependent analytical summaries, not clinical guides or
-validated recommendations.
+against a gold standard, each test alone, and parallel and serial
+strategies (with three tests also for every pair of tests, and a majority
+rule). Calculates sensitivity, specificity, predictive values, likelihood
+ratios, accuracy, and uncertainty intervals. Descriptive rankings are
+sample-dependent analytical summaries, not clinical guides or validated
+recommendations.
 }
 \examples{
 \donttest{

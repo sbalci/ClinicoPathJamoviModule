@@ -142,8 +142,18 @@ decisionClass <- if (requireNamespace("jmvcore"))
             #   would show literally ("&lt;20%"); plain "<20%" renders as written. Only a "<"
             #   that could open a tag (followed by a letter, "/", "!" or "?") is broken apart.
             .noteText = function(x) {
-                x <- chartr("[]", "()", as.character(x))
-                gsub("<(?=[A-Za-z/!?])", "< ", x, perl = TRUE)
+                private$.richText(chartr("[]", "()", as.character(x)))
+            },
+
+            # A user-supplied label (variable name, level) placed in a text cell, a column
+            # title or a superTitle. These use the same client renderer as notes (bt(): parsed
+            # as HTML; em/i/sub/sup kept without attributes, other tags unwrapped, script/style
+            # dropped). A "<" before a letter opens a tag, so a level "<LOD" (unclosed tag,
+            # discarded at end of input) or "<Negative>" (empty element) rendered as an empty
+            # cell. They are not re-translated (Column$setTitle and Cell$asProtoBuf never call
+            # translate()), so brackets stay as they are.
+            .richText = function(x) {
+                gsub("<(?=[A-Za-z/!?])", "< ", as.character(x), perl = TRUE)
             },
 
             # One discrimination band for the summary word, the interpretation panel and
@@ -222,7 +232,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
             # known only in .run(), which passes it in.
             .rawContingencyLabels = function(test_negative_label = self$options$testNegative) {
                 level_label <- function(x)
-                    if (length(x) > 0 && !is.na(x[1]) && nzchar(x[1])) as.character(x[1]) else ""
+                    if (length(x) > 0 && !is.na(x[1]) && nzchar(x[1])) private$.richText(x[1]) else ""
                 c(test_pos = level_label(self$options$testPositive),
                   test_neg = level_label(test_negative_label),
                   total = .("Total"))
@@ -421,11 +431,13 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     )
                 }
 
-                # Validate that selected levels actually exist in the data
-                goldVar <- jmvcore::constructFormula(terms = self$options$gold) %>%
-                          jmvcore::decomposeFormula() %>% unlist()
-                testVar <- jmvcore::constructFormula(terms = self$options$newtest) %>%
-                          jmvcore::decomposeFormula() %>% unlist()
+                # Validate that selected levels actually exist in the data.
+                # The option value IS the column name. A constructFormula() ->
+                # decomposeFormula() round-trip read "\" as an escape, so a column named
+                # "IHC\score" became "IHCscore", self$data[[...]] was NULL, and the run
+                # failed with a false "level not found" error.
+                goldVar <- self$options$gold
+                testVar <- self$options$newtest
 
                 # Get actual levels from data
                 gold_levels <- if (is.factor(self$data[[goldVar]])) {
@@ -529,11 +541,9 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
             # Prepare analysis data with efficient processing
             .prepareAnalysisData = function() {
-                # Get variable names efficiently
-                testVar <- jmvcore::constructFormula(terms = self$options$newtest) %>%
-                          jmvcore::decomposeFormula() %>% unlist()
-                goldVar <- jmvcore::constructFormula(terms = self$options$gold) %>%
-                          jmvcore::decomposeFormula() %>% unlist()
+                # The option values are the column names (see .validateCategoricalInputs).
+                testVar <- self$options$newtest
+                goldVar <- self$options$gold
 
                 vars_needed <- unique(c(testVar, goldVar))
                 if (length(vars_needed) < 2) {
@@ -1665,20 +1675,21 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
                     results_matrix <- as.matrix(results1)
 
-                    # Set column headers using USER'S selections, not lexicographic order
+                    # Set column headers using USER'S selections, not lexicographic order.
+                    # Titles and superTitles are rich-rendered: .richText() (see its comment).
                     if (!is.null(raw_contingency$getColumn("test_level"))) {
-                        raw_contingency$getColumn("test_level")$setTitle(testVariable)
+                        raw_contingency$getColumn("test_level")$setTitle(private$.richText(testVariable))
                         raw_contingency$getColumn("test_level")$setSuperTitle("")
                     }
                     if (!is.null(raw_contingency$getColumn("gold_pos"))) {
                         # Use user's goldPositive selection
-                        raw_contingency$getColumn("gold_pos")$setTitle(self$options$goldPositive)
-                        raw_contingency$getColumn("gold_pos")$setSuperTitle(goldVariable)
+                        raw_contingency$getColumn("gold_pos")$setTitle(private$.richText(self$options$goldPositive))
+                        raw_contingency$getColumn("gold_pos")$setSuperTitle(private$.richText(goldVariable))
                     }
                     if (!is.null(raw_contingency$getColumn("gold_neg"))) {
                         # Use user's goldNegative selection (or inferred)
-                        raw_contingency$getColumn("gold_neg")$setTitle(gold_negative_label)
-                        raw_contingency$getColumn("gold_neg")$setSuperTitle(goldVariable)
+                        raw_contingency$getColumn("gold_neg")$setTitle(private$.richText(gold_negative_label))
+                        raw_contingency$getColumn("gold_neg")$setSuperTitle(private$.richText(goldVariable))
                     }
                     if (!is.null(raw_contingency$getColumn("row_total"))) {
                         raw_contingency$getColumn("row_total")$setTitle(.("Total"))
@@ -1786,11 +1797,11 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     try(raw_counts_table$deleteRows(), silent = TRUE)
 
                     if (!is.null(raw_counts_table$getColumn("test_level"))) {
-                        raw_counts_table$getColumn("test_level")$setTitle(testVariable)
+                        raw_counts_table$getColumn("test_level")$setTitle(private$.richText(testVariable))
                         raw_counts_table$getColumn("test_level")$setSuperTitle("")
                     }
                     if (!is.null(raw_counts_table$getColumn("gold_level"))) {
-                        raw_counts_table$getColumn("gold_level")$setTitle(goldVariable)
+                        raw_counts_table$getColumn("gold_level")$setTitle(private$.richText(goldVariable))
                         raw_counts_table$getColumn("gold_level")$setSuperTitle("")
                     }
 
@@ -1812,12 +1823,12 @@ decisionClass <- if (requireNamespace("jmvcore"))
                                 .("Showing the first {shown} of {total} level combinations."),
                                 shown = sprintf("%d", combo_cap), total = sprintf("%d", nrow(combo_for_table))))
                         for (i in seq_len(combo_cap)) {
-                            private$.checkpoint()
+                            private$.checkpoint(flush = FALSE)
                             raw_counts_table$addRow(
                                 rowKey = paste0("row_", i),
                                 values = list(
-                                    test_level = combo_for_table$test_level[i],
-                                    gold_level = combo_for_table$gold_level[i],
+                                    test_level = private$.richText(combo_for_table$test_level[i]),
+                                    gold_level = private$.richText(combo_for_table$gold_level[i]),
                                     count = combo_for_table$count[i]
                                 )
                             )
@@ -2761,14 +2772,15 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     fp_cases$row_id <- fp_cases$original_row_index
 
                     max_show <- min(self$options$maxCasesShow, nrow(fp_cases))
-                    try(fp_table$deleteRows(), silent = TRUE)
 
                     for (i in seq_len(max_show)) {
-                        private$.checkpoint()
+                        # flush = FALSE: the default re-serialises the whole results tree
+                        # on every row (up to 500 per table) only to poll for a restart.
+                        private$.checkpoint(flush = FALSE)
                         fp_table$addRow(rowKey = i, values = list(
                             case_id = fp_cases$row_id[i],
-                            gold_value = as.character(fp_cases[[gold_var]][i]),
-                            test_value = as.character(fp_cases[[test_var]][i])
+                            gold_value = private$.richText(fp_cases[[gold_var]][i]),
+                            test_value = private$.richText(fp_cases[[test_var]][i])
                         ))
                     }
 
@@ -2788,14 +2800,13 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     fn_cases$row_id <- fn_cases$original_row_index
 
                     max_show <- min(self$options$maxCasesShow, nrow(fn_cases))
-                    try(fn_table$deleteRows(), silent = TRUE)
 
                     for (i in seq_len(max_show)) {
-                        private$.checkpoint()
+                        private$.checkpoint(flush = FALSE)
                         fn_table$addRow(rowKey = i, values = list(
                             case_id = fn_cases$row_id[i],
-                            gold_value = as.character(fn_cases[[gold_var]][i]),
-                            test_value = as.character(fn_cases[[test_var]][i])
+                            gold_value = private$.richText(fn_cases[[gold_var]][i]),
+                            test_value = private$.richText(fn_cases[[test_var]][i])
                         ))
                     }
 

@@ -1093,6 +1093,34 @@ FIXED in the same pass, and previously red: the two unsubstituted-`{placeholder}
 /security-audit-function decision
 ```
 
+- [x] (cleanup) `R/decision.b.R` L2766/L2773 and L2793/L2800: `falsePositiveTable` / `falseNegativeTable`
+  call `try(...$deleteRows(), silent = TRUE)` twice each (before and inside `if (n_fp > 0)` / `if (n_fn > 0)`);
+  the inner call is redundant. Filed from the 2026-09-27 security audit (meddecide carries no inline TODOs).
+  Done by `/fix-function decision --apply` (2026-09-27).
+
+**`/fix-function decision --apply` (2026-09-27) — results.** The gate with `decision` counted as shipped
+matched the normal run exactly (0 blocking), and the baseline suite was green (121 tests). Fixed:
+
+- `jamovi/decision.a.yaml` `version: '1.0.83'` → `'1.0.84'`. The release review's bump reached
+  `R/decision.h.R` and NEWS.md, but the yaml was rewritten 3 minutes after `prepare()` and lost it, so the next
+  `prepare()` would have rolled the header back. A one-analysis scratch module compiled with jamovi 28.3 gives
+  a header byte-identical to the committed one. A scan of all analyses finds no other yaml/header version drift.
+- The three `addRow` loops (rawCounts, FP, FN) call `private$.checkpoint(flush = FALSE)`. The default
+  `flush = TRUE` serialised the whole results tree on every row (up to 500 per table) just to poll for a restart.
+- The redundant inner `deleteRows()` is removed (item above).
+- New regression test in `test-decision-misclassified.R`: a restart at a table checkpoint escapes `.run()` and
+  raises no "Error in misclassified cases analysis" notice. It fails (2 failures) when the handler's re-raise is
+  removed. Before this there was no restart test for decision: a flushing checkpoint needs RProtoBuf, which
+  this dev library lacks.
+- Verify: all 10 `test-decision*.R` files green (122 tests, 0 fail/error/skip/warn);
+  `test-meddecide-library-audit.R` green (22 tests).
+
+- [ ] (follow-up, gate) `tools/release_gate.py` has no check that `jamovi/<fn>.a.yaml` `version:` equals
+  `version = c(...)` in `R/<fn>.h.R`. `decision` drifted (yaml 1.0.83, header 1.0.84) and the gate stayed green.
+  The check is a dozen lines (regex both files, compare integer tuples); 0 hits module-wide after this fix.
+- [ ] (cosmetic) `rawCounts` sorts rows alphabetically (`Neg` before `Pos`), while `rawContingency` lists the
+  positive level first. The 200-row cap there cannot trigger: the analysed data holds at most 4 level combinations.
+
 ### decisioncombine
 
 ```text
@@ -1106,6 +1134,174 @@ FIXED in the same pass, and previously red: the two unsubstituted-`{placeholder}
 /release-review-function decisioncombine
 /security-audit-function decisioncombine
 ```
+
+Independent review 2026-09-29 (`development-ideas/decisioncombine-independent-review-2026-09-29.md`;
+pre-fix evidence: `development-scripts/audit_decisioncombine.R`, 197 checks, 12 FAIL). Fixed the same day in the
+working tree (uncommitted; `menuGroup: meddecideT`, analysis 1.0.84); the script now verifies the fixes
+(`-postfix-matrix.csv`, 0 FAIL). A 22-agent adversarial review of the fixes found 18 more problems, all fixed.
+- [x] IR-03 (S3): sparse-cell notice now says the log-scale intervals are approximate and can fall below 95%.
+  Kept the Simel/Woolf intervals (module-wide convention); Koopman for LR is a separate, module-wide decision.
+- [x] IR-01 (S2): "Test k alone" rows (2-3 tests) and pairwise Serial/Parallel rows (3 tests) in the table and the
+  ranking; ties go to the rule with fewer tests; a sentence reports the J-optimal pattern union when it beats
+  every listed rule. About text no longer claims "every way". Youden's J was NOT added to the individual-test
+  tables: the "alone" rows show it with intervals, and the tables' `pc` column format would print J as a percent.
+- [x] IR-02 (S3): per-test guard graded by the Agresti-Caffo 95% CI of J (STRONG only when wholly below 0; INFO
+  "Test Performs at Chance Level" inside the CI). The first ungraded version false-alarmed on ~45% of useless tests.
+- [x] IR-04 (S3), IR-05 (S4), IR-06 (S4), IR-07 (S4).
+- [ ] Commit, then `Rscript _updateModules.R --dry-run` and sync to meddecide (shipped 1.0.83.05 is still the
+  pre-09-28 code); re-run `AUDIT_PKG=../meddecide AUDIT_SCOPE=headline` expecting 0 FAIL; move `menuGroup` back
+  from `meddecideT` when satisfied.
+- [x] (pre-existing drift, not this fix) `jamovi/decision.a.yaml` says version 1.0.83 while the committed
+  `R/decision.h.R` says 1.0.84: the next `jmvtools::prepare()` DOWNGRADES decision's header (seen 2026-09-29,
+  reverted). ~~Bump `decision.a.yaml` to 1.0.84.~~ A hand bump cannot hold: `_updateModules.R` stamps
+  `new_version`[1:3] (now 1.0.83) into the umbrella's own `.a.yaml` of every analysis it ships, T-parked ones
+  included. The user's 18:49 prepare left decision at yaml 1.0.83 = header 1.0.83. Raise `new_version` in
+  `_updateModules_config.yaml` if these analyses should ship as 1.0.84.
+
+**`/check-function decisioncombine --profile release` (2026-09-29) — results.**
+- Wiring: all 20 options read by the backend; every results item has a setter (4 images from `setState()`
+  state only, no `requiresData` needed); all 9 checkboxes default `false`; no File/Text/vector; `menuGroup`
+  was already `meddecideT`.
+- Added a `welcome` "Getting Started" panel (`style_welcome`). A new analysis showed three empty tables and
+  nothing else, and `.validateInputs()` said it returned quietly "to let the instructions panel speak" -- no
+  such panel existed. Same `visible: (length(gold) == 0 || ...)` form as `decision.r.yaml`; the static content
+  is set in `.init()` from 14 existing, translated msgids, so the i18n catalogs needed no change (IR-R2-8b).
+- Variable safety: new test -- punctuation, quotes and non-ASCII in column names and in a level label give the
+  plain-name table exactly, and the exported syntax parses and reproduces it (VAL-03 covered spaces only).
+  Labelled parity: N/A (the wrapper `as.factor()`s every variable; the backend never renames columns).
+- Version: the user's `_updateModules.R` run set `decisioncombine.a.yaml` back to 1.0.83 at 18:49 (see the
+  decision item above), leaving the header at 1.0.84. Header regenerated from a one-analysis scratch compile
+  (jamovi 28.3.0): the diff was the welcome item plus 84 -> 83. "analysis 1.0.84" above and in NEWS.md holds
+  only if `new_version` is raised.
+- Refs: `AgrestiCaffo2000` and `DescTools` added to the `.r.yaml` refs. The inversion-guard notices name the
+  Agresti-Caffo interval, which `DescTools::BinomDiffCI(method = "ac")` computes; both keys already existed.
+- Gates: `release_gate.py` 0 blocking, and byte-identical output with `decisioncombine` counted as shipped;
+  `check_state_guards.py` 0; `theme_safe_html.py` 0 for this file; library-review greps clean.
+- Verify: the 8 `test-decisioncombine*.R` files plus `test-zzz-results-rendering-contract.R`: 198 tests,
+  798 expectations, 0 failed / error / skip / warning. The final welcome test, run against the pre-change copy
+  in JamoviTest (synced 18:51, no `welcome` item), fails at its first expectation: "'welcome' does not exist in
+  this results element". Its first draft had called the wrapper with no variable at all and failed inside
+  `jmvcore::select()` instead, a path jamovi never takes.
+- [ ] (advisory, reviewer class) the option-determined rows of `combinationTable`, `combinationTableCI`,
+  `combinationTableCIRatios` and `crossTabTable` are built with `addRow()` in `.run()`, so they appear only after
+  the run. Moving them to `.init()` changes the "no rows on an early return" contract that 9 `rowCount == 0L`
+  assertions pin; `release_gate.py`'s `init_row_structure` detector does not flag this analysis.
+- [ ] (docs) `vignettes/decisioncombine-documentation.md`, `decisioncombine_documentation.md` and
+  `testing_decisioncombine.md` date from 2026-08-29 and miss the 09-27..29 changes (single-test and pairwise
+  rows, inversion guards, the ratio CI table, About panels, welcome). Refresh with `/document-function`.
+- [ ] (test data) `data-raw/decisioncombine_test_data.R` also writes CSV/XLSX/OMV, but only the 8 `.rda` are in
+  `data/`, and re-running it rewrites the `.rda` the tests read. Write CSVs from the `.rda` if jamovi example
+  data are wanted.
+- [ ] (out of scope, found by the i18n agent) 11 Turkish msgstr in `jamovi/i18n/tr.po` reorder `%d`/`%s` slots
+  without `%n$` markers: chisqposttest (5), crosstable (3), singlearm, venn, survivalcont. `sprintf()` then stops
+  with "invalid format '%d'; use format %s for character objects" -- in Turkish only. Example: msgid
+  "%d pairwise comparisons with %s adjustment, %d significant" -> "%s düzeltmesi ile %d ikili karşılaştırma,
+  %d anlamlı". Fix with `%2$s ... %1$d` positional markers; `tools/release_gate.py` check_i18n_po_formats WARNs,
+  and `test-zzz-meddecide-release-20260921.R` tolerates exactly 11.
+- [ ] (i18n, needs a project-wide decision) the shared msgid "Pattern" is "Örüntü" in tr.po (also used by
+  checkdata, missingdataexplorer, pathsampling, spatialanalysis), while decisioncombine's Turkish prose says
+  "patern"; numbers filled into notices always use "." while Turkish prose writes "0,5".
+- [ ] (optional, module-wide) LR+/LR- intervals: Koopman score interval (Fagerland 2015 §8.3) instead of the
+  0.5-adjusted log interval, which under-covers (0.888) for near-perfect tests in small series. Would change
+  numbers in decision, decisioncombine, decisioncompare together.
+
+**`/check-function-full decisioncombine` (2026-09-29) — results.** Report only; no source edited (`menuGroup`
+already `meddecideT`).
+- Evidence: all 19 options change the output when toggled (each `show*` only its own item; the two filters
+  change the bar chart, heatmap and forest plot, and by design not the decision-space plot). All 18 results
+  items are populated. Oracles agree: point estimates exact; Wilson intervals match `prop.test(correct = FALSE)`
+  (1e-16); LR/DOR intervals match `epiR::epi.tests` on the 16 zero-free rows (5e-12); Agresti-Caffo matches
+  the hand formula. `release_gate.py` output is byte-identical with `decisioncombine` counted as shipped;
+  `check_state_guards.py` 0; library-review greps clean.
+- [x] (UX/safety, High) `notices` is the LAST item in `jamovi/decisioncombine.r.yaml`, so every ERROR and
+  serious warning renders below the three combination tables. With 3 tests those hold 180 rows
+  (20 + 100 + 60). With the plots ticked, add the space the images reserve, up to about 5,850 px; the forest
+  plot alone is sized 4,050 px in `.init()`, even when an early return leaves it blank. That includes
+  "Positive Levels May Be Inverted", the only detector of a swapped level. `decision` and
+  `decisioncalculator` put `notices` at the top. Move it to just after `welcome`, and carry the
+  `&analysisInputs` anchor with it: an alias placed before its anchor is a YAML error, and `prepare()` exits 0
+  on YAML errors. Also reword the About sentence placing the missing-cases warning "at the end of the
+  results" (`R/decisioncombine.b.R:118`, a msgid) and the comment at `:972`.
+- [x] (severity, Medium) "Sparse Cell Counts" is a STRONG_WARNING (`R/decisioncombine.b.R:1377`) that fires
+  on all 8 bundled `decisioncombine_*` datasets (n 50-400). It names up to ~15 of 20 rows, including Parallel
+  and single-test rules that are sparse because they are good (the file's own comment at `:1965-1972`). Its
+  text says sensitivity, specificity and J stay sound. That leaves only the ratio intervals, which already
+  widen. A serious warning that always fires trains readers to skip the channel the inversion warning uses
+  (CHANGELOG 2026-09-29 rule: measure a warning's false-alarm rate before shipping it). Demote to WARNING.
+  Tests assert only the title, so add one that pins the severity.
+- [x] (docs, Low) the `filterStatistic` description in `jamovi/decisioncombine.a.yaml` (help panel and
+  `man/decisioncombine.Rd`) says the heatmap default "also includes ... Youden's J". The code leaves J out on
+  purpose (`:2663-2672`; the default draws Prevalence, Sensitivity, Specificity, PPV, NPV, Accuracy, Balanced
+  Accuracy). The `.r.yaml` heatmap description "all diagnostic metrics" is wrong too.
+- [x] (cleanup, Low) three translated notices can never fire, yet they still reach translators, against the
+  file's own rule at `:1403-1407`: "All Zero Counts" in `.analyzeSinglePattern` (`:1425`; validation
+  guarantees >= 4 complete cases), and "Invalid Counts" / "All Zero Counts" in `.analyzeIndividualTest`
+  (`:1073-1096`; `n_used == 0` returns first, and `table()` never yields NA or negative counts).
+- [x] (cleanup, Low) `.resultsItem()` (`:30`) and the `tryCatch()` around `self$options$showAbout` (`:78`)
+  were bridges for a stale `.h.R`. The header now defines both, so both are dead indirection.
+  `tests/testthat/helper-decisioncombine.R` defines two helpers that no test calls, for a transition that
+  has ended.
+- [x] (UX, Low) With one test and the ranking ticked, the table ranks "1 candidate rule(s)" and names Test 1
+  "Highest-Ranked Rule". In a one-class sample the decision-space plot is blank with no notice, while the
+  other three plots get one. The `.u.yaml` LevelSelector labels "Positive Level" are Title Case, and
+  `test2Positive` lacks the `enable: (test2)` that `test3Positive` has.
+- [x] (enhancement) Nothing flags weak discrimination in the best rule. For a binary rule, balanced accuracy
+  is the single-cut-point AUC, and the clinical profile asks for a caution below 0.7; calibrate its alarm
+  rate before adding it. The Agresti-Caffo CI for J is already computed for the inversion guard and could be
+  shown beside J.
+
+**Fix pass (2026-09-30) — results.** All seven items above done; `menuGroup` still `meddecideT`, analysis
+version untouched (the updater owns it). Plan cross-checked with Codex before coding; the change then went
+through a 45-agent adversarial workflow (statistics, jamovi integration, old-vs-new regression, Turkish,
+calibration; three skeptics per finding) and a Codex review.
+- Placement: `notices` is item 2 (after `welcome`), carrying the `&analysisInputs` anchor; the About text
+  and the "No Rule Performs Better Than Chance" text no longer say "at the end" / "tables above".
+- Youden's J: `youdenLower`/`youdenUpper` columns (Agresti-Caffo, `.youdenCI()`), a table note naming the
+  method, and a ranking-table note (`bound`) set only beside the "advantage is not established" sentence,
+  which keeps its conservative Wilson-sum bound. The inversion guards now read these columns: notice
+  text identical to the old recomputation in 30 of 30 inverted cases.
+- Discrimination notice (`.assessTopRuleDiscrimination()`), graded on the intervals of EVERY scored rule,
+  because its sentences speak for all of them (Codex and three review lenses found the first version,
+  graded on the top rule alone, contradicting another rule's interval): serious "Poor Discrimination" only
+  when every interval lies below 0.40; plain "Discrimination Not Established" when every interval includes 0
+  and one reaches 0.40; else plain "Discrimination May Be Poor". Separate one-test wording. Printed values
+  decide the bands. Hosmer-Lemeshow-Sturdivant is a notice-level reference (`setRefs()`, as in decision).
+  Calibration (harness, 150 reps per cell): serious warning on an acceptable test (true J 0.45) 0.000 /
+  0.000 / 0.007 at 15 / 30 / 60 per group, 0.000 with two tests; the first design was 0.26 at n 15.
+- Also: "Sparse Cell Counts" is a WARNING; unreachable notices and `.resultsItem()` removed; single-test
+  ranking note; blank decision-space notice; forest note for J; heatmap title and three help texts
+  (filterStatistic, showHeatmap, combinationTable description); "Positive level" labels, `enable: (test2)`;
+  `helper-decisioncombine.R` deleted; a dead test assertion replaced; `audit_decisioncombine.R` expectations
+  updated for the two reworded sentences.
+- Generated: `R/decisioncombine.h.R` from a one-analysis scratch `prepare()`; `man/decisioncombine.Rd` by
+  roxygen in a scratch package (`decisioncombineClass.Rd` reproduced byte-identical; `tools::checkRd` 0).
+  Catalogs by `jmvtools::i18nUpdate()`: every changed entry is decisioncombine's, 293/293 translated in
+  tr.po; the shared "Poor Discrimination" msgstr is now "Zayıf Ayırt Etme" (reviewer TR-1).
+- Verify: the 10 `test-decisioncombine*.R` files plus `test-zzz-results-rendering-contract.R` and
+  `test-meddecide-library-audit.R` (`load_all(export_all = FALSE)`, `NOT_CRAN=true`): 234 tests, 972
+  expectations, 0 failed / error / skip / warning. `development-scripts/audit_decisioncombine.R` with
+  `AUDIT_SIM_R=0` (matrix written to scratch, the recorded postfix matrices untouched): 233 checks, 232 PASS,
+  0 FAIL, 1 BLOCKED (the skipped simulation battery). `release_gate.py` with decisioncombine counted as
+  shipped: 0 blocking and identical to the pre-change run except the catalog size (34469 -> 34481 msgids,
+  0 unused); `check_state_guards.py` 0; library-review greps clean; `msgfmt -c` OK.
+- [x] (calibration, pre-existing) "No Rule Performs Better Than Chance" is an ungraded point-estimate STRONG
+  in a single-test analysis: it fires whenever the one test's J <= 0, e.g. 27% of samples of a test with
+  true J 0.15 at 15 per group (review calibration lens). Grade it by the Agresti-Caffo interval, as the
+  inversion guard is; the "Test Performs at Chance Level" suppression for eligible single tests would then
+  need revisiting (IR-02 tests pin it).
+  Done 2026-09-30: with one test, J <= 0 within sampling variation now gets the chance-level note (no longer
+  withheld above the 10-per-group gate) and `.assessTopRuleDiscrimination()` instead; a reversal beyond
+  sampling variation keeps "Positive Levels May Be Inverted". With two or three tests the warning is
+  unchanged (it needs every rule's J to be exactly 0; IR-02d, audit H4). Tests: IR-02b's single-test half
+  rewritten, IR-R2-4/-5 comments, CF-07, new CF-15; audit check H2d. Calibration (harness, 150 reps per
+  cell, one test): the old warning fires in 0 cells; a serious warning on an acceptable test (true J 0.45)
+  0.000 at 15 and 0.013 at 30 per group.
+- [ ] (docs) re-run `development-scripts/audit_decisioncombine.R` with its simulations (default
+  `AUDIT_SIM_R=2000`) to refresh the recorded `-postfix-matrix.csv` / `-postfix-sim-*.csv`; only the
+  deterministic checks were re-run (to scratch). `vignettes/decisioncombine-documentation.md` (item above)
+  also predates the J interval columns, the notices placement and the new notices.
+- [ ] (release decision) NEWS.md's decisioncombine header says "analysis 1.0.84"; the code is 1.0.83 until
+  `new_version` is raised (see the decision item under `### decision`).
 
 ### decisioncompare
 
@@ -7246,3 +7442,37 @@ hardcoded paths and config keys — an erroring block reports as one failure whi
 testing nothing.
 
 **Still blocked on regeneration** (unchanged): `../meddecide` carries none of this.
+
+# 2026-09-30 PR review follow-through: merge approved PRs, fix review findings
+
+Acceptance criteria
+- The 5 submodule CI PRs (Descriptives#5, jjstatsplot#13, meddecide#18, jsurvival#17, OncoPath#2)
+  carry the review polish and are squash-merged.
+- #125/#126/#127 branches carry a fix for every confirmed review finding (plus the pre-existing
+  defects in the files they touch), executed in R, generated files regenerated (never hand-edited),
+  independently verified, follow-up review posted. Not merged (not requested).
+- Umbrella master fixes stay UNCOMMITTED in the working tree (maintainer commits); nothing is pushed
+  to any master; the maintainer's dirty in-flight files are not touched.
+
+Checklist
+- [ ] Submodule CI PRs: check reporter, PR-only cancellation, drop no-op inputs, checkout@v5,
+      jsurvival file rename, meddecide badge -> push -> CI -> squash-merge
+- [ ] #127: R_PROFILE_USER + Ncpus + cache: always + tests from the source tree -> push -> measure
+- [ ] #125 fixes (tests, direct LF power formula, .h.R/.Rd, messages, ranges, gsDesign floor, labels,
+      dead power option, first test, reject() placement, n rounding, clearWith)
+- [ ] #126 fixes (regenerated .h.R, asFormula, addRow, tests, pi^2/6, enable binding, LR, docs,
+      nits, pre-existing kept-option defects)
+- [ ] Umbrella: `==`/`!=` enable bindings in 19 .u.yaml (mixedcox handled in #126)
+- [ ] Umbrella: park-aware meddecide audit test + psychopdaROC case -> mirror to meddecide
+- [ ] Umbrella: plotmath tokens in the dependency guard -> copy to the 5 siblings
+- [ ] Umbrella: 4 tests that assume wd = package root (grafify, groupedforest, groupsummary, parallelplot)
+- [ ] Siblings: OncoPath NEWS 1.0.83.05 + README RECIST/breadcrumb; meddecide irr import;
+      Descriptives dataquality mirror
+- [ ] hullplot: concave hulls via ggforce >= 0.5.0 without concaveman/V8 (only if verified at runtime)
+- [ ] Verify: harness tests, single-analysis prepare() diffs, guard/audit tests on sibling trees, CI
+- [ ] Follow-up reviews; Results section below
+
+Working notes
+- Disk 17 GiB free, swap ~10/11 GB: sparse `git clone --shared` scratch clones, <= 3 R processes,
+  no load_all()/document()/check() on the umbrella.
+- Unpushed local commits: umbrella 6, meddecide 2 (+16 dirty), OncoPath 2 (+3 dirty) -> never pushed here.

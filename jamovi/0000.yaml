@@ -1506,18 +1506,19 @@ analyses:
   - title: Combine Medical Decision Tests
     name: decisioncombine
     ns: ClinicoPath
-    menuGroup: meddecide
+    menuGroup: meddecideT
     menuSubgroup: Decision
     menuTitle: Combine Medical Decision Tests
     menuSubtitle: Combine and evaluate test patterns
     description: >
       Systematic evaluation of diagnostic test combinations. Analyzes all
       possible test result patterns (2-test: 4 patterns, 3-test: 8 patterns)
-      against a gold standard and summarizes named parallel, serial, and
-      majority strategies. Calculates sensitivity, specificity, predictive
-      values, likelihood ratios, accuracy, and uncertainty intervals.
-      Descriptive rankings are sample-dependent analytical summaries, not
-      clinical guides or validated recommendations.
+      against a gold standard, each test alone, and parallel and serial
+      strategies (with three tests also for every pair of tests, and a majority
+      rule). Calculates sensitivity, specificity, predictive values, likelihood
+      ratios, accuracy, and uncertainty intervals. Descriptive rankings are
+      sample-dependent analytical summaries, not clinical guides or validated
+      recommendations.
     ribbon: analyses
     category: analyses
   - title: Screening Test Calculator

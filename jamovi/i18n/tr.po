@@ -473,6 +473,33 @@ msgid ""
 "statistical analysis.'"
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid ""
+"\"{statistic}\" has no estimate with a confidence interval for any row "
+"selected by the pattern filter \"{filter}\" (for example a pattern that no "
+"patient shows, or a sample with only one gold-standard outcome), so the "
+"forest plot is blank. The tables show these cells, with the reason in their "
+"notes."
+msgstr ""
+"\"{statistic}\" için patern filtresi \"{filter}\" ile seçilen hiçbir satırda "
+"güven aralığıyla birlikte bir tahmin yok (örneğin hiçbir hastanın "
+"göstermediği bir patern ya da yalnızca tek bir altın standart sonucu içeren "
+"bir örneklem), bu nedenle orman grafiği boştur. Tablolar bu hücreleri, "
+"nedeni notlarında belirtilerek gösterir."
+
+#: R/decisioncombine.b.R
+msgid ""
+"\"{statistic}\" is blank for every row selected by the pattern filter "
+"\"{filter}\" (for example a sample with only one gold-standard outcome, or "
+"patterns that no patient shows), so the selected plots have nothing to show "
+"for it. The other notices and the combination-table notes give the reason."
+msgstr ""
+"\"{statistic}\", patern filtresi \"{filter}\" ile seçilen her satırda boştur "
+"(örneğin yalnızca tek bir altın standart sonucu içeren bir örneklem ya da "
+"hiçbir hastanın göstermediği paternler), bu nedenle seçilen grafiklerde "
+"bunun için gösterilecek bir şey yoktur. Nedeni diğer bildirimler ve "
+"kombinasyon tablosunun notları açıklar."
+
 #: R/decisioncurve.b.R
 msgid "\"Clinical decision rule\" is enabled but no rule variable has been selected."
 msgstr ""
@@ -1487,10 +1514,12 @@ msgstr "{n} satır dışlandı; {constants} sabit yordayıcı veya sütun çıka
 #: R/decisioncombine.b.R
 msgid ""
 "{n} rules tie on Youden's J ({rules}); \"{shown}\" is displayed only because "
-"it comes first."
+"it comes first (named rules are listed before exact patterns, and rules that "
+"use fewer tests come first)."
 msgstr ""
 "{n} kural Youden J üzerinde eşit puana sahip ({rules}); \"{shown}\" yalnızca "
-"ilk sırada yer aldığı için görüntüleniyor."
+"ilk sırada yer aldığı için görüntüleniyor (adlandırılmış kurallar tam "
+"paternlerden önce listelenir ve daha az test kullanan kurallar önce gelir)."
 
 #: R/survivalPower.b.R
 msgid "{n} subjects"
@@ -1781,9 +1810,46 @@ msgstr ""
 msgid "{stat2nl} = {stat}, df = {df}"
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid ""
+"{statistics}: no selected row has both an estimate and a confidence interval "
+"(for example a pattern that no patient shows, where PPV, LR+ and the "
+"diagnostic odds ratio are undefined and LR- is exactly 1 with no interval, "
+"or a sample with only one gold-standard outcome), so the forest plot omits "
+"them. The tables show these cells, with the reason in their notes."
+msgstr ""
+"{statistics}: seçilen hiçbir satırda hem tahmin hem de güven aralığı "
+"bulunmuyor (örneğin hiçbir hastanın göstermediği bir patern -burada PPV, LR+ "
+"ve tanısal odds oranı tanımsızdır ve LR- aralıksız olarak tam 1'dir- ya da "
+"yalnızca tek bir altın standart sonucu içeren bir örneklem), bu nedenle "
+"orman grafiği bunları göstermez. Tablolar bu hücreleri, nedeni notlarında "
+"belirtilerek gösterir."
+
 #: R/linechart.b.R
 msgid "{strength} {direction} correlation, {sig}"
 msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "{test} (J = {youden}, 95% CI {lower} to {upper})"
+msgstr "{test} (J = {youden}, %95 GA {lower} ila {upper})"
+
+#: R/decisioncombine.b.R
+msgid ""
+"{test} classifies worse than chance in this sample, beyond sampling "
+"variation: Youden's J = {youden} (Agresti-Caffo 95% CI {lower} to {upper}) "
+"on the {n} complete cases analysed here. Its sensitivity and specificity add "
+"up to less than 1, so calling its other level positive would do better; this "
+"is the signature of a reversed positive level. Check the level chosen as "
+"positive for {test} and for the reference standard before interpreting any "
+"of these results."
+msgstr ""
+"{test} bu örneklemde, örnekleme değişkenliğinin ötesinde, şanstan daha kötü "
+"sınıflandırıyor: burada analiz edilen {n} eksiksiz olguda Youden J = "
+"{youden} (Agresti-Caffo %95 GA {lower} ila {upper}). Duyarlılık ve "
+"özgüllüğünün toplamı 1'den küçüktür, dolayısıyla diğer düzeyini pozitif "
+"saymak daha iyi sonuç verirdi; bu, ters çevrilmiş bir pozitif düzeyin "
+"işaretidir. Bu sonuçlardan herhangi birini yorumlamadan önce {test} ve "
+"referans standart için pozitif olarak seçilen düzeyi kontrol edin."
 
 #: R/decisioncompare.b.R
 msgid "{test} in {stratum}"
@@ -12154,6 +12220,22 @@ msgid ""
 "those studies would itself tilt the test."
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid ""
+"A continuity correction of 0.5, added to all four cells, was applied to {n} "
+"row(s) with at least one zero cell ({patterns}). For the diagnostic odds "
+"ratio this is the Haldane-Anscombe correction; the likelihood ratios use the "
+"same adjustment. It affects LR+, LR-, the diagnostic odds ratio and their "
+"confidence intervals only; sensitivity, specificity, PPV and NPV on the same "
+"rows use the observed counts."
+msgstr ""
+"En az bir sıfır hücresi bulunan {n} satıra ({patterns}), dört hücrenin "
+"tümüne 0,5 eklenerek bir süreklilik düzeltmesi uygulandı. Tanısal odds oranı "
+"için bu Haldane-Anscombe düzeltmesidir; olabilirlik oranları da aynı "
+"düzeltmeyi kullanır. Düzeltme yalnızca LR+, LR-, tanısal odds oranı ve "
+"bunların güven aralıklarını etkiler; aynı satırlardaki duyarlılık, özgüllük, "
+"PPV ve NPV gözlemlenen sayıları kullanır."
+
 #: crosstable/options/showSummary.description.jamovi
 msgid ""
 "A copy-ready paragraph below the table: sample size, groups, the tests the "
@@ -12312,19 +12394,6 @@ msgstr ""
 "Sıfır bir hücre bulunduğu için olabilirlik oranlarına 0.5 Haldane-Anscombe "
 "düzeltmesi uygulandı. epiR güven aralığı tablosu ham sayıları kullanır, bu "
 "nedenle nokta tahminleri farklılık gösterebilir."
-
-#: R/decisioncombine.b.R
-msgid ""
-"A Haldane-Anscombe continuity correction of 0.5 was applied to {n} "
-"pattern(s) with at least one zero cell ({patterns}). The correction affects "
-"LR+, LR-, the diagnostic odds ratio and their confidence intervals only; "
-"sensitivity, specificity, PPV and NPV on the same rows use the observed "
-"counts."
-msgstr ""
-"En az bir sıfır hücresi bulunan {n} paterne ({patterns}) 0.5 "
-"Haldane-Anscombe süreklilik düzeltmesi uygulandı. Düzeltme yalnızca LR+, "
-"LR-, tanısal odds oranı ve bunların güven aralıklarını etkiler; aynı "
-"satırlardaki duyarlılık, özgüllük, PÖD ve NÖD gözlemlenen sayıları kullanır."
 
 #: R/multisurvival.b.R
 msgid ""
@@ -12633,10 +12702,15 @@ msgid ""
 "pattern\" rather than for a negative test. Accuracy and NPV on such a row "
 "are dominated by the patients who did not show the pattern, so a rare "
 "pattern reports both close to 1 minus the prevalence however uninformative "
-"it is -- read Youden's J there, not Accuracy. The named rows -- Parallel "
-"(>=1 pos), Serial (all pos) and, with three tests, Majority (>=2/3 pos) -- "
-"are the strategies you would normally apply to a patient; Serial (all pos) "
-"is numerically identical to the all-positive pattern row."
+"it is -- read Youden's J there, not Accuracy. The named rows are rules you "
+"would normally apply to a patient: each test alone (\"Test 1 alone\"), "
+"Parallel (>=1 pos) and Serial (all pos) and, with three tests, the same two "
+"rules for every pair of tests (\"Parallel 1+2 (>=1 pos)\", \"Serial 1+2 "
+"(both pos)\") and Majority (>=2/3 pos). Every row is scored on the same "
+"complete cases; Serial (all pos) is numerically identical to the "
+"all-positive pattern row. The individual-test tables use each test's own "
+"pairwise-complete cases, so with missing data they can differ from the "
+"\"alone\" rows."
 msgstr ""
 "Bir patern satırı (ör. \"+/-\") karşılıklı olarak birbirini dışlayan bir "
 "hasta grubudur. Yine de bir kural olarak okunabilir -- \"yalnızca sonuçlar "
@@ -12645,12 +12719,17 @@ msgstr ""
 "Duyarlılık bunu gösteren hastalıklı hastaların oranıdır, Özgüllük başka bir "
 "şey gösteren hastalıksız hastaların oranıdır ve LR- negatif bir test yerine "
 "\"başka herhangi bir patern\" için olabilirlik oranıdır. Böyle bir satırdaki "
-"Doğruluk ve NÖD, paterni göstermeyen hastaların baskın etkisi altındadır; bu "
-"nedenle nadir bir patern ne kadar bilgisizce olursa olsun her ikisini de 1 "
-"eksi yaygınlığa yakın rapor eder -- orada Doğruluk değil Youden J okuyun. "
-"Adlandırılmış satırlar -- Paralel (>=1 poz), Seri (tümü poz) ve üç testle "
-"Çoğunluk (>=2/3 poz) -- normalde bir hastaya uygulayacağınız stratejilerdir; "
-"Seri (tümü poz), sayısal olarak tümü-pozitif patern satırıyla özdeştir."
+"Doğruluk ve NPV, paterni göstermeyen hastaların baskın etkisi altındadır; bu "
+"nedenle nadir bir patern ne kadar bilgi vermez olursa olsun her ikisini de 1 "
+"eksi prevalansa yakın rapor eder -- orada Doğruluk değil Youden J okuyun. "
+"Adlandırılmış satırlar normalde bir hastaya uygulayacağınız kurallardır: tek "
+"başına her test (\"Test 1 tek başına\"), Paralel (>=1 poz) ve Seri (tümü "
+"poz) ve üç testle her test çifti için aynı iki kural (\"Paralel 1+2 (>=1 "
+"poz)\", \"Seri 1+2 (ikisi de poz)\") ile Çoğunluk (>=2/3 poz). Her satır "
+"aynı eksiksiz olgular üzerinde puanlanır; Seri (tümü poz), sayısal olarak "
+"tümü-pozitif patern satırıyla özdeştir. Bireysel test tabloları her testin "
+"kendi ikili eksiksiz olgularını kullanır, bu nedenle eksik veri olduğunda "
+"\"tek başına\" satırlarından farklı olabilirler."
 
 #: R/multisurvival.b.R
 msgid ""
@@ -12849,6 +12928,27 @@ msgstr ""
 "bölgenin ortalamasını almak, bu farkın rastgele kısmını yaklaşık olarak "
 "bölge sayısının karekökü oranında azaltır."
 
+#: R/decisioncombine.b.R
+msgid ""
+"A SINGLE-TEST row (\"Test 1 alone\") applies one test by itself to the same "
+"patients, so every combination can be compared with the tests it is built "
+"from. A combination that is no better than one of its own tests on "
+"sensitivity and no better on specificity adds cost without adding accuracy. "
+"One with a lower Youden's J than a single test can still suit one clinical "
+"role, because J weighs a missed case and a false positive equally: Parallel "
+"raises sensitivity (to rule out disease), Serial raises specificity (to rule "
+"it in)."
+msgstr ""
+"Bir TEK TEST satırı (\"Test 1 tek başına\") bir testi aynı hastalara tek "
+"başına uygular, böylece her kombinasyon kendisini oluşturan testlerle "
+"karşılaştırılabilir. Kendi testlerinden biriyle karşılaştırıldığında ne "
+"duyarlılıkta ne de özgüllükte daha iyi olan bir kombinasyon, doğruluk "
+"katmadan maliyet ekler. Youden J değeri tek bir testinkinden düşük olan bir "
+"kombinasyon yine de belirli bir klinik role uygun olabilir, çünkü J "
+"kaçırılan bir olguyu ve bir yanlış pozitifi eşit ağırlıkta değerlendirir: "
+"Paralel duyarlılığı artırır (hastalığı dışlamak için), Seri özgüllüğü "
+"artırır (hastalığı doğrulamak için)."
+
 #: R/multisurvival.b.R
 msgid "A small p-value indicates the covariate significantly improves fit."
 msgstr ""
@@ -12900,13 +13000,17 @@ msgid ""
 "A STRATEGY row is a rule you would normally apply to a patient. Parallel "
 "(>=1 pos) calls positive if any test is positive, which raises sensitivity "
 "and lowers specificity. Serial (all pos) requires every test to be positive, "
-"which does the reverse. Majority (>=2/3 pos) needs two of three."
+"which does the reverse. With three tests the same two rules are also listed "
+"for each pair of tests (\"Parallel 1+2 (>=1 pos)\", \"Serial 1+2 (both "
+"pos)\"), and Majority (>=2/3 pos) needs two of three."
 msgstr ""
 "Bir STRATEJİ satırı normalde bir hastaya uygulayacağınız bir kuraldır. "
 "Paralel (>=1 poz), herhangi bir test pozitifse pozitif kabul eder, bu da "
 "duyarlılığı artırır ve özgüllüğü düşürür. Seri (tümü poz), her testin "
-"pozitif olmasını gerektirir, bu da tersini yapar. Çoğunluk (>=2/3 poz) üçte "
-"ikisini gerektirir."
+"pozitif olmasını gerektirir, bu da tersini yapar. Üç testle aynı iki kural "
+"her test çifti için de listelenir (\"Paralel 1+2 (>=1 poz)\", \"Seri 1+2 "
+"(ikisi de poz)\") ve Çoğunluk (>=2/3 poz) üç testten ikisinin pozitif "
+"olmasını gerektirir."
 
 #: R/nogoldstandard.b.R
 msgid ""
@@ -13294,6 +13398,19 @@ msgstr ""
 #: jjcorrmat/results/about.title
 msgid "About"
 msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"About 100 cases is a rough rule of thumb, not a requirement: the number "
+"actually needed depends on the expected sensitivity and specificity, the "
+"precision wanted and the prevalence (Buderer 1996). This sample supports "
+"preliminary estimates, particularly once it is divided across the result "
+"patterns."
+msgstr ""
+"Yaklaşık 100 olgu bir zorunluluk değil, kaba bir kuraldır: gerçekte gereken "
+"sayı beklenen duyarlılık ve özgüllüğe, istenen kesinliğe ve prevalansa "
+"bağlıdır (Buderer 1996). Bu örneklem, özellikle sonuç paternlerine "
+"bölündüğünde ön tahminleri destekler."
 
 #: agreement/results/subgroupExplanation.title
 msgid "About Agreement by Subgroup"
@@ -13969,13 +14086,13 @@ msgid ""
 "that result combination, and LR+ is the likelihood ratio for that "
 "combination."
 msgstr ""
-"Bir patern satırındaki Doğruluk ve NÖD, o paterni GÖSTERMEYEN hastaların "
-"baskın etkisi altındadır; bu nedenle nadir bir patern ne kadar bilgisizce "
-"olursa olsun her ikisini de 1 eksi yaygınlığa yakın rapor eder. 50 "
+"Bir patern satırındaki Doğruluk ve NPV, o paterni GÖSTERMEYEN hastaların "
+"baskın etkisi altındadır; bu nedenle nadir bir patern ne kadar bilgi vermez "
+"olursa olsun her ikisini de 1 eksi prevalansa yakın rapor eder. 50 "
 "hastalıklı hastanın 5'inde ve 150 hastalıksız hastanın 10'unda görülen bir "
-"patern, 0.25 yaygınlığa karşı Doğruluk 0.73 ve NÖD 0.76 bildirirken, Youden "
-"J değeri 0.03'tür. Bu satırlarda Doğruluk değil Youden J veya Dengeli "
-"Doğruluk okuyun. PÖD ve LR+ temiz okunan iki sütundur: PÖD tam olarak bu "
+"patern, 0,25 prevalansa karşı Doğruluk 0,73 ve NPV 0,76 bildirirken, Youden "
+"J değeri 0,03'tür. Bu satırlarda Doğruluk değil Youden J veya Dengeli "
+"Doğruluk okuyun. PPV ve LR+ temiz okunan iki sütundur: PPV tam olarak bu "
 "sonuç kombinasyonu verildiğinde hastalık olasılığıdır ve LR+ bu kombinasyon "
 "için olabilirlik oranıdır."
 
@@ -14011,11 +14128,11 @@ msgstr ""
 "Açıkça hastalıklı ve açıkça sağlıklı hastalarda ölçülen doğruluk, testin "
 "gerçekte kullanıldığı ve erken, kısmi ve şüpheli tablolarla dolu "
 "popülasyondaki doğruluktan daha yüksektir. Bir vaka-kontrol (iki kapılı) "
-"tasarımı duyarlılık ve özgüllüğü şişirir ve Yaygınlık sütununu herhangi bir "
+"tasarımı duyarlılık ve özgüllüğü şişirir ve Prevalans sütununu herhangi bir "
 "klinik popülasyondan ziyade örnekleme oranının bir yapaylığı haline getirir; "
-"bu nedenle düşük yaygınlıklı bir ortama göre PÖD şişirilirken NÖD DÜŞÜRÜLÜR. "
-"0.90 duyarlılık ve özgüllükte, %50 örneklenmiş yaygınlık PÖD 0.90 ve NÖD "
-"0.90 verirken, gerçek %5 yaygınlık PÖD 0.32 ve NÖD 0.99 verir."
+"bu nedenle düşük prevalanslı bir ortama göre PPV şişirilirken NPV DÜŞÜRÜLÜR. "
+"0,90 duyarlılık ve özgüllükte, %50 örneklenmiş prevalans PPV 0,90 ve NPV "
+"0,90 verirken, gerçek %5 prevalans PPV 0,32 ve NPV 0,99 verir."
 
 #: methodvalidation/options/validation_type/accuracy_only.title
 msgid "Accuracy Study Only"
@@ -14383,11 +14500,13 @@ msgstr ""
 
 #: decisioncombine/options/addedPattern.description.ui
 msgid ""
-"Add a new column to the dataset containing the test combination pattern for "
-"each case (e.g., \"+/+\", \"+/-\", \"-/-\")."
+"Add a new column to the dataset containing the test combination pattern "
+"(e.g., \"+/+\", \"+/-\", \"-/-\") for each case with every selected test "
+"observed, including cases without a reference-standard result."
 msgstr ""
-"Veri setine her olgu için test kombinasyon paternini içeren yeni bir sütun "
-"ekleyin (ör. \"+/+\", \"+/-\", \"-/-\")."
+"Veri setine, seçilen tüm testleri gözlemlenmiş her olgu için (referans "
+"standart sonucu olmayan olgular dahil) test kombinasyon paternini içeren "
+"yeni bir sütun ekleyin (ör. \"+/+\", \"+/-\", \"-/-\")."
 
 #: R/decisioncurve.b.R
 msgid "Add a second model to compare."
@@ -18386,10 +18505,6 @@ msgstr ""
 msgid "All variables combined in a single summary table"
 msgstr ""
 
-#: R/decisioncombine.b.R
-msgid "All Zero Counts"
-msgstr "Tüm Sayılar Sıfır"
-
 #: agreement/options/specificAllCategories.title
 msgid "All-category estimates"
 msgstr "Tüm kategoriler için tahminler"
@@ -21103,16 +21218,6 @@ msgstr ""
 #: bayesiannetworkma/options/network_type/arm_based.title
 msgid "Arm-Based"
 msgstr ""
-
-#: R/decisioncombine.b.R
-msgid ""
-"Around 100 cases or more is the usual target for a stable diagnostic "
-"accuracy estimate; this sample supports preliminary estimates, particularly "
-"once it is divided across the result patterns."
-msgstr ""
-"Kararlı bir tanısal doğruluk tahmini için olağan hedef yaklaşık 100 olgu "
-"veya daha fazlasıdır; bu örneklem, özellikle sonuç paternlerine bölündüğünde "
-"ön tahminleri destekler."
 
 #: R/alluvial.b.R
 msgid ""
@@ -33649,6 +33754,7 @@ msgstr ""
 "gizler; gtsummary ikili değişken etiketlerinde sayılan düzeyi belirtir."
 
 #: R/decision.b.R
+#: R/decisioncombine.b.R
 msgid "Choose the diagnostic test you want to evaluate"
 msgstr "Değerlendirmek istediğiniz tanısal testi seçin"
 
@@ -33702,6 +33808,7 @@ msgid "Choose the plotting backend for optimal performance."
 msgstr ""
 
 #: R/decision.b.R
+#: R/decisioncombine.b.R
 msgid ""
 "Choose the reference-standard variable that defines disease status in this "
 "analysis (e.g., biopsy result, final diagnosis)"
@@ -33822,10 +33929,12 @@ msgid "Choose which gold-standard level means disease absent"
 msgstr "Hangi altın standart düzeyinin hastalık yok anlamına geldiğini seçin"
 
 #: R/decision.b.R
+#: R/decisioncombine.b.R
 msgid "Choose which level indicates disease is present"
 msgstr "Hangi düzeyin hastalık var olduğunu gösterdiğini seçin"
 
 #: R/decision.b.R
+#: R/decisioncombine.b.R
 msgid "Choose which level represents a positive test result"
 msgstr "Hangi düzeyin pozitif test sonucunu temsil ettiğini seçin"
 
@@ -38722,8 +38831,14 @@ msgid "Color-code segments within ridges"
 msgstr ""
 
 #: decisioncombine/results/heatmapPlot.description
-msgid "Color-coded heatmap showing all diagnostic metrics for each test pattern"
-msgstr "Her test paterni için tüm tanısal metrikleri gösteren renk kodlu ısı haritası"
+msgid ""
+"Color-coded heatmap of prevalence, sensitivity, specificity, PPV, NPV, "
+"accuracy and balanced accuracy for each pattern by default, or of one "
+"selected metric"
+msgstr ""
+"Varsayılan olarak her patern için prevalans, duyarlılık, özgüllük, PPV, NPV, "
+"doğruluk ve dengeli doğruluğu ya da seçilen tek bir metriği gösteren renk "
+"kodlu ısı haritası"
 
 #: aeplot/options/colorScheme/colorblind.title
 msgid "Colorblind"
@@ -39076,6 +39191,7 @@ msgstr "Farklı ölçekler veya bağlamlar genelinde verileri birleştirin"
 msgid "Combine data from multiple sources or time periods"
 msgstr "Birden fazla kaynaktan veya zaman diliminden verileri birleştirin"
 
+#: R/decisioncombine.b.R
 #: package/analyses/decisioncombine.title
 #: package/analyses/decisioncombine.menuTitle
 #: decisioncombine/options.title
@@ -40940,12 +41056,14 @@ msgstr ""
 #: R/decisioncombine.b.R
 msgid ""
 "Complete-case analysis: a patient missing the reference standard or any "
-"selected test is excluded from the combination table. The number excluded is "
-"reported above when it is not zero."
+"selected test is excluded from the combination table. When any are excluded, "
+"the number is given in the warning \"Removed N case(s) with missing values\" "
+"in the notices at the top of the results."
 msgstr ""
 "Eksiksiz olgu analizi: referans standardı veya seçilen herhangi bir testi "
 "eksik olan bir hasta kombinasyon tablosundan hariç tutulur. Hariç tutulan "
-"sayı sıfır olmadığında yukarıda bildirilir."
+"olgu olduğunda sayıları, sonuçların başındaki bildirimlerde yer alan \"Eksik "
+"değerlere sahip N olgu kaldırıldı\" uyarısında verilir."
 
 #: synopticcompleteness/options/completeThreshold.title
 msgid "Complete-report threshold (%)"
@@ -47031,13 +47149,25 @@ msgstr ""
 
 #: decisioncombine/results/combinationTable.description
 msgid ""
-"Counts and diagnostic performance metrics for each test combination pattern "
-"and clinical strategy, including prevalence, balanced accuracy, Youden's J, "
-"likelihood ratios, and diagnostic odds ratios"
+"Counts and diagnostic performance metrics for each test combination pattern, "
+"each test alone and each combination strategy, including prevalence, "
+"balanced accuracy, Youden's J with its Agresti-Caffo 95 percent confidence "
+"interval, likelihood ratios, and diagnostic odds ratios"
 msgstr ""
-"Prevalans, dengeli doğruluk, Youden J, olabilirlik oranları ve tanısal odds "
-"oranları dahil her test kombinasyon paterni ve klinik strateji için sayılar "
-"ve tanısal performans metrikleri"
+"Prevalans, dengeli doğruluk, Agresti-Caffo %95 güven aralığıyla birlikte "
+"Youden J, olabilirlik oranları ve tanısal odds oranları dahil her test "
+"kombinasyon paterni, tek başına her test ve her kombinasyon stratejisi için "
+"sayılar ve tanısal performans metrikleri"
+
+#: decisioncombine/results/goldFreqTable.description
+msgid ""
+"Counts and percentages of disease-present and disease-absent cases (the "
+"reference standard dichotomised at the chosen positive level) among the "
+"complete cases used for the combination table"
+msgstr ""
+"Kombinasyon tablosunda kullanılan eksiksiz olgular arasında hastalığı olan "
+"ve olmayan olguların sayıları ve yüzdeleri (referans standart, seçilen "
+"pozitif düzeyde iki kategoriye ayrılmıştır)"
 
 #: R/vartree.b.R
 msgid ""
@@ -53251,6 +53381,10 @@ msgstr ""
 msgid "Decision Variables:"
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid "Decision-Space Plot Is Blank"
+msgstr "Karar Uzayı Grafiği Boş"
+
 #: decisioncombine/results/decisionTreePlot.description
 msgid ""
 "Decision-space scatter plot positioning each test pattern by its sensitivity "
@@ -53477,6 +53611,7 @@ msgstr ""
 msgid "Default Imputation Method"
 msgstr ""
 
+#: R/decisioncombine.b.R
 #: decisioncombine/options/filterStatistic/all.title
 msgid "Default Metric Set"
 msgstr "Varsayılan Metrik Seti"
@@ -56751,6 +56886,10 @@ msgstr ""
 "yarışan riskler altında hastaları değil, genişletilmiş sözde gözlemleri "
 "sıralar."
 
+#: R/decisioncombine.b.R
+msgid "Discrimination May Be Poor"
+msgstr "Ayırt Etme Zayıf Olabilir"
+
 #: idi/options/discrimination_measure.title
 msgid "Discrimination Measure"
 msgstr ""
@@ -56772,6 +56911,10 @@ msgstr ""
 #: stagemigration/ui[9][2]/forestDiscriminationMetrics.label
 msgid "Discrimination metrics"
 msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "Discrimination Not Established"
+msgstr "Ayırt Etme Gösterilemedi"
 
 #: clinicalvalidation/options/performance_metrics/discrimination.title
 #: clinicalvalidationinteractive/options/performance_metrics/discrimination.title
@@ -56903,6 +57046,7 @@ msgstr ""
 msgid "Disease Present"
 msgstr "Hastalık Var"
 
+#: R/decisioncombine.b.R
 #: decision/options/goldPositive.title
 #: decisioncombine/options/goldPositive.title
 #: decisioncombine/ui[0][0]/goldPositive.label
@@ -57155,6 +57299,16 @@ msgstr ""
 "Çizilen tahmin hedefi için yüzde 95 güven aralıklarını görüntüleyin: "
 "standart bir analizde sağkalım veya yarışan risk analizinde kümülatif "
 "insidans."
+
+#: decisioncombine/options/showHeatmap.description.ui
+msgid ""
+"Display a color-coded heatmap of prevalence, sensitivity, specificity, PPV, "
+"NPV, accuracy and balanced accuracy for each row, or of one metric selected "
+"under Filters."
+msgstr ""
+"Her satır için prevalans, duyarlılık, özgüllük, PPV, NPV, doğruluk ve "
+"dengeli doğruluğu ya da Filtreler altında seçilen tek bir metriği gösteren "
+"renk kodlu bir ısı haritası görüntüleyin."
 
 #: stagemigration/options/showMigrationHeatmap.description
 msgid ""
@@ -57921,14 +58075,6 @@ msgid ""
 "Display hazard ratios from time-dependent Cox regression with confidence "
 "intervals and p-values."
 msgstr ""
-
-#: decisioncombine/options/showHeatmap.description.ui
-msgid ""
-"Display heatmap showing all metrics for all test patterns with color-coded "
-"performance values."
-msgstr ""
-"Renk kodlu performans değerleri ile tüm test paternleri için tüm metrikleri "
-"gösteren ısı haritasını görüntüleyin."
 
 #: ihcpredict/options/showConfidencePlot.description
 msgid "Display histogram of prediction confidence scores"
@@ -64460,10 +64606,6 @@ msgstr ""
 msgid "Estimate"
 msgstr "Tahmin"
 
-#: R/decisioncombine.b.R
-msgid "Estimate (95% CI)"
-msgstr "Tahmin (%95 GA)"
-
 #: treatmentmeta/results/bayesian_results.columns.title
 msgid "Estimate (Mean/Median)"
 msgstr ""
@@ -65875,24 +66017,36 @@ msgstr ""
 "yapaylıklarıdır: %s. Yalnızca 0.500 EAA yorumlanabilir."
 
 #: R/decisioncombine.b.R
-msgid ""
-"Every complete case has gold standard \"{level}\", so this sample contains "
-"no disease-absent cases. Specificity and NPV cannot be estimated and are "
-"reported as blank, and so are LR+, LR- and the diagnostic odds ratio: each "
-"of those needs a specificity, and computing one from the continuity "
-"correction would report a number that reflects no patient. Diagnostic "
-"accuracy assessment requires both diseased and non-diseased cases."
-msgstr ""
+msgid "Every combination that uses such a test is affected as well."
+msgstr "Böyle bir testi kullanan her kombinasyon da bundan etkilenir."
 
 #: R/decisioncombine.b.R
 msgid ""
-"Every complete case has gold standard \"{level}\", so this sample contains "
-"no disease-present cases. Sensitivity and PPV cannot be estimated and are "
-"reported as blank, and so are LR+, LR- and the diagnostic odds ratio: each "
-"of those needs a sensitivity, and computing one from the continuity "
-"correction would report a number that reflects no patient. Diagnostic "
-"accuracy assessment requires both diseased and non-diseased cases."
+"Every complete case used for the combination analysis has gold standard "
+"\"{level}\", so the combination analysis contains no disease-absent cases. "
+"Specificity cannot be estimated; PPV and NPV are fixed at 100% and 0% by the "
+"sampling rather than by any test; Accuracy only repeats the sensitivity; and "
+"Balanced Accuracy and Youden's J, which combine sensitivity with "
+"specificity, cannot be formed. All of these are reported as blank in the "
+"combination table. So are LR+, LR- and the diagnostic odds ratio: each of "
+"those needs a specificity, and computing one from the continuity correction "
+"would report a number that reflects no patient. Diagnostic accuracy "
+"assessment requires both diseased and non-diseased cases. Individual-test "
+"tables use their own pairwise-complete cases and may still contain both "
+"outcomes."
 msgstr ""
+"Kombinasyon analizinde kullanılan tüm eksiksiz olguların altın standart "
+"değeri \"{level}\" olduğundan kombinasyon analizinde hastalığı olmayan olgu "
+"bulunmamaktadır. Özgüllük tahmin edilemez; PPV ve NPV herhangi bir test "
+"tarafından değil örnekleme tarafından %100 ve %0 olarak sabitlenir; Doğruluk "
+"yalnızca duyarlılığı tekrarlar; duyarlılığı özgüllükle birleştiren Dengeli "
+"Doğruluk ve Youden J ise oluşturulamaz. Bunların tümü kombinasyon tablosunda "
+"boş bırakılır. LR+, LR- ve tanısal odds oranı da boş bırakılır: her biri bir "
+"özgüllüğe ihtiyaç duyar ve süreklilik düzeltmesinden bir özgüllük hesaplamak "
+"hiçbir hastayı yansıtmayan bir sayı raporlar. Tanısal doğruluk "
+"değerlendirmesi hem hastalığı olan hem de olmayan olgular gerektirir. Tek "
+"test tabloları kendi ikili eksiksiz olgularını kullanır ve yine de her iki "
+"sonucu da içerebilir."
 
 #: R/agreement.b.R
 msgid "Every model-based estimate, with confidence intervals."
@@ -66015,6 +66169,20 @@ msgstr ""
 "GEREKTİRMEZ ve testler biyolojiyi, örneği veya teknolojiyi paylaştığında "
 "geçerli kalır. Bağımsızlığı varsaymak zorunda olan ve bu konuda uyarıda "
 "bulunan sıralı test hesaplayıcısından temel fark budur."
+
+#: R/decisioncombine.b.R
+msgid ""
+"Every row must be a different patient. Several specimens, cores, blocks, "
+"lesions or lymph nodes from the same patient are correlated, and every "
+"confidence interval here treats the rows as independent, so with such data "
+"the intervals are too narrow. Use one result per patient, or a method that "
+"accounts for clustering."
+msgstr ""
+"Her satır farklı bir hasta olmalıdır. Aynı hastadan alınan birden çok örnek, "
+"kor biyopsi, blok, lezyon veya lenf nodu birbiriyle korelasyonludur ve "
+"buradaki her güven aralığı satırları bağımsız kabul eder; bu nedenle bu tür "
+"verilerde aralıklar gereğinden dardır. Hasta başına tek bir sonuç ya da "
+"kümelenmeyi hesaba katan bir yöntem kullanın."
 
 #: R/agreement.b.R
 msgid ""
@@ -68820,7 +68988,7 @@ msgid ""
 "prevalence may differ."
 msgstr ""
 "Kombinasyon analizinde aşırı hastalık prevalansı: %{percent} "
-"({diseased}/{observed} eksiksiz olgu). PÖD ve NÖD prevalansa karşı oldukça "
+"({diseased}/{observed} eksiksiz olgu). PPV ve NPV prevalansa karşı oldukça "
 "duyarlıdır ve farklı hastalık oranlarına sahip popülasyonlara "
 "genellenemeyebilir. Duyarlılık ve özgüllük de ortamlar ve vaka dağılımı "
 "arasında değişebilir ve bir kolda bu kadar az vaka olması durumunda her "
@@ -70310,14 +70478,14 @@ msgstr ""
 msgid ""
 "Filter the bar chart, heatmap and forest plot by pattern type: all patterns, "
 "all tests positive (+/+, +/+/+), all tests negative (-/-, -/-/-), or "
-"mixed/discordant patterns. Named strategy rows are not result patterns and "
-"are excluded whenever a specific pattern type is selected. The performance "
-"tables always show every pattern, and the decision-space plot always shows "
-"every row so patterns remain comparable."
+"mixed/discordant patterns. Single-test and strategy rows are not result "
+"patterns and are excluded whenever a specific pattern type is selected. The "
+"performance tables always show every pattern, and the decision-space plot "
+"always shows every row so patterns remain comparable."
 msgstr ""
 "Çubuk grafiği, ısı haritasını ve orman grafiğini patern tipine göre "
 "filtreleyin: tüm paternler, tüm testler pozitif (+/+, +/+/+), tüm testler "
-"negatif (-/-, -/-/-) veya karışık/uyumsuz paternler. Adlandırılmış strateji "
+"negatif (-/-, -/-/-) veya karışık/uyumsuz paternler. Tek test ve strateji "
 "satırları sonuç paternleri değildir ve belirli bir patern tipi seçildiğinde "
 "hariç tutulur. Performans tabloları her zaman her paterni gösterir ve karar "
 "uzayı grafiği her zaman her satırı gösterir, böylece paternler "
@@ -72692,17 +72860,13 @@ msgstr ""
 msgid "Forest Plot Customization"
 msgstr ""
 
-#: decisioncombine/results/forestPlot.description
-msgid ""
-"Forest plot displaying 95 percent confidence intervals for key diagnostic "
-"metrics"
-msgstr ""
-"Temel tanısal metrikler için yüzde 95 güven aralıklarını gösteren orman "
-"grafiği"
-
 #: diagnosticmeta/results/forestplot_explanation.title
 msgid "Forest Plot Explanation"
 msgstr "Orman Grafiği Açıklaması"
+
+#: R/decisioncombine.b.R
+msgid "Forest Plot Has Nothing to Draw"
+msgstr "Orman Grafiğinde Çizilecek Veri Yok"
 
 #: jforester/results/interpretation.title
 msgid "Forest Plot Interpretation"
@@ -72711,6 +72875,16 @@ msgstr ""
 #: R/decisioncombine.b.R
 msgid "Forest Plot Not Available for Selected Statistic"
 msgstr "Seçilen İstatistik İçin Orman Grafiği Mevcut Değil"
+
+#: decisioncombine/results/forestPlot.description
+msgid ""
+"Forest plot of 95 percent confidence intervals: proportions on a 0 to 100 "
+"percent axis, and LR+, LR- and the diagnostic odds ratio on a log axis with "
+"a dashed reference line at 1"
+msgstr ""
+"%95 güven aralıklarının orman grafiği: yüzde olarak ifade edilen ölçütler "
+"yüzde 0-100 ekseninde; LR+, LR- ve tanısal odds oranı ise 1'de kesikli "
+"referans çizgisi bulunan logaritmik eksende"
 
 #: agreement/results/subgroupForestPlotImage.title
 msgid "Forest Plot of Agreement by Subgroup"
@@ -73222,14 +73396,6 @@ msgstr ""
 #: pathagreement/results/raterFrequencyTables/frequencyTable.title
 msgid "Frequency Distribution"
 msgstr ""
-
-#: decisioncombine/results/goldFreqTable.description
-msgid ""
-"Frequency distribution of the gold standard (reference) test showing counts "
-"and percentages for each level"
-msgstr ""
-"Her düzey için sayıları ve yüzdeleri gösteren altın standart (referans) "
-"testin frekans dağılımı"
 
 #: enhancedfrequency/results/results/frequencyDistributionPlot.title
 msgid "Frequency Distribution Overview"
@@ -75117,6 +75283,7 @@ msgstr "Başlarken:"
 #: conditionalsurvival/results/todo.title
 #: datetimeconverter/results/welcome.title
 #: decision/results/welcome.title
+#: decisioncombine/results/welcome.title
 #: diagnosticmeta/results/instructions.title
 #: hierarchicalpathology/results/instructions.title
 #: mlpathology/results/instructions.title
@@ -75506,6 +75673,7 @@ msgstr "Altın Standart"
 msgid "gold standard"
 msgstr "altın standart"
 
+#: R/decisioncombine.b.R
 #: decisioncombine/options/gold.title
 #: decisioncombine/ui[0][0].label
 #: decisioncompare/options/gold.title
@@ -76861,7 +77029,7 @@ msgid ""
 "Grouped bar chart comparing sensitivity, specificity, PPV, NPV, and accuracy "
 "across test combinations"
 msgstr ""
-"Test kombinasyonları genelinde duyarlılık, özgüllük, PÖD, NÖD ve doğruluğu "
+"Test kombinasyonları genelinde duyarlılık, özgüllük, PPV, NPV ve doğruluğu "
 "karşılaştıran gruplandırılmış çubuk grafik"
 
 #: package/analyses/groupedbar.title
@@ -78186,8 +78354,8 @@ msgid "Heatmap"
 msgstr "Isı haritası"
 
 #: decisioncombine/results/heatmapPlot.title
-msgid "Heatmap - All Metrics by Pattern"
-msgstr "Isı Haritası - Paterne Göre Tüm Metrikler"
+msgid "Heatmap - Metrics by Pattern"
+msgstr "Isı Haritası - Paterne Göre Metrikler"
 
 #: ihcthreshold/options/plotType/heatmap.title
 msgid "Heatmap (Area × Threshold)"
@@ -86673,16 +86841,6 @@ msgstr "Geçersiz analiz türü '{type}'. Şunlardan biri olmalıdır: {valid}"
 msgid "Invalid competing-risk coding"
 msgstr "Geçersiz yarışan risk kodlaması"
 
-#: R/decisioncombine.b.R
-msgid "Invalid Counts"
-msgstr "Geçersiz Sayılar"
-
-#: R/decisioncombine.b.R
-msgid ""
-"Invalid counts were detected for Test {test}. The individual analysis was "
-"skipped."
-msgstr "Test {test} için geçersiz sayılar tespit edildi. Bireysel analiz atlandı."
-
 #: R/decisioncalculator.b.R
 msgid "Invalid cut-off inputs"
 msgstr "Geçersiz kesim değeri girdileri"
@@ -87453,15 +87611,17 @@ msgstr "%%95 GA'sı eşiğin altında, %s değerine kadar iner."
 
 #: R/decisioncombine.b.R
 msgid ""
-"Its advantage is not established: the lower bound of this rule's Youden's J "
-"({lower}) falls at or below the next-best rule's point estimate "
-"({runnerUp}), so the ranking may reflect sampling variation rather than a "
-"real difference."
+"Its advantage is not established: a conservative 95% lower bound for this "
+"rule's Youden's J ({lower}, from the lower Wilson limits of its sensitivity "
+"and specificity) falls at or below the point estimate of the best rule with "
+"a different 2-by-2 table ({runnerUp}), so the ranking may reflect sampling "
+"variation rather than a real difference."
 msgstr ""
-"Avantajı kesinleşmemiştir: bu kuralın Youden J alt sınırı ({lower}), bir "
-"sonraki en iyi kuralın nokta tahmininin ({runnerUp}) altında veya buna eşit "
-"kalmaktadır, bu nedenle sıralama gerçek bir farktan ziyade örnekleme "
-"değişkenliğini yansıtabilir."
+"Avantajı kesinleşmemiştir: bu kuralın Youden J için muhafazakâr %95 alt "
+"sınırı ({lower}; duyarlılık ve özgüllüğünün alt Wilson sınırlarından) farklı "
+"bir 2x2 tabloya sahip en iyi kuralın nokta tahmininin ({runnerUp}) altında "
+"veya buna eşit kalmaktadır, bu nedenle sıralama gerçek bir farktan ziyade "
+"örnekleme değişkenliğini yansıtabilir."
 
 #: R/decisioncurve.b.R
 msgid "Its curve is still shown in the plot."
@@ -93199,6 +93359,7 @@ msgstr "Düşük/Orta/Yüksek"
 #: decision/results/epirTable_number.columns.title
 #: decisioncalculator/results/epirTable_ratio.columns.title
 #: decisioncalculator/results/epirTable_number.columns.title
+#: decisioncombine/results/combinationTable.columns.title
 #: decisioncombine/results/combinationTableCI.columns.title
 #: decisioncombine/results/combinationTableCIRatios.columns.title
 #: decisioncompare/results/epirTable1.columns.title
@@ -93720,34 +93881,60 @@ msgstr ""
 
 #: R/decisioncombine.b.R
 msgid ""
-"LR+, LR- and the diagnostic odds ratio are computed with a Haldane-Anscombe "
-"0.5 continuity correction when a cell is zero, so they stay finite; "
-"sensitivity, specificity, PPV and NPV on the same row use the observed "
-"counts. The two therefore need not agree exactly at a zero cell. The "
-"correction repairs a sampling zero, not a structural one, so it is withheld "
-"whenever a whole margin is empty, and what is then left blank differs "
-"between the two kinds of empty margin. On a pattern that no patient "
-"exhibits, LR+ and the odds ratio are 0/0 and are left blank, while LR- is "
+"LR+, LR- and the diagnostic odds ratio add 0.5 to all four cells when a cell "
+"is zero, so they stay finite (for the odds ratio this is the "
+"Haldane-Anscombe correction; the likelihood ratios use the same adjustment); "
+"the proportions on the same row use the observed counts. A row on which no "
+"patient tests positive (a pattern nobody shows, or a rule that is never "
+"positive) is left BLANK rather than corrected: with no predicted positives, "
+"LR+ and the odds ratio are undefined and are not invented."
+msgstr ""
+"Bir hücre sıfır olduğunda LR+, LR- ve tanısal odds oranı, sonlu kalmaları "
+"için dört hücrenin tümüne 0,5 eklenerek hesaplanır (odds oranı için bu "
+"Haldane-Anscombe düzeltmesidir; olabilirlik oranları da aynı düzeltmeyi "
+"kullanır); aynı satırdaki yüzdeler gözlemlenen sayıları kullanır. Hiçbir "
+"hastanın pozitif çıkmadığı bir satır (hiç kimsenin göstermediği bir patern "
+"ya da hiçbir zaman pozitif olmayan bir kural) düzeltilmek yerine BOŞ "
+"bırakılır: tahmin edilen pozitif olmadığında, LR+ ve odds oranı tanımsızdır "
+"ve uydurulmaz."
+
+#: R/decisioncombine.b.R
+msgid ""
+"LR+, LR- and the diagnostic odds ratio are computed with 0.5 added to all "
+"four cells when a cell is zero, so they stay finite (for the odds ratio this "
+"is the Haldane-Anscombe correction; the likelihood ratios use the same "
+"adjustment); sensitivity, specificity, PPV and NPV on the same row use the "
+"observed counts. The two therefore need not agree exactly at a zero cell. "
+"The correction repairs a sampling zero, not a structural one, so it is "
+"withheld whenever a whole margin is empty, and what is then left blank "
+"differs between the two kinds of empty margin. On a row with no "
+"test-positive patients (a pattern nobody shows, or a rule that is never "
+"positive), LR+ and the odds ratio are 0/0 and are left blank, while LR- is "
 "exactly 1 and is shown as such: any other result leaves the odds unchanged. "
 "The mirror case, a row with no test-negative patients, blanks LR- and the "
 "odds ratio and shows LR+ as exactly 1. In a sample where every case is "
 "disease-present, or every case is disease-absent, sensitivity or specificity "
-"cannot be estimated at all, so all three ratios are left blank in every row."
+"cannot be estimated at all, so all three ratios are left blank in every row, "
+"as are PPV and NPV, which the sampling alone fixes at 0% or 100%, and "
+"Accuracy, which then only repeats the sensitivity or specificity."
 msgstr ""
-
-#: R/decisioncombine.b.R
-msgid ""
-"LR+, LR- and the diagnostic odds ratio use a Haldane-Anscombe 0.5 correction "
-"when a cell is zero, so they stay finite; the proportions on the same row "
-"use the observed counts. A pattern that no patient exhibits is left BLANK "
-"rather than corrected: with no predicted positives, LR+ and the odds ratio "
-"are undefined and are not invented."
-msgstr ""
-"Bir hücre sıfır olduğunda LR+, LR- ve tanısal odds oranı 0.5 "
-"Haldane-Anscombe düzeltmesi kullanır, böylece sonlu kalırlar; aynı satırdaki "
-"oranlar gözlemlenen sayıları kullanır. Hiçbir hastanın sergilemediği bir "
-"patern düzeltilmek yerine BOŞ bırakılır: tahmin edilen pozitif olmadığında, "
-"LR+ ve odds oranı tanımsızdır ve uydurulmaz."
+"Bir hücre sıfır olduğunda LR+, LR- ve tanısal odds oranı, sonlu kalmaları "
+"için dört hücrenin tümüne 0,5 eklenerek hesaplanır (odds oranı için bu "
+"Haldane-Anscombe düzeltmesidir; olabilirlik oranları da aynı düzeltmeyi "
+"kullanır); aynı satırdaki duyarlılık, özgüllük, PPV ve NPV gözlenen sayıları "
+"kullanır. Bu nedenle ikisi sıfır hücrede tam olarak uyuşmayabilir. Düzeltme "
+"yapısal değil örneklemsel bir sıfırı onarır; bu yüzden bir kenar toplamının "
+"tamamı boş olduğunda uygulanmaz ve bu durumda neyin boş bırakıldığı iki tür "
+"boş kenar arasında farklılık gösterir. Test-pozitif hastası olmayan bir "
+"satırda (hiç kimsenin göstermediği bir patern ya da hiçbir zaman pozitif "
+"olmayan bir kural) LR+ ve odds oranı 0/0'dır ve boş bırakılır; LR- ise tam "
+"1'dir ve böyle gösterilir: başka herhangi bir sonuç odds'u değiştirmez. Ayna "
+"durumunda, test-negatif hastası olmayan bir satırda LR- ve odds oranı boş "
+"bırakılır ve LR+ tam 1 olarak gösterilir. Tüm olguların hastalığı olan ya da "
+"tüm olguların hastalığı olmayan olduğu bir örneklemde duyarlılık veya "
+"özgüllük hiç tahmin edilemez; bu nedenle üç oran her satırda boş bırakılır, "
+"örneklemenin tek başına %0 veya %100'e sabitlediği PPV ve NPV ile o durumda "
+"yalnızca duyarlılığı ya da özgüllüğü tekrarlayan Doğruluk da öyle."
 
 #: mixedeffectscox/results/modelComparison.columns.title
 msgid "LRT p-value"
@@ -96876,7 +97063,6 @@ msgstr ""
 #: package/analyses/nogoldstandard.menuGroup
 #: package/analyses/decisioncompare.menuGroup
 #: package/analyses/psychopdaROC.menuGroup
-#: package/analyses/decisioncombine.menuGroup
 #: package/analyses/cotest.menuGroup
 #: package/analyses/sequentialtests.menuGroup
 #: package/analyses/decisioncurve.menuGroup
@@ -96887,7 +97073,6 @@ msgstr ""
 #: betabinomialdiagnostic/options.menuSubgroup
 #: cotest/options.menuGroup
 #: decisioncalculator/options.menuGroup
-#: decisioncombine/options.menuGroup
 #: decisioncompare/options.menuGroup
 #: decisioncurve/options.menuGroup
 #: enhancedROC/options.menuGroup
@@ -97028,8 +97213,10 @@ msgstr ""
 
 #: package/analyses/agreement.menuGroup
 #: package/analyses/decision.menuGroup
+#: package/analyses/decisioncombine.menuGroup
 #: agreement/options.menuGroup
 #: decision/options.menuGroup
+#: decisioncombine/options.menuGroup
 msgid "meddecideT"
 msgstr "meddecideT"
 
@@ -107015,9 +107202,7 @@ msgstr ""
 "Hiçbir aday kural en az 10 hastalıklı ve 10 hastalıksız olgu ile tahmin "
 "edilebilir bir Youden indeksine sahip değildir. Youden J, bir sıralamanın "
 "anlamlı olması için her iki referans grubunun da makul büyüklükte olmasına "
-"ihtiyaç duyar.Seçilen tüm değerlendiriciler boyunca eksiksiz olgu yok. "
-"Krippendorff alfası, en az iki gözlenmiş derecelendirmesi olan olgulardan "
-"hesaplandı; eksiksiz satır gerektiren analizler atlandı."
+"ihtiyaç duyar."
 
 #: R/agreement.b.R
 msgid "No case had a resolved reference consensus"
@@ -107151,6 +107336,34 @@ msgid ""
 "No comparison was run: the group tests compare objective response and "
 "disease control between groups, and no Response/Status variable is selected."
 msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"No complete case used for the combination analysis has gold standard "
+"\"{level}\" (the level chosen as disease present), so the combination "
+"analysis contains no disease-present cases. Sensitivity cannot be estimated; "
+"PPV and NPV are fixed at 0% and 100% by the sampling rather than by any "
+"test; Accuracy only repeats the specificity; and Balanced Accuracy and "
+"Youden's J, which combine sensitivity with specificity, cannot be formed. "
+"All of these are reported as blank in the combination table. So are LR+, LR- "
+"and the diagnostic odds ratio: each of those needs a sensitivity, and "
+"computing one from the continuity correction would report a number that "
+"reflects no patient. Diagnostic accuracy assessment requires both diseased "
+"and non-diseased cases. Individual-test tables use their own "
+"pairwise-complete cases and may still contain both outcomes."
+msgstr ""
+"Kombinasyon analizinde kullanılan hiçbir eksiksiz olgunun altın standart "
+"değeri \"{level}\" (hastalık var olarak seçilen düzey) değildir, bu nedenle "
+"kombinasyon analizinde hastalığı olan olgu bulunmamaktadır. Duyarlılık "
+"tahmin edilemez; PPV ve NPV herhangi bir test tarafından değil örnekleme "
+"tarafından %0 ve %100 olarak sabitlenir; Doğruluk yalnızca özgüllüğü "
+"tekrarlar; duyarlılığı özgüllükle birleştiren Dengeli Doğruluk ve Youden J "
+"ise oluşturulamaz. Bunların tümü kombinasyon tablosunda boş bırakılır. LR+, "
+"LR- ve tanısal odds oranı da boş bırakılır: her biri bir duyarlılığa ihtiyaç "
+"duyar ve süreklilik düzeltmesinden bir duyarlılık hesaplamak hiçbir hastayı "
+"yansıtmayan bir sayı raporlar. Tanısal doğruluk değerlendirmesi hem "
+"hastalığı olan hem de olmayan olgular gerektirir. Tek test tabloları kendi "
+"ikili eksiksiz olgularını kullanır ve yine de her iki sonucu da içerebilir."
 
 #: R/decisioncombine.b.R
 #: R/vartree.b.R
@@ -107975,6 +108188,20 @@ msgid ""
 "numerical precision."
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid ""
+"No listed rule reaches the highest Youden's J these results allow: calling "
+"positive exactly the patterns {patterns} would give J = {youden}, {gain} "
+"above the highest-ranked rule. That rule was chosen by looking at these "
+"data, so treat it as a hypothesis to test in new patients, not as a better "
+"rule."
+msgstr ""
+"Listelenen hiçbir kural bu sonuçların izin verdiği en yüksek Youden J "
+"değerine ulaşmıyor: tam olarak {patterns} paternlerini pozitif saymak J = "
+"{youden} verirdi; bu, en yüksek sıralı kuraldan {gain} daha yüksektir. Bu "
+"kural bu verilere bakılarak seçildiğinden, onu daha iyi bir kural olarak "
+"değil, yeni hastalarda test edilecek bir hipotez olarak ele alın."
+
 #: R/lassocox.b.R
 msgid ""
 "No log-rank p-value or group hazard ratio is reported for this same-data "
@@ -108085,12 +108312,6 @@ msgstr ""
 #: R/summarydata.b.R
 msgid "No observations were flagged beyond the IQR fences ({lower} to {upper})."
 msgstr "AAD sınırlarının ötesinde hiçbir gözlem işaretlenmedi ({lower} ile {upper})."
-
-#: R/decisioncombine.b.R
-msgid ""
-"No observations were found for pattern \"{pattern}\". This combination was "
-"skipped."
-msgstr "\"{pattern}\" paterni için hiçbir gözlem bulunamadı. Bu kombinasyon atlandı."
 
 #: R/alluvial.b.R
 msgid "No observations with non-missing weights remain."
@@ -108477,6 +108698,27 @@ msgstr "Patern Filtresiyle Eşleşen Satır Yok"
 #: R/decisioncombine.b.R
 msgid "No Rule Performs Better Than Chance"
 msgstr "Hiçbir Kural Şanstan Daha İyi Performans Göstermiyor"
+
+#: R/decisioncombine.b.R
+msgid ""
+"No rule scored here reaches acceptable discrimination. The highest Youden's "
+"J is {youden}, for {rule} (Agresti-Caffo 95% CI {lower} to {upper}; "
+"equivalent AUC {auc}), and the 95% confidence interval of every rule lies "
+"wholly below 0.40, the equivalent of an area under the ROC curve of 0.70, "
+"below which discrimination is conventionally read as poor (Hosmer, Lemeshow "
+"and Sturdivant 2013). This is a statistical convention, not a verdict on "
+"clinical usefulness: the likelihood ratios still show how far each result "
+"moves the probability of disease."
+msgstr ""
+"Burada puanlanan hiçbir kural kabul edilebilir bir ayırt etme düzeyine "
+"ulaşmıyor. En yüksek Youden J değeri: {youden}, {rule} için (Agresti-Caffo "
+"%95 GA {lower} ila {upper}; eşdeğer AUC {auc}); her kuralın %95 güven "
+"aralığı tümüyle 0.40'ın altında kalıyor. 0.40, ROC eğrisi altındaki 0.70'lik "
+"alana karşılık gelir ve bunun altı geleneksel olarak zayıf ayırt etme "
+"şeklinde yorumlanır (Hosmer, Lemeshow ve Sturdivant 2013). Bu, klinik "
+"yararlılık hakkında bir hüküm değil, istatistiksel bir kabuldür: olabilirlik "
+"oranları her sonucun hastalık olasılığını ne kadar kaydırdığını yine de "
+"gösterir."
 
 #: parallelplot/options/scaling/none.title
 msgid "No scaling"
@@ -108936,12 +109178,6 @@ msgstr "Sabit yordayıcılar çıkarıldıktan sonra geçerli açıklayıcı de�
 #: R/pathsampling.b.R
 msgid "No valid lymph-node pairs are available."
 msgstr "Geçerli lenf nodu sayı çifti yok."
-
-#: R/decisioncombine.b.R
-msgid ""
-"No valid observations were found for Test {test}. The individual analysis "
-"was skipped."
-msgstr "Test {test} için geçerli gözlem bulunamadı. Bireysel analiz atlandı."
 
 #: R/chisqposttest.b.R
 msgid ""
@@ -109891,14 +110127,23 @@ msgstr "Yok (ham veriyi kullan)"
 
 #: R/decisioncombine.b.R
 msgid ""
-"None of the {n} candidate rules that could be scored has a Youden's J above "
-"zero: in this sample no single test, result pattern or combination strategy "
-"separates disease-present from disease-absent cases better than chance. A "
-"rule with a negative Youden's J is anti-predictive - its result would have "
-"to be reversed to carry information. Review the level chosen as positive for "
-"the reference standard and for each test, then treat the sensitivity and "
-"specificity in the tables above as uninformative until that is settled."
+"None of the {n} candidate rule(s) that could be scored has a Youden's J "
+"above zero: in this sample no single test, result pattern or combination "
+"strategy separates disease-present from disease-absent cases better than "
+"chance. A rule with a negative Youden's J is anti-predictive - its result "
+"would have to be reversed to carry information. Review the level chosen as "
+"positive for the reference standard and for each test, then treat the "
+"sensitivity and specificity in the tables as uninformative until that is "
+"settled."
 msgstr ""
+"Puanlanabilen {n} aday kuralın hiçbirinin Youden J değeri sıfırın üzerinde "
+"değil: bu örneklemde hiçbir tek test, sonuç paterni veya kombinasyon "
+"stratejisi hastalığı olan olguları hastalığı olmayanlardan şanstan daha iyi "
+"ayırmıyor. Youden J değeri negatif olan bir kural ters yönde öngörücüdür - "
+"bilgi taşıması için sonucunun tersine çevrilmesi gerekirdi. Referans "
+"standart ve her test için pozitif olarak seçilen düzeyi gözden geçirin, "
+"ardından bu netleşene kadar tablolardaki duyarlılık ve özgüllüğü bilgi "
+"vermez kabul edin."
 
 #: R/waterfall.b.R
 msgid ""
@@ -114237,6 +114482,10 @@ msgstr ""
 "satırları sayar; Ağırlık toplamı o satırlardaki ağırlık değişkeninin "
 "toplamıdır ve şerit genişliğinin gösterdiği budur."
 
+#: R/decisioncombine.b.R
+msgid "One row per patient."
+msgstr "Hasta başına bir satır."
+
 #: jrecode/options/recode_rules.description
 msgid "One rule per line. Format: oldvalue -> newvalue"
 msgstr ""
@@ -115044,6 +115293,16 @@ msgstr ""
 msgid "OPA Criterion"
 msgstr "OPA Kriteri"
 
+#: R/decisioncombine.b.R
+msgid ""
+"Open points: rows with a zero cell, whose LR+, LR- and DOR use a 0.5 "
+"continuity correction; without it at least one of the three would be 0 or "
+"infinite."
+msgstr ""
+"Boş noktalar: LR+, LR- ve DOR değerlerinde 0,5 süreklilik düzeltmesi "
+"kullanılan, sıfır hücresi olan satırlar; düzeltme olmasaydı üçünden en az "
+"biri 0 ya da sonsuz olurdu."
+
 #: ggprism/options/prism_shape_palette/open.title
 msgid "Open Shapes"
 msgstr ""
@@ -115726,6 +115985,7 @@ msgstr ""
 msgid "Optional Summaries:"
 msgstr "İsteğe Bağlı Özetler:"
 
+#: R/decisioncombine.b.R
 #: decisioncombine/options/test3.description.ui
 msgid "Optional third test for 3-way combination analysis (8 patterns)."
 msgstr "3 yönlü kombinasyon analizi için isteğe bağlı üçüncü test (8 patern)."
@@ -119970,6 +120230,10 @@ msgstr "Paralel (>=1 poz)"
 #: decisionpanel/options/strategies/parallel.title
 msgid "Parallel (cotest) only"
 msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "Parallel {first}+{second} (>=1 pos)"
+msgstr "Paralel {first}+{second} (>=1 poz)"
 
 #: factoranalysis/options/nFactorsMethod/parallel.title
 #: factoranalysis/ui[2][0][1][0].label
@@ -126855,9 +127119,10 @@ msgid "Poor concordance"
 msgstr "Zayıf uyum"
 
 #: R/clinicalscore.b.R
+#: R/decisioncombine.b.R
 #: R/lassologistic.b.R
 msgid "Poor Discrimination"
-msgstr "Zayıf Ayrım"
+msgstr "Zayıf Ayırt Etme"
 
 #: R/decision.b.R
 msgid ""
@@ -127340,9 +127605,6 @@ msgstr ""
 
 #: aivalidation/options/positiveLevel.title
 #: aivalidation/ui[0][1]/positiveLevel.label
-#: decisioncombine/ui[0][1]/test1Positive.label
-#: decisioncombine/ui[0][2]/test2Positive.label
-#: decisioncombine/ui[0][3]/test3Positive.label
 #: decisionpanel/options/test1Positive.title
 #: decisionpanel/options/test2Positive.title
 #: decisionpanel/options/test3Positive.title
@@ -127362,6 +127624,13 @@ msgstr ""
 #: trichotomousroc/ui/outcomelevels/positive_level.label
 msgid "Positive Level"
 msgstr "Pozitif Düzey"
+
+#: R/decisioncombine.b.R
+#: decisioncombine/ui[0][1]/test1Positive.label
+#: decisioncombine/ui[0][2]/test2Positive.label
+#: decisioncombine/ui[0][3]/test3Positive.label
+msgid "Positive level"
+msgstr "Pozitif düzey"
 
 #: decisionpanel/options/goldPositive.title
 msgid "Positive Level (Disease Present)"
@@ -128585,7 +128854,7 @@ msgid ""
 "probability into a post-test probability at whatever prevalence the new "
 "setting has."
 msgstr ""
-"PÖD ve NÖD prevalansa bağlıdır, bu nedenle yalnızca hastalık oranı benzer "
+"PPV ve NPV prevalansa bağlıdır, bu nedenle yalnızca hastalık oranı benzer "
 "olduğunda başka bir popülasyona aktarılabilir. Duyarlılık, özgüllük ve "
 "olabilirlik oranları prevalansa daha az bağımlıdır, ancak bundan bağımsız "
 "değildir. LR+ ve LR- başka yerlere taşınacak daha kullanışlı sayılardır; "
@@ -128636,7 +128905,7 @@ msgstr ""
 
 #: R/decisioncombine.b.R
 msgid "PPV/NPV Interpretation"
-msgstr "PÖD/NÖD Yorumu"
+msgstr "PPV/NPV Yorumu"
 
 #: R/decisioncompare.b.R
 msgid ""
@@ -131918,6 +132187,10 @@ msgstr ""
 msgid "Proportion (%)"
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid "Proportion (95% CI)"
+msgstr "Yüzde (%95 GA)"
+
 #: jggstats/options/analysis_type/stat_prop.title
 msgid "Proportion Analysis"
 msgstr ""
@@ -133881,6 +134154,7 @@ msgstr ""
 
 #: R/alluvial.b.R
 #: R/decision.b.R
+#: R/decisioncombine.b.R
 msgid "Quick Start"
 msgstr "Hızlı Başlangıç"
 
@@ -134872,13 +135146,17 @@ msgstr ""
 
 #: decisioncombine/options/showRecommendation.description.ui
 msgid ""
-"Rank eligible exact-pattern rules and named parallel, serial, and majority "
-"strategies descriptively by observed Youden's J. This sample-dependent "
-"summary is not a clinical guide or validated recommendation."
+"Rank eligible exact-pattern rules, each test alone, and the parallel, "
+"serial, pairwise and majority strategies descriptively by observed Youden's "
+"J. This sample-dependent summary is not a clinical guide or validated "
+"recommendation. It needs at least two tests: one test gives one rule, so "
+"nothing is ranked."
 msgstr ""
-"Uygun tam patern kurallarını ve adlandırılmış paralel, seri ve çoğunluk "
-"stratejilerini gözlemlenen Youden J değerine göre betimsel olarak sıralayın. "
-"Bu örnekleme bağımlı özet klinik bir kılavuz veya doğrulanmış öneri değildir."
+"Uygun tam patern kurallarını, tek başına her testi ve paralel, seri, ikili "
+"ve çoğunluk stratejilerini gözlemlenen Youden J değerine göre betimsel "
+"olarak sıralayın. Bu örnekleme bağımlı özet klinik bir kılavuz veya "
+"doğrulanmış öneri değildir. En az iki test gerektirir: tek bir test tek bir "
+"kural verir, bu nedenle sıralanacak bir şey yoktur."
 
 #: survivalfeaturerank/options/rankBy.title
 msgid "Rank Features By"
@@ -134982,6 +135260,10 @@ msgstr ""
 #: bayesiannetworkma/options/ranking_measure.title
 msgid "Ranking Measure"
 msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "Ranking Needs Two or More Tests"
+msgstr "Sıralama İçin En Az İki Test Gerekir"
 
 #: survivalfeaturerank/ui[1][0].label
 msgid "Ranking Options"
@@ -135430,6 +135712,10 @@ msgstr "Oran (Ratio)"
 #: R/agreement.b.R
 msgid "ratio"
 msgstr "oran (ratio)"
+
+#: R/decisioncombine.b.R
+msgid "Ratio (95% CI), log scale; dashed line = 1 (uninformative)"
+msgstr "Oran (%95 GA), logaritmik ölçek; kesikli çizgi = 1 (bilgi vermez)"
 
 #: enhancedROC/results/results/imbalanceMetrics.columns.title
 msgid "Ratio (Pos:Neg)"
@@ -141802,6 +142088,7 @@ msgstr ""
 msgid "Row Proportions"
 msgstr ""
 
+#: R/decisioncombine.b.R
 #: decisioncombine/results/combinationTable.columns.title
 msgid "Row type"
 msgstr "Satır Türü"
@@ -141908,6 +142195,17 @@ msgid ""
 msgstr ""
 "Aynı olgu kimliğini paylaşan satırlar tek bir olgudur: %d olgu birden fazla "
 "koşulda ölçüldü, bu nedenle koşullar bu olguların içinde karşılaştırılır."
+
+#: R/decisioncombine.b.R
+msgid ""
+"Rows such as +/- are exact result patterns, each scored as 'this exact "
+"pattern' against all other results; the rows below the line are single tests "
+"and testing strategies. Read Youden's J in the table for pattern rows."
+msgstr ""
+"+/- gibi satırlar tam sonuç paternleridir; her biri 'tam olarak bu patern' "
+"olarak diğer tüm sonuçlara karşı değerlendirilir. Çizginin altındaki "
+"satırlar tek testler ve test stratejileridir. Patern satırları için "
+"tablodaki Youden J değerini okuyun."
 
 #: outlierdetection/options/sampleSize.title
 msgid "Rows to analyse when subsampling"
@@ -142135,6 +142433,10 @@ msgstr ""
 "Dışlama gücü yalnızca duyarlılıkla değil negatif olabilirlik oranıyla "
 "belirlenir; burada NOO = %.2f olup negatif bir sonuçtan sonra hastalık "
 "aleyhine zayıf kanıt sağlar."
+
+#: R/decisioncombine.b.R
+msgid "Rules Left Empty in the Forest Plot"
+msgstr "Orman Grafiğinde Boş Bırakılan Kurallar"
 
 #: R/decision.b.R
 msgid "Rules of thumb"
@@ -142469,13 +142771,19 @@ msgstr "Örneklem Büyüklüğü Yeterliliği:"
 
 #: R/decisioncombine.b.R
 msgid ""
-"Sample size and cell counts are reported as notices when they fall below the "
-"usual thresholds. Read the confidence intervals rather than the point "
-"estimates whenever they do."
+"Sample size and cell counts are reported as notices when they fall below "
+"this analysis's thresholds (20, 50 and 100 cases in all; 10 per reference "
+"group; 5 per cell). These are rules of thumb, not requirements: the number "
+"of cases a study needs depends on the expected sensitivity and specificity, "
+"the precision wanted and the prevalence (Buderer 1996). Read the confidence "
+"intervals rather than the point estimates whenever a notice appears."
 msgstr ""
-"Örneklem büyüklüğü ve hücre sayıları olağan eşiklerin altına düştüğünde "
-"bildirim olarak raporlanır. Böyle durumlarda nokta tahminleri yerine güven "
-"aralıklarını okuyun."
+"Örneklem büyüklüğü ve hücre sayıları bu analizin eşiklerinin (toplamda 20, "
+"50 ve 100 olgu; referans grubu başına 10; hücre başına 5) altına düştüğünde "
+"bildirim olarak raporlanır. Bunlar zorunluluk değil kaba kurallardır: bir "
+"çalışmanın ihtiyaç duyduğu olgu sayısı beklenen duyarlılık ve özgüllüğe, "
+"istenen kesinliğe ve prevalansa bağlıdır (Buderer 1996). Bir bildirim "
+"göründüğünde nokta tahminleri yerine güven aralıklarını okuyun."
 
 #: clinicaltrialdesign/results/sample_size_breakdown.title
 #: competingRisksPower/results/sampleSizeBreakdown.title
@@ -142810,13 +143118,13 @@ msgstr ""
 
 #: decisioncombine/results/recommendationTable.description
 msgid ""
-"Sample-dependent descriptive ranking of eligible exact-pattern rules and "
-"named testing strategies by observed Youden index; this is not a clinical "
-"guide or validated recommendation"
+"Sample-dependent descriptive ranking of eligible exact-pattern rules, single "
+"tests and named testing strategies by observed Youden index; this is not a "
+"clinical guide or validated recommendation"
 msgstr ""
-"Gözlemlenen Youden indeksine göre uygun tam patern kurallarının ve "
-"adlandırılmış test stratejilerinin örnekleme bağımlı betimsel sıralaması; bu "
-"klinik bir kılavuz veya doğrulanmış öneri değildir"
+"Gözlemlenen Youden indeksine göre uygun tam patern kurallarının, tek "
+"testlerin ve adlandırılmış test stratejilerinin örnekleme bağımlı betimsel "
+"sıralaması; bu klinik bir kılavuz veya doğrulanmış öneri değildir"
 
 #: pathsampling/results/multifocalTable.title
 msgid "Sample-position group counts"
@@ -144478,6 +144786,7 @@ msgstr ""
 msgid "Second Derivative"
 msgstr ""
 
+#: R/decisioncombine.b.R
 #: decisioncombine/options/test2.description.ui
 msgid ""
 "Second diagnostic test for combination analysis. Leave empty for single test "
@@ -145015,21 +145324,26 @@ msgstr ""
 msgid ""
 "Select one metric, or use the plot-specific default metric set. The bar "
 "chart defaults to sensitivity, specificity, PPV, NPV, and accuracy; the "
-"heatmap also includes prevalence, balanced accuracy, and Youden's J. The "
-"forest plot supports sensitivity, specificity, PPV, NPV, accuracy, LR+, LR-, "
-"and diagnostic OR, for which confidence intervals are available. Unsupported "
-"forest selections produce an explanatory notice rather than silently showing "
-"other statistics. The decision-space plot has fixed sensitivity and "
-"specificity axes and is unaffected."
+"heatmap also includes prevalence and balanced accuracy. In these two plots "
+"Youden's J, LR+, LR- and the diagnostic OR are drawn only when selected on "
+"their own. The forest plot's default set is sensitivity, specificity, PPV, "
+"NPV, accuracy, LR+, LR- and diagnostic OR, and it supports each of them "
+"alone; selecting prevalence, balanced accuracy or Youden's J (whose 95% "
+"confidence interval is in the combination table) produces an explanatory "
+"notice rather than silently showing other statistics. The decision-space "
+"plot has fixed sensitivity and specificity axes and is unaffected."
 msgstr ""
 "Bir metrik seçin veya grafiğe özgü varsayılan metrik setini kullanın. Çubuk "
-"grafik varsayılan olarak duyarlılık, özgüllük, PÖD, NÖD ve doğruluğu "
-"gösterir; ısı haritası ayrıca prevalans, dengeli doğruluk ve Youden J "
-"içerir. Orman grafiği güven aralıklarının mevcut olduğu duyarlılık, "
-"özgüllük, PÖD, NÖD, doğruluk, LR+, LR- ve tanısal OR'yi destekler. "
-"Desteklenmeyen orman seçimleri sessizce diğer istatistikleri göstermek "
-"yerine açıklayıcı bir bildirim üretir. Karar uzayı grafiği sabit duyarlılık "
-"ve özgüllük eksenlerine sahiptir ve etkilenmez."
+"grafik varsayılan olarak duyarlılık, özgüllük, PPV, NPV ve doğruluğu "
+"gösterir; ısı haritası ayrıca prevalans ve dengeli doğruluğu içerir. Bu iki "
+"grafikte Youden J, LR+, LR- ve tanısal OR yalnızca tek başına "
+"seçildiklerinde çizilir. Orman grafiğinin varsayılan seti duyarlılık, "
+"özgüllük, PPV, NPV, doğruluk, LR+, LR- ve tanısal OR'dir ve her birini tek "
+"başına da destekler; prevalans, dengeli doğruluk veya Youden J (Youden J'nin "
+"%95 güven aralığı kombinasyon tablosunda yer alır) seçildiğinde, sessizce "
+"diğer istatistikleri göstermek yerine açıklayıcı bir bildirim üretilir. "
+"Karar uzayı grafiği sabit duyarlılık ve özgüllük eksenlerine sahiptir ve "
+"etkilenmez."
 
 #: advancedbarplot/options/chart_approach.description.jamovi
 msgid ""
@@ -145616,6 +145930,10 @@ msgstr ""
 #: R/lassocox.b.R
 msgid "Selected Predictor Columns"
 msgstr "Seçilen yordayıcı sütunları"
+
+#: R/decisioncombine.b.R
+msgid "Selected Statistic Is Blank"
+msgstr "Seçilen İstatistik Boş"
 
 #: decisioncurve/options/selectedThresholds.title
 msgid "Selected Thresholds for Table"
@@ -146618,6 +146936,10 @@ msgstr ""
 msgid "Serial (all pos)"
 msgstr "Seri (tümü poz)"
 
+#: R/decisioncombine.b.R
+msgid "Serial {first}+{second} (both pos)"
+msgstr "Seri {first}+{second} (ikisi de poz)"
+
 #: R/sequentialtests.b.R
 msgid "serial negative (exclusion) strategy"
 msgstr "seri negatif (dışlama) stratejisi"
@@ -146661,7 +146983,7 @@ msgstr ""
 #: R/decisioncombine.b.R
 #: R/lassologistic.b.R
 msgid "Serious warning"
-msgstr ""
+msgstr "Ciddi uyarı"
 
 #: R/datetimeconverter.b.R
 msgid ""
@@ -146885,6 +147207,24 @@ msgstr "7+ küme analizi için yedinci değişken."
 #: R/waterfall.b.R
 msgid "SEVERAL ROWS PER PATIENT"
 msgstr "HASTA BAŞINA BİRDEN FAZLA SATIR"
+
+#: R/decisioncombine.b.R
+msgid ""
+"Several tests classify worse than chance in this sample, beyond sampling "
+"variation, on the {n} complete cases analysed here: {tests}. For each, "
+"sensitivity and specificity add up to less than 1, the signature of a "
+"reversed positive level. Check the levels chosen as positive for these tests "
+"and for the reference standard before interpreting any of these results; "
+"when every test is below chance, the reference standard's level is the "
+"likelier cause."
+msgstr ""
+"Birkaç test bu örneklemde, burada analiz edilen {n} eksiksiz olguda, "
+"örnekleme değişkenliğinin ötesinde şanstan daha kötü sınıflandırıyor: "
+"{tests}. Her birinde duyarlılık ve özgüllüğün toplamı 1'den küçüktür; bu, "
+"ters çevrilmiş bir pozitif düzeyin işaretidir. Bu sonuçlardan herhangi "
+"birini yorumlamadan önce bu testler ve referans standart için pozitif olarak "
+"seçilen düzeyleri kontrol edin; tüm testler şansın altındaysa daha olası "
+"neden referans standardın düzeyidir."
 
 #: R/categorize.b.R
 msgid ""
@@ -156092,7 +156432,6 @@ msgstr ""
 msgid "Static Map"
 msgstr ""
 
-#: R/decisioncombine.b.R
 #: R/nonparametric.b.R
 #: aalenhazard/results/goodnessOfFit.columns.title
 #: adaptivelasso/results/modelDiagnostics.columns.title
@@ -157246,6 +157585,10 @@ msgstr ""
 #: jjpiestats/ui[3][0][0]/resultssubtitle.label
 msgid "Statistics in plot subtitle"
 msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "Statistics Omitted from the Forest Plot"
+msgstr "Orman Grafiğinden Çıkarılan İstatistikler"
 
 #: groupsummary/ui[1].label
 msgid "Statistics Options"
@@ -161801,12 +162144,19 @@ msgstr ""
 msgid ""
 "Systematic evaluation of diagnostic test combinations. Analyzes all possible "
 "test result patterns (2-test: 4 patterns, 3-test: 8 patterns) against a gold "
-"standard and summarizes named parallel, serial, and majority strategies. "
-"Calculates sensitivity, specificity, predictive values, likelihood ratios, "
-"accuracy, and uncertainty intervals. Descriptive rankings are "
-"sample-dependent analytical summaries, not clinical guides or validated "
-"recommendations."
+"standard, each test alone, and parallel and serial strategies (with three "
+"tests also for every pair of tests, and a majority rule). Calculates "
+"sensitivity, specificity, predictive values, likelihood ratios, accuracy, "
+"and uncertainty intervals. Descriptive rankings are sample-dependent "
+"analytical summaries, not clinical guides or validated recommendations."
 msgstr ""
+"Tanı testi kombinasyonlarının sistematik değerlendirmesi. Olası tüm test "
+"sonucu paternlerini (2 test: 4 patern, 3 test: 8 patern), tek başına her "
+"testi ve paralel ile seri stratejileri (üç testle ayrıca her test çifti için "
+"bu stratejileri ve bir çoğunluk kuralını) bir altın standarda karşı analiz "
+"eder. Duyarlılık, özgüllük, öngörü değerleri, olabilirlik oranları, doğruluk "
+"ve belirsizlik aralıklarını hesaplar. Betimsel sıralamalar örnekleme bağımlı "
+"analitik özetlerdir; klinik kılavuzlar veya doğrulanmış öneriler değildir."
 
 #: R/agreement.b.R
 msgid ""
@@ -162914,6 +163264,10 @@ msgid ""
 msgstr ""
 
 #: R/decisioncombine.b.R
+msgid "Test {test} alone"
+msgstr "Test {test} tek başına"
+
+#: R/decisioncombine.b.R
 msgid ""
 "Test {test} cannot be summarized because no case has both the test and "
 "reference-standard result."
@@ -162951,6 +163305,7 @@ msgstr "Test 1 - Güven Aralıkları"
 msgid "Test 1 - Recoded Data"
 msgstr "Test 1 - Yeniden Kodlanmış Veriler"
 
+#: R/decisioncombine.b.R
 #: decisioncombine/options/test1.title
 #: decisioncombine/ui[0][1].label
 #: decisioncompare/options/test1.title
@@ -163100,6 +163455,7 @@ msgstr "Test 2 - Güven Aralıkları"
 msgid "Test 2 - Recoded Data"
 msgstr "Test 2 - Yeniden Kodlanmış Veriler"
 
+#: R/decisioncombine.b.R
 #: decisioncombine/options/test2.title
 #: decisioncombine/ui[0][2].label
 msgid "Test 2 (Required for Combinations)"
@@ -163249,6 +163605,7 @@ msgstr "Test 3 - Güven Aralıkları"
 msgid "Test 3 - Recoded Data"
 msgstr "Test 3 - Yeniden Kodlanmış Veriler"
 
+#: R/decisioncombine.b.R
 #: decisioncombine/options/test3.title
 #: decisioncombine/ui[0][3].label
 #: decisioncompare/options/test3.title
@@ -163756,6 +164113,10 @@ msgstr "Test Performansı Karşılaştırması"
 #: R/decision.b.R
 msgid "Test Performance Summary"
 msgstr "Test Performansı Özeti"
+
+#: R/decisioncombine.b.R
+msgid "Test Performs at Chance Level"
+msgstr "Test Şans Düzeyinde Performans Gösteriyor"
 
 #: R/decision.b.R
 #: R/decisioncombine.b.R
@@ -164602,6 +164963,18 @@ msgstr ""
 "gözlem tek tek olağandışı olduğu için değil, baştaki basamakları nedeniyle "
 "burada görünür."
 
+#: R/decisioncombine.b.R
+msgid ""
+"The 95% confidence interval beside Youden's J is the Agresti-Caffo interval "
+"for a difference of two independent proportions, sensitivity minus the "
+"false-positive rate. It is not adjusted for choosing among rules or for the "
+"number of rules shown."
+msgstr ""
+"Youden J'nin yanındaki %95 güven aralığı, iki bağımsız oranın farkı "
+"(duyarlılık eksi yanlış pozitif oranı) için Agresti-Caffo aralığıdır. "
+"Kurallar arasından seçim yapılmasına veya gösterilen kural sayısına göre "
+"düzeltilmemiştir."
+
 #: R/decision.b.R
 msgid ""
 "The 95% confidence interval for Youden's index includes 0, so this sample "
@@ -165108,13 +165481,17 @@ msgstr ""
 
 #: R/decisioncombine.b.R
 msgid ""
-"The candidate-rule ranking is a descriptive argmax over observed Youden's J "
-"with no significance test and no multiplicity correction. On data with no "
-"real signal it will still name a winner. It is a hypothesis to confirm in "
-"new data, not a validated recommendation."
+"The candidate-rule ranking is a descriptive argmax over observed Youden's J, "
+"taken over every row of the table -- result patterns, single tests and "
+"strategies -- with no significance test and no multiplicity correction. On a "
+"tie the rule using fewer tests is shown first. On data with no real signal "
+"it will still name a winner. It is a hypothesis to confirm in new data, not "
+"a validated recommendation."
 msgstr ""
-"Aday kural sıralaması, anlamlılık testi ve çokluk düzeltmesi olmaksızın "
-"gözlemlenen Youden J üzerinden betimsel bir argmax'tır. Gerçek bir sinyal "
+"Aday kural sıralaması, gözlemlenen Youden J üzerinden tablonun her satırında "
+"-- sonuç paternleri, tek testler ve stratejiler -- anlamlılık testi ve "
+"çokluk düzeltmesi olmaksızın alınan betimsel bir argmax'tır. Eşitlik "
+"durumunda daha az test kullanan kural önce gösterilir. Gerçek bir sinyal "
 "olmayan verilerde bile bir kazanan belirleyecektir. Yeni verilerde "
 "doğrulanacak bir hipotezdir, doğrulanmış bir öneri değildir."
 
@@ -165422,12 +165799,21 @@ msgstr "Güven aralığı 1'i içerir, bu nedenle veriler fark olmaması ile uyu
 #: R/decisioncombine.b.R
 msgid ""
 "The confidence interval is left blank for {n} row(s) ({patterns}) whose "
-"ratio is determinate but whose standard error is not estimable: the pattern "
-"has an empty test margin, so the delta-method standard error on the log "
-"scale is exactly zero and an interval computed from it would be zero-width. "
-"A zero-width interval would assert that the ratio is known exactly on a row "
-"carrying no information, so the point estimate is shown without one."
+"ratio is determinate but whose standard error is not estimable: the row has "
+"an empty test margin (no patient, or every patient, is positive under it), "
+"so the delta-method standard error on the log scale is exactly zero and an "
+"interval computed from it would be zero-width. A zero-width interval would "
+"assert that the ratio is known exactly on a row carrying no information, so "
+"the point estimate is shown without one."
 msgstr ""
+"Oranı tanımlı olan ancak standart hatası tahmin edilemeyen {n} satır "
+"({patterns}) için güven aralığı boş bırakıldı: satırın test kenar toplamı "
+"boştur (bu satırda ya hiçbir hasta pozitif değildir ya da her hasta "
+"pozitiftir), bu nedenle log ölçeğindeki delta yöntemi standart hatası tam "
+"olarak sıfırdır ve bundan hesaplanan bir aralığın genişliği sıfır olurdu. "
+"Sıfır genişlikli bir aralık, hiçbir bilgi taşımayan bir satırda oranın tam "
+"olarak bilindiğini ileri sürerdi; bu nedenle nokta tahmini aralıksız "
+"gösterilir."
 
 #: R/jjdotplotstats.b.R
 msgid ""
@@ -166119,6 +166505,18 @@ msgstr ""
 "belirler. P-değerleri normalde 3 ondalık basamakla gösterilir; test kararını "
 "korumak gerektiğinde 0,05 yakınında ek basamaklar kullanılır."
 
+#: R/decisioncombine.b.R
+msgid ""
+"The decision-space plot places each rule by its sensitivity and specificity, "
+"and no rule has both: every complete case has the same reference-standard "
+"result, so one of the two cannot be estimated. The notice about the "
+"reference standard says which."
+msgstr ""
+"Karar uzayı grafiği her kuralı duyarlılığına ve özgüllüğüne göre yerleştirir "
+"ve hiçbir kuralda ikisi birden yoktur: tüm eksiksiz olgular aynı referans "
+"standart sonucuna sahiptir, bu nedenle ikisinden biri tahmin edilemez. "
+"Referans standarda ilişkin bildirim hangisi olduğunu belirtir."
+
 #: R/cotest.b.R
 msgid ""
 "The dependence parameter for the diseased group (%1$.2f) is not attainable "
@@ -166801,6 +167199,19 @@ msgstr ""
 "için bir güven aralığı hesaplamıyor. Çubuk grafik ve ısı haritası bunu yine "
 "de görüntüleyebilir."
 
+#: R/decisioncombine.b.R
+msgid ""
+"The forest plot is not drawn for \"{statistic}\": it runs from -1 to 1, "
+"unlike the proportions and ratios on the forest plot axes. Its 95% "
+"confidence interval is in the combination table, and the bar chart and "
+"heatmap can still display it."
+msgstr ""
+"\"{statistic}\" için orman grafiği çizilmedi: bu istatistik -1 ile 1 "
+"arasında değişir, oysa orman grafiğinin eksenleri oranlar, olabilirlik "
+"oranları ve tanısal odds oranı içindir. Bu istatistiğin %95 güven aralığı "
+"kombinasyon tablosunda yer alır; çubuk grafik ve ısı haritası onu yine de "
+"görüntüleyebilir."
+
 #: R/relativesurvival.b.R
 msgid ""
 "The French population table (survexp.fr) is not available in this "
@@ -167148,6 +167559,46 @@ msgid ""
 "{youden}."
 msgstr "Uygun aday kurallar arasında gözlemlenen en yüksek Youden J {youden} idi."
 
+#: R/decisioncombine.b.R
+msgid ""
+"The highest Youden's J is {youden}, for {rule} (Agresti-Caffo 95% CI {lower} "
+"to {upper}; equivalent AUC {auc}), below 0.40, the equivalent of an area "
+"under the ROC curve of 0.70, under which discrimination is conventionally "
+"read as poor (Hosmer, Lemeshow and Sturdivant 2013). The 95% confidence "
+"interval of at least one rule reaches 0.40, so this sample cannot rule out "
+"acceptable discrimination; a larger sample could settle it."
+msgstr ""
+"En yüksek Youden J değeri: {youden}, {rule} için (Agresti-Caffo %95 GA "
+"{lower} ila {upper}; eşdeğer AUC {auc}). Bu değer, ROC eğrisi altındaki "
+"0.70'lik alana karşılık gelen 0.40'ın altındadır ve bu sınırın altı "
+"geleneksel olarak zayıf ayırt etme şeklinde yorumlanır (Hosmer, Lemeshow ve "
+"Sturdivant 2013). En az bir kuralın %95 güven aralığı 0.40'a ulaştığından bu "
+"örneklem kabul edilebilir bir ayırt etmeyi dışlayamaz; daha büyük bir "
+"örneklem bunu netleştirebilir."
+
+#: R/decisioncombine.b.R
+msgid ""
+"The highest Youden's J is {youden}, for {rule} (Agresti-Caffo 95% CI {lower} "
+"to {upper}; equivalent AUC {auc}). The 95% confidence interval of every rule "
+"scored here includes 0, so this sample does not show that any of them "
+"separates disease-present from disease-absent cases better than chance; at "
+"least one interval also reaches 0.40, the equivalent of an area under the "
+"ROC curve of 0.70 (Hosmer, Lemeshow and Sturdivant 2013), so acceptable "
+"discrimination is not ruled out either. The intervals are not adjusted for "
+"choosing among the rules. Check the levels chosen as positive, and whether "
+"the sample gives the precision you need."
+msgstr ""
+"En yüksek Youden J değeri: {youden}, {rule} için (Agresti-Caffo %95 GA "
+"{lower} ila {upper}; eşdeğer AUC {auc}). Burada puanlanan her kuralın %95 "
+"güven aralığı 0'ı içerir; dolayısıyla bu örneklem, bu kurallardan herhangi "
+"birinin hastalığı olan olguları hastalığı olmayanlardan şanstan daha iyi "
+"ayırdığını göstermez. En az bir aralık ayrıca ROC eğrisi altındaki 0.70'lik "
+"alana karşılık gelen 0.40'a ulaşır (Hosmer, Lemeshow ve Sturdivant 2013), bu "
+"nedenle kabul edilebilir bir ayırt etme de dışlanamaz. Aralıklar kurallar "
+"arasından seçim yapılmasına göre düzeltilmemiştir. Pozitif olarak seçilen "
+"düzeyleri ve örneklemin ihtiyaç duyduğunuz kesinliği sağlayıp sağlamadığını "
+"kontrol edin."
+
 #: R/lassocox.b.R
 msgid ""
 "The horizontal axis is log lambda; the vertical axis is cross-validated "
@@ -167366,6 +167817,10 @@ msgid ""
 "The kappaSize package is required but not installed. Please install it using "
 "install.packages(\"kappaSize\")"
 msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "The kinds of row"
+msgstr "Satır türleri"
 
 #: R/singlearm.b.R
 msgid "The KMunicate plot"
@@ -167739,6 +168194,18 @@ msgstr ""
 "Orta ve Düşük aralıkları boş kalır ve olgular yalnızca Yüksek veya Zayıf "
 "aralığına düşer. Beş aralığı ayırmak için Yüksek eşiği Düşük eşiğin üzerine "
 "ayarlayın."
+
+#: R/decisioncombine.b.R
+msgid ""
+"The lower bound quoted under Interpretation adds the lower Wilson limits of "
+"the rule's sensitivity and specificity and subtracts 1. It is usually more "
+"conservative than the Agresti-Caffo interval shown beside Youden's J in the "
+"combination table, so the two lower limits can differ."
+msgstr ""
+"Yorum sütununda belirtilen alt sınır, kuralın duyarlılık ve özgüllüğünün alt "
+"Wilson sınırlarını toplayıp 1 çıkarır. Genellikle kombinasyon tablosunda "
+"Youden J'nin yanında gösterilen Agresti-Caffo aralığından daha "
+"muhafazakârdır, bu nedenle iki alt sınır farklı olabilir."
 
 #: R/categorize.b.R
 msgid "the lower boundary (mean - {k} SD)"
@@ -168741,13 +169208,14 @@ msgid ""
 "The pattern-type filter \"{filter}\" matches none of the rows in this "
 "analysis, so the bar chart, heatmap and forest plot are blank. Pattern "
 "filters apply to exact result patterns such as \"+/+\"; a single-test "
-"analysis has no such rows, and the named strategies are not result patterns. "
-"Set the pattern filter back to \"All Patterns\" to see the plots."
+"analysis has no such rows, and the single-test and strategy rows are not "
+"result patterns. Set the pattern filter back to \"All Patterns\" to see the "
+"plots."
 msgstr ""
 "\"{filter}\" patern tipi filtresi bu analizdeki satırların hiçbiriyle "
 "eşleşmiyor, bu nedenle çubuk grafik, ısı haritası ve orman grafiği boştur. "
-"Patern filtreleri \"+/+\" gibi kesin sonuç paternlerine uygulanır; tek test "
-"analizinde bu tür satırlar yoktur ve adlandırılmış stratejiler sonuç "
+"Patern filtreleri \"+/+\" gibi tam sonuç paternlerine uygulanır; tek test "
+"analizinde bu tür satırlar yoktur ve tek test ile strateji satırları sonuç "
 "paternleri değildir. Grafikleri görmek için patern filtresini tekrar \"Tüm "
 "Paternler\"e ayarlayın."
 
@@ -169612,21 +170080,31 @@ msgstr ""
 "hastalıklı hastalar içinde ve özgüllüğü karşılaştırmak için hastalıksız "
 "hastalar içinde AYRI AYRI uygulanan McNemar testi, çünkü tüm örneklem "
 "üzerinde tek bir McNemar doğruluktan ziyade pozitiflik oranlarını "
-"karşılaştırır. Eşleştirilmiş PÖD ve NÖD karşılaştırmaları bunun yerine "
+"karşılaştırır. Eşleştirilmiş PPV ve NPV karşılaştırmaları bunun yerine "
 "genelleştirilmiş bir puan testi gerektirir. Bu analiz hiçbirini "
 "gerçekleştirmez."
 
 #: R/decisioncombine.b.R
 msgid ""
 "The rule that separates the two groups best in this sample is one that calls "
-"a patient positive when the tests are negative; or every named strategy "
-"(Parallel, Serial, Majority) performs at or below chance while an exact "
+"a patient positive when the tests are negative; or every named rule (each "
+"test alone and every strategy) performs at or below chance while an exact "
 "result pattern does not. Both are the signature of a reversed positive "
 "level: the arithmetic still works, but the sensitivity and specificity "
 "reported for each rule are then swapped, and the best-performing rule is one "
 "no clinician can apply. Check the level chosen as positive for the reference "
 "standard and for each test before interpreting any of these results."
 msgstr ""
+"Bu örneklemde ya iki grubu en iyi ayıran kural, testler negatif olduğunda "
+"hastayı pozitif sayan bir kuraldır ya da adlandırılmış her kural (tek başına "
+"her test ve her strateji) şans düzeyinde veya altında performans gösterirken "
+"tam sonuç paternlerinden biri şanstan daha iyi performans gösterir. Her "
+"ikisi de ters çevrilmiş bir pozitif düzeyin işaretidir: aritmetik yine "
+"işler, ancak her kural için bildirilen duyarlılık ve özgüllük bu durumda yer "
+"değiştirmiştir ve en iyi performans gösteren kural hiçbir klinisyenin "
+"uygulayamayacağı bir kuraldır. Bu sonuçlardan herhangi birini yorumlamadan "
+"önce referans standart ve her test için pozitif olarak seçilen düzeyi "
+"kontrol edin."
 
 #: R/survival.b.R
 msgid "the same hazard"
@@ -170730,10 +171208,6 @@ msgstr ""
 "kümesi sıraları korunarak, sıra değeri gözlenen olguların arkasına "
 "yerleştirildi."
 
-#: R/decisioncombine.b.R
-msgid "The two kinds of row"
-msgstr "İki tür satır"
-
 #: R/agreement.b.R
 msgid ""
 "The two rater variables declare different category sets. q is taken from the "
@@ -171583,18 +172057,40 @@ msgid ""
 "These rows have a 2-by-2 cell count below 5 (smallest cell {minimum}): "
 "{rows}. Their likelihood ratios, diagnostic odds ratios and confidence "
 "intervals rest on very few cases and may be unstable even when they look "
-"informative. Sensitivity, specificity and Youden's J on the same rows can "
-"still be sound, because those depend on the size of the two reference groups "
-"rather than on the smallest cell. Treat the ratio columns as exploratory and "
-"validate them in a larger independent sample."
+"informative. At such counts the log-scale intervals for these ratios are "
+"approximate: their actual coverage can be above or below the nominal 95%, "
+"and where the 0.5 continuity correction was applied it can fall below it. "
+"Sensitivity, specificity and Youden's J on the same rows can still be sound, "
+"because those depend on the size of the two reference groups rather than on "
+"the smallest cell. Treat the ratio columns as exploratory and validate them "
+"in a larger independent sample."
 msgstr ""
 "Bu satırların 2x2 hücre sayısı 5'in altındadır (en küçük hücre {minimum}): "
 "{rows}. Olabilirlik oranları, tanısal odds oranları ve güven aralıkları çok "
 "az sayıda olguya dayanır ve bilgilendirici görünseler bile kararsız "
-"olabilir. Aynı satırlardaki duyarlılık, özgüllük ve Youden J yine de sağlam "
-"olabilir, çünkü bunlar en küçük hücreden ziyade iki referans grubunun "
+"olabilir. Bu sayılarda bu oranların logaritmik ölçekli aralıkları "
+"yaklaşıktır: gerçek kapsama olasılıkları nominal %95'in üzerinde ya da "
+"altında olabilir ve 0,5 süreklilik düzeltmesinin uygulandığı yerlerde bunun "
+"altına düşebilir. Aynı satırlardaki duyarlılık, özgüllük ve Youden J yine de "
+"sağlam olabilir, çünkü bunlar en küçük hücreden ziyade iki referans grubunun "
 "boyutuna bağlıdır. Oran sütunlarını keşif amaçlı olarak ele alın ve bunları "
 "daha büyük bağımsız bir örneklemde doğrulayın."
+
+#: R/decisioncombine.b.R
+msgid ""
+"These rules have no estimate with a confidence interval for the statistic "
+"named, so their row is left empty in that facet: {details}. This happens for "
+"a pattern that no patient shows (PPV, LR+ and the diagnostic odds ratio are "
+"undefined there, and LR- is exactly 1 with no interval) and for a rule on "
+"which every patient, or no patient, tests positive. The tables show these "
+"cells, with the reason in their notes."
+msgstr ""
+"Bu kuralların belirtilen istatistik için güven aralığıyla birlikte bir "
+"tahmini yoktur, bu nedenle o panelde satırları boş bırakılır: {details}. Bu "
+"durum, hiçbir hastanın göstermediği bir paternde (burada PPV, LR+ ve tanısal "
+"odds oranı tanımsızdır ve LR- aralıksız olarak tam 1'dir) ve tüm hastaların "
+"ya da hiçbir hastanın test pozitif olduğu bir kuralda ortaya çıkar. Tablolar "
+"bu hücreleri, nedeni notlarında belirtilerek gösterir."
 
 #: R/jjhistostats.b.R
 msgid "These selected variables are not present in the data: {vars}."
@@ -171938,18 +172434,6 @@ msgstr ""
 "değerleri ve olabilirlik oranları dahil olmak üzere temel tanısal doğruluk "
 "ölçütlerini hesaplar."
 
-#: R/decisioncombine.b.R
-msgid ""
-"This analysis evaluates every way two or three diagnostic tests can be "
-"combined, scoring each against the reference standard on the same patients. "
-"With a single test selected it reports that one test alone, and the two row "
-"kinds described below do not arise."
-msgstr ""
-"Bu analiz, iki veya üç tanı testinin birleştirilebileceği her yolu "
-"değerlendirir ve her birini aynı hastalarda referans standarda göre puanlar. "
-"Tek bir test seçildiğinde yalnızca o testi raporlar ve aşağıda açıklanan iki "
-"satır türü ortaya çıkmaz."
-
 #: R/jjsegmentedtotalbar.b.R
 msgid ""
 "This analysis examined %s rows across %s categories of %s, with data "
@@ -172043,6 +172527,28 @@ msgid ""
 "state probabilities below are placeholders. Do not use the output for "
 "clinical interpretation, prognostic decisions, or research conclusions."
 msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"This analysis scores two or three diagnostic tests against the reference "
+"standard on the same patients: every exact result pattern, each test alone, "
+"and the usual ways of combining them -- Parallel and Serial across all the "
+"tests and, with three tests, across every pair, plus Majority. Mixed rules "
+"such as \"Test 1 positive and either Test 2 or Test 3 positive\" are not "
+"listed; the ranking says when some other way of calling the result patterns "
+"positive would score higher. With a single test selected it reports that one "
+"test alone (a single-test row, described below); the pattern and strategy "
+"rows do not arise."
+msgstr ""
+"Bu analiz, iki veya üç tanı testini aynı hastalarda referans standarda göre "
+"puanlar: her tam sonuç paterni, tek başına her test ve bunları "
+"birleştirmenin olağan yolları -- tüm testler genelinde ve üç testle her test "
+"çifti genelinde Paralel ve Seri, ayrıca Çoğunluk. \"Test 1 pozitif ve Test 2 "
+"ya da Test 3'ten biri pozitif\" gibi karma kurallar listelenmez; sonuç "
+"paternlerini pozitif saymanın başka bir yolu daha yüksek puan alacaksa "
+"sıralama bunu belirtir. Tek bir test seçildiğinde yalnızca o testi tek "
+"başına raporlar (aşağıda açıklanan bir tek test satırı); patern ve strateji "
+"satırları ortaya çıkmaz."
 
 #: R/riverplot.b.R
 msgid "This analysis shows the distribution and flow patterns of "
@@ -172451,13 +172957,13 @@ msgstr ""
 
 #: R/decisioncombine.b.R
 msgid ""
-"This is a descriptive, sample-dependent ranking of exact-pattern rules and "
-"named testing strategies. It is not a clinical guide or validated "
-"recommendation."
+"This is a descriptive, sample-dependent ranking of exact-pattern rules, each "
+"test alone and named testing strategies. It is not a clinical guide or "
+"validated recommendation."
 msgstr ""
-"Bu, kesin patern kurallarının ve adlandırılmış test stratejilerinin "
-"örnekleme bağımlı betimsel bir sıralamasıdır. Klinik bir kılavuz veya "
-"doğrulanmış öneri değildir."
+"Bu, tam patern kurallarının, tek başına her testin ve adlandırılmış test "
+"stratejilerinin örnekleme bağımlı betimsel bir sıralamasıdır. Klinik bir "
+"kılavuz veya doğrulanmış öneri değildir."
 
 #: R/kappaSizeCI.b.R
 msgid "This is a planning expectation, not a guarantee."
@@ -172937,7 +173443,7 @@ msgid ""
 "ratio and diagnostic odds ratio inherits that instability."
 msgstr ""
 "Bu örneklem {pos} hastalıklı ve {neg} hastalıksız eksiksiz olguya sahiptir. "
-"Duyarlılık ve PÖD hastalıklı sayısı ile, özgüllük ve NÖD ise hastalıksız "
+"Duyarlılık ve PPV hastalıklı sayısı ile, özgüllük ve NPV ise hastalıksız "
 "sayısı ile sınırlıdır; bu nedenle bir grupta 10'dan az olduğunda buna bağlı "
 "olan istatistikler tek hastalar tarafından belirlenir ve güven aralıkları "
 "olası aralığın çoğunu kapsar. Her olabilirlik oranı ve tanısal odds oranı bu "
@@ -180958,6 +181464,7 @@ msgstr ""
 #: decision/results/epirTable_number.columns.title
 #: decisioncalculator/results/epirTable_ratio.columns.title
 #: decisioncalculator/results/epirTable_number.columns.title
+#: decisioncombine/results/combinationTable.columns.title
 #: decisioncombine/results/combinationTableCI.columns.title
 #: decisioncombine/results/combinationTableCIRatios.columns.title
 #: decisioncompare/results/epirTable1.columns.title
@@ -188697,7 +189204,7 @@ msgid ""
 "rather than proportions, so they appear in their own table below."
 msgstr ""
 "Yukarıdaki kombinasyon tablosuyla eşleşmesi için yüzde olarak gösterilen "
-"duyarlılık, özgüllük, PÖD, NÖD ve doğruluk için Wilson puanı yüzde 95 güven "
+"duyarlılık, özgüllük, PPV, NPV ve doğruluk için Wilson puanı yüzde 95 güven "
 "aralıkları. Olabilirlik oranları ve tanısal odds oranı oranlar yerine "
 "sınırsız oranlar olduğundan aşağıdaki kendi tablolarında görünürler."
 
@@ -188909,24 +189416,38 @@ msgid ""
 "With fewer than 20 complete cases every proportion rests on a handful of "
 "patients, so one reclassified case moves sensitivity or specificity by "
 "several percentage points and the 95% confidence intervals are very wide. "
-"Read the intervals rather than the point estimates. Diagnostic accuracy "
-"studies usually need on the order of 100 cases before the intervals narrow "
-"usefully, and combination analysis splits those cases across four or eight "
+"Read the intervals rather than the point estimates. The number of cases a "
+"diagnostic accuracy study needs depends on the expected sensitivity and "
+"specificity, the precision wanted and the prevalence (Buderer 1996); as a "
+"rough rule of thumb the intervals seldom narrow usefully below about 100 "
+"cases, and combination analysis splits those cases across four or eight "
 "patterns."
 msgstr ""
 "20'den az eksiksiz olgu olduğunda her oran bir avuç hastaya dayanır, bu "
 "nedenle yeniden sınıflandırılan bir olgu duyarlılık veya özgüllüğü birkaç "
 "yüzde puanı hareket ettirir ve %95 güven aralıkları çok geniştir. Nokta "
-"tahminleri yerine aralıkları okuyun. Tanısal doğruluk çalışmaları, "
-"aralıkların yararlı şekilde daralmasından önce genellikle yaklaşık 100 "
-"olguya ihtiyaç duyar ve kombinasyon analizi bu olguları dört veya sekiz "
-"paterne böler."
+"tahminleri yerine aralıkları okuyun. Bir tanısal doğruluk çalışmasının "
+"ihtiyaç duyduğu olgu sayısı beklenen duyarlılık ve özgüllüğe, istenen "
+"kesinliğe ve prevalansa bağlıdır (Buderer 1996); kaba bir kural olarak "
+"aralıklar yaklaşık 100 olgunun altında nadiren yararlı biçimde daralır ve "
+"kombinasyon analizi bu olguları dört veya sekiz paterne böler."
 
 #: R/jjcorrmat.b.R
 msgid ""
 "With fewer than 3 variables, regular (zero-order) correlations are computed "
 "instead"
 msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"With one test there is only one rule to score, the test itself, so no "
+"ranking table is shown; the combination table reports that test on its own. "
+"Select a second test to rank the combinations."
+msgstr ""
+"Tek bir testle puanlanacak yalnızca bir kural vardır, o da testin "
+"kendisidir; bu nedenle sıralama tablosu gösterilmez, kombinasyon tablosu bu "
+"testi tek başına raporlar. Kombinasyonları sıralamak için ikinci bir test "
+"seçin."
 
 #: R/enhancedROC.b.R
 msgid ""
@@ -190310,6 +190831,80 @@ msgstr ""
 #: psychopdaROC/results/fixedSensSpecTable.columns.title
 msgid "Youden's J"
 msgstr "Youden J"
+
+#: decisioncombine/results/combinationTable.columns.superTitle
+msgid "Youden's J 95% CI"
+msgstr "Youden J %95 GA"
+
+#: R/decisioncombine.b.R
+msgid ""
+"Youden's J for {rule} is {youden} (Agresti-Caffo 95% CI {lower} to {upper}; "
+"equivalent AUC {auc}), below 0.40, the equivalent of an area under the ROC "
+"curve of 0.70, under which discrimination is conventionally read as poor "
+"(Hosmer, Lemeshow and Sturdivant 2013). The interval reaches 0.40, so this "
+"sample cannot rule out acceptable discrimination; a larger sample could "
+"settle it."
+msgstr ""
+"{rule} için Youden J değeri: {youden} (Agresti-Caffo %95 GA {lower} ila "
+"{upper}; eşdeğer AUC {auc}). Bu değer, ROC eğrisi altındaki 0.70'lik alana "
+"karşılık gelen 0.40'ın altındadır ve bu sınırın altı geleneksel olarak zayıf "
+"ayırt etme şeklinde yorumlanır (Hosmer, Lemeshow ve Sturdivant 2013). Aralık "
+"0.40'a ulaştığından bu örneklem kabul edilebilir bir ayırt etmeyi "
+"dışlayamaz; daha büyük bir örneklem bunu netleştirebilir."
+
+#: R/decisioncombine.b.R
+msgid ""
+"Youden's J for {rule} is {youden} (Agresti-Caffo 95% CI {lower} to {upper}; "
+"equivalent AUC {auc}). The interval includes 0, so this sample does not show "
+"that the test separates disease-present from disease-absent cases better "
+"than chance; it also reaches 0.40, the equivalent of an area under the ROC "
+"curve of 0.70 (Hosmer, Lemeshow and Sturdivant 2013), so acceptable "
+"discrimination is not ruled out either. Check the level chosen as positive, "
+"and whether the sample gives the precision you need."
+msgstr ""
+"{rule} için Youden J değeri: {youden} (Agresti-Caffo %95 GA {lower} ila "
+"{upper}; eşdeğer AUC {auc}). Aralık 0'ı içerir; dolayısıyla bu örneklem, "
+"testin hastalığı olan olguları hastalığı olmayanlardan şanstan daha iyi "
+"ayırdığını göstermez. Aralık ayrıca ROC eğrisi altındaki 0.70'lik alana "
+"karşılık gelen 0.40'a ulaşır (Hosmer, Lemeshow ve Sturdivant 2013), bu "
+"nedenle kabul edilebilir bir ayırt etme de dışlanamaz. Pozitif olarak "
+"seçilen düzeyi ve örneklemin ihtiyaç duyduğunuz kesinliği sağlayıp "
+"sağlamadığını kontrol edin."
+
+#: R/decisioncombine.b.R
+msgid ""
+"Youden's J for {rule} is {youden} (Agresti-Caffo 95% CI {lower} to {upper}; "
+"equivalent AUC {auc}). The whole interval lies below 0.40, the equivalent of "
+"an area under the ROC curve of 0.70, below which discrimination is "
+"conventionally read as poor (Hosmer, Lemeshow and Sturdivant 2013). This is "
+"a statistical convention, not a verdict on clinical usefulness: the "
+"likelihood ratios still show how far each result moves the probability of "
+"disease."
+msgstr ""
+"{rule} için Youden J değeri: {youden} (Agresti-Caffo %95 GA {lower} ila "
+"{upper}; eşdeğer AUC {auc}). Aralığın tamamı, ROC eğrisi altındaki 0.70'lik "
+"alana karşılık gelen 0.40'ın altında kalır; bu sınırın altı geleneksel "
+"olarak zayıf ayırt etme şeklinde yorumlanır (Hosmer, Lemeshow ve Sturdivant "
+"2013). Bu, klinik yararlılık hakkında bir hüküm değil, istatistiksel bir "
+"kabuldür: olabilirlik oranları her sonucun hastalık olasılığını ne kadar "
+"kaydırdığını yine de gösterir."
+
+#: R/decisioncombine.b.R
+msgid ""
+"Youden's J is below 0 but within sampling variation of 0 for {tests}, on the "
+"{n} complete cases analysed here. A test with no diagnostic value falls "
+"below 0 about half the time at any sample size, so a correctly coded but "
+"uninformative test and a test whose positive level is reversed cannot be "
+"told apart here. If the level chosen as positive is right, the test adds no "
+"information in this sample."
+msgstr ""
+"{tests} için Youden J 0'ın altında, ancak burada analiz edilen {n} eksiksiz "
+"olguda 0'dan farkı örnekleme değişkenliği sınırları içinde kalıyor. Tanısal "
+"değeri olmayan bir test, örneklem büyüklüğü ne olursa olsun zamanın yaklaşık "
+"yarısında 0'ın altına düşer; bu nedenle doğru kodlanmış ancak bilgi vermeyen "
+"bir test ile pozitif düzeyi ters çevrilmiş bir test burada birbirinden ayırt "
+"edilemez. Pozitif olarak seçilen düzey doğruysa, test bu örneklemde hiçbir "
+"bilgi eklemez."
 
 #: aivalidation/options/youdensJ.title
 #: aivalidation/ui/performanceMetrics/youdensJ.label

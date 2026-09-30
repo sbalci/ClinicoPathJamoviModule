@@ -4,10 +4,28 @@ title: Combine Medical Decision Tests
 jrs: '1.1'
 
 items:
-    - name: combinationTable
-      title: 'Test Combination Performance'
-      type: Table
-      rows: 0
+    - name: welcome
+      title: 'Getting Started'
+      type: Html
+      # Same form as jamovi/decision.r.yaml: a leading '!' would make the panel always
+      # visible, and a Variable's value needs length() rather than a bare truth test.
+      visible: (length(gold) == 0 || length(goldPositive) == 0 || length(test1) == 0 || length(test1Positive) == 0)
+      clearWith:
+        - gold
+        - goldPositive
+        - test1
+        - test1Positive
+
+    # Second, so an error or a serious warning (e.g. "Positive Levels May Be Inverted")
+    # is read before the tables it qualifies, as in decision. The &analysisInputs anchor
+    # lives here because a YAML alias must follow its anchor.
+    - name: notices
+      title: Notices
+      type: Html
+      visible: true
+      # Sources cited only by a notice; .renderNotices() lists those of the notices shown.
+      refs:
+        - HosmerLemeshow2013
       clearWith: &analysisInputs
         - gold
         - goldPositive
@@ -17,6 +35,12 @@ items:
         - test2Positive
         - test3
         - test3Positive
+
+    - name: combinationTable
+      title: 'Test Combination Performance'
+      type: Table
+      rows: 0
+      clearWith: *analysisInputs
       columns:
         - name: pattern
           title: 'Pattern'
@@ -68,6 +92,16 @@ items:
           title: "Youden's J"
           type: number
           format: zto
+        - name: youdenLower
+          title: 'Lower'
+          superTitle: "Youden's J 95% CI"
+          type: number
+          format: zto
+        - name: youdenUpper
+          title: 'Upper'
+          superTitle: "Youden's J 95% CI"
+          type: number
+          format: zto
         - name: lrPos
           title: 'LR+'
           type: number
@@ -77,7 +111,7 @@ items:
         - name: dor
           title: 'Diagnostic OR'
           type: number
-      description: "Counts and diagnostic performance metrics for each test combination pattern and clinical strategy, including prevalence, balanced accuracy, Youden's J, likelihood ratios, and diagnostic odds ratios"
+      description: "Counts and diagnostic performance metrics for each test combination pattern, each test alone and each combination strategy, including prevalence, balanced accuracy, Youden's J with its Agresti-Caffo 95 percent confidence interval, likelihood ratios, and diagnostic odds ratios"
 
     - name: combinationTableCI
       title: 'Proportions with 95% Confidence Intervals'
@@ -149,7 +183,7 @@ items:
           title: 'Percent'
           type: number
           format: pc
-      description: 'Frequency distribution of the gold standard (reference) test showing counts and percentages for each level'
+      description: 'Counts and percentages of disease-present and disease-absent cases (the reference standard dichotomised at the chosen positive level) among the complete cases used for the combination table'
 
     - name: crossTabTable
       title: 'Test Results Cross-Tabulation'
@@ -301,7 +335,7 @@ items:
       description: 'Grouped bar chart comparing sensitivity, specificity, PPV, NPV, and accuracy across test combinations'
 
     - name: heatmapPlot
-      title: 'Heatmap - All Metrics by Pattern'
+      title: 'Heatmap - Metrics by Pattern'
       type: Image
       width: 900
       height: 600
@@ -318,7 +352,7 @@ items:
         - test3Positive
         - filterStatistic
         - filterPattern
-      description: 'Color-coded heatmap showing all diagnostic metrics for each test pattern'
+      description: 'Color-coded heatmap of prevalence, sensitivity, specificity, PPV, NPV, accuracy and balanced accuracy for each pattern by default, or of one selected metric'
 
     - name: forestPlot
       title: 'Forest Plot - Confidence Intervals'
@@ -338,7 +372,7 @@ items:
         - test3Positive
         - filterStatistic
         - filterPattern
-      description: 'Forest plot displaying 95 percent confidence intervals for key diagnostic metrics'
+      description: 'Forest plot of 95 percent confidence intervals: proportions on a 0 to 100 percent axis, and LR+, LR- and the diagnostic odds ratio on a log axis with a dashed reference line at 1'
 
     - name: decisionTreePlot
       title: 'Decision Space: Sensitivity vs Specificity'
@@ -395,7 +429,7 @@ items:
         - name: rationale
           title: 'Interpretation'
           type: text
-      description: 'Sample-dependent descriptive ranking of eligible exact-pattern rules and named testing strategies by observed Youden index; this is not a clinical guide or validated recommendation'
+      description: 'Sample-dependent descriptive ranking of eligible exact-pattern rules, single tests and named testing strategies by observed Youden index; this is not a clinical guide or validated recommendation'
 
     - name: addedPattern
       title: 'Test Pattern Column'
@@ -435,17 +469,21 @@ items:
         - test3
         - test3Positive
 
-    - name: notices
-      title: Notices
-      type: Html
-      visible: true
-      clearWith: *analysisInputs
-
 refs:
     - ClinicoPathJamoviModule
     - DiagnosticTests
     - wilson1927
     - youden1950
     - haldane1956
+    - anscombe1956
+    - Simel1991
+    - woolf1955
+    - Glas2003
+    - Begg1983
+    - Ransohoff1978
+    - Leisenring2000
+    - Buderer1996
+    - AgrestiCaffo2000
+    - DescTools
     - forcats
 ...

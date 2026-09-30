@@ -1,5 +1,130 @@
 # ClinicoPath News
 
+## Unreleased — `decisioncombine` (Combine Medical Decision Tests) review fixes: single-test rules, inversion guard, notices (module 1.0.81.01, analysis 1.0.84)
+
+From the independent review of 2026-09-29
+(`development-ideas/decisioncombine-independent-review-2026-09-29.md`), the validation fixes of
+2026-09-28 and a follow-up check on 2026-09-30. A saved `.omv` can show extra rows, two extra
+columns and a different highest-ranked rule.
+
+### Follow-up check (2026-09-30): notices first, an interval for Youden's J, discrimination
+
+- **Notices now appear at the top of the results**, under the Getting Started panel, as in
+  `decision`. They used to come last, so an error or a serious warning such as "Positive Levels May
+  Be Inverted" sat below up to 180 table rows and every plot.
+- **Youden's J has a 95% confidence interval** (Agresti-Caffo, the method `decision` uses) in two
+  new columns of the combination table, and the inversion warnings quote the same interval. When
+  the ranking quotes its own, usually more conservative, bound for J, a note on the ranking table
+  says why the two lower limits differ.
+- **New notice on how well the best rule discriminates**, when the highest Youden's J is below 0.40
+  (an equivalent AUC below 0.70, conventionally poor). The intervals of all the rules scored decide
+  the message: a serious warning, "Poor Discrimination", only when every interval lies wholly below
+  0.40; a plain warning, "Discrimination Not Established", when every interval includes 0 but at
+  least one reaches 0.40; otherwise a plain warning, "Discrimination May Be Poor". In simulation an
+  acceptable test (true J 0.45) drew the serious warning in under 1% of samples at 15 to 60
+  patients per group; it fired on none of the eight bundled example datasets. It stays silent when
+  a reversed positive level is flagged, and Hosmer, Lemeshow & Sturdivant (2013) is listed under
+  References only when the notice is shown.
+- **A single test whose Youden's J is at or below 0 no longer gets the serious "No Rule Performs
+  Better Than Chance" unless the evidence supports it.** Fired on the bare point estimate, it called
+  the test anti-predictive and asked for its positive level to be reviewed, in about a quarter of
+  samples of a correctly coded test with true J 0.15 at 15 patients per group. Such a test now gets
+  the "Test Performs at Chance Level" note, as tests in a two- or three-test analysis already did,
+  and the graded discrimination notice above. A reversal beyond sampling variation still raises
+  "Positive Levels May Be Inverted". With two or three tests the warning is unchanged: it can appear
+  only when every rule's J is exactly 0.
+- **"Sparse Cell Counts" is a plain warning, not a serious one.** It fired on all eight bundled
+  example datasets: good rules have few false positives or false negatives by construction, and
+  the notice concerns only the likelihood-ratio and odds-ratio columns.
+- With one test and the ranking ticked, a note explains that there is nothing to rank, instead of
+  a table that ranked a single rule. The inversion and discrimination checks still run.
+- A blank decision-space plot (every case with the same reference-standard result) is explained by
+  a notice, as the other three plots' blanks already were. The forest-plot note for Youden's J no
+  longer says that no interval is calculated for it.
+- The heatmap is titled "Heatmap - Metrics by Pattern", and its help no longer says that the
+  default set includes Youden's J, which the heatmap leaves out on purpose. The level selectors
+  read "Positive level", and Test 2's is disabled until Test 2 is chosen.
+- Three notices that could never appear were removed, so translators no longer receive them.
+
+### BREAKING — rows and rankings that change
+
+- **Each test alone is now a row, and a candidate in the ranking.** With two or three tests the
+  table adds "Test 1 alone", "Test 2 alone" (and "Test 3 alone"), scored on the same complete
+  cases as the patterns. The ranking used to compare only result patterns and combination
+  strategies. With a strong test (sensitivity and specificity 0.90) and a weak one (0.60) it named
+  Parallel and Serial, tied at Youden's J 0.50, while Test 1 alone had J 0.80 and appeared nowhere.
+- **With three tests, Parallel and Serial are also listed for every pair of tests**
+  ("Parallel 1+2 (>=1 pos)", "Serial 1+2 (both pos)"). When the third test is useless the best rule
+  uses two tests, and no row could express it. The three-test table grows from 11 to 20 rows and the
+  two-test table from 6 to 8; the forest plot is taller.
+- **On a tie the rule that uses fewer tests is shown first**, and the winner and the list of tied
+  rules now use one tolerance.
+- **The ranking says when another way of calling the result patterns positive would score higher.**
+  Youden's J is additive over the result patterns, so the best any rule can reach is known; the
+  sentence names those patterns, states the gain over the highest-ranked rule, and flags the rule
+  as chosen on these data. It appears only when the gain is visible at three decimals.
+- **The pattern column is written for every case with all selected tests observed**, including
+  cases without a reference-standard result. Those unverified patients, the ones a rule would be
+  applied to, used to get a blank.
+
+### BREAKING — notices that change
+
+- **"Positive Levels May Be Inverted" now checks each test.** A test whose Youden's J lies below 0
+  beyond sampling variation (its Agresti-Caffo 95% interval is wholly below 0) is named, with that
+  interval and the number of cases. With two or three tests, a swapped positive level on the weaker
+  test used to pass silently, and the ranking then crowned the pattern "+/-", that is "positive when
+  Test 2 is negative". A J below 0 within sampling variation gets a note, "Test Performs at Chance
+  Level", instead: a correctly coded test with no diagnostic value falls below 0 about half the
+  time at any sample size, and a serious warning there would be a false alarm. The older collective
+  check (the all-negative pattern ranking first, or every named rule at or below chance) is graded
+  the same way: the pattern behind it must clear chance. Ungraded, it raised the warning on about
+  27% of samples of two tests unrelated to the disease; graded, all inversion warnings together
+  fire on about 7%, while a reversed reference standard is still caught in 50 of 50 samples.
+- **The sparse-cell notice no longer calls the likelihood-ratio intervals conservative.** Simulated
+  coverage of the log-scale LR+ and LR- intervals falls to 0.89 for a near-perfect test in a small
+  series, exactly where the 0.5 correction applies (Fagerland, Lydersen & Laake 2015). The notice
+  now says these intervals are approximate and can fall below 95%.
+- **The Assumptions panel says each row must be a different patient.** With three specimens per
+  patient (within-patient correlation 0.4), a nominal 95% interval covers the truth about 86% of the
+  time.
+- **The 0.5 continuity correction is described as what it is:** 0.5 added to all four cells. The
+  Haldane-Anscombe name now refers to the diagnostic odds ratio only.
+- The About panel no longer claims to evaluate "every way" the tests can be combined. It lists the
+  rules evaluated and says that mixed rules such as "Test 1 and either Test 2 or Test 3" are not.
+
+### Corrected
+
+- A test column named like an internal working column (`goldVariable2`, `test1Variable2`) was
+  overwritten by the recoded reference standard before it was read, so that test was silently
+  replaced (a perfect test when its levels were Positive/Negative, a constant one otherwise). The
+  recoded columns now live in their own data frame.
+- The ranking's "advantage is not established" sentence compared the winner with a rule that has
+  the winner's own 2x2 table (for example Test 1 alone and Parallel when Test 2 is positive only
+  where Test 1 is). It now compares with the best rule that has a different 2x2 table; rules with
+  the winner's table are named as a tie.
+- The bar chart and the heatmap list rules in table order instead of alphabetically. The
+  decision-space plot names every rule at a point once ("Serial (all pos) = +/+/+" used to print
+  one label over the other), no longer cuts labels at 100% sensitivity, and colours points by row
+  type rather than with 20 near-identical shades.
+- A Getting Started panel lists the variables to choose until the gold standard and Test 1 are
+  selected. A new analysis used to show three empty tables and nothing else.
+- References added: Agresti & Caffo 2000, for the interval the inversion guard reports, and
+  DescTools, which computes it.
+
+### Earlier fixes in this release (validation of 2026-09-27, fixed 2026-09-28)
+
+- PPV, NPV and their Wilson intervals are blank when every case is disease-present or every case is
+  disease-absent, as the notice says.
+- The ranking merges only Serial with the all-positive pattern. Distinct rules that share a 2x2
+  table are counted and named as ties.
+- The exported R syntax quotes variable and level names, so it runs for names with spaces or
+  symbols.
+- The forest plot draws proportions on a 0-100% axis and LR+, LR- and the DOR on a log axis with a
+  dashed line at 1. Its height follows the number of rows and survives export and reopen.
+- A single test with Youden's J below 0 raises "Positive Levels May Be Inverted" at any sample size.
+- References added: Anscombe 1956, Simel 1991, Woolf 1955, Glas 2003, Begg & Greenes 1983,
+  Ransohoff & Feinstein 1978, Leisenring 2000, Buderer 1996.
+
 ## Unreleased — `decision` (Medical Decision) review fixes: exclusions, intervals, likelihood ratios, wording (module 1.0.81.01, analysis 1.0.84)
 
 Each numeric change below was checked against an independent calculation (hand formulas,
@@ -65,6 +190,12 @@ different numbers or wording than before.
 
 - The Fagan nomogram's negative-result line no longer disappears for a strong rule-out test at
   low prevalence. A post-test probability below 0.32% used to be dropped from the plot.
+- A test or reference-standard column whose name contains a backslash (`IHC\score`) can now be
+  analysed. The name used to lose its backslash, so every table stayed empty under a false
+  "level not found" error.
+- A level or column name that starts with `<` and a letter (`<LOD`, `<Negative>`) is no longer blank
+  in the raw data tables, the misclassified-case tables and their column headers. jamovi read it
+  as markup; it now shows with a space after the `<` (`< LOD`).
 
 ## Unreleased — `agreement` review fixes: category order, marginal homogeneity, labels (module 1.0.81.01)
 

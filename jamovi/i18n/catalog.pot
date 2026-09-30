@@ -422,6 +422,23 @@ msgid ""
 "statistical analysis.'"
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid ""
+"\"{statistic}\" has no estimate with a confidence interval for any row "
+"selected by the pattern filter \"{filter}\" (for example a pattern that no "
+"patient shows, or a sample with only one gold-standard outcome), so the "
+"forest plot is blank. The tables show these cells, with the reason in their "
+"notes."
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"\"{statistic}\" is blank for every row selected by the pattern filter "
+"\"{filter}\" (for example a sample with only one gold-standard outcome, or "
+"patterns that no patient shows), so the selected plots have nothing to show "
+"for it. The other notices and the combination-table notes give the reason."
+msgstr ""
+
 #: R/decisioncurve.b.R
 msgid "\"Clinical decision rule\" is enabled but no rule variable has been selected."
 msgstr ""
@@ -1313,7 +1330,8 @@ msgstr ""
 #: R/decisioncombine.b.R
 msgid ""
 "{n} rules tie on Youden's J ({rules}); \"{shown}\" is displayed only because "
-"it comes first."
+"it comes first (named rules are listed before exact patterns, and rules that "
+"use fewer tests come first)."
 msgstr ""
 
 #: R/survivalPower.b.R
@@ -1563,8 +1581,32 @@ msgstr ""
 msgid "{stat2nl} = {stat}, df = {df}"
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid ""
+"{statistics}: no selected row has both an estimate and a confidence interval "
+"(for example a pattern that no patient shows, where PPV, LR+ and the "
+"diagnostic odds ratio are undefined and LR- is exactly 1 with no interval, "
+"or a sample with only one gold-standard outcome), so the forest plot omits "
+"them. The tables show these cells, with the reason in their notes."
+msgstr ""
+
 #: R/linechart.b.R
 msgid "{strength} {direction} correlation, {sig}"
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "{test} (J = {youden}, 95% CI {lower} to {upper})"
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"{test} classifies worse than chance in this sample, beyond sampling "
+"variation: Youden's J = {youden} (Agresti-Caffo 95% CI {lower} to {upper}) "
+"on the {n} complete cases analysed here. Its sensitivity and specificity add "
+"up to less than 1, so calling its other level positive would do better; this "
+"is the signature of a reversed positive level. Check the level chosen as "
+"positive for {test} and for the reference standard before interpreting any "
+"of these results."
 msgstr ""
 
 #: R/decisioncompare.b.R
@@ -11134,6 +11176,16 @@ msgid ""
 "those studies would itself tilt the test."
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid ""
+"A continuity correction of 0.5, added to all four cells, was applied to {n} "
+"row(s) with at least one zero cell ({patterns}). For the diagnostic odds "
+"ratio this is the Haldane-Anscombe correction; the likelihood ratios use the "
+"same adjustment. It affects LR+, LR-, the diagnostic odds ratio and their "
+"confidence intervals only; sensitivity, specificity, PPV and NPV on the same "
+"rows use the observed counts."
+msgstr ""
+
 #: crosstable/options/showSummary.description.jamovi
 msgid ""
 "A copy-ready paragraph below the table: sample size, groups, the tests the "
@@ -11255,15 +11307,6 @@ msgid ""
 "A Haldane-Anscombe 0.5 correction was applied to the likelihood ratios "
 "because a zero cell was present. The epiR confidence-interval table uses raw "
 "counts, so its point estimates may differ."
-msgstr ""
-
-#: R/decisioncombine.b.R
-msgid ""
-"A Haldane-Anscombe continuity correction of 0.5 was applied to {n} "
-"pattern(s) with at least one zero cell ({patterns}). The correction affects "
-"LR+, LR-, the diagnostic odds ratio and their confidence intervals only; "
-"sensitivity, specificity, PPV and NPV on the same rows use the observed "
-"counts."
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -11512,10 +11555,15 @@ msgid ""
 "pattern\" rather than for a negative test. Accuracy and NPV on such a row "
 "are dominated by the patients who did not show the pattern, so a rare "
 "pattern reports both close to 1 minus the prevalence however uninformative "
-"it is -- read Youden's J there, not Accuracy. The named rows -- Parallel "
-"(>=1 pos), Serial (all pos) and, with three tests, Majority (>=2/3 pos) -- "
-"are the strategies you would normally apply to a patient; Serial (all pos) "
-"is numerically identical to the all-positive pattern row."
+"it is -- read Youden's J there, not Accuracy. The named rows are rules you "
+"would normally apply to a patient: each test alone (\"Test 1 alone\"), "
+"Parallel (>=1 pos) and Serial (all pos) and, with three tests, the same two "
+"rules for every pair of tests (\"Parallel 1+2 (>=1 pos)\", \"Serial 1+2 "
+"(both pos)\") and Majority (>=2/3 pos). Every row is scored on the same "
+"complete cases; Serial (all pos) is numerically identical to the "
+"all-positive pattern row. The individual-test tables use each test's own "
+"pairwise-complete cases, so with missing data they can differ from the "
+"\"alone\" rows."
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -11673,6 +11721,18 @@ msgid ""
 "the square root of their number."
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid ""
+"A SINGLE-TEST row (\"Test 1 alone\") applies one test by itself to the same "
+"patients, so every combination can be compared with the tests it is built "
+"from. A combination that is no better than one of its own tests on "
+"sensitivity and no better on specificity adds cost without adding accuracy. "
+"One with a lower Youden's J than a single test can still suit one clinical "
+"role, because J weighs a missed case and a false positive equally: Parallel "
+"raises sensitivity (to rule out disease), Serial raises specificity (to rule "
+"it in)."
+msgstr ""
+
 #: R/multisurvival.b.R
 msgid "A small p-value indicates the covariate significantly improves fit."
 msgstr ""
@@ -11710,7 +11770,9 @@ msgid ""
 "A STRATEGY row is a rule you would normally apply to a patient. Parallel "
 "(>=1 pos) calls positive if any test is positive, which raises sensitivity "
 "and lowers specificity. Serial (all pos) requires every test to be positive, "
-"which does the reverse. Majority (>=2/3 pos) needs two of three."
+"which does the reverse. With three tests the same two rules are also listed "
+"for each pair of tests (\"Parallel 1+2 (>=1 pos)\", \"Serial 1+2 (both "
+"pos)\"), and Majority (>=2/3 pos) needs two of three."
 msgstr ""
 
 #: R/nogoldstandard.b.R
@@ -12037,6 +12099,15 @@ msgstr ""
 #: jjcoefstats/results/about.title
 #: jjcorrmat/results/about.title
 msgid "About"
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"About 100 cases is a rough rule of thumb, not a requirement: the number "
+"actually needed depends on the expected sensitivity and specificity, the "
+"precision wanted and the prevalence (Buderer 1996). This sample supports "
+"preliminary estimates, particularly once it is divided across the result "
+"patterns."
 msgstr ""
 
 #: agreement/results/subgroupExplanation.title
@@ -13095,8 +13166,9 @@ msgstr ""
 
 #: decisioncombine/options/addedPattern.description.ui
 msgid ""
-"Add a new column to the dataset containing the test combination pattern for "
-"each case (e.g., \"+/+\", \"+/-\", \"-/-\")."
+"Add a new column to the dataset containing the test combination pattern "
+"(e.g., \"+/+\", \"+/-\", \"-/-\") for each case with every selected test "
+"observed, including cases without a reference-standard result."
 msgstr ""
 
 #: R/decisioncurve.b.R
@@ -16909,10 +16981,6 @@ msgstr ""
 msgid "All variables combined in a single summary table"
 msgstr ""
 
-#: R/decisioncombine.b.R
-msgid "All Zero Counts"
-msgstr ""
-
 #: agreement/options/specificAllCategories.title
 msgid "All-category estimates"
 msgstr ""
@@ -19519,13 +19587,6 @@ msgstr ""
 
 #: bayesiannetworkma/options/network_type/arm_based.title
 msgid "Arm-Based"
-msgstr ""
-
-#: R/decisioncombine.b.R
-msgid ""
-"Around 100 cases or more is the usual target for a stable diagnostic "
-"accuracy estimate; this sample supports preliminary estimates, particularly "
-"once it is divided across the result patterns."
 msgstr ""
 
 #: R/alluvial.b.R
@@ -31626,6 +31687,7 @@ msgid ""
 msgstr ""
 
 #: R/decision.b.R
+#: R/decisioncombine.b.R
 msgid "Choose the diagnostic test you want to evaluate"
 msgstr ""
 
@@ -31677,6 +31739,7 @@ msgid "Choose the plotting backend for optimal performance."
 msgstr ""
 
 #: R/decision.b.R
+#: R/decisioncombine.b.R
 msgid ""
 "Choose the reference-standard variable that defines disease status in this "
 "analysis (e.g., biopsy result, final diagnosis)"
@@ -31790,10 +31853,12 @@ msgid "Choose which gold-standard level means disease absent"
 msgstr ""
 
 #: R/decision.b.R
+#: R/decisioncombine.b.R
 msgid "Choose which level indicates disease is present"
 msgstr ""
 
 #: R/decision.b.R
+#: R/decisioncombine.b.R
 msgid "Choose which level represents a positive test result"
 msgstr ""
 
@@ -36629,7 +36694,10 @@ msgid "Color-code segments within ridges"
 msgstr ""
 
 #: decisioncombine/results/heatmapPlot.description
-msgid "Color-coded heatmap showing all diagnostic metrics for each test pattern"
+msgid ""
+"Color-coded heatmap of prevalence, sensitivity, specificity, PPV, NPV, "
+"accuracy and balanced accuracy for each pattern by default, or of one "
+"selected metric"
 msgstr ""
 
 #: aeplot/options/colorScheme/colorblind.title
@@ -36967,6 +37035,7 @@ msgstr ""
 msgid "Combine data from multiple sources or time periods"
 msgstr ""
 
+#: R/decisioncombine.b.R
 #: package/analyses/decisioncombine.title
 #: package/analyses/decisioncombine.menuTitle
 #: decisioncombine/options.title
@@ -38743,8 +38812,9 @@ msgstr ""
 #: R/decisioncombine.b.R
 msgid ""
 "Complete-case analysis: a patient missing the reference standard or any "
-"selected test is excluded from the combination table. The number excluded is "
-"reported above when it is not zero."
+"selected test is excluded from the combination table. When any are excluded, "
+"the number is given in the warning \"Removed N case(s) with missing values\" "
+"in the notices at the top of the results."
 msgstr ""
 
 #: synopticcompleteness/options/completeThreshold.title
@@ -44597,9 +44667,17 @@ msgstr ""
 
 #: decisioncombine/results/combinationTable.description
 msgid ""
-"Counts and diagnostic performance metrics for each test combination pattern "
-"and clinical strategy, including prevalence, balanced accuracy, Youden's J, "
-"likelihood ratios, and diagnostic odds ratios"
+"Counts and diagnostic performance metrics for each test combination pattern, "
+"each test alone and each combination strategy, including prevalence, "
+"balanced accuracy, Youden's J with its Agresti-Caffo 95 percent confidence "
+"interval, likelihood ratios, and diagnostic odds ratios"
+msgstr ""
+
+#: decisioncombine/results/goldFreqTable.description
+msgid ""
+"Counts and percentages of disease-present and disease-absent cases (the "
+"reference standard dichotomised at the chosen positive level) among the "
+"complete cases used for the combination table"
 msgstr ""
 
 #: R/vartree.b.R
@@ -50627,6 +50705,10 @@ msgstr ""
 msgid "Decision Variables:"
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid "Decision-Space Plot Is Blank"
+msgstr ""
+
 #: decisioncombine/results/decisionTreePlot.description
 msgid ""
 "Decision-space scatter plot positioning each test pattern by its sensitivity "
@@ -50847,6 +50929,7 @@ msgstr ""
 msgid "Default Imputation Method"
 msgstr ""
 
+#: R/decisioncombine.b.R
 #: decisioncombine/options/filterStatistic/all.title
 msgid "Default Metric Set"
 msgstr ""
@@ -54030,6 +54113,10 @@ msgid ""
 "pseudo-observations rather than patients."
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid "Discrimination May Be Poor"
+msgstr ""
+
 #: idi/options/discrimination_measure.title
 msgid "Discrimination Measure"
 msgstr ""
@@ -54050,6 +54137,10 @@ msgstr ""
 
 #: stagemigration/ui[9][2]/forestDiscriminationMetrics.label
 msgid "Discrimination metrics"
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "Discrimination Not Established"
 msgstr ""
 
 #: clinicalvalidation/options/performance_metrics/discrimination.title
@@ -54179,6 +54270,7 @@ msgstr ""
 msgid "Disease Present"
 msgstr ""
 
+#: R/decisioncombine.b.R
 #: decision/options/goldPositive.title
 #: decisioncombine/options/goldPositive.title
 #: decisioncombine/ui[0][0]/goldPositive.label
@@ -54416,6 +54508,13 @@ msgstr ""
 msgid ""
 "Display 95 percent confidence intervals for the plotted estimand: survival "
 "in a standard analysis or cumulative incidence in a competing-risk analysis."
+msgstr ""
+
+#: decisioncombine/options/showHeatmap.description.ui
+msgid ""
+"Display a color-coded heatmap of prevalence, sensitivity, specificity, PPV, "
+"NPV, accuracy and balanced accuracy for each row, or of one metric selected "
+"under Filters."
 msgstr ""
 
 #: stagemigration/options/showMigrationHeatmap.description
@@ -55142,12 +55241,6 @@ msgstr ""
 msgid ""
 "Display hazard ratios from time-dependent Cox regression with confidence "
 "intervals and p-values."
-msgstr ""
-
-#: decisioncombine/options/showHeatmap.description.ui
-msgid ""
-"Display heatmap showing all metrics for all test patterns with color-coded "
-"performance values."
 msgstr ""
 
 #: ihcpredict/options/showConfidencePlot.description
@@ -61393,10 +61486,6 @@ msgstr ""
 msgid "Estimate"
 msgstr ""
 
-#: R/decisioncombine.b.R
-msgid "Estimate (95% CI)"
-msgstr ""
-
 #: treatmentmeta/results/bayesian_results.columns.title
 msgid "Estimate (Mean/Median)"
 msgstr ""
@@ -62746,23 +62835,23 @@ msgid ""
 msgstr ""
 
 #: R/decisioncombine.b.R
-msgid ""
-"Every complete case has gold standard \"{level}\", so this sample contains "
-"no disease-absent cases. Specificity and NPV cannot be estimated and are "
-"reported as blank, and so are LR+, LR- and the diagnostic odds ratio: each "
-"of those needs a specificity, and computing one from the continuity "
-"correction would report a number that reflects no patient. Diagnostic "
-"accuracy assessment requires both diseased and non-diseased cases."
+msgid "Every combination that uses such a test is affected as well."
 msgstr ""
 
 #: R/decisioncombine.b.R
 msgid ""
-"Every complete case has gold standard \"{level}\", so this sample contains "
-"no disease-present cases. Sensitivity and PPV cannot be estimated and are "
-"reported as blank, and so are LR+, LR- and the diagnostic odds ratio: each "
-"of those needs a sensitivity, and computing one from the continuity "
-"correction would report a number that reflects no patient. Diagnostic "
-"accuracy assessment requires both diseased and non-diseased cases."
+"Every complete case used for the combination analysis has gold standard "
+"\"{level}\", so the combination analysis contains no disease-absent cases. "
+"Specificity cannot be estimated; PPV and NPV are fixed at 100% and 0% by the "
+"sampling rather than by any test; Accuracy only repeats the sensitivity; and "
+"Balanced Accuracy and Youden's J, which combine sensitivity with "
+"specificity, cannot be formed. All of these are reported as blank in the "
+"combination table. So are LR+, LR- and the diagnostic odds ratio: each of "
+"those needs a specificity, and computing one from the continuity correction "
+"would report a number that reflects no patient. Diagnostic accuracy "
+"assessment requires both diseased and non-diseased cases. Individual-test "
+"tables use their own pairwise-complete cases and may still contain both "
+"outcomes."
 msgstr ""
 
 #: R/agreement.b.R
@@ -62852,6 +62941,15 @@ msgid ""
 "disease status, and they stay valid when the tests share biology, specimen "
 "or technology. That is the main difference from a sequential-testing "
 "calculator, which must assume independence and warns about it."
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"Every row must be a different patient. Several specimens, cores, blocks, "
+"lesions or lymph nodes from the same patient are correlated, and every "
+"confidence interval here treats the rows as independent, so with such data "
+"the intervals are too narrow. Use one result per patient, or a method that "
+"accounts for clustering."
 msgstr ""
 
 #: R/agreement.b.R
@@ -66965,10 +67063,10 @@ msgstr ""
 msgid ""
 "Filter the bar chart, heatmap and forest plot by pattern type: all patterns, "
 "all tests positive (+/+, +/+/+), all tests negative (-/-, -/-/-), or "
-"mixed/discordant patterns. Named strategy rows are not result patterns and "
-"are excluded whenever a specific pattern type is selected. The performance "
-"tables always show every pattern, and the decision-space plot always shows "
-"every row so patterns remain comparable."
+"mixed/discordant patterns. Single-test and strategy rows are not result "
+"patterns and are excluded whenever a specific pattern type is selected. The "
+"performance tables always show every pattern, and the decision-space plot "
+"always shows every row so patterns remain comparable."
 msgstr ""
 
 #: enhancedfactorvariable/ui[2].label
@@ -69171,14 +69269,12 @@ msgstr ""
 msgid "Forest Plot Customization"
 msgstr ""
 
-#: decisioncombine/results/forestPlot.description
-msgid ""
-"Forest plot displaying 95 percent confidence intervals for key diagnostic "
-"metrics"
-msgstr ""
-
 #: diagnosticmeta/results/forestplot_explanation.title
 msgid "Forest Plot Explanation"
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "Forest Plot Has Nothing to Draw"
 msgstr ""
 
 #: jforester/results/interpretation.title
@@ -69187,6 +69283,13 @@ msgstr ""
 
 #: R/decisioncombine.b.R
 msgid "Forest Plot Not Available for Selected Statistic"
+msgstr ""
+
+#: decisioncombine/results/forestPlot.description
+msgid ""
+"Forest plot of 95 percent confidence intervals: proportions on a 0 to 100 "
+"percent axis, and LR+, LR- and the diagnostic odds ratio on a log axis with "
+"a dashed reference line at 1"
 msgstr ""
 
 #: agreement/results/subgroupForestPlotImage.title
@@ -69685,12 +69788,6 @@ msgstr ""
 
 #: pathagreement/results/raterFrequencyTables/frequencyTable.title
 msgid "Frequency Distribution"
-msgstr ""
-
-#: decisioncombine/results/goldFreqTable.description
-msgid ""
-"Frequency distribution of the gold standard (reference) test showing counts "
-"and percentages for each level"
 msgstr ""
 
 #: enhancedfrequency/results/results/frequencyDistributionPlot.title
@@ -71508,6 +71605,7 @@ msgstr ""
 #: conditionalsurvival/results/todo.title
 #: datetimeconverter/results/welcome.title
 #: decision/results/welcome.title
+#: decisioncombine/results/welcome.title
 #: diagnosticmeta/results/instructions.title
 #: hierarchicalpathology/results/instructions.title
 #: mlpathology/results/instructions.title
@@ -71895,6 +71993,7 @@ msgstr ""
 msgid "gold standard"
 msgstr ""
 
+#: R/decisioncombine.b.R
 #: decisioncombine/options/gold.title
 #: decisioncombine/ui[0][0].label
 #: decisioncompare/options/gold.title
@@ -74512,7 +74611,7 @@ msgid "Heatmap"
 msgstr ""
 
 #: decisioncombine/results/heatmapPlot.title
-msgid "Heatmap - All Metrics by Pattern"
+msgid "Heatmap - Metrics by Pattern"
 msgstr ""
 
 #: ihcthreshold/options/plotType/heatmap.title
@@ -82672,16 +82771,6 @@ msgstr ""
 msgid "Invalid competing-risk coding"
 msgstr ""
 
-#: R/decisioncombine.b.R
-msgid "Invalid Counts"
-msgstr ""
-
-#: R/decisioncombine.b.R
-msgid ""
-"Invalid counts were detected for Test {test}. The individual analysis was "
-"skipped."
-msgstr ""
-
 #: R/decisioncalculator.b.R
 msgid "Invalid cut-off inputs"
 msgstr ""
@@ -83389,10 +83478,11 @@ msgstr ""
 
 #: R/decisioncombine.b.R
 msgid ""
-"Its advantage is not established: the lower bound of this rule's Youden's J "
-"({lower}) falls at or below the next-best rule's point estimate "
-"({runnerUp}), so the ranking may reflect sampling variation rather than a "
-"real difference."
+"Its advantage is not established: a conservative 95% lower bound for this "
+"rule's Youden's J ({lower}, from the lower Wilson limits of its sensitivity "
+"and specificity) falls at or below the point estimate of the best rule with "
+"a different 2-by-2 table ({runnerUp}), so the ranking may reflect sampling "
+"variation rather than a real difference."
 msgstr ""
 
 #: R/decisioncurve.b.R
@@ -88837,6 +88927,7 @@ msgstr ""
 #: decision/results/epirTable_number.columns.title
 #: decisioncalculator/results/epirTable_ratio.columns.title
 #: decisioncalculator/results/epirTable_number.columns.title
+#: decisioncombine/results/combinationTable.columns.title
 #: decisioncombine/results/combinationTableCI.columns.title
 #: decisioncombine/results/combinationTableCIRatios.columns.title
 #: decisioncompare/results/epirTable1.columns.title
@@ -89351,28 +89442,34 @@ msgstr ""
 
 #: R/decisioncombine.b.R
 msgid ""
-"LR+, LR- and the diagnostic odds ratio are computed with a Haldane-Anscombe "
-"0.5 continuity correction when a cell is zero, so they stay finite; "
-"sensitivity, specificity, PPV and NPV on the same row use the observed "
-"counts. The two therefore need not agree exactly at a zero cell. The "
-"correction repairs a sampling zero, not a structural one, so it is withheld "
-"whenever a whole margin is empty, and what is then left blank differs "
-"between the two kinds of empty margin. On a pattern that no patient "
-"exhibits, LR+ and the odds ratio are 0/0 and are left blank, while LR- is "
-"exactly 1 and is shown as such: any other result leaves the odds unchanged. "
-"The mirror case, a row with no test-negative patients, blanks LR- and the "
-"odds ratio and shows LR+ as exactly 1. In a sample where every case is "
-"disease-present, or every case is disease-absent, sensitivity or specificity "
-"cannot be estimated at all, so all three ratios are left blank in every row."
+"LR+, LR- and the diagnostic odds ratio add 0.5 to all four cells when a cell "
+"is zero, so they stay finite (for the odds ratio this is the "
+"Haldane-Anscombe correction; the likelihood ratios use the same adjustment); "
+"the proportions on the same row use the observed counts. A row on which no "
+"patient tests positive (a pattern nobody shows, or a rule that is never "
+"positive) is left BLANK rather than corrected: with no predicted positives, "
+"LR+ and the odds ratio are undefined and are not invented."
 msgstr ""
 
 #: R/decisioncombine.b.R
 msgid ""
-"LR+, LR- and the diagnostic odds ratio use a Haldane-Anscombe 0.5 correction "
-"when a cell is zero, so they stay finite; the proportions on the same row "
-"use the observed counts. A pattern that no patient exhibits is left BLANK "
-"rather than corrected: with no predicted positives, LR+ and the odds ratio "
-"are undefined and are not invented."
+"LR+, LR- and the diagnostic odds ratio are computed with 0.5 added to all "
+"four cells when a cell is zero, so they stay finite (for the odds ratio this "
+"is the Haldane-Anscombe correction; the likelihood ratios use the same "
+"adjustment); sensitivity, specificity, PPV and NPV on the same row use the "
+"observed counts. The two therefore need not agree exactly at a zero cell. "
+"The correction repairs a sampling zero, not a structural one, so it is "
+"withheld whenever a whole margin is empty, and what is then left blank "
+"differs between the two kinds of empty margin. On a row with no "
+"test-positive patients (a pattern nobody shows, or a rule that is never "
+"positive), LR+ and the odds ratio are 0/0 and are left blank, while LR- is "
+"exactly 1 and is shown as such: any other result leaves the odds unchanged. "
+"The mirror case, a row with no test-negative patients, blanks LR- and the "
+"odds ratio and shows LR+ as exactly 1. In a sample where every case is "
+"disease-present, or every case is disease-absent, sensitivity or specificity "
+"cannot be estimated at all, so all three ratios are left blank in every row, "
+"as are PPV and NPV, which the sampling alone fixes at 0% or 100%, and "
+"Accuracy, which then only repeats the sensitivity or specificity."
 msgstr ""
 
 #: mixedeffectscox/results/modelComparison.columns.title
@@ -92438,7 +92535,6 @@ msgstr ""
 #: package/analyses/nogoldstandard.menuGroup
 #: package/analyses/decisioncompare.menuGroup
 #: package/analyses/psychopdaROC.menuGroup
-#: package/analyses/decisioncombine.menuGroup
 #: package/analyses/cotest.menuGroup
 #: package/analyses/sequentialtests.menuGroup
 #: package/analyses/decisioncurve.menuGroup
@@ -92449,7 +92545,6 @@ msgstr ""
 #: betabinomialdiagnostic/options.menuSubgroup
 #: cotest/options.menuGroup
 #: decisioncalculator/options.menuGroup
-#: decisioncombine/options.menuGroup
 #: decisioncompare/options.menuGroup
 #: decisioncurve/options.menuGroup
 #: enhancedROC/options.menuGroup
@@ -92590,8 +92685,10 @@ msgstr ""
 
 #: package/analyses/agreement.menuGroup
 #: package/analyses/decision.menuGroup
+#: package/analyses/decisioncombine.menuGroup
 #: agreement/options.menuGroup
 #: decision/options.menuGroup
+#: decisioncombine/options.menuGroup
 msgid "meddecideT"
 msgstr ""
 
@@ -102404,6 +102501,22 @@ msgid ""
 msgstr ""
 
 #: R/decisioncombine.b.R
+msgid ""
+"No complete case used for the combination analysis has gold standard "
+"\"{level}\" (the level chosen as disease present), so the combination "
+"analysis contains no disease-present cases. Sensitivity cannot be estimated; "
+"PPV and NPV are fixed at 0% and 100% by the sampling rather than by any "
+"test; Accuracy only repeats the specificity; and Balanced Accuracy and "
+"Youden's J, which combine sensitivity with specificity, cannot be formed. "
+"All of these are reported as blank in the combination table. So are LR+, LR- "
+"and the diagnostic odds ratio: each of those needs a sensitivity, and "
+"computing one from the continuity correction would report a number that "
+"reflects no patient. Diagnostic accuracy assessment requires both diseased "
+"and non-diseased cases. Individual-test tables use their own "
+"pairwise-complete cases and may still contain both outcomes."
+msgstr ""
+
+#: R/decisioncombine.b.R
 #: R/vartree.b.R
 msgid "No Complete Cases"
 msgstr ""
@@ -103095,6 +103208,15 @@ msgid ""
 "numerical precision."
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid ""
+"No listed rule reaches the highest Youden's J these results allow: calling "
+"positive exactly the patterns {patterns} would give J = {youden}, {gain} "
+"above the highest-ranked rule. That rule was chosen by looking at these "
+"data, so treat it as a hypothesis to test in new patients, not as a better "
+"rule."
+msgstr ""
+
 #: R/lassocox.b.R
 msgid ""
 "No log-rank p-value or group hazard ratio is reported for this same-data "
@@ -103187,12 +103309,6 @@ msgstr ""
 
 #: R/summarydata.b.R
 msgid "No observations were flagged beyond the IQR fences ({lower} to {upper})."
-msgstr ""
-
-#: R/decisioncombine.b.R
-msgid ""
-"No observations were found for pattern \"{pattern}\". This combination was "
-"skipped."
 msgstr ""
 
 #: R/alluvial.b.R
@@ -103531,6 +103647,18 @@ msgstr ""
 
 #: R/decisioncombine.b.R
 msgid "No Rule Performs Better Than Chance"
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"No rule scored here reaches acceptable discrimination. The highest Youden's "
+"J is {youden}, for {rule} (Agresti-Caffo 95% CI {lower} to {upper}; "
+"equivalent AUC {auc}), and the 95% confidence interval of every rule lies "
+"wholly below 0.40, the equivalent of an area under the ROC curve of 0.70, "
+"below which discrimination is conventionally read as poor (Hosmer, Lemeshow "
+"and Sturdivant 2013). This is a statistical convention, not a verdict on "
+"clinical usefulness: the likelihood ratios still show how far each result "
+"moves the probability of disease."
 msgstr ""
 
 #: parallelplot/options/scaling/none.title
@@ -103930,12 +104058,6 @@ msgstr ""
 #: R/pathsampling.b.R
 msgid "No valid lymph-node pairs are available."
 msgstr "No valid lymph-node pairs are available."
-
-#: R/decisioncombine.b.R
-msgid ""
-"No valid observations were found for Test {test}. The individual analysis "
-"was skipped."
-msgstr ""
 
 #: R/chisqposttest.b.R
 msgid ""
@@ -104851,13 +104973,14 @@ msgstr ""
 
 #: R/decisioncombine.b.R
 msgid ""
-"None of the {n} candidate rules that could be scored has a Youden's J above "
-"zero: in this sample no single test, result pattern or combination strategy "
-"separates disease-present from disease-absent cases better than chance. A "
-"rule with a negative Youden's J is anti-predictive - its result would have "
-"to be reversed to carry information. Review the level chosen as positive for "
-"the reference standard and for each test, then treat the sensitivity and "
-"specificity in the tables above as uninformative until that is settled."
+"None of the {n} candidate rule(s) that could be scored has a Youden's J "
+"above zero: in this sample no single test, result pattern or combination "
+"strategy separates disease-present from disease-absent cases better than "
+"chance. A rule with a negative Youden's J is anti-predictive - its result "
+"would have to be reversed to carry information. Review the level chosen as "
+"positive for the reference standard and for each test, then treat the "
+"sensitivity and specificity in the tables as uninformative until that is "
+"settled."
 msgstr ""
 
 #: R/waterfall.b.R
@@ -108914,6 +109037,10 @@ msgid ""
 "which is what the ribbon width shows."
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid "One row per patient."
+msgstr ""
+
 #: jrecode/options/recode_rules.description
 msgid "One rule per line. Format: oldvalue -> newvalue"
 msgstr ""
@@ -109578,6 +109705,13 @@ msgstr ""
 
 #: decisioncompare/results/opaTable.columns.title
 msgid "OPA Criterion"
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"Open points: rows with a zero cell, whose LR+, LR- and DOR use a 0.5 "
+"continuity correction; without it at least one of the three would be 0 or "
+"infinite."
 msgstr ""
 
 #: ggprism/options/prism_shape_palette/open.title
@@ -110249,6 +110383,7 @@ msgstr ""
 msgid "Optional Summaries:"
 msgstr ""
 
+#: R/decisioncombine.b.R
 #: decisioncombine/options/test3.description.ui
 msgid "Optional third test for 3-way combination analysis (8 patterns)."
 msgstr ""
@@ -114286,6 +114421,10 @@ msgstr ""
 
 #: decisionpanel/options/strategies/parallel.title
 msgid "Parallel (cotest) only"
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "Parallel {first}+{second} (>=1 pos)"
 msgstr ""
 
 #: factoranalysis/options/nFactorsMethod/parallel.title
@@ -120931,6 +121070,7 @@ msgid "Poor concordance"
 msgstr ""
 
 #: R/clinicalscore.b.R
+#: R/decisioncombine.b.R
 #: R/lassologistic.b.R
 msgid "Poor Discrimination"
 msgstr ""
@@ -121407,9 +121547,6 @@ msgstr ""
 
 #: aivalidation/options/positiveLevel.title
 #: aivalidation/ui[0][1]/positiveLevel.label
-#: decisioncombine/ui[0][1]/test1Positive.label
-#: decisioncombine/ui[0][2]/test2Positive.label
-#: decisioncombine/ui[0][3]/test3Positive.label
 #: decisionpanel/options/test1Positive.title
 #: decisionpanel/options/test2Positive.title
 #: decisionpanel/options/test3Positive.title
@@ -121428,6 +121565,13 @@ msgstr ""
 #: trichotomousroc/options/positive_level.title
 #: trichotomousroc/ui/outcomelevels/positive_level.label
 msgid "Positive Level"
+msgstr ""
+
+#: R/decisioncombine.b.R
+#: decisioncombine/ui[0][1]/test1Positive.label
+#: decisioncombine/ui[0][2]/test2Positive.label
+#: decisioncombine/ui[0][3]/test3Positive.label
+msgid "Positive level"
 msgstr ""
 
 #: decisionpanel/options/goldPositive.title
@@ -125826,6 +125970,10 @@ msgstr ""
 msgid "Proportion (%)"
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid "Proportion (95% CI)"
+msgstr ""
+
 #: jggstats/options/analysis_type/stat_prop.title
 msgid "Proportion Analysis"
 msgstr ""
@@ -127728,6 +127876,7 @@ msgstr ""
 
 #: R/alluvial.b.R
 #: R/decision.b.R
+#: R/decisioncombine.b.R
 msgid "Quick Start"
 msgstr ""
 
@@ -128693,9 +128842,11 @@ msgstr ""
 
 #: decisioncombine/options/showRecommendation.description.ui
 msgid ""
-"Rank eligible exact-pattern rules and named parallel, serial, and majority "
-"strategies descriptively by observed Youden's J. This sample-dependent "
-"summary is not a clinical guide or validated recommendation."
+"Rank eligible exact-pattern rules, each test alone, and the parallel, "
+"serial, pairwise and majority strategies descriptively by observed Youden's "
+"J. This sample-dependent summary is not a clinical guide or validated "
+"recommendation. It needs at least two tests: one test gives one rule, so "
+"nothing is ranked."
 msgstr ""
 
 #: survivalfeaturerank/options/rankBy.title
@@ -128796,6 +128947,10 @@ msgstr ""
 
 #: bayesiannetworkma/options/ranking_measure.title
 msgid "Ranking Measure"
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "Ranking Needs Two or More Tests"
 msgstr ""
 
 #: survivalfeaturerank/ui[1][0].label
@@ -129234,6 +129389,10 @@ msgstr ""
 
 #: R/agreement.b.R
 msgid "ratio"
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "Ratio (95% CI), log scale; dashed line = 1 (uninformative)"
 msgstr ""
 
 #: enhancedROC/results/results/imbalanceMetrics.columns.title
@@ -135380,6 +135539,7 @@ msgstr ""
 msgid "Row Proportions"
 msgstr ""
 
+#: R/decisioncombine.b.R
 #: decisioncombine/results/combinationTable.columns.title
 msgid "Row type"
 msgstr ""
@@ -135480,6 +135640,13 @@ msgstr ""
 msgid ""
 "Rows sharing a case ID are one case: %d case(s) were measured under more "
 "than one condition, so the conditions are compared within those cases."
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"Rows such as +/- are exact result patterns, each scored as 'this exact "
+"pattern' against all other results; the rows below the line are single tests "
+"and testing strategies. Read Youden's J in the table for pattern rows."
 msgstr ""
 
 #: outlierdetection/options/sampleSize.title
@@ -135666,6 +135833,10 @@ msgid ""
 "Rule-out power is governed by the negative likelihood ratio rather than by "
 "sensitivity alone; here LR- = %.2f, which provides weak evidence against "
 "disease after a negative result."
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "Rules Left Empty in the Forest Plot"
 msgstr ""
 
 #: R/decision.b.R
@@ -135984,9 +136155,12 @@ msgstr ""
 
 #: R/decisioncombine.b.R
 msgid ""
-"Sample size and cell counts are reported as notices when they fall below the "
-"usual thresholds. Read the confidence intervals rather than the point "
-"estimates whenever they do."
+"Sample size and cell counts are reported as notices when they fall below "
+"this analysis's thresholds (20, 50 and 100 cases in all; 10 per reference "
+"group; 5 per cell). These are rules of thumb, not requirements: the number "
+"of cases a study needs depends on the expected sensitivity and specificity, "
+"the precision wanted and the prevalence (Buderer 1996). Read the confidence "
+"intervals rather than the point estimates whenever a notice appears."
 msgstr ""
 
 #: clinicaltrialdesign/results/sample_size_breakdown.title
@@ -136315,9 +136489,9 @@ msgstr ""
 
 #: decisioncombine/results/recommendationTable.description
 msgid ""
-"Sample-dependent descriptive ranking of eligible exact-pattern rules and "
-"named testing strategies by observed Youden index; this is not a clinical "
-"guide or validated recommendation"
+"Sample-dependent descriptive ranking of eligible exact-pattern rules, single "
+"tests and named testing strategies by observed Youden index; this is not a "
+"clinical guide or validated recommendation"
 msgstr ""
 
 #: pathsampling/results/multifocalTable.title
@@ -137913,6 +138087,7 @@ msgstr ""
 msgid "Second Derivative"
 msgstr ""
 
+#: R/decisioncombine.b.R
 #: decisioncombine/options/test2.description.ui
 msgid ""
 "Second diagnostic test for combination analysis. Leave empty for single test "
@@ -138416,12 +138591,14 @@ msgstr ""
 msgid ""
 "Select one metric, or use the plot-specific default metric set. The bar "
 "chart defaults to sensitivity, specificity, PPV, NPV, and accuracy; the "
-"heatmap also includes prevalence, balanced accuracy, and Youden's J. The "
-"forest plot supports sensitivity, specificity, PPV, NPV, accuracy, LR+, LR-, "
-"and diagnostic OR, for which confidence intervals are available. Unsupported "
-"forest selections produce an explanatory notice rather than silently showing "
-"other statistics. The decision-space plot has fixed sensitivity and "
-"specificity axes and is unaffected."
+"heatmap also includes prevalence and balanced accuracy. In these two plots "
+"Youden's J, LR+, LR- and the diagnostic OR are drawn only when selected on "
+"their own. The forest plot's default set is sensitivity, specificity, PPV, "
+"NPV, accuracy, LR+, LR- and diagnostic OR, and it supports each of them "
+"alone; selecting prevalence, balanced accuracy or Youden's J (whose 95% "
+"confidence interval is in the combination table) produces an explanatory "
+"notice rather than silently showing other statistics. The decision-space "
+"plot has fixed sensitivity and specificity axes and is unaffected."
 msgstr ""
 
 #: advancedbarplot/options/chart_approach.description.jamovi
@@ -138937,6 +139114,10 @@ msgstr ""
 
 #: R/lassocox.b.R
 msgid "Selected Predictor Columns"
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "Selected Statistic Is Blank"
 msgstr ""
 
 #: decisioncurve/options/selectedThresholds.title
@@ -139885,6 +140066,10 @@ msgstr ""
 msgid "Serial (all pos)"
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid "Serial {first}+{second} (both pos)"
+msgstr ""
+
 #: R/sequentialtests.b.R
 msgid "serial negative (exclusion) strategy"
 msgstr ""
@@ -140147,6 +140332,17 @@ msgstr ""
 
 #: R/waterfall.b.R
 msgid "SEVERAL ROWS PER PATIENT"
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"Several tests classify worse than chance in this sample, beyond sampling "
+"variation, on the {n} complete cases analysed here: {tests}. For each, "
+"sensitivity and specificity add up to less than 1, the signature of a "
+"reversed positive level. Check the levels chosen as positive for these tests "
+"and for the reference standard before interpreting any of these results; "
+"when every test is below chance, the reference standard's level is the "
+"likelier cause."
 msgstr ""
 
 #: R/categorize.b.R
@@ -149059,7 +149255,6 @@ msgstr ""
 msgid "Static Map"
 msgstr ""
 
-#: R/decisioncombine.b.R
 #: R/nonparametric.b.R
 #: aalenhazard/results/goodnessOfFit.columns.title
 #: adaptivelasso/results/modelDiagnostics.columns.title
@@ -150192,6 +150387,10 @@ msgstr ""
 #: jjbarstats/ui[3][0][0]/resultssubtitle.label
 #: jjpiestats/ui[3][0][0]/resultssubtitle.label
 msgid "Statistics in plot subtitle"
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "Statistics Omitted from the Forest Plot"
 msgstr ""
 
 #: groupsummary/ui[1].label
@@ -154607,11 +154806,11 @@ msgstr ""
 msgid ""
 "Systematic evaluation of diagnostic test combinations. Analyzes all possible "
 "test result patterns (2-test: 4 patterns, 3-test: 8 patterns) against a gold "
-"standard and summarizes named parallel, serial, and majority strategies. "
-"Calculates sensitivity, specificity, predictive values, likelihood ratios, "
-"accuracy, and uncertainty intervals. Descriptive rankings are "
-"sample-dependent analytical summaries, not clinical guides or validated "
-"recommendations."
+"standard, each test alone, and parallel and serial strategies (with three "
+"tests also for every pair of tests, and a majority rule). Calculates "
+"sensitivity, specificity, predictive values, likelihood ratios, accuracy, "
+"and uncertainty intervals. Descriptive rankings are sample-dependent "
+"analytical summaries, not clinical guides or validated recommendations."
 msgstr ""
 
 #: R/agreement.b.R
@@ -155695,6 +155894,10 @@ msgid ""
 msgstr ""
 
 #: R/decisioncombine.b.R
+msgid "Test {test} alone"
+msgstr ""
+
+#: R/decisioncombine.b.R
 msgid ""
 "Test {test} cannot be summarized because no case has both the test and "
 "reference-standard result."
@@ -155730,6 +155933,7 @@ msgstr ""
 msgid "Test 1 - Recoded Data"
 msgstr ""
 
+#: R/decisioncombine.b.R
 #: decisioncombine/options/test1.title
 #: decisioncombine/ui[0][1].label
 #: decisioncompare/options/test1.title
@@ -155868,6 +156072,7 @@ msgstr ""
 msgid "Test 2 - Recoded Data"
 msgstr ""
 
+#: R/decisioncombine.b.R
 #: decisioncombine/options/test2.title
 #: decisioncombine/ui[0][2].label
 msgid "Test 2 (Required for Combinations)"
@@ -156006,6 +156211,7 @@ msgstr ""
 msgid "Test 3 - Recoded Data"
 msgstr ""
 
+#: R/decisioncombine.b.R
 #: decisioncombine/options/test3.title
 #: decisioncombine/ui[0][3].label
 #: decisioncompare/options/test3.title
@@ -156506,6 +156712,10 @@ msgstr ""
 
 #: R/decision.b.R
 msgid "Test Performance Summary"
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "Test Performs at Chance Level"
 msgstr ""
 
 #: R/decision.b.R
@@ -157277,6 +157487,14 @@ msgid ""
 "because it is individually unusual."
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid ""
+"The 95% confidence interval beside Youden's J is the Agresti-Caffo interval "
+"for a difference of two independent proportions, sensitivity minus the "
+"false-positive rate. It is not adjusted for choosing among rules or for the "
+"number of rules shown."
+msgstr ""
+
 #: R/decision.b.R
 msgid ""
 "The 95% confidence interval for Youden's index includes 0, so this sample "
@@ -157683,10 +157901,12 @@ msgstr ""
 
 #: R/decisioncombine.b.R
 msgid ""
-"The candidate-rule ranking is a descriptive argmax over observed Youden's J "
-"with no significance test and no multiplicity correction. On data with no "
-"real signal it will still name a winner. It is a hypothesis to confirm in "
-"new data, not a validated recommendation."
+"The candidate-rule ranking is a descriptive argmax over observed Youden's J, "
+"taken over every row of the table -- result patterns, single tests and "
+"strategies -- with no significance test and no multiplicity correction. On a "
+"tie the rule using fewer tests is shown first. On data with no real signal "
+"it will still name a winner. It is a hypothesis to confirm in new data, not "
+"a validated recommendation."
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
@@ -157950,11 +158170,12 @@ msgstr ""
 #: R/decisioncombine.b.R
 msgid ""
 "The confidence interval is left blank for {n} row(s) ({patterns}) whose "
-"ratio is determinate but whose standard error is not estimable: the pattern "
-"has an empty test margin, so the delta-method standard error on the log "
-"scale is exactly zero and an interval computed from it would be zero-width. "
-"A zero-width interval would assert that the ratio is known exactly on a row "
-"carrying no information, so the point estimate is shown without one."
+"ratio is determinate but whose standard error is not estimable: the row has "
+"an empty test margin (no patient, or every patient, is positive under it), "
+"so the delta-method standard error on the log scale is exactly zero and an "
+"interval computed from it would be zero-width. A zero-width interval would "
+"assert that the ratio is known exactly on a row carrying no information, so "
+"the point estimate is shown without one."
 msgstr ""
 
 #: R/jjdotplotstats.b.R
@@ -158504,6 +158725,14 @@ msgid ""
 "kurtosis values, the visual summary table, the outlier report and the draft "
 "statistical summary. P-values are normally shown to 3 decimal places, with "
 "additional digits near 0.05 when needed to preserve the test decision."
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"The decision-space plot places each rule by its sensitivity and specificity, "
+"and no rule has both: every complete case has the same reference-standard "
+"result, so one of the two cannot be estimated. The notice about the "
+"reference standard says which."
 msgstr ""
 
 #: R/cotest.b.R
@@ -159071,6 +159300,14 @@ msgid ""
 "heatmap can still display it."
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid ""
+"The forest plot is not drawn for \"{statistic}\": it runs from -1 to 1, "
+"unlike the proportions and ratios on the forest plot axes. Its 95% "
+"confidence interval is in the combination table, and the bar chart and "
+"heatmap can still display it."
+msgstr ""
+
 #: R/relativesurvival.b.R
 msgid ""
 "The French population table (survexp.fr) is not available in this "
@@ -159341,6 +159578,29 @@ msgid ""
 "{youden}."
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid ""
+"The highest Youden's J is {youden}, for {rule} (Agresti-Caffo 95% CI {lower} "
+"to {upper}; equivalent AUC {auc}), below 0.40, the equivalent of an area "
+"under the ROC curve of 0.70, under which discrimination is conventionally "
+"read as poor (Hosmer, Lemeshow and Sturdivant 2013). The 95% confidence "
+"interval of at least one rule reaches 0.40, so this sample cannot rule out "
+"acceptable discrimination; a larger sample could settle it."
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"The highest Youden's J is {youden}, for {rule} (Agresti-Caffo 95% CI {lower} "
+"to {upper}; equivalent AUC {auc}). The 95% confidence interval of every rule "
+"scored here includes 0, so this sample does not show that any of them "
+"separates disease-present from disease-absent cases better than chance; at "
+"least one interval also reaches 0.40, the equivalent of an area under the "
+"ROC curve of 0.70 (Hosmer, Lemeshow and Sturdivant 2013), so acceptable "
+"discrimination is not ruled out either. The intervals are not adjusted for "
+"choosing among the rules. Check the levels chosen as positive, and whether "
+"the sample gives the precision you need."
+msgstr ""
+
 #: R/lassocox.b.R
 msgid ""
 "The horizontal axis is log lambda; the vertical axis is cross-validated "
@@ -159510,6 +159770,10 @@ msgstr ""
 msgid ""
 "The kappaSize package is required but not installed. Please install it using "
 "install.packages(\"kappaSize\")"
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "The kinds of row"
 msgstr ""
 
 #: R/singlearm.b.R
@@ -159781,6 +160045,14 @@ msgid ""
 "lower of the two is used as Low and the higher as High; where they are equal "
 "the Moderate and Low bands stay empty and cases fall into High or Poor only. "
 "Set High above Low to separate the five bands."
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"The lower bound quoted under Interpretation adds the lower Wilson limits of "
+"the rule's sensitivity and specificity and subtracts 1. It is usually more "
+"conservative than the Agresti-Caffo interval shown beside Youden's J in the "
+"combination table, so the two lower limits can differ."
 msgstr ""
 
 #: R/categorize.b.R
@@ -160583,8 +160855,9 @@ msgid ""
 "The pattern-type filter \"{filter}\" matches none of the rows in this "
 "analysis, so the bar chart, heatmap and forest plot are blank. Pattern "
 "filters apply to exact result patterns such as \"+/+\"; a single-test "
-"analysis has no such rows, and the named strategies are not result patterns. "
-"Set the pattern filter back to \"All Patterns\" to see the plots."
+"analysis has no such rows, and the single-test and strategy rows are not "
+"result patterns. Set the pattern filter back to \"All Patterns\" to see the "
+"plots."
 msgstr ""
 
 #: R/oddsratio.b.R
@@ -161270,8 +161543,8 @@ msgstr ""
 #: R/decisioncombine.b.R
 msgid ""
 "The rule that separates the two groups best in this sample is one that calls "
-"a patient positive when the tests are negative; or every named strategy "
-"(Parallel, Serial, Majority) performs at or below chance while an exact "
+"a patient positive when the tests are negative; or every named rule (each "
+"test alone and every strategy) performs at or below chance while an exact "
 "result pattern does not. Both are the signature of a reversed positive "
 "level: the arithmetic still works, but the sensitivity and specificity "
 "reported for each rule are then swapped, and the best-performing rule is one "
@@ -162125,10 +162398,6 @@ msgid ""
 "their dataset order."
 msgstr ""
 
-#: R/decisioncombine.b.R
-msgid "The two kinds of row"
-msgstr ""
-
 #: R/agreement.b.R
 msgid ""
 "The two rater variables declare different category sets. q is taken from the "
@@ -162799,10 +163068,23 @@ msgid ""
 "These rows have a 2-by-2 cell count below 5 (smallest cell {minimum}): "
 "{rows}. Their likelihood ratios, diagnostic odds ratios and confidence "
 "intervals rest on very few cases and may be unstable even when they look "
-"informative. Sensitivity, specificity and Youden's J on the same rows can "
-"still be sound, because those depend on the size of the two reference groups "
-"rather than on the smallest cell. Treat the ratio columns as exploratory and "
-"validate them in a larger independent sample."
+"informative. At such counts the log-scale intervals for these ratios are "
+"approximate: their actual coverage can be above or below the nominal 95%, "
+"and where the 0.5 continuity correction was applied it can fall below it. "
+"Sensitivity, specificity and Youden's J on the same rows can still be sound, "
+"because those depend on the size of the two reference groups rather than on "
+"the smallest cell. Treat the ratio columns as exploratory and validate them "
+"in a larger independent sample."
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"These rules have no estimate with a confidence interval for the statistic "
+"named, so their row is left empty in that facet: {details}. This happens for "
+"a pattern that no patient shows (PPV, LR+ and the diagnostic odds ratio are "
+"undefined there, and LR- is exactly 1 with no interval) and for a rule on "
+"which every patient, or no patient, tests positive. The tables show these "
+"cells, with the reason in their notes."
 msgstr ""
 
 #: R/jjhistostats.b.R
@@ -163075,14 +163357,6 @@ msgid ""
 "likelihood ratios."
 msgstr ""
 
-#: R/decisioncombine.b.R
-msgid ""
-"This analysis evaluates every way two or three diagnostic tests can be "
-"combined, scoring each against the reference standard on the same patients. "
-"With a single test selected it reports that one test alone, and the two row "
-"kinds described below do not arise."
-msgstr ""
-
 #: R/jjsegmentedtotalbar.b.R
 msgid ""
 "This analysis examined %s rows across %s categories of %s, with data "
@@ -163173,6 +163447,19 @@ msgid ""
 "fits. All transition intensities, sojourn times, covariate effects, and "
 "state probabilities below are placeholders. Do not use the output for "
 "clinical interpretation, prognostic decisions, or research conclusions."
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"This analysis scores two or three diagnostic tests against the reference "
+"standard on the same patients: every exact result pattern, each test alone, "
+"and the usual ways of combining them -- Parallel and Serial across all the "
+"tests and, with three tests, across every pair, plus Majority. Mixed rules "
+"such as \"Test 1 positive and either Test 2 or Test 3 positive\" are not "
+"listed; the ranking says when some other way of calling the result patterns "
+"positive would score higher. With a single test selected it reports that one "
+"test alone (a single-test row, described below); the pattern and strategy "
+"rows do not arise."
 msgstr ""
 
 #: R/riverplot.b.R
@@ -163489,9 +163776,9 @@ msgstr ""
 
 #: R/decisioncombine.b.R
 msgid ""
-"This is a descriptive, sample-dependent ranking of exact-pattern rules and "
-"named testing strategies. It is not a clinical guide or validated "
-"recommendation."
+"This is a descriptive, sample-dependent ranking of exact-pattern rules, each "
+"test alone and named testing strategies. It is not a clinical guide or "
+"validated recommendation."
 msgstr ""
 
 #: R/kappaSizeCI.b.R
@@ -171564,6 +171851,7 @@ msgstr ""
 #: decision/results/epirTable_number.columns.title
 #: decisioncalculator/results/epirTable_ratio.columns.title
 #: decisioncalculator/results/epirTable_number.columns.title
+#: decisioncombine/results/combinationTable.columns.title
 #: decisioncombine/results/combinationTableCI.columns.title
 #: decisioncombine/results/combinationTableCIRatios.columns.title
 #: decisioncompare/results/epirTable1.columns.title
@@ -179086,9 +179374,11 @@ msgid ""
 "With fewer than 20 complete cases every proportion rests on a handful of "
 "patients, so one reclassified case moves sensitivity or specificity by "
 "several percentage points and the 95% confidence intervals are very wide. "
-"Read the intervals rather than the point estimates. Diagnostic accuracy "
-"studies usually need on the order of 100 cases before the intervals narrow "
-"usefully, and combination analysis splits those cases across four or eight "
+"Read the intervals rather than the point estimates. The number of cases a "
+"diagnostic accuracy study needs depends on the expected sensitivity and "
+"specificity, the precision wanted and the prevalence (Buderer 1996); as a "
+"rough rule of thumb the intervals seldom narrow usefully below about 100 "
+"cases, and combination analysis splits those cases across four or eight "
 "patterns."
 msgstr ""
 
@@ -179096,6 +179386,13 @@ msgstr ""
 msgid ""
 "With fewer than 3 variables, regular (zero-order) correlations are computed "
 "instead"
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"With one test there is only one rule to score, the test itself, so no "
+"ranking table is shown; the combination table reports that test on its own. "
+"Select a second test to rank the combinations."
 msgstr ""
 
 #: R/enhancedROC.b.R
@@ -180392,6 +180689,52 @@ msgstr ""
 #: psychopdaROC/results/thresholdTable.columns.title
 #: psychopdaROC/results/fixedSensSpecTable.columns.title
 msgid "Youden's J"
+msgstr ""
+
+#: decisioncombine/results/combinationTable.columns.superTitle
+msgid "Youden's J 95% CI"
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"Youden's J for {rule} is {youden} (Agresti-Caffo 95% CI {lower} to {upper}; "
+"equivalent AUC {auc}), below 0.40, the equivalent of an area under the ROC "
+"curve of 0.70, under which discrimination is conventionally read as poor "
+"(Hosmer, Lemeshow and Sturdivant 2013). The interval reaches 0.40, so this "
+"sample cannot rule out acceptable discrimination; a larger sample could "
+"settle it."
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"Youden's J for {rule} is {youden} (Agresti-Caffo 95% CI {lower} to {upper}; "
+"equivalent AUC {auc}). The interval includes 0, so this sample does not show "
+"that the test separates disease-present from disease-absent cases better "
+"than chance; it also reaches 0.40, the equivalent of an area under the ROC "
+"curve of 0.70 (Hosmer, Lemeshow and Sturdivant 2013), so acceptable "
+"discrimination is not ruled out either. Check the level chosen as positive, "
+"and whether the sample gives the precision you need."
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"Youden's J for {rule} is {youden} (Agresti-Caffo 95% CI {lower} to {upper}; "
+"equivalent AUC {auc}). The whole interval lies below 0.40, the equivalent of "
+"an area under the ROC curve of 0.70, below which discrimination is "
+"conventionally read as poor (Hosmer, Lemeshow and Sturdivant 2013). This is "
+"a statistical convention, not a verdict on clinical usefulness: the "
+"likelihood ratios still show how far each result moves the probability of "
+"disease."
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"Youden's J is below 0 but within sampling variation of 0 for {tests}, on the "
+"{n} complete cases analysed here. A test with no diagnostic value falls "
+"below 0 about half the time at any sample size, so a correctly coded but "
+"uninformative test and a test whose positive level is reversed cannot be "
+"told apart here. If the level chosen as positive is right, the test adds no "
+"information in this sample."
 msgstr ""
 
 #: aivalidation/options/youdensJ.title

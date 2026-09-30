@@ -208,6 +208,8 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
     "decisioncombineResults",
     inherit = jmvcore::Group,
     active = list(
+        welcome = function() private$.items[["welcome"]],
+        notices = function() private$.items[["notices"]],
         combinationTable = function() private$.items[["combinationTable"]],
         combinationTableCI = function() private$.items[["combinationTableCI"]],
         combinationTableCIRatios = function() private$.items[["combinationTableCIRatios"]],
@@ -223,8 +225,7 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         recommendationTable = function() private$.items[["recommendationTable"]],
         addedPattern = function() private$.items[["addedPattern"]],
         about = function() private$.items[["about"]],
-        assumptions = function() private$.items[["assumptions"]],
-        notices = function() private$.items[["notices"]]),
+        assumptions = function() private$.items[["assumptions"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -238,7 +239,43 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "wilson1927",
                     "youden1950",
                     "haldane1956",
+                    "anscombe1956",
+                    "Simel1991",
+                    "woolf1955",
+                    "Glas2003",
+                    "Begg1983",
+                    "Ransohoff1978",
+                    "Leisenring2000",
+                    "Buderer1996",
+                    "AgrestiCaffo2000",
+                    "DescTools",
                     "forcats"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="welcome",
+                title="Getting Started",
+                visible="(length(gold) == 0 || length(goldPositive) == 0 || length(test1) == 0 || length(test1Positive) == 0)",
+                clearWith=list(
+                    "gold",
+                    "goldPositive",
+                    "test1",
+                    "test1Positive")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="notices",
+                title="Notices",
+                visible=TRUE,
+                refs=list(
+                    "HosmerLemeshow2013"),
+                clearWith=list(
+                    "gold",
+                    "goldPositive",
+                    "test1",
+                    "test1Positive",
+                    "test2",
+                    "test2Positive",
+                    "test3",
+                    "test3Positive")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="combinationTable",
@@ -316,6 +353,18 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     list(
                         `name`="youden", 
                         `title`="Youden's J", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="youdenLower", 
+                        `title`="Lower", 
+                        `superTitle`="Youden's J 95% CI", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="youdenUpper", 
+                        `title`="Upper", 
+                        `superTitle`="Youden's J 95% CI", 
                         `type`="number", 
                         `format`="zto"),
                     list(
@@ -664,7 +713,7 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$add(jmvcore::Image$new(
                 options=options,
                 name="heatmapPlot",
-                title="Heatmap - All Metrics by Pattern",
+                title="Heatmap - Metrics by Pattern",
                 width=900,
                 height=600,
                 visible="(showHeatmap)",
@@ -802,20 +851,6 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "test2",
                     "test2Positive",
                     "test3",
-                    "test3Positive")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="notices",
-                title="Notices",
-                visible=TRUE,
-                clearWith=list(
-                    "gold",
-                    "goldPositive",
-                    "test1",
-                    "test1Positive",
-                    "test2",
-                    "test2Positive",
-                    "test3",
                     "test3Positive")))}))
 
 decisioncombineBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -843,11 +878,12 @@ decisioncombineBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'
 #' Systematic evaluation of diagnostic test combinations. Analyzes all 
 #' possible test result patterns (2-test: 4 patterns, 3-test: 8 patterns) 
-#' against a gold standard and summarizes named parallel, serial, and majority 
-#' strategies. Calculates sensitivity, specificity, predictive values, 
-#' likelihood ratios, accuracy, and uncertainty intervals. Descriptive 
-#' rankings are sample-dependent analytical summaries, not clinical guides or 
-#' validated recommendations.
+#' against a gold standard, each test alone, and parallel and serial 
+#' strategies (with three tests also for every pair of tests, and a majority 
+#' rule). Calculates sensitivity, specificity, predictive values, likelihood 
+#' ratios, accuracy, and uncertainty intervals. Descriptive rankings are 
+#' sample-dependent analytical summaries, not clinical guides or validated 
+#' recommendations.
 #' 
 #'
 #' @examples
@@ -897,10 +933,12 @@ decisioncombineBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'   the bar chart, heatmap and forest plot (default: all).
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$combinationTable} \tab \tab \tab \tab \tab Counts and diagnostic performance metrics for each test combination pattern and clinical strategy, including prevalence, balanced accuracy, Youden's J, likelihood ratios, and diagnostic odds ratios \cr
+#'   \code{results$welcome} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$notices} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$combinationTable} \tab \tab \tab \tab \tab Counts and diagnostic performance metrics for each test combination pattern, each test alone and each combination strategy, including prevalence, balanced accuracy, Youden's J with its Agresti-Caffo 95 percent confidence interval, likelihood ratios, and diagnostic odds ratios \cr
 #'   \code{results$combinationTableCI} \tab \tab \tab \tab \tab Wilson score 95 percent confidence intervals for sensitivity, specificity, PPV, NPV and accuracy, shown as percentages to match the combination table above. Likelihood ratios and the diagnostic odds ratio are unbounded ratios rather than proportions, so they appear in their own table below. \cr
 #'   \code{results$combinationTableCIRatios} \tab \tab \tab \tab \tab Log-scale 95 percent confidence intervals for LR+, LR- and the diagnostic odds ratio. These are ratios on an unbounded scale, so they are reported separately from the proportions above rather than sharing a column with them. \cr
-#'   \code{results$goldFreqTable} \tab \tab \tab \tab \tab Frequency distribution of the gold standard (reference) test showing counts and percentages for each level \cr
+#'   \code{results$goldFreqTable} \tab \tab \tab \tab \tab Counts and percentages of disease-present and disease-absent cases (the reference standard dichotomised at the chosen positive level) among the complete cases used for the combination table \cr
 #'   \code{results$crossTabTable} \tab \tab \tab \tab \tab Cross-tabulation showing how test combination patterns align with gold standard results \cr
 #'   \code{results$individualTest1$test1Contingency} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$individualTest1$test1Stats} \tab \tab \tab \tab \tab a table \cr
@@ -909,14 +947,13 @@ decisioncombineBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'   \code{results$individualTest3$test3Contingency} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$individualTest3$test3Stats} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$barPlot} \tab \tab \tab \tab \tab Grouped bar chart comparing sensitivity, specificity, PPV, NPV, and accuracy across test combinations \cr
-#'   \code{results$heatmapPlot} \tab \tab \tab \tab \tab Color-coded heatmap showing all diagnostic metrics for each test pattern \cr
-#'   \code{results$forestPlot} \tab \tab \tab \tab \tab Forest plot displaying 95 percent confidence intervals for key diagnostic metrics \cr
+#'   \code{results$heatmapPlot} \tab \tab \tab \tab \tab Color-coded heatmap of prevalence, sensitivity, specificity, PPV, NPV, accuracy and balanced accuracy for each pattern by default, or of one selected metric \cr
+#'   \code{results$forestPlot} \tab \tab \tab \tab \tab Forest plot of 95 percent confidence intervals: proportions on a 0 to 100 percent axis, and LR+, LR- and the diagnostic odds ratio on a log axis with a dashed reference line at 1 \cr
 #'   \code{results$decisionTreePlot} \tab \tab \tab \tab \tab Decision-space scatter plot positioning each test pattern by its sensitivity and specificity, with point size scaled by Youden's J \cr
-#'   \code{results$recommendationTable} \tab \tab \tab \tab \tab Sample-dependent descriptive ranking of eligible exact-pattern rules and named testing strategies by observed Youden index; this is not a clinical guide or validated recommendation \cr
+#'   \code{results$recommendationTable} \tab \tab \tab \tab \tab Sample-dependent descriptive ranking of eligible exact-pattern rules, single tests and named testing strategies by observed Youden index; this is not a clinical guide or validated recommendation \cr
 #'   \code{results$addedPattern} \tab \tab \tab \tab \tab an output \cr
 #'   \code{results$about} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$notices} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

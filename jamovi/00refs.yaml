@@ -4774,7 +4774,7 @@ refs:
 
     Glas2003:
         type: article
-        author: "Glas, A. S., Lijmer, J. G., Prins, M. H., et al."
+        author: "Glas, A. S., Lijmer, J. G., Prins, M. H., Bonsel, G. J., & Bossuyt, P. M. M."
         year: 2003
         title: "The diagnostic odds ratio: a single indicator of test performance"
         publisher: Journal of Clinical Epidemiology
@@ -4898,5 +4898,53 @@ refs:
         pages: e6717
         doi: 10.1136/bmj.e6717
         url: "https://doi.org/10.1136/bmj.e6717"
+
+    woolf1955:
+        type: article
+        author: Woolf, B.
+        year: 1955
+        title: On estimating the relation between blood group and disease
+        publisher: Annals of Human Genetics
+        volume: 19
+        issue: 4
+        pages: 251-253
+        doi: 10.1111/j.1469-1809.1955.tb01348.x
+        url: "https://doi.org/10.1111/j.1469-1809.1955.tb01348.x"
+
+    Begg1983:
+        type: article
+        author: "Begg, C. B., & Greenes, R. A."
+        year: 1983
+        title: Assessment of diagnostic tests when disease verification is subject to selection bias
+        publisher: Biometrics
+        volume: 39
+        issue: 1
+        pages: 207-215
+        doi: 10.2307/2530820
+        url: "https://doi.org/10.2307/2530820"
+
+    Ransohoff1978:
+        type: article
+        author: "Ransohoff, D. F., & Feinstein, A. R."
+        year: 1978
+        title: Problems of spectrum and bias in evaluating the efficacy of diagnostic tests
+        publisher: New England Journal of Medicine
+        volume: 299
+        issue: 17
+        pages: 926-930
+        doi: 10.1056/NEJM197810262991705
+        url: "https://doi.org/10.1056/NEJM197810262991705"
+
+    Leisenring2000:
+        type: article
+        author: "Leisenring, W., Alonzo, T., & Pepe, M. S."
+        year: 2000
+        title: Comparisons of predictive values of binary medical diagnostic tests for paired designs
+        publisher: Biometrics
+        volume: 56
+        issue: 2
+        pages: 345-351
+        doi: 10.1111/j.0006-341x.2000.00345.x
+        url: "https://doi.org/10.1111/j.0006-341x.2000.00345.x"
 
 ...

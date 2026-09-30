@@ -5,6 +5,242 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-09-30 — fixing the `/check-function-full decisioncombine` findings: a notice graded on one rule that spoke for all, a `%` that broke the Rd, and two searches that found nothing
+
+- **Failure modes:**
+  - My first version of the new discrimination notice graded only the top rule's Agresti-Caffo interval,
+    but its text spoke for every rule ("no evidence that any rule scored here separates..."). Intervals
+    differ in width between rules, so another rule could exclude 0 or reach 0.40. It also made
+    "Discrimination Not Established" a serious warning, which fired on about a third of samples of an
+    acceptable test (true J 0.45) at 10 to 15 patients per group.
+  - The same flaw sat in an older notice. With one test, "No Rule Performs Better Than Chance" was a serious
+    warning fired whenever J <= 0. That is 27% of samples of a correctly coded test with true J 0.15 at 15
+    per group, and the warning told the user the test was anti-predictive and to review its level. Fixed the
+    same day: such a test now gets the chance-level note and the graded discrimination notice.
+  - I wrote "95%" into an `.r.yaml` description. It reached the Rd as `95\\%`, which opens an Rd comment and
+    swallowed the rest of the results-table row. The neighbouring descriptions spell "95 percent" for this
+    reason, and a memory note already said so.
+  - Two searches returned nothing, and I read that as "nothing there":
+    - A grep of the `.po` files for an `.a.yaml` help-text phrase: long msgids are wrapped over several
+      lines, so the phrase was split.
+    - A grep of the tests for an old ranking sentence: IR-01b built it from `paste0()` pieces, and the first
+      suite run failed on it.
+- **Detection signal:**
+  - Codex's post-implementation review gave a 20 + 20 counterexample. The statistics, regression and
+    calibration lenses of a 45-agent review workflow found the same defect independently, and the
+    calibration lens measured the alarm rate.
+  - `tools::checkRd()` on the regenerated Rd reported "Only 6 columns allowed in this table (row 3 has 11)".
+  - `jmvtools::i18nUpdate()` listed the help texts as catalogue entries.
+- **Prevention rules:**
+  - A notice that makes a claim about every rule is graded on every rule. A check on the top-ranked row
+    licenses a sentence about that row only.
+  - Before choosing a new notice's severity, simulate how often it fires on an acceptable input at small n.
+    This is the 2026-09-29 rule applied to a new notice, not just to an old guard.
+  - Run `tools::checkRd()` on every regenerated `.Rd`. Never put `%` in a `.yaml` description; write "percent".
+  - Search `.po` catalogues with a parser, not grep. Search tests for an old sentence by a short distinctive
+    fragment (three or four words), because tests split long strings with `paste0()`.
+
+---
+
+## 2026-09-29 — `/check-function decisioncombine --profile release`: a version bump the updater undoes, and a comment about a panel that did not exist
+
+- **Failure modes:**
+  - The review pass earlier today bumped `decisioncombine.a.yaml` to 1.0.84 and regenerated the header.
+    The user's `_updateModules.R` run then set the yaml back to 1.0.83: `set_analysis_versions()` writes
+    `new_version`[1:3] into the umbrella's own `.a.yaml` of every analysis it ships, and a `meddecideT`
+    analysis ships to JamoviTest. The header stayed at 1.0.84. The 09-27 entry below saw the same rollback
+    for decision and recorded it only as "the yaml was rewritten".
+  - `.validateInputs()` returned quietly on an empty selection "to let the instructions panel speak". No
+    such panel existed, so a new analysis showed three empty tables and nothing else. The comment dates
+    from 2026-09-23 (`cf4537d63`), and every review pass since then read past it.
+- **Detection signal:**
+  - The yaml's mtime moved to 18:49:38 while the user's run was going; only the `version:` line differed.
+    A grep of the updater for writes to `^version:` found `set_analysis_versions()`.
+  - The `style_welcome` step asked what the user sees before choosing anything, and the `.r.yaml` had no
+    item for it.
+- **Prevention rules:**
+  - Never bump one analysis's version by hand as part of a fix. The updater owns it through `new_version`.
+    After an updater run, regenerate the umbrella header so it matches the stamped yaml.
+  - A comment that names another results item ("the instructions panel", "the table below") gets checked
+    against the `.r.yaml` like any other claim.
+
+---
+
+## 2026-09-29 — fixing decisioncombine IR-02: a guard on a bare point estimate raised a false alarm half the time
+
+- **Failure modes:**
+  - My first fix raised "Positive Levels May Be Inverted" whenever any test's Youden's J was below
+    0. For a correctly coded test with no diagnostic value, J is below 0 about half the time at ANY
+    sample size, so the serious warning fired on 41 of 100 such analyses. In a single-test
+    analysis it also replaced the accurate "No Rule Performs Better Than Chance" notice.
+  - The older collective check ("-/-" ranks first, or every named rule is at or below chance) had
+    the same flaw and predates this fix: about 27% false alarms with two tests unrelated to the
+    disease. Graded the same way (the pattern behind it must clear chance); all inversion
+    warnings together now fire on about 7% of such samples.
+  - Adding single-test and pairwise rows made identical classifiers common (Test 1 alone equals
+    Parallel when Test 2 adds nothing). The ranking's runner-up was the winner's own twin, so an
+    exact identity was reported as possible "sampling variation".
+- **Detection signal:** a 4-lens adversarial review workflow (22 agents). The statistics lens
+  simulated the guard under the null and measured the alarm rate; the regression lens compared
+  1,000+ outputs with the shipped copy. My own smoke tests used only informative fixtures, where
+  every alarm was a true alarm.
+- **Prevention rules:**
+  - A guard that fires when a point estimate crosses a threshold must be graded by its sampling
+    error: fire the serious notice only when the confidence interval clears the threshold (here the
+    Agresti-Caffo 95% interval for J, the method decision.b.R uses), and give a quieter note inside
+    the interval.
+  - Before shipping any guard, simulate its false-alarm rate on correctly coded null data, not just
+    its detection rate on the data it was written for.
+  - When rows that can duplicate each other are added, re-check every consumer of "the next-best
+    row" and "the tie list".
+
+---
+
+## 2026-09-29 — `/independent-reviewer decisioncombine`: a two-scenario simulation became a blanket "conservative" claim
+
+- **Failure modes:**
+  - The 09-27 validation simulated LR/DOR interval coverage in 2 scenarios, saw over-coverage,
+    and the 09-28 fix wrote it into the sparse-cell notice as "conservative, most of all where
+    the 0.5 correction was applied". On a 24-design grid, LR+/LR- cover 0.888/0.894 for a
+    near-perfect test on 10/30 patients, exactly where the correction fires. Fagerland 2015
+    §6.3.1 reports the same.
+  - Both earlier passes checked every displayed number and missed what the ranking leaves out.
+    Single tests are never candidates, so it named Parallel (J 0.50) beside Test 1 alone (J 0.80).
+  - Harness: `exists("rf")` found `stats::rf` when my result object was absent. Also, `gold = gold`
+    passed to a generated wrapper is read by `enquo()` as a column literally named "gold".
+- **Detection signal:**
+  - An independent pass with a parameter grid covering the regions where the notice fires.
+  - A literature check on the claim's direction.
+  - A check that asks what the ranking should contain, not only whether its numbers are right.
+- **Prevention rules:**
+  - A simulation result becomes user-facing text only when the grid spans the conditions that
+    trigger that text (near-perfect tests, rare patterns, small n), and a primary source agrees.
+    Otherwise say "approximate".
+  - For any ranking or "best rule" output, test the candidate set: include the obvious
+    comparators, such as each single test.
+  - In audit scripts, call `exists(x, inherits = FALSE)`, and pass wrapper arguments by value with
+    `do.call()`.
+
+---
+
+## 2026-09-28 — `jamovi/i18n/tr.po`: an escaping filler double-escaped, and a blanket "repair" corrupted six other entries
+
+- **Failure mode:**
+  - To fill three reworded Turkish msgstr, I edited the old translations read back from `tr.po`.
+    That text was already PO-escaped (`\"`), and my filler escaped it again (`\\"`), so
+    `msgfmt` failed.
+  - My first repair was a file-wide replace of the escape sequence I assumed was broken. It missed
+    the real one and instead rewrote six LEGITIMATE `\\\"` sequences in other analyses'
+    translations.
+- **Detection signal:**
+  - `msgfmt -c` reported "keyword level unknown".
+  - The repair's own count (6 replaced against 5 grep lines) did not match the defect.
+  - An entry-level diff against the pre-round snapshot showed what had really changed.
+- **Prevention rule:**
+  - Unescape text read from a PO file before re-escaping it.
+  - Never repair escape sequences with a file-wide replace: fix the exact entries, restore any
+    collateral line from the snapshot, then require `msgfmt -c` clean plus an entry-level diff
+    showing 0 changed and 0 lost translations.
+  - Snapshot `jamovi/i18n` before every `i18nUpdate()`.
+
+---
+
+## 2026-09-28 — decisioncombine forest plot (VAL-04): my fix shipped a regression that only an adversarial review found
+
+- **Failure modes:**
+  - The first redesign set the image size in `.run()`. jamovi's export and redraw path builds a
+    fresh object and never runs `.run()`, so the exported figure fell back to 800 x 600 and the
+    overprinting VAL-04 was about came back, on exactly the image a clinician pastes into a
+    report.
+  - `scales::label_number()` rounded log ticks to one shared accuracy (0.001 printed as "0").
+  - My "label both sides of 1" fallback read `lim` as the data range. For a transformed scale
+    ggplot passes the EXPANDED range, and `geom_vline(xintercept = 1)` pulls 1 into it. So every
+    facet whose intervals sat on one side of 1 got 2-4 labels crammed into the 5% padding.
+- **Detection signal:** a 4-lens probe workflow (144-cell option grid, degenerate data, the
+  export path, visual read), then a second workflow that re-ran the repros against the patch and
+  hunted regressions. Three lenses independently found the overprint. All my own checks had
+  passed, because they looked at the facets the fix targeted, not at the one-sided ones.
+- **Prevention rules:**
+  - Set an Image's size in `.init()` from the options (house pattern: `enhancedROC.b.R`) when it
+    must survive export or reopen.
+  - A breaks function sees expanded limits: guard any "missing side" logic by a share of the
+    span, and thin breaks to a minimum gap.
+  - Label log axes with base `format()`, not `label_number()`.
+  - After fixing a plot, re-run an independent review over the whole option and data space, not
+    only over the cases the fix was written for.
+
+---
+
+## 2026-09-28 — `/validate-function` + `/fix-function decisioncombine`: five defects no parity test could see
+
+- **Failure modes (code):**
+  - A notice promised "reported as blank" while the table printed NPV 0% with a Wilson interval.
+  - The ranking de-duplicated rules on their tp|fp|fn|tn string, which merged DIFFERENT rules that
+    shared a 2x2, so "2 rules tie" was reported when 3 did.
+  - jmvcore's `OptionVariable$valueAsSource` returns the bare column name, so the exported syntax
+    `gold = Golden Standart` did not parse.
+  - One `facet_wrap(scales = "free_x")` put log-symmetric ratio intervals on a linear axis with no
+    line at 1.
+  - A single-test analysis had no inversion guard below 10 cases per group.
+
+  Every tabulated number was right: 328 checks against hand arithmetic, a blinded oracle and epiR
+  all passed.
+- **Failure modes (process):**
+  - I edited `development-scripts/validate_decisioncombine.R` while two `Rscript` runs were
+    executing it. R reads a `--file` script incrementally, so the runs would have read
+    byte-shifted code.
+  - The validation script's `ggplot_build()` opened the default pdf device and rewrote the tracked
+    `Rplots.pdf` in the repo root.
+- **Detection signal:**
+  - Code: a notice sentence checked against the table cell it describes; a fixture built so two
+    distinct rules share counts; the exported syntax run in `Rscript --vanilla` with a
+    non-syntactic column name; the rendered PNG looked at.
+  - Process: `git status` showed `M Rplots.pdf`, which was clean at session start.
+- **Prevention rules:**
+  - Test what a notice says against the table, not only that the notice fires.
+  - De-duplicate on identity (which rule), never on value (which counts).
+  - Any analysis that exports syntax needs a `.sourcifyOption` override for Variable options
+    (house pattern: `R/tableone.b.R`). The jmvcore default is unparseable for non-syntactic names.
+  - Ratios go on a log axis with a null line, in their own panel.
+  - Never edit a script a running R process is reading: snapshot it and run the copy.
+  - Start any script that builds plots outside a render call with `grDevices::pdf(NULL)`.
+
+---
+
+## 2026-09-27 — `/fix-function decision`: a version bump that reached the header but not the yaml
+
+- **Failure mode:** the release review bumped `jamovi/decision.a.yaml` to `1.0.84` and ran `prepare()`, so
+  `R/decision.h.R` and NEWS.md said 1.0.84. Three minutes later the yaml was rewritten and went back to
+  `1.0.83`, and that is the version that was committed. The yaml is the source of truth, so the next
+  `prepare()` would have rolled the header back to 1.0.83 with nothing on screen.
+- **Detection signal:** `stat` put the yaml's mtime (18:22) after the header's (18:19), and
+  `version = c(1,0,84)` in the header disagreed with `version: '1.0.83'` in the yaml. `release_gate.py`
+  checks only the package version.
+- **Prevention rule:** after the last yaml edit of a pass, regenerate the header and compare it with the yaml.
+  A header older than its yaml is stale. To check one analysis without module-wide `prepare()` writes, copy its
+  three yaml files and a one-entry `0000.yaml` into a scratch dir and run `jmvtools::prepare()` there
+  (`env -u ELECTRON_RUN_AS_NODE`). A gate check is filed in TODO.md.
+
+---
+
+## 2026-09-27 — `/security-audit-function decision`: a renderer claim read off minified code was half wrong
+
+- **Failure mode:** the audit read jamovi's minified `bt()` renderer and stated that it drops a
+  non-allowed tag "WITH its text". The code comment on `.richText()` and the regression test's
+  comment repeated that. In fact `bt()` unwraps a non-allowed tag and keeps its inner text; only
+  script/style lose content. `<LOD` renders blank because it is an unclosed tag, discarded at end
+  of input. `<Negative>` renders blank because it is an empty element. The fix was right; the
+  explanation was not.
+- **Detection signal:** two independent verifiers disagreed with the claim. One re-read `yt()`
+  (`return l` keeps the children). The other ran the extracted `bt/yt/gt` under jsdom:
+  `"<x>kept?</x>"` renders `kept?`.
+- **Prevention rule:** a statement about client rendering goes into a comment only after the
+  client code has been RUN on the input (extract the function from
+  `/Applications/jamovi.app/.../client/dist/assets/*.js`, evaluate it under jsdom). Reading
+  minified code is enough to find the renderer, not to describe what it does.
+
+---
+
 ## 2026-09-27 — `/release-review-function decision`: five passes changed the numbers, none said so
 
 ### Numbers changed with no version bump and no release note
