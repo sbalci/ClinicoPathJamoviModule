@@ -19,26 +19,63 @@ jobs:
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       R_KEEP_PKG_SOURCE: yes
+      # The tracked project .Rprofile replaces the ~/.Rprofile that setup-r writes,
+      # which hides the Posit Package Manager binary repo: every package then builds
+      # from source and the job cannot finish. Read setup-r's profile explicitly.
+      R_PROFILE_USER: ~/.Rprofile
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+          # The PR merge commit and its base parent, to list the files the PR changes.
+          fetch-depth: 2
 
       - uses: r-lib/actions/setup-r@v2
         with:
           r-version: release
           use-public-rspm: true
+          # ~/.Rprofile sets options(Ncpus); keep installs parallel.
+          Ncpus: 4
 
-      - uses: r-lib/actions/setup-r-dependencies@v2
+      - name: Install dependencies
+        id: dependencies
+        uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::rcmdcheck
           needs: check
           install-quarto: false
+          # Save the package cache even when a later step fails or times out.
+          cache: always
 
       - uses: r-lib/actions/check-r-package@v2
         with:
-          # Keep package installation and tests; leave documentation to full checks.
+          # Tests run from the source tree below: many read jamovi/ and R/, which the
+          # built tarball does not contain.
           build_args: 'c("--no-manual", "--no-build-vignettes")'
-          args: 'c("--no-manual", "--no-vignettes", "--no-examples")'
+          args: 'c("--no-manual", "--no-vignettes", "--no-examples", "--no-tests")'
           error-on: '"error"'
           upload-results: true
           artifact-name: pr-r-check-results
+
+      - name: Tests for the analyses this PR changes
+        # The full suite (~880 files) does not fit a PR check; run the test files of every
+        # analysis whose R/, jamovi/ or tests/ files the PR touches.
+        if: ${{ !cancelled() && steps.dependencies.outcome == 'success' }}
+        shell: bash
+        run: |
+          # Names are limited to [A-Za-z0-9._-] and reach R through the environment, not code.
+          names=$(git diff --name-only HEAD^1 HEAD \
+            | sed -nE 's#^R/([A-Za-z0-9._-]+)\.[bh]\.R$#\1#p; s#^jamovi/([A-Za-z0-9_-]+)\.[aru]\.yaml$#\1#p; s#^tests/testthat/test-([A-Za-z0-9._-]+)\.R$#\1#p' \
+            | sort -u | paste -sd'|' -)
+          if [ -z "$names" ]; then
+            echo "No analysis or test files changed; no tests to run."
+            exit 0
+          fi
+          matched=$(ls tests/testthat | sed -nE 's#^test-(.+)\.R$#\1#p' | grep -E "^($names)" || true)
+          if [ -z "$matched" ]; then
+            echo "No test files match the changed analyses ($names)."
+            exit 0
+          fi
+          echo "Test files to run:"; echo "$matched"
+          TEST_FILTER="^($names)" Rscript -e 'testthat::test_local(".", filter = Sys.getenv("TEST_FILTER"), reporter = "check", stop_on_failure = TRUE)'
