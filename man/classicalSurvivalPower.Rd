@@ -17,7 +17,6 @@ classicalSurvivalPower(
   allocation_ratio = 1,
   alpha = 0.025,
   beta = 0.1,
-  power = 0.9,
   sided = "one_sided",
   entry_type = "unif",
   gamma = 0,
@@ -58,15 +57,15 @@ person-time unit).}
 
 \item{alpha}{Type I error rate (significance level).}
 
-\item{beta}{Type II error rate (1 - power).}
-
-\item{power}{Statistical power (1 - beta).}
+\item{beta}{Type II error rate; the target power is 1 - beta (0.1 gives 90
+percent power).}
 
 \item{sided}{One-sided or two-sided statistical test.}
 
 \item{entry_type}{Pattern of patient entry into the study.}
 
-\item{gamma}{Rate parameter for exponential entry (0 if uniform entry).}
+\item{gamma}{Rate parameter for exponential entry; must be non-zero when
+entry_type is 'expo' (ignored for uniform entry).}
 
 \item{sample_size_input}{Total sample size when calculating power.}
 
@@ -85,8 +84,8 @@ results.}
 \item{show_timeline_plot}{Whether to display study timeline visualization
 for Lachin-Foulkes method.}
 
-\item{power_plot_range}{Sample size range for power plots (format 'min,max'
-or 'auto').}
+\item{power_plot_range}{Sample size range for Lachin-Foulkes or event-count
+range for Schoenfeld (format 'min,max' or 'auto').}
 
 \item{export_results}{Whether to show an on-screen summary of the computed
 power analysis result.}

@@ -71,12 +71,6 @@ children:
   - type: LayoutBox
     margin: large
     children:
-      - type: TextBox
-        name: power
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
       - type: ComboBox
         name: sided
   - type: LayoutBox
