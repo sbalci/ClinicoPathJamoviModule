@@ -1,4 +1,6 @@
 skip_if_not_installed("gsDesign")
+# A parked analysis (T/P/D menuGroup) is deleted from the generated module.
+skip_if_not(exists("classicalSurvivalPowerClass"), "classicalSurvivalPower is not in this module")
 
 # The generated wrapper returns the results Group, so outputs are read as
 # model$<item>$content. Private state needs the analysis object itself.
@@ -8,6 +10,18 @@ run_analysis <- function(...) {
   analysis$init()
   analysis$run()
   analysis
+}
+
+# Draws the power curve from its image into a null device; returns the ggplot drawn.
+draw_power_curve <- function(analysis) {
+  grDevices::pdf(NULL)
+  on.exit(grDevices::dev.off())
+  ggplot2::set_last_plot(NULL)
+  expect_true(analysis$.__enclos_env__$private$.plot_power_curve(analysis$results$power_plot, NULL, NULL))
+  ggplot2::last_plot()
+}
+layer_with <- function(plot, geom) {
+  plot$layers[[which(vapply(plot$layers, function(layer) inherits(layer$geom, geom), logical(1)))]]
 }
 
 lf_design <- function(...) {
@@ -180,11 +194,7 @@ test_that("the design-point marker sits on the curve at the displayed count", {
   skip_if_not_installed("ggplot2")
   marker_of <- function(...) {
     analysis <- run_analysis(show_power_plot = TRUE, ...)
-    grDevices::pdf(NULL)
-    on.exit(grDevices::dev.off())
-    analysis$.__enclos_env__$private$.plot_power_curve(NULL, NULL, NULL)
-    points <- Filter(function(layer) inherits(layer$geom, "GeomPoint"), ggplot2::last_plot()$layers)
-    list(point = points[[1]]$data, analysis = analysis)
+    list(point = layer_with(draw_power_curve(analysis), "GeomPoint")$data, analysis = analysis)
   }
   # 161.07 events are required; 162 are displayed, which give more than the 90% target.
   schoenfeld <- marker_of(method = "schoenfeld")
@@ -248,4 +258,248 @@ test_that("the power curve is redrawn when any option it depends on changes", {
                     "accrual_duration", "dropout_rate", "allocation_ratio", "alpha", "beta",
                     "sided", "entry_type", "gamma", "sample_size_input", "events_input",
                     "power_plot_range") %in% clear_with))
+})
+
+test_that("the design-point label stays inside the plot near 100% power", {
+  skip_if_not_installed("ggplot2")
+  label_of <- function(...) {
+    analysis <- run_analysis(show_power_plot = TRUE, ...)
+    plot <- draw_power_curve(analysis)
+    grDevices::pdf(NULL)  # layer_data() builds the plot; keep it off the default device
+    on.exit(grDevices::dev.off())
+    text <- which(vapply(plot$layers, function(layer) inherits(layer$geom, "GeomText"), logical(1)))
+    list(label = ggplot2::layer_data(plot, text), point = analysis$results$power_plot$state$point)
+  }
+  # 0.05 above the point, the label passed the 100% end of the scale and ggplot dropped it.
+  for (args in list(list(beta = 0.01), list(calculation_type = "power", sample_size_input = 10000),
+                    list(method = "schoenfeld", calculation_type = "power", events_input = 500))) {
+    shown <- do.call(label_of, args)
+    expect_gt(shown$point$power, 0.95)
+    expect_true(is.finite(shown$label$y))
+    expect_equal(shown$label$y, shown$point$power - 0.05)
+  }
+  low <- label_of(calculation_type = "power", sample_size_input = 50)
+  expect_equal(low$label$y, low$point$power + 0.05)
+  # The design point at the right end of the range: the label ends there, inside the panel.
+  expect_equal(label_of(power_plot_range = "0,100")$label$hjust, 1)
+})
+
+test_that("the effect size reads as an increase for HR > 1 and a reduction for HR < 1", {
+  effect <- function(...) classicalSurvivalPower(...)$interpretation$content
+  expect_match(effect(), "HR = 0.506 represents a 49.4% reduction in hazard", fixed = TRUE)
+  treatment_worse <- effect(hazard_treatment = 0.12)
+  expect_match(treatment_worse, "HR = 1.446 represents a 44.6% increase in hazard", fixed = TRUE)
+  expect_false(grepl("-[0-9.]+% reduction", treatment_worse))
+  expect_match(effect(method = "schoenfeld", hazard_ratio = 1.5),
+               "HR = 1.5 represents a 50% increase in hazard", fixed = TRUE)
+  expect_match(effect(method = "schoenfeld", calculation_type = "power", hazard_ratio = 1),
+               "HR = 1 represents no difference in hazard", fixed = TRUE)
+})
+
+test_that("Lachin-Foulkes sample size rounds each arm up and shows the allocation ratio", {
+  # 2:1 needs n = 159.01: 106.01 treatment and 53.00 control, so 107 + 54 = 161, not 160.
+  two_to_one <- classicalSurvivalPower(allocation_ratio = 2)
+  expect_match(two_to_one$power_results$content,
+               "Required Sample Size:</strong> 161 patients (107 treatment, 54 control)", fixed = TRUE)
+  # The power of the arms shown, at their own 107:54 ratio.
+  expect_match(two_to_one$power_results$content,
+               paste0("Power with 161 patients:</strong> ",
+                      round(100 * .classicalSurvivalPower_lf_power(161, lf_design(ratio = 107 / 54))$power, 1), "%"),
+               fixed = TRUE)
+  for (ratio in c(0.5, 1, 2, 3)) {
+    model <- classicalSurvivalPower(allocation_ratio = ratio)
+    required <- do.call(gsDesign::nSurvival, c(lf_design(ratio = ratio), list(beta = 0.1)))
+    share <- required$n * c(ratio, 1) / (1 + ratio)
+    arms <- ceiling(share)
+    expect_true(all(arms >= share))
+    split <- paste0(sum(arms), " patients (", arms[1], " treatment, ", arms[2], " control)")
+    expect_match(model$power_results$content, paste0("Required Sample Size:</strong> ", split), fixed = TRUE)
+    expect_match(model$interpretation$content, paste0("Total enrollment:</strong> ", split), fixed = TRUE)
+    expect_match(model$power_results$content, paste0("Allocation Ratio (T:C):</strong> ", ratio, ":1"), fixed = TRUE)
+  }
+  entered <- classicalSurvivalPower(calculation_type = "power", allocation_ratio = 2)
+  expect_match(entered$power_results$content, "Allocation Ratio (T:C):</strong> 2:1", fixed = TRUE)
+})
+
+test_that("unticking the study design summary clears the previous summary", {
+  analysis <- classicalSurvivalPowerClass$new(
+    options = classicalSurvivalPowerOptions$new(show_summary = FALSE), data = data.frame())
+  analysis$init()
+  # jamovi restores this item from the previous run: show_summary is not in its clearWith.
+  analysis$results$power_results$setContent("<h4>Power Analysis Results</h4><p>previous run</p>")
+  analysis$run()
+  expect_identical(analysis$results$power_results$content, "")
+})
+
+test_that("both plots draw on jamovi's export path from the image state alone", {
+  skip_if_not_installed("ggplot2")
+  # Export, resize and .omv reopen: a new analysis object, init() only, the saved image
+  # state restored, then the engine's own .createImage(). .run() is never called.
+  export_draw <- function(live, name) {
+    fresh <- classicalSurvivalPowerClass$new(options = live$options, data = data.frame())
+    fresh$init()
+    image <- fresh$results[[name]]
+    image$setState(live$results[[name]]$state)
+    grDevices::pdf(NULL)
+    on.exit(grDevices::dev.off())
+    fresh$.createImage(image$.__enclos_env__$private$.renderFun, image)
+  }
+  for (args in list(list(), list(calculation_type = "power", sample_size_input = 300),
+                    list(method = "schoenfeld"), list(method = "schoenfeld", calculation_type = "hazard_ratio"))) {
+    live <- do.call(run_analysis, c(list(show_power_plot = TRUE, show_timeline_plot = TRUE), args))
+    state <- live$results$power_plot$state
+    expect_true(is.data.frame(state$curve))
+    # Plot-ready numbers and labels only: no fitted model, no dataset.
+    expect_true(all(vapply(state, function(x) is.null(x) || is.data.frame(x) || is.atomic(x), logical(1))))
+    expect_lt(length(serialize(state, NULL)), 5000)
+    expect_true(export_draw(live, "power_plot"))
+    if (live$options$method == "lachin_foulkes") {
+      expect_equal(live$results$timeline_plot$state, list(accrual_duration = 12, study_duration = 24))
+      expect_true(export_draw(live, "timeline_plot"))
+    }
+  }
+  # No state (the calculation stopped, or the plot was off during the run): nothing drawn.
+  empty <- classicalSurvivalPowerClass$new(
+    options = classicalSurvivalPowerOptions$new(show_power_plot = TRUE, show_timeline_plot = TRUE),
+    data = data.frame())
+  empty$init()
+  expect_false(empty$.__enclos_env__$private$.plot_power_curve(empty$results$power_plot, NULL, NULL))
+  expect_false(empty$.__enclos_env__$private$.plot_timeline(empty$results$timeline_plot, NULL, NULL))
+})
+
+test_that("an exponential-entry overflow is named as such, not blamed on the design", {
+  big <- list(hazard_control = 10, hazard_treatment = 8, dropout_rate = 1, entry_type = "expo",
+              accrual_duration = 60, study_duration = 120)
+  for (mode in c("sample_size", "power")) {
+    expect_error(do.call(classicalSurvivalPower, c(big, gamma = -5, calculation_type = mode)),
+                 "Numerical overflow")
+  }
+  # The rejection matches gsDesign exactly: exp((10 + 1 - gamma) * 60) is Inf below this gamma.
+  edge <- 11 - log(.Machine$double.xmax) / 60
+  design <- function(gamma) {
+    c(lf_design(lambda1 = 10, lambda2 = 8, eta = 1, Tr = 60, Ts = 120, entry = "expo", gamma = gamma),
+      list(beta = 0.1))
+  }
+  expect_true(is.nan(do.call(gsDesign::nSurvival, design(edge - 1e-6))$n))
+  expect_true(is.finite(do.call(gsDesign::nSurvival, design(edge + 1e-6))$n))
+  expect_error(do.call(classicalSurvivalPower, c(big, gamma = edge - 1e-6)), "Numerical overflow")
+  computed <- do.call(classicalSurvivalPower, c(big, gamma = edge + 1e-6))
+  expect_match(computed$power_results$content, "Required Sample Size:</strong>", fixed = TRUE)
+})
+
+test_that("the power shown is that of the displayed arms, and reaches the target", {
+  results_of <- function(analysis) analysis$.__enclos_env__$private$.results_data
+  # 10:1 needs n = 38.08, shown as 35 treatment + 4 control. The nominal 10:1 split of 39 has
+  # 81.0% power; the 35/4 arms have 85.7% (closed form, integrated over entry: 0.8570519726).
+  small <- run_analysis(hazard_control = 0.3, hazard_treatment = 0.05, allocation_ratio = 10,
+                        beta = 0.2, show_power_plot = TRUE)
+  content <- small$results$power_results$content
+  expect_match(content, "Required Sample Size:</strong> 39 patients (35 treatment, 4 control)", fixed = TRUE)
+  expect_match(content, "Power with 39 patients:</strong> 85.7%", fixed = TRUE)
+  expect_equal(results_of(small)$achieved_power, 0.8570519726, tolerance = 1e-9)
+  # The marker is that design point (the arms' power). The curve is drawn at the PLANNED
+  # 10:1 allocation, so at 39 it shows the nominal 81.0%, not the arms' 85.7%.
+  state <- small$results$power_plot$state
+  expect_equal(state$point$amount, 39)
+  expect_equal(state$point$power, results_of(small)$achieved_power, tolerance = 1e-12)
+  planned <- lf_design(lambda1 = 0.3, lambda2 = 0.05, ratio = 10)
+  expect_equal(state$curve$power[state$curve$amount == 39],
+               .classicalSurvivalPower_lf_power(39, planned)$power, tolerance = 1e-12)
+  expect_lt(state$curve$power[state$curve$amount == 39], state$point$power - 0.04)
+
+  # Each arm rounded up can still fall short: n = 3.39 at 0.4:1 gives 1 treatment + 3 control,
+  # with 49.9% power for a 50% target. A treatment patient is added (closed form 0.6714852691);
+  # a control patient would have lowered the power to 47.7%.
+  short <- lf_design(lambda1 = 0.005, lambda2 = 0.1, alpha = 0.05)
+  expect_lt(.classicalSurvivalPower_lf_power(4, modifyList(short, list(ratio = 1 / 3)))$power, 0.5)
+  bumped <- run_analysis(hazard_control = 0.005, hazard_treatment = 0.1, allocation_ratio = 0.4,
+                         beta = 0.5, alpha = 0.05)
+  expect_match(bumped$results$power_results$content,
+               "Required Sample Size:</strong> 5 patients (2 treatment, 3 control)", fixed = TRUE)
+  expect_equal(results_of(bumped)$achieved_power, 0.6714852691, tolerance = 1e-9)
+  # ... and the summary says why the total exceeds the rounded shares
+  expect_match(bumped$results$power_results$content,
+               "1 patient(s) were added beyond the arms' rounded shares", fixed = TRUE)
+  expect_false(grepl("were added beyond", content, fixed = TRUE))
+
+  # Across ratios and effect sizes: every arm covers its share of n, and the power of the
+  # arms shown, which is the power displayed, is at least the target.
+  for (ratio in c(0.1, 0.25, 0.4, 1, 2.5, 4, 10)) for (treatment in c(0.005, 0.02, 0.06)) for (beta in c(0.05, 0.2, 0.5)) {
+    analysis <- run_analysis(hazard_treatment = treatment, allocation_ratio = ratio, beta = beta)
+    arms <- results_of(analysis)$arm_sizes
+    design <- lf_design(lambda2 = treatment, ratio = ratio)
+    share <- do.call(gsDesign::nSurvival, c(design, list(beta = beta)))$n * c(ratio, 1) / (1 + ratio)
+    expect_true(all(arms >= share))
+    at_arms <- .classicalSurvivalPower_lf_power(sum(arms), modifyList(design, list(ratio = arms[[1]] / arms[[2]])))$power
+    expect_equal(results_of(analysis)$achieved_power, at_arms, tolerance = 1e-12)
+    expect_gte(at_arms, 1 - beta)
+    expect_match(analysis$results$power_results$content,
+                 paste0("Power with ", sum(arms), " patients:</strong> ", round(100 * at_arms, 1), "%"), fixed = TRUE)
+  }
+})
+
+test_that("an HR that displays as 1 reads 'no difference', not '0% increase'", {
+  effect <- function(...) classicalSurvivalPower(...)$interpretation$content
+  for (hr in c(1.0004, 0.9996)) {
+    shown <- effect(method = "schoenfeld", calculation_type = "power", hazard_ratio = hr)
+    expect_match(shown, "HR = 1 represents no difference in hazard", fixed = TRUE)
+    expect_false(grepl("represents a 0% ", shown, fixed = TRUE))
+  }
+  # Lachin-Foulkes hazards 0.083 and 0.08304: HR 1.00048.
+  expect_match(effect(calculation_type = "power", hazard_treatment = 0.08304),
+               "HR = 1 represents no difference in hazard", fixed = TRUE)
+  # Past the rounding boundary the sentence matches the HR shown.
+  expect_match(effect(method = "schoenfeld", calculation_type = "power", hazard_ratio = 1.0006),
+               "HR = 1.001 represents a 0.1% increase in hazard", fixed = TRUE)
+})
+
+test_that("large counts print in full, never in scientific notation", {
+  skip_if_not_installed("ggplot2")
+  off_screen <- function(expr) {  # plots are built on a null device, never Rplots.pdf
+    grDevices::pdf(NULL)
+    on.exit(grDevices::dev.off())
+    expr
+  }
+  # A bare format() here is jmvcore::format, which returns a number unchanged, so 2e5 used
+  # to read "2e+05 patients (1e+05 treatment, 1e+05 control)".
+  near <- lf_design(lambda2 = 0.082)
+  beta <- uniroot(function(b) do.call(gsDesign::nSurvival, c(near, list(beta = b)))$n / 2 - (1e5 - 0.5),
+                  c(0.01, 0.5), tol = 1e-12)$root
+  big <- run_analysis(hazard_treatment = 0.082, beta = beta, show_power_plot = TRUE)
+  expect_match(big$results$power_results$content,
+               "Required Sample Size:</strong> 200000 patients (100000 treatment, 100000 control)", fixed = TRUE)
+  expect_match(big$results$power_results$content, "Power with 200000 patients:</strong>", fixed = TRUE)
+  expect_match(big$results$interpretation$content,
+               "Total enrollment:</strong> 200000 patients (100000 treatment, 100000 control)", fixed = TRUE)
+  plot <- draw_power_curve(big)
+  expect_match(layer_with(plot, "GeomText")$aes_params$label, "Current: 200000 subjects", fixed = TRUE)
+  axis <- off_screen(ggplot2::layer_scales(plot)$x$get_labels())
+  expect_true(all(c("100000", "200000") %in% axis))
+
+  # Schoenfeld: exactly 100000 events.
+  beta_events <- uniroot(function(b) gsDesign::nEvents(hr = 0.98, alpha = 0.025, beta = b) - (1e5 - 0.5),
+                         c(0.01, 0.5), tol = 1e-12)$root
+  events <- classicalSurvivalPower(method = "schoenfeld", calculation_type = "events", hazard_ratio = 0.98,
+                                   beta = beta_events)
+  expect_match(events$power_results$content, "Required Events:</strong> 100000 events", fixed = TRUE)
+  expect_match(events$power_results$content, "Power with 100000 events:</strong>", fixed = TRUE)
+  expect_match(events$interpretation$content, "Target events:</strong> 100000 events", fixed = TRUE)
+
+  # HR 1001 is a 100000% increase; a reversed plot range; a follow-up of 0.00001 time units.
+  hr_1001 <- classicalSurvivalPower(calculation_type = "power", hazard_control = 0.001, hazard_treatment = 1.001)
+  expect_match(hr_1001$interpretation$content, "HR = 1001 represents a 100000% increase in hazard", fixed = TRUE)
+  reversed <- classicalSurvivalPower(calculation_type = "power", power_plot_range = "200000,100000",
+                                     export_power_curve = TRUE)
+  expect_match(reversed$export_summary$content, "changed to 100 to 200000", fixed = TRUE)
+  brief <- run_analysis(study_duration = 12.00001, show_timeline_plot = TRUE)
+  expect_match(brief$results$interpretation$content, "12 time units for enrollment + 0.00001 additional follow-up", fixed = TRUE)
+  expect_true(off_screen(brief$.__enclos_env__$private$.plot_timeline(brief$results$timeline_plot, NULL, NULL)))
+  labels <- vapply(Filter(function(layer) inherits(layer$geom, "GeomText"), ggplot2::last_plot()$layers),
+                   function(layer) layer$aes_params$label, character(1))
+  expect_true(any(grepl("0.00001 time units", labels, fixed = TRUE)))
+
+  shown <- c(big$results$power_results$content, big$results$interpretation$content,
+             events$power_results$content, events$interpretation$content, hr_1001$interpretation$content,
+             reversed$export_summary$content, brief$results$interpretation$content, axis, labels)
+  expect_false(any(grepl("[0-9]e[+-]?[0-9]", shown)))
 })

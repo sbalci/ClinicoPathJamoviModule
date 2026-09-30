@@ -133,6 +133,10 @@ classicalSurvivalPowerClass <- if (requireNamespace("jmvcore", quietly = TRUE)) 
                         # Generate results
                         if (self$options$show_summary) {
                             private$.generate_summary()
+                        } else {
+                            # Always visible and not cleared by show_summary, so jamovi
+                            # would keep showing the previous run's summary.
+                            self$results$power_results$setContent("")
                         }
 
                         if (self$options$show_formulas) {
@@ -145,6 +149,18 @@ classicalSurvivalPowerClass <- if (requireNamespace("jmvcore", quietly = TRUE)) 
 
                         if (self$options$export_results || self$options$export_power_curve) {
                             private$.generate_export_summary()
+                        }
+
+                        # The renderers draw from these states only: export, resize and
+                        # .omv reopen render on a new analysis object that never ran.
+                        if (self$options$show_power_plot) {
+                            self$results$power_plot$setState(private$.power_plot_state())
+                        }
+                        if (self$options$show_timeline_plot && private$.results_data$method == "Lachin-Foulkes") {
+                            self$results$timeline_plot$setState(list(
+                                accrual_duration = private$.results_data$accrual_duration,
+                                study_duration = private$.results_data$study_duration
+                            ))
                         }
                     },
                     error = function(e) {
@@ -225,6 +241,15 @@ classicalSurvivalPowerClass <- if (requireNamespace("jmvcore", quietly = TRUE)) 
                             gamma = design$gamma
                         ))
                     }
+                    # The same formula multiplies by exp((rate - gamma) * Tr), in the same
+                    # operation order as here; when that is Inf every result is NaN.
+                    exponents <- (rates - design$gamma) * design$Tr
+                    if (any(is.infinite(exp(exponents)))) {
+                        jmvcore::reject(.fmt(
+                            .("Numerical overflow with exponential entry: gsDesign evaluates exp((hazard rate + dropout rate - gamma) x accrual duration), which is exp({value}) here, and anything above about exp(709) is infinite in double precision, so no sample size or power can be computed. This is a limit of the formula, not of the design. Shorten the accrual duration or bring gamma closer to 0, and check that the hazard rates, gamma and durations use the same time unit."),
+                            value = round(max(exponents))
+                        ))
+                    }
                 }
             },
             .lf_design = function() {
@@ -251,13 +276,16 @@ classicalSurvivalPowerClass <- if (requireNamespace("jmvcore", quietly = TRUE)) 
                     qnorm(1 - self$options$alpha / private$.sided_num()))
             },
             # Power at each sample size (Lachin-Foulkes) or event count (Schoenfeld); the
-            # curve and its marker use the same functions as the main result.
-            .power_at = function(amounts) {
+            # curve and its marker use the same functions, and design, as the main result.
+            # The curve uses the planned allocation; at_point = TRUE uses the design point's
+            # own rounded arms (Lachin-Foulkes sample-size mode), which is what the summary shows.
+            .power_at = function(amounts, at_point = FALSE) {
                 data <- private$.results_data
                 if (data$method == "Schoenfeld") {
                     private$.schoenfeld_power(amounts, data$hazard_ratio)
                 } else {
-                    .classicalSurvivalPower_lf_power(amounts, private$.lf_design())$power
+                    design <- if (at_point && !is.null(data$point_design)) data$point_design else data$design
+                    .classicalSurvivalPower_lf_power(amounts, design)$power
                 }
             },
             .calculate_power = function() {
@@ -272,21 +300,44 @@ classicalSurvivalPowerClass <- if (requireNamespace("jmvcore", quietly = TRUE)) 
             },
             .calculate_lachin_foulkes = function() {
                 # .validate_options() leaves only 'sample_size' and 'power' here.
-                design <- private$.lf_design()
+                planned <- private$.lf_design()
+                design <- planned
                 beta <- self$options$beta
                 solve_n <- self$options$calculation_type == "sample_size"
+                note <- NULL
 
                 if (solve_n) {
                     required <- do.call(gsDesign::nSurvival, c(design, list(beta = beta)))
                     if (!is.finite(required$n)) {
                         stop("The Lachin-Foulkes formulas give no finite sample size for this design.")
                     }
-                    # Whole patients, rounded up: rounding to the nearest can miss the target power.
-                    sample_size <- ceiling(required$n)
+                    # Whole patients per arm (treatment:control = ratio:1), each rounded up
+                    # to its share of n so neither arm falls short; the total is their sum.
+                    arm_sizes <- ceiling(required$n * c(treatment = design$ratio, control = 1) / (1 + design$ratio))
+                    # What is shown describes these arms, so it uses their own ratio. Rounding
+                    # shifts the allocation, which in a small trial can cost power: then add
+                    # patients one at a time, to the arm that gains more, until the target is met.
+                    # One of the two always gains, so this ends: the alternative-variance term grows
+                    # with either arm, and the null term depends on the allocation alone, monotonically.
+                    for_arms <- function(arms) utils::modifyList(design, list(ratio = arms[["treatment"]] / arms[["control"]]))
+                    power_of <- function(arms) .classicalSurvivalPower_lf_power(sum(arms), for_arms(arms))$power
+                    shares <- sum(arm_sizes)
+                    while (power_of(arm_sizes) < 1 - beta) {
+                        grown <- list(arm_sizes + c(1, 0), arm_sizes + c(0, 1))
+                        arm_sizes <- grown[[which.max(vapply(grown, power_of, numeric(1)))]]
+                    }
+                    if (sum(arm_sizes) > shares) {
+                        note <- .fmt(
+                            .("{added} patient(s) were added beyond the arms' rounded shares: rounding each arm up shifted the allocation enough to cost power in this small design."),
+                            added = sum(arm_sizes) - shares
+                        )
+                    }
+                    design <- for_arms(arm_sizes)
+                    sample_size <- sum(arm_sizes)
                 } else {
                     sample_size <- self$options$sample_size_input
                 }
-                # Power and expected events at the sample size that is displayed.
+                # Power and expected events at the sample size (and arms) that are displayed.
                 at_n <- .classicalSurvivalPower_lf_power(sample_size, design)
 
                 private$.results_data <- list(
@@ -302,7 +353,14 @@ classicalSurvivalPowerClass <- if (requireNamespace("jmvcore", quietly = TRUE)) 
                     study_duration = design$Ts,
                     accrual_duration = design$Tr,
                     alpha = design$alpha,
-                    beta = if (solve_n) beta else at_n$beta
+                    beta = if (solve_n) beta else at_n$beta,
+                    # The planned ratio; the arms' own ratio is in `design`.
+                    allocation_ratio = self$options$allocation_ratio,
+                    arm_sizes = if (solve_n) arm_sizes,
+                    note = note,
+                    # The curve is drawn at the planned allocation; the design point at its arms.
+                    design = planned,
+                    point_design = design
                 )
             },
             .calculate_schoenfeld = function() {
@@ -384,10 +442,17 @@ classicalSurvivalPowerClass <- if (requireNamespace("jmvcore", quietly = TRUE)) 
                 summary_html <- paste0(summary_html, "<p><strong>Method:</strong> ", data$method, "</p>")
                 summary_html <- paste0(summary_html, "<p><strong>Calculation:</strong> ", data$calculation, "</p>")
 
-                # Key results
+                # Key results. Counts use base::format(): the bare format() here is
+                # jmvcore::format (import(jmvcore)), which returns a number unchanged, so
+                # 1e5 would print as "1e+05".
                 if (!is.null(data$sample_size)) {
                     n_label <- if (identical(data$calculation, "Power")) .("Entered Sample Size") else .("Required Sample Size")
-                    summary_html <- paste0(summary_html, "<p><strong>", n_label, ":</strong> ", format(data$sample_size, scientific = FALSE), " patients</p>")
+                    summary_html <- paste0(summary_html, "<p><strong>", n_label, ":</strong> ", base::format(data$sample_size, scientific = FALSE), " patients")
+                    if (!is.null(data$arm_sizes)) {
+                        summary_html <- paste0(summary_html, " (", base::format(data$arm_sizes[["treatment"]], scientific = FALSE), " treatment, ",
+                                               base::format(data$arm_sizes[["control"]], scientific = FALSE), " control)")
+                    }
+                    summary_html <- paste0(summary_html, "</p>")
                 }
 
                 if (!is.null(data$events)) {
@@ -396,16 +461,16 @@ classicalSurvivalPowerClass <- if (requireNamespace("jmvcore", quietly = TRUE)) 
                     expected <- data$method == "Lachin-Foulkes" && identical(data$calculation, "Power")
                     events_label <- if (entered) .("Entered Events") else if (expected) .("Expected Events") else .("Required Events")
                     events_shown <- if (entered) data$events else if (expected) round(data$events) else ceiling(data$events)
-                    summary_html <- paste0(summary_html, "<p><strong>", events_label, ":</strong> ", format(events_shown, scientific = FALSE), " events</p>")
+                    summary_html <- paste0(summary_html, "<p><strong>", events_label, ":</strong> ", base::format(events_shown, scientific = FALSE), " events</p>")
                 }
 
                 summary_html <- paste0(summary_html, "<p><strong>Statistical Power:</strong> ", round(data$power * 100, 1), "%</p>")
                 if (!is.null(data$achieved_power)) {
                     # The required count is rounded up, so the power it reaches can exceed the target.
                     reached <- if (is.null(data$sample_size)) {
-                        .fmt(.("Power with {n} events"), n = format(data$events, scientific = FALSE))
+                        .fmt(.("Power with {n} events"), n = base::format(data$events, scientific = FALSE))
                     } else {
-                        .fmt(.("Power with {n} patients"), n = format(data$sample_size, scientific = FALSE))
+                        .fmt(.("Power with {n} patients"), n = base::format(data$sample_size, scientific = FALSE))
                     }
                     summary_html <- paste0(summary_html, "<p><strong>", reached, ":</strong> ", round(data$achieved_power * 100, 1), "%</p>")
                 }
@@ -493,16 +558,15 @@ classicalSurvivalPowerClass <- if (requireNamespace("jmvcore", quietly = TRUE)) 
                 if (grepl("Sample Size", data$calculation)) {
                     interp_html <- paste0(interp_html, "<h5>Sample Size Recommendations:</h5>")
                     if (!is.null(data$sample_size)) {
-                        interp_html <- paste0(interp_html, "<p>\u{2022} <strong>Total enrollment:</strong> ", round(data$sample_size), " patients")
-                        if (!is.null(data$allocation_ratio) && data$allocation_ratio != 1) {
-                            control_n <- round(data$sample_size / (1 + data$allocation_ratio))
-                            treatment_n <- round(data$sample_size - control_n)
-                            interp_html <- paste0(interp_html, " (", treatment_n, " treatment, ", control_n, " control)")
+                        interp_html <- paste0(interp_html, "<p>\u{2022} <strong>Total enrollment:</strong> ", base::format(round(data$sample_size), scientific = FALSE), " patients")
+                        if (!is.null(data$arm_sizes)) {
+                            interp_html <- paste0(interp_html, " (", base::format(data$arm_sizes[["treatment"]], scientific = FALSE), " treatment, ",
+                                                  base::format(data$arm_sizes[["control"]], scientific = FALSE), " control)")
                         }
                         interp_html <- paste0(interp_html, "</p>")
                     }
                     if (!is.null(data$events)) {
-                        interp_html <- paste0(interp_html, "<p>\u{2022} <strong>Events required:</strong> ", ceiling(data$events), " events for analysis</p>")
+                        interp_html <- paste0(interp_html, "<p>\u{2022} <strong>Events required:</strong> ", base::format(ceiling(data$events), scientific = FALSE), " events for analysis</p>")
                     }
                     interp_html <- paste0(interp_html, "<p>\u{2022} <strong>Statistical power:</strong> ", round(data$power * 100, 1), "% chance of detecting the specified effect size</p>")
                 } else if (grepl("Power", data$calculation)) {
@@ -515,24 +579,31 @@ classicalSurvivalPowerClass <- if (requireNamespace("jmvcore", quietly = TRUE)) 
                     }
                 } else if (grepl("Events", data$calculation)) {
                     interp_html <- paste0(interp_html, "<h5>Event Requirements:</h5>")
-                    interp_html <- paste0(interp_html, "<p>\u{2022} <strong>Target events:</strong> ", round(data$events), " events needed for ", round(data$power * 100, 1), "% power</p>")
+                    interp_html <- paste0(interp_html, "<p>\u{2022} <strong>Target events:</strong> ", base::format(round(data$events), scientific = FALSE), " events needed for ", round(data$power * 100, 1), "% power</p>")
                     interp_html <- paste0(interp_html, "<p>\u{2022} <strong>Effect size:</strong> Hazard ratio of ", round(data$hazard_ratio, 3), "</p>")
                 }
 
                 # General recommendations
                 interp_html <- paste0(interp_html, "<h5>Study Design Considerations:</h5>")
                 interp_html <- paste0(interp_html, "<ul style='margin: 5px 0; padding-left: 20px;'>")
-                interp_html <- paste0(
-                    interp_html, "<li><strong>Effect size:</strong> HR = ", round(data$hazard_ratio, 3),
-                    " represents a ", round((1 - data$hazard_ratio) * 100, 1), "% reduction in hazard</li>"
-                )
+                # Worded from the values shown, so an HR that displays as 1 is "no difference".
+                hr <- round(data$hazard_ratio, 3)
+                pct <- round(abs(1 - hr) * 100, 1)
+                effect <- if (pct == 0) {
+                    .("HR = 1 represents no difference in hazard")
+                } else if (hr < 1) {
+                    .fmt(.("HR = {hr} represents a {pct}% reduction in hazard"), hr = hr, pct = base::format(pct, scientific = FALSE))
+                } else {
+                    .fmt(.("HR = {hr} represents a {pct}% increase in hazard"), hr = hr, pct = base::format(pct, scientific = FALSE))
+                }
+                interp_html <- paste0(interp_html, "<li><strong>Effect size:</strong> ", effect, "</li>")
                 interp_html <- paste0(interp_html, "<li><strong>Type I error:</strong> ", data$alpha, " (", round(data$alpha * 100, 1), "% false positive rate)</li>")
                 interp_html <- paste0(interp_html, "<li><strong>Type II error:</strong> ", round(data$beta, 3), " (", round(data$beta * 100, 1), "% false negative rate)</li>")
 
                 if (data$method == "Lachin-Foulkes") {
                     interp_html <- paste0(
                         interp_html, "<li><strong>Study timeline:</strong> ", data$accrual_duration, " time units for enrollment + ",
-                        (data$study_duration - data$accrual_duration), " additional follow-up</li>"
+                        base::format(data$study_duration - data$accrual_duration, scientific = FALSE), " additional follow-up</li>"
                     )
                 }
 
@@ -562,34 +633,32 @@ classicalSurvivalPowerClass <- if (requireNamespace("jmvcore", quietly = TRUE)) 
                     jmvcore::reject("Package 'ggplot2' is required for power curve plots.")
                 }
 
-                if (is.null(private$.results_data)) {
-                    return()
-                }
-
-                # Generate power curve data
-                power_data <- private$.generate_power_curve_data()
-
-                if (is.null(power_data) || nrow(power_data) == 0) {
-                    return()
+                # Drawn from the state .run() stored, never from private fields: export,
+                # resize and .omv reopen call this on a new object that has not run.
+                state <- image$state
+                if (is.null(state) || is.null(state$curve) || nrow(state$curve) == 0) {
+                    return(FALSE)
                 }
                 caption <- "Dashed lines: 80% (orange) and 90% (green) power thresholds"
-                if (!is.null(attr(power_data, "note"))) {
-                    caption <- paste(c(caption, strwrap(attr(power_data, "note"), 100)), collapse = "\n")
+                if (!is.null(state$note)) {
+                    caption <- paste(c(caption, strwrap(state$note, 100)), collapse = "\n")
                 }
 
                 # Create power curve plot
-                p <- ggplot2::ggplot(power_data, ggplot2::aes(x = amount, y = power)) +
+                p <- ggplot2::ggplot(state$curve, ggplot2::aes(x = amount, y = power)) +
                     ggplot2::geom_line(color = "#1f77b4", linewidth = 1.2) +
                     ggplot2::geom_hline(yintercept = 0.8, linetype = "dashed", color = "#ff7f0e", alpha = 0.7) +
                     ggplot2::geom_hline(yintercept = 0.9, linetype = "dashed", color = "#2ca02c", alpha = 0.7) +
                     ggplot2::labs(
-                        title = paste("Power Curve -", private$.results_data$method, "Method"),
-                        subtitle = paste("Hazard Ratio:", round(private$.results_data$hazard_ratio, 3)),
-                        x = if (private$.results_data$method == "Schoenfeld") "Number of Events" else "Sample Size",
+                        title = paste("Power Curve -", state$method, "Method"),
+                        subtitle = paste("Hazard Ratio:", round(state$hazard_ratio, 3)),
+                        x = if (state$method == "Schoenfeld") "Number of Events" else "Sample Size",
                         y = "Statistical Power",
                         caption = caption
                     ) +
                     ggplot2::scale_y_continuous(limits = c(0, 1), labels = scales::percent) +
+                    # ggplot's default labels read 1e+05, 2e+05 on a large sample-size axis.
+                    ggplot2::scale_x_continuous(labels = function(x) base::format(x, scientific = FALSE, trim = TRUE)) +
                     ggplot2::theme_minimal() +
                     ggplot2::theme(
                         plot.title = ggplot2::element_text(hjust = 0.5, size = 14, face = "bold"),
@@ -598,51 +667,68 @@ classicalSurvivalPowerClass <- if (requireNamespace("jmvcore", quietly = TRUE)) 
                     )
 
                 # Add current point if applicable
-                if (private$.results_data$calculation %in% c("Sample Size", "Power", "Number of Events", "Sample Size (Events-Based)")) {
-                    amount <- if (private$.results_data$method == "Schoenfeld") private$.results_data$events else private$.results_data$sample_size
-                    # Power reached at the displayed (rounded-up) count, so the point sits on the curve.
-                    current_point <- data.frame(amount = amount, power = private$.power_at(amount))
-                    if (length(current_point$amount) == 1L && is.finite(current_point$amount)) {
-                        p <- p + ggplot2::geom_point(
-                            data = current_point,
+                point <- state$point
+                if (!is.null(point)) {
+                    # The y scale stops at 100% and ggplot drops a label placed beyond it,
+                    # so near the top the label goes below the point. hjust follows the
+                    # point's place in the range so the label stays inside the panel.
+                    span <- range(state$curve$amount)
+                    p <- p + ggplot2::geom_point(
+                        data = point,
+                        color = "#d62728",
+                        size = 4,
+                        shape = 19
+                    ) +
+                        ggplot2::annotate(
+                            "text",
+                            x = point$amount,
+                            y = if (point$power > 0.9) point$power - 0.05 else point$power + 0.05,
+                            label = paste(
+                                "Current:", base::format(round(point$amount), scientific = FALSE),
+                                if (state$method == "Schoenfeld") "events," else "subjects,",
+                                scales::percent(point$power, accuracy = 0.1), "power"
+                            ),
+                            hjust = (point$amount - span[1]) / diff(span),
                             color = "#d62728",
-                            size = 4,
-                            shape = 19
-                        ) +
-                            ggplot2::annotate(
-                                "text",
-                                x = current_point$amount,
-                                y = current_point$power + 0.05,
-                                label = paste(
-                                    "Current:", round(current_point$amount),
-                                    if (private$.results_data$method == "Schoenfeld") "events," else "subjects,",
-                                    scales::percent(current_point$power, accuracy = 0.1), "power"
-                                ),
-                                hjust = 0.5,
-                                color = "#d62728",
-                                fontface = "bold"
-                            )
-                    }
+                            fontface = "bold"
+                        )
                 }
 
                 print(p)
                 TRUE
+            },
+            # What the power curve draws, stored as the image state: the curve, the design
+            # point, the range note and the labels' inputs. Plain numbers and strings only.
+            .power_plot_state = function() {
+                data <- private$.results_data
+                curve <- private$.generate_power_curve_data()
+                note <- attr(curve, "note")
+                attr(curve, "note") <- NULL
+                point <- NULL
+                if (data$calculation %in% c("Sample Size", "Power", "Number of Events", "Sample Size (Events-Based)")) {
+                    amount <- if (data$method == "Schoenfeld") data$events else data$sample_size
+                    # Power the displayed design reaches (its rounded arms). The curve uses the
+                    # planned allocation, so in a small trial with very unequal arms the point can
+                    # sit slightly off the curve; the point, not the curve, is what the summary reports.
+                    if (length(amount) == 1L && is.finite(amount)) {
+                        point <- data.frame(amount = amount, power = private$.power_at(amount, at_point = TRUE))
+                    }
+                }
+                list(curve = curve, note = note, point = point, method = data$method, hazard_ratio = data$hazard_ratio)
             },
             .plot_timeline = function(image, ggtheme, theme, ...) {
                 if (!requireNamespace("ggplot2", quietly = TRUE)) {
                     jmvcore::reject("Package 'ggplot2' is required for timeline plots.")
                 }
 
-                if (is.null(private$.results_data) || private$.results_data$method != "Lachin-Foulkes") {
-                    return()
+                # From the state .run() stored (Lachin-Foulkes only), as for the power curve.
+                state <- image$state
+                if (is.null(state)) {
+                    return(FALSE)
                 }
-
-                # Generate timeline data
-                timeline_data <- private$.generate_timeline_data()
-
-                if (is.null(timeline_data)) {
-                    return()
-                }
+                accrual <- state$accrual_duration
+                duration <- state$study_duration
+                timeline_data <- private$.generate_timeline_data(accrual, duration)
 
                 # Create timeline plot
                 # TODO (correctness): as.numeric(phase) below relies on factor level
@@ -661,7 +747,7 @@ classicalSurvivalPowerClass <- if (requireNamespace("jmvcore", quietly = TRUE)) 
                     ggplot2::scale_fill_manual(values = c("Accrual" = "#1f77b4", "Follow-up" = "#ff7f0e", "Analysis" = "#2ca02c")) +
                     ggplot2::labs(
                         title = "Study Timeline - Lachin-Foulkes Design",
-                        subtitle = paste("Total Duration:", private$.results_data$study_duration, "time units"),
+                        subtitle = paste("Total Duration:", duration, "time units"),
                         x = "Time (months/years)",
                         y = "Study Phase"
                     ) +
@@ -678,22 +764,22 @@ classicalSurvivalPowerClass <- if (requireNamespace("jmvcore", quietly = TRUE)) 
                 # Add annotations
                 p <- p + ggplot2::annotate(
                     "text",
-                    x = private$.results_data$accrual_duration / 2,
+                    x = accrual / 2,
                     y = 3.2,
-                    label = paste("Accrual Period\n", private$.results_data$accrual_duration, "time units"),
+                    label = paste("Accrual Period\n", accrual, "time units"),
                     hjust = 0.5,
                     fontface = "bold",
                     color = "#1f77b4"
                 )
 
-                if (private$.results_data$study_duration > private$.results_data$accrual_duration) {
+                if (duration > accrual) {
                     p <- p + ggplot2::annotate(
                         "text",
-                        x = (private$.results_data$accrual_duration + private$.results_data$study_duration) / 2,
+                        x = (accrual + duration) / 2,
                         y = 2.2,
                         label = paste(
                             "Follow-up Period\n",
-                            private$.results_data$study_duration - private$.results_data$accrual_duration,
+                            base::format(duration - accrual, scientific = FALSE),
                             "time units"
                         ),
                         hjust = 0.5,
@@ -728,7 +814,7 @@ classicalSurvivalPowerClass <- if (requireNamespace("jmvcore", quietly = TRUE)) 
                         if (!identical(bounds, given)) {
                             note <- .fmt(
                                 .("The power plot range was changed to {low} to {high}: it must run from low to high, start above 0 and include the current design point."),
-                                low = format(bounds[1], scientific = FALSE), high = format(bounds[2], scientific = FALSE)
+                                low = base::format(bounds[1], scientific = FALSE), high = base::format(bounds[2], scientific = FALSE)
                             )
                         }
                     }
@@ -741,26 +827,14 @@ classicalSurvivalPowerClass <- if (requireNamespace("jmvcore", quietly = TRUE)) 
                 attr(curve, "note") <- note
                 curve
             },
-            .generate_timeline_data = function() {
-                if (is.null(private$.results_data) || private$.results_data$method != "Lachin-Foulkes") {
-                    return(NULL)
-                }
-
+            .generate_timeline_data = function(accrual, duration) {
                 data.frame(
                     phase = factor(c("Accrual", "Follow-up", "Analysis"),
                         levels = c("Analysis", "Follow-up", "Accrual")
                     ),
-                    start = c(0, private$.results_data$accrual_duration, private$.results_data$study_duration),
-                    end = c(
-                        private$.results_data$accrual_duration,
-                        private$.results_data$study_duration,
-                        private$.results_data$study_duration + 1
-                    ),
-                    time = c(
-                        private$.results_data$accrual_duration / 2,
-                        (private$.results_data$accrual_duration + private$.results_data$study_duration) / 2,
-                        private$.results_data$study_duration + 0.5
-                    )
+                    start = c(0, accrual, duration),
+                    end = c(accrual, duration, duration + 1),
+                    time = c(accrual / 2, (accrual + duration) / 2, duration + 0.5)
                 )
             },
             .generate_export_summary = function() {

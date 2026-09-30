@@ -84,6 +84,7 @@ children:
       - type: TextBox
         name: gamma
         format: number
+        enable: (entry_type:expo)
   - type: LayoutBox
     margin: large
     children:
