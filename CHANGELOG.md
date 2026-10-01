@@ -5,6 +5,112 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-10-01 — verifying that fix pass: an exact test that crashed at 2,000 cases, and a severity measured on a different scale from its test
+
+- **Failure modes** (found by a four-lens verification workflow AFTER the fix pass was green: 352 tests, 1,489
+  expectations, 0 failures):
+  - `stats::mantelhaen.test(exact = TRUE)` always fits a conditional MLE and its interval with `uniroot()` on
+    natural-scale densities. On large, strongly selective data those densities underflow, and the screen written
+    to catch reflex testing stopped the whole analysis on a 2,000-case reflex design ("f() values at end points
+    not of opposite sign"). The pre-fix code ran the same data. Only the p-value was ever used.
+  - The screen's severity (a crude ratio of recording rates) and its test (stratified by the reference standard)
+    measured different things. The crude ratio hid a 2.5-fold within-group difference, and it inflated a
+    1.2-fold one to a serious warning at large n. Its first replacement, the larger within-group ratio, was
+    noise in small groups: 27 disease-present Test 1-negative cases turned a true 1.5-fold difference into a
+    serious warning.
+  - The screen worded what the combination table contains before knowing whether a table would be built. Beside
+    "No Complete Cases" it printed two contradictory descriptions of a table that never existed, and its "by
+    construction" figures were false in one-class samples.
+  - The reference standard was never screened against the tests' joint result, so discrepant resolution (the
+    reference obtained only where the tests disagree) raised nothing.
+  - My heatmap limit change saturated single-valued panels. The paired table showed labelled blank rows after a
+    validation error. A reference cited only through `setRefs()` would be trimmed from the shipped modules.
+  - RF-05g, the only test of the optimism value, used a dominant-rule fixture whose true optimism (0.0007) lay
+    inside the test's tolerance (0.01). A bootstrap that never ran would have passed it.
+- **Detection signal:** the regression lens compared HEAD with the working tree on generated designs up to
+  100,000 cases, and the HIGH defect reproduced from its script in a minute. The guard lens checked every notice
+  sentence against the table actually produced. The statistics lens enumerated all 286^2 bootstrap outcomes of a
+  near-tie sample to obtain an exact optimism.
+- **Prevention rules:**
+  - Run new statistical code at n >= 2,000 and on structural (zero-cell) tables. Exact routines can fail
+    exactly where asymptotic ones are accurate, so wrap only the third-party call and fall back.
+  - Measure a guard's severity on the same scale as its significance test (here a Mantel-Haenszel rate ratio
+    within the reference groups), and prefer a pooled estimate to the maximum of noisy subgroup estimates.
+  - Word consequences only after the outcome they describe is known (store the findings, emit them later).
+  - A test whose tolerance exceeds the expected effect proves nothing. Test a quantity where it is large and
+    known exactly.
+  - Declare every reference key cited at run time in the `.r.yaml` as well: the updater trims `00refs.yaml` to
+    the keys the yaml cites.
+
+---
+
+## 2026-10-01 — fixing the `/review-function decisioncombine` findings: a shipped overflow, a degenerate paired test, and a guard graded on the wrong quantity
+
+- **Failure modes:**
+  - The Newcombe paired interval I planned to move "verbatim" from `decisioncompare` (shipped) counted
+    cells with `sum()` of logicals. That returns integers, so the four-margin product overflowed R's
+    integer range from a few hundred cases per group, became NA, and `if (NA)` stopped the whole
+    analysis. A 2,000-case `decisioncompare` with paired differences on failed outright.
+  - My first design for the paired table put McNemar's test and the Newcombe interval on every
+    strategy-vs-test row. But 18 of 21 rows (all 4 with two tests) compare NESTED rules: a Parallel rule
+    contains its own tests, and a Serial rule is contained in them. So one discordant cell is zero by
+    construction, McNemar's p reduces to 2^(1 - b) whatever n is, and the interval crosses an
+    impossible 0.
+  - My first missingness guard graded severity on purity ("every missing case shares one result"):
+    - Reflex testing plus 3% random loss dropped to a plain warning, though the complete cases were
+      100% one result.
+    - An equivocal-level reflex (ISH after IHC 2+) was never serious.
+    - A crude Fisher test blamed any accurate test for missingness that followed disease status alone,
+      where sensitivity and specificity are unbiased.
+  - Moving the screen before the level checks changed which error an all-missing reference column
+    shows ("Missing Level" instead of "No Complete Cases").
+- **Detection signal:**
+  - A Codex review of the written plan, and a four-lens design-review workflow (statistics, guard
+    calibration, jamovi integration, clinical wording) run BEFORE coding. Each finding came with a
+    counterexample and a simulation.
+  - An existing test (`notices survive every early return`) caught the precedence change.
+- **Prevention rules:**
+  - Cast counts to double before multiplying them, and test any shared statistical helper with at
+    least 1,000 cases per group.
+  - Before applying a paired test to two rules, ask whether one nests the other. For nested rules,
+    report the reclassified share with its Wilson score interval and no p-value.
+  - Grade a data-quality guard on an effect size that bounds the bias (here the ratio of recording
+    rates), gated by a test conditioned on the confounder the reader would blame (the reference
+    standard). Attribute each flag to one driver.
+  - Add a new diagnostic without reordering existing exits. A screen that needs no validated input
+    can run before them.
+  - Review the written plan adversarially before coding when a change adds statistics. All four of
+    these defects were found on paper, before a line was written.
+
+---
+
+## 2026-10-01 — `/review-function decisioncombine`: a colour scale that ran backwards for LR-, and a missingness pattern no pass looked for
+
+- **Failure modes:**
+  - The heatmap shares one red-to-blue diverging scale across metrics with opposite "good" directions,
+    on a linear scale. For LR-, where small is good, the worst value (3.63) was drawn in the "good" blue
+    pole and the best (0.024) in near-neutral pink. For LR+ and DOR, every value except the largest washed
+    out to neutral. The 2026-09-27 validation marked the colour midpoints "READ only" and verified only
+    the tile labels, so the direction was never tested.
+  - Seven review passes checked missing data only as "complete cases, disclosed". None asked how a
+    pathology dataset comes to have missing tests. In a reflex design (Test 2 recorded only after a
+    positive Test 1), complete-case analysis keeps only Test 1-positive patients. "Test 1 alone" then
+    read 100% / 0%, Serial sensitivity went from 70.9% to 79.7%, and the ranking crowned a conditional
+    rule, under a generic "Removed N cases" warning.
+- **Detection signal:**
+  - The plotted fills read back through `ggplot_build()` and set beside the values, for one metric at a
+    time.
+  - A probe built from a clinical workflow (reflex HER2 testing) rather than from random missingness.
+- **Prevention rules:**
+  - For any diverging colour scale, state each metric's "good" direction and test the fill at both ends.
+    Ratios go on a log scale centred on 1. A midpoint that is only read, never rendered, is not
+    verified.
+  - Missing-data checks include structural missingness: test whether missingness in one test depends on
+    another test's result, because clinical testing sequences create it. Gate the warning on sampling
+    error (Fisher's exact test, structural signature) and simulate it under MCAR before shipping.
+
+---
+
 ## 2026-09-30 — fixing the `/check-function-full decisioncombine` findings: a notice graded on one rule that spoke for all, a `%` that broke the Rd, and two searches that found nothing
 
 - **Failure modes:**

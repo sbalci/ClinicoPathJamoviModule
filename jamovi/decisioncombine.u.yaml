@@ -66,8 +66,29 @@ children:
         name: showFrequency
         label: Frequency tables
       - type: CheckBox
+        name: showCITables
+        label: Confidence interval tables
+      - type: CheckBox
         name: showRecommendation
         label: Descriptive candidate-rule ranking
+        children:
+          - type: CheckBox
+            name: optimismCorrection
+            label: Youden's J corrected for rule selection
+            enable: (showRecommendation && test2)
+            children:
+              - type: TextBox
+                name: nBoot
+                format: number
+                enable: (showRecommendation && test2 && optimismCorrection)
+              - type: TextBox
+                name: seed
+                format: number
+                enable: (showRecommendation && test2 && optimismCorrection)
+      - type: CheckBox
+        name: showPairedComparison
+        label: Combinations vs each test alone
+        enable: (test2)
       - type: CheckBox
         name: showAbout
         label: About this analysis

@@ -23,6 +23,15 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
             # interval would be the point estimate repeated. Collected here and disclosed
             # as ONE table note, for the same reason .continuityPatterns is.
             .zeroSeIntervalPatterns = character(),
+            # Every row of the combination table as a rule, keyed by its label:
+            # list(flag = patient-level positive call, type = row type, components = the
+            # tests it uses). Filled by .analyzeSinglePattern(); read by the paired
+            # comparisons and the optimism bootstrap, which need the rules themselves,
+            # not the table's summary counts.
+            .rules = list(),
+            # Findings of .screenSelectiveMissingness(), worded by .emitMissingnessNotices() once
+            # it is known whether the combination table will be built.
+            .missingness = NULL,
 
             # jmvcore's OptionVariable$valueAsSource returns the column name verbatim, so the
             # exported syntax read `gold = Golden Standart` -- not parseable R for any name
@@ -81,21 +90,21 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     li(esc(.("A SINGLE-TEST row (\"Test 1 alone\") applies one test by itself to the same patients, so every combination can be compared with the tests it is built from. A combination that is no better than one of its own tests on sensitivity and no better on specificity adds cost without adding accuracy. One with a lower Youden's J than a single test can still suit one clinical role, because J weighs a missed case and a false positive equally: Parallel raises sensitivity (to rule out disease), Serial raises specificity (to rule it in)."))),
                     li(esc(.("A STRATEGY row is a rule you would normally apply to a patient. Parallel (>=1 pos) calls positive if any test is positive, which raises sensitivity and lowers specificity. Serial (all pos) requires every test to be positive, which does the reverse. With three tests the same two rules are also listed for each pair of tests (\"Parallel 1+2 (>=1 pos)\", \"Serial 1+2 (both pos)\"), and Majority (>=2/3 pos) needs two of three."))),
                     "</ul><h4>", esc(.("Reading the columns")), "</h4><ul>",
-                    li(esc(.("Prevalence is identical in every row: it is the disease rate in the whole sample, not the rate within that pattern."))),
+                    li(esc(.("Prevalence is identical in every row: it is the disease rate in the whole sample, not the rate within that pattern. Every row is scored on the same complete cases; the individual-test tables use each test's own pairwise-complete cases, so with missing data they can differ from the \"alone\" rows."))),
                     li(esc(.("PPV and NPV depend on prevalence, so they transfer to another population only if its disease rate is similar. Sensitivity, specificity and the likelihood ratios are less prevalence-dependent, though not independent of it. LR+ and LR- are the more useful numbers to carry elsewhere not because they are more stable -- being functions of sensitivity and specificity, they inherit exactly the same dependence -- but because they convert a pre-test probability into a post-test probability at whatever prevalence the new setting has."))),
-                    li(esc(.("Balanced Accuracy and Youden's J are the same statistic on two scales: Balanced Accuracy = (J + 1) / 2."))),
-                    li(esc(.("LR+, LR- and the diagnostic odds ratio add 0.5 to all four cells when a cell is zero, so they stay finite (for the odds ratio this is the Haldane-Anscombe correction; the likelihood ratios use the same adjustment); the proportions on the same row use the observed counts. A row on which no patient tests positive (a pattern nobody shows, or a rule that is never positive) is left BLANK rather than corrected: with no predicted positives, LR+ and the odds ratio are undefined and are not invented."))),
+                    li(esc(.("Balanced Accuracy and Youden's J are the same statistic on two scales: Balanced Accuracy = (J + 1) / 2, so ranking by one is identical to ranking by the other."))),
+                    li(esc(.("LR+, LR- and the diagnostic odds ratio add 0.5 to all four cells when a cell is zero, so they stay finite (for the odds ratio this is the Haldane-Anscombe correction; the likelihood ratios use the same adjustment); the proportions on the same row use the observed counts, so the two need not agree exactly at a zero cell. The correction repairs a sampling zero, not a structural one. On a row with no test-positive patients (a pattern nobody shows, or a rule that is never positive), LR+ and the odds ratio are 0/0 and are left BLANK rather than corrected, while LR- is exactly 1: any other result leaves the odds unchanged. On a row with no test-negative patients, LR- and the odds ratio are blank and LR+ is exactly 1. In a sample with only one reference outcome all three are blank in every row, as are PPV and NPV, which the sampling alone fixes, and Accuracy, which then only repeats the sensitivity or specificity."))),
                     "</ul><h4>", esc(.("What this analysis does NOT assume")), "</h4><p>",
                     esc(.("Every row is estimated directly from the observed joint results, not derived from the individual tests' sensitivity and specificity. These figures therefore do NOT require the tests to be conditionally independent given disease status, and they stay valid when the tests share biology, specimen or technology. That is the main difference from a sequential-testing calculator, which must assume independence and warns about it.")),
                     "</p><p>",
                     esc(.("Two things that assumption-free estimation does not buy. Precision: the sample is split across four or eight pattern cells instead of being pooled into two marginal proportions, so the intervals are wider -- that width is what the assumption was paying for. Transport: these numbers carry to another population only if the whole joint distribution of results given disease status carries over, which is a stronger requirement than each test's sensitivity and specificity carrying over. Parallel and Serial figures here will also generally NOT match the textbook independence formulas computed by hand from the individual tests, and will usually be worse when the tests are correlated.")),
                     "</p><h4>", esc(.("The ranking")), "</h4><p>",
-                    esc(.("The candidate-rule ranking is a descriptive argmax over observed Youden's J, taken over every row of the table -- result patterns, single tests and strategies -- with no significance test and no multiplicity correction. On a tie the rule using fewer tests is shown first. On data with no real signal it will still name a winner. It is a hypothesis to confirm in new data, not a validated recommendation.")),
+                    esc(.("The candidate-rule ranking is a descriptive argmax over observed Youden's J, taken over every row of the table -- result patterns, single tests and strategies -- with no significance test and no multiplicity correction. On a tie the rule using fewer tests is shown first. On data with no real signal it will still name a winner. It is a hypothesis to confirm in new data, not a validated recommendation. Tick \"Youden's J corrected for rule selection\" for a bootstrap estimate of how much of the highest J is the luck of being picked from many rules.")),
                     "</p><p>", esc(.("The pattern-type and statistic filters affect the plots only. The performance tables always show every row.")), "</p>"
                 )
 
                 assumptions <- paste0(
-                    "<p>", esc(.("Diagnostic accuracy estimates are shaped by how the study was designed, not only by how the tests perform. The three biases below dominate real pathology accuracy studies and none of them is detectable from the data in front of this analysis.")), "</p><ul>",
+                    "<p>", esc(.("Diagnostic accuracy estimates are shaped by how the study was designed, not only by how the tests perform. The three biases below dominate real pathology accuracy studies. Spectrum and incorporation bias cannot be detected from the data in front of this analysis; partial verification can leave a trace, reference results missing according to test results, which this analysis checks for and reports.")), "</p><ul>",
                     li("<strong>", esc(.("Verification (work-up) bias.")), "</strong> ",
                        esc(.("If the reference standard was obtained mainly on patients whose test was positive, then test-negative patients of BOTH disease states are under-represented: the missing false negatives inflate sensitivity, and the missing true negatives deflate specificity. This is the usual situation when the reference standard is a biopsy or resection that is only performed after a positive test."))),
                     li("<strong>", esc(.("Spectrum bias.")), "</strong> ",
@@ -105,9 +114,9 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     "</ul><h4>", esc(.("Other requirements")), "</h4><ul>",
                     li("<strong>", esc(.("One row per patient.")), "</strong> ",
                        esc(.("Every row must be a different patient. Several specimens, cores, blocks, lesions or lymph nodes from the same patient are correlated, and every confidence interval here treats the rows as independent, so with such data the intervals are too narrow. Use one result per patient, or a method that accounts for clustering."))),
-                    li(esc(.("Complete-case analysis: a patient missing the reference standard or any selected test is excluded from the combination table. When any are excluded, the number is given in the warning \"Removed N case(s) with missing values\" in the notices at the top of the results."))),
+                    li(esc(.("Complete-case analysis: a patient missing the reference standard or any selected test is excluded from the combination table. When any are excluded, the number is given in the warning \"Removed N case(s) with missing values\" in the notices at the top of the results, and a separate warning reports results that are missing according to another result (reflex or referee testing, partial verification)."))),
                     li(esc(.("Each test is reduced to two levels. Any level that is not the one chosen as positive counts as negative, so equivocal and indeterminate results are folded into the negative arm unless you recode them as missing first."))),
-                    li(esc(.("The rows are not independent: every rule is scored on the same patients, so the differences between them are correlated. A formal comparison needs a paired procedure -- McNemar's test applied SEPARATELY within the diseased patients to compare sensitivity and within the non-diseased patients to compare specificity, because a single McNemar over the whole sample compares positivity rates rather than accuracy. Paired PPV and NPV comparisons need a generalised score test instead. This analysis performs neither."))),
+                    li(esc(.("The rows are not independent: every rule is scored on the same patients, so the differences between them are correlated. A formal comparison needs a paired procedure -- McNemar's test applied SEPARATELY within the diseased patients to compare sensitivity and within the non-diseased patients to compare specificity, because a single McNemar over the whole sample compares positivity rates rather than accuracy. Paired PPV and NPV comparisons need a generalised score test instead. The optional table \"Combination Rules vs Each Test Alone\" (option \"Combinations vs each test alone\") makes this comparison within each reference group for every combination strategy (Parallel, Serial and Majority) against each test it combines: a Parallel or Serial strategy can move only one way, so the table gives its change with an interval, and McNemar's test is used for Majority. Paired PPV and NPV comparisons are not performed."))),
                     li(esc(.("Sample size and cell counts are reported as notices when they fall below this analysis's thresholds (20, 50 and 100 cases in all; 10 per reference group; 5 per cell). These are rules of thumb, not requirements: the number of cases a study needs depends on the expected sensitivity and specificity, the precision wanted and the prevalence (Buderer 1996). Read the confidence intervals rather than the point estimates whenever a notice appears."))),
                     "</ul>"
                 )
@@ -271,9 +280,12 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
             # and Serial, plus (k = 3) the six pairwise rules and Majority; one row for a
             # single test. About 22 px per row per facet keeps the rule labels from
             # overprinting.
-            .forestPlotHeight = function() {
-                k <- sum(vapply(c("test1", "test2", "test3"), function(n)
+            .selectedTestCount = function() {
+                sum(vapply(c("test1", "test2", "test3"), function(n)
                     private$.optionSelected(self$options[[n]]), logical(1)))
+            },
+            .forestPlotHeight = function() {
+                k <- private$.selectedTestCount()
                 n_rules <- if (k < 2L) {
                     1L
                 } else {
@@ -356,15 +368,37 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 self$results$recommendationTable$setVisible(FALSE)
                 # Set only beside the "advantage is not established" sentence it explains.
                 self$results$recommendationTable$setNote("bound", NULL)
+                # The optimism notes, seed and reference exist only when the bootstrap ran.
+                self$results$recommendationTable$setNote("optimism", NULL)
+                self$results$recommendationTable$setNote("seed", NULL)
+                self$results$recommendationTable$setRefs(character(0))
                 self$results$recommendationTable$setRow(rowNo = 1, values = list(
                     pattern = NA_character_,
                     method = NA_character_,
                     youden = NA_real_,
+                    youdenCorrected = NA_real_,
+                    optimism = NA_real_,
                     sens = NA_real_,
                     spec = NA_real_,
                     acc = NA_real_,
                     rationale = NA_character_
                 ))
+
+                # Rows from .init(), so reset rather than deleted: jamovi restores an
+                # existing row's cells from the previous run. Hidden until filled, like the
+                # ranking above: after a validation error it showed labelled rows of blanks.
+                paired <- self$results$pairedComparisonTable
+                paired$setVisible(FALSE)
+                paired$setRefs(character(0))
+                blank <- list(sensGained = NA_integer_, sensLost = NA_integer_,
+                              sensChange = NA_real_, sensLower = NA_real_,
+                              sensUpper = NA_real_, sensP = NA_real_,
+                              specGained = NA_integer_, specLost = NA_integer_,
+                              specChange = NA_real_, specLower = NA_real_,
+                              specUpper = NA_real_, specP = NA_real_)
+                for (key in paired$rowKeys) {
+                    paired$setRow(rowKey = key, values = blank)
+                }
 
                 for (name in c("barPlot", "heatmapPlot", "forestPlot",
                                "decisionTreePlot")) {
@@ -376,6 +410,8 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 private$.noticeList <- list()
                 private$.continuityPatterns <- character()
                 private$.zeroSeIntervalPatterns <- character()
+                private$.rules <- list()
+                private$.missingness <- NULL
 
                 # Initialize fixed-structure tables for Test 1, 2, 3
                 for (i in seq_len(3L)) {
@@ -391,6 +427,21 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     statsTable$addRow(rowKey = "spec", values = list(statistic = .("Specificity")))
                     statsTable$addRow(rowKey = "ppv", values = list(statistic = .("PPV")))
                     statsTable$addRow(rowKey = "npv", values = list(statistic = .("NPV")))
+                }
+
+                # The paired-comparison rows depend on the options alone (4 with two tests,
+                # 21 with three), so they are built here and filled with setRow() in .run().
+                if (isTRUE(self$options$showPairedComparison)) {
+                    k <- private$.selectedTestCount()
+                    if (k >= 2L) {
+                        paired <- self$results$pairedComparisonTable
+                        for (def in private$.strategyDefinitions(k)) {
+                            for (i in def$components) {
+                                paired$addRow(rowKey = paste0(def$key, "_", i), values = list(
+                                    rule = def$label, comparator = private$.singleTestLabel(i)))
+                            }
+                        }
+                    }
                 }
 
                 # Getting Started panel: shown by the declarative visible: in the .r.yaml
@@ -440,6 +491,8 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 private$.noticeList <- list()
                 private$.continuityPatterns <- character()
                 private$.zeroSeIntervalPatterns <- character()
+                private$.rules <- list()
+                private$.missingness <- NULL
                 private$.clearDynamicResults()
                 private$.updateIndividualVisibility()
 
@@ -468,6 +521,10 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 #
                 # Step 1: Validate inputs (will stop on errors)
                 validation_result <- private$.validateInputs()
+                # The missingness notices say what the combination table contains, so they are
+                # worded only now that it is known whether the table will be built: after a
+                # failed validation they described a table, and a ranking, that never existed.
+                private$.emitMissingnessNotices(isTRUE(validation_result))
                 if (!validation_result) {
                     return() # Halt execution if validation failed
                 }
@@ -491,6 +548,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
 
                 # Step 4: Combination analysis
                 private$.analyzeCombinations(data_prep)
+                private$.populatePairedComparison(data_prep)
 
                 # Step 5: Populate frequency tables (if requested)
                 if (self$options$showFrequency) {
@@ -508,7 +566,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 # .clearDynamicResults() hides it and .populateRecommendation() re-shows it
                 # only when the option is on -- and the method is called exactly once per
                 # .run(), so neither notice can be emitted twice.
-                private$.populateRecommendation()
+                private$.populateRecommendation(data_prep)
 
                 # Step 7: Add pattern to data (if requested)
                 # House idiom for a pure Output item (R/ctdnadynamics.b.R:139): gate on
@@ -686,6 +744,19 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
 
                 selected_data <- private$.normalizeMissing(
                     self$data[, selected_vars, drop = FALSE])
+
+                # Before the complete-case exits: a design in which a test or the reference
+                # standard was obtained only after particular results can leave few or no
+                # complete cases, and the exits below would then stop without saying why.
+                # Unvalidated levels are harmless here: a positive level that never occurs
+                # makes that test's predictor constant, which the screen skips, and a
+                # reference level that never occurs only removes the stratification.
+                tested <- selected_levels[-1]
+                for (i in seq_along(tested)) {
+                    tested[[i]]$index <- i
+                }
+                private$.screenSelectiveMissingness(selected_data, selected_levels[[1]], tested)
+
                 n_complete <- nrow(jmvcore::naOmit(selected_data))
                 if (n_complete == 0) {
                     private$.addNotice(
@@ -735,6 +806,296 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 return(TRUE) # All validation checks passed
+            },
+            # Missing results that follow another result. Complete-case analysis assumes the
+            # excluded cases are like the rest; in pathology they often are not. A test done only
+            # after a positive or equivocal result (reflex: HER2 ISH after IHC 2+), a third test read
+            # only when two disagree (referee), or a reference standard obtained only after a
+            # positive test (partial verification) or only where the tests disagree (discrepant
+            # resolution) leaves the excluded cases concentrated in particular results, so every row
+            # is scored on a selected subgroup. Measured: Test 2 recorded only for Test 1-positive
+            # patients made "Test 1 alone" read 100% / 0% (truth 89% / 78%), raised Serial
+            # sensitivity from 70.9% to 79.7% and crowned "Test 2 alone", under only a generic
+            # "Removed 351 case(s)".
+            #
+            # For the reference standard and each test k, against each other test j and, with two
+            # or more other tests, "they disagree" (and, for the reference, "any test positive"): the
+            # recording rates of k when the predictor is positive and negative, and rho = the larger
+            # over the smaller (Inf when one is 0). If missingness follows the predictor, the
+            # complete-case odds of a sensitivity (specificity) are multiplied by that ratio among
+            # disease-present (disease-absent) cases, so a proportion can shift by up to
+            # (sqrt(rho) - 1) / (sqrt(rho) + 1): 0.06 at rho 1.25, 0.17 at 2. For a test k, rho is
+            # therefore the Mantel-Haenszel rate ratio pooled WITHIN the reference groups and p comes
+            # from an exact conditional (Mantel-Haenszel) test stratified by the reference standard,
+            # so size and significance measure the same thing. Missingness that follows disease
+            # status alone leaves sensitivity and specificity unbiased, and a crude ratio both hid a
+            # 2.5-fold within-group difference and inflated a 1.2-fold one to a serious warning at
+            # large n. The pooled ratio, not the larger of the two group ratios: in a small group
+            # that larger ratio is mostly noise (27 disease-present Test 1-negative cases turned a
+            # true 1.5-fold difference into a serious warning).
+            # The reference standard cannot be stratified on itself: crude ratio, Fisher's test.
+            # Flagged at rho >= 1.25 with p < 0.001 and at least 5 missing; STRONG at rho >= 2. The
+            # most significant predictor is reported for each k, once (ties, when p underflows on
+            # large data, go to the larger test statistic), so a test that merely agrees with the
+            # driver is not named as one. Counts are stated as fact, the mechanism only
+            # conditionally: the same counts arise when results are withheld because of disease
+            # status. Sentences about what the combination table contains are added by
+            # .emitMissingnessNotices() only when that table is built and holds both reference
+            # outcomes.
+            # Simulated on this method (2,000 replicates per cell, n 60 / 150 / 600, two and three
+            # tests): MCAR at 10-40% STRONG in at most 0.15% and WARNING in at most 0.55%;
+            # missingness that follows disease status never flagged; reflex (also with 3% random
+            # loss), partial verification, verification after any positive test, discrepant
+            # resolution and referee designs STRONG in 99.9-100%; reflex on an equivocal level STRONG
+            # in 70% at n 60 and 100% from n 150; a 2-fold difference within the disease-absent
+            # group hidden by a crude ratio of 1 flagged in 98.5% at n 600; a 1.2-fold within-group
+            # difference inflated by disease-driven missingness silent at n 20,000.
+            .screenSelectiveMissingness = function(data, gold, tests) {
+                gold_known <- !is.na(data[[gold$var]])
+                disease <- gold_known & as.character(data[[gold$var]]) == gold$level
+                positive <- function(item) as.character(data[[item$var]]) == item$level
+                percent <- function(x, n) base::format(round(100 * x / n, 1), nsmall = 1)
+                rates <- function(rec, value) {
+                    list(o0 = sum(rec[!value]), n0 = sum(!value),
+                         o1 = sum(rec[value]), n1 = sum(value))
+                }
+                # The larger recording rate over the smaller (Inf when one is 0, NA when both are or
+                # an arm is empty), pooled over the reference groups by Mantel-Haenszel weights; one
+                # group gives the plain ratio.
+                ratio <- function(groups) {
+                    num <- 0
+                    den <- 0
+                    for (r in groups) {
+                        total <- r$n0 + r$n1
+                        if (r$n0 == 0 || r$n1 == 0) {
+                            next
+                        }
+                        num <- num + r$o1 * r$n0 / total
+                        den <- den + r$o0 * r$n1 / total
+                    }
+                    if (num == 0 && den == 0) NA_real_ else if (num == 0 || den == 0) Inf
+                    else max(num / den, den / num)
+                }
+                # The p, and a test statistic that orders ties when p underflows to 0. Only the p of
+                # the exact test is used: it also fits a conditional MLE and its interval with
+                # uniroot() on natural-scale densities, which underflow on large, strongly selective
+                # data (a pure reflex design of about 1,700 cases stopped the whole analysis with "f()
+                # values at end points not of opposite sign"). There the asymptotic test is accurate,
+                # so it is the fallback.
+                association <- function(rec, value, stratum) {
+                    sizes <- table(stratum)
+                    keep <- stratum %in% names(sizes)[sizes >= 2L]
+                    if (!any(keep)) {
+                        return(list(p = 1, stat = 0))
+                    }
+                    lv <- c(FALSE, TRUE)
+                    tab <- table(factor(rec[keep], lv), factor(value[keep], lv),
+                                 factor(stratum[keep]))
+                    if (dim(tab)[3] == 1L) {
+                        p <- stats::fisher.test(tab[, , 1], conf.int = FALSE)$p.value
+                        stat <- suppressWarnings(
+                            unname(stats::chisq.test(tab[, , 1], correct = FALSE)$statistic))
+                    } else {
+                        asymptotic <- tryCatch({
+                            doubled <- tab
+                            storage.mode(doubled) <- "double"
+                            stats::mantelhaen.test(doubled, correct = FALSE)
+                        }, error = function(e) NULL)
+                        stat <- if (is.null(asymptotic)) 0 else unname(asymptotic$statistic)
+                        p <- tryCatch(stats::mantelhaen.test(tab, exact = TRUE)$p.value,
+                                      error = function(e) NA_real_)
+                        if (is.na(p)) {
+                            p <- if (is.null(asymptotic)) 1 else asymptotic$p.value
+                        }
+                    }
+                    list(p = if (is.finite(p)) p else 1, stat = if (is.finite(stat)) stat else 0)
+                }
+                empty <- list(lines = character(), consequences = character(), kinds = character())
+                found <- list(STRONG_WARNING = empty, WARNING = empty)
+                for (k in c(list(gold), tests)) {
+                    k_is_gold <- identical(k$var, gold$var)
+                    others <- Filter(function(item) !identical(item$var, k$var), tests)
+                    if (length(others) == 0) {
+                        next
+                    }
+                    calls <- lapply(others, positive)
+                    predictors <- lapply(seq_along(others), function(i)
+                        list(kind = "test", item = others[[i]], value = calls[[i]]))
+                    if (length(others) >= 2L) {
+                        hits <- Reduce(`+`, lapply(calls, as.integer))   # NA if any is missing
+                        if (k_is_gold) {
+                            predictors <- c(predictors, list(list(kind = "any", value = hits >= 1L)))
+                        }
+                        predictors <- c(predictors, list(list(
+                            kind = "disagree", value = hits > 0L & hits < length(others))))
+                    }
+                    recorded <- !is.na(data[[k$var]])
+                    best <- NULL
+                    for (pr in predictors) {
+                        rows <- !is.na(pr$value) & (k_is_gold | gold_known)
+                        rec <- recorded[rows]
+                        value <- pr$value[rows]
+                        if (sum(!rec) < 5L || all(value) || !any(value)) {
+                            next
+                        }
+                        strata <- NULL
+                        if (k_is_gold) {
+                            rho <- ratio(list(rates(rec, value)))
+                            stratum <- rep(1L, length(rec))
+                        } else {
+                            stratum <- disease[rows]
+                            strata <- list(present = rates(rec[stratum], value[stratum]),
+                                           absent = rates(rec[!stratum], value[!stratum]))
+                            rho <- ratio(strata)
+                        }
+                        if (is.na(rho) || rho < 1.25) {
+                            next
+                        }
+                        a <- association(rec, value, stratum)
+                        if (a$p >= 0.001 || (!is.null(best) &&
+                                             (a$p > best$p || (a$p == best$p && a$stat <= best$stat)))) {
+                            next
+                        }
+                        best <- list(pr = pr, p = a$p, stat = a$stat, rho = rho, rows = rows,
+                                     crude = rates(rec, value), strata = strata)
+                    }
+                    if (is.null(best)) {
+                        next
+                    }
+                    kind <- best$pr$kind
+                    j <- best$pr$item
+                    c0 <- best$crude
+                    crude <- list(o0 = c0$o0, n0 = c0$n0, p0 = percent(c0$o0, c0$n0),
+                                  o1 = c0$o1, n1 = c0$n1, p1 = percent(c0$o1, c0$n1))
+                    two_groups <- !k_is_gold &&
+                        all(vapply(best$strata, function(r) r$n0 > 0 && r$n1 > 0, logical(1)))
+                    if (k_is_gold) {
+                        line <- do.call(.fmt, c(list(switch(kind,
+                            test = .("The reference standard was recorded for {o0} of {n0} cases with {test} negative ({p0}%) and {o1} of {n1} with {test} positive ({p1}%)."),
+                            any = .("The reference standard was recorded for {o0} of {n0} cases where every test was negative ({p0}%) and {o1} of {n1} where at least one test was positive ({p1}%)."),
+                            disagree = .("The reference standard was recorded for {o0} of {n0} cases where the tests agreed ({p0}%) and {o1} of {n1} where they disagreed ({p1}%).")),
+                            test = if (is.null(j)) "" else j$label), crude))
+                    } else if (two_groups) {
+                        pr_ <- best$strata$present
+                        ab <- best$strata$absent
+                        groups <- list(
+                            o0d = pr_$o0, n0d = pr_$n0, p0d = percent(pr_$o0, pr_$n0),
+                            o1d = pr_$o1, n1d = pr_$n1, p1d = percent(pr_$o1, pr_$n1),
+                            o0h = ab$o0, n0h = ab$n0, p0h = percent(ab$o0, ab$n0),
+                            o1h = ab$o1, n1h = ab$n1, p1h = percent(ab$o1, ab$n1))
+                        line <- if (kind == "disagree") {
+                            do.call(.fmt, c(list(.("{missing} was recorded, among disease-present cases, for {o0d} of {n0d} where {first} and {second} agreed ({p0d}%) and {o1d} of {n1d} where they disagreed ({p1d}%), and among disease-absent cases for {o0h} of {n0h} where they agreed ({p0h}%) and {o1h} of {n1h} where they disagreed ({p1h}%)."),
+                                missing = k$label, first = others[[1]]$label,
+                                second = others[[2]]$label), groups))
+                        } else {
+                            do.call(.fmt, c(list(.("{missing} was recorded, among disease-present cases, for {o0d} of {n0d} with {test} negative ({p0d}%) and {o1d} of {n1d} with {test} positive ({p1d}%), and among disease-absent cases for {o0h} of {n0h} with {test} negative ({p0h}%) and {o1h} of {n1h} with {test} positive ({p1h}%)."),
+                                missing = k$label, test = j$label), groups))
+                        }
+                    } else {
+                        # One reference group lacks a case in one arm: crude counts.
+                        line <- if (kind == "disagree") {
+                            do.call(.fmt, c(list(.("Among cases with a reference result, {missing} was recorded for {o0} of {n0} where {first} and {second} agreed ({p0}%) and {o1} of {n1} where they disagreed ({p1}%)."),
+                                missing = k$label, first = others[[1]]$label,
+                                second = others[[2]]$label), crude))
+                        } else {
+                            do.call(.fmt, c(list(.("Among cases with a reference result, {missing} was recorded for {o0} of {n0} with {test} negative ({p0}%) and {o1} of {n1} with {test} positive ({p1}%)."),
+                                missing = k$label, test = j$label), crude))
+                        }
+                    }
+                    # The raw levels at which k was recorded, when j has more than two: the usual
+                    # reflex trigger is an EQUIVOCAL level (IHC 2+), which the dichotomisation folds
+                    # into the negative arm.
+                    if (!is.null(j)) {
+                        raw <- as.character(data[[j$var]][best$rows])
+                        by_level <- tapply(recorded[best$rows], raw, mean)
+                        if (length(by_level) > 2L && any(by_level == 0) && any(by_level > 0)) {
+                            line <- paste(line, .fmt(.("It was recorded only when {test} was {levels}."),
+                                test = j$label,
+                                levels = paste0("\"", names(by_level)[by_level > 0], "\"",
+                                                collapse = ", ")))
+                        }
+                    }
+                    # With one arm never recorded, what that does to the combination table (worded
+                    # by .emitMissingnessNotices() only if the table is built).
+                    none0 <- c0$o0 == 0
+                    none1 <- c0$o1 == 0
+                    consequence <- if (!(none0 || none1)) {
+                        ""
+                    } else if (k_is_gold && kind == "test") {
+                        .fmt(if (none0) {
+                            .("No case with {test} negative has a reference result, so {test}'s sensitivity reads 100% and its specificity 0% by construction, in the combination table and in its own table, which also needs the reference standard.")
+                        } else {
+                            .("No case with {test} positive has a reference result, so {test}'s sensitivity reads 0% and its specificity 100% by construction, in the combination table and in its own table, which also needs the reference standard.")
+                        }, test = j$label)
+                    } else if (k_is_gold && kind == "any") {
+                        if (none0) {
+                            .("No case where every test was negative has a reference result: every pattern with all tests negative is empty in the combination table, and the Parallel rule reads sensitivity 100% and specificity 0% by construction.")
+                        } else {
+                            ""
+                        }
+                    } else if (k_is_gold) {
+                        if (none0) {
+                            .("The combination table therefore contains only cases where the tests disagreed: every pattern in which they agree is empty, and every row describes the tests in those cases only.")
+                        } else {
+                            .("The combination table therefore contains only cases where the tests agreed: every pattern in which they disagree is empty, and every row describes the tests in those cases only.")
+                        }
+                    } else if (kind == "disagree") {
+                        .fmt(if (none0) {
+                            .("The combination table therefore contains only cases where {first} and {second} disagreed: every pattern in which they agree is empty, and every row describes the tests in those cases only.")
+                        } else {
+                            .("The combination table therefore contains only cases where {first} and {second} agreed: every pattern in which they disagree is empty, and every row describes the tests in those cases only.")
+                        }, first = others[[1]]$label, second = others[[2]]$label)
+                    } else {
+                        .fmt(if (none0) {
+                            .("The combination table therefore contains no case with {test} negative: the \"{alone}\" row reads sensitivity 100% and specificity 0% by construction, every pattern with {test} negative is empty, and the other rows, the ranking included, describe the tests only among cases with {test} positive.")
+                        } else {
+                            .("The combination table therefore contains no case with {test} positive: the \"{alone}\" row reads sensitivity 0% and specificity 100% by construction, every pattern with {test} positive is empty, and the other rows, the ranking included, describe the tests only among cases with {test} negative.")
+                        }, test = j$label, alone = private$.singleTestLabel(j$index))
+                    }
+                    severity <- if (best$rho >= 2) "STRONG_WARNING" else "WARNING"
+                    found[[severity]]$lines <- c(found[[severity]]$lines, line)
+                    found[[severity]]$consequences <- c(found[[severity]]$consequences, consequence)
+                    found[[severity]]$kinds <- c(found[[severity]]$kinds,
+                        if (!k_is_gold) "test" else if (kind == "test") "gold_test" else "gold_joint")
+                }
+                complete <- stats::complete.cases(data)
+                private$.missingness <- list(
+                    found = found,
+                    both_outcomes = any(disease[complete]) && any(!disease[complete]))
+            },
+            .emitMissingnessNotices = function(table_built) {
+                screen <- private$.missingness
+                if (is.null(screen)) {
+                    return()
+                }
+                # "By construction" figures hold only in a table with both reference outcomes: in a
+                # one-class sample the cells they name are blank, and that notice says why.
+                describe_table <- table_built && isTRUE(screen$both_outcomes)
+                for (severity in names(screen$found)) {
+                    f <- screen$found[[severity]]
+                    if (length(f$lines) == 0) {
+                        next
+                    }
+                    body <- if (describe_table) trimws(paste(f$lines, f$consequences)) else f$lines
+                    explanation <- c(
+                        if ("gold_test" %in% f$kinds) .("If the reference standard was obtained because of these results (partial verification), sensitivity is overstated and specificity understated for a test whose positive results were verified more often, and the reverse when its negative results were, in the combination table and in that test's own table, which also needs the reference standard; its predictive values are not distorted by it. If instead the reference standard was withheld because of disease status itself, sensitivity and specificity are unaffected but the predictive values are distorted. These data cannot tell the two apart. Correcting partial verification (Begg and Greenes 1983) needs the reference standard on a random sample of the cases verified less often."),
+                        if ("gold_joint" %in% f$kinds) .("If the reference standard was obtained only after a positive result on some test, or only where the tests disagreed (discrepant resolution), sensitivity, specificity and the predictive values can all be biased, in either direction, for every test and rule in the table. These data cannot tell this from results withheld because of disease status, and a correction needs the reference standard on a random sample of the cases verified less often."),
+                        if ("test" %in% f$kinds) .("If a test was done because of another test's result, a strategy that combines them describes the second test only among the cases that triggered it, not the accuracy of testing everyone with both, and the second test's figures here and in its own table equal its accuracy in all patients only if the two tests err independently given disease status. The test that triggered the testing is unaffected in its own table, which does not need the other test. When a test was done only after a positive result, a serial strategy can still be evaluated on all patients: record its final result (positive only when every test is positive) as a separate variable and analyse it as a single test."),
+                        if (table_built) {
+                            .("Cases missing any of these results are left out of the combination table, so it describes only the cases these results selected, and tests that agree with the one named are affected as well.")
+                        } else {
+                            .("The analysis stopped before the combination table was computed; the error above says why.")
+                        })
+                    private$.addNotice(
+                        severity,
+                        if (severity == "STRONG_WARNING") {
+                            .("Missing Results Follow Another Result")
+                        } else {
+                            .("Missing Results Partly Follow Another Result")
+                        },
+                        paste(c(body, explanation), collapse = " "),
+                        refs = if (any(c("gold_test", "gold_joint") %in% f$kinds)) "Begg1983" else character(0))
+                }
             },
             .prepareData = function() {
                 # Data preparation following decision.b.R pattern
@@ -1134,55 +1495,33 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
             .analyzeCombinations = function(data_prep) {
                 # Generate and analyze all test combinations
 
-                # The columns are headed "Sensitivity"/"Specificity"/"PPV"/"NPV" for every
-                # row, but an exhaustive pattern row ("+/-") is not a decision rule -- its
-                # "sensitivity" is P(this exact pattern | diseased). Only the strategy rows
-                # are rules you could actually apply to a patient. Say so.
+                # Always-visible notes: only what a clinician needs to read these numbers
+                # safely. They used to run to 613 words on every run, most of it repeating
+                # the opt-in About panel, which now holds the longer explanations (complete
+                # cases versus the individual-test tables, why the correction is withheld,
+                # joint estimation, Prevalence and Balanced Accuracy).
+                #
+                # Pattern-row semantics are the misreading this table invites ("+/-" is not
+                # a rule's sensitivity), so they stay beside it. The note must quote the
+                # labels the table prints: it once implied Serial had no row of its own.
                 self$results$combinationTable$setNote(
                     "row_kinds",
-                    # The note must quote the labels the table actually prints. It used to
-                    # call Serial "the all-positive pattern, which is the Serial (AND) rule",
-                    # implying Serial had no row of its own -- but a named "Serial (all pos)"
-                    # row has been emitted since the strategies were split out, so the note
-                    # sent the reader looking for a row that was right in front of them.
-                    jmvcore::.("A pattern row (e.g. \"+/-\") is a mutually exclusive group of patients. It can still be read as a rule -- \"call positive only when the results are exactly this\" -- and the ranking treats it that way, but every column then refers to that exact pattern: Sensitivity is the proportion of diseased patients showing it, Specificity the proportion of non-diseased patients showing anything else, and LR- the likelihood ratio for \"any other pattern\" rather than for a negative test. Accuracy and NPV on such a row are dominated by the patients who did not show the pattern, so a rare pattern reports both close to 1 minus the prevalence however uninformative it is -- read Youden's J there, not Accuracy. The named rows are rules you would normally apply to a patient: each test alone (\"Test 1 alone\"), Parallel (>=1 pos) and Serial (all pos) and, with three tests, the same two rules for every pair of tests (\"Parallel 1+2 (>=1 pos)\", \"Serial 1+2 (both pos)\") and Majority (>=2/3 pos). Every row is scored on the same complete cases; Serial (all pos) is numerically identical to the all-positive pattern row. The individual-test tables use each test's own pairwise-complete cases, so with missing data they can differ from the \"alone\" rows.")
+                    jmvcore::.("Rows such as \"+/-\" are exact result patterns, each a group of patients with exactly that combination: Sensitivity is the share of diseased patients showing it, Specificity the share of non-diseased patients showing anything else, and LR- refers to \"any other pattern\". Read Youden's J there, not Accuracy or NPV. The named rows are rules applied to every patient; Serial (all pos) equals the all-positive pattern.")
                 )
+                # The note must state the rule the code ACTUALLY applies, per branch: on an
+                # empty TEST margin the determinate ratio is kept (a pattern no patient
+                # exhibits prints LR- exactly 1.00), and only an empty DISEASE margin blanks
+                # all three. A reader told all three were blank would read that 1.00 as a
+                # corrected number, so the per-branch rule stays visible.
                 self$results$combinationTable$setNote(
                     "haldane",
-                    # The note must state the rule the code ACTUALLY applies, per branch.
-                    # It used to say the three ratios are "left blank whenever a whole
-                    # margin is empty", lumping the test and disease margins together --
-                    # but only the DISEASE-margin branch blanks all three. On an empty
-                    # TEST margin the code deliberately keeps the determinate ratio: a
-                    # pattern no patient exhibits (tp + fp = 0) prints LR- exactly 1.00,
-                    # verified on a fixture where test2 copies test1 so "+/-" and "-/+"
-                    # are empty. A reader told all three were blank would have read that
-                    # 1.00 as a corrected number.
-                    jmvcore::.("LR+, LR- and the diagnostic odds ratio are computed with 0.5 added to all four cells when a cell is zero, so they stay finite (for the odds ratio this is the Haldane-Anscombe correction; the likelihood ratios use the same adjustment); sensitivity, specificity, PPV and NPV on the same row use the observed counts. The two therefore need not agree exactly at a zero cell. The correction repairs a sampling zero, not a structural one, so it is withheld whenever a whole margin is empty, and what is then left blank differs between the two kinds of empty margin. On a row with no test-positive patients (a pattern nobody shows, or a rule that is never positive), LR+ and the odds ratio are 0/0 and are left blank, while LR- is exactly 1 and is shown as such: any other result leaves the odds unchanged. The mirror case, a row with no test-negative patients, blanks LR- and the odds ratio and shows LR+ as exactly 1. In a sample where every case is disease-present, or every case is disease-absent, sensitivity or specificity cannot be estimated at all, so all three ratios are left blank in every row, as are PPV and NPV, which the sampling alone fixes at 0% or 100%, and Accuracy, which then only repeats the sensitivity or specificity.")
+                    jmvcore::.("LR+, LR- and the diagnostic odds ratio are computed with 0.5 added to all four cells when a cell is zero, so they stay finite (for the odds ratio this is the Haldane-Anscombe correction; the likelihood ratios use the same adjustment). No correction is made on a row with no test-positive patients: its LR+ and odds ratio are blank and its LR- is exactly 1, and the mirror case blanks LR- and the odds ratio and shows LR+ as exactly 1. In a sample with one reference outcome all three are blank.")
                 )
-                # sequentialtests warns about conditional independence in five places because
-                # it DERIVES combined performance from marginal sensitivity and specificity.
-                # This analysis measures every combined rule directly from the observed joint
-                # 2x2, so that assumption is not required -- which is a real advantage, and a
-                # pathologist arriving from the sibling analysis has no way to know it applies
-                # differently here unless it is said.
-                self$results$combinationTable$setNote(
-                    "joint_estimation",
-                    jmvcore::.("Every row is estimated directly from the observed joint results, not derived from the individual tests' sensitivity and specificity. These figures therefore do not assume the tests are conditionally independent given disease status, and they remain valid when the tests share biology or technology. They do assume this sample's case mix resembles the population the rule would be used in.")
-                )
-                self$results$combinationTable$setNote(
-                    "column_reading",
-                    jmvcore::.("Prevalence is the same in every row: it is the disease rate in the whole sample, not the rate within that pattern. Balanced Accuracy and Youden's J are the same statistic on two scales (Balanced Accuracy = (J + 1) / 2), so ranking by one is identical to ranking by the other.")
-                )
-                # Name the interval method. The ranking's own, different bound for J is
+                # Name the interval method; the ranking's own, different bound for J is
                 # explained in a note on the ranking table, beside the sentence that quotes it.
                 self$results$combinationTable$setNote(
                     "youden_ci",
-                    jmvcore::.("The 95% confidence interval beside Youden's J is the Agresti-Caffo interval for a difference of two independent proportions, sensitivity minus the false-positive rate. It is not adjusted for choosing among rules or for the number of rules shown.")
-                )
-                self$results$combinationTable$setNote(
-                    "multiplicity",
-                    jmvcore::.("Every pattern and strategy is reported together with no adjustment for multiple comparisons. Treat the best-looking row as a hypothesis to confirm in new data, not as an established result.")
+                    jmvcore::.("The 95% confidence interval beside Youden's J is the Agresti-Caffo interval for a difference of two independent proportions, sensitivity minus the false-positive rate. No row is adjusted for multiple comparisons or for choosing among rules: treat the best-looking row as a hypothesis to confirm in new patients.")
                 )
 
                 # Both tables are filled with addRow(), so they must be emptied first.
@@ -1195,22 +1534,22 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 self$results$combinationTableCI$deleteRows()
                 self$results$combinationTableCIRatios$deleteRows()
 
-                # Inform users that PPV/NPV are based on sample prevalence - only when some
-                # row can show one. In a one-class sample every PPV/NPV cell is blank and the
-                # "Gold Standard Has Only One Outcome" notice says why; this note, which says
-                # they "are calculated", then contradicted the table.
+                # PPV and NPV assume this sample's prevalence. That was an INFO notice on
+                # every ordinary run, where a standing caveat about two columns does not
+                # belong; it is a footnote quoting the prevalence now. Only when some row can
+                # show a PPV or NPV: in a one-class sample every such cell is blank.
                 gold_classes <- table(factor(data_prep$goldVariable2,
                                              levels = c("Positive", "Negative")))
-                if (all(gold_classes > 0)) {
-                    private$.addNotice(
-                        "INFO",
-                        .("PPV/NPV Interpretation"),
-                        .("Positive and negative predictive values are calculated using the sample prevalence. Interpret them cautiously if the sample does not represent the target clinical population.")
-                    )
-                }
+                self$results$combinationTable$setNote(
+                    "ppv_npv",
+                    if (all(gold_classes > 0)) {
+                        .fmt(jmvcore::.("PPV and NPV are computed at this sample's prevalence of {percent}% and apply to another population only if its prevalence is similar."),
+                             percent = base::format(round(100 * gold_classes[["Positive"]] /
+                                                              sum(gold_classes), 1), nsmall = 1))
+                    }
+                )
 
                 has_test2 <- "test2Variable2" %in% names(data_prep)
-                has_test3 <- "test3Variable2" %in% names(data_prep)
 
                 if (!has_test2) {
                     # Single test only - no combinations. The row-kind footnote describes
@@ -1221,7 +1560,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     private$.analyzeSinglePattern(
                         data_prep, .("Test 1"),
                         data_prep$test1Variable2 == "Positive",
-                        row_type = .("Single test")
+                        row_type = .("Single test"), components = 1L
                     )
                     private$.emitContinuityNotice()
                     private$.emitNonEstimableCINote()
@@ -1229,24 +1568,14 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     return()
                 }
 
-                # Row order: result patterns, then each test alone, then (three tests) the
-                # pairwise rules, then the strategies over all the tests. The ranking lists
-                # named rows first and keeps this order among them, so on a tie the rule that
-                # uses fewer tests is shown.
-                if (!has_test3) {
-                    # Two-test combinations (4 patterns)
-                    private$.analyzeTwoTestPatterns(data_prep)
-                    private$.addSingleTestRules(data_prep)
-                    # Add clinical strategies for 2 tests
-                    private$.addTwoTestStrategies(data_prep)
-                } else {
-                    # Three-test combinations (8 patterns)
-                    private$.analyzeThreeTestPatterns(data_prep)
-                    private$.addSingleTestRules(data_prep)
-                    private$.addPairwiseRules(data_prep)
-                    # Add clinical strategies for 3 tests
-                    private$.addThreeTestStrategies(data_prep)
-                }
+                # Row order: result patterns, then each test alone, then the strategies in
+                # .strategyDefinitions() order (with three tests the pairwise rules come
+                # before the rules over all the tests). The ranking lists named rows first
+                # and keeps this order among them, so on a tie the rule that uses fewer tests
+                # is shown.
+                private$.analyzePatterns(data_prep)
+                private$.addSingleTestRules(data_prep)
+                private$.addStrategyRules(data_prep)
                 private$.emitContinuityNotice()
                 private$.emitNonEstimableCINote()
                 private$.assessSparseCounts()
@@ -1376,7 +1705,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 )
             },
             .analyzeSinglePattern = function(data_prep, pattern_name, condition,
-                                             row_type = NULL) {
+                                             row_type = NULL, components = NULL) {
                 # Analyze a single test pattern
                 if (is.null(row_type)) {
                     row_type <- .("Pattern")
@@ -1547,6 +1876,10 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 if (!is.finite(lr_neg)) lr_neg <- NA_real_
                 if (!is.finite(dor)) dor <- NA_real_
 
+                # The rule itself, for the paired comparisons and the optimism bootstrap.
+                private$.rules[[pattern_name]] <- list(
+                    flag = as.logical(condition), type = row_type, components = components)
+
                 # Add to main table
                 combTable <- self$results$combinationTable
                 combTable$addRow(rowKey = pattern_name, values = list(
@@ -1713,8 +2046,8 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 ))
             },
             .patternConditions = function(data_prep) {
-                # The 4- and 8-pattern condition lists were written out verbatim in
-                # .analyzeTwoTestPatterns / .analyzeThreeTestPatterns AND again in
+                # The 4- and 8-pattern condition lists were once written out verbatim in the
+                # two- and three-test pattern builders AND again in
                 # .populateFrequencyTables, and .addPatternColumn derived the same labels a
                 # third way. Three copies of the definition of what "+/-/+" means is three
                 # chances for the combination table, the cross-tabulation and the added
@@ -1747,16 +2080,15 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 out
             },
 
-            .analyzeTwoTestPatterns = function(data_prep) {
+            .analyzePatterns = function(data_prep) {
+                # The 4 or 8 exact result patterns; the arity comes from which testNVariable2
+                # columns exist. Every pattern involves every selected test.
                 patterns <- private$.patternConditions(data_prep)
+                tests <- seq_len(ncol(private$.positiveMatrix(data_prep)))
                 for (pattern_name in names(patterns)) {
                     private$.analyzeSinglePattern(data_prep, pattern_name,
-                                                  patterns[[pattern_name]])
+                                                  patterns[[pattern_name]], components = tests)
                 }
-            },
-            .analyzeThreeTestPatterns = function(data_prep) {
-                # Same generator; the arity comes from which testNVariable2 columns exist.
-                private$.analyzeTwoTestPatterns(data_prep)
             },
             # Row label of test i used on its own in a 2- or 3-test analysis. One definition,
             # read by the row builder below and by the inversion guard, which has to map a
@@ -1779,95 +2111,155 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                         data_prep,
                         private$.singleTestLabel(i),
                         data_prep[[column]] == "Positive",
-                        row_type = .("Single test")
+                        row_type = .("Single test"), components = i
                     )
                 }
             },
-            .addPairwiseRules = function(data_prep) {
-                # With three tests, the Serial and Parallel rules for each PAIR of tests. A
-                # useless third test makes the best rule a two-test one ("Test 1 and Test 2
-                # both positive"), which no other row can express.
-                for (pair in list(c(1L, 2L), c(1L, 3L), c(2L, 3L))) {
-                    first <- data_prep[[paste0("test", pair[1], "Variable2")]] == "Positive"
-                    second <- data_prep[[paste0("test", pair[2], "Variable2")]] == "Positive"
+            # The selected tests' results as a logical matrix, one column per test
+            # (TRUE = positive). matrix() keeps the shape when there is a single case.
+            .positiveMatrix = function(data_prep) {
+                columns <- intersect(paste0("test", seq_len(3L), "Variable2"), names(data_prep))
+                matrix(vapply(columns, function(column) data_prep[[column]] == "Positive",
+                              logical(nrow(data_prep))),
+                       nrow = nrow(data_prep))
+            },
+            # The strategy rows, in table order. With three tests the Serial and Parallel
+            # rule for each PAIR of tests comes first (a useless third test makes a two-test
+            # rule the best, which no other row can express); then Parallel and Serial over
+            # all the tests, and with three tests Majority. This one definition is read by
+            # the combination table, by the paired-comparison rows built in .init() and by
+            # their values in .run(), so a label or a rule cannot drift between them.
+            # Serial (all pos) is numerically identical to the all-positive pattern but has
+            # its own named row; .populateRecommendation() drops the pattern twin.
+            .strategyDefinitions = function(k) {
+                defs <- list()
+                if (k == 3L) {
+                    for (pair in list(c(1L, 2L), c(1L, 3L), c(2L, 3L))) {
+                        key <- paste(pair, collapse = "")
+                        defs[[length(defs) + 1L]] <- list(
+                            key = paste0("serial", key), op = "all", components = pair,
+                            label = .fmt(.("Serial {first}+{second} (both pos)"),
+                                         first = pair[1], second = pair[2]))
+                        defs[[length(defs) + 1L]] <- list(
+                            key = paste0("parallel", key), op = "any", components = pair,
+                            label = .fmt(.("Parallel {first}+{second} (>=1 pos)"),
+                                         first = pair[1], second = pair[2]))
+                    }
+                }
+                tests <- seq_len(k)
+                defs[[length(defs) + 1L]] <- list(key = "parallel", op = "any",
+                    components = tests, label = .("Parallel (>=1 pos)"))
+                defs[[length(defs) + 1L]] <- list(key = "serial", op = "all",
+                    components = tests, label = .("Serial (all pos)"))
+                if (k == 3L) {
+                    defs[[length(defs) + 1L]] <- list(key = "majority", op = "majority",
+                        components = tests, label = .("Majority (>=2/3 pos)"))
+                }
+                defs
+            },
+            # A strategy's positive call: any (Parallel), all (Serial) or at least two
+            # (Majority) of its component tests positive.
+            .ruleFlag = function(positive, op, components) {
+                hits <- rowSums(positive[, components, drop = FALSE])
+                switch(op,
+                    any = hits >= 1L,
+                    all = hits == length(components),
+                    majority = hits >= 2L)
+            },
+            .addStrategyRules = function(data_prep) {
+                positive <- private$.positiveMatrix(data_prep)
+                for (def in private$.strategyDefinitions(ncol(positive))) {
                     private$.analyzeSinglePattern(
-                        data_prep,
-                        .fmt(.("Serial {first}+{second} (both pos)"),
-                             first = pair[1], second = pair[2]),
-                        first & second,
-                        row_type = .("Strategy")
-                    )
-                    private$.analyzeSinglePattern(
-                        data_prep,
-                        .fmt(.("Parallel {first}+{second} (>=1 pos)"),
-                             first = pair[1], second = pair[2]),
-                        first | second,
-                        row_type = .("Strategy")
-                    )
+                        data_prep, def$label,
+                        private$.ruleFlag(positive, def$op, def$components),
+                        row_type = .("Strategy"), components = def$components)
                 }
             },
-            .addTwoTestStrategies = function(data_prep) {
-                # Add clinical strategy rows for 2-test combinations
-
-                # Parallel strategy: Positive if ANY test is positive (high sensitivity)
-                parallel_condition <- data_prep$test1Variable2 == "Positive" |
-                    data_prep$test2Variable2 == "Positive"
-                private$.analyzeSinglePattern(
-                    data_prep,
-                    .("Parallel (>=1 pos)"),
-                    parallel_condition,
-                    row_type = .("Strategy")
-                )
-
-                # Serial (AND) is numerically identical to the all-positive pattern "+/+",
-                # but a reader should not have to know that to find it. It gets its own
-                # named row; .populateRecommendation drops the all-positive pattern when this
-                # row is present, so the twin does not become a spurious tie.
-                serial_condition <- data_prep$test1Variable2 == "Positive" &
-                    data_prep$test2Variable2 == "Positive"
-                private$.analyzeSinglePattern(
-                    data_prep,
-                    .("Serial (all pos)"),
-                    serial_condition,
-                    row_type = .("Strategy")
-                )
+            # Each strategy against each test it combines, paired within the reference groups
+            # on the same joint complete cases. A Parallel rule is positive whenever a test it
+            # includes is, and a Serial rule only when that test is, so against its own tests a
+            # Parallel rule can only GAIN sensitivity and LOSE specificity, and a Serial rule
+            # the reverse: one discordant cell is zero by construction. For those rows
+            # McNemar's p would be 2^(1 - b), blind to n, for a "no reclassification" null that
+            # any single reclassified case refutes, and the Newcombe paired interval runs past
+            # 0 into values the rule cannot take. Their change is the reclassified share, exactly
+            # one binomial proportion for nested rules, with its Wilson score interval and no p.
+            # Majority can move
+            # either way: Newcombe's paired interval (shared with decisioncompare) and the
+            # McNemar mid-p test (Fagerland 2013), not adjusted, like every row here.
+            .populatePairedComparison = function(data_prep) {
+                positive <- private$.positiveMatrix(data_prep)
+                k <- ncol(positive)
+                if (!isTRUE(self$options$showPairedComparison) || k < 2L) {
+                    return()
+                }
+                paired <- self$results$pairedComparisonTable
+                paired$setVisible(TRUE)
+                # Newcombe and the McNemar mid-p are used only for Majority (three tests); the
+                # keys stay in the .r.yaml so the module updater ships them.
+                paired$setRefs(if (k == 3L) {
+                    c("newcombe1998paired", "mcnemar1947", "Fagerland2013")
+                } else {
+                    character(0)
+                })
+                diseased <- data_prep$goldVariable2 == "Positive"
+                for (def in private$.strategyDefinitions(k)) {
+                    flag <- private$.ruleFlag(positive, def$op, def$components)
+                    # The only direction a rule's sensitivity can move against its own test:
+                    # +1 (Parallel), -1 (Serial), 0 for either (Majority). Specificity moves
+                    # the other way.
+                    way <- switch(def$op, any = 1L, all = -1L, 0L)
+                    for (i in def$components) {
+                        sens <- private$.pairedChange(flag[diseased], positive[diseased, i], way)
+                        spec <- private$.pairedChange(!flag[!diseased], !positive[!diseased, i],
+                                                      -way)
+                        paired$setRow(rowKey = paste0(def$key, "_", i), values = list(
+                            sensGained = sens$gained, sensLost = sens$lost,
+                            sensChange = sens$change, sensLower = sens$lower,
+                            sensUpper = sens$upper, sensP = sens$p,
+                            specGained = spec$gained, specLost = spec$lost,
+                            specChange = spec$change, specLower = spec$lower,
+                            specUpper = spec$upper, specP = spec$p))
+                    }
+                }
+                paired$setNote("method", .fmt(
+                    jmvcore::.("Each rule is compared with each test it combines on the same {n} complete cases: sensitivity among the {npos} disease-present and specificity among the {nneg} disease-absent cases. Gained counts the cases the rule classifies correctly and the test alone does not, Lost the reverse, and Change is the rule minus the test."),
+                    n = length(diseased), npos = sum(diseased), nneg = sum(!diseased)))
+                paired$setNote("nested", jmvcore::.("A Parallel rule can only gain sensitivity and lose specificity against a test it includes, and a Serial rule the reverse, so one of Gained and Lost is zero by construction and any reclassified case is a real difference. Their p is therefore left blank, and the 95% interval is the Wilson interval of the reclassified share. Weigh the gain against the loss: a gain on one side is not overall superiority."))
+                paired$setNote("majority", if (k == 3L) {
+                    jmvcore::.("Majority can move either way: its 95% interval is Newcombe's hybrid score interval for paired proportions and its p is from the McNemar mid-p test. Neither is adjusted for multiple comparisons, and when p is close to 0.05 the two can disagree: the interval may exclude 0 while p is above 0.05, or the reverse.")
+                })
             },
-            .addThreeTestStrategies = function(data_prep) {
-                # Add clinical strategy rows for 3-test combinations
-
-                # Parallel strategy: Positive if ANY test is positive (high sensitivity)
-                parallel_condition <- data_prep$test1Variable2 == "Positive" |
-                    data_prep$test2Variable2 == "Positive" |
-                    data_prep$test3Variable2 == "Positive"
-                private$.analyzeSinglePattern(
-                    data_prep,
-                    .("Parallel (>=1 pos)"),
-                    parallel_condition,
-                    row_type = .("Strategy")
-                )
-
-                # Serial (AND): identical to "+/+/+" but named, for the same reason as above.
-                serial_condition <- data_prep$test1Variable2 == "Positive" &
-                    data_prep$test2Variable2 == "Positive" &
-                    data_prep$test3Variable2 == "Positive"
-                private$.analyzeSinglePattern(
-                    data_prep,
-                    .("Serial (all pos)"),
-                    serial_condition,
-                    row_type = .("Strategy")
-                )
-
-                # Majority rule: Positive if at least 2 of 3 tests are positive (balanced)
-                t1_pos <- data_prep$test1Variable2 == "Positive"
-                t2_pos <- data_prep$test2Variable2 == "Positive"
-                t3_pos <- data_prep$test3Variable2 == "Positive"
-                majority_condition <- (as.integer(t1_pos) + as.integer(t2_pos) + as.integer(t3_pos)) >= 2
-                private$.analyzeSinglePattern(
-                    data_prep,
-                    .("Majority (>=2/3 pos)"),
-                    majority_condition,
-                    row_type = .("Strategy")
-                )
+            # One paired contrast within one reference group. rule and test are the correct
+            # calls of each (positive among disease-present cases, negative among
+            # disease-absent ones); way is the only direction the rule can move (+1 gain,
+            # -1 loss) or 0 when it can move either way. An empty group (a one-class sample)
+            # gives blanks, which is not the same as "no difference".
+            .pairedChange = function(rule, test, way) {
+                n <- length(rule)
+                if (n == 0) {
+                    return(list(gained = NA_integer_, lost = NA_integer_, change = NA_real_,
+                                lower = NA_real_, upper = NA_real_, p = NA_real_))
+                }
+                gained <- sum(rule & !test)
+                lost <- sum(!rule & test)
+                change <- (gained - lost) / n
+                if (way != 0L) {
+                    interval <- way * private$.calcWilsonCI(if (way > 0L) gained else lost, n)
+                    return(list(gained = gained, lost = lost, change = change,
+                                lower = min(interval), upper = max(interval), p = NA_real_))
+                }
+                interval <- pairedProportionDifference(rule, test)
+                discordant <- gained + lost
+                p <- if (discordant == 0) {
+                    1
+                } else {
+                    smaller <- min(gained, lost)
+                    min(1, 2 * (stats::pbinom(smaller, discordant, 0.5) -
+                                    0.5 * stats::dbinom(smaller, discordant, 0.5)))
+                }
+                list(gained = gained, lost = lost, change = change,
+                     lower = interval$lower, upper = interval$upper, p = p)
             },
             .populateFrequencyTables = function(data_prep) {
                 # Emptied for the same reason as the combination tables above.
@@ -1895,7 +2287,6 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 # Cross-tabulation
                 crossTable <- self$results$crossTabTable
                 has_test2 <- "test2Variable2" %in% names(data_prep)
-                has_test3 <- "test3Variable2" %in% names(data_prep)
 
                 # A cross-tabulation of test PATTERNS needs at least two tests. With only
                 # test 1 selected this returned early, leaving a fully empty "Test Results
@@ -1989,7 +2380,53 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 private$.addNotice(type, title, do.call(.fmt, c(list(template), values)),
                                    refs = "HosmerLemeshow2013")
             },
-            .populateRecommendation = function() {
+            # Bootstrap optimism of the ranking (Harrell 2015) for the WHOLE selection: every
+            # scored rule competes in every resample, including rules whose observed J is at or
+            # below 0, in the ranking's order and with its tie-break. Every rule is a union of
+            # exact result patterns and each patient is described by a pattern and a reference
+            # result, so drawing pattern counts with rmultinom() within each reference group is
+            # exactly a patient bootstrap stratified by reference status (stratified, so the
+            # 10-per-group eligibility holds in every resample).
+            # Each resample's optimism uses the ranked rule r as a control variate:
+            # [J_b(pick) - J_b(r)] + [J_orig(r) - J_orig(pick)]. J is linear in the counts, so
+            # E*[J_b(r)] = J_orig(r) and the expectation is Harrell's, but both brackets compare
+            # an argmax, so every term is >= 0. The plain J_b(pick) - J_orig(pick) went negative
+            # about half the time when one rule clearly dominated, printing a corrected J above the
+            # observed one; there the control variate also cuts the Monte Carlo error sharply. Near
+            # ties its per-resample spread can be 1.2-1.8 times the plain one, which the printed
+            # Monte Carlo standard error reports honestly.
+            .optimismCorrection = function(scored, best, data_prep) {
+                diseased <- data_prep$goldVariable2 == "Positive"
+                patterns <- names(private$.patternConditions(data_prep))
+                in_pattern <- matrix(vapply(patterns, function(p) private$.rules[[p]]$flag,
+                                            logical(nrow(data_prep))),
+                                     nrow = nrow(data_prep))
+                # Which patterns make up each rule, read off one patient per pattern (an empty
+                # pattern never receives a resampled case, so its membership is irrelevant).
+                first_case <- apply(in_pattern, 2, function(x) match(TRUE, x))
+                weight <- 1 * t(vapply(scored$pattern, function(rule) {
+                    !is.na(first_case) & private$.rules[[rule]]$flag[first_case]
+                }, logical(length(patterns))))
+                n_pos <- colSums(in_pattern[diseased, , drop = FALSE])
+                n_neg <- colSums(in_pattern[!diseased, , drop = FALSE])
+                j_orig <- drop(weight %*% (n_pos / sum(n_pos)) - weight %*% (n_neg / sum(n_neg)))
+                r <- match(best$pattern, scored$pattern)
+                boots <- as.integer(self$options$nBoot)
+                # The kind is pinned too, so "Random seed: N" alone reproduces the numbers whatever
+                # RNG kind the session (or a calling script) has selected.
+                withr::local_seed(self$options$seed, .rng_kind = "Mersenne-Twister",
+                                  .rng_normal_kind = "Inversion", .rng_sample_kind = "Rejection")
+                draws_pos <- stats::rmultinom(boots, sum(n_pos), n_pos / sum(n_pos))
+                draws_neg <- stats::rmultinom(boots, sum(n_neg), n_neg / sum(n_neg))
+                j_boot <- weight %*% (draws_pos / sum(n_pos)) - weight %*% (draws_neg / sum(n_neg))
+                pick <- apply(j_boot, 2, function(j) which(j >= max(j) - 1e-9)[1])
+                optimism <- (j_boot[cbind(pick, seq_len(boots))] - j_boot[r, ]) +
+                    (j_orig[r] - j_orig[pick])
+                list(optimism = mean(optimism), corrected = best$youden - mean(optimism),
+                     mcse = stats::sd(optimism) / sqrt(boots), stability = mean(pick == r),
+                     B = boots, rules = nrow(scored))
+            },
+            .populateRecommendation = function(data_prep) {
                 # Called on every .run(), not only when showRecommendation is ticked: the
                 # two inversion STRONG_WARNINGs below are the analysis's only detectors of a
                 # reversed positive level, and .assessTopRuleDiscrimination() the only check
@@ -2278,6 +2715,13 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     return()
                 }
 
+                # Bootstrap optimism of the whole selection, only when it will be shown: this
+                # method runs on every .run(), and a hidden table must not cost 10,000 resamples.
+                correction <- if (isTRUE(self$options$showRecommendation) &&
+                                  isTRUE(self$options$optimismCorrection)) {
+                    private$.optimismCorrection(scored, best_pattern, data_prep)
+                }
+
                 # An exact tie was previously broken by whichever row came first, silently.
                 tied <- candidates$pattern[is_top]
                 rationale_parts <- character()
@@ -2421,6 +2865,14 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                         )
                     }
                 }
+                # A corrected J at or below 0 is said in words: a bare negative "Corrected J"
+                # beside a "Highest-Ranked Rule" reads as nonsense.
+                if (!is.null(correction) && round(correction$corrected, 3) <= 0) {
+                    rationale_parts <- c(rationale_parts, .fmt(
+                        .("Once the choice among all {n} scored rules, including those with a Youden's J at or below zero, is allowed for, Youden's J is {youden}: there is no evidence that the highest-ranked rule separates disease-present from disease-absent cases better than chance."),
+                        n = correction$rules,
+                        youden = base::format(round(correction$corrected, 3), nsmall = 3)))
+                }
                 rationale_parts <- c(
                     rationale_parts,
                     .("This sample-dependent ranking is an analytical summary, not a clinical guide or validated recommendation.")
@@ -2441,10 +2893,23 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                         jmvcore::.("The lower bound quoted under Interpretation adds the lower Wilson limits of the rule's sensitivity and specificity and subtracts 1. It is usually more conservative than the Agresti-Caffo interval shown beside Youden's J in the combination table, so the two lower limits can differ.")
                     )
                 }
+                if (!is.null(correction)) {
+                    recTable$setNote("optimism", .fmt(
+                        jmvcore::.("Corrected J estimates how a rule picked by this ranking would score in new patients like these. The whole ranking was repeated in {nboot} bootstrap samples drawn within each reference group; Expected drop is the average amount by which the rule picked in a sample scored higher there than in the original data (Monte Carlo standard error {mcse}). The highest-ranked rule was picked again in {stability}% of the samples. The correction is approximate: it leaves part of the optimism when rules are nearly tied, and it does not allow for how the tests, levels or patients were chosen."),
+                        nboot = correction$B,
+                        mcse = base::format(signif(correction$mcse, 2), scientific = FALSE),
+                        stability = base::format(round(100 * correction$stability, 1),
+                                                 nsmall = 1)))
+                    recTable$setNote("seed", .fmt(jmvcore::.("Random seed: {seed}"),
+                                                  seed = self$options$seed))
+                    recTable$setRefs("harrell2015")
+                }
                 recTable$setRow(rowNo = 1, values = list(
                     pattern = best_pattern$pattern,
                     method = .("Descriptive Youden ranking"),
                     youden = best_pattern$youden,
+                    youdenCorrected = if (is.null(correction)) NA_real_ else correction$corrected,
+                    optimism = if (is.null(correction)) NA_real_ else correction$optimism,
                     sens = best_pattern$sens,
                     spec = best_pattern$spec,
                     acc = best_pattern$acc,
@@ -2743,7 +3208,8 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 all_proportions <- all(metrics %in% proportion_metrics)
 
                 # Create plot
-                p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = Pattern, y = Value, fill = Metric)) +
+                p <- ggplot2::ggplot(plot_data, ggplot2::aes(
+                        x = .data$Pattern, y = .data$Value, fill = .data$Metric)) +
                     ggplot2::geom_bar(stat = "identity", position = "dodge") +
                     ggplot2::labs(
                         title = .("Diagnostic Performance Comparison"),
@@ -2804,7 +3270,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 # Reshape to long format
                 plot_data <- tidyr::pivot_longer(
                     metric_data,
-                    cols = -pattern,
+                    cols = -"pattern",
                     names_to = "Metric",
                     values_to = "Value"
                 )
@@ -2818,7 +3284,14 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 plot_data$pattern <- factor(plot_data$pattern,
                                             levels = rev(unique(filtered_df$pattern)))
 
-                midpoint <- if (stat_filter %in% c("lrPos", "lrNeg", "dor")) 1
+                # LR+, LR- and the diagnostic odds ratio are multiplicative: 0.5 and 2 are
+                # equally far from 1. They were coloured on a linear scale centred on 1, so
+                # every ratio below 1 was squeezed into the neutral band (an LR+ of 0.02
+                # looked like 1) and anything short of the largest value washed out (13.7 was
+                # near-neutral beside 60.7). They are now coloured on log10, centred on 0,
+                # which is a ratio of 1.
+                ratio_metric <- stat_filter %in% c("lrPos", "lrNeg", "dor")
+                midpoint <- if (ratio_metric) 0
                             else if (identical(stat_filter, "youden")) 0
                             else 0.5
 
@@ -2844,44 +3317,90 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 low_col  <- "#ef8a8a"
                 mid_col  <- if (is.list(theme) && length(theme$fill) > 0) theme$fill[[1]] else "#f7f7f7"
                 high_col <- "#74add1"
+                # A SMALL LR- is the good end (a negative result rules disease out), so its
+                # poles are swapped. Unswapped, the worst LR- (3.63) took the blue "good" pole.
+                if (identical(stat_filter, "lrNeg")) {
+                    swapped <- low_col
+                    low_col <- high_col
+                    high_col <- swapped
+                }
+                # The value the fill scale sees: log10 for ratios (non-positive or blank
+                # values become non-finite and take the grey na.value tile).
+                plot_data$Fill <- if (ratio_metric) log10(plot_data$Value) else plot_data$Value
+                estimable <- is.finite(plot_data$Fill)
+                # Limits: the data's own range, as before, when the tiles differ. When every tile
+                # has the same value (a one-test analysis has one tile), ggplot's zero-width range
+                # painted the neutral colour whatever the value; such tiles now sit on the metric's
+                # natural scale (0 to 1, -1 to 1, or 0.1 to 10 and wider for a ratio), so the colour
+                # keeps its direction AND its size: stretching the range to the midpoint instead
+                # gave a sensitivity of 0.51 the same full blue as 0.99. Prevalence is identical in
+                # every row and is not a performance measure, so it stays neutral.
+                values <- plot_data$Fill[estimable]
+                fill_limits <- NULL
+                if (length(values) > 0 && diff(range(values)) == 0 &&
+                    !identical(stat_filter, "prevalence")) {
+                    fill_limits <- if (ratio_metric) {
+                        c(-1, 1) * max(1, abs(values[1]))
+                    } else if (identical(stat_filter, "youden")) {
+                        c(-1, 1)
+                    } else {
+                        c(0, 1)
+                    }
+                }
 
                 # The tile labels were drawn in a hardcoded near-black whatever was under
                 # them. Reproduce the fill scale_fill_gradient2() will build and pick a light
                 # or dark label per tile from its relative luminance (Rec. 709), so the value
                 # stays readable on any pole, including a future dark render surface.
-                label_values <- plot_data$Value
-                estimable <- is.finite(label_values)
-                tile_fill <- rep("#bebebe", length(label_values))   # ggplot's na.value grey
+                tile_fill <- rep("#bebebe", nrow(plot_data))   # blank tiles carry no label
                 if (any(estimable)) {
                     tile_fill[estimable] <- scales::div_gradient_pal(
                         low_col, mid_col, high_col
-                    )(scales::rescale_mid(label_values[estimable], mid = midpoint))
+                    )(scales::rescale_mid(values,
+                                          from = if (is.null(fill_limits)) range(values) else fill_limits,
+                                          mid = midpoint))
                 }
                 luminance <- colSums(
                     grDevices::col2rgb(tile_fill) / 255 * c(0.2126, 0.7152, 0.0722))
                 plot_data$LabelColour <- ifelse(luminance < 0.5, "#f5f5f5", "#1a1a1a")
                 # sprintf("%.2f", NA) is the literal "NA", which was printed on the grey tile
-                # of every blank cell (empty patterns, one-class PPV/NPV).
-                plot_data$Label <- ifelse(estimable, sprintf("%.2f", label_values), "")
+                # of every blank cell (empty patterns, one-class PPV/NPV). Labels keep the
+                # untransformed value.
+                plot_data$Label <- ifelse(is.finite(plot_data$Value),
+                                          sprintf("%.2f", plot_data$Value), "")
 
-                p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = Metric, y = pattern, fill = Value)) +
+                p <- ggplot2::ggplot(plot_data, ggplot2::aes(
+                        x = .data$Metric, y = .data$pattern, fill = .data$Fill)) +
                     ggplot2::geom_tile() +
                     ggplot2::geom_text(
-                        ggplot2::aes(label = Label, color = LabelColour)
+                        ggplot2::aes(label = .data$Label, color = .data$LabelColour)
                     ) +
                     ggplot2::labs(
                         title = .("Performance Heatmap"),
                         x = "",
                         y = .("Pattern"),
-                        fill = .("Value")
+                        fill = if (ratio_metric) .("Value (log scale)") else .("Value")
                     ) +
                     # theme_minimal() replaced by ggtheme. The continuous fill scale must come
                     # AFTER ggtheme: ggtheme carries a DISCRETE fill scale that would replace
                     # this one and then fail with "continuous value supplied to discrete scale".
                     ggtheme +
+                    # Ratio legends are labelled in the original units at round ratios
+                    # (0.1, 1, 10, ...) rather than in log10 units.
                     ggplot2::scale_fill_gradient2(
                         low = low_col, mid = mid_col, high = high_col,
-                        midpoint = midpoint
+                        midpoint = midpoint, limits = fill_limits,
+                        breaks = if (ratio_metric) {
+                            function(lim) log10(scales::breaks_log(n = 5)(10^lim))
+                        } else {
+                            ggplot2::waiver()
+                        },
+                        labels = if (ratio_metric) {
+                            function(b) base::format(signif(10^b, 2), scientific = FALSE,
+                                                     drop0trailing = TRUE, trim = TRUE)
+                        } else {
+                            ggplot2::waiver()
+                        }
                     ) +
                     # After ggtheme for the same reason as the fill scale: ggtheme carries a
                     # discrete colour scale that would otherwise replace this one.
@@ -3002,8 +3521,8 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 }
                 panel <- function(df, ratio) {
                     df$corrected <- ratio & df$pattern %in% corrected
-                    p <- ggplot2::ggplot(
-                        df, ggplot2::aes(x = estimate, y = pattern, colour = statistic))
+                    p <- ggplot2::ggplot(df, ggplot2::aes(
+                        x = .data$estimate, y = .data$pattern, colour = .data$statistic))
                     if (separate_kinds) {
                         p <- p + ggplot2::geom_hline(
                             yintercept = n_strategy_rows + 0.5, colour = "grey70",
@@ -3015,12 +3534,14 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     }
                     p <- p +
                         ggplot2::geom_errorbar(
-                            ggplot2::aes(xmin = lower, xmax = upper),
+                            ggplot2::aes(xmin = .data$lower, xmax = .data$upper),
                             orientation = "y", width = 0.25
                         ) +
                         # Open points: a continuity-corrected ratio (a zero cell), so an
                         # infinite observed LR+ no longer looks like an ordinary 14.8.
-                        ggplot2::geom_point(ggplot2::aes(shape = corrected), size = 2.5,
+                        # .data$ names the COLUMN: a bare `corrected` also matched the
+                        # character vector of corrected rule labels in the enclosing frame.
+                        ggplot2::geom_point(ggplot2::aes(shape = .data$corrected), size = 2.5,
                                             fill = NA) +
                         # free_x in BOTH panels, so every facet draws its own labelled x
                         # axis: with "fixed" only the bottom of five stacked proportion
@@ -3160,9 +3681,9 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 table_df$rowType <- factor(table_df$rowType,
                                            levels = unique(table_df$rowType))
 
-                p <- ggplot2::ggplot(table_df, ggplot2::aes(x = sens, y = spec)) +
-                    ggplot2::geom_point(ggplot2::aes(size = youden, colour = rowType)) +
-                    ggplot2::geom_text(data = label_df, ggplot2::aes(label = label),
+                p <- ggplot2::ggplot(table_df, ggplot2::aes(x = .data$sens, y = .data$spec)) +
+                    ggplot2::geom_point(ggplot2::aes(size = .data$youden, colour = .data$rowType)) +
+                    ggplot2::geom_text(data = label_df, ggplot2::aes(label = .data$label),
                                        vjust = -1, size = 3.2) +
                     # Room for labels at 100% sensitivity or specificity, and no clipping at
                     # the panel edge (three "Parallel" labels were cut in half).

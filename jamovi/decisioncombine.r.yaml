@@ -117,6 +117,8 @@ items:
       title: 'Proportions with 95% Confidence Intervals'
       type: Table
       rows: 0
+      # Hidden, not unpopulated: the forest plot reads this table whatever its visibility.
+      visible: (showCITables)
       clearWith: *analysisInputs
       columns:
         - name: pattern
@@ -145,6 +147,7 @@ items:
       title: 'Likelihood Ratios with 95% Confidence Intervals'
       type: Table
       rows: 0
+      visible: (showCITables)
       clearWith: *analysisInputs
       columns:
         - name: pattern
@@ -165,6 +168,83 @@ items:
           superTitle: '95% CI'
           type: number
       description: 'Log-scale 95 percent confidence intervals for LR+, LR- and the diagnostic odds ratio. These are ratios on an unbounded scale, so they are reported separately from the proportions above rather than sharing a column with them.'
+
+    # Rows built in .init() (fixed by the selected tests: 4 with two tests, 21 with three)
+    # and filled with setRow() in .run().
+    - name: pairedComparisonTable
+      title: 'Combination Rules vs Each Test Alone'
+      type: Table
+      rows: 0
+      visible: (showPairedComparison && length(test2) > 0)
+      clearWith: *analysisInputs
+      refs:
+        - newcombe1998paired
+        - mcnemar1947
+        - Fagerland2013
+      columns:
+        - name: rule
+          title: 'Rule'
+          type: text
+        - name: comparator
+          title: 'Compared with'
+          type: text
+        - name: sensGained
+          title: 'Gained'
+          superTitle: 'Sensitivity'
+          type: integer
+        - name: sensLost
+          title: 'Lost'
+          superTitle: 'Sensitivity'
+          type: integer
+        - name: sensChange
+          title: 'Change'
+          superTitle: 'Sensitivity'
+          type: number
+          format: pc
+        - name: sensLower
+          title: 'Lower'
+          superTitle: 'Sensitivity'
+          type: number
+          format: pc
+        - name: sensUpper
+          title: 'Upper'
+          superTitle: 'Sensitivity'
+          type: number
+          format: pc
+        - name: sensP
+          title: 'p'
+          superTitle: 'Sensitivity'
+          type: number
+          format: zto,pvalue
+        - name: specGained
+          title: 'Gained'
+          superTitle: 'Specificity'
+          type: integer
+        - name: specLost
+          title: 'Lost'
+          superTitle: 'Specificity'
+          type: integer
+        - name: specChange
+          title: 'Change'
+          superTitle: 'Specificity'
+          type: number
+          format: pc
+        - name: specLower
+          title: 'Lower'
+          superTitle: 'Specificity'
+          type: number
+          format: pc
+        - name: specUpper
+          title: 'Upper'
+          superTitle: 'Specificity'
+          type: number
+          format: pc
+        - name: specP
+          title: 'p'
+          superTitle: 'Specificity'
+          type: number
+          format: zto,pvalue
+      description: 'Each combination rule against each test it combines, on the same patients: the cases gained and lost, and the change in sensitivity (disease-present cases) and specificity (disease-absent cases) with a 95 percent confidence interval'
 
     - name: goldFreqTable
       title: 'Gold Standard Frequency Distribution'
@@ -402,7 +482,25 @@ items:
       type: Table
       rows: 1
       visible: (showRecommendation)
-      clearWith: *analysisInputs
+      # Cited only when the bootstrap ran (setRefs() in .populateRecommendation()); declared
+      # here so the module updater keeps the key in the submodule's 00refs.yaml.
+      refs:
+        - harrell2015
+      # Its own list, not *analysisInputs: the optimism columns also depend on the bootstrap
+      # options, and jamovi restores the cells of an existing row when no clearWith option
+      # changed, so a new seed would otherwise show the previous corrected J until the rerun.
+      clearWith:
+        - gold
+        - goldPositive
+        - test1
+        - test1Positive
+        - test2
+        - test2Positive
+        - test3
+        - test3Positive
+        - optimismCorrection
+        - nBoot
+        - seed
       columns:
         - name: pattern
           title: 'Highest-Ranked Rule'
@@ -414,6 +512,16 @@ items:
           title: "Youden's J"
           type: number
           format: zto
+        - name: youdenCorrected
+          title: 'Corrected J'
+          type: number
+          format: zto
+          visible: (optimismCorrection)
+        - name: optimism
+          title: 'Expected drop'
+          type: number
+          format: zto
+          visible: (optimismCorrection)
         - name: sens
           title: 'Sensitivity'
           type: number

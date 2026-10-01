@@ -16,11 +16,16 @@ decisioncombineOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             test3Positive = NULL,
             showIndividual = FALSE,
             showFrequency = FALSE,
+            showCITables = TRUE,
             showBarPlot = FALSE,
             showHeatmap = FALSE,
             showForest = FALSE,
             showDecisionTree = FALSE,
             showRecommendation = FALSE,
+            optimismCorrection = FALSE,
+            nBoot = 1000,
+            seed = 42,
+            showPairedComparison = FALSE,
             showAbout = FALSE,
             filterStatistic = "all",
             filterPattern = "all", ...) {
@@ -89,6 +94,10 @@ decisioncombineOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 "showFrequency",
                 showFrequency,
                 default=FALSE)
+            private$..showCITables <- jmvcore::OptionBool$new(
+                "showCITables",
+                showCITables,
+                default=TRUE)
             private$..showBarPlot <- jmvcore::OptionBool$new(
                 "showBarPlot",
                 showBarPlot,
@@ -108,6 +117,24 @@ decisioncombineOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             private$..showRecommendation <- jmvcore::OptionBool$new(
                 "showRecommendation",
                 showRecommendation,
+                default=FALSE)
+            private$..optimismCorrection <- jmvcore::OptionBool$new(
+                "optimismCorrection",
+                optimismCorrection,
+                default=FALSE)
+            private$..nBoot <- jmvcore::OptionInteger$new(
+                "nBoot",
+                nBoot,
+                default=1000,
+                min=100,
+                max=10000)
+            private$..seed <- jmvcore::OptionInteger$new(
+                "seed",
+                seed,
+                default=42)
+            private$..showPairedComparison <- jmvcore::OptionBool$new(
+                "showPairedComparison",
+                showPairedComparison,
                 default=FALSE)
             private$..addedPattern <- jmvcore::OptionOutput$new(
                 "addedPattern")
@@ -152,11 +179,16 @@ decisioncombineOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$.addOption(private$..test3Positive)
             self$.addOption(private$..showIndividual)
             self$.addOption(private$..showFrequency)
+            self$.addOption(private$..showCITables)
             self$.addOption(private$..showBarPlot)
             self$.addOption(private$..showHeatmap)
             self$.addOption(private$..showForest)
             self$.addOption(private$..showDecisionTree)
             self$.addOption(private$..showRecommendation)
+            self$.addOption(private$..optimismCorrection)
+            self$.addOption(private$..nBoot)
+            self$.addOption(private$..seed)
+            self$.addOption(private$..showPairedComparison)
             self$.addOption(private$..addedPattern)
             self$.addOption(private$..showAbout)
             self$.addOption(private$..filterStatistic)
@@ -173,11 +205,16 @@ decisioncombineOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         test3Positive = function() private$..test3Positive$value,
         showIndividual = function() private$..showIndividual$value,
         showFrequency = function() private$..showFrequency$value,
+        showCITables = function() private$..showCITables$value,
         showBarPlot = function() private$..showBarPlot$value,
         showHeatmap = function() private$..showHeatmap$value,
         showForest = function() private$..showForest$value,
         showDecisionTree = function() private$..showDecisionTree$value,
         showRecommendation = function() private$..showRecommendation$value,
+        optimismCorrection = function() private$..optimismCorrection$value,
+        nBoot = function() private$..nBoot$value,
+        seed = function() private$..seed$value,
+        showPairedComparison = function() private$..showPairedComparison$value,
         addedPattern = function() private$..addedPattern$value,
         showAbout = function() private$..showAbout$value,
         filterStatistic = function() private$..filterStatistic$value,
@@ -193,11 +230,16 @@ decisioncombineOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         ..test3Positive = NA,
         ..showIndividual = NA,
         ..showFrequency = NA,
+        ..showCITables = NA,
         ..showBarPlot = NA,
         ..showHeatmap = NA,
         ..showForest = NA,
         ..showDecisionTree = NA,
         ..showRecommendation = NA,
+        ..optimismCorrection = NA,
+        ..nBoot = NA,
+        ..seed = NA,
+        ..showPairedComparison = NA,
         ..addedPattern = NA,
         ..showAbout = NA,
         ..filterStatistic = NA,
@@ -213,6 +255,7 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         combinationTable = function() private$.items[["combinationTable"]],
         combinationTableCI = function() private$.items[["combinationTableCI"]],
         combinationTableCIRatios = function() private$.items[["combinationTableCIRatios"]],
+        pairedComparisonTable = function() private$.items[["pairedComparisonTable"]],
         goldFreqTable = function() private$.items[["goldFreqTable"]],
         crossTabTable = function() private$.items[["crossTabTable"]],
         individualTest1 = function() private$.items[["individualTest1"]],
@@ -384,6 +427,7 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 name="combinationTableCI",
                 title="Proportions with 95% Confidence Intervals",
                 rows=0,
+                visible="(showCITables)",
                 clearWith=list(
                     "gold",
                     "goldPositive",
@@ -424,6 +468,7 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 name="combinationTableCIRatios",
                 title="Likelihood Ratios with 95% Confidence Intervals",
                 rows=0,
+                visible="(showCITables)",
                 clearWith=list(
                     "gold",
                     "goldPositive",
@@ -456,6 +501,102 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                         `title`="Upper", 
                         `superTitle`="95% CI", 
                         `type`="number"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="pairedComparisonTable",
+                title="Combination Rules vs Each Test Alone",
+                rows=0,
+                visible="(showPairedComparison && length(test2) > 0)",
+                clearWith=list(
+                    "gold",
+                    "goldPositive",
+                    "test1",
+                    "test1Positive",
+                    "test2",
+                    "test2Positive",
+                    "test3",
+                    "test3Positive"),
+                refs=list(
+                    "newcombe1998paired",
+                    "mcnemar1947",
+                    "Fagerland2013"),
+                columns=list(
+                    list(
+                        `name`="rule", 
+                        `title`="Rule", 
+                        `type`="text"),
+                    list(
+                        `name`="comparator", 
+                        `title`="Compared with", 
+                        `type`="text"),
+                    list(
+                        `name`="sensGained", 
+                        `title`="Gained", 
+                        `superTitle`="Sensitivity", 
+                        `type`="integer"),
+                    list(
+                        `name`="sensLost", 
+                        `title`="Lost", 
+                        `superTitle`="Sensitivity", 
+                        `type`="integer"),
+                    list(
+                        `name`="sensChange", 
+                        `title`="Change", 
+                        `superTitle`="Sensitivity", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="sensLower", 
+                        `title`="Lower", 
+                        `superTitle`="Sensitivity", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="sensUpper", 
+                        `title`="Upper", 
+                        `superTitle`="Sensitivity", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="sensP", 
+                        `title`="p", 
+                        `superTitle`="Sensitivity", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="specGained", 
+                        `title`="Gained", 
+                        `superTitle`="Specificity", 
+                        `type`="integer"),
+                    list(
+                        `name`="specLost", 
+                        `title`="Lost", 
+                        `superTitle`="Specificity", 
+                        `type`="integer"),
+                    list(
+                        `name`="specChange", 
+                        `title`="Change", 
+                        `superTitle`="Specificity", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="specLower", 
+                        `title`="Lower", 
+                        `superTitle`="Specificity", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="specUpper", 
+                        `title`="Upper", 
+                        `superTitle`="Specificity", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="specP", 
+                        `title`="p", 
+                        `superTitle`="Specificity", 
+                        `type`="number", 
+                        `format`="zto,pvalue"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="goldFreqTable",
@@ -771,6 +912,8 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 title="Descriptive Candidate-Rule Ranking",
                 rows=1,
                 visible="(showRecommendation)",
+                refs=list(
+                    "harrell2015"),
                 clearWith=list(
                     "gold",
                     "goldPositive",
@@ -779,7 +922,10 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "test2",
                     "test2Positive",
                     "test3",
-                    "test3Positive"),
+                    "test3Positive",
+                    "optimismCorrection",
+                    "nBoot",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="pattern", 
@@ -794,6 +940,18 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                         `title`="Youden's J", 
                         `type`="number", 
                         `format`="zto"),
+                    list(
+                        `name`="youdenCorrected", 
+                        `title`="Corrected J", 
+                        `type`="number", 
+                        `format`="zto", 
+                        `visible`="(optimismCorrection)"),
+                    list(
+                        `name`="optimism", 
+                        `title`="Expected drop", 
+                        `type`="number", 
+                        `format`="zto", 
+                        `visible`="(optimismCorrection)"),
                     list(
                         `name`="sens", 
                         `title`="Sensitivity", 
@@ -918,6 +1076,8 @@ decisioncombineBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' @param test3Positive The level representing a positive result for Test 3.
 #' @param showIndividual Boolean to show individual test performance tables.
 #' @param showFrequency Boolean to show frequency tables.
+#' @param showCITables Boolean to show the confidence-interval tables for the
+#'   proportions and for the likelihood ratios and diagnostic odds ratio.
 #' @param showBarPlot Boolean to display bar chart visualization.
 #' @param showHeatmap Boolean to display heatmap visualization.
 #' @param showForest Boolean to display forest plot.
@@ -925,6 +1085,14 @@ decisioncombineBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'   vs specificity) scatter plot.
 #' @param showRecommendation Boolean to show the descriptive candidate-rule
 #'   ranking table.
+#' @param optimismCorrection Boolean to add the bootstrap optimism-corrected
+#'   Youden's J to the ranking table.
+#' @param nBoot Number of bootstrap resamples for the optimism correction of
+#'   the ranking.
+#' @param seed Random seed for the bootstrap resamples of the optimism
+#'   correction. Change it to obtain a different set of resamples.
+#' @param showPairedComparison Boolean to show the paired comparison of each
+#'   combination rule with each of its component tests.
 #' @param showAbout Boolean to show the about-this-analysis and assumptions
 #'   panels.
 #' @param filterStatistic Character indicating which statistic to display in
@@ -938,6 +1106,7 @@ decisioncombineBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'   \code{results$combinationTable} \tab \tab \tab \tab \tab Counts and diagnostic performance metrics for each test combination pattern, each test alone and each combination strategy, including prevalence, balanced accuracy, Youden's J with its Agresti-Caffo 95 percent confidence interval, likelihood ratios, and diagnostic odds ratios \cr
 #'   \code{results$combinationTableCI} \tab \tab \tab \tab \tab Wilson score 95 percent confidence intervals for sensitivity, specificity, PPV, NPV and accuracy, shown as percentages to match the combination table above. Likelihood ratios and the diagnostic odds ratio are unbounded ratios rather than proportions, so they appear in their own table below. \cr
 #'   \code{results$combinationTableCIRatios} \tab \tab \tab \tab \tab Log-scale 95 percent confidence intervals for LR+, LR- and the diagnostic odds ratio. These are ratios on an unbounded scale, so they are reported separately from the proportions above rather than sharing a column with them. \cr
+#'   \code{results$pairedComparisonTable} \tab \tab \tab \tab \tab Each combination rule against each test it combines, on the same patients: the cases gained and lost, and the change in sensitivity (disease-present cases) and specificity (disease-absent cases) with a 95 percent confidence interval \cr
 #'   \code{results$goldFreqTable} \tab \tab \tab \tab \tab Counts and percentages of disease-present and disease-absent cases (the reference standard dichotomised at the chosen positive level) among the complete cases used for the combination table \cr
 #'   \code{results$crossTabTable} \tab \tab \tab \tab \tab Cross-tabulation showing how test combination patterns align with gold standard results \cr
 #'   \code{results$individualTest1$test1Contingency} \tab \tab \tab \tab \tab a table \cr
@@ -975,11 +1144,16 @@ decisioncombine <- function(
     test3Positive,
     showIndividual = FALSE,
     showFrequency = FALSE,
+    showCITables = TRUE,
     showBarPlot = FALSE,
     showHeatmap = FALSE,
     showForest = FALSE,
     showDecisionTree = FALSE,
     showRecommendation = FALSE,
+    optimismCorrection = FALSE,
+    nBoot = 1000,
+    seed = 42,
+    showPairedComparison = FALSE,
     showAbout = FALSE,
     filterStatistic = "all",
     filterPattern = "all") {
@@ -1015,11 +1189,16 @@ decisioncombine <- function(
         test3Positive = test3Positive,
         showIndividual = showIndividual,
         showFrequency = showFrequency,
+        showCITables = showCITables,
         showBarPlot = showBarPlot,
         showHeatmap = showHeatmap,
         showForest = showForest,
         showDecisionTree = showDecisionTree,
         showRecommendation = showRecommendation,
+        optimismCorrection = optimismCorrection,
+        nBoot = nBoot,
+        seed = seed,
+        showPairedComparison = showPairedComparison,
         showAbout = showAbout,
         filterStatistic = filterStatistic,
         filterPattern = filterPattern)

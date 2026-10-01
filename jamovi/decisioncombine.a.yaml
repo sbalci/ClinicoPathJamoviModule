@@ -151,6 +151,20 @@ options:
           R: >
             Boolean to show frequency tables.
 
+    - name: showCITables
+      title: Confidence interval tables
+      type: Bool
+      default: true
+      description:
+          ui: >
+            Display the two tables of 95 percent confidence intervals: Wilson intervals for
+            sensitivity, specificity, PPV, NPV and accuracy, and log-scale intervals for LR+, LR-
+            and the diagnostic odds ratio. Untick to shorten the output; the forest plot draws
+            the same intervals either way.
+          R: >
+            Boolean to show the confidence-interval tables for the proportions and for the
+            likelihood ratios and diagnostic odds ratio.
+
     - name: showBarPlot
       title: Bar chart
       type: Bool
@@ -204,6 +218,50 @@ options:
             It needs at least two tests: one test gives one rule, so nothing is ranked.
           R: >
             Boolean to show the descriptive candidate-rule ranking table.
+
+    - name: optimismCorrection
+      title: Youden's J corrected for rule selection
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Add to the ranking a bootstrap estimate of how much of the highest Youden's J comes
+            from picking the best of many rules on the same patients, and the J corrected for
+            it. Needs the ranking and at least two tests.
+          R: >
+            Boolean to add the bootstrap optimism-corrected Youden's J to the ranking table.
+
+    - name: nBoot
+      title: Number of bootstrap samples
+      type: Integer
+      default: 1000
+      min: 100
+      max: 10000
+      description:
+          R: >
+            Number of bootstrap resamples for the optimism correction of the ranking.
+
+    - name: seed
+      title: Random seed
+      type: Integer
+      default: 42
+      description:
+          R: >
+            Random seed for the bootstrap resamples of the optimism correction. Change it to
+            obtain a different set of resamples.
+
+    - name: showPairedComparison
+      title: Combinations vs each test alone
+      type: Bool
+      default: false
+      description:
+          ui: >
+            For each combination rule, show how its sensitivity and specificity differ from
+            each test it combines, on the same patients: the cases it gains and loses, the
+            change and its 95 percent confidence interval. Needs at least two tests.
+          R: >
+            Boolean to show the paired comparison of each combination rule with each of its
+            component tests.
 
     # BREAKING_CHANGE (release review): was `addPatternToData`, type Bool. jmvcore's
     # Output element resolves its own enabled state with options$get(<element name>), so

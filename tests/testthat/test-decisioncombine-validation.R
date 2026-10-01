@@ -585,11 +585,18 @@ test_that("VAL-01 (C39) the one-class notice names every blank column and the pa
     expect_match(txt, "no disease-absent cases", fixed = TRUE)
 })
 
-test_that("VAL-01 (C39) 'PPV/NPV Interpretation' appears only when some row can show a PPV or NPV", {
+test_that("VAL-01 (C39) the PPV/NPV caveat appears only when some row can show a PPV or NPV", {
+    # It was an INFO notice on every ordinary run; since review-function 2026-10-01 it is a
+    # combination-table footnote quoting the prevalence the predictive values assume.
     d <- .val_mk(.F4$cD, .F4$cN)
     dN <- d[d$gold == "N", ]; dN$gold <- factor(as.character(dN$gold), levels = c("D", "N"))
-    expect_false("PPV/NPV Interpretation" %in% .val_titles(.val_run(dN)))
-    expect_true("PPV/NPV Interpretation" %in% .val_titles(.val_run(d)))
+    one <- .val_run(dN)
+    two <- .val_run(d)
+    expect_null(one$combinationTable$notes$ppv_npv)
+    expect_false("PPV/NPV Interpretation" %in% .val_titles(two))
+    prevalence <- base::format(round(100 * mean(d$gold == "D"), 1), nsmall = 1)
+    expect_match(two$combinationTable$notes$ppv_npv$note,
+                 paste0("prevalence of ", prevalence, "%"), fixed = TRUE)
 })
 
 test_that("VAL-04 (C58) a selected statistic blank in every row gets one notice for all plots", {

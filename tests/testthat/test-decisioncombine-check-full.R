@@ -95,9 +95,14 @@ test_that("CF-01 the notices panel is the second results item, above every table
     inputs <- c("gold", "goldPositive", "test1", "test1Positive", "test2", "test2Positive",
                 "test3", "test3Positive")
     for (nm in c("notices", "combinationTable", "combinationTableCI",
-                 "combinationTableCIRatios", "recommendationTable")) {
+                 "combinationTableCIRatios", "pairedComparisonTable")) {
         expect_identical(unlist(items[[nm]]$clearWith), inputs, info = nm)
     }
+    # The ranking also clears on the bootstrap options: jamovi restores an existing row's
+    # cells when no clearWith option changed, so a new seed would otherwise show the
+    # previous corrected J until the rerun finished (review-function 2026-10-01).
+    expect_identical(unlist(items$recommendationTable$clearWith),
+                     c(inputs, "optimismCorrection", "nBoot", "seed"))
 })
 
 test_that("CF-02 every row carries the Agresti-Caffo 95% interval for Youden's J", {

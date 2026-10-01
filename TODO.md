@@ -1303,6 +1303,114 @@ calibration; three skeptics per finding) and a Codex review.
 - [ ] (release decision) NEWS.md's decisioncombine header says "analysis 1.0.84"; the code is 1.0.83 until
   `new_version` is raised (see the decision item under `### decision`).
 
+**`/review-function decisioncombine` (2026-10-01) — results.** Report only; no source edited (`menuGroup`
+already `meddecideT`).
+- Evidence: an independent oracle (hand-coded Agresti-Caffo, `binom` Wilson, its own continuity and blanking
+  rules) agrees on 2,665 of 2,665 cells of the three tables across six configurations (1, 2 and 3 tests,
+  correlated tests with missing values, zero cells and empty patterns, a one-class reference), and on the
+  ranking winner. Suite: 9 files, 209 tests, 877 expectations, 0 failed / error / skip / warning.
+  `release_gate.py` identical with `decisioncombine` counted as shipped. lintr: 0 bug-linter hits. tr.po:
+  207 of 207 strings translated. n = 200,000 with 3 tests and every output on: run 1.5 s, plots 1.3 s.
+- [ ] (clinical safety, High) No guard for reflex / sequential testing. When Test 2 is recorded only for
+  Test 1-positive patients (HER2 ISH after IHC 2+, reflex IHC), complete-case analysis drops every Test
+  1-negative case. Seen: n 600, 351 dropped. "Test 1 alone" reads 100% / 0% (truth 89% / 78%), Serial reads
+  sensitivity 79.7% and specificity 94.8% (truth 70.9% / 98.8%), and the ranking crowns "Test 2 alone". The
+  only notice is the generic "Removed 351 case(s)". Proposed guard: STRONG when at least 10 cases miss
+  test k with the reference and test j observed, all of them share one test-j result, and Fisher's exact
+  test of missing(k) vs result(j) gives p < 0.001; WARNING when p < 0.001 but the pattern is not
+  structural. Simulated (2,000 reps per cell, n 60 / 150 / 600): pure reflex gives STRONG 1.000 in every
+  cell. MCAR at 5-30% gives STRONG 0.000 and WARNING at most 0.002. Disease-dependent missingness gives a
+  WARNING only (0.095 at n 150, 0.832 at n 600). Later: compute Serial on all patients (a Test
+  1-negative is Serial-negative whatever Test 2 is).
+- [ ] (plot, Medium) The heatmap colours ratios on a linear scale with the RdBu poles fixed (`.plotHeatmap`).
+  LR- is inverted: the worst value (3.63, "-/-") is drawn in the full blue "good" pole and the best (0.024,
+  Parallel) a pale pink. LR+ / DOR compress: LR+ 13.7 and 3.97 are near-neutral, and only 60.7 is
+  saturated. Fix: `transform = "log10"` for lrPos / lrNeg / dor (ggplot2 4.0.3 centres `midpoint = 1`
+  correctly with it), swap the poles for lrNeg, and rescale the tile-label luminance replica on log10.
+- [ ] (UX, Medium) 613 words of always-on footnotes under the combination table (row_kinds 211, haldane
+  221, joint_estimation 60, column_reading 53, youden_ci 38, multiplicity 30). Most of it repeats the
+  opt-in About panel, against the playbook rule that explanatory text renders only when enabled. Keep
+  youden_ci, multiplicity and a one-line correction note; move the rest behind `showAbout`. "PPV/NPV
+  Interpretation" (INFO) also fires on every ordinary run.
+- [ ] (UX, Low) The two CI tables are always visible: 40 + 24 rows with 2 tests, 100 + 60 with 3. Gate
+  them behind an option, or move the estimate (95% CI) into the main table.
+- [ ] (hygiene, Low) Twelve `aes()` / tidyselect names have no global binding (`Pattern`, `Value`, `Metric`,
+  `pattern`, `Label`, `LabelColour`, `estimate`, `statistic`, `sens`, `spec`, `youden`, `rowType`). That
+  means R CMD check NOTEs. Use `.data$` (`rlang .data` is already imported at line 8 and unused).
+  `has_test3` (`.populateFrequencyTables`) is assigned but never used.
+- [ ] (enhancement) Paired McNemar comparisons (within the disease-present cases for sensitivity, within the
+  disease-absent for specificity) of the top rule against each of its own tests. Bootstrap
+  optimism-corrected J for the selected rule (best of up to 20 on the same data). A J = 0 chance diagonal
+  and ggrepel labels on the decision-space plot. A copy-ready report sentence for the top rule.
+
+**Fix pass (2026-10-01, user: "all") — results.** Plan reviewed by Codex and a four-lens design workflow
+before coding (statistics, guard calibration, jamovi integration, clinical wording); both changed the design.
+`menuGroup` still `meddecideT`; analysis version untouched (the updater owns it).
+- [x] 4. `.data$` in every `aes()` (incl. the ambiguous `aes(shape = corrected)`), `cols = -"pattern"` in tidyselect;
+  `has_test3` removed. codetools: 0 undeclared names (was 12).
+- [x] 2. Heatmap: LR+ / LR- / DOR coloured on log10 centred on 1, LR- poles swapped, legend in raw units, limits always
+  include the midpoint (a single tile or identical tiles no longer paint the neutral colour). Non-degenerate fills
+  byte-identical to before for proportions.
+- [x] 1. `.screenSelectiveMissingness()` in `.validateInputs()`, before the complete-case exits (existing exit order
+  kept). Per variable k (reference + each test) against each other test j and, with three tests, "the other two
+  disagree": recording-rate ratio rho; flagged at rho >= 1.25 with p < 0.001 (exact Mantel-Haenszel stratified by the
+  reference for a test k, Fisher for the reference) and >= 5 missing; STRONG at rho >= 2; one line per k; raw levels
+  named for an equivocal trigger. Simulated (2,000 reps/cell): MCAR STRONG <= 0.05%, WARNING <= 0.35%; disease-dependent
+  never STRONG; reflex / referee / verification 99.95-100% STRONG; equivocal reflex 70% at n 60, 100% from n 150.
+- [x] 3. Notes 613 -> about 200 words (row_kinds, haldane with the per-branch rule, youden_ci incl. multiplicity,
+  conditional ppv_npv quoting the prevalence); joint_estimation / column_reading / multiplicity removed; PPV/NPV notice
+  removed; About now states the empty-margin rule correctly; Assumptions describe the new table and the screen.
+- [x] 5a. `showCITables` (default true).
+- [x] 5b. `pairedComparisonTable` (rows in `.init()`): nested Parallel/Serial rows get the signed Wilson interval of the
+  reclassified share and no p (McNemar would be 2^(1 - b)); Majority gets Newcombe method 10 (shared helper) and McNemar
+  mid-p (Fagerland 2013, new ref). Newcombe moved to `R/utils-paired-proportions.R`; decisioncompare now calls it.
+  **Fixed a shipped decisioncompare bug on the way:** integer overflow in the margin product stopped any analysis with a
+  few hundred cases per group and paired differences on (2,000 cases: "missing value where TRUE/FALSE needed");
+  byte-identical results where it worked before (n 60/150/400).
+- [x] 5c. `optimismCorrection` + `nBoot` (1000) + `seed` (42): bootstrap of the whole ranking over its `scored` set,
+  multinomial pattern counts within each reference group, control-variate estimator (never negative, ~10x lower Monte
+  Carlo error), `withr::local_seed`; Corrected J / Expected drop columns, optimism + seed notes, `harrell2015` ref only
+  when it ran, stability ("picked again in x%"), plain-words sentence when corrected J <= 0. Matches an independent
+  patient-level bootstrap within 0.01 (RF-05g).
+- [x] Generated: `R/decisioncombine.h.R` from a one-analysis scratch `prepare()` (jamovi 28.3.0; diff = new options /
+  table / columns only); `man/decisioncombine.Rd` by roxygen in a scratch package (`decisioncombineClass.Rd`
+  byte-identical; `tools::checkRd` 0). Catalogs by `i18nUpdate()` (snapshot first): tr.po 87 added, 15 removed (all
+  decisioncombine), 0 translations lost; 46 new decisioncombine entries translated, plus the shared empty "Change";
+  `msgfmt -c` OK; decisioncombine 328/328 translated. **Collateral:** 41 untranslated msgids from other analyses'
+  uncommitted `.u.yaml` suffix/label rewrites (diagnosticsamplesize, survivalPower, biomarkerdiscovery, ihcscoring, ...)
+  became extractable and are now in the catalogs.
+- [x] Verify: 20 test files (10 decisioncombine, 6 decisioncompare, rendering contract, meddecide library audit,
+  init-row runtime, file naming, meddecide release): 352 tests, 1,489 expectations, 0 failed / error / skip / warning.
+  Oracle 2,665/2,665 cells on the final code. `release_gate.py` 0 blocking, identical with decisioncombine counted as
+  shipped (only +1 citation, +72 catalog msgids). lintr: 0 bug-linter hits. `_updateModules.R --dry-run` plans
+  `utils-paired-proportions.R` for meddecide (decisioncompare) and JamoviTest (decisioncombine), exit 0.
+- [x] Post-implementation verification (four-lens workflow: regression vs HEAD, statistics, guard, integration;
+  stopped before its skeptic phase, the HIGH finding reproduced by hand). 24 findings, all fixed:
+  - HIGH: `mantelhaen.test(exact = TRUE)` fits a uniroot() interval that underflowed on large selective data and
+    crashed the analysis from ~1,700 reflex cases (HEAD ran). Now only its p is used: tryCatch to the asymptotic
+    test, `fisher.test(conf.int = FALSE)`; ties when p underflows go to the larger statistic (a 3-test reflex
+    chain names the direct trigger). RF-01g runs 2,000 / 3,000-case reflex and referee designs.
+  - Screen severity now the Mantel-Haenszel rate ratio WITHIN reference groups (same scale as the stratified
+    test): a masked 2-fold within-group difference is flagged, disease-driven missingness is never flagged, and
+    small-group noise no longer escalates. Counts reported per reference group. New predictors for the reference
+    standard: "any test positive" and "the tests disagree" (discrepant resolution). Consequence sentences only
+    once the table is built with both outcomes (store, then `.emitMissingnessNotices()`). Re-simulated (2,000
+    reps/cell): MCAR STRONG <= 0.15%, WARNING <= 0.55%; structural designs 99.9-100%.
+  - Heatmap: data range when tiles differ (fills identical to HEAD), natural scale for identical tiles, prevalence
+    neutral. Paired table hidden on early return; its refs per run (Majority only); `harrell2015` declared in yaml
+    (updater trims refs to the yaml). RNG kind pinned in `withr::local_seed`. `.u.yaml` bootstrap boxes need Test 2.
+    Wording: two rule counts, "Wilson score" not "exact", the McNemar/interval disagreement, Assumptions names the
+    table; three Turkish corrections. RF-05i tests the optimism where it is large and known exactly (0.1215 by
+    enumeration).
+  - Verified: 20 files, 354 tests, 1,511 expectations, 0 failed / error / skip / warning; oracle 2,665/2,665;
+    release gate 0 blocking and identical with decisioncombine counted as shipped; i18n 337/337 translated,
+    `msgfmt -c` OK; header diff = refs only; codetools 0; lintr bug linters 0.
+- [ ] (user) Commit; `Rscript _updateModules.R` to sync meddecide (decisioncompare + the new helper) and JamoviTest; then
+  `Rscript --vanilla tools/submodule_smoke.R ../meddecide`.
+- [ ] (i18n, other analyses) translate the 41 collateral msgids, or re-run `i18nUpdate()` after that work lands.
+- [ ] (optional) Koopman score interval for LR (module-wide decision, unchanged); a second independent driver of
+  missingness is not named (one line per variable, the strongest).
+
 ### decisioncompare
 
 ```text

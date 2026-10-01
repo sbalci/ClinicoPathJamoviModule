@@ -134,76 +134,6 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 )
             },
 
-            # Compute a paired difference using Newcombe's method-10 score interval.
-            # The four cells are e=(1,1), f=(1,0), g=(0,1), h=(0,0), so the
-            # estimated difference is (f-g)/n. This avoids the zero-width boundary
-            # intervals produced by the unmodified paired Wald method.
-            .pairedProportionDifference = function(x, y) {
-                valid <- !is.na(x) & !is.na(y)
-                n <- sum(valid)
-                if (n == 0) {
-                    return(NULL)
-                }
-
-                x <- x[valid]
-                y <- y[valid]
-
-                both_pos <- sum(x == 1 & y == 1)
-                x_only <- sum(x == 1 & y == 0)
-                y_only <- sum(x == 0 & y == 1)
-                both_neg <- sum(x == 0 & y == 0)
-
-                diff <- (x_only - y_only) / n
-
-                wilson <- function(successes, total) {
-                    p <- successes / total
-                    z <- stats::qnorm(0.975)
-                    denominator <- 1 + z^2 / total
-                    center <- (p + z^2 / (2 * total)) / denominator
-                    half_width <- z * sqrt(
-                        (p * (1 - p) + z^2 / (4 * total)) / total
-                    ) / denominator
-                    c(lower = max(0, center - half_width),
-                      upper = min(1, center + half_width))
-                }
-
-                p_x <- (both_pos + x_only) / n
-                p_y <- (both_pos + y_only) / n
-                ci_x <- wilson(both_pos + x_only, n)
-                ci_y <- wilson(both_pos + y_only, n)
-                dl_x <- p_x - ci_x[["lower"]]
-                du_x <- ci_x[["upper"]] - p_x
-                dl_y <- p_y - ci_y[["lower"]]
-                du_y <- ci_y[["upper"]] - p_y
-
-                phi_denominator <- sqrt(
-                    (both_pos + x_only) * (y_only + both_neg) *
-                        (both_pos + y_only) * (x_only + both_neg)
-                )
-                phi_numerator <- both_pos * both_neg - x_only * y_only
-                if (phi_numerator > 0) {
-                    phi_numerator <- max(phi_numerator - n / 2, 0)
-                }
-                phi <- if (phi_denominator == 0) 0 else phi_numerator / phi_denominator
-
-                lower_distance <- sqrt(max(
-                    0, dl_x^2 - 2 * phi * dl_x * du_y + du_y^2
-                ))
-                upper_distance <- sqrt(max(
-                    0, du_x^2 - 2 * phi * du_x * dl_y + dl_y^2
-                ))
-                lower <- max(-1, diff - lower_distance)
-                upper <- min(1, diff + upper_distance)
-
-                list(
-                    diff = diff,
-                    lower = lower,
-                    upper = upper,
-                    n = n,
-                    counts = c(both_pos = both_pos, x_only = x_only, y_only = y_only, both_neg = both_neg)
-                )
-            },
-
             # ======================================================================
             # Notice Management Helper Methods (HTML output to avoid serialization)
             # ======================================================================
@@ -2023,7 +1953,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 sens_diff <- if (sum(sens_idx) == 0) {
                     NULL
                 } else {
-                    private$.pairedProportionDifference(
+                    pairedProportionDifference(
                         x = ifelse(t1[sens_idx] == "Positive", 1, 0),
                         y = ifelse(t2[sens_idx] == "Positive", 1, 0)
                     )
@@ -2035,7 +1965,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 spec_diff <- if (sum(spec_idx) == 0) {
                     NULL
                 } else {
-                    private$.pairedProportionDifference(
+                    pairedProportionDifference(
                         x = ifelse(t1[spec_idx] == "Negative", 1, 0),
                         y = ifelse(t2[spec_idx] == "Negative", 1, 0)
                     )
@@ -2043,7 +1973,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 add_diff_row(spec_diff, jmvcore::.("Specificity"), "Spec")
 
                 # Accuracy difference (all subjects)
-                acc_diff <- private$.pairedProportionDifference(
+                acc_diff <- pairedProportionDifference(
                     x = ifelse(t1[common_idx] == gold[common_idx], 1, 0),
                     y = ifelse(t2[common_idx] == gold[common_idx], 1, 0)
                 )

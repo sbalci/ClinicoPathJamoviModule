@@ -7,6 +7,65 @@ From the independent review of 2026-09-29
 2026-09-28 and a follow-up check on 2026-09-30. A saved `.omv` can show extra rows, two extra
 columns and a different highest-ranked rule.
 
+### Code review (2026-10-01): selectively missing results, heatmap colours, paired comparisons, optimism correction
+
+No number in the existing tables changes (2,665 cells re-checked against an independent
+calculation). The new options default to the previous output; what changes by default is the
+missing-results check, the shorter table notes, the PPV/NPV caveat moving from a notice into a
+table note, and the heatmap colours for the ratios.
+
+- **New check for results that are missing according to another result.** When a test was recorded
+  only after another test's positive or equivocal result (reflex testing, e.g. ISH after IHC 2+),
+  only when two tests disagreed (a referee test), or when the reference standard was obtained only
+  after a positive test (partial verification) or only where the tests disagreed (discrepant
+  resolution), complete-case analysis keeps a selected subgroup. The combination table then
+  misstates every row: in one example "Test 1 alone" read 100% / 0% (truth 89% / 78%) and the
+  ranking picked "Test 2 alone", under nothing but "Removed 351 case(s)". A notice now gives the
+  recording rates of the missing result by the other results (for a test, separately among
+  disease-present and disease-absent cases, because missingness that follows disease status alone
+  leaves sensitivity and specificity unbiased), and says what that does to the table. It does not
+  claim a cause, because the same counts arise when results are missing because of disease status.
+  It is a serious warning when one recording rate is at least twice the other, otherwise a plain
+  warning. In simulation it fired as a serious warning in at most 0.15% of samples with values
+  missing completely at random, never for missingness that follows disease status, and in
+  99.9-100% of reflex, referee, partial-verification and discrepant-resolution designs (70% for a
+  reflex on an equivocal level at 60 cases, 100% from 150). When no case has every result, the
+  notice explains the "No Complete Cases" error instead of describing a table that was never
+  computed.
+- **Heatmap colours for LR+, LR- and the diagnostic odds ratio are now on a log scale centred on
+  1**, so 0.1 and 10 are equally strong opposite colours. On the old linear scale a small LR- (a
+  good rule-out) was drawn near-neutral pink while a large, poor LR- took the blue "good" colour,
+  and an LR+ of 13.7 looked neutral beside 60.7. A heatmap whose tiles share one value, such as the
+  single tile of a one-test analysis, now shows its direction and size on the metric's natural
+  scale instead of the neutral colour; prevalence, the same in every row, stays neutral.
+- **The notes under the combination table are cut from 613 words to about 200.** The longer
+  explanations (complete cases versus the individual-test tables, why the 0.5 correction is
+  withheld on an empty margin, joint estimation, Prevalence and Balanced Accuracy) are in "About
+  this analysis". The PPV/NPV caveat is a table note quoting the sample prevalence instead of a
+  notice on every run. The About panel now states the empty-margin rule correctly: on a row no
+  patient tests positive under, LR+ and the odds ratio are blank but LR- is shown as exactly 1.
+- **New option "Confidence interval tables"** (on by default) hides the two interval tables. The
+  forest plot still draws the intervals.
+- **New table "Combination Rules vs Each Test Alone"** (option "Combinations vs each test alone")
+  compares each combination rule with each test it combines, on the same patients: the cases
+  gained and lost and the change in sensitivity and specificity with a 95% interval. Parallel and
+  Serial rules can move only one way against their own tests, so they get the Wilson score interval
+  of the reclassified share and no p-value; Majority gets Newcombe's paired interval and a McNemar
+  mid-p value.
+- **New option "Youden's J corrected for rule selection"** (with "Number of bootstrap samples",
+  default 1000, and "Random seed", default 42) adds "Corrected J" and "Expected drop" to the
+  ranking. The whole ranking is repeated in bootstrap samples drawn within each reference group.
+  A note reports the seed, the Monte Carlo error and how often the same rule won. When the
+  corrected J is at or below 0, the ranking says in words that there is no evidence the selected
+  rule beats chance.
+- **`decisioncompare`'s paired differences no longer fail on large samples.** The paired-interval
+  calculation multiplied integer counts, which overflowed once the reference groups reached a few
+  hundred cases (a 2,000-case analysis stopped with "missing value where TRUE/FALSE needed"). The
+  calculation is shared with `decisioncombine` now, with identical results wherever it worked
+  before.
+- R syntax: `decisioncombine()` gains `showCITables`, `showPairedComparison`, `optimismCorrection`,
+  `nBoot` and `seed`, all with defaults, so existing scripts run unchanged.
+
 ### Follow-up check (2026-09-30): notices first, an interval for Youden's J, discrimination
 
 - **Notices now appear at the top of the results**, under the Getting Started panel, as in

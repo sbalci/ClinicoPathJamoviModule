@@ -3320,6 +3320,16 @@ refs:
         publisher: "[R package]. Retrieved from https://CRAN.R-project.org/package=networkD3"
         url: "https://CRAN.R-project.org/package=networkD3"
 
+    Fagerland2013:
+        type: article
+        author: "Fagerland, M. W., Lydersen, S., & Laake, P."
+        year: 2013
+        title: "The McNemar test for binary matched-pairs data: mid-p and asymptotic are better than exact conditional"
+        publisher: BMC Medical Research Methodology
+        volume: 13
+        pages: 91
+        doi: 10.1186/1471-2288-13-91
+        url: "https://doi.org/10.1186/1471-2288-13-91"
     newcombe1998paired:
         type: article
         author: Newcombe, R. G.

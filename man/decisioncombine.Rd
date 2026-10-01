@@ -16,11 +16,16 @@ decisioncombine(
   test3Positive,
   showIndividual = FALSE,
   showFrequency = FALSE,
+  showCITables = TRUE,
   showBarPlot = FALSE,
   showHeatmap = FALSE,
   showForest = FALSE,
   showDecisionTree = FALSE,
   showRecommendation = FALSE,
+  optimismCorrection = FALSE,
+  nBoot = 1000,
+  seed = 42,
+  showPairedComparison = FALSE,
   showAbout = FALSE,
   filterStatistic = "all",
   filterPattern = "all"
@@ -52,6 +57,9 @@ analysis.}
 
 \item{showFrequency}{Boolean to show frequency tables.}
 
+\item{showCITables}{Boolean to show the confidence-interval tables for the
+proportions and for the likelihood ratios and diagnostic odds ratio.}
+
 \item{showBarPlot}{Boolean to display bar chart visualization.}
 
 \item{showHeatmap}{Boolean to display heatmap visualization.}
@@ -63,6 +71,18 @@ vs specificity) scatter plot.}
 
 \item{showRecommendation}{Boolean to show the descriptive candidate-rule
 ranking table.}
+
+\item{optimismCorrection}{Boolean to add the bootstrap optimism-corrected
+Youden's J to the ranking table.}
+
+\item{nBoot}{Number of bootstrap resamples for the optimism correction of
+the ranking.}
+
+\item{seed}{Random seed for the bootstrap resamples of the optimism
+correction. Change it to obtain a different set of resamples.}
+
+\item{showPairedComparison}{Boolean to show the paired comparison of each
+combination rule with each of its component tests.}
 
 \item{showAbout}{Boolean to show the about-this-analysis and assumptions
 panels.}
@@ -81,6 +101,7 @@ A results object containing:
 \code{results$combinationTable} \tab \tab \tab \tab \tab Counts and diagnostic performance metrics for each test combination pattern, each test alone and each combination strategy, including prevalence, balanced accuracy, Youden's J with its Agresti-Caffo 95 percent confidence interval, likelihood ratios, and diagnostic odds ratios \cr
 \code{results$combinationTableCI} \tab \tab \tab \tab \tab Wilson score 95 percent confidence intervals for sensitivity, specificity, PPV, NPV and accuracy, shown as percentages to match the combination table above. Likelihood ratios and the diagnostic odds ratio are unbounded ratios rather than proportions, so they appear in their own table below. \cr
 \code{results$combinationTableCIRatios} \tab \tab \tab \tab \tab Log-scale 95 percent confidence intervals for LR+, LR- and the diagnostic odds ratio. These are ratios on an unbounded scale, so they are reported separately from the proportions above rather than sharing a column with them. \cr
+\code{results$pairedComparisonTable} \tab \tab \tab \tab \tab Each combination rule against each test it combines, on the same patients: the cases gained and lost, and the change in sensitivity (disease-present cases) and specificity (disease-absent cases) with a 95 percent confidence interval \cr
 \code{results$goldFreqTable} \tab \tab \tab \tab \tab Counts and percentages of disease-present and disease-absent cases (the reference standard dichotomised at the chosen positive level) among the complete cases used for the combination table \cr
 \code{results$crossTabTable} \tab \tab \tab \tab \tab Cross-tabulation showing how test combination patterns align with gold standard results \cr
 \code{results$individualTest1$test1Contingency} \tab \tab \tab \tab \tab a table \cr

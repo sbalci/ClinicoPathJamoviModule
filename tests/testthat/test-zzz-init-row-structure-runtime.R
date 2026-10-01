@@ -269,3 +269,34 @@ test_that("survivalPower fills its .init() rows without a rowKey error", {
   expect_equal(run_sp()$sensitivity_analysis_table$rowCount, 0L)
   expect_equal(run_sp(interim_analyses = 2, alpha_spending = "none")$interim_analysis_table$rowCount, 0L)
 })
+
+
+test_that("decisioncombine paired-comparison table fills its .init() rows without a rowKey error", {
+  skip_if_not(analysis_available("decisioncombine"), "package not loaded")
+
+  set.seed(3)
+  n <- 200
+  disease <- runif(n) < 0.35
+  test <- function(se, sp) ifelse(disease, ifelse(runif(n) < se, "pos", "neg"),
+                                  ifelse(runif(n) < 1 - sp, "pos", "neg"))
+  d <- data.frame(gold = ifelse(disease, "D", "N"), t1 = test(0.85, 0.8),
+                  t2 = test(0.75, 0.9), t3 = test(0.8, 0.85))
+  run <- function(k, ...) decisioncombine(
+    data = d, gold = "gold", goldPositive = "D", test1 = "t1", test1Positive = "pos",
+    test2 = if (k >= 2) "t2" else NULL, test2Positive = if (k >= 2) "pos" else NULL,
+    test3 = if (k >= 3) "t3" else NULL, test3Positive = if (k >= 3) "pos" else NULL, ...)
+
+  two <- run(2, showPairedComparison = TRUE)$pairedComparisonTable
+  expect_equal(two$rowCount, 4L)
+  expect_false(anyNA(two$asDF$sensChange))
+  expect_equal(run(3, showPairedComparison = TRUE)$pairedComparisonTable$rowCount, 21L)
+  expect_equal(run(2)$pairedComparisonTable$rowCount, 0L)
+  # An early return leaves the pre-built rows blank rather than throwing.
+  bad <- decisioncombine(data = d, gold = "gold", goldPositive = "D", test1 = "t1",
+                         test1Positive = "pos", test2 = "t2", test2Positive = "NotALevel",
+                         test3 = NULL, test3Positive = NULL, showPairedComparison = TRUE)
+  expect_equal(bad$pairedComparisonTable$rowCount, 4L)
+  expect_true(all(is.na(bad$pairedComparisonTable$asDF$sensChange)))
+  # ... and hidden, like the ranking table, instead of labelled rows of blanks.
+  expect_false(bad$pairedComparisonTable$visible)
+})
