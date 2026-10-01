@@ -49,7 +49,7 @@ children:
           - type: TextBox
             name: nresample
             format: number
-            enable: (testtype == 'MonteCarlo')
+            enable: (testtype:MonteCarlo)
 
   - type: Label
     label: Tree Structure

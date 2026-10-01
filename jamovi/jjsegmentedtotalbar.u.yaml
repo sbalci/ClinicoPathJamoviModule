@@ -241,25 +241,25 @@ children:
           - type: CheckBox
             name: flerlage_show_labels
             label: Value labels
-            enable: (plot_type == 'flerlage')
+            enable: (plot_type:flerlage)
           - type: TextBox
             name: flerlage_label_size
             format: number
             label: Label size
-            enable: (plot_type == 'flerlage' && flerlage_show_labels)
+            enable: (plot_type:flerlage && flerlage_show_labels)
           - type: ComboBox
             name: flerlage_label_color
             label: Label color
-            enable: (plot_type == 'flerlage' && flerlage_show_labels)
+            enable: (plot_type:flerlage && flerlage_show_labels)
           - type: TextBox
             name: flerlage_alpha
             format: number
             label: Background transparency
-            enable: (plot_type == 'flerlage')
+            enable: (plot_type:flerlage)
           - type: ComboBox
             name: flerlage_box_color
             label: Background box color
-            enable: (plot_type == 'flerlage')
+            enable: (plot_type:flerlage)
   - type: CollapseBox
     label: Advanced Options
     collapsed: true

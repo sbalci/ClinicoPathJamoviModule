@@ -41,30 +41,30 @@ children:
           - type: TextBox
             name: senExposure
             format: number
-            enable: (misclassType == 'nondifferential')
+            enable: (misclassType:nondifferential)
           - type: TextBox
             name: specExposure
             format: number
-            enable: (misclassType == 'nondifferential')
+            enable: (misclassType:nondifferential)
       - type: LayoutBox
         margin: large
         children:
           - type: TextBox
             name: senExposureCase
             format: number
-            enable: (misclassType == 'differential')
+            enable: (misclassType:differential)
           - type: TextBox
             name: specExposureCase
             format: number
-            enable: (misclassType == 'differential')
+            enable: (misclassType:differential)
           - type: TextBox
             name: senExposureControl
             format: number
-            enable: (misclassType == 'differential')
+            enable: (misclassType:differential)
           - type: TextBox
             name: specExposureControl
             format: number
-            enable: (misclassType == 'differential')
+            enable: (misclassType:differential)
   - type: CollapseBox
     label: Analysis Options
     collapsed: false

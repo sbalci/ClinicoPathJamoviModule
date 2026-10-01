@@ -90,7 +90,7 @@ children:
           - type: TextBox
             name: variance_threshold
             format: number
-            suffix: ' (0.0-1.0)'
+            suffix: ' 0.0-1.0'
           - type: CheckBox
             name: outlier_detection
       - type: LayoutBox
@@ -113,11 +113,11 @@ children:
           - type: TextBox
             name: fdr_threshold
             format: number
-            suffix: ' (0.001-0.5)'
+            suffix: ' 0.001-0.5'
           - type: TextBox
             name: correlation_threshold
             format: number
-            suffix: ' (0.5-0.99)'
+            suffix: ' 0.5-0.99'
   - type: LayoutBox
     margin: large
     children:
@@ -129,7 +129,7 @@ children:
           - type: TextBox
             name: train_proportion
             format: number
-            suffix: ' (0.5-0.9)'
+            suffix: ' 0.5-0.9'
           - type: CheckBox
             name: hyperparameter_tuning
           - type: TextBox

@@ -7455,24 +7455,85 @@ Acceptance criteria
   to any master; the maintainer's dirty in-flight files are not touched.
 
 Checklist
-- [ ] Submodule CI PRs: check reporter, PR-only cancellation, drop no-op inputs, checkout@v5,
-      jsurvival file rename, meddecide badge -> push -> CI -> squash-merge
-- [ ] #127: R_PROFILE_USER + Ncpus + cache: always + tests from the source tree -> push -> measure
-- [ ] #125 fixes (tests, direct LF power formula, .h.R/.Rd, messages, ranges, gsDesign floor, labels,
+- [x] Submodule CI PRs: check reporter, PR-only cancellation, drop no-op inputs, checkout@v5,
+      jsurvival file rename, meddecide badge -> push -> CI
+- [ ] Squash-merge the five: BLOCKED by the session's permission policy ("merge without review") - merge by hand
+- [x] #127: R_PROFILE_USER + Ncpus + cache: always + tests from the source tree -> push -> measure
+- [x] #125 fixes (tests, direct LF power formula, .h.R/.Rd, messages, ranges, gsDesign floor, labels,
       dead power option, first test, reject() placement, n rounding, clearWith)
-- [ ] #126 fixes (regenerated .h.R, asFormula, addRow, tests, pi^2/6, enable binding, LR, docs,
+- [x] #126 fixes (regenerated .h.R, asFormula, addRow, tests, pi^2/6, enable binding, LR, docs,
       nits, pre-existing kept-option defects)
-- [ ] Umbrella: `==`/`!=` enable bindings in 19 .u.yaml (mixedcox handled in #126)
-- [ ] Umbrella: park-aware meddecide audit test + psychopdaROC case -> mirror to meddecide
-- [ ] Umbrella: plotmath tokens in the dependency guard -> copy to the 5 siblings
-- [ ] Umbrella: 4 tests that assume wd = package root (grafify, groupedforest, groupsummary, parallelplot)
-- [ ] Siblings: OncoPath NEWS 1.0.83.05 + README RECIST/breadcrumb; meddecide irr import;
+- [x] Umbrella: `==`/`!=` enable bindings in 19 .u.yaml (mixedcox handled in #126)
+- [x] Umbrella: park-aware meddecide audit test + psychopdaROC case -> mirror to meddecide
+- [x] Umbrella: plotmath tokens in the dependency guard -> copy to the 5 siblings
+- [x] Umbrella: 4 tests that assume wd = package root (grafify, groupedforest, groupsummary, parallelplot)
+- [x] Siblings: OncoPath NEWS 1.0.83.05 + README RECIST/breadcrumb; meddecide irr import;
       Descriptives dataquality mirror
-- [ ] hullplot: concave hulls via ggforce >= 0.5.0 without concaveman/V8 (only if verified at runtime)
-- [ ] Verify: harness tests, single-analysis prepare() diffs, guard/audit tests on sibling trees, CI
-- [ ] Follow-up reviews; Results section below
+- [x] hullplot: concave hulls via ggforce >= 0.5.0 without concaveman/V8 (only if verified at runtime)
+- [x] Verify: harness tests, single-analysis prepare() diffs, guard/audit tests on sibling trees, CI
+- [x] Follow-up reviews; Results section below
 
 Working notes
 - Disk 17 GiB free, swap ~10/11 GB: sparse `git clone --shared` scratch clones, <= 3 R processes,
   no load_all()/document()/check() on the umbrella.
 - Unpushed local commits: umbrella 6, meddecide 2 (+16 dirty), OncoPath 2 (+3 dirty) -> never pushed here.
+
+## Results (2026-10-01)
+
+Reviewed, fixed and independently verified. Every fix was executed in R or in jamovi 28.3's own client
+code, and each work item had a separate verifier. Git: PR branches only; nothing was pushed to any master.
+
+Merges were NOT performed: the session's permission policy blocked "merge without review". Merge by hand:
+`gh pr ready N -R sbalci/<repo> && gh pr merge N -R sbalci/<repo> --squash`.
+
+| PR | State |
+|---|---|
+| Descriptives#5, jsurvival#17 | polished; CI green; ready to squash-merge |
+| jjstatsplot#13, meddecide#18 | polished; red only until the regenerated test files below are committed in the sibling |
+| OncoPath#2 | polished; its last run merged into the old master; master + the OncoPath edits below pass the audit statically |
+| umbrella#127 | fixed; green in ~6 min (binary repo + cache + load check + changed-analysis tests); approve |
+| umbrella#125 | fixed in 3 rounds (exact LF power, working tests, arms, export-path plots); verified; follow-up review posted (approve) |
+| umbrella#126 | fixed in 3 rounds (header, fit, table, pi^2/6, strict date layouts, ordinal contrasts); verified; follow-up review posted (approve) |
+
+Uncommitted working-tree changes left for the maintainer to commit:
+- umbrella: 19 .u.yaml with ==/!= bindings rewritten to jamovi's grammar; 19 .u.yaml whose "(...)" suffix
+  and label text was read as a binding and never shown; jjhistostats dotted-option event removed and
+  events.js fixed; dependency-guard template (plotmath only inside quoting calls) and its regression tests;
+  park-aware audit tests (meddecide, OncoPath, jsurvival); hullplot on ggforce >= 0.5.0 without concaveman/V8
+  (R, a.yaml, h.R, Rd, DESCRIPTION, _updateModules_config.yaml prune_imports, tests); tests that assumed
+  wd = package root, and the defects that exposed (grafify, groupedforest, groupsummary, parallelplot,
+  categorize, patientsimilarity, pcacomponenttest, swimmerplot/waterfall validation).
+- siblings: guard test (all five); audit tests (meddecide, OncoPath, jsurvival); shipped .u.yaml
+  (jjstatsplot 4, meddecide 2, Descriptives 1); hullplot + DESCRIPTION (jjstatsplot); jjhistostats events.js
+  (jjstatsplot); dataquality placeholder fix (Descriptives); NEWS 1.0.83.05 + README breadcrumb (OncoPath);
+  irr kappa2 import in R/zzz_imports.R + NAMESPACE (meddecide, clears the R CMD check NOTE).
+
+## Follow-ups (logged, not fixed in this pass)
+
+- [ ] ~172 test files assert `inherits(model, "jmvcoreClass")`; jmvcore 2.7.38 has no such class, so every one
+      fails when run (generator-template defect; replace with expect_s3_class(x, "<name>Results")).
+- [ ] ~30 test files read ../../R or ../../jamovi via test_path() with no source-tree skip (ERROR under R CMD check);
+      the source-tree guards also pass in an --install-tests layout (check jamovi/0000.yaml instead of dir.exists).
+- [ ] test-clinicopath-descriptives-audit.R hard-codes 14 analyses without guards (same park-awareness fix).
+- [ ] simpleSurvivalPower (SurvivalD): interim-analysis table uses the Lan-DeMets spending formula under an
+      O'Brien-Fleming label and shows hard-coded statistics; interim_analyses is Number (fractional counts accepted).
+- [ ] classicalSurvivalPower: both renderers use theme_minimal() instead of jamovi's ggtheme; two-sided power uses
+      gsDesign's one-tail convention (alpha/2 at HR = 1); a vanishingly small non-zero gamma underflows.
+- [ ] mixedcox: user-visible strings not yet wrapped in .() (prepare-translation pass before promotion);
+      Time Elapsed could get enable: (!tint).
+- [ ] hullplot: hull_expand below ggforce's fixed 2.5 mm corner radius (~0.01) trims thin groups and, with labels on,
+      can fail the plot; pass radius = min(default, padding) in .plot().
+- [ ] Updater: prune_conflicts() cannot see a bare requireNamespace("pkg") probe (a prune entry could silently disable
+      a feature); _updateModules_plan.R:455 feeds binary data/*.rda (datadoc rows) to the scanner (459 warnings in the
+      jjstatsplot dry run, 4462 in meddecide's).
+- [ ] i18n: catalogs (umbrella and siblings) lack the new strings and keep removed msgids until the next
+      jmvtools::i18nUpdate(); generated build/js/*.src.js and pkgdown docs/reference refresh on the next prepare()/build.
+- [ ] patientsimilarity (umbrella test finding): negative survival times are accepted with no notice.
+- [ ] Pre-existing CI noise on umbrella PRs: claude-review fails every run (is_error, no model usage: credentials);
+      AppVeyor still attached although no appveyor.yml is tracked.
+- [ ] Date parsing across analyses: as.Date(text, format = ...) / strptime read only a PREFIX, so a wrong
+      day-month order, dd-mm-yyyy under %Y-%m-%d ('13-04-2016' -> year 13) or a 2-digit year 'parses' and gives
+      wrong times with no error. mixedcox (PR #126) now requires the whole value to match the layout; audit the
+      other .b.R files that parse user dates: surveysurvival (as.Date/strptime), and via lubridate/anytime/
+      as.POSIXct(format=) (check 2-digit years and day-month swaps): datetimeconverter, datevalidator, groupsummary, multisurvival, singlearm, summarydata2, survival, survivalcont, swimmerplot, timeinterval.
+- [ ] decisiongraph.b.R:2578 calls calculateMarkovTransitionMatrix, defined nowhere (parked, meddecideExtraD).

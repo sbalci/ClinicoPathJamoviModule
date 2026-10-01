@@ -119,13 +119,13 @@ children:
             label: Trimming Proportion
             format: number
             suffix: ''
-            enable: (robust_method == 'trimmed')
+            enable: (robust_method:trimmed)
           - type: TextBox
             name: winsorize_proportion
             label: Winsorizing Proportion
             format: number
             suffix: ''
-            enable: (robust_method == 'winsorized')
+            enable: (robust_method:winsorized)
   - type: CollapseBox
     label: Bootstrap and Resampling Methods
     collapsed: true

@@ -65,7 +65,7 @@ children:
                 name: sortNodes
               - type: CheckBox
                 name: sortDecreasing
-                enable: (sortNodes !== "none")
+                enable: (!sortNodes:none)
   - type: LayoutBox
     margin: large
     children:

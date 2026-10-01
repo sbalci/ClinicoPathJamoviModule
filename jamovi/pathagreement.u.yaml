@@ -109,7 +109,7 @@ children:
           - type: CheckBox
             name: showWeightedKappaGuide
             label: Weighted kappa guide
-            enable: (wght != 'unweighted')
+            enable: (!wght:unweighted)
   - type: CollapseBox
     label: 'Step 3: Visualization (optional)'
     collapsed: true

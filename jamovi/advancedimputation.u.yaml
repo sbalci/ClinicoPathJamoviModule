@@ -106,7 +106,7 @@ children:
           - type: TextBox
             name: delta_values
             format: string
-            suffix: " (comma-separated)"
+            suffix: " comma-separated"
 
   - type: LayoutBox
     margin: large
@@ -144,7 +144,7 @@ children:
           - type: TextBox
             name: passive_imputation
             format: string
-            suffix: " (R expressions)"
+            suffix: " R expressions"
 
   - type: LayoutBox
     margin: large

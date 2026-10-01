@@ -28,11 +28,11 @@ children:
           - type: TextBox
             name: alpha
             format: number
-            suffix: " (α)"
+            suffix: " α"
           - type: TextBox
             name: power
             format: number
-            suffix: " (1-β)"
+            suffix: " 1-β"
           - type: TextBox
             name: sample_size
             format: number
@@ -47,7 +47,7 @@ children:
           - type: TextBox
             name: effect_size
             format: number
-            suffix: " (Cohen's d)"
+            suffix: " Cohen's d"
           - type: TextBox
             name: mean_difference
             format: number
@@ -57,11 +57,11 @@ children:
           - type: TextBox
             name: proportion1
             format: number
-            suffix: " (0-1)"
+            suffix: " 0-1"
           - type: TextBox
             name: proportion2
             format: number
-            suffix: " (0-1)"
+            suffix: " 0-1"
 
   - type: LayoutBox
     margin: large
@@ -72,7 +72,7 @@ children:
           - type: TextBox
             name: allocation_ratio
             format: number
-            suffix: " (T:C ratio)"
+            suffix: " T:C ratio"
           - type: CheckBox
             name: two_sided
           - type: CheckBox

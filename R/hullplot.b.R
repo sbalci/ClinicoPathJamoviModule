@@ -371,23 +371,15 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                 self$results$todo$setContent("")
             }
 
-            # Safely require ggforce and concaveman
+            # ggforce (>= 0.5.0) computes concave hulls itself: geom_mark_hull()
+            # carries its own C++ port of concaveman, so neither the concaveman
+            # package nor V8 is needed and there is no convex fallback.
             if (!requireNamespace("ggforce", quietly = TRUE)) {
                 private$.addNotice(
                     "ERROR",
                     "The ggforce package is required",
                     "Hull plots are drawn with ggforce::geom_mark_hull(). Install it with install.packages('ggforce') and re-run the analysis.")
                 return()
-            }
-
-            # Check for V8/concaveman availability and prepare note
-            v8_available <- requireNamespace("V8", quietly = TRUE)
-            concaveman_available <- requireNamespace("concaveman", quietly = TRUE)
-            if (!(v8_available && concaveman_available)) {
-                private$.addNotice(
-                    "INFO",
-                    "Concave hulls unavailable",
-                    "V8 and concaveman are not both installed, so convex hulls are drawn instead and the Hull Shape setting has no effect. Install them with install.packages(c('V8', 'concaveman')) for concave hulls.")
             }
 
             # Prepare data using cached method
@@ -455,8 +447,8 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                 self$results$assumptions$setContent(assumptions_html)
             }
 
-            # Data-quality warnings and the convex-hull fallback are notices now
-            # (rendered above the plot), so the guide carries explanation only.
+            # Data-quality warnings are notices now (rendered above the plot),
+            # so the guide carries explanation only.
             self$results$interpretation$setContent(
                 private$.generate_interpretation_guide(plot_data, x_var, y_var, group_var))
 
@@ -483,16 +475,8 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
             color_mapping <- prepared$color_mapping
             size_var <- prepared$size_var
 
-            # Check V8/concaveman availability once; concave hulls need both.
-            # When either is missing we fall back to convex hulls (geom_polygon)
-            # instead of ggforce::geom_mark_hull.
-            v8_available <- requireNamespace("V8", quietly = TRUE)
-            concaveman_available <- requireNamespace("concaveman", quietly = TRUE)
-            use_fallback_hull <- !(v8_available && concaveman_available)
-
-            # Concavity applies only to the ggforce geom_mark_hull path, which is
-            # only taken when concaveman is available, so no fallback adjustment
-            # is needed here (it is unused on the convex-fallback path).
+            # geom_mark_hull() computes the concave hull with ggforce's own C++
+            # concaveman (ggforce >= 0.5.0), so this always takes effect.
             hull_concavity <- self$options$hull_concavity
 
             # Hull padding as a FRACTION OF THE PANEL ("npc"), not millimetres.
@@ -507,59 +491,25 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
             # Create base plot
             p <- ggplot2::ggplot(plot_data, ggplot2::aes(.data[[x_var]], .data[[y_var]]))
 
-            if (use_fallback_hull) {
-                # Build convex hull polygons per group using chull
-                split_groups <- split(plot_data, plot_data[[group_var]])
-                hull_list <- lapply(split_groups, function(df) {
-                    if (nrow(df) < 3) return(df)
-                    idx <- grDevices::chull(df[[x_var]], df[[y_var]])
-                    df[idx, , drop = FALSE]
-                })
-                hull_df <- do.call(rbind, hull_list)
-
-                p <- p + ggplot2::geom_polygon(
-                    data = hull_df,
-                    ggplot2::aes(.data[[x_var]], .data[[y_var]], fill = .data[[group_var]], group = .data[[group_var]]),
+            # Add hull polygons via ggforce with proper concavity handling
+            if (self$options$show_labels) {
+                p <- p + ggforce::geom_mark_hull(
+                    ggplot2::aes(fill = .data[[group_var]], label = .data[[group_var]]),
+                    concavity = hull_concavity,
+                    expand = hull_expand,
                     alpha = self$options$hull_alpha,
-                    color = NA
+                    show.legend = TRUE
                 )
-
-                if (self$options$show_labels) {
-                    # Label at group centroids
-                    centroids <- stats::aggregate(
-                        hull_df[c(x_var, y_var)],
-                        list(group = hull_df[[group_var]]),
-                        mean
-                    )
-                    names(centroids)[names(centroids) == "group"] <- group_var
-                    p <- p + ggplot2::geom_text(
-                        data = centroids,
-                        ggplot2::aes(.data[[x_var]], .data[[y_var]], label = .data[[group_var]]),
-                        fontface = "bold",
-                        color = "black"
-                    )
-                }
             } else {
-                # Add hull polygons via ggforce with proper concavity handling
-                if (self$options$show_labels) {
-                    p <- p + ggforce::geom_mark_hull(
-                        ggplot2::aes(fill = .data[[group_var]], label = .data[[group_var]]),
-                        concavity = hull_concavity,
-                        expand = hull_expand,
-                        alpha = self$options$hull_alpha,
-                        show.legend = TRUE
-                    )
-                } else {
-                    p <- p + ggforce::geom_mark_hull(
-                        ggplot2::aes(fill = .data[[group_var]]),
-                        concavity = hull_concavity,
-                        expand = hull_expand,
-                        alpha = self$options$hull_alpha,
-                        show.legend = TRUE
-                    )
-                }
+                p <- p + ggforce::geom_mark_hull(
+                    ggplot2::aes(fill = .data[[group_var]]),
+                    concavity = hull_concavity,
+                    expand = hull_expand,
+                    alpha = self$options$hull_alpha,
+                    show.legend = TRUE
+                )
             }
-            
+
             # Add confidence ellipses if requested
             if (self$options$confidence_ellipses) {
                 if (color_mapping == group_var) {
@@ -644,13 +594,6 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                 y = y_label
             )
 
-            # Add caption when falling back to convex hulls
-            if (use_fallback_hull) {
-                p <- p + ggplot2::labs(
-                    caption = "Concave hulls unavailable (install V8 + concaveman); showing convex hulls"
-                )
-            }
-            
             # Handle size legend (only when a size aesthetic was actually mapped,
             # matching the geom_point branch above)
             if (!is.null(size_var) && size_var != "" && paste0("size_", size_var) %in% names(plot_data)) {

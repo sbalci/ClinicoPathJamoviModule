@@ -53,17 +53,17 @@ children:
           - type: ComboBox
             name: bandwidth
             label: Bandwidth method
-            enable: (plot_type != 'histogram_ridges')
+            enable: (!plot_type:histogram_ridges)
           - type: TextBox
             name: bandwidth_value
             label: Custom bandwidth
             format: number
-            enable: (bandwidth == 'custom' && plot_type != 'histogram_ridges')
+            enable: (bandwidth:custom && !plot_type:histogram_ridges)
           - type: TextBox
             name: binwidth
             label: Histogram bin width
             format: number
-            enable: (plot_type == 'histogram_ridges')
+            enable: (plot_type:histogram_ridges)
   - type: CollapseBox
     label: Advanced Features
     collapsed: true
@@ -132,7 +132,7 @@ children:
             name: alpha
             label: Ridge transparency
             format: number
-            enable: (fill_ridges || plot_type == 'violin_ridges')
+            enable: (fill_ridges || plot_type:violin_ridges)
           - type: CheckBox
             name: fill_ridges
             label: Fill ridges
@@ -143,17 +143,17 @@ children:
             name: custom_colors
             label: Custom colors
             format: string
-            enable: (color_palette == 'custom')
+            enable: (color_palette:custom)
           - type: TextBox
             name: gradient_low
             label: Gradient low color
             format: string
-            enable: (plot_type == 'density_ridges_gradient')
+            enable: (plot_type:density_ridges_gradient)
           - type: TextBox
             name: gradient_high
             label: Gradient high color
             format: string
-            enable: (plot_type == 'density_ridges_gradient')
+            enable: (plot_type:density_ridges_gradient)
           - type: CheckBox
             name: reverse_order
             label: Reverse Y order

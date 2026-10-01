@@ -51,7 +51,7 @@ children:
           - type: TextBox
             name: mtry_custom
             format: number
-            enable: (mtry == 'custom')
+            enable: (mtry:custom)
           - type: TextBox
             name: min_node_size
             format: number
@@ -67,7 +67,7 @@ children:
           - type: TextBox
             name: num_random_splits
             format: number
-            enable: (splitrule == 'extratrees')
+            enable: (splitrule:extratrees)
           - type: TextBox
             name: max_depth
             format: number
@@ -97,7 +97,7 @@ children:
             name: importance
           - type: CheckBox
             name: scale_permutation
-            enable: (importance == 'permutation' || importance == 'both')
+            enable: (importance:permutation || importance:both)
 
   - type: Label
     label: Model Options

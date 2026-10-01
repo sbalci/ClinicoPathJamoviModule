@@ -75,11 +75,11 @@ children:
           - type: TextBox
             name: response_scale_min
             format: number
-            suffix: " (minimum)"
+            suffix: " minimum"
           - type: TextBox
             name: response_scale_max
             format: number
-            suffix: " (maximum)"
+            suffix: " maximum"
 
   - type: LayoutBox
     margin: large
@@ -96,7 +96,7 @@ children:
           - type: TextBox
             name: missing_threshold
             format: number
-            suffix: " (0.0-1.0)"
+            suffix: " 0.0-1.0"
 
   - type: LayoutBox
     margin: large
@@ -132,7 +132,7 @@ children:
           - type: TextBox
             name: mid_value
             format: number
-            suffix: " (MID value)"
+            suffix: " MID value"
           - type: CheckBox
             name: ceiling_floor_effects
 
@@ -177,7 +177,7 @@ children:
           - type: TextBox
             name: responder_threshold
             format: number
-            suffix: " (threshold)"
+            suffix: " threshold"
           - type: CheckBox
             name: anchor_based_analysis
           - type: CheckBox

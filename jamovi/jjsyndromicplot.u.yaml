@@ -29,7 +29,7 @@ children:
               - type: TextBox
                 name: cutoff
                 label: Loading Cutoff
-                suffix: (0-1)
+                suffix: 0-1
                 format: number
                 enable: (vars)
               - type: CheckBox

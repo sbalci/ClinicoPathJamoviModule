@@ -240,12 +240,14 @@ test_that("jjarcdiagram handles combined network types", {
 })
 
 test_that("jjarcdiagram works with CSV imported data", {
-  skip_if_not(file.exists("data/jjarcdiagram_test.csv"),
+  # the fixtures live in data-raw/non-rda/ (build-ignored: skips under R CMD check)
+  csv_path <- testthat::test_path("..", "..", "data-raw", "non-rda", "jjarcdiagram_test.csv")
+  skip_if_not(file.exists(csv_path),
               "CSV test file not available")
 
 
   # Read from CSV
-  csv_data <- read.csv("data/jjarcdiagram_test.csv", stringsAsFactors = TRUE)
+  csv_data <- read.csv(csv_path, stringsAsFactors = TRUE)
 
   result <- jjarcdiagram(
     data = csv_data,
@@ -258,14 +260,15 @@ test_that("jjarcdiagram works with CSV imported data", {
 })
 
 test_that("jjarcdiagram works with OMV imported data", {
-  skip_if_not(file.exists("data/jjarcdiagram_test.omv"),
+  omv_path <- testthat::test_path("..", "..", "data-raw", "non-rda", "jjarcdiagram_test.omv")
+  skip_if_not(file.exists(omv_path),
               "OMV test file not available")
   skip_if_not(requireNamespace("jmvReadWrite", quietly = TRUE),
               "jmvReadWrite package not available")
 
 
   # Read from OMV
-  omv_data <- jmvReadWrite::read_omv("data/jjarcdiagram_test.omv")
+  omv_data <- jmvReadWrite::read_omv(omv_path)
 
   result <- jjarcdiagram(
     data = omv_data,

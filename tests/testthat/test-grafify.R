@@ -1,11 +1,21 @@
+# testthat runs this file from tests/testthat, not the package root: resolve
+# source-tree files from there, and skip (not fail) where there is no source
+# tree, e.g. an installed-package run such as R CMD check.
+src_path <- function(...) {
+    root <- testthat::test_path("..", "..")
+    skip_if_not(dir.exists(file.path(root, "R")) && dir.exists(file.path(root, "jamovi")),
+                "package source tree not available")
+    file.path(root, ...)
+}
+
 test_that("grafify module files exist", {
     
     # Test that required files exist
-    expect_true(file.exists("R/grafify.b.R"))
-    expect_true(file.exists("jamovi/grafify.a.yaml"))
-    expect_true(file.exists("jamovi/grafify.u.yaml"))
-    expect_true(file.exists("jamovi/grafify.r.yaml"))
-    expect_true(file.exists("R/grafify.h.R"))
+    expect_true(file.exists(src_path("R/grafify.b.R")))
+    expect_true(file.exists(src_path("jamovi/grafify.a.yaml")))
+    expect_true(file.exists(src_path("jamovi/grafify.u.yaml")))
+    expect_true(file.exists(src_path("jamovi/grafify.r.yaml")))
+    expect_true(file.exists(src_path("R/grafify.h.R")))
 })
 
 test_that("grafify class and function availability", {
@@ -25,7 +35,7 @@ test_that("grafify class and function availability", {
 test_that("grafify backend implementation structure", {
     
     # Read the backend file and check for key elements
-    backend_content <- readLines("R/grafify.b.R", warn = FALSE)
+    backend_content <- readLines(src_path("R/grafify.b.R"), warn = FALSE)
     backend_text <- paste(backend_content, collapse = "\n")
     
     # Check for essential methods
@@ -48,7 +58,7 @@ test_that("grafify YAML configurations are valid", {
     
     # Test analysis configuration
     if (requireNamespace("yaml", quietly = TRUE)) {
-        analysis_config <- yaml::read_yaml("jamovi/grafify.a.yaml")
+        analysis_config <- yaml::read_yaml(src_path("jamovi/grafify.a.yaml"))
         
         expect_equal(analysis_config$name, "grafify")
         expect_true("title" %in% names(analysis_config))
@@ -60,7 +70,7 @@ test_that("grafify YAML configurations are valid", {
         expect_true(all(expected_options %in% option_names))
         
         # Test results configuration
-        results_config <- yaml::read_yaml("jamovi/grafify.r.yaml")
+        results_config <- yaml::read_yaml(src_path("jamovi/grafify.r.yaml"))
         item_names <- sapply(results_config$items, function(x) x$name)
         expect_true("main_plot" %in% item_names)
         expect_true("summary_stats" %in% item_names)
@@ -70,15 +80,15 @@ test_that("grafify YAML configurations are valid", {
 test_that("grafify test datasets exist and are properly structured", {
     
     # Test that datasets were created
-    expect_true(file.exists("data/grafify_comprehensive_data.rda"))
-    expect_true(file.exists("data/grafify_simple_data.rda"))
-    expect_true(file.exists("data/grafify_longitudinal_data.rda"))
-    expect_true(file.exists("data/grafify_correlation_data.rda"))
-    expect_true(file.exists("data/grafify_dose_response_data.rda"))
-    expect_true(file.exists("data/grafify_factorial_data.rda"))
+    expect_true(file.exists(src_path("data/grafify_comprehensive_data.rda")))
+    expect_true(file.exists(src_path("data/grafify_simple_data.rda")))
+    expect_true(file.exists(src_path("data/grafify_longitudinal_data.rda")))
+    expect_true(file.exists(src_path("data/grafify_correlation_data.rda")))
+    expect_true(file.exists(src_path("data/grafify_dose_response_data.rda")))
+    expect_true(file.exists(src_path("data/grafify_factorial_data.rda")))
     
     # Load and test the main dataset
-    load("data/grafify_comprehensive_data.rda")
+    load(src_path("data/grafify_comprehensive_data.rda"))
     
     expect_s3_class(grafify_comprehensive_data, "data.frame")
     expect_gt(nrow(grafify_comprehensive_data), 100)
@@ -96,9 +106,14 @@ test_that("grafify test datasets exist and are properly structured", {
 
 test_that("grafify vignette exists and has correct content", {
     
-    # Test vignette file exists
-    vignette_path <- "vignettes/jjstatsplot-15-grafify-comprehensive.qmd"
-    expect_true(file.exists(vignette_path))
+    # The vignette is no longer in this tree (.qmd -> .Rmd in 88c6b6aa1, then moved
+    # out); it ships with jjstatsplot as vignettes/15-grafify-comprehensive.Rmd,
+    # rewritten there without several of the sections checked below.
+    vignette_path <- src_path("vignettes",
+                              paste0("jjstatsplot-15-grafify-comprehensive.", c("qmd", "Rmd")))
+    vignette_path <- vignette_path[file.exists(vignette_path)][1]
+    skip_if(is.na(vignette_path),
+            "grafify vignette is not in this tree (it ships with the jjstatsplot module)")
     
     # Check vignette content
     vignette_content <- readLines(vignette_path, warn = FALSE)
@@ -120,7 +135,7 @@ test_that("grafify vignette exists and has correct content", {
 test_that("grafify color palettes are properly configured", {
     
     # Read analysis configuration
-    analysis_content <- readLines("jamovi/grafify.a.yaml", warn = FALSE)
+    analysis_content <- readLines(src_path("jamovi/grafify.a.yaml"), warn = FALSE)
     analysis_text <- paste(analysis_content, collapse = "\n")
     
     # Check that color palettes are defined
@@ -129,7 +144,7 @@ test_that("grafify color palettes are properly configured", {
     expect_gt(palette_count, 3)  # At least some palettes should be mentioned
     
     # Check backend has palette handling
-    backend_content <- readLines("R/grafify.b.R", warn = FALSE)  
+    backend_content <- readLines(src_path("R/grafify.b.R"), warn = FALSE)  
     backend_text <- paste(backend_content, collapse = "\n")
     expect_true(grepl("graf_palettes", backend_text))
     expect_true(grepl("reverse_palette", backend_text))
@@ -137,7 +152,7 @@ test_that("grafify color palettes are properly configured", {
 
 test_that("grafify has proper dependency management", {
     
-    backend_content <- readLines("R/grafify.b.R", warn = FALSE)
+    backend_content <- readLines(src_path("R/grafify.b.R"), warn = FALSE)
     backend_text <- paste(backend_content, collapse = "\n")
     
     # Check for essential imports

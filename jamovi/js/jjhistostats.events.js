@@ -13,10 +13,6 @@ const setOpt = function(ui, name, value) {
     const c = ctrl(ui, name);
     if (c) c.setValue(value);
 };
-const getOpt = function(ui, name, fallback) {
-    const c = ctrl(ui, name);
-    return c ? c.value() : fallback;
-};
 
 const events = {
     // Clinical preset system with intelligent parameter configuration for histograms
@@ -125,26 +121,6 @@ const events = {
             ui.binwidth.setValue(0.1);
     },
 
-    // Confidence level validation
-    onChange_conf_level: function(ui) {
-        let conf = getOpt(ui, 'conf.level', null);
-        
-        if (conf < 0.8) {
-            setOpt(ui, 'conf.level', 0.8);
-        } else if (conf > 0.99) {
-            setOpt(ui, 'conf.level', 0.99);
-        }
-        
-        // Standard confidence levels
-        if (conf === 0.95) {
-            // Most common choice
-        } else if (conf === 0.99) {
-            // Conservative choice
-        } else if (conf === 0.90) {
-            // Liberal choice
-        }
-    },
-
     // Digits validation for appropriate precision
     onChange_digits: function(ui) {
         let digits = ui.digits.value();
@@ -182,8 +158,9 @@ const events = {
     onChange_binfill: function(ui) {
         let fillColor = ui.binfill.value();
         
-        // Auto-suggest complementary centrality line color
-        let lineColor = this.getComplementaryColor(fillColor);
+        // Auto-suggest complementary centrality line color. `events.`, not `this.`: jamovi
+        // runs a handler with `this` bound to its View, which has no getComplementaryColor.
+        let lineColor = events.getComplementaryColor(fillColor);
         if (lineColor) {
             ui.centralitylinecolor.setValue(lineColor);
         }

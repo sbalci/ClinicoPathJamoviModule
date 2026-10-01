@@ -234,7 +234,8 @@ test_that("VAL-waterfall: Plot rendering and R syntax export (Claims C29, C30, C
 })
 
 test_that("VAL-waterfall-01: Module citation metadata in jamovi/00refs.yaml has no conflicting DOI in title", {
-  refs_path <- if (file.exists("jamovi/00refs.yaml")) "jamovi/00refs.yaml" else if (file.exists("../../jamovi/00refs.yaml")) "../../jamovi/00refs.yaml"
+  refs_path <- testthat::test_path("..", "..", "jamovi", "00refs.yaml")
+  skip_if_not(dir.exists(dirname(refs_path)), "package source tree not available")
   txt <- paste(readLines(refs_path, warn = FALSE, encoding = "UTF-8"), collapse = "\n")
   refs <- yaml::yaml.load(txt)
   expect_false(grepl("doi:10.5281/zenodo", refs$refs$ClinicoPathJamoviModule$title))

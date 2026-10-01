@@ -2,9 +2,7 @@
 
 context("patientsimilarity refinements")
 
-# Source the R files manually since the package isn't installed
-source("/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/patientsimilarity.h.R")
-source("/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/patientsimilarity.b.R")
+# test_check()/test_local() load the package: test its analysis, never source() R/ copies.
 
 test_that("Reproducibility works with seed", {
   skip_if_not_installed('jmvReadWrite')
@@ -66,9 +64,9 @@ test_that("Validations trigger warnings", {
         survivalEventLevel = NULL
     )
     
-    # Check warnings
-    warnings_html <- res$warnings$content
-    expect_match(warnings_html, "Perplexity .* is too high")
+    # The analysis reports through its plain-text `notices` item
+    notices <- res$notices$content
+    expect_match(notices, "Perplexity .* is too high")
     
     # Small sample size (< 10)
     df_small <- iris[1:5, 1:2]
@@ -78,8 +76,8 @@ test_that("Validations trigger warnings", {
         method = "pca",
         survivalEventLevel = NULL
     )
-    warnings_small <- res_small$warnings$content
-    expect_match(warnings_small, "Sample size is very small")
+    notices_small <- res_small$notices$content
+    expect_match(notices_small, "Sample size is very small")
 })
 
 test_that("DBSCAN parameters affect clustering", {
@@ -143,9 +141,15 @@ test_that("Survival analysis handles missing data", {
         method = "pca"
     )
     
-    # content is null if not visible, need to check if table is populated or warning is shown
-    warnings_html <- res$warnings$content
-    expect_match(warnings_html, "Survival analysis includes missing values")
+    # The 5 rows with a missing time are excluded and reported in the notices.
+    # The leading text delimits the count: "145 observation(s)" must not match.
+    notices <- res$notices$content
+    expect_match(
+        notices,
+        paste("Survival analysis: 5 observation(s) with missing time or event",
+              "values were excluded"),
+        fixed = TRUE
+    )
     
     # Check table is still produced (valid rows usage)
     expect_true(res$survivalTable$rowCount > 0)

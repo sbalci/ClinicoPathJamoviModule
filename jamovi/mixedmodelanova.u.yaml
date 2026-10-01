@@ -90,7 +90,7 @@ children:
       - type: TextBox
         name: confidence_level
         format: number
-        suffix: (confidence level)
+        suffix: confidence level
 
   - type: CollapseBox
     label: Documentation

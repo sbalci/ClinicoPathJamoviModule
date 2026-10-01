@@ -59,12 +59,14 @@ children:
                     name: test.value
                     format: number
                     enable: (enableOneSampleTest)
+              # No `events:` here. jamovi's client splits an event source on "." (conf.level ->
+              # UI object "conf"), so an event on this control throws inside initializeAll() and
+              # every binding and event after it stops updating. The option's own min/max
+              # (0.5-0.999) bound the value; the old handler clamped to 0.8-0.99 against them.
               - type: TextBox
                 name: conf.level
                 format: number
                 enable: (resultssubtitle)
-                events:
-                  change: ./jjhistostats.events::onChange_conf_level
               - type: CheckBox
                 name: bf.message
                 enable: (resultssubtitle)
@@ -193,7 +195,7 @@ children:
             name: subtitle
             format: string
             width: largest
-            enable: (resultssubtitle == false)
+            enable: (!resultssubtitle)
           - type: TextBox
             name: caption
             format: string

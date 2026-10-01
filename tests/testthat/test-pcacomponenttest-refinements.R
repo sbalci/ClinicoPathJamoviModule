@@ -1,8 +1,6 @@
 context("pcacomponenttest refinements")
 
-# Source necessary files
-source("/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/pcacomponenttest.h.R")
-source("/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/pcacomponenttest.b.R")
+# test_check()/test_local() load the package: test its analysis, never source() R/ copies.
 
 # Function wrapper for testing
 pcacomponenttest <- function(data, ...) {
@@ -111,11 +109,14 @@ test_that("Stop rule works", {
 })
 
 test_that("Warnings work", {
-    # Constant variable
+    # Constant variable: the analysis posts an ERROR notice naming it and stops
+    # before testing any component (no R error is raised)
     df <- data.frame(x1 = 1:10, x2 = 1:10, x3 = rep(1, 10))
     
-    expect_error(
-        pcacomponenttest(data = df, vars = colnames(df)),
-        "constant"
-    )
+    res <- pcacomponenttest(data = df, vars = colnames(df))
+    notices <- res$results$notices$content
+    expect_match(notices, "ERROR: Constant Variables", fixed = TRUE)
+    expect_match(notices, "Variables with zero variance detected: x3.",
+                 fixed = TRUE)
+    expect_equal(res$results$results$rowCount, 0)
 })

@@ -187,6 +187,86 @@ testthat::test_that("distributed dependency guard scanner matches updater", {
   )
 })
 
+# The template's bare-symbol test exempts plotmath keywords (atop, italic, ...)
+# only where a quoting call leaves them unevaluated. For each fixture (a name
+# of `cases`) this returns what that test would report. The definitions are
+# loaded the way verify_module() loads them: source() would also run the
+# template's test_that() blocks against this package. The NAMESPACE imports
+# jmvcore's `.`, as every real module's does, so bquote() escapes resolve.
+dependency_guard_reports <- function(cases) {
+  template <- testthat::test_path(
+    "..", "..", "_updateModules_test_dependency_guard.R"
+  )
+  testthat::skip_if_not(
+    file.exists(template),
+    "module updater templates are excluded from the installed package"
+  )
+  guard <- new.env(parent = globalenv())
+  for (expr in parse(template, keep.source = FALSE)) {
+    if (is.call(expr) && identical(expr[[1]], as.name("<-")) &&
+        startsWith(as.character(expr[[2]]), ".dependency_guard_")) {
+      eval(expr, guard)
+    }
+  }
+  reports <- lapply(names(cases), function(code) {
+    root <- make_dependency_fixture(code)
+    on.exit(unlink(root, recursive = TRUE), add = TRUE)
+    writeLines("importFrom(jmvcore, .)", file.path(root, "NAMESPACE"))
+    usage <- guard$.dependency_guard_symbol_use(file.path(root, "R"))
+    resolution <- guard$.dependency_guard_importable(
+      file.path(root, "NAMESPACE"), usage$defined
+    )
+    sort(setdiff(
+      names(usage$used),
+      c(resolution$importable, guard$.dependency_guard_language_symbols())
+    ))
+  })
+  stats::setNames(reports, names(cases))
+}
+
+testthat::test_that("plotmath in a quoting call's expression is not reported", {
+  cases <- list(
+    "as.expression(bquote(atop(.(e), .(t))))" = character(0),
+    "expression(italic(p) %+-% frac(1, 2))" = character(0),
+    # every argument of expression() is markup, named ones too
+    "expression(atop(a, b), italic(c), p = frac(1, 2))" = character(0),
+    "quote(atop(bold(x), widehat(xy)))" = character(0),
+    "substitute(atop(a, b), list(a = a))" = character(0),
+    "bquote(where = e, italic(p))" = character(0),
+    "substitute(env = e, expr = frac(a, b))" = character(0)
+  )
+  testthat::expect_equal(dependency_guard_reports(cases), cases)
+})
+
+testthat::test_that("code a quoting call evaluates is still reported", {
+  cases <- list(
+    "eval(bquote(.(d) %>% head()))" = "%>%",
+    "d %>% head()" = "%>%",
+    "quote(x %>% italic(y))" = "%>%",
+    "bquote(.(bold(x)) + y)" = "bold"
+  )
+  testthat::expect_equal(dependency_guard_reports(cases), cases)
+})
+
+testthat::test_that("a real function sharing a plotmath name is reported", {
+  # crayon's bold() and zeallot's %<-%, called outside any quoting call: a
+  # global plotmath exemption would hide exactly this missing importFrom
+  cases <- list(
+    "bold(x)" = "bold",
+    "c(a, b) %<-% list(1, 2)" = "%<-%"
+  )
+  testthat::expect_equal(dependency_guard_reports(cases), cases)
+})
+
+testthat::test_that("substitute()'s env and bquote()'s where stay checked", {
+  cases <- list(
+    "substitute(x, list(x = bold(a)))" = "bold",
+    "bquote(x, where = list2env(list(x = italic(a))))" = "italic",
+    "bquote(x, list2env(list(x = italic(a))))" = "italic"
+  )
+  testthat::expect_equal(dependency_guard_reports(cases), cases)
+})
+
 testthat::test_that("configured pruning removes only the named Imports", {
   skip_if_dependency_guard_utils_missing()
   testthat::skip_if_not_installed("desc")

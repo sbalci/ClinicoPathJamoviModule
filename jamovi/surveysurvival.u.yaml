@@ -78,8 +78,8 @@ children:
                     fitToGrid: true
                     stretchFactor: 1
                     enable: >-
-                      (design_type == 'stratified' || design_type ==
-                      'stratified_cluster' || design_type == 'multistage')
+                      (design_type:stratified || design_type:stratified_cluster ||
+                      design_type:multistage)
               - type: TargetLayoutBox
                 label: Primary Sampling Units (PSU)
                 children:
@@ -90,8 +90,8 @@ children:
                     fitToGrid: true
                     stretchFactor: 1
                     enable: >-
-                      (design_type == 'cluster' || design_type ==
-                      'stratified_cluster' || design_type == 'multistage')
+                      (design_type:cluster || design_type:stratified_cluster ||
+                      design_type:multistage)
               - type: TargetLayoutBox
                 label: Finite Population Correction
                 children:
@@ -110,8 +110,8 @@ children:
               - type: CheckBox
                 name: nest_clusters
                 enable: >-
-                  (design_type == 'stratified_cluster' || design_type ==
-                  'multistage')
+                  (design_type:stratified_cluster ||
+                  design_type:multistage)
       - type: Label
         label: Subpopulation Analysis
         children:

@@ -37,7 +37,7 @@ children:
               - type: TextBox
                 name: cutoff
                 label: Significance Cutoff
-                suffix: (0-1)
+                suffix: 0-1
                 format: number
                 enable: (vars)
 

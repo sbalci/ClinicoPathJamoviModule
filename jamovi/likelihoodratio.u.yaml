@@ -147,7 +147,7 @@ children:
           - type: TextBox
             name: specificPrevalences
             format: string
-            suffix: '(%, comma-separated)'
+            suffix: '%, comma-separated'
 
   # ============ DIAGNOSTIC MEASURES ============
   - type: CollapseBox
@@ -174,7 +174,7 @@ children:
           - type: TextBox
             name: clinicalThresholds
             format: string
-            suffix: '(probabilities, comma-separated)'
+            suffix: 'probabilities, comma-separated'
 
   # ============ STRATIFIED ANALYSIS ============
   - type: CollapseBox

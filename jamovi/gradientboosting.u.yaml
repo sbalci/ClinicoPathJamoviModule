@@ -95,11 +95,11 @@ children:
           - type: TextBox
             name: reg_alpha
             format: number
-            enable: (algorithm == 'xgboost')
+            enable: (algorithm:xgboost)
           - type: TextBox
             name: reg_lambda
             format: number
-            enable: (algorithm == 'xgboost')
+            enable: (algorithm:xgboost)
 
   - type: Label
     label: Variable Selection

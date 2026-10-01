@@ -238,11 +238,11 @@ test_that("outlier counts match the 1.5 x IQR rule", {
 })
 
 
-test_that("the convex-hull fallback renders when concaveman is unavailable", {
-    # ggforce::geom_mark_hull needs V8 + concaveman. Both are installed here, so
-    # the fallback branch never ran in any test: it is only reachable on a
-    # machine without them, which is exactly where a break would go unnoticed.
-    # Mock the availability check to force it.
+test_that("concave hulls need neither V8 nor concaveman (ggforce >= 0.5.0)", {
+    # ggforce 0.5.0 computes concave hulls with its own C++ port of concaveman,
+    # so hullplot no longer probes for V8/concaveman or swaps in convex chull
+    # polygons. Reporting both as unavailable must leave the plot unchanged.
+    skip_if_not(utils::packageVersion("ggforce") >= "0.5.0")
     real_rn <- base::requireNamespace
     fake_rn <- function(package, ..., quietly = FALSE)
         if (package %in% c("V8", "concaveman")) FALSE
@@ -259,23 +259,16 @@ test_that("the convex-hull fallback renders when concaveman is unavailable", {
     }
     geoms <- function(p) vapply(p$layers, function(l) class(l$geom)[1], character(1))
 
-    # concave path: one ggforce layer, no caption
-    p_concave <- render(hp_run())
-    expect_true("GeomMarkHull" %in% geoms(p_concave))
-    expect_null(p_concave$labels$caption)
-
-    # convex fallback: chull polygons plus centroid labels, and the substitution
-    # is disclosed in the caption rather than made silently
-    p_convex <- testthat::with_mocked_bindings(
-        render(hp_run()), requireNamespace = fake_rn, .package = "base")
-    expect_false("GeomMarkHull" %in% geoms(p_convex))
-    expect_true(all(c("GeomPolygon", "GeomText", "GeomPoint") %in% geoms(p_convex)))
-    expect_match(p_convex$labels$caption, "showing convex hulls")
-
-    # the label layer follows show_labels on this path too
-    p_nolab <- testthat::with_mocked_bindings(
-        render(hp_run(show_labels = FALSE)), requireNamespace = fake_rn, .package = "base")
-    expect_false("GeomText" %in% geoms(p_nolab))
+    for (labels in c(TRUE, FALSE)) {
+        a <- testthat::with_mocked_bindings(
+            hp_run(show_labels = labels), requireNamespace = fake_rn, .package = "base")
+        p <- testthat::with_mocked_bindings(
+            render(a), requireNamespace = fake_rn, .package = "base")
+        expect_true("GeomMarkHull" %in% geoms(p))
+        expect_false("GeomPolygon" %in% geoms(p))
+        expect_null(p$labels$caption)
+        expect_false(grepl("Concave hulls unavailable", a$results$notices$content, fixed = TRUE))
+    }
 
     # a group with fewer than 3 points has no hull; it must not break the render
     d <- hp_data()

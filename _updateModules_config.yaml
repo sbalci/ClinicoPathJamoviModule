@@ -111,6 +111,14 @@ modules:
   jjstatsplot:
     directory: "/Users/serdarbalci/Documents/GitHub/jjstatsplot"
     menu_groups: ["JJStatsPlot"]
+    # hullplot was the only user: a requireNamespace() probe that swapped in convex hulls.
+    # ggforce >= 0.5.0 draws concave hulls with its own C++ concaveman, so the probe is gone
+    # (2026-09-30; PNG-identical renders with both packages blocked). Dropping concaveman
+    # also drops its sf/s2/units closure (~75 MB) from the jmo. Needs ggforce (>= 0.5.0)
+    # in this module's DESCRIPTION, which is hand-maintained.
+    prune_imports:
+      - "concaveman"
+      - "V8"
     data_files:
       - "histopathology.rda"
       - "categorical_quality_data.rda"

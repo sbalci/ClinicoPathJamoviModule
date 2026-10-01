@@ -315,7 +315,8 @@ test_that("G01-G04 Cross-output consistency and copy-ready manuscript text parit
 })
 
 test_that("VAL-swimmerplot-01 ClinicoPath citation DOI in 00refs.yaml has no conflict", {
-    refs_path <- if (file.exists("jamovi/00refs.yaml")) "jamovi/00refs.yaml" else if (file.exists("../../jamovi/00refs.yaml")) "../../jamovi/00refs.yaml"
+    refs_path <- testthat::test_path("..", "..", "jamovi", "00refs.yaml")
+    skip_if_not(dir.exists(dirname(refs_path)), "package source tree not available")
     refs_text <- paste(readLines(refs_path, warn = FALSE), collapse = "\n")
     # Title should not embed a conflicting DOI string
     expect_false(grepl("title:.*doi:10.5281/zenodo", refs_text))
