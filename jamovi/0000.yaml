@@ -1417,16 +1417,17 @@ analyses:
   - title: Analysis Without Gold Standard
     name: nogoldstandard
     ns: ClinicoPath
-    menuGroup: meddecide
+    menuGroup: meddecideT
     menuSubgroup: Decision
     menuTitle: Analysis Without Gold Standard
     menuSubtitle: Multiple Test Analysis Without Gold Standard
     description: >
       Analysis of multiple binary tests when no perfect reference exists.
       Implements a conditional-independence two-class latent class model,
-      fixed-prior penalized EM point estimation, and descriptive agreement with
-      self-built composite reference rules. Latent classes are unlabeled, and
-      reference-rule results are not diagnostic-accuracy estimates.
+      fixed-prior penalized EM point estimation with numerical refinement, and
+      descriptive agreement with self-built reference rules. Latent classes are
+      unlabeled, and reference-rule results are not diagnostic-accuracy
+      estimates.
     ribbon: analyses
     category: analyses
   - title: Compare Medical Decision Tests

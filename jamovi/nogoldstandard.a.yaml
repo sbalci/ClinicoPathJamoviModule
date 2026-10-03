@@ -1,7 +1,7 @@
 ---
 name: nogoldstandard
 title: Analysis Without Gold Standard
-menuGroup: meddecide
+menuGroup: meddecideT
 menuSubgroup: Decision
 menuSubtitle: Multiple Test Analysis Without Gold Standard
 version: '1.0.83'
@@ -10,8 +10,8 @@ jas: '1.2'
 description:
     main: >
         Analysis of multiple binary tests when no perfect reference exists. Implements a
-        conditional-independence two-class latent class model, fixed-prior penalized EM
-        point estimation, and descriptive agreement with self-built composite reference rules.
+        conditional-independence two-class latent class model, fixed-prior penalized EM point
+        estimation with numerical refinement, and descriptive agreement with self-built reference rules.
         Latent classes are unlabeled, and reference-rule results are not diagnostic-accuracy estimates.
 
 options:
@@ -168,7 +168,10 @@ options:
             Calculate case-resampling percentile confidence intervals. For latent-class
             and penalized-EM models, confidence intervals are reported only when this
             option is enabled because ordinary binomial intervals do not account for
-            latent-variable estimation.
+            latent-variable estimation. Latent intervals require a converged, reportable
+            full-sample fit and at least 20 finite estimates for each interval. Coverage is
+            approximate and may be poor with small samples, boundaries or weak identification;
+            case resampling assumes independent rows.
 
     - name: nboot
       title: Number of Bootstrap Samples

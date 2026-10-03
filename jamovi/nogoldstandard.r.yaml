@@ -264,7 +264,7 @@ items:
         - name: verdict
           title: 'Interpretation'
           type: text
-      description: 'Latent class analysis assumes the tests are conditionally independent within each latent class. For each pair this compares the observed two-way table with the one implied by the fitted model. A residual above 3.84 is descriptive evidence against conditional independence, but this squared statistic does not identify the direction or cause of dependence and cannot determine the direction of bias in the fitted parameters. Requires four or more tests: with three the model is just-identified and no residual can diagnose dependence.'
+      description: 'Latent class analysis assumes the tests are conditionally independent within each latent class. For each pair this compares the observed two-way table with the one implied by the fitted model. A residual above 3.84 is descriptive evidence against conditional independence, but this squared statistic does not identify the direction or cause of dependence and cannot determine the direction of bias in the fitted parameters. With three tests the nominal residual degrees of freedom are zero, but exact fit is not guaranteed. Residuals remain descriptive and do not provide a formal chi-squared test or establish identifiability.'
 
     - name: diagnostics
       title: 'Analysis Diagnostics'
@@ -349,5 +349,7 @@ items:
 refs:
     - ClinicoPathJamoviModule
     - poLCA
+    - LinzerLewis2011
+    - AllmanLatent2018
     - irr
 ...

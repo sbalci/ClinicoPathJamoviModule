@@ -3563,6 +3563,26 @@ refs:
         publisher: "[R package]. Retrieved from https://CRAN.R-project.org/package=plsRcox"
         url: "https://CRAN.R-project.org/package=plsRcox"
 
+    LinzerLewis2011:
+        type: article
+        author: Linzer, D. A., & Lewis, J. B.
+        year: 2011
+        title: "poLCA: An R Package for Polytomous Variable Latent Class Analysis"
+        publisher: Journal of Statistical Software
+        volume: 42
+        issue: 10
+        pages: 1-29
+        doi: 10.18637/jss.v042.i10
+        url: https://www.jstatsoft.org/article/view/v042i10
+
+    AllmanLatent2018:
+        type: article
+        author: Allman, E. S., Baños Cervantes, H., Evans, R., Hoşten, S., Kubjas, K., Lemke, D., Rhodes, J. A., & Zwiernik, P.
+        year: 2018
+        title: Maximum likelihood estimation of the Latent Class Model through model boundary decomposition
+        publisher: arXiv
+        url: https://arxiv.org/abs/1710.01696v2
+
     poLCA:
         type: software
         author: Drew Linzer, Jeffrey Lewis

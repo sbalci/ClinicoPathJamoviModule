@@ -232,6 +232,8 @@ nogoldstandardResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 refs=list(
                     "ClinicoPathJamoviModule",
                     "poLCA",
+                    "LinzerLewis2011",
+                    "AllmanLatent2018",
                     "irr"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
@@ -624,9 +626,10 @@ nogoldstandardBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'
 #' Analysis of multiple binary tests when no perfect reference exists. 
 #' Implements a conditional-independence two-class latent class model, 
-#' fixed-prior penalized EM point estimation, and descriptive agreement with 
-#' self-built composite reference rules. Latent classes are unlabeled, and 
-#' reference-rule results are not diagnostic-accuracy estimates.
+#' fixed-prior penalized EM point estimation with numerical refinement, and 
+#' descriptive agreement with self-built reference rules. Latent classes are 
+#' unlabeled, and reference-rule results are not diagnostic-accuracy 
+#' estimates.
 #' 
 #' @param data The data as a data frame.
 #' @param clinicalPreset Illustrative scenario examples only. They do not
@@ -648,7 +651,11 @@ nogoldstandardBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @param bootstrap Calculate case-resampling percentile confidence intervals.
 #'   For latent-class and penalized-EM models, confidence intervals are reported
 #'   only when this option is enabled because ordinary binomial intervals do not
-#'   account for latent-variable estimation.
+#'   account for latent-variable estimation. Latent intervals require a
+#'   converged, reportable full-sample fit and at least 20 finite estimates for
+#'   each interval. Coverage is approximate and may be poor with small samples,
+#'   boundaries or weak identification; case resampling assumes independent
+#'   rows.
 #' @param nboot Number of bootstrap samples for confidence intervals.
 #' @param alpha Alpha level for confidence intervals.
 #' @param verbose Show detailed analysis diagnostics, including convergence,
@@ -674,7 +681,7 @@ nogoldstandardBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   \code{results$prevalence} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$test_metrics} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$model_fit} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$conditional_dependence} \tab \tab \tab \tab \tab Latent class analysis assumes the tests are conditionally independent within each latent class. For each pair this compares the observed two-way table with the one implied by the fitted model. A residual above 3.84 is descriptive evidence against conditional independence, but this squared statistic does not identify the direction or cause of dependence and cannot determine the direction of bias in the fitted parameters. Requires four or more tests: with three the model is just-identified and no residual can diagnose dependence. \cr
+#'   \code{results$conditional_dependence} \tab \tab \tab \tab \tab Latent class analysis assumes the tests are conditionally independent within each latent class. For each pair this compares the observed two-way table with the one implied by the fitted model. A residual above 3.84 is descriptive evidence against conditional independence, but this squared statistic does not identify the direction or cause of dependence and cannot determine the direction of bias in the fitted parameters. With three tests the nominal residual degrees of freedom are zero, but exact fit is not guaranteed. Residuals remain descriptive and do not provide a formal chi-squared test or establish identifiability. \cr
 #'   \code{results$diagnostics} \tab \tab \tab \tab \tab Detail of how the estimates were produced: sample size, method, convergence, number of random starts used, and bootstrap failures. Shown only when Verbose output is enabled. \cr
 #'   \code{results$crosstab} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$agreement_plot} \tab \tab \tab \tab \tab an image \cr

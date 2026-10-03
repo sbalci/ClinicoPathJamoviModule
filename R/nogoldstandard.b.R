@@ -296,11 +296,13 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                         title = .("Statistical background: Latent class analysis"),
                         bullets = c(
                             .("This method fits two unobserved classes and estimates each test's selected-positive probability within each class."),
-                            .("At least three tests are required. With exactly three tests the model is just-identified, so goodness-of-fit statistics cannot test its assumptions."),
+                            .("At least three informative tests are needed. Three tests give zero nominal residual degrees of freedom, but exact fit and parameter identifiability are not guaranteed. Fit discrepancies remain descriptive rather than formal chi-squared tests."),
                             .("The model assumes conditional independence within each latent class. A large bivariate residual is evidence against that assumption but does not determine the direction of bias."),
                             .("Class labels are unidentified. Calling the high-positive class disease requires a study-specific substantive justification.")
                         ),
                         citations = c(
+                            "Linzer DA, Lewis JB. poLCA: An R Package for Polytomous Variable Latent Class Analysis. <em>Journal of Statistical Software</em>. 2011;42(10):1-29. doi:10.18637/jss.v042.i10.",
+                            "Allman ES, et al. Maximum likelihood estimation of the Latent Class Model through model boundary decomposition. <em>arXiv</em>. 2018;1710.01696v2.",
                             "Hui SL, Walter SD. Estimating the error rates of diagnostic tests. <em>Biometrics</em>. 1980;36(1):167-71.",
                             "Dendukuri N, Joseph L. Bayesian approaches to modeling the conditional dependence between multiple diagnostic tests. <em>Biometrics</em>. 2001;57(1):158-67."
                         )
@@ -308,9 +310,9 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     bayesian = list(
                         title = .("Statistical background: Penalized EM"),
                         bullets = c(
-                            .("This method fits the same conditional-independence two-class model using fixed Beta penalties and returns one MAP-like point estimate."),
-                            .("At least three tests are required; the two-test model is not statistically identifiable."),
-                            .("This is not posterior sampling, the priors are not configurable, and its intervals are bootstrap confidence intervals rather than Bayesian credible intervals."),
+                            .("This method maximizes the two-class conditional-independence log likelihood plus the sum of log sensitivities and log specificities. These fixed Beta(2,1) penalties favor higher accuracy; a uniform Beta(1,1) penalty is used for the class proportion. Multiple EM initializations and numerical refinement produce a MAP point estimate, not a posterior sample."),
+                            .("At least three informative tests are needed; the number of tests alone does not establish identifiability. Estimates are suppressed when the data do not identify the latent parameters."),
+                            .("The priors are fixed and its intervals are approximate case-bootstrap confidence intervals, not Bayesian credible intervals. The cited Bayesian studies are background; their posterior-sampling or dependence-adjusted methods are not implemented here."),
                             .("Class labels remain unidentified, so diagnostic-accuracy terminology requires a study-specific substantive justification.")
                         ),
                         citations = c(
@@ -460,6 +462,11 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 data <- self$data
                 test_data <- data[unlist(tests)]
                 n_before <- nrow(test_data)
+                # Explicit NA factor levels are missing too; factor codes alone conceal them.
+                for (nm in names(test_data)) {
+                    missing <- is.na(as.character(test_data[[nm]]))
+                    is.na(test_data[[nm]]) <- missing
+                }
                 test_data <- jmvcore::naOmit(test_data)
                 n_after <- nrow(test_data)
 
@@ -549,12 +556,8 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     }
                 } else if (!is.null(results) && is.finite(results$prevalence) &&
                            !is.null(results$data)) {
-                    # MISSING BEFORE: the extreme-proportion caution was gated on the two
-                    # latent methods only. The three rule-based methods compute every
-                    # displayed percentage on exactly these two counts, so they become
-                    # unstable at the same boundaries -- and nothing told the reader that
-                    # the denominator behind a "99% specificity" was six patients.
-                    # Report the counts themselves: they ARE the denominators used below.
+                    # Response probabilities condition on rule groups; predictive values
+                    # instead condition on each test's positive or negative results.
                     n_rule <- nrow(results$data)
                     n_rule_pos <- round(n_rule * results$prevalence)
                     n_rule_neg <- n_rule - n_rule_pos
@@ -563,7 +566,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                             "STRONG_WARNING",
                             .("Reference rule splits the sample very unevenly"),
                             .fmt(
-                                .("Of {n} analyzed cases, {npos} meet the selected reference rule and {nneg} do not. Every percentage in the table below is computed on one of these two counts, so with fewer than about 10 cases on a side the estimate and its interval are driven by a handful of patients and should not be read as a stable value."),
+                                .("Of {n} analyzed cases, {npos} meet the selected reference rule and {nneg} do not. Positive- and negative-response probabilities use these rule-group counts. PPV and NPV instead use each test's positive and negative counts. With fewer than about 10 cases in a conditioning group, its estimate and interval can be unstable."),
                                 n = n_rule, npos = n_rule_pos, nneg = n_rule_neg
                             )
                         )
@@ -580,14 +583,15 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                         # This is the notice that tells the user the estimates below are
                         # not a solution. It was English-only in every locale; wrapped now.
                         .("The estimation did not converge"),
-                        sprintf(.("The EM algorithm reached its iteration limit (%s) without the parameter estimates settling. The sensitivities and specificities below are wherever the algorithm happened to stop, not a fitted solution, and should not be reported. Try a different method, or check whether the tests are nearly perfectly agreeing or nearly independent of one another."),
+                        sprintf(.("The latent-model solver did not meet its numerical convergence checks after %s refinement iterations. Point estimates and intervals have been left blank. Try a different method, or check whether the tests nearly perfectly agree or provide little information about separate classes."),
                                 if (is.null(results$iterations)) "100" else as.character(results$iterations))
                     )
                 }
 
 
                 # One bootstrap pass, reused by every table below.
-                if (isTRUE(self$options$bootstrap) && !is.null(results)) {
+                if (isTRUE(self$options$bootstrap) && !is.null(results) &&
+                    !isFALSE(results$estimable)) {
                     private$.boot_cache <- private$.bootstrapAll(
                         data = results$data,
                         method = self$options$method,
@@ -596,6 +600,14 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                         warm_start = if (identical(self$options$method, "latent_class"))
                             results$model$probs else NULL
                     )
+                }
+
+                if (isTRUE(self$options$bootstrap) && isFALSE(results$estimable)) {
+                    private$.boot_cache <- list(prevalence = numeric(0),
+                        sensitivities = matrix(numeric(0), 0, length(tests)),
+                        specificities = matrix(numeric(0), 0, length(tests)))
+                    private$.addNotice("WARNING", .("Bootstrap intervals not estimated"),
+                        .("The full-sample latent fit is not reportable, so bootstrap refitting was skipped. Resolve the convergence, identification or class-orientation warning first."))
                 }
 
                 private$.checkpoint() # Before result population
@@ -732,18 +744,11 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                         .("Confidence limits are Wilson score intervals for the observed proportion meeting the reference rule.")
                     }
                 )
-                # Latent-class replicates are warm-started from the full-sample fit and run a
-                # SINGLE EM pass (.bootstrapAll passes probs_start = results$model$probs with
-                # n_starts = 1L), not the 30-start search the primary fit uses. Repeating that
-                # search per replicate would be 30 x nboot poLCA fits, so the warm start stays
-                # -- but the note must say so rather than imply an independent refit.
-                # setNote() with NULL is how a note is REMOVED: the table keeps its notes
-                # between runs, so this must be written unconditionally or the warm-start
-                # caveat survives a switch to another method or to bootstrap off.
+                # Write NULL too, so a note from an earlier method does not persist.
                 table$setNote(
                     "boot_warm_start",
                     if (isTRUE(self$options$bootstrap) && identical(method, "latent_class"))
-                        .("Each latent-class resample is fitted with a single EM run started from the full-sample solution, not from the multi-start random search used for the primary fit. The interval is therefore conditional on that solution: it does not propagate label-switching or local-optimum variability and is likely anti-conservative, that is, too narrow.")
+                        .("Each latent-class resample uses the full-sample solution and two additional random starts, followed by likelihood refinement. The main fit uses a larger search, so local-optimum uncertainty may remain. Percentile intervals can be too narrow with weak identification, boundaries or small samples; nominal coverage is not guaranteed.")
                 )
                 table$setRow(rowNo = 1, values = list(
                     estimate = prevalence,
@@ -790,14 +795,11 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                         sprintf(jmvcore::.("%.0f%% intervals are Wilson score intervals for agreement with the observed reference rule."),
                                 conf_pct)
                 )
-                # See .populatePrevalence: latent-class replicates reuse the full-sample
-                # solution as their single EM start, so "refitting the model on each" above
-                # must not be read as an independent multi-start refit.
                 table$setNote(
                     "boot_warm_start",
                     if (isTRUE(self$options$bootstrap) &&
                         identical(self$options$method, "latent_class"))
-                        .("Each latent-class resample is fitted with a single EM run started from the full-sample solution, not from the multi-start random search used for the primary fit. The interval is therefore conditional on that solution: it does not propagate label-switching or local-optimum variability and is likely anti-conservative, that is, too narrow.")
+                        .("Each latent-class resample uses the full-sample solution and two additional random starts, followed by likelihood refinement. The main fit uses a larger search, so local-optimum uncertainty may remain. Percentile intervals can be too narrow with weak identification, boundaries or small samples; nominal coverage is not guaranteed.")
                 )
 
                 # These two "methods" build the reference standard out of the very tests
@@ -874,7 +876,19 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
 
                     # Calculate PPV and NPV
                     prevalence <- results$prevalence
-                    ppv_npv <- private$.calculatePPVNPV(sensitivity, specificity, prevalence)
+                    if (self$options$method %in% c("composite", "all_positive", "any_positive")) {
+                        ref <- switch(self$options$method,
+                            composite = rowMeans(results$data) > 0.5,
+                            all_positive = rowSums(results$data) == ncol(results$data),
+                            any_positive = rowSums(results$data) > 0)
+                        positive <- results$data[[i]] == 1
+                        ppv_npv <- list(
+                            ppv = if (any(positive)) mean(ref[positive]) else NA_real_,
+                            npv = if (any(!positive)) mean(!ref[!positive]) else NA_real_
+                        )
+                    } else {
+                        ppv_npv <- private$.calculatePPVNPV(sensitivity, specificity, prevalence)
+                    }
 
                     # Some metrics are fixed at 1 by the CONSTRUCTION of the reference, not
                     # estimated from the data, and reporting them as results is misleading:
@@ -913,18 +927,8 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     ))
                 }
             },
-            # Bivariate residuals: for each test pair, compare the observed two-way table
-            # with the one the fitted latent class model implies. Latent class analysis
-            # assumes the tests err INDEPENDENTLY given true status, and that assumption is
-            # what makes the estimates identifiable -- when it fails (two stains for one
-            # antigen, two readers of one slide) the estimated accuracy is inflated. The
-            # analysis previously only stated the assumption; this measures it.
-            #
-            # Only meaningful when resid.df > 0. With three tests the model is
-            # just-identified and reproduces every observed table exactly, so every residual
-            # is structurally 0 and can reveal nothing. Verified: on data where two tests
-            # share an artefact, 3 tests give all-zero residuals while 4 tests flag five of
-            # six pairs (up to 436 against a 3.84 threshold).
+            # Descriptive pairwise discrepancies remain useful at nominal df = 0:
+            # the binary latent-class model imposes probability inequalities as well.
             .populateConditionalDependence = function(model, tests) {
                 # The table may not exist until jmvtools::prepare() compiles the .r.yaml,
                 # but the dependence WARNING is clinically important either way -- so
@@ -937,10 +941,8 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 just_identified <- !is.numeric(resid_df) || length(resid_df) != 1 ||
                     !is.finite(resid_df) || resid_df <= 0
 
-                if (just_identified) {
-                    if (!is.null(table)) table$setNote("df0", jmvcore::.("Not computable with three tests: the model has no residual degrees of freedom, so it reproduces every observed table exactly and no residual can detect conditional dependence. Add a fourth test if you need to check this assumption."))
-                    return()
-                }
+                if (!is.null(table)) table$setNote("df0", if (just_identified)
+                    .("With three tests the nominal residual degrees of freedom are zero, but the latent-class model need not reproduce the observed table. These residuals describe discrepancies; they are not chi-squared tests of conditional independence. A small residual does not establish the assumption."))
 
                 y <- model$y
                 if (is.null(y) || nrow(y) == 0) return()
@@ -1048,12 +1050,8 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 table <- self$results$model_fit
                 table$deleteRows() # Clear existing rows to prevent duplicates on re-run
 
-                # A 2-class model over k binary tests has 2k+1 parameters and 2^k - 1
-                # degrees of freedom, so k = 3 leaves resid.df = 0: the model is
-                # just-identified and reproduces the observed table exactly. G-squared and
-                # Chi-squared are then structurally ~0 with no df to test them against, and
-                # printing them invites the reader to conclude the model "fits well". AIC and
-                # BIC remain meaningful for comparing models.
+                # Nominal dimension does not remove the model's inequality constraints.
+                # Always show discrepancies, without a chi-squared p-value at zero df.
                 resid_df <- model$resid.df
                 just_identified <- is.numeric(resid_df) && length(resid_df) == 1 &&
                     is.finite(resid_df) && resid_df <= 0
@@ -1062,17 +1060,13 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     BIC = model$bic,
                     AIC = model$aic,
                     "Log-Likelihood" = model$llik,
-                    "G-squared" = if (just_identified) NULL else model$Gsq,
-                    "Chi-squared" = if (just_identified) NULL else model$Chisq,
+                    "G-squared" = model$Gsq,
+                    "Chi-squared" = model$Chisq,
                     "Degrees of Freedom" = resid_df
                 )
 
-                if (just_identified) {
-                    table$setNote(
-                        "just_identified",
-                        jmvcore::.("With three tests this model has as many parameters as the data can support (0 residual degrees of freedom), so it reproduces the observed table exactly. Goodness-of-fit statistics are therefore omitted: they cannot tell you whether the conditional-independence assumption holds. Use four or more tests if you need to test the model's fit.")
-                    )
-                }
+                table$setNote("just_identified", if (just_identified)
+                    .("With three tests there are 0 nominal residual degrees of freedom. This does not guarantee exact fit: the model also imposes constraints on the observed probabilities. G-squared and Chi-squared are descriptive discrepancies, without a chi-squared reference test. Small discrepancies do not verify conditional independence or parameter identifiability."))
 
                 # Add each available statistic to table.
                 # WRONG BEFORE: the displayed label WAS the English list name, so this
@@ -1174,12 +1168,11 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                                     maxiter = 1000,
                                     graphs = FALSE,
                                     verbose = FALSE,
+                                    # Uncertainty is bootstrapped after likelihood refinement.
+                                    calc.se = FALSE,
                                     nrep = 1,
-                                    # Bootstrap replicates start from the main fit's solution
-                                    # rather than at random: a resample's optimum sits very close
-                                    # to the full-sample one, so EM converges in a few iterations
-                                    # and one start suffices. Random restarts per replicate were
-                                    # the whole cost of the latent-class bootstrap.
+                                    # Use the full-sample solution as the first candidate;
+                                    # extra random starts check alternative likelihood modes.
                                     probs.start = if (start == 1L) probs_start else NULL
                                 )
                             )
@@ -1236,13 +1229,24 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     )
                 }
 
-                iterations <- if (is.null(best_model$numiter)) NA_integer_ else best_model$numiter
+                pattern_data <- nogoldstandard_pattern_data(binary_data)
+                start_par <- c(best_model$P[1],
+                    vapply(best_model$probs, function(x) x[1, 2], numeric(1)),
+                    vapply(best_model$probs, function(x) x[2, 2], numeric(1)))
+                refined <- nogoldstandard_refine(pattern_data, start_par,
+                    checkpoint = function() private$.checkpoint(flush = FALSE))
+                best_model <- nogoldstandard_update_lca(best_model, pattern_data, refined)
+                identification <- nogoldstandard_identification(pattern_data, refined$par)
+                private$.diag(sprintf("Likelihood score: %.3g; identification singular-value ratio %.3g",
+                                      refined$score, identification$ratio))
+
+                iterations <- refined$iterations
                 # poLCA$eflag means that poLCA automatically restarted after a
                 # numerical problem; the returned model is the final successful run.
                 # It is not a nonconvergence flag. Convergence is instead determined
                 # from the iteration limit and finite fitted output.
                 restarted <- isTRUE(best_model$eflag)
-                converged <- private$.lcaConverged(best_model, maxiter = 1000L)
+                converged <- isTRUE(refined$converged)
                 private$.diag("poLCA restart  : ",
                               if (restarted) "automatic numerical restart occurred" else "none")
 
@@ -1285,19 +1289,40 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     specificities[i] <- best_model$probs[[i]][healthy_class, 1]
                 }
 
-                return(list(
+                return(private$.checkLatentEstimate(list(
                     prevalence = prevalence,
                     sensitivities = sensitivities,
                     specificities = specificities,
                     model = best_model,
                     data = binary_data,
                     disease_class = disease_class,
+                    identification = identification,
                     converged = converged,
                     restarted = restarted,
                     iterations = iterations,
                     starts_used = starts_used,
                     failed_starts = failed_starts
-                ))
+                )))
+            },
+            .checkLatentEstimate = function(results) {
+                identification <- results$identification
+                if (!is.null(identification) && !isTRUE(identification$identified)) {
+                    private$.addNotice("STRONG_WARNING", .("Latent parameters not estimable"),
+                        .("Unique, stable latent estimates could not be established. The fitted probability map is singular, numerically close to singular, or represents a nonregular boundary case. This can indicate a likelihood ridge beyond class-label ambiguity; at a boundary the numerical check alone does not prove nonuniqueness. Latent estimates and intervals are conservatively left blank. Fixed priors do not establish identification by the data; use observed agreement or additional informative tests."))
+                } else if (!is.null(identification) && isTRUE(identification$weak)) {
+                    private$.addNotice("STRONG_WARNING", .("Weak identification of latent parameters"),
+                        .("Small changes in the observed response frequencies can cause large changes in latent estimates. The numerical identification check is close to singular. Interpret estimates and bootstrap intervals cautiously and examine study-specific sensitivity analyses."))
+                }
+                if (isFALSE(results$converged) || isFALSE(results$orientation) ||
+                    (!is.null(identification) && !isTRUE(identification$identified))) {
+                    results$prevalence <- NA_real_
+                    results$sensitivities[] <- NA_real_
+                    results$specificities[] <- NA_real_
+                    results$estimable <- FALSE
+                } else {
+                    results$estimable <- TRUE
+                }
+                results
             },
             .runComposite = function(binary_data) {
                 # Strict majority means MORE than half positive. The previous >= 0.5 rule
@@ -1412,178 +1437,57 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                             alpha_sens / (alpha_sens + beta_sens))
                 )
 
-                # Initialize parameters
-                # Start with prevalence = 0.3 as initial guess
-                prevalence <- 0.3
-
-                # Initialize sensitivity and specificity for each test
-                sensitivities <- rep(0.8, num_tests) # initial guess
-                specificities <- rep(0.9, num_tests) # initial guess
-
-                # EM algorithm for parameter estimation
-                max_iter <- 100
-                tol <- 1e-6
-                converged <- FALSE
-
-                for (iter in 1:max_iter) {
-                    # Checkpoint periodically during EM iterations
-                    if (iter %% 20 == 1) { # Every 20 iterations
-                        private$.checkpoint(flush = FALSE) # Poll for changes only
-                    }
-
-                    # E-step, vectorized over patients. Work on the log-odds scale to avoid
-                    # underflow when several tests strongly favor one class.
-                    prevalence <- max(0.001, min(0.999, prevalence))
-                    log_odds <- rep(stats::qlogis(prevalence), num_patients)
-                    sens_clamped <- pmax(0.001, pmin(0.999, sensitivities))
-                    spec_clamped <- pmax(0.001, pmin(0.999, specificities))
-
-                    for (j in seq_len(num_tests)) {
-                        observed <- binary_matrix[, j]
-                        contribution <- ifelse(
-                            is.na(observed),
-                            0,
-                            ifelse(
-                                observed == 1,
-                                log(sens_clamped[j] / (1 - spec_clamped[j])),
-                                log((1 - sens_clamped[j]) / spec_clamped[j])
-                            )
-                        )
-                        log_odds <- log_odds + contribution
-                    }
-                    prob_disease <- stats::plogis(log_odds)
-                    prob_disease[!is.finite(prob_disease)] <- prevalence
-
-                    # M-step: Update parameters
-                    # Update prevalence
-                    new_prevalence <- (sum(prob_disease, na.rm = TRUE) + alpha_prev - 1) /
-                        (num_patients + alpha_prev + beta_prev - 2)
-
-                    # Update sensitivities and specificities
-                    new_sensitivities <- numeric(num_tests)
-                    new_specificities <- numeric(num_tests)
-
-                    for (j in 1:num_tests) {
-                        # For each test, get non-NA values
-                        not_na <- !is.na(binary_matrix[, j])
-                        if (sum(not_na) == 0) {
-                            # If all values are NA, keep previous estimates
-                            new_sensitivities[j] <- sensitivities[j]
-                            new_specificities[j] <- specificities[j]
-                            next
-                        }
-
-                        # Get test results and probabilities for non-NA values
-                        test_results <- binary_matrix[not_na, j]
-                        probs <- prob_disease[not_na]
-
-                        # For sensitivity: P(T+|D+)
-                        test_pos <- test_results == 1
-                        if (sum(probs) > 0) {
-                            new_sensitivities[j] <- (sum(probs[test_pos], na.rm = TRUE) + alpha_sens - 1) /
-                                (sum(probs, na.rm = TRUE) + alpha_sens + beta_sens - 2)
-                        } else {
-                            # Fallback if denominator is zero
-                            new_sensitivities[j] <- (alpha_sens - 1) / (alpha_sens + beta_sens - 2)
-                        }
-
-                        # For specificity: P(T-|D-)
-                        test_neg <- test_results == 0
-                        if (sum(1 - probs) > 0) {
-                            new_specificities[j] <- (sum((1 - probs)[test_neg], na.rm = TRUE) + alpha_spec - 1) /
-                                (sum(1 - probs, na.rm = TRUE) + alpha_spec + beta_spec - 2)
-                        } else {
-                            # Fallback if denominator is zero
-                            new_specificities[j] <- (alpha_spec - 1) / (alpha_spec + beta_spec - 2)
-                        }
-
-                        # Ensure values are within valid range
-                        new_sensitivities[j] <- max(0.001, min(0.999, new_sensitivities[j]))
-                        new_specificities[j] <- max(0.001, min(0.999, new_specificities[j]))
-                    }
-
-                    # Check convergence - handle NAs properly
-                    # Maximum absolute difference across all parameters
-                    param_diffs <- c(
-                        abs(new_prevalence - prevalence),
-                        abs(new_sensitivities - sensitivities),
-                        abs(new_specificities - specificities)
-                    )
-
-                    # Check if we've converged, ignoring NAs
-                    if (max(param_diffs, na.rm = TRUE) < tol) {
-                        prevalence <- new_prevalence
-                        sensitivities <- new_sensitivities
-                        specificities <- new_specificities
-                        converged <- TRUE
-                        break
-                    }
-
-                    # Update parameters for next iteration
-                    prevalence <- new_prevalence
-                    sensitivities <- new_sensitivities
-                    specificities <- new_specificities
+                pattern_data <- nogoldstandard_pattern_data(binary_data)
+                checkpoint <- function() private$.checkpoint(flush = FALSE)
+                starts <- list(
+                    c(.3, rep(.8, num_tests), rep(.1, num_tests)),
+                    c(.7, rep(.9, num_tests), rep(.2, num_tests)),
+                    c(.5, rep(.6, num_tests), rep(.4, num_tests)),
+                    c(.5, rep(.4, num_tests), rep(.6, num_tests))
+                )
+                # Exchangeable starts can miss modes where a test runs in the
+                # opposite direction. Include each test-specific contrast and its mirror.
+                for (j in seq_len(num_tests)) {
+                    q1 <- rep(.2, num_tests)
+                    q0 <- rep(.6, num_tests)
+                    q1[j] <- .95
+                    q0[j] <- .05
+                    starts <- c(starts, list(c(.3, q1, q0), c(.7, q0, q1)))
                 }
+                fits <- lapply(starts, function(start) {
+                    initial <- nogoldstandard_em_start(pattern_data, start, checkpoint)
+                    nogoldstandard_refine(pattern_data, initial, penalized = TRUE,
+                                          checkpoint = checkpoint)
+                })
+                finished <- which(vapply(fits, function(x) isTRUE(x$converged), logical(1)))
+                candidates <- if (length(finished)) finished else seq_along(fits)
+                best <- candidates[which.max(vapply(fits[candidates],
+                                                    function(x) x$objective, numeric(1)))]
+                fit <- fits[[best]]
+                par <- fit$par
+                sensitivities <- par[1 + seq_len(num_tests)]
+                specificities <- 1 - par[1 + num_tests + seq_len(num_tests)]
 
-                # Make the reported class convention deterministic. If the fitted class
-                # currently called positive has fewer selected-positive responses on average
-                # than its complement, swap the class labels and transform the response
-                # probabilities accordingly.
-                mean_positive_current <- mean(sensitivities, na.rm = TRUE)
-                mean_positive_complement <- mean(1 - specificities, na.rm = TRUE)
-                if (is.finite(mean_positive_current) &&
-                    is.finite(mean_positive_complement) &&
-                    mean_positive_current < mean_positive_complement) {
-                    old_sensitivities <- sensitivities
-                    prevalence <- 1 - prevalence
-                    sensitivities <- 1 - specificities
-                    specificities <- 1 - old_sensitivities
+                # Priors can pick a point on a likelihood ridge. Assess data identification
+                # with an unpenalized companion fit, not the curvature of the penalty.
+                unpenalized <- nogoldstandard_refine(pattern_data, par, checkpoint = checkpoint)
+                identification <- nogoldstandard_identification(pattern_data, unpenalized$par)
+                orientation <- mean(sensitivities) > mean(1 - specificities)
+                if (!orientation) {
+                    private$.addNotice("STRONG_WARNING", .("Prior and class orientation conflict"),
+                        .("The fixed-prior solution does not assign the higher average selected-positive probability to the positive class. Relabeling would change the asymmetric prior objective. Latent estimates and intervals are left blank; reconsider the selected positive levels or use the unpenalized model."))
                 }
-
-                # When the estimated prevalence collapses toward 0 the sensitivity
-                # denominator sum(prob_disease) collapses with it, the Beta(2,1) numerator
-                # offset dominates, and the clamp below pins the answer at 0.999. A cohort in
-                # which no test is ever positive was reported as 99.9% sensitive. A clamped
-                # boundary value is not an estimate; blank it and say why.
-                eff_diseased <- prevalence * num_patients
-                eff_healthy <- (1 - prevalence) * num_patients
-                unstable <- character(0)
-                if (!is.finite(eff_diseased) || eff_diseased < 1) {
-                    sensitivities <- rep(NA_real_, num_tests)
-                    unstable <- c(unstable, "sensitivity")
-                }
-                if (!is.finite(eff_healthy) || eff_healthy < 1) {
-                    specificities <- rep(NA_real_, num_tests)
-                    unstable <- c(unstable, "specificity")
-                }
-                if (length(unstable) > 0) {
-                    private$.addNotice(
-                        "STRONG_WARNING",
-                        .("Parameters not estimable"),
-                        if (length(unstable) > 1)
-                            sprintf(.("The fitted prevalence is %.4f, so the model implies fewer than one diseased case and fewer than one non-diseased case in this sample. Neither sensitivity nor specificity can be estimated from it and both have been left blank -- the algorithm would otherwise return values pinned at their boundary by the prior rather than by your data."),
-                                    prevalence)
-                        else if (identical(unstable, "sensitivity"))
-                            sprintf(.("The fitted prevalence is %.4f, so the model implies fewer than one diseased case in this sample. Sensitivity cannot be estimated from it and has been left blank -- the algorithm would otherwise return a value pinned at its boundary by the prior rather than by your data."),
-                                    prevalence)
-                        else
-                            sprintf(.("The fitted prevalence is %.4f, so the model implies fewer than one non-diseased case in this sample. Specificity cannot be estimated from it and has been left blank -- the algorithm would otherwise return a value pinned at its boundary by the prior rather than by your data."),
-                                    prevalence)
-                    )
-                }
-
-                private$.diag(sprintf("Penalized EM    : %s after %d iteration(s) (limit %d)",
-                                      if (converged) "converged" else "DID NOT CONVERGE",
-                                      iter, max_iter))
-
-                return(list(
-                    prevalence = prevalence,
-                    sensitivities = sensitivities,
-                    specificities = specificities,
-                    data = binary_data,
-                    converged = converged,
-                    iterations = iter
-                ))
+                private$.diag(sprintf(
+                    "Penalized EM    : %d starts; numerical refinement %s; score %.3g; objective %.10f",
+                    length(starts), if (fit$converged) "converged" else "DID NOT CONVERGE",
+                    fit$score, fit$objective))
+                private$.diag(sprintf("Identification : unpenalized singular-value ratio %.3g",
+                                      identification$ratio))
+                private$.checkLatentEstimate(list(prevalence = par[1], sensitivities = sensitivities,
+                     specificities = specificities, data = binary_data,
+                     converged = fit$converged, iterations = fit$iterations,
+                     identification = identification, orientation = orientation,
+                     objective = fit$objective))
             },
 
             # Analysis using "All Tests Positive" as reference
@@ -1705,7 +1609,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     boot_result <- tryCatch({
                         if (method == "latent_class") {
                             private$.runLCA(boot_data, names(data),
-                                            n_starts = if (is.null(warm_start)) 3L else 1L,
+                                            n_starts = 3L,
                                             probs_start = warm_start)
                         } else if (method == "composite") {
                             private$.runComposite(boot_data)
@@ -1730,7 +1634,8 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                         NULL
                     })
 
-                    if (is.null(boot_result) || isFALSE(boot_result$converged)) {
+                    if (is.null(boot_result) || isFALSE(boot_result$converged) ||
+                        isFALSE(boot_result$estimable)) {
                         error_count <- error_count + 1L
                         next
                     }
@@ -1749,16 +1654,29 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     private$.addNotice(
                         "WARNING",
                         .("Some bootstrap replicates failed"),
-                        sprintf(.("%1$d of %2$d bootstrap resamples (%3$.0f%%) could not be fitted and were discarded. The intervals below are based on the remaining %4$d. A high failure rate usually means the resamples are too small or too sparse to support the model."),
+                        sprintf(.("%1$d of %2$d bootstrap resamples (%3$.0f%%) did not yield a converged, identifiable fit and were discarded. At most %4$d fitted resamples remain for each interval. A high failure rate usually means the resamples are too small or too sparse to support the model."),
                                 error_count, nboot, 100 * error_count / nboot, nboot - error_count)
                     )
+                }
+
+                finite_counts <- c(sum(is.finite(prevalence)),
+                    colSums(is.finite(sens)), colSums(is.finite(spec)))
+                if (any(finite_counts < 20L)) {
+                    private$.addNotice("STRONG_WARNING", .("Insufficient bootstrap estimates"),
+                        .fmt(.("Each interval requires at least 20 finite parameter estimates. Across the class or rule proportion and test response probabilities, successful counts range from {minimum} to {maximum} of {requested}. Intervals with fewer than 20 are left blank; increase the sample information or resolve fitting failures before reporting uncertainty."),
+                             minimum = min(finite_counts), maximum = max(finite_counts),
+                             requested = nboot))
+                }
+                if (method %in% c("latent_class", "bayesian")) {
+                    private$.addNotice("WARNING", .("Bootstrap coverage is approximate"),
+                        .("Case-resampling percentile intervals assume independent cases. Small samples, boundary estimates and weak identification can give coverage below the stated confidence level. Fixed-prior estimates can also be biased; this bootstrap does not include uncertainty about the chosen priors. Check coverage in a study-specific simulation before confirmatory use."))
                 }
 
                 private$.diag(sprintf("Bootstrap       : %d resamples, seed %s, %d failed (%.1f%%)",
                                       nboot, base::format(seed_val), error_count,
                                       100 * error_count / nboot))
                 if (!is.null(warm_start))
-                    private$.diag("                  latent class replicates warm-started from the full-sample fit")
+                    private$.diag("                  latent class replicates use the full-sample start plus two random starts")
 
                 list(prevalence = prevalence, sensitivities = sens, specificities = spec,
                      n_failed = error_count, nboot = nboot)
@@ -2420,10 +2338,10 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                         error = function(e) NULL
                     )
                     p_value <- if (is.null(kappa_test) ||
-                        !is.finite(kappa_test$p.value)) {
+                        !is.finite(kappa_test$statistic)) {
                         NA_real_
                     } else {
-                        kappa_test$p.value
+                        2 * stats::pnorm(-abs(kappa_test$statistic))
                     }
 
                     return(list(kappa = kappa, p_value = p_value, agreement = p_o))
