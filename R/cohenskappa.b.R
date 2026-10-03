@@ -131,28 +131,20 @@ cohenskappaClass <- R6::R6Class(
                 warning_msg <- ""
             }
 
-            # Convert to factors if needed
-            # TODO (correctness): `as.factor(numeric)` orders levels by sort
-            # order of unique values, NOT by the user's intended ordinal
-            # sequence. For ordinal raters (e.g., Likert 1-5 stored as
-            # integers), this happens to coincide. But if levels are sparse
-            # (e.g., 1, 2, 4, 7), kappa weighting (linear/quadratic) treats
-            # them as equally spaced, which silently distorts weighted-kappa
-            # results. For weighted methods (kappa_type %in% c("linear",
-            # "quadratic", "all")), consider:
-            #   (a) requiring users to pre-convert numeric raters to ordered
-            #       factors, or
-            #   (b) explicitly using `factor(x, levels = sort(unique(x)),
-            #       ordered = TRUE)` and surfacing the assumed level order
-            #       in a notice.
-            # This site applies to L<this>+1 (rater1) and L<this>+4 (rater2),
-            # plus the parallel multi-rater path at L573-575.
-            if (is.numeric(rater1_data)) {
-                rater1_data <- as.factor(rater1_data)
+            weighted_requested <- self$options$kappa_type %in% c("linear", "quadratic", "all")
+            weighted_ok <- is.ordered(rater1_data) && is.ordered(rater2_data) &&
+                identical(levels(rater1_data), levels(rater2_data))
+            if (weighted_requested && !weighted_ok && self$options$kappa_type != "all") {
+                jmvcore::reject(.('Weighted kappa requires ordered factors with the same declared level order.'))
             }
-            if (is.numeric(rater2_data)) {
-                rater2_data <- as.factor(rater2_data)
+            if (weighted_requested && !weighted_ok) {
+                warning_msg <- paste0(warning_msg,
+                    "<p>Weighted estimates require ordered factors with the same declared level order; only unweighted kappa is reported.</p>")
             }
+            common_levels <- if (weighted_ok) levels(rater1_data) else
+                union(levels(as.factor(rater1_data)), levels(as.factor(rater2_data)))
+            rater1_data <- factor(rater1_data, levels = common_levels, ordered = weighted_ok)
+            rater2_data <- factor(rater2_data, levels = common_levels, ordered = weighted_ok)
 
             # Check minimum sample size
             n_obs <- length(rater1_data)
@@ -193,25 +185,27 @@ cohenskappaClass <- R6::R6Class(
                     }
 
                     # Weighted kappa (linear)
-                    if (kappa_type %in% c("linear", "all")) {
-                        linear_result <- psych::cohen.kappa(confusion_table, w = "equal")
+                    if (weighted_ok && kappa_type %in% c("linear", "all")) {
+                        linear_result <- psych::cohen.kappa(confusion_table,
+                            w = 1 - abs(outer(seq_len(n_categories), seq_len(n_categories), "-")) / (n_categories - 1))
                         kappa_results$linear <- list(
                             method = "Weighted Kappa (Linear)",
-                            kappa = linear_result$kappa,
-                            se = sqrt(linear_result$var.kappa),
-                            z_value = linear_result$kappa / sqrt(linear_result$var.kappa),
+                            kappa = linear_result$weighted.kappa,
+                            se = sqrt(linear_result$var.weighted),
+                            z_value = linear_result$weighted.kappa / sqrt(linear_result$var.weighted),
                             weights = "linear"
                         )
                     }
 
                     # Weighted kappa (quadratic)
-                    if (kappa_type %in% c("quadratic", "all")) {
-                        quad_result <- psych::cohen.kappa(confusion_table, w = "squared")
+                    if (weighted_ok && kappa_type %in% c("quadratic", "all")) {
+                        quad_result <- psych::cohen.kappa(confusion_table,
+                            w = 1 - (outer(seq_len(n_categories), seq_len(n_categories), "-") / (n_categories - 1))^2)
                         kappa_results$quadratic <- list(
                             method = "Weighted Kappa (Quadratic)",
-                            kappa = quad_result$kappa,
-                            se = sqrt(quad_result$var.kappa),
-                            z_value = quad_result$kappa / sqrt(quad_result$var.kappa),
+                            kappa = quad_result$weighted.kappa,
+                            se = sqrt(quad_result$var.weighted),
+                            z_value = quad_result$weighted.kappa / sqrt(quad_result$var.weighted),
                             weights = "quadratic"
                         )
                     }

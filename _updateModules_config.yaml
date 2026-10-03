@@ -295,6 +295,7 @@ modules:
     data_files:
       - "histopathology.rda"
       - "ihcheterogeneity_test.rda"   # the ihcheterogeneity help example
+      - "ihc_reader_reproducibility.rda" # pathagreement independent-reader example
 
 # Vignette folder-to-module mapping (used when modes$copy_vignettes is true)
 vignette_folders:

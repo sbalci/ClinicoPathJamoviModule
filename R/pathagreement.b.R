@@ -55,8 +55,86 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
             .plot_case_labels = NULL,
             .distance_metric = NULL,
 
+            .readerOptions = function() {
+                keys <- names(.paReaderDefaults())
+                stats::setNames(lapply(keys, function(key) self$options[[key]]), keys)
+            },
+
+            .readerInit = function() {
+                o <- private$.readerOptions()
+                prepared <- if (o$readerWorkflow == "off") NULL else
+                    tryCatch(.paReaderPrepare(self$data, o), error = function(e) NULL)
+                # Recreate even data-dependent case rows before loading saved cells.
+                layout <- .paReaderLayout(o, prepared)
+                for (name in names(layout)) {
+                    table <- self$results[[name]]
+                    table$deleteRows()
+                    if (o$readerWorkflow != "off") {
+                        for (key in layout[[name]]) table$addRow(rowKey = as.character(key))
+                    }
+                }
+            },
+
+            .readerRun = function() {
+                o <- private$.readerOptions()
+                prepared <- tryCatch(.paReaderPrepare(self$data, o), error = identity)
+                if (inherits(prepared, "error")) {
+                    jmvcore::reject(.fmt(.("Reader data: {message}"),
+                        message = conditionMessage(prepared)))
+                }
+                if (!isTRUE(prepared$ready)) {
+                    self$results$readerSettings$setRow(rowKey = "1",
+                        values = list(setting = .("Next step"), value = prepared$message))
+                    return()
+                }
+                report <- tryCatch(.paReaderReport(prepared,
+                    checkpoint = function() private$.checkpoint(flush = FALSE)), error = function(e) {
+                        if (identical(e$code, "restart")) stop(e)
+                        e
+                    })
+                if (inherits(report, "error")) {
+                    jmvcore::reject(.fmt(.("Reader analysis: {message}"),
+                        message = conditionMessage(report)))
+                }
+                for (name in names(report)) {
+                    rows <- report[[name]]
+                    table <- self$results[[name]]
+                    for (i in seq_len(nrow(rows))) {
+                        values <- as.list(rows[i, , drop = FALSE])
+                        # NULL renders an unavailable numeric cell without inventing an estimate.
+                        values <- lapply(values, function(x) {
+                            if (is.numeric(x) && !is.finite(x)) NULL else
+                                if (is.logical(x)) as.character(x) else x
+                        })
+                        table$setRow(rowKey = as.character(i), values = values)
+                    }
+                }
+                self$results$readerAccuracyTable$setNote("population",
+                    .("Available-case accuracy uses that reader and the reference. Shared-case accuracy requires all selected readers and the reference. Indeterminate results are excluded, never counted as negative. Estimates treat the stated reference as correct."))
+                self$results$cutoffAgreementTable$setNote("population",
+                    .("Each reader pair uses both-observed calls. Near-cutoff results are conditional on either member of that pair entering the stated band. Excluded counts are relative to all non-metadata case rows. Positive/negative specific agreement is symmetric agreement, not sensitivity/specificity."))
+                self$results$cutoffDisagreementCases$setNote("limit",
+                    .("The list is capped across pairs; all discordant cases contribute to the aggregate counts. Row identifies the original dataset row. A disagreement is not an error without a reference."))
+                self$results$readerOriginalAgreement$setNote("scale",
+                    .("Original ordinal scores retain their declared category order. These kappa point estimates describe the original scale; the cutoff table describes binary clinical calls."))
+                for (name in c("readerAccuracyTable", "cutoffAgreementTable", "kappaBalancedTable")) {
+                    self$results[[name]]$setNote("intervals",
+                        .("Intervals concern the selected fixed readers. Exact binomial intervals assume independent cases. Bootstrap intervals resample whole cases or patient clusters and preserve specimen weighting. Undefined or constant resampling distributions suppress the affected interval; attempted and invalid draw counts are shown. Percentile bootstrap intervals are exploratory: simulation found undercoverage even with 60 clusters. Rare categories and few clusters can make intervals unavailable."))
+                }
+                self$results$kappaBalancedTable$setNote("experimental",
+                    .("Exploratory module-specific definition: balanced accuracy of the named reader and unweighted Cohen kappa of the selected pair, on the same reference-complete cases. This is not a reporting standard or a verified reproduction of the paper's reader aggregation rule. Negative or undefined kappa makes the composite unavailable. No clinical acceptance bands are defined."))
+                if (o$readerCode) {
+                    code <- c("# Replace your_data with the original wide data frame.",
+                        "reader_options <-", utils::capture.output(dput(o)),
+                        "do.call(ClinicoPath::pathagreement, c(list(data = your_data), reader_options))")
+                    self$results$readerRCode$setContent(paste(code, collapse = "\n"))
+                }
+            },
+
             # Initialization
             .init = function() {
+                private$.readerInit()
+                if (self$options$readerWorkflow != "off") return()
                 private$.checkDependencies()
                 private$.initializeRows()
                 if (private$.shouldShowWelcome()) {
@@ -221,6 +299,10 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
 
             # Main analysis function
             .run = function() {
+                if (self$options$readerWorkflow != "off") {
+                    private$.readerRun()
+                    return()
+                }
                 # Reset messages
                 private$.resetMessages()
 

@@ -1,0 +1,5 @@
+R version 4.6.0 (2026-04-24)
+Platform: aarch64-apple-darwin23
+Seed: 20261003 + scenario*1000 + repetition; bootstrap seed: 90000 + repetition
+Confidence: 0.95; 300 repetitions; 399 draws; percentile type 7 quantiles
+MC intervals: exact binomial 95%, conditional on interval availability

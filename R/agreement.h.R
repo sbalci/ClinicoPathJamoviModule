@@ -161,7 +161,9 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             ssAlpha = 0.05,
             ssPower = 0.8,
             showSampleSizeGuide = FALSE,
-            seed = 42, ...) {
+            seed = 42,
+            specificCIMethod = "legacy",
+            specificCluster = NULL, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -964,6 +966,20 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "seed",
                 seed,
                 default=42)
+            private$..specificCIMethod <- jmvcore::OptionList$new(
+                "specificCIMethod",
+                specificCIMethod,
+                options=list(
+                    "bootstrap",
+                    "legacy"),
+                default="legacy")
+            private$..specificCluster <- jmvcore::OptionVariable$new(
+                "specificCluster",
+                specificCluster,
+                default=NULL,
+                suggested=list(
+                    "id",
+                    "nominal"))
 
             self$.addOption(private$..vars)
             self$.addOption(private$..baConfidenceLevel)
@@ -1123,6 +1139,8 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..ssPower)
             self$.addOption(private$..showSampleSizeGuide)
             self$.addOption(private$..seed)
+            self$.addOption(private$..specificCIMethod)
+            self$.addOption(private$..specificCluster)
         }),
     active = list(
         vars = function() private$..vars$value,
@@ -1282,7 +1300,9 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ssAlpha = function() private$..ssAlpha$value,
         ssPower = function() private$..ssPower$value,
         showSampleSizeGuide = function() private$..showSampleSizeGuide$value,
-        seed = function() private$..seed$value),
+        seed = function() private$..seed$value,
+        specificCIMethod = function() private$..specificCIMethod$value,
+        specificCluster = function() private$..specificCluster$value),
     private = list(
         ..vars = NA,
         ..baConfidenceLevel = NA,
@@ -1441,7 +1461,9 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..ssAlpha = NA,
         ..ssPower = NA,
         ..showSampleSizeGuide = NA,
-        ..seed = NA)
+        ..seed = NA,
+        ..specificCIMethod = NA,
+        ..specificCluster = NA)
 )
 
 agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -3705,22 +3727,50 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="number"),
                     list(
                         `name`="ci_lower", 
-                        `title`="95% CI Lower", 
+                        `title`="CI Lower", 
                         `type`="number"),
                     list(
                         `name`="ci_upper", 
-                        `title`="95% CI Upper", 
+                        `title`="CI Upper", 
                         `type`="number"),
                     list(
                         `name`="interpretation", 
                         `title`="Interpretation", 
+                        `type`="text"),
+                    list(
+                        `name`="n_cases", 
+                        `title`="Complete cases", 
+                        `type`="integer"),
+                    list(
+                        `name`="units", 
+                        `title`="Sampling units", 
+                        `type`="integer"),
+                    list(
+                        `name`="attempted", 
+                        `title`="Attempted draws", 
+                        `type`="integer"),
+                    list(
+                        `name`="valid", 
+                        `title`="Valid draws", 
+                        `type`="integer"),
+                    list(
+                        `name`="undefined", 
+                        `title`="Undefined draws", 
+                        `type`="integer"),
+                    list(
+                        `name`="ci_method", 
+                        `title`="CI method/status", 
                         `type`="text")),
                 clearWith=list(
                     "vars",
                     "specificPositiveCategory",
                     "specificAllCategories",
                     "confLevel",
-                    "specificConfidenceIntervals")))
+                    "specificConfidenceIntervals",
+                    "specificCIMethod",
+                    "specificCluster",
+                    "nBoot",
+                    "seed")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="specificAgreementExplanation",
@@ -4770,10 +4820,9 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   diagnoses/classifications have strong agreement and which may need improved
 #'   training or criteria clarification.
 #' @param specificConfidenceIntervals Calculate confidence intervals at the
-#'   chosen confidence level for specific agreement indices, using the Wilson
-#'   score method. Recommended for publication and when sample sizes vary across
-#'   categories. Helps distinguish true differences in category-specific
-#'   agreement from random variation.
+#'   chosen confidence level for specific agreement indices using the selected
+#'   method. Bootstrap resamples complete paired observations or clusters; the
+#'   legacy Wilson option remains explicitly approximate.
 #' @param showSpecificAgreementGuide Show educational guide and clinical use
 #'   cases for Specific Agreement Indices before running analysis.
 #' @param showSummary Display a natural-language interpretation of results
@@ -4994,6 +5043,14 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   clustering, and the random subsample the case-cluster heatmap draws above
 #'   200 cases. Change this value to obtain a different draw; the default (42)
 #'   reproduces the previous fixed behaviour.
+#' @param specificCIMethod Bootstrap preserves paired observations and
+#'   suppresses intervals with undefined or constant draws. It is exploratory;
+#'   simulations found undercoverage even with 60 clusters. Legacy Wilson uses
+#'   an effective denominator and has no guaranteed coverage. The existing
+#'   legacy default is retained pending better coverage validation.
+#' @param specificCluster Optional cluster ID aligned to the data.
+#'   Specific-agreement intervals resample whole clusters; all other agreement
+#'   outputs keep their own documented inference.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$welcome} \tab \tab \tab \tab \tab a html \cr
@@ -5284,7 +5341,9 @@ agreement <- function(
     ssAlpha = 0.05,
     ssPower = 0.8,
     showSampleSizeGuide = FALSE,
-    seed = 42) {
+    seed = 42,
+    specificCIMethod = "legacy",
+    specificCluster = NULL) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("agreement requires jmvcore to be installed (restart may be required)")
@@ -5296,6 +5355,7 @@ agreement <- function(
     if ( ! missing(caseIdVariable)) caseIdVariable <- jmvcore::resolveQuo(jmvcore::enquo(caseIdVariable))
     if ( ! missing(subgroupVariable)) subgroupVariable <- jmvcore::resolveQuo(jmvcore::enquo(subgroupVariable))
     if ( ! missing(conditionBVars)) conditionBVars <- jmvcore::resolveQuo(jmvcore::enquo(conditionBVars))
+    if ( ! missing(specificCluster)) specificCluster <- jmvcore::resolveQuo(jmvcore::enquo(specificCluster))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
@@ -5305,7 +5365,8 @@ agreement <- function(
             `if`( ! missing(conditionVariable), conditionVariable, NULL),
             `if`( ! missing(caseIdVariable), caseIdVariable, NULL),
             `if`( ! missing(subgroupVariable), subgroupVariable, NULL),
-            `if`( ! missing(conditionBVars), conditionBVars, NULL))
+            `if`( ! missing(conditionBVars), conditionBVars, NULL),
+            `if`( ! missing(specificCluster), specificCluster, NULL))
 
     for (v in conditionVariable) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
     for (v in subgroupVariable) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
@@ -5467,7 +5528,9 @@ agreement <- function(
         ssAlpha = ssAlpha,
         ssPower = ssPower,
         showSampleSizeGuide = showSampleSizeGuide,
-        seed = seed)
+        seed = seed,
+        specificCIMethod = specificCIMethod,
+        specificCluster = specificCluster)
 
     analysis <- agreementClass$new(
         options = options,

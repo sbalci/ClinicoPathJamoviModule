@@ -399,7 +399,7 @@ children:
           - type: TextBox
             name: nBoot
             format: number
-            enable: (bootstrapCI || bootstrap || robinsonA || tdi)
+            enable: (bootstrapCI || bootstrap || robinsonA || tdi || specificAgreement && specificConfidenceIntervals && specificCIMethod:bootstrap)
           - type: CheckBox
             name: showBootstrapCIGuide
   - type: CollapseBox
@@ -575,6 +575,20 @@ children:
           - type: CheckBox
             name: specificConfidenceIntervals
             enable: (specificAgreement)
+          - type: ComboBox
+            name: specificCIMethod
+            enable: (specificAgreement && specificConfidenceIntervals)
+          - type: VariableSupplier
+            persistentItems: false
+            children:
+              - type: TargetLayoutBox
+                label: Patient/cluster ID (optional)
+                children:
+                  - type: VariablesListBox
+                    name: specificCluster
+                    isTarget: true
+                    maxItemCount: 1
+                    enable: (specificAgreement && specificCIMethod:bootstrap)
           - type: CheckBox
             name: showSpecificAgreementGuide
   - type: CollapseBox

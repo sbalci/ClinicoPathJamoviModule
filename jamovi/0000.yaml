@@ -3744,7 +3744,7 @@ analyses:
     name: cohenskappa
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideExtraD
+    menuGroup: meddecideExtraDT
     menuSubgroup: Diagnostic Statistics
     menuTitle: Cohen's Kappa Agreement
     menuSubtitle: Two-Rater Agreement Analysis
@@ -4897,7 +4897,10 @@ analyses:
       Interrater reliability analysis including Cohen's kappa (2 raters),
       Fleiss' kappa (3+ raters), Krippendorff's alpha, and consensus analysis.
       Provides agreement statistics, visualization, and clinical
-      interpretation for categorical rating data.
+      interpretation for categorical rating data. Optional independent-reader
+      workflows report disease-positive accuracy and binary, ordinal or numeric
+      cutoff disagreement with explicit case populations and exploratory cluster
+      intervals. The default retains standard categorical agreement.
     menuSubtitle: Agreement on Categorical and Ordinal Data
   - title: Auto-Plot (esquisse)
     name: esquisseauto

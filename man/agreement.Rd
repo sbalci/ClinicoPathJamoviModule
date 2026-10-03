@@ -161,7 +161,9 @@ agreement(
   ssAlpha = 0.05,
   ssPower = 0.8,
   showSampleSizeGuide = FALSE,
-  seed = 42
+  seed = 42,
+  specificCIMethod = "legacy",
+  specificCluster = NULL
 )
 }
 \arguments{
@@ -745,10 +747,9 @@ diagnoses/classifications have strong agreement and which may need improved
 training or criteria clarification.}
 
 \item{specificConfidenceIntervals}{Calculate confidence intervals at the
-chosen confidence level for specific agreement indices, using the Wilson
-score method. Recommended for publication and when sample sizes vary across
-categories. Helps distinguish true differences in category-specific
-agreement from random variation.}
+chosen confidence level for specific agreement indices using the selected
+method. Bootstrap resamples complete paired observations or clusters; the
+legacy Wilson option remains explicitly approximate.}
 
 \item{showSpecificAgreementGuide}{Show educational guide and clinical use
 cases for Specific Agreement Indices before running analysis.}
@@ -1022,6 +1023,16 @@ bootstrap resampling, the k-means starting centres of rater and case
 clustering, and the random subsample the case-cluster heatmap draws above
 200 cases. Change this value to obtain a different draw; the default (42)
 reproduces the previous fixed behaviour.}
+
+\item{specificCIMethod}{Bootstrap preserves paired observations and
+suppresses intervals with undefined or constant draws. It is exploratory;
+simulations found undercoverage even with 60 clusters. Legacy Wilson uses
+an effective denominator and has no guaranteed coverage. The existing
+legacy default is retained pending better coverage validation.}
+
+\item{specificCluster}{Optional cluster ID aligned to the data.
+Specific-agreement intervals resample whole clusters; all other agreement
+outputs keep their own documented inference.}
 }
 \value{
 A results object containing:

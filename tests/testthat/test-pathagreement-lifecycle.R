@@ -61,6 +61,45 @@ pa_lifecycle_options_pb <- function(options) {
   invisible(pb)
 }
 
+# Standalone development jmvcore leaves the engine's protobuf aliases NULL.
+# Supply the actual RProtoBuf functions locally; serialization is not mocked.
+pa_lifecycle_transport <- function(.env = parent.frame()) {
+  if (is.null(getFromNamespace("RProtoBuf_new", "jmvcore"))) {
+    testthat::local_mocked_bindings(
+      RProtoBuf_new = RProtoBuf::new,
+      RProtoBuf_serialize = RProtoBuf::serialize,
+      RProtoBuf_read = RProtoBuf::read,
+      .package = "jmvcore", .env = .env)
+  }
+}
+
+test_that("reader diagnostic tables survive saving and restoring without recomputation", {
+  skip_if_not_installed("RProtoBuf")
+  pa_lifecycle_transport()
+  d <- data.frame(a = c(49, 50, 51, NA), b = c(50, 49, 51, 10),
+    gold = factor(c("N", "P", "P", "N")), id = c("X1", "X2", "X3", "X4"))
+  args <- list(readerWorkflow = "numeric_cutoff", readerScores = c("a", "b"),
+    referenceStandard = "gold", referencePositive = "P", referenceNegative = "N",
+    clinicalCutoff = "50", nearCutoffWidth = "1", caseID = "id", readerCode = TRUE)
+  a <- do.call(pa_lifecycle_new, c(list(data = d), args))
+  pa_lifecycle_options_pb(a$options)
+  a$run()
+  file <- tempfile()
+  withr::defer(unlink(file))
+  a$.setStatePathSource(function() file)
+  a$.save()
+  b <- do.call(pa_lifecycle_new, c(list(data = d), args))
+  pa_lifecycle_options_pb(b$options)
+  b$.setStatePathSource(function() file)
+  b$init(); b$postInit(); b$.load()
+  b$.__enclos_env__$private$.data <- NULL
+  for (name in c("readerSettings", "readerDataSummary", "readerAccuracyTable",
+                 "cutoffAgreementTable", "cutoffDisagreementCases")) {
+    expect_equal(b$results[[name]]$asDF, a$results[[name]]$asDF, info = name)
+  }
+  expect_equal(b$results$readerRCode$content, a$results$readerRCode$content)
+})
+
 test_that("option-determined rows exist before computation and are only filled", {
   d <- pa_lifecycle_data()
   a <- pa_lifecycle_new(d, vars = names(d)[1:4], referenceStandard = "reference",
@@ -89,6 +128,7 @@ test_that("option-determined rows exist before computation and are only filled",
 
 test_that("jamovi saved results restore every plot without source data or recomputation", {
   skip_if_not_installed("RProtoBuf")
+  pa_lifecycle_transport()
   getFromNamespace("initProtoBuf", "jmvcore")()
   d <- pa_lifecycle_data()
   args <- list(vars = names(d)[1:4], referenceStandard = "reference", caseID = "id",

@@ -60,7 +60,31 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             referenceStandard = NULL,
             useMetadataRows = FALSE,
             showInlineComments = FALSE,
-            showClusteringInterpretation = FALSE, ...) {
+            showClusteringInterpretation = FALSE,
+            readerWorkflow = "off",
+            readerScores = NULL,
+            readerPositive = "",
+            readerNegative = "",
+            referenceAccuracy = TRUE,
+            referencePositive = "",
+            referenceNegative = "",
+            readerPopulation = "available",
+            clinicalCutoff = "",
+            positiveRule = "ge",
+            nearCutoffWidth = "",
+            ordinalCutoff = "",
+            nearCutoffLevels = "",
+            readerPairs = "all",
+            readerPair1 = "",
+            readerPair2 = "",
+            readerCaseLimit = 50,
+            readerCluster = NULL,
+            readerIntervals = TRUE,
+            readerBootstrap = FALSE,
+            readerConfidence = 0.95,
+            showKappaBalanced = FALSE,
+            compositeReader = "",
+            readerCode = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -360,6 +384,130 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "showClusteringInterpretation",
                 showClusteringInterpretation,
                 default=FALSE)
+            private$..readerWorkflow <- jmvcore::OptionList$new(
+                "readerWorkflow",
+                readerWorkflow,
+                default="off",
+                options=list(
+                    "off",
+                    "binary",
+                    "ordinal_cutoff",
+                    "numeric_cutoff"))
+            private$..readerScores <- jmvcore::OptionVariables$new(
+                "readerScores",
+                readerScores,
+                default=NULL,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"))
+            private$..readerPositive <- jmvcore::OptionString$new(
+                "readerPositive",
+                readerPositive,
+                default="")
+            private$..readerNegative <- jmvcore::OptionString$new(
+                "readerNegative",
+                readerNegative,
+                default="")
+            private$..referenceAccuracy <- jmvcore::OptionBool$new(
+                "referenceAccuracy",
+                referenceAccuracy,
+                default=TRUE)
+            private$..referencePositive <- jmvcore::OptionString$new(
+                "referencePositive",
+                referencePositive,
+                default="")
+            private$..referenceNegative <- jmvcore::OptionString$new(
+                "referenceNegative",
+                referenceNegative,
+                default="")
+            private$..readerPopulation <- jmvcore::OptionList$new(
+                "readerPopulation",
+                readerPopulation,
+                default="available",
+                options=list(
+                    "available",
+                    "shared",
+                    "both"))
+            private$..clinicalCutoff <- jmvcore::OptionString$new(
+                "clinicalCutoff",
+                clinicalCutoff,
+                default="")
+            private$..positiveRule <- jmvcore::OptionList$new(
+                "positiveRule",
+                positiveRule,
+                default="ge",
+                options=list(
+                    "ge",
+                    "gt",
+                    "le",
+                    "lt"))
+            private$..nearCutoffWidth <- jmvcore::OptionString$new(
+                "nearCutoffWidth",
+                nearCutoffWidth,
+                default="")
+            private$..ordinalCutoff <- jmvcore::OptionString$new(
+                "ordinalCutoff",
+                ordinalCutoff,
+                default="")
+            private$..nearCutoffLevels <- jmvcore::OptionString$new(
+                "nearCutoffLevels",
+                nearCutoffLevels,
+                default="")
+            private$..readerPairs <- jmvcore::OptionList$new(
+                "readerPairs",
+                readerPairs,
+                default="all",
+                options=list(
+                    "all",
+                    "selected"))
+            private$..readerPair1 <- jmvcore::OptionString$new(
+                "readerPair1",
+                readerPair1,
+                default="")
+            private$..readerPair2 <- jmvcore::OptionString$new(
+                "readerPair2",
+                readerPair2,
+                default="")
+            private$..readerCaseLimit <- jmvcore::OptionInteger$new(
+                "readerCaseLimit",
+                readerCaseLimit,
+                default=50,
+                min=0,
+                max=500)
+            private$..readerCluster <- jmvcore::OptionVariable$new(
+                "readerCluster",
+                readerCluster,
+                default=NULL,
+                suggested=list(
+                    "id",
+                    "nominal"))
+            private$..readerIntervals <- jmvcore::OptionBool$new(
+                "readerIntervals",
+                readerIntervals,
+                default=TRUE)
+            private$..readerBootstrap <- jmvcore::OptionBool$new(
+                "readerBootstrap",
+                readerBootstrap,
+                default=FALSE)
+            private$..readerConfidence <- jmvcore::OptionNumber$new(
+                "readerConfidence",
+                readerConfidence,
+                default=0.95,
+                min=0.01,
+                max=0.999)
+            private$..showKappaBalanced <- jmvcore::OptionBool$new(
+                "showKappaBalanced",
+                showKappaBalanced,
+                default=FALSE)
+            private$..compositeReader <- jmvcore::OptionString$new(
+                "compositeReader",
+                compositeReader,
+                default="")
+            private$..readerCode <- jmvcore::OptionBool$new(
+                "readerCode",
+                readerCode,
+                default=FALSE)
 
             self$.addOption(private$..vars)
             self$.addOption(private$..sft)
@@ -416,6 +564,30 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..useMetadataRows)
             self$.addOption(private$..showInlineComments)
             self$.addOption(private$..showClusteringInterpretation)
+            self$.addOption(private$..readerWorkflow)
+            self$.addOption(private$..readerScores)
+            self$.addOption(private$..readerPositive)
+            self$.addOption(private$..readerNegative)
+            self$.addOption(private$..referenceAccuracy)
+            self$.addOption(private$..referencePositive)
+            self$.addOption(private$..referenceNegative)
+            self$.addOption(private$..readerPopulation)
+            self$.addOption(private$..clinicalCutoff)
+            self$.addOption(private$..positiveRule)
+            self$.addOption(private$..nearCutoffWidth)
+            self$.addOption(private$..ordinalCutoff)
+            self$.addOption(private$..nearCutoffLevels)
+            self$.addOption(private$..readerPairs)
+            self$.addOption(private$..readerPair1)
+            self$.addOption(private$..readerPair2)
+            self$.addOption(private$..readerCaseLimit)
+            self$.addOption(private$..readerCluster)
+            self$.addOption(private$..readerIntervals)
+            self$.addOption(private$..readerBootstrap)
+            self$.addOption(private$..readerConfidence)
+            self$.addOption(private$..showKappaBalanced)
+            self$.addOption(private$..compositeReader)
+            self$.addOption(private$..readerCode)
         }),
     active = list(
         vars = function() private$..vars$value,
@@ -472,7 +644,31 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         referenceStandard = function() private$..referenceStandard$value,
         useMetadataRows = function() private$..useMetadataRows$value,
         showInlineComments = function() private$..showInlineComments$value,
-        showClusteringInterpretation = function() private$..showClusteringInterpretation$value),
+        showClusteringInterpretation = function() private$..showClusteringInterpretation$value,
+        readerWorkflow = function() private$..readerWorkflow$value,
+        readerScores = function() private$..readerScores$value,
+        readerPositive = function() private$..readerPositive$value,
+        readerNegative = function() private$..readerNegative$value,
+        referenceAccuracy = function() private$..referenceAccuracy$value,
+        referencePositive = function() private$..referencePositive$value,
+        referenceNegative = function() private$..referenceNegative$value,
+        readerPopulation = function() private$..readerPopulation$value,
+        clinicalCutoff = function() private$..clinicalCutoff$value,
+        positiveRule = function() private$..positiveRule$value,
+        nearCutoffWidth = function() private$..nearCutoffWidth$value,
+        ordinalCutoff = function() private$..ordinalCutoff$value,
+        nearCutoffLevels = function() private$..nearCutoffLevels$value,
+        readerPairs = function() private$..readerPairs$value,
+        readerPair1 = function() private$..readerPair1$value,
+        readerPair2 = function() private$..readerPair2$value,
+        readerCaseLimit = function() private$..readerCaseLimit$value,
+        readerCluster = function() private$..readerCluster$value,
+        readerIntervals = function() private$..readerIntervals$value,
+        readerBootstrap = function() private$..readerBootstrap$value,
+        readerConfidence = function() private$..readerConfidence$value,
+        showKappaBalanced = function() private$..showKappaBalanced$value,
+        compositeReader = function() private$..compositeReader$value,
+        readerCode = function() private$..readerCode$value),
     private = list(
         ..vars = NA,
         ..sft = NA,
@@ -528,7 +724,31 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..referenceStandard = NA,
         ..useMetadataRows = NA,
         ..showInlineComments = NA,
-        ..showClusteringInterpretation = NA)
+        ..showClusteringInterpretation = NA,
+        ..readerWorkflow = NA,
+        ..readerScores = NA,
+        ..readerPositive = NA,
+        ..readerNegative = NA,
+        ..referenceAccuracy = NA,
+        ..referencePositive = NA,
+        ..referenceNegative = NA,
+        ..readerPopulation = NA,
+        ..clinicalCutoff = NA,
+        ..positiveRule = NA,
+        ..nearCutoffWidth = NA,
+        ..ordinalCutoff = NA,
+        ..nearCutoffLevels = NA,
+        ..readerPairs = NA,
+        ..readerPair1 = NA,
+        ..readerPair2 = NA,
+        ..readerCaseLimit = NA,
+        ..readerCluster = NA,
+        ..readerIntervals = NA,
+        ..readerBootstrap = NA,
+        ..readerConfidence = NA,
+        ..showKappaBalanced = NA,
+        ..compositeReader = NA,
+        ..readerCode = NA)
 )
 
 pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -584,7 +804,15 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         clusteringHeatmap = function() private$.items[["clusteringHeatmap"]],
         clusterDendrogram = function() private$.items[["clusterDendrogram"]],
         silhouettePlot = function() private$.items[["silhouettePlot"]],
-        clusteringInterpretation = function() private$.items[["clusteringInterpretation"]]),
+        clusteringInterpretation = function() private$.items[["clusteringInterpretation"]],
+        readerSettings = function() private$.items[["readerSettings"]],
+        readerDataSummary = function() private$.items[["readerDataSummary"]],
+        readerAccuracyTable = function() private$.items[["readerAccuracyTable"]],
+        cutoffAgreementTable = function() private$.items[["cutoffAgreementTable"]],
+        readerOriginalAgreement = function() private$.items[["readerOriginalAgreement"]],
+        cutoffDisagreementCases = function() private$.items[["cutoffDisagreementCases"]],
+        kappaBalancedTable = function() private$.items[["kappaBalancedTable"]],
+        readerRCode = function() private$.items[["readerRCode"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -618,6 +846,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
+                visible="(readerWorkflow:off)",
                 title="Getting Started",
                 clearWith=list(
                     "vars")))
@@ -625,7 +854,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="warnings",
                 title="Analysis Messages",
-                visible=TRUE,
+                visible="(readerWorkflow:off)",
                 clearWith=list(
                     "vars",
                     "caseID",
@@ -639,6 +868,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$add(jmvcore::Table$new(
                 options=options,
                 name="overviewTable",
+                visible="(readerWorkflow:off)",
                 title="Agreement Analysis Summary",
                 rows=1,
                 clearWith=list(
@@ -672,6 +902,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$add(jmvcore::Table$new(
                 options=options,
                 name="kappaTable",
+                visible="(readerWorkflow:off)",
                 title="Kappa Statistics",
                 clearWith=list(
                     "vars",
@@ -725,7 +956,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="iccTable",
                 title="Intraclass Correlation Coefficients",
-                visible="(icc)",
+                visible="(readerWorkflow:off && (icc))",
                 clearWith=list(
                     "vars",
                     "caseID",
@@ -769,7 +1000,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="pairwiseTable",
                 title="Pairwise Rater Agreements",
-                visible="(pairwiseAnalysis)",
+                visible="(readerWorkflow:off && (pairwiseAnalysis))",
                 clearWith=list(
                     "vars",
                     "caseID",
@@ -814,7 +1045,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="categoryTable",
                 title="Category-Specific Agreement",
-                visible="(categoryAnalysis)",
+                visible="(readerWorkflow:off && (categoryAnalysis))",
                 clearWith=list(
                     "vars",
                     "caseID",
@@ -856,7 +1087,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="outlierTable",
                 title="Cases with Poor Agreement",
-                visible="(outlierAnalysis)",
+                visible="(readerWorkflow:off && (outlierAnalysis))",
                 clearWith=list(
                     "vars",
                     "caseID",
@@ -888,8 +1119,8 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$add(jmvcore::Table$new(
                 options=options,
                 name="diagnosticAccuracyTable",
-                title="Diagnostic Accuracy by Rater",
-                visible="(pathologyContext)",
+                title="Diagnostic Accuracy by Rater (Macro-Averaged Across Categories)",
+                visible="(readerWorkflow:off && (pathologyContext))",
                 clearWith=list(
                     "vars",
                     "caseID",
@@ -908,22 +1139,22 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `format`="zto"),
                     list(
                         `name`="sensitivity", 
-                        `title`="Sensitivity %", 
+                        `title`="Macro sensitivity %", 
                         `type`="number", 
                         `format`="zto"),
                     list(
                         `name`="specificity", 
-                        `title`="Specificity %", 
+                        `title`="Macro specificity %", 
                         `type`="number", 
                         `format`="zto"),
                     list(
                         `name`="ppv", 
-                        `title`="PPV %", 
+                        `title`="Macro PPV %", 
                         `type`="number", 
                         `format`="zto"),
                     list(
                         `name`="npv", 
-                        `title`="NPV %", 
+                        `title`="Macro NPV %", 
                         `type`="number", 
                         `format`="zto"),
                     list(
@@ -935,7 +1166,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="diagnosticStyleTable",
                 title="Diagnostic Style Clustering Results",
-                visible="(performClustering)",
+                visible="(readerWorkflow:off && (performClustering))",
                 clearWith=list(
                     "vars",
                     "caseID",
@@ -987,7 +1218,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="styleSummaryTable",
                 title="Diagnostic Style Group Summary",
-                visible="(performClustering)",
+                visible="(readerWorkflow:off && (performClustering))",
                 clearWith=list(
                     "vars",
                     "caseID",
@@ -1038,7 +1269,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="discordantCasesTable",
                 title="Cases Distinguishing Diagnostic Styles",
-                visible="(identifyDiscordantCases)",
+                visible="(readerWorkflow:off && (identifyDiscordantCases))",
                 clearWith=list(
                     "vars",
                     "caseID",
@@ -1071,7 +1302,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="krippTable",
                 title="Krippendorff's Alpha Results",
-                visible="(kripp)",
+                visible="(readerWorkflow:off && (kripp))",
                 clearWith=list(
                     "vars",
                     "caseID",
@@ -1112,7 +1343,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="consensusTable",
                 title="Consensus Scoring Results",
-                visible="(consensus && show_consensus_table)",
+                visible="(readerWorkflow:off && (consensus && show_consensus_table))",
                 clearWith=list(
                     "vars",
                     "caseID",
@@ -1146,7 +1377,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="consensusSummary",
                 title="Consensus Summary Statistics",
-                visible="(consensus)",
+                visible="(readerWorkflow:off && (consensus))",
                 clearWith=list(
                     "vars",
                     "caseID",
@@ -1175,7 +1406,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 width=800,
                 height=600,
                 renderFun=".heatmapPlot",
-                visible="(heatmap)",
+                visible="(readerWorkflow:off && (heatmap))",
                 clearWith=list(
                     "vars",
                     "caseID",
@@ -1191,7 +1422,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 width=700,
                 height=500,
                 renderFun=".pairwisePlot",
-                visible="(pairwiseAnalysis)",
+                visible="(readerWorkflow:off && (pairwiseAnalysis))",
                 clearWith=list(
                     "vars",
                     "caseID",
@@ -1205,7 +1436,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 width=700,
                 height=500,
                 renderFun=".categoryPlot",
-                visible="(categoryAnalysis)",
+                visible="(readerWorkflow:off && (categoryAnalysis))",
                 clearWith=list(
                     "vars",
                     "caseID",
@@ -1219,7 +1450,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 width=600,
                 height=600,
                 renderFun=".confusionMatrixPlot",
-                visible="(pathologyContext)",
+                visible="(readerWorkflow:off && (pathologyContext))",
                 clearWith=list(
                     "vars",
                     "caseID",
@@ -1233,7 +1464,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 width=800,
                 height=600,
                 renderFun=".diagnosticStyleDendrogram",
-                visible="(performClustering)",
+                visible="(readerWorkflow:off && (performClustering))",
                 clearWith=list(
                     "vars",
                     "caseID",
@@ -1254,7 +1485,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 width=800,
                 height=600,
                 renderFun=".diagnosticStyleHeatmap",
-                visible="(performClustering && showClusteringHeatmap)",
+                visible="(readerWorkflow:off && (performClustering && showClusteringHeatmap))",
                 clearWith=list(
                     "vars",
                     "caseID",
@@ -1277,7 +1508,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 width=1000,
                 height=1000,
                 renderFun=".diagnosticStyleCombined",
-                visible="(performClustering)",
+                visible="(readerWorkflow:off && (performClustering))",
                 clearWith=list(
                     "vars",
                     "caseID",
@@ -1338,7 +1569,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="crosstabTable",
                 title="Cross-tabulation Matrix",
-                visible="(sft && length(vars) == 2)",
+                visible="(readerWorkflow:off && (sft && length(vars) == 2))",
                 clearWith=list(
                     "vars",
                     "caseID",
@@ -1357,7 +1588,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="clinicalSummary",
                 title="Clinical Summary",
-                visible="(showClinicalSummary)",
+                visible="(readerWorkflow:off && (showClinicalSummary))",
                 clearWith=list(
                     "vars",
                     "caseID",
@@ -1372,7 +1603,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="reportTemplate",
                 title="Copy-Ready Report",
-                visible="(showClinicalSummary)",
+                visible="(readerWorkflow:off && (showClinicalSummary))",
                 clearWith=list(
                     "vars",
                     "caseID",
@@ -1387,14 +1618,14 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="aboutAnalysis",
                 title="About This Analysis",
-                visible="(showAboutAnalysis)",
+                visible="(readerWorkflow:off && (showAboutAnalysis))",
                 clearWith=list(
                     "showAboutAnalysis")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="assumptions",
                 title="Assumptions & Caveats",
-                visible="(showAssumptions)",
+                visible="(readerWorkflow:off && (showAssumptions))",
                 clearWith=list(
                     "vars",
                     "caseID",
@@ -1404,7 +1635,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="weightedKappaGuide",
                 title="Weighted Kappa Guide",
-                visible="(showWeightedKappaGuide && wght != 'unweighted')",
+                visible="(readerWorkflow:off && (showWeightedKappaGuide && wght != 'unweighted'))",
                 clearWith=list(
                     "showWeightedKappaGuide",
                     "wght")))
@@ -1412,14 +1643,14 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="statisticalGlossary",
                 title="Statistical Terms Glossary",
-                visible="(showStatisticalGlossary)",
+                visible="(readerWorkflow:off && (showStatisticalGlossary))",
                 clearWith=list(
                     "showStatisticalGlossary")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="gwetACTable",
                 title="Gwet's Agreement Coefficients",
-                visible="(gwetAC)",
+                visible="(readerWorkflow:off && (gwetAC))",
                 clearWith=list(
                     "vars",
                     "caseID",
@@ -1458,7 +1689,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="pabakTable",
                 title="PABAK Analysis Results",
-                visible="(pabak)",
+                visible="(readerWorkflow:off && (pabak))",
                 clearWith=list(
                     "vars",
                     "caseID",
@@ -1492,7 +1723,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="sampleSizeTable",
                 title="Sample Size Planning Results",
-                visible="(sampleSizePlanning)",
+                visible="(readerWorkflow:off && (sampleSizePlanning))",
                 clearWith=list(
                     "vars",
                     "caseID",
@@ -1517,7 +1748,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="raterBiasTable",
                 title="Rater Disagreement with Consensus",
-                visible="(raterBiasAnalysis)",
+                visible="(readerWorkflow:off && (raterBiasAnalysis))",
                 clearWith=list(
                     "vars",
                     "caseID",
@@ -1549,7 +1780,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="agreementTrendTable",
                 title="Agreement Trend Analysis",
-                visible="(agreementTrendAnalysis)",
+                visible="(readerWorkflow:off && (agreementTrendAnalysis))",
                 clearWith=list(
                     "vars",
                     "caseID",
@@ -1583,7 +1814,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="caseDifficultyTable",
                 title="Case Difficulty Analysis",
-                visible="(caseDifficultyScoring)",
+                visible="(readerWorkflow:off && (caseDifficultyScoring))",
                 clearWith=list(
                     "vars",
                     "caseID",
@@ -1616,7 +1847,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="stabilityTable",
                 title="Agreement Stability Analysis",
-                visible="(agreementStabilityAnalysis)",
+                visible="(readerWorkflow:off && (agreementStabilityAnalysis))",
                 clearWith=list(
                     "vars",
                     "caseID",
@@ -1661,7 +1892,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 width=700,
                 height=500,
                 renderFun=".trendPlot",
-                visible="(agreementTrendAnalysis)",
+                visible="(readerWorkflow:off && (agreementTrendAnalysis))",
                 clearWith=list(
                     "vars",
                     "caseID",
@@ -1675,7 +1906,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 width=700,
                 height=500,
                 renderFun=".biasPlot",
-                visible="(raterBiasAnalysis)",
+                visible="(readerWorkflow:off && (raterBiasAnalysis))",
                 clearWith=list(
                     "vars",
                     "caseID",
@@ -1688,7 +1919,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 width=700,
                 height=500,
                 renderFun=".difficultyPlot",
-                visible="(caseDifficultyScoring)",
+                visible="(readerWorkflow:off && (caseDifficultyScoring))",
                 clearWith=list(
                     "vars",
                     "caseID",
@@ -1698,7 +1929,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="inlineComments",
                 title="Statistical Commentary",
-                visible="(showInlineComments)",
+                visible="(readerWorkflow:off && (showInlineComments))",
                 clearWith=list(
                     "vars",
                     "caseID",
@@ -1715,7 +1946,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="styleGroupSummary",
                 title="Diagnostic Style Groups Summary",
-                visible="(performClustering)",
+                visible="(readerWorkflow:off && (performClustering))",
                 clearWith=list(
                     "vars",
                     "caseID",
@@ -1765,7 +1996,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="styleGroupProfiles",
                 title="Diagnostic Patterns by Style Group",
-                visible="(performClustering)",
+                visible="(readerWorkflow:off && (performClustering))",
                 clearWith=list(
                     "vars",
                     "caseID",
@@ -1805,7 +2036,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="discordantCasesCluster",
                 title="High-Disagreement Cases Between Style Groups",
-                visible="(performClustering && identifyDiscordant)",
+                visible="(readerWorkflow:off && (performClustering && identifyDiscordant))",
                 clearWith=list(
                     "vars",
                     "caseID",
@@ -1846,7 +2077,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="characteristicAssociations",
                 title="Style Group Associations with Rater Characteristics",
-                visible="(performClustering)",
+                visible="(readerWorkflow:off && (performClustering))",
                 clearWith=list(
                     "vars",
                     "caseID",
@@ -1893,7 +2124,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="referenceComparison",
                 title="Style Group Agreement with Reference Standard",
-                visible="(performClustering && !is.null(referenceStandard))",
+                visible="(readerWorkflow:off && (performClustering && !is.null(referenceStandard)))",
                 clearWith=list(
                     "vars",
                     "caseID",
@@ -1947,7 +2178,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 width=1000,
                 height=800,
                 renderFun=".clusteringHeatmap",
-                visible="(performClustering && showClusteringHeatmap)",
+                visible="(readerWorkflow:off && (performClustering && showClusteringHeatmap))",
                 clearWith=list(
                     "vars",
                     "caseID",
@@ -1970,7 +2201,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 width=800,
                 height=600,
                 renderFun=".clusterDendrogram",
-                visible="(performClustering)",
+                visible="(readerWorkflow:off && (performClustering))",
                 clearWith=list(
                     "vars",
                     "caseID",
@@ -1991,7 +2222,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 width=700,
                 height=500,
                 renderFun=".silhouettePlot",
-                visible="(performClustering)",
+                visible="(readerWorkflow:off && (performClustering))",
                 clearWith=list(
                     "vars",
                     "caseID",
@@ -2009,7 +2240,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="clusteringInterpretation",
                 title="Clustering Analysis Interpretation Guide",
-                visible="(performClustering && showClusteringInterpretation)",
+                visible="(readerWorkflow:off && (performClustering && showClusteringInterpretation))",
                 clearWith=list(
                     "vars",
                     "caseID",
@@ -2023,7 +2254,623 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "identifyDiscordant",
                     "discordantThreshold",
                     "raterCharacteristics",
-                    "showClusteringInterpretation")))}))
+                    "showClusteringInterpretation")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="readerSettings",
+                title="Reader Analysis Settings",
+                visible="(readerWorkflow:binary || readerWorkflow:ordinal_cutoff || readerWorkflow:numeric_cutoff)",
+                rows=0,
+                clearWith=list(
+                    "readerWorkflow",
+                    "readerScores",
+                    "readerPositive",
+                    "readerNegative",
+                    "referenceAccuracy",
+                    "referencePositive",
+                    "referenceNegative",
+                    "readerPopulation",
+                    "clinicalCutoff",
+                    "positiveRule",
+                    "nearCutoffWidth",
+                    "ordinalCutoff",
+                    "nearCutoffLevels",
+                    "readerPairs",
+                    "readerPair1",
+                    "readerPair2",
+                    "readerCaseLimit",
+                    "readerCluster",
+                    "readerIntervals",
+                    "readerBootstrap",
+                    "readerConfidence",
+                    "showKappaBalanced",
+                    "compositeReader",
+                    "readerCode",
+                    "vars",
+                    "referenceStandard",
+                    "caseID",
+                    "useMetadataRows",
+                    "bootstrapSamples",
+                    "seed",
+                    "wght"),
+                columns=list(
+                    list(
+                        `name`="setting", 
+                        `title`="Setting", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="readerDataSummary",
+                title="Reader Data and Exclusions",
+                visible="(readerWorkflow:binary || readerWorkflow:ordinal_cutoff || readerWorkflow:numeric_cutoff)",
+                rows=0,
+                clearWith=list(
+                    "readerWorkflow",
+                    "readerScores",
+                    "readerPositive",
+                    "readerNegative",
+                    "referenceAccuracy",
+                    "referencePositive",
+                    "referenceNegative",
+                    "readerPopulation",
+                    "clinicalCutoff",
+                    "positiveRule",
+                    "nearCutoffWidth",
+                    "ordinalCutoff",
+                    "nearCutoffLevels",
+                    "readerPairs",
+                    "readerPair1",
+                    "readerPair2",
+                    "readerCaseLimit",
+                    "readerCluster",
+                    "readerIntervals",
+                    "readerBootstrap",
+                    "readerConfidence",
+                    "showKappaBalanced",
+                    "compositeReader",
+                    "readerCode",
+                    "vars",
+                    "referenceStandard",
+                    "caseID",
+                    "useMetadataRows",
+                    "bootstrapSamples",
+                    "seed",
+                    "wght"),
+                columns=list(
+                    list(
+                        `name`="reader", 
+                        `title`="Reader", 
+                        `type`="text"),
+                    list(
+                        `name`="total", 
+                        `title`="Total", 
+                        `type`="integer"),
+                    list(
+                        `name`="missing", 
+                        `title`="Missing", 
+                        `type`="integer"),
+                    list(
+                        `name`="indeterminate", 
+                        `title`="Indeterminate", 
+                        `type`="integer"),
+                    list(
+                        `name`="usable", 
+                        `title`="Usable", 
+                        `type`="integer"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="readerAccuracyTable",
+                title="Disease-Positive Reader Accuracy",
+                visible="((readerWorkflow:binary || readerWorkflow:ordinal_cutoff || readerWorkflow:numeric_cutoff) && referenceAccuracy)",
+                rows=0,
+                clearWith=list(
+                    "readerWorkflow",
+                    "readerScores",
+                    "readerPositive",
+                    "readerNegative",
+                    "referenceAccuracy",
+                    "referencePositive",
+                    "referenceNegative",
+                    "readerPopulation",
+                    "clinicalCutoff",
+                    "positiveRule",
+                    "nearCutoffWidth",
+                    "ordinalCutoff",
+                    "nearCutoffLevels",
+                    "readerPairs",
+                    "readerPair1",
+                    "readerPair2",
+                    "readerCaseLimit",
+                    "readerCluster",
+                    "readerIntervals",
+                    "readerBootstrap",
+                    "readerConfidence",
+                    "showKappaBalanced",
+                    "compositeReader",
+                    "readerCode",
+                    "vars",
+                    "referenceStandard",
+                    "caseID",
+                    "useMetadataRows",
+                    "bootstrapSamples",
+                    "seed",
+                    "wght"),
+                columns=list(
+                    list(
+                        `name`="reader", 
+                        `title`="Reader", 
+                        `type`="text"),
+                    list(
+                        `name`="population", 
+                        `title`="Population", 
+                        `type`="text"),
+                    list(
+                        `name`="n", 
+                        `title`="N", 
+                        `type`="integer"),
+                    list(
+                        `name`="units", 
+                        `title`="Units", 
+                        `type`="integer"),
+                    list(
+                        `name`="excluded", 
+                        `title`="Excluded", 
+                        `type`="integer"),
+                    list(
+                        `name`="tp", 
+                        `title`="Tp", 
+                        `type`="integer"),
+                    list(
+                        `name`="fn", 
+                        `title`="Fn", 
+                        `type`="integer"),
+                    list(
+                        `name`="tn", 
+                        `title`="Tn", 
+                        `type`="integer"),
+                    list(
+                        `name`="fp", 
+                        `title`="Fp", 
+                        `type`="integer"),
+                    list(
+                        `name`="metric", 
+                        `title`="Metric", 
+                        `type`="text"),
+                    list(
+                        `name`="estimate", 
+                        `title`="Estimate", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="lower", 
+                        `title`="CI lower", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="upper", 
+                        `title`="CI upper", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="attempted", 
+                        `title`="Attempted", 
+                        `type`="integer"),
+                    list(
+                        `name`="valid", 
+                        `title`="Valid", 
+                        `type`="integer"),
+                    list(
+                        `name`="undefined", 
+                        `title`="Undefined", 
+                        `type`="integer"),
+                    list(
+                        `name`="boundary", 
+                        `title`="Boundary", 
+                        `type`="integer"),
+                    list(
+                        `name`="constant", 
+                        `title`="Constant", 
+                        `type`="text"),
+                    list(
+                        `name`="status", 
+                        `title`="Interval status", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="cutoffAgreementTable",
+                title="Reader Agreement at the Clinical Cutoff",
+                visible="(readerWorkflow:binary || readerWorkflow:ordinal_cutoff || readerWorkflow:numeric_cutoff)",
+                rows=0,
+                clearWith=list(
+                    "readerWorkflow",
+                    "readerScores",
+                    "readerPositive",
+                    "readerNegative",
+                    "referenceAccuracy",
+                    "referencePositive",
+                    "referenceNegative",
+                    "readerPopulation",
+                    "clinicalCutoff",
+                    "positiveRule",
+                    "nearCutoffWidth",
+                    "ordinalCutoff",
+                    "nearCutoffLevels",
+                    "readerPairs",
+                    "readerPair1",
+                    "readerPair2",
+                    "readerCaseLimit",
+                    "readerCluster",
+                    "readerIntervals",
+                    "readerBootstrap",
+                    "readerConfidence",
+                    "showKappaBalanced",
+                    "compositeReader",
+                    "readerCode",
+                    "vars",
+                    "referenceStandard",
+                    "caseID",
+                    "useMetadataRows",
+                    "bootstrapSamples",
+                    "seed",
+                    "wght"),
+                columns=list(
+                    list(
+                        `name`="pair", 
+                        `title`="Pair", 
+                        `type`="text"),
+                    list(
+                        `name`="population", 
+                        `title`="Population", 
+                        `type`="text"),
+                    list(
+                        `name`="n", 
+                        `title`="N", 
+                        `type`="integer"),
+                    list(
+                        `name`="units", 
+                        `title`="Units", 
+                        `type`="integer"),
+                    list(
+                        `name`="excluded", 
+                        `title`="Excluded", 
+                        `type`="integer"),
+                    list(
+                        `name`="both_positive", 
+                        `title`="Both positive", 
+                        `type`="integer"),
+                    list(
+                        `name`="first_positive", 
+                        `title`="First positive", 
+                        `type`="integer"),
+                    list(
+                        `name`="second_positive", 
+                        `title`="Second positive", 
+                        `type`="integer"),
+                    list(
+                        `name`="both_negative", 
+                        `title`="Both negative", 
+                        `type`="integer"),
+                    list(
+                        `name`="metric", 
+                        `title`="Metric", 
+                        `type`="text"),
+                    list(
+                        `name`="estimate", 
+                        `title`="Estimate", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="lower", 
+                        `title`="CI lower", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="upper", 
+                        `title`="CI upper", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="attempted", 
+                        `title`="Attempted", 
+                        `type`="integer"),
+                    list(
+                        `name`="valid", 
+                        `title`="Valid", 
+                        `type`="integer"),
+                    list(
+                        `name`="undefined", 
+                        `title`="Undefined", 
+                        `type`="integer"),
+                    list(
+                        `name`="boundary", 
+                        `title`="Boundary", 
+                        `type`="integer"),
+                    list(
+                        `name`="constant", 
+                        `title`="Constant", 
+                        `type`="text"),
+                    list(
+                        `name`="status", 
+                        `title`="Interval status", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="readerOriginalAgreement",
+                title="Original Ordinal Score Agreement",
+                visible="(readerWorkflow:ordinal_cutoff)",
+                rows=0,
+                clearWith=list(
+                    "readerWorkflow",
+                    "readerScores",
+                    "readerPositive",
+                    "readerNegative",
+                    "referenceAccuracy",
+                    "referencePositive",
+                    "referenceNegative",
+                    "readerPopulation",
+                    "clinicalCutoff",
+                    "positiveRule",
+                    "nearCutoffWidth",
+                    "ordinalCutoff",
+                    "nearCutoffLevels",
+                    "readerPairs",
+                    "readerPair1",
+                    "readerPair2",
+                    "readerCaseLimit",
+                    "readerCluster",
+                    "readerIntervals",
+                    "readerBootstrap",
+                    "readerConfidence",
+                    "showKappaBalanced",
+                    "compositeReader",
+                    "readerCode",
+                    "vars",
+                    "referenceStandard",
+                    "caseID",
+                    "useMetadataRows",
+                    "bootstrapSamples",
+                    "seed",
+                    "wght"),
+                columns=list(
+                    list(
+                        `name`="pair", 
+                        `title`="Pair", 
+                        `type`="text"),
+                    list(
+                        `name`="n", 
+                        `title`="N", 
+                        `type`="integer"),
+                    list(
+                        `name`="weight", 
+                        `title`="Weight", 
+                        `type`="text"),
+                    list(
+                        `name`="kappa", 
+                        `title`="Kappa", 
+                        `type`="number", 
+                        `format`="zto"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="cutoffDisagreementCases",
+                title="Cases with Different Clinical Calls",
+                visible="(readerWorkflow:binary || readerWorkflow:ordinal_cutoff || readerWorkflow:numeric_cutoff)",
+                rows=0,
+                clearWith=list(
+                    "readerWorkflow",
+                    "readerScores",
+                    "readerPositive",
+                    "readerNegative",
+                    "referenceAccuracy",
+                    "referencePositive",
+                    "referenceNegative",
+                    "readerPopulation",
+                    "clinicalCutoff",
+                    "positiveRule",
+                    "nearCutoffWidth",
+                    "ordinalCutoff",
+                    "nearCutoffLevels",
+                    "readerPairs",
+                    "readerPair1",
+                    "readerPair2",
+                    "readerCaseLimit",
+                    "readerCluster",
+                    "readerIntervals",
+                    "readerBootstrap",
+                    "readerConfidence",
+                    "showKappaBalanced",
+                    "compositeReader",
+                    "readerCode",
+                    "vars",
+                    "referenceStandard",
+                    "caseID",
+                    "useMetadataRows",
+                    "bootstrapSamples",
+                    "seed",
+                    "wght"),
+                columns=list(
+                    list(
+                        `name`="row", 
+                        `title`="Row", 
+                        `type`="integer"),
+                    list(
+                        `name`="case", 
+                        `title`="Case", 
+                        `type`="text"),
+                    list(
+                        `name`="pair", 
+                        `title`="Pair", 
+                        `type`="text"),
+                    list(
+                        `name`="score1", 
+                        `title`="Score1", 
+                        `type`="text"),
+                    list(
+                        `name`="score2", 
+                        `title`="Score2", 
+                        `type`="text"),
+                    list(
+                        `name`="call1", 
+                        `title`="Call1", 
+                        `type`="text"),
+                    list(
+                        `name`="call2", 
+                        `title`="Call2", 
+                        `type`="text"),
+                    list(
+                        `name`="near", 
+                        `title`="Near", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="kappaBalancedTable",
+                title="Exploratory Kappa-Balanced Score",
+                visible="((readerWorkflow:binary || readerWorkflow:ordinal_cutoff || readerWorkflow:numeric_cutoff) && showKappaBalanced)",
+                rows=0,
+                clearWith=list(
+                    "readerWorkflow",
+                    "readerScores",
+                    "readerPositive",
+                    "readerNegative",
+                    "referenceAccuracy",
+                    "referencePositive",
+                    "referenceNegative",
+                    "readerPopulation",
+                    "clinicalCutoff",
+                    "positiveRule",
+                    "nearCutoffWidth",
+                    "ordinalCutoff",
+                    "nearCutoffLevels",
+                    "readerPairs",
+                    "readerPair1",
+                    "readerPair2",
+                    "readerCaseLimit",
+                    "readerCluster",
+                    "readerIntervals",
+                    "readerBootstrap",
+                    "readerConfidence",
+                    "showKappaBalanced",
+                    "compositeReader",
+                    "readerCode",
+                    "vars",
+                    "referenceStandard",
+                    "caseID",
+                    "useMetadataRows",
+                    "bootstrapSamples",
+                    "seed",
+                    "wght"),
+                columns=list(
+                    list(
+                        `name`="reader", 
+                        `title`="Reader", 
+                        `type`="text"),
+                    list(
+                        `name`="pair", 
+                        `title`="Pair", 
+                        `type`="text"),
+                    list(
+                        `name`="n", 
+                        `title`="N", 
+                        `type`="integer"),
+                    list(
+                        `name`="sensitivity", 
+                        `title`="Sensitivity", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="specificity", 
+                        `title`="Specificity", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="ba", 
+                        `title`="Ba", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="kappa", 
+                        `title`="Kappa", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="estimate", 
+                        `title`="Estimate", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="lower", 
+                        `title`="CI lower", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="upper", 
+                        `title`="CI upper", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="attempted", 
+                        `title`="Attempted", 
+                        `type`="integer"),
+                    list(
+                        `name`="valid", 
+                        `title`="Valid", 
+                        `type`="integer"),
+                    list(
+                        `name`="undefined", 
+                        `title`="Undefined", 
+                        `type`="integer"),
+                    list(
+                        `name`="boundary", 
+                        `title`="Boundary", 
+                        `type`="integer"),
+                    list(
+                        `name`="constant", 
+                        `title`="Constant", 
+                        `type`="text"),
+                    list(
+                        `name`="status", 
+                        `title`="Interval status", 
+                        `type`="text"))))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="readerRCode",
+                title="Reproducible Reader R Code",
+                visible="((readerWorkflow:binary || readerWorkflow:ordinal_cutoff || readerWorkflow:numeric_cutoff) && readerCode)",
+                clearWith=list(
+                    "readerWorkflow",
+                    "readerScores",
+                    "readerPositive",
+                    "readerNegative",
+                    "referenceAccuracy",
+                    "referencePositive",
+                    "referenceNegative",
+                    "readerPopulation",
+                    "clinicalCutoff",
+                    "positiveRule",
+                    "nearCutoffWidth",
+                    "ordinalCutoff",
+                    "nearCutoffLevels",
+                    "readerPairs",
+                    "readerPair1",
+                    "readerPair2",
+                    "readerCaseLimit",
+                    "readerCluster",
+                    "readerIntervals",
+                    "readerBootstrap",
+                    "readerConfidence",
+                    "showKappaBalanced",
+                    "compositeReader",
+                    "readerCode",
+                    "vars",
+                    "referenceStandard",
+                    "caseID",
+                    "useMetadataRows",
+                    "bootstrapSamples",
+                    "seed",
+                    "wght")))}))
 
 pathagreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "pathagreementBase",
@@ -2051,8 +2898,24 @@ pathagreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' Interrater reliability analysis including Cohen's kappa (2 raters),
 #' Fleiss' kappa (3+ raters), Krippendorff's alpha, and consensus analysis.
 #' Provides agreement statistics, visualization, and clinical
-#' interpretation for categorical rating data.
+#' interpretation for categorical rating data. Optional independent-reader
+#' workflows report disease-positive accuracy and binary, ordinal or numeric
+#' cutoff disagreement with explicit case populations and exploratory cluster
+#' intervals. The default retains standard categorical agreement.
 #' 
+#'
+#' @examples
+#' \donttest{
+#' data('ihc_reader_reproducibility', package = 'ClinicoPath')
+#' pathagreement(ihc_reader_reproducibility,
+#'     readerWorkflow = 'numeric_cutoff',
+#'     readerScores = c('score1', 'score2', 'score3'),
+#'     clinicalCutoff = '50', positiveRule = 'ge', nearCutoffWidth = '5',
+#'     referenceStandard = 'reference', referencePositive = 'Present',
+#'     referenceNegative = 'Absent', caseID = 'case_id',
+#'     readerCluster = 'patient_id', readerBootstrap = TRUE,
+#'     bootstrapSamples = 1000, seed = 42)
+#'}
 #' @param data The data as a data frame. Each row represents a case/subject,
 #'   and columns represent different raters/observers.
 #' @param vars Variables representing different raters/observers. Each
@@ -2202,6 +3065,55 @@ pathagreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param showClusteringInterpretation Display explanatory guide for
 #'   interpreting clustering results, diagnostic style groups, and discordant
 #'   cases. Useful for understanding clinical implications.
+#' @param readerWorkflow Standard agreement preserves existing analyses.
+#'   Reader diagnostics report accuracy and agreement on explicitly classified
+#'   independent readings.
+#' @param readerScores One numeric column per independent reader, on the same
+#'   score scale.
+#' @param readerPositive Exact positive label shared by binary reader columns.
+#'   Other labels are excluded as indeterminate.
+#' @param readerNegative Exact negative label shared by binary reader columns.
+#' @param referenceAccuracy Compute each reader against the optional
+#'   reference; agreement remains available without a reference.
+#' @param referencePositive Exact reference label denoting disease present.
+#' @param referenceNegative Exact reference label denoting disease absent;
+#'   other labels are excluded.
+#' @param readerPopulation Available uses each reader and reference. Shared
+#'   requires all selected readers and reference.
+#' @param clinicalCutoff Enter one finite numeric threshold; blank means no
+#'   cutoff has been specified.
+#' @param positiveRule The exact inequality is applied to every reader.
+#'   Ordinal comparisons use declared level order.
+#' @param nearCutoffWidth Nonnegative distance on either side of the numeric
+#'   cutoff. A pair is near cutoff if either reader falls in this inclusive
+#'   band.
+#' @param ordinalCutoff Exact boundary label from the common declared ordered
+#'   scale.
+#' @param nearCutoffLevels Exact ordinal category labels separated by
+#'   semicolons in the interface; R callers can also separate labels by
+#'   newlines. Either reader in this set defines the pair-specific near-cutoff
+#'   subset.
+#' @param readerPairs Choose all pairs or one named pair. One pair is required
+#'   for the exploratory composite.
+#' @param readerPair1 Exact name of the first selected reader column.
+#' @param readerPair2 Exact name of the second selected reader column.
+#' @param readerCaseLimit Limit the displayed list across pairs; all cases
+#'   still contribute to aggregate estimates.
+#' @param readerCluster Repeated specimens from a patient must share this ID.
+#'   Estimates remain specimen-weighted; intervals resample whole clusters.
+#' @param readerIntervals Independent-case proportions use exact binomial
+#'   intervals. Other metrics need bootstrap.
+#' @param readerBootstrap Resample complete case rows or patient clusters for
+#'   fixed selected readers. Undefined or constant draws suppress the affected
+#'   interval.
+#' @param readerConfidence Confidence level for the new reader workflow.
+#' @param showKappaBalanced Module-specific exploratory score sqrt(BA * Cohen
+#'   kappa), with BA from the explicitly selected reader on the pair/reference
+#'   common cases. No clinical acceptance thresholds.
+#' @param compositeReader Which member of the selected pair supplies balanced
+#'   accuracy for the exploratory score.
+#' @param readerCode Display the selected options as an R call using a data
+#'   frame named your_data.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -2254,6 +3166,14 @@ pathagreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$clusterDendrogram} \tab \tab \tab \tab \tab Dendrogram showing hierarchical relationships between raters \cr
 #'   \code{results$silhouettePlot} \tab \tab \tab \tab \tab Silhouette plot showing cluster separation and cohesion \cr
 #'   \code{results$clusteringInterpretation} \tab \tab \tab \tab \tab Explanatory guide for understanding diagnostic style groups and cluster results \cr
+#'   \code{results$readerSettings} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$readerDataSummary} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$readerAccuracyTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$cutoffAgreementTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$readerOriginalAgreement} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$cutoffDisagreementCases} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$kappaBalancedTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$readerRCode} \tab \tab \tab \tab \tab a preformatted \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -2319,7 +3239,31 @@ pathagreement <- function(
     referenceStandard = NULL,
     useMetadataRows = FALSE,
     showInlineComments = FALSE,
-    showClusteringInterpretation = FALSE) {
+    showClusteringInterpretation = FALSE,
+    readerWorkflow = "off",
+    readerScores = NULL,
+    readerPositive = "",
+    readerNegative = "",
+    referenceAccuracy = TRUE,
+    referencePositive = "",
+    referenceNegative = "",
+    readerPopulation = "available",
+    clinicalCutoff = "",
+    positiveRule = "ge",
+    nearCutoffWidth = "",
+    ordinalCutoff = "",
+    nearCutoffLevels = "",
+    readerPairs = "all",
+    readerPair1 = "",
+    readerPair2 = "",
+    readerCaseLimit = 50,
+    readerCluster = NULL,
+    readerIntervals = TRUE,
+    readerBootstrap = FALSE,
+    readerConfidence = 0.95,
+    showKappaBalanced = FALSE,
+    compositeReader = "",
+    readerCode = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("pathagreement requires jmvcore to be installed (restart may be required)")
@@ -2328,13 +3272,17 @@ pathagreement <- function(
     if ( ! missing(caseID)) caseID <- jmvcore::resolveQuo(jmvcore::enquo(caseID))
     if ( ! missing(sequenceVariable)) sequenceVariable <- jmvcore::resolveQuo(jmvcore::enquo(sequenceVariable))
     if ( ! missing(referenceStandard)) referenceStandard <- jmvcore::resolveQuo(jmvcore::enquo(referenceStandard))
+    if ( ! missing(readerScores)) readerScores <- jmvcore::resolveQuo(jmvcore::enquo(readerScores))
+    if ( ! missing(readerCluster)) readerCluster <- jmvcore::resolveQuo(jmvcore::enquo(readerCluster))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(vars), vars, NULL),
             `if`( ! missing(caseID), caseID, NULL),
             `if`( ! missing(sequenceVariable), sequenceVariable, NULL),
-            `if`( ! missing(referenceStandard), referenceStandard, NULL))
+            `if`( ! missing(referenceStandard), referenceStandard, NULL),
+            `if`( ! missing(readerScores), readerScores, NULL),
+            `if`( ! missing(readerCluster), readerCluster, NULL))
 
     for (v in vars) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
     for (v in referenceStandard) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
@@ -2394,7 +3342,31 @@ pathagreement <- function(
         referenceStandard = referenceStandard,
         useMetadataRows = useMetadataRows,
         showInlineComments = showInlineComments,
-        showClusteringInterpretation = showClusteringInterpretation)
+        showClusteringInterpretation = showClusteringInterpretation,
+        readerWorkflow = readerWorkflow,
+        readerScores = readerScores,
+        readerPositive = readerPositive,
+        readerNegative = readerNegative,
+        referenceAccuracy = referenceAccuracy,
+        referencePositive = referencePositive,
+        referenceNegative = referenceNegative,
+        readerPopulation = readerPopulation,
+        clinicalCutoff = clinicalCutoff,
+        positiveRule = positiveRule,
+        nearCutoffWidth = nearCutoffWidth,
+        ordinalCutoff = ordinalCutoff,
+        nearCutoffLevels = nearCutoffLevels,
+        readerPairs = readerPairs,
+        readerPair1 = readerPair1,
+        readerPair2 = readerPair2,
+        readerCaseLimit = readerCaseLimit,
+        readerCluster = readerCluster,
+        readerIntervals = readerIntervals,
+        readerBootstrap = readerBootstrap,
+        readerConfidence = readerConfidence,
+        showKappaBalanced = showKappaBalanced,
+        compositeReader = compositeReader,
+        readerCode = readerCode)
 
     analysis <- pathagreementClass$new(
         options = options,

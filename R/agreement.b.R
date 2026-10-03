@@ -4261,7 +4261,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 # R-side clearWith and Table has no reset), so a band or disclosure note
                 # written on a success path survives into a later failed run. Clear every
                 # key this function writes, then let each branch write only its own.
-                for (nk in c("ci_approx", "collapsed", "error", "info", "scale"))
+                for (nk in c("ci_approx", "ci_bootstrap", "collapsed", "error", "info", "scale"))
                     self$results$specificAgreementTable$setNote(nk, NULL)
 
                 tryCatch(
@@ -4275,6 +4275,18 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         complete_rows <- complete.cases(ratings)
                         ratings_complete <- ratings[complete_rows, , drop = FALSE]
 
+                        cluster_values <- NULL
+                        cluster_var <- self$options$specificCluster
+                        if (!is.null(cluster_var)) {
+                            if (nrow(ratings) != nrow(self$data) || !cluster_var %in% names(self$data))
+                                stop("Cluster IDs cannot be aligned to reader rows.")
+                            all_clusters <- as.character(self$data[[cluster_var]])
+                            if (anyNA(all_clusters) || any(!nzchar(all_clusters)))
+                                stop("Every row must have a patient/cluster ID.")
+                            if (include_ci && self$options$specificCIMethod != "bootstrap")
+                                stop("Select bootstrap intervals when a patient/cluster ID is supplied.")
+                            cluster_values <- all_clusters[complete_rows]
+                        }
                         n_cases <- nrow(ratings_complete)
                         n_raters <- ncol(ratings_complete)
 
@@ -4396,7 +4408,27 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                                     # Approximate CI with Wilson interval on specific agreement scale
                                     # Use number of subjects with at least one positive rating as N
-                                    if (include_ci) {
+                                    attempted <- valid <- undefined <- 0L
+                                    ci_method <- "Not requested"
+                                    units <- if (is.null(cluster_values)) n_cases else length(unique(cluster_values))
+                                    if (include_ci && self$options$specificCIMethod == "bootstrap") {
+                                        pair_data <- data.frame(x = rater1 == category, y = rater2 == category)
+                                        stat <- function(z) {
+                                            denom <- sum(z$x) + sum(z$y)
+                                            c(specific_agreement = if (denom > 0) 2 * sum(z$x & z$y) / denom else NA_real_)
+                                        }
+                                        boot_ci <- .readerResample(pair_data, stat, clusters = cluster_values,
+                                            samples = self$options$nBoot, confidence = self$options$confLevel,
+                                            seed = self$options$seed,
+                                            checkpoint = function() private$.checkpoint(flush = FALSE))
+                                        ci_lower <- boot_ci$lower
+                                        ci_upper <- boot_ci$upper
+                                        attempted <- boot_ci$attempted
+                                        valid <- boot_ci$valid
+                                        undefined <- boot_ci$undefined
+                                        ci_method <- boot_ci$status
+                                    } else if (include_ci) {
+                                        ci_method <- "Approximate Wilson (legacy)"
                                         n_eff <- sum(rater1 == category | rater2 == category)
                                         if (n_eff < 1) {
                                             ci_lower <- NA
@@ -4449,10 +4481,17 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                         specific_agreement = specific_agreement,
                                         ci_lower = ci_lower,
                                         ci_upper = ci_upper,
-                                        interpretation = interp
+                                        interpretation = interp,
+                                        n_cases = n_cases, units = units, attempted = attempted,
+                                        valid = valid, undefined = undefined, ci_method = ci_method
                                     ))
                                 }
                             }
+                        }
+
+                        if (include_ci && self$options$specificCIMethod == "bootstrap") {
+                            self$results$specificAgreementTable$setNote("ci_bootstrap",
+                                .("Percentile intervals resample whole cases or patient clusters, complete across all selected raters. Inference concerns fixed readers and specimen-weighted agreement. Any undefined draw or a constant distribution suppresses the interval; counts and reasons are shown. These intervals are exploratory; simulations found undercoverage even with 60 clusters. Rare categories and few clusters limit inference. Other agreement outputs do not automatically use this cluster correction."))
                         }
 
                         # Add summary note if PSA/NSA both calculated
@@ -4479,7 +4518,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         # and the Wilson interval is applied to it on a denominator
                         # (a+b+c) that does not match, so the stated coverage is not
                         # guaranteed. A bootstrap is the recommended alternative.
-                        if (include_ci) {
+                        if (include_ci && self$options$specificCIMethod == "legacy") {
                             self$results$specificAgreementTable$setNote(
                                 "ci_approx",
                                 sprintf(.("The %.0f%% interval is an <i>approximation</i>: a Wilson interval applied to specific agreement, which is not a binomial proportion, on the count of cases rated into the category by at least one rater. Actual coverage is not guaranteed, and the interval is least trustworthy for rare categories and for values near 0 or 1. de Vet and colleagues (2013) recommend a bootstrap interval instead; treat these limits as indicative."),
@@ -4488,6 +4527,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         }
                     },
                     error = function(e) {
+                        if (identical(e$code, "restart")) stop(e)
                         self$results$specificAgreementTable$setNote(
                             "error",
                             sprintf(.("Error calculating specific agreement: %s"), private$.noteSafe(e$message))

@@ -5,6 +5,7 @@ jrs:   '1.1'
 
 items:
     - name: todo
+      visible: (readerWorkflow:off)
       title: Getting Started
       type: Html
 
@@ -14,7 +15,7 @@ items:
     - name: warnings
       title: Analysis Messages
       type: Html
-      visible: true
+      visible: (readerWorkflow:off)
 
       clearWith:
         - vars
@@ -27,6 +28,7 @@ items:
         - gwetAC
         - pabak
     - name: overviewTable
+      visible: (readerWorkflow:off)
       title: Agreement Analysis Summary
       type: Table
       rows: 1
@@ -55,6 +57,7 @@ items:
           type: text
 
     - name: kappaTable
+      visible: (readerWorkflow:off)
       title: 'Kappa Statistics'
       type: Table
       clearWith:
@@ -101,7 +104,7 @@ items:
     - name: iccTable
       title: 'Intraclass Correlation Coefficients'
       type: Table
-      visible: (icc)
+      visible: (readerWorkflow:off && (icc))
       clearWith:
         - vars
         - caseID
@@ -138,7 +141,7 @@ items:
     - name: pairwiseTable
       title: 'Pairwise Rater Agreements'
       type: Table
-      visible: (pairwiseAnalysis)
+      visible: (readerWorkflow:off && (pairwiseAnalysis))
       clearWith:
         - vars
         - caseID
@@ -176,7 +179,7 @@ items:
     - name: categoryTable
       title: 'Category-Specific Agreement'
       type: Table
-      visible: (categoryAnalysis)
+      visible: (readerWorkflow:off && (categoryAnalysis))
       clearWith:
         - vars
         - caseID
@@ -212,7 +215,7 @@ items:
     - name: outlierTable
       title: 'Cases with Poor Agreement'
       type: Table
-      visible: (outlierAnalysis)
+      visible: (readerWorkflow:off && (outlierAnalysis))
       clearWith:
         - vars
         - caseID
@@ -238,9 +241,9 @@ items:
           visible: (pathologyContext)
 
     - name: diagnosticAccuracyTable
-      title: 'Diagnostic Accuracy by Rater'
+      title: 'Diagnostic Accuracy by Rater (Macro-Averaged Across Categories)'
       type: Table
-      visible: (pathologyContext)
+      visible: (readerWorkflow:off && (pathologyContext))
       clearWith:
         - vars
         - caseID
@@ -256,19 +259,19 @@ items:
           type: number
           format: zto
         - name: sensitivity
-          title: 'Sensitivity %'
+          title: 'Macro sensitivity %'
           type: number
           format: zto
         - name: specificity
-          title: 'Specificity %'
+          title: 'Macro specificity %'
           type: number
           format: zto
         - name: ppv
-          title: 'PPV %'
+          title: 'Macro PPV %'
           type: number
           format: zto
         - name: npv
-          title: 'NPV %'
+          title: 'Macro NPV %'
           type: number
           format: zto
         - name: kappa_vs_gold
@@ -279,7 +282,7 @@ items:
     - name: diagnosticStyleTable
       title: 'Diagnostic Style Clustering Results'
       type: Table
-      visible: (performClustering)
+      visible: (readerWorkflow:off && (performClustering))
       clearWith:
         - vars
         - caseID
@@ -324,7 +327,7 @@ items:
     - name: styleSummaryTable
       title: 'Diagnostic Style Group Summary'
       type: Table
-      visible: (performClustering)
+      visible: (readerWorkflow:off && (performClustering))
       clearWith:
         - vars
         - caseID
@@ -368,7 +371,7 @@ items:
     - name: discordantCasesTable
       title: 'Cases Distinguishing Diagnostic Styles'
       type: Table
-      visible: (identifyDiscordantCases)
+      visible: (readerWorkflow:off && (identifyDiscordantCases))
       clearWith:
         - vars
         - caseID
@@ -397,7 +400,7 @@ items:
     - name: krippTable
       title: "Krippendorff's Alpha Results"
       type: Table
-      visible: (kripp)
+      visible: (readerWorkflow:off && (kripp))
       clearWith:
         - vars
         - caseID
@@ -433,7 +436,7 @@ items:
     - name: consensusTable
       title: 'Consensus Scoring Results'
       type: Table
-      visible: (consensus && show_consensus_table)
+      visible: (readerWorkflow:off && (consensus && show_consensus_table))
       clearWith:
         - vars
         - caseID
@@ -462,7 +465,7 @@ items:
     - name: consensusSummary
       title: 'Consensus Summary Statistics'
       type: Table
-      visible: (consensus)
+      visible: (readerWorkflow:off && (consensus))
       clearWith:
         - vars
         - caseID
@@ -488,7 +491,7 @@ items:
       width: 800
       height: 600
       renderFun: .heatmapPlot
-      visible: (heatmap)
+      visible: (readerWorkflow:off && (heatmap))
 
       clearWith:
         - vars
@@ -504,7 +507,7 @@ items:
       width: 700
       height: 500
       renderFun: .pairwisePlot
-      visible: (pairwiseAnalysis)
+      visible: (readerWorkflow:off && (pairwiseAnalysis))
 
       clearWith:
         - vars
@@ -518,7 +521,7 @@ items:
       width: 700
       height: 500
       renderFun: .categoryPlot
-      visible: (categoryAnalysis)
+      visible: (readerWorkflow:off && (categoryAnalysis))
 
       clearWith:
         - vars
@@ -532,7 +535,7 @@ items:
       width: 600
       height: 600
       renderFun: .confusionMatrixPlot
-      visible: (pathologyContext)
+      visible: (readerWorkflow:off && (pathologyContext))
 
       clearWith:
         - vars
@@ -546,7 +549,7 @@ items:
       width: 800
       height: 600
       renderFun: .diagnosticStyleDendrogram
-      visible: (performClustering)
+      visible: (readerWorkflow:off && (performClustering))
 
       clearWith:
         - vars
@@ -567,7 +570,7 @@ items:
       width: 800
       height: 600
       renderFun: .diagnosticStyleHeatmap
-      visible: (performClustering && showClusteringHeatmap)
+      visible: (readerWorkflow:off && (performClustering && showClusteringHeatmap))
       clearWith:
         - vars
         - caseID
@@ -589,7 +592,7 @@ items:
       width: 1000
       height: 1000
       renderFun: .diagnosticStyleCombined
-      visible: (performClustering)
+      visible: (readerWorkflow:off && (performClustering))
 
       clearWith:
         - vars
@@ -607,7 +610,7 @@ items:
     - name: raterFrequencyTables
       title: 'Individual Rater Frequencies'
       type: Group
-      visible: (sft)
+      visible: (readerWorkflow:off && (sft))
       clearWith:
         - vars
         - caseID
@@ -640,7 +643,7 @@ items:
     - name: crosstabTable
       title: 'Cross-tabulation Matrix'
       type: Table
-      visible: (sft && length(vars) == 2)
+      visible: (readerWorkflow:off && (sft && length(vars) == 2))
       clearWith:
         - vars
         - caseID
@@ -659,7 +662,7 @@ items:
     - name: clinicalSummary
       title: Clinical Summary
       type: Html
-      visible: (showClinicalSummary)
+      visible: (readerWorkflow:off && (showClinicalSummary))
 
       clearWith:
         - vars
@@ -674,7 +677,7 @@ items:
     - name: reportTemplate
       title: Copy-Ready Report
       type: Html
-      visible: (showClinicalSummary)
+      visible: (readerWorkflow:off && (showClinicalSummary))
 
       clearWith:
         - vars
@@ -689,14 +692,14 @@ items:
     - name: aboutAnalysis
       title: About This Analysis
       type: Html
-      visible: (showAboutAnalysis)
+      visible: (readerWorkflow:off && (showAboutAnalysis))
 
       clearWith:
         - showAboutAnalysis
     - name: assumptions
       title: Assumptions & Caveats
       type: Html
-      visible: (showAssumptions)
+      visible: (readerWorkflow:off && (showAssumptions))
 
       clearWith:
         - vars
@@ -706,7 +709,7 @@ items:
     - name: weightedKappaGuide
       title: Weighted Kappa Guide
       type: Html
-      visible: (showWeightedKappaGuide && wght != 'unweighted')
+      visible: (readerWorkflow:off && (showWeightedKappaGuide && wght != 'unweighted'))
 
       clearWith:
         - showWeightedKappaGuide
@@ -714,7 +717,7 @@ items:
     - name: statisticalGlossary
       title: Statistical Terms Glossary
       type: Html
-      visible: (showStatisticalGlossary)
+      visible: (readerWorkflow:off && (showStatisticalGlossary))
 
 
 
@@ -732,7 +735,7 @@ items:
     - name: gwetACTable
       title: "Gwet's Agreement Coefficients"
       type: Table
-      visible: (gwetAC)
+      visible: (readerWorkflow:off && (gwetAC))
       clearWith:
         - vars
         - caseID
@@ -765,7 +768,7 @@ items:
     - name: pabakTable
       title: 'PABAK Analysis Results'
       type: Table
-      visible: (pabak)
+      visible: (readerWorkflow:off && (pabak))
       clearWith:
         - vars
         - caseID
@@ -794,7 +797,7 @@ items:
     - name: sampleSizeTable
       title: 'Sample Size Planning Results'
       type: Table
-      visible: (sampleSizePlanning)
+      visible: (readerWorkflow:off && (sampleSizePlanning))
       clearWith:
         - vars
         - caseID
@@ -816,7 +819,7 @@ items:
     - name: raterBiasTable
       title: 'Rater Disagreement with Consensus'
       type: Table
-      visible: (raterBiasAnalysis)
+      visible: (readerWorkflow:off && (raterBiasAnalysis))
       clearWith:
         - vars
         - caseID
@@ -843,7 +846,7 @@ items:
     - name: agreementTrendTable
       title: 'Agreement Trend Analysis'
       type: Table
-      visible: (agreementTrendAnalysis)
+      visible: (readerWorkflow:off && (agreementTrendAnalysis))
       clearWith:
         - vars
         - caseID
@@ -872,7 +875,7 @@ items:
     - name: caseDifficultyTable
       title: 'Case Difficulty Analysis'
       type: Table
-      visible: (caseDifficultyScoring)
+      visible: (readerWorkflow:off && (caseDifficultyScoring))
       clearWith:
         - vars
         - caseID
@@ -900,7 +903,7 @@ items:
     - name: stabilityTable
       title: 'Agreement Stability Analysis'
       type: Table
-      visible: (agreementStabilityAnalysis)
+      visible: (readerWorkflow:off && (agreementStabilityAnalysis))
       clearWith:
         - vars
         - caseID
@@ -939,7 +942,7 @@ items:
       width: 700
       height: 500
       renderFun: .trendPlot
-      visible: (agreementTrendAnalysis)
+      visible: (readerWorkflow:off && (agreementTrendAnalysis))
 
       clearWith:
         - vars
@@ -953,7 +956,7 @@ items:
       width: 700
       height: 500
       renderFun: .biasPlot
-      visible: (raterBiasAnalysis)
+      visible: (readerWorkflow:off && (raterBiasAnalysis))
 
       clearWith:
         - vars
@@ -966,7 +969,7 @@ items:
       width: 700
       height: 500
       renderFun: .difficultyPlot
-      visible: (caseDifficultyScoring)
+      visible: (readerWorkflow:off && (caseDifficultyScoring))
 
       clearWith:
         - vars
@@ -976,7 +979,7 @@ items:
     - name: inlineComments
       title: Statistical Commentary
       type: Html
-      visible: (showInlineComments)
+      visible: (readerWorkflow:off && (showInlineComments))
 
       clearWith:
         - vars
@@ -997,7 +1000,7 @@ items:
     - name: styleGroupSummary
       title: 'Diagnostic Style Groups Summary'
       type: Table
-      visible: (performClustering)
+      visible: (readerWorkflow:off && (performClustering))
       clearWith:
         - vars
         - caseID
@@ -1040,7 +1043,7 @@ items:
     - name: styleGroupProfiles
       title: 'Diagnostic Patterns by Style Group'
       type: Table
-      visible: (performClustering)
+      visible: (readerWorkflow:off && (performClustering))
       clearWith:
         - vars
         - caseID
@@ -1075,7 +1078,7 @@ items:
     - name: discordantCasesCluster
       title: 'High-Disagreement Cases Between Style Groups'
       type: Table
-      visible: (performClustering && identifyDiscordant)
+      visible: (readerWorkflow:off && (performClustering && identifyDiscordant))
       clearWith:
         - vars
         - caseID
@@ -1111,7 +1114,7 @@ items:
     - name: characteristicAssociations
       title: 'Style Group Associations with Rater Characteristics'
       type: Table
-      visible: (performClustering)
+      visible: (readerWorkflow:off && (performClustering))
       clearWith:
         - vars
         - caseID
@@ -1152,7 +1155,7 @@ items:
     - name: referenceComparison
       title: 'Style Group Agreement with Reference Standard'
       type: Table
-      visible: (performClustering && !is.null(referenceStandard))
+      visible: (readerWorkflow:off && (performClustering && !is.null(referenceStandard)))
       clearWith:
         - vars
         - caseID
@@ -1200,7 +1203,7 @@ items:
       width: 1000
       height: 800
       renderFun: .clusteringHeatmap
-      visible: (performClustering && showClusteringHeatmap)
+      visible: (readerWorkflow:off && (performClustering && showClusteringHeatmap))
       description: 'Heatmap showing diagnostic patterns with dual dendrograms (raters and cases)'
 
       clearWith:
@@ -1224,7 +1227,7 @@ items:
       width: 800
       height: 600
       renderFun: .clusterDendrogram
-      visible: (performClustering)
+      visible: (readerWorkflow:off && (performClustering))
       description: 'Dendrogram showing hierarchical relationships between raters'
 
       clearWith:
@@ -1246,7 +1249,7 @@ items:
       width: 700
       height: 500
       renderFun: .silhouettePlot
-      visible: (performClustering)
+      visible: (readerWorkflow:off && (performClustering))
       description: 'Silhouette plot showing cluster separation and cohesion'
 
       clearWith:
@@ -1265,7 +1268,7 @@ items:
     - name: clusteringInterpretation
       title: 'Clustering Analysis Interpretation Guide'
       type: Html
-      visible: (performClustering && showClusteringInterpretation)
+      visible: (readerWorkflow:off && (performClustering && showClusteringInterpretation))
       description: 'Explanatory guide for understanding diagnostic style groups and cluster results'
 
       clearWith:
@@ -1282,6 +1285,292 @@ items:
         - discordantThreshold
         - raterCharacteristics
         - showClusteringInterpretation
+    - name: readerSettings
+      title: Reader Analysis Settings
+      type: Table
+      visible: (readerWorkflow:binary || readerWorkflow:ordinal_cutoff || readerWorkflow:numeric_cutoff)
+      rows: 0
+      clearWith: &id001
+      - readerWorkflow
+      - readerScores
+      - readerPositive
+      - readerNegative
+      - referenceAccuracy
+      - referencePositive
+      - referenceNegative
+      - readerPopulation
+      - clinicalCutoff
+      - positiveRule
+      - nearCutoffWidth
+      - ordinalCutoff
+      - nearCutoffLevels
+      - readerPairs
+      - readerPair1
+      - readerPair2
+      - readerCaseLimit
+      - readerCluster
+      - readerIntervals
+      - readerBootstrap
+      - readerConfidence
+      - showKappaBalanced
+      - compositeReader
+      - readerCode
+      - vars
+      - referenceStandard
+      - caseID
+      - useMetadataRows
+      - bootstrapSamples
+      - seed
+      - wght
+      columns:
+      - name: setting
+        title: Setting
+        type: text
+      - name: value
+        title: Value
+        type: text
+    - name: readerDataSummary
+      title: Reader Data and Exclusions
+      type: Table
+      visible: (readerWorkflow:binary || readerWorkflow:ordinal_cutoff || readerWorkflow:numeric_cutoff)
+      rows: 0
+      clearWith: *id001
+      columns:
+      - name: reader
+        title: Reader
+        type: text
+      - name: total
+        title: Total
+        type: integer
+      - name: missing
+        title: Missing
+        type: integer
+      - name: indeterminate
+        title: Indeterminate
+        type: integer
+      - name: usable
+        title: Usable
+        type: integer
+    - name: readerAccuracyTable
+      title: Disease-Positive Reader Accuracy
+      type: Table
+      visible: ((readerWorkflow:binary || readerWorkflow:ordinal_cutoff || readerWorkflow:numeric_cutoff) && referenceAccuracy)
+      rows: 0
+      clearWith: *id001
+      columns:
+      - name: reader
+        title: Reader
+        type: text
+      - name: population
+        title: Population
+        type: text
+      - name: n
+        title: N
+        type: integer
+      - name: units
+        title: Units
+        type: integer
+      - name: excluded
+        title: Excluded
+        type: integer
+      - name: tp
+        title: Tp
+        type: integer
+      - name: fn
+        title: Fn
+        type: integer
+      - name: tn
+        title: Tn
+        type: integer
+      - name: fp
+        title: Fp
+        type: integer
+      - name: metric
+        title: Metric
+        type: text
+      - &id002
+        name: estimate
+        title: Estimate
+        type: number
+        format: zto
+      - &id003
+        name: lower
+        title: CI lower
+        type: number
+        format: zto
+      - &id004
+        name: upper
+        title: CI upper
+        type: number
+        format: zto
+      - &id005
+        name: attempted
+        title: Attempted
+        type: integer
+      - &id006
+        name: valid
+        title: Valid
+        type: integer
+      - &id007
+        name: undefined
+        title: Undefined
+        type: integer
+      - &id008
+        name: boundary
+        title: Boundary
+        type: integer
+      - &id009
+        name: constant
+        title: Constant
+        type: text
+      - &id010
+        name: status
+        title: Interval status
+        type: text
+    - name: cutoffAgreementTable
+      title: Reader Agreement at the Clinical Cutoff
+      type: Table
+      visible: (readerWorkflow:binary || readerWorkflow:ordinal_cutoff || readerWorkflow:numeric_cutoff)
+      rows: 0
+      clearWith: *id001
+      columns:
+      - name: pair
+        title: Pair
+        type: text
+      - name: population
+        title: Population
+        type: text
+      - name: n
+        title: N
+        type: integer
+      - name: units
+        title: Units
+        type: integer
+      - name: excluded
+        title: Excluded
+        type: integer
+      - name: both_positive
+        title: Both positive
+        type: integer
+      - name: first_positive
+        title: First positive
+        type: integer
+      - name: second_positive
+        title: Second positive
+        type: integer
+      - name: both_negative
+        title: Both negative
+        type: integer
+      - name: metric
+        title: Metric
+        type: text
+      - *id002
+      - *id003
+      - *id004
+      - *id005
+      - *id006
+      - *id007
+      - *id008
+      - *id009
+      - *id010
+    - name: readerOriginalAgreement
+      title: Original Ordinal Score Agreement
+      type: Table
+      visible: (readerWorkflow:ordinal_cutoff)
+      rows: 0
+      clearWith: *id001
+      columns:
+      - name: pair
+        title: Pair
+        type: text
+      - name: n
+        title: N
+        type: integer
+      - name: weight
+        title: Weight
+        type: text
+      - name: kappa
+        title: Kappa
+        type: number
+        format: zto
+    - name: cutoffDisagreementCases
+      title: Cases with Different Clinical Calls
+      type: Table
+      visible: (readerWorkflow:binary || readerWorkflow:ordinal_cutoff || readerWorkflow:numeric_cutoff)
+      rows: 0
+      clearWith: *id001
+      columns:
+      - name: row
+        title: Row
+        type: integer
+      - name: case
+        title: Case
+        type: text
+      - name: pair
+        title: Pair
+        type: text
+      - name: score1
+        title: Score1
+        type: text
+      - name: score2
+        title: Score2
+        type: text
+      - name: call1
+        title: Call1
+        type: text
+      - name: call2
+        title: Call2
+        type: text
+      - name: near
+        title: Near
+        type: text
+    - name: kappaBalancedTable
+      title: Exploratory Kappa-Balanced Score
+      type: Table
+      visible: ((readerWorkflow:binary || readerWorkflow:ordinal_cutoff || readerWorkflow:numeric_cutoff) && showKappaBalanced)
+      rows: 0
+      clearWith: *id001
+      columns:
+      - name: reader
+        title: Reader
+        type: text
+      - name: pair
+        title: Pair
+        type: text
+      - name: n
+        title: N
+        type: integer
+      - name: sensitivity
+        title: Sensitivity
+        type: number
+        format: zto
+      - name: specificity
+        title: Specificity
+        type: number
+        format: zto
+      - name: ba
+        title: Ba
+        type: number
+        format: zto
+      - name: kappa
+        title: Kappa
+        type: number
+        format: zto
+      - *id002
+      - *id003
+      - *id004
+      - *id005
+      - *id006
+      - *id007
+      - *id008
+      - *id009
+      - *id010
+    - name: readerRCode
+      title: Reproducible Reader R Code
+      type: Preformatted
+      visible: ((readerWorkflow:binary || readerWorkflow:ordinal_cutoff || readerWorkflow:numeric_cutoff) && readerCode)
+      clearWith: *id001
+
 refs:
     - ClinicoPathJamoviModule
     - LandisKoch1977

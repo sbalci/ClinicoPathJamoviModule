@@ -1,0 +1,3 @@
+"task","elapsed_seconds","report_bytes"
+"50000 specimens x 50 readers: all-pair points",55.744,864624
+"50000 specimens: selected pair, 1000 draws",43.461,32536

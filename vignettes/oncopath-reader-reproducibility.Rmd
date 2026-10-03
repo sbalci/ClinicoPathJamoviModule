@@ -1,0 +1,180 @@
+---
+title: "Diagnostic accuracy with independent reader reproducibility"
+author: "ClinicoPath"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Diagnostic accuracy with independent reader reproducibility}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", warning = FALSE, message = FALSE)
+```
+
+## Plan the independent readings
+
+Specify the scoring scale, clinical cutoff and direction before looking at results.
+Readers should score independently, using the same instructions and appropriate blinding.
+Retain original readings before discussion or adjudication. Record how the reference
+diagnosis was established; a consensus made from the same readings is not an independent
+reference. Software can analyse the readings but cannot establish that they were independent.
+
+Stoieva and Fraga's systematic review found that 73 of 84 dermatopathology IHC studies
+reported no interobserver agreement measure. Their proposed combined score could be
+calculated in only three studies. See the [PubMed abstract](https://pubmed.ncbi.nlm.nih.gov/42358041/).
+The workflow below reports accuracy and reproducibility separately, with an optional
+experimental composite. It does not claim to reproduce the full-text review methods.
+
+Use one row per specimen, one column per reader, and optional reference, specimen ID
+and patient ID columns. Patient IDs identify repeated specimens, not different readers.
+The supplied example has 180 fictional specimens, 90 fictional patients and three readers.
+
+```{r data}
+library(ClinicoPath)
+data("ihc_reader_reproducibility", package = "ClinicoPath")
+head(ihc_reader_reproducibility[c("case_id", "patient_id", "reference", "score1", "score2", "score3")])
+```
+
+## Numeric cutoff: accuracy and disagreements together
+
+In **Pathology Interrater Reliability**, select **Numeric clinical cutoff** as the
+reader workflow and expand **Reader Accuracy and Cutoff Agreement**. Select
+`score1`, `score2`, `score3` as numeric readers, `reference`
+as the reference and the two ID columns. Enter `Present` and `Absent` as the reference
+positive and negative labels. Use the illustrative cutoff `50`, the `>=` rule and
+near-cutoff width `5`. Neither cutoff nor band is an IHC recommendation.
+
+```{r numeric}
+result <- pathagreement(
+  data = ihc_reader_reproducibility,
+  readerWorkflow = "numeric_cutoff", readerScores = c("score1", "score2", "score3"),
+  caseID = "case_id", readerCluster = "patient_id",
+  referenceStandard = "reference", referencePositive = "Present", referenceNegative = "Absent",
+  clinicalCutoff = "50", positiveRule = "ge", nearCutoffWidth = "5",
+  readerPopulation = "both", readerCaseLimit = 12,
+  readerBootstrap = TRUE, bootstrapSamples = 1000, seed = 42,
+  readerConfidence = .95, readerCode = TRUE)
+result$readerDataSummary$asDF
+result$readerAccuracyTable$asDF[c("reader", "population", "n", "tp", "fn", "tn", "fp", "metric", "estimate", "status")]
+```
+
+Sensitivity is TP/(TP+FN); specificity is TN/(TN+FP). Balanced accuracy (BA) is
+their arithmetic mean. Each reader's available-case accuracy uses that reader and
+the reference. The shared-case accuracy view uses only rows complete for all selected
+readers and reference. These are distinct populations; inspect both denominators
+before comparing readers. Missing or indeterminate calls are never counted as negative.
+
+```{r disagreement}
+result$cutoffAgreementTable$asDF[c("pair", "population", "n", "units", "first_positive", "second_positive", "metric", "estimate")]
+result$cutoffDisagreementCases$asDF
+```
+
+Each pair uses its own available readings, even if no cases are complete across all
+readers. Near-cutoff cases are those where **either** member of that pair has a score
+within the inclusive band, here [45,55]. They form a conditional subgroup, not a new
+accuracy cohort. Both directional discordance counts are shown. A disagreement alone
+does not identify which reader is wrong. The case-list limit affects display only;
+all eligible cases contribute to the estimates. Original dataset row numbers disambiguate
+repeated specimen labels. Tables support jamovi's usual copying and export.
+
+## Binary calls and original ordinal agreement
+
+For already classified calls, choose the binary workflow and enter exact reader
+labels. Extra labels are counted as indeterminate. The example's `call1` to `call3`
+include explicit indeterminate calls in addition to missing readings.
+
+```{r binary}
+binary <- pathagreement(ihc_reader_reproducibility,
+  vars = c("call1", "call2", "call3"), readerWorkflow = "binary",
+  readerPositive = "Positive", readerNegative = "Negative",
+  referenceStandard = "reference", referencePositive = "Present", referenceNegative = "Absent",
+  caseID = "case_id", readerCluster = "patient_id")
+binary$readerDataSummary$asDF
+```
+
+Ordinal cutoff mode requires ordered factors with identical declared level order.
+In jamovi, set each grade's measure type to ordinal and its level order to
+Absent < Weak < Moderate < Strong. CSV files do not preserve this metadata; the R
+dataset does. Select `Moderate` as the positive boundary and `>=` as the rule.
+Specify near-boundary categories as exact labels separated by semicolons in the
+interface (for example, `Weak; Moderate`). R callers can also use newline-separated
+labels as below. Ordinal categories are not treated as numeric distances.
+
+```{r ordinal}
+ordinal <- pathagreement(ihc_reader_reproducibility,
+  vars = c("grade1", "grade2", "grade3"), readerWorkflow = "ordinal_cutoff",
+  ordinalCutoff = "Moderate", positiveRule = "ge", nearCutoffLevels = "Weak\nModerate",
+  wght = "equal", referenceAccuracy = FALSE)
+ordinal$readerOriginalAgreement$asDF
+```
+
+The original-score table reports the chosen weighted kappa; the cutoff table reports
+unweighted binary kappa. Neither substitutes for the other. Choosing **Standard
+agreement** restores the existing categorical workflow, whose reference sensitivity
+and specificity are explicitly macro-averaged across categories.
+
+## Uncertainty and its limits
+
+For independent cases, sensitivity, specificity, observed agreement and discordance
+have exact binomial intervals. BA, kappa and specific agreement use optional percentile
+bootstrap intervals. With a patient ID, **all** intervals require whole-patient
+resampling: every specimen from a sampled patient is retained, including repeated
+draws of that patient. Point estimates remain specimen-weighted. Readers are treated
+as fixed; these intervals do not support inference to a population of readers.
+
+Bootstrap intervals are exploratory. A reproducible audit with 300 simulated studies
+per scenario and 399 draws found conditional 95% interval coverage of 92.7–94.0%
+for 240 independent cases with unequal margins. With 60 clusters of three perfectly
+correlated specimens, coverage ranged from 91.3–93.0%; BA coverage was 91.3%
+(Monte Carlo 95% interval 87.6–94.3%). Thus the method does not guarantee nominal
+coverage. With eight clusters or rare categories, intervals were frequently unavailable.
+See `tools/validate_reader_intervals.R` and the CSV audit under
+`literature/reader-reproducibility-validation/` for all results and Monte Carlo intervals.
+
+Any undefined draw, undefined point estimate or constant bootstrap distribution
+suppresses the affected interval. Counts and reasons remain visible. Negative finite
+kappa is retained in agreement inference. A minimum of two sampling units permits
+computation, but does not establish adequate precision or coverage. More resamples
+reduce simulation noise; they do not fix sparse-data or small-cluster coverage.
+
+The separate `agreement` analysis now offers this exploratory method for specific
+agreement. Its existing approximate Wilson method remains the default because the
+coverage audit did not justify replacing it with a purportedly validated method.
+Both methods state their limitations. Its specific-agreement table retains complete
+cases across all selected raters, which differs from `pathagreement`'s pairwise masks.
+
+## Optional experimental combined score
+
+Select one reader pair and explicitly name which member supplies BA. The module-specific
+score is `sqrt(BA * kappa)`, computed on cases complete for that pair and the reference.
+It is unavailable for negative or undefined kappa; a valid zero is retained.
+
+```{r composite}
+exploratory <- pathagreement(ihc_reader_reproducibility,
+  readerWorkflow = "numeric_cutoff", readerScores = c("score1", "score2"),
+  clinicalCutoff = "50", referenceStandard = "reference",
+  referencePositive = "Present", referenceNegative = "Absent",
+  readerCluster = "patient_id", readerPairs = "selected", readerPair1 = "score1",
+  readerPair2 = "score2", showKappaBalanced = TRUE, compositeReader = "score1")
+exploratory$kappaBalancedTable$asDF
+```
+
+This is an explicitly labelled extension, not a verified reproduction of the paper's
+reader aggregation rule or a reporting standard. No clinical acceptance bands or
+automatic ranking are provided. Report the components as well as the combined value.
+
+## Plan sample size and record the analysis
+
+Use `kappaSizeCI()` for precision, `kappaSizePower()` for a hypothesis test, and
+`kappaSizeFixedN()` for power with an already fixed subject count. These existing
+calculators require category proportions, a specified kappa design and 2–6 raters
+who each rate every independent subject. They do not directly size a study with
+repeated specimens, selected near-cutoff subgroups, missing reads or a random-reader
+estimand. See their help pages for the supported category counts and assumptions.
+
+Record the independent-reading procedure, reference source, declared scale, cutoff
+and inequality, selected readers, class labels, missingness policy, case population,
+sampling unit, confidence method, seed and draw count. The **Reader workflow settings**
+table and optional R-code output preserve the analysis choices. Long resampling
+loops use jamovi checkpoints; select one pair when investigating expensive intervals.

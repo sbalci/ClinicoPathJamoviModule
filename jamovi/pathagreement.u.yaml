@@ -4,15 +4,37 @@ jus: '3.0'
 stage: 0
 compilerMode: tame
 children:
+  - type: ComboBox
+    name: readerWorkflow
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+    - type: TargetLayoutBox
+      label: Numeric reader scores
+      children:
+      - type: VariablesListBox
+        name: readerScores
+        isTarget: true
+        enable: (readerWorkflow:numeric_cutoff)
+    - type: TargetLayoutBox
+      label: Patient/cluster ID (optional)
+      children:
+      - type: VariablesListBox
+        name: readerCluster
+        isTarget: true
+        enable: (readerWorkflow:binary || readerWorkflow:ordinal_cutoff || readerWorkflow:numeric_cutoff)
+        maxItemCount: 1
   - type: VariableSupplier
     persistentItems: false
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Rater variables (required)
+        label: Categorical reader variables
         children:
           - type: VariablesListBox
             name: vars
+            enable: (readerWorkflow:off || readerWorkflow:binary || readerWorkflow:ordinal_cutoff)
             isTarget: true
             itemDropBehaviour: emptyspace
       - type: TargetLayoutBox
@@ -23,13 +45,104 @@ children:
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
+        label: Reference/expert standard (optional)
+        children:
+          - type: VariablesListBox
+            name: referenceStandard
+            maxItemCount: 1
+            isTarget: true
+            enable: (performClustering || categoryAnalysis || pathologyContext || readerWorkflow:binary || readerWorkflow:ordinal_cutoff || readerWorkflow:numeric_cutoff)
+      - type: TargetLayoutBox
         label: Trend sequence variable (optional)
         children:
           - type: VariablesListBox
             name: sequenceVariable
             maxItemCount: 1
             isTarget: true
-            enable: (agreementTrendAnalysis)
+            enable: (readerWorkflow:off && (agreementTrendAnalysis))
+  - type: CollapseBox
+    label: Reader Accuracy and Cutoff Agreement
+    collapsed: true
+    children:
+    - type: LayoutBox
+      margin: large
+      children:
+      - type: TextBox
+        name: readerPositive
+        enable: (readerWorkflow:binary)
+        format: string
+      - type: TextBox
+        name: readerNegative
+        enable: (readerWorkflow:binary)
+        format: string
+      - type: CheckBox
+        name: referenceAccuracy
+        enable: (readerWorkflow:binary || readerWorkflow:ordinal_cutoff || readerWorkflow:numeric_cutoff)
+      - type: TextBox
+        name: referencePositive
+        enable: (readerWorkflow:binary || readerWorkflow:ordinal_cutoff || readerWorkflow:numeric_cutoff)
+        format: string
+      - type: TextBox
+        name: referenceNegative
+        enable: (readerWorkflow:binary || readerWorkflow:ordinal_cutoff || readerWorkflow:numeric_cutoff)
+        format: string
+      - type: ComboBox
+        name: readerPopulation
+        enable: (readerWorkflow:binary || readerWorkflow:ordinal_cutoff || readerWorkflow:numeric_cutoff)
+      - type: TextBox
+        name: clinicalCutoff
+        enable: (readerWorkflow:numeric_cutoff)
+        format: string
+      - type: ComboBox
+        name: positiveRule
+        enable: (readerWorkflow:binary || readerWorkflow:ordinal_cutoff || readerWorkflow:numeric_cutoff)
+      - type: TextBox
+        name: nearCutoffWidth
+        enable: (readerWorkflow:numeric_cutoff)
+        format: string
+      - type: TextBox
+        name: ordinalCutoff
+        enable: (readerWorkflow:ordinal_cutoff)
+        format: string
+      - type: TextBox
+        name: nearCutoffLevels
+        enable: (readerWorkflow:ordinal_cutoff)
+        format: string
+      - type: ComboBox
+        name: readerPairs
+        enable: (readerWorkflow:binary || readerWorkflow:ordinal_cutoff || readerWorkflow:numeric_cutoff)
+      - type: TextBox
+        name: readerPair1
+        enable: (readerPairs:selected)
+        format: string
+      - type: TextBox
+        name: readerPair2
+        enable: (readerPairs:selected)
+        format: string
+      - type: TextBox
+        name: readerCaseLimit
+        enable: (readerWorkflow:binary || readerWorkflow:ordinal_cutoff || readerWorkflow:numeric_cutoff)
+        format: number
+      - type: CheckBox
+        name: readerIntervals
+        enable: (readerWorkflow:binary || readerWorkflow:ordinal_cutoff || readerWorkflow:numeric_cutoff)
+      - type: CheckBox
+        name: readerBootstrap
+        enable: (readerWorkflow:binary || readerWorkflow:ordinal_cutoff || readerWorkflow:numeric_cutoff)
+      - type: TextBox
+        name: readerConfidence
+        enable: (readerWorkflow:binary || readerWorkflow:ordinal_cutoff || readerWorkflow:numeric_cutoff)
+        format: number
+      - type: CheckBox
+        name: showKappaBalanced
+        enable: (readerWorkflow:binary || readerWorkflow:ordinal_cutoff || readerWorkflow:numeric_cutoff)
+      - type: TextBox
+        name: compositeReader
+        enable: (showKappaBalanced)
+        format: string
+      - type: CheckBox
+        name: readerCode
+        enable: (readerWorkflow:binary || readerWorkflow:ordinal_cutoff || readerWorkflow:numeric_cutoff)
   - type: CollapseBox
     label: 'Step 1: Core agreement analysis'
     collapsed: false
@@ -41,6 +154,7 @@ children:
             label: Statistical method selection
           - type: ComboBox
             name: multiraterMethod
+            enable: (readerWorkflow:off)
             label: Primary analysis method
             options:
               - title: Automatic (recommended for most users)
@@ -58,6 +172,7 @@ children:
             label: Data type and weighting
           - type: ComboBox
             name: wght
+            enable: (readerWorkflow:off || readerWorkflow:ordinal_cutoff)
             label: Weighting scheme
             options:
               - title: Unweighted (nominal/categorical data)
@@ -73,9 +188,11 @@ children:
             label: Statistical options
           - type: CheckBox
             name: fleissCI
+            enable: (readerWorkflow:off)
             label: Confidence intervals (recommended)
           - type: CheckBox
             name: exct
+            enable: (readerWorkflow:off)
             label: Conger's exact kappa (rater-specific marginals)
   - type: CollapseBox
     label: 'Step 2: Clinical output and interpretation'
@@ -88,9 +205,11 @@ children:
             label: Clinical reports
           - type: CheckBox
             name: showClinicalSummary
+            enable: (readerWorkflow:off)
             label: Clinical summary
           - type: CheckBox
             name: sft
+            enable: (readerWorkflow:off)
             label: Frequency tables for each rater
       - type: LayoutBox
         margin: large
@@ -99,17 +218,20 @@ children:
             label: Educational content
           - type: CheckBox
             name: showAboutAnalysis
+            enable: (readerWorkflow:off)
             label: About this analysis
           - type: CheckBox
             name: showAssumptions
+            enable: (readerWorkflow:off)
             label: Assumptions and caveats
           - type: CheckBox
             name: showStatisticalGlossary
+            enable: (readerWorkflow:off)
             label: Glossary of statistical terms
           - type: CheckBox
             name: showWeightedKappaGuide
             label: Weighted kappa guide
-            enable: (!wght:unweighted)
+            enable: (readerWorkflow:off && (!wght:unweighted))
   - type: CollapseBox
     label: 'Step 3: Visualization (optional)'
     collapsed: true
@@ -121,15 +243,16 @@ children:
             label: Agreement visualization
           - type: CheckBox
             name: heatmap
+            enable: (readerWorkflow:off)
             label: Agreement heatmap
           - type: CheckBox
             name: heatmapDetails
             label: Statistical details in heatmap
-            enable: (heatmap)
+            enable: (readerWorkflow:off && (heatmap))
           - type: ComboBox
             name: heatmapTheme
             label: Color theme
-            enable: (heatmap)
+            enable: (readerWorkflow:off && (heatmap))
             options:
               - title: Viridis (colorblind-safe, recommended)
                 name: viridis
@@ -150,11 +273,12 @@ children:
         children:
           - type: CheckBox
             name: consensus
+            enable: (readerWorkflow:off)
             label: Consensus scoring
           - type: ComboBox
             name: consensus_method
             label: Consensus threshold
-            enable: (consensus)
+            enable: (readerWorkflow:off && (consensus))
             options:
               - title: Simple Majority (>50% agreement)
                 name: majority
@@ -165,7 +289,7 @@ children:
           - type: ComboBox
             name: tie_breaking
             label: Handle ties by
-            enable: (consensus)
+            enable: (readerWorkflow:off && (consensus))
             options:
               - title: Excluding tied cases from analysis
                 name: exclude
@@ -176,7 +300,7 @@ children:
           - type: CheckBox
             name: show_consensus_table
             label: Case-by-case consensus results
-            enable: (consensus)
+            enable: (readerWorkflow:off && (consensus))
   - type: CollapseBox
     label: 'Advanced: Statistical methods (Krippendorff, ICC, Gwet, etc.)'
     collapsed: true
@@ -188,11 +312,12 @@ children:
             label: Alternative agreement coefficients
           - type: CheckBox
             name: kripp
+            enable: (readerWorkflow:off)
             label: Krippendorff's alpha (allows partial ratings)
           - type: ComboBox
             name: krippMethod
             label: Data measurement level
-            enable: (kripp)
+            enable: (readerWorkflow:off && (kripp))
             options:
               - title: Nominal (unordered categories)
                 name: nominal
@@ -204,12 +329,15 @@ children:
                 name: ratio
           - type: CheckBox
             name: icc
+            enable: (readerWorkflow:off)
             label: Intraclass correlation coefficient (ICC)
           - type: CheckBox
             name: gwetAC
+            enable: (readerWorkflow:off)
             label: Gwet's AC1/AC2 coefficients (prevalence-robust)
           - type: CheckBox
             name: pabak
+            enable: (readerWorkflow:off)
             label: PABAK (prevalence- and bias-adjusted kappa)
       - type: LayoutBox
         margin: large
@@ -218,21 +346,22 @@ children:
             label: Bootstrap analysis
           - type: CheckBox
             name: bootstrap
+            enable: (readerWorkflow:off)
             label: Bootstrap confidence intervals
           - type: TextBox
             name: bootstrapSamples
             label: Bootstrap samples (100-5000)
-            enable: (bootstrap || agreementStabilityAnalysis)
+            enable: (bootstrap || agreementStabilityAnalysis || readerBootstrap)
             format: number
           - type: TextBox
             name: seed
             label: Random seed
-            enable: (bootstrap || agreementStabilityAnalysis)
+            enable: (bootstrap || agreementStabilityAnalysis || readerBootstrap)
             format: number
           - type: ComboBox
             name: bootstrapCIType
             label: Interval method
-            enable: (bootstrap || agreementStabilityAnalysis)
+            enable: (readerWorkflow:off && (bootstrap || agreementStabilityAnalysis))
             options:
               - title: Bias-corrected and accelerated (BCa)
                 name: bca
@@ -256,6 +385,7 @@ children:
               Reference: Usubutun et al. (2012) Modern Pathology 25:877-884
           - type: CheckBox
             name: performClustering
+            enable: (readerWorkflow:off)
             label: Rater clustering (diagnostic styles)
       - type: LayoutBox
         margin: large
@@ -265,7 +395,7 @@ children:
           - type: ComboBox
             name: clusteringMethod
             label: Linkage method
-            enable: (performClustering)
+            enable: (readerWorkflow:off && (performClustering))
             options:
               - title: Ward's method (minimize variance, recommended)
                 name: ward
@@ -278,7 +408,7 @@ children:
           - type: ComboBox
             name: styleDistanceMetric
             label: Distance metric
-            enable: (performClustering)
+            enable: (readerWorkflow:off && (performClustering))
             options:
               - title: Percentage Agreement (recommended)
                 name: agreement
@@ -294,12 +424,12 @@ children:
           - type: CheckBox
             name: autoSelectGroups
             label: Choose the number of groups automatically (silhouette)
-            enable: (performClustering)
+            enable: (readerWorkflow:off && (performClustering))
           - type: TextBox
             name: nStyleGroups
             label: Number of groups (if manual, 2-10)
             format: number
-            enable: (performClustering && !autoSelectGroups)
+            enable: (readerWorkflow:off && (performClustering && !autoSelectGroups))
       - type: LayoutBox
         margin: large
         children:
@@ -308,16 +438,16 @@ children:
           - type: CheckBox
             name: identifyDiscordant
             label: High-disagreement cases
-            enable: (performClustering)
+            enable: (readerWorkflow:off && (performClustering))
           - type: TextBox
             name: discordantThreshold
             label: Disagreement threshold (0.2-0.8)
             format: number
-            enable: (performClustering && identifyDiscordant)
+            enable: (readerWorkflow:off && (performClustering && identifyDiscordant))
           - type: CheckBox
             name: identifyDiscordantCases
             label: Cases distinguishing diagnostic styles
-            enable: (performClustering)
+            enable: (readerWorkflow:off && (performClustering))
       - type: LayoutBox
         margin: large
         children:
@@ -326,11 +456,11 @@ children:
           - type: CheckBox
             name: showClusteringHeatmap
             label: Clustering heatmap
-            enable: (performClustering)
+            enable: (readerWorkflow:off && (performClustering))
           - type: ComboBox
             name: heatmapColorScheme
             label: Heatmap color scheme
-            enable: (performClustering && showClusteringHeatmap)
+            enable: (readerWorkflow:off && (performClustering && showClusteringHeatmap))
             options:
               - title: Diagnostic categories (blue-green-gold)
                 name: diagnostic
@@ -341,7 +471,7 @@ children:
           - type: CheckBox
             name: showClusteringInterpretation
             label: Clustering interpretation guide
-            enable: (performClustering)
+            enable: (readerWorkflow:off && (performClustering))
       - type: LayoutBox
         margin: large
         children:
@@ -350,25 +480,13 @@ children:
           - type: CheckBox
             name: raterCharacteristics
             label: Association with rater characteristics
-            enable: (performClustering)
+            enable: (readerWorkflow:off && (performClustering))
           - type: Label
             label: Rater characteristics are read from META_ rows in the dataset (see guide below).
           - type: CheckBox
             name: useMetadataRows
             label: Metadata rows in the dataset (see guide below)
-            enable: (performClustering && raterCharacteristics)
-      - type: VariableSupplier
-        persistentItems: false
-        stretchFactor: 1
-        children:
-          - type: TargetLayoutBox
-            label: Reference/expert standard (optional)
-            children:
-              - type: VariablesListBox
-                name: referenceStandard
-                maxItemCount: 1
-                isTarget: true
-                enable: (performClustering || categoryAnalysis || pathologyContext)
+            enable: (performClustering && raterCharacteristics || readerWorkflow:binary || readerWorkflow:ordinal_cutoff || readerWorkflow:numeric_cutoff)
       - type: LayoutBox
         margin: large
         children:
@@ -410,12 +528,15 @@ children:
             label: Rater-level analysis
           - type: CheckBox
             name: pairwiseAnalysis
+            enable: (readerWorkflow:off)
             label: Pairwise rater comparisons
           - type: CheckBox
             name: raterBiasAnalysis
+            enable: (readerWorkflow:off)
             label: Rater disagreement with consensus
           - type: CheckBox
             name: agreementTrendAnalysis
+            enable: (readerWorkflow:off)
             label: Agreement trend over case sequence
       - type: LayoutBox
         margin: large
@@ -424,12 +545,15 @@ children:
             label: Case-level analysis
           - type: CheckBox
             name: categoryAnalysis
+            enable: (readerWorkflow:off)
             label: Category-specific agreement
           - type: CheckBox
             name: outlierAnalysis
+            enable: (readerWorkflow:off)
             label: Cases with poor agreement
           - type: CheckBox
             name: caseDifficultyScoring
+            enable: (readerWorkflow:off)
             label: Case difficulty
       - type: LayoutBox
         margin: large
@@ -438,9 +562,11 @@ children:
             label: Clinical context analysis
           - type: CheckBox
             name: pathologyContext
+            enable: (readerWorkflow:off)
             label: Diagnostic accuracy metrics (requires reference standard)
           - type: CheckBox
             name: agreementStabilityAnalysis
+            enable: (readerWorkflow:off)
             label: Agreement stability (bootstrap)
   - type: CollapseBox
     label: 'Planning: Study design and sample size'
@@ -451,17 +577,18 @@ children:
         children:
           - type: CheckBox
             name: sampleSizePlanning
+            enable: (readerWorkflow:off)
             label: Sample size planning
           - type: TextBox
             name: targetKappa
             label: Target kappa value (0.02-0.98)
             format: number
-            enable: (sampleSizePlanning)
+            enable: (readerWorkflow:off && (sampleSizePlanning))
           - type: TextBox
             name: targetPrecision
             label: Target precision (95% CI half-width, e.g., 0.1)
             format: number
-            enable: (sampleSizePlanning)
+            enable: (readerWorkflow:off && (sampleSizePlanning))
   - type: CollapseBox
     label: 'Technical: System options'
     collapsed: true
@@ -473,4 +600,5 @@ children:
             label: Additional output
           - type: CheckBox
             name: showInlineComments
+            enable: (readerWorkflow:off)
             label: Inline statistical comments

@@ -1244,9 +1244,7 @@ options:
       description:
           R: >
             Calculate confidence intervals at the chosen confidence level for specific
-            agreement indices, using the Wilson score method. Recommended for publication and when sample sizes vary
-            across categories. Helps distinguish true differences in category-specific
-            agreement from random variation.
+            agreement indices using the selected method. Bootstrap resamples complete paired observations or clusters; the legacy Wilson option remains explicitly approximate.
 
     - name: showSpecificAgreementGuide
       title: "When to use specific agreement indices"
@@ -1963,5 +1961,30 @@ options:
             draw; the default (42) reproduces the previous fixed behaviour.
 
 
+
+    - name: specificCIMethod
+      title: Specific agreement interval method
+      type: List
+      options:
+      - name: bootstrap
+        title: Exploratory paired case/cluster bootstrap
+      - name: legacy
+        title: Approximate Wilson (legacy)
+      default: legacy
+      description:
+        R: Bootstrap preserves paired observations and suppresses intervals with undefined
+          or constant draws. It is exploratory; simulations found undercoverage even with
+          60 clusters. Legacy Wilson uses an effective denominator and has no guaranteed
+          coverage. The existing legacy default is retained pending better coverage validation.
+    - name: specificCluster
+      title: Patient/cluster ID for specific agreement
+      type: Variable
+      default: null
+      suggested:
+      - id
+      - nominal
+      description:
+        R: Optional cluster ID aligned to the data. Specific-agreement intervals resample
+          whole clusters; all other agreement outputs keep their own documented inference.
 
 ...

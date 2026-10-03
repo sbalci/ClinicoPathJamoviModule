@@ -12,7 +12,22 @@ description:
         Interrater reliability analysis including Cohen's kappa (2 raters),
         Fleiss' kappa (3+ raters), Krippendorff's alpha, and consensus analysis.
         Provides agreement statistics, visualization, and clinical
-        interpretation for categorical rating data.
+        interpretation for categorical rating data. Optional independent-reader
+        workflows report disease-positive accuracy and binary, ordinal or numeric
+        cutoff disagreement with explicit case populations and exploratory cluster
+        intervals. The default retains standard categorical agreement.
+    R:
+        dontrun: true
+        usage: |
+            data('ihc_reader_reproducibility', package = 'ClinicoPath')
+            pathagreement(ihc_reader_reproducibility,
+                readerWorkflow = 'numeric_cutoff',
+                readerScores = c('score1', 'score2', 'score3'),
+                clinicalCutoff = '50', positiveRule = 'ge', nearCutoffWidth = '5',
+                referenceStandard = 'reference', referencePositive = 'Present',
+                referenceNegative = 'Absent', caseID = 'case_id',
+                readerCluster = 'patient_id', readerBootstrap = TRUE,
+                bootstrapSamples = 1000, seed = 42)
     # R:
     #     dontrun: true
     #     usage: |
@@ -639,5 +654,198 @@ options:
           R: >
             Display explanatory guide for interpreting clustering results, diagnostic style groups,
             and discordant cases. Useful for understanding clinical implications.
+
+    - name: readerWorkflow
+      title: Reader workflow
+      type: List
+      default: 'off'
+      options:
+      - name: 'off'
+        title: Standard agreement
+      - name: binary
+        title: Binary reader diagnostics
+      - name: ordinal_cutoff
+        title: Ordinal clinical cutoff
+      - name: numeric_cutoff
+        title: Numeric clinical cutoff
+      description:
+        R: Standard agreement preserves existing analyses. Reader diagnostics report accuracy and agreement
+          on explicitly classified independent readings.
+    - name: readerScores
+      title: Numeric reader scores
+      type: Variables
+      default: null
+      suggested:
+      - continuous
+      permitted:
+      - numeric
+      description:
+        R: One numeric column per independent reader, on the same score scale.
+    - name: readerPositive
+      title: Reader positive label
+      type: String
+      default: ''
+      description:
+        R: Exact positive label shared by binary reader columns. Other labels are excluded as indeterminate.
+    - name: readerNegative
+      title: Reader negative label
+      type: String
+      default: ''
+      description:
+        R: Exact negative label shared by binary reader columns.
+    - name: referenceAccuracy
+      title: Reader accuracy against reference
+      type: Bool
+      default: true
+      description:
+        R: Compute each reader against the optional reference; agreement remains available without a reference.
+    - name: referencePositive
+      title: Reference positive label
+      type: String
+      default: ''
+      description:
+        R: Exact reference label denoting disease present.
+    - name: referenceNegative
+      title: Reference negative label
+      type: String
+      default: ''
+      description:
+        R: Exact reference label denoting disease absent; other labels are excluded.
+    - name: readerPopulation
+      title: Accuracy case population
+      type: List
+      default: available
+      options:
+      - name: available
+        title: Available for each reader
+      - name: shared
+        title: Shared across all readers
+      - name: both
+        title: Both populations
+      description:
+        R: Available uses each reader and reference. Shared requires all selected readers and reference.
+    - name: clinicalCutoff
+      title: Prespecified numeric cutoff
+      type: String
+      default: ''
+      description:
+        R: Enter one finite numeric threshold; blank means no cutoff has been specified.
+    - name: positiveRule
+      title: Positive call when score is
+      type: List
+      default: ge
+      options:
+      - name: ge
+        title: At or above cutoff
+      - name: gt
+        title: Above cutoff
+      - name: le
+        title: At or below cutoff
+      - name: lt
+        title: Below cutoff
+      description:
+        R: The exact inequality is applied to every reader. Ordinal comparisons use declared level order.
+    - name: nearCutoffWidth
+      title: Near-cutoff width (optional)
+      type: String
+      default: ''
+      description:
+        R: Nonnegative distance on either side of the numeric cutoff. A pair is near cutoff if either reader
+          falls in this inclusive band.
+    - name: ordinalCutoff
+      title: Ordinal boundary category
+      type: String
+      default: ''
+      description:
+        R: Exact boundary label from the common declared ordered scale.
+    - name: nearCutoffLevels
+      title: Near-cutoff categories (separate with ;)
+      type: String
+      default: ''
+      description:
+        R: Exact ordinal category labels separated by semicolons in the interface;
+          R callers can also separate labels by newlines. Either reader in this set
+          defines the pair-specific near-cutoff subset.
+    - name: readerPairs
+      title: Reader pairs
+      type: List
+      default: all
+      options:
+      - name: all
+        title: All pairs
+      - name: selected
+        title: One selected pair
+      description:
+        R: Choose all pairs or one named pair. One pair is required for the exploratory composite.
+    - name: readerPair1
+      title: First reader column name
+      type: String
+      default: ''
+      description:
+        R: Exact name of the first selected reader column.
+    - name: readerPair2
+      title: Second reader column name
+      type: String
+      default: ''
+      description:
+        R: Exact name of the second selected reader column.
+    - name: readerCaseLimit
+      title: Maximum displayed disagreements
+      type: Integer
+      default: 50
+      min: 0
+      max: 500
+      description:
+        R: Limit the displayed list across pairs; all cases still contribute to aggregate estimates.
+    - name: readerCluster
+      title: Patient or cluster ID
+      type: Variable
+      default: null
+      suggested:
+      - id
+      - nominal
+      description:
+        R: Repeated specimens from a patient must share this ID. Estimates remain specimen-weighted; intervals
+          resample whole clusters.
+    - name: readerIntervals
+      title: Reader confidence intervals
+      type: Bool
+      default: true
+      description:
+        R: Independent-case proportions use exact binomial intervals. Other metrics need bootstrap.
+    - name: readerBootstrap
+      title: Joint bootstrap intervals
+      type: Bool
+      default: false
+      description:
+        R: Resample complete case rows or patient clusters for fixed selected readers. Undefined or constant
+          draws suppress the affected interval.
+    - name: readerConfidence
+      title: Reader confidence level
+      type: Number
+      default: 0.95
+      min: 0.01
+      max: 0.999
+      description:
+        R: Confidence level for the new reader workflow.
+    - name: showKappaBalanced
+      title: Exploratory kappa-balanced score
+      type: Bool
+      default: false
+      description:
+        R: Module-specific exploratory score sqrt(BA * Cohen kappa), with BA from the explicitly selected
+          reader on the pair/reference common cases. No clinical acceptance thresholds.
+    - name: compositeReader
+      title: Accuracy reader column name
+      type: String
+      default: ''
+      description:
+        R: Which member of the selected pair supplies balanced accuracy for the exploratory score.
+    - name: readerCode
+      title: Reproducible reader R code
+      type: Bool
+      default: false
+      description:
+        R: Display the selected options as an R call using a data frame named your_data.
 
 ...

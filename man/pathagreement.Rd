@@ -60,7 +60,31 @@ pathagreement(
   referenceStandard = NULL,
   useMetadataRows = FALSE,
   showInlineComments = FALSE,
-  showClusteringInterpretation = FALSE
+  showClusteringInterpretation = FALSE,
+  readerWorkflow = "off",
+  readerScores = NULL,
+  readerPositive = "",
+  readerNegative = "",
+  referenceAccuracy = TRUE,
+  referencePositive = "",
+  referenceNegative = "",
+  readerPopulation = "available",
+  clinicalCutoff = "",
+  positiveRule = "ge",
+  nearCutoffWidth = "",
+  ordinalCutoff = "",
+  nearCutoffLevels = "",
+  readerPairs = "all",
+  readerPair1 = "",
+  readerPair2 = "",
+  readerCaseLimit = 50,
+  readerCluster = NULL,
+  readerIntervals = TRUE,
+  readerBootstrap = FALSE,
+  readerConfidence = 0.95,
+  showKappaBalanced = FALSE,
+  compositeReader = "",
+  readerCode = FALSE
 )
 }
 \arguments{
@@ -268,6 +292,79 @@ interpretations inline with results for educational purposes.}
 \item{showClusteringInterpretation}{Display explanatory guide for
 interpreting clustering results, diagnostic style groups, and discordant
 cases. Useful for understanding clinical implications.}
+
+\item{readerWorkflow}{Standard agreement preserves existing analyses.
+Reader diagnostics report accuracy and agreement on explicitly classified
+independent readings.}
+
+\item{readerScores}{One numeric column per independent reader, on the same
+score scale.}
+
+\item{readerPositive}{Exact positive label shared by binary reader columns.
+Other labels are excluded as indeterminate.}
+
+\item{readerNegative}{Exact negative label shared by binary reader columns.}
+
+\item{referenceAccuracy}{Compute each reader against the optional
+reference; agreement remains available without a reference.}
+
+\item{referencePositive}{Exact reference label denoting disease present.}
+
+\item{referenceNegative}{Exact reference label denoting disease absent;
+other labels are excluded.}
+
+\item{readerPopulation}{Available uses each reader and reference. Shared
+requires all selected readers and reference.}
+
+\item{clinicalCutoff}{Enter one finite numeric threshold; blank means no
+cutoff has been specified.}
+
+\item{positiveRule}{The exact inequality is applied to every reader.
+Ordinal comparisons use declared level order.}
+
+\item{nearCutoffWidth}{Nonnegative distance on either side of the numeric
+cutoff. A pair is near cutoff if either reader falls in this inclusive
+band.}
+
+\item{ordinalCutoff}{Exact boundary label from the common declared ordered
+scale.}
+
+\item{nearCutoffLevels}{Exact ordinal category labels separated by
+semicolons in the interface; R callers can also separate labels by
+newlines. Either reader in this set defines the pair-specific near-cutoff
+subset.}
+
+\item{readerPairs}{Choose all pairs or one named pair. One pair is required
+for the exploratory composite.}
+
+\item{readerPair1}{Exact name of the first selected reader column.}
+
+\item{readerPair2}{Exact name of the second selected reader column.}
+
+\item{readerCaseLimit}{Limit the displayed list across pairs; all cases
+still contribute to aggregate estimates.}
+
+\item{readerCluster}{Repeated specimens from a patient must share this ID.
+Estimates remain specimen-weighted; intervals resample whole clusters.}
+
+\item{readerIntervals}{Independent-case proportions use exact binomial
+intervals. Other metrics need bootstrap.}
+
+\item{readerBootstrap}{Resample complete case rows or patient clusters for
+fixed selected readers. Undefined or constant draws suppress the affected
+interval.}
+
+\item{readerConfidence}{Confidence level for the new reader workflow.}
+
+\item{showKappaBalanced}{Module-specific exploratory score sqrt(BA * Cohen
+kappa), with BA from the explicitly selected reader on the pair/reference
+common cases. No clinical acceptance thresholds.}
+
+\item{compositeReader}{Which member of the selected pair supplies balanced
+accuracy for the exploratory score.}
+
+\item{readerCode}{Display the selected options as an R call using a data
+frame named your_data.}
 }
 \value{
 A results object containing:
@@ -322,6 +419,14 @@ A results object containing:
 \code{results$clusterDendrogram} \tab \tab \tab \tab \tab Dendrogram showing hierarchical relationships between raters \cr
 \code{results$silhouettePlot} \tab \tab \tab \tab \tab Silhouette plot showing cluster separation and cohesion \cr
 \code{results$clusteringInterpretation} \tab \tab \tab \tab \tab Explanatory guide for understanding diagnostic style groups and cluster results \cr
+\code{results$readerSettings} \tab \tab \tab \tab \tab a table \cr
+\code{results$readerDataSummary} \tab \tab \tab \tab \tab a table \cr
+\code{results$readerAccuracyTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$cutoffAgreementTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$readerOriginalAgreement} \tab \tab \tab \tab \tab a table \cr
+\code{results$cutoffDisagreementCases} \tab \tab \tab \tab \tab a table \cr
+\code{results$kappaBalancedTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$readerRCode} \tab \tab \tab \tab \tab a preformatted \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -334,5 +439,21 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 Interrater reliability analysis including Cohen's kappa (2 raters),
 Fleiss' kappa (3+ raters), Krippendorff's alpha, and consensus analysis.
 Provides agreement statistics, visualization, and clinical
-interpretation for categorical rating data.
+interpretation for categorical rating data. Optional independent-reader
+workflows report disease-positive accuracy and binary, ordinal or numeric
+cutoff disagreement with explicit case populations and exploratory cluster
+intervals. The default retains standard categorical agreement.
+}
+\examples{
+\donttest{
+data('ihc_reader_reproducibility', package = 'ClinicoPath')
+pathagreement(ihc_reader_reproducibility,
+    readerWorkflow = 'numeric_cutoff',
+    readerScores = c('score1', 'score2', 'score3'),
+    clinicalCutoff = '50', positiveRule = 'ge', nearCutoffWidth = '5',
+    referenceStandard = 'reference', referencePositive = 'Present',
+    referenceNegative = 'Absent', caseID = 'case_id',
+    readerCluster = 'patient_id', readerBootstrap = TRUE,
+    bootstrapSamples = 1000, seed = 42)
+}
 }

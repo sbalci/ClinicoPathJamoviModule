@@ -1922,13 +1922,31 @@ items:
           title: 'Specific Agreement'
           type: number
         - name: ci_lower
-          title: '95% CI Lower'
+          title: 'CI Lower'
           type: number
         - name: ci_upper
-          title: '95% CI Upper'
+          title: 'CI Upper'
           type: number
         - name: interpretation
           title: 'Interpretation'
+          type: text
+        - name: n_cases
+          title: Complete cases
+          type: integer
+        - name: units
+          title: Sampling units
+          type: integer
+        - name: attempted
+          title: Attempted draws
+          type: integer
+        - name: valid
+          title: Valid draws
+          type: integer
+        - name: undefined
+          title: Undefined draws
+          type: integer
+        - name: ci_method
+          title: CI method/status
           type: text
       clearWith:
           - vars
@@ -1936,6 +1954,10 @@ items:
           - specificAllCategories
           - confLevel
           - specificConfidenceIntervals
+          - specificCIMethod
+          - specificCluster
+          - nBoot
+          - seed
 
     - name: specificAgreementExplanation
       title: "About Specific Agreement Indices"
