@@ -37,6 +37,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
             .any_significant_comparison = NULL,
             # Cochran's Q global p-value (set in .performCochranQ for 3+ tests).
             .cochran_pvalue = NULL,
+            .cochran_method_note = "",
             # Whether the pairwise McNemar p-values were Holm-adjusted (more than one computable
             # pair); the copy-ready Methods sentence must say so when they were.
             .holm_applied = NULL,
@@ -441,6 +442,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 private$.noticeList <- list()
                 private$.any_significant_comparison <- NULL
                 private$.cochran_pvalue <- NULL
+                private$.cochran_method_note <- ""
                 private$.mcnemar_uninformative <- NULL
                 private$.holm_applied <- NULL
                 private$.best_test_tied <- NULL
@@ -459,7 +461,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 }
                 # Deleting rows does not remove table notes from a previous method or dataset.
                 for (key in c("mcnemar_multiplicity", "mcnemar_uninformative_excluded",
-                              "mcnemar_midp_nostat", "cochran_q_failed"))
+                              "mcnemar_midp_nostat", "cochran_q_failed", "cochran_method"))
                     self$results$mcnemarTable$setNote(key, NULL)
                 self$results$diffTable$setNote("diff_multiplicity", NULL)
                 # Preserve the fixed row scaffold, but blank values before validation can fail.
@@ -866,16 +868,29 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
 
             # Display original data tables
             .displayOriginalData = function(processed_data) {
-                mydata <- processed_data$data
+                # Bound the original level cross-product before table() allocates it.
+                # Dropping unused levels here affects display only, not diagnostic recoding.
+                mydata <- droplevels(processed_data$data)
                 goldVariable <- processed_data$goldVariable
+                test_vars <- private$.getTestVariables()
+                n_gold <- nlevels(as.factor(mydata[[goldVariable]]))
+                n_test <- vapply(test_vars, function(v) {
+                    nlevels(as.factor(mydata[[v]]))
+                }, integer(1))
+                if (any(as.double(n_gold) * n_test > 10000)) {
+                    private$.addNotice(
+                        type = "WARNING",
+                        title = jmvcore::.("Original Data Display Omitted"),
+                        content = jmvcore::.("An original-data cross-tabulation would exceed 10,000 cells. The original-data display was omitted; diagnostic estimates and comparisons are unaffected.")
+                    )
+                    return(invisible(NULL))
+                }
 
                 # Create frequency table for gold standard
                 freq_table <- table(mydata[[goldVariable]])
                 self$results$text1$setContent(freq_table)
 
                 # Create cross-tabulation tables
-                test_vars <- private$.getTestVariables()
-
                 if (length(test_vars) > 0) {
                     html_tables <- ""
                     for (test_var in test_vars) {
@@ -1997,6 +2012,38 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
 
             },
 
+            # Exact conditional tail for three tests. Each informative row has three
+            # equiprobable permutations conditional on its sum (one or two correct).
+            # Convolve column-1/column-2 totals; column 3 follows from the fixed total.
+            # The caller bounds m at 30: O(m^3) work and O(m^2) storage, no RNG.
+            .cochranExactP = function(correctness) {
+                totals <- rowSums(correctness)
+                informative <- correctness[totals > 0 & totals < 3, , drop = FALSE]
+                m <- nrow(informative)
+                if (m == 0) return(NA_real_)
+                stopifnot(ncol(informative) == 3, m <= 30)
+                row_totals <- rowSums(informative)
+                prob <- matrix(1, 1, 1)
+                for (r in row_totals) {
+                    size <- nrow(prob)
+                    next_prob <- matrix(0, size + 1L, size + 1L)
+                    ix <- seq_len(size)
+                    next_prob[ix + 1L, ix] <- next_prob[ix + 1L, ix] + prob / 3
+                    next_prob[ix, ix + 1L] <- next_prob[ix, ix + 1L] + prob / 3
+                    shift <- if (r == 1) 0L else 1L
+                    next_prob[ix + shift, ix + shift] <-
+                        next_prob[ix + shift, ix + shift] + prob / 3
+                    prob <- next_prob
+                }
+                # With fixed row sums, Q is monotone in the sum of squared column totals.
+                # Using this integer-valued score avoids floating-point tail-tie errors.
+                observed <- sum(colSums(informative)^2)
+                score <- outer(0:m, 0:m, function(a, b) {
+                    a^2 + b^2 + (sum(row_totals) - a - b)^2
+                })
+                min(1, sum(prob[score >= observed]))
+            },
+
             # Perform Cochran's Q test for 3+ tests (global test)
             # CRITICAL: Compare CORRECTNESS relative to gold standard, not raw positivity rates
             .performCochranQ = function(test_results, mcnemarTable) {
@@ -2060,7 +2107,17 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
 
                         Q <- (k - 1) * numerator / denominator
                         df <- k - 1
-                        p_value <- stats::pchisq(Q, df, lower.tail = FALSE)
+                        n_informative <- sum(Ri > 0 & Ri < k)
+                        exact <- k == 3 && n_informative <= 30
+                        if (exact) {
+                            p_value <- private$.cochranExactP(all_tests_matrix)
+                            df <- NA_integer_
+                            private$.cochran_method_note <- .fmt(jmvcore::.("Cochran's Q used an exact conditional p-value based on {n} informative cases, conditioning on each case's number of correct tests and assuming exchangeability of test labels under the null. The statistic column reports Q; no chi-square degrees of freedom apply."), n = n_informative)
+                        } else {
+                            p_value <- stats::pchisq(Q, df, lower.tail = FALSE)
+                            private$.cochran_method_note <- .fmt(jmvcore::.("Cochran's Q used the chi-square approximation with {n} informative cases. This is a large-sample approximation; the total complete-case count includes concordant cases that contribute no information to this test."), n = n_informative)
+                        }
+                        mcnemarTable$setNote("cochran_method", private$.cochran_method_note)
                         # Store the global p-value for honest report wording
                         private$.cochran_pvalue <- p_value
 
@@ -2773,7 +2830,8 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
 
                 # IR-decisioncompare-03: the Results paragraph prints exact intervals for sensitivity
                 # and specificity whatever the CI option, so the Methods must name the method.
-                paste(trimws(methods), jmvcore::.("Sensitivity and specificity are given with exact (Clopper-Pearson) 95% confidence intervals."))
+                paste(trimws(methods), private$.cochran_method_note,
+                      jmvcore::.("Sensitivity and specificity are given with exact (Clopper-Pearson) 95% confidence intervals."))
             },
 
             # Generate results section with key findings
@@ -3416,7 +3474,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                             # gone: the paragraph below now says which pairs differ, or that none does,
                             # and the old sentence contradicted the second case.
                             html <- paste0(html, sprintf(
-                                jmvcore::.("<p><b>Overall comparison:</b> Cochran's Q test (\u03C7\u00B2 = %1$.2f, p %2$s) <span style='color:inherit;'><b>found significant differences</b></span> among the three tests: these data are evidence that the tests do not all have the same accuracy.</p>"),
+                                jmvcore::.("<p><b>Overall comparison:</b> Cochran's Q test (Q = %1$.2f, p %2$s) <span style='color:inherit;'><b>found significant differences</b></span> among the three tests: these data are evidence that the tests do not all have the same accuracy.</p>"),
                                 private$.halfUp(q_stat, 2L), private$.formatP(q_p)
                             ))
 
@@ -3449,7 +3507,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                                 html <- paste0(html, "<p>", conflict, "</p>")
                         } else {
                             html <- paste0(html, sprintf(
-                                jmvcore::.("<p><b>Overall comparison:</b> Cochran's Q test (\u03C7\u00B2 = %1$.2f, p %2$s) <span style='color:inherit;'><b>did not detect a significant difference</b></span> among the three tests. This is not evidence that they perform equally: with this sample size a clinically important accuracy difference could go undetected, and no test of one test against another across a pre-specified equivalence margin was performed. (If requested, the criterion column in the Overall Percent Agreement table compares each test with a user-specified descriptive OPA threshold; it is not a noninferiority comparison between tests or clinical guidance.) The confidence intervals for the paired differences in the Differences with 95%% Confidence Intervals table show how large a difference remains compatible with these data.</p>"),
+                                jmvcore::.("<p><b>Overall comparison:</b> Cochran's Q test (Q = %1$.2f, p %2$s) <span style='color:inherit;'><b>did not detect a significant difference</b></span> among the three tests. This is not evidence that they perform equally: with this sample size a clinically important accuracy difference could go undetected, and no test of one test against another across a pre-specified equivalence margin was performed. (If requested, the criterion column in the Overall Percent Agreement table compares each test with a user-specified descriptive OPA threshold; it is not a noninferiority comparison between tests or clinical guidance.) The confidence intervals for the paired differences in the Differences with 95%% Confidence Intervals table show how large a difference remains compatible with these data.</p>"),
                                 private$.halfUp(q_stat, 2L), private$.formatP(q_p)
                             ))
                             # Cochran's Q and each pair use different rows, so a pair can reach
@@ -3556,6 +3614,8 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 html <- paste0(html, "</div>")
+                if (nzchar(private$.cochran_method_note))
+                    html <- paste0(html, "<p>", private$.cochran_method_note, "</p>")
                 self$results$summaryReport$setContent(html)
             },
 
@@ -3580,7 +3640,6 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         identical(as.character(mcnemar_table$rowKeys[[1]]), "cochran_q_global")
                     q_row <- if (is_q) mcnemar_table$rowKeys[[1]] else NULL
                     q_stat <- if (is_q) mcnemar_table$getCell(rowKey = q_row, col = "stat")$value else NA
-                    q_df <- if (is_q) mcnemar_table$getCell(rowKey = q_row, col = "df")$value else NA
                     q_p <- if (is_q) mcnemar_table$getCell(rowKey = q_row, col = "p")$value else NA
                     q_n <- if (is_q) mcnemar_table$getCell(rowKey = q_row, col = "n")$value else NA
                     if (is_q && length(q_stat) == 1 && !is.na(q_stat) && length(q_p) == 1 && !is.na(q_p)) {
@@ -3588,11 +3647,11 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         # "did not detect") through %s, which no language can reorder. Copy-ready
                         # text carries its N (VAL-decisioncompare-05) and never "p = 0.000".
                         report <- paste0(if (q_p < private$P_THRESHOLD_SIGNIFICANT)
-                            sprintf(jmvcore::.("Cochran's Q test revealed a significant difference in diagnostic accuracy among the three tests (n = %1$d cases with all three results; \u03C7\u00B2(%2$d) = %3$.2f, p %4$s)."),
-                                q_n, q_df, private$.halfUp(q_stat, 2L), private$.formatP(q_p))
+                            sprintf(jmvcore::.("Cochran's Q test revealed a significant difference in diagnostic accuracy among the three tests (n = %1$d cases with all three results; Q = %2$.2f, p %3$s)."),
+                                q_n, private$.halfUp(q_stat, 2L), private$.formatP(q_p))
                         else
-                            sprintf(jmvcore::.("Cochran's Q test did not detect a significant difference in diagnostic accuracy among the three tests (n = %1$d cases with all three results; \u03C7\u00B2(%2$d) = %3$.2f, p %4$s)."),
-                                q_n, q_df, private$.halfUp(q_stat, 2L), private$.formatP(q_p)), " ")
+                            sprintf(jmvcore::.("Cochran's Q test did not detect a significant difference in diagnostic accuracy among the three tests (n = %1$d cases with all three results; Q = %2$.2f, p %3$s)."),
+                                q_n, private$.halfUp(q_stat, 2L), private$.formatP(q_p)), " ")
                         findings <- private$.pairwiseFindingsText()
                         if (q_p >= private$P_THRESHOLD_SIGNIFICANT) {
                             report <- paste0(
@@ -3757,6 +3816,8 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 html <- paste0(html, "</div></div>")
+                if (nzchar(private$.cochran_method_note))
+                    html <- paste0(html, "<p>", private$.cochran_method_note, "</p>")
                 self$results$reportSentence$setContent(html)
             },
 
@@ -3794,13 +3855,13 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
 
                 html <- paste0(
                     html,
-                    "<dt><b>Sensitivity</b></dt>",
+                    jmvcore::.("<dt><b>Sensitivity</b></dt>"),
                     paste0("<dd style='margin-bottom:12px;'>", jmvcore::.("Proportion of diseased cases correctly identified (True Positive Rate). High sensitivity means few false negatives. Important when missing disease is costly."), "</dd>")
                 )
 
                 html <- paste0(
                     html,
-                    "<dt><b>Specificity</b></dt>",
+                    jmvcore::.("<dt><b>Specificity</b></dt>"),
                     paste0("<dd style='margin-bottom:12px;'>", jmvcore::.("Proportion of non-diseased cases correctly identified (True Negative Rate). High specificity means few false positives. Important when false alarms are problematic."), "</dd>")
                 )
 

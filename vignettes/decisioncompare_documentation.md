@@ -1,48 +1,55 @@
-# Compare Medical Decision Tests - Feature Mapping Specification
+# decisioncompare: option-to-result mapping
 
-## Feature-to-Code Mapping
+The analysis accepts paired categorical diagnostic tests against a reference standard.
+`data` is supplied by jamovi; every other option has a named UI control. Level options
+are required arguments of the R wrapper, including optional-test levels passed as `NULL`.
 
-- **Analysis Function**: `decisioncompare`
-- **Module**: `meddecide`
+| Option | UI control | Backend / calculation | Result |
+|---|---|---|---|
+| `data` | Dataset supplied by jamovi | self$data → .prepareData() | All data-dependent outputs |
+| `gold` | VariablesListBox | .validateInputs() / .prepareData() → per-test coding and paired alignment | cTable1–3, epirTable1–3, accuracy/comparison tables, plots and prose |
+| `goldPositive` | LevelSelector | .validateInputs() / .prepareData() → per-test coding and paired alignment | cTable1–3, epirTable1–3, accuracy/comparison tables, plots and prose |
+| `goldNegative` | LevelSelector | .validateInputs() / .prepareData() → per-test coding and paired alignment | cTable1–3, epirTable1–3, accuracy/comparison tables, plots and prose |
+| `test1` | VariablesListBox | .validateInputs() / .prepareData() → per-test coding and paired alignment | cTable1–3, epirTable1–3, accuracy/comparison tables, plots and prose |
+| `test1Positive` | LevelSelector | .validateInputs() / .prepareData() → per-test coding and paired alignment | cTable1–3, epirTable1–3, accuracy/comparison tables, plots and prose |
+| `test1Negative` | LevelSelector | .validateInputs() / .prepareData() → per-test coding and paired alignment | cTable1–3, epirTable1–3, accuracy/comparison tables, plots and prose |
+| `test2` | VariablesListBox | .validateInputs() / .prepareData() → per-test coding and paired alignment | cTable1–3, epirTable1–3, accuracy/comparison tables, plots and prose |
+| `test2Positive` | LevelSelector | .validateInputs() / .prepareData() → per-test coding and paired alignment | cTable1–3, epirTable1–3, accuracy/comparison tables, plots and prose |
+| `test2Negative` | LevelSelector | .validateInputs() / .prepareData() → per-test coding and paired alignment | cTable1–3, epirTable1–3, accuracy/comparison tables, plots and prose |
+| `test3` | VariablesListBox | .validateInputs() / .prepareData() → per-test coding and paired alignment | cTable1–3, epirTable1–3, accuracy/comparison tables, plots and prose |
+| `test3Positive` | LevelSelector | .validateInputs() / .prepareData() → per-test coding and paired alignment | cTable1–3, epirTable1–3, accuracy/comparison tables, plots and prose |
+| `test3Negative` | LevelSelector | .validateInputs() / .prepareData() → per-test coding and paired alignment | cTable1–3, epirTable1–3, accuracy/comparison tables, plots and prose |
+| `pp` | CheckBox | .calculateDiagnosticMetrics() → prevalence adjustment | comparisonTable PPV/NPV, plots and descriptive prose |
+| `pprob` | TextBox | .calculateDiagnosticMetrics() → Bayes predictive values | comparisonTable PPV/NPV, plots and descriptive prose |
+| `od` | CheckBox | .displayOriginalData() → original categorical frequencies, subject to display-size limit | text1, text2, notices |
+| `fnote` | CheckBox | .run() → educational definitions | cTable1–3 and comparisonTable notes |
+| `ci` | CheckBox | .processSingleTest() → epiR exact intervals | epirTable1–3 |
+| `plot` | CheckBox | .setupVisualizations() → stored summaries → .plot1() | plot1 |
+| `excludeIndeterminate` | CheckBox | .prepareData() / .processSingleTest() → explicit negative-level exclusions | All data-dependent outputs and denominator notices |
+| `radarplot` | CheckBox | .setupVisualizations() → stored summaries → .plotRadar() | plotRadar |
+| `heatmap` | CheckBox | .buildHeatmapData() → stored correctness → .plotHeatmap() | plotHeatmap |
+| `opa` | CheckBox | .populateOPATable() → per-test concordance | opaTable |
+| `niMargin` | TextBox | OPA lower-bound comparison with descriptive threshold | opaTable criterion cells |
+| `useOpaCriterion` | CheckBox | Enable descriptive OPA threshold assessment | opaTable criterion cells |
+| `ciMethod` | ComboBox | Wilson / logit / exact OPA interval | opaTable |
+| `stratify` | VariablesListBox | Subgroup-specific available-case calculations | stratifiedTable |
+| `statComp` | CheckBox | .performStatisticalComparisons() / .calculateDifferences() | mcnemarTable, diffTable, optional inferential prose |
+| `mcnemarMethod` | ComboBox | .mcnemarTest() → mid-p / uncorrected asymptotic tail | mcnemarTable, diffTable sensitivity/specificity p, prose |
+| `showSummary` | CheckBox | .generateSummary() | summaryReport |
+| `showExplanations` | CheckBox | .generateExplanations() | explanationsContent, aboutAnalysis |
+| `showReportSentence` | CheckBox | .generateReportSentence() | reportSentence |
+| `showDescriptiveReport` | CheckBox | Methods/results templates and descriptive ranking | clinicalReport |
 
-| Feature / Option | UI Binding | Backend Handler | Target Result Item |
-| :--- | :--- | :--- | :--- |
-| `data` | UI Control `data` | `self$options$data` | Output item / Table |
-| `gold` | UI Control `gold` | `self$options$gold` | Output item / Table |
-| `goldPositive` | UI Control `goldPositive` | `self$options$goldPositive` | Output item / Table |
-| `goldNegative` | UI Control `goldNegative` | `self$options$goldNegative` | Output item / Table |
-| `test1` | UI Control `test1` | `self$options$test1` | Output item / Table |
-| `test1Positive` | UI Control `test1Positive` | `self$options$test1Positive` | Output item / Table |
-| `test1Negative` | UI Control `test1Negative` | `self$options$test1Negative` | Output item / Table |
-| `test2` | UI Control `test2` | `self$options$test2` | Output item / Table |
-| `test2Positive` | UI Control `test2Positive` | `self$options$test2Positive` | Output item / Table |
-| `test2Negative` | UI Control `test2Negative` | `self$options$test2Negative` | Output item / Table |
-| `test3` | UI Control `test3` | `self$options$test3` | Output item / Table |
-| `test3Positive` | UI Control `test3Positive` | `self$options$test3Positive` | Output item / Table |
-| `test3Negative` | UI Control `test3Negative` | `self$options$test3Negative` | Output item / Table |
-| `pp` | UI Control `pp` | `self$options$pp` | Output item / Table |
-| `pprob` | UI Control `pprob` | `self$options$pprob` | Output item / Table |
-| `od` | UI Control `od` | `self$options$od` | Output item / Table |
-| `fnote` | UI Control `fnote` | `self$options$fnote` | Output item / Table |
-| `ci` | UI Control `ci` | `self$options$ci` | Output item / Table |
-| `plot` | UI Control `plot` | `self$options$plot` | Output item / Table |
-| `excludeIndeterminate` | UI Control `excludeIndeterminate` | `self$options$excludeIndeterminate` | Output item / Table |
-| `radarplot` | UI Control `radarplot` | `self$options$radarplot` | Output item / Table |
-| `heatmap` | UI Control `heatmap` | `self$options$heatmap` | Output item / Table |
-| `opa` | UI Control `opa` | `self$options$opa` | Output item / Table |
-| `niMargin` | UI Control `niMargin` | `self$options$niMargin` | Output item / Table |
-| `useOpaCriterion` | UI Control `useOpaCriterion` | `self$options$useOpaCriterion` | Output item / Table |
-| `ciMethod` | UI Control `ciMethod` | `self$options$ciMethod` | Output item / Table |
-| `stratify` | UI Control `stratify` | `self$options$stratify` | Output item / Table |
-| `statComp` | UI Control `statComp` | `self$options$statComp` | Output item / Table |
-| `showSummary` | UI Control `showSummary` | `self$options$showSummary` | Output item / Table |
-| `showExplanations` | UI Control `showExplanations` | `self$options$showExplanations` | Output item / Table |
-| `showReportSentence` | UI Control `showReportSentence` | `self$options$showReportSentence` | Output item / Table |
-| `showDescriptiveReport` | UI Control `showDescriptiveReport` | `self$options$showDescriptiveReport` | Output item / Table |
+No unused options were found. Some options operate through validation, visibility or plotting
+rather than changing estimates. The `statComp` option controls inferential outputs; the
+selected `mcnemarMethod` affects overall and class-specific paired comparisons, not Cochran's Q.
 
-## Verification Checklist
+The optional original-data display drops unused factor levels. If any test-by-reference
+cross-tabulation would exceed 10,000 cells, the original-data display is omitted with a
+warning. Diagnostic estimates, comparisons, plots and reports still run normally.
 
-- [x] All options defined in `.a.yaml` have matching UI bindings in `.u.yaml`.
-- [x] Backend `R/decisioncompare.b.R` references all declared options safely.
-- [x] Results definitions in `.r.yaml` correspond to populated output containers.
-
+Automatic behaviors without separate controls are intentional: available-case denominators,
+Holm adjustment over informative overall-accuracy pairs, unadjusted class-specific comparisons,
+Newcombe method-10 difference intervals, denominator-specific likelihood-ratio correction,
+and exact conditional Cochran's Q for at most 30 informative cases. Their assumptions and
+limits are described in the [developer documentation](decisioncompare-documentation.md).

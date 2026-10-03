@@ -7679,21 +7679,6 @@ msgstr ""
 #: R/decisioncompare.b.R
 msgid ""
 "<p><b>Overall comparison:</b> Cochran's Q test (χ² = %1$.2f, p %2$s) <span "
-"style='color:inherit;'><b>did not detect a significant difference</b></span> "
-"among the three tests. This is not evidence that they perform equally: with "
-"this sample size a clinically important accuracy difference could go "
-"undetected, and no test of one test against another across a pre-specified "
-"equivalence margin was performed. (If requested, the criterion column in the "
-"Overall Percent Agreement table compares each test with a user-specified "
-"descriptive OPA threshold; it is not a noninferiority comparison between "
-"tests or clinical guidance.) The confidence intervals for the paired "
-"differences in the Differences with 95%% Confidence Intervals table show how "
-"large a difference remains compatible with these data.</p>"
-msgstr ""
-
-#: R/decisioncompare.b.R
-msgid ""
-"<p><b>Overall comparison:</b> Cochran's Q test (χ² = %1$.2f, p %2$s) <span "
 "style='color:inherit;'><b>found significant differences</b></span> among the "
 "three tests: these data are evidence that the tests do not all have the same "
 "accuracy. The pairwise comparisons above show which pairs differ.</p>"
@@ -36040,13 +36025,6 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid ""
-"Cochran's Q test did not detect a significant difference in diagnostic "
-"accuracy among the three tests (n = %1$d cases with all three results; "
-"χ²(%2$d) = %3$.2f, p %4$s)."
-msgstr ""
-
-#: R/decisioncompare.b.R
-msgid ""
 "Cochran's Q test failed. Pairwise comparisons may still be valid but should "
 "be interpreted cautiously."
 msgstr ""
@@ -36071,13 +36049,6 @@ msgstr ""
 
 #: cochranq/results/cochranQTest.title
 msgid "Cochran's Q Test Results"
-msgstr ""
-
-#: R/decisioncompare.b.R
-msgid ""
-"Cochran's Q test revealed a significant difference in diagnostic accuracy "
-"among the three tests (n = %1$d cases with all three results; χ²(%2$d) = "
-"%3$.2f, p %4$s)."
 msgstr ""
 
 #: R/decisioncompare.b.R
@@ -181897,4 +181868,44 @@ msgstr ""
 
 #: contTables/results/chiSq.title
 msgid "χ² Tests"
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid "<dt><b>Sensitivity</b></dt>"
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid "<dt><b>Specificity</b></dt>"
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid "<p><b>Overall comparison:</b> Cochran's Q test (Q = %1$.2f, p %2$s) <span style='color:inherit;'><b>did not detect a significant difference</b></span> among the three tests. This is not evidence that they perform equally: with this sample size a clinically important accuracy difference could go undetected, and no test of one test against another across a pre-specified equivalence margin was performed. (If requested, the criterion column in the Overall Percent Agreement table compares each test with a user-specified descriptive OPA threshold; it is not a noninferiority comparison between tests or clinical guidance.) The confidence intervals for the paired differences in the Differences with 95%% Confidence Intervals table show how large a difference remains compatible with these data.</p>"
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid "<p><b>Overall comparison:</b> Cochran's Q test (Q = %1$.2f, p %2$s) <span style='color:inherit;'><b>found significant differences</b></span> among the three tests: these data are evidence that the tests do not all have the same accuracy.</p>"
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid "Cochran's Q test did not detect a significant difference in diagnostic accuracy among the three tests (n = %1$d cases with all three results; Q = %2$.2f, p %3$s)."
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid "Cochran's Q test revealed a significant difference in diagnostic accuracy among the three tests (n = %1$d cases with all three results; Q = %2$.2f, p %3$s)."
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid "Cochran's Q used an exact conditional p-value based on {n} informative cases, conditioning on each case's number of correct tests and assuming exchangeability of test labels under the null. The statistic column reports Q; no chi-square degrees of freedom apply."
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid "Cochran's Q used the chi-square approximation with {n} informative cases. This is a large-sample approximation; the total complete-case count includes concordant cases that contribute no information to this test."
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid "Original Data Display Omitted"
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid "An original-data cross-tabulation would exceed 10,000 cells. The original-data display was omitted; diagnostic estimates and comparisons are unaffected."
 msgstr ""

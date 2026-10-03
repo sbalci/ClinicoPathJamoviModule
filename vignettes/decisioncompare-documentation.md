@@ -28,6 +28,20 @@ reports separate, unadjusted McNemar p-values for sensitivity and specificity. H
 of overall-accuracy pairwise p-values applies only when more than one pair is informative
 (has discordant observations).
 
+For three tests, Cochran's Q uses an exact conditional upper-tail p-value when at most
+30 complete cases have differing correctness across tests. The calculation conditions on
+each case's number of correct results and assumes exchangeability of test labels under the
+null, in addition to independent cases. A deterministic convolution enumerates the column-total
+distribution without random simulation. Concordant cases do not affect this p-value. Q is
+reported with an empty degrees-of-freedom cell for exact inference.
+
+Above 30 informative cases, the existing chi-square approximation (2 df) is retained and
+explicitly identified. The threshold bounds computation; it is not a guarantee that every
+larger sample has an accurate asymptotic approximation. Table notes and copy-ready text report
+the method and informative count. Zero informative cases still produce no global test.
+See [NIST's Cochran test reference](https://www.itl.nist.gov/div898/software/dataplot/refman1/auxillar/cochran.htm)
+for the large-sample nature of the chi-square approximation.
+
 Level options have no schema default: the generated R wrapper requires all Level arguments
 explicitly. Pass `NULL` for unused optional levels; the `NULL` entries below describe the
 unset internal option state, not optional arguments in the R wrapper.

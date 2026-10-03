@@ -24,6 +24,7 @@ items:
           - pp
           - pprob
           - ci
+          - od
           - excludeIndeterminate
           - statComp
           - mcnemarMethod
@@ -403,7 +404,7 @@ items:
           title: 'Method'
           type: text
         - name: stat
-          title: "Chi-squared"
+          title: "Statistic"
           type: number
         - name: df
           title: 'df'

@@ -732,10 +732,11 @@ test_that("Recommended McNemar variants (Fagerland 2013): with three tests the p
     expect_equal(asy$p[match(pairs, asy$comparison)], stats::p.adjust(raw_asy, "holm"), tolerance = 1e-12)
     expect_equal(asy$stat[match(pairs, asy$comparison)], c(36 / 10, 36 / 14, 0), tolerance = 1e-12)
     # Cochran's Q stays the global test for either variant. Hand: correct per test 36, 30, 30; per case
-    # 3 (20), 2 (15), 1 (6), 0 (5): Q = 2 * (3 * 3096 - 96^2) / (3 * 96 - 246) = 24/7, p = exp(-12/7) on 2 df
+    # 3 (20), 2 (15), 1 (6), 0 (5): Q = 2 * (3 * 3096 - 96^2) / (3 * 96 - 246) = 24/7. Exact tail: sum multinomial(6; a) * multinomial(15; b)
+    # over sum((a + 15 - b)^2) >= 456, divided by 3^21: 807196867/3486784401.
     for (q in list(mid, asy)) {
         g <- q[q$method == "Cochran's Q", , drop = FALSE]
-        expect_equal(c(g$n, g$stat, g$df, g$p), c(46, 24 / 7, 2, exp(-12 / 7)), tolerance = 1e-12)
+        expect_equal(c(g$n, g$stat, g$df, g$p), c(46, 24 / 7, NA, 807196867 / 3486784401), tolerance = 1e-12)
     }
 })
 
@@ -1041,7 +1042,7 @@ test_that("Recommended McNemar variants (Fagerland 2013): mid-p rows leave the s
 
 test_that("Recommended McNemar variants (Fagerland 2013): with three tests the post-hoc sentence names the variant that ran", {
     # Hand: correct per test 35, 20, 20 (T = 75); per case 3 right (20 cases), 1 (15), 0 (5), so Cochran's
-    # Q = 2 * (3 * (35^2 + 20^2 + 20^2) - 75^2) / (3 * 75 - (20 * 9 + 15)) = 900 / 30 = 30, p = exp(-30 / 2) on 2 df
+    # Q = 2 * (3 * (35^2 + 20^2 + 20^2) - 75^2) / (3 * 75 - (20 * 9 + 15)) = 900 / 30 = 30. Exact tail: all 15 correct results in one column, 3/3^15.
     d3 <- val_from_correct(list(t1 = rep(c(TRUE, TRUE, FALSE), c(20, 15, 5)),
                                 t2 = rep(c(TRUE, FALSE, FALSE), c(20, 15, 5)),
                                 t3 = rep(c(TRUE, FALSE, FALSE), c(20, 15, 5))))
@@ -1051,11 +1052,11 @@ test_that("Recommended McNemar variants (Fagerland 2013): with three tests the p
         res <- val_dc(d3, test3 = "t3", test3Positive = "+", statComp = TRUE, mcnemarMethod = m, showReportSentence = TRUE)
         mc <- res$mcnemarTable$asDF
         q <- mc[mc$method == "Cochran's Q", , drop = FALSE]
-        expect_equal(c(q$n, q$stat, q$df), c(40, 30, 2), tolerance = 1e-12)
-        expect_equal(q$p, exp(-15), tolerance = 1e-10)
+        expect_equal(c(q$n, q$stat, q$df), c(40, 30, NA), tolerance = 1e-12)
+        expect_equal(q$p, 3^(-14), tolerance = 1e-10)
         rp <- val_text(res$reportSentence$content)
         expect_match(rp, paste0("Cochran's Q test revealed a significant difference in diagnostic accuracy among the three tests (n = 40 cases with all three results; ",
-                                val_chisq, "(2) = 30.00, p < 0.001). ", post[[m]]), fixed = TRUE)
+                                "Q = 30.00, p < 0.001). ", post[[m]]), fixed = TRUE)
         expect_false(grepl(post[[setdiff(names(post), m)]], rp, fixed = TRUE), info = m)
     }
 })

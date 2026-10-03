@@ -1,5 +1,11 @@
 # ClinicoPath News
 
+## Unreleased — `decisioncompare` integration repairs (module 1.0.81.01, analysis 1.0.84)
+
+- Align the analysis source version with the generated runtime version, preserving the
+  sparse Cochran-Q and reporting fixes through regeneration.
+- Invalidate notices when Original data is toggled, including the cross-tab size-limit warning.
+
 ## Unreleased — `decisioncompare` (Compare Medical Decision Tests): the text says which test a significant comparison favours; sensitivity and specificity get their own p-values (module 1.0.81.01, analysis 1.0.83)
 
 Fixes from the independent review of 2026-10-02.

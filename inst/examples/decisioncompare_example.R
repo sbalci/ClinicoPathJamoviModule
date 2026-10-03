@@ -16,6 +16,7 @@ decisioncompare(
   test2 = "Test2",
   test2Positive = "Positive",
   test2Negative = NULL,
+  test3Positive = NULL,
   test3Negative = NULL
 )
 
@@ -73,6 +74,7 @@ decisioncompare(
   test2 = "DiagnosticTest",
   test2Positive = "Positive",
   test2Negative = NULL,
+  test3Positive = NULL,
   test3Negative = NULL,
   ci = TRUE,
   plot = TRUE,
@@ -92,10 +94,11 @@ decisioncompare(
   test2 = "Test2",
   test2Positive = "Positive",
   test2Negative = NULL,
+  test3Positive = NULL,
   test3Negative = NULL,
   pp = TRUE,
   pprob = 0.15,  # 15% prevalence in screening population
-  ci = TRUE,
+  ci = FALSE,
   od = TRUE
 )
 
@@ -127,13 +130,14 @@ decisioncompare(
   data = decisioncompare_indeterminate,
   gold = "GoldStandard",
   goldPositive = "Positive",
-  goldNegative = NULL,
+  goldNegative = "Negative",
   test1 = "Test1",
   test1Positive = "Positive",
-  test1Negative = NULL,
+  test1Negative = "Negative",
   test2 = "Test2",
   test2Positive = "Positive",
-  test2Negative = NULL,
+  test2Negative = "Negative",
+  test3Positive = NULL,
   test3Negative = NULL,
   excludeIndeterminate = TRUE,
   ci = TRUE
@@ -152,6 +156,7 @@ decisioncompare(
   test2 = "ImperfectTest",
   test2Positive = "Positive",
   test2Negative = NULL,
+  test3Positive = NULL,
   test3Negative = NULL,
   ci = TRUE,
   plot = TRUE,
@@ -171,10 +176,11 @@ decisioncompare(
   test2 = "Test2",
   test2Positive = "Positive",
   test2Negative = NULL,
+  test3Positive = NULL,
   test3Negative = NULL,
   pp = TRUE,
   pprob = 0.05,  # 5% prevalence in screening
-  ci = TRUE,
+  ci = FALSE,
   plot = TRUE
 )
 
@@ -196,7 +202,7 @@ decisioncompare(
   test3Negative = NULL,
   pp = TRUE,
   pprob = 0.30,
-  ci = TRUE,
+  ci = FALSE,
   plot = TRUE,
   radarplot = TRUE,
   statComp = TRUE,

@@ -378,6 +378,7 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "pp",
                     "pprob",
                     "ci",
+                    "od",
                     "excludeIndeterminate",
                     "statComp",
                     "mcnemarMethod",
@@ -871,7 +872,7 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                         `type`="text"),
                     list(
                         `name`="stat", 
-                        `title`="Chi-squared", 
+                        `title`="Statistic", 
                         `type`="number"),
                     list(
                         `name`="df", 
@@ -1133,7 +1134,7 @@ decisioncompareBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             super$initialize(
                 package = "ClinicoPath",
                 name = "decisioncompare",
-                version = c(1,0,83),
+                version = c(1,0,84),
                 options = options,
                 results = decisioncompareResults$new(options=options),
                 data = data,
