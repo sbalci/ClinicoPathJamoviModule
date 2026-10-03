@@ -612,7 +612,11 @@ msgstr "(%%95 GA: %.1f-%.1f %s)"
 
 #: R/decisioncompare.b.R
 msgid "(95%% CI: %1$.1f-%2$.1f%%)"
-msgstr ""
+msgstr "(%%95 GA: %%%1$.1f-%2$.1f)"
+
+#: R/decisioncompare.b.R
+msgid "(a likelihood ratio is not estimable)"
+msgstr "(bir olabilirlik oranı tahmin edilemiyor)"
 
 #: R/clinicalscore.b.R
 msgid "(adequate)"
@@ -642,7 +646,7 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "(Holm-Bonferroni corrected)"
-msgstr ""
+msgstr "(Holm-Bonferroni düzeltmeli)"
 
 #: R/clinicalscore.b.R
 msgid "(INSUFFICIENT)"
@@ -768,7 +772,7 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "(zero cell; LR may be unstable)"
-msgstr ""
+msgstr "(sıfır hücre; LR kararsız olabilir)"
 
 #: R/jjsegmentedtotalbar.b.R
 msgid ""
@@ -877,6 +881,10 @@ msgid ""
 "has no row in the McNemar table, and it was excluded from the multiplicity "
 "correction so that the remaining comparisons are not over-corrected."
 msgstr ""
+"{comparison} test edilemedi: hiçbir olguda her iki test ve referans standart "
+"için belirli bir sonuç yok ya da eşleştirilmiş tablo boş. Bu çiftin McNemar "
+"tablosunda satırı yoktur ve kalan karşılaştırmalar gereğinden fazla "
+"düzeltilmesin diye çoklu karşılaştırma düzeltmesinin dışında tutulmuştur."
 
 #: R/survival.b.R
 msgid ""
@@ -1054,6 +1062,10 @@ msgstr ""
 "varsayar ve yarışan risk sonucu 0/1/2 olarak kodlanmıştır. Bunun yerine "
 "kümülatif insidans çıktısını kullanın veya sağkalım türünü Genel ya da "
 "Nedene Özgü olarak ayarlayın."
+
+#: R/decisioncompare.b.R
+msgid "{first} vs {second}"
+msgstr "{first} ile {second}"
 
 #: R/decision.b.R
 msgid "{fn} of {n} diseased cases missed here"
@@ -1267,7 +1279,12 @@ msgid ""
 "where {first} and {second} agreed ({p0d}%) and {o1d} of {n1d} where they "
 "disagreed ({p1d}%), and among disease-absent cases for {o0h} of {n0h} where "
 "they agreed ({p0h}%) and {o1h} of {n1h} where they disagreed ({p1h}%)."
-msgstr "{missing}, hastalığı olan olgular arasında {first} ve {second} sonuçlarının uyuştuğu {n0d} olgunun {o0d} tanesinde (%{p0d}) ve uyuşmadığı {n1d} olgunun {o1d} tanesinde (%{p1d}), hastalığı olmayan olgular arasında ise uyuştuğu {n0h} olgunun {o0h} tanesinde (%{p0h}) ve uyuşmadığı {n1h} olgunun {o1h} tanesinde (%{p1h}) kaydedildi."
+msgstr ""
+"{missing}, hastalığı olan olgular arasında {first} ve {second} sonuçlarının "
+"uyuştuğu {n0d} olgunun {o0d} tanesinde (%{p0d}) ve uyuşmadığı {n1d} olgunun "
+"{o1d} tanesinde (%{p1d}), hastalığı olmayan olgular arasında ise uyuştuğu "
+"{n0h} olgunun {o0h} tanesinde (%{p0h}) ve uyuşmadığı {n1h} olgunun {o1h} "
+"tanesinde (%{p1h}) kaydedildi."
 
 #: R/decisioncombine.b.R
 msgid ""
@@ -1275,7 +1292,12 @@ msgid ""
 "{test} negative ({p0d}%) and {o1d} of {n1d} with {test} positive ({p1d}%), "
 "and among disease-absent cases for {o0h} of {n0h} with {test} negative "
 "({p0h}%) and {o1h} of {n1h} with {test} positive ({p1h}%)."
-msgstr "{missing}, hastalığı olan olgular arasında {test} sonucu negatif olan {n0d} olgunun {o0d} tanesinde (%{p0d}) ve pozitif olan {n1d} olgunun {o1d} tanesinde (%{p1d}), hastalığı olmayan olgular arasında ise {test} sonucu negatif olan {n0h} olgunun {o0h} tanesinde (%{p0h}) ve pozitif olan {n1h} olgunun {o1h} tanesinde (%{p1h}) kaydedildi."
+msgstr ""
+"{missing}, hastalığı olan olgular arasında {test} sonucu negatif olan {n0d} "
+"olgunun {o0d} tanesinde (%{p0d}) ve pozitif olan {n1d} olgunun {o1d} "
+"tanesinde (%{p1d}), hastalığı olmayan olgular arasında ise {test} sonucu "
+"negatif olan {n0h} olgunun {o0h} tanesinde (%{p0h}) ve pozitif olan {n1h} "
+"olgunun {o1h} tanesinde (%{p1h}) kaydedildi."
 
 #: R/decisioncurve.b.R
 msgid ""
@@ -1789,6 +1811,8 @@ msgid ""
 "{rows} row(s) have no value for {variable}. They remain in overall per-test "
 "results but are omitted from subgroup rows."
 msgstr ""
+"{rows} satırda {variable} için değer yok. Bu satırlar test başına genel "
+"sonuçlarda kalır ancak alt grup satırlarından çıkarılır."
 
 #: R/pathagreement.b.R
 msgid ""
@@ -1867,9 +1891,17 @@ msgstr ""
 "işaretidir. Bu sonuçlardan herhangi birini yorumlamadan önce {test} ve "
 "referans standart için pozitif olarak seçilen düzeyi kontrol edin."
 
+#: R/decisioncombine.b.R
+msgid "{test} Has No Positive Results"
+msgstr "{test} İçin Pozitif Sonuç Yok"
+
+#: R/decisioncombine.b.R
+msgid "{test} Has Only Positive Results"
+msgstr "{test} İçin Yalnızca Pozitif Sonuç Var"
+
 #: R/decisioncompare.b.R
 msgid "{test} in {stratum}"
-msgstr ""
+msgstr "{test} ({stratum} alt grubu)"
 
 #: R/decisioncompare.b.R
 msgid ""
@@ -1877,12 +1909,19 @@ msgid ""
 "positive level is Positive; all other levels are combined as Negative. This "
 "may bias estimates when those levels include equivocal results."
 msgstr ""
+"{test} ya da referans standardı ikiden fazla düzeye sahip. Yalnızca seçilen "
+"pozitif düzey Pozitif kabul edilir; diğer tüm düzeyler Negatif olarak "
+"birleştirilir. Bu düzeyler şüpheli sonuçlar içerdiğinde tahminler yanlı "
+"olabilir."
 
 #: R/decisioncompare.b.R
 msgid ""
 "{test}: {missing} of {total} rows lacked this test result or the reference "
 "result and were excluded only from analyses requiring those values."
 msgstr ""
+"{test}: {total} satırın {missing} tanesinde bu test sonucu ya da referans "
+"sonucu yoktu; bu satırlar yalnızca bu değerleri gerektiren analizlerden "
+"çıkarıldı."
 
 #: R/decisioncompare.b.R
 msgid ""
@@ -1892,6 +1931,11 @@ msgid ""
 "likelihood ratio that was not affected, uses the raw counts. Interpret the "
 "corrected value cautiously."
 msgstr ""
+"{test}: paydasındaki hücre boş olduğu için {ratio} tanımsız olurdu; bu "
+"nedenle 2x2 tablonun dört hücresinin hepsine {correction} eklendikten sonra "
+"hesaplandı ve {shown} bulundu. Aynı satırdaki diğer tüm istatistikler, "
+"etkilenmeyen olabilirlik oranı dahil, ham sayıları kullanır. Düzeltilmiş "
+"değeri dikkatle yorumlayın."
 
 #: R/decisioncompare.b.R
 msgid ""
@@ -1899,6 +1943,9 @@ msgid ""
 "conditional on a determinate result; the exclusion count and rate are "
 "reported in the tables."
 msgstr ""
+"{test}: {total} satırın {excluded} tanesi hariç tutuldu (%{pct}). Doğruluk "
+"tahminleri belirli bir sonuca koşulludur; hariç tutulan sayı ve oran "
+"tablolarda verilmiştir."
 
 #: R/decisioncompare.b.R
 msgid ""
@@ -1908,6 +1955,47 @@ msgid ""
 "suggests. Enable the 95% CI option and read the interval before quoting "
 "either figure."
 msgstr ""
+"{test}: duyarlılık {positives} referans-pozitif olguya, özgüllük ise "
+"{negatives} referans-negatif olguya dayanıyor. Bu kadar küçük bir paydadan "
+"hesaplanan bir yüzde, analiz edilen toplam N'nin düşündürdüğünden çok daha "
+"az kesindir. Bu değerlerden birini aktarmadan önce %95 GA seçeneğini açın ve "
+"aralığı okuyun."
+
+#: R/decisioncompare.b.R
+msgid ""
+"{test}: sensitivity rests on {positives} reference-positive cases and "
+"specificity on {negatives} reference-negative cases. A percentage computed "
+"on a denominator this small is far less precise than the overall analyzed N "
+"suggests. Switch off the supplied prevalence and enable the 95% CI option to "
+"read the interval before quoting either figure."
+msgstr ""
+"{test}: duyarlılık {positives} referans-pozitif olguya, özgüllük ise "
+"{negatives} referans-negatif olguya dayanıyor. Bu kadar küçük bir paydadan "
+"hesaplanan bir yüzde, analiz edilen toplam N'nin düşündürdüğünden çok daha "
+"az kesindir. Bu değerlerden birini aktarmadan önce aralığı okumak için "
+"girilen prevalansı kapatın ve %95 GA seçeneğini açın."
+
+#: R/decisioncompare.b.R
+msgid ""
+"{test}: the test was never negative in these cases, so LR- is 0/0 and is "
+"left blank (its sensitivity is 1 and its specificity 0 here). A continuity "
+"correction cannot create rule-out evidence for a test that made no negative "
+"call."
+msgstr ""
+"{test}: test bu olgularda hiç negatif sonuç vermedi; bu nedenle LR- 0/0'dır "
+"ve boş bırakıldı (burada duyarlılığı 1, özgüllüğü 0). Süreklilik düzeltmesi, "
+"hiç negatif sonuç vermeyen bir test için dışlama kanıtı üretemez."
+
+#: R/decisioncompare.b.R
+msgid ""
+"{test}: the test was never positive in these cases, so LR+ is 0/0 and is "
+"left blank (its sensitivity is 0 and its specificity 1 here). A continuity "
+"correction cannot create rule-in evidence for a test that made no positive "
+"call."
+msgstr ""
+"{test}: test bu olgularda hiç pozitif sonuç vermedi; bu nedenle LR+ 0/0'dır "
+"ve boş bırakıldı (burada duyarlılığı 0, özgüllüğü 1). Süreklilik düzeltmesi, "
+"hiç pozitif sonuç vermeyen bir test için tanıyı doğrulama kanıtı üretemez."
 
 #: R/decisioncompare.b.R
 msgid ""
@@ -1915,6 +2003,10 @@ msgid ""
 "available determinate denominators: {denominators}. Paired comparisons use "
 "only rows determinate for both tests and the reference standard."
 msgstr ""
+"Seçilen {rows} satırda {tests} tanı testi karşılaştırıldı. Test başına "
+"kullanılabilir belirli paydalar: {denominators}. Eşleştirilmiş "
+"karşılaştırmalar yalnızca her iki test ve referans standart için belirli "
+"sonucu olan satırları kullanır."
 
 #: R/decisioncompare.b.R
 msgid ""
@@ -1922,6 +2014,9 @@ msgid ""
 "because it was selected first; this descriptive tie is not a clinical "
 "recommendation."
 msgstr ""
+"{tests} aynı gözlenen dengeli doğruluğa sahipti. {first} yalnızca önce "
+"seçildiği için ilk sırada görünüyor; bu betimsel eşitlik bir klinik öneri "
+"değildir."
 
 #: R/summarydata.b.R
 msgid "{title}: {content}"
@@ -2789,6 +2884,10 @@ msgstr ""
 msgid "%.1f %s (n=%d responders)"
 msgstr "%.1f %s (n=%d yanıt veren)"
 
+#: R/decisioncompare.b.R
+msgid "%.1f%%"
+msgstr "%%%.1f"
+
 #: R/waterfall.b.R
 msgid "%.1f%% (%d of %d evaluable patients achieved complete or partial response)"
 msgstr "%%%.1f (%d / %d değerlendirilebilir hasta tam veya kısmi yanıt elde etti)"
@@ -3051,33 +3150,11 @@ msgstr "%1$s olgu, %2$s değerlendirici tarafından değerlendirildi"
 
 #: R/decisioncompare.b.R
 msgid ""
-"%1$s classified significantly more cases correctly than %2$s (accuracy "
-"%3$.1f%% vs %4$.1f%%); McNemar's test compares overall correctness only."
+"%1$s classified significantly more cases correctly than %2$s; McNemar's test "
+"compares overall correctness only."
 msgstr ""
-
-#: R/decisioncompare.b.R
-msgid ""
-"%1$s comparing %2$s and %3$s did not detect a significant difference in "
-"diagnostic accuracy (exact p = %4$.3f)."
-msgstr ""
-
-#: R/decisioncompare.b.R
-msgid ""
-"%1$s comparing %2$s and %3$s did not detect a significant difference in "
-"diagnostic accuracy (χ²(%4$d) = %5$.2f, p = %6$.3f)."
-msgstr ""
-
-#: R/decisioncompare.b.R
-msgid ""
-"%1$s comparing %2$s and %3$s showed a significant difference in diagnostic "
-"accuracy (exact p = %4$.3f)."
-msgstr ""
-
-#: R/decisioncompare.b.R
-msgid ""
-"%1$s comparing %2$s and %3$s showed a significant difference in diagnostic "
-"accuracy (χ²(%4$d) = %5$.2f, p = %6$.3f)."
-msgstr ""
+"%1$s, %2$s testinden anlamlı olarak daha fazla olguyu doğru sınıflandırdı; "
+"McNemar testi yalnızca genel doğruluğu karşılaştırır."
 
 #: R/enhancedROC.b.R
 msgid ""
@@ -4197,6 +4274,8 @@ msgid ""
 "%s had the highest observed balanced accuracy; this descriptive ranking was "
 "not tested as a superiority claim and is not a clinical recommendation."
 msgstr ""
+"En yüksek gözlenen dengeli doğruluk %s testindeydi; bu betimsel sıralama bir "
+"üstünlük iddiası olarak test edilmedi ve bir klinik öneri değildir."
 
 #: R/jjcorrmat.b.R
 msgid ""
@@ -4607,12 +4686,16 @@ msgid ""
 "• Example emphasis: sensitivity and NPV<br>• Example threshold: 95%<br>• "
 "Study-specific aim: reduce false negatives"
 msgstr ""
+"• Örnek vurgu: duyarlılık ve NÖD<br>• Örnek eşik: %95<br>• Çalışmaya özgü "
+"amaç: yanlış negatifleri azaltmak"
 
 #: R/decisioncompare.b.R
 msgid ""
 "• Example emphasis: specificity and PPV<br>• Example thresholds: 95% and "
 "90%<br>• Study-specific aim: reduce false positives"
 msgstr ""
+"• Örnek vurgu: özgüllük ve PÖD<br>• Örnek eşikler: %95 ve %90<br>• Çalışmaya "
+"özgü amaç: yanlış pozitifleri azaltmak"
 
 #: R/kappaSizeCI.b.R
 msgid "• Expected category proportions of {props}"
@@ -6145,27 +6228,27 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "<dt><b>Cochran's Q Test</b></dt>"
-msgstr ""
+msgstr "<dt><b>Cochran Q Testi</b></dt>"
 
 #: R/decisioncompare.b.R
 msgid "<dt><b>Discordant Pairs</b></dt>"
-msgstr ""
+msgstr "<dt><b>Uyumsuz Çiftler</b></dt>"
 
 #: R/decisioncompare.b.R
 msgid "<dt><b>Holm-Bonferroni Correction</b></dt>"
-msgstr ""
+msgstr "<dt><b>Holm-Bonferroni Düzeltmesi</b></dt>"
 
 #: R/decisioncompare.b.R
 msgid "<dt><b>McNemar's Test</b></dt>"
-msgstr ""
+msgstr "<dt><b>McNemar Testi</b></dt>"
 
 #: R/decisioncompare.b.R
 msgid "<dt><b>NPV (Negative Predictive Value)</b></dt>"
-msgstr ""
+msgstr "<dt><b>NÖD (Negatif Öngörü Değeri)</b></dt>"
 
 #: R/decisioncompare.b.R
 msgid "<dt><b>PPV (Positive Predictive Value)</b></dt>"
-msgstr ""
+msgstr "<dt><b>PÖD (Pozitif Öngörü Değeri)</b></dt>"
 
 #: R/pathagreement.b.R
 msgid ""
@@ -6659,12 +6742,17 @@ msgid ""
 "<li><b>Adequate Information:</b> Precision and power depend strongly on the "
 "number of discordant pairs</li>"
 msgstr ""
+"<li><b>Yeterli Bilgi:</b> Kesinlik ve güç büyük ölçüde uyumsuz çift sayısına "
+"bağlıdır</li>"
 
 #: R/decisioncompare.b.R
 msgid ""
 "<li><b>Available Cases:</b> Standalone metrics use each test's observed "
 "reference/test pairs; paired comparisons use common determinate rows</li>"
 msgstr ""
+"<li><b>Kullanılabilir Olgular:</b> Tek başına ölçütler her testin gözlenen "
+"referans/test çiftlerini kullanır; eşleştirilmiş karşılaştırmalar ortak "
+"belirli satırları kullanır</li>"
 
 #: R/decisioncompare.b.R
 msgid ""
@@ -6672,18 +6760,25 @@ msgid ""
 "recoding; multilevel results require explicit handling when indeterminate "
 "values should be excluded</li>"
 msgstr ""
+"<li><b>İkili Yeniden Kodlama:</b> Her test pozitif/negatif olarak yeniden "
+"kodlandıktan sonra analiz edilir; belirsiz değerlerin hariç tutulması "
+"gerektiğinde çok düzeyli sonuçlar açıkça ele alınmalıdır</li>"
 
 #: R/decisioncompare.b.R
 msgid ""
 "<li><b>Gold Standard:</b> Reference test must represent true disease status "
 "(e.g., biopsy, final diagnosis)</li>"
 msgstr ""
+"<li><b>Altın Standart:</b> Referans test gerçek hastalık durumunu temsil "
+"etmelidir (ör. biyopsi, kesin tanı)</li>"
 
 #: R/decisioncompare.b.R
 msgid ""
 "<li><b>Paired Data:</b> All tests must be performed on the same "
 "patients/samples (not independent groups)</li>"
 msgstr ""
+"<li><b>Eşleştirilmiş Veri:</b> Tüm testler aynı hastalarda/örneklerde "
+"uygulanmış olmalıdır (bağımsız gruplarda değil)</li>"
 
 #: R/pathagreement.b.R
 msgid ""
@@ -6793,6 +6888,8 @@ msgid ""
 "<li><strong>Choose Tests to Compare:</strong> Select 2-3 diagnostic tests "
 "you want to evaluate</li>"
 msgstr ""
+"<li><strong>Karşılaştırılacak Testleri Seçin:</strong> Değerlendirmek "
+"istediğiniz 2-3 tanı testini seçin</li>"
 
 #: R/pathagreement.b.R
 msgid ""
@@ -6828,6 +6925,8 @@ msgid ""
 "<li><strong>Clinical Research:</strong> Validating biomarkers, imaging "
 "techniques, or clinical assessments</li>"
 msgstr ""
+"<li><strong>Klinik Araştırma:</strong> Biyobelirteçlerin, görüntüleme "
+"tekniklerinin veya klinik değerlendirmelerin doğrulanması</li>"
 
 #: R/jjarcdiagram.b.R
 msgid ""
@@ -6856,12 +6955,22 @@ msgid ""
 "differences use Newcombe's method-10 score interval for correlated "
 "proportions.</li>"
 msgstr ""
+"<li><strong>Güven Aralıkları:</strong> Test başına GA tabloları, oranlar "
+"(duyarlılık, özgüllük, PÖD, NÖD, doğruluk ve prevalans) için "
+"epiR::epi.tests() tarafından varsayılan ayarlarıyla hesaplanan "
+"Clopper-Pearson kesin aralıklarını verir. Olabilirlik oranları güven aralığı "
+"olmadan, yalnızca nokta tahmini olarak verilir. Genel Yüzde Uyum (OPA) "
+"tablosu seçilen tek oran yöntemini kullanır. Eşleştirilmiş farklar için "
+"ilişkili oranlara yönelik Newcombe 10. yöntem skor aralığı kullanılır.</li>"
 
 #: R/decisioncompare.b.R
 msgid ""
 "<li><strong>Configure Options:</strong> Enable statistical comparisons, "
 "confidence intervals, or visualizations as needed</li>"
 msgstr ""
+"<li><strong>Seçenekleri Ayarlayın:</strong> Gerektiğinde istatistiksel "
+"karşılaştırmaları, güven aralıklarını veya görselleştirmeleri "
+"etkinleştirin</li>"
 
 #: R/jjarcdiagram.b.R
 msgid ""
@@ -6894,6 +7003,8 @@ msgid ""
 "<li><strong>Copy Report:</strong> Use the auto-generated sentences for your "
 "documentation</li>"
 msgstr ""
+"<li><strong>Raporu Kopyalayın:</strong> Belgeleriniz için otomatik "
+"oluşturulan cümleleri kullanın</li>"
 
 #: R/jjarcdiagram.b.R
 msgid ""
@@ -6906,6 +7017,8 @@ msgid ""
 "<li><strong>Define Positive Levels:</strong> Specify what constitutes a "
 "\"positive\" result for each test</li>"
 msgstr ""
+"<li><strong>Pozitif Düzeyleri Tanımlayın:</strong> Her test için neyin "
+"\"pozitif\" sonuç sayılacağını belirtin</li>"
 
 #: R/jjarcdiagram.b.R
 msgid ""
@@ -7006,6 +7119,8 @@ msgid ""
 "<li><strong>Gold Standard:</strong> Assumes your reference test is truly "
 "accurate</li>"
 msgstr ""
+"<li><strong>Altın Standart:</strong> Referans testinizin gerçekten doğru "
+"olduğu varsayılır</li>"
 
 #: R/jjarcdiagram.b.R
 msgid ""
@@ -7106,12 +7221,16 @@ msgid ""
 "<li><strong>McNemar Test:</strong> Requires paired/matched data for "
 "statistical comparisons</li>"
 msgstr ""
+"<li><strong>McNemar Testi:</strong> İstatistiksel karşılaştırmalar için "
+"eşleştirilmiş/eşlenmiş veri gerektirir</li>"
 
 #: R/decisioncompare.b.R
 msgid ""
 "<li><strong>Method Comparison:</strong> Describing and testing differences "
 "among paired tests</li>"
 msgstr ""
+"<li><strong>Yöntem Karşılaştırması:</strong> Eşleştirilmiş testler "
+"arasındaki farkların betimlenmesi ve test edilmesi</li>"
 
 #: R/pathagreement.b.R
 msgid ""
@@ -7136,6 +7255,10 @@ msgid ""
 "reference/test pairs; paired comparisons use common determinate rows. "
 "Missing-data handling and counts should be reported.</li>"
 msgstr ""
+"<li><strong>Eksik Veri:</strong> Tek başına tahminler kullanılabilir "
+"referans/test çiftlerini kullanır; eşleştirilmiş karşılaştırmalar ortak "
+"belirli satırları kullanır. Eksik veri yönetimi ve sayıları "
+"raporlanmalıdır.</li>"
 
 #: R/sequentialtests.b.R
 msgid ""
@@ -7239,6 +7362,8 @@ msgid ""
 "<li><strong>Prevalence Dependency:</strong> PPV and NPV vary with disease "
 "prevalence</li>"
 msgstr ""
+"<li><strong>Prevalansa Bağımlılık:</strong> PÖD ve NÖD hastalık "
+"prevalansıyla değişir</li>"
 
 #: R/pathagreement.b.R
 msgid ""
@@ -7251,12 +7376,16 @@ msgid ""
 "<li><strong>Protocol Development:</strong> Optimizing diagnostic "
 "workflows</li>"
 msgstr ""
+"<li><strong>Protokol Geliştirme:</strong> Tanısal iş akışlarının "
+"iyileştirilmesi</li>"
 
 #: R/decisioncompare.b.R
 msgid ""
 "<li><strong>Quality Assessment:</strong> Measuring agreement between "
 "different raters or methods</li>"
 msgstr ""
+"<li><strong>Kalite Değerlendirmesi:</strong> Farklı değerlendiriciler veya "
+"yöntemler arasındaki uyumun ölçülmesi</li>"
 
 #: R/pathagreement.b.R
 msgid ""
@@ -7275,6 +7404,8 @@ msgid ""
 "<li><strong>Run Analysis:</strong> Review estimates, denominators, "
 "exclusions, and statistical comparisons</li>"
 msgstr ""
+"<li><strong>Analizi Çalıştırın:</strong> Tahminleri, paydaları, hariç "
+"tutmaları ve istatistiksel karşılaştırmaları gözden geçirin</li>"
 
 #: R/pathagreement.b.R
 msgid ""
@@ -7306,12 +7437,16 @@ msgid ""
 "<li><strong>Sample Size:</strong> Results more reliable with larger, "
 "representative samples</li>"
 msgstr ""
+"<li><strong>Örneklem Büyüklüğü:</strong> Sonuçlar daha büyük ve temsili "
+"örneklemlerde daha güvenilirdir</li>"
 
 #: R/decisioncompare.b.R
 msgid ""
 "<li><strong>Select Gold Standard:</strong> Choose your most reliable "
 "reference test (e.g., biopsy, expert consensus)</li>"
 msgstr ""
+"<li><strong>Altın Standardı Seçin:</strong> En güvenilir referans testinizi "
+"seçin (ör. biyopsi, uzman uzlaşısı)</li>"
 
 #: R/jjarcdiagram.b.R
 msgid ""
@@ -7390,6 +7525,8 @@ msgid ""
 "<li><strong>Test Validation:</strong> Comparing new diagnostic methods "
 "against established standards</li>"
 msgstr ""
+"<li><strong>Test Doğrulama:</strong> Yeni tanı yöntemlerinin yerleşik "
+"standartlarla karşılaştırılması</li>"
 
 #: R/pathagreement.b.R
 msgid ""
@@ -7475,6 +7612,8 @@ msgid ""
 "<li>Comparing diagnostic accuracy of 2-3 tests performed on same "
 "patients</li>"
 msgstr ""
+"<li>Aynı hastalarda uygulanan 2-3 testin tanısal doğruluğunun "
+"karşılaştırılması</li>"
 
 #: R/lassologistic.b.R
 msgid ""
@@ -7538,6 +7677,8 @@ msgid ""
 "<li>Evaluating if a new test is significantly better/worse than standard "
 "test</li>"
 msgstr ""
+"<li>Yeni bir testin standart testten anlamlı olarak daha iyi/kötü olup "
+"olmadığının değerlendirilmesi</li>"
 
 #: R/lassologistic.b.R
 msgid ""
@@ -7618,6 +7759,8 @@ msgid ""
 "<li>McNemar's test compares overall accuracy only - does not separately test "
 "sensitivity vs specificity differences</li>"
 msgstr ""
+"<li>McNemar testi yalnızca genel doğruluğu karşılaştırır - duyarlılık ve "
+"özgüllük farklarını ayrı ayrı test etmez</li>"
 
 #: R/pathagreement.b.R
 msgid "<li>Near-category disagreements receive partial agreement credit</li>"
@@ -7645,7 +7788,7 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "<li>Optimizing test selection based on performance metrics</li>"
-msgstr ""
+msgstr "<li>Performans ölçütlerine dayalı olarak test seçiminin iyileştirilmesi</li>"
 
 #: R/pathagreement.b.R
 msgid ""
@@ -7662,6 +7805,8 @@ msgid ""
 "<li>P-values do not indicate clinical importance - consider effect sizes and "
 "practical implications</li>"
 msgstr ""
+"<li>P değerleri klinik önemi göstermez - etki büyüklüklerini ve pratik "
+"sonuçları göz önünde bulundurun</li>"
 
 #: R/sequentialtests.b.R
 msgid "<li>PPV = numerator/denominator = {numerator}/{denominator} = {ppv}</li>"
@@ -7734,6 +7879,8 @@ msgid ""
 "<li>Requires paired observations - cannot compare tests performed on "
 "different patient groups</li>"
 msgstr ""
+"<li>Eşleştirilmiş gözlemler gerektirir - farklı hasta gruplarında uygulanan "
+"testler karşılaştırılamaz</li>"
 
 #: R/pathagreement.b.R
 msgid "<li>Research studies requiring reliable measurements</li>"
@@ -7766,7 +7913,7 @@ msgstr ""
 msgid ""
 "<li>Small number of discordant pairs reduces statistical power and "
 "reliability</li>"
-msgstr ""
+msgstr "<li>Az sayıda uyumsuz çift istatistiksel gücü ve güvenilirliği azaltır</li>"
 
 #: R/jjarcdiagram.b.R
 msgid "<li>Source Node: Starting point of connections</li>"
@@ -7819,6 +7966,10 @@ msgid ""
 "dedicated ROC (Receiver Operating Characteristic) analysis functions for "
 "comparing curves (e.g., DeLong's test).</li>"
 msgstr ""
+"<li>Bu fonksiyon istatistiksel karşılaştırma için sürekli test sonuçlarını "
+"doğrudan işleyemez. Sürekli tanı testleri için eğrileri karşılaştırmaya "
+"yönelik özel ROC (Alıcı İşletim Karakteristiği) analiz fonksiyonlarını "
+"kullanın (ör. DeLong testi).</li>"
 
 #: R/pathagreement.b.R
 msgid "<li>Training new staff and measuring competency</li>"
@@ -7836,7 +7987,7 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "<li>Validating diagnostic tools in clinical or pathology practice</li>"
-msgstr ""
+msgstr "<li>Klinik veya patoloji pratiğinde tanı araçlarının doğrulanması</li>"
 
 #: R/lassologistic.b.R
 msgid ""
@@ -8125,12 +8276,25 @@ msgid ""
 msgstr ""
 
 #: R/decisioncompare.b.R
-msgid "<p><b>%1$s:</b> exact p = %2$.3f"
+msgid ""
+"<p><b>%1$s:</b> not informative here. No case was classified correctly by "
+"exactly one of the two tests, so McNemar's test has no discordant pairs to "
+"compare and p is shown as 1 only by convention. Read the accuracy difference "
+"and its paired confidence interval instead.</p>"
 msgstr ""
+"<p><b>%1$s:</b> burada bilgi sağlamaz. Hiçbir olgu iki testten yalnızca biri "
+"tarafından doğru sınıflandırılmadı; bu nedenle McNemar testinin "
+"karşılaştıracağı uyumsuz çift yoktur ve p yalnızca geleneksel bir kabulle 1 "
+"olarak gösterilir. Bunun yerine doğruluk farkını ve eşleştirilmiş güven "
+"aralığını değerlendirin.</p>"
 
 #: R/decisioncompare.b.R
-msgid "<p><b>%1$s:</b> χ² = %2$.2f, p = %3$.3f"
-msgstr ""
+msgid "<p><b>%1$s:</b> p %2$s"
+msgstr "<p><b>%1$s:</b> p %2$s"
+
+#: R/decisioncompare.b.R
+msgid "<p><b>%1$s:</b> χ² = %2$.2f, p %3$s"
+msgstr "<p><b>%1$s:</b> χ² = %2$.2f, p %3$s"
 
 #: R/pathsampling.b.R
 msgid ""
@@ -8182,9 +8346,12 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid ""
-"<p><b>Comparison:</b> %1$s (accuracy: %2$.1f%%) vs %3$s (accuracy: "
-"%4$.1f%%)</p>"
+"<p><b>Comparison:</b> %1$s vs %2$s on the %3$d cases with a determinate "
+"result for both tests and the reference standard: accuracy %4$.1f%% vs "
+"%5$.1f%%.</p>"
 msgstr ""
+"<p><b>Karşılaştırma:</b> her iki test ve referans standart için belirli "
+"sonucu olan %3$d olguda %1$s ile %2$s: doğruluk %%%4$.1f ile %%%5$.1f.</p>"
 
 #: R/pathsampling.b.R
 msgid "<p><b>Data notes:</b> {v1}.</p>"
@@ -8198,6 +8365,23 @@ msgid ""
 "ranking is not a superiority test or clinical recommendation. Review the "
 "pairwise comparisons above for inferential results.</p>"
 msgstr ""
+"<p><b>Betimsel yorum:</b> Bu örneklemde en yüksek gözlenen dengeli doğruluk "
+"<span style='color:inherit;'><b>%1$s</b></span> testindeydi (genel doğruluk "
+"%%%2$.1f). Bu betimsel sıralama bir üstünlük testi ya da klinik öneri "
+"değildir. Çıkarımsal sonuçlar için yukarıdaki ikili karşılaştırmalara "
+"bakın.</p>"
+
+#: R/decisioncompare.b.R
+msgid ""
+"<p><b>Descriptive interpretation:</b> balanced accuracy could not be "
+"estimated for any test because one reference-standard class has no cases, so "
+"no test is ranked. Review the pairwise comparisons above for inferential "
+"results.</p>"
+msgstr ""
+"<p><b>Betimsel yorum:</b> bir referans standart sınıfında hiç olgu olmadığı "
+"için hiçbir testin dengeli doğruluğu tahmin edilemedi; bu nedenle hiçbir "
+"test sıralanmadı. Çıkarımsal sonuçlar için yukarıdaki ikili "
+"karşılaştırmalara bakın.</p>"
 
 #: R/pathsampling.b.R
 msgid ""
@@ -8484,8 +8668,44 @@ msgstr ""
 "protokolün altında örneklemeyi gerekçelendirmez.</p>"
 
 #: R/decisioncompare.b.R
-msgid "<p><b>Overall comparison:</b> Cochran's Q test (χ² = %1$.2f, p = %2$.3f)"
+msgid ""
+"<p><b>Overall comparison:</b> Cochran's Q test (χ² = %1$.2f, p %2$s) <span "
+"style='color:inherit;'><b>did not detect a significant difference</b></span> "
+"among the three tests. This is not evidence that they perform equally: with "
+"this sample size a clinically important accuracy difference could go "
+"undetected, and no test of one test against another across a pre-specified "
+"equivalence margin was performed. (If requested, the criterion column in the "
+"Overall Percent Agreement table compares each test with a user-specified "
+"descriptive OPA threshold; it is not a noninferiority comparison between "
+"tests or clinical guidance.) The confidence intervals for the paired "
+"differences in the Differences with 95%% Confidence Intervals table show how "
+"large a difference remains compatible with these data.</p>"
 msgstr ""
+"<p><b>Genel karşılaştırma:</b> Cochran Q testi (χ² = %1$.2f, p %2$s) üç test "
+"arasında <span style='color:inherit;'><b>anlamlı bir fark "
+"saptamadı</b></span>. Bu, testlerin eşit performans gösterdiğinin kanıtı "
+"değildir: bu örneklem büyüklüğüyle klinik açıdan önemli bir doğruluk farkı "
+"saptanamamış olabilir ve önceden belirlenmiş bir eşdeğerlik sınırında bir "
+"testin diğeriyle karşılaştırıldığı bir test yapılmamıştır. (İstenirse, Genel "
+"Yüzde Uyum tablosundaki kriter sütunu her testi kullanıcının belirlediği "
+"betimsel bir OPA eşiğiyle karşılaştırır; bu, testler arasında bir aşağı "
+"olmama (non-inferiority) karşılaştırması ya da klinik kılavuz değildir.) "
+"%%95 Güven Aralığı ile Farklar tablosundaki eşleştirilmiş farkların güven "
+"aralıkları, bu verilerle ne büyüklükte bir farkın hâlâ uyumlu olduğunu "
+"gösterir.</p>"
+
+#: R/decisioncompare.b.R
+msgid ""
+"<p><b>Overall comparison:</b> Cochran's Q test (χ² = %1$.2f, p %2$s) <span "
+"style='color:inherit;'><b>found significant differences</b></span> among the "
+"three tests: these data are evidence that the tests do not all have the same "
+"accuracy. The pairwise comparisons above show which pairs differ.</p>"
+msgstr ""
+"<p><b>Genel karşılaştırma:</b> Cochran Q testi (χ² = %1$.2f, p %2$s) üç test "
+"arasında <span style='color:inherit;'><b>anlamlı farklılıklar "
+"buldu</b></span>: bu veriler, testlerin hepsinin aynı doğruluğa sahip "
+"olmadığının kanıtıdır. Hangi çiftlerin farklı olduğunu yukarıdaki ikili "
+"karşılaştırmalar gösterir.</p>"
 
 #: R/pathsampling.b.R
 msgid ""
@@ -8663,7 +8883,7 @@ msgstr ""
 msgid ""
 "<p><strong>Accuracy:</strong> Overall probability of correct "
 "classification</p>"
-msgstr ""
+msgstr "<p><strong>Doğruluk:</strong> Doğru sınıflandırmanın genel olasılığı</p>"
 
 #: R/jjarcdiagram.b.R
 msgid ""
@@ -8717,6 +8937,9 @@ msgid ""
 "only. They are not clinical guides, validated decision rules, or "
 "recommendations for patient care.</p>"
 msgstr ""
+"<p><strong>Önemli:</strong> Bu eşikler ve kullanım durumları yalnızca "
+"örnektir. Klinik kılavuz, doğrulanmış karar kuralı ya da hasta bakımı için "
+"öneri değildir.</p>"
 
 #: R/jjarcdiagram.b.R
 msgid ""
@@ -8762,16 +8985,22 @@ msgstr ""
 #: R/decisioncompare.b.R
 msgid "<p><strong>LR-:</strong> How much negative test decreases odds of disease</p>"
 msgstr ""
+"<p><strong>LR-:</strong> Negatif testin hastalık olasılığını (odds) ne kadar "
+"azalttığı</p>"
 
 #: R/decisioncompare.b.R
 msgid "<p><strong>LR+:</strong> How much positive test increases odds of disease</p>"
 msgstr ""
+"<p><strong>LR+:</strong> Pozitif testin hastalık olasılığını (odds) ne kadar "
+"artırdığı</p>"
 
 #: R/decisioncompare.b.R
 msgid ""
 "<p><strong>McNemar Test:</strong> Statistical comparison between paired "
 "tests</p>"
 msgstr ""
+"<p><strong>McNemar Testi:</strong> Eşleştirilmiş testler arasında "
+"istatistiksel karşılaştırma</p>"
 
 #: R/decisioncompare.b.R
 msgid ""
@@ -8779,6 +9008,9 @@ msgid ""
 "(%2$.1f%%) and high specificity (%3$.1f%%) in this sample: few false "
 "negatives and few false positives.</p>"
 msgstr ""
+"<p><strong>Ölçülen performans:</strong> %1$s bu örneklemde hem yüksek "
+"duyarlılığa (%%%2$.1f) hem de yüksek özgüllüğe (%%%3$.1f) sahipti: az yanlış "
+"negatif ve az yanlış pozitif.</p>"
 
 #: R/decisioncompare.b.R
 msgid ""
@@ -8786,6 +9018,9 @@ msgid ""
 "(%2$.1f%%) but lower specificity (%3$.1f%%) in this sample: few false "
 "negatives, more false positives.</p>"
 msgstr ""
+"<p><strong>Ölçülen performans:</strong> %1$s bu örneklemde yüksek "
+"duyarlılığa (%%%2$.1f) ancak daha düşük özgüllüğe (%%%3$.1f) sahipti: az "
+"yanlış negatif, daha fazla yanlış pozitif.</p>"
 
 #: R/decisioncompare.b.R
 msgid ""
@@ -8793,6 +9028,9 @@ msgid ""
 "(%2$.1f%%) but lower sensitivity (%3$.1f%%) in this sample: few false "
 "positives, more false negatives.</p>"
 msgstr ""
+"<p><strong>Ölçülen performans:</strong> %1$s bu örneklemde yüksek özgüllüğe "
+"(%%%2$.1f) ancak daha düşük duyarlılığa (%%%3$.1f) sahipti: az yanlış "
+"pozitif, daha fazla yanlış negatif.</p>"
 
 #: R/decisioncompare.b.R
 msgid ""
@@ -8803,6 +9041,11 @@ msgid ""
 "rates observed in these particular cases, not a fixed property of the "
 "test.</p>"
 msgstr ""
+"<p><strong>Ölçülen performans:</strong> %1$s bu örneklemde ne %%95 "
+"duyarlılığa (%%%2$.1f) ne de %%95 özgüllüğe (%%%3$.1f) ulaştı; dolayısıyla "
+"bu çalışma noktasında, oranlarını Karar Testi Karşılaştırması tablosundan "
+"okuyabileceğiniz hem yanlış negatifler hem de yanlış pozitifler üretir. "
+"Bunlar testin sabit bir özelliği değil, bu olgularda gözlenen oranlardır.</p>"
 
 #: R/decisioncompare.b.R
 msgid ""
@@ -8812,6 +9055,11 @@ msgid ""
 "the ranking had nothing else to compare; check the 2x2 counts in the Recoded "
 "Data table before reading any other panel.</p>"
 msgstr ""
+"<p><strong>Ölçülen performans:</strong> bir altın standart sınıfında hiç "
+"olgu olmadığı için %s testinde duyarlılık ve/veya özgüllük hesaplanamadı; bu "
+"oranın paydası boştur. Bu test burada yalnızca sıralamanın karşılaştıracak "
+"başka bir şeyi olmadığı için anılmaktadır; başka bir paneli okumadan önce "
+"Yeniden Kodlanmış Veriler tablosundaki 2x2 sayıları kontrol edin.</p>"
 
 #: R/jjarcdiagram.b.R
 msgid ""
@@ -8842,6 +9090,8 @@ msgstr ""
 #: R/decisioncompare.b.R
 msgid "<p><strong>NPV:</strong> Probability of no disease when test negative</p>"
 msgstr ""
+"<p><strong>NÖD:</strong> Test negatif olduğunda hastalık olmaması "
+"olasılığı</p>"
 
 #: R/jjarcdiagram.b.R
 msgid ""
@@ -8869,7 +9119,7 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "<p><strong>PPV:</strong> Probability of disease when test positive</p>"
-msgstr ""
+msgstr "<p><strong>PÖD:</strong> Test pozitif olduğunda hastalık olasılığı</p>"
 
 #: R/jjarcdiagram.b.R
 msgid ""
@@ -8900,12 +9150,16 @@ msgid ""
 "<p><strong>Sensitivity:</strong> Probability test is positive when disease "
 "present (rule-out ability)</p>"
 msgstr ""
+"<p><strong>Duyarlılık:</strong> Hastalık varken testin pozitif olma "
+"olasılığı (dışlama yeteneği)</p>"
 
 #: R/decisioncompare.b.R
 msgid ""
 "<p><strong>Specificity:</strong> Probability test is negative when disease "
 "absent (rule-in ability)</p>"
 msgstr ""
+"<p><strong>Özgüllük:</strong> Hastalık yokken testin negatif olma olasılığı "
+"(tanıyı doğrulama yeteneği)</p>"
 
 #: R/jjarcdiagram.b.R
 msgid "<p><strong>Status:</strong> Network analysis completed successfully.</p>"
@@ -9286,6 +9540,11 @@ msgid ""
 "thresholds and consequences depend on the clinical setting, population, "
 "harms, benefits, and decision pathway.</p>"
 msgstr ""
+"<p>Radar grafiğinin LR ölçeği, Tıp Literatürü Kullanıcı Kılavuzlarında "
+"(Jaeschke ve ark., 1994) tanımlanan bilinen olabilirlik oranı kanıt "
+"kategorilerini yalnızca açıklayıcı bir görselleştirme olarak kullanır. Uygun "
+"eşikler ve sonuçları klinik ortama, popülasyona, zararlara, yararlara ve "
+"karar yoluna bağlıdır.</p>"
 
 #: R/cotest.b.R
 msgid ""
@@ -9406,10 +9665,16 @@ msgstr ""
 #: R/decisioncompare.b.R
 msgid ""
 "<span style='color:inherit;'><b>Significant difference detected.</b></span> "
-"%1$s classified significantly more cases correctly than %2$s (accuracy "
-"%3$.1f%% vs %4$.1f%%). McNemar's test compares overall correctness only; the "
-"two tests may still differ in the sensitivity/specificity balance.</p>"
+"%1$s classified significantly more cases correctly than %2$s: of the %3$d "
+"cases where exactly one test was correct, %4$d favoured %1$s. McNemar's test "
+"compares overall correctness only; the two tests may still differ in the "
+"sensitivity/specificity balance.</p>"
 msgstr ""
+"<span style='color:inherit;'><b>Anlamlı fark saptandı.</b></span> %1$s, %2$s "
+"testinden anlamlı olarak daha fazla olguyu doğru sınıflandırdı: yalnızca bir "
+"testin doğru olduğu %3$d olgunun %4$d tanesi %1$s lehineydi. McNemar testi "
+"yalnızca genel doğruluğu karşılaştırır; iki test duyarlılık/özgüllük "
+"dengesinde yine de farklı olabilir.</p>"
 
 #: R/jjhistostats.b.R
 msgid ""
@@ -9509,10 +9774,18 @@ msgid ""
 "<strong>Cases where Test A and Test B have different CORRECTNESS</strong> "
 "relative to the reference standard (e.g., Test A correct but Test B wrong, "
 "or vice versa). McNemar's test examines whether the imbalance between these "
-"discordant types is statistically significant. Exact inference is used "
-"automatically when fewer than 25 discordant pairs are available, but "
+"discordant types is statistically significant. The p-value comes from the "
+"McNemar mid-p test or, if chosen, the asymptotic test without continuity "
+"correction, the two versions recommended by Fagerland et al. (2013); "
 "precision and power still depend on the number of discordant pairs."
 msgstr ""
+"<strong>Test A ile Test B'nin referans standarda göre DOĞRULUĞUNUN farklı "
+"olduğu olgular</strong> (ör. Test A doğru ama Test B yanlış ya da tersi). "
+"McNemar testi, bu uyumsuz türler arasındaki dengesizliğin istatistiksel "
+"olarak anlamlı olup olmadığını inceler. p değeri, Fagerland ve ark. (2013) "
+"tarafından önerilen iki sürümden biriyle hesaplanır: McNemar mid-p testi ya "
+"da, seçilmişse, süreklilik düzeltmesiz asimptotik test. Kesinlik ve güç yine "
+"de uyumsuz çift sayısına bağlıdır."
 
 #: R/decisioncompare.b.R
 msgid ""
@@ -9522,6 +9795,12 @@ msgid ""
 "named here only because it had the highest observed balanced accuracy in "
 "this sample, and these data say nothing about whether the tests differ.</p>"
 msgstr ""
+"<strong>Dikkat:</strong> Bu veriler için testler arasında hiçbir "
+"istatistiksel karşılaştırma hesaplanamadı, bu nedenle bir testin diğeriyle "
+"karşılaştırıldığı bir test yapılmadı; nedeni Önemli Bilgi panelinde "
+"verilmiştir. %s burada yalnızca bu örneklemde en yüksek gözlenen dengeli "
+"doğruluğa sahip olduğu için anılmaktadır ve bu veriler testlerin farklı olup "
+"olmadığı hakkında hiçbir şey söylemez.</p>"
 
 #: R/decisioncompare.b.R
 msgid ""
@@ -9533,6 +9812,13 @@ msgid ""
 "The confidence intervals above show how large a real difference remains "
 "compatible with these data.</p>"
 msgstr ""
+"<strong>Dikkat:</strong> Karşılaştırılan testler arasında istatistiksel "
+"olarak anlamlı bir fark saptanmadı. %s burada yalnızca bu örneklemde en "
+"yüksek gözlenen dengeli doğruluğa sahip olduğu için anılmaktadır; anlamlı "
+"olmayan bir sonuç yalnızca sınırlı gücü yansıtıyor olabileceğinden, veriler "
+"ne onun diğerlerinden daha iyi performans gösterdiğini ne de testlerin "
+"eşdeğer olduğunu ortaya koyar. Yukarıdaki güven aralıkları, bu verilerle ne "
+"büyüklükte gerçek bir farkın hâlâ uyumlu olduğunu gösterir.</p>"
 
 #: R/jjhistostats.b.R
 msgid "<strong>Central tendency:</strong> mean = {mean}, median = {median}"
@@ -9571,6 +9857,12 @@ msgid ""
 "paired/matched data only. P < 0.05 indicates tests differ significantly in "
 "accuracy."
 msgstr ""
+"<strong>İki testin altın standarda göre tanısal DOĞRULUĞUNU "
+"karşılaştırır.</strong> <i>Uyumsuz çiftlere</i> (bir testin doğru, diğerinin "
+"yanlış olduğu olgular) odaklanır. Test A'nın Test B'den anlamlı olarak daha "
+"fazla/daha az olguyu doğru sınıflandırıp sınıflandırmadığını test eder. "
+"Yalnızca eşleştirilmiş/eşlenmiş veriler için uygundur. P < 0.05, testlerin "
+"doğrulukta anlamlı olarak farklı olduğunu gösterir."
 
 #: R/pathagreement.b.R
 msgid "<strong>Complete agreement (all raters identical):</strong> {pct}%"
@@ -12721,6 +13013,9 @@ msgid ""
 "perform equally; the test uses only the discordant pairs and may lack power "
 "to detect a clinically important difference."
 msgstr ""
+"Anlamlı olmayan bir McNemar sonucu iki testin eşit performans gösterdiğini "
+"kanıtlamaz; test yalnızca uyumsuz çiftleri kullanır ve klinik açıdan önemli "
+"bir farkı saptayacak güçten yoksun olabilir."
 
 #: R/multisurvival.b.R
 msgid ""
@@ -12768,7 +13063,14 @@ msgid ""
 "Their p is therefore left blank, and the 95% interval is the Wilson interval "
 "of the reclassified share. Weigh the gain against the loss: a gain on one "
 "side is not overall superiority."
-msgstr "Paralel bir kural, içerdiği bir teste göre yalnızca duyarlılık kazanıp özgüllük kaybedebilir, Seri bir kural ise tersini; bu nedenle Kazanılan ve Kaybedilen değerlerinden biri yapısı gereği sıfırdır ve yeniden sınıflandırılan her olgu gerçek bir farktır. Bu yüzden bu kuralların p değeri boş bırakılır ve %95 aralık, yeniden sınıflandırılan oranın Wilson aralığıdır. Kazancı kayba karşı tartın: bir taraftaki kazanç genel üstünlük anlamına gelmez."
+msgstr ""
+"Paralel bir kural, içerdiği bir teste göre yalnızca duyarlılık kazanıp "
+"özgüllük kaybedebilir, Seri bir kural ise tersini; bu nedenle Kazanılan ve "
+"Kaybedilen değerlerinden biri yapısı gereği sıfırdır ve yeniden "
+"sınıflandırılan her olgu gerçek bir farktır. Bu yüzden bu kuralların p "
+"değeri boş bırakılır ve %95 aralık, yeniden sınıflandırılan oranın Wilson "
+"aralığıdır. Kazancı kayba karşı tartın: bir taraftaki kazanç genel üstünlük "
+"anlamına gelmez."
 
 #: R/decisioncombine.b.R
 msgid ""
@@ -13596,7 +13898,7 @@ msgstr "Ortalama Spearman Rho Hakkında"
 
 #: R/decisioncompare.b.R
 msgid "About Medical Decision Test Comparison"
-msgstr ""
+msgstr "Tıbbi Karar Testi Karşılaştırması Hakkında"
 
 #: agreement/results/mixedEffectsExplanation.title
 msgid "About Mixed-Effects Condition Comparison"
@@ -14105,7 +14407,7 @@ msgstr "Doğruluk"
 
 #: R/decisioncompare.b.R
 msgid "accuracy"
-msgstr ""
+msgstr "doğruluk"
 
 #: ihcdiagnostic/results/diagnosticPerformance.columns.title
 #: ihcdiagnostic/results/panelOptimization.columns.title
@@ -15997,6 +16299,9 @@ msgid ""
 "(false positives). More powerful than standard Bonferroni correction. "
 "Applied automatically when comparing 3 tests."
 msgstr ""
+"Çoklu karşılaştırma yapılırken I. tip hatayı (yanlış pozitifler) kontrol "
+"etmek için p değerlerini düzeltir. Standart Bonferroni düzeltmesinden daha "
+"güçlüdür. 3 test karşılaştırılırken otomatik olarak uygulanır."
 
 #: R/chisqposttest.b.R
 msgid ""
@@ -19029,13 +19334,19 @@ msgid ""
 "Among cases with a reference result, {missing} was recorded for {o0} of {n0} "
 "where {first} and {second} agreed ({p0}%) and {o1} of {n1} where they "
 "disagreed ({p1}%)."
-msgstr "Referans sonucu olan olgular arasında {missing}, {first} ve {second} sonuçlarının uyuştuğu {n0} olgunun {o0} tanesinde (%{p0}) ve uyuşmadığı {n1} olgunun {o1} tanesinde (%{p1}) kaydedildi."
+msgstr ""
+"Referans sonucu olan olgular arasında {missing}, {first} ve {second} "
+"sonuçlarının uyuştuğu {n0} olgunun {o0} tanesinde (%{p0}) ve uyuşmadığı {n1} "
+"olgunun {o1} tanesinde (%{p1}) kaydedildi."
 
 #: R/decisioncombine.b.R
 msgid ""
 "Among cases with a reference result, {missing} was recorded for {o0} of {n0} "
 "with {test} negative ({p0}%) and {o1} of {n1} with {test} positive ({p1}%)."
-msgstr "Referans sonucu olan olgular arasında {missing}, {test} sonucu negatif olan {n0} olgunun {o0} tanesinde (%{p0}) ve pozitif olan {n1} olgunun {o1} tanesinde (%{p1}) kaydedildi."
+msgstr ""
+"Referans sonucu olan olgular arasında {missing}, {test} sonucu negatif olan "
+"{n0} olgunun {o0} tanesinde (%{p0}) ve pozitif olan {n1} olgunun {o1} "
+"tanesinde (%{p1}) kaydedildi."
 
 #: R/multisurvival.b.R
 msgid ""
@@ -19069,25 +19380,9 @@ msgid ""
 "this is a descriptive ranking only and not evidence of superiority or a "
 "clinical recommendation."
 msgstr ""
-
-#: R/decisioncompare.b.R
-msgid ""
-"among the three tests. This is not evidence that they perform equally: with "
-"this sample size a clinically important accuracy difference could go "
-"undetected, and no test of one test against another across a pre-specified "
-"equivalence margin was performed. (If requested, the criterion column in the "
-"Overall Percent Agreement table compares each test with a user-specified "
-"descriptive OPA threshold; it is not a noninferiority comparison between "
-"tests or clinical guidance.) The confidence intervals for the paired "
-"differences in the Differences with 95% Confidence Intervals table show how "
-"large a difference remains compatible with these data.</p>"
-msgstr ""
-
-#: R/decisioncompare.b.R
-msgid ""
-"among the three tests. This means the tests do NOT perform equally - at "
-"least one differs significantly from the others.</p>"
-msgstr ""
+"Değerlendirilen testler arasında en yüksek gözlenen dengeli doğruluk %s "
+"testindeydi; bu yalnızca betimsel bir sıralamadır, üstünlüğün kanıtı ya da "
+"bir klinik öneri değildir."
 
 #: grafify/options/jitter_width.description
 msgid ""
@@ -19308,6 +19603,10 @@ msgstr ""
 msgid "An optional variable from `data`."
 msgstr "`data` içinden isteğe bağlı bir değişken."
 
+#: R/decisioncompare.b.R
+msgid "An overall difference among the three tests was tested with Cochran's Q test."
+msgstr "Üç test arasındaki genel fark Cochran Q testiyle test edildi."
+
 #: R/multisurvival.b.R
 msgid "An sHR is not a risk ratio and does not quantify a cause-specific hazard."
 msgstr "sTO bir risk oranı değildir ve nedene özgü tehlikeyi ölçmez."
@@ -19495,7 +19794,7 @@ msgstr "{variable} için analiz tamamlandı."
 
 #: R/decisioncompare.b.R
 msgid "Analysis Completed Successfully"
-msgstr ""
+msgstr "Analiz Başarıyla Tamamlandı"
 
 #: R/timeinterval.b.R
 msgid ""
@@ -20820,6 +21119,10 @@ msgid ""
 "for chance agreement and should not be used alone to characterize diagnostic "
 "performance."
 msgstr ""
+"Her kriter betimseldir; bir karşılaştırıcıya karşı aşağı olmama "
+"(non-inferiority) analizi, düzenleyici kılavuz ya da klinik kılavuz "
+"değildir. OPA şans eseri uyumu düzeltmez ve tanısal performansı tanımlamak "
+"için tek başına kullanılmamalıdır."
 
 #: R/waterfallrecist.b.R
 msgid "any new lesion is automatic progression"
@@ -21798,7 +22101,7 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "Assumptions & Requirements"
-msgstr ""
+msgstr "Varsayımlar ve Gereksinimler"
 
 #: variablebiplot/results/assumptions.title
 msgid "Assumptions & Warnings"
@@ -21864,6 +22167,10 @@ msgstr ""
 #: rocreg/options/ci_method/asymptotic.title
 msgid "Asymptotic (Delta Method)"
 msgstr ""
+
+#: decisioncompare/options/mcnemarMethod/asymptotic.title
+msgid "Asymptotic (no continuity correction)"
+msgstr "Asimptotik (süreklilik düzeltmesiz)"
 
 #: cohenskappa/options/ci_method/asymptotic.title
 #: vusanalysis/options/ci_method/asymptotic.title
@@ -22170,6 +22477,8 @@ msgid ""
 "At least one test variable must be specified. Select diagnostic test "
 "variables to compare against the gold standard."
 msgstr ""
+"En az bir test değişkeni belirtilmelidir. Altın standartla karşılaştırılacak "
+"tanı testi değişkenlerini seçin."
 
 #: R/diagnosticmeta.b.R
 msgid "At least three finite studies are required for %s meta-regression."
@@ -22276,6 +22585,10 @@ msgid ""
 "were observed; predictive values and accuracy change with prevalence and "
 "would need to be recomputed for a population with a different disease rate."
 msgstr ""
+"Bu örneklemde gözlenen %%%1$.1f hastalık prevalansında pozitif öngörü değeri "
+"%2$s, negatif öngörü değeri %3$s ve genel doğruluk %4$s olarak gözlendi; "
+"öngörü değerleri ve doğruluk prevalansla değişir ve hastalık oranı farklı "
+"bir popülasyon için yeniden hesaplanmaları gerekir."
 
 #: R/decisioncompare.b.R
 msgid ""
@@ -22285,6 +22598,10 @@ msgid ""
 "accuracy change with prevalence and would need to be recomputed for a "
 "population with a different disease rate."
 msgstr ""
+"Bu analiz için girilen %%%1$.1f popülasyon prevalansında pozitif öngörü "
+"değeri %2$s, negatif öngörü değeri %3$s idi; genel doğruluk bu örneklemin "
+"prevalansında %4$s idi. Öngörü değerleri ve doğruluk prevalansla değişir ve "
+"hastalık oranı farklı bir popülasyon için yeniden hesaplanmaları gerekir."
 
 #: R/kappaSizeCI.b.R
 msgid ""
@@ -22303,6 +22620,10 @@ msgid ""
 "observed; predictive values and accuracy change with prevalence and would "
 "need to be recomputed for a population with a different disease rate."
 msgstr ""
+"Bu örneklemde gözlenen hastalık prevalansında pozitif öngörü değeri %1$s, "
+"negatif öngörü değeri %2$s ve genel doğruluk %3$s olarak gözlendi; öngörü "
+"değerleri ve doğruluk prevalansla değişir ve hastalık oranı farklı bir "
+"popülasyon için yeniden hesaplanmaları gerekir."
 
 #: R/agreement.b.R
 #: R/kappaSizePower.b.R
@@ -23216,7 +23537,7 @@ msgstr "Kullanılabilir Öngördürücüler"
 
 #: R/decisioncompare.b.R
 msgid "Available-Case Missing-Data Handling"
-msgstr ""
+msgstr "Kullanılabilir Olgu Yöntemiyle Eksik Veri Yönetimi"
 
 #: jvisr/options/aval_var.title
 #: jvisr/ui[3][0].label
@@ -23671,6 +23992,14 @@ msgstr ""
 "Dengeli Doğruluk ve Youden J iki ölçekte aynı istatistiktir: Dengeli "
 "Doğruluk = (J + 1) / 2; bu nedenle birine göre sıralama diğerine göre "
 "sıralamayla aynıdır."
+
+#: R/decisioncompare.b.R
+msgid ""
+"Balanced accuracy could not be estimated for any test because one "
+"reference-standard class has no cases, so no test is ranked."
+msgstr ""
+"Bir referans standart sınıfında hiç olgu olmadığı için hiçbir testin dengeli "
+"doğruluğu tahmin edilemedi; bu nedenle hiçbir test sıralanmadı."
 
 #: R/decisioncalculator.b.R
 msgid ""
@@ -25184,6 +25513,9 @@ msgid ""
 "this ranking reflects the observed sample and should not be reported as "
 "evidence that one test outperforms the others."
 msgstr ""
+"Testler arasındaki farklar istatistiksel olarak anlamlı olmadığından bu "
+"sıralama gözlenen örneklemi yansıtır ve bir testin diğerlerinden daha iyi "
+"performans gösterdiğinin kanıtı olarak raporlanmamalıdır."
 
 #: R/enhancedROC.b.R
 msgid ""
@@ -31349,7 +31681,7 @@ msgstr "Okunan Olgular"
 
 #: R/decisioncompare.b.R
 msgid "Cases sorted by gold standard result (n=%d)"
-msgstr ""
+msgstr "Olgular altın standart sonucuna göre sıralandı (n=%d)"
 
 #: R/pathagreement.b.R
 msgid "Cases were ordered by '{variable}'; ties preserve their dataset order."
@@ -33200,6 +33532,10 @@ msgstr ""
 #: R/categorize.b.R
 msgid "Check the frequency table and the distribution plot"
 msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "Check the level chosen as positive and any filter applied to the data."
+msgstr "Pozitif olarak seçilen düzeyi ve verilere uygulanan filtreleri kontrol edin."
 
 #: R/lassocox.b.R
 msgid "Check the selected variables and the model options."
@@ -37422,7 +37758,7 @@ msgstr ""
 #: R/decisioncompare.b.R
 #: exacttests/options/ciMethod/clopper_pearson.title
 msgid "Clopper-Pearson (exact)"
-msgstr ""
+msgstr "Clopper-Pearson (kesin)"
 
 #: decisioncompare/options/ciMethod/exact.title
 msgid "Clopper-Pearson (Exact)"
@@ -38073,6 +38409,13 @@ msgid ""
 "Confidence Intervals table, which show how large a real difference is still "
 "compatible with this sample."
 msgstr ""
+"Cochran Q, testlerin aralarında herhangi bir yerde doğruluk açısından farklı "
+"olup olmadığına ilişkin tek bir testtir. Burada p < 0.05 düzeyine ulaşmadı; "
+"bu, testlerin uyumlu olduğu anlamına değil, bu verilerin testleri ayırt "
+"edemediği anlamına gelir. Bu durumda bu tablodaki çift başına satırlar keşif "
+"amaçlıdır: bunları %95 Güven Aralığı ile Farklar tablosundaki eşleştirilmiş "
+"farklar ve bunların %95 güven aralıklarıyla birlikte okuyun; bu aralıklar ne "
+"büyüklükte gerçek bir farkın bu örneklemle hâlâ uyumlu olduğunu gösterir."
 
 #: R/decisioncompare.b.R
 msgid ""
@@ -38081,6 +38424,10 @@ msgid ""
 "discordance for the statistic to use. This means the data cannot separate "
 "the tests, not that the analysis failed."
 msgstr ""
+"Bu veriler için Cochran Q tanımsızdır: her olgu üç test tarafından da aynı "
+"şekilde sınıflandırıldı (hepsi doğru ya da hepsi yanlış), dolayısıyla "
+"istatistiğin kullanabileceği bir uyumsuzluk kalmadı. Bu, analizin başarısız "
+"olduğu anlamına değil, verilerin testleri ayırt edemediği anlamına gelir."
 
 #: nonparametric/options/test_type/cochran_q.title
 msgid "Cochran's Q Test (binary outcomes)"
@@ -38089,14 +38436,19 @@ msgstr ""
 #: R/decisioncompare.b.R
 msgid ""
 "Cochran's Q test did not detect a significant difference in diagnostic "
-"accuracy among the three tests (χ²(%1$d) = %2$.2f, p = %3$.3f)."
+"accuracy among the three tests (n = %1$d cases with all three results; "
+"χ²(%2$d) = %3$.2f, p %4$s)."
 msgstr ""
+"Cochran Q testi üç test arasında tanısal doğrulukta anlamlı bir fark "
+"saptamadı (n = üç sonucu da olan %1$d olgu; χ²(%2$d) = %3$.2f, p %4$s)."
 
 #: R/decisioncompare.b.R
 msgid ""
 "Cochran's Q test failed. Pairwise comparisons may still be valid but should "
 "be interpreted cautiously."
 msgstr ""
+"Cochran Q testi başarısız oldu. İkili karşılaştırmalar yine de geçerli "
+"olabilir ancak dikkatle yorumlanmalıdır."
 
 #: package/analyses/cochranq.description
 #: cochranq/options.description.main
@@ -38123,8 +38475,11 @@ msgstr ""
 #: R/decisioncompare.b.R
 msgid ""
 "Cochran's Q test revealed a significant difference in diagnostic accuracy "
-"among the three tests (χ²(%1$d) = %2$.2f, p = %3$.3f)."
+"among the three tests (n = %1$d cases with all three results; χ²(%2$d) = "
+"%3$.2f, p %4$s)."
 msgstr ""
+"Cochran Q testi üç test arasında tanısal doğrulukta anlamlı bir fark ortaya "
+"koydu (n = üç sonucu da olan %1$d olgu; χ²(%2$d) = %3$.2f, p %4$s)."
 
 #: R/decisioncompare.b.R
 msgid ""
@@ -38132,6 +38487,9 @@ msgid ""
 "tests and the reference standard. The pairwise comparisons below each use "
 "their own complete cases."
 msgstr ""
+"Cochran Q hesaplanmadı: hiçbir olguda üç testin tümü ve referans standart "
+"için belirli bir sonuç yok. Aşağıdaki ikili karşılaştırmaların her biri "
+"kendi tam olgularını kullanır."
 
 #: lassocox/results/encoding.columns.title
 msgid "Coding"
@@ -40612,6 +40970,15 @@ msgstr ""
 #: R/decisioncurve.b.R
 msgid "Comparisons not tested"
 msgstr "Test edilmeyen karşılaştırmalar"
+
+#: R/decisioncompare.b.R
+msgid ""
+"Comparisons without discordant pairs are left out of the Holm-Bonferroni "
+"adjustment: their p = 1 is a convention, not a test result."
+msgstr ""
+"Uyumsuz çifti olmayan karşılaştırmalar Holm-Bonferroni düzeltmesinin dışında "
+"bırakılmıştır: bunların p = 1 değeri bir test sonucu değil, geleneksel bir "
+"kabuldür."
 
 #: ihccluster/results/spatialCompartmentSummary.columns.title
 #: ihccluster/results/spatialClusterComparison.columns.title
@@ -43573,7 +43940,7 @@ msgstr "Güven aralıkları bootstrap gerektirir ve boş bırakılmıştır."
 
 #: R/decisioncompare.b.R
 msgid "Confidence Intervals Unavailable"
-msgstr ""
+msgstr "Güven Aralıkları Kullanılamıyor"
 
 #: R/advancedraincloud.b.R
 msgid ""
@@ -44232,7 +44599,7 @@ msgstr "Doğrulayıcı Test (Yüksek Özgüllük)"
 
 #: R/decisioncompare.b.R
 msgid "Confirmatory Tests (Rule-In):"
-msgstr ""
+msgstr "Doğrulayıcı Testler (Tanıyı Doğrulama):"
 
 #: decisionpanel/ui[7][1][1].label
 msgid "Confirmatory Tests: Prioritize high specificity (minimize false alarms)"
@@ -44281,7 +44648,7 @@ msgstr "ÇELİŞKİLİ DOĞRULAMA DEĞERLERİ"
 
 #: R/decisioncompare.b.R
 msgid "Conflicting Options"
-msgstr ""
+msgstr "Çakışan Seçenekler"
 
 #: R/benford.b.R
 msgid "Conformity: {label}"
@@ -45879,6 +46246,8 @@ msgid ""
 "Copy and adapt to your manuscript. Verify all statistical values and add "
 "clinical context."
 msgstr ""
+"Kopyalayıp makalenize uyarlayın. Tüm istatistiksel değerleri doğrulayın ve "
+"klinik bağlam ekleyin."
 
 #: R/enhancedROC.b.R
 msgid "Copy and paste the sections below into your clinical reports or publications"
@@ -47104,6 +47473,8 @@ msgid ""
 "Could not calculate confidence intervals for {test} (n={n}). This may be due "
 "to insufficient sample size or extreme values. Error: {error}"
 msgstr ""
+"{test} için güven aralıkları hesaplanamadı (n={n}). Bunun nedeni yetersiz "
+"örneklem büyüklüğü ya da uç değerler olabilir. Hata: {error}"
 
 #: R/pathagreement.b.R
 msgid ""
@@ -47114,6 +47485,8 @@ msgstr ""
 #: R/decisioncompare.b.R
 msgid "Could not calculate: %s. Check that all tests have valid paired data."
 msgstr ""
+"Hesaplanamadı: %s. Tüm testlerin geçerli eşleştirilmiş verisi olduğunu "
+"kontrol edin."
 
 #: R/enhancedROC.b.R
 #: R/lassocox.b.R
@@ -47177,6 +47550,8 @@ msgid ""
 "may be due to insufficient discordant pairs or identical test results. "
 "Error: {error}"
 msgstr ""
+"{comparison} için McNemar testi yapılamadı (n1={n1}, n2={n2}). Bunun nedeni "
+"yetersiz uyumsuz çift ya da özdeş test sonuçları olabilir. Hata: {error}"
 
 #: R/datetimeconverter.b.R
 msgid ""
@@ -49132,7 +49507,7 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "Cross-tabulation of {test} and {gold}"
-msgstr ""
+msgstr "{test} ve {gold} çapraz tablosu"
 
 #: modalitycomparison/results/contingencyTable.title
 msgid "Cross-Tabulation of Scores"
@@ -54203,6 +54578,9 @@ msgid ""
 "of the 2x2. Not reproducible from the sensitivity and specificity in this "
 "row, which use the raw counts."
 msgstr ""
+"Payda hücresi boş; 2x2 tablonun dört hücresinin hepsine {correction} "
+"eklendikten sonra hesaplandı. Ham sayıları kullanan bu satırdaki duyarlılık "
+"ve özgüllükten yeniden üretilemez."
 
 #: tidydensity/options/f_df2.title
 msgid "Denominator DF"
@@ -54639,7 +55017,7 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "Descriptive Performance Summary"
-msgstr ""
+msgstr "Betimsel Performans Özeti"
 
 #: R/jjwithinstats.b.R
 msgid "Descriptive Plot (ggpubr)"
@@ -55288,7 +55666,7 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "Determinate denominators were {denominators}."
-msgstr ""
+msgstr "Belirli paydalar şöyleydi: {denominators}."
 
 #: stagemigration/options/performOptimalCutpoint.description
 msgid ""
@@ -55704,6 +56082,25 @@ msgstr ""
 #: imagingcorrelation/results/confidenceAssessment.title
 msgid "Diagnostic Confidence Assessment"
 msgstr ""
+
+#: R/decisioncompare.b.R
+msgid ""
+"Diagnostic correctness was compared with the asymptotic McNemar test without "
+"continuity correction, which Fagerland et al. (2013) recommend when small "
+"excesses over the nominal significance level are acceptable."
+msgstr ""
+"Tanısal doğruluk, süreklilik düzeltmesiz asimptotik McNemar testiyle "
+"karşılaştırıldı; Fagerland ve ark. (2013) bu testi, nominal anlamlılık "
+"düzeyinin hafifçe aşılmasının kabul edilebilir olduğu durumlarda "
+"önermektedir."
+
+#: R/decisioncompare.b.R
+msgid ""
+"Diagnostic correctness was compared with the McNemar mid-p test, which "
+"Fagerland et al. (2013) recommend for use in any situation."
+msgstr ""
+"Tanısal doğruluk, McNemar mid-p testiyle karşılaştırıldı; Fagerland ve ark. "
+"(2013) bu testin her durumda kullanılmasını önermektedir."
 
 #: R/venn.b.R
 msgid "Diagnostic criteria overlap"
@@ -56257,10 +56654,6 @@ msgstr ""
 #: ordinalroc/results/cumulativeAUC.columns.title
 #: ordinalroc/results/optimalThresholds.columns.title
 msgid "Dichotomization"
-msgstr ""
-
-#: R/decisioncompare.b.R
-msgid "did not detect a significant difference"
 msgstr ""
 
 #: timedependentdca/results/comparisonTable.columns.title
@@ -60430,7 +60823,7 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "Duplicate Test Variables"
-msgstr ""
+msgstr "Yinelenen Test Değişkenleri"
 
 #: R/dataquality.b.R
 msgid "Duplicate Value Analysis"
@@ -60787,6 +61180,14 @@ msgstr ""
 "bir karşılaştırmanın sağlayacağından daha az kesindir. Bunları "
 "ilişkilendirmek için bir olgu kimliği değişkeni belirtin."
 
+#: R/decisioncompare.b.R
+msgid ""
+"Each difference is the first-named test minus the second: for 'A vs B', a "
+"positive value favours A and a negative value favours B."
+msgstr ""
+"Her fark, ilk adı geçen testten ikincisinin çıkarılmasıyla elde edilir: 'A "
+"ile B' için pozitif bir değer A'nın, negatif bir değer B'nin lehinedir."
+
 #: R/jjdotplotstats.b.R
 msgid ""
 "Each group is drawn as a violin (the shape of its distribution), a boxplot "
@@ -60808,6 +61209,9 @@ msgid ""
 "adjusted for multiplicity, whereas the p-values in the McNemar table are "
 "Holm-Bonferroni adjusted."
 msgstr ""
+"Her aralık tek bir karşılaştırma için olağan bir %95 aralıktır ve çoklu "
+"karşılaştırma için düzeltilmemiştir; McNemar tablosundaki p değerleri ise "
+"Holm-Bonferroni ile düzeltilmiştir."
 
 #: R/nogoldstandard.b.R
 msgid ""
@@ -61041,7 +61445,12 @@ msgid ""
 "the {nneg} disease-absent cases. Gained counts the cases the rule classifies "
 "correctly and the test alone does not, Lost the reverse, and Change is the "
 "rule minus the test."
-msgstr "Her kural, birleştirdiği her testle aynı {n} eksiksiz olguda karşılaştırılır: duyarlılık hastalığı olan {npos} olguda, özgüllük hastalığı olmayan {nneg} olguda. Kazanılan, kuralın doğru sınıflandırdığı ancak testin tek başına doğru sınıflandıramadığı olguları sayar, Kaybedilen bunun tersini, Değişim ise kural eksi testtir."
+msgstr ""
+"Her kural, birleştirdiği her testle aynı {n} eksiksiz olguda "
+"karşılaştırılır: duyarlılık hastalığı olan {npos} olguda, özgüllük hastalığı "
+"olmayan {nneg} olguda. Kazanılan, kuralın doğru sınıflandırdığı ancak testin "
+"tek başına doğru sınıflandıramadığı olguları sayar, Kaybedilen bunun "
+"tersini, Değişim ise kural eksi testtir."
 
 #: R/summarydata.b.R
 msgid "Each selected variable has no more than 5% missing values."
@@ -61053,7 +61462,7 @@ msgstr "her alt grubun kendine ait"
 
 #: R/decisioncompare.b.R
 msgid "Each test had %d determinate results."
-msgstr ""
+msgstr "Her testin %d belirli sonucu vardı."
 
 #: R/nogoldstandard.b.R
 msgid ""
@@ -61122,6 +61531,8 @@ msgid ""
 "Each test slot must contain a different variable. Remove the duplicate "
 "selection(s): {duplicates}."
 msgstr ""
+"Her test alanı farklı bir değişken içermelidir. Yinelenen seçimleri "
+"kaldırın: {duplicates}."
 
 #: R/pathagreement.b.R
 msgid ""
@@ -62286,10 +62697,6 @@ msgstr ""
 #: R/waterfall.b.R
 msgid "Enable 'Show RECIST Thresholds' for clinical interpretation"
 msgstr "Klinik yorum için 'RECIST Eşiklerini Göster'i etkinleştirin"
-
-#: R/jjpiestats.b.R
-msgid "Enable \"Statistical results\" to show that exact value on the chart."
-msgstr ""
 
 #: stagemigration/options/enableAccessibilityFeatures.description
 msgid ""
@@ -66241,6 +66648,14 @@ msgstr ""
 "yapaylıklarıdır: %s. Yalnızca 0.500 EAA yorumlanabilir."
 
 #: R/decisioncombine.b.R
+msgid ""
+"Every combination that uses it either reduces to a rule on the other tests "
+"alone or calls every case positive, or every case negative."
+msgstr ""
+"Onu kullanan her kombinasyon ya yalnızca diğer testlere dayanan bir kurala "
+"indirgenir ya da her olguyu pozitif veya her olguyu negatif sayar."
+
+#: R/decisioncombine.b.R
 msgid "Every combination that uses such a test is affected as well."
 msgstr "Böyle bir testi kullanan her kombinasyon da bundan etkilenir."
 
@@ -66300,6 +66715,13 @@ msgstr ""
 "modelden her hasta için bir sağkalım eğrisi öngörülür ve bu eğrilerin "
 "ortalaması alınır. İşlem her düzey için yinelenir."
 
+#: R/jjpiestats.b.R
+msgid ""
+"Every pair falls in the same category on both measurements, so McNemar's "
+"test has no information: p is 1 by convention and no test result is shown on "
+"the chart."
+msgstr ""
+
 #: R/jjdotplotstats.b.R
 msgid "every pair of groups"
 msgstr ""
@@ -66325,6 +66747,18 @@ msgstr ""
 "kodlayın: zaman 0 sonrasındaki satırlar değerlendirme olarak ele alınır, bu "
 "nedenle %%0 değerindeki başlangıç satırı en iyi yanıta katılır ve "
 "progresyonu gizler."
+
+#: R/decisioncombine.b.R
+msgid ""
+"Every recorded result of {test} ({variable}) is \"{level}\", the level "
+"chosen as positive, so {test} cannot separate disease-present from "
+"disease-absent cases in these data: on its own it reads sensitivity 100% and "
+"specificity 0% by construction."
+msgstr ""
+"{test} ({variable}) için kaydedilmiş her sonuç, pozitif olarak seçilen düzey "
+"olan \"{level}\" değeridir; bu nedenle {test} bu verilerde hastalığı olan "
+"olguları hastalığı olmayanlardan ayıramaz: tek başına yapısı gereği %100 "
+"duyarlılık ve %0 özgüllük gösterir."
 
 #: R/ihcheterogeneity.b.R
 msgid "Every regional measurement equalled its comparison in every case."
@@ -66725,16 +67159,6 @@ msgstr "Meslektaşlarla birebir uyum %"
 
 #: likelihoodratio/options/ciMethod/exact.title
 msgid "Exact binomial"
-msgstr ""
-
-#: R/decisioncompare.b.R
-msgid ""
-"Exact binomial inference was used because there were only %d discordant "
-"pairs; interpret the estimate with its paired confidence interval."
-msgstr ""
-
-#: R/decisioncompare.b.R
-msgid "Exact binomial McNemar"
 msgstr ""
 
 #: exacttests/options/testType/binomial.title
@@ -69046,6 +69470,12 @@ msgid ""
 "accurate than the others. Proceed to pairwise comparisons with multiple "
 "comparison correction to identify which tests differ."
 msgstr ""
+"McNemar testinin 3 veya daha fazla test için genişletilmiş biçimi. Altın "
+"standarda göre testler arasında <strong>tanısal doğruluğun farklı olup "
+"olmadığını test eder</strong>. Anlamlıysa (p < 0.05), en az bir test "
+"diğerlerinden anlamlı olarak daha doğru/daha az doğrudur. Hangi testlerin "
+"farklı olduğunu belirlemek için çoklu karşılaştırma düzeltmeli ikili "
+"karşılaştırmalara geçin."
 
 #: R/checkdata.b.R
 msgid "extensive missing data (30-50%)"
@@ -69177,6 +69607,10 @@ msgid ""
 "rates. Sensitivity and specificity can also vary across settings and case "
 "mix."
 msgstr ""
+"Gözlenen referans sonuçları arasında aşırı hastalık prevalansı: %{pct} "
+"({diseased}/{observed} olgu). PÖD ve NÖD prevalansa karşı oldukça duyarlıdır "
+"ve hastalık oranları farklı popülasyonlara genellenemeyebilir. Duyarlılık ve "
+"özgüllük de ortamlara ve olgu karışımına göre değişebilir."
 
 #: R/decisioncombine.b.R
 msgid ""
@@ -70383,6 +70817,10 @@ msgstr "Kadın düzeyi:"
 #: R/decision.b.R
 msgid "Few cases in one arm: {dpos} disease-present and {dneg} disease-free"
 msgstr "Gruplardan birinde az olgu: {dpos} hastalıklı ve {dneg} hastalıksız olgu"
+
+#: R/jjpiestats.b.R
+msgid "Few discordant pairs"
+msgstr ""
 
 #: R/outcomeorganizer.b.R
 msgid ""
@@ -73298,10 +73736,6 @@ msgstr ""
 msgid "Found date format:"
 msgstr "Bulunan tarih formatı:"
 
-#: R/decisioncompare.b.R
-msgid "found significant differences"
-msgstr ""
-
 #: multisurvival/options/numRiskGroups/four.title
 msgid "Four Groups"
 msgstr "Dört Grup"
@@ -75827,7 +76261,7 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "Global Test Not Computed"
-msgstr ""
+msgstr "Genel Test Hesaplanmadı"
 
 #: pheval/results/globalTestPlots.title
 msgid "Global Test Visualizations"
@@ -75890,6 +76324,7 @@ msgstr "Altın Standart Negatif"
 msgid "Gold Positive"
 msgstr "Altın Standart Pozitif"
 
+#: R/decisioncompare.b.R
 #: decisioncompare/ui[0][0].label
 #: decisionpanel/options/gold.title
 msgid "Gold Standard"
@@ -75939,6 +76374,8 @@ msgid ""
 "Gold standard variable must be specified. Select a reference test variable "
 "that represents the true disease status."
 msgstr ""
+"Altın standart değişkeni belirtilmelidir. Gerçek hastalık durumunu temsil "
+"eden bir referans test değişkeni seçin."
 
 #: bayesiandiagnostic/options/gold_standard.title
 #: bayesiandiagnostic/ui[0][1].label
@@ -79527,15 +79964,15 @@ msgstr "Yüksek örnekleme değişkenliği"
 
 #: R/decisioncompare.b.R
 msgid "High sensitivity (>=95%): few false negatives in this sample"
-msgstr ""
+msgstr "Yüksek duyarlılık (>=%95): bu örneklemde az yanlış negatif"
 
 #: R/decisioncompare.b.R
 msgid "High sensitivity and high specificity in this sample (both >=95%)"
-msgstr ""
+msgstr "Bu örneklemde yüksek duyarlılık ve yüksek özgüllük (her ikisi de >=%95)"
 
 #: R/decisioncompare.b.R
 msgid "High specificity (>=95%): few false positives in this sample"
-msgstr ""
+msgstr "Yüksek özgüllük (>=%95): bu örneklemde az yanlış pozitif"
 
 #: agreement/options/loaHighThreshold.title
 msgid "High threshold (percent) - detailed mode"
@@ -79925,11 +80362,11 @@ msgstr "Yüksek düzeyde anlamlı fark (p < 0.001)"
 
 #: R/decisioncompare.b.R
 msgid "Highly significant difference (p<0.001)"
-msgstr ""
+msgstr "Çok yüksek düzeyde anlamlı fark (p<0.001)"
 
 #: R/decisioncompare.b.R
 msgid "Highly significant overall difference among tests (p<0.001)"
-msgstr ""
+msgstr "Testler arasında çok yüksek düzeyde anlamlı genel fark (p<0.001)"
 
 #: R/checkdata.b.R
 msgid "Highly skewed"
@@ -80633,7 +81070,7 @@ msgstr ""
 #: R/decisioncompare.b.R
 #: tidyplots/results/howto.title
 msgid "How to Use This Analysis"
-msgstr ""
+msgstr "Bu Analiz Nasıl Kullanılır"
 
 #: R/multisurvival.b.R
 msgid "How to Use This Nomogram:"
@@ -81423,8 +81860,18 @@ msgid "Ideal Value"
 msgstr ""
 
 #: R/decisioncompare.b.R
-msgid "Identical Positive and Negative Levels"
+msgid ""
+"Identical correctness on these cases does not establish that the two tests "
+"perform equally; the confidence interval shows how large a difference "
+"remains compatible with these data."
 msgstr ""
+"Bu olgularda doğruluğun özdeş olması, iki testin eşit performans "
+"gösterdiğini kanıtlamaz; güven aralığı, bu verilerle ne büyüklükte bir "
+"farkın hâlâ uyumlu olduğunu gösterir."
+
+#: R/decisioncompare.b.R
+msgid "Identical Positive and Negative Levels"
+msgstr "Aynı Pozitif ve Negatif Düzeyler"
 
 #: costeffectiveness/results/dominanceTable.description
 msgid "Identification of dominated and extendedly dominated strategies"
@@ -81833,7 +82280,17 @@ msgid ""
 "predictive values are distorted. These data cannot tell the two apart. "
 "Correcting partial verification (Begg and Greenes 1983) needs the reference "
 "standard on a random sample of the cases verified less often."
-msgstr "Referans standart bu sonuçlar nedeniyle elde edildiyse (kısmi doğrulama), pozitif sonuçları daha sık doğrulanan bir test için duyarlılık olduğundan yüksek, özgüllük olduğundan düşük görünür; negatif sonuçları daha sık doğrulandıysa tersi geçerlidir. Bu hem kombinasyon tablosunda hem de yine referans standarda ihtiyaç duyan o testin kendi tablosunda görülür; testin öngörü değerleri bundan etkilenmez. Referans standart bunun yerine hastalık durumunun kendisi nedeniyle elde edilmediyse duyarlılık ve özgüllük etkilenmez, ancak öngörü değerleri bozulur. Bu veriler ikisini birbirinden ayıramaz. Kısmi doğrulamanın düzeltilmesi (Begg ve Greenes 1983), daha az doğrulanan olguların rastgele bir örnekleminde referans standardı gerektirir."
+msgstr ""
+"Referans standart bu sonuçlar nedeniyle elde edildiyse (kısmi doğrulama), "
+"pozitif sonuçları daha sık doğrulanan bir test için duyarlılık olduğundan "
+"yüksek, özgüllük olduğundan düşük görünür; negatif sonuçları daha sık "
+"doğrulandıysa tersi geçerlidir. Bu hem kombinasyon tablosunda hem de yine "
+"referans standarda ihtiyaç duyan o testin kendi tablosunda görülür; testin "
+"öngörü değerleri bundan etkilenmez. Referans standart bunun yerine hastalık "
+"durumunun kendisi nedeniyle elde edilmediyse duyarlılık ve özgüllük "
+"etkilenmez, ancak öngörü değerleri bozulur. Bu veriler ikisini birbirinden "
+"ayıramaz. Kısmi doğrulamanın düzeltilmesi (Begg ve Greenes 1983), daha az "
+"doğrulanan olguların rastgele bir örnekleminde referans standardı gerektirir."
 
 #: R/decisioncombine.b.R
 msgid ""
@@ -81859,7 +82316,13 @@ msgid ""
 "tell this from results withheld because of disease status, and a correction "
 "needs the reference standard on a random sample of the cases verified less "
 "often."
-msgstr "Referans standart yalnızca bir testte pozitif sonuç çıktıktan sonra ya da yalnızca testlerin uyuşmadığı durumlarda (uyuşmazlık çözümlemesi) elde edildiyse, tablodaki her test ve kural için duyarlılık, özgüllük ve öngörü değerleri her iki yönde de yanlı olabilir. Bu veriler bunu hastalık durumu nedeniyle elde edilmeyen sonuçlardan ayıramaz; bir düzeltme, daha az doğrulanan olguların rastgele bir örnekleminde referans standardı gerektirir."
+msgstr ""
+"Referans standart yalnızca bir testte pozitif sonuç çıktıktan sonra ya da "
+"yalnızca testlerin uyuşmadığı durumlarda (uyuşmazlık çözümlemesi) elde "
+"edildiyse, tablodaki her test ve kural için duyarlılık, özgüllük ve öngörü "
+"değerleri her iki yönde de yanlı olabilir. Bu veriler bunu hastalık durumu "
+"nedeniyle elde edilmeyen sonuçlardan ayıramaz; bir düzeltme, daha az "
+"doğrulanan olguların rastgele bir örnekleminde referans standardı gerektirir."
 
 #: R/decisioncurve.b.R
 msgid ""
@@ -82198,7 +82661,7 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "Illustrative Interpretation Examples"
-msgstr ""
+msgstr "Açıklayıcı Yorumlama Örnekleri"
 
 #: R/nogoldstandard.b.R
 msgid "Illustrative observer-agreement scenario"
@@ -82732,7 +83195,7 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "Important Assumptions & Limitations"
-msgstr ""
+msgstr "Önemli Varsayımlar ve Kısıtlılıklar"
 
 #: R/venn.b.R
 msgid "Important Assumptions:"
@@ -83120,10 +83583,29 @@ msgstr ""
 msgid ""
 "In this sample neither sensitivity nor specificity reached 85%, and neither "
 "likelihood ratio reached LR+ >= 5 or LR- <= 0.2. That describes these counts "
+"at this operating point, not the test in general; switch off the supplied "
+"prevalence and enable the 95% CI option to see how precisely each rate is "
+"pinned down by this many cases"
+msgstr ""
+"Bu örneklemde ne duyarlılık ne de özgüllük %85'e ulaştı ve olabilirlik "
+"oranlarının hiçbiri LR+ >= 5 ya da LR- <= 0.2 düzeyine ulaşmadı. Bu, testi "
+"genel olarak değil, bu çalışma noktasındaki bu sayıları tanımlar; her oranın "
+"bu kadar olguyla ne kadar kesin belirlendiğini görmek için girilen "
+"prevalansı kapatın ve %95 GA seçeneğini açın"
+
+#: R/decisioncompare.b.R
+msgid ""
+"In this sample neither sensitivity nor specificity reached 85%, and neither "
+"likelihood ratio reached LR+ >= 5 or LR- <= 0.2. That describes these counts "
 "at this operating point, not the test in general; the Confidence Intervals "
 "table for this test (95% CI option) shows how precisely each rate is pinned "
 "down by this many cases"
 msgstr ""
+"Bu örneklemde ne duyarlılık ne de özgüllük %85'e ulaştı ve olabilirlik "
+"oranlarının hiçbiri LR+ >= 5 ya da LR- <= 0.2 düzeyine ulaşmadı. Bu, testi "
+"genel olarak değil, bu çalışma noktasındaki bu sayıları tanımlar; her oranın "
+"bu kadar olguyla ne kadar kesin belirlendiğini bu testin Güven Aralıkları "
+"tablosu (%95 GA seçeneği) gösterir"
 
 #: ihcpredict/results/validationResults.columns.title
 msgid "In Training Set"
@@ -84164,7 +84646,7 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "Indeterminate / excluded"
-msgstr ""
+msgstr "Belirsiz / hariç tutulan"
 
 #: R/decisioncompare.b.R
 msgid ""
@@ -84172,6 +84654,9 @@ msgid ""
 "level is selected. Its non-positive levels are currently combined as "
 "Negative."
 msgstr ""
+"Bir negatif düzey seçilene kadar {variables} için belirsiz sonuçların hariç "
+"tutulması uygulanamaz. Pozitif olmayan düzeyleri şu anda Negatif olarak "
+"birleştirilmektedir."
 
 #: trichotomousroc/options/indeterminate_level.title
 #: trichotomousroc/ui/outcomelevels/indeterminate_level.label
@@ -84180,7 +84665,7 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "Indeterminate Results Excluded"
-msgstr ""
+msgstr "Belirsiz Sonuçlar Hariç Tutuldu"
 
 #: trichotomousroc/options/indeterminate_action.title
 msgid "Indeterminate Zone Action"
@@ -87208,7 +87693,7 @@ msgstr "Geçersiz Pozitif Sınıf Seçimi"
 
 #: R/decisioncompare.b.R
 msgid "Invalid Positive Level"
-msgstr ""
+msgstr "Geçersiz Pozitif Düzey"
 
 #: R/pathsampling.b.R
 msgid "Invalid positive sample counts"
@@ -87220,7 +87705,7 @@ msgstr "Geçersiz pozitif örnek listeleri"
 
 #: R/decisioncompare.b.R
 msgid "Invalid Prevalence Value"
-msgstr ""
+msgstr "Geçersiz Prevalans Değeri"
 
 #: R/decisioncurve.b.R
 msgid "Invalid Probabilities: {model}"
@@ -89188,7 +89673,7 @@ msgstr "Anahtar Kesişim:"
 
 #: R/decisioncompare.b.R
 msgid "Key Metrics Explained"
-msgstr ""
+msgstr "Temel Ölçütlerin Açıklaması"
 
 #: R/decision.b.R
 msgid "Key Output Measures"
@@ -91543,6 +92028,10 @@ msgstr ""
 #: likelihoodratio/ui[7]/plotLikelihoodRatios.label
 msgid "Likelihood ratio nomogram"
 msgstr ""
+
+#: R/decisioncompare.b.R
+msgid "Likelihood Ratio Not Estimable"
+msgstr "Olabilirlik Oranı Tahmin Edilemiyor"
 
 #: R/decisioncalculator.b.R
 #: R/decisioncompare.b.R
@@ -94128,7 +94617,7 @@ msgstr "LR- <0.1 hastalığa KARŞI güçlü kanıt, LR- 0.1-0.2 orta, LR- 0.2-0
 
 #: R/decisioncompare.b.R
 msgid "LR- Quality"
-msgstr ""
+msgstr "LR- Kalitesi"
 
 #: R/decisioncombine.b.R
 #: R/decisioncompare.b.R
@@ -94158,7 +94647,7 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "LR+ and LR-"
-msgstr ""
+msgstr "LR+ ve LR-"
 
 #: R/cotest.b.R
 msgid ""
@@ -94170,7 +94659,7 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "LR+ Quality"
-msgstr ""
+msgstr "LR+ Kalitesi"
 
 #: R/decisioncombine.b.R
 msgid ""
@@ -94536,7 +95025,12 @@ msgid ""
 "Neither is adjusted for multiple comparisons, and when p is close to 0.05 "
 "the two can disagree: the interval may exclude 0 while p is above 0.05, or "
 "the reverse."
-msgstr "Çoğunluk her iki yönde de değişebilir: %95 aralığı eşleştirilmiş oranlar için Newcombe'un hibrit skor aralığıdır ve p değeri McNemar orta-p testinden gelir. Hiçbiri çoklu karşılaştırmalar için düzeltilmemiştir ve p değeri 0,05'e yakın olduğunda ikisi çelişebilir: aralık 0'ı dışarıda bırakırken p 0,05'in üzerinde olabilir ya da tersi."
+msgstr ""
+"Çoğunluk her iki yönde de değişebilir: %95 aralığı eşleştirilmiş oranlar "
+"için Newcombe'un hibrit skor aralığıdır ve p değeri McNemar mid-p testinden "
+"gelir. Hiçbiri çoklu karşılaştırmalar için düzeltilmemiştir ve p değeri "
+"0.05'e yakın olduğunda ikisi çelişebilir: aralık 0'ı dışarıda bırakırken p "
+"0.05'in üzerinde olabilir ya da tersi."
 
 #: decisionpanel/options/parallelRules/majority.title
 msgid "Majority positive"
@@ -96287,8 +96781,12 @@ msgid ""
 msgstr ""
 
 #: R/decisioncompare.b.R
-msgid "McNemar chi-squared (continuity corrected)"
-msgstr ""
+msgid "McNemar asymptotic (no continuity correction)"
+msgstr "McNemar asimptotik (süreklilik düzeltmesiz)"
+
+#: R/decisioncompare.b.R
+msgid "McNemar mid-p"
+msgstr "McNemar mid-p"
 
 #: package/analyses/contTablesPaired.menuSubtitle
 #: package/analyses/contTablesPaired.description
@@ -96298,10 +96796,11 @@ msgid "McNemar test"
 msgstr ""
 
 #: contTablesPaired/results/test.title
+#: decisioncompare/options/mcnemarMethod.title
 #: multiclassdiagnostics/options/mcnemarTest.title
 #: multiclassdiagnostics/ui[1][1][0]/compareModels/mcnemarTest.label
 msgid "McNemar Test"
-msgstr ""
+msgstr "McNemar Testi"
 
 #: clinicaltrialdesign/options/test_type/mcnemar.title
 msgid "McNemar Test (Paired Binary)"
@@ -96326,22 +96825,6 @@ msgid ""
 "B). No grouping variable specified."
 msgstr ""
 
-#: R/jjpiestats.b.R
-msgid ""
-"McNemar test requires at least 10 paired observations for reliable results. "
-"Your data has %d paired observations. Collect more data, or run an exact "
-"binomial test on the discordant pairs - the exact counterpart of McNemar. "
-"Note that Fisher's exact test is not an alternative here: it assumes "
-"independent samples, not paired ones."
-msgstr ""
-
-#: R/jjpiestats.b.R
-msgid ""
-"McNemar test requires non-zero marginal totals. Your contingency table has "
-"at least one row or column with zero observations. Check your data for "
-"complete coverage of all category combinations."
-msgstr ""
-
 #: R/nonparametric.b.R
 msgid ""
 "McNemar test requires paired categorical data. Please specify a pairing "
@@ -96354,14 +96837,10 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "McNemar Test Unavailable"
-msgstr ""
+msgstr "McNemar Testi Kullanılamıyor"
 
 #: cochranq/results/pairwiseComparisons.columns.title
 msgid "McNemar χ²"
-msgstr ""
-
-#: R/jjpiestats.b.R
-msgid "McNemar's exact test, a binomial test on the discordant pairs"
 msgstr ""
 
 #: outbreakanalysis/options/statistical_tests/mcnemar.title
@@ -96376,6 +96855,29 @@ msgid ""
 "McNemar result here can still differ in their sensitivity/specificity "
 "balance. Read the per-metric contrasts in the Differences with 95% "
 "Confidence Intervals table alongside this p-value."
+msgstr ""
+"McNemar testi yalnızca genel doğruluğu karşılaştırır: duyarlılığın ya da "
+"özgüllüğün testler arasında farklı olup olmadığını ayrı ayrı test etmez. "
+"Genel doğruluk hastalık prevalansına bağlıdır; bu nedenle burada McNemar "
+"sonucu anlamlı olmayan iki test, duyarlılık/özgüllük dengesinde yine de "
+"farklı olabilir. Bu p değeriyle birlikte %95 Güven Aralığı ile Farklar "
+"tablosundaki ölçüt başına karşılaştırmaları okuyun."
+
+#: R/jjpiestats.b.R
+msgid ""
+"McNemar's test compares the pairs that changed in one direction with those "
+"that changed in the other. p < 0.05 indicates that the proportion differs "
+"between the paired measurements. The expected-count rule does not apply, and "
+"no exact p-value replaces the result on the chart."
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid ""
+"McNemar's test is not shown for fewer than 10 paired observations; your data "
+"has %d. The evidence that the test keeps its error rate (Fagerland et al. "
+"2013) starts at 10 pairs, and with fewer it has almost no power. Collect "
+"more data. Fisher's exact test is not an alternative: it assumes independent "
+"samples, not paired ones."
 msgstr ""
 
 #: R/jjpiestats.b.R
@@ -97358,7 +97860,6 @@ msgstr ""
 
 #: package/analyses/decisioncalculator.menuGroup
 #: package/analyses/nogoldstandard.menuGroup
-#: package/analyses/decisioncompare.menuGroup
 #: package/analyses/psychopdaROC.menuGroup
 #: package/analyses/cotest.menuGroup
 #: package/analyses/sequentialtests.menuGroup
@@ -97370,7 +97871,6 @@ msgstr ""
 #: betabinomialdiagnostic/options.menuSubgroup
 #: cotest/options.menuGroup
 #: decisioncalculator/options.menuGroup
-#: decisioncompare/options.menuGroup
 #: decisioncurve/options.menuGroup
 #: enhancedROC/options.menuGroup
 #: hierarchicalbayes/options.menuSubgroup
@@ -97510,10 +98010,12 @@ msgstr ""
 
 #: package/analyses/agreement.menuGroup
 #: package/analyses/decision.menuGroup
+#: package/analyses/decisioncompare.menuGroup
 #: package/analyses/decisioncombine.menuGroup
 #: agreement/options.menuGroup
 #: decision/options.menuGroup
 #: decisioncombine/options.menuGroup
+#: decisioncompare/options.menuGroup
 msgid "meddecideT"
 msgstr "meddecideT"
 
@@ -98973,18 +99475,6 @@ msgid ""
 "both approaches for complete assessment."
 msgstr ""
 
-#: decisioncompare/options/ciMethod.description.ui
-msgid ""
-"Method for computing confidence intervals for agreement proportions. Wilson "
-"score is recommended for most cases. Logit is preferred when proportions are "
-"near 0 or 1 (common in high-agreement studies). Clopper-Pearson (Exact) is "
-"the most conservative."
-msgstr ""
-"Uyum oranları için güven aralıklarını hesaplama yöntemi. Çoğu durum için "
-"Wilson puanı önerilir. Oranlar 0 veya 1'e yakın olduğunda (yüksek uyum "
-"çalışmalarında yaygındır) Logit tercih edilir. Clopper-Pearson (Kesin) en "
-"muhafazakar olanıdır."
-
 #: factoranalysis/options/scores.description
 msgid "Method for computing factor scores"
 msgstr ""
@@ -99205,6 +99695,22 @@ msgstr ""
 #: recurrentsurvival/options/reReg_se.description.ui
 msgid "Method for standard error estimation"
 msgstr ""
+
+#: decisioncompare/options/ciMethod.description.ui
+msgid ""
+"Method for the confidence interval of overall percent agreement. Wilson "
+"score suits most cases. Near 0 or 100 percent agreement, which is common in "
+"concordance studies, Wilson and logit intervals can cover the true value "
+"less often than the nominal 95 percent; Clopper-Pearson (Exact) never does "
+"and is the most conservative. The logit interval is undefined at 0 or 100 "
+"percent agreement, where the Clopper-Pearson limits are shown instead."
+msgstr ""
+"Genel yüzde uyumun güven aralığı için yöntem. Wilson puanı çoğu durum için "
+"uygundur. Uyum çalışmalarında sık görülen yüzde 0 ya da yüzde 100 uyuma "
+"yakın değerlerde Wilson ve logit aralıkları gerçek değeri nominal yüzde "
+"95'ten daha seyrek kapsayabilir; Clopper-Pearson (Kesin) aralığı bunu asla "
+"yapmaz ve en tutucu olanıdır. Logit aralığı yüzde 0 ya da yüzde 100 uyumda "
+"tanımsızdır; bu durumda yerine Clopper-Pearson sınırları gösterilir."
 
 #: timedependent/options/roc_method.description.ui
 msgid "Method for time-dependent ROC calculation"
@@ -99664,7 +100170,7 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "Metric Difference Unavailable"
-msgstr ""
+msgstr "Ölçüt Farkı Kullanılamıyor"
 
 #: segmentationmetrics/results/metricDistributionPlot.title
 msgid "Metric Distribution Across Images"
@@ -99702,7 +100208,7 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "Metric Unavailable"
-msgstr ""
+msgstr "Ölçüt Kullanılamıyor"
 
 #: clinicalheatmap/results/optimalKAnalysis/optimalKTable.columns.title
 #: timedependent/results/model_comparison.columns.title
@@ -99785,6 +100291,10 @@ msgstr ""
 #: patientreported/ui[5][0]/mid_value.suffix
 msgid "MID value"
 msgstr ""
+
+#: decisioncompare/options/mcnemarMethod/midp.title
+msgid "Mid-p"
+msgstr "Mid-p"
 
 #: R/riverplot.b.R
 msgid "Mid-points added for smoother flow transitions"
@@ -101319,7 +101829,7 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "Missing epiR Package"
-msgstr ""
+msgstr "epiR Paketi Eksik"
 
 #: clinicalvalidation/options/missing_data_handling/indicator.title
 #: clinicalvalidationinteractive/options/missing_data_handling/indicator.title
@@ -101376,11 +101886,11 @@ msgstr "Eksiklik desenleri grafiği (vis_miss)"
 
 #: R/decisioncompare.b.R
 msgid "Missing Positive Level"
-msgstr ""
+msgstr "Pozitif Düzey Eksik"
 
 #: R/decisioncompare.b.R
 msgid "Missing Positive Levels"
-msgstr ""
+msgstr "Pozitif Düzeyler Eksik"
 
 #: R/diagnosticmeta.b.R
 msgid "Missing required columns for proportional-hazards SROC analysis"
@@ -101396,7 +101906,7 @@ msgstr "Gerekli değişkenler eksik: {vars}"
 
 #: R/decisioncompare.b.R
 msgid "Missing Results Excluded Per Test"
-msgstr ""
+msgstr "Eksik Sonuçlar Test Başına Hariç Tutuldu"
 
 #: R/decisioncombine.b.R
 msgid "Missing Results Follow Another Result"
@@ -101408,7 +101918,7 @@ msgstr "Eksik Sonuçlar Kısmen Başka Bir Sonucu İzliyor"
 
 #: R/decisioncompare.b.R
 msgid "Missing Stratifier Values"
-msgstr ""
+msgstr "Eksik Tabakalandırma Değerleri"
 
 #: intervalsurvival/options/imputation_method.title
 msgid "Missing Time Imputation"
@@ -101520,6 +102030,12 @@ msgid ""
 "results. Report this handling and assess whether missingness could bias "
 "accuracy estimates (STARD 2015)."
 msgstr ""
+"Eksik değerler şeffaf, teste özgü işlem için korundu ({counts}). Her tek "
+"başına test, o test ve referans standart için gözlenen satırları kullanır; "
+"eşleştirilmiş karşılaştırmalar her iki test ve referans standart için "
+"gözlenen satırları kullanır. Eksik tabakalandırma değerleri yalnızca alt "
+"grup sonuçlarını etkiler. Bu yöntemi raporlayın ve eksikliğin doğruluk "
+"tahminlerini yanlı kılıp kılamayacağını değerlendirin (STARD 2015)."
 
 #: R/reportcat.b.R
 msgid "Missing values: {count}. Percentages above are of {valid} valid cases."
@@ -103629,7 +104145,7 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "Moderate negative evidence"
-msgstr ""
+msgstr "Orta düzeyde negatif kanıt"
 
 #: R/checkdata.b.R
 msgid "Moderate number of categories"
@@ -103661,7 +104177,7 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "Moderate positive evidence"
-msgstr ""
+msgstr "Orta düzeyde pozitif kanıt"
 
 #: R/agreement.b.R
 msgid "Moderate rank correlation"
@@ -103750,15 +104266,15 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "Moderately high sensitivity (>=85%) in this sample"
-msgstr ""
+msgstr "Bu örneklemde orta-yüksek duyarlılık (>=%85)"
 
 #: R/decisioncompare.b.R
 msgid "Moderately high sensitivity and specificity in this sample (both >=85%)"
-msgstr ""
+msgstr "Bu örneklemde orta-yüksek duyarlılık ve özgüllük (her ikisi de >=%85)"
 
 #: R/decisioncompare.b.R
 msgid "Moderately high specificity (>=85%) in this sample"
-msgstr ""
+msgstr "Bu örneklemde orta-yüksek özgüllük (>=%85)"
 
 #: R/checkdata.b.R
 msgid "Moderately skewed"
@@ -104531,7 +105047,7 @@ msgstr "Çok Düzeyli Sonuç Değişkeni Tespit Edildi"
 
 #: R/decisioncompare.b.R
 msgid "Multi-Level Results Combined"
-msgstr ""
+msgstr "Çok Düzeyli Sonuçlar Birleştirildi"
 
 #: pathologyagreement/results/multimethod_summary.title
 msgid "Multi-Method Analysis Summary"
@@ -105836,7 +106352,7 @@ msgstr "yok"
 #: R/checkdata.b.R
 #: R/decisioncompare.b.R
 msgid "N/A"
-msgstr ""
+msgstr "Uygulanamaz"
 
 #: R/lassocox.b.R
 msgid "N/A (single column)"
@@ -106262,7 +106778,7 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "Negative Level Required for Exclusion"
-msgstr ""
+msgstr "Hariç Tutma İçin Negatif Düzey Gerekli"
 
 #: R/diagnosticmeta.b.R
 #: decision/results/ratioTable.columns.title
@@ -106275,10 +106791,6 @@ msgstr "Negatif Olabilirlik Oranı"
 #: R/decision.b.R
 msgid "Negative likelihood ratio"
 msgstr "Negatif olabilirlik oranı"
-
-#: R/decisioncompare.b.R
-msgid "negative likelihood ratio"
-msgstr ""
 
 #: R/sequentialtests.b.R
 msgid "Negative Likelihood Ratio Infinite"
@@ -106362,7 +106874,7 @@ msgstr "Negatif öngörü değeri"
 
 #: R/decisioncompare.b.R
 msgid "negative predictive value"
-msgstr ""
+msgstr "negatif öngörü değeri"
 
 #: R/enhancedROC.b.R
 msgid ""
@@ -106372,9 +106884,21 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid ""
+"Negative Predictive Value = Probability of being healthy when test is "
+"negative, by Bayes' theorem at the supplied prevalence p: Spec x (1 - p) / "
+"((1 - Sens) x p + Spec x (1 - p))"
+msgstr ""
+"Negatif Öngörü Değeri = Test negatif olduğunda sağlıklı olma olasılığı; "
+"girilen p prevalansında Bayes teoremiyle: Özgüllük x (1 - p) / ((1 - "
+"Duyarlılık) x p + Özgüllük x (1 - p))"
+
+#: R/decisioncompare.b.R
+msgid ""
 "Negative Predictive Value = TN/(TN+FN) = Probability of being healthy when "
 "test is negative"
 msgstr ""
+"Negatif Öngörü Değeri = GN/(GN+YN) = Test negatif olduğunda sağlıklı olma "
+"olasılığı"
 
 #: R/decision.b.R
 msgid ""
@@ -107487,6 +108011,9 @@ msgid ""
 "No analyzable cases were found in any observed stratum of '{variable}'. "
 "Check subgroup values and test/reference availability."
 msgstr ""
+"'{variable}' değişkeninin gözlenen hiçbir tabakasında analiz edilebilir olgu "
+"bulunamadı. Alt grup değerlerini ve test/referans sonuçlarının varlığını "
+"kontrol edin."
 
 #: R/diagnosticmeta.b.R
 msgid "No asymmetry detected (p >= 0.05)"
@@ -107587,7 +108114,10 @@ msgid ""
 "No case where every test was negative has a reference result: every pattern "
 "with all tests negative is empty in the combination table, and the Parallel "
 "rule reads sensitivity 100% and specificity 0% by construction."
-msgstr "Tüm testlerin negatif olduğu hiçbir olgunun referans sonucu yok: kombinasyon tablosunda tüm testlerin negatif olduğu her patern boştur ve Paralel kural yapısı gereği %100 duyarlılık ve %0 özgüllük gösterir."
+msgstr ""
+"Tüm testlerin negatif olduğu hiçbir olgunun referans sonucu yok: kombinasyon "
+"tablosunda tüm testlerin negatif olduğu her patern boştur ve Paralel kural "
+"yapısı gereği %100 duyarlılık ve %0 özgüllük gösterir."
 
 #: R/decisioncombine.b.R
 msgid ""
@@ -107628,6 +108158,8 @@ msgid ""
 "No cases remain for {test} after applying the selected positive and negative "
 "levels."
 msgstr ""
+"Seçilen pozitif ve negatif düzeyler uygulandıktan sonra {test} için hiç olgu "
+"kalmadı."
 
 #: R/pathsampling.b.R
 msgid "No cases with >={v1} foci"
@@ -108092,13 +108624,16 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "No Data Provided"
-msgstr ""
+msgstr "Veri Sağlanmadı"
 
 #: R/decisioncompare.b.R
 msgid ""
 "No data provided for analysis. Please ensure your dataset contains data. "
 "Load a dataset with diagnostic test variables and a gold standard reference."
 msgstr ""
+"Analiz için veri sağlanmadı. Lütfen veri setinizin veri içerdiğinden emin "
+"olun. Tanı testi değişkenlerini ve bir altın standart referansı içeren bir "
+"veri seti yükleyin."
 
 #: R/tableone.b.R
 msgid ""
@@ -108171,7 +108706,7 @@ msgstr "Saptanan lezyon yok"
 
 #: R/decisioncompare.b.R
 msgid "No Determinate Cases"
-msgstr ""
+msgstr "Belirli Olgu Yok"
 
 #: R/oddsratio.b.R
 msgid ""
@@ -108208,6 +108743,31 @@ msgid ""
 msgstr ""
 "Düzeye göre değişen bir fark saptanmadı; bu, böyle bir farkın olmadığını "
 "göstermez."
+
+#: R/jjpiestats.b.R
+msgid "No discordant pairs"
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid ""
+"No discordant pairs: both tests were correct on exactly the same cases, so "
+"McNemar's test has no information here; p is set to 1 and no test statistic "
+"is computed."
+msgstr ""
+"Uyumsuz çift yok: iki test de tam olarak aynı olgularda doğruydu; bu nedenle "
+"McNemar testi burada bilgi sağlamaz; p değeri 1 olarak alındı ve test "
+"istatistiği hesaplanmadı."
+
+#: R/decisioncompare.b.R
+msgid ""
+"No discordant pairs: none of the %1$d paired cases was classified correctly "
+"by only one of %2$s and %3$s, so McNemar's test has no information about a "
+"difference in accuracy (its p-value is set to 1 by convention, not computed)."
+msgstr ""
+"Uyumsuz çift yok: %1$d eşleştirilmiş olgunun hiçbiri %2$s ve %3$s "
+"testlerinden yalnızca biri tarafından doğru sınıflandırılmadı; bu nedenle "
+"McNemar testi doğruluktaki bir fark hakkında bilgi sağlamaz (p değeri "
+"hesaplanmamış, geleneksel bir kabulle 1 olarak alınmıştır)."
 
 #: R/decision.b.R
 msgid "No discrimination (Youden's index 0, equivalent AUC 0.50)"
@@ -108598,6 +109158,9 @@ msgid ""
 "the Important Information panel. No statistical comparison was performed, so "
 "these data say nothing about whether the tests differ."
 msgstr ""
+"Bu iki test için McNemar sonucu yok; nedeni Önemli Bilgi panelinde "
+"verilmiştir. İstatistiksel karşılaştırma yapılmadığından bu veriler "
+"testlerin farklı olup olmadığı hakkında hiçbir şey söylemez."
 
 #: R/swimmerplot.b.R
 msgid ""
@@ -108614,7 +109177,7 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "No minimum OPA criterion was requested."
-msgstr ""
+msgstr "Minimum OPA kriteri istenmedi."
 
 #: R/reportcat.b.R
 msgid "No missing values in any of the selected variables."
@@ -108727,6 +109290,8 @@ msgid ""
 "No paired statistical comparison between the tests could be computed for "
 "these data, so none is reported."
 msgstr ""
+"Bu veriler için testler arasında eşleştirilmiş istatistiksel karşılaştırma "
+"hesaplanamadı, bu nedenle hiçbiri raporlanmadı."
 
 #: R/nonparametric.b.R
 msgid ""
@@ -108844,6 +109409,8 @@ msgid ""
 "No positive level supplied for {target}. Please select the level that "
 "represents a positive result in the variable selection panel."
 msgstr ""
+"{target} için pozitif düzey belirtilmedi. Lütfen değişken seçim panelinde "
+"pozitif sonucu temsil eden düzeyi seçin."
 
 #: R/decisioncalculator.b.R
 msgid "No positive test results"
@@ -108946,6 +109513,18 @@ msgstr ""
 #: R/swimmerplot.b.R
 msgid "No recorded response ({n}/{N})"
 msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"No recorded result of {test} ({variable}) is \"{level}\", the level chosen "
+"as positive, so {test} cannot separate disease-present from disease-absent "
+"cases in these data: on its own it reads sensitivity 0% and specificity 100% "
+"by construction."
+msgstr ""
+"{test} ({variable}) için kaydedilmiş sonuçların hiçbiri pozitif olarak "
+"seçilen düzey olan \"{level}\" değildir; bu nedenle {test} bu verilerde "
+"hastalığı olan olguları hastalığı olmayanlardan ayıramaz: tek başına yapısı "
+"gereği %0 duyarlılık ve %100 özgüllük gösterir."
 
 #: R/tableone.b.R
 msgid "no recorded values"
@@ -109141,10 +109720,12 @@ msgid ""
 "No significant difference detected at alpha = 0.05; this does not establish "
 "that the tests perform equally"
 msgstr ""
+"Alfa = 0.05 düzeyinde anlamlı fark saptanmadı; bu, testlerin eşit performans "
+"gösterdiğini kanıtlamaz"
 
 #: R/decisioncompare.b.R
 msgid "No significant difference detected."
-msgstr ""
+msgstr "Anlamlı fark saptanmadı."
 
 #: R/ihcheterogeneity.b.R
 msgid ""
@@ -109163,6 +109744,8 @@ msgid ""
 "No significant overall difference detected among tests (p>=0.05); this does "
 "not establish that the tests perform equally"
 msgstr ""
+"Testler arasında anlamlı genel fark saptanmadı (p>=0.05); bu, testlerin eşit "
+"performans gösterdiğini kanıtlamaz"
 
 #: R/pathagreement.b.R
 msgid "No significant trend"
@@ -109220,6 +109803,10 @@ msgid ""
 "given in the Important Information panel. These data therefore say nothing "
 "about whether the tests differ."
 msgstr ""
+"Bu veriler için testler arasında hiçbir istatistiksel karşılaştırma "
+"hesaplanamadı, bu nedenle McNemar ya da Cochran testi sonucu yok; nedeni "
+"Önemli Bilgi panelinde verilmiştir. Dolayısıyla bu veriler testlerin farklı "
+"olup olmadığı hakkında hiçbir şey söylemez."
 
 #: R/decisioncompare.b.R
 msgid ""
@@ -109228,6 +109815,10 @@ msgid ""
 "produced a result; the reason is given in the Important Information panel. "
 "Report the per-test performance only."
 msgstr ""
+"Bu veriler için testler arasında hiçbir istatistiksel karşılaştırma "
+"hesaplanamadı: ne genel Cochran Q testi ne de herhangi bir ikili McNemar "
+"testi sonuç verdi; nedeni Önemli Bilgi panelinde verilmiştir. Yalnızca test "
+"başına performansı raporlayın."
 
 #: R/decisioncompare.b.R
 msgid ""
@@ -109236,6 +109827,10 @@ msgid ""
 "produced a result. The reason is given in the Important Information panel, "
 "and these data say nothing about whether the tests differ."
 msgstr ""
+"Bu veriler için testler arasında hiçbir istatistiksel karşılaştırma "
+"hesaplanamadı: ne genel Cochran Q testi ne de herhangi bir ikili McNemar "
+"testi sonuç verdi. Nedeni Önemli Bilgi panelinde verilmiştir ve bu veriler "
+"testlerin farklı olup olmadığı hakkında hiçbir şey söylemez."
 
 #: R/decisioncompare.b.R
 msgid ""
@@ -109243,6 +109838,9 @@ msgid ""
 "reason is given in the Important Information panel. Report the per-test "
 "performance only."
 msgstr ""
+"Bu iki test arasında istatistiksel karşılaştırma hesaplanamadı; nedeni "
+"Önemli Bilgi panelinde verilmiştir. Yalnızca test başına performansı "
+"raporlayın."
 
 #: R/nonparametric.b.R
 msgid "No statistically significant %s (p = %s, alpha = %s)"
@@ -109386,6 +109984,15 @@ msgstr "Test 2 Pozitif Düzeyi Yok"
 msgid "No Test 3 Positive Level"
 msgstr "Test 3 Pozitif Düzeyi Yok"
 
+#: R/decisioncompare.b.R
+msgid ""
+"No test could be ranked by balanced accuracy because one reference-standard "
+"class has no cases; the figures below describe %s, the first test selected."
+msgstr ""
+"Bir referans standart sınıfında hiç olgu olmadığı için hiçbir test dengeli "
+"doğruluğa göre sıralanamadı; aşağıdaki değerler ilk seçilen test olan %s "
+"testini tanımlar."
+
 #: R/jjbetweenstats.b.R
 msgid ""
 "No test statistic is displayed: switch on 'Statistical results' to show it "
@@ -109400,7 +110007,7 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "No Test Variables"
-msgstr ""
+msgstr "Test Değişkeni Yok"
 
 #: grafify/options/log_transform/none.title
 msgid "No Transformation"
@@ -111216,6 +111823,14 @@ msgstr ""
 "Tahmin edilemiyor: hiçbir yanıt veren hastada ilk yanıttan sonra "
 "değerlendirme yok"
 
+#: R/decisioncompare.b.R
+msgid "Not estimable: the test was never negative, so LR- is 0/0."
+msgstr "Tahmin edilemiyor: test hiç negatif sonuç vermedi, bu nedenle LR- 0/0'dır."
+
+#: R/decisioncompare.b.R
+msgid "Not estimable: the test was never positive, so LR+ is 0/0."
+msgstr "Tahmin edilemiyor: test hiç pozitif sonuç vermedi, bu nedenle LR+ 0/0'dır."
+
 #: R/agreement.b.R
 msgid ""
 "Not estimable: this rater and the reference rater used only one and the same "
@@ -111288,6 +111903,10 @@ msgstr "Dahil edilmedi"
 msgid "Not informative (post-hoc)"
 msgstr ""
 
+#: R/decisioncompare.b.R
+msgid "Not informative: no discordant pairs (p = 1 by convention)"
+msgstr "Bilgi sağlamaz: uyumsuz çift yok (geleneksel bir kabulle p = 1)"
+
 #: R/lassologistic.b.R
 msgid "Not interpretable"
 msgstr "Yorumlanamaz"
@@ -111336,7 +111955,7 @@ msgstr "yarışan riskler için bildirilmez"
 
 #: R/decisioncompare.b.R
 msgid "Not requested"
-msgstr ""
+msgstr "İstenmedi"
 
 #: R/waterfall.b.R
 msgid "NOT RESPONSE-EVALUABLE"
@@ -111930,11 +112549,11 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "NPV uses the prevalence observed in this sample."
-msgstr ""
+msgstr "NÖD bu örneklemde gözlenen prevalansı kullanır."
 
 #: R/decisioncompare.b.R
 msgid "NPV uses the supplied population prevalence."
-msgstr ""
+msgstr "NÖD girilen popülasyon prevalansını kullanır."
 
 #: R/swimmerplot.b.R
 msgid "NR"
@@ -114504,6 +115123,16 @@ msgstr ""
 "tespit eder, ancak aralık%s önemli ölçüde daha kötü bir performansa izin "
 "vermektedir."
 
+#: R/decisioncompare.b.R
+msgid ""
+"On these paired cases accuracy was %1$.1f%% for %2$s and %3$.1f%% for %4$s; "
+"the difference, %2$s minus %4$s, was %5$s percentage points (95%% CI %6$s to "
+"%7$s; Newcombe's method 10)."
+msgstr ""
+"Bu eşleştirilmiş olgularda doğruluk %2$s için %%%1$.1f, %4$s için %%%3$.1f "
+"idi; %2$s eksi %4$s farkı %5$s yüzde puandı (%%95 GA %6$s ile %7$s arası; "
+"Newcombe 10. yöntem)."
+
 #: waterfall/options/ongoingVar.title
 #: waterfall/ui[0][5].label
 msgid "On-Treatment / Ongoing (optional)"
@@ -114515,7 +115144,11 @@ msgid ""
 "J at or below zero, is allowed for, Youden's J is {youden}: there is no "
 "evidence that the highest-ranked rule separates disease-present from "
 "disease-absent cases better than chance."
-msgstr "Youden J değeri sıfır veya altında olanlar dahil puanlanan {n} kuralın tamamı arasından seçim yapılması hesaba katıldığında Youden J {youden} olur: en yüksek sıralı kuralın hastalığı olan ve olmayan olguları şanstan daha iyi ayırdığına dair bir kanıt yoktur."
+msgstr ""
+"Youden J değeri sıfır veya altında olanlar dahil puanlanan {n} kuralın "
+"tamamı arasından seçim yapılması hesaba katıldığında Youden J {youden} olur: "
+"en yüksek sıralı kuralın hastalığı olan ve olmayan olguları şanstan daha iyi "
+"ayırdığına dair bir kanıt yoktur."
 
 #: R/waterfall.b.R
 msgid "Oncology clinical trials and treatment response studies"
@@ -115331,6 +115964,40 @@ msgstr ""
 "yaklaşımı yaklaşık 10'dan az olguda güvenilir değildir; p-değerini dikkatle "
 "yorumlayın."
 
+#: R/jjpiestats.b.R
+msgid ""
+"Only %d discordant pairs, so McNemar's test has little power here; a "
+"non-significant result does not show that the proportions are the same."
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid ""
+"Only %d discordant pairs, so McNemar's test has little power here; read the "
+"accuracy difference and its paired confidence interval."
+msgstr ""
+"Yalnızca %d uyumsuz çift olduğu için McNemar testinin burada gücü düşüktür; "
+"doğruluk farkını ve eşleştirilmiş güven aralığını değerlendirin."
+
+#: R/jjpiestats.b.R
+msgid ""
+"Only %d discordant pairs: with so few, McNemar's test cannot reach p < 0.05 "
+"whatever their split, so its non-significant result says nothing about "
+"whether the proportions changed."
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid ""
+"Only %d discordant pairs: with so few, McNemar's test cannot reach p < 0.05 "
+"whatever their split, so its non-significant result says nothing about "
+"whether the tests differ; read the accuracy difference and its paired "
+"confidence interval."
+msgstr ""
+"Yalnızca %d uyumsuz çift var: bu kadar az çift iki test arasında nasıl "
+"dağılırsa dağılsın, McNemar testi p < 0.05 düzeyine ulaşamaz; bu nedenle "
+"testin anlamlı olmayan sonucu, testlerin farklı olup olmadığı hakkında "
+"hiçbir şey söylemez; doğruluk farkını ve eşleştirilmiş güven aralığını "
+"değerlendirin."
+
 #: R/survivalcont.b.R
 msgid ""
 "Only %d event(s) detected (n=%d total). Descriptive results are shown, but "
@@ -115382,22 +116049,6 @@ msgstr ""
 "eksik veridir. Bu sayıları bildirmeden önce sonuç sütununun eksiksiz "
 "olduğunu kontrol edin."
 
-#: R/jjpiestats.b.R
-msgid ""
-"Only %d of the %d pairs are discordant. McNemar's chi-square is an "
-"asymptotic test on the discordant pairs alone, so below about 25 of them it "
-"is anti-conservative. The exact binomial test on those pairs gives "
-"<b>%s</b>; quote that value."
-msgstr ""
-
-#: R/jjpiestats.b.R
-msgid ""
-"Only %d of the %d pairs disagree. McNemar's chi-square is an asymptotic test "
-"on the discordant pairs alone and is anti-conservative below about 25 of "
-"them, and the plotting package computes it without a continuity correction. "
-"The exact binomial test on the discordant pairs gives %s. %s"
-msgstr ""
-
 #: R/diagnosticmeta.b.R
 msgid ""
 "Only %d studies are pooled. The bivariate model estimates five parameters "
@@ -115439,6 +116090,23 @@ msgid ""
 "this size. For the overall table, an exact test or a larger sample is needed "
 "before the p-value can be read at face value."
 msgstr ""
+
+#: R/jjpiestats.b.R
+msgid ""
+"Only 1 discordant pair: McNemar's test cannot reach p < 0.05, so its "
+"non-significant result says nothing about whether the proportions changed."
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid ""
+"Only 1 discordant pair: with one, McNemar's test cannot reach p < 0.05, so "
+"its non-significant result says nothing about whether the tests differ; read "
+"the accuracy difference and its paired confidence interval."
+msgstr ""
+"Yalnızca 1 uyumsuz çift var: tek bir çiftle McNemar testi p < 0.05 düzeyine "
+"ulaşamaz; bu nedenle testin anlamlı olmayan sonucu, testlerin farklı olup "
+"olmadığı hakkında hiçbir şey söylemez; doğruluk farkını ve eşleştirilmiş "
+"güven aralığını değerlendirin."
 
 #: R/decisioncurve.b.R
 msgid "Only 1 event of the outcome is present in the analysed cases."
@@ -115550,15 +116218,20 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid ""
-"Only one pairwise comparison was computed, so neither this interval nor the "
-"McNemar p-value is adjusted for multiplicity."
+"Only one pairwise comparison was tested (had discordant pairs), so no "
+"multiplicity adjustment applies and the p-value shown is the unadjusted one."
 msgstr ""
+"Yalnızca bir ikili karşılaştırmada uyumsuz çift vardı ve test edildi; bu "
+"nedenle çoklu karşılaştırma düzeltmesi uygulanmaz ve gösterilen p değeri "
+"düzeltilmemiş değerdir."
 
 #: R/decisioncompare.b.R
 msgid ""
-"Only one pairwise comparison was computed, so no multiplicity adjustment "
-"applies and the p-value shown is the unadjusted one."
+"Only one pairwise comparison was tested by McNemar's test, so neither this "
+"interval nor the McNemar p-value is adjusted for multiplicity."
 msgstr ""
+"McNemar testiyle yalnızca bir ikili karşılaştırma test edildi; bu nedenle ne "
+"bu aralık ne de McNemar p değeri çoklu karşılaştırma için düzeltildi."
 
 #: R/lassocox.b.R
 msgid "Only one predictor column; collinearity not applicable."
@@ -115638,7 +116311,7 @@ msgstr "OPA"
 
 #: R/decisioncompare.b.R
 msgid "OPA = (TP + TN) / analyzed N. {method} 95% confidence intervals."
-msgstr ""
+msgstr "OPA = (GP + GN) / analiz edilen N. {method} %95 güven aralıkları."
 
 #: decisioncompare/results/opaTable.notes.note
 msgid ""
@@ -118502,11 +119175,11 @@ msgstr "Genel"
 
 #: R/decisioncompare.b.R
 msgid "Overall (%d tests)"
-msgstr ""
+msgstr "Genel (%d test)"
 
 #: R/decisioncompare.b.R
 msgid "Overall (%d tests) - ERROR"
-msgstr ""
+msgstr "Genel (%d test) - HATA"
 
 #: finegray/options/cifPlotBy/overall.title
 msgid "Overall (no grouping)"
@@ -120074,15 +120747,17 @@ msgid "Paired Binary Variables (minimum 3)"
 msgstr ""
 
 #: R/decisioncompare.b.R
-msgid ""
-"Paired comparisons used the common determinate rows. Diagnostic correctness "
-"was compared with McNemar's test, using an exact binomial p-value when fewer "
-"than 25 discordant pairs were available."
-msgstr ""
+msgid "Paired Difference Unavailable"
+msgstr "Eşleştirilmiş Fark Kullanılamıyor"
 
 #: R/decisioncompare.b.R
-msgid "Paired Difference Unavailable"
+msgid ""
+"Paired differences in sensitivity, specificity and accuracy are reported "
+"with 95% confidence intervals by Newcombe's method 10 for paired proportions."
 msgstr ""
+"Duyarlılık, özgüllük ve doğruluktaki eşleştirilmiş farklar, eşleştirilmiş "
+"oranlar için Newcombe 10. yöntemle hesaplanan %95 güven aralıklarıyla "
+"raporlanmıştır."
 
 #: decisioncompare/results/mcnemarTable.columns.title
 #: decisioncompare/results/diffTable.columns.title
@@ -120145,6 +120820,10 @@ msgstr ""
 #: nonparametric/options/paired_variable.title
 #: nonparametric/ui[0][3].label
 msgid "Paired/Repeated Measures Variable"
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid "Pairing not used by the Bayesian analysis"
 msgstr ""
 
 #: effectsize/options/pairing_variable.title
@@ -120261,7 +120940,7 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "Pairwise Comparison Not Computed"
-msgstr ""
+msgstr "İkili Karşılaştırma Hesaplanmadı"
 
 #: bayesiannetworkma/options/pairwise_probabilities.title
 msgid "Pairwise Comparison Probabilities"
@@ -120458,6 +121137,15 @@ msgstr ""
 #: R/survival.b.R
 msgid "Pairwise log-rank comparisons"
 msgstr "İkili log-rank karşılaştırmaları"
+
+#: R/decisioncompare.b.R
+msgid ""
+"Pairwise McNemar p-values were adjusted for multiple comparisons with the "
+"Holm-Bonferroni method; the confidence intervals for the paired differences "
+"were not."
+msgstr ""
+"İkili McNemar p değerleri Holm-Bonferroni yöntemiyle çoklu karşılaştırma "
+"için düzeltildi; eşleştirilmiş farkların güven aralıkları düzeltilmedi."
 
 #: concordanceindex/results/pairwiseTests.title
 msgid "Pairwise Model Comparison Tests"
@@ -125786,6 +126474,9 @@ msgid ""
 "Please specify positive levels for: {slots}. Use the level selector in the "
 "variable panel to choose which level represents a positive test result."
 msgstr ""
+"Lütfen şu alanlar için pozitif düzeyleri belirtin: {slots}. Hangi düzeyin "
+"pozitif test sonucunu temsil ettiğini seçmek için değişken panelindeki düzey "
+"seçiciyi kullanın."
 
 #: R/oddsratio.b.R
 msgid ""
@@ -127880,6 +128571,8 @@ msgid ""
 "Positive and negative levels for {variable} are both \"{chosen}\". Choose "
 "two different levels."
 msgstr ""
+"{variable} için pozitif ve negatif düzeylerin ikisi de \"{chosen}\". İki "
+"farklı düzey seçin."
 
 #: R/decisioncalculator.b.R
 msgid ""
@@ -128010,10 +128703,6 @@ msgstr "Pozitif Olabilirlik Oranı"
 #: R/decision.b.R
 msgid "Positive likelihood ratio"
 msgstr "Pozitif olabilirlik oranı"
-
-#: R/decisioncompare.b.R
-msgid "positive likelihood ratio"
-msgstr ""
 
 #: R/decision.b.R
 msgid "Positive likelihood ratio unavailable due to data limitations"
@@ -128146,7 +128835,7 @@ msgstr "Pozitif öngörü değeri"
 
 #: R/decisioncompare.b.R
 msgid "positive predictive value"
-msgstr ""
+msgstr "pozitif öngörü değeri"
 
 #: R/enhancedROC.b.R
 msgid ""
@@ -128156,9 +128845,21 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid ""
+"Positive Predictive Value = Probability of disease when test is positive, by "
+"Bayes' theorem at the supplied prevalence p: Sens x p / (Sens x p + (1 - "
+"Spec) x (1 - p))"
+msgstr ""
+"Pozitif Öngörü Değeri = Test pozitif olduğunda hastalık olasılığı; girilen p "
+"prevalansında Bayes teoremiyle: Duyarlılık x p / (Duyarlılık x p + (1 - "
+"Özgüllük) x (1 - p))"
+
+#: R/decisioncompare.b.R
+msgid ""
 "Positive Predictive Value = TP/(TP+FP) = Probability of disease when test is "
 "positive"
 msgstr ""
+"Pozitif Öngörü Değeri = GP/(GP+YP) = Test pozitif olduğunda hastalık "
+"olasılığı"
 
 #: R/decision.b.R
 msgid ""
@@ -128446,9 +129147,22 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid ""
-"Post-hoc pairwise comparisons with Holm-Bonferroni correction were conducted "
-"to identify specific differences between tests."
+"Post-hoc pairwise comparisons used the asymptotic McNemar test without "
+"continuity correction, with Holm-Bonferroni correction, to identify specific "
+"differences between tests."
 msgstr ""
+"Testler arasındaki belirli farkları belirlemek için post-hoc ikili "
+"karşılaştırmalarda Holm-Bonferroni düzeltmesiyle birlikte süreklilik "
+"düzeltmesiz asimptotik McNemar testi kullanıldı."
+
+#: R/decisioncompare.b.R
+msgid ""
+"Post-hoc pairwise comparisons used the McNemar mid-p test with "
+"Holm-Bonferroni correction to identify specific differences between tests."
+msgstr ""
+"Testler arasındaki belirli farkları belirlemek için post-hoc ikili "
+"karşılaştırmalarda Holm-Bonferroni düzeltmesiyle birlikte McNemar mid-p "
+"testi kullanıldı."
 
 #: psychopdaROC/options/powerAnalysisType/post_hoc.title
 msgid "Post-hoc power (observed data)"
@@ -129237,6 +129951,8 @@ msgid ""
 "PPV and NPV were computed at the population prevalence you supplied; overall "
 "accuracy reflects the prevalence of this sample."
 msgstr ""
+"PÖD ve NÖD girdiğiniz popülasyon prevalansında hesaplandı; genel doğruluk bu "
+"örneklemin prevalansını yansıtır."
 
 #: prauc/results/performanceAtKey.columns.title
 msgid "PPV Interpretation"
@@ -129256,21 +129972,23 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "PPV uses the prevalence observed in this sample."
-msgstr ""
+msgstr "PÖD bu örneklemde gözlenen prevalansı kullanır."
 
 #: R/decisioncompare.b.R
 msgid "PPV uses the supplied population prevalence."
-msgstr ""
+msgstr "PÖD girilen popülasyon prevalansını kullanır."
 
 #: R/decisioncompare.b.R
 msgid "PPV, NPV and overall accuracy all depend on disease prevalence."
-msgstr ""
+msgstr "PÖD, NÖD ve genel doğruluğun hepsi hastalık prevalansına bağlıdır."
 
 #: R/decisioncompare.b.R
 msgid ""
 "PPV/NPV will be calculated using the supplied population prevalence "
 "(pp=TRUE). Confidence intervals are unavailable in this mode."
 msgstr ""
+"PÖD/NÖD girilen popülasyon prevalansı kullanılarak hesaplanacak (pp=TRUE). "
+"Bu modda güven aralıkları kullanılamaz."
 
 #: recist/results/stratifiedTable.columns.title
 msgid "PR (%)"
@@ -130950,7 +131668,7 @@ msgstr "Prevalans"
 
 #: R/decisioncompare.b.R
 msgid "prevalence"
-msgstr ""
+msgstr "prevalans"
 
 #: clinicalvalidationinteractive/results/prevalenceAnalysis.columns.title
 #: epidemiosurvival/results/population_attributable_risk.columns.title
@@ -131075,7 +131793,7 @@ msgstr "Yaygınlık Ayarları"
 
 #: R/decisioncompare.b.R
 msgid "Prevalence Source"
-msgstr ""
+msgstr "Prevalans Kaynağı"
 
 #: R/nogoldstandard.b.R
 msgid ""
@@ -131532,12 +132250,18 @@ msgid ""
 "disable either the \"Prior Probability\" or the \"95% CI\" option. Use CI "
 "for sample-based estimates or custom prevalence for population-based PPV/NPV."
 msgstr ""
+"Ön test olasılığı ve güven aralıkları aynı anda etkinleştirilemez. Lütfen "
+"\"Ön Test Olasılığı\" ya da \"%95 GA\" seçeneğinden birini kapatın. "
+"Örnekleme dayalı tahminler için GA'yı, popülasyona dayalı PÖD/NÖD için özel "
+"prevalansı kullanın."
 
 #: R/decisioncompare.b.R
 msgid ""
 "Prior probability must be between 0 and 1 (exclusive). Current value: "
 "{value}. Enter a decimal value like 0.15 for 15% prevalence."
 msgstr ""
+"Ön test olasılığı 0 ile 1 arasında olmalıdır (sınırlar hariç). Geçerli "
+"değer: {value}. %15 prevalans için 0.15 gibi ondalık bir değer girin."
 
 #: spikeslabpriors/options/prior_inclusion_prob.description
 msgid "Prior probability that each variable is included"
@@ -132010,12 +132734,17 @@ msgid ""
 "Probability that a negative test result truly indicates absence of disease. "
 "Also depends on prevalence."
 msgstr ""
+"Negatif bir test sonucunun gerçekten hastalık yokluğunu gösterme olasılığı. "
+"Bu da prevalansa bağlıdır."
 
 #: R/decisioncompare.b.R
 msgid ""
 "Probability that a positive test result truly indicates disease. Depends on "
 "disease prevalence - higher in populations with higher disease rates."
 msgstr ""
+"Pozitif bir test sonucunun gerçekten hastalığı gösterme olasılığı. Hastalık "
+"prevalansına bağlıdır - hastalık oranı daha yüksek popülasyonlarda daha "
+"yüksektir."
 
 #: clinicalnomograms/options/risk_thresholds.description.ui
 msgid "Probability thresholds for risk groups (comma-separated)"
@@ -132588,6 +133317,9 @@ msgid ""
 "sensitivity means few false negatives. Important when missing disease is "
 "costly."
 msgstr ""
+"Doğru tanımlanan hasta olguların oranı (Gerçek Pozitif Oranı). Yüksek "
+"duyarlılık az yanlış negatif anlamına gelir. Hastalığı atlamanın maliyetli "
+"olduğu durumlarda önemlidir."
 
 #: R/decision.b.R
 msgid ""
@@ -132631,6 +133363,9 @@ msgid ""
 "High specificity means few false positives. Important when false alarms are "
 "problematic."
 msgstr ""
+"Doğru tanımlanan hasta olmayan olguların oranı (Gerçek Negatif Oranı). "
+"Yüksek özgüllük az yanlış pozitif anlamına gelir. Yanlış alarmların sorun "
+"yarattığı durumlarda önemlidir."
 
 #: R/cotest.b.R
 msgid "Proportion of non-diseased patients correctly identified by %s"
@@ -133996,6 +134731,9 @@ msgid ""
 "sample only. They are not clinical guides, validated decision rules, or "
 "recommendations for patient care."
 msgstr ""
+"Nitel performans etiketleri yalnızca gözlenen örneklemin açıklayıcı "
+"özetleridir. Klinik kılavuz, doğrulanmış karar kuralı ya da hasta bakımı "
+"için öneri değildir."
 
 #: ihcbasic/results/silhouetteTable.columns.title
 #: ihccluster/results/spatialCompartmentSummary.columns.title
@@ -137477,7 +138215,7 @@ msgstr "Referans Sonucu"
 
 #: R/decisioncompare.b.R
 msgid "Reference Reused as a Test"
-msgstr ""
+msgstr "Referans Bir Test Olarak Yeniden Kullanıldı"
 
 #: R/nogoldstandard.b.R
 msgid "Reference rule splits the sample very unevenly"
@@ -138912,7 +139650,7 @@ msgstr ""
 #: R/decisioncompare.b.R
 #: clinicalheatmap/results/reportSentences.title
 msgid "Report Sentences"
-msgstr ""
+msgstr "Rapor Cümleleri"
 
 #: chisqposttest/options/copyReadySentences.title
 #: venn/options/reportSentences.title
@@ -144348,7 +145086,7 @@ msgstr "Kapsam sınırlaması"
 
 #: R/decisioncompare.b.R
 msgid "Scope of these estimates:"
-msgstr ""
+msgstr "Bu tahminlerin kapsamı:"
 
 #: R/nogoldstandard.b.R
 msgid "Scope warning:"
@@ -144728,7 +145466,7 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "Screening Tests (Rule-Out):"
-msgstr ""
+msgstr "Tarama Testleri (Dışlama):"
 
 #: decisionpanel/ui[7][1][0].label
 msgid "Screening Tests: Prioritize high sensitivity (minimize missed cases)"
@@ -146694,7 +147432,7 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "Sensitivity = TP/(TP+FN) = Probability of positive test among diseased"
-msgstr ""
+msgstr "Duyarlılık = GP/(GP+YN) = Hastalar arasında pozitif test olasılığı"
 
 #: R/decision.b.R
 msgid ""
@@ -146897,6 +147635,10 @@ msgid ""
 "blank rather than as a low value. The 2x2 counts behind this row are in the "
 "Recoded Data table for this test"
 msgstr ""
+"Duyarlılık ve/veya özgüllük burada hesaplanamadı: bir altın standart "
+"sınıfında hiç olgu yok, bu nedenle bu oranın paydası boştur ve düşük bir "
+"değer olarak değil, boş olarak gösterilir. Bu satırın dayandığı 2x2 sayılar "
+"bu testin Yeniden Kodlanmış Veriler tablosundadır"
 
 #: enhancedROC/results/results/diagnosticPerformance.columns.title
 msgid "Sensitivity CI"
@@ -147040,7 +147782,7 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "Sensitivity was %1$s%2$s and specificity was %3$s%4$s."
-msgstr ""
+msgstr "Duyarlılık %1$s%2$s ve özgüllük %3$s%4$s idi."
 
 #: betabinomialdiagnostic/results/correlationResults.title
 #: hierarchicalbayes/options/correlation_model.title
@@ -152001,7 +152743,7 @@ msgstr "Anlamlı fark (p < 0.05)"
 
 #: R/decisioncompare.b.R
 msgid "Significant difference (p<0.01)"
-msgstr ""
+msgstr "Anlamlı fark (p<0.01)"
 
 #: R/ihcheterogeneity.b.R
 msgid "Significant difference in per-case mean biomarker levels across compartments"
@@ -152047,7 +152789,7 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "Significant overall difference among tests (p<0.01)"
-msgstr ""
+msgstr "Testler arasında anlamlı genel fark (p<0.01)"
 
 #: jjdotplotstats/options/pairwisedisplay/significant.title
 msgid "Significant pairs only"
@@ -152964,14 +153706,20 @@ msgid ""
 "is sparse. Interpret the interval widths and class-specific denominators; no "
 "universal sample-size cutoff guarantees adequate precision."
 msgstr ""
+"Gözlenen referans standart örneklemi küçük (n={n}). Özellikle altın standart "
+"sınıflarından biri seyrek olduğunda güven aralıkları geniş ve tahminler "
+"kararsız olabilir. Aralık genişliklerini ve sınıfa özgü paydaları "
+"yorumlayın; hiçbir evrensel örneklem büyüklüğü eşiği yeterli kesinliği "
+"garanti etmez."
 
 #: R/decisioncompare.b.R
 msgid ""
-"Small paired sample/discordant counts; CI may be unstable (n={n}, discordant "
-"counts: {counts})."
+"Small paired sample or sparse cells; CI may be unstable (n={n}; paired "
+"counts both, first only, second only, neither: {counts})."
 msgstr ""
-"Küçük eşleştirilmiş örneklem/uyumsuz sayılar; GA kararsız olabilir (n={n}, "
-"uyumsuz sayılar: {counts})."
+"Küçük eşleştirilmiş örneklem ya da seyrek hücreler; GA kararsız olabilir "
+"(n={n}; eşleştirilmiş sayılar (ikisi de, yalnızca birinci, yalnızca ikinci, "
+"hiçbiri): {counts})."
 
 #: eurostatmap/options/geo_level/nuts3.title
 msgid "Small Regions (NUTS 3)"
@@ -154111,7 +154859,7 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "Sparse Reference-Standard Class"
-msgstr ""
+msgstr "Seyrek Referans Standart Sınıfı"
 
 #: R/survivalcont.b.R
 msgid ""
@@ -154850,7 +155598,7 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "Specificity = TN/(TN+FP) = Probability of negative test among healthy"
-msgstr ""
+msgstr "Özgüllük = GN/(GN+YP) = Sağlıklılar arasında negatif test olasılığı"
 
 #: R/decision.b.R
 msgid ""
@@ -157076,6 +157824,9 @@ msgid ""
 "statistically significant difference in test performance (detailed results "
 "in the comparison tables)."
 msgstr ""
+"İstatistiksel karşılaştırma (McNemar/Cochran testi) test performansında "
+"istatistiksel olarak anlamlı bir fark ortaya koymadı (ayrıntılı sonuçlar "
+"karşılaştırma tablolarındadır)."
 
 #: R/decisioncompare.b.R
 msgid ""
@@ -157083,6 +157834,9 @@ msgid ""
 "significant difference in test performance (detailed results in the "
 "comparison tables)."
 msgstr ""
+"İstatistiksel karşılaştırma (McNemar/Cochran testi) test performansında "
+"istatistiksel olarak anlamlı bir fark ortaya koydu (ayrıntılı sonuçlar "
+"karşılaştırma tablolarındadır)."
 
 #: haralicktexture/results/groupcomparisontable.description
 msgid "Statistical comparison across groups"
@@ -157122,6 +157876,16 @@ msgstr "İstatistiksel Karşılaştırma Özeti"
 msgid "Statistical Comparison Table"
 msgstr ""
 
+#: R/decisioncompare.b.R
+msgid ""
+"Statistical comparison was not informative here: none of the pairs of tests "
+"that could be compared had discordant pairs, so McNemar's test produced no "
+"test result (detailed results in the comparison tables)."
+msgstr ""
+"İstatistiksel karşılaştırma burada bilgi sağlamadı: karşılaştırılabilen test "
+"çiftlerinin hiçbirinde uyumsuz çift yoktu; bu nedenle McNemar testi bir test "
+"sonucu üretmedi (ayrıntılı sonuçlar karşılaştırma tablolarındadır)."
+
 #: jjwithinstats/options/ggpubrAddStats.title
 msgid "Statistical comparisons"
 msgstr ""
@@ -157139,6 +157903,8 @@ msgid ""
 "Statistical comparisons between tests are reported in the comparison tables "
 "above."
 msgstr ""
+"Testler arasındaki istatistiksel karşılaştırmalar yukarıdaki karşılaştırma "
+"tablolarında raporlanmıştır."
 
 #: enhancedROC/results/results/statisticalSummary.columns.title
 msgid "Statistical Conclusion"
@@ -157911,7 +158677,7 @@ msgstr "\\u{3B1} = %g düzeyinde istatistiksel olarak anlamlı"
 
 #: R/decisioncompare.b.R
 msgid "Statistically significant difference (p<0.05)"
-msgstr ""
+msgstr "İstatistiksel olarak anlamlı fark (p<0.05)"
 
 #: R/waterfall.b.R
 msgid "Statistically significant difference in disease control rates between groups"
@@ -157941,7 +158707,7 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "Statistically significant overall difference among tests (p<0.05)"
-msgstr ""
+msgstr "Testler arasında istatistiksel olarak anlamlı genel fark (p<0.05)"
 
 #: contTables/ui[1][0].label
 #: crosstablepivot/options/statistics.title
@@ -158500,7 +159266,7 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "Stratification Empty"
-msgstr ""
+msgstr "Tabakalandırma Boş"
 
 #: R/multisurvival.b.R
 msgid ""
@@ -159126,7 +159892,7 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "Strong negative evidence"
-msgstr ""
+msgstr "Güçlü negatif kanıt"
 
 #: R/jjcorrmat.b.R
 msgid ""
@@ -159140,7 +159906,7 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "Strong positive evidence"
-msgstr ""
+msgstr "Güçlü pozitif kanıt"
 
 #: R/decisioncalculator.b.R
 #: R/nogoldstandard.b.R
@@ -163663,24 +164429,12 @@ msgid "Test {test} alone"
 msgstr "Test {test} tek başına"
 
 #: R/decisioncombine.b.R
-msgid ""
-"Test {test} cannot be summarized because no case has both the test and "
-"reference-standard result."
-msgstr ""
-"Test {test} özetlenemiyor çünkü hiçbir olguda hem test hem de referans "
-"standart sonucu bulunmuyor."
-
-#: R/decisioncombine.b.R
-msgid "Test {test} Has No Complete Cases"
-msgstr "Test {test} Eksiksiz Olguya Sahip Değil"
-
-#: R/decisioncombine.b.R
 msgid "Test {test} Pairwise Denominator"
 msgstr "Test {test} İkili Paydası"
 
 #: R/decisioncompare.b.R
 msgid "Test %d"
-msgstr ""
+msgstr "Test %d"
 
 #: R/cotest.b.R
 #: R/decisioncombine.b.R
@@ -165358,6 +166112,18 @@ msgstr ""
 "gözlem tek tek olağandışı olduğu için değil, baştaki basamakları nedeniyle "
 "burada görünür."
 
+#: R/decisioncompare.b.R
+msgid ""
+"The 95 percent confidence interval for the accuracy difference comes from "
+"Newcombe's method 10, a different procedure from McNemar's test, and it "
+"excludes 0, the value of no difference; the two procedures disagree on these "
+"data, so report both rather than either alone."
+msgstr ""
+"Doğruluk farkının yüzde 95 güven aralığı, McNemar testinden farklı bir "
+"prosedür olan Newcombe 10. yöntemle hesaplanır ve fark olmamasına karşılık "
+"gelen 0 değerini dışarıda bırakır; iki prosedür bu verilerde uyuşmamaktadır, "
+"bu nedenle yalnızca birini değil ikisini birlikte raporlayın."
+
 #: R/decisioncombine.b.R
 msgid ""
 "The 95% confidence interval beside Youden's J is the Agresti-Caffo interval "
@@ -165556,7 +166322,9 @@ msgstr ""
 msgid ""
 "The analysis stopped before the combination table was computed; the error "
 "above says why."
-msgstr "Analiz, kombinasyon tablosu hesaplanmadan önce durdu; nedeni yukarıdaki hatada belirtilmiştir."
+msgstr ""
+"Analiz, kombinasyon tablosu hesaplanmadan önce durdu; nedeni yukarıdaki "
+"hatada belirtilmiştir."
 
 #: R/survivalcont.b.R
 msgid "the analysis stopped with an error: %s"
@@ -165667,6 +166435,26 @@ msgstr ""
 msgid "The assumed HR is below the NI margin; calculated power is {power}%."
 msgstr "Varsayılan HR, aşağı olmama sınırının altındadır; hesaplanan güç %{power}."
 
+#: R/decisioncompare.b.R
+msgid ""
+"The asymptotic McNemar test without continuity correction comparing %1$s and "
+"%2$s did not detect a significant difference in diagnostic accuracy (n = "
+"%3$d paired cases; χ²(%4$d) = %5$.2f, p %6$s)."
+msgstr ""
+"Süreklilik düzeltmesiz asimptotik McNemar testi, %1$s ile %2$s testlerini "
+"karşılaştırırken tanısal doğrulukta anlamlı bir fark saptamadı (n = %3$d "
+"eşleştirilmiş olgu; χ²(%4$d) = %5$.2f, p %6$s)."
+
+#: R/decisioncompare.b.R
+msgid ""
+"The asymptotic McNemar test without continuity correction comparing %1$s and "
+"%2$s showed a significant difference in diagnostic accuracy (n = %3$d paired "
+"cases; χ²(%4$d) = %5$.2f, p %6$s)."
+msgstr ""
+"Süreklilik düzeltmesiz asimptotik McNemar testi, %1$s ile %2$s testlerini "
+"karşılaştırırken tanısal doğrulukta anlamlı bir fark gösterdi (n = %3$d "
+"eşleştirilmiş olgu; χ²(%4$d) = %5$.2f, p %6$s)."
+
 #: R/stagemigration.b.R
 msgid "The AUC at {t} months could not be estimated."
 msgstr ""
@@ -165738,6 +166526,14 @@ msgstr ""
 msgid ""
 "the Bayes factor message is switched on, which ggstatsplot renders alongside "
 "its own subtitle"
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid ""
+"The Bayesian contingency analysis has no paired version: the chart shows a "
+"Bayes factor for independence of the two variables, not a test of change "
+"between the paired measurements. Choose a type of statistic other than Bayes "
+"for McNemar's test."
 msgstr ""
 
 #: R/agreement.b.R
@@ -165994,10 +166790,6 @@ msgid ""
 msgstr ""
 
 #: R/jjpiestats.b.R
-msgid "The chart subtitle reports that exact value."
-msgstr ""
-
-#: R/jjpiestats.b.R
 msgid ""
 "The chart subtitle still reports an uncorrected Pearson chi-square - no "
 "statistic option changes that, as the plotting package offers no exact test. "
@@ -166169,14 +166961,20 @@ msgid ""
 "The combination table therefore contains only cases where the tests agreed: "
 "every pattern in which they disagree is empty, and every row describes the "
 "tests in those cases only."
-msgstr "Bu nedenle kombinasyon tablosu yalnızca testlerin uyuştuğu olguları içerir: uyuşmadıkları her patern boştur ve her satır testleri yalnızca bu olgularda tanımlar."
+msgstr ""
+"Bu nedenle kombinasyon tablosu yalnızca testlerin uyuştuğu olguları içerir: "
+"uyuşmadıkları her patern boştur ve her satır testleri yalnızca bu olgularda "
+"tanımlar."
 
 #: R/decisioncombine.b.R
 msgid ""
 "The combination table therefore contains only cases where the tests "
 "disagreed: every pattern in which they agree is empty, and every row "
 "describes the tests in those cases only."
-msgstr "Bu nedenle kombinasyon tablosu yalnızca testlerin uyuşmadığı olguları içerir: uyuştukları her patern boştur ve her satır testleri yalnızca bu olgularda tanımlar."
+msgstr ""
+"Bu nedenle kombinasyon tablosu yalnızca testlerin uyuşmadığı olguları "
+"içerir: uyuştukları her patern boştur ve her satır testleri yalnızca bu "
+"olgularda tanımlar."
 
 #: R/sequentialtests.b.R
 msgid ""
@@ -166800,7 +167598,7 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "The dataset contains no rows to analyze."
-msgstr ""
+msgstr "Veri setinde analiz edilecek satır yok."
 
 #: R/ihcheterogeneity.b.R
 msgid ""
@@ -167274,6 +168072,8 @@ msgid ""
 "The epiR package is required for confidence intervals. Install it with "
 "install.packages(\"epiR\"), or disable the \"95% CI\" option."
 msgstr ""
+"Güven aralıkları için epiR paketi gereklidir. install.packages(\"epiR\") ile "
+"yükleyin ya da \"%95 GA\" seçeneğini kapatın."
 
 #: R/decision.b.R
 msgid ""
@@ -167766,6 +168566,9 @@ msgid ""
 "is given in the Important Information panel. Report the pairwise comparisons "
 "and their confidence intervals instead."
 msgstr ""
+"Bu veriler için genel Cochran Q testi hesaplanamadı; nedeni Önemli Bilgi "
+"panelinde verilmiştir. Bunun yerine ikili karşılaştırmaları ve güven "
+"aralıklarını raporlayın."
 
 #: R/decisioncompare.b.R
 msgid ""
@@ -167773,6 +168576,9 @@ msgid ""
 "is given in the Important Information panel. The pairwise comparisons and "
 "their confidence intervals in the tables above are unaffected."
 msgstr ""
+"Bu veriler için genel Cochran Q testi hesaplanamadı; nedeni Önemli Bilgi "
+"panelinde verilmiştir. Yukarıdaki tablolardaki ikili karşılaştırmalar ve "
+"güven aralıkları bundan etkilenmez."
 
 #: R/psychopdaROC.b.R
 msgid ""
@@ -167807,6 +168613,8 @@ msgid ""
 "The gold-standard variable cannot also occupy a test slot. Select a "
 "different variable for each test."
 msgstr ""
+"Altın standart değişkeni aynı zamanda bir test alanında yer alamaz. Her test "
+"için farklı bir değişken seçin."
 
 #: R/agreement.b.R
 msgid ""
@@ -168047,8 +168855,8 @@ msgstr ""
 #: R/decisioncombine.b.R
 msgid ""
 "The highest Youden's J is {youden}, for {rule} (Agresti-Caffo 95% CI {lower} "
-"to {upper}; equivalent AUC {auc}). The 95% confidence interval of every rule "
-"scored here includes 0, so this sample does not show that any of them "
+"to {upper}; equivalent AUC {auc}). No rule scored here has a 95% confidence "
+"interval wholly above 0, so this sample does not show that any of them "
 "separates disease-present from disease-absent cases better than chance; at "
 "least one interval also reaches 0.40, the equivalent of an area under the "
 "ROC curve of 0.70 (Hosmer, Lemeshow and Sturdivant 2013), so acceptable "
@@ -168057,15 +168865,15 @@ msgid ""
 "the sample gives the precision you need."
 msgstr ""
 "En yüksek Youden J değeri: {youden}, {rule} için (Agresti-Caffo %95 GA "
-"{lower} ila {upper}; eşdeğer AUC {auc}). Burada puanlanan her kuralın %95 "
-"güven aralığı 0'ı içerir; dolayısıyla bu örneklem, bu kurallardan herhangi "
-"birinin hastalığı olan olguları hastalığı olmayanlardan şanstan daha iyi "
-"ayırdığını göstermez. En az bir aralık ayrıca ROC eğrisi altındaki 0.70'lik "
-"alana karşılık gelen 0.40'a ulaşır (Hosmer, Lemeshow ve Sturdivant 2013), bu "
-"nedenle kabul edilebilir bir ayırt etme de dışlanamaz. Aralıklar kurallar "
-"arasından seçim yapılmasına göre düzeltilmemiştir. Pozitif olarak seçilen "
-"düzeyleri ve örneklemin ihtiyaç duyduğunuz kesinliği sağlayıp sağlamadığını "
-"kontrol edin."
+"{lower} ila {upper}; eşdeğer AUC {auc}). Burada puanlanan hiçbir kuralın %95 "
+"güven aralığı tamamen 0'ın üzerinde değildir; dolayısıyla bu örneklem, bu "
+"kurallardan herhangi birinin hastalığı olan olguları hastalığı olmayanlardan "
+"şanstan daha iyi ayırdığını göstermez. En az bir aralık ayrıca ROC eğrisi "
+"altındaki 0.70'lik alana karşılık gelen 0.40'a ulaşır (Hosmer, Lemeshow ve "
+"Sturdivant 2013), bu nedenle kabul edilebilir bir ayırt etme de dışlanamaz. "
+"Aralıklar kurallar arasından seçim yapılmasına göre düzeltilmemiştir. "
+"Pozitif olarak seçilen düzeyleri ve örneklemin ihtiyaç duyduğunuz kesinliği "
+"sağlayıp sağlamadığını kontrol edin."
 
 #: R/lassocox.b.R
 msgid ""
@@ -168609,7 +169417,7 @@ msgstr ""
 msgid ""
 "The likelihood ratio for positive results was %1$s and for negative results "
 "was %2$s."
-msgstr ""
+msgstr "Pozitif sonuçlar için olabilirlik oranı %1$s, negatif sonuçlar için %2$s idi."
 
 #: R/agreement.b.R
 msgid ""
@@ -168643,6 +169451,14 @@ msgstr ""
 "tek bölmeli maksimum seçilmiş sıra testi çoklu kesim noktası işlemini "
 "düzeltmez. Klinik kullanımdan önce her kesim noktasını bağımsız verilerde "
 "doğrulayın."
+
+#: R/decisioncompare.b.R
+msgid ""
+"The logit interval is undefined at 0% or 100% agreement, so this row shows "
+"Clopper-Pearson (exact) limits."
+msgstr ""
+"Logit aralığı %0 ya da %100 uyumda tanımsızdır; bu nedenle bu satır "
+"Clopper-Pearson (kesin) sınırlarını gösterir."
 
 #: R/lollipop.b.R
 msgid ""
@@ -168768,6 +169584,32 @@ msgid ""
 "The McNemar chi-square reported by the plotting package is computed without "
 "a continuity correction, so it will not match the base R default."
 msgstr ""
+
+#: R/decisioncompare.b.R
+msgid ""
+"The McNemar mid-p test comparing %1$s and %2$s did not detect a significant "
+"difference in diagnostic accuracy (n = %3$d paired cases; p %4$s)."
+msgstr ""
+"%1$s ile %2$s testlerini karşılaştıran McNemar mid-p testi, tanısal "
+"doğrulukta anlamlı bir fark saptamadı (n = %3$d eşleştirilmiş olgu; p %4$s)."
+
+#: R/decisioncompare.b.R
+msgid ""
+"The McNemar mid-p test comparing %1$s and %2$s showed a significant "
+"difference in diagnostic accuracy (n = %3$d paired cases; p %4$s)."
+msgstr ""
+"%1$s ile %2$s testlerini karşılaştıran McNemar mid-p testi, tanısal "
+"doğrulukta anlamlı bir fark gösterdi (n = %3$d eşleştirilmiş olgu; p %4$s)."
+
+#: R/decisioncompare.b.R
+msgid ""
+"The McNemar mid-p test is computed directly from the binomial distribution "
+"of the discordant pairs, so it has no chi-squared statistic or degrees of "
+"freedom; those cells are empty in its rows."
+msgstr ""
+"McNemar mid-p testi doğrudan uyumsuz çiftlerin binom dağılımından "
+"hesaplanır; bu nedenle ne ki-kare istatistiği ne de serbestlik derecesi "
+"vardır ve bu testin satırlarında söz konusu hücreler boştur."
 
 #: R/agreement.b.R
 msgid "The mean is the plain arithmetic mean of the pairwise coefficients."
@@ -169567,11 +170409,16 @@ msgstr ""
 #: R/decisioncompare.b.R
 msgid ""
 "The p-values in this table are Holm-Bonferroni adjusted across the "
-"{comparisons} pairwise comparisons that could be computed. The confidence "
-"intervals in the Differences with 95% Confidence Intervals table are not "
-"adjusted for multiplicity, so an adjusted p above 0.05 can sit beside an "
-"interval that excludes zero."
+"{comparisons} pairwise comparisons that were tested (those with discordant "
+"pairs). The confidence intervals in the Differences with 95% Confidence "
+"Intervals table are not adjusted for multiplicity, so an adjusted p above "
+"0.05 can sit beside an interval that excludes zero."
 msgstr ""
+"Bu tablodaki p değerleri, test edilen (uyumsuz çifti olan) {comparisons} "
+"ikili karşılaştırma üzerinden Holm-Bonferroni ile düzeltilmiştir. %95 Güven "
+"Aralığı ile Farklar tablosundaki güven aralıkları çoklu karşılaştırma için "
+"düzeltilmemiştir; bu nedenle 0.05'in üzerindeki düzeltilmiş bir p değeri, "
+"sıfırı içermeyen bir aralığın yanında yer alabilir."
 
 #: R/jjwithinstats.b.R
 msgid ""
@@ -169768,6 +170615,8 @@ msgid ""
 "The positive level \"{chosen}\" was not found in {target}. Check spelling "
 "and capitalisation. Available levels: {available}."
 msgstr ""
+"Pozitif düzey \"{chosen}\", {target} içinde bulunamadı. Yazımı ve "
+"büyük/küçük harf kullanımını kontrol edin. Mevcut düzeyler: {available}."
 
 #: R/decisioncalculator.b.R
 msgid ""
@@ -170247,13 +171096,18 @@ msgid ""
 "The reference standard was recorded for {o0} of {n0} cases where every test "
 "was negative ({p0}%) and {o1} of {n1} where at least one test was positive "
 "({p1}%)."
-msgstr "Referans standart, tüm testlerin negatif olduğu {n0} olgunun {o0} tanesinde (%{p0}) ve en az bir testin pozitif olduğu {n1} olgunun {o1} tanesinde (%{p1}) kaydedildi."
+msgstr ""
+"Referans standart, tüm testlerin negatif olduğu {n0} olgunun {o0} tanesinde "
+"(%{p0}) ve en az bir testin pozitif olduğu {n1} olgunun {o1} tanesinde "
+"(%{p1}) kaydedildi."
 
 #: R/decisioncombine.b.R
 msgid ""
 "The reference standard was recorded for {o0} of {n0} cases where the tests "
 "agreed ({p0}%) and {o1} of {n1} where they disagreed ({p1}%)."
-msgstr "Referans standart, testlerin uyuştuğu {n0} olgunun {o0} tanesinde (%{p0}) ve uyuşmadığı {n1} olgunun {o1} tanesinde (%{p1}) kaydedildi."
+msgstr ""
+"Referans standart, testlerin uyuştuğu {n0} olgunun {o0} tanesinde (%{p0}) ve "
+"uyuşmadığı {n1} olgunun {o1} tanesinde (%{p1}) kaydedildi."
 
 #: R/decisioncombine.b.R
 msgid ""
@@ -170568,7 +171422,22 @@ msgid ""
 "Serial strategy can move only one way, so the table gives its change with an "
 "interval, and McNemar's test is used for Majority. Paired PPV and NPV "
 "comparisons are not performed."
-msgstr "Satırlar bağımsız değildir: her kural aynı hastalar üzerinde puanlanır, bu nedenle aralarındaki farklar korelasyonludur. Resmi bir karşılaştırma eşleştirilmiş bir prosedür gerektirir -- duyarlılığı karşılaştırmak için hastalıklı hastalar içinde ve özgüllüğü karşılaştırmak için hastalıksız hastalar içinde AYRI AYRI uygulanan McNemar testi, çünkü tüm örneklem üzerinde tek bir McNemar doğruluktan ziyade pozitiflik oranlarını karşılaştırır. Eşleştirilmiş PPV ve NPV karşılaştırmaları bunun yerine genelleştirilmiş bir puan testi gerektirir. İsteğe bağlı \"Kombinasyon Kuralları ile Tek Başına Testler\" tablosu (\"Kombinasyonlar ile tek başına testler\" seçeneği) bu karşılaştırmayı her referans grubu içinde, her kombinasyon stratejisi (Paralel, Seri ve Çoğunluk) için birleştirdiği her teste karşı yapar: Paralel veya Seri bir strateji yalnızca tek yönde değişebildiğinden tablo değişimini bir aralıkla verir ve Çoğunluk için McNemar testi kullanılır. Eşleştirilmiş PPV ve NPV karşılaştırmaları yapılmaz."
+msgstr ""
+"Satırlar bağımsız değildir: her kural aynı hastalar üzerinde puanlanır, bu "
+"nedenle aralarındaki farklar korelasyonludur. Resmi bir karşılaştırma "
+"eşleştirilmiş bir prosedür gerektirir -- duyarlılığı karşılaştırmak için "
+"hastalıklı hastalar içinde ve özgüllüğü karşılaştırmak için hastalıksız "
+"hastalar içinde AYRI AYRI uygulanan McNemar testi, çünkü tüm örneklem "
+"üzerinde tek bir McNemar doğruluktan ziyade pozitiflik oranlarını "
+"karşılaştırır. Eşleştirilmiş PPV ve NPV karşılaştırmaları bunun yerine "
+"genelleştirilmiş bir puan testi gerektirir. İsteğe bağlı \"Kombinasyon "
+"Kuralları ile Tek Başına Testler\" tablosu (\"Kombinasyonlar ile tek başına "
+"testler\" seçeneği) bu karşılaştırmayı her referans grubu içinde, her "
+"kombinasyon stratejisi (Paralel, Seri ve Çoğunluk) için birleştirdiği her "
+"teste karşı yapar: Paralel veya Seri bir strateji yalnızca tek yönde "
+"değişebildiğinden tablo değişimini bir aralıkla verir ve Çoğunluk için "
+"McNemar testi kullanılır. Eşleştirilmiş PPV ve NPV karşılaştırmaları "
+"yapılmaz."
 
 #: R/decisioncombine.b.R
 msgid ""
@@ -170577,20 +171446,21 @@ msgid ""
 "test alone and every strategy) performs at or below chance while an exact "
 "result pattern does not. Both are the signature of a reversed positive "
 "level: the arithmetic still works, but the sensitivity and specificity "
-"reported for each rule are then swapped, and the best-performing rule is one "
-"no clinician can apply. Check the level chosen as positive for the reference "
-"standard and for each test before interpreting any of these results."
+"reported for each rule then describe results read the wrong way round, and "
+"the best-performing rule is one no clinician would apply. Check the level "
+"chosen as positive for the reference standard and for each test before "
+"interpreting any of these results."
 msgstr ""
 "Bu örneklemde ya iki grubu en iyi ayıran kural, testler negatif olduğunda "
 "hastayı pozitif sayan bir kuraldır ya da adlandırılmış her kural (tek başına "
 "her test ve her strateji) şans düzeyinde veya altında performans gösterirken "
 "tam sonuç paternlerinden biri şanstan daha iyi performans gösterir. Her "
 "ikisi de ters çevrilmiş bir pozitif düzeyin işaretidir: aritmetik yine "
-"işler, ancak her kural için bildirilen duyarlılık ve özgüllük bu durumda yer "
-"değiştirmiştir ve en iyi performans gösteren kural hiçbir klinisyenin "
-"uygulayamayacağı bir kuraldır. Bu sonuçlardan herhangi birini yorumlamadan "
-"önce referans standart ve her test için pozitif olarak seçilen düzeyi "
-"kontrol edin."
+"işler, ancak her kural için bildirilen duyarlılık ve özgüllük bu durumda "
+"ters okunmuş sonuçları tanımlar ve en iyi performans gösteren kural hiçbir "
+"klinisyenin uygulamayacağı bir kuraldır. Bu sonuçlardan herhangi birini "
+"yorumlamadan önce referans standart ve her test için pozitif olarak seçilen "
+"düzeyi kontrol edin."
 
 #: R/survival.b.R
 msgid "the same hazard"
@@ -172398,6 +173268,8 @@ msgid ""
 "These estimates are apparent performance in this dataset and have not been "
 "externally validated."
 msgstr ""
+"Bu tahminler bu veri setindeki görünür performansı yansıtır ve dış "
+"doğrulamadan geçmemiştir."
 
 #: R/lassologistic.b.R
 msgid ""
@@ -172769,7 +173641,7 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "They were all computed at the prevalence of this sample."
-msgstr ""
+msgstr "Hepsi bu örneklemin prevalansında hesaplanmıştır."
 
 #: R/kappaSizeFixedN.b.R
 msgid ""
@@ -173096,6 +173968,15 @@ msgstr ""
 "ilerleyin, Kırmızı = sonuçlar oldukça kararsız veya yanlış tanımlanmış "
 "olabilir."
 
+#: R/jjpiestats.b.R
+msgid ""
+"This asymptotic test uses only the discordant pairs. Fagerland et al. (2013) "
+"recommend it when a type I error rate slightly above the nominal level (at "
+"most 5.37% at 5%) is acceptable, and advise against the exact binomial and "
+"continuity-corrected versions in any situation, as both are overly "
+"conservative. Few discordant pairs limit its power."
+msgstr ""
+
 #: R/enhancedROC.b.R
 msgid ""
 "This AUC is apparent (in-sample), and where a cutpoint was searched for on "
@@ -173299,6 +174180,11 @@ msgid ""
 "descriptive threshold; it is not a noninferiority comparison between tests "
 "or clinical guidance.)"
 msgstr ""
+"Bu, testlerin eşit performans gösterdiğini kanıtlamaz; önceden belirlenmiş "
+"bir eşdeğerlik sınırında bir testin diğeriyle karşılaştırıldığı bir test "
+"yapılmadı. (İstenirse, OPA kriteri sütunu her testi kullanıcının belirlediği "
+"betimsel bir eşikle karşılaştırır; bu, testler arasında bir aşağı olmama "
+"(non-inferiority) karşılaştırması ya da klinik kılavuz değildir.)"
 
 #: R/checkdata.b.R
 msgid ""
@@ -173534,6 +174420,11 @@ msgid ""
 "difference to see how large a difference remains compatible with these "
 "data.</p>"
 msgstr ""
+"Bu, iki testin eşdeğer olduğunun kanıtı değildir: McNemar testi yalnızca "
+"uyumsuz çiftleri kullanır, bu nedenle uyumsuzluk az olduğunda gerçek bir "
+"farkı saptama gücü düşüktür. Bu verilerle ne büyüklükte bir farkın hâlâ "
+"uyumlu olduğunu görmek için doğruluk farkının güven aralığını kontrol "
+"edin.</p>"
 
 #: R/singlearm.b.R
 msgid ""
@@ -174000,6 +174891,16 @@ msgstr ""
 "Çapraz Tablo analizine bölmeyi veya gruplama değişkeninin nadir düzeylerini "
 "birlikte gruplamayı düşünün."
 
+#: R/decisioncompare.b.R
+msgid ""
+"This significant result is borderline: the 95 percent confidence interval "
+"for the accuracy difference comes from Newcombe's method 10, a different "
+"procedure from McNemar's test, and it includes 0, the value of no difference."
+msgstr ""
+"Bu anlamlı sonuç sınırdadır: doğruluk farkının yüzde 95 güven aralığı, "
+"McNemar testinden farklı bir prosedür olan Newcombe 10. yöntemle hesaplanır "
+"ve fark olmamasına karşılık gelen 0 değerini içerir."
+
 #: R/psychopdaROC.b.R
 msgid "This simplified interface shows essential diagnostic performance metrics."
 msgstr "Bu basitleştirilmiş arayüz temel tanısal performans ölçütlerini gösterir."
@@ -174131,6 +175032,11 @@ msgid ""
 "support transparent comparison of observed performance. It does not select a "
 "test for clinical use."
 msgstr ""
+"Bu araç birden çok tıbbi testin tanısal performansını bir altın standart "
+"referansla karşılaştırır. Gözlenen performansın şeffaf karşılaştırılmasını "
+"desteklemek için duyarlılık, özgüllük, öngörü değerleri, olabilirlik "
+"oranları ve genel doğruluğu sistematik olarak değerlendirir. Klinik kullanım "
+"için test seçmez."
 
 #: R/categorize.b.R
 msgid "This tool converts continuous numeric variables into categorical variables."
@@ -174709,7 +175615,7 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "Tied Descriptive Ranking"
-msgstr ""
+msgstr "Eşit Betimsel Sıralama"
 
 #: mixedeffectscox/options/ties_method.title
 #: mixedeffectscox/ui[3][0]/ties_method.label
@@ -177093,7 +177999,7 @@ msgid "Too few complete observations (%d). Need at least 10."
 msgstr ""
 
 #: R/jjpiestats.b.R
-msgid "Too few discordant pairs for McNemar"
+msgid "Too few discordant pairs to reach p < 0.05"
 msgstr ""
 
 #: R/lassologistic.b.R
@@ -180645,19 +181551,21 @@ msgstr ""
 msgid ""
 "Unable to compute {metric} difference for {comparison}: insufficient paired "
 "data."
-msgstr ""
+msgstr "{comparison} için {metric} farkı hesaplanamadı: eşleştirilmiş veri yetersiz."
 
 #: R/decisioncompare.b.R
 msgid ""
 "Unable to compute {metric} for {test}: denominator is zero. The result is "
 "set to NA."
-msgstr ""
+msgstr "{test} için {metric} hesaplanamadı: payda sıfır. Sonuç NA olarak ayarlandı."
 
 #: R/decisioncompare.b.R
 msgid ""
 "Unable to compute paired differences for {comparison}: no observations with "
 "complete data across both tests and the gold standard."
 msgstr ""
+"{comparison} için eşleştirilmiş farklar hesaplanamadı: her iki test ve altın "
+"standart için tam verisi olan gözlem yok."
 
 #: R/multisurvival.b.R
 msgid "Unable to compute PH diagnostics (cox.zph): {error}"
@@ -183191,6 +184099,8 @@ msgid ""
 "User-requested minimum OPA criterion: {pct}%. 'Criterion met' means the "
 "lower confidence bound exceeds this descriptive threshold."
 msgstr ""
+"Kullanıcının istediği minimum OPA kriteri: %{pct}. 'Kriter karşılandı', alt "
+"güven sınırının bu betimsel eşiği aştığı anlamına gelir."
 
 #: R/pathsampling.b.R
 msgid "User-selected count threshold"
@@ -183558,7 +184468,7 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "Validation failed"
-msgstr ""
+msgstr "Doğrulama başarısız oldu"
 
 #: R/enhancedROC.b.R
 msgid "Validation failed for {pred}: {msg}"
@@ -186259,6 +187169,26 @@ msgstr "Sonlanım değişkeninde eksik değer olmadığını doğrulayın"
 msgid "Verify there are no special characters in the variable name"
 msgstr "Değişken adında özel karakter olmadığını doğrulayın"
 
+#: decisioncompare/options/mcnemarMethod.description.ui
+msgid ""
+"Version of McNemar's test used for each pair of tests. Both are recommended "
+"by Fagerland, Lydersen and Laake (2013). The mid-p test never exceeded the "
+"nominal 5 percent level in their 9595 scenarios, evaluated exactly by "
+"complete enumeration. The asymptotic test without continuity correction is "
+"slightly more powerful and reports a chi-squared statistic, but it often "
+"exceeds the nominal level slightly (at most 5.37 percent observed). The "
+"exact conditional test and the continuity-corrected test are not offered: "
+"both are overly conservative."
+msgstr ""
+"Her test çifti için kullanılan McNemar testi sürümü. Sunulan iki sürüm de "
+"Fagerland, Lydersen ve Laake (2013) tarafından önerilmektedir. Mid-p testi, "
+"yazarların tüm olası sonuçları sayarak kesin olarak değerlendirdiği 9595 "
+"senaryonun hiçbirinde nominal yüzde 5 düzeyini aşmadı. Süreklilik "
+"düzeltmesiz asimptotik test biraz daha güçlüdür ve bir ki-kare istatistiği "
+"bildirir, ancak nominal düzeyi sıklıkla hafifçe aşar (gözlenen en yüksek "
+"değer yüzde 5.37). Kesin koşullu test ve süreklilik düzeltmeli test "
+"sunulmamaktadır: ikisi de aşırı tutucudur."
+
 #: advancedbarplot/options/orientation/vertical.title
 #: alluvial/options/orient/vert.title
 #: economistplots/options/plot_orientation/vertical.title
@@ -186536,6 +187466,11 @@ msgid ""
 "class is sparse. Interpret the interval widths and class-specific "
 "denominators; no universal sample-size cutoff guarantees adequate precision."
 msgstr ""
+"Gözlenen referans standart örneklemi çok küçük (n={n}). Özellikle altın "
+"standart sınıflarından biri seyrek olduğunda güven aralıkları geniş ve "
+"tahminler kararsız olabilir. Aralık genişliklerini ve sınıfa özgü paydaları "
+"yorumlayın; hiçbir evrensel örneklem büyüklüğü eşiği yeterli kesinliği "
+"garanti etmez."
 
 #: R/waterfall.b.R
 msgid "VERY SMALL SAMPLE"
@@ -186559,7 +187494,7 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "Very Small Sample Size"
-msgstr ""
+msgstr "Çok Küçük Örneklem Büyüklüğü"
 
 #: R/riverplot.b.R
 msgid ""
@@ -187759,6 +188694,12 @@ msgid ""
 "metrics included sensitivity, specificity, positive and negative predictive "
 "values, likelihood ratios, and overall accuracy. %5$s"
 msgstr ""
+"Tanısal doğruluk analiziyle %1$s testin (%2$s) tanısal performansını "
+"referans standartla karşılaştırdık. Veri seti %3$d seçili satır içeriyordu. "
+"%4$s Tek başına tahminlerde kullanılabilir referans/test çiftleri, "
+"eşleştirilmiş karşılaştırmalarda ise ortak belirli satırlar kullanıldı. "
+"Performans ölçütleri duyarlılık, özgüllük, pozitif ve negatif öngörü "
+"değerleri, olabilirlik oranları ve genel doğruluğu içeriyordu. %5$s"
 
 #: R/linechart.b.R
 msgid "weak"
@@ -189696,7 +190637,7 @@ msgstr ""
 #: R/decisioncompare.b.R
 #: exacttests/options/ciMethod/wilson.title
 msgid "Wilson score"
-msgstr ""
+msgstr "Wilson puanı"
 
 #: decisioncompare/options/ciMethod/wilson.title
 msgid "Wilson Score"
@@ -191589,14 +192530,20 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "Zero Cell Continuity Correction"
-msgstr ""
+msgstr "Sıfır Hücre Süreklilik Düzeltmesi"
 
 #: R/decisioncompare.b.R
 msgid ""
 "Zero cell detected. A 0.5 continuity correction is applied only to a "
-"likelihood ratio whose own denominator cell is empty (FP = 0 for LR+, TN = 0 "
-"for LR-); every other statistic uses these raw counts. Interpret cautiously."
+"likelihood ratio whose own denominator cell is empty while its numerator is "
+"not (FP = 0 with TP > 0 for LR+, TN = 0 with FN > 0 for LR-); a ratio that "
+"is 0/0 is left blank, and every other statistic uses these raw counts. "
+"Interpret cautiously."
 msgstr ""
+"Sıfır hücre saptandı. 0.5 süreklilik düzeltmesi yalnızca kendi payda hücresi "
+"boş, payı ise boş olmayan bir olabilirlik oranına uygulanır (LR+ için GP > 0 "
+"iken YP = 0, LR- için YN > 0 iken GN = 0); 0/0 olan bir oran boş bırakılır "
+"ve diğer tüm istatistikler bu ham sayıları kullanır. Dikkatle yorumlayın."
 
 #: R/oddsratio.b.R
 msgid ""

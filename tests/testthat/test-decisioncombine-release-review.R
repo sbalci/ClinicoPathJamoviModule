@@ -1003,3 +1003,61 @@ test_that("a rare pattern row really does report high Accuracy at near-zero Youd
     expect_equal(row$youden, 1 / 30, tolerance = 1e-9)  # ...and is worthless
     expect_lt(row$youden, 0.05)
 })
+
+
+# ---- Release review 2026-10-01: large samples (RR2-n) -----------------------------------
+# table() and sum() return R integers, and an integer product above 2^31 - 1 (two factors
+# of about 46,341) is NA, not a large number. Every earlier fixture had under 3,000 cases,
+# so neither defect below could appear in a test.
+
+# 50,000 disease-present and 50,000 disease-absent cases; Test 1 is 94% sensitive and 94%
+# specific. Optionally, cases with no reference result, split evenly over Test 1's results.
+big_single_test <- function(missing_gold = 0L) {
+    d <- data.frame(
+        gold = rep(c("pos", "neg"), each = 50000L),
+        t1 = c(rep(c("pos", "neg"), c(47000L, 3000L)), rep(c("pos", "neg"), c(3000L, 47000L))),
+        stringsAsFactors = FALSE)
+    if (missing_gold > 0L) {
+        d <- rbind(d, data.frame(gold = NA_character_,
+                                 t1 = rep(c("pos", "neg"), length.out = missing_gold),
+                                 stringsAsFactors = FALSE))
+    }
+    d
+}
+run_single <- function(d, ...) ClinicoPath::decisioncombine(
+    data = d, gold = "gold", goldPositive = "pos", test1 = "t1", test1Positive = "pos",
+    test2 = NULL, test2Positive = NULL, test3 = NULL, test3Positive = NULL, ...)
+
+test_that("RR2-01 the missingness screen runs on 100,000 cases with ten reference results missing", {
+    # Measured before the fix: "missing value where TRUE/FALSE needed", and the whole analysis
+    # stopped. The screen's rate ratio multiplied integer counts (50,000 x 50,005).
+    res <- run_single(big_single_test(missing_gold = 10L))
+    ct <- as.data.frame(res$combinationTable$asDF)
+    expect_identical(nrow(ct), 1L)
+    expect_equal(ct$tp + ct$fp + ct$fn + ct$tn, 100000)
+    txt <- notices_of(res)
+    expect_match(txt, "Removed 10 case(s)", fixed = TRUE)
+    # Missing equally often after either Test 1 result, so nothing follows another result.
+    expect_false(grepl("Missing Results", txt, fixed = TRUE))
+})
+
+test_that("RR2-02 the diagnostic odds ratio and its interval survive two cells above 46,341", {
+    # Measured before the fix: the DOR and both limits blank (47,000 x 47,000 overflowed), with
+    # no notice -- only an R warning, which jamovi never shows.
+    expect_no_warning(res <- run_single(big_single_test()))
+    ct <- as.data.frame(res$combinationTable$asDF)
+    dor <- 47000^2 / 3000^2
+    expect_equal(ct$dor, dor, tolerance = 1e-12)
+    ratios <- as.data.frame(res$combinationTableCIRatios$asDF)
+    row <- ratios[ratios$statistic == "DOR", ]
+    se <- sqrt(2 / 47000 + 2 / 3000)                       # Woolf, no zero cell
+    expect_equal(c(row$lower, row$upper), exp(log(dor) + c(-1, 1) * qnorm(0.975) * se),
+                 tolerance = 1e-10)
+})
+
+test_that("RR2-03 the seed note shows the seed as the integer the bootstrap used", {
+    # jmvcore's format() prints a double 100000, as the R syntax passes it, as "1e+05".
+    res <- run_dcomb2(dcomb_fixture(), showRecommendation = TRUE, optimismCorrection = TRUE,
+                      nBoot = 100, seed = 100000)
+    expect_identical(res$recommendationTable$notes$seed$note, "Random seed: 100000")
+})

@@ -2182,10 +2182,11 @@
         `url`="https://CRAN.R-project.org/package=ggpattern"), 
     `ggplot2`=list(
         `type`="software", 
-        `author`="Wickham, H., Chang, W., Henry, L., Pedersen, T. L., Takahashi, K., Wilke, C., Woo, K., & RStudio", 
-        `year`=2018, 
+        `author`="Wickham, H., Chang, W., Henry, L., Pedersen, T. L., Takahashi, K., Wilke, C., Woo, K., Yutani, H., Dunnington, D., & van den Brand, T.", 
+        `year`=2026, 
         `title`="ggplot2: Create Elegant Data Visualisations Using the Grammar of Graphics", 
         `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=ggplot2", 
+        `doi`="10.32614/CRAN.package.ggplot2", 
         `url`="https://CRAN.R-project.org/package=ggplot2"), 
     `ggprism`=list(
         `type`="software", 
@@ -2661,10 +2662,11 @@
         `url`="https://CRAN.R-project.org/package=klaR"), 
     `knitr`=list(
         `type`="software", 
-        `author`="Yihui Xie", 
-        `year`=2025, 
-        `title`="knitr: R package", 
+        `author`="Xie, Y.", 
+        `year`=2026, 
+        `title`="knitr: A General-Purpose Package for Dynamic Report Generation in R", 
         `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=knitr", 
+        `doi`="10.32614/CRAN.package.knitr", 
         `url`="https://CRAN.R-project.org/package=knitr"), 
     `laas2019`=list(
         `type`="article", 
@@ -4426,4 +4428,26 @@
         `issue`=2, 
         `pages`="345-351", 
         `doi`="10.1111/j.0006-341x.2000.00345.x", 
-        `url`="https://doi.org/10.1111/j.0006-341x.2000.00345.x"))
+        `url`="https://doi.org/10.1111/j.0006-341x.2000.00345.x"), 
+    `Fagerland2014`=list(
+        `type`="article", 
+        `author`="Fagerland, M. W., Lydersen, S., & Laake, P.", 
+        `year`=2014, 
+        `title`="Recommended tests and confidence intervals for paired binomial proportions", 
+        `publisher`="Statistics in Medicine", 
+        `volume`=33, 
+        `issue`=16, 
+        `pages`="2850-2875", 
+        `doi`="10.1002/sim.6148", 
+        `url`="https://doi.org/10.1002/sim.6148"), 
+    `BrownCaiDasGupta2001`=list(
+        `type`="article", 
+        `author`="Brown, L. D., Cai, T. T., & DasGupta, A.", 
+        `year`=2001, 
+        `title`="Interval estimation for a binomial proportion", 
+        `publisher`="Statistical Science", 
+        `volume`=16, 
+        `issue`=2, 
+        `pages`="101-133", 
+        `doi`="10.1214/ss/1009213286", 
+        `url`="https://doi.org/10.1214/ss/1009213286"))

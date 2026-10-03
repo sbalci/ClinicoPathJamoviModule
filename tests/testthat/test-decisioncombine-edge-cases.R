@@ -91,7 +91,7 @@ test_that("decisioncombine flags a gold standard with only one outcome (all nega
   expect_true(all(is.na(res$combinationTable$asDF$sens)))
 })
 
-test_that("a constant test1 still yields valid combinations, with zero cells flagged", {
+test_that("a constant test1 still yields valid combinations, and is named by its own notice", {
   test_data_const <- decisioncombine_pathology
   test_data_const$rater1 <- factor(rep("Positive", nrow(decisioncombine_pathology)))
 
@@ -105,7 +105,11 @@ test_that("a constant test1 still yields valid combinations, with zero cells fla
   # patients must not have one manufactured for it by the continuity correction, which
   # is what used to happen here.
   expect_gt(res$combinationTable$rowCount, 0L)
-  expect_match(dc_notices(res), "Sparse Cell Counts")
+  # BEHAVIOUR CHANGE (fix-function 2026-10-01): this asserted "Sparse Cell Counts", raised only
+  # by the four rows with no test-negative case, whose zeros are structural (blank ratios, LR
+  # exactly 1, no correction). The constant test now gets its own notice instead.
+  expect_match(dc_notices(res), "Test 1 Has Only Positive Results")
+  expect_false(grepl("Sparse Cell Counts", dc_notices(res), fixed = TRUE))
 
   ct <- res$combinationTable$asDF
   # test1 alone can never be negative, so "-/+" and "-/-" hold nobody

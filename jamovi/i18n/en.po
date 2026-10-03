@@ -531,6 +531,10 @@ msgstr ""
 msgid "(95%% CI: %1$.1f-%2$.1f%%)"
 msgstr ""
 
+#: R/decisioncompare.b.R
+msgid "(a likelihood ratio is not estimable)"
+msgstr ""
+
 #: R/clinicalscore.b.R
 msgid "(adequate)"
 msgstr ""
@@ -921,6 +925,10 @@ msgid ""
 "event type, and the competing-risk outcome is coded 0/1/2. Use the "
 "cumulative incidence output instead, or set survival type to Overall or "
 "Cause Specific."
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid "{first} vs {second}"
 msgstr ""
 
 #: R/decision.b.R
@@ -1625,6 +1633,14 @@ msgid ""
 "of these results."
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid "{test} Has No Positive Results"
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid "{test} Has Only Positive Results"
+msgstr ""
+
 #: R/decisioncompare.b.R
 msgid "{test} in {stratum}"
 msgstr ""
@@ -1665,6 +1681,31 @@ msgid ""
 "on a denominator this small is far less precise than the overall analyzed N "
 "suggests. Enable the 95% CI option and read the interval before quoting "
 "either figure."
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid ""
+"{test}: sensitivity rests on {positives} reference-positive cases and "
+"specificity on {negatives} reference-negative cases. A percentage computed "
+"on a denominator this small is far less precise than the overall analyzed N "
+"suggests. Switch off the supplied prevalence and enable the 95% CI option to "
+"read the interval before quoting either figure."
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid ""
+"{test}: the test was never negative in these cases, so LR- is 0/0 and is "
+"left blank (its sensitivity is 1 and its specificity 0 here). A continuity "
+"correction cannot create rule-out evidence for a test that made no negative "
+"call."
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid ""
+"{test}: the test was never positive in these cases, so LR+ is 0/0 and is "
+"left blank (its sensitivity is 0 and its specificity 1 here). A continuity "
+"correction cannot create rule-in evidence for a test that made no positive "
+"call."
 msgstr ""
 
 #: R/decisioncompare.b.R
@@ -2482,6 +2523,10 @@ msgstr ""
 msgid "%.1f %s (n=%d responders)"
 msgstr ""
 
+#: R/decisioncompare.b.R
+msgid "%.1f%%"
+msgstr ""
+
 #: R/waterfall.b.R
 msgid "%.1f%% (%d of %d evaluable patients achieved complete or partial response)"
 msgstr ""
@@ -2697,32 +2742,8 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid ""
-"%1$s classified significantly more cases correctly than %2$s (accuracy "
-"%3$.1f%% vs %4$.1f%%); McNemar's test compares overall correctness only."
-msgstr ""
-
-#: R/decisioncompare.b.R
-msgid ""
-"%1$s comparing %2$s and %3$s did not detect a significant difference in "
-"diagnostic accuracy (exact p = %4$.3f)."
-msgstr ""
-
-#: R/decisioncompare.b.R
-msgid ""
-"%1$s comparing %2$s and %3$s did not detect a significant difference in "
-"diagnostic accuracy (χ²(%4$d) = %5$.2f, p = %6$.3f)."
-msgstr ""
-
-#: R/decisioncompare.b.R
-msgid ""
-"%1$s comparing %2$s and %3$s showed a significant difference in diagnostic "
-"accuracy (exact p = %4$.3f)."
-msgstr ""
-
-#: R/decisioncompare.b.R
-msgid ""
-"%1$s comparing %2$s and %3$s showed a significant difference in diagnostic "
-"accuracy (χ²(%4$d) = %5$.2f, p = %6$.3f)."
+"%1$s classified significantly more cases correctly than %2$s; McNemar's test "
+"compares overall correctness only."
 msgstr ""
 
 #: R/enhancedROC.b.R
@@ -7278,11 +7299,19 @@ msgid ""
 msgstr ""
 
 #: R/decisioncompare.b.R
-msgid "<p><b>%1$s:</b> exact p = %2$.3f"
+msgid ""
+"<p><b>%1$s:</b> not informative here. No case was classified correctly by "
+"exactly one of the two tests, so McNemar's test has no discordant pairs to "
+"compare and p is shown as 1 only by convention. Read the accuracy difference "
+"and its paired confidence interval instead.</p>"
 msgstr ""
 
 #: R/decisioncompare.b.R
-msgid "<p><b>%1$s:</b> χ² = %2$.2f, p = %3$.3f"
+msgid "<p><b>%1$s:</b> p %2$s"
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid "<p><b>%1$s:</b> χ² = %2$.2f, p %3$s"
 msgstr ""
 
 #: R/pathsampling.b.R
@@ -7335,8 +7364,9 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid ""
-"<p><b>Comparison:</b> %1$s (accuracy: %2$.1f%%) vs %3$s (accuracy: "
-"%4$.1f%%)</p>"
+"<p><b>Comparison:</b> %1$s vs %2$s on the %3$d cases with a determinate "
+"result for both tests and the reference standard: accuracy %4$.1f%% vs "
+"%5$.1f%%.</p>"
 msgstr ""
 
 #: R/pathsampling.b.R
@@ -7350,6 +7380,14 @@ msgid ""
 "accuracy in this sample (overall accuracy %2$.1f%%). This descriptive "
 "ranking is not a superiority test or clinical recommendation. Review the "
 "pairwise comparisons above for inferential results.</p>"
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid ""
+"<p><b>Descriptive interpretation:</b> balanced accuracy could not be "
+"estimated for any test because one reference-standard class has no cases, so "
+"no test is ranked. Review the pairwise comparisons above for inferential "
+"results.</p>"
 msgstr ""
 
 #: R/pathsampling.b.R
@@ -7639,7 +7677,26 @@ msgstr ""
 "reducing sampling below a validated protocol.</p>"
 
 #: R/decisioncompare.b.R
-msgid "<p><b>Overall comparison:</b> Cochran's Q test (χ² = %1$.2f, p = %2$.3f)"
+msgid ""
+"<p><b>Overall comparison:</b> Cochran's Q test (χ² = %1$.2f, p %2$s) <span "
+"style='color:inherit;'><b>did not detect a significant difference</b></span> "
+"among the three tests. This is not evidence that they perform equally: with "
+"this sample size a clinically important accuracy difference could go "
+"undetected, and no test of one test against another across a pre-specified "
+"equivalence margin was performed. (If requested, the criterion column in the "
+"Overall Percent Agreement table compares each test with a user-specified "
+"descriptive OPA threshold; it is not a noninferiority comparison between "
+"tests or clinical guidance.) The confidence intervals for the paired "
+"differences in the Differences with 95%% Confidence Intervals table show how "
+"large a difference remains compatible with these data.</p>"
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid ""
+"<p><b>Overall comparison:</b> Cochran's Q test (χ² = %1$.2f, p %2$s) <span "
+"style='color:inherit;'><b>found significant differences</b></span> among the "
+"three tests: these data are evidence that the tests do not all have the same "
+"accuracy. The pairwise comparisons above show which pairs differ.</p>"
 msgstr ""
 
 #: R/pathsampling.b.R
@@ -8500,9 +8557,10 @@ msgstr ""
 #: R/decisioncompare.b.R
 msgid ""
 "<span style='color:inherit;'><b>Significant difference detected.</b></span> "
-"%1$s classified significantly more cases correctly than %2$s (accuracy "
-"%3$.1f%% vs %4$.1f%%). McNemar's test compares overall correctness only; the "
-"two tests may still differ in the sensitivity/specificity balance.</p>"
+"%1$s classified significantly more cases correctly than %2$s: of the %3$d "
+"cases where exactly one test was correct, %4$d favoured %1$s. McNemar's test "
+"compares overall correctness only; the two tests may still differ in the "
+"sensitivity/specificity balance.</p>"
 msgstr ""
 
 #: R/jjhistostats.b.R
@@ -8598,8 +8656,9 @@ msgid ""
 "<strong>Cases where Test A and Test B have different CORRECTNESS</strong> "
 "relative to the reference standard (e.g., Test A correct but Test B wrong, "
 "or vice versa). McNemar's test examines whether the imbalance between these "
-"discordant types is statistically significant. Exact inference is used "
-"automatically when fewer than 25 discordant pairs are available, but "
+"discordant types is statistically significant. The p-value comes from the "
+"McNemar mid-p test or, if chosen, the asymptotic test without continuity "
+"correction, the two versions recommended by Fagerland et al. (2013); "
 "precision and power still depend on the number of discordant pairs."
 msgstr ""
 
@@ -17546,25 +17605,6 @@ msgid ""
 "clinical recommendation."
 msgstr ""
 
-#: R/decisioncompare.b.R
-msgid ""
-"among the three tests. This is not evidence that they perform equally: with "
-"this sample size a clinically important accuracy difference could go "
-"undetected, and no test of one test against another across a pre-specified "
-"equivalence margin was performed. (If requested, the criterion column in the "
-"Overall Percent Agreement table compares each test with a user-specified "
-"descriptive OPA threshold; it is not a noninferiority comparison between "
-"tests or clinical guidance.) The confidence intervals for the paired "
-"differences in the Differences with 95% Confidence Intervals table show how "
-"large a difference remains compatible with these data.</p>"
-msgstr ""
-
-#: R/decisioncompare.b.R
-msgid ""
-"among the three tests. This means the tests do NOT perform equally - at "
-"least one differs significantly from the others.</p>"
-msgstr ""
-
 #: grafify/options/jitter_width.description
 msgid ""
 "Amount of horizontal jittering for data points. Helps avoid overlapping "
@@ -17735,6 +17775,10 @@ msgstr ""
 #: venn/options/var3.description.jamovi
 #: venn/options/var4.description.jamovi
 msgid "An optional variable from `data`."
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid "An overall difference among the three tests was tested with Cochran's Q test."
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -20229,6 +20273,10 @@ msgstr ""
 msgid "Asymptotic (Delta Method)"
 msgstr ""
 
+#: decisioncompare/options/mcnemarMethod/asymptotic.title
+msgid "Asymptotic (no continuity correction)"
+msgstr ""
+
 #: cohenskappa/options/ci_method/asymptotic.title
 #: vusanalysis/options/ci_method/asymptotic.title
 msgid "Asymptotic (Normal Approximation)"
@@ -21928,6 +21976,12 @@ msgid ""
 "Balanced Accuracy and Youden's J are the same statistic on two scales: "
 "Balanced Accuracy = (J + 1) / 2, so ranking by one is identical to ranking "
 "by the other."
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid ""
+"Balanced accuracy could not be estimated for any test because one "
+"reference-standard class has no cases, so no test is ranked."
 msgstr ""
 
 #: R/decisioncalculator.b.R
@@ -31171,6 +31225,10 @@ msgstr ""
 msgid "Check the frequency table and the distribution plot"
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid "Check the level chosen as positive and any filter applied to the data."
+msgstr ""
+
 #: R/lassocox.b.R
 msgid "Check the selected variables and the model options."
 msgstr ""
@@ -35983,7 +36041,8 @@ msgstr ""
 #: R/decisioncompare.b.R
 msgid ""
 "Cochran's Q test did not detect a significant difference in diagnostic "
-"accuracy among the three tests (χ²(%1$d) = %2$.2f, p = %3$.3f)."
+"accuracy among the three tests (n = %1$d cases with all three results; "
+"χ²(%2$d) = %3$.2f, p %4$s)."
 msgstr ""
 
 #: R/decisioncompare.b.R
@@ -36017,7 +36076,8 @@ msgstr ""
 #: R/decisioncompare.b.R
 msgid ""
 "Cochran's Q test revealed a significant difference in diagnostic accuracy "
-"among the three tests (χ²(%1$d) = %2$.2f, p = %3$.3f)."
+"among the three tests (n = %1$d cases with all three results; χ²(%2$d) = "
+"%3$.2f, p %4$s)."
 msgstr ""
 
 #: R/decisioncompare.b.R
@@ -38408,6 +38468,12 @@ msgstr ""
 
 #: R/decisioncurve.b.R
 msgid "Comparisons not tested"
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid ""
+"Comparisons without discordant pairs are left out of the Holm-Bonferroni "
+"adjustment: their p = 1 is a convention, not a test result."
 msgstr ""
 
 #: ihccluster/results/spatialCompartmentSummary.columns.title
@@ -52981,6 +53047,19 @@ msgstr ""
 msgid "Diagnostic Confidence Assessment"
 msgstr ""
 
+#: R/decisioncompare.b.R
+msgid ""
+"Diagnostic correctness was compared with the asymptotic McNemar test without "
+"continuity correction, which Fagerland et al. (2013) recommend when small "
+"excesses over the nominal significance level are acceptable."
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid ""
+"Diagnostic correctness was compared with the McNemar mid-p test, which "
+"Fagerland et al. (2013) recommend for use in any situation."
+msgstr ""
+
 #: R/venn.b.R
 msgid "Diagnostic criteria overlap"
 msgstr ""
@@ -53514,10 +53593,6 @@ msgstr ""
 #: ordinalroc/results/cumulativeAUC.columns.title
 #: ordinalroc/results/optimalThresholds.columns.title
 msgid "Dichotomization"
-msgstr ""
-
-#: R/decisioncompare.b.R
-msgid "did not detect a significant difference"
 msgstr ""
 
 #: timedependentdca/results/comparisonTable.columns.title
@@ -57859,6 +57934,12 @@ msgid ""
 "within-case comparison would be. Give a case ID variable to link them."
 msgstr ""
 
+#: R/decisioncompare.b.R
+msgid ""
+"Each difference is the first-named test minus the second: for 'A vs B', a "
+"positive value favours A and a negative value favours B."
+msgstr ""
+
 #: R/jjdotplotstats.b.R
 msgid ""
 "Each group is drawn as a violin (the shape of its distribution), a boxplot "
@@ -59286,10 +59367,6 @@ msgstr ""
 
 #: R/waterfall.b.R
 msgid "Enable 'Show RECIST Thresholds' for clinical interpretation"
-msgstr ""
-
-#: R/jjpiestats.b.R
-msgid "Enable \"Statistical results\" to show that exact value on the chart."
 msgstr ""
 
 #: stagemigration/options/enableAccessibilityFeatures.description
@@ -63048,6 +63125,12 @@ msgid ""
 msgstr ""
 
 #: R/decisioncombine.b.R
+msgid ""
+"Every combination that uses it either reduces to a rule on the other tests "
+"alone or calls every case positive, or every case negative."
+msgstr ""
+
+#: R/decisioncombine.b.R
 msgid "Every combination that uses such a test is affected as well."
 msgstr ""
 
@@ -63089,6 +63172,13 @@ msgid ""
 "those curves are averaged. The procedure repeats for every level."
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid ""
+"Every pair falls in the same category on both measurements, so McNemar's "
+"test has no information: p is 1 by convention and no test result is shown on "
+"the chart."
+msgstr ""
+
 #: R/jjdotplotstats.b.R
 msgid "every pair of groups"
 msgstr ""
@@ -63108,6 +63198,14 @@ msgid ""
 "rows are baselines, recode the baseline time as 0: rows after time 0 are "
 "treated as assessments, so a 0%% baseline row takes part in the best "
 "response and hides progression."
+msgstr ""
+
+#: R/decisioncombine.b.R
+msgid ""
+"Every recorded result of {test} ({variable}) is \"{level}\", the level "
+"chosen as positive, so {test} cannot separate disease-present from "
+"disease-absent cases in these data: on its own it reads sensitivity 100% and "
+"specificity 0% by construction."
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
@@ -63445,16 +63543,6 @@ msgstr ""
 
 #: likelihoodratio/options/ciMethod/exact.title
 msgid "Exact binomial"
-msgstr ""
-
-#: R/decisioncompare.b.R
-msgid ""
-"Exact binomial inference was used because there were only %d discordant "
-"pairs; interpret the estimate with its paired confidence interval."
-msgstr ""
-
-#: R/decisioncompare.b.R
-msgid "Exact binomial McNemar"
 msgstr ""
 
 #: exacttests/options/testType/binomial.title
@@ -66991,6 +67079,10 @@ msgstr ""
 msgid "Few cases in one arm: {dpos} disease-present and {dneg} disease-free"
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid "Few discordant pairs"
+msgstr ""
+
 #: R/outcomeorganizer.b.R
 msgid ""
 "Few events: only {nEv} of {nTotal} non-missing outcomes ({pct}%) are "
@@ -69690,10 +69782,6 @@ msgstr ""
 msgid "Found date format:"
 msgstr ""
 
-#: R/decisioncompare.b.R
-msgid "found significant differences"
-msgstr ""
-
 #: multisurvival/options/numRiskGroups/four.title
 msgid "Four Groups"
 msgstr ""
@@ -72204,6 +72292,7 @@ msgstr ""
 msgid "Gold Positive"
 msgstr ""
 
+#: R/decisioncompare.b.R
 #: decisioncompare/ui[0][0].label
 #: decisionpanel/options/gold.title
 msgid "Gold Standard"
@@ -77600,6 +77689,13 @@ msgid "Ideal Value"
 msgstr ""
 
 #: R/decisioncompare.b.R
+msgid ""
+"Identical correctness on these cases does not establish that the two tests "
+"perform equally; the confidence interval shows how large a difference "
+"remains compatible with these data."
+msgstr ""
+
+#: R/decisioncompare.b.R
 msgid "Identical Positive and Negative Levels"
 msgstr ""
 
@@ -79178,6 +79274,15 @@ msgid ""
 "In this run every confidence interval overlaps every other one (%1$d of %2$d "
 "rows carry an interval). Overlapping intervals are consistent with a single "
 "underlying level of agreement, but they do not establish one."
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid ""
+"In this sample neither sensitivity nor specificity reached 85%, and neither "
+"likelihood ratio reached LR+ >= 5 or LR- <= 0.2. That describes these counts "
+"at this operating point, not the test in general; switch off the supplied "
+"prevalence and enable the 95% CI option to see how precisely each rate is "
+"pinned down by this many cases"
 msgstr ""
 
 #: R/decisioncompare.b.R
@@ -87158,6 +87263,10 @@ msgstr ""
 msgid "Likelihood ratio nomogram"
 msgstr ""
 
+#: R/decisioncompare.b.R
+msgid "Likelihood Ratio Not Estimable"
+msgstr ""
+
 #: R/decisioncalculator.b.R
 #: R/decisioncompare.b.R
 msgid "Likelihood ratio of a negative test"
@@ -91779,7 +91888,11 @@ msgid ""
 msgstr ""
 
 #: R/decisioncompare.b.R
-msgid "McNemar chi-squared (continuity corrected)"
+msgid "McNemar asymptotic (no continuity correction)"
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid "McNemar mid-p"
 msgstr ""
 
 #: package/analyses/contTablesPaired.menuSubtitle
@@ -91790,6 +91903,7 @@ msgid "McNemar test"
 msgstr ""
 
 #: contTablesPaired/results/test.title
+#: decisioncompare/options/mcnemarMethod.title
 #: multiclassdiagnostics/options/mcnemarTest.title
 #: multiclassdiagnostics/ui[1][1][0]/compareModels/mcnemarTest.label
 msgid "McNemar Test"
@@ -91818,22 +91932,6 @@ msgid ""
 "B). No grouping variable specified."
 msgstr ""
 
-#: R/jjpiestats.b.R
-msgid ""
-"McNemar test requires at least 10 paired observations for reliable results. "
-"Your data has %d paired observations. Collect more data, or run an exact "
-"binomial test on the discordant pairs - the exact counterpart of McNemar. "
-"Note that Fisher's exact test is not an alternative here: it assumes "
-"independent samples, not paired ones."
-msgstr ""
-
-#: R/jjpiestats.b.R
-msgid ""
-"McNemar test requires non-zero marginal totals. Your contingency table has "
-"at least one row or column with zero observations. Check your data for "
-"complete coverage of all category combinations."
-msgstr ""
-
 #: R/nonparametric.b.R
 msgid ""
 "McNemar test requires paired categorical data. Please specify a pairing "
@@ -91852,10 +91950,6 @@ msgstr ""
 msgid "McNemar χ²"
 msgstr ""
 
-#: R/jjpiestats.b.R
-msgid "McNemar's exact test, a binomial test on the discordant pairs"
-msgstr ""
-
 #: outbreakanalysis/options/statistical_tests/mcnemar.title
 msgid "McNemar's Test (Matched)"
 msgstr ""
@@ -91868,6 +91962,23 @@ msgid ""
 "McNemar result here can still differ in their sensitivity/specificity "
 "balance. Read the per-metric contrasts in the Differences with 95% "
 "Confidence Intervals table alongside this p-value."
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid ""
+"McNemar's test compares the pairs that changed in one direction with those "
+"that changed in the other. p < 0.05 indicates that the proportion differs "
+"between the paired measurements. The expected-count rule does not apply, and "
+"no exact p-value replaces the result on the chart."
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid ""
+"McNemar's test is not shown for fewer than 10 paired observations; your data "
+"has %d. The evidence that the test keeps its error rate (Fagerland et al. "
+"2013) starts at 10 pairs, and with fewer it has almost no power. Collect "
+"more data. Fisher's exact test is not an alternative: it assumes independent "
+"samples, not paired ones."
 msgstr ""
 
 #: R/jjpiestats.b.R
@@ -92818,7 +92929,6 @@ msgstr ""
 
 #: package/analyses/decisioncalculator.menuGroup
 #: package/analyses/nogoldstandard.menuGroup
-#: package/analyses/decisioncompare.menuGroup
 #: package/analyses/psychopdaROC.menuGroup
 #: package/analyses/cotest.menuGroup
 #: package/analyses/sequentialtests.menuGroup
@@ -92830,7 +92940,6 @@ msgstr ""
 #: betabinomialdiagnostic/options.menuSubgroup
 #: cotest/options.menuGroup
 #: decisioncalculator/options.menuGroup
-#: decisioncompare/options.menuGroup
 #: decisioncurve/options.menuGroup
 #: enhancedROC/options.menuGroup
 #: hierarchicalbayes/options.menuSubgroup
@@ -92970,10 +93079,12 @@ msgstr ""
 
 #: package/analyses/agreement.menuGroup
 #: package/analyses/decision.menuGroup
+#: package/analyses/decisioncompare.menuGroup
 #: package/analyses/decisioncombine.menuGroup
 #: agreement/options.menuGroup
 #: decision/options.menuGroup
 #: decisioncombine/options.menuGroup
+#: decisioncompare/options.menuGroup
 msgid "meddecideT"
 msgstr ""
 
@@ -94411,14 +94522,6 @@ msgid ""
 "both approaches for complete assessment."
 msgstr ""
 
-#: decisioncompare/options/ciMethod.description.ui
-msgid ""
-"Method for computing confidence intervals for agreement proportions. Wilson "
-"score is recommended for most cases. Logit is preferred when proportions are "
-"near 0 or 1 (common in high-agreement studies). Clopper-Pearson (Exact) is "
-"the most conservative."
-msgstr ""
-
 #: factoranalysis/options/scores.description
 msgid "Method for computing factor scores"
 msgstr ""
@@ -94624,6 +94727,16 @@ msgstr ""
 
 #: recurrentsurvival/options/reReg_se.description.ui
 msgid "Method for standard error estimation"
+msgstr ""
+
+#: decisioncompare/options/ciMethod.description.ui
+msgid ""
+"Method for the confidence interval of overall percent agreement. Wilson "
+"score suits most cases. Near 0 or 100 percent agreement, which is common in "
+"concordance studies, Wilson and logit intervals can cover the true value "
+"less often than the nominal 95 percent; Clopper-Pearson (Exact) never does "
+"and is the most conservative. The logit interval is undefined at 0 or 100 "
+"percent agreement, where the Clopper-Pearson limits are shown instead."
 msgstr ""
 
 #: timedependent/options/roc_method.description.ui
@@ -95198,6 +95311,10 @@ msgstr ""
 
 #: patientreported/ui[5][0]/mid_value.suffix
 msgid "MID value"
+msgstr ""
+
+#: decisioncompare/options/mcnemarMethod/midp.title
+msgid "Mid-p"
 msgstr ""
 
 #: R/riverplot.b.R
@@ -101523,10 +101640,6 @@ msgstr ""
 msgid "Negative likelihood ratio"
 msgstr ""
 
-#: R/decisioncompare.b.R
-msgid "negative likelihood ratio"
-msgstr ""
-
 #: R/sequentialtests.b.R
 msgid "Negative Likelihood Ratio Infinite"
 msgstr ""
@@ -101607,6 +101720,13 @@ msgstr ""
 msgid ""
 "Negative Predictive Value (NPV) will be unreliable even with high "
 "sensitivity/specificity"
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid ""
+"Negative Predictive Value = Probability of being healthy when test is "
+"negative, by Bayes' theorem at the supplied prevalence p: Spec x (1 - p) / "
+"((1 - Sens) x p + Spec x (1 - p))"
 msgstr ""
 
 #: R/decisioncompare.b.R
@@ -103266,6 +103386,24 @@ msgid ""
 "that there is none."
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid "No discordant pairs"
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid ""
+"No discordant pairs: both tests were correct on exactly the same cases, so "
+"McNemar's test has no information here; p is set to 1 and no test statistic "
+"is computed."
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid ""
+"No discordant pairs: none of the %1$d paired cases was classified correctly "
+"by only one of %2$s and %3$s, so McNemar's test has no information about a "
+"difference in accuracy (its p-value is set to 1 by convention, not computed)."
+msgstr ""
+
 #: R/decision.b.R
 msgid "No discrimination (Youden's index 0, equivalent AUC 0.50)"
 msgstr ""
@@ -103892,6 +104030,14 @@ msgstr ""
 msgid "No recorded response ({n}/{N})"
 msgstr ""
 
+#: R/decisioncombine.b.R
+msgid ""
+"No recorded result of {test} ({variable}) is \"{level}\", the level chosen "
+"as positive, so {test} cannot separate disease-present from disease-absent "
+"cases in these data: on its own it reads sensitivity 0% and specificity 100% "
+"by construction."
+msgstr ""
+
 #: R/tableone.b.R
 msgid "no recorded values"
 msgstr ""
@@ -104264,6 +104410,12 @@ msgstr ""
 
 #: R/decisioncombine.b.R
 msgid "No Test 3 Positive Level"
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid ""
+"No test could be ranked by balanced accuracy because one reference-standard "
+"class has no cases; the figures below describe %s, the first test selected."
 msgstr ""
 
 #: R/jjbetweenstats.b.R
@@ -105976,6 +106128,14 @@ msgstr ""
 msgid "Not estimable: no responder has an assessment after the first response"
 msgstr ""
 
+#: R/decisioncompare.b.R
+msgid "Not estimable: the test was never negative, so LR- is 0/0."
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid "Not estimable: the test was never positive, so LR+ is 0/0."
+msgstr ""
+
 #: R/agreement.b.R
 msgid ""
 "Not estimable: this rater and the reference rater used only one and the same "
@@ -106027,6 +106187,10 @@ msgstr ""
 
 #: R/psychopdaROC.b.R
 msgid "Not informative (post-hoc)"
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid "Not informative: no discordant pairs (p = 1 by convention)"
 msgstr ""
 
 #: R/lassologistic.b.R
@@ -109088,6 +109252,13 @@ msgid ""
 "with disease, but the interval%s admits materially worse performance."
 msgstr ""
 
+#: R/decisioncompare.b.R
+msgid ""
+"On these paired cases accuracy was %1$.1f%% for %2$s and %3$.1f%% for %4$s; "
+"the difference, %2$s minus %4$s, was %5$s percentage points (95%% CI %6$s to "
+"%7$s; Newcombe's method 10)."
+msgstr ""
+
 #: waterfall/options/ongoingVar.title
 #: waterfall/ui[0][5].label
 msgid "On-Treatment / Ongoing (optional)"
@@ -109779,6 +109950,33 @@ msgid ""
 "cautiously."
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid ""
+"Only %d discordant pairs, so McNemar's test has little power here; a "
+"non-significant result does not show that the proportions are the same."
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid ""
+"Only %d discordant pairs, so McNemar's test has little power here; read the "
+"accuracy difference and its paired confidence interval."
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid ""
+"Only %d discordant pairs: with so few, McNemar's test cannot reach p < 0.05 "
+"whatever their split, so its non-significant result says nothing about "
+"whether the proportions changed."
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid ""
+"Only %d discordant pairs: with so few, McNemar's test cannot reach p < 0.05 "
+"whatever their split, so its non-significant result says nothing about "
+"whether the tests differ; read the accuracy difference and its paired "
+"confidence interval."
+msgstr ""
+
 #: R/survivalcont.b.R
 msgid ""
 "Only %d event(s) detected (n=%d total). Descriptive results are shown, but "
@@ -109812,22 +110010,6 @@ msgid ""
 "survivors of that filtering. The levels you assigned (%s) cover every value "
 "that IS present, so this is missing data rather than a mis-selected level. "
 "Check that the outcome column is complete before reporting these numbers."
-msgstr ""
-
-#: R/jjpiestats.b.R
-msgid ""
-"Only %d of the %d pairs are discordant. McNemar's chi-square is an "
-"asymptotic test on the discordant pairs alone, so below about 25 of them it "
-"is anti-conservative. The exact binomial test on those pairs gives "
-"<b>%s</b>; quote that value."
-msgstr ""
-
-#: R/jjpiestats.b.R
-msgid ""
-"Only %d of the %d pairs disagree. McNemar's chi-square is an asymptotic test "
-"on the discordant pairs alone and is anti-conservative below about 25 of "
-"them, and the plotting package computes it without a continuity correction. "
-"The exact binomial test on the discordant pairs gives %s. %s"
 msgstr ""
 
 #: R/diagnosticmeta.b.R
@@ -109870,6 +110052,19 @@ msgid ""
 "a large-sample approximation, so the p-value reported above is unreliable at "
 "this size. For the overall table, an exact test or a larger sample is needed "
 "before the p-value can be read at face value."
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid ""
+"Only 1 discordant pair: McNemar's test cannot reach p < 0.05, so its "
+"non-significant result says nothing about whether the proportions changed."
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid ""
+"Only 1 discordant pair: with one, McNemar's test cannot reach p < 0.05, so "
+"its non-significant result says nothing about whether the tests differ; read "
+"the accuracy difference and its paired confidence interval."
 msgstr ""
 
 #: R/decisioncurve.b.R
@@ -109955,14 +110150,14 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid ""
-"Only one pairwise comparison was computed, so neither this interval nor the "
-"McNemar p-value is adjusted for multiplicity."
+"Only one pairwise comparison was tested (had discordant pairs), so no "
+"multiplicity adjustment applies and the p-value shown is the unadjusted one."
 msgstr ""
 
 #: R/decisioncompare.b.R
 msgid ""
-"Only one pairwise comparison was computed, so no multiplicity adjustment "
-"applies and the p-value shown is the unadjusted one."
+"Only one pairwise comparison was tested by McNemar's test, so neither this "
+"interval nor the McNemar p-value is adjusted for multiplicity."
 msgstr ""
 
 #: R/lassocox.b.R
@@ -114271,14 +114466,13 @@ msgid "Paired Binary Variables (minimum 3)"
 msgstr ""
 
 #: R/decisioncompare.b.R
-msgid ""
-"Paired comparisons used the common determinate rows. Diagnostic correctness "
-"was compared with McNemar's test, using an exact binomial p-value when fewer "
-"than 25 discordant pairs were available."
+msgid "Paired Difference Unavailable"
 msgstr ""
 
 #: R/decisioncompare.b.R
-msgid "Paired Difference Unavailable"
+msgid ""
+"Paired differences in sensitivity, specificity and accuracy are reported "
+"with 95% confidence intervals by Newcombe's method 10 for paired proportions."
 msgstr ""
 
 #: decisioncompare/results/mcnemarTable.columns.title
@@ -114336,6 +114530,10 @@ msgstr ""
 #: nonparametric/options/paired_variable.title
 #: nonparametric/ui[0][3].label
 msgid "Paired/Repeated Measures Variable"
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid "Pairing not used by the Bayesian analysis"
 msgstr ""
 
 #: effectsize/options/pairing_variable.title
@@ -114631,6 +114829,13 @@ msgstr ""
 
 #: R/survival.b.R
 msgid "Pairwise log-rank comparisons"
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid ""
+"Pairwise McNemar p-values were adjusted for multiple comparisons with the "
+"Holm-Bonferroni method; the confidence intervals for the paired differences "
+"were not."
 msgstr ""
 
 #: concordanceindex/results/pairwiseTests.title
@@ -121936,10 +122141,6 @@ msgstr ""
 msgid "Positive likelihood ratio"
 msgstr ""
 
-#: R/decisioncompare.b.R
-msgid "positive likelihood ratio"
-msgstr ""
-
 #: R/decision.b.R
 msgid "Positive likelihood ratio unavailable due to data limitations"
 msgstr ""
@@ -122072,6 +122273,13 @@ msgstr ""
 msgid ""
 "Positive Predictive Value (PPV) will be unreliable even with high "
 "sensitivity/specificity"
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid ""
+"Positive Predictive Value = Probability of disease when test is positive, by "
+"Bayes' theorem at the supplied prevalence p: Sens x p / (Sens x p + (1 - "
+"Spec) x (1 - p))"
 msgstr ""
 
 #: R/decisioncompare.b.R
@@ -122343,8 +122551,15 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid ""
-"Post-hoc pairwise comparisons with Holm-Bonferroni correction were conducted "
-"to identify specific differences between tests."
+"Post-hoc pairwise comparisons used the asymptotic McNemar test without "
+"continuity correction, with Holm-Bonferroni correction, to identify specific "
+"differences between tests."
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid ""
+"Post-hoc pairwise comparisons used the McNemar mid-p test with "
+"Holm-Bonferroni correction to identify specific differences between tests."
 msgstr ""
 
 #: psychopdaROC/options/powerAnalysisType/post_hoc.title
@@ -145949,8 +146164,8 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid ""
-"Small paired sample/discordant counts; CI may be unstable (n={n}, discordant "
-"counts: {counts})."
+"Small paired sample or sparse cells; CI may be unstable (n={n}; paired "
+"counts both, first only, second only, neither: {counts})."
 msgstr ""
 
 #: eurostatmap/options/geo_level/nuts3.title
@@ -149916,6 +150131,13 @@ msgstr ""
 
 #: stagemigration/options/showStatisticalComparison.title
 msgid "Statistical Comparison Table"
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid ""
+"Statistical comparison was not informative here: none of the pairs of tests "
+"that could be compared had discordant pairs, so McNemar's test produced no "
+"test result (detailed results in the comparison tables)."
 msgstr ""
 
 #: jjwithinstats/options/ggpubrAddStats.title
@@ -156268,16 +156490,6 @@ msgid "Test {test} alone"
 msgstr ""
 
 #: R/decisioncombine.b.R
-msgid ""
-"Test {test} cannot be summarized because no case has both the test and "
-"reference-standard result."
-msgstr ""
-
-#: R/decisioncombine.b.R
-msgid "Test {test} Has No Complete Cases"
-msgstr ""
-
-#: R/decisioncombine.b.R
 msgid "Test {test} Pairwise Denominator"
 msgstr ""
 
@@ -157857,6 +158069,14 @@ msgid ""
 "because it is individually unusual."
 msgstr ""
 
+#: R/decisioncompare.b.R
+msgid ""
+"The 95 percent confidence interval for the accuracy difference comes from "
+"Newcombe's method 10, a different procedure from McNemar's test, and it "
+"excludes 0, the value of no difference; the two procedures disagree on these "
+"data, so report both rather than either alone."
+msgstr ""
+
 #: R/decisioncombine.b.R
 msgid ""
 "The 95% confidence interval beside Youden's J is the Agresti-Caffo interval "
@@ -158107,6 +158327,20 @@ msgstr ""
 msgid "The assumed HR is below the NI margin; calculated power is {power}%."
 msgstr ""
 
+#: R/decisioncompare.b.R
+msgid ""
+"The asymptotic McNemar test without continuity correction comparing %1$s and "
+"%2$s did not detect a significant difference in diagnostic accuracy (n = "
+"%3$d paired cases; χ²(%4$d) = %5$.2f, p %6$s)."
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid ""
+"The asymptotic McNemar test without continuity correction comparing %1$s and "
+"%2$s showed a significant difference in diagnostic accuracy (n = %3$d paired "
+"cases; χ²(%4$d) = %5$.2f, p %6$s)."
+msgstr ""
+
 #: R/stagemigration.b.R
 msgid "The AUC at {t} months could not be estimated."
 msgstr ""
@@ -158167,6 +158401,14 @@ msgstr ""
 msgid ""
 "the Bayes factor message is switched on, which ggstatsplot renders alongside "
 "its own subtitle"
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid ""
+"The Bayesian contingency analysis has no paired version: the chart shows a "
+"Bayes factor for independence of the two variables, not a test of change "
+"between the paired measurements. Choose a type of statistic other than Bayes "
+"for McNemar's test."
 msgstr ""
 
 #: R/agreement.b.R
@@ -158361,10 +158603,6 @@ msgstr ""
 msgid ""
 "The chart rests on {n} observations in total, too few for the differences "
 "between groups to be stable; treat the ordering as provisional."
-msgstr ""
-
-#: R/jjpiestats.b.R
-msgid "The chart subtitle reports that exact value."
 msgstr ""
 
 #: R/jjpiestats.b.R
@@ -160014,8 +160252,8 @@ msgstr ""
 #: R/decisioncombine.b.R
 msgid ""
 "The highest Youden's J is {youden}, for {rule} (Agresti-Caffo 95% CI {lower} "
-"to {upper}; equivalent AUC {auc}). The 95% confidence interval of every rule "
-"scored here includes 0, so this sample does not show that any of them "
+"to {upper}; equivalent AUC {auc}). No rule scored here has a 95% confidence "
+"interval wholly above 0, so this sample does not show that any of them "
 "separates disease-present from disease-absent cases better than chance; at "
 "least one interval also reaches 0.40, the equivalent of an area under the "
 "ROC curve of 0.70 (Hosmer, Lemeshow and Sturdivant 2013), so acceptable "
@@ -160456,6 +160694,12 @@ msgid ""
 "Validate every cut-point in independent data before clinical use."
 msgstr ""
 
+#: R/decisioncompare.b.R
+msgid ""
+"The logit interval is undefined at 0% or 100% agreement, so this row shows "
+"Clopper-Pearson (exact) limits."
+msgstr ""
+
 #: R/lollipop.b.R
 msgid ""
 "The lollipop chart needs the following R packages, which are not installed: "
@@ -160558,6 +160802,25 @@ msgstr ""
 msgid ""
 "The McNemar chi-square reported by the plotting package is computed without "
 "a continuity correction, so it will not match the base R default."
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid ""
+"The McNemar mid-p test comparing %1$s and %2$s did not detect a significant "
+"difference in diagnostic accuracy (n = %3$d paired cases; p %4$s)."
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid ""
+"The McNemar mid-p test comparing %1$s and %2$s showed a significant "
+"difference in diagnostic accuracy (n = %3$d paired cases; p %4$s)."
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid ""
+"The McNemar mid-p test is computed directly from the binomial distribution "
+"of the discordant pairs, so it has no chi-squared statistic or degrees of "
+"freedom; those cells are empty in its rows."
 msgstr ""
 
 #: R/agreement.b.R
@@ -161187,10 +161450,10 @@ msgstr ""
 #: R/decisioncompare.b.R
 msgid ""
 "The p-values in this table are Holm-Bonferroni adjusted across the "
-"{comparisons} pairwise comparisons that could be computed. The confidence "
-"intervals in the Differences with 95% Confidence Intervals table are not "
-"adjusted for multiplicity, so an adjusted p above 0.05 can sit beside an "
-"interval that excludes zero."
+"{comparisons} pairwise comparisons that were tested (those with discordant "
+"pairs). The confidence intervals in the Differences with 95% Confidence "
+"Intervals table are not adjusted for multiplicity, so an adjusted p above "
+"0.05 can sit beside an interval that excludes zero."
 msgstr ""
 
 #: R/jjwithinstats.b.R
@@ -161995,9 +162258,10 @@ msgid ""
 "test alone and every strategy) performs at or below chance while an exact "
 "result pattern does not. Both are the signature of a reversed positive "
 "level: the arithmetic still works, but the sensitivity and specificity "
-"reported for each rule are then swapped, and the best-performing rule is one "
-"no clinician can apply. Check the level chosen as positive for the reference "
-"standard and for each test before interpreting any of these results."
+"reported for each rule then describe results read the wrong way round, and "
+"the best-performing rule is one no clinician would apply. Check the level "
+"chosen as positive for the reference standard and for each test before "
+"interpreting any of these results."
 msgstr ""
 
 #: R/survival.b.R
@@ -163960,6 +164224,15 @@ msgid ""
 "misspecified."
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid ""
+"This asymptotic test uses only the discordant pairs. Fagerland et al. (2013) "
+"recommend it when a type I error rate slightly above the nominal level (at "
+"most 5.37% at 5%) is acceptable, and advise against the exact binomial and "
+"continuity-corrected versions in any situation, as both are overly "
+"conservative. Few discordant pairs limit its power."
+msgstr ""
+
 #: R/enhancedROC.b.R
 msgid ""
 "This AUC is apparent (in-sample), and where a cutpoint was searched for on "
@@ -164634,6 +164907,13 @@ msgid ""
 "conservative - genuine differences are harder to detect. Consider splitting "
 "the variables over two or three separate Cross Table analyses, or grouping "
 "rare levels of the grouping variable together."
+msgstr ""
+
+#: R/decisioncompare.b.R
+msgid ""
+"This significant result is borderline: the 95 percent confidence interval "
+"for the accuracy difference comes from Newcombe's method 10, a different "
+"procedure from McNemar's test, and it includes 0, the value of no difference."
 msgstr ""
 
 #: R/psychopdaROC.b.R
@@ -167567,7 +167847,7 @@ msgid "Too few complete observations (%d). Need at least 10."
 msgstr ""
 
 #: R/jjpiestats.b.R
-msgid "Too few discordant pairs for McNemar"
+msgid "Too few discordant pairs to reach p < 0.05"
 msgstr ""
 
 #: R/lassologistic.b.R
@@ -176455,6 +176735,18 @@ msgstr ""
 msgid "Verify there are no special characters in the variable name"
 msgstr ""
 
+#: decisioncompare/options/mcnemarMethod.description.ui
+msgid ""
+"Version of McNemar's test used for each pair of tests. Both are recommended "
+"by Fagerland, Lydersen and Laake (2013). The mid-p test never exceeded the "
+"nominal 5 percent level in their 9595 scenarios, evaluated exactly by "
+"complete enumeration. The asymptotic test without continuity correction is "
+"slightly more powerful and reports a chi-squared statistic, but it often "
+"exceeds the nominal level slightly (at most 5.37 percent observed). The "
+"exact conditional test and the continuity-corrected test are not offered: "
+"both are overly conservative."
+msgstr ""
+
 #: advancedbarplot/options/orientation/vertical.title
 #: alluvial/options/orient/vert.title
 #: economistplots/options/plot_orientation/vertical.title
@@ -181385,8 +181677,10 @@ msgstr ""
 #: R/decisioncompare.b.R
 msgid ""
 "Zero cell detected. A 0.5 continuity correction is applied only to a "
-"likelihood ratio whose own denominator cell is empty (FP = 0 for LR+, TN = 0 "
-"for LR-); every other statistic uses these raw counts. Interpret cautiously."
+"likelihood ratio whose own denominator cell is empty while its numerator is "
+"not (FP = 0 with TP > 0 for LR+, TN = 0 with FN > 0 for LR-); a ratio that "
+"is 0/0 is left blank, and every other statistic uses these raw counts. "
+"Interpret cautiously."
 msgstr ""
 
 #: R/oddsratio.b.R

@@ -1,3 +1,283 @@
+# decisioncompare (meddecide) — `/check-function decisioncompare --profile release` (2026-10-02)
+
+Release profile: every production flag plus external comparison, comprehensive validation, all tests,
+documentation completeness and a release checklist. menuGroup is already `meddecideT` (no change).
+Inputs: the independent review `development-ideas/decisioncompare-independent-review-2026-10-02.md`
+(IR-01 S2, IR-02 S3, IR-03..07 S4, all open) and the follow-ups below. Baseline (before any edit):
+`development-scripts/audit_decisioncompare.R` 344 checks, 332 PASS / 9 FAIL / 3 BLOCKED, identical to
+the review's matrix (run from a scratchpad copy, so the review's matrix file is untouched).
+Acceptance: the audit's 9 FAILs pass; the validation script and every decisioncompare suite are green;
+`prepare()` and `document()` are clean; the release gate with decisioncompare counted as shipped
+matches the normal run; every new msgid has Turkish.
+- [ ] Check workflow: 11 dimensions (args, outputs, variable safety, labelled, validation, UI,
+      placeholders/welcome/gate, i18n, docs/data/tests, external, narrative), two verifiers each
+- [ ] Split agreed 19:55 with peer session `clinicopathjamovimodule-cf`: by the user's request it runs
+      `/fix-function` for IR-01..IR-07 (with t1, t6 and t8) and extends
+      `test-decisioncompare-validation.R`. It owns the narrative, comparison, CI-label, level-handling and
+      heatmap functions until it says "done". This pass keeps the check dimensions plus t3 (Cochran glossary),
+      t4 (liberal-Q disclosure), t5 (Cochran sapply drop) and t7 (strata order), and keeps
+      `prepare()`/`document()`/`i18nUpdate()`/Turkish. No writes to `decisioncompare.b.R`/`.a.yaml`/`.r.yaml`
+      before the handoff.
+- [ ] Fix confirmed in-scope check findings outside the peer's functions
+- [ ] Regression tests for every fix (`test-decisioncompare-release-check.R`)
+- [ ] `i18nUpdate()` + Turkish for new msgids; `prepare()`; `document()`
+- [ ] Verify: audit script, validation script, decisioncompare suites + meddecide audit + zzz contracts,
+      release gate (decisioncompare as shipped), parse
+- [ ] NEWS.md, CHANGELOG.md, release checklist and verdict
+
+# decisioncompare (meddecide) — `/fix-function decisioncompare --apply` for IR-01..IR-07 (2026-10-02, session `clinicopathjamovimodule-cf`)
+
+Source: `development-ideas/decisioncompare-independent-review-2026-10-02.md`. Ownership (agreed with
+`clinicopathjamovimodule-c0`): the narrative, comparison, CI-label, level-handling and heatmap functions
+in `decisioncompare.b.R`, the diffTable `p` column in `.r.yaml`, and the `mcnemarMethod` help in
+`.a.yaml`. No `prepare()`/`document()`/`i18nUpdate()`/`.po` edits in the shared tree: verification runs
+in an isolated scratchpad copy where `prepare()` is run. Backups: scratchpad `backups_20261002_1952`.
+Acceptance: the audit script's 9 FAILs pass and its other 335 checks stay unchanged; every
+decisioncompare suite is green in the isolated copy; new regression tests are in
+`test-decisioncompare-validation.R`.
+- [x] Codex plan (CLAUDE.md step 1); reconcile with the audit's proposed fixes
+- [x] IR-01 (S2) direction of significant pairs + ranking-conflict sentence (Summary, Report, Descriptive)
+- [x] IR-02 (S3) per-class McNemar p in diffTable (`p` column, Accuracy row blank) + prevalence caveat
+- [x] IR-03 (S4) Clopper-Pearson named in Methods and in an epirTable note
+- [x] IR-04 (S4) half-up rounding in every copy-ready number (1 dp %, 2 dp LR)
+- [x] IR-05 (S4) epiR labels: false positive rate / false negative rate
+- [x] IR-06 (S4) NA level (`addNA`) treated as missing in level counts and missing counts
+- [x] IR-07 (S4) heatmap reference row keyed by a reserved key; label translated at draw time
+- [x] t1 tie wording; t6 Differences footnote wording; t8 `mcnemarMethod` help (10-100 pairs)
+- [x] Update other decisioncompare test assertions broken by wording changes (list them in the handoff)
+- [x] Verify in the isolated copy: parse, `prepare()`, audit script, all decisioncompare suites
+- [x] NEWS.md + CHANGELOG.md entries
+- [ ] Adversarial review of the diff (4 lenses + refuters); handoff "done" message to `clinicopathjamovimodule-c0`
+- [ ] Then `/validate-function decisioncompare tests=write`
+
+# decisioncompare (meddecide) — `/fix-function decisioncompare --apply` (2026-10-01)
+
+Source: `development-ideas/decisioncompare-validation-2026-10-01.md` (NOT VALIDATED: 1 S1, 1 S2, 7 S3, 5 S4).
+menuGroup `meddecide` -> `meddecideT` for this pass (move it back after testing). Backups: scratchpad
+`backup-fix-decisioncompare-20261001-181600`. Acceptance: every skip-guarded test in
+`tests/testthat/test-decisioncompare-validation.R` live and green; the validation script ends with 0 FAIL;
+existing decisioncompare suites and the meddecide audit test green; `prepare()` clean with only
+`decisioncompare.h.R` changed.
+- [x] VAL-01 (S1) winner sentence from the paired cells, paired accuracies and n (Summary + Report)
+- [x] VAL-02 (S2) LR+ / LR- not estimable at 0/0 (never positive / never negative)
+- [x] VAL-03 `.sourcifyOption`: Variable and Level options as escaped string literals
+- [x] VAL-04 one p formatter for copy-ready text ("< 0.001")
+- [x] VAL-05 Methods names Cochran's Q, Holm, continuity correction, Newcombe; sentences carry n and the difference CI
+- [x] VAL-06 logit OPA row at 0% / 100%: footnote the Clopper-Pearson fallback
+- [x] VAL-07 Bayes formula footnotes when a prevalence is supplied
+- [x] VAL-08 no ranking sentence when no balanced accuracy is estimable
+- [x] VAL-09 LR from counts, band comparisons with tolerance
+- [x] VAL-10 radar LR axes continuous and symmetric
+- [x] VAL-11 difference table states first-minus-second
+- [x] VAL-12 multi-level checks count observed levels
+- [x] VAL-13 heatmap fill scale after `ggtheme`
+- [x] VAL-14 `ciMethod` description; sparse-class notice when `pp` is on
+- [x] menuGroup T suffix; `prepare()`; `document()`
+- [x] Verify: validation tests unskipped, validation script, decisioncompare suites, meddecide audit, release gate
+- [x] NEWS.md entry; CHANGELOG.md lesson
+- **Results.**
+  - **Regression tests.** `test-decisioncompare-validation.R` has 30 tests and 168 expectations,
+    all green. With the pre-fix class swapped into the namespace in memory, exactly the 13 defect
+    tests fail and the 17 baseline tests pass.
+  - **Suites.** All seven `test-decisioncompare*.R` files, `test-meddecide-library-audit.R` and the
+    three zzz contracts: 142 tests, 542 expectations, green.
+  - **Validation script.** The post-fix run (R = 2000) gives 896 of 896 PASS. Against the pre-fix
+    matrix, 24 rows went FAIL -> PASS and no PASS row changed value.
+  - **Generation.** `prepare()` changed only `decisioncompare.h.R` and `0000.yaml`; `document()`
+    changed only `decisioncompare.Rd`.
+  - **Release gate.** With decisioncompare counted as shipped: identical to the normal run,
+    0 blocking.
+  - **Codex plan review.** Six refinements were applied (see the report's "Fix status").
+- [x] `/prepare-translation decisioncompare` (tr). Plan: `i18n-plans/decisioncompare-tr-translation-plan.md`.
+  - **Wrapped.** Wrapped the comparison label `{first} vs {second}` (row keys stay English), the
+    heatmap "Gold Standard" label (state key unchanged), the 3-test Cochran summary as two complete
+    msgids, and `fmt_pct()` as `.("%.1f%%")` so Turkish gets `%85.0`. The Edit tool had decoded a
+    typed backslash-u escape for the chi-squared sign into the literal character; the escape was
+    restored, and `showNonASCIIfile()` gives 0. The tool layer does the same in Bash heredocs,
+    raw strings included, so build such escapes from code points (`chr(92) + 'u03C7'`).
+  - **Catalog.** Filled 282 Turkish msgstr, so decisioncompare is 472/472 (was 190/471).
+    `i18nUpdate()` changed decisioncompare entries only, and `msgfmt -c` is OK.
+  - **Release gate.** With decisioncompare gated as shipped, the output is identical to the normal
+    run.
+  - **Turkish runtime smoke.** 11 fixtures with every panel on: 0 errors, 0 English R-side
+    fragments, 0 sprintf residue.
+  - **Tests.** 139 tests and 631 expectations, all green.
+- [x] `/update-refs decisioncompare` and `/reference-verifier decisioncompare`. Report:
+  `development-ideas/decisioncompare_refs_audit.md`; BibTeX: `decisioncompare_refs.bib`.
+  - **Refs.** Added `edwards1948` (retired later the same day, see below), `ClopperPearson1934`,
+    `BrownCaiDasGupta2001`, `haldane1956` and `anscombe1956` to the r.yaml. Two new `00refs.yaml` entries; the shared `knitr` (placeholder
+    title) and `ggplot2` (2018, partial author list) entries corrected.
+  - **`--validate`.** 18/18 keys resolve.
+  - **Worker.** The `/update-refs` worker's only addition (`jmvtools`, from a comment) was not
+    applied.
+  - **Fagerland 2014 not added at first.** Its recommended McNemar tests were not the ones reported
+    then, so the citation would have misled. It was added once the analysis switched to those
+    tests (next item).
+  - **Level 4 fix.** "Strong positive/negative evidence" now needs LR+ > 10 / LR- < 0.1, so exactly
+    10 and 0.1 are Moderate, as in Jaeschke 1994 and `decision`. The VAL-09 test and three
+    evidence-script checks now take their oracle from the source.
+  - **Generation.** `prepare()` changed only `decisioncompare.h.R` (refs) and `R/00jmv.R`
+    (metadata).
+  - **Verification.**
+    - 139 tests and 635 expectations: green.
+    - Validation script: 896/896 PASS; the post-fix matrix is refreshed.
+    - Release gate: with decisioncompare gated as shipped, identical to the normal run (0
+      blocking).
+- [x] Use the recommended McNemar tests (user, 2026-10-01).
+  - **What changed.**
+    - The default is the mid-p test, Fagerland et al. 2013 eqs. 5-6: the tie rule is 1 - f/2, and
+      b + c = 0 gives p = 1 with a footnote.
+    - A new option, `mcnemarMethod`, offers the asymptotic test without continuity correction.
+    - The exact-conditional (< 25 discordant pairs) and continuity-corrected tests are gone.
+    - `edwards1948` was retired, and `Fagerland2013` and `Fagerland2014` are cited.
+  - **Evidence.**
+    - Fagerland 2013 full text and the 2017 book (Table 8.15) were read in full; there is no
+      cut-off rule.
+    - Fagerland's Table 6 is reproduced through the full analysis: Bentur mid-p 0.0391 and
+      asymptotic 0.0339; Cavo 0.0347 and 0.0330.
+  - **Process.** A 6-agent research workflow, then an implementation-and-review workflow. That
+    second workflow covered tests, the evidence script, Turkish and the playbook, followed by
+    4-lens review with 2 skeptics per finding: 31 findings survived, all S3/S4.
+  - **Round-2 text fixes.**
+    - Per-variant report sentences.
+    - A disagreement sentence when p and the Newcombe CI disagree.
+    - Zero-discordant narrative.
+    - Singular footnote.
+    - Note explaining the empty statistic cells under mid-p.
+    - The 3-test report names the test.
+    - "complete enumeration" instead of "simulated".
+    - `note: >-`, so the McNemar table note is translated.
+  - **Round 3, from the second review.**
+    - The Cochran row is matched by its exact key. A test named "Cochrane" crashed the 3-test panels
+      (S1), or under the asymptotic option showed a pairwise result as Cochran's Q (S2).
+    - The disagreement wording is "includes/excludes 0, the value of no difference".
+    - The Summary carries the same disclosure as the Report.
+    - Zero discordant pairs: "Not informative" in the interpretation cell, the footnote and the
+      Results section.
+    - CI limits near 0 print with more decimals.
+  - **Round 4, from the final review.**
+    - The Holm family now holds only the pairs that were tested; zero-discordant pairs are left
+      out, with a note (S2).
+    - `mcnemar_cache[i] <- list(mc)`: a trailing uncomputable pair raised a spurious warning.
+    - The Caution paragraph is gated when the comparison was not informative.
+    - One number formatter for the difference and the CI limits, so a nonzero value never prints
+      as 0.0 and zero never as -0.0.
+    - `.formatP` rounds half up, as the jamovi table does (0.0625 is 0.063 in both).
+    - Footnote when no split can reach p < 0.05: m <= 4 for mid-p, m <= 3 for the asymptotic test.
+    - Cochran error notice; Differences footnote relabelled.
+  - **Round 5, from the round-4 review.**
+    - The significance state counts only tests that ran, and is NA when none did. The "not
+      informative" sentence no longer claims all tests agreed, and the Methods still name the
+      test.
+    - The multiplicity notes say "tested", and the exclusion note appears only when Holm was
+      applied.
+    - Paired accuracies and the difference round half away from zero, as the jamovi table does
+      (56.25 is 56.3).
+  - **Final verification.**
+    - Tests: 163 tests, 1097 expectations, 0 failed, errors, skips or warnings.
+    - Release gate: 0 blocking; identical with decisioncompare gated as shipped.
+    - Turkish: 490/490 and `msgfmt -c` OK; the runtime smoke ends with 0 problems.
+    - Evidence script: see the validation report addendum.
+  - **Records.** NEWS, CHANGELOG, validation report addendum, refs audit addendum and bib,
+    translation plan, vignette row, validate-function playbook, memory notes.
+- [ ] (user) Move `menuGroup` back to `meddecide` after testing in JamoviTest.
+- [ ] Follow-up, out of scope. 11 Turkish msgstr in other analyses reorder unnumbered `%s`/`%d`, so
+  `sprintf()` fails for Turkish users. Analyses: `chisqposttest` (5), `crosstable` (3),
+  `singlearm`, `venn` and `survivalcont` (1 each). The release gate WARNs "11 translations do not
+  keep their sprintf conversions". Fix with positional `%n$` msgids or restore the order.
+- [ ] Follow-up. Decide module-wide whether the shared `PPV`/`NPV` column-title msgstr become
+  `PÖD`/`NÖD`, as the prose already uses.
+- [x] Follow-up (shipped JJStatsPlot; Fagerland 2013): retire "exact binomial below 25 discordant
+  pairs" in jjpiestats and jjbarstats. Done 2026-10-02 as a plain fix request (no slash command), so
+  `menuGroup` stays `JJStatsPlot`.
+  - **Design.** Keep ggstatsplot's asymptotic McNemar without continuity correction (a Fagerland
+    recommended test); no exact swap, no new option. Notices at b + c = 0, <= 3 (cannot reach
+    p < 0.05) and < 10 (little power). The total n < 10 gate stays because Fagerland evaluated
+    10-100 pairs; only its advice changed. jjpiestats' false "non-zero marginal totals" gate is gone.
+    Bayes + paired is no longer labelled McNemar: statsExpressions ignores `paired` there.
+  - **Review fixes.** These come from 3 reviewers with 2 skeptics per finding: 9 findings confirmed
+    (de-duplicating to 5), 4 refuted.
+    - jjbarstats Assumptions no longer gives paired data the expected-count rule and Fisher advice.
+    - The jjbarstats setup panel and its notices no longer call Bayes runs McNemar.
+    - The jjpiestats Interpretation panel no longer points to a removed exact p.
+  - **Verify.**
+    - Tests: jj pie 166 tests (353 expectations), bar 142 (282), module 34 (93), 0 failures.
+    - On HEAD code the new tests fail with 45 (pie) and 21 (bar) failed expectations.
+    - Release gate: 0 blocking. `msgfmt -c` OK.
+    - `prepare()`: refs line only in the two `.h.R`.
+    - i18n: 12 new jjpiestats msgids (untranslated, as all its McNemar text was); 8 retired, none
+      of which had Turkish.
+  - **Records.** NEWS, CHANGELOG 2026-10-02, memory (`reference_mcnemar_guard...`,
+    `reference_ggstatsplot_palette...`).
+- [ ] (user) `Rscript _updateModules.R --dry-run`, then sync jjstatsplot. Its copies of
+  `R/jjpiestats.b.R` and `R/jjbarstats.b.R` predate the McNemar fix.
+- [ ] Follow-ups to the jj McNemar fix (out of scope, found by the 2026-10-02 review):
+  - **Split By.** Paired notices use the pooled table. A panel with b + c = 0 loses its subtitle
+    with no note (both analyses).
+  - **Level order.** statsExpressions reads b and c by position (`xtab[1,2]`, `xtab[2,1]`). If dep
+    and group order their levels differently, the concordant cells get tested: measured p 0.0896
+    with matched levels vs 0.742 with the group levels reversed. Relevel group to dep's levels, or
+    reject.
+  - **Paired wording.** The interpretation guides and the report still describe Cramer's V and
+    "association" for paired runs, where the chart shows Cohen's g and a test of change.
+  - **Seed caption.** `captionSeedMatters()` (`R/utils-ggstatsplot.R:124`) ignores `paired`, so
+    paired frequentist charts with the BF message on get a spurious "Random seed" caption.
+  - **jjbarstats, one outcome with b + c = 0.** It rejects every outcome. Consider drawing with a
+    p = 1 note, as jjpiestats does.
+  - **Bayes + paired with an invalid design** (n < 10, or b + c = 0) is refused for a McNemar
+    reason in both analyses.
+  - **jjbarstats, unpaired Bayes runs.** Assumptions still says "the chart reports an uncorrected
+    Pearson chi-squared ... quote Fisher" and lists the expected-count rule, but the chart is a Bayes
+    factor. Gate it like `.emitDataQualityNotices()`.
+  - **jjpiestats Methods** still names McNemar when the chart is blank (the table is not 2x2, or
+    n < 10).
+  - **Optional `mcnemarMethod` (mid-p)** for parity with decisioncompare.
+  - **Turkish.** `/prepare-translation jjpiestats` (25/224 translated). jjbarstats notices are
+    unwrapped English.
+  - **Parked analyses on retired variants.**
+    - modalitycomparison: exact test on discordant pairs (`R/modalitycomparison.b.R:410`).
+    - Edwards' correction: mlpathology, treecompare, multiclassdiagnostics, nonparametric,
+      cohenskappa, decisionpanel, contTablesPaired, and exacttests when that option is set.
+- [ ] Follow-up. Give decisioncombine the shared mid-p.
+  - **The mismatch.** `R/decisioncombine.b.R:2306-2313` computes the McNemar mid-p inline. At a
+    tie it returns 1, where Fagerland eq. 6 (used by decisioncompare) gives 1 - f/2. Both cite
+    Fagerland2013.
+  - **Fix.** Move one pure helper, with no `.()` and no options, into
+    `R/utils-paired-proportions.R`; both analyses already share that file. Then update
+    decisioncombine's RF-05c oracle.
+  - **Scope.** decisioncombine has uncommitted work from another session, so do this as its own
+    change.
+- [ ] Follow-up (pre-existing, statistics). Cochran's Q compares to a chi-squared reference on 2 df. That is too
+  liberal when the three tests' correctness is unequally correlated, even in large samples: the
+  type I error rate is about 0.076 at nominal 0.05 when two tests agree closely. The source is
+  Bhapkar & Somes 1977, JASA 72:658. Consider an exact or permutation Q, or disclose it; do not
+  describe Q as holding the nominal level.
+- [ ] Follow-up (i18n). Translatable results-yaml strings with edge whitespace are never matched by
+  the catalog: the compiler trims the msgid, but the runtime string keeps the whitespace. Hits:
+  - shipped: `jamovi/multisurvival.r.yaml:287` `title: ' Statistical Glossary'`, also in jsurvival;
+  - draft: `jamovi/precisionrecall.r.yaml:10` `content: >`.
+
+  decisioncompare's two notes were fixed with `>-`. Consider a release-gate check for title,
+  superTitle, notes and content strings that differ from their trim.
+- [ ] Follow-up (i18n). The lowercase msgid `McNemar test` (contTablesPaired) has no Turkish.
+- [ ] Follow-up (decisioncompare, low). Other percentages in the copy-ready text still round exact
+  binary ties half-to-even (sprintf), where jamovi's `pc` columns round half up. Examples: the
+  sensitivity and specificity in the Results section (`fmt_pct`) and the per-test summaries. Use
+  `private$.halfUp1()` there as well. The McNemar-related numbers were aligned on 2026-10-02.
+- [ ] Follow-up (decisioncompare, tests). The Cochran's Q error branch (R4-7 notice) has no
+  regression test, because no valid fixture reaches it. Reviewers reached it with a one-row 3-test
+  dataset, where `sapply()` drops to a vector.
+- [ ] Follow-up (decisioncompare, pre-existing). When the balanced accuracies are exactly tied,
+  the copy-ready text still names one test as having "the highest observed balanced accuracy". This
+  happens in the Results lead, the Caution paragraph, and the 3-test Summary and Report. The tie
+  appears only in the "Tied Descriptive Ranking" notice. Use tie sentences when
+  `length(private$.best_test_tied) > 1` (new msgids plus Turkish). Final review 2026-10-02, A5.
+- [ ] Follow-up (decisioncompare, pre-existing). The 3-test Summary and Report never read the
+  pairwise McNemar rows, so their wording about pairwise comparisons can contradict the table.
+  State the pairwise outcome from the table instead: either the Holm-adjusted pairs with p < 0.05,
+  or that none was significant after adjustment. Also reword the Cochran glossary to "the tests do
+  not all have the same accuracy". Final review 2026-10-02, LB-4.
+
 # agreement (meddecide) — deferred from the 2026-09-23 correctness pass
 
 Everything the independent audit found is fixed and verified (audit harness 29/29, suites 616 pass).
@@ -1410,6 +1690,97 @@ before coding (statistics, guard calibration, jamovi integration, clinical wordi
 - [ ] (i18n, other analyses) translate the 41 collateral msgids, or re-run `i18nUpdate()` after that work lands.
 - [ ] (optional) Koopman score interval for LR (module-wide decision, unchanged); a second independent driver of
   missingness is not named (one line per variable, the strongest).
+
+**`/release-review-function decisioncombine` (2026-10-01) — results.** `menuGroup` already `meddecideT`; analysis
+version untouched (the updater owns it). Only `R/decisioncombine.b.R` changed, so no `prepare()`/`document()` and no
+catalog update (no `.()` string changed).
+- Evidence (scratch oracle sharing no code with the analysis): 1,488 cells of the combination and two CI tables in
+  3 configurations (2 tests; 3 tests with 3% missing; 3 tests at n 70 with zero cells and empty patterns) to 1e-9;
+  46 zero-free LR/DOR intervals equal `epiR::epi.tests`; the paired table's 46 rows equal hand counts, `binom`
+  Wilson, `ratesci` MOVER-Wilson (Newcombe method 10; it reproduces Newcombe's published 0.0569 to 0.3404) and the
+  `exact2x2` mid-p; the expected drop equals a patient-level stratified bootstrap with Harrell's plain estimator
+  (B 20,000) within 4 Monte Carlo SE in 3 designs incl. a near-tie, stability within 0.6 points. Missingness screen:
+  severity equals the `epiR` Mantel-Haenszel risk ratio thresholds in 5 constructed designs (incl. rho exactly 2);
+  values missing completely at random (20% per variable, n 150 / 600, 2 and 3 tests, 1,200 runs): 0 serious, 2
+  plain warnings.
+- [x] (crash, Critical) `.screenSelectiveMissingness()`'s `ratio()` multiplied integer counts. Any sample of about
+  93,000+ cases with five values missing in one variable, missing completely at random, stopped the analysis with
+  "missing value where TRUE/FALSE needed" (reproduced at 100,000 / 200,000). `as.numeric()` at the product; counts
+  stay integers for the notice text. Test RR2-01.
+- [x] (silent blank, Major) `.analyzeSinglePattern()` kept `tp_adj <- tp` as an integer when no correction applied:
+  from two cells above 46,341 the DOR and its interval were blank with no notice (6 of 8 rows at 200,000), and the
+  forest-plot notice blamed "a pattern no patient shows". RR2-02.
+- [x] (Minor) the seed note read "Random seed: 1e+05" for `seed = 100000` from R syntax (jmvcore's `format()` on a
+  double); `as.integer()`. RR2-03.
+- [ ] (wording, Minor, not changed) the partial-verification explanation for joint predictors says the predictive
+  values "can all be biased ... for every test and rule"; the PPV of an exact-pattern row is unbiased when the
+  reference depends only on the pattern. Errs on the cautious side; changing the msgid means redoing the Turkish.
+- Verify: 21 files (10 decisioncombine incl. the 3 RR2 tests, 6 decisioncompare, rendering contract, meddecide
+  library audit, init-row runtime, file naming, meddecide release): 357 tests, 1,519 expectations, 0 failed / error /
+  skip / warning (baseline 354 / 1,511). The 3 RR2 scenarios fail on HEAD (crash; DOR NA + an R warning; "1e+05") and
+  pass on the tree (`HEAD:R/decisioncombine.b.R` vs tree, sys.source harness). `release_gate.py` 0 blocking,
+  identical before/after and with decisioncombine counted as shipped; `check_state_guards.py` 0;
+  `check_uyaml_duplicate_names.py` OK; `render_ui.sh decisioncombine` renders, no error; library-review greps clean.
+  Runtime: n 200,000 reflex design 0.5 s.
+- [ ] (user) Commit; `Rscript _updateModules.R --dry-run`, then sync (JamoviTest carries decisioncombine while it is
+  `meddecideT`); `Rscript --vanilla tools/submodule_smoke.R ../JamoviTest`; move `menuGroup` back to `meddecide`
+  when satisfied (promotion: re-run `release_gate.py` first).
+
+**`/fix-function decisioncombine --apply` (2026-10-01) — plan.** `menuGroup` already `meddecideT`; no peer session.
+Baseline: the 10 `test-decisioncombine*.R` files, 233 tests / 1,002 expectations, 0 failed / error / skip / warning.
+Clean (probed, no change): wiring of every option and result item, `.fmt` placeholders, refs keys, declared
+dependencies, generated syntax for 1 / 2 / 3 tests (parses and runs), special-character names and levels, numeric /
+logical / tibble input, a jamovi row filter (`addedPattern` row numbers), every validation exit, all four plots in 11
+configurations (no R warning or error), the documented `histopathology` example.
+Acceptance: a constant test is named by a notice and no notice misdescribes its structural zeros; empty patterns no
+longer appear in "Sparse Cell Counts"; sampling zeros still do; no number in any table changes.
+- [x] (A, error handling) A test that is constant among the complete cases (always positive, or its positive level never
+  occurs) runs with no notice naming the cause. One test: a serious "Poor Discrimination" whose advice ("the likelihood
+  ratios still show how far each result moves the probability of disease") cannot apply, plus "Sparse Cell Counts".
+  Two or three tests: nothing. Fixed: STRONG_WARNING "{test} Has Only Positive Results" / "... Has No Positive Results"
+  from `.prepareData()`, judged on ALL the test's recorded results (a test left with one result by missing values is
+  the missingness notice's case, whose cause this one would misname) and only with both reference outcomes present;
+  `.assessTopRuleDiscrimination()` stays silent for such a single test (`.constantTests`). FX-01..04.
+- [x] (B, wrong notice) `.assessSparseCounts()` exempted an empty disease margin (VAL-01 / C44) but not an empty TEST
+  margin, so every pattern nobody shows, and every always/never-positive rule, was reported as resting on "very few
+  cases", although `.analyzeSinglePattern()` applies no correction there and the ratios are blank or exactly 1. Fixed:
+  the same four empty margins the correction skips. Behaviour reversal vs `test-decisioncombine-edge-cases.R:94`
+  (2026-08-28 asserted the sparse notice for a constant test1, raised there only by its four structural rows): that
+  test now asserts the new notice and no sparse notice. FX-05.
+- [x] (C, from the Codex review) "Discrimination Not Established" (two or three tests) said "the 95% confidence interval
+  of every rule scored here includes 0" while the condition is only that no lower limit exceeds 0; an exact pattern at
+  J -0.30, interval -0.486 to -0.076, contradicted it. Now "No rule scored here has a 95% confidence interval wholly
+  above 0". The one-test wording ("The interval includes 0") is right: a test wholly below 0 gets the inversion
+  warning instead. FX-06.
+- [x] (D, from the Codex review) The collective "Positive Levels May Be Inverted" said a reversed level leaves each
+  rule's sensitivity and specificity "swapped"; it complements them (1 - x). Now "then describe results read the
+  wrong way round", and "no clinician would apply" for "can apply". FX-07.
+- [x] (E, from the Codex review) "Test {test} Has No Complete Cases" could not fire (validation guarantees four joint
+  complete cases); now a bare defensive return, two msgids fewer for translators.
+- [x] (F, from the Codex review) The empty-state gate tested gold and Test 1 only: Test 2 chosen first returned
+  silently while Test 1 first drew "No Gold Standard". All four slots now. FX-08.
+- [x] Regression tests: `tests/testthat/test-decisioncombine-fix-function.R` (8 tests, 28 expectations). On the pre-fix
+  file (sys.source harness) FX-01, 02, 05, 06, 07, 08 fail and the two over-firing guards FX-03 / FX-04 pass; all 8
+  pass on the fix. i18n: `jmvtools::i18nUpdate()` (catalog diff = the 6 new, 2 reworded, 2 removed msgids only; the
+  tool also rewrapped 17 long single-line Turkish msgstr from earlier sessions, text identical) and Turkish for
+  the 8 new / reworded msgids; `msgfmt -c` OK; a second `i18nUpdate()` is idempotent; decisioncombine 341/341
+  translated.
+- [x] Verify (results below).
+
+**Results.** Changed: `R/decisioncombine.b.R` only in source (no yaml, so `R/decisioncombine.h.R`, `0000.yaml` and
+`man/` are untouched and need no `prepare()` / `document()`), the three catalogs, the new test file, and one assertion
+in `test-decisioncombine-edge-cases.R`. No number in any table changes. Verified: the 11 `test-decisioncombine*.R`
+files + rendering contract + init-row runtime + file naming + meddecide library audit + meddecide release: 16 files,
+297 tests, 1,342 expectations, 0 failed / error / skip / warning (baseline for the 10 original files: 233 / 1,002,
+unchanged; the edge-case file gains one expectation). `release_gate.py`: 0 blocking, 9 advisory, byte-identical with
+decisioncombine counted as shipped. Probes with no defect found: wiring of every option and result item, `.fmt`
+placeholders (parser check, 0 mismatches), refs keys, declared dependencies, generated syntax for 1 / 2 / 3 tests
+(parses and runs), special-character names and levels, numeric / logical / tibble input, a jamovi row filter, every
+validation exit, all four plots in 11 configurations (no R warning or error), the documented `histopathology` example.
+Known limit, not changed: a test left with one result among the complete cases because fewer than 5 values are
+missing (below the missingness screen's floor) still gets only the generic "Removed N case(s)" notice.
+- [ ] (user) Commit; `Rscript _updateModules.R --dry-run`, then sync JamoviTest; move `menuGroup` back to `meddecide`
+  when satisfied (re-run `release_gate.py` first).
 
 ### decisioncompare
 
@@ -6273,7 +6644,7 @@ Verified in this pass (independent references, not the code's own arithmetic):
 
 - [x] hygiene greps: no set.seed / <<- / library() / par() / options() / raw non-ASCII; `\value` present; all `::` packages in Imports. lintr review set: 0 real-bug linters fire (40 quotes_linter + 1 brace_linter are style). codetools on every lifted R6 method: 15 notes, all false positives (glue `{}` interpolation of `prep_time`/`error_context`, purrr `~` lambdas, jamovi render signature `image`/`theme`, unused `e` in handlers). Manual `&`/`|`-in-`if` scan: none. No unreferenced private methods. Rendering contract 6/6.
 - [ ] [stats] interpretation guide quotes Cohen's df=1 thresholds (0.1 / 0.3 / 0.5) for Cramer's V; the subtitle's V is the bias-corrected one and for an r x c table the thresholds are 0.1/0.3/0.5 divided by sqrt(min(r, c) - 1) (3x3: 0.07 / 0.21 / 0.35, so V = 0.19 on the example data is near "medium", not "small"). Compute df* per table in `.generateInterpretationGuide()` and print the scaled thresholds; say "bias-corrected".
-- [ ] [clinical] McNemar has no discordant-pair guard: `.validatePairedData()` checks total n >= 10 only. Add a STRONG_WARNING when b + c < 25 (exact binomial on the discordant pairs is the right test there) and an ERROR when b + c == 0.
+- [x] [clinical] McNemar has no discordant-pair guard: `.validatePairedData()` checks total n >= 10 only. Add a STRONG_WARNING when b + c < 25 (exact binomial on the discordant pairs is the right test there) and an ERROR when b + c == 0. **Superseded 2026-10-01:** Fagerland et al. 2013 recommend the mid-p or asymptotic McNemar at any b + c, never the exact binomial; see the jjpiestats/jjbarstats follow-up near the top of this file. **Resolved 2026-10-02** by that fix (notices at b + c = 0, <= 3 and < 10; no exact advice).
 - [ ] [notices] "Small Group Sizes" (< 5 rows per group) is not a chi-squared criterion and now overlaps the expected-count notice; reword as a data note or drop it.
 - [ ] [ui] `addGGPubrBalloon` title "Add balloon plot (ggpubr)" starts with an action verb (no .u.yaml override) -> "Balloon plot (ggpubr)"; "Quick Clinical Setup" CollapseBox sits above the VariableSupplier -> move it below (library rule: supplier near the top).
 - [ ] [ux] copy-ready report's `<button onclick=...>` is inert in exported documents and may be blocked in the results webview; drop it (the text is selectable).

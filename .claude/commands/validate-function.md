@@ -562,11 +562,29 @@ write, not a conclusion. Obey E3: read the default, do not recall it.
 
 - Chi-square with sparse expected counts (Cochran: no more than 20% below 5, none below 1) and the
   fallback actually used; ordered categories need a trend test; paired data need McNemar.
-- McNemar's validity is governed by the DISCORDANT pairs b + c, not by the table total: a guard
-  written on total N passes a table with n = 206 and 6 discordant pairs, where jjpiestats reported
-  p = 0.1025 against an exact binomial p = 0.2188. Below about 25 discordant pairs the comparison is
-  `binom.test(b, b + c, 0.5)`; Fisher is not the alternative, it assumes independent samples. Check
-  the correction too: `statsExpressions::contingency_table(paired = TRUE)` calls
+- McNemar's information lives in the DISCORDANT pairs b + c, not in the table total: a guard keyed
+  on total N stayed silent on a jjpiestats table with n = 206 and only 6 discordant pairs. Fisher
+  is not the alternative, it assumes independent samples. Expect a variant Fagerland, Lydersen and
+  Laake recommend at any b + c (BMC Med Res Methodol 2013;13:91; their 2017 book Statistical
+  Analysis of Contingency Tables, Table 8.15): **mid-p** by default, or the asymptotic test WITHOUT
+  continuity correction, (b - c)^2 / (b + c) on 1 df, where small but frequent excesses over the
+  nominal level are acceptable; their exact unconditional (Suissa-Shuster) test also qualifies.
+  Mid-p is eq. (5) when b != c, `2 * pbinom(k, b + c, 0.5) - dbinom(k, b + c, 0.5)` with
+  `k = min(b, c)`, and eq. (6) at a tie, `1 - dbinom(b, 2 * b, 0.5) / 2` (0.75 at b = c = 1); it
+  has no chi-square or df to display. b + c = 0 carries no information: expect p = 1 (the paper's
+  own setting for the asymptotic tests), a note saying why, and no chi-square - `mcnemar.test()`
+  returns NaN there and a bare eq. (6) gives 0.5. Oracles: that closed form, and the paper's
+  Table 6 - (b, c) = (1, 7) gives mid-p 0.0391, asymptotic 0.0339, exact conditional 0.0703,
+  continuity-corrected 0.0771; (6, 16) gives mid-p 0.0347, asymptotic 0.0330.
+  `coin::midpvalue()` on an exact `coin::mh_test()` follows eq. (6), while
+  `exact2x2(paired = TRUE, midp = TRUE)` returns 1 at every tie, so it is no oracle there.
+- An exact conditional p (`binom.test(b, b + c, 0.5)`), Edwards' continuity-corrected test (base
+  `mcnemar.test()` defaults to `correct = TRUE`) or a rule switching to the exact test below about
+  25 discordant pairs computes a named method correctly: file it as a **method-choice defect** and
+  never adopt it as the oracle. Both tests are highly conservative with poor power - on (1, 7)
+  both land above 0.05 where mid-p and asymptotic land below - and the authors "do not recommend
+  use of the McNemar exact conditional test nor the asymptotic test with CC in any situation".
+  Name the variant too: `statsExpressions::contingency_table(paired = TRUE)` calls
   `mcnemar.test(correct = FALSE)` while base R defaults to TRUE, so an unqualified "McNemar's test"
   in a Methods sentence does not reproduce.
 - 2x2 measures: OR vs RR vs RD labels; table orientation; zero-cell correction disclosed;
@@ -631,7 +649,8 @@ write, not a conclusion. Obey E3: read the default, do not recall it.
 - PPV and NPV depend on prevalence; under case-control sampling the sample prevalence is
   meaningless and a user-supplied prevalence with Bayes is required.
 - AUC CI (DeLong vs bootstrap); correlated ROC curves need the paired test; two tests on the same
-  patients need McNemar on discordant pairs for sensitivity and specificity separately.
+  patients need McNemar on discordant pairs for sensitivity and specificity separately, in a
+  variant the cross-tabulation McNemar bullets accept (mid-p, or asymptotic without correction).
 - Data-driven cut-offs: Youden vs closest-to-corner vs cost; ties in the marker; `>=` vs `>` at the
   cut; sensitivity and specificity at the selected cut are optimistic without resampling.
 - Decision curve: net benefit = TP/n - FP/n x pt/(1 - pt) (Vickers and Elkin 2006); treat-all and

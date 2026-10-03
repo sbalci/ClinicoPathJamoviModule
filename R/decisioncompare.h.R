@@ -33,6 +33,7 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             ciMethod = "wilson",
             stratify = NULL,
             statComp = FALSE,
+            mcnemarMethod = "midp",
             showSummary = FALSE,
             showExplanations = FALSE,
             showReportSentence = FALSE,
@@ -180,6 +181,13 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 "statComp",
                 statComp,
                 default=FALSE)
+            private$..mcnemarMethod <- jmvcore::OptionList$new(
+                "mcnemarMethod",
+                mcnemarMethod,
+                options=list(
+                    "midp",
+                    "asymptotic"),
+                default="midp")
             private$..showSummary <- jmvcore::OptionBool$new(
                 "showSummary",
                 showSummary,
@@ -224,6 +232,7 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$.addOption(private$..ciMethod)
             self$.addOption(private$..stratify)
             self$.addOption(private$..statComp)
+            self$.addOption(private$..mcnemarMethod)
             self$.addOption(private$..showSummary)
             self$.addOption(private$..showExplanations)
             self$.addOption(private$..showReportSentence)
@@ -257,6 +266,7 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         ciMethod = function() private$..ciMethod$value,
         stratify = function() private$..stratify$value,
         statComp = function() private$..statComp$value,
+        mcnemarMethod = function() private$..mcnemarMethod$value,
         showSummary = function() private$..showSummary$value,
         showExplanations = function() private$..showExplanations$value,
         showReportSentence = function() private$..showReportSentence$value,
@@ -289,6 +299,7 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         ..ciMethod = NA,
         ..stratify = NA,
         ..statComp = NA,
+        ..mcnemarMethod = NA,
         ..showSummary = NA,
         ..showExplanations = NA,
         ..showReportSentence = NA,
@@ -299,6 +310,7 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
     "decisioncompareResults",
     inherit = jmvcore::Group,
     active = list(
+        notices = function() private$.items[["notices"]],
         text1 = function() private$.items[["text1"]],
         text2 = function() private$.items[["text2"]],
         cTable1 = function() private$.items[["cTable1"]],
@@ -319,8 +331,7 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         reportSentence = function() private$.items[["reportSentence"]],
         explanationsContent = function() private$.items[["explanationsContent"]],
         clinicalReport = function() private$.items[["clinicalReport"]],
-        aboutAnalysis = function() private$.items[["aboutAnalysis"]],
-        notices = function() private$.items[["notices"]]),
+        aboutAnalysis = function() private$.items[["aboutAnalysis"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -335,12 +346,49 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "forcats",
                     "knitr",
                     "mcnemar1947",
+                    "Fagerland2013",
+                    "Fagerland2014",
                     "cochran1950",
                     "holm1979",
                     "wilson1927",
+                    "ClopperPearson1934",
+                    "BrownCaiDasGupta2001",
                     "newcombe1998paired",
+                    "haldane1956",
+                    "anscombe1956",
                     "STARD2015",
                     "jaeschke1994"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "gold",
+                    "goldPositive",
+                    "goldNegative",
+                    "test1",
+                    "test1Positive",
+                    "test1Negative",
+                    "test2",
+                    "test2Positive",
+                    "test2Negative",
+                    "test3",
+                    "test3Positive",
+                    "test3Negative",
+                    "pp",
+                    "pprob",
+                    "ci",
+                    "excludeIndeterminate",
+                    "statComp",
+                    "mcnemarMethod",
+                    "opa",
+                    "useOpaCriterion",
+                    "niMargin",
+                    "ciMethod",
+                    "stratify",
+                    "showSummary",
+                    "showReportSentence",
+                    "showDescriptiveReport")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text1",
@@ -664,7 +712,7 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 visible="(opa)",
                 rows=0,
                 notes=list(
-                    `note`="OPA = (TP + TN) / Total. OPA does not correct for chance agreement; consider Cohen's kappa for chance-corrected concordance. The criterion is met when the lower CI bound exceeds the user-specified minimum OPA. The criterion is optional and descriptive. It is not a noninferiority comparison, regulatory guidance, or clinical guidance.\n"),
+                    `note`="OPA = (TP + TN) / Total. OPA does not correct for chance agreement; consider Cohen's kappa for chance-corrected concordance. The criterion is met when the lower CI bound exceeds the user-specified minimum OPA. The criterion is optional and descriptive. It is not a noninferiority comparison, regulatory guidance, or clinical guidance."),
                 columns=list(
                     list(
                         `name`="test", 
@@ -807,7 +855,7 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 visible="(statComp)",
                 rows=0,
                 notes=list(
-                    `note`="For 2 tests: McNemar's test compares diagnostic CORRECTNESS (agreement with gold standard) between paired tests. For 3+ tests: Cochran's Q test provides an overall test, followed by pairwise McNemar's tests with Holm-Bonferroni correction for multiple comparisons. Tests examine discordant pairs (cases where one test is correct and the other is wrong relative to the gold standard) to determine if differences in accuracy are statistically significant.\n"),
+                    `note`="For 2 tests: McNemar's test compares diagnostic CORRECTNESS (agreement with gold standard) between paired tests. For 3+ tests: Cochran's Q test provides an overall test, followed by pairwise McNemar's tests, Holm-Bonferroni adjusted whenever more than one pair is tested. Tests examine discordant pairs (cases where one test is correct and the other is wrong relative to the gold standard) to determine if differences in accuracy are statistically significant."),
                 columns=list(
                     list(
                         `name`="comparison", 
@@ -852,7 +900,8 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "test3Positive",
                     "test3Negative",
                     "excludeIndeterminate",
-                    "statComp")))
+                    "statComp",
+                    "mcnemarMethod")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="diffTable",
@@ -888,7 +937,12 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                         `title`="Upper", 
                         `superTitle`="95% Confidence Interval", 
                         `type`="number", 
-                        `format`="pc")),
+                        `format`="pc"),
+                    list(
+                        `name`="p", 
+                        `title`="p-value", 
+                        `type`="number", 
+                        `format`="zto,pvalue")),
                 clearWith=list(
                     "gold",
                     "goldPositive",
@@ -903,7 +957,8 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "test3Positive",
                     "test3Negative",
                     "excludeIndeterminate",
-                    "statComp")))
+                    "statComp",
+                    "mcnemarMethod")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot1",
@@ -1005,6 +1060,7 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "pp",
                     "pprob",
                     "statComp",
+                    "mcnemarMethod",
                     "showSummary")))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -1028,6 +1084,7 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "pp",
                     "pprob",
                     "statComp",
+                    "mcnemarMethod",
                     "showReportSentence")))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -1058,6 +1115,7 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "pp",
                     "pprob",
                     "statComp",
+                    "mcnemarMethod",
                     "showDescriptiveReport")))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -1065,37 +1123,7 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 title="About This Analysis",
                 visible="(showExplanations)",
                 clearWith=list(
-                    "showExplanations")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="notices",
-                title="Important Information",
-                clearWith=list(
-                    "gold",
-                    "goldPositive",
-                    "goldNegative",
-                    "test1",
-                    "test1Positive",
-                    "test1Negative",
-                    "test2",
-                    "test2Positive",
-                    "test2Negative",
-                    "test3",
-                    "test3Positive",
-                    "test3Negative",
-                    "pp",
-                    "pprob",
-                    "ci",
-                    "excludeIndeterminate",
-                    "statComp",
-                    "opa",
-                    "useOpaCriterion",
-                    "niMargin",
-                    "ciMethod",
-                    "stratify",
-                    "showSummary",
-                    "showReportSentence",
-                    "showDescriptiveReport")))}))
+                    "showExplanations")))}))
 
 decisioncompareBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "decisioncompareBase",
@@ -1124,7 +1152,9 @@ decisioncompareBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' sensitivity, specificity, positive predictive value, negative predictive 
 #' value, and other metrics between different tests against the same gold 
 #' standard. Includes statistical comparison using McNemar's test and 
-#' confidence intervals for differences.
+#' confidence intervals for differences. Tests are paired within each case; 
+#' cases must be independent across rows. Repeated specimens or lesions from 
+#' one patient require a method that accounts for clustering.
 #' 
 #'
 #' @examples
@@ -1197,11 +1227,16 @@ decisioncompareBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'   niMargin option name for compatibility with saved analyses.
 #' @param useOpaCriterion Whether to apply the descriptive minimum OPA
 #'   criterion.
-#' @param ciMethod CI method: wilson, logit, or exact (Clopper-Pearson).
+#' @param ciMethod CI method for overall percent agreement: wilson (default),
+#'   logit, or exact (Clopper-Pearson). Logit falls back to Clopper-Pearson at 0
+#'   or 100 percent agreement.
 #' @param stratify Optional stratification variable for subgroup-specific
 #'   diagnostic accuracy analysis.
 #' @param statComp Perform statistical comparison between tests (McNemar's
 #'   test and confidence intervals for differences).
+#' @param mcnemarMethod McNemar test for the pairwise comparisons: midp
+#'   (default; Fagerland et al. 2013) or asymptotic (chi-squared without
+#'   continuity correction).
 #' @param showSummary Boolean to show natural language summary of statistical
 #'   comparisons.
 #' @param showExplanations Boolean to show explanations, glossary, and
@@ -1211,6 +1246,7 @@ decisioncompareBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'   templates.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$notices} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text2} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$cTable1} \tab \tab \tab \tab \tab a table \cr
@@ -1232,7 +1268,6 @@ decisioncompareBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'   \code{results$explanationsContent} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$clinicalReport} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$aboutAnalysis} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$notices} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -1271,6 +1306,7 @@ decisioncompare <- function(
     ciMethod = "wilson",
     stratify = NULL,
     statComp = FALSE,
+    mcnemarMethod = "midp",
     showSummary = FALSE,
     showExplanations = FALSE,
     showReportSentence = FALSE,
@@ -1327,6 +1363,7 @@ decisioncompare <- function(
         ciMethod = ciMethod,
         stratify = stratify,
         statComp = statComp,
+        mcnemarMethod = mcnemarMethod,
         showSummary = showSummary,
         showExplanations = showExplanations,
         showReportSentence = showReportSentence,

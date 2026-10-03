@@ -283,6 +283,7 @@ jjbarstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ClinicoPathJamoviModule",
                     "ggstatsplot",
                     "statsExpressions",
+                    "Fagerland2013",
                     "ggpubr",
                     "digest",
                     "ggthemes"),

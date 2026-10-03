@@ -1,8 +1,9 @@
 # Regression tests from the `decisioncompare` release review.
 #
 # Each case corresponds to a defect confirmed in the shipped code, and is checked
-# against an independent reference (epiR, stats::mcnemar.test, DescTools, binom)
-# rather than against the module's own arithmetic.
+# against an independent reference (epiR, the Fagerland et al. 2013 McNemar mid-p
+# formula in helper-decisioncompare.R, DescTools, binom) rather than against the
+# module's own arithmetic.
 
 skip_if_not_installed("epiR")
 
@@ -83,10 +84,12 @@ test_that("McNemar uses diagnostic correctness, and Holm adjusts the pairwise p-
     d <- make_fixture()
     mc <- run_dc(d, statComp = TRUE)$mcnemarTable$asDF
 
+    # Default test: the McNemar mid-p on the CORRECTNESS discordant pairs (Fagerland et al.
+    # 2013, eq. 5/6; helper-decisioncompare.R), never on raw positivity.
     raw <- vapply(list(c("t1","t2"), c("t1","t3"), c("t2","t3")), function(pr) {
-        tb <- table(factor(d[[pr[1]]] == d$gold, c(TRUE, FALSE)),
-                    factor(d[[pr[2]]] == d$gold, c(TRUE, FALSE)))
-        stats::mcnemar.test(tb)$p.value
+        ok1 <- d[[pr[1]]] == d$gold
+        ok2 <- d[[pr[2]]] == d$gold
+        dc_mcnemar_midp(sum(ok1 & !ok2), sum(!ok1 & ok2))
     }, numeric(1))
     holm <- stats::p.adjust(raw, "holm")
     nm <- c("t1 vs t2", "t1 vs t3", "t2 vs t3")
@@ -347,7 +350,9 @@ test_that("the difference table names its confidence-interval method", {
 
 
 test_that("the manuscript-ready report does not claim a winner it cannot support", {
-    d <- make_fixture()   # no pairwise comparison survives Holm in this fixture
+    # No comparison survives in this fixture: the smallest raw mid-p (t1 vs t3, 0.029)
+    # is 0.086 after Holm, and Cochran's Q gives p = 0.076.
+    d <- make_fixture()
     res <- run_dc(d, statComp = TRUE, showDescriptiveReport = TRUE)
     mc <- res$mcnemarTable$asDF
     expect_false(any(mc$p < 0.05, na.rm = TRUE))

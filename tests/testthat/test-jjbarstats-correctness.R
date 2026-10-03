@@ -450,22 +450,23 @@ test_that("jjbarstats McNemar p-value matches manual calculation for paired 2×2
     stringsAsFactors = FALSE
   )
 
-  # Manual McNemar calculation
+  # Manual McNemar calculation: (10 - 5)^2 / 15 = 1.67 on 1 df, p = 0.197
   manual_table <- xtabs(count ~ before + after, data = paired_data)
   manual_mcnemar <- mcnemar.test(manual_table, correct = FALSE)  # Without continuity correction
+  expect_equal(unname(manual_mcnemar$statistic), 25 / 15, tolerance = 1e-12)
 
-  # Expected results
-  expected_p <- manual_mcnemar$p.value
-  expected_X2 <- manual_mcnemar$statistic
-
-  # Tolerance
-  tolerance <- 0.001
-
-  # Verify McNemar test directly
-  result_mcnemar <- mcnemar.test(manual_table, correct = FALSE)
-
-  expect_equal(result_mcnemar$p.value, expected_p, tolerance = tolerance)
-  expect_equal(as.numeric(result_mcnemar$statistic), as.numeric(expected_X2), tolerance = tolerance)
+  # This block used to compare mcnemar.test() with itself and never ran
+  # jjbarstats. Read the statistic off the rendered chart instead.
+  res <- jjbarstats(data = paired_data, dep = "before", group = "after",
+                    counts = "count", paired = TRUE, resultssubtitle = TRUE)
+  f <- tempfile(fileext = ".svg"); svglite::svglite(f, 9, 6)
+  on.exit(unlink(f), add = TRUE)
+  print(res$plot)
+  grDevices::dev.off()          # close before reading: svglite buffers
+  x <- readLines(f, warn = FALSE)
+  t <- paste(gsub("^>|</text>$", "", regmatches(x, regexpr(">[^<]*</text>", x))), collapse = " ")
+  expect_match(t, "McNemar", fixed = TRUE)
+  expect_match(t, sprintf("%.2f", unname(manual_mcnemar$statistic)), fixed = TRUE)
 })
 
 test_that("jjbarstats auto-switch to Fisher is triggered correctly for low counts", {

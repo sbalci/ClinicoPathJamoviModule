@@ -1,7 +1,7 @@
 ---
 name: decisioncompare
 title: Compare Medical Decision Tests
-menuGroup: meddecide
+menuGroup: meddecideT
 menuSubgroup: Decision
 menuSubtitle: Compare sensitivity, specificity, PPV, NPV, ...
 version: '1.0.83'
@@ -12,6 +12,8 @@ description:
         Function for comparing multiple Medical Decision Tests. Compares sensitivity, specificity, positive predictive value,
         negative predictive value, and other metrics between different tests against the same gold standard.
         Includes statistical comparison using McNemar's test and confidence intervals for differences.
+        Tests are paired within each case; cases must be independent across rows.
+        Repeated specimens or lesions from one patient require a method that accounts for clustering.
     R:
         dontrun: true
         usage: |
@@ -349,12 +351,15 @@ options:
       default: wilson
       description:
           ui: >
-            Method for computing confidence intervals for agreement proportions.
-            Wilson score is recommended for most cases. Logit is preferred when
-            proportions are near 0 or 1 (common in high-agreement studies).
-            Clopper-Pearson (Exact) is the most conservative.
+            Method for the confidence interval of overall percent agreement.
+            Wilson score suits most cases. Near 0 or 100 percent agreement, which is
+            common in concordance studies, Wilson and logit intervals can cover the true
+            value less often than the nominal 95 percent; Clopper-Pearson (Exact) never
+            does and is the most conservative. The logit interval is undefined at 0 or
+            100 percent agreement, where the Clopper-Pearson limits are shown instead.
           R: >
-            CI method: wilson, logit, or exact (Clopper-Pearson).
+            CI method for overall percent agreement: wilson (default), logit, or exact
+            (Clopper-Pearson). Logit falls back to Clopper-Pearson at 0 or 100 percent agreement.
 
     - name: stratify
       title: Stratification Variable
@@ -382,6 +387,28 @@ options:
             Also provides confidence intervals for metric differences.
           R: >
             Perform statistical comparison between tests (McNemar's test and confidence intervals for differences).
+
+    - name: mcnemarMethod
+      title: McNemar Test
+      type: List
+      options:
+        - title: Mid-p
+          name: midp
+        - title: Asymptotic (no continuity correction)
+          name: asymptotic
+      default: midp
+      description:
+          ui: >
+            Version of McNemar's test used for each pair of tests. Both are recommended by
+            Fagerland, Lydersen and Laake (2013). The mid-p test never exceeded the nominal
+            5 percent level in their 9595 scenarios with 10 to 100 pairs, evaluated exactly by complete enumeration. The asymptotic test without
+            continuity correction is slightly more powerful and reports a chi-squared
+            statistic, but it often exceeds the nominal level slightly (at most 5.37 percent
+            observed). The exact conditional test and the continuity-corrected test are not
+            offered: both are overly conservative.
+          R: >
+            McNemar test for the pairwise comparisons: midp (default; Fagerland et al.
+            2013) or asymptotic (chi-squared without continuity correction).
 
     - name: showSummary
       title: "Summary"

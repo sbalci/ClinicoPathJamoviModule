@@ -1432,7 +1432,7 @@ analyses:
   - title: Compare Medical Decision Tests
     name: decisioncompare
     ns: ClinicoPath
-    menuGroup: meddecide
+    menuGroup: meddecideT
     menuTitle: Compare Medical Decision Tests
     menuSubgroup: Decision
     menuSubtitle: Compare sensitivity, specificity, PPV, NPV, ...
@@ -1441,7 +1441,9 @@ analyses:
       sensitivity, specificity, positive predictive value, negative predictive
       value, and other metrics between different tests against the same gold
       standard. Includes statistical comparison using McNemar's test and
-      confidence intervals for differences.
+      confidence intervals for differences. Tests are paired within each case;
+      cases must be independent across rows. Repeated specimens or lesions from
+      one patient require a method that accounts for clustering.
     ribbon: analyses
     category: analyses
   - title: Confidence Interval Approach for the Number of Subjects Required

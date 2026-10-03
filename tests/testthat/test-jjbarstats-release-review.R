@@ -217,20 +217,73 @@ test_that("the interpretation guide scales Cramer's V cut-offs to the table", {
     expect_match(g2, "0.1 (small), 0.3 (medium), 0.5 (large)", fixed = TRUE)      # df* = 1
 })
 
-test_that("McNemar is guarded by the discordant-pair count", {
-    few <- data.frame(a = factor(rep(c("Y", "N", "Y", "N"), c(40, 5, 3, 40))),
-                      b = factor(rep(c("Y", "Y", "N", "N"), c(40, 5, 3, 40))))   # b = 5, c = 3
-    res <- jjbarstats(data = few, dep = "a", group = "b", paired = TRUE)
-    n <- paste(as.character(res$notices$content), collapse = " ")
-    expect_match(n, "Few discordant pairs")
-    expect_match(n, "Only 8 discordant pairs")
+# The chart shows the asymptotic McNemar test without continuity correction
+# (statsExpressions: mcnemar.test(correct = FALSE)), which Fagerland, Lydersen &
+# Laake (BMC Med Res Methodol 2013;13:91) recommend; they advise against the
+# exact binomial test "in any situation". The notices therefore say how much
+# b + c can show (cannot reach p < 0.05 at m <= 3, little power below 10) and
+# never advise the exact test. A retired rule is guarded by asserting its
+# phrases are gone: the new low-power notice reuses the title "Few discordant
+# pairs", so a title-only check passed under the old rule and the new one alike.
+bar_mcn_retired <- c("exact binomial", "anti-conservative", "below 25", "unreliable")
+bar_mcn <- function(v, ...) {
+    ab <- c("Y", "N", "Y", "N")      # pairs: (Y,Y) a, (N,Y) b, (Y,N) c, (N,N) d
+    d <- data.frame(a = factor(rep(ab, v)), b = factor(rep(c("Y", "Y", "N", "N"), v)))
+    jjbarstats(data = d, dep = "a", group = "b", paired = TRUE, ...)
+}
+
+test_that("McNemar notices follow the discordant pairs without the retired cut-off", {
+    notes <- function(v, ...) jbs_txt(paste(as.character(bar_mcn(v, ...)$notices$content), collapse = " "))
+    n8 <- notes(c(40, 5, 3, 40))                                         # b = 5, c = 3
+    expect_match(n8, "Only 8 discordant pairs (5 vs 3) for 'a', so McNemar's test has little power", fixed = TRUE)
+    for (r in bar_mcn_retired) expect_false(grepl(r, n8, fixed = TRUE), info = r)
+    n3 <- notes(c(20, 3, 0, 20))
+    expect_match(n3, "Only 3 discordant pairs (3 vs 0) for 'a': McNemar's test cannot reach p < 0.05", fixed = TRUE)
+    expect_false(grepl("Zero-Count Cells", n3, fixed = TRUE))            # a paired 2x2 cannot be collapsed
+    expect_match(notes(c(20, 1, 0, 20)), "Only 1 discordant pair (1 vs 0)", fixed = TRUE)
+    expect_false(grepl("discordant pair", notes(c(20, 15, 15, 20)), fixed = TRUE))   # m = 30
     # statsExpressions runs mcnemar.test(correct = FALSE); the narrative must say which
-    expect_match(as.character(res$summary$content), "without continuity correction", fixed = TRUE)
-    many <- data.frame(a = factor(rep(c("Y", "N", "Y", "N"), c(20, 15, 15, 20))),
-                       b = factor(rep(c("Y", "Y", "N", "N"), c(20, 15, 15, 20))))  # b + c = 30
-    n2 <- paste(as.character(jjbarstats(data = many, dep = "a", group = "b",
-                                        paired = TRUE)$notices$content), collapse = " ")
-    expect_false(grepl("Few discordant pairs", n2, fixed = TRUE))
+    expect_match(as.character(bar_mcn(c(40, 5, 3, 40))$summary$content),
+                 "without continuity correction", fixed = TRUE)
+})
+
+test_that("a sparse paired table gets no expected-count rule and no Fisher advice", {
+    # (b, c) = (6, 1), n = 40, one expected count 0.9: Fisher's exact test (an
+    # independent-samples test) gives p = 0.030, the McNemar test shown 0.059.
+    a <- jbs_assump(bar_mcn(c(30, 6, 1, 3), showAssumptions = TRUE))
+    expect_match(a, "Paired observations (matched subjects)", fixed = TRUE)
+    for (p in c("Fisher's exact test on this table", "quote that value", "Pearson",
+                "Assumption Violated", "Expected cell counts"))
+        expect_false(grepl(p, a, fixed = TRUE), info = p)
+})
+
+test_that("the paired chart shows McNemar's asymptotic statistic", {
+    # (b, c) = (7, 17): chi2 = 100 / 24 = 4.17, p = 0.0412; the exact binomial
+    # (0.0639) is not what is shown
+    ref <- stats::mcnemar.test(matrix(c(20, 17, 7, 20), 2), correct = FALSE)
+    expect_identical(sprintf("%.2f", unname(ref$statistic)), "4.17")
+    t <- jbs_plot_txt(bar_mcn(c(20, 7, 17, 20), resultssubtitle = TRUE))
+    expect_match(t, "McNemar", fixed = TRUE)
+    expect_match(t, "4.17", fixed = TRUE)
+})
+
+test_that("fewer than 10 pairs are refused without exact-test advice", {
+    err <- tryCatch(bar_mcn(c(2, 3, 1, 2)), error = function(e) conditionMessage(e))
+    expect_type(err, "character")
+    expect_match(err, "McNemar's test is not run for fewer than 10 pairs", fixed = TRUE)
+    for (r in bar_mcn_retired) expect_false(grepl(r, err, fixed = TRUE), info = r)
+})
+
+test_that("a Bayesian paired run is not labelled McNemar", {
+    r <- bar_mcn(c(20, 2, 8, 20), typestatistics = "bayes", showSummary = TRUE, showAssumptions = TRUE)
+    s <- jbs_txt(r$summary$content)
+    expect_match(s, "Bayesian contingency table analysis", fixed = TRUE)
+    expect_false(grepl("McNemar", s, fixed = TRUE))
+    expect_false(grepl("McNemar", jbs_assump(r), fixed = TRUE))
+    expect_false(grepl("McNemar", jbs_txt(r$todo$content), fixed = TRUE))
+    n <- jbs_txt(paste(as.character(r$notices$content), collapse = " "))
+    expect_match(n, "Pairing not used by the Bayesian analysis", fixed = TRUE)
+    expect_false(grepl("compatible with McNemar", n, fixed = TRUE))
 })
 
 test_that("the palette option reaches ggbarstats in package::palette form", {

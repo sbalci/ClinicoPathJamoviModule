@@ -5,6 +5,214 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-10-02 — decisioncompare: a ranking by one metric printed beside a significance test of another
+
+- **Failure mode:** the narrative panels ranked tests by balanced accuracy (sensitivity and
+  specificity weighted equally) and printed that ranking beside McNemar's test of overall accuracy
+  (weighted by prevalence). At low prevalence the two point in opposite directions. The copy-ready
+  text then named, as the "highest" test, the one the analysis had found significantly LESS
+  accurate (75% against 90%). No sentence was literally false; the error was in what was left out
+  and in the juxtaposition. Two smaller lessons came from the same pass:
+  - A test extracted a number with a greedy `.*\(95% CI` and broke as soon as the paragraph gained
+    a second interval.
+  - The audit's own proposed regression property, that per-class p-values stay unchanged when the
+    diseased rows are quadrupled, was wrong. The point estimates stay; test statistics scale with n.
+    Codex caught it in the planning step.
+- **Detection signal:** an independent audit (`development-ideas/decisioncompare-independent-review-2026-10-02.md`)
+  built a fixture where the two metrics disagree: a sensitive and a specific test at 20% prevalence.
+  The wrapper-level checks had all used fixtures where they agree.
+- **Prevention rules:**
+  - When text names a "best" item by metric A beside a test of metric B, include a fixture where A
+    and B disagree, and make every "significant" sentence state its direction.
+  - Anchor regexes that pull a number from generated prose on that sentence's unique wording, never
+    on a phrase that can recur.
+  - For metamorphic tests on duplicated or resampled data, separate quantities that stay invariant
+    (point estimates) from those that scale with n (test statistics, p-values, interval widths).
+
+---
+
+## 2026-10-02 — jjpiestats/jjbarstats McNemar: a retired rule outlives its fix, and its test passes both ways
+
+- **Failure mode:** the 2026-10-01 decisioncompare fix retired "exact binomial below 25 discordant
+  pairs", but two shipped analyses still applied or taught it. Pie Charts replaced the chart's
+  McNemar p with the exact binomial (Bentur data: 0.070 shown, recommended asymptotic 0.034), and
+  both analyses' notices said to quote it. The jjbarstats test for the old notice asserted its
+  title and count ("Few discordant pairs", "Only 8 discordant pairs"). It passes unchanged under
+  the new low-power notice, which keeps the title, so it guarded nothing about the rule itself.
+- **Detection signal:** the module sweep recorded in memory during the decisioncompare fix. A
+  prototype run of the old jj tests against the new code then showed only two of them failing.
+- **Prevention rules:**
+  - When retiring a rule, assert that its phrases are absent ("exact binomial",
+    "anti-conservative", "below 25"). Asserting that a notice with the right title exists is not
+    enough.
+  - Before deleting a gate, check the evidence range of the source that retires the rule.
+    Fagerland et al. (2013) evaluated 10 to 100 pairs, so the total-pairs gate at 10 marks the edge
+    of the evidence. It was kept; only its advice changed. The 25-discordant-pair cut-off had no
+    source at all.
+  - statsExpressions ignores `paired` when `type = "bayes"`. Check for Bayes before paired in every
+    method label, or a Bayesian chart gets named McNemar.
+
+## 2026-10-01 — decisioncompare McNemar: a textbook rule of thumb that the evidence had overturned
+
+- **Failure mode:** the pairwise comparison followed the traditional rule: exact binomial below 25
+  discordant pairs, continuity-corrected chi-squared above. Fagerland, Lydersen & Laake (2013)
+  evaluated these against the alternatives in 9595 scenarios and recommend neither "in any
+  situation". The exact test's type I error was "barely above 3%, even for as much as 100 matched
+  pairs", and power suffered accordingly (Cavo data: exact p = 0.052, mid-p 0.035). The 25-pair
+  cut-off has no source. The memory notes repeated the old rule, so it was being recommended to
+  other analyses too.
+- **Detection signal:** the reference audit's Level 4 check of a proposed citation. A paper put
+  forward to support the paired intervals turned out to recommend against the paired tests. The
+  validation had graded the "<25 discordant" switch "correct, threshold unsourced"; it checked the
+  arithmetic of the rule, not whether the rule was the right one.
+- **Prevention rules:**
+  - When an analysis picks a test variant by a rule of thumb (n < 25, expected count < 5,
+    "exact for small samples"), look for a recent comparative evaluation of the variants before
+    accepting the rule, and cite it.
+  - Run the published worked examples through the full analysis (Fagerland 2013 Table 6 here) as
+    oracles.
+  - Record a superseded rule in memory as superseded rather than deleting it, so it is not
+    re-learned from older code.
+- **Second failure mode, introduced and caught the same day:** to show empty cells, the mid-p rows
+  wrote NULL instead of NA in the statistic column. One reader of that column, the 3-test Summary
+  and Report, found "the Cochran row" with `grepl("cochran", first row key)`. Pairwise row keys
+  embed user variable names, so with a test named "Cochrane" and no computable Q,
+  `if (TRUE && logical(0))` stopped the analysis. Before the NULL change, the same substring match
+  had silently presented a pairwise McNemar result as Cochran's Q.
+  - **Detection:** a second adversarial review round, whose path-hunting lens built adversarial
+    variable names.
+  - **Prevention:**
+    - When a cell's type changes (NA to NULL, number to text), grep every reader of that column
+      and make each one length-safe.
+    - Never identify a results row by a substring of a key that embeds user input; compare the
+      exact key.
+
+## 2026-10-01 — `/reference-verifier decisioncompare`: a band-edge oracle taken from the code, and a proposed citation that contradicted the method
+
+- **Failure modes:**
+  - The validation's VAL-09 fix made LR+ = 10 land "on its band edge" and pinned the result in a
+    regression test. The edge was the module's own `>= 10`. The source the analysis cites,
+    Jaeschke 1994, puts exactly 10 in "5 to 10", which is moderate, and the sibling `decision`
+    already did. The test enshrined the deviation.
+  - The same report proposed citing Fagerland et al. 2014 because it "recommends the closed-form
+    intervals used here". Its own abstract recommends McNemar tests other than the two the analysis
+    reports. Its 2013 companion says not to report those two at all.
+- **Detection signal:** reference-verifier Level 4. It reads the sentence the analysis displays
+  next to what the cited text says, including the inequality at a band edge, and each candidate
+  reference against *every* method the analysis uses, not just the one it was proposed for.
+- **Prevention rules:**
+  - A band-edge oracle quotes the source's inequality (`> 10`, "5 to 10"), never the code's.
+  - When a test pins an edge, cite the source in the test.
+  - Before adding a reference, check what it recommends *against*: a paper that endorses the
+    interval but not the test cannot be listed as support for the analysis.
+
+## 2026-10-01 — `/prepare-translation decisioncompare`: a number format outside `.()`, and an escape the editor decoded
+
+- **Failure modes:**
+  - The report sentences were translated, but the values spliced into them came from
+    `sprintf("%.1f%%", x)` outside `.()`. A Turkish sentence therefore read "... 85.0% ..." next to
+    a translated "(%95 GA: %80.1-90.2)". A unit's position is locale text too.
+  - Merging the 3-test Cochran fragments into one msgid with the Edit tool turned a typed
+    `χ²` into a literal `χ²`. That puts non-ASCII in an R file that had none (an R CMD
+    check WARNING), the same trap as memory Pitfall 4.
+- **Detection signal:** a Turkish runtime smoke test. It injects tr.po into jmvcore's `.i18n`
+  cache with `LANGUAGE=tr`, runs 11 fixtures with every panel on, and greps for English template
+  fragments and `%%`/`%n$` residue; the misplaced `%` showed up in the rendered sentence. The
+  non-ASCII count was diffed against HEAD (0 then, 1 after the edit).
+- **Prevention rules:**
+  - When translating, also wrap the number-plus-unit formats that feed translated sentences
+    (`.("%.1f%%")` translated as `%%%.1f`).
+  - After any Edit that types a `\u` escape into R code, run
+    `LC_ALL=C grep -c '[^ -~<tab>]' R/<file>.b.R` against HEAD and repair it via a Python
+    heredoc. The jamovi extractor decodes `\uXXXX`, so the escape and the literal give the same
+    msgid; re-running `i18nUpdate()` proves the catalog did not move.
+
+## 2026-10-01 — `/fix-function decisioncompare`: a significance verdict whose direction came from other rows than its p-value
+
+- **Failure modes:**
+  - The Summary and the Manuscript-Ready Report chose the "significantly more accurate" test by
+    comparing standalone accuracies, each computed on that test's own available rows, while the
+    McNemar p beside it used only the rows both tests had. With one test done on a subset of hard
+    cases, the sentence named the test that was significantly *less* accurate on the paired cases
+    (5 discordant pairs one way, 25 the other).
+  - The 0.5 correction meant for an infinite likelihood ratio (empty denominator cell) also ran on
+    0/0, a test that never called positive. It produced LR+ = (TN+1)/(FN+1) and the label
+    "Moderate positive evidence" for a test with no positive call.
+  - Copy-ready text printed "p = 0.000"; the Methods paragraph left out Cochran's Q and the Holm
+    adjustment that the shown p-values carried; the heatmap's manual fill scale came before
+    `+ ggtheme`, whose own fill scale replaced it in jamovi.
+- **Detection signal:** `/validate-function decisioncompare depth=exhaustive`, with a fixture built
+  for unequal missingness (test A on 300 rows, test B on the 100 hard ones) and a cross-output
+  check of the named winner against the sign of the paired accuracy difference. Every earlier
+  test used complete data, where standalone and paired accuracies point the same way.
+- **Prevention rules:**
+  - A sentence that reports a test result takes its direction and its numbers from the rows that
+    test used. Do not mix estimands computed on different row sets in one sentence.
+  - A correction for an infinite ratio checks both cells: 0/0 is "not estimable", not infinite.
+  - Copy-ready text goes through one p formatter ("< 0.001", never "0.000").
+  - Fixtures for paired comparisons need unequal missingness between the tests; complete data hides
+    every row-alignment defect.
+
+---
+
+## 2026-10-01 — `/fix-function decisioncombine`: an exemption covering half of a structural case, and notices that said more than their condition
+
+- **Failure modes:**
+  - "Sparse Cell Counts" exempted rows with an empty DISEASE margin (VAL-01, 2026-09-28) but not
+    their mirror, an empty TEST margin. `.analyzeSinglePattern()` treats all four empty margins
+    alike: no correction, ratios blank or exactly 1. So every pattern no patient shows was
+    reported as resting on "very few cases". A test with one result in every case got the same
+    sparse notice. With one test it also got a serious "Poor Discrimination" whose likelihood-ratio
+    advice cannot apply, and with two or three tests nothing named it at all.
+  - Two notices claimed more than their `if` tested. "Discrimination Not Established" said every
+    interval includes 0, but the condition is only that no lower limit exceeds 0, and an exact
+    pattern lying wholly below 0 contradicts the sentence. The collective-inversion warning said a
+    reversed level "swaps" sensitivity and specificity, but it complements them.
+  - A notice that could not fire ("Test N Has No Complete Cases": validation already guarantees
+    four joint complete cases). An empty-state gate tested two of the four variable slots, so
+    picking Test 2 first was silent while picking Test 1 first gave an error.
+- **Detection signal:** a probe with one test held constant. The 2026-08-28 edge-case test
+  *asserted* the misleading sparse notice for exactly that fixture ("with zero cells flagged"),
+  so the suite pinned the defect for a month. Codex reviewed the plan and found the two
+  condition-versus-sentence mismatches, each with a counterexample.
+- **Prevention rules:**
+  - An exemption for a structural case must use the same predicate as the computation it
+    describes. Here that is `empty_margin` in `.analyzeSinglePattern()`; a hand-picked subset of
+    it leaves the mirror case flagged.
+  - Read every notice sentence back against its `if`. "Every interval includes 0" needs
+    `lower <= 0 <= upper` for every rule; the code tested `lower <= 0` alone.
+  - A test that asserts a notice fires should say why that notice is *true* for its fixture, not
+    just that it appears.
+
+---
+
+## 2026-10-01 — `/release-review-function decisioncombine`: the overflow rule written that morning, applied to one helper only
+
+- **Failure modes:**
+  - The fix pass below wrote the rule "cast counts to double before multiplying them" after finding an
+    integer overflow in the Newcombe helper, and applied it to that helper only. The new missingness screen
+    multiplied `sum()` counts in its Mantel-Haenszel ratio. From about 93,000 cases, five values missing in
+    one variable, even completely at random, stopped the whole analysis with "missing value where TRUE/FALSE
+    needed". The screen runs on every run, before any table is built.
+  - The combination table's odds ratio, `(tp_adj * tn_adj) / (fp_adj * fn_adj)`, multiplied `table()`
+    integers whenever no continuity correction applied. From two cells above 46,341 the DOR and its interval
+    were blank, with no notice, on 6 of 8 rows at 200,000 cases. The R warning that explained it never
+    reaches jamovi, and the forest-plot notice blamed "a pattern no patient shows".
+  - jmvcore's `format()` prints a double 100000 as "1e+05", and R syntax passes the seed as a double.
+- **Detection signal:** reading every product of two counts in the file, then one probe at 100,000 and
+  200,000 cases (reference missing at random, complete data, a reflex design). The earlier verification ran
+  "designs up to 100,000 cases", but none with a 50/50 split and missing values in every variable, which is
+  where the products peak.
+- **Prevention rules:**
+  - When an overflow is found, grep the whole file for products of counts, not just the helper it was found
+    in. `table()`, `sum(<logical>)`, `nrow()` and `length()` all return integers. Cast at the product
+    (`as.numeric(a) * b`) rather than at the source when the count is also printed, because jmvcore's
+    `format()` would print a double 100000 as "1e+05".
+  - Design a large-n test to maximise the product, not the n: a 50/50 split across two cells, and at least
+    one missing value per variable so every guard runs.
+
+---
+
 ## 2026-10-01 — verifying that fix pass: an exact test that crashed at 2,000 cases, and a severity measured on a different scale from its test
 
 - **Failure modes** (found by a four-lens verification workflow AFTER the fix pass was green: 352 tests, 1,489

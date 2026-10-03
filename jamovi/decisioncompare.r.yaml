@@ -4,6 +4,41 @@ title: Compare Medical Decision Tests
 jrs: '1.1'
 
 items:
+    # Rich HTML guidance, ordered by severity in the backend and placed before results.
+    - name: notices
+      title: 'Important Information'
+      type: Html
+      clearWith:
+          - gold
+          - goldPositive
+          - goldNegative
+          - test1
+          - test1Positive
+          - test1Negative
+          - test2
+          - test2Positive
+          - test2Negative
+          - test3
+          - test3Positive
+          - test3Negative
+          - pp
+          - pprob
+          - ci
+          - excludeIndeterminate
+          - statComp
+          - mcnemarMethod
+          - opa
+          - useOpaCriterion
+          - niMargin
+          - ciMethod
+          - stratify
+          # .findBestTest() emits the "Tied Descriptive Ranking" notice and is reached
+          # ONLY from these three display toggles, so they belong in this item's
+          # clearWith too.
+          - showSummary
+          - showReportSentence
+          - showDescriptiveReport
+
     - name: text1
       title: Original Data
       type: Preformatted
@@ -223,7 +258,7 @@ items:
       visible: (opa)
       rows: 0
       notes:
-        note: >
+        note: >-
           OPA = (TP + TN) / Total.
           OPA does not correct for chance agreement; consider Cohen's kappa for chance-corrected concordance.
           The criterion is met when the lower CI bound exceeds the user-specified minimum OPA.
@@ -353,9 +388,9 @@ items:
       visible: (statComp)
       rows: 0
       notes:
-        note: >
+        note: >-
           For 2 tests: McNemar's test compares diagnostic CORRECTNESS (agreement with gold standard) between paired tests.
-          For 3+ tests: Cochran's Q test provides an overall test, followed by pairwise McNemar's tests with Holm-Bonferroni correction for multiple comparisons.
+          For 3+ tests: Cochran's Q test provides an overall test, followed by pairwise McNemar's tests, Holm-Bonferroni adjusted whenever more than one pair is tested.
           Tests examine discordant pairs (cases where one test is correct and the other is wrong relative to the gold standard) to determine if differences in accuracy are statistically significant.
       columns:
         - name: comparison
@@ -395,6 +430,7 @@ items:
           - test3Negative
           - excludeIndeterminate
           - statComp
+          - mcnemarMethod
 
     - name: diffTable
       title: 'Differences with 95% Confidence Intervals'
@@ -425,6 +461,10 @@ items:
           superTitle: '95% Confidence Interval'
           type: number
           format: pc
+        - name: p
+          title: 'p-value'
+          type: number
+          format: zto,pvalue
       clearWith:
           - gold
           - goldPositive
@@ -440,6 +480,7 @@ items:
           - test3Negative
           - excludeIndeterminate
           - statComp
+          - mcnemarMethod
 
     # Plot
     - name: plot1
@@ -528,14 +569,14 @@ items:
       title: 'Summary'
       type: Html
       visible: (statComp && showSummary)
-      clearWith: [gold, goldPositive, goldNegative, test1, test1Positive, test1Negative, test2, test2Positive, test2Negative, test3, test3Positive, test3Negative, excludeIndeterminate, pp, pprob, statComp, showSummary]
+      clearWith: [gold, goldPositive, goldNegative, test1, test1Positive, test1Negative, test2, test2Positive, test2Negative, test3, test3Positive, test3Negative, excludeIndeterminate, pp, pprob, statComp, mcnemarMethod, showSummary]
 
     # Report Sentence
     - name: reportSentence
       title: 'Manuscript-Ready Report'
       type: Html
       visible: (statComp && showReportSentence)
-      clearWith: [gold, goldPositive, goldNegative, test1, test1Positive, test1Negative, test2, test2Positive, test2Negative, test3, test3Positive, test3Negative, excludeIndeterminate, pp, pprob, statComp, showReportSentence]
+      clearWith: [gold, goldPositive, goldNegative, test1, test1Positive, test1Negative, test2, test2Positive, test2Negative, test3, test3Positive, test3Negative, excludeIndeterminate, pp, pprob, statComp, mcnemarMethod, showReportSentence]
 
     # Explanations and Glossary
     - name: explanationsContent
@@ -549,7 +590,7 @@ items:
       title: 'Descriptive Summary & Report Templates'
       type: Html
       visible: (showDescriptiveReport)
-      clearWith: [gold, goldPositive, goldNegative, test1, test1Positive, test1Negative, test2, test2Positive, test2Negative, test3, test3Positive, test3Negative, excludeIndeterminate, pp, pprob, statComp, showDescriptiveReport]
+      clearWith: [gold, goldPositive, goldNegative, test1, test1Positive, test1Negative, test2, test2Positive, test2Negative, test3, test3Positive, test3Negative, excludeIndeterminate, pp, pprob, statComp, mcnemarMethod, showDescriptiveReport]
 
     # About This Analysis
     - name: aboutAnalysis
@@ -558,39 +599,6 @@ items:
       visible: (showExplanations)
       clearWith: [showExplanations]
 
-    # Notice outputs converted to HTML to avoid serialization errors
-    - name: notices
-      title: 'Important Information'
-      type: Html
-      clearWith:
-          - gold
-          - goldPositive
-          - goldNegative
-          - test1
-          - test1Positive
-          - test1Negative
-          - test2
-          - test2Positive
-          - test2Negative
-          - test3
-          - test3Positive
-          - test3Negative
-          - pp
-          - pprob
-          - ci
-          - excludeIndeterminate
-          - statComp
-          - opa
-          - useOpaCriterion
-          - niMargin
-          - ciMethod
-          - stratify
-          # .findBestTest() emits the "Tied Descriptive Ranking" notice and is reached
-          # ONLY from these three display toggles, so they belong in this item's
-          # clearWith too.
-          - showSummary
-          - showReportSentence
-          - showDescriptiveReport
 
 refs:
     - ClinicoPathJamoviModule
@@ -599,10 +607,16 @@ refs:
     - forcats
     - knitr
     - mcnemar1947
+    - Fagerland2013
+    - Fagerland2014
     - cochran1950
     - holm1979
     - wilson1927
+    - ClopperPearson1934
+    - BrownCaiDasGupta2001
     - newcombe1998paired
+    - haldane1956
+    - anscombe1956
     - STARD2015
     - jaeschke1994
 

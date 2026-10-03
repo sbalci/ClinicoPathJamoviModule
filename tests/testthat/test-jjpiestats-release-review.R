@@ -250,20 +250,13 @@ test_that("an adequately powered table keeps the chi-square subtitle", {
 })
 
 test_that("paired and Bayesian analyses are left alone", {
-    # McNemar is the right test for paired data WHEN its asymptotic assumption
-    # holds, and the Bayesian subtitle is not a chi-square - neither should be
-    # overwritten. This fixture has 55 discordant pairs, comfortably above the
-    # threshold, so McNemar must survive untouched.
-    #
-    # The earlier fixture here (set.seed(5), n = 60) had only 17 discordant
-    # pairs, where McNemar gives p = 0.0076 against an exact p = 0.0127 - i.e.
-    # anti-conservative, the very case the exact swap now covers. Asserting
-    # "McNemar" on that table asserted the wrong test.
+    # McNemar is the right test for paired data and the Bayesian subtitle is not
+    # a chi-square - neither may be overwritten. This paired table is not sparse;
+    # a sparse paired one (Bentur, smallest expected count 1.3) is checked in
+    # "the paired chart keeps McNemar's asymptotic test at any b + c".
     dp <- data.frame(
         pre  = factor(rep(c("Neg", "Neg", "Pos", "Pos"), times = c(40, 30, 25, 40))),
         post = factor(rep(c("Neg", "Pos", "Neg", "Pos"), times = c(40, 30, 25, 40))))
-    tp <- table(dp$pre, dp$post)
-    expect_gte(tp[1, 2] + tp[2, 1], 25L)
     t_paired <- pie_plot_txt(jjpiestats(data = dp, dep = "pre", group = "post",
                                         paired = TRUE, resultssubtitle = TRUE))
     expect_match(t_paired, "McNemar")
@@ -385,61 +378,110 @@ test_that("the single-variable pie chart shows its goodness-of-fit subtitle", {
     expect_false(identical(t, t4))
 })
 
-# ---- McNemar: the discordant pairs, not the table total ---------------------
+# ---- McNemar: the recommended test at any number of discordant pairs ---------
 
-# n = 206 but only 6 discordant pairs. The asymptotic McNemar the plotting
-# package runs (correct = FALSE) gives p = 0.1025; base R's corrected default
-# gives 0.2207; the exact binomial on the discordant pairs gives 0.2188. The
-# old guard only rejected a TOTAL below 10, so this table sailed through and
-# published p = 0.10 under the unqualified name "McNemar's test".
-pie_paired_sparse <- function() {
-    tb <- matrix(c(100, 5, 1, 100), 2, 2,
+# The chart keeps the plotting package's asymptotic McNemar test without
+# continuity correction, (b - c)^2 / (b + c) on 1 df. Fagerland, Lydersen & Laake
+# (BMC Med Res Methodol 2013;13:91) recommend it (and the mid-p test) and advise
+# against the exact binomial and continuity-corrected tests "in any situation".
+# The old code swapped in the exact binomial below 25 discordant pairs, which
+# turned Fagerland's Table 6 examples non-significant: Bentur (b = 1, c = 7)
+# asymptotic p = 0.0339 vs exact 0.0703; Cavo (6, 16) 0.0330 vs 0.0525.
+# Retiring a rule: assert its phrases are gone, not just that a notice exists.
+pie_mcn_retired <- c("exact binomial", "anti-conservative", "below about 25",
+                     "quote that value", "McNemar's exact test", "exact counterpart")
+
+# Aggregated paired 2x2: a = (Neg, Neg), b = (Neg -> Pos), c = (Pos -> Neg), d = (Pos, Pos).
+pie_mcn_tab <- function(a, b, c, d) {
+    tb <- matrix(c(a, c, b, d), 2, 2,
                  dimnames = list(Pre = c("Neg", "Pos"), Post = c("Neg", "Pos")))
-    d <- as.data.frame(as.table(tb))
-    names(d) <- c("Pre", "Post", "n")
-    d
+    out <- as.data.frame(as.table(tb))
+    names(out) <- c("Pre", "Post", "n")
+    out
 }
+pie_mcn <- function(v, ...) jjpiestats(data = pie_mcn_tab(v[1], v[2], v[3], v[4]),
+                                       dep = "Pre", group = "Post", counts = "n",
+                                       paired = TRUE, ...)
 
-test_that("a paired 2x2 with too few discordant pairs reports the exact binomial", {
-    d <- pie_paired_sparse()
-    p_exact <- binom.test(1, 6, 0.5)$p.value      # b = 1, c = 5
-
-    n <- pie_notices(jjpiestats(data = d, dep = "Pre", group = "Post",
-                                counts = "n", paired = TRUE, resultssubtitle = TRUE))
-    expect_match(n, "Too few discordant pairs", fixed = TRUE)
-    expect_match(n, "Only 6 of the 206 pairs", fixed = TRUE)
-    expect_match(n, formatC(p_exact, format = "f", digits = 3), fixed = TRUE)
-
-    # and the figure carries the exact value, not the anti-conservative one
-    t <- pie_plot_txt(jjpiestats(data = d, dep = "Pre", group = "Post", counts = "n",
-                                 paired = TRUE, resultssubtitle = TRUE), "plot2")
-    expect_match(t, "exact")
-    expect_false(grepl("0.10", t, fixed = TRUE))
+test_that("the paired chart keeps McNemar's asymptotic test at any b + c", {
+    # n = 206 with 6 discordant pairs: chi2 = 2.67, p = 0.1025; the retired exact
+    # swap showed p = 0.219 instead.
+    for (cs in list(list(v = c(2, 1, 7, 11),    chi = "4.50", old = "0.070"),   # Bentur
+                    list(v = c(59, 6, 16, 80),  chi = "4.55", old = "0.052"),   # Cavo
+                    list(v = c(100, 1, 5, 100), chi = "2.67", old = "0.219"))) {
+        ref <- stats::mcnemar.test(matrix(cs$v[c(1, 3, 2, 4)], 2), correct = FALSE)
+        expect_identical(sprintf("%.2f", unname(ref$statistic)), cs$chi)
+        t <- pie_plot_txt(pie_mcn(cs$v, resultssubtitle = TRUE), "plot2")
+        expect_match(t, "McNemar", fixed = TRUE, info = cs$chi)
+        expect_match(t, cs$chi, fixed = TRUE)
+        expect_false(grepl("exact", t, fixed = TRUE), info = cs$chi)
+        expect_false(grepl(cs$old, t, fixed = TRUE), info = cs$chi)
+    }
 })
 
-test_that("the Methods sentence names the exact test, or discloses the correction", {
-    # sparse discordants -> the exact test is what ran and what is shown
-    r <- pie_txt(jjpiestats(data = pie_paired_sparse(), dep = "Pre", group = "Post",
-                            counts = "n", paired = TRUE, resultssubtitle = TRUE,
-                            showexplanations = TRUE)$report$content)
-    expect_match(r, "McNemar's exact test", fixed = TRUE)
-
-    # enough discordants -> plain McNemar, but the missing continuity correction
-    # must be named or the number will not reproduce in base R
-    set.seed(4)
-    d2 <- data.frame(Pre = factor(sample(c("Neg", "Pos"), 200, TRUE)),
-                     Post = factor(sample(c("Neg", "Pos"), 200, TRUE)))
-    r2 <- pie_txt(jjpiestats(data = d2, dep = "Pre", group = "Post", paired = TRUE,
-                             showexplanations = TRUE)$report$content)
-    expect_match(r2, "without continuity correction", fixed = TRUE)
+test_that("the notices say how much b + c can show, never that the test is invalid", {
+    notes <- function(v) pie_notices(pie_mcn(v))
+    n6 <- notes(c(100, 1, 5, 100))
+    expect_match(n6, "Only 6 discordant pairs, so McNemar's test has little power", fixed = TRUE)
+    for (r in pie_mcn_retired) expect_false(grepl(r, n6, fixed = TRUE), info = r)
+    # smallest asymptotic p with m pairs is P(chi2(1) > m): 0.083 at m = 3, 0.0455 at m = 4
+    expect_match(notes(c(20, 3, 0, 20)), "Only 3 discordant pairs: with so few, McNemar's test cannot reach p < 0.05", fixed = TRUE)
+    n4 <- notes(c(20, 4, 0, 20))
+    expect_false(grepl("cannot reach", n4, fixed = TRUE))
+    expect_match(n4, "Only 4 discordant pairs, so McNemar's test has little power", fixed = TRUE)
+    expect_match(notes(c(20, 1, 0, 20)), "Only 1 discordant pair: McNemar's test cannot reach p < 0.05", fixed = TRUE)
+    expect_false(grepl("discordant", notes(c(20, 9, 21, 20)), fixed = TRUE))   # m = 30
+    expect_false(grepl("discordant", notes(c(20, 5, 5, 20)), fixed = TRUE))    # m = 10, tie
 })
 
-test_that("adequate discordant pairs do not trigger the exact swap", {
-    set.seed(5)
-    d <- data.frame(Pre = factor(sample(c("Neg", "Pos"), 300, TRUE)),
-                    Post = factor(sample(c("Neg", "Pos"), 300, TRUE)))
-    n <- pie_notices(jjpiestats(data = d, dep = "Pre", group = "Post", paired = TRUE))
-    expect_false(grepl("Too few discordant pairs", n, fixed = TRUE))
+test_that("no discordant pairs is said, not left as a silent blank subtitle", {
+    r <- pie_mcn(c(20, 0, 0, 20), resultssubtitle = TRUE)
+    expect_match(pie_notices(r), "No discordant pairs", fixed = TRUE)
+    expect_match(pie_notices(r), "p is 1 by convention", fixed = TRUE)
+    expect_false(grepl("McNemar", pie_plot_txt(r, "plot2"), fixed = TRUE))
+})
+
+test_that("Methods and Assumptions name the asymptotic test without the retired rule", {
+    r <- pie_mcn(c(100, 1, 5, 100), resultssubtitle = TRUE, showexplanations = TRUE)
+    rep_txt <- pie_txt(r$report$content)
+    expect_match(rep_txt, "McNemar's test without continuity correction", fixed = TRUE)
+    expect_false(grepl("exact", rep_txt, fixed = TRUE))
+    a <- pie_txt(r$assumptions$content)
+    expect_match(a, "Fagerland et al. (2013)", fixed = TRUE)
+    expect_match(a, "Pairs must be independent", fixed = TRUE)
+    for (p in c("anti-conservative", "below about 25", "quote that value"))
+        expect_false(grepl(p, a, fixed = TRUE), info = p)
+    # The Interpretation panel used to send paired runs to "the exact p-value
+    # reported in the Assumptions panel", which no longer exists for paired data.
+    for (ty in c("parametric", "nonparametric", "robust")) {
+        g <- pie_txt(pie_mcn(c(30, 6, 1, 3), typestatistics = ty,
+                             showInterpretation = TRUE)$interpretation$content)
+        expect_match(g, "McNemar's test compares the pairs", fixed = TRUE, info = ty)
+        for (p in c("exact p-value reported", "Pearson chi-square"))
+            expect_false(grepl(p, g, fixed = TRUE), info = paste(ty, p))
+    }
+})
+
+test_that("a zero margin is analysed, and fewer than 10 pairs are refused without exact advice", {
+    # zero row margin (b = 5, c = 0): chi2 = 5.00, p = 0.0253 - only b and c matter
+    rz <- pie_mcn(c(10, 5, 0, 0), resultssubtitle = TRUE)
+    expect_false(grepl("Paired analysis not shown", pie_notices(rz), fixed = TRUE))
+    expect_match(pie_plot_txt(rz, "plot2"), "5.00", fixed = TRUE)
+    # n = 8: below the 10 to 100 pairs Fagerland et al. evaluated
+    n8 <- pie_notices(pie_mcn(c(2, 3, 1, 2)))
+    expect_match(n8, "not shown for fewer than 10 paired observations; your data has 8", fixed = TRUE)
+    for (r in pie_mcn_retired) expect_false(grepl(r, n8, fixed = TRUE), info = r)
+})
+
+test_that("a Bayesian paired run is not labelled McNemar", {
+    # statsExpressions ignores `paired` for type = "bayes": the chart is an
+    # independence Bayes factor.
+    r <- pie_mcn(c(20, 2, 8, 20), typestatistics = "bayes", showexplanations = TRUE)
+    expect_match(pie_notices(r), "Pairing not used by the Bayesian analysis", fixed = TRUE)
+    expect_false(grepl("McNemar", pie_txt(r$summary$content), fixed = TRUE))
+    rep_txt <- pie_txt(r$report$content)
+    expect_match(rep_txt, "Bayesian", fixed = TRUE)
+    expect_false(grepl("McNemar", rep_txt, fixed = TRUE))
 })
 
 test_that("option changes on a reused analysis instance are not served from a stale cache", {

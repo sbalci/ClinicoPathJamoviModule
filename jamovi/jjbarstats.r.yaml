@@ -104,6 +104,7 @@ refs:
     - ClinicoPathJamoviModule
     - ggstatsplot
     - statsExpressions
+    - Fagerland2013
     - ggpubr
     - digest
     - ggthemes

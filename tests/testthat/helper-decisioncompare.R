@@ -39,3 +39,22 @@ call_decisioncompare <- function(...) {
 decisioncompare_has_negative_levels <- function() {
     "goldNegative" %in% names(formals(ClinicoPath::decisioncompare))
 }
+
+# McNemar oracles, transcribed from Fagerland, Lydersen & Laake (BMC Med Res Methodol 2013;13:91)
+# and never from the module: b = cases only test 1 got right, c = cases only test 2 got right.
+# Mid-p, eq. (5): 2 * (one-sided exact p - f/2), f the Bin(b + c, 1/2) probability of the observed
+# count; eq. (6) at a tie: 1 - f/2. Point probabilities come from lchoose(), not pbinom()/dbinom().
+# Without discordant pairs there is no information, and p = 1 by convention.
+dc_mcnemar_midp <- function(b, c) {
+    n <- b + c
+    if (n == 0) return(1)
+    f <- function(x) exp(lchoose(n, x) - n * log(2))
+    if (b == c) return(1 - f(b) / 2)
+    2 * (sum(f(0:min(b, c))) - f(b) / 2)
+}
+# Asymptotic test without continuity correction, as the z form: z = (b - c) / sqrt(b + c).
+dc_mcnemar_asymptotic <- function(b, c) {
+    if (b + c == 0) return(c(stat = NA_real_, p = 1))
+    z <- (b - c) / sqrt(b + c)
+    c(stat = z^2, p = 2 * stats::pnorm(-abs(z)))
+}

@@ -33,6 +33,7 @@ decisioncompare(
   ciMethod = "wilson",
   stratify = NULL,
   statComp = FALSE,
+  mcnemarMethod = "midp",
   showSummary = FALSE,
   showExplanations = FALSE,
   showReportSentence = FALSE,
@@ -114,13 +115,19 @@ niMargin option name for compatibility with saved analyses.}
 \item{useOpaCriterion}{Whether to apply the descriptive minimum OPA
 criterion.}
 
-\item{ciMethod}{CI method: wilson, logit, or exact (Clopper-Pearson).}
+\item{ciMethod}{CI method for overall percent agreement: wilson (default),
+logit, or exact (Clopper-Pearson). Logit falls back to Clopper-Pearson at 0
+or 100 percent agreement.}
 
 \item{stratify}{Optional stratification variable for subgroup-specific
 diagnostic accuracy analysis.}
 
 \item{statComp}{Perform statistical comparison between tests (McNemar's
 test and confidence intervals for differences).}
+
+\item{mcnemarMethod}{McNemar test for the pairwise comparisons: midp
+(default; Fagerland et al. 2013) or asymptotic (chi-squared without
+continuity correction).}
 
 \item{showSummary}{Boolean to show natural language summary of statistical
 comparisons.}
@@ -136,6 +143,7 @@ templates.}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$notices} \tab \tab \tab \tab \tab a html \cr
 \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$text2} \tab \tab \tab \tab \tab a html \cr
 \code{results$cTable1} \tab \tab \tab \tab \tab a table \cr
@@ -157,7 +165,6 @@ A results object containing:
 \code{results$explanationsContent} \tab \tab \tab \tab \tab a html \cr
 \code{results$clinicalReport} \tab \tab \tab \tab \tab a html \cr
 \code{results$aboutAnalysis} \tab \tab \tab \tab \tab a html \cr
-\code{results$notices} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -171,7 +178,9 @@ Function for comparing multiple Medical Decision Tests. Compares
 sensitivity, specificity, positive predictive value, negative predictive
 value, and other metrics between different tests against the same gold
 standard. Includes statistical comparison using McNemar's test and
-confidence intervals for differences.
+confidence intervals for differences. Tests are paired within each case;
+cases must be independent across rows. Repeated specimens or lesions from
+one patient require a method that accounts for clustering.
 }
 \examples{
 \donttest{

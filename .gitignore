@@ -111,3 +111,9 @@ TODO-audit.md
 tests/*.md 
 promotion/OncoPath-Promotion-Video-1/
 promotion/OncoPath-Promotion-Video-2/
+
+# Full-text literature for analyses (local only)
+references/
+books/
+i18n-plans/
+

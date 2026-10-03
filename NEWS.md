@@ -1,11 +1,215 @@
 # ClinicoPath News
 
+## Unreleased — `decisioncompare` (Compare Medical Decision Tests): the text says which test a significant comparison favours; sensitivity and specificity get their own p-values (module 1.0.81.01, analysis 1.0.83)
+
+Fixes from the independent review of 2026-10-02.
+
+- **The text no longer names a "best" test that the analysis found significantly less accurate.**
+  The ranking uses balanced accuracy, the average of sensitivity and specificity. McNemar's test
+  compares overall accuracy, which weights the two by the prevalence in your sample, so the two
+  can point in opposite directions. Example: a sensitive test (95% / 70%) and a specific test
+  (60% / 97.5%) at 20% prevalence. The Summary, the Manuscript-Ready Report and the Descriptive
+  report named only the sensitive test, as the one with the highest balanced accuracy, beside
+  "a significant difference". The significant results showed it was LESS accurate overall (75%
+  against 90%).
+  - Every panel now names, for each significant comparison, the test it favours and the
+    discordant counts, with the p-value from the table.
+  - When the test named for balanced accuracy is on the losing side, the panels now say so and
+    explain why the two rankings disagree.
+  - With three tests, the pairwise results are reported whatever Cochran's Q shows. When the global
+    test is not significant they are marked as exploratory.
+- **New p-values for sensitivity and specificity in the Differences table.** Each comes from the
+  same McNemar test, applied to the discordant pairs within reference-positive and
+  reference-negative cases. Unlike overall accuracy, what they compare does not depend on
+  prevalence. They are not adjusted for multiplicity, like the intervals beside them. The
+  Accuracy row's p-value is left empty because its test is in the McNemar table.
+- **Prevalence caveat.** The McNemar table note, the Summary and the Report now say that the
+  accuracy comparison applies to the case mix of your sample, and that under case-control sampling
+  it does not estimate population accuracy. With two tests, the Report adds the sensitivity and
+  specificity differences, with their intervals and p-values.
+- **Interval methods are named.** The copy-ready Methods paragraph and each per-test CI table now
+  say that sensitivity, specificity and the other proportions use exact (Clopper-Pearson)
+  intervals.
+- **One rounding rule for every copy-ready number.** Percentages, interval limits, likelihood
+  ratios and chi-squared values are rounded half away from zero, as the tables round. An accuracy
+  of 81.25% used to print as 81.3% in the Summary and 81.2% in the Descriptive report.
+- **Clearer labels in the CI tables.** "Proportion of false positives" is now "False positive rate
+  (1 - specificity)", and "Proportion of false negative" is now "False negative rate (1 -
+  sensitivity)". The old wording read like the false discovery rate shown two rows below.
+- **Smaller fixes.**
+  - Ties for the highest balanced accuracy now name every tied test.
+  - The "Measured performance" paragraph no longer prints "NA%" when one rate is not estimable.
+  - A test variable named "Gold Standard" no longer draws over the reference row of the heatmap.
+  - For R users, a missing value stored as an explicit NA level (`addNA()`) is treated as missing.
+    It no longer triggers the "more than two levels, combined as Negative" warning.
+  - The Differences table's small-sample footnote now just reports the counts.
+  - The McNemar help text says that Fagerland et al. evaluated 10 to 100 pairs.
+
+## Unreleased — `jjpiestats` (Pie Charts) and `jjbarstats` (Bar Charts): McNemar's test for paired data follows the current recommendation (module 1.0.81.01)
+
+- **Paired charts keep McNemar's test at any number of discordant pairs.** When fewer than 25
+  pairs disagreed, Pie Charts replaced the McNemar result on the chart with an exact binomial
+  p-value, and both analyses told you to quote that value. Fagerland, Lydersen and Laake (2013)
+  advise against the exact test "in any situation", because it is overly conservative, and the
+  25-pair cut-off has no source. The chart now always shows McNemar's test without continuity
+  correction. They recommend it where a type I error rate slightly above the nominal level is
+  acceptable (at most 5.37% at 5%).
+  - **What you will see.** With 1 and 7 discordant pairs, Pie Charts showed exact p = 0.070; it
+    now shows p = 0.03 (0.034). With 6 and 16, p = 0.052 becomes 0.03 (0.033). The chart again
+    shows the chi-squared statistic, Cohen's g with its confidence interval and the number of pairs.
+  - **New notices** say what the discordant pairs can show. With 3 or fewer, the test cannot reach
+    p < 0.05 whatever their split. With fewer than 10, it has little power, so a non-significant
+    result does not show that the proportions are equal. With none, Pie Charts sets p to 1 by
+    convention and shows no result on the chart; Bar Charts stops with an error, as before.
+  - **No more advice to use Fisher's exact test on paired data.** Bar Charts' Assumptions panel
+    applied the expected-count rule to paired tables and told you to quote Fisher's exact p
+    instead of the chart. Fisher's test assumes independent samples, and on one table it gave
+    p = 0.030 where McNemar's gives 0.059. Pie Charts' Interpretation panel pointed to an exact
+    p-value for paired data that the Assumptions panel no longer reports.
+  - **Fewer than 10 pairs in total are still not tested.** Fagerland et al. evaluated 10 to 100
+    pairs. The message no longer suggests an exact binomial test.
+  - **Pie Charts now analyses a table with an empty row or column.** McNemar's test uses only the
+    discordant pairs. Bar Charts already did this.
+  - **Bayesian runs with "Paired" ticked are no longer labelled McNemar.** The Bayesian analysis has
+    no paired version and tests independence, and a notice now says so.
+  - **Bar Charts:**
+    - The assumption listed for paired data is now "Paired observations; pairs independent of one
+      another". It no longer says "Observations are independent" or gives the expected-count rule.
+    - It no longer suggests collapsing the categories of a paired 2x2 table that has an empty cell.
+  - Fagerland et al. (2013) is now in both analyses' references. The 11 new Pie Charts messages are
+    not yet translated into Turkish, like the rest of its McNemar text.
+
+## Unreleased — `decisioncompare` (Compare Medical Decision Tests) validation fixes: recommended McNemar tests, the winner sentence, 0/0 likelihood ratios, copy-ready text (module 1.0.81.01, analysis 1.0.83)
+
+From the validation of 2026-10-01 (`development-ideas/decisioncompare-validation-2026-10-01.md`).
+Table numbers change only where noted below; the text around them changes more.
+
+- **Pairwise p-values now come from the McNemar tests that are recommended today.** The
+  comparison of two tests used an exact binomial test below 25 discordant pairs and a
+  continuity-corrected chi-squared test above. Fagerland, Lydersen and Laake (2013) recommend
+  neither "in any situation", because both are overly conservative. The p-value now comes from the
+  McNemar mid-p test, which never exceeded the nominal 5% level in their 9595 scenarios. A new
+  option, **McNemar Test**, offers the asymptotic chi-squared test without continuity correction
+  instead: it is slightly more powerful and reports a chi-squared statistic, but can exceed the
+  nominal level a little.
+  - **What you will see.** P-values are smaller, and some comparisons now fall below 0.05. With 6
+    and 16 discordant pairs, for example, the exact test gave p = 0.052; the mid-p test gives 0.035.
+  - **Table changes.** The Chi-squared and df columns are empty for mid-p rows.
+  - **Footnotes.** A comparison with no discordant pairs now carries its own footnote and p = 1.
+    The footnote for fewer than 10 discordant pairs warns about low power instead of claiming
+    exact inference.
+  - **Comparisons without discordant pairs** (the two tests right on exactly the same cases) are
+    labelled "Not informative" and left out of the Holm-Bonferroni adjustment, because their
+    p = 1 is a convention rather than a test result. Counting them made the other comparisons'
+    p-values larger than they should be.
+  - **With very few discordant pairs**, the footnote says when McNemar's test cannot reach
+    p < 0.05 whatever the split: up to 4 pairs for the mid-p test, up to 3 for the asymptotic
+    test. A non-significant result then says nothing about whether the tests differ.
+  - **The Manuscript-Ready Report names the test** in every sentence, including the 3-test
+    post-hoc sentence. It says so when the p-value and the paired confidence interval disagree
+    near p = 0.05: they come from different procedures. With no discordant pairs it no longer
+    prints a test verdict, because p = 1 is only a convention there.
+  - **Turkish.** The fixed note under the McNemar table is now translated. A trailing newline in
+    the results definition had kept it in English.
+  - **Fixed along the way:**
+    - With three tests, a test whose variable name contained "cochran" (for example "Cochrane")
+      could crash the Summary and Report when Cochran's Q was not computed, or show a pairwise
+      result as Cochran's Q.
+    - p-values that are exact ties (for example 0.0625) now round the same way in the text as in
+      the table.
+- **The Summary and the Manuscript-Ready Report now name the right test.** The "significantly more
+  accurate" test was chosen from each test's own accuracy, computed on that test's own rows, while
+  McNemar's p-value used only the cases with a result for both tests. When the tests had different
+  missing or excluded cases, for example a stain done only on the difficult cases, the sentence
+  could name the test that was significantly *less* accurate on the cases where both were done.
+  The verdict, and the accuracies quoted with it, now come from those paired cases, and the
+  sentence says how many there were.
+- **A likelihood ratio that is 0/0 is now blank, not invented.** For a test that never called
+  positive, LR+ was computed after adding 0.5 to every cell. This gave a finite number and a
+  "Moderate" or "Strong positive evidence" label for a test with no positive call (likewise LR-
+  for a test that never called negative). It is now left blank, with a footnote and a notice. The
+  0.5 correction still applies when only the denominator cell is empty.
+- **Likelihood-ratio labels follow the cited bands exactly at their edges.** Ratios are now formed
+  from the counts: an LR+ of exactly 10 used to be computed as 9.999999999999991. The bands are
+  those of Jaeschke et al. (1994), the source the analysis cites: "> 10 or < 0.1" large, "5 to 10"
+  and "0.1 to 0.2" moderate. An LR of exactly 10 or exactly 0.1 is therefore "Moderate", as in the
+  `decision` analysis.
+- **Copy-ready text is complete:**
+  - p-values below 0.001 read "p < 0.001", not "p = 0.000".
+  - The Methods paragraph names the McNemar test that was used, and Cochran's Q, the
+    Holm-Bonferroni adjustment and Newcombe's intervals whenever they were used.
+  - The report sentence gives the number of paired cases and the accuracy difference with its
+    95% CI.
+- **Smaller corrections:**
+  - The R syntax that jamovi shows now runs for variable names with spaces or symbols. It used to
+    read `gold = Golden Standart`.
+  - In jamovi the heatmap legend reads Negative / Positive / Indeterminate again. jamovi's theme had
+    replaced it with an untitled "0 1 2".
+  - With a supplied prevalence, the PPV and NPV footnotes give Bayes' formula, not TP/(TP+FP).
+  - A logit agreement interval at 0% or 100% agreement says that Clopper-Pearson limits are shown.
+  - In an all-diseased (or all-healthy) series no sentence names a "highest balanced accuracy".
+  - The Differences table says that each difference is the first test minus the second.
+  - An unused factor level no longer raises the multi-level warning.
+  - The radar plot scores LR+ and LR- symmetrically: an uninformative test no longer looks better
+    at ruling in than at ruling out.
+  - The CI-method help no longer says that logit is preferred near 0% or 100% agreement.
+    Clopper-Pearson is the method that keeps 95% coverage there.
+- **Turkish:** the analysis is now fully translated. Before, 281 of its 471 texts were English,
+  including most notices, the help panels and the report sentences. The "A vs B" comparison labels
+  and the heatmap's "Gold Standard" row are now translatable, and percentages in Turkish sentences
+  read "%85.0".
+- **References.** The analysis now also cites:
+  - Fagerland, Lydersen and Laake (2013, 2014) for the McNemar tests;
+  - Clopper and Pearson (1934);
+  - Brown, Cai and DasGupta (2001) for the logit and Wilson intervals;
+  - Haldane (1956) and Anscombe (1956) for the 0.5 correction.
+
+  The module-wide knitr and ggplot2 citations now show their current title, authors and year.
+
 ## Unreleased — `decisioncombine` (Combine Medical Decision Tests) review fixes: single-test rules, inversion guard, notices (module 1.0.81.01, analysis 1.0.84)
 
 From the independent review of 2026-09-29
 (`development-ideas/decisioncombine-independent-review-2026-09-29.md`), the validation fixes of
 2026-09-28 and a follow-up check on 2026-09-30. A saved `.omv` can show extra rows, two extra
 columns and a different highest-ranked rule.
+
+### Fix pass (2026-10-01): tests with one result, and four notices
+
+No number in any table changes.
+
+- **A test whose recorded results are all positive, or never positive, is now named.** This
+  happens, for example, when the level chosen as positive does not occur in the data, or when
+  the data were filtered on that test. A serious warning ("Test 1 Has Only Positive Results",
+  or "... Has No Positive Results") says the test cannot separate the two groups, what its own
+  row therefore shows, and what happens to the combinations that use it. Before, one such test
+  got a "Poor Discrimination" warning whose advice about likelihood ratios cannot apply to it,
+  and with two or three tests there was no notice at all.
+- **"Sparse Cell Counts" no longer lists rows that are empty by construction.** These are result
+  patterns that no patient shows, and rules that call every case, or no case, positive. Their
+  ratios are blank or exactly 1, so they do not "rest on very few cases". Rows with a genuine
+  zero cell are still listed.
+- **"Discrimination Not Established" no longer says that every rule's interval includes 0.**
+  It now says that no rule's interval lies wholly above 0, which is what is checked; an exact
+  pattern's interval can lie wholly below 0.
+- **"Positive Levels May Be Inverted" no longer says that sensitivity and specificity are
+  "swapped".** A reversed level turns each into its complement (1 minus the value); it does not
+  exchange the two.
+- Choosing Test 2 before the reference standard and Test 1 now says which choice is still
+  missing, as choosing Test 1 first already did.
+
+### Release review (2026-10-01): large samples
+
+- **The analysis no longer stops on large samples with a few missing values.** The new check
+  for selectively missing results multiplied whole-number counts, which R cannot hold once
+  the product passes about 2.1 billion. From about 93,000 cases, five missing values in one
+  variable were enough, even when missing completely at random, to stop the whole analysis
+  with "missing value where TRUE/FALSE needed".
+- **The diagnostic odds ratio and its interval are no longer blank on very large samples.**
+  For the same reason, a row with two cells above about 46,000 (6 of 8 rows in a
+  200,000-case example) showed a blank odds ratio with no explanation. No other column was
+  affected.
+- The random seed printed beside the corrected Youden's J is a whole number: from R syntax,
+  a seed of 100000 read "1e+05".
 
 ### Code review (2026-10-01): selectively missing results, heatmap colours, paired comparisons, optimism correction
 

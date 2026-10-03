@@ -282,11 +282,12 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
             },
 
             .methodDescription = function(data) {
+                # Bayes first: statsExpressions ignores `paired` for type = "bayes".
+                if (identical(private$.option("typestatistics"), "bayes"))
+                    return("Bayesian contingency table analysis")
                 # statsExpressions calls stats::mcnemar.test(correct = FALSE): say so, because
                 # base R's default is the continuity-corrected statistic and the two differ.
                 if (isTRUE(private$.option("paired"))) return("McNemar's test (chi-squared without continuity correction)")
-                if (identical(private$.option("typestatistics"), "bayes"))
-                    return("Bayesian contingency table analysis")
                 methods <- vapply(self$options$dep, function(dv) {
                     if (isTRUE(private$.option("resultssubtitle")) &&
                         !is.null(private$.exactSubtitle(data, dv)))
@@ -524,8 +525,11 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 warnings <- character()
                 recommendations <- character()
 
-                # Check group sizes for chi-square validity across every dependent variable
-                if (self$options$group %in% names(analysis_data)) {
+                # Check group sizes for chi-square validity across every dependent variable.
+                # Not for paired data: McNemar uses only the discordant pairs, has no
+                # expected-count rule, and Fisher's exact test assumes independent samples.
+                if (self$options$group %in% names(analysis_data) &&
+                    !isTRUE(private$.option("paired"))) {
                     for (dep_var_check in self$options$dep) {
                         if (!(dep_var_check %in% names(analysis_data)))
                             next
@@ -586,9 +590,10 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 }
 
                 # Check for paired data appropriateness
-                if (private$.option("paired")) {
+                if (isTRUE(private$.option("paired")) &&
+                    !identical(private$.option("typestatistics"), "bayes")) {
                     warnings <- c(warnings,
-                        " <strong>Paired Analysis:</strong> McNemar's test assumes matched pairs (e.g., before/after, case/control matching). It is computed without continuity correction, so with few discordant pairs it is anti-conservative; the notice panel flags that case."
+                        " <strong>Paired Analysis:</strong> McNemar's test assumes matched pairs (e.g., before/after, case/control matching) and uses only the discordant pairs. It is the asymptotic test without continuity correction, which Fagerland et al. (2013) recommend when a type I error rate slightly above the nominal level (at most 5.37% at 5%) is acceptable; they advise against the exact binomial and continuity-corrected versions in any situation, as both are overly conservative. Few discordant pairs limit its power; the notice panel says when that applies."
                     )
                 }
 
@@ -600,9 +605,10 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     "<p><strong>General Assumptions:</strong></p>",
                     "<ul>",
                     "<li>Variables are categorical or ordinal</li>",
-                    "<li>Observations are independent</li>",
-                    "<li>Expected cell counts \u2265 5 for chi-square validity</li>",
-                    if (private$.option("paired")) "<li>Paired observations (matched subjects)</li>" else "",
+                    # Paired observations are dependent by design, and McNemar has no
+                    # expected-count rule.
+                    if (isTRUE(private$.option("paired"))) "<li>Paired observations (matched subjects); the pairs are independent of one another</li>"
+                    else "<li>Observations are independent</li><li>Expected cell counts \u2265 5 for chi-square validity</li>",
                     "</ul>",
 
                     if (length(warnings) > 0) paste0(
@@ -810,7 +816,9 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     if (is.null(dep_var) || !(dep_var %in% names(data)))
                         next
                     cross_table <- private$.getWeightedTable(data, dep_var, group_var)
-                    if (any(cross_table == 0)) {
+                    # Not for paired data: an empty discordant cell is a result, and a
+                    # paired 2x2 cannot be collapsed.
+                    if (!isTRUE(private$.option("paired")) && any(cross_table == 0)) {
                         private$.addNotice('WARNING', 'Zero-Count Cells', sprintf(
                             "Variable '%s' vs '%s': some cells have zero counts. Consider collapsing categories.",
                             dep_var, group_var
@@ -865,14 +873,28 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     if (!paired_valid$valid) {
                         private$.addNotice('ERROR', 'Invalid Paired Data', paired_valid$message)
                         jmvcore::reject(paired_valid$message)
+                    } else if (identical(private$.option("typestatistics"), "bayes")) {
+                        # statsExpressions ignores `paired` for type = "bayes", so there is
+                        # no McNemar test here to describe.
+                        private$.addNotice('WARNING', 'Pairing not used by the Bayesian analysis', sprintf(
+                            "The Bayesian contingency analysis has no paired version: for '%s' the chart shows a Bayes factor for independence of the two variables, not a test of change between the paired measurements. Choose the frequentist type of statistic for McNemar's test.",
+                            dep_var))
                     } else {
                         private$.addNotice('STRONG_WARNING', 'Paired Data Assumption', paired_valid$message)
-                        # The chi-squared approximation needs enough discordant pairs; below
-                        # about 25 the exact binomial test on those pairs is the valid test.
-                        if (paired_valid$discordant < 25)
-                            private$.addNotice('STRONG_WARNING', 'Few discordant pairs', sprintf(
-                                "Only %d discordant pairs (%d vs %d) drive McNemar's test for '%s'; below 25 its chi-squared approximation (computed without continuity correction) is unreliable and anti-conservative. Use an exact binomial test on the discordant pairs.",
-                                paired_valid$discordant, paired_valid$b, paired_valid$c, dep_var))
+                        # How much information the discordant pairs carry, not a validity
+                        # cut-off: Fagerland et al. (2013) recommend the asymptotic test
+                        # ggbarstats shows and advise against the exact binomial in any
+                        # situation. With m pairs the statistic is at most m, so its
+                        # smallest p is P(chi2(1) > m): m <= 3 cannot reach 0.05.
+                        m <- paired_valid$discordant
+                        if (stats::pchisq(m, df = 1, lower.tail = FALSE) >= 0.05)
+                            private$.addNotice('WARNING', 'Too few discordant pairs to reach p < 0.05', sprintf(
+                                "Only %d discordant %s (%d vs %d) for '%s': McNemar's test cannot reach p < 0.05 whatever their split, so its non-significant result says nothing about whether the proportions changed.",
+                                m, if (m == 1) "pair" else "pairs", paired_valid$b, paired_valid$c, dep_var))
+                        else if (m < 10)
+                            private$.addNotice('INFO', 'Few discordant pairs', sprintf(
+                                "Only %d discordant pairs (%d vs %d) for '%s', so McNemar's test has little power here; a non-significant result does not show that the proportions are the same.",
+                                m, paired_valid$b, paired_valid$c, dep_var))
                     }
                 }
                 invisible(NULL)
@@ -931,13 +953,15 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     ))
                 }
 
-                # Check for adequate sample size (total count)
+                # Fagerland et al. (2013) evaluated McNemar's tests on 10 to 100 pairs, so
+                # below 10 there is no evidence the test keeps its error rate. Do not
+                # suggest the exact binomial test: they advise against it in any situation.
                 total_n <- sum(cross_table)
                 if (total_n < 10) {
                     return(list(
                         valid = FALSE,
                         message = sprintf(
-                            "Only %d paired observations are available. Use an exact binomial test on discordant pairs; do not replace a paired analysis with an independent-samples Fisher test.",
+                            "Only %d paired observations are available. McNemar's test is not run for fewer than 10 pairs: the evidence that it keeps its error rate (Fagerland et al. 2013) starts at 10 pairs, and with fewer it has almost no power. Collect more data; do not replace a paired analysis with an independent-samples Fisher test.",
                             total_n
                         )
                     ))
@@ -1145,7 +1169,8 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                         
                         # Additional info about analysis settings
                         analysis_info <- ""
-                        if (private$.option("paired")) {
+                        if (isTRUE(private$.option("paired")) &&
+                            !identical(private$.option("typestatistics"), "bayes")) {
                             analysis_info <- paste0(analysis_info, "<br>\u2022 Using paired/repeated measures design (McNemar's test)")
                         }
                         if (!is.null(self$options$counts)) {

@@ -271,6 +271,7 @@ jjpiestatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ggplot2",
                     "ggstatsplot",
                     "statsExpressions",
+                    "Fagerland2013",
                     "digest",
                     "ggpubr",
                     "tools"),

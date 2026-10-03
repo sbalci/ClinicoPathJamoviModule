@@ -264,7 +264,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 paste(.('Comparing across groups:'), htmltools::htmlEscape(self$options$group))
             } else { .('No grouping variable - single pie chart') }
             
-            method_info <- paste(.('Statistical method:'), if (private$.effectiveOptionsList()$paired) 'McNemar' else tools::toTitleCase(private$.effectiveOptionsList()$typestatistics))
+            method_info <- paste(.('Statistical method:'), if (private$.isMcNemar()) 'McNemar' else tools::toTitleCase(private$.effectiveOptionsList()$typestatistics))
             
             glue::glue(
                 "<h4>{summary_title}</h4>
@@ -280,17 +280,14 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         .generateAssumptionsContent = function() {
             opts <- private$.effectiveOptionsList()
-            if (isTRUE(opts$paired)) {
-                pd <- private$.pairedDiscordant(self$data, self$options$dep,
-                                                self$options$group, self$options$counts)
-                detail <- if (!is.null(pd))
-                    sprintf(.('Only %d of the %d pairs are discordant. McNemar\'s chi-square is an asymptotic test on the discordant pairs alone, so below about 25 of them it is anti-conservative. The exact binomial test on those pairs gives <b>%s</b>; quote that value.'),
-                            pd$n_disc, pd$n_total, private$.fmtP(pd$p_exact))
-                else
-                    .('The McNemar chi-square reported by the plotting package is computed without a continuity correction, so it will not match the base R default.')
+            if (private$.isMcNemar()) {
                 return(paste0("<p>",
                     .('McNemar analysis requires paired categorical observations with matching category coding. Pairs must be independent of one another. An independent-samples Fisher test is not a replacement.'),
-                    " ", detail, "</p>"))
+                    " ",
+                    .('The McNemar chi-square reported by the plotting package is computed without a continuity correction, so it will not match the base R default.'),
+                    " ",
+                    .('This asymptotic test uses only the discordant pairs. Fagerland et al. (2013) recommend it when a type I error rate slightly above the nominal level (at most 5.37% at 5%) is acceptable, and advise against the exact binomial and continuity-corrected versions in any situation, as both are overly conservative. Few discordant pairs limit its power.'),
+                    "</p>"))
             }
             if (identical(opts$typestatistics, "bayes"))
                 return("<p>Bayesian contingency analysis assumes independent observations and valid case frequencies. Interpret the Bayes factor with its prior; Pearson expected-count diagnostics do not determine Bayesian validity.</p>")
@@ -395,7 +392,11 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
         
         .generateInterpretationContent = function() {
-            method_guidance <- switch(private$.effectiveOptionsList()$typestatistics,
+            # Paired runs show McNemar's test, whatever the frequentist type: the
+            # chi-square, expected-count and Fisher guidance below does not apply.
+            method_guidance <- if (private$.isMcNemar())
+                .('McNemar\'s test compares the pairs that changed in one direction with those that changed in the other. p < 0.05 indicates that the proportion differs between the paired measurements. The expected-count rule does not apply, and no exact p-value replaces the result on the chart.')
+            else switch(private$.effectiveOptionsList()$typestatistics,
                 "parametric" = .('Chi-square test results show whether group differences are statistically significant. Look for p-values < 0.05 for significant associations. Example: \u03c7\u00b2(1) = 5.2, p = 0.023 indicates significant difference between groups.'),
                 # For a contingency table, ggstatsplot computes the SAME Pearson
                 # chi-square for parametric, nonparametric and robust - it offers no
@@ -459,20 +460,14 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # from the number shown. statsExpressions::contingency_table() routes
             # every frequentist type to chi-square; there is no exact-test option.
             opts <- private$.effectiveOptionsList()
-            method_name <- if (isTRUE(opts$paired)) {
+            # Bayes first: statsExpressions ignores `paired` for type = "bayes".
+            method_name <- if (identical(opts$typestatistics, "bayes"))
+                .('a Bayesian contingency table analysis')
+            else if (isTRUE(opts$paired))
                 # statsExpressions runs mcnemar.test(correct = FALSE) while base R
                 # defaults to correct = TRUE, so an unqualified "McNemar's test" does
-                # not reproduce in base R. Name the correction, or the exact test
-                # when that is what the chart now shows.
-                if (isTRUE(opts$resultssubtitle) &&
-                    !is.null(private$.exactSubtitle(self$data, opts$dep, opts$group,
-                                                    opts$counts, opts$conflevel, opts$digits)))
-                    .("McNemar's exact test, a binomial test on the discordant pairs")
-                else
-                    .("McNemar's test without continuity correction")
-            }
-            else if (identical(opts$typestatistics, "bayes"))
-                .('a Bayesian contingency table analysis')
+                # not reproduce in base R. Name the correction.
+                .("McNemar's test without continuity correction")
             else if (isTRUE(opts$resultssubtitle) &&
                      !is.null(private$.exactSubtitle(self$data, opts$dep, opts$group,
                                                     opts$counts, opts$conflevel, opts$digits)))
@@ -732,18 +727,26 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             })
         },
 
-        # McNemar's chi-square is an asymptotic test on the DISCORDANT pairs alone,
-        # so its validity is governed by b + c, not by the table total - and the
-        # plotting package additionally runs it WITHOUT the continuity correction.
-        # The old guard only rejected a total below 10, so a table with n = 206 and
-        # just 6 discordant pairs passed and reported p = 0.10, where the exact
-        # binomial test (the exact counterpart of McNemar) gives p = 0.22.
+        # The chart shows McNemar only for a paired, non-Bayesian run:
+        # statsExpressions ignores `paired` for type = "bayes".
+        .isMcNemar = function() {
+            opts <- private$.effectiveOptionsList()
+            isTRUE(opts$paired) && !identical(opts$typestatistics, "bayes")
+        },
+
+        # McNemar's test uses only the DISCORDANT pairs b and c, so what it can show
+        # depends on b + c, not on the table total. The chart keeps the plotting
+        # package's asymptotic test without continuity correction
+        # (mcnemar.test(correct = FALSE)). Fagerland, Lydersen & Laake (BMC Med Res
+        # Methodol 2013;13:91) recommend it where a type I error rate slightly above
+        # the nominal level is acceptable (at most 5.37% at 5% over 10 to 100 pairs),
+        # and "do not recommend use of the McNemar exact conditional test nor the
+        # asymptotic test with CC in any situation". So there is no b + c cut-off;
+        # the run notices say how much information b + c carries.
         #
-        # Returns the exact result when the asymptotic test should not be trusted,
-        # and NULL otherwise (no grouping variable, not 2x2, no discordant pairs at
-        # all, or enough of them).
-        .pairedDiscordant = function(data, dep_var, group_var, counts_var = NULL,
-                                     min_discordant = 25L) {
+        # Returns the number of discordant pairs b + c of a 2x2 table, or NULL (no
+        # grouping variable, or not 2x2).
+        .pairedDiscordant = function(data, dep_var, group_var, counts_var = NULL) {
             if (is.null(group_var) || !nzchar(group_var))
                 return(NULL)
             tryCatch({
@@ -758,14 +761,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (!identical(dim(tb), c(2L, 2L)))
                     return(NULL)
 
-                b <- tb[1L, 2L]
-                cc <- tb[2L, 1L]
-                n_disc <- b + cc
-                if (n_disc == 0 || n_disc >= min_discordant)
-                    return(NULL)
-
-                list(b = b, c = cc, n_disc = n_disc, n_total = sum(tb),
-                     p_exact = stats::binom.test(b, n_disc, 0.5)$p.value)
+                tb[1L, 2L] + tb[2L, 1L]
             }, error = function(e) NULL)
         },
 
@@ -790,30 +786,15 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         #
         # Returns a plotmath expression in ggstatsplot's own idiom, or NULL when
         # the exact test does not apply (not 2x2, adequate expected counts, paired
-        # data - where McNemar is already correct - or a Bayesian analysis).
+        # data or a Bayesian analysis). Paired data keep the plotting package's
+        # McNemar test (see .pairedDiscordant); Fisher assumes independent samples.
         .exactSubtitle = function(data, dep_var, group_var, counts_var = NULL,
                                   conf_level = 0.95, digits = 2L) {
             if (is.null(group_var) || !nzchar(group_var))
                 return(NULL)
             opts <- private$.effectiveOptionsList()
-            if (identical(opts$typestatistics, "bayes"))
+            if (identical(opts$typestatistics, "bayes") || isTRUE(opts$paired))
                 return(NULL)
-
-            # Paired data: Fisher assumes independent samples and is NOT the
-            # alternative here. The exact counterpart of McNemar is a binomial
-            # test on the discordant pairs, so put THAT on the chart when the
-            # asymptotic McNemar cannot be trusted.
-            if (isTRUE(opts$paired)) {
-                pd <- private$.pairedDiscordant(data, dep_var, group_var, counts_var)
-                if (is.null(pd))
-                    return(NULL)
-                d <- max(0L, as.integer(digits))
-                p_txt <- if (pd$p_exact < 0.001) "< 0.001"
-                         else formatC(pd$p_exact, format = "f", digits = max(3L, d))
-                return(parse(text = sprintf(
-                    'list(italic("p")["exact"] == "%s", italic("n")["discordant"] == "%d", italic("n")["obs"] == "%d")',
-                    p_txt, pd$n_disc, pd$n_total))[[1]])
-            }
 
             tryCatch({
                 if (!is.null(counts_var) && nzchar(counts_var) && counts_var %in% names(data)) {
@@ -891,31 +872,19 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 ))
             }
 
-            # Check minimum sample size (McNemar requires at least 10 paired observations)
+            # Fagerland et al. (2013) evaluated McNemar's tests on 10 to 100 pairs, so
+            # below 10 there is no evidence the test keeps its error rate. Do not
+            # suggest the exact binomial test (they advise against it in any
+            # situation) or Fisher's exact test (it assumes independent samples).
+            # A zero row or column is no obstacle: the test uses only b and c.
             total_n <- sum(cross_table)
             if (total_n < 10) {
                 return(list(
                     valid = FALSE,
-                    # Do NOT point at "the nonparametric option" for an exact
-                    # test - that option returns the same chi-square. And Fisher's
-                    # exact test is the wrong suggestion for PAIRED data anyway:
-                    # it assumes independent samples. The exact counterpart of
-                    # McNemar is a binomial test on the discordant pairs.
                     message = sprintf(
-                        .('McNemar test requires at least 10 paired observations for reliable results. Your data has %d paired observations. Collect more data, or run an exact binomial test on the discordant pairs - the exact counterpart of McNemar. Note that Fisher\'s exact test is not an alternative here: it assumes independent samples, not paired ones.'),
+                        .('McNemar\'s test is not shown for fewer than 10 paired observations; your data has %d. The evidence that the test keeps its error rate (Fagerland et al. 2013) starts at 10 pairs, and with fewer it has almost no power. Collect more data. Fisher\'s exact test is not an alternative: it assumes independent samples, not paired ones.'),
                         total_n
                     )
-                ))
-            }
-
-            # Check for zero marginals (can cause computational issues)
-            row_sums <- rowSums(cross_table)
-            col_sums <- colSums(cross_table)
-
-            if (any(row_sums == 0) || any(col_sums == 0)) {
-                return(list(
-                    valid = FALSE,
-                    message = .('McNemar test requires non-zero marginal totals. Your contingency table has at least one row or column with zero observations. Check your data for complete coverage of all category combinations.')
                 ))
             }
 
@@ -1233,22 +1202,29 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # nothing and said nothing. Raise its verdict here as well.
             if (isTRUE(self$options$paired)) {
                 v <- private$.validatePairedData(prepared_data, dep, group)
-                if (!v$valid)
+                m <- private$.pairedDiscordant(prepared_data, dep, group, self$options$counts)
+                if (!v$valid) {
                     private$.addNotice("WARNING", .('Paired analysis not shown'), v$message)
-            }
-
-            # McNemar's validity rests on the discordant pairs, not the table total,
-            # so a large study with few disagreements still gets an unreliable test.
-            if (isTRUE(self$options$paired)) {
-                pd <- private$.pairedDiscordant(prepared_data, dep, group, self$options$counts)
-                if (!is.null(pd))
-                    private$.addNotice("STRONG_WARNING", .('Too few discordant pairs for McNemar'),
-                        sprintf(.('Only %d of the %d pairs disagree. McNemar\'s chi-square is an asymptotic test on the discordant pairs alone and is anti-conservative below about 25 of them, and the plotting package computes it without a continuity correction. The exact binomial test on the discordant pairs gives %s. %s'),
-                                pd$n_disc, pd$n_total, private$.fmtP(pd$p_exact, html = FALSE),
-                                if (isTRUE(self$options$resultssubtitle))
-                                    .('The chart subtitle reports that exact value.')
-                                else
-                                    .('Enable "Statistical results" to show that exact value on the chart.')))
+                } else if (!private$.isMcNemar()) {
+                    private$.addNotice("WARNING", .('Pairing not used by the Bayesian analysis'),
+                        .('The Bayesian contingency analysis has no paired version: the chart shows a Bayes factor for independence of the two variables, not a test of change between the paired measurements. Choose a type of statistic other than Bayes for McNemar\'s test.'))
+                } else if (!is.null(m)) {
+                    # How much information the discordant pairs carry, not a validity
+                    # cut-off. With m pairs the asymptotic statistic is at most m, so
+                    # its smallest p is P(chi2(1) > m): m <= 3 cannot reach 0.05.
+                    if (m == 0)
+                        private$.addNotice("WARNING", .('No discordant pairs'),
+                            .('Every pair falls in the same category on both measurements, so McNemar\'s test has no information: p is 1 by convention and no test result is shown on the chart.'))
+                    else if (stats::pchisq(m, df = 1, lower.tail = FALSE) >= 0.05)
+                        private$.addNotice("WARNING", .('Too few discordant pairs to reach p < 0.05'),
+                            if (m == 1)
+                                .('Only 1 discordant pair: McNemar\'s test cannot reach p < 0.05, so its non-significant result says nothing about whether the proportions changed.')
+                            else
+                                sprintf(.('Only %d discordant pairs: with so few, McNemar\'s test cannot reach p < 0.05 whatever their split, so its non-significant result says nothing about whether the proportions changed.'), m))
+                    else if (m < 10)
+                        private$.addNotice("INFO", .('Few discordant pairs'),
+                            sprintf(.('Only %d discordant pairs, so McNemar\'s test has little power here; a non-significant result does not show that the proportions are the same.'), m))
+                }
             }
 
             # A variable crossed with itself yields a perfectly diagonal table, so
@@ -1346,7 +1322,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     todo <- glue::glue(
                         "<br>{ready_msg} {dep_info}{group_info}{split_info}.<br>
                         <br>{data_msg}: {nrow(prepared_data)} {obs_msg}{cache_status}.<br>
-                        <br>{method_msg}: {if (private$.effectiveOptionsList()$paired) 'McNemar' else tools::toTitleCase(private$.effectiveOptionsList()$typestatistics)} {analysis_msg}.<br>
+                        <br>{method_msg}: {if (private$.isMcNemar()) 'McNemar' else tools::toTitleCase(private$.effectiveOptionsList()$typestatistics)} {analysis_msg}.<br>
                         {perf_warning}
                         {if(prep_time > 0.1) paste0('<br>', prep_time_msg, ': ', prep_time, ' ', seconds_msg, '.<br>') else ''}
                         <hr>",

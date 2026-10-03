@@ -32,6 +32,9 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
             # Findings of .screenSelectiveMissingness(), worded by .emitMissingnessNotices() once
             # it is known whether the combination table will be built.
             .missingness = NULL,
+            # Tests (1-3) named by the "Has Only/No Positive Results" notice of .prepareData(), so
+            # .assessTopRuleDiscrimination() can leave that diagnosis to it.
+            .constantTests = integer(),
 
             # jmvcore's OptionVariable$valueAsSource returns the column name verbatim, so the
             # exported syntax read `gold = Golden Standart` -- not parseable R for any name
@@ -412,6 +415,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 private$.zeroSeIntervalPatterns <- character()
                 private$.rules <- list()
                 private$.missingness <- NULL
+                private$.constantTests <- integer()
 
                 # Initialize fixed-structure tables for Test 1, 2, 3
                 for (i in seq_len(3L)) {
@@ -493,6 +497,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 private$.zeroSeIntervalPatterns <- character()
                 private$.rules <- list()
                 private$.missingness <- NULL
+                private$.constantTests <- integer()
                 private$.clearDynamicResults()
                 private$.updateIndividualVisibility()
 
@@ -600,9 +605,10 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 # below then only fire once the user has STARTED choosing -- a partial
                 # selection (a gold standard with no positive level, say) is the case that
                 # genuinely needs telling, because nothing on screen says which control is
-                # still empty.
-                if (!private$.optionSelected(self$options$gold) &&
-                    !private$.optionSelected(self$options$test1)) {
+                # still empty. A Test 2 or Test 3 chosen first is a started selection too: it
+                # returned here silently while Test 1 alone drew "No Gold Standard".
+                if (!any(vapply(c("gold", "test1", "test2", "test3"), function(name)
+                    private$.optionSelected(self$options[[name]]), logical(1)))) {
                     return(FALSE)
                 }
 
@@ -862,6 +868,11 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 # The larger recording rate over the smaller (Inf when one is 0, NA when both are or
                 # an arm is empty), pooled over the reference groups by Mantel-Haenszel weights; one
                 # group gives the plain ratio.
+                # The counts are integers (sum() of logicals), so each product is formed in double:
+                # an integer product overflows to NA once both factors pass ~46,000, and `if (NA)`
+                # then stopped the analysis on ANY sample of about 93,000 cases with five values
+                # missing at random. The counts stay integers for the notice text, where jmvcore's
+                # format() prints a double 100000 as "1e+05".
                 ratio <- function(groups) {
                     num <- 0
                     den <- 0
@@ -870,8 +881,8 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                         if (r$n0 == 0 || r$n1 == 0) {
                             next
                         }
-                        num <- num + r$o1 * r$n0 / total
-                        den <- den + r$o0 * r$n1 / total
+                        num <- num + as.numeric(r$o1) * r$n0 / total
+                        den <- den + as.numeric(r$o0) * r$n1 / total
                     }
                     if (num == 0 && den == 0) NA_real_ else if (num == 0 || den == 0) Inf
                     else max(num / den, den / num)
@@ -1077,6 +1088,10 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                         next
                     }
                     body <- if (describe_table) trimws(paste(f$lines, f$consequences)) else f$lines
+                    # TODO (wording): the "gold_joint" sentence says the predictive values can be
+                    # biased "for every test and rule"; the PPV of an exact-pattern row is not when
+                    # the reference depends only on the pattern. Cautious, so left; a msgid change
+                    # means redoing tr.po (release review 2026-10-01).
                     explanation <- c(
                         if ("gold_test" %in% f$kinds) .("If the reference standard was obtained because of these results (partial verification), sensitivity is overstated and specificity understated for a test whose positive results were verified more often, and the reverse when its negative results were, in the combination table and in that test's own table, which also needs the reference standard; its predictive values are not distorted by it. If instead the reference standard was withheld because of disease status itself, sensitivity and specificity are unaffected but the predictive values are distorted. These data cannot tell the two apart. Correcting partial verification (Begg and Greenes 1983) needs the reference standard on a random sample of the cases verified less often."),
                         if ("gold_joint" %in% f$kinds) .("If the reference standard was obtained only after a positive result on some test, or only where the tests disagreed (discrepant resolution), sensitivity, specificity and the predictive values can all be biased, in either direction, for every test and rule in the table. These data cannot tell this from results withheld because of disease status, and a correction needs the reference standard on a random sample of the cases verified less often."),
@@ -1343,6 +1358,42 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                         mydata[[self$options$test3]], self$options$test3Positive)
                 }
 
+                # A test whose every recorded result falls on one side of its positive level
+                # separates no patients, and it ran with nothing naming the cause: one test drew
+                # "Poor Discrimination", whose advice about the likelihood ratios cannot apply to
+                # a test with one result, and two or three tests drew nothing. Judged on ALL its
+                # recorded results, not only the complete cases: a test left with one result
+                # because missing values removed the other (reflex testing, partial
+                # verification) is explained by the missingness notice, whose cause this one
+                # would misname. With one reference outcome the notice above explains the blanks.
+                if (n_gold_pos > 0 && n_gold_neg > 0) {
+                    for (i in seq_len(3L)) {
+                        rl <- required_levels[[paste0("test", i)]]
+                        if (is.null(rl)) {
+                            next
+                        }
+                        recorded <- stats::na.omit(as.character(subset_data[[rl$var]]))
+                        n_positive <- sum(recorded == rl$level)
+                        if (n_positive > 0 && n_positive < length(recorded)) {
+                            next
+                        }
+                        private$.constantTests <- c(private$.constantTests, i)
+                        message <- .fmt(if (n_positive == 0) {
+                            .('No recorded result of {test} ({variable}) is "{level}", the level chosen as positive, so {test} cannot separate disease-present from disease-absent cases in these data: on its own it reads sensitivity 0% and specificity 100% by construction.')
+                        } else {
+                            .('Every recorded result of {test} ({variable}) is "{level}", the level chosen as positive, so {test} cannot separate disease-present from disease-absent cases in these data: on its own it reads sensitivity 100% and specificity 0% by construction.')
+                        }, test = rl$label, variable = rl$var, level = rl$level)
+                        if (private$.optionSelected(self$options$test2)) {
+                            message <- paste(message, .("Every combination that uses it either reduces to a rule on the other tests alone or calls every case positive, or every case negative."))
+                        }
+                        private$.addNotice(
+                            "STRONG_WARNING",
+                            .fmt(if (n_positive == 0) .("{test} Has No Positive Results")
+                                 else .("{test} Has Only Positive Results"), test = rl$label),
+                            paste(message, .("Check the level chosen as positive and any filter applied to the data.")))
+                    }
+                }
+
                 return(work)
             },
             .analyzeIndividualTest = function(test_num) {
@@ -1360,18 +1411,10 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 keep <- stats::complete.cases(pair_data)
                 n_total <- nrow(pair_data)
                 n_used <- sum(keep)
+                # Defensive only, and carrying no notice for that reason: .run() calls this after
+                # .validateInputs() has required four cases with the reference standard and every
+                # selected test, and all of them are in this test's pairwise sample.
                 if (n_used == 0) {
-                    private$.addNotice(
-                        "WARNING",
-                        .fmt(
-                            .("Test {test} Has No Complete Cases"),
-                            test = test_num
-                        ),
-                        .fmt(
-                            .("Test {test} cannot be summarized because no case has both the test and reference-standard result."),
-                            test = test_num
-                        )
-                    )
                     return()
                 }
                 if (n_used < n_total) {
@@ -1668,15 +1711,21 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     return()
                 }
                 row_minima <- suppressWarnings(apply(cell_matrix, 1, min, na.rm = TRUE))
-                # A row with no disease-present or no disease-absent cases (a one-class
-                # sample) has zero cells by construction, not by sparse sampling: its
-                # ratios are already blank and its other notice explains why. Flagging it
-                # here told the reader the (blank) ratios were "unstable" and that its
-                # (blank) sensitivity could "still be sound".
-                disease_margin_empty <- (table_df$tp + table_df$fn) == 0 |
-                    (table_df$fp + table_df$tn) == 0
+                # A row with an empty margin has zero cells by construction, not by sparse
+                # sampling, and .analyzeSinglePattern() corrects none of them. With no
+                # disease-present or no disease-absent cases (a one-class sample) its ratios
+                # are blank and its own notice says why; flagging it told the reader the
+                # (blank) ratios were "unstable" and that its (blank) sensitivity could "still
+                # be sound". With no test-positive or no test-negative cases (a pattern nobody
+                # shows, a rule positive in every case or in none) its ratios are blank or
+                # exactly 1 with no interval, as the "haldane" note says, yet every such row
+                # was listed as resting on "very few cases".
+                margin_empty <- (table_df$tp + table_df$fn) == 0 |
+                    (table_df$fp + table_df$tn) == 0 |
+                    (table_df$tp + table_df$fp) == 0 |
+                    (table_df$fn + table_df$tn) == 0
                 sparse <- is.finite(row_minima) & row_minima < 5 &
-                    !(disease_margin_empty %in% TRUE)
+                    !(margin_empty %in% TRUE)
                 if (!any(sparse)) {
                     return()
                 }
@@ -1777,10 +1826,14 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     private$.continuityPatterns <- c(
                         private$.continuityPatterns, pattern_name)
                 } else {
-                    tp_adj <- tp
-                    fp_adj <- fp
-                    fn_adj <- fn
-                    tn_adj <- tn
+                    # Doubles, as in the corrected branch: table() counts are integers, and the
+                    # odds ratio's products overflowed to NA once two cells passed ~46,000, so
+                    # the diagnostic odds ratio and its interval went blank, with no notice, on
+                    # most rows of a 200,000-case analysis.
+                    tp_adj <- as.numeric(tp)
+                    fp_adj <- as.numeric(fp)
+                    fn_adj <- as.numeric(fn)
+                    tn_adj <- as.numeric(tn)
                 }
 
                 # These four are the definitional proportions of the 2x2. epiR::epi.tests
@@ -2333,10 +2386,12 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
             # acceptable test at 10 to 15 patients per group (CHANGELOG 2026-09-29: a guard on a
             # point estimate needs a sampling-error gate). J and the bounds are compared as
             # printed (three decimals), so a printed 0.000 or 0.400 always gets the verdict its
-            # text states. Silent when an inversion warning was raised: that is the specific
-            # diagnosis. One test gets its own wording, since nothing was compared or chosen.
+            # text states. Silent when an inversion warning was raised, or when a single test has
+            # only one result (.constantTests): each is the specific diagnosis, and this notice's
+            # advice about the likelihood ratios cannot apply to a test with one result. One test
+            # gets its own wording, since nothing was compared or chosen.
             .assessTopRuleDiscrimination = function(best, scored, inversion_flagged, multi_test) {
-                if (inversion_flagged) {
+                if (inversion_flagged || (!multi_test && length(private$.constantTests) > 0)) {
                     return()
                 }
                 j3 <- round(best$youden, 3)
@@ -2363,8 +2418,12 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 } else if (all(lowers <= 0)) {
                     type <- "WARNING"
                     title <- .("Discrimination Not Established")
+                    # "No interval wholly above 0" is what the condition tests. It used to say every
+                    # interval INCLUDES 0, which a rule wholly below 0 contradicts: an exact pattern
+                    # at J -0.30, interval -0.486 to -0.076, beside a top rule at 0.20. One test
+                    # cannot reach this with an interval wholly below 0: the inversion warning fires.
                     template <- if (multi_test) {
-                        .("The highest Youden's J is {youden}, for {rule} (Agresti-Caffo 95% CI {lower} to {upper}; equivalent AUC {auc}). The 95% confidence interval of every rule scored here includes 0, so this sample does not show that any of them separates disease-present from disease-absent cases better than chance; at least one interval also reaches 0.40, the equivalent of an area under the ROC curve of 0.70 (Hosmer, Lemeshow and Sturdivant 2013), so acceptable discrimination is not ruled out either. The intervals are not adjusted for choosing among the rules. Check the levels chosen as positive, and whether the sample gives the precision you need.")
+                        .("The highest Youden's J is {youden}, for {rule} (Agresti-Caffo 95% CI {lower} to {upper}; equivalent AUC {auc}). No rule scored here has a 95% confidence interval wholly above 0, so this sample does not show that any of them separates disease-present from disease-absent cases better than chance; at least one interval also reaches 0.40, the equivalent of an area under the ROC curve of 0.70 (Hosmer, Lemeshow and Sturdivant 2013), so acceptable discrimination is not ruled out either. The intervals are not adjusted for choosing among the rules. Check the levels chosen as positive, and whether the sample gives the precision you need.")
                     } else {
                         .("Youden's J for {rule} is {youden} (Agresti-Caffo 95% CI {lower} to {upper}; equivalent AUC {auc}). The interval includes 0, so this sample does not show that the test separates disease-present from disease-absent cases better than chance; it also reaches 0.40, the equivalent of an area under the ROC curve of 0.70 (Hosmer, Lemeshow and Sturdivant 2013), so acceptable discrimination is not ruled out either. Check the level chosen as positive, and whether the sample gives the precision you need.")
                     }
@@ -2621,11 +2680,14 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                         all(candidates$youden[named_rows] <= 0) &&
                         any(vapply(pattern_idx, function(i)
                             clears_chance(candidates[i, , drop = FALSE]), logical(1)))
+                    # A reversed level reports 1 - sensitivity and 1 - specificity (a reversed
+                    # reference: 1 - specificity and 1 - sensitivity), not the two "swapped", as
+                    # this text used to say; and "-/-" can be applied, only no clinician would.
                     if (!inversion_flagged && (negative_rule_wins || named_rules_fail)) {
                         private$.addNotice(
                             "STRONG_WARNING",
                             .("Positive Levels May Be Inverted"),
-                            .("The rule that separates the two groups best in this sample is one that calls a patient positive when the tests are negative; or every named rule (each test alone and every strategy) performs at or below chance while an exact result pattern does not. Both are the signature of a reversed positive level: the arithmetic still works, but the sensitivity and specificity reported for each rule are then swapped, and the best-performing rule is one no clinician can apply. Check the level chosen as positive for the reference standard and for each test before interpreting any of these results.")
+                            .("The rule that separates the two groups best in this sample is one that calls a patient positive when the tests are negative; or every named rule (each test alone and every strategy) performs at or below chance while an exact result pattern does not. Both are the signature of a reversed positive level: the arithmetic still works, but the sensitivity and specificity reported for each rule then describe results read the wrong way round, and the best-performing rule is one no clinician would apply. Check the level chosen as positive for the reference standard and for each test before interpreting any of these results.")
                         )
                         inversion_flagged <- TRUE
                     }
@@ -2900,8 +2962,10 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                         mcse = base::format(signif(correction$mcse, 2), scientific = FALSE),
                         stability = base::format(round(100 * correction$stability, 1),
                                                  nsmall = 1)))
+                    # as.integer(): the value set.seed() used, and jmvcore's format() prints a
+                    # double seed of 100000 (as the R syntax passes it) as "1e+05".
                     recTable$setNote("seed", .fmt(jmvcore::.("Random seed: {seed}"),
-                                                  seed = self$options$seed))
+                                                  seed = as.integer(self$options$seed)))
                     recTable$setRefs("harrell2015")
                 }
                 recTable$setRow(rowNo = 1, values = list(

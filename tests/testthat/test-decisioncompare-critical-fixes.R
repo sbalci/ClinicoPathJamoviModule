@@ -8,11 +8,12 @@
 test_that("McNemar compares diagnostic CORRECTNESS, not raw positivity rates", {
     skip_if_not_installed("ClinicoPath")
 
-    # Discriminating fixture: both tests call exactly 10 of 20 cases positive, so a
-    # McNemar run on RAW POSITIVITY gives p = 1.000. They differ sharply in whether
-    # those calls are right (accuracy 16/20 vs 4/20), so a McNemar run on
-    # CORRECTNESS gives a small exact McNemar p-value. The module must report
-    # that value rather than the raw-positivity comparison.
+    # Discriminating fixture: both tests call exactly 10 of 20 cases positive, and a
+    # McNemar run on RAW POSITIVITY sees a tie (6 vs 6 discordant calls, mid-p 0.887).
+    # They differ sharply in whether those calls are right (accuracy 16/20 vs 4/20):
+    # on CORRECTNESS only test1 is right in 12 cases and only test2 in none, so the
+    # McNemar mid-p is 2 * (1/4096 - 1/8192) = 1/4096. The module must report that
+    # value rather than the raw-positivity comparison.
     gold  <- c(rep("Pos", 10), rep("Neg", 10))
     test1 <- c(rep("Pos", 8), rep("Neg", 2), rep("Pos", 2), rep("Neg", 8))
     test2 <- c(rep("Pos", 2), rep("Neg", 8), rep("Pos", 8), rep("Neg", 2))
@@ -31,19 +32,20 @@ test_that("McNemar compares diagnostic CORRECTNESS, not raw positivity rates", {
     mc <- res$mcnemarTable$asDF
     expect_equal(nrow(mc), 1L)
 
+    # Oracle: the Fagerland et al. (2013) mid-p formula in helper-decisioncompare.R
     correctness_table <- table(
         factor(test1 == gold, c(TRUE, FALSE)),
         factor(test2 == gold, c(TRUE, FALSE)))
-    p_correctness <- stats::binom.test(
-        correctness_table[1, 2],
-        correctness_table[1, 2] + correctness_table[2, 1],
-        p = 0.5)$p.value
-    p_positivity <- stats::mcnemar.test(table(
-        factor(test1, c("Pos", "Neg")), factor(test2, c("Pos", "Neg"))))$p.value
+    positivity_table <- table(
+        factor(test1, c("Pos", "Neg")), factor(test2, c("Pos", "Neg")))
+    p_correctness <- dc_mcnemar_midp(correctness_table[1, 2], correctness_table[2, 1])
+    p_positivity <- dc_mcnemar_midp(positivity_table[1, 2], positivity_table[2, 1])
+    expect_equal(p_correctness, 1 / 4096, tolerance = 1e-12)   # hand, b = 12, c = 0
+    expect_equal(p_positivity, 1 - 462 / 4096, tolerance = 1e-12)   # hand, tie: 1 - f(6 | 12) / 2
 
     # single comparison -> Holm leaves the p-value unchanged
-    expect_equal(mc$p[1], p_correctness, tolerance = 1e-9)
-    expect_equal(mc$method[1], "Exact binomial McNemar")
+    expect_equal(mc$p[1], p_correctness, tolerance = 1e-12)
+    expect_equal(mc$method[1], "McNemar mid-p")
     expect_false(isTRUE(all.equal(mc$p[1], p_positivity)))
     expect_lt(mc$p[1], 0.05)
 })

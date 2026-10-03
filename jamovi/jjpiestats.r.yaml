@@ -115,6 +115,7 @@ refs:
     - ggplot2
     - ggstatsplot
     - statsExpressions
+    - Fagerland2013
     - digest
     - ggpubr
     - tools

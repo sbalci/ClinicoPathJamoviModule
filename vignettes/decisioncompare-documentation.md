@@ -10,7 +10,7 @@
   - `jamovi/decisioncompare.a.yaml` - Options & Schema Definition
   - `jamovi/decisioncompare.r.yaml` - Results Layout & Tables
   - `R/decisioncompare.b.R` - Backend Implementation
-- **Summary**: Function for comparing multiple Medical Decision Tests. Compares sensitivity, specificity, positive predictive value, negative predictive value, and other metrics between different tests against the same gold standard. Includes statistical comparison using McNemar's test and confidence intervals for differences.
+- **Summary**: Function for comparing multiple Medical Decision Tests. Compares sensitivity, specificity, positive predictive value, negative predictive value, and other metrics between different tests against the same gold standard. Includes statistical comparison using McNemar's test (the mid-p test by default, or the asymptotic test without continuity correction; Fagerland et al. 2013) and confidence intervals for differences.
 
 ## 1a. Changelog
 
@@ -18,6 +18,19 @@
 - **Summary**: Comprehensive documentation suite created & verified against active schemas and backend implementation.
 
 ## 2. Options Reference (`.a.yaml`)
+
+Tests are paired within each case, and cases must be independent across rows. This analysis
+does not adjust for repeated specimens or lesions from the same patient; those data require
+a method that accounts for clustering.
+
+The main statistical comparison table tests overall accuracy. The Differences table also
+reports separate, unadjusted McNemar p-values for sensitivity and specificity. Holm adjustment
+of overall-accuracy pairwise p-values applies only when more than one pair is informative
+(has discordant observations).
+
+Level options have no schema default: the generated R wrapper requires all Level arguments
+explicitly. Pass `NULL` for unused optional levels; the `NULL` entries below describe the
+unset internal option state, not optional arguments in the R wrapper.
 
 | Option | Type | Default | Description |
 | :--- | :--- | :--- | :--- |
@@ -49,6 +62,7 @@
 | `ciMethod` | `List` | `wilson` | CI Method for Agreement |
 | `stratify` | `Variable` | `NULL` | Stratification Variable |
 | `statComp` | `Bool` | `FALSE` | Statistical comparison |
+| `mcnemarMethod` | `List` | `midp` | McNemar Test (`midp` = mid-p; `asymptotic` = asymptotic chi-squared without continuity correction) |
 | `showSummary` | `Bool` | `FALSE` | Summary |
 | `showExplanations` | `Bool` | `FALSE` | Explanations |
 | `showReportSentence` | `Bool` | `FALSE` | Report sentence |
@@ -143,4 +157,3 @@ sequenceDiagram
 - **Data Filtering**: Ensure observations with missing values are handled gracefully according to analysis options.
 - **Formula Conflicts**: Use isolated environment calls or base formula methods when interacting with `ggstatsplot` or formula parsers.
 - **Safe Deparsing**: Use `deparse(val)` in syntax generation (`asSource()`) to escape column names with spaces or special symbols.
-

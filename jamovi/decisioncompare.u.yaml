@@ -89,6 +89,9 @@ children:
         enable: (opa)
       - type: CheckBox
         name: statComp
+      - type: ComboBox
+        name: mcnemarMethod
+        enable: (statComp)
   - type: CollapseBox
     label: Prevalence Settings
     collapsed: true
