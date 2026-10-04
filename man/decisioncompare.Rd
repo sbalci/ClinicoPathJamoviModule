@@ -6,6 +6,9 @@
 \usage{
 decisioncompare(
   data,
+  referenceType = "legacy",
+  referenceDescription = "",
+  targetDefinition = "",
   gold = NULL,
   goldPositive,
   goldNegative,
@@ -37,53 +40,68 @@ decisioncompare(
   showSummary = FALSE,
   showExplanations = FALSE,
   showReportSentence = FALSE,
-  showDescriptiveReport = FALSE
+  showDescriptiveReport = FALSE,
+  showValidationContext = FALSE,
+  cohortRole = "",
+  samplingDesign = "",
+  thresholdSource = "",
+  modelVersion = "",
+  analysisUnit = ""
 )
 }
 \arguments{
 \item{data}{The data as a data frame.}
 
-\item{gold}{The gold standard reference variable representing true disease
-status.}
+\item{referenceType}{Comparator interpretation; legacy retains diagnostic
+terminology. All modes require explicit positive and negative levels.
+Consensus and method report agreement without disease-risk interpretation.}
 
-\item{goldPositive}{The level indicating presence of disease in the gold
-standard variable.}
+\item{referenceDescription}{Free text describing the reference or
+comparator (e.g. consensus of three pathologists); displayed in the
+Reference and target table and, when shown, the Validation context table;
+not validated.}
 
-\item{goldNegative}{The level indicating disease is ABSENT in the gold
-standard variable. Required for excludeIndeterminate to act on a variable
-with more than two levels; pass NULL when not used.}
+\item{targetDefinition}{Free text defining the target condition the
+positive level represents; displayed in the Reference and target table
+only, not validated.}
+
+\item{gold}{The reference variable; its interpretation is selected
+separately.}
+
+\item{goldPositive}{The positive reference level; disease interpretation
+requires a disease standard.}
+
+\item{goldNegative}{Explicit negative level, required for each selected
+variable. Pass NULL only when this variable is not selected.}
 
 \item{test1}{The first diagnostic test variable being evaluated for
 performance.}
 
 \item{test1Positive}{The level representing a positive result for Test 1.}
 
-\item{test1Negative}{The level indicating a NEGATIVE result for test 1.
-Required for excludeIndeterminate to act on a variable with more than two
-levels; pass NULL when not used.}
+\item{test1Negative}{Explicit negative level, required for each selected
+variable. Pass NULL only when this variable is not selected.}
 
 \item{test2}{The second diagnostic test variable for comparison analysis.}
 
 \item{test2Positive}{The level representing a positive result for Test 2.}
 
-\item{test2Negative}{The level indicating a NEGATIVE result for test 2.
-Required for excludeIndeterminate to act on a variable with more than two
-levels; pass NULL when not used.}
+\item{test2Negative}{Explicit negative level, required for each selected
+variable. Pass NULL only when this variable is not selected.}
 
 \item{test3}{Optional third diagnostic test variable for extended
 comparison analysis.}
 
 \item{test3Positive}{The level representing a positive result for Test 3.}
 
-\item{test3Negative}{The level indicating a NEGATIVE result for test 3.
-Required for excludeIndeterminate to act on a variable with more than two
-levels; pass NULL when not used.}
+\item{test3Negative}{Explicit negative level, required for each selected
+variable. Pass NULL only when this variable is not selected.}
 
 \item{pp}{Enable custom prior probability (prevalence) for predictive value
 calculations.}
 
 \item{pprob}{Prior probability (disease prevalence in the community).
-Requires a value between 0.001 and 0.999, default 0.300.}
+Requires a value strictly between 0 and 1, default 0.300.}
 
 \item{od}{Boolean selection whether to show frequency tables. Default is
 'false'.}
@@ -96,9 +114,10 @@ displayed.}
 
 \item{plot}{Generate comparison plot showing test performance metrics.}
 
-\item{excludeIndeterminate}{If TRUE, drop rows where test/gold values are
-neither the specified positive level nor a clear negative level to avoid
-inflating specificity/NPV from equivocal results.}
+\item{excludeIndeterminate}{If TRUE, exclude results outside the explicit
+positive/negative pairs. If FALSE, additional observed levels cause a
+validation error. Both levels are always required; neither missing mappings
+nor extra labels invoke one-versus-rest recoding.}
 
 \item{radarplot}{Generate radar plot for comprehensive test comparison
 visualization.}
@@ -139,11 +158,35 @@ educational content.}
 
 \item{showDescriptiveReport}{Boolean to show the longer descriptive report
 templates.}
+
+\item{showValidationContext}{Display the user-declared validation context
+(cohort role, sampling design, threshold source, model version, unit of
+observation) with the reference interpretation and comparator description
+in the Validation context table.}
+
+\item{cohortRole}{Declared role of this cohort (e.g. development, internal
+or external validation); displayed only, not verified.}
+
+\item{samplingDesign}{Declared sampling design (e.g. consecutive,
+case-control); displayed only, not verified. Case-control sampling distorts
+predictive values.}
+
+\item{thresholdSource}{Declared origin of any cut-off used to make the
+tests binary (e.g. prespecified, chosen in this sample); displayed only,
+not verified.}
+
+\item{modelVersion}{Declared version of the test, assay or algorithm;
+displayed only, not verified.}
+
+\item{analysisUnit}{Declared unit each row represents (e.g. case, patient,
+lesion); displayed only, not verified. This analysis assumes independent
+rows.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
 \code{results$notices} \tab \tab \tab \tab \tab a html \cr
+\code{results$levelMapping} \tab \tab \tab \tab \tab a table \cr
 \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$text2} \tab \tab \tab \tab \tab a html \cr
 \code{results$cTable1} \tab \tab \tab \tab \tab a table \cr
@@ -165,13 +208,24 @@ A results object containing:
 \code{results$explanationsContent} \tab \tab \tab \tab \tab a html \cr
 \code{results$clinicalReport} \tab \tab \tab \tab \tab a html \cr
 \code{results$aboutAnalysis} \tab \tab \tab \tab \tab a html \cr
+\code{results$referenceDefinition} \tab \tab \tab \tab \tab a table \cr
+\code{results$comparatorCounts} \tab \tab \tab \tab \tab a table \cr
+\code{results$comparatorPopulation} \tab \tab \tab \tab \tab a table \cr
+\code{results$comparatorMetrics} \tab \tab \tab \tab \tab a table \cr
+\code{results$comparatorReport} \tab \tab \tab \tab \tab a html \cr
+\code{results$comparatorDifferences} \tab \tab \tab \tab \tab a table \cr
+\code{results$comparatorStrata} \tab \tab \tab \tab \tab a table \cr
+\code{results$comparatorPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$comparatorRadar} \tab \tab \tab \tab \tab an image \cr
+\code{results$comparatorHeatmap} \tab \tab \tab \tab \tab an image \cr
+\code{results$validationContext} \tab \tab \tab \tab \tab a table \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 
-\code{results$cTable1$asDF}
+\code{results$levelMapping$asDF}
 
-\code{as.data.frame(results$cTable1)}
+\code{as.data.frame(results$levelMapping)}
 }
 \description{
 Function for comparing multiple Medical Decision Tests. Compares
@@ -180,23 +234,26 @@ value, and other metrics between different tests against the same gold
 standard. Includes statistical comparison using McNemar's test and
 confidence intervals for differences. Tests are paired within each case;
 cases must be independent across rows. Repeated specimens or lesions from
-one patient require a method that accounts for clustering.
+one patient require a method that accounts for clustering. Explicit
+positive and negative levels are required for the reference and every
+selected test. Other observed levels require explicit exclusion or prior
+recoding; they are never pooled as negative.
 }
 \examples{
 \donttest{
 # Level arguments are explicit in the generated R API. Pass NULL for
-# unused negative levels and for the optional third test selectors.
+# the unused optional third test selectors only.
 decisioncompare(
     data = histopathology,
     gold = "Golden Standart",
     goldPositive = "1",
-    goldNegative = NULL,
+    goldNegative = "0",
     test1 = "New Test",
     test1Positive = "1",
-    test1Negative = NULL,
+    test1Negative = "0",
     test2 = "Rater 1",
     test2Positive = "1",
-    test2Negative = NULL,
+    test2Negative = "0",
     test3 = NULL,
     test3Positive = NULL,
     test3Negative = NULL,

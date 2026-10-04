@@ -7,6 +7,21 @@ items:
     - name: sample_size_summary
       title: Sample Size Calculation Results
       type: Table
+      clearWith:
+        - referenceType
+        - study_purpose
+        - target_sensitivity
+        - target_specificity
+        - prevalence
+        - ci_width
+        - alpha
+        - nonresponse_rate
+        - show_statement
+        - show_methodology
+        - show_references
+        - show_comparison_table
+        - comparison_prevalences
+        - show_method_comparison
       rows: 0
       columns:
         - name: parameter
@@ -16,7 +31,7 @@ items:
           title: Target Value
           type: number
         - name: n_cases
-          title: N (Cases/Controls)
+          title: N in reference stratum
           type: integer
         - name: n_total
           title: Total N Required
@@ -25,11 +40,41 @@ items:
     - name: sample_size_statement
       title: Sample Size Justification Statement
       type: Html
+      clearWith:
+        - referenceType
+        - study_purpose
+        - target_sensitivity
+        - target_specificity
+        - prevalence
+        - ci_width
+        - alpha
+        - nonresponse_rate
+        - show_statement
+        - show_methodology
+        - show_references
+        - show_comparison_table
+        - comparison_prevalences
+        - show_method_comparison
       visible: (show_statement)
 
     - name: prevalence_table
-      title: Sample Size Across Prevalence Levels
+      title: Sample Size Across Reference-Positive Proportions
       type: Table
+      clearWith:
+        - referenceType
+        - study_purpose
+        - target_sensitivity
+        - target_specificity
+        - prevalence
+        - ci_width
+        - alpha
+        - nonresponse_rate
+        - show_statement
+        - show_methodology
+        - show_references
+        - show_comparison_table
+        - comparison_prevalences
+        - show_method_comparison
       visible: (show_comparison_table)
       rows: 0
       columns:
@@ -49,6 +94,21 @@ items:
     - name: method_comparison
       title: CI Method Comparison
       type: Table
+      clearWith:
+        - referenceType
+        - study_purpose
+        - target_sensitivity
+        - target_specificity
+        - prevalence
+        - ci_width
+        - alpha
+        - nonresponse_rate
+        - show_statement
+        - show_methodology
+        - show_references
+        - show_comparison_table
+        - comparison_prevalences
+        - show_method_comparison
       visible: (show_method_comparison)
       rows: 0
       columns:
@@ -71,12 +131,66 @@ items:
     - name: methodology
       title: Methodology
       type: Html
+      clearWith:
+        - referenceType
+        - study_purpose
+        - target_sensitivity
+        - target_specificity
+        - prevalence
+        - ci_width
+        - alpha
+        - nonresponse_rate
+        - show_statement
+        - show_methodology
+        - show_references
+        - show_comparison_table
+        - comparison_prevalences
+        - show_method_comparison
       visible: (show_methodology)
 
     - name: references
       title: References
       type: Html
+      clearWith:
+        - referenceType
+        - study_purpose
+        - target_sensitivity
+        - target_specificity
+        - prevalence
+        - ci_width
+        - alpha
+        - nonresponse_rate
+        - show_statement
+        - show_methodology
+        - show_references
+        - show_comparison_table
+        - comparison_prevalences
+        - show_method_comparison
       visible: (show_references)
+
+    - name: zeroMissPlan
+      title: Conditional zero-miss precision plan
+      type: Table
+      visible: (zeroMissPlanning)
+      clearWith:
+      - zeroMissPlanning
+      - minimumSensitivityBound
+      - alpha
+      - prevalence
+      - referenceType
+      columns:
+      - name: positives
+        title: Independent positives
+        type: number
+        format: dp:6
+      - name: lower
+        title: Exact lower confidence bound
+        type: number
+        format: dp:6
+      - name: total
+        title: Expected recruitment at supplied prevalence
+        type: number
+        format: dp:6
 
 refs:
     - ClinicoPathJamoviModule

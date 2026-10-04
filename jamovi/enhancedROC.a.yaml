@@ -1,7 +1,7 @@
 ---
 name: enhancedROC
 title: Clinical ROC Analysis
-menuGroup: meddecide
+menuGroup: meddecideT
 menuSubgroup: ROC
 menuSubtitle: "Clinical ROC analysis with diagnostic metrics and optimal cutoffs"
 version: '1.0.83'
@@ -346,8 +346,8 @@ options:
       title: 'Disease prevalence'
       type: Number
       default: 0.1
-      min: 0.001
-      max: 0.999
+      min: 0.000000001
+      max: 0.999999999
       description: 'Disease prevalence to assume when computing predictive values. Used only when "Use observed prevalence" is unticked - set it to the prevalence of the population the test will actually be used in, which for a screening setting is usually far lower than in a case-control sample.'
 
     - name: useObservedPrevalence
@@ -623,13 +623,13 @@ options:
       title: "Clinical impact analysis"
       type: Bool
       default: false
-      description: 'Calculate clinical impact metrics (NNT, NND, clinical utility)'
+      description: 'Calculate observed or projected workload at independently supplied score cutoffs'
 
     - name: nntCalculation
-      title: "NNT and NND columns"
+      title: "Inverse net benefit and inverse Youden columns"
       type: Bool
       default: false
-      description: 'Show the number needed to test (1 / net benefit) and number needed to diagnose (1 / Youden index) columns in the clinical impact table'
+      description: 'Show inverse net benefit and inverse Youden index; neither is a count of tests or reviews'
 
     - name: clinicalUtilityCurve
       title: "Clinical utility curve"
@@ -759,3 +759,123 @@ options:
 # Advanced analyses removed - can be added in future versions if needed
     # - name: effectSizeAnalysis
     # - name: powerAnalysis
+
+    - name: impactCutoffs
+      title: Fixed score cutoffs (comma separated)
+      type: String
+      default: '0.5'
+    - name: utilityThreshold
+      title: Utility threshold (harm/benefit)
+      type: Number
+      default: 0.1
+      min: 1.0e-09
+      max: 0.999999999
+    - name: workloadPopulationSize
+      title: Target population size
+      type: Integer
+      default: 1000
+      min: 1
+      max: 1000000000
+    - name: analysisUnit
+      title: Unit of observation
+      type: String
+      default: slide
+    - name: prevalenceScenarios
+      title: Additional target prevalences (proportions)
+      type: String
+      default: ''
+    - name: validationPanel
+      title: Frozen-model validation report
+      type: Bool
+      default: false
+    - name: validationNegative
+      title: Explicit negative reference level
+      type: String
+      default: ''
+    - name: referenceDescription
+      title: Reference standard and blinding
+      type: String
+      default: ''
+    - name: modelVersion
+      title: Frozen model version
+      type: String
+      default: ''
+    - name: cohortRole
+      title: Cohort role
+      type: List
+      default: frozen
+      options:
+      - name: development
+        title: Development / exploratory
+      - name: frozen
+        title: Frozen external / temporal evaluation
+    - name: samplingDesign
+      title: Sampling design
+      type: List
+      default: consecutive
+      options:
+      - name: consecutive
+        title: Consecutive
+      - name: enriched
+        title: Enriched
+      - name: positive_only
+        title: Positive only
+      - name: other
+        title: Other / unknown
+    - name: thresholdSource
+      title: Threshold source
+      type: List
+      default: prespecified
+      options:
+      - name: prespecified
+        title: Prespecified independently
+      - name: development
+        title: Selected in development
+      - name: exploratory
+        title: Selected in evaluation data
+    - name: predictionScale
+      title: Prediction scale
+      type: List
+      default: score
+      options:
+      - name: score
+        title: Score
+      - name: probability
+        title: Probability of selected positive class
+    - name: patientID
+      title: Patient identifier
+      type: Variable
+      default: null
+      suggested:
+      - nominal
+      permitted:
+      - factor
+      - numeric
+    - name: siteID
+      title: Site identifier
+      type: Variable
+      default: null
+      suggested:
+      - nominal
+      permitted:
+      - factor
+      - numeric
+    - name: partitionID
+      title: Development / validation partition identifier
+      type: Variable
+      default: null
+      suggested:
+      - nominal
+      permitted:
+      - factor
+      - numeric
+    - name: validationBootstrap
+      title: Bootstrap frozen-model metrics
+      type: Bool
+      default: false
+    - name: validationDraws
+      title: Bootstrap replicates
+      type: Integer
+      default: 999
+      min: 100
+      max: 10000

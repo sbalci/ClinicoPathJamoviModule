@@ -33,6 +33,12 @@ clearWith:
     - plotwidth
     - plotheight
     - showExplanations
+    - pairedEffects
+    - pairedEstimator
+    - pairedCIMethod
+    - pairedBootstrap
+    - pairedUnits
+    - pairedTimeRatios
 
 
 items:
@@ -108,6 +114,67 @@ items:
         - k
         - plotwidth
         - plotheight
+
+    - name: pairedChanges
+      title: Paired Changes
+      type: Table
+      visible: (pairedEffects)
+      rows: 0
+      clearWith:
+        - dep1
+        - dep2
+        - dep3
+        - dep4
+        - pairedEffects
+        - pairedEstimator
+        - pairedCIMethod
+        - pairedBootstrap
+        - pairedUnits
+        - pairedTimeRatios
+        - clinicalpreset
+        - typestatistics
+        - pairwisecomparisons
+        - padjustmethod
+        - conflevel
+        - seed
+      columns:
+        - name: contrast
+          title: Contrast
+          type: text
+        - name: effect
+          title: Effect definition
+          type: text
+        - name: pairs
+          title: Pairs
+          type: integer
+        - name: units
+          title: Units
+          type: text
+        - name: estimate
+          title: Estimate
+          type: number
+          format: sf:4
+        - name: lower
+          title: Lower CI
+          type: number
+          format: sf:4
+        - name: upper
+          title: Upper CI
+          type: number
+          format: sf:4
+        - name: method
+          title: CI method
+          type: text
+        - name: test
+          title: Paired test
+          type: text
+        - name: p
+          title: p
+          type: number
+          format: zto,pvalue
+        - name: note
+          title: Estimation note
+          type: text
 
     - name: summary
       title: Analysis Summary

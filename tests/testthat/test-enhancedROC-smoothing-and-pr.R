@@ -139,8 +139,9 @@ test_that("useObservedPrevalence reaches the clinical impact table", {
     off <- as.data.frame(run_er(clinicalImpact = TRUE, useObservedPrevalence = FALSE)$results$clinicalImpactTable)
     on  <- as.data.frame(run_er(clinicalImpact = TRUE, useObservedPrevalence = TRUE)$results$clinicalImpactTable)
     expect_false(isTRUE(all.equal(off, on)))
-    # ticking the box must put the OBSERVED prevalence on the threshold
-    expect_equal(as.numeric(on$threshold[1]), mean(er_data()$gold == "Positive"), tolerance = 1e-9)
+    # Population prevalence changes expected impact, never the score cutoff.
+    expect_equal(as.numeric(on$threshold[1]), 0.5)
+    expect_equal(as.numeric(off$threshold[1]), 0.5)
 })
 
 test_that("the clinical impact table says where its threshold came from", {
@@ -148,7 +149,8 @@ test_that("the clinical impact table says where its threshold came from", {
     # harm-to-benefit exchange rate, not a base rate, so the source has to be stated.
     res <- run_er(clinicalImpact = TRUE, useObservedPrevalence = TRUE)
     notes <- paste(unlist(lapply(res$results$clinicalImpactTable$notes, function(n) if (is.character(n)) n else if (!is.null(n$note)) n$note else n$content)), collapse = " ")
-    expect_match(notes, "risk threshold", fixed = TRUE)
+    expect_match(notes, "fixed score cutoffs", fixed = TRUE)
+    expect_match(notes, "utility harm/benefit threshold are separate inputs", fixed = TRUE)
 })
 
 test_that("plotWidth and plotHeight reach the image", {

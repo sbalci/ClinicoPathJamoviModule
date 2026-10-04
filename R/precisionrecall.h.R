@@ -9,7 +9,7 @@ precisionrecallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             outcome = NULL,
             positiveClass = NULL,
             scores = NULL,
-            interpolation = "nonlinear",
+            interpolation = "linear",
             showBaseline = TRUE,
             aucMethod = "trapezoid",
             ci = FALSE,
@@ -17,9 +17,10 @@ precisionrecallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             ciSamples = 1000,
             ciWidth = 95,
             comparison = FALSE,
-            comparisonMethod = "bootstrap",
+            comparisonMethod = "permutation",
             showROC = FALSE,
-            showFScore = FALSE, ...) {
+            showFScore = FALSE,
+            seed = 1, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -51,9 +52,8 @@ precisionrecallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 "interpolation",
                 interpolation,
                 options=list(
-                    "nonlinear",
                     "linear"),
-                default="nonlinear")
+                default="linear")
             private$..showBaseline <- jmvcore::OptionBool$new(
                 "showBaseline",
                 showBaseline,
@@ -63,7 +63,7 @@ precisionrecallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 aucMethod,
                 options=list(
                     "trapezoid",
-                    "interpolated"),
+                    "average_precision"),
                 default="trapezoid")
             private$..ci <- jmvcore::OptionBool$new(
                 "ci",
@@ -74,8 +74,7 @@ precisionrecallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 ciMethod,
                 options=list(
                     "bootstrap",
-                    "percentile",
-                    "bca"),
+                    "percentile"),
                 default="bootstrap")
             private$..ciSamples <- jmvcore::OptionInteger$new(
                 "ciSamples",
@@ -97,9 +96,8 @@ precisionrecallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 "comparisonMethod",
                 comparisonMethod,
                 options=list(
-                    "bootstrap",
                     "permutation"),
-                default="bootstrap")
+                default="permutation")
             private$..showROC <- jmvcore::OptionBool$new(
                 "showROC",
                 showROC,
@@ -108,6 +106,11 @@ precisionrecallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 "showFScore",
                 showFScore,
                 default=FALSE)
+            private$..seed <- jmvcore::OptionInteger$new(
+                "seed",
+                seed,
+                default=1,
+                min=0)
 
             self$.addOption(private$..outcome)
             self$.addOption(private$..positiveClass)
@@ -123,6 +126,7 @@ precisionrecallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$.addOption(private$..comparisonMethod)
             self$.addOption(private$..showROC)
             self$.addOption(private$..showFScore)
+            self$.addOption(private$..seed)
         }),
     active = list(
         outcome = function() private$..outcome$value,
@@ -138,7 +142,8 @@ precisionrecallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         comparison = function() private$..comparison$value,
         comparisonMethod = function() private$..comparisonMethod$value,
         showROC = function() private$..showROC$value,
-        showFScore = function() private$..showFScore$value),
+        showFScore = function() private$..showFScore$value,
+        seed = function() private$..seed$value),
     private = list(
         ..outcome = NA,
         ..positiveClass = NA,
@@ -153,7 +158,8 @@ precisionrecallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         ..comparison = NA,
         ..comparisonMethod = NA,
         ..showROC = NA,
-        ..showFScore = NA)
+        ..showFScore = NA,
+        ..seed = NA)
 )
 
 precisionrecallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -315,8 +321,8 @@ precisionrecallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' @param positiveClass Value representing positive class (disease/event)
 #' @param scores One or more continuous variables containing classifier scores
 #'   or predicted probabilities
-#' @param interpolation PRC requires non-linear interpolation. Linear shown
-#'   for educational comparison.
+#' @param interpolation Observed PR points are connected linearly; average
+#'   precision is a separate step-area summary.
 #' @param showBaseline Display horizontal baseline at y = P/(P+N) representing
 #'   random classifier
 #' @param aucMethod Method for calculating area under PRC curve
@@ -328,6 +334,7 @@ precisionrecallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' @param comparisonMethod .
 #' @param showROC Display ROC curve alongside PRC for comparison
 #' @param showFScore Display F₁ score iso-lines on PRC plot
+#' @param seed .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
@@ -349,7 +356,7 @@ precisionrecall <- function(
     outcome,
     positiveClass,
     scores,
-    interpolation = "nonlinear",
+    interpolation = "linear",
     showBaseline = TRUE,
     aucMethod = "trapezoid",
     ci = FALSE,
@@ -357,9 +364,10 @@ precisionrecall <- function(
     ciSamples = 1000,
     ciWidth = 95,
     comparison = FALSE,
-    comparisonMethod = "bootstrap",
+    comparisonMethod = "permutation",
     showROC = FALSE,
-    showFScore = FALSE) {
+    showFScore = FALSE,
+    seed = 1) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("precisionrecall requires jmvcore to be installed (restart may be required)")
@@ -387,7 +395,8 @@ precisionrecall <- function(
         comparison = comparison,
         comparisonMethod = comparisonMethod,
         showROC = showROC,
-        showFScore = showFScore)
+        showFScore = showFScore,
+        seed = seed)
 
     analysis <- precisionrecallClass$new(
         options = options,

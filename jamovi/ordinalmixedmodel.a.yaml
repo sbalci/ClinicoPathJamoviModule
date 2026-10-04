@@ -110,12 +110,12 @@ options:
             Threshold parameterization
 
     - name: propOddsTest
-      title: Test Proportional Odds Assumption
+      title: Proportional-odds test (unavailable for CLMM)
       type: Bool
-      default: true
+      default: false
       description:
           R: >
-            Test the proportional odds (parallel lines) assumption using nominal_test
+            Retained for saved analyses; shows an explanation because nominal_test supports CLM, not CLMM.
 
     - name: oddsRatios
       title: Show Odds Ratios
@@ -168,9 +168,9 @@ options:
             Show AIC, BIC, log-likelihood, and deviance
 
     - name: conditionMeans
-      title: Condition Marginal Probabilities
+      title: Marginal probabilities (unavailable)
       type: Bool
       default: false
       description:
           R: >
-            Show predicted marginal probabilities for each factor level
+            Retained for saved analyses; no marginal probabilities are calculated.

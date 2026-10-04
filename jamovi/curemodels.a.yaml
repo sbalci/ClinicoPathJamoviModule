@@ -3,7 +3,7 @@ title: Cure Models for Long-term Survivors
 menuGroup: OncoPathDT
 menuSubgroup: Survival Analysis
 menuSubtitle: Mixture and Non-mixture Cure Models
-version: 1.0.0
+version: '1.0.83'
 jas: '1.2'
 description:
   main: Model-based cure probabilities with explicit endpoint and event coding, observed-time cumulative

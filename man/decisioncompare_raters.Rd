@@ -8,10 +8,10 @@
 A data frame with 150 rows and 5 variables:
 \describe{
 \item{patient_id}{Character: Patient identifier (PT001-PT150)}
-\item{ConsensusPanel}{Factor: Consensus diagnosis ("No Disease", "Disease"), 32\% disease}
-\item{Rater1}{Factor: Experienced rater ("No Disease", "Disease"), Sens=0.88, Spec=0.90}
-\item{Rater2}{Factor: Moderate experience ("No Disease", "Disease"), Sens=0.82, Spec=0.85}
-\item{Rater3}{Factor: Junior rater ("No Disease", "Disease"), Sens=0.75, Spec=0.82}
+\item{ConsensusPanel}{Factor: Consensus panel diagnosis ("No Disease", "Disease"), 32\% "Disease"; the comparator}
+\item{Rater1}{Factor: Experienced rater ("No Disease", "Disease"), simulated PPA=0.88, NPA=0.90 vs panel}
+\item{Rater2}{Factor: Moderate experience ("No Disease", "Disease"), simulated PPA=0.82, NPA=0.85 vs panel}
+\item{Rater3}{Factor: Junior rater ("No Disease", "Disease"), simulated PPA=0.75, NPA=0.82 vs panel}
 \item{case_difficulty}{Factor: Case difficulty (Easy, Moderate, Difficult)}
 }
 }
@@ -22,20 +22,25 @@ Generated test data for ClinicoPath package
 decisioncompare_raters
 }
 \description{
-Dataset with 150 patients evaluating three raters (experienced, moderate,
-junior) against consensus panel gold standard.
+Dataset with 150 patients comparing three raters (experienced, moderate,
+junior) with a consensus panel diagnosis. The panel is a consensus
+comparator, not a disease gold standard, so the analysis reports agreement
+(PPA/NPA/OPA), not sensitivity/specificity.
 }
 \details{
-Inter-rater reliability study with varying expertise levels. Demonstrates
-performance comparison across different experience levels.
+Rater-versus-consensus agreement study with varying expertise levels. Use
+\code{referenceType = "consensus"}: positive/negative percent agreement
+(PPA/NPA) with the panel, not sensitivity/specificity for disease.
 }
 \examples{
 data(decisioncompare_raters)
-decisioncompare(data = decisioncompare_raters, gold = "ConsensusPanel",
-                goldPositive = "Disease", goldNegative = NULL, test1 = "Rater1",
-                test1Positive = "Disease", test1Negative = NULL, test2 = "Rater2",
-                test2Positive = "Disease", test2Negative = NULL, test3 = "Rater3",
-                test3Positive = "Disease", test3Negative = NULL, statComp = TRUE)
+decisioncompare(data = decisioncompare_raters, referenceType = "consensus",
+                referenceDescription = "Consensus panel diagnosis",
+                gold = "ConsensusPanel",
+                goldPositive = "Disease", goldNegative = "No Disease", test1 = "Rater1",
+                test1Positive = "Disease", test1Negative = "No Disease", test2 = "Rater2",
+                test2Positive = "Disease", test2Negative = "No Disease", test3 = "Rater3",
+                test3Positive = "Disease", test3Negative = "No Disease", statComp = TRUE)
 
 }
 \keyword{datasets}

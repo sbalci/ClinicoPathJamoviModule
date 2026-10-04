@@ -57,6 +57,33 @@ clinicaltrialdesignClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 )
             },
             .run = function() {
+                private$.init()
+                paired <- self$options$test_type == "paired_ttest"
+                for (name in c("design_summary", "power_results", "sample_size_breakdown",
+                               "effect_size_analysis", "assumptions_check", "sensitivity_analysis",
+                               "regulatory_considerations"))
+                    self$results[[name]]$deleteRows()
+                for (name in c("clinical_interpretation", "study_protocol_template")) {
+                    self$results[[name]]$setContent("")
+                    self$results[[name]]$setVisible(!paired && self$options$show_interpretation)
+                }
+                self$results$regulatory_considerations$setVisible(
+                    !paired && self$options$show_interpretation)
+                self$results$sensitivity_analysis$setVisible(!paired && self$options$show_sensitivity)
+                for (name in c("power_curve", "effect_size_plot", "sample_size_plot")) {
+                    self$results[[name]]$setState(NULL)
+                    self$results[[name]]$setVisible(!paired && self$options$show_plots &&
+                        (name != "sample_size_plot" || self$options$calculation_type == "sample_size"))
+                }
+                if (self$options$test_type == "mcnemar") {
+                    jmvcore::reject(paste("McNemar planning is unavailable: marginal proportions",
+                        "do not identify the two discordant-pair probabilities.",
+                        "No sample size or power has been calculated."))
+                }
+                if (self$options$test_type == "paired_ttest") {
+                    private$.runPairedPlanning()
+                    return()
+                }
                 # Check for required packages
                 required_packages <- c("pwr")
                 missing_packages <- c()
@@ -298,7 +325,7 @@ clinicaltrialdesignClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         } else if (test_type == "correlation") {
                             return(private$.calculateCorrelation())
                         } else if (test_type == "mcnemar") {
-                            return(private$.calculateMcNemar())
+                            stop("McNemar planning requires discordant-pair probabilities and is unavailable.")
                         }
 
                         return(NULL)
@@ -307,6 +334,72 @@ clinicaltrialdesignClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         return(NULL)
                     }
                 )
+            },
+            .calculatePairedTTest = function() {
+                args <- list(sig.level = self$options$alpha, type = "paired",
+                    alternative = if (self$options$two_sided) "two.sided" else "greater")
+                calc <- self$options$calculation_type
+                if (calc != "sample_size") args$n <- self$options$sample_size
+                if (calc != "effect_size") args$d <- self$options$effect_size
+                if (calc != "power") args$power <- self$options$power
+                result <- do.call(pwr::pwr.t.test, args)
+                if (calc == "sample_size") {
+                    result <- pwr::pwr.t.test(n = ceiling(result$n), d = result$d,
+                        sig.level = result$sig.level, type = "paired",
+                        alternative = args$alternative)
+                }
+                list(power = result$power, n = result$n, effect_size = result$d)
+            },
+            .runPairedPlanning = function() {
+                if (!requireNamespace("pwr", quietly = TRUE))
+                    jmvcore::reject("The pwr package is required for paired t-test planning.")
+                if (self$options$trial_type != "superiority" ||
+                    self$options$outcome_type != "continuous" ||
+                    self$options$interim_analyses != 0 ||
+                    self$options$multiple_comparisons != "none")
+                    jmvcore::reject(paste("Paired t-test planning supports one continuous",
+                        "superiority endpoint without interim analyses or multiplicity adjustment."))
+
+                for (name in c("design_summary", "power_results", "sample_size_breakdown",
+                               "effect_size_analysis", "assumptions_check", "sensitivity_analysis"))
+                    self$results[[name]]$deleteRows()
+                self$results$instructions$setContent(paste0(
+                    "<p>Paired t-test planning uses independent complete pairs. Enter d<sub>z</sub>",
+                    " = mean within-pair difference / SD of within-pair differences in Effect Size.",
+                    " Sample size counts pairs (usually participants), not individual measurements.",
+                    " The allocation ratio and common between-person SD are not used.</p>",
+                    "<p>This calculation does not model multiple readers, clustered pairs, ",
+                    "noninferiority, equivalence, interim analyses or multiple endpoints.</p>"))
+                result <- private$.calculatePairedTTest()
+                calc <- self$options$calculation_type
+                label <- switch(calc, power = "Power",
+                    sample_size = "Required complete pairs", effect_size = "Detectable d_z")
+                value <- switch(calc, power = result$power, sample_size = result$n,
+                    effect_size = result$effect_size)
+                self$results$power_results$addRow(rowKey = "paired", values = list(
+                    parameter = label, input_value = "", calculated_value = as.character(value),
+                    confidence_interval = "", interpretation = "Noncentral t distribution; independent pairs"
+                ))
+                self$results$power_results$addRow(rowKey = "achieved", values = list(
+                    parameter = "Power at the reported number of pairs", input_value = "",
+                    calculated_value = as.character(result$power), confidence_interval = "",
+                    interpretation = paste("Number of pairs:", result$n, "; d_z:", result$effect_size)
+                ))
+                self$results$assumptions_check$setNote("paired", paste(
+                    "Pairs must be independent; differences within pairs should be approximately",
+                    "normal. The one-sided option tests a positive mean difference."))
+                if (calc == "sample_size") {
+                    n_recruit <- ceiling(result$n / (1 - self$options$dropout_rate / 100))
+                    self$results$sample_size_breakdown$addRow(rowKey = "paired", values = list(
+                        component = "Complete pairs", per_group = result$n, total = result$n,
+                        adjustment_factor = 1, rationale = "Both measurements per participant are required"
+                    ))
+                    self$results$sample_size_breakdown$addRow(rowKey = "recruit", values = list(
+                        component = "Participants to recruit", per_group = n_recruit, total = n_recruit,
+                        adjustment_factor = n_recruit / result$n,
+                        rationale = "Dropout means failure to provide a complete pair"
+                    ))
+                }
             },
             .calculateTwoSampleTTest = function() {
                 calc_type <- self$options$calculation_type

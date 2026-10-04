@@ -3,13 +3,41 @@ diagnosticsamplesizeClass <- R6::R6Class(
     inherit = diagnosticsamplesizeBase,
     private = list(
         .results_cache = NULL,
+        .planningLabels = function() {
+            mode <- self$options$referenceType
+            if (is.null(mode)) mode <- "disease"
+            agreement <- mode %in% c("consensus", "method")
+            list(positive = if (agreement) "Positive percent agreement (PPA)" else "Sensitivity",
+                 negative = if (agreement) "Negative percent agreement (NPA)" else "Specificity",
+                 prevalence = if (agreement) "Reference-positive proportion" else "Disease prevalence",
+                 positive_group = if (agreement) "reference-positive participants" else "diseased participants",
+                 negative_group = if (agreement) "reference-negative participants" else "nondiseased participants",
+                 comparator = switch(mode, consensus = "Expert consensus", method = "Comparison method",
+                                     "Disease reference standard"),
+                 agreement = agreement)
+        },
         .init = function() {
             if (self$options$show_methodology) private$.setMethodology()
             if (self$options$show_references) private$.setReferences()
         },
         .run = function() {
+            self$results$zeroMissPlan$deleteRows()
+            if (self$options$zeroMissPlanning) {
+                lower <- self$options$minimumSensitivityBound
+                alpha <- self$options$alpha
+                positives <- ceiling(log(alpha / 2) / log(lower))
+                self$results$zeroMissPlan$addRow(rowKey = "plan", values = list(
+                    positives = positives, lower = (alpha / 2)^(1 / positives),
+                    total = ceiling(positives / self$options$prevalence)))
+                self$results$zeroMissPlan$setNote("assumption", "Two-sided exact binomial lower bound conditional on zero misses among independent positive patients. Multiple slides from one patient do not count as independent positives. Recruitment is an expectation, not a guarantee of obtaining the required positives; this is not a power or assurance calculation.")
+            }
             tryCatch(
                 {
+                    labels <- private$.planningLabels()
+                    for (name in c("sample_size_summary", "prevalence_table", "method_comparison"))
+                        self$results[[name]]$deleteRows()
+                    self$results$sample_size_statement$setContent("")
+                    if (self$options$show_methodology) private$.setMethodology()
                     # Get parameters
                     sens <- self$options$target_sensitivity
                     spec <- self$options$target_specificity
@@ -39,15 +67,15 @@ diagnosticsamplesizeClass <- R6::R6Class(
                     if (purpose == "diagnostic") {
                         # Both sens and spec need to be high - take maximum
                         n_required <- max(n_sens_total, n_spec_total)
-                        limiting_factor <- if (n_sens_total > n_spec_total) "Sensitivity" else "Specificity"
+                        limiting_factor <- if (n_sens_total > n_spec_total) labels$positive else labels$negative
                     } else if (purpose == "screening_sens") {
                         # Emphasize sensitivity
                         n_required <- n_sens_total
-                        limiting_factor <- "Sensitivity (screening emphasis)"
+                        limiting_factor <- labels$positive
                     } else {
                         # Emphasize specificity
                         n_required <- n_spec_total
-                        limiting_factor <- "Specificity (screening emphasis)"
+                        limiting_factor <- labels$negative
                     }
 
                     # Adjust for non-response
@@ -165,11 +193,20 @@ diagnosticsamplesizeClass <- R6::R6Class(
         .populateTables = function() {
             res <- private$.results_cache
 
+            labels <- private$.planningLabels()
             summary_table <- self$results$sample_size_summary
+            summary_table$setNote("population", paste("Comparator:", labels$comparator,
+                ". Independent participants, one paired test/reference result per participant.",
+                "This is single-proportion precision planning, not reader-study power planning."))
+            self$results$prevalence_table$getColumn("prevalence")$setTitle(labels$prevalence)
+            self$results$prevalence_table$getColumn("n_sens_total")$setTitle(paste("N for", labels$positive))
+            self$results$prevalence_table$getColumn("n_spec_total")$setTitle(paste("N for", labels$negative))
+            self$results$method_comparison$getColumn("n_sensitivity")$setTitle(paste("N for", labels$positive))
+            self$results$method_comparison$getColumn("n_specificity")$setTitle(paste("N for", labels$negative))
 
             # Row 1: Sensitivity
             summary_table$addRow(rowKey = 1, values = list(
-                parameter = "Sensitivity",
+                parameter = labels$positive,
                 target_value = res$sens,
                 n_cases = res$n_sens,
                 n_total = res$n_sens_total
@@ -177,7 +214,7 @@ diagnosticsamplesizeClass <- R6::R6Class(
 
             # Row 2: Specificity
             summary_table$addRow(rowKey = 2, values = list(
-                parameter = "Specificity",
+                parameter = labels$negative,
                 target_value = res$spec,
                 n_cases = res$n_spec,
                 n_total = res$n_spec_total
@@ -203,68 +240,34 @@ diagnosticsamplesizeClass <- R6::R6Class(
         },
         .generateStatement = function() {
             res <- private$.results_cache
-
-            purpose_text <- switch(res$purpose,
-                diagnostic = "diagnostic marker with high sensitivity AND specificity",
-                screening_sens = "screening tool emphasizing high sensitivity",
-                screening_spec = "screening tool emphasizing high specificity"
-            )
-
-            html <- sprintf(
-                "<div style='padding: 15px; background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #4CAF50; color: inherit;'>
-                <h3>Sample Size Justification Statement</h3>
-
-                <p><strong>Study Objective:</strong> This study aims to evaluate a %s.</p>
-
-                <p><strong>Methodology:</strong> Sample size calculation based on Clopper-Pearson exact binomial
-                confidence intervals for sensitivity and specificity (Bujang, 2023).</p>
-
-                <p><strong>Parameters:</strong></p>
-                <ul>
-                <li>Target population disease prevalence: <strong>%.1f%%</strong></li>
-                <li>Target sensitivity: <strong>%.1f%%</strong> (95%% CI width: %.2f)</li>
-                <li>Target specificity: <strong>%.1f%%</strong> (95%% CI width: %.2f)</li>
-                <li>Significance level (\u{03B1}): <strong>%.2f</strong> (two-sided)</li>
-                </ul>
-
-                <p><strong>Sample Size Calculations:</strong></p>
-                <ul>
-                <li>For sensitivity estimation: <strong>%d total subjects</strong> required (to obtain %d diseased cases)</li>
-                <li>For specificity estimation: <strong>%d total subjects</strong> required (to obtain %d non-diseased cases)</li>
-                <li><strong>Minimum required sample size: %d subjects</strong> (limited by %s)</li>
-                %s
-                </ul>
-
-                <p><strong>Reference:</strong> Bujang MA (2023). An Elaboration on Sample Size Planning for Performing a
-                One-Sample Sensitivity and Specificity Analysis by Basing on Calculations on a Specified 95%% Confidence
-                Interval Width. <em>Diagnostics</em> 13(8):1390.
-                <a href='https://doi.org/10.3390/diagnostics13081390' target='_blank'>doi:10.3390/diagnostics13081390</a></p>
-                </div>",
-                purpose_text,
-                res$prev * 100,
-                res$sens * 100, res$width,
-                res$spec * 100, res$width,
-                res$alpha,
-                res$n_sens_total, res$n_sens,
-                res$n_spec_total, res$n_spec,
-                res$n_required, res$limiting_factor,
-                if (res$nonresp > 0) {
-                    sprintf(
-                        "<li><strong>Final sample size adjusted for %.0f%% non-response: %d subjects</strong></li>",
-                        res$nonresp * 100, res$n_final
-                    )
-                } else {
-                    ""
-                }
-            )
-
+            labels <- private$.planningLabels()
+            html <- sprintf(paste0(
+                "<h3>Precision-based sample size statement</h3>",
+                "<p>Comparator: %s. Plan to estimate %s at %.1f%% and %s at %.1f%%, ",
+                "using %.1f%% Clopper-Pearson intervals with total width at most %.3f ",
+                "at the rounded expected success count.</p>",
+                "<p>%s: %.1f%%. The positive-reference stratum requires %d %s ",
+                "(%d total participants); the negative-reference stratum requires %d %s ",
+                "(%d total participants). The selected objective requires %d participants; ",
+                "after %.1f%% incomplete-result allowance, recruit %d.</p>",
+                "<p>These are independent-participant calculations. Dividing stratum requirements ",
+                "by the expected reference proportions does not guarantee the realized stratum sizes ",
+                "or confidence-interval widths. Clustered or multireader studies require separate planning.</p>",
+                "%s"), labels$comparator, labels$positive, 100 * res$sens,
+                labels$negative, 100 * res$spec, 100 * (1 - res$alpha), res$width,
+                labels$prevalence, 100 * res$prev, res$n_sens, labels$positive_group,
+                res$n_sens_total, res$n_spec, labels$negative_group, res$n_spec_total,
+                res$n_required, 100 * res$nonresp, res$n_final,
+                if (labels$agreement) paste0("<p>PPA and NPA describe agreement with the declared ",
+                    "comparator; they do not establish disease sensitivity or specificity.</p>") else "")
             self$results$sample_size_statement$setContent(html)
         },
         .generateComparisonTable = function() {
             # Parse prevalence values
             prev_string <- self$options$comparison_prevalences
             prev_values <- as.numeric(unlist(strsplit(prev_string, ",")))
-            prev_values <- prev_values[!is.na(prev_values)]
+            if (any(!is.finite(prev_values) | prev_values <= 0 | prev_values >= 1))
+                stop("Comparison reference proportions must be numbers strictly between 0 and 1.")
 
             if (length(prev_values) == 0) {
                 return()
@@ -441,74 +444,20 @@ diagnosticsamplesizeClass <- R6::R6Class(
             )
         },
         .setMethodology = function() {
-            html <- "
-<h3>Diagnostic Test Sample Size Methodology (Bujang 2023)</h3>
-
-<h4>Precision-Based Sample Size Planning</h4>
-<p>This calculator uses <strong>precision-based</strong> (confidence interval width) sample size
-planning rather than traditional power-based approaches. The focus is on ensuring sufficient
-precision in sensitivity and specificity estimates.</p>
-
-<h4>Clopper-Pearson Exact Binomial Confidence Intervals</h4>
-<p>Sample sizes are calculated using <strong>Clopper-Pearson exact binomial confidence intervals</strong>,
-which are based on the cumulative probabilities of the binomial distribution. This 'exact' method
-is superior to normal approximation methods, especially for extreme values of sensitivity/specificity
-or small sample sizes.</p>
-
-<h4>Study Purpose Types</h4>
-
-<p><strong>1. Diagnostic Purpose (High Sensitivity AND Specificity)</strong></p>
-<ul>
-<li>Both sensitivity and specificity should be >=0.70 (preferably >=0.80)</li>
-<li>Sample size is determined by the <strong>maximum</strong> of sensitivity and specificity requirements</li>
-<li>Example: Clinical diagnostic test replacing gold standard</li>
-</ul>
-
-<p><strong>2. Screening Purpose (Emphasize Sensitivity OR Specificity)</strong></p>
-<ul>
-<li>High sensitivity screening: Sens >=0.70, Spec >=0.50 (acceptable to sacrifice specificity)</li>
-<li>High specificity screening: Spec >=0.70, Sens >=0.50 (acceptable to sacrifice sensitivity)</li>
-<li>Example: Population screening where false negatives/positives have different costs</li>
-</ul>
-
-<h4>Key Factors Affecting Sample Size</h4>
-
-<p><strong>1. Target Sensitivity/Specificity Values</strong></p>
-<ul>
-<li>Lower target values \u{2192} Larger sample size needed</li>
-<li>Recommendation: 0.95 = excellent, 0.90 = nearly excellent, 0.80 = good, 0.70 = fair</li>
-</ul>
-
-<p><strong>2. Disease Prevalence</strong></p>
-<ul>
-<li>Low prevalence \u{2192} Larger N for sensitivity estimation (need more diseased cases)</li>
-<li>High prevalence \u{2192} Larger N for specificity estimation (need more non-diseased cases)</li>
-<li>Critical consideration: Prevalence should reflect target population, not general population</li>
-</ul>
-
-<p><strong>3. Desired CI Width</strong></p>
-<ul>
-<li>Narrower width \u{2192} Larger sample size</li>
-<li>0.05 = very high precision (\u{00B1}2.5%); 0.10 = high precision (\u{00B1}5%); 0.20 = moderate precision (\u{00B1}10%)</li>
-<li>Recommendation: Use 0.10 for most diagnostic studies, 0.20 for screening studies</li>
-</ul>
-
-<h4>Sample Size Formula</h4>
-<p>For <strong>sensitivity</strong>: Find minimum N such that Clopper-Pearson CI width <= target width,
-then <code>N_total = ceiling(N_diseased / prevalence)</code></p>
-
-<p>For <strong>specificity</strong>: Find minimum N such that Clopper-Pearson CI width <= target width,
-then <code>N_total = ceiling(N_non-diseased / (1 - prevalence))</code></p>
-
-<p><strong>Final N</strong>: Take maximum of N_sensitivity and N_specificity (for diagnostic purpose)
-or specific N based on screening emphasis</p>
-
-<h4>Non-Response Adjustment</h4>
-<p>If non-response/dropout is expected, inflate final N:
-<code>N_adjusted = ceiling(N / (1 - non_response_rate))</code></p>
-<p>Example: N=100, 20% non-response \u{2192} N_adjusted = ceiling(100/0.8) = 125</p>
-"
-            self$results$methodology$setContent(html)
+            labels <- private$.planningLabels()
+            self$results$methodology$setContent(paste0(
+                "<h3>Single-proportion precision planning</h3><p>The declared comparator is ",
+                labels$comparator, ". The two estimands are ", labels$positive, " and ",
+                labels$negative, ". Numerators count matching test results within the ",
+                "reference-positive and reference-negative strata, respectively.</p>",
+                "<p>Planning evaluates Clopper-Pearson interval width at the rounded expected ",
+                "number of matching results. The confidence level is 100 &times; (1 &minus; alpha) percent. ",
+                "The expected stratum proportion converts each stratum count to a total participant count. ",
+                "The selected objective uses both requirements or one specified stratum.</p>",
+                "<p>Participants must be independent and contribute one paired result. These calculations ",
+                "condition on the reference classification and do not include comparator uncertainty, ",
+                "reader variance, patient clustering, assurance of stratum recruitment, or power for a ",
+                "difference between tests. Multiple readings do not replace independent participants.</p>"))
         },
         .setReferences = function() {
             html <- "

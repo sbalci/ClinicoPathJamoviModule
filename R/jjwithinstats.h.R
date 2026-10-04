@@ -20,6 +20,12 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             pairwisecomparisons = FALSE,
             pairwisedisplay = "significant",
             padjustmethod = "holm",
+            pairedEffects = FALSE,
+            pairedEstimator = "mean",
+            pairedCIMethod = "bootstrap",
+            pairedBootstrap = 2000,
+            pairedUnits = "",
+            pairedTimeRatios = FALSE,
             effsizetype = "biased",
             violin = TRUE,
             boxplot = TRUE,
@@ -146,6 +152,39 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "fdr",
                     "none"),
                 default="holm")
+            private$..pairedEffects <- jmvcore::OptionBool$new(
+                "pairedEffects",
+                pairedEffects,
+                default=FALSE)
+            private$..pairedEstimator <- jmvcore::OptionList$new(
+                "pairedEstimator",
+                pairedEstimator,
+                options=list(
+                    "mean",
+                    "median",
+                    "hodges_lehmann"),
+                default="mean")
+            private$..pairedCIMethod <- jmvcore::OptionList$new(
+                "pairedCIMethod",
+                pairedCIMethod,
+                options=list(
+                    "bootstrap",
+                    "standard"),
+                default="bootstrap")
+            private$..pairedBootstrap <- jmvcore::OptionInteger$new(
+                "pairedBootstrap",
+                pairedBootstrap,
+                min=200,
+                max=10000,
+                default=2000)
+            private$..pairedUnits <- jmvcore::OptionString$new(
+                "pairedUnits",
+                pairedUnits,
+                default="")
+            private$..pairedTimeRatios <- jmvcore::OptionBool$new(
+                "pairedTimeRatios",
+                pairedTimeRatios,
+                default=FALSE)
             private$..effsizetype <- jmvcore::OptionList$new(
                 "effsizetype",
                 effsizetype,
@@ -270,6 +309,12 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..pairwisecomparisons)
             self$.addOption(private$..pairwisedisplay)
             self$.addOption(private$..padjustmethod)
+            self$.addOption(private$..pairedEffects)
+            self$.addOption(private$..pairedEstimator)
+            self$.addOption(private$..pairedCIMethod)
+            self$.addOption(private$..pairedBootstrap)
+            self$.addOption(private$..pairedUnits)
+            self$.addOption(private$..pairedTimeRatios)
             self$.addOption(private$..effsizetype)
             self$.addOption(private$..violin)
             self$.addOption(private$..boxplot)
@@ -307,6 +352,12 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         pairwisecomparisons = function() private$..pairwisecomparisons$value,
         pairwisedisplay = function() private$..pairwisedisplay$value,
         padjustmethod = function() private$..padjustmethod$value,
+        pairedEffects = function() private$..pairedEffects$value,
+        pairedEstimator = function() private$..pairedEstimator$value,
+        pairedCIMethod = function() private$..pairedCIMethod$value,
+        pairedBootstrap = function() private$..pairedBootstrap$value,
+        pairedUnits = function() private$..pairedUnits$value,
+        pairedTimeRatios = function() private$..pairedTimeRatios$value,
         effsizetype = function() private$..effsizetype$value,
         violin = function() private$..violin$value,
         boxplot = function() private$..boxplot$value,
@@ -343,6 +394,12 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..pairwisecomparisons = NA,
         ..pairwisedisplay = NA,
         ..padjustmethod = NA,
+        ..pairedEffects = NA,
+        ..pairedEstimator = NA,
+        ..pairedCIMethod = NA,
+        ..pairedBootstrap = NA,
+        ..pairedUnits = NA,
+        ..pairedTimeRatios = NA,
         ..effsizetype = NA,
         ..violin = NA,
         ..boxplot = NA,
@@ -375,6 +432,7 @@ jjwithinstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         interpretation = function() private$.items[["interpretation"]],
         explanations = function() private$.items[["explanations"]],
         plot = function() private$.items[["plot"]],
+        pairedChanges = function() private$.items[["pairedChanges"]],
         summary = function() private$.items[["summary"]],
         ggpubrPlot = function() private$.items[["ggpubrPlot"]]),
     private = list(),
@@ -420,7 +478,13 @@ jjwithinstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "k",
                     "plotwidth",
                     "plotheight",
-                    "showExplanations"))
+                    "showExplanations",
+                    "pairedEffects",
+                    "pairedEstimator",
+                    "pairedCIMethod",
+                    "pairedBootstrap",
+                    "pairedUnits",
+                    "pairedTimeRatios"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -492,6 +556,78 @@ jjwithinstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "k",
                     "plotwidth",
                     "plotheight")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="pairedChanges",
+                title="Paired Changes",
+                visible="(pairedEffects)",
+                rows=0,
+                clearWith=list(
+                    "dep1",
+                    "dep2",
+                    "dep3",
+                    "dep4",
+                    "pairedEffects",
+                    "pairedEstimator",
+                    "pairedCIMethod",
+                    "pairedBootstrap",
+                    "pairedUnits",
+                    "pairedTimeRatios",
+                    "clinicalpreset",
+                    "typestatistics",
+                    "pairwisecomparisons",
+                    "padjustmethod",
+                    "conflevel",
+                    "seed"),
+                columns=list(
+                    list(
+                        `name`="contrast", 
+                        `title`="Contrast", 
+                        `type`="text"),
+                    list(
+                        `name`="effect", 
+                        `title`="Effect definition", 
+                        `type`="text"),
+                    list(
+                        `name`="pairs", 
+                        `title`="Pairs", 
+                        `type`="integer"),
+                    list(
+                        `name`="units", 
+                        `title`="Units", 
+                        `type`="text"),
+                    list(
+                        `name`="estimate", 
+                        `title`="Estimate", 
+                        `type`="number", 
+                        `format`="sf:4"),
+                    list(
+                        `name`="lower", 
+                        `title`="Lower CI", 
+                        `type`="number", 
+                        `format`="sf:4"),
+                    list(
+                        `name`="upper", 
+                        `title`="Upper CI", 
+                        `type`="number", 
+                        `format`="sf:4"),
+                    list(
+                        `name`="method", 
+                        `title`="CI method", 
+                        `type`="text"),
+                    list(
+                        `name`="test", 
+                        `title`="Paired test", 
+                        `type`="text"),
+                    list(
+                        `name`="p", 
+                        `title`="p", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="note", 
+                        `title`="Estimation note", 
+                        `type`="text"))))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="summary",
@@ -538,7 +674,7 @@ jjwithinstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "jjwithinstats",
-                version = c(1,0,81),
+                version = c(1,0,83),
                 options = options,
                 results = jjwithinstatsResults$new(options=options),
                 data = data,
@@ -586,6 +722,30 @@ jjwithinstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   identifying when changes occur during treatment or disease progression.
 #' @param pairwisedisplay .
 #' @param padjustmethod .
+#' @param pairedEffects Report changes as the later selected measurement minus
+#'   the earlier one. Each row must be an independent case; do not stack
+#'   multiple readers of the same cases. Uses the same complete cases across all
+#'   selected measurements as the plots. Confidence intervals are pointwise.
+#' @param pairedEstimator Mean or median of the within-case differences, or
+#'   their Hodges-Lehmann pseudomedian (median Walsh average). The pseudomedian
+#'   is not generally the median difference; its location-shift interpretation
+#'   requires symmetric differences.
+#' @param pairedCIMethod Bootstrap resamples complete independent case rows.
+#'   Estimator-specific intervals use a t interval for the mean and the
+#'   normal-approximation signed-rank interval for Hodges-Lehmann; the median
+#'   still uses the paired percentile bootstrap. Constant resampling
+#'   distributions do not produce a confidence interval. All intervals use
+#'   Confidence level.
+#' @param pairedBootstrap Number of case-row resamples for paired change
+#'   intervals. Uses Random seed without changing the caller's random-number
+#'   stream.
+#' @param pairedUnits Units shared by the selected measurements, for example
+#'   seconds.
+#' @param pairedTimeRatios For strictly positive measurements, report
+#'   exp(mean(log(later) - log(earlier))), with an interval on the log scale
+#'   transformed back. This is the geometric mean of within-case ratios, not the
+#'   ratio of arithmetic means. A value below 1 means the later measurement is
+#'   shorter. Ratios are withheld for a contrast containing nonpositive times.
 #' @param effsizetype .
 #' @param violin .
 #' @param boxplot .
@@ -621,9 +781,16 @@ jjwithinstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$explanations} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$pairedChanges} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$ggpubrPlot} \tab \tab \tab \tab \tab an image \cr
 #' }
+#'
+#' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+#'
+#' \code{results$pairedChanges$asDF}
+#'
+#' \code{as.data.frame(results$pairedChanges)}
 #'
 #' @export
 jjwithinstats <- function(
@@ -642,6 +809,12 @@ jjwithinstats <- function(
     pairwisecomparisons = FALSE,
     pairwisedisplay = "significant",
     padjustmethod = "holm",
+    pairedEffects = FALSE,
+    pairedEstimator = "mean",
+    pairedCIMethod = "bootstrap",
+    pairedBootstrap = 2000,
+    pairedUnits = "",
+    pairedTimeRatios = FALSE,
     effsizetype = "biased",
     violin = TRUE,
     boxplot = TRUE,
@@ -695,6 +868,12 @@ jjwithinstats <- function(
         pairwisecomparisons = pairwisecomparisons,
         pairwisedisplay = pairwisedisplay,
         padjustmethod = padjustmethod,
+        pairedEffects = pairedEffects,
+        pairedEstimator = pairedEstimator,
+        pairedCIMethod = pairedCIMethod,
+        pairedBootstrap = pairedBootstrap,
+        pairedUnits = pairedUnits,
+        pairedTimeRatios = pairedTimeRatios,
         effsizetype = effsizetype,
         violin = violin,
         boxplot = boxplot,

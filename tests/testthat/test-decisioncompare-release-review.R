@@ -19,10 +19,10 @@ make_fixture <- function(seed = 20260805, n = 300) {
 
 run_dc <- function(dat, ...) {
     do.call(call_decisioncompare, utils::modifyList(
-        list(data = dat, gold = "gold", goldPositive = "pos", goldNegative = NULL,
-             test1 = "t1", test1Positive = "pos", test1Negative = NULL,
-             test2 = "t2", test2Positive = "pos", test2Negative = NULL,
-             test3 = "t3", test3Positive = "pos", test3Negative = NULL,
+        list(data = dat, gold = "gold", goldPositive = "pos", goldNegative = "neg",
+             test1 = "t1", test1Positive = "pos", test1Negative = "neg",
+             test2 = "t2", test2Positive = "pos", test2Negative = "neg",
+             test3 = "t3", test3Positive = "pos", test3Negative = "neg",
              stratify = NULL),
         list(...)))
 }
@@ -60,8 +60,8 @@ test_that("tables do not accumulate rows across re-runs", {
     # table grew -- each test appearing 2x, then 3x, then 4x.
     d <- make_fixture()
     opts <- ClinicoPath:::decisioncompareOptions$new(
-        gold = "gold", goldPositive = "pos", test1 = "t1", test1Positive = "pos",
-        test2 = "t2", test2Positive = "pos", test3 = "t3", test3Positive = "pos",
+        gold = "gold", goldPositive = "pos", goldNegative = "neg", test1 = "t1", test1Positive = "pos", test1Negative = "neg",
+        test2 = "t2", test2Positive = "pos", test2Negative = "neg", test3 = "t3", test3Positive = "pos", test3Negative = "neg",
         stratify = NULL, statComp = TRUE, opa = TRUE, ci = TRUE)
     analysis <- ClinicoPath:::decisioncompareClass$new(options = opts, data = d)
 
@@ -175,10 +175,11 @@ test_that("Newcombe interval does not collapse with one-sided discordances", {
         t2 = c(rep("pos", 36), rep("neg", 14)),
         stringsAsFactors = FALSE
     )
+    d[] <- lapply(d, factor, levels = c("pos", "neg"))
     res <- call_decisioncompare(
-        data = d, gold = "gold", goldPositive = "pos", goldNegative = NULL,
-        test1 = "t1", test1Positive = "pos", test1Negative = NULL,
-        test2 = "t2", test2Positive = "pos", test2Negative = NULL,
+        data = d, gold = "gold", goldPositive = "pos", goldNegative = "neg",
+        test1 = "t1", test1Positive = "pos", test1Negative = "neg",
+        test2 = "t2", test2Positive = "pos", test2Negative = "neg",
         test3 = NULL, test3Positive = NULL, test3Negative = NULL,
         stratify = NULL, statComp = TRUE)
     row <- res$diffTable$asDF
@@ -219,8 +220,8 @@ test_that("per-test tables hide when their test is not selected", {
     # (truthy) string and the tables were permanently visible -- an empty
     # "Test 3 - Recoded Data" table sat under every two-test analysis.
     opts <- ClinicoPath:::decisioncompareOptions$new(
-        gold = "gold", goldPositive = "pos", test1 = "t1", test1Positive = "pos",
-        test2 = "t2", test2Positive = "pos", test3 = NULL, test3Positive = NULL,
+        gold = "gold", goldPositive = "pos", goldNegative = "neg", test1 = "t1", test1Positive = "pos", test1Negative = "neg",
+        test2 = "t2", test2Positive = "pos", test2Negative = "neg", test3 = NULL, test3Positive = NULL,
         stratify = NULL)
 
     expect_true(isTRUE(opts$eval("(length(test1) > 0)")))
@@ -240,37 +241,22 @@ equivocal_fixture <- function() {
         stringsAsFactors = FALSE)
 }
 
-test_that("excludeIndeterminate refuses to act when no negative level is named", {
-    # The filter was `c(positiveLevel, setdiff(levels, positiveLevel))` -- every
-    # level -- so the option was a silent no-op and equivocal results were still
-    # counted as negatives, inflating specificity exactly as the module's own
-    # warning describes. Without a named negative level the analysis cannot tell a
-    # genuine negative from an equivocal, so it must say so rather than pretend.
-    d <- equivocal_fixture()
-    res <- call_decisioncompare(
-        data = d, gold = "gold", goldPositive = "Pos", goldNegative = NULL,
-        test1 = "t1", test1Positive = "Pos", test1Negative = NULL,
-        test2 = "t2", test2Positive = "Pos", test2Negative = NULL,
-        test3 = NULL, test3Positive = NULL, test3Negative = NULL, stratify = NULL,
-        excludeIndeterminate = TRUE)
-
-    notices <- strip_html(res$notices$content)
-    expect_match(notices, "Negative Level Required for Exclusion")
-    expect_match(notices, "currently combined as Negative")
-
-    # the inflation it warns about is real: 38/40 with equivocals folded in
-    ct <- res$comparisonTable$asDF
-    expect_equal(ct$Spec[ct$test == "t1"][1], 38 / 40, tolerance = 1e-10)
+test_that("excludeIndeterminate stops when no negative level is named", {
+    expect_error(call_decisioncompare(
+        data = equivocal_fixture(), gold = "gold", goldPositive = "Pos", goldNegative = NULL,
+        test1 = "t1", test1Positive = "Pos", test1Negative = "Neg",
+        test2 = "t2", test2Positive = "Pos", test2Negative = "Neg",
+        test3 = NULL, test3Positive = NULL, test3Negative = NULL,
+        excludeIndeterminate = TRUE), "gold: Select an explicit negative level")
 })
 
 
 test_that("excludeIndeterminate drops equivocal rows once a negative level is named", {
-    # Exercised through .processSingleTest directly so this holds both before and
-    # after jmvtools::prepare() compiles the new *Negative options into the wrapper.
+    # Direct backend calls must enforce the same explicit mapping contract.
     d <- equivocal_fixture()
     opts <- ClinicoPath:::decisioncompareOptions$new(
-        gold = "gold", goldPositive = "Pos", test1 = "t1", test1Positive = "Pos",
-        test2 = "t2", test2Positive = "Pos", test3 = NULL, test3Positive = NULL,
+        gold = "gold", goldPositive = "Pos", goldNegative = "Neg", test1 = "t1", test1Positive = "Pos", test1Negative = "Neg",
+        test2 = "t2", test2Positive = "Pos", test2Negative = "Neg", test3 = NULL, test3Positive = NULL,
         stratify = NULL, excludeIndeterminate = TRUE)
     analysis <- ClinicoPath:::decisioncompareClass$new(options = opts, data = d)
     analysis$run()
@@ -279,26 +265,21 @@ test_that("excludeIndeterminate drops equivocal rows once a negative level is na
 
     excluded <- prv$.processSingleTest(prepared$data, "t1", "Pos", "gold", "Pos", 1,
                                        testNLevel = "Neg", goldNLevel = "Neg")
-    folded <- prv$.processSingleTest(prepared$data, "t1", "Pos", "gold", "Pos", 1)
+    expect_error(prv$.processSingleTest(prepared$data, "t1", "Pos", "gold", "Pos", 1),
+        "Select an explicit negative level")
 
     # 20 gold-positive + 20 determinate gold-negative; the 20 Equivocal rows go
     expect_equal(excluded$TP + excluded$FP + excluded$FN + excluded$TN, 40)
-    expect_equal(folded$TP + folded$FP + folded$FN + folded$TN, 60)
 
     expect_equal(excluded$metrics$Spec, 18 / 20, tolerance = 1e-10)   # honest
-    expect_equal(folded$metrics$Spec,   38 / 40, tolerance = 1e-10)   # inflated
-    expect_gt(folded$metrics$Spec, excluded$metrics$Spec)
-
-    # sensitivity is untouched: no gold-positive case was equivocal
-    expect_equal(excluded$metrics$Sens, folded$metrics$Sens, tolerance = 1e-10)
 })
 
 
 test_that("a negative level identical to the positive level is rejected", {
     d <- equivocal_fixture()
     opts <- ClinicoPath:::decisioncompareOptions$new(
-        gold = "gold", goldPositive = "Pos", test1 = "t1", test1Positive = "Pos",
-        test2 = "t2", test2Positive = "Pos", test3 = NULL, test3Positive = NULL,
+        gold = "gold", goldPositive = "Pos", goldNegative = "Neg", test1 = "t1", test1Positive = "Pos", test1Negative = "Neg",
+        test2 = "t2", test2Positive = "Pos", test2Negative = "Neg", test3 = NULL, test3Positive = NULL,
         stratify = NULL, excludeIndeterminate = TRUE)
     analysis <- ClinicoPath:::decisioncompareClass$new(options = opts, data = d)
     analysis$run()
@@ -321,9 +302,9 @@ test_that("a tie for best test is disclosed rather than broken silently", {
     d$t2 <- d$t1
 
     res <- call_decisioncompare(
-        data = d, gold = "gold", goldPositive = "pos", goldNegative = NULL,
-        test1 = "t1", test1Positive = "pos", test1Negative = NULL,
-        test2 = "t2", test2Positive = "pos", test2Negative = NULL,
+        data = d, gold = "gold", goldPositive = "pos", goldNegative = "neg",
+        test1 = "t1", test1Positive = "pos", test1Negative = "neg",
+        test2 = "t2", test2Positive = "pos", test2Negative = "neg",
         test3 = NULL, test3Positive = NULL, test3Negative = NULL, stratify = NULL,
         showDescriptiveReport = TRUE)
 
@@ -382,9 +363,9 @@ test_that("a genuinely significant difference is reported without the hedge", {
     d <- data.frame(gold = gold, t1 = good, t2 = poor, stringsAsFactors = FALSE)
 
     res <- call_decisioncompare(
-        data = d, gold = "gold", goldPositive = "pos", goldNegative = NULL,
-        test1 = "t1", test1Positive = "pos", test1Negative = NULL,
-        test2 = "t2", test2Positive = "pos", test2Negative = NULL,
+        data = d, gold = "gold", goldPositive = "pos", goldNegative = "neg",
+        test1 = "t1", test1Positive = "pos", test1Negative = "neg",
+        test2 = "t2", test2Positive = "pos", test2Negative = "neg",
         test3 = NULL, test3Positive = NULL, test3Negative = NULL, stratify = NULL,
         statComp = TRUE, showDescriptiveReport = TRUE)
 
@@ -450,9 +431,9 @@ test_that("duplicate test selections are rejected", {
     d <- equivocal_fixture()
     expect_error(
         call_decisioncompare(
-            data = d, gold = "gold", goldPositive = "Pos", goldNegative = NULL,
-            test1 = "t1", test1Positive = "Pos", test1Negative = NULL,
-            test2 = "t1", test2Positive = "Pos", test2Negative = NULL,
+            data = d, gold = "gold", goldPositive = "Pos", goldNegative = "Neg",
+            test1 = "t1", test1Positive = "Pos", test1Negative = "Neg",
+            test2 = "t1", test2Positive = "Pos", test2Negative = "Neg",
             test3 = NULL, test3Positive = NULL, test3Negative = NULL,
             stratify = NULL),
         "Validation failed"
@@ -464,9 +445,9 @@ test_that("the reference variable cannot be reused as a test", {
     d <- equivocal_fixture()
     expect_error(
         call_decisioncompare(
-            data = d, gold = "gold", goldPositive = "Pos", goldNegative = NULL,
-            test1 = "gold", test1Positive = "Pos", test1Negative = NULL,
-            test2 = "t2", test2Positive = "Pos", test2Negative = NULL,
+            data = d, gold = "gold", goldPositive = "Pos", goldNegative = "Neg",
+            test1 = "gold", test1Positive = "Pos", test1Negative = "Neg",
+            test2 = "t2", test2Positive = "Pos", test2Negative = "Neg",
             test3 = NULL, test3Positive = NULL, test3Negative = NULL,
             stratify = NULL),
         "Validation failed"
@@ -477,11 +458,11 @@ test_that("the reference variable cannot be reused as a test", {
 test_that("interpretation presets are explicitly examples rather than clinical guides", {
     d <- equivocal_fixture()
     res <- call_decisioncompare(
-        data = d, gold = "gold", goldPositive = "Pos", goldNegative = NULL,
-        test1 = "t1", test1Positive = "Pos", test1Negative = NULL,
-        test2 = "t2", test2Positive = "Pos", test2Negative = NULL,
+        data = d, gold = "gold", goldPositive = "Pos", goldNegative = "Neg",
+        test1 = "t1", test1Positive = "Pos", test1Negative = "Neg",
+        test2 = "t2", test2Positive = "Pos", test2Negative = "Neg",
         test3 = NULL, test3Positive = NULL, test3Negative = NULL,
-        stratify = NULL, showExplanations = TRUE)
+        stratify = NULL, showExplanations = TRUE, excludeIndeterminate = TRUE)
 
     about <- strip_html(res$aboutAnalysis$content)
     expect_match(about, "examples only")
@@ -505,9 +486,9 @@ test_that("missing co-tests and stratifiers do not change standalone metrics", {
     missing_stratum$site[seq_len(20)] <- NA
 
     run_two <- function(dat, stratify = NULL) call_decisioncompare(
-        data = dat, gold = "gold", goldPositive = "pos", goldNegative = NULL,
-        test1 = "t1", test1Positive = "pos", test1Negative = NULL,
-        test2 = "t2", test2Positive = "pos", test2Negative = NULL,
+        data = dat, gold = "gold", goldPositive = "pos", goldNegative = "neg",
+        test1 = "t1", test1Positive = "pos", test1Negative = "neg",
+        test2 = "t2", test2Positive = "pos", test2Negative = "neg",
         test3 = NULL, test3Positive = NULL, test3Negative = NULL,
         stratify = stratify, statComp = TRUE)
     metric <- function(res) {

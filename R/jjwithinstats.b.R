@@ -308,6 +308,78 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$.data_info_messages <- append(private$.data_info_messages, message)
             private$.accumulateInfoMessage(message)
         },
+
+        .populatePairedEffects = function(prepared) {
+            table <- self$results$pairedChanges
+            table$deleteRows()
+            table$setVisible(isTRUE(self$options$pairedEffects))
+            for (key in c("scope", "intervals", "testing", "ratios", "unavailable", "warnings"))
+                table$setNote(key, "")
+            if (!isTRUE(self$options$pairedEffects)) return()
+            table$setNote("scope", .("Each row must be an independent case. Do not stack multiple readers of the same cases. Changes are later selected measurement minus earlier; all contrasts use the same complete cases across every selected measurement. A fixed measurement order cannot separate modality from period effects."))
+            if (is.null(prepared)) {
+                table$setNote("unavailable", .("Paired changes require at least three complete independent cases. See Messages for data exclusions."))
+                return()
+            }
+            vars <- levels(prepared$measurement)
+            ids <- unique(prepared$rowid)
+            wide <- lapply(vars, function(v) {
+                d <- prepared[prepared$measurement == v, , drop = FALSE]
+                d$value[match(ids, d$rowid)]
+            })
+            names(wide) <- vars
+            wide <- as.data.frame(wide, check.names = FALSE)
+            effects <- tryCatch(.jjWithinPairedEffects(
+                wide, estimator = self$options$pairedEstimator,
+                ci_method = self$options$pairedCIMethod,
+                confidence = self$options$conflevel, samples = self$options$pairedBootstrap,
+                seed = self$options$seed, ratios = self$options$pairedTimeRatios,
+                checkpoint = private$.checkpoint), error = function(e) e)
+            if (inherits(effects, "error")) {
+                table$setNote("unavailable", sprintf(
+                    .("Paired changes could not be calculated: %s"),
+                    private$.safeHtmlOutput(conditionMessage(effects))))
+                return()
+            }
+            pvalues <- .jjWithinPairedPValues(
+                wide, type = self$options$typestatistics,
+                pairwise = self$options$pairwisecomparisons,
+                adjustment = self$options$padjustmethod)
+            for (i in seq_len(nrow(effects))) {
+                e <- effects[i, ]
+                p <- NULL
+                test <- ""
+                if (!e$ratio && !is.null(pvalues)) {
+                    index <- which(pvalues$first == e$first & pvalues$second == e$second)
+                    if (length(index) == 1L) {
+                        if (is.finite(pvalues$p[index])) p <- pvalues$p[index]
+                        test <- pvalues$test[index]
+                    }
+                }
+                table$addRow(rowKey = i, values = list(
+                    contrast = paste(e$second, if (e$ratio) "/" else "\u2212", e$first),
+                    effect = .(e$effect), pairs = e$n,
+                    units = if (e$ratio) .("ratio") else self$options$pairedUnits,
+                    estimate = if (is.finite(e$estimate)) e$estimate else NULL,
+                    lower = if (is.finite(e$lower)) e$lower else NULL,
+                    upper = if (is.finite(e$upper)) e$upper else NULL,
+                    method = .(e$method), test = test, p = p, note = .(e$note)))
+            }
+            table$setNote("intervals", sprintf(
+                .("Intervals are pointwise %.1f%% intervals, without multiplicity adjustment. Bootstrap intervals use %d whole-case resamples (seed %d); a constant resampling distribution does not provide an interval. The median paired change differs from the difference of marginal medians. The Hodges-Lehmann estimate is the median Walsh average of paired differences; its shift interpretation assumes symmetry."),
+                100 * self$options$conflevel, self$options$pairedBootstrap, self$options$seed))
+            table$setNote("testing", sprintf(
+                .("The p column reuses the selected paired test, not a separate test of the displayed estimator or time ratio. With three or more measurements it is available only when Pairwise comparisons is enabled, with adjustment '%s' across all measurement pairs; nonparametric post-hoc tests are Durbin-Conover. With two measurements it is the unadjusted paired t or signed-rank test. Robust/Bayesian tests remain in the plots; their p-values are not supplied here."),
+                self$options$padjustmethod))
+            if (isTRUE(self$options$pairedTimeRatios))
+                table$setNote("ratios", .("The time ratio is exp(mean(log(later) - log(earlier))), the geometric mean of within-case ratios. It is not the ratio of arithmetic means. Ratios below 1 indicate shorter later measurements. Each contrast must contain only positive values; no additional pairs are dropped to obtain a ratio."))
+            if (!is.null(pvalues) && length(attr(pvalues, "warnings")) > 0L)
+                table$setNote("warnings", private$.safeHtmlOutput(
+                    paste(attr(pvalues, "warnings"), collapse = " ")))
+            if (is.null(pvalues) && self$options$typestatistics %in% c("parametric", "nonparametric") &&
+                (length(vars) == 2L || isTRUE(self$options$pairwisecomparisons)))
+                table$setNote("unavailable", .("The selected paired test could not be evaluated; p-values are unavailable. Effect estimates and confidence intervals are reported independently."))
+        },
         
         # Name of the test that is ACTUALLY run. With TWO measurements the
         # analysis is a paired t-test / Wilcoxon signed-rank, not an ANOVA; the
@@ -1069,6 +1141,9 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # run ----
         .run = function() {
+
+            # Clear optional results even when inputs were removed or data preparation fails.
+            private$.populatePairedEffects(NULL)
             # The explanations panel holds STATIC method text and its visibility
             # is governed declaratively by `visible: (showExplanations)` in
             # .r.yaml. Populate it unconditionally - when it was filled only in
@@ -1114,6 +1189,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # cases, no rows left after cleaning, missing columns); the
                 # reason has been written to the Messages panel.
                 prepared <- private$.prepareData()
+                private$.populatePairedEffects(prepared)
 
                 # Probe the subtitle takeover HERE, not in .plot(): .run() is the
                 # only place that composes the warnings HTML, so a flag set later

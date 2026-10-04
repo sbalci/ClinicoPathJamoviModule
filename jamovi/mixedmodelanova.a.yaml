@@ -51,7 +51,9 @@ options:
       type: List
       options:
         - name: random_intercept
-          title: Random Intercept Only
+          title: Random intercept (one grouping variable)
+        - name: crossed
+          title: Crossed random intercepts (all grouping variables)
         - name: random_slope
           title: Random Intercept and Slope
         - name: nested

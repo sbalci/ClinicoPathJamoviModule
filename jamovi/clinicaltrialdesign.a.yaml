@@ -79,7 +79,7 @@ options:
           - name: "one_sample_ttest"
             title: "One-Sample t-test (Single Group vs Reference)"
           - name: "paired_ttest"
-            title: "Paired t-test (Before vs After)"
+            title: "Paired t-test (independent pairs; effect size d_z)"
           - name: "anova_oneway"
             title: "One-Way ANOVA (Multiple Groups)"
           - name: "two_proportions"
@@ -91,7 +91,7 @@ options:
           - name: "correlation"
             title: "Correlation Analysis"
           - name: "mcnemar"
-            title: "McNemar Test (Paired Binary)"
+            title: "McNemar planning (unavailable; needs discordance inputs)"
       default: "two_sample_ttest"
       description:
           R: Statistical test appropriate for the outcome type and study design
@@ -136,7 +136,7 @@ options:
       max: 100000
       default: 100
       description:
-          R: Total sample size for power calculation
+          R: Total sample size; for a paired t-test this is the number of independent complete pairs.
 
     # Effect Size Parameters
     - name: effect_size
@@ -146,7 +146,7 @@ options:
       max: 5.0
       default: 0.5
       description:
-          R: Standardized effect size (Cohen's d for continuous outcomes)
+          R: Standardized effect size; paired t-tests use mean difference divided by SD of within-pair differences (d_z).
 
     - name: mean_difference
       title: Mean Difference

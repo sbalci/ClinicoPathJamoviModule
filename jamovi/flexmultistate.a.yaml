@@ -3,7 +3,7 @@ title: Flexible Multi-State Survival Models
 menuGroup: SurvivalDT
 menuSubgroup: Multi-State Models
 menuSubtitle: Flexible Parametric Multi-State Modeling
-version: 0.0.3
+version: '1.0.83'
 jas: '1.2'
 description:
   main: Clock-forward Markov multistate models with separately fitted spline or parametric transition

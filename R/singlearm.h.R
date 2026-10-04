@@ -1528,7 +1528,7 @@ singlearmBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "singlearm",
-                version = c(1,0,81),
+                version = c(1,0,83),
                 options = options,
                 results = singlearmResults$new(options=options),
                 data = data,

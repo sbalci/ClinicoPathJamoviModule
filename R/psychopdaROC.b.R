@@ -1661,46 +1661,10 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
 
       # Calculate precision-recall curve
       .calculatePrecisionRecall = function(x, class, positiveClass) {
-        # Convert to binary response (1 = positive, 0 = negative)
-        response <- as.numeric(class == positiveClass)
-
-        # Sort values and create thresholds
-        sorted_values <- sort(unique(x))
-        precision <- numeric(length(sorted_values))
-        recall <- numeric(length(sorted_values))
-
-        # Calculate precision and recall for each threshold
-        for (i in seq_along(sorted_values)) {
-          threshold <- sorted_values[i]
-          # Respect user-specified direction
-          if (self$options$direction == ">=") {
-            predicted_pos <- x >= threshold
-          } else {
-            predicted_pos <- x <= threshold
-          }
-
-          # Compute TP, FP, FN
-          tp <- sum(predicted_pos & response == 1)
-          fp <- sum(predicted_pos & response == 0)
-          fn <- sum(!predicted_pos & response == 1)
-
-          # Calculate precision and recall
-          precision[i] <- ifelse(tp + fp > 0, tp / (tp + fp), 0)
-          recall[i] <- ifelse(tp + fn > 0, tp / (tp + fn), 0)
-        }
-
-        # Calculate AUPRC using the trapezoidal rule
-        auprc <- 0
-        for (i in 2:length(recall)) {
-          auprc <- auprc + 0.5 * (precision[i] + precision[i - 1]) * abs(recall[i] - recall[i - 1])
-        }
-
-        return(list(
-          threshold = sorted_values,
-          precision = precision,
-          recall = recall,
-          auprc = auprc
-        ))
+        pr <- .dvPR(x, class, positiveClass, self$options$direction == ">=")
+        if (is.null(pr)) return(list(threshold = numeric(), precision = numeric(),
+                                    recall = numeric(), auprc = NA_real_))
+        c(as.list(pr$curve), list(auprc = pr$auprc, avg_precision = pr$avg_precision))
       },
 
       # Calculate comprehensive performance metrics for classifier comparison

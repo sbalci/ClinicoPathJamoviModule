@@ -391,6 +391,25 @@ enhancedROCClass <- R6::R6Class(
                 return()
             }
 
+            for (name in c("validationContext", "denominatorLedger", "frozenMetrics", "screeningWorkload")) {
+                self$results$results$get(name)$deleteRows()
+            }
+            if (isTRUE(self$options$validationPanel)) {
+                report <- .enhancedROCValidation(self$data, self$options)
+                for (pair in list(c("validationContext", "context"), c("denominatorLedger", "ledger"),
+                                  c("frozenMetrics", "metrics"), c("screeningWorkload", "workload"))) {
+                    table <- self$results$results$get(pair[1])
+                    frame <- report[[pair[2]]]
+                    for (i in seq_len(nrow(frame))) table$addRow(rowKey = as.character(i), values = as.list(frame[i, ]))
+                }
+                self$results$results$frozenMetrics$setNote("scope", .("Percentile intervals resample whole patients when an ID is supplied, jointly across models and within fixed sites. These approximate intervals can under-cover, especially with rare outcomes or unequal cluster sizes. Counts and metrics remain weighted by slides. Undefined or degenerate intervals are unavailable. Calibration logits require probabilities strictly between 0 and 1 and a converged nonseparated fit. Positive-only cohorts cannot estimate specificity or discrimination. No model is refitted and no cutoff is optimized."))
+                return()
+            }
+
+            if (!is.null(self$options$patientID) && nzchar(self$options$patientID)) {
+                private$.addNotice(type = "INFO", title = .("Patient clustering is inactive"),
+                    content = .("Enable Frozen-model validation report to use patient-cluster intervals. Other ROC panels use their ordinary independent-row methods."))
+            }
             # Apply clinical presets if selected
             private$.applyClinicalPresets()
 
@@ -3000,71 +3019,7 @@ enhancedROCClass <- R6::R6Class(
             return(bt$conf.int)
         },
         .computePRMetrics = function(scores, labels, positive_label, roc_direction = "<") {
-            # Simple PR curve and AUPRC calculation without extra dependencies
-            y <- as.integer(labels == positive_label)
-            if (length(unique(y)) < 2) {
-                return(NULL)
-            }
-            # pROC direction "<" means higher values = positive (sort descending)
-            # pROC direction ">" means lower values = positive (negate to sort descending)
-            if (roc_direction == ">") scores <- -scores
-
-            # Accumulate one step per DISTINCT score, not per row. Stepping row by row through a
-            # group of tied scores walks the curve through operating points that no threshold can
-            # actually produce, and because order() is a stable sort, which points those are
-            # depends on the order the rows happen to sit in the spreadsheet. On a three-level
-            # ordinal marker that made AUPRC swing between 0.48 and 0.84 on the same 200 patients
-            # purely by re-sorting them, while the ROC AUC stayed fixed at 0.66 - so the ROC panel
-            # looked stable while the PR panel silently did not. Graded predictors (tumour grade,
-            # IHC 0-3+, mitotic count) tie constantly, so this is the normal case here.
-            keep <- !is.na(scores) & !is.na(y)
-            scores <- scores[keep]
-            y <- y[keep]
-            if (length(unique(y)) < 2) {
-                return(NULL)
-            }
-            distinct_scores <- sort(unique(scores), decreasing = TRUE)
-            pos_at <- vapply(distinct_scores, function(v) sum(y[scores == v]), numeric(1))
-            neg_at <- vapply(distinct_scores, function(v) sum(1 - y[scores == v]), numeric(1))
-            tp_cum <- cumsum(pos_at)
-            fp_cum <- cumsum(neg_at)
-            total_pos <- sum(y)
-            recall <- tp_cum / total_pos
-            precision <- tp_cum / (tp_cum + fp_cum)
-
-            # prepend (0,1) for proper step interpolation
-            recall <- c(0, recall)
-            precision <- c(1, precision)
-
-            # Average precision is the step-wise sum sum((R_n - R_n-1) * P_n) - it makes no
-            # interpolation assumption and is the value most PR software reports. The area under
-            # the PR curve is the trapezoidal integral of the same points, so the two are close
-            # but genuinely different quantities; computing both as the step sum (as this did)
-            # printed one number under two column headings.
-            avg_precision <- sum(diff(recall) * precision[-1], na.rm = TRUE)
-            auprc <- sum(diff(recall) * (precision[-1] + precision[-length(precision)]) / 2, na.rm = TRUE)
-
-            f1_denom <- precision + recall
-            f1_scores <- ifelse(f1_denom > 0, 2 * precision * recall / f1_denom, NA_real_)
-            best_f1 <- max(f1_scores, na.rm = TRUE)
-            if (is.infinite(best_f1)) best_f1 <- NA_real_
-
-            # Precision and recall must be quoted AT an operating point, and the only operating
-            # point this table already names is the one maximising F1. Reading precision[2] /
-            # recall[2] instead described the single top-ranked patient, so precision was
-            # trivially 1.0 and recall was 1/(number of positives) - and neither could be
-            # reconciled with the F1 printed beside them.
-            best_idx <- if (all(is.na(f1_scores))) NA_integer_ else which.max(f1_scores)
-            best_precision <- if (is.na(best_idx)) NA_real_ else precision[best_idx]
-            best_recall <- if (is.na(best_idx)) NA_real_ else recall[best_idx]
-
-            list(
-                auprc = auprc,
-                max_f1 = best_f1,
-                precision = best_precision,
-                recall = best_recall,
-                avg_precision = avg_precision
-            )
+            .dvPR(scores, labels, positive_label, higher = roc_direction != ">")
         },
         .populatePrecisionRecall = function(analysisData) {
             if (!self$options$detectImbalance) {
@@ -4153,7 +4108,8 @@ enhancedROCClass <- R6::R6Class(
 
                     # Create clinical decision plot showing PPV/NPV vs prevalence
                     plot_data <- data.frame()
-                    prevalence_range <- seq(0.01, 0.99, 0.01)
+                    prevalence_range <- sort(unique(c(10^seq(-9, -2, length.out = 100),
+                        seq(.01, .99, length.out = 100), self$options$prevalence)))
 
                     for (predictor in names(private$.rocResults)) {
                         optimal <- private$.rocResults[[predictor]]$optimal_cutoff
@@ -5391,153 +5347,55 @@ enhancedROCClass <- R6::R6Class(
             )
         },
         .populateClinicalImpact = function() {
-            if (!self$options$clinicalImpact) {
-                return()
-            }
-
-            impactTable <- self$results$results$clinicalImpactTable
-            impactTable$deleteRows()   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
-            decisionTable <- self$results$results$decisionImpactSummary
-            decisionTable$deleteRows()   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
-
-            # Net benefit and NNT are read straight off the risk threshold, and this analysis takes
-            # that threshold from the prevalence. Those are not the same quantity: a threshold
-            # probability states the harm-to-benefit exchange rate you accept (Vickers & Elkin,
-            # Med Decis Making 2006;26:565-74), whereas prevalence is a property of the sample -
-            # and on an enriched case-control series it is an artefact of how cases were chosen.
-            # Ticking "use observed prevalence" therefore moves NNT and net benefit, so say where
-            # the threshold came from and what it implies.
-            impact_prevalence <- private$.effectivePrevalence(
-                mean(private$.binaryData == levels(private$.binaryData)[2])
-            )
-            impact_threshold <- min(max(impact_prevalence, 0.01), 0.99)
-            impactTable$setNote(
-                "threshold_source",
-                .fmt(
-                    .("Net benefit and number needed to treat are evaluated at a risk threshold of {thr}, taken from the disease prevalence {src}. A threshold of {thr} means accepting {ratio} unnecessary positive results for each additional case found. If that trade-off does not match your setting, untick \u2018Use observed prevalence\u2019 and enter the threshold you want in the Disease Prevalence box."),
-                    thr = sprintf("%.3f", impact_threshold),
-                    src = if (isTRUE(self$options$useObservedPrevalence)) .("observed in these data") else .("you entered"),
-                    ratio = sprintf("%.1f", (1 - impact_threshold) / impact_threshold)
-                )
-            )
-
+            impact <- self$results$results$clinicalImpactTable
+            decision <- self$results$results$decisionImpactSummary
+            workload <- self$results$results$screeningWorkload
+            impact$deleteRows()
+            decision$deleteRows()
+            workload$deleteRows()
+            cuts <- .dvNumbers(self$options$impactCutoffs)
+            if (!length(cuts)) stop("Enter fixed score cutoffs for workload analysis.")
+            scenario <- .dvNumbers(self$options$prevalenceScenarios, 0, 1)
+            utility <- self$options$utilityThreshold
+            population <- self$options$workloadPopulationSize
+            note <- .("Workload uses fixed score cutoffs, not prevalence-selected thresholds. Population prevalence and the utility harm/benefit threshold are separate inputs. Projected counts are expectations, conditional on transportable sensitivity/specificity. Inverse net benefit and inverse Youden are not numbers of tests or reviews. This replaces the legacy prevalence-as-threshold calculation.")
+            impact$setNote("threshold_source", note)
+            workload$setNote("source", note)
+            decision$setNote("population", if (self$options$useObservedPrevalence)
+                .("Observed sample counts and PPV; unit is given in the workload table.") else
+                .("Projected target-population counts and PPV; fractional expected counts are retained."))
+            data <- private$.analysisData
+            y <- as.integer(data[[private$.outcome]] == levels(data[[private$.outcome]])[2])
             for (predictor in names(private$.rocResults)) {
-                tryCatch(
-                    {
-                        # Get data
-                        data <- private$.analysisData
-                        outcome <- data[[private$.outcome]]
-                        pred_vals <- data[[predictor]]
-                        y_binary <- as.numeric(outcome == levels(outcome)[2])
-                        n <- length(y_binary)
-                        prevalence <- private$.effectivePrevalence(mean(y_binary))
-
-                        # Direction-aware risk; see .riskProbabilities().
-                        roc_dir <- if (!is.null(private$.rocObjects[[predictor]])) private$.rocObjects[[predictor]]$direction else "<"
-                        risk <- private$.riskProbabilities(pred_vals, y_binary, roc_dir)
-                        probs <- risk$probs
-                        if (risk$assumed_probability) {
-                            private$.addNotice(
-                                type = "STRONG_WARNING",
-                                title = sprintf(.("Values Read as Risks: %s"), predictor),
-                                # Two complete sentences per branch rather than an untranslated
-                                # English clause spliced through %s. The ">" branch must say the
-                                # values were INVERTED: the panel silently used 1 - x as the risk,
-                                # matching the wording already used by the calibration panel.
-                                content = if (identical(roc_dir, ">")) {
-                                    sprintf(.("Every value of %s falls between 0 and 1, so they are being used directly as predicted risks rather than modelled, inverted to 1 minus the value because lower values indicate the positive class. Net benefit, NNT and the decision-impact rows below therefore assume this column already IS a calibrated probability, read that way round. If it is a measurement that merely happens to lie in that range, rescale it or these figures will not mean what they say."), predictor)
-                                } else {
-                                    sprintf(.("Every value of %s falls between 0 and 1, so they are being used directly as predicted risks rather than modelled. Net benefit, NNT and the decision-impact rows below therefore assume this column already IS a calibrated probability of the outcome. If it is a measurement that merely happens to lie in that range, rescale it or these figures will not mean what they say."), predictor)
-                                }
-                            )
-                        } else {
-                            # The OPPOSITE branch - the common one for any raw marker - had no
-                            # warning at all in this panel, while the calibration panel one
-                            # screen up warns in bold about exactly the same situation. These
-                            # numbers come from a logistic model fitted to these same patients
-                            # and evaluated on them: apparent performance, not validated.
-                            private$.addNotice(
-                                type = "STRONG_WARNING",
-                                title = sprintf(.("Risks Were Modelled from These Same Data: %s"), predictor),
-                                content = .fmt(.("The values of {pred} are not probabilities, so a logistic regression was fitted to these same patients to turn them into predicted risks. Every figure in the Clinical Impact panel \u2014 NNT, NND, net benefit and the PPV and NPV at each threshold \u2014 is therefore apparent performance: the model was both fitted and evaluated on the same {n} observations, which overstates what the marker would achieve on new patients. \u2022 Treat these as an upper bound. \u2022 For an honest estimate, supply predicted risks from a model fitted elsewhere, or use the Internal Validation panel."), pred = predictor, n = n)
-                            )
-                        }
-
-                        # Decision threshold = the prevalence actually in use (observed when "Use
-                        # observed prevalence" is ticked, otherwise the value typed in the box).
-                        # `self$options$prevalence %||% prevalence` was an unconditional read of
-                        # the raw option: the .a.yaml gives it a default, so it is never NULL and
-                        # the fallback never fired - which is why the checkbox did nothing here.
-                        threshold_prob <- min(max(prevalence, 0.01), 0.99)
-                        classified_positive <- probs >= threshold_prob
-
-                        tp <- sum(classified_positive & y_binary == 1)
-                        fp <- sum(classified_positive & y_binary == 0)
-                        fn <- sum(!classified_positive & y_binary == 1)
-                        tn <- sum(!classified_positive & y_binary == 0)
-
-                        sens <- ifelse((tp + fn) > 0, tp / (tp + fn), NA)
-                        spec <- ifelse((tn + fp) > 0, tn / (tn + fp), NA)
-                        youden <- if (!is.na(sens) && !is.na(spec)) sens + spec - 1 else NA
-                        nnd <- if (!is.na(youden) && youden > 0) 1 / youden else NA
-
-                        # NNT (Number Needed to Test/Screen): inverse of net benefit
-                        # NNT = 1 / (TP/n - FP/n * pt/(1-pt)) where pt = threshold probability
-                        # This is the number of patients that need to be tested for one
-                        # additional true positive at the given decision threshold
-                        net_benefit_local <- (tp / n) - (fp / n) * (threshold_prob / (1 - threshold_prob))
-                        nnt <- if (!is.na(net_benefit_local) && net_benefit_local > 0) {
-                            round(1 / net_benefit_local)
-                        } else {
-                            NA
-                        }
-
-                        tested_positive <- (tp + fp) / n
-                        false_positive_rate <- 1 - spec
-                        net_benefit <- net_benefit_local
-
-                        row <- list(
-                            predictor = predictor,
-                            threshold = threshold_prob,
-                            nnt = nnt,
-                            nnd = nnd,
-                            tested_positive = tested_positive,
-                            true_positive_rate = sens,
-                            false_positive_rate = false_positive_rate,
-                            net_benefit_per_100 = net_benefit * 100
-                        )
-                        impactTable$addRow(rowKey = private$.escapeVar(predictor), values = row)
-
-                        if (self$options$decisionImpactTable) {
-                            thresholds <- unique(pmin(pmax(c(0.1, 0.2, 0.3, threshold_prob), 0.01), 0.99))
-                            for (thr in thresholds) {
-                                pred_pos <- probs >= thr
-                                tp_thr <- sum(pred_pos & y_binary == 1)
-                                fp_thr <- sum(pred_pos & y_binary == 0)
-                                fn_thr <- sum(!pred_pos & y_binary == 1)
-                                tn_thr <- sum(!pred_pos & y_binary == 0)
-
-                                ppv <- ifelse((tp_thr + fp_thr) > 0, tp_thr / (tp_thr + fp_thr), NA)
-                                npv <- ifelse((tn_thr + fn_thr) > 0, tn_thr / (tn_thr + fn_thr), NA)
-
-                                decisionTable$addRow(rowKey = paste0(private$.escapeVar(predictor), "_", thr), values = list(
-                                    # Without this the four rows per marker were unlabelled -
-                                    # the same defect already fixed for multiClassAUC.
-                                    predictor = predictor,
-                                    threshold = thr,
-                                    n_high_risk = tp_thr + fp_thr,
-                                    n_high_risk_with_event = tp_thr,
-                                    n_high_risk_without_event = fp_thr,
-                                    ppv = ppv,
-                                    npv = npv
-                                ))
-                            }
-                        }
-                    },
-                    error = function(e) {
-                        private$.addNotice(type = "WARNING", title = sprintf(.("Clinical Impact Error: %s"), predictor), content = sprintf(.("Clinical impact analysis failed for %1$s: %2$s"), predictor, e$message))
+                higher <- private$.rocObjects[[predictor]]$direction != ">"
+                scores <- data[[predictor]]
+                for (cut in cuts) {
+                    z <- .dvCounts(y, scores, cut, higher)
+                    se <- if (sum(y == 1)) unname(z['tp'] / sum(y == 1)) else NA_real_
+                    sp <- if (sum(y == 0)) unname(z['tn'] / sum(y == 0)) else NA_real_
+                    observed <- isTRUE(self$options$useObservedPrevalence)
+                    prevalence <- if (observed) mean(y) else self$options$prevalence
+                    size <- if (observed) length(y) else population
+                    w <- .dvWorkload(se, sp, prevalence, size, utility)
+                    key <- paste(predictor, cut, sep = "_")
+                    impact$addRow(rowKey = key, values = list(predictor = predictor,
+                        threshold = cut, nnt = if (is.finite(w$net_benefit) && w$net_benefit > 0)
+                            1 / w$net_benefit else NA_real_,
+                        nnd = if (is.finite(se+sp) && se+sp > 1) 1 / (se+sp-1) else NA_real_,
+                        tested_positive = w$flags / size, true_positive_rate = se,
+                        false_positive_rate = 1-sp, net_benefit_per_100 = 100*w$net_benefit))
+                    decision$addRow(rowKey = key, values = list(predictor = predictor, threshold = cut,
+                        n_high_risk = w$flags, n_high_risk_with_event = w$tp,
+                        n_high_risk_without_event = w$fp, ppv = w$ppv, npv = w$npv))
+                    scenarios <- c(prevalence, scenario)
+                    for (i in seq_along(scenarios)) {
+                        row <- .dvWorkload(se, sp, scenarios[i], if (i == 1) size else population, utility)
+                        workload$addRow(rowKey = paste(key, i, sep = "_"), values = c(
+                            list(predictor = predictor, cutoff = cut,
+                                 source = if (i == 1 && observed) "Observed" else "Projected",
+                                 unit = self$options$analysisUnit), as.list(row)))
                     }
-                )
+                }
             }
         },
         # Clinical impact curve (Kerr 2016; Vickers 2019): the same counts the
@@ -5551,7 +5409,7 @@ enhancedROCClass <- R6::R6Class(
 
             tryCatch(
                 {
-                    thresholds <- seq(0.01, 0.99, by = 0.01)
+                    thresholds <- .dvNumbers(self$options$impactCutoffs)
                     lab_high <- .("Called high risk")
                     lab_event <- .("High risk and has the event")
                     plot_data <- data.frame()
@@ -5566,10 +5424,17 @@ enhancedROCClass <- R6::R6Class(
 
                         # Direction-aware risk; see .riskProbabilities().
                         roc_dir <- if (!is.null(private$.rocObjects[[predictor]])) private$.rocObjects[[predictor]]$direction else "<"
-                        probs <- private$.riskProbabilities(pred_vals, y_binary, roc_dir)$probs
+                        probs <- pred_vals
+                        higher <- roc_dir != ">"
 
-                        n_high <- vapply(thresholds, function(th) sum(probs >= th, na.rm = TRUE) / n * 1000, numeric(1))
-                        n_tp <- vapply(thresholds, function(th) sum(probs >= th & y_binary == 1, na.rm = TRUE) / n * 1000, numeric(1))
+                        prevalence <- private$.effectivePrevalence(mean(y_binary))
+                        counts <- lapply(thresholds, function(th) {
+                            z <- .dvCounts(y_binary, probs, th, higher)
+                            .dvWorkload(z['tp']/sum(y_binary == 1), z['tn']/sum(y_binary == 0),
+                                        prevalence, 1000, self$options$utilityThreshold)
+                        })
+                        n_high <- vapply(counts, function(z) z$flags, numeric(1))
+                        n_tp <- vapply(counts, function(z) z$tp, numeric(1))
 
                         plot_data <- rbind(plot_data, data.frame(
                             Threshold = rep(thresholds, 2L),
@@ -5593,10 +5458,10 @@ enhancedROCClass <- R6::R6Class(
                         )) +
                         ggplot2::geom_line(linewidth = 1) +
                         ggplot2::labs(
-                            x = .("Threshold Probability"),
+                            x = .("Fixed score cutoff"),
                             y = .("Number per 1000 tested"),
                             title = .("Clinical Impact Curve"),
-                            subtitle = .("Where a marker is not already a probability, the risks come from a logistic model fitted to these same data, so the curve is apparent, not validated."),
+                            subtitle = paste(if (self$options$useObservedPrevalence) "Observed" else "Projected", self$options$analysisUnit, "counts at fixed score cutoffs"),
                             colour = .("Predictor"),
                             linetype = .("Group")
                         ) +
@@ -5649,7 +5514,7 @@ enhancedROCClass <- R6::R6Class(
                     # ggplot2 available via package Imports
 
                     plot_data <- data.frame()
-                    thresholds <- seq(0.01, 0.99, by = 0.01)
+                    thresholds <- .dvNumbers(self$options$impactCutoffs)
 
                     for (predictor in names(private$.rocResults)) {
                         data <- private$.analysisData
@@ -5660,18 +5525,17 @@ enhancedROCClass <- R6::R6Class(
 
                         # Direction-aware risk; see .riskProbabilities().
                         roc_dir <- if (!is.null(private$.rocObjects[[predictor]])) private$.rocObjects[[predictor]]$direction else "<"
-                        probs <- private$.riskProbabilities(pred_vals, y_binary, roc_dir)$probs
+                        probs <- pred_vals
+                        higher <- roc_dir != ">"
 
                         net_benefits <- numeric(length(thresholds))
 
                         for (i in seq_along(thresholds)) {
                             thresh <- thresholds[i]
-                            tp <- sum(probs >= thresh & y_binary == 1)
-                            fp <- sum(probs >= thresh & y_binary == 0)
-
-                            # Net Benefit
-                            nb <- (tp / n) - (fp / n) * (thresh / (1 - thresh))
-                            net_benefits[i] <- nb
+                            z <- .dvCounts(y_binary, probs, thresh, higher)
+                            w <- .dvWorkload(z['tp']/sum(y_binary == 1), z['tn']/sum(y_binary == 0),
+                                private$.effectivePrevalence(mean(y_binary)), 1000, self$options$utilityThreshold)
+                            net_benefits[i] <- w$net_benefit
                         }
 
                         df <- data.frame(
@@ -5684,8 +5548,8 @@ enhancedROCClass <- R6::R6Class(
                     }
 
                     # Add "Treat All" line
-                    prevalence <- mean(as.numeric(private$.analysisData[[private$.outcome]] == levels(private$.analysisData[[private$.outcome]])[2]))
-                    treat_all_nb <- prevalence - (1 - prevalence) * (thresholds / (1 - thresholds))
+                    prevalence <- private$.effectivePrevalence(mean(as.numeric(private$.analysisData[[private$.outcome]] == levels(private$.analysisData[[private$.outcome]])[2])))
+                    treat_all_nb <- rep(prevalence - (1-prevalence) * self$options$utilityThreshold / (1-self$options$utilityThreshold), length(thresholds))
                     treat_all_df <- data.frame(
                         Threshold = thresholds,
                         NetBenefit = treat_all_nb,
@@ -5709,10 +5573,10 @@ enhancedROCClass <- R6::R6Class(
                     p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = Threshold, y = NetBenefit, color = Predictor, linetype = Type)) +
                         ggplot2::geom_line(linewidth = 1) +
                         ggplot2::labs(
-                            x = .("Threshold Probability"),
+                            x = .("Fixed score cutoff"),
                             y = .("Net Benefit"),
                             title = .("Decision Curve Analysis"),
-                            subtitle = .("Net Benefit vs Threshold Probability"),
+                            subtitle = paste("Fixed utility threshold:", self$options$utilityThreshold),
                             color = .("Strategy"),
                             linetype = .("Type")
                         ) +

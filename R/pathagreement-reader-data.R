@@ -10,11 +10,19 @@
        readerPairs = "all", readerPair1 = "", readerPair2 = "", readerCaseLimit = 50L,
        readerIntervals = TRUE, readerBootstrap = FALSE, readerConfidence = 0.95,
        bootstrapSamples = 1000L, seed = 42L, wght = "unweighted",
-       showKappaBalanced = FALSE, compositeReader = "", readerCode = FALSE)
+       showKappaBalanced = FALSE, compositeReader = "", readerCode = FALSE,
+       referenceType = "legacy", referenceDescription = "", targetDefinition = "",
+       readerNondiagnostic = FALSE, readerNondiagnosticLevel = "",
+       readerAllObservedAgreement = FALSE, readerFormat = "wide",
+       readerID = NULL, modality = NULL, rating = NULL,
+       baselineModality = "", comparisonModality = "", readerModalityComparison = FALSE,
+       modalityPopulation = "determinate", readerTransitions = FALSE,
+       transitionBaseline = "", transitionComparison = "")
 }
 
 .paReaderPrepare <- function(data, options) {
   o <- utils::modifyList(.paReaderDefaults(), options)
+  if (identical(o$readerFormat, "long")) return(.paReaderPrepareLong(data, o))
   pending <- function(message) list(ready = FALSE, message = message)
   numeric_mode <- identical(o$readerWorkflow, "numeric_cutoff")
   vars <- if (numeric_mode) o$readerScores else o$vars
@@ -32,6 +40,23 @@
   }
   rows <- rows[!meta]
   raw <- data[rows, vars, drop = FALSE]
+  original_raw <- raw
+  if (o$readerNondiagnostic) {
+    if (!nzchar(o$readerNondiagnosticLevel)) return(pending("Enter the exact nondiagnostic label."))
+    if (o$readerWorkflow == "binary" &&
+        o$readerNondiagnosticLevel %in% c(o$readerPositive, o$readerNegative)) {
+      stop("Nondiagnostic and positive/negative reader labels must differ.")
+    }
+    for (v in vars) {
+      nd <- !is.na(raw[[v]]) & as.character(raw[[v]]) == o$readerNondiagnosticLevel
+      raw[[v]][nd] <- NA
+      if (is.factor(raw[[v]])) {
+        raw[[v]] <- factor(as.character(raw[[v]]),
+          levels = setdiff(levels(raw[[v]]), o$readerNondiagnosticLevel),
+          ordered = is.ordered(raw[[v]]))
+      }
+    }
+  }
   # Binary metadata labels can be removed, but an ordinal scale is declared by
   # the user: an unobserved boundary category must retain its position.
   only_meta <- setdiff(unlist(lapply(data[meta, vars, drop = FALSE], as.character)),
@@ -66,7 +91,9 @@
       return(pending(paste0("Specify positive and negative reader labels. Available: ",
                             paste(available, collapse = ", "))))
     }
-    labels(o$readerPositive, o$readerNegative, available, "Reader")
+    labels(o$readerPositive, o$readerNegative,
+      if (o$readerNondiagnostic) union(available, c(o$readerPositive, o$readerNegative)) else available,
+      "Reader")
     for (j in seq_along(vars)) {
       x <- as.character(raw[[j]])
       calls[, j] <- ifelse(x %in% c(o$readerPositive, o$readerNegative),
@@ -156,7 +183,26 @@
     if (anyNA(idx) || idx[1] == idx[2]) stop("The selected pair must name two distinct selected reader columns.")
     pairs <- list(idx)
   }
-  list(ready = TRUE, options = o, raw = raw, calls = calls, near = near,
+  status <- matrix("determinate", nrow(raw), ncol(raw), dimnames = dimnames(calls))
+  for (j in seq_along(vars)) {
+    status[is.na(calls[, j]), j] <- "unmapped"
+    status[is.na(original_raw[[j]]), j] <- "missing"
+    if (o$readerNondiagnostic) {
+      nd <- !is.na(original_raw[[j]]) &
+        as.character(original_raw[[j]]) == o$readerNondiagnosticLevel
+      status[nd, j] <- "nondiagnostic"
+    }
+  }
+  if (o$readerNondiagnostic && any(status == "unmapped")) {
+    bad <- unique(unlist(lapply(seq_along(vars), function(j)
+      as.character(original_raw[[j]][status[, j] == "unmapped"]))))
+    stop(paste("Unmapped reader labels:", paste(bad, collapse = ", "),
+               "Map them explicitly; they are not nondiagnostic."))
+  }
+  reference_state <- ifelse(is.na(ref_raw), "missing",
+                            ifelse(is.na(ref), "excluded_level", "eligible"))
+  list(ready = TRUE, options = o, raw = raw, original_raw = original_raw,
+       status = status, reference_state = reference_state, calls = calls, near = near,
        has_band = has_band, reference = ref, reference_raw = ref_raw,
        reference_ready = ref_ready, reference_message = ref_message,
        rows = rows, ids = ids, clusters = clusters, pairs = pairs, rule = rule,

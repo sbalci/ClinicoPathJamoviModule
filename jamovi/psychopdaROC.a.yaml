@@ -1,7 +1,7 @@
 ---
 name: psychopdaROC
 title: Advanced ROC Analysis
-menuGroup: meddecide
+menuGroup: meddecideT
 menuSubgroup: ROC
 menuSubtitle: Advanced ROC analysis with statistical comparisons and effect sizes
 version: '1.0.83'
@@ -289,8 +289,8 @@ options:
       title: Prior Prevalence Value
       type: Number
       default: 0.5
-      min: 0.001
-      max: 0.999
+      min: 0.000000001
+      max: 0.999999999
       description:
           R: >
             Population prevalence to use for predictive value calculations.

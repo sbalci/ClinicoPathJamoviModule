@@ -1,6 +1,7 @@
+jus: '3.0'
 title: Clinical ROC Analysis
 name: enhancedROC
-jus: '3.0'
+
 stage: 0
 compilerMode: tame
 children:
@@ -26,6 +27,27 @@ children:
             name: predictors
             isTarget: true
             itemDropBehaviour: emptyspace
+      - type: TargetLayoutBox
+        label: Patient identifier
+        children:
+        - type: VariablesListBox
+          name: patientID
+          maxItemCount: 1
+          isTarget: true
+      - type: TargetLayoutBox
+        label: Site identifier
+        children:
+        - type: VariablesListBox
+          name: siteID
+          maxItemCount: 1
+          isTarget: true
+      - type: TargetLayoutBox
+        label: Partition identifier
+        children:
+        - type: VariablesListBox
+          name: partitionID
+          maxItemCount: 1
+          isTarget: true
   - type: CollapseBox
     label: Analysis Options
     collapsed: false
@@ -419,3 +441,52 @@ children:
                   # NOT IMPLEMENTED - option commented out in enhancedROC.a.yaml.
                   # - type: CheckBox
                   #   name: transportability
+
+  - type: CollapseBox
+    label: Deployment prevalence and workload
+    collapsed: true
+    children:
+    - type: TextBox
+      name: impactCutoffs
+      format: string
+    - type: TextBox
+      name: utilityThreshold
+      format: number
+    - type: TextBox
+      name: workloadPopulationSize
+      format: number
+    - type: TextBox
+      name: analysisUnit
+      format: string
+    - type: TextBox
+      name: prevalenceScenarios
+      format: string
+
+  - type: CollapseBox
+    label: Frozen-model validation
+    collapsed: true
+    children:
+    - type: CheckBox
+      name: validationPanel
+    - type: TextBox
+      name: validationNegative
+      format: string
+    - type: TextBox
+      name: referenceDescription
+      format: string
+    - type: TextBox
+      name: modelVersion
+      format: string
+    - type: ComboBox
+      name: cohortRole
+    - type: ComboBox
+      name: samplingDesign
+    - type: ComboBox
+      name: thresholdSource
+    - type: ComboBox
+      name: predictionScale
+    - type: CheckBox
+      name: validationBootstrap
+    - type: TextBox
+      name: validationDraws
+      format: number

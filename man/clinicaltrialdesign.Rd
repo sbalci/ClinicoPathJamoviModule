@@ -53,10 +53,11 @@ non-inferiority)}
 
 \item{power}{Desired statistical power (typically 0.80 or 0.90)}
 
-\item{sample_size}{Total sample size for power calculation}
+\item{sample_size}{Total sample size; for a paired t-test this is the
+number of independent complete pairs.}
 
-\item{effect_size}{Standardized effect size (Cohen's d for continuous
-outcomes)}
+\item{effect_size}{Standardized effect size; paired t-tests use mean
+difference divided by SD of within-pair differences (d_z).}
 
 \item{mean_difference}{Expected difference in means between groups}
 

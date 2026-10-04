@@ -548,7 +548,7 @@ cohenskappaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "cohenskappa",
-                version = c(0,0,31),
+                version = c(1,0,83),
                 options = options,
                 results = cohenskappaResults$new(options=options),
                 data = data,

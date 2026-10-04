@@ -28,7 +28,11 @@ decisioncalculator(
   tp2 = 80,
   fp2 = 15,
   tn2 = 95,
-  fn2 = 30
+  fn2 = 30,
+  showWorkload = FALSE,
+  workloadPopulationSize = 1000,
+  prevalenceScenarios = "0.0001,0.001,0.01",
+  analysisUnit = "slide"
 )
 }
 \arguments{
@@ -48,7 +52,7 @@ standard.}
 prevalence-dependent predictive measures.}
 
 \item{pprob}{Prior probability (disease prevalence in the community).
-Requires a value between 0.001 and 0.999, default 0.300.}
+Requires a value strictly between 0 and 1, default 0.300.}
 
 \item{fnote}{Boolean selection whether to show detailed explanatory
 footnotes.}
@@ -90,6 +94,14 @@ scenarios.}
 \item{tn2}{True-negative frequency for illustrative scenario 2.}
 
 \item{fn2}{False-negative frequency for illustrative scenario 2.}
+
+\item{showWorkload}{.}
+
+\item{workloadPopulationSize}{.}
+
+\item{prevalenceScenarios}{.}
+
+\item{analysisUnit}{.}
 }
 \value{
 A results object containing:
@@ -109,6 +121,7 @@ A results object containing:
 \code{results$faganSummary} \tab \tab \tab \tab \tab Plain-language reading of the Fagan nomogram: the pre-test probability, the likelihood ratios, and where a positive or a negative result moves the probability of disease. \cr
 \code{results$plot1} \tab \tab \tab \tab \tab an image \cr
 \code{results$multipleCutoffTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$screeningWorkload} \tab \tab \tab \tab \tab a table \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

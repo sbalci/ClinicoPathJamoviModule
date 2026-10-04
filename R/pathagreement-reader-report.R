@@ -1,5 +1,6 @@
 .paReaderLayout <- function(o, prepared = NULL) {
-  vars <- if (o$readerWorkflow == "numeric_cutoff") o$readerScores else o$vars
+  vars <- if (isTRUE(prepared$ready)) prepared$vars else
+    if (o$readerWorkflow == "numeric_cutoff") o$readerScores else o$vars
   np <- if (length(vars) >= 2L) {
     if (o$readerPairs == "selected") 1L else choose(length(vars), 2)
   } else 0L
@@ -12,18 +13,37 @@
       sum(prepared$calls[, pair[1]] != prepared$calls[, pair[2]], na.rm = TRUE)
     }, numeric(1))))
   }
-  list(readerSettings = seq_len(19L), readerDataSummary = seq_len(length(vars) + 1L),
+  if (!is.null(prepared$long)) np <- 0L
+  advanced <- isTRUE(prepared$ready) && (o$readerNondiagnostic || o$readerFormat == "long")
+  mapping_n <- if (advanced) sum(vapply(prepared$original_raw,
+    function(x) length(unique(as.character(x))), integer(1))) else 0L
+  transitions <- if (isTRUE(prepared$ready) && o$readerTransitions)
+    tryCatch(.paReaderTransitions(prepared), error = function(e) list()) else list()
+  modality_k <- if (o$modalityPopulation == "all_observed") 4L else 3L
+  modality_ready <- isTRUE(prepared$ready) && !is.null(prepared$long) &&
+    o$readerModalityComparison && prepared$reference_ready
+  list(readerSettings = seq_len(24L), readerDataSummary = seq_len(length(vars) + 1L),
        readerAccuracyTable = seq_len(length(vars) * pops * 3L),
        cutoffAgreementTable = seq_len(np * (1L + band) * 5L),
        readerOriginalAgreement = seq_len(np), kappaBalancedTable = 1L,
-       cutoffDisagreementCases = seq_len(case_count))
+       cutoffDisagreementCases = seq_len(case_count),
+       readerAvailability = seq_len(if (advanced) length(vars) * 16L else 0L),
+       readerMapping = seq_len(mapping_n),
+       readerReferenceExclusions = seq_len(if (advanced)
+         length(unique(prepared$reference_raw[prepared$reference_state != "eligible"])) else 0L),
+       readerObservedAgreement = seq_len(if (advanced && o$readerAllObservedAgreement &&
+         prepared$reference_ready) length(vars) * 4L else 0L),
+       readerModalitySummary = seq_len(if (modality_ready) modality_k * 2L else 0L),
+       readerModalityContrast = seq_len(if (modality_ready) modality_k else 0L),
+       readerTransitionsTable = seq_len(NROW(transitions$readerTransitionsTable)),
+       readerTransitionMatrix = seq_len(NROW(transitions$readerTransitionMatrix)))
 }
 
 .paReaderReport <- function(d, checkpoint = NULL) {
   o <- d$options
   # Rows are accumulated in lists; this avoids quadratic rbind work for many pairs.
-  output <- stats::setNames(lapply(names(.paReaderLayout(o)), function(x) list()),
-                           names(.paReaderLayout(o)))
+  output <- stats::setNames(lapply(names(.paReaderLayout(o, d)), function(x) list()),
+                           names(.paReaderLayout(o, d)))
   add <- function(name, values) {
     output[[name]][[length(output[[name]]) + 1L]] <<- values
   }
@@ -45,10 +65,16 @@
     `Readers and weighting` = "Fixed selected readers; specimen-weighted estimates",
     `Pair selection` = if (o$readerPairs == "all") "All pairs" else paste(o$readerPair1, "vs", o$readerPair2),
     `Display limit` = as.character(o$readerCaseLimit),
-    `Case identifier` = if (length(o$caseID)) o$caseID else "Original row number")
+    `Case identifier` = if (length(o$caseID)) o$caseID else "Original row number",
+    `Reference interpretation` = switch(o$referenceType, legacy = "Not specified; interpretation must be declared",
+      disease = "Disease reference standard", consensus = "Expert consensus comparator",
+      method = "Comparison method"),
+    `Reference description` = o$referenceDescription, `Target definition` = o$targetDefinition,
+    `Nondiagnostic label` = if (o$readerNondiagnostic) o$readerNondiagnosticLevel else "Not declared",
+    `Input format` = o$readerFormat)
   for (key in names(settings)) add("readerSettings", list(setting = key, value = settings[[key]]))
   for (j in seq_along(d$vars)) {
-    missing <- is.na(d$raw[[j]])
+    missing <- is.na(d$original_raw[[j]])
     add("readerDataSummary", list(reader = d$vars[j], total = n, missing = sum(missing),
       indeterminate = sum(!missing & is.na(d$calls[, j])), usable = sum(!is.na(d$calls[, j]))))
   }
@@ -101,7 +127,11 @@
       for (k in seq_len(nrow(ci))) add("readerAccuracyTable", c(list(
         reader = d$vars[j], population = population, n = length(idx), units = cluster_n(idx),
         excluded = n - length(idx), tp = vals[["tp"]], fn = vals[["fn"]],
-        tn = vals[["tn"]], fp = vals[["fp"]], metric = ci$metric[k]), ci_fields(ci, k)))
+        tn = vals[["tn"]], fp = vals[["fp"]], metric = if (o$referenceType %in% c("consensus", "method"))
+          c("PPA", "NPA", "Mean PPA and NPA")[k] else ci$metric[k],
+        numerator = c(vals[["tp"]], vals[["tn"]], NA_real_)[k],
+        denominator = c(vals[["tp"]] + vals[["fn"]], vals[["tn"]] + vals[["fp"]], NA_real_)[k]),
+        ci_fields(ci, k)))
     }
   }
   for (pair in d$pairs) {
@@ -162,8 +192,17 @@
         ba = acc[["balanced_accuracy"]], kappa = kap), ci_fields(ci, 1)))
     }
   }
-  lapply(output, function(rows) {
+  output <- lapply(output, function(rows) {
     if (!length(rows)) return(data.frame())
     do.call(rbind, lapply(rows, as.data.frame, stringsAsFactors = FALSE))
   })
+  if (o$readerNondiagnostic || o$readerFormat == "long") {
+    status_report <- .paReaderStatusReport(d, checkpoint)
+    output[names(status_report)] <- status_report
+  }
+  modality <- .paReaderModalityReport(d, checkpoint)
+  output[names(modality)] <- modality
+  transitions <- .paReaderTransitions(d)
+  output[names(transitions)] <- transitions
+  output
 }

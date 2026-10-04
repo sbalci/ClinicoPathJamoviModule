@@ -704,13 +704,13 @@ options:
       type: String
       default: ''
       description:
-        R: Exact reference label denoting disease present.
+        R: Exact positive reference classification.
     - name: referenceNegative
       title: Reference negative label
       type: String
       default: ''
       description:
-        R: Exact reference label denoting disease absent; other labels are excluded.
+        R: Exact negative reference classification; other labels are excluded.
     - name: readerPopulation
       title: Accuracy case population
       type: List
@@ -847,5 +847,108 @@ options:
       default: false
       description:
         R: Display the selected options as an R call using a data frame named your_data.
+
+    - name: referenceType
+      title: Reference interpretation
+      type: List
+      default: legacy
+      options:
+      - name: legacy
+        title: Not specified
+      - name: disease
+        title: Disease reference standard
+      - name: consensus
+        title: Expert consensus comparator
+      - name: method
+        title: Comparison method
+    - name: referenceDescription
+      title: Reference description
+      type: String
+      default: ''
+    - name: targetDefinition
+      title: Target condition or classification
+      type: String
+      default: ''
+    - name: readerNondiagnostic
+      title: Account for nondiagnostic readings
+      type: Bool
+      default: false
+    - name: readerNondiagnosticLevel
+      title: Exact nondiagnostic label
+      type: String
+      default: ''
+    - name: readerAllObservedAgreement
+      title: Agreement including nondiagnostic calls
+      type: Bool
+      default: false
+      description:
+        R: Separate estimates on observed readings with an eligible reference. Missing readings are excluded;
+          ordinary binary estimates remain conditional on determinate calls.
+    - name: readerFormat
+      title: Reader input format
+      type: List
+      default: wide
+      options:
+      - name: wide
+        title: 'Wide: one column per reader'
+      - name: long
+        title: 'Long: case, reader and modality'
+    - name: readerID
+      title: Reader ID
+      type: Variable
+      default: null
+      suggested:
+      - nominal
+      - id
+    - name: modality
+      title: Modality
+      type: Variable
+      default: null
+      suggested:
+      - nominal
+      - id
+    - name: rating
+      title: Long-format rating
+      type: Variable
+      default: null
+      suggested:
+      - nominal
+      - ordinal
+    - name: baselineModality
+      title: Baseline modality label
+      type: String
+      default: ''
+    - name: comparisonModality
+      title: Comparison modality label
+      type: String
+      default: ''
+    - name: readerModalityComparison
+      title: Paired fixed-reader modality comparison
+      type: Bool
+      default: false
+      description:
+        R: A prespecified comparison minus baseline contrast on complete matched cases with equal fixed-reader
+          weights. Intervals resample whole cases or patients; no random-reader inference or p-values.
+    - name: modalityPopulation
+      title: Matched comparison population
+      type: List
+      default: determinate
+      options:
+      - name: determinate
+        title: Determinate in every reading
+      - name: all_observed
+        title: Observed in every reading; nondiagnostic retained
+    - name: readerTransitions
+      title: Ordered category transitions
+      type: Bool
+      default: false
+    - name: transitionBaseline
+      title: Baseline reader column name (wide input)
+      type: String
+      default: ''
+    - name: transitionComparison
+      title: Comparison reader column name (wide input)
+      type: String
+      default: ''
 
 ...

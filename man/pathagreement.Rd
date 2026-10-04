@@ -84,7 +84,24 @@ pathagreement(
   readerConfidence = 0.95,
   showKappaBalanced = FALSE,
   compositeReader = "",
-  readerCode = FALSE
+  readerCode = FALSE,
+  referenceType = "legacy",
+  referenceDescription = "",
+  targetDefinition = "",
+  readerNondiagnostic = FALSE,
+  readerNondiagnosticLevel = "",
+  readerAllObservedAgreement = FALSE,
+  readerFormat = "wide",
+  readerID = NULL,
+  modality = NULL,
+  rating = NULL,
+  baselineModality = "",
+  comparisonModality = "",
+  readerModalityComparison = FALSE,
+  modalityPopulation = "determinate",
+  readerTransitions = FALSE,
+  transitionBaseline = "",
+  transitionComparison = ""
 )
 }
 \arguments{
@@ -308,10 +325,10 @@ Other labels are excluded as indeterminate.}
 \item{referenceAccuracy}{Compute each reader against the optional
 reference; agreement remains available without a reference.}
 
-\item{referencePositive}{Exact reference label denoting disease present.}
+\item{referencePositive}{Exact positive reference classification.}
 
-\item{referenceNegative}{Exact reference label denoting disease absent;
-other labels are excluded.}
+\item{referenceNegative}{Exact negative reference classification; other
+labels are excluded.}
 
 \item{readerPopulation}{Available uses each reader and reference. Shared
 requires all selected readers and reference.}
@@ -365,6 +382,45 @@ accuracy for the exploratory score.}
 
 \item{readerCode}{Display the selected options as an R call using a data
 frame named your_data.}
+
+\item{referenceType}{.}
+
+\item{referenceDescription}{.}
+
+\item{targetDefinition}{.}
+
+\item{readerNondiagnostic}{.}
+
+\item{readerNondiagnosticLevel}{.}
+
+\item{readerAllObservedAgreement}{Separate estimates on observed readings
+with an eligible reference. Missing readings are excluded; ordinary binary
+estimates remain conditional on determinate calls.}
+
+\item{readerFormat}{.}
+
+\item{readerID}{.}
+
+\item{modality}{.}
+
+\item{rating}{.}
+
+\item{baselineModality}{.}
+
+\item{comparisonModality}{.}
+
+\item{readerModalityComparison}{A prespecified comparison minus baseline
+contrast on complete matched cases with equal fixed-reader weights.
+Intervals resample whole cases or patients; no random-reader inference or
+p-values.}
+
+\item{modalityPopulation}{.}
+
+\item{readerTransitions}{.}
+
+\item{transitionBaseline}{.}
+
+\item{transitionComparison}{.}
 }
 \value{
 A results object containing:
@@ -427,6 +483,15 @@ A results object containing:
 \code{results$cutoffDisagreementCases} \tab \tab \tab \tab \tab a table \cr
 \code{results$kappaBalancedTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$readerRCode} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$readerAvailability} \tab \tab \tab \tab \tab a table \cr
+\code{results$readerMapping} \tab \tab \tab \tab \tab a table \cr
+\code{results$readerObservedAgreement} \tab \tab \tab \tab \tab a table \cr
+\code{results$readerModalitySummary} \tab \tab \tab \tab \tab a table \cr
+\code{results$readerModalityContrast} \tab \tab \tab \tab \tab a table \cr
+\code{results$readerTransitionsTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$readerTransitionMatrix} \tab \tab \tab \tab \tab a table \cr
+\code{results$pathReferenceDefinition} \tab \tab \tab \tab \tab a table \cr
+\code{results$readerReferenceExclusions} \tab \tab \tab \tab \tab a table \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

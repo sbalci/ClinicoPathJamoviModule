@@ -74,7 +74,25 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             decisionImpactTable = FALSE,
             internalValidation = FALSE,
             validationMethod = "bootstrap",
-            decisionImpactCurves = FALSE, ...) {
+            decisionImpactCurves = FALSE,
+            impactCutoffs = "0.5",
+            utilityThreshold = 0.1,
+            workloadPopulationSize = 1000,
+            analysisUnit = "slide",
+            prevalenceScenarios = "",
+            validationPanel = FALSE,
+            validationNegative = "",
+            referenceDescription = "",
+            modelVersion = "",
+            cohortRole = "frozen",
+            samplingDesign = "consecutive",
+            thresholdSource = "prespecified",
+            predictionScale = "score",
+            patientID = NULL,
+            siteID = NULL,
+            partitionID = NULL,
+            validationBootstrap = FALSE,
+            validationDraws = 999, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -277,8 +295,8 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 "prevalence",
                 prevalence,
                 default=0.1,
-                min=0.001,
-                max=0.999)
+                min=1e-9,
+                max=0.999999999)
             private$..useObservedPrevalence <- jmvcore::OptionBool$new(
                 "useObservedPrevalence",
                 useObservedPrevalence,
@@ -441,6 +459,114 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 "decisionImpactCurves",
                 decisionImpactCurves,
                 default=FALSE)
+            private$..impactCutoffs <- jmvcore::OptionString$new(
+                "impactCutoffs",
+                impactCutoffs,
+                default="0.5")
+            private$..utilityThreshold <- jmvcore::OptionNumber$new(
+                "utilityThreshold",
+                utilityThreshold,
+                default=0.1,
+                min=1e-9,
+                max=0.999999999)
+            private$..workloadPopulationSize <- jmvcore::OptionInteger$new(
+                "workloadPopulationSize",
+                workloadPopulationSize,
+                default=1000,
+                min=1,
+                max=1000000000)
+            private$..analysisUnit <- jmvcore::OptionString$new(
+                "analysisUnit",
+                analysisUnit,
+                default="slide")
+            private$..prevalenceScenarios <- jmvcore::OptionString$new(
+                "prevalenceScenarios",
+                prevalenceScenarios,
+                default="")
+            private$..validationPanel <- jmvcore::OptionBool$new(
+                "validationPanel",
+                validationPanel,
+                default=FALSE)
+            private$..validationNegative <- jmvcore::OptionString$new(
+                "validationNegative",
+                validationNegative,
+                default="")
+            private$..referenceDescription <- jmvcore::OptionString$new(
+                "referenceDescription",
+                referenceDescription,
+                default="")
+            private$..modelVersion <- jmvcore::OptionString$new(
+                "modelVersion",
+                modelVersion,
+                default="")
+            private$..cohortRole <- jmvcore::OptionList$new(
+                "cohortRole",
+                cohortRole,
+                default="frozen",
+                options=list(
+                    "development",
+                    "frozen"))
+            private$..samplingDesign <- jmvcore::OptionList$new(
+                "samplingDesign",
+                samplingDesign,
+                default="consecutive",
+                options=list(
+                    "consecutive",
+                    "enriched",
+                    "positive_only",
+                    "other"))
+            private$..thresholdSource <- jmvcore::OptionList$new(
+                "thresholdSource",
+                thresholdSource,
+                default="prespecified",
+                options=list(
+                    "prespecified",
+                    "development",
+                    "exploratory"))
+            private$..predictionScale <- jmvcore::OptionList$new(
+                "predictionScale",
+                predictionScale,
+                default="score",
+                options=list(
+                    "score",
+                    "probability"))
+            private$..patientID <- jmvcore::OptionVariable$new(
+                "patientID",
+                patientID,
+                default=NULL,
+                suggested=list(
+                    "nominal"),
+                permitted=list(
+                    "factor",
+                    "numeric"))
+            private$..siteID <- jmvcore::OptionVariable$new(
+                "siteID",
+                siteID,
+                default=NULL,
+                suggested=list(
+                    "nominal"),
+                permitted=list(
+                    "factor",
+                    "numeric"))
+            private$..partitionID <- jmvcore::OptionVariable$new(
+                "partitionID",
+                partitionID,
+                default=NULL,
+                suggested=list(
+                    "nominal"),
+                permitted=list(
+                    "factor",
+                    "numeric"))
+            private$..validationBootstrap <- jmvcore::OptionBool$new(
+                "validationBootstrap",
+                validationBootstrap,
+                default=FALSE)
+            private$..validationDraws <- jmvcore::OptionInteger$new(
+                "validationDraws",
+                validationDraws,
+                default=999,
+                min=100,
+                max=10000)
 
             self$.addOption(private$..outcome)
             self$.addOption(private$..positiveClass)
@@ -511,6 +637,24 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             self$.addOption(private$..internalValidation)
             self$.addOption(private$..validationMethod)
             self$.addOption(private$..decisionImpactCurves)
+            self$.addOption(private$..impactCutoffs)
+            self$.addOption(private$..utilityThreshold)
+            self$.addOption(private$..workloadPopulationSize)
+            self$.addOption(private$..analysisUnit)
+            self$.addOption(private$..prevalenceScenarios)
+            self$.addOption(private$..validationPanel)
+            self$.addOption(private$..validationNegative)
+            self$.addOption(private$..referenceDescription)
+            self$.addOption(private$..modelVersion)
+            self$.addOption(private$..cohortRole)
+            self$.addOption(private$..samplingDesign)
+            self$.addOption(private$..thresholdSource)
+            self$.addOption(private$..predictionScale)
+            self$.addOption(private$..patientID)
+            self$.addOption(private$..siteID)
+            self$.addOption(private$..partitionID)
+            self$.addOption(private$..validationBootstrap)
+            self$.addOption(private$..validationDraws)
         }),
     active = list(
         outcome = function() private$..outcome$value,
@@ -581,7 +725,25 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         decisionImpactTable = function() private$..decisionImpactTable$value,
         internalValidation = function() private$..internalValidation$value,
         validationMethod = function() private$..validationMethod$value,
-        decisionImpactCurves = function() private$..decisionImpactCurves$value),
+        decisionImpactCurves = function() private$..decisionImpactCurves$value,
+        impactCutoffs = function() private$..impactCutoffs$value,
+        utilityThreshold = function() private$..utilityThreshold$value,
+        workloadPopulationSize = function() private$..workloadPopulationSize$value,
+        analysisUnit = function() private$..analysisUnit$value,
+        prevalenceScenarios = function() private$..prevalenceScenarios$value,
+        validationPanel = function() private$..validationPanel$value,
+        validationNegative = function() private$..validationNegative$value,
+        referenceDescription = function() private$..referenceDescription$value,
+        modelVersion = function() private$..modelVersion$value,
+        cohortRole = function() private$..cohortRole$value,
+        samplingDesign = function() private$..samplingDesign$value,
+        thresholdSource = function() private$..thresholdSource$value,
+        predictionScale = function() private$..predictionScale$value,
+        patientID = function() private$..patientID$value,
+        siteID = function() private$..siteID$value,
+        partitionID = function() private$..partitionID$value,
+        validationBootstrap = function() private$..validationBootstrap$value,
+        validationDraws = function() private$..validationDraws$value),
     private = list(
         ..outcome = NA,
         ..positiveClass = NA,
@@ -651,7 +813,25 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         ..decisionImpactTable = NA,
         ..internalValidation = NA,
         ..validationMethod = NA,
-        ..decisionImpactCurves = NA)
+        ..decisionImpactCurves = NA,
+        ..impactCutoffs = NA,
+        ..utilityThreshold = NA,
+        ..workloadPopulationSize = NA,
+        ..analysisUnit = NA,
+        ..prevalenceScenarios = NA,
+        ..validationPanel = NA,
+        ..validationNegative = NA,
+        ..referenceDescription = NA,
+        ..modelVersion = NA,
+        ..cohortRole = NA,
+        ..samplingDesign = NA,
+        ..thresholdSource = NA,
+        ..predictionScale = NA,
+        ..patientID = NA,
+        ..siteID = NA,
+        ..partitionID = NA,
+        ..validationBootstrap = NA,
+        ..validationDraws = NA)
 )
 
 enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -717,7 +897,11 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     clinicalImpactTable = function() private$.items[["clinicalImpactTable"]],
                     decisionImpactSummary = function() private$.items[["decisionImpactSummary"]],
                     clinicalUtilityPlot = function() private$.items[["clinicalUtilityPlot"]],
-                    decisionImpactPlot = function() private$.items[["decisionImpactPlot"]]),
+                    decisionImpactPlot = function() private$.items[["decisionImpactPlot"]],
+                    screeningWorkload = function() private$.items[["screeningWorkload"]],
+                    validationContext = function() private$.items[["validationContext"]],
+                    denominatorLedger = function() private$.items[["denominatorLedger"]],
+                    frozenMetrics = function() private$.items[["frozenMetrics"]]),
                 private = list(),
                 public=list(
                     initialize=function(options) {
@@ -750,7 +934,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             options=options,
                             name="imbalanceMetrics",
                             title="Class Imbalance Metrics",
-                            visible="(detectImbalance)",
+                            visible="(detectImbalance && !validationPanel)",
                             clearWith=list(
                                 "outcome",
                                 "predictors",
@@ -793,7 +977,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             options=options,
                             name="precisionRecallTable",
                             title="Precision-Recall Metrics",
-                            visible="(detectImbalance)",
+                            visible="(detectImbalance && !validationPanel)",
                             clearWith=list(
                                 "outcome",
                                 "predictors",
@@ -874,7 +1058,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             options=options,
                             name="aucSummary",
                             title="Area Under the Curve (AUC) Summary",
-                            visible="(aucTable)",
+                            visible="(aucTable && !validationPanel)",
                             clearWith=list(
                                 "outcome",
                                 "predictors",
@@ -924,7 +1108,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             options=options,
                             name="rocComparisons",
                             title="ROC Curve Comparisons",
-                            visible="(pairwiseComparisons && analysisType:comparative)",
+                            visible="(pairwiseComparisons && analysisType:comparative && !validationPanel)",
                             clearWith=list(
                                 "outcome",
                                 "predictors",
@@ -969,7 +1153,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             options=options,
                             name="detailedComparison",
                             title="Detailed Model Comparison",
-                            visible="(showMetricsDiff && analysisType:comparative)",
+                            visible="(showMetricsDiff && analysisType:comparative && !validationPanel)",
                             clearWith=list(
                                 "outcome",
                                 "predictors",
@@ -1019,7 +1203,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             options=options,
                             name="statisticalSummary",
                             title="Statistical Comparison Summary",
-                            visible="(statisticalComparison && analysisType:comparative)",
+                            visible="(statisticalComparison && analysisType:comparative && !validationPanel)",
                             clearWith=list(
                                 "outcome",
                                 "predictors",
@@ -1054,7 +1238,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             options=options,
                             name="optimalCutoffSummary",
                             title="Optimal Cutoff Analysis",
-                            visible="(optimalCutoffs)",
+                            visible="(optimalCutoffs && !validationPanel)",
                             clearWith=list(
                                 "outcome",
                                 "predictors",
@@ -1102,7 +1286,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             options=options,
                             name="cutoffAnalysis",
                             title="Detailed Cutoff Analysis",
-                            visible="(cutoffTable)",
+                            visible="(cutoffTable && !validationPanel)",
                             clearWith=list(
                                 "outcome",
                                 "predictors",
@@ -1166,7 +1350,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             options=options,
                             name="diagnosticPerformance",
                             title="Diagnostic Performance Metrics",
-                            visible="(diagnosticMetrics)",
+                            visible="(diagnosticMetrics && !validationPanel)",
                             clearWith=list(
                                 "outcome",
                                 "predictors",
@@ -1218,7 +1402,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             options=options,
                             name="clinicalApplicationMetrics",
                             title="Clinical Application Metrics",
-                            visible="(clinicalMetrics)",
+                            visible="(clinicalMetrics && !validationPanel)",
                             clearWith=list(
                                 "outcome",
                                 "predictors",
@@ -1271,7 +1455,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             options=options,
                             name="partialAucAnalysis",
                             title="Partial AUC Analysis",
-                            visible="(partialAuc)",
+                            visible="(partialAuc && !validationPanel)",
                             clearWith=list(
                                 "outcome",
                                 "predictors",
@@ -1315,13 +1499,13 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                     `title`="pAUC Lower CI", 
                                     `type`="number", 
                                     `format`="zto", 
-                                    `visible`="(bootstrapPartialAUC)"),
+                                    `visible`="(bootstrapPartialAUC && !validationPanel)"),
                                 list(
                                     `name`="partial_auc_upper", 
                                     `title`="pAUC Upper CI", 
                                     `type`="number", 
                                     `format`="zto", 
-                                    `visible`="(bootstrapPartialAUC)"),
+                                    `visible`="(bootstrapPartialAUC && !validationPanel)"),
                                 list(
                                     `name`="normalized_pauc", 
                                     `title`="Normalized pAUC", 
@@ -1335,7 +1519,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             options=options,
                             name="crocAnalysisTable",
                             title="CROC (Concentrated ROC) Analysis",
-                            visible="(crocAnalysis)",
+                            visible="(crocAnalysis && !validationPanel)",
                             clearWith=list(
                                 "outcome",
                                 "predictors",
@@ -1374,7 +1558,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             options=options,
                             name="convexHullTable",
                             title="ROC Convex Hull Analysis",
-                            visible="(convexHull)",
+                            visible="(convexHull && !validationPanel)",
                             clearWith=list(
                                 "outcome",
                                 "predictors",
@@ -1412,7 +1596,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             options=options,
                             name="comprehensiveAnalysisSummary",
                             title="Comprehensive ROC Analysis Summary",
-                            visible="(comprehensive_output)",
+                            visible="(comprehensive_output && !validationPanel)",
                             clearWith=list(
                                 "outcome",
                                 "predictors",
@@ -1441,7 +1625,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             options=options,
                             name="clinicalInterpretationGuide",
                             title="Clinical Application Guidance",
-                            visible="(clinical_interpretation)",
+                            visible="(clinical_interpretation && !validationPanel)",
                             clearWith=list(
                                 "outcome",
                                 "predictors",
@@ -1451,7 +1635,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             options=options,
                             name="methodsExplanation",
                             title="Statistical Methods and References",
-                            visible="(comprehensive_output)",
+                            visible="(comprehensive_output && !validationPanel)",
                             clearWith=list(
                                 "outcome",
                                 "predictors",
@@ -1460,7 +1644,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             options=options,
                             name="rocCurvePlot",
                             title="ROC Curve Analysis",
-                            visible="(rocCurve)",
+                            visible="(rocCurve && !validationPanel)",
                             renderFun=".plotROCCurve",
                             clearWith=list(
                                 "outcome",
@@ -1485,7 +1669,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             options=options,
                             name="prcPlot",
                             title="Precision-Recall Curve",
-                            visible="(detectImbalance)",
+                            visible="(detectImbalance && !validationPanel)",
                             renderFun=".plotPRC",
                             clearWith=list(
                                 "direction",
@@ -1502,7 +1686,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             options=options,
                             name="comparativeROCPlot",
                             title="Comparative ROC Analysis",
-                            visible="(rocCurve && analysisType:comparative)",
+                            visible="(rocCurve && analysisType:comparative && !validationPanel)",
                             renderFun=".plotComparativeROC",
                             clearWith=list(
                                 "outcome",
@@ -1525,7 +1709,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             options=options,
                             name="cutoffAnalysisPlot",
                             title="Cutoff Analysis Plot",
-                            visible="(cutoffTable)",
+                            visible="(cutoffTable && !validationPanel)",
                             renderFun=".plotCutoffAnalysis",
                             clearWith=list(
                                 "direction",
@@ -1541,7 +1725,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             options=options,
                             name="youdenIndexPlot",
                             title="Youden Index Optimization Plot",
-                            visible="(youdenOptimization)",
+                            visible="(youdenOptimization && !validationPanel)",
                             renderFun=".plotYoudenIndex",
                             clearWith=list(
                                 "direction",
@@ -1561,7 +1745,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             options=options,
                             name="clinicalDecisionPlot",
                             title="Clinical Decision Analysis Plot",
-                            visible="(clinicalMetrics)",
+                            visible="(clinicalMetrics && !validationPanel)",
                             renderFun=".plotClinicalDecision",
                             clearWith=list(
                                 "direction",
@@ -1583,7 +1767,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             options=options,
                             name="crocCurvePlot",
                             title="CROC (Concentrated ROC) Curve",
-                            visible="(crocAnalysis)",
+                            visible="(crocAnalysis && !validationPanel)",
                             renderFun=".plotCROC",
                             clearWith=list(
                                 "direction",
@@ -1600,7 +1784,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             options=options,
                             name="convexHullPlot",
                             title="ROC Convex Hull Plot",
-                            visible="(convexHull)",
+                            visible="(convexHull && !validationPanel)",
                             renderFun=".plotConvexHull",
                             clearWith=list(
                                 "direction",
@@ -1616,7 +1800,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             options=options,
                             name="calibrationSummary",
                             title="Calibration Performance Summary",
-                            visible="(calibrationAnalysis)",
+                            visible="(calibrationAnalysis && !validationPanel)",
                             clearWith=list(
                                 "outcome",
                                 "predictors",
@@ -1647,47 +1831,47 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                     `name`="calibration_slope", 
                                     `title`="Calibration Slope", 
                                     `type`="number", 
-                                    `visible`="(calibrationMetrics)"),
+                                    `visible`="(calibrationMetrics && !validationPanel)"),
                                 list(
                                     `name`="calibration_intercept", 
                                     `title`="Calibration Intercept", 
                                     `type`="number", 
-                                    `visible`="(calibrationMetrics)"),
+                                    `visible`="(calibrationMetrics && !validationPanel)"),
                                 list(
                                     `name`="calibration_in_large", 
                                     `title`="Calibration-in-the-Large", 
                                     `type`="number", 
-                                    `visible`="(calibrationMetrics)"),
+                                    `visible`="(calibrationMetrics && !validationPanel)"),
                                 list(
                                     `name`="ici", 
                                     `title`="ICI", 
                                     `type`="number", 
                                     `format`="zto", 
-                                    `visible`="(splineCalibration)"),
+                                    `visible`="(splineCalibration && !validationPanel)"),
                                 list(
                                     `name`="e50", 
                                     `title`="E50", 
                                     `type`="number", 
                                     `format`="zto", 
-                                    `visible`="(splineCalibration)"),
+                                    `visible`="(splineCalibration && !validationPanel)"),
                                 list(
                                     `name`="e90", 
                                     `title`="E90", 
                                     `type`="number", 
                                     `format`="zto", 
-                                    `visible`="(splineCalibration)"),
+                                    `visible`="(splineCalibration && !validationPanel)"),
                                 list(
                                     `name`="emax", 
                                     `title`="Emax", 
                                     `type`="number", 
                                     `format`="zto", 
-                                    `visible`="(splineCalibration)"),
+                                    `visible`="(splineCalibration && !validationPanel)"),
                                 list(
                                     `name`="eo_ratio", 
                                     `title`="E/O Ratio", 
                                     `type`="number", 
                                     `format`="dp:3", 
-                                    `visible`="(eoRatio)"),
+                                    `visible`="(eoRatio && !validationPanel)"),
                                 list(
                                     `name`="interpretation", 
                                     `title`="Interpretation", 
@@ -1696,7 +1880,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             options=options,
                             name="hosmerLemeshowTable",
                             title="Hosmer-Lemeshow Goodness-of-Fit Test",
-                            visible="(calibrationAnalysis && hosmerLemeshow)",
+                            visible="(calibrationAnalysis && hosmerLemeshow && !validationPanel)",
                             clearWith=list(
                                 "outcome",
                                 "predictors",
@@ -1733,7 +1917,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             options=options,
                             name="calibrationPlotImage",
                             title="Calibration Plot",
-                            visible="(calibrationAnalysis && calibrationPlot)",
+                            visible="(calibrationAnalysis && calibrationPlot && !validationPanel)",
                             renderFun=".plotCalibration",
                             clearWith=list(
                                 "direction",
@@ -1753,7 +1937,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             options=options,
                             name="multiClassAUC",
                             title="Multi-Class ROC Summary",
-                            visible="(multiClassROC)",
+                            visible="(multiClassROC && !validationPanel)",
                             clearWith=list(
                                 "direction",
                                 "outcome",
@@ -1802,7 +1986,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             options=options,
                             name="multiClassAverage",
                             title="Multi-Class Average AUC",
-                            visible="(multiClassROC)",
+                            visible="(multiClassROC && !validationPanel)",
                             clearWith=list(
                                 "direction",
                                 "outcome",
@@ -1834,7 +2018,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             options=options,
                             name="multiClassROCPlot",
                             title="Multi-Class ROC Curves",
-                            visible="(multiClassROC)",
+                            visible="(multiClassROC && !validationPanel)",
                             renderFun=".plotMultiClassROC",
                             clearWith=list(
                                 "direction",
@@ -1851,8 +2035,15 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             options=options,
                             name="clinicalImpactTable",
                             title="Clinical Impact Metrics",
-                            visible="(clinicalImpact)",
+                            visible="(clinicalImpact && !validationPanel)",
                             clearWith=list(
+                                "impactCutoffs",
+                                "utilityThreshold",
+                                "workloadPopulationSize",
+                                "analysisUnit",
+                                "prevalenceScenarios",
+                                "prevalence",
+                                "useObservedPrevalence",
                                 "outcome",
                                 "predictors",
                                 "positiveClass",
@@ -1871,14 +2062,14 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                     `format`="zto"),
                                 list(
                                     `name`="nnt", 
-                                    `title`="NNT", 
+                                    `title`="Inverse net benefit", 
                                     `type`="number", 
-                                    `visible`="(nntCalculation)"),
+                                    `visible`="(nntCalculation && !validationPanel)"),
                                 list(
                                     `name`="nnd", 
-                                    `title`="NND", 
+                                    `title`="Inverse Youden index", 
                                     `type`="number", 
-                                    `visible`="(nntCalculation)"),
+                                    `visible`="(nntCalculation && !validationPanel)"),
                                 list(
                                     `name`="tested_positive", 
                                     `title`="Tested Positive (%)", 
@@ -1902,8 +2093,15 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             options=options,
                             name="decisionImpactSummary",
                             title="Decision Impact at Key Thresholds",
-                            visible="(clinicalImpact && decisionImpactTable)",
+                            visible="(clinicalImpact && decisionImpactTable && !validationPanel)",
                             clearWith=list(
+                                "impactCutoffs",
+                                "utilityThreshold",
+                                "workloadPopulationSize",
+                                "analysisUnit",
+                                "prevalenceScenarios",
+                                "prevalence",
+                                "useObservedPrevalence",
                                 "outcome",
                                 "predictors",
                                 "positiveClass",
@@ -1923,15 +2121,15 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                 list(
                                     `name`="n_high_risk", 
                                     `title`="N High Risk", 
-                                    `type`="integer"),
+                                    `type`="number"),
                                 list(
                                     `name`="n_high_risk_with_event", 
                                     `title`="N True Positives", 
-                                    `type`="integer"),
+                                    `type`="number"),
                                 list(
                                     `name`="n_high_risk_without_event", 
                                     `title`="N False Positives", 
-                                    `type`="integer"),
+                                    `type`="number"),
                                 list(
                                     `name`="ppv", 
                                     `title`="PPV", 
@@ -1946,9 +2144,16 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             options=options,
                             name="clinicalUtilityPlot",
                             title="Clinical Utility Curve",
-                            visible="(clinicalImpact && clinicalUtilityCurve)",
+                            visible="(clinicalImpact && clinicalUtilityCurve && !validationPanel)",
                             renderFun=".plotClinicalUtility",
                             clearWith=list(
+                                "impactCutoffs",
+                                "utilityThreshold",
+                                "workloadPopulationSize",
+                                "analysisUnit",
+                                "prevalenceScenarios",
+                                "prevalence",
+                                "useObservedPrevalence",
                                 "direction",
                                 "plotTheme",
                                 "outcome",
@@ -1962,9 +2167,16 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             options=options,
                             name="decisionImpactPlot",
                             title="Clinical Impact Curve",
-                            visible="(decisionImpactCurves)",
+                            visible="(decisionImpactCurves && !validationPanel)",
                             renderFun=".plotDecisionImpact",
                             clearWith=list(
+                                "impactCutoffs",
+                                "utilityThreshold",
+                                "workloadPopulationSize",
+                                "analysisUnit",
+                                "prevalenceScenarios",
+                                "prevalence",
+                                "useObservedPrevalence",
                                 "plotTheme",
                                 "outcome",
                                 "predictors",
@@ -1973,7 +2185,301 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                 "plotWidth",
                                 "plotHeight"),
                             width=600,
-                            height=600))}))$new(options=options))}))
+                            height=600))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="screeningWorkload",
+                            title="Observed and projected workload",
+                            visible="(clinicalImpact)",
+                            clearWith=list(
+                                "outcome",
+                                "predictors",
+                                "positiveClass",
+                                "direction",
+                                "customCutoffs",
+                                "prevalence",
+                                "useObservedPrevalence",
+                                "impactCutoffs",
+                                "utilityThreshold",
+                                "workloadPopulationSize",
+                                "analysisUnit",
+                                "prevalenceScenarios",
+                                "validationPanel",
+                                "validationNegative",
+                                "referenceDescription",
+                                "modelVersion",
+                                "cohortRole",
+                                "samplingDesign",
+                                "thresholdSource",
+                                "predictionScale",
+                                "patientID",
+                                "siteID",
+                                "partitionID",
+                                "validationBootstrap",
+                                "validationDraws",
+                                "seed",
+                                "confidenceLevel"),
+                            columns=list(
+                                list(
+                                    `name`="predictor", 
+                                    `title`="Predictor", 
+                                    `type`="text"),
+                                list(
+                                    `name`="source", 
+                                    `title`="Population", 
+                                    `type`="text"),
+                                list(
+                                    `name`="unit", 
+                                    `title`="Unit", 
+                                    `type`="text"),
+                                list(
+                                    `name`="cutoff", 
+                                    `title`="Score cutoff", 
+                                    `type`="number", 
+                                    `format`="dp:6"),
+                                list(
+                                    `name`="prevalence", 
+                                    `title`="Prevalence", 
+                                    `type`="number", 
+                                    `format`="dp:6"),
+                                list(
+                                    `name`="population", 
+                                    `title`="Population size", 
+                                    `type`="number", 
+                                    `format`="dp:6"),
+                                list(
+                                    `name`="tp", 
+                                    `title`="True positives", 
+                                    `type`="number", 
+                                    `format`="dp:6"),
+                                list(
+                                    `name`="fp", 
+                                    `title`="False positives", 
+                                    `type`="number", 
+                                    `format`="dp:6"),
+                                list(
+                                    `name`="fn", 
+                                    `title`="False negatives", 
+                                    `type`="number", 
+                                    `format`="dp:6"),
+                                list(
+                                    `name`="tn", 
+                                    `title`="True negatives", 
+                                    `type`="number", 
+                                    `format`="dp:6"),
+                                list(
+                                    `name`="flags", 
+                                    `title`="Flags", 
+                                    `type`="number", 
+                                    `format`="dp:6"),
+                                list(
+                                    `name`="ppv", 
+                                    `title`="PPV", 
+                                    `type`="number", 
+                                    `format`="dp:6"),
+                                list(
+                                    `name`="npv", 
+                                    `title`="NPV", 
+                                    `type`="number", 
+                                    `format`="dp:6"),
+                                list(
+                                    `name`="flags_per_1000", 
+                                    `title`="Flags per 1000", 
+                                    `type`="number", 
+                                    `format`="dp:6"),
+                                list(
+                                    `name`="flags_per_detected", 
+                                    `title`="Flags per detected positive", 
+                                    `type`="number", 
+                                    `format`="dp:6"),
+                                list(
+                                    `name`="tests_per_detected", 
+                                    `title`="Tests per detected positive", 
+                                    `type`="number", 
+                                    `format`="dp:6"),
+                                list(
+                                    `name`="net_benefit", 
+                                    `title`="Net benefit", 
+                                    `type`="number", 
+                                    `format`="dp:6"))))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="validationContext",
+                            title="Validation context",
+                            visible="(validationPanel)",
+                            clearWith=list(
+                                "outcome",
+                                "predictors",
+                                "positiveClass",
+                                "direction",
+                                "customCutoffs",
+                                "prevalence",
+                                "useObservedPrevalence",
+                                "impactCutoffs",
+                                "utilityThreshold",
+                                "workloadPopulationSize",
+                                "analysisUnit",
+                                "prevalenceScenarios",
+                                "validationPanel",
+                                "validationNegative",
+                                "referenceDescription",
+                                "modelVersion",
+                                "cohortRole",
+                                "samplingDesign",
+                                "thresholdSource",
+                                "predictionScale",
+                                "patientID",
+                                "siteID",
+                                "partitionID",
+                                "validationBootstrap",
+                                "validationDraws",
+                                "seed",
+                                "confidenceLevel"),
+                            columns=list(
+                                list(
+                                    `name`="setting", 
+                                    `title`="Setting", 
+                                    `type`="text"),
+                                list(
+                                    `name`="value", 
+                                    `title`="Value", 
+                                    `type`="text"))))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="denominatorLedger",
+                            title="Validation denominator ledger",
+                            visible="(validationPanel)",
+                            clearWith=list(
+                                "outcome",
+                                "predictors",
+                                "positiveClass",
+                                "direction",
+                                "customCutoffs",
+                                "prevalence",
+                                "useObservedPrevalence",
+                                "impactCutoffs",
+                                "utilityThreshold",
+                                "workloadPopulationSize",
+                                "analysisUnit",
+                                "prevalenceScenarios",
+                                "validationPanel",
+                                "validationNegative",
+                                "referenceDescription",
+                                "modelVersion",
+                                "cohortRole",
+                                "samplingDesign",
+                                "thresholdSource",
+                                "predictionScale",
+                                "patientID",
+                                "siteID",
+                                "partitionID",
+                                "validationBootstrap",
+                                "validationDraws",
+                                "seed",
+                                "confidenceLevel"),
+                            columns=list(
+                                list(
+                                    `name`="status", 
+                                    `title`="Status", 
+                                    `type`="text"),
+                                list(
+                                    `name`="n", 
+                                    `title`="Rows", 
+                                    `type`="number"))))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="frozenMetrics",
+                            title="Frozen-model performance and paired differences",
+                            visible="(validationPanel)",
+                            clearWith=list(
+                                "outcome",
+                                "predictors",
+                                "positiveClass",
+                                "direction",
+                                "customCutoffs",
+                                "prevalence",
+                                "useObservedPrevalence",
+                                "impactCutoffs",
+                                "utilityThreshold",
+                                "workloadPopulationSize",
+                                "analysisUnit",
+                                "prevalenceScenarios",
+                                "validationPanel",
+                                "validationNegative",
+                                "referenceDescription",
+                                "modelVersion",
+                                "cohortRole",
+                                "samplingDesign",
+                                "thresholdSource",
+                                "predictionScale",
+                                "patientID",
+                                "siteID",
+                                "partitionID",
+                                "validationBootstrap",
+                                "validationDraws",
+                                "seed",
+                                "confidenceLevel"),
+                            columns=list(
+                                list(
+                                    `name`="n", 
+                                    `title`="Analyzed rows", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="positives", 
+                                    `title`="Positive rows", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="negatives", 
+                                    `title`="Negative rows", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="clusters", 
+                                    `title`="Independent units", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="site", 
+                                    `title`="Site", 
+                                    `type`="text"),
+                                list(
+                                    `name`="model", 
+                                    `title`="Model / comparison", 
+                                    `type`="text"),
+                                list(
+                                    `name`="cutoff", 
+                                    `title`="Fixed cutoff", 
+                                    `type`="number", 
+                                    `format`="dp:6"),
+                                list(
+                                    `name`="metric", 
+                                    `title`="Metric", 
+                                    `type`="text"),
+                                list(
+                                    `name`="estimate", 
+                                    `title`="Estimate", 
+                                    `type`="number", 
+                                    `format`="dp:6"),
+                                list(
+                                    `name`="lower", 
+                                    `title`="CI lower", 
+                                    `type`="number", 
+                                    `format`="dp:6"),
+                                list(
+                                    `name`="upper", 
+                                    `title`="CI upper", 
+                                    `type`="number", 
+                                    `format`="dp:6"),
+                                list(
+                                    `name`="valid", 
+                                    `title`="Valid draws", 
+                                    `type`="number"),
+                                list(
+                                    `name`="failed", 
+                                    `title`="Failed draws", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="status", 
+                                    `title`="Interval status", 
+                                    `type`="text"))))}))$new(options=options))}))
 
 enhancedROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "enhancedROCBase",
@@ -2151,11 +2657,10 @@ enhancedROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   weights every class equally, Weighted weights each class by how many cases
 #'   it contains. The One-vs-One strategy reports only its own unweighted
 #'   average over class pairs, which is what that statistic is defined as.
-#' @param clinicalImpact Calculate clinical impact metrics (NNT, NND, clinical
-#'   utility)
-#' @param nntCalculation Show the number needed to test (1 / net benefit) and
-#'   number needed to diagnose (1 / Youden index) columns in the clinical impact
-#'   table
+#' @param clinicalImpact Calculate observed or projected workload at
+#'   independently supplied score cutoffs
+#' @param nntCalculation Show inverse net benefit and inverse Youden index;
+#'   neither is a count of tests or reviews
 #' @param clinicalUtilityCurve Display clinical utility curve showing test
 #'   consequences
 #' @param decisionImpactTable Show decision impact at various thresholds
@@ -2165,6 +2670,24 @@ enhancedROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param decisionImpactCurves Plot the clinical impact curve: how many of
 #'   1000 tested patients would be called high risk at each threshold
 #'   probability, and how many of those actually have the event.
+#' @param impactCutoffs .
+#' @param utilityThreshold .
+#' @param workloadPopulationSize .
+#' @param analysisUnit .
+#' @param prevalenceScenarios .
+#' @param validationPanel .
+#' @param validationNegative .
+#' @param referenceDescription .
+#' @param modelVersion .
+#' @param cohortRole .
+#' @param samplingDesign .
+#' @param thresholdSource .
+#' @param predictionScale .
+#' @param patientID .
+#' @param siteID .
+#' @param partitionID .
+#' @param validationBootstrap .
+#' @param validationDraws .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$results$notices} \tab \tab \tab \tab \tab a html \cr
@@ -2205,6 +2728,10 @@ enhancedROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$results$decisionImpactSummary} \tab \tab \tab \tab \tab Clinical consequences at various decision thresholds \cr
 #'   \code{results$results$clinicalUtilityPlot} \tab \tab \tab \tab \tab Clinical utility showing test consequences across thresholds \cr
 #'   \code{results$results$decisionImpactPlot} \tab \tab \tab \tab \tab Number of patients called high risk, and number of true events among them, per 1000 tested across thresholds \cr
+#'   \code{results$results$screeningWorkload} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$results$validationContext} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$results$denominatorLedger} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$results$frozenMetrics} \tab \tab \tab \tab \tab a table \cr
 #' }
 #'
 #' @export
@@ -2278,18 +2805,42 @@ enhancedROC <- function(
     decisionImpactTable = FALSE,
     internalValidation = FALSE,
     validationMethod = "bootstrap",
-    decisionImpactCurves = FALSE) {
+    decisionImpactCurves = FALSE,
+    impactCutoffs = "0.5",
+    utilityThreshold = 0.1,
+    workloadPopulationSize = 1000,
+    analysisUnit = "slide",
+    prevalenceScenarios = "",
+    validationPanel = FALSE,
+    validationNegative = "",
+    referenceDescription = "",
+    modelVersion = "",
+    cohortRole = "frozen",
+    samplingDesign = "consecutive",
+    thresholdSource = "prespecified",
+    predictionScale = "score",
+    patientID = NULL,
+    siteID = NULL,
+    partitionID = NULL,
+    validationBootstrap = FALSE,
+    validationDraws = 999) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("enhancedROC requires jmvcore to be installed (restart may be required)")
 
     if ( ! missing(outcome)) outcome <- jmvcore::resolveQuo(jmvcore::enquo(outcome))
     if ( ! missing(predictors)) predictors <- jmvcore::resolveQuo(jmvcore::enquo(predictors))
+    if ( ! missing(patientID)) patientID <- jmvcore::resolveQuo(jmvcore::enquo(patientID))
+    if ( ! missing(siteID)) siteID <- jmvcore::resolveQuo(jmvcore::enquo(siteID))
+    if ( ! missing(partitionID)) partitionID <- jmvcore::resolveQuo(jmvcore::enquo(partitionID))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(outcome), outcome, NULL),
-            `if`( ! missing(predictors), predictors, NULL))
+            `if`( ! missing(predictors), predictors, NULL),
+            `if`( ! missing(patientID), patientID, NULL),
+            `if`( ! missing(siteID), siteID, NULL),
+            `if`( ! missing(partitionID), partitionID, NULL))
 
 
     options <- enhancedROCOptions$new(
@@ -2361,7 +2912,25 @@ enhancedROC <- function(
         decisionImpactTable = decisionImpactTable,
         internalValidation = internalValidation,
         validationMethod = validationMethod,
-        decisionImpactCurves = decisionImpactCurves)
+        decisionImpactCurves = decisionImpactCurves,
+        impactCutoffs = impactCutoffs,
+        utilityThreshold = utilityThreshold,
+        workloadPopulationSize = workloadPopulationSize,
+        analysisUnit = analysisUnit,
+        prevalenceScenarios = prevalenceScenarios,
+        validationPanel = validationPanel,
+        validationNegative = validationNegative,
+        referenceDescription = referenceDescription,
+        modelVersion = modelVersion,
+        cohortRole = cohortRole,
+        samplingDesign = samplingDesign,
+        thresholdSource = thresholdSource,
+        predictionScale = predictionScale,
+        patientID = patientID,
+        siteID = siteID,
+        partitionID = partitionID,
+        validationBootstrap = validationBootstrap,
+        validationDraws = validationDraws)
 
     analysis <- enhancedROCClass$new(
         options = options,

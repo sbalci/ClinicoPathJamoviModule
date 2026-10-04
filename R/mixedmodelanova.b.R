@@ -3,6 +3,10 @@ mixedmodelanovaClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
     inherit = mixedmodelanovaBase,
     private = list(
         .run = function() {
+            private$.model <- NULL
+            for (name in c("fixed_effects", "anova_table", "random_effects", "icc_table",
+                           "effect_sizes", "posthoc", "assumptions"))
+                self$results[[name]]$deleteRows()
 
             # Check if required packages are available
             if (!requireNamespace("lme4", quietly = TRUE)) {
@@ -36,6 +40,10 @@ mixedmodelanovaClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 if (!is.factor(data[[var]])) {
                     data[[var]] <- as.factor(data[[var]])
                 }
+                data[[var]] <- droplevels(data[[var]])
+                if (nlevels(data[[var]]) < 2L)
+                    jmvcore::reject("Each fixed factor must contain at least two observed levels.")
+                contrasts(data[[var]]) <- stats::contr.sum(nlevels(data[[var]]))
             }
 
             # Build formula
@@ -52,9 +60,10 @@ mixedmodelanovaClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             # generic R errors.
             model <- tryCatch({
                 reml <- self$options$estimation_method == "reml"
-                lmerTest::lmer(jmvcore::asFormula(formula_str), data = data, REML = reml)
+                formula <- jmvcore::asFormula(formula_str)
+                lmerTest::lmer(formula, data = data, REML = reml)
             }, error = function(e) {
-                jmvcore::reject("Model fitting failed: {}", e$message)
+                jmvcore::reject(paste("Model fitting failed:", conditionMessage(e)))
             })
 
             # Store model for use by other methods
@@ -102,8 +111,18 @@ mixedmodelanovaClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 
             # Build random effects part
             if (model_type == "random_intercept") {
+                if (length(random_fac) != 1L)
+                    jmvcore::reject("Select crossed random intercepts to use multiple grouping variables.")
                 random_part <- paste0("(1 | ", jmvcore::composeTerm(random_fac[1]), ")")
+            } else if (model_type == "crossed") {
+                if (length(random_fac) < 2L)
+                    jmvcore::reject("Crossed random intercepts require at least two grouping variables.")
+                random_part <- paste(vapply(random_fac, function(group) {
+                    paste0("(1 | ", jmvcore::composeTerm(group), ")")
+                }, character(1)), collapse = " + ")
             } else if (model_type == "random_slope") {
+                if (length(random_fac) != 1L)
+                    jmvcore::reject("The random slope model requires exactly one grouping variable.")
                 if (length(fixed_fac) == 0) {
                     jmvcore::reject("Random slope model requires at least one fixed factor")
                 }
@@ -112,7 +131,8 @@ mixedmodelanovaClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 if (length(random_fac) < 2) {
                     jmvcore::reject("Nested design requires at least two random factors")
                 }
-                random_part <- paste0("(1 | ", jmvcore::composeTerm(random_fac[1]), "/", jmvcore::composeTerm(random_fac[2]), ")")
+                random_part <- paste0("(1 | ", paste(vapply(random_fac,
+                    jmvcore::composeTerm, character(1)), collapse = "/"), ")")
             }
 
             # Combine
@@ -124,7 +144,8 @@ mixedmodelanovaClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             table <- self$results$model_info
 
             n_obs <- nrow(model@frame)
-            n_groups <- length(unique(model@frame[[names(model@flist)[1]]]))
+            n_groups <- paste(paste(names(model@flist),
+                vapply(model@flist, nlevels, integer(1)), sep = ": "), collapse = "; ")
             estimation <- toupper(self$options$estimation_method)
 
             table$setRow(rowNo = 1, values = list(
@@ -157,7 +178,7 @@ mixedmodelanovaClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             if (!self$options$show_fixed_effects) return()
 
             table <- self$results$anova_table
-            anova_result <- anova(model)
+            anova_result <- stats::anova(model, type = 3, ddf = "Satterthwaite")
 
             for (i in seq_len(nrow(anova_result))) {
                 table$addRow(rowKey = i, values = list(
@@ -200,8 +221,9 @@ mixedmodelanovaClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 aic = AIC(model),
                 bic = BIC(model),
                 loglik = as.numeric(logLik(model)),
-                deviance = deviance(model)
+                deviance = stats::deviance(model, REML = FALSE)
             ))
+            table$setNote("deviance", "Deviance is evaluated on the ML scale at the fitted parameters.")
         },
 
         .populateICC = function(model) {
@@ -209,38 +231,33 @@ mixedmodelanovaClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 
             table <- self$results$icc_table
 
-            # Calculate ICC
-            # TODO (correctness): if VarCorr() does not return a "Residual" row
-            # (some fits, e.g. GLMM families, omit it) then var_residual is
-            # numeric(0) and the ICC becomes numeric(0)/NaN. Guard with a
-            # length check and surface a notice instead of populating NaN.
             vc <- as.data.frame(lme4::VarCorr(model))
-            var_random <- sum(vc$vcov[!is.na(vc$grp) & vc$grp != "Residual"])
-            var_residual <- vc$vcov[vc$grp == "Residual"]
-            icc <- var_random / (var_random + var_residual)
-
-            interpretation <- if (icc < 0.05) {
-                "Very low clustering"
-            } else if (icc < 0.10) {
-                "Low clustering"
-            } else if (icc < 0.15) {
-                "Moderate clustering"
-            } else {
-                "High clustering"
+            if (self$options$model_type == "random_slope") {
+                table$setNote("scope", paste("A single ICC is not reported for random slopes:",
+                    "within-group correlation depends on the predictor values."))
+                return()
             }
-
-            table$addRow(rowKey = 1, values = list(
-                group = names(model@flist)[1],
-                icc = icc,
-                interpretation = interpretation
-            ))
+            intercepts <- vc[vc$grp != "Residual" & vc$var1 == "(Intercept)" &
+                             is.na(vc$var2), , drop = FALSE]
+            residual <- vc$vcov[vc$grp == "Residual"]
+            total <- sum(intercepts$vcov) + residual
+            for (i in seq_len(nrow(intercepts))) {
+                table$addRow(rowKey = i, values = list(
+                    group = intercepts$grp[i],
+                    icc = intercepts$vcov[i] / total,
+                    interpretation = "Variance share for this grouping factor"
+                ))
+            }
+            table$setNote("scope", paste("Random-intercept variance shares use all grouping",
+                "variances plus residual variance in the denominator. For crossed effects,",
+                "correlation depends on which grouping factors two observations share."))
         },
 
         .populateEffectSizes = function(model) {
             if (!self$options$show_effect_sizes) return()
 
             table <- self$results$effect_sizes
-            anova_result <- anova(model)
+            anova_result <- stats::anova(model, type = 3, ddf = "Satterthwaite")
 
             for (i in seq_len(nrow(anova_result))) {
                 # Calculate partial eta squared
@@ -278,8 +295,12 @@ mixedmodelanovaClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 
             tryCatch({
                 emm <- emmeans::emmeans(model, specs = fixed_fac[1])
-                pairs <- emmeans::pairs(emm, adjust = self$options$posthoc_method)
-                pairs_summary <- summary(pairs)
+                pairs <- emmeans::contrast(emm, method = "pairwise",
+                    adjust = self$options$posthoc_method)
+                pairs_summary <- summary(pairs, infer = c(TRUE, TRUE),
+                    level = self$options$confidence_level)
+                table$setNote("scope", paste("Comparisons for", fixed_fac[1],
+                    "at the emmeans reference grid. Interactions require conditional contrasts."))
 
                 for (i in seq_len(nrow(pairs_summary))) {
                     table$addRow(rowKey = i, values = list(
@@ -287,12 +308,14 @@ mixedmodelanovaClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         estimate = pairs_summary$estimate[i],
                         se = pairs_summary$SE[i],
                         df = pairs_summary$df[i],
+                        lower_ci = pairs_summary$lower.CL[i],
+                        upper_ci = pairs_summary$upper.CL[i],
                         t_ratio = pairs_summary$t.ratio[i],
                         p_value = pairs_summary$p.value[i]
                     ))
                 }
             }, error = function(e) {
-                # Silently fail if emmeans doesn't work
+                table$setNote("unavailable", paste("Comparisons unavailable:", conditionMessage(e)))
             })
         },
 

@@ -32,8 +32,10 @@ binary, or count}
 \item{cluster_id}{variable identifying clusters (e.g., patient ID, dog ID).
 Observations with the same ID are treated as correlated.}
 
-\item{time_var}{for longitudinal data, specifies time ordering within
-clusters. Used with AR(1) correlation structure.}
+\item{time_var}{Positive integer planned-visit indices or an ordered
+factor, unique within each cluster. Data are sorted by cluster and visit
+before fitting. Required for AR(1) and unstructured correlation; gaps in
+visit indices are retained.}
 
 \item{family}{distribution family and link function for the outcome
 variable. Gaussian for continuous, Binomial for binary, Poisson for counts.}
@@ -44,8 +46,9 @@ point) - AR(1): correlation decays with time lag (for longitudinal data) -
 Unstructured: estimates all pairwise correlations (requires many
 observations) - Independence: no correlation (equivalent to GLM)}
 
-\item{robust_se}{sandwich estimator for standard errors (recommended).
-Provides valid inference even if correlation structure is misspecified.}
+\item{robust_se}{Use sandwich standard errors; when disabled, use the
+approximate jackknife. Both require an adequate number of independent
+clusters.}
 
 \item{conf_level}{confidence level for confidence intervals (default 95
 percent)}

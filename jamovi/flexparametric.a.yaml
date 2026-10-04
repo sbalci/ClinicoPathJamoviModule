@@ -2,7 +2,7 @@ name: flexparametric
 title: Flexible Parametric Survival Models (Enhanced)
 menuGroup: SurvivalDT
 menuSubgroup: Survival Analysis
-version: 2.0.0
+version: '1.0.83'
 jas: '1.2'
 description:
   main: Fits traditional parametric distributions or Royston-Parmar splines on hazard, odds, or probit

@@ -7,12 +7,65 @@ items:
     - name: instructions
       title: Getting Started
       type: Html
+      clearWith:
+        - trial_type
+        - outcome_type
+        - test_type
+        - calculation_type
+        - alpha
+        - power
+        - sample_size
+        - effect_size
+        - mean_difference
+        - common_sd
+        - proportion1
+        - proportion2
+        - allocation_ratio
+        - two_sided
+        - continuity_correction
+        - margin
+        - margin_type
+        - dropout_rate
+        - interim_analyses
+        - multiple_comparisons
+        - show_assumptions
+        - show_interpretation
+        - show_sensitivity
+        - show_plots
+        - regulatory_context
       description: Instructions for clinical trial design and power analysis
       visible: true
 
     - name: design_summary
       title: Trial Design Summary
       type: Table
+      rows: 0
+      clearWith:
+        - trial_type
+        - outcome_type
+        - test_type
+        - calculation_type
+        - alpha
+        - power
+        - sample_size
+        - effect_size
+        - mean_difference
+        - common_sd
+        - proportion1
+        - proportion2
+        - allocation_ratio
+        - two_sided
+        - continuity_correction
+        - margin
+        - margin_type
+        - dropout_rate
+        - interim_analyses
+        - multiple_comparisons
+        - show_assumptions
+        - show_interpretation
+        - show_sensitivity
+        - show_plots
+        - regulatory_context
       description: Summary of trial design parameters and recommendations
       columns:
           - name: parameter
@@ -27,14 +80,37 @@ items:
           - name: rationale
             title: Rationale
             type: text
-      clearWith:
-          - trial_type
-          - outcome_type
-          - test_type
 
     - name: power_results
       title: Power Analysis Results
       type: Table
+      rows: 0
+      clearWith:
+        - trial_type
+        - outcome_type
+        - test_type
+        - calculation_type
+        - alpha
+        - power
+        - sample_size
+        - effect_size
+        - mean_difference
+        - common_sd
+        - proportion1
+        - proportion2
+        - allocation_ratio
+        - two_sided
+        - continuity_correction
+        - margin
+        - margin_type
+        - dropout_rate
+        - interim_analyses
+        - multiple_comparisons
+        - show_assumptions
+        - show_interpretation
+        - show_sensitivity
+        - show_plots
+        - regulatory_context
       description: Primary power analysis calculations and results
       columns:
           - name: parameter
@@ -52,16 +128,37 @@ items:
           - name: interpretation
             title: Interpretation
             type: text
-      clearWith:
-          - calculation_type
-          - alpha
-          - power
-          - effect_size
-          - sample_size
 
     - name: sample_size_breakdown
       title: Sample Size Breakdown
       type: Table
+      rows: 0
+      clearWith:
+        - trial_type
+        - outcome_type
+        - test_type
+        - calculation_type
+        - alpha
+        - power
+        - sample_size
+        - effect_size
+        - mean_difference
+        - common_sd
+        - proportion1
+        - proportion2
+        - allocation_ratio
+        - two_sided
+        - continuity_correction
+        - margin
+        - margin_type
+        - dropout_rate
+        - interim_analyses
+        - multiple_comparisons
+        - show_assumptions
+        - show_interpretation
+        - show_sensitivity
+        - show_plots
+        - regulatory_context
       description: Detailed sample size calculations with adjustments
       visible: (calculation_type:sample_size)
       columns:
@@ -81,15 +178,37 @@ items:
           - name: rationale
             title: Rationale
             type: text
-      clearWith:
-          - sample_size
-          - allocation_ratio
-          - dropout_rate
-          - interim_analyses
 
     - name: effect_size_analysis
       title: Effect Size Analysis
       type: Table
+      rows: 0
+      clearWith:
+        - trial_type
+        - outcome_type
+        - test_type
+        - calculation_type
+        - alpha
+        - power
+        - sample_size
+        - effect_size
+        - mean_difference
+        - common_sd
+        - proportion1
+        - proportion2
+        - allocation_ratio
+        - two_sided
+        - continuity_correction
+        - margin
+        - margin_type
+        - dropout_rate
+        - interim_analyses
+        - multiple_comparisons
+        - show_assumptions
+        - show_interpretation
+        - show_sensitivity
+        - show_plots
+        - regulatory_context
       description: Effect size calculations and clinical significance assessment
       columns:
           - name: effect_measure
@@ -108,15 +227,37 @@ items:
           - name: statistical_significance
             title: Statistical Significance
             type: text
-      clearWith:
-          - effect_size
-          - mean_difference
-          - proportion1
-          - proportion2
 
     - name: assumptions_check
       title: Statistical Assumptions
       type: Table
+      rows: 0
+      clearWith:
+        - trial_type
+        - outcome_type
+        - test_type
+        - calculation_type
+        - alpha
+        - power
+        - sample_size
+        - effect_size
+        - mean_difference
+        - common_sd
+        - proportion1
+        - proportion2
+        - allocation_ratio
+        - two_sided
+        - continuity_correction
+        - margin
+        - margin_type
+        - dropout_rate
+        - interim_analyses
+        - multiple_comparisons
+        - show_assumptions
+        - show_interpretation
+        - show_sensitivity
+        - show_plots
+        - regulatory_context
       description: Key assumptions for the selected statistical test
       visible: (show_assumptions)
       columns:
@@ -135,13 +276,37 @@ items:
           - name: alternatives
             title: Alternative Tests
             type: text
-      clearWith:
-          - test_type
-          - outcome_type
 
     - name: sensitivity_analysis
       title: Sensitivity Analysis
       type: Table
+      rows: 0
+      clearWith:
+        - trial_type
+        - outcome_type
+        - test_type
+        - calculation_type
+        - alpha
+        - power
+        - sample_size
+        - effect_size
+        - mean_difference
+        - common_sd
+        - proportion1
+        - proportion2
+        - allocation_ratio
+        - two_sided
+        - continuity_correction
+        - margin
+        - margin_type
+        - dropout_rate
+        - interim_analyses
+        - multiple_comparisons
+        - show_assumptions
+        - show_interpretation
+        - show_sensitivity
+        - show_plots
+        - regulatory_context
       description: Power/sample size sensitivity across parameter ranges
       visible: (show_sensitivity)
       columns:
@@ -160,15 +325,37 @@ items:
           - name: impact_assessment
             title: Impact Assessment
             type: text
-      clearWith:
-          - effect_size
-          - power
-          - alpha
-          - dropout_rate
 
     - name: regulatory_considerations
       title: Regulatory Considerations
       type: Table
+      rows: 0
+      clearWith:
+        - trial_type
+        - outcome_type
+        - test_type
+        - calculation_type
+        - alpha
+        - power
+        - sample_size
+        - effect_size
+        - mean_difference
+        - common_sd
+        - proportion1
+        - proportion2
+        - allocation_ratio
+        - two_sided
+        - continuity_correction
+        - margin
+        - margin_type
+        - dropout_rate
+        - interim_analyses
+        - multiple_comparisons
+        - show_assumptions
+        - show_interpretation
+        - show_sensitivity
+        - show_plots
+        - regulatory_context
       description: Regulatory guidance and compliance considerations
       visible: (show_interpretation)
       columns:
@@ -187,63 +374,173 @@ items:
           - name: reference
             title: Reference
             type: text
-      clearWith:
-          - regulatory_context
-          - trial_type
-          - alpha
-          - power
 
     - name: power_curve
       title: Power Curve Analysis
       type: Image
+      clearWith:
+        - trial_type
+        - outcome_type
+        - test_type
+        - calculation_type
+        - alpha
+        - power
+        - sample_size
+        - effect_size
+        - mean_difference
+        - common_sd
+        - proportion1
+        - proportion2
+        - allocation_ratio
+        - two_sided
+        - continuity_correction
+        - margin
+        - margin_type
+        - dropout_rate
+        - interim_analyses
+        - multiple_comparisons
+        - show_assumptions
+        - show_interpretation
+        - show_sensitivity
+        - show_plots
+        - regulatory_context
       width: 800
       height: 600
       description: Power curves showing relationship between sample size and statistical power
       visible: (show_plots)
       requiresData: false
-      clearWith:
-          - effect_size
-          - alpha
-          - test_type
-          - allocation_ratio
 
     - name: effect_size_plot
       title: Effect Size Visualization
       type: Image  
+      clearWith:
+        - trial_type
+        - outcome_type
+        - test_type
+        - calculation_type
+        - alpha
+        - power
+        - sample_size
+        - effect_size
+        - mean_difference
+        - common_sd
+        - proportion1
+        - proportion2
+        - allocation_ratio
+        - two_sided
+        - continuity_correction
+        - margin
+        - margin_type
+        - dropout_rate
+        - interim_analyses
+        - multiple_comparisons
+        - show_assumptions
+        - show_interpretation
+        - show_sensitivity
+        - show_plots
+        - regulatory_context
       width: 800
       height: 600
       description: Effect size distribution and clinical significance thresholds
       visible: (show_plots)
       requiresData: false
-      clearWith:
-          - effect_size
-          - mean_difference
-          - common_sd
-          - outcome_type
 
     - name: sample_size_plot
       title: Sample Size Requirements
       type: Image
+      clearWith:
+        - trial_type
+        - outcome_type
+        - test_type
+        - calculation_type
+        - alpha
+        - power
+        - sample_size
+        - effect_size
+        - mean_difference
+        - common_sd
+        - proportion1
+        - proportion2
+        - allocation_ratio
+        - two_sided
+        - continuity_correction
+        - margin
+        - margin_type
+        - dropout_rate
+        - interim_analyses
+        - multiple_comparisons
+        - show_assumptions
+        - show_interpretation
+        - show_sensitivity
+        - show_plots
+        - regulatory_context
       width: 800
       height: 600
       description: Sample size requirements across different effect sizes and power levels
       visible: (show_plots && calculation_type:sample_size)
       requiresData: false
-      clearWith:
-          - power
-          - alpha
-          - effect_size
-          - dropout_rate
 
     - name: clinical_interpretation
       title: Clinical Interpretation & Guidelines
       type: Html
+      clearWith:
+        - trial_type
+        - outcome_type
+        - test_type
+        - calculation_type
+        - alpha
+        - power
+        - sample_size
+        - effect_size
+        - mean_difference
+        - common_sd
+        - proportion1
+        - proportion2
+        - allocation_ratio
+        - two_sided
+        - continuity_correction
+        - margin
+        - margin_type
+        - dropout_rate
+        - interim_analyses
+        - multiple_comparisons
+        - show_assumptions
+        - show_interpretation
+        - show_sensitivity
+        - show_plots
+        - regulatory_context
       description: Clinical context, interpretation guidelines, and next steps
       visible: (show_interpretation)
 
     - name: study_protocol_template
       title: Study Protocol Template
       type: Html
+      clearWith:
+        - trial_type
+        - outcome_type
+        - test_type
+        - calculation_type
+        - alpha
+        - power
+        - sample_size
+        - effect_size
+        - mean_difference
+        - common_sd
+        - proportion1
+        - proportion2
+        - allocation_ratio
+        - two_sided
+        - continuity_correction
+        - margin
+        - margin_type
+        - dropout_rate
+        - interim_analyses
+        - multiple_comparisons
+        - show_assumptions
+        - show_interpretation
+        - show_sensitivity
+        - show_plots
+        - regulatory_context
       description: Template sections for study protocol statistical analysis plan
       visible: (show_interpretation)
 

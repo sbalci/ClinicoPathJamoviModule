@@ -7,6 +7,26 @@ items:
     - name: model_info
       title: Model Information
       type: Table
+      clearWith:
+        - dependent
+        - fixed_factors
+        - random_factors
+        - covariates
+        - model_type
+        - interaction_terms
+        - estimation_method
+        - show_fixed_effects
+        - show_random_effects
+        - show_model_fit
+        - show_assumptions
+        - show_posthoc
+        - posthoc_method
+        - confidence_level
+        - show_effect_sizes
+        - show_icc
+        - show_plots
+        - show_methodology
+        - show_references
       rows: 1
       columns:
         - name: formula
@@ -19,12 +39,32 @@ items:
           title: Observations
           type: integer
         - name: n_groups
-          title: Number of Groups
-          type: integer
+          title: Levels by grouping variable
+          type: text
 
     - name: fixed_effects
       title: Fixed Effects
       type: Table
+      clearWith:
+        - dependent
+        - fixed_factors
+        - random_factors
+        - covariates
+        - model_type
+        - interaction_terms
+        - estimation_method
+        - show_fixed_effects
+        - show_random_effects
+        - show_model_fit
+        - show_assumptions
+        - show_posthoc
+        - posthoc_method
+        - confidence_level
+        - show_effect_sizes
+        - show_icc
+        - show_plots
+        - show_methodology
+        - show_references
       visible: (show_fixed_effects)
       rows: 0
       columns:
@@ -51,6 +91,26 @@ items:
     - name: anova_table
       title: Type III ANOVA Table
       type: Table
+      clearWith:
+        - dependent
+        - fixed_factors
+        - random_factors
+        - covariates
+        - model_type
+        - interaction_terms
+        - estimation_method
+        - show_fixed_effects
+        - show_random_effects
+        - show_model_fit
+        - show_assumptions
+        - show_posthoc
+        - posthoc_method
+        - confidence_level
+        - show_effect_sizes
+        - show_icc
+        - show_plots
+        - show_methodology
+        - show_references
       visible: (show_fixed_effects)
       rows: 0
       columns:
@@ -80,6 +140,26 @@ items:
     - name: random_effects
       title: Random Effects
       type: Table
+      clearWith:
+        - dependent
+        - fixed_factors
+        - random_factors
+        - covariates
+        - model_type
+        - interaction_terms
+        - estimation_method
+        - show_fixed_effects
+        - show_random_effects
+        - show_model_fit
+        - show_assumptions
+        - show_posthoc
+        - posthoc_method
+        - confidence_level
+        - show_effect_sizes
+        - show_icc
+        - show_plots
+        - show_methodology
+        - show_references
       visible: (show_random_effects)
       rows: 0
       columns:
@@ -96,6 +176,26 @@ items:
     - name: model_fit
       title: Model Fit Statistics
       type: Table
+      clearWith:
+        - dependent
+        - fixed_factors
+        - random_factors
+        - covariates
+        - model_type
+        - interaction_terms
+        - estimation_method
+        - show_fixed_effects
+        - show_random_effects
+        - show_model_fit
+        - show_assumptions
+        - show_posthoc
+        - posthoc_method
+        - confidence_level
+        - show_effect_sizes
+        - show_icc
+        - show_plots
+        - show_methodology
+        - show_references
       visible: (show_model_fit)
       rows: 1
       columns:
@@ -115,6 +215,26 @@ items:
     - name: icc_table
       title: Intraclass Correlation Coefficients
       type: Table
+      clearWith:
+        - dependent
+        - fixed_factors
+        - random_factors
+        - covariates
+        - model_type
+        - interaction_terms
+        - estimation_method
+        - show_fixed_effects
+        - show_random_effects
+        - show_model_fit
+        - show_assumptions
+        - show_posthoc
+        - posthoc_method
+        - confidence_level
+        - show_effect_sizes
+        - show_icc
+        - show_plots
+        - show_methodology
+        - show_references
       visible: (show_icc)
       rows: 0
       columns:
@@ -131,6 +251,26 @@ items:
     - name: effect_sizes
       title: Effect Sizes (Partial η²)
       type: Table
+      clearWith:
+        - dependent
+        - fixed_factors
+        - random_factors
+        - covariates
+        - model_type
+        - interaction_terms
+        - estimation_method
+        - show_fixed_effects
+        - show_random_effects
+        - show_model_fit
+        - show_assumptions
+        - show_posthoc
+        - posthoc_method
+        - confidence_level
+        - show_effect_sizes
+        - show_icc
+        - show_plots
+        - show_methodology
+        - show_references
       visible: (show_effect_sizes)
       rows: 0
       columns:
@@ -147,6 +287,26 @@ items:
     - name: posthoc
       title: Post Hoc Comparisons
       type: Table
+      clearWith:
+        - dependent
+        - fixed_factors
+        - random_factors
+        - covariates
+        - model_type
+        - interaction_terms
+        - estimation_method
+        - show_fixed_effects
+        - show_random_effects
+        - show_model_fit
+        - show_assumptions
+        - show_posthoc
+        - posthoc_method
+        - confidence_level
+        - show_effect_sizes
+        - show_icc
+        - show_plots
+        - show_methodology
+        - show_references
       visible: (show_posthoc)
       rows: 0
       columns:
@@ -165,6 +325,12 @@ items:
         - name: t_ratio
           title: t ratio
           type: number
+        - name: lower_ci
+          title: CI lower
+          type: number
+        - name: upper_ci
+          title: CI upper
+          type: number
         - name: p_value
           title: p
           type: number
@@ -173,6 +339,26 @@ items:
     - name: assumptions
       title: Assumption Checks
       type: Table
+      clearWith:
+        - dependent
+        - fixed_factors
+        - random_factors
+        - covariates
+        - model_type
+        - interaction_terms
+        - estimation_method
+        - show_fixed_effects
+        - show_random_effects
+        - show_model_fit
+        - show_assumptions
+        - show_posthoc
+        - posthoc_method
+        - confidence_level
+        - show_effect_sizes
+        - show_icc
+        - show_plots
+        - show_methodology
+        - show_references
       visible: (show_assumptions)
       rows: 0
       columns:
@@ -193,6 +379,26 @@ items:
     - name: diagnostic_plots
       title: Diagnostic Plots
       type: Image
+      clearWith:
+        - dependent
+        - fixed_factors
+        - random_factors
+        - covariates
+        - model_type
+        - interaction_terms
+        - estimation_method
+        - show_fixed_effects
+        - show_random_effects
+        - show_model_fit
+        - show_assumptions
+        - show_posthoc
+        - posthoc_method
+        - confidence_level
+        - show_effect_sizes
+        - show_icc
+        - show_plots
+        - show_methodology
+        - show_references
       visible: (show_plots)
       width: 600
       height: 600
@@ -201,15 +407,75 @@ items:
     - name: interpretation
       title: Interpretation Guide
       type: Html
+      clearWith:
+        - dependent
+        - fixed_factors
+        - random_factors
+        - covariates
+        - model_type
+        - interaction_terms
+        - estimation_method
+        - show_fixed_effects
+        - show_random_effects
+        - show_model_fit
+        - show_assumptions
+        - show_posthoc
+        - posthoc_method
+        - confidence_level
+        - show_effect_sizes
+        - show_icc
+        - show_plots
+        - show_methodology
+        - show_references
 
     - name: methodology
       title: Methodology
       type: Html
+      clearWith:
+        - dependent
+        - fixed_factors
+        - random_factors
+        - covariates
+        - model_type
+        - interaction_terms
+        - estimation_method
+        - show_fixed_effects
+        - show_random_effects
+        - show_model_fit
+        - show_assumptions
+        - show_posthoc
+        - posthoc_method
+        - confidence_level
+        - show_effect_sizes
+        - show_icc
+        - show_plots
+        - show_methodology
+        - show_references
       visible: (show_methodology)
 
     - name: references
       title: References
       type: Html
+      clearWith:
+        - dependent
+        - fixed_factors
+        - random_factors
+        - covariates
+        - model_type
+        - interaction_terms
+        - estimation_method
+        - show_fixed_effects
+        - show_random_effects
+        - show_model_fit
+        - show_assumptions
+        - show_posthoc
+        - posthoc_method
+        - confidence_level
+        - show_effect_sizes
+        - show_icc
+        - show_plots
+        - show_methodology
+        - show_references
       visible: (show_references)
 
 refs:

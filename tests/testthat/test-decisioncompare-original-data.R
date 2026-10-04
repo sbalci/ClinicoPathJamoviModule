@@ -1,10 +1,12 @@
 dc_original_analysis <- function(data, od = TRUE) {
   options <- ClinicoPath:::decisioncompareOptions$new(
-    gold = "gold", goldPositive = "v1",
-    test1 = "a", test1Positive = "v1",
-    test2 = "b", test2Positive = "v1",
+    gold = "gold", goldPositive = "v1", goldNegative = "v2",
+    test1 = "a", test1Positive = "v1", test1Negative = "v2",
+    test2 = "b", test2Positive = "v1", test2Negative = "v2",
     test3 = if ("c" %in% names(data)) "c" else NULL,
     test3Positive = if ("c" %in% names(data)) "v1" else NULL,
+    test3Negative = if ("c" %in% names(data)) "v2" else NULL,
+    excludeIndeterminate = TRUE,
     od = od, statComp = TRUE, opa = TRUE, ci = TRUE,
     plot = TRUE, radarplot = TRUE, heatmap = TRUE,
     showSummary = TRUE, showReportSentence = TRUE,
@@ -17,7 +19,7 @@ dc_original_analysis <- function(data, od = TRUE) {
 
 dc_original_data <- function(k) {
   values <- paste0("v", seq_len(k))
-  data.frame(gold = factor(values), a = factor(values), b = factor(rev(values)))
+  data.frame(gold = factor(values), a = factor(values), b = factor(c(values[1:2], rev(values[-(1:2)]))))
 }
 
 dc_original_cell_count <- function(analysis) {
@@ -82,7 +84,7 @@ test_that("preflight covers the optional third test before building any original
   expect_identical(analysis$results$text2$content, "")
   expect_match(analysis$results$notices$content, "Original Data Display Omitted", fixed = TRUE)
   expect_equal(analysis$results$comparisonTable$getCell(rowKey = "test_3", col = "n")$value,
-               101)
+               2)
 })
 
 test_that("original display and its warning reset when data or display options change", {

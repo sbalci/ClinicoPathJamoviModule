@@ -400,6 +400,77 @@ items:
           - tn2
           - fn2
 
+    - name: screeningWorkload
+      title: Observed and projected workload
+      type: Table
+      visible: (showWorkload)
+      clearWith:
+      - showWorkload
+      - workloadPopulationSize
+      - prevalenceScenarios
+      - analysisUnit
+      - TP
+      - FP
+      - FN
+      - TN
+      - pp
+      - pprob
+      columns:
+      - name: source
+        title: Population
+        type: text
+      - name: unit
+        title: Unit
+        type: text
+      - name: prevalence
+        title: Prevalence
+        type: number
+        format: dp:6
+      - name: population
+        title: Population
+        type: number
+        format: dp:6
+      - name: tp
+        title: True positives
+        type: number
+        format: dp:6
+      - name: fp
+        title: False positives
+        type: number
+        format: dp:6
+      - name: fn
+        title: False negatives
+        type: number
+        format: dp:6
+      - name: tn
+        title: True negatives
+        type: number
+        format: dp:6
+      - name: flags
+        title: Flags
+        type: number
+        format: dp:6
+      - name: ppv
+        title: PPV
+        type: number
+        format: dp:6
+      - name: npv
+        title: NPV
+        type: number
+        format: dp:6
+      - name: flags_per_1000
+        title: Flags per 1000
+        type: number
+        format: dp:6
+      - name: flags_per_detected
+        title: Flags per detected positive
+        type: number
+        format: dp:6
+      - name: tests_per_detected
+        title: Tests per detected positive
+        type: number
+        format: dp:6
+
 refs:
     - ClinicoPathJamoviModule
     - DiagnosticTests

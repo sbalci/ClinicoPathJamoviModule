@@ -15,8 +15,8 @@ dc_q_analysis <- function(m = 3) {
     gold <- rep(c('P', 'N'), each = 60)
     b <- gold; b[seq_len(m)] <- 'N'
     opts <- ClinicoPath:::decisioncompareOptions$new(
-        gold='gold', goldPositive='P', test1='a', test1Positive='P',
-        test2='b', test2Positive='P', test3='c', test3Positive='P',
+        gold='gold', goldPositive='P', goldNegative = 'N', test1='a', test1Positive='P', test1Negative = 'N',
+        test2='b', test2Positive='P', test2Negative = 'N', test3='c', test3Positive='P', test3Negative = 'N',
         statComp=TRUE, showSummary=TRUE, showReportSentence=TRUE, showExplanations=TRUE)
     a <- ClinicoPath:::decisioncompareClass$new(options=opts,
         data=data.frame(gold=factor(gold), a=factor(gold), b=factor(b), c=factor(b)))

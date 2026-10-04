@@ -29,7 +29,11 @@ decisioncalculatorOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
             tp2 = 80,
             fp2 = 15,
             tn2 = 95,
-            fn2 = 30, ...) {
+            fn2 = 30,
+            showWorkload = FALSE,
+            workloadPopulationSize = 1000,
+            prevalenceScenarios = "0.0001,0.001,0.01",
+            analysisUnit = "slide", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -61,8 +65,8 @@ decisioncalculatorOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 "pprob",
                 pprob,
                 default=0.3,
-                min=0.001,
-                max=0.999)
+                min=1e-9,
+                max=0.999999999)
             private$..fnote <- jmvcore::OptionBool$new(
                 "fnote",
                 fnote,
@@ -135,6 +139,24 @@ decisioncalculatorOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 "fn2",
                 fn2,
                 default=30)
+            private$..showWorkload <- jmvcore::OptionBool$new(
+                "showWorkload",
+                showWorkload,
+                default=FALSE)
+            private$..workloadPopulationSize <- jmvcore::OptionInteger$new(
+                "workloadPopulationSize",
+                workloadPopulationSize,
+                default=1000,
+                min=1,
+                max=1000000000)
+            private$..prevalenceScenarios <- jmvcore::OptionString$new(
+                "prevalenceScenarios",
+                prevalenceScenarios,
+                default="0.0001,0.001,0.01")
+            private$..analysisUnit <- jmvcore::OptionString$new(
+                "analysisUnit",
+                analysisUnit,
+                default="slide")
 
             self$.addOption(private$..TP)
             self$.addOption(private$..TN)
@@ -160,6 +182,10 @@ decisioncalculatorOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
             self$.addOption(private$..fp2)
             self$.addOption(private$..tn2)
             self$.addOption(private$..fn2)
+            self$.addOption(private$..showWorkload)
+            self$.addOption(private$..workloadPopulationSize)
+            self$.addOption(private$..prevalenceScenarios)
+            self$.addOption(private$..analysisUnit)
         }),
     active = list(
         TP = function() private$..TP$value,
@@ -185,7 +211,11 @@ decisioncalculatorOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
         tp2 = function() private$..tp2$value,
         fp2 = function() private$..fp2$value,
         tn2 = function() private$..tn2$value,
-        fn2 = function() private$..fn2$value),
+        fn2 = function() private$..fn2$value,
+        showWorkload = function() private$..showWorkload$value,
+        workloadPopulationSize = function() private$..workloadPopulationSize$value,
+        prevalenceScenarios = function() private$..prevalenceScenarios$value,
+        analysisUnit = function() private$..analysisUnit$value),
     private = list(
         ..TP = NA,
         ..TN = NA,
@@ -210,7 +240,11 @@ decisioncalculatorOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
         ..tp2 = NA,
         ..fp2 = NA,
         ..tn2 = NA,
-        ..fn2 = NA)
+        ..fn2 = NA,
+        ..showWorkload = NA,
+        ..workloadPopulationSize = NA,
+        ..prevalenceScenarios = NA,
+        ..analysisUnit = NA)
 )
 
 decisioncalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -231,7 +265,8 @@ decisioncalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
         epirTable_number = function() private$.items[["epirTable_number"]],
         faganSummary = function() private$.items[["faganSummary"]],
         plot1 = function() private$.items[["plot1"]],
-        multipleCutoffTable = function() private$.items[["multipleCutoffTable"]]),
+        multipleCutoffTable = function() private$.items[["multipleCutoffTable"]],
+        screeningWorkload = function() private$.items[["screeningWorkload"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -672,7 +707,92 @@ decisioncalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                     "tp2",
                     "fp2",
                     "tn2",
-                    "fn2")))}))
+                    "fn2")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="screeningWorkload",
+                title="Observed and projected workload",
+                visible="(showWorkload)",
+                clearWith=list(
+                    "showWorkload",
+                    "workloadPopulationSize",
+                    "prevalenceScenarios",
+                    "analysisUnit",
+                    "TP",
+                    "FP",
+                    "FN",
+                    "TN",
+                    "pp",
+                    "pprob"),
+                columns=list(
+                    list(
+                        `name`="source", 
+                        `title`="Population", 
+                        `type`="text"),
+                    list(
+                        `name`="unit", 
+                        `title`="Unit", 
+                        `type`="text"),
+                    list(
+                        `name`="prevalence", 
+                        `title`="Prevalence", 
+                        `type`="number", 
+                        `format`="dp:6"),
+                    list(
+                        `name`="population", 
+                        `title`="Population", 
+                        `type`="number", 
+                        `format`="dp:6"),
+                    list(
+                        `name`="tp", 
+                        `title`="True positives", 
+                        `type`="number", 
+                        `format`="dp:6"),
+                    list(
+                        `name`="fp", 
+                        `title`="False positives", 
+                        `type`="number", 
+                        `format`="dp:6"),
+                    list(
+                        `name`="fn", 
+                        `title`="False negatives", 
+                        `type`="number", 
+                        `format`="dp:6"),
+                    list(
+                        `name`="tn", 
+                        `title`="True negatives", 
+                        `type`="number", 
+                        `format`="dp:6"),
+                    list(
+                        `name`="flags", 
+                        `title`="Flags", 
+                        `type`="number", 
+                        `format`="dp:6"),
+                    list(
+                        `name`="ppv", 
+                        `title`="PPV", 
+                        `type`="number", 
+                        `format`="dp:6"),
+                    list(
+                        `name`="npv", 
+                        `title`="NPV", 
+                        `type`="number", 
+                        `format`="dp:6"),
+                    list(
+                        `name`="flags_per_1000", 
+                        `title`="Flags per 1000", 
+                        `type`="number", 
+                        `format`="dp:6"),
+                    list(
+                        `name`="flags_per_detected", 
+                        `title`="Flags per detected positive", 
+                        `type`="number", 
+                        `format`="dp:6"),
+                    list(
+                        `name`="tests_per_detected", 
+                        `title`="Tests per detected positive", 
+                        `type`="number", 
+                        `format`="dp:6"))))}))
 
 decisioncalculatorBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "decisioncalculatorBase",
@@ -730,7 +850,7 @@ decisioncalculatorBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' @param pp Boolean selection whether to use known population prevalence for
 #'   prevalence-dependent predictive measures.
 #' @param pprob Prior probability (disease prevalence in the community).
-#'   Requires a value between 0.001 and 0.999, default 0.300.
+#'   Requires a value strictly between 0 and 1, default 0.300.
 #' @param fnote Boolean selection whether to show detailed explanatory
 #'   footnotes.
 #' @param ci Boolean selection whether to calculate 95 percent confidence
@@ -754,6 +874,10 @@ decisioncalculatorBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' @param fp2 False-positive frequency for illustrative scenario 2.
 #' @param tn2 True-negative frequency for illustrative scenario 2.
 #' @param fn2 False-negative frequency for illustrative scenario 2.
+#' @param showWorkload .
+#' @param workloadPopulationSize .
+#' @param prevalenceScenarios .
+#' @param analysisUnit .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
@@ -771,6 +895,7 @@ decisioncalculatorBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #'   \code{results$faganSummary} \tab \tab \tab \tab \tab Plain-language reading of the Fagan nomogram: the pre-test probability, the likelihood ratios, and where a positive or a negative result moves the probability of disease. \cr
 #'   \code{results$plot1} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$multipleCutoffTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$screeningWorkload} \tab \tab \tab \tab \tab a table \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -804,7 +929,11 @@ decisioncalculator <- function(
     tp2 = 80,
     fp2 = 15,
     tn2 = 95,
-    fn2 = 30) {
+    fn2 = 30,
+    showWorkload = FALSE,
+    workloadPopulationSize = 1000,
+    prevalenceScenarios = "0.0001,0.001,0.01",
+    analysisUnit = "slide") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("decisioncalculator requires jmvcore to be installed (restart may be required)")
@@ -834,7 +963,11 @@ decisioncalculator <- function(
         tp2 = tp2,
         fp2 = fp2,
         tn2 = tn2,
-        fn2 = fn2)
+        fn2 = fn2,
+        showWorkload = showWorkload,
+        workloadPopulationSize = workloadPopulationSize,
+        prevalenceScenarios = prevalenceScenarios,
+        analysisUnit = analysisUnit)
 
     analysis <- decisioncalculatorClass$new(
         options = options,

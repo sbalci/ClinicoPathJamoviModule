@@ -4,7 +4,7 @@ title: Cohen's Kappa Agreement
 menuGroup: meddecideExtraDT
 menuSubgroup: Diagnostic Statistics
 menuSubtitle: 'Two-Rater Agreement Analysis'
-version: '0.0.31'
+version: '1.0.83'
 jas: '1.2'
 
 description:

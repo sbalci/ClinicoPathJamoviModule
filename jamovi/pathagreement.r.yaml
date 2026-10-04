@@ -181,6 +181,7 @@ items:
       type: Table
       visible: (readerWorkflow:off && (categoryAnalysis))
       clearWith:
+        - referenceType
         - vars
         - caseID
         - useMetadataRows
@@ -241,10 +242,11 @@ items:
           visible: (pathologyContext)
 
     - name: diagnosticAccuracyTable
-      title: 'Diagnostic Accuracy by Rater (Macro-Averaged Across Categories)'
+      title: 'Reference Comparison by Rater (Macro-Averaged Across Categories)'
       type: Table
       visible: (readerWorkflow:off && (pathologyContext))
       clearWith:
+        - referenceType
         - vars
         - caseID
         - useMetadataRows
@@ -1291,6 +1293,23 @@ items:
       visible: (readerWorkflow:binary || readerWorkflow:ordinal_cutoff || readerWorkflow:numeric_cutoff)
       rows: 0
       clearWith: &id001
+      - referenceType
+      - referenceDescription
+      - targetDefinition
+      - readerNondiagnostic
+      - readerNondiagnosticLevel
+      - readerAllObservedAgreement
+      - readerFormat
+      - readerID
+      - modality
+      - rating
+      - baselineModality
+      - comparisonModality
+      - readerModalityComparison
+      - modalityPopulation
+      - readerTransitions
+      - transitionBaseline
+      - transitionComparison
       - readerWorkflow
       - readerScores
       - readerPositive
@@ -1352,9 +1371,9 @@ items:
         title: Usable
         type: integer
     - name: readerAccuracyTable
-      title: Disease-Positive Reader Accuracy
+      title: Determinate Reader Comparison
       type: Table
-      visible: ((readerWorkflow:binary || readerWorkflow:ordinal_cutoff || readerWorkflow:numeric_cutoff) && referenceAccuracy)
+      visible: (referenceAccuracy && (readerWorkflow:binary || readerWorkflow:ordinal_cutoff || readerWorkflow:numeric_cutoff))
       rows: 0
       clearWith: *id001
       columns:
@@ -1374,16 +1393,22 @@ items:
         title: Excluded
         type: integer
       - name: tp
-        title: Tp
+        title: Positive match
         type: integer
       - name: fn
-        title: Fn
+        title: Reference positive, reader negative
         type: integer
       - name: tn
-        title: Tn
+        title: Negative match
         type: integer
       - name: fp
-        title: Fp
+        title: Reference negative, reader positive
+        type: integer
+      - name: numerator
+        title: Numerator
+        type: integer
+      - name: denominator
+        title: Denominator
         type: integer
       - name: metric
         title: Metric
@@ -1570,6 +1595,285 @@ items:
       type: Preformatted
       visible: ((readerWorkflow:binary || readerWorkflow:ordinal_cutoff || readerWorkflow:numeric_cutoff) && readerCode)
       clearWith: *id001
+
+    - name: readerAvailability
+      title: Result Availability by Reference State
+      type: Table
+      visible: (readerWorkflow != 'off' && (readerNondiagnostic || readerFormat:long))
+      rows: 0
+      clearWith: *id001
+      columns:
+      - name: reader
+        title: Reader
+        type: text
+      - name: reference
+        title: Reference
+        type: text
+      - name: result
+        title: Result
+        type: text
+      - name: n
+        title: N
+        type: integer
+    - name: readerMapping
+      title: Observed Rating Mapping
+      type: Table
+      visible: (readerWorkflow != 'off' && (readerNondiagnostic || readerFormat:long))
+      rows: 0
+      clearWith: *id001
+      columns:
+      - name: reader
+        title: Reader
+        type: text
+      - name: value
+        title: Raw value
+        type: text
+      - name: status
+        title: Status
+        type: text
+      - name: call
+        title: Call
+        type: text
+      - name: n
+        title: N
+        type: integer
+    - name: readerObservedAgreement
+      title: Agreement Including Nondiagnostic Calls
+      type: Table
+      visible: (readerWorkflow != 'off' && readerAllObservedAgreement && (readerNondiagnostic || readerFormat:long))
+      rows: 0
+      clearWith: *id001
+      columns:
+      - name: reader
+        title: Reader
+        type: text
+      - name: population
+        title: Population
+        type: text
+      - name: metric
+        title: Metric
+        type: text
+      - name: numerator
+        title: Numerator
+        type: integer
+      - name: denominator
+        title: Denominator
+        type: integer
+      - name: estimate
+        title: Estimate
+        type: number
+        format: zto
+      - name: lower
+        title: CI lower
+        type: number
+        format: dp:3
+      - name: upper
+        title: CI upper
+        type: number
+        format: dp:3
+      - name: status
+        title: Interval method/status
+        type: text
+      - name: attempted
+        title: Attempted
+        type: integer
+      - name: undefined
+        title: Undefined
+        type: integer
+    - name: readerModalitySummary
+      title: Modalities on the Same Matched Cases
+      type: Table
+      visible: (readerWorkflow != 'off' && readerFormat:long && readerModalityComparison)
+      rows: 0
+      clearWith: *id001
+      columns:
+      - name: modality
+        title: Modality
+        type: text
+      - name: metric
+        title: Metric
+        type: text
+      - name: population
+        title: Population
+        type: text
+      - name: cases
+        title: Cases
+        type: integer
+      - name: readers
+        title: Readers
+        type: integer
+      - name: readings
+        title: Readings
+        type: integer
+      - name: excluded_cases
+        title: Excluded Cases
+        type: integer
+      - name: numerator
+        title: Numerator
+        type: integer
+      - name: denominator
+        title: Denominator
+        type: integer
+      - name: estimate
+        title: Estimate
+        type: number
+        format: zto
+      - name: lower
+        title: CI lower
+        type: number
+        format: dp:3
+      - name: upper
+        title: CI upper
+        type: number
+        format: dp:3
+      - name: status
+        title: Interval method/status
+        type: text
+      - name: attempted
+        title: Attempted
+        type: integer
+      - name: undefined
+        title: Undefined
+        type: integer
+    - name: readerModalityContrast
+      title: Paired Modality Differences (Percentage Points)
+      type: Table
+      visible: (readerWorkflow != 'off' && readerFormat:long && readerModalityComparison)
+      rows: 0
+      clearWith: *id001
+      columns:
+      - name: baseline
+        title: Baseline
+        type: text
+      - name: comparison
+        title: Comparison
+        type: text
+      - name: metric
+        title: Metric
+        type: text
+      - name: population
+        title: Population
+        type: text
+      - name: cases
+        title: Cases
+        type: integer
+      - name: readers
+        title: Readers
+        type: integer
+      - name: readings
+        title: Readings
+        type: integer
+      - name: excluded_cases
+        title: Excluded Cases
+        type: integer
+      - name: units
+        title: Units
+        type: integer
+      - name: difference
+        title: Difference
+        type: number
+        format: dp:3
+      - name: lower
+        title: CI lower
+        type: number
+        format: dp:3
+      - name: upper
+        title: CI upper
+        type: number
+        format: dp:3
+      - name: status
+        title: Interval method/status
+        type: text
+      - name: attempted
+        title: Attempted
+        type: integer
+      - name: undefined
+        title: Undefined
+        type: integer
+    - name: readerTransitionsTable
+      title: Category and Adequacy Transitions
+      type: Table
+      visible: (readerWorkflow:ordinal_cutoff && readerTransitions)
+      rows: 0
+      clearWith: *id001
+      columns:
+      - name: pair
+        title: Pair
+        type: text
+      - name: transition
+        title: Transition
+        type: text
+      - name: population
+        title: Population
+        type: text
+      - name: numerator
+        title: Numerator
+        type: integer
+      - name: denominator
+        title: Denominator
+        type: integer
+      - name: estimate
+        title: Estimate
+        type: number
+        format: zto
+    - name: readerTransitionMatrix
+      title: Observed Category Transition Matrix
+      type: Table
+      visible: (readerWorkflow:ordinal_cutoff && readerTransitions)
+      rows: 0
+      clearWith: *id001
+      columns:
+      - name: pair
+        title: Pair
+        type: text
+      - name: baseline
+        title: Baseline
+        type: text
+      - name: baseline_status
+        title: Baseline Status
+        type: text
+      - name: comparison
+        title: Comparison
+        type: text
+      - name: comparison_status
+        title: Comparison Status
+        type: text
+      - name: n
+        title: N
+        type: integer
+      - name: denominator
+        title: Denominator
+        type: integer
+
+    - name: pathReferenceDefinition
+      title: Reference and Target Definition
+      type: Table
+      rows: 0
+      clearWith: [referenceType, referenceDescription, targetDefinition]
+      columns:
+      - name: setting
+        title: Setting
+        type: text
+      - name: value
+        title: Definition
+        type: text
+
+    - name: readerReferenceExclusions
+      title: Unavailable Reference Classifications
+      type: Table
+      visible: (readerWorkflow != 'off' && (readerNondiagnostic || readerFormat:long))
+      rows: 0
+      clearWith: *id001
+      columns:
+      - name: value
+        title: Raw reference value
+        type: text
+      - name: status
+        title: Status
+        type: text
+      - name: n
+        title: Cases
+        type: integer
 
 refs:
     - ClinicoPathJamoviModule

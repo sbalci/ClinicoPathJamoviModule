@@ -33,7 +33,7 @@ ordinalmixedmodelClass <- R6::R6Class(
                         </ul>
                         <h3>Proportional Odds Assumption</h3>
                         <p>The default logit link assumes proportional odds: the effect of predictors is
-                        constant across all category thresholds. The nominal test checks this assumption.</p>
+                        constant across all category thresholds. A proportional-odds test is not available for this mixed model.</p>
                     </div>
                     </body></html>"
                 )
@@ -42,6 +42,11 @@ ordinalmixedmodelClass <- R6::R6Class(
         },
 
         .run = function() {
+            self$results$instructions$setContent("")
+            self$results$methodExplanation$setContent("")
+            for (name in c("modelFitTable", "fixedEffects", "thresholds", "randomEffects",
+                           "propOddsTestTable", "conditionProbs"))
+                self$results[[name]]$deleteRows()
 
             if (is.null(self$options$dep) || is.null(self$options$randomTerms) ||
                 length(self$options$randomTerms) == 0)
@@ -102,15 +107,13 @@ ordinalmixedmodelClass <- R6::R6Class(
                           self$options$fixedCovs, self$options$randomTerms)
                 cols <- unique(cols)
 
-                analysis_data <- data.frame(stringsAsFactors = FALSE)
-                for (col in cols) {
-                    if (!is.null(data[[col]])) {
-                        analysis_data[[col]] <- data[[col]]
-                    }
-                }
+                analysis_data <- as.data.frame(setNames(lapply(cols, function(col) {
+                    if (is.null(data[[col]])) stop("A selected variable is unavailable.")
+                    data[[col]]
+                }), cols), check.names = FALSE)
 
                 # Remove incomplete cases
-                analysis_data <- analysis_data[complete.cases(analysis_data), ]
+                analysis_data <- droplevels(analysis_data[complete.cases(analysis_data), , drop = FALSE])
                 if (nrow(analysis_data) < 10) {
                     self$results$instructions$setContent(
                         "<p>Insufficient complete cases for model fitting (need at least 10).</p>"
@@ -143,15 +146,10 @@ ordinalmixedmodelClass <- R6::R6Class(
                 for (rt in self$options$randomTerms) {
                     analysis_data[[rt]] <- as.factor(analysis_data[[rt]])
                 }
-                # TODO (correctness, ⚠ behavior risk): `as.numeric()` on a factor returns
-                # level indices, not the jamovi values-attribute coding. fixedCovs is
-                # permitted:numeric so should not arrive as factor in practice, but if a
-                # user picks a factor that R coerces, downstream estimates would be wrong.
-                # Consider guarding with `is.factor(analysis_data[[cv]])` → reject, or
-                # swap to `jmvcore::toNumeric()`. Needs manual review of expected semantics.
-                # Ensure numeric for covariates
                 for (cv in self$options$fixedCovs) {
-                    analysis_data[[cv]] <- as.numeric(analysis_data[[cv]])
+                    if (!is.numeric(analysis_data[[cv]]) ||
+                        any(!is.finite(analysis_data[[cv]])))
+                        stop("Covariates must contain finite numeric values.")
                 }
 
                 return(analysis_data)
@@ -191,9 +189,8 @@ ordinalmixedmodelClass <- R6::R6Class(
                     paste(random_parts, collapse = " + ")
                 )
 
-                # `|` allow-listed for lme4-style random-effects bar `(1|group)` (built at L177).
-                # composeTerm has already backtick-quoted all variable names (Defense 1).
-                formula <- jmvcore::asFormula(formula_str, additional_allowed_functions = c("|"))
+                # The safe formula parser already permits the random-effects operator.
+                formula <- jmvcore::asFormula(formula_str)
 
                 # Fit CLMM
                 model <- ordinal::clmm(
@@ -245,6 +242,10 @@ ordinalmixedmodelClass <- R6::R6Class(
             coefs <- summ$coefficients
 
             # Only the fixed effect rows (not thresholds)
+            table$setNote("ci_scale", if (self$options$oddsRatios &&
+                                         self$options$link == "logit")
+                "Confidence intervals are on the odds-ratio scale."
+                else "Confidence intervals are on the coefficient (link) scale.")
             beta_names <- names(model$beta)
             if (is.null(beta_names) || length(beta_names) == 0) {
                 table$addRow(rowKey = 1, values = list(
@@ -275,12 +276,15 @@ ordinalmixedmodelClass <- R6::R6Class(
                     p = p_val
                 )
 
-                if (self$options$oddsRatios) {
+                if (self$options$oddsRatios && self$options$link == "logit") {
                     vals$or <- exp(est)
                 }
                 if (self$options$confInt) {
-                    vals$ciLower <- exp(est - z_crit * se)
-                    vals$ciUpper <- exp(est + z_crit * se)
+                    bounds <- est + c(-1, 1) * z_crit * se
+                    if (self$options$oddsRatios && self$options$link == "logit")
+                        bounds <- exp(bounds)
+                    vals$ciLower <- bounds[1]
+                    vals$ciUpper <- bounds[2]
                 }
 
                 table$addRow(rowKey = i, values = vals)
@@ -335,103 +339,18 @@ ordinalmixedmodelClass <- R6::R6Class(
         },
 
         .populatePropOddsTest = function(model) {
-
             table <- self$results$propOddsTestTable
-
-            tryCatch({
-                nom_test <- ordinal::nominal_test(model)
-
-                test_df <- as.data.frame(nom_test)
-                test_names <- rownames(test_df)
-
-                row_key <- 1
-                for (i in seq_along(test_names)) {
-                    nm <- test_names[i]
-                    if (nm == "<none>") next
-
-                    # Extract values safely
-                    chisq_col <- grep("stat|Chisq", colnames(test_df), value = TRUE)
-                    df_col <- grep("^df$", colnames(test_df), value = TRUE)
-                    p_col <- grep("Pr|p", colnames(test_df), value = TRUE)
-
-                    chisq_val <- if (length(chisq_col) > 0) test_df[i, chisq_col[1]] else NA
-                    df_val <- if (length(df_col) > 0) test_df[i, df_col[1]] else NA
-                    p_val <- if (length(p_col) > 0) test_df[i, p_col[1]] else NA
-
-                    conclusion <- if (!is.na(p_val) && p_val < 0.05) {
-                        "Proportional odds assumption may be violated (p < 0.05)"
-                    } else if (is.na(p_val)) {
-                        "Could not determine"
-                    } else {
-                        "Proportional odds assumption is tenable"
-                    }
-
-                    table$addRow(rowKey = row_key, values = list(
-                        term = nm,
-                        chisq = as.numeric(chisq_val),
-                        df = as.integer(df_val),
-                        p = as.numeric(p_val),
-                        conclusion = conclusion
-                    ))
-                    row_key <- row_key + 1
-                }
-            }, error = function(e) {
-                table$addRow(rowKey = 1, values = list(
-                    term = "Test could not be performed",
-                    chisq = NA,
-                    df = NA,
-                    p = NA,
-                    conclusion = paste("Error:", e$message)
-                ))
-            })
+            table$deleteRows()
+            table$setNote("unavailable", paste("Not available for cumulative link mixed models.",
+                "ordinal::nominal_test supports clm, not clmm; no test was performed."))
         },
 
         .populateConditionProbs = function(model, data) {
-
             table <- self$results$conditionProbs
-
-            tryCatch({
-                dep_name <- self$options$dep
-                resp_levels <- levels(data[[dep_name]])
-                row_key <- 1
-
-                for (ff in self$options$fixedFactors) {
-                    factor_levels <- levels(data[[ff]])
-                    for (lv in factor_levels) {
-                        newdata <- data[1, , drop = FALSE]
-                        newdata[[ff]] <- factor(lv, levels = factor_levels)
-
-                        pred <- tryCatch(
-                            predict(model, newdata = newdata, type = "prob"),
-                            error = function(e) NULL
-                        )
-
-                        if (!is.null(pred) && !is.null(pred$fit)) {
-                            prob_str <- paste(
-                                sapply(seq_along(resp_levels), function(j) {
-                                    sprintf("%s: %.3f", resp_levels[j], pred$fit[j])
-                                }),
-                                collapse = ", "
-                            )
-                        } else {
-                            prob_str <- "Could not compute"
-                        }
-
-                        table$addRow(rowKey = row_key, values = list(
-                            factor = ff,
-                            level = lv,
-                            probabilities = prob_str
-                        ))
-                        row_key <- row_key + 1
-                    }
-                }
-            }, error = function(e) {
-                table$addRow(rowKey = 1, values = list(
-                    factor = "Error",
-                    level = "",
-                    probabilities = e$message
-                ))
-            })
+            table$deleteRows()
+            table$setNote("unavailable", paste("Marginal category probabilities are not available",
+                "in this analysis. Their definition requires an explicit covariate grid and",
+                "a choice between conditioning on or integrating over random effects."))
         },
 
         .generateMethodExplanation = function(model) {
@@ -458,7 +377,7 @@ ordinalmixedmodelClass <- R6::R6Class(
                 "<p>The cumulative model assumes that the ordinal response Y has categories ",
                 "1 &lt; 2 &lt; ... &lt; J, and models:</p>",
                 "<p style='font-family: monospace; background-color: rgba(88, 88, 88, 0.06); padding: 8px; color: inherit;'>",
-                "logit[P(Y \u{2264} j)] = \u{03B1}<sub>j</sub> - X\u{03B2} - Zu</p>",
+                "g[P(Y \u{2264} j)] = \u{03B1}<sub>j</sub> - X\u{03B2} - Zu</p>",
                 "<p>where \u{03B1}<sub>j</sub> are threshold parameters, X\u{03B2} are fixed effects, ",
                 "and Zu are random effects.</p>",
 
@@ -466,10 +385,10 @@ ordinalmixedmodelClass <- R6::R6Class(
                 "<ul>",
                 "<li><strong>Positive coefficients</strong>: Higher values of the predictor are associated ",
                 "with higher ordinal categories</li>",
-                "<li><strong>Odds Ratios &gt; 1</strong>: The odds of being in a higher category increase ",
-                "with the predictor</li>",
-                "<li><strong>Proportional odds</strong>: The effect is assumed constant across all ",
-                "category thresholds (test this assumption)</li>",
+                if (self$options$link == "logit") paste0(
+                    "<li>Exponentiated logit coefficients are proportional odds ratios for ",
+                    "higher categories. This assumption is not tested by this analysis.</li>")
+                else "<li>Coefficients and their intervals use the selected link scale.</li>",
                 "</ul>",
 
                 "<h4>Clinical Applications</h4>",

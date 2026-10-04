@@ -1,6 +1,7 @@
+jus: '3.0'
 title: Medical Decision Calculator
 name: decisioncalculator
-jus: '3.0'
+
 stage: 0
 compilerMode: tame
 children:
@@ -233,3 +234,19 @@ children:
                     name: tn2
                     label: 'TN'
                     format: number
+
+  - type: CollapseBox
+    label: Deployment workload
+    collapsed: true
+    children:
+    - type: CheckBox
+      name: showWorkload
+    - type: TextBox
+      name: workloadPopulationSize
+      format: number
+    - type: TextBox
+      name: prevalenceScenarios
+      format: string
+    - type: TextBox
+      name: analysisUnit
+      format: string

@@ -11,8 +11,8 @@ dc_fix_fixture <- function() {
 
 dc_fix_analysis <- function(...) {
     opts <- do.call(ClinicoPath:::decisioncompareOptions$new, c(list(
-        gold = "gold", goldPositive = "P", test1 = "a", test1Positive = "P",
-        test2 = "b", test2Positive = "P", statComp = TRUE
+        gold = "gold", goldPositive = "P", goldNegative = "N", test1 = "a", test1Positive = "P", test1Negative = "N",
+        test2 = "b", test2Positive = "P", test2Negative = "N", statComp = TRUE
     ), list(...)))
     analysis <- ClinicoPath:::decisioncompareClass$new(options = opts, data = dc_fix_fixture())
     analysis$run()

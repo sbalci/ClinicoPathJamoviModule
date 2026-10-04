@@ -20,6 +20,12 @@ jjwithinstats(
   pairwisecomparisons = FALSE,
   pairwisedisplay = "significant",
   padjustmethod = "holm",
+  pairedEffects = FALSE,
+  pairedEstimator = "mean",
+  pairedCIMethod = "bootstrap",
+  pairedBootstrap = 2000,
+  pairedUnits = "",
+  pairedTimeRatios = FALSE,
   effsizetype = "biased",
   violin = TRUE,
   boxplot = TRUE,
@@ -87,6 +93,36 @@ identifying when changes occur during treatment or disease progression.}
 
 \item{padjustmethod}{.}
 
+\item{pairedEffects}{Report changes as the later selected measurement minus
+the earlier one. Each row must be an independent case; do not stack
+multiple readers of the same cases. Uses the same complete cases across all
+selected measurements as the plots. Confidence intervals are pointwise.}
+
+\item{pairedEstimator}{Mean or median of the within-case differences, or
+their Hodges-Lehmann pseudomedian (median Walsh average). The pseudomedian
+is not generally the median difference; its location-shift interpretation
+requires symmetric differences.}
+
+\item{pairedCIMethod}{Bootstrap resamples complete independent case rows.
+Estimator-specific intervals use a t interval for the mean and the
+normal-approximation signed-rank interval for Hodges-Lehmann; the median
+still uses the paired percentile bootstrap. Constant resampling
+distributions do not produce a confidence interval. All intervals use
+Confidence level.}
+
+\item{pairedBootstrap}{Number of case-row resamples for paired change
+intervals. Uses Random seed without changing the caller's random-number
+stream.}
+
+\item{pairedUnits}{Units shared by the selected measurements, for example
+seconds.}
+
+\item{pairedTimeRatios}{For strictly positive measurements, report
+exp(mean(log(later) - log(earlier))), with an interval on the log scale
+transformed back. This is the geometric mean of within-case ratios, not the
+ratio of arithmetic means. A value below 1 means the later measurement is
+shorter. Ratios are withheld for a contrast containing nonpositive times.}
+
 \item{effsizetype}{.}
 
 \item{violin}{.}
@@ -144,9 +180,16 @@ A results object containing:
 \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
 \code{results$explanations} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$pairedChanges} \tab \tab \tab \tab \tab a table \cr
 \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 \code{results$ggpubrPlot} \tab \tab \tab \tab \tab an image \cr
 }
+
+Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+
+\code{results$pairedChanges$asDF}
+
+\code{as.data.frame(results$pairedChanges)}
 }
 \description{
 Wrapper Function for ggstatsplot::ggwithinstats and

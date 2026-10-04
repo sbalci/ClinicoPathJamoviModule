@@ -1,0 +1,7 @@
+"comparison","metric","n","diff","lower","upper","p","adjusted","method","policy"
+"first minus second","PPA",10,0,NA,NA,1,1,"McNemar mid-p; no discordance: p=1 convention","one_vs_rest"
+"first minus second","NPA",20,-0.5,NA,NA,0.0009765625,0.0029296875,"McNemar mid-p","one_vs_rest"
+"first minus second","OPA",30,-0.333333333333333,NA,NA,0.0009765625,0.0029296875,"McNemar mid-p","one_vs_rest"
+"first minus second","PPA",10,0,NA,NA,1,1,"McNemar mid-p; no discordance: p=1 convention","selected_levels"
+"first minus second","NPA",10,0,NA,NA,1,1,"McNemar mid-p; no discordance: p=1 convention","selected_levels"
+"first minus second","OPA",20,0,NA,NA,1,1,"McNemar mid-p; no discordance: p=1 convention","selected_levels"

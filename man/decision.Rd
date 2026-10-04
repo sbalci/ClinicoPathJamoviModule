@@ -6,6 +6,9 @@
 \usage{
 decision(
   data,
+  referenceType = "legacy",
+  referenceDescription = "",
+  targetDefinition = "",
   gold = NULL,
   goldPositive,
   newtest = NULL,
@@ -23,18 +26,32 @@ decision(
   showReportTemplate = FALSE,
   showAboutAnalysis = FALSE,
   showMisclassified = FALSE,
-  maxCasesShow = 50
+  maxCasesShow = 50,
+  showValidationContext = FALSE,
+  cohortRole = "",
+  samplingDesign = "",
+  thresholdSource = "",
+  modelVersion = "",
+  analysisUnit = "slide"
 )
 }
 \arguments{
 \item{data}{The data as a data frame. The data frame should contain the
 variables specified in the 'variables' option.}
 
+\item{referenceType}{Comparator interpretation; legacy preserves existing
+binary calculations. Consensus and method report agreement without
+disease-risk interpretation.}
+
+\item{referenceDescription}{.}
+
+\item{targetDefinition}{.}
+
 \item{gold}{The reference standard variable, used as each case's disease
 status.}
 
-\item{goldPositive}{The level indicating presence of disease in the gold
-standard variable.}
+\item{goldPositive}{The positive reference level; disease interpretation
+requires a disease standard.}
 
 \item{newtest}{The diagnostic test variable being evaluated for
 performance.}
@@ -57,8 +74,8 @@ rather than pooling them.}
 \item{pp}{Boolean selection whether to use known population prevalence
 instead of study prevalence.}
 
-\item{pprob}{Population disease prevalence as a proportion between 0.001
-and 0.999.}
+\item{pprob}{Population disease prevalence as a proportion strictly between
+0 and 1.}
 
 \item{od}{Boolean selection whether to show original data frequency tables.
 The raw data outputs (rawContingency, rawCounts and missingDataSummary) are
@@ -90,6 +107,18 @@ misclassified cases tables.}
 
 \item{maxCasesShow}{Maximum number of misclassified cases to display in
 tables.}
+
+\item{showValidationContext}{.}
+
+\item{cohortRole}{.}
+
+\item{samplingDesign}{.}
+
+\item{thresholdSource}{.}
+
+\item{modelVersion}{.}
+
+\item{analysisUnit}{.}
 }
 \value{
 A results object containing:
@@ -115,6 +144,13 @@ A results object containing:
 \code{results$falseNegativeTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$misclassificationInterpretation} \tab \tab \tab \tab \tab a html \cr
 \code{results$saveClassifications} \tab \tab \tab \tab \tab an output \cr
+\code{results$referenceDefinition} \tab \tab \tab \tab \tab a table \cr
+\code{results$comparatorCounts} \tab \tab \tab \tab \tab a table \cr
+\code{results$comparatorPopulation} \tab \tab \tab \tab \tab a table \cr
+\code{results$comparatorMetrics} \tab \tab \tab \tab \tab a table \cr
+\code{results$comparatorReport} \tab \tab \tab \tab \tab a html \cr
+\code{results$comparatorCases} \tab \tab \tab \tab \tab a table \cr
+\code{results$validationContext} \tab \tab \tab \tab \tab a table \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

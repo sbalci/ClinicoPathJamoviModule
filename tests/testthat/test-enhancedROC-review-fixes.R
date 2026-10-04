@@ -91,15 +91,15 @@ test_that("a mirrored [0,1] marker gives mirrored-identical clinical impact", {
 })
 
 test_that("under the default direction a wrong-way marker stays wrong-way in every panel", {
-    # The complement of the test above, and the reason it is not a bug that `lo` scores 0.145
-    # by default: the panels must AGREE. Auto-orienting inside the clinical code would have made
-    # net benefit positive while the AUC two panels up still said 0.145. If this ever flips to
-    # AUC 0.855, someone has reintroduced direction-fitting behind the user's back.
+    # Direction stays declared; net benefit also depends on prevalence and utility.
     d <- mirrored_data()
     r <- er_run(data = d, outcome = "y", predictors = "lo", positiveClass = "P",
                 clinicalImpact = TRUE, useObservedPrevalence = TRUE)
     expect_lt(as.numeric(as.data.frame(r$results$aucSummary)$auc[1]), 0.5)
-    expect_lt(as.numeric(as.data.frame(r$results$clinicalImpactTable)$net_benefit_per_100[1]), 0)
+    positive <- d$y == "P"
+    flagged <- d$lo >= 0.5
+    expected <- 100 * (mean(flagged & positive) - mean(flagged & !positive) * 0.1 / 0.9)
+    expect_equal(as.numeric(as.data.frame(r$results$clinicalImpactTable)$net_benefit_per_100[1]), expected)
     expect_match(er_strip(r$results$notices$content), "opposite direction")
 })
 
@@ -129,10 +129,11 @@ test_that("calibration also respects direction for a [0,1] marker", {
     expect_gt(brier("lo", "higher"), 0.5)
 })
 
-test_that("taking raw values as risks is announced, not assumed silently", {
+test_that("fixed score impact does not interpret scores as calibrated risks", {
     d <- mirrored_data()
     r <- er_run(data = d, outcome = "y", predictors = "hi", positiveClass = "P", clinicalImpact = TRUE)
-    expect_match(er_strip(r$results$notices$content), "Values Read as Risks")
+    expect_false(grepl("Values Read as Risks", er_strip(r$results$notices$content)))
+    expect_equal(as.numeric(as.data.frame(r$results$clinicalImpactTable)$threshold[1]), 0.5)
 })
 
 # ── C-2  Multi-class output must be attributable to a predictor ───────────────

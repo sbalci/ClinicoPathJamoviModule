@@ -237,14 +237,17 @@ test_that("the output states which way each marker was read", {
 })
 
 
-test_that("every declared option is read by the backend", {
+test_that("every declared option is read by the backend or controls visibility", {
     a_yaml <- readLines("../../jamovi/enhancedROC.a.yaml", warn = FALSE)
     declared <- sub("^    - name: ", "", grep("^    - name: [A-Za-z0-9_]+$", a_yaml, value = TRUE))
-    # `data` is the Data option; `nntCalculation` gates a column declaratively via a .r.yaml
+    # `data` is the Data option; `nntCalculation` and `decisionImpactTable` gate output via .r.yaml
     # visible: expression. `splineKnots` used to be excused here because splineCalibration was
     # unimplemented -- it is implemented now, so splineKnots must be read like anything else.
-    declared <- setdiff(declared, c("data", "nntCalculation"))
-    backend <- paste(readLines("../../R/enhancedROC.b.R", warn = FALSE), collapse = "\n")
+    declared <- setdiff(declared, c("data", "nntCalculation", "decisionImpactTable"))
+    result_yaml <- paste(readLines("../../jamovi/enhancedROC.r.yaml"), collapse = "\n")
+    expect_match(result_yaml, "visible: (clinicalImpact && decisionImpactTable && !validationPanel)", fixed = TRUE)
+    backend <- paste(c(readLines("../../R/enhancedROC.b.R", warn = FALSE),
+                       readLines("../../R/enhancedROC-validation.R", warn = FALSE)), collapse = "\n")
     unread <- declared[!vapply(declared, function(o)
         grepl(paste0("options\\$", o, "\\b"), backend), logical(1))]
     expect_equal(unread, character(0))

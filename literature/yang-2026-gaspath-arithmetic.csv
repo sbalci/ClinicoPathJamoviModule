@@ -1,0 +1,3 @@
+"strategy","total_slides","positive_slides","observed_prevalence","reported_sensitivity","rounded_specificity","inferred_false_positive_flags","inferred_total_flags","inferred_ppv","inferred_flags_per_1000","inferred_flags_per_detected_positive","rounding_compatible_fp_min","rounding_compatible_fp_max"
+"default_argmax",7056,45,0.00637755102040816,1,0.905,666.045,711.045,0.0632871337257136,100.771683673469,15.801,663,669
+"gas_probability_at_least_0.95",7056,45,0.00637755102040816,1,0.956,308.484,353.484,0.12730420613097,50.0969387755102,7.85520000000001,305,311

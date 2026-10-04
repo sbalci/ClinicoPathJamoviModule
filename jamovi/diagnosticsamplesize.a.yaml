@@ -9,41 +9,53 @@ version: '1.0.0'
 jas: '1.2'
 
 options:
+    - name: referenceType
+      title: Reference interpretation
+      type: List
+      options:
+        - name: disease
+          title: Disease reference standard
+        - name: consensus
+          title: Expert consensus (agreement)
+        - name: method
+          title: Comparison method (agreement)
+      default: disease
+
     - name: study_purpose
       title: Study Purpose
       type: List
       options:
         - name: diagnostic
-          title: Diagnostic (high Sens AND Spec)
+          title: Both reference strata
         - name: screening_sens
-          title: Screening (emphasize Sensitivity)
+          title: Positive reference stratum only
         - name: screening_spec
-          title: Screening (emphasize Specificity)
+          title: Negative reference stratum only
       default: diagnostic
 
     - name: target_sensitivity
-      title: Target Sensitivity
+      title: Target sensitivity / PPA
       type: Number
       min: 0.50
       max: 0.99
       default: 0.90
 
     - name: target_specificity
-      title: Target Specificity
+      title: Target specificity / NPA
       type: Number
       min: 0.50
       max: 0.99
       default: 0.90
 
     - name: prevalence
-      title: Disease Prevalence
+      title: Reference-positive proportion
       type: Number
-      min: 0.01
-      max: 0.99
+      min: 0.000000001
+      max: 0.999999999
       default: 0.10
 
     - name: ci_width
-      title: Desired 95 percent CI Width
+      title: Desired confidence interval width
       type: Number
       min: 0.05
       max: 0.30
@@ -79,12 +91,12 @@ options:
       default: false
 
     - name: show_comparison_table
-      title: Show Prevalence Sensitivity Table
+      title: Comparison of reference-positive proportions
       type: Bool
       default: false
 
     - name: comparison_prevalences
-      title: Prevalence Values for Comparison
+      title: Reference-positive proportions to compare
       type: String
       default: "0.05, 0.10, 0.20, 0.30, 0.50"
 
@@ -92,3 +104,14 @@ options:
       title: Show CI Method Comparison
       type: Bool
       default: false
+
+    - name: zeroMissPlanning
+      title: Plan independent positives assuming zero misses
+      type: Bool
+      default: false
+    - name: minimumSensitivityBound
+      title: Required lower sensitivity / PPA confidence bound
+      type: Number
+      default: 0.95
+      min: 0.5
+      max: 0.999999

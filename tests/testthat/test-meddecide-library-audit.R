@@ -888,9 +888,11 @@ test_that("fixed epiR rows are scaffolded in .init() and footnotes follow their 
     d2 <- d
     d2$test2 <- factor(ifelse(stats::runif(nrow(d2)) < ifelse(d2$gold == "Positive", 0.7, 0.25),
                               "Positive", "Negative"), levels = c("Negative", "Positive"))
+    # decisioncompare 1.1.0 requires an explicit negative level for every selected variable.
     cmp <- decisioncompareClass$new(options = decisioncompareOptions$new(
-      gold = "gold", goldPositive = "Positive", test1 = "test", test1Positive = "Positive",
-      test2 = "test2", test2Positive = "Positive", ci = TRUE), data = d2)
+      gold = "gold", goldPositive = "Positive", goldNegative = "Negative",
+      test1 = "test", test1Positive = "Positive", test1Negative = "Negative",
+      test2 = "test2", test2Positive = "Positive", test2Negative = "Negative", ci = TRUE), data = d2)
     quiet(cmp$init())
     expect_true(all(c("se", "sp", "pv.pos") %in% unlist(cmp$results$epirTable1$rowKeys)))
     expect_identical(cmp$results$epirTable2$rowKeys, cmp$results$epirTable1$rowKeys)

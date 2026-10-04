@@ -3,7 +3,7 @@ title: Illness-Death Multi-State Models
 menuGroup: SurvivalDT
 menuSubgroup: Multi-State Analysis
 menuSubtitle: Three-state models for disease progression with recovery and mortality
-version: 0.0.31
+version: '1.0.83'
 jas: '1.2'
 description:
   main: Exact-time, clock-forward multistate analysis from complete subject histories. Fits separate cause-specific

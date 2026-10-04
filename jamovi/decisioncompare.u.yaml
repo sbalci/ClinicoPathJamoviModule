@@ -1,15 +1,28 @@
+jus: '3.0'
 title: Compare Medical Decision Tests
 name: decisioncompare
-jus: '3.0'
+
 stage: 0
 compilerMode: tame
 children:
+  - type: CollapseBox
+    label: Reference Interpretation
+    collapsed: false
+    children:
+      - type: ComboBox
+        name: referenceType
+      - type: TextBox
+        name: referenceDescription
+        format: string
+      - type: TextBox
+        name: targetDefinition
+        format: string
   - type: VariableSupplier
     persistentItems: false
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Gold Standard
+        label: Reference / Comparator
         children:
           - type: VariablesListBox
             name: gold
@@ -20,7 +33,7 @@ children:
             enable: (gold)
           - type: LevelSelector
             name: goldNegative
-            enable: (gold && excludeIndeterminate)
+            enable: (gold)
       - type: TargetLayoutBox
         label: Test 1
         children:
@@ -33,7 +46,7 @@ children:
             enable: (test1)
           - type: LevelSelector
             name: test1Negative
-            enable: (test1 && excludeIndeterminate)
+            enable: (test1)
       - type: TargetLayoutBox
         label: Test 2
         children:
@@ -46,7 +59,7 @@ children:
             enable: (test2)
           - type: LevelSelector
             name: test2Negative
-            enable: (test2 && excludeIndeterminate)
+            enable: (test2)
       - type: TargetLayoutBox
         label: Test 3
         children:
@@ -59,7 +72,7 @@ children:
             enable: (test3)
           - type: LevelSelector
             name: test3Negative
-            enable: (test3 && excludeIndeterminate)
+            enable: (test3)
       - type: TargetLayoutBox
         label: Stratification (Optional)
         children:
@@ -67,26 +80,34 @@ children:
             name: stratify
             maxItemCount: 1
             isTarget: true
+  - type: LayoutBox
+    margin: normal
+    children:
+      - type: CheckBox
+        name: excludeIndeterminate
+  - type: Label
+    label: Select exact positive and negative levels. Recode ordinal cutoffs before analysis.
   - type: CollapseBox
     label: Statistical Options
     collapsed: true
     children:
       - type: CheckBox
         name: ci
-        enable: (!pp)
+        enable: (!pp || ci || referenceType:consensus || referenceType:method)
       - type: CheckBox
         name: opa
+        enable: (referenceType:legacy || referenceType:disease)
       - type: CheckBox
         name: useOpaCriterion
-        enable: (opa)
+        enable: ((opa) && (referenceType:legacy || referenceType:disease))
       - type: TextBox
         name: niMargin
         label: Minimum acceptable OPA (%)
         format: number
-        enable: (opa && useOpaCriterion)
+        enable: ((opa && useOpaCriterion) && (referenceType:legacy || referenceType:disease))
       - type: ComboBox
         name: ciMethod
-        enable: (opa)
+        enable: ((opa) && (referenceType:legacy || referenceType:disease))
       - type: CheckBox
         name: statComp
       - type: ComboBox
@@ -98,12 +119,12 @@ children:
     children:
       - type: CheckBox
         name: pp
-        enable: (!ci)
+        enable: ((!ci || pp) && (referenceType:legacy || referenceType:disease))
       - type: TextBox
         name: pprob
         label: Prior Probability
         format: number
-        enable: (pp)
+        enable: ((pp) && (referenceType:legacy || referenceType:disease))
   - type: CollapseBox
     label: Visualizations
     collapsed: true
@@ -120,20 +141,46 @@ children:
     children:
       - type: CheckBox
         name: od
+        enable: (referenceType:legacy || referenceType:disease)
       - type: CheckBox
         name: fnote
+        enable: (referenceType:legacy || referenceType:disease)
       - type: CheckBox
         name: showSummary
-        enable: (statComp)
+        enable: ((statComp) && (referenceType:legacy || referenceType:disease))
       - type: CheckBox
         name: showExplanations
+        enable: (referenceType:legacy || referenceType:disease)
       - type: CheckBox
         name: showReportSentence
-        enable: (statComp)
+        enable: ((statComp) && (referenceType:legacy || referenceType:disease))
       - type: CheckBox
         name: showDescriptiveReport
-  - type: LayoutBox
-    margin: large
+        enable: (referenceType:legacy || referenceType:disease)
+
+  - type: CollapseBox
+    label: Validation Provenance
+    collapsed: true
     children:
-      - type: CheckBox
-        name: excludeIndeterminate
+    - type: CheckBox
+      name: showValidationContext
+    - type: TextBox
+      name: cohortRole
+      format: string
+      enable: (showValidationContext)
+    - type: TextBox
+      name: samplingDesign
+      format: string
+      enable: (showValidationContext)
+    - type: TextBox
+      name: thresholdSource
+      format: string
+      enable: (showValidationContext)
+    - type: TextBox
+      name: modelVersion
+      format: string
+      enable: (showValidationContext)
+    - type: TextBox
+      name: analysisUnit
+      format: string
+      enable: (showValidationContext)

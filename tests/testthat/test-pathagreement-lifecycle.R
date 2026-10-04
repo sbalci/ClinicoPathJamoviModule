@@ -240,3 +240,36 @@ test_that("progress announcements are removed while explanatory warnings remain"
   expect_match(a$results$warnings$content, "data-severity='strong_warning'", fixed = TRUE)
   expect_match(a$results$warnings$content, "Strong warning")
 })
+
+test_that("long reader-study tables survive save/load with declared comparator and ND state", {
+  skip_if_not_installed("RProtoBuf")
+  pa_lifecycle_transport()
+  d <- expand.grid(case = paste0("C", 1:12), reader = c("R1", "R2"),
+    modality = c("Baseline", "AI"), stringsAsFactors = FALSE)
+  d$reference <- rep(c("P", "N"), length.out = nrow(d))
+  d$rating <- ordered(rep(c("II", "III", "IV", "I"), length.out = nrow(d)),
+                      c("I", "II", "III", "IV", "V", "VI"))
+  args <- list(readerWorkflow = "ordinal_cutoff", readerFormat = "long", caseID = "case",
+    readerID = "reader", modality = "modality", rating = "rating", ordinalCutoff = "III",
+    baselineModality = "Baseline", comparisonModality = "AI",
+    referenceStandard = "reference", referencePositive = "P", referenceNegative = "N",
+    referenceType = "consensus", readerNondiagnostic = TRUE, readerNondiagnosticLevel = "I",
+    readerAllObservedAgreement = TRUE, readerModalityComparison = TRUE,
+    modalityPopulation = "all_observed", readerTransitions = TRUE)
+  a <- do.call(pa_lifecycle_new, c(list(data = d), args))
+  pa_lifecycle_options_pb(a$options)
+  a$run()
+  file <- tempfile(); withr::defer(unlink(file))
+  a$.setStatePathSource(function() file); a$.save()
+  b <- do.call(pa_lifecycle_new, c(list(data = d), args))
+  pa_lifecycle_options_pb(b$options)
+  b$.setStatePathSource(function() file)
+  b$init(); b$postInit(); b$.load()
+  b$.__enclos_env__$private$.data <- NULL
+  for (name in c("readerAvailability", "readerMapping", "readerObservedAgreement",
+    "readerModalitySummary", "readerModalityContrast", "readerTransitionsTable",
+    "readerTransitionMatrix", "pathReferenceDefinition")) {
+    expect_equal(b$results[[name]]$asDF, a$results[[name]]$asDF, info = name)
+  }
+  expect_equal(a$results$readerTransitionMatrix$rowCount, 72)
+})

@@ -1,7 +1,7 @@
----
+jus: '3.0'
 name: diagnosticsamplesize
 title: Diagnostic Test Sample Size Calculator
-jus: '3.0'
+
 stage: 0
 compilerMode: tame
 
@@ -13,13 +13,15 @@ children:
         label: Study Design
         children:
           - type: ComboBox
+            name: referenceType
+          - type: ComboBox
             name: study_purpose
 
   - type: LayoutBox
     margin: large
     children:
       - type: Label
-        label: Target Diagnostic Accuracy
+        label: Target Conditional Proportions
         children:
           - type: TextBox
             name: target_sensitivity
@@ -39,7 +41,7 @@ children:
           - type: TextBox
             name: prevalence
             format: number
-            suffix: disease prevalence
+            suffix: reference-positive fraction
           - type: TextBox
             name: ci_width
             format: number
@@ -83,3 +85,13 @@ children:
         enable: (show_comparison_table)
       - type: CheckBox
         name: show_method_comparison
+
+  - type: CollapseBox
+    label: Zero-miss precision planning
+    collapsed: true
+    children:
+    - type: CheckBox
+      name: zeroMissPlanning
+    - type: TextBox
+      name: minimumSensitivityBound
+      format: number

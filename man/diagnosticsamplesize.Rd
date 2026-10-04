@@ -5,6 +5,7 @@
 \title{Diagnostic Test Sample Size Calculator}
 \usage{
 diagnosticsamplesize(
+  referenceType = "disease",
   study_purpose = "diagnostic",
   target_sensitivity = 0.9,
   target_specificity = 0.9,
@@ -17,10 +18,14 @@ diagnosticsamplesize(
   show_references = FALSE,
   show_comparison_table = FALSE,
   comparison_prevalences = "0.05, 0.10, 0.20, 0.30, 0.50",
-  show_method_comparison = FALSE
+  show_method_comparison = FALSE,
+  zeroMissPlanning = FALSE,
+  minimumSensitivityBound = 0.95
 )
 }
 \arguments{
+\item{referenceType}{.}
+
 \item{study_purpose}{.}
 
 \item{target_sensitivity}{.}
@@ -46,6 +51,10 @@ diagnosticsamplesize(
 \item{comparison_prevalences}{.}
 
 \item{show_method_comparison}{.}
+
+\item{zeroMissPlanning}{.}
+
+\item{minimumSensitivityBound}{.}
 }
 \value{
 A results object containing:
@@ -56,6 +65,7 @@ A results object containing:
 \code{results$method_comparison} \tab \tab \tab \tab \tab a table \cr
 \code{results$methodology} \tab \tab \tab \tab \tab a html \cr
 \code{results$references} \tab \tab \tab \tab \tab a html \cr
+\code{results$zeroMissPlan} \tab \tab \tab \tab \tab a table \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

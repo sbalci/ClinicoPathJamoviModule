@@ -36,7 +36,7 @@ children:
           - type: TextBox
             name: sample_size
             format: number
-            suffix: " subjects"
+            suffix: " subjects (complete pairs for paired t-test)"
 
   - type: LayoutBox
     margin: large
@@ -47,7 +47,7 @@ children:
           - type: TextBox
             name: effect_size
             format: number
-            suffix: " Cohen's d"
+            suffix: " d (paired test uses d_z)"
           - type: TextBox
             name: mean_difference
             format: number
@@ -71,6 +71,7 @@ children:
         children:
           - type: TextBox
             name: allocation_ratio
+            enable: (!test_type:paired_ttest)
             format: number
             suffix: " T:C ratio"
           - type: CheckBox

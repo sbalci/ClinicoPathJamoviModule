@@ -953,7 +953,7 @@ flexmultistateBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             super$initialize(
                 package = "ClinicoPath",
                 name = "flexmultistate",
-                version = c(0,0,3),
+                version = c(1,0,83),
                 options = options,
                 results = flexmultistateResults$new(options=options),
                 data = data,

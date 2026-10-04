@@ -5,6 +5,88 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-10-04 — decisioncompare release check, second pass: an "explicit" level that the client chose, and strings the catalog never saw
+
+- **Failure modes:**
+  - **Levels that were not explicit.** The explicit-mapping contract said no level is ever
+    inferred. Yet without `allowNone: true` the jamovi client pre-selects `levels[0]` in every
+    `LevelSelector`, so positive and negative started identical and a quick fix could leave an
+    inverted mapping.
+  - **Strings the catalog never saw.** `jmvcore::.(` followed by a line break, with the literal
+    on the next line, is invisible to the catalog extractor. Three notes were "wrapped" but could
+    never be translated.
+  - **Braces rewritten.** `.fmt()` rewrites `{`/`}` inside values, so a level labelled `{1+}` was
+    recorded as `(1+)` in the rule meant to document the exact recoding.
+  - **Radar drawn wrong.** A filled `geom_polygon` on a three-level discrete polar axis closes
+    back through the middle spoke, so the shaded area was a crescent, not the agreement profile.
+  - **Concurrent writer.** An agent outside Claude Code (IDE-hosted Codex, not in `ListAgents`)
+    edited the same analysis mid-check and left `.h.R` stale, so every run errored until its
+    `prepare()`.
+- **Detection signal:** a 109-agent review workflow (5 dimensions, 3-lens adversarial verify),
+  then a 71-agent verification of the fixes. The concurrent writer showed up as mtimes that did
+  not match this session's edits.
+- **Prevention rules:**
+  - Every `Level` option that must be chosen explicitly gets `allowNone: true`.
+  - Keep each `.()` string literal on the same line as `jmvcore::.(`. After `i18nUpdate()`, grep
+    `catalog.pot` for a new msgid before calling it translatable.
+  - Format user labels with positional `sprintf()` templates, not `.fmt()`.
+  - Draw radar charts as a closed `geom_path` on a continuous angle, repeating the first spoke.
+  - Before final verification, compare the target files' mtimes with your own edits. If something
+    else is writing, verify in an isolated copy and do not run `prepare()` in the shared tree.
+
+---
+
+## 2026-10-04 — decisioncompare: a mode switch greys out a box but keeps its value
+
+- **Failure mode:** the explicit-mapping pass added `referenceType` and disabled the Prior
+  probability box (`pp`) in consensus/method modes. A disabled jamovi control keeps its value and
+  still reaches R. So a `pp` ticked in disease mode had three effects in comparator mode:
+  - `.validateInputs()` announced "PPV/NPV will be calculated using the supplied population
+    prevalence" for an analysis that reports no PPV/NPV.
+  - The CI box (`enable: (!pp)`) stayed disabled, so comparator intervals could not be requested.
+  - A pair of mutually exclusive enable rules could also deadlock: tick `ci` in comparator mode,
+    switch back, and both boxes were ticked, both disabled, and the analysis stopped with
+    "Conflicting Options".
+
+  The same pass, and the IR-01 pass before it, never ran `i18nUpdate()`, so 59 backend msgids
+  were in no catalog at all.
+- **Detection signal:** release-profile check. The UI walk-through came from reading the
+  `.u.yaml` enable rules against the backend's option reads; Codex flagged the same pair
+  independently. A Turkish-coverage script parsed every `.()` in `.b.R` and looked it up in
+  `tr.po`.
+- **Prevention rules:**
+  - When a mode disables a control, the backend must also ignore that option in that mode.
+    Greying out the control is not enough.
+  - Mutually exclusive checkboxes use `enable: (!other || self)`, so a ticked box can always be
+    unticked whatever another control did to its partner.
+  - After any pass that adds or rewords a `.()` string, run `jmvtools::i18nUpdate()` and count
+    the analysis's empty `msgstr` before calling it done.
+
+---
+
+## 2026-10-04 — decisioncompare: an audit oracle encoded the old method, not the documented routing
+
+- **Failure mode:** a parallel pass on 2026-10-03 switched Cochran's Q (three tests, at most 30
+  informative cases) from the chi-square approximation to an exact conditional p with no df. Seven
+  audit checks and four validation checks went red overnight. The module was right (its p equals a
+  brute-force count over all 3^m arrangements and an independent multinomial derivation); the
+  oracles had hard-coded `pchisq(Q, 2)`. Two harness slips came with the re-basing:
+  - `c(p = s)` where `s <- k[2]` carries the name `f` produces the name `p.f`, so `[["p"]]` failed
+    with "subscript out of bounds".
+  - A hand fraction (7547/2^20) compared with `pbinom` arithmetic at tolerance 1e-15 failed on
+    rounding alone.
+- **Detection signal:** re-running the audit against a clean `git archive HEAD` copy before writing
+  the validation report; every FAIL named the Cochran row or a phrase the other pass had reworded.
+- **Prevention rules:**
+  - When a module picks a method by a documented rule (here the method note), make the oracle apply
+    the same rule and check the rule separately (the note's text), rather than hard-coding one method.
+  - Verify a newly introduced exact test against brute-force enumeration on small cases and an
+    independently derived formula on large ones before updating any expectation to its value.
+  - Unname counts before building named result vectors (`k[[2]]`, not `k[2]`).
+  - Compare a hand fraction with floating-point library output at 1e-12, not 1e-15.
+
+---
+
 ## 2026-10-02 — decisioncompare: a ranking by one metric printed beside a significance test of another
 
 - **Failure mode:** the narrative panels ranked tests by balanced accuracy (sensitivity and

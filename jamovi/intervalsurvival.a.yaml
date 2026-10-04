@@ -2,7 +2,7 @@ name: intervalsurvival
 title: Interval-Censored Survival Analysis
 menuGroup: ClinicoPathDT
 menuSubgroup: Survival Analysis
-version: 0.0.3
+version: '1.0.83'
 jas: '1.2'
 description:
   main: Single-event interval-censored survival analysis using genuine Turnbull, proportional-hazards,

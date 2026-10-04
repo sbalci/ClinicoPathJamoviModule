@@ -7,10 +7,10 @@
 # defect" assert the CORRECT behaviour and are skipped until the defect is fixed; remove the skip
 # when the fix lands.
 
-val_dc <- function(data, gold = "gold", goldPositive = "D", goldNegative = NULL,
-                   test1 = "t1", test1Positive = "+", test1Negative = NULL,
-                   test2 = "t2", test2Positive = "+", test2Negative = NULL,
-                   test3 = NULL, test3Positive = NULL, test3Negative = NULL,
+val_dc <- function(data, gold = "gold", goldPositive = "D", goldNegative = "N",
+                   test1 = "t1", test1Positive = "+", test1Negative = "-",
+                   test2 = "t2", test2Positive = "+", test2Negative = "-",
+                   test3 = NULL, test3Positive = NULL, test3Negative = if (is.null(test3)) NULL else "-",
                    stratify = NULL, ...) {
     # Every Level argument explicit; variables as strings through do.call (a bare symbol would be
     # read by resolveQuo as the column NAME).
@@ -238,7 +238,7 @@ test_that("VAL C29: logit at OPA = 100% shows Clopper-Pearson limits (binom's co
 test_that("VAL C39/C41: Holm-adjusted McNemar p and Cochran's Q match closed forms and DescTools", {
     skip_if_not_installed("DescTools")
     d3 <- val_d3()
-    mc <- val_dc(d3, test3 = "t3", test3Positive = "+", statComp = TRUE)$mcnemarTable$asDF
+    mc <- val_dc(d3, test3 = "t3", test3Positive = "+", test3Negative = "-", statComp = TRUE)$mcnemarTable$asDF
     tv <- c("t1", "t2", "t3")
     correct <- function(v, ok) (d3[[v]][ok] == "+") == (d3$gold[ok] == "D")
     # raw p: the McNemar mid-p (Fagerland 2013 eq. 5/6) on each pair's own complete cases
@@ -270,7 +270,7 @@ test_that("VAL C52: swapping the two tests negates each difference and mirrors i
 test_that("VAL C04: swapping the reference level maps sensitivity to 1 - specificity and inverts the LRs", {
     d3 <- val_d3()
     a <- val_row(val_dc(d3)$comparisonTable$asDF, "t1")
-    b <- val_row(val_dc(d3, goldPositive = "N")$comparisonTable$asDF, "t1")
+    b <- val_row(val_dc(d3, goldPositive = "N", goldNegative = "D")$comparisonTable$asDF, "t1")
     expect_equal(c(b$Sens, b$Spec, b$PPV, b$NPV, b$AccurT, b$LRP, b$LRN),
                  c(1 - a$Spec, 1 - a$Sens, 1 - a$PPV, 1 - a$NPV, 1 - a$AccurT, 1 / a$LRP, 1 / a$LRN), tolerance = 1e-12)
 })
@@ -381,7 +381,7 @@ test_that("VAL-decisioncompare-04: copy-ready text never prints a p-value as 0.0
     d <- data.frame(gold = factor(as.character(hp[["Golden Standart"]]), c("0", "1")),
                     t1 = factor(as.character(hp[["New Test"]]), c("0", "1")),
                     t2 = factor(as.character(hp[["Rater 1"]]), c("0", "1")))
-    res <- val_dc(d, goldPositive = "1", test1Positive = "1", test2Positive = "1", statComp = TRUE,
+    res <- val_dc(d, goldPositive = "1", goldNegative = "0", test1Positive = "1", test1Negative = "0", test2Positive = "1", test2Negative = "0", statComp = TRUE,
                   showSummary = TRUE, showReportSentence = TRUE)
     sm <- val_text(res$summaryReport$content)
     rp <- val_text(res$reportSentence$content)
@@ -390,8 +390,8 @@ test_that("VAL-decisioncompare-04: copy-ready text never prints a p-value as 0.0
     expect_match(rp, "p < 0.001", fixed = TRUE)
     # the formatter's edges: a significant p never prints as 0.050
     a <- ClinicoPath:::decisioncompareClass$new(
-        options = ClinicoPath:::decisioncompareOptions$new(gold = "gold", goldPositive = "D", test1 = "t1",
-            test1Positive = "+", test2 = "t2", test2Positive = "+", test3 = NULL, test3Positive = NULL, stratify = NULL),
+        options = ClinicoPath:::decisioncompareOptions$new(gold = "gold", goldPositive = "D", goldNegative = "N", test1 = "t1",
+            test1Positive = "+", test1Negative = "-", test2 = "t2", test2Positive = "+", test2Negative = "-", test3 = NULL, test3Positive = NULL, stratify = NULL),
         data = val_d1())
     f <- a$.__enclos_env__$private$.formatP
     expect_identical(vapply(c(0.0004, 0.0123, 0.0496, 0.04996, 0.0504, 1), f, ""),
@@ -400,7 +400,7 @@ test_that("VAL-decisioncompare-04: copy-ready text never prints a p-value as 0.0
 
 test_that("VAL-decisioncompare-05: copy-ready Methods name every test run, and the report sentence carries N and the CI", {
     d3 <- val_d3()
-    res <- val_dc(d3, test3 = "t3", test3Positive = "+", statComp = TRUE, showDescriptiveReport = TRUE,
+    res <- val_dc(d3, test3 = "t3", test3Positive = "+", test3Negative = "-", statComp = TRUE, showDescriptiveReport = TRUE,
                   showReportSentence = TRUE)
     txt <- val_text(res$clinicalReport$content)
     # the Methods paragraph only: the Results paragraph says "McNemar's/Cochran's test" anyway
@@ -454,7 +454,7 @@ test_that("VAL-decisioncompare-08: no balanced-accuracy ranking is claimed when 
                      t1 = factor(rep("+", 60), c("+", "-")),
                      t2 = factor(rep(c("+", "-"), c(30, 30)), c("+", "-")),
                      t3 = factor(rep(c("+", "-"), c(35, 25)), c("+", "-")))
-    r3 <- val_dc(d3, test3 = "t3", test3Positive = "+", statComp = TRUE, showSummary = TRUE, showReportSentence = TRUE)
+    r3 <- val_dc(d3, test3 = "t3", test3Positive = "+", test3Negative = "-", statComp = TRUE, showSummary = TRUE, showReportSentence = TRUE)
     expect_lt(r3$mcnemarTable$asDF$p[r3$mcnemarTable$asDF$method == "Cochran's Q"], 0.05)
     expect_false(grepl("highest observed balanced accuracy", val_text(r3$summaryReport$content), fixed = TRUE))
     expect_false(grepl("highest observed balanced accuracy", val_text(r3$reportSentence$content), fixed = TRUE))
@@ -484,8 +484,8 @@ test_that("VAL-decisioncompare-09: an LR exactly on a band edge falls where Jaes
 
 test_that("VAL-decisioncompare-10: the radar plot scores LR+ = r and LR- = 1/r alike, continuously", {
     a <- ClinicoPath:::decisioncompareClass$new(
-        options = ClinicoPath:::decisioncompareOptions$new(gold = "gold", goldPositive = "D", test1 = "t1",
-            test1Positive = "+", test2 = "t2", test2Positive = "+", test3 = NULL, test3Positive = NULL, stratify = NULL),
+        options = ClinicoPath:::decisioncompareOptions$new(gold = "gold", goldPositive = "D", goldNegative = "N", test1 = "t1",
+            test1Positive = "+", test1Negative = "-", test2 = "t2", test2Positive = "+", test2Negative = "-", test3 = NULL, test3Positive = NULL, stratify = NULL),
         data = val_d1())
     p <- a$.__enclos_env__$private
     th <- p$LR_CLINICAL_THRESHOLDS
@@ -509,16 +509,17 @@ test_that("VAL-decisioncompare-12: an unused factor level does not raise the mul
     d$gold <- factor(as.character(d$gold), levels = c("D", "N", "Unused"))
     res <- val_dc(d)
     expect_false(grepl("Multi-Level Results Combined", res$notices$content, fixed = TRUE))
-    # a level that IS used still raises it
+    # An observed extra level now stops analysis unless exclusion is requested.
     d$gold[14] <- "Unused"
-    expect_match(val_dc(d)$notices$content, "Multi-Level Results Combined", fixed = TRUE)
+    expect_error(val_dc(d), "outside the selected positive/negative pair")
+    expect_equal(val_dc(d, excludeIndeterminate = TRUE)$levelMapping$asDF$otherN[1], 1)
 })
 
 test_that("VAL-decisioncompare-13: the heatmap legend keeps its labels under jamovi's own theme", {
     gt <- jmvcore:::getGlobalTheme("default", "jmv")
     a <- ClinicoPath:::decisioncompareClass$new(
-        options = ClinicoPath:::decisioncompareOptions$new(gold = "gold", goldPositive = "D", test1 = "t1",
-            test1Positive = "+", test2 = "t2", test2Positive = "+", test3 = NULL, test3Positive = NULL,
+        options = ClinicoPath:::decisioncompareOptions$new(gold = "gold", goldPositive = "D", goldNegative = "N", test1 = "t1",
+            test1Positive = "+", test1Negative = "-", test2 = "t2", test2Positive = "+", test2Negative = "-", test3 = NULL, test3Positive = NULL,
             stratify = NULL, heatmap = TRUE),
         data = val_d1())
     suppressWarnings(a$run())
@@ -689,8 +690,8 @@ test_that("Recommended McNemar variants (Fagerland 2013): under 10 discordant pa
 
 test_that("Recommended McNemar variants (Fagerland 2013): mid-p is the default; label and statistic per variant", {
     expect_identical(formals(ClinicoPath::decisioncompare)$mcnemarMethod, "midp")
-    opts <- ClinicoPath:::decisioncompareOptions$new(gold = "gold", goldPositive = "D", test1 = "t1", test1Positive = "+",
-        test2 = "t2", test2Positive = "+", test3 = NULL, test3Positive = NULL, stratify = NULL)
+    opts <- ClinicoPath:::decisioncompareOptions$new(gold = "gold", goldPositive = "D", goldNegative = "N", test1 = "t1", test1Positive = "+", test1Negative = "-",
+        test2 = "t2", test2Positive = "+", test2Negative = "-", test3 = NULL, test3Positive = NULL, stratify = NULL)
     expect_identical(opts$mcnemarMethod, "midp")
     d <- val_mc(1, 1, 7, 12)
     def <- val_dc(d, statComp = TRUE)$mcnemarTable$asDF   # option left out
@@ -716,7 +717,7 @@ test_that("Recommended McNemar variants (Fagerland 2013): with three tests the p
     raw_mid <- vapply(bc, function(x) dc_mcnemar_midp(x[1], x[2]), numeric(1))
     expect_equal(raw_mid, c(67 / 1024, 1941 / 16384, 1 - 24310 / 262144), tolerance = 1e-12)   # hand
     raw_asy <- vapply(bc, function(x) dc_mcnemar_asymptotic(x[1], x[2])[["p"]], numeric(1))
-    run3 <- function(m) val_dc(d3, test3 = "t3", test3Positive = "+", statComp = TRUE, mcnemarMethod = m)$mcnemarTable
+    run3 <- function(m) val_dc(d3, test3 = "t3", test3Positive = "+", test3Negative = "-", statComp = TRUE, mcnemarMethod = m)$mcnemarTable
     tabs <- list(midp = run3("midp"), asymptotic = run3("asymptotic"))
     mid <- tabs$midp$asDF
     asy <- tabs$asymptotic$asDF
@@ -761,7 +762,7 @@ test_that("Recommended McNemar variants (Fagerland 2013): a pair without discord
     excluded <- "Comparisons without discordant pairs are left out of the Holm-Bonferroni adjustment: their p = 1 is a convention, not a test result."
     cell <- function(tb, col) vapply(pairs, function(k) tb$getCell(rowKey = k, col = col)$value, if (col == "p") numeric(1) else "")
     for (m in names(raw)) {
-        tb <- val_dc(d3, test3 = "t3", test3Positive = "+", statComp = TRUE, mcnemarMethod = m)$mcnemarTable
+        tb <- val_dc(d3, test3 = "t3", test3Positive = "+", test3Negative = "-", statComp = TRUE, mcnemarMethod = m)$mcnemarTable
         expect_equal(unname(cell(tb, "p")), c(1, stats::p.adjust(rep(raw[[m]], 2), "holm")), tolerance = 1e-12, info = m)
         if (m == "midp") expect_equal(unname(cell(tb, "p")), c(1, 3 / 4, 3 / 4), tolerance = 1e-12)
         expect_identical(unname(cell(tb, "interpretation")), c(not_informative, tested, tested), info = m)
@@ -787,7 +788,7 @@ test_that("Recommended McNemar variants (Fagerland 2013): a last pair never obse
     d$t3[1:20] <- NA; d$t2[21:40] <- NA
     expect_equal(c(dc_mcnemar_midp(2, 6), dc_mcnemar_midp(7, 1)), c(46, 10) / 256, tolerance = 1e-12)
     for (m in c("midp", "asymptotic")) {
-        res <- val_dc(d, test3 = "t3", test3Positive = "+", statComp = TRUE, mcnemarMethod = m)
+        res <- val_dc(d, test3 = "t3", test3Positive = "+", test3Negative = "-", statComp = TRUE, mcnemarMethod = m)
         tb <- res$mcnemarTable
         expect_identical(unlist(tb$rowKeys), c("t1 vs t2", "t1 vs t3"), info = m)
         raw <- if (m == "midp") c(46, 10) / 256 else c(dc_mcnemar_asymptotic(2, 6)[["p"]], dc_mcnemar_asymptotic(7, 1)[["p"]])
@@ -805,7 +806,7 @@ test_that("Recommended McNemar variants (Fagerland 2013): a last pair never obse
     d0 <- val_from_correct(list(t1 = c(b1$x, b2$x), t2 = c(b1$y, rep(TRUE, 12)), t3 = c(rep(TRUE, 12), b2$y)))
     d0$t3[1:12] <- NA; d0$t2[13:24] <- NA
     for (m in c("midp", "asymptotic")) {
-        r0 <- val_dc(d0, test3 = "t3", test3Positive = "+", statComp = TRUE, mcnemarMethod = m, showDescriptiveReport = TRUE)
+        r0 <- val_dc(d0, test3 = "t3", test3Positive = "+", test3Negative = "-", statComp = TRUE, mcnemarMethod = m, showDescriptiveReport = TRUE)
         rs <- val_results(r0)
         expect_false(grepl("Methods Section:", rs, fixed = TRUE))   # the section was found
         expect_false(grepl("the tests were correct on exactly the same paired cases", rs, fixed = TRUE))
@@ -830,7 +831,7 @@ test_that("VAL round 5: with one tested pair the notes say so and no Holm exclus
     d <- val_from_correct(list(t1 = c(b1$x, b2$x), t2 = c(b1$y, rep(TRUE, 20)), t3 = c(rep(TRUE, 12), b2$y)))
     d$t3[1:12] <- NA; d$t2[13:32] <- NA
     for (m in c("midp", "asymptotic")) {
-        res <- val_dc(d, test3 = "t3", test3Positive = "+", statComp = TRUE, mcnemarMethod = m)
+        res <- val_dc(d, test3 = "t3", test3Positive = "+", test3Negative = "-", statComp = TRUE, mcnemarMethod = m)
         tb <- res$mcnemarTable
         raw <- if (m == "midp") dc_mcnemar_midp(7, 1) else dc_mcnemar_asymptotic(7, 1)[["p"]]
         expect_equal(tb$asDF$p[unlist(tb$rowKeys) == "t1 vs t3"], raw, tolerance = 1e-12, info = m)   # unadjusted
@@ -1010,8 +1011,8 @@ test_that("Recommended McNemar variants (Fagerland 2013): copy-ready p rounds ha
     expect_false(grepl("0.062", paste(sm, rp), fixed = TRUE))
     # the exact binary ties at the third decimal are k/16 with k odd; half up: 0.0625 -> 0.063, ..., 0.9375 -> 0.938
     a <- ClinicoPath:::decisioncompareClass$new(
-        options = ClinicoPath:::decisioncompareOptions$new(gold = "gold", goldPositive = "D", test1 = "t1",
-            test1Positive = "+", test2 = "t2", test2Positive = "+", test3 = NULL, test3Positive = NULL, stratify = NULL),
+        options = ClinicoPath:::decisioncompareOptions$new(gold = "gold", goldPositive = "D", goldNegative = "N", test1 = "t1",
+            test1Positive = "+", test1Negative = "-", test2 = "t2", test2Positive = "+", test2Negative = "-", test3 = NULL, test3Positive = NULL, stratify = NULL),
         data = val_d1())
     f <- a$.__enclos_env__$private$.formatP
     expect_identical(vapply(seq(1, 15, 2) / 16, f, ""),
@@ -1049,7 +1050,7 @@ test_that("Recommended McNemar variants (Fagerland 2013): with three tests the p
     post <- c(midp = "Post-hoc pairwise comparisons used the McNemar mid-p test with Holm-Bonferroni correction to identify specific differences between tests.",
               asymptotic = "Post-hoc pairwise comparisons used the asymptotic McNemar test without continuity correction, with Holm-Bonferroni correction, to identify specific differences between tests.")
     for (m in names(post)) {
-        res <- val_dc(d3, test3 = "t3", test3Positive = "+", statComp = TRUE, mcnemarMethod = m, showReportSentence = TRUE)
+        res <- val_dc(d3, test3 = "t3", test3Positive = "+", test3Negative = "-", statComp = TRUE, mcnemarMethod = m, showReportSentence = TRUE)
         mc <- res$mcnemarTable$asDF
         q <- mc[mc$method == "Cochran's Q", , drop = FALSE]
         expect_equal(c(q$n, q$stat, q$df), c(40, 30, NA), tolerance = 1e-12)
@@ -1078,7 +1079,7 @@ test_that("Recommended McNemar variants (Fagerland 2013): a test named 'Cochrane
     bc <- list(c(5, 5), c(7, 1), c(2, 6))
     for (m in c("midp", "asymptotic")) {
         res <- NULL
-        expect_no_error(res <- val_dc(d, test1 = "Cochrane", test2 = "t2", test3 = "t3", test3Positive = "+",
+        expect_no_error(res <- val_dc(d, test1 = "Cochrane", test2 = "t2", test3 = "t3", test3Positive = "+", test3Negative = "-",
                                       statComp = TRUE, mcnemarMethod = m, showSummary = TRUE, showReportSentence = TRUE))
         if (is.null(res)) next   # the crash is the failure; the other variant is still checked
         # the three pairwise rows, each on its own 20 complete cases, Holm-adjusted over 3; no Cochran row
@@ -1148,7 +1149,7 @@ test_that("Recommended McNemar variants (Fagerland 2013): mid-p agrees with exac
 test_that("the static notes of the McNemar and OPA tables do not end in whitespace", {
     # The notes compiled from the .r.yaml (a folded block that keeps its final newline would end in one).
     r <- ClinicoPath:::decisioncompareResults$new(options = ClinicoPath:::decisioncompareOptions$new(
-        gold = "gold", goldPositive = "D", test1 = "t1", test1Positive = "+", test2 = "t2", test2Positive = "+",
+        gold = "gold", goldPositive = "D", goldNegative = "N", test1 = "t1", test1Positive = "+", test1Negative = "-", test2 = "t2", test2Positive = "+", test2Negative = "-",
         test3 = NULL, test3Positive = NULL, stratify = NULL))
     for (tb in list(mcnemarTable = r$mcnemarTable, opaTable = r$opaTable)) {
         expect_identical(names(tb$notes), "note", info = tb$name)
@@ -1216,4 +1217,181 @@ test_that("VAL round 3 (fixed in round 4): without discordant pairs the Performa
         expect_false(grepl("No statistically significant difference in overall accuracy was detected", cr, fixed = TRUE), info = m)
         expect_false(grepl("non-significant result may simply reflect limited power", cr, fixed = TRUE), info = m)
     }
+})
+
+# ---------------------------------------------------------------------------------------------
+# /validate-function decisioncompare tests=write (2026-10-04): regression tests for the fixes of
+# the independent review (development-ideas/decisioncompare-independent-review-2026-10-02.md,
+# IR-01..IR-07), the per-class McNemar p, the tie wording and the exact conditional Cochran's Q.
+# Report: development-ideas/decisioncompare-validation-2026-10-04.md. Expected values are hand
+# arithmetic or closed forms; the fixtures are the audit script's B, B3 and R.
+# ---------------------------------------------------------------------------------------------
+
+# Fixture B: 20 D / 80 N. t1 sensitive (Se 19/20, Sp 56/80), t2 specific (Se 12/20, Sp 78/80).
+# Correctness discordance: only t1 right 7 (D, t1+ t2-), only t2 right 22 (N, t1+ t2-).
+val_irB <- function() val_expand(data.frame(
+    gold = c("D", "D", "D", "N", "N", "N"), t1 = c("+", "+", "-", "-", "+", "+"),
+    t2 = c("+", "-", "-", "-", "-", "+"), n = c(12, 7, 1, 56, 22, 2)))
+# Fixture B3: B plus t3 (Se 13/20, Sp 75/80). Balanced accuracy t1 .825 > t3 .79375 > t2 .7875;
+# overall accuracy t1 .75 < t3 .88 < t2 .90. Discordance (only first right, only second right):
+# t1-t2 (7, 22), t1-t3 (6, 19), t2-t3 (3, 1).
+val_irB3 <- function() val_expand(data.frame(
+    gold = c("D", "D", "D", "D", "N", "N", "N", "N"), t1 = c("+", "+", "+", "-", "-", "+", "+", "+"),
+    t2 = c("+", "-", "-", "-", "-", "-", "-", "+"), t3 = c("+", "+", "-", "-", "-", "+", "-", "+"),
+    n = c(12, 1, 6, 1, 56, 3, 19, 2)))
+# Fagerland et al. (2013) eq. (5)/(6), p = 1 without discordant pairs.
+val_ir_midp <- function(b, c) {
+    m <- b + c; k <- min(b, c)
+    if (m == 0) 1 else if (b == c) 1 - stats::dbinom(b, m, 0.5) / 2 else 2 * stats::pbinom(k, m, 0.5) - stats::dbinom(k, m, 0.5)
+}
+val_ir_p3 <- function(p) sprintf("%.3f", floor(p * 1000 + 0.5) / 1000)   # copy-ready p, half up
+
+test_that("IR-01: after a significant Cochran's Q the 3-test Summary and Report give each significant pair and its direction", {
+    r <- val_dc(val_irB3(), test3 = "t3", test3Positive = "+", test3Negative = "-", statComp = TRUE,
+                showSummary = TRUE, showReportSentence = TRUE)
+    # Holm (1979) written out: raw p sorted t1-t2 < t1-t3 < t2-t3, multipliers 3, 2, 1, running max.
+    p12 <- val_ir_midp(7, 22); p13 <- val_ir_midp(6, 19); p23 <- val_ir_midp(3, 1)
+    expect_equal(p23, 6 / 16, tolerance = 1e-12)
+    h12 <- 3 * p12; h13 <- max(h12, 2 * p13); h23 <- max(h13, p23)
+    mc <- r$mcnemarTable$asDF
+    expect_equal(mc$p[match(c("t1 vs t2", "t1 vs t3", "t2 vs t3"), mc$comparison)], c(h12, h13, h23), tolerance = 1e-12)
+    s12 <- sprintf("t2 classified significantly more cases correctly than t1: 22 of the 29 cases where exactly one of the two was correct (Holm-adjusted p = %s).", val_ir_p3(h12))
+    s13 <- sprintf("t3 classified significantly more cases correctly than t1: 19 of the 25 cases where exactly one of the two was correct (Holm-adjusted p = %s).", val_ir_p3(h13))
+    for (txt in list(val_text(r$summaryReport$content), val_text(r$reportSentence$content))) {
+        expect_match(txt, s12, fixed = TRUE)
+        expect_match(txt, s13, fixed = TRUE)
+        # t2 vs t3 is not significant (Holm p 0.375): no direction is claimed for it
+        expect_false(grepl("t3 classified significantly more cases correctly than t2", txt, fixed = TRUE))
+        expect_false(grepl("t2 classified significantly more cases correctly than t3", txt, fixed = TRUE))
+    }
+})
+
+test_that("IR-01: a balanced-accuracy leader that is significantly less accurate is called out in every narrative", {
+    conflict <- "t1 had the highest observed balanced accuracy but classified significantly fewer cases correctly than t2, t3."
+    why <- "Balanced accuracy weights sensitivity and specificity equally, whereas overall accuracy, which McNemar's test compares, weights them by the prevalence in this sample, so the two rankings can disagree"
+    r3 <- val_dc(val_irB3(), test3 = "t3", test3Positive = "+", test3Negative = "-", statComp = TRUE,
+                 showSummary = TRUE, showReportSentence = TRUE, showDescriptiveReport = TRUE)
+    for (txt in list(val_text(r3$summaryReport$content), val_text(r3$reportSentence$content),
+                     val_text(r3$clinicalReport$content))) {
+        expect_match(txt, conflict, fixed = TRUE)
+        expect_match(txt, why, fixed = TRUE)
+    }
+    # Two tests (fixture B): the Descriptive report names t1 (BA .825 > .7875) and now also says
+    # which test the significant McNemar result favours (mid-p 2804012/2^29, hand).
+    expect_equal(val_ir_midp(7, 22), 2804012 / 2^29, tolerance = 1e-12)
+    cr <- val_text(val_dc(val_irB(), statComp = TRUE, showDescriptiveReport = TRUE)$clinicalReport$content)
+    expect_match(cr, "t2 classified significantly more cases correctly than t1: 22 of the 29 cases where exactly one of the two was correct (p = 0.005).", fixed = TRUE)
+    expect_match(cr, "t1 had the highest observed balanced accuracy but classified significantly fewer cases correctly than t2.", fixed = TRUE)
+})
+
+test_that("t1: two tests tied on balanced accuracy, one significantly more accurate, are reported as a tie with a direction", {
+    # t1 Se 18/20 Sp 56/80, t2 Se 14/20 Sp 72/80: balanced accuracy 0.8 for both (the same doubles);
+    # accuracy discordance (4, 16): mid-p 7547/2^20 (hand: 2 (1+20+190+1140+4845) - 4845 over 2^20).
+    d <- val_expand(data.frame(gold = c("D", "D", "D", "N", "N", "N"), t1 = c("+", "+", "-", "-", "+", "+"),
+                               t2 = c("+", "-", "-", "-", "-", "+"), n = c(14, 4, 2, 56, 16, 8)))
+    expect_equal(val_ir_midp(4, 16), 7547 / 2^20, tolerance = 1e-12)
+    cr <- val_text(val_dc(d, statComp = TRUE, showDescriptiveReport = TRUE)$clinicalReport$content)
+    expect_match(cr, "t1, t2 were tied for the highest observed balanced accuracy", fixed = TRUE)
+    expect_match(cr, "t1 and t2 were tied for the highest observed balanced accuracy, but t2 classified significantly more cases correctly.", fixed = TRUE)
+    # Neither tied test is a "loser" of a different ranking, so the ranking-metric explanation is absent
+    expect_false(grepl("had the highest observed balanced accuracy but classified significantly fewer", cr, fixed = TRUE))
+    expect_false(grepl("so the two rankings can disagree", cr, fixed = TRUE))
+})
+
+test_that("IR-02: per-class McNemar p on each class's own discordant pairs; resampling the diseased changes only the sensitivity p", {
+    # Sensitivity among D: only t1 right 7, only t2 right 0 -> mid-p 1/2^7. Specificity among N:
+    # (0, 22) -> 1/2^22. Quadrupling the D rows (fixture B4, prevalence 0.2 -> 0.5) leaves both point
+    # estimates and the specificity p alone and gives (28, 0) -> 1/2^28.
+    b <- val_irB(); b4 <- rbind(b[rep(which(b$gold == "D"), 4), ], b[b$gold == "N", ])
+    getp <- function(d, method) {
+        dt <- val_dc(d, statComp = TRUE, mcnemarMethod = method)$diffTable$asDF
+        dt[match(c("Sensitivity", "Specificity", "Accuracy"), dt$metric), c("diff", "p")]
+    }
+    rB <- getp(b, "midp"); rB4 <- getp(b4, "midp")
+    expect_equal(rB$diff, c(7 / 20, -22 / 80, -15 / 100), tolerance = 1e-12)
+    expect_equal(rB4$diff[1:2], rB$diff[1:2], tolerance = 1e-12)
+    expect_equal(rB$p, c(1 / 2^7, 1 / 2^22, NA), tolerance = 1e-12)
+    expect_equal(rB4$p, c(1 / 2^28, 1 / 2^22, NA), tolerance = 1e-12)
+    # Asymptotic option, no continuity correction: (b - c)^2 / (b + c) = 7 and 22 on 1 df
+    expect_equal(getp(b, "asymptotic")$p, c(stats::pchisq(7, 1, lower.tail = FALSE), stats::pchisq(22, 1, lower.tail = FALSE), NA),
+                 tolerance = 1e-12)
+    # Copy-ready text carries the class differences with their unadjusted p and the case-mix caveat
+    rp <- val_text(val_dc(b, statComp = TRUE, showReportSentence = TRUE)$reportSentence$content)
+    expect_match(rp, "35.0 percentage points in sensitivity (95% CI", fixed = TRUE)
+    expect_match(rp, sprintf("McNemar p = %s, unadjusted) and -27.5 percentage points in specificity", val_ir_p3(1 / 2^7)), fixed = TRUE)
+    expect_match(rp, "McNemar p < 0.001, unadjusted)", fixed = TRUE)
+    expect_match(rp, "by the prevalence of the target condition among these cases (20.0%)", fixed = TRUE)
+})
+
+test_that("IR-03: the copy-ready Methods and the per-test CI tables name the Clopper-Pearson interval", {
+    skip_if_not_installed("epiR")
+    r <- val_dc(val_d1(), ci = TRUE, showDescriptiveReport = TRUE)
+    expect_match(val_text(r$clinicalReport$content),
+                 "Sensitivity and specificity are given with exact (Clopper-Pearson) 95% confidence intervals.", fixed = TRUE)
+    expect_identical(r$epirTable1$notes[["ci_method"]]$note,
+                     "Exact (Clopper-Pearson) 95% confidence intervals for each proportion, computed by epiR::epi.tests().")
+})
+
+test_that("IR-04: one quantity prints with one rounding rule in every panel (81.25% -> 81.3%) and never as 95.0% under 95%", {
+    # Fixture R: 40 D / 40 N; tX TP 33 FN 7 FP 8 TN 32, accuracy 65/80 = 0.8125 exactly; tY 58/80.
+    r <- val_dc(val_expand(data.frame(gold = c("D", "D", "D", "N", "N", "N"), t1 = c("+", "+", "-", "-", "-", "+"),
+                                      t2 = c("+", "-", "-", "-", "+", "+"), n = c(30, 3, 7, 28, 4, 8))),
+                statComp = TRUE, showSummary = TRUE, showDescriptiveReport = TRUE)
+    expect_match(val_text(r$summaryReport$content), "accuracy 81.3% vs 72.5%", fixed = TRUE)
+    expect_match(val_text(r$clinicalReport$content), "81.3% overall accuracy", fixed = TRUE)
+    # Se 113/119 = 94.958%: half-up to one decimal would print 95.0 beside "reached neither 95%".
+    d <- val_expand(data.frame(gold = c("D", "D", "D", "N", "N", "N"), t1 = c("+", "+", "-", "-", "-", "+"),
+                               t2 = c("+", "-", "-", "-", "+", "+"), n = c(100, 13, 6, 60, 10, 11)))
+    cr <- val_text(val_dc(d, showDescriptiveReport = TRUE)$clinicalReport$content)
+    expect_match(cr, "t1 reached neither 95% sensitivity (94.95%) nor 95% specificity (86.4%)", fixed = TRUE)
+})
+
+test_that("IR-05: the epiR error-rate rows are labelled as rates, with FP/(FP+TN) and FN/(FN+TP) values", {
+    skip_if_not_installed("epiR")
+    ep <- val_dc(val_d1(), ci = TRUE)$epirTable1$asDF
+    key <- gsub('^"|"$', "", rownames(ep))
+    # t1 on rows 1-12: FP 2 of 6 reference-negatives, FN 1 of 6 reference-positives (hand)
+    expect_identical(ep$statsnames[key == "p.tpdn"], "False positive rate (1 - specificity)")
+    expect_identical(ep$statsnames[key == "p.tndp"], "False negative rate (1 - sensitivity)")
+    expect_equal(c(ep$est[key == "p.tpdn"], ep$est[key == "p.tndp"]), c(2 / 6, 1 / 6), tolerance = 1e-12)
+})
+
+test_that("IR-06: a missing reference value carried as an NA level (addNA) is handled exactly as a plain NA", {
+    d <- val_d1(); dn <- d; dn$gold <- addNA(dn$gold)
+    expect_true(anyNA(levels(dn$gold)))
+    r0 <- val_dc(d); r1 <- val_dc(dn)
+    expect_equal(r1$comparisonTable$asDF, r0$comparisonTable$asDF)
+    expect_identical(val_text(r1$notices$content), val_text(r0$notices$content))
+    expect_false(grepl("Multi-Level Results Combined", val_text(r1$notices$content), fixed = TRUE))
+    # rows 1-12 (row 13 lacks t1, row 14 the reference): Spec 4/6 (hand)
+    ct <- r1$comparisonTable$asDF
+    expect_equal(c(ct$n[ct$test == "t1"], ct$Spec[ct$test == "t1"]), c(12, 4 / 6), tolerance = 1e-12)
+})
+
+test_that("IR-07: a test variable named 'Gold Standard' gets its own heatmap row, not the reference's", {
+    d <- val_d1(); dg <- d; names(dg)[2] <- "Gold Standard"
+    h0 <- val_dc(d, heatmap = TRUE)$plotHeatmap$state
+    h1 <- val_dc(dg, test1 = "Gold Standard", heatmap = TRUE)$plotHeatmap$state
+    expect_equal(as.vector(table(h1$source)[c("reference", "test_1", "test_2")]), c(14, 14, 14))
+    # Renaming a variable moves no tile: same keys, same order, same values; only the label changes
+    expect_identical(h1[c("case_order", "source", "value")], h0[c("case_order", "source", "value")])
+    expect_identical(unique(as.character(h1$label[h1$source == "test_1"])), "Gold Standard")
+})
+
+test_that("Cochran exact conditional (k = 3, <= 30 informative): B3 Q is the closed form and its p the exact conditional tail (29 informative cases)", {
+    # Correctness column sums 75, 90, 88; row sums: 68 x 3, 20 x 2, 9 x 1, 3 x 0 -> sum R 253,
+    # sum R^2 701; Q = 2 (3 * 21469 - 253^2) / (3 * 253 - 701) = 796 / 58.
+    # Exact p (Patil 1975): the lone right test (9 rows) / lone wrong test (20 rows) is uniform over
+    # the three, so its placement counts are Multinomial(m, 1/3, 1/3, 1/3); Q is monotone in sum C^2.
+    comp <- function(m) { g <- expand.grid(a1 = 0:m, a2 = 0:m); g <- g[g$a1 + g$a2 <= m, ]; g$a3 <- m - g$a1 - g$a2
+        g$pr <- exp(lfactorial(m) - lfactorial(g$a1) - lfactorial(g$a2) - lfactorial(g$a3) - m * log(3)); g }
+    A <- comp(9); B <- comp(20)
+    S <- outer(seq_len(nrow(A)), seq_len(nrow(B)), function(i, j)
+        (A$a1[i] + 20 - B$a1[j])^2 + (A$a2[i] + 20 - B$a2[j])^2 + (A$a3[i] + 20 - B$a3[j])^2)
+    # informative column sums: t1 7 (6 + 1), t2 22 (3 + 19), t3 20 (1 + 19) -> sum of squares 933
+    p_exact <- sum(outer(A$pr, B$pr)[S >= 7^2 + 22^2 + 20^2])
+    q <- val_dc(val_irB3(), test3 = "t3", test3Positive = "+", test3Negative = "-", statComp = TRUE)$mcnemarTable$asDF
+    q <- q[q$comparison == "Overall (3 tests)", ]
+    expect_equal(c(q$n, q$stat, q$p), c(100, 796 / 58, p_exact), tolerance = 1e-12)
+    expect_true(is.na(q$df))
 })

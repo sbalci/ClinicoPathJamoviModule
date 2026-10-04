@@ -17,13 +17,13 @@ test_that("decisioncompare handles small datasets", {
     data = decisioncompare_small,
     gold = "GoldStandard",
     goldPositive = "Positive",
-    goldNegative = NULL,
+    goldNegative = "Negative",
     test1 = "Test1",
     test1Positive = "Positive",
-    test1Negative = NULL,
+    test1Negative = "Negative",
     test2 = "Test2",
     test2Positive = "Positive",
-    test2Negative = NULL,
+    test2Negative = "Negative",
     test3Positive = NULL,
     test3Negative = NULL
   )
@@ -36,16 +36,16 @@ test_that("decisioncompare handles large datasets efficiently", {
     data = decisioncompare_large,
     gold = "GoldStandard",
     goldPositive = "Positive",
-    goldNegative = NULL,
+    goldNegative = "Negative",
     test1 = "Test1",
     test1Positive = "Positive",
-    test1Negative = NULL,
+    test1Negative = "Negative",
     test2 = "Test2",
     test2Positive = "Positive",
-    test2Negative = NULL,
+    test2Negative = "Negative",
     test3 = "Test3",
     test3Positive = "Positive",
-    test3Negative = NULL
+    test3Negative = "Negative"
   )
   expect_s3_class(result, "decisioncompareResults")
   expect_true(nrow(decisioncompare_large) == 500)
@@ -56,13 +56,13 @@ test_that("decisioncompare handles perfect test performance", {
     data = decisioncompare_perfect,
     gold = "GoldStandard",
     goldPositive = "Positive",
-    goldNegative = NULL,
+    goldNegative = "Negative",
     test1 = "PerfectTest",
     test1Positive = "Positive",
-    test1Negative = NULL,
+    test1Negative = "Negative",
     test2 = "ImperfectTest",
     test2Positive = "Positive",
-    test2Negative = NULL,
+    test2Negative = "Negative",
     test3Positive = NULL,
     test3Negative = NULL
   )
@@ -74,13 +74,13 @@ test_that("decisioncompare handles poor test performance", {
     data = decisioncompare_poor,
     gold = "GoldStandard",
     goldPositive = "Positive",
-    goldNegative = NULL,
+    goldNegative = "Negative",
     test1 = "PoorTest1",
     test1Positive = "Positive",
-    test1Negative = NULL,
+    test1Negative = "Negative",
     test2 = "PoorTest2",
     test2Positive = "Positive",
-    test2Negative = NULL,
+    test2Negative = "Negative",
     test3Positive = NULL,
     test3Negative = NULL
   )
@@ -92,13 +92,13 @@ test_that("decisioncompare handles rare disease prevalence", {
     data = decisioncompare_rare,
     gold = "GoldStandard",
     goldPositive = "Positive",
-    goldNegative = NULL,
+    goldNegative = "Negative",
     test1 = "Test1",
     test1Positive = "Positive",
-    test1Negative = NULL,
+    test1Negative = "Negative",
     test2 = "Test2",
     test2Positive = "Positive",
-    test2Negative = NULL,
+    test2Negative = "Negative",
     test3Positive = NULL,
     test3Negative = NULL
   )
@@ -113,13 +113,13 @@ test_that("decisioncompare handles common disease prevalence", {
     data = decisioncompare_common,
     gold = "GoldStandard",
     goldPositive = "Positive",
-    goldNegative = NULL,
+    goldNegative = "Negative",
     test1 = "Test1",
     test1Positive = "Positive",
-    test1Negative = NULL,
+    test1Negative = "Negative",
     test2 = "Test2",
     test2Positive = "Positive",
-    test2Negative = NULL,
+    test2Negative = "Negative",
     test3Positive = NULL,
     test3Negative = NULL
   )
@@ -134,13 +134,13 @@ test_that("decisioncompare handles identical tests", {
     data = decisioncompare_identical,
     gold = "GoldStandard",
     goldPositive = "Positive",
-    goldNegative = NULL,
+    goldNegative = "Negative",
     test1 = "Test1",
     test1Positive = "Positive",
-    test1Negative = NULL,
+    test1Negative = "Negative",
     test2 = "Test2",
     test2Positive = "Positive",
-    test2Negative = NULL,
+    test2Negative = "Negative",
     test3Positive = NULL,
     test3Negative = NULL
   )
@@ -153,16 +153,16 @@ test_that("decisioncompare handles missing data", {
     data = decisioncompare_missing,
     gold = "GoldStandard",
     goldPositive = "Positive",
-    goldNegative = NULL,
+    goldNegative = "Negative",
     test1 = "Test1",
     test1Positive = "Positive",
-    test1Negative = NULL,
+    test1Negative = "Negative",
     test2 = "Test2",
     test2Positive = "Positive",
-    test2Negative = NULL,
+    test2Negative = "Negative",
     test3 = "Test3",
     test3Positive = "Positive",
-    test3Negative = NULL
+    test3Negative = "Negative"
   )
   # Should handle with warnings or listwise deletion
   expect_s3_class(result, "decisioncompareResults")
@@ -170,36 +170,35 @@ test_that("decisioncompare handles missing data", {
 })
 
 test_that("decisioncompare handles indeterminate results", {
-  # With indeterminate results included (treated as negative)
-  result_include <- call_decisioncompare(
+  # Additional observed levels require an explicit exclusion choice.
+  expect_error(call_decisioncompare(
     data = decisioncompare_indeterminate,
     gold = "GoldStandard",
     goldPositive = "Positive",
-    goldNegative = NULL,
+    goldNegative = "Negative",
     test1 = "Test1",
     test1Positive = "Positive",
-    test1Negative = NULL,
+    test1Negative = "Negative",
     test2 = "Test2",
     test2Positive = "Positive",
-    test2Negative = NULL,
+    test2Negative = "Negative",
     excludeIndeterminate = FALSE,
     test3Positive = NULL,
     test3Negative = NULL
-  )
-  expect_s3_class(result_include, "decisioncompareResults")
+  ), "outside the selected positive/negative pair")
 
   # With indeterminate results excluded
   result_exclude <- call_decisioncompare(
     data = decisioncompare_indeterminate,
     gold = "GoldStandard",
     goldPositive = "Positive",
-    goldNegative = NULL,
+    goldNegative = "Negative",
     test1 = "Test1",
     test1Positive = "Positive",
-    test1Negative = NULL,
+    test1Negative = "Negative",
     test2 = "Test2",
     test2Positive = "Positive",
-    test2Negative = NULL,
+    test2Negative = "Negative",
     excludeIndeterminate = TRUE,
     test3Positive = NULL,
     test3Negative = NULL
@@ -219,10 +218,10 @@ test_that("decisioncompare waits silently until required variables are selected"
       data = decisioncompare_small,
       gold = "GoldStandard",
       goldPositive = "Positive",
-      goldNegative = NULL,
+      goldNegative = "Negative",
       test1 = "Test1",
       test1Positive = "Positive",
-      test1Negative = NULL,
+      test1Negative = "Negative",
       test2Positive = NULL,
       test2Negative = NULL,
       test3Positive = NULL,
@@ -237,10 +236,10 @@ test_that("decisioncompare waits silently until required variables are selected"
       data = decisioncompare_small,
       test1 = "Test1",
       test1Positive = "Positive",
-      test1Negative = NULL,
+      test1Negative = "Negative",
       test2 = "Test2",
       test2Positive = "Positive",
-      test2Negative = NULL,
+      test2Negative = "Negative",
       goldPositive = NULL,
       goldNegative = NULL,
       test3Positive = NULL,
@@ -252,9 +251,9 @@ test_that("decisioncompare waits silently until required variables are selected"
   # ...but a complete selection does produce results
   res3 <- call_decisioncompare(
     data = decisioncompare_small,
-    gold = "GoldStandard", goldPositive = "Positive", goldNegative = NULL,
-    test1 = "Test1", test1Positive = "Positive", test1Negative = NULL,
-    test2 = "Test2", test2Positive = "Positive", test2Negative = NULL,
+    gold = "GoldStandard", goldPositive = "Positive", goldNegative = "Negative",
+    test1 = "Test1", test1Positive = "Positive", test1Negative = "Negative",
+    test2 = "Test2", test2Positive = "Positive", test2Negative = "Negative",
     test3 = NULL, test3Positive = NULL, test3Negative = NULL, stratify = NULL
   )
   expect_gt(res3$comparisonTable$rowCount, 0L)
@@ -267,19 +266,21 @@ test_that("decisioncompare validates prevalence bounds", {
       data = decisioncompare_small,
       gold = "GoldStandard",
       goldPositive = "Positive",
-      goldNegative = NULL,
+      goldNegative = "Negative",
       test1 = "Test1",
       test1Positive = "Positive",
-      test1Negative = NULL,
+      test1Negative = "Negative",
       test2 = "Test2",
       test2Positive = "Positive",
-      test2Negative = NULL,
+      test2Negative = "Negative",
       pp = TRUE,
-      pprob = 0.0005,  # Below minimum (0.001)
+      # Bounds are 1e-9 .. 1-1e-9 since the explicit-mapping release (rare-disease screening
+      # prevalence such as 0.0005 is valid); 0 is out of range.
+      pprob = 0,
       test3Positive = NULL,
       test3Negative = NULL
     ),
-    regexp = "prevalence|probability|0.001|0.999",
+    regexp = "prevalence|probability|pprob|1e-09|0.999",
     ignore.case = TRUE
   )
 
@@ -289,13 +290,13 @@ test_that("decisioncompare validates prevalence bounds", {
       data = decisioncompare_small,
       gold = "GoldStandard",
       goldPositive = "Positive",
-      goldNegative = NULL,
+      goldNegative = "Negative",
       test1 = "Test1",
       test1Positive = "Positive",
-      test1Negative = NULL,
+      test1Negative = "Negative",
       test2 = "Test2",
       test2Positive = "Positive",
-      test2Negative = NULL,
+      test2Negative = "Negative",
       pp = TRUE,
       pprob = 1.0,  # Above maximum (0.999)
       test3Positive = NULL,
@@ -312,13 +313,13 @@ test_that("decisioncompare handles extreme prevalence values", {
     data = decisioncompare_small,
     gold = "GoldStandard",
     goldPositive = "Positive",
-    goldNegative = NULL,
+    goldNegative = "Negative",
     test1 = "Test1",
     test1Positive = "Positive",
-    test1Negative = NULL,
+    test1Negative = "Negative",
     test2 = "Test2",
     test2Positive = "Positive",
-    test2Negative = NULL,
+    test2Negative = "Negative",
     pp = TRUE,
     pprob = 0.001,
     test3Positive = NULL,
@@ -331,13 +332,13 @@ test_that("decisioncompare handles extreme prevalence values", {
     data = decisioncompare_small,
     gold = "GoldStandard",
     goldPositive = "Positive",
-    goldNegative = NULL,
+    goldNegative = "Negative",
     test1 = "Test1",
     test1Positive = "Positive",
-    test1Negative = NULL,
+    test1Negative = "Negative",
     test2 = "Test2",
     test2Positive = "Positive",
-    test2Negative = NULL,
+    test2Negative = "Negative",
     pp = TRUE,
     pprob = 0.999,
     test3Positive = NULL,
@@ -351,13 +352,13 @@ test_that("decisioncompare handles all output options with small sample", {
     data = decisioncompare_small,
     gold = "GoldStandard",
     goldPositive = "Positive",
-    goldNegative = NULL,
+    goldNegative = "Negative",
     test1 = "Test1",
     test1Positive = "Positive",
-    test1Negative = NULL,
+    test1Negative = "Negative",
     test2 = "Test2",
     test2Positive = "Positive",
-    test2Negative = NULL,
+    test2Negative = "Negative",
     ci = TRUE,
     plot = TRUE,
     statComp = TRUE,

@@ -1,9 +1,22 @@
+jus: '3.0'
 title: Medical Decision
 name: decision
-jus: '3.0'
+
 stage: 0
 compilerMode: tame
 children:
+  - type: CollapseBox
+    label: Reference interpretation
+    collapsed: false
+    children:
+      - type: ComboBox
+        name: referenceType
+      - type: TextBox
+        name: referenceDescription
+        format: string
+      - type: TextBox
+        name: targetDefinition
+        format: string
   - type: VariableSupplier
     persistentItems: false
     stretchFactor: 1
@@ -46,9 +59,11 @@ children:
             label: 95% confidence intervals
           - type: CheckBox
             name: fnote
+            enable: (referenceType:legacy || referenceType:disease)
             label: Explanatory footnotes
           - type: CheckBox
             name: od
+            enable: (referenceType:legacy || referenceType:disease)
             label: Raw data tables
   - type: CollapseBox
     label: Population Prevalence Settings
@@ -58,18 +73,20 @@ children:
         label: Use when sample doesn't represent target population disease prevalence
       - type: CheckBox
         name: pp
+        enable: (referenceType:legacy || referenceType:disease)
         label: Known population prevalence
       - type: TextBox
         name: pprob
         label: Disease prevalence in target population (0.001-0.999)
         format: number
-        enable: (pp)
+        enable: ((pp) && (referenceType:legacy || referenceType:disease))
   - type: CollapseBox
     label: Visualization
     collapsed: true
     children:
       - type: CheckBox
         name: fagan
+        enable: (referenceType:legacy || referenceType:disease)
         label: Fagan nomogram
   - type: CollapseBox
     label: Output Options
@@ -77,25 +94,29 @@ children:
     children:
       - type: CheckBox
         name: showNaturalLanguage
+        enable: (referenceType:legacy || referenceType:disease)
         label: Clinical summary
       - type: CheckBox
         name: showClinicalInterpretation
+        enable: (referenceType:legacy || referenceType:disease)
         label: Clinical interpretation guide
       - type: CheckBox
         name: showReportTemplate
+        enable: (referenceType:legacy || referenceType:disease)
         label: Copy-ready results paragraph
       - type: CheckBox
         name: showAboutAnalysis
+        enable: (referenceType:legacy || referenceType:disease)
         label: About this analysis
   - type: CollapseBox
-    label: Misclassified Cases Analysis
+    label: Discordant Cases
     collapsed: true
     children:
       - type: Label
-        label: Identify and analyze false positive and false negative cases
+        label: Inspect discordant calls under the selected reference interpretation
       - type: CheckBox
         name: showMisclassified
-        label: Misclassified cases tables
+        label: Discordant cases tables
       - type: LayoutBox
         margin: small
         children:
@@ -110,7 +131,29 @@ children:
         margin: small
         children:
           - type: Label
-            label: 'Save classification groups (TP/FP/FN/TN) to dataset:'
+            label: 'Save classification groups under the selected reference interpretation:'
             fitToGrid: true
           - type: Output
             name: saveClassifications
+
+  - type: CollapseBox
+    label: Validation Provenance
+    collapsed: true
+    children:
+    - type: CheckBox
+      name: showValidationContext
+    - type: TextBox
+      name: cohortRole
+      format: string
+    - type: TextBox
+      name: samplingDesign
+      format: string
+    - type: TextBox
+      name: thresholdSource
+      format: string
+    - type: TextBox
+      name: modelVersion
+      format: string
+    - type: TextBox
+      name: analysisUnit
+      format: string

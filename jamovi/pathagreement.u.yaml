@@ -6,6 +6,84 @@ compilerMode: tame
 children:
   - type: ComboBox
     name: readerWorkflow
+  - type: CollapseBox
+    label: Reference interpretation and reader study design
+    collapsed: false
+    children:
+    - type: ComboBox
+      name: readerFormat
+      enable: (!readerWorkflow:off)
+    - type: ComboBox
+      name: referenceType
+    - type: TextBox
+      name: referenceDescription
+      format: string
+    - type: TextBox
+      name: targetDefinition
+      format: string
+    - type: VariableSupplier
+      persistentItems: false
+      stretchFactor: 1
+      children:
+      - type: TargetLayoutBox
+        label: Reader ID (long input)
+        children:
+        - type: VariablesListBox
+          name: readerID
+          maxItemCount: 1
+          isTarget: true
+          enable: (readerFormat:long && !readerWorkflow:off)
+      - type: TargetLayoutBox
+        label: Modality (long input)
+        children:
+        - type: VariablesListBox
+          name: modality
+          maxItemCount: 1
+          isTarget: true
+          enable: (readerFormat:long && !readerWorkflow:off)
+      - type: TargetLayoutBox
+        label: Rating (long input)
+        children:
+        - type: VariablesListBox
+          name: rating
+          maxItemCount: 1
+          isTarget: true
+          enable: (readerFormat:long && !readerWorkflow:off)
+    - type: TextBox
+      name: baselineModality
+      format: string
+      enable: (readerFormat:long && !readerWorkflow:off)
+    - type: TextBox
+      name: comparisonModality
+      format: string
+      enable: (readerFormat:long && !readerWorkflow:off)
+    - type: CheckBox
+      name: readerNondiagnostic
+      enable: (!readerWorkflow:off)
+    - type: CheckBox
+      name: readerAllObservedAgreement
+      enable: (readerNondiagnostic || readerFormat:long)
+    - type: CheckBox
+      name: readerModalityComparison
+      enable: (readerFormat:long && !readerWorkflow:off)
+    - type: CheckBox
+      name: readerTransitions
+      enable: (readerWorkflow:ordinal_cutoff)
+    - type: TextBox
+      name: readerNondiagnosticLevel
+      format: string
+      enable: (readerNondiagnostic)
+    - type: ComboBox
+      name: modalityPopulation
+      enable: (readerFormat:long && readerModalityComparison)
+    - type: TextBox
+      name: transitionBaseline
+      format: string
+      enable: (readerTransitions && readerFormat:wide)
+    - type: TextBox
+      name: transitionComparison
+      format: string
+      enable: (readerTransitions && readerFormat:wide)
   - type: VariableSupplier
     persistentItems: false
     stretchFactor: 1

@@ -4,7 +4,7 @@ title: Compare Medical Decision Tests
 menuGroup: meddecideT
 menuSubgroup: Decision
 menuSubtitle: Compare sensitivity, specificity, PPV, NPV, ...
-version: '1.0.84'
+version: '1.0.83'
 jas: '1.2'
 
 description:
@@ -14,22 +14,24 @@ description:
         Includes statistical comparison using McNemar's test and confidence intervals for differences.
         Tests are paired within each case; cases must be independent across rows.
         Repeated specimens or lesions from one patient require a method that accounts for clustering.
+        Explicit positive and negative levels are required for the reference and every selected test.
+        Other observed levels require explicit exclusion or prior recoding; they are never pooled as negative.
     R:
         dontrun: true
         usage: |
             # Level arguments are explicit in the generated R API. Pass NULL for
-            # unused negative levels and for the optional third test selectors.
+            # the unused optional third test selectors only.
             decisioncompare(
                 data = histopathology,
                 gold = "Golden Standart",
                 goldPositive = "1",
-                goldNegative = NULL,
+                goldNegative = "0",
                 test1 = "New Test",
                 test1Positive = "1",
-                test1Negative = NULL,
+                test1Negative = "0",
                 test2 = "Rater 1",
                 test2Positive = "1",
-                test2Negative = NULL,
+                test2Negative = "0",
                 test3 = NULL,
                 test3Positive = NULL,
                 test3Negative = NULL,
@@ -43,45 +45,78 @@ options:
       description:
           R: The data as a data frame.
 
+    - name: referenceType
+      title: Reference interpretation
+      type: List
+      options:
+        - name: legacy
+          title: Not specified
+        - name: disease
+          title: Disease reference
+        - name: consensus
+          title: Expert consensus
+        - name: method
+          title: Comparative method
+      default: legacy
+      description:
+          R: Comparator interpretation; legacy retains diagnostic terminology. All modes require explicit positive and negative levels. Consensus and method report agreement without disease-risk interpretation.
+
+    - name: referenceDescription
+      title: Comparator description
+      type: String
+      default: ''
+      description:
+          R: >
+            Free text describing the reference or comparator (e.g. consensus of three pathologists); displayed in the Reference and target table and, when shown, the Validation context table; not validated.
+
+    - name: targetDefinition
+      title: Target definition
+      type: String
+      default: ''
+      description:
+          R: >
+            Free text defining the target condition the positive level represents; displayed in the Reference and target table only, not validated.
+
     - name: gold
-      title: Gold Standard (Reference Test)
+      title: Reference / comparator
       type: Variable
       default: NULL
       suggested: [ nominal ]
       permitted: [ factor ]
       description:
           ui: >
-            Select the most reliable diagnostic method available (e.g., biopsy, final pathology, 
-            expert consensus). This is the "truth" against which we compare other tests. 
-            The selected positive level is compared with the remaining levels; if
-            indeterminate values should be excluded, also select explicit negative levels.
+            Select the most reliable diagnostic method available (e.g., biopsy, final pathology,
+            expert consensus). Choose Reference interpretation before interpreting estimates; consensus is a comparator, not an independent disease standard.
+            Select distinct positive and negative levels explicitly. Other observed levels
+            require explicit exclusion or recoding before analysis.
           R: >
-            The gold standard reference variable representing true disease status.
+            The reference variable; its interpretation is selected separately.
 
     - name: goldPositive
-      title: Disease present level
+      title: Reference positive level
       type: Level
       variable: (gold)
+      allowNone: true
       description:
           ui: >
-            Select the level that indicates disease IS PRESENT in your gold standard variable 
+            Select the positive reference level
             (e.g., "positive", "malignant", "1"). This represents the condition you want to detect.
           R: >
-            The level indicating presence of disease in the gold standard variable.
+            The positive reference level; disease interpretation requires a disease standard.
 
     - name: goldNegative
-      title: Disease absent level
+      title: Reference negative level
       type: Level
       variable: (gold)
+      allowNone: true
       description:
           ui: >
-            Optional. Select the level that indicates disease is ABSENT in the gold standard variable. Only needed when the
-            variable has more than two levels and you want "Exclude
-            indeterminate/Equivocal levels" to drop the remaining (equivocal)
-            rows instead of counting them as negative.
+            Required for a selected variable, even with only two levels. Choose a negative
+            level different from the positive level. Other labels are never treated as negative.
           R: >
-            The level indicating disease is ABSENT in the gold standard variable. Required for excludeIndeterminate to act on a
-            variable with more than two levels; pass NULL when not used.
+            Explicit negative level, required for each selected variable. Pass NULL only
+            when this variable is not selected.
+
 
     # For the first test
 
@@ -93,7 +128,7 @@ options:
       permitted: [ factor ]
       description:
           ui: >
-            Select the first diagnostic test to evaluate (e.g., imaging result, biomarker, 
+            Select the first diagnostic test to evaluate (e.g., imaging result, biomarker,
             clinical assessment). This should be a test you want to validate against the gold standard.
           R: >
             The first diagnostic test variable being evaluated for performance.
@@ -102,9 +137,10 @@ options:
       title: Test 1 Positive Level
       type: Level
       variable: (test1)
+      allowNone: true
       description:
           ui: >
-            Select the level that represents a POSITIVE result for Test 1 
+            Select the level that represents a POSITIVE result for Test 1
             (e.g., "abnormal", "high", "positive"). This should indicate suspected disease presence.
           R: >
             The level representing a positive result for Test 1.
@@ -113,15 +149,15 @@ options:
       title: Test 1 Negative Level
       type: Level
       variable: (test1)
+      allowNone: true
       description:
           ui: >
-            Optional. Select the level that indicates a NEGATIVE result for test 1. Only needed when the
-            variable has more than two levels and you want "Exclude
-            indeterminate/Equivocal levels" to drop the remaining (equivocal)
-            rows instead of counting them as negative.
+            Required for a selected variable, even with only two levels. Choose a negative
+            level different from the positive level. Other labels are never treated as negative.
           R: >
-            The level indicating a NEGATIVE result for test 1. Required for excludeIndeterminate to act on a
-            variable with more than two levels; pass NULL when not used.
+            Explicit negative level, required for each selected variable. Pass NULL only
+            when this variable is not selected.
+
 
     # For the second test
 
@@ -133,7 +169,7 @@ options:
       permitted: [ factor ]
       description:
           ui: >
-            Select a second diagnostic test to compare with Test 1. This enables head-to-head 
+            Select a second diagnostic test to compare with Test 1. This enables head-to-head
             comparison analysis (e.g., new method vs standard method, or two different biomarkers).
           R: >
             The second diagnostic test variable for comparison analysis.
@@ -142,6 +178,7 @@ options:
       title: Test 2 Positive Level
       type: Level
       variable: (test2)
+      allowNone: true
       description:
           ui: >
             Select the level that represents a POSITIVE result for Test 2.
@@ -152,15 +189,15 @@ options:
       title: Test 2 Negative Level
       type: Level
       variable: (test2)
+      allowNone: true
       description:
           ui: >
-            Optional. Select the level that indicates a NEGATIVE result for test 2. Only needed when the
-            variable has more than two levels and you want "Exclude
-            indeterminate/Equivocal levels" to drop the remaining (equivocal)
-            rows instead of counting them as negative.
+            Required for a selected variable, even with only two levels. Choose a negative
+            level different from the positive level. Other labels are never treated as negative.
           R: >
-            The level indicating a NEGATIVE result for test 2. Required for excludeIndeterminate to act on a
-            variable with more than two levels; pass NULL when not used.
+            Explicit negative level, required for each selected variable. Pass NULL only
+            when this variable is not selected.
+
 
     # For the third test
 
@@ -172,7 +209,7 @@ options:
       permitted: [ factor ]
       description:
           ui: >
-            Optionally select a third diagnostic test for three-way comparison. 
+            Optionally select a third diagnostic test for three-way comparison.
             This allows comprehensive evaluation of multiple testing strategies simultaneously.
           R: >
             Optional third diagnostic test variable for extended comparison analysis.
@@ -181,6 +218,7 @@ options:
       title: Test 3 Positive Level
       type: Level
       variable: (test3)
+      allowNone: true
       description:
           ui: >
             Select the level that represents a POSITIVE result for Test 3.
@@ -193,15 +231,15 @@ options:
       title: Test 3 Negative Level
       type: Level
       variable: (test3)
+      allowNone: true
       description:
           ui: >
-            Optional. Select the level that indicates a NEGATIVE result for test 3. Only needed when the
-            variable has more than two levels and you want "Exclude
-            indeterminate/Equivocal levels" to drop the remaining (equivocal)
-            rows instead of counting them as negative.
+            Required for a selected variable, even with only two levels. Choose a negative
+            level different from the positive level. Other labels are never treated as negative.
           R: >
-            The level indicating a NEGATIVE result for test 3. Required for excludeIndeterminate to act on a
-            variable with more than two levels; pass NULL when not used.
+            Explicit negative level, required for each selected variable. Pass NULL only
+            when this variable is not selected.
+
 
     - name: pp
       title: Prior probability (prevalence)
@@ -209,8 +247,8 @@ options:
       default: false
       description:
           ui: >
-            Enable custom disease prevalence for calculating PPV and NPV. 
-            Use when your study population differs from the dataset prevalence 
+            Enable custom disease prevalence for calculating PPV and NPV.
+            Use when your study population differs from the dataset prevalence
             (e.g., screening vs high-risk populations).
           R: >
             Enable custom prior probability (prevalence) for predictive value calculations.
@@ -219,15 +257,15 @@ options:
       title: Prior probability (prevalence)
       type: Number
       default: 0.300
-      min: 0.001
-      max: 0.999
+      min: 0.000000001
+      max: 0.999999999
       description:
           ui: >
             Prior probability (disease prevalence in the community).
-            Requires a value between 0.001 and 0.999, default 0.300.
+            Requires a value strictly between 0 and 1, default 0.300.
           R: >
             Prior probability (disease prevalence in the community).
-            Requires a value between 0.001 and 0.999, default 0.300.
+            Requires a value strictly between 0 and 1, default 0.300.
 
     - name: od
       title: Original data
@@ -259,20 +297,25 @@ options:
       default: false
       description:
           ui: >
-            Generate bar chart comparing test performance metrics side-by-side. 
+            Generate bar chart comparing test performance metrics side-by-side.
             Useful for visualizing differences in sensitivity, specificity, PPV, NPV, and accuracy.
           R: >
             Generate comparison plot showing test performance metrics.
 
     - name: excludeIndeterminate
-      title: Exclude indeterminate/Equivocal levels
+      title: Exclude other observed levels
       type: Bool
       default: false
       description:
           ui: >
-            When a test or the gold standard has more than two levels (e.g., indeterminate/equivocal), exclude those rows instead of treating them as negative.
+            Exclude observed reference/test results outside the selected positive and negative
+            levels, including nondiagnostic or equivocal results. Counts remain visible.
+            Estimates then describe only determinate pairs. Otherwise, additional observed
+            levels stop the analysis. Missing data are always handled per test.
           R: >
-            If TRUE, drop rows where test/gold values are neither the specified positive level nor a clear negative level to avoid inflating specificity/NPV from equivocal results.
+            If TRUE, exclude results outside the explicit positive/negative pairs. If FALSE,
+            additional observed levels cause a validation error. Both levels are always required;
+            neither missing mappings nor extra labels invoke one-versus-rest recoding.
 
     - name: radarplot
       title: "Radar plot"
@@ -455,4 +498,47 @@ options:
             templates. The text is an editable reporting aid, not clinical guidance.
           R: >
             Boolean to show the longer descriptive report templates.
+    - name: showValidationContext
+      title: Validation context
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display the user-declared validation context (cohort role, sampling design, threshold source, model version, unit of observation) with the reference interpretation and comparator description in the Validation context table.
+    - name: cohortRole
+      title: Cohort role
+      type: String
+      default: ''
+      description:
+          R: >
+            Declared role of this cohort (e.g. development, internal or external validation); displayed only, not verified.
+    - name: samplingDesign
+      title: Sampling design
+      type: String
+      default: ''
+      description:
+          R: >
+            Declared sampling design (e.g. consecutive, case-control); displayed only, not verified. Case-control sampling distorts predictive values.
+    - name: thresholdSource
+      title: Threshold source
+      type: String
+      default: ''
+      description:
+          R: >
+            Declared origin of any cut-off used to make the tests binary (e.g. prespecified, chosen in this sample); displayed only, not verified.
+    - name: modelVersion
+      title: Model version
+      type: String
+      default: ''
+      description:
+          R: >
+            Declared version of the test, assay or algorithm; displayed only, not verified.
+    - name: analysisUnit
+      title: Unit of observation
+      type: String
+      default: ''
+      description:
+          R: >
+            Declared unit each row represents (e.g. case, patient, lesion); displayed only, not verified. This analysis assumes independent rows.
+
 ...

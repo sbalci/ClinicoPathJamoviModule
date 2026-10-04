@@ -74,7 +74,25 @@ enhancedROC(
   decisionImpactTable = FALSE,
   internalValidation = FALSE,
   validationMethod = "bootstrap",
-  decisionImpactCurves = FALSE
+  decisionImpactCurves = FALSE,
+  impactCutoffs = "0.5",
+  utilityThreshold = 0.1,
+  workloadPopulationSize = 1000,
+  analysisUnit = "slide",
+  prevalenceScenarios = "",
+  validationPanel = FALSE,
+  validationNegative = "",
+  referenceDescription = "",
+  modelVersion = "",
+  cohortRole = "frozen",
+  samplingDesign = "consecutive",
+  thresholdSource = "prespecified",
+  predictionScale = "score",
+  patientID = NULL,
+  siteID = NULL,
+  partitionID = NULL,
+  validationBootstrap = FALSE,
+  validationDraws = 999
 )
 }
 \arguments{
@@ -290,12 +308,11 @@ weights every class equally, Weighted weights each class by how many cases
 it contains. The One-vs-One strategy reports only its own unweighted
 average over class pairs, which is what that statistic is defined as.}
 
-\item{clinicalImpact}{Calculate clinical impact metrics (NNT, NND, clinical
-utility)}
+\item{clinicalImpact}{Calculate observed or projected workload at
+independently supplied score cutoffs}
 
-\item{nntCalculation}{Show the number needed to test (1 / net benefit) and
-number needed to diagnose (1 / Youden index) columns in the clinical impact
-table}
+\item{nntCalculation}{Show inverse net benefit and inverse Youden index;
+neither is a count of tests or reviews}
 
 \item{clinicalUtilityCurve}{Display clinical utility curve showing test
 consequences}
@@ -310,6 +327,42 @@ cross-validation or bootstrap}
 \item{decisionImpactCurves}{Plot the clinical impact curve: how many of
 1000 tested patients would be called high risk at each threshold
 probability, and how many of those actually have the event.}
+
+\item{impactCutoffs}{.}
+
+\item{utilityThreshold}{.}
+
+\item{workloadPopulationSize}{.}
+
+\item{analysisUnit}{.}
+
+\item{prevalenceScenarios}{.}
+
+\item{validationPanel}{.}
+
+\item{validationNegative}{.}
+
+\item{referenceDescription}{.}
+
+\item{modelVersion}{.}
+
+\item{cohortRole}{.}
+
+\item{samplingDesign}{.}
+
+\item{thresholdSource}{.}
+
+\item{predictionScale}{.}
+
+\item{patientID}{.}
+
+\item{siteID}{.}
+
+\item{partitionID}{.}
+
+\item{validationBootstrap}{.}
+
+\item{validationDraws}{.}
 }
 \value{
 A results object containing:
@@ -352,6 +405,10 @@ A results object containing:
 \code{results$results$decisionImpactSummary} \tab \tab \tab \tab \tab Clinical consequences at various decision thresholds \cr
 \code{results$results$clinicalUtilityPlot} \tab \tab \tab \tab \tab Clinical utility showing test consequences across thresholds \cr
 \code{results$results$decisionImpactPlot} \tab \tab \tab \tab \tab Number of patients called high risk, and number of true events among them, per 1000 tested across thresholds \cr
+\code{results$results$screeningWorkload} \tab \tab \tab \tab \tab a table \cr
+\code{results$results$validationContext} \tab \tab \tab \tab \tab a table \cr
+\code{results$results$denominatorLedger} \tab \tab \tab \tab \tab a table \cr
+\code{results$results$frozenMetrics} \tab \tab \tab \tab \tab a table \cr
 }
 }
 \description{

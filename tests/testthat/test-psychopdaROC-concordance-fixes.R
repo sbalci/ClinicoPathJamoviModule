@@ -36,9 +36,13 @@ test_that("psychopdaROC and enhancedROC agree on net benefit at a matched thresh
     d <- pc_data()
     P <- pc_run(data = d, classVar = "gold", dependentVars = "m1", positiveClass = "Positive",
                 refVar = NULL, clinicalUtilityAnalysis = TRUE, treatmentThreshold = "0.1,0.1,0.1")
+    # Supply the same fitted risks explicitly; enhancedROC no longer fits them silently.
+    y <- as.integer(d$gold == "Positive")
+    d$risk <- as.numeric(stats::fitted(stats::glm(y ~ d$m1, family = stats::binomial())))
     E <- suppressWarnings(do.call(ClinicoPath::enhancedROC, list(
-        data = d, outcome = "gold", predictors = "m1", positiveClass = "Positive",
-        clinicalImpact = TRUE, useObservedPrevalence = FALSE, prevalence = 0.10)))
+        data = d, outcome = "gold", predictors = "risk", positiveClass = "Positive",
+        clinicalImpact = TRUE, useObservedPrevalence = TRUE,
+        impactCutoffs = "0.1", utilityThreshold = 0.1)))
     p_nb <- as.numeric(as.data.frame(P$clinicalUtilityTable)$net_benefit[1])
     e_nb <- as.numeric(as.data.frame(E$results$clinicalImpactTable)$net_benefit_per_100[1]) / 100
     expect_equal(p_nb, e_nb, tolerance = 1e-9)

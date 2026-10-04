@@ -14,6 +14,9 @@
 
 ## 1a. Changelog
 
+- **Date**: 2026-10-04
+- **Summary**: Analysis 1.1.0 - `referenceType`, `referenceDescription`, `targetDefinition`; explicit positive and negative levels required for every selected variable; level-mapping, reference-definition and comparator outputs added; validation-provenance options (`showValidationContext`, `cohortRole`, `samplingDesign`, `thresholdSource`, `modelVersion`, `analysisUnit`) and the `validationContext` table added (displayed only, not validated); `pprob` bounds widened to 1e-9 to 1 − 1e-9.
+
 - **Date**: 2026-08-29
 - **Summary**: Comprehensive documentation suite created & verified against active schemas and backend implementation.
 
@@ -43,15 +46,19 @@ See [NIST's Cochran test reference](https://www.itl.nist.gov/div898/software/dat
 for the large-sample nature of the chi-square approximation.
 
 Level options have no schema default: the generated R wrapper requires all Level arguments
-explicitly. Pass `NULL` for unused optional levels; the `NULL` entries below describe the
-unset internal option state, not optional arguments in the R wrapper.
+explicitly. Since analysis 1.1.0 every selected variable needs distinct positive AND negative
+levels; pass `NULL` only for the levels of an unselected `test3`. The `NULL` entries below describe
+the unset internal option state, not optional arguments in the R wrapper.
 
 | Option | Type | Default | Description |
 | :--- | :--- | :--- | :--- |
 | `data` | `Data` | `NULL` |  |
-| `gold` | `Variable` | `NULL` | Gold Standard (Reference Test) |
-| `goldPositive` | `Level` | `NULL` | Disease present level |
-| `goldNegative` | `Level` | `NULL` | Disease absent level |
+| `referenceType` | `List` | `legacy` | Reference interpretation (`legacy` = not specified, `disease`, `consensus`, `method`) |
+| `referenceDescription` | `String` | `''` | Comparator description |
+| `targetDefinition` | `String` | `''` | Target definition |
+| `gold` | `Variable` | `NULL` | Reference / comparator |
+| `goldPositive` | `Level` | `NULL` | Reference positive level |
+| `goldNegative` | `Level` | `NULL` | Reference negative level (required) |
 | `test1` | `Variable` | `NULL` | Test 1 (Required) |
 | `test1Positive` | `Level` | `NULL` | Test 1 Positive Level |
 | `test1Negative` | `Level` | `NULL` | Test 1 Negative Level |
@@ -62,12 +69,12 @@ unset internal option state, not optional arguments in the R wrapper.
 | `test3Positive` | `Level` | `NULL` | Test 3 Positive Level |
 | `test3Negative` | `Level` | `NULL` | Test 3 Negative Level |
 | `pp` | `Bool` | `FALSE` | Prior probability (prevalence) |
-| `pprob` | `Number` | `0.3` | Prior probability (prevalence) |
+| `pprob` | `Number` | `0.3` | Prior probability (prevalence); bounds 1e-9 to 1 − 1e-9 |
 | `od` | `Bool` | `FALSE` | Original data |
 | `fnote` | `Bool` | `FALSE` | Footnotes |
 | `ci` | `Bool` | `FALSE` | 95 percent CI |
 | `plot` | `Bool` | `FALSE` | Comparison plot |
-| `excludeIndeterminate` | `Bool` | `FALSE` | Exclude indeterminate/Equivocal levels |
+| `excludeIndeterminate` | `Bool` | `FALSE` | Exclude other observed levels (FALSE: extra levels stop the analysis) |
 | `radarplot` | `Bool` | `FALSE` | Radar plot |
 | `heatmap` | `Bool` | `FALSE` | Concordance heatmap |
 | `opa` | `Bool` | `FALSE` | Overall percent agreement with CI |
@@ -81,6 +88,12 @@ unset internal option state, not optional arguments in the R wrapper.
 | `showExplanations` | `Bool` | `FALSE` | Explanations |
 | `showReportSentence` | `Bool` | `FALSE` | Report sentence |
 | `showDescriptiveReport` | `Bool` | `FALSE` | Descriptive report templates |
+| `showValidationContext` | `Bool` | `FALSE` | Validation context (shows `validationContext`) |
+| `cohortRole` | `String` | `''` | Cohort role (displayed only, not validated) |
+| `samplingDesign` | `String` | `''` | Sampling design (displayed only, not validated) |
+| `thresholdSource` | `String` | `''` | Threshold source (displayed only, not validated) |
+| `modelVersion` | `String` | `''` | Model version (displayed only, not validated) |
+| `analysisUnit` | `String` | `''` | Unit of observation (displayed only, not validated) |
 
 ## 3. Results Definition (`.r.yaml`)
 
@@ -108,6 +121,16 @@ unset internal option state, not optional arguments in the R wrapper.
 | `clinicalReport` | `Html` | `Descriptive Summary & Report Templates` |  |
 | `aboutAnalysis` | `Html` | `About This Analysis` |  |
 | `notices` | `Html` | `Important Information` |  |
+| `levelMapping` | `Table` | `Selected Levels and Exclusions` | Per variable: selected levels and positive/negative/other/missing counts (all modes) |
+| `referenceDefinition` | `Table` | `Reference and target` | Reference interpretation, descriptions, level rules, population (all modes) |
+| `comparatorCounts` | `Table` | `Binary comparator counts` | consensus/method only |
+| `comparatorPopulation` | `Table` | `Comparison populations` | consensus/method only |
+| `comparatorMetrics` | `Table` | `Agreement with comparator` | PPA/NPA/OPA, reverse conditionals, specific agreement; exact binomial CI when `ci` |
+| `comparatorReport` | `Html` | `Comparator interpretation` | consensus/method only |
+| `comparatorDifferences` | `Table` | `Paired agreement differences` | consensus/method with `statComp`; McNemar, Newcombe CI, Holm over pair x metric |
+| `comparatorStrata` | `Table` | `Agreement by stratum` | consensus/method with `stratify` |
+| `comparatorPlot` / `comparatorRadar` / `comparatorHeatmap` | `Image` | `Comparator agreement (...)` | consensus/method with `plot` / `radarplot` / `heatmap` |
+| `validationContext` | `Table` | `Validation context` | With `showValidationContext`: the five provenance strings plus `referenceType`/`referenceDescription`, filled by `.dvProvenance()` from `.init()`; displayed only, not validated (all modes) |
 
 ## 4. Architecture & Data Flow Diagram
 

@@ -1,0 +1,2 @@
+"rows","predictors","operation","elapsed_seconds","score_matrix_bytes"
+50000,50,"Tie-aware PR summaries; 50 score columns",0.532000000000004,20000216

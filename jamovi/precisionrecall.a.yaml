@@ -63,14 +63,12 @@ options:
       title: Interpolation Method
       type: List
       options:
-        - name: nonlinear
-          title: Non-linear (correct for PRC)
         - name: linear
           title: Linear (for comparison only)
-      default: nonlinear
+      default: linear
       description:
           R: >
-            PRC requires non-linear interpolation. Linear shown for educational comparison.
+            Observed PR points are connected linearly; average precision is a separate step-area summary.
 
     - name: showBaseline
       title: Show Baseline
@@ -86,8 +84,8 @@ options:
       options:
         - name: trapezoid
           title: Trapezoidal rule
-        - name: interpolated
-          title: Interpolated (Davis & Goadrich)
+        - name: average_precision
+          title: Average precision (step area)
       default: trapezoid
       description:
           R: >
@@ -106,8 +104,6 @@ options:
           title: Bootstrap
         - name: percentile
           title: Percentile
-        - name: bca
-          title: Bias-corrected accelerated (BCa)
       default: bootstrap
 
     - name: ciSamples
@@ -136,11 +132,9 @@ options:
       title: Comparison Method
       type: List
       options:
-        - name: bootstrap
-          title: Bootstrap Test
         - name: permutation
           title: Permutation Test
-      default: bootstrap
+      default: permutation
 
     - name: showROC
       title: Show Companion ROC Plot
@@ -157,5 +151,11 @@ options:
       description:
           R: >
             Display F₁ score iso-lines on PRC plot
+
+    - name: seed
+      title: Random seed
+      type: Integer
+      default: 1
+      min: 0
 
 ...

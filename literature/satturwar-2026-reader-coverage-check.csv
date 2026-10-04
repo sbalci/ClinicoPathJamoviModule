@@ -1,0 +1,4 @@
+"metric","simulations","bootstrap_draws","available","coverage","monte_carlo_se","mean_width"
+"PPA difference",200,399,200,0.945,0.0161206389451535,0.1765375
+"NPA difference",200,399,200,0.95,0.0154110350074224,0.158083333333333
+"Overall difference",200,399,200,0.94,0.0167928556237467,0.15513125

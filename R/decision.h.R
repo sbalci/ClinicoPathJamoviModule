@@ -6,6 +6,9 @@ decisionOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
+            referenceType = "legacy",
+            referenceDescription = "",
+            targetDefinition = "",
             gold = NULL,
             goldPositive = NULL,
             newtest = NULL,
@@ -23,7 +26,13 @@ decisionOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             showReportTemplate = FALSE,
             showAboutAnalysis = FALSE,
             showMisclassified = FALSE,
-            maxCasesShow = 50, ...) {
+            maxCasesShow = 50,
+            showValidationContext = FALSE,
+            cohortRole = "",
+            samplingDesign = "",
+            thresholdSource = "",
+            modelVersion = "",
+            analysisUnit = "slide", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -31,6 +40,23 @@ decisionOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresData=TRUE,
                 ...)
 
+            private$..referenceType <- jmvcore::OptionList$new(
+                "referenceType",
+                referenceType,
+                options=list(
+                    "legacy",
+                    "disease",
+                    "consensus",
+                    "method"),
+                default="legacy")
+            private$..referenceDescription <- jmvcore::OptionString$new(
+                "referenceDescription",
+                referenceDescription,
+                default="")
+            private$..targetDefinition <- jmvcore::OptionString$new(
+                "targetDefinition",
+                targetDefinition,
+                default="")
             private$..gold <- jmvcore::OptionVariable$new(
                 "gold",
                 gold,
@@ -71,8 +97,8 @@ decisionOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "pprob",
                 pprob,
                 default=0.3,
-                min=0.001,
-                max=0.999)
+                min=1e-9,
+                max=0.999999999)
             private$..od <- jmvcore::OptionBool$new(
                 "od",
                 od,
@@ -117,7 +143,34 @@ decisionOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 max=500)
             private$..saveClassifications <- jmvcore::OptionOutput$new(
                 "saveClassifications")
+            private$..showValidationContext <- jmvcore::OptionBool$new(
+                "showValidationContext",
+                showValidationContext,
+                default=FALSE)
+            private$..cohortRole <- jmvcore::OptionString$new(
+                "cohortRole",
+                cohortRole,
+                default="")
+            private$..samplingDesign <- jmvcore::OptionString$new(
+                "samplingDesign",
+                samplingDesign,
+                default="")
+            private$..thresholdSource <- jmvcore::OptionString$new(
+                "thresholdSource",
+                thresholdSource,
+                default="")
+            private$..modelVersion <- jmvcore::OptionString$new(
+                "modelVersion",
+                modelVersion,
+                default="")
+            private$..analysisUnit <- jmvcore::OptionString$new(
+                "analysisUnit",
+                analysisUnit,
+                default="slide")
 
+            self$.addOption(private$..referenceType)
+            self$.addOption(private$..referenceDescription)
+            self$.addOption(private$..targetDefinition)
             self$.addOption(private$..gold)
             self$.addOption(private$..goldPositive)
             self$.addOption(private$..newtest)
@@ -137,8 +190,17 @@ decisionOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..showMisclassified)
             self$.addOption(private$..maxCasesShow)
             self$.addOption(private$..saveClassifications)
+            self$.addOption(private$..showValidationContext)
+            self$.addOption(private$..cohortRole)
+            self$.addOption(private$..samplingDesign)
+            self$.addOption(private$..thresholdSource)
+            self$.addOption(private$..modelVersion)
+            self$.addOption(private$..analysisUnit)
         }),
     active = list(
+        referenceType = function() private$..referenceType$value,
+        referenceDescription = function() private$..referenceDescription$value,
+        targetDefinition = function() private$..targetDefinition$value,
         gold = function() private$..gold$value,
         goldPositive = function() private$..goldPositive$value,
         newtest = function() private$..newtest$value,
@@ -157,8 +219,17 @@ decisionOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         showAboutAnalysis = function() private$..showAboutAnalysis$value,
         showMisclassified = function() private$..showMisclassified$value,
         maxCasesShow = function() private$..maxCasesShow$value,
-        saveClassifications = function() private$..saveClassifications$value),
+        saveClassifications = function() private$..saveClassifications$value,
+        showValidationContext = function() private$..showValidationContext$value,
+        cohortRole = function() private$..cohortRole$value,
+        samplingDesign = function() private$..samplingDesign$value,
+        thresholdSource = function() private$..thresholdSource$value,
+        modelVersion = function() private$..modelVersion$value,
+        analysisUnit = function() private$..analysisUnit$value),
     private = list(
+        ..referenceType = NA,
+        ..referenceDescription = NA,
+        ..targetDefinition = NA,
         ..gold = NA,
         ..goldPositive = NA,
         ..newtest = NA,
@@ -177,7 +248,13 @@ decisionOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..showAboutAnalysis = NA,
         ..showMisclassified = NA,
         ..maxCasesShow = NA,
-        ..saveClassifications = NA)
+        ..saveClassifications = NA,
+        ..showValidationContext = NA,
+        ..cohortRole = NA,
+        ..samplingDesign = NA,
+        ..thresholdSource = NA,
+        ..modelVersion = NA,
+        ..analysisUnit = NA)
 )
 
 decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -204,7 +281,14 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         falsePositiveTable = function() private$.items[["falsePositiveTable"]],
         falseNegativeTable = function() private$.items[["falseNegativeTable"]],
         misclassificationInterpretation = function() private$.items[["misclassificationInterpretation"]],
-        saveClassifications = function() private$.items[["saveClassifications"]]),
+        saveClassifications = function() private$.items[["saveClassifications"]],
+        referenceDefinition = function() private$.items[["referenceDefinition"]],
+        comparatorCounts = function() private$.items[["comparatorCounts"]],
+        comparatorPopulation = function() private$.items[["comparatorPopulation"]],
+        comparatorMetrics = function() private$.items[["comparatorMetrics"]],
+        comparatorReport = function() private$.items[["comparatorReport"]],
+        comparatorCases = function() private$.items[["comparatorCases"]],
+        validationContext = function() private$.items[["validationContext"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -220,8 +304,11 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="welcome",
                 title="Getting Started",
-                visible="(length(gold) == 0 || length(newtest) == 0 || length(goldPositive) == 0 || length(testPositive) == 0)",
+                visible="(referenceType:legacy && (length(gold) == 0 || length(newtest) == 0 || length(goldPositive) == 0 || length(testPositive) == 0) || referenceType:disease && (length(gold) == 0 || length(newtest) == 0 || length(goldPositive) == 0 || length(testPositive) == 0))",
                 clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
                     "gold",
                     "newtest",
                     "goldPositive",
@@ -244,6 +331,9 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "STARD2015",
                     "Schuetz2012"),
                 clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
                     "gold",
                     "newtest",
                     "goldPositive",
@@ -259,7 +349,7 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="rawContingency",
                 title="Analysed Contingency Table",
-                visible="(od)",
+                visible="(referenceType:legacy && (od) || referenceType:disease && (od))",
                 rows=0,
                 columns=list(
                     list(
@@ -279,6 +369,9 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `title`="Total", 
                         `type`="integer")),
                 clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
                     "gold",
                     "newtest",
                     "goldPositive",
@@ -289,7 +382,7 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="rawCounts",
                 title="Analysed Combination Counts",
-                visible="(od)",
+                visible="(referenceType:legacy && (od) || referenceType:disease && (od))",
                 rows=0,
                 columns=list(
                     list(
@@ -305,6 +398,9 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `title`="Count", 
                         `type`="integer")),
                 clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
                     "gold",
                     "newtest",
                     "goldPositive",
@@ -315,6 +411,7 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="cTable",
                 title="2x2 Table",
+                visible="(referenceType:legacy || referenceType:disease)",
                 rows=0,
                 columns=list(
                     list(
@@ -334,6 +431,9 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `title`="Total", 
                         `type`="number")),
                 clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
                     "gold",
                     "newtest",
                     "goldPositive",
@@ -344,6 +444,7 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="nTable",
                 title="n",
+                visible="(referenceType:legacy || referenceType:disease)",
                 swapRowsColumns=TRUE,
                 rows=1,
                 columns=list(
@@ -380,6 +481,9 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `title`="Disagree with Reference", 
                         `type`="number")),
                 clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
                     "pp",
                     "pprob",
                     "gold",
@@ -394,6 +498,7 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="ratioTable",
                 title="",
+                visible="(referenceType:legacy || referenceType:disease)",
                 swapRowsColumns=TRUE,
                 rows=1,
                 columns=list(
@@ -440,6 +545,9 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `title`="Negative Likelihood Ratio", 
                         `type`="number")),
                 clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
                     "pp",
                     "pprob",
                     "gold",
@@ -462,8 +570,11 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="missingDataSummary",
                 title="Data Quality Summary",
-                visible="(od)",
+                visible="(referenceType:legacy && (od) || referenceType:disease && (od))",
                 clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
                     "gold",
                     "newtest",
                     "goldPositive",
@@ -474,7 +585,7 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="epirTable_ratio",
                 title="Sensitivity, Specificity and Predictive Values with 95% CI",
-                visible="(ci)",
+                visible="(referenceType:legacy && (ci) || referenceType:disease && (ci))",
                 rows=0,
                 columns=list(
                     list(
@@ -499,6 +610,9 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="number", 
                         `format`="pc")),
                 clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
                     "pp",
                     "pprob",
                     "gold",
@@ -517,7 +631,7 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="epirTable_number",
                 title="",
-                visible="(ci)",
+                visible="(referenceType:legacy && (ci) || referenceType:disease && (ci))",
                 rows=0,
                 columns=list(
                     list(
@@ -539,6 +653,9 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `superTitle`="95% Confidence Interval", 
                         `type`="number")),
                 clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
                     "pp",
                     "pprob",
                     "gold",
@@ -565,8 +682,11 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 width=600,
                 height=450,
                 renderFun=".plot1",
-                visible="(fagan)",
+                visible="(referenceType:legacy && (fagan) || referenceType:disease && (fagan))",
                 clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
                     "pp",
                     "pprob",
                     "fagan",
@@ -583,8 +703,11 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="naturalLanguageSummary",
                 title="Clinical Summary",
-                visible="(showNaturalLanguage)",
+                visible="(referenceType:legacy && (showNaturalLanguage) || referenceType:disease && (showNaturalLanguage))",
                 clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
                     "gold",
                     "newtest",
                     "goldPositive",
@@ -601,8 +724,11 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="clinicalInterpretation",
                 title="Clinical Interpretation Guide",
-                visible="(showClinicalInterpretation)",
+                visible="(referenceType:legacy && (showClinicalInterpretation) || referenceType:disease && (showClinicalInterpretation))",
                 clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
                     "gold",
                     "newtest",
                     "goldPositive",
@@ -621,8 +747,11 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="reportTemplate",
                 title="Copy-Ready Results Paragraph",
-                visible="(showReportTemplate)",
+                visible="(referenceType:legacy && (showReportTemplate) || referenceType:disease && (showReportTemplate))",
                 clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
                     "gold",
                     "newtest",
                     "goldPositive",
@@ -641,8 +770,11 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="aboutAnalysis",
                 title="About This Analysis",
-                visible="(showAboutAnalysis)",
+                visible="(referenceType:legacy && (showAboutAnalysis) || referenceType:disease && (showAboutAnalysis))",
                 clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
                     "gold",
                     "newtest",
                     "goldPositive",
@@ -665,8 +797,11 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="misclassifiedHeading",
                 title="Misclassified Cases Analysis",
-                visible="(showMisclassified)",
+                visible="(referenceType:legacy && (showMisclassified) || referenceType:disease && (showMisclassified))",
                 clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
                     "gold",
                     "newtest",
                     "goldPositive",
@@ -677,7 +812,7 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="confusionMatrixSummary",
                 title="Confusion Matrix Summary",
-                visible="(showMisclassified)",
+                visible="(referenceType:legacy && (showMisclassified) || referenceType:disease && (showMisclassified))",
                 rows=0,
                 columns=list(
                     list(
@@ -694,6 +829,9 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="number", 
                         `format`="pc")),
                 clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
                     "gold",
                     "newtest",
                     "goldPositive",
@@ -704,7 +842,7 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="falsePositiveTable",
                 title="False Positive Cases (Test+ but Disease-)",
-                visible="(showMisclassified)",
+                visible="(referenceType:legacy && (showMisclassified) || referenceType:disease && (showMisclassified))",
                 rows=0,
                 columns=list(
                     list(
@@ -720,6 +858,9 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `title`="Test Result", 
                         `type`="text")),
                 clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
                     "gold",
                     "newtest",
                     "goldPositive",
@@ -730,7 +871,7 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="falseNegativeTable",
                 title="False Negative Cases (Test- but Disease+)",
-                visible="(showMisclassified)",
+                visible="(referenceType:legacy && (showMisclassified) || referenceType:disease && (showMisclassified))",
                 rows=0,
                 columns=list(
                     list(
@@ -746,6 +887,9 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `title`="Test Result", 
                         `type`="text")),
                 clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
                     "gold",
                     "newtest",
                     "goldPositive",
@@ -756,8 +900,11 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="misclassificationInterpretation",
                 title="Interpretation of Misclassified Cases",
-                visible="(showMisclassified)",
+                visible="(referenceType:legacy && (showMisclassified) || referenceType:disease && (showMisclassified))",
                 clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
                     "gold",
                     "newtest",
                     "goldPositive",
@@ -772,12 +919,259 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 varDescription="Classification of each case: True Positive, False Positive, False Negative, or True Negative",
                 measureType="nominal",
                 clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
                     "gold",
                     "newtest",
                     "goldPositive",
                     "testPositive",
                     "goldNegative",
-                    "testNegative")))}))
+                    "testNegative")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="referenceDefinition",
+                title="Reference and target",
+                visible=TRUE,
+                rows=0,
+                clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
+                    "gold",
+                    "goldPositive",
+                    "goldNegative",
+                    "ci",
+                    "pp",
+                    "pprob",
+                    "newtest",
+                    "testPositive",
+                    "testNegative",
+                    "showMisclassified",
+                    "saveClassifications"),
+                columns=list(
+                    list(
+                        `name`="setting", 
+                        `title`="Setting", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="comparatorCounts",
+                title="Binary comparator counts",
+                visible="(referenceType:consensus || referenceType:method)",
+                rows=0,
+                clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
+                    "gold",
+                    "goldPositive",
+                    "goldNegative",
+                    "ci",
+                    "pp",
+                    "pprob",
+                    "newtest",
+                    "testPositive",
+                    "testNegative",
+                    "showMisclassified",
+                    "saveClassifications"),
+                columns=list(
+                    list(
+                        `name`="test", 
+                        `title`="Test", 
+                        `type`="text"),
+                    list(
+                        `name`="call", 
+                        `title`="Call", 
+                        `type`="text"),
+                    list(
+                        `name`="refPositive", 
+                        `title`="Reference positive", 
+                        `type`="integer"),
+                    list(
+                        `name`="refNegative", 
+                        `title`="Reference negative", 
+                        `type`="integer"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="comparatorPopulation",
+                title="Comparison populations",
+                visible="(referenceType:consensus || referenceType:method)",
+                rows=0,
+                clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
+                    "gold",
+                    "goldPositive",
+                    "goldNegative",
+                    "ci",
+                    "pp",
+                    "pprob",
+                    "newtest",
+                    "testPositive",
+                    "testNegative",
+                    "showMisclassified",
+                    "saveClassifications"),
+                columns=list(
+                    list(
+                        `name`="test", 
+                        `title`="Test", 
+                        `type`="text"),
+                    list(
+                        `name`="selected", 
+                        `title`="Selected rows", 
+                        `type`="integer"),
+                    list(
+                        `name`="analyzed", 
+                        `title`="Analyzed pairs", 
+                        `type`="integer"),
+                    list(
+                        `name`="excluded", 
+                        `title`="Excluded pairs", 
+                        `type`="integer"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="comparatorMetrics",
+                title="Agreement with comparator",
+                visible="(referenceType:consensus || referenceType:method)",
+                rows=0,
+                clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
+                    "gold",
+                    "goldPositive",
+                    "goldNegative",
+                    "ci",
+                    "pp",
+                    "pprob",
+                    "newtest",
+                    "testPositive",
+                    "testNegative",
+                    "showMisclassified",
+                    "saveClassifications"),
+                columns=list(
+                    list(
+                        `name`="test", 
+                        `title`="Test", 
+                        `type`="text"),
+                    list(
+                        `name`="metric", 
+                        `title`="Metric", 
+                        `type`="text"),
+                    list(
+                        `name`="numerator", 
+                        `title`="Numerator", 
+                        `type`="integer"),
+                    list(
+                        `name`="denominator", 
+                        `title`="Denominator", 
+                        `type`="integer"),
+                    list(
+                        `name`="estimate", 
+                        `title`="Estimate", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="lower", 
+                        `title`="Lower 95% CI", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="upper", 
+                        `title`="Upper 95% CI", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="method", 
+                        `title`="Interval method", 
+                        `type`="text"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="comparatorReport",
+                title="Comparator interpretation",
+                visible="(referenceType:consensus || referenceType:method)",
+                clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
+                    "gold",
+                    "goldPositive",
+                    "goldNegative",
+                    "ci",
+                    "pp",
+                    "pprob",
+                    "newtest",
+                    "testPositive",
+                    "testNegative",
+                    "showMisclassified",
+                    "saveClassifications")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="comparatorCases",
+                title="Discordant comparator calls",
+                visible="(referenceType:consensus && (showMisclassified) || referenceType:method && (showMisclassified))",
+                rows=0,
+                clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
+                    "gold",
+                    "goldPositive",
+                    "goldNegative",
+                    "ci",
+                    "pp",
+                    "pprob",
+                    "newtest",
+                    "testPositive",
+                    "testNegative",
+                    "showMisclassified",
+                    "saveClassifications"),
+                columns=list(
+                    list(
+                        `name`="row", 
+                        `title`="Row", 
+                        `type`="integer"),
+                    list(
+                        `name`="reference", 
+                        `title`="Reference value", 
+                        `type`="text"),
+                    list(
+                        `name`="test", 
+                        `title`="Test value", 
+                        `type`="text"),
+                    list(
+                        `name`="classification", 
+                        `title`="Comparison", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="validationContext",
+                title="Validation context",
+                visible="(showValidationContext)",
+                clearWith=list(
+                    "showValidationContext",
+                    "cohortRole",
+                    "samplingDesign",
+                    "thresholdSource",
+                    "modelVersion",
+                    "analysisUnit",
+                    "referenceType",
+                    "referenceDescription"),
+                columns=list(
+                    list(
+                        `name`="setting", 
+                        `title`="Setting", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="text"))))}))
 
 decisionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "decisionBase",
@@ -807,10 +1201,15 @@ decisionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 
 #' @param data The data as a data frame. The data frame should contain the
 #'   variables specified in the 'variables' option.
+#' @param referenceType Comparator interpretation; legacy preserves existing
+#'   binary calculations. Consensus and method report agreement without
+#'   disease-risk interpretation.
+#' @param referenceDescription .
+#' @param targetDefinition .
 #' @param gold The reference standard variable, used as each case's disease
 #'   status.
-#' @param goldPositive The level indicating presence of disease in the gold
-#'   standard variable.
+#' @param goldPositive The positive reference level; disease interpretation
+#'   requires a disease standard.
 #' @param newtest The diagnostic test variable being evaluated for
 #'   performance.
 #' @param testPositive The level representing a positive result for the test
@@ -827,8 +1226,8 @@ decisionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   rather than pooling them.
 #' @param pp Boolean selection whether to use known population prevalence
 #'   instead of study prevalence.
-#' @param pprob Population disease prevalence as a proportion between 0.001
-#'   and 0.999.
+#' @param pprob Population disease prevalence as a proportion strictly between
+#'   0 and 1.
 #' @param od Boolean selection whether to show original data frequency tables.
 #'   The raw data outputs (rawContingency, rawCounts and missingDataSummary) are
 #'   filled only when this is TRUE, so R code that reads them must set od =
@@ -850,6 +1249,12 @@ decisionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   misclassified cases tables.
 #' @param maxCasesShow Maximum number of misclassified cases to display in
 #'   tables.
+#' @param showValidationContext .
+#' @param cohortRole .
+#' @param samplingDesign .
+#' @param thresholdSource .
+#' @param modelVersion .
+#' @param analysisUnit .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$welcome} \tab \tab \tab \tab \tab a html \cr
@@ -873,6 +1278,13 @@ decisionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$falseNegativeTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$misclassificationInterpretation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$saveClassifications} \tab \tab \tab \tab \tab an output \cr
+#'   \code{results$referenceDefinition} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$comparatorCounts} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$comparatorPopulation} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$comparatorMetrics} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$comparatorReport} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$comparatorCases} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$validationContext} \tab \tab \tab \tab \tab a table \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -884,6 +1296,9 @@ decisionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 decision <- function(
     data,
+    referenceType = "legacy",
+    referenceDescription = "",
+    targetDefinition = "",
     gold = NULL,
     goldPositive,
     newtest = NULL,
@@ -901,7 +1316,13 @@ decision <- function(
     showReportTemplate = FALSE,
     showAboutAnalysis = FALSE,
     showMisclassified = FALSE,
-    maxCasesShow = 50) {
+    maxCasesShow = 50,
+    showValidationContext = FALSE,
+    cohortRole = "",
+    samplingDesign = "",
+    thresholdSource = "",
+    modelVersion = "",
+    analysisUnit = "slide") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("decision requires jmvcore to be installed (restart may be required)")
@@ -918,6 +1339,9 @@ decision <- function(
     for (v in newtest) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- decisionOptions$new(
+        referenceType = referenceType,
+        referenceDescription = referenceDescription,
+        targetDefinition = targetDefinition,
         gold = gold,
         goldPositive = goldPositive,
         newtest = newtest,
@@ -935,7 +1359,13 @@ decision <- function(
         showReportTemplate = showReportTemplate,
         showAboutAnalysis = showAboutAnalysis,
         showMisclassified = showMisclassified,
-        maxCasesShow = maxCasesShow)
+        maxCasesShow = maxCasesShow,
+        showValidationContext = showValidationContext,
+        cohortRole = cohortRole,
+        samplingDesign = samplingDesign,
+        thresholdSource = thresholdSource,
+        modelVersion = modelVersion,
+        analysisUnit = analysisUnit)
 
     analysis <- decisionClass$new(
         options = options,

@@ -20,8 +20,14 @@ formulas and Newcombe's paired-proportion interval.
 devtools::load_all()
 source("tests/testthat/helper-decisioncompare.R")
 files <- list.files("tests/testthat", pattern = "^test-decisioncompare.*[.]R$", full.names = TRUE)
+files <- c(files, "tests/testthat/test-diagnostic-comparator.R",
+           "tests/testthat/test-gaspath-live.R")
 lapply(files, testthat::test_file)
 ```
+
+`test-diagnostic-comparator.R` covers the shared consensus/method comparator helpers.
+`test-gaspath-live.R` is shared too: besides decisioncompare it also exercises decision,
+decisioncalculator, psychopdaROC and precisionrecall, so a failure there may belong to another analysis.
 
 Latest focused release verification: 130 test blocks / 962 passing expectations, with the
 corrected examples test rerun separately. No final focused test failures, errors, warnings or
@@ -34,15 +40,16 @@ adversarial runs and compiled Turkish warning lookup also passed.
 
 ## Release checklist
 
-- [x] Source options and UI controls mapped; no unused options found.
+- [ ] Source options and UI controls mapped; no unused options found. Needs re-verification
+  for the explicit-mapping release (1.1.0: reference type, negative levels, provenance options).
 - [x] Headless options panel rendered in jamovi's real client with no panel errors.
 - [x] Scoped state guards, theme checks and release checks passed.
 - [x] Real bundled-jamovi protobuf roundtrip and restored plot rendering verified in the
   preceding repair pass; option replay matched a fresh computation.
 - [x] Compiled Turkish lookup tested for the repaired glossary and method text.
-- [x] Regenerated the target header in isolation; verified source/runtime version 1.0.84,
-  the Statistic heading, and original-data notice invalidation. The wrapper API and
-  documentation were unchanged by these metadata repairs.
+- [ ] Regenerated the target header in isolation; verified source/runtime version 1.0.84,
+  the Statistic heading, and original-data notice invalidation. Needs re-verification for
+  the explicit-mapping release: the 1.1.0 wrapper API and documentation changed.
 - [ ] Exercise actual app .omv save/reopen/export and GUI locale switching.
 - [ ] Verify the intended submodule after the maintainer promotes the analysis from meddecideT.
 

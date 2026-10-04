@@ -1,6 +1,13 @@
 # Implementation plan: comparator agreement and reader studies
 
-Status: proposed implementation; no analysis source changes made.
+Status: implemented in testing/draft routes on 4 October 2026; native saved-analysis
+reopening and release promotion remain outstanding. See the
+[implementation record](satturwar-2026-thyroid-fna-implementation.md) for validation and limits.
+Follow-up on 4 October 2026: the user's explicit-positive-and-negative requirement supersedes
+phase 0's original compatibility policy for `decisioncompare`. Analysis 1.1.0 requires both
+levels in every reference mode and rejects extra observed levels unless exclusion is selected.
+Historical configurations needing new selections stop before recalculation.
+
 Prepared 4 October 2026. Builds on the
 [article review](satturwar-2026-thyroid-fna-citation-review.md).
 
@@ -111,14 +118,14 @@ above; it does not silently redefine the familiar binary statistics.
   and all `decisioncompare` test selectors.
 - Record current behavior for two-level factors, explicit selected levels in multilevel
   factors, missing values, zero cells, prevalence adjustment and saved classifications.
-- Keep `decisioncompare`'s existing `excludeIndeterminate` behavior unchanged in legacy
-  mode; it is different from `decision`'s explicit level filtering. Do not harmonize the
-  two silently as part of terminology work.
+- **Superseded by the follow-up fix:** `decisioncompare` now uses explicit positive/negative
+  mappings in every mode. Other observed levels require explicit exclusion; missing negative
+  mappings stop analysis. Previously implicit one-versus-rest calls require user selections.
 - Extend existing `test-decision-release-review.R`, `test-decision-full-check.R`,
   `test-decisioncompare-release-review.R` and argument tests where necessary.
 
-**Acceptance:** identical existing binary estimates and compatible R calls for the
-legacy/default path. No new required `Level` arguments.
+**Acceptance:** identical estimates for explicitly mapped binary data. Argument names remain
+unchanged, but selected `decisioncompare` variables now require non-NULL negative levels.
 
 ### 1. Add comparator interpretation to existing binary analyses
 
@@ -291,9 +298,11 @@ The relevant analyses are currently parked in testing or draft groups except pro
 `jjwithinstats`. Retain their routing during implementation and run release gates before
 promotion. No new File/Text option or application-version increase is needed for this plan.
 
-## Scope of this planning change
+## Implementation record
 
-Only this plan and a cross-reference in the prior review were added/updated. No `.a.yaml`,
-`.b.R`, `.r.yaml`, `.u.yaml`, generated file, menu routing or installed module was changed.
-The priority is A followed by B: these resolve the comparator and denominator issues
-while respecting the existing dichotomous selectors and binary diagnostic calculations.
+Change sets A–E and the bounded draft repairs in F have been implemented. The binary
+decision engines retain their existing dichotomous selectors and filtering rules.
+Nondiagnostic accounting and paired modality inference live in the opt-in reader workflow.
+Random-reader MRMC inference, reader-study simulation power planning, and an incomplete-grid
+estimator remain separate method-development projects as specified above. This work does
+not promote any new feature to a released production analysis.

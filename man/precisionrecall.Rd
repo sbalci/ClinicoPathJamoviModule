@@ -9,7 +9,7 @@ precisionrecall(
   outcome,
   positiveClass,
   scores,
-  interpolation = "nonlinear",
+  interpolation = "linear",
   showBaseline = TRUE,
   aucMethod = "trapezoid",
   ci = FALSE,
@@ -17,9 +17,10 @@ precisionrecall(
   ciSamples = 1000,
   ciWidth = 95,
   comparison = FALSE,
-  comparisonMethod = "bootstrap",
+  comparisonMethod = "permutation",
   showROC = FALSE,
-  showFScore = FALSE
+  showFScore = FALSE,
+  seed = 1
 )
 }
 \arguments{
@@ -33,8 +34,8 @@ levels)}
 \item{scores}{One or more continuous variables containing classifier scores
 or predicted probabilities}
 
-\item{interpolation}{PRC requires non-linear interpolation. Linear shown
-for educational comparison.}
+\item{interpolation}{Observed PR points are connected linearly; average
+precision is a separate step-area summary.}
 
 \item{showBaseline}{Display horizontal baseline at y = P/(P+N) representing
 random classifier}
@@ -56,6 +57,8 @@ random classifier}
 \item{showROC}{Display ROC curve alongside PRC for comparison}
 
 \item{showFScore}{Display F₁ score iso-lines on PRC plot}
+
+\item{seed}{.}
 }
 \value{
 A results object containing:

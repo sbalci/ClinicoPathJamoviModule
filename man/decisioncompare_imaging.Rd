@@ -32,10 +32,10 @@ specificity. Biomarker offers non-invasive alternative with good specificity.
 \examples{
 data(decisioncompare_imaging)
 decisioncompare(data = decisioncompare_imaging, gold = "Pathology",
-                goldPositive = "Malignant", goldNegative = NULL, test1 = "CT_Scan",
-                test1Positive = "Abnormal", test1Negative = NULL, test2 = "MRI",
-                test2Positive = "Abnormal", test2Negative = NULL, test3 = "Biomarker",
-                test3Positive = "Elevated", test3Negative = NULL, radarplot = TRUE)
+                goldPositive = "Malignant", goldNegative = "Benign", test1 = "CT_Scan",
+                test1Positive = "Abnormal", test1Negative = "Normal", test2 = "MRI",
+                test2Positive = "Abnormal", test2Negative = "Normal", test3 = "Biomarker",
+                test3Positive = "Elevated", test3Negative = "Normal", radarplot = TRUE)
 
 }
 \keyword{datasets}

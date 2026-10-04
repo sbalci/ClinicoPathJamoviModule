@@ -846,7 +846,7 @@ intervalsurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             super$initialize(
                 package = "ClinicoPath",
                 name = "intervalsurvival",
-                version = c(0,0,3),
+                version = c(1,0,83),
                 options = options,
                 results = intervalsurvivalResults$new(options=options),
                 data = data,

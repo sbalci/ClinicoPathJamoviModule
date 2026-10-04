@@ -62,6 +62,9 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
 
             .readerInit = function() {
                 o <- private$.readerOptions()
+                self$results$pathReferenceDefinition$deleteRows()
+                for (key in seq_len(4L))
+                    self$results$pathReferenceDefinition$addRow(rowKey = as.character(key))
                 prepared <- if (o$readerWorkflow == "off") NULL else
                     tryCatch(.paReaderPrepare(self$data, o), error = function(e) NULL)
                 # Recreate even data-dependent case rows before loading saved cells.
@@ -73,6 +76,31 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                         for (key in layout[[name]]) table$addRow(rowKey = as.character(key))
                     }
                 }
+            },
+
+            .referenceInterpretation = function() {
+                mode <- .diagReferenceMode(self$options$referenceType)
+                values <- c(mode$name, self$options$referenceDescription,
+                    self$options$targetDefinition,
+                    if (mode$legacy) .("Interpretation is not specified; legacy diagnostic labels require a suitable disease standard.")
+                    else if (mode$comparator) .("Agreement with the comparator does not establish disease status. PPA/NPA differ from symmetric specific agreement.")
+                    else .("Disease interpretation assumes the selected reference establishes the target condition."))
+                settings <- c("Reference interpretation", "Reference description", "Target definition", "Interpretation")
+                for (i in seq_along(settings)) self$results$pathReferenceDefinition$setRow(
+                    rowKey = as.character(i), values = list(setting = settings[i], value = values[i]))
+                for (name in c("categoryTable", "diagnosticAccuracyTable", "kappaBalancedTable")) {
+                    table <- self$results[[name]]
+                    table$getColumn("sensitivity")$setTitle(if (name == "diagnosticAccuracyTable") {
+                        if (mode$comparator) .("Macro PPA %") else .("Macro sensitivity %")
+                    } else if (mode$comparator) .("PPA") else .("Sensitivity"))
+                    table$getColumn("specificity")$setTitle(if (name == "diagnosticAccuracyTable") {
+                        if (mode$comparator) .("Macro NPA %") else .("Macro specificity %")
+                    } else if (mode$comparator) .("NPA") else .("Specificity"))
+                }
+                table <- self$results$diagnosticAccuracyTable
+                table$getColumn("ppv")$setTitle(if (mode$comparator) .("Reference-positive among positive calls %") else .("Macro PPV %"))
+                table$getColumn("npv")$setTitle(if (mode$comparator) .("Reference-negative among negative calls %") else .("Macro NPV %"))
+                table$getColumn("accuracy")$setTitle(if (mode$comparator) .("Exact agreement %") else .("Accuracy %"))
             },
 
             .readerRun = function() {
@@ -110,13 +138,21 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     }
                 }
                 self$results$readerAccuracyTable$setNote("population",
-                    .("Available-case accuracy uses that reader and the reference. Shared-case accuracy requires all selected readers and the reference. Indeterminate results are excluded, never counted as negative. Estimates treat the stated reference as correct."))
+                    .("Available-case comparison uses that reader and the reference. Shared-case comparison requires every selected reading and the reference. Ordinary binary estimates exclude nondiagnostic, missing and unmapped calls. PPA/NPA in comparator mode condition on the reference classification; they do not establish disease status."))
                 self$results$cutoffAgreementTable$setNote("population",
                     .("Each reader pair uses both-observed calls. Near-cutoff results are conditional on either member of that pair entering the stated band. Excluded counts are relative to all non-metadata case rows. Positive/negative specific agreement is symmetric agreement, not sensitivity/specificity."))
                 self$results$cutoffDisagreementCases$setNote("limit",
                     .("The list is capped across pairs; all discordant cases contribute to the aggregate counts. Row identifies the original dataset row. A disagreement is not an error without a reference."))
                 self$results$readerOriginalAgreement$setNote("scale",
-                    .("Original ordinal scores retain their declared category order. These kappa point estimates describe the original scale; the cutoff table describes binary clinical calls."))
+                    .("Ordinal scores retain declared category order and unused categories. A declared nondiagnostic category is removed from the severity scale. These kappa estimates concern determinate pairs; the cutoff table describes binary calls."))
+                self$results$readerObservedAgreement$setNote("population",
+                    .("Nondiagnostic readings remain in observed reference-class denominators and do not count as matches. Missing readings and unavailable reference classifications are excluded. These estimates do not replace the determinate binary table and are not inputs to binary likelihood ratios or disease-risk calculations."))
+                self$results$readerModalityContrast$setNote("design",
+                    .("Comparison minus baseline, in percentage points, on the same complete matched cases with equal weights for the fixed selected readers. Whole cases or patients are resampled with all readings together. Intervals do not generalize to new readers. No p-values or simultaneous inference are provided; additional contrasts are exploratory. Percentile bootstrap coverage must be validated for the intended design."))
+                self$results$readerModalitySummary$setNote("population",
+                    .("Pooled read proportions on the complete matched grid equal the mean of fixed-reader proportions because every selected reader contributes to every included case. Per-reader available-case summaries above may use different cases. Bootstrap intervals preserve case/patient dependence; individual reads are not independent sampling units."))
+                self$results$readerTransitionsTable$setNote("direction",
+                    .("Higher/lower refer to the declared ordered severity scale, not correctness. Threshold crossings use the selected positive-call rule. Nondiagnostic status is separate from severity; direction and threshold counts require both readings to be determinate."))
                 for (name in c("readerAccuracyTable", "cutoffAgreementTable", "kappaBalancedTable")) {
                     self$results[[name]]$setNote("intervals",
                         .("Intervals concern the selected fixed readers. Exact binomial intervals assume independent cases. Bootstrap intervals resample whole cases or patient clusters and preserve specimen weighting. Undefined or constant resampling distributions suppress the affected interval; attempted and invalid draw counts are shown. Percentile bootstrap intervals are exploratory: simulation found undercoverage even with 60 clusters. Rare categories and few clusters can make intervals unavailable."))
@@ -124,7 +160,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 self$results$kappaBalancedTable$setNote("experimental",
                     .("Exploratory module-specific definition: balanced accuracy of the named reader and unweighted Cohen kappa of the selected pair, on the same reference-complete cases. This is not a reporting standard or a verified reproduction of the paper's reader aggregation rule. Negative or undefined kappa makes the composite unavailable. No clinical acceptance bands are defined."))
                 if (o$readerCode) {
-                    code <- c("# Replace your_data with the original wide data frame.",
+                    code <- c("# Replace your_data with the original input data frame.",
                         "reader_options <-", utils::capture.output(dput(o)),
                         "do.call(ClinicoPath::pathagreement, c(list(data = your_data), reader_options))")
                     self$results$readerRCode$setContent(paste(code, collapse = "\n"))
@@ -299,6 +335,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
 
             # Main analysis function
             .run = function() {
+                private$.referenceInterpretation()
                 if (self$options$readerWorkflow != "off") {
                     private$.readerRun()
                     return()
@@ -2092,7 +2129,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 }
                 note <- .("Category kappa collapses the ratings to \u{201C}this category vs. all others\u{201D}. Frequency counts cases in which at least one rater used the category.")
                 if (all(is.na(res$sensitivity))) {
-                    note <- paste0(note, "\n\n", .("Sensitivity and specificity require a reference/expert standard variable."))
+                    note <- paste0(note, "\n\n", .("Reference-conditioned rates require a reference/comparator variable."))
                 }
                 tbl$setNote("cat", note)
             },
@@ -2242,7 +2279,9 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 for (r in seq_len(nrow(res))) {
                     tbl$setRow(rowKey = res$rater[r], values = as.list(res[r, ]))
                 }
-                tbl$setNote("macro", .("Sensitivity, specificity, PPV and NPV are macro-averaged over the categories of the reference standard (each scored one-vs-rest, then averaged). Accuracy is the percentage of cases the rater classified exactly as the reference standard."))
+                tbl$setNote("macro", if (self$options$referenceType %in% c("consensus", "method"))
+                    .("PPA, NPA and reverse conditional agreement are macro-averaged over comparator categories, each scored one-vs-rest. Exact agreement is the proportion matching the comparator. These quantities do not establish disease accuracy or disease predictive values.") else
+                    .("Sensitivity, specificity, PPV and NPV are macro-averaged over the categories of the reference standard (each scored one-vs-rest, then averaged). Accuracy is the percentage of cases the rater classified exactly as the reference standard."))
             },
 
             # Visualization functions

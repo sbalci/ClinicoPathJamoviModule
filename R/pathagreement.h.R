@@ -84,7 +84,24 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             readerConfidence = 0.95,
             showKappaBalanced = FALSE,
             compositeReader = "",
-            readerCode = FALSE, ...) {
+            readerCode = FALSE,
+            referenceType = "legacy",
+            referenceDescription = "",
+            targetDefinition = "",
+            readerNondiagnostic = FALSE,
+            readerNondiagnosticLevel = "",
+            readerAllObservedAgreement = FALSE,
+            readerFormat = "wide",
+            readerID = NULL,
+            modality = NULL,
+            rating = NULL,
+            baselineModality = "",
+            comparisonModality = "",
+            readerModalityComparison = FALSE,
+            modalityPopulation = "determinate",
+            readerTransitions = FALSE,
+            transitionBaseline = "",
+            transitionComparison = "", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -508,6 +525,94 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "readerCode",
                 readerCode,
                 default=FALSE)
+            private$..referenceType <- jmvcore::OptionList$new(
+                "referenceType",
+                referenceType,
+                default="legacy",
+                options=list(
+                    "legacy",
+                    "disease",
+                    "consensus",
+                    "method"))
+            private$..referenceDescription <- jmvcore::OptionString$new(
+                "referenceDescription",
+                referenceDescription,
+                default="")
+            private$..targetDefinition <- jmvcore::OptionString$new(
+                "targetDefinition",
+                targetDefinition,
+                default="")
+            private$..readerNondiagnostic <- jmvcore::OptionBool$new(
+                "readerNondiagnostic",
+                readerNondiagnostic,
+                default=FALSE)
+            private$..readerNondiagnosticLevel <- jmvcore::OptionString$new(
+                "readerNondiagnosticLevel",
+                readerNondiagnosticLevel,
+                default="")
+            private$..readerAllObservedAgreement <- jmvcore::OptionBool$new(
+                "readerAllObservedAgreement",
+                readerAllObservedAgreement,
+                default=FALSE)
+            private$..readerFormat <- jmvcore::OptionList$new(
+                "readerFormat",
+                readerFormat,
+                default="wide",
+                options=list(
+                    "wide",
+                    "long"))
+            private$..readerID <- jmvcore::OptionVariable$new(
+                "readerID",
+                readerID,
+                default=NULL,
+                suggested=list(
+                    "nominal",
+                    "id"))
+            private$..modality <- jmvcore::OptionVariable$new(
+                "modality",
+                modality,
+                default=NULL,
+                suggested=list(
+                    "nominal",
+                    "id"))
+            private$..rating <- jmvcore::OptionVariable$new(
+                "rating",
+                rating,
+                default=NULL,
+                suggested=list(
+                    "nominal",
+                    "ordinal"))
+            private$..baselineModality <- jmvcore::OptionString$new(
+                "baselineModality",
+                baselineModality,
+                default="")
+            private$..comparisonModality <- jmvcore::OptionString$new(
+                "comparisonModality",
+                comparisonModality,
+                default="")
+            private$..readerModalityComparison <- jmvcore::OptionBool$new(
+                "readerModalityComparison",
+                readerModalityComparison,
+                default=FALSE)
+            private$..modalityPopulation <- jmvcore::OptionList$new(
+                "modalityPopulation",
+                modalityPopulation,
+                default="determinate",
+                options=list(
+                    "determinate",
+                    "all_observed"))
+            private$..readerTransitions <- jmvcore::OptionBool$new(
+                "readerTransitions",
+                readerTransitions,
+                default=FALSE)
+            private$..transitionBaseline <- jmvcore::OptionString$new(
+                "transitionBaseline",
+                transitionBaseline,
+                default="")
+            private$..transitionComparison <- jmvcore::OptionString$new(
+                "transitionComparison",
+                transitionComparison,
+                default="")
 
             self$.addOption(private$..vars)
             self$.addOption(private$..sft)
@@ -588,6 +693,23 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..showKappaBalanced)
             self$.addOption(private$..compositeReader)
             self$.addOption(private$..readerCode)
+            self$.addOption(private$..referenceType)
+            self$.addOption(private$..referenceDescription)
+            self$.addOption(private$..targetDefinition)
+            self$.addOption(private$..readerNondiagnostic)
+            self$.addOption(private$..readerNondiagnosticLevel)
+            self$.addOption(private$..readerAllObservedAgreement)
+            self$.addOption(private$..readerFormat)
+            self$.addOption(private$..readerID)
+            self$.addOption(private$..modality)
+            self$.addOption(private$..rating)
+            self$.addOption(private$..baselineModality)
+            self$.addOption(private$..comparisonModality)
+            self$.addOption(private$..readerModalityComparison)
+            self$.addOption(private$..modalityPopulation)
+            self$.addOption(private$..readerTransitions)
+            self$.addOption(private$..transitionBaseline)
+            self$.addOption(private$..transitionComparison)
         }),
     active = list(
         vars = function() private$..vars$value,
@@ -668,7 +790,24 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         readerConfidence = function() private$..readerConfidence$value,
         showKappaBalanced = function() private$..showKappaBalanced$value,
         compositeReader = function() private$..compositeReader$value,
-        readerCode = function() private$..readerCode$value),
+        readerCode = function() private$..readerCode$value,
+        referenceType = function() private$..referenceType$value,
+        referenceDescription = function() private$..referenceDescription$value,
+        targetDefinition = function() private$..targetDefinition$value,
+        readerNondiagnostic = function() private$..readerNondiagnostic$value,
+        readerNondiagnosticLevel = function() private$..readerNondiagnosticLevel$value,
+        readerAllObservedAgreement = function() private$..readerAllObservedAgreement$value,
+        readerFormat = function() private$..readerFormat$value,
+        readerID = function() private$..readerID$value,
+        modality = function() private$..modality$value,
+        rating = function() private$..rating$value,
+        baselineModality = function() private$..baselineModality$value,
+        comparisonModality = function() private$..comparisonModality$value,
+        readerModalityComparison = function() private$..readerModalityComparison$value,
+        modalityPopulation = function() private$..modalityPopulation$value,
+        readerTransitions = function() private$..readerTransitions$value,
+        transitionBaseline = function() private$..transitionBaseline$value,
+        transitionComparison = function() private$..transitionComparison$value),
     private = list(
         ..vars = NA,
         ..sft = NA,
@@ -748,7 +887,24 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..readerConfidence = NA,
         ..showKappaBalanced = NA,
         ..compositeReader = NA,
-        ..readerCode = NA)
+        ..readerCode = NA,
+        ..referenceType = NA,
+        ..referenceDescription = NA,
+        ..targetDefinition = NA,
+        ..readerNondiagnostic = NA,
+        ..readerNondiagnosticLevel = NA,
+        ..readerAllObservedAgreement = NA,
+        ..readerFormat = NA,
+        ..readerID = NA,
+        ..modality = NA,
+        ..rating = NA,
+        ..baselineModality = NA,
+        ..comparisonModality = NA,
+        ..readerModalityComparison = NA,
+        ..modalityPopulation = NA,
+        ..readerTransitions = NA,
+        ..transitionBaseline = NA,
+        ..transitionComparison = NA)
 )
 
 pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -812,7 +968,16 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         readerOriginalAgreement = function() private$.items[["readerOriginalAgreement"]],
         cutoffDisagreementCases = function() private$.items[["cutoffDisagreementCases"]],
         kappaBalancedTable = function() private$.items[["kappaBalancedTable"]],
-        readerRCode = function() private$.items[["readerRCode"]]),
+        readerRCode = function() private$.items[["readerRCode"]],
+        readerAvailability = function() private$.items[["readerAvailability"]],
+        readerMapping = function() private$.items[["readerMapping"]],
+        readerObservedAgreement = function() private$.items[["readerObservedAgreement"]],
+        readerModalitySummary = function() private$.items[["readerModalitySummary"]],
+        readerModalityContrast = function() private$.items[["readerModalityContrast"]],
+        readerTransitionsTable = function() private$.items[["readerTransitionsTable"]],
+        readerTransitionMatrix = function() private$.items[["readerTransitionMatrix"]],
+        pathReferenceDefinition = function() private$.items[["pathReferenceDefinition"]],
+        readerReferenceExclusions = function() private$.items[["readerReferenceExclusions"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -1047,6 +1212,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 title="Category-Specific Agreement",
                 visible="(readerWorkflow:off && (categoryAnalysis))",
                 clearWith=list(
+                    "referenceType",
                     "vars",
                     "caseID",
                     "useMetadataRows",
@@ -1119,9 +1285,10 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$add(jmvcore::Table$new(
                 options=options,
                 name="diagnosticAccuracyTable",
-                title="Diagnostic Accuracy by Rater (Macro-Averaged Across Categories)",
+                title="Reference Comparison by Rater (Macro-Averaged Across Categories)",
                 visible="(readerWorkflow:off && (pathologyContext))",
                 clearWith=list(
+                    "referenceType",
                     "vars",
                     "caseID",
                     "useMetadataRows",
@@ -2262,6 +2429,23 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 visible="(readerWorkflow:binary || readerWorkflow:ordinal_cutoff || readerWorkflow:numeric_cutoff)",
                 rows=0,
                 clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
+                    "readerNondiagnostic",
+                    "readerNondiagnosticLevel",
+                    "readerAllObservedAgreement",
+                    "readerFormat",
+                    "readerID",
+                    "modality",
+                    "rating",
+                    "baselineModality",
+                    "comparisonModality",
+                    "readerModalityComparison",
+                    "modalityPopulation",
+                    "readerTransitions",
+                    "transitionBaseline",
+                    "transitionComparison",
                     "readerWorkflow",
                     "readerScores",
                     "readerPositive",
@@ -2309,6 +2493,23 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 visible="(readerWorkflow:binary || readerWorkflow:ordinal_cutoff || readerWorkflow:numeric_cutoff)",
                 rows=0,
                 clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
+                    "readerNondiagnostic",
+                    "readerNondiagnosticLevel",
+                    "readerAllObservedAgreement",
+                    "readerFormat",
+                    "readerID",
+                    "modality",
+                    "rating",
+                    "baselineModality",
+                    "comparisonModality",
+                    "readerModalityComparison",
+                    "modalityPopulation",
+                    "readerTransitions",
+                    "transitionBaseline",
+                    "transitionComparison",
                     "readerWorkflow",
                     "readerScores",
                     "readerPositive",
@@ -2364,10 +2565,27 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$add(jmvcore::Table$new(
                 options=options,
                 name="readerAccuracyTable",
-                title="Disease-Positive Reader Accuracy",
-                visible="((readerWorkflow:binary || readerWorkflow:ordinal_cutoff || readerWorkflow:numeric_cutoff) && referenceAccuracy)",
+                title="Determinate Reader Comparison",
+                visible="(referenceAccuracy && (readerWorkflow:binary || readerWorkflow:ordinal_cutoff || readerWorkflow:numeric_cutoff))",
                 rows=0,
                 clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
+                    "readerNondiagnostic",
+                    "readerNondiagnosticLevel",
+                    "readerAllObservedAgreement",
+                    "readerFormat",
+                    "readerID",
+                    "modality",
+                    "rating",
+                    "baselineModality",
+                    "comparisonModality",
+                    "readerModalityComparison",
+                    "modalityPopulation",
+                    "readerTransitions",
+                    "transitionBaseline",
+                    "transitionComparison",
                     "readerWorkflow",
                     "readerScores",
                     "readerPositive",
@@ -2422,19 +2640,27 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `type`="integer"),
                     list(
                         `name`="tp", 
-                        `title`="Tp", 
+                        `title`="Positive match", 
                         `type`="integer"),
                     list(
                         `name`="fn", 
-                        `title`="Fn", 
+                        `title`="Reference positive, reader negative", 
                         `type`="integer"),
                     list(
                         `name`="tn", 
-                        `title`="Tn", 
+                        `title`="Negative match", 
                         `type`="integer"),
                     list(
                         `name`="fp", 
-                        `title`="Fp", 
+                        `title`="Reference negative, reader positive", 
+                        `type`="integer"),
+                    list(
+                        `name`="numerator", 
+                        `title`="Numerator", 
+                        `type`="integer"),
+                    list(
+                        `name`="denominator", 
+                        `title`="Denominator", 
                         `type`="integer"),
                     list(
                         `name`="metric", 
@@ -2486,6 +2712,23 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 visible="(readerWorkflow:binary || readerWorkflow:ordinal_cutoff || readerWorkflow:numeric_cutoff)",
                 rows=0,
                 clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
+                    "readerNondiagnostic",
+                    "readerNondiagnosticLevel",
+                    "readerAllObservedAgreement",
+                    "readerFormat",
+                    "readerID",
+                    "modality",
+                    "rating",
+                    "baselineModality",
+                    "comparisonModality",
+                    "readerModalityComparison",
+                    "modalityPopulation",
+                    "readerTransitions",
+                    "transitionBaseline",
+                    "transitionComparison",
                     "readerWorkflow",
                     "readerScores",
                     "readerPositive",
@@ -2604,6 +2847,23 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 visible="(readerWorkflow:ordinal_cutoff)",
                 rows=0,
                 clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
+                    "readerNondiagnostic",
+                    "readerNondiagnosticLevel",
+                    "readerAllObservedAgreement",
+                    "readerFormat",
+                    "readerID",
+                    "modality",
+                    "rating",
+                    "baselineModality",
+                    "comparisonModality",
+                    "readerModalityComparison",
+                    "modalityPopulation",
+                    "readerTransitions",
+                    "transitionBaseline",
+                    "transitionComparison",
                     "readerWorkflow",
                     "readerScores",
                     "readerPositive",
@@ -2660,6 +2920,23 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 visible="(readerWorkflow:binary || readerWorkflow:ordinal_cutoff || readerWorkflow:numeric_cutoff)",
                 rows=0,
                 clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
+                    "readerNondiagnostic",
+                    "readerNondiagnosticLevel",
+                    "readerAllObservedAgreement",
+                    "readerFormat",
+                    "readerID",
+                    "modality",
+                    "rating",
+                    "baselineModality",
+                    "comparisonModality",
+                    "readerModalityComparison",
+                    "modalityPopulation",
+                    "readerTransitions",
+                    "transitionBaseline",
+                    "transitionComparison",
                     "readerWorkflow",
                     "readerScores",
                     "readerPositive",
@@ -2731,6 +3008,23 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 visible="((readerWorkflow:binary || readerWorkflow:ordinal_cutoff || readerWorkflow:numeric_cutoff) && showKappaBalanced)",
                 rows=0,
                 clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
+                    "readerNondiagnostic",
+                    "readerNondiagnosticLevel",
+                    "readerAllObservedAgreement",
+                    "readerFormat",
+                    "readerID",
+                    "modality",
+                    "rating",
+                    "baselineModality",
+                    "comparisonModality",
+                    "readerModalityComparison",
+                    "modalityPopulation",
+                    "readerTransitions",
+                    "transitionBaseline",
+                    "transitionComparison",
                     "readerWorkflow",
                     "readerScores",
                     "readerPositive",
@@ -2840,6 +3134,23 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 title="Reproducible Reader R Code",
                 visible="((readerWorkflow:binary || readerWorkflow:ordinal_cutoff || readerWorkflow:numeric_cutoff) && readerCode)",
                 clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
+                    "readerNondiagnostic",
+                    "readerNondiagnosticLevel",
+                    "readerAllObservedAgreement",
+                    "readerFormat",
+                    "readerID",
+                    "modality",
+                    "rating",
+                    "baselineModality",
+                    "comparisonModality",
+                    "readerModalityComparison",
+                    "modalityPopulation",
+                    "readerTransitions",
+                    "transitionBaseline",
+                    "transitionComparison",
                     "readerWorkflow",
                     "readerScores",
                     "readerPositive",
@@ -2870,7 +3181,747 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "useMetadataRows",
                     "bootstrapSamples",
                     "seed",
-                    "wght")))}))
+                    "wght")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="readerAvailability",
+                title="Result Availability by Reference State",
+                visible="(readerWorkflow != 'off' && (readerNondiagnostic || readerFormat:long))",
+                rows=0,
+                clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
+                    "readerNondiagnostic",
+                    "readerNondiagnosticLevel",
+                    "readerAllObservedAgreement",
+                    "readerFormat",
+                    "readerID",
+                    "modality",
+                    "rating",
+                    "baselineModality",
+                    "comparisonModality",
+                    "readerModalityComparison",
+                    "modalityPopulation",
+                    "readerTransitions",
+                    "transitionBaseline",
+                    "transitionComparison",
+                    "readerWorkflow",
+                    "readerScores",
+                    "readerPositive",
+                    "readerNegative",
+                    "referenceAccuracy",
+                    "referencePositive",
+                    "referenceNegative",
+                    "readerPopulation",
+                    "clinicalCutoff",
+                    "positiveRule",
+                    "nearCutoffWidth",
+                    "ordinalCutoff",
+                    "nearCutoffLevels",
+                    "readerPairs",
+                    "readerPair1",
+                    "readerPair2",
+                    "readerCaseLimit",
+                    "readerCluster",
+                    "readerIntervals",
+                    "readerBootstrap",
+                    "readerConfidence",
+                    "showKappaBalanced",
+                    "compositeReader",
+                    "readerCode",
+                    "vars",
+                    "referenceStandard",
+                    "caseID",
+                    "useMetadataRows",
+                    "bootstrapSamples",
+                    "seed",
+                    "wght"),
+                columns=list(
+                    list(
+                        `name`="reader", 
+                        `title`="Reader", 
+                        `type`="text"),
+                    list(
+                        `name`="reference", 
+                        `title`="Reference", 
+                        `type`="text"),
+                    list(
+                        `name`="result", 
+                        `title`="Result", 
+                        `type`="text"),
+                    list(
+                        `name`="n", 
+                        `title`="N", 
+                        `type`="integer"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="readerMapping",
+                title="Observed Rating Mapping",
+                visible="(readerWorkflow != 'off' && (readerNondiagnostic || readerFormat:long))",
+                rows=0,
+                clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
+                    "readerNondiagnostic",
+                    "readerNondiagnosticLevel",
+                    "readerAllObservedAgreement",
+                    "readerFormat",
+                    "readerID",
+                    "modality",
+                    "rating",
+                    "baselineModality",
+                    "comparisonModality",
+                    "readerModalityComparison",
+                    "modalityPopulation",
+                    "readerTransitions",
+                    "transitionBaseline",
+                    "transitionComparison",
+                    "readerWorkflow",
+                    "readerScores",
+                    "readerPositive",
+                    "readerNegative",
+                    "referenceAccuracy",
+                    "referencePositive",
+                    "referenceNegative",
+                    "readerPopulation",
+                    "clinicalCutoff",
+                    "positiveRule",
+                    "nearCutoffWidth",
+                    "ordinalCutoff",
+                    "nearCutoffLevels",
+                    "readerPairs",
+                    "readerPair1",
+                    "readerPair2",
+                    "readerCaseLimit",
+                    "readerCluster",
+                    "readerIntervals",
+                    "readerBootstrap",
+                    "readerConfidence",
+                    "showKappaBalanced",
+                    "compositeReader",
+                    "readerCode",
+                    "vars",
+                    "referenceStandard",
+                    "caseID",
+                    "useMetadataRows",
+                    "bootstrapSamples",
+                    "seed",
+                    "wght"),
+                columns=list(
+                    list(
+                        `name`="reader", 
+                        `title`="Reader", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Raw value", 
+                        `type`="text"),
+                    list(
+                        `name`="status", 
+                        `title`="Status", 
+                        `type`="text"),
+                    list(
+                        `name`="call", 
+                        `title`="Call", 
+                        `type`="text"),
+                    list(
+                        `name`="n", 
+                        `title`="N", 
+                        `type`="integer"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="readerObservedAgreement",
+                title="Agreement Including Nondiagnostic Calls",
+                visible="(readerWorkflow != 'off' && readerAllObservedAgreement && (readerNondiagnostic || readerFormat:long))",
+                rows=0,
+                clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
+                    "readerNondiagnostic",
+                    "readerNondiagnosticLevel",
+                    "readerAllObservedAgreement",
+                    "readerFormat",
+                    "readerID",
+                    "modality",
+                    "rating",
+                    "baselineModality",
+                    "comparisonModality",
+                    "readerModalityComparison",
+                    "modalityPopulation",
+                    "readerTransitions",
+                    "transitionBaseline",
+                    "transitionComparison",
+                    "readerWorkflow",
+                    "readerScores",
+                    "readerPositive",
+                    "readerNegative",
+                    "referenceAccuracy",
+                    "referencePositive",
+                    "referenceNegative",
+                    "readerPopulation",
+                    "clinicalCutoff",
+                    "positiveRule",
+                    "nearCutoffWidth",
+                    "ordinalCutoff",
+                    "nearCutoffLevels",
+                    "readerPairs",
+                    "readerPair1",
+                    "readerPair2",
+                    "readerCaseLimit",
+                    "readerCluster",
+                    "readerIntervals",
+                    "readerBootstrap",
+                    "readerConfidence",
+                    "showKappaBalanced",
+                    "compositeReader",
+                    "readerCode",
+                    "vars",
+                    "referenceStandard",
+                    "caseID",
+                    "useMetadataRows",
+                    "bootstrapSamples",
+                    "seed",
+                    "wght"),
+                columns=list(
+                    list(
+                        `name`="reader", 
+                        `title`="Reader", 
+                        `type`="text"),
+                    list(
+                        `name`="population", 
+                        `title`="Population", 
+                        `type`="text"),
+                    list(
+                        `name`="metric", 
+                        `title`="Metric", 
+                        `type`="text"),
+                    list(
+                        `name`="numerator", 
+                        `title`="Numerator", 
+                        `type`="integer"),
+                    list(
+                        `name`="denominator", 
+                        `title`="Denominator", 
+                        `type`="integer"),
+                    list(
+                        `name`="estimate", 
+                        `title`="Estimate", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="lower", 
+                        `title`="CI lower", 
+                        `type`="number", 
+                        `format`="dp:3"),
+                    list(
+                        `name`="upper", 
+                        `title`="CI upper", 
+                        `type`="number", 
+                        `format`="dp:3"),
+                    list(
+                        `name`="status", 
+                        `title`="Interval method/status", 
+                        `type`="text"),
+                    list(
+                        `name`="attempted", 
+                        `title`="Attempted", 
+                        `type`="integer"),
+                    list(
+                        `name`="undefined", 
+                        `title`="Undefined", 
+                        `type`="integer"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="readerModalitySummary",
+                title="Modalities on the Same Matched Cases",
+                visible="(readerWorkflow != 'off' && readerFormat:long && readerModalityComparison)",
+                rows=0,
+                clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
+                    "readerNondiagnostic",
+                    "readerNondiagnosticLevel",
+                    "readerAllObservedAgreement",
+                    "readerFormat",
+                    "readerID",
+                    "modality",
+                    "rating",
+                    "baselineModality",
+                    "comparisonModality",
+                    "readerModalityComparison",
+                    "modalityPopulation",
+                    "readerTransitions",
+                    "transitionBaseline",
+                    "transitionComparison",
+                    "readerWorkflow",
+                    "readerScores",
+                    "readerPositive",
+                    "readerNegative",
+                    "referenceAccuracy",
+                    "referencePositive",
+                    "referenceNegative",
+                    "readerPopulation",
+                    "clinicalCutoff",
+                    "positiveRule",
+                    "nearCutoffWidth",
+                    "ordinalCutoff",
+                    "nearCutoffLevels",
+                    "readerPairs",
+                    "readerPair1",
+                    "readerPair2",
+                    "readerCaseLimit",
+                    "readerCluster",
+                    "readerIntervals",
+                    "readerBootstrap",
+                    "readerConfidence",
+                    "showKappaBalanced",
+                    "compositeReader",
+                    "readerCode",
+                    "vars",
+                    "referenceStandard",
+                    "caseID",
+                    "useMetadataRows",
+                    "bootstrapSamples",
+                    "seed",
+                    "wght"),
+                columns=list(
+                    list(
+                        `name`="modality", 
+                        `title`="Modality", 
+                        `type`="text"),
+                    list(
+                        `name`="metric", 
+                        `title`="Metric", 
+                        `type`="text"),
+                    list(
+                        `name`="population", 
+                        `title`="Population", 
+                        `type`="text"),
+                    list(
+                        `name`="cases", 
+                        `title`="Cases", 
+                        `type`="integer"),
+                    list(
+                        `name`="readers", 
+                        `title`="Readers", 
+                        `type`="integer"),
+                    list(
+                        `name`="readings", 
+                        `title`="Readings", 
+                        `type`="integer"),
+                    list(
+                        `name`="excluded_cases", 
+                        `title`="Excluded Cases", 
+                        `type`="integer"),
+                    list(
+                        `name`="numerator", 
+                        `title`="Numerator", 
+                        `type`="integer"),
+                    list(
+                        `name`="denominator", 
+                        `title`="Denominator", 
+                        `type`="integer"),
+                    list(
+                        `name`="estimate", 
+                        `title`="Estimate", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="lower", 
+                        `title`="CI lower", 
+                        `type`="number", 
+                        `format`="dp:3"),
+                    list(
+                        `name`="upper", 
+                        `title`="CI upper", 
+                        `type`="number", 
+                        `format`="dp:3"),
+                    list(
+                        `name`="status", 
+                        `title`="Interval method/status", 
+                        `type`="text"),
+                    list(
+                        `name`="attempted", 
+                        `title`="Attempted", 
+                        `type`="integer"),
+                    list(
+                        `name`="undefined", 
+                        `title`="Undefined", 
+                        `type`="integer"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="readerModalityContrast",
+                title="Paired Modality Differences (Percentage Points)",
+                visible="(readerWorkflow != 'off' && readerFormat:long && readerModalityComparison)",
+                rows=0,
+                clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
+                    "readerNondiagnostic",
+                    "readerNondiagnosticLevel",
+                    "readerAllObservedAgreement",
+                    "readerFormat",
+                    "readerID",
+                    "modality",
+                    "rating",
+                    "baselineModality",
+                    "comparisonModality",
+                    "readerModalityComparison",
+                    "modalityPopulation",
+                    "readerTransitions",
+                    "transitionBaseline",
+                    "transitionComparison",
+                    "readerWorkflow",
+                    "readerScores",
+                    "readerPositive",
+                    "readerNegative",
+                    "referenceAccuracy",
+                    "referencePositive",
+                    "referenceNegative",
+                    "readerPopulation",
+                    "clinicalCutoff",
+                    "positiveRule",
+                    "nearCutoffWidth",
+                    "ordinalCutoff",
+                    "nearCutoffLevels",
+                    "readerPairs",
+                    "readerPair1",
+                    "readerPair2",
+                    "readerCaseLimit",
+                    "readerCluster",
+                    "readerIntervals",
+                    "readerBootstrap",
+                    "readerConfidence",
+                    "showKappaBalanced",
+                    "compositeReader",
+                    "readerCode",
+                    "vars",
+                    "referenceStandard",
+                    "caseID",
+                    "useMetadataRows",
+                    "bootstrapSamples",
+                    "seed",
+                    "wght"),
+                columns=list(
+                    list(
+                        `name`="baseline", 
+                        `title`="Baseline", 
+                        `type`="text"),
+                    list(
+                        `name`="comparison", 
+                        `title`="Comparison", 
+                        `type`="text"),
+                    list(
+                        `name`="metric", 
+                        `title`="Metric", 
+                        `type`="text"),
+                    list(
+                        `name`="population", 
+                        `title`="Population", 
+                        `type`="text"),
+                    list(
+                        `name`="cases", 
+                        `title`="Cases", 
+                        `type`="integer"),
+                    list(
+                        `name`="readers", 
+                        `title`="Readers", 
+                        `type`="integer"),
+                    list(
+                        `name`="readings", 
+                        `title`="Readings", 
+                        `type`="integer"),
+                    list(
+                        `name`="excluded_cases", 
+                        `title`="Excluded Cases", 
+                        `type`="integer"),
+                    list(
+                        `name`="units", 
+                        `title`="Units", 
+                        `type`="integer"),
+                    list(
+                        `name`="difference", 
+                        `title`="Difference", 
+                        `type`="number", 
+                        `format`="dp:3"),
+                    list(
+                        `name`="lower", 
+                        `title`="CI lower", 
+                        `type`="number", 
+                        `format`="dp:3"),
+                    list(
+                        `name`="upper", 
+                        `title`="CI upper", 
+                        `type`="number", 
+                        `format`="dp:3"),
+                    list(
+                        `name`="status", 
+                        `title`="Interval method/status", 
+                        `type`="text"),
+                    list(
+                        `name`="attempted", 
+                        `title`="Attempted", 
+                        `type`="integer"),
+                    list(
+                        `name`="undefined", 
+                        `title`="Undefined", 
+                        `type`="integer"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="readerTransitionsTable",
+                title="Category and Adequacy Transitions",
+                visible="(readerWorkflow:ordinal_cutoff && readerTransitions)",
+                rows=0,
+                clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
+                    "readerNondiagnostic",
+                    "readerNondiagnosticLevel",
+                    "readerAllObservedAgreement",
+                    "readerFormat",
+                    "readerID",
+                    "modality",
+                    "rating",
+                    "baselineModality",
+                    "comparisonModality",
+                    "readerModalityComparison",
+                    "modalityPopulation",
+                    "readerTransitions",
+                    "transitionBaseline",
+                    "transitionComparison",
+                    "readerWorkflow",
+                    "readerScores",
+                    "readerPositive",
+                    "readerNegative",
+                    "referenceAccuracy",
+                    "referencePositive",
+                    "referenceNegative",
+                    "readerPopulation",
+                    "clinicalCutoff",
+                    "positiveRule",
+                    "nearCutoffWidth",
+                    "ordinalCutoff",
+                    "nearCutoffLevels",
+                    "readerPairs",
+                    "readerPair1",
+                    "readerPair2",
+                    "readerCaseLimit",
+                    "readerCluster",
+                    "readerIntervals",
+                    "readerBootstrap",
+                    "readerConfidence",
+                    "showKappaBalanced",
+                    "compositeReader",
+                    "readerCode",
+                    "vars",
+                    "referenceStandard",
+                    "caseID",
+                    "useMetadataRows",
+                    "bootstrapSamples",
+                    "seed",
+                    "wght"),
+                columns=list(
+                    list(
+                        `name`="pair", 
+                        `title`="Pair", 
+                        `type`="text"),
+                    list(
+                        `name`="transition", 
+                        `title`="Transition", 
+                        `type`="text"),
+                    list(
+                        `name`="population", 
+                        `title`="Population", 
+                        `type`="text"),
+                    list(
+                        `name`="numerator", 
+                        `title`="Numerator", 
+                        `type`="integer"),
+                    list(
+                        `name`="denominator", 
+                        `title`="Denominator", 
+                        `type`="integer"),
+                    list(
+                        `name`="estimate", 
+                        `title`="Estimate", 
+                        `type`="number", 
+                        `format`="zto"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="readerTransitionMatrix",
+                title="Observed Category Transition Matrix",
+                visible="(readerWorkflow:ordinal_cutoff && readerTransitions)",
+                rows=0,
+                clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
+                    "readerNondiagnostic",
+                    "readerNondiagnosticLevel",
+                    "readerAllObservedAgreement",
+                    "readerFormat",
+                    "readerID",
+                    "modality",
+                    "rating",
+                    "baselineModality",
+                    "comparisonModality",
+                    "readerModalityComparison",
+                    "modalityPopulation",
+                    "readerTransitions",
+                    "transitionBaseline",
+                    "transitionComparison",
+                    "readerWorkflow",
+                    "readerScores",
+                    "readerPositive",
+                    "readerNegative",
+                    "referenceAccuracy",
+                    "referencePositive",
+                    "referenceNegative",
+                    "readerPopulation",
+                    "clinicalCutoff",
+                    "positiveRule",
+                    "nearCutoffWidth",
+                    "ordinalCutoff",
+                    "nearCutoffLevels",
+                    "readerPairs",
+                    "readerPair1",
+                    "readerPair2",
+                    "readerCaseLimit",
+                    "readerCluster",
+                    "readerIntervals",
+                    "readerBootstrap",
+                    "readerConfidence",
+                    "showKappaBalanced",
+                    "compositeReader",
+                    "readerCode",
+                    "vars",
+                    "referenceStandard",
+                    "caseID",
+                    "useMetadataRows",
+                    "bootstrapSamples",
+                    "seed",
+                    "wght"),
+                columns=list(
+                    list(
+                        `name`="pair", 
+                        `title`="Pair", 
+                        `type`="text"),
+                    list(
+                        `name`="baseline", 
+                        `title`="Baseline", 
+                        `type`="text"),
+                    list(
+                        `name`="baseline_status", 
+                        `title`="Baseline Status", 
+                        `type`="text"),
+                    list(
+                        `name`="comparison", 
+                        `title`="Comparison", 
+                        `type`="text"),
+                    list(
+                        `name`="comparison_status", 
+                        `title`="Comparison Status", 
+                        `type`="text"),
+                    list(
+                        `name`="n", 
+                        `title`="N", 
+                        `type`="integer"),
+                    list(
+                        `name`="denominator", 
+                        `title`="Denominator", 
+                        `type`="integer"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="pathReferenceDefinition",
+                title="Reference and Target Definition",
+                rows=0,
+                clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition"),
+                columns=list(
+                    list(
+                        `name`="setting", 
+                        `title`="Setting", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Definition", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="readerReferenceExclusions",
+                title="Unavailable Reference Classifications",
+                visible="(readerWorkflow != 'off' && (readerNondiagnostic || readerFormat:long))",
+                rows=0,
+                clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
+                    "readerNondiagnostic",
+                    "readerNondiagnosticLevel",
+                    "readerAllObservedAgreement",
+                    "readerFormat",
+                    "readerID",
+                    "modality",
+                    "rating",
+                    "baselineModality",
+                    "comparisonModality",
+                    "readerModalityComparison",
+                    "modalityPopulation",
+                    "readerTransitions",
+                    "transitionBaseline",
+                    "transitionComparison",
+                    "readerWorkflow",
+                    "readerScores",
+                    "readerPositive",
+                    "readerNegative",
+                    "referenceAccuracy",
+                    "referencePositive",
+                    "referenceNegative",
+                    "readerPopulation",
+                    "clinicalCutoff",
+                    "positiveRule",
+                    "nearCutoffWidth",
+                    "ordinalCutoff",
+                    "nearCutoffLevels",
+                    "readerPairs",
+                    "readerPair1",
+                    "readerPair2",
+                    "readerCaseLimit",
+                    "readerCluster",
+                    "readerIntervals",
+                    "readerBootstrap",
+                    "readerConfidence",
+                    "showKappaBalanced",
+                    "compositeReader",
+                    "readerCode",
+                    "vars",
+                    "referenceStandard",
+                    "caseID",
+                    "useMetadataRows",
+                    "bootstrapSamples",
+                    "seed",
+                    "wght"),
+                columns=list(
+                    list(
+                        `name`="value", 
+                        `title`="Raw reference value", 
+                        `type`="text"),
+                    list(
+                        `name`="status", 
+                        `title`="Status", 
+                        `type`="text"),
+                    list(
+                        `name`="n", 
+                        `title`="Cases", 
+                        `type`="integer"))))}))
 
 pathagreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "pathagreementBase",
@@ -3075,9 +4126,9 @@ pathagreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param readerNegative Exact negative label shared by binary reader columns.
 #' @param referenceAccuracy Compute each reader against the optional
 #'   reference; agreement remains available without a reference.
-#' @param referencePositive Exact reference label denoting disease present.
-#' @param referenceNegative Exact reference label denoting disease absent;
-#'   other labels are excluded.
+#' @param referencePositive Exact positive reference classification.
+#' @param referenceNegative Exact negative reference classification; other
+#'   labels are excluded.
 #' @param readerPopulation Available uses each reader and reference. Shared
 #'   requires all selected readers and reference.
 #' @param clinicalCutoff Enter one finite numeric threshold; blank means no
@@ -3114,6 +4165,28 @@ pathagreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   accuracy for the exploratory score.
 #' @param readerCode Display the selected options as an R call using a data
 #'   frame named your_data.
+#' @param referenceType .
+#' @param referenceDescription .
+#' @param targetDefinition .
+#' @param readerNondiagnostic .
+#' @param readerNondiagnosticLevel .
+#' @param readerAllObservedAgreement Separate estimates on observed readings
+#'   with an eligible reference. Missing readings are excluded; ordinary binary
+#'   estimates remain conditional on determinate calls.
+#' @param readerFormat .
+#' @param readerID .
+#' @param modality .
+#' @param rating .
+#' @param baselineModality .
+#' @param comparisonModality .
+#' @param readerModalityComparison A prespecified comparison minus baseline
+#'   contrast on complete matched cases with equal fixed-reader weights.
+#'   Intervals resample whole cases or patients; no random-reader inference or
+#'   p-values.
+#' @param modalityPopulation .
+#' @param readerTransitions .
+#' @param transitionBaseline .
+#' @param transitionComparison .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -3174,6 +4247,15 @@ pathagreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$cutoffDisagreementCases} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$kappaBalancedTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$readerRCode} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$readerAvailability} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$readerMapping} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$readerObservedAgreement} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$readerModalitySummary} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$readerModalityContrast} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$readerTransitionsTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$readerTransitionMatrix} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$pathReferenceDefinition} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$readerReferenceExclusions} \tab \tab \tab \tab \tab a table \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -3263,7 +4345,24 @@ pathagreement <- function(
     readerConfidence = 0.95,
     showKappaBalanced = FALSE,
     compositeReader = "",
-    readerCode = FALSE) {
+    readerCode = FALSE,
+    referenceType = "legacy",
+    referenceDescription = "",
+    targetDefinition = "",
+    readerNondiagnostic = FALSE,
+    readerNondiagnosticLevel = "",
+    readerAllObservedAgreement = FALSE,
+    readerFormat = "wide",
+    readerID = NULL,
+    modality = NULL,
+    rating = NULL,
+    baselineModality = "",
+    comparisonModality = "",
+    readerModalityComparison = FALSE,
+    modalityPopulation = "determinate",
+    readerTransitions = FALSE,
+    transitionBaseline = "",
+    transitionComparison = "") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("pathagreement requires jmvcore to be installed (restart may be required)")
@@ -3274,6 +4373,9 @@ pathagreement <- function(
     if ( ! missing(referenceStandard)) referenceStandard <- jmvcore::resolveQuo(jmvcore::enquo(referenceStandard))
     if ( ! missing(readerScores)) readerScores <- jmvcore::resolveQuo(jmvcore::enquo(readerScores))
     if ( ! missing(readerCluster)) readerCluster <- jmvcore::resolveQuo(jmvcore::enquo(readerCluster))
+    if ( ! missing(readerID)) readerID <- jmvcore::resolveQuo(jmvcore::enquo(readerID))
+    if ( ! missing(modality)) modality <- jmvcore::resolveQuo(jmvcore::enquo(modality))
+    if ( ! missing(rating)) rating <- jmvcore::resolveQuo(jmvcore::enquo(rating))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
@@ -3282,7 +4384,10 @@ pathagreement <- function(
             `if`( ! missing(sequenceVariable), sequenceVariable, NULL),
             `if`( ! missing(referenceStandard), referenceStandard, NULL),
             `if`( ! missing(readerScores), readerScores, NULL),
-            `if`( ! missing(readerCluster), readerCluster, NULL))
+            `if`( ! missing(readerCluster), readerCluster, NULL),
+            `if`( ! missing(readerID), readerID, NULL),
+            `if`( ! missing(modality), modality, NULL),
+            `if`( ! missing(rating), rating, NULL))
 
     for (v in vars) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
     for (v in referenceStandard) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
@@ -3366,7 +4471,24 @@ pathagreement <- function(
         readerConfidence = readerConfidence,
         showKappaBalanced = showKappaBalanced,
         compositeReader = compositeReader,
-        readerCode = readerCode)
+        readerCode = readerCode,
+        referenceType = referenceType,
+        referenceDescription = referenceDescription,
+        targetDefinition = targetDefinition,
+        readerNondiagnostic = readerNondiagnostic,
+        readerNondiagnosticLevel = readerNondiagnosticLevel,
+        readerAllObservedAgreement = readerAllObservedAgreement,
+        readerFormat = readerFormat,
+        readerID = readerID,
+        modality = modality,
+        rating = rating,
+        baselineModality = baselineModality,
+        comparisonModality = comparisonModality,
+        readerModalityComparison = readerModalityComparison,
+        modalityPopulation = modalityPopulation,
+        readerTransitions = readerTransitions,
+        transitionBaseline = transitionBaseline,
+        transitionComparison = transitionComparison)
 
     analysis <- pathagreementClass$new(
         options = options,

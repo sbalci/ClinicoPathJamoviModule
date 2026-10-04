@@ -112,6 +112,10 @@ geemodelClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
 
         .run = function() {
+            private$.model <- NULL
+            for (name in c("coefficientsTable", "posthocTable"))
+                self$results[[name]]$deleteRows()
+            self$results$interpretationNote$setContent("")
 
             # Check required inputs
             if (is.null(self$options$outcome) ||
@@ -131,6 +135,7 @@ geemodelClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Prepare data - get all needed variables
             all_vars <- c(outcome_var, predictor_vars, cluster_var)
             if (!is.null(time_var)) all_vars <- c(all_vars, time_var)
+            all_vars <- unique(all_vars)
 
             # Extract data and convert to regular data frame
             raw_data <- self$data
@@ -247,7 +252,7 @@ geemodelClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 "gaussian" = gaussian(),
                 "binomial" = binomial(),
                 "poisson" = poisson(),
-                "gamma" = Gamma(),
+                "gamma" = stats::Gamma(link = "log"),
                 gaussian()
             )
 
@@ -292,11 +297,15 @@ geemodelClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     return()
                 }
 
-                # Fit model
+                ordered <- private$.prepareClusterOrder(data, cluster_var, time_var, corstr)
+                data <- ordered$data
+
+                # geepack requires contiguous clusters; waves identify visits within clusters.
                 private$.model <- geepack::geeglm(
                     formula = formula_obj,
                     data = data,
-                    id = data[[cluster_var]],
+                    id = ordered$id,
+                    waves = ordered$waves,
                     family = family_choice,
                     corstr = corstr,
                     std.err = if (self$options$robust_se) "san.se" else "jack"
@@ -332,6 +341,40 @@ geemodelClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 self$setError(paste("GEE model fitting failed:", e$message))
             })
 
+        },
+
+        .prepareClusterOrder = function(data, cluster_var, time_var, corstr) {
+            ids <- data[[cluster_var]]
+            if (anyNA(ids) || any(trimws(as.character(ids)) == ""))
+                stop("Cluster IDs must be nonmissing and nonempty.")
+            if (length(unique(ids)) < 2L)
+                stop("GEE requires at least two independent clusters.")
+
+            waves <- NULL
+            if (!is.null(time_var) && nzchar(time_var)) {
+                time <- data[[time_var]]
+                if (is.ordered(time)) {
+                    waves <- as.integer(time)
+                } else if (is.numeric(time) && all(is.finite(time)) &&
+                           all(time >= 1 & time <= .Machine$integer.max & time == floor(time))) {
+                    waves <- as.integer(time)
+                } else {
+                    stop(paste("Time must contain positive integer visit indices or an",
+                               "ordered factor; recode continuous times to planned visits."))
+                }
+                if (anyDuplicated(data.frame(id = ids, wave = waves)))
+                    stop("Each cluster must have at most one observation per visit.")
+                if (corstr == "unstructured" && max(waves) > max(table(ids)))
+                    stop(paste("Unstructured correlation requires contiguous planned visit",
+                        "indices and at least one complete cluster covering those visits."))
+            } else if (corstr %in% c("ar1", "unstructured")) {
+                stop("Select a visit/time variable for AR(1) or unstructured correlation.")
+            }
+
+            index <- if (is.null(waves)) order(ids) else order(ids, waves)
+            list(data = data[index, , drop = FALSE],
+                 id = as.integer(factor(ids[index])),
+                 waves = if (is.null(waves)) NULL else waves[index])
         },
 
         .populateModelInfo = function(data, cluster_var) {
@@ -373,7 +416,7 @@ geemodelClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 value=as.character(corstr_name)))
             table$setRow(rowNo=6, values=list(
                 info=as.character("Standard Errors"),
-                value=as.character(if(self$options$robust_se) "Robust (Sandwich)" else "Model-Based")))
+                value=as.character(if(self$options$robust_se) "Robust (Sandwich)" else "Approximate jackknife")))
 
         },
 
@@ -402,11 +445,8 @@ geemodelClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     lower_ci <- as.numeric(estimate - z_crit * se)
                     upper_ci <- as.numeric(estimate + z_crit * se)
 
-                    # Get degrees of freedom (use number of clusters - number of parameters)
-                    # For GEE, df should be based on clusters, not observations
-                    n_clusters <- length(unique(private$.model$id))
-                    n_params <- length(coef(private$.model))
-                    df <- as.integer(max(1, n_clusters - n_params))  # Ensure at least 1
+                    # Each reported coefficient uses a one-degree-of-freedom Wald test.
+                    df <- 1L
 
                     # Debug: Check all values are atomic
                     if (!is.atomic(term) || length(term) != 1) {
@@ -458,34 +498,20 @@ geemodelClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             tryCatch({
 
-                # Calculate QIC manually since not all packages provide it
-                # QIC = -2 * quasi-likelihood + 2 * trace(Omega_I * V_R)
-
-                # Get model components
-                mu <- fitted(private$.model)
-                y <- private$.model$y
-                family <- private$.model$family
-
-                # Calculate quasi-likelihood
-                quasi_ll <- sum(family$dev.resids(y, mu, wt = rep(1, length(y))))
-
-                # Number of parameters
-                p <- length(coef(private$.model))
-
-                # Simple QIC approximation
-                qic_value <- as.numeric(quasi_ll + 2 * p)
-                qicu_value <- as.numeric(quasi_ll + 2 * p * (private$.model$nobs / (private$.model$nobs - p)))
-                aic_value <- as.numeric(quasi_ll + 2 * p)
-
+                values <- geepack::QIC(private$.model,
+                    env = environment(stats::formula(private$.model)))
                 table <- self$results$qicTable
-                table$setRow(rowNo=1, values=list(
-                    qic = qic_value,
-                    qicu = qicu_value,
-                    aic = aic_value
+                table$setRow(rowNo = 1, values = list(
+                    qic = unname(values["QIC"]),
+                    qicu = unname(values["QICu"]),
+                    aic = NA_real_
                 ))
+                table$setNote("method", paste("QIC and QICu use geepack::QIC.",
+                    "Likelihood-based AIC is not defined for this GEE fit."))
 
             }, error = function(e) {
-                # QIC calculation failed - not critical
+                self$results$qicTable$setNote("unavailable",
+                    paste("QIC unavailable:", conditionMessage(e)))
             })
 
         },
@@ -522,7 +548,7 @@ geemodelClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 factor_var <- factor_vars[1]
 
                 emm <- emmeans::emmeans(private$.model, specs = factor_var)
-                pairs <- emmeans::pairs(emm, adjust = adjust_method)
+                pairs <- emmeans::contrast(emm, method = "pairwise", adjust = adjust_method)
                 pairs_summary <- summary(pairs)
 
                 for (i in seq_len(nrow(pairs_summary))) {
@@ -536,7 +562,8 @@ geemodelClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 }
 
             }, error = function(e) {
-                # Post-hoc failed - not critical
+                self$results$posthocTable$setNote("unavailable",
+                    paste("Post-hoc comparisons unavailable:", conditionMessage(e)))
             })
 
         },
@@ -575,7 +602,8 @@ geemodelClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             ))
             table$setRow(rowNo=4, values=list(
                 diagnostic = as.character("Working Correlation (\u{03B1})"),
-                value = as.character(if (!is.na(working_corr)) sprintf("%.3f", working_corr) else "N/A")
+                value = if (length(working_corr) && all(is.finite(working_corr)))
+                    paste(sprintf("%.3f", working_corr), collapse = ", ") else "N/A"
             ))
             # Check convergence (geeglm models may not have a 'converged' field)
             converged <- "Unknown"
@@ -738,7 +766,7 @@ geemodelClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 "gaussian" = "For continuous outcomes, coefficients represent the average change in the outcome for a one-unit change in the predictor.",
                 "binomial" = "For binary outcomes, coefficients are log-odds ratios. Exponentiate (exp(\u{03B2})) to get odds ratios.",
                 "poisson" = "For count outcomes, coefficients are log rate ratios. Exponentiate (exp(\u{03B2})) to get rate ratios.",
-                "gamma" = "For positive continuous outcomes, coefficients represent multiplicative effects on the mean."
+                "gamma" = "For positive continuous outcomes, coefficients are log mean ratios; exponentiated coefficients are mean ratios."
             )
 
             html <- paste0("<html>

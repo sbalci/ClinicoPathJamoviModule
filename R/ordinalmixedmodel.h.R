@@ -12,7 +12,7 @@ ordinalmixedmodelOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             randomTerms = NULL,
             link = "logit",
             threshold = "flexible",
-            propOddsTest = TRUE,
+            propOddsTest = FALSE,
             oddsRatios = TRUE,
             confInt = TRUE,
             confLevel = 0.95,
@@ -80,7 +80,7 @@ ordinalmixedmodelOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             private$..propOddsTest <- jmvcore::OptionBool$new(
                 "propOddsTest",
                 propOddsTest,
-                default=TRUE)
+                default=FALSE)
             private$..oddsRatios <- jmvcore::OptionBool$new(
                 "oddsRatios",
                 oddsRatios,
@@ -185,20 +185,43 @@ ordinalmixedmodelResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 options=options,
                 name="instructions",
                 title="Analysis Instructions",
-                visible=TRUE))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="modelFitTable",
-                title="Model Fit",
-                visible="(modelFit)",
-                rows=1,
                 clearWith=list(
                     "dep",
                     "fixedFactors",
                     "fixedCovs",
                     "randomTerms",
                     "link",
-                    "threshold"),
+                    "threshold",
+                    "propOddsTest",
+                    "oddsRatios",
+                    "confInt",
+                    "confLevel",
+                    "randomEffectsTable",
+                    "thresholdsTable",
+                    "modelFit",
+                    "conditionMeans"),
+                visible=TRUE))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="modelFitTable",
+                title="Model Fit",
+                clearWith=list(
+                    "dep",
+                    "fixedFactors",
+                    "fixedCovs",
+                    "randomTerms",
+                    "link",
+                    "threshold",
+                    "propOddsTest",
+                    "oddsRatios",
+                    "confInt",
+                    "confLevel",
+                    "randomEffectsTable",
+                    "thresholdsTable",
+                    "modelFit",
+                    "conditionMeans"),
+                visible="(modelFit)",
+                rows=0,
                 columns=list(
                     list(
                         `name`="stat", 
@@ -208,20 +231,28 @@ ordinalmixedmodelResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                         `name`="value", 
                         `title`="Value", 
                         `type`="number", 
-                        `format`="zto:3"))))
+                        `format`="zto,dp:3"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="fixedEffects",
                 title="Fixed Effects",
-                visible=TRUE,
-                rows=1,
                 clearWith=list(
                     "dep",
                     "fixedFactors",
                     "fixedCovs",
                     "randomTerms",
                     "link",
-                    "threshold"),
+                    "threshold",
+                    "propOddsTest",
+                    "oddsRatios",
+                    "confInt",
+                    "confLevel",
+                    "randomEffectsTable",
+                    "thresholdsTable",
+                    "modelFit",
+                    "conditionMeans"),
+                visible=TRUE,
+                rows=0,
                 columns=list(
                     list(
                         `name`="term", 
@@ -231,17 +262,17 @@ ordinalmixedmodelResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                         `name`="estimate", 
                         `title`="Estimate", 
                         `type`="number", 
-                        `format`="zto:4"),
+                        `format`="zto,dp:4"),
                     list(
                         `name`="se", 
                         `title`="SE", 
                         `type`="number", 
-                        `format`="zto:4"),
+                        `format`="zto,dp:4"),
                     list(
                         `name`="z", 
                         `title`="z", 
                         `type`="number", 
-                        `format`="zto:3"),
+                        `format`="zto,dp:3"),
                     list(
                         `name`="p", 
                         `title`="p", 
@@ -251,33 +282,41 @@ ordinalmixedmodelResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                         `name`="or", 
                         `title`="OR", 
                         `type`="number", 
-                        `format`="zto:3", 
-                        `visible`="(oddsRatios)"),
+                        `format`="zto,dp:3", 
+                        `visible`="(oddsRatios && link:logit)"),
                     list(
                         `name`="ciLower", 
                         `title`="CI Lower", 
                         `type`="number", 
-                        `format`="zto:3", 
+                        `format`="zto,dp:3", 
                         `visible`="(confInt)"),
                     list(
                         `name`="ciUpper", 
                         `title`="CI Upper", 
                         `type`="number", 
-                        `format`="zto:3", 
+                        `format`="zto,dp:3", 
                         `visible`="(confInt)"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="thresholds",
                 title="Threshold Coefficients",
-                visible="(thresholdsTable)",
-                rows=1,
                 clearWith=list(
                     "dep",
                     "fixedFactors",
                     "fixedCovs",
                     "randomTerms",
                     "link",
-                    "threshold"),
+                    "threshold",
+                    "propOddsTest",
+                    "oddsRatios",
+                    "confInt",
+                    "confLevel",
+                    "randomEffectsTable",
+                    "thresholdsTable",
+                    "modelFit",
+                    "conditionMeans"),
+                visible="(thresholdsTable)",
+                rows=0,
                 columns=list(
                     list(
                         `name`="threshold", 
@@ -287,17 +326,17 @@ ordinalmixedmodelResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                         `name`="estimate", 
                         `title`="Estimate", 
                         `type`="number", 
-                        `format`="zto:4"),
+                        `format`="zto,dp:4"),
                     list(
                         `name`="se", 
                         `title`="SE", 
                         `type`="number", 
-                        `format`="zto:4"),
+                        `format`="zto,dp:4"),
                     list(
                         `name`="z", 
                         `title`="z", 
                         `type`="number", 
-                        `format`="zto:3"),
+                        `format`="zto,dp:3"),
                     list(
                         `name`="p", 
                         `title`="p", 
@@ -307,15 +346,23 @@ ordinalmixedmodelResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 options=options,
                 name="randomEffects",
                 title="Random Effects",
-                visible="(randomEffectsTable)",
-                rows=1,
                 clearWith=list(
                     "dep",
                     "fixedFactors",
                     "fixedCovs",
                     "randomTerms",
                     "link",
-                    "threshold"),
+                    "threshold",
+                    "propOddsTest",
+                    "oddsRatios",
+                    "confInt",
+                    "confLevel",
+                    "randomEffectsTable",
+                    "thresholdsTable",
+                    "modelFit",
+                    "conditionMeans"),
+                visible="(randomEffectsTable)",
+                rows=0,
                 columns=list(
                     list(
                         `name`="group", 
@@ -325,12 +372,12 @@ ordinalmixedmodelResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                         `name`="variance", 
                         `title`="Variance", 
                         `type`="number", 
-                        `format`="zto:4"),
+                        `format`="zto,dp:4"),
                     list(
                         `name`="sd", 
                         `title`="SD", 
                         `type`="number", 
-                        `format`="zto:4"),
+                        `format`="zto,dp:4"),
                     list(
                         `name`="nLevels", 
                         `title`="N Levels", 
@@ -338,16 +385,24 @@ ordinalmixedmodelResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             self$add(jmvcore::Table$new(
                 options=options,
                 name="propOddsTestTable",
-                title="Proportional Odds Assumption Test",
-                visible="(propOddsTest)",
-                rows=1,
+                title="Proportional-odds test availability",
                 clearWith=list(
                     "dep",
                     "fixedFactors",
                     "fixedCovs",
                     "randomTerms",
                     "link",
-                    "threshold"),
+                    "threshold",
+                    "propOddsTest",
+                    "oddsRatios",
+                    "confInt",
+                    "confLevel",
+                    "randomEffectsTable",
+                    "thresholdsTable",
+                    "modelFit",
+                    "conditionMeans"),
+                visible="(propOddsTest)",
+                rows=0,
                 columns=list(
                     list(
                         `name`="term", 
@@ -357,7 +412,7 @@ ordinalmixedmodelResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                         `name`="chisq", 
                         `title`="Chi-Square", 
                         `type`="number", 
-                        `format`="zto:3"),
+                        `format`="zto,dp:3"),
                     list(
                         `name`="df", 
                         `title`="df", 
@@ -374,16 +429,24 @@ ordinalmixedmodelResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             self$add(jmvcore::Table$new(
                 options=options,
                 name="conditionProbs",
-                title="Predicted Marginal Probabilities",
-                visible="(conditionMeans)",
-                rows=1,
+                title="Marginal probability availability",
                 clearWith=list(
                     "dep",
                     "fixedFactors",
                     "fixedCovs",
                     "randomTerms",
                     "link",
-                    "threshold"),
+                    "threshold",
+                    "propOddsTest",
+                    "oddsRatios",
+                    "confInt",
+                    "confLevel",
+                    "randomEffectsTable",
+                    "thresholdsTable",
+                    "modelFit",
+                    "conditionMeans"),
+                visible="(conditionMeans)",
+                rows=0,
                 columns=list(
                     list(
                         `name`="factor", 
@@ -401,6 +464,21 @@ ordinalmixedmodelResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 options=options,
                 name="methodExplanation",
                 title="Method and Clinical Context",
+                clearWith=list(
+                    "dep",
+                    "fixedFactors",
+                    "fixedCovs",
+                    "randomTerms",
+                    "link",
+                    "threshold",
+                    "propOddsTest",
+                    "oddsRatios",
+                    "confInt",
+                    "confLevel",
+                    "randomEffectsTable",
+                    "thresholdsTable",
+                    "modelFit",
+                    "conditionMeans"),
                 visible=TRUE))}))
 
 ordinalmixedmodelBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -441,16 +519,16 @@ ordinalmixedmodelBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #'   rater, site)
 #' @param link Link function for the cumulative model
 #' @param threshold Threshold parameterization
-#' @param propOddsTest Test the proportional odds (parallel lines) assumption
-#'   using nominal_test
+#' @param propOddsTest Retained for saved analyses; shows an explanation
+#'   because nominal_test supports CLM, not CLMM.
 #' @param oddsRatios Display exponentiated coefficients as odds ratios
 #' @param confInt Show confidence intervals for coefficients
 #' @param confLevel Confidence level for intervals
 #' @param randomEffectsTable Show random effects variance components
 #' @param thresholdsTable Show threshold (intercept) coefficients
 #' @param modelFit Show AIC, BIC, log-likelihood, and deviance
-#' @param conditionMeans Show predicted marginal probabilities for each factor
-#'   level
+#' @param conditionMeans Retained for saved analyses; no marginal
+#'   probabilities are calculated.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
@@ -478,7 +556,7 @@ ordinalmixedmodel <- function(
     randomTerms,
     link = "logit",
     threshold = "flexible",
-    propOddsTest = TRUE,
+    propOddsTest = FALSE,
     oddsRatios = TRUE,
     confInt = TRUE,
     confLevel = 0.95,

@@ -3,7 +3,7 @@ title: Comprehensive Flexible Parametric Survival Models
 menuGroup: SurvivalDT
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: Advanced flexible parametric models with clinical analysis
-version: 2.0.0
+version: '1.0.83'
 jas: '1.2'
 description:
   main: Royston-Parmar PH, PO, or probit models fitted with rstpm2, including spline time-varying effects

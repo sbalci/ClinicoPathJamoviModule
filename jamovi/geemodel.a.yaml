@@ -78,13 +78,14 @@ options:
             Observations with the same ID are treated as correlated.
 
     - name: time_var
-      title: Time/Sequence Variable (Optional)
+      title: Visit index (required for AR(1)/unstructured)
       type: Variable
       permitted: [numeric, factor]
       description:
           R: >
-            for longitudinal data, specifies time ordering within clusters.
-            Used with AR(1) correlation structure.
+            Positive integer planned-visit indices or an ordered factor, unique within
+            each cluster. Data are sorted by cluster and visit before fitting. Required
+            for AR(1) and unstructured correlation; gaps in visit indices are retained.
 
     - name: family
       title: Family/Link Function
@@ -131,8 +132,8 @@ options:
       default: true
       description:
           R: >
-            sandwich estimator for standard errors (recommended).
-            Provides valid inference even if correlation structure is misspecified.
+            Use sandwich standard errors; when disabled, use the approximate jackknife.
+            Both require an adequate number of independent clusters.
 
     - name: conf_level
       title: Confidence Level

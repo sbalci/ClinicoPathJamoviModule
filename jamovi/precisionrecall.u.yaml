@@ -1,3 +1,4 @@
+jus: '2.0'
 name: precisionrecall
 title: Precision-Recall Curve
 stage: 0
@@ -114,4 +115,8 @@ children:
           - type: CheckBox
             name: showFScore
             label: Show F-score iso-lines
-jus: '2.0'
+
+
+  - type: TextBox
+    name: seed
+    format: number

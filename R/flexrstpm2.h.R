@@ -2014,7 +2014,7 @@ flexrstpm2Base <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "flexrstpm2",
-                version = c(2,0,0),
+                version = c(1,0,83),
                 options = options,
                 results = flexrstpm2Results$new(options=options),
                 data = data,

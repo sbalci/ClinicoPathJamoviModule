@@ -185,18 +185,40 @@ geemodelResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="instructions",
                 title="Instructions",
+                clearWith=list(
+                    "outcome",
+                    "predictors",
+                    "cluster_id",
+                    "time_var",
+                    "family",
+                    "corstr",
+                    "robust_se",
+                    "conf_level",
+                    "qic",
+                    "posthoc",
+                    "posthoc_adjust",
+                    "diagnostics",
+                    "correlation_plot"),
                 visible=FALSE))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="modelInfo",
                 title="Model Information",
-                rows=6,
                 clearWith=list(
                     "outcome",
                     "predictors",
                     "cluster_id",
+                    "time_var",
                     "family",
-                    "corstr"),
+                    "corstr",
+                    "robust_se",
+                    "conf_level",
+                    "qic",
+                    "posthoc",
+                    "posthoc_adjust",
+                    "diagnostics",
+                    "correlation_plot"),
+                rows=6,
                 columns=list(
                     list(
                         `name`="info", 
@@ -214,9 +236,16 @@ geemodelResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "outcome",
                     "predictors",
                     "cluster_id",
+                    "time_var",
                     "family",
                     "corstr",
-                    "robust_se"),
+                    "robust_se",
+                    "conf_level",
+                    "qic",
+                    "posthoc",
+                    "posthoc_adjust",
+                    "diagnostics",
+                    "correlation_plot"),
                 columns=list(
                     list(
                         `name`="term", 
@@ -255,14 +284,22 @@ geemodelResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="qicTable",
                 title="Model Selection Criterion",
-                visible="(qic)",
-                rows=1,
                 clearWith=list(
                     "outcome",
                     "predictors",
                     "cluster_id",
+                    "time_var",
                     "family",
-                    "corstr"),
+                    "corstr",
+                    "robust_se",
+                    "conf_level",
+                    "qic",
+                    "posthoc",
+                    "posthoc_adjust",
+                    "diagnostics",
+                    "correlation_plot"),
+                visible="(qic)",
+                rows=1,
                 columns=list(
                     list(
                         `name`="qic", 
@@ -280,15 +317,21 @@ geemodelResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="posthocTable",
                 title="Post-hoc Pairwise Comparisons",
-                visible="(posthoc)",
                 clearWith=list(
                     "outcome",
                     "predictors",
                     "cluster_id",
+                    "time_var",
                     "family",
                     "corstr",
+                    "robust_se",
+                    "conf_level",
+                    "qic",
                     "posthoc",
-                    "posthoc_adjust"),
+                    "posthoc_adjust",
+                    "diagnostics",
+                    "correlation_plot"),
+                visible="(posthoc)",
                 columns=list(
                     list(
                         `name`="contrast", 
@@ -315,12 +358,22 @@ geemodelResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="diagnosticsTable",
                 title="Model Diagnostics",
-                visible="(diagnostics)",
-                rows=5,
                 clearWith=list(
                     "outcome",
                     "predictors",
-                    "cluster_id"),
+                    "cluster_id",
+                    "time_var",
+                    "family",
+                    "corstr",
+                    "robust_se",
+                    "conf_level",
+                    "qic",
+                    "posthoc",
+                    "posthoc_adjust",
+                    "diagnostics",
+                    "correlation_plot"),
+                visible="(diagnostics)",
+                rows=5,
                 columns=list(
                     list(
                         `name`="diagnostic", 
@@ -334,25 +387,62 @@ geemodelResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="correlationPlot",
                 title="Estimated Within-Cluster Correlation",
-                visible="(correlation_plot)",
-                requiresData=TRUE,
-                width=500,
-                height=400,
-                renderFun=".plotCorrelation",
                 clearWith=list(
                     "outcome",
                     "predictors",
                     "cluster_id",
-                    "corstr")))
+                    "time_var",
+                    "family",
+                    "corstr",
+                    "robust_se",
+                    "conf_level",
+                    "qic",
+                    "posthoc",
+                    "posthoc_adjust",
+                    "diagnostics",
+                    "correlation_plot"),
+                visible="(correlation_plot)",
+                requiresData=TRUE,
+                width=500,
+                height=400,
+                renderFun=".plotCorrelation"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="methodologyNote",
                 title="Methodology Notes",
+                clearWith=list(
+                    "outcome",
+                    "predictors",
+                    "cluster_id",
+                    "time_var",
+                    "family",
+                    "corstr",
+                    "robust_se",
+                    "conf_level",
+                    "qic",
+                    "posthoc",
+                    "posthoc_adjust",
+                    "diagnostics",
+                    "correlation_plot"),
                 visible=TRUE))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="interpretationNote",
                 title="Interpretation Guide",
+                clearWith=list(
+                    "outcome",
+                    "predictors",
+                    "cluster_id",
+                    "time_var",
+                    "family",
+                    "corstr",
+                    "robust_se",
+                    "conf_level",
+                    "qic",
+                    "posthoc",
+                    "posthoc_adjust",
+                    "diagnostics",
+                    "correlation_plot"),
                 visible=TRUE))}))
 
 geemodelBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -404,8 +494,10 @@ geemodelBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param predictors predictor variables (independent variables) for the model
 #' @param cluster_id variable identifying clusters (e.g., patient ID, dog ID).
 #'   Observations with the same ID are treated as correlated.
-#' @param time_var for longitudinal data, specifies time ordering within
-#'   clusters. Used with AR(1) correlation structure.
+#' @param time_var Positive integer planned-visit indices or an ordered
+#'   factor, unique within each cluster. Data are sorted by cluster and visit
+#'   before fitting. Required for AR(1) and unstructured correlation; gaps in
+#'   visit indices are retained.
 #' @param family distribution family and link function for the outcome
 #'   variable. Gaussian for continuous, Binomial for binary, Poisson for counts.
 #' @param corstr Working correlation structure within clusters: -
@@ -413,8 +505,9 @@ geemodelBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   point) - AR(1): correlation decays with time lag (for longitudinal data) -
 #'   Unstructured: estimates all pairwise correlations (requires many
 #'   observations) - Independence: no correlation (equivalent to GLM)
-#' @param robust_se sandwich estimator for standard errors (recommended).
-#'   Provides valid inference even if correlation structure is misspecified.
+#' @param robust_se Use sandwich standard errors; when disabled, use the
+#'   approximate jackknife. Both require an adequate number of independent
+#'   clusters.
 #' @param conf_level confidence level for confidence intervals (default 95
 #'   percent)
 #' @param qic Quasi-likelihood under Independence Model Criterion. Lower QIC

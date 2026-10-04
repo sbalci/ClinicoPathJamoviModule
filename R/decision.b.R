@@ -29,6 +29,56 @@ decisionClass <- if (requireNamespace("jmvcore"))
             # Constants for maintainability
             NOMOGRAM_LABEL_SIZE = 14/5,
 
+            .clearDiseaseOutputs = function() {
+                self$results$plot1$setState(NULL)
+                for (nm in c("welcome", "naturalLanguageSummary", "clinicalInterpretation",
+                             "reportTemplate", "aboutAnalysis", "misclassificationInterpretation",
+                             "misclassifiedHeading")) self$results[[nm]]$setContent("")
+                for (nm in c("cTable", "nTable", "ratioTable", "epirTable_ratio", "epirTable_number")) {
+                    table <- self$results[[nm]]
+                    for (column in table$columns) if (column$type %in% c("number", "integer")) {
+                        for (i in seq_len(table$rowCount))
+                            table$setCell(col = column$name, rowNo = i, value = NA_real_)
+                    }
+                }
+                for (nm in c("rawCounts", "rawContingency", "confusionMatrixSummary",
+                             "falsePositiveTable", "falseNegativeTable")) self$results[[nm]]$deleteRows()
+            },
+
+            .runComparator = function(mydata, testVariable, goldVariable) {
+                negative <- function(variable, recoded) paste(unique(as.character(
+                    mydata[[variable]][mydata[[recoded]] == "Negative"])), collapse = ", ")
+                .diagReferenceDefinition(self$results, self$options,
+                    paste0(goldVariable, ": positive = ", self$options$goldPositive,
+                        "; negative = ", negative(goldVariable, "goldVariable2"), " | ",
+                        testVariable, ": positive = ", self$options$testPositive,
+                        "; negative = ", negative(testVariable, "testVariable2")),
+                    "Selected binary pairs only; missing and unselected levels excluded")
+                call <- rep(NA, nrow(self$data))
+                reference <- call
+                idx <- mydata$original_row_position
+                call[idx] <- mydata$testVariable2 == "Positive"
+                reference[idx] <- mydata$goldVariable2 == "Positive"
+                comparisons <- stats::setNames(list(list(call = call, reference = reference)), testVariable)
+                summaries <- .diagFillComparator(self$results, comparisons, self$options$ci)
+                self$results$comparatorReport$setContent(.diagComparatorReport(summaries))
+                classifications <- .diagComparatorClassifications(call, reference)
+                if (isTRUE(self$options$saveClassifications)) {
+                    self$results$saveClassifications$setRowNums(rownames(self$data))
+                    self$results$saveClassifications$setValues(classifications)
+                }
+                if (self$options$showMisclassified) {
+                    discordant <- which(!is.na(call) & !is.na(reference) & call != reference)
+                    for (i in utils::head(discordant, self$options$maxCasesShow)) {
+                        self$results$comparatorCases$addRow(rowKey = i, values = list(
+                            row = mydata$original_row_index[match(i, idx)],
+                            reference = as.character(self$data[[goldVariable]][i]),
+                            test = as.character(self$data[[testVariable]][i]),
+                            classification = classifications[i]))
+                    }
+                }
+            },
+
             # i18n: after rewording any .() string here, run jmvtools::i18nUpdate() and fill
             # its Turkish msgstr in jamovi/i18n/tr.po (every string had one on 2026-09-27).
             #
@@ -604,7 +654,9 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     private$.addNotice(
                         type = "WARNING",
                         title = .fmt(.("Removed {n} case(s) with an explicit missing level"), n = sprintf("%d", sum(explicit_na))),
-                        content = .("These cases carry a level that codes missingness rather than a result. They are excluded rather than counted as negative, which would have biased sensitivity and specificity.")
+                        content = if (.diagReferenceMode(self$options$referenceType)$comparator)
+                            "These cases carry a missingness code. They are excluded from agreement denominators rather than counted as negative."
+                        else .("These cases carry a level that codes missingness rather than a result. They are excluded rather than counted as negative, which would have biased sensitivity and specificity.")
                     )
                     mydata <- mydata[!explicit_na, , drop = FALSE]
                     mydata[[goldVar]] <- droplevels(mydata[[goldVar]])
@@ -655,15 +707,23 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     if (length(gold_candidates) == 0)
                         private$.addNotice(
                             type = "ERROR",
-                            title = .("The gold standard has only one level among the analysed cases"),
-                            content = .fmt(.('Every analysed case has the gold-standard level "{pos}", so there are no disease-absent cases to estimate specificity from. Check the data, any exclusions reported in the warnings, and the level selection.'),
+                            title = if (.diagReferenceMode(self$options$referenceType)$comparator)
+                                "The reference has only one level among the analysed cases"
+                            else .("The gold standard has only one level among the analysed cases"),
+                            content = .fmt(if (.diagReferenceMode(self$options$referenceType)$comparator)
+                                'Every analysed case has reference level "{pos}". No reference-negative denominator is available; check exclusions and level selection.'
+                            else .('Every analysed case has the gold-standard level "{pos}", so there are no disease-absent cases to estimate specificity from. Check the data, any exclusions reported in the warnings, and the level selection.'),
                                            pos = self$options$goldPositive)
                         )
                     else
                         private$.addNotice(
                             type = "ERROR",
-                            title = .("Choose which gold-standard level means disease absent"),
-                            content = .fmt(.('The gold standard has more than one level besides "{pos}" ({lvls}), so the disease-absent level cannot be inferred. Select it under Disease absent level. Levels you do not name are excluded from the analysis rather than counted as disease-absent.'),
+                            title = if (.diagReferenceMode(self$options$referenceType)$comparator)
+                                "Choose the reference-negative level"
+                            else .("Choose which gold-standard level means disease absent"),
+                            content = .fmt(if (.diagReferenceMode(self$options$referenceType)$comparator)
+                                'The reference has multiple levels besides "{pos}" ({lvls}). Select one Reference negative level. Unselected levels are excluded from the binary comparison.'
+                            else .('The gold standard has more than one level besides "{pos}" ({lvls}), so the disease-absent level cannot be inferred. Select it under Disease absent level. Levels you do not name are excluded from the analysis rather than counted as disease-absent.'),
                                            pos = self$options$goldPositive,
                                            lvls = paste(gold_candidates, collapse = ", "))
                         )
@@ -798,7 +858,9 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     private$.addNotice(
                         type = "STRONG_WARNING",
                         title = .("Zero counts detected in contingency table"),
-                        content = .("A zero count makes a proportion exactly 0% or 100%. Read the 95% confidence intervals (95% confidence intervals option), not the point estimate. For the likelihood ratios, see Continuity correction applied.")
+                        content = if (.diagReferenceMode(self$options$referenceType)$comparator)
+                            "A zero count makes an agreement proportion 0% or 100%. Inspect the exact 95% confidence intervals; no continuity correction is applied to agreement proportions."
+                        else .("A zero count makes a proportion exactly 0% or 100%. Read the 95% confidence intervals (95% confidence intervals option), not the point estimate. For the likelihood ratios, see Continuity correction applied.")
                     )
                 }
                 
@@ -1580,12 +1642,25 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
             ,
             .run = function() {
+                .dvProvenance(self$results$validationContext, self$options)
                 # Reset accumulated notices at the start of every run cycle.
                 # The R6 instance is reused across runs, so the `.noticeList = list()`
                 # field default (evaluated once at instantiation) is not enough: without
                 # this reset each .addNotice() message re-appends and renders N times over
                 # N runs (same pattern fixed in survival.b.R).
                 private$.noticeList <- list()
+
+                if (.diagReferenceMode(self$options$referenceType)$comparator)
+                    private$.clearDiseaseOutputs()
+
+                .diagReferenceDefinition(self$results, self$options,
+                    paste("Reference:", self$options$gold, "positive", self$options$goldPositive,
+                          "negative", self$options$goldNegative, "; test:", self$options$newtest,
+                          "positive", self$options$testPositive, "negative", self$options$testNegative),
+                    "Only selected positive/negative reference and test levels; missing and other levels excluded")
+                for (nm in c("comparatorCounts", "comparatorMetrics", "comparatorPopulation", "comparatorCases"))
+                    self$results[[nm]]$deleteRows()
+                self$results$comparatorReport$setContent("")
 
                 # Render whatever was collected however this method exits. Five
                 # early return()s sit between here and the end of .run(), and each
@@ -1617,6 +1692,11 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 mydata <- prepared_data$data
                 testVariable <- prepared_data$testVar
                 goldVariable <- prepared_data$goldVar
+
+                if (.diagReferenceMode(self$options$referenceType)$comparator) {
+                    private$.runComparator(mydata, testVariable, goldVariable)
+                    return()
+                }
                 
                 # Check data size for performance warnings
                 private$.checkDataSize(mydata)

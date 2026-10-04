@@ -216,8 +216,8 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 "priorPrev",
                 priorPrev,
                 default=0.5,
-                min=0.001,
-                max=0.999)
+                min=1e-9,
+                max=0.999999999)
             private$..costratioFP <- jmvcore::OptionNumber$new(
                 "costratioFP",
                 costratioFP,

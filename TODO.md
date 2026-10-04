@@ -9,6 +9,57 @@ Unsupported legacy options are hidden or explicitly rejected; no substitute stat
 - [ ] Treat semi-Markov/clock-reset, shared transition effects, frailty, and predictive cross-validation as separate extensions with statistical reference checks.
 - [ ] Complete interactive jamovi/OMV persistence and installed-submodule release checks before promoting these testing/draft routes.
 
+# decisioncompare (meddecide) — `/check-function decisioncompare --profile release` (2026-10-04, session `clinicopathjamovimodule-b2`)
+
+Target: the working tree, including the uncommitted "explicit binary mapping" pass (analysis 1.1.0,
+`referenceType`, shared untracked `R/utils-diagnostic-comparator.R`). menuGroup already `meddecideT`.
+Supersedes the unfinished 2026-10-02 block below. Acceptance: every decisioncompare suite and the
+meddecide audit green; `prepare()`/`document()` clean; release gate with decisioncompare as shipped
+identical to the normal run; every decisioncompare msgid has Turkish.
+- [x] Baseline: parse OK; 13 decisioncompare suites 1416 expectations green; wiring map (36 options,
+      33 results) all used; static library greps clean
+- [x] Codex read-only review of the diff (`codex exec`, scratchpad `codex_review.txt`)
+- [x] F1 stale `pp` leaks into consensus/method: false "Prevalence Source" notice, CI box stuck
+      disabled; a pp+ci pair can deadlock both checkboxes (`.validateInputs`, `.u.yaml`)
+- [x] F2 comparatorDifferences `p`/`adjusted` lack `format: zto,pvalue`
+- [x] F3 `test-meddecide-library-audit.R` decisioncompare block calls without negative levels
+- [x] F4 119 decisioncompare msgids without Turkish (59 backend from the IR-01 pass and this pass,
+      plus yaml strings) - filled, `msgfmt -c` OK
+- [x] F5 developer docs (`vignettes/decisioncompare*-documentation.md`) predate referenceType/levels
+- [x] F6 CollapseBox `Reference interpretation` not Title Case (gate, decisioncompare as shipped)
+- [x] F7 R6-method strings in the comparator/level-mapping code bypassed `.()` (Codex P3)
+- [x] Regression tests (`test-decisioncompare-release-check.R`); `prepare()` (only decisioncompare.h.R
+      changed); `i18nUpdate()` x2; `document()` (no man/NAMESPACE change)
+- [x] Verify. At 18:34, before the external edits: all 13 earlier decisioncompare suites, the meddecide
+      audit, comparator and decisioncombine suites green. Isolated copy of the 18:39 tree with prepare():
+      release-check 37/37 green; 3 failures, none from this pass (below).
+- [x] Second pass (after the other agent finished, 18:59): review workflow (109 agents: 5 finder
+      dimensions, dedup, 3-lens adversarial verify, critic) - 30 confirmed / 3 refuted. All fixed
+      except #25 (hand-set analysis version 1.1.0 vs updater stamping - user decision).
+      Documentation agent fixed the 14 help-page examples, Example 6, docs and the testing doc.
+      Fix-verification workflow (71 agents) - 18 confirmed, all fixed except #16 (accepted: the
+      pp+ci error after a mode round-trip is actionable and both boxes can be unticked).
+      Shared helpers gained optional translated `text`; decision/pathagreement keep English.
+      `decision` touched only for 2 labels (audit/gate). Verify: prepare (decisioncompare.h.R +
+      derived 0000.yaml only), i18nUpdate + Turkish (635/635), msgfmt, document, suites, gate.
+- [ ] Follow-ups: `decision`/`pathagreement` could pass translated `text` to the shared
+      helpers too; `diagnosticsamplesize.b.R:454` entity FAIL; analysis version policy (#25).
+- [x] RESOLVED - external agent finished; its work is reviewed above. Original note: from 18:35 an agent outside Claude Code (Antigravity IDE Codex; not in
+      ListAgents; session `-da` confirmed it is not the writer) is adding "validation provenance" to
+      decisioncompare and sibling analyses: 6 options (`showValidationContext`, `cohortRole`,
+      `samplingDesign`, `thresholdSource`, `modelVersion`, `analysisUnit`), `validationContext` table,
+      `R/utils-diagnostic-validation.R`. In the shared tree `.h.R` lacks `validationContext`, so every
+      run errors until it runs prepare(). In the copy:
+      - `pprob` bounds widened to 1e-9..1-1e-9, which breaks edge-cases "validates prevalence bounds".
+      - Its Bool label fails the meddecide audit "state labels rather than action labels".
+      - CollapseBox "Validation provenance" is not Title Case.
+      - `validationContext` rows are built in `.run()`.
+      Re-run this check once that work settles.
+- [x] NEWS.md, CHANGELOG.md
+- Follow-ups (not this pass): shared helper `R/utils-diagnostic-comparator.R` text is English-only
+  (file-level helper cannot call `.()`, so the three callers must pass translated labels);
+  `diagnosticsamplesize.b.R:444` `&minus;`/`&times;` fails the entity contract (other in-flight work).
+
 # decisioncompare (meddecide) — `/check-function decisioncompare --profile release` (2026-10-02)
 
 Release profile: every production flag plus external comparison, comprehensive validation, all tests,
@@ -58,8 +109,15 @@ decisioncompare suite is green in the isolated copy; new regression tests are in
 - [x] Update other decisioncompare test assertions broken by wording changes (list them in the handoff)
 - [x] Verify in the isolated copy: parse, `prepare()`, audit script, all decisioncompare suites
 - [x] NEWS.md + CHANGELOG.md entries
-- [ ] Adversarial review of the diff (4 lenses + refuters); handoff "done" message to `clinicopathjamovimodule-c0`
-- [ ] Then `/validate-function decisioncompare tests=write`
+- [x] Adversarial review of the diff (4 lenses + refuters); its S2 (unscoped "not significant" in the
+      Descriptive report beside significant per-class tests) fixed. Handoff overtaken: peer `c0` ended and the
+      user committed both passes (c70e5f5ef, b063b98b0, 2026-10-03)
+- [x] Re-verified against committed HEAD 0ec8e446e (2026-10-04, clean `git archive` copy): audit 346 PASS / 0 FAIL /
+      3 BLOCKED after re-basing 7 Cochran expectations on the exact conditional p the Oct 3 pass introduced
+      (module helper = brute force over 3^m and an independent multinomial oracle); validation script FAILs were
+      stale expectations (footnote wording, heatmap keys, "Q =" wording, M6 exact p) - updated, 1151/1151 PASS
+- [x] `/validate-function decisioncompare tests=write` - report `development-ideas/decisioncompare-validation-2026-10-04.md`;
+      10 new regression tests in `test-decisioncompare-validation.R` (each fails on the pre-fix source)
 
 # decisioncompare (meddecide) — `/fix-function decisioncompare --apply` (2026-10-01)
 

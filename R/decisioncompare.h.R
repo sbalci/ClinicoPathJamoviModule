@@ -6,6 +6,9 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
+            referenceType = "legacy",
+            referenceDescription = "",
+            targetDefinition = "",
             gold = NULL,
             goldPositive = NULL,
             goldNegative = NULL,
@@ -37,7 +40,13 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             showSummary = FALSE,
             showExplanations = FALSE,
             showReportSentence = FALSE,
-            showDescriptiveReport = FALSE, ...) {
+            showDescriptiveReport = FALSE,
+            showValidationContext = FALSE,
+            cohortRole = "",
+            samplingDesign = "",
+            thresholdSource = "",
+            modelVersion = "",
+            analysisUnit = "", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -45,6 +54,23 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 requiresData=TRUE,
                 ...)
 
+            private$..referenceType <- jmvcore::OptionList$new(
+                "referenceType",
+                referenceType,
+                options=list(
+                    "legacy",
+                    "disease",
+                    "consensus",
+                    "method"),
+                default="legacy")
+            private$..referenceDescription <- jmvcore::OptionString$new(
+                "referenceDescription",
+                referenceDescription,
+                default="")
+            private$..targetDefinition <- jmvcore::OptionString$new(
+                "targetDefinition",
+                targetDefinition,
+                default="")
             private$..gold <- jmvcore::OptionVariable$new(
                 "gold",
                 gold,
@@ -56,11 +82,13 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             private$..goldPositive <- jmvcore::OptionLevel$new(
                 "goldPositive",
                 goldPositive,
-                variable="(gold)")
+                variable="(gold)",
+                allowNone=TRUE)
             private$..goldNegative <- jmvcore::OptionLevel$new(
                 "goldNegative",
                 goldNegative,
-                variable="(gold)")
+                variable="(gold)",
+                allowNone=TRUE)
             private$..test1 <- jmvcore::OptionVariable$new(
                 "test1",
                 test1,
@@ -72,11 +100,13 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             private$..test1Positive <- jmvcore::OptionLevel$new(
                 "test1Positive",
                 test1Positive,
-                variable="(test1)")
+                variable="(test1)",
+                allowNone=TRUE)
             private$..test1Negative <- jmvcore::OptionLevel$new(
                 "test1Negative",
                 test1Negative,
-                variable="(test1)")
+                variable="(test1)",
+                allowNone=TRUE)
             private$..test2 <- jmvcore::OptionVariable$new(
                 "test2",
                 test2,
@@ -88,11 +118,13 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             private$..test2Positive <- jmvcore::OptionLevel$new(
                 "test2Positive",
                 test2Positive,
-                variable="(test2)")
+                variable="(test2)",
+                allowNone=TRUE)
             private$..test2Negative <- jmvcore::OptionLevel$new(
                 "test2Negative",
                 test2Negative,
-                variable="(test2)")
+                variable="(test2)",
+                allowNone=TRUE)
             private$..test3 <- jmvcore::OptionVariable$new(
                 "test3",
                 test3,
@@ -104,11 +136,13 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             private$..test3Positive <- jmvcore::OptionLevel$new(
                 "test3Positive",
                 test3Positive,
-                variable="(test3)")
+                variable="(test3)",
+                allowNone=TRUE)
             private$..test3Negative <- jmvcore::OptionLevel$new(
                 "test3Negative",
                 test3Negative,
-                variable="(test3)")
+                variable="(test3)",
+                allowNone=TRUE)
             private$..pp <- jmvcore::OptionBool$new(
                 "pp",
                 pp,
@@ -117,8 +151,8 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 "pprob",
                 pprob,
                 default=0.3,
-                min=0.001,
-                max=0.999)
+                min=1e-9,
+                max=0.999999999)
             private$..od <- jmvcore::OptionBool$new(
                 "od",
                 od,
@@ -204,7 +238,34 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 "showDescriptiveReport",
                 showDescriptiveReport,
                 default=FALSE)
+            private$..showValidationContext <- jmvcore::OptionBool$new(
+                "showValidationContext",
+                showValidationContext,
+                default=FALSE)
+            private$..cohortRole <- jmvcore::OptionString$new(
+                "cohortRole",
+                cohortRole,
+                default="")
+            private$..samplingDesign <- jmvcore::OptionString$new(
+                "samplingDesign",
+                samplingDesign,
+                default="")
+            private$..thresholdSource <- jmvcore::OptionString$new(
+                "thresholdSource",
+                thresholdSource,
+                default="")
+            private$..modelVersion <- jmvcore::OptionString$new(
+                "modelVersion",
+                modelVersion,
+                default="")
+            private$..analysisUnit <- jmvcore::OptionString$new(
+                "analysisUnit",
+                analysisUnit,
+                default="")
 
+            self$.addOption(private$..referenceType)
+            self$.addOption(private$..referenceDescription)
+            self$.addOption(private$..targetDefinition)
             self$.addOption(private$..gold)
             self$.addOption(private$..goldPositive)
             self$.addOption(private$..goldNegative)
@@ -237,8 +298,17 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$.addOption(private$..showExplanations)
             self$.addOption(private$..showReportSentence)
             self$.addOption(private$..showDescriptiveReport)
+            self$.addOption(private$..showValidationContext)
+            self$.addOption(private$..cohortRole)
+            self$.addOption(private$..samplingDesign)
+            self$.addOption(private$..thresholdSource)
+            self$.addOption(private$..modelVersion)
+            self$.addOption(private$..analysisUnit)
         }),
     active = list(
+        referenceType = function() private$..referenceType$value,
+        referenceDescription = function() private$..referenceDescription$value,
+        targetDefinition = function() private$..targetDefinition$value,
         gold = function() private$..gold$value,
         goldPositive = function() private$..goldPositive$value,
         goldNegative = function() private$..goldNegative$value,
@@ -270,8 +340,17 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         showSummary = function() private$..showSummary$value,
         showExplanations = function() private$..showExplanations$value,
         showReportSentence = function() private$..showReportSentence$value,
-        showDescriptiveReport = function() private$..showDescriptiveReport$value),
+        showDescriptiveReport = function() private$..showDescriptiveReport$value,
+        showValidationContext = function() private$..showValidationContext$value,
+        cohortRole = function() private$..cohortRole$value,
+        samplingDesign = function() private$..samplingDesign$value,
+        thresholdSource = function() private$..thresholdSource$value,
+        modelVersion = function() private$..modelVersion$value,
+        analysisUnit = function() private$..analysisUnit$value),
     private = list(
+        ..referenceType = NA,
+        ..referenceDescription = NA,
+        ..targetDefinition = NA,
         ..gold = NA,
         ..goldPositive = NA,
         ..goldNegative = NA,
@@ -303,7 +382,13 @@ decisioncompareOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         ..showSummary = NA,
         ..showExplanations = NA,
         ..showReportSentence = NA,
-        ..showDescriptiveReport = NA)
+        ..showDescriptiveReport = NA,
+        ..showValidationContext = NA,
+        ..cohortRole = NA,
+        ..samplingDesign = NA,
+        ..thresholdSource = NA,
+        ..modelVersion = NA,
+        ..analysisUnit = NA)
 )
 
 decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -311,6 +396,7 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
     inherit = jmvcore::Group,
     active = list(
         notices = function() private$.items[["notices"]],
+        levelMapping = function() private$.items[["levelMapping"]],
         text1 = function() private$.items[["text1"]],
         text2 = function() private$.items[["text2"]],
         cTable1 = function() private$.items[["cTable1"]],
@@ -331,7 +417,18 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         reportSentence = function() private$.items[["reportSentence"]],
         explanationsContent = function() private$.items[["explanationsContent"]],
         clinicalReport = function() private$.items[["clinicalReport"]],
-        aboutAnalysis = function() private$.items[["aboutAnalysis"]]),
+        aboutAnalysis = function() private$.items[["aboutAnalysis"]],
+        referenceDefinition = function() private$.items[["referenceDefinition"]],
+        comparatorCounts = function() private$.items[["comparatorCounts"]],
+        comparatorPopulation = function() private$.items[["comparatorPopulation"]],
+        comparatorMetrics = function() private$.items[["comparatorMetrics"]],
+        comparatorReport = function() private$.items[["comparatorReport"]],
+        comparatorDifferences = function() private$.items[["comparatorDifferences"]],
+        comparatorStrata = function() private$.items[["comparatorStrata"]],
+        comparatorPlot = function() private$.items[["comparatorPlot"]],
+        comparatorRadar = function() private$.items[["comparatorRadar"]],
+        comparatorHeatmap = function() private$.items[["comparatorHeatmap"]],
+        validationContext = function() private$.items[["validationContext"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -363,6 +460,9 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 name="notices",
                 title="Important Information",
                 clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
                     "gold",
                     "goldPositive",
                     "goldNegative",
@@ -390,12 +490,67 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "showSummary",
                     "showReportSentence",
                     "showDescriptiveReport")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="levelMapping",
+                title="Selected Levels and Exclusions",
+                rows=0,
+                clearWith=list(
+                    "gold",
+                    "goldPositive",
+                    "goldNegative",
+                    "test1",
+                    "test1Positive",
+                    "test1Negative",
+                    "test2",
+                    "test2Positive",
+                    "test2Negative",
+                    "test3",
+                    "test3Positive",
+                    "test3Negative",
+                    "excludeIndeterminate"),
+                columns=list(
+                    list(
+                        `name`="variable", 
+                        `title`="Variable", 
+                        `type`="text"),
+                    list(
+                        `name`="positive", 
+                        `title`="Positive level", 
+                        `type`="text"),
+                    list(
+                        `name`="negative", 
+                        `title`="Negative level", 
+                        `type`="text"),
+                    list(
+                        `name`="positiveN", 
+                        `title`="Positive n", 
+                        `type`="integer"),
+                    list(
+                        `name`="negativeN", 
+                        `title`="Negative n", 
+                        `type`="integer"),
+                    list(
+                        `name`="otherN", 
+                        `title`="Other n", 
+                        `type`="integer"),
+                    list(
+                        `name`="missingN", 
+                        `title`="Missing n", 
+                        `type`="integer"),
+                    list(
+                        `name`="otherLevels", 
+                        `title`="Other observed levels (counts)", 
+                        `type`="text"))))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text1",
                 title="Original Data",
-                visible="(od)",
+                visible="(referenceType:legacy && (od) || referenceType:disease && (od))",
                 clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
                     "gold",
                     "goldPositive",
                     "goldNegative",
@@ -414,8 +569,11 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="text2",
                 title="Original Data",
-                visible="(od)",
+                visible="(referenceType:legacy && (od) || referenceType:disease && (od))",
                 clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
                     "gold",
                     "goldPositive",
                     "goldNegative",
@@ -434,9 +592,12 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="cTable1",
                 title="Test 1 - Recoded Data",
-                visible="(length(test1) > 0)",
+                visible="(referenceType:legacy && (length(test1) > 0) || referenceType:disease && (length(test1) > 0))",
                 rows=0,
                 clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
                     "gold",
                     "goldPositive",
                     "goldNegative",
@@ -465,9 +626,12 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="epirTable1",
                 title="Test 1 - Confidence Intervals",
-                visible="(ci && !is.null(test1) && test1 != \"\")",
+                visible="(referenceType:legacy && (ci && !is.null(test1) && test1 != \"\") || referenceType:disease && (ci && !is.null(test1) && test1 != \"\"))",
                 rows=0,
                 clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
                     "gold",
                     "goldPositive",
                     "goldNegative",
@@ -502,9 +666,12 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="cTable2",
                 title="Test 2 - Recoded Data",
-                visible="(length(test2) > 0)",
+                visible="(referenceType:legacy && (length(test2) > 0) || referenceType:disease && (length(test2) > 0))",
                 rows=0,
                 clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
                     "gold",
                     "goldPositive",
                     "goldNegative",
@@ -533,9 +700,12 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="epirTable2",
                 title="Test 2 - Confidence Intervals",
-                visible="(ci && !is.null(test2) && test2 != \"\")",
+                visible="(referenceType:legacy && (ci && !is.null(test2) && test2 != \"\") || referenceType:disease && (ci && !is.null(test2) && test2 != \"\"))",
                 rows=0,
                 clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
                     "gold",
                     "goldPositive",
                     "goldNegative",
@@ -570,9 +740,12 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="cTable3",
                 title="Test 3 - Recoded Data",
-                visible="(length(test3) > 0)",
+                visible="(referenceType:legacy && (length(test3) > 0) || referenceType:disease && (length(test3) > 0))",
                 rows=0,
                 clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
                     "gold",
                     "goldPositive",
                     "goldNegative",
@@ -601,9 +774,12 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="epirTable3",
                 title="Test 3 - Confidence Intervals",
-                visible="(ci && !is.null(test3) && test3 != \"\")",
+                visible="(referenceType:legacy && (ci && !is.null(test3) && test3 != \"\") || referenceType:disease && (ci && !is.null(test3) && test3 != \"\"))",
                 rows=0,
                 clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
                     "gold",
                     "goldPositive",
                     "goldNegative",
@@ -638,6 +814,7 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="comparisonTable",
                 title="Decision Test Comparison",
+                visible="(referenceType:legacy || referenceType:disease)",
                 rows=0,
                 columns=list(
                     list(
@@ -691,6 +868,9 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                         `title`="Negative Likelihood Ratio", 
                         `type`="number")),
                 clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
                     "gold",
                     "goldPositive",
                     "goldNegative",
@@ -710,7 +890,7 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="opaTable",
                 title="Overall Percent Agreement (Descriptive)",
-                visible="(opa)",
+                visible="(referenceType:legacy && (opa) || referenceType:disease && (opa))",
                 rows=0,
                 notes=list(
                     `note`="OPA = (TP + TN) / Total. OPA does not correct for chance agreement; consider Cohen's kappa for chance-corrected concordance. The criterion is met when the lower CI bound exceeds the user-specified minimum OPA. The criterion is optional and descriptive. It is not a noninferiority comparison, regulatory guidance, or clinical guidance."),
@@ -758,6 +938,9 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                         `title`="Criterion Met?", 
                         `type`="text")),
                 clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
                     "gold",
                     "goldPositive",
                     "goldNegative",
@@ -778,7 +961,7 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="stratifiedTable",
                 title="Stratified Diagnostic Accuracy",
-                visible="(length(stratify) > 0)",
+                visible="(referenceType:legacy && (length(stratify) > 0) || referenceType:disease && (length(stratify) > 0))",
                 rows=0,
                 columns=list(
                     list(
@@ -833,6 +1016,9 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                         `type`="number", 
                         `format`="pc")),
                 clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
                     "gold",
                     "goldPositive",
                     "goldNegative",
@@ -853,7 +1039,7 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="mcnemarTable",
                 title="Statistical Comparison of Test Accuracy",
-                visible="(statComp)",
+                visible="(referenceType:legacy && (statComp) || referenceType:disease && (statComp))",
                 rows=0,
                 notes=list(
                     `note`="For 2 tests: McNemar's test compares diagnostic CORRECTNESS (agreement with gold standard) between paired tests. For 3+ tests: Cochran's Q test provides an overall test, followed by pairwise McNemar's tests, Holm-Bonferroni adjusted whenever more than one pair is tested. Tests examine discordant pairs (cases where one test is correct and the other is wrong relative to the gold standard) to determine if differences in accuracy are statistically significant."),
@@ -888,6 +1074,9 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                         `title`="Statistical Interpretation", 
                         `type`="text")),
                 clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
                     "gold",
                     "goldPositive",
                     "goldNegative",
@@ -907,7 +1096,7 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="diffTable",
                 title="Differences with 95% Confidence Intervals",
-                visible="(statComp)",
+                visible="(referenceType:legacy && (statComp) || referenceType:disease && (statComp))",
                 rows=0,
                 columns=list(
                     list(
@@ -945,6 +1134,9 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                         `type`="number", 
                         `format`="zto,pvalue")),
                 clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
                     "gold",
                     "goldPositive",
                     "goldNegative",
@@ -967,8 +1159,11 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 width=600,
                 height=450,
                 renderFun=".plot1",
-                visible="(plot)",
+                visible="(referenceType:legacy && (plot) || referenceType:disease && (plot))",
                 clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
                     "plot",
                     "gold",
                     "goldPositive",
@@ -994,8 +1189,11 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 width=600,
                 height=600,
                 renderFun=".plotRadar",
-                visible="(radarplot)",
+                visible="(referenceType:legacy && (radarplot) || referenceType:disease && (radarplot))",
                 clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
                     "radarplot",
                     "gold",
                     "goldPositive",
@@ -1021,8 +1219,11 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 width=800,
                 height=400,
                 renderFun=".plotHeatmap",
-                visible="(heatmap)",
+                visible="(referenceType:legacy && (heatmap) || referenceType:disease && (heatmap))",
                 clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
                     "heatmap",
                     "gold",
                     "goldPositive",
@@ -1043,8 +1244,11 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="summaryReport",
                 title="Summary",
-                visible="(statComp && showSummary)",
+                visible="(referenceType:legacy && (statComp && showSummary) || referenceType:disease && (statComp && showSummary))",
                 clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
                     "gold",
                     "goldPositive",
                     "goldNegative",
@@ -1067,8 +1271,11 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="reportSentence",
                 title="Manuscript-Ready Report",
-                visible="(statComp && showReportSentence)",
+                visible="(referenceType:legacy && (statComp && showReportSentence) || referenceType:disease && (statComp && showReportSentence))",
                 clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
                     "gold",
                     "goldPositive",
                     "goldNegative",
@@ -1091,15 +1298,21 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="explanationsContent",
                 title="Statistical Explanations & Glossary",
-                visible="(showExplanations)",
+                visible="(referenceType:legacy && (showExplanations) || referenceType:disease && (showExplanations))",
                 clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
                     "showExplanations")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="clinicalReport",
                 title="Descriptive Summary & Report Templates",
-                visible="(showDescriptiveReport)",
+                visible="(referenceType:legacy && (showDescriptiveReport) || referenceType:disease && (showDescriptiveReport))",
                 clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
                     "gold",
                     "goldPositive",
                     "goldNegative",
@@ -1122,9 +1335,521 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="aboutAnalysis",
                 title="About This Analysis",
-                visible="(showExplanations)",
+                visible="(referenceType:legacy && (showExplanations) || referenceType:disease && (showExplanations))",
                 clearWith=list(
-                    "showExplanations")))}))
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
+                    "showExplanations")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="referenceDefinition",
+                title="Reference and target",
+                visible=TRUE,
+                rows=0,
+                clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
+                    "gold",
+                    "goldPositive",
+                    "goldNegative",
+                    "ci",
+                    "pp",
+                    "pprob",
+                    "test1",
+                    "test1Positive",
+                    "test1Negative",
+                    "test2",
+                    "test2Positive",
+                    "test2Negative",
+                    "test3",
+                    "test3Positive",
+                    "test3Negative",
+                    "excludeIndeterminate",
+                    "statComp",
+                    "mcnemarMethod",
+                    "stratify",
+                    "plot",
+                    "radarplot",
+                    "heatmap"),
+                columns=list(
+                    list(
+                        `name`="setting", 
+                        `title`="Setting", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="comparatorCounts",
+                title="Binary comparator counts",
+                visible="(referenceType:consensus || referenceType:method)",
+                rows=0,
+                clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
+                    "gold",
+                    "goldPositive",
+                    "goldNegative",
+                    "ci",
+                    "pp",
+                    "pprob",
+                    "test1",
+                    "test1Positive",
+                    "test1Negative",
+                    "test2",
+                    "test2Positive",
+                    "test2Negative",
+                    "test3",
+                    "test3Positive",
+                    "test3Negative",
+                    "excludeIndeterminate",
+                    "statComp",
+                    "mcnemarMethod",
+                    "stratify",
+                    "plot",
+                    "radarplot",
+                    "heatmap"),
+                columns=list(
+                    list(
+                        `name`="test", 
+                        `title`="Test", 
+                        `type`="text"),
+                    list(
+                        `name`="call", 
+                        `title`="Call", 
+                        `type`="text"),
+                    list(
+                        `name`="refPositive", 
+                        `title`="Reference positive", 
+                        `type`="integer"),
+                    list(
+                        `name`="refNegative", 
+                        `title`="Reference negative", 
+                        `type`="integer"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="comparatorPopulation",
+                title="Comparison populations",
+                visible="(referenceType:consensus || referenceType:method)",
+                rows=0,
+                clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
+                    "gold",
+                    "goldPositive",
+                    "goldNegative",
+                    "ci",
+                    "pp",
+                    "pprob",
+                    "test1",
+                    "test1Positive",
+                    "test1Negative",
+                    "test2",
+                    "test2Positive",
+                    "test2Negative",
+                    "test3",
+                    "test3Positive",
+                    "test3Negative",
+                    "excludeIndeterminate",
+                    "statComp",
+                    "mcnemarMethod",
+                    "stratify",
+                    "plot",
+                    "radarplot",
+                    "heatmap"),
+                columns=list(
+                    list(
+                        `name`="test", 
+                        `title`="Test", 
+                        `type`="text"),
+                    list(
+                        `name`="selected", 
+                        `title`="Selected rows", 
+                        `type`="integer"),
+                    list(
+                        `name`="analyzed", 
+                        `title`="Analyzed pairs", 
+                        `type`="integer"),
+                    list(
+                        `name`="excluded", 
+                        `title`="Excluded pairs", 
+                        `type`="integer"),
+                    list(
+                        `name`="missing", 
+                        `title`="Missing result", 
+                        `type`="integer"),
+                    list(
+                        `name`="other", 
+                        `title`="Other level", 
+                        `type`="integer"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="comparatorMetrics",
+                title="Agreement with comparator",
+                visible="(referenceType:consensus || referenceType:method)",
+                rows=0,
+                clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
+                    "gold",
+                    "goldPositive",
+                    "goldNegative",
+                    "ci",
+                    "pp",
+                    "pprob",
+                    "test1",
+                    "test1Positive",
+                    "test1Negative",
+                    "test2",
+                    "test2Positive",
+                    "test2Negative",
+                    "test3",
+                    "test3Positive",
+                    "test3Negative",
+                    "excludeIndeterminate",
+                    "statComp",
+                    "mcnemarMethod",
+                    "stratify",
+                    "plot",
+                    "radarplot",
+                    "heatmap"),
+                columns=list(
+                    list(
+                        `name`="test", 
+                        `title`="Test", 
+                        `type`="text"),
+                    list(
+                        `name`="metric", 
+                        `title`="Metric", 
+                        `type`="text"),
+                    list(
+                        `name`="numerator", 
+                        `title`="Numerator", 
+                        `type`="integer"),
+                    list(
+                        `name`="denominator", 
+                        `title`="Denominator", 
+                        `type`="integer"),
+                    list(
+                        `name`="estimate", 
+                        `title`="Estimate", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="lower", 
+                        `title`="Lower 95% CI", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="upper", 
+                        `title`="Upper 95% CI", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="method", 
+                        `title`="Interval method", 
+                        `type`="text"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="comparatorReport",
+                title="Comparator interpretation",
+                visible="(referenceType:consensus || referenceType:method)",
+                clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
+                    "gold",
+                    "goldPositive",
+                    "goldNegative",
+                    "ci",
+                    "pp",
+                    "pprob",
+                    "test1",
+                    "test1Positive",
+                    "test1Negative",
+                    "test2",
+                    "test2Positive",
+                    "test2Negative",
+                    "test3",
+                    "test3Positive",
+                    "test3Negative",
+                    "excludeIndeterminate",
+                    "statComp",
+                    "mcnemarMethod",
+                    "stratify",
+                    "plot",
+                    "radarplot",
+                    "heatmap")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="comparatorDifferences",
+                title="Paired agreement differences",
+                visible="(referenceType:consensus && (statComp) || referenceType:method && (statComp))",
+                rows=0,
+                clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
+                    "gold",
+                    "goldPositive",
+                    "goldNegative",
+                    "ci",
+                    "pp",
+                    "pprob",
+                    "test1",
+                    "test1Positive",
+                    "test1Negative",
+                    "test2",
+                    "test2Positive",
+                    "test2Negative",
+                    "test3",
+                    "test3Positive",
+                    "test3Negative",
+                    "excludeIndeterminate",
+                    "statComp",
+                    "mcnemarMethod",
+                    "stratify",
+                    "plot",
+                    "radarplot",
+                    "heatmap"),
+                columns=list(
+                    list(
+                        `name`="comparison", 
+                        `title`="First minus second", 
+                        `type`="text"),
+                    list(
+                        `name`="metric", 
+                        `title`="Metric", 
+                        `type`="text"),
+                    list(
+                        `name`="n", 
+                        `title`="Paired cases", 
+                        `type`="integer"),
+                    list(
+                        `name`="diff", 
+                        `title`="Difference", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="lower", 
+                        `title`="Lower 95% CI", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="upper", 
+                        `title`="Upper 95% CI", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="p", 
+                        `title`="Unadjusted p", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="adjusted", 
+                        `title`="Holm p", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="method", 
+                        `title`="Method", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="comparatorStrata",
+                title="Agreement by stratum",
+                visible="(referenceType:consensus && (length(stratify) > 0) || referenceType:method && (length(stratify) > 0))",
+                rows=0,
+                clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
+                    "gold",
+                    "goldPositive",
+                    "goldNegative",
+                    "ci",
+                    "pp",
+                    "pprob",
+                    "test1",
+                    "test1Positive",
+                    "test1Negative",
+                    "test2",
+                    "test2Positive",
+                    "test2Negative",
+                    "test3",
+                    "test3Positive",
+                    "test3Negative",
+                    "excludeIndeterminate",
+                    "statComp",
+                    "mcnemarMethod",
+                    "stratify",
+                    "plot",
+                    "radarplot",
+                    "heatmap"),
+                columns=list(
+                    list(
+                        `name`="stratum", 
+                        `title`="Stratum", 
+                        `type`="text"),
+                    list(
+                        `name`="test", 
+                        `title`="Test", 
+                        `type`="text"),
+                    list(
+                        `name`="metric", 
+                        `title`="Metric", 
+                        `type`="text"),
+                    list(
+                        `name`="numerator", 
+                        `title`="Numerator", 
+                        `type`="integer"),
+                    list(
+                        `name`="denominator", 
+                        `title`="Denominator", 
+                        `type`="integer"),
+                    list(
+                        `name`="estimate", 
+                        `title`="Estimate", 
+                        `type`="number", 
+                        `format`="pc"))))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="comparatorPlot",
+                title="Comparator agreement (bar)",
+                visible="(referenceType:consensus && (plot) || referenceType:method && (plot))",
+                width=600,
+                height=450,
+                renderFun=".plotComparatorBar",
+                refs=list(
+                    "ggplot2"),
+                clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
+                    "gold",
+                    "goldPositive",
+                    "goldNegative",
+                    "ci",
+                    "pp",
+                    "pprob",
+                    "test1",
+                    "test1Positive",
+                    "test1Negative",
+                    "test2",
+                    "test2Positive",
+                    "test2Negative",
+                    "test3",
+                    "test3Positive",
+                    "test3Negative",
+                    "excludeIndeterminate",
+                    "statComp",
+                    "mcnemarMethod",
+                    "stratify",
+                    "plot",
+                    "radarplot",
+                    "heatmap")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="comparatorRadar",
+                title="Comparator agreement (radar)",
+                visible="(referenceType:consensus && (radarplot) || referenceType:method && (radarplot))",
+                width=600,
+                height=450,
+                renderFun=".plotComparatorRadar",
+                refs=list(
+                    "ggplot2"),
+                clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
+                    "gold",
+                    "goldPositive",
+                    "goldNegative",
+                    "ci",
+                    "pp",
+                    "pprob",
+                    "test1",
+                    "test1Positive",
+                    "test1Negative",
+                    "test2",
+                    "test2Positive",
+                    "test2Negative",
+                    "test3",
+                    "test3Positive",
+                    "test3Negative",
+                    "excludeIndeterminate",
+                    "statComp",
+                    "mcnemarMethod",
+                    "stratify",
+                    "plot",
+                    "radarplot",
+                    "heatmap")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="comparatorHeatmap",
+                title="Comparator agreement (heatmap)",
+                visible="(referenceType:consensus && (heatmap) || referenceType:method && (heatmap))",
+                width=600,
+                height=450,
+                renderFun=".plotComparatorHeatmap",
+                refs=list(
+                    "ggplot2"),
+                clearWith=list(
+                    "referenceType",
+                    "referenceDescription",
+                    "targetDefinition",
+                    "gold",
+                    "goldPositive",
+                    "goldNegative",
+                    "ci",
+                    "pp",
+                    "pprob",
+                    "test1",
+                    "test1Positive",
+                    "test1Negative",
+                    "test2",
+                    "test2Positive",
+                    "test2Negative",
+                    "test3",
+                    "test3Positive",
+                    "test3Negative",
+                    "excludeIndeterminate",
+                    "statComp",
+                    "mcnemarMethod",
+                    "stratify",
+                    "plot",
+                    "radarplot",
+                    "heatmap")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="validationContext",
+                title="Validation context",
+                visible="(showValidationContext)",
+                clearWith=list(
+                    "showValidationContext",
+                    "cohortRole",
+                    "samplingDesign",
+                    "thresholdSource",
+                    "modelVersion",
+                    "analysisUnit",
+                    "referenceType",
+                    "referenceDescription"),
+                columns=list(
+                    list(
+                        `name`="setting", 
+                        `title`="Setting", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="text"))))}))
 
 decisioncompareBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "decisioncompareBase",
@@ -1134,7 +1859,7 @@ decisioncompareBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             super$initialize(
                 package = "ClinicoPath",
                 name = "decisioncompare",
-                version = c(1,0,84),
+                version = c(1,0,83),
                 options = options,
                 results = decisioncompareResults$new(options=options),
                 data = data,
@@ -1155,24 +1880,27 @@ decisioncompareBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' standard. Includes statistical comparison using McNemar's test and 
 #' confidence intervals for differences. Tests are paired within each case; 
 #' cases must be independent across rows. Repeated specimens or lesions from 
-#' one patient require a method that accounts for clustering.
+#' one patient require a method that accounts for clustering. Explicit 
+#' positive and negative levels are required for the reference and every 
+#' selected test. Other observed levels require explicit exclusion or prior 
+#' recoding; they are never pooled as negative.
 #' 
 #'
 #' @examples
 #' \donttest{
 #' # Level arguments are explicit in the generated R API. Pass NULL for
-#' # unused negative levels and for the optional third test selectors.
+#' # the unused optional third test selectors only.
 #' decisioncompare(
 #'     data = histopathology,
 #'     gold = "Golden Standart",
 #'     goldPositive = "1",
-#'     goldNegative = NULL,
+#'     goldNegative = "0",
 #'     test1 = "New Test",
 #'     test1Positive = "1",
-#'     test1Negative = NULL,
+#'     test1Negative = "0",
 #'     test2 = "Rater 1",
 #'     test2Positive = "1",
-#'     test2Negative = NULL,
+#'     test2Negative = "0",
 #'     test3 = NULL,
 #'     test3Positive = NULL,
 #'     test3Negative = NULL,
@@ -1180,34 +1908,40 @@ decisioncompareBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' )
 #'}
 #' @param data The data as a data frame.
-#' @param gold The gold standard reference variable representing true disease
-#'   status.
-#' @param goldPositive The level indicating presence of disease in the gold
-#'   standard variable.
-#' @param goldNegative The level indicating disease is ABSENT in the gold
-#'   standard variable. Required for excludeIndeterminate to act on a variable
-#'   with more than two levels; pass NULL when not used.
+#' @param referenceType Comparator interpretation; legacy retains diagnostic
+#'   terminology. All modes require explicit positive and negative levels.
+#'   Consensus and method report agreement without disease-risk interpretation.
+#' @param referenceDescription Free text describing the reference or
+#'   comparator (e.g. consensus of three pathologists); displayed in the
+#'   Reference and target table and, when shown, the Validation context table;
+#'   not validated.
+#' @param targetDefinition Free text defining the target condition the
+#'   positive level represents; displayed in the Reference and target table
+#'   only, not validated.
+#' @param gold The reference variable; its interpretation is selected
+#'   separately.
+#' @param goldPositive The positive reference level; disease interpretation
+#'   requires a disease standard.
+#' @param goldNegative Explicit negative level, required for each selected
+#'   variable. Pass NULL only when this variable is not selected.
 #' @param test1 The first diagnostic test variable being evaluated for
 #'   performance.
 #' @param test1Positive The level representing a positive result for Test 1.
-#' @param test1Negative The level indicating a NEGATIVE result for test 1.
-#'   Required for excludeIndeterminate to act on a variable with more than two
-#'   levels; pass NULL when not used.
+#' @param test1Negative Explicit negative level, required for each selected
+#'   variable. Pass NULL only when this variable is not selected.
 #' @param test2 The second diagnostic test variable for comparison analysis.
 #' @param test2Positive The level representing a positive result for Test 2.
-#' @param test2Negative The level indicating a NEGATIVE result for test 2.
-#'   Required for excludeIndeterminate to act on a variable with more than two
-#'   levels; pass NULL when not used.
+#' @param test2Negative Explicit negative level, required for each selected
+#'   variable. Pass NULL only when this variable is not selected.
 #' @param test3 Optional third diagnostic test variable for extended
 #'   comparison analysis.
 #' @param test3Positive The level representing a positive result for Test 3.
-#' @param test3Negative The level indicating a NEGATIVE result for test 3.
-#'   Required for excludeIndeterminate to act on a variable with more than two
-#'   levels; pass NULL when not used.
+#' @param test3Negative Explicit negative level, required for each selected
+#'   variable. Pass NULL only when this variable is not selected.
 #' @param pp Enable custom prior probability (prevalence) for predictive value
 #'   calculations.
 #' @param pprob Prior probability (disease prevalence in the community).
-#'   Requires a value between 0.001 and 0.999, default 0.300.
+#'   Requires a value strictly between 0 and 1, default 0.300.
 #' @param od Boolean selection whether to show frequency tables. Default is
 #'   'false'.
 #' @param fnote Boolean indicating whether table footnotes should be
@@ -1215,9 +1949,10 @@ decisioncompareBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' @param ci Boolean indicating whether confidence interval tables should be
 #'   displayed.
 #' @param plot Generate comparison plot showing test performance metrics.
-#' @param excludeIndeterminate If TRUE, drop rows where test/gold values are
-#'   neither the specified positive level nor a clear negative level to avoid
-#'   inflating specificity/NPV from equivocal results.
+#' @param excludeIndeterminate If TRUE, exclude results outside the explicit
+#'   positive/negative pairs. If FALSE, additional observed levels cause a
+#'   validation error. Both levels are always required; neither missing mappings
+#'   nor extra labels invoke one-versus-rest recoding.
 #' @param radarplot Generate radar plot for comprehensive test comparison
 #'   visualization.
 #' @param heatmap Generate concordance heatmap comparing per-case test results
@@ -1245,9 +1980,27 @@ decisioncompareBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' @param showReportSentence Boolean to show manuscript-ready report sentence.
 #' @param showDescriptiveReport Boolean to show the longer descriptive report
 #'   templates.
+#' @param showValidationContext Display the user-declared validation context
+#'   (cohort role, sampling design, threshold source, model version, unit of
+#'   observation) with the reference interpretation and comparator description
+#'   in the Validation context table.
+#' @param cohortRole Declared role of this cohort (e.g. development, internal
+#'   or external validation); displayed only, not verified.
+#' @param samplingDesign Declared sampling design (e.g. consecutive,
+#'   case-control); displayed only, not verified. Case-control sampling distorts
+#'   predictive values.
+#' @param thresholdSource Declared origin of any cut-off used to make the
+#'   tests binary (e.g. prespecified, chosen in this sample); displayed only,
+#'   not verified.
+#' @param modelVersion Declared version of the test, assay or algorithm;
+#'   displayed only, not verified.
+#' @param analysisUnit Declared unit each row represents (e.g. case, patient,
+#'   lesion); displayed only, not verified. This analysis assumes independent
+#'   rows.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$notices} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$levelMapping} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text2} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$cTable1} \tab \tab \tab \tab \tab a table \cr
@@ -1269,17 +2022,31 @@ decisioncompareBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'   \code{results$explanationsContent} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$clinicalReport} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$aboutAnalysis} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$referenceDefinition} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$comparatorCounts} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$comparatorPopulation} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$comparatorMetrics} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$comparatorReport} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$comparatorDifferences} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$comparatorStrata} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$comparatorPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$comparatorRadar} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$comparatorHeatmap} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$validationContext} \tab \tab \tab \tab \tab a table \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 #'
-#' \code{results$cTable1$asDF}
+#' \code{results$levelMapping$asDF}
 #'
-#' \code{as.data.frame(results$cTable1)}
+#' \code{as.data.frame(results$levelMapping)}
 #'
 #' @export
 decisioncompare <- function(
     data,
+    referenceType = "legacy",
+    referenceDescription = "",
+    targetDefinition = "",
     gold = NULL,
     goldPositive,
     goldNegative,
@@ -1311,7 +2078,13 @@ decisioncompare <- function(
     showSummary = FALSE,
     showExplanations = FALSE,
     showReportSentence = FALSE,
-    showDescriptiveReport = FALSE) {
+    showDescriptiveReport = FALSE,
+    showValidationContext = FALSE,
+    cohortRole = "",
+    samplingDesign = "",
+    thresholdSource = "",
+    modelVersion = "",
+    analysisUnit = "") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("decisioncompare requires jmvcore to be installed (restart may be required)")
@@ -1337,6 +2110,9 @@ decisioncompare <- function(
     for (v in stratify) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- decisioncompareOptions$new(
+        referenceType = referenceType,
+        referenceDescription = referenceDescription,
+        targetDefinition = targetDefinition,
         gold = gold,
         goldPositive = goldPositive,
         goldNegative = goldNegative,
@@ -1368,7 +2144,13 @@ decisioncompare <- function(
         showSummary = showSummary,
         showExplanations = showExplanations,
         showReportSentence = showReportSentence,
-        showDescriptiveReport = showDescriptiveReport)
+        showDescriptiveReport = showDescriptiveReport,
+        showValidationContext = showValidationContext,
+        cohortRole = cohortRole,
+        samplingDesign = samplingDesign,
+        thresholdSource = thresholdSource,
+        modelVersion = modelVersion,
+        analysisUnit = analysisUnit)
 
     analysis <- decisioncompareClass$new(
         options = options,

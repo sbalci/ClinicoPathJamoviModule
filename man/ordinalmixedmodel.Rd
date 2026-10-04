@@ -12,7 +12,7 @@ ordinalmixedmodel(
   randomTerms,
   link = "logit",
   threshold = "flexible",
-  propOddsTest = TRUE,
+  propOddsTest = FALSE,
   oddsRatios = TRUE,
   confInt = TRUE,
   confLevel = 0.95,
@@ -39,8 +39,8 @@ rater, site)}
 
 \item{threshold}{Threshold parameterization}
 
-\item{propOddsTest}{Test the proportional odds (parallel lines) assumption
-using nominal_test}
+\item{propOddsTest}{Retained for saved analyses; shows an explanation
+because nominal_test supports CLM, not CLMM.}
 
 \item{oddsRatios}{Display exponentiated coefficients as odds ratios}
 
@@ -54,8 +54,8 @@ using nominal_test}
 
 \item{modelFit}{Show AIC, BIC, log-likelihood, and deviance}
 
-\item{conditionMeans}{Show predicted marginal probabilities for each factor
-level}
+\item{conditionMeans}{Retained for saved analyses; no marginal
+probabilities are calculated.}
 }
 \value{
 A results object containing:

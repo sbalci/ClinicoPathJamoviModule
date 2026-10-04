@@ -24,31 +24,57 @@ options:
           R: The data as a data frame. The data frame should contain the variables specified in the 'variables' option.
 
 
+    - name: referenceType
+      title: Reference interpretation
+      type: List
+      options:
+        - name: legacy
+          title: Not specified
+        - name: disease
+          title: Disease reference
+        - name: consensus
+          title: Expert consensus
+        - name: method
+          title: Comparative method
+      default: legacy
+      description:
+          R: Comparator interpretation; legacy preserves existing binary calculations. Consensus and method report agreement without disease-risk interpretation.
+
+    - name: referenceDescription
+      title: Comparator description
+      type: String
+      default: ''
+
+    - name: targetDefinition
+      title: Target definition
+      type: String
+      default: ''
+
     - name: gold
-      title: Gold Standard (Reference)
+      title: Reference / comparator
       type: Variable
       default: NULL
       suggested: [ nominal ]
       permitted: [ factor ]
       description:
           ui: >
-            The reference standard, used as each case's disease status. Use the most
-            reliable method available (e.g., biopsy, final diagnosis). All estimates treat it
-            as error-free, so errors in it can bias them.
+            Select the reference variable and its interpretation: disease reference, expert
+            consensus, or comparative method. Only a suitable disease reference supports
+            disease-accuracy interpretation.
           R: >
             The reference standard variable, used as each case's disease status.
 
 
     - name: goldPositive
-      title: Disease present level
+      title: Reference positive level
       type: Level
       variable: (gold)
       description:
           ui: >
-            Select the level that indicates disease is present in your gold standard variable.
+            Select the positive reference level.
             This represents the condition you want to detect or diagnose.
           R: >
-            The level indicating presence of disease in the gold standard variable.
+            The positive reference level; disease interpretation requires a disease standard.
 
     - name: newtest
       title: Test Under Evaluation
@@ -75,7 +101,7 @@ options:
             The level representing a positive result for the test under evaluation.
 
     - name: goldNegative
-      title: Disease absent level
+      title: Reference negative level
       type: Level
       variable: (gold)
       description:
@@ -125,14 +151,14 @@ options:
       title: Population disease prevalence
       type: Number
       default: 0.300
-      min: 0.001
-      max: 0.999
+      min: 0.000000001
+      max: 0.999999999
       description:
           ui: >
-            Known disease prevalence in the target population, as a proportion from 0.001 to 0.999.
+            Known disease prevalence in the target population, as a proportion strictly between 0 and 1.
             This affects post-test probabilities and predictive values.
           R: >
-            Population disease prevalence as a proportion between 0.001 and 0.999.
+            Population disease prevalence as a proportion strictly between 0 and 1.
 
 
     - name: od
@@ -277,5 +303,30 @@ options:
             Output variable to save classification results to the dataset.
 
 
+
+    - name: showValidationContext
+      title: Validation context
+      type: Bool
+      default: false
+    - name: cohortRole
+      title: Cohort role
+      type: String
+      default: ''
+    - name: samplingDesign
+      title: Sampling design
+      type: String
+      default: ''
+    - name: thresholdSource
+      title: Threshold source
+      type: String
+      default: ''
+    - name: modelVersion
+      title: Model version
+      type: String
+      default: ''
+    - name: analysisUnit
+      title: Unit of observation
+      type: String
+      default: slide
 
 ...

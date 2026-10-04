@@ -1,10 +1,10 @@
 ---
 name:  jjwithinstats
 title: Box-Violin Plots to Compare Within Groups
-menuGroup: JJStatsPlot
+menuGroup: JJStatsPlotT
 menuSubgroup: 'Categorical vs Continuous'
 menuSubtitle: Repeated Continuous Measurements
-version: '1.0.81'
+version: '1.0.83'
 jas: '1.2'
 
 
@@ -246,6 +246,83 @@ options:
         - title: none
           name: none
       default: holm
+
+    - name: pairedEffects
+      title: Paired changes table
+      type: Bool
+      default: false
+      description:
+          R: >
+            Report changes as the later selected measurement minus the earlier one.
+            Each row must be an independent case; do not stack multiple readers of
+            the same cases. Uses the same complete cases across all selected
+            measurements as the plots. Confidence intervals are pointwise.
+
+    - name: pairedEstimator
+      title: Change estimate
+      type: List
+      options:
+        - name: mean
+          title: Mean paired change
+        - name: median
+          title: Median paired change
+        - name: hodges_lehmann
+          title: Hodges-Lehmann shift
+      default: mean
+      description:
+          R: >
+            Mean or median of the within-case differences, or their Hodges-Lehmann
+            pseudomedian (median Walsh average). The pseudomedian is not generally
+            the median difference; its location-shift interpretation requires
+            symmetric differences.
+
+    - name: pairedCIMethod
+      title: Change confidence intervals
+      type: List
+      options:
+        - name: bootstrap
+          title: Paired bootstrap (percentile)
+        - name: standard
+          title: Estimator-specific interval
+      default: bootstrap
+      description:
+          R: >
+            Bootstrap resamples complete independent case rows. Estimator-specific
+            intervals use a t interval for the mean and the normal-approximation
+            signed-rank interval for Hodges-Lehmann; the median still uses the
+            paired percentile bootstrap. Constant resampling distributions do not
+            produce a confidence interval. All intervals use Confidence level.
+
+    - name: pairedBootstrap
+      title: Bootstrap samples
+      type: Integer
+      min: 200
+      max: 10000
+      default: 2000
+      description:
+          R: >
+            Number of case-row resamples for paired change intervals. Uses Random seed
+            without changing the caller's random-number stream.
+
+    - name: pairedUnits
+      title: Measurement units
+      type: String
+      default: ''
+      description:
+          R: >
+            Units shared by the selected measurements, for example seconds.
+
+    - name: pairedTimeRatios
+      title: Geometric mean of paired time ratios
+      type: Bool
+      default: false
+      description:
+          R: >
+            For strictly positive measurements, report exp(mean(log(later) -
+            log(earlier))), with an interval on the log scale transformed back.
+            This is the geometric mean of within-case ratios, not the ratio of
+            arithmetic means. A value below 1 means the later measurement is
+            shorter. Ratios are withheld for a contrast containing nonpositive times.
 
     - name: effsizetype
       title: 'Effect size for parametric tests'

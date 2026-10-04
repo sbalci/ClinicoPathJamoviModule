@@ -1,5 +1,86 @@
 # ClinicoPath News
 
+## Unreleased — rare-disease AI validation and workload
+
+- Correct `psychopdaROC` PR-AUC endpoints using a shared tie-aware helper; distinguish
+  average precision from trapezoidal PR area. Repair the draft PR method choices and
+  implement a reproducible paired model-swap permutation comparison.
+- Separate fixed score cutoffs, target prevalence and utility thresholds in `enhancedROC`.
+  Add observed/projected workload counts, rare-prevalence scenarios, and explicit units.
+  Legacy prevalence-as-cutoff behavior is replaced; specify the intended cutoffs when
+  revisiting saved impact analyses. Inverse net benefit is no longer labeled a test count.
+- Add a dedicated frozen-model validation report with explicit reference mapping, patient
+  and partition audits, fixed-site patient bootstrap intervals and paired score comparisons.
+  Bootstrap intervals are approximate; degenerate intervals are unavailable, and sparse-event
+  or unequal-cluster undercoverage remains documented. Optional ID arguments default to NULL.
+- Add aggregate workload to `decisioncalculator`, context tables to `decision` and
+  `decisioncompare`, and conditional zero-miss precision planning to `diagnosticsamplesize`.
+  Prevalence controls now accept values below 0.1%. Edited analyses remain in testing routes.
+
+## Unreleased — explicit binary mapping in `decisioncompare` (module 1.0.81.01, analysis 1.1.0)
+
+- Require distinct, explicit positive and negative levels for the reference and every selected
+  test, including binary variables, in all four reference modes. Negative selectors are always
+  enabled when their variable is selected. Automatic one-versus-rest recoding has been removed.
+- Additional observed levels now stop analysis unless **Exclude other observed levels** is
+  selected. Missing mappings never disable exclusion silently. The new level mapping table
+  displays selected labels, other labels and counts, and missing counts; exclusions are
+  accompanied by a warning that estimates are conditional on determinate results.
+- Existing saved analyses and R calls that relied on implicit negative levels must select
+  negative levels before recalculation. Existing explicitly mapped binary analyses retain
+  their estimates. Multilevel analyses require explicit exclusion or prior recoding, so their
+  previous one-versus-rest results cannot silently turn into selected-pair results.
+- Release check: in Expert consensus and Comparative method modes, a **Prior probability**
+  left ticked from disease mode no longer adds a PPV/NPV notice or blocks the **95 percent CI**
+  checkbox. A ticked CI or prevalence box can always be unticked, so switching reference type
+  can no longer disable both. Paired agreement p-values use the standard p-value format, and the
+  new comparator, level-mapping and reference tables are translated into Turkish.
+- Release check, second pass:
+  - **Level selectors.** They start empty instead of on the first level, so a mapping is never
+    chosen silently, and a mapping failure now carries one clear notice title.
+  - **Expert consensus / Comparative method.** These modes now:
+    - warn when PPA or NPA rests on fewer than 30 cases;
+    - stop when a test has no determinate pair;
+    - report missing results and excluded other levels separately;
+    - list strata in their level order and report missing stratifier values.
+  - **Comparator statistics and plots.**
+    - The Holm adjustment covers only tests with discordant pairs, as in disease mode.
+    - The radar plot draws a closed outline instead of a misdrawn filled area.
+    - Metrics that cannot be estimated are named on the plots.
+    - The report rounds half-up like the tables.
+  - **Validation context.**
+    - The unit of observation is no longer pre-filled as "slide".
+    - The reference interpretation is shown as a readable label, and empty fields read
+      "Not specified".
+  - **Prevalence.** Prevalences below 0.1% are now accepted. The report shows enough decimals
+    that they never read as 0.0% or 100.0%.
+  - **Other fixes.**
+    - Labels starting with "<" stay visible in the tables.
+    - A stratifier that is the reference or one of the tests is rejected.
+    - Free-text fields export as valid R syntax.
+    - A single selected test now prompts for a second test.
+    - The dataset help-page examples pass explicit negative levels.
+    - The rater example runs in Expert consensus mode.
+
+## Unreleased — comparator agreement and reader studies
+
+- `decision`, `decisioncompare`, and `pathagreement` now let users declare a disease
+  reference, expert consensus, or comparative method. The default explicitly identifies an
+  unspecified reference interpretation; `decisioncompare` requires the explicit mapping above.
+  Consensus/method outputs use agreement terminology and suppress disease-risk reporting.
+- The binary decision engines retain their existing positive/negative selectors.
+  `pathagreement` adds separate nondiagnostic and missing-result accounting, optional
+  all-observed agreement, fixed-reader paired modality contrasts with case/patient
+  bootstrap intervals, and ordinal/adequacy transitions. Synthetic teaching examples
+  and the article's aggregate-count denominator checks accompany these testing features.
+- `jjwithinstats` adds optional paired mean, median, Hodges–Lehmann, and geometric-mean
+  ratio estimates with intervals and the existing paired-test adjustments. It is in the
+  testing menu pending release review.
+- Adjacent draft repairs cover Gamma/log GEE with ordered waves and package QIC,
+  crossed mixed-model intercepts and contrasts, supported-only ordinal mixed-model
+  output, paired-t planning, and comparator-aware precision labels. Unsupported
+  McNemar planning now explains that discordant-pair assumptions are required.
+
 ## Unreleased — `decisioncompare` integration repairs (module 1.0.81.01, analysis 1.0.84)
 
 - Align the analysis source version with the generated runtime version, preserving the

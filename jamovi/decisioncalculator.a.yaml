@@ -1,7 +1,7 @@
 ---
 name:  decisioncalculator
 title: Medical Decision Calculator
-menuGroup: meddecide
+menuGroup: meddecideT
 menuSubgroup: Decision Calculators
 menuSubtitle: Sensitivity, Specificity, PPV, NPV, ...
 version: '1.0.83'
@@ -96,15 +96,15 @@ options:
       title: Prior Probability (prevalence)
       type: Number
       default: 0.300
-      min: 0.001
-      max: 0.999
+      min: 0.000000001
+      max: 0.999999999
       description:
           ui: >
             Prior probability (disease prevalence in the community).
-            Requires a value between 0.001 and 0.999, default 0.300.
+            Requires a value strictly between 0 and 1, default 0.300.
           R: >
             Prior probability (disease prevalence in the community).
-            Requires a value between 0.001 and 0.999, default 0.300.
+            Requires a value strictly between 0 and 1, default 0.300.
 
 
 
@@ -279,5 +279,24 @@ options:
           ui: Reference-positive participants testing negative in illustrative scenario 2.
           R: False-negative frequency for illustrative scenario 2.
 
+
+    - name: showWorkload
+      title: Observed and projected workload
+      type: Bool
+      default: false
+    - name: workloadPopulationSize
+      title: Target population size
+      type: Integer
+      default: 1000
+      min: 1
+      max: 1000000000
+    - name: prevalenceScenarios
+      title: Target prevalences (comma-separated proportions)
+      type: String
+      default: 0.0001,0.001,0.01
+    - name: analysisUnit
+      title: Unit of observation
+      type: String
+      default: slide
 
 ...

@@ -24,7 +24,7 @@ test_that("precisionrecall works with basic inputs", {
       outcome = 'outcome',
       positiveClass = 'Pos',
       scores = c('scores1', 'scores2'),
-      interpolation = 'nonlinear',
+      interpolation = 'linear',
       showBaseline = TRUE,
       aucMethod = 'trapezoid',
       ci = FALSE,

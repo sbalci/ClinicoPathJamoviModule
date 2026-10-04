@@ -7,13 +7,6 @@ items:
     - name: instructions
       title: 'Analysis Instructions'
       type: Html
-      visible: true
-
-    - name: modelFitTable
-      title: 'Model Fit'
-      type: Table
-      visible: (modelFit)
-      rows: 1
       clearWith:
         - dep
         - fixedFactors
@@ -21,6 +14,36 @@ items:
         - randomTerms
         - link
         - threshold
+        - propOddsTest
+        - oddsRatios
+        - confInt
+        - confLevel
+        - randomEffectsTable
+        - thresholdsTable
+        - modelFit
+        - conditionMeans
+      visible: true
+
+    - name: modelFitTable
+      title: 'Model Fit'
+      type: Table
+      clearWith:
+        - dep
+        - fixedFactors
+        - fixedCovs
+        - randomTerms
+        - link
+        - threshold
+        - propOddsTest
+        - oddsRatios
+        - confInt
+        - confLevel
+        - randomEffectsTable
+        - thresholdsTable
+        - modelFit
+        - conditionMeans
+      visible: (modelFit)
+      rows: 0
       columns:
         - name: stat
           title: 'Statistic'
@@ -28,13 +51,11 @@ items:
         - name: value
           title: 'Value'
           type: number
-          format: zto:3
+          format: zto,dp:3
 
     - name: fixedEffects
       title: 'Fixed Effects'
       type: Table
-      visible: true
-      rows: 1
       clearWith:
         - dep
         - fixedFactors
@@ -42,6 +63,16 @@ items:
         - randomTerms
         - link
         - threshold
+        - propOddsTest
+        - oddsRatios
+        - confInt
+        - confLevel
+        - randomEffectsTable
+        - thresholdsTable
+        - modelFit
+        - conditionMeans
+      visible: true
+      rows: 0
       columns:
         - name: term
           title: 'Term'
@@ -49,15 +80,15 @@ items:
         - name: estimate
           title: 'Estimate'
           type: number
-          format: zto:4
+          format: zto,dp:4
         - name: se
           title: 'SE'
           type: number
-          format: zto:4
+          format: zto,dp:4
         - name: z
           title: 'z'
           type: number
-          format: zto:3
+          format: zto,dp:3
         - name: p
           title: 'p'
           type: number
@@ -65,24 +96,22 @@ items:
         - name: or
           title: 'OR'
           type: number
-          format: zto:3
-          visible: (oddsRatios)
+          format: zto,dp:3
+          visible: (oddsRatios && link:logit)
         - name: ciLower
           title: 'CI Lower'
           type: number
-          format: zto:3
+          format: zto,dp:3
           visible: (confInt)
         - name: ciUpper
           title: 'CI Upper'
           type: number
-          format: zto:3
+          format: zto,dp:3
           visible: (confInt)
 
     - name: thresholds
       title: 'Threshold Coefficients'
       type: Table
-      visible: (thresholdsTable)
-      rows: 1
       clearWith:
         - dep
         - fixedFactors
@@ -90,6 +119,16 @@ items:
         - randomTerms
         - link
         - threshold
+        - propOddsTest
+        - oddsRatios
+        - confInt
+        - confLevel
+        - randomEffectsTable
+        - thresholdsTable
+        - modelFit
+        - conditionMeans
+      visible: (thresholdsTable)
+      rows: 0
       columns:
         - name: threshold
           title: 'Threshold'
@@ -97,15 +136,15 @@ items:
         - name: estimate
           title: 'Estimate'
           type: number
-          format: zto:4
+          format: zto,dp:4
         - name: se
           title: 'SE'
           type: number
-          format: zto:4
+          format: zto,dp:4
         - name: z
           title: 'z'
           type: number
-          format: zto:3
+          format: zto,dp:3
         - name: p
           title: 'p'
           type: number
@@ -114,8 +153,6 @@ items:
     - name: randomEffects
       title: 'Random Effects'
       type: Table
-      visible: (randomEffectsTable)
-      rows: 1
       clearWith:
         - dep
         - fixedFactors
@@ -123,6 +160,16 @@ items:
         - randomTerms
         - link
         - threshold
+        - propOddsTest
+        - oddsRatios
+        - confInt
+        - confLevel
+        - randomEffectsTable
+        - thresholdsTable
+        - modelFit
+        - conditionMeans
+      visible: (randomEffectsTable)
+      rows: 0
       columns:
         - name: group
           title: 'Group'
@@ -130,20 +177,18 @@ items:
         - name: variance
           title: 'Variance'
           type: number
-          format: zto:4
+          format: zto,dp:4
         - name: sd
           title: 'SD'
           type: number
-          format: zto:4
+          format: zto,dp:4
         - name: nLevels
           title: 'N Levels'
           type: integer
 
     - name: propOddsTestTable
-      title: 'Proportional Odds Assumption Test'
+      title: 'Proportional-odds test availability'
       type: Table
-      visible: (propOddsTest)
-      rows: 1
       clearWith:
         - dep
         - fixedFactors
@@ -151,6 +196,16 @@ items:
         - randomTerms
         - link
         - threshold
+        - propOddsTest
+        - oddsRatios
+        - confInt
+        - confLevel
+        - randomEffectsTable
+        - thresholdsTable
+        - modelFit
+        - conditionMeans
+      visible: (propOddsTest)
+      rows: 0
       columns:
         - name: term
           title: 'Term'
@@ -158,7 +213,7 @@ items:
         - name: chisq
           title: 'Chi-Square'
           type: number
-          format: zto:3
+          format: zto,dp:3
         - name: df
           title: 'df'
           type: integer
@@ -171,10 +226,8 @@ items:
           type: text
 
     - name: conditionProbs
-      title: 'Predicted Marginal Probabilities'
+      title: 'Marginal probability availability'
       type: Table
-      visible: (conditionMeans)
-      rows: 1
       clearWith:
         - dep
         - fixedFactors
@@ -182,6 +235,16 @@ items:
         - randomTerms
         - link
         - threshold
+        - propOddsTest
+        - oddsRatios
+        - confInt
+        - confLevel
+        - randomEffectsTable
+        - thresholdsTable
+        - modelFit
+        - conditionMeans
+      visible: (conditionMeans)
+      rows: 0
       columns:
         - name: factor
           title: 'Factor'
@@ -196,6 +259,21 @@ items:
     - name: methodExplanation
       title: 'Method and Clinical Context'
       type: Html
+      clearWith:
+        - dep
+        - fixedFactors
+        - fixedCovs
+        - randomTerms
+        - link
+        - threshold
+        - propOddsTest
+        - oddsRatios
+        - confInt
+        - confLevel
+        - randomEffectsTable
+        - thresholdsTable
+        - modelFit
+        - conditionMeans
       visible: true
 
 refs:

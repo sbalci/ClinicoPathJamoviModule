@@ -1,0 +1,3 @@
+"scenario","mode","analyzed","ppa_or_sensitivity","npa_or_specificity","overall","reference_positive_given_positive","reference_negative_given_negative","pooling_warning","missing_negative_warning"
+"reference_pooled","consensus",40,0.666666666666667,0.8,0.75,0.666666666666667,0.8,FALSE,FALSE
+"reference_selected_pair","consensus",30,0.666666666666667,0.666666666666667,0.666666666666667,0.666666666666667,0.666666666666667,FALSE,FALSE

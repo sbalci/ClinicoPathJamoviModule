@@ -80,6 +80,26 @@ children:
                     name: padjustmethod
                     enable: (pairwisecomparisons)
   - type: CollapseBox
+    label: Paired Changes
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: pairedEffects
+        children:
+          - type: ComboBox
+            name: pairedEstimator
+          - type: ComboBox
+            name: pairedCIMethod
+          - type: TextBox
+            name: pairedBootstrap
+            format: number
+          - type: TextBox
+            name: pairedUnits
+            format: string
+          - type: CheckBox
+            name: pairedTimeRatios
+
+  - type: CollapseBox
     label: Plot Display
     collapsed: true
     children:

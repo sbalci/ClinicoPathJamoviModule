@@ -6,6 +6,7 @@ diagnosticsamplesizeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
+            referenceType = "disease",
             study_purpose = "diagnostic",
             target_sensitivity = 0.9,
             target_specificity = 0.9,
@@ -18,7 +19,9 @@ diagnosticsamplesizeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
             show_references = FALSE,
             show_comparison_table = FALSE,
             comparison_prevalences = "0.05, 0.10, 0.20, 0.30, 0.50",
-            show_method_comparison = FALSE, ...) {
+            show_method_comparison = FALSE,
+            zeroMissPlanning = FALSE,
+            minimumSensitivityBound = 0.95, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -26,6 +29,14 @@ diagnosticsamplesizeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
                 requiresData=FALSE,
                 ...)
 
+            private$..referenceType <- jmvcore::OptionList$new(
+                "referenceType",
+                referenceType,
+                options=list(
+                    "disease",
+                    "consensus",
+                    "method"),
+                default="disease")
             private$..study_purpose <- jmvcore::OptionList$new(
                 "study_purpose",
                 study_purpose,
@@ -49,8 +60,8 @@ diagnosticsamplesizeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
             private$..prevalence <- jmvcore::OptionNumber$new(
                 "prevalence",
                 prevalence,
-                min=0.01,
-                max=0.99,
+                min=1e-9,
+                max=0.999999999,
                 default=0.1)
             private$..ci_width <- jmvcore::OptionNumber$new(
                 "ci_width",
@@ -94,7 +105,18 @@ diagnosticsamplesizeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
                 "show_method_comparison",
                 show_method_comparison,
                 default=FALSE)
+            private$..zeroMissPlanning <- jmvcore::OptionBool$new(
+                "zeroMissPlanning",
+                zeroMissPlanning,
+                default=FALSE)
+            private$..minimumSensitivityBound <- jmvcore::OptionNumber$new(
+                "minimumSensitivityBound",
+                minimumSensitivityBound,
+                default=0.95,
+                min=0.5,
+                max=0.999999)
 
+            self$.addOption(private$..referenceType)
             self$.addOption(private$..study_purpose)
             self$.addOption(private$..target_sensitivity)
             self$.addOption(private$..target_specificity)
@@ -108,8 +130,11 @@ diagnosticsamplesizeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
             self$.addOption(private$..show_comparison_table)
             self$.addOption(private$..comparison_prevalences)
             self$.addOption(private$..show_method_comparison)
+            self$.addOption(private$..zeroMissPlanning)
+            self$.addOption(private$..minimumSensitivityBound)
         }),
     active = list(
+        referenceType = function() private$..referenceType$value,
         study_purpose = function() private$..study_purpose$value,
         target_sensitivity = function() private$..target_sensitivity$value,
         target_specificity = function() private$..target_specificity$value,
@@ -122,8 +147,11 @@ diagnosticsamplesizeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
         show_references = function() private$..show_references$value,
         show_comparison_table = function() private$..show_comparison_table$value,
         comparison_prevalences = function() private$..comparison_prevalences$value,
-        show_method_comparison = function() private$..show_method_comparison$value),
+        show_method_comparison = function() private$..show_method_comparison$value,
+        zeroMissPlanning = function() private$..zeroMissPlanning$value,
+        minimumSensitivityBound = function() private$..minimumSensitivityBound$value),
     private = list(
+        ..referenceType = NA,
         ..study_purpose = NA,
         ..target_sensitivity = NA,
         ..target_specificity = NA,
@@ -136,7 +164,9 @@ diagnosticsamplesizeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
         ..show_references = NA,
         ..show_comparison_table = NA,
         ..comparison_prevalences = NA,
-        ..show_method_comparison = NA)
+        ..show_method_comparison = NA,
+        ..zeroMissPlanning = NA,
+        ..minimumSensitivityBound = NA)
 )
 
 diagnosticsamplesizeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -148,7 +178,8 @@ diagnosticsamplesizeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
         prevalence_table = function() private$.items[["prevalence_table"]],
         method_comparison = function() private$.items[["method_comparison"]],
         methodology = function() private$.items[["methodology"]],
-        references = function() private$.items[["references"]]),
+        references = function() private$.items[["references"]],
+        zeroMissPlan = function() private$.items[["zeroMissPlan"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -162,6 +193,21 @@ diagnosticsamplesizeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
                 options=options,
                 name="sample_size_summary",
                 title="Sample Size Calculation Results",
+                clearWith=list(
+                    "referenceType",
+                    "study_purpose",
+                    "target_sensitivity",
+                    "target_specificity",
+                    "prevalence",
+                    "ci_width",
+                    "alpha",
+                    "nonresponse_rate",
+                    "show_statement",
+                    "show_methodology",
+                    "show_references",
+                    "show_comparison_table",
+                    "comparison_prevalences",
+                    "show_method_comparison"),
                 rows=0,
                 columns=list(
                     list(
@@ -174,7 +220,7 @@ diagnosticsamplesizeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
                         `type`="number"),
                     list(
                         `name`="n_cases", 
-                        `title`="N (Cases/Controls)", 
+                        `title`="N in reference stratum", 
                         `type`="integer"),
                     list(
                         `name`="n_total", 
@@ -184,11 +230,41 @@ diagnosticsamplesizeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
                 options=options,
                 name="sample_size_statement",
                 title="Sample Size Justification Statement",
+                clearWith=list(
+                    "referenceType",
+                    "study_purpose",
+                    "target_sensitivity",
+                    "target_specificity",
+                    "prevalence",
+                    "ci_width",
+                    "alpha",
+                    "nonresponse_rate",
+                    "show_statement",
+                    "show_methodology",
+                    "show_references",
+                    "show_comparison_table",
+                    "comparison_prevalences",
+                    "show_method_comparison"),
                 visible="(show_statement)"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="prevalence_table",
-                title="Sample Size Across Prevalence Levels",
+                title="Sample Size Across Reference-Positive Proportions",
+                clearWith=list(
+                    "referenceType",
+                    "study_purpose",
+                    "target_sensitivity",
+                    "target_specificity",
+                    "prevalence",
+                    "ci_width",
+                    "alpha",
+                    "nonresponse_rate",
+                    "show_statement",
+                    "show_methodology",
+                    "show_references",
+                    "show_comparison_table",
+                    "comparison_prevalences",
+                    "show_method_comparison"),
                 visible="(show_comparison_table)",
                 rows=0,
                 columns=list(
@@ -212,6 +288,21 @@ diagnosticsamplesizeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
                 options=options,
                 name="method_comparison",
                 title="CI Method Comparison",
+                clearWith=list(
+                    "referenceType",
+                    "study_purpose",
+                    "target_sensitivity",
+                    "target_specificity",
+                    "prevalence",
+                    "ci_width",
+                    "alpha",
+                    "nonresponse_rate",
+                    "show_statement",
+                    "show_methodology",
+                    "show_references",
+                    "show_comparison_table",
+                    "comparison_prevalences",
+                    "show_method_comparison"),
                 visible="(show_method_comparison)",
                 rows=0,
                 columns=list(
@@ -239,12 +330,69 @@ diagnosticsamplesizeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
                 options=options,
                 name="methodology",
                 title="Methodology",
+                clearWith=list(
+                    "referenceType",
+                    "study_purpose",
+                    "target_sensitivity",
+                    "target_specificity",
+                    "prevalence",
+                    "ci_width",
+                    "alpha",
+                    "nonresponse_rate",
+                    "show_statement",
+                    "show_methodology",
+                    "show_references",
+                    "show_comparison_table",
+                    "comparison_prevalences",
+                    "show_method_comparison"),
                 visible="(show_methodology)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="references",
                 title="References",
-                visible="(show_references)"))}))
+                clearWith=list(
+                    "referenceType",
+                    "study_purpose",
+                    "target_sensitivity",
+                    "target_specificity",
+                    "prevalence",
+                    "ci_width",
+                    "alpha",
+                    "nonresponse_rate",
+                    "show_statement",
+                    "show_methodology",
+                    "show_references",
+                    "show_comparison_table",
+                    "comparison_prevalences",
+                    "show_method_comparison"),
+                visible="(show_references)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="zeroMissPlan",
+                title="Conditional zero-miss precision plan",
+                visible="(zeroMissPlanning)",
+                clearWith=list(
+                    "zeroMissPlanning",
+                    "minimumSensitivityBound",
+                    "alpha",
+                    "prevalence",
+                    "referenceType"),
+                columns=list(
+                    list(
+                        `name`="positives", 
+                        `title`="Independent positives", 
+                        `type`="number", 
+                        `format`="dp:6"),
+                    list(
+                        `name`="lower", 
+                        `title`="Exact lower confidence bound", 
+                        `type`="number", 
+                        `format`="dp:6"),
+                    list(
+                        `name`="total", 
+                        `title`="Expected recruitment at supplied prevalence", 
+                        `type`="number", 
+                        `format`="dp:6"))))}))
 
 diagnosticsamplesizeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "diagnosticsamplesizeBase",
@@ -270,6 +418,7 @@ diagnosticsamplesizeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
 #' Diagnostic Test Sample Size Calculator
 #'
 #' 
+#' @param referenceType .
 #' @param study_purpose .
 #' @param target_sensitivity .
 #' @param target_specificity .
@@ -283,6 +432,8 @@ diagnosticsamplesizeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
 #' @param show_comparison_table .
 #' @param comparison_prevalences .
 #' @param show_method_comparison .
+#' @param zeroMissPlanning .
+#' @param minimumSensitivityBound .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$sample_size_summary} \tab \tab \tab \tab \tab a table \cr
@@ -291,6 +442,7 @@ diagnosticsamplesizeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
 #'   \code{results$method_comparison} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$methodology} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$references} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$zeroMissPlan} \tab \tab \tab \tab \tab a table \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -301,6 +453,7 @@ diagnosticsamplesizeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
 #'
 #' @export
 diagnosticsamplesize <- function(
+    referenceType = "disease",
     study_purpose = "diagnostic",
     target_sensitivity = 0.9,
     target_specificity = 0.9,
@@ -313,13 +466,16 @@ diagnosticsamplesize <- function(
     show_references = FALSE,
     show_comparison_table = FALSE,
     comparison_prevalences = "0.05, 0.10, 0.20, 0.30, 0.50",
-    show_method_comparison = FALSE) {
+    show_method_comparison = FALSE,
+    zeroMissPlanning = FALSE,
+    minimumSensitivityBound = 0.95) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("diagnosticsamplesize requires jmvcore to be installed (restart may be required)")
 
 
     options <- diagnosticsamplesizeOptions$new(
+        referenceType = referenceType,
         study_purpose = study_purpose,
         target_sensitivity = target_sensitivity,
         target_specificity = target_specificity,
@@ -332,7 +488,9 @@ diagnosticsamplesize <- function(
         show_references = show_references,
         show_comparison_table = show_comparison_table,
         comparison_prevalences = comparison_prevalences,
-        show_method_comparison = show_method_comparison)
+        show_method_comparison = show_method_comparison,
+        zeroMissPlanning = zeroMissPlanning,
+        minimumSensitivityBound = minimumSensitivityBound)
 
     analysis <- diagnosticsamplesizeClass$new(
         options = options,

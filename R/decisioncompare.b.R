@@ -83,6 +83,14 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     length(value) == 1L && nzchar(value)) {
                     return(paste0(option$name, " = ", encodeString(value, quote = '"')))
                 }
+                # Free-text options: jmvcore does not escape quotes or backslashes, so
+                # `Consensus of 3 "expert" pathologists` would export unparseable syntax.
+                free_text <- c("referenceDescription", "targetDefinition", "cohortRole",
+                               "samplingDesign", "thresholdSource", "modelVersion", "analysisUnit")
+                if (option$name %in% free_text && is.character(value) && length(value) == 1L &&
+                    nzchar(value) && !identical(value, option$default)) {
+                    return(paste0(option$name, " = ", encodeString(value, quote = '"')))
+                }
                 super$.sourcifyOption(option)
             },
 
@@ -331,6 +339,89 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
             # 81.3 for the same value (IR-decisioncompare-04). Decisions use the unrounded value.
             .halfUp = function(x, digits) sign(x) * floor(abs(x) * 10^digits + 0.5) / 10^digits,
             .halfUp1 = function(x) private$.halfUp(x, 1L),
+            # Translated text for the shared .diag* helpers (they cannot call .() themselves).
+            .diagText = function() {
+                utils::modifyList(.diagText, list(
+                    ref_interpretation = jmvcore::.("Reference interpretation"),
+                    ref_description = jmvcore::.("Comparator description"),
+                    ref_target = jmvcore::.("Target definition"),
+                    ref_rules = jmvcore::.("Positive and negative rules"),
+                    ref_population = jmvcore::.("Analysis population"),
+                    ref_unit = jmvcore::.("Sampling unit"),
+                    ref_unit_value = jmvcore::.("Independent cases; repeated reads require a reader/cluster analysis"),
+                    not_specified = jmvcore::.("Not specified"),
+                    mode_legacy = jmvcore::.("Not specified"),
+                    mode_disease = jmvcore::.("Disease reference"),
+                    mode_consensus = jmvcore::.("Expert consensus"),
+                    mode_method = jmvcore::.("Comparative method"),
+                    note_legacy = jmvcore::.("Reference interpretation is not specified. Existing diagnostic wording is retained for compatibility; it requires a suitable disease reference. Choose consensus or comparative method when measuring agreement."),
+                    note_comparator = jmvcore::.("Agreement with this comparator does not establish disease status. PPA/NPA condition on the comparator; symmetric positive/negative specific agreement uses different denominators. Population-prevalence adjustment and disease-risk outputs are not used."),
+                    note_disease = jmvcore::.("Diagnostic interpretation assumes the selected reference establishes the target disease status."),
+                    metric_ppa = jmvcore::.("Positive percent agreement (PPA)"),
+                    metric_npa = jmvcore::.("Negative percent agreement (NPA)"),
+                    metric_opa = jmvcore::.("Overall percent agreement (OPA)"),
+                    metric_rpos = jmvcore::.("Reference positive given positive call"),
+                    metric_rneg = jmvcore::.("Reference negative given negative call"),
+                    metric_psa = jmvcore::.("Positive specific agreement (symmetric)"),
+                    metric_nsa = jmvcore::.("Negative specific agreement (symmetric)"),
+                    method_not_requested = jmvcore::.("Not requested"),
+                    method_no_denominator = jmvcore::.("No eligible denominator"),
+                    method_exact = jmvcore::.("Exact binomial (independent cases)"),
+                    method_symmetric = jmvcore::.("Symmetric ratio; binomial CI not applicable"),
+                    call_positive = jmvcore::.("Positive"),
+                    call_negative = jmvcore::.("Negative"),
+                    note_denominators = jmvcore::.("PPA/NPA condition on reference-positive/reference-negative cases. Reverse conditional agreement is not a patient's probability of disease. Symmetric specific agreement is not PPA/NPA. All binary estimates use determinate reference/test pairs under the displayed recoding rule."),
+                    bin_missing_positive = jmvcore::.("Select an explicit positive level. Both positive and negative levels are required; no level is inferred."),
+                    bin_missing_negative = jmvcore::.("Select an explicit negative level. Both positive and negative levels are required; no level is inferred."),
+                    bin_unavailable_positive = jmvcore::.("The positive level \"%1$s\" is not available. Available levels: %2$s."),
+                    bin_unavailable_negative = jmvcore::.("The negative level \"%1$s\" is not available. Available levels: %2$s."),
+                    bin_identical = jmvcore::.("Choose different positive and negative levels."),
+                    bin_other = jmvcore::.("Observed levels outside the selected positive/negative pair: %s. Select 'Exclude other observed levels' to omit these results, or explicitly recode the variable before analysis. Other levels are never treated as negative."),
+                    report_rate = jmvcore::.("%1$.1f%% (%2$d/%3$d)"),
+                    report_unavailable = jmvcore::.("unavailable (denominator 0)"),
+                    report_test = jmvcore::.("%1$s: PPA %2$s, NPA %3$s; %4$d analyzed cases, %5$d excluded."),
+                    report_close = jmvcore::.("These quantities describe agreement with the selected comparator. The tables state the denominators and interval methods. Differences between tests require paired comparisons on common cases."),
+                    plot_test = jmvcore::.("Test"),
+                    plot_row = jmvcore::.("Selected row"),
+                    plot_call = jmvcore::.("Call / reference"),
+                    plot_agreement = jmvcore::.("Agreement"),
+                    plot_gaps = jmvcore::.("Not estimable (denominator 0), not drawn: %s"),
+                    class_pos_match = jmvcore::.("Positive match"),
+                    class_pos_call = jmvcore::.("Positive call / negative reference"),
+                    class_neg_call = jmvcore::.("Negative call / positive reference"),
+                    class_neg_match = jmvcore::.("Negative match"),
+                    class_excluded = jmvcore::.("Excluded")
+                ))
+            },
+
+            .dvText = function() {
+                list(
+                    cohortRole = jmvcore::.("Cohort role"),
+                    samplingDesign = jmvcore::.("Sampling design"),
+                    thresholdSource = jmvcore::.("Threshold source"),
+                    modelVersion = jmvcore::.("Model version"),
+                    analysisUnit = jmvcore::.("Unit of observation"),
+                    referenceType = jmvcore::.("Reference interpretation"),
+                    referenceDescription = jmvcore::.("Comparator description"),
+                    not_specified = jmvcore::.("Not specified"),
+                    legacy = jmvcore::.("Not specified"),
+                    disease = jmvcore::.("Disease reference"),
+                    consensus = jmvcore::.("Expert consensus"),
+                    method = jmvcore::.("Comparative method"),
+                    note = jmvcore::.("User-declared context does not verify independence or external validation. Mapping and exclusion ledgers define the analyzed pairs; unknown levels must not silently become negative.")
+                )
+            },
+
+            # Percent text for a proportion: one decimal, unless that would print a value strictly
+            # between 0 and 1 as 0.0 or 100.0 (rare-disease prevalence, PPV at such a prevalence);
+            # then two significant digits of the distance to the edge.
+            .pctAdaptive = function(p) {
+                pct <- p * 100
+                edge <- min(pct, 100 - pct)
+                digits <- if (!is.finite(edge) || edge <= 0 || edge >= 0.05) 1L
+                    else min(10L, 1L - as.integer(floor(log10(edge))))
+                formatC(private$.halfUp(pct, digits), format = "f", digits = digits)
+            },
 
             .formatP = function(p) {
                 if (length(p) != 1L || is.na(p)) return("= NA")
@@ -433,13 +524,168 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
             .init = function() {
                 # Initialize table rows for dynamic population
                 private$.initializeTables()
-
+                # Option-only tables get their rows here so they never render as an empty
+                # header that then restructures; .run()/.validateMappings() refill the same keys.
+                .dvProvenance(self$results$validationContext, self$options, private$.dvText())
+                .diagReferenceDefinition(self$results, self$options,
+                    jmvcore::.("Select reference and test levels; binary recoding is displayed after validation"),
+                    jmvcore::.("Per-test available binary pairs; differences use common cases"),
+                    private$.diagText())
             },
             # Main analysis orchestrator - refactored for clarity
+            .runComparator = function() {
+                tests <- private$.getTestVariables()
+                positives <- private$.getTestPositives()
+                negatives <- private$.getTestNegatives()
+                reference <- private$.mapBinary(self$data[[self$options$gold]],
+                    self$options$goldPositive, private$.opt("goldNegative"), self$options$gold)
+                comparisons <- stats::setNames(lapply(tests, function(nm) list(
+                    call = private$.mapBinary(self$data[[nm]], positives[[nm]],
+                        negatives[[nm]], nm), reference = reference)), tests)
+                # A test with no determinate pair stops, as on the disease path, before any
+                # comparator table is filled.
+                n_pairs <- vapply(comparisons, function(z)
+                    sum(!is.na(z$call) & !is.na(z$reference)), integer(1))
+                if (any(n_pairs == 0L)) {
+                    private$.addNotice(type = "ERROR",
+                        title = jmvcore::.("No Determinate Cases"),
+                        content = .fmt(jmvcore::.("No cases remain for {test} after applying the selected positive and negative levels."),
+                            test = paste(names(n_pairs)[n_pairs == 0L], collapse = ", ")))
+                    stop(jmvcore::.("Validation failed"), call. = FALSE)
+                }
+                text <- private$.diagText()
+                summaries <- .diagFillComparator(self$results, comparisons, self$options$ci, text)
+                gold_missing <- is.na(as.character(self$data[[self$options$gold]]))
+                for (i in seq_along(tests)) {
+                    nm <- tests[i]
+                    k <- summaries[[nm]]$counts
+                    positives_n <- k[["a"]] + k[["c"]]
+                    negatives_n <- k[["b"]] + k[["d"]]
+                    if (min(positives_n, negatives_n) < 30)
+                        private$.addNotice(type = "STRONG_WARNING",
+                            title = jmvcore::.("Sparse Comparator Class"),
+                            content = if (isTRUE(self$options$ci))
+                                .fmt(jmvcore::.("{test}: PPA rests on {positives} comparator-positive cases and NPA on {negatives} comparator-negative cases. A percentage computed on a denominator this small is far less precise than the overall analyzed N suggests. Read the 95% CI in the Agreement with comparator table before quoting either figure."),
+                                    test = nm, positives = positives_n, negatives = negatives_n)
+                            else
+                                .fmt(jmvcore::.("{test}: PPA rests on {positives} comparator-positive cases and NPA on {negatives} comparator-negative cases. A percentage computed on a denominator this small is far less precise than the overall analyzed N suggests. Enable the 95% CI option and read the interval before quoting either figure."),
+                                    test = nm, positives = positives_n, negatives = negatives_n))
+                    # Split the excluded pairs: a missing result versus an excluded other level.
+                    missing_n <- sum(gold_missing | is.na(as.character(self$data[[nm]])))
+                    self$results$comparatorPopulation$setRow(rowKey = i, values = list(
+                        missing = missing_n, other = summaries[[nm]]$excluded - missing_n))
+                }
+                self$results$comparatorReport$setContent(.diagComparatorReport(summaries, text))
+                if (self$options$statComp) {
+                    rows <- list()
+                    informative <- logical(0)
+                    for (pair in utils::combn(tests, 2L, simplify = FALSE)) {
+                        x <- comparisons[[pair[1]]]$call
+                        y <- comparisons[[pair[2]]]$call
+                        ok <- !is.na(x) & !is.na(y) & !is.na(reference)
+                        for (metric in c("PPA", "NPA", "OPA")) {
+                            take <- ok & if (metric == "PPA") reference else
+                                if (metric == "NPA") !reference else TRUE
+                            take[is.na(take)] <- FALSE
+                            a <- x[take]; b <- y[take]
+                            if (metric == "NPA") { a <- !a; b <- !b }
+                            if (metric == "OPA") {
+                                a <- a == reference[take]; b <- b == reference[take]
+                            }
+                            d <- pairedProportionDifference(a, b)
+                            row <- list(comparison = .diagCellText(sprintf(jmvcore::.("%1$s minus %2$s"),
+                                    pair[1], pair[2])),
+                                metric = metric, n = sum(take), diff = NULL, lower = NULL,
+                                upper = NULL, p = NULL, adjusted = NULL,
+                                method = jmvcore::.("No eligible paired cases"))
+                            if (!is.null(d)) {
+                                discordant <- d$counts[c("x_only", "y_only")]
+                                test <- private$.mcnemarTest(discordant[1], discordant[2],
+                                    self$options$mcnemarMethod)
+                                row$diff <- d$diff
+                                if (self$options$ci) { row$lower <- d$lower; row$upper <- d$upper }
+                                row$p <- test$p.value
+                                row$method <- paste(c(test$method,
+                                    if (self$options$ci) jmvcore::.("Newcombe paired 95% CI"),
+                                    if (!sum(discordant)) jmvcore::.("no discordance: p=1 convention")),
+                                    collapse = "; ")
+                            }
+                            informative <- c(informative, !is.null(d) && sum(discordant) > 0)
+                            rows[[length(rows) + 1L]] <- row
+                        }
+                    }
+                    # Holm over the informative tests only, as the disease path does: a
+                    # no-discordance row carries p = 1 by convention and would only inflate the family.
+                    p <- vapply(rows, function(z) if (is.null(z$p)) NA_real_ else z$p, numeric(1))
+                    adjusted <- rep(NA_real_, length(p))
+                    if (any(informative))
+                        adjusted[informative] <- stats::p.adjust(p[informative], "holm")
+                    for (i in seq_along(rows)) {
+                        rows[[i]]$adjusted <- if (is.na(adjusted[i])) NULL else adjusted[i]
+                        self$results$comparatorDifferences$addRow(rowKey = i, values = rows[[i]])
+                    }
+                    self$results$comparatorDifferences$setNote("paired", jmvcore::.("First minus second on common cases. PPA uses reference-positive cases; NPA uses reference-negative cases; OPA compares agreement with the reference. Holm adjustment covers the displayed pair/metric tests that have discordant pairs; a test without discordance keeps p = 1 and is not adjusted. Intervals are pointwise, not multiplicity-adjusted. Independent cases are required."))
+                }
+                stratum <- private$.opt("stratify")
+                if (!is.null(stratum)) {
+                    groups <- as.character(self$data[[stratum]])
+                    strata <- private$.strataOrder(self$data[[stratum]])
+                    n_missing_stratum <- sum(is.na(groups))
+                    if (n_missing_stratum > 0)
+                        private$.addNotice(type = "INFO",
+                            title = jmvcore::.("Missing Stratifier Values"),
+                            content = .fmt(jmvcore::.("{rows} row(s) have no value for {variable}. They remain in overall per-test results but are omitted from subgroup rows."),
+                                rows = n_missing_stratum, variable = stratum))
+                    any_pairs <- FALSE
+                    for (level in strata) for (nm in tests) {
+                        take <- !is.na(groups) & groups == level
+                        m <- .diagComparatorMetrics(comparisons[[nm]]$call[take],
+                            reference[take], FALSE, text)$metrics
+                        any_pairs <- any_pairs || m$denominator[3] > 0
+                        for (i in seq_len(nrow(m))) self$results$comparatorStrata$addRow(
+                            rowKey = paste(match(level, strata), match(nm, tests), i), values =
+                            list(stratum = .diagCellText(level), test = .diagCellText(nm), metric = m$metric[i],
+                                numerator = m$numerator[i], denominator = m$denominator[i],
+                                estimate = if (is.na(m$estimate[i])) NULL else m$estimate[i]))
+                    }
+                    if (!any_pairs)
+                        private$.addNotice(type = "WARNING",
+                            title = jmvcore::.("Stratification Empty"),
+                            content = .fmt(jmvcore::.("No analyzable cases were found in any observed stratum of '{variable}'. Check subgroup values and test/reference availability."),
+                                variable = stratum))
+                }
+                states <- .diagComparatorPlotState(comparisons, summaries, text)
+                if (self$options$plot) self$results$comparatorPlot$setState(states$bar)
+                if (self$options$radarplot) self$results$comparatorRadar$setState(states$bar)
+                if (self$options$heatmap) self$results$comparatorHeatmap$setState(states$heatmap)
+                self$results$comparatorPopulation$setNote("plot", jmvcore::.("Heatmaps display at most the first 1,000 selected rows; tables use all eligible rows. Missing stratification values are omitted only from stratified results."))
+            },
+
+            .plotComparatorBar = function(image, ggtheme, ...) {
+                .diagComparatorPlot(image, ggtheme, "bar", private$.diagText())
+            },
+            .plotComparatorRadar = function(image, ggtheme, ...) {
+                .diagComparatorPlot(image, ggtheme, "radar", private$.diagText())
+            },
+            .plotComparatorHeatmap = function(image, ggtheme, ...) {
+                .diagComparatorPlot(image, ggtheme, "heatmap", private$.diagText())
+            },
+
             .run = function() {
                 # Reset per-run state so notices/flags do not accumulate or leak
                 # across successive runs when jamovi reuses the R6 instance.
                 private$.noticeList <- list()
+                self$results$levelMapping$deleteRows()
+                .diagReferenceDefinition(self$results, self$options,
+                    jmvcore::.("Select reference and test levels; binary recoding is displayed after validation"),
+                    jmvcore::.("Per-test available binary pairs; differences use common cases"),
+                    private$.diagText())
+                for (nm in c("comparatorMetrics", "comparatorCounts", "comparatorPopulation",
+                             "comparatorDifferences", "comparatorStrata"))
+                    self$results[[nm]]$deleteRows()
+                self$results$comparatorReport$setContent("")
+                for (nm in c("comparatorPlot", "comparatorRadar", "comparatorHeatmap"))
+                    self$results[[nm]]$setState(NULL)
                 private$.any_significant_comparison <- NULL
                 private$.cochran_pvalue <- NULL
                 private$.cochran_method_note <- ""
@@ -487,6 +733,15 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
 
                 # Step 1: Check if minimum required variables are selected
                 if (!private$.hasRequiredVars()) {
+                    # A reference plus one test is a common setup that would otherwise stay
+                    # silently empty; say what is missing.
+                    gold <- private$.opt("gold")
+                    if (!is.null(gold) && length(setdiff(private$.getTestVariables(), gold)) == 1L) {
+                        private$.addNotice(type = "INFO",
+                            title = jmvcore::.("Second Test Required"),
+                            content = jmvcore::.("This analysis compares two or three tests against the same reference. Select a second test variable in another test slot; for a single test use the Medical Decision analysis."))
+                        private$.renderNotices()
+                    }
                     return() # Wait for user to select required variables
                 }
 
@@ -494,6 +749,12 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     {
                         # Step 2: Comprehensive input validation
                         private$.validateInputs()
+
+                        if (.diagReferenceMode(self$options$referenceType)$comparator) {
+                            private$.runComparator()
+                            private$.renderNotices()
+                            return(invisible(NULL))
+                        }
 
                         # Step 3: Process and clean data
                         processed_data <- private$.prepareData()
@@ -616,6 +877,93 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
             },
 
 
+            # One mapping/validation path for disease and comparator analyses.
+            .mapBinary = function(values, positive, negative, variable) {
+                tryCatch(
+                    .diagComparatorBinary(values, positive, negative,
+                        self$options$excludeIndeterminate, private$.diagText()),
+                    error = function(e) {
+                        message <- paste0(variable, ": ", conditionMessage(e))
+                        # One title fits every mapping failure: a missing level, identical
+                        # levels, an unavailable level, or extra observed levels.
+                        private$.addNotice(type = "ERROR",
+                            title = jmvcore::.("Level Mapping Problem"),
+                            content = message)
+                        stop(sprintf(jmvcore::.("Validation failed: %s"), message), call. = FALSE)
+                    }
+                )
+            },
+
+            .validateMappings = function() {
+                tests <- private$.getTestVariables()
+                variables <- c(self$options$gold, tests)
+                positives <- c(list(self$options$goldPositive),
+                    unname(private$.getTestPositives()))
+                negatives <- c(list(private$.opt("goldNegative")),
+                    unname(private$.getTestNegatives()))
+                rows <- vector("list", length(variables))
+                rules <- character(length(variables))
+                # Check every variable first and report all mapping problems in one notice, so a
+                # new analysis is not fixed one variable per run.
+                problems <- character(0)
+                text <- private$.diagText()
+                for (i in seq_along(variables)) {
+                    nm <- variables[i]
+                    if (!nm %in% names(self$data))
+                        stop(sprintf(jmvcore::.("Variable not found: %s"), nm), call. = FALSE)
+                    problem <- tryCatch({
+                        .diagComparatorBinary(self$data[[nm]], positives[[i]], negatives[[i]],
+                            self$options$excludeIndeterminate, text)
+                        NULL
+                    }, error = function(e) paste0(nm, ": ", conditionMessage(e)))
+                    problems <- c(problems, problem)
+                }
+                if (length(problems)) {
+                    private$.addNotice(type = "ERROR",
+                        title = jmvcore::.("Level Mapping Problem"),
+                        content = paste(problems, collapse = " | "))
+                    stop(sprintf(jmvcore::.("Validation failed: %s"), paste(problems, collapse = " | ")),
+                        call. = FALSE)
+                }
+                for (i in seq_along(variables)) {
+                    nm <- variables[i]
+                    raw <- as.character(self$data[[nm]])
+                    other <- !is.na(raw) & !raw %in% c(positives[[i]], negatives[[i]])
+                    counts <- table(raw[other])
+                    # .diagCellText() only on displayed labels; matching above used the raw values.
+                    rows[[i]] <- list(variable = .diagCellText(nm),
+                        positive = .diagCellText(positives[[i]]),
+                        negative = .diagCellText(negatives[[i]]),
+                        positiveN = sum(raw == positives[[i]], na.rm = TRUE),
+                        negativeN = sum(raw == negatives[[i]], na.rm = TRUE),
+                        otherN = sum(other), missingN = sum(is.na(raw)),
+                        otherLevels = if (length(counts)) .diagCellText(paste0(names(counts), " (n=",
+                            as.integer(counts), ")", collapse = "; ")) else jmvcore::.("None"))
+                    # sprintf, not .fmt: .fmt rewrites braces inside values, and the rule must show
+                    # the exact level labels.
+                    rules[i] <- sprintf(jmvcore::.("%1$s: positive = %2$s; negative = %3$s"),
+                        nm, positives[[i]], negatives[[i]])
+                }
+                # Validate every mapping before publishing any result.
+                for (i in seq_along(rows))
+                    self$results$levelMapping$addRow(rowKey = i, values = rows[[i]])
+                self$results$levelMapping$setNote("policy", jmvcore::.("Positive and negative mean exactly the selected levels, not ordinal cutoffs. Other observed levels are never negative. Column counts may overlap across variables. Missing results are excluded per test; paired comparisons use common eligible cases."))
+                population <- if (self$options$excludeIndeterminate)
+                    jmvcore::.("Per-test selected positive/negative pairs; differences use common paired cases; missing results excluded; other observed levels explicitly excluded")
+                else
+                    jmvcore::.("Per-test selected positive/negative pairs; differences use common paired cases; missing results excluded")
+                if (self$options$excludeIndeterminate) {
+                    if (any(vapply(rows, function(x) x$otherN > 0L, logical(1)))) {
+                        private$.addNotice(type = "STRONG_WARNING",
+                            title = jmvcore::.("Estimates Conditional on Selected Levels"),
+                            content = jmvcore::.("Results outside the selected positive/negative pairs were excluded. Review their labels and counts in the Selected Levels and Exclusions table and report exclusions alongside performance. These estimates are conditional on determinate results, not performance on all attempted tests."))
+                    }
+                }
+                .diagReferenceDefinition(self$results, self$options,
+                    paste(rules, collapse = " | "), population, private$.diagText())
+                invisible(NULL)
+            },
+
             # Comprehensive input validation with informative error messages
             .validateInputs = function() {
                 # Check for valid data
@@ -648,9 +996,21 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     )
                     stop(jmvcore::.("Validation failed"), call. = FALSE)
                 }
+                # Stratifying by the reference or a compared test gives subgroup rows that follow
+                # from the definition (PPA 100% / NPA 0% within the test's own call), not the data.
+                stratum <- private$.opt("stratify")
+                if (!is.null(stratum) && stratum %in% c(self$options$gold, selected_tests)) {
+                    private$.addNotice(
+                        type = "ERROR",
+                        title = jmvcore::.("Stratifier Reused"),
+                        content = jmvcore::.("The stratification variable cannot also be the reference or one of the compared tests. Choose a different subgroup variable.")
+                    )
+                    stop(jmvcore::.("Validation failed"), call. = FALSE)
+                }
 
                 # Validate that positive levels are specified for selected tests
                 test_positive_pairs <- list(
+                    list(test = self$options$gold, positive = self$options$goldPositive, name = jmvcore::.("Reference")),
                     list(test = self$options$test1, positive = self$options$test1Positive, name = jmvcore::.("Test 1")),
                     list(test = self$options$test2, positive = self$options$test2Positive, name = jmvcore::.("Test 2")),
                     list(test = self$options$test3, positive = self$options$test3Positive, name = jmvcore::.("Test 3"))
@@ -659,7 +1019,8 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 missing_positives <- character(0)
                 for (pair in test_positive_pairs) {
                     if (!is.null(pair$test) && pair$test != "") {
-                        if (is.null(pair$positive) || pair$positive == "") {
+                        if (length(pair$positive) != 1L || is.na(pair$positive) ||
+                            !nzchar(pair$positive)) {
                             missing_positives <- c(missing_positives, pair$name)
                         }
                     }
@@ -674,6 +1035,13 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     )
                     stop(jmvcore::.("Validation failed"), call. = FALSE)
                 }
+
+                private$.validateMappings()
+
+                # Prevalence belongs to the disease path. Consensus/method ignore pp, which keeps
+                # its last value while its checkbox is disabled.
+                if (.diagReferenceMode(self$options$referenceType)$comparator)
+                    return(invisible(NULL))
 
                 # Validate prevalence setting
                 if (self$options$pp && (self$options$pprob <= 0 || self$options$pprob >= 1)) {
@@ -772,33 +1140,34 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     )
                 }
 
-                # Sample-size notices use the observed reference-standard denominator.
+                # Sample-size notices use only the selected reference-positive/negative levels.
                 gold_chars <- as.character(mydata[[goldVariable]])
-                n_gold_observed <- sum(!is.na(gold_chars))
-                if (n_gold_observed < 50) {
-                    very_small <- n_gold_observed < 30
+                gold_determinate <- gold_chars %in% c(goldPLevel, private$.opt("goldNegative"))
+                n_gold_eligible <- sum(gold_determinate)
+                if (n_gold_eligible < 50) {
+                    very_small <- n_gold_eligible < 30
                     # Two complete sentences rather than splicing a translated adjective
                     # into an English frame: word order differs between languages.
                     private$.addNotice(
                         type = if (very_small) "STRONG_WARNING" else "WARNING",
                         title = if (very_small) jmvcore::.("Very Small Sample Size") else jmvcore::.("Small Sample Size"),
                         content = if (very_small)
-                            .fmt(jmvcore::.("Very small observed reference-standard sample (n={n}). Confidence intervals may be wide and estimates unstable, especially when either gold-standard class is sparse. Interpret the interval widths and class-specific denominators; no universal sample-size cutoff guarantees adequate precision."), n = n_gold_observed)
+                            .fmt(jmvcore::.("Very small eligible reference-standard sample (n={n}). Confidence intervals may be wide and estimates unstable, especially when either gold-standard class is sparse. Interpret the interval widths and class-specific denominators; no universal sample-size cutoff guarantees adequate precision."), n = n_gold_eligible)
                         else
-                            .fmt(jmvcore::.("Small observed reference-standard sample (n={n}). Confidence intervals may be wide and estimates unstable, especially when either gold-standard class is sparse. Interpret the interval widths and class-specific denominators; no universal sample-size cutoff guarantees adequate precision."), n = n_gold_observed)
+                            .fmt(jmvcore::.("Small eligible reference-standard sample (n={n}). Confidence intervals may be wide and estimates unstable, especially when either gold-standard class is sparse. Interpret the interval widths and class-specific denominators; no universal sample-size cutoff guarantees adequate precision."), n = n_gold_eligible)
                     )
                 }
 
-                # Prevalence uses observed reference-standard values only.
+                # Prevalence uses the selected reference pair only.
                 n_diseased <- sum(gold_chars == goldPLevel, na.rm = TRUE)
-                prevalence <- if (n_gold_observed > 0) n_diseased / n_gold_observed else NA_real_
+                prevalence <- if (n_gold_eligible > 0) n_diseased / n_gold_eligible else NA_real_
 
                 if (!is.na(prevalence) && (prevalence < 0.05 || prevalence > 0.95)) {
                     private$.addNotice(
                         type = "STRONG_WARNING",
                         title = jmvcore::.("Extreme Disease Prevalence"),
-                        content = .fmt(jmvcore::.("Extreme disease prevalence among observed reference results: {pct}% ({diseased}/{observed} cases). PPV and NPV are highly sensitive to prevalence and may not generalize to populations with different disease rates. Sensitivity and specificity can also vary across settings and case mix."),
-                            pct = round(prevalence * 100, 1), diseased = n_diseased, observed = n_gold_observed)
+                        content = .fmt(jmvcore::.("Extreme disease prevalence among eligible reference results: {pct}% ({diseased}/{observed} cases). PPV and NPV are highly sensitive to prevalence and may not generalize to populations with different disease rates. Sensitivity and specificity can also vary across settings and case mix."),
+                            pct = private$.pctAdaptive(prevalence), diseased = n_diseased, observed = n_gold_eligible)
                     )
                 }
 
@@ -931,15 +1300,22 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 return(testPositives)
             },
 
-            # Optional negative levels, keyed by test variable name (mirrors
+            # Strata in the stratifier's level order (grade, stage), not in row order.
+            .strataOrder = function(x) {
+                values <- as.character(x)
+                values <- values[!is.na(values)]
+                if (is.factor(x)) intersect(levels(x), values) else unique(values)
+            },
+
+            # Explicit negative levels, keyed by test variable name (mirrors
             # .getTestPositives). Absent entries stay NULL.
             .getTestNegatives = function() {
                 testNegatives <- list()
                 for (i in 1:3) {
                     testVar <- private$.opt(paste0("test", i))
                     negLevel <- private$.opt(paste0("test", i, "Negative"))
-                    if (!is.null(testVar) && !is.null(negLevel))
-                        testNegatives[[testVar]] <- negLevel
+                    if (!is.null(testVar))
+                        testNegatives[testVar] <- list(negLevel)
                 }
                 return(testNegatives)
             },
@@ -979,8 +1355,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     slot_index <- match(testVariable, slotVariables)
                     if (is.na(slot_index)) slot_index <- i
 
-                    # Process individual test. The negative levels are optional and
-                    # only consulted when excludeIndeterminate is enabled.
+                    # Every selected test and reference uses its explicit positive/negative pair.
                     result <- private$.processSingleTest(
                         mydata, testVariable, testPLevel, goldVariable, goldPLevel, slot_index,
                         testNLevel = testNegatives[[testVariable]],
@@ -1004,40 +1379,15 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 test_label <- sprintf(jmvcore::.("Test %d"), test_index)
                 private$.assertLevelExists(test_values, testPLevel, testVariable, test_label)
 
-                validate_negative <- function(values, positive, negative, variable, label = NULL) {
-                    if (is.null(negative)) return(invisible(NULL))
-                    private$.assertLevelExists(values, negative, variable, label)
-                    if (identical(negative, positive)) {
-                        private$.addNotice(
-                            type = "ERROR",
-                            title = jmvcore::.("Identical Positive and Negative Levels"),
-                            content = .fmt(jmvcore::.("Positive and negative levels for {variable} are both \"{chosen}\". Choose two different levels."),
-                                variable = variable, chosen = positive)
-                        )
-                        stop(jmvcore::.("Validation failed"), call. = FALSE)
-                    }
-                }
-                validate_negative(test_values, testPLevel, testNLevel, testVariable, test_label)
-                validate_negative(gold_values, goldPLevel, goldNLevel, goldVariable)
-
                 exclude <- isTRUE(self$options$excludeIndeterminate)
-                # Levels that occur in the data: a declared but unused level combines nothing, so
-                # it must not raise the multi-level warnings below (VAL-decisioncompare-12). An
-                # explicit NA level (addNA()) is missing data, not a category (IR-decisioncompare-06).
-                test_levels <- setdiff(levels(droplevels(test_values)), NA_character_)
-                gold_levels <- setdiff(levels(droplevels(gold_values)), NA_character_)
-
-                recode_binary <- function(values, positive, negative) {
-                    output <- ifelse(as.character(values) == positive, "Positive", "Negative")
-                    if (exclude && !is.null(negative)) {
-                        determinate <- as.character(values) %in% c(positive, negative)
-                        output[!determinate] <- NA_character_
-                    }
-                    factor(output, levels = c("Positive", "Negative"))
+                as_binary_factor <- function(values) {
+                    factor(ifelse(values, "Positive", "Negative"),
+                        levels = c("Positive", "Negative"))
                 }
-
-                test_binary <- recode_binary(test_values, testPLevel, testNLevel)
-                gold_binary <- recode_binary(gold_values, goldPLevel, goldNLevel)
+                test_binary <- as_binary_factor(private$.mapBinary(
+                    test_values, testPLevel, testNLevel, testVariable))
+                gold_binary <- as_binary_factor(private$.mapBinary(
+                    gold_values, goldPLevel, goldNLevel, goldVariable))
                 missing_row <- is.na(as.character(test_values)) | is.na(as.character(gold_values))
                 determinate <- !is.na(test_binary) & !is.na(gold_binary)
                 n_total <- length(determinate)
@@ -1056,37 +1406,13 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     stop(jmvcore::.("Validation failed"), call. = FALSE)
                 }
 
-                if (length(test_levels) > 2 || length(gold_levels) > 2) {
-                    missing_negative <- character(0)
-                    if (length(test_levels) > 2 && is.null(testNLevel)) missing_negative <- c(missing_negative, testVariable)
-                    if (length(gold_levels) > 2 && is.null(goldNLevel)) missing_negative <- c(missing_negative, goldVariable)
-
-                    if (exclude && length(missing_negative) > 0) {
-                        private$.addNotice(
-                            type = "STRONG_WARNING",
-                            title = jmvcore::.("Negative Level Required for Exclusion"),
-                            content = .fmt(jmvcore::.("Indeterminate exclusion cannot be applied to {variables} until a negative level is selected. Its non-positive levels are currently combined as Negative."),
-                                variables = paste(unique(missing_negative), collapse = ", ")
-                            )
-                        )
-                    } else if (exclude && n_excluded > 0) {
-                        private$.addNotice(
-                            type = "INFO",
-                            title = jmvcore::.("Indeterminate Results Excluded"),
-                            content = .fmt(jmvcore::.("{test}: excluded {excluded} of {total} rows ({pct}%). Accuracy estimates are conditional on a determinate result; the exclusion count and rate are reported in the tables."),
-                                test = testVariable, excluded = n_excluded, total = n_total,
-                                pct = round(100 * n_excluded / n_total, 1)
-                            )
-                        )
-                    } else if (!exclude) {
-                        private$.addNotice(
-                            type = "STRONG_WARNING",
-                            title = jmvcore::.("Multi-Level Results Combined"),
-                            content = .fmt(jmvcore::.("{test} or its reference standard has more than two levels. Only the selected positive level is Positive; all other levels are combined as Negative. This may bias estimates when those levels include equivocal results."),
-                                test = testVariable
-                            )
-                        )
-                    }
+                if (n_indeterminate > 0) {
+                    private$.addNotice(
+                        type = "INFO",
+                        title = jmvcore::.("Other Results Excluded"),
+                        content = .fmt(jmvcore::.("{test}: {excluded} of {total} rows have observed results outside the selected positive/negative pairs. Estimates are conditional on the selected levels; exclusions are reported separately from missing results."),
+                            test = testVariable, excluded = n_indeterminate, total = n_total)
+                    )
                 }
 
                 if (n_missing > 0) {
@@ -1560,7 +1886,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 if (is.null(strat_var) || !nzchar(strat_var) || !strat_var %in% colnames(mydata)) return()
 
                 stratum_values <- as.character(mydata[[strat_var]])
-                strata <- unique(stratum_values[!is.na(stratum_values)])
+                strata <- private$.strataOrder(mydata[[strat_var]])
                 n_missing_stratum <- sum(is.na(stratum_values))
                 if (n_missing_stratum > 0) {
                     private$.addNotice(
@@ -1607,7 +1933,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         stratTable$addRow(
                             rowKey = row_idx,
                             values = list(
-                                stratum = stratum,
+                                stratum = .diagCellText(stratum),
                                 n = as.integer(n_analyzed),
                                 excluded = as.integer(n_excluded),
                                 excludedRate = if (n_stratum > 0) n_excluded / n_stratum else NA_real_,
@@ -2930,9 +3256,14 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 use_pp <- isTRUE(self$options$pp) && !is.na(self$options$pprob)
 
                 predictive_sentence <- if (use_pp) {
+                    # pprob may be 1e-9 .. 1-1e-9: give enough decimals that neither end prints
+                    # as 0.0% or 100.0% (default 0.3 still reads 30.0).
+                    fmt_edge <- function(x) if (length(x) != 1 || !is.finite(x))
+                        jmvcore::.("not estimable") else sprintf(jmvcore::.("%s%%"), private$.pctAdaptive(x))
                     sprintf(
-                        jmvcore::.("At the %1$.1f%% population prevalence supplied for this analysis, positive predictive value was %2$s and negative predictive value was %3$s; overall accuracy was %4$s at the prevalence of this sample. Predictive values and accuracy change with prevalence and would need to be recomputed for a population with a different disease rate."),
-                        private$.halfUp1(self$options$pprob * 100), ppv_pct, npv_pct, acc_pct)
+                        jmvcore::.("At the %1$s%% population prevalence supplied for this analysis, positive predictive value was %2$s and negative predictive value was %3$s; overall accuracy was %4$s at the prevalence of this sample. Predictive values and accuracy change with prevalence and would need to be recomputed for a population with a different disease rate."),
+                        private$.pctAdaptive(self$options$pprob), fmt_edge(best_metrics$PPV),
+                        fmt_edge(best_metrics$NPV), acc_pct)
                 } else if (is.na(sample_prev_pct)) {
                     # Two complete alternative sentences rather than splicing a translated
                     # noun phrase ("the X% prevalence observed...") into an English frame.
@@ -2941,8 +3272,8 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         ppv_pct, npv_pct, acc_pct)
                 } else {
                     sprintf(
-                        jmvcore::.("At the %1$.1f%% disease prevalence observed in this sample, %2$s positive predictive value, %3$s negative predictive value, and %4$s overall accuracy were observed; predictive values and accuracy change with prevalence and would need to be recomputed for a population with a different disease rate."),
-                        private$.halfUp1(sample_prev_pct), ppv_pct, npv_pct, acc_pct)
+                        jmvcore::.("At the %1$s%% disease prevalence observed in this sample, %2$s positive predictive value, %3$s negative predictive value, and %4$s overall accuracy were observed; predictive values and accuracy change with prevalence and would need to be recomputed for a population with a different disease rate."),
+                        private$.pctAdaptive(sample_prev_pct / 100), ppv_pct, npv_pct, acc_pct)
                 }
 
                 # IR-decisioncompare-01: a "significant difference" sentence must say which way it
@@ -3147,7 +3478,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     '<ol style="line-height: 1.8; color: inherit;">',
                     jmvcore::.("<li><strong>Select Gold Standard:</strong> Choose your most reliable reference test (e.g., biopsy, expert consensus)</li>"),
                     jmvcore::.("<li><strong>Choose Tests to Compare:</strong> Select 2-3 diagnostic tests you want to evaluate</li>"),
-                    jmvcore::.("<li><strong>Define Positive Levels:</strong> Specify what constitutes a \"positive\" result for each test</li>"),
+                    jmvcore::.("<li><strong>Define Positive and Negative Levels:</strong> Select both exact levels for the reference and every test; explicitly exclude other observed levels or recode them before analysis</li>"),
                     jmvcore::.("<li><strong>Configure Options:</strong> Enable statistical comparisons, confidence intervals, or visualizations as needed</li>"),
                     jmvcore::.("<li><strong>Run Analysis:</strong> Review estimates, denominators, exclusions, and statistical comparisons</li>"),
                     jmvcore::.("<li><strong>Copy Report:</strong> Use the auto-generated sentences for your documentation</li>"),
@@ -3602,8 +3933,8 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                             # prevalence among these cases.
                             if (isTRUE(is.finite(paired$prevalence)))
                                 html <- paste0(html, "<p>", sprintf(
-                                    jmvcore::.("Overall accuracy weights sensitivity and specificity by the prevalence of the target condition among these %1$d cases (%2$.1f%%), so which test is more accurate overall can change with the case mix; the Differences with 95%% Confidence Intervals table compares sensitivity and specificity separately."),
-                                    paired$n, private$.halfUp1(paired$prevalence * 100)), "</p>")
+                                    jmvcore::.("Overall accuracy weights sensitivity and specificity by the prevalence of the target condition among these %1$d cases (%2$s%%), so which test is more accurate overall can change with the case mix; the Differences with 95%% Confidence Intervals table compares sensitivity and specificity separately."),
+                                    paired$n, private$.pctAdaptive(paired$prevalence)), "</p>")
                         }
                     } else {
                         # No McNemar row means the pair was not computable at all. Without
@@ -3799,8 +4130,8 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         # the prevalence-free comparisons of sensitivity and specificity go beside it.
                         if (!no_discordant && isTRUE(is.finite(paired$prevalence)))
                             report <- paste(report, sprintf(
-                                jmvcore::.("Overall accuracy weights sensitivity and specificity by the prevalence of the target condition among these cases (%1$.1f%%), so this comparison applies to that case mix; under case-control sampling it does not estimate population accuracy."),
-                                private$.halfUp1(paired$prevalence * 100)))
+                                jmvcore::.("Overall accuracy weights sensitivity and specificity by the prevalence of the target condition among these cases (%1$s%%), so this comparison applies to that case mix; under case-control sampling it does not estimate population accuracy."),
+                                private$.pctAdaptive(paired$prevalence)))
                         class_sentence <- if (!no_discordant) private$.classDifferenceSentence(1) else ""
                         if (nzchar(class_sentence))
                             report <- paste(report, class_sentence)
@@ -3887,7 +4218,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     jmvcore::.("<li><b>Paired Data:</b> All tests must be performed on the same patients/samples (not independent groups)</li>"),
                     jmvcore::.("<li><b>Independent Cases:</b> Tests are paired within each case, but cases must be independent across rows. Multiple specimens or lesions from the same patient require a method that accounts for clustering; this analysis does not adjust for repeated observations.</li>"),
                     jmvcore::.("<li><b>Adequate Information:</b> Precision and power depend strongly on the number of discordant pairs</li>"),
-                    jmvcore::.("<li><b>Binary Recoding:</b> Each test is analyzed after positive/negative recoding; multilevel results require explicit handling when indeterminate values should be excluded</li>"),
+                    jmvcore::.("<li><b>Explicit Binary Mapping:</b> Select distinct positive and negative levels for the reference and every test. Other observed levels require explicit exclusion or prior recoding; they never become negative automatically. Estimates after exclusion are conditional on determinate pairs.</li>"),
                     jmvcore::.("<li><b>Gold Standard:</b> Reference test must represent true disease status (e.g., biopsy, final diagnosis)</li>"),
                     jmvcore::.("<li><b>Available Cases:</b> Standalone metrics use each test's observed reference/test pairs; paired comparisons use common determinate rows</li>")
                 )

@@ -46,6 +46,8 @@ precisionrecallClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 }, add = TRUE)
             }
 
+            if (self$options$ci || self$options$comparison) set.seed(self$options$seed)
+
             # Get data
             outcome <- self$data[[self$options$outcome]]
             positiveClass <- self$options$positiveClass
@@ -55,6 +57,13 @@ precisionrecallClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 jmvcore::reject("Outcome variable must have exactly 2 levels")
             }
 
+            if (is.null(positiveClass) || !positiveClass %in% outcome) jmvcore::reject("Select an observed positive class.")
+            self$results$aucTable$deleteRows()
+            self$results$comparisonTable$deleteRows()
+            self$results$aucTable$setNote("bootstrap", "")
+            self$results$aucTable$setNote("method", paste("Area method:", self$options$aucMethod,
+                ". Curves join observed points linearly. Intervals resample independent rows."))
+            self$results$comparisonTable$setNote("method", "Paired within-row model swaps; assumes model exchangeability under the null. Unadjusted exploratory p-values. Each difference uses the same paired rows as its test.")
             # Calculate PRC for each score
             prcList <- list()
             aucValues <- numeric()
@@ -63,18 +72,12 @@ precisionrecallClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 score <- self$data[[scoreVar]]
 
                 # Remove missing values
-                valid <- complete.cases(outcome, score)
+                valid <- complete.cases(outcome, score) & is.finite(score)
                 outcomeClean <- outcome[valid]
                 scoreClean <- score[valid]
 
                 # Calculate precision-recall points
                 prc <- private$.calculatePRC(outcomeClean, scoreClean, positiveClass)
-
-                # Apply interpolation if requested
-                if (self$options$interpolation == "nonlinear") {
-                    # For now, use linear (TODO: implement proper non-linear)
-                    # Full non-linear interpolation requires TP/FP tracking
-                }
 
                 # Calculate AUC
                 auc <- private$.calculateAUC_PRC(prc, method = self$options$aucMethod)
@@ -83,19 +86,20 @@ precisionrecallClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 aucValues <- c(aucValues, auc)
             }
 
-            # Calculate baseline (random classifier)
-            nPos <- sum(outcome == positiveClass, na.rm = TRUE)
-            nTotal <- sum(!is.na(outcome))
-            baseline <- nPos / nTotal
+            # Each curve's baseline uses the same analyzable rows as that curve.
+            baselines <- vapply(self$options$scores, function(scoreVar) {
+                valid <- !is.na(outcome) & is.finite(self$data[[scoreVar]])
+                mean(outcome[valid] == positiveClass)
+            }, numeric(1))
 
             # Populate AUC table
             aucTable <- self$results$aucTable
             for (i in seq_along(self$options$scores)) {
-                aucTable$setRow(rowKey = self$options$scores[i], values = list(
+                aucTable$addRow(rowKey = self$options$scores[i], values = list(
                     model = self$options$scores[i],
                     auc = aucValues[i],
-                    baseline = baseline,
-                    improvement = aucValues[i] - baseline
+                    baseline = baselines[i],
+                    improvement = aucValues[i] - baselines[i]
                 ))
             }
 
@@ -103,7 +107,7 @@ precisionrecallClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             if (self$options$ci) {
                 for (i in seq_along(self$options$scores)) {
                     score <- self$data[[self$options$scores[i]]]
-                    valid <- complete.cases(outcome, score)
+                    valid <- complete.cases(outcome, score) & is.finite(score)
 
                     ci <- private$.bootstrapCI(
                         outcome[valid],
@@ -132,7 +136,7 @@ precisionrecallClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                         score1 <- self$data[[self$options$scores[i]]]
                         score2 <- self$data[[self$options$scores[j]]]
 
-                        valid <- complete.cases(outcome, score1, score2)
+                        valid <- complete.cases(outcome, score1, score2) & is.finite(score1) & is.finite(score2)
 
                         pValue <- private$.comparePRC(
                             outcome[valid],
@@ -145,7 +149,7 @@ precisionrecallClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                         compTable$addRow(rowKey = paste0(i, "_", j), values = list(
                             model1 = self$options$scores[i],
                             model2 = self$options$scores[j],
-                            aucDiff = aucValues[i] - aucValues[j],
+                            aucDiff = private$.calculateAUC_PRC(private$.calculatePRC(outcome[valid], score1[valid], positiveClass), self$options$aucMethod) - private$.calculateAUC_PRC(private$.calculatePRC(outcome[valid], score2[valid], positiveClass), self$options$aucMethod),
                             pValue = pValue
                         ))
                     }
@@ -156,7 +160,7 @@ precisionrecallClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             image <- self$results$prcPlot
             image$setState(list(
                 prcList = prcList,
-                baseline = baseline,
+                baseline = baselines,
                 showBaseline = self$options$showBaseline,
                 showFScore = self$options$showFScore,
                 scoreNames = self$options$scores
@@ -167,7 +171,7 @@ precisionrecallClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 rocImage <- self$results$rocPlot
                 rocList <- lapply(self$options$scores, function(scoreVar) {
                     score <- self$data[[scoreVar]]
-                    valid <- complete.cases(outcome, score)
+                    valid <- complete.cases(outcome, score) & is.finite(score)
                     private$.calculateROC(outcome[valid], score[valid], positiveClass)
                 })
                 rocImage$setState(list(
@@ -178,46 +182,16 @@ precisionrecallClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
         },
 
         .calculatePRC = function(outcome, score, positiveClass) {
-            # Calculate precision-recall points at all thresholds
-            thresholds <- sort(unique(score), decreasing = TRUE)
-
-            recall <- numeric(length(thresholds))
-            precision <- numeric(length(thresholds))
-
-            for (i in seq_along(thresholds)) {
-                predicted <- score >= thresholds[i]
-                tp <- sum(predicted & outcome == positiveClass, na.rm = TRUE)
-                fp <- sum(predicted & outcome != positiveClass, na.rm = TRUE)
-                fn <- sum(!predicted & outcome == positiveClass, na.rm = TRUE)
-
-                recall[i] <- ifelse(tp + fn == 0, 0, tp / (tp + fn))
-                precision[i] <- ifelse(tp + fp == 0, 1, tp / (tp + fp))
-            }
-
-            # Add (0,1) and (1, baseline) endpoints
-            nPos <- sum(outcome == positiveClass, na.rm = TRUE)
-            nTotal <- length(outcome)
-            baseline <- nPos / nTotal
-
-            data.frame(
-                recall = c(0, recall, 1),
-                precision = c(1, precision, baseline),
-                threshold = c(Inf, thresholds, -Inf)
-            )
+            pr <- .dvPR(score, outcome, positiveClass)
+            if (is.null(pr)) return(data.frame(recall = numeric(), precision = numeric(), threshold = numeric()))
+            pr$curve
         },
-
         .calculateAUC_PRC = function(prc, method = "trapezoid") {
-            # Calculate area under PRC curve using trapezoidal rule
-            auc <- 0
-            for (i in 1:(nrow(prc)-1)) {
-                width <- prc$recall[i+1] - prc$recall[i]
-                height <- (prc$precision[i] + prc$precision[i+1]) / 2
-                auc <- auc + width * height
-            }
-
-            return(abs(auc))
+            if (nrow(prc) < 2) return(NA_real_)
+            if (method == "average_precision") return(sum(diff(prc$recall) * tail(prc$precision, -1)))
+            if (method != "trapezoid") stop("Unsupported PR area method; select trapezoid or average precision.")
+            sum(diff(prc$recall) * (head(prc$precision, -1) + tail(prc$precision, -1)) / 2)
         },
-
         .calculateROC = function(outcome, score, positiveClass) {
             # Calculate ROC points at all thresholds
             thresholds <- sort(unique(score), decreasing = TRUE)
@@ -246,70 +220,34 @@ precisionrecallClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
 
         .bootstrapCI = function(outcome, score, positiveClass, samples = 1000,
                                method = "percentile", level = 95) {
-            # Bootstrap confidence interval for AUC(PRC)
-            aucBoot <- numeric(samples)
-
-            n <- length(outcome)
-
-            for (b in 1:samples) {
-                # Resample with replacement
-                idx <- sample(1:n, n, replace = TRUE)
-                outcomeB <- outcome[idx]
-                scoreB <- score[idx]
-
-                # Calculate PRC and AUC
-                prcB <- private$.calculatePRC(outcomeB, scoreB, positiveClass)
-                aucBoot[b] <- private$.calculateAUC_PRC(prcB, method = self$options$aucMethod)
+            if (!method %in% c("percentile", "bootstrap")) stop("Only percentile intervals are implemented.")
+            aucBoot <- replicate(samples, {
+                idx <- sample.int(length(outcome), length(outcome), TRUE)
+                private$.calculateAUC_PRC(private$.calculatePRC(outcome[idx], score[idx], positiveClass),
+                                         self$options$aucMethod)
+            })
+            good <- aucBoot[is.finite(aucBoot)]
+            if (length(good) < max(100, .8 * samples) || diff(range(good)) < 1e-12) {
+                self$results$aucTable$setNote("bootstrap", "Interval unavailable for degenerate or insufficient valid bootstrap replicates.")
+                return(c(NA_real_, NA_real_))
             }
-
-            # Calculate CI
-            alpha <- (100 - level) / 100
-            if (method == "percentile" || method == "bootstrap") {
-                ci <- quantile(aucBoot, probs = c(alpha/2, 1 - alpha/2), na.rm = TRUE)
-            } else if (method == "bca") {
-                # Simplified BCa (full implementation would require acceleration constant)
-                ci <- quantile(aucBoot, probs = c(alpha/2, 1 - alpha/2), na.rm = TRUE)
-            }
-
-            return(ci)
+            stats::quantile(good, c((1-level/100)/2, (1+level/100)/2), names = FALSE)
         },
-
-        .comparePRC = function(outcome, score1, score2, positiveClass, method = "bootstrap") {
-            # Statistical comparison of two PRC curves
-
-            if (method == "bootstrap") {
-                # Bootstrap test for AUC difference
-                nBoot <- 1000
-                aucDiff <- numeric(nBoot)
-
-                n <- length(outcome)
-
-                for (b in 1:nBoot) {
-                    idx <- sample(1:n, n, replace = TRUE)
-
-                    prc1 <- private$.calculatePRC(outcome[idx], score1[idx], positiveClass)
-                    prc2 <- private$.calculatePRC(outcome[idx], score2[idx], positiveClass)
-
-                    auc1 <- private$.calculateAUC_PRC(prc1)
-                    auc2 <- private$.calculateAUC_PRC(prc2)
-
-                    aucDiff[b] <- auc1 - auc2
-                }
-
-                # Two-sided p-value
-                pValue <- 2 * min(mean(aucDiff >= 0), mean(aucDiff <= 0))
-
-            } else if (method == "permutation") {
-                # Permutation test is NOT implemented. Return NA rather than a
-                # fabricated p-value. A correct implementation must permute the
-                # model/label assignment and recompute the AUC-PR difference
-                # null distribution. Until then this branch reports no result.
-                pValue <- NA_real_
+        .comparePRC = function(outcome, score1, score2, positiveClass, method = "permutation") {
+            if (method != "permutation") stop("Select the paired permutation comparison; legacy bootstrap testing is unsupported.")
+            difference <- function(a, b) {
+                private$.calculateAUC_PRC(private$.calculatePRC(outcome, a, positiveClass), self$options$aucMethod) -
+                    private$.calculateAUC_PRC(private$.calculatePRC(outcome, b, positiveClass), self$options$aucMethod)
             }
-
-            return(pValue)
+            observed <- difference(score1, score2)
+            if (!is.finite(observed)) return(NA_real_)
+            draws <- replicate(self$options$ciSamples, {
+                swap <- stats::runif(length(outcome)) < .5
+                difference(ifelse(swap, score2, score1), ifelse(swap, score1, score2))
+            })
+            # Model exchangeability within paired rows is the permutation null.
+            (1 + sum(abs(draws) >= abs(observed) - 1e-12)) / (1 + length(draws))
         },
-
         .plotPRC = function(image, ...) {
             # Create PRC plot
             state <- image$state
@@ -344,14 +282,11 @@ precisionrecallClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             # Add baseline if requested
             if (state$showBaseline) {
                 p <- p + geom_hline(
-                    yintercept = state$baseline,
+                    data = data.frame(model = state$scoreNames, baseline = state$baseline),
+                    aes(yintercept = baseline, color = model),
                     linetype = "dashed",
-                    color = "gray50",
                     size = 0.5
-                ) +
-                annotate("text", x = 0.5, y = state$baseline + 0.05,
-                         label = paste0("Random baseline = ", round(state$baseline, 3)),
-                         color = "gray50", size = 3)
+                ) + labs(caption = "Dashed lines: prevalence among each model's analyzable rows")
             }
 
             # Add F-score iso-lines if requested

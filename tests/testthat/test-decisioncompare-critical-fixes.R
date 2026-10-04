@@ -23,9 +23,9 @@ test_that("McNemar compares diagnostic CORRECTNESS, not raw positivity rates", {
     expect_equal(sum(test1 == "Pos"), sum(test2 == "Pos"))   # identical positivity
 
     res <- call_decisioncompare(
-        data = dat, gold = "gold", goldPositive = "Pos", goldNegative = NULL,
-        test1 = "test1", test1Positive = "Pos", test1Negative = NULL,
-        test2 = "test2", test2Positive = "Pos", test2Negative = NULL,
+        data = dat, gold = "gold", goldPositive = "Pos", goldNegative = "Neg",
+        test1 = "test1", test1Positive = "Pos", test1Negative = "Neg",
+        test2 = "test2", test2Positive = "Pos", test2Negative = "Neg",
         test3 = NULL, test3Positive = NULL, test3Negative = NULL, stratify = NULL,
         statComp = TRUE)
 
@@ -85,28 +85,16 @@ test_that("naOmit only filters SELECTED variables, not entire dataset", {
 })
 
 
-test_that("Multi-level variables generate warnings", {
-    skip_if_not_installed("ClinicoPath")
-
-    # Create test data with >2 levels (equivocal results)
-    test_data <- data.frame(
-        gold = factor(c("Pos", "Neg", "Pos", "Neg")),
-        test_multilevel = factor(c("Pos", "Neg", "Equivocal", "Invalid"))
-    )
-
-    # Simulate the warning detection logic
-    test_levels <- levels(test_data$test_multilevel)
-    testPLevel <- "Pos"
-
-    # Should detect >2 levels
-    expect_true(length(test_levels) > 2)
-
-    # Extra levels that will be treated as "Negative"
-    extra_levels <- setdiff(test_levels, testPLevel)
-    expect_equal(sort(extra_levels), sort(c("Equivocal", "Invalid", "Neg")))
-
-    # Validate this is problematic: "Equivocal" and "Invalid"
-    # will inflate specificity if treated as true negatives
+test_that("extra observed levels are rejected by the real analysis", {
+    d <- data.frame(gold = factor(c("Pos", "Neg", "Pos", "Neg")),
+        a = factor(c("Pos", "Neg", "Equivocal", "Invalid")),
+        b = factor(c("Pos", "Neg", "Pos", "Neg")))
+    expect_error(call_decisioncompare(data = d,
+        gold = "gold", goldPositive = "Pos", goldNegative = "Neg",
+        test1 = "a", test1Positive = "Pos", test1Negative = "Neg",
+        test2 = "b", test2Positive = "Pos", test2Negative = "Neg",
+        test3 = NULL, test3Positive = NULL, test3Negative = NULL),
+        "Equivocal.*Invalid")
 })
 
 
@@ -122,9 +110,9 @@ test_that("the completion notice reports the analysed sample size", {
         stringsAsFactors = FALSE)
 
     res <- call_decisioncompare(
-        data = dat, gold = "gold", goldPositive = "Pos", goldNegative = NULL,
-        test1 = "test1", test1Positive = "Pos", test1Negative = NULL,
-        test2 = "test2", test2Positive = "Pos", test2Negative = NULL,
+        data = dat, gold = "gold", goldPositive = "Pos", goldNegative = "Neg",
+        test1 = "test1", test1Positive = "Pos", test1Negative = "Neg",
+        test2 = "test2", test2Positive = "Pos", test2Negative = "Neg",
         test3 = NULL, test3Positive = NULL, test3Negative = NULL, stratify = NULL)
 
     notices <- gsub("<[^>]+>", " ", paste(res$notices$content, collapse = " "))
@@ -147,10 +135,10 @@ test_that("Cochran Q across 3 tests matches an independent implementation", {
                       test3 = mk(0.65), stringsAsFactors = FALSE)
 
     res <- call_decisioncompare(
-        data = dat, gold = "gold", goldPositive = "Pos", goldNegative = NULL,
-        test1 = "test1", test1Positive = "Pos", test1Negative = NULL,
-        test2 = "test2", test2Positive = "Pos", test2Negative = NULL,
-        test3 = "test3", test3Positive = "Pos", test3Negative = NULL,
+        data = dat, gold = "gold", goldPositive = "Pos", goldNegative = "Neg",
+        test1 = "test1", test1Positive = "Pos", test1Negative = "Neg",
+        test2 = "test2", test2Positive = "Pos", test2Negative = "Neg",
+        test3 = "test3", test3Positive = "Pos", test3Negative = "Neg",
         stratify = NULL, statComp = TRUE)
 
     mc <- res$mcnemarTable$asDF

@@ -7,18 +7,40 @@ items:
     - name: instructions
       title: Instructions
       type: Html
+      clearWith:
+        - outcome
+        - predictors
+        - cluster_id
+        - time_var
+        - family
+        - corstr
+        - robust_se
+        - conf_level
+        - qic
+        - posthoc
+        - posthoc_adjust
+        - diagnostics
+        - correlation_plot
       visible: False
 
     - name: modelInfo
       title: Model Information
       type: Table
-      rows: 6
       clearWith:
         - outcome
         - predictors
         - cluster_id
+        - time_var
         - family
         - corstr
+        - robust_se
+        - conf_level
+        - qic
+        - posthoc
+        - posthoc_adjust
+        - diagnostics
+        - correlation_plot
+      rows: 6
       columns:
         - name: info
           title: ''
@@ -34,9 +56,16 @@ items:
         - outcome
         - predictors
         - cluster_id
+        - time_var
         - family
         - corstr
         - robust_se
+        - conf_level
+        - qic
+        - posthoc
+        - posthoc_adjust
+        - diagnostics
+        - correlation_plot
       columns:
         - name: term
           title: Term
@@ -67,14 +96,22 @@ items:
     - name: qicTable
       title: Model Selection Criterion
       type: Table
-      visible: (qic)
-      rows: 1
       clearWith:
         - outcome
         - predictors
         - cluster_id
+        - time_var
         - family
         - corstr
+        - robust_se
+        - conf_level
+        - qic
+        - posthoc
+        - posthoc_adjust
+        - diagnostics
+        - correlation_plot
+      visible: (qic)
+      rows: 1
       columns:
         - name: qic
           title: QIC
@@ -89,15 +126,21 @@ items:
     - name: posthocTable
       title: Post-hoc Pairwise Comparisons
       type: Table
-      visible: (posthoc)
       clearWith:
         - outcome
         - predictors
         - cluster_id
+        - time_var
         - family
         - corstr
+        - robust_se
+        - conf_level
+        - qic
         - posthoc
         - posthoc_adjust
+        - diagnostics
+        - correlation_plot
+      visible: (posthoc)
       columns:
         - name: contrast
           title: Contrast
@@ -119,12 +162,22 @@ items:
     - name: diagnosticsTable
       title: Model Diagnostics
       type: Table
-      visible: (diagnostics)
-      rows: 5
       clearWith:
         - outcome
         - predictors
         - cluster_id
+        - time_var
+        - family
+        - corstr
+        - robust_se
+        - conf_level
+        - qic
+        - posthoc
+        - posthoc_adjust
+        - diagnostics
+        - correlation_plot
+      visible: (diagnostics)
+      rows: 5
       columns:
         - name: diagnostic
           title: ''
@@ -136,25 +189,62 @@ items:
     - name: correlationPlot
       title: Estimated Within-Cluster Correlation
       type: Image
+      clearWith:
+        - outcome
+        - predictors
+        - cluster_id
+        - time_var
+        - family
+        - corstr
+        - robust_se
+        - conf_level
+        - qic
+        - posthoc
+        - posthoc_adjust
+        - diagnostics
+        - correlation_plot
       visible: (correlation_plot)
       requiresData: true
       width: 500
       height: 400
       renderFun: .plotCorrelation
-      clearWith:
-        - outcome
-        - predictors
-        - cluster_id
-        - corstr
 
     - name: methodologyNote
       title: Methodology Notes
       type: Html
+      clearWith:
+        - outcome
+        - predictors
+        - cluster_id
+        - time_var
+        - family
+        - corstr
+        - robust_se
+        - conf_level
+        - qic
+        - posthoc
+        - posthoc_adjust
+        - diagnostics
+        - correlation_plot
       visible: True
 
     - name: interpretationNote
       title: Interpretation Guide
       type: Html
+      clearWith:
+        - outcome
+        - predictors
+        - cluster_id
+        - time_var
+        - family
+        - corstr
+        - robust_se
+        - conf_level
+        - qic
+        - posthoc
+        - posthoc_adjust
+        - diagnostics
+        - correlation_plot
       visible: True
 
 refs:

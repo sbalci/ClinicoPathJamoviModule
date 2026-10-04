@@ -32,10 +32,10 @@ data handling warnings.
 \examples{
 data(decisioncompare_missing)
 decisioncompare(data = decisioncompare_missing, gold = "GoldStandard",
-                goldPositive = "Positive", goldNegative = NULL, test1 = "Test1",
-                test1Positive = "Positive", test1Negative = NULL, test2 = "Test2",
-                test2Positive = "Positive", test2Negative = NULL,
-                test3Positive = "", test3Negative = NULL)
+                goldPositive = "Positive", goldNegative = "Negative", test1 = "Test1",
+                test1Positive = "Positive", test1Negative = "Negative", test2 = "Test2",
+                test2Positive = "Positive", test2Negative = "Negative",
+                test3 = NULL, test3Positive = NULL, test3Negative = NULL)
 
 }
 \keyword{datasets}

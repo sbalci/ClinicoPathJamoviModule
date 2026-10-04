@@ -183,6 +183,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 )
             },
             .run = function() {
+                self$results$screeningWorkload$deleteRows()
                 private$.noticeList <- list()
 
                 # Read numbers from input ----
@@ -368,6 +369,22 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 # Calculate metrics with safe division
                 Sens <- if (DiseaseP > 0) TP / DiseaseP else 0
                 Spec <- if (DiseaseN > 0) TN / DiseaseN else 0
+                if (self$options$showWorkload) {
+                    scenario <- .dvNumbers(self$options$prevalenceScenarios, 0, 1)
+                    if (self$options$pp) scenario <- unique(c(self$options$pprob, scenario))
+                    prev <- c(DiseaseP / (DiseaseP + DiseaseN), scenario)
+                    for (i in seq_along(prev)) {
+                        w <- .dvWorkload(if (DiseaseP > 0) TP/DiseaseP else NA_real_,
+                            if (DiseaseN > 0) TN/DiseaseN else NA_real_, prev[i],
+                            if (i == 1) DiseaseP+DiseaseN else self$options$workloadPopulationSize)
+                        w$net_benefit <- NULL
+                        self$results$screeningWorkload$addRow(rowKey = as.character(i), values = c(
+                            list(source = if (i == 1) "Observed" else "Projected",
+                                 unit = self$options$analysisUnit), as.list(w)))
+                    }
+                    self$results$screeningWorkload$setNote("source", .("Projected fractional counts assume sensitivity and specificity transport to the target population. These are flagged observations, not measured extra review time or unique patients. No uncertainty in target prevalence is assumed."))
+                }
+
                 AccurT <- if (TotalPop > 0) TestT / TotalPop else 0
                 PrevalenceD <- if (TotalPop > 0) DiseaseP / TotalPop else 0
 

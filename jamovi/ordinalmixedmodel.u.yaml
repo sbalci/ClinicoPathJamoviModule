@@ -64,6 +64,7 @@ children:
                 name: propOddsTest
               - type: CheckBox
                 name: oddsRatios
+                enable: (link:logit)
               - type: CheckBox
                 name: confInt
               - type: CheckBox
