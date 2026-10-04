@@ -1,7 +1,7 @@
 ---
 name:  singlearm
 title: Single Arm Survival
-menuGroup: Survival
+menuGroup: SurvivalT
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Survival for whole group, no explanatory factor'
 version: '1.0.81'
@@ -27,6 +27,23 @@ description:
 
 
 options:
+
+    - name: cif_all_causes
+      title: All event types at selected times
+      type: Bool
+      default: true
+      description: >-
+        Report the event-free probability and cumulative incidence of the target
+        and competing events within observed follow-up.
+
+    - name: show_followup_support
+      title: Follow-up support counts
+      type: Bool
+      default: true
+      description: >-
+        Show numbers at risk and cumulative event and censoring counts with the
+        all-event cumulative incidence table. A late plateau does not establish cure.
+
 
     - name: data
       type: Data
@@ -371,10 +388,9 @@ options:
       type: Bool
       default: false
       description: >-
-        Display the number of subjects still at risk below supported Kaplan-Meier plots.
-        This is a count, not a table of probabilities or hazards. A combined risk panel is
-        not available for the competing-risk CIF plot; use the cumulative-incidence table
-        for counts at selected times.
+        Display the number of subjects still at risk below Kaplan-Meier and cumulative-incidence
+        plots. Counts use the common event-free risk set just before each time point and are
+        restricted to observed follow-up. The all-event table also reports cumulative counts.
 
     - name: censored
       title: Censored

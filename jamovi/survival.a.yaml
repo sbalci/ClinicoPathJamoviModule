@@ -1,7 +1,7 @@
 ---
 name:  survival
 title: Survival Analysis
-menuGroup: Survival
+menuGroup: SurvivalT
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Univariate Survival Analysis, Cox, Kaplan-Meier, 1,3,5-yr'
 version: '1.0.81'
@@ -20,6 +20,23 @@ description:
 
 
 options:
+
+    - name: cif_all_causes
+      title: All event types at selected times
+      type: Bool
+      default: true
+      description: >-
+        Report the event-free probability and cumulative incidence of the target
+        and competing events within observed follow-up.
+
+    - name: show_followup_support
+      title: Follow-up support counts
+      type: Bool
+      default: true
+      description: >-
+        Show numbers at risk and cumulative event and censoring counts with the
+        all-event cumulative incidence table. A late plateau does not establish cure.
+
 
     # - name: lang
     #   title: Language

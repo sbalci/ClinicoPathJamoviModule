@@ -6,6 +6,10 @@ flexmultistateOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
+            subject_id = NULL,
+            time_entry = NULL,
+            random_seed = 2026,
+            ci_samples = 200,
             time = NULL,
             status = NULL,
             start_state = NULL,
@@ -34,6 +38,35 @@ flexmultistateOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 requiresData=TRUE,
                 ...)
 
+            private$..subject_id <- jmvcore::OptionVariable$new(
+                "subject_id",
+                subject_id,
+                suggested=list(
+                    "nominal",
+                    "id"),
+                permitted=list(
+                    "factor",
+                    "numeric"),
+                default=NULL)
+            private$..time_entry <- jmvcore::OptionVariable$new(
+                "time_entry",
+                time_entry,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"),
+                default=NULL)
+            private$..random_seed <- jmvcore::OptionInteger$new(
+                "random_seed",
+                random_seed,
+                default=2026,
+                min=1)
+            private$..ci_samples <- jmvcore::OptionInteger$new(
+                "ci_samples",
+                ci_samples,
+                default=200,
+                min=50,
+                max=2000)
             private$..time <- jmvcore::OptionVariable$new(
                 "time",
                 time,
@@ -76,8 +109,7 @@ flexmultistateOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=list(
                     "illness_death",
                     "competing_risks",
-                    "progressive",
-                    "custom"),
+                    "progressive"),
                 default="illness_death")
             private$..hazard_distribution <- jmvcore::OptionList$new(
                 "hazard_distribution",
@@ -105,7 +137,8 @@ flexmultistateOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..transition_specific <- jmvcore::OptionBool$new(
                 "transition_specific",
                 transition_specific,
-                default=TRUE)
+                default=TRUE,
+                hidden=TRUE)
             private$..shared_effects <- jmvcore::OptionVariables$new(
                 "shared_effects",
                 shared_effects,
@@ -115,7 +148,8 @@ flexmultistateOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "nominal"),
                 permitted=list(
                     "numeric",
-                    "factor"))
+                    "factor"),
+                hidden=TRUE)
             private$..time_varying_effects <- jmvcore::OptionVariables$new(
                 "time_varying_effects",
                 time_varying_effects,
@@ -125,7 +159,8 @@ flexmultistateOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "nominal"),
                 permitted=list(
                     "numeric",
-                    "factor"))
+                    "factor"),
+                hidden=TRUE)
             private$..prediction_times <- jmvcore::OptionString$new(
                 "prediction_times",
                 prediction_times,
@@ -169,6 +204,10 @@ flexmultistateOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 confidence_intervals,
                 default=TRUE)
 
+            self$.addOption(private$..subject_id)
+            self$.addOption(private$..time_entry)
+            self$.addOption(private$..random_seed)
+            self$.addOption(private$..ci_samples)
             self$.addOption(private$..time)
             self$.addOption(private$..status)
             self$.addOption(private$..start_state)
@@ -192,6 +231,10 @@ flexmultistateOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$.addOption(private$..confidence_intervals)
         }),
     active = list(
+        subject_id = function() private$..subject_id$value,
+        time_entry = function() private$..time_entry$value,
+        random_seed = function() private$..random_seed$value,
+        ci_samples = function() private$..ci_samples$value,
         time = function() private$..time$value,
         status = function() private$..status$value,
         start_state = function() private$..start_state$value,
@@ -214,6 +257,10 @@ flexmultistateOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         n_simulation = function() private$..n_simulation$value,
         confidence_intervals = function() private$..confidence_intervals$value),
     private = list(
+        ..subject_id = NA,
+        ..time_entry = NA,
+        ..random_seed = NA,
+        ..ci_samples = NA,
         ..time = NA,
         ..status = NA,
         ..start_state = NA,
@@ -273,20 +320,68 @@ flexmultistateResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 name="todo",
                 title="Instructions",
                 clearWith=list(
+                    "subject_id",
+                    "time_entry",
+                    "random_seed",
+                    "ci_samples",
                     "time",
                     "status",
-                    "predictors")))
+                    "start_state",
+                    "predictors",
+                    "model_type",
+                    "hazard_distribution",
+                    "spline_knots",
+                    "time_scale",
+                    "transition_specific",
+                    "shared_effects",
+                    "time_varying_effects",
+                    "prediction_times",
+                    "transition_probabilities",
+                    "state_probabilities",
+                    "expected_sojourn",
+                    "plot_hazards",
+                    "plot_cumhaz",
+                    "plot_survival",
+                    "microsimulation",
+                    "n_simulation",
+                    "confidence_intervals")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="summary",
                 title="Model Summary",
-                visible=TRUE))
+                visible=TRUE,
+                clearWith=list(
+                    "subject_id",
+                    "time_entry",
+                    "random_seed",
+                    "ci_samples",
+                    "time",
+                    "status",
+                    "start_state",
+                    "predictors",
+                    "model_type",
+                    "hazard_distribution",
+                    "spline_knots",
+                    "time_scale",
+                    "transition_specific",
+                    "shared_effects",
+                    "time_varying_effects",
+                    "prediction_times",
+                    "transition_probabilities",
+                    "state_probabilities",
+                    "expected_sojourn",
+                    "plot_hazards",
+                    "plot_cumhaz",
+                    "plot_survival",
+                    "microsimulation",
+                    "n_simulation",
+                    "confidence_intervals")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="transitionMatrix",
                 title="Transition Matrix",
                 visible=TRUE,
-                rows=1,
+                rows=0,
                 columns=list(
                     list(
                         `name`="from_state", 
@@ -307,13 +402,39 @@ flexmultistateResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     list(
                         `name`="person_years", 
                         `title`="Person-Years", 
-                        `type`="number"))))
+                        `type`="number")),
+                clearWith=list(
+                    "subject_id",
+                    "time_entry",
+                    "random_seed",
+                    "ci_samples",
+                    "time",
+                    "status",
+                    "start_state",
+                    "predictors",
+                    "model_type",
+                    "hazard_distribution",
+                    "spline_knots",
+                    "time_scale",
+                    "transition_specific",
+                    "shared_effects",
+                    "time_varying_effects",
+                    "prediction_times",
+                    "transition_probabilities",
+                    "state_probabilities",
+                    "expected_sojourn",
+                    "plot_hazards",
+                    "plot_cumhaz",
+                    "plot_survival",
+                    "microsimulation",
+                    "n_simulation",
+                    "confidence_intervals")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="transitionModels",
                 title="Transition Model Results",
                 visible=TRUE,
-                rows=1,
+                rows=0,
                 columns=list(
                     list(
                         `name`="transition", 
@@ -351,13 +472,39 @@ flexmultistateResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     list(
                         `name`="hr_upper", 
                         `title`="HR Upper", 
-                        `type`="number"))))
+                        `type`="number")),
+                clearWith=list(
+                    "subject_id",
+                    "time_entry",
+                    "random_seed",
+                    "ci_samples",
+                    "time",
+                    "status",
+                    "start_state",
+                    "predictors",
+                    "model_type",
+                    "hazard_distribution",
+                    "spline_knots",
+                    "time_scale",
+                    "transition_specific",
+                    "shared_effects",
+                    "time_varying_effects",
+                    "prediction_times",
+                    "transition_probabilities",
+                    "state_probabilities",
+                    "expected_sojourn",
+                    "plot_hazards",
+                    "plot_cumhaz",
+                    "plot_survival",
+                    "microsimulation",
+                    "n_simulation",
+                    "confidence_intervals")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="modelComparison",
                 title="Model Fit Statistics",
                 visible=TRUE,
-                rows=1,
+                rows=0,
                 columns=list(
                     list(
                         `name`="transition", 
@@ -378,13 +525,39 @@ flexmultistateResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     list(
                         `name`="n_parameters", 
                         `title`="Parameters", 
-                        `type`="integer"))))
+                        `type`="integer")),
+                clearWith=list(
+                    "subject_id",
+                    "time_entry",
+                    "random_seed",
+                    "ci_samples",
+                    "time",
+                    "status",
+                    "start_state",
+                    "predictors",
+                    "model_type",
+                    "hazard_distribution",
+                    "spline_knots",
+                    "time_scale",
+                    "transition_specific",
+                    "shared_effects",
+                    "time_varying_effects",
+                    "prediction_times",
+                    "transition_probabilities",
+                    "state_probabilities",
+                    "expected_sojourn",
+                    "plot_hazards",
+                    "plot_cumhaz",
+                    "plot_survival",
+                    "microsimulation",
+                    "n_simulation",
+                    "confidence_intervals")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="transitionProbTable",
                 title="Transition Probabilities",
                 visible="(transition_probabilities)",
-                rows=1,
+                rows=0,
                 columns=list(
                     list(
                         `name`="time_point", 
@@ -409,13 +582,39 @@ flexmultistateResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     list(
                         `name`="prob_upper", 
                         `title`="Upper CI", 
-                        `type`="number"))))
+                        `type`="number")),
+                clearWith=list(
+                    "subject_id",
+                    "time_entry",
+                    "random_seed",
+                    "ci_samples",
+                    "time",
+                    "status",
+                    "start_state",
+                    "predictors",
+                    "model_type",
+                    "hazard_distribution",
+                    "spline_knots",
+                    "time_scale",
+                    "transition_specific",
+                    "shared_effects",
+                    "time_varying_effects",
+                    "prediction_times",
+                    "transition_probabilities",
+                    "state_probabilities",
+                    "expected_sojourn",
+                    "plot_hazards",
+                    "plot_cumhaz",
+                    "plot_survival",
+                    "microsimulation",
+                    "n_simulation",
+                    "confidence_intervals")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="stateProbTable",
                 title="State Occupancy Probabilities",
                 visible="(state_probabilities)",
-                rows=1,
+                rows=0,
                 columns=list(
                     list(
                         `name`="time_point", 
@@ -436,13 +635,39 @@ flexmultistateResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     list(
                         `name`="prob_upper", 
                         `title`="Upper CI", 
-                        `type`="number"))))
+                        `type`="number")),
+                clearWith=list(
+                    "subject_id",
+                    "time_entry",
+                    "random_seed",
+                    "ci_samples",
+                    "time",
+                    "status",
+                    "start_state",
+                    "predictors",
+                    "model_type",
+                    "hazard_distribution",
+                    "spline_knots",
+                    "time_scale",
+                    "transition_specific",
+                    "shared_effects",
+                    "time_varying_effects",
+                    "prediction_times",
+                    "transition_probabilities",
+                    "state_probabilities",
+                    "expected_sojourn",
+                    "plot_hazards",
+                    "plot_cumhaz",
+                    "plot_survival",
+                    "microsimulation",
+                    "n_simulation",
+                    "confidence_intervals")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="sojournTable",
                 title="Expected Sojourn Times",
                 visible="(expected_sojourn)",
-                rows=1,
+                rows=0,
                 columns=list(
                     list(
                         `name`="state", 
@@ -459,46 +684,138 @@ flexmultistateResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     list(
                         `name`="sojourn_upper", 
                         `title`="Upper CI", 
-                        `type`="number"))))
+                        `type`="number")),
+                clearWith=list(
+                    "subject_id",
+                    "time_entry",
+                    "random_seed",
+                    "ci_samples",
+                    "time",
+                    "status",
+                    "start_state",
+                    "predictors",
+                    "model_type",
+                    "hazard_distribution",
+                    "spline_knots",
+                    "time_scale",
+                    "transition_specific",
+                    "shared_effects",
+                    "time_varying_effects",
+                    "prediction_times",
+                    "transition_probabilities",
+                    "state_probabilities",
+                    "expected_sojourn",
+                    "plot_hazards",
+                    "plot_cumhaz",
+                    "plot_survival",
+                    "microsimulation",
+                    "n_simulation",
+                    "confidence_intervals")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="hazardPlot",
                 title="Transition Hazard Functions",
                 width=700,
                 height=500,
-                renderFun=".plotTransitionHazards",
+                renderFun=".plotHazards",
                 visible="(plot_hazards)",
                 clearWith=list(
+                    "subject_id",
+                    "time_entry",
+                    "random_seed",
+                    "ci_samples",
                     "time",
                     "status",
+                    "start_state",
                     "predictors",
-                    "hazard_distribution")))
+                    "model_type",
+                    "hazard_distribution",
+                    "spline_knots",
+                    "time_scale",
+                    "transition_specific",
+                    "shared_effects",
+                    "time_varying_effects",
+                    "prediction_times",
+                    "transition_probabilities",
+                    "state_probabilities",
+                    "expected_sojourn",
+                    "plot_hazards",
+                    "plot_cumhaz",
+                    "plot_survival",
+                    "microsimulation",
+                    "n_simulation",
+                    "confidence_intervals"),
+                requiresData=FALSE))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="cumhazPlot",
                 title="Cumulative Hazard Functions",
                 width=700,
                 height=500,
-                renderFun=".plotCumulativeHazards",
+                renderFun=".plotCumHaz",
                 visible="(plot_cumhaz)",
                 clearWith=list(
+                    "subject_id",
+                    "time_entry",
+                    "random_seed",
+                    "ci_samples",
                     "time",
                     "status",
+                    "start_state",
                     "predictors",
-                    "hazard_distribution")))
+                    "model_type",
+                    "hazard_distribution",
+                    "spline_knots",
+                    "time_scale",
+                    "transition_specific",
+                    "shared_effects",
+                    "time_varying_effects",
+                    "prediction_times",
+                    "transition_probabilities",
+                    "state_probabilities",
+                    "expected_sojourn",
+                    "plot_hazards",
+                    "plot_cumhaz",
+                    "plot_survival",
+                    "microsimulation",
+                    "n_simulation",
+                    "confidence_intervals"),
+                requiresData=FALSE))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="survivalPlot",
                 title="State Occupancy Probabilities",
                 width=700,
                 height=500,
-                renderFun=".plotStateProbabilities",
+                renderFun=".plotSurvival",
                 visible="(plot_survival)",
                 clearWith=list(
+                    "subject_id",
+                    "time_entry",
+                    "random_seed",
+                    "ci_samples",
                     "time",
                     "status",
+                    "start_state",
                     "predictors",
-                    "prediction_times")))
+                    "model_type",
+                    "hazard_distribution",
+                    "spline_knots",
+                    "time_scale",
+                    "transition_specific",
+                    "shared_effects",
+                    "time_varying_effects",
+                    "prediction_times",
+                    "transition_probabilities",
+                    "state_probabilities",
+                    "expected_sojourn",
+                    "plot_hazards",
+                    "plot_cumhaz",
+                    "plot_survival",
+                    "microsimulation",
+                    "n_simulation",
+                    "confidence_intervals"),
+                requiresData=FALSE))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="transitionDiagram",
@@ -506,24 +823,127 @@ flexmultistateResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 width=600,
                 height=400,
                 renderFun=".plotTransitionDiagram",
-                visible=TRUE,
+                visible=FALSE,
                 clearWith=list(
-                    "model_type")))
+                    "subject_id",
+                    "time_entry",
+                    "random_seed",
+                    "ci_samples",
+                    "time",
+                    "status",
+                    "start_state",
+                    "predictors",
+                    "model_type",
+                    "hazard_distribution",
+                    "spline_knots",
+                    "time_scale",
+                    "transition_specific",
+                    "shared_effects",
+                    "time_varying_effects",
+                    "prediction_times",
+                    "transition_probabilities",
+                    "state_probabilities",
+                    "expected_sojourn",
+                    "plot_hazards",
+                    "plot_cumhaz",
+                    "plot_survival",
+                    "microsimulation",
+                    "n_simulation",
+                    "confidence_intervals"),
+                requiresData=FALSE))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="microsimResults",
                 title="Microsimulation Results",
-                visible="(microsimulation)"))
+                visible="(microsimulation)",
+                clearWith=list(
+                    "subject_id",
+                    "time_entry",
+                    "random_seed",
+                    "ci_samples",
+                    "time",
+                    "status",
+                    "start_state",
+                    "predictors",
+                    "model_type",
+                    "hazard_distribution",
+                    "spline_knots",
+                    "time_scale",
+                    "transition_specific",
+                    "shared_effects",
+                    "time_varying_effects",
+                    "prediction_times",
+                    "transition_probabilities",
+                    "state_probabilities",
+                    "expected_sojourn",
+                    "plot_hazards",
+                    "plot_cumhaz",
+                    "plot_survival",
+                    "microsimulation",
+                    "n_simulation",
+                    "confidence_intervals")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="goodnessOfFit",
                 title="Model Diagnostics",
-                visible=TRUE))
+                visible=FALSE,
+                clearWith=list(
+                    "subject_id",
+                    "time_entry",
+                    "random_seed",
+                    "ci_samples",
+                    "time",
+                    "status",
+                    "start_state",
+                    "predictors",
+                    "model_type",
+                    "hazard_distribution",
+                    "spline_knots",
+                    "time_scale",
+                    "transition_specific",
+                    "shared_effects",
+                    "time_varying_effects",
+                    "prediction_times",
+                    "transition_probabilities",
+                    "state_probabilities",
+                    "expected_sojourn",
+                    "plot_hazards",
+                    "plot_cumhaz",
+                    "plot_survival",
+                    "microsimulation",
+                    "n_simulation",
+                    "confidence_intervals")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="clinicalInterpretation",
                 title="Clinical Interpretation",
-                visible=TRUE))}))
+                visible=FALSE,
+                clearWith=list(
+                    "subject_id",
+                    "time_entry",
+                    "random_seed",
+                    "ci_samples",
+                    "time",
+                    "status",
+                    "start_state",
+                    "predictors",
+                    "model_type",
+                    "hazard_distribution",
+                    "spline_knots",
+                    "time_scale",
+                    "transition_specific",
+                    "shared_effects",
+                    "time_varying_effects",
+                    "prediction_times",
+                    "transition_probabilities",
+                    "state_probabilities",
+                    "expected_sojourn",
+                    "plot_hazards",
+                    "plot_cumhaz",
+                    "plot_survival",
+                    "microsimulation",
+                    "n_simulation",
+                    "confidence_intervals")))}))
 
 flexmultistateBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "flexmultistateBase",
@@ -548,11 +968,16 @@ flexmultistateBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 
 #' Flexible Multi-State Survival Models
 #'
-#' Flexible parametric multi-state survival models for complex disease 
-#' progression.
-#' Models transition hazards using splines and handles competing risks and 
-#' intermediate states.
-#' 
+#' Clock-forward Markov multistate models with separately fitted spline or 
+#' parametric transition hazards. Requires subject ID and complete entry/exit 
+#' state histories. Reports integrated transition probabilities, 
+#' reference-profile state occupation, and restricted time in state. 
+#' Predictions beyond follow-up depend on the parametric extrapolation 
+#' assumptions.
+#' @param subject_id .
+#' @param time_entry .
+#' @param random_seed .
+#' @param ci_samples .
 #' @param data The data as a data frame.
 #' @param time Time variable for transitions
 #' @param status State or transition status variable
@@ -602,6 +1027,10 @@ flexmultistateBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'
 #' @export
 flexmultistate <- function(
+    subject_id = NULL,
+    time_entry = NULL,
+    random_seed = 2026,
+    ci_samples = 200,
     data,
     time,
     status,
@@ -628,6 +1057,8 @@ flexmultistate <- function(
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("flexmultistate requires jmvcore to be installed (restart may be required)")
 
+    if ( ! missing(subject_id)) subject_id <- jmvcore::resolveQuo(jmvcore::enquo(subject_id))
+    if ( ! missing(time_entry)) time_entry <- jmvcore::resolveQuo(jmvcore::enquo(time_entry))
     if ( ! missing(time)) time <- jmvcore::resolveQuo(jmvcore::enquo(time))
     if ( ! missing(status)) status <- jmvcore::resolveQuo(jmvcore::enquo(status))
     if ( ! missing(start_state)) start_state <- jmvcore::resolveQuo(jmvcore::enquo(start_state))
@@ -637,6 +1068,8 @@ flexmultistate <- function(
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
+            `if`( ! missing(subject_id), subject_id, NULL),
+            `if`( ! missing(time_entry), time_entry, NULL),
             `if`( ! missing(time), time, NULL),
             `if`( ! missing(status), status, NULL),
             `if`( ! missing(start_state), start_state, NULL),
@@ -646,6 +1079,10 @@ flexmultistate <- function(
 
 
     options <- flexmultistateOptions$new(
+        subject_id = subject_id,
+        time_entry = time_entry,
+        random_seed = random_seed,
+        ci_samples = ci_samples,
         time = time,
         status = status,
         start_state = start_state,

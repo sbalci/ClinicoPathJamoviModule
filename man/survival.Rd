@@ -5,6 +5,8 @@
 \title{Survival Analysis}
 \usage{
 survival(
+  cif_all_causes = TRUE,
+  show_followup_support = TRUE,
   data,
   elapsedtime = NULL,
   tint = FALSE,
@@ -83,6 +85,13 @@ survival(
 )
 }
 \arguments{
+\item{cif_all_causes}{Report the event-free probability and cumulative
+incidence of the target and competing events within observed follow-up.}
+
+\item{show_followup_support}{Show numbers at risk and cumulative event and
+censoring counts with the all-event cumulative incidence table. A late
+plateau does not establish cure.}
+
 \item{data}{The data as a data frame.}
 
 \item{elapsedtime}{The time elapsed from the start of the study to the
@@ -357,6 +366,7 @@ reproduces the previous fixed behaviour.}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$cifTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$eventRecodeInfo} \tab \tab \tab \tab \tab a html \cr
 \code{results$subtitle} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -441,9 +451,9 @@ A results object containing:
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 
-\code{results$medianTable$asDF}
+\code{results$cifTable$asDF}
 
-\code{as.data.frame(results$medianTable)}
+\code{as.data.frame(results$cifTable)}
 }
 \description{
 Performs univariate time-to-event analysis comparing groups using

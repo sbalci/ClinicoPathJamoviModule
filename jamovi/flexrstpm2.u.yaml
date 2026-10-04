@@ -4,205 +4,181 @@ jus: '3.0'
 stage: 0
 compilerMode: tame
 children:
-  - type: VariableSupplier
-    persistentItems: false
+- type: ComboBox
+  name: endpoint_type
+- type: TextBox
+  name: bootstrap_seed
+  format: number
+  enable: (bootstrap_validation)
+- type: VariableSupplier
+  persistentItems: false
+  stretchFactor: 1
+  children:
+  - type: TargetLayoutBox
+    label: Time Variable (e.g., survival time, follow-up duration)
+    children:
+    - type: VariablesListBox
+      name: elapsedtime
+      maxItemCount: 1
+      isTarget: true
+      itemDropBehaviour: overwrite
+  - type: TargetLayoutBox
+    label: Event Variable (0=censored, 1=event occurred)
+    children:
+    - type: VariablesListBox
+      name: outcome
+      maxItemCount: 1
+      isTarget: true
+      itemDropBehaviour: overwrite
+  - type: TargetLayoutBox
+    label: 'Covariates (predictors: age, stage, treatment, etc.)'
+    children:
+    - type: VariablesListBox
+      name: covariates
+      isTarget: true
+      itemDropBehaviour: insert
+  - type: TargetLayoutBox
+    label: Time-Varying Covariates (Optional)
+    children:
+    - type: VariablesListBox
+      name: time_varying_covariates
+      isTarget: true
+      itemDropBehaviour: insert
+  - type: TargetLayoutBox
+    label: Background Hazard (Optional)
+    children:
+    - type: VariablesListBox
+      name: bhazard
+      maxItemCount: 1
+      isTarget: true
+      itemDropBehaviour: overwrite
+- type: LayoutBox
+  margin: large
+  stretchFactor: 1
+  children:
+  - type: CollapseBox
+    label: Model Specification
+    collapsed: false
     stretchFactor: 1
     children:
-      - type: TargetLayoutBox
-        label: Time Variable (e.g., survival time, follow-up duration)
-        children:
-          - type: VariablesListBox
-            name: elapsedtime
-            maxItemCount: 1
-            isTarget: true
-            itemDropBehaviour: overwrite
-      - type: TargetLayoutBox
-        label: Event Variable (0=censored, 1=event occurred)
-        children:
-          - type: VariablesListBox
-            name: outcome
-            maxItemCount: 1
-            isTarget: true
-            itemDropBehaviour: overwrite
-      - type: TargetLayoutBox
-        label: "Covariates (predictors: age, stage, treatment, etc.)"
-        children:
-          - type: VariablesListBox
-            name: covariates
-            isTarget: true
-            itemDropBehaviour: insert
-      - type: TargetLayoutBox
-        label: Time-Varying Covariates (Optional)
-        children:
-          - type: VariablesListBox
-            name: time_varying_covariates
-            isTarget: true
-            itemDropBehaviour: insert
-      - type: TargetLayoutBox
-        label: Background Hazard (Optional)
-        children:
-          - type: VariablesListBox
-            name: bhazard
-            maxItemCount: 1
-            isTarget: true
-            itemDropBehaviour: overwrite
-      - type: TargetLayoutBox
-        label: Group Variable (Optional)
-        children:
-          - type: VariablesListBox
-            name: group_variable
-            maxItemCount: 1
-            isTarget: true
-            itemDropBehaviour: overwrite
-  - type: LayoutBox
-    margin: large
+    - type: LayoutBox
+      margin: large
+      children:
+      - type: TextBox
+        name: outcomeLevel
+        format: string
+        label: Event Level (value indicating event occurred, usually '1')
+      - type: ComboBox
+        name: scale
+        label: Model Scale (hazard=like Cox model, odds/normal=alternative scales)
+      - type: TextBox
+        name: df
+        format: number
+        label: Degrees of Freedom (3-4 typical, 5-6 for complex patterns, need >=30 events)
+      - type: TextBox
+        name: knots
+        format: string
+        label: 'Knot Positions (advanced: manually set time points for splines)'
+      - type: TextBox
+        name: boundary_knots
+        format: string
+        label: 'Boundary Knots (advanced: min/max time range for splines)'
+  - type: CollapseBox
+    label: Time-Varying Effects
+    collapsed: true
     stretchFactor: 1
     children:
-      - type: CollapseBox
-        label: Model Specification
-        collapsed: false
-        stretchFactor: 1
-        children:
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: TextBox
-                name: outcomeLevel
-                format: string
-                label: "Event Level (value indicating event occurred, usually '1')"
-              - type: ComboBox
-                name: scale
-                label: "Model Scale (hazard=like Cox model, odds/normal=alternative scales)"
-              - type: TextBox
-                name: df
-                format: number
-                label: "Degrees of Freedom (3-4 typical, 5-6 for complex patterns, need >=30 events)"
-              - type: ComboBox
-                name: link_function
-                label: "Link Function (log=standard, identity/sqrt=special cases)"
-              - type: TextBox
-                name: knots
-                format: string
-                label: "Knot Positions (advanced: manually set time points for splines)"
-              - type: TextBox
-                name: boundary_knots
-                format: string
-                label: "Boundary Knots (advanced: min/max time range for splines)"
-      - type: CollapseBox
-        label: Time-Varying Effects
-        collapsed: true
-        stretchFactor: 1
-        children:
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: TextBox
-                name: tvc_df
-                format: number
-                label: "Time-Varying Effect DF (flexibility for changing effects over time, 2-3 typical)"
-              - type: TextBox
-                name: smooth_formula
-                format: string
-                label: Custom Smooth Formula
-      - type: CollapseBox
-        label: Clinical Analysis Options
-        collapsed: true
-        stretchFactor: 1
-        children:
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: TextBox
-                name: prediction_times
-                format: string
-                label: "Prediction Time Points (e.g., '1, 2, 5' for 1-year, 2-year, 5-year survival)"
-              - type: TextBox
-                name: extrapolation_time
-                format: number
-                label: Extrapolation Time
-              - type: TextBox
-                name: confidence_level
-                format: number
-                label: "Confidence Level (0.95 = 95% CI, standard for medical research)"
-              - type: CheckBox
-                name: time_ratio
-                label: Time Ratio Analysis
-              - type: CheckBox
-                name: relative_survival
-                label: Relative Survival Analysis
-              - type: CheckBox
-                name: hazard_analysis
-                label: Hazard Function Analysis
-              - type: CheckBox
-                name: derivative_analysis
-                label: Derivative Analysis
-      - type: CollapseBox
-        label: Model Validation
-        collapsed: true
-        stretchFactor: 1
-        children:
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: CheckBox
-                name: model_comparison
-                label: Model Comparison
-              - type: CheckBox
-                name: goodness_of_fit
-                label: Goodness of Fit Tests
-              - type: CheckBox
-                name: bootstrap_validation
-                label: Bootstrap Validation
-              - type: TextBox
-                name: bootstrap_samples
-                format: number
-                label: Bootstrap Samples
-      - type: CollapseBox
-        label: Advanced Options
-        collapsed: true
-        stretchFactor: 1
-        children:
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: CheckBox
-                name: cure_fraction
-                label: Include Cure Fraction
-              - type: CheckBox
-                name: robust_se
-                label: Robust Standard Errors
-      - type: CollapseBox
-        label: Display Options
-        collapsed: true
-        stretchFactor: 1
-        children:
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: CheckBox
-                name: show_model_summary
-                label: Show Model Summary
-              - type: CheckBox
-                name: show_coefficients_table
-                label: Show Coefficients Table
-              - type: CheckBox
-                name: show_survival_curves
-                label: Show Survival Curves
-              - type: CheckBox
-                name: show_hazard_curves
-                label: Show Hazard Curves
-              - type: CheckBox
-                name: show_time_varying_plots
-                label: Show Time-Varying Plots
-              - type: CheckBox
-                name: show_model_diagnostics
-                label: Show Model Diagnostics
-              - type: CheckBox
-                name: show_residuals
-                label: Show Residual Plots
-              - type: CheckBox
-                name: showSummaries
-                label: Analysis Summaries
-              - type: CheckBox
-                name: showExplanations
-                label: Method Explanations
+    - type: LayoutBox
+      margin: large
+      children:
+      - type: TextBox
+        name: tvc_df
+        format: number
+        label: Time-Varying Effect DF (flexibility for changing effects over time, 2-3 typical)
+  - type: CollapseBox
+    label: Clinical Analysis Options
+    collapsed: true
+    stretchFactor: 1
+    children:
+    - type: LayoutBox
+      margin: large
+      children:
+      - type: TextBox
+        name: prediction_times
+        format: string
+        label: Prediction Time Points (e.g., '1, 2, 5' for 1-year, 2-year, 5-year survival)
+      - type: TextBox
+        name: extrapolation_time
+        format: number
+        label: Extrapolation Time
+      - type: TextBox
+        name: confidence_level
+        format: number
+        label: Confidence Level (0.95 = 95% CI, standard for medical research)
+      - type: CheckBox
+        name: relative_survival
+        label: Relative Survival Analysis
+      - type: CheckBox
+        name: hazard_analysis
+        label: Hazard Function Analysis
+      - type: CheckBox
+        name: derivative_analysis
+        label: Derivative Analysis
+  - type: CollapseBox
+    label: Model Validation
+    collapsed: true
+    stretchFactor: 1
+    children:
+    - type: LayoutBox
+      margin: large
+      children:
+      - type: CheckBox
+        name: model_comparison
+        label: Model Comparison
+      - type: CheckBox
+        name: bootstrap_validation
+        label: Bootstrap prediction uncertainty
+      - type: TextBox
+        name: bootstrap_samples
+        format: number
+        label: Bootstrap Samples
+  - type: CollapseBox
+    label: Advanced Options
+    collapsed: true
+    stretchFactor: 1
+    children:
+    - type: LayoutBox
+      margin: large
+      children:
+      - type: CheckBox
+        name: cure_fraction
+        label: Include Cure Fraction
+      - type: CheckBox
+        name: robust_se
+        label: Robust Standard Errors
+  - type: CollapseBox
+    label: Display Options
+    collapsed: true
+    stretchFactor: 1
+    children:
+    - type: LayoutBox
+      margin: large
+      children:
+      - type: CheckBox
+        name: show_model_summary
+        label: Show Model Summary
+      - type: CheckBox
+        name: show_coefficients_table
+        label: Show Coefficients Table
+      - type: CheckBox
+        name: show_survival_curves
+        label: Show Survival Curves
+      - type: CheckBox
+        name: show_hazard_curves
+        label: Show Hazard Curves
+      - type: CheckBox
+        name: show_time_varying_plots
+        label: Show Time-Varying Plots
+      - type: CheckBox
+        name: showSummaries
+        label: Analysis Summaries

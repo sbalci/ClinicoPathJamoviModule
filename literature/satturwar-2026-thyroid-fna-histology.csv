@@ -1,0 +1,4 @@
+"modality","benign_reads","malignant_reads","benign_concordance_II","malignant_concordance_V_VI","derived_triage_sensitivity_III_VI","nondiagnostic_benign","nondiagnostic_malignant"
+"microscopy",186,114,52.6881720430108,40.3508771929825,71.0526315789474,47,1
+"single_layer",186,114,46.7741935483871,55.2631578947368,88.5964912280702,30,0
+"seven_layer",186,114,44.0860215053763,55.2631578947368,87.719298245614,28,0

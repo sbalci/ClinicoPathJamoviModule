@@ -1,278 +1,355 @@
----
 name: curemodels
 title: Cure Models for Long-term Survivors
-menuGroup: OncoPathD
+menuGroup: OncoPathDT
 menuSubgroup: Survival Analysis
-menuSubtitle: 'Mixture and Non-mixture Cure Models'
-version: '1.0.0'
+menuSubtitle: Mixture and Non-mixture Cure Models
+version: 1.0.0
 jas: '1.2'
-
 description:
-    main: |
-        Cure models for analyzing survival data with a cured fraction of long-term survivors.
-        Implements mixture cure models and non-mixture cure models for oncology research.
-    # R:
-    #     dontrun: true
-    #     usage: |
-    #         # Example usage
-    #         curemodels(
-    #             data = cancer_data,
-    #             time = followup_time,
-    #             status = death_status,
-    #             predictors = c(age, stage, treatment),
-    #             model_type = "mixture"
-    #         )
-
+  main: Model-based cure probabilities with explicit endpoint and event coding, observed-time cumulative
+    incidence, follow-up support, and administrative-censoring sensitivity refits. Recurrence cure with
+    competing death is not estimated by censoring the competing event. Statistical cure with background
+    mortality requires externally matched hazards.
 options:
-    - name: data
-      type: Data
-      description:
-          R: The data as a data frame.
+- name: endpoint_type
+  title: Endpoint interpretation
+  type: List
+  options:
+  - name: recurrence
+    title: Recurrence or another nonfatal event
+  - name: all_cause_death
+    title: All-cause death (observed risk only)
+  - name: excess_mortality
+    title: Excess mortality (statistical cure)
+  default: recurrence
+- name: event_value
+  title: Event value or label
+  type: String
+  default: '1'
+- name: censor_value
+  title: Censoring value or label
+  type: String
+  default: '0'
+- name: competing_value
+  title: Competing-event value or label (optional)
+  type: String
+  default: ''
+- name: prediction_profile
+  title: Cure prediction population
+  type: List
+  options:
+  - name: standardized
+    title: Original cohort average
+  - name: reference
+    title: Numeric zero and reference factor levels
+  default: standardized
+- name: latency_predictors
+  title: Separate latency predictors (optional)
+  type: Variables
+  suggested:
+  - continuous
+  - nominal
+  - ordinal
+  permitted:
+  - numeric
+  - factor
+  default: null
+- name: analysis_horizons
+  title: Observation horizons (data time units)
+  type: String
+  default: 12,36,60
+- name: sensitivity_alternatives
+  title: Alternative latency models or distributions
+  type: Bool
+  default: false
+- name: bootstrap_seed
+  title: Bootstrap random seed
+  type: Integer
+  default: 2026
+  min: 1
+  max: 2147483646
+- name: data
+  type: Data
+  description:
+    R: The data as a data frame.
+- name: time
+  title: Survival Time
+  type: Variable
+  suggested:
+  - continuous
+  permitted:
+  - numeric
+  description:
+    ui: 'Follow-up time variable (in months or years)
 
-    - name: time
-      title: 'Survival Time'
-      type: Variable
-      suggested: [ continuous ]
-      permitted: [ numeric ]
-      description:
-          ui: >
-            Follow-up time variable (in months or years)
-          R: >
-            Follow-up time variable
+      '
+    R: 'Follow-up time variable
 
-    - name: status
-      title: 'Event Status'
-      type: Variable
-      suggested: [ ordinal, nominal ]
-      permitted: [ factor, numeric ]
-      description:
-          ui: >
-            Event status (0 = censored, 1 = event)
-          R: >
-            Event status variable
+      '
+- name: status
+  title: Event Status
+  type: Variable
+  suggested:
+  - ordinal
+  - nominal
+  permitted:
+  - factor
+  - numeric
+  description:
+    ui: 'Event status (0 = censored, 1 = event)
 
-    - name: predictors
-      title: 'Predictor Variables'
-      type: Variables
-      suggested: [ continuous, ordinal, nominal ]
-      permitted: [ numeric, factor ]
-      default: NULL
-      description:
-          ui: >
-            Variables to include in the cure model
-          R: >
-            Predictor variables for the model (optional: without them the
-            model estimates the cure fraction of the whole cohort)
+      '
+    R: 'Event status variable
 
-    - name: model_type
-      title: 'Cure Model Type'
-      type: List
-      options:
-        - title: Mixture Cure Model (smcure)
-          name: mixture
-        - title: Non-mixture Cure Model (flexsurvcure)
-          name: nonmixture
-        - title: cuRe Model (with background mortality)
-          name: cure
-        - title: Nonparametric Cure Model (npcure)
-          name: npcure
-        - title: Compare All Models
-          name: all
-      default: mixture
-      description:
-          ui: >
-            Type of cure model to fit. cuRe allows background mortality; npcure is nonparametric.
-          R: >
-            Type of cure model: mixture (smcure), non-mixture (flexsurvcure), cuRe, npcure, or all
+      '
+- name: predictors
+  title: Predictor Variables
+  type: Variables
+  suggested:
+  - continuous
+  - ordinal
+  - nominal
+  permitted:
+  - numeric
+  - factor
+  default: null
+  description:
+    ui: 'Variables to include in the cure model
 
-    - name: smcure_model_type
-      title: 'smcure Survival Model Type'
-      type: List
-      options:
-        - title: Proportional Hazards (Cox PH)
-          name: ph
-        - title: Accelerated Failure Time
-          name: aft
-      default: ph
-      description:
-          ui: >
-            Survival model type for the uncured fraction in smcure (PH or AFT)
-          R: >
-            Survival model type for smcure: 'ph' (proportional hazards) or 'aft' (accelerated failure time)
+      '
+    R: 'Predictor variables for the model (optional: without them the model estimates the cure fraction
+      of the whole cohort)
 
-    - name: cure_link
-      title: 'Link Function for Cure Probability'
-      type: List
-      options:
-        - title: Logit
-          name: logit
-        - title: Probit
-          name: probit
-        - title: Complementary log-log
-          name: cloglog
-      default: logit
-      description:
-          ui: >
-            Link function for modeling cure probability
-          R: >
-            Link function for the cure probability model
+      '
+- name: model_type
+  title: Cure Model Type
+  type: List
+  options:
+  - title: Mixture Cure Model (smcure)
+    name: mixture
+  - title: Non-mixture Cure Model (flexsurvcure)
+    name: nonmixture
+  - title: cuRe Model (with background mortality)
+    name: cure
+  - title: Nonparametric Cure Model (npcure)
+    name: npcure
+  - title: Compare Single-Event Cure Models
+    name: all
+  default: mixture
+  description:
+    ui: 'Type of cure model to fit. cuRe allows background mortality; npcure is nonparametric.
 
-    - name: survival_dist
-      title: 'Survival Distribution'
-      type: List
-      options:
-        - title: Weibull
-          name: weibull
-        - title: Exponential
-          name: exponential
-        - title: Log-normal
-          name: lognormal
-        - title: Log-logistic
-          name: loglogistic
-      default: weibull
-      description:
-          ui: >
-            Distribution for the survival time of uncured patients
-          R: >
-            Distribution for modeling survival of uncured patients
+      '
+    R: 'Type of cure model: mixture (smcure), non-mixture (flexsurvcure), cuRe, npcure, or all
 
-    - name: bootstrap_ci
-      title: 'Bootstrap Confidence Intervals'
-      type: Bool
-      default: false
-      description:
-          ui: >
-            Calculate bootstrap confidence intervals for cure fraction
-          R: >
-            Use bootstrap for confidence interval estimation
+      '
+- name: smcure_model_type
+  title: smcure Survival Model Type
+  type: List
+  options:
+  - title: Proportional Hazards (Cox PH)
+    name: ph
+  - title: Accelerated Failure Time
+    name: aft
+  default: ph
+  description:
+    ui: 'Survival model type for the uncured fraction in smcure (PH or AFT)
 
-    - name: n_bootstrap
-      title: 'Number of Bootstrap Samples'
-      type: Integer
-      default: 1000
-      min: 100
-      max: 10000
-      description:
-          ui: >
-            Number of bootstrap samples for CI estimation
-          R: >
-            Number of bootstrap samples
+      '
+    R: 'Survival model type for smcure: ''ph'' (proportional hazards) or ''aft'' (accelerated failure
+      time)
 
-    - name: cure_threshold
-      title: 'Cure Threshold Time'
-      type: Number
-      default: 60
-      min: 0
-      description:
-          ui: >
-            Time point (months) to define long-term survivors
-          R: >
-            Time threshold for defining cured patients
+      '
+- name: cure_link
+  title: Incidence link (smcure requires logit)
+  type: List
+  options:
+  - title: Logit
+    name: logit
+  - title: Probit
+    name: probit
+  - title: Complementary log-log
+    name: cloglog
+  default: logit
+  description:
+    ui: 'Link function for modeling cure probability
 
-    - name: plot_cure_fraction
-      title: 'Plot Cure Fraction'
-      type: Bool
-      default: false
-      description:
-          ui: >
-            Display plot of cure fraction by covariates
-          R: >
-            Generate cure fraction plot
+      '
+    R: 'Link function for the cure probability model
 
-    - name: plot_survival
-      title: 'Plot Survival Curves'
-      type: Bool
-      default: false
-      description:
-          ui: >
-            Display survival curves for cured and uncured groups
-          R: >
-            Generate survival curve plots
+      '
+- name: survival_dist
+  title: Survival Distribution
+  type: List
+  options:
+  - title: Weibull
+    name: weibull
+  - title: Exponential
+    name: exponential
+  - title: Log-normal
+    name: lognormal
+  - title: Log-logistic
+    name: loglogistic
+  default: weibull
+  description:
+    ui: 'Distribution for the survival time of uncured patients
 
-    - name: goodness_of_fit
-      title: 'Goodness of Fit Tests'
-      type: Bool
-      default: false
-      description:
-          ui: >
-            Perform goodness of fit tests for the cure model
-          R: >
-            Conduct goodness of fit assessment
+      '
+    R: 'Distribution for modeling survival of uncured patients
 
-    - name: sensitivity_analysis
-      title: 'Sensitivity Analysis'
-      type: Bool
-      default: false
-      description:
-          ui: >
-            Perform sensitivity analysis for cure threshold
-          R: >
-            Conduct sensitivity analysis
+      '
+- name: bootstrap_ci
+  title: Bootstrap Confidence Intervals
+  type: Bool
+  default: false
+  description:
+    ui: 'Calculate bootstrap confidence intervals for cure fraction
 
-    # cuRe Package Options (Background Mortality)
-    - name: use_background_mortality
-      title: 'Use Background Mortality (cuRe)'
-      type: Bool
-      default: false
-      description:
-          ui: >
-            Incorporate general population mortality rates (requires cuRe package)
-          R: >
-            Enable background mortality integration using cuRe package
+      '
+    R: 'Use bootstrap for confidence interval estimation
 
-    - name: background_hazard_var
-      title: 'Background Hazard Variable'
-      type: Variable
-      default: null
-      suggested: [ continuous ]
-      permitted: [ numeric ]
-      description:
-          ui: >
-            Variable containing background hazard rates (e.g., from life tables)
-          R: >
-            Background hazard variable for cuRe models
+      '
+- name: n_bootstrap
+  title: Number of Bootstrap Samples
+  type: Integer
+  default: 1000
+  min: 100
+  max: 10000
+  description:
+    ui: 'Number of bootstrap samples for CI estimation
 
-    - name: npcure_covariate
-      title: 'Covariate for Nonparametric Model'
-      type: Variable
-      default: null
-      suggested: [ continuous ]
-      permitted: [ numeric ]
-      description:
-          ui: >
-            Single continuous covariate for nonparametric cure estimation
-          R: >
-            Continuous covariate for npcure model (limited to one variable)
+      '
+    R: 'Number of bootstrap samples
 
-    - name: npcure_bandwidth
-      title: 'Bandwidth for Nonparametric Estimation'
-      type: List
-      options:
-        - title: Automatic (cross-validation)
-          name: auto
-        - title: Small (0.1)
-          name: small
-        - title: Medium (0.3)
-          name: medium
-        - title: Large (0.5)
-          name: large
-      default: auto
-      description:
-          ui: >
-            Bandwidth for kernel smoothing in nonparametric estimation
-          R: >
-            Bandwidth parameter for npcure kernel smoothing
+      '
+- name: cure_threshold
+  title: Late follow-up assessment time
+  type: Number
+  default: 60
+  min: 0
+  description:
+    ui: 'Time point in the data units for assessing follow-up support; does not define cure
 
-    - name: npcure_time_points
-      title: 'Number of Time Points'
-      type: Integer
-      default: 100
-      min: 50
-      max: 500
-      description:
-          ui: >
-            Number of time points for cure probability estimation
-          R: >
-            Number of time points for testimate in npcure
+      '
+    R: 'Time point for follow-up counts; does not classify patients as cured
 
-...
+      '
+- name: plot_cure_fraction
+  title: Plot Cure Fraction
+  type: Bool
+  default: false
+  description:
+    ui: 'Display plot of cure fraction by covariates
+
+      '
+    R: 'Generate cure fraction plot
+
+      '
+- name: plot_survival
+  title: Plot Survival Curves
+  type: Bool
+  default: false
+  description:
+    ui: 'Display survival curves for cured and uncured groups
+
+      '
+    R: 'Generate survival curve plots
+
+      '
+- name: goodness_of_fit
+  title: Goodness of Fit Tests
+  type: Bool
+  default: false
+  description:
+    ui: 'Perform goodness of fit tests for the cure model
+
+      '
+    R: 'Conduct goodness of fit assessment
+
+      '
+- name: sensitivity_analysis
+  title: Sensitivity Analysis
+  type: Bool
+  default: false
+  description:
+    ui: 'Refit after administrative censoring at the requested observation horizons
+
+      '
+    R: 'Conduct sensitivity analysis
+
+      '
+- name: use_background_mortality
+  title: Use Background Mortality (cuRe)
+  type: Bool
+  default: false
+  description:
+    ui: 'Incorporate general population mortality rates (requires cuRe package)
+
+      '
+    R: 'Enable background mortality integration using cuRe package
+
+      '
+- name: background_hazard_var
+  title: Background Hazard Variable
+  type: Variable
+  default: null
+  suggested:
+  - continuous
+  permitted:
+  - numeric
+  description:
+    ui: 'Variable containing background hazard rates (e.g., from life tables)
+
+      '
+    R: 'Background hazard variable for cuRe models
+
+      '
+- name: npcure_covariate
+  title: Covariate for Nonparametric Model
+  type: Variable
+  default: null
+  suggested:
+  - continuous
+  permitted:
+  - numeric
+  description:
+    ui: 'Single continuous covariate for nonparametric cure estimation
+
+      '
+    R: 'Continuous covariate for npcure model (limited to one variable)
+
+      '
+- name: npcure_bandwidth
+  title: Bandwidth for Nonparametric Estimation
+  type: List
+  options:
+  - title: Automatic (cross-validation)
+    name: auto
+  - title: Small (0.1)
+    name: small
+  - title: Medium (0.3)
+    name: medium
+  - title: Large (0.5)
+    name: large
+  default: auto
+  description:
+    ui: 'Bandwidth for kernel smoothing in nonparametric estimation
+
+      '
+    R: 'Bandwidth parameter for npcure kernel smoothing
+
+      '
+- name: npcure_time_points
+  title: Number of Time Points
+  type: Integer
+  default: 100
+  min: 50
+  max: 500
+  description:
+    ui: 'Number of time points for cure probability estimation
+
+      '
+    R: 'Number of time points for testimate in npcure
+
+      '
+  hidden: true

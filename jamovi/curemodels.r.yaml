@@ -5,40 +5,21 @@ jrs:   '1.1'
 
 items:
 
-    - name:  todo
-      title: To Do
-      type:  Html
-      clearWith:
-          - time
-          - status
-          - predictors
-
-    - name:  warnings
-      title: Warnings
-      type:  Html
+    - name: followupSupport
+      title: Observed follow-up support
+      type: Table
+      rows: 0
       visible: true
       clearWith:
-          - time
-          - status
-          - predictors
-          - model_type
-          - bootstrap_ci
-
-    - name:  errors
-      title: Errors
-      type:  Html
-      visible: true
-      clearWith:
-          - time
-          - status
-          - predictors
-          - model_type
-
-    - name:  summary
-      title: Analysis Summary
-      type:  Html
-      visible: true
-      clearWith:
+          - endpoint_type
+          - event_value
+          - censor_value
+          - competing_value
+          - prediction_profile
+          - latency_predictors
+          - analysis_horizons
+          - sensitivity_alternatives
+          - bootstrap_seed
           - time
           - status
           - predictors
@@ -48,6 +29,375 @@ items:
           - survival_dist
           - bootstrap_ci
           - n_bootstrap
+          - cure_threshold
+          - plot_cure_fraction
+          - plot_survival
+          - goodness_of_fit
+          - sensitivity_analysis
+          - use_background_mortality
+          - background_hazard_var
+          - npcure_covariate
+          - npcure_bandwidth
+          - npcure_time_points
+      columns:
+        - name: n
+          title: "Complete cases"
+          type: integer
+        - name: excluded
+          title: "Excluded missing"
+          type: integer
+        - name: events
+          title: "Target events"
+          type: integer
+        - name: competing
+          title: "Competing events"
+          type: integer
+        - name: censored
+          title: "Censored"
+          type: integer
+        - name: assessment_time
+          title: "Assessment time"
+          type: number
+        - name: n_risk
+          title: "At risk"
+          type: integer
+        - name: late_events
+          title: "Events at or after assessment"
+          type: integer
+        - name: max_time
+          title: "Maximum follow-up"
+          type: number
+        - name: median_followup
+          title: "Reverse-KM median follow-up"
+          type: number
+
+    - name: observedRisk
+      title: Observed-time probabilities
+      type: Table
+      rows: 0
+      visible: true
+      clearWith:
+          - endpoint_type
+          - event_value
+          - censor_value
+          - competing_value
+          - prediction_profile
+          - latency_predictors
+          - analysis_horizons
+          - sensitivity_alternatives
+          - bootstrap_seed
+          - time
+          - status
+          - predictors
+          - model_type
+          - smcure_model_type
+          - cure_link
+          - survival_dist
+          - bootstrap_ci
+          - n_bootstrap
+          - cure_threshold
+          - plot_cure_fraction
+          - plot_survival
+          - goodness_of_fit
+          - sensitivity_analysis
+          - use_background_mortality
+          - background_hazard_var
+          - npcure_covariate
+          - npcure_bandwidth
+          - npcure_time_points
+      columns:
+        - name: group
+          title: "Group"
+          type: text
+        - name: time
+          title: "Time"
+          type: number
+        - name: cause
+          title: "State / event"
+          type: text
+        - name: estimate
+          title: "Probability"
+          type: number
+          format: pc
+        - name: lower
+          title: "Lower 95% CI"
+          type: number
+          format: pc
+        - name: upper
+          title: "Upper 95% CI"
+          type: number
+          format: pc
+        - name: n_risk
+          title: "At risk"
+          type: integer
+        - name: n_events
+          title: "Cumulative events"
+          type: integer
+        - name: n_censored
+          title: "Cumulative censoring"
+          type: integer
+
+    - name: fitDiagnostics
+      title: Fit and uncertainty diagnostics
+      type: Table
+      rows: 0
+      visible: true
+      clearWith:
+          - endpoint_type
+          - event_value
+          - censor_value
+          - competing_value
+          - prediction_profile
+          - latency_predictors
+          - analysis_horizons
+          - sensitivity_alternatives
+          - bootstrap_seed
+          - time
+          - status
+          - predictors
+          - model_type
+          - smcure_model_type
+          - cure_link
+          - survival_dist
+          - bootstrap_ci
+          - n_bootstrap
+          - cure_threshold
+          - plot_cure_fraction
+          - plot_survival
+          - goodness_of_fit
+          - sensitivity_analysis
+          - use_background_mortality
+          - background_hazard_var
+          - npcure_covariate
+          - npcure_bandwidth
+          - npcure_time_points
+      columns:
+        - name: model
+          title: "Model"
+          type: text
+        - name: successful
+          title: "Successful bootstrap fits"
+          type: integer
+        - name: attempted
+          title: "Bootstrap attempts"
+          type: integer
+        - name: ci_method
+          title: "Interval method"
+          type: text
+        - name: convergence
+          title: "Fit status"
+          type: text
+
+    - name: sensitivityTable
+      title: Administrative-horizon sensitivity refits
+      type: Table
+      rows: 0
+      visible: (sensitivity_analysis)
+      clearWith:
+          - endpoint_type
+          - event_value
+          - censor_value
+          - competing_value
+          - prediction_profile
+          - latency_predictors
+          - analysis_horizons
+          - sensitivity_alternatives
+          - bootstrap_seed
+          - time
+          - status
+          - predictors
+          - model_type
+          - smcure_model_type
+          - cure_link
+          - survival_dist
+          - bootstrap_ci
+          - n_bootstrap
+          - cure_threshold
+          - plot_cure_fraction
+          - plot_survival
+          - goodness_of_fit
+          - sensitivity_analysis
+          - use_background_mortality
+          - background_hazard_var
+          - npcure_covariate
+          - npcure_bandwidth
+          - npcure_time_points
+      columns:
+        - name: model
+          title: "Model"
+          type: text
+        - name: horizon
+          title: "Horizon"
+          type: number
+        - name: n
+          title: "N"
+          type: integer
+        - name: events
+          title: "Events"
+          type: integer
+        - name: n_risk
+          title: "At risk at horizon"
+          type: integer
+        - name: recensored
+          title: "Recensored at horizon"
+          type: integer
+        - name: estimate
+          title: "Model asymptote"
+          type: number
+          format: pc
+        - name: lower
+          title: "Lower 95% CI"
+          type: number
+          format: pc
+        - name: upper
+          title: "Upper 95% CI"
+          type: number
+          format: pc
+        - name: bootstrap_success
+          title: "Successful bootstrap fits"
+          type: integer
+        - name: bootstrap_attempts
+          title: "Bootstrap attempts"
+          type: integer
+        - name: status
+          title: "Fit status"
+          type: text
+
+
+    - name:  todo
+      title: To Do
+      type:  Html
+      clearWith:
+          - endpoint_type
+          - event_value
+          - censor_value
+          - competing_value
+          - prediction_profile
+          - latency_predictors
+          - analysis_horizons
+          - sensitivity_alternatives
+          - bootstrap_seed
+          - time
+          - status
+          - predictors
+          - model_type
+          - smcure_model_type
+          - cure_link
+          - survival_dist
+          - bootstrap_ci
+          - n_bootstrap
+          - cure_threshold
+          - plot_cure_fraction
+          - plot_survival
+          - goodness_of_fit
+          - sensitivity_analysis
+          - use_background_mortality
+          - background_hazard_var
+          - npcure_covariate
+          - npcure_bandwidth
+          - npcure_time_points
+
+    - name:  warnings
+      title: Warnings
+      type:  Html
+      visible: true
+      clearWith:
+          - endpoint_type
+          - event_value
+          - censor_value
+          - competing_value
+          - prediction_profile
+          - latency_predictors
+          - analysis_horizons
+          - sensitivity_alternatives
+          - bootstrap_seed
+          - time
+          - status
+          - predictors
+          - model_type
+          - smcure_model_type
+          - cure_link
+          - survival_dist
+          - bootstrap_ci
+          - n_bootstrap
+          - cure_threshold
+          - plot_cure_fraction
+          - plot_survival
+          - goodness_of_fit
+          - sensitivity_analysis
+          - use_background_mortality
+          - background_hazard_var
+          - npcure_covariate
+          - npcure_bandwidth
+          - npcure_time_points
+
+    - name:  errors
+      title: Errors
+      type:  Html
+      visible: true
+      clearWith:
+          - endpoint_type
+          - event_value
+          - censor_value
+          - competing_value
+          - prediction_profile
+          - latency_predictors
+          - analysis_horizons
+          - sensitivity_alternatives
+          - bootstrap_seed
+          - time
+          - status
+          - predictors
+          - model_type
+          - smcure_model_type
+          - cure_link
+          - survival_dist
+          - bootstrap_ci
+          - n_bootstrap
+          - cure_threshold
+          - plot_cure_fraction
+          - plot_survival
+          - goodness_of_fit
+          - sensitivity_analysis
+          - use_background_mortality
+          - background_hazard_var
+          - npcure_covariate
+          - npcure_bandwidth
+          - npcure_time_points
+
+    - name:  summary
+      title: Analysis Summary
+      type:  Html
+      visible: true
+      clearWith:
+          - endpoint_type
+          - event_value
+          - censor_value
+          - competing_value
+          - prediction_profile
+          - latency_predictors
+          - analysis_horizons
+          - sensitivity_alternatives
+          - bootstrap_seed
+          - time
+          - status
+          - predictors
+          - model_type
+          - smcure_model_type
+          - cure_link
+          - survival_dist
+          - bootstrap_ci
+          - n_bootstrap
+          - cure_threshold
+          - plot_cure_fraction
+          - plot_survival
+          - goodness_of_fit
+          - sensitivity_analysis
+          - use_background_mortality
+          - background_hazard_var
+          - npcure_covariate
+          - npcure_bandwidth
+          - npcure_time_points
 
     - name:  modelTable
       title: Cure Model Results
@@ -55,6 +405,15 @@ items:
       visible: true
       rows: 0
       clearWith:
+          - endpoint_type
+          - event_value
+          - censor_value
+          - competing_value
+          - prediction_profile
+          - latency_predictors
+          - analysis_horizons
+          - sensitivity_alternatives
+          - bootstrap_seed
           - time
           - status
           - predictors
@@ -64,6 +423,16 @@ items:
           - survival_dist
           - bootstrap_ci
           - n_bootstrap
+          - cure_threshold
+          - plot_cure_fraction
+          - plot_survival
+          - goodness_of_fit
+          - sensitivity_analysis
+          - use_background_mortality
+          - background_hazard_var
+          - npcure_covariate
+          - npcure_bandwidth
+          - npcure_time_points
       columns:
           - name: parameter
             title: 'Parameter'
@@ -94,13 +463,34 @@ items:
       visible: true
       rows: 0
       clearWith:
+          - endpoint_type
+          - event_value
+          - censor_value
+          - competing_value
+          - prediction_profile
+          - latency_predictors
+          - analysis_horizons
+          - sensitivity_alternatives
+          - bootstrap_seed
           - time
           - status
           - predictors
           - model_type
+          - smcure_model_type
           - cure_link
           - survival_dist
           - bootstrap_ci
+          - n_bootstrap
+          - cure_threshold
+          - plot_cure_fraction
+          - plot_survival
+          - goodness_of_fit
+          - sensitivity_analysis
+          - use_background_mortality
+          - background_hazard_var
+          - npcure_covariate
+          - npcure_bandwidth
+          - npcure_time_points
       columns:
           - name: group
             title: 'Group'
@@ -124,37 +514,18 @@ items:
       width:  700
       height: 450
       renderFun: .renderCureFractionPlot
-      requiresData: true
+      requiresData: false
       visible: (plot_cure_fraction)
       clearWith:
-          - time
-          - status
-          - predictors
-          - model_type
-          - cure_link
-          - bootstrap_ci
-
-    - name:  survivalPlot
-      title: Survival Curves by Cure Status
-      type:  Image
-      width:  700
-      height: 450
-      renderFun: .plotSurvival
-      requiresData: true
-      visible: (plot_survival)
-      clearWith:
-          - time
-          - status
-          - predictors
-          - model_type
-          - survival_dist
-
-    - name:  goodnessOfFit
-      title: Goodness of Fit Tests
-      type:  Table
-      visible: (goodness_of_fit)
-      rows: 0
-      clearWith:
+          - endpoint_type
+          - event_value
+          - censor_value
+          - competing_value
+          - prediction_profile
+          - latency_predictors
+          - analysis_horizons
+          - sensitivity_alternatives
+          - bootstrap_seed
           - time
           - status
           - predictors
@@ -162,6 +533,91 @@ items:
           - smcure_model_type
           - cure_link
           - survival_dist
+          - bootstrap_ci
+          - n_bootstrap
+          - cure_threshold
+          - plot_cure_fraction
+          - plot_survival
+          - goodness_of_fit
+          - sensitivity_analysis
+          - use_background_mortality
+          - background_hazard_var
+          - npcure_covariate
+          - npcure_bandwidth
+          - npcure_time_points
+
+    - name:  survivalPlot
+      title: Observed event-free survival by Cure Status
+      type:  Image
+      width:  700
+      height: 450
+      renderFun: .plotSurvival
+      requiresData: false
+      visible: (plot_survival)
+      clearWith:
+          - endpoint_type
+          - event_value
+          - censor_value
+          - competing_value
+          - prediction_profile
+          - latency_predictors
+          - analysis_horizons
+          - sensitivity_alternatives
+          - bootstrap_seed
+          - time
+          - status
+          - predictors
+          - model_type
+          - smcure_model_type
+          - cure_link
+          - survival_dist
+          - bootstrap_ci
+          - n_bootstrap
+          - cure_threshold
+          - plot_cure_fraction
+          - plot_survival
+          - goodness_of_fit
+          - sensitivity_analysis
+          - use_background_mortality
+          - background_hazard_var
+          - npcure_covariate
+          - npcure_bandwidth
+          - npcure_time_points
+
+    - name:  goodnessOfFit
+      title: Goodness of Fit Tests
+      type:  Table
+      visible: (goodness_of_fit)
+      rows: 0
+      clearWith:
+          - endpoint_type
+          - event_value
+          - censor_value
+          - competing_value
+          - prediction_profile
+          - latency_predictors
+          - analysis_horizons
+          - sensitivity_alternatives
+          - bootstrap_seed
+          - time
+          - status
+          - predictors
+          - model_type
+          - smcure_model_type
+          - cure_link
+          - survival_dist
+          - bootstrap_ci
+          - n_bootstrap
+          - cure_threshold
+          - plot_cure_fraction
+          - plot_survival
+          - goodness_of_fit
+          - sensitivity_analysis
+          - use_background_mortality
+          - background_hazard_var
+          - npcure_covariate
+          - npcure_bandwidth
+          - npcure_time_points
       columns:
           - name: test_name
             title: 'Test'
@@ -182,18 +638,15 @@ items:
       type:  Html
       visible: (sensitivity_analysis)
       clearWith:
-          - time
-          - status
-          - predictors
-          - cure_threshold
-          - model_type
-
-    - name:  modelComparison
-      title: Model Comparison
-      type:  Table
-      visible: (model_type:all)
-      rows: 0
-      clearWith:
+          - endpoint_type
+          - event_value
+          - censor_value
+          - competing_value
+          - prediction_profile
+          - latency_predictors
+          - analysis_horizons
+          - sensitivity_alternatives
+          - bootstrap_seed
           - time
           - status
           - predictors
@@ -201,6 +654,53 @@ items:
           - smcure_model_type
           - cure_link
           - survival_dist
+          - bootstrap_ci
+          - n_bootstrap
+          - cure_threshold
+          - plot_cure_fraction
+          - plot_survival
+          - goodness_of_fit
+          - sensitivity_analysis
+          - use_background_mortality
+          - background_hazard_var
+          - npcure_covariate
+          - npcure_bandwidth
+          - npcure_time_points
+
+    - name:  modelComparison
+      title: Model Comparison
+      type:  Table
+      visible: (model_type:all)
+      rows: 0
+      clearWith:
+          - endpoint_type
+          - event_value
+          - censor_value
+          - competing_value
+          - prediction_profile
+          - latency_predictors
+          - analysis_horizons
+          - sensitivity_alternatives
+          - bootstrap_seed
+          - time
+          - status
+          - predictors
+          - model_type
+          - smcure_model_type
+          - cure_link
+          - survival_dist
+          - bootstrap_ci
+          - n_bootstrap
+          - cure_threshold
+          - plot_cure_fraction
+          - plot_survival
+          - goodness_of_fit
+          - sensitivity_analysis
+          - use_background_mortality
+          - background_hazard_var
+          - npcure_covariate
+          - npcure_bandwidth
+          - npcure_time_points
       columns:
           - name: model
             title: 'Model Type'
@@ -220,12 +720,34 @@ items:
       type:  Html
       visible: true
       clearWith:
+          - endpoint_type
+          - event_value
+          - censor_value
+          - competing_value
+          - prediction_profile
+          - latency_predictors
+          - analysis_horizons
+          - sensitivity_alternatives
+          - bootstrap_seed
           - time
           - status
           - predictors
           - model_type
+          - smcure_model_type
           - cure_link
           - survival_dist
+          - bootstrap_ci
+          - n_bootstrap
+          - cure_threshold
+          - plot_cure_fraction
+          - plot_survival
+          - goodness_of_fit
+          - sensitivity_analysis
+          - use_background_mortality
+          - background_hazard_var
+          - npcure_covariate
+          - npcure_bandwidth
+          - npcure_time_points
 
 
 refs:

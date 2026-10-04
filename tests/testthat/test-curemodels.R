@@ -298,6 +298,6 @@ test_that("an intercept-only mixture cure model explains that smcure needs a pre
   data("curemodels_test", package = "ClinicoPath", envir = environment())
   res <- curemodels(data = curemodels_test, time = "FollowUpMonths", status = "Recurrence",
                     model_type = "mixture")
-  expect_match(res$errors$content, "needs at least one predictor", fixed = TRUE)
+  expect_match(res$errors$content, "requires incidence and latency predictors", fixed = TRUE)
   expect_false(grepl("subscript out of bounds", res$warnings$content, fixed = TRUE))
 })

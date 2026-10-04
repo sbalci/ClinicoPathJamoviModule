@@ -1,466 +1,1496 @@
----
-name:  flexrstpm2
+name: flexrstpm2
 title: Flexible Parametric Models (Royston-Parmar)
-jrs:   '1.1'
-
+jrs: '1.1'
 items:
-    - name: todo
-      title: Analysis
-      type: Html
-      visible: true
-
-    - name: modelSummary
-      title: Model Summary
-      type: Html
-      visible: (show_model_summary)
-
-    - name: coefficientsTable
-      title: Model Coefficients
-      type: Table
-      visible: (show_coefficients_table)
-      columns:
-          - name: term
-            title: Term
-            type: text
-          - name: coefficient
-            title: β
-            type: number
-          - name: se
-            title: SE
-            type: number
-          - name: z_value
-            title: z
-            type: number
-          - name: p_value
-            title: p
-            type: number
-          - name: lower_ci
-            title: Lower CI
-            type: number
-          - name: upper_ci
-            title: Upper CI
-            type: number
-
-    - name: timeVaryingTable
-      title: Time-Varying Effects
-      type: Table
-      visible: (length(time_varying_covariates) > 0 && show_coefficients_table)
-      columns:
-          - name: covariate
-            title: Covariate
-            type: text
-          - name: time_point
-            title: Time
-            type: number
-          - name: effect
-            title: Effect
-            type: number
-          - name: se
-            title: SE
-            type: number
-          - name: lower_ci
-            title: Lower CI
-            type: number
-          - name: upper_ci
-            title: Upper CI
-            type: number
-
-    - name: modelFit
-      title: Model Fit Statistics
-      type: Table
-      visible: (show_model_summary)
-      columns:
-          - name: statistic
-            title: Statistic
-            type: text
-          - name: value
-            title: Value
-            type: number
-          - name: interpretation
-            title: Interpretation
-            type: text
-
-    - name: splineInfo
-      title: Spline Configuration
-      type: Table
-      visible: (show_model_summary)
-      columns:
-          - name: component
-            title: Component
-            type: text
-          - name: df
-            title: Degrees of Freedom
-            type: integer
-          - name: knots
-            title: Knots
-            type: text
-          - name: boundary_knots
-            title: Boundary Knots
-            type: text
-
-    - name: parameterEstimates
-      title: 'Parameter Estimates with Clinical Interpretation'
-      type: Table
-      visible: (show_coefficients_table)
-      rows: 1
-      clearWith:
-        - covariates
-        - scale
-        - df
-      columns:
-        - name: parameter
-          title: 'Parameter'
-          type: text
-        - name: estimate
-          title: 'Estimate'
-          type: number
-          format: zto:4
-        - name: standard_error
-          title: 'SE'
-          type: number
-          format: zto:4
-        - name: confidence_interval
-          title: 'Confidence Interval'
-          type: text
-        - name: z_value
-          title: 'z-value'
-          type: number
-          format: zto:3
-        - name: p_value
-          title: 'p-value'
-          type: number
-          format: zto:4
-        - name: hazard_ratio
-          title: 'Hazard Ratio'
-          type: number
-          format: zto:4
-        - name: interpretation
-          title: 'Clinical Interpretation'
-          type: text
-
-    - name: survivalPredictions
-      title: 'Survival Predictions'
-      type: Table
-      visible: true
-      rows: 1
-      clearWith:
-        - prediction_times
-        - scale
-      columns:
-        - name: time_point
-          title: 'Time Point'
-          type: number
-          format: zto:2
-        - name: survival_probability
-          title: 'Survival Probability'
-          type: number
-          format: zto:4
-        - name: confidence_interval
-          title: 'Confidence Interval'
-          type: text
-        - name: hazard_rate
-          title: 'Hazard Rate'
-          type: number
-          format: zto:4
-        - name: hazard_ratio
-          title: 'Hazard Ratio'
-          type: number
-          format: zto:4
-          visible: (covariates)
-
-    - name: timeRatioAnalysis
-      title: 'Time Ratio Analysis'
-      type: Table
-      visible: (time_ratio)
-      rows: 1
-      clearWith:
-        - time_ratio
-        - covariates
-      columns:
-        - name: covariate
-          title: 'Covariate'
-          type: text
-        - name: time_ratio
-          title: 'Time Ratio'
-          type: number
-          format: zto:4
-        - name: confidence_interval
-          title: 'Confidence Interval'
-          type: text
-        - name: p_value
-          title: 'p-value'
-          type: number
-          format: zto:4
-        - name: interpretation
-          title: 'Interpretation'
-          type: text
-
-    - name: relativeSurvivalAnalysis
-      title: 'Relative Survival Analysis'
-      type: Table
-      visible: (relative_survival)
-      rows: 1
-      clearWith:
-        - relative_survival
-        - bhazard
-      columns:
-        - name: time_point
-          title: 'Time Point'
-          type: number
-          format: zto:2
-        - name: observed_survival
-          title: 'Observed Survival'
-          type: number
-          format: zto:4
-        - name: expected_survival
-          title: 'Expected Survival'
-          type: number
-          format: zto:4
-        - name: relative_survival
-          title: 'Relative Survival'
-          type: number
-          format: zto:4
-        - name: excess_mortality
-          title: 'Excess Mortality Rate'
-          type: number
-          format: zto:4
-
-    - name: modelComparison
-      title: 'Model Comparison'
-      type: Table
-      visible: (model_comparison)
-      rows: 1
-      clearWith:
-        - model_comparison
-        - df
-      columns:
-        - name: model
-          title: 'Model'
-          type: text
-        - name: parameters
-          title: 'Parameters'
-          type: integer
-        - name: log_likelihood
-          title: 'Log-Likelihood'
-          type: number
-          format: zto:2
-        - name: aic
-          title: 'AIC'
-          type: number
-          format: zto:2
-        - name: bic
-          title: 'BIC'
-          type: number
-          format: zto:2
-        - name: likelihood_ratio_test
-          title: 'LR Test p-value'
-          type: number
-          format: zto:4
-
-    - name: goodnessOfFitTests
-      title: 'Goodness of Fit Tests'
-      type: Table
-      visible: (goodness_of_fit)
-      rows: 1
-      clearWith:
-        - goodness_of_fit
-        - scale
-      columns:
-        - name: test
-          title: 'Test'
-          type: text
-        - name: statistic
-          title: 'Test Statistic'
-          type: number
-          format: zto:4
-        - name: p_value
-          title: 'p-value'
-          type: number
-          format: zto:4
-        - name: conclusion
-          title: 'Conclusion'
-          type: text
-
-    - name: hazardAnalysis
-      title: 'Hazard Function Analysis'
-      type: Table
-      visible: (hazard_analysis)
-      rows: 1
-      clearWith:
-        - hazard_analysis
-        - prediction_times
-      columns:
-        - name: time_point
-          title: 'Time Point'
-          type: number
-          format: zto:2
-        - name: hazard_rate
-          title: 'Hazard Rate'
-          type: number
-          format: zto:4
-        - name: hazard_confidence_interval
-          title: 'Hazard CI'
-          type: text
-        - name: hazard_pattern
-          title: 'Hazard Pattern'
-          type: text
-
-    - name: derivativeAnalysis
-      title: 'Hazard Derivative Analysis'
-      type: Table
-      visible: (derivative_analysis)
-      rows: 1
-      clearWith:
-        - derivative_analysis
-        - prediction_times
-      columns:
-        - name: time_point
-          title: 'Time Point'
-          type: number
-          format: zto:2
-        - name: first_derivative
-          title: 'First Derivative'
-          type: number
-          format: zto:4
-        - name: second_derivative
-          title: 'Second Derivative'
-          type: number
-          format: zto:4
-        - name: acceleration_pattern
-          title: 'Acceleration Pattern'
-          type: text
-
-    - name: bootstrapValidation
-      title: 'Bootstrap Validation Results'
-      type: Table
-      visible: (bootstrap_validation)
-      rows: 1
-      clearWith:
-        - bootstrap_validation
-        - bootstrap_samples
-      columns:
-        - name: validation_metric
-          title: 'Validation Metric'
-          type: text
-        - name: original_estimate
-          title: 'Original'
-          type: number
-          format: zto:4
-        - name: bootstrap_mean
-          title: 'Bootstrap Mean'
-          type: number
-          format: zto:4
-        - name: bootstrap_se
-          title: 'Bootstrap SE'
-          type: number
-          format: zto:4
-        - name: bias
-          title: 'Bias'
-          type: number
-          format: zto:4
-        - name: percentile_ci
-          title: 'Percentile CI'
-          type: text
-
-    - name: survivalCurves
-      title: Fitted Survival Curves
-      type: Image
-      visible: (show_survival_curves)
-
-    - name: hazardCurves
-      title: Fitted Hazard Functions
-      type: Image
-      visible: (show_hazard_curves)
-
-    - name: timeVaryingPlots
-      title: Time-Varying Effects
-      type: Image
-      visible: (length(time_varying_covariates) > 0 && show_time_varying_plots)
-
-    - name: modelDiagnostics
-      title: Model Diagnostics
-      type: Image
-      visible: (show_model_diagnostics)
-
-    - name: residualPlots
-      title: Residual Analysis
-      type: Image
-      visible: (show_residuals)
-
-    - name: splineComponents
-      title: Spline Components
-      type: Image
-      visible: (show_model_diagnostics)
-
-    - name: hazardFunctionPlot
-      title: 'Hazard Function Plot'
-      type: Image
-      visible: (hazard_analysis)
-      requiresData: true
-      width: 800
-      height: 600
-      renderFun: .plotHazardFunction
-      clearWith:
-        - hazard_analysis
-        - scale
-        - df
-
-    - name: splineBasisPlot
-      title: 'Spline Basis Functions Plot'
-      type: Image
-      visible: (show_model_diagnostics)
-      requiresData: true
-      width: 800
-      height: 600
-      renderFun: .plotSplineBasis
-      clearWith:
-        - df
-        - knots
-        - scale
-
-    - name: modelComparisonPlot
-      title: 'Model Comparison Plot'
-      type: Image
-      visible: (model_comparison)
-      requiresData: true
-      width: 800
-      height: 600
-      renderFun: .plotModelComparison
-      clearWith:
-        - model_comparison
-        - df
-
-    - name: derivativePlot
-      title: 'Hazard Derivative Plot'
-      type: Image
-      visible: (derivative_analysis)
-      requiresData: true
-      width: 800
-      height: 600
-      renderFun: .plotDerivatives
-      clearWith:
-        - derivative_analysis
-        - scale
-
-    - name: clinicalSummary
-      title: 'Clinical Summary and Report Templates'
-      type: Html
-      visible: true
-
-    - name: analysisSummary
-      title: Analysis Summary
-      type: Html
-      visible: (showSummaries)
-
-    - name: methodExplanation
-      title: Methodology
-      type: Html
-      visible: (showExplanations)
-
+- name: todo
+  title: Analysis
+  type: Html
+  visible: true
+  clearWith:
+  - endpoint_type
+  - bootstrap_seed
+  - elapsedtime
+  - outcome
+  - covariates
+  - outcomeLevel
+  - scale
+  - df
+  - knots
+  - boundary_knots
+  - time_varying_covariates
+  - tvc_df
+  - cure_fraction
+  - bhazard
+  - group_variable
+  - link_function
+  - prediction_times
+  - extrapolation_time
+  - confidence_level
+  - smooth_formula
+  - robust_se
+  - time_ratio
+  - relative_survival
+  - model_comparison
+  - goodness_of_fit
+  - hazard_analysis
+  - derivative_analysis
+  - bootstrap_validation
+  - bootstrap_samples
+  - show_model_summary
+  - show_coefficients_table
+  - show_survival_curves
+  - show_hazard_curves
+  - show_time_varying_plots
+  - show_model_diagnostics
+  - show_residuals
+  - showSummaries
+  - showExplanations
+- name: modelSummary
+  title: Model Summary
+  type: Html
+  visible: (show_model_summary)
+  clearWith:
+  - endpoint_type
+  - bootstrap_seed
+  - elapsedtime
+  - outcome
+  - covariates
+  - outcomeLevel
+  - scale
+  - df
+  - knots
+  - boundary_knots
+  - time_varying_covariates
+  - tvc_df
+  - cure_fraction
+  - bhazard
+  - group_variable
+  - link_function
+  - prediction_times
+  - extrapolation_time
+  - confidence_level
+  - smooth_formula
+  - robust_se
+  - time_ratio
+  - relative_survival
+  - model_comparison
+  - goodness_of_fit
+  - hazard_analysis
+  - derivative_analysis
+  - bootstrap_validation
+  - bootstrap_samples
+  - show_model_summary
+  - show_coefficients_table
+  - show_survival_curves
+  - show_hazard_curves
+  - show_time_varying_plots
+  - show_model_diagnostics
+  - show_residuals
+  - showSummaries
+  - showExplanations
+- name: coefficientsTable
+  title: Model Coefficients
+  type: Table
+  visible: (show_coefficients_table)
+  columns:
+  - name: term
+    title: Term
+    type: text
+  - name: coefficient
+    title: β
+    type: number
+  - name: se
+    title: SE
+    type: number
+  - name: z_value
+    title: z
+    type: number
+  - name: p_value
+    title: p
+    type: number
+  - name: lower_ci
+    title: Lower CI
+    type: number
+  - name: upper_ci
+    title: Upper CI
+    type: number
+  clearWith:
+  - endpoint_type
+  - bootstrap_seed
+  - elapsedtime
+  - outcome
+  - covariates
+  - outcomeLevel
+  - scale
+  - df
+  - knots
+  - boundary_knots
+  - time_varying_covariates
+  - tvc_df
+  - cure_fraction
+  - bhazard
+  - group_variable
+  - link_function
+  - prediction_times
+  - extrapolation_time
+  - confidence_level
+  - smooth_formula
+  - robust_se
+  - time_ratio
+  - relative_survival
+  - model_comparison
+  - goodness_of_fit
+  - hazard_analysis
+  - derivative_analysis
+  - bootstrap_validation
+  - bootstrap_samples
+  - show_model_summary
+  - show_coefficients_table
+  - show_survival_curves
+  - show_hazard_curves
+  - show_time_varying_plots
+  - show_model_diagnostics
+  - show_residuals
+  - showSummaries
+  - showExplanations
+- name: timeVaryingTable
+  title: Time-Varying Effects
+  type: Table
+  visible: (length(time_varying_covariates) > 0 && show_coefficients_table)
+  columns:
+  - name: covariate
+    title: Covariate
+    type: text
+  - name: time_point
+    title: Time
+    type: number
+  - name: effect
+    title: Effect
+    type: number
+  - name: se
+    title: SE
+    type: number
+  - name: lower_ci
+    title: Lower CI
+    type: number
+  - name: upper_ci
+    title: Upper CI
+    type: number
+  clearWith:
+  - endpoint_type
+  - bootstrap_seed
+  - elapsedtime
+  - outcome
+  - covariates
+  - outcomeLevel
+  - scale
+  - df
+  - knots
+  - boundary_knots
+  - time_varying_covariates
+  - tvc_df
+  - cure_fraction
+  - bhazard
+  - group_variable
+  - link_function
+  - prediction_times
+  - extrapolation_time
+  - confidence_level
+  - smooth_formula
+  - robust_se
+  - time_ratio
+  - relative_survival
+  - model_comparison
+  - goodness_of_fit
+  - hazard_analysis
+  - derivative_analysis
+  - bootstrap_validation
+  - bootstrap_samples
+  - show_model_summary
+  - show_coefficients_table
+  - show_survival_curves
+  - show_hazard_curves
+  - show_time_varying_plots
+  - show_model_diagnostics
+  - show_residuals
+  - showSummaries
+  - showExplanations
+- name: modelFit
+  title: Model Fit Statistics
+  type: Table
+  visible: (show_model_summary)
+  columns:
+  - name: statistic
+    title: Statistic
+    type: text
+  - name: value
+    title: Value
+    type: number
+  - name: interpretation
+    title: Interpretation
+    type: text
+  clearWith:
+  - endpoint_type
+  - bootstrap_seed
+  - elapsedtime
+  - outcome
+  - covariates
+  - outcomeLevel
+  - scale
+  - df
+  - knots
+  - boundary_knots
+  - time_varying_covariates
+  - tvc_df
+  - cure_fraction
+  - bhazard
+  - group_variable
+  - link_function
+  - prediction_times
+  - extrapolation_time
+  - confidence_level
+  - smooth_formula
+  - robust_se
+  - time_ratio
+  - relative_survival
+  - model_comparison
+  - goodness_of_fit
+  - hazard_analysis
+  - derivative_analysis
+  - bootstrap_validation
+  - bootstrap_samples
+  - show_model_summary
+  - show_coefficients_table
+  - show_survival_curves
+  - show_hazard_curves
+  - show_time_varying_plots
+  - show_model_diagnostics
+  - show_residuals
+  - showSummaries
+  - showExplanations
+- name: splineInfo
+  title: Spline Configuration
+  type: Table
+  visible: false
+  columns:
+  - name: component
+    title: Component
+    type: text
+  - name: df
+    title: Degrees of Freedom
+    type: integer
+  - name: knots
+    title: Knots
+    type: text
+  - name: boundary_knots
+    title: Boundary Knots
+    type: text
+  clearWith:
+  - endpoint_type
+  - bootstrap_seed
+  - elapsedtime
+  - outcome
+  - covariates
+  - outcomeLevel
+  - scale
+  - df
+  - knots
+  - boundary_knots
+  - time_varying_covariates
+  - tvc_df
+  - cure_fraction
+  - bhazard
+  - group_variable
+  - link_function
+  - prediction_times
+  - extrapolation_time
+  - confidence_level
+  - smooth_formula
+  - robust_se
+  - time_ratio
+  - relative_survival
+  - model_comparison
+  - goodness_of_fit
+  - hazard_analysis
+  - derivative_analysis
+  - bootstrap_validation
+  - bootstrap_samples
+  - show_model_summary
+  - show_coefficients_table
+  - show_survival_curves
+  - show_hazard_curves
+  - show_time_varying_plots
+  - show_model_diagnostics
+  - show_residuals
+  - showSummaries
+  - showExplanations
+- name: parameterEstimates
+  title: Parameter Estimates with Clinical Interpretation
+  type: Table
+  visible: false
+  rows: 0
+  clearWith:
+  - endpoint_type
+  - bootstrap_seed
+  - elapsedtime
+  - outcome
+  - covariates
+  - outcomeLevel
+  - scale
+  - df
+  - knots
+  - boundary_knots
+  - time_varying_covariates
+  - tvc_df
+  - cure_fraction
+  - bhazard
+  - group_variable
+  - link_function
+  - prediction_times
+  - extrapolation_time
+  - confidence_level
+  - smooth_formula
+  - robust_se
+  - time_ratio
+  - relative_survival
+  - model_comparison
+  - goodness_of_fit
+  - hazard_analysis
+  - derivative_analysis
+  - bootstrap_validation
+  - bootstrap_samples
+  - show_model_summary
+  - show_coefficients_table
+  - show_survival_curves
+  - show_hazard_curves
+  - show_time_varying_plots
+  - show_model_diagnostics
+  - show_residuals
+  - showSummaries
+  - showExplanations
+  columns:
+  - name: parameter
+    title: Parameter
+    type: text
+  - name: estimate
+    title: Estimate
+    type: number
+    format: zto:4
+  - name: standard_error
+    title: SE
+    type: number
+    format: zto:4
+  - name: confidence_interval
+    title: Confidence Interval
+    type: text
+  - name: z_value
+    title: z-value
+    type: number
+    format: zto:3
+  - name: p_value
+    title: p-value
+    type: number
+    format: zto:4
+  - name: hazard_ratio
+    title: Hazard Ratio
+    type: number
+    format: zto:4
+  - name: interpretation
+    title: Clinical Interpretation
+    type: text
+- name: survivalPredictions
+  title: Survival Predictions
+  type: Table
+  visible: true
+  rows: 0
+  clearWith:
+  - endpoint_type
+  - bootstrap_seed
+  - elapsedtime
+  - outcome
+  - covariates
+  - outcomeLevel
+  - scale
+  - df
+  - knots
+  - boundary_knots
+  - time_varying_covariates
+  - tvc_df
+  - cure_fraction
+  - bhazard
+  - group_variable
+  - link_function
+  - prediction_times
+  - extrapolation_time
+  - confidence_level
+  - smooth_formula
+  - robust_se
+  - time_ratio
+  - relative_survival
+  - model_comparison
+  - goodness_of_fit
+  - hazard_analysis
+  - derivative_analysis
+  - bootstrap_validation
+  - bootstrap_samples
+  - show_model_summary
+  - show_coefficients_table
+  - show_survival_curves
+  - show_hazard_curves
+  - show_time_varying_plots
+  - show_model_diagnostics
+  - show_residuals
+  - showSummaries
+  - showExplanations
+  columns:
+  - name: time_point
+    title: Time Point
+    type: number
+    format: zto:2
+  - name: survival_probability
+    title: Survival Probability
+    type: number
+    format: zto:4
+  - name: confidence_interval
+    title: Confidence Interval
+    type: text
+  - name: hazard_rate
+    title: Hazard Rate
+    type: number
+    format: zto:4
+  - name: hazard_ratio
+    title: Hazard Ratio
+    type: number
+    format: zto:4
+    visible: (covariates)
+- name: timeRatioAnalysis
+  title: Time Ratio Analysis
+  type: Table
+  visible: (time_ratio)
+  rows: 0
+  clearWith:
+  - endpoint_type
+  - bootstrap_seed
+  - elapsedtime
+  - outcome
+  - covariates
+  - outcomeLevel
+  - scale
+  - df
+  - knots
+  - boundary_knots
+  - time_varying_covariates
+  - tvc_df
+  - cure_fraction
+  - bhazard
+  - group_variable
+  - link_function
+  - prediction_times
+  - extrapolation_time
+  - confidence_level
+  - smooth_formula
+  - robust_se
+  - time_ratio
+  - relative_survival
+  - model_comparison
+  - goodness_of_fit
+  - hazard_analysis
+  - derivative_analysis
+  - bootstrap_validation
+  - bootstrap_samples
+  - show_model_summary
+  - show_coefficients_table
+  - show_survival_curves
+  - show_hazard_curves
+  - show_time_varying_plots
+  - show_model_diagnostics
+  - show_residuals
+  - showSummaries
+  - showExplanations
+  columns:
+  - name: covariate
+    title: Covariate
+    type: text
+  - name: time_ratio
+    title: Time Ratio
+    type: number
+    format: zto:4
+  - name: confidence_interval
+    title: Confidence Interval
+    type: text
+  - name: p_value
+    title: p-value
+    type: number
+    format: zto:4
+  - name: interpretation
+    title: Interpretation
+    type: text
+- name: relativeSurvivalAnalysis
+  title: Relative Survival Analysis
+  type: Table
+  visible: (relative_survival || endpoint_type:excess_mortality)
+  rows: 0
+  clearWith:
+  - endpoint_type
+  - bootstrap_seed
+  - elapsedtime
+  - outcome
+  - covariates
+  - outcomeLevel
+  - scale
+  - df
+  - knots
+  - boundary_knots
+  - time_varying_covariates
+  - tvc_df
+  - cure_fraction
+  - bhazard
+  - group_variable
+  - link_function
+  - prediction_times
+  - extrapolation_time
+  - confidence_level
+  - smooth_formula
+  - robust_se
+  - time_ratio
+  - relative_survival
+  - model_comparison
+  - goodness_of_fit
+  - hazard_analysis
+  - derivative_analysis
+  - bootstrap_validation
+  - bootstrap_samples
+  - show_model_summary
+  - show_coefficients_table
+  - show_survival_curves
+  - show_hazard_curves
+  - show_time_varying_plots
+  - show_model_diagnostics
+  - show_residuals
+  - showSummaries
+  - showExplanations
+  columns:
+  - name: time_point
+    title: Time Point
+    type: number
+    format: zto:2
+  - name: observed_survival
+    title: Observed Survival
+    type: number
+    format: zto:4
+  - name: expected_survival
+    title: Expected Survival
+    type: number
+    format: zto:4
+  - name: relative_survival
+    title: Relative Survival
+    type: number
+    format: zto:4
+  - name: excess_mortality
+    title: Excess Mortality Rate
+    type: number
+    format: zto:4
+- name: modelComparison
+  title: Model Comparison
+  type: Table
+  visible: (model_comparison)
+  rows: 0
+  clearWith:
+  - endpoint_type
+  - bootstrap_seed
+  - elapsedtime
+  - outcome
+  - covariates
+  - outcomeLevel
+  - scale
+  - df
+  - knots
+  - boundary_knots
+  - time_varying_covariates
+  - tvc_df
+  - cure_fraction
+  - bhazard
+  - group_variable
+  - link_function
+  - prediction_times
+  - extrapolation_time
+  - confidence_level
+  - smooth_formula
+  - robust_se
+  - time_ratio
+  - relative_survival
+  - model_comparison
+  - goodness_of_fit
+  - hazard_analysis
+  - derivative_analysis
+  - bootstrap_validation
+  - bootstrap_samples
+  - show_model_summary
+  - show_coefficients_table
+  - show_survival_curves
+  - show_hazard_curves
+  - show_time_varying_plots
+  - show_model_diagnostics
+  - show_residuals
+  - showSummaries
+  - showExplanations
+  columns:
+  - name: model
+    title: Model
+    type: text
+  - name: parameters
+    title: Parameters
+    type: integer
+  - name: log_likelihood
+    title: Log-Likelihood
+    type: number
+    format: zto:2
+  - name: aic
+    title: AIC
+    type: number
+    format: zto:2
+  - name: bic
+    title: BIC
+    type: number
+    format: zto:2
+  - name: likelihood_ratio_test
+    title: LR Test p-value
+    type: number
+    format: zto:4
+- name: goodnessOfFitTests
+  title: Goodness of Fit Tests
+  type: Table
+  visible: (goodness_of_fit)
+  rows: 0
+  clearWith:
+  - endpoint_type
+  - bootstrap_seed
+  - elapsedtime
+  - outcome
+  - covariates
+  - outcomeLevel
+  - scale
+  - df
+  - knots
+  - boundary_knots
+  - time_varying_covariates
+  - tvc_df
+  - cure_fraction
+  - bhazard
+  - group_variable
+  - link_function
+  - prediction_times
+  - extrapolation_time
+  - confidence_level
+  - smooth_formula
+  - robust_se
+  - time_ratio
+  - relative_survival
+  - model_comparison
+  - goodness_of_fit
+  - hazard_analysis
+  - derivative_analysis
+  - bootstrap_validation
+  - bootstrap_samples
+  - show_model_summary
+  - show_coefficients_table
+  - show_survival_curves
+  - show_hazard_curves
+  - show_time_varying_plots
+  - show_model_diagnostics
+  - show_residuals
+  - showSummaries
+  - showExplanations
+  columns:
+  - name: test
+    title: Test
+    type: text
+  - name: statistic
+    title: Test Statistic
+    type: number
+    format: zto:4
+  - name: p_value
+    title: p-value
+    type: number
+    format: zto:4
+  - name: conclusion
+    title: Conclusion
+    type: text
+- name: hazardAnalysis
+  title: Hazard Function Analysis
+  type: Table
+  visible: (hazard_analysis)
+  rows: 0
+  clearWith:
+  - endpoint_type
+  - bootstrap_seed
+  - elapsedtime
+  - outcome
+  - covariates
+  - outcomeLevel
+  - scale
+  - df
+  - knots
+  - boundary_knots
+  - time_varying_covariates
+  - tvc_df
+  - cure_fraction
+  - bhazard
+  - group_variable
+  - link_function
+  - prediction_times
+  - extrapolation_time
+  - confidence_level
+  - smooth_formula
+  - robust_se
+  - time_ratio
+  - relative_survival
+  - model_comparison
+  - goodness_of_fit
+  - hazard_analysis
+  - derivative_analysis
+  - bootstrap_validation
+  - bootstrap_samples
+  - show_model_summary
+  - show_coefficients_table
+  - show_survival_curves
+  - show_hazard_curves
+  - show_time_varying_plots
+  - show_model_diagnostics
+  - show_residuals
+  - showSummaries
+  - showExplanations
+  columns:
+  - name: time_point
+    title: Time Point
+    type: number
+    format: zto:2
+  - name: hazard_rate
+    title: Hazard Rate
+    type: number
+    format: zto:4
+  - name: hazard_confidence_interval
+    title: Hazard CI
+    type: text
+  - name: hazard_pattern
+    title: Hazard Pattern
+    type: text
+- name: derivativeAnalysis
+  title: Hazard Derivative Analysis
+  type: Table
+  visible: (derivative_analysis)
+  rows: 0
+  clearWith:
+  - endpoint_type
+  - bootstrap_seed
+  - elapsedtime
+  - outcome
+  - covariates
+  - outcomeLevel
+  - scale
+  - df
+  - knots
+  - boundary_knots
+  - time_varying_covariates
+  - tvc_df
+  - cure_fraction
+  - bhazard
+  - group_variable
+  - link_function
+  - prediction_times
+  - extrapolation_time
+  - confidence_level
+  - smooth_formula
+  - robust_se
+  - time_ratio
+  - relative_survival
+  - model_comparison
+  - goodness_of_fit
+  - hazard_analysis
+  - derivative_analysis
+  - bootstrap_validation
+  - bootstrap_samples
+  - show_model_summary
+  - show_coefficients_table
+  - show_survival_curves
+  - show_hazard_curves
+  - show_time_varying_plots
+  - show_model_diagnostics
+  - show_residuals
+  - showSummaries
+  - showExplanations
+  columns:
+  - name: time_point
+    title: Time Point
+    type: number
+    format: zto:2
+  - name: first_derivative
+    title: First Derivative
+    type: number
+    format: zto:4
+  - name: second_derivative
+    title: Second Derivative
+    type: number
+    format: zto:4
+  - name: acceleration_pattern
+    title: Acceleration Pattern
+    type: text
+- name: bootstrapValidation
+  title: Bootstrap Validation Results
+  type: Table
+  visible: (bootstrap_validation)
+  rows: 0
+  clearWith:
+  - endpoint_type
+  - bootstrap_seed
+  - elapsedtime
+  - outcome
+  - covariates
+  - outcomeLevel
+  - scale
+  - df
+  - knots
+  - boundary_knots
+  - time_varying_covariates
+  - tvc_df
+  - cure_fraction
+  - bhazard
+  - group_variable
+  - link_function
+  - prediction_times
+  - extrapolation_time
+  - confidence_level
+  - smooth_formula
+  - robust_se
+  - time_ratio
+  - relative_survival
+  - model_comparison
+  - goodness_of_fit
+  - hazard_analysis
+  - derivative_analysis
+  - bootstrap_validation
+  - bootstrap_samples
+  - show_model_summary
+  - show_coefficients_table
+  - show_survival_curves
+  - show_hazard_curves
+  - show_time_varying_plots
+  - show_model_diagnostics
+  - show_residuals
+  - showSummaries
+  - showExplanations
+  columns:
+  - name: validation_metric
+    title: Validation Metric
+    type: text
+  - name: original_estimate
+    title: Original
+    type: number
+    format: zto:4
+  - name: bootstrap_mean
+    title: Bootstrap Mean
+    type: number
+    format: zto:4
+  - name: bootstrap_se
+    title: Bootstrap SE
+    type: number
+    format: zto:4
+  - name: bias
+    title: Bias
+    type: number
+    format: zto:4
+  - name: percentile_ci
+    title: Percentile CI
+    type: text
+- name: survivalCurves
+  title: Fitted Survival Curves
+  type: Image
+  visible: (show_survival_curves)
+  clearWith:
+  - endpoint_type
+  - bootstrap_seed
+  - elapsedtime
+  - outcome
+  - covariates
+  - outcomeLevel
+  - scale
+  - df
+  - knots
+  - boundary_knots
+  - time_varying_covariates
+  - tvc_df
+  - cure_fraction
+  - bhazard
+  - group_variable
+  - link_function
+  - prediction_times
+  - extrapolation_time
+  - confidence_level
+  - smooth_formula
+  - robust_se
+  - time_ratio
+  - relative_survival
+  - model_comparison
+  - goodness_of_fit
+  - hazard_analysis
+  - derivative_analysis
+  - bootstrap_validation
+  - bootstrap_samples
+  - show_model_summary
+  - show_coefficients_table
+  - show_survival_curves
+  - show_hazard_curves
+  - show_time_varying_plots
+  - show_model_diagnostics
+  - show_residuals
+  - showSummaries
+  - showExplanations
+  requiresData: false
+  renderFun: .plotSurvival
+- name: hazardCurves
+  title: Fitted Hazard Functions
+  type: Image
+  visible: (show_hazard_curves)
+  clearWith:
+  - endpoint_type
+  - bootstrap_seed
+  - elapsedtime
+  - outcome
+  - covariates
+  - outcomeLevel
+  - scale
+  - df
+  - knots
+  - boundary_knots
+  - time_varying_covariates
+  - tvc_df
+  - cure_fraction
+  - bhazard
+  - group_variable
+  - link_function
+  - prediction_times
+  - extrapolation_time
+  - confidence_level
+  - smooth_formula
+  - robust_se
+  - time_ratio
+  - relative_survival
+  - model_comparison
+  - goodness_of_fit
+  - hazard_analysis
+  - derivative_analysis
+  - bootstrap_validation
+  - bootstrap_samples
+  - show_model_summary
+  - show_coefficients_table
+  - show_survival_curves
+  - show_hazard_curves
+  - show_time_varying_plots
+  - show_model_diagnostics
+  - show_residuals
+  - showSummaries
+  - showExplanations
+  requiresData: false
+  renderFun: .plotHazard
+- name: timeVaryingPlots
+  title: Time-Varying Effects
+  type: Image
+  visible: (length(time_varying_covariates) > 0 && show_time_varying_plots)
+  clearWith:
+  - endpoint_type
+  - bootstrap_seed
+  - elapsedtime
+  - outcome
+  - covariates
+  - outcomeLevel
+  - scale
+  - df
+  - knots
+  - boundary_knots
+  - time_varying_covariates
+  - tvc_df
+  - cure_fraction
+  - bhazard
+  - group_variable
+  - link_function
+  - prediction_times
+  - extrapolation_time
+  - confidence_level
+  - smooth_formula
+  - robust_se
+  - time_ratio
+  - relative_survival
+  - model_comparison
+  - goodness_of_fit
+  - hazard_analysis
+  - derivative_analysis
+  - bootstrap_validation
+  - bootstrap_samples
+  - show_model_summary
+  - show_coefficients_table
+  - show_survival_curves
+  - show_hazard_curves
+  - show_time_varying_plots
+  - show_model_diagnostics
+  - show_residuals
+  - showSummaries
+  - showExplanations
+  requiresData: false
+  renderFun: .plotTimeVarying
+- name: modelDiagnostics
+  title: Model Diagnostics
+  type: Image
+  visible: false
+  clearWith:
+  - endpoint_type
+  - bootstrap_seed
+  - elapsedtime
+  - outcome
+  - covariates
+  - outcomeLevel
+  - scale
+  - df
+  - knots
+  - boundary_knots
+  - time_varying_covariates
+  - tvc_df
+  - cure_fraction
+  - bhazard
+  - group_variable
+  - link_function
+  - prediction_times
+  - extrapolation_time
+  - confidence_level
+  - smooth_formula
+  - robust_se
+  - time_ratio
+  - relative_survival
+  - model_comparison
+  - goodness_of_fit
+  - hazard_analysis
+  - derivative_analysis
+  - bootstrap_validation
+  - bootstrap_samples
+  - show_model_summary
+  - show_coefficients_table
+  - show_survival_curves
+  - show_hazard_curves
+  - show_time_varying_plots
+  - show_model_diagnostics
+  - show_residuals
+  - showSummaries
+  - showExplanations
+  requiresData: false
+  renderFun: .emptyPlot
+- name: residualPlots
+  title: Residual Analysis
+  type: Image
+  visible: false
+  clearWith:
+  - endpoint_type
+  - bootstrap_seed
+  - elapsedtime
+  - outcome
+  - covariates
+  - outcomeLevel
+  - scale
+  - df
+  - knots
+  - boundary_knots
+  - time_varying_covariates
+  - tvc_df
+  - cure_fraction
+  - bhazard
+  - group_variable
+  - link_function
+  - prediction_times
+  - extrapolation_time
+  - confidence_level
+  - smooth_formula
+  - robust_se
+  - time_ratio
+  - relative_survival
+  - model_comparison
+  - goodness_of_fit
+  - hazard_analysis
+  - derivative_analysis
+  - bootstrap_validation
+  - bootstrap_samples
+  - show_model_summary
+  - show_coefficients_table
+  - show_survival_curves
+  - show_hazard_curves
+  - show_time_varying_plots
+  - show_model_diagnostics
+  - show_residuals
+  - showSummaries
+  - showExplanations
+  requiresData: false
+  renderFun: .emptyPlot
+- name: splineComponents
+  title: Spline Components
+  type: Image
+  visible: false
+  clearWith:
+  - endpoint_type
+  - bootstrap_seed
+  - elapsedtime
+  - outcome
+  - covariates
+  - outcomeLevel
+  - scale
+  - df
+  - knots
+  - boundary_knots
+  - time_varying_covariates
+  - tvc_df
+  - cure_fraction
+  - bhazard
+  - group_variable
+  - link_function
+  - prediction_times
+  - extrapolation_time
+  - confidence_level
+  - smooth_formula
+  - robust_se
+  - time_ratio
+  - relative_survival
+  - model_comparison
+  - goodness_of_fit
+  - hazard_analysis
+  - derivative_analysis
+  - bootstrap_validation
+  - bootstrap_samples
+  - show_model_summary
+  - show_coefficients_table
+  - show_survival_curves
+  - show_hazard_curves
+  - show_time_varying_plots
+  - show_model_diagnostics
+  - show_residuals
+  - showSummaries
+  - showExplanations
+  requiresData: false
+  renderFun: .emptyPlot
+- name: hazardFunctionPlot
+  title: Hazard Function Plot
+  type: Image
+  visible: (hazard_analysis)
+  requiresData: false
+  width: 800
+  height: 600
+  renderFun: .plotHazard
+  clearWith:
+  - endpoint_type
+  - bootstrap_seed
+  - elapsedtime
+  - outcome
+  - covariates
+  - outcomeLevel
+  - scale
+  - df
+  - knots
+  - boundary_knots
+  - time_varying_covariates
+  - tvc_df
+  - cure_fraction
+  - bhazard
+  - group_variable
+  - link_function
+  - prediction_times
+  - extrapolation_time
+  - confidence_level
+  - smooth_formula
+  - robust_se
+  - time_ratio
+  - relative_survival
+  - model_comparison
+  - goodness_of_fit
+  - hazard_analysis
+  - derivative_analysis
+  - bootstrap_validation
+  - bootstrap_samples
+  - show_model_summary
+  - show_coefficients_table
+  - show_survival_curves
+  - show_hazard_curves
+  - show_time_varying_plots
+  - show_model_diagnostics
+  - show_residuals
+  - showSummaries
+  - showExplanations
+- name: splineBasisPlot
+  title: Spline Basis Functions Plot
+  type: Image
+  visible: false
+  requiresData: false
+  width: 800
+  height: 600
+  renderFun: .emptyPlot
+  clearWith:
+  - endpoint_type
+  - bootstrap_seed
+  - elapsedtime
+  - outcome
+  - covariates
+  - outcomeLevel
+  - scale
+  - df
+  - knots
+  - boundary_knots
+  - time_varying_covariates
+  - tvc_df
+  - cure_fraction
+  - bhazard
+  - group_variable
+  - link_function
+  - prediction_times
+  - extrapolation_time
+  - confidence_level
+  - smooth_formula
+  - robust_se
+  - time_ratio
+  - relative_survival
+  - model_comparison
+  - goodness_of_fit
+  - hazard_analysis
+  - derivative_analysis
+  - bootstrap_validation
+  - bootstrap_samples
+  - show_model_summary
+  - show_coefficients_table
+  - show_survival_curves
+  - show_hazard_curves
+  - show_time_varying_plots
+  - show_model_diagnostics
+  - show_residuals
+  - showSummaries
+  - showExplanations
+- name: modelComparisonPlot
+  title: Model Comparison Plot
+  type: Image
+  visible: false
+  requiresData: false
+  width: 800
+  height: 600
+  renderFun: .emptyPlot
+  clearWith:
+  - endpoint_type
+  - bootstrap_seed
+  - elapsedtime
+  - outcome
+  - covariates
+  - outcomeLevel
+  - scale
+  - df
+  - knots
+  - boundary_knots
+  - time_varying_covariates
+  - tvc_df
+  - cure_fraction
+  - bhazard
+  - group_variable
+  - link_function
+  - prediction_times
+  - extrapolation_time
+  - confidence_level
+  - smooth_formula
+  - robust_se
+  - time_ratio
+  - relative_survival
+  - model_comparison
+  - goodness_of_fit
+  - hazard_analysis
+  - derivative_analysis
+  - bootstrap_validation
+  - bootstrap_samples
+  - show_model_summary
+  - show_coefficients_table
+  - show_survival_curves
+  - show_hazard_curves
+  - show_time_varying_plots
+  - show_model_diagnostics
+  - show_residuals
+  - showSummaries
+  - showExplanations
+- name: derivativePlot
+  title: Hazard Derivative Plot
+  type: Image
+  visible: false
+  requiresData: false
+  width: 800
+  height: 600
+  renderFun: .emptyPlot
+  clearWith:
+  - endpoint_type
+  - bootstrap_seed
+  - elapsedtime
+  - outcome
+  - covariates
+  - outcomeLevel
+  - scale
+  - df
+  - knots
+  - boundary_knots
+  - time_varying_covariates
+  - tvc_df
+  - cure_fraction
+  - bhazard
+  - group_variable
+  - link_function
+  - prediction_times
+  - extrapolation_time
+  - confidence_level
+  - smooth_formula
+  - robust_se
+  - time_ratio
+  - relative_survival
+  - model_comparison
+  - goodness_of_fit
+  - hazard_analysis
+  - derivative_analysis
+  - bootstrap_validation
+  - bootstrap_samples
+  - show_model_summary
+  - show_coefficients_table
+  - show_survival_curves
+  - show_hazard_curves
+  - show_time_varying_plots
+  - show_model_diagnostics
+  - show_residuals
+  - showSummaries
+  - showExplanations
+- name: clinicalSummary
+  title: Clinical Summary and Report Templates
+  type: Html
+  visible: true
+  clearWith:
+  - endpoint_type
+  - bootstrap_seed
+  - elapsedtime
+  - outcome
+  - covariates
+  - outcomeLevel
+  - scale
+  - df
+  - knots
+  - boundary_knots
+  - time_varying_covariates
+  - tvc_df
+  - cure_fraction
+  - bhazard
+  - group_variable
+  - link_function
+  - prediction_times
+  - extrapolation_time
+  - confidence_level
+  - smooth_formula
+  - robust_se
+  - time_ratio
+  - relative_survival
+  - model_comparison
+  - goodness_of_fit
+  - hazard_analysis
+  - derivative_analysis
+  - bootstrap_validation
+  - bootstrap_samples
+  - show_model_summary
+  - show_coefficients_table
+  - show_survival_curves
+  - show_hazard_curves
+  - show_time_varying_plots
+  - show_model_diagnostics
+  - show_residuals
+  - showSummaries
+  - showExplanations
+- name: analysisSummary
+  title: Analysis Summary
+  type: Html
+  visible: (showSummaries)
+  clearWith:
+  - endpoint_type
+  - bootstrap_seed
+  - elapsedtime
+  - outcome
+  - covariates
+  - outcomeLevel
+  - scale
+  - df
+  - knots
+  - boundary_knots
+  - time_varying_covariates
+  - tvc_df
+  - cure_fraction
+  - bhazard
+  - group_variable
+  - link_function
+  - prediction_times
+  - extrapolation_time
+  - confidence_level
+  - smooth_formula
+  - robust_se
+  - time_ratio
+  - relative_survival
+  - model_comparison
+  - goodness_of_fit
+  - hazard_analysis
+  - derivative_analysis
+  - bootstrap_validation
+  - bootstrap_samples
+  - show_model_summary
+  - show_coefficients_table
+  - show_survival_curves
+  - show_hazard_curves
+  - show_time_varying_plots
+  - show_model_diagnostics
+  - show_residuals
+  - showSummaries
+  - showExplanations
+- name: methodExplanation
+  title: Methodology
+  type: Html
+  visible: false
+  clearWith:
+  - endpoint_type
+  - bootstrap_seed
+  - elapsedtime
+  - outcome
+  - covariates
+  - outcomeLevel
+  - scale
+  - df
+  - knots
+  - boundary_knots
+  - time_varying_covariates
+  - tvc_df
+  - cure_fraction
+  - bhazard
+  - group_variable
+  - link_function
+  - prediction_times
+  - extrapolation_time
+  - confidence_level
+  - smooth_formula
+  - robust_se
+  - time_ratio
+  - relative_survival
+  - model_comparison
+  - goodness_of_fit
+  - hazard_analysis
+  - derivative_analysis
+  - bootstrap_validation
+  - bootstrap_samples
+  - show_model_summary
+  - show_coefficients_table
+  - show_survival_curves
+  - show_hazard_curves
+  - show_time_varying_plots
+  - show_model_diagnostics
+  - show_residuals
+  - showSummaries
+  - showExplanations
 refs:
-    - ClinicoPathJamoviModule
-
-    - splines
-    - survival
-    - rstpm2
-...
+- ClinicoPathJamoviModule
+- splines
+- survival
+- rstpm2

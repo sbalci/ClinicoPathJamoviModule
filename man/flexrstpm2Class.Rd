@@ -2,54 +2,13 @@
 % Please edit documentation in R/flexrstpm2.b.R
 \name{flexrstpm2Class}
 \alias{flexrstpm2Class}
-\title{Royston-Parmar Flexible Parametric Models Implementation}
+\title{Flexible Parametric Survival Models}
 \value{
-An \code{R6} class generator object for the \code{flexrstpm2Class} backend; used internally by the jamovi analysis wrapper and not called directly.
+An R6 class generator using rstpm2 model fits and predictions.
 }
 \description{
-Backend implementation class for Royston-Parmar flexible parametric survival models.
-This R6 class provides comprehensive functionality for flexible parametric modeling
-using restricted cubic splines to model the baseline log cumulative hazard function,
-allowing for non-monotonic hazard functions while maintaining parametric advantages.
+Flexible Parametric Survival Models
 }
-\details{
-The flexrstpm2Class implements Royston-Parmar flexible parametric models with:
-
-\strong{Model Scales:}
-\itemize{
-\item Proportional hazards scale (log cumulative hazard)
-\item Proportional odds scale (log cumulative odds)
-\item Probit scale (normal distribution transformation)
-}
-
-\strong{Flexible Modeling Features:}
-\itemize{
-\item Restricted cubic splines for baseline function modeling
-\item Time-varying covariate effects through spline interactions
-\item Customizable knot placement and degrees of freedom
-\item Cure fraction modeling for long-term survivors
-}
-
-\strong{Advanced Capabilities:}
-\itemize{
-\item Background hazard incorporation for relative survival
-\item Multiple link functions and transformation scales
-\item Time-dependent effects visualization
-\item Comprehensive model diagnostics and validation
-}
-
-\strong{Clinical Applications:}
-\itemize{
-\item Cancer survival modeling with flexible hazard patterns
-\item Long-term follow-up studies with cure fractions
-\item Population-based survival analysis with background mortality
-\item Treatment effect evaluation with time-varying impacts
-}
-}
-\seealso{
-\code{\link{flexrstpm2}} for the main user interface function
-}
-\keyword{internal}
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{flexrstpm2Base} -> \code{flexrstpm2Class}
 }

@@ -1,152 +1,508 @@
----
 name: flexparametric
 title: Flexible Parametric Survival Models (Enhanced)
 jrs: '1.1'
-
 items:
-    - name: todo
-      title: Analysis
-      type: Html
-      visible: true
-
-    - name: modelSummary
-      title: Model Summary
-      type: Html
-      visible: true
-
-    - name: parametersTable
-      title: Parameter Estimates with Clinical Interpretation
-      type: Table
-      visible: (show_parameters)
-      columns:
-        - name: parameter
-          title: Parameter
-          type: text
-        - name: estimate
-          title: Estimate
-          type: number
-        - name: se
-          title: SE
-          type: number
-        - name: lower_ci
-          title: Lower CI
-          type: number
-        - name: upper_ci
-          title: Upper CI
-          type: number
-        - name: z_value
-          title: z
-          type: number
-        - name: p_value
-          title: p
-          type: number
-        - name: hazard_ratio
-          title: HR
-          type: number
-        - name: interpretation
-          title: Clinical Interpretation
-          type: text
-
-    - name: splineDetails
-      title: Spline Configuration
-      type: Table
-      visible: (model_approach == 'spline_based' && show_parameters)
-      columns:
-        - name: component
-          title: Component
-          type: text
-        - name: df
-          title: DF
-          type: integer
-        - name: knots
-          title: Knot Positions
-          type: text
-        - name: basis_type
-          title: Basis Type
-          type: text
-
-    - name: modelComparison
-      title: Model Comparison
-      type: Table
-      visible: (model_comparison)
-      columns:
-        - name: model
-          title: Model
-          type: text
-        - name: parameters
-          title: Parameters
-          type: integer
-        - name: log_likelihood
-          title: Log-Likelihood
-          type: number
-        - name: aic
-          title: AIC
-          type: number
-        - name: bic
-          title: BIC
-          type: number
-        - name: best
-          title: Best Model
-          type: text
-
-    - name: fitStatistics
-      title: Goodness of Fit
-      type: Table
-      visible: (show_aic_bic)
-      columns:
-        - name: statistic
-          title: Statistic
-          type: text
-        - name: value
-          title: Value
-          type: number
-        - name: interpretation
-          title: Interpretation
-          type: text
-
-    - name: survivalPlot
-      title: Parametric Survival Curves
-      type: Image
-      visible: (show_survival_plot)
-
-    - name: hazardPlot
-      title: Parametric Hazard Functions
-      type: Image
-      visible: (show_hazard_plot)
-
-    - name: densityPlot
-      title: Parametric Density Functions
-      type: Image
-      visible: (show_density_plot)
-
-    - name: splinePlot
-      title: Spline Components
-      type: Image
-      visible: (model_approach == 'spline_based' && show_spline_plot)
-
-    - name: diagnosticsPlot
-      title: Model Diagnostics
-      type: Image
-      visible: (show_diagnostics)
-
-    - name: clinicalSummary
-      title: Clinical Summary and Report
-      type: Html
-      visible: (show_clinical_summary)
-
-    - name: analysisSummary
-      title: Analysis Summary
-      type: Html
-      visible: (showSummaries)
-
-    - name: methodExplanation
-      title: About This Analysis
-      type: Html
-      visible: (showExplanations)
-
+- name: todo
+  title: Analysis
+  type: Html
+  visible: true
+  clearWith:
+  - elapsedtime
+  - outcome
+  - covariates
+  - outcomeLevel
+  - model_approach
+  - distribution
+  - spline_type
+  - spline_df
+  - knot_placement
+  - manual_knots
+  - confidence_level
+  - grouping_variable
+  - model_comparison
+  - time_varying_effects
+  - show_parameters
+  - show_aic_bic
+  - show_survival_plot
+  - show_hazard_plot
+  - show_spline_plot
+  - show_diagnostics
+  - show_clinical_summary
+  - show_density_plot
+  - plot_time_max
+  - showSummaries
+  - showExplanations
+- name: modelSummary
+  title: Model Summary
+  type: Html
+  visible: true
+  clearWith:
+  - elapsedtime
+  - outcome
+  - covariates
+  - outcomeLevel
+  - model_approach
+  - distribution
+  - spline_type
+  - spline_df
+  - knot_placement
+  - manual_knots
+  - confidence_level
+  - grouping_variable
+  - model_comparison
+  - time_varying_effects
+  - show_parameters
+  - show_aic_bic
+  - show_survival_plot
+  - show_hazard_plot
+  - show_spline_plot
+  - show_diagnostics
+  - show_clinical_summary
+  - show_density_plot
+  - plot_time_max
+  - showSummaries
+  - showExplanations
+- name: parametersTable
+  title: Parameter Estimates with Clinical Interpretation
+  type: Table
+  visible: (show_parameters)
+  columns:
+  - name: parameter
+    title: Parameter
+    type: text
+  - name: estimate
+    title: Estimate
+    type: number
+  - name: se
+    title: SE
+    type: number
+  - name: lower_ci
+    title: Lower CI
+    type: number
+  - name: upper_ci
+    title: Upper CI
+    type: number
+  - name: z_value
+    title: z
+    type: number
+  - name: p_value
+    title: p
+    type: number
+  - name: hazard_ratio
+    title: HR
+    type: number
+  - name: interpretation
+    title: Clinical Interpretation
+    type: text
+  clearWith:
+  - elapsedtime
+  - outcome
+  - covariates
+  - outcomeLevel
+  - model_approach
+  - distribution
+  - spline_type
+  - spline_df
+  - knot_placement
+  - manual_knots
+  - confidence_level
+  - grouping_variable
+  - model_comparison
+  - time_varying_effects
+  - show_parameters
+  - show_aic_bic
+  - show_survival_plot
+  - show_hazard_plot
+  - show_spline_plot
+  - show_diagnostics
+  - show_clinical_summary
+  - show_density_plot
+  - plot_time_max
+  - showSummaries
+  - showExplanations
+- name: splineDetails
+  title: Spline Configuration
+  type: Table
+  visible: (model_approach == 'spline_based' && show_parameters)
+  columns:
+  - name: component
+    title: Component
+    type: text
+  - name: df
+    title: DF
+    type: integer
+  - name: knots
+    title: Knot Positions
+    type: text
+  - name: basis_type
+    title: Basis Type
+    type: text
+  clearWith:
+  - elapsedtime
+  - outcome
+  - covariates
+  - outcomeLevel
+  - model_approach
+  - distribution
+  - spline_type
+  - spline_df
+  - knot_placement
+  - manual_knots
+  - confidence_level
+  - grouping_variable
+  - model_comparison
+  - time_varying_effects
+  - show_parameters
+  - show_aic_bic
+  - show_survival_plot
+  - show_hazard_plot
+  - show_spline_plot
+  - show_diagnostics
+  - show_clinical_summary
+  - show_density_plot
+  - plot_time_max
+  - showSummaries
+  - showExplanations
+- name: modelComparison
+  title: Model Comparison
+  type: Table
+  visible: (model_comparison)
+  columns:
+  - name: model
+    title: Model
+    type: text
+  - name: parameters
+    title: Parameters
+    type: integer
+  - name: log_likelihood
+    title: Log-Likelihood
+    type: number
+  - name: aic
+    title: AIC
+    type: number
+  - name: bic
+    title: BIC
+    type: number
+  - name: best
+    title: Best Model
+    type: text
+  clearWith:
+  - elapsedtime
+  - outcome
+  - covariates
+  - outcomeLevel
+  - model_approach
+  - distribution
+  - spline_type
+  - spline_df
+  - knot_placement
+  - manual_knots
+  - confidence_level
+  - grouping_variable
+  - model_comparison
+  - time_varying_effects
+  - show_parameters
+  - show_aic_bic
+  - show_survival_plot
+  - show_hazard_plot
+  - show_spline_plot
+  - show_diagnostics
+  - show_clinical_summary
+  - show_density_plot
+  - plot_time_max
+  - showSummaries
+  - showExplanations
+- name: fitStatistics
+  title: Goodness of Fit
+  type: Table
+  visible: (show_aic_bic)
+  columns:
+  - name: statistic
+    title: Statistic
+    type: text
+  - name: value
+    title: Value
+    type: number
+  - name: interpretation
+    title: Interpretation
+    type: text
+  clearWith:
+  - elapsedtime
+  - outcome
+  - covariates
+  - outcomeLevel
+  - model_approach
+  - distribution
+  - spline_type
+  - spline_df
+  - knot_placement
+  - manual_knots
+  - confidence_level
+  - grouping_variable
+  - model_comparison
+  - time_varying_effects
+  - show_parameters
+  - show_aic_bic
+  - show_survival_plot
+  - show_hazard_plot
+  - show_spline_plot
+  - show_diagnostics
+  - show_clinical_summary
+  - show_density_plot
+  - plot_time_max
+  - showSummaries
+  - showExplanations
+- name: survivalPlot
+  title: Parametric Survival Curves
+  type: Image
+  visible: (show_survival_plot)
+  clearWith:
+  - elapsedtime
+  - outcome
+  - covariates
+  - outcomeLevel
+  - model_approach
+  - distribution
+  - spline_type
+  - spline_df
+  - knot_placement
+  - manual_knots
+  - confidence_level
+  - grouping_variable
+  - model_comparison
+  - time_varying_effects
+  - show_parameters
+  - show_aic_bic
+  - show_survival_plot
+  - show_hazard_plot
+  - show_spline_plot
+  - show_diagnostics
+  - show_clinical_summary
+  - show_density_plot
+  - plot_time_max
+  - showSummaries
+  - showExplanations
+  requiresData: false
+  renderFun: .plotSurvivalPlot
+- name: hazardPlot
+  title: Parametric Hazard Functions
+  type: Image
+  visible: (show_hazard_plot)
+  clearWith:
+  - elapsedtime
+  - outcome
+  - covariates
+  - outcomeLevel
+  - model_approach
+  - distribution
+  - spline_type
+  - spline_df
+  - knot_placement
+  - manual_knots
+  - confidence_level
+  - grouping_variable
+  - model_comparison
+  - time_varying_effects
+  - show_parameters
+  - show_aic_bic
+  - show_survival_plot
+  - show_hazard_plot
+  - show_spline_plot
+  - show_diagnostics
+  - show_clinical_summary
+  - show_density_plot
+  - plot_time_max
+  - showSummaries
+  - showExplanations
+  requiresData: false
+  renderFun: .plotHazardPlot
+- name: densityPlot
+  title: Parametric Density Functions
+  type: Image
+  visible: (show_density_plot)
+  clearWith:
+  - elapsedtime
+  - outcome
+  - covariates
+  - outcomeLevel
+  - model_approach
+  - distribution
+  - spline_type
+  - spline_df
+  - knot_placement
+  - manual_knots
+  - confidence_level
+  - grouping_variable
+  - model_comparison
+  - time_varying_effects
+  - show_parameters
+  - show_aic_bic
+  - show_survival_plot
+  - show_hazard_plot
+  - show_spline_plot
+  - show_diagnostics
+  - show_clinical_summary
+  - show_density_plot
+  - plot_time_max
+  - showSummaries
+  - showExplanations
+  requiresData: false
+  renderFun: .plotDensityPlot
+- name: splinePlot
+  title: Spline Components
+  type: Image
+  visible: (model_approach == 'spline_based' && show_spline_plot)
+  clearWith:
+  - elapsedtime
+  - outcome
+  - covariates
+  - outcomeLevel
+  - model_approach
+  - distribution
+  - spline_type
+  - spline_df
+  - knot_placement
+  - manual_knots
+  - confidence_level
+  - grouping_variable
+  - model_comparison
+  - time_varying_effects
+  - show_parameters
+  - show_aic_bic
+  - show_survival_plot
+  - show_hazard_plot
+  - show_spline_plot
+  - show_diagnostics
+  - show_clinical_summary
+  - show_density_plot
+  - plot_time_max
+  - showSummaries
+  - showExplanations
+  requiresData: false
+  renderFun: .plotSplinePlot
+- name: diagnosticsPlot
+  title: Model Diagnostics
+  type: Image
+  visible: (show_diagnostics)
+  clearWith:
+  - elapsedtime
+  - outcome
+  - covariates
+  - outcomeLevel
+  - model_approach
+  - distribution
+  - spline_type
+  - spline_df
+  - knot_placement
+  - manual_knots
+  - confidence_level
+  - grouping_variable
+  - model_comparison
+  - time_varying_effects
+  - show_parameters
+  - show_aic_bic
+  - show_survival_plot
+  - show_hazard_plot
+  - show_spline_plot
+  - show_diagnostics
+  - show_clinical_summary
+  - show_density_plot
+  - plot_time_max
+  - showSummaries
+  - showExplanations
+  requiresData: false
+  renderFun: .plotDiagnosticsPlot
+- name: clinicalSummary
+  title: Clinical Summary and Report
+  type: Html
+  visible: (show_clinical_summary)
+  clearWith:
+  - elapsedtime
+  - outcome
+  - covariates
+  - outcomeLevel
+  - model_approach
+  - distribution
+  - spline_type
+  - spline_df
+  - knot_placement
+  - manual_knots
+  - confidence_level
+  - grouping_variable
+  - model_comparison
+  - time_varying_effects
+  - show_parameters
+  - show_aic_bic
+  - show_survival_plot
+  - show_hazard_plot
+  - show_spline_plot
+  - show_diagnostics
+  - show_clinical_summary
+  - show_density_plot
+  - plot_time_max
+  - showSummaries
+  - showExplanations
+- name: analysisSummary
+  title: Analysis Summary
+  type: Html
+  visible: (showSummaries)
+  clearWith:
+  - elapsedtime
+  - outcome
+  - covariates
+  - outcomeLevel
+  - model_approach
+  - distribution
+  - spline_type
+  - spline_df
+  - knot_placement
+  - manual_knots
+  - confidence_level
+  - grouping_variable
+  - model_comparison
+  - time_varying_effects
+  - show_parameters
+  - show_aic_bic
+  - show_survival_plot
+  - show_hazard_plot
+  - show_spline_plot
+  - show_diagnostics
+  - show_clinical_summary
+  - show_density_plot
+  - plot_time_max
+  - showSummaries
+  - showExplanations
+- name: methodExplanation
+  title: About This Analysis
+  type: Html
+  visible: (showExplanations)
+  clearWith:
+  - elapsedtime
+  - outcome
+  - covariates
+  - outcomeLevel
+  - model_approach
+  - distribution
+  - spline_type
+  - spline_df
+  - knot_placement
+  - manual_knots
+  - confidence_level
+  - grouping_variable
+  - model_comparison
+  - time_varying_effects
+  - show_parameters
+  - show_aic_bic
+  - show_survival_plot
+  - show_hazard_plot
+  - show_spline_plot
+  - show_diagnostics
+  - show_clinical_summary
+  - show_density_plot
+  - plot_time_max
+  - showSummaries
+  - showExplanations
 refs:
-    - ClinicoPathJamoviModule
-
-    - flexsurv
-    - rstpm2
-...
+- ClinicoPathJamoviModule
+- flexsurv
+- rstpm2

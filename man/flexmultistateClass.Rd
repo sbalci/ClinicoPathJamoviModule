@@ -2,12 +2,12 @@
 % Please edit documentation in R/flexmultistate.b.R
 \name{flexmultistateClass}
 \alias{flexmultistateClass}
-\title{Flexible Multi-State Survival Models}
+\title{Flexible Parametric Multi-State Models}
 \value{
-An \code{R6} class generator object for the \code{flexmultistateClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+An R6 class generator for clock-forward parametric multistate models.
 }
 \description{
-Flexible Multi-State Survival Models
+Flexible Parametric Multi-State Models
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{flexmultistateBase} -> \code{flexmultistateClass}

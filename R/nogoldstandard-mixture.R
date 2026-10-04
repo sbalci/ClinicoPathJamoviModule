@@ -1,5 +1,12 @@
 # Probability-scale likelihood utilities for nogoldstandard's binary two-class model.
 # Parameter order: class weight, P(test+ | class 1), P(test+ | class 0).
+nogoldstandard_orientation <- function(positive, negative) {
+  contrast <- mean(positive) - mean(negative)
+  # Numerical label guard on the probability scale, not a significance test.
+  tied <- !is.finite(contrast) || abs(contrast) <= 1e-6
+  list(contrast = contrast, tied = tied)
+}
+
 nogoldstandard_pattern_data <- function(data) {
   k <- ncol(data)
   patterns <- as.matrix(expand.grid(rep(list(0:1), k)))

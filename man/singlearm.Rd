@@ -5,6 +5,8 @@
 \title{Single Arm Survival}
 \usage{
 singlearm(
+  cif_all_causes = TRUE,
+  show_followup_support = TRUE,
   data,
   elapsedtime = NULL,
   tint = FALSE,
@@ -46,6 +48,13 @@ singlearm(
 )
 }
 \arguments{
+\item{cif_all_causes}{Report the event-free probability and cumulative
+incidence of the target and competing events within observed follow-up.}
+
+\item{show_followup_support}{Show numbers at risk and cumulative event and
+censoring counts with the all-event cumulative incidence table. A late
+plateau does not establish cure.}
+
 \item{data}{The data as a data frame.}
 
 \item{elapsedtime}{The time-to-event or follow-up duration for each
@@ -191,9 +200,9 @@ estimand: survival in a standard analysis or cumulative incidence in a
 competing-risk analysis.}
 
 \item{risktable}{Display the number of subjects still at risk below
-supported Kaplan-Meier plots. This is a count, not a table of probabilities
-or hazards. A combined risk panel is not available for the competing-risk
-CIF plot; use the cumulative-incidence table for counts at selected times.}
+Kaplan-Meier and cumulative-incidence plots. Counts use the common
+event-free risk set just before each time point and are restricted to
+observed follow-up. The all-event table also reports cumulative counts.}
 
 \item{censored}{Enable this option to display censored observations on the
 survival plots. Censored observations have not experienced the modeled
@@ -265,6 +274,7 @@ representativeness, or adequacy for a particular clinical decision.}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$cifTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$eventRecodeInfo} \tab \tab \tab \tab \tab a html \cr
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$errors} \tab \tab \tab \tab \tab a html \cr
@@ -310,9 +320,9 @@ A results object containing:
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 
-\code{results$medianTable$asDF}
+\code{results$cifTable$asDF}
 
-\code{as.data.frame(results$medianTable)}
+\code{as.data.frame(results$cifTable)}
 }
 \description{
 Performs survival analysis for a single cohort without group comparisons.

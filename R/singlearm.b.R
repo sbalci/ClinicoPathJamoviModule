@@ -224,6 +224,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # early-return paths it never reaches.
         self$results$plot$setVisible(FALSE)
         self$results$plot_cif$setVisible(FALSE)
+        self$results$cifTable$setVisible(FALSE)
       },
 
       .displayMessages = function() {
@@ -1636,6 +1637,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         cr <- private$.isCompetingRisk()
         self$results$plot$setVisible(isTRUE(self$options$sc) && !cr)
         self$results$plot_cif$setVisible(isTRUE(self$options$sc) && cr)
+        self$results$cifTable$setVisible(isTRUE(self$options$cif_all_causes) && cr)
 
         # The piecewise-hazard section is not computed under competing risks
         # (the renderers refuse and .baselineHazardAnalysis() returns early),
@@ -2370,6 +2372,11 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         # Handle Competing Risk Analysis for Survival Table
         if (private$.isCompetingRisk()) {
+          if (isTRUE(self$options$cif_all_causes)) {
+            .populateObservedCif(self$results$cifTable, mydata[[mytime]],
+                                mydata[[myoutcome]],
+                                private$.resolveCutpoints(self$options$cutp))
+          }
           # For competing risk, we calculate Cumulative Incidence
           
           # Build the multi-state status as a FACTOR with explicit levels.
@@ -3491,7 +3498,24 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             breaks = seq(0, self$options$endplot, by = self$options$byplot)) +
           ggplot2::theme(legend.position = 'bottom')
 
-        .quietly(print(plot_obj))
+        if (isTRUE(self$options$risktable)) {
+          breaks <- seq(0, self$options$endplot, by = self$options$byplot)
+          breaks <- breaks[breaks <= max(plotData[[mytime]], na.rm = TRUE)]
+          counts <- vapply(breaks, function(t) sum(plotData[[mytime]] >= t), integer(1))
+          risk <- ggplot2::ggplot(data.frame(time = breaks, n = counts),
+                                 ggplot2::aes(time, 1, label = n)) +
+            ggplot2::geom_text() +
+            ggplot2::scale_x_continuous(limits = c(0, self$options$endplot), breaks = breaks) +
+            ggplot2::labs(x = paste0('Time (', self$options$timetypeoutput, ')'),
+                          y = .("At risk")) + ggtheme +
+            ggplot2::theme(axis.text.y = ggplot2::element_blank(),
+                           axis.ticks.y = ggplot2::element_blank(),
+                           panel.grid = ggplot2::element_blank())
+          .quietly(print(ggpubr::ggarrange(plot_obj, risk, ncol = 1, heights = c(4, 1),
+                                         align = "v")))
+        } else {
+          .quietly(print(plot_obj))
+        }
         TRUE
       }
 

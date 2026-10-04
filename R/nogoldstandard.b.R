@@ -966,9 +966,8 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                         b <- var_cols[j]
                         bvr <- private$.bivariateResidual(model, a, b)
                         if (!is.finite(bvr)) next
-                        # rowKey stays language-independent; the displayed label was a
-                        # bare English "vs" spliced between the two test names.
-                        pair_key <- paste(a, "vs", b)
+                        # Test names can contain the display separator; key by position.
+                        pair_key <- paste0("pair_", i, "_", j)
                         pair <- .fmt(.("{a} vs {b}"), a = a, b = b)
                         if (bvr > THRESHOLD) flagged <- c(flagged, pair)
                         if (!is.null(table)) table$addRow(rowKey = pair_key, values = list(
@@ -1269,9 +1268,10 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 # truth (sens .90/.80/.70, spec .95/.85/.75) the module returned
                 # sens .936/.840/.737 and spec .903/.777/.720: sensitivity and specificity
                 # exactly SWAPPED. poLCA itself recovers the truth.
-                mean_pos_class1 <- mean(sapply(best_model$probs, function(x) x[1, 2]))
-                mean_pos_class2 <- mean(sapply(best_model$probs, function(x) x[2, 2]))
-                disease_class <- which.max(c(mean_pos_class1, mean_pos_class2))
+                orientation <- nogoldstandard_orientation(
+                    vapply(best_model$probs, function(x) x[1, 2], numeric(1)),
+                    vapply(best_model$probs, function(x) x[2, 2], numeric(1)))
+                disease_class <- if (isTRUE(orientation$contrast > 0)) 1L else 2L
                 healthy_class <- 3 - disease_class # The lower-positive class
 
                 # Fitted proportion of the high-positive class.
@@ -1297,6 +1297,8 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     data = binary_data,
                     disease_class = disease_class,
                     identification = identification,
+                    orientation = !orientation$tied,
+                    orientation_tied = orientation$tied,
                     converged = converged,
                     restarted = restarted,
                     iterations = iterations,
@@ -1305,6 +1307,10 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 )))
             },
             .checkLatentEstimate = function(results) {
+                if (isTRUE(results$orientation_tied)) {
+                    private$.addNotice("STRONG_WARNING", .("Class orientation is ambiguous"),
+                        .("The fitted classes have equal average selected-positive probabilities within a numerical tolerance of 0.000001. There is no unique high-positive class under this naming rule. Class proportion, response probabilities, predictive values and their intervals are left blank. Observed agreement and available model-fit diagnostics are retained. This tolerance is a numerical safeguard, not a statistical test of class separation."))
+                }
                 identification <- results$identification
                 if (!is.null(identification) && !isTRUE(identification$identified)) {
                     private$.addNotice("STRONG_WARNING", .("Latent parameters not estimable"),
@@ -1472,8 +1478,9 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 # with an unpenalized companion fit, not the curvature of the penalty.
                 unpenalized <- nogoldstandard_refine(pattern_data, par, checkpoint = checkpoint)
                 identification <- nogoldstandard_identification(pattern_data, unpenalized$par)
-                orientation <- mean(sensitivities) > mean(1 - specificities)
-                if (!orientation) {
+                class_orientation <- nogoldstandard_orientation(sensitivities, 1 - specificities)
+                orientation <- !class_orientation$tied && class_orientation$contrast > 0
+                if (!orientation && !class_orientation$tied) {
                     private$.addNotice("STRONG_WARNING", .("Prior and class orientation conflict"),
                         .("The fixed-prior solution does not assign the higher average selected-positive probability to the positive class. Relabeling would change the asymmetric prior objective. Latent estimates and intervals are left blank; reconsider the selected positive levels or use the unpenalized model."))
                 }
@@ -1487,6 +1494,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                      specificities = specificities, data = binary_data,
                      converged = fit$converged, iterations = fit$iterations,
                      identification = identification, orientation = orientation,
+                     orientation_tied = class_orientation$tied,
                      objective = fit$objective))
             },
 
@@ -1654,7 +1662,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     private$.addNotice(
                         "WARNING",
                         .("Some bootstrap replicates failed"),
-                        sprintf(.("%1$d of %2$d bootstrap resamples (%3$.0f%%) did not yield a converged, identifiable fit and were discarded. At most %4$d fitted resamples remain for each interval. A high failure rate usually means the resamples are too small or too sparse to support the model."),
+                        sprintf(.("%1$d of %2$d bootstrap resamples (%3$.0f%%) did not yield a converged, identifiable fit with a unique class orientation and were discarded. At most %4$d fitted resamples remain for each interval. A high failure rate can reflect small or sparse samples, fitting problems, or ambiguous class orientation."),
                                 error_count, nboot, 100 * error_count / nboot, nboot - error_count)
                     )
                 }
@@ -1858,6 +1866,16 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                             }
                         }
 
+                        # Global themes also carry discrete palette scales. Keep the
+                        # theme, but retain this heatmap's continuous fill and text colors.
+                        plot_theme <- if (is.null(ggtheme)) ggplot2::theme_minimal() else ggtheme
+                        if (is.list(plot_theme) && !inherits(plot_theme, "theme")) {
+                            plot_theme <- Filter(function(x) {
+                                !(inherits(x, "Scale") &&
+                                  any(x$aesthetics %in% c("fill", "colour", "color")))
+                            }, plot_theme)
+                        }
+
                         # Create plot with ggplot2
                         p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = Test1, y = Test2, fill = Agreement)) +
                             ggplot2::geom_tile(color = "white", linewidth = 0.5) +
@@ -1876,18 +1894,14 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                                 limits = c(0, 1),
                                 breaks = seq(0, 1, by = 0.2)
                             ) +
-                            ggplot2::scale_color_manual(values = c("white", "black"), guide = "none") +
+                            ggplot2::scale_color_manual(
+                                values = c(white = "white", black = "black"), guide = "none") +
                             ggplot2::labs(
                                 title = .("Test Agreement Matrix"),
                                 x = NULL,
                                 y = NULL
                             ) +
-                            # WRONG BEFORE: theme_minimal() was hard-coded and the ggtheme
-                            # parameter was accepted and never used, so this was the one
-                            # figure in a jamovi document that ignored the global theme. A
-                            # ggtheme is a COMPLETE theme and replaces what precedes it, so
-                            # it goes here -- before the tweaks below, which must survive.
-                            (if (is.null(ggtheme)) ggplot2::theme_minimal() else ggtheme) +
+                            plot_theme +
                             ggplot2::theme(
                                 axis.text = ggplot2::element_text(size = 11, face = "bold"),
                                 axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
@@ -1984,6 +1998,15 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 for (i in seq_along(tests)) {
                     test_name <- tests[[i]]
                     pos_level <- test_levels[[i]]
+                    observed_levels <- unique(as.character(data[[test_name]]))
+                    observed_levels <- observed_levels[!is.na(observed_levels)]
+                    if (length(observed_levels) > 2L) {
+                        private$.addNotice("STRONG_WARNING", .("Test categories collapsed"),
+                            .fmt(
+                                .("Test '{test}' has more than two observed categories. Only '{positive}' is treated as positive; all other observed categories ({pooled}) are pooled as not-positive (negative). This includes equivocal or indeterminate results if present. Recode or exclude such results before analysis if this is not the intended comparison. All estimates and agreement statistics use this split on complete cases."),
+                                test = test_name, positive = pos_level,
+                                pooled = paste(setdiff(observed_levels, pos_level), collapse = ", ")))
+                    }
                     is_pos <- data[[test_name]] == pos_level
                     n_pos <- sum(is_pos, na.rm = TRUE)
                     n_neg <- sum(!is_pos, na.rm = TRUE)
@@ -2066,7 +2089,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     "<h4 style='color: inherit; margin-top: 0;'> ", .("Latent Class Analysis"), "</h4>",
                     "<p><strong>", .("Description"), ":</strong> ", .("A two-class conditional-independence mixture model for three or more tests."), "</p>",
                     "<p><strong>", .("Illustrative context"), ":</strong> ", .("Studies with at least three tests whose errors are plausibly independent within each latent class."), "</p>",
-                    "<p><strong>", .("Limitations"), ":</strong> ", .("Class labels are unidentified; the high-positive class is not automatically disease. The model assumes conditionally independent errors and does NOT model conditional dependence; with exactly three tests its fit cannot be tested."), "</p>",
+                    "<p><strong>", .("Limitations"), ":</strong> ", .("Class labels are unidentified; the high-positive class is not automatically disease. The model assumes conditionally independent errors and does NOT model conditional dependence; with three tests the nominal residual degrees of freedom are zero, but probability constraints can still prevent an exact fit. Fit discrepancies remain informative; a conventional chi-squared reference distribution is not justified."), "</p>",
                     "</div>",
                     "<div style='margin: 15px 0; padding: 15px; background-color: rgba(33, 152, 239, 0.13); border-radius: 5px; color: inherit;'>",
                     "<h4 style='color: inherit; margin-top: 0;'> ", .("Penalized EM (MAP-like; Fixed Priors)"), "</h4>",
@@ -2357,7 +2380,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                             test_data[[test2]], test_levels[[j]]
                         )
 
-                        table$addRow(rowKey = paste0(test1, "_", test2), values = list(
+                        table$addRow(rowKey = paste0("pair_", i, "_", j), values = list(
                             # was a bare English "vs" spliced between two test names
                             test_pair = .fmt(.("{a} vs {b}"), a = test1, b = test2),
                             kappa = res$kappa,

@@ -5,6 +5,10 @@
 \title{Flexible Multi-State Survival Models}
 \usage{
 flexmultistate(
+  subject_id = NULL,
+  time_entry = NULL,
+  random_seed = 2026,
+  ci_samples = 200,
   data,
   time,
   status,
@@ -30,6 +34,14 @@ flexmultistate(
 )
 }
 \arguments{
+\item{subject_id}{.}
+
+\item{time_entry}{.}
+
+\item{random_seed}{.}
+
+\item{ci_samples}{.}
+
 \item{data}{The data as a data frame.}
 
 \item{time}{Time variable for transitions}
@@ -101,8 +113,10 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$transitionMatrix)}
 }
 \description{
-Flexible parametric multi-state survival models for complex disease
-progression.
-Models transition hazards using splines and handles competing risks and
-intermediate states.
+Clock-forward Markov multistate models with separately fitted spline or
+parametric transition hazards. Requires subject ID and complete entry/exit
+state histories. Reports integrated transition probabilities,
+reference-profile state occupation, and restricted time in state.
+Predictions beyond follow-up depend on the parametric extrapolation
+assumptions.
 }

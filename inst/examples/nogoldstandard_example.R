@@ -3,6 +3,10 @@
 # ═══════════════════════════════════════════════════════════
 library(ClinicoPath)
 
+# The R wrapper requires every positive-level argument; use NULL for unused tests.
+# Latent methods need at least three tests and assume conditional independence.
+# The high-positive class is a naming convention, not an established disease class.
+
 # ═══ EXAMPLE 1: Basic Two-Test Analysis ═══
 data(nogoldstandard_test)
 nogoldstandard(
@@ -11,17 +15,24 @@ nogoldstandard(
   test1Positive = "Positive",
   test2 = "Test2",
   test2Positive = "Positive",
+  test3Positive = NULL,
+  test4Positive = NULL,
+  test5Positive = NULL,
   method = "all_positive"
 )
 
-# ═══ EXAMPLE 2: Latent Class Analysis (Recommended) ═══
-data(nogoldstandard_test)
+# ═══ EXAMPLE 2: Latent Class Analysis (Three Tests) ═══
+data(nogoldstandard_validation)
 nogoldstandard(
-  data = nogoldstandard_test,
-  test1 = "Test1",
+  data = nogoldstandard_validation,
+  test1 = "New_Test",
   test1Positive = "Positive",
-  test2 = "Test2",
+  test2 = "Reference1",
   test2Positive = "Positive",
+  test3 = "Reference2",
+  test3Positive = "Positive",
+  test4Positive = NULL,
+  test5Positive = NULL,
   method = "latent_class"
 )
 
@@ -35,6 +46,8 @@ nogoldstandard(
   test2Positive = "Malignant",
   test3 = "Pathologist3",
   test3Positive = "Malignant",
+  test4Positive = NULL,
+  test5Positive = NULL,
   method = "latent_class",
   clinicalPreset = "pathology_agreement"
 )
@@ -51,6 +64,7 @@ nogoldstandard(
   test3Positive = "Elevated",
   test4 = "AFP",
   test4Positive = "Elevated",
+  test5Positive = NULL,
   method = "composite",
   clinicalPreset = "tumor_markers"
 )
@@ -81,6 +95,9 @@ nogoldstandard(
   test1Positive = "Positive",
   test2 = "Test2",
   test2Positive = "Positive",
+  test3Positive = NULL,
+  test4Positive = NULL,
+  test5Positive = NULL,
   method = "composite"
 )
 
@@ -94,28 +111,38 @@ nogoldstandard(
   test2Positive = "Malignant",
   test3 = "Pathologist3",
   test3Positive = "Malignant",
+  test4Positive = NULL,
+  test5Positive = NULL,
   method = "any_positive"
 )
 
-# ═══ EXAMPLE 8: Bayesian Analysis ═══
-data(nogoldstandard_test)
+# ═══ EXAMPLE 8: Penalized EM (Fixed-Prior MAP) ═══
+data(nogoldstandard_validation)
 nogoldstandard(
-  data = nogoldstandard_test,
-  test1 = "Test1",
+  data = nogoldstandard_validation,
+  test1 = "New_Test",
   test1Positive = "Positive",
-  test2 = "Test2",
+  test2 = "Reference1",
   test2Positive = "Positive",
+  test3 = "Reference2",
+  test3Positive = "Positive",
+  test4Positive = NULL,
+  test5Positive = NULL,
   method = "bayesian"
 )
 
 # ═══ EXAMPLE 9: Latent Class with Bootstrap CI ═══
-data(nogoldstandard_test)
+data(nogoldstandard_validation)
 nogoldstandard(
-  data = nogoldstandard_test,
-  test1 = "Test1",
+  data = nogoldstandard_validation,
+  test1 = "New_Test",
   test1Positive = "Positive",
-  test2 = "Test2",
+  test2 = "Reference1",
   test2Positive = "Positive",
+  test3 = "Reference2",
+  test3Positive = "Positive",
+  test4Positive = NULL,
+  test5Positive = NULL,
   method = "latent_class",
   bootstrap = TRUE,
   nboot = 500,
@@ -132,6 +159,8 @@ nogoldstandard(
   test2Positive = "Positive",
   test3 = "Reference2",
   test3Positive = "Positive",
+  test4Positive = NULL,
+  test5Positive = NULL,
   method = "latent_class",
   clinicalPreset = "diagnostic_validation",
   bootstrap = TRUE,

@@ -5,6 +5,9 @@
 \title{Interval-Censored Survival Analysis}
 \usage{
 intervalsurvival(
+  data,
+  bootstrap_ci = FALSE,
+  bootstrap_seed = 2026,
   left_time,
   right_time,
   status_var = NULL,
@@ -20,8 +23,8 @@ intervalsurvival(
   survival_curves = TRUE,
   hazard_function = FALSE,
   model_diagnostics = TRUE,
-  residual_analysis = TRUE,
-  goodness_of_fit = TRUE,
+  residual_analysis = FALSE,
+  goodness_of_fit = FALSE,
   model_comparison = FALSE,
   prediction_times = "12,24,36,60",
   bootstrap_samples = 200,
@@ -31,6 +34,12 @@ intervalsurvival(
 )
 }
 \arguments{
+\item{data}{The data as a data frame.}
+
+\item{bootstrap_ci}{.}
+
+\item{bootstrap_seed}{.}
+
 \item{left_time}{Left boundary of the censoring interval}
 
 \item{right_time}{Right boundary of the censoring interval}
@@ -100,7 +109,9 @@ A results object containing:
 }
 }
 \description{
-Interval-censored survival analysis for data where the exact event time
-is unknown but falls within an interval. Common in periodic follow-up
-studies, screening programs, and clinical trials with scheduled visits.
+Single-event interval-censored survival analysis using genuine Turnbull,
+proportional-hazards, or parametric accelerated-failure-time likelihoods.
+Exact, left, right, and interval censoring retain their observation
+semantics. Optional bootstrap intervals describe fitted prediction
+uncertainty; joint competing-risk interval censoring is not implemented.
 }

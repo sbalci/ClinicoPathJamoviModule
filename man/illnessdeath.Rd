@@ -13,7 +13,7 @@ illnessdeath(
   subject_id,
   covariates,
   model_structure = "standard",
-  transition_specific = FALSE,
+  transition_specific = TRUE,
   baseline_hazard = "nonparametric",
   common_baseline = FALSE,
   time_varying_covariates,
@@ -35,7 +35,7 @@ illnessdeath(
   show_hazard_ratios = TRUE,
   show_state_probabilities = TRUE,
   show_sojourn_analysis = TRUE,
-  plot_transition_diagram = TRUE,
+  plot_transition_diagram = FALSE,
   plot_state_probabilities = TRUE,
   plot_transition_hazards = TRUE,
   plot_cumulative_incidence = FALSE,
@@ -219,17 +219,10 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$transitionSummary)}
 }
 \description{
-Illness-death multi-state models for analyzing disease progression through
-three states: healthy (state 0), ill (state 1), and death (state 2). This
-framework models transitions between states with separate hazard functions,
-enabling analysis of disease onset, recovery rates, and differential
-mortality risks. The implementation supports both non-parametric and
-parametric approaches, competing risks formulation, reversible and
-irreversible illness states, time-dependent covariates, and comprehensive
-transition probability estimation. Particularly valuable for chronic
-disease studies, cancer progression analysis, hospital readmission studies,
-and any scenario involving intermediate health states with potential
-recovery. The model provides state occupancy probabilities, mean sojourn
-times, and transition-specific hazard ratios with clinical interpretation
-frameworks for evidence-based medicine.
+Exact-time, clock-forward multistate analysis from complete subject
+histories. Fits separate cause-specific Cox transition models and reports
+unadjusted Aalen-Johansen occupation probabilities with observed-time
+support. Restricted mean time in state can use whole-subject bootstrap
+uncertainty. Parametric shared-baseline, frailty, interval-censored, and
+clock-reset models are not implemented here.
 }

@@ -1,0 +1,4037 @@
+[
+  {
+    "name": "agreement",
+    "title": "Interrater Reliability",
+    "menuGroup": "meddecideT",
+    "menuSubgroup": "Agreement",
+    "description": {
+      "main": "Agreement between two or more raters who scored the same cases. Cohen's kappa for two raters (unweighted, or linear or quadratic weighted for ordinal grades) with a confidence interval, and Fleiss' or Conger's exact kappa for three or more; optional Krippendorff's alpha, Gwet's AC, PABAK, ICC, Lin's concordance, Bland-Altman limits, marginal homogeneity tests, per-rater and per-subgroup agreement, rater and case clustering, consensus and agreement-level variables, and sample size for an agreement study.\n",
+      "R": {
+        "dontrun": true,
+        "usage": "# Two raters scoring the same 250 cases as 0 or 1\nagreement(\n    data = histopathology,\n    vars = c(\"Rater 1\", \"Rater 2\"),\n    sft = TRUE)\n"
+      }
+    },
+    "options": [
+      {
+        "name": "data",
+        "title": null,
+        "type": "Data"
+      },
+      {
+        "name": "vars",
+        "title": "Raters",
+        "type": "Variables"
+      },
+      {
+        "name": "baConfidenceLevel",
+        "title": "Coverage for limits of agreement",
+        "type": "Number"
+      },
+      {
+        "name": "confLevel",
+        "title": "Confidence level for CIs",
+        "type": "Number"
+      },
+      {
+        "name": "kappaCIMethod",
+        "title": "Kappa interval method",
+        "type": "List"
+      },
+      {
+        "name": "proportionalBias",
+        "title": "Difference-mean trend (exploratory)",
+        "type": "Bool"
+      },
+      {
+        "name": "showBlandAltmanGuide",
+        "title": "When to use Bland-Altman analysis",
+        "type": "Bool"
+      },
+      {
+        "name": "blandAltmanPlot",
+        "title": "Bland-Altman plot",
+        "type": "Bool"
+      },
+      {
+        "name": "agreementHeatmap",
+        "title": "Agreement heatmap (confusion matrix)",
+        "type": "Bool"
+      },
+      {
+        "name": "heatmapColorScheme",
+        "title": "Heatmap colour scheme",
+        "type": "List"
+      },
+      {
+        "name": "heatmapShowPercentages",
+        "title": "Percentages in cells",
+        "type": "Bool"
+      },
+      {
+        "name": "heatmapShowCounts",
+        "title": "Counts in cells",
+        "type": "Bool"
+      },
+      {
+        "name": "heatmapAnnotationSize",
+        "title": "Cell annotation size",
+        "type": "Number"
+      },
+      {
+        "name": "showAgreementHeatmapGuide",
+        "title": "When to use agreement heatmap",
+        "type": "Bool"
+      },
+      {
+        "name": "sft",
+        "title": "Frequency tables",
+        "type": "Bool"
+      },
+      {
+        "name": "wght",
+        "title": "Weighted kappa (ordinal data only)",
+        "type": "List"
+      },
+      {
+        "name": "exct",
+        "title": "Exact kappa (3+ raters)",
+        "type": "Bool"
+      },
+      {
+        "name": "showLevelInfo",
+        "title": "Level ordering information",
+        "type": "Bool"
+      },
+      {
+        "name": "gradingDesign",
+        "title": "Study design and category distribution",
+        "type": "Bool"
+      },
+      {
+        "name": "perPathologist",
+        "title": "Per-pathologist agreement",
+        "type": "Bool"
+      },
+      {
+        "name": "severityModel",
+        "title": "Grading tendency per pathologist (mixed model)",
+        "type": "Bool"
+      },
+      {
+        "name": "latentModel",
+        "title": "Model-based agreement (latent ICC and model-based kappa)",
+        "type": "Bool"
+      },
+      {
+        "name": "showGradingGuide",
+        "title": "Explanations for pathologist grading analysis",
+        "type": "Bool"
+      },
+      {
+        "name": "kripp",
+        "title": "Krippendorff's alpha",
+        "type": "Bool"
+      },
+      {
+        "name": "krippMethod",
+        "title": "Data type for Krippendorff's alpha",
+        "type": "List"
+      },
+      {
+        "name": "bootstrap",
+        "title": "Bootstrap confidence intervals",
+        "type": "Bool"
+      },
+      {
+        "name": "showKrippGuide",
+        "title": "When to use Krippendorff's alpha",
+        "type": "Bool"
+      },
+      {
+        "name": "gwet",
+        "title": "Gwet's AC1/AC2",
+        "type": "Bool"
+      },
+      {
+        "name": "gwetWeights",
+        "title": "Weights for Gwet's AC",
+        "type": "List"
+      },
+      {
+        "name": "showGwetGuide",
+        "title": "When to use Gwet's AC",
+        "type": "Bool"
+      },
+      {
+        "name": "pabak",
+        "title": "PABAK & prevalence/bias indices",
+        "type": "Bool"
+      },
+      {
+        "name": "showPABAKGuide",
+        "title": "When to use PABAK",
+        "type": "Bool"
+      },
+      {
+        "name": "icc",
+        "title": "ICC (continuous data)",
+        "type": "Bool"
+      },
+      {
+        "name": "showICCGuide",
+        "title": "When to use ICC",
+        "type": "Bool"
+      },
+      {
+        "name": "iccType",
+        "title": "ICC model",
+        "type": "List"
+      },
+      {
+        "name": "meanPearson",
+        "title": "Mean Pearson correlation (linear association)",
+        "type": "Bool"
+      },
+      {
+        "name": "showMeanPearsonGuide",
+        "title": "When to use mean Pearson correlation",
+        "type": "Bool"
+      },
+      {
+        "name": "linCCC",
+        "title": "Lin's concordance correlation coefficient (CCC)",
+        "type": "Bool"
+      },
+      {
+        "name": "showLinCCCGuide",
+        "title": "When to use Lin's CCC",
+        "type": "Bool"
+      },
+      {
+        "name": "tdi",
+        "title": "Total deviation index (TDI)",
+        "type": "Bool"
+      },
+      {
+        "name": "tdiCoverage",
+        "title": "Empirical coverage target (percent)",
+        "type": "Number"
+      },
+      {
+        "name": "tdiLimit",
+        "title": "Acceptable limit",
+        "type": "Number"
+      },
+      {
+        "name": "showTDIGuide",
+        "title": "When to use TDI",
+        "type": "Bool"
+      },
+      {
+        "name": "iota",
+        "title": "Iota coefficient (single variable)",
+        "type": "Bool"
+      },
+      {
+        "name": "iotaStandardize",
+        "title": "Standardize quantitative ratings (no effect on a single variable)",
+        "type": "Bool"
+      },
+      {
+        "name": "showIotaGuide",
+        "title": "When to use iota coefficient",
+        "type": "Bool"
+      },
+      {
+        "name": "finn",
+        "title": "Finn coefficient (variance-based agreement)",
+        "type": "Bool"
+      },
+      {
+        "name": "finnLevels",
+        "title": "Number of rating categories (Finn)",
+        "type": "Integer"
+      },
+      {
+        "name": "finnModel",
+        "title": "Finn model type",
+        "type": "List"
+      },
+      {
+        "name": "showFinnGuide",
+        "title": "When to use Finn coefficient",
+        "type": "Bool"
+      },
+      {
+        "name": "lightKappa",
+        "title": "Light's kappa (3+ raters)",
+        "type": "Bool"
+      },
+      {
+        "name": "showLightKappaGuide",
+        "title": "When to use Light's kappa",
+        "type": "Bool"
+      },
+      {
+        "name": "kendallW",
+        "title": "Kendall's W (concordance for rankings)",
+        "type": "Bool"
+      },
+      {
+        "name": "showKendallWGuide",
+        "title": "When to use Kendall's W",
+        "type": "Bool"
+      },
+      {
+        "name": "robinsonA",
+        "title": "Robinson's A (ordinal agreement index)",
+        "type": "Bool"
+      },
+      {
+        "name": "showRobinsonAGuide",
+        "title": "When to use Robinson's A",
+        "type": "Bool"
+      },
+      {
+        "name": "meanSpearman",
+        "title": "Mean Spearman rho (average rank correlation)",
+        "type": "Bool"
+      },
+      {
+        "name": "showMeanSpearmanGuide",
+        "title": "When to use mean Spearman rho",
+        "type": "Bool"
+      },
+      {
+        "name": "raterBias",
+        "title": "Directional discordance test (ordinal, 2 raters)",
+        "type": "Bool"
+      },
+      {
+        "name": "showRaterBiasGuide",
+        "title": "When to use directional discordance test",
+        "type": "Bool"
+      },
+      {
+        "name": "bhapkar",
+        "title": "Bhapkar test (marginal homogeneity for 2 raters)",
+        "type": "Bool"
+      },
+      {
+        "name": "showBhapkarGuide",
+        "title": "When to use Bhapkar test",
+        "type": "Bool"
+      },
+      {
+        "name": "stuartMaxwell",
+        "title": "Stuart-Maxwell test (marginal homogeneity for 2 raters)",
+        "type": "Bool"
+      },
+      {
+        "name": "showStuartMaxwellGuide",
+        "title": "When to use Stuart-Maxwell test",
+        "type": "Bool"
+      },
+      {
+        "name": "maxwellRE",
+        "title": "Rater variance decomposition (systematic vs random)",
+        "type": "Bool"
+      },
+      {
+        "name": "showMaxwellREGuide",
+        "title": "When to use the variance decomposition",
+        "type": "Bool"
+      },
+      {
+        "name": "interIntraRater",
+        "title": "Inter/intra-rater reliability (test-retest)",
+        "type": "Bool"
+      },
+      {
+        "name": "interIntraSeparator",
+        "title": "Column name separator (inter/intra)",
+        "type": "String"
+      },
+      {
+        "name": "showInterIntraRaterGuide",
+        "title": "When to use inter/intra-rater reliability",
+        "type": "Bool"
+      },
+      {
+        "name": "pairwiseKappa",
+        "title": "Pairwise kappa (vs reference)",
+        "type": "Bool"
+      },
+      {
+        "name": "referenceRater",
+        "title": "Reference rater variable",
+        "type": "Variable"
+      },
+      {
+        "name": "rankRaters",
+        "title": "Rater performance ranking",
+        "type": "Bool"
+      },
+      {
+        "name": "showPairwiseKappaGuide",
+        "title": "When to use pairwise kappa",
+        "type": "Bool"
+      },
+      {
+        "name": "allPairsKappa",
+        "title": "All-pairs Cohen's kappa (every rater pair)",
+        "type": "Bool"
+      },
+      {
+        "name": "allPairsCI",
+        "title": "Confidence interval for each pair",
+        "type": "Bool"
+      },
+      {
+        "name": "showAllPairsKappaGuide",
+        "title": "When to use all-pairs kappa",
+        "type": "Bool"
+      },
+      {
+        "name": "itemModalCategoryAgreement",
+        "title": "Per-category item-modal agreement",
+        "type": "Bool"
+      },
+      {
+        "name": "showItemModalGuide",
+        "title": "When to use per-category item-modal agreement",
+        "type": "Bool"
+      },
+      {
+        "name": "hierarchicalKappa",
+        "title": "Hierarchical/multilevel kappa",
+        "type": "Bool"
+      },
+      {
+        "name": "clusterVariable",
+        "title": "Cluster/institution variable",
+        "type": "Variable"
+      },
+      {
+        "name": "iccHierarchical",
+        "title": "Hierarchical ICC decomposition",
+        "type": "Bool"
+      },
+      {
+        "name": "clusterSpecificKappa",
+        "title": "Cluster-specific kappa estimates",
+        "type": "Bool"
+      },
+      {
+        "name": "varianceDecomposition",
+        "title": "Variance component decomposition",
+        "type": "Bool"
+      },
+      {
+        "name": "testClusterHomogeneity",
+        "title": "Cluster homogeneity test",
+        "type": "Bool"
+      },
+      {
+        "name": "clusterRankings",
+        "title": "Cluster performance rankings",
+        "type": "Bool"
+      },
+      {
+        "name": "showHierarchicalGuide",
+        "title": "When to use hierarchical kappa",
+        "type": "Bool"
+      },
+      {
+        "name": "conditionVariable",
+        "title": "Condition/method variable",
+        "type": "Variable"
+      },
+      {
+        "name": "caseIdVariable",
+        "title": "Case ID variable",
+        "type": "Variable"
+      },
+      {
+        "name": "mixedEffectsComparison",
+        "title": "Mixed-effects condition comparison",
+        "type": "Bool"
+      },
+      {
+        "name": "multipleTestCorrection",
+        "title": "Multiple testing correction",
+        "type": "List"
+      },
+      {
+        "name": "showMixedEffectsGuide",
+        "title": "When to use mixed-effects comparison",
+        "type": "Bool"
+      },
+      {
+        "name": "confusionMatrix",
+        "title": "Confusion matrix table",
+        "type": "Bool"
+      },
+      {
+        "name": "confusionNormalize",
+        "title": "Normalization",
+        "type": "List"
+      },
+      {
+        "name": "showConfusionMatrixGuide",
+        "title": "When to use confusion matrix",
+        "type": "Bool"
+      },
+      {
+        "name": "bootstrapCI",
+        "title": "Bootstrap confidence intervals",
+        "type": "Bool"
+      },
+      {
+        "name": "nBoot",
+        "title": "Number of bootstrap samples",
+        "type": "Integer"
+      },
+      {
+        "name": "showBootstrapCIGuide",
+        "title": "When to use bootstrap CIs",
+        "type": "Bool"
+      },
+      {
+        "name": "multiAnnotatorConcordance",
+        "title": "Multi-annotator concordance",
+        "type": "Bool"
+      },
+      {
+        "name": "predictionColumn",
+        "title": "Prediction column (first rater)",
+        "type": "Integer"
+      },
+      {
+        "name": "showConcordanceF1Guide",
+        "title": "When to use multi-annotator concordance",
+        "type": "Bool"
+      },
+      {
+        "name": "specificAgreement",
+        "title": "Specific agreement indices (category-focused)",
+        "type": "Bool"
+      },
+      {
+        "name": "specificPositiveCategory",
+        "title": "Positive category (binary analysis)",
+        "type": "String"
+      },
+      {
+        "name": "specificAllCategories",
+        "title": "All-category estimates",
+        "type": "Bool"
+      },
+      {
+        "name": "specificConfidenceIntervals",
+        "title": "Confidence intervals",
+        "type": "Bool"
+      },
+      {
+        "name": "showSpecificAgreementGuide",
+        "title": "When to use specific agreement indices",
+        "type": "Bool"
+      },
+      {
+        "name": "showSummary",
+        "title": "Plain-language summary",
+        "type": "Bool"
+      },
+      {
+        "name": "showAbout",
+        "title": "About this analysis",
+        "type": "Bool"
+      },
+      {
+        "name": "consensusName",
+        "title": "Consensus variable name",
+        "type": "String"
+      },
+      {
+        "name": "consensusVar",
+        "title": "Consensus variable",
+        "type": "Output"
+      },
+      {
+        "name": "consensusRule",
+        "title": "Consensus rule",
+        "type": "List"
+      },
+      {
+        "name": "tieBreaker",
+        "title": "Tie handling",
+        "type": "List"
+      },
+      {
+        "name": "loaVariable",
+        "title": "Case agreement categorization",
+        "type": "Bool"
+      },
+      {
+        "name": "detailLevel",
+        "title": "Detail level",
+        "type": "List"
+      },
+      {
+        "name": "simpleThreshold",
+        "title": "Majority threshold (percent) - simple mode",
+        "type": "Number"
+      },
+      {
+        "name": "loaThresholds",
+        "title": "Categorization method (detailed mode)",
+        "type": "List"
+      },
+      {
+        "name": "loaHighThreshold",
+        "title": "High threshold (percent) - detailed mode",
+        "type": "Number"
+      },
+      {
+        "name": "loaLowThreshold",
+        "title": "Low threshold (percent) - detailed mode",
+        "type": "Number"
+      },
+      {
+        "name": "loaVariableName",
+        "title": "Variable name for LoA",
+        "type": "String"
+      },
+      {
+        "name": "showLoaTable",
+        "title": "LoA distribution table",
+        "type": "Bool"
+      },
+      {
+        "name": "loaOutput",
+        "title": "Case agreement categorization column",
+        "type": "Output"
+      },
+      {
+        "name": "raterProfiles",
+        "title": "Rater profile plots (distribution comparison)",
+        "type": "Bool"
+      },
+      {
+        "name": "raterProfileType",
+        "title": "Profile plot type",
+        "type": "List"
+      },
+      {
+        "name": "raterProfileShowPoints",
+        "title": "Individual data points",
+        "type": "Bool"
+      },
+      {
+        "name": "showRaterProfileGuide",
+        "title": "When to use rater profile plots",
+        "type": "Bool"
+      },
+      {
+        "name": "agreementBySubgroup",
+        "title": "Agreement by subgroup (stratified analysis)",
+        "type": "Bool"
+      },
+      {
+        "name": "subgroupVariable",
+        "title": "Subgroup variable",
+        "type": "Variable"
+      },
+      {
+        "name": "subgroupForestPlot",
+        "title": "Forest plot",
+        "type": "Bool"
+      },
+      {
+        "name": "subgroupMinCases",
+        "title": "Minimum cases per subgroup",
+        "type": "Integer"
+      },
+      {
+        "name": "showSubgroupGuide",
+        "title": "When to use agreement by subgroup",
+        "type": "Bool"
+      },
+      {
+        "name": "raterClustering",
+        "title": "Rater clustering (identify rating pattern groups)",
+        "type": "Bool"
+      },
+      {
+        "name": "clusterMethod",
+        "title": "Clustering method",
+        "type": "List"
+      },
+      {
+        "name": "clusterDistance",
+        "title": "Distance metric",
+        "type": "List"
+      },
+      {
+        "name": "clusterLinkage",
+        "title": "Linkage method (hierarchical)",
+        "type": "List"
+      },
+      {
+        "name": "nClusters",
+        "title": "Number of clusters",
+        "type": "Integer"
+      },
+      {
+        "name": "showDendrogram",
+        "title": "Dendrogram",
+        "type": "Bool"
+      },
+      {
+        "name": "showClusterHeatmap",
+        "title": "Cluster heatmap",
+        "type": "Bool"
+      },
+      {
+        "name": "showRaterClusterGuide",
+        "title": "When to use rater clustering",
+        "type": "Bool"
+      },
+      {
+        "name": "caseClustering",
+        "title": "Case clustering (identify rating pattern groups)",
+        "type": "Bool"
+      },
+      {
+        "name": "caseClusterMethod",
+        "title": "Clustering method",
+        "type": "List"
+      },
+      {
+        "name": "caseClusterDistance",
+        "title": "Distance metric",
+        "type": "List"
+      },
+      {
+        "name": "caseClusterLinkage",
+        "title": "Linkage method (hierarchical)",
+        "type": "List"
+      },
+      {
+        "name": "nCaseClusters",
+        "title": "Number of clusters",
+        "type": "Integer"
+      },
+      {
+        "name": "showCaseDendrogram",
+        "title": "Dendrogram",
+        "type": "Bool"
+      },
+      {
+        "name": "showCaseClusterHeatmap",
+        "title": "Cluster heatmap",
+        "type": "Bool"
+      },
+      {
+        "name": "showCaseClusterGuide",
+        "title": "When to use case clustering",
+        "type": "Bool"
+      },
+      {
+        "name": "pairedAgreementTest",
+        "title": "Paired agreement comparison",
+        "type": "Bool"
+      },
+      {
+        "name": "conditionBVars",
+        "title": "Condition B raters",
+        "type": "Variables"
+      },
+      {
+        "name": "pairedBootN",
+        "title": "Bootstrap replications",
+        "type": "Integer"
+      },
+      {
+        "name": "showPairedAgreementGuide",
+        "title": "When to use paired agreement comparison",
+        "type": "Bool"
+      },
+      {
+        "name": "agreementSampleSize",
+        "title": "Agreement study sample size",
+        "type": "Bool"
+      },
+      {
+        "name": "ssMetric",
+        "title": "Agreement metric",
+        "type": "List"
+      },
+      {
+        "name": "ssKappaNull",
+        "title": "Null kappa (H0)",
+        "type": "Number"
+      },
+      {
+        "name": "ssKappaAlt",
+        "title": "Expected kappa (H1)",
+        "type": "Number"
+      },
+      {
+        "name": "ssNRaters",
+        "title": "Number of raters",
+        "type": "Integer"
+      },
+      {
+        "name": "ssNCategories",
+        "title": "Number of categories",
+        "type": "Integer"
+      },
+      {
+        "name": "ssAlpha",
+        "title": "Significance level",
+        "type": "Number"
+      },
+      {
+        "name": "ssPower",
+        "title": "Desired power",
+        "type": "Number"
+      },
+      {
+        "name": "showSampleSizeGuide",
+        "title": "When to use sample size calculator",
+        "type": "Bool"
+      },
+      {
+        "name": "seed",
+        "title": "Random seed",
+        "type": "Integer"
+      },
+      {
+        "name": "specificCIMethod",
+        "title": "Specific agreement interval method",
+        "type": "List"
+      },
+      {
+        "name": "specificCluster",
+        "title": "Patient/cluster ID for specific agreement",
+        "type": "Variable"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "welcome",
+        "title": "",
+        "type": "Html"
+      },
+      {
+        "name": "irrtableHeading",
+        "title": "Interrater Reliability",
+        "type": "Preformatted"
+      },
+      {
+        "name": "irrtable",
+        "title": "Interrater Reliability",
+        "type": "Table"
+      },
+      {
+        "name": "contingencyTableHeading",
+        "title": "Data Summary",
+        "type": "Preformatted"
+      },
+      {
+        "name": "contingencyTable",
+        "title": "Contingency Table (2 Raters)",
+        "type": "Table"
+      },
+      {
+        "name": "ratingCombinationsTable",
+        "title": "Rating Combinations (3+ Raters)",
+        "type": "Table"
+      },
+      {
+        "name": "contingencyTableExplanation",
+        "title": "About Contingency Table & Rating Combinations",
+        "type": "Html"
+      },
+      {
+        "name": "gradingHeading",
+        "title": "Pathologist Grading Analysis",
+        "type": "Preformatted"
+      },
+      {
+        "name": "designSummaryTable",
+        "title": "Study Design",
+        "type": "Table"
+      },
+      {
+        "name": "categoryDistributionTable",
+        "title": "Category Distribution by Pathologist",
+        "type": "Table"
+      },
+      {
+        "name": "pathologistTable",
+        "title": "Per-Pathologist Agreement and Grading Tendency",
+        "type": "Table"
+      },
+      {
+        "name": "boundaryTable",
+        "title": "Boundary Excess over Colleagues",
+        "type": "Table"
+      },
+      {
+        "name": "severityPlot",
+        "title": "Grading Tendency per Pathologist",
+        "type": "Image"
+      },
+      {
+        "name": "latentModelTable",
+        "title": "Model-Based Agreement (Latent Probit Model)",
+        "type": "Table"
+      },
+      {
+        "name": "gradingGuide",
+        "title": "About the Pathologist Grading Analysis",
+        "type": "Html"
+      },
+      {
+        "name": "blandAltmanHeading",
+        "title": "Bland-Altman Method Comparison",
+        "type": "Preformatted"
+      },
+      {
+        "name": "blandAltman",
+        "title": "Bland-Altman Plot",
+        "type": "Image"
+      },
+      {
+        "name": "agreementHeatmapPlot",
+        "title": "Agreement Heatmap (Confusion Matrix)",
+        "type": "Image"
+      },
+      {
+        "name": "agreementHeatmapExplanation",
+        "title": "About Agreement Heatmap",
+        "type": "Html"
+      },
+      {
+        "name": "blandAltmanExplanation",
+        "title": "About Bland-Altman Analysis",
+        "type": "Html"
+      },
+      {
+        "name": "blandAltmanStats",
+        "title": "Bland-Altman Statistics",
+        "type": "Table"
+      },
+      {
+        "name": "krippTableHeading",
+        "title": "Krippendorff's Alpha",
+        "type": "Preformatted"
+      },
+      {
+        "name": "krippTable",
+        "title": "Krippendorff's Alpha Results",
+        "type": "Table"
+      },
+      {
+        "name": "krippExplanation",
+        "title": "About Krippendorff's Alpha",
+        "type": "Html"
+      },
+      {
+        "name": "lightKappaTableHeading",
+        "title": "Additional Categorical Agreement Measures",
+        "type": "Preformatted"
+      },
+      {
+        "name": "lightKappaTable",
+        "title": "Light's Kappa Results",
+        "type": "Table"
+      },
+      {
+        "name": "lightKappaExplanation",
+        "title": "About Light's Kappa",
+        "type": "Html"
+      },
+      {
+        "name": "finnTable",
+        "title": "Finn Coefficient Results (Variance-Based Agreement)",
+        "type": "Table"
+      },
+      {
+        "name": "finnExplanation",
+        "title": "About Finn Coefficient",
+        "type": "Html"
+      },
+      {
+        "name": "kendallWTable",
+        "title": "Kendall's Coefficient of Concordance (W) Results",
+        "type": "Table"
+      },
+      {
+        "name": "kendallWExplanation",
+        "title": "About Kendall's W",
+        "type": "Html"
+      },
+      {
+        "name": "robinsonATable",
+        "title": "Robinson's A (Ordinal Agreement Index) Results",
+        "type": "Table"
+      },
+      {
+        "name": "robinsonAExplanation",
+        "title": "About Robinson's A",
+        "type": "Html"
+      },
+      {
+        "name": "meanSpearmanTable",
+        "title": "Mean Spearman Rho (Average Rank Correlation) Results",
+        "type": "Table"
+      },
+      {
+        "name": "meanSpearmanExplanation",
+        "title": "About Mean Spearman Rho",
+        "type": "Html"
+      },
+      {
+        "name": "raterBiasHeading",
+        "title": "Directional Discordance and Marginal Homogeneity Tests",
+        "type": "Preformatted"
+      },
+      {
+        "name": "raterBiasTable",
+        "title": "Directional Discordance Test (ordinal, 2 raters)",
+        "type": "Table"
+      },
+      {
+        "name": "raterBiasExplanation",
+        "title": "About Directional Discordance Test",
+        "type": "Html"
+      },
+      {
+        "name": "bhapkarTable",
+        "title": "Bhapkar Test for Marginal Homogeneity",
+        "type": "Table"
+      },
+      {
+        "name": "bhapkarExplanation",
+        "title": "About Bhapkar Test",
+        "type": "Html"
+      },
+      {
+        "name": "stuartMaxwellTable",
+        "title": "Stuart-Maxwell Test for Marginal Homogeneity",
+        "type": "Table"
+      },
+      {
+        "name": "stuartMaxwellExplanation",
+        "title": "About Stuart-Maxwell Test",
+        "type": "Html"
+      },
+      {
+        "name": "pairwiseKappaTable",
+        "title": "Pairwise Kappa (Each Rater vs Reference)",
+        "type": "Table"
+      },
+      {
+        "name": "pairwiseKappaExplanation",
+        "title": "About Pairwise Kappa Analysis",
+        "type": "Html"
+      },
+      {
+        "name": "allPairsKappaTable",
+        "title": "All-Pairs Kappa (Every Rater Pair)",
+        "type": "Table"
+      },
+      {
+        "name": "allPairsKappaExplanation",
+        "title": "About All-Pairs Kappa Analysis",
+        "type": "Html"
+      },
+      {
+        "name": "itemModalAgreementTable",
+        "title": "Agreement by Item Modal Category",
+        "type": "Table"
+      },
+      {
+        "name": "itemModalAgreementExplanation",
+        "title": "About Per-Category Item-Modal Agreement",
+        "type": "Html"
+      },
+      {
+        "name": "hierarchicalHeading",
+        "title": "Hierarchical / Multilevel Agreement",
+        "type": "Preformatted"
+      },
+      {
+        "name": "hierarchicalOverallTable",
+        "title": "Hierarchical Kappa - Overall Agreement",
+        "type": "Table"
+      },
+      {
+        "name": "clusterSpecificTable",
+        "title": "Cluster-Specific Kappa Estimates",
+        "type": "Table"
+      },
+      {
+        "name": "varianceDecompositionTable",
+        "title": "Variance Component Decomposition",
+        "type": "Table"
+      },
+      {
+        "name": "hierarchicalICCTable",
+        "title": "Hierarchical ICC Decomposition",
+        "type": "Table"
+      },
+      {
+        "name": "homogeneityTestTable",
+        "title": "Cluster Homogeneity Test Results",
+        "type": "Table"
+      },
+      {
+        "name": "hierarchicalExplanation",
+        "title": "About Hierarchical/Multilevel Kappa",
+        "type": "Html"
+      },
+      {
+        "name": "advancedHeading",
+        "title": "Advanced Agreement Analyses",
+        "type": "Preformatted"
+      },
+      {
+        "name": "mixedEffectsTable",
+        "title": "Mixed-Effects Condition Comparison",
+        "type": "Table"
+      },
+      {
+        "name": "mixedEffectsVarianceTable",
+        "title": "Mixed-Effects Variance Components",
+        "type": "Table"
+      },
+      {
+        "name": "mixedEffectsExplanation",
+        "title": "About Mixed-Effects Condition Comparison",
+        "type": "Html"
+      },
+      {
+        "name": "confusionMatrixTable",
+        "title": "Confusion Matrix",
+        "type": "Table"
+      },
+      {
+        "name": "perClassMetricsTable",
+        "title": "Per-Class Classification Metrics",
+        "type": "Table"
+      },
+      {
+        "name": "confusionMatrixExplanation",
+        "title": "About Confusion Matrix",
+        "type": "Html"
+      },
+      {
+        "name": "bootstrapCITable",
+        "title": "Bootstrap Confidence Intervals for Agreement Metrics",
+        "type": "Table"
+      },
+      {
+        "name": "bootstrapCIExplanation",
+        "title": "About Bootstrap Confidence Intervals",
+        "type": "Html"
+      },
+      {
+        "name": "concordanceF1Table",
+        "title": "Multi-Annotator Concordance Metrics",
+        "type": "Table"
+      },
+      {
+        "name": "concordanceF1PerClassTable",
+        "title": "Per-Class Concordance F1",
+        "type": "Table"
+      },
+      {
+        "name": "concordanceF1Explanation",
+        "title": "About Multi-Annotator Concordance",
+        "type": "Html"
+      },
+      {
+        "name": "gwetHeading",
+        "title": "Chance-Corrected Agreement Variants",
+        "type": "Preformatted"
+      },
+      {
+        "name": "gwetTable",
+        "title": "Gwet's AC1/AC2 Results",
+        "type": "Table"
+      },
+      {
+        "name": "gwetExplanation",
+        "title": "About Gwet's AC Coefficient",
+        "type": "Html"
+      },
+      {
+        "name": "pabakTable",
+        "title": "PABAK & Prevalence/Bias Indices",
+        "type": "Table"
+      },
+      {
+        "name": "pabakExplanation",
+        "title": "About PABAK & Prevalence/Bias Indices",
+        "type": "Html"
+      },
+      {
+        "name": "iccHeading",
+        "title": "Continuous Agreement Measures",
+        "type": "Preformatted"
+      },
+      {
+        "name": "iccTable",
+        "title": "Intraclass Correlation Coefficient (ICC) Results",
+        "type": "Table"
+      },
+      {
+        "name": "iccExplanation",
+        "title": "About Intraclass Correlation Coefficient (ICC)",
+        "type": "Html"
+      },
+      {
+        "name": "meanPearsonTable",
+        "title": "Mean Pearson Correlation (Linear Association) Results",
+        "type": "Table"
+      },
+      {
+        "name": "meanPearsonExplanation",
+        "title": "About Mean Pearson Correlation",
+        "type": "Html"
+      },
+      {
+        "name": "linCCCTable",
+        "title": "Lin's Concordance Correlation Coefficient (CCC)",
+        "type": "Table"
+      },
+      {
+        "name": "linCCCExplanation",
+        "title": "About Lin's Concordance Correlation Coefficient",
+        "type": "Html"
+      },
+      {
+        "name": "tdiTable",
+        "title": "Empirical Total Deviation Index (TDI)",
+        "type": "Table"
+      },
+      {
+        "name": "tdiExplanation",
+        "title": "About Total Deviation Index (TDI)",
+        "type": "Html"
+      },
+      {
+        "name": "maxwellREHeading",
+        "title": "Error Decomposition & Reliability",
+        "type": "Preformatted"
+      },
+      {
+        "name": "maxwellRETable",
+        "title": "Rater Variance Decomposition - Systematic vs Random Disagreement",
+        "type": "Table"
+      },
+      {
+        "name": "maxwellREExplanation",
+        "title": "About the rater variance decomposition",
+        "type": "Html"
+      },
+      {
+        "name": "interIntraRaterIntraTable",
+        "title": "Intra-Rater Reliability (Test-Retest Consistency)",
+        "type": "Table"
+      },
+      {
+        "name": "interIntraRaterInterTable",
+        "title": "Inter-Rater Reliability (Between Raters)",
+        "type": "Table"
+      },
+      {
+        "name": "interIntraRaterExplanation",
+        "title": "About Inter/Intra-Rater Reliability",
+        "type": "Html"
+      },
+      {
+        "name": "iotaTable",
+        "title": "Iota Coefficient Results (Single Variable)",
+        "type": "Table"
+      },
+      {
+        "name": "iotaExplanation",
+        "title": "About Iota Coefficient",
+        "type": "Html"
+      },
+      {
+        "name": "weightedKappaGuide",
+        "title": "Weighted Kappa Interpretation Guide",
+        "type": "Html"
+      },
+      {
+        "name": "specificAgreementHeading",
+        "title": "Category-Specific Agreement",
+        "type": "Preformatted"
+      },
+      {
+        "name": "specificAgreementTable",
+        "title": "Specific Agreement Indices (Category-Focused Agreement)",
+        "type": "Table"
+      },
+      {
+        "name": "specificAgreementExplanation",
+        "title": "About Specific Agreement Indices",
+        "type": "Html"
+      },
+      {
+        "name": "levelInfoTable",
+        "title": "Level Ordering Information",
+        "type": "Table"
+      },
+      {
+        "name": "summary",
+        "title": "Summary",
+        "type": "Html"
+      },
+      {
+        "name": "about",
+        "title": "About This Analysis",
+        "type": "Html"
+      },
+      {
+        "name": "clinicalUseCases",
+        "title": "Clinical Use Cases & Method Selection Guide",
+        "type": "Html"
+      },
+      {
+        "name": "consensusTable",
+        "title": "Consensus Variable Summary",
+        "type": "Table"
+      },
+      {
+        "name": "loaTable",
+        "title": "Level of Agreement Distribution",
+        "type": "Table"
+      },
+      {
+        "name": "loaDetailTable",
+        "title": "Case-Level Agreement Details",
+        "type": "Table"
+      },
+      {
+        "name": "computedVariablesInfo",
+        "title": "Computed Variables Added to Dataset",
+        "type": "Html"
+      },
+      {
+        "name": "consensusVar",
+        "title": "Add Consensus Variable to Data",
+        "type": "Output"
+      },
+      {
+        "name": "loaOutput",
+        "title": "Add Case Agreement Categorization to Data",
+        "type": "Output"
+      },
+      {
+        "name": "raterProfilePlot",
+        "title": "Rater Profile Plots (Rating Distribution by Rater)",
+        "type": "Image"
+      },
+      {
+        "name": "raterProfileExplanation",
+        "title": "About Rater Profile Plots",
+        "type": "Html"
+      },
+      {
+        "name": "subgroupAgreementTable",
+        "title": "Agreement by Subgroup (Stratified Analysis)",
+        "type": "Table"
+      },
+      {
+        "name": "subgroupForestPlotImage",
+        "title": "Forest Plot of Agreement by Subgroup",
+        "type": "Image"
+      },
+      {
+        "name": "subgroupExplanation",
+        "title": "About Agreement by Subgroup",
+        "type": "Html"
+      },
+      {
+        "name": "raterClusterHeading",
+        "title": "Rater & Case Clustering",
+        "type": "Preformatted"
+      },
+      {
+        "name": "raterClusterTable",
+        "title": "Rater Cluster Assignments",
+        "type": "Table"
+      },
+      {
+        "name": "raterDendrogram",
+        "title": "Rater Clustering Dendrogram",
+        "type": "Image"
+      },
+      {
+        "name": "raterClusterHeatmap",
+        "title": "Rater Similarity Heatmap with Clusters",
+        "type": "Image"
+      },
+      {
+        "name": "raterClusterExplanation",
+        "title": "About Rater Clustering",
+        "type": "Html"
+      },
+      {
+        "name": "caseClusterTable",
+        "title": "Case Cluster Assignments",
+        "type": "Table"
+      },
+      {
+        "name": "caseDendrogram",
+        "title": "Case Clustering Dendrogram",
+        "type": "Image"
+      },
+      {
+        "name": "caseClusterHeatmap",
+        "title": "Case Similarity Heatmap with Clusters",
+        "type": "Image"
+      },
+      {
+        "name": "caseClusterExplanation",
+        "title": "About Case Clustering",
+        "type": "Html"
+      },
+      {
+        "name": "pairedAgreementHeading",
+        "title": "Paired Agreement & Sample Size",
+        "type": "Preformatted"
+      },
+      {
+        "name": "pairedAgreementTable",
+        "title": "Paired Agreement Comparison",
+        "type": "Table"
+      },
+      {
+        "name": "pairedAgreementExplanation",
+        "title": "About Paired Agreement Comparison",
+        "type": "Html"
+      },
+      {
+        "name": "agreementSampleSizeTable",
+        "title": "Sample Size for Agreement Study",
+        "type": "Table"
+      },
+      {
+        "name": "agreementSampleSizeExplanation",
+        "title": "About Agreement Sample Size",
+        "type": "Html"
+      }
+    ],
+    "ui": true,
+    "ui_type": null,
+    "backend": true,
+    "backend_lines": 17015
+  },
+  {
+    "name": "aivalidation",
+    "title": "AI Model Validation",
+    "menuGroup": "meddecideExtraD",
+    "menuSubgroup": "AI & Machine Learning",
+    "description": {
+      "main": "Simplified AI model validation tool for comparing diagnostic performance. Calculates AUC, sensitivity, and specificity for predictor variables and performs statistical comparison using DeLong test.\n"
+    },
+    "options": [
+      {
+        "name": "data",
+        "title": null,
+        "type": "Data"
+      },
+      {
+        "name": "predictorVars",
+        "title": "Predictor Variables",
+        "type": "Variables"
+      },
+      {
+        "name": "outcomeVar",
+        "title": "Outcome Variable",
+        "type": "Variable"
+      },
+      {
+        "name": "positiveLevel",
+        "title": "Positive Level",
+        "type": "Level"
+      },
+      {
+        "name": "compareModels",
+        "title": "Compare Models",
+        "type": "Bool"
+      },
+      {
+        "name": "youdensJ",
+        "title": "Youden's J Statistic",
+        "type": "Bool"
+      },
+      {
+        "name": "matthewsCC",
+        "title": "Matthews Correlation Coefficient",
+        "type": "Bool"
+      },
+      {
+        "name": "bootstrapCI",
+        "title": "Bootstrap Confidence Intervals",
+        "type": "Bool"
+      },
+      {
+        "name": "nBootstrap",
+        "title": "Bootstrap Iterations",
+        "type": "Integer"
+      },
+      {
+        "name": "rocPlot",
+        "title": "ROC Curves",
+        "type": "Bool"
+      },
+      {
+        "name": "crossValidation",
+        "title": "Cross-Validation Method",
+        "type": "List"
+      },
+      {
+        "name": "stratified",
+        "title": "Stratified Sampling",
+        "type": "Bool"
+      },
+      {
+        "name": "randomSeed",
+        "title": "Random Seed",
+        "type": "Integer"
+      },
+      {
+        "name": "showExplanations",
+        "title": "Show Explanations",
+        "type": "Bool"
+      },
+      {
+        "name": "showSummaries",
+        "title": "Show Summaries",
+        "type": "Bool"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "instructions",
+        "title": "Instructions",
+        "type": "Html"
+      },
+      {
+        "name": "performanceTable",
+        "title": "Model Performance Metrics",
+        "type": "Table"
+      },
+      {
+        "name": "comparisonTable",
+        "title": "Model Comparison (DeLong Test)",
+        "type": "Table"
+      },
+      {
+        "name": "cvPerformanceTable",
+        "title": "Cross-Validation Performance",
+        "type": "Table"
+      },
+      {
+        "name": "rocPlot",
+        "title": "ROC Curves",
+        "type": "Image"
+      },
+      {
+        "name": "methodologyExplanation",
+        "title": "Methodology",
+        "type": "Html"
+      },
+      {
+        "name": "resultsInterpretation",
+        "title": "Interpretation",
+        "type": "Html"
+      }
+    ],
+    "ui": true,
+    "ui_type": null,
+    "backend": true,
+    "backend_lines": 734
+  },
+  {
+    "name": "cochranq",
+    "title": "Cochran's Q Test for Paired Categorical Data",
+    "menuGroup": "ClinicoPathD",
+    "menuSubgroup": null,
+    "description": {
+      "main": "Cochran's Q test for analyzing paired categorical (binary) data with more than two  time points or conditions. This is the extension of McNemar's test for repeated  measures with binary outcomes, commonly used in clinical studies to test for  changes in treatment response or diagnostic agreement across multiple time points.\n"
+    },
+    "options": [
+      {
+        "name": "data",
+        "title": null,
+        "type": "Data"
+      },
+      {
+        "name": "variables",
+        "title": "Paired Binary Variables",
+        "type": "Variables"
+      },
+      {
+        "name": "id",
+        "title": "Subject ID (optional)",
+        "type": "Variable"
+      },
+      {
+        "name": "method",
+        "title": "Test Method",
+        "type": "List"
+      },
+      {
+        "name": "alpha",
+        "title": "Significance Level",
+        "type": "Number"
+      },
+      {
+        "name": "posthoc",
+        "title": "Post-hoc Pairwise Comparisons",
+        "type": "Bool"
+      },
+      {
+        "name": "correction",
+        "title": "Multiple Comparison Correction",
+        "type": "List"
+      },
+      {
+        "name": "effect_size",
+        "title": "Effect Size Measures",
+        "type": "Bool"
+      },
+      {
+        "name": "confidence_level",
+        "title": "Confidence Level",
+        "type": "Number"
+      },
+      {
+        "name": "show_pattern",
+        "title": "Response Pattern Analysis",
+        "type": "Bool"
+      },
+      {
+        "name": "show_assumptions",
+        "title": "Assumption Testing",
+        "type": "Bool"
+      },
+      {
+        "name": "clinical_interpretation",
+        "title": "Clinical Interpretation",
+        "type": "Bool"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "instructions",
+        "title": "Analysis Instructions",
+        "type": "Html"
+      },
+      {
+        "name": "dataInfo",
+        "title": "Data Summary",
+        "type": "Table"
+      },
+      {
+        "name": "cochranQTest",
+        "title": "Cochran's Q Test Results",
+        "type": "Table"
+      },
+      {
+        "name": "effectSize",
+        "title": "Effect Size Measures",
+        "type": "Table"
+      },
+      {
+        "name": "responsePatterns",
+        "title": "Response Pattern Analysis",
+        "type": "Table"
+      },
+      {
+        "name": "pairwiseComparisons",
+        "title": "Post-hoc Pairwise Comparisons",
+        "type": "Table"
+      },
+      {
+        "name": "marginalFrequencies",
+        "title": "Marginal Frequencies",
+        "type": "Table"
+      },
+      {
+        "name": "assumptionTesting",
+        "title": "Assumption Assessment",
+        "type": "Table"
+      },
+      {
+        "name": "clinicalInterpretation",
+        "title": "Clinical Interpretation Guide",
+        "type": "Table"
+      },
+      {
+        "name": "responsePatternPlot",
+        "title": "Response Pattern Visualization",
+        "type": "Image"
+      },
+      {
+        "name": "marginalProportionsPlot",
+        "title": "Marginal Proportions Plot",
+        "type": "Image"
+      },
+      {
+        "name": "pairwiseComparisonPlot",
+        "title": "Pairwise Comparison Heatmap",
+        "type": "Image"
+      },
+      {
+        "name": "methodExplanation",
+        "title": "Method and Clinical Context",
+        "type": "Html"
+      }
+    ],
+    "ui": true,
+    "ui_type": null,
+    "backend": true,
+    "backend_lines": 566
+  },
+  {
+    "name": "cohenskappa",
+    "title": "Cohen's Kappa Agreement",
+    "menuGroup": "meddecideExtraDT",
+    "menuSubgroup": "Diagnostic Statistics",
+    "description": {
+      "main": "Cohen's kappa and weighted kappa for two-rater agreement analysis.\nEssential for assessing agreement between two pathologists, diagnostic reproducibility,\nand quality assurance in clinical pathology practice.\n"
+    },
+    "options": [
+      {
+        "name": "data",
+        "title": null,
+        "type": "Data"
+      },
+      {
+        "name": "rater1",
+        "title": "First Rater",
+        "type": "Variable"
+      },
+      {
+        "name": "rater2",
+        "title": "Second Rater",
+        "type": "Variable"
+      },
+      {
+        "name": "kappa_type",
+        "title": "Kappa Method",
+        "type": "List"
+      },
+      {
+        "name": "confidence_level",
+        "title": "Confidence Level",
+        "type": "Number"
+      },
+      {
+        "name": "ci_method",
+        "title": "Confidence Interval Method",
+        "type": "List"
+      },
+      {
+        "name": "bootstrap_samples",
+        "title": "Bootstrap Samples",
+        "type": "Integer"
+      },
+      {
+        "name": "exact_agreement",
+        "title": "Exact Agreement Statistics",
+        "type": "Bool"
+      },
+      {
+        "name": "marginal_homogeneity",
+        "title": "Test Marginal Homogeneity",
+        "type": "Bool"
+      },
+      {
+        "name": "agreement_plot",
+        "title": "Agreement Visualization",
+        "type": "Bool"
+      },
+      {
+        "name": "confusion_matrix",
+        "title": "Confusion Matrix",
+        "type": "Bool"
+      },
+      {
+        "name": "category_analysis",
+        "title": "Category-Specific Analysis",
+        "type": "Bool"
+      },
+      {
+        "name": "interpretation_guide",
+        "title": "Clinical Interpretation Guide",
+        "type": "Bool"
+      },
+      {
+        "name": "missing_treatment",
+        "title": "Missing Data Treatment",
+        "type": "List"
+      },
+      {
+        "name": "minimum_categories",
+        "title": "Minimum Categories Warning",
+        "type": "Integer"
+      },
+      {
+        "name": "rater3",
+        "title": "Third Rater (Optional)",
+        "type": "Variable"
+      },
+      {
+        "name": "rater4",
+        "title": "Fourth Rater (Optional)",
+        "type": "Variable"
+      },
+      {
+        "name": "rater5",
+        "title": "Fifth Rater (Optional)",
+        "type": "Variable"
+      },
+      {
+        "name": "multi_rater_method",
+        "title": "Multi-Rater Method",
+        "type": "List"
+      },
+      {
+        "name": "show_pairwise_kappa",
+        "title": "Show Pairwise Kappa Matrix",
+        "type": "Bool"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "todo",
+        "title": "Instructions",
+        "type": "Html"
+      },
+      {
+        "name": "summary",
+        "title": "Analysis Summary",
+        "type": "Html"
+      },
+      {
+        "name": "kappaTable",
+        "title": "Kappa Statistics",
+        "type": "Table"
+      },
+      {
+        "name": "agreementStats",
+        "title": "Agreement Statistics",
+        "type": "Table"
+      },
+      {
+        "name": "confusionMatrix",
+        "title": "Confusion Matrix",
+        "type": "Table"
+      },
+      {
+        "name": "categoryStats",
+        "title": "Category-Specific Agreement",
+        "type": "Table"
+      },
+      {
+        "name": "marginalTest",
+        "title": "Marginal Homogeneity Test",
+        "type": "Table"
+      },
+      {
+        "name": "bootstrapResults",
+        "title": "Bootstrap Confidence Intervals",
+        "type": "Table"
+      },
+      {
+        "name": "agreementPlot",
+        "title": "Agreement Visualization",
+        "type": "Image"
+      },
+      {
+        "name": "confusionHeatmap",
+        "title": "Agreement Heatmap",
+        "type": "Image"
+      },
+      {
+        "name": "interpretationGuide",
+        "title": "Clinical Interpretation Guidelines",
+        "type": "Html"
+      },
+      {
+        "name": "technicalNotes",
+        "title": "Technical Notes and Assumptions",
+        "type": "Html"
+      },
+      {
+        "name": "multiRaterKappa",
+        "title": "Multi-Rater Kappa Statistics",
+        "type": "Table"
+      },
+      {
+        "name": "pairwiseKappaMatrix",
+        "title": "Pairwise Kappa Matrix",
+        "type": "Table"
+      },
+      {
+        "name": "multiRaterSummary",
+        "title": "Multi-Rater Analysis Summary",
+        "type": "Html"
+      }
+    ],
+    "ui": true,
+    "ui_type": null,
+    "backend": true,
+    "backend_lines": 927
+  },
+  {
+    "name": "contTablesPaired",
+    "title": "Paired Samples Contingency Tables",
+    "menuGroup": "ExplorationD",
+    "menuSubgroup": "Frequencies Contingency Tables",
+    "description": {
+      "main": "McNemar test"
+    },
+    "options": [
+      {
+        "name": "data",
+        "title": null,
+        "type": "Data"
+      },
+      {
+        "name": "rows",
+        "title": "Rows",
+        "type": "Variable"
+      },
+      {
+        "name": "cols",
+        "title": "Columns",
+        "type": "Variable"
+      },
+      {
+        "name": "counts",
+        "title": "Counts (optional)",
+        "type": "Variable"
+      },
+      {
+        "name": "chiSq",
+        "title": "\u03c7\u00b2",
+        "type": "Bool"
+      },
+      {
+        "name": "chiSqCorr",
+        "title": "\u03c7\u00b2 continuity correction",
+        "type": "Bool"
+      },
+      {
+        "name": "exact",
+        "title": "Log odds ratio exact",
+        "type": "Bool"
+      },
+      {
+        "name": "pcRow",
+        "title": "Row",
+        "type": "Bool"
+      },
+      {
+        "name": "pcCol",
+        "title": "Column",
+        "type": "Bool"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "freqs",
+        "title": "Contingency Tables",
+        "type": "Table"
+      },
+      {
+        "name": "test",
+        "title": "McNemar Test",
+        "type": "Table"
+      }
+    ],
+    "ui": true,
+    "ui_type": null,
+    "backend": true,
+    "backend_lines": 335
+  },
+  {
+    "name": "decision",
+    "title": "Medical Decision",
+    "menuGroup": "meddecideT",
+    "menuSubgroup": "Decision",
+    "description": {
+      "main": "Function for Medical Decision Analysis. Sensitivity, Specificity, Positive Predictive Value, Negative Predictive Value.\n"
+    },
+    "options": [
+      {
+        "name": "data",
+        "title": null,
+        "type": "Data"
+      },
+      {
+        "name": "gold",
+        "title": "Gold Standard (Reference)",
+        "type": "Variable"
+      },
+      {
+        "name": "goldPositive",
+        "title": "Disease present level",
+        "type": "Level"
+      },
+      {
+        "name": "newtest",
+        "title": "Test Under Evaluation",
+        "type": "Variable"
+      },
+      {
+        "name": "testPositive",
+        "title": "Test positive level",
+        "type": "Level"
+      },
+      {
+        "name": "goldNegative",
+        "title": "Disease absent level",
+        "type": "Level"
+      },
+      {
+        "name": "testNegative",
+        "title": "Test negative level",
+        "type": "Level"
+      },
+      {
+        "name": "pp",
+        "title": "Known population prevalence",
+        "type": "Bool"
+      },
+      {
+        "name": "pprob",
+        "title": "Population disease prevalence",
+        "type": "Number"
+      },
+      {
+        "name": "od",
+        "title": "Raw data tables",
+        "type": "Bool"
+      },
+      {
+        "name": "fnote",
+        "title": "Explanatory footnotes",
+        "type": "Bool"
+      },
+      {
+        "name": "ci",
+        "title": "95 percent confidence intervals",
+        "type": "Bool"
+      },
+      {
+        "name": "fagan",
+        "title": "Fagan nomogram plot",
+        "type": "Bool"
+      },
+      {
+        "name": "showNaturalLanguage",
+        "title": "Clinical summary",
+        "type": "Bool"
+      },
+      {
+        "name": "showClinicalInterpretation",
+        "title": "Clinical interpretation guide",
+        "type": "Bool"
+      },
+      {
+        "name": "showReportTemplate",
+        "title": "Copy-ready results paragraph",
+        "type": "Bool"
+      },
+      {
+        "name": "showAboutAnalysis",
+        "title": "About this analysis",
+        "type": "Bool"
+      },
+      {
+        "name": "showMisclassified",
+        "title": "Misclassified cases analysis",
+        "type": "Bool"
+      },
+      {
+        "name": "maxCasesShow",
+        "title": "Maximum cases to display",
+        "type": "Integer"
+      },
+      {
+        "name": "saveClassifications",
+        "title": "Save classifications to data",
+        "type": "Output"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "welcome",
+        "title": "Getting Started",
+        "type": "Html"
+      },
+      {
+        "name": "notices",
+        "title": "Important Information",
+        "type": "Html"
+      },
+      {
+        "name": "rawContingency",
+        "title": "Analysed Contingency Table",
+        "type": "Table"
+      },
+      {
+        "name": "rawCounts",
+        "title": "Analysed Combination Counts",
+        "type": "Table"
+      },
+      {
+        "name": "cTable",
+        "title": "2x2 Table",
+        "type": "Table"
+      },
+      {
+        "name": "nTable",
+        "title": "n",
+        "type": "Table"
+      },
+      {
+        "name": "ratioTable",
+        "title": "",
+        "type": "Table"
+      },
+      {
+        "name": "missingDataSummary",
+        "title": "Data Quality Summary",
+        "type": "Html"
+      },
+      {
+        "name": "epirTable_ratio",
+        "title": "Sensitivity, Specificity and Predictive Values with 95% CI",
+        "type": "Table"
+      },
+      {
+        "name": "epirTable_number",
+        "title": "",
+        "type": "Table"
+      },
+      {
+        "name": "plot1",
+        "title": "Fagan nomogram",
+        "type": "Image"
+      },
+      {
+        "name": "naturalLanguageSummary",
+        "title": "Clinical Summary",
+        "type": "Html"
+      },
+      {
+        "name": "clinicalInterpretation",
+        "title": "Clinical Interpretation Guide",
+        "type": "Html"
+      },
+      {
+        "name": "reportTemplate",
+        "title": "Copy-Ready Results Paragraph",
+        "type": "Html"
+      },
+      {
+        "name": "aboutAnalysis",
+        "title": "About This Analysis",
+        "type": "Html"
+      },
+      {
+        "name": "misclassifiedHeading",
+        "title": "Misclassified Cases Analysis",
+        "type": "Html"
+      },
+      {
+        "name": "confusionMatrixSummary",
+        "title": "Confusion Matrix Summary",
+        "type": "Table"
+      },
+      {
+        "name": "falsePositiveTable",
+        "title": "False Positive Cases (Test+ but Disease-)",
+        "type": "Table"
+      },
+      {
+        "name": "falseNegativeTable",
+        "title": "False Negative Cases (Test- but Disease+)",
+        "type": "Table"
+      },
+      {
+        "name": "misclassificationInterpretation",
+        "title": "Interpretation of Misclassified Cases",
+        "type": "Html"
+      },
+      {
+        "name": "saveClassifications",
+        "title": "Classification Groups",
+        "type": "Output"
+      }
+    ],
+    "ui": true,
+    "ui_type": null,
+    "backend": true,
+    "backend_lines": 2894
+  },
+  {
+    "name": "decisioncalculator",
+    "title": "Medical Decision Calculator",
+    "menuGroup": "meddecide",
+    "menuSubgroup": "Decision Calculators",
+    "description": {
+      "main": "Medical Decision Calculator for diagnostic test evaluation when you have the four key counts: True Positives (TP), False Positives (FP), True Negatives (TN), and False Negatives (FN). Calculates comprehensive diagnostic performance metrics including sensitivity, specificity, positive and negative predictive values, likelihood ratios, and post-test probabilities. Supports confidence interval estimation and Fagan nomogram visualization for educational interpretation. Presets and examples are illustrative only and are not clinical guides.\n",
+      "R": {
+        "dontrun": true,
+        "usage": "# Illustrative examples only; these are not clinical guides.\nresult1 <- decisioncalculator(\n  TP = 90, FN = 20, TN = 80, FP = 30\n)\n\nresult2 <- decisioncalculator(\n  TP = 90, FN = 20, TN = 80, FP = 30,\n  ci = TRUE, pp = TRUE, pprob = 0.15, fagan = TRUE\n)\n"
+      }
+    },
+    "options": [
+      {
+        "name": "TP",
+        "title": "True Positive (TP)",
+        "type": "Number"
+      },
+      {
+        "name": "TN",
+        "title": "True Negative (TN)",
+        "type": "Number"
+      },
+      {
+        "name": "FP",
+        "title": "False Positive (FP)",
+        "type": "Number"
+      },
+      {
+        "name": "FN",
+        "title": "False Negative (FN)",
+        "type": "Number"
+      },
+      {
+        "name": "pp",
+        "title": "Known population prevalence",
+        "type": "Bool"
+      },
+      {
+        "name": "pprob",
+        "title": "Prior Probability (prevalence)",
+        "type": "Number"
+      },
+      {
+        "name": "fnote",
+        "title": "Explanatory footnotes",
+        "type": "Bool"
+      },
+      {
+        "name": "ci",
+        "title": "95 percent confidence intervals",
+        "type": "Bool"
+      },
+      {
+        "name": "fagan",
+        "title": "Fagan nomogram plot",
+        "type": "Bool"
+      },
+      {
+        "name": "showWelcome",
+        "title": "Welcome message",
+        "type": "Bool"
+      },
+      {
+        "name": "showSummary",
+        "title": "Plain-language summary",
+        "type": "Bool"
+      },
+      {
+        "name": "showAbout",
+        "title": "About this analysis",
+        "type": "Bool"
+      },
+      {
+        "name": "showGlossary",
+        "title": "Clinical terms glossary",
+        "type": "Bool"
+      },
+      {
+        "name": "multiplecuts",
+        "title": "Multiple cut-off evaluation",
+        "type": "Bool"
+      },
+      {
+        "name": "cutoff1",
+        "title": "Cut-off scenario 1 name",
+        "type": "String"
+      },
+      {
+        "name": "tp1",
+        "title": "TP (Cut-off 1)",
+        "type": "Number"
+      },
+      {
+        "name": "fp1",
+        "title": "FP (Cut-off 1)",
+        "type": "Number"
+      },
+      {
+        "name": "tn1",
+        "title": "TN (Cut-off 1)",
+        "type": "Number"
+      },
+      {
+        "name": "fn1",
+        "title": "FN (Cut-off 1)",
+        "type": "Number"
+      },
+      {
+        "name": "cutoff2",
+        "title": "Cut-off scenario 2 name",
+        "type": "String"
+      },
+      {
+        "name": "tp2",
+        "title": "TP (Cut-off 2)",
+        "type": "Number"
+      },
+      {
+        "name": "fp2",
+        "title": "FP (Cut-off 2)",
+        "type": "Number"
+      },
+      {
+        "name": "tn2",
+        "title": "TN (Cut-off 2)",
+        "type": "Number"
+      },
+      {
+        "name": "fn2",
+        "title": "FN (Cut-off 2)",
+        "type": "Number"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "notices",
+        "title": "Important Information",
+        "type": "Preformatted"
+      },
+      {
+        "name": "welcome",
+        "title": "",
+        "type": "Html"
+      },
+      {
+        "name": "summary",
+        "title": "Summary",
+        "type": "Html"
+      },
+      {
+        "name": "about",
+        "title": "About This Analysis",
+        "type": "Html"
+      },
+      {
+        "name": "assumptions",
+        "title": "Assumptions & Caveats",
+        "type": "Html"
+      },
+      {
+        "name": "glossary",
+        "title": "Clinical Terms Glossary",
+        "type": "Html"
+      },
+      {
+        "name": "cTable",
+        "title": "",
+        "type": "Table"
+      },
+      {
+        "name": "nTable",
+        "title": "",
+        "type": "Table"
+      },
+      {
+        "name": "ratioTable",
+        "title": "",
+        "type": "Table"
+      },
+      {
+        "name": "advancedMetricsTable",
+        "title": "Advanced Diagnostic Metrics",
+        "type": "Table"
+      },
+      {
+        "name": "epirTable_ratio",
+        "title": "",
+        "type": "Table"
+      },
+      {
+        "name": "epirTable_number",
+        "title": "",
+        "type": "Table"
+      },
+      {
+        "name": "faganSummary",
+        "title": "Reading the Nomogram",
+        "type": "Html"
+      },
+      {
+        "name": "plot1",
+        "title": "Fagan nomogram",
+        "type": "Image"
+      },
+      {
+        "name": "multipleCutoffTable",
+        "title": "Cut-off Comparison",
+        "type": "Table"
+      }
+    ],
+    "ui": true,
+    "ui_type": null,
+    "backend": true,
+    "backend_lines": 1546
+  },
+  {
+    "name": "decisioncompare",
+    "title": "Compare Medical Decision Tests",
+    "menuGroup": "meddecideT",
+    "menuSubgroup": "Decision",
+    "description": {
+      "main": "Function for comparing multiple Medical Decision Tests. Compares sensitivity, specificity, positive predictive value, negative predictive value, and other metrics between different tests against the same gold standard. Includes statistical comparison using McNemar's test and confidence intervals for differences. Tests are paired within each case; cases must be independent across rows. Repeated specimens or lesions from one patient require a method that accounts for clustering.\n",
+      "R": {
+        "dontrun": true,
+        "usage": "# Level arguments are explicit in the generated R API. Pass NULL for\n# unused negative levels and for the optional third test selectors.\ndecisioncompare(\n    data = histopathology,\n    gold = \"Golden Standart\",\n    goldPositive = \"1\",\n    goldNegative = NULL,\n    test1 = \"New Test\",\n    test1Positive = \"1\",\n    test1Negative = NULL,\n    test2 = \"Rater 1\",\n    test2Positive = \"1\",\n    test2Negative = NULL,\n    test3 = NULL,\n    test3Positive = NULL,\n    test3Negative = NULL,\n    statComp = TRUE\n)\n"
+      }
+    },
+    "options": [
+      {
+        "name": "data",
+        "title": null,
+        "type": "Data"
+      },
+      {
+        "name": "gold",
+        "title": "Gold Standard (Reference Test)",
+        "type": "Variable"
+      },
+      {
+        "name": "goldPositive",
+        "title": "Disease present level",
+        "type": "Level"
+      },
+      {
+        "name": "goldNegative",
+        "title": "Disease absent level",
+        "type": "Level"
+      },
+      {
+        "name": "test1",
+        "title": "Test 1 (Required)",
+        "type": "Variable"
+      },
+      {
+        "name": "test1Positive",
+        "title": "Test 1 Positive Level",
+        "type": "Level"
+      },
+      {
+        "name": "test1Negative",
+        "title": "Test 1 Negative Level",
+        "type": "Level"
+      },
+      {
+        "name": "test2",
+        "title": "Test 2 (Required for Comparison)",
+        "type": "Variable"
+      },
+      {
+        "name": "test2Positive",
+        "title": "Test 2 Positive Level",
+        "type": "Level"
+      },
+      {
+        "name": "test2Negative",
+        "title": "Test 2 Negative Level",
+        "type": "Level"
+      },
+      {
+        "name": "test3",
+        "title": "Test 3 (Optional)",
+        "type": "Variable"
+      },
+      {
+        "name": "test3Positive",
+        "title": "Test 3 Positive Level",
+        "type": "Level"
+      },
+      {
+        "name": "test3Negative",
+        "title": "Test 3 Negative Level",
+        "type": "Level"
+      },
+      {
+        "name": "pp",
+        "title": "Prior probability (prevalence)",
+        "type": "Bool"
+      },
+      {
+        "name": "pprob",
+        "title": "Prior probability (prevalence)",
+        "type": "Number"
+      },
+      {
+        "name": "od",
+        "title": "Original data",
+        "type": "Bool"
+      },
+      {
+        "name": "fnote",
+        "title": "Footnotes",
+        "type": "Bool"
+      },
+      {
+        "name": "ci",
+        "title": "95 percent CI",
+        "type": "Bool"
+      },
+      {
+        "name": "plot",
+        "title": "Comparison plot",
+        "type": "Bool"
+      },
+      {
+        "name": "excludeIndeterminate",
+        "title": "Exclude indeterminate/Equivocal levels",
+        "type": "Bool"
+      },
+      {
+        "name": "radarplot",
+        "title": "Radar plot",
+        "type": "Bool"
+      },
+      {
+        "name": "heatmap",
+        "title": "Concordance heatmap",
+        "type": "Bool"
+      },
+      {
+        "name": "opa",
+        "title": "Overall percent agreement with CI",
+        "type": "Bool"
+      },
+      {
+        "name": "niMargin",
+        "title": "Minimum acceptable OPA (percent)",
+        "type": "Number"
+      },
+      {
+        "name": "useOpaCriterion",
+        "title": "Minimum OPA criterion",
+        "type": "Bool"
+      },
+      {
+        "name": "ciMethod",
+        "title": "CI Method for Agreement",
+        "type": "List"
+      },
+      {
+        "name": "stratify",
+        "title": "Stratification Variable",
+        "type": "Variable"
+      },
+      {
+        "name": "statComp",
+        "title": "Statistical comparison",
+        "type": "Bool"
+      },
+      {
+        "name": "mcnemarMethod",
+        "title": "McNemar Test",
+        "type": "List"
+      },
+      {
+        "name": "showSummary",
+        "title": "Summary",
+        "type": "Bool"
+      },
+      {
+        "name": "showExplanations",
+        "title": "Explanations",
+        "type": "Bool"
+      },
+      {
+        "name": "showReportSentence",
+        "title": "Report sentence",
+        "type": "Bool"
+      },
+      {
+        "name": "showDescriptiveReport",
+        "title": "Descriptive report templates",
+        "type": "Bool"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "notices",
+        "title": "Important Information",
+        "type": "Html"
+      },
+      {
+        "name": "text1",
+        "title": "Original Data",
+        "type": "Preformatted"
+      },
+      {
+        "name": "text2",
+        "title": "Original Data",
+        "type": "Html"
+      },
+      {
+        "name": "cTable1",
+        "title": "Test 1 - Recoded Data",
+        "type": "Table"
+      },
+      {
+        "name": "epirTable1",
+        "title": "Test 1 - Confidence Intervals",
+        "type": "Table"
+      },
+      {
+        "name": "cTable2",
+        "title": "Test 2 - Recoded Data",
+        "type": "Table"
+      },
+      {
+        "name": "epirTable2",
+        "title": "Test 2 - Confidence Intervals",
+        "type": "Table"
+      },
+      {
+        "name": "cTable3",
+        "title": "Test 3 - Recoded Data",
+        "type": "Table"
+      },
+      {
+        "name": "epirTable3",
+        "title": "Test 3 - Confidence Intervals",
+        "type": "Table"
+      },
+      {
+        "name": "comparisonTable",
+        "title": "Decision Test Comparison",
+        "type": "Table"
+      },
+      {
+        "name": "opaTable",
+        "title": "Overall Percent Agreement (Descriptive)",
+        "type": "Table"
+      },
+      {
+        "name": "stratifiedTable",
+        "title": "Stratified Diagnostic Accuracy",
+        "type": "Table"
+      },
+      {
+        "name": "mcnemarTable",
+        "title": "Statistical Comparison of Test Accuracy",
+        "type": "Table"
+      },
+      {
+        "name": "diffTable",
+        "title": "Differences with 95% Confidence Intervals",
+        "type": "Table"
+      },
+      {
+        "name": "plot1",
+        "title": "Test Comparison",
+        "type": "Image"
+      },
+      {
+        "name": "plotRadar",
+        "title": "Radar Plot Comparison",
+        "type": "Image"
+      },
+      {
+        "name": "plotHeatmap",
+        "title": "Concordance Heatmap",
+        "type": "Image"
+      },
+      {
+        "name": "summaryReport",
+        "title": "Summary",
+        "type": "Html"
+      },
+      {
+        "name": "reportSentence",
+        "title": "Manuscript-Ready Report",
+        "type": "Html"
+      },
+      {
+        "name": "explanationsContent",
+        "title": "Statistical Explanations & Glossary",
+        "type": "Html"
+      },
+      {
+        "name": "clinicalReport",
+        "title": "Descriptive Summary & Report Templates",
+        "type": "Html"
+      },
+      {
+        "name": "aboutAnalysis",
+        "title": "About This Analysis",
+        "type": "Html"
+      }
+    ],
+    "ui": true,
+    "ui_type": null,
+    "backend": true,
+    "backend_lines": 3927
+  },
+  {
+    "name": "multiclassdiagnostics",
+    "title": "Multi-class Diagnostic Performance Evaluation",
+    "menuGroup": "meddecideExtraD",
+    "menuSubgroup": "Diagnostic Performance",
+    "description": {
+      "main": "Comprehensive evaluation of multi-class classification performance including per-class and overall metrics, ROC curves, confusion matrices, and model comparison capabilities.\n"
+    },
+    "options": [
+      {
+        "name": "data",
+        "title": null,
+        "type": "Data"
+      },
+      {
+        "name": "predicted",
+        "title": "Predicted Classes",
+        "type": "Variable"
+      },
+      {
+        "name": "actual",
+        "title": "Actual Classes",
+        "type": "Variable"
+      },
+      {
+        "name": "positiveClass",
+        "title": "Positive Class (for binary)",
+        "type": "Level"
+      },
+      {
+        "name": "confidenceLevel",
+        "title": "Confidence Level",
+        "type": "Number"
+      },
+      {
+        "name": "showROC",
+        "title": "ROC Curves",
+        "type": "Bool"
+      },
+      {
+        "name": "showConfusion",
+        "title": "Confusion Matrix",
+        "type": "Bool"
+      },
+      {
+        "name": "showPerClass",
+        "title": "Per-Class Metrics",
+        "type": "Bool"
+      },
+      {
+        "name": "showOverall",
+        "title": "Overall Metrics",
+        "type": "Bool"
+      },
+      {
+        "name": "compareModels",
+        "title": "Compare Models",
+        "type": "Bool"
+      },
+      {
+        "name": "predicted2",
+        "title": "Predicted Classes (Model 2)",
+        "type": "Variable"
+      },
+      {
+        "name": "modelNames",
+        "title": "Model Names",
+        "type": "String"
+      },
+      {
+        "name": "deLongTest",
+        "title": "DeLong Test",
+        "type": "Bool"
+      },
+      {
+        "name": "mcnemarTest",
+        "title": "McNemar Test",
+        "type": "Bool"
+      },
+      {
+        "name": "plotTheme",
+        "title": "Plot Theme",
+        "type": "List"
+      },
+      {
+        "name": "saveResults",
+        "title": "Save Results",
+        "type": "Bool"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "confusionMatrix",
+        "title": "Confusion Matrix",
+        "type": "Table"
+      },
+      {
+        "name": "perClassMetrics",
+        "title": "Per-Class Performance Metrics",
+        "type": "Table"
+      },
+      {
+        "name": "overallMetrics",
+        "title": "Overall Performance Metrics",
+        "type": "Table"
+      },
+      {
+        "name": "modelComparison",
+        "title": "Model Comparison",
+        "type": "Table"
+      },
+      {
+        "name": "deLongResults",
+        "title": "DeLong Test Results",
+        "type": "Table"
+      },
+      {
+        "name": "mcnemarResults",
+        "title": "McNemar Test Results",
+        "type": "Table"
+      },
+      {
+        "name": "rocPlot",
+        "title": "ROC Curves",
+        "type": "Image"
+      },
+      {
+        "name": "confusionPlot",
+        "title": "Confusion Matrix Heatmap",
+        "type": "Image"
+      },
+      {
+        "name": "metricsPlot",
+        "title": "Performance Metrics Comparison",
+        "type": "Image"
+      },
+      {
+        "name": "modelComparisonPlot",
+        "title": "Model Comparison Plot",
+        "type": "Image"
+      },
+      {
+        "name": "text",
+        "title": "Analysis Summary",
+        "type": "Preformatted"
+      }
+    ],
+    "ui": true,
+    "ui_type": null,
+    "backend": true,
+    "backend_lines": 640
+  },
+  {
+    "name": "nogoldstandard",
+    "title": "Analysis Without Gold Standard",
+    "menuGroup": "meddecideT",
+    "menuSubgroup": "Decision",
+    "description": {
+      "main": "Analysis of multiple binary tests when no perfect reference exists. Implements a conditional-independence two-class latent class model, fixed-prior penalized EM point estimation with numerical refinement, and descriptive agreement with self-built reference rules. Latent classes are unlabeled, and reference-rule results are not diagnostic-accuracy estimates.\n"
+    },
+    "options": [
+      {
+        "name": "data",
+        "title": null,
+        "type": "Data"
+      },
+      {
+        "name": "clinicalPreset",
+        "title": "Illustrative Scenario Example",
+        "type": "List"
+      },
+      {
+        "name": "test1",
+        "title": "Test 1",
+        "type": "Variable"
+      },
+      {
+        "name": "test1Positive",
+        "title": "Positive Level",
+        "type": "Level"
+      },
+      {
+        "name": "test2",
+        "title": "Test 2",
+        "type": "Variable"
+      },
+      {
+        "name": "test2Positive",
+        "title": "Positive Level",
+        "type": "Level"
+      },
+      {
+        "name": "test3",
+        "title": "Test 3",
+        "type": "Variable"
+      },
+      {
+        "name": "test3Positive",
+        "title": "Positive Level",
+        "type": "Level"
+      },
+      {
+        "name": "test4",
+        "title": "Test 4",
+        "type": "Variable"
+      },
+      {
+        "name": "test4Positive",
+        "title": "Positive Level",
+        "type": "Level"
+      },
+      {
+        "name": "test5",
+        "title": "Test 5",
+        "type": "Variable"
+      },
+      {
+        "name": "test5Positive",
+        "title": "Positive Level",
+        "type": "Level"
+      },
+      {
+        "name": "method",
+        "title": "Analysis Method",
+        "type": "List"
+      },
+      {
+        "name": "bootstrap",
+        "title": "Bootstrap CI",
+        "type": "Bool"
+      },
+      {
+        "name": "nboot",
+        "title": "Number of Bootstrap Samples",
+        "type": "Number"
+      },
+      {
+        "name": "alpha",
+        "title": "Alpha for Confidence Intervals",
+        "type": "Number"
+      },
+      {
+        "name": "verbose",
+        "title": "Analysis Diagnostics",
+        "type": "Bool"
+      },
+      {
+        "name": "seed",
+        "title": "Random Seed",
+        "type": "Integer"
+      },
+      {
+        "name": "showSummary",
+        "title": "Plain-Language Summary",
+        "type": "Bool"
+      },
+      {
+        "name": "showMethodGuide",
+        "title": "Method Guide",
+        "type": "Bool"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "notices",
+        "title": "Important Information",
+        "type": "Preformatted"
+      },
+      {
+        "name": "instructions",
+        "title": "Instructions",
+        "type": "Html"
+      },
+      {
+        "name": "agreement_stats",
+        "title": "Agreement Statistics (Cohen's Kappa)",
+        "type": "Table"
+      },
+      {
+        "name": "clinical_summary",
+        "title": "Plain-Language Summary",
+        "type": "Html"
+      },
+      {
+        "name": "method_guide",
+        "title": "Method Selection Guide",
+        "type": "Html"
+      },
+      {
+        "name": "prevalence",
+        "title": "Estimated Class or Rule Proportion",
+        "type": "Table"
+      },
+      {
+        "name": "test_metrics",
+        "title": "Estimated Test Metrics or Rule Agreement",
+        "type": "Table"
+      },
+      {
+        "name": "model_fit",
+        "title": "Model Fit Statistics",
+        "type": "Table"
+      },
+      {
+        "name": "conditional_dependence",
+        "title": "Conditional Independence Check (Bivariate Residuals)",
+        "type": "Table"
+      },
+      {
+        "name": "diagnostics",
+        "title": "Analysis Diagnostics",
+        "type": "Preformatted"
+      },
+      {
+        "name": "crosstab",
+        "title": "Test Cross-Tabulation",
+        "type": "Table"
+      },
+      {
+        "name": "agreement_plot",
+        "title": "Test Agreement Matrix",
+        "type": "Image"
+      }
+    ],
+    "ui": true,
+    "ui_type": null,
+    "backend": true,
+    "backend_lines": 2400
+  },
+  {
+    "name": "ordinalmixedmodel",
+    "title": "Ordinal Mixed Models (Cumulative Link)",
+    "menuGroup": "ClinicoPathD",
+    "menuSubgroup": null,
+    "description": {
+      "main": "Cumulative link mixed models (CLMM) for ordinal response data with random effects. Appropriate for Likert-scale data, ordered categorical outcomes (e.g., tumor grades, disease severity), and repeated-measures designs with ordinal endpoints. Uses the ordinal package for fitting cumulative link mixed models with logit, probit, or complementary log-log links.\n"
+    },
+    "options": [
+      {
+        "name": "data",
+        "title": null,
+        "type": "Data"
+      },
+      {
+        "name": "dep",
+        "title": "Dependent Variable (Ordinal)",
+        "type": "Variable"
+      },
+      {
+        "name": "fixedFactors",
+        "title": "Fixed Factors",
+        "type": "Variables"
+      },
+      {
+        "name": "fixedCovs",
+        "title": "Fixed Covariates",
+        "type": "Variables"
+      },
+      {
+        "name": "randomTerms",
+        "title": "Random Effects Grouping",
+        "type": "Variables"
+      },
+      {
+        "name": "link",
+        "title": "Link Function",
+        "type": "List"
+      },
+      {
+        "name": "threshold",
+        "title": "Threshold Type",
+        "type": "List"
+      },
+      {
+        "name": "propOddsTest",
+        "title": "Test Proportional Odds Assumption",
+        "type": "Bool"
+      },
+      {
+        "name": "oddsRatios",
+        "title": "Show Odds Ratios",
+        "type": "Bool"
+      },
+      {
+        "name": "confInt",
+        "title": "Confidence Intervals",
+        "type": "Bool"
+      },
+      {
+        "name": "confLevel",
+        "title": "Confidence Level",
+        "type": "Number"
+      },
+      {
+        "name": "randomEffectsTable",
+        "title": "Random Effects Variance",
+        "type": "Bool"
+      },
+      {
+        "name": "thresholdsTable",
+        "title": "Threshold Coefficients",
+        "type": "Bool"
+      },
+      {
+        "name": "modelFit",
+        "title": "Model Fit Statistics",
+        "type": "Bool"
+      },
+      {
+        "name": "conditionMeans",
+        "title": "Condition Marginal Probabilities",
+        "type": "Bool"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "instructions",
+        "title": "Analysis Instructions",
+        "type": "Html"
+      },
+      {
+        "name": "modelFitTable",
+        "title": "Model Fit",
+        "type": "Table"
+      },
+      {
+        "name": "fixedEffects",
+        "title": "Fixed Effects",
+        "type": "Table"
+      },
+      {
+        "name": "thresholds",
+        "title": "Threshold Coefficients",
+        "type": "Table"
+      },
+      {
+        "name": "randomEffects",
+        "title": "Random Effects",
+        "type": "Table"
+      },
+      {
+        "name": "propOddsTestTable",
+        "title": "Proportional Odds Assumption Test",
+        "type": "Table"
+      },
+      {
+        "name": "conditionProbs",
+        "title": "Predicted Marginal Probabilities",
+        "type": "Table"
+      },
+      {
+        "name": "methodExplanation",
+        "title": "Method and Clinical Context",
+        "type": "Html"
+      }
+    ],
+    "ui": true,
+    "ui_type": null,
+    "backend": true,
+    "backend_lines": 492
+  },
+  {
+    "name": "pathagreement",
+    "title": "Pathology Interrater Reliability",
+    "menuGroup": "OncoPathT",
+    "menuSubgroup": "Agreement",
+    "description": {
+      "main": "Interrater reliability analysis including Cohen's kappa (2 raters),\nFleiss' kappa (3+ raters), Krippendorff's alpha, and consensus analysis.\nProvides agreement statistics, visualization, and clinical\ninterpretation for categorical rating data. Optional independent-reader\nworkflows report disease-positive accuracy and binary, ordinal or numeric\ncutoff disagreement with explicit case populations and exploratory cluster\nintervals. The default retains standard categorical agreement.\n",
+      "R": {
+        "dontrun": true,
+        "usage": "data('ihc_reader_reproducibility', package = 'ClinicoPath')\npathagreement(ihc_reader_reproducibility,\n    readerWorkflow = 'numeric_cutoff',\n    readerScores = c('score1', 'score2', 'score3'),\n    clinicalCutoff = '50', positiveRule = 'ge', nearCutoffWidth = '5',\n    referenceStandard = 'reference', referencePositive = 'Present',\n    referenceNegative = 'Absent', caseID = 'case_id',\n    readerCluster = 'patient_id', readerBootstrap = TRUE,\n    bootstrapSamples = 1000, seed = 42)\n"
+      }
+    },
+    "options": [
+      {
+        "name": "data",
+        "title": null,
+        "type": "Data"
+      },
+      {
+        "name": "vars",
+        "title": "Raters/Observers",
+        "type": "Variables"
+      },
+      {
+        "name": "sft",
+        "title": "Frequency Tables",
+        "type": "Bool"
+      },
+      {
+        "name": "heatmap",
+        "title": "Agreement Heatmap",
+        "type": "Bool"
+      },
+      {
+        "name": "heatmapDetails",
+        "title": "Show Detailed Heatmap",
+        "type": "Bool"
+      },
+      {
+        "name": "heatmapTheme",
+        "title": "Heatmap Color Theme",
+        "type": "List"
+      },
+      {
+        "name": "wght",
+        "title": "Weighted Kappa (Ordinal Variables only)",
+        "type": "List"
+      },
+      {
+        "name": "exct",
+        "title": "Conger's exact kappa (3 or more raters)",
+        "type": "Bool"
+      },
+      {
+        "name": "multiraterMethod",
+        "title": "Multi-rater Agreement Method",
+        "type": "List"
+      },
+      {
+        "name": "fleissCI",
+        "title": "Fleiss Kappa Confidence Intervals",
+        "type": "Bool"
+      },
+      {
+        "name": "kripp",
+        "title": "Krippendorff's Alpha",
+        "type": "Bool"
+      },
+      {
+        "name": "krippMethod",
+        "title": "Data Type for Krippendorff's Alpha",
+        "type": "List"
+      },
+      {
+        "name": "consensus",
+        "title": "Consensus Analysis",
+        "type": "Bool"
+      },
+      {
+        "name": "consensus_method",
+        "title": "Consensus Method",
+        "type": "List"
+      },
+      {
+        "name": "tie_breaking",
+        "title": "Tie Breaking Method",
+        "type": "List"
+      },
+      {
+        "name": "show_consensus_table",
+        "title": "Show Consensus Results",
+        "type": "Bool"
+      },
+      {
+        "name": "showClinicalSummary",
+        "title": "Clinical Summary",
+        "type": "Bool"
+      },
+      {
+        "name": "showAboutAnalysis",
+        "title": "About This Analysis",
+        "type": "Bool"
+      },
+      {
+        "name": "showAssumptions",
+        "title": "Assumptions & Caveats",
+        "type": "Bool"
+      },
+      {
+        "name": "showWeightedKappaGuide",
+        "title": "Weighted Kappa Guide",
+        "type": "Bool"
+      },
+      {
+        "name": "showStatisticalGlossary",
+        "title": "Statistical Terms Glossary",
+        "type": "Bool"
+      },
+      {
+        "name": "styleDistanceMetric",
+        "title": "Style Distance Metric",
+        "type": "List"
+      },
+      {
+        "name": "raterCharacteristics",
+        "title": "Include Rater Characteristics",
+        "type": "Bool"
+      },
+      {
+        "name": "identifyDiscordantCases",
+        "title": "Identify Discordant Cases",
+        "type": "Bool"
+      },
+      {
+        "name": "caseID",
+        "title": "Case ID Variable",
+        "type": "Variable"
+      },
+      {
+        "name": "icc",
+        "title": "Intraclass Correlation Coefficient",
+        "type": "Bool"
+      },
+      {
+        "name": "bootstrap",
+        "title": "Bootstrap Confidence Intervals",
+        "type": "Bool"
+      },
+      {
+        "name": "bootstrapCIType",
+        "title": "Bootstrap Interval Method",
+        "type": "List"
+      },
+      {
+        "name": "bootstrapSamples",
+        "title": "Bootstrap Samples",
+        "type": "Number"
+      },
+      {
+        "name": "seed",
+        "title": "Random seed",
+        "type": "Integer"
+      },
+      {
+        "name": "pairwiseAnalysis",
+        "title": "Pairwise Rater Analysis",
+        "type": "Bool"
+      },
+      {
+        "name": "categoryAnalysis",
+        "title": "Category-Specific Agreement",
+        "type": "Bool"
+      },
+      {
+        "name": "outlierAnalysis",
+        "title": "Identify Outlier Cases",
+        "type": "Bool"
+      },
+      {
+        "name": "pathologyContext",
+        "title": "Pathology-Specific Metrics",
+        "type": "Bool"
+      },
+      {
+        "name": "gwetAC",
+        "title": "Gwet's Agreement Coefficients",
+        "type": "Bool"
+      },
+      {
+        "name": "pabak",
+        "title": "PABAK Analysis",
+        "type": "Bool"
+      },
+      {
+        "name": "sampleSizePlanning",
+        "title": "Sample Size Planning",
+        "type": "Bool"
+      },
+      {
+        "name": "targetKappa",
+        "title": "Target Kappa Value",
+        "type": "Number"
+      },
+      {
+        "name": "targetPrecision",
+        "title": "Target precision (half-width of the 95 percent CI)",
+        "type": "Number"
+      },
+      {
+        "name": "raterBiasAnalysis",
+        "title": "Rater disagreement with consensus",
+        "type": "Bool"
+      },
+      {
+        "name": "agreementTrendAnalysis",
+        "title": "Agreement Trend Analysis",
+        "type": "Bool"
+      },
+      {
+        "name": "sequenceVariable",
+        "title": "Trend Sequence Variable",
+        "type": "Variable"
+      },
+      {
+        "name": "caseDifficultyScoring",
+        "title": "Case Difficulty Analysis",
+        "type": "Bool"
+      },
+      {
+        "name": "agreementStabilityAnalysis",
+        "title": "Agreement Stability Analysis",
+        "type": "Bool"
+      },
+      {
+        "name": "performClustering",
+        "title": "Perform Rater Clustering Analysis",
+        "type": "Bool"
+      },
+      {
+        "name": "clusteringMethod",
+        "title": "Clustering Linkage Method",
+        "type": "List"
+      },
+      {
+        "name": "nStyleGroups",
+        "title": "Number of Style Groups",
+        "type": "Integer"
+      },
+      {
+        "name": "autoSelectGroups",
+        "title": "Automatically Select Number of Groups",
+        "type": "Bool"
+      },
+      {
+        "name": "showClusteringHeatmap",
+        "title": "Show Clustering Heatmap",
+        "type": "Bool"
+      },
+      {
+        "name": "heatmapColorScheme",
+        "title": "Heatmap Color Scheme",
+        "type": "List"
+      },
+      {
+        "name": "identifyDiscordant",
+        "title": "Identify Discordant Cases",
+        "type": "Bool"
+      },
+      {
+        "name": "discordantThreshold",
+        "title": "Discordant Case Threshold",
+        "type": "Number"
+      },
+      {
+        "name": "referenceStandard",
+        "title": "Reference/Expert Standard (optional)",
+        "type": "Variable"
+      },
+      {
+        "name": "useMetadataRows",
+        "title": "Extract Rater Characteristics from Metadata Rows",
+        "type": "Bool"
+      },
+      {
+        "name": "showInlineComments",
+        "title": "Show Inline Statistical Comments",
+        "type": "Bool"
+      },
+      {
+        "name": "showClusteringInterpretation",
+        "title": "Show Clustering Interpretation Guide",
+        "type": "Bool"
+      },
+      {
+        "name": "readerWorkflow",
+        "title": "Reader workflow",
+        "type": "List"
+      },
+      {
+        "name": "readerScores",
+        "title": "Numeric reader scores",
+        "type": "Variables"
+      },
+      {
+        "name": "readerPositive",
+        "title": "Reader positive label",
+        "type": "String"
+      },
+      {
+        "name": "readerNegative",
+        "title": "Reader negative label",
+        "type": "String"
+      },
+      {
+        "name": "referenceAccuracy",
+        "title": "Reader accuracy against reference",
+        "type": "Bool"
+      },
+      {
+        "name": "referencePositive",
+        "title": "Reference positive label",
+        "type": "String"
+      },
+      {
+        "name": "referenceNegative",
+        "title": "Reference negative label",
+        "type": "String"
+      },
+      {
+        "name": "readerPopulation",
+        "title": "Accuracy case population",
+        "type": "List"
+      },
+      {
+        "name": "clinicalCutoff",
+        "title": "Prespecified numeric cutoff",
+        "type": "String"
+      },
+      {
+        "name": "positiveRule",
+        "title": "Positive call when score is",
+        "type": "List"
+      },
+      {
+        "name": "nearCutoffWidth",
+        "title": "Near-cutoff width (optional)",
+        "type": "String"
+      },
+      {
+        "name": "ordinalCutoff",
+        "title": "Ordinal boundary category",
+        "type": "String"
+      },
+      {
+        "name": "nearCutoffLevels",
+        "title": "Near-cutoff categories (separate with ;)",
+        "type": "String"
+      },
+      {
+        "name": "readerPairs",
+        "title": "Reader pairs",
+        "type": "List"
+      },
+      {
+        "name": "readerPair1",
+        "title": "First reader column name",
+        "type": "String"
+      },
+      {
+        "name": "readerPair2",
+        "title": "Second reader column name",
+        "type": "String"
+      },
+      {
+        "name": "readerCaseLimit",
+        "title": "Maximum displayed disagreements",
+        "type": "Integer"
+      },
+      {
+        "name": "readerCluster",
+        "title": "Patient or cluster ID",
+        "type": "Variable"
+      },
+      {
+        "name": "readerIntervals",
+        "title": "Reader confidence intervals",
+        "type": "Bool"
+      },
+      {
+        "name": "readerBootstrap",
+        "title": "Joint bootstrap intervals",
+        "type": "Bool"
+      },
+      {
+        "name": "readerConfidence",
+        "title": "Reader confidence level",
+        "type": "Number"
+      },
+      {
+        "name": "showKappaBalanced",
+        "title": "Exploratory kappa-balanced score",
+        "type": "Bool"
+      },
+      {
+        "name": "compositeReader",
+        "title": "Accuracy reader column name",
+        "type": "String"
+      },
+      {
+        "name": "readerCode",
+        "title": "Reproducible reader R code",
+        "type": "Bool"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "todo",
+        "title": "Getting Started",
+        "type": "Html"
+      },
+      {
+        "name": "warnings",
+        "title": "Analysis Messages",
+        "type": "Html"
+      },
+      {
+        "name": "overviewTable",
+        "title": "Agreement Analysis Summary",
+        "type": "Table"
+      },
+      {
+        "name": "kappaTable",
+        "title": "Kappa Statistics",
+        "type": "Table"
+      },
+      {
+        "name": "iccTable",
+        "title": "Intraclass Correlation Coefficients",
+        "type": "Table"
+      },
+      {
+        "name": "pairwiseTable",
+        "title": "Pairwise Rater Agreements",
+        "type": "Table"
+      },
+      {
+        "name": "categoryTable",
+        "title": "Category-Specific Agreement",
+        "type": "Table"
+      },
+      {
+        "name": "outlierTable",
+        "title": "Cases with Poor Agreement",
+        "type": "Table"
+      },
+      {
+        "name": "diagnosticAccuracyTable",
+        "title": "Diagnostic Accuracy by Rater (Macro-Averaged Across Categories)",
+        "type": "Table"
+      },
+      {
+        "name": "diagnosticStyleTable",
+        "title": "Diagnostic Style Clustering Results",
+        "type": "Table"
+      },
+      {
+        "name": "styleSummaryTable",
+        "title": "Diagnostic Style Group Summary",
+        "type": "Table"
+      },
+      {
+        "name": "discordantCasesTable",
+        "title": "Cases Distinguishing Diagnostic Styles",
+        "type": "Table"
+      },
+      {
+        "name": "krippTable",
+        "title": "Krippendorff's Alpha Results",
+        "type": "Table"
+      },
+      {
+        "name": "consensusTable",
+        "title": "Consensus Scoring Results",
+        "type": "Table"
+      },
+      {
+        "name": "consensusSummary",
+        "title": "Consensus Summary Statistics",
+        "type": "Table"
+      },
+      {
+        "name": "heatmapPlot",
+        "title": "Agreement Heatmap",
+        "type": "Image"
+      },
+      {
+        "name": "pairwisePlot",
+        "title": "Pairwise Agreement Plot",
+        "type": "Image"
+      },
+      {
+        "name": "categoryPlot",
+        "title": "Category Agreement Plot",
+        "type": "Image"
+      },
+      {
+        "name": "confusionMatrixPlot",
+        "title": "Confusion Matrix",
+        "type": "Image"
+      },
+      {
+        "name": "diagnosticStyleDendrogram",
+        "title": "Diagnostic Style Dendrogram",
+        "type": "Image"
+      },
+      {
+        "name": "diagnosticStyleHeatmap",
+        "title": "Diagnostic Style Heatmap",
+        "type": "Image"
+      },
+      {
+        "name": "diagnosticStyleCombined",
+        "title": "Combined Dendrogram + Heatmap (Usubutun Style)",
+        "type": "Image"
+      },
+      {
+        "name": "raterFrequencyTables",
+        "title": "Individual Rater Frequencies",
+        "type": "Group"
+      },
+      {
+        "name": "crosstabTable",
+        "title": "Cross-tabulation Matrix",
+        "type": "Table"
+      },
+      {
+        "name": "clinicalSummary",
+        "title": "Clinical Summary",
+        "type": "Html"
+      },
+      {
+        "name": "reportTemplate",
+        "title": "Copy-Ready Report",
+        "type": "Html"
+      },
+      {
+        "name": "aboutAnalysis",
+        "title": "About This Analysis",
+        "type": "Html"
+      },
+      {
+        "name": "assumptions",
+        "title": "Assumptions & Caveats",
+        "type": "Html"
+      },
+      {
+        "name": "weightedKappaGuide",
+        "title": "Weighted Kappa Guide",
+        "type": "Html"
+      },
+      {
+        "name": "statisticalGlossary",
+        "title": "Statistical Terms Glossary",
+        "type": "Html"
+      },
+      {
+        "name": "gwetACTable",
+        "title": "Gwet's Agreement Coefficients",
+        "type": "Table"
+      },
+      {
+        "name": "pabakTable",
+        "title": "PABAK Analysis Results",
+        "type": "Table"
+      },
+      {
+        "name": "sampleSizeTable",
+        "title": "Sample Size Planning Results",
+        "type": "Table"
+      },
+      {
+        "name": "raterBiasTable",
+        "title": "Rater Disagreement with Consensus",
+        "type": "Table"
+      },
+      {
+        "name": "agreementTrendTable",
+        "title": "Agreement Trend Analysis",
+        "type": "Table"
+      },
+      {
+        "name": "caseDifficultyTable",
+        "title": "Case Difficulty Analysis",
+        "type": "Table"
+      },
+      {
+        "name": "stabilityTable",
+        "title": "Agreement Stability Analysis",
+        "type": "Table"
+      },
+      {
+        "name": "trendPlot",
+        "title": "Agreement Trend Plot",
+        "type": "Image"
+      },
+      {
+        "name": "biasPlot",
+        "title": "Rater Disagreement with Consensus",
+        "type": "Image"
+      },
+      {
+        "name": "difficultyPlot",
+        "title": "Case Difficulty Distribution",
+        "type": "Image"
+      },
+      {
+        "name": "inlineComments",
+        "title": "Statistical Commentary",
+        "type": "Html"
+      },
+      {
+        "name": "styleGroupSummary",
+        "title": "Diagnostic Style Groups Summary",
+        "type": "Table"
+      },
+      {
+        "name": "styleGroupProfiles",
+        "title": "Diagnostic Patterns by Style Group",
+        "type": "Table"
+      },
+      {
+        "name": "discordantCasesCluster",
+        "title": "High-Disagreement Cases Between Style Groups",
+        "type": "Table"
+      },
+      {
+        "name": "characteristicAssociations",
+        "title": "Style Group Associations with Rater Characteristics",
+        "type": "Table"
+      },
+      {
+        "name": "referenceComparison",
+        "title": "Style Group Agreement with Reference Standard",
+        "type": "Table"
+      },
+      {
+        "name": "clusteringHeatmap",
+        "title": "Hierarchical Clustering Heatmap (Cases \u00d7 Raters)",
+        "type": "Image"
+      },
+      {
+        "name": "clusterDendrogram",
+        "title": "Rater Clustering Dendrogram",
+        "type": "Image"
+      },
+      {
+        "name": "silhouettePlot",
+        "title": "Cluster Quality (Silhouette Plot)",
+        "type": "Image"
+      },
+      {
+        "name": "clusteringInterpretation",
+        "title": "Clustering Analysis Interpretation Guide",
+        "type": "Html"
+      },
+      {
+        "name": "readerSettings",
+        "title": "Reader Analysis Settings",
+        "type": "Table"
+      },
+      {
+        "name": "readerDataSummary",
+        "title": "Reader Data and Exclusions",
+        "type": "Table"
+      },
+      {
+        "name": "readerAccuracyTable",
+        "title": "Disease-Positive Reader Accuracy",
+        "type": "Table"
+      },
+      {
+        "name": "cutoffAgreementTable",
+        "title": "Reader Agreement at the Clinical Cutoff",
+        "type": "Table"
+      },
+      {
+        "name": "readerOriginalAgreement",
+        "title": "Original Ordinal Score Agreement",
+        "type": "Table"
+      },
+      {
+        "name": "cutoffDisagreementCases",
+        "title": "Cases with Different Clinical Calls",
+        "type": "Table"
+      },
+      {
+        "name": "kappaBalancedTable",
+        "title": "Exploratory Kappa-Balanced Score",
+        "type": "Table"
+      },
+      {
+        "name": "readerRCode",
+        "title": "Reproducible Reader R Code",
+        "type": "Preformatted"
+      }
+    ],
+    "ui": true,
+    "ui_type": null,
+    "backend": true,
+    "backend_lines": 6222
+  },
+  {
+    "name": "pathologyagreement",
+    "title": "Pathology Agreement Analysis",
+    "menuGroup": "OncoPathP",
+    "menuSubgroup": "Agreement",
+    "description": null,
+    "options": [
+      {
+        "name": "data",
+        "title": null,
+        "type": "Data"
+      },
+      {
+        "name": "dep1",
+        "title": "Method 1",
+        "type": "Variable"
+      },
+      {
+        "name": "dep2",
+        "title": "Method 2",
+        "type": "Variable"
+      },
+      {
+        "name": "additional_methods",
+        "title": "Additional Methods (Optional)",
+        "type": "Variables"
+      },
+      {
+        "name": "clinical_preset",
+        "title": "Clinical Analysis Type",
+        "type": "List"
+      },
+      {
+        "name": "bootstrap_n",
+        "title": "Bootstrap Replicates",
+        "type": "Integer"
+      },
+      {
+        "name": "conf_level",
+        "title": "Confidence Level",
+        "type": "Number"
+      },
+      {
+        "name": "show_plots",
+        "title": "Show Agreement Plots",
+        "type": "Bool"
+      },
+      {
+        "name": "icc_type",
+        "title": "Reliability Assessment Type",
+        "type": "List"
+      },
+      {
+        "name": "correlation_method",
+        "title": "Correlation Method",
+        "type": "List"
+      },
+      {
+        "name": "ba_method",
+        "title": "Bland-Altman Limits Method",
+        "type": "List"
+      },
+      {
+        "name": "missing_data",
+        "title": "Missing Data Handling",
+        "type": "List"
+      },
+      {
+        "name": "show_interpretation",
+        "title": "Show Clinical Interpretation",
+        "type": "Bool"
+      },
+      {
+        "name": "show_summary",
+        "title": "Show Plain Language Summary",
+        "type": "Bool"
+      },
+      {
+        "name": "show_explanations",
+        "title": "Show Educational Explanations",
+        "type": "Bool"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "warnings",
+        "title": "Notices and Warnings",
+        "type": "Html"
+      },
+      {
+        "name": "interpretation",
+        "title": "Clinical Interpretation and Analysis Summary",
+        "type": "Html"
+      },
+      {
+        "name": "summary",
+        "title": "Plain Language Summary",
+        "type": "Html"
+      },
+      {
+        "name": "explanations",
+        "title": "About This Analysis",
+        "type": "Html"
+      },
+      {
+        "name": "agreementtable",
+        "title": "Agreement Statistics",
+        "type": "Table"
+      },
+      {
+        "name": "correlationtable",
+        "title": "Correlation Analysis",
+        "type": "Table"
+      },
+      {
+        "name": "scatterplot",
+        "title": "Method Comparison Scatter Plot",
+        "type": "Image"
+      },
+      {
+        "name": "blandaltmanplot",
+        "title": "Bland-Altman Agreement Plot",
+        "type": "Image"
+      },
+      {
+        "name": "multimethod_summary",
+        "title": "Multi-Method Analysis Summary",
+        "type": "Html"
+      },
+      {
+        "name": "correlationmatrix",
+        "title": "Method Correlation Matrix",
+        "type": "Table"
+      },
+      {
+        "name": "overall_icc_table",
+        "title": "Overall Multi-Method ICC",
+        "type": "Table"
+      },
+      {
+        "name": "report_sentences",
+        "title": "Copy-Ready Report Text",
+        "type": "Html"
+      },
+      {
+        "name": "statistical_glossary",
+        "title": "Statistical Terms Glossary",
+        "type": "Html"
+      },
+      {
+        "name": "icc_selection_guide",
+        "title": "ICC Selection Guide",
+        "type": "Html"
+      }
+    ],
+    "ui": true,
+    "ui_type": null,
+    "backend": true,
+    "backend_lines": 1371
+  }
+]

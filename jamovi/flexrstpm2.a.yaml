@@ -1,416 +1,377 @@
----
-name:  flexrstpm2
+name: flexrstpm2
 title: Comprehensive Flexible Parametric Survival Models
-menuGroup: SurvivalD
+menuGroup: SurvivalDT
 menuSubgroup: ClinicoPath Survival
-menuSubtitle: 'Advanced flexible parametric models with clinical analysis'
-version: '2.0.0'
+menuSubtitle: Advanced flexible parametric models with clinical analysis
+version: 2.0.0
 jas: '1.2'
-
 description:
-    main: >-
-        FLEXIBLE PARAMETRIC SURVIVAL MODELS (Royston-Parmar)
-
-        CLINICAL USE: Model survival data with smooth, flexible hazard functions that can capture
-        complex patterns (increasing, decreasing, or bathtub-shaped hazards). Better than Cox models
-        when you need to extrapolate beyond observed data or estimate absolute risks.
-
-        WHEN TO USE:
-        • Cancer survival with complex hazard patterns
-        • Health economic evaluations requiring extrapolation
-        • Time-varying treatment effects
-        • Relative survival analysis with population mortality
-
-        REQUIREMENTS:
-        • Minimum 30 events (preferably >=50)
-        • Follow-up covering the period of interest
-        • For df>4: need >=100 events to avoid overfitting
-
-        KEY OUTPUTS:
-        • Hazard ratios with clinical interpretation
-        • Survival predictions at specific time points
-        • Model fit statistics (AIC, concordance)
-        • Time-varying effect plots
-        • Copy-ready clinical report sentences
-    # R:
-    #     dontrun: true
-    #     usage: |
-    #         # Example 1: Basic flexible parametric model
-    #         library(rstpm2)
-    #         library(survival)
-            
-    #         flexrstpm2(
-    #             data = breast_cancer_data,
-    #             elapsedtime = "rectime",
-    #             outcome = "censrec",
-    #             outcomeLevel = "1",
-    #             covariates = c("hormon", "age", "size"),
-    #             df = 4,
-    #             scale = "hazard"
-    #         )
-            
-    #         # Example 2: Time-varying effects with spline interactions
-    #         flexrstpm2(
-    #             data = colon_data,
-    #             elapsedtime = "time",
-    #             outcome = "status",
-    #             outcomeLevel = "1",
-    #             covariates = c("rx", "age", "nodes"),
-    #             time_varying_covariates = c("rx"),
-    #             df = 5,
-    #             tvc_df = 3,
-    #             scale = "odds",
-    #             show_time_varying_plots = TRUE
-    #         )
-
+  main: Royston-Parmar PH, PO, or probit models fitted with rstpm2, including spline time-varying effects
+    and externally matched background hazards for relative survival. Reports computed reference-profile
+    predictions, model likelihood statistics, and optional bootstrap prediction uncertainty. Extrapolation
+    does not establish cure; expected population survival requires additional background-hazard integration.
 options:
+- name: endpoint_type
+  title: Endpoint interpretation
+  type: List
+  options:
+  - name: recurrence
+    title: Recurrence or another nonfatal event
+  - name: all_cause_death
+    title: All-cause death
+  - name: excess_mortality
+    title: Excess mortality
+  default: recurrence
+- name: bootstrap_seed
+  title: Bootstrap random seed
+  type: Integer
+  default: 2026
+  min: 1
+- name: data
+  type: Data
+  description:
+    R: the data as a data frame
+- name: elapsedtime
+  title: Time Variable
+  type: Variable
+  suggested:
+  - continuous
+  permitted:
+  - numeric
+  description:
+    R: 'Survival time or follow-up duration variable
 
-# Data ----
-  - name: data
-    type: Data
-    description:
-        R: the data as a data frame
+      '
+- name: outcome
+  title: Event Variable
+  type: Variable
+  suggested:
+  - nominal
+  - ordinal
+  permitted:
+  - factor
+  - numeric
+  description:
+    R: 'Event indicator variable (0/1, FALSE/TRUE, or factor)
 
-# Variables ----
-  - name: elapsedtime
-    title: Time Variable
-    type: Variable
-    suggested:
-        - continuous
-    permitted:
-        - numeric
-    description:
-        R: >
-          Survival time or follow-up duration variable
+      '
+- name: covariates
+  title: Covariates
+  type: Variables
+  suggested:
+  - continuous
+  - nominal
+  - ordinal
+  permitted:
+  - numeric
+  - factor
+  description:
+    R: 'Covariate variables for flexible parametric modeling
 
-  - name: outcome
-    title: Event Variable
-    type: Variable
-    suggested:
-        - nominal
-        - ordinal
-    permitted:
-        - factor
-        - numeric
-    description:
-        R: >
-          Event indicator variable (0/1, FALSE/TRUE, or factor)
+      '
+- name: outcomeLevel
+  title: Event Level
+  type: String
+  default: '1'
+  description:
+    R: 'Level of outcome variable indicating event occurrence
 
-  - name: covariates
-    title: Covariates
-    type: Variables
-    suggested:
-        - continuous
-        - nominal
-        - ordinal
-    permitted:
-        - numeric
-        - factor
-    description:
-        R: >
-          Covariate variables for flexible parametric modeling
+      '
+- name: scale
+  title: Model Scale
+  type: List
+  options:
+  - name: hazard
+    title: Proportional Hazards
+  - name: odds
+    title: Proportional Odds
+  - name: normal
+    title: Probit (Normal)
+  default: hazard
+  description:
+    R: 'Scale for the flexible parametric model
 
-# Model Specifications ----
-  - name: outcomeLevel
-    title: Event Level
-    type: String
-    default: '1'
-    description:
-        R: >
-          Level of outcome variable indicating event occurrence
+      '
+- name: df
+  title: Degrees of Freedom
+  type: Integer
+  min: 1
+  max: 10
+  default: 4
+  description:
+    R: 'Degrees of freedom for baseline spline function (complexity of hazard curve). Clinical guide:
+      df=3-4 for most analyses, df=5-6 for complex patterns. Need >=30 events per df for reliable results.
 
-  - name: scale
-    title: Model Scale
-    type: List
-    options:
-        - name: hazard
-          title: "Proportional Hazards"
-        - name: odds
-          title: "Proportional Odds"
-        - name: normal
-          title: "Probit (Normal)"
-    default: hazard
-    description:
-        R: >
-          Scale for the flexible parametric model
+      '
+- name: knots
+  title: Knot Positions
+  type: String
+  default: ''
+  description:
+    R: 'Comma-separated knot positions (optional, overrides df)
 
-  - name: df
-    title: Degrees of Freedom
-    type: Integer
-    min: 1
-    max: 10
-    default: 4
-    description:
-        R: >
-          Degrees of freedom for baseline spline function (complexity of hazard curve).
-          Clinical guide: df=3-4 for most analyses, df=5-6 for complex patterns.
-          Need >=30 events per df for reliable results.
+      '
+- name: boundary_knots
+  title: Boundary Knots
+  type: String
+  default: ''
+  description:
+    R: 'Comma-separated boundary knot positions (optional)
 
-  - name: knots
-    title: Knot Positions
-    type: String
-    default: ''
-    description:
-        R: >
-          Comma-separated knot positions (optional, overrides df)
+      '
+- name: time_varying_covariates
+  title: Time-Varying Covariates
+  type: Variables
+  suggested:
+  - continuous
+  - nominal
+  - ordinal
+  permitted:
+  - numeric
+  - factor
+  description:
+    R: 'Covariates with time-varying effects (spline interactions)
 
-  - name: boundary_knots
-    title: Boundary Knots
-    type: String
-    default: ''
-    description:
-        R: >
-          Comma-separated boundary knot positions (optional)
+      '
+- name: tvc_df
+  title: Time-Varying Effect DF
+  type: Integer
+  min: 1
+  max: 6
+  default: 3
+  description:
+    R: 'Degrees of freedom for time-varying covariate effects
 
-# Time-Varying Effects ----
-  - name: time_varying_covariates
-    title: Time-Varying Covariates
-    type: Variables
-    suggested:
-        - continuous
-        - nominal
-        - ordinal
-    permitted:
-        - numeric
-        - factor
-    description:
-        R: >
-          Covariates with time-varying effects (spline interactions)
+      '
+- name: cure_fraction
+  title: Cure Fraction
+  type: Bool
+  default: false
+  description:
+    R: 'Include cure fraction in the model
 
-  - name: tvc_df
-    title: Time-Varying Effect DF
-    type: Integer
-    min: 1
-    max: 6
-    default: 3
-    description:
-        R: >
-          Degrees of freedom for time-varying covariate effects
+      '
+- name: bhazard
+  title: Background Hazard Variable
+  type: Variable
+  suggested:
+  - continuous
+  permitted:
+  - numeric
+  description:
+    R: 'Background hazard variable for relative survival analysis
 
-  - name: cure_fraction
-    title: Cure Fraction
-    type: Bool
-    default: false
-    description:
-        R: >
-          Include cure fraction in the model
+      '
+- name: group_variable
+  title: Group Variable (optional)
+  type: Variable
+  suggested:
+  - nominal
+  permitted:
+  - factor
+  description:
+    R: 'Optional grouping variable for stratified analysis
 
-  - name: bhazard
-    title: Background Hazard Variable
-    type: Variable
-    suggested:
-        - continuous
-    permitted:
-        - numeric
-    description:
-        R: >
-          Background hazard variable for relative survival analysis
+      '
+  hidden: true
+- name: link_function
+  title: Link Function
+  type: List
+  options:
+  - name: log
+    title: Log
+  - name: identity
+    title: Identity
+  - name: sqrt
+    title: Square Root
+  default: log
+  description:
+    R: 'Link function for baseline transformation
 
-  - name: group_variable
-    title: Group Variable (optional)
-    type: Variable
-    suggested:
-        - nominal
-    permitted:
-        - factor
-    description:
-        R: >
-          Optional grouping variable for stratified analysis
+      '
+  hidden: true
+- name: prediction_times
+  title: Prediction Time Points
+  type: String
+  default: 1, 2, 5, 10
+  description:
+    R: 'Comma-separated list of time points for survival predictions
 
-# Advanced Options ----
-  - name: link_function
-    title: Link Function
-    type: List
-    options:
-        - name: log
-          title: "Log"
-        - name: identity
-          title: "Identity"
-        - name: sqrt
-          title: "Square Root"
-    default: log
-    description:
-        R: >
-          Link function for baseline transformation
+      '
+- name: extrapolation_time
+  title: Extrapolation Time
+  type: Number
+  min: 0
+  default: 20
+  description:
+    R: 'Maximum time for survival curve extrapolation
 
-  - name: prediction_times
-    title: Prediction Time Points
-    type: String
-    default: '1, 2, 5, 10'
-    description:
-        R: >
-          Comma-separated list of time points for survival predictions
+      '
+- name: confidence_level
+  title: Confidence Level
+  type: Number
+  min: 0.8
+  max: 0.99
+  default: 0.95
+  description:
+    R: 'Confidence level for confidence intervals
 
-  - name: extrapolation_time
-    title: Extrapolation Time
-    type: Number
-    min: 0
-    default: 20
-    description:
-        R: >
-          Maximum time for survival curve extrapolation
+      '
+- name: smooth_formula
+  title: Custom Smooth Formula
+  type: String
+  default: ''
+  description:
+    R: 'Custom smoothing formula for advanced specifications
 
-  - name: confidence_level
-    title: Confidence Level
-    type: Number
-    min: 0.80
-    max: 0.99
-    default: 0.95
-    description:
-        R: >
-          Confidence level for confidence intervals
+      '
+  hidden: true
+- name: robust_se
+  title: Robust Standard Errors
+  type: Bool
+  default: false
+  description:
+    R: 'Use robust sandwich estimator for standard errors
 
-  - name: smooth_formula
-    title: Custom Smooth Formula
-    type: String
-    default: ''
-    description:
-        R: >
-          Custom smoothing formula for advanced specifications
+      '
+- name: time_ratio
+  title: Time Ratio Analysis
+  type: Bool
+  default: false
+  description:
+    R: 'Include time ratio (acceleration factor) analysis
 
-  - name: robust_se
-    title: Robust Standard Errors
-    type: Bool
-    default: false
-    description:
-        R: >
-          Use robust sandwich estimator for standard errors
+      '
+  hidden: true
+- name: relative_survival
+  title: Relative Survival
+  type: Bool
+  default: false
+  description:
+    R: 'Perform relative survival analysis (requires background hazard)
 
-  - name: time_ratio
-    title: Time Ratio Analysis
-    type: Bool
-    default: false
-    description:
-        R: >
-          Include time ratio (acceleration factor) analysis
+      '
+- name: model_comparison
+  title: Model Comparison
+  type: Bool
+  default: true
+  description:
+    R: 'Compare flexible parametric models with standard parametric models
 
-  - name: relative_survival
-    title: Relative Survival
-    type: Bool
-    default: false
-    description:
-        R: >
-          Perform relative survival analysis (requires background hazard)
+      '
+- name: goodness_of_fit
+  title: Goodness of Fit Tests
+  type: Bool
+  default: true
+  description:
+    R: 'Perform goodness of fit tests and model diagnostics
 
-  - name: model_comparison
-    title: Model Comparison
-    type: Bool
-    default: true
-    description:
-        R: >
-          Compare flexible parametric models with standard parametric models
+      '
+  hidden: true
+- name: hazard_analysis
+  title: Hazard Function Analysis
+  type: Bool
+  default: true
+  description:
+    R: 'Generate hazard function estimates and plots
 
-  - name: goodness_of_fit
-    title: Goodness of Fit Tests
-    type: Bool
-    default: true
-    description:
-        R: >
-          Perform goodness of fit tests and model diagnostics
+      '
+- name: derivative_analysis
+  title: Derivative Analysis
+  type: Bool
+  default: false
+  description:
+    R: 'Include analysis of hazard function derivatives (acceleration/deceleration)
 
-  - name: hazard_analysis
-    title: Hazard Function Analysis
-    type: Bool
-    default: true
-    description:
-        R: >
-          Generate hazard function estimates and plots
+      '
+- name: bootstrap_validation
+  title: Bootstrap prediction uncertainty
+  type: Bool
+  default: false
+  description:
+    R: 'Perform bootstrap validation of model predictions
 
-  - name: derivative_analysis
-    title: Derivative Analysis
-    type: Bool
-    default: false
-    description:
-        R: >
-          Include analysis of hazard function derivatives (acceleration/deceleration)
+      '
+- name: bootstrap_samples
+  title: Bootstrap Samples
+  type: Integer
+  min: 100
+  max: 2000
+  default: 500
+  description:
+    R: 'Number of bootstrap samples for validation (when bootstrap enabled)
 
-  - name: bootstrap_validation
-    title: Bootstrap Validation
-    type: Bool
-    default: false
-    description:
-        R: >
-          Perform bootstrap validation of model predictions
+      '
+- name: show_model_summary
+  title: Show Model Summary
+  type: Bool
+  default: true
+  description:
+    R: 'Display comprehensive model summary
 
-  - name: bootstrap_samples
-    title: Bootstrap Samples
-    type: Integer
-    min: 100
-    max: 2000
-    default: 500
-    description:
-        R: >
-          Number of bootstrap samples for validation (when bootstrap enabled)
+      '
+- name: show_coefficients_table
+  title: Show Coefficients Table
+  type: Bool
+  default: true
+  description:
+    R: 'Display table of model coefficients
 
-# Display Options ----
-  - name: show_model_summary
-    title: Show Model Summary
-    type: Bool
-    default: true
-    description:
-        R: >
-          Display comprehensive model summary
+      '
+- name: show_survival_curves
+  title: Show Survival Curves
+  type: Bool
+  default: true
+  description:
+    R: 'Display fitted survival curves
 
-  - name: show_coefficients_table
-    title: Show Coefficients Table
-    type: Bool
-    default: true
-    description:
-        R: >
-          Display table of model coefficients
+      '
+- name: show_hazard_curves
+  title: Show Hazard Curves
+  type: Bool
+  default: true
+  description:
+    R: 'Display fitted hazard functions
 
-  - name: show_survival_curves
-    title: Show Survival Curves
-    type: Bool
-    default: true
-    description:
-        R: >
-          Display fitted survival curves
+      '
+- name: show_time_varying_plots
+  title: Show Time-Varying Effect Plots
+  type: Bool
+  default: false
+  description:
+    R: 'Display time-varying covariate effect plots
 
-  - name: show_hazard_curves
-    title: Show Hazard Curves
-    type: Bool
-    default: true
-    description:
-        R: >
-          Display fitted hazard functions
+      '
+- name: show_model_diagnostics
+  title: Show Model Diagnostics
+  type: Bool
+  default: true
+  description:
+    R: 'Display model diagnostic plots
 
-  - name: show_time_varying_plots
-    title: Show Time-Varying Effect Plots
-    type: Bool
-    default: false
-    description:
-        R: >
-          Display time-varying covariate effect plots
+      '
+  hidden: true
+- name: show_residuals
+  title: Show Residual Plots
+  type: Bool
+  default: false
+  description:
+    R: 'Display residual analysis plots
 
-  - name: show_model_diagnostics
-    title: Show Model Diagnostics
-    type: Bool
-    default: true
-    description:
-        R: >
-          Display model diagnostic plots
+      '
+  hidden: true
+- name: showSummaries
+  title: Analysis Summaries
+  type: Bool
+  default: false
+  description:
+    R: 'Generate natural language summaries of results
 
-  - name: show_residuals
-    title: Show Residual Plots
-    type: Bool
-    default: false
-    description:
-        R: >
-          Display residual analysis plots
-
-  - name: showSummaries
-    title: Analysis Summaries
-    type: Bool
-    default: false
-    description:
-        R: >
-          Generate natural language summaries of results
-
-  - name: showExplanations
-    title: Method Explanations
-    type: Bool
-    default: false
-    description:
-        R: >
-          Show detailed methodology explanations
+      '
+- name: showExplanations
+  title: Method Explanations
+  type: Bool
+  default: false
+  description:
+    R: Show detailed methodology explanations
+  hidden: true

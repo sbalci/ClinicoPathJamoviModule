@@ -1018,16 +1018,10 @@ importFrom(httr,
   status_code,
   timeout
 )
-importFrom(icenReg,
-  ic_np,
-  ic_par,
-  ic_sp
-)
 importFrom(igraph,
   betweenness,
   is_connected
 )
-importFrom(interval,icfit)
 importFrom(irr,
   agree,
   kappa2,

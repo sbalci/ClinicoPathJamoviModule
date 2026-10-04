@@ -1,0 +1,19 @@
+Satturwar et al. (2026), DOI 10.1002/cncy.70149, Supplementary Table S1
+Retrieved: 2026-10-04T08:14:03.758091+00:00
+Source: https://www.ebi.ac.uk/europepmc/webservices/rest/PMC13601818/supplementaryFiles
+Article: https://pmc.ncbi.nlm.nih.gov/articles/PMC13601818/
+Archive member: CNCY-134-0-s001.docx
+Publisher filename: cncy70149-sup-0001-table_s1.docx
+Extraction: DOCX ZIP word/document.xml. Numerical table retained; explanatory prose paraphrased below.
+Access note: Wiley download returned HTTP 403; PMC direct download required browser preparation; Europe PMC supplementaryFiles API returned the source DOCX successfully.
+
+Table S1: numerical data and paraphrased endpoint definitions.
+The surgical diagnosis supplies the benign/malignant column groups. Each observation is a reader assessment; three readers contribute per case. Agreement with benign histology requires a Bethesda II call, whereas agreement with malignant histology requires V or VI. Categories I, III and IV count as neither type of agreement.
+Modality | Histology | Bethesda counts (300 reads per modality) | Concordance
+ |  | I | II | III | IV | V | VI | Total | Benign | Malignant
+Microscopy | Benign | 47 | 98 | 30 | 9 | 1 | 1 | 186 | 52.7% | 1.1%
+ | Malignant | 1 | 32 | 26 | 9 | 14 | 32 | 114 | 28.1% | 40.4%
+AI-assistedS-WSI review | Benign | 30 | 87 | 51 | 15 | 3 | 0 | 186 | 46.8% | 1.6%
+ | Malignant | 0 | 13 | 28 | 10 | 16 | 47 | 114 | 11.4% | 55.3%
+AI-assisted7-WSI review | Benign | 28 | 82 | 53 | 16 | 7 | 0 | 186 | 44.1% | 3.8%
+ | Malignant | 0 | 14 | 25 | 12 | 18 | 45 | 114 | 12.3% | 55.3%

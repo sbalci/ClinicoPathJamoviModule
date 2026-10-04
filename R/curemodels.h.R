@@ -6,6 +6,15 @@ curemodelsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
+            endpoint_type = "recurrence",
+            event_value = "1",
+            censor_value = "0",
+            competing_value = "",
+            prediction_profile = "standardized",
+            latency_predictors = NULL,
+            analysis_horizons = "12,36,60",
+            sensitivity_alternatives = FALSE,
+            bootstrap_seed = 2026,
             time = NULL,
             status = NULL,
             predictors = NULL,
@@ -32,6 +41,58 @@ curemodelsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresData=TRUE,
                 ...)
 
+            private$..endpoint_type <- jmvcore::OptionList$new(
+                "endpoint_type",
+                endpoint_type,
+                options=list(
+                    "recurrence",
+                    "all_cause_death",
+                    "excess_mortality"),
+                default="recurrence")
+            private$..event_value <- jmvcore::OptionString$new(
+                "event_value",
+                event_value,
+                default="1")
+            private$..censor_value <- jmvcore::OptionString$new(
+                "censor_value",
+                censor_value,
+                default="0")
+            private$..competing_value <- jmvcore::OptionString$new(
+                "competing_value",
+                competing_value,
+                default="")
+            private$..prediction_profile <- jmvcore::OptionList$new(
+                "prediction_profile",
+                prediction_profile,
+                options=list(
+                    "standardized",
+                    "reference"),
+                default="standardized")
+            private$..latency_predictors <- jmvcore::OptionVariables$new(
+                "latency_predictors",
+                latency_predictors,
+                suggested=list(
+                    "continuous",
+                    "nominal",
+                    "ordinal"),
+                permitted=list(
+                    "numeric",
+                    "factor"),
+                default=NULL)
+            private$..analysis_horizons <- jmvcore::OptionString$new(
+                "analysis_horizons",
+                analysis_horizons,
+                default="12,36,60")
+            private$..sensitivity_alternatives <- jmvcore::OptionBool$new(
+                "sensitivity_alternatives",
+                sensitivity_alternatives,
+                default=FALSE)
+            private$..bootstrap_seed <- jmvcore::OptionInteger$new(
+                "bootstrap_seed",
+                bootstrap_seed,
+                default=2026,
+                min=1,
+                max=2147483646)
             private$..time <- jmvcore::OptionVariable$new(
                 "time",
                 time,
@@ -158,8 +219,18 @@ curemodelsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 npcure_time_points,
                 default=100,
                 min=50,
-                max=500)
+                max=500,
+                hidden=TRUE)
 
+            self$.addOption(private$..endpoint_type)
+            self$.addOption(private$..event_value)
+            self$.addOption(private$..censor_value)
+            self$.addOption(private$..competing_value)
+            self$.addOption(private$..prediction_profile)
+            self$.addOption(private$..latency_predictors)
+            self$.addOption(private$..analysis_horizons)
+            self$.addOption(private$..sensitivity_alternatives)
+            self$.addOption(private$..bootstrap_seed)
             self$.addOption(private$..time)
             self$.addOption(private$..status)
             self$.addOption(private$..predictors)
@@ -181,6 +252,15 @@ curemodelsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..npcure_time_points)
         }),
     active = list(
+        endpoint_type = function() private$..endpoint_type$value,
+        event_value = function() private$..event_value$value,
+        censor_value = function() private$..censor_value$value,
+        competing_value = function() private$..competing_value$value,
+        prediction_profile = function() private$..prediction_profile$value,
+        latency_predictors = function() private$..latency_predictors$value,
+        analysis_horizons = function() private$..analysis_horizons$value,
+        sensitivity_alternatives = function() private$..sensitivity_alternatives$value,
+        bootstrap_seed = function() private$..bootstrap_seed$value,
         time = function() private$..time$value,
         status = function() private$..status$value,
         predictors = function() private$..predictors$value,
@@ -201,6 +281,15 @@ curemodelsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         npcure_bandwidth = function() private$..npcure_bandwidth$value,
         npcure_time_points = function() private$..npcure_time_points$value),
     private = list(
+        ..endpoint_type = NA,
+        ..event_value = NA,
+        ..censor_value = NA,
+        ..competing_value = NA,
+        ..prediction_profile = NA,
+        ..latency_predictors = NA,
+        ..analysis_horizons = NA,
+        ..sensitivity_alternatives = NA,
+        ..bootstrap_seed = NA,
         ..time = NA,
         ..status = NA,
         ..predictors = NA,
@@ -226,6 +315,10 @@ curemodelsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "curemodelsResults",
     inherit = jmvcore::Group,
     active = list(
+        followupSupport = function() private$.items[["followupSupport"]],
+        observedRisk = function() private$.items[["observedRisk"]],
+        fitDiagnostics = function() private$.items[["fitDiagnostics"]],
+        sensitivityTable = function() private$.items[["sensitivityTable"]],
         todo = function() private$.items[["todo"]],
         warnings = function() private$.items[["warnings"]],
         errors = function() private$.items[["errors"]],
@@ -256,41 +349,22 @@ curemodelsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "glue",
                     "stringr",
                     "SchemperSmith1996"))
-            self$add(jmvcore::Html$new(
+            self$add(jmvcore::Table$new(
                 options=options,
-                name="todo",
-                title="To Do",
-                clearWith=list(
-                    "time",
-                    "status",
-                    "predictors")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="warnings",
-                title="Warnings",
+                name="followupSupport",
+                title="Observed follow-up support",
+                rows=0,
                 visible=TRUE,
                 clearWith=list(
-                    "time",
-                    "status",
-                    "predictors",
-                    "model_type",
-                    "bootstrap_ci")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="errors",
-                title="Errors",
-                visible=TRUE,
-                clearWith=list(
-                    "time",
-                    "status",
-                    "predictors",
-                    "model_type")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="summary",
-                title="Analysis Summary",
-                visible=TRUE,
-                clearWith=list(
+                    "endpoint_type",
+                    "event_value",
+                    "censor_value",
+                    "competing_value",
+                    "prediction_profile",
+                    "latency_predictors",
+                    "analysis_horizons",
+                    "sensitivity_alternatives",
+                    "bootstrap_seed",
                     "time",
                     "status",
                     "predictors",
@@ -299,7 +373,411 @@ curemodelsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "cure_link",
                     "survival_dist",
                     "bootstrap_ci",
-                    "n_bootstrap")))
+                    "n_bootstrap",
+                    "cure_threshold",
+                    "plot_cure_fraction",
+                    "plot_survival",
+                    "goodness_of_fit",
+                    "sensitivity_analysis",
+                    "use_background_mortality",
+                    "background_hazard_var",
+                    "npcure_covariate",
+                    "npcure_bandwidth",
+                    "npcure_time_points"),
+                columns=list(
+                    list(
+                        `name`="n", 
+                        `title`="Complete cases", 
+                        `type`="integer"),
+                    list(
+                        `name`="excluded", 
+                        `title`="Excluded missing", 
+                        `type`="integer"),
+                    list(
+                        `name`="events", 
+                        `title`="Target events", 
+                        `type`="integer"),
+                    list(
+                        `name`="competing", 
+                        `title`="Competing events", 
+                        `type`="integer"),
+                    list(
+                        `name`="censored", 
+                        `title`="Censored", 
+                        `type`="integer"),
+                    list(
+                        `name`="assessment_time", 
+                        `title`="Assessment time", 
+                        `type`="number"),
+                    list(
+                        `name`="n_risk", 
+                        `title`="At risk", 
+                        `type`="integer"),
+                    list(
+                        `name`="late_events", 
+                        `title`="Events at or after assessment", 
+                        `type`="integer"),
+                    list(
+                        `name`="max_time", 
+                        `title`="Maximum follow-up", 
+                        `type`="number"),
+                    list(
+                        `name`="median_followup", 
+                        `title`="Reverse-KM median follow-up", 
+                        `type`="number"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="observedRisk",
+                title="Observed-time probabilities",
+                rows=0,
+                visible=TRUE,
+                clearWith=list(
+                    "endpoint_type",
+                    "event_value",
+                    "censor_value",
+                    "competing_value",
+                    "prediction_profile",
+                    "latency_predictors",
+                    "analysis_horizons",
+                    "sensitivity_alternatives",
+                    "bootstrap_seed",
+                    "time",
+                    "status",
+                    "predictors",
+                    "model_type",
+                    "smcure_model_type",
+                    "cure_link",
+                    "survival_dist",
+                    "bootstrap_ci",
+                    "n_bootstrap",
+                    "cure_threshold",
+                    "plot_cure_fraction",
+                    "plot_survival",
+                    "goodness_of_fit",
+                    "sensitivity_analysis",
+                    "use_background_mortality",
+                    "background_hazard_var",
+                    "npcure_covariate",
+                    "npcure_bandwidth",
+                    "npcure_time_points"),
+                columns=list(
+                    list(
+                        `name`="group", 
+                        `title`="Group", 
+                        `type`="text"),
+                    list(
+                        `name`="time", 
+                        `title`="Time", 
+                        `type`="number"),
+                    list(
+                        `name`="cause", 
+                        `title`="State / event", 
+                        `type`="text"),
+                    list(
+                        `name`="estimate", 
+                        `title`="Probability", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="lower", 
+                        `title`="Lower 95% CI", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="upper", 
+                        `title`="Upper 95% CI", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="n_risk", 
+                        `title`="At risk", 
+                        `type`="integer"),
+                    list(
+                        `name`="n_events", 
+                        `title`="Cumulative events", 
+                        `type`="integer"),
+                    list(
+                        `name`="n_censored", 
+                        `title`="Cumulative censoring", 
+                        `type`="integer"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="fitDiagnostics",
+                title="Fit and uncertainty diagnostics",
+                rows=0,
+                visible=TRUE,
+                clearWith=list(
+                    "endpoint_type",
+                    "event_value",
+                    "censor_value",
+                    "competing_value",
+                    "prediction_profile",
+                    "latency_predictors",
+                    "analysis_horizons",
+                    "sensitivity_alternatives",
+                    "bootstrap_seed",
+                    "time",
+                    "status",
+                    "predictors",
+                    "model_type",
+                    "smcure_model_type",
+                    "cure_link",
+                    "survival_dist",
+                    "bootstrap_ci",
+                    "n_bootstrap",
+                    "cure_threshold",
+                    "plot_cure_fraction",
+                    "plot_survival",
+                    "goodness_of_fit",
+                    "sensitivity_analysis",
+                    "use_background_mortality",
+                    "background_hazard_var",
+                    "npcure_covariate",
+                    "npcure_bandwidth",
+                    "npcure_time_points"),
+                columns=list(
+                    list(
+                        `name`="model", 
+                        `title`="Model", 
+                        `type`="text"),
+                    list(
+                        `name`="successful", 
+                        `title`="Successful bootstrap fits", 
+                        `type`="integer"),
+                    list(
+                        `name`="attempted", 
+                        `title`="Bootstrap attempts", 
+                        `type`="integer"),
+                    list(
+                        `name`="ci_method", 
+                        `title`="Interval method", 
+                        `type`="text"),
+                    list(
+                        `name`="convergence", 
+                        `title`="Fit status", 
+                        `type`="text"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="sensitivityTable",
+                title="Administrative-horizon sensitivity refits",
+                rows=0,
+                visible="(sensitivity_analysis)",
+                clearWith=list(
+                    "endpoint_type",
+                    "event_value",
+                    "censor_value",
+                    "competing_value",
+                    "prediction_profile",
+                    "latency_predictors",
+                    "analysis_horizons",
+                    "sensitivity_alternatives",
+                    "bootstrap_seed",
+                    "time",
+                    "status",
+                    "predictors",
+                    "model_type",
+                    "smcure_model_type",
+                    "cure_link",
+                    "survival_dist",
+                    "bootstrap_ci",
+                    "n_bootstrap",
+                    "cure_threshold",
+                    "plot_cure_fraction",
+                    "plot_survival",
+                    "goodness_of_fit",
+                    "sensitivity_analysis",
+                    "use_background_mortality",
+                    "background_hazard_var",
+                    "npcure_covariate",
+                    "npcure_bandwidth",
+                    "npcure_time_points"),
+                columns=list(
+                    list(
+                        `name`="model", 
+                        `title`="Model", 
+                        `type`="text"),
+                    list(
+                        `name`="horizon", 
+                        `title`="Horizon", 
+                        `type`="number"),
+                    list(
+                        `name`="n", 
+                        `title`="N", 
+                        `type`="integer"),
+                    list(
+                        `name`="events", 
+                        `title`="Events", 
+                        `type`="integer"),
+                    list(
+                        `name`="n_risk", 
+                        `title`="At risk at horizon", 
+                        `type`="integer"),
+                    list(
+                        `name`="recensored", 
+                        `title`="Recensored at horizon", 
+                        `type`="integer"),
+                    list(
+                        `name`="estimate", 
+                        `title`="Model asymptote", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="lower", 
+                        `title`="Lower 95% CI", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="upper", 
+                        `title`="Upper 95% CI", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="bootstrap_success", 
+                        `title`="Successful bootstrap fits", 
+                        `type`="integer"),
+                    list(
+                        `name`="bootstrap_attempts", 
+                        `title`="Bootstrap attempts", 
+                        `type`="integer"),
+                    list(
+                        `name`="status", 
+                        `title`="Fit status", 
+                        `type`="text"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="todo",
+                title="To Do",
+                clearWith=list(
+                    "endpoint_type",
+                    "event_value",
+                    "censor_value",
+                    "competing_value",
+                    "prediction_profile",
+                    "latency_predictors",
+                    "analysis_horizons",
+                    "sensitivity_alternatives",
+                    "bootstrap_seed",
+                    "time",
+                    "status",
+                    "predictors",
+                    "model_type",
+                    "smcure_model_type",
+                    "cure_link",
+                    "survival_dist",
+                    "bootstrap_ci",
+                    "n_bootstrap",
+                    "cure_threshold",
+                    "plot_cure_fraction",
+                    "plot_survival",
+                    "goodness_of_fit",
+                    "sensitivity_analysis",
+                    "use_background_mortality",
+                    "background_hazard_var",
+                    "npcure_covariate",
+                    "npcure_bandwidth",
+                    "npcure_time_points")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="warnings",
+                title="Warnings",
+                visible=TRUE,
+                clearWith=list(
+                    "endpoint_type",
+                    "event_value",
+                    "censor_value",
+                    "competing_value",
+                    "prediction_profile",
+                    "latency_predictors",
+                    "analysis_horizons",
+                    "sensitivity_alternatives",
+                    "bootstrap_seed",
+                    "time",
+                    "status",
+                    "predictors",
+                    "model_type",
+                    "smcure_model_type",
+                    "cure_link",
+                    "survival_dist",
+                    "bootstrap_ci",
+                    "n_bootstrap",
+                    "cure_threshold",
+                    "plot_cure_fraction",
+                    "plot_survival",
+                    "goodness_of_fit",
+                    "sensitivity_analysis",
+                    "use_background_mortality",
+                    "background_hazard_var",
+                    "npcure_covariate",
+                    "npcure_bandwidth",
+                    "npcure_time_points")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="errors",
+                title="Errors",
+                visible=TRUE,
+                clearWith=list(
+                    "endpoint_type",
+                    "event_value",
+                    "censor_value",
+                    "competing_value",
+                    "prediction_profile",
+                    "latency_predictors",
+                    "analysis_horizons",
+                    "sensitivity_alternatives",
+                    "bootstrap_seed",
+                    "time",
+                    "status",
+                    "predictors",
+                    "model_type",
+                    "smcure_model_type",
+                    "cure_link",
+                    "survival_dist",
+                    "bootstrap_ci",
+                    "n_bootstrap",
+                    "cure_threshold",
+                    "plot_cure_fraction",
+                    "plot_survival",
+                    "goodness_of_fit",
+                    "sensitivity_analysis",
+                    "use_background_mortality",
+                    "background_hazard_var",
+                    "npcure_covariate",
+                    "npcure_bandwidth",
+                    "npcure_time_points")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="summary",
+                title="Analysis Summary",
+                visible=TRUE,
+                clearWith=list(
+                    "endpoint_type",
+                    "event_value",
+                    "censor_value",
+                    "competing_value",
+                    "prediction_profile",
+                    "latency_predictors",
+                    "analysis_horizons",
+                    "sensitivity_alternatives",
+                    "bootstrap_seed",
+                    "time",
+                    "status",
+                    "predictors",
+                    "model_type",
+                    "smcure_model_type",
+                    "cure_link",
+                    "survival_dist",
+                    "bootstrap_ci",
+                    "n_bootstrap",
+                    "cure_threshold",
+                    "plot_cure_fraction",
+                    "plot_survival",
+                    "goodness_of_fit",
+                    "sensitivity_analysis",
+                    "use_background_mortality",
+                    "background_hazard_var",
+                    "npcure_covariate",
+                    "npcure_bandwidth",
+                    "npcure_time_points")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="modelTable",
@@ -307,6 +785,15 @@ curemodelsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 visible=TRUE,
                 rows=0,
                 clearWith=list(
+                    "endpoint_type",
+                    "event_value",
+                    "censor_value",
+                    "competing_value",
+                    "prediction_profile",
+                    "latency_predictors",
+                    "analysis_horizons",
+                    "sensitivity_alternatives",
+                    "bootstrap_seed",
                     "time",
                     "status",
                     "predictors",
@@ -315,7 +802,17 @@ curemodelsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "cure_link",
                     "survival_dist",
                     "bootstrap_ci",
-                    "n_bootstrap"),
+                    "n_bootstrap",
+                    "cure_threshold",
+                    "plot_cure_fraction",
+                    "plot_survival",
+                    "goodness_of_fit",
+                    "sensitivity_analysis",
+                    "use_background_mortality",
+                    "background_hazard_var",
+                    "npcure_covariate",
+                    "npcure_bandwidth",
+                    "npcure_time_points"),
                 columns=list(
                     list(
                         `name`="parameter", 
@@ -353,13 +850,34 @@ curemodelsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 visible=TRUE,
                 rows=0,
                 clearWith=list(
+                    "endpoint_type",
+                    "event_value",
+                    "censor_value",
+                    "competing_value",
+                    "prediction_profile",
+                    "latency_predictors",
+                    "analysis_horizons",
+                    "sensitivity_alternatives",
+                    "bootstrap_seed",
                     "time",
                     "status",
                     "predictors",
                     "model_type",
+                    "smcure_model_type",
                     "cure_link",
                     "survival_dist",
-                    "bootstrap_ci"),
+                    "bootstrap_ci",
+                    "n_bootstrap",
+                    "cure_threshold",
+                    "plot_cure_fraction",
+                    "plot_survival",
+                    "goodness_of_fit",
+                    "sensitivity_analysis",
+                    "use_background_mortality",
+                    "background_hazard_var",
+                    "npcure_covariate",
+                    "npcure_bandwidth",
+                    "npcure_time_points"),
                 columns=list(
                     list(
                         `name`="group", 
@@ -388,30 +906,75 @@ curemodelsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 width=700,
                 height=450,
                 renderFun=".renderCureFractionPlot",
-                requiresData=TRUE,
+                requiresData=FALSE,
                 visible="(plot_cure_fraction)",
                 clearWith=list(
+                    "endpoint_type",
+                    "event_value",
+                    "censor_value",
+                    "competing_value",
+                    "prediction_profile",
+                    "latency_predictors",
+                    "analysis_horizons",
+                    "sensitivity_alternatives",
+                    "bootstrap_seed",
                     "time",
                     "status",
                     "predictors",
                     "model_type",
+                    "smcure_model_type",
                     "cure_link",
-                    "bootstrap_ci")))
+                    "survival_dist",
+                    "bootstrap_ci",
+                    "n_bootstrap",
+                    "cure_threshold",
+                    "plot_cure_fraction",
+                    "plot_survival",
+                    "goodness_of_fit",
+                    "sensitivity_analysis",
+                    "use_background_mortality",
+                    "background_hazard_var",
+                    "npcure_covariate",
+                    "npcure_bandwidth",
+                    "npcure_time_points")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="survivalPlot",
-                title="Survival Curves by Cure Status",
+                title="Observed event-free survival by Cure Status",
                 width=700,
                 height=450,
                 renderFun=".plotSurvival",
-                requiresData=TRUE,
+                requiresData=FALSE,
                 visible="(plot_survival)",
                 clearWith=list(
+                    "endpoint_type",
+                    "event_value",
+                    "censor_value",
+                    "competing_value",
+                    "prediction_profile",
+                    "latency_predictors",
+                    "analysis_horizons",
+                    "sensitivity_alternatives",
+                    "bootstrap_seed",
                     "time",
                     "status",
                     "predictors",
                     "model_type",
-                    "survival_dist")))
+                    "smcure_model_type",
+                    "cure_link",
+                    "survival_dist",
+                    "bootstrap_ci",
+                    "n_bootstrap",
+                    "cure_threshold",
+                    "plot_cure_fraction",
+                    "plot_survival",
+                    "goodness_of_fit",
+                    "sensitivity_analysis",
+                    "use_background_mortality",
+                    "background_hazard_var",
+                    "npcure_covariate",
+                    "npcure_bandwidth",
+                    "npcure_time_points")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="goodnessOfFit",
@@ -419,13 +982,34 @@ curemodelsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 visible="(goodness_of_fit)",
                 rows=0,
                 clearWith=list(
+                    "endpoint_type",
+                    "event_value",
+                    "censor_value",
+                    "competing_value",
+                    "prediction_profile",
+                    "latency_predictors",
+                    "analysis_horizons",
+                    "sensitivity_alternatives",
+                    "bootstrap_seed",
                     "time",
                     "status",
                     "predictors",
                     "model_type",
                     "smcure_model_type",
                     "cure_link",
-                    "survival_dist"),
+                    "survival_dist",
+                    "bootstrap_ci",
+                    "n_bootstrap",
+                    "cure_threshold",
+                    "plot_cure_fraction",
+                    "plot_survival",
+                    "goodness_of_fit",
+                    "sensitivity_analysis",
+                    "use_background_mortality",
+                    "background_hazard_var",
+                    "npcure_covariate",
+                    "npcure_bandwidth",
+                    "npcure_time_points"),
                 columns=list(
                     list(
                         `name`="test_name", 
@@ -450,11 +1034,34 @@ curemodelsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Sensitivity Analysis",
                 visible="(sensitivity_analysis)",
                 clearWith=list(
+                    "endpoint_type",
+                    "event_value",
+                    "censor_value",
+                    "competing_value",
+                    "prediction_profile",
+                    "latency_predictors",
+                    "analysis_horizons",
+                    "sensitivity_alternatives",
+                    "bootstrap_seed",
                     "time",
                     "status",
                     "predictors",
+                    "model_type",
+                    "smcure_model_type",
+                    "cure_link",
+                    "survival_dist",
+                    "bootstrap_ci",
+                    "n_bootstrap",
                     "cure_threshold",
-                    "model_type")))
+                    "plot_cure_fraction",
+                    "plot_survival",
+                    "goodness_of_fit",
+                    "sensitivity_analysis",
+                    "use_background_mortality",
+                    "background_hazard_var",
+                    "npcure_covariate",
+                    "npcure_bandwidth",
+                    "npcure_time_points")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="modelComparison",
@@ -462,13 +1069,34 @@ curemodelsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 visible="(model_type:all)",
                 rows=0,
                 clearWith=list(
+                    "endpoint_type",
+                    "event_value",
+                    "censor_value",
+                    "competing_value",
+                    "prediction_profile",
+                    "latency_predictors",
+                    "analysis_horizons",
+                    "sensitivity_alternatives",
+                    "bootstrap_seed",
                     "time",
                     "status",
                     "predictors",
                     "model_type",
                     "smcure_model_type",
                     "cure_link",
-                    "survival_dist"),
+                    "survival_dist",
+                    "bootstrap_ci",
+                    "n_bootstrap",
+                    "cure_threshold",
+                    "plot_cure_fraction",
+                    "plot_survival",
+                    "goodness_of_fit",
+                    "sensitivity_analysis",
+                    "use_background_mortality",
+                    "background_hazard_var",
+                    "npcure_covariate",
+                    "npcure_bandwidth",
+                    "npcure_time_points"),
                 columns=list(
                     list(
                         `name`="model", 
@@ -492,12 +1120,34 @@ curemodelsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Clinical Interpretation",
                 visible=TRUE,
                 clearWith=list(
+                    "endpoint_type",
+                    "event_value",
+                    "censor_value",
+                    "competing_value",
+                    "prediction_profile",
+                    "latency_predictors",
+                    "analysis_horizons",
+                    "sensitivity_alternatives",
+                    "bootstrap_seed",
                     "time",
                     "status",
                     "predictors",
                     "model_type",
+                    "smcure_model_type",
                     "cure_link",
-                    "survival_dist")))}))
+                    "survival_dist",
+                    "bootstrap_ci",
+                    "n_bootstrap",
+                    "cure_threshold",
+                    "plot_cure_fraction",
+                    "plot_survival",
+                    "goodness_of_fit",
+                    "sensitivity_analysis",
+                    "use_background_mortality",
+                    "background_hazard_var",
+                    "npcure_covariate",
+                    "npcure_bandwidth",
+                    "npcure_time_points")))}))
 
 curemodelsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "curemodelsBase",
@@ -522,11 +1172,20 @@ curemodelsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Cure Models for Long-term Survivors
 #'
-#' Cure models for analyzing survival data with a cured fraction of long-term 
-#' survivors.
-#' Implements mixture cure models and non-mixture cure models for oncology 
-#' research.
-#' 
+#' Model-based cure probabilities with explicit endpoint and event coding, 
+#' observed-time cumulative incidence, follow-up support, and 
+#' administrative-censoring sensitivity refits. Recurrence cure with competing 
+#' death is not estimated by censoring the competing event. Statistical cure 
+#' with background mortality requires externally matched hazards.
+#' @param endpoint_type .
+#' @param event_value .
+#' @param censor_value .
+#' @param competing_value .
+#' @param prediction_profile .
+#' @param latency_predictors .
+#' @param analysis_horizons .
+#' @param sensitivity_alternatives .
+#' @param bootstrap_seed .
 #' @param data The data as a data frame.
 #' @param time Follow-up time variable
 #' @param status Event status variable
@@ -540,7 +1199,8 @@ curemodelsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param survival_dist Distribution for modeling survival of uncured patients
 #' @param bootstrap_ci Use bootstrap for confidence interval estimation
 #' @param n_bootstrap Number of bootstrap samples
-#' @param cure_threshold Time threshold for defining cured patients
+#' @param cure_threshold Time point for follow-up counts; does not classify
+#'   patients as cured
 #' @param plot_cure_fraction Generate cure fraction plot
 #' @param plot_survival Generate survival curve plots
 #' @param goodness_of_fit Conduct goodness of fit assessment
@@ -554,6 +1214,10 @@ curemodelsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param npcure_time_points Number of time points for testimate in npcure
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$followupSupport} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$observedRisk} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$fitDiagnostics} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$sensitivityTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$errors} \tab \tab \tab \tab \tab a html \cr
@@ -570,12 +1234,21 @@ curemodelsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 #'
-#' \code{results$modelTable$asDF}
+#' \code{results$followupSupport$asDF}
 #'
-#' \code{as.data.frame(results$modelTable)}
+#' \code{as.data.frame(results$followupSupport)}
 #'
 #' @export
 curemodels <- function(
+    endpoint_type = "recurrence",
+    event_value = "1",
+    censor_value = "0",
+    competing_value = "",
+    prediction_profile = "standardized",
+    latency_predictors = NULL,
+    analysis_horizons = "12,36,60",
+    sensitivity_alternatives = FALSE,
+    bootstrap_seed = 2026,
     data,
     time,
     status,
@@ -600,6 +1273,7 @@ curemodels <- function(
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("curemodels requires jmvcore to be installed (restart may be required)")
 
+    if ( ! missing(latency_predictors)) latency_predictors <- jmvcore::resolveQuo(jmvcore::enquo(latency_predictors))
     if ( ! missing(time)) time <- jmvcore::resolveQuo(jmvcore::enquo(time))
     if ( ! missing(status)) status <- jmvcore::resolveQuo(jmvcore::enquo(status))
     if ( ! missing(predictors)) predictors <- jmvcore::resolveQuo(jmvcore::enquo(predictors))
@@ -608,6 +1282,7 @@ curemodels <- function(
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
+            `if`( ! missing(latency_predictors), latency_predictors, NULL),
             `if`( ! missing(time), time, NULL),
             `if`( ! missing(status), status, NULL),
             `if`( ! missing(predictors), predictors, NULL),
@@ -616,6 +1291,15 @@ curemodels <- function(
 
 
     options <- curemodelsOptions$new(
+        endpoint_type = endpoint_type,
+        event_value = event_value,
+        censor_value = censor_value,
+        competing_value = competing_value,
+        prediction_profile = prediction_profile,
+        latency_predictors = latency_predictors,
+        analysis_horizons = analysis_horizons,
+        sensitivity_alternatives = sensitivity_alternatives,
+        bootstrap_seed = bootstrap_seed,
         time = time,
         status = status,
         predictors = predictors,

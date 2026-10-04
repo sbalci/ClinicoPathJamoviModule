@@ -12,7 +12,13 @@
   - `R/nogoldstandard.b.R` - Backend Implementation
 - **Summary**: Analysis of multiple binary tests when no perfect reference exists. Implements a conditional-independence two-class latent class model, fixed-prior penalized EM point estimation, and descriptive agreement with self-built composite reference rules. Latent classes are unlabeled, and reference-rule results are not diagnostic-accuracy estimates.
 
+Input factors are converted to the selected positive level versus all other observed levels, after excluding cases missing any selected test. If a test has more than two observed categories, a strong warning names the pooled levels; equivocal and indeterminate results are treated as not-positive unless recoded or excluded before analysis. Unused factor levels do not trigger this warning.
+
+Latent estimates are reported only when the model passes the convergence and identification checks and the orientation rule selects a unique high-positive class. Mean selected-positive probabilities differing by at most `1e-6` are treated as numerically tied; class-specific estimates and intervals are then blank, while observed agreement and available fit diagnostics remain. This is a numerical labeling safeguard, not a test of statistical separation. The same guard applies to bootstrap refits. Fixed-prior MAP estimates cannot be relabeled without changing the prior objective.
+
 ## 1a. Changelog
+
+- **2026-10-03**: Guard numerically tied class orientation; disclose pooled response categories; use unique pair identifiers; repair the heatmap, three-test fit guidance, and R examples.
 
 - **Date**: 2026-08-29
 - **Summary**: Comprehensive documentation suite created & verified against active schemas and backend implementation.
@@ -24,15 +30,15 @@
 | `data` | `Data` | `NULL` |  |
 | `clinicalPreset` | `List` | `none` | Illustrative Scenario Example |
 | `test1` | `Variable` | `NULL` | Test 1 |
-| `test1Positive` | `Level` | `NULL` | Positive Level |
+| `test1Positive` | `Level` | Required | Positive Level; pass `NULL` for unused tests in R |
 | `test2` | `Variable` | `NULL` | Test 2 |
-| `test2Positive` | `Level` | `NULL` | Positive Level |
+| `test2Positive` | `Level` | Required | Positive Level; pass `NULL` for unused tests in R |
 | `test3` | `Variable` | `NULL` | Test 3 |
-| `test3Positive` | `Level` | `NULL` | Positive Level |
+| `test3Positive` | `Level` | Required | Positive Level; pass `NULL` for unused tests in R |
 | `test4` | `Variable` | `NULL` | Test 4 |
-| `test4Positive` | `Level` | `NULL` | Positive Level |
+| `test4Positive` | `Level` | Required | Positive Level; pass `NULL` for unused tests in R |
 | `test5` | `Variable` | `NULL` | Test 5 |
-| `test5Positive` | `Level` | `NULL` | Positive Level |
+| `test5Positive` | `Level` | Required | Positive Level; pass `NULL` for unused tests in R |
 | `method` | `List` | `latent_class` | Analysis Method |
 | `bootstrap` | `Bool` | `FALSE` | Bootstrap CI |
 | `nboot` | `Number` | `1000` | Number of Bootstrap Samples |
@@ -54,7 +60,7 @@
 | `prevalence` | `Table` | `Estimated Class or Rule Proportion` |  |
 | `test_metrics` | `Table` | `Estimated Test Metrics or Rule Agreement` |  |
 | `model_fit` | `Table` | `Model Fit Statistics` |  |
-| `conditional_dependence` | `Table` | `Conditional Independence Check (Bivariate Residuals)` | Latent class analysis assumes the tests are conditionally independent within each latent class. For each pair this compares the observed two-way table with the one implied by the fitted model. A residual above 3.84 is descriptive evidence against conditional independence, but this squared statistic does not identify the direction or cause of dependence and cannot determine the direction of bias in the fitted parameters. Requires four or more tests: with three the model is just-identified and no residual can diagnose dependence. |
+| `conditional_dependence` | `Table` | `Conditional Independence Check (Bivariate Residuals)` | Latent class analysis assumes the tests are conditionally independent within each latent class. For each pair this compares the observed two-way table with the one implied by the fitted model. A residual above 3.84 is descriptive evidence against conditional independence, but this squared statistic does not identify the direction or cause of dependence and cannot determine the direction of bias in the fitted parameters. Available with three or more tests. With three tests the nominal residual degrees of freedom are zero, but probability constraints can still prevent an exact fit. Discrepancies remain informative; a conventional chi-squared reference distribution is not justified, and small residuals do not establish independence. |
 | `diagnostics` | `Preformatted` | `Analysis Diagnostics` | Detail of how the estimates were produced: sample size, method, convergence, number of random starts used, and bootstrap failures. Shown only when Verbose output is enabled. |
 | `crosstab` | `Table` | `Test Cross-Tabulation` |  |
 | `agreement_plot` | `Image` | `Test Agreement Matrix` |  |

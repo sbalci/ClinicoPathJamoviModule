@@ -5,6 +5,15 @@
 \title{Cure Models for Long-term Survivors}
 \usage{
 curemodels(
+  endpoint_type = "recurrence",
+  event_value = "1",
+  censor_value = "0",
+  competing_value = "",
+  prediction_profile = "standardized",
+  latency_predictors = NULL,
+  analysis_horizons = "12,36,60",
+  sensitivity_alternatives = FALSE,
+  bootstrap_seed = 2026,
   data,
   time,
   status,
@@ -28,6 +37,24 @@ curemodels(
 )
 }
 \arguments{
+\item{endpoint_type}{.}
+
+\item{event_value}{.}
+
+\item{censor_value}{.}
+
+\item{competing_value}{.}
+
+\item{prediction_profile}{.}
+
+\item{latency_predictors}{.}
+
+\item{analysis_horizons}{.}
+
+\item{sensitivity_alternatives}{.}
+
+\item{bootstrap_seed}{.}
+
 \item{data}{The data as a data frame.}
 
 \item{time}{Follow-up time variable}
@@ -51,7 +78,8 @@ hazards) or 'aft' (accelerated failure time)}
 
 \item{n_bootstrap}{Number of bootstrap samples}
 
-\item{cure_threshold}{Time threshold for defining cured patients}
+\item{cure_threshold}{Time point for follow-up counts; does not classify
+patients as cured}
 
 \item{plot_cure_fraction}{Generate cure fraction plot}
 
@@ -76,6 +104,10 @@ one variable)}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$followupSupport} \tab \tab \tab \tab \tab a table \cr
+\code{results$observedRisk} \tab \tab \tab \tab \tab a table \cr
+\code{results$fitDiagnostics} \tab \tab \tab \tab \tab a table \cr
+\code{results$sensitivityTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 \code{results$errors} \tab \tab \tab \tab \tab a html \cr
@@ -92,13 +124,14 @@ A results object containing:
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 
-\code{results$modelTable$asDF}
+\code{results$followupSupport$asDF}
 
-\code{as.data.frame(results$modelTable)}
+\code{as.data.frame(results$followupSupport)}
 }
 \description{
-Cure models for analyzing survival data with a cured fraction of long-term
-survivors.
-Implements mixture cure models and non-mixture cure models for oncology
-research.
+Model-based cure probabilities with explicit endpoint and event coding,
+observed-time cumulative incidence, follow-up support, and
+administrative-censoring sensitivity refits. Recurrence cure with competing
+death is not estimated by censoring the competing event. Statistical cure
+with background mortality requires externally matched hazards.
 }

@@ -5,6 +5,89 @@ jrs:   '1.1'
 
 items:
 
+    - name: cifTable
+      title: Observed-time cumulative incidence and follow-up support
+      type: Table
+      rows: 0
+      visible: (cif_all_causes && multievent && analysistype:compete)
+      clearWith:
+          - cif_all_causes
+          - show_followup_support
+          - elapsedtime
+          - tint
+          - dxdate
+          - fudate
+          - calculatedtime
+          - outcome
+          - outcomeLevel
+          - dod
+          - dooc
+          - awd
+          - awod
+          - analysistype
+          - outcomeredefined
+          - cutp
+          - timetypedata
+          - timetypeoutput
+          - uselandmark
+          - landmark
+          - sc
+          - kmunicate
+          - ce
+          - ch
+          - endplot
+          - ybegin_plot
+          - yend_plot
+          - byplot
+          - multievent
+          - ci95
+          - risktable
+          - censored
+          - medianline
+          - person_time
+          - time_intervals
+          - rate_multiplier
+          - baseline_hazard
+          - hazard_smoothing
+          - showExplanations
+          - showSummaries
+          - advancedDiagnostics
+      columns:
+        - name: group
+          title: "Group"
+          type: text
+        - name: time
+          title: "Time"
+          type: number
+          format: zto
+        - name: cause
+          title: "State / event"
+          type: text
+        - name: estimate
+          title: "Probability"
+          type: number
+          format: pc
+        - name: lower
+          title: "Lower 95% CI"
+          type: number
+          format: pc
+        - name: upper
+          title: "Upper 95% CI"
+          type: number
+          format: pc
+        - name: n_risk
+          title: "At risk"
+          type: integer
+          visible: (show_followup_support)
+        - name: n_events
+          title: "Cumulative events"
+          type: integer
+          visible: (show_followup_support)
+        - name: n_censored
+          title: "Cumulative censoring"
+          type: integer
+          visible: (show_followup_support)
+
 
     - name:  eventRecodeInfo
       title: 'Outcome Recode'

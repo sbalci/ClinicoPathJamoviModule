@@ -1,3 +1,14 @@
+# Cure-model article implementation follow-ups (2026-10-04)
+
+The supported P0–P4 estimation paths and verification are described in
+[the implementation guide](literature/putter-andersen-2026-implementation.md).
+Unsupported legacy options are hidden or explicitly rejected; no substitute statistics are reported.
+
+- [ ] Design and independently validate a joint likelihood for interval-censored recurrence with competing death.
+- [ ] Add validated life-table matching and future population-hazard integration before reporting expected and observed all-cause survival from relative-survival fits.
+- [ ] Treat semi-Markov/clock-reset, shared transition effects, frailty, and predictive cross-validation as separate extensions with statistical reference checks.
+- [ ] Complete interactive jamovi/OMV persistence and installed-submodule release checks before promoting these testing/draft routes.
+
 # decisioncompare (meddecide) — `/check-function decisioncompare --profile release` (2026-10-02)
 
 Release profile: every production flag plus external comparison, comprehensive validation, all tests,

@@ -4,7 +4,7 @@
 \alias{curemodelsClass}
 \title{Cure Models for Long-term Survivors}
 \value{
-An \code{R6} class generator object for the \code{curemodelsClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+An R6 class generator for the cure-model analysis backend.
 }
 \description{
 Cure Models for Long-term Survivors

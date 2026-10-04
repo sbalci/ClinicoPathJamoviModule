@@ -347,6 +347,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
             },
 
             .init = function() {
+                self$results$cifTable$setVisible(FALSE)
                 # Result visibility is declared in survival.r.yaml. The only
                 # imperative visibility here is the dynamic onboarding panel.
                 missing_required_input <-
@@ -1769,10 +1770,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
             .cox = function(results) {
                 ### Cox Regression ----
                 
-                # Skip if competing risk analysis
-                if (private$.isCompetingRisk()) {
-                    return()
-                }
+                if (private$.isCompetingRisk()) return()
 
 
                 mytime <- results$name1time
@@ -2438,11 +2436,26 @@ survivalClass <- if (requireNamespace('jmvcore'))
             # Survival Table Function ----
             ,
             .survTable = function(results) {
-                # Skip if competing risk analysis
+                self$results$cifTable$setVisible(
+                    isTRUE(self$options$cif_all_causes) && private$.isCompetingRisk())
                 if (private$.isCompetingRisk()) {
+                    if (isTRUE(self$options$cif_all_causes)) {
+                        times <- suppressWarnings(as.numeric(trimws(
+                            strsplit(self$options$cutp, ",", fixed = TRUE)[[1]])))
+                        valid <- is.finite(times) & times >= 0
+                        self$results$cifTable$setNote("cutpoints", if (any(!valid))
+                            "Invalid time points were omitted; enter non-negative finite numbers."
+                            else NULL)
+                        d <- results$cleanData
+                        .populateObservedCif(self$results$cifTable,
+                            jmvcore::toNumeric(d[[results$name1time]]),
+                            d[[results$name2outcome]], times[valid],
+                            if (is.null(results$name3explanatory)) NULL
+                            else d[[results$name3explanatory]])
+                    }
                     return()
                 }
-                
+
                 mytime <- results$name1time
                 myoutcome <- results$name2outcome
                 myfactor <- results$name3explanatory

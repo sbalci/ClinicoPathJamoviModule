@@ -68,6 +68,10 @@ flexparametricClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 self$results$todo$setContent("<p>Configure the analysis options and run to see flexible parametric survival modeling results.</p>")
             },
             .prepareData = function() {
+                if (length(self$options$grouping_variable)) {
+                    self$results$todo$setContent("Group-specific prediction is unavailable; include the group as a covariate to fit its effect.")
+                    return(NULL)
+                }
                 # Extract variables from data
                 data <- self$data
 
@@ -90,6 +94,21 @@ flexparametricClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     for (cov_name in covariate_names) {
                         analysis_data[[cov_name]] <- data[[cov_name]]
                     }
+                }
+
+                raw_levels <- unique(as.character(analysis_data$event[!is.na(analysis_data$event)]))
+                if (length(raw_levels) > 2L ||
+                    !as.character(self$options$outcomeLevel) %in% raw_levels) {
+                    self$results$todo$setContent(paste(
+                        "Select a binary event indicator and an observed event level.",
+                        "Competing events require a cumulative-incidence or multistate analysis."))
+                    return(NULL)
+                }
+                if (!is.numeric(analysis_data$time) ||
+                    any(!is.finite(analysis_data$time[!is.na(analysis_data$time)]) |
+                        analysis_data$time[!is.na(analysis_data$time)] <= 0)) {
+                    self$results$todo$setContent("Follow-up times must be finite positive numbers.")
+                    return(NULL)
                 }
 
                 # Handle outcome coding
@@ -253,6 +272,8 @@ flexparametricClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         } else if (model_approach == "automatic") {
                             model <- private$.fitBestModel(formula_obj, data)
                         } else {
+                            if (self$options$time_varying_effects)
+                                stop("Select spline-based modeling for time-varying effects.")
                             # Traditional parametric approach
                             model <- flexsurv::flexsurvreg(
                                 formula_obj,
@@ -262,13 +283,17 @@ flexparametricClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         }
 
                         # Extract model information
-                        model_summary <- summary(model)
+                        if (is.null(model) || model$opt$convergence != 0 ||
+                            any(!is.finite(stats::coef(model))) ||
+                            any(!is.finite(stats::vcov(model))))
+                            stop("The selected model did not produce a converged finite fit.")
 
                         return(list(
                             model = model,
-                            summary = model_summary,
                             data = data,
-                            distribution = distribution,
+                            distribution = if (model_approach == "spline_based")
+                                paste("Royston-Parmar spline on", self$options$spline_type, "scale")
+                                else model$dlist$name,
                             approach = model_approach
                         ))
                     },
@@ -305,14 +330,18 @@ flexparametricClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     upper_ci <- estimate + z_crit * se
 
                     # Calculate hazard ratio for covariate parameters
-                    hazard_ratio <- if (!grepl("scale|shape|gamma|intercept", param_name, ignore.case = TRUE)) {
+                    hazard_ratio <- if (identical(model_results$approach, "spline_based") &&
+                        self$options$spline_type == "hazard" && !self$options$time_varying_effects &&
+                        !grepl("^gamma", param_name)) {
                         exp(estimate)
                     } else {
                         NA
                     }
 
                     # Clinical interpretation
-                    interpretation <- private$.interpretParameter(param_name, estimate, hazard_ratio, p_value)
+                    interpretation <- if (is.finite(hazard_ratio))
+                        "Proportional-hazards coefficient; exponentiated effect is a hazard ratio."
+                        else "Parameter on the fitted model's transformed scale; not a global log hazard ratio."
 
                     table$addRow(rowKey = i, values = list(
                         parameter = param_name,
@@ -344,13 +373,13 @@ flexparametricClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 table$addRow(rowKey = "aic", values = list(
                     statistic = "AIC",
                     value = round(aic_value, 2),
-                    interpretation = "Lower values indicate better model fit"
+                    interpretation = "Lower is preferred among models fitted to the same observations"
                 ))
 
                 table$addRow(rowKey = "bic", values = list(
                     statistic = "BIC",
                     value = round(bic_value, 2),
-                    interpretation = "Lower values indicate better model fit (penalizes complexity)"
+                    interpretation = "Relative model comparison on the same observations, penalizing complexity"
                 ))
 
                 table$addRow(rowKey = "loglik", values = list(
@@ -368,35 +397,30 @@ flexparametricClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 ))
             },
             .populatePlots = function(model_results, data) {
-                # Survival plot
-                if (self$options$show_survival_plot) {
-                    survival_plot <- private$.createSurvivalPlot(model_results)
-                    self$results$survivalPlot$setState(survival_plot)
+                had_seed <- exists(".Random.seed", .GlobalEnv, inherits = FALSE)
+                if (had_seed) old_seed <- get(".Random.seed", .GlobalEnv)
+                on.exit(if (had_seed) assign(".Random.seed", old_seed, .GlobalEnv)
+                    else if (exists(".Random.seed", .GlobalEnv, inherits = FALSE))
+                        rm(".Random.seed", envir = .GlobalEnv))
+                set.seed(2026)
+                for (type in c("survival", "hazard", "density")) {
+                    selected <- switch(type, survival = self$options$show_survival_plot,
+                        hazard = self$options$show_hazard_plot, density = self$options$show_density_plot)
+                    if (!selected) next
+                    plot <- switch(type, survival = private$.createSurvivalPlot(model_results),
+                        hazard = private$.createHazardPlot(model_results),
+                        density = private$.createDensityPlot(model_results))
+                    d <- as.data.frame(plot$data)
+                    d$estimate <- d[[type]]
+                    d$quantity <- type
+                    d$observed <- d$time <= max(data$time)
+                    d$family <- model_results$distribution
+                    self$results[[paste0(type, "Plot")]]$setState(d[, c("time", "estimate", "lower", "upper", "quantity", "observed", "family")])
                 }
-
-                # Hazard plot
-                if (self$options$show_hazard_plot) {
-                    hazard_plot <- private$.createHazardPlot(model_results)
-                    self$results$hazardPlot$setState(hazard_plot)
-                }
-
-                # Density plot
-                if (self$options$show_density_plot) {
-                    density_plot <- private$.createDensityPlot(model_results)
-                    self$results$densityPlot$setState(density_plot)
-                }
-
-                # Spline plot
-                if (self$options$show_spline_plot && self$options$model_approach == "spline_based") {
-                    spline_plot <- private$.createSplinePlot(model_results)
-                    self$results$splinePlot$setState(spline_plot)
-                }
-
-                # Diagnostics plot
-                if (self$options$show_diagnostics) {
-                    diagnostics_plot <- private$.createDiagnosticsPlot(model_results)
-                    self$results$diagnosticsPlot$setState(diagnostics_plot)
-                }
+                self$results$splinePlot$setVisible(FALSE)
+                self$results$diagnosticsPlot$setVisible(FALSE)
+                if (self$options$show_spline_plot || self$options$show_diagnostics)
+                    self$results$todo$setContent("Spline-basis and residual diagnostic plots are unavailable; fitted survival/hazard/density curves and likelihood comparisons are reported.")
             },
             .createSurvivalPlot = function(model_results) {
                 model <- model_results$model
@@ -422,10 +446,10 @@ flexparametricClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             mean_covs[[col]] <- names(sort(table(data[[col]]), decreasing = TRUE))[1]
                         }
                     }
-                    surv_probs <- summary(model, t = times, newdata = mean_covs, type = "survival")[[1]]
+                    surv_probs <- summary(model, t = times, newdata = mean_covs, type = "survival", cl = self$options$confidence_level)[[1]]
                 } else {
                     # No covariates model
-                    surv_probs <- summary(model, t = times, type = "survival")[[1]]
+                    surv_probs <- summary(model, t = times, type = "survival", cl = self$options$confidence_level)[[1]]
                 }
 
                 # Create plot data
@@ -478,10 +502,10 @@ flexparametricClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             mean_covs[[col]] <- names(sort(table(data[[col]]), decreasing = TRUE))[1]
                         }
                     }
-                    hazard_rates <- summary(model, t = times, newdata = mean_covs, type = "hazard")[[1]]
+                    hazard_rates <- summary(model, t = times, newdata = mean_covs, type = "hazard", cl = self$options$confidence_level)[[1]]
                 } else {
                     # No covariates model
-                    hazard_rates <- summary(model, t = times, type = "hazard")[[1]]
+                    hazard_rates <- summary(model, t = times, type = "hazard", cl = self$options$confidence_level)[[1]]
                 }
 
                 # Create plot data
@@ -533,10 +557,10 @@ flexparametricClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             mean_covs[[col]] <- names(sort(table(data[[col]]), decreasing = TRUE))[1]
                         }
                     }
-                    densities <- summary(model, t = times, newdata = mean_covs, type = "density")[[1]]
+                    densities <- summary(model, t = times, newdata = mean_covs, type = "density", cl = self$options$confidence_level)[[1]]
                 } else {
                     # No covariates model
-                    densities <- summary(model, t = times, type = "density")[[1]]
+                    densities <- summary(model, t = times, type = "density", cl = self$options$confidence_level)[[1]]
                 }
 
                 # Create plot data
@@ -565,100 +589,40 @@ flexparametricClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 return(p)
             },
             .fitSplineModel = function(formula_obj, data) {
-                spline_type <- self$options$spline_type
-                spline_df <- self$options$spline_df
-                knot_placement <- self$options$knot_placement
-
-                # Convert spline_type to rstpm2 scale
-                scale_map <- list(
-                    "hazard" = "hazard",
-                    "odds" = "odds",
-                    "normal" = "normal"
-                )
-                scale <- scale_map[[spline_type]]
-
-                # Determine knot positions with validation
-                if (knot_placement == "manual" && nchar(self$options$manual_knots) > 0) {
-                    knots_str <- trimws(self$options$manual_knots)
-                    knots <- as.numeric(unlist(strsplit(knots_str, "[,;\\s]+")))
-                    knots <- knots[!is.na(knots) & knots > 0]
-
-                    # Validate knots are within data range
-                    max_time <- max(data$time, na.rm = TRUE)
-                    knots <- knots[knots < max_time]
-
-                    # Sort knots and remove duplicates
-                    knots <- unique(sort(knots))
-
-                    # Need at least some valid knots
-                    if (length(knots) == 0) {
-                        knots <- NULL
-                        warning("Manual knots were invalid, using default quantile-based knots")
-                    }
-                } else {
-                    # Use default quantile-based knots
-                    knots <- NULL
+                scale <- self$options$spline_type
+                k <- max(0L, self$options$spline_df - 1L)
+                event_times <- data$time[data$event == 1 & data$time > 0]
+                if (length(unique(event_times)) < 3)
+                    stop("Spline models require at least three distinct positive event times.")
+                bounds <- range(log(event_times))
+                knots <- NULL
+                if (self$options$knot_placement == "manual") {
+                    raw <- suppressWarnings(as.numeric(strsplit(
+                        self$options$manual_knots, ",", fixed = TRUE)[[1]]))
+                    if (!length(raw) || any(!is.finite(raw) | raw <= 0))
+                        stop("Manual knots must be positive times separated by commas.")
+                    knots <- sort(unique(log(raw)))
+                    if (any(knots <= bounds[1] | knots >= bounds[2]))
+                        stop("Manual knots must lie strictly inside the observed event-time range.")
+                    k <- length(knots)
+                } else if (self$options$knot_placement == "equal" && k > 0) {
+                    knots <- seq(bounds[1], bounds[2], length.out = k + 2L)[-c(1, k + 2L)]
                 }
-
-                # Fit rstpm2 model with enhanced error handling
-                model <- NULL
-                if (requireNamespace("rstpm2", quietly = TRUE)) {
-                    model <- tryCatch(
-                        {
-                            rstpm2::stpm2(
-                                formula_obj,
-                                data = data,
-                                df = spline_df,
-                                knots = knots,
-                                scale = scale
-                            )
-                        },
-                        error = function(e) {
-                            # If rstpm2 fails, return NULL to try flexsurv
-                            NULL
-                        }
-                    )
+                anc <- NULL
+                if (self$options$time_varying_effects) {
+                    rhs <- stats::formula(stats::delete.response(stats::terms(formula_obj)))
+                    if (!length(all.vars(rhs))) stop("Time-varying effects require predictors.")
+                    anc <- stats::setNames(rep(list(rhs), k + 1L), paste0("gamma", seq_len(k + 1L)))
                 }
-
-                # If rstpm2 not available or failed, try flexsurv spline
-                if (is.null(model)) {
-                    model <- private$.tryFlexsurvSpline(formula_obj, data, spline_df, scale)
-                }
-
-                return(model)
-            },
-            .tryFlexsurvSpline = function(formula_obj, data, spline_df, scale) {
-                tryCatch(
-                    {
-                        # Try flexsurv spline with appropriate parameters
-                        scale_map <- list(
-                            "hazard" = "cumhaz",
-                            "odds" = "cumhaz", # flexsurv doesn't have odds scale
-                            "normal" = "cumhaz"
-                        )
-                        flexsurv_scale <- if (is.null(scale_map[[scale]])) "cumhaz" else scale_map[[scale]]
-
-                        model <- flexsurv::flexsurvspline(
-                            formula_obj,
-                            data = data,
-                            k = max(1, spline_df - 1), # Ensure k >= 1
-                            scale = flexsurv_scale
-                        )
-                        return(model)
-                    },
-                    error = function(e) {
-                        # Ultimate fallback to simple parametric model
-                        warning("Spline modeling failed, using Weibull distribution instead")
-                        model <- flexsurv::flexsurvreg(
-                            formula_obj,
-                            data = data,
-                            dist = "weibull"
-                        )
-                        return(model)
-                    }
-                )
+                model <- flexsurv::flexsurvspline(formula_obj, data = data, k = k,
+                    knots = knots, bknots = bounds, scale = scale, anc = anc)
+                if (model$opt$convergence != 0)
+                    stop("The selected spline model did not converge; no substitute distribution was fitted.")
+                model
             },
             .fitBestModel = function(formula_obj, data) {
+                if (self$options$time_varying_effects)
+                    stop("Select spline-based modeling for time-varying effects.")
                 # Optimized model comparison - start with most robust models
                 distributions <- c("weibull", "lognormal", "gamma") # Reduced set for speed
                 models <- vector("list", length(distributions))
@@ -696,7 +660,7 @@ flexparametricClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Try more complex models only if sample size permits and simple models don't fit well
                 n_events <- sum(data$event)
-                if (n_events >= 50 && min(aics, na.rm = TRUE) > 100) {
+                if (n_events >= 50) {
                     complex_dists <- c("gengamma", "genf")
 
                     for (dist in complex_dists) {
@@ -759,7 +723,7 @@ flexparametricClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 }
 
                 table <- self$results$splineDetails
-                spline_df <- self$options$spline_df
+                spline_df <- length(model_results$model$knots) - 1L
                 spline_type <- self$options$spline_type
                 knot_placement <- self$options$knot_placement
 
@@ -767,7 +731,7 @@ flexparametricClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 table$addRow(rowKey = "baseline", values = list(
                     component = "Baseline Spline",
                     df = spline_df,
-                    knots = paste0("DF=", spline_df, ", Placement: ", knot_placement),
+                    knots = paste(signif(exp(model_results$model$knots), 5), collapse = ", "),
                     basis_type = paste0("Spline on ", spline_type)
                 ))
 
@@ -799,7 +763,11 @@ flexparametricClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     distributions <- c("weibull", "lognormal", "gamma", "gengamma", "genf")
                 }
 
-                comparison_results <- list()
+                comparison_results <- list(selected = list(
+                    model = paste("Selected:", model_results$distribution),
+                    parameters = length(stats::coef(model_results$model)),
+                    log_likelihood = model_results$model$loglik,
+                    aic = stats::AIC(model_results$model), bic = stats::BIC(model_results$model)))
 
                 formula_obj <- private$.createFormula(data)
 
@@ -812,6 +780,8 @@ flexparametricClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                 dist = dist
                             )
 
+                            if (test_model$opt$convergence != 0 ||
+                                any(!is.finite(stats::coef(test_model)))) next
                             comparison_results[[dist]] <- list(
                                 model = dist,
                                 parameters = length(test_model$coefficients),
@@ -828,7 +798,7 @@ flexparametricClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Find best model by AIC
                 aics <- sapply(comparison_results, function(x) x$aic)
-                best_model <- names(which.min(aics))
+                best_model <- comparison_results[[which.min(aics)]]$model
 
                 # Populate comparison table
                 for (result in comparison_results) {
@@ -846,66 +816,13 @@ flexparametricClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 }
             },
             .populateClinicalSummary = function(model_results) {
-                if (!self$options$show_clinical_summary) {
-                    return()
-                }
-
-                model <- model_results$model
-                distribution <- model_results$distribution
-                data <- model_results$data
-
-                # Basic survival metrics
-                n_events <- sum(data$event)
-                n_obs <- nrow(data)
-                event_rate <- n_events / n_obs * 100
-
-                # Extract key parameters for clinical interpretation
-                coefs <- model$coefficients
-                covariate_names <- self$options$covariates
-
-                clinical_html <- paste0(
-                    "<h3> Clinical Summary</h3>",
-                    "<div style='background-color: rgba(33, 159, 33, 0.1); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
-                    "<h4> Model Performance</h4>",
-                    "<p><strong>Distribution Fit:</strong> ", distribution, " distribution provides ",
-                    private$.assessModelFit(model), "</p>",
-                    "<p><strong>Sample Adequacy:</strong> ", n_obs, " patients with ", n_events,
-                    " events (", round(event_rate, 1), "% event rate)</p>",
-                    "</div>"
-                )
-
-                # Add covariate interpretations if present
-                if (!is.null(covariate_names) && length(covariate_names) > 0) {
-                    clinical_html <- paste0(
-                        clinical_html,
-                        "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
-                        "<h4> Clinical Findings</h4>",
-                        private$.generateClinicalFindings(model, covariate_names),
-                        "</div>"
-                    )
-                }
-
-                # Add assumptions and model validation section
-                assumptions_check <- private$.checkModelAssumptions(model_results, data)
-                clinical_html <- paste0(
-                    clinical_html,
-                    "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
-                    "<h4> Model Assumptions & Validation</h4>",
-                    assumptions_check,
-                    "</div>"
-                )
-
-                # Add copy-ready report section
-                clinical_html <- paste0(
-                    clinical_html,
-                    "<div style='background-color: rgba(33, 163, 188, 0.21); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
-                    "<h4> Copy-Ready Report</h4>",
-                    "<p style='font-family: monospace; background-color: white; padding: 10px; border: 1px solid #ccc;'>",
-                    private$.generateCopyReadyReport(model_results),
-                    "</p></div>"
-                )
-
-                self$results$clinicalSummary$setContent(clinical_html)
+                self$results$clinicalSummary$setContent(paste0(
+                    "<p>Fitted family: ", htmltools::htmlEscape(model_results$distribution),
+                    "; ", nrow(model_results$data), " observations and ",
+                    sum(model_results$data$event), " events.</p>",
+                    "<p>AIC/BIC compare candidate models on the same data; their absolute values do not validate assumptions.</p>",
+                    "<p>AFT, proportional-odds, probit, and time-varying coefficients must not be interpreted as constant hazard ratios.</p>",
+                    "<p>Curve predictions use numeric covariates at their mean and factors at their most frequent level. Extrapolated tails remain model-dependent.</p>"))
             },
             .createFormula = function(data) {
                 covariate_names <- self$options$covariates
@@ -917,267 +834,6 @@ flexparametricClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 } else {
                     return(surv_obj ~ 1)
                 }
-            },
-            .interpretParameter = function(param_name, estimate, hazard_ratio, p_value) {
-                if (grepl("scale|shape|gamma", param_name)) {
-                    return("Distribution parameter")
-                }
-
-                if (is.na(hazard_ratio)) {
-                    return("Distribution parameter")
-                }
-
-                significance <- if (p_value < 0.001) "highly significant" else if (p_value < 0.01) "significant" else if (p_value < 0.05) "marginally significant" else "not significant"
-
-                if (hazard_ratio > 1) {
-                    percent_increase <- round((hazard_ratio - 1) * 100, 1)
-                    return(paste0("Increased hazard: ", percent_increase, "% higher risk (", significance, ")"))
-                } else {
-                    percent_decrease <- round((1 - hazard_ratio) * 100, 1)
-                    return(paste0("Decreased hazard: ", percent_decrease, "% lower risk (", significance, ")"))
-                }
-            },
-            .assessModelFit = function(model) {
-                aic <- AIC(model)
-                bic <- BIC(model)
-
-                if (aic < 100) {
-                    return("excellent fit to the data")
-                } else if (aic < 500) {
-                    return("good fit to the data")
-                } else {
-                    return("adequate fit to the data")
-                }
-            },
-            .generateClinicalFindings = function(model, covariate_names) {
-                coefs <- model$coefficients
-                findings <- ""
-
-                for (cov in covariate_names) {
-                    if (cov %in% names(coefs)) {
-                        estimate <- coefs[cov]
-                        hr <- exp(estimate)
-                        cov_safe <- htmltools::htmlEscape(cov)
-
-                        if (hr > 1.1) {
-                            findings <- paste0(
-                                findings, "<p>\u{2022} <strong>", cov_safe,
-                                ":</strong> Associated with ", round((hr - 1) * 100, 1),
-                                "% increased hazard (HR=", round(hr, 2), ")</p>"
-                            )
-                        } else if (hr < 0.9) {
-                            findings <- paste0(
-                                findings, "<p>\u{2022} <strong>", cov_safe,
-                                ":</strong> Associated with ", round((1 - hr) * 100, 1),
-                                "% decreased hazard (HR=", round(hr, 2), ")</p>"
-                            )
-                        } else {
-                            findings <- paste0(
-                                findings, "<p>\u{2022} <strong>", cov_safe,
-                                ":</strong> Minimal effect on hazard (HR=", round(hr, 2), ")</p>"
-                            )
-                        }
-                    }
-                }
-
-                if (nchar(findings) == 0) {
-                    findings <- "<p>No significant covariate effects detected.</p>"
-                }
-
-                return(findings)
-            },
-            .generateCopyReadyReport = function(model_results) {
-                model <- model_results$model
-                distribution <- model_results$distribution
-                n_obs <- nobs(model)
-                n_events <- sum(model_results$data$event)
-
-                report <- paste0(
-                    "Flexible parametric survival analysis using ", distribution, " distribution. ",
-                    "Sample: ", n_obs, " patients (", n_events, " events). ",
-                    "AIC: ", round(AIC(model), 1), ", BIC: ", round(BIC(model), 1), ". ",
-                    "Model provides good fit for complex hazard patterns."
-                )
-
-                return(report)
-            },
-            .checkModelAssumptions = function(model_results, data) {
-                model <- model_results$model
-                distribution <- model_results$distribution
-                n_events <- sum(data$event)
-                n_obs <- nrow(data)
-                event_rate <- n_events / n_obs * 100
-
-                assumptions_html <- ""
-                warnings_count <- 0
-
-                # Check sample size adequacy
-                if (n_events >= 30) {
-                    assumptions_html <- paste0(
-                        assumptions_html,
-                        "<p> <strong>Sample Size:</strong> Adequate with ", n_events, " events for reliable parametric modeling.</p>"
-                    )
-                } else if (n_events >= 10) {
-                    assumptions_html <- paste0(
-                        assumptions_html,
-                        "<p> <strong>Sample Size:</strong> Marginal with ", n_events, " events. Results may be less stable.</p>"
-                    )
-                    warnings_count <- warnings_count + 1
-                }
-
-                # Check event rate
-                if (event_rate >= 10 && event_rate <= 80) {
-                    assumptions_html <- paste0(
-                        assumptions_html,
-                        "<p> <strong>Event Rate:</strong> Appropriate at ", round(event_rate, 1), "% for parametric modeling.</p>"
-                    )
-                } else {
-                    assumptions_html <- paste0(
-                        assumptions_html,
-                        "<p> <strong>Event Rate:</strong> ", round(event_rate, 1), "% may affect model reliability.</p>"
-                    )
-                    warnings_count <- warnings_count + 1
-                }
-
-                # Check model complexity vs sample size
-                n_params <- length(model$coefficients)
-                if (n_events / n_params >= 10) {
-                    assumptions_html <- paste0(
-                        assumptions_html,
-                        "<p> <strong>Model Complexity:</strong> ", n_params, " parameters well-supported by data.</p>"
-                    )
-                } else {
-                    assumptions_html <- paste0(
-                        assumptions_html,
-                        "<p> <strong>Model Complexity:</strong> ", n_params, " parameters may be too many for ", n_events, " events.</p>"
-                    )
-                    warnings_count <- warnings_count + 1
-                }
-
-                # Check distribution appropriateness
-                aic_value <- AIC(model)
-                if (aic_value < nrow(data)) {
-                    assumptions_html <- paste0(
-                        assumptions_html,
-                        "<p> <strong>Model Fit:</strong> ", distribution, " distribution provides good fit (AIC=", round(aic_value, 1), ").</p>"
-                    )
-                } else {
-                    assumptions_html <- paste0(
-                        assumptions_html,
-                        "<p> <strong>Model Fit:</strong> Consider simpler model or check for outliers (AIC=", round(aic_value, 1), ").</p>"
-                    )
-                    warnings_count <- warnings_count + 1
-                }
-
-                # Check for potential issues with censoring
-                censoring_rate <- (n_obs - n_events) / n_obs * 100
-                if (censoring_rate <= 50) {
-                    assumptions_html <- paste0(
-                        assumptions_html,
-                        "<p> <strong>Censoring:</strong> ", round(censoring_rate, 1), "% censoring rate is appropriate.</p>"
-                    )
-                } else if (censoring_rate <= 80) {
-                    assumptions_html <- paste0(
-                        assumptions_html,
-                        "<p> <strong>Censoring:</strong> High censoring (", round(censoring_rate, 1), "%) may limit model precision.</p>"
-                    )
-                    warnings_count <- warnings_count + 1
-                } else {
-                    assumptions_html <- paste0(
-                        assumptions_html,
-                        "<p> <strong>Censoring:</strong> Very high censoring (", round(censoring_rate, 1), "%) - consider longer follow-up.</p>"
-                    )
-                    warnings_count <- warnings_count + 1
-                }
-
-                # Add overall assessment
-                if (warnings_count == 0) {
-                    assumptions_html <- paste0(
-                        "<p style='background-color: rgba(33, 162, 64, 0.19); padding: 8px; border-radius: 3px; color: inherit;'>",
-                        "<strong> Overall Assessment:</strong> All key assumptions appear satisfied. Model results are reliable.</p>",
-                        assumptions_html
-                    )
-                } else {
-                    assumptions_html <- paste0(
-                        "<p style='background-color: rgba(255, 202, 33, 0.23); padding: 8px; border-radius: 3px; color: inherit;'>",
-                        "<strong> Overall Assessment:</strong> ", warnings_count, " assumption concerns detected. Interpret results with caution.</p>",
-                        assumptions_html
-                    )
-                }
-
-                return(assumptions_html)
-            },
-            .createSplinePlot = function(model_results) {
-                # Create a plot showing spline basis functions
-                data <- model_results$data
-                max_time <- max(data$time, na.rm = TRUE)
-                times <- seq(0.01, max_time, length.out = 100)
-
-                # Create a simple representation of spline flexibility
-                spline_df <- self$options$spline_df
-
-                plot_data <- data.frame(
-                    time = rep(times, spline_df),
-                    basis = rep(1:spline_df, each = length(times)),
-                    value = rep(sin(seq(0, 2 * pi, length.out = length(times))), spline_df)
-                )
-
-                p <- ggplot(plot_data, aes(x = time, y = value, color = factor(basis))) +
-                    geom_line(size = 1) +
-                    labs(
-                        title = paste0("Spline Basis Functions (DF=", spline_df, ")"),
-                        x = "Time",
-                        y = "Basis Function Value",
-                        color = "Basis"
-                    ) +
-                    theme_minimal() +
-                    theme(plot.title = element_text(hjust = 0.5))
-
-                return(p)
-            },
-            .createDiagnosticsPlot = function(model_results) {
-                model <- model_results$model
-                data <- model_results$data
-
-                # Create residual plot
-                tryCatch(
-                    {
-                        # Cox-Snell residuals
-                        residuals <- resid(model, type = "response")
-                        fitted_vals <- fitted(model)
-
-                        plot_data <- data.frame(
-                            fitted = fitted_vals,
-                            residuals = residuals
-                        )
-
-                        p <- ggplot(plot_data, aes(x = fitted, y = residuals)) +
-                            geom_point(alpha = 0.6) +
-                            geom_smooth(method = "loess", se = TRUE, color = "red") +
-                            geom_hline(yintercept = 0, linetype = "dashed", color = "blue") +
-                            labs(
-                                title = "Model Diagnostic Plot",
-                                x = "Fitted Values",
-                                y = "Residuals"
-                            ) +
-                            theme_minimal() +
-                            theme(plot.title = element_text(hjust = 0.5))
-
-                        return(p)
-                    },
-                    error = function(e) {
-                        # Fallback diagnostic plot
-                        p <- ggplot() +
-                            annotate("text",
-                                x = 0.5, y = 0.5,
-                                label = "Diagnostic plot unavailable\nfor this model type",
-                                size = 5, hjust = 0.5
-                            ) +
-                            theme_void() +
-                            labs(title = "Model Diagnostics")
-                        return(p)
-                    }
-                )
             },
             .populateSummary = function(model_results) {
                 if (!self$options$showSummaries) {
@@ -1202,192 +858,39 @@ flexparametricClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     return()
                 }
 
-                methodology_html <- "
-            <h3> About This Analysis</h3>
-
-            <div style='background-color: rgba(33, 149, 236, 0.1); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
-            <h4> What This Analysis Does</h4>
-            <p>Flexible parametric survival modeling fits smooth mathematical functions to survival data, allowing for complex hazard patterns that Cox regression cannot capture. This approach is especially useful when you need to:</p>
-            <ul>
-                <li>Model non-proportional hazards (risk changes over time)</li>
-                <li>Extrapolate survival curves beyond observed data</li>
-                <li>Calculate mean survival times and restricted mean survival</li>
-                <li>Generate smooth hazard and survival functions</li>
-            </ul>
-            </div>
-
-            <div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
-            <h4> When to Use This Analysis</h4>
-            <p><strong>Ideal for:</strong></p>
-            <ul>
-                <li>Cancer survival studies with adequate follow-up</li>
-                <li>Treatment effectiveness with time-varying effects</li>
-                <li>Health economic modeling requiring extrapolation</li>
-                <li>Data with complex hazard patterns (bathtub, unimodal)</li>
-            </ul>
-            <p><strong>Minimum Requirements:</strong></p>
-            <ul>
-                <li>>=10 events for basic modeling</li>
-                <li>>=5 events per covariate for multivariable models</li>
-                <li>Adequate follow-up to observe event patterns</li>
-            </ul>
-            </div>
-
-            <div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
-            <h4> Key Assumptions & Limitations</h4>
-            <ul>
-                <li><strong>Independent observations:</strong> Each patient contributes one survival time</li>
-                <li><strong>Correct event coding:</strong> 1=event occurred, 0=censored</li>
-                <li><strong>Informative censoring:</strong> Censoring should be unrelated to outcome risk</li>
-                <li><strong>Parametric assumptions:</strong> True hazard follows chosen mathematical distribution</li>
-                <li><strong>Sample size:</strong> Complex models need more events for stable estimates</li>
-            </ul>
-            </div>
-
-            <div style='background-color: rgba(33, 162, 64, 0.19); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
-            <h4> How to Use This Function</h4>
-            <ol>
-                <li><strong>Select Variables:</strong> Choose time variable (months/years), event indicator (1/0), and covariates</li>
-                <li><strong>Choose Approach:</strong> Traditional (standard distributions), Flexible (splines), or Automatic (best fit)</li>
-                <li><strong>Check Warnings:</strong> Review sample size and assumption warnings</li>
-                <li><strong>Interpret Results:</strong> Focus on hazard ratios, survival curves, and clinical summary</li>
-                <li><strong>Validate Model:</strong> Check diagnostic plots and model fit statistics</li>
-            </ol>
-            </div>
-
-            <div style='background-color: rgba(33, 33, 33, 0.07); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
-            <h4> Distribution Guide</h4>
-            <p><strong>Weibull:</strong> Most common, good for increasing/decreasing hazards (cancer, wear-out)</p>
-            <p><strong>Log-normal:</strong> Bell-shaped hazard, good for acute conditions with recovery</p>
-            <p><strong>Gamma:</strong> Flexible shape, can handle complex hazard patterns</p>
-            <p><strong>Generalized Gamma:</strong> Very flexible, includes Weibull and gamma as special cases</p>
-            <p><strong>Spline Models:</strong> Maximum flexibility, good for complex or unknown hazard shapes</p>
-            </div>
-
-            <div style='background-color: rgba(33, 41, 56, 0.13); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
-            <h4> Reporting Template</h4>
-            <p style='font-style: italic;'>\"Flexible parametric survival analysis was performed using [distribution] distribution. The model included [N] patients with [N] events ([%] event rate). [Covariate] was associated with [HR] hazard of [outcome] (HR=X.XX, 95% CI X.XX-X.XX, p=X.XXX). Model fit was assessed using AIC ([value]) and diagnostic plots.\"</p>
-            </div>"
+                methodology_html <- paste(
+                    "<p>Fits a parametric distribution or a Royston-Parmar spline to a binary,",
+                    "right-censored endpoint. Splines use log time on the selected hazard, odds, or probit scale.</p>",
+                    "<p>Time-varying spline effects relax a constant covariate effect. Traditional distributions",
+                    "and automatic distribution selection do not fit those interactions.</p>",
+                    "<p>Confidence intervals describe fitted parameter uncertainty. AIC/BIC compare models",
+                    "on the same cohort; they do not establish adequate follow-up, independent censoring, or cure.</p>",
+                    "<p>Predictions beyond observed follow-up are extrapolations. Report the family, predictors,",
+                    "prediction profile, uncertainty, and follow-up support. Interpret coefficients on the",
+                    "model's scale; only the constant PH effects are displayed as hazard ratios.</p>"
+                )
 
                 self$results$methodExplanation$setContent(methodology_html)
             },
 
-            # Plot render functions for jamovi integration
-            .plotSurvivalPlot = function(image, ...) {
-                if (!self$options$show_survival_plot) {
-                    return()
-                }
-
-                tryCatch(
-                    {
-                        data <- private$.prepareData()
-                        if (is.null(data)) {
-                            return()
-                        }
-
-                        model_results <- private$.fitParametricModel(data)
-                        if (is.null(model_results)) {
-                            return()
-                        }
-
-                        plot <- private$.createSurvivalPlot(model_results)
-                        print(plot)
-                        TRUE
-                    },
-                    error = function(e) {
-                        # Create error plot
-                        error_plot <- ggplot() +
-                            annotate("text",
-                                x = 0.5, y = 0.5,
-                                label = paste("Plot error:", e$message),
-                                size = 4, hjust = 0.5
-                            ) +
-                            theme_void() +
-                            labs(title = "Survival Plot Error")
-                        print(error_plot)
-                        TRUE
-                    }
-                )
-            },
-            .plotHazardPlot = function(image, ...) {
-                if (!self$options$show_hazard_plot) {
-                    return()
-                }
-
-                data <- private$.prepareData()
-                if (is.null(data)) {
-                    return()
-                }
-
-                model_results <- private$.fitParametricModel(data)
-                if (is.null(model_results)) {
-                    return()
-                }
-
-                plot <- private$.createHazardPlot(model_results)
-                print(plot)
+            .renderCurve = function(image, ggtheme, theme, ...) {
+                d <- image$state
+                if (is.null(d) || !nrow(d)) return(FALSE)
+                print(ggplot2::ggplot(d, ggplot2::aes(time, estimate)) +
+                    ggplot2::geom_line(ggplot2::aes(linetype = observed)) + ggplot2::geom_ribbon(
+                        ggplot2::aes(ymin = lower, ymax = upper), alpha = .15) +
+                    ggplot2::labs(x = "Time", y = d$quantity[1], title = d$family[1],
+                        linetype = "Within follow-up") + ggtheme)
                 TRUE
             },
-            .plotDensityPlot = function(image, ...) {
-                if (!self$options$show_density_plot) {
-                    return()
-                }
-
-                data <- private$.prepareData()
-                if (is.null(data)) {
-                    return()
-                }
-
-                model_results <- private$.fitParametricModel(data)
-                if (is.null(model_results)) {
-                    return()
-                }
-
-                plot <- private$.createDensityPlot(model_results)
-                print(plot)
-                TRUE
-            },
-            .plotSplinePlot = function(image, ...) {
-                if (!self$options$show_spline_plot) {
-                    return()
-                }
-                if (self$options$model_approach != "spline_based") {
-                    return()
-                }
-
-                data <- private$.prepareData()
-                if (is.null(data)) {
-                    return()
-                }
-
-                model_results <- private$.fitParametricModel(data)
-                if (is.null(model_results)) {
-                    return()
-                }
-
-                plot <- private$.createSplinePlot(model_results)
-                print(plot)
-                TRUE
-            },
-            .plotDiagnosticsPlot = function(image, ...) {
-                if (!self$options$show_diagnostics) {
-                    return()
-                }
-
-                data <- private$.prepareData()
-                if (is.null(data)) {
-                    return()
-                }
-
-                model_results <- private$.fitParametricModel(data)
-                if (is.null(model_results)) {
-                    return()
-                }
-
-                plot <- private$.createDiagnosticsPlot(model_results)
-                print(plot)
-                TRUE
-            }
+            .plotSurvivalPlot = function(image, ggtheme, theme, ...)
+                private$.renderCurve(image, ggtheme, theme, ...),
+            .plotHazardPlot = function(image, ggtheme, theme, ...)
+                private$.renderCurve(image, ggtheme, theme, ...),
+            .plotDensityPlot = function(image, ggtheme, theme, ...)
+                private$.renderCurve(image, ggtheme, theme, ...),
+            .plotSplinePlot = function(...) FALSE,
+            .plotDiagnosticsPlot = function(...) FALSE
         )
     )
 }

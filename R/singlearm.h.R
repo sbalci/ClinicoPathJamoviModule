@@ -6,6 +6,8 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
+            cif_all_causes = TRUE,
+            show_followup_support = TRUE,
             elapsedtime = NULL,
             tint = FALSE,
             dxdate = NULL,
@@ -50,6 +52,14 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresData=TRUE,
                 ...)
 
+            private$..cif_all_causes <- jmvcore::OptionBool$new(
+                "cif_all_causes",
+                cif_all_causes,
+                default=TRUE)
+            private$..show_followup_support <- jmvcore::OptionBool$new(
+                "show_followup_support",
+                show_followup_support,
+                default=TRUE)
             private$..elapsedtime <- jmvcore::OptionVariable$new(
                 "elapsedtime",
                 elapsedtime,
@@ -255,6 +265,8 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 advancedDiagnostics,
                 default=FALSE)
 
+            self$.addOption(private$..cif_all_causes)
+            self$.addOption(private$..show_followup_support)
             self$.addOption(private$..elapsedtime)
             self$.addOption(private$..tint)
             self$.addOption(private$..dxdate)
@@ -296,6 +308,8 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..advancedDiagnostics)
         }),
     active = list(
+        cif_all_causes = function() private$..cif_all_causes$value,
+        show_followup_support = function() private$..show_followup_support$value,
         elapsedtime = function() private$..elapsedtime$value,
         tint = function() private$..tint$value,
         dxdate = function() private$..dxdate$value,
@@ -336,6 +350,8 @@ singlearmOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         showSummaries = function() private$..showSummaries$value,
         advancedDiagnostics = function() private$..advancedDiagnostics$value),
     private = list(
+        ..cif_all_causes = NA,
+        ..show_followup_support = NA,
         ..elapsedtime = NA,
         ..tint = NA,
         ..dxdate = NA,
@@ -381,6 +397,7 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "singlearmResults",
     inherit = jmvcore::Group,
     active = list(
+        cifTable = function() private$.items[["cifTable"]],
         eventRecodeInfo = function() private$.items[["eventRecodeInfo"]],
         todo = function() private$.items[["todo"]],
         errors = function() private$.items[["errors"]],
@@ -441,6 +458,98 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "survivalrwnahhas",
                     "digest",
                     "lubridate"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="cifTable",
+                title="Observed-time cumulative incidence and follow-up support",
+                rows=0,
+                visible="(cif_all_causes && multievent && analysistype:compete)",
+                clearWith=list(
+                    "cif_all_causes",
+                    "show_followup_support",
+                    "elapsedtime",
+                    "tint",
+                    "dxdate",
+                    "fudate",
+                    "calculatedtime",
+                    "outcome",
+                    "outcomeLevel",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "analysistype",
+                    "outcomeredefined",
+                    "cutp",
+                    "timetypedata",
+                    "timetypeoutput",
+                    "uselandmark",
+                    "landmark",
+                    "sc",
+                    "kmunicate",
+                    "ce",
+                    "ch",
+                    "endplot",
+                    "ybegin_plot",
+                    "yend_plot",
+                    "byplot",
+                    "multievent",
+                    "ci95",
+                    "risktable",
+                    "censored",
+                    "medianline",
+                    "person_time",
+                    "time_intervals",
+                    "rate_multiplier",
+                    "baseline_hazard",
+                    "hazard_smoothing",
+                    "showExplanations",
+                    "showSummaries",
+                    "advancedDiagnostics"),
+                columns=list(
+                    list(
+                        `name`="group", 
+                        `title`="Group", 
+                        `type`="text"),
+                    list(
+                        `name`="time", 
+                        `title`="Time", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="cause", 
+                        `title`="State / event", 
+                        `type`="text"),
+                    list(
+                        `name`="estimate", 
+                        `title`="Probability", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="lower", 
+                        `title`="Lower 95% CI", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="upper", 
+                        `title`="Upper 95% CI", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="n_risk", 
+                        `title`="At risk", 
+                        `type`="integer", 
+                        `visible`="(show_followup_support)"),
+                    list(
+                        `name`="n_events", 
+                        `title`="Cumulative events", 
+                        `type`="integer", 
+                        `visible`="(show_followup_support)"),
+                    list(
+                        `name`="n_censored", 
+                        `title`="Cumulative censoring", 
+                        `type`="integer", 
+                        `visible`="(show_followup_support)"))))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="eventRecodeInfo",
@@ -1440,6 +1549,11 @@ singlearmBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' states. Optional person-time rates use the sum of individual observation 
 #' periods as their denominator. This is descriptive analysis of one cohort, 
 #' not a treatment-effect estimate.
+#' @param cif_all_causes Report the event-free probability and cumulative
+#'   incidence of the target and competing events within observed follow-up.
+#' @param show_followup_support Show numbers at risk and cumulative event and
+#'   censoring counts with the all-event cumulative incidence table. A late
+#'   plateau does not establish cure.
 #' @param data The data as a data frame.
 #' @param elapsedtime The time-to-event or follow-up duration for each
 #'   patient. The sum is the denominator when person-time rates are requested;
@@ -1558,9 +1672,9 @@ singlearmBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   estimand: survival in a standard analysis or cumulative incidence in a
 #'   competing-risk analysis.
 #' @param risktable Display the number of subjects still at risk below
-#'   supported Kaplan-Meier plots. This is a count, not a table of probabilities
-#'   or hazards. A combined risk panel is not available for the competing-risk
-#'   CIF plot; use the cumulative-incidence table for counts at selected times.
+#'   Kaplan-Meier and cumulative-incidence plots. Counts use the common
+#'   event-free risk set just before each time point and are restricted to
+#'   observed follow-up. The all-event table also reports cumulative counts.
 #' @param censored Enable this option to display censored observations on the
 #'   survival plots. Censored observations have not experienced the modeled
 #'   event by their last observed time; this may reflect administrative
@@ -1620,6 +1734,7 @@ singlearmBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   representativeness, or adequacy for a particular clinical decision.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$cifTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$eventRecodeInfo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$errors} \tab \tab \tab \tab \tab a html \cr
@@ -1665,12 +1780,14 @@ singlearmBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 #'
-#' \code{results$medianTable$asDF}
+#' \code{results$cifTable$asDF}
 #'
-#' \code{as.data.frame(results$medianTable)}
+#' \code{as.data.frame(results$cifTable)}
 #'
 #' @export
 singlearm <- function(
+    cif_all_causes = TRUE,
+    show_followup_support = TRUE,
     data,
     elapsedtime = NULL,
     tint = FALSE,
@@ -1727,6 +1844,8 @@ singlearm <- function(
 
 
     options <- singlearmOptions$new(
+        cif_all_causes = cif_all_causes,
+        show_followup_support = show_followup_support,
         elapsedtime = elapsedtime,
         tint = tint,
         dxdate = dxdate,

@@ -6,6 +6,8 @@ intervalsurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
+            bootstrap_ci = FALSE,
+            bootstrap_seed = 2026,
             left_time = NULL,
             right_time = NULL,
             status_var = NULL,
@@ -21,8 +23,8 @@ intervalsurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             survival_curves = TRUE,
             hazard_function = FALSE,
             model_diagnostics = TRUE,
-            residual_analysis = TRUE,
-            goodness_of_fit = TRUE,
+            residual_analysis = FALSE,
+            goodness_of_fit = FALSE,
             model_comparison = FALSE,
             prediction_times = "12,24,36,60",
             bootstrap_samples = 200,
@@ -33,9 +35,18 @@ intervalsurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             super$initialize(
                 package="ClinicoPath",
                 name="intervalsurvival",
-                requiresData=FALSE,
+                requiresData=TRUE,
                 ...)
 
+            private$..bootstrap_ci <- jmvcore::OptionBool$new(
+                "bootstrap_ci",
+                bootstrap_ci,
+                default=FALSE)
+            private$..bootstrap_seed <- jmvcore::OptionInteger$new(
+                "bootstrap_seed",
+                bootstrap_seed,
+                default=2026,
+                min=1)
             private$..left_time <- jmvcore::OptionVariable$new(
                 "left_time",
                 left_time,
@@ -77,7 +88,8 @@ intervalsurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "ordinal"),
                 permitted=list(
                     "factor"),
-                default=NULL)
+                default=NULL,
+                hidden=TRUE)
             private$..model_type <- jmvcore::OptionList$new(
                 "model_type",
                 model_type,
@@ -98,7 +110,8 @@ intervalsurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "em_algorithm",
                     "newton_raphson",
                     "mcmc"),
-                default="em_algorithm")
+                default="em_algorithm",
+                hidden=TRUE)
             private$..confidence_level <- jmvcore::OptionNumber$new(
                 "confidence_level",
                 confidence_level,
@@ -110,7 +123,8 @@ intervalsurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 convergence_tolerance,
                 default=0.0001,
                 min=0.00001,
-                max=0.01)
+                max=0.01,
+                hidden=TRUE)
             private$..max_iterations <- jmvcore::OptionInteger$new(
                 "max_iterations",
                 max_iterations,
@@ -120,13 +134,15 @@ intervalsurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             private$..baseline_hazard_smooth <- jmvcore::OptionBool$new(
                 "baseline_hazard_smooth",
                 baseline_hazard_smooth,
-                default=FALSE)
+                default=FALSE,
+                hidden=TRUE)
             private$..smoothing_bandwidth <- jmvcore::OptionNumber$new(
                 "smoothing_bandwidth",
                 smoothing_bandwidth,
                 default=1,
                 min=0.1,
-                max=10)
+                max=10,
+                hidden=TRUE)
             private$..survival_curves <- jmvcore::OptionBool$new(
                 "survival_curves",
                 survival_curves,
@@ -134,7 +150,8 @@ intervalsurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             private$..hazard_function <- jmvcore::OptionBool$new(
                 "hazard_function",
                 hazard_function,
-                default=FALSE)
+                default=FALSE,
+                hidden=TRUE)
             private$..model_diagnostics <- jmvcore::OptionBool$new(
                 "model_diagnostics",
                 model_diagnostics,
@@ -142,15 +159,18 @@ intervalsurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             private$..residual_analysis <- jmvcore::OptionBool$new(
                 "residual_analysis",
                 residual_analysis,
-                default=TRUE)
+                default=FALSE,
+                hidden=TRUE)
             private$..goodness_of_fit <- jmvcore::OptionBool$new(
                 "goodness_of_fit",
                 goodness_of_fit,
-                default=TRUE)
+                default=FALSE,
+                hidden=TRUE)
             private$..model_comparison <- jmvcore::OptionBool$new(
                 "model_comparison",
                 model_comparison,
-                default=FALSE)
+                default=FALSE,
+                hidden=TRUE)
             private$..prediction_times <- jmvcore::OptionString$new(
                 "prediction_times",
                 prediction_times,
@@ -166,13 +186,15 @@ intervalsurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 mcmc_iterations,
                 default=5000,
                 min=1000,
-                max=20000)
+                max=20000,
+                hidden=TRUE)
             private$..mcmc_burnin <- jmvcore::OptionInteger$new(
                 "mcmc_burnin",
                 mcmc_burnin,
                 default=1000,
                 min=200,
-                max=5000)
+                max=5000,
+                hidden=TRUE)
             private$..imputation_method <- jmvcore::OptionList$new(
                 "imputation_method",
                 imputation_method,
@@ -181,8 +203,11 @@ intervalsurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "random",
                     "conditional_mean",
                     "multiple_imputation"),
-                default="midpoint")
+                default="midpoint",
+                hidden=TRUE)
 
+            self$.addOption(private$..bootstrap_ci)
+            self$.addOption(private$..bootstrap_seed)
             self$.addOption(private$..left_time)
             self$.addOption(private$..right_time)
             self$.addOption(private$..status_var)
@@ -208,6 +233,8 @@ intervalsurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             self$.addOption(private$..imputation_method)
         }),
     active = list(
+        bootstrap_ci = function() private$..bootstrap_ci$value,
+        bootstrap_seed = function() private$..bootstrap_seed$value,
         left_time = function() private$..left_time$value,
         right_time = function() private$..right_time$value,
         status_var = function() private$..status_var$value,
@@ -232,6 +259,8 @@ intervalsurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
         mcmc_burnin = function() private$..mcmc_burnin$value,
         imputation_method = function() private$..imputation_method$value),
     private = list(
+        ..bootstrap_ci = NA,
+        ..bootstrap_seed = NA,
         ..left_time = NA,
         ..right_time = NA,
         ..status_var = NA,
@@ -292,52 +321,312 @@ intervalsurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 options=options,
                 name="instructions",
                 title="Analysis Instructions",
-                visible=TRUE))
+                visible=TRUE,
+                clearWith=list(
+                    "bootstrap_ci",
+                    "bootstrap_seed",
+                    "left_time",
+                    "right_time",
+                    "status_var",
+                    "covariates",
+                    "stratification_vars",
+                    "model_type",
+                    "estimation_method",
+                    "confidence_level",
+                    "convergence_tolerance",
+                    "max_iterations",
+                    "baseline_hazard_smooth",
+                    "smoothing_bandwidth",
+                    "survival_curves",
+                    "hazard_function",
+                    "model_diagnostics",
+                    "residual_analysis",
+                    "goodness_of_fit",
+                    "model_comparison",
+                    "prediction_times",
+                    "bootstrap_samples",
+                    "mcmc_iterations",
+                    "mcmc_burnin",
+                    "imputation_method")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="data_summary",
                 title="Interval-Censored Data Summary",
-                visible=TRUE))
+                visible=TRUE,
+                clearWith=list(
+                    "bootstrap_ci",
+                    "bootstrap_seed",
+                    "left_time",
+                    "right_time",
+                    "status_var",
+                    "covariates",
+                    "stratification_vars",
+                    "model_type",
+                    "estimation_method",
+                    "confidence_level",
+                    "convergence_tolerance",
+                    "max_iterations",
+                    "baseline_hazard_smooth",
+                    "smoothing_bandwidth",
+                    "survival_curves",
+                    "hazard_function",
+                    "model_diagnostics",
+                    "residual_analysis",
+                    "goodness_of_fit",
+                    "model_comparison",
+                    "prediction_times",
+                    "bootstrap_samples",
+                    "mcmc_iterations",
+                    "mcmc_burnin",
+                    "imputation_method")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="model_results",
                 title="Model Estimation Results",
-                visible=TRUE))
+                visible=TRUE,
+                clearWith=list(
+                    "bootstrap_ci",
+                    "bootstrap_seed",
+                    "left_time",
+                    "right_time",
+                    "status_var",
+                    "covariates",
+                    "stratification_vars",
+                    "model_type",
+                    "estimation_method",
+                    "confidence_level",
+                    "convergence_tolerance",
+                    "max_iterations",
+                    "baseline_hazard_smooth",
+                    "smoothing_bandwidth",
+                    "survival_curves",
+                    "hazard_function",
+                    "model_diagnostics",
+                    "residual_analysis",
+                    "goodness_of_fit",
+                    "model_comparison",
+                    "prediction_times",
+                    "bootstrap_samples",
+                    "mcmc_iterations",
+                    "mcmc_burnin",
+                    "imputation_method")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="covariate_effects",
                 title="Covariate Effects",
-                visible=TRUE))
+                visible=TRUE,
+                clearWith=list(
+                    "bootstrap_ci",
+                    "bootstrap_seed",
+                    "left_time",
+                    "right_time",
+                    "status_var",
+                    "covariates",
+                    "stratification_vars",
+                    "model_type",
+                    "estimation_method",
+                    "confidence_level",
+                    "convergence_tolerance",
+                    "max_iterations",
+                    "baseline_hazard_smooth",
+                    "smoothing_bandwidth",
+                    "survival_curves",
+                    "hazard_function",
+                    "model_diagnostics",
+                    "residual_analysis",
+                    "goodness_of_fit",
+                    "model_comparison",
+                    "prediction_times",
+                    "bootstrap_samples",
+                    "mcmc_iterations",
+                    "mcmc_burnin",
+                    "imputation_method")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="survival_estimates",
                 title="Survival Function Estimates",
-                visible=TRUE))
+                visible=TRUE,
+                clearWith=list(
+                    "bootstrap_ci",
+                    "bootstrap_seed",
+                    "left_time",
+                    "right_time",
+                    "status_var",
+                    "covariates",
+                    "stratification_vars",
+                    "model_type",
+                    "estimation_method",
+                    "confidence_level",
+                    "convergence_tolerance",
+                    "max_iterations",
+                    "baseline_hazard_smooth",
+                    "smoothing_bandwidth",
+                    "survival_curves",
+                    "hazard_function",
+                    "model_diagnostics",
+                    "residual_analysis",
+                    "goodness_of_fit",
+                    "model_comparison",
+                    "prediction_times",
+                    "bootstrap_samples",
+                    "mcmc_iterations",
+                    "mcmc_burnin",
+                    "imputation_method")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="hazard_estimates",
                 title="Hazard Function Estimates",
-                visible="(hazard_function)"))
+                visible="(hazard_function)",
+                clearWith=list(
+                    "bootstrap_ci",
+                    "bootstrap_seed",
+                    "left_time",
+                    "right_time",
+                    "status_var",
+                    "covariates",
+                    "stratification_vars",
+                    "model_type",
+                    "estimation_method",
+                    "confidence_level",
+                    "convergence_tolerance",
+                    "max_iterations",
+                    "baseline_hazard_smooth",
+                    "smoothing_bandwidth",
+                    "survival_curves",
+                    "hazard_function",
+                    "model_diagnostics",
+                    "residual_analysis",
+                    "goodness_of_fit",
+                    "model_comparison",
+                    "prediction_times",
+                    "bootstrap_samples",
+                    "mcmc_iterations",
+                    "mcmc_burnin",
+                    "imputation_method")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="model_diagnostics_summary",
                 title="Model Diagnostics",
-                visible="(model_diagnostics)"))
+                visible="(model_diagnostics)",
+                clearWith=list(
+                    "bootstrap_ci",
+                    "bootstrap_seed",
+                    "left_time",
+                    "right_time",
+                    "status_var",
+                    "covariates",
+                    "stratification_vars",
+                    "model_type",
+                    "estimation_method",
+                    "confidence_level",
+                    "convergence_tolerance",
+                    "max_iterations",
+                    "baseline_hazard_smooth",
+                    "smoothing_bandwidth",
+                    "survival_curves",
+                    "hazard_function",
+                    "model_diagnostics",
+                    "residual_analysis",
+                    "goodness_of_fit",
+                    "model_comparison",
+                    "prediction_times",
+                    "bootstrap_samples",
+                    "mcmc_iterations",
+                    "mcmc_burnin",
+                    "imputation_method")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="goodness_of_fit_results",
                 title="Goodness of Fit Tests",
-                visible="(goodness_of_fit)"))
+                visible="(goodness_of_fit)",
+                clearWith=list(
+                    "bootstrap_ci",
+                    "bootstrap_seed",
+                    "left_time",
+                    "right_time",
+                    "status_var",
+                    "covariates",
+                    "stratification_vars",
+                    "model_type",
+                    "estimation_method",
+                    "confidence_level",
+                    "convergence_tolerance",
+                    "max_iterations",
+                    "baseline_hazard_smooth",
+                    "smoothing_bandwidth",
+                    "survival_curves",
+                    "hazard_function",
+                    "model_diagnostics",
+                    "residual_analysis",
+                    "goodness_of_fit",
+                    "model_comparison",
+                    "prediction_times",
+                    "bootstrap_samples",
+                    "mcmc_iterations",
+                    "mcmc_burnin",
+                    "imputation_method")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="model_comparison_table",
                 title="Model Comparison",
-                visible="(model_comparison)"))
+                visible="(model_comparison)",
+                clearWith=list(
+                    "bootstrap_ci",
+                    "bootstrap_seed",
+                    "left_time",
+                    "right_time",
+                    "status_var",
+                    "covariates",
+                    "stratification_vars",
+                    "model_type",
+                    "estimation_method",
+                    "confidence_level",
+                    "convergence_tolerance",
+                    "max_iterations",
+                    "baseline_hazard_smooth",
+                    "smoothing_bandwidth",
+                    "survival_curves",
+                    "hazard_function",
+                    "model_diagnostics",
+                    "residual_analysis",
+                    "goodness_of_fit",
+                    "model_comparison",
+                    "prediction_times",
+                    "bootstrap_samples",
+                    "mcmc_iterations",
+                    "mcmc_burnin",
+                    "imputation_method")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="residual_summary",
                 title="Residual Analysis",
-                visible="(residual_analysis)"))
+                visible="(residual_analysis)",
+                clearWith=list(
+                    "bootstrap_ci",
+                    "bootstrap_seed",
+                    "left_time",
+                    "right_time",
+                    "status_var",
+                    "covariates",
+                    "stratification_vars",
+                    "model_type",
+                    "estimation_method",
+                    "confidence_level",
+                    "convergence_tolerance",
+                    "max_iterations",
+                    "baseline_hazard_smooth",
+                    "smoothing_bandwidth",
+                    "survival_curves",
+                    "hazard_function",
+                    "model_diagnostics",
+                    "residual_analysis",
+                    "goodness_of_fit",
+                    "model_comparison",
+                    "prediction_times",
+                    "bootstrap_samples",
+                    "mcmc_iterations",
+                    "mcmc_burnin",
+                    "imputation_method")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="survival_curves_plot",
@@ -347,10 +636,32 @@ intervalsurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 renderFun=".plot_survival_curves",
                 visible="(survival_curves)",
                 clearWith=list(
+                    "bootstrap_ci",
+                    "bootstrap_seed",
                     "left_time",
                     "right_time",
+                    "status_var",
+                    "covariates",
+                    "stratification_vars",
                     "model_type",
-                    "covariates")))
+                    "estimation_method",
+                    "confidence_level",
+                    "convergence_tolerance",
+                    "max_iterations",
+                    "baseline_hazard_smooth",
+                    "smoothing_bandwidth",
+                    "survival_curves",
+                    "hazard_function",
+                    "model_diagnostics",
+                    "residual_analysis",
+                    "goodness_of_fit",
+                    "model_comparison",
+                    "prediction_times",
+                    "bootstrap_samples",
+                    "mcmc_iterations",
+                    "mcmc_burnin",
+                    "imputation_method"),
+                requiresData=FALSE))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="hazard_plot",
@@ -358,12 +669,34 @@ intervalsurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 width=800,
                 height=600,
                 renderFun=".plot_hazard_function",
-                visible="(hazard_function)",
+                visible=FALSE,
                 clearWith=list(
+                    "bootstrap_ci",
+                    "bootstrap_seed",
                     "left_time",
                     "right_time",
+                    "status_var",
+                    "covariates",
+                    "stratification_vars",
                     "model_type",
-                    "baseline_hazard_smooth")))
+                    "estimation_method",
+                    "confidence_level",
+                    "convergence_tolerance",
+                    "max_iterations",
+                    "baseline_hazard_smooth",
+                    "smoothing_bandwidth",
+                    "survival_curves",
+                    "hazard_function",
+                    "model_diagnostics",
+                    "residual_analysis",
+                    "goodness_of_fit",
+                    "model_comparison",
+                    "prediction_times",
+                    "bootstrap_samples",
+                    "mcmc_iterations",
+                    "mcmc_burnin",
+                    "imputation_method"),
+                requiresData=FALSE))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="interval_plot",
@@ -373,9 +706,32 @@ intervalsurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 renderFun=".plot_intervals",
                 visible=TRUE,
                 clearWith=list(
+                    "bootstrap_ci",
+                    "bootstrap_seed",
                     "left_time",
                     "right_time",
-                    "status_var")))
+                    "status_var",
+                    "covariates",
+                    "stratification_vars",
+                    "model_type",
+                    "estimation_method",
+                    "confidence_level",
+                    "convergence_tolerance",
+                    "max_iterations",
+                    "baseline_hazard_smooth",
+                    "smoothing_bandwidth",
+                    "survival_curves",
+                    "hazard_function",
+                    "model_diagnostics",
+                    "residual_analysis",
+                    "goodness_of_fit",
+                    "model_comparison",
+                    "prediction_times",
+                    "bootstrap_samples",
+                    "mcmc_iterations",
+                    "mcmc_burnin",
+                    "imputation_method"),
+                requiresData=FALSE))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="residual_plots",
@@ -383,11 +739,34 @@ intervalsurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 width=800,
                 height=600,
                 renderFun=".plot_residuals",
-                visible="(residual_analysis)",
+                visible=FALSE,
                 clearWith=list(
-                    "model_type",
+                    "bootstrap_ci",
+                    "bootstrap_seed",
+                    "left_time",
+                    "right_time",
+                    "status_var",
                     "covariates",
-                    "estimation_method")))
+                    "stratification_vars",
+                    "model_type",
+                    "estimation_method",
+                    "confidence_level",
+                    "convergence_tolerance",
+                    "max_iterations",
+                    "baseline_hazard_smooth",
+                    "smoothing_bandwidth",
+                    "survival_curves",
+                    "hazard_function",
+                    "model_diagnostics",
+                    "residual_analysis",
+                    "goodness_of_fit",
+                    "model_comparison",
+                    "prediction_times",
+                    "bootstrap_samples",
+                    "mcmc_iterations",
+                    "mcmc_burnin",
+                    "imputation_method"),
+                requiresData=FALSE))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="model_comparison_plot",
@@ -395,11 +774,34 @@ intervalsurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 width=800,
                 height=600,
                 renderFun=".plot_model_comparison",
-                visible="(model_comparison)",
+                visible=FALSE,
                 clearWith=list(
+                    "bootstrap_ci",
+                    "bootstrap_seed",
                     "left_time",
                     "right_time",
-                    "covariates")))
+                    "status_var",
+                    "covariates",
+                    "stratification_vars",
+                    "model_type",
+                    "estimation_method",
+                    "confidence_level",
+                    "convergence_tolerance",
+                    "max_iterations",
+                    "baseline_hazard_smooth",
+                    "smoothing_bandwidth",
+                    "survival_curves",
+                    "hazard_function",
+                    "model_diagnostics",
+                    "residual_analysis",
+                    "goodness_of_fit",
+                    "model_comparison",
+                    "prediction_times",
+                    "bootstrap_samples",
+                    "mcmc_iterations",
+                    "mcmc_burnin",
+                    "imputation_method"),
+                requiresData=FALSE))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="convergence_plot",
@@ -407,11 +809,34 @@ intervalsurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 width=800,
                 height=600,
                 renderFun=".plot_convergence",
-                visible="(estimation_method == 'mcmc')",
+                visible=FALSE,
                 clearWith=list(
+                    "bootstrap_ci",
+                    "bootstrap_seed",
+                    "left_time",
+                    "right_time",
+                    "status_var",
+                    "covariates",
+                    "stratification_vars",
+                    "model_type",
+                    "estimation_method",
+                    "confidence_level",
+                    "convergence_tolerance",
+                    "max_iterations",
+                    "baseline_hazard_smooth",
+                    "smoothing_bandwidth",
+                    "survival_curves",
+                    "hazard_function",
+                    "model_diagnostics",
+                    "residual_analysis",
+                    "goodness_of_fit",
+                    "model_comparison",
+                    "prediction_times",
+                    "bootstrap_samples",
                     "mcmc_iterations",
                     "mcmc_burnin",
-                    "convergence_tolerance")))}))
+                    "imputation_method"),
+                requiresData=FALSE))}))
 
 intervalsurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "intervalsurvivalBase",
@@ -431,15 +856,19 @@ intervalsurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 pause = NULL,
                 completeWhenFilled = FALSE,
                 requiresMissings = FALSE,
-                weightsSupport = 'na')
+                weightsSupport = 'auto')
         }))
 
 #' Interval-Censored Survival Analysis
 #'
-#' Interval-censored survival analysis for data where the exact event time 
-#' is unknown but falls within an interval. Common in periodic follow-up 
-#' studies, screening programs, and clinical trials with scheduled visits.
-#' 
+#' Single-event interval-censored survival analysis using genuine Turnbull, 
+#' proportional-hazards, or parametric accelerated-failure-time likelihoods. 
+#' Exact, left, right, and interval censoring retain their observation 
+#' semantics. Optional bootstrap intervals describe fitted prediction 
+#' uncertainty; joint competing-risk interval censoring is not implemented.
+#' @param data The data as a data frame.
+#' @param bootstrap_ci .
+#' @param bootstrap_seed .
 #' @param left_time Left boundary of the censoring interval
 #' @param right_time Right boundary of the censoring interval
 #' @param status_var Censoring status indicator variable
@@ -486,6 +915,9 @@ intervalsurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #'
 #' @export
 intervalsurvival <- function(
+    data,
+    bootstrap_ci = FALSE,
+    bootstrap_seed = 2026,
     left_time,
     right_time,
     status_var = NULL,
@@ -501,8 +933,8 @@ intervalsurvival <- function(
     survival_curves = TRUE,
     hazard_function = FALSE,
     model_diagnostics = TRUE,
-    residual_analysis = TRUE,
-    goodness_of_fit = TRUE,
+    residual_analysis = FALSE,
+    goodness_of_fit = FALSE,
     model_comparison = FALSE,
     prediction_times = "12,24,36,60",
     bootstrap_samples = 200,
@@ -518,8 +950,20 @@ intervalsurvival <- function(
     if ( ! missing(status_var)) status_var <- jmvcore::resolveQuo(jmvcore::enquo(status_var))
     if ( ! missing(covariates)) covariates <- jmvcore::resolveQuo(jmvcore::enquo(covariates))
     if ( ! missing(stratification_vars)) stratification_vars <- jmvcore::resolveQuo(jmvcore::enquo(stratification_vars))
+    if (missing(data))
+        data <- jmvcore::marshalData(
+            parent.frame(),
+            `if`( ! missing(left_time), left_time, NULL),
+            `if`( ! missing(right_time), right_time, NULL),
+            `if`( ! missing(status_var), status_var, NULL),
+            `if`( ! missing(covariates), covariates, NULL),
+            `if`( ! missing(stratification_vars), stratification_vars, NULL))
+
+    for (v in stratification_vars) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- intervalsurvivalOptions$new(
+        bootstrap_ci = bootstrap_ci,
+        bootstrap_seed = bootstrap_seed,
         left_time = left_time,
         right_time = right_time,
         status_var = status_var,

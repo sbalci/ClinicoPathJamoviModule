@@ -25,7 +25,7 @@ flexparametric(
   show_survival_plot = TRUE,
   show_hazard_plot = FALSE,
   show_spline_plot = FALSE,
-  show_diagnostics = TRUE,
+  show_diagnostics = FALSE,
   show_clinical_summary = TRUE,
   show_density_plot = FALSE,
   plot_time_max = 0,
@@ -123,16 +123,10 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$parametersTable)}
 }
 \description{
-ENHANCED: Comprehensive flexible parametric survival modeling combining
-traditional parametric distributions (Generalized Gamma, Weibull, etc.)
-with advanced spline-based approaches (Royston-Parmar, B-splines). Provides
-maximum flexibility for modeling complex hazard shapes, time-varying
-effects, and non-proportional hazards.
-CLINICAL USE: Model survival data when standard Cox models are inadequate.
-Ideal for cancer research, health economics, and comparative effectiveness
-studies.
-KEY FEATURES: • Traditional parametric and spline-based models in one
-function • Automatic model comparison and selection • Clinical
-interpretation of parameters • Comprehensive diagnostic plots • Copy-ready
-report templates
+Fits traditional parametric distributions or Royston-Parmar splines on
+hazard, odds, or probit scales. Spline interactions support time-varying
+effects. Reports native parameter estimates, same-cohort likelihood
+comparisons, and computed survival, hazard, and density predictions with
+fitted-parameter uncertainty. Extrapolation and model-scale interpretation
+are explicit; diagnostic plots are not implemented.
 }

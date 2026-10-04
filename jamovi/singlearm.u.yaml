@@ -4,6 +4,16 @@ jus: '3.0'
 stage: 0
 compilerMode: tame
 children:
+  - type: CollapseBox
+    label: Observed-time competing risks
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: cif_all_causes
+        enable: (multievent && analysistype:compete)
+      - type: CheckBox
+        name: show_followup_support
+        enable: (multievent && analysistype:compete && cif_all_causes)
   - type: VariableSupplier
     persistentItems: false
     stretchFactor: 1

@@ -1,0 +1,16 @@
+"modality","metric","numerator","denominator","percent","independent_binomial_lower","independent_binomial_upper","published_lower","published_upper","ci_matches_to_1_decimal"
+"microscopy","PPA_all_reference_positive",108,180,60,52.449208028243,67.2157524909658,52.4,67.2,TRUE
+"microscopy","NPA_all_reference_negative",67,105,63.8095238095238,53.8548554529505,72.9635078942149,53.9,73,TRUE
+"microscopy","reference_positive_given_positive_call",108,121,89.2561983471074,82.3286235994081,94.1539878936783,82.3,94.2,TRUE
+"microscopy","reference_negative_given_negative_call",67,130,51.5384615384615,42.6150049039913,60.3902662044455,42.6,60.4,TRUE
+"microscopy","overall_binary_agreement_all_eligible",175,285,61.4035087719298,55.4812791121877,67.0859823233574,55.5,67.1,TRUE
+"single_layer","PPA_all_reference_positive",141,180,78.3333333333333,71.5929880028621,84.1161387914794,71.6,84.1,TRUE
+"single_layer","NPA_all_reference_negative",61,105,58.0952380952381,48.0666362381574,67.6551993513913,48.1,67.7,TRUE
+"single_layer","reference_positive_given_positive_call",141,170,82.9411764705882,76.4283386307705,88.2678074641667,76.4,88.3,TRUE
+"single_layer","reference_negative_given_negative_call",61,96,63.5416666666667,53.0936203292886,73.1298205888562,53.1,73.1,TRUE
+"single_layer","overall_binary_agreement_all_eligible",202,285,70.8771929824561,65.2286157750081,76.0856438826664,65.2,76.1,TRUE
+"seven_layer","PPA_all_reference_positive",143,180,79.4444444444444,72.7979332133262,85.0948224904849,72.8,85.1,TRUE
+"seven_layer","NPA_all_reference_negative",60,105,57.1428571428571,47.1144350964607,66.7578439631177,47.1,66.8,TRUE
+"seven_layer","reference_positive_given_positive_call",143,175,81.7142857142857,75.1780402255224,87.1435751612303,75.2,87.1,TRUE
+"seven_layer","reference_negative_given_negative_call",60,92,65.2173913043478,54.5736871282449,74.8514473864737,54.6,74.9,TRUE
+"seven_layer","overall_binary_agreement_all_eligible",203,285,71.2280701754386,65.5944975199568,76.4140544412664,65.6,76.4,TRUE

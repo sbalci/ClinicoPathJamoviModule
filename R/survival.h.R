@@ -6,6 +6,8 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
+            cif_all_causes = TRUE,
+            show_followup_support = TRUE,
             elapsedtime = NULL,
             tint = FALSE,
             dxdate = NULL,
@@ -87,6 +89,14 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresData=TRUE,
                 ...)
 
+            private$..cif_all_causes <- jmvcore::OptionBool$new(
+                "cif_all_causes",
+                cif_all_causes,
+                default=TRUE)
+            private$..show_followup_support <- jmvcore::OptionBool$new(
+                "show_followup_support",
+                show_followup_support,
+                default=TRUE)
             private$..elapsedtime <- jmvcore::OptionVariable$new(
                 "elapsedtime",
                 elapsedtime,
@@ -496,6 +506,8 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 seed,
                 default=42)
 
+            self$.addOption(private$..cif_all_causes)
+            self$.addOption(private$..show_followup_support)
             self$.addOption(private$..elapsedtime)
             self$.addOption(private$..tint)
             self$.addOption(private$..dxdate)
@@ -575,6 +587,8 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..seed)
         }),
     active = list(
+        cif_all_causes = function() private$..cif_all_causes$value,
+        show_followup_support = function() private$..show_followup_support$value,
         elapsedtime = function() private$..elapsedtime$value,
         tint = function() private$..tint$value,
         dxdate = function() private$..dxdate$value,
@@ -653,6 +667,8 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         bootstrapValN = function() private$..bootstrapValN$value,
         seed = function() private$..seed$value),
     private = list(
+        ..cif_all_causes = NA,
+        ..show_followup_support = NA,
         ..elapsedtime = NA,
         ..tint = NA,
         ..dxdate = NA,
@@ -736,6 +752,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "survivalResults",
     inherit = jmvcore::Group,
     active = list(
+        cifTable = function() private$.items[["cifTable"]],
         eventRecodeInfo = function() private$.items[["eventRecodeInfo"]],
         subtitle = function() private$.items[["subtitle"]],
         todo = function() private$.items[["todo"]],
@@ -839,6 +856,136 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "patchwork",
                     "splines",
                     "tools"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="cifTable",
+                title="Observed-time cumulative incidence and follow-up support",
+                rows=0,
+                visible="(cif_all_causes && multievent && analysistype:compete)",
+                clearWith=list(
+                    "cif_all_causes",
+                    "show_followup_support",
+                    "elapsedtime",
+                    "tint",
+                    "dxdate",
+                    "fudate",
+                    "calculatedtime",
+                    "explanatory",
+                    "outcome",
+                    "outcomeLevel",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "analysistype",
+                    "outcomeredefined",
+                    "cutp",
+                    "timetypedata",
+                    "timetypeoutput",
+                    "uselandmark",
+                    "landmark",
+                    "pw",
+                    "padjustmethod",
+                    "weightedLogRank",
+                    "survivalTestType",
+                    "ph_cox",
+                    "sc",
+                    "kmunicate",
+                    "ce",
+                    "ch",
+                    "endplot",
+                    "ybegin_plot",
+                    "yend_plot",
+                    "byplot",
+                    "multievent",
+                    "ci95",
+                    "risktable",
+                    "censored",
+                    "pplot",
+                    "medianline",
+                    "person_time",
+                    "time_intervals",
+                    "rate_multiplier",
+                    "rmst_analysis",
+                    "rmst_tau",
+                    "stratified_cox",
+                    "strata_variable",
+                    "age_adjustment",
+                    "age_variable",
+                    "age_interaction",
+                    "age_stratified_cox",
+                    "age_group_cutpoints",
+                    "age_time_scale",
+                    "age_standardization",
+                    "age_standardization_method",
+                    "age_stratified_km",
+                    "adjusted_curves",
+                    "remark_checklist",
+                    "residual_diagnostics",
+                    "export_survival_data",
+                    "loglog",
+                    "showExplanations",
+                    "showSummaries",
+                    "use_parametric",
+                    "parametric_distribution",
+                    "parametric_covariates",
+                    "spline_knots",
+                    "spline_scale",
+                    "compare_distributions",
+                    "parametric_survival_plots",
+                    "calibration_curves",
+                    "calibration_timepoint",
+                    "calibration_ngroups",
+                    "rcs_analysis",
+                    "rcs_variable",
+                    "rcs_knots",
+                    "bootstrapValidation",
+                    "bootstrapValN",
+                    "seed"),
+                columns=list(
+                    list(
+                        `name`="group", 
+                        `title`="Group", 
+                        `type`="text"),
+                    list(
+                        `name`="time", 
+                        `title`="Time", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="cause", 
+                        `title`="State / event", 
+                        `type`="text"),
+                    list(
+                        `name`="estimate", 
+                        `title`="Probability", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="lower", 
+                        `title`="Lower 95% CI", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="upper", 
+                        `title`="Upper 95% CI", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="n_risk", 
+                        `title`="At risk", 
+                        `type`="integer", 
+                        `visible`="(show_followup_support)"),
+                    list(
+                        `name`="n_events", 
+                        `title`="Cumulative events", 
+                        `type`="integer", 
+                        `visible`="(show_followup_support)"),
+                    list(
+                        `name`="n_censored", 
+                        `title`="Cumulative censoring", 
+                        `type`="integer", 
+                        `visible`="(show_followup_support)"))))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="eventRecodeInfo",
@@ -2780,6 +2927,11 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' regression. Optional outputs include restricted mean survival time and 
 #' crude person-time incidence rates. These methods describe associations and 
 #' do not establish causality.
+#' @param cif_all_causes Report the event-free probability and cumulative
+#'   incidence of the target and competing events within observed follow-up.
+#' @param show_followup_support Show numbers at risk and cumulative event and
+#'   censoring counts with the all-event cumulative incidence table. A late
+#'   plateau does not establish cure.
 #' @param data The data as a data frame.
 #' @param elapsedtime The time elapsed from the start of the study to the
 #'   event or censoring.
@@ -2978,6 +3130,7 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   reproduces the previous fixed behaviour.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$cifTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$eventRecodeInfo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$subtitle} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -3062,12 +3215,14 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 #'
-#' \code{results$medianTable$asDF}
+#' \code{results$cifTable$asDF}
 #'
-#' \code{as.data.frame(results$medianTable)}
+#' \code{as.data.frame(results$cifTable)}
 #'
 #' @export
 survival <- function(
+    cif_all_causes = TRUE,
+    show_followup_support = TRUE,
     data,
     elapsedtime = NULL,
     tint = FALSE,
@@ -3171,6 +3326,8 @@ survival <- function(
     for (v in strata_variable) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- survivalOptions$new(
+        cif_all_causes = cif_all_causes,
+        show_followup_support = show_followup_support,
         elapsedtime = elapsedtime,
         tint = tint,
         dxdate = dxdate,

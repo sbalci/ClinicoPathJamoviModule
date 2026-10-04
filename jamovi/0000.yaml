@@ -1037,7 +1037,7 @@ analyses:
   - title: Single Arm Survival
     name: singlearm
     ns: ClinicoPath
-    menuGroup: Survival
+    menuGroup: SurvivalT
     menuSubgroup: ClinicoPath Survival
     menuTitle: Single Arm Survival
     menuSubtitle: Survival for whole group, no explanatory factor
@@ -1053,7 +1053,7 @@ analyses:
   - title: Survival Analysis
     name: survival
     ns: ClinicoPath
-    menuGroup: Survival
+    menuGroup: SurvivalT
     menuSubgroup: ClinicoPath Survival
     menuTitle: Survival Analysis
     menuSubtitle: Univariate Survival Analysis, Cox, Kaplan-Meier, 1,3,5-yr
@@ -2372,16 +2372,17 @@ analyses:
     name: curemodels
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathD
+    menuGroup: OncoPathDT
     menuSubgroup: Survival Analysis
     menuTitle: Cure Models for Long-term Survivors
     menuSubtitle: Mixture and Non-mixture Cure Models
-    description: >
-      Cure models for analyzing survival data with a cured fraction of long-term
-      survivors.
-
-      Implements mixture cure models and non-mixture cure models for oncology
-      research.
+    description: >-
+      Model-based cure probabilities with explicit endpoint and event coding,
+      observed-time cumulative incidence, follow-up support, and
+      administrative-censoring sensitivity refits. Recurrence cure with
+      competing death is not estimated by censoring the competing event.
+      Statistical cure with background mortality requires externally matched
+      hazards.
   - title: Multistate Survival Models
     name: multistatesurvival
     ns: ClinicoPath
@@ -2784,13 +2785,15 @@ analyses:
     name: intervalsurvival
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPathD
+    menuGroup: ClinicoPathDT
     menuSubgroup: Survival Analysis
     menuTitle: Interval-Censored Survival Analysis
-    description: |
-      Interval-censored survival analysis for data where the exact event time 
-      is unknown but falls within an interval. Common in periodic follow-up 
-      studies, screening programs, and clinical trials with scheduled visits.
+    description: >-
+      Single-event interval-censored survival analysis using genuine Turnbull,
+      proportional-hazards, or parametric accelerated-failure-time likelihoods.
+      Exact, left, right, and interval censoring retain their observation
+      semantics. Optional bootstrap intervals describe fitted prediction
+      uncertainty; joint competing-risk interval censoring is not implemented.
   - title: Recurrent Event Survival Analysis
     name: recurrentsurvival
     ns: ClinicoPath
@@ -2950,24 +2953,16 @@ analyses:
     name: flexparametric
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalD
+    menuGroup: SurvivalDT
     menuSubgroup: Survival Analysis
     menuTitle: Flexible Parametric Survival Models (Enhanced)
     description: >-
-      ENHANCED: Comprehensive flexible parametric survival modeling combining
-      traditional parametric distributions (Generalized Gamma, Weibull, etc.)
-      with advanced spline-based approaches (Royston-Parmar, B-splines).
-      Provides maximum flexibility for modeling complex hazard shapes,
-      time-varying effects, and non-proportional hazards.
-
-      CLINICAL USE: Model survival data when standard Cox models are inadequate.
-      Ideal for cancer research, health economics, and comparative effectiveness
-      studies.
-
-      KEY FEATURES: • Traditional parametric and spline-based models in one
-      function • Automatic model comparison and selection • Clinical
-      interpretation of parameters • Comprehensive diagnostic plots • Copy-ready
-      report templates
+      Fits traditional parametric distributions or Royston-Parmar splines on
+      hazard, odds, or probit scales. Spline interactions support time-varying
+      effects. Reports native parameter estimates, same-cohort likelihood
+      comparisons, and computed survival, hazard, and density predictions with
+      fitted-parameter uncertainty. Extrapolation and model-scale interpretation
+      are explicit; diagnostic plots are not implemented.
   - title: Spline-based Hazard Functions
     name: splinehazard
     ns: ClinicoPath
@@ -3025,29 +3020,17 @@ analyses:
     name: flexrstpm2
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalD
+    menuGroup: SurvivalDT
     menuSubgroup: ClinicoPath Survival
     menuTitle: Comprehensive Flexible Parametric Survival Models
     menuSubtitle: Advanced flexible parametric models with clinical analysis
     description: >-
-      FLEXIBLE PARAMETRIC SURVIVAL MODELS (Royston-Parmar)
-
-      CLINICAL USE: Model survival data with smooth, flexible hazard functions
-      that can capture complex patterns (increasing, decreasing, or
-      bathtub-shaped hazards). Better than Cox models when you need to
-      extrapolate beyond observed data or estimate absolute risks.
-
-      WHEN TO USE: • Cancer survival with complex hazard patterns • Health
-      economic evaluations requiring extrapolation • Time-varying treatment
-      effects • Relative survival analysis with population mortality
-
-      REQUIREMENTS: • Minimum 30 events (preferably >=50) • Follow-up covering
-      the period of interest • For df>4: need >=100 events to avoid overfitting
-
-      KEY OUTPUTS: • Hazard ratios with clinical interpretation • Survival
-      predictions at specific time points • Model fit statistics (AIC,
-      concordance) • Time-varying effect plots • Copy-ready clinical report
-      sentences
+      Royston-Parmar PH, PO, or probit models fitted with rstpm2, including
+      spline time-varying effects and externally matched background hazards for
+      relative survival. Reports computed reference-profile predictions, model
+      likelihood statistics, and optional bootstrap prediction uncertainty.
+      Extrapolation does not establish cure; expected population survival
+      requires additional background-hazard integration.
   - title: Smoothly Time-Varying Effects
     name: smoothtimevary
     ns: ClinicoPath
@@ -3608,24 +3591,17 @@ analyses:
     name: illnessdeath
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalD
+    menuGroup: SurvivalDT
     menuSubgroup: Multi-State Analysis
     menuTitle: Illness-Death Multi-State Models
     menuSubtitle: Three-state models for disease progression with recovery and mortality
-    description: >
-      Illness-death multi-state models for analyzing disease progression through
-      three states: healthy (state 0), ill (state 1), and death (state 2). This
-      framework models transitions between states with separate hazard
-      functions, enabling analysis of disease onset, recovery rates, and
-      differential mortality risks. The implementation supports both
-      non-parametric and parametric approaches, competing risks formulation,
-      reversible and irreversible illness states, time-dependent covariates, and
-      comprehensive transition probability estimation. Particularly valuable for
-      chronic disease studies, cancer progression analysis, hospital readmission
-      studies, and any scenario involving intermediate health states with
-      potential recovery. The model provides state occupancy probabilities, mean
-      sojourn times, and transition-specific hazard ratios with clinical
-      interpretation frameworks for evidence-based medicine.
+    description: >-
+      Exact-time, clock-forward multistate analysis from complete subject
+      histories. Fits separate cause-specific Cox transition models and reports
+      unadjusted Aalen-Johansen occupation probabilities with observed-time
+      support. Restricted mean time in state can use whole-subject bootstrap
+      uncertainty. Parametric shared-baseline, frailty, interval-censored, and
+      clock-reset models are not implemented here.
   - title: Net Reclassification Improvement (NRI)
     name: netreclassification
     ns: ClinicoPath
@@ -3687,16 +3663,17 @@ analyses:
     name: flexmultistate
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalD
+    menuGroup: SurvivalDT
     menuSubgroup: Multi-State Models
     menuTitle: Flexible Multi-State Survival Models
     menuSubtitle: Flexible Parametric Multi-State Modeling
-    description: >
-      Flexible parametric multi-state survival models for complex disease
-      progression.
-
-      Models transition hazards using splines and handles competing risks and
-      intermediate states.
+    description: >-
+      Clock-forward Markov multistate models with separately fitted spline or
+      parametric transition hazards. Requires subject ID and complete entry/exit
+      state histories. Reports integrated transition probabilities,
+      reference-profile state occupation, and restricted time in state.
+      Predictions beyond follow-up depend on the parametric extrapolation
+      assumptions.
   - title: Continuous-Time Markov Models
     name: continuousmarkov
     ns: ClinicoPath

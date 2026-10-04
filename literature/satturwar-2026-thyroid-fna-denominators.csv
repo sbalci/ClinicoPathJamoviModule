@@ -1,0 +1,4 @@
+"modality","eligible_reads","positive_positive","positive_negative","negative_positive","negative_negative","nondiagnostic_positive","nondiagnostic_negative","determinate_reads","nondiagnostic_all_reads","determinate_coverage_percent","ppa_determinate_only","npa_determinate_only","exact_multicategory_agreement"
+"microscopy",285,108,13,63,67,9,25,251,48,88.0701754385965,63.1578947368421,83.75,44.3333333333333
+"single_layer",285,141,29,35,61,4,15,266,30,93.3333333333333,80.1136363636364,67.7777777777778,51.6666666666667
+"seven_layer",285,143,32,32,60,5,13,267,28,93.6842105263158,81.7142857142857,65.2173913043478,51

@@ -4,20 +4,13 @@
 \alias{intervalsurvivalClass}
 \title{Interval-Censored Survival Analysis}
 \value{
-An \code{R6} class generator object for the \code{intervalsurvivalClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+An R6 class generator for interval-censored survival analysis.
 }
 \description{
 Interval-Censored Survival Analysis
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{intervalsurvivalBase} -> \code{intervalsurvivalClass}
-}
-\section{Active bindings}{
-  \if{html}{\out{<div class="r6-active-bindings">}}
-  \describe{
-    \item{\code{.current_model}}{Active binding for storing the current model object}
-  }
-  \if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
