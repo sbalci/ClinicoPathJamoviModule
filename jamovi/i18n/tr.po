@@ -51,6 +51,14 @@ msgid ""
 "statistics and visualizations."
 msgstr ""
 
+#: R/nogoldstandard.b.R
+msgid ""
+"%.0f%% confidence intervals are not reported for latent-model response "
+"probabilities and predictive values without bootstrap refitting. Ordinary "
+"binomial intervals omit uncertainty from estimating the latent classes and "
+"can be substantially too narrow. Enable Bootstrap CI to obtain intervals."
+msgstr "Örtük model yanıt olasılıkları ve öngörü değerleri için bootstrap yeniden uyarlaması olmaksızın %.0f%% güven aralıkları bildirilmez. Sıradan binom aralıkları, örtük sınıfların tahmin edilmesinden kaynaklanan belirsizliği atlar ve önemli ölçüde çok dar olabilir. Aralıkları elde etmek için Bootstrap GA'yı etkinleştirin."
+
 #: R/outcomeorganizer.b.R
 msgid ""
 "- A per-patient state code (0 = disease-free, 1 = disease, 2 = death from "
@@ -472,6 +480,42 @@ msgid ""
 "ggstatsplot::grouped_ggpiestats to generate Pie Charts with\n"
 "statistical analysis.'"
 msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid ""
+"A test with only one observed result has kappa 0 with every test that "
+"varies; the test of kappa = 0 is then undefined, so its p-value is left "
+"blank."
+msgstr "Yalnızca tek bir sonucu gözlenen bir testin, değişen her testle kappa değeri 0'dır; bu durumda kappa = 0 testi tanımsızdır, bu nedenle p değeri boş bırakılır."
+
+#: R/nogoldstandard.b.R
+msgid ""
+"Choose the positive level for {tests}. A test enters the analysis only after"
+" its positive level is chosen, so no results are shown yet."
+msgstr "{tests} için pozitif düzeyi seçin. Bir test ancak pozitif düzeyi seçildikten sonra analize girer; bu nedenle henüz sonuç gösterilmiyor."
+
+#: R/nogoldstandard.b.R
+msgid ""
+"Latent class analysis needs both positive and not-positive results for every"
+" test among the analysed cases. Only one result was observed for: {}. Such a"
+" test carries no information about the latent classes. Check that the "
+"correct positive level is selected, or remove the test."
+msgstr "Örtük sınıf analizi, analiz edilen olgular arasında her test için hem pozitif hem de pozitif olmayan sonuçlar gerektirir. Yalnızca tek bir sonuç gözlenen testler: {}. Böyle bir test örtük sınıflar hakkında bilgi taşımaz. Doğru pozitif düzeyin seçildiğini kontrol edin veya testi çıkarın."
+
+#: R/nogoldstandard.b.R
+msgid ""
+"PPV and NPV hold only at the class or rule proportion of these data. In a "
+"population with a different prevalence they differ, even when the response "
+"probabilities are the same."
+msgstr "PPV ve NPV yalnızca bu verilerin sınıf veya kural oranında geçerlidir. Prevalansı farklı bir popülasyonda, yanıt olasılıkları aynı olsa bile farklılık gösterirler."
+
+#: R/nogoldstandard.b.R
+msgid "Positive level not selected"
+msgstr "Pozitif düzey seçilmedi"
+
+#: R/nogoldstandard.b.R
+msgid "Test {number} ({variable})"
+msgstr "Test {number} ({variable})"
 
 #: R/decisioncombine.b.R
 msgid ""
@@ -969,6 +1013,24 @@ msgstr ""
 "Ayrıştırılan {total} tarihten {count} tanesi makul aralığın dışına çıkıyor "
 "(<1900 veya gelecekte >1 yıl); ilki {example}. Doğru ayrıştırmayı onaylamak "
 "için önizlemeyi inceleyin."
+
+#: R/nogoldstandard.b.R
+msgid ""
+"{count} of the {total} latent estimates (class proportion and response "
+"probabilities) are at 0% or 100%. Boundary estimates are nonregular: their "
+"bootstrap intervals are unreliable and collapse to a single value when every "
+"resample stays at the boundary. Tests that agree perfectly fit both "
+"perfectly accurate tests and tests that share the same errors, so do not "
+"report 0% or 100% sensitivity or specificity from this fit without "
+"independent evidence."
+msgstr ""
+"{total} örtük tahminden {count} tanesi (sınıf oranı ve yanıt olasılıkları) "
+"%0 veya %100 düzeyindedir. Sınırdaki tahminler düzenli değildir: bootstrap "
+"aralıkları güvenilir değildir ve her yeniden örneklem sınırda kaldığında tek "
+"bir değere iner. Tam uyum gösteren testler hem tamamen doğru testlerle hem "
+"de aynı hataları paylaşan testlerle eşit derecede uyumludur; bu nedenle "
+"bağımsız kanıt olmadan bu modelden %0 veya %100 duyarlılık ya da özgüllük "
+"bildirmeyin."
 
 #: R/reportcat.b.R
 msgid "{count} of these levels have no observations."
@@ -2851,19 +2913,6 @@ msgstr ""
 
 #: R/nogoldstandard.b.R
 msgid ""
-"%.0f%% confidence intervals are not reported for latent-model response "
-"probabilities without bootstrap refitting. Ordinary binomial intervals omit "
-"uncertainty from estimating the latent classes and can be substantially too "
-"narrow. Enable Bootstrap CI to obtain intervals."
-msgstr ""
-"Örtük model yanıt olasılıkları için bootstrap yeniden uyarlaması olmaksızın "
-"%.0f%% güven aralıkları bildirilmez. Sıradan binom aralıkları, örtük "
-"sınıfların tahmin edilmesinden kaynaklanan belirsizliği atlar ve önemli "
-"ölçüde çok dar olabilir. Aralıkları elde etmek için Bootstrap GA'yı "
-"etkinleştirin."
-
-#: R/nogoldstandard.b.R
-msgid ""
 "%.0f%% intervals are Wilson score intervals for agreement with the observed "
 "reference rule."
 msgstr ""
@@ -2995,7 +3044,7 @@ msgstr ""
 msgid ""
 "%1$.0f%% intervals are bootstrap percentile intervals from %2$d resamples of "
 "the cases, refitting the model on each. Seed: %3$s."
-msgstr ""
+msgstr "%%%1$.0f aralıklar, olguların %2$d yeniden örnekleminden elde edilen ve her birinde model yeniden uyarlanan bootstrap yüzdelik aralıklarıdır. Tohum: %3$s."
 
 #: R/agreement.b.R
 msgid "%1$.1f percentage points above strict accuracy (%2$.4f), same %3$d cases"
@@ -3044,7 +3093,7 @@ msgid ""
 "%4$d fitted resamples remain for each interval. A high failure rate can "
 "reflect small or sparse samples, fitting problems, or ambiguous class "
 "orientation."
-msgstr ""
+msgstr "%2$d bootstrap yeniden örnekleminden %1$d tanesi (%%%3$.0f) yakınsamış, tanımlanabilir ve tek bir sınıf yönelimine sahip bir uyum vermedi ve atıldı. Her aralık için en fazla %4$d uyarlanmış yeniden örneklem kaldı. Yüksek bir başarısızlık oranı küçük veya seyrek örneklemleri, uyum sorunlarını ya da belirsiz sınıf yönelimini yansıtabilir."
 
 #: R/lassologistic.b.R
 msgid ""
@@ -4363,18 +4412,22 @@ msgstr ""
 msgid ""
 "%s have bivariate residuals above the descriptive threshold. This is "
 "evidence that the conditional-independence model does not reproduce those "
-"pairwise tables. Because the residual is squared, it does not show the "
-"direction or cause of the dependence and cannot determine whether fitted "
-"response probabilities are biased upward or downward. Do not interpret the "
-"latent-class parameters as diagnostic accuracy without a "
+"pairwise tables. The flagged pair is not necessarily the dependent pair: "
+"dependence between other tests can be absorbed into the latent classes and "
+"appear as misfit elsewhere. Because the residual is squared, it does not "
+"show the direction or cause of the dependence and cannot determine whether "
+"fitted response probabilities are biased upward or downward. Do not "
+"interpret the latent-class parameters as diagnostic accuracy without a "
 "dependence-sensitive model or a study-specific sensitivity analysis."
 msgstr ""
 "%s betimsel eşiğin üzerinde iki değişkenli kalıntılara sahiptir. Bu, koşullu "
 "bağımsızlık modelinin bu ikili tabloları yeniden üretemediğinin kanıtıdır. "
-"Kalıntı kareli olduğundan, bağımlılığın yönünü veya nedenini göstermez ve "
-"uyarlanan yanıt olasılıklarının yukarı veya aşağı doğru yanlı olup "
-"olmadığını belirleyemez. Bağımlılığa duyarlı bir model veya çalışmaya özgü "
-"bir duyarlılık analizi olmaksızın örtük sınıf parametrelerini tanısal "
+"İşaretlenen çift, bağımlı olan çift olmayabilir: diğer testler arasındaki "
+"bağımlılık örtük sınıflarca emilebilir ve başka bir yerde uyumsuzluk olarak "
+"görünebilir. Kalıntı kareli olduğundan, bağımlılığın yönünü veya nedenini "
+"göstermez ve uyarlanan yanıt olasılıklarının yukarı veya aşağı doğru yanlı "
+"olup olmadığını belirleyemez. Bağımlılığa duyarlı bir model veya çalışmaya "
+"özgü bir duyarlılık analizi olmaksızın örtük sınıf parametrelerini tanısal "
 "doğruluk olarak yorumlamayın."
 
 #: R/cotest.b.R
@@ -18046,10 +18099,6 @@ msgid ""
 "requirements."
 msgstr ""
 
-#: R/nogoldstandard.b.R
-msgid "Agreement data available but plotting failed"
-msgstr ""
-
 #: cohenskappa/results/confusionHeatmap.title
 #: pathagreement/options/heatmap.title
 #: pathagreement/results/heatmapPlot.title
@@ -18626,7 +18675,7 @@ msgstr ""
 
 #: R/nogoldstandard.b.R
 msgid "All %d cases have a result for every selected test."
-msgstr ""
+msgstr "%d olgunun tümünde seçilen her test için bir sonuç vardır."
 
 #: R/outcomeorganizer.b.R
 msgid "all %d patients would be truncated"
@@ -19947,7 +19996,7 @@ msgstr ""
 
 #: R/nogoldstandard.b.R
 msgid "Analysing %d cases"
-msgstr ""
+msgstr "%d olgu analiz ediliyor"
 
 #: aalenhazard/results/todo.title
 #: adaptivetrialdesign/results/interimResults.columns.title
@@ -20176,14 +20225,6 @@ msgstr "Analiz Tanılamaları"
 msgid "Analysis diagnostics"
 msgstr "Analiz tanılamaları"
 
-#: R/nogoldstandard.b.R
-msgid ""
-"Analysis diagnostics: {tests} tests analyzed with N = {n} using method "
-"'{method}'."
-msgstr ""
-"Analiz tanılamaları: '{method}' yöntemi kullanılarak N = {n} ile {tests} "
-"test analiz edildi."
-
 #: R/benford.b.R
 #: R/linechart.b.R
 #: R/riverplot.b.R
@@ -20344,7 +20385,7 @@ msgstr ""
 
 #: R/nogoldstandard.b.R
 msgid "Analysis method: currently \"{current}\", example \"{example}\""
-msgstr ""
+msgstr "Analiz yöntemi: şu anda \"{current}\", örnekte \"{example}\""
 
 #: R/advancedraincloud.b.R
 #: R/lassocox.b.R
@@ -20392,7 +20433,7 @@ msgid ""
 "fixed-prior penalized EM point estimation with numerical refinement, and "
 "descriptive agreement with self-built reference rules. Latent classes are "
 "unlabeled, and reference-rule results are not diagnostic-accuracy estimates."
-msgstr ""
+msgstr "Kusursuz bir referans bulunmadığında birden çok ikili testin analizi. Koşullu bağımsızlığa dayanan iki sınıflı bir örtük sınıf modeli, sayısal iyileştirmeli ve sabit önsel dağılımlı cezalandırılmış EM nokta tahmini ve testlerden oluşturulan referans kurallarıyla betimsel uyum sunar. Örtük sınıflar etiketlenmemiştir ve referans kuralı sonuçları tanısal doğruluk tahminleri değildir."
 
 #: ihcscoring/results/digitalvalidation/batcheffects.description
 msgid "Analysis of systematic differences across batches"
@@ -22666,6 +22707,16 @@ msgstr ""
 "tahmin edilemedi; bu nedenle ilgili istatistik için yüzdelik aralık "
 "raporlandı."
 
+#: R/nogoldstandard.b.R
+msgid ""
+"at least one estimate is at 0% or 100%. Perfect agreement between tests does "
+"not show that the tests are perfectly accurate; read the boundary warning "
+"before reporting these values."
+msgstr ""
+"en az bir tahmin %0 veya %100 düzeyindedir. Testler arasındaki tam uyum, "
+"testlerin tamamen doğru olduğunu göstermez; bu değerleri bildirmeden önce "
+"sınır uyarısını okuyun."
+
 #: R/chisqposttest.b.R
 msgid "At least one expected count is below 1"
 msgstr "En az bir beklenen sayı 1'in altında"
@@ -22764,7 +22815,7 @@ msgid ""
 "At least three informative tests are needed; the number of tests alone does "
 "not establish identifiability. Estimates are suppressed when the data do not "
 "identify the latent parameters."
-msgstr ""
+msgstr "En az üç bilgilendirici test gereklidir; test sayısı tek başına tanımlanabilirliği sağlamaz. Veriler örtük parametreleri tanımlamadığında tahminler gösterilmez."
 
 #: R/nogoldstandard.b.R
 msgid ""
@@ -22772,7 +22823,7 @@ msgid ""
 "residual degrees of freedom, but exact fit and parameter identifiability are "
 "not guaranteed. Fit discrepancies remain descriptive rather than formal "
 "chi-squared tests."
-msgstr ""
+msgstr "En az üç bilgilendirici test gereklidir. Üç test sıfır nominal kalıntı serbestlik derecesi verir, ancak tam uyum ve parametre tanımlanabilirliği garanti edilmez. Uyum farklılıkları resmi ki-kare testleri değil, betimsel kalır."
 
 #: R/diagnosticmeta.b.R
 msgid "At least two finite studies are required for %s"
@@ -28199,15 +28250,15 @@ msgstr ""
 
 #: R/nogoldstandard.b.R
 msgid "Bootstrap confidence intervals: currently off, example on"
-msgstr ""
+msgstr "Bootstrap güven aralıkları: şu anda kapalı, örnekte açık"
 
 #: R/nogoldstandard.b.R
 msgid "Bootstrap confidence intervals: currently on, example off"
-msgstr ""
+msgstr "Bootstrap güven aralıkları: şu anda açık, örnekte kapalı"
 
 #: R/nogoldstandard.b.R
 msgid "Bootstrap coverage is approximate"
-msgstr ""
+msgstr "Bootstrap kapsama oranı yaklaşıktır"
 
 #: jsummarytools/options/bootstrap_css.title
 msgid "Bootstrap CSS"
@@ -28294,7 +28345,7 @@ msgstr ""
 
 #: R/nogoldstandard.b.R
 msgid "Bootstrap intervals not estimated"
-msgstr ""
+msgstr "Bootstrap aralıkları hesaplanmadı"
 
 #: R/psychopdaROC.b.R
 msgid "Bootstrap Iteration"
@@ -28633,7 +28684,7 @@ msgstr ""
 
 #: R/nogoldstandard.b.R
 msgid "Bootstrap samples: currently {current}, example {example}"
-msgstr ""
+msgstr "Bootstrap örneklem sayısı: şu anda {current}, örnekte {example}"
 
 #: conditionalinference/options/replace.title
 msgid "Bootstrap Sampling"
@@ -31983,7 +32034,7 @@ msgid ""
 "the stated confidence level. Fixed-prior estimates can also be biased; this "
 "bootstrap does not include uncertainty about the chosen priors. Check "
 "coverage in a study-specific simulation before confirmatory use."
-msgstr ""
+msgstr "Olgu yeniden örneklemeli yüzdelik aralıklar olguların bağımsız olduğunu varsayar. Küçük örneklemler, sınırdaki tahminler ve zayıf tanımlanabilirlik, belirtilen güven düzeyinin altında kapsama oranına yol açabilir. Sabit önsel dağılımlı tahminler de yanlı olabilir; bu bootstrap seçilen önsel dağılımlarla ilgili belirsizliği içermez. Doğrulayıcı kullanımdan önce kapsamayı çalışmaya özgü bir simülasyonla denetleyin."
 
 #: ihcdiagnostic/options/id.title
 msgid "Case/Patient ID (Optional)"
@@ -35394,7 +35445,7 @@ msgid ""
 "of freedom are zero, but probability constraints can still prevent an exact "
 "fit. Fit discrepancies remain informative; a conventional chi-squared "
 "reference distribution is not justified."
-msgstr ""
+msgstr "Sınıf etiketleri tanımlanmamıştır; yüksek pozitif sınıf kendiliğinden hastalık anlamına gelmez. Model koşullu olarak bağımsız hatalar varsayar ve koşullu bağımlılığı MODELLEMEZ; üç testle nominal kalıntı serbestlik derecesi sıfırdır, ancak olasılık kısıtları yine de tam uyumu engelleyebilir. Uyum farklılıkları bilgi verici olmaya devam eder; geleneksel bir ki-kare referans dağılımı gerekçelendirilemez."
 
 #: R/nogoldstandard.b.R
 msgid ""
@@ -35418,7 +35469,7 @@ msgstr ""
 
 #: R/nogoldstandard.b.R
 msgid "Class orientation is ambiguous"
-msgstr ""
+msgstr "Sınıf yönelimi belirsiz"
 
 #: psychopdaROC/options/classVar.title
 #: psychopdaROC/ui[0][1].label
@@ -37777,7 +37828,6 @@ msgstr ""
 msgid "Clinical Utility, Net Benefit, Threshold Analysis"
 msgstr "Klinik Yarar, Net Fayda, Eşik Değer Analizi"
 
-#: R/nogoldstandard.b.R
 #: digitalvalidation/options/validation_type/clinical.title
 msgid "Clinical Validation"
 msgstr ""
@@ -61905,7 +61955,7 @@ msgid ""
 "range from {minimum} to {maximum} of {requested}. Intervals with fewer than "
 "20 are left blank; increase the sample information or resolve fitting "
 "failures before reporting uncertainty."
-msgstr ""
+msgstr "Her aralık en az 20 sonlu parametre tahmini gerektirir. Sınıf veya kural oranı ile test yanıt olasılıkları genelinde başarılı sayılar {requested} içinde {minimum} ile {maximum} arasındadır. 20'den az tahmini olan aralıklar boş bırakılır; belirsizliği bildirmeden önce örneklem bilgisini artırın veya uyum başarısızlıklarını giderin."
 
 #: R/decisioncompare.b.R
 msgid ""
@@ -61924,7 +61974,7 @@ msgid ""
 "search, so local-optimum uncertainty may remain. Percentile intervals can be "
 "too narrow with weak identification, boundaries or small samples; nominal "
 "coverage is not guaranteed."
-msgstr ""
+msgstr "Her örtük sınıf yeniden örneklemi, tam örneklem çözümünü ve iki ek rastgele başlangıcı kullanır; ardından olabilirlik iyileştirmesi yapılır. Ana uyum daha geniş bir arama kullandığından yerel optimum belirsizliği kalabilir. Yüzdelik aralıklar zayıf tanımlanabilirlik, sınır değerleri veya küçük örneklemlerde fazla dar olabilir; nominal kapsama garanti edilmez."
 
 #: R/jjwithinstats.b.R
 msgid ""
@@ -61969,6 +62019,15 @@ msgid ""
 "Each p-value tests kappa = 0 for one pair and is not adjusted for multiple "
 "comparisons; judge pairs by their kappa and confidence interval."
 msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid ""
+"Each penalized-EM resample starts from the full-sample solution and two "
+"standard starting values, followed by penalized-likelihood refinement. The "
+"main fit uses a larger search, so local-optimum uncertainty may remain. "
+"Percentile intervals can be too narrow with weak identification, boundaries "
+"or small samples; nominal coverage is not guaranteed."
+msgstr "Her cezalandırılmış EM yeniden örneklemi, tam örneklem çözümünden ve iki standart başlangıç değerinden başlar; ardından cezalandırılmış olabilirlik iyileştirmesi yapılır. Ana uyum daha geniş bir arama kullandığından yerel optimum belirsizliği kalabilir. Yüzdelik aralıklar zayıf tanımlanabilirlik, sınır değerleri veya küçük örneklemlerde fazla dar olabilir; nominal kapsama garanti edilmez."
 
 #: R/clinicalscore.b.R
 msgid ""
@@ -62245,6 +62304,10 @@ msgstr ""
 "puanlanır, bu nedenle bunlar tanısal doğruluk tahminleri değil, o kural ile "
 "uyum ölçütleridir. Boş sütun yapı gereği %100'e sabitlenmiştir ve bilgi "
 "taşımaz."
+
+#: R/nogoldstandard.b.R
+msgid "Each test must be a different variable; '{}' is selected more than once."
+msgstr "Her test farklı bir değişken olmalıdır; '{}' birden fazla kez seçilmiş."
 
 #: R/decisioncompare.b.R
 msgid ""
@@ -65515,10 +65578,6 @@ msgstr "Yanlış sınıflandırılan olgular analizinde hata"
 msgid "Error in Pie Chart Analysis"
 msgstr ""
 
-#: R/nogoldstandard.b.R
-msgid "Error in plot: {msg}"
-msgstr "Grafik hatası: {msg}"
-
 #: R/agreement.b.R
 msgid "Error in rater clustering: %s"
 msgstr "Değerlendirici kümelemede hata: %s"
@@ -66115,6 +66174,10 @@ msgid ""
 "so their point estimates differ from the ones here. Quantities that are not "
 "estimable from the raw table are left blank."
 msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid "Estimates at the parameter boundary"
+msgstr "Parametre sınırındaki tahminler"
 
 #: R/decisioncompare.b.R
 msgid "Estimates Conditional on Selected Levels"
@@ -67391,7 +67454,7 @@ msgid ""
 "Every case in the analyzed data meets the strict-majority rule, so there is "
 "no rule-negative group. The negative-response probability cannot be computed "
 "from an empty denominator and is left blank rather than reported."
-msgstr ""
+msgstr "Analiz edilen verilerdeki her olgu kesin çoğunluk kuralını karşılıyor, bu nedenle kural negatif grup yoktur. Negatif yanıt olasılığı boş bir paydadan hesaplanamaz ve bildirilmek yerine boş bırakılır."
 
 #: R/lassologistic.b.R
 msgid ""
@@ -68084,14 +68147,14 @@ msgstr "Örnek yöntem"
 msgid ""
 "Example only -- not clinical guidance. {description} {guidance} Current "
 "settings happen to match this illustrative example."
-msgstr ""
+msgstr "Yalnızca örnek -- klinik rehberlik değildir. {description} {guidance} Mevcut ayarlar bu açıklayıcı örnekle eşleşmektedir."
 
 #: R/nogoldstandard.b.R
 msgid ""
 "Example only -- not clinical guidance. {description} {guidance} This example "
 "does not change settings. For comparison, its example settings differ as "
 "follows: {diffs}."
-msgstr ""
+msgstr "Yalnızca örnek -- klinik rehberlik değildir. {description} {guidance} Bu örnek ayarları değiştirmez. Karşılaştırma için örnek ayarları şu şekilde farklıdır: {diffs}."
 
 #: R/nogoldstandard.b.R
 msgid "Example only:"
@@ -68512,7 +68575,7 @@ msgstr ""
 
 #: R/nogoldstandard.b.R
 msgid "Excluded %d case(s) with missing test results"
-msgstr ""
+msgstr "Eksik test sonucu olan %d olgu dışlandı"
 
 #: R/singlearm.b.R
 msgid ""
@@ -70546,7 +70609,7 @@ msgstr ""
 
 #: R/nogoldstandard.b.R
 msgid "Extreme Test Imbalance"
-msgstr ""
+msgstr "Aşırı Test Dengesizliği"
 
 #: timeinterval/options/extreme_multiplier.title
 msgid "Extreme threshold multiplier"
@@ -72927,7 +72990,7 @@ msgstr ""
 
 #: R/nogoldstandard.b.R
 msgid "Fixed priors used by penalized EM"
-msgstr ""
+msgstr "Cezalandırılmış EM tarafından kullanılan sabit önsel dağılımlar"
 
 #: pathsampling/options/setSeed.title
 msgid "Fixed random seed"
@@ -73932,6 +73995,18 @@ msgstr ""
 "En az bir karşılaştırma için kesin hesaplama tamamlanamadı ve Fisher testi "
 "bunun yerine Monte Carlo simülasyonu ile değerlendirildi; Test Yöntemi "
 "sütunu bu karşılaştırmaları adlandırır."
+
+#: R/nogoldstandard.b.R
+msgid ""
+"For at least one estimate every bootstrap resample gave the same value, so "
+"its percentile interval has zero width. A zero-width interval does not "
+"describe the uncertainty and is left blank. This usually happens at 0% or "
+"100%."
+msgstr ""
+"En az bir tahmin için her bootstrap yeniden örneklemi aynı değeri verdi, bu "
+"nedenle yüzdelik aralığının genişliği sıfırdır. Sıfır genişlikli bir aralık "
+"belirsizliği tanımlamaz ve boş bırakılır. Bu genellikle %0 veya %100 "
+"düzeyinde olur."
 
 #: R/agepyramid.b.R
 msgid "for automatic age grouping"
@@ -75484,7 +75559,7 @@ msgstr ""
 
 #: R/nogoldstandard.b.R
 msgid "G-squared"
-msgstr ""
+msgstr "G-kare"
 
 #: spatialanalysis/results/interaction.columns.title
 msgid "g(r) Expected"
@@ -83607,7 +83682,7 @@ msgstr "Açıklayıcı örnek, klinik kılavuz değildir:"
 
 #: R/nogoldstandard.b.R
 msgid "Illustrative example: {preset}"
-msgstr ""
+msgstr "Açıklayıcı örnek: {preset}"
 
 #: R/decisioncompare.b.R
 msgid "Illustrative Interpretation Examples"
@@ -86669,7 +86744,7 @@ msgstr ""
 
 #: R/nogoldstandard.b.R
 msgid "Insufficient bootstrap estimates"
-msgstr ""
+msgstr "Yetersiz bootstrap tahmini"
 
 #: R/categorize.b.R
 msgid "Insufficient break points generated."
@@ -92214,7 +92289,7 @@ msgid ""
 "the nominal residual degrees of freedom are zero, but exact fit is not "
 "guaranteed. Residuals remain descriptive and do not provide a formal "
 "chi-squared test or establish identifiability."
-msgstr ""
+msgstr "Örtük sınıf analizi, testlerin her örtük sınıf içinde koşullu olarak bağımsız olduğunu varsayar. Her çift için gözlenen iki yönlü tablo, uyarlanan modelin öngördüğü tabloyla karşılaştırılır. 3,84'ün üzerindeki bir kalıntı koşullu bağımsızlığa karşı betimsel bir kanıttır, ancak bu kareli istatistik bağımlılığın yönünü veya nedenini belirlemez ve uyarlanan parametrelerdeki yanlılığın yönünü saptayamaz. Üç testle nominal kalıntı serbestlik derecesi sıfırdır, ancak tam uyum garanti edilmez. Kalıntılar betimsel kalır; resmi bir ki-kare testi sağlamaz veya tanımlanabilirliği kanıtlamaz."
 
 #: R/nogoldstandard.b.R
 msgid ""
@@ -92258,7 +92333,7 @@ msgstr "Gizil ICC(2,1), kurumlar genelinde"
 
 #: R/nogoldstandard.b.R
 msgid "Latent parameters not estimable"
-msgstr ""
+msgstr "Örtük parametreler tahmin edilemiyor"
 
 #: enhancedtables/options/export_format/latex.title
 #: gtsummary/options/outputFormat/latex.title
@@ -92314,15 +92389,7 @@ msgstr ""
 
 #: R/nogoldstandard.b.R
 msgid "LCA Sample Size"
-msgstr ""
-
-#: R/nogoldstandard.b.R
-msgid "LCA Under-Identified"
-msgstr ""
-
-#: R/nogoldstandard.b.R
-msgid "LCA with only 2 tests is under-identified."
-msgstr "Yalnızca 2 test içeren LCA eksik tanımlıdır."
+msgstr "Örtük Sınıf Analizi Örneklem Büyüklüğü"
 
 #: qualitycontrol/results/controlChartsResults.columns.title
 msgid "LCL"
@@ -96110,7 +96177,7 @@ msgstr ""
 
 #: R/nogoldstandard.b.R
 msgid "Majority rule has an empty group"
-msgstr ""
+msgstr "Çoğunluk kuralında boş bir grup var"
 
 #: agreement/options/simpleThreshold.title
 msgid "Majority threshold (percent) - simple mode"
@@ -109264,7 +109331,7 @@ msgid ""
 "No case in the analyzed data meets the strict-majority rule, so there is no "
 "rule-positive group. The positive-response probability cannot be computed "
 "from an empty denominator and is left blank rather than reported."
-msgstr ""
+msgstr "Analiz edilen verilerde hiçbir olgu kesin çoğunluk kuralını karşılamıyor, bu nedenle kural pozitif grup yoktur. Pozitif yanıt olasılığı boş bir paydadan hesaplanamaz ve bildirilmek yerine boş bırakılır."
 
 #: R/pathagreement.b.R
 msgid ""
@@ -112790,6 +112857,10 @@ msgstr "Değerlendirilemez (boş model)"
 msgid "Not assessable (reference mean near zero)"
 msgstr "Değerlendirilemez (referans ortalaması sıfıra yakın)"
 
+#: R/nogoldstandard.b.R
+msgid "Not assessable: the model reproduces this pair exactly"
+msgstr "Değerlendirilemez: model bu çifti tam olarak yeniden üretir"
+
 #: R/ihcheterogeneity.b.R
 msgid "Not assessable: the reference has the same value in every case."
 msgstr "Değerlendirilemez: referans her vakada aynı değere sahip."
@@ -116273,7 +116344,7 @@ msgid ""
 "counts. PPV and NPV instead use each test's positive and negative counts. "
 "With fewer than about 10 cases in a conditioning group, its estimate and "
 "interval can be unstable."
-msgstr ""
+msgstr "Analiz edilen {n} olgudan {npos} tanesi seçilen referans kuralını karşılıyor, {nneg} tanesi karşılamıyor. Pozitif ve negatif yanıt olasılıkları bu kural grubu sayılarını kullanır. PPV ve NPV ise her testin pozitif ve negatif sayılarını kullanır. Koşullayan bir grupta yaklaşık 10'dan az olgu olduğunda o grubun tahmini ve aralığı kararsız olabilir."
 
 #: R/waterfall.b.R
 msgid ""
@@ -124854,7 +124925,7 @@ msgstr ""
 
 #: R/nogoldstandard.b.R
 msgid "Penalized EM Sample Size"
-msgstr ""
+msgstr "Cezalandırılmış EM Örneklem Büyüklüğü"
 
 #: package/analyses/lassologistic.menuSubtitle
 #: lassologistic/options.menuSubtitle
@@ -133374,11 +133445,12 @@ msgid ""
 "Prevalence uses a uniform Beta(%1$g, %2$g) prior. Sensitivity and "
 "specificity each use a Beta(%3$g, %4$g) prior, which has mean %5$.2f and "
 "increases toward 1, so it pulls both estimates upward -- in MAP terms it "
-"adds one pseudo-positive result to every test. With a small sample this "
-"prior, not your data, may be driving the numbers below. These are "
-"penalised-likelihood (MAP) point estimates from an EM algorithm, not draws "
-"from a posterior, so the intervals shown are not credible intervals."
-msgstr ""
+"adds one pseudo true-positive and one pseudo true-negative result to every "
+"test. With a small sample this prior, not your data, may be driving the "
+"numbers below. These are penalised-likelihood (MAP) point estimates from an "
+"EM algorithm, not draws from a posterior, so the intervals shown are not "
+"credible intervals."
+msgstr "Prevalans tekdüze bir Beta(%1$g, %2$g) önsel dağılımı kullanır. Duyarlılık ve özgüllüğün her biri, ortalaması %5$.2f olan ve 1'e doğru artan bir Beta(%3$g, %4$g) önsel dağılımı kullanır; bu nedenle her iki tahmini de yukarı çeker -- MAP açısından her teste bir sözde gerçek pozitif ve bir sözde gerçek negatif sonuç ekler. Küçük bir örneklemde aşağıdaki sayıları verileriniz değil bu önsel dağılım belirliyor olabilir. Bunlar bir EM algoritmasından elde edilen cezalandırılmış olabilirlik (MAP) nokta tahminleridir, sonsal dağılımdan çekilmiş değerler değildir; bu nedenle gösterilen aralıklar inanılırlık aralıkları değildir."
 
 #: R/sequentialtests.b.R
 msgid "Prevalence Very High"
@@ -133691,7 +133763,7 @@ msgstr ""
 
 #: R/nogoldstandard.b.R
 msgid "Prior and class orientation conflict"
-msgstr ""
+msgstr "Önsel dağılım ile sınıf yönelimi çelişiyor"
 
 #: psychopdaROC/ui[11][0]/priorAUC.label
 msgid "Prior AUC"
@@ -140011,7 +140083,7 @@ msgstr "Referans Bir Test Olarak Yeniden Kullanıldı"
 
 #: R/nogoldstandard.b.R
 msgid "Reference rule splits the sample very unevenly"
-msgstr ""
+msgstr "Referans kuralı örneklemi çok dengesiz bölüyor"
 
 #: mlpathology/options/reference_segmentation.title
 msgid "Reference Segmentation"
@@ -155667,7 +155739,7 @@ msgid ""
 "in latent estimates. The numerical identification check is close to "
 "singular. Interpret estimates and bootstrap intervals cautiously and examine "
 "study-specific sensitivity analyses."
-msgstr ""
+msgstr "Gözlenen yanıt sıklıklarındaki küçük değişiklikler örtük tahminlerde büyük değişikliklere yol açabilir. Sayısal tanımlanabilirlik denetimi tekilliğe yakındır. Tahminleri ve bootstrap aralıklarını dikkatle yorumlayın ve çalışmaya özgü duyarlılık analizlerini inceleyin."
 
 #: R/riverplot.b.R
 msgid ""
@@ -155930,7 +156002,7 @@ msgstr ""
 
 #: R/nogoldstandard.b.R
 msgid "Small Test Categories"
-msgstr ""
+msgstr "Küçük Test Kategorileri"
 
 #: R/riverplot.b.R
 msgid ""
@@ -156380,8 +156452,12 @@ msgstr ""
 "fazla değeri var: %s. İz, ilk kaydedilen değeri gösterir."
 
 #: R/nogoldstandard.b.R
+msgid "Some bootstrap intervals left blank"
+msgstr "Bazı bootstrap aralıkları boş bırakıldı"
+
+#: R/nogoldstandard.b.R
 msgid "Some bootstrap replicates failed"
-msgstr ""
+msgstr "Bazı bootstrap tekrarları başarısız oldu"
 
 #: R/enhancedROC.b.R
 msgid ""
@@ -166540,7 +166616,7 @@ msgid ""
 "Test '{test}' has fewer than 5 cases on one side of the "
 "positive/not-positive split the analysis uses ({npos} positive, {nneg} not "
 "positive). Estimates may be unstable."
-msgstr ""
+msgstr "'{test}' testinde, analizin kullandığı pozitif/pozitif olmayan ayrımının bir tarafında 5'ten az olgu var ({npos} pozitif, {nneg} pozitif değil). Tahminler kararsız olabilir."
 
 #: R/nogoldstandard.b.R
 msgid ""
@@ -166550,14 +166626,14 @@ msgid ""
 "present. Recode or exclude such results before analysis if this is not the "
 "intended comparison. All estimates and agreement statistics use this split "
 "on complete cases."
-msgstr ""
+msgstr "'{test}' testinde ikiden fazla gözlenen kategori var. Yalnızca '{positive}' pozitif kabul edilir; gözlenen diğer tüm kategoriler ({pooled}) pozitif olmayan (negatif) olarak birleştirilir. Varsa şüpheli veya belirsiz sonuçlar da buna dahildir. Amaçlanan karşılaştırma bu değilse bu sonuçları analizden önce yeniden kodlayın veya dışlayın. Tüm tahminler ve uyum istatistikleri tam olgularda bu ayrımı kullanır."
 
 #: R/nogoldstandard.b.R
 msgid ""
 "Test '{test}' is extremely imbalanced on the positive/not-positive split the "
 "analysis uses: the smaller side is {percentage}% of observations. This may "
 "destabilize parameter estimation."
-msgstr ""
+msgstr "'{test}' testi, analizin kullandığı pozitif/pozitif olmayan ayrımında aşırı dengesizdir: küçük taraf gözlemlerin %{percentage} kadarıdır. Bu, parametre tahminini istikrarsızlaştırabilir."
 
 #: R/decisioncombine.b.R
 msgid "Test {test} alone"
@@ -166946,10 +167022,6 @@ msgid "Test age interaction"
 msgstr "Yaş etkileşimini test edin"
 
 #: R/nogoldstandard.b.R
-msgid "Test Agreement"
-msgstr ""
-
-#: R/nogoldstandard.b.R
 #: nogoldstandard/results/agreement_plot.title
 msgid "Test Agreement Matrix"
 msgstr "Test Uyum Matrisi"
@@ -166989,7 +167061,7 @@ msgstr ""
 
 #: R/nogoldstandard.b.R
 msgid "Test categories collapsed"
-msgstr ""
+msgstr "Test kategorileri birleştirildi"
 
 #: screeningcalculator/ui[0].label
 msgid "Test Characteristics"
@@ -170228,7 +170300,7 @@ msgstr ""
 
 #: R/nogoldstandard.b.R
 msgid "The estimation did not converge"
-msgstr ""
+msgstr "Tahmin yakınsamadı"
 
 #: eurostatmap/options/dataset_id.description.jamovi
 msgid "The Eurostat dataset identifier to retrieve data from."
@@ -170444,7 +170516,7 @@ msgid ""
 "values and their intervals are left blank. Observed agreement and available "
 "model-fit diagnostics are retained. This tolerance is a numerical safeguard, "
 "not a statistical test of class separation."
-msgstr ""
+msgstr "Uyarlanan sınıfların ortalama seçili pozitif olasılıkları 0,000001'lik sayısal tolerans içinde eşittir. Bu adlandırma kuralına göre tek bir yüksek pozitif sınıf yoktur. Sınıf oranı, yanıt olasılıkları, prediktif değerler ve aralıkları boş bırakılır. Gözlenen uyum ve mevcut model uyum tanılamaları korunur. Bu tolerans, sınıf ayrımının istatistiksel bir testi değil, sayısal bir güvencedir."
 
 #: R/nogoldstandard.b.R
 msgid ""
@@ -170504,7 +170576,7 @@ msgid ""
 "selected-positive probability to the positive class. Relabeling would change "
 "the asymmetric prior objective. Latent estimates and intervals are left "
 "blank; reconsider the selected positive levels or use the unpenalized model."
-msgstr ""
+msgstr "Sabit önsel dağılımlı çözüm, daha yüksek ortalama seçili pozitif olasılığı pozitif sınıfa atamıyor. Yeniden etiketleme asimetrik önsel amaç fonksiyonunu değiştirir. Örtük tahminler ve aralıklar boş bırakılır; seçilen pozitif düzeyleri yeniden gözden geçirin veya cezalandırılmamış modeli kullanın."
 
 #: R/stagemigration-part5.R
 msgid ""
@@ -170651,7 +170723,7 @@ msgid ""
 "The full-sample latent fit is not reportable, so bootstrap refitting was "
 "skipped. Resolve the convergence, identification or class-orientation "
 "warning first."
-msgstr ""
+msgstr "Tam örneklem örtük uyumu raporlanabilir değil, bu nedenle bootstrap ile yeniden uyarlama atlandı. Önce yakınsama, tanımlanabilirlik veya sınıf yönelimi uyarısını giderin."
 
 #: R/lassologistic.b.R
 msgid ""
@@ -171413,7 +171485,7 @@ msgid ""
 "%s refinement iterations. Point estimates and intervals have been left "
 "blank. Try a different method, or check whether the tests nearly perfectly "
 "agree or provide little information about separate classes."
-msgstr ""
+msgstr "Örtük model çözücüsü %s iyileştirme yinelemesinden sonra sayısal yakınsama denetimlerini karşılamadı. Nokta tahminleri ve aralıklar boş bırakıldı. Farklı bir yöntem deneyin veya testlerin neredeyse tam uyum gösterip göstermediğini ya da ayrı sınıflar hakkında az bilgi sağlayıp sağlamadığını denetleyin."
 
 #: R/benford.b.R
 msgid ""
@@ -172996,7 +173068,7 @@ msgid ""
 "confidence intervals, not Bayesian credible intervals. The cited Bayesian "
 "studies are background; their posterior-sampling or dependence-adjusted "
 "methods are not implemented here."
-msgstr ""
+msgstr "Önsel dağılımlar sabittir ve aralıkları Bayesçi inanılırlık aralıkları değil, yaklaşık olgu bootstrap güven aralıklarıdır. Atıf yapılan Bayesçi çalışmalar arka plan bilgisidir; sonsal örnekleme veya bağımlılığa göre düzeltilmiş yöntemleri burada uygulanmamıştır."
 
 #: advancedSurvivalPower/options/power.description
 msgid ""
@@ -173292,7 +173364,7 @@ msgid ""
 "left blank rather than reported as findings. The remaining values are also "
 "affected by this circularity and describe agreement with the rule, not "
 "diagnostic accuracy."
-msgstr ""
+msgstr "Referans kuralı \"en az bir test pozitif\" olarak tanımlanmıştır, bu nedenle her test kendi sonucundan oluşturulan bir kuralla karşılaştırılır. Bu yüzden özgüllük ve PPV her veri kümesinde yapısı gereği %100'e sabitlenir ve bulgu olarak bildirilmek yerine boş bırakılır. Kalan değerler de bu döngüsellikten etkilenir ve tanısal doğruluğu değil, kuralla uyumu tanımlar."
 
 #: R/nogoldstandard.b.R
 msgid ""
@@ -173302,7 +173374,7 @@ msgid ""
 "rather than reported as findings. The remaining values are also affected by "
 "this circularity and describe agreement with the rule, not diagnostic "
 "accuracy."
-msgstr ""
+msgstr "Referans kuralı \"her test pozitif\" olarak tanımlanmıştır, bu nedenle her test kendi sonucundan oluşturulan bir kuralla karşılaştırılır. Bu yüzden duyarlılık ve NPV her veri kümesinde yapısı gereği %100'e sabitlenir ve bulgu olarak bildirilmek yerine boş bırakılır. Kalan değerler de bu döngüsellikten etkilenir ve tanısal doğruluğu değil, kuralla uyumu tanımlar."
 
 #: R/decisioncombine.b.R
 msgid ""
@@ -176174,7 +176246,7 @@ msgid ""
 "for every selected test. All displayed estimates use these complete cases. "
 "If the probability of a missing result is related to an unobserved test "
 "result or latent class, the estimates can be biased."
-msgstr ""
+msgstr "Bu analiz, %2$d olgudan seçilen her test için sonucu kaydedilmiş %1$d olguyu (%%%3$.1f) kullanır. Gösterilen tüm tahminler bu tam olguları kullanır. Eksik sonuç olasılığı gözlenmemiş bir test sonucu veya örtük sınıfla ilişkiliyse tahminler yanlı olabilir."
 
 #: R/riverplot.b.R
 msgid ""
@@ -176798,7 +176870,7 @@ msgid ""
 "Beta(2,1) penalties favor higher accuracy; a uniform Beta(1,1) penalty is "
 "used for the class proportion. Multiple EM initializations and numerical "
 "refinement produce a MAP point estimate, not a posterior sample."
-msgstr ""
+msgstr "Bu yöntem, iki sınıflı koşullu bağımsızlık log olabilirliğini log duyarlılıklar ve log özgüllüklerin toplamıyla birlikte en büyükler. Bu sabit Beta(2,1) cezaları daha yüksek doğruluğu kayırır; sınıf oranı için tekdüze bir Beta(1,1) cezası kullanılır. Birden çok EM başlatması ve sayısal iyileştirme, sonsal bir örneklem değil, bir MAP nokta tahmini üretir."
 
 #: R/nogoldstandard.b.R
 msgid ""
@@ -184781,7 +184853,7 @@ msgid ""
 "prove nonuniqueness. Latent estimates and intervals are conservatively left "
 "blank. Fixed priors do not establish identification by the data; use "
 "observed agreement or additional informative tests."
-msgstr ""
+msgstr "Benzersiz ve kararlı örtük tahminler elde edilemedi. Uyarlanan olasılık eşlemesi tekil, sayısal olarak tekile yakın veya düzenli olmayan bir sınır durumudur. Bu, sınıf etiketi belirsizliğinin ötesinde bir olabilirlik sırtına işaret edebilir; sınırda sayısal denetim tek başına benzersiz olmamayı kanıtlamaz. Örtük tahminler ve aralıklar ihtiyatlı olarak boş bırakılır. Sabit önsel dağılımlar verilerle tanımlanabilirlik sağlamaz; gözlenen uyumu veya ek bilgilendirici testleri kullanın."
 
 #: R/dataquality.b.R
 msgid "Unique: {unique}, Duplicates: {dups} ({pct}% of non-missing)"
@@ -191106,7 +191178,7 @@ msgstr ""
 
 #: R/nogoldstandard.b.R
 msgid "Weak identification of latent parameters"
-msgstr ""
+msgstr "Örtük parametrelerin zayıf tanımlanabilirliği"
 
 #: R/jjcorrmat.b.R
 msgid "weak-to-moderate negative"
@@ -193341,7 +193413,7 @@ msgid ""
 "latent-class model need not reproduce the observed table. These residuals "
 "describe discrepancies; they are not chi-squared tests of conditional "
 "independence. A small residual does not establish the assumption."
-msgstr ""
+msgstr "Üç testle nominal kalıntı serbestlik derecesi sıfırdır, ancak örtük sınıf modelinin gözlenen tabloyu yeniden üretmesi gerekmez. Bu kalıntılar farklılıkları tanımlar; koşullu bağımsızlığın ki-kare testleri değildir. Küçük bir kalıntı varsayımı kanıtlamaz."
 
 #: R/nogoldstandard.b.R
 msgid ""
@@ -193350,7 +193422,7 @@ msgid ""
 "probabilities. G-squared and Chi-squared are descriptive discrepancies, "
 "without a chi-squared reference test. Small discrepancies do not verify "
 "conditional independence or parameter identifiability."
-msgstr ""
+msgstr "Üç testle 0 nominal kalıntı serbestlik derecesi vardır. Bu tam uyumu garanti etmez: model gözlenen olasılıklara da kısıtlar uygular. G-kare ve Ki-kare, ki-kare referans testi olmadan betimsel farklılıklardır. Küçük farklılıklar koşullu bağımsızlığı veya parametre tanımlanabilirliğini doğrulamaz."
 
 #: R/agreement.b.R
 msgid ""

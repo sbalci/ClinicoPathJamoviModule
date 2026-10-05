@@ -202,8 +202,28 @@ items:
           title: PPV
           type: number
           format: pc
+        - name: ppv_ci_lower
+          title: Lower CI
+          superTitle: Positive Predictive Value
+          type: number
+          format: pc
+        - name: ppv_ci_upper
+          title: Upper CI
+          superTitle: Positive Predictive Value
+          type: number
+          format: pc
         - name: npv
           title: NPV
+          type: number
+          format: pc
+        - name: npv_ci_lower
+          title: Lower CI
+          superTitle: Negative Predictive Value
+          type: number
+          format: pc
+        - name: npv_ci_upper
+          title: Upper CI
+          superTitle: Negative Predictive Value
           type: number
           format: pc
 

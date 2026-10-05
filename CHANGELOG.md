@@ -5,6 +5,154 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-10-05 — nogoldstandard: discarded bootstrap resamples were not random
+
+- **Failure mode:** latent-class bootstrap counted a resample as failed when a rare test
+  came out constant, because poLCA dropped the column. Those are exactly the resamples where
+  that test's sensitivity is 0. Dropping them pulled its interval off the boundary: 2 positives
+  in 150 gave 1.5-9.0% with 18% of resamples discarded; keeping them gives 0.0-8.9%, none
+  discarded.
+- **Detection signal:** following up the "Some bootstrap replicates failed" notice: asking
+  which resamples failed, not just how many.
+- **Prevention rule:** a bootstrap failure rate is a selection mechanism. Before discarding
+  failed resamples, check that failure is unrelated to the statistic. If the failures are
+  boundary values of the estimator, compute them instead.
+
+---
+
+## 2026-10-05 — nogoldstandard fix pass: a package that removes a column without being asked
+
+- **Failure mode:** latent class with a test that has one observed result (all negative, all
+  positive, or a positive level that never occurs) stopped with "gradient function must return
+  a numeric vector of length 5". poLCA drops a constant manifest variable and only prints an
+  ALERT. `.runLCA` then read k-1 tests' starting values for a k-test likelihood.
+- **Detection signal:** an edge-case sweep of 13 data shapes x 5 methods x bootstrap on/off,
+  classifying each failure as a `reject()` message or a raw R error. Five review passes and 494
+  expectations had run on this analysis; none used a constant test with latent class.
+- **Prevention rules:**
+  - When a third-party fitter's output is indexed by position, check that it kept every input.
+    Validate before the call (here: reject a constant test) rather than realigning afterwards.
+  - Any analysis with several test slots gets a constant-column probe for every method.
+
+---
+
+## 2026-10-05 — nogoldstandard security audit: a recorded rule applied to 4 of 369 analyses
+
+- **Failure modes:** the syntax pane wrote `test1 = HPV DNA`, which does not parse, and a
+  crafted column name would appear there as live R code. The rule ("any analysis that exports
+  syntax needs a `.sourcifyOption` override", entry above at the decisioncombine VAL-03 fix)
+  was applied to 4 analyses; 369 declare a Variable option (how many of those actually export
+  broken syntax is unmeasured). Separately, test names reached
+  table cells raw, where the client's HTML filter blanks `<LOD flag` and cuts `a<b` to `a`.
+- **Detection signal:** `/security-audit-function` running `asSource()` through `parse()`, and
+  probing cells with `<`-names. Formula injection was already closed and stayed closed.
+- **Prevention rules:**
+  - A class-level rule in CHANGELOG gets a sweep TODO the day it is written, not a fix in the
+    one analysis that surfaced it (TODO.md, "syntax pane" block).
+  - A user-derived label in a table cell goes through `.diagCellText()` at the sink.
+
+---
+
+## 2026-10-05 — nogoldstandard release review: the fix that made a rare state the default
+
+- **Failure modes:**
+  - **A selected test dropped without a word.** `allowNone` (added earlier the same day) makes
+    "variable chosen, positive level unset" the state of every newly added test. The backend
+    skipped such a slot. Rule methods then ran on the remaining tests: three tests became a
+    two-test composite, which is the all-positive rule. Latent class rejected with "add more
+    tests" although three had been added.
+  - **A notice blamed the bootstrap for a blank it did not cause.** `.bootCI()` ran on the
+    column that all/any-positive blank by construction. Its resamples are all 1, so every run
+    with bootstrap said "Some bootstrap intervals left blank".
+  - **Prior described half right.** The penalized-EM notice said Beta(2,1) adds "one
+    pseudo-positive result to every test". On specificity it adds a pseudo true negative.
+- **Detection signal:** `/release-review-function` probes of the partial-configuration state,
+  and of each rule method with bootstrap on. The 479 existing expectations passed on all
+  three defects.
+- **Prevention rules:**
+  - When a fix makes a state reachable by default (`allowNone`, a new `default:`, a removed
+    guard), run the analysis in that exact state before calling the fix done.
+  - A slot the user filled is never dropped silently. Either analyse it or name it in an INFO
+    notice and wait.
+  - Decide what is blank by construction before computing its interval, not after.
+
+---
+
+## 2026-10-05 — nogoldstandard review: a positive level the client picked, and a lesson that did not travel
+
+- **Failure modes:**
+  - **Positive level chosen by the client.** The five positive-level options had no
+    `allowNone: true`. The decisioncompare pass had established the day before that the client
+    then pre-selects `levels[0]`. In pathology coding that is usually the negative level
+    (`neg`/`pos`, `Benign`/`Malignant`, `0`/`1`), so every test could run reversed. Latent class
+    analysis is symmetric under that reversal: the healthy class would be reported as
+    "high-positive", with sensitivity and specificity swapped.
+  - **Prior shown and prior applied kept in sync by hand.** The prior notice printed constants
+    from `.runBayesian`. The penalty itself is hard-coded in `nogoldstandard_refine()`. Two of
+    the constants were never used.
+  - **Bootstrap search not scaled down.** Penalized-EM replicates ran the full 4 + 2k search,
+    about 2.5 min at `nboot = 1000`.
+  - **Turkish 80% complete.** 59 of the analysis's strings had no Turkish, safety notices
+    included.
+- **Detection signal:** `/review-function`, which read the previous day's CHANGELOG entry
+  against this analysis, plus `codetools::checkUsage` on the R6 methods lifted out as plain
+  functions.
+- **Prevention rules:**
+  - When a CHANGELOG lesson names a class of defect ("every `Level` that must be chosen
+    explicitly"), grep every analysis with that shape, not just the one being fixed:
+    `grep -L allowNone` over the `.a.yaml` files that declare `type: Level`.
+  - A notice that reports a computation's parameters reads them from where the computation
+    lives, or carries a comment naming that place.
+  - Bootstrap replicates warm-start from the full-sample solution, with a short search.
+    Confirm by measurement that intervals do not change.
+
+---
+
+## 2026-10-04 — nogoldstandard deep audit: perfect agreement read as perfect accuracy, and a check that could not fail
+
+- **Failure modes:**
+  - **Boundary fit with no warning.** Three identical tests passed every estimability check. The
+    analysis then reported 100% sensitivity and specificity, with a 100-100% bootstrap interval.
+    The data fit perfect tests and tests that share the same errors equally well. The
+    identification check targets ridges, not this boundary case.
+  - **A check that could not fail.** With three tests, an interior fit reproduces every pairwise
+    table exactly, so the bivariate residual is about 1e-29 whatever the dependence. Every row
+    still read "Consistent with independence", which contradicted the table's own note.
+  - **Wrong pair implied.** With four tests, the residual flagged C vs D when B copied A,
+    because the latent classes absorb the A-B dependence.
+- **Detection signal:** `/check-function-full` notice-trigger and follow-up probes on data built
+  with known structure (identical tests; B copying A in 60% of cases). The 385 existing
+  expectations passed on all three.
+- **Prevention rules:**
+  - A latent estimate at 0 or 1 always raises a notice. A zero-width percentile interval is
+    blanked, never shown.
+  - A diagnostic whose statistic is zero by construction reports "not assessable", not a pass.
+  - Probe each assumption check with data that violates it on purpose. A check that never fires
+    on violated data is not a check.
+
+---
+
+## 2026-10-04 — nogoldstandard release check: one variable in two slots, and a fractional count reaching `%d`
+
+- **Failure modes:**
+  - **Same variable, two slots.** The five test slots were never checked for repeats. Columns
+    were then assigned by name, so the second copy stayed all-NA. `composite` aborted with
+    "missing value where TRUE/FALSE needed", and `latent_class` filled a table with duplicate
+    row keys.
+  - **Fractional bootstrap count.** `nboot` was `type: Number`, so 150.5 was accepted and then
+    aborted the run at `sprintf("%d", nboot)` in the interval note.
+  - **Fixed rows built in `.run()`.** Four tables whose rows are fixed by the options were built
+    with `addRow()` in `.run()`. The gate's detector misses computed rowKeys, so it reported 0.
+- **Detection signal:** adversarial runtime probes (duplicate slot, special-character names,
+  fractional `nboot`) during `/check-function --profile release`. The full suite of 381
+  expectations passed on the defective code.
+- **Prevention rules:**
+  - Any analysis with several single-variable slots rejects a variable that is used twice.
+  - A count that reaches `%d`, `seq_len()` or `matrix(nrow =)` is `type: Integer`, never `Number`.
+  - A zero from `check_init_row_structure` is not proof. Read the `addRow()` sites yourself.
+
+---
+
 ## 2026-10-04 — decisioncompare release check, second pass: an "explicit" level that the client chose, and strings the catalog never saw
 
 - **Failure modes:**

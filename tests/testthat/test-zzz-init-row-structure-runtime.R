@@ -300,3 +300,47 @@ test_that("decisioncombine paired-comparison table fills its .init() rows withou
   # ... and hidden, like the ranking table, instead of labelled rows of blanks.
   expect_false(bad$pairedComparisonTable$visible)
 })
+
+
+test_that("nogoldstandard builds its option-determined rows in .init() and fills them", {
+  skip_if_not(analysis_available("nogoldstandard"), "package not loaded")
+  skip_if_not_installed("poLCA")
+
+  set.seed(5)
+  n <- 150
+  z <- rbinom(n, 1, 0.4)
+  mk <- function(se, sp) factor(ifelse(z == 1, rbinom(n, 1, se), rbinom(n, 1, 1 - sp)),
+                                0:1, c("neg", "pos"))
+  # special characters exercise the rowKey <-> test-name mapping
+  d <- data.frame(`HPV DNA` = mk(.9, .9), `p16+/p53` = mk(.8, .85),
+                  `Grade (2/3)` = mk(.75, .9), check.names = FALSE)
+  args <- list(data = d, test1 = "HPV DNA", test1Positive = "pos",
+               test2 = "p16+/p53", test2Positive = "pos",
+               test3 = "Grade (2/3)", test3Positive = "pos",
+               test4Positive = NULL, test5Positive = NULL)
+
+  # rows exist after .init() alone, before any computation
+  a <- ClinicoPath:::nogoldstandardClass$new(
+    options = do.call(ClinicoPath:::nogoldstandardOptions$new,
+                      utils::modifyList(args, list(data = NULL), keep.null = FALSE)),
+    data = d)
+  a$init()
+  expect_equal(a$results$test_metrics$rowCount, 3L)
+  expect_equal(a$results$agreement_stats$rowCount, 3L)
+  expect_equal(a$results$conditional_dependence$rowCount, 3L)
+  expect_equal(a$results$model_fit$rowCount, 6L)
+
+  lca <- do.call(nogoldstandard, c(args, method = "latent_class"))
+  expect_equal(lca$test_metrics$asDF$test, names(d))
+  expect_true(all(is.finite(lca$test_metrics$asDF$sensitivity)))
+  expect_true(all(is.finite(lca$agreement_stats$asDF$kappa)))
+  expect_true(all(is.finite(lca$conditional_dependence$asDF$bvr)))
+  expect_true(all(is.finite(lca$model_fit$asDF$value)))
+  expect_equal(lca$agreement_stats$asDF$test_pair[3], "p16+/p53 vs Grade (2/3)")
+
+  # rule-based methods build no latent-model rows
+  comp <- do.call(nogoldstandard, c(args, method = "composite"))
+  expect_equal(comp$model_fit$rowCount, 0L)
+  expect_equal(comp$conditional_dependence$rowCount, 0L)
+  expect_equal(comp$test_metrics$rowCount, 3L)
+})

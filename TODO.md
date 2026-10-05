@@ -9,6 +9,25 @@ Unsupported legacy options are hidden or explicitly rejected; no substitute stat
 - [ ] Treat semi-Markov/clock-reset, shared transition effects, frailty, and predictive cross-validation as separate extensions with statistical reference checks.
 - [ ] Complete interactive jamovi/OMV persistence and installed-submodule release checks before promoting these testing/draft routes.
 
+# syntax pane: Variable options exported unquoted, module-wide (2026-10-05)
+
+jmvcore's `OptionVariable$valueAsSource` returns the bare name, so `asSource()` emits `x = HPV DNA`
+(does not parse; a crafted column name becomes live code in a snippet users copy). Fixed by a
+`.sourcifyOption` override (`encodeString(value, quote = '"')`) in decisioncombine, decisioncompare,
+tableone and nogoldstandard only; 369 `.a.yaml` declare a Variable option.
+- [ ] Sweep: for each analysis with Variable/Variables/Level options, `parse(text = analysis$asSource())`
+      with a column named `HPV DNA`; add the override where it fails (Variables need `vars()` handling)
+- [ ] Consider asking jamovi to quote in `OptionVariable$valueAsSource` upstream instead
+
+# allowNone multi-test slots: is a variable without its level dropped silently? (2026-10-05)
+
+Found in `nogoldstandard` (`/release-review-function`, CHANGELOG 2026-10-05): with `allowNone`, a test
+variable whose positive level is unset was skipped without a word, so the analysis ran on fewer tests than
+the user selected. Out of scope there; same multi-slot shape here:
+- [ ] `decisioncompare` (8 allowNone Levels): run with one test variable selected and its positive/negative
+      level unset; expect a notice naming the slot, not a silent smaller comparison
+- [ ] `decisioncombine` (2 allowNone Levels): same probe
+
 # decisioncompare (meddecide) — `/check-function decisioncompare --profile release` (2026-10-04, session `clinicopathjamovimodule-b2`)
 
 Target: the working tree, including the uncommitted "explicit binary mapping" pass (analysis 1.1.0,

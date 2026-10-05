@@ -18,6 +18,7 @@ Latent estimates are reported only when the model passes the convergence and ide
 
 ## 1a. Changelog
 
+- **2026-10-05**: A test whose variable is selected but whose positive level is still unset (the `allowNone` default) keeps the analysis on its welcome screen with an INFO notice naming the test; it was previously dropped without a word. Rule methods with bootstrap no longer raise the zero-width-interval notice for the column that is blank by construction. The penalized-EM prior notice now says the penalty adds a pseudo true-positive and a pseudo true-negative per test. Latent class analysis rejects a test with a single observed result (poLCA would drop it and the refinement failed); penalized EM keeps such a column and reports it through the identification and boundary checks. Exported syntax quotes the test variables, and test names are protected from the client's cell filter. A latent-class bootstrap resample in which a test is constant fits the other tests and places that test at its boundary (its MLE), instead of failing; resamples without a constant test are unchanged. `test_metrics` gains `ppv_ci_lower/upper` and `npv_ci_lower/upper`: with bootstrap, each resample's PPV/NPV are computed from its cached class or rule proportion, sensitivity and specificity (an exact 2x2 identity, with empty groups contributing 0); without bootstrap, rule methods use Wilson intervals on the test-positive and test-negative counts and latent methods leave them blank. Columns fixed at 100% by construction stay blank with their intervals.
 - **2026-10-03**: Guard numerically tied class orientation; disclose pooled response categories; use unique pair identifiers; repair the heatmap, three-test fit guidance, and R examples.
 
 - **Date**: 2026-08-29
@@ -30,18 +31,18 @@ Latent estimates are reported only when the model passes the convergence and ide
 | `data` | `Data` | `NULL` |  |
 | `clinicalPreset` | `List` | `none` | Illustrative Scenario Example |
 | `test1` | `Variable` | `NULL` | Test 1 |
-| `test1Positive` | `Level` | Required | Positive Level; pass `NULL` for unused tests in R |
+| `test1Positive` | `Level` | Required | Positive Level; starts unselected in jamovi (`allowNone`); pass `NULL` for unused tests in R |
 | `test2` | `Variable` | `NULL` | Test 2 |
-| `test2Positive` | `Level` | Required | Positive Level; pass `NULL` for unused tests in R |
+| `test2Positive` | `Level` | Required | Positive Level; starts unselected in jamovi (`allowNone`); pass `NULL` for unused tests in R |
 | `test3` | `Variable` | `NULL` | Test 3 |
-| `test3Positive` | `Level` | Required | Positive Level; pass `NULL` for unused tests in R |
+| `test3Positive` | `Level` | Required | Positive Level; starts unselected in jamovi (`allowNone`); pass `NULL` for unused tests in R |
 | `test4` | `Variable` | `NULL` | Test 4 |
-| `test4Positive` | `Level` | Required | Positive Level; pass `NULL` for unused tests in R |
+| `test4Positive` | `Level` | Required | Positive Level; starts unselected in jamovi (`allowNone`); pass `NULL` for unused tests in R |
 | `test5` | `Variable` | `NULL` | Test 5 |
-| `test5Positive` | `Level` | Required | Positive Level; pass `NULL` for unused tests in R |
+| `test5Positive` | `Level` | Required | Positive Level; starts unselected in jamovi (`allowNone`); pass `NULL` for unused tests in R |
 | `method` | `List` | `latent_class` | Analysis Method |
 | `bootstrap` | `Bool` | `FALSE` | Bootstrap CI |
-| `nboot` | `Number` | `1000` | Number of Bootstrap Samples |
+| `nboot` | `Integer` | `1000` | Number of Bootstrap Samples |
 | `alpha` | `Number` | `0.05` | Alpha for Confidence Intervals |
 | `verbose` | `Bool` | `FALSE` | Analysis Diagnostics |
 | `seed` | `Integer` | `0` | Random Seed |

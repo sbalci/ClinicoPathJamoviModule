@@ -50,10 +50,13 @@ options:
           R: >
             First diagnostic test variable.
 
+    # allowNone: without it the jamovi client pre-selects levels[0] -- usually the
+    # NEGATIVE level (neg/pos, Benign/Malignant, 0/1) -- and every test runs reversed.
     - name: test1Positive
       title: Positive Level
       type: Level
       variable: (test1)
+      allowNone: true
       description:
           R: >
             The positive level for Test 1.
@@ -72,6 +75,7 @@ options:
       title: Positive Level
       type: Level
       variable: (test2)
+      allowNone: true
       description:
           R: >
             The positive level for Test 2.
@@ -90,6 +94,7 @@ options:
       title: Positive Level
       type: Level
       variable: (test3)
+      allowNone: true
       description:
           R: >
             The positive level for Test 3.
@@ -109,6 +114,7 @@ options:
       title: Positive Level
       type: Level
       variable: (test4)
+      allowNone: true
       description:
           R: >
             The positive level for Test 4.
@@ -128,6 +134,7 @@ options:
       title: Positive Level
       type: Level
       variable: (test5)
+      allowNone: true
       description:
           R: >
             The positive level for Test 5.
@@ -175,7 +182,8 @@ options:
 
     - name: nboot
       title: Number of Bootstrap Samples
-      type: Number
+      # Integer: a fractional Number reached sprintf("%d", nboot) and aborted the run.
+      type: Integer
       default: 1000
       min: 100
       max: 10000

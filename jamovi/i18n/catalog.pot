@@ -47,6 +47,14 @@ msgid ""
 "statistics and visualizations."
 msgstr ""
 
+#: R/nogoldstandard.b.R
+msgid ""
+"%.0f%% confidence intervals are not reported for latent-model response "
+"probabilities and predictive values without bootstrap refitting. Ordinary "
+"binomial intervals omit uncertainty from estimating the latent classes and "
+"can be substantially too narrow. Enable Bootstrap CI to obtain intervals."
+msgstr ""
+
 #: R/outcomeorganizer.b.R
 msgid ""
 "- A per-patient state code (0 = disease-free, 1 = disease, 2 = death from "
@@ -420,6 +428,42 @@ msgid ""
 "'Wrapper Function for ggstatsplot::ggpiestats and\n"
 "ggstatsplot::grouped_ggpiestats to generate Pie Charts with\n"
 "statistical analysis.'"
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid ""
+"A test with only one observed result has kappa 0 with every test that "
+"varies; the test of kappa = 0 is then undefined, so its p-value is left "
+"blank."
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid ""
+"Choose the positive level for {tests}. A test enters the analysis only after"
+" its positive level is chosen, so no results are shown yet."
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid ""
+"Latent class analysis needs both positive and not-positive results for every"
+" test among the analysed cases. Only one result was observed for: {}. Such a"
+" test carries no information about the latent classes. Check that the "
+"correct positive level is selected, or remove the test."
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid ""
+"PPV and NPV hold only at the class or rule proportion of these data. In a "
+"population with a different prevalence they differ, even when the response "
+"probabilities are the same."
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid "Positive level not selected"
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid "Test {number} ({variable})"
 msgstr ""
 
 #: R/decisioncombine.b.R
@@ -850,6 +894,17 @@ msgid ""
 "{count} of {total} parsed date(s) fall outside the plausible range (<1900 or "
 ">1 year in the future); the first is {example}. Review preview to confirm "
 "correct parsing."
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid ""
+"{count} of the {total} latent estimates (class proportion and response "
+"probabilities) are at 0% or 100%. Boundary estimates are nonregular: their "
+"bootstrap intervals are unreliable and collapse to a single value when every "
+"resample stays at the boundary. Tests that agree perfectly fit both "
+"perfectly accurate tests and tests that share the same errors, so do not "
+"report 0% or 100% sensitivity or specificity from this fit without "
+"independent evidence."
 msgstr ""
 
 #: R/reportcat.b.R
@@ -2497,14 +2552,6 @@ msgstr ""
 
 #: R/nogoldstandard.b.R
 msgid ""
-"%.0f%% confidence intervals are not reported for latent-model response "
-"probabilities without bootstrap refitting. Ordinary binomial intervals omit "
-"uncertainty from estimating the latent classes and can be substantially too "
-"narrow. Enable Bootstrap CI to obtain intervals."
-msgstr ""
-
-#: R/nogoldstandard.b.R
-msgid ""
 "%.0f%% intervals are Wilson score intervals for agreement with the observed "
 "reference rule."
 msgstr ""
@@ -3749,10 +3796,12 @@ msgstr ""
 msgid ""
 "%s have bivariate residuals above the descriptive threshold. This is "
 "evidence that the conditional-independence model does not reproduce those "
-"pairwise tables. Because the residual is squared, it does not show the "
-"direction or cause of the dependence and cannot determine whether fitted "
-"response probabilities are biased upward or downward. Do not interpret the "
-"latent-class parameters as diagnostic accuracy without a "
+"pairwise tables. The flagged pair is not necessarily the dependent pair: "
+"dependence between other tests can be absorbed into the latent classes and "
+"appear as misfit elsewhere. Because the residual is squared, it does not "
+"show the direction or cause of the dependence and cannot determine whether "
+"fitted response probabilities are biased upward or downward. Do not "
+"interpret the latent-class parameters as diagnostic accuracy without a "
 "dependence-sensitive model or a study-specific sensitivity analysis."
 msgstr ""
 
@@ -16326,10 +16375,6 @@ msgid ""
 "requirements."
 msgstr ""
 
-#: R/nogoldstandard.b.R
-msgid "Agreement data available but plotting failed"
-msgstr ""
-
 #: cohenskappa/results/confusionHeatmap.title
 #: pathagreement/options/heatmap.title
 #: pathagreement/results/heatmapPlot.title
@@ -18267,12 +18312,6 @@ msgstr ""
 
 #: nogoldstandard/ui[2][0]/verbose.label
 msgid "Analysis diagnostics"
-msgstr ""
-
-#: R/nogoldstandard.b.R
-msgid ""
-"Analysis diagnostics: {tests} tests analyzed with N = {n} using method "
-"'{method}'."
 msgstr ""
 
 #: R/benford.b.R
@@ -20700,6 +20739,13 @@ msgid ""
 "At least one BCa stability interval could not be estimated from the "
 "leave-one-case-out values, so a percentile interval was reported for that "
 "statistic."
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid ""
+"at least one estimate is at 0% or 100%. Perfect agreement between tests does "
+"not show that the tests are perfectly accurate; read the boundary warning "
+"before reporting these values."
 msgstr ""
 
 #: R/chisqposttest.b.R
@@ -35352,7 +35398,6 @@ msgstr ""
 msgid "Clinical Utility, Net Benefit, Threshold Analysis"
 msgstr ""
 
-#: R/nogoldstandard.b.R
 #: digitalvalidation/options/validation_type/clinical.title
 msgid "Clinical Validation"
 msgstr ""
@@ -58663,6 +58708,15 @@ msgid ""
 "comparisons; judge pairs by their kappa and confidence interval."
 msgstr ""
 
+#: R/nogoldstandard.b.R
+msgid ""
+"Each penalized-EM resample starts from the full-sample solution and two "
+"standard starting values, followed by penalized-likelihood refinement. The "
+"main fit uses a larger search, so local-optimum uncertainty may remain. "
+"Percentile intervals can be too narrow with weak identification, boundaries "
+"or small samples; nominal coverage is not guaranteed."
+msgstr ""
+
 #: R/clinicalscore.b.R
 msgid ""
 "Each predictor was assigned points based on regression coefficient "
@@ -58876,6 +58930,10 @@ msgid ""
 "themselves, so these are measures of agreement with that rule, not estimates "
 "of diagnostic accuracy. The blank column is fixed at 100% by construction "
 "and carries no information."
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid "Each test must be a different variable; '{}' is selected more than once."
 msgstr ""
 
 #: R/decisioncompare.b.R
@@ -62027,10 +62085,6 @@ msgstr ""
 msgid "Error in Pie Chart Analysis"
 msgstr ""
 
-#: R/nogoldstandard.b.R
-msgid "Error in plot: {msg}"
-msgstr ""
-
 #: R/agreement.b.R
 msgid "Error in rater clustering: %s"
 msgstr ""
@@ -62592,6 +62646,10 @@ msgid ""
 "above use a Haldane-Anscombe 0.5 correction because a zero cell was present, "
 "so their point estimates differ from the ones here. Quantities that are not "
 "estimable from the raw table are left blank."
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid "Estimates at the parameter boundary"
 msgstr ""
 
 #: R/decisioncompare.b.R
@@ -69995,6 +70053,14 @@ msgid ""
 "For at least one comparison the exact computation could not be completed, "
 "and Fisher's test was evaluated by Monte Carlo simulation instead; the Test "
 "Method column names those comparisons."
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid ""
+"For at least one estimate every bootstrap resample gave the same value, so "
+"its percentile interval has zero width. A zero-width interval does not "
+"describe the uncertainty and is left blank. This usually happens at 0% or "
+"100%."
 msgstr ""
 
 #: R/agepyramid.b.R
@@ -87519,14 +87585,6 @@ msgstr ""
 
 #: R/nogoldstandard.b.R
 msgid "LCA Sample Size"
-msgstr ""
-
-#: R/nogoldstandard.b.R
-msgid "LCA Under-Identified"
-msgstr ""
-
-#: R/nogoldstandard.b.R
-msgid "LCA with only 2 tests is under-identified."
 msgstr ""
 
 #: qualitycontrol/results/controlChartsResults.columns.title
@@ -107055,6 +107113,10 @@ msgstr ""
 
 #: R/ihcheterogeneity.b.R
 msgid "Not assessable (reference mean near zero)"
+msgstr ""
+
+#: R/nogoldstandard.b.R
+msgid "Not assessable: the model reproduces this pair exactly"
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
@@ -126599,10 +126661,11 @@ msgid ""
 "Prevalence uses a uniform Beta(%1$g, %2$g) prior. Sensitivity and "
 "specificity each use a Beta(%3$g, %4$g) prior, which has mean %5$.2f and "
 "increases toward 1, so it pulls both estimates upward -- in MAP terms it "
-"adds one pseudo-positive result to every test. With a small sample this "
-"prior, not your data, may be driving the numbers below. These are "
-"penalised-likelihood (MAP) point estimates from an EM algorithm, not draws "
-"from a posterior, so the intervals shown are not credible intervals."
+"adds one pseudo true-positive and one pseudo true-negative result to every "
+"test. With a small sample this prior, not your data, may be driving the "
+"numbers below. These are penalised-likelihood (MAP) point estimates from an "
+"EM algorithm, not draws from a posterior, so the intervals shown are not "
+"credible intervals."
 msgstr ""
 
 #: R/sequentialtests.b.R
@@ -148711,6 +148774,10 @@ msgid ""
 msgstr ""
 
 #: R/nogoldstandard.b.R
+msgid "Some bootstrap intervals left blank"
+msgstr ""
+
+#: R/nogoldstandard.b.R
 msgid "Some bootstrap replicates failed"
 msgstr ""
 
@@ -158891,10 +158958,6 @@ msgstr ""
 
 #: survival/options/age_interaction.title
 msgid "Test age interaction"
-msgstr ""
-
-#: R/nogoldstandard.b.R
-msgid "Test Agreement"
 msgstr ""
 
 #: R/nogoldstandard.b.R

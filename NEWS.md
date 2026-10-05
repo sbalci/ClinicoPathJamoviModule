@@ -2,6 +2,28 @@
 
 ## Unreleased — rare-disease AI validation and workload
 
+- `nogoldstandard` now rejects a variable chosen for two test slots with a clear message;
+  previously the composite method stopped with an R error. The bootstrap sample count is now
+  a whole number, so a fractional value no longer stops the analysis. Latent estimates at 0%
+  or 100% (for example, tests that always agree) now carry a warning, and bootstrap intervals
+  of zero width are left blank instead of showing 100-100%. With three tests the pairwise
+  dependence check reads "Not assessable" instead of "Consistent with independence".
+  Positive levels now start unselected, so a test is never analysed with its first (often
+  negative) level silently treated as positive. Penalized-EM bootstrap runs about a third
+  faster with unchanged intervals, and all of the analysis's messages are translated into
+  Turkish. A test added without choosing its positive level is now named in a notice and
+  the analysis waits for it; previously that test was left out of the analysis without
+  warning. The R syntax it exports now quotes the test variables, so it runs for names
+  such as `HPV DNA`, and a test name starting with `<` (for example `<LOD flag`) no
+  longer shows as a blank table label. Latent class analysis now names a test that has
+  only one observed result (for example, a positive level that never occurs) instead of
+  stopping with an optimizer error, and latent-model bootstrap runs faster. Latent class
+  bootstrap no longer discards resamples in which a rare test has no positive result, so
+  that test's interval can reach 0%; the kappa table explains why a test with a single
+  result has no p-value. PPV and NPV now have confidence intervals: bootstrap percentile
+  intervals when Bootstrap CI is on, Wilson intervals for the reference-rule methods
+  otherwise, with a note that predictive values hold only at the data's class or rule
+  proportion.
 - Correct `psychopdaROC` PR-AUC endpoints using a shared tie-aware helper; distinguish
   average precision from trapezoidal PR area. Repair the draft PR method choices and
   implement a reproducible paired model-swap permutation comparison.

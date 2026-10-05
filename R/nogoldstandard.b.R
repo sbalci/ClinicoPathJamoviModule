@@ -1,7 +1,7 @@
 #' @title Analysis Without Gold Standard
 #' @importFrom R6 R6Class
 #' @importFrom graphics axis box image
-#' @importFrom grDevices colorRampPalette hcl.colors
+#' @importFrom grDevices hcl.colors
 #' @import jmvcore
 #' @noRd
 NULL
@@ -20,6 +20,8 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
             .noticeList = list(),
             # One bootstrap pass per run, shared by prevalence and every test metric.
             .boot_cache = NULL,
+            # Set by .bootCI() when it blanks a zero-width interval.
+            .degenerateCI = FALSE,
 
             # Lines collected for the Analysis Diagnostics panel. `verbose` previously did
             # almost nothing a jamovi user could see: 17 of its 18 effects were message()
@@ -46,6 +48,19 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     seed <- 0
                 }
                 as.integer((as.double(seed) + as.double(offset)) %% .Machine$integer.max)
+            },
+
+            # Syntax pane: jmvcore writes a Variable value unquoted (`test1 = HPV DNA` does not
+            # parse) and a Level value without escaping `"` or `\`, so a crafted column name could
+            # put live code into a snippet users copy into R. A NULL Level stays with super: the
+            # wrapper needs `test3Positive = NULL` because Level arguments have no default.
+            .sourcifyOption = function(option) {
+                quoted <- c(paste0("test", 1:5), paste0("test", 1:5, "Positive"))
+                value <- option$value
+                if (option$name %in% quoted && is.character(value) &&
+                    length(value) == 1L && nzchar(value))
+                    return(paste0(option$name, " = ", encodeString(value, quote = '"')))
+                super$.sourcifyOption(option)
             },
 
             # The .a.yaml option TITLES, so notices can name a choice the way the
@@ -146,6 +161,58 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
 
                 # Show welcome message initially
                 private$.showWelcomeMessage()
+
+                # Rows fixed by the options are built here and filled with setRow() in
+                # .run(), so the tables do not appear empty and then restructure.
+                tests <- private$.configuredTests()
+                if (length(tests) >= 2 && !anyDuplicated(tests) &&
+                    length(private$.pendingSlots()) == 0)
+                    private$.initTables(tests)
+            },
+            # Variables that have both a test variable and a selected positive level.
+            .configuredTests = function() {
+                unlist(lapply(seq_len(5), function(i) {
+                    v <- self$options[[paste0("test", i)]]
+                    if (!is.null(v) && !is.null(self$options[[paste0("test", i, "Positive")]])) v
+                }))
+            },
+            # Slots holding a variable whose positive level is still unselected (allowNone
+            # makes that the state of every newly added variable). Such a test used to be
+            # dropped in silence: rule methods ran on the rest, latent class asked for "more
+            # tests" the user had already added.
+            .pendingSlots = function() {
+                Filter(function(i) !is.null(self$options[[paste0("test", i)]]) &&
+                           is.null(self$options[[paste0("test", i, "Positive")]]),
+                       seq_len(5))
+            },
+            .initTables = function(tests) {
+                # Cells are HTML-filtered by the client: a raw "<LOD flag" renders blank and
+                # "a<b" as "a". Break the tag at the display sink only; rowKeys stay raw.
+                for (t in tests)
+                    self$results$test_metrics$addRow(rowKey = t, values = list(test = .diagCellText(t)))
+
+                latent <- identical(self$options$method, "latent_class")
+                # Same "pair_i_j" keys and order as the i < j loops in .run().
+                for (p in utils::combn(length(tests), 2, simplify = FALSE)) {
+                    key <- paste0("pair_", p[1], "_", p[2])
+                    label <- .diagCellText(.fmt(.("{a} vs {b}"), a = tests[p[1]], b = tests[p[2]]))
+                    self$results$agreement_stats$addRow(rowKey = key, values = list(test_pair = label))
+                    if (latent)
+                        self$results$conditional_dependence$addRow(rowKey = key, values = list(pair = label))
+                }
+
+                if (latent) {
+                    # rowKey keeps the stable English key; only the label is translated.
+                    labels <- list(
+                        "BIC"                = .("BIC"),
+                        "AIC"                = .("AIC"),
+                        "Log-Likelihood"     = .("Log-Likelihood"),
+                        "G-squared"          = .("G-squared"),
+                        "Chi-squared"        = .("Chi-squared"),
+                        "Degrees of Freedom" = .("Degrees of Freedom"))
+                    for (name in names(labels))
+                        self$results$model_fit$addRow(rowKey = name, values = list(statistic = labels[[name]]))
+                }
             },
             .populateCrossTab = function(test_data, tests, test_levels) {
                 # Create cross-tabulation table showing all possible test combinations
@@ -190,7 +257,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     for (j in seq_len(ncol(pattern))) {
                         test_name <- names(pattern)[j]
                         result <- ifelse(pattern[[j]] == 1, "+", "-")
-                        pattern_labels[j] <- paste0(test_name, result)
+                        pattern_labels[j] <- paste0(.diagCellText(test_name), result)
                     }
                     combination_label <- paste(pattern_labels, collapse = ", ")
 
@@ -221,12 +288,8 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 # A test is configured only when both its variable and selected positive
                 # level are present. Counting variables alone led to a validation error and
                 # stale output when a positive-level selection was removed.
-                configured <- vapply(seq_len(5), function(i) {
-                    !is.null(self$options[[paste0("test", i)]]) &&
-                        !is.null(self$options[[paste0("test", i, "Positive")]])
-                }, logical(1))
-
-                if (sum(configured) < 2) {
+                if (length(private$.configuredTests()) < 2 ||
+                    length(private$.pendingSlots()) > 0) {
                     self$results$instructions$setVisible(TRUE)
                     # clinical_summary carries `visible: (showSummary)` in the .r.yaml;
                     # calling setVisible() here re-implemented that binding imperatively and
@@ -384,6 +447,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 on.exit(private$.renderNotices(), add = TRUE)
                 private$.diagLines <- character(0)
                 private$.boot_cache <- NULL
+                private$.degenerateCI <- FALSE
                 private$.preset_info <- NULL
                 self$results$clinical_summary$setContent("")
 
@@ -398,6 +462,14 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
 
                 # Show welcome message if needed and return early if instructions are displayed
                 if (private$.showWelcomeMessage()) {
+                    pending <- private$.pendingSlots()
+                    if (length(pending) > 0)
+                        private$.addNotice("INFO", .("Positive level not selected"),
+                            .fmt(.("Choose the positive level for {tests}. A test enters the analysis only after its positive level is chosen, so no results are shown yet."),
+                                 tests = paste(vapply(pending, function(i)
+                                     .fmt(.("Test {number} ({variable})"), number = i,
+                                          variable = self$options[[paste0("test", i)]]),
+                                     character(1)), collapse = ", ")))
                     return()
                 }
 
@@ -448,6 +520,15 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 # Ensure at least 2 tests are provided
                 if (length(tests) < 2) {
                     jmvcore::reject(.("At least two tests with positive levels must be specified"))
+                }
+
+                # One variable in two slots left the second copy all-NA (columns are
+                # assigned by name): composite aborted with an R error and latent class
+                # fitted a column of missing values.
+                duplicated_tests <- unlist(tests)[duplicated(unlist(tests))]
+                if (length(duplicated_tests) > 0) {
+                    jmvcore::reject(.("Each test must be a different variable; '{}' is selected more than once."),
+                                    code = NULL, duplicated_tests[1])
                 }
 
                 # Enforce LCA constraint
@@ -518,6 +599,18 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
 
                     var <- test_data[[test_name]]
                     binary_data[[test_name]] <- as.numeric(var == pos_level)
+                }
+
+                # WRONG BEFORE: poLCA silently drops a constant test ("ALERT ... removed from
+                # the analysis"), so .runLCA built 2(k-1)+1 starting values for a k-test
+                # likelihood and nlminb stopped with "gradient function must return a numeric
+                # vector of length 5". Penalized EM keeps the column and reports it honestly.
+                if (self$options$method == "latent_class") {
+                    constant <- names(binary_data)[vapply(binary_data,
+                        function(x) length(unique(x)) < 2, logical(1))]
+                    if (length(constant) > 0)
+                        jmvcore::reject(.("Latent class analysis needs both positive and not-positive results for every test among the analysed cases. Only one result was observed for: {}. Such a test carries no information about the latent classes. Check that the correct positive level is selected, or remove the test."),
+                                        code = NULL, paste0("'", constant, "'", collapse = ", "))
                 }
 
                 private$.checkpoint() # Before main analysis
@@ -596,9 +689,9 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                         data = results$data,
                         method = self$options$method,
                         nboot = self$options$nboot,
-                        verbose = self$options$verbose,
-                        warm_start = if (identical(self$options$method, "latent_class"))
-                            results$model$probs else NULL
+                        warm_start = switch(self$options$method,
+                            latent_class = results$model$probs,
+                            bayesian = results$par)
                     )
                 }
 
@@ -616,6 +709,9 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 if (!is.null(results)) {
                     private$.populatePrevalence(results)
                     private$.populateTestMetrics(results)
+                    if (isTRUE(private$.degenerateCI))
+                        private$.addNotice("WARNING", .("Some bootstrap intervals left blank"),
+                            .("For at least one estimate every bootstrap resample gave the same value, so its percentile interval has zero width. A zero-width interval does not describe the uncertainty and is left blank. This usually happens at 0% or 100%."))
                     if (self$options$method == "latent_class") {
                         private$.populateModelFit(results$model)
                         private$.populateConditionalDependence(results$model, tests)
@@ -683,6 +779,14 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 )
             },
 
+            # Footnote for latent-model bootstrap replicates; NULL clears it otherwise.
+            .bootWarmStartNote = function() {
+                if (!isTRUE(self$options$bootstrap)) return(NULL)
+                switch(self$options$method,
+                    latent_class = .("Each latent-class resample uses the full-sample solution and two additional random starts, followed by likelihood refinement. The main fit uses a larger search, so local-optimum uncertainty may remain. Percentile intervals can be too narrow with weak identification, boundaries or small samples; nominal coverage is not guaranteed."),
+                    bayesian = .("Each penalized-EM resample starts from the full-sample solution and two standard starting values, followed by penalized-likelihood refinement. The main fit uses a larger search, so local-optimum uncertainty may remain. Percentile intervals can be too narrow with weak identification, boundaries or small samples; nominal coverage is not guaranteed."),
+                    NULL)
+            },
             .populatePrevalence = function(results) {
                 if (is.null(results)) {
                     return()
@@ -746,10 +850,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 )
                 # Write NULL too, so a note from an earlier method does not persist.
                 table$setNote(
-                    "boot_warm_start",
-                    if (isTRUE(self$options$bootstrap) && identical(method, "latent_class"))
-                        .("Each latent-class resample uses the full-sample solution and two additional random starts, followed by likelihood refinement. The main fit uses a larger search, so local-optimum uncertainty may remain. Percentile intervals can be too narrow with weak identification, boundaries or small samples; nominal coverage is not guaranteed.")
-                )
+                    "boot_warm_start", private$.bootWarmStartNote())
                 table$setRow(rowNo = 1, values = list(
                     estimate = prevalence,
                     ci_lower = ci_lower,
@@ -766,9 +867,8 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 # variable and a selected positive level.
                 tests <- names(results$data)
 
-                # Clear any existing rows to prevent duplicates
+                # Rows are built in .init(), keyed by test name.
                 table <- self$results$test_metrics
-                table$deleteRows()
 
                 # The columns are headed "Lower CI"/"Upper CI" whatever produced them and at
                 # whatever level, so an 80% Wald interval was indistinguishable from a 95%
@@ -789,18 +889,17 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                                 conf_pct, self$options$nboot,
                                 base::format(private$.seedValue()))
                     else if (self$options$method %in% c("latent_class", "bayesian"))
-                        sprintf(jmvcore::.("%.0f%% confidence intervals are not reported for latent-model response probabilities without bootstrap refitting. Ordinary binomial intervals omit uncertainty from estimating the latent classes and can be substantially too narrow. Enable Bootstrap CI to obtain intervals."),
+                        sprintf(jmvcore::.("%.0f%% confidence intervals are not reported for latent-model response probabilities and predictive values without bootstrap refitting. Ordinary binomial intervals omit uncertainty from estimating the latent classes and can be substantially too narrow. Enable Bootstrap CI to obtain intervals."),
                                 conf_pct)
                     else
                         sprintf(jmvcore::.("%.0f%% intervals are Wilson score intervals for agreement with the observed reference rule."),
                                 conf_pct)
                 )
                 table$setNote(
-                    "boot_warm_start",
-                    if (isTRUE(self$options$bootstrap) &&
-                        identical(self$options$method, "latent_class"))
-                        .("Each latent-class resample uses the full-sample solution and two additional random starts, followed by likelihood refinement. The main fit uses a larger search, so local-optimum uncertainty may remain. Percentile intervals can be too narrow with weak identification, boundaries or small samples; nominal coverage is not guaranteed.")
-                )
+                    "boot_warm_start", private$.bootWarmStartNote())
+                table$setNote(
+                    "predictive",
+                    .("PPV and NPV hold only at the class or rule proportion of these data. In a population with a different prevalence they differ, even when the response probabilities are the same."))
 
                 # These two "methods" build the reference standard out of the very tests
                 # being evaluated, so each test is scored against a standard that contains
@@ -847,14 +946,34 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     )
                 }
 
+                # Some metrics are fixed at 1 by the CONSTRUCTION of the reference, not
+                # estimated from the data, and reporting them as results is misleading:
+                #   all_positive: the reference is TRUE only when every test is positive,
+                #     so a diseased case can never be test-negative -> FN = 0 ->
+                #     sensitivity == 1 and NPV == 1 for EVERY test, on EVERY dataset.
+                #   any_positive: the reference is FALSE only when every test is negative,
+                #     so FP = 0 -> specificity == 1 and PPV == 1 likewise.
+                # Confirmed on 25/25 random datasets. They are blanked rather than shown
+                # as "100% (95% CI 100-100%)", which reads as a perfect test.
+                degenerate_sens <- identical(self$options$method, "all_positive") ||
+                    (identical(self$options$method, "composite") && length(tests) == 2)
+                degenerate_spec <- identical(self$options$method, "any_positive")
+                no_ci <- list(lower = NA_real_, upper = NA_real_)
+
                 for (i in seq_along(tests)) {
                     sensitivity <- results$sensitivities[i]
                     specificity <- results$specificities[i]
 
                     # Calculate confidence intervals
                     if (self$options$bootstrap) {
-                        sens_ci <- private$.bootCI(private$.boot_cache$sensitivities[, i], self$options$alpha)
-                        spec_ci <- private$.bootCI(private$.boot_cache$specificities[, i], self$options$alpha)
+                        # WRONG BEFORE: the blanked column went through .bootCI too. Its
+                        # resamples are all exactly 1, so it raised "Some bootstrap intervals
+                        # left blank" on every all/any-positive run, blaming the bootstrap
+                        # for a column that is blank by construction.
+                        sens_ci <- if (degenerate_sens) no_ci else
+                            private$.bootCI(private$.boot_cache$sensitivities[, i], self$options$alpha)
+                        spec_ci <- if (degenerate_spec) no_ci else
+                            private$.bootCI(private$.boot_cache$specificities[, i], self$options$alpha)
                     } else if (self$options$method %in% c("latent_class", "bayesian")) {
                         sens_ci <- list(lower = NA_real_, upper = NA_real_)
                         spec_ci <- list(lower = NA_real_, upper = NA_real_)
@@ -890,32 +1009,37 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                         ppv_npv <- private$.calculatePPVNPV(sensitivity, specificity, prevalence)
                     }
 
-                    # Some metrics are fixed at 1 by the CONSTRUCTION of the reference, not
-                    # estimated from the data, and reporting them as results is misleading:
-                    #   all_positive: the reference is TRUE only when every test is positive,
-                    #     so a diseased case can never be test-negative -> FN = 0 ->
-                    #     sensitivity == 1 and NPV == 1 for EVERY test, on EVERY dataset.
-                    #   any_positive: the reference is FALSE only when every test is negative,
-                    #     so FP = 0 -> specificity == 1 and PPV == 1 likewise.
-                    # Confirmed on 25/25 random datasets. They are blanked rather than shown
-                    # as "100% (95% CI 100-100%)", which reads as a perfect test.
-                    degenerate_sens <- identical(self$options$method, "all_positive") ||
-                        (identical(self$options$method, "composite") && length(tests) == 2)
-                    degenerate_spec <- identical(self$options$method, "any_positive")
+                    # Predictive-value intervals use the same source as the other intervals.
+                    # Each resample's PPV/NPV follow from its cached prevalence, sensitivity and
+                    # specificity (exact on a 2x2 table), so no extra refitting is needed.
+                    if (isTRUE(self$options$bootstrap)) {
+                        boot <- private$.boot_cache
+                        boot_pv <- private$.calculatePPVNPV(boot$sensitivities[, i],
+                            boot$specificities[, i], boot$prevalence)
+                        ppv_ci <- if (degenerate_spec) no_ci else
+                            private$.bootCI(boot_pv$ppv, self$options$alpha)
+                        npv_ci <- if (degenerate_sens) no_ci else
+                            private$.bootCI(boot_pv$npv, self$options$alpha)
+                    } else if (self$options$method %in% c("composite", "all_positive", "any_positive")) {
+                        ppv_ci <- private$.wilsonCI(sum(ref & positive), sum(positive), self$options$alpha)
+                        npv_ci <- private$.wilsonCI(sum(!ref & !positive), sum(!positive), self$options$alpha)
+                    } else {
+                        ppv_ci <- npv_ci <- no_ci
+                    }
 
                     if (degenerate_sens) {
                         sensitivity <- NA_real_
-                        sens_ci <- list(lower = NA_real_, upper = NA_real_)
+                        sens_ci <- no_ci
                         ppv_npv$npv <- NA_real_
+                        npv_ci <- no_ci
                     } else if (degenerate_spec) {
                         specificity <- NA_real_
-                        spec_ci <- list(lower = NA_real_, upper = NA_real_)
+                        spec_ci <- no_ci
                         ppv_npv$ppv <- NA_real_
+                        ppv_ci <- no_ci
                     }
 
-                    # Add row to cleared table
-                    table$addRow(rowKey = tests[i], values = list(
-                        test = tests[i],
+                    table$setRow(rowKey = tests[i], values = list(
                         sensitivity = sensitivity,
                         specificity = specificity,
                         sens_ci_lower = sens_ci$lower,
@@ -923,7 +1047,11 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                         spec_ci_lower = spec_ci$lower,
                         spec_ci_upper = spec_ci$upper,
                         ppv = ppv_npv$ppv,
-                        npv = ppv_npv$npv
+                        ppv_ci_lower = ppv_ci$lower,
+                        ppv_ci_upper = ppv_ci$upper,
+                        npv = ppv_npv$npv,
+                        npv_ci_lower = npv_ci$lower,
+                        npv_ci_upper = npv_ci$upper
                     ))
                 }
             },
@@ -935,7 +1063,6 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 # compute regardless and guard only the table writes.
                 table <- private$.resultsItem("conditional_dependence")
                 if (is.null(model)) return()
-                if (!is.null(table)) table$deleteRows()
 
                 resid_df <- model$resid.df
                 just_identified <- !is.numeric(resid_df) || length(resid_df) != 1 ||
@@ -950,30 +1077,32 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 # as.data.frame() on the cbind response matrix, which runs make.names() on
                 # the column names, while model$probs keeps the names the user selected.
                 # Any test named non-syntactically ("HPV DNA", "p16+/p53", "Grade 2/3")
-                # therefore never matched, var_cols came up short and the whole
-                # bivariate-residual panel returned silently empty -- so the
-                # conditional-independence assumption looked checked when it was not.
-                # model$probs carries the original names, so match on those.
-                var_cols <- intersect(names(model$probs), unlist(tests))
-                if (length(var_cols) < 2) return()
+                # therefore never matched and the whole bivariate-residual panel stayed
+                # silently empty. .bivariateResidual() matches on names(model$probs).
+                tests <- unlist(tests)
 
                 THRESHOLD <- stats::qchisq(0.95, df = 1)   # 3.841
                 flagged <- character(0)
 
-                for (i in seq_len(length(var_cols) - 1)) {
-                    for (j in seq(i + 1, length(var_cols))) {
-                        a <- var_cols[i]
-                        b <- var_cols[j]
+                for (i in seq_len(length(tests) - 1)) {
+                    for (j in seq(i + 1, length(tests))) {
+                        a <- tests[i]
+                        b <- tests[j]
                         bvr <- private$.bivariateResidual(model, a, b)
+                        # The .init() row stays blank when the residual is unavailable.
                         if (!is.finite(bvr)) next
                         # Test names can contain the display separator; key by position.
                         pair_key <- paste0("pair_", i, "_", j)
                         pair <- .fmt(.("{a} vs {b}"), a = a, b = b)
                         if (bvr > THRESHOLD) flagged <- c(flagged, pair)
-                        if (!is.null(table)) table$addRow(rowKey = pair_key, values = list(
-                            pair = pair,
+                        if (!is.null(table)) table$setRow(rowKey = pair_key, values = list(
                             bvr = bvr,
-                            verdict = if (bvr > THRESHOLD)
+                            # WRONG BEFORE: with three tests an interior fit reproduces every
+                            # pairwise table exactly (residual ~1e-29 even when one test
+                            # copies another), yet each row read "Consistent with independence".
+                            verdict = if (just_identified && bvr < 1e-6)
+                                jmvcore::.("Not assessable: the model reproduces this pair exactly")
+                            else if (bvr > THRESHOLD)
                                 jmvcore::.("Evidence against conditional independence")
                             else jmvcore::.("Consistent with independence")
                         ))
@@ -988,7 +1117,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     private$.addNotice(
                         "STRONG_WARNING",
                         .("Tests do not appear to err independently"),
-                        sprintf(jmvcore::.("%s have bivariate residuals above the descriptive threshold. This is evidence that the conditional-independence model does not reproduce those pairwise tables. Because the residual is squared, it does not show the direction or cause of the dependence and cannot determine whether fitted response probabilities are biased upward or downward. Do not interpret the latent-class parameters as diagnostic accuracy without a dependence-sensitive model or a study-specific sensitivity analysis."),
+                        sprintf(jmvcore::.("%s have bivariate residuals above the descriptive threshold. This is evidence that the conditional-independence model does not reproduce those pairwise tables. The flagged pair is not necessarily the dependent pair: dependence between other tests can be absorbed into the latent classes and appear as misfit elsewhere. Because the residual is squared, it does not show the direction or cause of the dependence and cannot determine whether fitted response probabilities are biased upward or downward. Do not interpret the latent-class parameters as diagnostic accuracy without a dependence-sensitive model or a study-specific sensitivity analysis."),
                                 paste(flagged, collapse = ", "))
                     )
                 }
@@ -1047,7 +1176,6 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 table <- self$results$model_fit
-                table$deleteRows() # Clear existing rows to prevent duplicates on re-run
 
                 # Nominal dimension does not remove the model's inequality constraints.
                 # Always show discrepancies, without a chi-squared p-value at zero df.
@@ -1067,25 +1195,10 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 table$setNote("just_identified", if (just_identified)
                     .("With three tests there are 0 nominal residual degrees of freedom. This does not guarantee exact fit: the model also imposes constraints on the observed probabilities. G-squared and Chi-squared are descriptive discrepancies, without a chi-squared reference test. Small discrepancies do not verify conditional independence or parameter identifiability."))
 
-                # Add each available statistic to table.
-                # WRONG BEFORE: the displayed label WAS the English list name, so this
-                # table's row labels stayed English inside an otherwise-translated result
-                # tree. rowKey keeps the stable English key; only the label is translated.
+                # Rows and their translated labels are built in .init().
                 for (name in names(fit_stats)) {
-                    if (!is.null(fit_stats[[name]])) {
-                        label <- switch(name,
-                            "BIC"                = .("BIC"),
-                            "AIC"                = .("AIC"),
-                            "Log-Likelihood"     = .("Log-Likelihood"),
-                            "G-squared"          = .("G-squared"),
-                            "Chi-squared"        = .("Chi-squared"),
-                            "Degrees of Freedom" = .("Degrees of Freedom"),
-                            name)
-                        table$addRow(rowKey = name, values = list(
-                            statistic = label,
-                            value = fit_stats[[name]]
-                        ))
-                    }
+                    if (!is.null(fit_stats[[name]]))
+                        table$setRow(rowKey = name, values = list(value = fit_stats[[name]]))
                 }
             },
             .lcaConverged = function(model, maxiter = 1000L) {
@@ -1327,6 +1440,17 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     results$estimable <- FALSE
                 } else {
                     results$estimable <- TRUE
+                    # WRONG BEFORE: three identical tests passed every check above and were
+                    # reported as 100% sensitivity and specificity with a 100-100% bootstrap
+                    # interval. The data fit perfect tests and tests sharing one error
+                    # equally well, so the identification check cannot catch it; say so.
+                    est <- c(results$prevalence, results$sensitivities, results$specificities)
+                    at_bound <- sum(est < 1e-6 | est > 1 - 1e-6, na.rm = TRUE)
+                    results$boundary <- at_bound > 0
+                    if (results$boundary)
+                        private$.addNotice("STRONG_WARNING", .("Estimates at the parameter boundary"),
+                            .fmt(.("{count} of the {total} latent estimates (class proportion and response probabilities) are at 0% or 100%. Boundary estimates are nonregular: their bootstrap intervals are unreliable and collapse to a single value when every resample stays at the boundary. Tests that agree perfectly fit both perfectly accurate tests and tests that share the same errors, so do not report 0% or 100% sensitivity or specificity from this fit without independent evidence."),
+                                 count = at_bound, total = length(est)))
                 }
                 results
             },
@@ -1404,11 +1528,10 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
 
             # Fixed-prior, penalized latent-class EM. The public option name remains
             # `bayesian` for compatibility, but this is not posterior sampling.
-            .runBayesian = function(binary_data) {
-                # Number of tests and patients
+            # start_par: a bootstrap replicate starts from the full-sample solution plus
+            # two standard starts instead of the full search (as .runLCA's probs_start).
+            .runBayesian = function(binary_data, start_par = NULL) {
                 num_tests <- ncol(binary_data)
-                num_patients <- nrow(binary_data)
-                binary_matrix <- as.matrix(binary_data)
 
                 # A two-class model over k binary tests has 2k + 1 free parameters and
                 # 2^k - 1 degrees of freedom, so k = 2 gives 5 parameters for 3 df: the
@@ -1419,26 +1542,22 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     jmvcore::reject(.("Penalized EM requires at least 3 tests because the two-test latent-class model is not statistically identifiable."))
                 }
 
-                # Prior parameters
-                # Prior for prevalence (Beta distribution)
-                alpha_prev <- 1 # uniform prior
-                beta_prev <- 1 # uniform prior
-
-                # Prior for sensitivity and specificity (Beta distribution).
+                # These constants only DESCRIBE the priors for the notice below. The penalty
+                # itself is hard-coded in nogoldstandard_refine(penalized = TRUE) as
+                # log(sens) + log(spec) per test, i.e. Beta(2,1) on both and a uniform
+                # Beta(1,1) on prevalence (no term). Change both places together.
                 # Beta(2,1) has density 2x on [0,1]: mean 2/3, monotonically increasing, so
-                # it pulls BOTH estimates upward. In MAP terms it adds one pseudo-success and
-                # no pseudo-failure to every test. That is a deliberate thumb on the scale
-                # toward better-looking tests, and it was invisible to the user -- neither
-                # the output nor the option description mentioned any prior at all.
+                # it pulls BOTH estimates upward -- in MAP terms one pseudo true positive (class +)
+                # and one pseudo true negative (class -) per test, NOT a pseudo-positive result.
+                alpha_prev <- 1
+                beta_prev <- 1
                 alpha_sens <- 2
                 beta_sens <- 1
-                alpha_spec <- 2
-                beta_spec <- 1
 
                 private$.addNotice(
                     "WARNING",
                     .("Fixed priors used by penalized EM"),
-                    sprintf(.("Prevalence uses a uniform Beta(%1$g, %2$g) prior. Sensitivity and specificity each use a Beta(%3$g, %4$g) prior, which has mean %5$.2f and increases toward 1, so it pulls both estimates upward -- in MAP terms it adds one pseudo-positive result to every test. With a small sample this prior, not your data, may be driving the numbers below. These are penalised-likelihood (MAP) point estimates from an EM algorithm, not draws from a posterior, so the intervals shown are not credible intervals."),
+                    sprintf(.("Prevalence uses a uniform Beta(%1$g, %2$g) prior. Sensitivity and specificity each use a Beta(%3$g, %4$g) prior, which has mean %5$.2f and increases toward 1, so it pulls both estimates upward -- in MAP terms it adds one pseudo true-positive and one pseudo true-negative result to every test. With a small sample this prior, not your data, may be driving the numbers below. These are penalised-likelihood (MAP) point estimates from an EM algorithm, not draws from a posterior, so the intervals shown are not credible intervals."),
                             alpha_prev, beta_prev, alpha_sens, beta_sens,
                             alpha_sens / (alpha_sens + beta_sens))
                 )
@@ -1460,6 +1579,8 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     q0[j] <- .05
                     starts <- c(starts, list(c(.3, q1, q0), c(.7, q0, q1)))
                 }
+                # Each replicate ran all 4 + 2k starts (~2.5 min at nboot = 1000, n = 300).
+                if (!is.null(start_par)) starts <- c(list(start_par), starts[1:2])
                 fits <- lapply(starts, function(start) {
                     initial <- nogoldstandard_em_start(pattern_data, start, checkpoint)
                     nogoldstandard_refine(pattern_data, initial, penalized = TRUE,
@@ -1490,7 +1611,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     fit$score, fit$objective))
                 private$.diag(sprintf("Identification : unpenalized singular-value ratio %.3g",
                                       identification$ratio))
-                private$.checkLatentEstimate(list(prevalence = par[1], sensitivities = sensitivities,
+                private$.checkLatentEstimate(list(prevalence = par[1], par = par, sensitivities = sensitivities,
                      specificities = specificities, data = binary_data,
                      converged = fit$converged, iterations = fit$iterations,
                      identification = identification, orientation = orientation,
@@ -1574,7 +1695,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
             # Resampling once per replicate and reading all the statistics off that single
             # fit is both far cheaper and statistically better: the intervals now come from
             # one coherent set of resamples rather than several unrelated ones.
-            .bootstrapAll = function(data, method, nboot, verbose = FALSE, warm_start = NULL) {
+            .bootstrapAll = function(data, method, nboot, warm_start = NULL) {
                 n <- nrow(data)
                 n_tests <- ncol(data)
 
@@ -1616,9 +1737,27 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
 
                     boot_result <- tryCatch({
                         if (method == "latent_class") {
-                            private$.runLCA(boot_data, names(data),
-                                            n_starts = 3L,
-                                            probs_start = warm_start)
+                            # A rare test can be constant in a resample. poLCA would drop it and
+                            # the replicate used to fail -- discarding exactly the resamples
+                            # where its sensitivity is 0, which pulled the interval off the
+                            # boundary. Its MLE is that value in both classes and leaves the other
+                            # tests' likelihood unchanged: fit the rest, place it at the boundary.
+                            keep <- vapply(boot_data, function(x) length(unique(x)) > 1, logical(1))
+                            fit <- private$.runLCA(boot_data[keep], names(data)[keep],
+                                                   n_starts = 3L,
+                                                   probs_start = warm_start[keep])
+                            if (!all(keep) && isTRUE(fit$estimable)) {
+                                # (tryCatch evaluates here: never reuse the names sens/spec)
+                                value <- vapply(boot_data[!keep], `[`, numeric(1), 1L)
+                                full_sens <- full_spec <- numeric(n_tests)
+                                full_sens[keep] <- fit$sensitivities
+                                full_spec[keep] <- fit$specificities
+                                full_sens[!keep] <- value
+                                full_spec[!keep] <- 1 - value
+                                fit$sensitivities <- full_sens
+                                fit$specificities <- full_spec
+                            }
+                            fit
                         } else if (method == "composite") {
                             private$.runComposite(boot_data)
                         } else if (method == "all_positive") {
@@ -1626,7 +1765,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                         } else if (method == "any_positive") {
                             private$.runAnyPositive(boot_data)
                         } else if (method == "bayesian") {
-                            private$.runBayesian(boot_data)
+                            private$.runBayesian(boot_data, start_par = warm_start)
                         } else {
                             NULL
                         }
@@ -1684,7 +1823,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                                       nboot, base::format(seed_val), error_count,
                                       100 * error_count / nboot))
                 if (!is.null(warm_start))
-                    private$.diag("                  latent class replicates use the full-sample start plus two random starts")
+                    private$.diag("                  replicates start from the full-sample solution plus two additional starts")
 
                 list(prevalence = prevalence, sensitivities = sens, specificities = spec,
                      n_failed = error_count, nboot = nboot)
@@ -1695,6 +1834,12 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 values <- values[is.finite(values)]
                 if (length(values) < 20) return(list(lower = NA_real_, upper = NA_real_))
                 q <- stats::quantile(values, c(alpha / 2, 1 - alpha / 2), names = FALSE, na.rm = TRUE)
+                # Every resample gave the same value (in practice 0 or 1): a zero-width
+                # percentile interval reads as certainty, so blank it and say why once.
+                if (q[2] - q[1] < 1e-12) {
+                    private$.degenerateCI <- TRUE
+                    return(list(lower = NA_real_, upper = NA_real_))
+                }
                 list(lower = q[1], upper = q[2])
             },
 
@@ -1704,128 +1849,21 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
 
                 # PPV = (sensitivity * prevalence) / ((sensitivity * prevalence) + ((1 - specificity) * (1 - prevalence)))
                 # A test with no diseased (or no healthy) cases yields NA sensitivity or
-                # specificity upstream. `if (NA > 0)` then throws "missing value where
-                # TRUE/FALSE needed" and aborts the ENTIRE analysis rather than leaving one
-                # cell blank. isTRUE() makes the guard NA-safe.
-                ppv_numerator <- sensitivity * prevalence
-                ppv_denominator <- ppv_numerator + ((1 - specificity) * (1 - prevalence))
-                ppv <- if (isTRUE(ppv_denominator > 0)) ppv_numerator / ppv_denominator else NA_real_
-
-                # NPV = (specificity * (1 - prevalence)) / (((1 - sensitivity) * prevalence) + (specificity * (1 - prevalence)))
-                npv_numerator <- specificity * (1 - prevalence)
-                npv_denominator <- ((1 - sensitivity) * prevalence) + npv_numerator
-                npv <- if (isTRUE(npv_denominator > 0)) npv_numerator / npv_denominator else NA_real_
+                # specificity upstream; ifelse() keeps that NA-safe (a bare `if (NA > 0)`
+                # once aborted the whole analysis instead of blanking one cell).
+                #
+                # Vectorized for bootstrap replicates. On any 2x2 table this identity is exact,
+                # so it also gives a rule method's empirical PPV/NPV -- provided an empty group
+                # contributes 0: with prevalence 0 sensitivity is NA (no positive group) but
+                # PPV is 0 and NPV 1, and NA * 0 would otherwise drop that resample.
+                tp <- ifelse(prevalence == 0, 0, sensitivity * prevalence)
+                fn <- ifelse(prevalence == 0, 0, (1 - sensitivity) * prevalence)
+                fp <- ifelse(prevalence == 1, 0, (1 - specificity) * (1 - prevalence))
+                tn <- ifelse(prevalence == 1, 0, specificity * (1 - prevalence))
+                ppv <- ifelse(tp + fp > 0, tp / (tp + fp), NA_real_)
+                npv <- ifelse(tn + fn > 0, tn / (tn + fn), NA_real_)
 
                 return(list(ppv = ppv, npv = npv))
-            },
-            .plot = function(image, ggtheme, theme, ...) {
-                # Get state
-                state <- image$state
-                if (is.null(state) || is.null(state$agreement_matrix) || is.null(state$tests)) {
-                    return(FALSE)
-                }
-
-                # Extract data
-                agreement_matrix <- state$agreement_matrix
-                tests <- state$tests
-
-                # Safety check
-                if (length(tests) < 2) {
-                    return(FALSE)
-                }
-
-                # Create the plot
-                tryCatch(
-                    {
-                        # Set up plotting parameters
-                        old_par <- par(no.readonly = TRUE)
-                        on.exit(par(old_par), add = TRUE)
-
-                        # Set margins to accommodate legend (right margin increased)
-                        par(mar = c(5, 5, 4, 8), xpd = TRUE)
-
-                        # Create better color palette - viridis-inspired
-                        # Using a green to blue color scheme for better differentiation
-                        colors <- colorRampPalette(c("#440154", "#414487", "#2a788e", "#22a884", "#7ad151", "#fde725"))(100)
-
-                        # Create the heatmap
-                        image(
-                            seq_len(nrow(agreement_matrix)),
-                            seq_len(ncol(agreement_matrix)),
-                            agreement_matrix,
-                            axes = FALSE,
-                            xlab = "",
-                            ylab = "",
-                            main = .("Test Agreement Matrix"),
-                            col = colors,
-                            zlim = c(0, 1)
-                        )
-
-                        # Add test names with better formatting
-                        axis(1, at = seq_along(tests), labels = tests, las = 2, cex.axis = 1.2)
-                        axis(2, at = seq_along(tests), labels = tests, las = 2, cex.axis = 1.2)
-
-                        # Add agreement values with improved visibility
-                        for (i in seq_len(nrow(agreement_matrix))) {
-                            for (j in seq_len(ncol(agreement_matrix))) {
-                                # Determine text color based on background brightness
-                                # Use white text on dark backgrounds, black text on light backgrounds
-                                color_idx <- round(agreement_matrix[i, j] * 99) + 1
-                                if (color_idx < 50) {
-                                    text_col <- "white"
-                                } else {
-                                    text_col <- "black"
-                                }
-
-                                text(i, j, sprintf("%.2f", agreement_matrix[i, j]),
-                                    col = text_col, cex = 1.2, font = 2
-                                )
-                            }
-                        }
-
-                        # Add a color bar legend outside the plot area
-                        legend_colors <- colors[seq(1, length(colors), length.out = 5)]
-                        legend_values <- seq(0, 1, length.out = 5)
-                        legend_labels <- sprintf("%.1f", legend_values)
-
-                        # Place legend to the right of the plot
-                        legend(length(tests) + 0.5, length(tests) / 2,
-                            legend = legend_labels,
-                            fill = legend_colors,
-                            title = .("Agreement"),
-                            bty = "n", # No box around legend
-                            cex = 1.1,
-                            y.intersp = 1.2,
-                            title.cex = 1.2
-                        )
-
-                        # Add a subtle box around the plot area
-                        box(col = "gray50", lwd = 2)
-
-                        return(TRUE)
-                    },
-                    error = function(e) {
-                        # In case of error, create a simpler plot
-                        message(.fmt(.("Error in plot: {msg}"), msg = e$message))
-
-                        # Simple fallback plot
-                        try(
-                            {
-                                plot(0, 0,
-                                    type = "n", xlim = c(0, 1), ylim = c(0, 1),
-                                    xlab = "", ylab = "", main = .("Test Agreement")
-                                )
-                                text(0.5, 0.5, .("Agreement data available but plotting failed"),
-                                    cex = 1.2, col = "red"
-                                )
-                                return(TRUE)
-                            },
-                            silent = TRUE
-                        )
-
-                        return(FALSE)
-                    }
-                )
             },
             # ggtheme/theme default to NULL: the renderer guards on ggtheme, and forcing a
             # missing promise would error rather than fall back.
@@ -1848,12 +1886,6 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 # Create the plot using ggplot2
                 tryCatch(
                     {
-                        # Check if ggplot2 is available
-                        if (!requireNamespace("ggplot2", quietly = TRUE)) {
-                            # Fallback to base R plot
-                            return(private$.plot(image, ggtheme, theme, ...))
-                        }
-
                         # Convert matrix to long format for ggplot
                         plot_data <- data.frame()
                         for (i in seq_len(nrow(agreement_matrix))) {
@@ -2042,35 +2074,12 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     }
                 }
 
-                # Method-specific warnings
-                if (method == "latent_class" && n_tests < 3) {
-                    # checking this earlier in .run now, but good to keep as message if we relax allow
-                    private$.addNotice(
-                        "WARNING",
-                        .("LCA Under-Identified"),
-                        .("LCA with only 2 tests is under-identified.")
-                    )
-                }
-
+                # Method-specific warnings (LCA with < 3 tests is rejected in .run())
                 if (method == "composite" && n_tests %% 2 == 0) {
                     private$.addNotice(
                         "WARNING",
                         .("Composite ties are classified as rule negative"),
                         .("A strict majority requires more than half of the selected tests to be positive. With an even number of tests, tied cases are therefore rule negative. This is part of the rule definition, not evidence of disease absence; use an odd number of tests or a prespecified alternative if that convention is unsuitable.")
-                    )
-                }
-
-                # Clinical context message
-                if (self$options$verbose) {
-                    private$.addNotice(
-                        "INFO",
-                        .("Clinical Validation"),
-                        .fmt(
-                            .("Analysis diagnostics: {tests} tests analyzed with N = {n} using method '{method}'."),
-                            tests = n_tests,
-                            n = n_obs,
-                            method = method
-                        )
                     )
                 }
             },
@@ -2289,7 +2298,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     "<div class='clinical-summary' style='background-color: rgba(33, 152, 255, 0.07); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;'>",
                     "<h4 style='color: inherit; margin-top: 0;'> ", .("Plain-Language Summary"), "</h4>",
                     "<p><strong>", .("Analysis:"), "</strong> ", method_label, "</p>",
-                    "<p><strong>", .("Tests analyzed:"), "</strong> ", paste(jmvcore::htmlEscape(unlist(tests)), collapse = ", "), " (N=", n_tests, ")</p>",
+                    "<p><strong>", .("Tests analyzed:"), "</strong> ", paste(jmvcore::htmlEscape(unlist(tests)), collapse = ", "), "</p>",
                     "<p><strong>", prev_label, "</strong> ", prev_pct,
                     if (rule_based) paste0(" <em>", .("(this is the share of cases satisfying the rule, not an estimate of disease prevalence)"), "</em>") else "",
                     "</p>",
@@ -2301,15 +2310,18 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                                .("this method scores each test against a reference built from the tests themselves, so the figures describe agreement with that rule rather than diagnostic accuracy."), "</p>")
                     else paste0("<p><strong>", .("Caution:"), "</strong> ",
                                 .("latent classes are unlabeled. Interpreting the high-positive class as disease, and these response probabilities as accuracy, requires a study-specific substantive justification."), "</p>"),
+                    if (isTRUE(results$boundary))
+                        paste0("<p><strong>", .("Caution:"), "</strong> ",
+                               .("at least one estimate is at 0% or 100%. Perfect agreement between tests does not show that the tests are perfectly accurate; read the boundary warning before reporting these values."), "</p>")
+                    else "",
                     "</div>"
                 )
 
                 return(summary_html)
             },
             .populateAgreementStats = function(test_data, tests, test_levels) {
-                # Calculate pairwise Cohen's Kappa
+                # Calculate pairwise Cohen's Kappa; rows are built in .init()
                 table <- self$results$agreement_stats
-                table$deleteRows() # Clear existing rows to prevent duplicates on re-run
                 n_tests <- length(tests)
 
                 if (n_tests < 2) {
@@ -2344,6 +2356,10 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                         return(list(kappa = NA_real_, p_value = NA_real_, agreement = p_o))
                     }
                     kappa <- (p_o - p_e) / chance_denominator
+                    # One constant test: kappa is exactly 0 and the null variance is 0, so the
+                    # z-test is undefined (irr::kappa2 returns 0/0 with "NaNs produced").
+                    if (any(row_sums == 0) || any(col_sums == 0))
+                        return(list(kappa = kappa, p_value = NA_real_, agreement = p_o))
 
                     # The p-value tests H0: kappa = 0 and therefore needs the null
                     # variance. vcd::Kappa's ASE is the non-null variance intended for
@@ -2380,9 +2396,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                             test_data[[test2]], test_levels[[j]]
                         )
 
-                        table$addRow(rowKey = paste0("pair_", i, "_", j), values = list(
-                            # was a bare English "vs" spliced between two test names
-                            test_pair = .fmt(.("{a} vs {b}"), a = test1, b = test2),
+                        table$setRow(rowKey = paste0("pair_", i, "_", j), values = list(
                             kappa = res$kappa,
                             p_value = res$p_value,
                             agreement = res$agreement
@@ -2394,6 +2408,11 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     "kappa_se",
                     .("Kappa compares the selected positive/negative meanings, even when tests use different factor labels. P-values test kappa = 0 using the null-variance Wald statistic from irr::kappa2. They are unadjusted across pairs and should be treated as exploratory; interpret them cautiously in small or sparse samples. Kappa is not estimable when both tests are constant.")
                 )
+                # Explains the blank p-value calculate_kappa() returns for a constant test.
+                constant <- vapply(seq_len(n_tests), function(i)
+                    length(unique(test_data[[tests[[i]]]] == test_levels[[i]])) < 2, logical(1))
+                table$setNote("kappa_constant", if (any(constant))
+                    .("A test with only one observed result has kappa 0 with every test that varies; the test of kappa = 0 is then undefined, so its p-value is left blank."))
             }
         )
     )

@@ -525,3 +525,366 @@ test_that("poLCA automatic restarts are not treated as nonconvergence", {
     model$numiter <- 1000L
     expect_false(private$.lcaConverged(model))
 })
+
+
+# Regressions from /check-function --profile release, 2026-10-04.
+
+test_that("one variable in two test slots is rejected, not fitted as an all-NA column", {
+    d <- sim_tests(0.4, c(.9, .8, .75), c(.9, .85, .9), n = 200)
+    for (m in c("composite", "latent_class")) {
+        # Before: composite stopped with "missing value where TRUE/FALSE needed";
+        # latent_class returned duplicate row keys.
+        expect_error(run_ngs(d, test2 = "t1", method = m),
+                     "'t1' is selected more than once", fixed = TRUE)
+    }
+})
+
+test_that("a fractional bootstrap count is refused by the option, not by sprintf", {
+    d <- sim_tests(0.4, c(.9, .8, .75), c(.9, .85, .9), n = 200)
+    # Before: nboot = 150.5 passed the Number option and aborted on sprintf("%d").
+    err <- tryCatch(run_ngs(d, method = "composite", bootstrap = TRUE, nboot = 150.5),
+                    error = function(e) conditionMessage(e))
+    expect_false(grepl("invalid format", err, fixed = TRUE))
+    expect_match(err, "nboot")
+})
+
+
+# Regressions from /check-function-full, 2026-10-04.
+
+dep_tests <- function(n, prev, sens, spec, dep, seed = 1) {
+    # Test B copies test A in a `dep` share of cases: conditional dependence by construction.
+    set.seed(seed)
+    z <- rbinom(n, 1, prev)
+    out <- lapply(seq_along(sens), function(i)
+        ifelse(z == 1, rbinom(n, 1, sens[i]), rbinom(n, 1, 1 - spec[i])))
+    flip <- runif(n) < dep
+    out[[2]][flip] <- out[[1]][flip]
+    d <- as.data.frame(lapply(out, function(x) factor(x, 0:1, c("neg", "pos"))))
+    names(d) <- paste0("t", seq_along(sens))
+    d
+}
+
+test_that("identical tests are not reported as perfect without a boundary warning", {
+    skip_if_not_installed("poLCA")
+    d <- sim_tests(0.35, c(.9, .8, .75), c(.92, .88, .93), n = 300)
+    d$t2 <- d$t1
+    d$t3 <- d$t1
+    # Before: sensitivity = specificity = 100% with a 100-100% interval and no warning.
+    r <- run_ngs(d, bootstrap = TRUE, nboot = 100, showSummary = TRUE)
+    expect_match(notices_of(r), "Estimates at the parameter boundary", fixed = TRUE)
+    expect_match(notices_of(r), "Some bootstrap intervals left blank", fixed = TRUE)
+    tm <- r$test_metrics$asDF
+    expect_true(all(is.na(c(tm$sens_ci_lower, tm$sens_ci_upper,
+                            tm$spec_ci_lower, tm$spec_ci_upper))))
+    expect_match(r$clinical_summary$content, "at least one estimate is at 0% or 100%", fixed = TRUE)
+
+    # an interior fit raises neither notice and keeps its intervals
+    ok <- run_ngs(sim_tests(0.35, c(.9, .8, .75), c(.92, .88, .93), n = 300),
+                  bootstrap = TRUE, nboot = 100)
+    expect_false(grepl("parameter boundary", notices_of(ok), fixed = TRUE))
+    expect_false(grepl("intervals left blank", notices_of(ok), fixed = TRUE))
+    expect_true(all(is.finite(ok$test_metrics$asDF$sens_ci_lower)))
+})
+
+test_that("three-test residuals are not reported as evidence of independence", {
+    skip_if_not_installed("poLCA")
+    d <- dep_tests(400, .35, c(.85, .8, .75), c(.9, .88, .9), dep = .6)
+    cd <- run_ngs(d)$conditional_dependence$asDF
+    expect_equal(nrow(cd), 3L)
+    # Before: "Consistent with independence" on every row although t2 copies t1.
+    expect_true(all(startsWith(cd$verdict, "Not assessable")))
+})
+
+test_that("four-test dependence warning does not imply the flagged pair is the dependent one", {
+    skip_if_not_installed("poLCA")
+    d <- dep_tests(400, .35, c(.85, .8, .75, .8), c(.9, .88, .9, .85), dep = .6)
+    r <- run_ngs(d, test4 = "t4", test4Positive = "pos")
+    cd <- r$conditional_dependence$asDF
+    expect_false(any(startsWith(cd$verdict, "Not assessable")))
+    expect_true(any(cd$bvr > stats::qchisq(.95, 1)))
+    expect_match(notices_of(r), "not necessarily the dependent pair", fixed = TRUE)
+})
+
+
+# Regressions from /review-function, 2026-10-05.
+
+test_that("positive-level selectors start empty instead of on the first level", {
+    # Without allowNone the client pre-selects levels[0], usually the NEGATIVE level, and
+    # every test runs reversed. Unset levels must leave the analysis on its welcome screen.
+    options <- yaml::read_yaml(test_path("..", "..", "jamovi", "nogoldstandard.a.yaml"))$options
+    levels <- Filter(function(o) identical(o$type, "Level"), options)
+    expect_length(levels, 5L)
+    expect_true(all(vapply(levels, function(o) isTRUE(o$allowNone), logical(1))))
+
+    d <- sim_tests(0.35, c(.9, .8, .75), c(.92, .88, .93), n = 120)
+    # run_ngs() would drop the NULLs (modifyList), so call the wrapper directly
+    r <- ClinicoPath::nogoldstandard(data = d, test1 = "t1", test1Positive = NULL,
+        test2 = "t2", test2Positive = NULL, test3 = "t3", test3Positive = NULL,
+        test4Positive = NULL, test5Positive = NULL)
+    expect_true(r$instructions$visible)
+    expect_equal(r$test_metrics$rowCount, 0L)
+})
+
+test_that("penalized-EM bootstrap replicates reuse the full-sample solution", {
+    d <- sim_tests(0.35, c(.9, .8, .75), c(.92, .88, .93), n = 300)
+    options <- ClinicoPath:::nogoldstandardOptions$new(
+        test1 = "t1", test1Positive = "pos", test2 = "t2", test2Positive = "pos",
+        test3 = "t3", test3Positive = "pos", test4 = NULL, test4Positive = NULL,
+        test5 = NULL, test5Positive = NULL, method = "bayesian")
+    private <- ClinicoPath:::nogoldstandardClass$new(options = options, data = d)$.__enclos_env__$private
+    bd <- as.data.frame(lapply(d, function(x) as.numeric(x == "pos")))
+    full <- private$.runBayesian(bd)
+    resample <- bd[withr::with_seed(3, sample.int(nrow(bd), replace = TRUE)), ]
+    # the 3-start warm search reaches the same optimum as the full 10-start search
+    expect_equal(private$.runBayesian(resample, start_par = full$par)[c("prevalence", "sensitivities", "specificities")],
+                 private$.runBayesian(resample)[c("prevalence", "sensitivities", "specificities")],
+                 tolerance = 1e-6)
+
+    r <- run_ngs(d, method = "bayesian", bootstrap = TRUE, nboot = 100)
+    expect_match(r$prevalence$notes$boot_warm_start$note, "penalized-EM resample", fixed = TRUE)
+    expect_true(all(is.finite(r$test_metrics$asDF$sens_ci_lower)))
+})
+
+test_that("every Turkish sprintf template for this analysis formats without error", {
+    po <- test_path("..", "..", "jamovi", "i18n", "tr.po")
+    skip_if_not(file.exists(po))
+    # entries are separated by blank lines; join continuation lines of msgid / msgstr
+    blocks <- strsplit(paste(readLines(po, encoding = "UTF-8"), collapse = "\n"), "\n\n")[[1]]
+    field <- function(b, key) {
+        m <- regmatches(b, regexpr(paste0("(?s)\n?", key, " \".*?\"(\n\"[^\n]*\")*"), b, perl = TRUE))
+        if (!length(m)) return("")
+        q <- regmatches(m, gregexpr('"(?:[^"\\\\]|\\\\.)*"', m))[[1]]
+        gsub('\\\\"', '"', paste(substr(q, 2, nchar(q) - 1), collapse = ""))
+    }
+    conv <- "%(\\d+\\$)?[-+0#]*\\d*(\\.\\d+)?[sdifeEgGxX]"
+    checked <- 0L
+    for (b in blocks[grepl("#: R/nogoldstandard.b.R", blocks, fixed = TRUE)]) {
+        id <- field(b, "msgid"); str <- field(b, "msgstr")
+        cs <- regmatches(gsub("%%", "", id), gregexpr(conv, gsub("%%", "", id)))[[1]]
+        if (!length(cs) || !nzchar(str)) next
+        # one argument per msgid slot (numbered slots: one per distinct number), typed by conversion
+        n <- if (all(grepl("\\$", cs))) max(as.integer(sub("%(\\d+)\\$.*", "\\1", cs))) else length(cs)
+        types <- if (all(grepl("\\$", cs)))
+            vapply(seq_len(n), function(k) sub(".*([a-zA-Z])$", "\\1", cs[grepl(paste0("^%", k, "\\$"), cs)][1]), "")
+            else sub(".*([a-zA-Z])$", "\\1", cs)
+        args <- lapply(types, function(t) switch(t, d = , i = 3L, s = "x", 2.5))
+        expect_no_error(do.call(sprintf, c(list(str), args)), message = id)
+        checked <- checked + 1L
+    }
+    expect_gte(checked, 8L)
+})
+
+
+# Regressions from /release-review-function, 2026-10-05 (second pass).
+
+test_that("a test whose positive level is unset is named, not silently dropped", {
+    d <- sim_tests(0.35, c(.9, .8, .75), c(.92, .88, .93), n = 150)
+    partial <- function(method)
+        ClinicoPath::nogoldstandard(data = d, test1 = "t1", test1Positive = "pos",
+            test2 = "t2", test2Positive = "pos", test3 = "t3", test3Positive = NULL,
+            test4Positive = NULL, test5Positive = NULL, method = method)
+    # Before: latent class rejected with "add more tests" although three were selected, and
+    # the rule methods ran on t1 and t2 alone without a word about t3.
+    for (m in c("latent_class", "composite", "all_positive")) {
+        r <- partial(m)
+        expect_true(r$instructions$visible)
+        expect_equal(r$test_metrics$rowCount, 0L)
+        expect_match(notices_of(r), "Choose the positive level for Test 3 (t3)", fixed = TRUE)
+    }
+})
+
+test_that("a column blank by construction does not raise the zero-width bootstrap notice", {
+    d <- sim_tests(0.35, c(.9, .8, .75), c(.92, .88, .93), n = 200)
+    for (m in c("all_positive", "any_positive")) {
+        r <- run_ngs(d, method = m, bootstrap = TRUE, nboot = 100)
+        # Before: every run said "Some bootstrap intervals left blank".
+        expect_false(grepl("intervals left blank", notices_of(r), fixed = TRUE), info = m)
+        tm <- r$test_metrics$asDF
+        kept <- if (m == "all_positive") tm$spec_ci_lower else tm$sens_ci_lower
+        expect_true(all(is.finite(kept)), info = m)
+    }
+})
+
+test_that("the prior notice describes the pseudo-counts the penalty adds", {
+    # The Beta(2,1) penalty on specificity adds a pseudo true NEGATIVE, not a positive.
+    r <- run_ngs(sim_tests(0.35, c(.9, .8, .75), c(.92, .88, .93), n = 150),
+                 method = "bayesian", showSummary = TRUE)
+    expect_match(notices_of(r), "one pseudo true-positive and one pseudo true-negative", fixed = TRUE)
+    # "(N=3)" next to the test list read as a sample size of three
+    expect_false(grepl("(N=", r$clinical_summary$content, fixed = TRUE))
+})
+
+
+# Regressions from /security-audit-function, 2026-10-05.
+
+test_that("the syntax-pane call quotes test variables and levels, so it parses and runs", {
+    d <- sim_tests(0.35, c(.9, .8, .75), c(.92, .88, .93), n = 150)
+    names(d) <- c("HPV DNA", "p16\"x\\y", "x); stop('injected'); (y")
+    opts <- ClinicoPath:::nogoldstandardOptions$new(
+        test1 = names(d)[1], test1Positive = "pos", test2 = names(d)[2], test2Positive = "pos",
+        test3 = names(d)[3], test3Positive = "pos", test4 = NULL, test4Positive = NULL,
+        test5 = NULL, test5Positive = NULL, method = "composite")
+    src <- ClinicoPath:::nogoldstandardClass$new(options = opts, data = d)$asSource()
+    # Before: `test1 = HPV DNA` -- unexpected symbol -- and the third name as live code.
+    expr <- parse(text = src)[[1]]
+    expect_identical(expr$test1, "HPV DNA")
+    expect_identical(expr$test2, "p16\"x\\y")
+    expect_identical(expr$test3, "x); stop('injected'); (y")
+    # a NULL Level is still written, the wrapper needs it
+    expect_true("test4Positive" %in% names(expr))
+    expect_null(expr[["test4Positive"]])
+    data <- d
+    expect_s3_class(eval(expr), "nogoldstandardResults")
+})
+
+test_that("a column name with '<' before a letter is not swallowed by the cell filter", {
+    d <- sim_tests(0.35, c(.9, .8, .75), c(.92, .88, .93), n = 150)
+    names(d) <- c("<LOD flag", "a<b", "Ki67 <20")
+    r <- ClinicoPath::nogoldstandard(data = d, test1 = names(d)[1], test1Positive = "pos",
+        test2 = names(d)[2], test2Positive = "pos", test3 = names(d)[3], test3Positive = "pos",
+        test4Positive = NULL, test5Positive = NULL, method = "composite")
+    # The client keeps only em/i/sub/sup: "<LOD flag" rendered blank, "a<b" as "a".
+    expect_equal(r$test_metrics$asDF$test, c("< LOD flag", "a< b", "Ki67 <20"))
+    expect_equal(r$agreement_stats$asDF$test_pair[1], "< LOD flag vs a< b")
+    expect_false(any(grepl("<[A-Za-z]", r$crosstab$asDF$test_combination)))
+    # the values were still computed for every row (rowKeys kept the raw names)
+    expect_true(all(is.finite(r$test_metrics$asDF$specificity)))
+})
+
+
+# Regressions from /fix-function --apply, 2026-10-05.
+
+test_that("latent class names a constant test instead of failing inside the optimizer", {
+    skip_if_not_installed("poLCA")
+    d <- sim_tests(0.35, c(.9, .8, .75), c(.92, .88, .93), n = 150)
+    d$t1 <- factor(rep("neg", nrow(d)), c("neg", "pos"))   # positive level never observed
+    # Before: "gradient function must return a numeric vector of length 5" -- poLCA had
+    # dropped t1 and the refinement got starting values for two tests instead of three.
+    expect_error(run_ngs(d), "Only one result was observed for: 't1'", fixed = TRUE)
+    d$t1 <- factor(rep("pos", nrow(d)), c("neg", "pos"))
+    expect_error(run_ngs(d), "Only one result was observed for: 't1'", fixed = TRUE)
+    # penalized EM keeps the column and reports it as not estimable rather than failing
+    expect_no_warning(r <- run_ngs(d, method = "bayesian"))
+    expect_match(notices_of(r), "Latent parameters not estimable", fixed = TRUE)
+    # a constant rater: kappa is exactly 0 and its null-variance z-test is undefined
+    ag <- r$agreement_stats$asDF
+    expect_equal(ag$kappa[1:2], c(0, 0))
+    expect_true(all(is.na(ag$p_value[1:2])))
+    expect_true(is.finite(ag$p_value[3]))
+})
+
+test_that("pattern probabilities and their Jacobian match the direct row-product formula", {
+    set.seed(4)
+    k <- 4
+    patterns <- as.matrix(expand.grid(rep(list(0:1), k)))
+    par <- c(.37, runif(k, .5, .99), runif(k, .01, .5))
+    got <- ClinicoPath:::nogoldstandard_probabilities(par, patterns)
+    lik <- function(q) apply(patterns, 1, function(x) prod(ifelse(x == 1, q, 1 - q)))
+    q1 <- par[1 + seq_len(k)]; q0 <- par[1 + k + seq_len(k)]
+    expect_equal(got$prob, par[1] * lik(q1) + (1 - par[1]) * lik(q0), tolerance = 1e-14)
+    # the analytic Jacobian against central differences
+    num <- vapply(seq_along(par), function(i) {
+        h <- 1e-6; up <- dn <- par; up[i] <- up[i] + h; dn[i] <- dn[i] - h
+        (ClinicoPath:::nogoldstandard_probabilities(up, patterns)$prob -
+         ClinicoPath:::nogoldstandard_probabilities(dn, patterns)$prob) / (2 * h)
+    }, numeric(nrow(patterns)))
+    expect_equal(got$jacobian, num, tolerance = 1e-7)
+})
+
+
+# Regressions from "fix remaining issues", 2026-10-05.
+
+test_that("latent-class bootstrap keeps resamples in which a rare test is constant", {
+    skip_if_not_installed("poLCA")
+    d <- sim_tests(0.35, c(.9, .8, .85), c(.92, .88, .9), n = 150, seed = 21)
+    t4 <- rep(0, nrow(d)); t4[which(d$t1 == "pos")[1:2]] <- 1
+    d$t4 <- factor(c("neg", "pos")[t4 + 1], c("neg", "pos"))
+    r <- run_ngs(d, test4 = "t4", test4Positive = "pos", bootstrap = TRUE, nboot = 100, seed = 3)
+    # Before: every resample without a t4 positive failed (18% here) and was discarded, so
+    # t4's sensitivity interval could not reach 0 although those resamples estimate 0.
+    expect_false(grepl("Some bootstrap replicates failed", notices_of(r), fixed = TRUE))
+    tm <- r$test_metrics$asDF
+    expect_equal(tm$sens_ci_lower[4], 0)
+    expect_true(all(is.finite(tm$sens_ci_lower[1:3])))
+})
+
+test_that("the kappa table explains a blank p-value only when a test is constant", {
+    d <- sim_tests(0.35, c(.9, .8, .75), c(.92, .88, .93), n = 150)
+    ok <- run_ngs(d, method = "composite")
+    expect_null(ok$agreement_stats$notes$kappa_constant)
+    d$t1 <- factor(rep("pos", nrow(d)), c("neg", "pos"))
+    r <- run_ngs(d, method = "composite")
+    expect_match(r$agreement_stats$notes$kappa_constant$note, "only one observed result", fixed = TRUE)
+    expect_true(all(is.na(r$agreement_stats$asDF$p_value[1:2])))
+})
+
+
+# PPV/NPV confidence intervals, 2026-10-05.
+
+test_that("rule-method PPV/NPV intervals are Wilson intervals on the test's own counts", {
+    d <- sim_tests(0.35, c(.9, .8, .75), c(.92, .88, .93), n = 300)
+    r <- run_ngs(d, method = "composite")
+    x <- as.data.frame(lapply(d, function(v) as.numeric(v == "pos")))
+    ref <- rowMeans(x) > 0.5
+    tm <- r$test_metrics$asDF
+    for (j in 1:3) {
+        pos <- x[[j]] == 1
+        expect_equal(c(tm$ppv_ci_lower[j], tm$ppv_ci_upper[j]),
+                     as.numeric(prop.test(sum(ref & pos), sum(pos), correct = FALSE)$conf.int), tolerance = 1e-10)
+        expect_equal(c(tm$npv_ci_lower[j], tm$npv_ci_upper[j]),
+                     as.numeric(prop.test(sum(!ref & !pos), sum(!pos), correct = FALSE)$conf.int), tolerance = 1e-10)
+    }
+    expect_match(r$test_metrics$notes$predictive$note, "different prevalence", fixed = TRUE)
+})
+
+test_that("bootstrap PPV/NPV intervals equal an independent empirical bootstrap", {
+    d <- sim_tests(0.35, c(.9, .8, .75), c(.92, .88, .93), n = 120)
+    r <- run_ngs(d, method = "composite", bootstrap = TRUE, nboot = 300, seed = 11)
+    x <- as.matrix(as.data.frame(lapply(d, function(v) as.numeric(v == "pos"))))
+    # the module draws one sample.int(n, n, TRUE) per resample from the seeded stream
+    idx <- withr::with_seed(11L, lapply(seq_len(300), function(b) sample.int(nrow(x), nrow(x), TRUE)))
+    pv <- vapply(idx, function(i) {
+        xb <- x[i, ]; ref <- rowMeans(xb) > 0.5
+        unlist(lapply(1:3, function(j) { p <- xb[, j] == 1
+            c(if (any(p)) mean(ref[p]) else NA, if (any(!p)) mean(!ref[!p]) else NA) }))
+    }, numeric(6))
+    q <- function(v) stats::quantile(v[is.finite(v)], c(.025, .975), names = FALSE)
+    tm <- r$test_metrics$asDF
+    for (j in 1:3) {
+        expect_equal(c(tm$ppv_ci_lower[j], tm$ppv_ci_upper[j]), q(pv[2 * j - 1, ]), tolerance = 1e-12)
+        expect_equal(c(tm$npv_ci_lower[j], tm$npv_ci_upper[j]), q(pv[2 * j, ]), tolerance = 1e-12)
+    }
+})
+
+test_that("predictive values stay exact when a resample has an empty rule group", {
+    p <- ClinicoPath:::nogoldstandardClass$new(
+        options = ClinicoPath:::nogoldstandardOptions$new(test1Positive = NULL, test2Positive = NULL,
+            test3Positive = NULL, test4Positive = NULL, test5Positive = NULL),
+        data = data.frame())$.__enclos_env__$private
+    # prevalence 0: no positive group, sensitivity NA -- PPV is 0 and NPV 1 (not dropped)
+    v <- p$.calculatePPVNPV(c(NA, .8, NA), c(.7, .9, 1), c(0, .3, 0))
+    expect_equal(v$ppv, c(0, .8 * .3 / (.8 * .3 + .1 * .7), NA))
+    expect_equal(v$npv, c(1, .9 * .7 / (.9 * .7 + .2 * .3), 1))
+    # prevalence 1: no negative group, specificity NA -- PPV is 1 and NPV 0
+    v <- p$.calculatePPVNPV(.6, NA, 1)
+    expect_equal(c(v$ppv, v$npv), c(1, 0))
+})
+
+test_that("predictive-value intervals: blank by construction, by method, and present with bootstrap", {
+    d <- sim_tests(0.35, c(.9, .8, .75), c(.92, .88, .93), n = 200)
+    ap <- run_ngs(d, method = "all_positive", bootstrap = TRUE, nboot = 100)$test_metrics$asDF
+    expect_true(all(is.na(c(ap$npv_ci_lower, ap$npv_ci_upper))))     # NPV fixed at 100%
+    expect_true(all(is.finite(ap$ppv_ci_lower)))
+    an <- run_ngs(d, method = "any_positive", bootstrap = TRUE, nboot = 100)
+    expect_true(all(is.na(an$test_metrics$asDF$ppv_ci_lower)))     # PPV fixed at 100%
+    expect_true(all(is.finite(an$test_metrics$asDF$npv_ci_lower)))
+    expect_false(grepl("intervals left blank", notices_of(an), fixed = TRUE))
+
+    skip_if_not_installed("poLCA")
+    lc <- run_ngs(d)
+    expect_true(all(is.na(lc$test_metrics$asDF$ppv_ci_lower)))     # latent: bootstrap only
+    expect_match(lc$test_metrics$notes$ci_provenance$note, "predictive values", fixed = TRUE)
+    lb <- run_ngs(d, bootstrap = TRUE, nboot = 100)$test_metrics$asDF
+    expect_true(all(lb$ppv_ci_lower <= lb$ppv & lb$ppv <= lb$ppv_ci_upper))
+    expect_true(all(lb$npv_ci_lower <= lb$npv & lb$npv <= lb$npv_ci_upper))
+})

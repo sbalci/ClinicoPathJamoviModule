@@ -16,18 +16,23 @@ nogoldstandard_pattern_data <- function(data) {
 
 nogoldstandard_probabilities <- function(par, patterns) {
   k <- ncol(patterns)
+  # apply(x, 1, prod) was ~60% of penalized-EM bootstrap time (the refinement Hessian
+  # calls this hundreds of times per resample); k <= 5 columns, so loop over columns.
+  rowprod <- function(x) {
+    out <- rep(1, nrow(x))
+    for (j in seq_len(ncol(x))) out <- out * x[, j]
+    out
+  }
   terms <- lapply(list(par[1L + seq_len(k)], par[1L + k + seq_len(k)]), function(q) {
     sweep(patterns, 2, q, function(x, p) ifelse(x == 1, p, 1 - p))
   })
-  component <- lapply(terms, function(x) apply(x, 1, prod))
+  component <- lapply(terms, rowprod)
   jacobian <- matrix(0, nrow(patterns), 1L + 2L * k)
   jacobian[, 1] <- component[[1]] - component[[2]]
   for (j in seq_len(k)) {
     sign <- 2 * patterns[, j] - 1
-    jacobian[, 1L + j] <- par[1] * sign *
-      apply(terms[[1]][, -j, drop = FALSE], 1, prod)
-    jacobian[, 1L + k + j] <- (1 - par[1]) * sign *
-      apply(terms[[2]][, -j, drop = FALSE], 1, prod)
+    jacobian[, 1L + j] <- par[1] * sign * rowprod(terms[[1]][, -j, drop = FALSE])
+    jacobian[, 1L + k + j] <- (1 - par[1]) * sign * rowprod(terms[[2]][, -j, drop = FALSE])
   }
   list(prob = par[1] * component[[1]] + (1 - par[1]) * component[[2]],
        component = component, jacobian = jacobian)

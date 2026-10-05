@@ -52,7 +52,8 @@ nogoldstandardOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..test1Positive <- jmvcore::OptionLevel$new(
                 "test1Positive",
                 test1Positive,
-                variable="(test1)")
+                variable="(test1)",
+                allowNone=TRUE)
             private$..test2 <- jmvcore::OptionVariable$new(
                 "test2",
                 test2,
@@ -64,7 +65,8 @@ nogoldstandardOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..test2Positive <- jmvcore::OptionLevel$new(
                 "test2Positive",
                 test2Positive,
-                variable="(test2)")
+                variable="(test2)",
+                allowNone=TRUE)
             private$..test3 <- jmvcore::OptionVariable$new(
                 "test3",
                 test3,
@@ -76,7 +78,8 @@ nogoldstandardOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..test3Positive <- jmvcore::OptionLevel$new(
                 "test3Positive",
                 test3Positive,
-                variable="(test3)")
+                variable="(test3)",
+                allowNone=TRUE)
             private$..test4 <- jmvcore::OptionVariable$new(
                 "test4",
                 test4,
@@ -88,7 +91,8 @@ nogoldstandardOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..test4Positive <- jmvcore::OptionLevel$new(
                 "test4Positive",
                 test4Positive,
-                variable="(test4)")
+                variable="(test4)",
+                allowNone=TRUE)
             private$..test5 <- jmvcore::OptionVariable$new(
                 "test5",
                 test5,
@@ -100,7 +104,8 @@ nogoldstandardOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..test5Positive <- jmvcore::OptionLevel$new(
                 "test5Positive",
                 test5Positive,
-                variable="(test5)")
+                variable="(test5)",
+                allowNone=TRUE)
             private$..method <- jmvcore::OptionList$new(
                 "method",
                 method,
@@ -115,7 +120,7 @@ nogoldstandardOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 "bootstrap",
                 bootstrap,
                 default=FALSE)
-            private$..nboot <- jmvcore::OptionNumber$new(
+            private$..nboot <- jmvcore::OptionInteger$new(
                 "nboot",
                 nboot,
                 default=1000,
@@ -450,8 +455,32 @@ nogoldstandardResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                         `type`="number", 
                         `format`="pc"),
                     list(
+                        `name`="ppv_ci_lower", 
+                        `title`="Lower CI", 
+                        `superTitle`="Positive Predictive Value", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="ppv_ci_upper", 
+                        `title`="Upper CI", 
+                        `superTitle`="Positive Predictive Value", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
                         `name`="npv", 
                         `title`="NPV", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="npv_ci_lower", 
+                        `title`="Lower CI", 
+                        `superTitle`="Negative Predictive Value", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="npv_ci_upper", 
+                        `title`="Upper CI", 
+                        `superTitle`="Negative Predictive Value", 
                         `type`="number", 
                         `format`="pc"))))
             self$add(jmvcore::Table$new(
