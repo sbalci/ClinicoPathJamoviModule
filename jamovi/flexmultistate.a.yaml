@@ -1,6 +1,6 @@
 name: flexmultistate
 title: Flexible Multi-State Survival Models
-menuGroup: SurvivalDT
+menuGroup: SurvivalD
 menuSubgroup: Multi-State Models
 menuSubtitle: Flexible Parametric Multi-State Modeling
 version: '1.0.83'

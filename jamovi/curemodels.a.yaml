@@ -1,6 +1,6 @@
 name: curemodels
 title: Cure Models for Long-term Survivors
-menuGroup: OncoPathDT
+menuGroup: OncoPathD
 menuSubgroup: Survival Analysis
 menuSubtitle: Mixture and Non-mixture Cure Models
 version: '1.0.83'

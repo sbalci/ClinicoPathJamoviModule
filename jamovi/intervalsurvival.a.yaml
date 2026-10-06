@@ -1,6 +1,6 @@
 name: intervalsurvival
 title: Interval-Censored Survival Analysis
-menuGroup: ClinicoPathDT
+menuGroup: ClinicoPathD
 menuSubgroup: Survival Analysis
 version: '1.0.83'
 jas: '1.2'

@@ -156,11 +156,11 @@ test_that("audit-sensitive output strings remain export-safe", {
       readLines(file.path(root, "R", "nogoldstandard.b.R"), warn = FALSE),
       collapse = "\n"
     )
-    expect_match(
-      no_gold_text,
-      '.fmt(.("Error in plot: {msg}")',
-      fixed = TRUE
-    )
+    # Audit 2026-07-13 [LOW]: a translatable fragment glued to e$message,
+    # message(.("Error in plot: "), e$message). Test the pattern, not one string: the
+    # "Error in plot" base-graphics renderer was dead (reachable only without ggplot2,
+    # an Import) and was deleted on 2026-10-05, which broke the old exact-string match.
+    expect_false(grepl('\\.\\("[^"\n]*[:;,] "\\)', no_gold_text))
     expect_match(
       no_gold_text,
       '.fmt(.("Error in ggplot: {msg}")',

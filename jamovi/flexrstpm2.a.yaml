@@ -1,6 +1,6 @@
 name: flexrstpm2
 title: Comprehensive Flexible Parametric Survival Models
-menuGroup: SurvivalDT
+menuGroup: SurvivalD
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: Advanced flexible parametric models with clinical analysis
 version: '1.0.83'

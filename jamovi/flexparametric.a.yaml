@@ -1,6 +1,6 @@
 name: flexparametric
 title: Flexible Parametric Survival Models (Enhanced)
-menuGroup: SurvivalDT
+menuGroup: SurvivalD
 menuSubgroup: Survival Analysis
 version: '1.0.83'
 jas: '1.2'

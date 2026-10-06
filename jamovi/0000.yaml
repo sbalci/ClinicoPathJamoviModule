@@ -1547,7 +1547,7 @@ analyses:
   - title: Co-Testing Analysis
     name: cotest
     ns: ClinicoPath
-    menuGroup: meddecide
+    menuGroup: meddecideT
     menuTitle: Co-Testing Analysis
     menuSubgroup: Decision Calculators
     menuSubtitle: Two tests run in parallel
@@ -2375,7 +2375,7 @@ analyses:
     name: curemodels
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathDT
+    menuGroup: OncoPathD
     menuSubgroup: Survival Analysis
     menuTitle: Cure Models for Long-term Survivors
     menuSubtitle: Mixture and Non-mixture Cure Models
@@ -2788,7 +2788,7 @@ analyses:
     name: intervalsurvival
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPathDT
+    menuGroup: ClinicoPathD
     menuSubgroup: Survival Analysis
     menuTitle: Interval-Censored Survival Analysis
     description: >-
@@ -2956,7 +2956,7 @@ analyses:
     name: flexparametric
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalDT
+    menuGroup: SurvivalD
     menuSubgroup: Survival Analysis
     menuTitle: Flexible Parametric Survival Models (Enhanced)
     description: >-
@@ -3023,7 +3023,7 @@ analyses:
     name: flexrstpm2
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalDT
+    menuGroup: SurvivalD
     menuSubgroup: ClinicoPath Survival
     menuTitle: Comprehensive Flexible Parametric Survival Models
     menuSubtitle: Advanced flexible parametric models with clinical analysis
@@ -3594,7 +3594,7 @@ analyses:
     name: illnessdeath
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalDT
+    menuGroup: SurvivalD
     menuSubgroup: Multi-State Analysis
     menuTitle: Illness-Death Multi-State Models
     menuSubtitle: Three-state models for disease progression with recovery and mortality
@@ -3666,7 +3666,7 @@ analyses:
     name: flexmultistate
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalDT
+    menuGroup: SurvivalD
     menuSubgroup: Multi-State Models
     menuTitle: Flexible Multi-State Survival Models
     menuSubtitle: Flexible Parametric Multi-State Modeling
@@ -3724,7 +3724,7 @@ analyses:
     name: cohenskappa
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideExtraDT
+    menuGroup: meddecideExtraD
     menuSubgroup: Diagnostic Statistics
     menuTitle: Cohen's Kappa Agreement
     menuSubtitle: Two-Rater Agreement Analysis

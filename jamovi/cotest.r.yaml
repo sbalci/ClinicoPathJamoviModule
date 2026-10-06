@@ -138,5 +138,6 @@ refs:
     - ConditionalDependenceDiagnosticTests
     - Fagan1975
     - DeeksAltman2004
+    - jaeschke1994
 
 ...

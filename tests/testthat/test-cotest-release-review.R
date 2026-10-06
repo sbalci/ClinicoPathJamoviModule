@@ -500,13 +500,15 @@ test_that("the dependence essay does not contradict the safety default or the bi
     expect_false(grepl("limited information about how the tests interact", txt))
     expect_match(txt, "has to be justified")
     # and it claimed independence exaggerates positive post-test probabilities, which is
-    # backwards for the headline parallel-rule row in ~85% of ordinary parameter sets
+    # not true of the headline parallel-rule row in general (its direction can go either way)
     expect_false(grepl("unrealistically narrow confidence", txt))
     expect_match(txt, "Either test positive")
 })
 
-test_that("independence really does bias the two extreme rows in the directions the essay states", {
-    # The essay now makes four falsifiable claims. Check the two it states as universal.
+test_that("with similar dependence in both groups, independence biases the two extreme rows as the essay describes", {
+    # The essay no longer states these directions as universal (validation 2026-10-05,
+    # VAL-cotest-01: they reverse when the dependence lies mainly in one group). With rho+ and
+    # rho- drawn from the same range they hold for every set, which is what is checked here.
     set.seed(11); over_bp <- 0; under_bn <- 0; n <- 0
     for (i in 1:120) {
         s1 <- runif(1,.6,.95); c1 <- runif(1,.7,.98)
@@ -591,4 +593,54 @@ test_that("the guidance prose can be switched off without touching a number", {
     # gated by the declarative expression, never by setVisible() from the backend
     expect_false(grepl("instructions\\$setVisible|dependenceExplanation\\$setVisible",
                        paste(readLines("../../R/cotest.b.R"), collapse = "\n")))
+})
+
+test_that("asSource() escapes test names so the exported syntax parses back to them", {
+    # jmvcore pastes a String option between quotes unescaped: `test1_name = "A "q""`.
+    a <- ClinicoPath:::cotestClass$new(
+        options = ClinicoPath:::cotestOptions$new(test1_name = 'A "q"', test2_name = "C:\\x"),
+        data = data.frame(x = 1))
+    a$run()
+    call <- parse(text = a$asSource())[[1]]
+    expect_equal(call$test1_name, 'A "q"')
+    expect_equal(call$test2_name, "C:\\x")
+    # blank names stay at their default and are not exported
+    b <- ClinicoPath:::cotestClass$new(options = ClinicoPath:::cotestOptions$new(),
+                                      data = data.frame(x = 1))
+    b$run()
+    expect_false(grepl("test1_name", b$asSource(), fixed = TRUE))
+})
+
+test_that("a worked example overriding indep says 'you supplied' only for a non-default value", {
+    # cotest(preset = "psa_dre") leaves indep at its FALSE default; the notice used to say the
+    # example had replaced "values you supplied".
+    plain <- notices_of(ClinicoPath::cotest(preset = "psa_dre"))
+    expect_false(grepl("values you supplied", plain, fixed = TRUE))
+    expect_match(plain, "its default, or as you set it", fixed = TRUE)
+    expect_match(plain, "selects which model is fitted", fixed = TRUE)
+    # TRUE differs from the default, so it was supplied; a dependent example replaces it
+    given <- notices_of(ClinicoPath::cotest(preset = "hpv_pap", indep = TRUE))
+    expect_match(given, "values you supplied", fixed = TRUE)
+    expect_match(given, "(TRUE given, FALSE used", fixed = TRUE)
+    # the GUI state (events.js writes the example's own indep) raises neither
+    gui <- notices_of(ClinicoPath::cotest(preset = "psa_dre", indep = TRUE))
+    expect_false(grepl("selects which model is fitted", gui, fixed = TRUE))
+})
+
+test_that("degenerate-LR notices and the joint-probability lines use the test names", {
+    # rho = 0.80 makes test-2-only impossible in both groups (see "left blank" above)
+    res <- run_ct(indep = FALSE, cond_dep_pos = 0.80, cond_dep_neg = 0.80,
+                  test1_name = "HPV", test2_name = "Pap cytology")
+    expect_match(notices_of(res), "Pap cytology Positive Only LR is undefined", fixed = TRUE)
+    panel <- res$dependenceInfo$content
+    expect_match(panel, "P(HPV+, Pap cytology- | Disease+)", fixed = TRUE)
+    expect_false(grepl("Test1", panel, fixed = TRUE))
+    # unnamed tests read as the table rows do
+    plain <- run_ct(indep = FALSE, cond_dep_pos = 0.80, cond_dep_neg = 0.80)
+    expect_match(notices_of(plain), "Test 2 Positive Only LR is undefined", fixed = TRUE)
+    expect_match(plain$dependenceInfo$content, "P(Test 1+, Test 2+ | Disease+)", fixed = TRUE)
+    # a name reaches this HTML panel escaped
+    esc <- run_ct(indep = FALSE, test2_name = "HPV <LOD")$dependenceInfo$content
+    expect_match(esc, "HPV &lt;LOD+", fixed = TRUE)
+    expect_false(grepl("<LOD", esc, fixed = TRUE))
 })

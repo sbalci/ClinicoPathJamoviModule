@@ -88,14 +88,14 @@ children:
             children:
               - type: TextBox
                 name: cond_dep_pos
-                label: 'Dependence among subjects with disease'
+                label: 'Correlation (phi) among subjects with disease'
                 format: number
                 enable: (preset:custom && !indep)
                 events:
                   change: ./cotest.events::onChange_cond_dep_pos
               - type: TextBox
                 name: cond_dep_neg
-                label: 'Dependence among subjects without disease'
+                label: 'Correlation (phi) among subjects without disease'
                 format: number
                 enable: (preset:custom && !indep)
                 events:

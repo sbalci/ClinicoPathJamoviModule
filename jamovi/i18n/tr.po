@@ -51,14 +51,6 @@ msgid ""
 "statistics and visualizations."
 msgstr ""
 
-#: R/nogoldstandard.b.R
-msgid ""
-"%.0f%% confidence intervals are not reported for latent-model response "
-"probabilities and predictive values without bootstrap refitting. Ordinary "
-"binomial intervals omit uncertainty from estimating the latent classes and "
-"can be substantially too narrow. Enable Bootstrap CI to obtain intervals."
-msgstr "Örtük model yanıt olasılıkları ve öngörü değerleri için bootstrap yeniden uyarlaması olmaksızın %.0f%% güven aralıkları bildirilmez. Sıradan binom aralıkları, örtük sınıfların tahmin edilmesinden kaynaklanan belirsizliği atlar ve önemli ölçüde çok dar olabilir. Aralıkları elde etmek için Bootstrap GA'yı etkinleştirin."
-
 #: R/outcomeorganizer.b.R
 msgid ""
 "- A per-patient state code (0 = disease-free, 1 = disease, 2 = death from "
@@ -481,42 +473,6 @@ msgid ""
 "statistical analysis.'"
 msgstr ""
 
-#: R/nogoldstandard.b.R
-msgid ""
-"A test with only one observed result has kappa 0 with every test that "
-"varies; the test of kappa = 0 is then undefined, so its p-value is left "
-"blank."
-msgstr "Yalnızca tek bir sonucu gözlenen bir testin, değişen her testle kappa değeri 0'dır; bu durumda kappa = 0 testi tanımsızdır, bu nedenle p değeri boş bırakılır."
-
-#: R/nogoldstandard.b.R
-msgid ""
-"Choose the positive level for {tests}. A test enters the analysis only after"
-" its positive level is chosen, so no results are shown yet."
-msgstr "{tests} için pozitif düzeyi seçin. Bir test ancak pozitif düzeyi seçildikten sonra analize girer; bu nedenle henüz sonuç gösterilmiyor."
-
-#: R/nogoldstandard.b.R
-msgid ""
-"Latent class analysis needs both positive and not-positive results for every"
-" test among the analysed cases. Only one result was observed for: {}. Such a"
-" test carries no information about the latent classes. Check that the "
-"correct positive level is selected, or remove the test."
-msgstr "Örtük sınıf analizi, analiz edilen olgular arasında her test için hem pozitif hem de pozitif olmayan sonuçlar gerektirir. Yalnızca tek bir sonuç gözlenen testler: {}. Böyle bir test örtük sınıflar hakkında bilgi taşımaz. Doğru pozitif düzeyin seçildiğini kontrol edin veya testi çıkarın."
-
-#: R/nogoldstandard.b.R
-msgid ""
-"PPV and NPV hold only at the class or rule proportion of these data. In a "
-"population with a different prevalence they differ, even when the response "
-"probabilities are the same."
-msgstr "PPV ve NPV yalnızca bu verilerin sınıf veya kural oranında geçerlidir. Prevalansı farklı bir popülasyonda, yanıt olasılıkları aynı olsa bile farklılık gösterirler."
-
-#: R/nogoldstandard.b.R
-msgid "Positive level not selected"
-msgstr "Pozitif düzey seçilmedi"
-
-#: R/nogoldstandard.b.R
-msgid "Test {number} ({variable})"
-msgstr "Test {number} ({variable})"
-
 #: R/decisioncombine.b.R
 msgid ""
 "\"{statistic}\" has no estimate with a confidence interval for any row "
@@ -704,32 +660,12 @@ msgstr "(Kesişim)"
 msgid "(k = %d < 10: low statistical power, descriptive only)"
 msgstr ""
 
-#: R/cotest.b.R
-msgid "(major decrease)"
-msgstr ""
-
-#: R/cotest.b.R
-msgid "(major increase)"
-msgstr ""
-
-#: R/cotest.b.R
-msgid "(minimal change)"
-msgstr ""
-
 #: R/alluvial.b.R
 msgid "(Missing {k})"
 msgstr ""
 
 #: R/alluvial.b.R
 msgid "(Missing)"
-msgstr ""
-
-#: R/cotest.b.R
-msgid "(moderate decrease)"
-msgstr ""
-
-#: R/cotest.b.R
-msgid "(moderate increase)"
 msgstr ""
 
 #: R/jjhistostats.b.R
@@ -739,10 +675,6 @@ msgstr ""
 #: R/multisurvival.b.R
 msgid "(none specified)"
 msgstr "(belirtilmedi)"
-
-#: R/cotest.b.R
-msgid "(not estimable)"
-msgstr ""
 
 #: R/singlearm.b.R
 #: R/venn.b.R
@@ -769,18 +701,14 @@ msgstr ""
 
 #: R/cotest.b.R
 msgid ""
-"(requested %.2f among diseased, truncated to the largest value the entered "
+"(requested %.2f among diseased, truncated to the nearest value the entered "
 "sensitivities allow)"
 msgstr ""
 
 #: R/cotest.b.R
 msgid ""
-"(requested %.2f among non-diseased, truncated to the largest value the "
+"(requested %.2f among non-diseased, truncated to the nearest value the "
 "entered specificities allow)"
-msgstr ""
-
-#: R/cotest.b.R
-msgid "(slight increase)"
 msgstr ""
 
 #: R/decision.b.R
@@ -2913,6 +2841,19 @@ msgstr ""
 
 #: R/nogoldstandard.b.R
 msgid ""
+"%.0f%% confidence intervals are not reported for latent-model response "
+"probabilities and predictive values without bootstrap refitting. Ordinary "
+"binomial intervals omit uncertainty from estimating the latent classes and "
+"can be substantially too narrow. Enable Bootstrap CI to obtain intervals."
+msgstr ""
+"Örtük model yanıt olasılıkları ve öngörü değerleri için bootstrap yeniden "
+"uyarlaması olmaksızın %.0f%% güven aralıkları bildirilmez. Sıradan binom "
+"aralıkları, örtük sınıfların tahmin edilmesinden kaynaklanan belirsizliği "
+"atlar ve önemli ölçüde çok dar olabilir. Aralıkları elde etmek için "
+"Bootstrap GA'yı etkinleştirin."
+
+#: R/nogoldstandard.b.R
+msgid ""
 "%.0f%% intervals are Wilson score intervals for agreement with the observed "
 "reference rule."
 msgstr ""
@@ -2993,10 +2934,6 @@ msgstr ""
 "birlikte, istatistiksel güç azalmıştır ve geç sağkalım tahminleri geniş "
 "güven aralıklarına sahip olabilir."
 
-#: R/cotest.b.R
-msgid "%.1fx increase"
-msgstr ""
-
 #: R/agreement.b.R
 msgid ""
 "%.2f (the harmonic mean of the ratings per case, because some cases were not "
@@ -3004,10 +2941,6 @@ msgid ""
 msgstr ""
 "%.2f (olgu başına değerlendirme sayısının harmonik ortalaması; çünkü bazı "
 "olgular her değerlendirici tarafından değerlendirilmemiştir)"
-
-#: R/cotest.b.R
-msgid "%.2fx of prevalence, a decrease"
-msgstr ""
 
 #: R/lassologistic.b.R
 msgid "%.3f (CI not estimable)"
@@ -3044,7 +2977,10 @@ msgstr ""
 msgid ""
 "%1$.0f%% intervals are bootstrap percentile intervals from %2$d resamples of "
 "the cases, refitting the model on each. Seed: %3$s."
-msgstr "%%%1$.0f aralıklar, olguların %2$d yeniden örnekleminden elde edilen ve her birinde model yeniden uyarlanan bootstrap yüzdelik aralıklarıdır. Tohum: %3$s."
+msgstr ""
+"%%%1$.0f aralıklar, olguların %2$d yeniden örnekleminden elde edilen ve her "
+"birinde model yeniden uyarlanan bootstrap yüzdelik aralıklarıdır. Tohum: "
+"%3$s."
 
 #: R/agreement.b.R
 msgid "%1$.1f percentage points above strict accuracy (%2$.4f), same %3$d cases"
@@ -3093,7 +3029,12 @@ msgid ""
 "%4$d fitted resamples remain for each interval. A high failure rate can "
 "reflect small or sparse samples, fitting problems, or ambiguous class "
 "orientation."
-msgstr "%2$d bootstrap yeniden örnekleminden %1$d tanesi (%%%3$.0f) yakınsamış, tanımlanabilir ve tek bir sınıf yönelimine sahip bir uyum vermedi ve atıldı. Her aralık için en fazla %4$d uyarlanmış yeniden örneklem kaldı. Yüksek bir başarısızlık oranı küçük veya seyrek örneklemleri, uyum sorunlarını ya da belirsiz sınıf yönelimini yansıtabilir."
+msgstr ""
+"%2$d bootstrap yeniden örnekleminden %1$d tanesi (%%%3$.0f) yakınsamış, "
+"tanımlanabilir ve tek bir sınıf yönelimine sahip bir uyum vermedi ve atıldı. "
+"Her aralık için en fazla %4$d uyarlanmış yeniden örneklem kaldı. Yüksek bir "
+"başarısızlık oranı küçük veya seyrek örneklemleri, uyum sorunlarını ya da "
+"belirsiz sınıf yönelimini yansıtabilir."
 
 #: R/lassologistic.b.R
 msgid ""
@@ -3336,6 +3277,13 @@ msgstr ""
 #: R/agreement.b.R
 msgid "%1$s vs %2$s"
 msgstr "%1$s ve %2$s"
+
+#: R/cotest.b.R
+msgid ""
+"%1$s was %2$s (its default, or as you set it) and the worked example changed "
+"it to %3$s, which selects which model is fitted. To fit the other model, set "
+"the worked example to Custom values."
+msgstr ""
 
 #: R/psychopdaROC.b.R
 msgid ""
@@ -4402,6 +4350,15 @@ msgstr ""
 "En yüksek gözlenen dengeli doğruluk %s testindeydi; bu betimsel sıralama bir "
 "üstünlük iddiası olarak test edilmedi ve bir klinik öneri değildir."
 
+#: R/cotest.b.R
+msgid ""
+"%s has low discriminatory power (sensitivity plus specificity below 1.1, "
+"i.e. a Youden index below 0.1). Check its likelihood ratios in the Test "
+"Parameters table: an operating point close to the chance diagonal can still "
+"give an informative LR+ or LR- when sensitivity and specificity are very "
+"unequal."
+msgstr ""
+
 #: R/jjcorrmat.b.R
 msgid ""
 "%s has no variation (a single value), so its correlations are undefined: "
@@ -4432,10 +4389,18 @@ msgstr ""
 
 #: R/cotest.b.R
 msgid ""
+"%s is below the chance diagonal (sensitivity plus specificity below 1): a "
+"positive result makes disease less likely, not more. Check whether its "
+"sensitivity and specificity, or its positive and negative categories, have "
+"been entered the wrong way round."
+msgstr ""
+
+#: R/cotest.b.R
+msgid ""
 "%s is infinite: with the current parameters this combination of test results "
 "cannot occur in a subject without disease, so its post-test probability is 1 "
-"by construction rather than estimated. Lower the conditional dependence if "
-"that is not intended."
+"by construction rather than estimated. Move the conditional dependence "
+"toward 0 if that is not intended."
 msgstr ""
 
 #: R/singlearm.b.R
@@ -4488,8 +4453,8 @@ msgstr ""
 msgid ""
 "%s is zero: with the current parameters this combination of test results "
 "cannot occur in a subject with disease, so its post-test probability is 0 by "
-"construction rather than estimated. Lower the conditional dependence if that "
-"is not intended."
+"construction rather than estimated. Move the conditional dependence toward 0 "
+"if that is not intended."
 msgstr ""
 
 #: R/diagnosticmeta.b.R
@@ -4525,12 +4490,24 @@ msgstr ""
 "başlangıcından ileriye doğru ölçülür, bu nedenle negatif veya sonsuz bir "
 "zaman noktası geçerli değildir."
 
+#: R/cotest.b.R
+msgid "%s Negative LR"
+msgstr ""
+
+#: R/cotest.b.R
+msgid "%s Positive LR"
+msgstr ""
+
 #: R/diagnosticmeta.b.R
 msgid "%s Positive LR %.2f and negative LR %.2f."
 msgstr "%s Pozitif OO %.2f ve negatif OO %.2f."
 
 #: R/cotest.b.R
 msgid "%s Positive Only"
+msgstr ""
+
+#: R/cotest.b.R
+msgid "%s Positive Only LR"
 msgstr ""
 
 #: R/clinicalscore.b.R
@@ -4770,6 +4747,14 @@ msgstr "%%%s, her vakada aynı: %%%s marjının ötesinde"
 #: R/ihcheterogeneity.b.R
 msgid "%s%%, identical in every case: within the %s%% margin"
 msgstr "%%%s, her vakada aynı: %%%s marjı içinde"
+
+#: R/cotest.b.R
+msgid "%sx increase"
+msgstr ""
+
+#: R/cotest.b.R
+msgid "%sx of prevalence, a decrease"
+msgstr ""
 
 #: ggprism/ui[7][2][0].label
 msgid "• 2 groups, non-normal → Box plot + Wilcoxon"
@@ -6144,9 +6129,9 @@ msgid ""
 "<h4>When to Use Dependent vs. Independent Models</h4>\n"
 "\n"
 "<p><strong>Independence is the assumption that has to be justified, not the "
-"fallback.</strong> It is the optimistic choice: it credits the pair with "
-"more combined information than dependent tests actually provide. Use it only "
-"when you can point to a positive reason, such as:</p>\n"
+"fallback.</strong> It is usually the optimistic choice: it credits the pair "
+"with more combined information than tests that tend to err together actually "
+"provide. Use it only when you can point to a positive reason, such as:</p>\n"
 "<ul>\n"
 "  <li>The tests measure genuinely different biological phenomena</li>\n"
 "  <li>They use different specimens, and different mechanisms of "
@@ -6158,10 +6143,10 @@ msgid ""
 "<p><strong>If you simply do not know how the two tests interact, "
 "independence is the wrong default.</strong> Tests that share a specimen, a "
 "modality, an observer or a biological pathway are dependent unless shown "
-"otherwise. Enter a small positive dependence (0.05 to 0.15) and see how far "
-"the conclusion moves; if it moves a lot, the honest report gives the range "
-"rather than the independent figure. This is why the independence checkbox is "
-"off by default.</p>\n"
+"otherwise. Try a few small positive values (for example 0.05, 0.10 and 0.20) "
+"and see how far the conclusion moves; if it moves a lot, the honest report "
+"gives the range rather than the independent figure. This is why the "
+"independence checkbox is off by default.</p>\n"
 "\n"
 "<p><strong>Use the dependence model when:</strong></p>\n"
 "<ul>\n"
@@ -6189,40 +6174,50 @@ msgid ""
 "<p>The conditional dependence parameters (ρ<sub>pos</sub> for diseased "
 "subjects and ρ<sub>neg</sub> for non-diseased subjects) ideally should be "
 "estimated from paired testing data with known disease status. Positive "
-"values between 0 and 0.5 are the common case in practice, with larger values "
-"indicating stronger dependence; negative values are unusual but legitimate "
-"where the two tests genuinely compensate for one another. When no data is "
-"available, sensitivity analyses using a range of plausible values (e.g., "
-"0.05, 0.1, 0.2) can reveal how much dependence affects results.</p>\n"
+"values are the usual case, with larger values indicating stronger "
+"dependence; negative values are unusual but legitimate where the two tests "
+"genuinely compensate for one another. When no data is available, sensitivity "
+"analyses using a range of plausible values (e.g., 0.05, 0.1, 0.2) can reveal "
+"how much dependence affects results.</p>\n"
+"\n"
+"<p><strong>The value entered is a correlation (phi), not a covariance or a "
+"kappa.</strong> Several sources, Gardner et al. (2000) among them, report "
+"the conditional <em>covariance</em> instead. Convert it before entering it: "
+"among subjects with disease, phi = covariance / √(Sens₁ × (1−Sens₁) × Sens₂ "
+"× (1−Sens₂)); among subjects without disease, the same with (1−Spec) in "
+"place of Sens. A kappa measures agreement, not this correlation, and is not "
+"interchangeable with it.</p>\n"
 "\n"
 "<h4>Impact of Ignoring Dependence</h4>\n"
-"<p>Ignoring conditional dependence when it exists overstates how much the "
-"second test adds. The <em>direction</em> of the error differs by row, so it "
-"is worth being precise rather than saying post-test probabilities are simply "
-"\"exaggerated\":</p>\n"
+"<p>When two tests tend to err together, assuming independence usually "
+"overstates how much the second test adds; for the parallel rule, dependence "
+"among subjects with the disease lowers the combined sensitivity (Gardner et "
+"al. 2000). <em>Which way</em> each post-test probability moves, however, "
+"depends on where the dependence lies — among subjects with the disease, "
+"among those without it, or both — and on the sensitivities and "
+"specificities, so no single direction holds for every row. For tests that do "
+"better than chance (sensitivity plus specificity above 1):</p>\n"
 "<ul>\n"
-"  <li><strong>Both tests positive</strong> — assuming independence makes the "
-"probability of disease <strong>too high</strong>. Two correlated positives "
-"are partly the same evidence counted twice. (Simulation across 400 ordinary "
-"clinical parameter sets: this held in 100% of them.)</li>\n"
-"  <li><strong>Both tests negative</strong> — assuming independence makes the "
-"probability of disease <strong>too low</strong>, i.e. it overstates how "
-"safely the pair rules disease out. This is the error that matters most in "
-"screening. (100% of the same sets.)</li>\n"
-"  <li><strong>Either test positive (the parallel rule)</strong> — here "
-"independence makes the probability of disease <strong>too low</strong> in "
-"the large majority of cases (85%), not too high, because dependence "
-"concentrates false positives into the double-positive cell. Do not assume "
-"the independent figure is the conservative one for this row.</li>\n"
-"  <li><strong>One test positive only</strong> — the direction is not "
-"determined by dependence alone; across the same sets it went each way about "
-"half the time, depending on the two operating points.</li>\n"
+"  <li><strong>Both tests positive</strong> — when the tests share false "
+"positives (dependence mainly among subjects <em>without</em> the disease), "
+"independence makes this probability too high: two correlated positives are "
+"partly the same evidence counted twice. When the dependence lies mainly "
+"among subjects <em>with</em> the disease, it can go the other way.</li>\n"
+"  <li><strong>Both tests negative</strong> — when the tests miss the disease "
+"together (dependence mainly among subjects <em>with</em> the disease), "
+"independence makes this probability too low, overstating how safely the pair "
+"rules disease out. Dependence mainly among subjects without the disease can "
+"reverse this.</li>\n"
+"  <li><strong>Either test positive (the parallel rule)</strong> and "
+"<strong>one test positive only</strong> — the direction can go either "
+"way.</li>\n"
 "</ul>\n"
-"<p>The common thread is an <strong>overly optimistic assessment of what the "
-"two tests achieve together</strong>, not a uniform inflation of every "
-"number. Note also that this analysis reports no confidence intervals at all: "
-"every figure is conditional on the sensitivity, specificity and prevalence "
-"you entered being exact.</p>\n"
+"<p>The dependable way to see the effect for your own tests is to compare: "
+"run the analysis once assuming independence and once with your dependence "
+"values, and read the change row by row. The points above are a guide to "
+"reading that comparison, not rules. Note also that this analysis reports no "
+"confidence intervals at all: every figure is conditional on the sensitivity, "
+"specificity and prevalence you entered being exact.</p>\n"
 "</div>"
 msgstr ""
 
@@ -6275,7 +6270,8 @@ msgid ""
 "in the paper the test was validated in.</li>\n"
 "<li><strong>Configure test independence</strong>: state whether the two "
 "tests are conditionally independent or dependent (see \"Understanding Test "
-"Dependence\" below). This choice moves the answer more than any other.</li>\n"
+"Dependence\" below). This choice can move the answer substantially, so "
+"compare both settings.</li>\n"
 "<li><strong>Review Results</strong>: The analysis provides post-test "
 "probabilities for all test combination outcomes, including the critical "
 "<em>Either Test Positive (Parallel Rule)</em> used in clinical co-testing "
@@ -6330,7 +6326,7 @@ msgid ""
 "<li><strong>Troponin + ECG</strong>: both driven by extent of injury "
 "(dependent)</li>\n"
 "<li><strong>Mammography + ultrasound</strong>: two views of the same tissue, "
-"strongest dependence (dependent)</li>\n"
+"dependence set relatively high in both groups (dependent)</li>\n"
 "<li><strong>Rapid antigen + PCR</strong>: two assays, one swab, both track "
 "viral load (dependent)</li>\n"
 "<li><strong>Chest radiograph + sputum microscopy</strong>: imaging plus "
@@ -6358,6 +6354,17 @@ msgid ""
 "conditional on those numbers being right, and carries no confidence interval "
 "— published test performance and local prevalence both vary "
 "considerably.</p>\n"
+"\n"
+"<p><strong>Where the inputs come from matters:</strong> sensitivity and "
+"specificity measured in a case-control design (clear-cut cases against "
+"healthy controls), in a study that checked only some results against the "
+"reference standard, or in a population with a different spectrum of disease "
+"are often optimistic (spectrum and verification bias). Take both tests' "
+"sensitivity and specificity, and any dependence value, from the same "
+"population and the same reference standard where you can: figures from two "
+"separate studies do not describe the pair tested together. Indeterminate or "
+"invalid results (an unsatisfactory smear, an invalid PCR) are outside this "
+"calculation.</p>\n"
 "\n"
 "<p><strong>Tip:</strong> Enable \"Detailed footnotes\" for explanations of "
 "each metric. Enable \"Fagan nomogram\" for a visual of the probability "
@@ -9076,28 +9083,6 @@ msgid ""
 "joined by its own shortest path.</p>"
 msgstr ""
 
-#: R/cotest.b.R
-msgid ""
-"<p><strong>Clinical Interpretation:</strong></p>\n"
-"                <p>Disease prevalence (pre-test probability): "
-"<strong>%1$s</strong></p>\n"
-"                <p><strong>Both tests positive:</strong> %2$s probability "
-"(%3$s) - %4$s</p>\n"
-"                <p><strong>Both tests negative:</strong> %5$s probability "
-"(%6$s) %7$s</p>\n"
-"                <p><strong>Single positive test:</strong></p>\n"
-"                <ul>\n"
-"                <li>%8$s positive only: <strong>%9$s</strong> %10$s</li>\n"
-"                <li>%11$s positive only: <strong>%12$s</strong> %13$s</li>\n"
-"                </ul>\n"
-"                <div style='background-color: rgba(33, 152, 255, 0.07); "
-"padding: 10px; border-radius: 5px; margin-top: 15px; color: inherit;'>\n"
-"                <p><strong>Copy-ready summary:</strong></p>\n"
-"                <p style='font-family: monospace; font-size: "
-"12px;'>%14$s</p>\n"
-"                </div>"
-msgstr ""
-
 #: R/swimmerplot.b.R
 msgid "<p><strong>Error:</strong> {message}</p>"
 msgstr "<p><strong>Hata:</strong> {message}</p>"
@@ -9304,6 +9289,34 @@ msgstr ""
 #: R/decisioncompare.b.R
 msgid "<p><strong>PPV:</strong> Probability of disease when test positive</p>"
 msgstr "<p><strong>PÖD:</strong> Test pozitif olduğunda hastalık olasılığı</p>"
+
+#: R/cotest.b.R
+msgid ""
+"<p><strong>Reading the results (a rough guide):</strong></p>\n"
+"                <p>Disease prevalence (pre-test probability): "
+"<strong>%1$s</strong></p>\n"
+"                <p><strong>Either test positive (parallel rule):</strong> "
+"%2$s probability (%3$s) - %4$s</p>\n"
+"                <p><strong>Both tests positive:</strong> %5$s probability "
+"(%6$s) - %7$s</p>\n"
+"                <p><strong>Both tests negative:</strong> %8$s probability "
+"(%9$s) - %10$s</p>\n"
+"                <p><strong>Single positive test:</strong></p>\n"
+"                <ul>\n"
+"                <li>%11$s positive only: <strong>%12$s</strong> - %13$s</li>\n"
+"                <li>%14$s positive only: <strong>%15$s</strong> - %16$s</li>\n"
+"                </ul>\n"
+"                <p style='font-size: 90%%;'>These descriptions apply a "
+"conventional rule of thumb for likelihood ratios (Jaeschke et al. 1994) to "
+"help read the table. They are a guide, not a clinical judgement; the numbers "
+"are in the table above.</p>\n"
+"                <div style='background-color: rgba(33, 152, 255, 0.07); "
+"padding: 10px; border-radius: 5px; margin-top: 15px; color: inherit;'>\n"
+"                <p><strong>Copy-ready summary:</strong></p>\n"
+"                <p style='font-family: monospace; font-size: "
+"12px;'>%17$s</p>\n"
+"                </div>"
+msgstr ""
 
 #: R/jjarcdiagram.b.R
 msgid ""
@@ -9679,14 +9692,14 @@ msgid ""
 "                was not attainable given the sensitivities and specificities "
 "supplied.)</span></p>\n"
 "                <p>Joint probabilities after accounting for dependence:<br>\n"
-"                P(Test1+,Test2+ | Disease+): %5$.4f<br>\n"
-"                P(Test1+,Test2- | Disease+): %6$.4f<br>\n"
-"                P(Test1-,Test2+ | Disease+): %7$.4f<br>\n"
-"                P(Test1-,Test2- | Disease+): %8$.4f<br>\n"
-"                P(Test1+,Test2+ | Disease-): %9$.4f<br>\n"
-"                P(Test1+,Test2- | Disease-): %10$.4f<br>\n"
-"                P(Test1-,Test2+ | Disease-): %11$.4f<br>\n"
-"                P(Test1-,Test2- | Disease-): %12$.4f</p>"
+"                P(%13$s+, %14$s+ | Disease+): %5$.4f<br>\n"
+"                P(%13$s+, %14$s- | Disease+): %6$.4f<br>\n"
+"                P(%13$s-, %14$s+ | Disease+): %7$.4f<br>\n"
+"                P(%13$s-, %14$s- | Disease+): %8$.4f<br>\n"
+"                P(%13$s+, %14$s+ | Disease-): %9$.4f<br>\n"
+"                P(%13$s+, %14$s- | Disease-): %10$.4f<br>\n"
+"                P(%13$s-, %14$s+ | Disease-): %11$.4f<br>\n"
+"                P(%13$s-, %14$s- | Disease-): %12$.4f</p>"
 msgstr ""
 
 #: R/pathsampling.b.R
@@ -9735,13 +9748,14 @@ msgid ""
 "<p>The two tests are run in parallel on the same subject and are assumed to "
 "be <strong>conditionally independent</strong>: within the diseased group, "
 "and again within the non-diseased group, the result of one test carries no "
-"information about the other. The joint probabilities below are therefore "
-"plain products of the entered sensitivities and "
-"specificities.</p><p>Independence is the optimistic assumption. If the two "
+"information about the other, so each joint probability is the plain product "
+"of the two tests' sensitivities (or false-positive rates).</p><p>If the two "
 "tests in fact tend to err together — same specimen, same operator, same "
-"biology — it overstates how much the pair adds over either test alone. Clear "
-"<em>Assume the two tests are conditionally independent</em> and enter a "
-"dependence parameter to see how far the conclusion moves.</p>"
+"biology — independence usually overstates how much the pair adds, and which "
+"rows move up or down depends on where the dependence lies (see "
+"<em>Understanding Test Dependence</em>). Clear <em>Assume the two tests are "
+"conditionally independent</em> and enter a dependence parameter to see how "
+"far the conclusion moves.</p>"
 msgstr ""
 
 #: R/pathagreement.b.R
@@ -13357,6 +13371,12 @@ msgstr ""
 "Pozitif bir sonuç test öncesi odds değerini %.2fx ile çarpar; test sonrası "
 "olasılık aynı zamanda test öncesi olasılığa da bağlıdır."
 
+#: R/cotest.b.R
+msgid ""
+"A probability of exactly 0% or 100% here is set by the dependence being at "
+"the limit the entered values allow; it is not an estimate."
+msgstr ""
+
 #: contTablesPaired/results/freqs.description
 msgid "a proportions table"
 msgstr ""
@@ -13757,6 +13777,16 @@ msgstr ""
 "%{value} hedefi uygulanamayacak kadar çok örnek gerektirebilir. Bu, klinik "
 "bir standart değil, betimsel bir hedeftir."
 
+#: R/nogoldstandard.b.R
+msgid ""
+"A test with only one observed result has kappa 0 with every test that "
+"varies; the test of kappa = 0 is then undefined, so its p-value is left "
+"blank."
+msgstr ""
+"Yalnızca tek bir sonucu gözlenen bir testin, değişen her testle kappa değeri "
+"0'dır; bu durumda kappa = 0 testi tanımsızdır, bu nedenle p değeri boş "
+"bırakılır."
+
 #: R/datetimeconverter.b.R
 msgid ""
 "A text date format is selected but this column is numeric. • Choose Excel "
@@ -14156,6 +14186,10 @@ msgstr "Patolog Derecelendirme Analizi Hakkında"
 #: agreement/results/maxwellREExplanation.title
 msgid "About the rater variance decomposition"
 msgstr "Değerlendirici varyans ayrıştırması hakkında"
+
+#: R/cotest.b.R
+msgid "about the same as the prevalence"
+msgstr ""
 
 #: R/summarydata.b.R
 #: agreement/results/about.title
@@ -20433,7 +20467,13 @@ msgid ""
 "fixed-prior penalized EM point estimation with numerical refinement, and "
 "descriptive agreement with self-built reference rules. Latent classes are "
 "unlabeled, and reference-rule results are not diagnostic-accuracy estimates."
-msgstr "Kusursuz bir referans bulunmadığında birden çok ikili testin analizi. Koşullu bağımsızlığa dayanan iki sınıflı bir örtük sınıf modeli, sayısal iyileştirmeli ve sabit önsel dağılımlı cezalandırılmış EM nokta tahmini ve testlerden oluşturulan referans kurallarıyla betimsel uyum sunar. Örtük sınıflar etiketlenmemiştir ve referans kuralı sonuçları tanısal doğruluk tahminleri değildir."
+msgstr ""
+"Kusursuz bir referans bulunmadığında birden çok ikili testin analizi. "
+"Koşullu bağımsızlığa dayanan iki sınıflı bir örtük sınıf modeli, sayısal "
+"iyileştirmeli ve sabit önsel dağılımlı cezalandırılmış EM nokta tahmini ve "
+"testlerden oluşturulan referans kurallarıyla betimsel uyum sunar. Örtük "
+"sınıflar etiketlenmemiştir ve referans kuralı sonuçları tanısal doğruluk "
+"tahminleri değildir."
 
 #: ihcscoring/results/digitalvalidation/batcheffects.description
 msgid "Analysis of systematic differences across batches"
@@ -22815,7 +22855,10 @@ msgid ""
 "At least three informative tests are needed; the number of tests alone does "
 "not establish identifiability. Estimates are suppressed when the data do not "
 "identify the latent parameters."
-msgstr "En az üç bilgilendirici test gereklidir; test sayısı tek başına tanımlanabilirliği sağlamaz. Veriler örtük parametreleri tanımlamadığında tahminler gösterilmez."
+msgstr ""
+"En az üç bilgilendirici test gereklidir; test sayısı tek başına "
+"tanımlanabilirliği sağlamaz. Veriler örtük parametreleri tanımlamadığında "
+"tahminler gösterilmez."
 
 #: R/nogoldstandard.b.R
 msgid ""
@@ -22823,7 +22866,11 @@ msgid ""
 "residual degrees of freedom, but exact fit and parameter identifiability are "
 "not guaranteed. Fit discrepancies remain descriptive rather than formal "
 "chi-squared tests."
-msgstr "En az üç bilgilendirici test gereklidir. Üç test sıfır nominal kalıntı serbestlik derecesi verir, ancak tam uyum ve parametre tanımlanabilirliği garanti edilmez. Uyum farklılıkları resmi ki-kare testleri değil, betimsel kalır."
+msgstr ""
+"En az üç bilgilendirici test gereklidir. Üç test sıfır nominal kalıntı "
+"serbestlik derecesi verir, ancak tam uyum ve parametre tanımlanabilirliği "
+"garanti edilmez. Uyum farklılıkları resmi ki-kare testleri değil, betimsel "
+"kalır."
 
 #: R/diagnosticmeta.b.R
 msgid "At least two finite studies are required for %s"
@@ -29076,16 +29123,6 @@ msgstr "Herkese her iki test de uygulandı"
 msgid "Both Tests Positive"
 msgstr ""
 
-#: R/cotest.b.R
-msgid "Both tests were applied in parallel and assumed conditionally independent."
-msgstr ""
-
-#: R/cotest.b.R
-msgid ""
-"Both tests were applied in parallel, allowing conditional dependence "
-"(correlation %1$s among diseased and %2$s among non-diseased subjects)%3$s."
-msgstr ""
-
 #: R/categorize.b.R
 msgid "both the lower and the upper boundary (mean +/- {k} SD)"
 msgstr ""
@@ -29860,6 +29897,34 @@ msgid ""
 "By the Landis and Koch (1977) convention this is {band} agreement; whether "
 "it is adequate depends on the confidence interval, the prevalence of each "
 "category and the clinical consequence of a disagreement."
+msgstr ""
+
+#: R/cotest.b.R
+msgid "by the usual rule of thumb, a large shift away from disease"
+msgstr ""
+
+#: R/cotest.b.R
+msgid "by the usual rule of thumb, a large shift towards disease"
+msgstr ""
+
+#: R/cotest.b.R
+msgid "by the usual rule of thumb, a moderate shift away from disease"
+msgstr ""
+
+#: R/cotest.b.R
+msgid "by the usual rule of thumb, a moderate shift towards disease"
+msgstr ""
+
+#: R/cotest.b.R
+msgid "by the usual rule of thumb, a small shift away from disease"
+msgstr ""
+
+#: R/cotest.b.R
+msgid "by the usual rule of thumb, a small shift towards disease"
+msgstr ""
+
+#: R/cotest.b.R
+msgid "by the usual rule of thumb, little shift either way"
 msgstr ""
 
 #: jjsegmentedtotalbar/options/sort_categories/total.title
@@ -32034,7 +32099,13 @@ msgid ""
 "the stated confidence level. Fixed-prior estimates can also be biased; this "
 "bootstrap does not include uncertainty about the chosen priors. Check "
 "coverage in a study-specific simulation before confirmatory use."
-msgstr "Olgu yeniden örneklemeli yüzdelik aralıklar olguların bağımsız olduğunu varsayar. Küçük örneklemler, sınırdaki tahminler ve zayıf tanımlanabilirlik, belirtilen güven düzeyinin altında kapsama oranına yol açabilir. Sabit önsel dağılımlı tahminler de yanlı olabilir; bu bootstrap seçilen önsel dağılımlarla ilgili belirsizliği içermez. Doğrulayıcı kullanımdan önce kapsamayı çalışmaya özgü bir simülasyonla denetleyin."
+msgstr ""
+"Olgu yeniden örneklemeli yüzdelik aralıklar olguların bağımsız olduğunu "
+"varsayar. Küçük örneklemler, sınırdaki tahminler ve zayıf tanımlanabilirlik, "
+"belirtilen güven düzeyinin altında kapsama oranına yol açabilir. Sabit önsel "
+"dağılımlı tahminler de yanlı olabilir; bu bootstrap seçilen önsel "
+"dağılımlarla ilgili belirsizliği içermez. Doğrulayıcı kullanımdan önce "
+"kapsamayı çalışmaya özgü bir simülasyonla denetleyin."
 
 #: ihcdiagnostic/options/id.title
 msgid "Case/Patient ID (Optional)"
@@ -33642,6 +33713,12 @@ msgid ""
 "calculating Mx, Sx, and Dx indices."
 msgstr ""
 
+#: R/cotest.b.R
+msgid ""
+"certain by construction under the dependence entered, not an estimate (see "
+"the table footnote)"
+msgstr ""
+
 #: latentbiomarker/results/summaryTable.columns.title
 msgid "CFA parameters"
 msgstr ""
@@ -34779,6 +34856,14 @@ msgstr ""
 msgid "Choose the plotting backend for optimal performance."
 msgstr ""
 
+#: R/nogoldstandard.b.R
+msgid ""
+"Choose the positive level for {tests}. A test enters the analysis only after "
+"its positive level is chosen, so no results are shown yet."
+msgstr ""
+"{tests} için pozitif düzeyi seçin. Bir test ancak pozitif düzeyi seçildikten "
+"sonra analize girer; bu nedenle henüz sonuç gösterilmiyor."
+
 #: R/decision.b.R
 #: R/decisioncombine.b.R
 msgid ""
@@ -35445,7 +35530,13 @@ msgid ""
 "of freedom are zero, but probability constraints can still prevent an exact "
 "fit. Fit discrepancies remain informative; a conventional chi-squared "
 "reference distribution is not justified."
-msgstr "Sınıf etiketleri tanımlanmamıştır; yüksek pozitif sınıf kendiliğinden hastalık anlamına gelmez. Model koşullu olarak bağımsız hatalar varsayar ve koşullu bağımlılığı MODELLEMEZ; üç testle nominal kalıntı serbestlik derecesi sıfırdır, ancak olasılık kısıtları yine de tam uyumu engelleyebilir. Uyum farklılıkları bilgi verici olmaya devam eder; geleneksel bir ki-kare referans dağılımı gerekçelendirilemez."
+msgstr ""
+"Sınıf etiketleri tanımlanmamıştır; yüksek pozitif sınıf kendiliğinden "
+"hastalık anlamına gelmez. Model koşullu olarak bağımsız hatalar varsayar ve "
+"koşullu bağımlılığı MODELLEMEZ; üç testle nominal kalıntı serbestlik "
+"derecesi sıfırdır, ancak olasılık kısıtları yine de tam uyumu "
+"engelleyebilir. Uyum farklılıkları bilgi verici olmaya devam eder; "
+"geleneksel bir ki-kare referans dağılımı gerekçelendirilemez."
 
 #: R/nogoldstandard.b.R
 msgid ""
@@ -38197,6 +38288,7 @@ msgstr "ClinicoPath Sağkalım"
 #: package/analyses/assayoptimization.menuGroup
 #: package/analyses/frailtysurvival.menuGroup
 #: package/analyses/pseudosurvival.menuGroup
+#: package/analyses/intervalsurvival.menuGroup
 #: package/analyses/clinicalnomograms.menuGroup
 #: package/analyses/rmst.menuGroup
 #: package/analyses/permutationsurvival.menuGroup
@@ -38280,6 +38372,7 @@ msgstr "ClinicoPath Sağkalım"
 #: hierarchicalbayes/options.menuGroup
 #: imagingcorrelation/options.menuGroup
 #: interruptedtimeseries/options.menuGroup
+#: intervalsurvival/options.menuGroup
 #: labcontrolcharts/options.menuGroup
 #: labinterpret/options.menuGroup
 #: mediansurvival/options.menuGroup
@@ -38307,11 +38400,6 @@ msgstr "ClinicoPath Sağkalım"
 #: treatmentoptim/options.menuGroup
 #: treatmentswitching/options.menuGroup
 msgid "ClinicoPathD"
-msgstr ""
-
-#: package/analyses/intervalsurvival.menuGroup
-#: intervalsurvival/options.menuGroup
-msgid "ClinicoPathDT"
 msgstr ""
 
 #: package/analyses/flexmultistate.description
@@ -38950,10 +39038,11 @@ msgstr "Birlikte Test Sonuçları"
 
 #: R/cotest.b.R
 msgid ""
-"Co-testing with %1$s (sensitivity %2$.0f%%, specificity %3$.0f%%) and %4$s "
-"(sensitivity %5$.0f%%, specificity %6$.0f%%) in a population with %7$.1f%% "
-"disease prevalence showed: when both tests are positive, disease probability "
-"is %8$s (%9$s); when both are negative, disease probability is %10$s (%11$s)."
+"Co-testing with %1$s (sensitivity %2$s, specificity %3$s) and %4$s "
+"(sensitivity %5$s, specificity %6$s) at a pre-test probability of %7$s gave "
+"calculated post-test probabilities of disease of %8$s after a positive "
+"result on either test (the parallel rule; %9$s), %10$s when both tests were "
+"positive (%11$s) and %12$s when both were negative (%13$s)."
 msgstr ""
 
 #: treatmenteffects/options/matching_method/coarsened_exact.title
@@ -40316,6 +40405,10 @@ msgstr ""
 
 #: enhancedfrequency/results/results/combinedSummary.title
 msgid "Combined Frequency Summary"
+msgstr ""
+
+#: R/cotest.b.R
+msgid "combined likelihood ratio %1$s; %2$s"
 msgstr ""
 
 #: R/sequentialtests.b.R
@@ -47322,6 +47415,18 @@ msgstr "Korelasyon (1 - r), yalnızca profil şekli"
 #: ihccluster/options/markerClusteringMethod/correlation.title
 msgid "Correlation (continuous markers)"
 msgstr ""
+
+#: R/cotest.b.R
+#: cotest/options/cond_dep_pos.title
+#: cotest/ui[3][0][1]/cond_dep_pos.label
+msgid "Correlation (phi) among subjects with disease"
+msgstr "Hastalığı olan denekler arasındaki korelasyon (phi)"
+
+#: R/cotest.b.R
+#: cotest/options/cond_dep_neg.title
+#: cotest/ui[3][0][1]/cond_dep_neg.label
+msgid "Correlation (phi) among subjects without disease"
+msgstr "Hastalığı olmayan denekler arasındaki korelasyon (phi)"
 
 #: ihcscoring/results/agreementtable.columns.title
 #: imagingcorrelation/results/correlationTable.columns.title
@@ -55387,18 +55492,6 @@ msgstr ""
 "Aşağıda bildirilen sapmalar bu nedenle verilerin nasıl kaydedildiği hakkında "
 "hiçbir şey belirtmeksizin büyük olabilir"
 
-#: R/cotest.b.R
-#: cotest/options/cond_dep_pos.title
-#: cotest/ui[3][0][1]/cond_dep_pos.label
-msgid "Dependence among subjects with disease"
-msgstr "Hastalığı olan denekler arasındaki bağımlılık"
-
-#: R/cotest.b.R
-#: cotest/options/cond_dep_neg.title
-#: cotest/ui[3][0][1]/cond_dep_neg.label
-msgid "Dependence among subjects without disease"
-msgstr "Hastalığı olmayan denekler arasındaki bağımlılık"
-
 #: R/lollipop.b.R
 #: advancedanova/options/dependent.title
 #: advancedanova/ui[0][0].label
@@ -61955,7 +62048,12 @@ msgid ""
 "range from {minimum} to {maximum} of {requested}. Intervals with fewer than "
 "20 are left blank; increase the sample information or resolve fitting "
 "failures before reporting uncertainty."
-msgstr "Her aralık en az 20 sonlu parametre tahmini gerektirir. Sınıf veya kural oranı ile test yanıt olasılıkları genelinde başarılı sayılar {requested} içinde {minimum} ile {maximum} arasındadır. 20'den az tahmini olan aralıklar boş bırakılır; belirsizliği bildirmeden önce örneklem bilgisini artırın veya uyum başarısızlıklarını giderin."
+msgstr ""
+"Her aralık en az 20 sonlu parametre tahmini gerektirir. Sınıf veya kural "
+"oranı ile test yanıt olasılıkları genelinde başarılı sayılar {requested} "
+"içinde {minimum} ile {maximum} arasındadır. 20'den az tahmini olan aralıklar "
+"boş bırakılır; belirsizliği bildirmeden önce örneklem bilgisini artırın veya "
+"uyum başarısızlıklarını giderin."
 
 #: R/decisioncompare.b.R
 msgid ""
@@ -61974,7 +62072,12 @@ msgid ""
 "search, so local-optimum uncertainty may remain. Percentile intervals can be "
 "too narrow with weak identification, boundaries or small samples; nominal "
 "coverage is not guaranteed."
-msgstr "Her örtük sınıf yeniden örneklemi, tam örneklem çözümünü ve iki ek rastgele başlangıcı kullanır; ardından olabilirlik iyileştirmesi yapılır. Ana uyum daha geniş bir arama kullandığından yerel optimum belirsizliği kalabilir. Yüzdelik aralıklar zayıf tanımlanabilirlik, sınır değerleri veya küçük örneklemlerde fazla dar olabilir; nominal kapsama garanti edilmez."
+msgstr ""
+"Her örtük sınıf yeniden örneklemi, tam örneklem çözümünü ve iki ek rastgele "
+"başlangıcı kullanır; ardından olabilirlik iyileştirmesi yapılır. Ana uyum "
+"daha geniş bir arama kullandığından yerel optimum belirsizliği kalabilir. "
+"Yüzdelik aralıklar zayıf tanımlanabilirlik, sınır değerleri veya küçük "
+"örneklemlerde fazla dar olabilir; nominal kapsama garanti edilmez."
 
 #: R/jjwithinstats.b.R
 msgid ""
@@ -62027,7 +62130,13 @@ msgid ""
 "main fit uses a larger search, so local-optimum uncertainty may remain. "
 "Percentile intervals can be too narrow with weak identification, boundaries "
 "or small samples; nominal coverage is not guaranteed."
-msgstr "Her cezalandırılmış EM yeniden örneklemi, tam örneklem çözümünden ve iki standart başlangıç değerinden başlar; ardından cezalandırılmış olabilirlik iyileştirmesi yapılır. Ana uyum daha geniş bir arama kullandığından yerel optimum belirsizliği kalabilir. Yüzdelik aralıklar zayıf tanımlanabilirlik, sınır değerleri veya küçük örneklemlerde fazla dar olabilir; nominal kapsama garanti edilmez."
+msgstr ""
+"Her cezalandırılmış EM yeniden örneklemi, tam örneklem çözümünden ve iki "
+"standart başlangıç değerinden başlar; ardından cezalandırılmış olabilirlik "
+"iyileştirmesi yapılır. Ana uyum daha geniş bir arama kullandığından yerel "
+"optimum belirsizliği kalabilir. Yüzdelik aralıklar zayıf tanımlanabilirlik, "
+"sınır değerleri veya küçük örneklemlerde fazla dar olabilir; nominal kapsama "
+"garanti edilmez."
 
 #: R/clinicalscore.b.R
 msgid ""
@@ -67454,7 +67563,10 @@ msgid ""
 "Every case in the analyzed data meets the strict-majority rule, so there is "
 "no rule-negative group. The negative-response probability cannot be computed "
 "from an empty denominator and is left blank rather than reported."
-msgstr "Analiz edilen verilerdeki her olgu kesin çoğunluk kuralını karşılıyor, bu nedenle kural negatif grup yoktur. Negatif yanıt olasılığı boş bir paydadan hesaplanamaz ve bildirilmek yerine boş bırakılır."
+msgstr ""
+"Analiz edilen verilerdeki her olgu kesin çoğunluk kuralını karşılıyor, bu "
+"nedenle kural negatif grup yoktur. Negatif yanıt olasılığı boş bir paydadan "
+"hesaplanamaz ve bildirilmek yerine boş bırakılır."
 
 #: R/lassologistic.b.R
 msgid ""
@@ -67767,13 +67879,6 @@ msgstr "Koşullu bağımsızlığa karşı kanıt"
 #: R/decision.b.R
 msgid "evidence against disease when positive"
 msgstr "pozitif olduğunda hastalığa karşı kanıt"
-
-#: R/cotest.b.R
-msgid ""
-"evidence against disease: this result combination is more common in subjects "
-"without the disease, so it lowers the probability of disease. Check whether "
-"a sensitivity and a specificity have been entered the wrong way round."
-msgstr ""
 
 #: clinicalalerts/results/clinicalRecommendations.columns.title
 #: clinicalvalidationinteractive/results/clinicalGuidelines.columns.title
@@ -68147,14 +68252,19 @@ msgstr "Örnek yöntem"
 msgid ""
 "Example only -- not clinical guidance. {description} {guidance} Current "
 "settings happen to match this illustrative example."
-msgstr "Yalnızca örnek -- klinik rehberlik değildir. {description} {guidance} Mevcut ayarlar bu açıklayıcı örnekle eşleşmektedir."
+msgstr ""
+"Yalnızca örnek -- klinik rehberlik değildir. {description} {guidance} Mevcut "
+"ayarlar bu açıklayıcı örnekle eşleşmektedir."
 
 #: R/nogoldstandard.b.R
 msgid ""
 "Example only -- not clinical guidance. {description} {guidance} This example "
 "does not change settings. For comparison, its example settings differ as "
 "follows: {diffs}."
-msgstr "Yalnızca örnek -- klinik rehberlik değildir. {description} {guidance} Bu örnek ayarları değiştirmez. Karşılaştırma için örnek ayarları şu şekilde farklıdır: {diffs}."
+msgstr ""
+"Yalnızca örnek -- klinik rehberlik değildir. {description} {guidance} Bu "
+"örnek ayarları değiştirmez. Karşılaştırma için örnek ayarları şu şekilde "
+"farklıdır: {diffs}."
 
 #: R/nogoldstandard.b.R
 msgid "Example only:"
@@ -68584,6 +68694,12 @@ msgid ""
 msgstr ""
 "Kayıp zaman veya sonuç değerleri olan %d gözlem%s hariç tutuldu. Analiz %d "
 "eksiksiz olguya dayanmaktadır."
+
+#: R/cotest.b.R
+msgid ""
+"excluded by construction under the dependence entered, not an estimate (see "
+"the table footnote)"
+msgstr ""
 
 #: pathagreement/results/readerModalitySummary.columns.title
 #: pathagreement/results/readerModalityContrast.columns.title
@@ -74239,16 +74355,6 @@ msgstr ""
 "iki ondalıklı aralıklar verir (Makul 0.21 ile 0.40 arasıdır) ve aralıklar "
 "arasındaki boşluğu tanımsız bırakır; bu nedenle sınırdaki bir değerin bir "
 "kurala göre atanması gerekir."
-
-#: R/cotest.b.R
-msgid ""
-"For orientation: most diagnostic tests fall between 0.60 and 0.95 for "
-"sensitivity and between 0.70 and 0.98 for specificity, and prevalence is the "
-"pre-test probability in the population you are testing (roughly 0.001-0.01 "
-"for rare disease, 0.05-0.20 for common conditions). Values far outside these "
-"bands are worth re-checking — most often sensitivity and specificity have "
-"been entered the wrong way round."
-msgstr ""
 
 #: simpleSurvivalPower/ui[1][0]/sample_size_input.suffix
 msgid "for power/effect calculations"
@@ -92289,7 +92395,28 @@ msgid ""
 "the nominal residual degrees of freedom are zero, but exact fit is not "
 "guaranteed. Residuals remain descriptive and do not provide a formal "
 "chi-squared test or establish identifiability."
-msgstr "Örtük sınıf analizi, testlerin her örtük sınıf içinde koşullu olarak bağımsız olduğunu varsayar. Her çift için gözlenen iki yönlü tablo, uyarlanan modelin öngördüğü tabloyla karşılaştırılır. 3,84'ün üzerindeki bir kalıntı koşullu bağımsızlığa karşı betimsel bir kanıttır, ancak bu kareli istatistik bağımlılığın yönünü veya nedenini belirlemez ve uyarlanan parametrelerdeki yanlılığın yönünü saptayamaz. Üç testle nominal kalıntı serbestlik derecesi sıfırdır, ancak tam uyum garanti edilmez. Kalıntılar betimsel kalır; resmi bir ki-kare testi sağlamaz veya tanımlanabilirliği kanıtlamaz."
+msgstr ""
+"Örtük sınıf analizi, testlerin her örtük sınıf içinde koşullu olarak "
+"bağımsız olduğunu varsayar. Her çift için gözlenen iki yönlü tablo, "
+"uyarlanan modelin öngördüğü tabloyla karşılaştırılır. 3,84'ün üzerindeki bir "
+"kalıntı koşullu bağımsızlığa karşı betimsel bir kanıttır, ancak bu kareli "
+"istatistik bağımlılığın yönünü veya nedenini belirlemez ve uyarlanan "
+"parametrelerdeki yanlılığın yönünü saptayamaz. Üç testle nominal kalıntı "
+"serbestlik derecesi sıfırdır, ancak tam uyum garanti edilmez. Kalıntılar "
+"betimsel kalır; resmi bir ki-kare testi sağlamaz veya tanımlanabilirliği "
+"kanıtlamaz."
+
+#: R/nogoldstandard.b.R
+msgid ""
+"Latent class analysis needs both positive and not-positive results for every "
+"test among the analysed cases. Only one result was observed for: {}. Such a "
+"test carries no information about the latent classes. Check that the correct "
+"positive level is selected, or remove the test."
+msgstr ""
+"Örtük sınıf analizi, analiz edilen olgular arasında her test için hem "
+"pozitif hem de pozitif olmayan sonuçlar gerektirir. Yalnızca tek bir sonuç "
+"gözlenen testler: {}. Böyle bir test örtük sınıflar hakkında bilgi taşımaz. "
+"Doğru pozitif düzeyin seçildiğini kontrol edin veya testi çıkarın."
 
 #: R/nogoldstandard.b.R
 msgid ""
@@ -95089,11 +95216,11 @@ msgstr ""
 
 #: R/cotest.b.R
 msgid ""
-"Low prevalence (below 5%): every post-test probability below is driven "
-"mainly by the prevalence you entered rather than by the tests, and changes "
-"steeply with it. Check that this is the pre-test probability in the "
-"population you are actually testing, and re-run with a plausible range "
-"around it before acting on the numbers."
+"Low prevalence (below 5%): check that this is the pre-test probability in "
+"the population you are actually testing. At a prevalence this low a small "
+"absolute change (for example from 1% to 2%) about doubles the pre-test odds "
+"and moves every post-test probability with it, so re-run with a plausible "
+"range before acting on the numbers."
 msgstr ""
 
 #: R/agreement.b.R
@@ -95760,8 +95887,10 @@ msgstr "LR+ ve LR-"
 msgid ""
 "LR+ is how many times more likely a positive result is in someone with the "
 "disease than in someone without it; LR- is the same ratio for a negative "
-"result. Above 10 (or below 0.1) a single result shifts the probability of "
-"disease substantially; between 0.5 and 2 it barely moves it."
+"result. A common rule of thumb (Jaeschke et al. 1994) reads values above 10 "
+"or below 0.1 as large shifts in the probability of disease, 5 to 10 or 0.1 "
+"to 0.2 as moderate, 2 to 5 or 0.2 to 0.5 as small, and 0.5 to 2 as little "
+"change; it is a convention to help reading, not a threshold."
 msgstr ""
 
 #: R/decisioncompare.b.R
@@ -99027,14 +99156,12 @@ msgstr ""
 msgid "Mechanism Testing"
 msgstr ""
 
-#: package/analyses/cotest.menuGroup
 #: package/analyses/sequentialtests.menuGroup
 #: package/analyses/decisioncurve.menuGroup
 #: package/analyses/betabinomialdiagnostic.menuSubgroup
 #: package/analyses/hierarchicalbayes.menuSubgroup
 #: package/analyses/lassologistic.menuGroup
 #: betabinomialdiagnostic/options.menuSubgroup
-#: cotest/options.menuGroup
 #: decisioncurve/options.menuGroup
 #: hierarchicalbayes/options.menuSubgroup
 #: lassologistic/options.menuGroup
@@ -99083,6 +99210,7 @@ msgstr ""
 #: package/analyses/differentialdiagnosis.menuGroup
 #: package/analyses/idi.menuGroup
 #: package/analyses/netreclassification.menuGroup
+#: package/analyses/cohenskappa.menuGroup
 #: package/analyses/methodcomparison.menuGroup
 #: package/analyses/likelihoodratio.menuGroup
 #: package/analyses/precisionrecall.menuGroup
@@ -99121,6 +99249,7 @@ msgstr ""
 #: causalmediation/options.menuGroup
 #: clinicalvalidation/options.menuGroup
 #: clinicalvalidationinteractive/options.menuGroup
+#: cohenskappa/options.menuGroup
 #: concordanceindex/options.menuGroup
 #: costeffectiveness/options.menuGroup
 #: decisiongraph/options.menuGroup
@@ -99162,11 +99291,6 @@ msgstr ""
 msgid "meddecideExtraD"
 msgstr ""
 
-#: package/analyses/cohenskappa.menuGroup
-#: cohenskappa/options.menuGroup
-msgid "meddecideExtraDT"
-msgstr ""
-
 #: package/analyses/mageeequation.menuGroup
 #: mageeequation/options.menuGroup
 msgid "meddecideP"
@@ -99179,8 +99303,10 @@ msgstr ""
 #: package/analyses/decisioncompare.menuGroup
 #: package/analyses/psychopdaROC.menuGroup
 #: package/analyses/decisioncombine.menuGroup
+#: package/analyses/cotest.menuGroup
 #: package/analyses/enhancedROC.menuGroup
 #: agreement/options.menuGroup
+#: cotest/options.menuGroup
 #: decision/options.menuGroup
 #: decisioncalculator/options.menuGroup
 #: decisioncombine/options.menuGroup
@@ -101922,10 +102048,6 @@ msgstr "Hastalığa karşı minimal kanıt"
 #: R/decision.b.R
 msgid "Minimal evidence for disease"
 msgstr "Hastalık lehine minimal kanıt"
-
-#: R/cotest.b.R
-msgid "minimal evidence for disease"
-msgstr ""
 
 #: R/decision.b.R
 msgid "minimal evidence for disease when positive"
@@ -105306,10 +105428,6 @@ msgstr "Hastalığa karşı orta derecede kanıt"
 msgid "Moderate evidence for disease"
 msgstr "Hastalık lehine orta derecede kanıt"
 
-#: R/cotest.b.R
-msgid "moderate evidence for disease"
-msgstr ""
-
 #: R/decision.b.R
 msgid "moderate evidence for disease when positive"
 msgstr "pozitif olduğunda hastalık lehine orta derecede kanıt"
@@ -108111,6 +108229,7 @@ msgstr "Negatif uyum yüzdesi (NPA)"
 #: decision/results/ratioTable.columns.title
 #: decisioncalculator/results/ratioTable.columns.title
 #: decisioncompare/results/comparisonTable.columns.title
+#: nogoldstandard/results/test_metrics.columns.superTitle
 #: screeningcalculator/results/singleTestTable.columns.title
 #: stagemigration/results/clinicalUtilityComparisonTable.columns.title
 msgid "Negative Predictive Value"
@@ -109131,6 +109250,7 @@ msgstr ""
 msgid "nlminb"
 msgstr ""
 
+#: R/cotest.b.R
 #: R/decision.b.R
 #: hematologicindices/options/indices/nlr.title
 #: hematologicindices/options/survivalIndex/nlr.title
@@ -109331,7 +109451,10 @@ msgid ""
 "No case in the analyzed data meets the strict-majority rule, so there is no "
 "rule-positive group. The positive-response probability cannot be computed "
 "from an empty denominator and is left blank rather than reported."
-msgstr "Analiz edilen verilerde hiçbir olgu kesin çoğunluk kuralını karşılamıyor, bu nedenle kural pozitif grup yoktur. Pozitif yanıt olasılığı boş bir paydadan hesaplanamaz ve bildirilmek yerine boş bırakılır."
+msgstr ""
+"Analiz edilen verilerde hiçbir olgu kesin çoğunluk kuralını karşılamıyor, bu "
+"nedenle kural pozitif grup yoktur. Pozitif yanıt olasılığı boş bir paydadan "
+"hesaplanamaz ve bildirilmek yerine boş bırakılır."
 
 #: R/pathagreement.b.R
 msgid ""
@@ -109967,10 +110090,6 @@ msgid ""
 msgstr ""
 "Tanısal belirteç mevcut değil. Tanısal metrikler atlandı; tahmin nomogramı "
 "regresyon modelinden yine de üretilebilir."
-
-#: R/cotest.b.R
-msgid "no diagnostic value"
-msgstr ""
 
 #: R/ihcheterogeneity.b.R
 msgid ""
@@ -112836,8 +112955,8 @@ msgstr "Birbirinin yerine kullanılmaya uygun değil:"
 msgid ""
 "Not an estimate: with these parameters this result combination cannot occur "
 "in one of the two disease groups, so the probability is %s by construction. "
-"This follows from the conditional dependence being truncated to the largest "
-"value the entered sensitivities and specificities allow — move it toward 0 "
+"This follows from the conditional dependence being at, or truncated to, the "
+"limit the entered sensitivities and specificities allow — move it toward 0 "
 "to leave this regime."
 msgstr ""
 
@@ -116344,7 +116463,12 @@ msgid ""
 "counts. PPV and NPV instead use each test's positive and negative counts. "
 "With fewer than about 10 cases in a conditioning group, its estimate and "
 "interval can be unstable."
-msgstr "Analiz edilen {n} olgudan {npos} tanesi seçilen referans kuralını karşılıyor, {nneg} tanesi karşılamıyor. Pozitif ve negatif yanıt olasılıkları bu kural grubu sayılarını kullanır. PPV ve NPV ise her testin pozitif ve negatif sayılarını kullanır. Koşullayan bir grupta yaklaşık 10'dan az olgu olduğunda o grubun tahmini ve aralığı kararsız olabilir."
+msgstr ""
+"Analiz edilen {n} olgudan {npos} tanesi seçilen referans kuralını "
+"karşılıyor, {nneg} tanesi karşılamıyor. Pozitif ve negatif yanıt "
+"olasılıkları bu kural grubu sayılarını kullanır. PPV ve NPV ise her testin "
+"pozitif ve negatif sayılarını kullanır. Koşullayan bir grupta yaklaşık "
+"10'dan az olgu olduğunda o grubun tahmini ve aralığı kararsız olabilir."
 
 #: R/waterfall.b.R
 msgid ""
@@ -116553,6 +116677,7 @@ msgstr ""
 #: package/analyses/dendrogram.menuGroup
 #: package/analyses/modelperformance.menuGroup
 #: package/analyses/variablebiplot.menuGroup
+#: package/analyses/curemodels.menuGroup
 #: package/analyses/digitalvalidation.menuGroup
 #: package/analyses/haralicktexture.menuGroup
 #: package/analyses/ihcscoring.menuGroup
@@ -116597,6 +116722,7 @@ msgstr ""
 #: condsurvival/options.menuGroup
 #: consortdiagram/options.menuGroup
 #: ctdnadynamics/options.menuGroup
+#: curemodels/options.menuGroup
 #: dendrogram/options.menuGroup
 #: digitalvalidation/options.menuGroup
 #: explainableai/options.menuGroup
@@ -116639,11 +116765,6 @@ msgstr ""
 #: tumorgrowth/options.menuGroup
 #: variablebiplot/options.menuGroup
 msgid "OncoPathD"
-msgstr ""
-
-#: package/analyses/curemodels.menuGroup
-#: curemodels/options.menuGroup
-msgid "OncoPathDT"
 msgstr ""
 
 #: package/analyses/metaanalysis.menuGroup
@@ -129190,6 +129311,7 @@ msgstr "Grafik Açıklamaları"
 msgid "plotted values across"
 msgstr ""
 
+#: R/cotest.b.R
 #: R/decision.b.R
 #: hematologicindices/options/indices/plr.title
 #: hematologicindices/options/survivalIndex/plr.title
@@ -130275,6 +130397,10 @@ msgstr ""
 msgid "Positive Level (Disease)"
 msgstr ""
 
+#: R/nogoldstandard.b.R
+msgid "Positive level not selected"
+msgstr "Pozitif düzey seçilmedi"
+
 #: R/decisioncombine.b.R
 msgid "Positive Levels May Be Inverted"
 msgstr "Pozitif Düzeyler Ters Çevrilmiş Olabilir"
@@ -130422,6 +130548,7 @@ msgstr "Pozitif uyum yüzdesi (PPA)"
 #: decision/results/ratioTable.columns.title
 #: decisioncalculator/results/ratioTable.columns.title
 #: decisioncompare/results/comparisonTable.columns.title
+#: nogoldstandard/results/test_metrics.columns.superTitle
 #: ppv/options.title
 #: ppv/ui.title
 #: ppv/results.title
@@ -130901,10 +131028,12 @@ msgstr ""
 msgid "Post. SD"
 msgstr ""
 
+#: R/cotest.b.R
 #: R/decision.b.R
 msgid "Post(-)"
 msgstr "Test sonrası(-)"
 
+#: R/cotest.b.R
 #: R/decision.b.R
 msgid "Post(+)"
 msgstr "Test sonrası(+)"
@@ -131577,6 +131706,16 @@ msgstr ""
 "fonksiyonları oldukları için tam olarak aynı bağımlılığı devralırlar -- "
 "ancak yeni ortamın sahip olduğu herhangi bir prevalansta ön test olasılığını "
 "son test olasılığına dönüştürdükleri için."
+
+#: R/nogoldstandard.b.R
+msgid ""
+"PPV and NPV hold only at the class or rule proportion of these data. In a "
+"population with a different prevalence they differ, even when the response "
+"probabilities are the same."
+msgstr ""
+"PPV ve NPV yalnızca bu verilerin sınıf veya kural oranında geçerlidir. "
+"Prevalansı farklı bir popülasyonda, yanıt olasılıkları aynı olsa bile "
+"farklılık gösterirler."
 
 #: R/decisioncalculator.b.R
 msgid ""
@@ -133287,6 +133426,7 @@ msgstr ""
 msgid "Pretty Breaks"
 msgstr ""
 
+#: R/cotest.b.R
 #: R/decision.b.R
 #: R/decisioncombine.b.R
 #: R/decisioncurve.b.R
@@ -133450,7 +133590,16 @@ msgid ""
 "numbers below. These are penalised-likelihood (MAP) point estimates from an "
 "EM algorithm, not draws from a posterior, so the intervals shown are not "
 "credible intervals."
-msgstr "Prevalans tekdüze bir Beta(%1$g, %2$g) önsel dağılımı kullanır. Duyarlılık ve özgüllüğün her biri, ortalaması %5$.2f olan ve 1'e doğru artan bir Beta(%3$g, %4$g) önsel dağılımı kullanır; bu nedenle her iki tahmini de yukarı çeker -- MAP açısından her teste bir sözde gerçek pozitif ve bir sözde gerçek negatif sonuç ekler. Küçük bir örneklemde aşağıdaki sayıları verileriniz değil bu önsel dağılım belirliyor olabilir. Bunlar bir EM algoritmasından elde edilen cezalandırılmış olabilirlik (MAP) nokta tahminleridir, sonsal dağılımdan çekilmiş değerler değildir; bu nedenle gösterilen aralıklar inanılırlık aralıkları değildir."
+msgstr ""
+"Prevalans tekdüze bir Beta(%1$g, %2$g) önsel dağılımı kullanır. Duyarlılık "
+"ve özgüllüğün her biri, ortalaması %5$.2f olan ve 1'e doğru artan bir "
+"Beta(%3$g, %4$g) önsel dağılımı kullanır; bu nedenle her iki tahmini de "
+"yukarı çeker -- MAP açısından her teste bir sözde gerçek pozitif ve bir "
+"sözde gerçek negatif sonuç ekler. Küçük bir örneklemde aşağıdaki sayıları "
+"verileriniz değil bu önsel dağılım belirliyor olabilir. Bunlar bir EM "
+"algoritmasından elde edilen cezalandırılmış olabilirlik (MAP) nokta "
+"tahminleridir, sonsal dağılımdan çekilmiş değerler değildir; bu nedenle "
+"gösterilen aralıklar inanılırlık aralıkları değildir."
 
 #: R/sequentialtests.b.R
 msgid "Prevalence Very High"
@@ -137134,7 +137283,7 @@ msgstr ""
 "gerekmeyenlerin seçimini kaldırın."
 
 #: R/cotest.b.R
-msgid "raised to %.2fx of prevalence"
+msgid "raised to %sx of prevalence"
 msgstr ""
 
 #: dynamicprediction/results/trajectoryParameters.columns.title
@@ -139619,7 +139768,7 @@ msgstr ""
 "sayısı {requested} değerinden {used} değerine düşürüldü."
 
 #: R/cotest.b.R
-msgid "reduced to %.2fx of prevalence"
+msgid "reduced to %sx of prevalence"
 msgstr ""
 
 #: ihccluster/results/markerClusteringTree.columns.title
@@ -155739,7 +155888,11 @@ msgid ""
 "in latent estimates. The numerical identification check is close to "
 "singular. Interpret estimates and bootstrap intervals cautiously and examine "
 "study-specific sensitivity analyses."
-msgstr "Gözlenen yanıt sıklıklarındaki küçük değişiklikler örtük tahminlerde büyük değişikliklere yol açabilir. Sayısal tanımlanabilirlik denetimi tekilliğe yakındır. Tahminleri ve bootstrap aralıklarını dikkatle yorumlayın ve çalışmaya özgü duyarlılık analizlerini inceleyin."
+msgstr ""
+"Gözlenen yanıt sıklıklarındaki küçük değişiklikler örtük tahminlerde büyük "
+"değişikliklere yol açabilir. Sayısal tanımlanabilirlik denetimi tekilliğe "
+"yakındır. Tahminleri ve bootstrap aralıklarını dikkatle yorumlayın ve "
+"çalışmaya özgü duyarlılık analizlerini inceleyin."
 
 #: R/riverplot.b.R
 msgid ""
@@ -161999,10 +162152,6 @@ msgstr ""
 msgid "Strong evidence for disease"
 msgstr "Hastalık lehine güçlü kanıt"
 
-#: R/cotest.b.R
-msgid "strong evidence for disease"
-msgstr ""
-
 #: R/decision.b.R
 msgid "strong evidence for disease when positive"
 msgstr "pozitif olduğunda hastalık lehine güçlü kanıt"
@@ -164934,7 +165083,9 @@ msgstr ""
 #: package/analyses/mixedcox.menuGroup
 #: package/analyses/timevarycox.menuGroup
 #: package/analyses/weightedlogrank.menuGroup
+#: package/analyses/flexparametric.menuGroup
 #: package/analyses/aalenhazard.menuGroup
+#: package/analyses/flexrstpm2.menuGroup
 #: package/analyses/mixedeffectscox.menuGroup
 #: package/analyses/emfrailty.menuGroup
 #: package/analyses/parametricfrailty.menuGroup
@@ -164949,9 +165100,11 @@ msgstr ""
 #: package/analyses/gradientboosting.menuGroup
 #: package/analyses/adaptivelasso.menuGroup
 #: package/analyses/grouplasso.menuGroup
+#: package/analyses/illnessdeath.menuGroup
 #: package/analyses/sparsegrouplasso.menuGroup
 #: package/analyses/survivalbart.menuGroup
 #: package/analyses/landmarkanalysis.menuGroup
+#: package/analyses/flexmultistate.menuGroup
 #: package/analyses/continuousmarkov.menuGroup
 #: package/analyses/pcacox.menuGroup
 #: package/analyses/plscox.menuGroup
@@ -165000,11 +165153,15 @@ msgstr ""
 #: extratrees/options.menuGroup
 #: finegray/options.menuGroup
 #: flexcomprisk/options.menuGroup
+#: flexmultistate/options.menuGroup
+#: flexparametric/options.menuGroup
+#: flexrstpm2/options.menuGroup
 #: gradientboosting/options.menuGroup
 #: groomecompare/options.menuGroup
 #: groupedforest/options.menuGroup
 #: grouplasso/options.menuGroup
 #: hiddenmarkov/options.menuGroup
+#: illnessdeath/options.menuGroup
 #: jiwillsurvive/options.menuGroup
 #: joinpoint/options.menuGroup
 #: jointfrailty/options.menuGroup
@@ -165045,17 +165202,6 @@ msgstr ""
 #: weightedlogrank/options.menuGroup
 #: winratio/options.menuGroup
 msgid "SurvivalD"
-msgstr ""
-
-#: package/analyses/flexparametric.menuGroup
-#: package/analyses/flexrstpm2.menuGroup
-#: package/analyses/illnessdeath.menuGroup
-#: package/analyses/flexmultistate.menuGroup
-#: flexmultistate/options.menuGroup
-#: flexparametric/options.menuGroup
-#: flexrstpm2/options.menuGroup
-#: illnessdeath/options.menuGroup
-msgid "SurvivalDT"
 msgstr ""
 
 #: package/analyses/survivalvalidation.menuGroup
@@ -166616,7 +166762,10 @@ msgid ""
 "Test '{test}' has fewer than 5 cases on one side of the "
 "positive/not-positive split the analysis uses ({npos} positive, {nneg} not "
 "positive). Estimates may be unstable."
-msgstr "'{test}' testinde, analizin kullandığı pozitif/pozitif olmayan ayrımının bir tarafında 5'ten az olgu var ({npos} pozitif, {nneg} pozitif değil). Tahminler kararsız olabilir."
+msgstr ""
+"'{test}' testinde, analizin kullandığı pozitif/pozitif olmayan ayrımının bir "
+"tarafında 5'ten az olgu var ({npos} pozitif, {nneg} pozitif değil). "
+"Tahminler kararsız olabilir."
 
 #: R/nogoldstandard.b.R
 msgid ""
@@ -166626,14 +166775,27 @@ msgid ""
 "present. Recode or exclude such results before analysis if this is not the "
 "intended comparison. All estimates and agreement statistics use this split "
 "on complete cases."
-msgstr "'{test}' testinde ikiden fazla gözlenen kategori var. Yalnızca '{positive}' pozitif kabul edilir; gözlenen diğer tüm kategoriler ({pooled}) pozitif olmayan (negatif) olarak birleştirilir. Varsa şüpheli veya belirsiz sonuçlar da buna dahildir. Amaçlanan karşılaştırma bu değilse bu sonuçları analizden önce yeniden kodlayın veya dışlayın. Tüm tahminler ve uyum istatistikleri tam olgularda bu ayrımı kullanır."
+msgstr ""
+"'{test}' testinde ikiden fazla gözlenen kategori var. Yalnızca '{positive}' "
+"pozitif kabul edilir; gözlenen diğer tüm kategoriler ({pooled}) pozitif "
+"olmayan (negatif) olarak birleştirilir. Varsa şüpheli veya belirsiz sonuçlar "
+"da buna dahildir. Amaçlanan karşılaştırma bu değilse bu sonuçları analizden "
+"önce yeniden kodlayın veya dışlayın. Tüm tahminler ve uyum istatistikleri "
+"tam olgularda bu ayrımı kullanır."
 
 #: R/nogoldstandard.b.R
 msgid ""
 "Test '{test}' is extremely imbalanced on the positive/not-positive split the "
 "analysis uses: the smaller side is {percentage}% of observations. This may "
 "destabilize parameter estimation."
-msgstr "'{test}' testi, analizin kullandığı pozitif/pozitif olmayan ayrımında aşırı dengesizdir: küçük taraf gözlemlerin %{percentage} kadarıdır. Bu, parametre tahminini istikrarsızlaştırabilir."
+msgstr ""
+"'{test}' testi, analizin kullandığı pozitif/pozitif olmayan ayrımında aşırı "
+"dengesizdir: küçük taraf gözlemlerin %{percentage} kadarıdır. Bu, parametre "
+"tahminini istikrarsızlaştırabilir."
+
+#: R/nogoldstandard.b.R
+msgid "Test {number} ({variable})"
+msgstr "Test {number} ({variable})"
 
 #: R/decisioncombine.b.R
 msgid "Test {test} alone"
@@ -166672,14 +166834,6 @@ msgstr "Test 1 - Yeniden Kodlanmış Veriler"
 msgid "Test 1 (Required)"
 msgstr "Test 1 (Zorunlu)"
 
-#: R/cotest.b.R
-msgid ""
-"Test 1 has low discriminatory power (sensitivity plus specificity below 1.1, "
-"i.e. a Youden index below 0.1). Check its likelihood ratios in the results "
-"table: an operating point close to the chance diagonal can still give an "
-"informative LR+ or LR- when sensitivity and specificity are very unequal."
-msgstr ""
-
 #: R/decisioncombine.b.R
 msgid "Test 1 is required. Select at least one test variable."
 msgstr "Test 1 zorunludur. En az bir test değişkeni seçin."
@@ -166699,14 +166853,6 @@ msgstr "Test 1 Adı Boş"
 #: decisioncompare/options/test1Negative.title
 msgid "Test 1 Negative Level"
 msgstr "Test 1 Negatif Düzey"
-
-#: R/cotest.b.R
-msgid "Test 1 Negative LR"
-msgstr ""
-
-#: R/cotest.b.R
-msgid "Test 1 Only LR"
-msgstr ""
 
 #: cotest/ui[1].label
 msgid "Test 1 parameters"
@@ -166730,10 +166876,6 @@ msgstr ""
 #: decisioncompare/options/test1Positive.title
 msgid "Test 1 Positive Level"
 msgstr "Test 1 Pozitif Düzey"
-
-#: R/cotest.b.R
-msgid "Test 1 Positive LR"
-msgstr ""
 
 #: R/cotest.b.R
 #: cotest/options/test1_sens.title
@@ -166825,14 +166967,6 @@ msgstr "Test 2 (Kombinasyonlar İçin Zorunlu)"
 msgid "Test 2 (Required for Comparison)"
 msgstr "Test 2 (Karşılaştırma İçin Zorunlu)"
 
-#: R/cotest.b.R
-msgid ""
-"Test 2 has low discriminatory power (sensitivity plus specificity below 1.1, "
-"i.e. a Youden index below 0.1). Check its likelihood ratios in the results "
-"table: an operating point close to the chance diagonal can still give an "
-"informative LR+ or LR- when sensitivity and specificity are very unequal."
-msgstr ""
-
 #: R/sequentialtests.b.R
 msgid "Test 2 Low Performance"
 msgstr "Test 2 Düşük Performans"
@@ -166848,14 +166982,6 @@ msgstr "Test 2 Adı Boş"
 #: decisioncompare/options/test2Negative.title
 msgid "Test 2 Negative Level"
 msgstr "Test 2 Negatif Düzey"
-
-#: R/cotest.b.R
-msgid "Test 2 Negative LR"
-msgstr ""
-
-#: R/cotest.b.R
-msgid "Test 2 Only LR"
-msgstr ""
 
 #: cotest/ui[2].label
 msgid "Test 2 parameters"
@@ -166879,10 +167005,6 @@ msgstr ""
 #: decisioncompare/options/test2Positive.title
 msgid "Test 2 Positive Level"
 msgstr "Test 2 Pozitif Düzey"
-
-#: R/cotest.b.R
-msgid "Test 2 Positive LR"
-msgstr ""
 
 #: R/decisioncombine.b.R
 msgid "Test 2 Required Before Test 3"
@@ -168851,6 +168973,19 @@ msgid ""
 "subjects, is what binds here."
 msgstr ""
 
+#: R/cotest.b.R
+msgid ""
+"The calculation assumes both tests are performed in parallel and allows "
+"conditional dependence (correlation %1$s among diseased and %2$s among "
+"non-diseased subjects)%3$s."
+msgstr ""
+
+#: R/cotest.b.R
+msgid ""
+"The calculation assumes both tests are performed in parallel and are "
+"conditionally independent."
+msgstr ""
+
 #: R/kappaSizeFixedN.b.R
 msgid ""
 "The calculation did not converge to a usable answer: the search returned "
@@ -170004,9 +170139,10 @@ msgid ""
 "The dependence parameter for the diseased group (%1$.2f) is not attainable "
 "with these sensitivities, so the joint positive probability was truncated "
 "from %2$.4f to its bound %3$.4f. The model actually fitted is therefore not "
-"the one you specified, and can force some test combinations to be "
-"impossible. Move the value toward 0 until this note disappears; the realized "
-"correlation is reported in the Test Dependence panel."
+"the one you specified, and at least one combination of results becomes "
+"impossible in that group. Move the value toward 0 until this note "
+"disappears; the realized correlation is reported in the Test Dependence "
+"panel."
 msgstr ""
 
 #: R/cotest.b.R
@@ -170014,9 +170150,10 @@ msgid ""
 "The dependence parameter for the non-diseased group (%1$.2f) is not "
 "attainable with these specificities, so the joint false-positive probability "
 "was truncated from %2$.4f to its bound %3$.4f. The model actually fitted is "
-"therefore not the one you specified, and can force some test combinations to "
-"be impossible. Move the value toward 0 until this note disappears; the "
-"realized correlation is reported in the Test Dependence panel."
+"therefore not the one you specified, and at least one combination of results "
+"becomes impossible in that group. Move the value toward 0 until this note "
+"disappears; the realized correlation is reported in the Test Dependence "
+"panel."
 msgstr ""
 
 #: R/survivalPower.b.R
@@ -170468,15 +170605,19 @@ msgstr ""
 #: R/cotest.b.R
 msgid ""
 "The Fagan nomogram was not drawn because one of the combined likelihood "
-"ratios is not a finite number with these parameters. Check the sensitivity "
-"and specificity values you entered."
+"ratios is not a finite number with these parameters: a combination of "
+"results is impossible in one disease group because the dependence is at, or "
+"was truncated to, the limit the entered values allow (see the notice above). "
+"Move the dependence toward 0."
 msgstr ""
 
 #: R/cotest.b.R
 msgid ""
 "The Fagan nomogram was not drawn because the negative-rule likelihood ratio "
-"is zero, which cannot be placed on the nomogram's logarithmic axis. Check "
-"the sensitivity and specificity values you entered."
+"is zero, which cannot be placed on the nomogram's logarithmic axis: two "
+"negative results are impossible in subjects with the disease because the "
+"dependence is at, or was truncated to, the limit the entered values allow "
+"(see the notice above). Move the dependence toward 0."
 msgstr ""
 
 #: R/cotest.b.R
@@ -170516,7 +170657,13 @@ msgid ""
 "values and their intervals are left blank. Observed agreement and available "
 "model-fit diagnostics are retained. This tolerance is a numerical safeguard, "
 "not a statistical test of class separation."
-msgstr "Uyarlanan sınıfların ortalama seçili pozitif olasılıkları 0,000001'lik sayısal tolerans içinde eşittir. Bu adlandırma kuralına göre tek bir yüksek pozitif sınıf yoktur. Sınıf oranı, yanıt olasılıkları, prediktif değerler ve aralıkları boş bırakılır. Gözlenen uyum ve mevcut model uyum tanılamaları korunur. Bu tolerans, sınıf ayrımının istatistiksel bir testi değil, sayısal bir güvencedir."
+msgstr ""
+"Uyarlanan sınıfların ortalama seçili pozitif olasılıkları 0,000001'lik "
+"sayısal tolerans içinde eşittir. Bu adlandırma kuralına göre tek bir yüksek "
+"pozitif sınıf yoktur. Sınıf oranı, yanıt olasılıkları, prediktif değerler ve "
+"aralıkları boş bırakılır. Gözlenen uyum ve mevcut model uyum tanılamaları "
+"korunur. Bu tolerans, sınıf ayrımının istatistiksel bir testi değil, sayısal "
+"bir güvencedir."
 
 #: R/nogoldstandard.b.R
 msgid ""
@@ -170576,7 +170723,12 @@ msgid ""
 "selected-positive probability to the positive class. Relabeling would change "
 "the asymmetric prior objective. Latent estimates and intervals are left "
 "blank; reconsider the selected positive levels or use the unpenalized model."
-msgstr "Sabit önsel dağılımlı çözüm, daha yüksek ortalama seçili pozitif olasılığı pozitif sınıfa atamıyor. Yeniden etiketleme asimetrik önsel amaç fonksiyonunu değiştirir. Örtük tahminler ve aralıklar boş bırakılır; seçilen pozitif düzeyleri yeniden gözden geçirin veya cezalandırılmamış modeli kullanın."
+msgstr ""
+"Sabit önsel dağılımlı çözüm, daha yüksek ortalama seçili pozitif olasılığı "
+"pozitif sınıfa atamıyor. Yeniden etiketleme asimetrik önsel amaç "
+"fonksiyonunu değiştirir. Örtük tahminler ve aralıklar boş bırakılır; seçilen "
+"pozitif düzeyleri yeniden gözden geçirin veya cezalandırılmamış modeli "
+"kullanın."
 
 #: R/stagemigration-part5.R
 msgid ""
@@ -170723,7 +170875,10 @@ msgid ""
 "The full-sample latent fit is not reportable, so bootstrap refitting was "
 "skipped. Resolve the convergence, identification or class-orientation "
 "warning first."
-msgstr "Tam örneklem örtük uyumu raporlanabilir değil, bu nedenle bootstrap ile yeniden uyarlama atlandı. Önce yakınsama, tanımlanabilirlik veya sınıf yönelimi uyarısını giderin."
+msgstr ""
+"Tam örneklem örtük uyumu raporlanabilir değil, bu nedenle bootstrap ile "
+"yeniden uyarlama atlandı. Önce yakınsama, tanımlanabilirlik veya sınıf "
+"yönelimi uyarısını giderin."
 
 #: R/lassologistic.b.R
 msgid ""
@@ -171485,7 +171640,12 @@ msgid ""
 "%s refinement iterations. Point estimates and intervals have been left "
 "blank. Try a different method, or check whether the tests nearly perfectly "
 "agree or provide little information about separate classes."
-msgstr "Örtük model çözücüsü %s iyileştirme yinelemesinden sonra sayısal yakınsama denetimlerini karşılamadı. Nokta tahminleri ve aralıklar boş bırakıldı. Farklı bir yöntem deneyin veya testlerin neredeyse tam uyum gösterip göstermediğini ya da ayrı sınıflar hakkında az bilgi sağlayıp sağlamadığını denetleyin."
+msgstr ""
+"Örtük model çözücüsü %s iyileştirme yinelemesinden sonra sayısal yakınsama "
+"denetimlerini karşılamadı. Nokta tahminleri ve aralıklar boş bırakıldı. "
+"Farklı bir yöntem deneyin veya testlerin neredeyse tam uyum gösterip "
+"göstermediğini ya da ayrı sınıflar hakkında az bilgi sağlayıp sağlamadığını "
+"denetleyin."
 
 #: R/benford.b.R
 msgid ""
@@ -173068,7 +173228,11 @@ msgid ""
 "confidence intervals, not Bayesian credible intervals. The cited Bayesian "
 "studies are background; their posterior-sampling or dependence-adjusted "
 "methods are not implemented here."
-msgstr "Önsel dağılımlar sabittir ve aralıkları Bayesçi inanılırlık aralıkları değil, yaklaşık olgu bootstrap güven aralıklarıdır. Atıf yapılan Bayesçi çalışmalar arka plan bilgisidir; sonsal örnekleme veya bağımlılığa göre düzeltilmiş yöntemleri burada uygulanmamıştır."
+msgstr ""
+"Önsel dağılımlar sabittir ve aralıkları Bayesçi inanılırlık aralıkları "
+"değil, yaklaşık olgu bootstrap güven aralıklarıdır. Atıf yapılan Bayesçi "
+"çalışmalar arka plan bilgisidir; sonsal örnekleme veya bağımlılığa göre "
+"düzeltilmiş yöntemleri burada uygulanmamıştır."
 
 #: advancedSurvivalPower/options/power.description
 msgid ""
@@ -173364,7 +173528,12 @@ msgid ""
 "left blank rather than reported as findings. The remaining values are also "
 "affected by this circularity and describe agreement with the rule, not "
 "diagnostic accuracy."
-msgstr "Referans kuralı \"en az bir test pozitif\" olarak tanımlanmıştır, bu nedenle her test kendi sonucundan oluşturulan bir kuralla karşılaştırılır. Bu yüzden özgüllük ve PPV her veri kümesinde yapısı gereği %100'e sabitlenir ve bulgu olarak bildirilmek yerine boş bırakılır. Kalan değerler de bu döngüsellikten etkilenir ve tanısal doğruluğu değil, kuralla uyumu tanımlar."
+msgstr ""
+"Referans kuralı \"en az bir test pozitif\" olarak tanımlanmıştır, bu nedenle "
+"her test kendi sonucundan oluşturulan bir kuralla karşılaştırılır. Bu yüzden "
+"özgüllük ve PPV her veri kümesinde yapısı gereği %100'e sabitlenir ve bulgu "
+"olarak bildirilmek yerine boş bırakılır. Kalan değerler de bu döngüsellikten "
+"etkilenir ve tanısal doğruluğu değil, kuralla uyumu tanımlar."
 
 #: R/nogoldstandard.b.R
 msgid ""
@@ -173374,7 +173543,12 @@ msgid ""
 "rather than reported as findings. The remaining values are also affected by "
 "this circularity and describe agreement with the rule, not diagnostic "
 "accuracy."
-msgstr "Referans kuralı \"her test pozitif\" olarak tanımlanmıştır, bu nedenle her test kendi sonucundan oluşturulan bir kuralla karşılaştırılır. Bu yüzden duyarlılık ve NPV her veri kümesinde yapısı gereği %100'e sabitlenir ve bulgu olarak bildirilmek yerine boş bırakılır. Kalan değerler de bu döngüsellikten etkilenir ve tanısal doğruluğu değil, kuralla uyumu tanımlar."
+msgstr ""
+"Referans kuralı \"her test pozitif\" olarak tanımlanmıştır, bu nedenle her "
+"test kendi sonucundan oluşturulan bir kuralla karşılaştırılır. Bu yüzden "
+"duyarlılık ve NPV her veri kümesinde yapısı gereği %100'e sabitlenir ve "
+"bulgu olarak bildirilmek yerine boş bırakılır. Kalan değerler de bu "
+"döngüsellikten etkilenir ve tanısal doğruluğu değil, kuralla uyumu tanımlar."
 
 #: R/decisioncombine.b.R
 msgid ""
@@ -175545,6 +175719,10 @@ msgstr ""
 "Bunlar ayrı temel tehlikeler tanımlar ve puan ölçekleri yoktur; bu nedenle "
 "nomogram bir tabaka içinde geçerlidir."
 
+#: R/cotest.b.R
+msgid "These dependence values are the analysis defaults, not estimates from data."
+msgstr ""
+
 #: R/decisioncompare.b.R
 msgid ""
 "These estimates are apparent performance in this dataset and have not been "
@@ -176246,7 +176424,11 @@ msgid ""
 "for every selected test. All displayed estimates use these complete cases. "
 "If the probability of a missing result is related to an unobserved test "
 "result or latent class, the estimates can be biased."
-msgstr "Bu analiz, %2$d olgudan seçilen her test için sonucu kaydedilmiş %1$d olguyu (%%%3$.1f) kullanır. Gösterilen tüm tahminler bu tam olguları kullanır. Eksik sonuç olasılığı gözlenmemiş bir test sonucu veya örtük sınıfla ilişkiliyse tahminler yanlı olabilir."
+msgstr ""
+"Bu analiz, %2$d olgudan seçilen her test için sonucu kaydedilmiş %1$d olguyu "
+"(%%%3$.1f) kullanır. Gösterilen tüm tahminler bu tam olguları kullanır. "
+"Eksik sonuç olasılığı gözlenmemiş bir test sonucu veya örtük sınıfla "
+"ilişkiliyse tahminler yanlı olabilir."
 
 #: R/riverplot.b.R
 msgid ""
@@ -176870,7 +177052,12 @@ msgid ""
 "Beta(2,1) penalties favor higher accuracy; a uniform Beta(1,1) penalty is "
 "used for the class proportion. Multiple EM initializations and numerical "
 "refinement produce a MAP point estimate, not a posterior sample."
-msgstr "Bu yöntem, iki sınıflı koşullu bağımsızlık log olabilirliğini log duyarlılıklar ve log özgüllüklerin toplamıyla birlikte en büyükler. Bu sabit Beta(2,1) cezaları daha yüksek doğruluğu kayırır; sınıf oranı için tekdüze bir Beta(1,1) cezası kullanılır. Birden çok EM başlatması ve sayısal iyileştirme, sonsal bir örneklem değil, bir MAP nokta tahmini üretir."
+msgstr ""
+"Bu yöntem, iki sınıflı koşullu bağımsızlık log olabilirliğini log "
+"duyarlılıklar ve log özgüllüklerin toplamıyla birlikte en büyükler. Bu sabit "
+"Beta(2,1) cezaları daha yüksek doğruluğu kayırır; sınıf oranı için tekdüze "
+"bir Beta(1,1) cezası kullanılır. Birden çok EM başlatması ve sayısal "
+"iyileştirme, sonsal bir örneklem değil, bir MAP nokta tahmini üretir."
 
 #: R/nogoldstandard.b.R
 msgid ""
@@ -183115,8 +183302,8 @@ msgstr "İki Grup"
 
 #: R/cotest.b.R
 msgid ""
-"Two imaging modalities of the same tissue: the strongest dependence among "
-"the worked examples, which is what dense tissue would produce."
+"Two imaging modalities of the same tissue, so dependence is set relatively "
+"high in both disease groups, as dense tissue might produce."
 msgstr ""
 
 #: R/benford.b.R
@@ -184853,7 +185040,14 @@ msgid ""
 "prove nonuniqueness. Latent estimates and intervals are conservatively left "
 "blank. Fixed priors do not establish identification by the data; use "
 "observed agreement or additional informative tests."
-msgstr "Benzersiz ve kararlı örtük tahminler elde edilemedi. Uyarlanan olasılık eşlemesi tekil, sayısal olarak tekile yakın veya düzenli olmayan bir sınır durumudur. Bu, sınıf etiketi belirsizliğinin ötesinde bir olabilirlik sırtına işaret edebilir; sınırda sayısal denetim tek başına benzersiz olmamayı kanıtlamaz. Örtük tahminler ve aralıklar ihtiyatlı olarak boş bırakılır. Sabit önsel dağılımlar verilerle tanımlanabilirlik sağlamaz; gözlenen uyumu veya ek bilgilendirici testleri kullanın."
+msgstr ""
+"Benzersiz ve kararlı örtük tahminler elde edilemedi. Uyarlanan olasılık "
+"eşlemesi tekil, sayısal olarak tekile yakın veya düzenli olmayan bir sınır "
+"durumudur. Bu, sınıf etiketi belirsizliğinin ötesinde bir olabilirlik "
+"sırtına işaret edebilir; sınırda sayısal denetim tek başına benzersiz "
+"olmamayı kanıtlamaz. Örtük tahminler ve aralıklar ihtiyatlı olarak boş "
+"bırakılır. Sabit önsel dağılımlar verilerle tanımlanabilirlik sağlamaz; "
+"gözlenen uyumu veya ek bilgilendirici testleri kullanın."
 
 #: R/dataquality.b.R
 msgid "Unique: {unique}, Duplicates: {dups} ({pct}% of non-missing)"
@@ -189713,10 +189907,6 @@ msgstr "Çok yüksek"
 msgid "Very High"
 msgstr ""
 
-#: R/cotest.b.R
-msgid "Very high %1$s ratio ( %2$s ) - indicates highly informative test."
-msgstr ""
-
 #: R/ihcheterogeneity.b.R
 msgid ""
 "Very high biomarker values detected (max: %s). Verify if these are "
@@ -189774,10 +189964,11 @@ msgstr "Çok Yüksek Prevalans"
 
 #: R/cotest.b.R
 msgid ""
-"Very high prevalence (above 95%): every post-test probability below is "
-"driven mainly by the prevalence you entered rather than by the tests, and "
-"even the 'both tests negative' row will stay high. Check that this is the "
-"pre-test probability in the population you are actually testing."
+"Very high prevalence (above 95%): check that this is the pre-test "
+"probability in the population you are actually testing. At a prevalence this "
+"high a small absolute change (for example from 98% to 99%) about doubles the "
+"pre-test odds and moves every post-test probability with it, so re-run with "
+"a plausible range before acting on the numbers."
 msgstr ""
 
 #: R/agreement.b.R
@@ -191159,10 +191350,6 @@ msgstr "Hastalığa karşı zayıf kanıt"
 #: R/diagnosticmeta.b.R
 msgid "Weak evidence for disease"
 msgstr "Hastalık lehine zayıf kanıt"
-
-#: R/cotest.b.R
-msgid "weak evidence for disease"
-msgstr ""
 
 #: R/decision.b.R
 msgid "weak evidence for disease when positive"
@@ -193413,7 +193600,11 @@ msgid ""
 "latent-class model need not reproduce the observed table. These residuals "
 "describe discrepancies; they are not chi-squared tests of conditional "
 "independence. A small residual does not establish the assumption."
-msgstr "Üç testle nominal kalıntı serbestlik derecesi sıfırdır, ancak örtük sınıf modelinin gözlenen tabloyu yeniden üretmesi gerekmez. Bu kalıntılar farklılıkları tanımlar; koşullu bağımsızlığın ki-kare testleri değildir. Küçük bir kalıntı varsayımı kanıtlamaz."
+msgstr ""
+"Üç testle nominal kalıntı serbestlik derecesi sıfırdır, ancak örtük sınıf "
+"modelinin gözlenen tabloyu yeniden üretmesi gerekmez. Bu kalıntılar "
+"farklılıkları tanımlar; koşullu bağımsızlığın ki-kare testleri değildir. "
+"Küçük bir kalıntı varsayımı kanıtlamaz."
 
 #: R/nogoldstandard.b.R
 msgid ""
@@ -193422,7 +193613,11 @@ msgid ""
 "probabilities. G-squared and Chi-squared are descriptive discrepancies, "
 "without a chi-squared reference test. Small discrepancies do not verify "
 "conditional independence or parameter identifiability."
-msgstr "Üç testle 0 nominal kalıntı serbestlik derecesi vardır. Bu tam uyumu garanti etmez: model gözlenen olasılıklara da kısıtlar uygular. G-kare ve Ki-kare, ki-kare referans testi olmadan betimsel farklılıklardır. Küçük farklılıklar koşullu bağımsızlığı veya parametre tanımlanabilirliğini doğrulamaz."
+msgstr ""
+"Üç testle 0 nominal kalıntı serbestlik derecesi vardır. Bu tam uyumu garanti "
+"etmez: model gözlenen olasılıklara da kısıtlar uygular. G-kare ve Ki-kare, "
+"ki-kare referans testi olmadan betimsel farklılıklardır. Küçük farklılıklar "
+"koşullu bağımsızlığı veya parametre tanımlanabilirliğini doğrulamaz."
 
 #: R/agreement.b.R
 msgid ""
@@ -193696,6 +193891,16 @@ msgstr "Rastgele değerlendirmeden kötü"
 #: R/decision.b.R
 msgid "worse-than-chance"
 msgstr "şanstan daha kötü"
+
+#: R/cotest.b.R
+msgid ""
+"Worth checking: if a test's sensitivity plus specificity is below 1, a "
+"positive result makes disease less likely, which usually means its "
+"sensitivity and specificity (or its positive and negative categories) have "
+"been entered the wrong way round. Prevalence should be the pre-test "
+"probability in the population you are testing, not the figure from the study "
+"that validated the test."
+msgstr ""
 
 #: jggstats/options/facet_type/wrap.title
 msgid "Wrap"
@@ -194492,6 +194697,13 @@ msgstr "İkiden fazla değişken seçtiniz."
 
 #: R/jjhistostats.b.R
 msgid "You have selected to make a histogram."
+msgstr ""
+
+#: R/cotest.b.R
+msgid ""
+"You named the tests %1$s, but every value below comes from the worked "
+"example (%2$s). The labels follow your names; the numbers do not describe "
+"those tests."
 msgstr ""
 
 #: R/chisqposttest.b.R

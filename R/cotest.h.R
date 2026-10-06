@@ -177,7 +177,8 @@ cotestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "DiagnosticTests",
                     "ConditionalDependenceDiagnosticTests",
                     "Fagan1975",
-                    "DeeksAltman2004"))
+                    "DeeksAltman2004",
+                    "jaeschke1994"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",
@@ -339,7 +340,8 @@ cotestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' # (For tests run one after another, where the second is ordered only after a
 #' # particular first result, use a sequential testing analysis instead.)
 #'
-#' # Conditionally independent tests -- the optimistic assumption
+#' # Conditionally independent tests -- usually the optimistic assumption, so it has
+#' # to be justified (see "Understanding Test Dependence")
 #' res <- cotest(
 #'     test1_sens = 0.80,
 #'     test1_spec = 0.90,
@@ -387,19 +389,23 @@ cotestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param cond_dep_pos Correlation between the two test results among subjects
 #'   with disease, where 0 is conditional independence. 1 is the theoretical
 #'   maximum, but the largest value the sensitivities you entered actually
-#'   permit is often smaller (frequently around 0.5), and values above it are
-#'   truncated to that bound with a warning; the correlation the fitted model
-#'   achieved is reported as "Realized phi". Negative values describe tests that
-#'   compensate for each other's errors and are permitted, but their feasible
-#'   range is narrower still.
+#'   permit is often well below 1, and values above it are truncated to that
+#'   bound with a warning; the correlation the fitted model achieved is reported
+#'   as "Realized phi". Negative values describe tests that compensate for each
+#'   other's errors and are permitted, but their feasible range is narrower
+#'   still. A source that reports a conditional covariance (for example Gardner
+#'   et al. 2000) must be converted first: phi = covariance / sqrt(Se1 (1 - Se1)
+#'   Se2 (1 - Se2)). A kappa is an agreement statistic, not this correlation.
 #' @param cond_dep_neg Correlation between the two test results among subjects
 #'   without disease, where 0 is conditional independence. 1 is the theoretical
 #'   maximum, but the largest value the specificities you entered actually
-#'   permit is often smaller (frequently around 0.5), and values above it are
-#'   truncated to that bound with a warning; the correlation the fitted model
-#'   achieved is reported as "Realized phi". Negative values describe tests that
-#'   compensate for each other's errors and are permitted, but their feasible
-#'   range is narrower still.
+#'   permit is often well below 1, and values above it are truncated to that
+#'   bound with a warning; the correlation the fitted model achieved is reported
+#'   as "Realized phi". Negative values describe tests that compensate for each
+#'   other's errors and are permitted, but their feasible range is narrower
+#'   still. A source that reports a conditional covariance must be converted
+#'   first: phi = covariance / sqrt(Fp1 (1 - Fp1) Fp2 (1 - Fp2)), where Fp = 1 -
+#'   specificity. A kappa is an agreement statistic, not this correlation.
 #' @param prevalence Prior probability (disease prevalence in the population).
 #'   Requires a value between 0.001 and 0.999.
 #' @param showGuidance Show the introductory guidance panel and the
