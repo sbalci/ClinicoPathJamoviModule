@@ -608,7 +608,12 @@ test_that("release metadata versions agree", {
     module_version <- as.character(yaml::read_yaml("../../jamovi/0000.yaml")$version)
     citation_version <- as.character(yaml::read_yaml("../../CITATION.cff")$version)
 
-    expect_identical(analysis_version, sub("^([0-9]+\\.[0-9]+\\.[0-9]+).*", "\\1", description_version))
+    # The analysis version is stamped by _updateModules.R from `new_version` in its config, not
+    # from the umbrella DESCRIPTION, so the two drift apart between releases (1.0.83 vs 1.0.81.01
+    # on 2026-10-08) and the old DESCRIPTION comparison failed on a correct tree.
+    shipped_version <- as.character(
+        yaml::read_yaml("../../_updateModules_config.yaml")$new_version)
+    expect_identical(analysis_version, sub("^([0-9]+\\.[0-9]+\\.[0-9]+).*", "\\1", shipped_version))
     expect_identical(module_version, description_version)
     expect_identical(citation_version, description_version)
 })
@@ -625,4 +630,313 @@ test_that("an out-of-range entry is rejected, never silently clamped in the GUI"
 
     expect_error(run_st(test1_sens = 80), "between 0.01 and 0.99")
     expect_error(run_st(prevalence = 10), "between 0.001 and 0.999")
+})
+
+
+test_that("a test name with markup characters survives every table cell", {
+    # jamovi parses table cells as HTML, so "<LOD assay" opened a tag and rendered blank.
+    res <- run_st(test1_name = "<LOD assay", test2_name = "Culture <b>", show_cost_analysis = TRUE)
+    st <- summary_of(res)
+    expect_identical(st$first_test, "< LOD assay")
+    expect_identical(st$second_test, "Culture < b>")
+    it <- res$individual_tests_table$asDF
+    expect_identical(it$test_name[1:2], c("< LOD assay", "Culture < b>"))
+    ct <- res$cost_analysis_table$asDF
+    expect_true(all(c("Test 1: < LOD assay", "Test 2: Culture < b>") %in% ct$item))
+    # "<5" opens no tag and is left alone
+    expect_identical(summary_of(run_st(test1_name = "CRP <5"))$first_test, "CRP <5")
+})
+
+
+# ---- /check-function-full 2026-10-08 ---------------------------------------------------------
+
+test_that("the teaching-example notice names the example, not its option key", {
+    hiv <- run_st(preset = "hiv_screening_confirmation")$notices$content
+    expect_match(hiv, '"HIV Ag/Ab + Differentiation Assay (Illustrative)" teaching example', fixed = TRUE)
+    expect_false(grepl("hiv_screening_confirmation", hiv, fixed = TRUE))
+})
+
+test_that("an imperfect combined value is never printed as 100.0% or 0.0%", {
+    p <- private_st()$p
+    expect_identical(p$.formatPercent(0.9999), "99.99%")
+    expect_identical(p$.formatPercent(0.0001), "0.01%")
+    expect_identical(p$.formatPercent(0.5), "50.0%")
+    expect_identical(p$.formatPercent(1), "100.0%")
+    # PPV/NPV are not bounded away from the ends: prevalence 0.999 drives PPV to 0.9999999
+    expect_identical(p$.formatPercent(0.9999999), ">99.99%")
+    expect_identical(p$.formatPercent(1e-7), "<0.01%")
+    # HIV example: serial-positive specificity 0.95 + 0.05 x 0.99 = 0.9995
+    res <- run_st(preset = "hiv_screening_confirmation", show_explanation = TRUE)
+    expect_false(grepl("100.0%", res$notices$content, fixed = TRUE))
+    expect_false(grepl("100.0% specificity", res$plain_summary$content, fixed = TRUE))
+})
+
+test_that("name similarity is a WARNING, not a STRONG WARNING", {
+    n <- run_st(test1_name = "PCR", test2_name = "RT-PCR")$notices$content
+    expect_match(n, "(^|\n)WARNING: Test Correlation Risk")
+    expect_false(grepl("STRONG WARNING: Test Correlation Risk", n, fixed = TRUE))
+})
+
+test_that("an empty test name falls back to a label instead of blocking the analysis", {
+    st <- summary_of(run_st(test1_name = "  ", test2_name = ""))
+    expect_identical(c(st$first_test, st$second_test), c("Test 1", "Test 2"))
+    expect_false(is.na(st$combined_sens))
+    # the two fallback labels are one edit apart and must not trip the similarity notice
+    expect_false(grepl("Test Correlation Risk",
+                       run_st(test1_name = "", test2_name = "")$notices$content, fixed = TRUE))
+})
+
+test_that("the cost table explains an all-zero cost column", {
+    notes_of <- function(res) names(res$cost_analysis_table$.__enclos_env__$private$.notes)
+    expect_true("zero_costs" %in% notes_of(run_st(show_cost_analysis = TRUE)))
+    expect_false("zero_costs" %in% notes_of(run_st(show_cost_analysis = TRUE, test2_cost = 50)))
+})
+
+test_that("Html names are escaped only where HTML needs it", {
+    html <- run_st(test1_name = "HIV Ag/Ab <x>", show_explanation = TRUE)$plain_summary$content
+    expect_match(html, "HIV Ag/Ab &lt;x&gt;", fixed = TRUE)
+    expect_false(grepl("&#x", html, fixed = TRUE))
+})
+
+test_that("plots: schematics have no axes, labels are clean, facets are ordered", {
+    # A ggtheme that sets the child axis elements explicitly, as jamovi's does: blanking the
+    # parent axis.text alone left coordinate axes on the schematics.
+    jtheme <- ggplot2::theme_bw() + ggplot2::theme(
+        axis.text.x = ggplot2::element_text(), axis.text.y = ggplot2::element_text(),
+        axis.line = ggplot2::element_line(), panel.grid.major = ggplot2::element_line())
+    h <- private_st(preset = "hiv_screening_confirmation", show_plots = TRUE)
+    h$p$.run()
+    grDevices::pdf(NULL); on.exit(grDevices::dev.off(), add = TRUE)
+    draw <- function(nm) {
+        expect_true(h$p[[paste0(".", nm)]](h$a$results[[nm]], ggtheme = jtheme), label = nm)
+        ggplot2::last_plot()
+    }
+    for (nm in c("plot_flow_diagram", "plot_population_flow")) {
+        th <- draw(nm)$theme
+        for (el in c("axis.text.x", "axis.text.y", "axis.line", "panel.grid.major"))
+            expect_true(inherits(th[[el]], "element_blank"), label = paste(nm, el))
+    }
+    pr <- draw("plot_probability")
+    txt <- Filter(function(l) inherits(l$geom, "GeomText"), pr$layers)
+    expect_true(length(txt) == 1 && isFALSE(txt[[1]]$show.legend))
+    pf <- draw("plot_performance")
+    expect_identical(levels(pf$data$Metric), c("Sensitivity", "Specificity", "PPV", "NPV"))
+    expect_identical(pf$theme$legend.position, "none")
+})
+
+test_that("no .() msgid carries a line break, and cost options clear only the cost table", {
+    # A "\n" inside .() never reached the translation catalog; layout is applied in R instead.
+    src <- readLines("../../R/sequentialtests.b.R", warn = FALSE)
+    expect_false(any(grepl("\\.\\((\"|')[^\"']*\\\\n", src)))
+    ry <- yaml::read_yaml("../../jamovi/sequentialtests.r.yaml")
+    for (it in ry$items)
+        if (it$name != "cost_analysis_table")
+            expect_false(any(c("test1_cost", "test2_cost") %in% it$clearWith), label = it$name)
+})
+
+test_that("every teaching example stays inside the option bounds", {
+    # The direct PPV/NPV/LR divisions rely on these bounds, and a preset bypasses the option check.
+    p <- private_st()$p
+    for (nm in c("covid_screening_confirmation", "breast_cancer_screening", "mi_emergency_parallel",
+                 "tb_screening_confirmation", "prostate_screening_exclusion",
+                 "hiv_screening_confirmation", "stroke_emergency_parallel")) {
+        v <- p$.getPresetValues(nm)
+        expect_true(all(unlist(v[c("test1_sens", "test1_spec", "test2_sens", "test2_spec")]) >= 0.01 &
+                        unlist(v[c("test1_sens", "test1_spec", "test2_sens", "test2_spec")]) <= 0.99), label = nm)
+        expect_true(v$prevalence >= 0.001 && v$prevalence <= 0.999, label = nm)
+        expect_true(nzchar(v$title), label = nm)
+    }
+})
+
+
+# ---- /review-function 2026-10-08: findings IR-01 to IR-08 of the independent review ----------
+
+test_that("test order changes no combined figure, and the notice says so (IR-01)", {
+    # Both serial rules are symmetric in the two tests. The old WARNING ("Test 2 specificity is
+    # below Test 1 ... may not improve specificity as much as expected") fired on one order only,
+    # and on the one that performs FEWER second tests.
+    for (s in c("serial_positive", "serial_negative")) {
+        a <- run_st(strategy = s, show_cost_analysis = TRUE)
+        b <- run_st(strategy = s, test1_sens = 0.80, test1_spec = 0.98,
+                    test2_sens = 0.95, test2_spec = 0.70, show_cost_analysis = TRUE)
+        cols <- c("combined_sens", "combined_spec", "combined_ppv", "combined_npv")
+        expect_equal(unlist(summary_of(a)[cols]), unlist(summary_of(b)[cols]), tolerance = 1e-12, label = s)
+        for (r in list(a, b))
+            expect_false(grepl("Assumption Check", r$notices$content, fixed = TRUE), label = s)
+        # The notice appears only in the order whose swap would need fewer second tests, and its
+        # counts are the cost table's second-test count and the swapped one.
+        n2 <- c(a = a$cost_analysis_table$asDF$number_tests[2], b = b$cost_analysis_table$asDF$number_tests[2])
+        has <- c(a = grepl("Test Order", a$notices$content, fixed = TRUE),
+                 b = grepl("Test Order", b$notices$content, fixed = TRUE))
+        expect_identical(unname(has), unname(n2 > rev(n2)), label = s)
+        noisy <- if (has[["a"]]) a else b
+        expect_match(noisy$notices$content,
+                     sprintf("about %s per 1,000 people in this order, about %s if the two tests were swapped",
+                             round(max(n2)), round(min(n2))), fixed = TRUE, label = s)
+        expect_false(grepl("WARNING: Test Order", noisy$notices$content, fixed = TRUE))
+    }
+    # Parallel testing gives everyone both tests: order means nothing, so no notice.
+    expect_false(grepl("Test Order", run_st(strategy = "parallel")$notices$content, fixed = TRUE))
+})
+
+test_that("no 'N of every 100' sentence claims 0 or 100 for an interior value (IR-02)", {
+    p <- private_st()$p
+    expect_identical(p$.formatPer100(0.9995), "more than 99")
+    expect_identical(p$.formatPer100(0.995), "more than 99")
+    expect_identical(p$.formatPer100(0.004), "fewer than 1")
+    expect_identical(p$.formatPer100(0.97), "97")
+    expect_identical(p$.formatPer100(1), "100")
+    # HIV example: Sp = .95 + .05 x .99 = .9995; serial-negative .95/.95: Se = .9975
+    hiv <- run_st(preset = "hiv_screening_confirmation", show_explanation = TRUE)$plain_summary$content
+    sn <- run_st(strategy = "serial_negative", test1_sens = .95, test2_sens = .95,
+                 show_explanation = TRUE)$plain_summary$content
+    for (h in list(hiv, sn)) expect_false(grepl("100 of every 100", h, fixed = TRUE))
+    expect_match(hiv, "rules out more than 99 of every 100 healthy", fixed = TRUE)
+    expect_match(sn, "detects more than 99 of every 100 diseased", fixed = TRUE)
+    # The NNS sentence keeps its space now that the template carries it.
+    expect_match(hiv, "(NPV). You would need to screen", fixed = TRUE)
+})
+
+test_that("the formulas panel never rounds an interior PPV to 1", {
+    p <- private_st()$p
+    expect_identical(p$.formatProb(0.99999), "0.99999")
+    expect_identical(p$.formatProb(0.9999999), "0.9999999")
+    expect_identical(p$.formatProb(0.9999), "0.9999")
+    expect_identical(p$.formatProb(1), "1")
+    # Se .9801, Sp .9999 at prevalence .999: PPV = 0.99999990
+    f <- run_st(test1_sens = .99, test1_spec = .99, test2_sens = .99, test2_spec = .99,
+                prevalence = .999, show_formulas = TRUE)$formulas_text$content
+    expect_false(grepl("= 1</li>", f, fixed = TRUE))
+    expect_match(f, "PPV = numerator/denominator = [0-9.]+/[0-9.]+ = 0\\.99999+</li>")
+    expect_false(grepl(".(\"<ul>\")", paste(readLines("../../R/sequentialtests.b.R"), collapse = "\n"), fixed = TRUE))
+})
+
+test_that("each table says what its numbers are (IR-03, IR-06)", {
+    res <- run_st()
+    notes <- function(tab) vapply(tab$.__enclos_env__$private$.notes,
+                                  function(e) get("note", envir = e), character(1))
+    expect_match(notes(res$individual_tests_table)[["standalone"]], "used on its own at the entered prevalence", fixed = TRUE)
+    expect_match(notes(res$population_flow_table)[["expected_counts"]], "expected values", fixed = TRUE)
+})
+
+test_that("expected counts below 10 are not rounded to 0 (IR-05)", {
+    h <- private_st(population_size = 100, prevalence = .001, show_explanation = TRUE, show_plots = TRUE)
+    h$p$.run()
+    ex <- h$a$results$explanation_text$content
+    expect_false(grepl("Among 0 expected", ex, fixed = TRUE))
+    expect_match(ex, "Among 0.1 expected people with disease, 0.076 are correctly identified", fixed = TRUE)
+    expect_identical(h$p$.formatCount(9.96), "10")
+    expect_identical(h$p$.formatCount(1e-5), "0.00001")
+    grDevices::pdf(NULL); on.exit(grDevices::dev.off(), add = TRUE)
+    expect_true(h$p$.plot_population_flow(h$a$results$plot_population_flow, ggtheme = ggplot2::theme_bw()))
+    labels <- unlist(lapply(ggplot2::last_plot()$layers, function(l) l$aes_params$label))
+    expect_true(any(grepl("Disease+\n(n=0.1)", labels, fixed = TRUE)))   # .wrapLabel(, 8)
+    expect_false(any(grepl("(n=0)", labels, fixed = TRUE)))
+    # Box labels were white on orange/red at alpha .7 (1.8:1, 2.6:1 contrast).
+    cols <- unlist(lapply(ggplot2::last_plot()$layers, function(l)
+        if (inherits(l$geom, "GeomText")) l$aes_params$colour))
+    expect_false("white" %in% cols)
+})
+
+test_that("the probability axis stops at 100% (IR-07)", {
+    h <- private_st(preset = "hiv_screening_confirmation", show_plots = TRUE)
+    h$p$.run()
+    grDevices::pdf(NULL); on.exit(grDevices::dev.off(), add = TRUE)
+    expect_true(h$p$.plot_probability(h$a$results$plot_probability, ggtheme = ggplot2::theme_bw()))
+    built <- ggplot2::ggplot_build(ggplot2::last_plot())
+    expect_lte(max(built$layout$panel_params[[1]]$y.range), 100)
+    expect_false(anyNA(built$data[[2]]$y))   # no point dropped by the new limit
+})
+
+test_that("the 5% low-prevalence edge is presented as a convention (IR-08)", {
+    n <- run_st(prevalence = .02)$notices$content
+    expect_match(n, "This analysis flags pre-test probabilities below 5%", fixed = TRUE)
+    expect_false(grepl("PPV is dominated by specificity", n, fixed = TRUE))
+})
+
+test_that("the performance plot and the table share one PPV/NPV formula", {
+    h <- private_st(show_plots = TRUE, prevalence = .03)
+    h$p$.run()
+    grDevices::pdf(NULL); on.exit(grDevices::dev.off(), add = TRUE)
+    expect_true(h$p$.plot_performance(h$a$results$plot_performance, ggtheme = ggplot2::theme_bw()))
+    d <- ggplot2::last_plot()$data
+    tab <- h$a$results$individual_tests_table$asDF
+    expect_equal(d$Value[d$Metric == "PPV"], tab$ppv * 100, tolerance = 1e-12)
+    expect_equal(d$Value[d$Metric == "NPV"], tab$npv * 100, tolerance = 1e-12)
+})
+
+test_that("a table cell jamovi would show as 100.0% or 0.0% carries its value (RR-01)", {
+    # The jamovi client prints a `pc` column as (100 * x).toFixed(1) at its default number format,
+    # and no column option changes that: the COVID and HIV examples' combined specificity 0.9995
+    # read "100.0 %" in the summary table while every sentence beside it said 99.95%.
+    fn <- function(tab, col, row = 1) tab$getCell(rowNo = row, col = col)$footnotes
+    res <- run_st(preset = "hiv_screening_confirmation")
+    expect_match(fn(res$summary_table, "combined_spec"), "99.95%", fixed = TRUE)
+    expect_match(fn(res$individual_tests_table, "npv", 1), "99.96%", fixed = TRUE)
+    expect_length(fn(res$summary_table, "combined_sens"), 0)
+
+    res <- run_st(test1_sens = .01, test1_spec = .01, test2_sens = .01, test2_spec = .01,
+                  prevalence = .001)
+    expect_match(fn(res$summary_table, "combined_ppv"), "<0.01%", fixed = TRUE)
+
+    res <- run_st()
+    for (col in c("combined_sens", "combined_spec", "combined_ppv", "combined_npv"))
+        expect_length(fn(res$summary_table, col), 0)
+
+    # A rerun whose value no longer rounds to an endpoint drops the footnote.
+    h <- private_st(preset = "hiv_screening_confirmation")
+    h$p$.run()
+    expect_length(fn(h$a$results$summary_table, "combined_spec"), 1)
+    op <- h$o$option("preset"); op$value <- "custom"
+    h$p$.run()
+    expect_length(fn(h$a$results$summary_table, "combined_spec"), 0)
+})
+
+test_that("the formulas panel prints decimals, never scientific notation (RR-02)", {
+    p <- private_st()$p
+    expect_identical(p$.formatProb(1e-4), "0.0001")
+    expect_identical(p$.formatProb(9801), "9801")
+    f <- run_st(test1_sens = .01, test1_spec = .01, test2_sens = .01, test2_spec = .01,
+                prevalence = .001, show_formulas = TRUE)$formulas_text$content
+    expect_false(grepl("[0-9]e[-+][0-9]", f))
+})
+
+test_that("asSource() escapes test names so the syntax pane cannot be broken out of (SEC-01)", {
+    # jmvcore pastes a String option between quotes unescaped: `test1_name = "A "q""` did not
+    # parse, and `" |> paste0(Sys.getpid()) == "` parsed with Sys.getpid() as live code.
+    src_of <- function(n1, n2) {
+        a <- ClinicoPath:::sequentialtestsClass$new(
+            options = ClinicoPath:::sequentialtestsOptions$new(test1_name = n1, test2_name = n2),
+            data = data.frame(x = 1))
+        a$asSource()
+    }
+    names <- list(c('A "q"', "C:\\x"),
+                  c('" |> paste0(Sys.getpid()) == "', '", x = file.exists("/etc/passwd"), y = "'))
+    for (nm in names) {
+        call <- parse(text = src_of(nm[1], nm[2]))[[1]]
+        expect_identical(call$test1_name, nm[1])
+        expect_identical(call$test2_name, nm[2])
+        expect_setequal(all.names(call, functions = TRUE),
+                        c("::", "ClinicoPath", "sequentialtests"))
+    }
+    # default names are not exported
+    expect_false(grepl("test1_name", src_of("Screening Test", "Confirmatory Test"), fixed = TRUE))
+})
+
+test_that("a long test name is sized to fit its flow-diagram box (FF-01)", {
+    # "Immunohistochemistry" (20 characters) ran out of its box and across the incoming arrow.
+    # A line longer than the 12-character wrap width is drawn at 3.2 x 12 / its length.
+    for (st in c("serial_positive", "serial_negative", "parallel")) {
+        h <- private_st(show_plots = TRUE, strategy = st,
+                        test1_name = "Immunohistochemistry", test2_name = "CK7")
+        h$p$.run()
+        grDevices::pdf(NULL); on.exit(grDevices::dev.off(), add = TRUE)
+        expect_true(h$p$.plot_flow_diagram(h$a$results$plot_flow_diagram, ggtheme = ggplot2::theme_bw()))
+        size_of <- function(lbl) {
+            hit <- Filter(function(l) identical(l$aes_params$label, lbl), ggplot2::last_plot()$layers)
+            hit[[1]]$aes_params$size
+        }
+        expect_equal(size_of("Immunohistochemistry"), 3.2 * 12 / 20)
+        expect_equal(size_of("CK7"), 3.2)   # short names keep the original size
+    }
 })

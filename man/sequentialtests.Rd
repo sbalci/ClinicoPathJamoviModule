@@ -113,3 +113,13 @@ values are teaching examples only, not clinical guidance or validated
 diagnostic pathways. Replace all example parameters with estimates
 applicable to the intended population before interpreting results.
 }
+\examples{
+\donttest{
+# No data: every input is an assumed parameter, not an estimate.
+sequentialtests(
+    test1_sens = 0.95, test1_spec = 0.70,
+    test2_sens = 0.80, test2_spec = 0.98,
+    prevalence = 0.10, strategy = "serial_positive",
+    show_cost_analysis = TRUE, test1_cost = 10, test2_cost = 150)
+}
+}

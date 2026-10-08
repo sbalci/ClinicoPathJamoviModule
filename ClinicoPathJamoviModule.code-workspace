@@ -20,6 +20,9 @@
 		},
 		{
 			"path": "../jjstatsplot"
+		},
+		{
+			"path": "../dev.jamovi.org"
 		}
 	],
 	"settings": {}

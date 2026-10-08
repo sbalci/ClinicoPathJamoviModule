@@ -311,6 +311,19 @@ nothing about `mode: vector`.
   markdown. Details: [`File`](jamovi_a_yaml_guide.md#file-jamovi-283),
   [`Text`](jamovi_r_yaml_guide.md#text-jamovi-283).
 
+### Later Releases: 28.4 - 28.8 and Docs Added Since (checked 2026-10-08)
+
+| Release / page | What | Developer action |
+|----------------|------|------------------|
+| jamovi 28.4 (2026-09-30) | "module support for opening external files" (release note only) | none: no dev docs page found; do not use |
+| jamovi 28.7 (2026-10-03) | "module support for exporting files" (release note only) | none: no dev docs page found; do not use |
+| 28.5, 28.6, 28.8 | NA handling in computed variables, language selection, bug fixes | none |
+| jamovi 2.7.16 | `setSize2` responsive image sizing | optional, guarded: [plots guide](jamovi_plots_guide.md#responsive-sizing-with-setsize2-jamovi-2716) |
+| Tutorial 02b (weighted data) | `weightsSupport` header key | [a.yaml guide](jamovi_a_yaml_guide.md#weightssupport-optional-upstream-tutorial-02b) |
+| `api/notice` page | `type: Notice` in `.r.yaml` documented | contradicts our empirical result: [notices guide](jamovi_notices_guide.md) |
+
+The report with sources and open decisions: `vignettes/jamovi_docs_sync_2026-10.md`.
+
 ### Exists Upstream, Not Yet Documented
 
 These exist upstream but have no documentation yet. Do not use them:

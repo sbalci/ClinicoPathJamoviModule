@@ -1,3 +1,33 @@
+# sequentialtests (meddecide) — `/release-review-function` (2026-10-08)
+
+Verdict: ready after minor actions. Fixed: `pc` table cells that jamovi rounds to 100.0 %/0.0 % now carry a
+footnote with the value (COVID/HIV examples' combined specificity 0.9995); formulas panel no longer prints
+`1e-04`. 827 expectations, 0 failures (baseline 814); 1,260/1,260 enumeration-oracle checks; epiR agrees to
+6 dp; 96/96 Turkish runs; release gate adds 0 hits with the analysis counted as shipped.
+
+- [x] **`/security-audit-function` (same day):** syntax-pane break-out through the free-text test names fixed
+  with a `.sourcifyOption` override (cotest idiom); regression test SEC-01. No other finding.
+- [x] **`/fix-function --apply` (same day):** flow-diagram test names longer than the 12-character wrap width
+  ("Immunohistochemistry") ran out of their box and across the arrows; now drawn proportionally smaller
+  (`.labelSize`), regression test FF-01. 843 expectations, 0 failures; 400 renders (4 themes) clean.
+- [ ] **Run `jmvtools::i18nUpdate()`**: new msgid "Rounded for display: the value is {value}, not {bound}."
+  is in `tr.po` (translated) but not yet in `catalog.pot`/`en.po`.
+- [ ] **Run the updater, then test in jamovi** (JamoviTest copy predates today's fixes). The options panel
+  could not be rendered headlessly (`render_ui.sh`: `require is not defined`, the events.js blind spot), so
+  check the Cost Analysis box and the table footnotes in the app.
+- [ ] **NEWS.md** has none of today's user-visible changes (test-order notice, schematic axes, cost options
+  moved into their own box, rounding footnotes). Add them with the version bump.
+- [x] **DELETED 2026-10-08 at the maintainer's request.** **`inst/examples/sequentialtests_example.R` is broken and contradicts the analysis.** 8 of its 22 calls
+  pass `show_nomogram = TRUE` (error: unused argument); one passes `prevalence = 0.0001` and
+  `test2_spec = 0.999` (out of bounds); it says the presets are "based on published test characteristics"
+  and describes a Fagan nomogram; its arithmetic is wrong ("99.5%" for 0.9995, "~95%" saving for 86%).
+  Unreferenced and not shipped to meddecide. Delete it or rewrite it.
+- [ ] **Sensitivity/specificity are capped at 0.99.** Real assays (HIV Ag/Ab specificity about 99.5-99.8%)
+  cannot be entered, and at low prevalence PPV depends heavily on that third decimal. Raising `max:` is a
+  design decision: it touches the ">= 99%" notices, the "within 1e-4 of the ends" invariants and the
+  bounds tests.
+- [ ] Plot colours are fixed Okabe-Ito with no "jamovi (follow global)" choice (review guide §23). Advisory.
+
 # jamovi submission/update process (dev.jamovi.org) — follow-ups from the docs update (2026-10-08)
 
 Docs done: review guide §30, patterns guide (datasets, distributing), vendored `tuts0110`/`tuts0111`/`submit.md`,

@@ -228,11 +228,9 @@ sequentialtestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "test1_name",
                     "test1_sens",
                     "test1_spec",
-                    "test1_cost",
                     "test2_name",
                     "test2_sens",
                     "test2_spec",
-                    "test2_cost",
                     "strategy",
                     "prevalence",
                     "population_size")))
@@ -288,11 +286,9 @@ sequentialtestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "test1_name",
                     "test1_sens",
                     "test1_spec",
-                    "test1_cost",
                     "test2_name",
                     "test2_sens",
                     "test2_spec",
-                    "test2_cost",
                     "strategy",
                     "prevalence",
                     "population_size")))
@@ -339,11 +335,9 @@ sequentialtestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "test1_name",
                     "test1_sens",
                     "test1_spec",
-                    "test1_cost",
                     "test2_name",
                     "test2_sens",
                     "test2_spec",
-                    "test2_cost",
                     "strategy",
                     "prevalence",
                     "population_size")))
@@ -448,11 +442,9 @@ sequentialtestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "test1_name",
                     "test1_sens",
                     "test1_spec",
-                    "test1_cost",
                     "test2_name",
                     "test2_sens",
                     "test2_spec",
-                    "test2_cost",
                     "strategy",
                     "prevalence",
                     "population_size")))
@@ -466,11 +458,9 @@ sequentialtestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "test1_name",
                     "test1_sens",
                     "test1_spec",
-                    "test1_cost",
                     "test2_name",
                     "test2_sens",
                     "test2_spec",
-                    "test2_cost",
                     "strategy",
                     "prevalence",
                     "population_size")))
@@ -487,11 +477,9 @@ sequentialtestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "test1_name",
                     "test1_sens",
                     "test1_spec",
-                    "test1_cost",
                     "test2_name",
                     "test2_sens",
                     "test2_spec",
-                    "test2_cost",
                     "strategy",
                     "prevalence",
                     "population_size")))
@@ -508,11 +496,9 @@ sequentialtestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "test1_name",
                     "test1_sens",
                     "test1_spec",
-                    "test1_cost",
                     "test2_name",
                     "test2_sens",
                     "test2_spec",
-                    "test2_cost",
                     "strategy",
                     "prevalence",
                     "population_size")))
@@ -529,11 +515,9 @@ sequentialtestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "test1_name",
                     "test1_sens",
                     "test1_spec",
-                    "test1_cost",
                     "test2_name",
                     "test2_sens",
                     "test2_spec",
-                    "test2_cost",
                     "strategy",
                     "prevalence",
                     "population_size")))
@@ -550,11 +534,9 @@ sequentialtestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "test1_name",
                     "test1_sens",
                     "test1_spec",
-                    "test1_cost",
                     "test2_name",
                     "test2_sens",
                     "test2_spec",
-                    "test2_cost",
                     "strategy",
                     "prevalence",
                     "population_size")))
@@ -571,11 +553,9 @@ sequentialtestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "test1_name",
                     "test1_sens",
                     "test1_spec",
-                    "test1_cost",
                     "test2_name",
                     "test2_sens",
                     "test2_spec",
-                    "test2_cost",
                     "strategy",
                     "prevalence",
                     "population_size")))
@@ -589,11 +569,9 @@ sequentialtestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "test1_name",
                     "test1_sens",
                     "test1_spec",
-                    "test1_cost",
                     "test2_name",
                     "test2_sens",
                     "test2_spec",
-                    "test2_cost",
                     "strategy",
                     "prevalence",
                     "population_size")))}))
@@ -633,6 +611,16 @@ sequentialtestsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' diagnostic pathways. Replace all example parameters with estimates 
 #' applicable to the intended population before interpreting results.
 #' 
+#'
+#' @examples
+#' \donttest{
+#' # No data: every input is an assumed parameter, not an estimate.
+#' sequentialtests(
+#'     test1_sens = 0.95, test1_spec = 0.70,
+#'     test2_sens = 0.80, test2_spec = 0.98,
+#'     prevalence = 0.10, strategy = "serial_positive",
+#'     show_cost_analysis = TRUE, test1_cost = 10, test2_cost = 150)
+#'}
 #' @param preset Select a teaching example or use custom values. Examples load
 #'   rounded, hypothetical parameters chosen only to demonstrate how each
 #'   strategy behaves. They are not clinical guidance, validated diagnostic

@@ -14,7 +14,7 @@ children:
         events:
           change: ./sequentialtests.events::onChange_preset
   - type: Label
-    label: First Test (Screening)
+    label: First Test
     children:
       - type: LayoutBox
         margin: large
@@ -35,7 +35,7 @@ children:
             label: Specificity
             enable: (preset:custom)
   - type: Label
-    label: Second Test (Confirmatory)
+    label: Second Test
     children:
       - type: LayoutBox
         margin: large
@@ -55,20 +55,6 @@ children:
             format: number
             label: Specificity
             enable: (preset:custom)
-  - type: Label
-    label: Illustrative unit costs
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: TextBox
-            name: test1_cost
-            format: number
-            label: First test
-          - type: TextBox
-            name: test2_cost
-            format: number
-            label: Second test
   - type: Label
     label: Testing Strategy
     children:
@@ -103,5 +89,22 @@ children:
             name: show_formulas
           - type: CheckBox
             name: show_plots
+  - type: CollapseBox
+    label: Cost Analysis
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
           - type: CheckBox
             name: show_cost_analysis
+          - type: TextBox
+            name: test1_cost
+            format: number
+            label: First test unit cost
+            enable: (show_cost_analysis)
+          - type: TextBox
+            name: test2_cost
+            format: number
+            label: Second test unit cost
+            enable: (show_cost_analysis)

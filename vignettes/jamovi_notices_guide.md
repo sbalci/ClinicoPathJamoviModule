@@ -2882,6 +2882,14 @@ The notice helpers in this project stay hand-rolled HTML for a different reason:
 renders as escaped plain text and takes no newlines, and these panels are multi-line. That is a
 standing product decision, not a workaround for a bug.
 
+> **Upstream docs now show it (2026-10-08).** <https://dev.jamovi.org/api/notice> documents
+> `- name: dataNote` / `type: Notice` in `.r.yaml`, `$setContent()`, `$setType(jmvcore::NoticeType$INFO)`
+> (`INFO`, `WARNING`, `STRONG_WARNING`, `ERROR`) and the dynamic `jmvcore::Notice$new(options=,
+> name=, type=)` + `self$results$insert(1, notice)`, with no minimum version stated. This
+> contradicts the empirical result below for jmvtools 28.3.1. Do **not** adopt it on the strength of
+> the docs: re-run the minimal re-test at the end of this section against the newest jmvtools
+> first (`install.packages("jmvtools", repos = "https://repo.jamovi.org")`).
+
 **`type: Notice` in `.r.yaml`, verified empirically, remains unavailable:**
 
 Verified empirically against **jamovi 28.1.0 / jmvtools 28.3 / jamovi-compiler 0.3.5**:

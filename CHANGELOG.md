@@ -5,6 +5,85 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-10-08 — sequentialtests: a ponytail ceiling that ordinary vocabulary reached
+
+- **Failure mode:** the flow diagram's `ponytail:` comment said a single word "much longer than ~15
+  characters" would overflow its box, to be fixed "if that shows up". "Immunohistochemistry" (20) is
+  an everyday test name for this module's users, and it ran out of the box and across the arrow.
+- **Detection signal:** rendering the diagram with real pathology test names instead of the defaults
+  and the teaching examples, which are all short.
+- **Prevention rule:** test a label-fit limit against the users' real vocabulary (IHC, assay and
+  imaging names) before parking it as a ceiling. A ceiling that a common input reaches is a bug.
+
+---
+
+## 2026-10-08 — sequentialtests: the sentences stopped saying 100.0%, the tables kept saying it
+
+- **Failure mode:** an earlier pass made every sentence print an interior proportion as "99.95%" or
+  ">99.99%", never "100.0%", and pinned it with a test. The tables, where the numbers are actually read,
+  were left alone. The jamovi client prints a `pc` column as `(100 * x).toFixed(n - 2)` (one decimal at
+  the default number format) and no column option overrides it, so the COVID and HIV teaching examples'
+  combined specificity 0.9995 read "100.0 %" in the summary table, as did both of HIV's single-test NPVs
+  and every NPV cell at prevalence 0.1%. Separately, the formulas panel printed "0.01 × 0.01 = 1e-04".
+- **Detection signal:** reading the client formatter (`client/dist/assets/quill-*.js` in jamovi.app: the
+  `pc` branch skips the significant-figure logic and calls `toFixed(dp - 2)`), then counting cells with
+  `sprintf("%.1f", 100 * x) %in% c("100.0", "0.0")` across the presets. R's `print(table)` shows
+  `99.99000` and hides the problem. The notation turned up in a text sweep that grepped `[0-9]e[-+]0`.
+- **Prevention rule:** a display rule for a number applies to every sink that shows it: sentences, plot
+  labels and table cells. Table cells are formatted by the client, so check them against the client's
+  formatter, never against `print()` in R. A `pc` cell that can round to an endpoint gets a footnote with
+  its value. Numbers in teaching text use `format(..., scientific = FALSE)`.
+
+---
+
+## 2026-10-08 — sequentialtests: a test-order warning about a quantity order cannot change
+
+- **Failure mode:** the serial-positive WARNING said that putting the less specific test second "may
+  not improve specificity as much as expected". Both serial rules (both-positive, either-positive) are
+  symmetric in the two tests, so order changes no combined Se, Sp, PPV or NPV. It changes only how many
+  second tests are performed, and the warning fired on the order that needs FEWER of them (98 vs 365
+  per 1000). Three smaller defects of the same kind: "rules out 100 of every 100" for Sp .9995,
+  "PPV = 1" for .9999999 in the formulas panel, and "Among 0 expected people" for 0.1. While fixing
+  them, a regex that rewrote every `base::format(x, digits = 4)` into the new `.formatProb()` also
+  rewrote the call inside `.formatProb()`'s own body, making it infinitely recursive. Separately,
+  `development-scripts/audit_sequentialtests.R` crashed on the fixed code: a `regmatches()` note is
+  `character(0)` once the quoted defect is gone, so the audit could only finish while the bug existed.
+- **Detection signal:** an order-swap metamorphic check (swap the two tests, compare every combined
+  figure and every notice title) in the independent review. The recursion showed up in a
+  `grep -A3 "\.formatProb = function"` after the bulk rewrite. The audit crash came from the first
+  re-run after the fixes.
+- **Prevention rule:** before a notice compares two inputs, check that the quantity it talks about
+  actually depends on that comparison. A heuristic copied from teaching ("screen first, confirm
+  second") is a cost convention, not an accuracy property. Any number turned into words ("N of every
+  100", "= 1", "0 people") goes through a formatter that cannot print a boundary for an interior value.
+  After a regex rewrite of call sites, grep the definition of the function you introduced. In audit
+  helpers, collapse free-text notes with `paste(note, collapse = " ")` so a PASS row cannot crash.
+
+---
+
+## 2026-10-08 — sequentialtests: schematic plots kept their axes, and the audit misread the catalog
+
+- **Failure mode:** the flow diagram and population-flow plot blanked `axis.text` and `panel.grid`,
+  but jamovi's themes set the CHILD elements explicitly (`axis.text.x/.y` and `axis.line` in
+  "default", `panel.grid.major/.minor` in "minimal"), so both schematics showed coordinate axes or a
+  grid. Separately, the `/check-function-full` audit reported the 13 `.()` msgids containing `\n` as
+  "never extracted to the catalog". They were extracted and translated: the audit's `grep -F` had a
+  doubled backslash inside single quotes and matched nothing. The audit also claimed two decimals
+  always separate an imperfect value from 100%, true for combined sensitivity/specificity and false
+  for PPV/NPV at prevalence 0.999.
+- **Detection signal:** rendering every plot to PNG under `jmvcore:::getGlobalTheme(<name>, "jmv")`
+  and looking at it. The tests passed `ggplot2::theme_bw()`, which sets no child elements. The
+  catalog claim fell apart when the before/after `tr.po` diff listed old Turkish for each `\n`
+  msgid. The PPV bound was found by the Codex review of the fix plan.
+- **Prevention rule:** blank the child theme elements by name on any non-data plot, and render
+  under all four jamovi themes (default, hadley, minimal, iheartspss) before calling a plot fixed.
+  Test a theme fix with a ggtheme that sets the children explicitly, never `theme_bw()`. Before
+  reporting "absent from the catalog", parse the `.po` rather than grep it. When you claim a bound
+  ("never within 1e-4 of 1"), check it against every quantity that goes through the helper, not
+  just the first one.
+
+---
+
 ## 2026-10-08 — decisioncalculator: in-house intervals were written only where epiR had a row of the same name
 
 - **Failure mode:** all five rows of `epirTable_number` (LR+, LR-, DOR, Youden's index, NNDx) are

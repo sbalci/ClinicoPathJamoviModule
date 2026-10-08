@@ -85,6 +85,33 @@ Every plot in jamovi is defined as an `Image` type item in the `.r.yaml` file:
 | `requiresData` | boolean | Re-read the dataset before this renderer runs outside `.run()` (resize, `.omv` reopen, export). Set **only** if the renderer reaches `self$data` — see [below](#mandatory-requiresdata-matches-what-the-renderer-reads) | false |
 | `mode` | string | `raster`, or `vector` to render SVG (jamovi 28.3+). Bounded-mark plots only — see [Rendering Mode](#rendering-mode-raster-vs-vector-jamovi-283) | `raster` |
 
+### Responsive sizing with `setSize2` (jamovi 2.7.16+)
+
+Upstream (<https://dev.jamovi.org/tutorial/tuts0303-responsive-image-sizing>, added 2025-12-31)
+splits an image size into a **stretchable** part (M, scales with the user's resize) and a
+**fixed** part (B, axis labels and margins that keep their pixel size):
+
+```r
+# widthM, heightM, widthB, heightB
+self$results$plot$setSize2(500, 250 * nRows, 100, 100)
+```
+
+Compute M from the data (rows, groups, variables), never hard-code it; fixed space is usually
+non-zero on both axes (y-axis width, x-axis height). `setSize2` does not exist before 2.7.16,
+so guard it and fall back to `setSize`:
+
+```r
+image <- self$results$plot
+if (!is.null(image[["setSize2"]])) {
+    image$setSize2(500, 250 * nRows, 100, 100)
+} else {
+    image$setSize(600, 250 * nRows + 100)
+}
+```
+
+Unlike `File`/`Text`, a guarded `setSize2` needs **no** `minApp` raise. No ClinicoPath analysis
+uses it yet (checked 2026-10-08); it is an optional improvement for faceted plots.
+
 ### Rendering Mode: raster vs vector (jamovi 28.3+)
 
 `mode: vector` makes the engine render the image with `grDevices::svg()` to an

@@ -136,6 +136,21 @@ options:
 - **Current Standard**: `'1.2'`
 - **Example**: `jas: '1.2'`
 
+#### `weightsSupport` (Optional; upstream tutorial 02b)
+
+Header key controlling how jamovi's row-weights feature reaches the analysis
+(<https://dev.jamovi.org/tutorial/tuts0202b-weighted-data>). Values: `auto` (default when
+omitted: rows are replicated by their integer weights before `.run()`, non-integer weights are
+rounded, so `nrow(self$data)` is the sum of weights), `full` (no expansion, fractional weights
+passed through), `integerOnly` (no expansion, fractional weights rounded with a warning) and
+`none` (runs unweighted, the user sees a strong warning). For `full`/`integerOnly` read
+`attr(self$data, 'jmv-weights')` (numeric vector or `NULL`) and
+`attr(self$data, 'jmv-weights-name')`. jamovi prepends its own weights Notice; define a result
+element named `.weights` to replace or suppress it. The page states no minimum jamovi version.
+**No ClinicoPath analysis sets `weightsSupport` (0 of the `.a.yaml` files, 2026-10-08)**, so
+every analysis gets `auto`: counts and N in our tables are weighted counts when a user weights
+the dataset. Whether any analysis should opt in is a per-analysis decision, not a bulk edit.
+
 #### Minimum jamovi version (not an `.a.yaml` key)
 
 The minimum app version is set once per module by `minApp:` in `jamovi/0000.yaml`, not per analysis. For the [`File`](#file-jamovi-283) option and [`Text`](jamovi_r_yaml_guide.md#text-jamovi-283) results the official docs say to declare `minApp: 28.3.0` so jamovi prevents installation on older versions; the compiler does not enforce it. Raising it locks every older jamovi user out of the whole module, so it is a deliberate release decision: see [Version Gating: minApp](jamovi_module_patterns_guide.md#version-gating-minapp).

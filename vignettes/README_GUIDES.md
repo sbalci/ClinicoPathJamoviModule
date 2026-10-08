@@ -330,15 +330,16 @@ New guides should follow this structure:
 
 - **jmvbaseR Example Module:** `/Users/serdarbalci/Documents/GitHub/jmvbaseR`
 - **Official jamovi Documentation:** `./development-documentations-dev.jamovi.org-master/`
-  (an old snapshot; only `api_option-file.md` and `api_text.md` cover jamovi 28.3, and the
+  (an old snapshot; `api_option-file.md`, `api_text.md`, `tuts0110`, `tuts0111`, `submit.md` and the condensed `condensed_*.md` notes are newer, and the
   live docs are at [dev.jamovi.org](https://dev.jamovi.org))
 - **ClinicoPath Examples:** This repository (`R/*.b.R`, `jamovi/*.yaml`)
 
 ---
 
-**Last Updated:** 2026-09-19
+**Last Updated:** 2026-10-08
 
 **Recent additions:**
+- 2026-10-08: docs sync (`jamovi_docs_sync_2026-10.md`) - `setSize2` (2.7.16), `weightsSupport`, upstream `type: Notice` docs vs our empirical result, 28.4-28.8 release notes (see `jamovi_module_patterns_guide.md` → "Later Releases")
 - 2026-09-19: jamovi 28.3 / jmvtools 28.3.1 - `File` option, `Text` result (markdown), Image `mode: vector`; installing current jmvtools and jmvcore, `minApp` gating and CRAN-jmvcore test guards (see `jamovi_module_patterns_guide.md` → "jamovi 28.3 Features")
 - 2026-06-22: Documented jmvtools DESCRIPTION `Imports`/`Remotes` behavior - a package may now appear in both fields; jmvtools suppresses the CRAN-mirror download of an import when it also appears in `Remotes` (see `jamovi_module_patterns_guide.md` → "DESCRIPTION: Dependencies")
 - 2026-01-31: Added `jamovi_i18n_guide.md` - Comprehensive internationalization guide
