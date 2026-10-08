@@ -5,6 +5,22 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-10-08 — decisioncalculator: in-house intervals were written only where epiR had a row of the same name
+
+- **Failure mode:** all five rows of `epirTable_number` (LR+, LR-, DOR, Youden's index, NNDx) are
+  computed in the analysis, but they were copied into epiR's result frame and written only for rows
+  epiR also returned. An epiR error, or a future epiR that renames a statistic, blanked intervals the
+  code already had, and the notice said "the two interval tables are left blank". Latent: epiR
+  2.0.96 returns every statistic, even for degenerate tables.
+- **Detection signal:** a `TODO (cleanup)` left by `/review-function`, confirmed by mocking
+  `epiR::epi.tests` to fail (`local_mocked_bindings(.package = "epiR")`). All five rows came up blank.
+- **Prevention rule:** never gate a value you compute yourself on a third-party result containing a
+  row or column of the same name. Write your own values on their own path, and keep only the rows
+  the package really supplies inside its `tryCatch`. Test the package-failure path with a mock, not
+  by reasoning about it.
+
+---
+
 ## 2026-10-07 — decisioncalculator: a format fix patched one notice of three, and "the GUI sends int32" did not hold
 
 - **Failure mode:** the earlier `base::format(scientific = FALSE)` fix covered only the inversion

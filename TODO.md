@@ -1,3 +1,25 @@
+# decisioncalculator — `/fix-function decisioncalculator --apply` (2026-10-08)
+
+Acceptance: the in-house interval rows survive an epiR failure; an empty target-prevalence list raises
+a notice; no displayed fallback is a literal 0; normal output is byte-identical to HEAD.
+
+- [x] LR+/LR-/DOR/Youden/NNDx intervals filled from the in-house computation, not via epiR's row names
+- [x] INFO notice when `prevalenceScenarios` is empty
+- [x] Unreachable `else 0` fallbacks (Sens, Spec, accuracy, prevalence) are `NA_real_`
+- [x] Regression tests FF-01 (epiR mocked to fail) and FF-02, in `test-decisioncalculator-validation.R`
+- [x] Verify: parse; 7 test files; differential against HEAD; release gate
+- [ ] **Translations:** 2 new and 4 reworded msgids (epiR-missing, epiR-error, could-not-be-matched,
+  some-could-not-be-matched notices; "No target prevalences" notice). Run `/prepare-translation decisioncalculator`.
+- [ ] Run the updater before testing in jamovi (JamoviTest copy predates this fix).
+
+**Results.** `R/decisioncalculator.b.R` only (no YAML change, so no `prepare()` needed). The interval block
+now fills `epirTable_number` from `own` whenever counts are integers. epiR feeds only `epirTable_ratio`,
+which removed the label lookup, both subset frames and the copy loop (two TODOs cleared). Verified:
+1,746 expectations, 0 failures (baseline 1,735). FF-01 and FF-02 failed before the fix. A differential over
+56 tables × ci × pp with every display option on found 0 differences from HEAD. The same harness does
+detect the new notice. Release gate run with decisioncalculator counted as shipped: output identical to
+the normal run (0 blocking), so it adds 0 hits.
+
 # decisioncalculator — `/release-review-function` (2026-10-07)
 
 Verdict: ready after minor actions. Fixed: counts in the sparse-group and cohort notices printed "1e+05"

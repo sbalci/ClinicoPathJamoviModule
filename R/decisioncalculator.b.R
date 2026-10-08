@@ -451,34 +451,32 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     private$.addNotice("WARNING", .("Continuity correction applied"), .("A zero cell was present, so a Haldane-Anscombe 0.5 correction was added to every cell for the likelihood ratios, the diagnostic odds ratio and their confidence intervals. Sensitivity, specificity, predictive values and their intervals use the observed counts."))
                 }
 
-                # Calculate metrics with safe division
-                # TODO (cleanup): the `else 0` fallbacks here and for AccurT/PrevalenceD are
-                # unreachable (the early returns above guarantee DiseaseP, DiseaseN > 0) but would
-                # display a fabricated 0% if a guard moved; use NA_real_ (review guide section 20).
-                Sens <- if (DiseaseP > 0) TP / DiseaseP else 0
-                Spec <- if (DiseaseN > 0) TN / DiseaseN else 0
+                # The early returns above guarantee DiseaseP, DiseaseN > 0. The fallbacks here and
+                # for AccurT/PrevalenceD are NA_real_ (a footnoted blank), never a fabricated 0%,
+                # should a guard ever move (review guide section 20).
+                Sens <- if (DiseaseP > 0) TP / DiseaseP else NA_real_
+                Spec <- if (DiseaseN > 0) TN / DiseaseN else NA_real_
                 # Footnote for any table cell that has no value (see .footnoteNA)
                 na_note <- .("Not estimable for this table: a denominator is zero or the quantity is undefined.")
                 if (self$options$showWorkload) {
                     # Wrap only the parser: its stop() used to abort .run() and discard every
-                    # table for one mistyped scenario ("1%,5%").
-                    # TODO (UX): an emptied prevalenceScenarios returns numeric() with no notice, so
-                    # the table silently shows only the Observed row; add an INFO saying no target
-                    # prevalences were entered (check-function-full 2026-10-07).
-                    scenario <- tryCatch(.dvNumbers(self$options$prevalenceScenarios, 0, 1),
+                    # table for one mistyped scenario ("1%,5%"). NULL = nothing was entered.
+                    scenario <- tryCatch(.dvNumbers(self$options$prevalenceScenarios, 0, 1, fallback = NULL),
                         error = function(e) {
                             private$.addNotice("ERROR", .("Invalid target prevalences"),
                                 .("Target prevalences must be at most 100 comma-separated proportions between 0 and 1, for example 0.001,0.01. The projected rows for this list are omitted; every other result is unaffected."))
                             numeric()
                         })
+                    if (is.null(scenario))
+                        private$.addNotice("INFO", .("No target prevalences"),
+                            .("The target-prevalence list is empty, so no projected rows are added from it. Enter comma-separated proportions, for example 0.001,0.01."))
                     if (self$options$pp) scenario <- unique(c(self$options$pprob, scenario))
                     prev <- c(DiseaseP / (DiseaseP + DiseaseN), scenario)
                     # TODO (cleanup): the row set depends only on options (prevalenceScenarios,
                     # pp, pprob), so it belongs in .init() with setRow() here (check-function
                     # library-review checklist); kept in .run() because the parse-error notice lives here.
                     for (i in seq_along(prev)) {
-                        w <- .dvWorkload(if (DiseaseP > 0) TP/DiseaseP else NA_real_,
-                            if (DiseaseN > 0) TN/DiseaseN else NA_real_, prev[i],
+                        w <- .dvWorkload(Sens, Spec, prev[i],
                             if (i == 1) DiseaseP+DiseaseN else self$options$workloadPopulationSize)
                         w$net_benefit <- NULL
                         self$results$screeningWorkload$addRow(rowKey = as.character(i), values = c(
@@ -490,8 +488,8 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     self$results$screeningWorkload$setNote("source", .("Projected fractional counts assume sensitivity and specificity transport to the target population. These are flagged observations, not measured extra review time or unique patients. The projections use the point estimates of sensitivity and specificity and assume no uncertainty in them or in the target prevalence."))
                 }
 
-                AccurT <- if (TotalPop > 0) TestT / TotalPop else 0
-                PrevalenceD <- if (TotalPop > 0) DiseaseP / TotalPop else 0
+                AccurT <- if (TotalPop > 0) TestT / TotalPop else NA_real_
+                PrevalenceD <- if (TotalPop > 0) DiseaseP / TotalPop else NA_real_
 
                 # Determine which prevalence to use
                 if (pp) {
@@ -873,7 +871,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     # the summary/about/assumptions/glossary panels and left plot1 without a
                     # state, so the Fagan nomogram came up blank with no explanation, even
                     # though every table above had already been filled successfully. Both
-                    # now only skip the two interval tables.
+                    # now only skip the proportion intervals, the only ones epiR supplies.
                     epir_ok <- !fractional_counts &&
                         requireNamespace("epiR", quietly = TRUE)
 
@@ -881,7 +879,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                         private$.addNotice(
                             "ERROR",
                             .("epiR package missing"),
-                            .("The epiR package is required for confidence intervals. Install it or disable confidence intervals. The two interval tables are left blank; every other result on this page is unaffected.")
+                            .("The epiR package is required for the intervals of sensitivity, specificity and the other proportions. Install it or disable confidence intervals. That interval table is left blank; the likelihood-ratio, odds-ratio and Youden's index intervals and every other result on this page are unaffected.")
                         )
                     }
 
@@ -899,7 +897,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                                     "ERROR",
                                     .("Confidence intervals could not be computed"),
                                     .fmt(
-                                        .("epiR could not compute confidence intervals for this table: {error}. The two interval tables are left blank; the point estimates above are unaffected."),
+                                        .("epiR could not compute the intervals of the proportions for this table: {error}. That interval table is left blank; the likelihood-ratio, odds-ratio and Youden's index intervals and the point estimates above are unaffected."),
                                         error = conditionMessage(e)
                                     )
                                 )
@@ -908,39 +906,56 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                         )
                     }
 
-                    if (!is.null(epirresult2)) {
-                        stat_labels <- private$.epirStatLabels()
-                        # TODO (cleanup): index by as.character(epirresult2$statistic). A factor
-                        # index uses the integer codes, not the names; epiR 2.0.96 returns character,
-                        # so this is latent (the comment above fill() still says "factor").
-                        epirresult2$statsnames <- unname(stat_labels[epirresult2$statistic])
+                    # Writes each row of df whose `statistic` is in keys (as.character: a factor
+                    # would not match a string rowKey). Returns the number of rows it filled.
+                    inf_note <- .("No finite limit: the interval is unbounded on this side.")
+                    fill <- function(table, df, keys) {
+                        stats <- as.character(df$statistic)
+                        filled <- 0L
+                        for (i in seq_len(nrow(df)))
+                            if (stats[i] %in% keys) {
+                                # epiR reports a zero cell as est = Inf with lower = NaN
+                                # (verified: TP=90 FP=0 TN=80 FN=10 gives lr.pos and
+                                # diag.or = Inf, lower = NaN). NaN is a floating-point
+                                # artifact, not a confidence bound, and Inf is not an
+                                # estimate; send NA and footnote the cell. A missing limit in
+                                # a row with any finite value is an unbounded side (LR, DOR,
+                                # and NNDx when only the Youden upper limit is above 0).
+                                v <- c(df$est[i], df$lower[i], df$upper[i])
+                                v[!is.finite(v)] <- NA_real_
+                                table$setRow(rowKey = stats[i],
+                                    values = list(est = v[1], lower = v[2],
+                                                  upper = v[3]))
+                                private$.footnoteNA(table, list(est = v[1]), na_note, rowKey = stats[i])
+                                private$.footnoteNA(table, list(lower = v[2], upper = v[3]),
+                                    if (all(is.na(v))) na_note else inf_note, rowKey = stats[i])
+                                filled <- filled + 1L
+                            }
+                        filled
+                    }
+                    # Every interval here is binomial: one independent subject per count.
+                    # Pathology counts are often slides, blocks or lesions, several per
+                    # patient (Genders et al., Radiology 2012;265:910-6).
+                    independence_note <- .("These intervals treat each count as one independent patient. If a patient contributes several slides, blocks or lesions, they can be too narrow: count one result per patient, or use a method for clustered data.")
 
-                        # The same key sets .init() scaffolded, so a row cannot be scaffolded
-                        # but never filled.
-                        epirresult_ratio <- epirresult2[
-                            epirresult2$statistic %in% private$.epirRatioStats() &
-                                !is.na(epirresult2$statsnames), , drop = FALSE
-                        ]
-                        epirresult_number <- epirresult2[
-                            epirresult2$statistic %in% private$.epirNumberStats() &
-                                !is.na(epirresult2$statsnames), , drop = FALSE
-                        ]
-
-                        # The ratio rows are not epiR's. LR+, LR- and the DOR are the values the
-                        # tables above show (all cells + 0.5 when one is zero) with log-scale
-                        # intervals on those same counts (Simel 1991; Woolf for the DOR); without
-                        # a zero cell this is exactly epi.tests(). A ratio whose RAW denominator
-                        # count is 0 has no finite upper limit, and one whose raw numerator count
-                        # is 0 has lower limit 0: the corrected counts would otherwise invent a
-                        # finite bound (true LR+ 900 at specificity 0.999 lay above every possible
-                        # upper limit at 10 + 10). On the raw counts epiR gave Inf/NaN, a
-                        # zero-width [1, 1] interval for a test that is never positive, and at
-                        # 10 + 10, specificity 0.95, an LR+ interval for only 40% of tables
-                        # (coverage 0.785 among them). Exact enumeration of this rule over six
-                        # designs (10 + 10 to 100 + 100, sens/spec 0.5-0.999): mean coverage
-                        # 0.94-0.96 for the LRs, 0.96-0.98 for the DOR; the log method still dips
-                        # to 0.84-0.91 at extreme accuracy, so the note calls them approximate.
-                        # Youden: Agresti-Caffo on the observed counts.
+                    # epirTable_number is not epiR's: every row is computed here, so it does not
+                    # wait on epiR (an epiR error or a renamed statistic used to blank it).
+                    # LR+, LR- and the DOR are the values the
+                    # tables above show (all cells + 0.5 when one is zero) with log-scale
+                    # intervals on those same counts (Simel 1991; Woolf for the DOR); without
+                    # a zero cell this is exactly epi.tests(). A ratio whose RAW denominator
+                    # count is 0 has no finite upper limit, and one whose raw numerator count
+                    # is 0 has lower limit 0: the corrected counts would otherwise invent a
+                    # finite bound (true LR+ 900 at specificity 0.999 lay above every possible
+                    # upper limit at 10 + 10). On the raw counts epiR gave Inf/NaN, a
+                    # zero-width [1, 1] interval for a test that is never positive, and at
+                    # 10 + 10, specificity 0.95, an LR+ interval for only 40% of tables
+                    # (coverage 0.785 among them). Exact enumeration of this rule over six
+                    # designs (10 + 10 to 100 + 100, sens/spec 0.5-0.999): mean coverage
+                    # 0.94-0.96 for the LRs, 0.96-0.98 for the DOR; the log method still dips
+                    # to 0.84-0.91 at extreme accuracy, so the note calls them approximate.
+                    # Youden: Agresti-Caffo on the observed counts.
+                    if (!fractional_counts) {
                         z <- stats::qnorm(0.975)
                         log_ci <- function(est, v, num0, den0) {
                             if (!is.finite(est)) return(c(NA_real_, NA_real_))   # not estimable
@@ -951,7 +966,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                             ci
                         }
                         youden_ci <- private$.youdenCI(TP, TP + FN, FP, FP + TN, z)
-                        own <- list(
+                        own <- rbind(
                             lr.pos = c(LRP, log_ci(LRP, 1 / TP_cc - 1 / (TP_cc + FN_cc) + 1 / FP_cc - 1 / (FP_cc + TN_cc),
                                                    TP == 0, FP == 0)),
                             lr.neg = c(LRN, log_ci(LRN, 1 / FN_cc - 1 / (TP_cc + FN_cc) + 1 / TN_cc - 1 / (FP_cc + TN_cc),
@@ -960,85 +975,48 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                                                     TP == 0 || TN == 0, FP == 0 || FN == 0)),
                             youden = unname(youden_ci),
                             nndx = unname(private$.nndxFromYouden(youden_ci)))
-                        # TODO (cleanup): all five epirTable_number rows are computed in-house
-                        # (`own`), yet they are filled only when epiR returns a row with the same
-                        # name, so an epiR error or a renamed statistic blanks intervals this code
-                        # already has. Fill epirTable_number from `own` directly, outside epir_ok.
-                        for (k in names(own)) {
-                            ix <- which(as.character(epirresult_number$statistic) == k)
-                            if (length(ix) == 1L)
-                                epirresult_number[ix, c("est", "lower", "upper")] <- as.list(own[[k]])
-                        }
+                        fill(epirTable_number,
+                             data.frame(statistic = rownames(own), est = own[, 1], lower = own[, 2], upper = own[, 3]),
+                             private$.epirNumberStats())
 
-                        # as.character: epiR returns `statistic` as a factor, which does not match
-                        # a string rowKey. Returns the number of rows it managed to fill.
-                        inf_note <- .("No finite limit: the interval is unbounded on this side.")
-                        fill <- function(table, df, keys) {
-                            stats <- as.character(df$statistic)
-                            filled <- 0L
-                            for (i in seq_len(nrow(df)))
-                                if (stats[i] %in% keys) {
-                                    # epiR reports a zero cell as est = Inf with lower = NaN
-                                    # (verified: TP=90 FP=0 TN=80 FN=10 gives lr.pos and
-                                    # diag.or = Inf, lower = NaN). NaN is a floating-point
-                                    # artifact, not a confidence bound, and Inf is not an
-                                    # estimate; send NA and footnote the cell. A missing limit in
-                                    # a row with any finite value is an unbounded side (LR, DOR,
-                                    # and NNDx when only the Youden upper limit is above 0).
-                                    v <- c(df$est[i], df$lower[i], df$upper[i])
-                                    v[!is.finite(v)] <- NA_real_
-                                    table$setRow(rowKey = stats[i],
-                                        values = list(est = v[1], lower = v[2],
-                                                      upper = v[3]))
-                                    private$.footnoteNA(table, list(est = v[1]), na_note, rowKey = stats[i])
-                                    private$.footnoteNA(table, list(lower = v[2], upper = v[3]),
-                                        if (all(is.na(v))) na_note else inf_note, rowKey = stats[i])
-                                    filled <- filled + 1L
-                                }
-                            filled
-                        }
-                        n_filled <-
-                            fill(epirTable_ratio, epirresult_ratio, private$.epirRatioStats()) +
-                            fill(epirTable_number, epirresult_number, private$.epirNumberStats())
+                        # Always on: a reader cannot reproduce an interval without its method.
+                        epirTable_number$setNote("method", .("Likelihood ratios: approximate log-scale 95% interval (Simel, Samsa and Matchar 1991), which can fall short of 95% when sensitivity or specificity is near 100% in a small study. Diagnostic odds ratio: log-scale (Woolf) interval. Youden's index: Agresti-Caffo interval for the difference between the true-positive and false-positive rates. Number needed to diagnose = 1 / Youden's index; its interval is the inverse of the positive part of the Youden interval."))
+                        epirTable_number$setNote("independence", independence_note)
+                        epirTable_number$setNote("rawcounts", if (zero_cell)
+                            .("A zero cell was present, so the likelihood ratios and the diagnostic odds ratio here, as in the tables above, use the table with 0.5 added to every cell, and so do their intervals. A ratio whose denominator count is zero has no finite upper limit, which is left blank and footnoted; one whose numerator count is zero has a lower limit of 0. Youden's index and the number needed to diagnose use the observed counts.")
+                            else NULL)
+                        # An empty NNDx cell needs its reason on screen (decision.b.R wording).
+                        nn <- own["nndx", ]
+                        epirTable_number$setNote("nndx",
+                            if (!is.finite(nn[1]) && !is.finite(nn[2]))
+                                .("The number needed to diagnose is not estimable: Youden's index and its whole confidence interval are at or below 0.")
+                            else if (!is.finite(nn[1]))
+                                .("Youden's index is 0 or below in this sample, so the number needed to diagnose has no point estimate. Its confidence interval starts at the lower limit shown and has no upper bound.")
+                            else if (!is.finite(nn[3]))
+                                .("The number needed to diagnose has no finite upper limit: the Youden's index interval includes 0, so the interval for its inverse has no upper bound.")
+                            else NULL)
+                    }
 
+                    if (!is.null(epirresult2)) {
+                        # The join is by epiR's own `statistic` strings, against the key set
+                        # .init() scaffolded. A future epiR that renames them (it has before)
+                        # would leave those rows blank with nothing on screen to say why.
+                        n_filled <- fill(epirTable_ratio, epirresult2, private$.epirRatioStats())
                         if (n_filled == 0L) {
-                            # The join is by epiR's own `statistic` strings. A future epiR
-                            # that renames them (it has before) would leave every scaffolded
-                            # row blank with nothing on screen to say why.
                             private$.addNotice(
                                 "ERROR",
                                 .("Confidence intervals could not be matched"),
-                                .("No confidence intervals could be matched to the reported statistics. The installed version of epiR labels its output differently from the version this analysis expects. The interval tables are left blank; the point estimates above are unaffected.")
+                                .("No interval for sensitivity, specificity or the other proportions could be matched to the statistics epiR reported. The installed version of epiR labels its output differently from the version this analysis expects. That interval table is left blank; the likelihood-ratio, odds-ratio and Youden's index intervals and the point estimates above are unaffected.")
                             )
                         } else {
-                            if (n_filled < length(private$.epirRatioStats()) + length(private$.epirNumberStats()))
+                            if (n_filled < length(private$.epirRatioStats()))
                                 private$.addNotice(
                                     "WARNING",
                                     .("Some confidence intervals could not be matched"),
-                                    .("Some rows of the interval tables are empty because the installed version of epiR does not report those statistics. The values that are shown are unaffected.")
+                                    .("Some rows of the interval table for the proportions are empty because the installed version of epiR does not report those statistics. The values that are shown are unaffected.")
                                 )
-                            # Always on: a reader cannot reproduce an interval without its method.
                             epirTable_ratio$setNote("method", .("Exact Clopper-Pearson 95% intervals, computed by epiR from the observed counts."))
-                            epirTable_number$setNote("method", .("Likelihood ratios: approximate log-scale 95% interval (Simel, Samsa and Matchar 1991), which can fall short of 95% when sensitivity or specificity is near 100% in a small study. Diagnostic odds ratio: log-scale (Woolf) interval. Youden's index: Agresti-Caffo interval for the difference between the true-positive and false-positive rates. Number needed to diagnose = 1 / Youden's index; its interval is the inverse of the positive part of the Youden interval."))
-                            # Every interval here is binomial: one independent subject per count.
-                            # Pathology counts are often slides, blocks or lesions, several per
-                            # patient (Genders et al., Radiology 2012;265:910-6).
-                            independence_note <- .("These intervals treat each count as one independent patient. If a patient contributes several slides, blocks or lesions, they can be too narrow: count one result per patient, or use a method for clustered data.")
                             epirTable_ratio$setNote("independence", independence_note)
-                            epirTable_number$setNote("independence", independence_note)
-                            epirTable_number$setNote("rawcounts", if (zero_cell)
-                                .("A zero cell was present, so the likelihood ratios and the diagnostic odds ratio here, as in the tables above, use the table with 0.5 added to every cell, and so do their intervals. A ratio whose denominator count is zero has no finite upper limit, which is left blank and footnoted; one whose numerator count is zero has a lower limit of 0. Youden's index and the number needed to diagnose use the observed counts.")
-                                else NULL)
-                            # An empty NNDx cell needs its reason on screen (decision.b.R wording).
-                            nn <- own$nndx
-                            epirTable_number$setNote("nndx",
-                                if (!is.finite(nn[1]) && !is.finite(nn[2]))
-                                    .("The number needed to diagnose is not estimable: Youden's index and its whole confidence interval are at or below 0.")
-                                else if (!is.finite(nn[1]))
-                                    .("Youden's index is 0 or below in this sample, so the number needed to diagnose has no point estimate. Its confidence interval starts at the lower limit shown and has no upper bound.")
-                                else if (!is.finite(nn[3]))
-                                    .("The number needed to diagnose has no finite upper limit: the Youden's index interval includes 0, so the interval for its inverse has no upper bound.")
-                                else NULL)
                         }
                     }
                 }

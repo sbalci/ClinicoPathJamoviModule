@@ -434,3 +434,25 @@ test_that("one invalid cut-off scenario leaves the computable rows filled", {
   expect_match(mc$getCell(rowKey = 1, col = "recommendation")$value, "invalid frequencies", fixed = TRUE)
   expect_match(mc$getCell(rowKey = 3, col = "recommendation")$value, "Descriptive comparison unavailable", fixed = TRUE)
 })
+
+# ------------------------------------------------------ /fix-function 2026-10-08 (FF-NN) --
+
+test_that("FF-01 the LR, DOR, Youden and NNDx intervals do not wait on epiR", {
+  # All five are computed in-house; they were written only into rows epiR also returned, so an
+  # epiR error (or a renamed statistic) blanked intervals the analysis already had.
+  ok <- val_dc(ci = TRUE)
+  testthat::local_mocked_bindings(epi.tests = function(...) stop("forced failure"), .package = "epiR")
+  r <- val_dc(ci = TRUE)
+  expect_match(val_notices(r), "forced failure", fixed = TRUE)
+  expect_true(all(is.na(r$epirTable_ratio$asDF$est)))                 # epiR's own rows stay blank
+  for (k in c("lr.pos", "lr.neg", "diag.or", "youden", "nndx"))
+    expect_equal(val_ci(r, k), val_ci(ok, k), info = k)
+  expect_match(r$epirTable_number$notes$method$note, "Simel", fixed = TRUE)
+})
+
+test_that("FF-02 an empty target-prevalence list is explained, not silent", {
+  r <- val_dc(showWorkload = TRUE, prevalenceScenarios = "  ")
+  expect_equal(nrow(r$screeningWorkload$asDF), 1L)                    # observed row only
+  expect_match(val_notices(r), "target-prevalence list is empty", fixed = TRUE)
+  expect_false(grepl("target-prevalence list is empty", val_notices(val_dc(showWorkload = TRUE)), fixed = TRUE))
+})
