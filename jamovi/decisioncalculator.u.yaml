@@ -6,7 +6,7 @@ stage: 0
 compilerMode: tame
 children:
   - type: Label
-    label: "Confusion matrix (reference standard vs test result)"
+    label: "Confusion Matrix (Reference Standard vs Test Result)"
     margin: small
     children:
       - type: LayoutBox
@@ -125,7 +125,7 @@ children:
     collapsed: true
     children:
       - type: Label
-        label: Illustrative cut-off comparison
+        label: Illustrative Cut-off Comparison
         children:
           - type: LayoutBox
             margin: large
@@ -138,7 +138,7 @@ children:
                 enable: (multiplecuts)
 
       - type: Label
-        label: Illustrative scenario 1
+        label: Illustrative Scenario 1
         enable: (multiplecuts)
         children:
           - type: LayoutBox
@@ -187,7 +187,7 @@ children:
                     format: number
 
       - type: Label
-        label: Illustrative scenario 2
+        label: Illustrative Scenario 2
         enable: (multiplecuts)
         children:
           - type: LayoutBox

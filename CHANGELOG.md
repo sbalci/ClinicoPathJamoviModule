@@ -5,6 +5,49 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-10-07 — decisioncalculator: a format fix patched one notice of three, and "the GUI sends int32" did not hold
+
+- **Failure mode:** the earlier `base::format(scientific = FALSE)` fix covered only the inversion
+  notice, under a test named "counts in notices are never printed in scientific notation". The
+  sparse-group notice still printed "1e+05" from the R wrapper. The cut-off cohort notice printed
+  "100/1e+05" even from integer (GUI) input, because `vapply(..., numeric(1))` had already made the
+  counts doubles, and `paste0()` formats a round double the same way `jmvcore::format()` does.
+- **Detection signal:** `/release-review-function` read every count that reaches a notice and probed
+  a "per 100,000 screened" table with integer literals.
+- **Prevention rules:**
+  - When fixing a formatting defect, grep every site in the file that prints a count, and make the
+    test cover each one. A test name that says "never" must exercise more than one site.
+  - Integer input does not protect a derived value: `vapply(numeric(1))`, `as.numeric()` and
+    double arithmetic all produce doubles.
+
+---
+
+## 2026-10-07 — decisioncalculator: a never-positive test got a likelihood ratio from the group sizes
+
+- **Failure mode:** when a test-result row is all zero, the likelihood ratio of the result the test
+  never gave is 0/0. The all-cells 0.5 correction turned it into (n0 + 1) / (n1 + 1), a function of
+  the group sizes alone. At TP 0, FP 0, FN 10, TN 100 the Measures table showed LR+ 9.18 and DOR 9.57.
+  The nomogram was drawn, and its panel said a positive result "raises the probability from 9.1% to
+  47.9%". Youden's J for that table is 0. In the never-negative mirror, the LR- got the same artifact,
+  and the nomogram notice told the user to "Check the test coding".
+- **Detection signal:** `/review-function` probed a never-positive table with UNEQUAL groups. Every
+  earlier degenerate fixture (validation D7/D10, the audit script) used n1 == n0. There the artifact
+  is exactly 1, which reads as the correct "uninformative" answer, so 1,696 passing expectations never
+  saw it. `decision` was not affected (it refuses a one-level test), and `cotest` and
+  `screeningcalculator` were not applicable (their sensitivity and specificity inputs are bounded to
+  0.01-0.99). A subagent checked all three by running them.
+- **Near miss in the fix:** `format(n, scientific = FALSE)` inside the R6 class still printed "1e+05".
+  The umbrella NAMESPACE has `import(jmvcore)`, so a bare `format()` there is `jmvcore::format`.
+  The memory note said the package imported only selected jmvcore functions; it has been corrected.
+- **Prevention rules:**
+  - Build degenerate fixtures with unequal margins (n1 != n0). A symmetric fixture can turn an
+    artifact into the right-looking answer.
+  - A ratio whose numerator and denominator are both zero is not estimable, before any continuity
+    correction. Report it blank and footnoted, and never draw it on a nomogram.
+  - In package code, write `base::format()`.
+
+---
+
 ## 2026-10-07 — decisioncalculator: a format branch chosen on the raw value, a duplicated column, an ungraded guard
 
 - **Failure modes:**

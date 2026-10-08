@@ -185,7 +185,7 @@ test_that("C48 C78 C83 VAL-decisioncalculator-05: a positive probability is neve
   expect_match(fs, "Pre-test probability is 0.01%", fixed = TRUE)
   expect_match(fs, "raises the probability from 0.01% to 0.03%", fixed = TRUE)
   expect_match(val_strip(r$summary$content), "PPV 0.03%", fixed = TRUE)
-  expect_match(val_notices(r), "The selected prevalence is 0.01%", fixed = TRUE)
+  expect_match(val_notices(r), "The supplied prevalence is 0.01%", fixed = TRUE)   # INFO since 2026-10-07
 })
 
 test_that("C62 VAL-decisioncalculator-06: the recommendation does not judge a Youden ranking by accuracy intervals", {
@@ -365,4 +365,72 @@ test_that("CFF-03 the negative-test post-test probability is 1 - NPV, not the NP
   cell <- z$ratioTable$getCell(rowNo = 1, col = "PostTestProbNeg")
   expect_identical(cell$value, "")
   expect_match(cell$footnotes, "Not estimable", fixed = TRUE)
+})
+
+# ------------------------------------------- /review-function decisioncalculator 2026-10-07 --
+
+test_that("a never-positive or never-negative test has no likelihood ratio, DOR or nomogram", {
+  # Unequal groups on purpose: with n1 == n0 the 0.5-corrected ratio is exactly 1 and looks right.
+  # The old code printed LR+ = (n0 + 1) / (n1 + 1) = 101/11 = 9.18 for a test that was never
+  # positive, and drew a nomogram saying a positive result raised the probability.
+  np <- val_dc(TP = 0, FP = 0, FN = 10, TN = 100, ci = TRUE, fagan = TRUE, showSummary = TRUE)
+  cell <- np$ratioTable$getCell(rowNo = 1, col = "LRP")
+  expect_identical(cell$value, "")
+  expect_match(cell$footnotes, "Not estimable", fixed = TRUE)
+  expect_identical(np$advancedMetricsTable$getCell(rowNo = 1, col = "dor")$value, "")
+  expect_true(is.finite(val_key(np$ratioTable$asDF, "1")$LRN))   # the other ratio is still reported
+  # no estimate, so no interval either: [0, unbounded) would not be a Simel/Woolf interval
+  expect_true(all(is.na(val_ci(np, "lr.pos"))))
+  expect_true(all(is.na(val_ci(np, "diag.or"))))
+  expect_match(np$epirTable_number$getCell(rowKey = "lr.pos", col = "lower")$footnotes, "Not estimable", fixed = TRUE)
+  expect_true(all(is.finite(val_ci(np, "lr.neg"))))
+  expect_false(isTRUE(np$plot1$state$drawable))
+  fs <- val_strip(np$faganSummary$content)
+  expect_match(fs, "never positive", fixed = TRUE)
+  expect_false(grepl("raises the probability", fs, fixed = TRUE))
+  expect_match(val_notices(np), "never positive", fixed = TRUE)
+  expect_false(grepl("Check the test coding", val_notices(np), fixed = TRUE))
+  sm <- val_strip(np$summary$content)
+  expect_match(sm, "positive likelihood ratio is not estimable", fixed = TRUE)
+  expect_false(grepl("\\bNA\\b", sm))
+
+  nn <- val_dc(TP = 10, FP = 100, FN = 0, TN = 0, fagan = TRUE, showSummary = TRUE)
+  expect_identical(nn$ratioTable$getCell(rowNo = 1, col = "LRN")$value, "")
+  expect_identical(nn$advancedMetricsTable$getCell(rowNo = 1, col = "dor")$value, "")
+  expect_true(is.finite(val_key(nn$ratioTable$asDF, "1")$LRP))
+  expect_match(val_notices(nn), "never negative", fixed = TRUE)
+  expect_false(grepl("Check the test coding", val_notices(nn), fixed = TRUE))
+  expect_match(val_strip(nn$faganSummary$content), "never negative", fixed = TRUE)
+  expect_match(val_strip(nn$summary$content), "negative likelihood ratio is not estimable", fixed = TRUE)
+
+  # an inverted but non-degenerate test still declines with the coding advice
+  inv <- val_dc(TP = 20, FN = 90, FP = 80, TN = 30, fagan = TRUE)
+  expect_match(val_notices(inv), "Check the test coding", fixed = TRUE)
+})
+
+test_that("a supplied low prevalence is INFO; a sample prevalence below 5% stays a STRONG WARNING", {
+  expect_match(val_notices(val_dc(pp = TRUE, pprob = 0.01)), "INFO: Extreme prevalence", fixed = TRUE)
+  expect_match(val_notices(val_dc(TP = 4, FN = 1, FP = 10, TN = 185)), "STRONG WARNING: Extreme prevalence", fixed = TRUE)
+})
+
+test_that("counts in notices are never printed in scientific notation", {
+  # jmvcore::format() printed the double 1e5 as "1e+05" (R wrapper; the GUI sends int32)
+  expect_match(val_notices(val_dc(TP = 10000, FN = 90000, FP = 90000, TN = 10000)),
+               "100000 reference-positive and 100000 reference-negative", fixed = TRUE)
+  # sparse-group notice (R wrapper doubles)
+  expect_match(val_notices(val_dc(TP = 5, FN = 3, FP = 0, TN = 100000)),
+               "8 reference-positive and 100000 reference-negative", fixed = TRUE)
+  # cohort notice: vapply(numeric(1)) makes even the GUI's int32 counts doubles, so this one
+  # was reachable in jamovi ("per 100,000 screened")
+  expect_match(val_notices(val_dc(TP = 90L, FN = 10L, FP = 4990L, TN = 95010L, multiplecuts = TRUE)),
+               "100/100000, 110/110 and 110/110", fixed = TRUE)
+})
+
+test_that("one invalid cut-off scenario leaves the computable rows filled", {
+  mc <- val_dc(multiplecuts = TRUE, tp1 = -1)$multipleCutoffTable
+  expect_equal(mc$getCell(rowKey = 3, col = "sensitivity")$value, 90 / 110)   # current: TP 90, FN 20
+  expect_equal(mc$getCell(rowKey = 2, col = "sensitivity")$value, 80 / 110)   # scenario 2: TP 80, FN 30
+  expect_identical(mc$getCell(rowKey = 1, col = "sensitivity")$value, "")
+  expect_match(mc$getCell(rowKey = 1, col = "recommendation")$value, "invalid frequencies", fixed = TRUE)
+  expect_match(mc$getCell(rowKey = 3, col = "recommendation")$value, "Descriptive comparison unavailable", fixed = TRUE)
 })

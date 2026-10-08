@@ -1,3 +1,50 @@
+# decisioncalculator — `/release-review-function` (2026-10-07)
+
+Verdict: ready after minor actions. Fixed: counts in the sparse-group and cohort notices printed "1e+05"
+(cohort one from GUI integer input too). 1,729 expectations, 0 failures; 90/90 independent oracle checks;
+release gate adds 0 hits with the analysis counted as shipped; options panel renders in the jamovi client.
+
+- [ ] **Run the updater before testing in jamovi:** `../JamoviTest/R/decisioncalculator.b.R` predates
+  today's fixes (degenerate-row LR rule, inversion guard, this fix). Then `Rscript --vanilla
+  tools/submodule_smoke.R ../JamoviTest`.
+- [ ] **Sample prevalence < 5% is a STRONG WARNING at any n** (`R/decisioncalculator.b.R`, ~line 508; same in
+  `R/decision.b.R:1113`). At 300 positives in 10,000 it says the predictive values "may be unstable".
+  Decide for both analyses together: gate STRONG on a small positive or negative group (or the PPV
+  interval width), else WARNING. Pinned by `test-decisioncalculator-validation.R` ("stays a STRONG WARNING").
+- [ ] **CIs are off by default** (`ci: false`, as in `decision`); STARD 2015 item 24 asks for them. User call.
+- [ ] Developer doc `vignettes/decisioncalculator-documentation.md` (2026-08-29) lacks the workload options
+  and the `screeningWorkload` result.
+
+# decisioncalculator — `/review-function` action items (2026-10-07)
+
+Acceptance: a never-positive (TP = FP = 0) or never-negative (TN = FN = 0) table shows no LR+/LR-/DOR value and
+draws no nomogram, with the reason on screen; regression tests use UNEQUAL groups (n1 != n0), which the old code
+fails; the five minor TODOs are cleared; all decisioncalculator tests pass; parse + prepare() clean.
+
+- [x] Codex plan review of the degenerate-row fix (core rule confirmed; four refinements taken)
+- [x] Degenerate test row: LR/DOR not estimable, Fagan declines with the right reason, summary sentence, notices
+- [x] Regression tests (0/0/10/100 and 10/100/0/0; old code gives 9.18)
+- [x] Minor: pp extreme prevalence -> INFO; counts printed without "1e+05"; drop unused tibble step;
+      invalid cut-off scenario keeps the computable rows; stale Fagan comment
+- [x] `.u.yaml` group headings in Title Case
+- [x] Sibling check: decision NOT AFFECTED, cotest / screeningcalculator NOT APPLICABLE (bounded inputs)
+- [x] Verify: parse, all test-decisioncalculator* files, probe script, prepare()
+- [x] `/prepare-translation decisioncalculator`
+- [x] CHANGELOG entry (balanced degenerate fixtures hid the artifact)
+- [ ] **screeningcalculator (latent, unreachable today):** `R/screeningcalculator.b.R:141-143` sets LR+ to Inf
+  whenever spec == 1, footnoted "Infinite (perfect specificity)"; with sens == 0 that is 0/0. Inputs are bounded
+  to 0.01-0.99, so it only matters if the bounds are ever widened. Return NA + "not estimable" then.
+- [ ] Turkish in-app review under the Turkish locale (85 machine-drafted entries).
+
+**Results.** `R/decisioncalculator.b.R`: degenerate-row rule after the DOR, every LR consumer (footnotes,
+interval rows, both Fagan explanations, summary, notices); INFO grading for a supplied prevalence (notice and
+about panel); `base::format` for counts; unused tibble step removed; partial cut-off table. `.u.yaml`: four
+headings in Title Case. Tests: 4 new blocks in `test-decisioncalculator-validation.R`, 3 pinned expectations
+updated (supplied-prevalence grade and two reworded sentences). Catalogs: 63 added / 26 removed msgids, all
+decisioncalculator-only, 85 Turkish entries filled. Verified: 7 test files, 1,727 expectations, 0 failures;
+probe of the fixed cases; nomogram renders for normal, zero-cell and J = 0 tables; lintr unchanged (3 style
+hits); `msgfmt -c`; `prepare()` exit 0 with no generated-file change.
+
 # decisioncalculator (meddecide) — `/fix-function decisioncalculator --apply` (2026-10-07)
 
 VAL-decisioncalculator-01..11 from `development-ideas/decisioncalculator-validation-2026-10-06.md` are fixed;

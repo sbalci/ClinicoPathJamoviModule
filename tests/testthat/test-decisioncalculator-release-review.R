@@ -104,7 +104,8 @@ test_that("tables do not accumulate rows across re-runs", {
     expect_true(any(grepl("table\\$setRow\\(rowKey = stats\\[i\\]", src)),
                 info = "the epiR values are written by statistic key")
     expect_equal(sum(grepl("multipleCutoffTable\\$addRow\\(", src)), 3L)
-    expect_equal(sum(grepl("multipleCutoffTable\\$setRow\\(", src)), 3L)
+    # rows are only ever ADDED in .init(); .run() may fill them from several paths
+    expect_gte(sum(grepl("multipleCutoffTable\\$setRow\\(", src)), 3L)
 })
 
 
@@ -359,15 +360,19 @@ test_that("non-finite illustrative cut-off counts are rejected through notices",
 })
 
 
-test_that("extreme prevalence and very sparse groups produce strong warnings", {
+test_that("extreme prevalence and very sparse groups produce graded warnings", {
+    # A SUPPLIED prevalence of 0.1% is the intended (screening) use, so it is INFO, not a
+    # STRONG WARNING (review-function 2026-10-07); a sample prevalence that extreme stays STRONG.
     extreme <- decisioncalculator(TP = 90, TN = 80, FP = 30, FN = 20,
                                   pp = TRUE, pprob = 0.001)
     extreme_notice <- notices_of(extreme)
-    expect_match(extreme_notice, "STRONG WARNING: Extreme prevalence")
+    expect_match(extreme_notice, "INFO: Extreme prevalence")
     expect_match(extreme_notice, "0.1%")
+    mixed <- notices_of(decisioncalculator(TP = 1, TN = 1, FP = 1, FN = 1,
+                                           pp = TRUE, pprob = 0.001))
     expect_lt(
-        regexpr("STRONG WARNING", extreme_notice)[1],
-        regexpr("INFO:", extreme_notice)[1],
+        regexpr("STRONG WARNING", mixed)[1],
+        regexpr("INFO:", mixed)[1],
         label = "strong warnings should be displayed before informational notices"
     )
 
@@ -511,7 +516,7 @@ test_that("an invalid cut-off scenario does not blank the summary panel or the n
     expect_equal(r$ratioTable$asDF$Sens[1], TP0 / (TP0 + FN0), tolerance = 1e-12)
     # the omission is explained rather than silent
     expect_match(notices_of(r), "must be non-negative finite numbers")
-    expect_match(notices_of(r), "The rest of the analysis is unaffected")
+    expect_match(notices_of(r), "the rest of the analysis are unaffected", fixed = TRUE)
 })
 
 
@@ -549,4 +554,29 @@ test_that("user-typed labels starting with '<' survive jamovi's HTML-parsed tabl
     expect_match(m$cutoffName[2], "high> cut-off", fixed = TRUE)
     expect_match(m$recommendation[3], "high> cut-off", fixed = TRUE)
     expect_true(all(grepl("slide>", w$unit, fixed = TRUE)))
+})
+
+
+test_that("asSource() escapes the free-text options so the syntax parses back to them", {
+    # jmvcore pastes a String option between quotes unescaped, so a crafted scenario name
+    # closed the literal and turned the argument into R code (security audit 2026-10-07).
+    crafted <- '" |> paste0(Sys.getpid()) == "'
+    a <- ClinicoPath:::decisioncalculatorClass$new(
+        options = ClinicoPath:::decisioncalculatorOptions$new(
+            multiplecuts = TRUE, cutoff1 = crafted, cutoff2 = 'Low "rule-out" C:\\x',
+            showWorkload = TRUE, prevalenceScenarios = "0.01, 0.1", analysisUnit = 'lesion "A"'),
+        data = data.frame(x = 1))
+    a$run()
+    expr <- parse(text = a$asSource())
+    call <- expr[[1]]
+    expect_equal(call$cutoff1, crafted)
+    expect_equal(call$cutoff2, 'Low "rule-out" C:\\x')
+    expect_equal(call$prevalenceScenarios, "0.01, 0.1")
+    expect_equal(call$analysisUnit, 'lesion "A"')
+    expect_false("Sys.getpid" %in% all.names(expr))
+    # defaults stay unexported
+    b <- ClinicoPath:::decisioncalculatorClass$new(
+        options = ClinicoPath:::decisioncalculatorOptions$new(), data = data.frame(x = 1))
+    b$run()
+    expect_false(grepl("cutoff1", b$asSource(), fixed = TRUE))
 })

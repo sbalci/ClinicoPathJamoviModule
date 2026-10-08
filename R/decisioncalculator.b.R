@@ -9,6 +9,16 @@
 decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
     R6::R6Class("decisioncalculatorClass",
         inherit = decisioncalculatorBase, private = list(
+            # jmvcore's OptionString$valueAsSource quotes without escaping: a name containing `"`
+            # broke the syntax pane, and a crafted one became R code that runs when pasted into R.
+            .sourcifyOption = function(option) {
+                value <- option$value
+                if (option$name %in% c("cutoff1", "cutoff2", "prevalenceScenarios", "analysisUnit") &&
+                    is.character(value) && length(value) == 1L && !identical(value, option$default))
+                    return(paste0(option$name, " = ", encodeString(value, quote = '"')))
+                super$.sourcifyOption(option)
+            },
+
             # Notice collection helpers. A single Preformatted (plain-text) output item,
             # so the whole set renders in severity order with no HTML (project convention:
             # notice content must be plain text). NOTE (corrected 2026-09-22): jmvcore::Notice
@@ -326,12 +336,12 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
 
                 # Check for positive tests
                 if (TP + FP == 0) {
-                    private$.addNotice("WARNING", .("No positive test results"), .("TP + FP equals zero, so positive predictive value is undefined."))
+                    private$.addNotice("WARNING", .("No positive test results"), .("TP + FP equals zero: the test was never positive. The positive predictive value, the positive likelihood ratio and the diagnostic odds ratio are not estimable, and the test cannot separate the two groups. The negative likelihood ratio differs from 1 only because of the 0.5 zero-cell correction."))
                 }
 
                 # Check for negative tests
                 if (TN + FN == 0) {
-                    private$.addNotice("WARNING", .("No negative test results"), .("TN + FN equals zero, so negative predictive value is undefined."))
+                    private$.addNotice("WARNING", .("No negative test results"), .("TN + FN equals zero: the test was never negative. The negative predictive value, the negative likelihood ratio and the diagnostic odds ratio are not estimable, and the test cannot separate the two groups. The positive likelihood ratio differs from 1 only because of the 0.5 zero-cell correction."))
                 }
 
 
@@ -492,7 +502,20 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     PriorProb <- PrevalenceD
                 }
 
-                if (PriorProb < 0.05 || PriorProb > 0.95) {
+                # A supplied population prevalence this far from 50% is the intended use (screening;
+                # the workload defaults are 0.0001-0.01), so it is INFO about how strongly the
+                # predictive values depend on the error rates. A sample prevalence that extreme stays
+                # a STRONG_WARNING.
+                if (pp && (PriorProb < 0.05 || PriorProb > 0.95)) {
+                    private$.addNotice(
+                        "INFO",
+                        .("Extreme prevalence"),
+                        .fmt(
+                            .("The supplied prevalence is {prevalence}. At a prevalence this far from 50%, the predictive values depend strongly on the error rates: at low prevalence a small change in specificity moves the PPV considerably, and at high prevalence a small change in sensitivity moves the NPV."),
+                            prevalence = private$.pct(PriorProb)
+                        )
+                    )
+                } else if (PriorProb < 0.05 || PriorProb > 0.95) {
                     private$.addNotice(
                         "STRONG_WARNING",
                         .("Extreme prevalence"),
@@ -509,8 +532,8 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                         .("Very sparse reference groups"),
                         .fmt(
                             .("Only {positive} reference-positive and {negative} reference-negative observations are available. Estimates will be imprecise; inspect confidence intervals and justify sample size for the intended precision. This warning is not a clinical adequacy threshold."),
-                            positive = DiseaseP,
-                            negative = DiseaseN
+                            positive = base::format(DiseaseP, scientific = FALSE),
+                            negative = base::format(DiseaseN, scientific = FALSE)
                         )
                     )
                 }
@@ -585,6 +608,18 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     DOR <- NA
                 }
 
+                # A test-result row of zeros (the test was never positive, or never negative) makes
+                # that likelihood ratio and the DOR 0/0. The 0.5 correction turned them into a function
+                # of the group sizes alone -- LR+ = (n0 + 1) / (n1 + 1), 9.18 at 0/0/10/100 -- under a
+                # nomogram saying a positive result raised the probability. With n1 == n0 the artifact
+                # is exactly 1, which is how it went unnoticed. The other ratio keeps its corrected
+                # value (the all-cells correction is a deferred estimator choice); the notice says so.
+                no_pos_tests <- TestP == 0
+                no_neg_tests <- TestN == 0
+                if (no_pos_tests) LRP <- NA_real_
+                if (no_neg_tests) LRN <- NA_real_
+                if (no_pos_tests || no_neg_tests) DOR <- NA_real_
+
                 # Youden's Index (optimal cut-off criterion)
                 YoudenIndex <- Sens + Spec - 1
 
@@ -597,10 +632,13 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     yci <- private$.youdenCI(TP, DiseaseP, FP, DiseaseN)
                     youden_txt <- sprintf("%.3f", YoudenIndex)
                     if (inversion == "strong") {
+                        # base::format(): jmvcore::format() printed a round double count as "1e+05" (R
+                        # wrapper), and a bare format() here IS jmvcore::format (@import jmvcore).
                         private$.addNotice("STRONG_WARNING", .("Test performs worse than chance"),
                             .fmt(.("Youden's index is {youden} (95% CI {lower} to {upper}; {npos} reference-positive and {nneg} reference-negative observations), and the whole interval is below 0: a positive result is less common among reference-positive than among reference-negative subjects. Check whether TP and FN, or FP and TN, were entered in swapped positions."),
                                 youden = youden_txt, lower = sprintf("%.3f", yci[["lower"]]),
-                                upper = sprintf("%.3f", yci[["upper"]]), npos = DiseaseP, nneg = DiseaseN))
+                                upper = sprintf("%.3f", yci[["upper"]]), npos = base::format(DiseaseP, scientific = FALSE),
+                                nneg = base::format(DiseaseN, scientific = FALSE)))
                     } else if (fractional_counts) {
                         private$.addNotice("INFO", .("Youden's index below 0"),
                             .fmt(.("Youden's index is {youden}, below 0. No interval is computed for fractional counts, so whether this differs from chance is not assessed. If the counts are not coded as intended, check whether TP and FN, or FP and TN, were swapped."),
@@ -757,8 +795,8 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     if (zero_cell) {
                         # LRN and the DOR are corrected too; the note used to sit on LRP only.
                         zc_note <- .("A zero cell was present, so 0.5 was added to every cell for the likelihood ratios and the diagnostic odds ratio. Their confidence intervals use the same corrected counts.")
-                        ratioTable$addFootnote(rowNo = 1, col = "LRP", zc_note)
-                        ratioTable$addFootnote(rowNo = 1, col = "LRN", zc_note)
+                        if (is.finite(LRP)) ratioTable$addFootnote(rowNo = 1, col = "LRP", zc_note)
+                        if (is.finite(LRN)) ratioTable$addFootnote(rowNo = 1, col = "LRN", zc_note)
                     }
                 }
 
@@ -802,7 +840,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                         rowNo = 1, col = "dor",
                         .("Diagnostic odds ratio compares the odds of a positive result between reference-positive and reference-negative groups. Its magnitude is descriptive and has no universal clinical cut-off.")
                     )
-                    if (zero_cell)   # zc_note: set in the ratioTable footnote block above
+                    if (zero_cell && is.finite(DOR))   # zc_note: set in the ratioTable footnote block above
                         advancedMetricsTable$addFootnote(rowNo = 1, col = "dor", zc_note)
                 }
 
@@ -855,8 +893,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                         epirresult2 <- tryCatch(
                             epiR::epi.tests(dat = table3) |>
                                 summary() |>
-                                as.data.frame() |>
-                                tibble::rownames_to_column(var = "statsabv"),
+                                as.data.frame(),
                             error = function(e) {
                                 private$.addNotice(
                                     "ERROR",
@@ -906,7 +943,8 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                         # Youden: Agresti-Caffo on the observed counts.
                         z <- stats::qnorm(0.975)
                         log_ci <- function(est, v, num0, den0) {
-                            ci <- if (is.finite(est) && est > 0 && is.finite(v)) exp(log(est) + c(-1, 1) * z * sqrt(v))
+                            if (!is.finite(est)) return(c(NA_real_, NA_real_))   # not estimable
+                            ci <- if (est > 0 && is.finite(v)) exp(log(est) + c(-1, 1) * z * sqrt(v))
                                   else c(NA_real_, NA_real_)
                             if (num0) ci[1] <- 0
                             if (den0) ci[2] <- NA_real_                  # unbounded: footnoted in fill()
@@ -1120,8 +1158,10 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     # out of .run(), so one bad scenario frequency also blanked the
                     # summary/about/assumptions/glossary panels and left plot1 without a
                     # state (an empty Fagan nomogram) -- with nothing on screen to say why.
-                    # Skip only the comparison table; calculate_cutoff_metrics() has already
-                    # raised a notice naming the offending scenario and its frequencies.
+                    # Skip only the comparison; calculate_cutoff_metrics() has already raised a
+                    # notice naming the offending scenario and its frequencies. The rows that can
+                    # be computed are still filled: unset .init() cells render "." in jamovi, so a
+                    # single bad scenario used to blank the current row as well.
                     if (is.null(cutoff1_metrics) || is.null(cutoff2_metrics)) {
                         bad <- c(self$options$cutoff1, self$options$cutoff2)[
                             c(is.null(cutoff1_metrics), is.null(cutoff2_metrics))]
@@ -1129,10 +1169,21 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                             "ERROR",
                             .("Cut-off validation failed"),
                             .fmt(
-                                .("The cut-off comparison is omitted because these scenarios have invalid frequencies: {scenarios}. The rest of the analysis is unaffected."),
+                                .("The cut-off comparison is omitted because these scenarios have invalid frequencies: {scenarios}. Their rows are left blank; the other rows and the rest of the analysis are unaffected."),
                                 scenarios = paste(bad, collapse = ", ")
                             )
                         )
+                        invalid_row <- list(sensitivity = "", specificity = "", ppv = "", npv = "",
+                                            accuracy = "", youden = "",
+                                            recommendation = .("Not computed: invalid frequencies"))
+                        rows <- list(cutoff1_metrics %||% invalid_row, cutoff2_metrics %||% invalid_row,
+                                     list(sensitivity = Sens, specificity = Spec, ppv = PPV, npv = NPV,
+                                          accuracy = AccurT, youden = YoudenIndex,
+                                          recommendation = .("Descriptive comparison unavailable")))
+                        for (k in c(1, 2, 3)) {   # double keys, as .init() created them
+                            multipleCutoffTable$setRow(rowKey = k, values = rows[[k]])
+                            private$.footnoteNA(multipleCutoffTable, rows[[k]], na_note, rowKey = k)
+                        }
                     }
                 }
 
@@ -1160,7 +1211,10 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     n_pos <- vapply(cell, function(x) x[1] + x[2], numeric(1))
                     n_neg <- vapply(cell, function(x) x[3] + x[4], numeric(1))
                     if (length(unique(n_pos)) > 1 || length(unique(n_neg)) > 1) {
-                        cohort <- paste0(n_pos, "/", n_neg)
+                        # vapply(numeric(1)) made even jamovi's int32 counts doubles, and paste0()
+                        # printed a group of exactly 100000 as "1e+05".
+                        num <- function(x) base::format(x, scientific = FALSE, trim = TRUE, drop0trailing = TRUE)
+                        cohort <- paste0(num(n_pos), "/", num(n_neg))
                         private$.addNotice(
                             "WARNING",
                             .("Cut-offs describe different cohorts"),
@@ -1287,7 +1341,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     about_html <- private$.createAboutPanel()
                     self$results$about$setContent(about_html)
 
-                    assumptions_html <- private$.createAssumptionsPanel(TP, TN, FP, FN, PriorProb)
+                    assumptions_html <- private$.createAssumptionsPanel(TP, TN, FP, FN, PriorProb, supplied = pp)
                     self$results$assumptions$setContent(assumptions_html)
                 }
 
@@ -1328,13 +1382,18 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 lr_pos_one <- abs(lr_pos_cross) <= 1e-12 * TP_cc * (TN_cc + FP_cc)
                 lr_neg_one <- abs(lr_neg_cross) <= 1e-12 * TN_cc * (TP_cc + FN_cc)
                 fagan_ok <- is.finite(LRP) && is.finite(LRN) && (lr_pos_cross > 0 || lr_pos_one)
-                # The inversion itself is a STRONG_WARNING raised above for every run; this one
-                # only explains the missing plot.
+                # Only explains the missing plot. fagan_ok is decided on the corrected counts, and the
+                # inversion notice above is graded on the raw ones, so either can appear without the
+                # other. A never-positive or never-negative test has no ratio to draw at all.
                 if (isTRUE(self$options$fagan) && !fagan_ok) {
                     private$.addNotice(
                         "WARNING",
                         .("Fagan nomogram not drawn"),
-                        .fmt(
+                        if (no_pos_tests)
+                            .("The test was never positive in this table, so the positive likelihood ratio is not estimable and the nomogram is omitted.")
+                        else if (no_neg_tests)
+                            .("The test was never negative in this table, so the negative likelihood ratio is not estimable and the nomogram is omitted.")
+                        else .fmt(
                             .("The positive likelihood ratio is {lr}. A nomogram assumes that a positive result raises the probability of the outcome; here it lowers that probability, so the plot is omitted. Check the test coding."),
                             lr = sprintf("%.3f", LRP)
                         )
@@ -1362,7 +1421,11 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 fagan_item <- self$results$faganSummary
                 if (isTRUE(self$options$fagan)) {
                     if (!fagan_ok) {
-                        not_drawn_reason <- .fmt(
+                        not_drawn_reason <- if (no_pos_tests)
+                            .("The test was never positive in this table, so the positive likelihood ratio is not estimable.")
+                        else if (no_neg_tests)
+                            .("The test was never negative in this table, so the negative likelihood ratio is not estimable.")
+                        else .fmt(
                             .("The positive likelihood ratio is {lr}, so a positive result lowers the probability of a reference-positive outcome rather than raising it."),
                             lr = sprintf("%.3f", LRP)
                         )
@@ -1511,14 +1574,14 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     .("At {prevalence} prevalence"),
                     prevalence = fmtPct(Prevalence)
                 )
-                positive_update <- .fmt(
+                positive_update <- if (is.finite(LRP)) .fmt(
                     .("A positive result multiplies pre-test odds by {lr}."),
                     lr = sprintf("%.2f", LRP)
-                )
-                negative_update <- .fmt(
+                ) else .("The positive likelihood ratio is not estimable: the test was never positive in this table.")
+                negative_update <- if (is.finite(LRN)) .fmt(
                     .("A negative result multiplies pre-test odds by {lr}."),
                     lr = sprintf("%.3f", LRN)
-                )
+                ) else .("The negative likelihood ratio is not estimable: the test was never negative in this table.")
 
                 paste0(
                     "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>",
@@ -1598,11 +1661,12 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     "</p></div></div>"
                 )
             },
-            .createAssumptionsPanel = function(TP, TN, FP, FN, prev) {
+            .createAssumptionsPanel = function(TP, TN, FP, FN, prev, supplied = FALSE) {
                 warnings <- character()
 
-                # Check for extreme prevalence
-                if (prev < 0.05 || prev > 0.95) {
+                # Check for extreme prevalence. A supplied population prevalence is the intended use
+                # and is explained by an INFO notice, so it is not listed as a warning here.
+                if (!supplied && (prev < 0.05 || prev > 0.95)) {
                     warnings <- c(
                         warnings,
                         .fmt(

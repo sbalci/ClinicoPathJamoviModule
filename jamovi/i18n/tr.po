@@ -834,6 +834,17 @@ msgstr "%{alpha} anlamlılık düzeyi (tek yönlü)"
 msgid "{alpha}% significance level (two-sided)"
 msgstr "%{alpha} anlamlılık düzeyi (iki yönlü)"
 
+#: R/decisioncalculator.b.R
+msgid ""
+"{better} has both higher sensitivity and higher specificity than {worse}. "
+"Moving a single threshold on the same patients trades one for the other, so "
+"these rows describe different tests or cohorts, not cut-offs of one marker."
+msgstr ""
+"{better}, {worse} ile karşılaştırıldığında hem daha yüksek duyarlılığa hem "
+"de daha yüksek özgüllüğe sahip. Aynı hastalarda tek bir eşiği kaydırmak "
+"birini diğeri pahasına artırır; bu nedenle bu satırlar tek bir belirtecin "
+"kesim değerlerini değil, farklı testleri veya kohortları tanımlar."
+
 #: R/pathagreement.b.R
 msgid "{cases} cases"
 msgstr ""
@@ -982,13 +993,13 @@ msgstr "{ctx} sonlu olmayan bir olasılık üretti."
 
 #: R/decisioncalculator.b.R
 msgid ""
-"{cutoff} has the highest Youden's J, {margin} above current; its "
-"sample-accuracy interval overlaps the current cut-off's, so the difference "
-"is not established."
+"{cutoff} has the highest Youden's J, {margin} above current; its Youden's J "
+"interval overlaps the current cut-off's, so these separate intervals do not "
+"show a difference."
 msgstr ""
 "{cutoff} en yüksek Youden J değerine sahip (mevcuttan {margin} yüksek); "
-"örneklem doğruluğu aralığı mevcut kesim değerininkiyle örtüşüyor, bu nedenle "
-"fark kesinleşmemiştir."
+"Youden J aralığı mevcut kesim değerininkiyle örtüşüyor, bu nedenle bu ayrı "
+"aralıklar bir fark göstermiyor."
 
 #: R/decisioncalculator.b.R
 msgid ""
@@ -1000,11 +1011,11 @@ msgstr ""
 
 #: R/decisioncalculator.b.R
 msgid ""
-"{cutoff} has the highest Youden's J, {margin} above current; their "
-"sample-accuracy intervals do not overlap."
+"{cutoff} has the highest Youden's J, {margin} above current; their Youden's "
+"J intervals do not overlap."
 msgstr ""
 "{cutoff} en yüksek Youden J değerine sahip (mevcuttan {margin} yüksek); "
-"örneklem doğruluğu aralıkları örtüşmüyor."
+"Youden J aralıkları örtüşmüyor."
 
 #: R/pathagreement.b.R
 msgid ""
@@ -11354,7 +11365,7 @@ msgstr ""
 
 #: decisioncalculator/options/prevalenceScenarios.default
 msgid "0.0001,0.001,0.01"
-msgstr ""
+msgstr "0.0001,0.001,0.01"
 
 #: biomarkerdiscovery/ui[4][0]/fdr_threshold.suffix
 msgid "0.001-0.5"
@@ -13361,26 +13372,6 @@ msgstr ""
 "anlamına gelmez. Yüzdeyi yorumlamadan önce satır etiketinin hangi kategoriyi "
 "belirttiğini kontrol edin."
 
-#: R/decisioncalculator.b.R
-msgid ""
-"A Haldane-Anscombe 0.5 correction was applied to likelihood-ratio and "
-"diagnostic-odds-ratio point estimates because a zero cell was present. "
-"Confidence intervals use the raw counts and are not continuity-corrected."
-msgstr ""
-"Sıfır bir hücre bulunduğu için olabilirlik oranı ve tanısal odds oranı nokta "
-"tahminlerine 0.5 Haldane-Anscombe düzeltmesi uygulandı. Güven aralıkları ham "
-"sayıları kullanır ve süreklilik düzeltmeli değildir."
-
-#: R/decisioncalculator.b.R
-msgid ""
-"A Haldane-Anscombe 0.5 correction was applied to the likelihood ratios "
-"because a zero cell was present. The epiR confidence-interval table uses raw "
-"counts, so its point estimates may differ."
-msgstr ""
-"Sıfır bir hücre bulunduğu için olabilirlik oranlarına 0.5 Haldane-Anscombe "
-"düzeltmesi uygulandı. epiR güven aralığı tablosu ham sayıları kullanır, bu "
-"nedenle nokta tahminleri farklılık gösterebilir."
-
 #: R/multisurvival.b.R
 msgid ""
 "A hazard ratio above 1 means a higher instantaneous event rate and below 1 a "
@@ -13550,6 +13541,14 @@ msgid ""
 "A model that describes the progression of patients through different health "
 "states over time using transition probabilities."
 msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"A negative result has a likelihood ratio of {lr} and leaves the probability "
+"at {prevalence}."
+msgstr ""
+"Negatif bir sonucun olabilirlik oranı {lr} olup olasılığı {prevalence} "
+"düzeyinde bırakır."
 
 #: R/decisioncalculator.b.R
 msgid ""
@@ -13742,6 +13741,14 @@ msgid ""
 msgstr ""
 "Pozitif bir sonuç hastalık olasılığını azaltır: test pozitif olarak seçilen "
 "düzey ters çevrilmiş olabilir"
+
+#: R/decisioncalculator.b.R
+msgid ""
+"A positive result has a likelihood ratio of {lr} and leaves the probability "
+"at {prevalence}."
+msgstr ""
+"Pozitif bir sonucun olabilirlik oranı {lr} olup olasılığı {prevalence} "
+"düzeyinde bırakır."
 
 #: R/decisioncalculator.b.R
 msgid ""
@@ -14308,14 +14315,71 @@ msgid ""
 "validation data, and a Haldane-Anscombe correction was applied to the "
 "likelihood ratios and diagnostic odds ratio."
 msgstr ""
+"Sıfır hücre saptandı. %0 veya %100'e sabitlenen tahminler sınırlı doğrulama "
+"verisini yansıtıyor olabilir; olabilirlik oranlarına ve tanısal odds oranına "
+"Haldane-Anscombe düzeltmesi uygulandı."
+
+#: R/decisioncalculator.b.R
+msgid ""
+"A zero cell was present, so 0.5 was added to every cell for the likelihood "
+"ratios and the diagnostic odds ratio. Their confidence intervals use the "
+"same corrected counts."
+msgstr ""
+"Sıfır hücre bulunduğu için olabilirlik oranları ve tanısal odds oranı için "
+"her hücreye 0.5 eklendi. Güven aralıkları da aynı düzeltilmiş sayıları "
+"kullanır."
+
+#: R/decisioncalculator.b.R
+msgid ""
+"A zero cell was present, so a Haldane-Anscombe 0.5 correction was added to "
+"every cell for the likelihood ratios, the diagnostic odds ratio and their "
+"confidence intervals. Sensitivity, specificity, predictive values and their "
+"intervals use the observed counts."
+msgstr ""
+"Sıfır hücre bulunduğu için olabilirlik oranları, tanısal odds oranı ve "
+"bunların güven aralıkları için her hücreye 0.5 Haldane-Anscombe düzeltmesi "
+"eklendi. Duyarlılık, özgüllük, öngörü değerleri ve bunların aralıkları "
+"gözlenen sayıları kullanır."
+
+#: R/decisioncalculator.b.R
+msgid ""
+"A zero cell was present, so the likelihood ratios and the diagnostic odds "
+"ratio here, as in the tables above, use the table with 0.5 added to every "
+"cell, and so do their intervals. A ratio whose denominator count is zero has "
+"no finite upper limit, which is left blank and footnoted; one whose "
+"numerator count is zero has a lower limit of 0. Youden's index and the "
+"number needed to diagnose use the observed counts."
+msgstr ""
+"Sıfır hücre bulunduğu için buradaki olabilirlik oranları ve tanısal odds "
+"oranı, yukarıdaki tablolarda olduğu gibi, her hücresine 0.5 eklenmiş tabloyu "
+"kullanır; aralıkları da öyle. Payda sayısı sıfır olan bir oranın sonlu bir "
+"üst sınırı yoktur; bu sınır boş bırakılır ve dipnotla açıklanır. Pay sayısı "
+"sıfır olan bir oranın alt sınırı 0'dır. Youden indeksi ve tanı için gereken "
+"sayı gözlenen sayıları kullanır."
 
 #: R/decisioncalculator.b.R
 msgid ""
 "A zero cell was present, so the likelihood ratios and the probabilities read "
 "from the nomogram use the Haldane-Anscombe 0.5 correction. The predictive "
-"values in the Measures table are computed from the raw counts and can differ "
-"slightly."
+"values and post-test probabilities in the Measures table are computed from "
+"the raw counts and can differ, by a wide margin in a small table."
 msgstr ""
+"Sıfır hücre bulunduğu için olabilirlik oranları ve nomogramdan okunan "
+"olasılıklar 0.5 Haldane-Anscombe düzeltmesini kullanır. Ölçüler tablosundaki "
+"öngörü değerleri ve test sonrası olasılıklar ham sayılardan hesaplanır ve "
+"küçük bir tabloda belirgin biçimde farklı olabilir."
+
+#: R/decisioncalculator.b.R
+msgid ""
+"A zero cell was present, so the likelihood ratios use the Haldane-Anscombe "
+"0.5 correction, while the predictive values above use the observed counts. "
+"Multiplying the pre-test odds by these likelihood ratios therefore need not "
+"reproduce the predictive values exactly."
+msgstr ""
+"Sıfır hücre bulunduğu için olabilirlik oranları 0.5 Haldane-Anscombe "
+"düzeltmesini kullanırken yukarıdaki öngörü değerleri gözlenen sayıları "
+"kullanır. Bu nedenle test öncesi odds'u bu olabilirlik oranlarıyla çarpmak "
+"öngörü değerlerini tam olarak vermeyebilir."
 
 #: R/decision.b.R
 msgid ""
@@ -15107,15 +15171,6 @@ msgstr ""
 #: pathagreement/options/readerPopulation.title
 msgid "Accuracy case population"
 msgstr ""
-
-#: R/decisioncalculator.b.R
-msgid ""
-"Accuracy intervals are not computed for scenarios containing fractional "
-"frequencies because no effective sample size or weighting design was "
-"supplied."
-msgstr ""
-"Etkin örneklem büyüklüğü veya ağırlıklandırma tasarımı belirtilmediği için "
-"kesirli frekans içeren senaryolarda doğruluk aralıkları hesaplanmaz."
 
 #: pathagreement/results/referenceComparison.columns.title
 msgid "Accuracy Level"
@@ -24827,10 +24882,6 @@ msgstr "Dengeli Doğruluk"
 #: R/decisioncalculator.b.R
 msgid "Balanced accuracy"
 msgstr "Dengeli doğruluk"
-
-#: R/decisioncalculator.b.R
-msgid "Balanced accuracy (CI not computed)"
-msgstr "Dengeli doğruluk (GA hesaplanmadı)"
 
 #: R/decisioncombine.b.R
 msgid ""
@@ -41122,6 +41173,10 @@ msgstr ""
 msgid "Comma-separated survival quantiles for regression"
 msgstr ""
 
+#: decisioncalculator/options/prevalenceScenarios.description.ui
+msgid "Comma-separated target prevalences, each a proportion between 0 and 1."
+msgstr "Virgülle ayrılmış hedef prevalanslar; her biri 0 ile 1 arasında bir oran."
+
 #: hiddenmarkov/options/timeIntervals.description
 msgid "Comma-separated time intervals for piecewise constant model"
 msgstr ""
@@ -45055,11 +45110,11 @@ msgstr ""
 
 #: R/decisioncalculator.b.R
 msgid "Confidence intervals could not be computed"
-msgstr ""
+msgstr "Güven aralıkları hesaplanamadı"
 
 #: R/decisioncalculator.b.R
 msgid "Confidence intervals could not be matched"
-msgstr ""
+msgstr "Güven aralıkları eşleştirilemedi"
 
 #: waterfall/options/showConfidenceIntervals.title
 msgid "Confidence intervals for clinical metrics"
@@ -45921,8 +45976,8 @@ msgid "Confusion Matrix (Ordinal Classification)"
 msgstr ""
 
 #: decisioncalculator/ui[0].label
-msgid "Confusion matrix (reference standard vs test result)"
-msgstr "Karışıklık matrisi (referans standart ve test sonucu)"
+msgid "Confusion Matrix (Reference Standard vs Test Result)"
+msgstr "Karışıklık Matrisi (Referans Standart ve Test Sonucu)"
 
 #: R/agreement.b.R
 msgid "Confusion matrix error: %s"
@@ -52731,22 +52786,27 @@ msgstr ""
 
 #: R/decisioncalculator.b.R
 msgid ""
-"Cut-offs are compared on point estimates only. A formal test would need to "
-"know, for each patient, how the two thresholds classified them; four summary "
-"counts per scenario cannot supply that. The accuracy intervals referred to "
-"above are Wilson 95% intervals computed separately per scenario, so overlap "
-"is a conservative signal that the counts do not separate the cut-offs."
+"Cut-offs are compared on point estimates; no paired test of the difference "
+"is performed. The intervals referred to above are Agresti-Caffo 95% "
+"intervals for each scenario's Youden's J, computed separately. For "
+"thresholds applied to the same patients, non-overlap is a conservative "
+"signal of a difference, and overlap does not show that there is none. Like "
+"every interval here, they treat each count as one independent patient and "
+"can be too narrow when a patient contributes several slides, blocks or "
+"lesions."
 msgstr ""
-"Kesim değerleri yalnızca nokta tahminleri üzerinden karşılaştırılır. Resmi "
-"bir testin, her hasta için iki eşiğin onları nasıl sınıflandırdığını bilmesi "
-"gerekir; senaryo başına dört özet sayı bunu sağlayamaz. Yukarıda atıfta "
-"bulunulan doğruluk aralıkları senaryo başına ayrı ayrı hesaplanan Wilson %95 "
-"aralıklarıdır, bu nedenle örtüşme sayıların kesim değerlerini ayırmadığına "
-"dair muhafazakar bir işarettir."
+"Kesim değerleri nokta tahminleri üzerinden karşılaştırılır; farka yönelik "
+"eşleştirilmiş bir test yapılmaz. Yukarıda sözü edilen aralıklar, her "
+"senaryonun Youden J değeri için ayrı ayrı hesaplanan Agresti-Caffo %95 "
+"aralıklarıdır. Aynı hastalara uygulanan eşiklerde örtüşmeme bir farkın "
+"muhafazakar bir işaretidir; örtüşme ise fark olmadığını göstermez. Buradaki "
+"tüm aralıklar gibi bunlar da her sayımı bağımsız bir hasta olarak ele alır "
+"ve bir hasta birden fazla lam, blok veya lezyon katkısında bulunduğunda "
+"gereğinden dar olabilir."
 
 #: R/decisioncalculator.b.R
-msgid "Cut-offs describe different numbers of patients"
-msgstr "Kesim değerleri farklı sayıda hastayı tanımlar"
+msgid "Cut-offs describe different cohorts"
+msgstr "Kesim değerleri farklı kohortları tanımlıyor"
 
 #: R/survivalcont.b.R
 msgid "Cut-offs reduced to respect minimum group size"
@@ -56008,8 +56068,8 @@ msgid "Deployment prevalence and workload"
 msgstr ""
 
 #: decisioncalculator/ui[6].label
-msgid "Deployment workload"
-msgstr ""
+msgid "Deployment Workload"
+msgstr "Uygulamadaki İş Yükü"
 
 #: flexrstpm2/options/derivative_analysis.title
 #: flexrstpm2/ui[3][2][0]/derivative_analysis.label
@@ -62424,6 +62484,17 @@ msgstr ""
 "sayısı %1$d ile %2$d arasında değişir. Olgu sütunu, en az iki değerlendirici "
 "tarafından değerlendirilen olguları sayar."
 
+#: R/decisioncalculator.b.R
+msgid ""
+"Each count is one independent patient. If a patient contributes several "
+"slides, blocks or lesions, count one result per patient or use a method for "
+"clustered data; otherwise the confidence intervals can be too narrow."
+msgstr ""
+"Her sayım bağımsız bir hastadır. Bir hasta birden fazla lam, blok veya "
+"lezyon katkısında bulunuyorsa hasta başına tek bir sonuç sayın ya da "
+"kümelenmiş veriye yönelik bir yöntem kullanın; aksi halde güven aralıkları "
+"gereğinden dar olabilir."
+
 #: R/agreement.b.R
 msgid ""
 "Each data row is treated as a separate case. If the same case was measured "
@@ -65491,6 +65562,8 @@ msgid ""
 "epiR could not compute confidence intervals for this table: {error}. The two "
 "interval tables are left blank; the point estimates above are unaffected."
 msgstr ""
+"epiR bu tablo için güven aralıklarını hesaplayamadı: {error}. İki aralık "
+"tablosu boş bırakıldı; yukarıdaki nokta tahminleri etkilenmez."
 
 #: R/decisioncalculator.b.R
 msgid "epiR package missing"
@@ -66692,15 +66765,6 @@ msgstr ""
 
 #: jsjplot/options/plot_type/est.title
 msgid "Estimates (Coefficients)"
-msgstr ""
-
-#: R/decisioncalculator.b.R
-msgid ""
-"Estimates and intervals in this table are computed by epiR from the raw "
-"counts. The likelihood ratios and diagnostic odds ratio shown in the tables "
-"above use a Haldane-Anscombe 0.5 correction because a zero cell was present, "
-"so their point estimates differ from the ones here. Quantities that are not "
-"estimable from the raw table are left blank."
 msgstr ""
 
 #: R/nogoldstandard.b.R
@@ -68496,6 +68560,12 @@ msgstr "Kesin binom (bağımsız olgular)"
 #: exacttests/options/testType/binomial.title
 msgid "Exact binomial test"
 msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"Exact Clopper-Pearson 95% intervals, computed by epiR from the observed "
+"counts."
+msgstr "Gözlenen sayılardan epiR ile hesaplanan kesin Clopper-Pearson %95 aralıkları."
 
 #: R/waterfall.b.R
 msgid ""
@@ -71304,10 +71374,6 @@ msgid "F1 Score (Max)"
 msgstr "F1 Puanı (Maks)"
 
 #: R/decisioncalculator.b.R
-msgid "F1 score at selected prevalence (CI not computed)"
-msgstr "Seçilen prevalansta F1 puanı (GA hesaplanmadı)"
-
-#: R/decisioncalculator.b.R
 msgid ""
 "F1 score is the harmonic mean of sensitivity and positive predictive value. "
 "When an external prevalence is supplied, this value uses the "
@@ -71758,7 +71824,7 @@ msgstr "Yanlış Negatifler"
 #: decisioncalculator/results/screeningWorkload.columns.title
 #: enhancedROC/results/results/screeningWorkload.columns.title
 msgid "False negatives"
-msgstr ""
+msgstr "Yanlış negatifler"
 
 #: diagnosticmeta/ui[0][3][0].label
 msgid "False Negatives (Disease+, Test-)"
@@ -71832,7 +71898,7 @@ msgstr "Yanlış Pozitifler"
 #: decisioncalculator/results/screeningWorkload.columns.title
 #: enhancedROC/results/results/screeningWorkload.columns.title
 msgid "False positives"
-msgstr ""
+msgstr "Yanlış pozitifler"
 
 #: diagnosticmeta/ui[0][2][0].label
 msgid "False Positives (Disease-, Test+)"
@@ -73664,17 +73730,17 @@ msgstr ""
 #: decisioncalculator/results/screeningWorkload.columns.title
 #: enhancedROC/results/results/screeningWorkload.columns.title
 msgid "Flags"
-msgstr ""
+msgstr "İşaretlenenler"
 
 #: decisioncalculator/results/screeningWorkload.columns.title
 #: enhancedROC/results/results/screeningWorkload.columns.title
 msgid "Flags per 1000"
-msgstr ""
+msgstr "1000 kişide işaretlenen"
 
 #: decisioncalculator/results/screeningWorkload.columns.title
 #: enhancedROC/results/results/screeningWorkload.columns.title
 msgid "Flags per detected positive"
-msgstr ""
+msgstr "Saptanan pozitif başına işaretlenen"
 
 #: R/dataquality.b.R
 msgid "Flags:"
@@ -83701,6 +83767,8 @@ msgid ""
 "If 220 participants include 110 reference-positive and 110 "
 "reference-negative observations, with TP=90 and TN=80, then FN=20 and FP=30."
 msgstr ""
+"220 katılımcı 110 referans-pozitif ve 110 referans-negatif gözlem içeriyorsa "
+"ve GP=90, GN=80 ise YN=20 ve YP=30 olur."
 
 #: R/tableone.b.R
 msgid ""
@@ -84200,8 +84268,8 @@ msgid "Illustrative context"
 msgstr "Açıklayıcı bağlam"
 
 #: decisioncalculator/ui[5][0].label
-msgid "Illustrative cut-off comparison"
-msgstr "Açıklayıcı kesim değeri karşılaştırması"
+msgid "Illustrative Cut-off Comparison"
+msgstr "Açıklayıcı Kesim Değeri Karşılaştırması"
 
 #: R/nogoldstandard.b.R
 msgid "Illustrative diagnostic-test validation scenario"
@@ -84241,12 +84309,12 @@ msgid "Illustrative scenario (not clinical guidance)"
 msgstr "Açıklayıcı senaryo (klinik kılavuz değildir)"
 
 #: decisioncalculator/ui[5][1].label
-msgid "Illustrative scenario 1"
-msgstr "Açıklayıcı senaryo 1"
+msgid "Illustrative Scenario 1"
+msgstr "Açıklayıcı Senaryo 1"
 
 #: decisioncalculator/ui[5][2].label
-msgid "Illustrative scenario 2"
-msgstr "Açıklayıcı senaryo 2"
+msgid "Illustrative Scenario 2"
+msgstr "Açıklayıcı Senaryo 2"
 
 #: nogoldstandard/options/clinicalPreset.title
 msgid "Illustrative Scenario Example"
@@ -89351,6 +89419,10 @@ msgstr "Geçersiz tablo stili. Tableone, gtsummary, arsenal veya janitor seçin.
 msgid "Invalid target confidence"
 msgstr "Geçersiz hedef güven düzeyi"
 
+#: R/decisioncalculator.b.R
+msgid "Invalid target prevalences"
+msgstr "Geçersiz hedef prevalanslar"
+
 #: R/decisioncurve.b.R
 msgid "Invalid Threshold Range"
 msgstr "Geçersiz Eşik Aralığı"
@@ -91821,6 +91893,14 @@ msgstr ""
 msgid "Label for the screening/assessment stage."
 msgstr ""
 
+#: decisioncalculator/options/analysisUnit.description.ui
+msgid ""
+"Label for what one count represents, shown in the workload table (for "
+"example patient). It does not change any calculation."
+msgstr ""
+"Bir sayımın neyi temsil ettiğini belirten etiket; iş yükü tablosunda "
+"gösterilir (örneğin hasta). Hiçbir hesaplamayı değiştirmez."
+
 #: jjpubr/options/xlab.description.ui
 msgid "Label for X-axis (leave empty for variable name)"
 msgstr ""
@@ -93775,6 +93855,23 @@ msgstr ""
 #: decisioncombine/results/combinationTableCIRatios.title
 msgid "Likelihood Ratios with 95% Confidence Intervals"
 msgstr "Olabilirlik Oranları ve %95 Güven Aralıkları"
+
+#: R/decisioncalculator.b.R
+msgid ""
+"Likelihood ratios: approximate log-scale 95% interval (Simel, Samsa and "
+"Matchar 1991), which can fall short of 95% when sensitivity or specificity "
+"is near 100% in a small study. Diagnostic odds ratio: log-scale (Woolf) "
+"interval. Youden's index: Agresti-Caffo interval for the difference between "
+"the true-positive and false-positive rates. Number needed to diagnose = 1 / "
+"Youden's index; its interval is the inverse of the positive part of the "
+"Youden interval."
+msgstr ""
+"Olabilirlik oranları: yaklaşık log ölçekli %95 aralık (Simel, Samsa ve "
+"Matchar 1991); küçük bir çalışmada duyarlılık veya özgüllük %100'e yakın "
+"olduğunda %95'in altında kalabilir. Tanısal odds oranı: log ölçekli (Woolf) "
+"aralık. Youden indeksi: gerçek pozitif ve yanlış pozitif oranları arasındaki "
+"fark için Agresti-Caffo aralığı. Tanı için gereken sayı = 1 / Youden "
+"indeksi; aralığı, Youden aralığının pozitif kısmının tersidir."
 
 #: R/multisurvival.b.R
 msgid ""
@@ -100487,6 +100584,14 @@ msgid ""
 "educational interpretation. Presets and examples are illustrative only and "
 "are not clinical guides."
 msgstr ""
+"Dört temel sayım elinizdeyken tanı testi değerlendirmesi için Tıbbi Karar "
+"Hesaplayıcı: Gerçek Pozitifler (GP), Yanlış Pozitifler (YP), Gerçek "
+"Negatifler (GN) ve Yanlış Negatifler (YN). Duyarlılık, özgüllük, pozitif ve "
+"negatif öngörü değerleri, olabilirlik oranları ve test sonrası olasılıklar "
+"dahil kapsamlı tanısal performans ölçülerini hesaplar. Güven aralığı "
+"tahminini ve eğitim amaçlı yorum için Fagan nomogramı görselleştirmesini "
+"destekler. Hazır ayarlar ve örnekler yalnızca açıklayıcıdır ve klinik rehber "
+"değildir."
 
 #: package/analyses/treemedical.title
 #: package/analyses/treemedical.menuTitle
@@ -110269,6 +110374,9 @@ msgid ""
 "this analysis expects. The interval tables are left blank; the point "
 "estimates above are unaffected."
 msgstr ""
+"Raporlanan istatistiklerle hiçbir güven aralığı eşleştirilemedi. Kurulu epiR "
+"sürümü, çıktısını bu analizin beklediği sürümden farklı etiketliyor. Aralık "
+"tabloları boş bırakıldı; yukarıdaki nokta tahminleri etkilenmez."
 
 #: R/benford.b.R
 msgid ""
@@ -110788,6 +110896,10 @@ msgstr ""
 #: nogoldstandard/options/clinicalPreset/none.title
 msgid "No example"
 msgstr "Örnek yok"
+
+#: R/decisioncalculator.b.R
+msgid "No finite limit: the interval is unbounded on this side."
+msgstr "Sonlu sınır yok: aralık bu tarafta sınırsızdır."
 
 #: R/multisurvival.b.R
 msgid "No fitted hazard-rate association on that contrast"
@@ -113408,21 +113520,6 @@ msgstr ""
 "izin verdiği sınırda olmasından ya da bu sınıra kırpılmasından kaynaklanır — "
 "bu durumdan çıkmak için bağımlılığı 0'a doğru yaklaştırın."
 
-#: R/cotest.b.R
-msgid ""
-"Not estimable: with these parameters this result combination cannot occur "
-"in either disease group, so no post-test probability exists. This follows "
-"from the conditional dependence being at, or truncated to, the limit the "
-"entered sensitivities and specificities allow — move it toward 0 to leave "
-"this regime."
-msgstr ""
-"Tahmin edilemiyor: bu parametrelerle bu sonuç kombinasyonu iki hastalık "
-"grubunun hiçbirinde ortaya çıkamaz; bu nedenle bir test sonrası olasılık "
-"yoktur. Bu, koşullu bağımlılığın girilen duyarlılık ve özgüllüklerin "
-"izin verdiği sınırda olmasından ya da bu sınıra kırpılmasından "
-"kaynaklanır — bu durumdan çıkmak için bağımlılığı 0'a doğru "
-"yaklaştırın."
-
 #: R/benford.b.R
 msgid "Not assessable"
 msgstr "Değerlendirilemez"
@@ -113570,6 +113667,14 @@ msgstr "Hesaplanamaz"
 msgid "Not computed"
 msgstr "Hesaplanmadı"
 
+#: R/decisioncalculator.b.R
+msgid "Not computed for this table; the notices at the top say why."
+msgstr "Bu tablo için hesaplanmadı; nedeni üstteki bildirimlerde belirtilmiştir."
+
+#: R/decisioncalculator.b.R
+msgid "Not computed: invalid frequencies"
+msgstr "Hesaplanmadı: geçersiz frekanslar"
+
 #: R/checkdata.b.R
 msgid ""
 "Not computed: needs more than 3 complete values and a non-zero MAD; "
@@ -113676,6 +113781,12 @@ msgstr "Kestirilemiyor (farklı saptama konumu sayısı yetersiz)"
 msgid "not estimable (zero variance)"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid ""
+"Not estimable for this table: a denominator is zero or the quantity is "
+"undefined."
+msgstr "Bu tablo için tahmin edilemez: bir payda sıfırdır veya nicelik tanımsızdır."
+
 #: R/waterfall.b.R
 msgid "Not estimable with fewer than 2 responders"
 msgstr "Tahmin edilemiyor: yanıt veren hasta sayısı 2'den az"
@@ -113718,6 +113829,20 @@ msgstr ""
 "Kestirilemiyor: bu değerlendirici ve referans değerlendirici yalnızca tek ve "
 "aynı kategoriyi kullandı; bu nedenle şans eseri uyum tamdır ve kappa 0 bölü "
 "0'dır."
+
+#: R/cotest.b.R
+msgid ""
+"Not estimable: with these parameters this result combination cannot occur in "
+"either disease group, so no post-test probability exists. This follows from "
+"the conditional dependence being at, or truncated to, the limit the entered "
+"sensitivities and specificities allow — move it toward 0 to leave this "
+"regime."
+msgstr ""
+"Tahmin edilemiyor: bu parametrelerle bu sonuç kombinasyonu iki hastalık "
+"grubunun hiçbirinde ortaya çıkamaz; bu nedenle bir test sonrası olasılık "
+"yoktur. Bu, koşullu bağımlılığın girilen duyarlılık ve özgüllüklerin izin "
+"verdiği sınırda olmasından ya da bu sınıra kırpılmasından kaynaklanır — bu "
+"durumdan çıkmak için bağımlılığı 0'a doğru yaklaştırın."
 
 #: R/agepyramid.b.R
 msgid ""
@@ -115523,6 +115648,10 @@ msgstr ""
 msgid "Number of PCA components to analyze."
 msgstr ""
 
+#: decisioncalculator/options/workloadPopulationSize.description.ui
+msgid "Number of people tested in each projected scenario."
+msgstr "Öngörülen her senaryoda test edilen kişi sayısı."
+
 #: grouplasso/options/n_permutations.title
 #: pcacomponenttest/options/nperm.title
 #: pcacomponenttest/ui[1][0][0]/nperm.label
@@ -116391,6 +116520,7 @@ msgstr ""
 msgid "Observations: {n}"
 msgstr "Gözlem sayısı: {n}"
 
+#: R/decisioncalculator.b.R
 #: continuousmarkov/results/transitionMatrix.columns.title
 #: flexmultistate/results/transitionMatrix.columns.title
 #: hiddenmarkov/results/viterbiStates.columns.title
@@ -116403,7 +116533,7 @@ msgstr "Gözlem sayısı: {n}"
 #: standardizedratio/results/stratumTable.columns.title
 #: survivalbart/results/posteriorPredictive.columns.title
 msgid "Observed"
-msgstr ""
+msgstr "Gözlenen"
 
 #: misclassificationbias/results/biasAnalysis.columns.title
 msgid "Observed (Crude)"
@@ -116433,7 +116563,7 @@ msgstr "Gözlenen Uyum"
 #: decisioncalculator/results/screeningWorkload.title
 #: enhancedROC/results/results/screeningWorkload.title
 msgid "Observed and projected workload"
-msgstr ""
+msgstr "Gözlenen ve öngörülen iş yükü"
 
 #: multisurvival/results/adjustedSurvTable.columns.title
 msgid "Observed at Risk"
@@ -124436,6 +124566,10 @@ msgstr ""
 msgid "Patient"
 msgstr ""
 
+#: decisioncalculator/options/analysisUnit.default
+msgid "patient"
+msgstr "hasta"
+
 #: qualityoflife/ui[0][3].label
 msgid "Patient & Study Variables"
 msgstr ""
@@ -131478,12 +131612,12 @@ msgid "Post-test Probability vs Prevalence"
 msgstr ""
 
 #: decisioncalculator/results/ratioTable.columns.title
-msgid "Post-test Reference-negative Probability"
-msgstr "Test Sonrası Referans Negatif Olasılığı"
+msgid "Post-test Reference-positive Probability (Negative Test)"
+msgstr "Test Sonrası Referans Pozitif Olasılığı (Negatif Test)"
 
 #: decisioncalculator/results/ratioTable.columns.title
-msgid "Post-test Reference-positive Probability"
-msgstr "Test Sonrası Referans Pozitif Olasılığı"
+msgid "Post-test Reference-positive Probability (Positive Test)"
+msgstr "Test Sonrası Referans Pozitif Olasılığı (Pozitif Test)"
 
 #: hierarchicalbayes/results/pooledEstimates.columns.title
 #: hierarchicalbayes/results/hierarchicalParameters.columns.title
@@ -133934,8 +134068,8 @@ msgid "Prevalence (0-1)"
 msgstr "Yaygınlık (0-1)"
 
 #: decisioncalculator/ui[3][0][0]/pprob.label
-msgid "Prevalence (0.001-0.999)"
-msgstr "Prevalans (0.001-0.999)"
+msgid "Prevalence (proportion between 0 and 1)"
+msgstr "Prevalans (0 ile 1 arasında oran)"
 
 #: differentialdiagnosis/options/prevalence_adjustment.title
 msgid "Prevalence Adjustment"
@@ -134077,6 +134211,18 @@ msgstr "Prevalans Çok Yüksek"
 #: R/sequentialtests.b.R
 msgid "Prevalence Very Low"
 msgstr "Prevalans Çok Düşük"
+
+#: R/decisioncalculator.b.R
+msgid ""
+"Prevalence, PPV and NPV (and their intervals) use this sample's own "
+"prevalence, which estimates the population prevalence only for a "
+"cross-sectional (consecutive) sample. For a case-control sample, supply the "
+"population prevalence instead."
+msgstr ""
+"Prevalans, PÖD ve NÖD (ve aralıkları) bu örneklemin kendi prevalansını "
+"kullanır; bu prevalans popülasyon prevalansını yalnızca kesitsel (ardışık) "
+"bir örneklemde tahmin eder. Olgu-kontrol örnekleminde bunun yerine "
+"popülasyon prevalansını girin."
 
 #: R/decision.b.R
 msgid ""
@@ -134869,19 +135015,20 @@ msgstr ""
 
 #: R/decisioncalculator.b.R
 msgid ""
-"Probability of a reference-negative outcome after a negative test, using the "
-"displayed prevalence. It is identical to the NPV shown here."
-msgstr ""
-"Görüntülenen prevalans kullanılarak negatif bir testten sonra referans "
-"negatif bir sonucun olasılığı. Burada gösterilen NÖD ile özdeştir."
-
-#: R/decisioncalculator.b.R
-msgid ""
 "Probability of a reference-negative outcome after a negative test; it "
 "depends on prevalence."
 msgstr ""
 "Negatif bir testten sonra referans negatif bir sonucun olasılığı; prevalansa "
 "bağlıdır."
+
+#: R/decisioncalculator.b.R
+msgid ""
+"Probability of a reference-positive outcome after a negative test, using the "
+"displayed prevalence. It equals 1 minus the NPV shown here."
+msgstr ""
+"Görüntülenen prevalans kullanılarak negatif bir testten sonra "
+"referans-pozitif bir sonucun olasılığı. Burada gösterilen NÖD'ün 1'den "
+"çıkarılmasına eşittir."
 
 #: R/decisioncalculator.b.R
 msgid ""
@@ -135410,6 +135557,10 @@ msgstr "İlerleyen hastalık: n = %d (%%%.1f)"
 msgid "Progressive Model"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "Projected"
+msgstr "Öngörülen"
+
 #: decisioncurve/results/clinicalImpactTable.columns.title
 msgid "Projected False Positives"
 msgstr "Öngörülen Yanlış Pozitifler"
@@ -135418,9 +135569,15 @@ msgstr "Öngörülen Yanlış Pozitifler"
 msgid ""
 "Projected fractional counts assume sensitivity and specificity transport to "
 "the target population. These are flagged observations, not measured extra "
-"review time or unique patients. No uncertainty in target prevalence is "
-"assumed."
+"review time or unique patients. The projections use the point estimates of "
+"sensitivity and specificity and assume no uncertainty in them or in the "
+"target prevalence."
 msgstr ""
+"Öngörülen kesirli sayımlar, duyarlılık ve özgüllüğün hedef popülasyona "
+"aktarılabildiğini varsayar. Bunlar işaretlenen gözlemlerdir; ölçülmüş ek "
+"inceleme süresi veya tekil hastalar değildir. Öngörüler duyarlılık ve "
+"özgüllüğün nokta tahminlerini kullanır ve bunlarda ya da hedef prevalansta "
+"belirsizlik olmadığını varsayar."
 
 #: decisioncurve/results/clinicalImpactTable.columns.title
 msgid "Projected Interventions"
@@ -140864,6 +141021,10 @@ msgstr ""
 msgid "Reference-positive proportions to compare"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "Reference-standard prevalence in this sample"
+msgstr "Bu örneklemde referans standart prevalansı"
+
 #: R/agreement.b.R
 msgid "Reference: %1$s, Predicted: %2$s. N = %3$s complete cases."
 msgstr "Referans: %1$s, Tahmin Edilen: %2$s. N = %3$s eksiksiz olgu."
@@ -145813,6 +145974,10 @@ msgstr ""
 #: jjsegmentedtotalbar/results/summary.columns.title
 msgid "Rows Analysed"
 msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Rows are not thresholds of one marker"
+msgstr "Satırlar tek bir belirtecin eşikleri değil"
 
 #: R/riverplot.b.R
 msgid "rows before error"
@@ -154620,6 +154785,16 @@ msgstr ""
 "Yüzde etiketleri, minimum boyut filtreleme ve derece sıralaması ekleyen "
 "ComplexUpset kesişim grafiğini gösterin."
 
+#: decisioncalculator/options/showWorkload.description.ui
+msgid ""
+"Show the expected true and false positives, flags per 1000 tested and tests "
+"per detected positive, observed in this table and projected to target "
+"prevalences."
+msgstr ""
+"Bu tabloda gözlenen ve hedef prevalanslara yansıtılan beklenen gerçek ve "
+"yanlış pozitifleri, test edilen 1000 kişide işaretlenenleri ve saptanan "
+"pozitif başına test sayısını gösterir."
+
 #: classicalSurvivalPower/options/show_formulas.description.jamovi
 msgid "Show the mathematical formulas and equations used in calculations."
 msgstr ""
@@ -156217,7 +156392,6 @@ msgid "Slice label type"
 msgstr ""
 
 #: decision/options/analysisUnit.default
-#: decisioncalculator/options/analysisUnit.default
 #: enhancedROC/options/analysisUnit.default
 msgid "slide"
 msgstr ""
@@ -157152,6 +157326,10 @@ msgstr "Bazı klinik özet verileri mevcut değildi."
 msgid "Some Comparison P-Values Could Not Be Computed"
 msgstr "Bazı Karşılaştırma P Değerleri Hesaplanamadı"
 
+#: R/decisioncalculator.b.R
+msgid "Some confidence intervals could not be matched"
+msgstr "Bazı güven aralıkları eşleştirilemedi"
+
 #: R/agepyramid.b.R
 msgid "Some custom age breaks could not be read"
 msgstr "Bazı özel yaş sınırları okunamadı"
@@ -157290,6 +157468,15 @@ msgstr ""
 "sırada yazılan tarihler hata vermeden ayrıştırılır ve pozitif kalır, bu "
 "nedenle bu sayfadaki başka hiçbir şey onları göremez ve toplam kişi-zamanı "
 "bu satırlar ne kadar yanlışsa o kadar yanlış olur."
+
+#: R/decisioncalculator.b.R
+msgid ""
+"Some rows of the interval tables are empty because the installed version of "
+"epiR does not report those statistics. The values that are shown are "
+"unaffected."
+msgstr ""
+"Kurulu epiR sürümü bu istatistikleri raporlamadığı için aralık tablolarının "
+"bazı satırları boştur. Gösterilen değerler etkilenmez."
 
 #: R/jjsegmentedtotalbar.b.R
 msgid ""
@@ -157493,8 +157680,9 @@ msgid "Sorting & Display Options"
 msgstr "Sıralama ve Gösterim Seçenekleri"
 
 #: advancedanova/results/anova.columns.title
+#: decisioncalculator/results/screeningWorkload.columns.title
 msgid "Source"
-msgstr ""
+msgstr "Kaynak"
 
 #: advancedbarplot/options/source_text.title
 msgid "Source Citation"
@@ -166588,7 +166776,7 @@ msgstr ""
 #: decisioncalculator/options/workloadPopulationSize.title
 #: enhancedROC/options/workloadPopulationSize.title
 msgid "Target population size"
-msgstr ""
+msgstr "Hedef popülasyon büyüklüğü"
 
 #: psychopdaROC/ui[10][0]/targetPower.label
 msgid "Target Power"
@@ -166619,7 +166807,17 @@ msgstr ""
 
 #: decisioncalculator/options/prevalenceScenarios.title
 msgid "Target prevalences (comma-separated proportions)"
+msgstr "Hedef prevalanslar (virgülle ayrılmış oranlar)"
+
+#: R/decisioncalculator.b.R
+msgid ""
+"Target prevalences must be at most 100 comma-separated proportions between 0 "
+"and 1, for example 0.001,0.01. The projected rows for this list are omitted; "
+"every other result is unaffected."
 msgstr ""
+"Hedef prevalanslar, 0 ile 1 arasında en fazla 100 virgülle ayrılmış oran "
+"olmalıdır, örneğin 0.001,0.01. Bu listeye ait öngörülen satırlar çıkarıldı; "
+"diğer tüm sonuçlar etkilenmez."
 
 #: sigmametrics/results/defectRateAnalysis.columns.title
 msgid "Target Rate (ppm)"
@@ -168075,6 +168273,10 @@ msgstr "Test Performansı Özeti"
 msgid "Test Performs at Chance Level"
 msgstr "Test Şans Düzeyinde Performans Gösteriyor"
 
+#: R/decisioncalculator.b.R
+msgid "Test performs worse than chance"
+msgstr "Test şanstan daha kötü performans gösteriyor"
+
 #: R/decision.b.R
 #: R/decisioncombine.b.R
 #: R/decisioncompare.b.R
@@ -168572,7 +168774,7 @@ msgstr ""
 #: decisioncalculator/results/screeningWorkload.columns.title
 #: enhancedROC/results/results/screeningWorkload.columns.title
 msgid "Tests per detected positive"
-msgstr ""
+msgstr "Saptanan pozitif başına test"
 
 #: decisionpanel/results/strategyComparison.columns.title
 msgid "Tests Used"
@@ -170138,6 +170340,18 @@ msgstr "Kümülatif insidans grafiği tahmin edilemedi"
 msgid "The current outcome \"{var}\" has {n} levels: {levels}."
 msgstr "Geçerli sonuç \"{var}\" {n} düzeye sahiptir: {levels}."
 
+#: R/decisioncalculator.b.R
+msgid ""
+"The current row and the two scenarios have {current}, {scenario1} and "
+"{scenario2} reference-positive/reference-negative cases. Moving a cut-off on "
+"one cohort changes neither count, so these rows cannot be interpreted as "
+"thresholds applied to the same participants."
+msgstr ""
+"Mevcut satır ve iki senaryo sırasıyla {current}, {scenario1} ve {scenario2} "
+"referans-pozitif/referans-negatif olguya sahip. Bir kohortta kesim değerini "
+"kaydırmak bu sayıların hiçbirini değiştirmez; bu nedenle bu satırlar aynı "
+"katılımcılara uygulanan eşikler olarak yorumlanamaz."
+
 #: R/decisioncurve.b.R
 msgid "The current rule variable \"{var}\" has {n} levels: {levels}."
 msgstr "Geçerli kural değişkeni \"{var}\" {n} düzeye sahiptir: {levels}."
@@ -170207,8 +170421,12 @@ msgstr ""
 #: R/decisioncalculator.b.R
 msgid ""
 "The cut-off comparison is omitted because these scenarios have invalid "
-"frequencies: {scenarios}. The rest of the analysis is unaffected."
+"frequencies: {scenarios}. Their rows are left blank; the other rows and the "
+"rest of the analysis are unaffected."
 msgstr ""
+"Şu senaryolar geçersiz frekanslara sahip olduğu için kesim değeri "
+"karşılaştırması yapılmadı: {scenarios}. Bu senaryoların satırları boş "
+"bırakıldı; diğer satırlar ve analizin geri kalanı etkilenmez."
 
 #: R/survivalcont.b.R
 msgid "the cut-off groups of '%s'"
@@ -170904,6 +171122,9 @@ msgid ""
 "confidence intervals. The two interval tables are left blank; every other "
 "result on this page is unaffected."
 msgstr ""
+"Güven aralıkları için epiR paketi gereklidir. Paketi kurun veya güven "
+"aralıklarını kapatın. İki aralık tablosu boş bırakıldı; bu sayfadaki diğer "
+"tüm sonuçlar etkilenmez."
 
 #: R/decisioncompare.b.R
 msgid ""
@@ -172933,19 +173154,27 @@ msgstr ""
 msgid ""
 "The named scenarios are illustrative examples, not clinical guides. The "
 "current row reports which scenario has the highest Youden's J and whether "
-"its separately calculated accuracy interval overlaps the current row. "
+"its separately calculated Youden's J interval overlaps the current row. "
 "Choosing a cut-off on the same data used to assess it is optimistically "
 "biased and does not establish clinical utility."
 msgstr ""
 "Adlandırılmış senaryolar açıklayıcı örneklerdir; klinik rehber değildir. "
 "Güncel satır, hangi senaryonun en yüksek Youden J değerine sahip olduğunu ve "
-"ayrı hesaplanan doğruluk aralığının güncel satırla örtüşüp örtüşmediğini "
-"bildirir. Kesim noktasını aynı veriler üzerinde seçmek iyimser yanlılığa yol "
-"açar ve klinik yararı kanıtlamaz."
+"ayrı hesaplanan Youden J aralığının güncel satırla örtüşüp örtüşmediğini "
+"bildirir. Kesim noktasını değerlendirmede kullanılan aynı veriler üzerinde "
+"seçmek iyimser yanlılığa yol açar ve klinik yararı kanıtlamaz."
 
 #: R/decisioncompare.b.R
 msgid "The negative level \"%1$s\" is not available. Available levels: %2$s."
 msgstr "Negatif düzey \"%1$s\" mevcut değil. Mevcut düzeyler: %2$s."
+
+#: R/decisioncalculator.b.R
+msgid ""
+"The negative likelihood ratio is not estimable: the test was never negative "
+"in this table."
+msgstr ""
+"Negatif olabilirlik oranı tahmin edilemez: test bu tabloda hiç negatif sonuç "
+"vermedi."
 
 #: R/nogoldstandard.b.R
 msgid ""
@@ -173040,6 +173269,22 @@ msgstr ""
 "edilecek hastaların bir sayısı değil, ayırt etme gücünün prevalanstan "
 "bağımsız bir indeksidir: bir ek olgu bulmak için gerçekte test edilmesi "
 "gereken sayı aynı zamanda popülasyondaki hastalık prevalansına da bağlıdır."
+
+#: R/decisioncalculator.b.R
+msgid ""
+"The number needed to diagnose has no finite upper limit: the Youden's index "
+"interval includes 0, so the interval for its inverse has no upper bound."
+msgstr ""
+"Tanı için gereken sayının sonlu bir üst sınırı yoktur: Youden indeksi "
+"aralığı 0'ı içerdiği için tersinin aralığının üst sınırı yoktur."
+
+#: R/decisioncalculator.b.R
+msgid ""
+"The number needed to diagnose is not estimable: Youden's index and its whole "
+"confidence interval are at or below 0."
+msgstr ""
+"Tanı için gereken sayı tahmin edilemez: Youden indeksi ve güven aralığının "
+"tamamı 0 veya altındadır."
 
 #: R/decision.b.R
 msgid ""
@@ -173603,6 +173848,14 @@ msgstr ""
 "Pozitif olabilirlik oranı {lr}'dir. Bir nomogram pozitif bir sonucun sonucun "
 "olasılığını yükselttiğini varsayar; burada bu olasılığı düşürür, bu nedenle "
 "grafik atlanmıştır. Test kodlamasını kontrol edin."
+
+#: R/decisioncalculator.b.R
+msgid ""
+"The positive likelihood ratio is not estimable: the test was never positive "
+"in this table."
+msgstr ""
+"Pozitif olabilirlik oranı tahmin edilemez: test bu tabloda hiç pozitif sonuç "
+"vermedi."
 
 #: R/oddsratio.b.R
 msgid "The positive predictor level was automatically detected as: '{level}'"
@@ -175239,6 +175492,18 @@ msgid ""
 "using install.packages(\"summarytools\")"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid ""
+"The supplied prevalence is {prevalence}. At a prevalence this far from 50%, "
+"the predictive values depend strongly on the error rates: at low prevalence "
+"a small change in specificity moves the PPV considerably, and at high "
+"prevalence a small change in sensitivity moves the NPV."
+msgstr ""
+"Girilen prevalans {prevalence}. %50'den bu kadar uzak bir prevalansta öngörü "
+"değerleri hata oranlarına güçlü biçimde bağlıdır: düşük prevalansta "
+"özgüllükteki küçük bir değişiklik PÖD'ü belirgin biçimde değiştirir, yüksek "
+"prevalansta ise duyarlılıktaki küçük bir değişiklik NÖD'ü değiştirir."
+
 #: R/lassocox.b.R
 msgid "The survival plot could not be drawn: {msg}"
 msgstr ""
@@ -175372,6 +175637,38 @@ msgstr ""
 msgid "The test has only one level among the analysed cases"
 msgstr "Test, analiz edilen olgular arasında yalnızca bir düzeye sahiptir"
 
+#: R/decisioncalculator.b.R
+msgid ""
+"The test was never negative in this table, so the negative likelihood ratio "
+"is not estimable and the nomogram is omitted."
+msgstr ""
+"Test bu tabloda hiç negatif sonuç vermediği için negatif olabilirlik oranı "
+"tahmin edilemez ve nomogram çizilmedi."
+
+#: R/decisioncalculator.b.R
+msgid ""
+"The test was never negative in this table, so the negative likelihood ratio "
+"is not estimable."
+msgstr ""
+"Test bu tabloda hiç negatif sonuç vermediği için negatif olabilirlik oranı "
+"tahmin edilemez."
+
+#: R/decisioncalculator.b.R
+msgid ""
+"The test was never positive in this table, so the positive likelihood ratio "
+"is not estimable and the nomogram is omitted."
+msgstr ""
+"Test bu tabloda hiç pozitif sonuç vermediği için pozitif olabilirlik oranı "
+"tahmin edilemez ve nomogram çizilmedi."
+
+#: R/decisioncalculator.b.R
+msgid ""
+"The test was never positive in this table, so the positive likelihood ratio "
+"is not estimable."
+msgstr ""
+"Test bu tabloda hiç pozitif sonuç vermediği için pozitif olabilirlik oranı "
+"tahmin edilemez."
+
 #: R/sequentialtests.b.R
 msgid ""
 "The tests have similar marginal sensitivity and specificity. Similar "
@@ -175381,16 +175678,6 @@ msgstr ""
 "Testler benzer marjinal duyarlılık ve özgüllüğe sahiptir. Benzer marjinal "
 "performans fazlalığı veya bağımsızlığı kanıtlamaz; harici kanıtları "
 "kullanarak koşullu bağımlılığı değerlendirin."
-
-#: R/decisioncalculator.b.R
-msgid ""
-"The three scenarios total {current}, {scenario1}, and {scenario2} cases. "
-"Moving a cut-off on one cohort cannot change its size, so these rows cannot "
-"be interpreted as thresholds applied to the same participants."
-msgstr ""
-"Üç senaryo toplam {current}, {scenario1} ve {scenario2} olguya sahiptir. Bir "
-"kohortta bir kesim değerini değiştirmek boyutunu değiştiremez, bu nedenle bu "
-"satırlar aynı katılımcılara uygulanan eşikler olarak yorumlanamaz."
 
 #: R/decisioncurve.b.R
 msgid ""
@@ -176287,6 +176574,17 @@ msgstr ""
 "simülasyonda %95'lik aralık, çalışmaların %92 ile %99.5'inde (ortalama "
 "%95.4) gerçek değeri kapsadı; dolayısıyla hiçbir zaman belirgin biçimde "
 "fazla dar değildir ve bazen gereğinden geniştir."
+
+#: R/decisioncalculator.b.R
+msgid ""
+"These intervals treat each count as one independent patient. If a patient "
+"contributes several slides, blocks or lesions, they can be too narrow: count "
+"one result per patient, or use a method for clustered data."
+msgstr ""
+"Bu aralıklar her sayımı bağımsız bir hasta olarak ele alır. Bir hasta birden "
+"fazla lam, blok veya lezyon katkısında bulunuyorsa aralıklar gereğinden dar "
+"olabilir: hasta başına tek bir sonuç sayın ya da kümelenmiş veriye yönelik "
+"bir yöntem kullanın."
 
 #: R/psychopdaROC.b.R
 msgid "These labels describe discrimination in this sample only."
@@ -180766,8 +181064,16 @@ msgid "TN (Cut-off 2)"
 msgstr "GN (Kesim Değeri 2)"
 
 #: R/decisioncalculator.b.R
-msgid "TN + FN equals zero, so negative predictive value is undefined."
-msgstr "GN + YN sıfıra eşittir, bu nedenle negatif öngörü değeri tanımsızdır."
+msgid ""
+"TN + FN equals zero: the test was never negative. The negative predictive "
+"value, the negative likelihood ratio and the diagnostic odds ratio are not "
+"estimable, and the test cannot separate the two groups. The positive "
+"likelihood ratio differs from 1 only because of the 0.5 zero-cell correction."
+msgstr ""
+"GN + YN sıfıra eşittir: test hiç negatif sonuç vermedi. Negatif öngörü "
+"değeri, negatif olabilirlik oranı ve tanısal odds oranı tahmin edilemez ve "
+"test iki grubu ayıramaz. Pozitif olabilirlik oranı yalnızca 0.5 sıfır hücre "
+"düzeltmesi nedeniyle 1'den farklıdır."
 
 #: R/decisioncalculator.b.R
 msgid ""
@@ -181861,8 +182167,16 @@ msgstr ""
 "hesaplanamaz."
 
 #: R/decisioncalculator.b.R
-msgid "TP + FP equals zero, so positive predictive value is undefined."
-msgstr "GP + YP sıfıra eşittir, bu nedenle pozitif öngörü değeri tanımsızdır."
+msgid ""
+"TP + FP equals zero: the test was never positive. The positive predictive "
+"value, the positive likelihood ratio and the diagnostic odds ratio are not "
+"estimable, and the test cannot separate the two groups. The negative "
+"likelihood ratio differs from 1 only because of the 0.5 zero-cell correction."
+msgstr ""
+"GP + YP sıfıra eşittir: test hiç pozitif sonuç vermedi. Pozitif öngörü "
+"değeri, pozitif olabilirlik oranı ve tanısal odds oranı tahmin edilemez ve "
+"test iki grubu ayıramaz. Negatif olabilirlik oranı yalnızca 0.5 sıfır hücre "
+"düzeltmesi nedeniyle 1'den farklıdır."
 
 #: R/decisioncalculator.b.R
 msgid "TP, FP, TN, and FN must be finite numbers. Check the input values."
@@ -183418,7 +183732,7 @@ msgstr "Gerçek Negatifler"
 #: decisioncalculator/results/screeningWorkload.columns.title
 #: enhancedROC/results/results/screeningWorkload.columns.title
 msgid "True negatives"
-msgstr ""
+msgstr "Gerçek negatifler"
 
 #: diagnosticmeta/ui[0][4][0].label
 msgid "True Negatives (Disease-, Test-)"
@@ -183473,7 +183787,7 @@ msgstr "Gerçek Pozitifler"
 #: decisioncalculator/results/screeningWorkload.columns.title
 #: enhancedROC/results/results/screeningWorkload.columns.title
 msgid "True positives"
-msgstr ""
+msgstr "Gerçek pozitifler"
 
 #: diagnosticmeta/ui[0][1][0].label
 msgid "True Positives (Disease+, Test+)"
@@ -183487,7 +183801,6 @@ msgstr "Doğru Pozitifler (DP)"
 msgid "True positives is still empty."
 msgstr ""
 
-#: R/decisioncalculator.b.R
 #: R/decisioncompare.b.R
 msgid "True prevalence"
 msgstr "Gerçek yaygınlık"
@@ -195418,6 +195731,10 @@ msgstr ""
 "eşikleri değildir."
 
 #: R/decisioncalculator.b.R
+msgid "Youden's index below 0"
+msgstr "Youden indeksi 0'ın altında"
+
+#: R/decisioncalculator.b.R
 msgid ""
 "Youden's index equals sensitivity plus specificity minus one. It weights "
 "sensitivity and specificity equally and is descriptive, not a clinical "
@@ -195441,6 +195758,42 @@ msgstr ""
 
 #: R/decisioncalculator.b.R
 msgid ""
+"Youden's index intervals are not computed for scenarios containing "
+"fractional frequencies because no effective sample size or weighting design "
+"was supplied."
+msgstr ""
+"Etkin örneklem büyüklüğü veya ağırlıklandırma tasarımı belirtilmediği için "
+"kesirli frekans içeren senaryolarda Youden indeksi aralıkları hesaplanmaz."
+
+#: R/decisioncalculator.b.R
+msgid ""
+"Youden's index is {youden} (95% CI {lower} to {upper}; {npos} "
+"reference-positive and {nneg} reference-negative observations), and the "
+"whole interval is below 0: a positive result is less common among "
+"reference-positive than among reference-negative subjects. Check whether TP "
+"and FN, or FP and TN, were entered in swapped positions."
+msgstr ""
+"Youden indeksi {youden} (%95 GA {lower} ile {upper} arası; {npos} "
+"referans-pozitif ve {nneg} referans-negatif gözlem) ve aralığın tamamı 0'ın "
+"altında: pozitif sonuç referans-pozitif deneklerde referans-negatif "
+"deneklere göre daha seyrek. GP ile YN'nin veya YP ile GN'nin yer değiştirmiş "
+"olarak girilip girilmediğini kontrol edin."
+
+#: R/decisioncalculator.b.R
+msgid ""
+"Youden's index is {youden} (95% CI {lower} to {upper}), below 0 but within "
+"sampling variation of 0, so this table does not show that the test "
+"discriminates better than chance. If the counts are not coded as intended, "
+"check whether TP and FN, or FP and TN, were swapped."
+msgstr ""
+"Youden indeksi {youden} (%95 GA {lower} ile {upper} arası); 0'ın altında "
+"ancak 0'a göre örnekleme değişkenliği içinde, bu nedenle bu tablo testin "
+"şanstan daha iyi ayırt ettiğini göstermez. Sayımlar amaçlandığı gibi "
+"kodlanmadıysa GP ile YN'nin veya YP ile GN'nin yer değiştirip "
+"değiştirmediğini kontrol edin."
+
+#: R/decisioncalculator.b.R
+msgid ""
 "Youden's index is {youden} and sample accuracy is {accuracy}. These values "
 "describe the entered study table; they are not clinical grades or decision "
 "thresholds."
@@ -195449,7 +195802,20 @@ msgstr ""
 "girilen çalışma tablosunu tanımlar; klinik dereceler veya karar eşikleri "
 "değildir."
 
+#: R/decisioncalculator.b.R
+msgid ""
+"Youden's index is {youden}, below 0. No interval is computed for fractional "
+"counts, so whether this differs from chance is not assessed. If the counts "
+"are not coded as intended, check whether TP and FN, or FP and TN, were "
+"swapped."
+msgstr ""
+"Youden indeksi {youden}, 0'ın altında. Kesirli sayımlar için aralık "
+"hesaplanmaz, bu nedenle bunun şanstan farklı olup olmadığı değerlendirilmez. "
+"Sayımlar amaçlandığı gibi kodlanmadıysa GP ile YN'nin veya YP ile GN'nin yer "
+"değiştirip değiştirmediğini kontrol edin."
+
 #: R/decision.b.R
+#: R/decisioncalculator.b.R
 msgid ""
 "Youden's index is 0 or below in this sample, so the number needed to "
 "diagnose has no point estimate. Its confidence interval starts at the lower "

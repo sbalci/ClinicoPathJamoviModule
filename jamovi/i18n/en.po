@@ -740,6 +740,13 @@ msgstr ""
 msgid "{alpha}% significance level (two-sided)"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid ""
+"{better} has both higher sensitivity and higher specificity than {worse}. "
+"Moving a single threshold on the same patients trades one for the other, so "
+"these rows describe different tests or cohorts, not cut-offs of one marker."
+msgstr ""
+
 #: R/pathagreement.b.R
 msgid "{cases} cases"
 msgstr ""
@@ -853,9 +860,9 @@ msgstr ""
 
 #: R/decisioncalculator.b.R
 msgid ""
-"{cutoff} has the highest Youden's J, {margin} above current; its "
-"sample-accuracy interval overlaps the current cut-off's, so the difference "
-"is not established."
+"{cutoff} has the highest Youden's J, {margin} above current; its Youden's J "
+"interval overlaps the current cut-off's, so these separate intervals do not "
+"show a difference."
 msgstr ""
 
 #: R/decisioncalculator.b.R
@@ -866,8 +873,8 @@ msgstr ""
 
 #: R/decisioncalculator.b.R
 msgid ""
-"{cutoff} has the highest Youden's J, {margin} above current; their "
-"sample-accuracy intervals do not overlap."
+"{cutoff} has the highest Youden's J, {margin} above current; their Youden's "
+"J intervals do not overlap."
 msgstr ""
 
 #: R/pathagreement.b.R
@@ -11609,20 +11616,6 @@ msgid ""
 "row label names before interpreting a percentage."
 msgstr ""
 
-#: R/decisioncalculator.b.R
-msgid ""
-"A Haldane-Anscombe 0.5 correction was applied to likelihood-ratio and "
-"diagnostic-odds-ratio point estimates because a zero cell was present. "
-"Confidence intervals use the raw counts and are not continuity-corrected."
-msgstr ""
-
-#: R/decisioncalculator.b.R
-msgid ""
-"A Haldane-Anscombe 0.5 correction was applied to the likelihood ratios "
-"because a zero cell was present. The epiR confidence-interval table uses raw "
-"counts, so its point estimates may differ."
-msgstr ""
-
 #: R/multisurvival.b.R
 msgid ""
 "A hazard ratio above 1 means a higher instantaneous event rate and below 1 a "
@@ -11755,6 +11748,12 @@ msgstr ""
 msgid ""
 "A model that describes the progression of patients through different health "
 "states over time using transition probabilities."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"A negative result has a likelihood ratio of {lr} and leaves the probability "
+"at {prevalence}."
 msgstr ""
 
 #: R/decisioncalculator.b.R
@@ -11904,6 +11903,12 @@ msgstr ""
 msgid ""
 "A positive result decreases the probability of disease: the level chosen as "
 "test-positive may be inverted"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"A positive result has a likelihood ratio of {lr} and leaves the probability "
+"at {prevalence}."
 msgstr ""
 
 #: R/decisioncalculator.b.R
@@ -12343,10 +12348,43 @@ msgstr ""
 
 #: R/decisioncalculator.b.R
 msgid ""
+"A zero cell was present, so 0.5 was added to every cell for the likelihood "
+"ratios and the diagnostic odds ratio. Their confidence intervals use the "
+"same corrected counts."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"A zero cell was present, so a Haldane-Anscombe 0.5 correction was added to "
+"every cell for the likelihood ratios, the diagnostic odds ratio and their "
+"confidence intervals. Sensitivity, specificity, predictive values and their "
+"intervals use the observed counts."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"A zero cell was present, so the likelihood ratios and the diagnostic odds "
+"ratio here, as in the tables above, use the table with 0.5 added to every "
+"cell, and so do their intervals. A ratio whose denominator count is zero has "
+"no finite upper limit, which is left blank and footnoted; one whose "
+"numerator count is zero has a lower limit of 0. Youden's index and the "
+"number needed to diagnose use the observed counts."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
 "A zero cell was present, so the likelihood ratios and the probabilities read "
 "from the nomogram use the Haldane-Anscombe 0.5 correction. The predictive "
-"values in the Measures table are computed from the raw counts and can differ "
-"slightly."
+"values and post-test probabilities in the Measures table are computed from "
+"the raw counts and can differ, by a wide margin in a small table."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"A zero cell was present, so the likelihood ratios use the Haldane-Anscombe "
+"0.5 correction, while the predictive values above use the observed counts. "
+"Multiplying the pre-test odds by these likelihood ratios therefore need not "
+"reproduce the predictive values exactly."
 msgstr ""
 
 #: R/decision.b.R
@@ -13114,13 +13152,6 @@ msgstr ""
 
 #: pathagreement/options/readerPopulation.title
 msgid "Accuracy case population"
-msgstr ""
-
-#: R/decisioncalculator.b.R
-msgid ""
-"Accuracy intervals are not computed for scenarios containing fractional "
-"frequencies because no effective sample size or weighting design was "
-"supplied."
 msgstr ""
 
 #: pathagreement/results/referenceComparison.columns.title
@@ -22340,10 +22371,6 @@ msgstr ""
 
 #: R/decisioncalculator.b.R
 msgid "Balanced accuracy"
-msgstr ""
-
-#: R/decisioncalculator.b.R
-msgid "Balanced accuracy (CI not computed)"
 msgstr ""
 
 #: R/decisioncombine.b.R
@@ -38163,6 +38190,10 @@ msgstr ""
 msgid "Comma-separated survival quantiles for regression"
 msgstr ""
 
+#: decisioncalculator/options/prevalenceScenarios.description.ui
+msgid "Comma-separated target prevalences, each a proportion between 0 and 1."
+msgstr ""
+
 #: hiddenmarkov/options/timeIntervals.description
 msgid "Comma-separated time intervals for piecewise constant model"
 msgstr ""
@@ -42791,7 +42822,7 @@ msgid "Confusion Matrix (Ordinal Classification)"
 msgstr ""
 
 #: decisioncalculator/ui[0].label
-msgid "Confusion matrix (reference standard vs test result)"
+msgid "Confusion Matrix (Reference Standard vs Test Result)"
 msgstr ""
 
 #: R/agreement.b.R
@@ -49338,15 +49369,18 @@ msgstr ""
 
 #: R/decisioncalculator.b.R
 msgid ""
-"Cut-offs are compared on point estimates only. A formal test would need to "
-"know, for each patient, how the two thresholds classified them; four summary "
-"counts per scenario cannot supply that. The accuracy intervals referred to "
-"above are Wilson 95% intervals computed separately per scenario, so overlap "
-"is a conservative signal that the counts do not separate the cut-offs."
+"Cut-offs are compared on point estimates; no paired test of the difference "
+"is performed. The intervals referred to above are Agresti-Caffo 95% "
+"intervals for each scenario's Youden's J, computed separately. For "
+"thresholds applied to the same patients, non-overlap is a conservative "
+"signal of a difference, and overlap does not show that there is none. Like "
+"every interval here, they treat each count as one independent patient and "
+"can be too narrow when a patient contributes several slides, blocks or "
+"lesions."
 msgstr ""
 
 #: R/decisioncalculator.b.R
-msgid "Cut-offs describe different numbers of patients"
+msgid "Cut-offs describe different cohorts"
 msgstr ""
 
 #: R/survivalcont.b.R
@@ -52503,7 +52537,7 @@ msgid "Deployment prevalence and workload"
 msgstr ""
 
 #: decisioncalculator/ui[6].label
-msgid "Deployment workload"
+msgid "Deployment Workload"
 msgstr ""
 
 #: flexrstpm2/options/derivative_analysis.title
@@ -58693,6 +58727,13 @@ msgid ""
 "to %2$d. Cases counts the cases rated by at least two raters."
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid ""
+"Each count is one independent patient. If a patient contributes several "
+"slides, blocks or lesions, count one result per patient or use a method for "
+"clustered data; otherwise the confidence intervals can be too narrow."
+msgstr ""
+
 #: R/agreement.b.R
 msgid ""
 "Each data row is treated as a separate case. If the same case was measured "
@@ -62717,15 +62758,6 @@ msgstr "estimated; assess independence and ascertainment before use"
 msgid "Estimates (Coefficients)"
 msgstr ""
 
-#: R/decisioncalculator.b.R
-msgid ""
-"Estimates and intervals in this table are computed by epiR from the raw "
-"counts. The likelihood ratios and diagnostic odds ratio shown in the tables "
-"above use a Haldane-Anscombe 0.5 correction because a zero cell was present, "
-"so their point estimates differ from the ones here. Quantities that are not "
-"estimable from the raw table are left blank."
-msgstr ""
-
 #: R/nogoldstandard.b.R
 msgid "Estimates at the parameter boundary"
 msgstr ""
@@ -64374,6 +64406,12 @@ msgstr ""
 
 #: exacttests/options/testType/binomial.title
 msgid "Exact binomial test"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"Exact Clopper-Pearson 95% intervals, computed by epiR from the observed "
+"counts."
 msgstr ""
 
 #: R/waterfall.b.R
@@ -67054,10 +67092,6 @@ msgstr ""
 
 #: enhancedROC/results/results/precisionRecallTable.columns.title
 msgid "F1 Score (Max)"
-msgstr ""
-
-#: R/decisioncalculator.b.R
-msgid "F1 score at selected prevalence (CI not computed)"
 msgstr ""
 
 #: R/decisioncalculator.b.R
@@ -79386,7 +79420,7 @@ msgid "Illustrative context"
 msgstr ""
 
 #: decisioncalculator/ui[5][0].label
-msgid "Illustrative cut-off comparison"
+msgid "Illustrative Cut-off Comparison"
 msgstr ""
 
 #: R/nogoldstandard.b.R
@@ -79427,11 +79461,11 @@ msgid "Illustrative scenario (not clinical guidance)"
 msgstr ""
 
 #: decisioncalculator/ui[5][1].label
-msgid "Illustrative scenario 1"
+msgid "Illustrative Scenario 1"
 msgstr ""
 
 #: decisioncalculator/ui[5][2].label
-msgid "Illustrative scenario 2"
+msgid "Illustrative Scenario 2"
 msgstr ""
 
 #: nogoldstandard/options/clinicalPreset.title
@@ -84340,6 +84374,10 @@ msgstr ""
 msgid "Invalid target confidence"
 msgstr "Invalid target confidence"
 
+#: R/decisioncalculator.b.R
+msgid "Invalid target prevalences"
+msgstr ""
+
 #: R/decisioncurve.b.R
 msgid "Invalid Threshold Range"
 msgstr ""
@@ -86611,6 +86649,12 @@ msgstr ""
 msgid "Label for the screening/assessment stage."
 msgstr ""
 
+#: decisioncalculator/options/analysisUnit.description.ui
+msgid ""
+"Label for what one count represents, shown in the workload table (for "
+"example patient). It does not change any calculation."
+msgstr ""
+
 #: jjpubr/options/xlab.description.ui
 msgid "Label for X-axis (leave empty for variable name)"
 msgstr ""
@@ -88464,6 +88508,17 @@ msgstr ""
 
 #: decisioncombine/results/combinationTableCIRatios.title
 msgid "Likelihood Ratios with 95% Confidence Intervals"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"Likelihood ratios: approximate log-scale 95% interval (Simel, Samsa and "
+"Matchar 1991), which can fall short of 95% when sensitivity or specificity "
+"is near 100% in a small study. Diagnostic odds ratio: log-scale (Woolf) "
+"interval. Youden's index: Agresti-Caffo interval for the difference between "
+"the true-positive and false-positive rates. Number needed to diagnose = 1 / "
+"Youden's index; its interval is the inverse of the positive part of the "
+"Youden interval."
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -104825,6 +104880,10 @@ msgstr ""
 msgid "No example"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "No finite limit: the interval is unbounded on this side."
+msgstr ""
+
 #: R/multisurvival.b.R
 msgid "No fitted hazard-rate association on that contrast"
 msgstr ""
@@ -107163,15 +107222,6 @@ msgid ""
 "to leave this regime."
 msgstr ""
 
-#: R/cotest.b.R
-msgid ""
-"Not estimable: with these parameters this result combination cannot occur "
-"in either disease group, so no post-test probability exists. This follows "
-"from the conditional dependence being at, or truncated to, the limit the "
-"entered sensitivities and specificities allow — move it toward 0 to leave "
-"this regime."
-msgstr ""
-
 #: R/benford.b.R
 msgid "Not assessable"
 msgstr ""
@@ -107310,6 +107360,14 @@ msgstr ""
 msgid "Not computed"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "Not computed for this table; the notices at the top say why."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Not computed: invalid frequencies"
+msgstr ""
+
 #: R/checkdata.b.R
 msgid ""
 "Not computed: needs more than 3 complete values and a non-zero MAD; "
@@ -107407,6 +107465,12 @@ msgstr "Not estimable (too few distinct detection positions)"
 msgid "not estimable (zero variance)"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid ""
+"Not estimable for this table: a denominator is zero or the quantity is "
+"undefined."
+msgstr ""
+
 #: R/waterfall.b.R
 msgid "Not estimable with fewer than 2 responders"
 msgstr ""
@@ -107443,6 +107507,15 @@ msgstr ""
 msgid ""
 "Not estimable: this rater and the reference rater used only one and the same "
 "category, so chance agreement is complete and kappa is 0 divided by 0."
+msgstr ""
+
+#: R/cotest.b.R
+msgid ""
+"Not estimable: with these parameters this result combination cannot occur in "
+"either disease group, so no post-test probability exists. This follows from "
+"the conditional dependence being at, or truncated to, the limit the entered "
+"sensitivities and specificities allow — move it toward 0 to leave this "
+"regime."
 msgstr ""
 
 #: R/agepyramid.b.R
@@ -109153,6 +109226,10 @@ msgstr ""
 msgid "Number of PCA components to analyze."
 msgstr ""
 
+#: decisioncalculator/options/workloadPopulationSize.description.ui
+msgid "Number of people tested in each projected scenario."
+msgstr ""
+
 #: grouplasso/options/n_permutations.title
 #: pcacomponenttest/options/nperm.title
 #: pcacomponenttest/ui[1][0][0]/nperm.label
@@ -109973,6 +110050,7 @@ msgstr ""
 msgid "Observations: {n}"
 msgstr ""
 
+#: R/decisioncalculator.b.R
 #: continuousmarkov/results/transitionMatrix.columns.title
 #: flexmultistate/results/transitionMatrix.columns.title
 #: hiddenmarkov/results/viterbiStates.columns.title
@@ -117524,6 +117602,10 @@ msgstr ""
 msgid "Patient"
 msgstr ""
 
+#: decisioncalculator/options/analysisUnit.default
+msgid "patient"
+msgstr ""
+
 #: qualityoflife/ui[0][3].label
 msgid "Patient & Study Variables"
 msgstr ""
@@ -124282,11 +124364,11 @@ msgid "Post-test Probability vs Prevalence"
 msgstr ""
 
 #: decisioncalculator/results/ratioTable.columns.title
-msgid "Post-test Reference-negative Probability"
+msgid "Post-test Reference-positive Probability (Negative Test)"
 msgstr ""
 
 #: decisioncalculator/results/ratioTable.columns.title
-msgid "Post-test Reference-positive Probability"
+msgid "Post-test Reference-positive Probability (Positive Test)"
 msgstr ""
 
 #: hierarchicalbayes/results/pooledEstimates.columns.title
@@ -126642,7 +126724,7 @@ msgid "Prevalence (0-1)"
 msgstr ""
 
 #: decisioncalculator/ui[3][0][0]/pprob.label
-msgid "Prevalence (0.001-0.999)"
+msgid "Prevalence (proportion between 0 and 1)"
 msgstr ""
 
 #: differentialdiagnosis/options/prevalence_adjustment.title
@@ -126760,6 +126842,14 @@ msgstr ""
 
 #: R/sequentialtests.b.R
 msgid "Prevalence Very Low"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"Prevalence, PPV and NPV (and their intervals) use this sample's own "
+"prevalence, which estimates the population prevalence only for a "
+"cross-sectional (consecutive) sample. For a case-control sample, supply the "
+"population prevalence instead."
 msgstr ""
 
 #: R/decision.b.R
@@ -127535,14 +127625,14 @@ msgstr "Probability Models"
 
 #: R/decisioncalculator.b.R
 msgid ""
-"Probability of a reference-negative outcome after a negative test, using the "
-"displayed prevalence. It is identical to the NPV shown here."
+"Probability of a reference-negative outcome after a negative test; it "
+"depends on prevalence."
 msgstr ""
 
 #: R/decisioncalculator.b.R
 msgid ""
-"Probability of a reference-negative outcome after a negative test; it "
-"depends on prevalence."
+"Probability of a reference-positive outcome after a negative test, using the "
+"displayed prevalence. It equals 1 minus the NPV shown here."
 msgstr ""
 
 #: R/decisioncalculator.b.R
@@ -128051,6 +128141,10 @@ msgstr ""
 msgid "Progressive Model"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "Projected"
+msgstr ""
+
 #: decisioncurve/results/clinicalImpactTable.columns.title
 msgid "Projected False Positives"
 msgstr ""
@@ -128059,8 +128153,9 @@ msgstr ""
 msgid ""
 "Projected fractional counts assume sensitivity and specificity transport to "
 "the target population. These are flagged observations, not measured extra "
-"review time or unique patients. No uncertainty in target prevalence is "
-"assumed."
+"review time or unique patients. The projections use the point estimates of "
+"sensitivity and specificity and assume no uncertainty in them or in the "
+"target prevalence."
 msgstr ""
 
 #: decisioncurve/results/clinicalImpactTable.columns.title
@@ -133334,6 +133429,10 @@ msgstr ""
 msgid "Reference-positive proportions to compare"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "Reference-standard prevalence in this sample"
+msgstr ""
+
 #: R/agreement.b.R
 msgid "Reference: %1$s, Predicted: %2$s. N = %3$s complete cases."
 msgstr ""
@@ -138101,6 +138200,10 @@ msgstr ""
 
 #: jjsegmentedtotalbar/results/summary.columns.title
 msgid "Rows Analysed"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Rows are not thresholds of one marker"
 msgstr ""
 
 #: R/riverplot.b.R
@@ -146516,6 +146619,13 @@ msgid ""
 "minimum-size filtering and degree sorting."
 msgstr ""
 
+#: decisioncalculator/options/showWorkload.description.ui
+msgid ""
+"Show the expected true and false positives, flags per 1000 tested and tests "
+"per detected positive, observed in this table and projected to target "
+"prevalences."
+msgstr ""
+
 #: classicalSurvivalPower/options/show_formulas.description.jamovi
 msgid "Show the mathematical formulas and equations used in calculations."
 msgstr ""
@@ -148058,7 +148168,6 @@ msgid "Slice label type"
 msgstr ""
 
 #: decision/options/analysisUnit.default
-#: decisioncalculator/options/analysisUnit.default
 #: enhancedROC/options/analysisUnit.default
 msgid "slide"
 msgstr ""
@@ -148920,6 +149029,10 @@ msgstr ""
 msgid "Some Comparison P-Values Could Not Be Computed"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid "Some confidence intervals could not be matched"
+msgstr ""
+
 #: R/agepyramid.b.R
 msgid "Some custom age breaks could not be read"
 msgstr ""
@@ -149022,6 +149135,13 @@ msgid ""
 "typed in two different orders in one column parse without error and stay "
 "positive, so nothing else on this page can see them, and the total "
 "person-time is wrong by however much those rows are wrong."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"Some rows of the interval tables are empty because the installed version of "
+"epiR does not report those statistics. The values that are shown are "
+"unaffected."
 msgstr ""
 
 #: R/jjsegmentedtotalbar.b.R
@@ -149224,6 +149344,7 @@ msgid "Sorting & Display Options"
 msgstr ""
 
 #: advancedanova/results/anova.columns.title
+#: decisioncalculator/results/screeningWorkload.columns.title
 msgid "Source"
 msgstr ""
 
@@ -158046,6 +158167,13 @@ msgstr ""
 msgid "Target prevalences (comma-separated proportions)"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid ""
+"Target prevalences must be at most 100 comma-separated proportions between 0 "
+"and 1, for example 0.001,0.01. The projected rows for this list are omitted; "
+"every other result is unaffected."
+msgstr ""
+
 #: sigmametrics/results/defectRateAnalysis.columns.title
 msgid "Target Rate (ppm)"
 msgstr ""
@@ -159454,6 +159582,10 @@ msgstr ""
 
 #: R/decisioncombine.b.R
 msgid "Test Performs at Chance Level"
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid "Test performs worse than chance"
 msgstr ""
 
 #: R/decision.b.R
@@ -161193,6 +161325,14 @@ msgstr ""
 msgid "The current outcome \"{var}\" has {n} levels: {levels}."
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid ""
+"The current row and the two scenarios have {current}, {scenario1} and "
+"{scenario2} reference-positive/reference-negative cases. Moving a cut-off on "
+"one cohort changes neither count, so these rows cannot be interpreted as "
+"thresholds applied to the same participants."
+msgstr ""
+
 #: R/decisioncurve.b.R
 msgid "The current rule variable \"{var}\" has {n} levels: {levels}."
 msgstr ""
@@ -161247,7 +161387,8 @@ msgstr ""
 #: R/decisioncalculator.b.R
 msgid ""
 "The cut-off comparison is omitted because these scenarios have invalid "
-"frequencies: {scenarios}. The rest of the analysis is unaffected."
+"frequencies: {scenarios}. Their rows are left blank; the other rows and the "
+"rest of the analysis are unaffected."
 msgstr ""
 
 #: R/survivalcont.b.R
@@ -163321,13 +163462,19 @@ msgstr ""
 msgid ""
 "The named scenarios are illustrative examples, not clinical guides. The "
 "current row reports which scenario has the highest Youden's J and whether "
-"its separately calculated accuracy interval overlaps the current row. "
+"its separately calculated Youden's J interval overlaps the current row. "
 "Choosing a cut-off on the same data used to assess it is optimistically "
 "biased and does not establish clinical utility."
 msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "The negative level \"%1$s\" is not available. Available levels: %2$s."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"The negative likelihood ratio is not estimable: the test was never negative "
+"in this table."
 msgstr ""
 
 #: R/nogoldstandard.b.R
@@ -163401,6 +163548,18 @@ msgid ""
 "prevalence-free index of discriminating power, not a count of patients to "
 "test: the number that must actually be tested to find one additional case "
 "also depends on disease prevalence in the population."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"The number needed to diagnose has no finite upper limit: the Youden's index "
+"interval includes 0, so the interval for its inverse has no upper bound."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"The number needed to diagnose is not estimable: Youden's index and its whole "
+"confidence interval are at or below 0."
 msgstr ""
 
 #: R/decision.b.R
@@ -163858,6 +164017,12 @@ msgid ""
 "The positive likelihood ratio is {lr}. A nomogram assumes that a positive "
 "result raises the probability of the outcome; here it lowers that "
 "probability, so the plot is omitted. Check the test coding."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"The positive likelihood ratio is not estimable: the test was never positive "
+"in this table."
 msgstr ""
 
 #: R/oddsratio.b.R
@@ -165121,6 +165286,14 @@ msgid ""
 "using install.packages(\"summarytools\")"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid ""
+"The supplied prevalence is {prevalence}. At a prevalence this far from 50%, "
+"the predictive values depend strongly on the error rates: at low prevalence "
+"a small change in specificity moves the PPV considerably, and at high "
+"prevalence a small change in sensitivity moves the NPV."
+msgstr ""
+
 #: R/lassocox.b.R
 msgid "The survival plot could not be drawn: {msg}"
 msgstr ""
@@ -165218,18 +165391,35 @@ msgstr ""
 msgid "The test has only one level among the analysed cases"
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid ""
+"The test was never negative in this table, so the negative likelihood ratio "
+"is not estimable and the nomogram is omitted."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"The test was never negative in this table, so the negative likelihood ratio "
+"is not estimable."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"The test was never positive in this table, so the positive likelihood ratio "
+"is not estimable and the nomogram is omitted."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"The test was never positive in this table, so the positive likelihood ratio "
+"is not estimable."
+msgstr ""
+
 #: R/sequentialtests.b.R
 msgid ""
 "The tests have similar marginal sensitivity and specificity. Similar "
 "marginal performance does not establish redundancy or independence; assess "
 "conditional dependence using external evidence."
-msgstr ""
-
-#: R/decisioncalculator.b.R
-msgid ""
-"The three scenarios total {current}, {scenario1}, and {scenario2} cases. "
-"Moving a cut-off on one cohort cannot change its size, so these rows cannot "
-"be interpreted as thresholds applied to the same participants."
 msgstr ""
 
 #: R/decisioncurve.b.R
@@ -165926,6 +166116,13 @@ msgid ""
 "and 3 pathologists, the 95% interval covered the true value in 92 to 99.5% "
 "of studies (mean 95.4%), so it is never much too narrow and sometimes wider "
 "than necessary."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"These intervals treat each count as one independent patient. If a patient "
+"contributes several slides, blocks or lesions, they can be too narrow: count "
+"one result per patient, or use a method for clustered data."
 msgstr ""
 
 #: R/psychopdaROC.b.R
@@ -169870,7 +170067,11 @@ msgid "TN (Cut-off 2)"
 msgstr ""
 
 #: R/decisioncalculator.b.R
-msgid "TN + FN equals zero, so negative predictive value is undefined."
+msgid ""
+"TN + FN equals zero: the test was never negative. The negative predictive "
+"value, the negative likelihood ratio and the diagnostic odds ratio are not "
+"estimable, and the test cannot separate the two groups. The positive "
+"likelihood ratio differs from 1 only because of the 0.5 zero-cell correction."
 msgstr ""
 
 #: R/decisioncalculator.b.R
@@ -170932,7 +171133,11 @@ msgid ""
 msgstr ""
 
 #: R/decisioncalculator.b.R
-msgid "TP + FP equals zero, so positive predictive value is undefined."
+msgid ""
+"TP + FP equals zero: the test was never positive. The positive predictive "
+"value, the positive likelihood ratio and the diagnostic odds ratio are not "
+"estimable, and the test cannot separate the two groups. The negative "
+"likelihood ratio differs from 1 only because of the 0.5 zero-cell correction."
 msgstr ""
 
 #: R/decisioncalculator.b.R
@@ -172548,7 +172753,6 @@ msgstr ""
 msgid "True positives is still empty."
 msgstr ""
 
-#: R/decisioncalculator.b.R
 #: R/decisioncompare.b.R
 msgid "True prevalence"
 msgstr ""
@@ -183806,6 +184010,10 @@ msgid ""
 msgstr ""
 
 #: R/decisioncalculator.b.R
+msgid "Youden's index below 0"
+msgstr ""
+
+#: R/decisioncalculator.b.R
 msgid ""
 "Youden's index equals sensitivity plus specificity minus one. It weights "
 "sensitivity and specificity equally and is descriptive, not a clinical "
@@ -183822,12 +184030,45 @@ msgstr ""
 
 #: R/decisioncalculator.b.R
 msgid ""
+"Youden's index intervals are not computed for scenarios containing "
+"fractional frequencies because no effective sample size or weighting design "
+"was supplied."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"Youden's index is {youden} (95% CI {lower} to {upper}; {npos} "
+"reference-positive and {nneg} reference-negative observations), and the "
+"whole interval is below 0: a positive result is less common among "
+"reference-positive than among reference-negative subjects. Check whether TP "
+"and FN, or FP and TN, were entered in swapped positions."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
+"Youden's index is {youden} (95% CI {lower} to {upper}), below 0 but within "
+"sampling variation of 0, so this table does not show that the test "
+"discriminates better than chance. If the counts are not coded as intended, "
+"check whether TP and FN, or FP and TN, were swapped."
+msgstr ""
+
+#: R/decisioncalculator.b.R
+msgid ""
 "Youden's index is {youden} and sample accuracy is {accuracy}. These values "
 "describe the entered study table; they are not clinical grades or decision "
 "thresholds."
 msgstr ""
 
+#: R/decisioncalculator.b.R
+msgid ""
+"Youden's index is {youden}, below 0. No interval is computed for fractional "
+"counts, so whether this differs from chance is not assessed. If the counts "
+"are not coded as intended, check whether TP and FN, or FP and TN, were "
+"swapped."
+msgstr ""
+
 #: R/decision.b.R
+#: R/decisioncalculator.b.R
 msgid ""
 "Youden's index is 0 or below in this sample, so the number needed to "
 "diagnose has no point estimate. Its confidence interval starts at the lower "
