@@ -1209,7 +1209,7 @@ stagemigrationPart3 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                         # rowKeys are re-added every run; clear first so the fixed summary rows
                         # below cannot accumulate when clearWith does not fire.
-                        table$deleteRows()
+                        .deleteTableRows(table)
 
                         n_boot_ok <- stepwise_info$n_bootstrap_successful
                         mean_boot_aic <- stepwise_info$bootstrap_performance$mean_aic
@@ -1596,7 +1596,7 @@ stagemigrationPart3 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 if (!is.null(personalized) && is.null(personalized$error) &&
                     length(personalized$summary_stats) > 0) {
                     table <- self$results$personalizedRiskSummary
-                    table$deleteRows()
+                    .deleteTableRows(table)
 
                     for (time_key in names(personalized$summary_stats)) {
                         stats_row <- personalized$summary_stats[[time_key]]
@@ -1625,7 +1625,7 @@ stagemigrationPart3 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 diagnostics <- multifactorial_results$model_diagnostics
                 if (!is.null(diagnostics) && is.null(diagnostics$error)) {
                     table <- self$results$multifactorialModelDiagnostics
-                    table$deleteRows()
+                    .deleteTableRows(table)
 
                     assumptions <- diagnostics$model_assumptions
                     diag_sources <- list(
@@ -1689,7 +1689,7 @@ stagemigrationPart3 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 mv_dca <- multifactorial_results$multivariable_dca
                 if (!is.null(mv_dca) && is.null(mv_dca$error) && length(mv_dca) > 0) {
                     table <- self$results$multivariableDCASummary
-                    table$deleteRows()
+                    .deleteTableRows(table)
 
                     dca_model_labels <- c(
                         baseline = "Baseline (Covariates Only)",
@@ -1986,7 +1986,7 @@ stagemigrationPart3 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                         # rows: 0 + addRow(): jamovi does not clear the table between runs
                         # unless a clearWith option changed, so re-running appends duplicates.
-                        table$deleteRows()
+                        .deleteTableRows(table)
 
                         # Add explanatory text
                         if (isTRUE(self$options$showExplanations)) {
@@ -2036,7 +2036,7 @@ stagemigrationPart3 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         recommendation <- all_results$will_rogers_recommendation
 
                         # rows: 0 + addRow(): clear first or a re-run appends duplicate rows.
-                        table$deleteRows()
+                        .deleteTableRows(table)
 
                         # Overall recommendation
                         table$addRow(rowKey = "overall", values = list(

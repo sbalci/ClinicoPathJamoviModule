@@ -328,7 +328,7 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Summary table (populates the correct .r.yaml column names)
             summary_table <- self$results$summary
-            summary_table$deleteRows()
+            .deleteTableRows(summary_table)
             for (i in seq_along(private$.processedData)) {
                  sd <- private$.processedData[[i]]
                  summary_table$addRow(rowKey = i, values = list(

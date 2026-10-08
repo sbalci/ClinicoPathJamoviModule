@@ -184,3 +184,26 @@ NULL
     x[hit] <- substring(x[hit], nchar(prefix) + 1L)
     x
 }
+
+#' Empty a jmvcore Table, row names included
+#'
+#' jmvcore's `Table$deleteRows()` resets the row keys, the cells and the row
+#' count but not the private row names, which only `addRow()` rewrites. A table
+#' emptied after holding rows therefore keeps phantom names: `$asDF` fails with
+#' "invalid 'row.names' length" and `fromProtoBuf()` indexes past the keys
+#' (measured on jmvcore 2.7.38: rowCount 0, rowKeys 0, names 2).
+#'
+#' jmvcore has no public setter, so the names are reset to `character(0)`, the
+#' value a newly built Table starts with. Once jmvcore clears them itself, the
+#' guard never fires. If a jmvcore release renames the field, the write lands
+#' nowhere and the regression test in `test-utils-delete-table-rows.R` fails.
+#'
+#' @param table a `jmvcore::Table`.
+#' @return `table`, invisibly.
+#' @noRd
+.deleteTableRows <- function(table) {
+    table$deleteRows()
+    if (length(table$names) > 0)
+        table$.__enclos_env__$private$.rowNames <- character()
+    invisible(table)
+}

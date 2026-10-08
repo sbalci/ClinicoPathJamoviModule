@@ -1864,7 +1864,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # that re-runs .run() (ticking the glossary, for instance). Without this
             # the pairwise rows were appended a second and third time, so a 3x3 table
             # grew from 6 rows to 12 to 18 as the user toggled unrelated checkboxes.
-            self$results$posthocTable$deleteRows()
+            .deleteTableRows(self$results$posthocTable)
 
             # CRITICAL FIX: Check if user wants to disable post-hoc tests entirely
             # When posthoc = "none", skip all pairwise testing
@@ -2044,7 +2044,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Generate comprehensive export table
         .generateExportTable = function(chiSqTest, contTable, pairwise_results = NULL) {
             # Same append-not-replace problem as posthocTable - see the note there.
-            self$results$exportTable$deleteRows()
+            .deleteTableRows(self$results$exportTable)
             # these rows carry the same p-values and interval as the tables above
             mc_used <- length(pairwise_results) > 0 &&
                 any(vapply(pairwise_results, function(x) identical(x$test_used, "fisher_mc"), logical(1)))

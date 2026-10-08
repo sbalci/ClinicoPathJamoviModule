@@ -1283,7 +1283,7 @@ simpleSurvivalPowerClass <- R6::R6Class(
             # Clear existing rows to avoid accumulation on updates
             try(
                 {
-                    table$deleteRows()
+                    .deleteTableRows(table)
                 },
                 silent = TRUE
             )
@@ -1324,7 +1324,7 @@ simpleSurvivalPowerClass <- R6::R6Class(
             table <- self$results$power_results
             try(
                 {
-                    table$deleteRows()
+                    .deleteTableRows(table)
                 },
                 silent = TRUE
             )
@@ -1384,7 +1384,7 @@ simpleSurvivalPowerClass <- R6::R6Class(
             table <- self$results$effect_size_results
             try(
                 {
-                    table$deleteRows()
+                    .deleteTableRows(table)
                 },
                 silent = TRUE
             )
@@ -1454,7 +1454,7 @@ simpleSurvivalPowerClass <- R6::R6Class(
             table <- self$results$study_duration_results
             try(
                 {
-                    table$deleteRows()
+                    .deleteTableRows(table)
                 },
                 silent = TRUE
             )
@@ -1557,7 +1557,7 @@ simpleSurvivalPowerClass <- R6::R6Class(
             table <- self$results$competing_risks_table
             try(
                 {
-                    table$deleteRows()
+                    .deleteTableRows(table)
                 },
                 silent = TRUE
             )
@@ -1633,7 +1633,7 @@ simpleSurvivalPowerClass <- R6::R6Class(
             table <- self$results$non_inferiority_table
             try(
                 {
-                    table$deleteRows()
+                    .deleteTableRows(table)
                 },
                 silent = TRUE
             )
@@ -1713,7 +1713,7 @@ simpleSurvivalPowerClass <- R6::R6Class(
             table <- self$results$rmst_analysis_table
             try(
                 {
-                    table$deleteRows()
+                    .deleteTableRows(table)
                 },
                 silent = TRUE
             )
@@ -1786,7 +1786,7 @@ simpleSurvivalPowerClass <- R6::R6Class(
             table <- self$results$snp_analysis_table
             try(
                 {
-                    table$deleteRows()
+                    .deleteTableRows(table)
                 },
                 silent = TRUE
             )
@@ -1873,7 +1873,7 @@ simpleSurvivalPowerClass <- R6::R6Class(
             table <- self$results$multi_arm_table
             try(
                 {
-                    table$deleteRows()
+                    .deleteTableRows(table)
                 },
                 silent = TRUE
             )
@@ -1954,7 +1954,7 @@ simpleSurvivalPowerClass <- R6::R6Class(
             table <- self$results$interim_analysis_table
             try(
                 {
-                    table$deleteRows()
+                    .deleteTableRows(table)
                 },
                 silent = TRUE
             )
@@ -2033,7 +2033,7 @@ simpleSurvivalPowerClass <- R6::R6Class(
                     }
 
                     # Clear existing rows first
-                    table$deleteRows()
+                    .deleteTableRows(table)
 
                     # Get base case values from current options
                     base_hr <- self$options$effect_size
@@ -2254,7 +2254,7 @@ simpleSurvivalPowerClass <- R6::R6Class(
             table <- self$results$assumptions_table
             try(
                 {
-                    table$deleteRows()
+                    .deleteTableRows(table)
                 },
                 silent = TRUE
             )
@@ -2618,7 +2618,7 @@ simpleSurvivalPowerClass <- R6::R6Class(
             table <- self$results$regulatory_table
             try(
                 {
-                    table$deleteRows()
+                    .deleteTableRows(table)
                 },
                 silent = TRUE
             )

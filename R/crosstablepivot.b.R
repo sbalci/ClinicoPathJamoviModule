@@ -117,7 +117,7 @@ crosstablepivotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             group_text <- self$options$group
             
             # Clear any existing rows
-            pivot_table$deleteRows()
+            .deleteTableRows(pivot_table)
             
             # Add basic summary information
             pivot_table$addRow(rowKey = 1, values = list(
@@ -151,7 +151,7 @@ crosstablepivotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             summary_table <- self$results$summary_stats
 
             # Clear any existing rows (table declares no fixed `rows:`, so use addRow)
-            summary_table$deleteRows()
+            .deleteTableRows(summary_table)
 
             # Add summary statistics
             summary_table$addRow(rowKey = 1, values = list(

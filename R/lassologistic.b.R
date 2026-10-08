@@ -194,7 +194,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 for (nm in c("modelSummary", "coefficients", "scoringTable",
                              "lookupTable", "variableImportance", "modelComparison")) {
                     tbl <- tryCatch(self$results[[nm]], error = function(e) NULL)
-                    if (!is.null(tbl)) tbl$deleteRows()
+                    if (!is.null(tbl)) .deleteTableRows(tbl)
                 }
                 # The four fixed-row tables keep their .init() rows; only their values are
                 # blanked, so a run that stops early cannot leave the previous run's numbers.

@@ -1586,7 +1586,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         private$.notePredictiveValues(resultsTable, private$.prevalenceList[[var]])
 
         # Clear existing rows
-        resultsTable$deleteRows()
+        .deleteTableRows(resultsTable)
 
         # A non-finite cutpoint is not an operating point a clinician can apply to a patient.
         # It appears when no threshold achieves a positive Youden index - typically because the
@@ -2057,7 +2057,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         # or blank pooled AUCs. Rebuilding the row set from scratch also drops a "random"
         # row left over from a previous method choice, which .blankMetaAnalysisRows()
         # (keyed on the CURRENT labels) would otherwise never clear.
-        self$results$metaAnalysisTable$deleteRows()
+        .deleteTableRows(self$results$metaAnalysisTable)
         metaLabels <- private$.metaAnalysisRowLabels()
         for (key in names(metaLabels))
           self$results$metaAnalysisTable$addRow(rowKey = key,
@@ -2301,7 +2301,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
               private$.blankMetaAnalysisRows()
               next
             }
-            tryCatch(item$deleteRows(), error = function(e) NULL)
+            tryCatch(.deleteTableRows(item), error = function(e) NULL)
           }
         }
       },
@@ -3482,7 +3482,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           # Checkpoint before expensive threshold table generation
           private$.checkpoint()
           thresholdTable <- self$results$thresholdTable
-          thresholdTable$deleteRows() # Clear previous results
+          .deleteTableRows(thresholdTable) # Clear previous results
 
           for (var in names(private$.rocDataList)) {
             rocData <- private$.rocDataList[[var]]

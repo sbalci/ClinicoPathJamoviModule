@@ -409,7 +409,7 @@ jjdotchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.summaryLabelLower(), 100 * self$options$conflevel,
                 base::format(self$options$testvalue)))
             # jmvcore Tables have no setRows(); clear and re-add.
-            t$deleteRows()
+            .deleteTableRows(t)
             for (i in seq_len(nrow(tab))) {
                 t$addRow(rowKey = i, values = list(
                     grp = tab$grp[i], n = tab$n[i], value = tab$value[i],

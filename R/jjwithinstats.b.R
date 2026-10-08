@@ -311,7 +311,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         .populatePairedEffects = function(prepared) {
             table <- self$results$pairedChanges
-            table$deleteRows()
+            .deleteTableRows(table)
             table$setVisible(isTRUE(self$options$pairedEffects))
             for (key in c("scope", "intervals", "testing", "ratios", "unavailable", "warnings"))
                 table$setNote(key, "")

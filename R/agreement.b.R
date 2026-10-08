@@ -15328,14 +15328,9 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                              "pathologistTable", "boundaryTable")) {
                     tbl <- tryCatch(self$results[[nm]], error = function(e) NULL)
                     if (is.null(tbl)) next
-                    tbl$deleteRows()
-                    # jmvcore 2.7.38 Table$deleteRows() clears .rowKeys and the columns but
-                    # NOT .rowNames, which addRow() recomputes wholesale from .rowKeys. So a
-                    # table emptied here and left empty by this run keeps the PREVIOUS run's
-                    # row names, and $asDF then fails with "invalid 'row.names' length"
-                    # (measured: rowCount 0, rowKeys 0, rowNames 2). Clear it to match.
-                    tryCatch(tbl$.__enclos_env__$private$.rowNames <- list(),
-                             error = function(e) NULL)
+                    # Not tbl$deleteRows(): it leaves the previous run's row names behind, so a
+                    # table this run leaves empty fails $asDF (see .deleteTableRows, R/utils.R).
+                    .deleteTableRows(tbl)
                 }
 
                 # The scaffolded tables keep their .init() rows, but jamovi restores the previous

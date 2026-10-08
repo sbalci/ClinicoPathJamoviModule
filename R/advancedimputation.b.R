@@ -44,7 +44,7 @@ advancedimputationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
 
             # 3. Missing Data Summary Table
             tableSummary <- self$results$summary
-            tableSummary$deleteRows()
+            .deleteTableRows(tableSummary)
             for (v in impVars) {
                 m <- sum(is.na(mydata[[v]]))
                 p <- (m / nrow(mydata)) * 100
@@ -59,7 +59,7 @@ advancedimputationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
             # We'll just set up the methods summary for now to provide feedback to user
             
             tableMethods <- self$results$imputationMethodSummary
-            tableMethods$deleteRows()
+            .deleteTableRows(tableMethods)
             
             methods <- list()
             for (v in impVars) {

@@ -42,7 +42,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     }
                 }
                 for (nm in c("rawCounts", "rawContingency", "confusionMatrixSummary",
-                             "falsePositiveTable", "falseNegativeTable")) self$results[[nm]]$deleteRows()
+                             "falsePositiveTable", "falseNegativeTable")) .deleteTableRows(self$results[[nm]])
             },
 
             .runComparator = function(mydata, testVariable, goldVariable) {
@@ -1659,7 +1659,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                           "positive", self$options$testPositive, "negative", self$options$testNegative),
                     "Only selected positive/negative reference and test levels; missing and other levels excluded")
                 for (nm in c("comparatorCounts", "comparatorMetrics", "comparatorPopulation", "comparatorCases"))
-                    self$results[[nm]]$deleteRows()
+                    .deleteTableRows(self$results[[nm]])
                 self$results$comparatorReport$setContent("")
 
                 # Render whatever was collected however this method exits. Five
@@ -1874,7 +1874,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     # Populate raw combination count jamovi table
                     raw_counts_table <- self$results$rawCounts
                     # Clear existing rows - jamovi tables use deleteRows(), not clear()
-                    try(raw_counts_table$deleteRows(), silent = TRUE)
+                    try(.deleteTableRows(raw_counts_table), silent = TRUE)
 
                     if (!is.null(raw_counts_table$getColumn("test_level"))) {
                         raw_counts_table$getColumn("test_level")$setTitle(private$.richText(testVariable))
@@ -2845,7 +2845,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
                 # False Positive cases table
                 fp_table <- self$results$falsePositiveTable
-                try(fp_table$deleteRows(), silent = TRUE)
+                try(.deleteTableRows(fp_table), silent = TRUE)
                 if (n_fp > 0) {
                     fp_cases <- mydata2[fp_idx, ]
                     # Use original row indices from the dataset, not filtered indices
@@ -2873,7 +2873,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
                 # False Negative cases table
                 fn_table <- self$results$falseNegativeTable
-                try(fn_table$deleteRows(), silent = TRUE)
+                try(.deleteTableRows(fn_table), silent = TRUE)
                 if (n_fn > 0) {
                     fn_cases <- mydata2[fn_idx, ]
                     # Use original row indices from the dataset, not filtered indices

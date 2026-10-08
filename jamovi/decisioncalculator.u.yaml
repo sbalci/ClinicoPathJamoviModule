@@ -103,7 +103,7 @@ children:
                 name: pp
               - type: TextBox
                 name: pprob
-                label: 'Prevalence (0.001-0.999)'
+                label: 'Prevalence (proportion between 0 and 1)'
                 format: number
                 enable: (pp)
 
@@ -236,7 +236,7 @@ children:
                     format: number
 
   - type: CollapseBox
-    label: Deployment workload
+    label: Deployment Workload
     collapsed: true
     children:
     - type: CheckBox
@@ -244,9 +244,12 @@ children:
     - type: TextBox
       name: workloadPopulationSize
       format: number
+      enable: (showWorkload)
     - type: TextBox
       name: prevalenceScenarios
       format: string
+      enable: (showWorkload)
     - type: TextBox
       name: analysisUnit
       format: string
+      enable: (showWorkload)

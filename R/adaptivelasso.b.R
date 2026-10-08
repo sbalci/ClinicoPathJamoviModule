@@ -1028,7 +1028,7 @@ adaptivelassoClass <- R6::R6Class(
             if (self$options$baseline_survival) {
                 private$.populatePredictions(adaptive_results, cox_data)
             } else {
-                self$results$predictions$deleteRows()
+                .deleteTableRows(self$results$predictions)
             }
 
             # Plots - set state data for all enabled plots
@@ -1134,7 +1134,7 @@ adaptivelassoClass <- R6::R6Class(
 
         .populateCoefficients = function(adaptive_results, cox_data) {
             table <- self$results$coefficients
-            table$deleteRows()
+            .deleteTableRows(table)
 
             coef_vec <- as.vector(adaptive_results$coef_min)
             selected_idx <- which(abs(coef_vec) > 1e-8)
@@ -1198,7 +1198,7 @@ adaptivelassoClass <- R6::R6Class(
 
         .populateSelectionPath = function(adaptive_results) {
             table <- self$results$selectionPath
-            table$deleteRows()
+            .deleteTableRows(table)
 
             cv_fit <- adaptive_results$cv_fit
             full_fit <- adaptive_results$full_fit
@@ -1232,7 +1232,7 @@ adaptivelassoClass <- R6::R6Class(
 
         .populateCVResults = function(adaptive_results) {
             table <- self$results$cvResults
-            table$deleteRows()
+            .deleteTableRows(table)
 
             cv_fit <- adaptive_results$cv_fit
             min_idx <- which(cv_fit$lambda == cv_fit$lambda.min)
@@ -1260,7 +1260,7 @@ adaptivelassoClass <- R6::R6Class(
 
         .populateStabilityResults = function(adaptive_results) {
             table <- self$results$stabilityResults
-            table$deleteRows()
+            .deleteTableRows(table)
 
             stability <- adaptive_results$stability
             var_names <- rownames(adaptive_results$cv_fit$glmnet.fit$beta)
@@ -1302,7 +1302,7 @@ adaptivelassoClass <- R6::R6Class(
 
         .populateDiagnostics = function(adaptive_results) {
             table <- self$results$modelDiagnostics
-            table$deleteRows()
+            .deleteTableRows(table)
 
             diag <- adaptive_results$diagnostics
 
@@ -1382,7 +1382,7 @@ adaptivelassoClass <- R6::R6Class(
 
         .populatePerformance = function(adaptive_results, cox_data) {
             table <- self$results$performanceMetrics
-            table$deleteRows()
+            .deleteTableRows(table)
 
             diag <- adaptive_results$diagnostics
 
@@ -1442,7 +1442,7 @@ adaptivelassoClass <- R6::R6Class(
 
         .populateRiskGroups = function(adaptive_results, cox_data) {
             table <- self$results$riskGroups
-            table$deleteRows()
+            .deleteTableRows(table)
 
             diag <- adaptive_results$diagnostics
             selected_idx <- diag$selected_idx
@@ -1536,7 +1536,7 @@ adaptivelassoClass <- R6::R6Class(
 
         .populatePredictions = function(adaptive_results, cox_data) {
             table <- self$results$predictions
-            table$deleteRows()
+            .deleteTableRows(table)
 
             if (!isTRUE(self$options$baseline_survival)) {
                 return()

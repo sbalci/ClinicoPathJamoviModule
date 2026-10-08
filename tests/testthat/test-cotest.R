@@ -759,3 +759,18 @@ test_that("the Fagan nomogram is titled with the rule it actually plots", {
     expect_equal(unname(odds / (1 + odds)), unname(either), tolerance = 1e-9)
 })
 
+
+test_that("an out-of-range entry is rejected, never silently clamped in the GUI", {
+    # The jamovi client does not enforce an option's min/max. events.js used to clamp instead,
+    # so "80" typed for an 80% sensitivity ran as 0.99 and "10" for a 10% prevalence as 0.999,
+    # with nothing on screen saying so. jmvcore's own range check is the honest response.
+    js <- gsub("//[^\n]*", "", paste(readLines("../../jamovi/js/cotest.events.js", warn = FALSE),
+                                     collapse = "\n"))
+    expect_false(grepl("clamp|Math\\.(min|max)", js))
+    u <- readLines("../../jamovi/cotest.u.yaml", warn = FALSE)
+    expect_identical(trimws(grep("change:", u, value = TRUE)),
+                     "change: ./cotest.events::onChange_preset")
+
+    expect_error(ClinicoPath::cotest(test1_sens = 80), "between 0.01 and 0.99")
+    expect_error(ClinicoPath::cotest(prevalence = 10), "between 0.001 and 0.999")
+})

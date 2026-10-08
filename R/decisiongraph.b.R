@@ -29,7 +29,9 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
             # Data storage
             .treeData = NULL,
             .nodeData = NULL,
-            .results = NULL,
+            # Per-strategy expected values. Not `.results`: that is jmvcore Analysis's own field
+            # for the results tree, and assigning to it (or NULLing it in .retrieveState) wiped the tree.
+            .strategyResults = NULL,
             .markovData = NULL,
             .psaResults = NULL,
             .nmbAnalysis = NULL,
@@ -1075,7 +1077,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
                 # Store in both private variable (for immediate use) and state (for persistence)
                 # Ensure results is a clean data frame to prevent serialization issues
                 cleanResults <- as.data.frame(results)
-                private$.results <- cleanResults
+                private$.strategyResults <- cleanResults
                 if (!is.null(self$results$summaryTable)) {
                     self$results$summaryTable$setState(cleanResults)
                 }
@@ -1169,11 +1171,11 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
 
                 wtp <- self$options$willingnessToPay
 
-                if (is.null(private$.results)) {
+                if (is.null(private$.strategyResults)) {
                     private$.calculateExpectedValues()
                 }
 
-                results <- private$.results
+                results <- private$.strategyResults
 
                 # Enhanced NMB calculations with configurable WTP thresholds for sensitivity
                 wtp_multiples <- private$DECISIONGRAPH_DEFAULTS$default_wtp_multiples
@@ -1339,11 +1341,11 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
                     return(NULL)
                 }
 
-                if (is.null(private$.results)) {
+                if (is.null(private$.strategyResults)) {
                     private$.calculateExpectedValues()
                 }
 
-                results <- private$.results
+                results <- private$.strategyResults
 
                 # Sort by effectiveness (utility)
                 results <- results[order(results$expectedUtility), ]
@@ -1466,11 +1468,11 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
                 if (!self$options$sensitivityAnalysis) {
                     return(NULL)
                 }
-                if (is.null(private$.results)) {
+                if (is.null(private$.strategyResults)) {
                     private$.calculateExpectedValues()
                 }
 
-                baseResults <- private$.results
+                baseResults <- private$.strategyResults
                 wtp <- self$options$willingnessToPay
 
                 # Define parameters to vary
@@ -1566,7 +1568,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
                 return(private$.cohortTrace)
             },
             .performBudgetImpactAnalysis = function() {
-                if (!self$options$budgetImpactAnalysis || is.null(private$.results)) {
+                if (!self$options$budgetImpactAnalysis || is.null(private$.strategyResults)) {
                     return(NULL)
                 }
 
@@ -1575,7 +1577,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
                 timeHorizon <- self$options$timeHorizon
 
                 # Calculate total costs for each strategy
-                strategies <- private$.results
+                strategies <- private$.strategyResults
 
                 # Current practice (baseline strategy)
                 baselineStrategy <- strategies[1, ]
@@ -2321,14 +2323,14 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
             .populateBudgetImpactAnalysis = function() {
                 # Populate budget impact analysis results
 
-                if (!self$options$budgetImpactAnalysis || is.null(private$.results)) {
+                if (!self$options$budgetImpactAnalysis || is.null(private$.strategyResults)) {
                     return()
                 }
 
                 targetPop <- self$options$targetPopulationSize
                 marketPen <- self$options$marketPenetration
 
-                results <- private$.results
+                results <- private$.strategyResults
 
                 # Calculate budget impact
                 if (nrow(results) >= 2) {
@@ -2466,11 +2468,11 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
             },
             .createDecisionComparison = function() {
                 # Create comprehensive decision comparison table
-                if (!self$options$decisionComparison || is.null(private$.results)) {
+                if (!self$options$decisionComparison || is.null(private$.strategyResults)) {
                     return(NULL)
                 }
 
-                results <- private$.results
+                results <- private$.strategyResults
                 wtp <- self$options$willingnessToPay
 
                 # Add additional comparison metrics
@@ -2922,11 +2924,11 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
                 # Populate summary table with serialization protection
                 tryCatch(
                     {
-                        if (self$options$summaryTable && !is.null(private$.results)) {
+                        if (self$options$summaryTable && !is.null(private$.strategyResults)) {
                             summaryTable <- self$results$summaryTable
 
                             # Ensure we have a clean data frame
-                            results <- as.data.frame(private$.results)
+                            results <- as.data.frame(private$.strategyResults)
 
                             for (i in seq_len(nrow(results))) {
                                 summaryTable$addRow(rowKey = i, values = list(
@@ -2941,7 +2943,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
                     },
                     error = function(e) {
                         # If table population fails, clear private variable to prevent serialization issues
-                        private$.results <- NULL
+                        private$.strategyResults <- NULL
                     }
                 )
 
@@ -3212,7 +3214,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
                                 if (!is.null(nmbResults)) {
                                     # Extract results from the enhanced NMB analysis - ensure serializable
                                     if (!is.null(nmbResults$results)) {
-                                        private$.results <- nmbResults$results
+                                        private$.strategyResults <- nmbResults$results
                                     }
                                     # Store only serializable parts of the analysis
                                     if (is.list(nmbResults) && length(nmbResults) > 0) {
@@ -3233,7 +3235,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
                                 if (!is.null(icerResults)) {
                                     # Ensure ICER results are serializable
                                     if (is.data.frame(icerResults) || (is.list(icerResults) && !any(sapply(icerResults, is.function)))) {
-                                        private$.results <- icerResults
+                                        private$.strategyResults <- icerResults
                                     }
                                 }
                             }
@@ -3360,24 +3362,24 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
             },
             .ensureSerializableResults = function() {
                 # Ensure all result objects are serializable data frames or vectors
-                if (!is.null(private$.results)) {
-                    if (is.data.frame(private$.results)) {
+                if (!is.null(private$.strategyResults)) {
+                    if (is.data.frame(private$.strategyResults)) {
                         # Ensure all columns are basic types
-                        for (col_name in names(private$.results)) {
-                            col <- private$.results[[col_name]]
+                        for (col_name in names(private$.strategyResults)) {
+                            col <- private$.strategyResults[[col_name]]
                             if (is.factor(col)) {
-                                private$.results[[col_name]] <- as.character(col)
+                                private$.strategyResults[[col_name]] <- as.character(col)
                             } else if (is.list(col)) {
-                                private$.results[[col_name]] <- sapply(col, function(x) {
+                                private$.strategyResults[[col_name]] <- sapply(col, function(x) {
                                     if (length(x) == 1) as.character(x) else paste(x, collapse = ", ")
                                 })
                             }
                         }
                     } else {
                         # Convert non-data.frame results to data frame
-                        private$.results <- tryCatch(
+                        private$.strategyResults <- tryCatch(
                             {
-                                as.data.frame(private$.results)
+                                as.data.frame(private$.strategyResults)
                             },
                             error = function(e) {
                                 NULL
@@ -3389,7 +3391,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
             .validateStateIntegrity = function() {
                 # Test serialization of key objects
                 test_objects <- list(
-                    "results" = private$.results,
+                    "results" = private$.strategyResults,
                     "treeData" = private$.treeData,
                     "psaResults" = private$.psaResults
                 )
@@ -3404,7 +3406,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
                             error = function(e) {
                                 # Object cannot be serialized - remove it
                                 if (name == "results") {
-                                    private$.results <- NULL
+                                    private$.strategyResults <- NULL
                                 } else if (name == "treeData") {
                                     private$.treeData <- NULL
                                 } else if (name == "psaResults") private$.psaResults <- NULL
@@ -3415,7 +3417,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
             },
             .emergencyStateCleanup = function() {
                 # Nuclear option - clear everything if normal cleanup fails
-                private$.results <- NULL
+                private$.strategyResults <- NULL
                 private$.treeData <- NULL
                 private$.nodeData <- NULL
                 private$.markovData <- NULL
@@ -3480,17 +3482,14 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
             # Get Current Memory Usage
             # Returns: List with memory statistics
             .getMemoryUsage = function() {
-                if (exists("memory.size", where = "package:utils")) {
-                    # Windows
-                    list(used = utils::memory.size(), limit = utils::memory.limit())
-                } else {
-                    # Unix-like systems
-                    mem_info <- gc(verbose = FALSE)
-                    list(
-                        used = sum(mem_info[, "used"]),
-                        max_used = sum(mem_info[, "max used"])
-                    )
-                }
+                # gc() on every platform. memory.size()/memory.limit() are stubs since R 4.2
+                # that warn "no longer supported" (and exist() is TRUE for them everywhere, so
+                # the old Windows branch ran on every platform and warned on every run).
+                mem_info <- gc(verbose = FALSE)
+                list(
+                    used = sum(mem_info[, "used"]),
+                    max_used = sum(mem_info[, "max used"])
+                )
             },
 
             # Perform Smart Garbage Collection
@@ -3508,7 +3507,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
             # Aggressive Memory Cleanup
             .aggressiveMemoryCleanup = function() {
                 # Clear all private variables immediately
-                private$.results <- NULL
+                private$.strategyResults <- NULL
                 private$.treeData <- NULL
                 private$.nodeData <- NULL
                 private$.markovData <- NULL
@@ -3527,7 +3526,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
                 private$.cohortTrace <- NULL # Markov trace matrices
 
                 # Preserve smaller, cacheable objects
-                # private$.results - keep for performance
+                # private$.strategyResults - keep for performance
                 # private$.treeData - keep if not too large
                 if (!is.null(private$.treeData) && object.size(private$.treeData) > 1e6) {
                     private$.treeData <- NULL
@@ -3537,7 +3536,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
             # Standard Memory Cleanup
             .standardMemoryCleanup = function() {
                 # Balanced cleanup for standard operations
-                private$.results <- NULL
+                private$.strategyResults <- NULL
                 private$.psaResults <- NULL
                 private$.cohortTrace <- NULL
                 private$.budgetImpactData <- NULL
@@ -3565,7 +3564,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
                 tryCatch(
                     {
                         # Initialize temporary private variables as NULL
-                        private$.results <- NULL
+                        private$.strategyResults <- NULL
                         private$.treeData <- NULL
                         private$.nodeData <- NULL
                         private$.markovData <- NULL
@@ -3573,7 +3572,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
 
                         # Try to retrieve previous results
                         if (!is.null(self$results$summaryTable$state)) {
-                            private$.results <- self$results$summaryTable$state
+                            private$.strategyResults <- self$results$summaryTable$state
                         }
 
                         # Try to retrieve previous tree data
@@ -3585,7 +3584,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
                     },
                     error = function(e) {
                         # If state retrieval fails, start fresh
-                        private$.results <- NULL
+                        private$.strategyResults <- NULL
                         private$.treeData <- NULL
                         private$.nodeData <- NULL
                         private$.markovData <- NULL

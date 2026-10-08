@@ -605,9 +605,9 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
       
       # Clear analysis outputs on error to prevent stale results
       .clearAnalysisOutputs = function() {
-        self$results$selectedVariables$deleteRows()
-        self$results$regularizationMetrics$deleteRows()
-        self$results$stabilityResults$deleteRows()
+        .deleteTableRows(self$results$selectedVariables)
+        .deleteTableRows(self$results$regularizationMetrics)
+        .deleteTableRows(self$results$stabilityResults)
       },
 
       # Initialize result tables

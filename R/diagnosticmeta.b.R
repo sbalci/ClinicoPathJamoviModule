@@ -1700,7 +1700,7 @@ diagnosticmetaClass <- R6::R6Class(
 
             # Clear first, before any early return, so a run that bails out
             # cannot leave rows from a previous configuration on screen.
-            self$results$metaregression$deleteRows()
+            .deleteTableRows(self$results$metaregression)
 
             if (!requireNamespace("metafor", quietly = TRUE)) {
                 self$results$metaregression$setNote("package_error",
@@ -3033,7 +3033,7 @@ diagnosticmetaClass <- R6::R6Class(
 
             table <- self$results$individualstudies
 
-            table$deleteRows()
+            .deleteTableRows(table)
 
             # Calculate sensitivity and specificity for each study
             meta_data$sens <- meta_data$tp / (meta_data$tp + meta_data$fn)

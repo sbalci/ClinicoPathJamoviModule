@@ -66,7 +66,7 @@
     list(key = "Analysis population", label = text$ref_population, value = population),
     list(key = "Sampling unit", label = text$ref_unit, value = text$ref_unit_value))
   table <- results$referenceDefinition
-  table$deleteRows()
+  .deleteTableRows(table)
   for (row in rows) {
     value <- row$value
     table$addRow(rowKey = row$key, values = list(setting = row$label,
@@ -141,9 +141,9 @@
 }
 
 .diagFillComparator <- function(results, comparisons, ci = TRUE, text = .diagText) {
-  results$comparatorMetrics$deleteRows()
-  results$comparatorCounts$deleteRows()
-  results$comparatorPopulation$deleteRows()
+  .deleteTableRows(results$comparatorMetrics)
+  .deleteTableRows(results$comparatorCounts)
+  .deleteTableRows(results$comparatorPopulation)
   summaries <- lapply(comparisons, function(z) .diagComparatorMetrics(z$call, z$reference, ci, text))
   for (test in names(summaries)) {
     s <- summaries[[test]]

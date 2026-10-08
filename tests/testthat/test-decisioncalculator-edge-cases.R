@@ -431,24 +431,13 @@ test_that("handles very small fractional counts", {
 # Prevalence Edge Cases
 # ═══════════════════════════════════════════════════════════
 
-test_that("prevalence below minimum (< 0.001) rejected", {
-  expect_error(
-    decisioncalculator(
-      TP = 90, TN = 80, FP = 20, FN = 10,
-      pp = TRUE,
-      pprob = 0.0005
-    )
-  )
-})
-
-test_that("prevalence above maximum (> 0.999) rejected", {
-  expect_error(
-    decisioncalculator(
-      TP = 90, TN = 80, FP = 20, FN = 10,
-      pp = TRUE,
-      pprob = 0.9995
-    )
-  )
+test_that("prevalence at or beyond 0 and 1 is rejected; small but positive values are accepted", {
+  # jamovi/decisioncalculator.a.yaml accepts 1e-9 to 0.999999999 since 2026-10-04 (the old
+  # 0.001-0.999 range rejected realistic screening prevalences such as 0.0005).
+  expect_error(decisioncalculator(TP = 90, TN = 80, FP = 20, FN = 10, pp = TRUE, pprob = 0))
+  expect_error(decisioncalculator(TP = 90, TN = 80, FP = 20, FN = 10, pp = TRUE, pprob = 1))
+  expect_no_error(decisioncalculator(TP = 90, TN = 80, FP = 20, FN = 10, pp = TRUE, pprob = 0.0005))
+  expect_no_error(decisioncalculator(TP = 90, TN = 80, FP = 20, FN = 10, pp = TRUE, pprob = 0.9995))
 })
 
 test_that("prevalence = 1.0 rejected", {

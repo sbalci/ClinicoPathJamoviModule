@@ -730,7 +730,7 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # only cleared by its clearWith options: a change to plot_title or
             # a colour re-runs .run() with the rows still in place, so without
             # this the table doubled on every such change.
-            pyramidTable$deleteRows()
+            .deleteTableRows(pyramidTable)
             for(i in seq_len(nrow(plotData2))) {
                 pyramidTable$addRow(rowKey = i, values = plotData2[i,])
             }

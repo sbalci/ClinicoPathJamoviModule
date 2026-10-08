@@ -1750,7 +1750,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # clearWith (now in the .r.yaml) is the primary fix; clearing here
                 # is the belt-and-braces half, because the row set depends on the
                 # DATA (one row per distinct outcome code), not only on options.
-                outcome_table$deleteRows()
+                .deleteTableRows(outcome_table)
 
                 # Add rows for each unique outcome value
                 for (i in seq_along(outcome_counts)) {
@@ -1770,7 +1770,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Add diagnostics table if requested
             if (self$options$diagnostics && length(diagnostics) > 0) {
                 diagnostics_table <- self$results$diagnosticsTable
-                diagnostics_table$deleteRows()   # see the note on outputTable above
+                .deleteTableRows(diagnostics_table)   # see the note on outputTable above
 
                 # Add each diagnostic as a row
                 i <- 1

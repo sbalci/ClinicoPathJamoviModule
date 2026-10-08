@@ -704,12 +704,16 @@ msgid ""
 "(requested %.2f among diseased, truncated to the nearest value the entered "
 "sensitivities allow)"
 msgstr ""
+"(hastalığı olanlarda %.2f istendi; girilen duyarlılıkların izin verdiği en "
+"yakın değere kırpıldı)"
 
 #: R/cotest.b.R
 msgid ""
 "(requested %.2f among non-diseased, truncated to the nearest value the "
 "entered specificities allow)"
 msgstr ""
+"(hastalığı olmayanlarda %.2f istendi; girilen özgüllüklerin izin verdiği en "
+"yakın değere kırpıldı)"
 
 #: R/decision.b.R
 msgid "(the population prevalence you supplied)"
@@ -974,7 +978,7 @@ msgstr "Eksik sonuca sahip {count} satır model uyumundan önce hariç tutuldu."
 
 #: R/cotest.b.R
 msgid "{ctx} resulted in a non-finite probability."
-msgstr ""
+msgstr "{ctx} sonlu olmayan bir olasılık üretti."
 
 #: R/decisioncalculator.b.R
 msgid ""
@@ -3129,10 +3133,12 @@ msgstr "%1$d kullanıldı (tanımlanan: %2$d)"
 #: R/cotest.b.R
 msgid "%1$s (%2$s given, %3$s used — this selects which model is fitted)"
 msgstr ""
+"%1$s (verilen: %2$s, kullanılan: %3$s — bu, hangi modelin uydurulacağını "
+"belirler)"
 
 #: R/cotest.b.R
 msgid "%1$s (%2$s given, %3$s used)"
-msgstr ""
+msgstr "%1$s (verilen: %2$s, kullanılan: %3$s)"
 
 #: R/agreement.b.R
 msgid "%1$s (CI spans %2$s to %3$s)"
@@ -3284,6 +3290,10 @@ msgid ""
 "it to %3$s, which selects which model is fitted. To fit the other model, set "
 "the worked example to Custom values."
 msgstr ""
+"%1$s değeri %2$s idi (varsayılanı ya da sizin ayarladığınız) ve işlenmiş "
+"örnek bunu %3$s olarak değiştirdi; bu değer hangi modelin uydurulacağını "
+"belirler. Diğer modeli uydurmak için işlenmiş örneği Özel değerler olarak "
+"ayarlayın."
 
 #: R/psychopdaROC.b.R
 msgid ""
@@ -4358,6 +4368,11 @@ msgid ""
 "give an informative LR+ or LR- when sensitivity and specificity are very "
 "unequal."
 msgstr ""
+"%s: ayırt etme gücü düşük (duyarlılık artı özgüllük 1.1'in altında, yani "
+"Youden indeksi 0.1'in altında). Test Parametreleri tablosundaki olabilirlik "
+"oranlarını kontrol edin: duyarlılık ve özgüllük birbirinden çok farklı "
+"olduğunda, şans köşegenine yakın bir çalışma noktası bile bilgilendirici bir "
+"LR+ veya LR- verebilir."
 
 #: R/jjcorrmat.b.R
 msgid ""
@@ -4394,6 +4409,10 @@ msgid ""
 "sensitivity and specificity, or its positive and negative categories, have "
 "been entered the wrong way round."
 msgstr ""
+"%s: şans köşegeninin altında (duyarlılık artı özgüllük 1'in altında): "
+"pozitif bir sonuç hastalığı daha olası değil, daha az olası kılar. "
+"Duyarlılık ve özgüllüğün ya da pozitif ve negatif kategorilerin ters girilip "
+"girilmediğini kontrol edin."
 
 #: R/cotest.b.R
 msgid ""
@@ -4402,6 +4421,10 @@ msgid ""
 "by construction rather than estimated. Move the conditional dependence "
 "toward 0 if that is not intended."
 msgstr ""
+"%s sonsuzdur: mevcut parametrelerle bu test sonucu kombinasyonu hastalığı "
+"olmayan bir denekte ortaya çıkamaz; bu nedenle test sonrası olasılığı tahmin "
+"edilmiş değil, yapı gereği 1'dir. Amaçlanan bu değilse koşullu bağımlılığı "
+"0'a doğru yaklaştırın."
 
 #: R/singlearm.b.R
 msgid ""
@@ -4446,8 +4469,12 @@ msgid ""
 "%s is undefined: with the current parameters this combination of test "
 "results has probability zero in both the diseased and the non-diseased "
 "group, so it cannot occur at all and no post-test probability exists for it. "
-"That row is left blank."
+"That row is footnoted as not estimable."
 msgstr ""
+"%s tanımsızdır: mevcut parametrelerle bu test sonucu kombinasyonunun "
+"olasılığı hem hastalığı olan hem de hastalığı olmayan grupta sıfırdır; "
+"dolayısıyla hiç ortaya çıkamaz ve bunun için bir test sonrası olasılık "
+"yoktur. Bu satır dipnotta tahmin edilemiyor olarak işaretlenmiştir."
 
 #: R/cotest.b.R
 msgid ""
@@ -4456,6 +4483,10 @@ msgid ""
 "construction rather than estimated. Move the conditional dependence toward 0 "
 "if that is not intended."
 msgstr ""
+"%s sıfırdır: mevcut parametrelerle bu test sonucu kombinasyonu hastalığı "
+"olan bir denekte ortaya çıkamaz; bu nedenle test sonrası olasılığı tahmin "
+"edilmiş değil, yapı gereği 0'dır. Amaçlanan bu değilse koşullu bağımlılığı "
+"0'a doğru yaklaştırın."
 
 #: R/diagnosticmeta.b.R
 msgid ""
@@ -4492,11 +4523,11 @@ msgstr ""
 
 #: R/cotest.b.R
 msgid "%s Negative LR"
-msgstr ""
+msgstr "%s Negatif LR"
 
 #: R/cotest.b.R
 msgid "%s Positive LR"
-msgstr ""
+msgstr "%s Pozitif LR"
 
 #: R/diagnosticmeta.b.R
 msgid "%s Positive LR %.2f and negative LR %.2f."
@@ -4504,11 +4535,11 @@ msgstr "%s Pozitif OO %.2f ve negatif OO %.2f."
 
 #: R/cotest.b.R
 msgid "%s Positive Only"
-msgstr ""
+msgstr "Yalnızca %s Pozitif"
 
 #: R/cotest.b.R
 msgid "%s Positive Only LR"
-msgstr ""
+msgstr "Yalnızca %s Pozitif LR"
 
 #: R/clinicalscore.b.R
 msgid "%s regression"
@@ -4750,11 +4781,11 @@ msgstr "%%%s, her vakada aynı: %%%s marjı içinde"
 
 #: R/cotest.b.R
 msgid "%sx increase"
-msgstr ""
+msgstr "%sx artış"
 
 #: R/cotest.b.R
 msgid "%sx of prevalence, a decrease"
-msgstr ""
+msgstr "prevalansın %sx katı, bir azalma"
 
 #: ggprism/ui[7][2][0].label
 msgid "• 2 groups, non-normal → Box plot + Wilcoxon"
@@ -5273,6 +5304,8 @@ msgid ""
 "<b>Demonstration only.</b> Illustrative test performance from a built-in "
 "worked example, not values for clinical use."
 msgstr ""
+"<b>Yalnızca gösterim amaçlıdır.</b> Yerleşik bir işlenmiş örnekten alınan "
+"temsili test performansıdır; klinik kullanım için değerler değildir."
 
 #: R/cotest.b.R
 msgid ""
@@ -5282,6 +5315,11 @@ msgid ""
 "pooled literature estimates, are not taken from any guideline, and must not "
 "be used for patient care."
 msgstr ""
+"<b>Yalnızca gösterim amaçlıdır.</b> Bu rakamlar yerleşik bir işlenmiş "
+"örnekten gelmektedir: hesaplamanın nasıl işlediğini göstermek için seçilmiş "
+"yuvarlak, temsili duyarlılık, özgüllük, prevalans ve bağımlılık değerleri. "
+"Bunlar literatürden birleştirilmiş tahminler değildir, herhangi bir "
+"kılavuzdan alınmamıştır ve hasta bakımında kullanılmamalıdır."
 
 #: R/singlearm.b.R
 msgid ""
@@ -6220,6 +6258,159 @@ msgid ""
 "specificity and prevalence you entered being exact.</p>\n"
 "</div>"
 msgstr ""
+"<div style=\"max-width: 800px;\">\n"
+"<h3>Tanı Testlerinde Test Bağımlılığını Anlama</h3>\n"
+"\n"
+"<p>Bu, <strong>paralel</strong> değerlendirilen iki test için geçerlidir: "
+"her ikisi de aynı deneğe aynı anda, sonuçlardan herhangi biri bilinmeden "
+"uygulanır ve iki sonuç daha sonra birleştirilir. Birbiri ardına yapılan ve "
+"ikincisinin yalnızca belirli bir ilk sonuçtan sonra istendiği testler için "
+"bunun yerine sıralı test analizi kullanın — orada ikinci testin duyarlılık "
+"ve özgüllüğü herkese değil, seçilmiş alt gruba uygulanır.</p>\n"
+"\n"
+"<h4>Koşullu bağımsızlık ve bağımlılık nedir?</h4>\n"
+"<p>İki tanı testi, <em>hastalık durumu bilindiğinde</em> bir testin sonucu "
+"diğer testin sonucunu etkilemiyorsa <strong>koşullu olarak "
+"bağımsızdır</strong>. Başka bir deyişle, hastalığı olan popülasyon içinde "
+"Test 1'in pozitif olma olasılığı Test 2'nin sonucunu bilmekten etkilenmez ve "
+"bunun tersi de geçerlidir. Aynısı hastalığı olmayan popülasyon için de "
+"geçerlidir.</p>\n"
+"\n"
+"<p>Hastanın gerçek hastalık durumunu bildiğimizde bile bir testin sonucu "
+"diğer test sonucunun olasılığını etkiliyorsa testler <strong>koşullu olarak "
+"bağımlıdır</strong>.</p>\n"
+"\n"
+"<h4>Matematiksel Formülasyon</h4>\n"
+"\n"
+"<p><strong>Bağımsız Testler:</strong> Testler bağımsız olduğunda birleşik "
+"olasılıklar, tek tek olasılıkların çarpımıdır:</p>\n"
+"<ul>\n"
+"  <li>P(Test1+ ve Test2+ | Hastalık+) = P(Test1+ | Hastalık+) × P(Test2+ | "
+"Hastalık+) = Duy₁ × Duy₂</li>\n"
+"  <li>P(Test1+ ve Test2+ | Hastalık−) = P(Test1+ | Hastalık−) × P(Test2+ | "
+"Hastalık−) = (1−Özg₁) × (1−Özg₂)</li>\n"
+"  <li>P(Test1− ve Test2− | Hastalık+) = P(Test1− | Hastalık+) × P(Test2− | "
+"Hastalık+) = (1−Duy₁) × (1−Duy₂)</li>\n"
+"  <li>P(Test1− ve Test2− | Hastalık−) = P(Test1− | Hastalık−) × P(Test2− | "
+"Hastalık−) = Özg₁ × Özg₂</li>\n"
+"</ul>\n"
+"\n"
+"<p><strong>Bağımlı Testler:</strong> Testler bağımlı olduğunda bu "
+"olasılıkları, −1'den 0'a (bağımsızlık) ve +1'e uzanan bir korelasyon "
+"parametresiyle (ρ veya ψ ile gösterilir) düzeltiriz. Pozitif değerler "
+"birlikte hata yapma eğilimindeki testleri tanımlar; negatif değerler ise "
+"birbirlerinin hatalarını telafi eden, yani birinin negatif olduğu yerde "
+"diğerinin pozitif olma eğiliminde olduğu testleri tanımlar. Burada her "
+"ikisine de izin verilir; ancak ulaşılabilir aralık −1 ile +1'den daha dardır "
+"ve girilen duyarlılık ve özgüllüklere bağlıdır — bu aralığın dışındaki "
+"değerler kırpılır ve analiz bunu bildirir:</p>\n"
+"<ul>\n"
+"  <li>P(Test1+ ve Test2+ | Hastalık+) = (Duy₁ × Duy₂) + ρ<sub>poz</sub> × "
+"√(Duy₁ × (1−Duy₁) × Duy₂ × (1−Duy₂))</li>\n"
+"  <li>P(Test1+ ve Test2+ | Hastalık−) = ((1−Özg₁) × (1−Özg₂)) + "
+"ρ<sub>neg</sub> × √((1−Özg₁) × Özg₁ × (1−Özg₂) × Özg₂)</li>\n"
+"</ul>\n"
+"\n"
+"<p>Uç değerler, uygulanabilir birleşik sınırlar içinde kalmaları için "
+"otomatik olarak kırpılır; kırpmadan sonra gerçekleşen korelasyon "
+"bildirilir.</p>\n"
+"\n"
+"<p>Not: Diğer birleşik olasılıklar için de benzer düzeltmeler yapılır.</p>\n"
+"\n"
+"<h4>Bağımlı ve Bağımsız Modeller Ne Zaman Kullanılmalı</h4>\n"
+"\n"
+"<p><strong>Bağımsızlık, varsayılan geri dönüş seçeneği değil, "
+"gerekçelendirilmesi gereken bir varsayımdır.</strong> Genellikle iyimser "
+"seçimdir: çifte, birlikte hata yapma eğilimindeki testlerin gerçekte "
+"sağladığından daha fazla birleşik bilgi atfeder. Yalnızca aşağıdakiler gibi "
+"olumlu bir gerekçe gösterebildiğinizde kullanın:</p>\n"
+"<ul>\n"
+"  <li>Testler gerçekten farklı biyolojik olguları ölçüyor</li>\n"
+"  <li>Farklı örnekler ve farklı ölçüm mekanizmaları kullanıyorlar</li>\n"
+"  <li>Kendi serinizden ya da yayımlanmış bir seriden elde edilen "
+"eşleştirilmiş veriler, hastalık durumu içinde artık korelasyon "
+"göstermiyor</li>\n"
+"</ul>\n"
+"\n"
+"<p><strong>İki testin nasıl etkileştiğini bilmiyorsanız, bağımsızlık yanlış "
+"varsayılandır.</strong> Bir örneği, bir yöntemi, bir gözlemciyi ya da bir "
+"biyolojik yolağı paylaşan testler, aksi gösterilmedikçe bağımlıdır. Birkaç "
+"küçük pozitif değer deneyin (örneğin 0.05, 0.10 ve 0.20) ve sonucun ne kadar "
+"değiştiğine bakın; çok değişiyorsa, dürüst bir rapor bağımsız değer yerine "
+"aralığı verir. Bağımsızlık onay kutusunun varsayılan olarak kapalı olmasının "
+"nedeni budur.</p>\n"
+"\n"
+"<p><strong>Bağımlılık modelini şu durumlarda kullanın:</strong></p>\n"
+"<ul>\n"
+"  <li>Testler aynı ya da benzer biyolojik olguları ölçüyorsa</li>\n"
+"  <li>Testler aynı biyolojik örneğe ya da mekanizmaya dayanıyorsa</li>\n"
+"  <li>Önceki çalışmalar test sonuçları arasında korelasyon gösteriyorsa</li>\n"
+"  <li>Her iki test de aynı karıştırıcı etkenlerden etkileniyorsa</li>\n"
+"  <li>Bir test sonucunu bilmenin diğerini öngördüğünü gözlemlediyseniz</li>\n"
+"</ul>\n"
+"\n"
+"<h4>Bağımlı Testlerin Gerçek Dünyadan Örnekleri</h4>\n"
+"<ul>\n"
+"  <li>Aynı anatomik yapıya bakan iki görüntüleme testi (örn. MRG ve BT)</li>\n"
+"  <li>Aynı patojene karşı farklı antikorları saptayan iki serolojik "
+"test</li>\n"
+"  <li>Her ikisi de aynı karıştırıcı etkenden (örn. inflamasyon) "
+"etkilenebilen testler</li>\n"
+"  <li>Aynı testin farklı gözlemciler tarafından yapılan çoklu okumaları</li>\n"
+"  <li>Aynı patojenin farklı genlerini saptayan iki farklı moleküler "
+"test</li>\n"
+"</ul>\n"
+"\n"
+"<h4>Bağımlılık Parametrelerinin Tahmini</h4>\n"
+"<p>Koşullu bağımlılık parametreleri (hastalığı olan denekler için "
+"ρ<sub>poz</sub> ve hastalığı olmayan denekler için ρ<sub>neg</sub>) ideal "
+"olarak hastalık durumu bilinen eşleştirilmiş test verilerinden tahmin "
+"edilmelidir. Olağan durum pozitif değerlerdir ve daha büyük değerler daha "
+"güçlü bağımlılığı gösterir; negatif değerler alışılmadıktır, ancak iki "
+"testin gerçekten birbirini telafi ettiği durumlarda geçerlidir. Veri yoksa, "
+"bir dizi makul değerle (örn. 0.05, 0.1, 0.2) yapılan duyarlılık analizleri "
+"bağımlılığın sonuçları ne kadar etkilediğini ortaya koyabilir.</p>\n"
+"\n"
+"<p><strong>Girilen değer bir korelasyondur (phi); kovaryans ya da kappa "
+"değildir.</strong> Gardner ve ark. (2000) dahil bazı kaynaklar bunun yerine "
+"koşullu <em>kovaryansı</em> bildirir. Girmeden önce dönüştürün: hastalığı "
+"olan deneklerde phi = kovaryans / √(Duy₁ × (1−Duy₁) × Duy₂ × (1−Duy₂)); "
+"hastalığı olmayan deneklerde Duy yerine (1−Özg) konularak aynı formül. Kappa "
+"bu korelasyonu değil uyumu ölçer ve onun yerine kullanılamaz.</p>\n"
+"\n"
+"<h4>Bağımlılığı Göz Ardı Etmenin Etkisi</h4>\n"
+"<p>İki test birlikte hata yapma eğilimindeyse, bağımsızlık varsaymak "
+"genellikle ikinci testin kattığı katkıyı abartır; paralel kural için "
+"hastalığı olan deneklerdeki bağımlılık birleşik duyarlılığı düşürür (Gardner "
+"ve ark. 2000). Ancak her test sonrası olasılığın <em>hangi yöne</em> "
+"kaydığı, bağımlılığın nerede olduğuna — hastalığı olan deneklerde mi, "
+"olmayanlarda mı, yoksa her ikisinde mi — ve duyarlılık ile özgüllüklere "
+"bağlıdır; bu nedenle her satır için geçerli tek bir yön yoktur. Şanstan daha "
+"iyi performans gösteren testler için (duyarlılık artı özgüllük 1'in "
+"üzerinde):</p>\n"
+"<ul>\n"
+"  <li><strong>Her iki test pozitif</strong> — testler yanlış pozitifleri "
+"paylaştığında (bağımlılık esas olarak hastalığı <em>olmayan</em> "
+"deneklerde), bağımsızlık bu olasılığı fazla yüksek gösterir: korelasyonlu "
+"iki pozitif sonuç kısmen iki kez sayılmış aynı kanıttır. Bağımlılık esas "
+"olarak hastalığı <em>olan</em> deneklerdeyse durum tersine dönebilir.</li>\n"
+"  <li><strong>Her iki test negatif</strong> — testler hastalığı birlikte "
+"kaçırdığında (bağımlılık esas olarak hastalığı <em>olan</em> deneklerde), "
+"bağımsızlık bu olasılığı fazla düşük gösterir ve çiftin hastalığı ne kadar "
+"güvenle dışladığını abartır. Bağımlılığın esas olarak hastalığı olmayan "
+"deneklerde olması bunu tersine çevirebilir.</li>\n"
+"  <li><strong>Herhangi bir test pozitif (paralel kural)</strong> ve "
+"<strong>yalnızca bir test pozitif</strong> — yön her iki tarafa da "
+"gidebilir.</li>\n"
+"</ul>\n"
+"<p>Etkiyi kendi testleriniz için görmenin güvenilir yolu karşılaştırmaktır: "
+"analizi bir kez bağımsızlık varsayarak, bir kez de kendi bağımlılık "
+"değerlerinizle çalıştırın ve değişikliği satır satır okuyun. Yukarıdaki "
+"noktalar kural değil, bu karşılaştırmayı okumak için bir rehberdir. Ayrıca "
+"bu analizin hiç güven aralığı bildirmediğini unutmayın: her değer, "
+"girdiğiniz duyarlılık, özgüllük ve prevalansın kesin olmasına "
+"koşulludur.</p>\n"
+"</div>"
 
 #: R/cotest.b.R
 msgid ""
@@ -6374,6 +6565,160 @@ msgid ""
 "table, not to \"Both Tests Positive\".</p>\n"
 "</div>"
 msgstr ""
+"<div style=\"max-width: 900px; font-family: sans-serif;\">\n"
+"<h3>Birlikte Test Analizine Hoş Geldiniz</h3>\n"
+"<p><strong>Amaç:</strong> Bu analiz, <strong>paralel</strong> uygulanan iki "
+"testin birleşik tanısal performansını, aralarındaki olası bağımlılığı hesaba "
+"katarak değerlendirir.</p>\n"
+"\n"
+"<p><strong>Burada \"paralel\" ne anlama gelir:</strong> her iki test de aynı "
+"deneğe aynı anda, sonuçlardan herhangi biri bilinmeden uygulanır ve iki "
+"sonuç daha sonra tek bir yargıda birleştirilir. Hiçbir test diğerinin "
+"yapılmasını koşullandırmaz: Test 1 pozitif çıksa da çıkmasa da Test 2 "
+"yapılır. Paralel birlikte testi <em>sıralı</em> (seri) testten ayıran budur; "
+"sıralı testte ikinci test yalnızca belirli bir ilk sonuçtan sonra istenir ve "
+"ikinci testin performans özellikleri herkese değil, seçilmiş alt gruba "
+"uygulanır. Testleriniz birbiri ardına yapılıyor ve ikincisi birincinin "
+"sonucuna bağlıysa bu yanlış analizdir — bunun yerine <em>Sıralı Test "
+"Analizi</em>'ni kullanın.</p>\n"
+"\n"
+"<p><strong>Paralel test için bu analiz ile Sıralı Test Analizi arasında "
+"seçim.</strong> Sıralı Test Analizi'nin de paralel bir stratejisi vardır ve "
+"<em>koşullu olarak bağımsız</em> testler için ikisi aynı sonucu verir. O "
+"analiz birleşik değerlerini bu bağımsızlık varsayımı altında hesaplar ve "
+"bağımlılığın önemli olacağı durumlarda metin içinde uyarır. Bağımlılığı "
+"gerçekten modelleyen analiz budur: iki test bir örneği, bir yöntemi, bir "
+"gözlemciyi ya da bir biyolojik yolağı paylaşıyorsa bu analizi kullanın ve "
+"bir bağımlılık parametresi girin.</p>\n"
+"\n"
+"<p>Her iki test de her zaman yapıldığı için her denek dört sonuç "
+"kombinasyonundan tam olarak birine düşer — her ikisi pozitif, yalnızca Test "
+"1, yalnızca Test 2, her ikisi negatif — ve aşağıdaki tablo her biri için "
+"hastalığın test sonrası olasılığını, ayrıca paralel karar kuralının "
+"kullandığı birleşik <em>herhangi biri pozitif</em> kolunu verir.</p>\n"
+"\n"
+"<h4>Hızlı Başlangıç Kılavuzu</h4>\n"
+"<ol>\n"
+"<li><strong>Bir işlenmiş örnek seçin</strong> (isteğe bağlı): HPV+Pap, "
+"PSA+rektal muayene, Troponin+EKG ve diğerleri, hesaplamayı baştan sona "
+"görebilmeniz için tüm parametreleri sizin yerinize doldurur. <strong>Bunlar "
+"klinik girdiler değil, örneklemelerdir</strong> — aşağıdaki uyarıya "
+"bakın.</li>\n"
+"<li><strong>Kendi test parametrelerinizi girin</strong>: <em>Özel "
+"değerler</em> seçiliyken her test için duyarlılık ve özgüllüğü girin. Bir "
+"işlenmiş örnek seçiliyken bu kutular kilitlidir, çünkü değerleri örnek "
+"sağlar.</li>\n"
+"<li><strong>Hastalık prevalansını ayarlayın</strong>: gerçekten test "
+"ettiğiniz popülasyondaki hastalığın test öncesi olasılığı — testin "
+"doğrulandığı makalede belirtilen rakam değil.</li>\n"
+"<li><strong>Test bağımsızlığını yapılandırın</strong>: iki testin koşullu "
+"olarak bağımsız mı yoksa bağımlı mı olduğunu belirtin (aşağıdaki \"Test "
+"Bağımlılığını Anlama\" bölümüne bakın). Bu seçim sonucu önemli ölçüde "
+"değiştirebilir, bu nedenle her iki ayarı karşılaştırın.</li>\n"
+"<li><strong>Sonuçları İnceleyin</strong>: Analiz, klinik birlikte test "
+"algoritmalarında kullanılan kritik <em>Herhangi Bir Test Pozitif (Paralel "
+"Kural)</em> dahil, tüm test kombinasyonu sonuçları için test sonrası "
+"olasılıkları verir.</li>\n"
+"</ol>\n"
+"\n"
+"<h4>Temel Klinik Senaryolar</h4>\n"
+"<ul>\n"
+"<li><strong>Herhangi Bir Test Pozitif (Paralel Kural)</strong>: En az bir "
+"test pozitiftir. Bu birleştirme kuralı, özgüllük pahasına, testlerin tek "
+"başına kullanımına göre duyarlılığı artırır; bu nedenle dışlama bilgisini "
+"tamamlayıcı kol taşır. <em>Herhangi Bir Test Pozitif</em> satırı, <em>en az "
+"bir</em> pozitif sonuç olduğunda hastalık olasılığıdır; dolayısıyla tek "
+"pozitif ve çift pozitif olguları bir araya getirir. Yalnızca bir test "
+"pozitif olduğunda bunun yerine o testin tek pozitif satırını okuyun "
+"(<em>Yalnızca Test 1 Pozitif</em> / <em>Yalnızca Test 2 Pozitif</em> olarak "
+"ya da testlere verdiğiniz adlarla etiketlenir). Bir sonucun olasılığı ne "
+"kadar değiştirdiğini olabilirlik oranı belirler: her testin tek başına "
+"pozitif ve negatif olabilirlik oranları <em>Test Parametreleri</em> "
+"tablosunda listelenir; bir senaryonun birleşik etkisi ise ayrı bir birleşik "
+"olabilirlik oranı olarak değil, <em>Birlikte Test Sonuçları</em> tablosunda "
+"<em>Test Sonrası Olasılık</em> ve <em>Test Sonrası Odds</em> olarak "
+"bildirilir.</li>\n"
+"<li><strong>Her İki Test Pozitif</strong>: Her iki test de pozitiftir. "
+"Ortaya çıkan test sonrası olasılık; test öncesi prevalansa, her iki testin "
+"pozitif olabilirlik oranlarına (<em>Test Parametreleri</em> tablosunda "
+"listelenir) ve belirttiğiniz koşullu bağımlılığa bağlıdır. Ortaya çıkan "
+"değeri <em>Her İki Test Pozitif</em> satırının <em>Test Sonrası "
+"Olasılık</em> sütununda okuyun.</li>\n"
+"<li><strong>Her İki Test Negatif</strong>: Hiçbir test pozitif değildir. "
+"Paralel kuralın üzerinde karar vermek için tasarlandığı kol budur. <em>Her "
+"İki Test Negatif</em> satırı ortaya çıkan <em>Test Sonrası Olasılığı</em> "
+"verir; <em>Yaygınlığa Göreceli</em> değeri bu olasılığın girdiğiniz "
+"prevalansa bölümüdür, dolayısıyla 0.20 değeri iki negatif sonucun hastalık "
+"olasılığını başlangıçtaki değerin beşte birine indirdiği anlamına gelir. Bu "
+"kaymanın arkasındaki birleşik negatif olabilirlik oranı ayrı bir sayı olarak "
+"yazdırılmaz.</li>\n"
+"<li><strong>Tek Pozitif</strong>: İki testten yalnızca biri pozitiftir. Bu "
+"sonucu bir testin pozitif olabilirlik oranı ile diğerinin negatif "
+"olabilirlik oranı birlikte belirler; her ikisi de <em>Test "
+"Parametreleri</em> tablosunda listelenir. Ortaya çıkan olasılık <em>Birlikte "
+"Test Sonuçları</em> tablosunun ilgili tek pozitif satırındadır ve negatif "
+"test olasılığı geri çektiği için <em>Her İki Test Pozitif</em> satırının "
+"oldukça altında kalabilir.</li>\n"
+"</ul>\n"
+"\n"
+"<h4>Dahil edilen işlenmiş örnekler</h4>\n"
+"<ul>\n"
+"<li><strong>HPV + Pap sitoloji</strong>: duyarlı test artı özgül test, aynı "
+"örnek (bağımlı)</li>\n"
+"<li><strong>PSA + parmakla rektal muayene</strong>: tek bağımsız örnek "
+"(biyokimyasal artı fizik muayene)</li>\n"
+"<li><strong>Troponin + EKG</strong>: her ikisi de hasarın yaygınlığından "
+"etkilenir (bağımlı)</li>\n"
+"<li><strong>Mamografi + ultrasonografi</strong>: aynı dokunun iki görüntüsü, "
+"bağımlılık her iki grupta da görece yüksek ayarlanmış (bağımlı)</li>\n"
+"<li><strong>Hızlı antijen + PCR</strong>: iki test, tek sürüntü, her ikisi "
+"de viral yükü izler (bağımlı)</li>\n"
+"<li><strong>Akciğer grafisi + balgam mikroskopisi</strong>: görüntüleme artı "
+"mikrobiyoloji (bağımlı)</li>\n"
+"</ul>\n"
+"\n"
+"<div style=\"background-color: rgba(220, 53, 69, 0.12); border-left: 3px "
+"solid rgba(220, 53, 69, 0.85); border-radius: 3px; padding: 10px 14px; "
+"margin: 12px 0; color: inherit;\">\n"
+"<p style=\"margin: 0;\"><strong>İşlenmiş örnekler yalnızca gösterim "
+"amaçlıdır.</strong> İçlerindeki her duyarlılık, özgüllük, prevalans ve "
+"bağımlılık değeri, hesaplamanın nasıl işlediğini — duyarlı bir testin özgül "
+"bir testle nasıl eşleştiğini, bağımlılığın sonucu nasıl geri çektiğini — "
+"göstermek için seçilmiş yuvarlak, temsili bir sayıdır. Bunlar literatürden "
+"birleştirilmiş tahminler <strong>değildir</strong>, herhangi bir kılavuzdan "
+"<strong>alınmamıştır</strong> ve klinik doğruluk açısından <strong>kontrol "
+"edilmemiştir</strong>. Bunları alıntılamayın ve bunlarla hesaplanan bir "
+"sonuca dayanarak herhangi bir klinik karar vermeyin. Gerçek çalışmalar için "
+"<em>Özel değerler</em>'i seçin ve sizinkine benzer bir popülasyondaki bir "
+"doğrulama çalışmasından alınan duyarlılık ve özgüllüğü, kendi yerel "
+"prevalansınızla birlikte girin.</p>\n"
+"</div>\n"
+"\n"
+"<p><strong>Belirsizlik yayılımı yapılmaz:</strong> duyarlılık, özgüllük ve "
+"prevalans kesin değerler olarak ele alınır. Burada bildirilen her olasılık "
+"bu sayıların doğru olmasına koşulludur ve güven aralığı içermez — "
+"yayımlanmış test performansı ve yerel prevalans önemli ölçüde değişkenlik "
+"gösterir.</p>\n"
+"\n"
+"<p><strong>Girdilerin nereden geldiği önemlidir:</strong> olgu-kontrol "
+"tasarımında (belirgin olgulara karşı sağlıklı kontroller), sonuçların "
+"yalnızca bir kısmının referans standartla karşılaştırıldığı bir çalışmada ya "
+"da farklı bir hastalık spektrumuna sahip bir popülasyonda ölçülen duyarlılık "
+"ve özgüllük çoğu zaman iyimserdir (spektrum ve doğrulama yanlılığı). Mümkün "
+"olduğunda her iki testin duyarlılık ve özgüllüğünü ve tüm bağımlılık "
+"değerlerini aynı popülasyondan ve aynı referans standarttan alın: iki ayrı "
+"çalışmadan gelen değerler birlikte test edilen çifti tanımlamaz. Belirsiz "
+"veya geçersiz sonuçlar (yetersiz bir yayma, geçersiz bir PCR) bu "
+"hesaplamanın dışındadır.</p>\n"
+"\n"
+"<p><strong>İpucu:</strong> Her ölçütün açıklamaları için \"Ayrıntılı "
+"dipnotlar\" seçeneğini etkinleştirin. Olasılık güncellemesinin görsel bir "
+"gösterimi için \"Fagan nomogramı\" seçeneğini etkinleştirin — nomogramın "
+"<em>paralel kuralı</em> (testlerden herhangi biri pozitifse pozitif, "
+"yalnızca her ikisi negatifse negatif) çizdiğini unutmayın; dolayısıyla "
+"pozitif kolu sonuç tablosunun \"Her İki Test Pozitif\" satırına değil, "
+"\"Herhangi Bir Test Pozitif\" satırına karşılık gelir.</p>\n"
+"</div>"
 
 #: R/decisioncompare.b.R
 msgid "<dt><b>Cochran's Q Test</b></dt>"
@@ -9317,6 +9662,32 @@ msgid ""
 "12px;'>%17$s</p>\n"
 "                </div>"
 msgstr ""
+"<p><strong>Sonuçları okuma (kaba bir rehber):</strong></p>\n"
+"                <p>Hastalık prevalansı (test öncesi olasılık): "
+"<strong>%1$s</strong></p>\n"
+"                <p><strong>Herhangi bir test pozitif (paralel "
+"kural):</strong> %2$s olasılık (%3$s) - %4$s</p>\n"
+"                <p><strong>Her iki test pozitif:</strong> %5$s olasılık "
+"(%6$s) - %7$s</p>\n"
+"                <p><strong>Her iki test negatif:</strong> %8$s olasılık "
+"(%9$s) - %10$s</p>\n"
+"                <p><strong>Tek pozitif test:</strong></p>\n"
+"                <ul>\n"
+"                <li>Yalnızca %11$s pozitif: <strong>%12$s</strong> - "
+"%13$s</li>\n"
+"                <li>Yalnızca %14$s pozitif: <strong>%15$s</strong> - "
+"%16$s</li>\n"
+"                </ul>\n"
+"                <p style='font-size: 90%%;'>Bu açıklamalar, tabloyu okumaya "
+"yardımcı olmak için olabilirlik oranlarına ilişkin geleneksel bir pratik "
+"kuralı (Jaeschke ve ark. 1994) uygular. Bunlar klinik bir yargı değil, bir "
+"rehberdir; sayılar yukarıdaki tablodadır.</p>\n"
+"                <div style='background-color: rgba(33, 152, 255, 0.07); "
+"padding: 10px; border-radius: 5px; margin-top: 15px; color: inherit;'>\n"
+"                <p><strong>Kopyalanmaya hazır özet:</strong></p>\n"
+"                <p style='font-family: monospace; font-size: "
+"12px;'>%17$s</p>\n"
+"                </div>"
 
 #: R/jjarcdiagram.b.R
 msgid ""
@@ -9701,6 +10072,28 @@ msgid ""
 "                P(%13$s-, %14$s+ | Disease-): %11$.4f<br>\n"
 "                P(%13$s-, %14$s- | Disease-): %12$.4f</p>"
 msgstr ""
+"<p>Testler koşullu bağımlılık ile modellenmiştir:<br>\n"
+"                Hastalığı olan denekler için bağımlılık: %1$.2f<br>\n"
+"                Hastalığı olmayan denekler için bağımlılık: %2$.2f<br>\n"
+"                Gerçekleşen phi (hastalık var): %3$s<br>\n"
+"                Gerçekleşen phi (hastalık yok): %4$s<br>\n"
+"                <span style='font-size: 90%%;'>(Phi, uydurulan modelin "
+"gerçekte ulaştığı, iki test sonucu arasındaki\n"
+"                korelasyondur; −1 ile +1 arasındaki bir ölçektedir ve 0 "
+"koşullu bağımsızlıktır.\n"
+"                Girdiğiniz değer, verilen duyarlılık ve özgüllüklerle "
+"ulaşılabilir olmadığında\n"
+"                bundan farklıdır.)</span></p>\n"
+"                <p>Bağımlılık hesaba katıldıktan sonra birleşik "
+"olasılıklar:<br>\n"
+"                P(%13$s+, %14$s+ | Hastalık+): %5$.4f<br>\n"
+"                P(%13$s+, %14$s- | Hastalık+): %6$.4f<br>\n"
+"                P(%13$s-, %14$s+ | Hastalık+): %7$.4f<br>\n"
+"                P(%13$s-, %14$s- | Hastalık+): %8$.4f<br>\n"
+"                P(%13$s+, %14$s+ | Hastalık-): %9$.4f<br>\n"
+"                P(%13$s+, %14$s- | Hastalık-): %10$.4f<br>\n"
+"                P(%13$s-, %14$s+ | Hastalık-): %11$.4f<br>\n"
+"                P(%13$s-, %14$s- | Hastalık-): %12$.4f</p>"
 
 #: R/pathsampling.b.R
 msgid ""
@@ -9757,6 +10150,17 @@ msgid ""
 "conditionally independent</em> and enter a dependence parameter to see how "
 "far the conclusion moves.</p>"
 msgstr ""
+"<p>İki test aynı denekte paralel olarak uygulanır ve <strong>koşullu olarak "
+"bağımsız</strong> oldukları varsayılır: hastalığı olan grupta ve yine "
+"hastalığı olmayan grupta bir testin sonucu diğeri hakkında hiçbir bilgi "
+"taşımaz; bu nedenle her birleşik olasılık, iki testin duyarlılıklarının (ya "
+"da yanlış pozitif oranlarının) basit çarpımıdır.</p><p>İki test gerçekte "
+"birlikte hata yapma eğilimindeyse — aynı örnek, aynı uygulayıcı, aynı "
+"biyoloji — bağımsızlık genellikle çiftin kattığı katkıyı abartır ve hangi "
+"satırların yukarı ya da aşağı kayacağı bağımlılığın nerede olduğuna bağlıdır "
+"(bkz. <em>Test Bağımlılığını Anlama</em>). Sonucun ne kadar değiştiğini "
+"görmek için <em>İki testin koşullu olarak bağımsız olduğunu varsay</em> "
+"seçeneğinin işaretini kaldırın ve bir bağımlılık parametresi girin.</p>"
 
 #: R/pathagreement.b.R
 msgid ""
@@ -13376,6 +13780,9 @@ msgid ""
 "A probability of exactly 0% or 100% here is set by the dependence being at "
 "the limit the entered values allow; it is not an estimate."
 msgstr ""
+"Burada tam olarak yüzde 0 veya yüzde 100 olan bir olasılık, bağımlılığın "
+"girilen değerlerin izin verdiği sınırda olmasından kaynaklanır; bir tahmin "
+"değildir."
 
 #: contTablesPaired/results/freqs.description
 msgid "a proportions table"
@@ -13453,12 +13860,18 @@ msgid ""
 "A sensitive imaging test paired with a highly specific microbiological one; "
 "advanced disease makes both more likely to be positive."
 msgstr ""
+"Duyarlı bir görüntüleme testi, son derece özgül bir mikrobiyolojik testle "
+"eşleştirilmiştir; ileri evre hastalık her ikisinin de pozitif olma "
+"olasılığını artırır."
 
 #: R/cotest.b.R
 msgid ""
 "A sensitive test paired with a specific one, both read from the same "
 "cervical sample, so they are modelled as conditionally dependent."
 msgstr ""
+"Duyarlı bir test özgül bir testle eşleştirilmiştir; her ikisi de aynı "
+"servikal örnekten değerlendirildiği için koşullu olarak bağımlı "
+"modellenmiştir."
 
 #: R/lassologistic.b.R
 msgid ""
@@ -14189,7 +14602,7 @@ msgstr "Değerlendirici varyans ayrıştırması hakkında"
 
 #: R/cotest.b.R
 msgid "about the same as the prevalence"
-msgstr ""
+msgstr "prevalansla hemen hemen aynı"
 
 #: R/summarydata.b.R
 #: agreement/results/about.title
@@ -29041,7 +29454,7 @@ msgstr ""
 
 #: R/cotest.b.R
 msgid "Both Negative LR"
-msgstr ""
+msgstr "Her İkisi Negatif LR"
 
 #: R/lassocox.b.R
 msgid ""
@@ -29076,7 +29489,7 @@ msgstr ""
 
 #: R/cotest.b.R
 msgid "Both Positive LR"
-msgstr ""
+msgstr "Her İkisi Pozitif LR"
 
 #: diagnosticsamplesize/options/study_purpose/diagnostic.title
 msgid "Both reference strata"
@@ -29110,10 +29523,12 @@ msgid ""
 "Both tests are driven by the extent of myocardial injury, so they are "
 "modelled as dependent among diseased subjects in particular."
 msgstr ""
+"Her iki test de miyokard hasarının yaygınlığından etkilenir; bu nedenle "
+"özellikle hastalığı olan deneklerde bağımlı olarak modellenmiştir."
 
 #: R/cotest.b.R
 msgid "Both Tests Negative"
-msgstr ""
+msgstr "Her İki Test Negatif"
 
 #: R/sequentialtests.b.R
 msgid "Both tests performed on everyone"
@@ -29121,7 +29536,7 @@ msgstr "Herkese her iki test de uygulandı"
 
 #: R/cotest.b.R
 msgid "Both Tests Positive"
-msgstr ""
+msgstr "Her İki Test Pozitif"
 
 #: R/categorize.b.R
 msgid "both the lower and the upper boundary (mean +/- {k} SD)"
@@ -29901,31 +30316,31 @@ msgstr ""
 
 #: R/cotest.b.R
 msgid "by the usual rule of thumb, a large shift away from disease"
-msgstr ""
+msgstr "genel pratik kurala göre hastalıktan uzağa büyük bir kayma"
 
 #: R/cotest.b.R
 msgid "by the usual rule of thumb, a large shift towards disease"
-msgstr ""
+msgstr "genel pratik kurala göre hastalığa doğru büyük bir kayma"
 
 #: R/cotest.b.R
 msgid "by the usual rule of thumb, a moderate shift away from disease"
-msgstr ""
+msgstr "genel pratik kurala göre hastalıktan uzağa orta düzeyde bir kayma"
 
 #: R/cotest.b.R
 msgid "by the usual rule of thumb, a moderate shift towards disease"
-msgstr ""
+msgstr "genel pratik kurala göre hastalığa doğru orta düzeyde bir kayma"
 
 #: R/cotest.b.R
 msgid "by the usual rule of thumb, a small shift away from disease"
-msgstr ""
+msgstr "genel pratik kurala göre hastalıktan uzağa küçük bir kayma"
 
 #: R/cotest.b.R
 msgid "by the usual rule of thumb, a small shift towards disease"
-msgstr ""
+msgstr "genel pratik kurala göre hastalığa doğru küçük bir kayma"
 
 #: R/cotest.b.R
 msgid "by the usual rule of thumb, little shift either way"
-msgstr ""
+msgstr "genel pratik kurala göre iki yönde de az kayma"
 
 #: jjsegmentedtotalbar/options/sort_categories/total.title
 msgid "By Total Value"
@@ -33718,6 +34133,8 @@ msgid ""
 "certain by construction under the dependence entered, not an estimate (see "
 "the table footnote)"
 msgstr ""
+"girilen bağımlılık altında yapı gereği kesin; bir tahmin değil (tablo "
+"dipnotuna bakın)"
 
 #: latentbiomarker/results/summaryTable.columns.title
 msgid "CFA parameters"
@@ -34229,11 +34646,11 @@ msgstr "Göğüs Görüntüleme + Kültür (Açıklayıcı)"
 
 #: R/cotest.b.R
 msgid "Chest radiograph"
-msgstr ""
+msgstr "Akciğer grafisi"
 
 #: R/cotest.b.R
 msgid "Chest radiograph (Test 1) + sputum microscopy (Test 2)"
-msgstr ""
+msgstr "Akciğer grafisi (Test 1) + balgam mikroskopisi (Test 2)"
 
 #: cotest/options/preset/tb_xray_sputum.title
 msgid "Chest radiograph + sputum (demo only)"
@@ -39044,6 +39461,11 @@ msgid ""
 "result on either test (the parallel rule; %9$s), %10$s when both tests were "
 "positive (%11$s) and %12$s when both were negative (%13$s)."
 msgstr ""
+"%1$s (duyarlılık %2$s, özgüllük %3$s) ve %4$s (duyarlılık %5$s, özgüllük "
+"%6$s) ile birlikte test, %7$s test öncesi olasılıkta hastalık için şu "
+"hesaplanmış test sonrası olasılıkları verdi: testlerden herhangi biri "
+"pozitif olduğunda %8$s (paralel kural; %9$s), her iki test pozitif olduğunda "
+"%10$s (%11$s) ve her ikisi negatif olduğunda %12$s (%13$s)."
 
 #: treatmenteffects/options/matching_method/coarsened_exact.title
 msgid "Coarsened Exact Matching (CEM)"
@@ -40409,7 +40831,7 @@ msgstr ""
 
 #: R/cotest.b.R
 msgid "combined likelihood ratio %1$s; %2$s"
-msgstr ""
+msgstr "birleşik olabilirlik oranı %1$s; %2$s"
 
 #: R/sequentialtests.b.R
 msgid ""
@@ -55334,11 +55756,11 @@ msgstr ""
 
 #: R/cotest.b.R
 msgid "DEMONSTRATION ONLY — %s, illustrative values, not for clinical use"
-msgstr ""
+msgstr "YALNIZCA GÖSTERİM AMAÇLI — %s, temsili değerler, klinik kullanım için değil"
 
 #: R/cotest.b.R
 msgid "DEMONSTRATION ONLY — illustrative values, not for clinical use"
-msgstr ""
+msgstr "YALNIZCA GÖSTERİM AMAÇLI — temsili değerler, klinik kullanım için değil"
 
 #: mixedmodelanova/results/anova_table.columns.title
 msgid "DenDF"
@@ -58459,6 +58881,7 @@ msgstr "Hastalık var düzeyi"
 #: R/psychopdaROC.b.R
 #: R/sequentialtests.b.R
 #: bayesiandiagnostic/results/predictiveValues.columns.title
+#: cotest/ui[4].label
 #: decisionpanel/options/prevalence.title
 #: enhancedROC/ui[3][0][0][0].label
 #: sequentialtests/results/summary_table.columns.title
@@ -58469,7 +58892,6 @@ msgstr "Hastalık Prevalansı"
 
 #: R/cotest.b.R
 #: cotest/options/prevalence.title
-#: cotest/ui[4].label
 #: enhancedROC/options/prevalence.title
 #: sequentialtests/options/prevalence.title
 #: stagemigration/ui[7][1][0]/clinicalUtilityPrevalence.label
@@ -59732,6 +60154,7 @@ msgstr ""
 #: competingsurvival/ui[3][0].label
 #: conditionalsurvival/ui[1][1].label
 #: consortdiagram/ui[3].label
+#: cotest/ui[5].label
 #: datevalidator/ui[4].label
 #: decisioncalculator/ui[1].label
 #: decisioncombine/ui[1].label
@@ -59789,10 +60212,6 @@ msgstr ""
 #: weightedlogrank/ui[4].label
 msgid "Display Options"
 msgstr "Görüntüleme Seçenekleri"
-
-#: cotest/ui[5].label
-msgid "Display options"
-msgstr "Görüntüleme seçenekleri"
 
 #: pheval/ui[5][0].label
 #: stratifiedparametric/ui[4][0].label
@@ -63350,11 +63769,11 @@ msgstr "Ya başlangıca göre yüzde değişimleri ya da ham tümör ölçümler
 
 #: R/cotest.b.R
 msgid "Either Positive LR"
-msgstr ""
+msgstr "Herhangi Biri Pozitif LR"
 
 #: R/cotest.b.R
 msgid "Either Test Positive (Parallel Rule)"
-msgstr ""
+msgstr "Herhangi Bir Test Pozitif (Paralel Kural)"
 
 #: R/singlearm.b.R
 msgid "Elapsed time and outcome must be different variables."
@@ -68700,6 +69119,8 @@ msgid ""
 "excluded by construction under the dependence entered, not an estimate (see "
 "the table footnote)"
 msgstr ""
+"girilen bağımlılık altında yapı gereği dışlanmış; bir tahmin değil (tablo "
+"dipnotuna bakın)"
 
 #: pathagreement/results/readerModalitySummary.columns.title
 #: pathagreement/results/readerModalityContrast.columns.title
@@ -81045,6 +81466,8 @@ msgid ""
 "High prevalence (above 50%) detected. Ensure this reflects your actual "
 "clinical population."
 msgstr ""
+"Yüksek prevalans (yüzde 50'nin üzerinde) saptandı. Bunun gerçek klinik "
+"popülasyonunuzu yansıttığından emin olun."
 
 #: clinicalalerts/results/patientAnalysis.columns.title
 msgid "High Priority Alerts"
@@ -82018,6 +82441,8 @@ msgid ""
 "How many times more (or less) likely disease is after testing compared to "
 "before testing"
 msgstr ""
+"Hastalığın test sonrasında, test öncesine göre kaç kat daha olası (ya da "
+"daha az olası) olduğu"
 
 #: R/decision.b.R
 msgid ""
@@ -82263,11 +82688,11 @@ msgstr ""
 
 #: R/cotest.b.R
 msgid "HPV"
-msgstr ""
+msgstr "HPV"
 
 #: R/cotest.b.R
 msgid "HPV (Test 1) + Pap cytology (Test 2)"
-msgstr ""
+msgstr "HPV (Test 1) + Pap sitoloji (Test 2)"
 
 #: cotest/options/preset/hpv_pap.title
 msgid "HPV + Pap cytology (demo only)"
@@ -87738,6 +88163,9 @@ msgid ""
 "Internal: could not read the default for '%s', so the analysis cannot report "
 "whether a worked example replaced a value you supplied. Please report this."
 msgstr ""
+"Dahili: '%s' için varsayılan değer okunamadı; bu nedenle analiz, işlenmiş "
+"örneğin sizin girdiğiniz bir değerin yerine geçip geçmediğini bildiremiyor. "
+"Lütfen bunu bildirin."
 
 #: screeningevaluation/options/international_standards.title
 msgid "International Standards Compliance"
@@ -95222,6 +95650,12 @@ msgid ""
 "and moves every post-test probability with it, so re-run with a plausible "
 "range before acting on the numbers."
 msgstr ""
+"Düşük prevalans (yüzde 5'in altında): bunun gerçekten test ettiğiniz "
+"popülasyondaki test öncesi olasılık olduğunu kontrol edin. Bu kadar düşük "
+"bir prevalansta küçük bir mutlak değişiklik (örneğin yüzde 1'den yüzde 2'ye) "
+"test öncesi odds'u yaklaşık iki katına çıkarır ve tüm test sonrası "
+"olasılıkları da onunla birlikte değiştirir; bu nedenle sayılara göre hareket "
+"etmeden önce analizi makul bir aralıkla yeniden çalıştırın."
 
 #: R/agreement.b.R
 msgid "Low rank correlation"
@@ -95892,6 +96326,13 @@ msgid ""
 "to 0.2 as moderate, 2 to 5 or 0.2 to 0.5 as small, and 0.5 to 2 as little "
 "change; it is a convention to help reading, not a threshold."
 msgstr ""
+"LR+, pozitif bir sonucun hastalığı olan birinde, hastalığı olmayan birine "
+"göre kaç kat daha olası olduğunu gösterir; LR- negatif bir sonuç için aynı "
+"orandır. Yaygın bir pratik kural (Jaeschke ve ark. 1994), 10'un üzerindeki "
+"veya 0.1'in altındaki değerleri hastalık olasılığında büyük, 5 ile 10 veya "
+"0.1 ile 0.2 arasını orta, 2 ile 5 veya 0.2 ile 0.5 arasını küçük ve 0.5 ile "
+"2 arasını az değişiklik olarak okur; bu bir eşik değil, okumaya yardımcı "
+"olan bir uzlaşımdır."
 
 #: R/decisioncompare.b.R
 msgid "LR+ Quality"
@@ -96347,7 +96788,7 @@ msgstr "Mamografi"
 
 #: R/cotest.b.R
 msgid "Mammography (Test 1) + ultrasound (Test 2)"
-msgstr ""
+msgstr "Mamografi (Test 1) + ultrasonografi (Test 2)"
 
 #: cotest/options/preset/mammogram_ultrasound.title
 msgid "Mammography + ultrasound (demo only)"
@@ -108164,6 +108605,8 @@ msgid ""
 "Negative Likelihood Ratio: how much more likely a negative result is in "
 "diseased vs. non-diseased patients"
 msgstr ""
+"Negatif Olabilirlik Oranı: negatif bir sonucun hastalığı olan hastalarda, "
+"hastalığı olmayan hastalara göre ne kadar daha olası olduğu"
 
 #: R/decision.b.R
 msgid ""
@@ -112959,6 +113402,26 @@ msgid ""
 "limit the entered sensitivities and specificities allow — move it toward 0 "
 "to leave this regime."
 msgstr ""
+"Tahmin değildir: bu parametrelerle bu sonuç kombinasyonu iki hastalık "
+"grubundan birinde ortaya çıkamaz; bu nedenle olasılık yapı gereği %s olarak "
+"belirlenir. Bu, koşullu bağımlılığın girilen duyarlılık ve özgüllüklerin "
+"izin verdiği sınırda olmasından ya da bu sınıra kırpılmasından kaynaklanır — "
+"bu durumdan çıkmak için bağımlılığı 0'a doğru yaklaştırın."
+
+#: R/cotest.b.R
+msgid ""
+"Not estimable: with these parameters this result combination cannot occur "
+"in either disease group, so no post-test probability exists. This follows "
+"from the conditional dependence being at, or truncated to, the limit the "
+"entered sensitivities and specificities allow — move it toward 0 to leave "
+"this regime."
+msgstr ""
+"Tahmin edilemiyor: bu parametrelerle bu sonuç kombinasyonu iki hastalık "
+"grubunun hiçbirinde ortaya çıkamaz; bu nedenle bir test sonrası olasılık "
+"yoktur. Bu, koşullu bağımlılığın girilen duyarlılık ve özgüllüklerin "
+"izin verdiği sınırda olmasından ya da bu sınıra kırpılmasından "
+"kaynaklanır — bu durumdan çıkmak için bağımlılığı 0'a doğru "
+"yaklaştırın."
 
 #: R/benford.b.R
 msgid "Not assessable"
@@ -122873,7 +123336,7 @@ msgstr ""
 
 #: R/cotest.b.R
 msgid "Pap cytology"
-msgstr ""
+msgstr "Pap sitoloji"
 
 #: epidemiosurvival/results/population_attributable_risk.columns.title
 msgid "PAR (%)"
@@ -122949,6 +123412,8 @@ msgid ""
 "Parallel rule: positive if either test is positive, negative only if both "
 "are negative."
 msgstr ""
+"Paralel kural: testlerden herhangi biri pozitifse pozitif, yalnızca her "
+"ikisi negatifse negatif."
 
 #: R/sequentialtests.b.R
 msgid "Parallel Test Assumption Check"
@@ -124727,7 +125192,7 @@ msgstr ""
 
 #: R/cotest.b.R
 msgid "PCR"
-msgstr ""
+msgstr "PCR"
 
 #: jsummarytools/results/descriptive_stats.columns.title
 msgid "Pct.Valid"
@@ -130430,6 +130895,8 @@ msgid ""
 "Positive Likelihood Ratio: how much more likely a positive result is in "
 "diseased vs. non-diseased patients"
 msgstr ""
+"Pozitif Olabilirlik Oranı: pozitif bir sonucun hastalığı olan hastalarda, "
+"hastalığı olmayan hastalara göre ne kadar daha olası olduğu"
 
 #: R/decision.b.R
 msgid ""
@@ -130967,6 +131434,8 @@ msgid ""
 "Post-test odds: probability of disease divided by probability of no disease. "
 "Odds of 1 mean a 50% probability; odds of 9 mean 90%."
 msgstr ""
+"Test sonrası odds: hastalık olasılığının hastalık olmaması olasılığına "
+"bölümü. 1'lik odds yüzde 50, 9'luk odds yüzde 90 olasılık anlamına gelir."
 
 #: likelihoodratio/results/postTestProbabilities.title
 msgid "Post-test Probabilities"
@@ -134464,7 +134933,7 @@ msgstr ""
 
 #: R/cotest.b.R
 msgid "Probability of disease after obtaining this test result combination"
-msgstr ""
+msgstr "Bu test sonucu kombinasyonu elde edildikten sonra hastalık olasılığı"
 
 #: R/decision.b.R
 msgid ""
@@ -135159,7 +135628,7 @@ msgstr ""
 
 #: R/cotest.b.R
 msgid "Proportion of diseased patients correctly identified by %s"
-msgstr ""
+msgstr "%s tarafından doğru tanımlanan, hastalığı olan hastaların oranı"
 
 #: R/agreement.b.R
 msgid "Proportion of exact agreement"
@@ -135177,7 +135646,7 @@ msgstr ""
 
 #: R/cotest.b.R
 msgid "Proportion of non-diseased patients correctly identified by %s"
-msgstr ""
+msgstr "%s tarafından doğru tanımlanan, hastalığı olmayan hastaların oranı"
 
 #: qtwist/options/toxicity_probability.description
 msgid ""
@@ -135793,7 +136262,7 @@ msgstr ""
 
 #: R/cotest.b.R
 msgid "PSA"
-msgstr ""
+msgstr "PSA"
 
 #: R/agreement.b.R
 msgid ""
@@ -135812,7 +136281,7 @@ msgstr ""
 
 #: R/cotest.b.R
 msgid "PSA (Test 1) + digital rectal examination (Test 2)"
-msgstr ""
+msgstr "PSA (Test 1) + parmakla rektal muayene (Test 2)"
 
 #: sequentialtests/options/preset/prostate_screening_exclusion.title
 msgid "PSA + MRI (Illustrative)"
@@ -137284,7 +137753,7 @@ msgstr ""
 
 #: R/cotest.b.R
 msgid "raised to %sx of prevalence"
-msgstr ""
+msgstr "prevalansın %sx katına yükseldi"
 
 #: dynamicprediction/results/trajectoryParameters.columns.title
 msgid "Rand. Intercept Var"
@@ -138197,11 +138666,11 @@ msgstr ""
 
 #: R/cotest.b.R
 msgid "Rapid antigen"
-msgstr ""
+msgstr "Hızlı antijen"
 
 #: R/cotest.b.R
 msgid "Rapid antigen (Test 1) + PCR (Test 2)"
-msgstr ""
+msgstr "Hızlı antijen (Test 1) + PCR (Test 2)"
 
 #: cotest/options/preset/covid_antigen_pcr.title
 msgid "Rapid antigen + PCR (demo only)"
@@ -139549,7 +140018,7 @@ msgstr ""
 
 #: R/cotest.b.R
 msgid "Rectal examination"
-msgstr ""
+msgstr "Rektal muayene"
 
 #: smoothhazard/options/kernel_type/rectangular.title
 msgid "Rectangular"
@@ -139769,7 +140238,7 @@ msgstr ""
 
 #: R/cotest.b.R
 msgid "reduced to %sx of prevalence"
-msgstr ""
+msgstr "prevalansın %sx katına düştü"
 
 #: ihccluster/results/markerClusteringTree.columns.title
 msgid "Reduction"
@@ -150034,12 +150503,18 @@ msgid ""
 "not reflect sampling uncertainty in the values entered — published test "
 "performance estimates and local prevalence both vary."
 msgstr ""
+"Duyarlılık, özgüllük ve prevalans kesin değerler olarak ele alınır. Bu "
+"nedenle bu test sonrası olasılıklar güven aralığı <i>içermez</i> ve girilen "
+"değerlerdeki örnekleme belirsizliğini yansıtmaz — yayımlanmış test "
+"performansı tahminleri de yerel prevalans da değişkenlik gösterir."
 
 #: R/cotest.b.R
 msgid ""
 "Sensitivity, specificity and prevalence were treated as exact, so these "
 "probabilities carry no confidence interval."
 msgstr ""
+"Duyarlılık, özgüllük ve prevalans kesin değerler olarak ele alındığından bu "
+"olasılıklar güven aralığı içermez."
 
 #: R/pathagreement.b.R
 msgid ""
@@ -158605,7 +159080,7 @@ msgstr "Balgam Kültürü"
 
 #: R/cotest.b.R
 msgid "Sputum microscopy"
-msgstr ""
+msgstr "Balgam mikroskopisi"
 
 #: basegraphics/options/point_type/15.title
 #: jggheatmap/options/cell_shape/square.title
@@ -163019,11 +163494,11 @@ msgstr ""
 
 #: R/cotest.b.R
 msgid "subjects with disease"
-msgstr ""
+msgstr "hastalığı olan denekler"
 
 #: R/cotest.b.R
 msgid "subjects without disease"
-msgstr ""
+msgstr "hastalığı olmayan denekler"
 
 #: advancedtrials/results/regulatory_compliance.columns.title
 msgid "Submission Pathway"
@@ -166855,8 +167330,8 @@ msgid "Test 1 Negative Level"
 msgstr "Test 1 Negatif Düzey"
 
 #: cotest/ui[1].label
-msgid "Test 1 parameters"
-msgstr "Test 1 parametreleri"
+msgid "Test 1 Parameters"
+msgstr "Test 1 Parametreleri"
 
 #: decisioncombine/results/individualTest1.title
 msgid "Test 1 Performance"
@@ -166984,8 +167459,8 @@ msgid "Test 2 Negative Level"
 msgstr "Test 2 Negatif Düzey"
 
 #: cotest/ui[2].label
-msgid "Test 2 parameters"
-msgstr "Test 2 parametreleri"
+msgid "Test 2 Parameters"
+msgstr "Test 2 Parametreleri"
 
 #: decisioncombine/results/individualTest2.title
 msgid "Test 2 Performance"
@@ -167442,8 +167917,8 @@ msgid ""
 msgstr ""
 
 #: cotest/ui[3].label
-msgid "Test independence"
-msgstr "Test bağımsızlığı"
+msgid "Test Independence"
+msgstr "Test Bağımsızlığı"
 
 #: distributionfit/options/test_loglogistic.title
 msgid "Test Log-logistic Distribution"
@@ -168979,12 +169454,17 @@ msgid ""
 "conditional dependence (correlation %1$s among diseased and %2$s among "
 "non-diseased subjects)%3$s."
 msgstr ""
+"Hesaplama, her iki testin paralel uygulandığını varsayar ve koşullu "
+"bağımlılığa izin verir (hastalığı olan deneklerde korelasyon %1$s, hastalığı "
+"olmayan deneklerde %2$s)%3$s."
 
 #: R/cotest.b.R
 msgid ""
 "The calculation assumes both tests are performed in parallel and are "
 "conditionally independent."
 msgstr ""
+"Hesaplama, her iki testin paralel uygulandığını ve koşullu olarak bağımsız "
+"olduğunu varsayar."
 
 #: R/kappaSizeFixedN.b.R
 msgid ""
@@ -170144,6 +170624,13 @@ msgid ""
 "disappears; the realized correlation is reported in the Test Dependence "
 "panel."
 msgstr ""
+"Hastalığı olan grup için bağımlılık parametresine (%1$.2f) bu "
+"duyarlılıklarla ulaşılamaz; bu nedenle birleşik pozitif olasılık %2$.4f "
+"değerinden sınırı olan %3$.4f değerine kırpıldı. Dolayısıyla gerçekte "
+"uydurulan model sizin belirttiğiniz model değildir ve bu grupta en az bir "
+"sonuç kombinasyonu imkânsız hâle gelir. Bu not kaybolana kadar değeri 0'a "
+"doğru yaklaştırın; gerçekleşen korelasyon Test Bağımlılığı panelinde "
+"bildirilir."
 
 #: R/cotest.b.R
 msgid ""
@@ -170155,6 +170642,13 @@ msgid ""
 "disappears; the realized correlation is reported in the Test Dependence "
 "panel."
 msgstr ""
+"Hastalığı olmayan grup için bağımlılık parametresine (%1$.2f) bu "
+"özgüllüklerle ulaşılamaz; bu nedenle birleşik yanlış pozitif olasılığı "
+"%2$.4f değerinden sınırı olan %3$.4f değerine kırpıldı. Dolayısıyla gerçekte "
+"uydurulan model sizin belirttiğiniz model değildir ve bu grupta en az bir "
+"sonuç kombinasyonu imkânsız hâle gelir. Bu not kaybolana kadar değeri 0'a "
+"doğru yaklaştırın; gerçekleşen korelasyon Test Bağımlılığı panelinde "
+"bildirilir."
 
 #: R/survivalPower.b.R
 msgid ""
@@ -170610,6 +171104,11 @@ msgid ""
 "was truncated to, the limit the entered values allow (see the notice above). "
 "Move the dependence toward 0."
 msgstr ""
+"Fagan nomogramı çizilmedi çünkü bu parametrelerle birleşik olabilirlik "
+"oranlarından biri sonlu bir sayı değildir: bağımlılık girilen değerlerin "
+"izin verdiği sınırda olduğu ya da bu sınıra kırpıldığı için bir hastalık "
+"grubunda bir sonuç kombinasyonu imkânsızdır (yukarıdaki bildirime bakın). "
+"Bağımlılığı 0'a doğru yaklaştırın."
 
 #: R/cotest.b.R
 msgid ""
@@ -170619,6 +171118,11 @@ msgid ""
 "dependence is at, or was truncated to, the limit the entered values allow "
 "(see the notice above). Move the dependence toward 0."
 msgstr ""
+"Fagan nomogramı çizilmedi çünkü negatif kural olabilirlik oranı sıfırdır ve "
+"nomogramın logaritmik eksenine yerleştirilemez: bağımlılık girilen "
+"değerlerin izin verdiği sınırda olduğu ya da bu sınıra kırpıldığı için "
+"hastalığı olan deneklerde iki negatif sonuç imkânsızdır (yukarıdaki "
+"bildirime bakın). Bağımlılığı 0'a doğru yaklaştırın."
 
 #: R/cotest.b.R
 msgid ""
@@ -170628,6 +171132,11 @@ msgid ""
 "specified perform worse than chance. Check the sensitivity and specificity "
 "values you entered."
 msgstr ""
+"Fagan nomogramı çizilmedi çünkü pozitif kural olabilirlik oranı %.2f olup "
+"1'in altındadır. Fagan nomogramı pozitif bir sonucun hastalık olasılığını "
+"artırdığını varsayar; burada ise olasılığı azaltmaktadır, bu da belirtildiği "
+"hâliyle testlerin şanstan daha kötü performans gösterdiği anlamına gelir. "
+"Girdiğiniz duyarlılık ve özgüllük değerlerini kontrol edin."
 
 #: R/cotest.b.R
 msgid ""
@@ -170638,6 +171147,11 @@ msgid ""
 "(sensitivity = 1 - specificity). Check the sensitivity and specificity "
 "values you entered."
 msgstr ""
+"Fagan nomogramı çizilmedi çünkü iki test birlikte hiçbir bilgi "
+"taşımamaktadır: pozitif kural ve negatif kural olabilirlik oranlarının her "
+"ikisi de %.2f olduğundan ne pozitif ne de negatif birleşik sonuç hastalık "
+"olasılığını değiştirir. Her test şans köşegeni üzerindedir (duyarlılık = 1 - "
+"özgüllük). Girdiğiniz duyarlılık ve özgüllük değerlerini kontrol edin."
 
 #: R/lassocox.b.R
 msgid ""
@@ -171432,6 +171946,8 @@ msgid ""
 "The joint probabilities for %1$s are not all valid probabilities (%2$s). "
 "Review the dependence parameters."
 msgstr ""
+"%1$s için birleşik olasılıkların hepsi geçerli olasılık değildir (%2$s). "
+"Bağımlılık parametrelerini gözden geçirin."
 
 #: R/cotest.b.R
 msgid ""
@@ -171439,12 +171955,17 @@ msgid ""
 "entered (they imply %2$.4f and %3$.4f, against %4$.4f and %5$.4f). Review "
 "the dependence parameters."
 msgstr ""
+"%1$s için birleşik olasılıklar girilen test parametrelerini yeniden vermiyor "
+"(%2$.4f ve %3$.4f değerlerini veriyor; girilen değerler %4$.4f ve %5$.4f). "
+"Bağımlılık parametrelerini gözden geçirin."
 
 #: R/cotest.b.R
 msgid ""
 "The joint probabilities for %1$s sum to %2$.6f rather than 1. Review the "
 "dependence parameters."
 msgstr ""
+"%1$s için birleşik olasılıkların toplamı 1 yerine %2$.6f. Bağımlılık "
+"parametrelerini gözden geçirin."
 
 #: R/singlearm.b.R
 msgid "The Kaplan-Meier survival plot"
@@ -172603,6 +173124,8 @@ msgid ""
 "The one worked example that assumes conditional independence: a biochemical "
 "measurement and a physical examination."
 msgstr ""
+"Koşullu bağımsızlık varsayan tek işlenmiş örnek: biyokimyasal bir ölçüm ve "
+"bir fizik muayene."
 
 #: R/enhancedROC.b.R
 msgid ""
@@ -175434,6 +175957,9 @@ msgid ""
 "every parameter; to use your own numbers set the worked example to Custom "
 "values."
 msgstr ""
+"İşlenmiş örnek, girdiğiniz değerlerin yerine geçti: %s. İşlenmiş örnek tüm "
+"parametreleri belirler; kendi sayılarınızı kullanmak için işlenmiş örneği "
+"Özel değerler olarak ayarlayın."
 
 #: R/linechart.b.R
 msgid ""
@@ -175722,6 +176248,8 @@ msgstr ""
 #: R/cotest.b.R
 msgid "These dependence values are the analysis defaults, not estimates from data."
 msgstr ""
+"Bu bağımlılık değerleri analizin varsayılanlarıdır, verilerden elde edilmiş "
+"tahminler değildir."
 
 #: R/decisioncompare.b.R
 msgid ""
@@ -175771,6 +176299,10 @@ msgid ""
 "ratio is <b>not</b> their product — use the Post-test Odds column of the "
 "Co-Testing Results table instead."
 msgstr ""
+"Bu olabilirlik oranları her testi <i>tek başına</i> tanımlar. İki test "
+"koşullu olarak bağımlı modellendiğinden birleşik olabilirlik oranı bunların "
+"çarpımı <b>değildir</b> — bunun yerine Birlikte Test Sonuçları tablosundaki "
+"Test Sonrası Odds sütununu kullanın."
 
 #: R/decisioncurve.b.R
 msgid "These look like percentages: enter {values} instead."
@@ -182782,7 +183314,7 @@ msgstr "Troponin"
 
 #: R/cotest.b.R
 msgid "Troponin (Test 1) + ECG (Test 2)"
-msgstr ""
+msgstr "Troponin (Test 1) + EKG (Test 2)"
 
 #: cotest/options/preset/troponin_ecg.title
 msgid "Troponin + ECG (demo only)"
@@ -183257,6 +183789,9 @@ msgid ""
 "Two assays for the same organism on the same swab; both track viral load, so "
 "dependence among diseased subjects is set high."
 msgstr ""
+"Aynı sürüntü örneğinde aynı organizma için iki test; her ikisi de viral yükü "
+"izler, bu nedenle hastalığı olan deneklerdeki bağımlılık yüksek "
+"ayarlanmıştır."
 
 #: circos/options/inputMode/crosstab.title
 msgid "Two categorical variables (cross-tabulated)"
@@ -183305,6 +183840,9 @@ msgid ""
 "Two imaging modalities of the same tissue, so dependence is set relatively "
 "high in both disease groups, as dense tissue might produce."
 msgstr ""
+"Aynı dokunun iki görüntüleme yöntemi; bu nedenle, yoğun dokunun yol "
+"açabileceği gibi, bağımlılık her iki hastalık grubunda da görece yüksek "
+"ayarlanmıştır."
 
 #: R/benford.b.R
 msgid ""
@@ -184018,7 +184556,7 @@ msgstr ""
 
 #: R/cotest.b.R
 msgid "Ultrasound"
-msgstr ""
+msgstr "Ultrasonografi"
 
 #: patientsimilarity/options/method/umap.title
 msgid "UMAP (Uniform Manifold Approximation and Projection)"
@@ -184251,7 +184789,7 @@ msgstr ""
 #: R/kappaSizeFixedN.b.R
 #: R/kappaSizePower.b.R
 msgid "unavailable"
-msgstr ""
+msgstr "mevcut değil"
 
 #: R/decisioncompare.b.R
 msgid "unavailable (denominator 0)"
@@ -189970,6 +190508,12 @@ msgid ""
 "pre-test odds and moves every post-test probability with it, so re-run with "
 "a plausible range before acting on the numbers."
 msgstr ""
+"Çok yüksek prevalans (yüzde 95'in üzerinde): bunun gerçekten test ettiğiniz "
+"popülasyondaki test öncesi olasılık olduğunu kontrol edin. Bu kadar yüksek "
+"bir prevalansta küçük bir mutlak değişiklik (örneğin yüzde 98'den yüzde "
+"99'a) test öncesi odds'u yaklaşık iki katına çıkarır ve tüm test sonrası "
+"olasılıkları da onunla birlikte değiştirir; bu nedenle sayılara göre hareket "
+"etmeden önce analizi makul bir aralıkla yeniden çalıştırın."
 
 #: R/agreement.b.R
 msgid "Very high rank correlation"
@@ -193824,10 +194368,15 @@ msgid ""
 "enter sensitivity, specificity and prevalence from your own population "
 "before acting on any result below."
 msgstr ""
+"Kullanılan işlenmiş örnek: %1$s. %2$s Bunlar hesaplamayı göstermek için "
+"seçilmiş yuvarlak, temsili sayılardır; literatürden birleştirilmiş tahminler "
+"değildir ve hasta bakımında kullanılacak değerler değildir — aşağıdaki "
+"herhangi bir sonuca göre hareket etmeden önce Özel değerler'i seçin ve kendi "
+"popülasyonunuza ait duyarlılık, özgüllük ve prevalans değerlerini girin."
 
 #: cotest/ui[0].label
 msgid "Worked Examples (Demonstration Only)"
-msgstr ""
+msgstr "İşlenmiş Örnekler (Yalnızca Gösterim Amaçlı)"
 
 #: patientdashboard/results/workflowAnalysisTable.title
 msgid "Workflow Analysis"
@@ -193901,6 +194450,11 @@ msgid ""
 "probability in the population you are testing, not the figure from the study "
 "that validated the test."
 msgstr ""
+"Kontrol etmeye değer: bir testin duyarlılık artı özgüllüğü 1'in altındaysa "
+"pozitif bir sonuç hastalığı daha az olası kılar; bu genellikle duyarlılık ve "
+"özgüllüğün (ya da pozitif ve negatif kategorilerin) ters girildiği anlamına "
+"gelir. Prevalans, testi doğrulayan çalışmadaki rakam değil, test ettiğiniz "
+"popülasyondaki test öncesi olasılık olmalıdır."
 
 #: jggstats/options/facet_type/wrap.title
 msgid "Wrap"
@@ -194705,6 +195259,9 @@ msgid ""
 "example (%2$s). The labels follow your names; the numbers do not describe "
 "those tests."
 msgstr ""
+"Testleri %1$s olarak adlandırdınız, ancak aşağıdaki tüm değerler işlenmiş "
+"örnekten (%2$s) gelmektedir. Etiketler sizin verdiğiniz adları kullanır; "
+"sayılar bu testleri tanımlamaz."
 
 #: R/chisqposttest.b.R
 msgid ""

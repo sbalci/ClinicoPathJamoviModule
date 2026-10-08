@@ -62,7 +62,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
 
             .readerInit = function() {
                 o <- private$.readerOptions()
-                self$results$pathReferenceDefinition$deleteRows()
+                .deleteTableRows(self$results$pathReferenceDefinition)
                 for (key in seq_len(4L))
                     self$results$pathReferenceDefinition$addRow(rowKey = as.character(key))
                 prepared <- if (o$readerWorkflow == "off") NULL else
@@ -71,7 +71,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 layout <- .paReaderLayout(o, prepared)
                 for (name in names(layout)) {
                     table <- self$results[[name]]
-                    table$deleteRows()
+                    .deleteTableRows(table)
                     if (o$readerWorkflow != "off") {
                         for (key in layout[[name]]) table$addRow(rowKey = as.character(key))
                     }
@@ -194,7 +194,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     } else {
                         self$results[[name]]
                     }
-                    table$deleteRows()
+                    .deleteTableRows(table)
                     for (key in keys) table$addRow(rowKey = unname(key))
                 }
                 method <- self$options$multiraterMethod
@@ -2186,7 +2186,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
 
             .performOutlierAnalysis = function() {
                 tbl <- self$results$outlierTable
-                tbl$deleteRows()
+                .deleteTableRows(tbl)
                 res <- private$.outlierCaseResults()
                 if (is.null(res)) {
                     private$.accumulateMessage(

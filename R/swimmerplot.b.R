@@ -2211,7 +2211,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
         .resetSummaryTable = function() {
             tbl <- self$results$summary
             labs <- private$.summaryMetricLabels()
-            tbl$deleteRows()
+            .deleteTableRows(tbl)
             for (i in seq_along(labs))
                 tbl$addRow(rowKey = i, values = list(metric = labs[i], value = NA_real_))
         },
@@ -2250,7 +2250,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             want <- names(advanced_labels)
             have <- as.character(unlist(self$results$advancedMetrics$rowKeys))
             if (!identical(have, as.character(want))) {
-                self$results$advancedMetrics$deleteRows()
+                .deleteTableRows(self$results$advancedMetrics)
                 for (key in want)
                     self$results$advancedMetrics$addRow(rowKey = key,
                         values = list(metric_name = advanced_labels[[key]]))
@@ -2278,7 +2278,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             # cover it: editing a cell in the spreadsheet changes no option.
             for (tbl in c("personTimeTable", "milestoneTable", "eventMarkerTable",
                           "groupComparisonTest", "timelineData", "summaryData"))
-                self$results[[tbl]]$deleteRows()
+                .deleteTableRows(self$results[[tbl]])
             self$results$interpretation$setContent('')
             self$results$copyReadyReport$setContent('')
 
@@ -2585,7 +2585,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 # not finish. Same reset the top of .run() performs.
                 for (tbl in c("personTimeTable", "milestoneTable", "eventMarkerTable",
                               "groupComparisonTest", "timelineData", "summaryData"))
-                    try(self$results[[tbl]]$deleteRows(), silent = TRUE)
+                    try(.deleteTableRows(self$results[[tbl]]), silent = TRUE)
                 try(self$results$interpretation$setContent(''), silent = TRUE)
                 try(self$results$copyReadyReport$setContent(''), silent = TRUE)
                 try(private$.resetSummaryTable(), silent = TRUE)
@@ -2701,7 +2701,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
         .updatePersonTimeTable = function(patient_data, stats) {
             # Clear FIRST: the early returns below used to precede deleteRows(),
             # so a run whose data no longer supports the table kept stale rows.
-            self$results$personTimeTable$deleteRows()
+            .deleteTableRows(self$results$personTimeTable)
 
             # This table is person-time BY BEST RESPONSE, so it needs both
             # options. With "Response analysis" off it went on printing CR/PR/
@@ -2774,7 +2774,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
         # Milestone table population
         .updateMilestoneTable = function(patient_data, milestone_data) {
             # Clear FIRST so an empty-input run does not keep stale rows
-            self$results$milestoneTable$deleteRows()
+            .deleteTableRows(self$results$milestoneTable)
 
             # The table is visible as soon as a milestone variable is chosen, so
             # an empty one has to say why instead of sitting there blank.
@@ -2831,7 +2831,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
         # Event marker table population
         .updateEventMarkerTable = function(patient_data, event_data) {
             # Clear FIRST so an empty-input run does not keep stale rows
-            self$results$eventMarkerTable$deleteRows()
+            .deleteTableRows(self$results$eventMarkerTable)
 
             if (!self$options$showEventMarkers) return()
             if (is.null(event_data) || nrow(event_data) == 0) {
@@ -3098,7 +3098,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
         .updateGroupComparisonTests = function(patient_data, stats) {
             # Clear FIRST so a run without a group variable does not keep stale rows
-            self$results$groupComparisonTest$deleteRows()
+            .deleteTableRows(self$results$groupComparisonTest)
 
             if (is.null(self$options$groupVar)) return()
 
@@ -3321,7 +3321,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 # only repopulated tables never cleared, so any rerun outside
                 # their clearWith (laneWidth, showLegend, ...) duplicated every
                 # exported row.
-                tbl$deleteRows()
+                .deleteTableRows(tbl)
 
                 per_patient <- stats$patient_summary
                 if (!is.null(per_patient) && nrow(per_patient) > 0) {
@@ -3416,7 +3416,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 }
 
                 tbl <- self$results$summaryData
-                tbl$deleteRows()
+                .deleteTableRows(tbl)
                 for (i in seq_len(nrow(summary_export))) {
                     tbl$addRow(rowKey = i, values = list(
                         metric = as.character(summary_export$metric[i]),

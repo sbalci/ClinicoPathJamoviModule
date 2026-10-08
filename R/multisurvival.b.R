@@ -2435,7 +2435,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         # corrected too, but deleteRows() is what makes the table correct
         # regardless of any future omission from that list. Six other tables in
         # this file already do this.
-        self$results$personTimeTable$deleteRows()
+        .deleteTableRows(self$results$personTimeTable)
 
         # Add to personTimeTable - first the overall row
         self$results$personTimeTable$addRow(rowKey=1, values=list(
@@ -2670,7 +2670,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
         tryCatch({
           tbl <- self$results$survMetricsTable
-          tbl$deleteRows()
+          .deleteTableRows(tbl)
           rk <- 0L
           max_time <- max(mydata$mytime, na.rm = TRUE)
 
@@ -2980,7 +2980,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           full_ll  <- as.numeric(stats::logLik(full_local))
 
           tbl <- self$results$modelContributionTable
-          tbl$deleteRows()
+          .deleteTableRows(tbl)
           rk <- 0L
 
           # Refit each reduced model explicitly rather than calling stats::drop1().
@@ -3731,7 +3731,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         # console dump. The Preformatted element is kept for the failure case
         # only, and hidden when the diagnostics computed successfully.
         phTable <- self$results$cox_phTable
-        phTable$deleteRows()
+        .deleteTableRows(phTable)
 
         if (inherits(zph, "multisurvival_ph_error")) {
           self$results$cox_ph$setVisible(TRUE)
@@ -5086,7 +5086,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         # The method was refused. jamovi does not clear a result item just
         # because the code that fills it was skipped, so wipe both explicitly or
         # last run's numbers stay on screen under the new method's name.
-        self$results$adjustedSurvTable$deleteRows()
+        .deleteTableRows(self$results$adjustedSurvTable)
         self$results$adjustedSurvTableSummary$setContent("")
         return(NULL)
       }
@@ -5145,7 +5145,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       }
 
       # Clear existing rows (jmvcore Table has no setRows(); deleteRows() clears all)
-      self$results$adjustedSurvTable$deleteRows()
+      .deleteTableRows(self$results$adjustedSurvTable)
 
       if (length(all_results) > 0) {
         for (i in seq_along(all_results)) {
@@ -5408,7 +5408,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       if (is.null(curves)) {
         curves <- private$.adjustedCurveData(cox_model, mydata, adj_var, method)
       }
-      medianTable$deleteRows()
+      .deleteTableRows(medianTable)
       if (is.null(curves)) {
         self$results$adjustedMedianSummary$setContent("")
         return(invisible(NULL))
@@ -5682,7 +5682,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
       # Create Cox table
       coxTable <- self$results$adjustedCoxTable
-      coxTable$deleteRows()
+      .deleteTableRows(coxTable)
       coxTable$setNote(
         "effect",
         if (is_cr)

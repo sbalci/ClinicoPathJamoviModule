@@ -114,7 +114,7 @@ geemodelClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         .run = function() {
             private$.model <- NULL
             for (name in c("coefficientsTable", "posthocTable"))
-                self$results[[name]]$deleteRows()
+                .deleteTableRows(self$results[[name]])
             self$results$interpretationNote$setContent("")
 
             # Check required inputs

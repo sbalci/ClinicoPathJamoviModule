@@ -853,7 +853,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             # Clear first: jamovi re-runs .run() on data-cell edits WITHOUT
             # firing clearWith, so uncleared addRow() calls duplicate rows.
             repro_table <- self$results$reproducibilitytable
-            repro_table$deleteRows()
+            .deleteTableRows(repro_table)
 
             min_pairs <- private$.CLINICAL_CONSTANTS$MIN_CASES_ANALYSIS
             X <- as.matrix(biopsy_data)
@@ -1069,7 +1069,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             # Clear first: jamovi re-runs .run() on data-cell edits WITHOUT
             # firing clearWith, so uncleared addRow() calls duplicate rows.
             bias_table <- self$results$samplingbiastable
-            bias_table$deleteRows()
+            .deleteTableRows(bias_table)
 
             X <- as.matrix(biopsy_data)
             storage.mode(X) <- "double"
@@ -1416,7 +1416,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
         # increase recommended" with a required n of 830.
         .performSampleSizePlanning = function() {
             table <- self$results$samplesizetable
-            table$deleteRows()
+            .deleteTableRows(table)
             private$.ss_done <- TRUE
             info <- private$.icc_info
             k <- if (is.null(info)) 0 else info$k
@@ -1495,7 +1495,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             # Clear first: jamovi re-runs .run() on data-cell edits WITHOUT
             # firing clearWith, so uncleared addRow() calls duplicate rows.
             spatial_table <- self$results$spatialanalysistable
-            spatial_table$deleteRows()
+            .deleteTableRows(spatial_table)
 
             groups <- private$.compartments(spatial_regions)
             private$.missingCompartmentNote(spatial_table, groups)
@@ -2627,7 +2627,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             # Clear first: jamovi re-runs .run() on data-cell edits WITHOUT
             # firing clearWith, so uncleared addRow() calls duplicate rows.
             comp_table <- self$results$compartmentComparison
-            comp_table$deleteRows()
+            .deleteTableRows(comp_table)
 
             groups <- private$.compartments(spatial_regions)
             private$.missingCompartmentNote(comp_table, groups)
@@ -2788,7 +2788,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             # Clear first: jamovi re-runs .run() on data-cell edits WITHOUT
             # firing clearWith, so uncleared addRow() calls duplicate rows.
             test_table <- self$results$compartmentTests
-            test_table$deleteRows()
+            .deleteTableRows(test_table)
 
             groups <- private$.compartments(spatial_regions)
             private$.missingCompartmentNote(test_table, groups)

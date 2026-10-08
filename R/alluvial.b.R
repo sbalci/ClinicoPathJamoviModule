@@ -865,7 +865,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 tbl$getColumn("w")$setVisible(weighted)
                 # Data-shaped rows: not an .init() row set, so clear before adding
                 # (addRow() never checks for an existing rowKey).
-                tbl$deleteRows()
+                .deleteTableRows(tbl)
                 for (i in seq_len(nrow(flows))) {
                     tbl$addRow(rowKey = i, values = list(
                         path = flows$path[i], n = flows$n[i],

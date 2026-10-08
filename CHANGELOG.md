@@ -5,6 +5,134 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-10-07 — decisioncalculator: a format branch chosen on the raw value, a duplicated column, an ungraded guard
+
+- **Failure modes:**
+  - `nomogrammer()`'s `p2percent()` chose its decimal branch on the raw p (`p >= 0.995`) but printed
+    `signif(p, 3)` at whole percents. So p in (0.9945, 0.995) printed "Post(+) = 100%" beside a
+    panel reading 99.5% (decisioncalculator 90/10/0/80). cotest, decision and screeningcalculator
+    share the helper.
+  - The Measures table's "post-test reference-negative probability" was the NPV again, and its
+    footnote said so. Meanwhile P(reference-positive | negative test), the nomogram's Post(-), was
+    in no main table.
+  - An inverted 2x2 (sens + spec < 1) raised a notice only when the nomogram was switched on.
+- **Detection signal:** `/check-function-full` rendered the nomogram for a zero-cell table and read
+  the subtitle against the panel. It also printed PPV, NPV and the two post-test columns side by
+  side for three tables.
+- **Near miss:** the first fix for the inversion warned on the point estimate J < 0. That fires on
+  about half of correctly coded, uninformative tests, the trap the decisioncombine guard fell into
+  on 2026-09-29. Codex's review flagged a different defect (a sign disagreement between raw and
+  corrected counts). The saved guard rule caught this one before the run. The shipped guard is
+  graded: STRONG only when the Agresti-Caffo interval lies wholly below 0, INFO otherwise.
+  Exact null enumeration gives a STRONG rate of 0.03-2.8% across designs.
+- **Prevention rules:**
+  - Choose a formatting branch on the value as it will be rounded, not on the raw value. Test the
+    boundary with adjacent doubles, not only with round numbers.
+  - A column whose footnote says "identical to X" is a duplicate. Remove it, or replace it with the
+    quantity the reader actually needs.
+  - Before writing any threshold notice on an estimate, re-read the guard rule (sampling-error gate)
+    and enumerate the null.
+
+---
+
+## 2026-10-07 — jamovi sends whole numbers as int32; decisioncalculator crashed from ~430 subjects
+
+- **Failure mode:** the jamovi 28.3 client encodes any `Number.isInteger(value)` option as
+  `AnalysisOption.i` (int32), and `jmvcore::parseOptionPB()` plus `OptionNumber` hand R an
+  `integer`. decisioncalculator's MCC multiplied the four margins in integer arithmetic, which
+  overflows 2^31 - 1 once N exceeds about 430 (balanced). `.run()` then aborted with "missing value
+  where TRUE/FALSE needed", so a 500-case validation study (180/20/30/270) gave no result in
+  jamovi. The defect dated from 2025-08-13. The same audit found that a numeric `NA` table cell
+  reaches jamovi as a double NaN, printed "NaN", under notes promising a blank cell.
+- **Detection signal:** the earlier validation called the R wrapper with double literals, so it
+  never saw an integer. The independent review (`development-scripts/audit_decisioncalculator.R`,
+  D07/D08) replayed jamovi's own option message through `Options$fromProtoBuf()` using the
+  RProtoBuf bundled in jamovi.app. It also read the client bundle to see how a cell is rendered.
+- **Prevention rules:**
+  - Treat every `type: Number` option as possibly integer, in the GUI as well as from `table()`.
+    Take products of counts in double at the product (`as.numeric(a) * b`), and keep display
+    counts integer.
+  - A cell with no value is `""` plus a footnote: the only blank cell, and `$asDF` reads it back
+    as `NA`. Never claim "left blank" for an `NA` cell.
+  - Test an analysis's int32 path with `D08` from that script, not only the R wrapper.
+
+---
+
+## 2026-10-06 — An emptied table kept its old row names; timeupdatedsurvival never showed a result
+
+- **Failure mode:** jmvcore's `Table$deleteRows()` resets the keys, the cells and the row count,
+  but not the private row names. Only `addRow()` rebuilds them. A table that held rows and is
+  left empty (an early return, a section switched off) keeps phantom names. `$asDF` then fails
+  with "invalid 'row.names' length", and `fromProtoBuf()` fails with "subscript out of bounds"
+  when the emptying happens in `.init()`. 269 direct calls in 70 files were exposed; only
+  agreement and pathsampling had a workaround, and their two copies differed.
+  - The sweep's guard test also found `timeupdatedsurvival` calling `deleteRows(rowNo = 1)`.
+    `deleteRows()` takes no arguments, so clearing the `rows: 1` placeholder threw before any
+    table was filled. Every fitted model showed only an error footnote.
+  - Behind that crash sat a second defect. The analysis kept its fit in a private field named
+    `.results`, which is jmvcore Analysis's own field for the results tree, so
+    `private$.results <- results` replaced the tree with a plain list. Fixing the first crash
+    alone would have made the analysis fail harder.
+- **Detection signal:** reviewing the two private-field writes in agreement and pathsampling
+  after the cotest security audit, then reproducing on a bare jmvcore Table (0 rows, 0 keys,
+  2 names). The `.results` clobber surfaced as "attempt to apply non-function" blamed on a method
+  that exists; injecting a log line into the swallowing handler and checking
+  `class(a$results)` after `a$run()` (a `list`) found it.
+- **Prevention rules:**
+  - Empty a table with `.deleteTableRows(table)` (`R/utils.R`), never `table$deleteRows()`.
+    `test-utils-delete-table-rows.R` fails on any direct call in `R/` (parsed, so comments do
+    not count). An upstream issue draft is in
+    `development-ideas/jmvcore-issue-deleteRows-rowNames.md`.
+  - Never name an analysis private field after a jmvcore Analysis field: check
+    `names(jmvcore::Analysis$private_fields)` first. Guarded by
+    `test-timeupdatedsurvival-regressions.R` and, after decisiongraph was fixed on 2026-10-07
+    (its `.retrieveState()` NULLed the whole tree at the start of every run),
+    `test-decisiongraph-regressions.R`. Still unreviewed: 19 writes to other jmvcore private
+    members in 10 analyses (`private$.data` 14, `.status` in jrecode, `.info` in venn).
+  - When fixing a crash, re-run the analysis to the end: code the crash used to block may be
+    broken too.
+
+---
+
+## 2026-10-06 — cotest: a notice promised a blank row that jamovi prints as "NaN"
+
+- **Failure mode:** when the dependence makes a result combination impossible in both disease
+  groups, the row's three numeric cells hold `NA_real_`. jmvcore's `Cell$asProtoBuf()` sends
+  that as a double, because `inherits(NA_real_, "numeric")` is checked before `is.na()`, and
+  jamovi's cell formatter begins `if (isNaN(it)) return "NaN"`. The notice said "That row is
+  left blank". The user saw three bare "NaN" cells with no footnote, under a notice describing
+  something else. Rows forced to exactly 0 or 1 already carried a "Not an estimate" footnote;
+  the impossible row was the one structural case without one.
+- **Detection signal:** `/release-review-function cotest` ran an independent oracle that builds
+  the joint table and applies Bayes per cell directly. A mismatch on a structurally empty row led
+  to reading how the row is serialised and drawn: jmvcore `Cell$asProtoBuf()`, then the 28.3
+  `resultsview`/`quill` bundles. testthat sees only `asDF`, where the value is a plain `NA`.
+- **Prevention rule:** describe a missing table cell by what jamovi draws, not by the R value.
+  A numeric `NA` prints "NaN" and a `NULL` prints "." (from the 28.3 client code). Put the
+  explanation on the cell as a footnote. Guarded by "an impossible combination is footnoted on
+  its row; the notice does not promise a blank" in `test-cotest-release-review.R`.
+
+---
+
+## 2026-10-06 — cotest, sequentialtests: the GUI silently replaced an out-of-range entry
+
+- **Failure mode:** both `events.js` files clamped every numeric box to its `.a.yaml` bounds on
+  change. A clinician who typed `80` for an 80% sensitivity got 0.99, and `10` for a 10%
+  prevalence got 0.999. The analysis ran on those values with no message. Left alone, jmvcore
+  rejects the same entry with "test1_sens must be between 0.01 and 0.99 (is 80)", because the
+  jamovi client does not enforce an option's `min`/`max` (its bundle checks only enumerated
+  values). The clamp turned an informative error into a silent wrong answer.
+- **Detection signal:** `/review-function cotest` read `cotest.events.js` next to the `.a.yaml`
+  bounds and called `cotest(test1_sens = 80)` from R to see what jmvcore does without the clamp.
+  testthat cannot reach the JS, so 506 passing tests said nothing about it.
+- **Prevention rule:** never clamp, round or rewrite a user's typed value in `events.js`. Let
+  jmvcore's range check reject it. A JS handler may write into controls only on an explicit user
+  action whose effect is visible, such as choosing a worked example. Guarded by "an out-of-range
+  entry is rejected, never silently clamped in the GUI" in `test-cotest.R` and
+  `test-sequentialtests-release-review.R`.
+
+---
+
 ## 2026-10-05 — cotest: a notice claimed a provenance the code could not know
 
 - **Failure mode:** when a worked example overrode `indep`, the notice said it had replaced

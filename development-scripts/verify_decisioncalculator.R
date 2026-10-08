@@ -285,7 +285,7 @@ test_that("Population Prevalence Adjustment", {
     
     # Post-test probabilities should match PPV/NPV when pp=TRUE
     expect_equal(ratio_table$PostTestProbDisease, ratio_table$PPV)
-    expect_equal(ratio_table$PostTestProbHealthy, ratio_table$NPV)
+    expect_equal(ratio_table$PostTestProbNeg, 1 - ratio_table$NPV)
 })
 
 test_that("Advanced Metrics", {

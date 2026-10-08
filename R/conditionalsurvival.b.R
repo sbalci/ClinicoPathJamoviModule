@@ -484,7 +484,7 @@ conditionalsurvivalClass <- R6::R6Class(
             table <- self$results$condsurvTable
 
             # Clear all existing rows (no-arg form is the correct pattern)
-            table$deleteRows()
+            .deleteTableRows(table)
 
             # Add results - include group column for stratified analyses
             for (i in seq_len(nrow(results))) {

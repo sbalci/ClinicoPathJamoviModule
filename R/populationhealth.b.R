@@ -138,7 +138,7 @@ populationhealthClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
         # are not duplicated.
         .fillTable = function(table, rows_list) {
             if (table$rowCount > 0)
-                table$deleteRows()
+                .deleteTableRows(table)
             for (i in seq_along(rows_list))
                 table$addRow(rowKey = i, values = rows_list[[i]])
         },

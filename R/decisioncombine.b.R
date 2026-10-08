@@ -327,7 +327,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                                "crossTabTable")) {
                     item <- self$results[[name]]
                     if (item$rowCount > 0) {
-                        item$deleteRows()
+                        .deleteTableRows(item)
                     }
                 }
 
@@ -1573,9 +1573,9 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 # (5 -> 10 -> 15) until the duplicated rowKeys made $asDF fail outright
                 # with "duplicate 'row.names' are not allowed", taking the recommendation
                 # and every plot down with it.
-                self$results$combinationTable$deleteRows()
-                self$results$combinationTableCI$deleteRows()
-                self$results$combinationTableCIRatios$deleteRows()
+                .deleteTableRows(self$results$combinationTable)
+                .deleteTableRows(self$results$combinationTableCI)
+                .deleteTableRows(self$results$combinationTableCIRatios)
 
                 # PPV and NPV assume this sample's prevalence. That was an INFO notice on
                 # every ordinary run, where a standing caveat about two columns does not
@@ -2316,8 +2316,8 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
             },
             .populateFrequencyTables = function(data_prep) {
                 # Emptied for the same reason as the combination tables above.
-                self$results$goldFreqTable$deleteRows()
-                self$results$crossTabTable$deleteRows()
+                .deleteTableRows(self$results$goldFreqTable)
+                .deleteTableRows(self$results$crossTabTable)
 
                 # Gold standard frequency
                 goldTable <- self$results$goldFreqTable

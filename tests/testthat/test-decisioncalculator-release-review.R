@@ -72,9 +72,9 @@ test_that("confidence intervals match epiR on every bound", {
         expect_equal(got$lower, ref$lower, tolerance = 1e-10, info = pair[1])
         expect_equal(got$upper, ref$upper, tolerance = 1e-10, info = pair[1])
     }
-    # statistics with no interval are blank, not given a fabricated one
-    ba <- ci[grepl("Balanced accuracy", ci$statsnames), ][1, ]
-    expect_true(is.na(ba$lower) && is.na(ba$upper))
+    # statistics with no interval are not rows of the interval table (DC-IR-02: their NA limits
+    # reached jamovi as "NaN"); advancedMetricsTable carries balanced accuracy and F1
+    expect_false(any(grepl("Balanced accuracy|F1 score", ci$statsnames)))
 })
 
 
@@ -202,7 +202,8 @@ test_that("confidence intervals and external prevalence coexist without false PP
     expect_true(all(c("Test sensitivity", "Test specificity", "Diagnostic accuracy") %in%
                         ratio$statsnames))
     expect_false(any(ratio$statsnames %in% c(
-        "Apparent prevalence", "True prevalence", "Positive predictive value",
+        "Apparent prevalence", "Reference-standard prevalence in this sample",
+        "Positive predictive value",
         "Negative predictive value", "Proportion of subjects with outcome ruled out",
         "Proportion of subjects with outcome ruled in",
         "False-positive rate among outcome-negative subjects",
@@ -312,19 +313,24 @@ test_that("UI dependencies, references, and theme behavior match the repaired co
 })
 
 
-test_that("cut-offs describing different cohort sizes are flagged", {
-    # Moving a threshold on one cohort cannot change how many patients there are, so
-    # differing totals mean these are separate studies, not thresholds.
+test_that("cut-offs describing different cohorts are flagged", {
+    # Moving a threshold on one cohort changes neither the reference-positive nor the
+    # reference-negative count, so a difference in either means separate studies.
+    # (validate-function 2026-10-06 VAL-07: the guard used to compare totals only.)
     r <- decisioncalculator(TP = TP0, TN = TN0, FP = FP0, FN = FN0, multiplecuts = TRUE,
                             tp1 = 95,  fp1 = 28, tn1 = 82,  fn1 = 15,
                             tp2 = 150, fp2 = 20, tn2 = 200, fn2 = 30)
-    expect_match(notices_of(r), "different numbers of patients")
+    expect_match(notices_of(r), "Cut-offs describe different cohorts")
 
     # matched totals produce no such notice
     ok <- decisioncalculator(TP = 90, TN = 80, FP = 30, FN = 20, multiplecuts = TRUE,
                              tp1 = 95, fp1 = 25, tn1 = 85, fn1 = 15,
                              tp2 = 85, fp2 = 35, tn2 = 75, fn2 = 25)
-    expect_false(grepl("different numbers of patients", notices_of(ok)))
+    expect_false(grepl("Cut-offs describe different cohorts", notices_of(ok)))
+    # same totals, different reference-positive count: 120/100 vs 110/110
+    same_total <- decisioncalculator(TP = 90, TN = 80, FP = 30, FN = 20, multiplecuts = TRUE,
+                                     tp1 = 110, fn1 = 10, fp1 = 30, tn1 = 70)
+    expect_match(notices_of(same_total), "Cut-offs describe different cohorts")
 })
 
 
@@ -412,8 +418,11 @@ test_that("a zero cell continuity-corrects the ratios and says so", {
     expect_true(is.finite(x$LRP[1]))            # not Inf
     expect_equal(x$Spec[1], 1, tolerance = 1e-12)  # the table keeps the uncorrected value
     expect_match(notices_of(r), "Continuity correction applied")
-    # and it discloses that the intervals are NOT corrected
-    expect_match(notices_of(r), "not continuity-corrected")
+    # validate-function 2026-10-06 VAL-02/VAL-11: the LR/DOR intervals now use the same
+    # corrected counts as the point estimates (raw counts gave Inf/NaN and [1, 1]); the
+    # notice says so, and that the proportions stay on the observed counts.
+    expect_match(notices_of(r), "the diagnostic odds ratio and their confidence intervals")
+    expect_match(notices_of(r), "use the observed counts")
 })
 
 
@@ -433,7 +442,7 @@ test_that("the Fagan reading is shown in jamovi, not printed to the console", {
     x <- r$ratioTable$asDF
     expect_match(txt, "Pre-test probability")
     expect_match(txt, sprintf("%.1f%%", 100 * x$PostTestProbDisease[1]), fixed = TRUE)
-    expect_match(txt, sprintf("%.1f%%", 100 * (1 - x$PostTestProbHealthy[1])), fixed = TRUE)
+    expect_match(txt, sprintf("%.1f%%", 100 * x$PostTestProbNeg[1]), fixed = TRUE)
 })
 
 
@@ -447,7 +456,7 @@ test_that("the Fagan reading tracks the supplied prior and matches Bayes", {
     pre_odds <- x$PrevalenceD[1] / (1 - x$PrevalenceD[1])
     expect_equal(x$PostTestProbDisease[1],
                  (pre_odds * x$LRP[1]) / (1 + pre_odds * x$LRP[1]), tolerance = 1e-10)
-    expect_equal(1 - x$PostTestProbHealthy[1],
+    expect_equal(x$PostTestProbNeg[1],
                  (pre_odds * x$LRN[1]) / (1 + pre_odds * x$LRN[1]), tolerance = 1e-10)
     expect_equal(x$PrevalenceD[1], 0.05, tolerance = 1e-12)
 
@@ -458,17 +467,18 @@ test_that("the Fagan reading tracks the supplied prior and matches Bayes", {
 })
 
 
-test_that("the cut-off verdict reports whether the accuracy intervals overlap", {
-    # A formal paired test is impossible from four marginal counts per scenario, but a
-    # Wilson interval on each accuracy is computable, and overlap is a conservative signal
-    # that the counts do not separate the cut-offs.
+test_that("the cut-off verdict reports whether the Youden's J intervals overlap", {
+    # A formal paired test is impossible from four marginal counts per scenario, but an
+    # Agresti-Caffo interval on each scenario's J is computable; non-overlap is a
+    # conservative signal of a difference. (It used Wilson ACCURACY intervals while ranking
+    # on J - validate-function 2026-10-06 VAL-06.)
     overlapping <- decisioncalculator(
         TP = TP0, TN = TN0, FP = FP0, FN = FN0, multiplecuts = TRUE,
         tp1 = 100, fp1 = 25, tn1 = 85, fn1 = 10,
         tp2 = 95,  fp2 = 28, tn2 = 82, fn2 = 15)
     rec1 <- as.character(overlapping$multipleCutoffTable$asDF$recommendation[3])
     expect_match(rec1, "overlaps the current cut-off")
-    expect_match(rec1, "not established")
+    expect_match(rec1, "do not show a difference")
 
     separated <- decisioncalculator(
         TP = TP0, TN = TN0, FP = FP0, FN = FN0, multiplecuts = TRUE,
@@ -480,7 +490,7 @@ test_that("the cut-off verdict reports whether the accuracy intervals overlap", 
     # and the table says why a formal test is not offered
     notes <- paste(vapply(as.list(separated$multipleCutoffTable$notes),
                           function(n) n$note, character(1)), collapse = " ")
-    expect_match(notes, "four summary counts per scenario cannot supply that")
+    expect_match(notes, "no paired test of the difference is performed")
 })
 
 
@@ -519,4 +529,24 @@ test_that("fractional counts skip only the epiR interval tables", {
     expect_gt(nchar(r$summary$content), 0)
     expect_false(is.null(r$plot1$state))
     expect_true(all(is.na(r$epirTable_ratio$asDF$est)))
+})
+
+
+test_that("user-typed labels starting with '<' survive jamovi's HTML-parsed table cells", {
+    # jamovi parses a text cell as HTML: "<LOD" (unclosed tag) and "<high>" (empty
+    # element) rendered as BLANK cells. A "<" before a letter must reach the cell broken.
+    # Default counts: scenario 2 (80/30/95/15) has the highest Youden's J (0.591 vs 0.545),
+    # so the verdict cell on the current row quotes its name.
+    r <- decisioncalculator(TP = TP0, TN = TN0, FP = FP0, FN = FN0, multiplecuts = TRUE,
+                            cutoff1 = "<LOD rule", cutoff2 = "<high> cut-off",
+                            showWorkload = TRUE, analysisUnit = "<slide>")
+    m <- r$multipleCutoffTable$asDF
+    w <- r$screeningWorkload$asDF
+    cells <- c(m$cutoffName, m$recommendation, w$unit)
+
+    expect_false(any(grepl("<[A-Za-z/!?]", cells)))
+    expect_match(m$cutoffName[1], "LOD rule", fixed = TRUE)
+    expect_match(m$cutoffName[2], "high> cut-off", fixed = TRUE)
+    expect_match(m$recommendation[3], "high> cut-off", fixed = TRUE)
+    expect_true(all(grepl("slide>", w$unit, fixed = TRUE)))
 })

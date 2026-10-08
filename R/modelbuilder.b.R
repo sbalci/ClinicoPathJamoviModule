@@ -1821,7 +1821,7 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             # Populate validation results table
             if (length(cv_results) > 0) {
                 validation_table <- self$results$validationResults
-                validation_table$deleteRows()
+                .deleteTableRows(validation_table)
                 
                 for (model_name in names(cv_results)) {
                     cv_result <- cv_results[[model_name]]
@@ -1902,7 +1902,7 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             # Calculate NRI if requested
             if (self$options$calculateNRI && length(models_built) >= 2) {
                 nri_table <- self$results$nriTable
-                nri_table$deleteRows()
+                .deleteTableRows(nri_table)
                 
                 # Parse NRI thresholds
                 threshold_str <- self$options$nriThresholds %||% "0.05, 0.10, 0.20"
@@ -1958,7 +1958,7 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             # Calculate IDI if requested
             if (self$options$calculateIDI && length(models_built) >= 2) {
                 idi_table <- self$results$idiTable
-                idi_table$deleteRows()
+                .deleteTableRows(idi_table)
                 
                 # Compare each model to basic model (or first model)
                 reference_model <- private$.models[[models_built[1]]]
@@ -2024,7 +2024,7 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
         .populateModelSummary = function(model, table_name) {
             summary_table <- self$results[[table_name]]
-            summary_table$deleteRows()
+            .deleteTableRows(summary_table)
 
             if (is.null(model)) return()
 
@@ -2103,7 +2103,7 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             if (!self$options$compareModels) return()
 
             comparison_table <- self$results$modelComparisonTable
-            comparison_table$deleteRows()
+            .deleteTableRows(comparison_table)
 
             outcome_var <- self$options$outcome
 
@@ -2234,7 +2234,7 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             if (!self$options$generateRiskScore) return()
 
             risk_score_table <- self$results$riskScoreTable
-            risk_score_table$deleteRows()
+            .deleteTableRows(risk_score_table)
 
             # For now, use the first built model
             if (length(models_built) > 0) {

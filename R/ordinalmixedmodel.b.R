@@ -46,7 +46,7 @@ ordinalmixedmodelClass <- R6::R6Class(
             self$results$methodExplanation$setContent("")
             for (name in c("modelFitTable", "fixedEffects", "thresholds", "randomEffects",
                            "propOddsTestTable", "conditionProbs"))
-                self$results[[name]]$deleteRows()
+                .deleteTableRows(self$results[[name]])
 
             if (is.null(self$options$dep) || is.null(self$options$randomTerms) ||
                 length(self$options$randomTerms) == 0)
@@ -340,14 +340,14 @@ ordinalmixedmodelClass <- R6::R6Class(
 
         .populatePropOddsTest = function(model) {
             table <- self$results$propOddsTestTable
-            table$deleteRows()
+            .deleteTableRows(table)
             table$setNote("unavailable", paste("Not available for cumulative link mixed models.",
                 "ordinal::nominal_test supports clm, not clmm; no test was performed."))
         },
 
         .populateConditionProbs = function(model, data) {
             table <- self$results$conditionProbs
-            table$deleteRows()
+            .deleteTableRows(table)
             table$setNote("unavailable", paste("Marginal category probabilities are not available",
                 "in this analysis. Their definition requires an explicit covariate grid and",
                 "a choice between conditioning on or integrating over random effects."))

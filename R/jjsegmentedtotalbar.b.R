@@ -249,7 +249,7 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             private$.composition_data <- NULL
 
             # Clear existing tables to prevent accumulation
-            self$results$composition_table$deleteRows()
+            .deleteTableRows(self$results$composition_table)
             # detailed_stats keeps the rows .init() scaffolded (deleting them would drop the
             # table until the statistics return); blank the values so an early return does
             # not leave a previous run's numbers on screen.
@@ -257,7 +257,7 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 self$results$detailed_stats$setRow(rowKey = key, values = list(value = NA_character_))
 
             if (self$options$show_statistical_tests) {
-                 self$results$statistical_tests$deleteRows()
+                 .deleteTableRows(self$results$statistical_tests)
             }
 
             # Get data
@@ -1488,7 +1488,7 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             }
             
             # Clear existing results
-            self$results$statistical_tests$deleteRows()
+            .deleteTableRows(self$results$statistical_tests)
             
             tryCatch({
                 # Create contingency table for chi-square test

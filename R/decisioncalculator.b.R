@@ -17,10 +17,11 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
             # Invalid counts are reported HERE rather than by rejecting the option, which is
             # why jamovi/decisioncalculator.a.yaml gives the counts no `min:`. ====
             .noticeList = list(),
-            # A results item that may not exist in the compiled .h.R yet. jmvcore raises
-            # rather than returning NULL, so a bare self$results$x would crash every run
-            # between the .r.yaml edit and the next jmvtools::prepare().
-            .resultsItem = function(name) tryCatch(self$results[[name]], error = function(e) NULL),
+            # A user-typed label (scenario name, unit) placed in a table text cell. jamovi
+            # parses cells as HTML, so "<LOD" or "<high>" rendered as an empty cell. Same
+            # rule as decision.b.R .richText(); apply at the cell only, never to a value
+            # used for matching.
+            .richText = function(x) gsub("<(?=[A-Za-z/!?])", "< ", as.character(x), perl = TRUE),
 
             .addNotice = function(type, title, content) {
                 private$.noticeList[[length(private$.noticeList) + 1]] <- list(
@@ -71,7 +72,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
             # already see - so their rows are scaffolded here and .run() only fills values.
             .epirStatLabels = function() {
                 c("ap"      = .("Apparent prevalence"),
-                  "tp"      = .("True prevalence"),
+                  "tp"      = .("Reference-standard prevalence in this sample"),
                   "se"      = .("Test sensitivity"),
                   "sp"      = .("Test specificity"),
                   "diag.ac" = .("Diagnostic accuracy"),
@@ -87,17 +88,85 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                   "p.tpdn"  = .("False-positive rate among outcome-negative subjects"),
                   "p.tndp"  = .("False-negative rate among outcome-positive subjects"),
                   "p.dntp"  = .("False-discovery proportion among test-positive subjects"),
-                  "p.dptn"  = .("False-omission proportion among test-negative subjects"),
-                  "bal.acc"  = .("Balanced accuracy (CI not computed)"),
-                  "f1.score" = .("F1 score at selected prevalence (CI not computed)"))
+                  "p.dptn"  = .("False-omission proportion among test-negative subjects"))
             },
+            # Balanced accuracy and F1 have no interval here, so they are not rows of an interval
+            # table (their limits printed "NaN"); advancedMetricsTable shows both.
             .epirRatioStats = function() {
-                base <- if (isTRUE(self$options$pp)) c("se", "sp", "diag.ac")
-                        else c("ap", "tp", "se", "sp", "diag.ac", "pv.pos", "pv.neg",
-                               "p.rout", "p.rin", "p.tpdn", "p.tndp", "p.dntp", "p.dptn")
-                c(base, "bal.acc", "f1.score")
+                if (isTRUE(self$options$pp)) c("se", "sp", "diag.ac")
+                else c("ap", "tp", "se", "sp", "diag.ac", "pv.pos", "pv.neg",
+                       "p.rout", "p.rin", "p.tpdn", "p.tndp", "p.dntp", "p.dptn")
             },
             .epirNumberStats = function() c("lr.pos", "lr.neg", "diag.or", "youden", "nndx"),
+
+            # Youden's index = TP/n1 - FP/n0, a difference of two INDEPENDENT binomial
+            # proportions. Agresti & Caffo (2000): add one success and one failure to each
+            # group, Wald interval of the adjusted difference, clamped to [-1, 1]; the
+            # estimate stays the observed index. Same code and rationale as decision.b.R:
+            # epiR's interval adds the two Clopper-Pearson bounds and covered 0.997 under a
+            # "95%" label (exact enumeration, validation 2026-10-06).
+            .youdenCI = function(tp, n1, fp, n0, z = stats::qnorm(0.975)) {
+                q1 <- (tp + 1) / (n1 + 2)
+                q2 <- (fp + 1) / (n0 + 2)
+                se <- sqrt(q1 * (1 - q1) / (n1 + 2) + q2 * (1 - q2) / (n0 + 2))
+                c(est = tp / n1 - fp / n0,
+                  lower = max(-1, q1 - q2 - z * se),
+                  upper = min(1, q1 - q2 + z * se))
+            },
+
+            # "Inverted test" guard on the raw counts: "none", "info" or "strong". A point estimate
+            # J < 0 occurs about half the time for an uninformative but correctly coded test, so
+            # the STRONG_WARNING needs the whole Agresti-Caffo interval below 0 (one-sided 2.5%);
+            # J < 0 within sampling variation, or with fractional counts (no interval), is INFO.
+            # J < 0 <=> TP * n0 < FP * n1: exact for integer counts while the products stay below
+            # 2^53, i.e. any realistic table; no tolerance, so J = 0 (1/3 + 2/3) is not "below 0".
+            # When J < 0 and the interval is below 0, the 0.5-corrected LR+ is below 1 as well (the
+            # shrunk difference is linear in the shrinkage), so this never contradicts the nomogram.
+            .inversionGrade = function(tp, fn, fp, tn) {
+                n1 <- tp + fn
+                n0 <- fp + tn
+                if (!(as.numeric(tp) * n0 < as.numeric(fp) * n1)) return("none")
+                counts <- c(tp, fn, fp, tn)
+                if (any(abs(counts - round(counts)) > 1e-6)) return("info")
+                if (private$.youdenCI(tp, n1, fp, n0)[["upper"]] < 0) "strong" else "info"
+            },
+
+            # Number needed to diagnose = 1 / J. The confidence set for 1/J is
+            # {1/j : j in (L, U), j > 0}: (1/U, 1/L) when L > 0, (1/U, +Inf) when L <= 0 < U.
+            # NA where undefined or unbounded. epiR's min/max(1/bounds) excluded its own
+            # estimate whenever the Youden interval crossed 0, and printed negative NNDx.
+            .nndxFromYouden = function(y) {
+                est <- if (is.finite(y[["est"]]) && y[["est"]] > 0) 1 / y[["est"]] else NA_real_
+                lower <- if (is.finite(y[["upper"]]) && y[["upper"]] > 0) 1 / y[["upper"]] else NA_real_
+                upper <- if (is.finite(est) && is.finite(y[["lower"]]) && y[["lower"]] > 0) 1 / y[["lower"]] else NA_real_
+                c(est = est, lower = lower, upper = upper)
+            },
+
+            # Percent text with one decimal, and more only when one decimal would print a
+            # probability strictly between 0 and 1 as "0.0%" or "100.0%" (prevalence 0.01%
+            # read "0.0%", and "raises the probability from 0.0% to 0.0%").
+            .pct = function(p) {
+                if (!is.finite(p)) return(NA_character_)
+                x <- 100 * p
+                for (d in 1:4) {
+                    s <- sprintf("%.*f", d, x)
+                    v <- as.numeric(s)
+                    if (!(x > 0 && v == 0) && !(x < 100 && v == 100)) return(paste0(s, "%"))
+                }
+                if (x < 50) "<0.0001%" else ">99.9999%"
+            },
+
+            # An NA cell is never blank in jamovi: jmvcore sends a numeric NA as a double, printed
+            # "NaN", and a logical NA as missing, printed ".". An empty string is the only blank
+            # cell, and $asDF reads it back as NA. So each NA cell becomes "" with a footnote
+            # saying why. Call it after setRow(), which clears a cell's footnotes (no duplicates).
+            .footnoteNA = function(table, values, note, rowNo = NA, rowKey = NULL) {
+                for (col in names(values))
+                    if (isTRUE(is.na(values[[col]]))) {
+                        table$setCell(col = col, value = "", rowNo = rowNo, rowKey = rowKey)
+                        table$addFootnote(col = col, note = note, rowNo = rowNo, rowKey = rowKey)
+                    }
+            },
 
             .init = function() {
                 if (isTRUE(self$options$ci)) {
@@ -171,11 +240,11 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 multipleCutoffTable <- self$results$multipleCutoffTable
                 multipleCutoffTable$addRow(
                     rowKey = 1,
-                    values = list(cutoffName = self$options$cutoff1)
+                    values = list(cutoffName = private$.richText(self$options$cutoff1))
                 )
                 multipleCutoffTable$addRow(
                     rowKey = 2,
-                    values = list(cutoffName = self$options$cutoff2)
+                    values = list(cutoffName = private$.richText(self$options$cutoff2))
                 )
                 multipleCutoffTable$addRow(
                     rowKey = 3,
@@ -183,10 +252,15 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 )
             },
             .run = function() {
-                self$results$screeningWorkload$deleteRows()
+                .deleteTableRows(self$results$screeningWorkload)
                 private$.noticeList <- list()
 
                 # Read numbers from input ----
+                # jamovi sends a typed whole number as int32, so these usually arrive as R
+                # integers (table() counts in R do too). They stay integers here, so the count
+                # tables keep integer cells; every PRODUCT of counts below is taken in double
+                # (TP_cc..FN_cc, MCC), because the four-margin product overflows 2^31 - 1 from
+                # about 430 subjects ("missing value where TRUE/FALSE needed").
                 TP <- self$options$TP
                 FP <- self$options$FP
                 TN <- self$options$TN
@@ -348,14 +422,15 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     )
                 }
 
-                # Continuity correction for zero-cell issues (stabilizes the LR/DOR point
-                # estimates only; epi.tests() below is fed the raw table3, so the CIs are
-                # uncorrected)
+                # Continuity correction for zero-cell issues: the LR and DOR point estimates and
+                # their in-house intervals (see the ci block) use the corrected counts; the
+                # proportions, and epi.tests() on the raw table3, do not.
                 zero_cell <- any(c(TP, FP, TN, FN) == 0)
-                TP_cc <- TP
-                FP_cc <- FP
-                TN_cc <- TN
-                FN_cc <- FN
+                # Doubles: the DOR and the nomogram's cross products multiply these.
+                TP_cc <- as.numeric(TP)
+                FP_cc <- as.numeric(FP)
+                TN_cc <- as.numeric(TN)
+                FN_cc <- as.numeric(FN)
 
                 if (zero_cell) {
                     TP_cc <- TP + 0.5
@@ -363,26 +438,46 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     TN_cc <- TN + 0.5
                     FN_cc <- FN + 0.5
 
-                    private$.addNotice("WARNING", .("Continuity correction applied"), .("A Haldane-Anscombe 0.5 correction was applied to likelihood-ratio and diagnostic-odds-ratio point estimates because a zero cell was present. Confidence intervals use the raw counts and are not continuity-corrected."))
+                    private$.addNotice("WARNING", .("Continuity correction applied"), .("A zero cell was present, so a Haldane-Anscombe 0.5 correction was added to every cell for the likelihood ratios, the diagnostic odds ratio and their confidence intervals. Sensitivity, specificity, predictive values and their intervals use the observed counts."))
                 }
 
                 # Calculate metrics with safe division
+                # TODO (cleanup): the `else 0` fallbacks here and for AccurT/PrevalenceD are
+                # unreachable (the early returns above guarantee DiseaseP, DiseaseN > 0) but would
+                # display a fabricated 0% if a guard moved; use NA_real_ (review guide section 20).
                 Sens <- if (DiseaseP > 0) TP / DiseaseP else 0
                 Spec <- if (DiseaseN > 0) TN / DiseaseN else 0
+                # Footnote for any table cell that has no value (see .footnoteNA)
+                na_note <- .("Not estimable for this table: a denominator is zero or the quantity is undefined.")
                 if (self$options$showWorkload) {
-                    scenario <- .dvNumbers(self$options$prevalenceScenarios, 0, 1)
+                    # Wrap only the parser: its stop() used to abort .run() and discard every
+                    # table for one mistyped scenario ("1%,5%").
+                    # TODO (UX): an emptied prevalenceScenarios returns numeric() with no notice, so
+                    # the table silently shows only the Observed row; add an INFO saying no target
+                    # prevalences were entered (check-function-full 2026-10-07).
+                    scenario <- tryCatch(.dvNumbers(self$options$prevalenceScenarios, 0, 1),
+                        error = function(e) {
+                            private$.addNotice("ERROR", .("Invalid target prevalences"),
+                                .("Target prevalences must be at most 100 comma-separated proportions between 0 and 1, for example 0.001,0.01. The projected rows for this list are omitted; every other result is unaffected."))
+                            numeric()
+                        })
                     if (self$options$pp) scenario <- unique(c(self$options$pprob, scenario))
                     prev <- c(DiseaseP / (DiseaseP + DiseaseN), scenario)
+                    # TODO (cleanup): the row set depends only on options (prevalenceScenarios,
+                    # pp, pprob), so it belongs in .init() with setRow() here (check-function
+                    # library-review checklist); kept in .run() because the parse-error notice lives here.
                     for (i in seq_along(prev)) {
                         w <- .dvWorkload(if (DiseaseP > 0) TP/DiseaseP else NA_real_,
                             if (DiseaseN > 0) TN/DiseaseN else NA_real_, prev[i],
                             if (i == 1) DiseaseP+DiseaseN else self$options$workloadPopulationSize)
                         w$net_benefit <- NULL
                         self$results$screeningWorkload$addRow(rowKey = as.character(i), values = c(
-                            list(source = if (i == 1) "Observed" else "Projected",
-                                 unit = self$options$analysisUnit), as.list(w)))
+                            list(source = if (i == 1) .("Observed") else .("Projected"),
+                                 unit = private$.richText(self$options$analysisUnit)), as.list(w)))
+                        private$.footnoteNA(self$results$screeningWorkload, as.list(w), na_note,
+                            rowKey = as.character(i))
                     }
-                    self$results$screeningWorkload$setNote("source", .("Projected fractional counts assume sensitivity and specificity transport to the target population. These are flagged observations, not measured extra review time or unique patients. No uncertainty in target prevalence is assumed."))
+                    self$results$screeningWorkload$setNote("source", .("Projected fractional counts assume sensitivity and specificity transport to the target population. These are flagged observations, not measured extra review time or unique patients. The projections use the point estimates of sensitivity and specificity and assume no uncertainty in them or in the target prevalence."))
                 }
 
                 AccurT <- if (TotalPop > 0) TestT / TotalPop else 0
@@ -403,7 +498,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                         .("Extreme prevalence"),
                         .fmt(
                             .("The selected prevalence is {prevalence}. Predictive values may be unstable or poorly transportable; verify them in the intended population and report the prevalence used."),
-                            prevalence = sprintf("%.1f%%", 100 * PriorProb)
+                            prevalence = private$.pct(PriorProb)
                         )
                     )
                 }
@@ -455,9 +550,13 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     NA
                 }
 
-                PostTestProbHealthy <- if (!is.na(Sens) && !is.na(Spec)) {
-                    numerator <- (1 - PriorProb) * Spec
-                    denominator <- ((1 - PriorProb) * Spec) + (PriorProb * (1 - Sens))
+                # Probability of a reference-positive outcome after a NEGATIVE test (1 - NPV): the
+                # nomogram's Post(-). The column used to report P(reference-negative | negative
+                # test), which is the NPV again; 1 - NPV appeared only as epiR's false-omission row,
+                # with ci on and the sample prevalence.
+                PostTestProbNeg <- if (!is.na(Sens) && !is.na(Spec)) {
+                    numerator <- PriorProb * (1 - Sens)
+                    denominator <- (PriorProb * (1 - Sens)) + ((1 - PriorProb) * Spec)
                     if (denominator > 0) numerator / denominator else NA
                 } else {
                     NA
@@ -477,9 +576,9 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     0
                 }
 
-                # Diagnostic Odds Ratio (Haldane-Anscombe corrected counts).
-                # Displayed in advancedMetricsTable; confidence intervals for all
-                # metrics are supplied by epiR::epi.tests() (see the ci block below).
+                # Diagnostic Odds Ratio (Haldane-Anscombe corrected counts), displayed in
+                # advancedMetricsTable. Its interval, like the LR ones, is computed in the ci block
+                # on these corrected counts; epi.tests() supplies only the proportion intervals.
                 if (FN_cc > 0 && FP_cc > 0) {
                     DOR <- (TP_cc * TN_cc) / (FN_cc * FP_cc)
                 } else {
@@ -488,6 +587,31 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
 
                 # Youden's Index (optimal cut-off criterion)
                 YoudenIndex <- Sens + Spec - 1
+
+                # sens + spec < 1: a positive result is rarer among reference-positive than among
+                # reference-negative subjects, often TP/FN or FP/TN typed in swapped positions. Only
+                # the Fagan path used to say so, so with the nomogram off 20/90/80/30 raised nothing.
+                # Graded, see .inversionGrade(); the interval and n are quoted, as in decision.
+                inversion <- private$.inversionGrade(TP, FN, FP, TN)
+                if (inversion != "none") {
+                    yci <- private$.youdenCI(TP, DiseaseP, FP, DiseaseN)
+                    youden_txt <- sprintf("%.3f", YoudenIndex)
+                    if (inversion == "strong") {
+                        private$.addNotice("STRONG_WARNING", .("Test performs worse than chance"),
+                            .fmt(.("Youden's index is {youden} (95% CI {lower} to {upper}; {npos} reference-positive and {nneg} reference-negative observations), and the whole interval is below 0: a positive result is less common among reference-positive than among reference-negative subjects. Check whether TP and FN, or FP and TN, were entered in swapped positions."),
+                                youden = youden_txt, lower = sprintf("%.3f", yci[["lower"]]),
+                                upper = sprintf("%.3f", yci[["upper"]]), npos = DiseaseP, nneg = DiseaseN))
+                    } else if (fractional_counts) {
+                        private$.addNotice("INFO", .("Youden's index below 0"),
+                            .fmt(.("Youden's index is {youden}, below 0. No interval is computed for fractional counts, so whether this differs from chance is not assessed. If the counts are not coded as intended, check whether TP and FN, or FP and TN, were swapped."),
+                                youden = youden_txt))
+                    } else {
+                        private$.addNotice("INFO", .("Youden's index below 0"),
+                            .fmt(.("Youden's index is {youden} (95% CI {lower} to {upper}), below 0 but within sampling variation of 0, so this table does not show that the test discriminates better than chance. If the counts are not coded as intended, check whether TP and FN, or FP and TN, were swapped."),
+                                youden = youden_txt, lower = sprintf("%.3f", yci[["lower"]]),
+                                upper = sprintf("%.3f", yci[["upper"]])))
+                    }
+                }
 
                 # Balanced Accuracy (useful when dealing with imbalanced data)
                 BalancedAccuracy <- (Sens + Spec) / 2
@@ -500,8 +624,9 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 # Matthews Correlation Coefficient (MCC)
-                mcc_numerator <- (TP * TN) - (FP * FN)
-                mcc_denominator <- sqrt((TP + FP) * (TP + FN) * (TN + FP) * (TN + FN))
+                # In double (see "Read numbers from input"); raw counts, not the corrected ones.
+                mcc_numerator <- (as.numeric(TP) * TN) - (as.numeric(FP) * FN)
+                mcc_denominator <- sqrt(as.numeric(TP + FP) * (TP + FN) * (TN + FP) * (TN + FN))
                 if (mcc_denominator > 0) {
                     MCC <- mcc_numerator / mcc_denominator
                 } else {
@@ -530,22 +655,25 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
 
 
                 ratioTable <- self$results$ratioTable
-                ratioTable$setRow(
-                    rowNo = 1,
-                    values = list(
-                        tablename = .("Measures"),
-                        Sens = Sens,
-                        Spec = Spec,
-                        AccurT = AccurT,
-                        PrevalenceD = PriorProb,
-                        PPV = PPV,
-                        NPV = NPV,
-                        PostTestProbDisease = PostTestProbDisease,
-                        PostTestProbHealthy = PostTestProbHealthy,
-                        LRP = LRP,
-                        LRN = LRN
-                    )
+                ratio_values <- list(
+                    tablename = .("Measures"),
+                    Sens = Sens,
+                    Spec = Spec,
+                    AccurT = AccurT,
+                    PrevalenceD = PriorProb,
+                    PPV = PPV,
+                    NPV = NPV,
+                    PostTestProbDisease = PostTestProbDisease,
+                    PostTestProbNeg = PostTestProbNeg,
+                    LRP = LRP,
+                    LRN = LRN
                 )
+                ratioTable$setRow(rowNo = 1, values = ratio_values)
+                private$.footnoteNA(ratioTable, ratio_values, na_note, rowNo = 1)
+                # Always visible (footnotes are off by default): the sample's prevalence is
+                # an estimate of anything only for a cross-sectional sample.
+                ratioTable$setNote("design", if (pp) NULL else
+                    .("Prevalence, PPV and NPV (and their intervals) use this sample's own prevalence, which estimates the population prevalence only for a cross-sectional (consecutive) sample. For a case-control sample, supply the population prevalence instead."))
 
 
                 # nTable footnotes ----
@@ -580,12 +708,12 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     accuracy_note <- if (pp) {
                         .fmt(
                             .("Sample accuracy is the proportion of concordant results. It is computed at the prevalence observed in this sample ({prevalence}), not at the supplied population prevalence, and changes with case mix."),
-                            prevalence = sprintf("%.1f%%", PrevalenceD * 100)
+                            prevalence = private$.pct(PrevalenceD)
                         )
                     } else {
                         .fmt(
                             .("Sample accuracy is the proportion of concordant results. It is computed at the prevalence observed in this sample ({prevalence}) and changes with case mix."),
-                            prevalence = sprintf("%.1f%%", PrevalenceD * 100)
+                            prevalence = private$.pct(PrevalenceD)
                         )
                     }
                     ratioTable$addFootnote(rowNo = 1, col = "AccurT", accuracy_note)
@@ -614,7 +742,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
 
                     ratioTable$addFootnote(rowNo = 1, col = "PostTestProbDisease", .("Probability of a reference-positive outcome after a positive test, using the displayed prevalence. It is identical to the PPV shown here."))
 
-                    ratioTable$addFootnote(rowNo = 1, col = "PostTestProbHealthy", .("Probability of a reference-negative outcome after a negative test, using the displayed prevalence. It is identical to the NPV shown here."))
+                    ratioTable$addFootnote(rowNo = 1, col = "PostTestProbNeg", .("Probability of a reference-positive outcome after a negative test, using the displayed prevalence. It equals 1 minus the NPV shown here."))
 
                     ratioTable$addFootnote(
                         rowNo = 1, col = "LRP",
@@ -627,24 +755,26 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     )
 
                     if (zero_cell) {
-                        ratioTable$addFootnote(rowNo = 1, col = "LRP", .("A Haldane-Anscombe 0.5 correction was applied to the likelihood ratios because a zero cell was present. The epiR confidence-interval table uses raw counts, so its point estimates may differ."))
+                        # LRN and the DOR are corrected too; the note used to sit on LRP only.
+                        zc_note <- .("A zero cell was present, so 0.5 was added to every cell for the likelihood ratios and the diagnostic odds ratio. Their confidence intervals use the same corrected counts.")
+                        ratioTable$addFootnote(rowNo = 1, col = "LRP", zc_note)
+                        ratioTable$addFootnote(rowNo = 1, col = "LRN", zc_note)
                     }
                 }
 
 
                 # Populate advanced metrics table ----
                 advancedMetricsTable <- self$results$advancedMetricsTable
-                advancedMetricsTable$setRow(
-                    rowNo = 1,
-                    values = list(
-                        tablename = .("Advanced measures"),
-                        youdenIndex = YoudenIndex,
-                        balancedAccuracy = BalancedAccuracy,
-                        f1Score = F1Score,
-                        mcc = MCC,
-                        dor = DOR
-                    )
+                advanced_values <- list(
+                    tablename = .("Advanced measures"),
+                    youdenIndex = YoudenIndex,
+                    balancedAccuracy = BalancedAccuracy,
+                    f1Score = F1Score,
+                    mcc = MCC,
+                    dor = DOR
                 )
+                advancedMetricsTable$setRow(rowNo = 1, values = advanced_values)
+                private$.footnoteNA(advancedMetricsTable, advanced_values, na_note, rowNo = 1)
 
                 # Add footnotes for advanced metrics
                 if (self$options$fnote) {
@@ -672,6 +802,8 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                         rowNo = 1, col = "dor",
                         .("Diagnostic odds ratio compares the odds of a positive result between reference-positive and reference-negative groups. Its magnitude is descriptive and has no universal clinical cut-off.")
                     )
+                    if (zero_cell)   # zc_note: set in the ratioTable footnote block above
+                        advancedMetricsTable$addFootnote(rowNo = 1, col = "dor", zc_note)
                 }
 
 
@@ -683,12 +815,20 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     epirTable_ratio <- self$results$epirTable_ratio
                     epirTable_number <- self$results$epirTable_number
                     # The rows are the fixed statistic set scaffolded in .init(); deleting them here
-                    # would make the table appear only once epiR returns. Blank the values instead.
+                    # would make the table appear only once epiR returns. Blank the values instead,
+                    # footnoted: fill() below replaces each row it fills (setRow clears footnotes),
+                    # so the footnote survives only on a row left empty - fractional counts, no
+                    # epiR, an epiR error, or a statistic a future epiR no longer reports.
                     blank <- list(est = NA_real_, lower = NA_real_, upper = NA_real_)
-                    for (key in private$.epirRatioStats())
+                    blank_note <- .("Not computed for this table; the notices at the top say why.")
+                    for (key in private$.epirRatioStats()) {
                         epirTable_ratio$setRow(rowKey = key, values = blank)
-                    for (key in private$.epirNumberStats())
+                        private$.footnoteNA(epirTable_ratio, blank, blank_note, rowKey = key)
+                    }
+                    for (key in private$.epirNumberStats()) {
                         epirTable_number$setRow(rowKey = key, values = blank)
+                        private$.footnoteNA(epirTable_number, blank, blank_note, rowKey = key)
+                    }
 
                     # Confidence intervals are an OPTIONAL extra. A missing epiR, or an
                     # error inside it, used to `return()` out of .run() -- which threw away
@@ -733,40 +873,68 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
 
                     if (!is.null(epirresult2)) {
                         stat_labels <- private$.epirStatLabels()
+                        # TODO (cleanup): index by as.character(epirresult2$statistic). A factor
+                        # index uses the integer codes, not the names; epiR 2.0.96 returns character,
+                        # so this is latent (the comment above fill() still says "factor").
                         epirresult2$statsnames <- unname(stat_labels[epirresult2$statistic])
 
-                        ratiorows <- if (pp) {
-                            c("se", "sp", "diag.ac")
-                        } else {
-                            c(
-                                "ap", "tp", "se", "sp", "diag.ac", "pv.pos", "pv.neg",
-                                "p.rout", "p.rin", "p.tpdn", "p.tndp", "p.dntp", "p.dptn"
-                            )
-                        }
-                        numberrows <- c("diag.or", "nndx", "youden", "lr.pos", "lr.neg")
-
+                        # The same key sets .init() scaffolded, so a row cannot be scaffolded
+                        # but never filled.
                         epirresult_ratio <- epirresult2[
-                            epirresult2$statistic %in% ratiorows &
+                            epirresult2$statistic %in% private$.epirRatioStats() &
                                 !is.na(epirresult2$statsnames), , drop = FALSE
                         ]
                         epirresult_number <- epirresult2[
-                            epirresult2$statistic %in% numberrows &
+                            epirresult2$statistic %in% private$.epirNumberStats() &
                                 !is.na(epirresult2$statsnames), , drop = FALSE
                         ]
 
-                        extra_rows <- data.frame(
-                            statistic = c("bal.acc", "f1.score"),
-                            est = c(BalancedAccuracy, F1Score),
-                            lower = NA_real_,
-                            upper = NA_real_,
-                            statsabv = c("bal.acc", "f1.score"),
-                            statsnames = unname(stat_labels[c("bal.acc", "f1.score")]),
-                            stringsAsFactors = FALSE
-                        )
-                        epirresult_ratio <- rbind(epirresult_ratio, extra_rows)
+                        # The ratio rows are not epiR's. LR+, LR- and the DOR are the values the
+                        # tables above show (all cells + 0.5 when one is zero) with log-scale
+                        # intervals on those same counts (Simel 1991; Woolf for the DOR); without
+                        # a zero cell this is exactly epi.tests(). A ratio whose RAW denominator
+                        # count is 0 has no finite upper limit, and one whose raw numerator count
+                        # is 0 has lower limit 0: the corrected counts would otherwise invent a
+                        # finite bound (true LR+ 900 at specificity 0.999 lay above every possible
+                        # upper limit at 10 + 10). On the raw counts epiR gave Inf/NaN, a
+                        # zero-width [1, 1] interval for a test that is never positive, and at
+                        # 10 + 10, specificity 0.95, an LR+ interval for only 40% of tables
+                        # (coverage 0.785 among them). Exact enumeration of this rule over six
+                        # designs (10 + 10 to 100 + 100, sens/spec 0.5-0.999): mean coverage
+                        # 0.94-0.96 for the LRs, 0.96-0.98 for the DOR; the log method still dips
+                        # to 0.84-0.91 at extreme accuracy, so the note calls them approximate.
+                        # Youden: Agresti-Caffo on the observed counts.
+                        z <- stats::qnorm(0.975)
+                        log_ci <- function(est, v, num0, den0) {
+                            ci <- if (is.finite(est) && est > 0 && is.finite(v)) exp(log(est) + c(-1, 1) * z * sqrt(v))
+                                  else c(NA_real_, NA_real_)
+                            if (num0) ci[1] <- 0
+                            if (den0) ci[2] <- NA_real_                  # unbounded: footnoted in fill()
+                            ci
+                        }
+                        youden_ci <- private$.youdenCI(TP, TP + FN, FP, FP + TN, z)
+                        own <- list(
+                            lr.pos = c(LRP, log_ci(LRP, 1 / TP_cc - 1 / (TP_cc + FN_cc) + 1 / FP_cc - 1 / (FP_cc + TN_cc),
+                                                   TP == 0, FP == 0)),
+                            lr.neg = c(LRN, log_ci(LRN, 1 / FN_cc - 1 / (TP_cc + FN_cc) + 1 / TN_cc - 1 / (FP_cc + TN_cc),
+                                                   FN == 0, TN == 0)),
+                            diag.or = c(DOR, log_ci(DOR, 1 / TP_cc + 1 / FP_cc + 1 / FN_cc + 1 / TN_cc,
+                                                    TP == 0 || TN == 0, FP == 0 || FN == 0)),
+                            youden = unname(youden_ci),
+                            nndx = unname(private$.nndxFromYouden(youden_ci)))
+                        # TODO (cleanup): all five epirTable_number rows are computed in-house
+                        # (`own`), yet they are filled only when epiR returns a row with the same
+                        # name, so an epiR error or a renamed statistic blanks intervals this code
+                        # already has. Fill epirTable_number from `own` directly, outside epir_ok.
+                        for (k in names(own)) {
+                            ix <- which(as.character(epirresult_number$statistic) == k)
+                            if (length(ix) == 1L)
+                                epirresult_number[ix, c("est", "lower", "upper")] <- as.list(own[[k]])
+                        }
 
                         # as.character: epiR returns `statistic` as a factor, which does not match
                         # a string rowKey. Returns the number of rows it managed to fill.
+                        inf_note <- .("No finite limit: the interval is unbounded on this side.")
                         fill <- function(table, df, keys) {
                             stats <- as.character(df$statistic)
                             filled <- 0L
@@ -776,12 +944,17 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                                     # (verified: TP=90 FP=0 TN=80 FN=10 gives lr.pos and
                                     # diag.or = Inf, lower = NaN). NaN is a floating-point
                                     # artifact, not a confidence bound, and Inf is not an
-                                    # estimate; blank both and explain in the note below.
+                                    # estimate; send NA and footnote the cell. A missing limit in
+                                    # a row with any finite value is an unbounded side (LR, DOR,
+                                    # and NNDx when only the Youden upper limit is above 0).
                                     v <- c(df$est[i], df$lower[i], df$upper[i])
                                     v[!is.finite(v)] <- NA_real_
                                     table$setRow(rowKey = stats[i],
                                         values = list(est = v[1], lower = v[2],
                                                       upper = v[3]))
+                                    private$.footnoteNA(table, list(est = v[1]), na_note, rowKey = stats[i])
+                                    private$.footnoteNA(table, list(lower = v[2], upper = v[3]),
+                                        if (all(is.na(v))) na_note else inf_note, rowKey = stats[i])
                                     filled <- filled + 1L
                                 }
                             filled
@@ -799,14 +972,35 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                                 .("Confidence intervals could not be matched"),
                                 .("No confidence intervals could be matched to the reported statistics. The installed version of epiR labels its output differently from the version this analysis expects. The interval tables are left blank; the point estimates above are unaffected.")
                             )
-                        } else if (zero_cell) {
-                            # The tables above show Haldane-Anscombe corrected likelihood
-                            # ratios and DOR; epi.tests() is fed the raw table3. Without this
-                            # the two panels contradict each other with nothing to reconcile
-                            # them, and the only text that mentioned it was gated on fnote.
-                            ci_note <- .("Estimates and intervals in this table are computed by epiR from the raw counts. The likelihood ratios and diagnostic odds ratio shown in the tables above use a Haldane-Anscombe 0.5 correction because a zero cell was present, so their point estimates differ from the ones here. Quantities that are not estimable from the raw table are left blank.")
-                            epirTable_ratio$setNote("rawcounts", ci_note)
-                            epirTable_number$setNote("rawcounts", ci_note)
+                        } else {
+                            if (n_filled < length(private$.epirRatioStats()) + length(private$.epirNumberStats()))
+                                private$.addNotice(
+                                    "WARNING",
+                                    .("Some confidence intervals could not be matched"),
+                                    .("Some rows of the interval tables are empty because the installed version of epiR does not report those statistics. The values that are shown are unaffected.")
+                                )
+                            # Always on: a reader cannot reproduce an interval without its method.
+                            epirTable_ratio$setNote("method", .("Exact Clopper-Pearson 95% intervals, computed by epiR from the observed counts."))
+                            epirTable_number$setNote("method", .("Likelihood ratios: approximate log-scale 95% interval (Simel, Samsa and Matchar 1991), which can fall short of 95% when sensitivity or specificity is near 100% in a small study. Diagnostic odds ratio: log-scale (Woolf) interval. Youden's index: Agresti-Caffo interval for the difference between the true-positive and false-positive rates. Number needed to diagnose = 1 / Youden's index; its interval is the inverse of the positive part of the Youden interval."))
+                            # Every interval here is binomial: one independent subject per count.
+                            # Pathology counts are often slides, blocks or lesions, several per
+                            # patient (Genders et al., Radiology 2012;265:910-6).
+                            independence_note <- .("These intervals treat each count as one independent patient. If a patient contributes several slides, blocks or lesions, they can be too narrow: count one result per patient, or use a method for clustered data.")
+                            epirTable_ratio$setNote("independence", independence_note)
+                            epirTable_number$setNote("independence", independence_note)
+                            epirTable_number$setNote("rawcounts", if (zero_cell)
+                                .("A zero cell was present, so the likelihood ratios and the diagnostic odds ratio here, as in the tables above, use the table with 0.5 added to every cell, and so do their intervals. A ratio whose denominator count is zero has no finite upper limit, which is left blank and footnoted; one whose numerator count is zero has a lower limit of 0. Youden's index and the number needed to diagnose use the observed counts.")
+                                else NULL)
+                            # An empty NNDx cell needs its reason on screen (decision.b.R wording).
+                            nn <- own$nndx
+                            epirTable_number$setNote("nndx",
+                                if (!is.finite(nn[1]) && !is.finite(nn[2]))
+                                    .("The number needed to diagnose is not estimable: Youden's index and its whole confidence interval are at or below 0.")
+                                else if (!is.finite(nn[1]))
+                                    .("Youden's index is 0 or below in this sample, so the number needed to diagnose has no point estimate. Its confidence interval starts at the lower limit shown and has no upper bound.")
+                                else if (!is.finite(nn[3]))
+                                    .("The number needed to diagnose has no finite upper limit: the Youden's index interval includes 0, so the interval for its inverse has no upper bound.")
+                                else NULL)
                         }
                     }
                 }
@@ -855,11 +1049,16 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                         # Safe division with appropriate handling for zero denominators
                         sens <- if (diseased > 0) tp / diseased else NA_real_
                         spec <- if (healthy > 0) tn / healthy else NA_real_
-                        if (pp && is.finite(sens) && is.finite(spec)) {
-                            ppv_den <- sens * PriorProb + (1 - spec) * (1 - PriorProb)
-                            npv_den <- spec * (1 - PriorProb) + (1 - sens) * PriorProb
-                            ppv <- if (ppv_den > 0) sens * PriorProb / ppv_den else NA_real_
-                            npv <- if (npv_den > 0) spec * (1 - PriorProb) / npv_den else NA_real_
+                        if (pp) {
+                            # Bayes at the supplied prevalence needs both sens and spec; the
+                            # sample formula is not a substitute (it printed PPV 0 / NPV 1).
+                            ppv <- npv <- NA_real_
+                            if (is.finite(sens) && is.finite(spec)) {
+                                ppv_den <- sens * PriorProb + (1 - spec) * (1 - PriorProb)
+                                npv_den <- spec * (1 - PriorProb) + (1 - sens) * PriorProb
+                                if (ppv_den > 0) ppv <- sens * PriorProb / ppv_den
+                                if (npv_den > 0) npv <- spec * (1 - PriorProb) / npv_den
+                            }
                         } else {
                             ppv <- if ((tp + fp) > 0) tp / (tp + fp) else NA_real_
                             npv <- if ((tn + fn) > 0) tn / (tn + fn) else NA_real_
@@ -891,8 +1090,9 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                             recommendation <- .("Illustrative point estimates; not clinical guidance")
                         }
 
+                        # No cutoffName: .init() wrote the (cell-safe) name, and setRow()
+                        # leaves cells it is not given.
                         return(list(
-                            cutoffName = cutoff_name,
                             sensitivity = sens,
                             specificity = spec,
                             ppv = ppv,
@@ -939,101 +1139,77 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 if (self$options$multiplecuts &&
                     !is.null(cutoff1_metrics) && !is.null(cutoff2_metrics)) {
                     # Rows are created in .init(); only the computed cells are set here.
-                    multipleCutoffTable$setRow(
-                        rowKey = 1,
-                        values = cutoff1_metrics
-                    )
+                    multipleCutoffTable$setRow(rowKey = 1, values = cutoff1_metrics)
+                    private$.footnoteNA(multipleCutoffTable, cutoff1_metrics, na_note, rowKey = 1)
+                    multipleCutoffTable$setRow(rowKey = 2, values = cutoff2_metrics)
+                    private$.footnoteNA(multipleCutoffTable, cutoff2_metrics, na_note, rowKey = 2)
 
-                    multipleCutoffTable$setRow(
-                        rowKey = 2,
-                        values = cutoff2_metrics
-                    )
-
-                    # Optimal cut-off recommendation.
+                    # Optimal cut-off recommendation: the best of the three on Youden's J, its
+                    # margin over the current cut-off, and an uncertainty statement about that
+                    # SAME quantity. It used to rank on J and judge by Wilson ACCURACY
+                    # intervals, so a winner with far lower accuracy (0.595 vs 0.941) read
+                    # "their sample-accuracy intervals do not overlap" (validation 2026-10-06).
                     #
-                    # Three defects were fixed here:
-                    #  1. The chain was `if (cutoff1 beats current) ... else if (cutoff2 ...)`,
-                    #     so when BOTH alternatives beat the current one only cutoff1 was ever
-                    #     named -- even when cutoff2 was far better. Now the best of the three
-                    #     is chosen on Youden's J.
-                    #  2. The verdict was a bare point-estimate comparison with no uncertainty:
-                    #     an advantage of 0.001 in both Youden and accuracy printed
-                    #     "performs better than current". It now says how large the margin is
-                    #     and warns when it is slight.
-                    #  3. A cut-off comparison only means anything if the scenarios are
-                    #     thresholds on the SAME cohort, so their totals must match. Nothing
-                    #     checked that; a 220-case study could be compared with a 300-case one
-                    #     as though they were two thresholds.
-                    current_youden <- YoudenIndex
-                    current_accuracy <- AccurT
-
-                    n_current <- TP + FP + TN + FN
-                    n1 <- self$options$tp1 + self$options$fp1 + self$options$tn1 + self$options$fn1
-                    n2 <- self$options$tp2 + self$options$fp2 + self$options$tn2 + self$options$fn2
-                    if (length(unique(c(n_current, n1, n2))) > 1) {
+                    # A comparison means anything only for thresholds on the SAME cohort, and
+                    # moving a threshold changes neither the reference-positive nor the
+                    # reference-negative count. The guard used to compare totals only, so
+                    # 120/100 and 110/110 cases passed as one cohort.
+                    o <- self$options
+                    cell <- list(c(TP, FN, FP, TN), c(o$tp1, o$fn1, o$fp1, o$tn1),
+                                 c(o$tp2, o$fn2, o$fp2, o$tn2))
+                    n_pos <- vapply(cell, function(x) x[1] + x[2], numeric(1))
+                    n_neg <- vapply(cell, function(x) x[3] + x[4], numeric(1))
+                    if (length(unique(n_pos)) > 1 || length(unique(n_neg)) > 1) {
+                        cohort <- paste0(n_pos, "/", n_neg)
                         private$.addNotice(
                             "WARNING",
-                            .("Cut-offs describe different numbers of patients"),
+                            .("Cut-offs describe different cohorts"),
                             .fmt(
-                                .("The three scenarios total {current}, {scenario1}, and {scenario2} cases. Moving a cut-off on one cohort cannot change its size, so these rows cannot be interpreted as thresholds applied to the same participants."),
-                                current = n_current,
-                                scenario1 = n1,
-                                scenario2 = n2
+                                .("The current row and the two scenarios have {current}, {scenario1} and {scenario2} reference-positive/reference-negative cases. Moving a cut-off on one cohort changes neither count, so these rows cannot be interpreted as thresholds applied to the same participants."),
+                                current = cohort[1],
+                                scenario1 = cohort[2],
+                                scenario2 = cohort[3]
                             )
                         )
                     }
 
-                    cand <- list(
-                        list(name = .("Current"), youden = current_youden, accuracy = current_accuracy),
-                        list(name = cutoff1_metrics$cutoffName, youden = cutoff1_metrics$youden,
-                             accuracy = cutoff1_metrics$accuracy),
-                        list(name = cutoff2_metrics$cutoffName, youden = cutoff2_metrics$youden,
-                             accuracy = cutoff2_metrics$accuracy)
-                    )
-                    ys <- vapply(cand, function(x) {
-                        if (is.null(x$youden) || !is.finite(x$youden)) NA_real_ else x$youden
-                    },
-                        numeric(1))
-
-                    # Uncertainty. A formal test of two cut-offs would need the paired
-                    # discordance between them, which four marginal counts per scenario
-                    # cannot supply. What IS computable is a Wilson interval on each
-                    # scenario's ACCURACY, so the reader can see whether the intervals
-                    # overlap -- overlapping intervals mean the counts do not separate the
-                    # cut-offs, whatever the point estimates suggest.
-                    wilson <- function(x, n, integer_counts, conf = 0.95) {
-                        if (!integer_counts || !is.finite(x) || !is.finite(n) || n <= 0)
-                            return(c(NA_real_, NA_real_))
-                        z <- stats::qnorm(1 - (1 - conf) / 2)
-                        ph <- x / n
-                        den <- 1 + z^2 / n
-                        ctr <- (ph + z^2 / (2 * n)) / den
-                        hw <- z * sqrt((ph * (1 - ph) + z^2 / (4 * n)) / n) / den
-                        c(max(0, ctr - hw), min(1, ctr + hw))
+                    # Moving one threshold of one marker trades sensitivity against specificity;
+                    # a row better on BOTH than another is a different test, not a cut-off.
+                    cand_names <- c(.("Current"), o$cutoff1, o$cutoff2)
+                    se3 <- c(Sens, cutoff1_metrics$sensitivity, cutoff2_metrics$sensitivity)
+                    sp3 <- c(Spec, cutoff1_metrics$specificity, cutoff2_metrics$specificity)
+                    dominant <- which(outer(se3, se3, ">") & outer(sp3, sp3, ">"), arr.ind = TRUE)
+                    if (nrow(dominant) > 0) {
+                        private$.addNotice(
+                            "WARNING",
+                            .("Rows are not thresholds of one marker"),
+                            .fmt(
+                                .("{better} has both higher sensitivity and higher specificity than {worse}. Moving a single threshold on the same patients trades one for the other, so these rows describe different tests or cohorts, not cut-offs of one marker."),
+                                better = cand_names[dominant[1, 1]],
+                                worse = cand_names[dominant[1, 2]]
+                            )
+                        )
                     }
-                    integer_scenarios <- c(
-                        !fractional_counts,
-                        !any(abs(c(self$options$tp1, self$options$fp1,
-                                   self$options$tn1, self$options$fn1) -
-                                 round(c(self$options$tp1, self$options$fp1,
-                                         self$options$tn1, self$options$fn1))) > 1e-6),
-                        !any(abs(c(self$options$tp2, self$options$fp2,
-                                   self$options$tn2, self$options$fn2) -
-                                 round(c(self$options$tp2, self$options$fp2,
-                                         self$options$tn2, self$options$fn2))) > 1e-6)
-                    )
-                    acc_ci <- list(
-                        wilson(TP + TN, n_current, integer_scenarios[1]),
-                        wilson(self$options$tp1 + self$options$tn1, n1,
-                               integer_scenarios[2]),
-                        wilson(self$options$tp2 + self$options$tn2, n2,
-                               integer_scenarios[3])
-                    )
+                    ys <- c(YoudenIndex, cutoff1_metrics$youden, cutoff2_metrics$youden)
+                    ys[!is.finite(ys)] <- NA_real_
+
+                    # Uncertainty: the Agresti-Caffo interval of each scenario's J, computed
+                    # separately. A formal test would need each patient's classification at
+                    # both thresholds, which summary counts cannot supply; because the
+                    # scenarios classify the same patients, non-overlap of separate intervals
+                    # is a conservative signal of a difference, and overlap establishes none.
+                    integer_scenarios <- vapply(cell, function(x) all(abs(x - round(x)) <= 1e-6), logical(1))
+                    j_ci <- lapply(seq_along(cell), function(i) {
+                        x <- cell[[i]]
+                        if (!integer_scenarios[i] || x[1] + x[2] <= 0 || x[3] + x[4] <= 0)
+                            return(c(NA_real_, NA_real_))
+                        unname(private$.youdenCI(x[1], x[1] + x[2], x[3], x[3] + x[4])[c("lower", "upper")])
+                    })
                     if (any(!integer_scenarios)) {
                         private$.addNotice(
                             "WARNING",
                             .("Cut-off intervals omitted for fractional counts"),
-                            .("Accuracy intervals are not computed for scenarios containing fractional frequencies because no effective sample size or weighting design was supplied.")
+                            .("Youden's index intervals are not computed for scenarios containing fractional frequencies because no effective sample size or weighting design was supplied.")
                         )
                     }
 
@@ -1041,11 +1217,9 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     if (any(is.finite(ys))) {
                         best <- which.max(replace(ys, !is.finite(ys), -Inf))
                         margin <- ys[best] - ys[1]                      # vs the current cut-off
-                        # do the best and current accuracy intervals overlap?
-                        ov <- NA
-                        if (best != 1L && all(is.finite(c(acc_ci[[best]], acc_ci[[1]]))))
-                            ov <- acc_ci[[best]][1] <= acc_ci[[1]][2] &&
-                                  acc_ci[[1]][1] <= acc_ci[[best]][2]
+                        ov <- NA                                        # do the J intervals overlap?
+                        if (best != 1L && all(is.finite(c(j_ci[[best]], j_ci[[1]]))))
+                            ov <- j_ci[[best]][1] <= j_ci[[1]][2] && j_ci[[1]][1] <= j_ci[[best]][2]
 
                         if (best == 1L || !is.finite(margin) || margin <= 0) {
                             optimal_msg <- .fmt(
@@ -1054,20 +1228,20 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                             )
                         } else if (isTRUE(ov)) {
                             optimal_msg <- .fmt(
-                                .("{cutoff} has the highest Youden's J, {margin} above current; its sample-accuracy interval overlaps the current cut-off's, so the difference is not established."),
-                                cutoff = cand[[best]]$name,
+                                .("{cutoff} has the highest Youden's J, {margin} above current; its Youden's J interval overlaps the current cut-off's, so these separate intervals do not show a difference."),
+                                cutoff = cand_names[best],
                                 margin = sprintf("%.3f", margin)
                             )
                         } else if (isFALSE(ov)) {
                             optimal_msg <- .fmt(
-                                .("{cutoff} has the highest Youden's J, {margin} above current; their sample-accuracy intervals do not overlap."),
-                                cutoff = cand[[best]]$name,
+                                .("{cutoff} has the highest Youden's J, {margin} above current; their Youden's J intervals do not overlap."),
+                                cutoff = cand_names[best],
                                 margin = sprintf("%.3f", margin)
                             )
                         } else {
                             optimal_msg <- .fmt(
                                 .("{cutoff} has the highest Youden's J, {margin} above current; paired uncertainty cannot be assessed from these summary counts."),
-                                cutoff = cand[[best]]$name,
+                                cutoff = cand_names[best],
                                 margin = sprintf("%.3f", margin)
                             )
                         }
@@ -1075,27 +1249,26 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
 
                     multipleCutoffTable$setNote(
                         "sameData",
-                        jmvcore::.("The named scenarios are illustrative examples, not clinical guides. The current row reports which scenario has the highest Youden's J and whether its separately calculated accuracy interval overlaps the current row. Choosing a cut-off on the same data used to assess it is optimistically biased and does not establish clinical utility.")
+                        jmvcore::.("The named scenarios are illustrative examples, not clinical guides. The current row reports which scenario has the highest Youden's J and whether its separately calculated Youden's J interval overlaps the current row. Choosing a cut-off on the same data used to assess it is optimistically biased and does not establish clinical utility.")
                     )
 
                     multipleCutoffTable$setNote(
                         "uncertainty",
-                        jmvcore::.("Cut-offs are compared on point estimates only. A formal test would need to know, for each patient, how the two thresholds classified them; four summary counts per scenario cannot supply that. The accuracy intervals referred to above are Wilson 95% intervals computed separately per scenario, so overlap is a conservative signal that the counts do not separate the cut-offs.")
+                        jmvcore::.("Cut-offs are compared on point estimates; no paired test of the difference is performed. The intervals referred to above are Agresti-Caffo 95% intervals for each scenario's Youden's J, computed separately. For thresholds applied to the same patients, non-overlap is a conservative signal of a difference, and overlap does not show that there is none. Like every interval here, they treat each count as one independent patient and can be too narrow when a patient contributes several slides, blocks or lesions.")
                     )
 
-                    multipleCutoffTable$setRow(
-                        rowKey = 3,
-                        values = list(
-                            cutoffName = .("Current (reference)"),
-                            sensitivity = Sens,
-                            specificity = Spec,
-                            ppv = PPV,
-                            npv = NPV,
-                            accuracy = AccurT,
-                            youden = YoudenIndex,
-                            recommendation = optimal_msg
-                        )
+                    current_values <- list(
+                        cutoffName = .("Current (reference)"),
+                        sensitivity = Sens,
+                        specificity = Spec,
+                        ppv = PPV,
+                        npv = NPV,
+                        accuracy = AccurT,
+                        youden = YoudenIndex,
+                        recommendation = private$.richText(optimal_msg)   # quotes a scenario name
                     )
+                    multipleCutoffTable$setRow(rowKey = 3, values = current_values)
+                    private$.footnoteNA(multipleCutoffTable, current_values, na_note, rowKey = 3)
                 }
 
                 # Generate Summary, About, and Glossary panels ----
@@ -1104,7 +1277,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 if (self$options$showSummary) {
                     summary_html <- private$.createSummary(
                         Sens, Spec, PPV, NPV, LRP, LRN,
-                        YoudenIndex, AccurT, PriorProb
+                        YoudenIndex, AccurT, PriorProb, zero_cell
                     )
                     self$results$summary$setContent(summary_html)
                 }
@@ -1143,7 +1316,20 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 # disease inverts the nomogram's meaning -- but it arrived as an unexplained
                 # crash. Detect it here, where a notice can still be rendered, and tell the
                 # plot to decline instead.
-                fagan_ok <- is.finite(LRP) && is.finite(LRN) && LRP >= 1
+                # Decided on the counts, not on the derived double: sens 1/3, spec 2/3 is an
+                # LR+ of exactly 1 but is stored as 0.9999999999999999, and `LRP >= 1` then
+                # declined the plot and told the user the test coding was inverted.
+                # LR+ >= 1  <=>  TP (TN + FP) >= FP (TP + FN), on the corrected counts.
+                # Half-integer cross products are exact in floating point; the relative
+                # tolerance only guards fractional or very large counts. Each ratio gets its
+                # own test: LR+ within rounding of 1 does not make LR- 1.
+                lr_pos_cross <- TP_cc * (TN_cc + FP_cc) - FP_cc * (TP_cc + FN_cc)   # sign of LR+ - 1
+                lr_neg_cross <- FN_cc * (TN_cc + FP_cc) - TN_cc * (TP_cc + FN_cc)   # sign of LR- - 1
+                lr_pos_one <- abs(lr_pos_cross) <= 1e-12 * TP_cc * (TN_cc + FP_cc)
+                lr_neg_one <- abs(lr_neg_cross) <= 1e-12 * TN_cc * (TP_cc + FN_cc)
+                fagan_ok <- is.finite(LRP) && is.finite(LRN) && (lr_pos_cross > 0 || lr_pos_one)
+                # The inversion itself is a STRONG_WARNING raised above for every run; this one
+                # only explains the missing plot.
                 if (isTRUE(self$options$fagan) && !fagan_ok) {
                     private$.addNotice(
                         "WARNING",
@@ -1173,8 +1359,8 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 # is the most clinically useful part of the figure, so render it beside the
                 # plot instead, at the tables' precision rather than nomogrammer's whole
                 # percents.
-                fagan_item <- private$.resultsItem("faganSummary")
-                if (!is.null(fagan_item) && isTRUE(self$options$fagan)) {
+                fagan_item <- self$results$faganSummary
+                if (isTRUE(self$options$fagan)) {
                     if (!fagan_ok) {
                         not_drawn_reason <- .fmt(
                             .("The positive likelihood ratio is {lr}, so a positive result lowers the probability of a reference-positive outcome rather than raising it."),
@@ -1203,33 +1389,34 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                         pretest_sentence <- if (isTRUE(self$options$pp)) {
                             .fmt(
                                 .("Pre-test probability is {prevalence}, using the population prevalence you supplied."),
-                                prevalence = sprintf("%.1f%%", 100 * pre)
+                                prevalence = private$.pct(pre)
                             )
                         } else {
                             .fmt(
                                 .("Pre-test probability is {prevalence}, using the prevalence observed in this study table."),
-                                prevalence = sprintf("%.1f%%", 100 * pre)
+                                prevalence = private$.pct(pre)
                             )
                         }
-                        positive_sentence <- .fmt(
-                            .("A positive result has a likelihood ratio of {lr} and raises the probability from {prevalence} to {posttest}."),
-                            lr = sprintf("%.2f", LRP),
-                            prevalence = sprintf("%.1f%%", 100 * pre),
-                            posttest = sprintf("%.1f%%", 100 * post_pos)
-                        )
-                        negative_sentence <- .fmt(
-                            .("A negative result has a likelihood ratio of {lr} and lowers the probability from {prevalence} to {posttest}."),
-                            lr = sprintf("%.3f", LRN),
-                            prevalence = sprintf("%.1f%%", 100 * pre),
-                            posttest = sprintf("%.1f%%", 100 * post_neg)
-                        )
+                        # An uninformative result neither raises nor lowers the probability.
+                        positive_sentence <- if (lr_pos_one) .fmt(
+                                .("A positive result has a likelihood ratio of {lr} and leaves the probability at {prevalence}."),
+                                lr = sprintf("%.2f", LRP), prevalence = private$.pct(pre))
+                            else .fmt(
+                                .("A positive result has a likelihood ratio of {lr} and raises the probability from {prevalence} to {posttest}."),
+                                lr = sprintf("%.2f", LRP), prevalence = private$.pct(pre), posttest = private$.pct(post_pos))
+                        negative_sentence <- if (lr_neg_one) .fmt(
+                                .("A negative result has a likelihood ratio of {lr} and leaves the probability at {prevalence}."),
+                                lr = sprintf("%.3f", LRN), prevalence = private$.pct(pre))
+                            else .fmt(
+                                .("A negative result has a likelihood ratio of {lr} and lowers the probability from {prevalence} to {posttest}."),
+                                lr = sprintf("%.3f", LRN), prevalence = private$.pct(pre), posttest = private$.pct(post_neg))
                         # Disclose which table the probabilities above were read off.
                         # They now follow the corrected likelihood ratios (and the plot);
                         # the Measures table's PPV/NPV are raw-count Bayes, so with a zero
                         # cell the two panels legitimately differ by a fraction of a point.
                         correction_paragraph <- if (zero_cell) {
                             paste0("<p style='font-size:90%;color:inherit;'>",
-                                .("A zero cell was present, so the likelihood ratios and the probabilities read from the nomogram use the Haldane-Anscombe 0.5 correction. The predictive values in the Measures table are computed from the raw counts and can differ slightly."),
+                                .("A zero cell was present, so the likelihood ratios and the probabilities read from the nomogram use the Haldane-Anscombe 0.5 correction. The predictive values and post-test probabilities in the Measures table are computed from the raw counts and can differ, by a wide margin in a small table."),
                                 "</p>")
                         } else {
                             ""
@@ -1286,6 +1473,8 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 # scale_color_manual and repainted the red positive / blue negative
                 # trajectories -- the only thing distinguishing the two lines. Apply the
                 # ggtheme first, then re-apply the scale and the blanking tweaks.
+                # TODO (UX): no "jamovi (follow global)" palette choice for the two
+                # trajectories (review guide §23, jmvcore::colorPalette(2, theme$palette)).
                 plot1 <- plot1 + ggtheme +
                     ggplot2::scale_color_manual(values = c("pos" = "red", "neg" = "blue")) +
                     ggplot2::theme(
@@ -1306,21 +1495,21 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
 
             # Private helper methods for summaries ----
 
-            .createSummary = function(Sens, Spec, PPV, NPV, LRP, LRN, Youden, Accuracy, Prevalence) {
+            .createSummary = function(Sens, Spec, PPV, NPV, LRP, LRN, Youden, Accuracy, Prevalence, zero_cell = FALSE) {
                 # PPV is NA when TP + FP == 0 and NPV when TN + FN == 0. Both are only
                 # WARNINGs, not early returns, so this panel is still built and
                 # sprintf("%.1f%%", NA) printed the literal "NA%" in 18px type while the
                 # matching ratioTable cell was correctly blank. Say the same thing twice.
                 na_label <- .("not estimable")
-                fmtPct <- function(x) if (is.finite(x)) sprintf("%.1f%%", x * 100) else na_label
+                fmtPct <- function(x) if (is.finite(x)) private$.pct(x) else na_label
                 descriptive_result <- .fmt(
                     .("Youden's index is {youden} and sample accuracy is {accuracy}. These values describe the entered study table; they are not clinical grades or decision thresholds."),
                     youden = sprintf("%.3f", Youden),
-                    accuracy = sprintf("%.1f%%", Accuracy * 100)
+                    accuracy = fmtPct(Accuracy)
                 )
                 prevalence_label <- .fmt(
                     .("At {prevalence} prevalence"),
-                    prevalence = sprintf("%.1f%%", Prevalence * 100)
+                    prevalence = fmtPct(Prevalence)
                 )
                 positive_update <- .fmt(
                     .("A positive result multiplies pre-test odds by {lr}."),
@@ -1342,11 +1531,11 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     "<table style='width: 100%; border-collapse: collapse; margin: 15px 0;'><tr>",
                     "<td style='border: 1px solid #ccc; padding: 10px; background-color: rgba(155, 155, 155, 0.06); color: inherit;'><strong>",
                     .("Sensitivity"), "</strong><br><span style='font-size: 18px;'>",
-                    sprintf("%.1f%%", Sens * 100), "</span><br><span style='font-size: 12px;'>",
+                    fmtPct(Sens), "</span><br><span style='font-size: 12px;'>",
                     .("True-positive rate"), "</span></td>",
                     "<td style='border: 1px solid #ccc; padding: 10px; background-color: rgba(155, 155, 155, 0.06); color: inherit;'><strong>",
                     .("Specificity"), "</strong><br><span style='font-size: 18px;'>",
-                    sprintf("%.1f%%", Spec * 100), "</span><br><span style='font-size: 12px;'>",
+                    fmtPct(Spec), "</span><br><span style='font-size: 12px;'>",
                     .("True-negative rate"), "</span></td></tr><tr>",
                     "<td style='border: 1px solid #ccc; padding: 10px; background-color: rgba(155, 155, 155, 0.06); color: inherit;'><strong>",
                     .("PPV"), "</strong><br><span style='font-size: 18px;'>",
@@ -1359,6 +1548,12 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     "<p style='margin: 10px 0;'><strong>", .("Likelihood-ratio update:"),
                     "</strong></p><ul style='margin: 10px 0; padding-left: 25px;'><li>",
                     positive_update, "</li><li>", negative_update, "</li></ul>",
+                    # The LRs above are Haldane-Anscombe corrected on a zero cell and the PPV /
+                    # NPV are not, so "PPV 100.0%" sat beside "multiplies pre-test odds by
+                    # 11.00" with nothing to reconcile them.
+                    if (isTRUE(zero_cell)) paste0("<p style='margin: 10px 0; font-size: 13px;'>",
+                        .("A zero cell was present, so the likelihood ratios use the Haldane-Anscombe 0.5 correction, while the predictive values above use the observed counts. Multiplying the pre-test odds by these likelihood ratios therefore need not reproduce the predictive values exactly."),
+                        "</p>") else "",
                     "<div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 12px; margin: 15px 0; color: inherit;'>",
                     "<p style='margin: 0; font-weight: bold;'>", .("Interpretation caveat"),
                     "</p><p style='margin: 5px 0 0 0;'>",
@@ -1412,7 +1607,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                         warnings,
                         .fmt(
                             .("Extreme prevalence is {prevalence}. PPV and NPV estimates may be unstable; verify them in the target population."),
-                            prevalence = sprintf("%.1f%%", prev * 100)
+                            prevalence = private$.pct(prev)
                         )
                     )
                 }
@@ -1465,6 +1660,8 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     .("An imperfect reference standard can bias every estimated measure; document its limitations and consider latent-class or discrepant-resolution methods where appropriate."),
                     "</li><li>",
                     .("Interpret the index test and reference standard independently and use blinding where possible."),
+                    "</li><li>",
+                    .("Each count is one independent patient. If a patient contributes several slides, blocks or lesions, count one result per patient or use a method for clustered data; otherwise the confidence intervals can be too narrow."),
                     "</li><li>",
                     .("The study population should represent the intended-use population and relevant disease spectrum."),
                     "</li><li>",

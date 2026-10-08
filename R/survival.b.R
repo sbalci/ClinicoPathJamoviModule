@@ -5004,7 +5004,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                     # Observed survival per group via KM
                     group_table <- self$results$calibrationGroupTable
-                    group_table$deleteRows()
+                    .deleteTableRows(group_table)
                     group_pred <- c()
                     group_obs <- c()
 
@@ -5564,7 +5564,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 res     <- fit$res
                 covrows <- if (useCov) grep("^\\.grp", rownames(res)) else integer(0)
                 smy     <- self$results$parametricModelSummary
-                smy$deleteRows()
+                .deleteTableRows(smy)
                 for (i in seq_len(nrow(res))) {
                     est <- res[i, "est"]; se <- res[i, "se"]
                     pv  <- if (i %in% covrows && is.finite(se) && se > 0)

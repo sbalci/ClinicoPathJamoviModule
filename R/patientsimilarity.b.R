@@ -551,7 +551,7 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
 
                 # Summary table
                 cluster_summary <- self$results$clusterSummary
-                cluster_summary$deleteRows()
+                .deleteTableRows(cluster_summary)
 
                 for (cl in sort(unique(clusters))) {
                     cluster_summary$addRow(rowKey = cl, values = list(
@@ -608,7 +608,7 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
 
         .clusterCharacteristics = function(clusters, original_data) {
             char_table <- self$results$clusterCharacteristics
-            char_table$deleteRows()
+            .deleteTableRows(char_table)
 
             # Get mean values for each cluster
             for (var in self$options$vars) {
@@ -640,7 +640,7 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
 
         .clusterOutcomes = function(clusters, original_data) {
             outcome_table <- self$results$clusterOutcomes
-            outcome_table$deleteRows()
+            .deleteTableRows(outcome_table)
             outcome_var <- original_data[[self$options$colorBy]]
 
             for (cl in sort(unique(clusters))) {
@@ -733,7 +733,7 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
                 fit_table <- summary(fit)$table
 
                 surv_table <- self$results$survivalTable
-                surv_table$deleteRows()
+                .deleteTableRows(surv_table)
 
                 for (cl in levels(surv_df$clusters)) {
                     key <- paste0("clusters=", cl)

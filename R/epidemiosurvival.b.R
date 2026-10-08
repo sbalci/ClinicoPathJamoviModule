@@ -71,9 +71,9 @@ epidemiosurvivalClass <- R6::R6Class(
 
         .initializeResultTables = function() {
             # Initialize empty result tables
-            self$results$cohort_summary$deleteRows()
-            self$results$survival_estimates$deleteRows()
-            self$results$hazard_ratios$deleteRows()
+            .deleteTableRows(self$results$cohort_summary)
+            .deleteTableRows(self$results$survival_estimates)
+            .deleteTableRows(self$results$hazard_ratios)
         },
 
         .run = function() {

@@ -237,7 +237,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     for (i in seq_len(table$rowCount)) table$setRow(rowNo = i,
                         values = stats::setNames(rep(list(NA), length(fixed_columns[[name]])),
                             fixed_columns[[name]]))
-                } else table$deleteRows()
+                } else .deleteTableRows(table)
             }
             for (name in c("summaryText", "suitabilityReport", "rCode")) {
                 self$results[[name]]$setContent("")
@@ -833,8 +833,8 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
 
         .populateReproducibility = function(results) {
-            self$results$encoding$deleteRows()
-            self$results$reproducibility$deleteRows()
+            .deleteTableRows(self$results$encoding)
+            .deleteTableRows(self$results$reproducibility)
             if (self$options$showEncoding) {
                 for (i in seq_len(nrow(results$data$encoding))) {
                     row <- as.list(results$data$encoding[i, , drop = FALSE])
@@ -974,7 +974,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             table <- self$results$coefficients
             
             # Clear existing rows
-            table$deleteRows()
+            .deleteTableRows(table)
             
             if (length(results$selected_vars) == 0) {
                 table$addRow(rowKey = 1, values = list(
@@ -1429,7 +1429,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         .populateVariableImportance = function(results) {
             table <- self$results$variableImportance
-            table$deleteRows()
+            .deleteTableRows(table)
             
             if (length(results$selected_vars) == 0) {
                 table$addRow(rowKey = 1, values = list(

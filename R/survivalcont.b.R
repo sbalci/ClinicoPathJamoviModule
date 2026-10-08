@@ -1539,9 +1539,9 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     } else {
                         # No results this cycle: drop the previous cycle's rows
                         # rather than leaving them under a failure message.
-                        self$results$multipleCutTable$deleteRows()
-                        self$results$multipleMedianTable$deleteRows()
-                        self$results$multipleSurvTable$deleteRows()
+                        .deleteTableRows(self$results$multipleCutTable)
+                        .deleteTableRows(self$results$multipleMedianTable)
+                        .deleteTableRows(self$results$multipleSurvTable)
                     }
                     if (is.null(multicut_results) && !private$.lowEventCount) {
                         reason <- private$.multicutFailReason
@@ -1971,7 +1971,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 # this reset addRow() appended a second copy of every row on each
                 # cycle: after three runs the survival table showed 18 rows instead of
                 # 6 and each cut-off group appeared three times.
-                coxTable$deleteRows()
+                .deleteTableRows(coxTable)
 
                 coxTable$setNote(
                     "scale",
@@ -2119,7 +2119,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 rescut_summary <- summary(res.cut)
 
                 rescutTable <- self$results$rescutTable
-                rescutTable$deleteRows()
+                .deleteTableRows(rescutTable)
 
                 # Simple plain text title (table titles don't render HTML)
                 rescutTable$setTitle(
@@ -2236,7 +2236,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
 
                 medianTable <- self$results$medianTable
-                medianTable$deleteRows()
+                .deleteTableRows(medianTable)
                 private$.landmarkNote(self$results$medianTable, results)
                 data_frame <- results2table
                 for (i in seq_along(data_frame[, 1, drop = TRUE])) {
@@ -2392,7 +2392,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 data_frame <- km_fit_df2
 
                 survTable <- self$results$survTable
-                survTable$deleteRows()
+                .deleteTableRows(survTable)
                 private$.landmarkNote(self$results$survTable, results)
 
 
@@ -2476,7 +2476,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     .("Exact (Garwood) Poisson 95% CI. Rows with 0 events give a one-sided 97.5% upper bound; intervals with very little accrued person-time yield correspondingly wide bounds."))
 
                 # Add to personTimeTable - first the overall row
-                self$results$personTimeTable$deleteRows()
+                .deleteTableRows(self$results$personTimeTable)
                 private$.landmarkNote(self$results$personTimeTable, results)
                 self$results$personTimeTable$addRow(rowKey=1, values=list(
                     interval=paste0("Overall (0-max)"),
@@ -3546,7 +3546,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
                 # Populate cut-off points table (without statistical columns)
                 cutoff_table <- self$results$multipleCutTable
-                cutoff_table$deleteRows()  # Clear existing rows
+                .deleteTableRows(cutoff_table)  # Clear existing rows
 
                 # Name the group this cut-off opens using the same vocabulary as
                 # every other table ("Low marker", "Middle marker", ...). It used to
@@ -3604,7 +3604,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
                 # Populate median survival table
                 median_table <- self$results$multipleMedianTable
-                median_table$deleteRows()  # Clear existing rows
+                .deleteTableRows(median_table)  # Clear existing rows
 
                 for (group_name in names(multicut_results$group_stats)) {
                     stats <- multicut_results$group_stats[[group_name]]
@@ -3622,7 +3622,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
                 # Populate survival estimates table
                 survtable <- self$results$multipleSurvTable
-                survtable$deleteRows()  # Clear existing rows
+                .deleteTableRows(survtable)  # Clear existing rows
 
                 # Calculate survival at flexible time points (defaults to 1, 3, 5 years)
                 time_points <- private$.parseSurvivalTimePoints(
@@ -3843,7 +3843,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 # A tau between the two limits let the first pass write a summary and
                 # the second pass return early -- leaving an empty table beside a
                 # 276-character interpretation of an RMST that is no longer shown.
-                self$results$rmstTable$deleteRows()
+                .deleteTableRows(self$results$rmstTable)
                 self$results$rmstSummary$setContent("")
                 private$.landmarkNote(self$results$rmstTable, results)
 
@@ -4020,8 +4020,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
                 # Clear rows from any previous (pre-cutoff) invocation so integer rowKeys are
                 # not duplicated (addRow with an existing rowKey errors) when findcut is enabled.
-                self$results$residualsTable$deleteRows()
-                self$results$schoenfeldResidualsTable$deleteRows()
+                .deleteTableRows(self$results$residualsTable)
+                .deleteTableRows(self$results$schoenfeldResidualsTable)
 
                 # Use cutoffdata if provided, otherwise use original data
                 data_to_use <- if (!is.null(cutoffdata)) cutoffdata else results$cleanData
@@ -4168,7 +4168,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 if (!self$options$stratified_cox) return()
 
                 tbl <- self$results$stratifiedCoxTable
-                tbl$deleteRows()
+                .deleteTableRows(tbl)
 
                 strata_var <- self$options$strata_variable
                 if (is.null(strata_var) || length(strata_var) == 0) {

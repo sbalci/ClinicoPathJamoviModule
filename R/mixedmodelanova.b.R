@@ -6,7 +6,7 @@ mixedmodelanovaClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$.model <- NULL
             for (name in c("fixed_effects", "anova_table", "random_effects", "icc_table",
                            "effect_sizes", "posthoc", "assumptions"))
-                self$results[[name]]$deleteRows()
+                .deleteTableRows(self$results[[name]])
 
             # Check if required packages are available
             if (!requireNamespace("lme4", quietly = TRUE)) {

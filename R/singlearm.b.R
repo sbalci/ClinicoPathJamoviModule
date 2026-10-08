@@ -182,7 +182,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # invalid.
         for (nm in c("medianTable", "survTable", "personTimeTable",
                      "baselineHazardTable")) {
-          try(self$results[[nm]]$deleteRows(), silent = TRUE)
+          try(.deleteTableRows(self$results[[nm]]), silent = TRUE)
         }
         # dataQualityTable keeps the metric rows scaffolded in .init(); only
         # their contents are reset (the median row's label varies per run).

@@ -1585,7 +1585,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # "duplicate 'row.names' are not allowed", which .generateReportSummary catches
             # and silently degrades. clearWith only covers the variable options, so any
             # visual change (scale, alpha, theme) re-ran this with the old rows still there.
-            stats_table$deleteRows()
+            .deleteTableRows(stats_table)
 
             # Build grouping variables: always include y, optionally add fill and facet
             grouping_vars <- "y"
@@ -2144,7 +2144,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # See .generateStatistics: addRow() accepts duplicate rowKeys, so the table has
             # to be emptied before it is refilled or it accumulates across re-runs.
-            tests_table$deleteRows()
+            .deleteTableRows(tests_table)
             # Cliff's delta has a bootstrap confidence interval
             tests_table$setNote("seed", if (identical(private$.option("effsize_type"), "cliff_delta"))
                 .fmt(.("Random seed: {seed}"), seed = self$options$seed))

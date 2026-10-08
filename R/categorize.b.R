@@ -901,7 +901,7 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             breakTable <- self$results$breakpointsTable
             # addRow() appends without a duplicate-key check, so a second
             # $run() on the same analysis object would double every row.
-            breakTable$deleteRows()
+            .deleteTableRows(breakTable)
             # above .jenksExactMaxN the natural breaks come from a random subsample
             breakTable$setNote("seed", if (method == "jenks" && requireNamespace("classInt", quietly = TRUE) &&
                                            length(x_clean) > private$.jenksExactMaxN)
@@ -918,7 +918,7 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Populate frequency table ----
             freqTable <- self$results$freqTable
-            freqTable$deleteRows()
+            .deleteTableRows(freqTable)
 
             # Calculate frequencies. Break points come from the non-missing
             # values, but x_cat carries NA wherever x was NA (and wherever a

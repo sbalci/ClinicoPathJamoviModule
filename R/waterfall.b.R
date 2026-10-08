@@ -2650,7 +2650,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # and are filled with setRow.
         for (tbl in c("clinicalMetrics", "personTimeTable",
                       "groupComparisonTable", "groupComparisonTest")) {
-          self$results[[tbl]]$deleteRows()
+          .deleteTableRows(self$results[[tbl]])
         }
 
         # Step 2: Validate inputs and data

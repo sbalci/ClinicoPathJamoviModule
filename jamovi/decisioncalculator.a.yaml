@@ -284,19 +284,46 @@ options:
       title: Observed and projected workload
       type: Bool
       default: false
+      description:
+          ui: >
+            Show the expected true and false positives, flags per 1000 tested and tests per
+            detected positive, observed in this table and projected to target prevalences.
+          R: >
+            Boolean selection whether to show the observed and projected workload table.
+
     - name: workloadPopulationSize
       title: Target population size
       type: Integer
       default: 1000
       min: 1
       max: 1000000000
+      description:
+          ui: >
+            Number of people tested in each projected scenario.
+          R: >
+            Population size used for the projected workload rows.
+
     - name: prevalenceScenarios
       title: Target prevalences (comma-separated proportions)
       type: String
       default: 0.0001,0.001,0.01
+      description:
+          ui: >
+            Comma-separated target prevalences, each a proportion between 0 and 1.
+          R: >
+            Comma-separated proportions between 0 and 1 (at most 100) at which workload is
+            projected.
+
+    # patient, not slide: every interval assumes one independent observation per count.
     - name: analysisUnit
       title: Unit of observation
       type: String
-      default: slide
+      default: patient
+      description:
+          ui: >
+            Label for what one count represents, shown in the workload table (for example
+            patient). It does not change any calculation.
+          R: >
+            Label for the unit each count represents, shown in the workload table.
 
 ...

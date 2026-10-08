@@ -68,7 +68,7 @@ measurementuncertaintyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6
 
             # 8. Populate Uncertainty Results
             tableResults <- self$results$uncertaintyResults
-            tableResults$deleteRows()
+            .deleteTableRows(tableResults)
             
             tableResults$addRow(rowKey=1, values=list(
                 parameter = "Standard Uncertainty (Combined)",
@@ -93,7 +93,7 @@ measurementuncertaintyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6
 
             # 9. Populate Budget Table
             tableBudget <- self$results$budgetTable
-            tableBudget$deleteRows()
+            .deleteTableRows(tableBudget)
             
             sources <- c("Repeatability (Type A)", "Calibration (Type B)", "Reference Material (Type B)", "Temperature (Type B)")
             types <- c("A", "B", "B", "B")

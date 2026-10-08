@@ -106,7 +106,7 @@ sigmametricsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             # Sigma Results Table
             tableResults <- self$results$sigmaResults
-            tableResults$deleteRows()
+            .deleteTableRows(tableResults)
             
             for (i in seq_len(nrow(mydata))) {
                 analyte_val <- if (!is.null(analyteVar)) as.character(mydata[i, analyteVar]) else paste("Row", i)
@@ -128,7 +128,7 @@ sigmametricsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # 0.8-1.2: Both imprecision and inaccuracy
             if (self$options$quality_goal_index) {
                 tableQGI <- self$results$qualityGoalIndex
-                tableQGI$deleteRows()
+                .deleteTableRows(tableQGI)
                 
                 for (i in seq_len(nrow(mydata))) {
                     qgi_val <- abs(mydata[i, biasVar]) / (1.5 * mydata[i, cvVar])
@@ -150,7 +150,7 @@ sigmametricsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Defect Rate Analysis
             if (self$options$defect_rates) {
                 tableDefects <- self$results$defectRateAnalysis
-                tableDefects$deleteRows()
+                .deleteTableRows(tableDefects)
                 
                 for (i in seq_len(nrow(mydata))) {
                     analyte_val <- if (!is.null(analyteVar)) as.character(mydata[i, analyteVar]) else paste("Row", i)

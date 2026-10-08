@@ -1,3 +1,22 @@
+# decisioncalculator (meddecide) — `/fix-function decisioncalculator --apply` (2026-10-07)
+
+VAL-decisioncalculator-01..11 from `development-ideas/decisioncalculator-validation-2026-10-06.md` are fixed;
+post-fix evidence in `development-ideas/decisioncalculator-validation-2026-10-07-postfix-matrix.csv`.
+Deferred, with reasons:
+
+- [ ] **Zero-cell correction rule differs from `decision`.** Here every ratio is computed on the all-cells
+  +0.5 table when any cell is zero. `decision.b.R` corrects only the ratio whose own formula holds the zero.
+  So TP 10, FP 10, FN 0, TN 10 gives LR+ 1.909 here and 2.0 there. This is an estimator choice, not a defect,
+  and changing it moves the nomogram inputs (the plot passes corrected Sens/Spec), so it needs its own pass.
+  Raised by the Codex plan review.
+- [ ] **Translations:** reworded `.()` strings (zero-cell notice and notes, cut-off sentences and notes, the
+  new method and design notes, `.pct` callers) have no `tr.po` entry. The release gate lists the stale
+  msgids. Run `/prepare-translation decisioncalculator`. The catalogs were already dirty from other work, so
+  they were not touched here.
+- [ ] **Possible enhancement:** for genuinely nested thresholds on one marker, the marginal counts identify
+  the discordant counts, so a paired (McNemar-type) comparison of the scenarios' sensitivities and
+  specificities is computable. The table now says that no paired test is performed.
+
 # Cure-model article implementation follow-ups (2026-10-04)
 
 The supported P0–P4 estimation paths and verification are described in

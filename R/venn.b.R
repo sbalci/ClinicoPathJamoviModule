@@ -2040,7 +2040,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                                                      stringsAsFactors = FALSE)
 
                     if (nrow(membership_data) == 0L) {
-                        table$deleteRows()
+                        .deleteTableRows(table)
                         return()
                     }
 
@@ -2083,7 +2083,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                     names(membership_data) <- safe_col_names
 
                     table$setState(state_data)
-                    table$deleteRows()
+                    .deleteTableRows(table)
 
                     # Cap the rendered rows. jmvcore's addRow is called once per
                     # patient and the cost grows quadratically: measured 3.2s at

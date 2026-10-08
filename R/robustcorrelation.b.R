@@ -645,7 +645,7 @@ robustcorrelationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # jmvcore Table has no setRows(); clear then add each row
-            table$deleteRows()
+            .deleteTableRows(table)
             for (.ri in seq_along(rows)) table$addRow(rowKey = .ri, values = rows[[.ri]])
         },
 
@@ -670,7 +670,7 @@ robustcorrelationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # jmvcore Table has no setRows(); clear then add each row
-            table$deleteRows()
+            .deleteTableRows(table)
             for (.ri in seq_along(rows)) table$addRow(rowKey = .ri, values = rows[[.ri]])
         },
 
@@ -699,7 +699,7 @@ robustcorrelationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # jmvcore Table has no setRows(); clear then add each row
-            table$deleteRows()
+            .deleteTableRows(table)
             for (.ri in seq_along(rows)) table$addRow(rowKey = .ri, values = rows[[.ri]])
         },
 

@@ -438,3 +438,17 @@ cat("6. Plot structure and rendering\n")
 cat("7. Performance and efficiency\n")
 cat("8. Parameter type validation\n")
 cat("==========================================\n")
+
+test_that("a post-test probability just below 99.5% is not printed as 100%", {
+  # p2percent() chose its upper-tail branch on the raw p (>= 0.995) but formatted signif(p, 3)
+  # at whole percents, so (0.9945, 0.995) rounded to "100%": decisioncalculator 90/10/0/80 drew
+  # "Post(+) = 100%" beside a panel reading 99.5% (check-function-full, 2026-10-07).
+  post_pos <- function(p) {          # prevalence 0.5, sens 0.9: choose spec so that Post(+) = p
+    g <- nomogrammer(Prevalence = 0.5, Sens = 0.9, Spec = 1 - 0.9 * (1 - p) / p, Detail = TRUE)
+    sub("^.*Post\\(\\+\\) = ([^ ,]+).*$", "\\1", paste(g$labels$subtitle, collapse = " "))
+  }
+  for (p in c(0.99452, 0.9947, 0.99499, 0.996, 0.9999))
+    expect_false(post_pos(p) == "100%", info = p)
+  expect_identical(post_pos(0.99452), "99.5%")
+  expect_identical(post_pos(0.9944), "99%")     # below the band the old whole-percent form stands
+})

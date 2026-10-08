@@ -149,7 +149,7 @@ clinicalcalculatorsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 
                 # 5. Model Summary Table
                 tableModel <- self$results$model_summary
-                tableModel$deleteRows()
+                .deleteTableRows(tableModel)
                 
                 s <- summary(model)
                 coefs <- s$coefficients
@@ -197,7 +197,7 @@ clinicalcalculatorsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                     }
                     
                     tableModel <- self$results$model_summary
-                    tableModel$deleteRows()
+                    .deleteTableRows(tableModel)
                     
                     s <- summary(model)
                     coefs <- s$coefficients
@@ -225,7 +225,7 @@ clinicalcalculatorsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             # 6. Risk Scoring (Simplified Point System)
             if (!is.null(model)) {
                 tableRisk <- self$results$risk_table
-                tableRisk$deleteRows()
+                .deleteTableRows(tableRisk)
                 
                 # Simple rounding of coefficients to create a point system
                 # For Cox, coefs are in 'model$coefficients'

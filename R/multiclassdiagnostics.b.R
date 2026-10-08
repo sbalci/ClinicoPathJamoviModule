@@ -104,7 +104,7 @@ multiclassdiagnosticsClass <- R6::R6Class(
             confTable <- self$results$confusionMatrix
             
             # Clear existing rows
-            confTable$deleteRows()
+            .deleteTableRows(confTable)
             
             # Identifier-safe jamovi column keys (index-based). Human-readable class
             # labels may contain spaces, punctuation, Unicode, or leading digits that are
@@ -145,7 +145,7 @@ multiclassdiagnosticsClass <- R6::R6Class(
         
         .calculatePerClassMetrics = function(predicted, actual, classes) {
             perClassTable <- self$results$perClassMetrics
-            perClassTable$deleteRows()
+            .deleteTableRows(perClassTable)
             
             conf_level <- self$options$confidenceLevel
             
@@ -218,7 +218,7 @@ multiclassdiagnosticsClass <- R6::R6Class(
         
         .calculateOverallMetrics = function(predicted, actual) {
             overallTable <- self$results$overallMetrics
-            overallTable$deleteRows()
+            .deleteTableRows(overallTable)
             
             conf_level <- self$options$confidenceLevel
             n <- length(predicted)
@@ -332,7 +332,7 @@ multiclassdiagnosticsClass <- R6::R6Class(
             # `htmltools::htmlEscape`. Currently only flows to jamovi typed `text` cells
             # (UI auto-escapes), so escape is needed only if HTML output is added.
             compTable <- self$results$modelComparison
-            compTable$deleteRows()
+            .deleteTableRows(compTable)
 
             # Calculate metrics for both models
             acc1 <- sum(predicted1 == actual) / length(actual)
@@ -341,7 +341,7 @@ multiclassdiagnosticsClass <- R6::R6Class(
             # McNemar test if requested
             if (self$options$mcnemarTest) {
                 mcTable <- self$results$mcnemarResults
-                mcTable$deleteRows()
+                .deleteTableRows(mcTable)
                 
                 # Create contingency table for McNemar test
                 correct1 <- predicted1 == actual
@@ -380,7 +380,7 @@ multiclassdiagnosticsClass <- R6::R6Class(
             if (self$options$deLongTest && length(unique(actual)) == 2) {
                 if (requireNamespace("pROC", quietly = TRUE)) {
                     deLongTable <- self$results$deLongResults
-                    deLongTable$deleteRows()
+                    .deleteTableRows(deLongTable)
                     
                     # TODO (correctness/stub): alphabet-derived binary encoding for DeLong test.
                     # `as.numeric(factor) - 1` here and at L351/L352 maps the alphabetically

@@ -114,6 +114,20 @@ test_that("a combination that cannot occur in either group is left blank, not re
 })
 
 
+test_that("an impossible combination is footnoted on its row; the notice does not promise a blank", {
+    # The cells hold NA_real_, which jmvcore sends as a double and jamovi's cell formatter prints
+    # as "NaN" (`if (isNaN(it)) return "NaN"`), so "That row is left blank" described a cell the
+    # user never saw, and the NaN carried no explanation on the row. Release review 2026-10-06.
+    res <- run_ct(indep = FALSE, cond_dep_pos = 0.80, cond_dep_neg = 0.80)
+    fns <- res$cotestResultsTable$getCell(rowKey = "test2_pos", col = "postProb")$footnotes
+    expect_true(any(grepl("Not estimable", fns, fixed = TRUE)))
+    expect_false(grepl("left blank", notices_of(res), fixed = TRUE))
+    expect_match(notices_of(res), "footnoted as not estimable", fixed = TRUE)
+    # a row that can occur carries neither structural footnote
+    expect_length(res$cotestResultsTable$getCell(rowKey = "both_pos", col = "postProb")$footnotes, 0)
+})
+
+
 test_that("a combination impossible only in the non-diseased group gives exactly 1", {
     # rho = 0.70 binds the D- bound but not the D+ one, so the scenario is conclusive for
     # disease. The old 1e6 likelihood-ratio cap turned that into a fake-precision 0.999991.
@@ -324,8 +338,9 @@ test_that("negative conditional dependence is permitted", {
     # 0, so it could not be expressed at all.
     a_yaml <- paste(readLines("../../jamovi/cotest.a.yaml"), collapse = "\n")
     expect_match(a_yaml, "min: -1\\.00")
-    js <- paste(readLines("../../jamovi/js/cotest.events.js"), collapse = "\n")
-    expect_match(js, "clampControl\\(ui, 'cond_dep_pos', -1, 1\\)")
+    # The GUI clamps no input at all any more, so nothing can lift a negative value to 0.
+    js <- gsub("//[^\n]*", "", paste(readLines("../../jamovi/js/cotest.events.js"), collapse = "\n"))
+    expect_false(grepl("clamp|Math\\.(min|max)", js))
 
     # backend validation accepts it
     p <- private_of()

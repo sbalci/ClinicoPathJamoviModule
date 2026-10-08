@@ -56,7 +56,7 @@ methodvalidationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             # 4. Precision Analysis
             if (self$options$precision_analysis) {
                 tablePrec <- self$results$precisionResults
-                tablePrec$deleteRows()
+                .deleteTableRows(tablePrec)
                 
                 if (!is.null(levelVar)) {
                     levels <- unique(mydata[[levelVar]])
@@ -99,7 +99,7 @@ methodvalidationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             # 5. Accuracy Analysis
             if (self$options$accuracy_analysis && !is.null(refVar)) {
                 tableAcc <- self$results$accuracyResults
-                tableAcc$deleteRows()
+                .deleteTableRows(tableAcc)
                 
                 if (!is.null(levelVar)) {
                     levels <- unique(mydata[[levelVar]])

@@ -2279,7 +2279,7 @@ stagemigrationPart1 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # "C-index Improvement" row. Neither cleared the table, so on a rows: 0
                 # table the rows accumulated across run cycles and the same metric could
                 # appear twice with different numbers from the two paths.
-                table$deleteRows()
+                .deleteTableRows(table)
 
                 table$addRow(rowKey = "cindex_improvement_legacy", values = list(
                     Metric = "C-index Improvement (optimism-corrected)",
@@ -2325,7 +2325,7 @@ stagemigrationPart1 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             },
             .populateClinicalInterpretation = function(interpretation) {
                 table <- self$results$clinicalInterpretation
-                table$deleteRows()
+                .deleteTableRows(table)
 
                 # Overall Assessment
                 overall <- interpretation$overall_assessment
@@ -2448,7 +2448,7 @@ stagemigrationPart1 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     return()
                 }
                 table <- self$results$likelihoodTests
-                table$deleteRows()
+                .deleteTableRows(table)
                 add <- function(key, label, t) {
                     table$addRow(rowKey = key, values = list(
                         Test = label,
@@ -2472,7 +2472,7 @@ stagemigrationPart1 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     return()
                 }
                 # Populated from two option blocks in one run; clear first or every row appears twice.
-                table$deleteRows()
+                .deleteTableRows(table)
 
                 lr_stats <- advanced_results$individual_lr_stats
 
@@ -2712,7 +2712,7 @@ stagemigrationPart1 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     if (!is.null(table) && !is.null(sme_results$calculations)) {
                         # clearWith lists only 6 of 238 options; without this the rows double
                         # every time an option outside that list is changed.
-                        table$deleteRows()
+                        .deleteTableRows(table)
 
                         # Add results for each timepoint
                         for (timepoint in names(sme_results$calculations)) {
@@ -2738,7 +2738,7 @@ stagemigrationPart1 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 if ("stageMigrationEffectAssessment" %in% names(self$results)) {
                     assessment_table <- self$results$stageMigrationEffectAssessment
                     if (!is.null(assessment_table) && !is.null(sme_results$overall_assessment)) {
-                        assessment_table$deleteRows()
+                        .deleteTableRows(assessment_table)
                         overall <- sme_results$overall_assessment
 
                         # Add overall metrics
@@ -2821,7 +2821,7 @@ stagemigrationPart1 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 if ("rmstByStage" %in% names(self$results)) {
                     table <- self$results$rmstByStage
                     if (!is.null(table) && !is.null(rmst_results$comparison)) {
-                        table$deleteRows()
+                        .deleteTableRows(table)
                         # Add old system results
                         if (!is.null(rmst_results$comparison$old_system$rmst_by_stage)) {
                             for (stage_name in names(rmst_results$comparison$old_system$rmst_by_stage)) {
@@ -2881,7 +2881,7 @@ stagemigrationPart1 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 if ("rmstComparison" %in% names(self$results)) {
                     comparison_table <- self$results$rmstComparison
                     if (!is.null(comparison_table) && !is.null(rmst_results$comparison$overall_assessment)) {
-                        comparison_table$deleteRows()
+                        .deleteTableRows(comparison_table)
                         overall <- rmst_results$comparison$overall_assessment
 
                         # Add discrimination metrics
@@ -2957,7 +2957,7 @@ stagemigrationPart1 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 if ("competingRisksEventDistribution" %in% names(self$results)) {
                     table <- self$results$competingRisksEventDistribution
                     if (!is.null(table)) {
-                        table$deleteRows()
+                        .deleteTableRows(table)
                         if (!is.null(competing_results$error)) {
                             table$setNote("cr_status", as.character(competing_results$error))
                         } else if (is.null(competing_results$old_system_summary) &&
@@ -3026,7 +3026,7 @@ stagemigrationPart1 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 if ("competingRisksComparison" %in% names(self$results)) {
                     comparison_table <- self$results$competingRisksComparison
                     if (!is.null(comparison_table)) {
-                        comparison_table$deleteRows()
+                        .deleteTableRows(comparison_table)
                     }
                     if (!is.null(comparison_table) && !is.null(competing_results$comparison)) {
                         overall_comp <- competing_results$comparison$overall_comparison
@@ -3135,7 +3135,7 @@ stagemigrationPart1 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 }
                 # addRow() appends blindly and clearWith cannot cover every option;
                 # clear first so a re-run cannot duplicate these rows
-                table$deleteRows()
+                .deleteTableRows(table)
 
 
                 # Add overall IDI result

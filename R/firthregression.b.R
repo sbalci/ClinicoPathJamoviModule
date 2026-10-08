@@ -395,7 +395,7 @@ firthregressionClass <- R6::R6Class(
             if (data_info$is_cox) return()  # Separation is a logistic-specific concern
 
             table <- self$results$separationDiagnostics
-            table$deleteRows()
+            .deleteTableRows(table)
 
             pred_data <- data_info$pred_data
             event <- data_info$event_binary
@@ -667,7 +667,7 @@ firthregressionClass <- R6::R6Class(
         # ── Populate coefficients table ───────────────────────────────
         .populateCoefficients = function(firth_fit, standard_fit, model_type) {
             table <- self$results$coefficients
-            table$deleteRows()
+            .deleteTableRows(table)
 
             if (model_type == "logistic") {
                 coefs <- firth_fit$coefficients
@@ -783,7 +783,7 @@ firthregressionClass <- R6::R6Class(
         # ── Populate model fit statistics ─────────────────────────────
         .populateModelFit = function(firth_fit, standard_fit, data_info, model_type) {
             table <- self$results$modelFit
-            table$deleteRows()
+            .deleteTableRows(table)
 
             if (model_type == "logistic") {
                 # Observations
@@ -874,7 +874,7 @@ firthregressionClass <- R6::R6Class(
         # ── Populate comparison table ─────────────────────────────────
         .populateComparison = function(firth_fit, standard_fit, model_type) {
             table <- self$results$comparisonTable
-            table$deleteRows()
+            .deleteTableRows(table)
 
             if (model_type == "logistic") {
                 firth_coefs <- firth_fit$coefficients

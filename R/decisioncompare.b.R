@@ -675,14 +675,14 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 # Reset per-run state so notices/flags do not accumulate or leak
                 # across successive runs when jamovi reuses the R6 instance.
                 private$.noticeList <- list()
-                self$results$levelMapping$deleteRows()
+                .deleteTableRows(self$results$levelMapping)
                 .diagReferenceDefinition(self$results, self$options,
                     jmvcore::.("Select reference and test levels; binary recoding is displayed after validation"),
                     jmvcore::.("Per-test available binary pairs; differences use common cases"),
                     private$.diagText())
                 for (nm in c("comparatorMetrics", "comparatorCounts", "comparatorPopulation",
                              "comparatorDifferences", "comparatorStrata"))
-                    self$results[[nm]]$deleteRows()
+                    .deleteTableRows(self$results[[nm]])
                 self$results$comparatorReport$setContent("")
                 for (nm in c("comparatorPlot", "comparatorRadar", "comparatorHeatmap"))
                     self$results[[nm]]$setState(NULL)
@@ -703,7 +703,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 # failures and analyses whose required variables have just been removed.
                 for (table_name in c("comparisonTable", "opaTable", "stratifiedTable", "mcnemarTable", "diffTable")) {
                     table <- tryCatch(self$results[[table_name]], error = function(e) NULL)
-                    if (!is.null(table)) table$deleteRows()
+                    if (!is.null(table)) .deleteTableRows(table)
                 }
                 # Deleting rows does not remove table notes from a previous method or dataset.
                 for (key in c("mcnemar_multiplicity", "mcnemar_uninformative_excluded",
@@ -1671,7 +1671,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
             .populateComparisonTable = function(test_results) {
                 comparisonTable <- self$results$comparisonTable
 
-                comparisonTable$deleteRows()
+                .deleteTableRows(comparisonTable)
                 comparisonTable$setNote(
                     "interpretation_scope",
                     jmvcore::.("Qualitative performance labels are illustrative summaries of the observed sample only. They are not clinical guides, validated decision rules, or recommendations for patient care.")
@@ -1806,7 +1806,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
             # Populate OPA table with confidence intervals and noninferiority result
             .populateOPATable = function(test_results) {
                 opaTable <- self$results$opaTable
-                opaTable$deleteRows()
+                .deleteTableRows(opaTable)
 
                 ci_method <- self$options$ciMethod
                 use_criterion <- isTRUE(private$.opt("useOpaCriterion", FALSE))
@@ -1879,7 +1879,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
             # Populate stratified comparison table
             .populateStratifiedTable = function(processed_data, test_results) {
                 stratTable <- self$results$stratifiedTable
-                stratTable$deleteRows()
+                .deleteTableRows(stratTable)
 
                 strat_var <- self$options$stratify
                 mydata <- processed_data$data
@@ -2145,8 +2145,8 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 mcnemarTable <- self$results$mcnemarTable
                 diffTable <- self$results$diffTable
 
-                mcnemarTable$deleteRows()
-                diffTable$deleteRows()
+                .deleteTableRows(mcnemarTable)
+                .deleteTableRows(diffTable)
 
                 # This caveat used to live only inside the showExplanations HTML panel, so a
                 # clinician who read the table alone saw a p-value with no hint of what it

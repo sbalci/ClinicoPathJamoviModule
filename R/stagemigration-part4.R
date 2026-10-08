@@ -879,7 +879,7 @@ stagemigrationPart4 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 }
                 # clearWith lists only 6 of 238 options; without this the rows double
                 # every time an option outside that list is changed.
-                table$deleteRows()
+                .deleteTableRows(table)
 
                 fmtNum <- function(value, digits = 3) {
                     v <- private$.safeAtomic(value, "numeric", NA)
@@ -5717,7 +5717,7 @@ stagemigrationPart4 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 tryCatch(
                     {
                         table <- self$results$cifSummary
-                        table$deleteRows()
+                        .deleteTableRows(table)
 
                         for (result in results) {
                             if (is.list(result) && "Time_Point" %in% names(result)) {

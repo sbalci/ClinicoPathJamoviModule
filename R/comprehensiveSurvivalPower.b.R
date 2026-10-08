@@ -484,7 +484,7 @@ comprehensiveSurvivalPowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)
 
         .populateResults = function(results) {
             # Clear existing results
-            self$results$powerResults$deleteRows()
+            .deleteTableRows(self$results$powerResults)
 
             # Main results table
             main_results <- data.frame(
@@ -591,7 +591,7 @@ comprehensiveSurvivalPowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)
         },
 
         .populateMethodDetails = function(details) {
-            self$results$methodDetails$deleteRows()
+            .deleteTableRows(self$results$methodDetails)
 
             details_df <- data.frame(
                 aspect = character(0),
@@ -622,7 +622,7 @@ comprehensiveSurvivalPowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)
         },
 
         .populateAssumptions = function(results) {
-            self$results$assumptions$deleteRows()
+            .deleteTableRows(self$results$assumptions)
 
             assumptions <- private$.getMethodAssumptions()
 
@@ -760,7 +760,7 @@ comprehensiveSurvivalPowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)
 
         .populateSensitivityAnalysis = function(results) {
             # Clear existing sensitivity analysis results
-            self$results$sensitivityTable$deleteRows()
+            .deleteTableRows(self$results$sensitivityTable)
 
             # Get base parameters
             alpha <- self$options$alpha
@@ -822,7 +822,7 @@ comprehensiveSurvivalPowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)
 
         .populateMethodComparison = function(results) {
             # Clear existing method comparison results
-            self$results$methodComparison$deleteRows()
+            .deleteTableRows(self$results$methodComparison)
 
             # Get current parameters
             alpha <- self$options$alpha

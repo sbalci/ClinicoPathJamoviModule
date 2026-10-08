@@ -162,11 +162,14 @@ nomogrammer <- function(Prevalence,
         # Upper tail, the mirror of the lower one below: at integer accuracy every
         # probability from 99.5% up printed as "100%" - certainty - while the widened
         # panel now draws the line visibly short of 100% (PPV 99.69% read "Post(+) = 100%").
-        if (p >= 0.995 && p < 1) {
+        # The boundary is 0.9945, not 0.995: the branch below rounds signif(p, 3) first, so
+        # 0.99452 became 0.995 and printed "100%" (decisioncalculator 90/10/0/80, whose panel
+        # said 99.5%). Below 0.9945, signif(p, 3) is at most 0.994 and prints "99%".
+        if (p >= 0.9945 && p < 1) {
             if (1 - p < 1e-5) return(">99.999%")
             return(scales::percent(p, accuracy = if (1 - p < 0.001) 1e-3 else 0.1))
         }
-        if (abs(p) >= 0.01)                       # 1% to below 99.5%: byte-identical to the old output
+        if (abs(p) >= 0.01)                       # 1% to below 99.45%: byte-identical to the old output
             return(scales::percent(signif(p, digits = 3), accuracy = 1))
         if (abs(p) < 1e-5)                        # would still render as all zeros
             return(if (p > 0) "<0.001%" else ">-0.001%")

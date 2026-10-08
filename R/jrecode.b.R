@@ -179,7 +179,7 @@ jrecodeClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             total <- length(var)
 
             # Clear existing rows
-            self$results$levels_table$deleteRows()
+            .deleteTableRows(self$results$levels_table)
 
             # Add rows for each level
             for (i in seq_along(freq_table)) {
@@ -404,7 +404,7 @@ jrecodeClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         .updateComparisonTable = function(original, recoded) {
             # Clear existing rows
-            self$results$comparison$deleteRows()
+            .deleteTableRows(self$results$comparison)
 
             # Create frequency table of combinations
             df <- data.frame(

@@ -185,39 +185,22 @@ test_that("omitting a required variable shows the welcome panel, not an error", 
 })
 
 test_that("decision validates prevalence bounds", {
-  # Prevalence too low
-  expect_error(
-    decision(
-      data = decision_small,
-      gold = "GoldStandard",
-      goldPositive = "Positive",
-      newtest = "NewTest",
-      testPositive = "Positive",
-      pp = TRUE,
-      pprob = 0.0005,  # Below minimum (0.001)
-      goldNegative = NULL,
-      testNegative = NULL
-    ),
-    regexp = "prevalence|probability|0.001|0.999",
-    ignore.case = TRUE
-  )
+  # pprob accepts a proportion strictly between 0 and 1: min 1e-9, max 0.999999999 in
+  # decision.a.yaml since 9d2516f0a (2026-10-04). The old floor was 0.001, which shut out
+  # rare-disease screening prevalences such as 0.0005.
+  run_pprob <- function(p) decision(
+    data = decision_small, gold = "GoldStandard", goldPositive = "Positive",
+    newtest = "NewTest", testPositive = "Positive", pp = TRUE, pprob = p,
+    goldNegative = NULL, testNegative = NULL)
+  bound_msg <- "pprob must be between 1e-09 and 0.999999999"
 
-  # Prevalence too high
-  expect_error(
-    decision(
-      data = decision_small,
-      gold = "GoldStandard",
-      goldPositive = "Positive",
-      newtest = "NewTest",
-      testPositive = "Positive",
-      pp = TRUE,
-      pprob = 1.0,  # Above maximum (0.999)
-      goldNegative = NULL,
-      testNegative = NULL
-    ),
-    regexp = "prevalence|probability|0.001|0.999",
-    ignore.case = TRUE
-  )
+  # 0 and 1 are not prevalences a predictive value can be computed from
+  expect_error(run_pprob(0), bound_msg, fixed = TRUE)
+  expect_error(run_pprob(1.0), bound_msg, fixed = TRUE)
+
+  # below the old 0.001 floor: now accepted, and the supplied prior is the one used
+  r <- run_pprob(0.0005)
+  expect_equal(r$ratioTable$asDF$PrevalenceD, 0.0005, tolerance = 1e-12)
 })
 
 test_that("decision handles extreme prevalence values", {

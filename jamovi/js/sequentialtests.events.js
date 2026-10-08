@@ -1,23 +1,9 @@
-// sequentialtests.events.js - teaching-example defaults and input clamping
-
-const clampNumeric = (value, min, max) => {
-    if (!Number.isFinite(value))
-        return value;
-    return Math.min(max, Math.max(min, value));
-};
-
-const getNumericValue = (control, fallback) => {
-    if (!control || typeof control.value !== 'function')
-        return fallback;
-
-    const raw = control.value();
-    const numeric = (typeof raw === 'number') ? raw : parseFloat(raw);
-
-    if (Number.isFinite(numeric))
-        return numeric;
-
-    return fallback;
-};
+// sequentialtests.events.js - teaching-example defaults
+//
+// No input clamping. The numeric boxes used to clamp an out-of-range entry to the nearest
+// bound, so "80" typed for an 80% sensitivity silently became 0.99 and the analysis ran on
+// it. The jamovi client does not enforce an option's min/max, but jmvcore does: left alone,
+// the same entry stops the analysis with "test1_sens must be between 0.01 and 0.99 (is 80)".
 
 const setControlValue = (control, value) => {
     if (!control || typeof control.setValue !== 'function')
@@ -134,67 +120,6 @@ const events = {
             return;
 
         applySequentialPresetConfig(ui, preset);
-    },
-
-    onChange_test1_sens(ui) {
-        const control = ui.test1_sens;
-        if (!control) return;
-
-        const value = getNumericValue(control, NaN);
-        const adjusted = clampNumeric(value, 0.01, 0.99);
-
-        if (Number.isFinite(adjusted) && adjusted !== value)
-            setControlValue(control, adjusted);
-    },
-
-    onChange_test1_spec(ui) {
-        const control = ui.test1_spec;
-        if (!control) return;
-
-        const value = getNumericValue(control, NaN);
-        const adjusted = clampNumeric(value, 0.01, 0.99);
-
-        if (Number.isFinite(adjusted) && adjusted !== value)
-            setControlValue(control, adjusted);
-    },
-
-    onChange_test2_sens(ui) {
-        const control = ui.test2_sens;
-        if (!control) return;
-
-        const value = getNumericValue(control, NaN);
-        const adjusted = clampNumeric(value, 0.01, 0.99);
-
-        if (Number.isFinite(adjusted) && adjusted !== value)
-            setControlValue(control, adjusted);
-    },
-
-    onChange_test2_spec(ui) {
-        const control = ui.test2_spec;
-        if (!control) return;
-
-        const value = getNumericValue(control, NaN);
-        const adjusted = clampNumeric(value, 0.01, 0.99);
-
-        if (Number.isFinite(adjusted) && adjusted !== value)
-            setControlValue(control, adjusted);
-    },
-
-    onChange_prevalence(ui) {
-        const control = ui.prevalence;
-
-        if (!control)
-            return;
-
-        let prevalence = getNumericValue(control, NaN);
-
-        if (Number.isFinite(prevalence) && prevalence < 0.001) {
-            prevalence = 0.001;
-            setControlValue(control, prevalence);
-        } else if (Number.isFinite(prevalence) && prevalence > 0.999) {
-            prevalence = 0.999;
-            setControlValue(control, prevalence);
-        }
     }
 };
 

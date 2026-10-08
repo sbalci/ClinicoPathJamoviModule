@@ -63,9 +63,9 @@ advancedtrialsClass <- R6::R6Class(
         
         .initializeResultTables = function() {
             # Initialize empty result tables
-            self$results$trial_design_summary$deleteRows()
-            self$results$group_sequential_boundaries$deleteRows()
-            self$results$sample_size_calculations$deleteRows()
+            .deleteTableRows(self$results$trial_design_summary)
+            .deleteTableRows(self$results$group_sequential_boundaries)
+            .deleteTableRows(self$results$sample_size_calculations)
         },
         
         .run = function() {

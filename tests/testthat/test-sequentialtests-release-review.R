@@ -611,3 +611,17 @@ test_that("release metadata versions agree", {
     expect_identical(module_version, description_version)
     expect_identical(citation_version, description_version)
 })
+
+
+test_that("an out-of-range entry is rejected, never silently clamped in the GUI", {
+    # Same defect as cotest: events.js clamped "80" (meaning 80%) to 0.99 and ran on it.
+    js <- gsub("//[^\n]*", "", paste(readLines("../../jamovi/js/sequentialtests.events.js",
+                                               warn = FALSE), collapse = "\n"))
+    expect_false(grepl("clamp|Math\\.(min|max)|prevalence = 0\\.0", js))
+    u <- readLines("../../jamovi/sequentialtests.u.yaml", warn = FALSE)
+    expect_identical(trimws(grep("change:", u, value = TRUE)),
+                     "change: ./sequentialtests.events::onChange_preset")
+
+    expect_error(run_st(test1_sens = 80), "between 0.01 and 0.99")
+    expect_error(run_st(prevalence = 10), "between 0.001 and 0.999")
+})

@@ -522,7 +522,7 @@ pcaloadingheatmapClass <- if (requireNamespace("jmvcore")) {
                 table <- self$results$variance
 
                 # Clear existing rows - jamovi tables use deleteRows(), not clear()
-                table$deleteRows()
+                .deleteTableRows(table)
                 for (i in seq_len(nrow(var_df))) {
                     table$addRow(rowKey = i, values = list(
                         component = paste0("PC", var_df$component[i]),

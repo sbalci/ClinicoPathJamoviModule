@@ -241,7 +241,7 @@ hiddenmarkovClass <- R6::R6Class(
             estimates <- summary_model$parameters
             
             table <- self$results$modelSummary
-            table$deleteRows()
+            .deleteTableRows(table)
             
             for (i in seq_len(nrow(estimates))) {
                 row <- list(
@@ -264,7 +264,7 @@ hiddenmarkovClass <- R6::R6Class(
             qmatrix <- msm::qmatrix.msm(private$.model, ci = "normal")
             
             table <- self$results$transitionMatrix
-            table$deleteRows()
+            .deleteTableRows(table)
             
             nstates <- self$options$nstates
             row_idx <- 1
@@ -303,7 +303,7 @@ hiddenmarkovClass <- R6::R6Class(
                 return()
             
             table <- self$results$transitionProbs
-            table$deleteRows()
+            .deleteTableRows(table)
             
             nstates <- self$options$nstates
             row_idx <- 1
@@ -348,7 +348,7 @@ hiddenmarkovClass <- R6::R6Class(
                 return()
             
             table <- self$results$statePrevalence
-            table$deleteRows()
+            .deleteTableRows(table)
             
             nstates <- self$options$nstates
             row_idx <- 1
@@ -380,7 +380,7 @@ hiddenmarkovClass <- R6::R6Class(
                 return()
             
             table <- self$results$goodnessOfFit
-            table$deleteRows()
+            .deleteTableRows(table)
             
             # Log-likelihood
             loglik <- private$.model$minus2loglik / -2
@@ -405,7 +405,7 @@ hiddenmarkovClass <- R6::R6Class(
                 return()
 
             table <- self$results$viterbiStates
-            table$deleteRows()
+            .deleteTableRows(table)
 
             tryCatch({
                 # Get Viterbi states (most likely hidden state sequence)

@@ -4832,7 +4832,7 @@ stagemigrationPart2 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             .populateCalibrationAnalysis = function(calibration_results) {
                 # Populate calibration analysis table
                 table <- self$results$calibrationAnalysis
-                table$deleteRows()
+                .deleteTableRows(table)
 
                 if (is.null(calibration_results)) {
                     table$setNote("note", .("Calibration analysis could not be completed. Check if Cox models were successfully fitted."))

@@ -181,7 +181,7 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # "clearRows" guard referenced a method that never existed, so rows
             # duplicated across reruns not covered by clearWith.
             summaryTable <- self$results$summary
-            summaryTable$deleteRows()
+            .deleteTableRows(summaryTable)
             for (var in vars) {
                 varData <- clusterData[[var]]
                 summaryTable$addRow(rowKey = var, values = list(
@@ -238,7 +238,7 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # deleteRows() (the real jmvcore API - "clearRows" never existed, so
             # the old guard never fired and rows duplicated across reruns not
             # covered by clearWith)
-            clusterSummary$deleteRows()
+            .deleteTableRows(clusterSummary)
 
             clusterCounts <- as.data.frame(table(clusterMembership), stringsAsFactors = FALSE)
             names(clusterCounts) <- c("cluster", "n")

@@ -33,7 +33,7 @@ decisioncalculatorOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
             showWorkload = FALSE,
             workloadPopulationSize = 1000,
             prevalenceScenarios = "0.0001,0.001,0.01",
-            analysisUnit = "slide", ...) {
+            analysisUnit = "patient", ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -156,7 +156,7 @@ decisioncalculatorOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
             private$..analysisUnit <- jmvcore::OptionString$new(
                 "analysisUnit",
                 analysisUnit,
-                default="slide")
+                default="patient")
 
             self$.addOption(private$..TP)
             self$.addOption(private$..TN)
@@ -473,12 +473,12 @@ decisioncalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                         `format`="pc"),
                     list(
                         `name`="PostTestProbDisease", 
-                        `title`="Post-test Reference-positive Probability", 
+                        `title`="Post-test Reference-positive Probability (Positive Test)", 
                         `type`="number", 
                         `format`="pc"),
                     list(
-                        `name`="PostTestProbHealthy", 
-                        `title`="Post-test Reference-negative Probability", 
+                        `name`="PostTestProbNeg", 
+                        `title`="Post-test Reference-positive Probability (Negative Test)", 
                         `type`="number", 
                         `format`="pc"),
                     list(
@@ -612,7 +612,12 @@ decisioncalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                     "ci"),
                 refs=list(
                     "epiR",
-                    "DeeksAltman2004")))
+                    "DeeksAltman2004",
+                    "Simel1991",
+                    "Glas2003",
+                    "youden1950",
+                    "AgrestiCaffo2000",
+                    "LinnGrunau2006")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="faganSummary",
@@ -727,7 +732,7 @@ decisioncalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 columns=list(
                     list(
                         `name`="source", 
-                        `title`="Population", 
+                        `title`="Source", 
                         `type`="text"),
                     list(
                         `name`="unit", 
@@ -737,62 +742,53 @@ decisioncalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                         `name`="prevalence", 
                         `title`="Prevalence", 
                         `type`="number", 
-                        `format`="dp:6"),
+                        `format`="pc"),
                     list(
                         `name`="population", 
                         `title`="Population", 
-                        `type`="number", 
-                        `format`="dp:6"),
+                        `type`="number"),
                     list(
                         `name`="tp", 
                         `title`="True positives", 
-                        `type`="number", 
-                        `format`="dp:6"),
+                        `type`="number"),
                     list(
                         `name`="fp", 
                         `title`="False positives", 
-                        `type`="number", 
-                        `format`="dp:6"),
+                        `type`="number"),
                     list(
                         `name`="fn", 
                         `title`="False negatives", 
-                        `type`="number", 
-                        `format`="dp:6"),
+                        `type`="number"),
                     list(
                         `name`="tn", 
                         `title`="True negatives", 
-                        `type`="number", 
-                        `format`="dp:6"),
+                        `type`="number"),
                     list(
                         `name`="flags", 
                         `title`="Flags", 
-                        `type`="number", 
-                        `format`="dp:6"),
+                        `type`="number"),
                     list(
                         `name`="ppv", 
                         `title`="PPV", 
                         `type`="number", 
-                        `format`="dp:6"),
+                        `format`="pc"),
                     list(
                         `name`="npv", 
                         `title`="NPV", 
                         `type`="number", 
-                        `format`="dp:6"),
+                        `format`="pc"),
                     list(
                         `name`="flags_per_1000", 
                         `title`="Flags per 1000", 
-                        `type`="number", 
-                        `format`="dp:6"),
+                        `type`="number"),
                     list(
                         `name`="flags_per_detected", 
                         `title`="Flags per detected positive", 
-                        `type`="number", 
-                        `format`="dp:6"),
+                        `type`="number"),
                     list(
                         `name`="tests_per_detected", 
                         `title`="Tests per detected positive", 
-                        `type`="number", 
-                        `format`="dp:6"))))}))
+                        `type`="number"))))}))
 
 decisioncalculatorBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "decisioncalculatorBase",
@@ -874,10 +870,14 @@ decisioncalculatorBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' @param fp2 False-positive frequency for illustrative scenario 2.
 #' @param tn2 True-negative frequency for illustrative scenario 2.
 #' @param fn2 False-negative frequency for illustrative scenario 2.
-#' @param showWorkload .
-#' @param workloadPopulationSize .
-#' @param prevalenceScenarios .
-#' @param analysisUnit .
+#' @param showWorkload Boolean selection whether to show the observed and
+#'   projected workload table.
+#' @param workloadPopulationSize Population size used for the projected
+#'   workload rows.
+#' @param prevalenceScenarios Comma-separated proportions between 0 and 1 (at
+#'   most 100) at which workload is projected.
+#' @param analysisUnit Label for the unit each count represents, shown in the
+#'   workload table.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
@@ -933,7 +933,7 @@ decisioncalculator <- function(
     showWorkload = FALSE,
     workloadPopulationSize = 1000,
     prevalenceScenarios = "0.0001,0.001,0.01",
-    analysisUnit = "slide") {
+    analysisUnit = "patient") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("decisioncalculator requires jmvcore to be installed (restart may be required)")

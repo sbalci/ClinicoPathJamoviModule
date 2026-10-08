@@ -32,7 +32,7 @@ decisioncalculator(
   showWorkload = FALSE,
   workloadPopulationSize = 1000,
   prevalenceScenarios = "0.0001,0.001,0.01",
-  analysisUnit = "slide"
+  analysisUnit = "patient"
 )
 }
 \arguments{
@@ -95,13 +95,17 @@ scenarios.}
 
 \item{fn2}{False-negative frequency for illustrative scenario 2.}
 
-\item{showWorkload}{.}
+\item{showWorkload}{Boolean selection whether to show the observed and
+projected workload table.}
 
-\item{workloadPopulationSize}{.}
+\item{workloadPopulationSize}{Population size used for the projected
+workload rows.}
 
-\item{prevalenceScenarios}{.}
+\item{prevalenceScenarios}{Comma-separated proportions between 0 and 1 (at
+most 100) at which workload is projected.}
 
-\item{analysisUnit}{.}
+\item{analysisUnit}{Label for the unit each count represents, shown in the
+workload table.}
 }
 \value{
 A results object containing:

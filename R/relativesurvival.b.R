@@ -460,7 +460,7 @@ relativesurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             timepoints <- timepoints[timepoints <= max_time_years * 1.1]
             if (length(timepoints) == 0) timepoints <- c(max_time_years)
 
-            table$deleteRows()
+            .deleteTableRows(table)
 
             for (i in seq_along(timepoints)) {
                 tp <- timepoints[i]
@@ -514,7 +514,7 @@ relativesurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             timepoints <- timepoints[timepoints <= max_time_years * 1.1]
             if (length(timepoints) == 0) timepoints <- c(max_time_years)
 
-            table$deleteRows()
+            .deleteTableRows(table)
 
             for (i in seq_along(timepoints)) {
                 tp <- timepoints[i]
@@ -552,7 +552,7 @@ relativesurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     return()
                 }
 
-                table$deleteRows()
+                .deleteTableRows(table)
 
                 excess_vals <- numeric(length(yearly))
                 has_se <- !is.null(rel_surv$std.err) && length(rel_surv$std.err) > 0
@@ -664,7 +664,7 @@ relativesurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 timepoints <- timepoints[timepoints <= max_time * 1.1]
                 if (length(timepoints) == 0) timepoints <- c(max_time)
 
-                table$deleteRows()
+                .deleteTableRows(table)
 
                 for (i in seq_along(timepoints)) {
                     tp <- timepoints[i]
@@ -742,7 +742,7 @@ relativesurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 timepoints <- timepoints[timepoints <= max_time * 1.1]
                 if (length(timepoints) == 0) timepoints <- c(1)
 
-                table$deleteRows()
+                .deleteTableRows(table)
 
                 for (i in seq_along(timepoints)) {
                     tp <- timepoints[i]
@@ -866,7 +866,7 @@ relativesurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     return()
                 }
 
-                table$deleteRows()
+                .deleteTableRows(table)
 
                 for (i in seq_along(periods)) {
                     prd <- periods[i]
@@ -1015,7 +1015,7 @@ relativesurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     return()
                 }
 
-                reg_table$deleteRows()
+                .deleteTableRows(reg_table)
 
                 for (i in seq_len(nrow(coefs))) {
                     var_name <- rownames(coefs)[i]
@@ -1048,7 +1048,7 @@ relativesurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     paste0("Model type: ", model_names[model_type]))
 
                 # Model fit
-                fit_table$deleteRows()
+                .deleteTableRows(fit_table)
                 ll <- tryCatch(logLik(reg_model), error = function(e) NA)
                 aic_val <- tryCatch(AIC(reg_model), error = function(e) NA)
 

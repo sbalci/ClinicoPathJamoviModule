@@ -106,15 +106,8 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 add("ajccNStage", paste0("stage_", 1:3), nodes)
                 add("adequacyByELN", paste0("eln_", 1:5), nodes)
             },
-            .deleteRows = function(table) {
-                table$deleteRows()
-                # Current jmvcore clears cells/keys but can retain display row names.
-                # An empty table then fails as.data.frame() after a previous populated run.
-                if (table$rowCount == 0 && length(table$names) > 0)
-                    table$.__enclos_env__$private$.rowNames <- character()
-            },
             .clearTable = function(table) {
-                if (!table$name %in% private$.fixedTables) private$.deleteRows(table)
+                if (!table$name %in% private$.fixedTables) .deleteTableRows(table)
             },
             .putRow = function(table, rowKey, values) {
                 # Dynamic/result-dependent rows are created here; fixed rows already exist.
@@ -185,7 +178,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 private$.pEstimate <- NULL
                 for (nm in self$results$itemNames) {
                     item <- self$results$get(nm)
-                    if (inherits(item, "Table")) private$.deleteRows(item)
+                    if (inherits(item, "Table")) .deleteTableRows(item)
                     else if (inherits(item, "Image")) item$setState(NULL)
                     else if (!nm %in% c("welcome", "guidedInstructions", "conciseInstructions"))
                         item$setContent("")
@@ -1651,7 +1644,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     private$.clearTable(obsPredTable)
 
                     if (is.na(pEstimate)) {
-                        private$.deleteRows(obsPredTable)
+                        .deleteTableRows(obsPredTable)
                         obsPredText$setContent(jmvcore::.("Cannot compare observed vs predicted: detection probability (q) could not be estimated."))
                     } else {
                         op_results <- private$.calculateObsPred(firstDetectionData, pEstimate, maxSamp)
@@ -1683,7 +1676,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     private$.clearTable(multifocalTable)
 
                     q_val <- pEstimate
-                    if (!is.finite(q_val)) private$.deleteRows(multifocalTable)
+                    if (!is.finite(q_val)) .deleteTableRows(multifocalTable)
 
                     for (i in if (is.finite(q_val)) seq_len(maxSamp) else integer()) {
                         # P(X >= k) = 1 - pbinom(k-1, n, p)

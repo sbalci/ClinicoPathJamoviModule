@@ -204,7 +204,7 @@ groupsummaryClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             table <- self$results$summaryTable
 
             # Clear existing rows instead of columns
-            table$deleteRows()
+            .deleteTableRows(table)
 
             # Add group variable columns (leftmost, in selection order) so each
             # row shows which group it belongs to. Use 'text' so the TOTAL row

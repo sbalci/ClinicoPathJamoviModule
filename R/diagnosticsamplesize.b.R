@@ -21,7 +21,7 @@ diagnosticsamplesizeClass <- R6::R6Class(
             if (self$options$show_references) private$.setReferences()
         },
         .run = function() {
-            self$results$zeroMissPlan$deleteRows()
+            .deleteTableRows(self$results$zeroMissPlan)
             if (self$options$zeroMissPlanning) {
                 lower <- self$options$minimumSensitivityBound
                 alpha <- self$options$alpha
@@ -35,7 +35,7 @@ diagnosticsamplesizeClass <- R6::R6Class(
                 {
                     labels <- private$.planningLabels()
                     for (name in c("sample_size_summary", "prevalence_table", "method_comparison"))
-                        self$results[[name]]$deleteRows()
+                        .deleteTableRows(self$results[[name]])
                     self$results$sample_size_statement$setContent("")
                     if (self$options$show_methodology) private$.setMethodology()
                     # Get parameters
@@ -451,7 +451,7 @@ diagnosticsamplesizeClass <- R6::R6Class(
                 labels$negative, ". Numerators count matching test results within the ",
                 "reference-positive and reference-negative strata, respectively.</p>",
                 "<p>Planning evaluates Clopper-Pearson interval width at the rounded expected ",
-                "number of matching results. The confidence level is 100 &times; (1 &minus; alpha) percent. ",
+                "number of matching results. The confidence level is 100 \u00D7 (1 \u2212 alpha) percent. ",
                 "The expected stratum proportion converts each stratum count to a total participant count. ",
                 "The selected objective uses both requirements or one specified stratum.</p>",
                 "<p>Participants must be independent and contribute one paired result. These calculations ",

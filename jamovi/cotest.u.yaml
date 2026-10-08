@@ -20,7 +20,7 @@ children:
           change: ./cotest.events::onChange_preset
 
   - type: Label
-    label: Test 1 parameters
+    label: Test 1 Parameters
     children:
       - type: LayoutBox
         margin: large
@@ -35,18 +35,14 @@ children:
             label: 'Sensitivity (0-1)'
             format: number
             enable: (preset:custom)
-            events:
-              change: ./cotest.events::onChange_test1_sens
           - type: TextBox
             name: test1_spec
             label: 'Specificity (0-1)'
             format: number
             enable: (preset:custom)
-            events:
-              change: ./cotest.events::onChange_test1_spec
 
   - type: Label
-    label: Test 2 parameters
+    label: Test 2 Parameters
     children:
       - type: LayoutBox
         margin: large
@@ -61,18 +57,14 @@ children:
             label: 'Sensitivity (0-1)'
             format: number
             enable: (preset:custom)
-            events:
-              change: ./cotest.events::onChange_test2_sens
           - type: TextBox
             name: test2_spec
             label: 'Specificity (0-1)'
             format: number
             enable: (preset:custom)
-            events:
-              change: ./cotest.events::onChange_test2_spec
 
   - type: Label
-    label: Test independence
+    label: Test Independence
     children:
       - type: LayoutBox
         margin: large
@@ -81,8 +73,6 @@ children:
             name: indep
             label: 'Assume the two tests are conditionally independent'
             enable: (preset:custom)
-            events:
-              change: ./cotest.events::onChange_indep
           - type: LayoutBox
             margin: large
             children:
@@ -91,18 +81,14 @@ children:
                 label: 'Correlation (phi) among subjects with disease'
                 format: number
                 enable: (preset:custom && !indep)
-                events:
-                  change: ./cotest.events::onChange_cond_dep_pos
               - type: TextBox
                 name: cond_dep_neg
                 label: 'Correlation (phi) among subjects without disease'
                 format: number
                 enable: (preset:custom && !indep)
-                events:
-                  change: ./cotest.events::onChange_cond_dep_neg
 
   - type: Label
-    label: Disease prevalence
+    label: Disease Prevalence
     children:
       - type: LayoutBox
         margin: large
@@ -112,11 +98,9 @@ children:
             label: 'Prevalence (0-1)'
             format: number
             enable: (preset:custom)
-            events:
-              change: ./cotest.events::onChange_prevalence
 
   - type: Label
-    label: Display options
+    label: Display Options
     children:
       - type: LayoutBox
         margin: large

@@ -58,8 +58,8 @@ precisionrecallClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             }
 
             if (is.null(positiveClass) || !positiveClass %in% outcome) jmvcore::reject("Select an observed positive class.")
-            self$results$aucTable$deleteRows()
-            self$results$comparisonTable$deleteRows()
+            .deleteTableRows(self$results$aucTable)
+            .deleteTableRows(self$results$comparisonTable)
             self$results$aucTable$setNote("bootstrap", "")
             self$results$aucTable$setNote("method", paste("Area method:", self$options$aucMethod,
                 ". Curves join observed points linearly. Intervals resample independent rows."))
@@ -128,7 +128,7 @@ precisionrecallClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             # Model comparison if requested
             if (self$options$comparison && length(self$options$scores) > 1) {
                 compTable <- self$results$comparisonTable
-                compTable$deleteRows()
+                .deleteTableRows(compTable)
 
                 # Pairwise comparisons
                 for (i in 1:(length(self$options$scores)-1)) {

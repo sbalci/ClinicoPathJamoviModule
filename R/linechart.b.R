@@ -527,7 +527,7 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # Enhanced correlation table with copy-ready interpretations
         .populateCorrelation = function(correlation_stats) {
             table <- self$results$correlation
-            table$deleteRows()
+            .deleteTableRows(table)
 
             row_num <- 1
             

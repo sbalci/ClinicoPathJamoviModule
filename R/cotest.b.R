@@ -183,11 +183,11 @@ cotestClass <- if (requireNamespace("jmvcore"))
                         # the preset is one the caller deliberately set. In the GUI events.js has
                         # already written the preset into the controls, so nothing differs and the
                         # warning stays silent there.
-                        # Reads jmvcore's private per-option object. If a jmvcore release renames
-                        # it this must break a test rather than quietly disable the warning, so the
-                        # miss is recorded as a notice instead of being swallowed.
+                        # Reads the option object through jmvcore's public Options$option(). If it
+                        # ever returns nothing, that must break a test rather than quietly disable
+                        # the warning, so the miss is recorded as a notice instead of being swallowed.
                         opt_default <- function(nm) {
-                            o <- self$options$.__enclos_env__$private[[paste0("..", nm)]]
+                            o <- self$options$option(nm)
                             if (is.null(o)) {
                                 private$.addNotice(sprintf(
                                     .("Internal: could not read the default for '%s', so the analysis cannot report whether a worked example replaced a value you supplied. Please report this."),
@@ -306,16 +306,10 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 dependence_info <- results$dependence_info
 
                 # Calculate "Either Test Positive" (clinical parallel rule)
-                # P(Disease | Either+) from P(Either+ | Disease) and P(Either+ | no Disease)
-                if (indep) {
-                    # P(Either+ | Disease+) = 1 - P(Both- | Disease+)
-                    p_either_pos_D <- 1 - ((1 - test1_sens) * (1 - test2_sens))
-                    p_either_pos_nD <- 1 - (test1_spec * test2_spec)
-                } else {
-                    # For dependent tests, use clamped joint probabilities to maintain coherence
-                    p_either_pos_D <- 1 - results$p_both_neg_D
-                    p_either_pos_nD <- 1 - results$p_both_neg_nD
-                }
+                # P(Either+ | group) = 1 - P(Both- | group), from whichever model was fitted
+                # (for dependent tests these are the clamped joint probabilities)
+                p_either_pos_D <- 1 - results$p_both_neg_D
+                p_either_pos_nD <- 1 - results$p_both_neg_nD
 
                 lr_either_pos <- private$.calculateLikelihoodRatio(p_either_pos_D, p_either_pos_nD, .("Either Positive LR"))
                 postest_odds_either <- pretest_odds * lr_either_pos
@@ -397,7 +391,7 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 # because it can decide the nomogram is not drawable and add a notice saying so.
                 if (self$options$fagan) {
                     private$.prepareFaganPlotData(prevalence, test1_sens, test1_spec, test2_sens, test2_spec,
-                                                 indep, lr_either_pos, if (indep) test1_nlr * test2_nlr else results$lr_both_neg,
+                                                 indep, lr_either_pos, results$lr_both_neg,
                                                  preset, preset_label)
                 }
 
@@ -515,7 +509,7 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 # value is a structural consequence of the assumed model rather than an estimate.
                 if (num_zero && den_zero) {
                     private$.addNotice(sprintf(
-                        .("%s is undefined: with the current parameters this combination of test results has probability zero in both the diseased and the non-diseased group, so it cannot occur at all and no post-test probability exists for it. That row is left blank."),
+                        .("%s is undefined: with the current parameters this combination of test results has probability zero in both the diseased and the non-diseased group, so it cannot occur at all and no post-test probability exists for it. That row is footnoted as not estimable."),
                         scenario_name), "warning")
                     return(NA_real_)
                 }
@@ -683,6 +677,10 @@ cotestClass <- if (requireNamespace("jmvcore"))
                     postest_odds_both_neg <- pretest_odds * lr_both_neg
                     postest_prob_both_neg <- private$.oddsToProbability(postest_odds_both_neg)
 
+                    p_both_neg_D <- (1 - test1_sens) * (1 - test2_sens)
+                    p_both_neg_nD <- test1_spec * test2_spec
+                    phi_d <- 0; phi_n <- 0   # independence IS zero correlation
+
                     # One .() literal per message: a msgid cannot be assembled by paste0().
                     dependence_info <- .("<p>The two tests are run in parallel on the same subject and are assumed to be <strong>conditionally independent</strong>: within the diseased group, and again within the non-diseased group, the result of one test carries no information about the other, so each joint probability is the plain product of the two tests' sensitivities (or false-positive rates).</p><p>If the two tests in fact tend to err together \u2014 same specimen, same operator, same biology \u2014 independence usually overstates how much the pair adds, and which rows move up or down depends on where the dependence lies (see <em>Understanding Test Dependence</em>). Clear <em>Assume the two tests are conditionally independent</em> and enter a dependence parameter to see how far the conclusion moves.</p>")
                 } else {
@@ -704,20 +702,10 @@ cotestClass <- if (requireNamespace("jmvcore"))
                     p_both_neg_nD <- dep_results$p_both_neg_nD
                     phi_d <- dep_results$phi_d
                     phi_n <- dep_results$phi_n
-                }
-                
-                # Store LRs for plot data (set to NA for independent case)
-                if (indep) {
-                    lr_both_pos <- test1_plr * test2_plr
-                    lr_both_neg <- test1_nlr * test2_nlr
-                    p_both_neg_D <- (1 - test1_sens) * (1 - test2_sens)
-                    p_both_neg_nD <- test1_spec * test2_spec
-                    phi_d <- 0; phi_n <- 0   # independence IS zero correlation
-                } else {
                     lr_both_pos <- dep_results$lr_both_pos
                     lr_both_neg <- dep_results$lr_both_neg
                 }
-                
+
                 return(list(
                     postest_prob_t1 = postest_prob_t1,
                     postest_prob_t2 = postest_prob_t2,
@@ -947,6 +935,14 @@ cotestClass <- if (requireNamespace("jmvcore"))
                             sprintf(.("Not an estimate: with these parameters this result combination cannot occur in one of the two disease groups, so the probability is %s by construction. This follows from the conditional dependence being at, or truncated to, the limit the entered sensitivities and specificities allow \u2014 move it toward 0 to leave this regime."),
                                     if (is.infinite(odds)) "1" else "0"))
                     }
+
+                    # Impossible in BOTH groups: the cells hold NA, which jmvcore sends as a double
+                    # and jamovi prints as "NaN". Explain it on the row, as for 0 and 1 above.
+                    if (length(scenario$postProb) == 1L && is.na(scenario$postProb)) {
+                        cotestResultsTable$addFootnote(
+                            rowKey = scenario$key, col = "postProb",
+                            .("Not estimable: with these parameters this result combination cannot occur in either disease group, so no post-test probability exists. This follows from the conditional dependence being at, or truncated to, the limit the entered sensitivities and specificities allow \u2014 move it toward 0 to leave this regime."))
+                    }
                 }
             },
 
@@ -1095,13 +1091,12 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 dp <- if (tail >= 0.01) 1L else as.integer(ceiling(-log10(100 * tail))) + 1L
                 sprintf("%.*f%%", dp, 100 * p)
             },
-            .fmtRatio = function(r) if (length(r) != 1L || is.na(r)) .("not estimable") else sprintf("%.2fx", r),
             # An entered value as typed: 0.925 -> "92.5%", not "%.0f"'s half-to-even "92%" (IR-05).
             .fmtInput = function(x) paste0(trimws(formatC(100 * x, digits = 4, format = "fg")), "%"),
-            # TRUE when the option still holds its schema default (read from jmvcore's option
-            # object, as the worked-example override check does); FALSE if that cannot be read.
+            # TRUE when the option still holds its schema default (read via the public
+            # Options$option(), as the worked-example override check does); FALSE if that cannot be read.
             .isDefault = function(nm) {
-                o <- self$options$.__enclos_env__$private[[paste0("..", nm)]]
+                o <- self$options$option(nm)
                 !is.null(o) && isTRUE(all.equal(self$options[[nm]], o$default))
             },
             # Three significant digits: 9.3, 0.0585, 120. Never "0.06x" for 0.0585 or "1.0x" for 1.03.
@@ -1200,7 +1195,8 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 # "calculated", not "showed": these are Bayes'-theorem consequences of the values
                 # typed in, not observations. The parallel rule's own positive arm (either test
                 # positive) leads; it used to be absent, inviting the Both+ figure to be quoted as
-                # the rule's result -- 93.0% against 42.1% at the defaults (VAL-cotest-11).
+                # the rule's result -- 89.1% against 42.5% at the defaults, 93.0% against 42.1%
+                # under independence (VAL-cotest-11).
                 paste0(marker, sprintf(
                     .("Co-testing with %1$s (sensitivity %2$s, specificity %3$s) and %4$s (sensitivity %5$s, specificity %6$s) at a pre-test probability of %7$s gave calculated post-test probabilities of disease of %8$s after a positive result on either test (the parallel rule; %9$s), %10$s when both tests were positive (%11$s) and %12$s when both were negative (%13$s)."),
                     t1_name, private$.fmtInput(test1_sens), private$.fmtInput(test1_spec),

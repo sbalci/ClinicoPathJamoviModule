@@ -3795,7 +3795,7 @@ msgid ""
 "%s is undefined: with the current parameters this combination of test "
 "results has probability zero in both the diseased and the non-diseased "
 "group, so it cannot occur at all and no post-test probability exists for it. "
-"That row is left blank."
+"That row is footnoted as not estimable."
 msgstr ""
 
 #: R/cotest.b.R
@@ -55258,6 +55258,7 @@ msgstr ""
 #: R/psychopdaROC.b.R
 #: R/sequentialtests.b.R
 #: bayesiandiagnostic/results/predictiveValues.columns.title
+#: cotest/ui[4].label
 #: decisionpanel/options/prevalence.title
 #: enhancedROC/ui[3][0][0][0].label
 #: sequentialtests/results/summary_table.columns.title
@@ -55268,7 +55269,6 @@ msgstr ""
 
 #: R/cotest.b.R
 #: cotest/options/prevalence.title
-#: cotest/ui[4].label
 #: enhancedROC/options/prevalence.title
 #: sequentialtests/options/prevalence.title
 #: stagemigration/ui[7][1][0]/clinicalUtilityPrevalence.label
@@ -56463,6 +56463,7 @@ msgstr ""
 #: competingsurvival/ui[3][0].label
 #: conditionalsurvival/ui[1][1].label
 #: consortdiagram/ui[3].label
+#: cotest/ui[5].label
 #: datevalidator/ui[4].label
 #: decisioncalculator/ui[1].label
 #: decisioncombine/ui[1].label
@@ -56519,10 +56520,6 @@ msgstr ""
 #: treemedical/ui[4].label
 #: weightedlogrank/ui[4].label
 msgid "Display Options"
-msgstr ""
-
-#: cotest/ui[5].label
-msgid "Display options"
 msgstr ""
 
 #: pheval/ui[5][0].label
@@ -107133,6 +107130,15 @@ msgid ""
 "This follows from the conditional dependence being at, or truncated to, the "
 "limit the entered sensitivities and specificities allow — move it toward 0 "
 "to leave this regime."
+msgstr ""
+
+#: R/cotest.b.R
+msgid ""
+"Not estimable: with these parameters this result combination cannot occur "
+"in either disease group, so no post-test probability exists. This follows "
+"from the conditional dependence being at, or truncated to, the limit the "
+"entered sensitivities and specificities allow — move it toward 0 to leave "
+"this regime."
 msgstr ""
 
 #: R/benford.b.R
@@ -158702,7 +158708,7 @@ msgid "Test 1 Negative Level"
 msgstr ""
 
 #: cotest/ui[1].label
-msgid "Test 1 parameters"
+msgid "Test 1 Parameters"
 msgstr ""
 
 #: decisioncombine/results/individualTest1.title
@@ -158820,7 +158826,7 @@ msgid "Test 2 Negative Level"
 msgstr ""
 
 #: cotest/ui[2].label
-msgid "Test 2 parameters"
+msgid "Test 2 Parameters"
 msgstr ""
 
 #: decisioncombine/results/individualTest2.title
@@ -159265,7 +159271,7 @@ msgid ""
 msgstr ""
 
 #: cotest/ui[3].label
-msgid "Test independence"
+msgid "Test Independence"
 msgstr ""
 
 #: distributionfit/options/test_loglogistic.title

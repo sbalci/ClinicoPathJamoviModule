@@ -392,7 +392,7 @@ enhancedROCClass <- R6::R6Class(
             }
 
             for (name in c("validationContext", "denominatorLedger", "frozenMetrics", "screeningWorkload")) {
-                self$results$results$get(name)$deleteRows()
+                .deleteTableRows(self$results$results$get(name))
             }
             if (isTRUE(self$options$validationPanel)) {
                 report <- .enhancedROCValidation(self$data, self$options)
@@ -1559,7 +1559,7 @@ enhancedROCClass <- R6::R6Class(
         },
         .populateAUCSummary = function() {
             aucTable <- self$results$results$aucSummary
-            aucTable$deleteRows()   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
+            .deleteTableRows(aucTable)   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
             private$.noteDirection(aucTable, private$.rocObjects)
             aucTable$setNote("seed", if (isTRUE(self$options$useBootstrap)) .fmt(.("Random seed: {seed}"), seed = self$options$seed))
             aucTable$setNote(
@@ -1612,7 +1612,7 @@ enhancedROCClass <- R6::R6Class(
         },
         .populateOptimalCutoffs = function() {
             cutoffTable <- self$results$results$optimalCutoffSummary
-            cutoffTable$deleteRows()   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
+            .deleteTableRows(cutoffTable)   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
             cutoffTable$setNote(
                 "cutpoint_optimism",
                 .("Sensitivity, specificity and accuracy are reported at a cutpoint that was searched for on these same data, so they are optimistic; they are not cross-validated or externally validated estimates.")
@@ -1682,7 +1682,7 @@ enhancedROCClass <- R6::R6Class(
             cutoffTable <- self$results$results$cutoffAnalysis
             # This table still builds its rows in .run(): the row count is not knowable in
             # advance, so deleteRows() is required or every run would stack duplicates.
-            cutoffTable$deleteRows()
+            .deleteTableRows(cutoffTable)
 
             for (predictor in names(private$.rocResults)) {
                 result <- private$.rocResults[[predictor]]
@@ -1772,7 +1772,7 @@ enhancedROCClass <- R6::R6Class(
         },
         .populateDiagnosticPerformance = function() {
             diagTable <- self$results$results$diagnosticPerformance
-            diagTable$deleteRows()   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
+            .deleteTableRows(diagTable)   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
 
             for (predictor in names(private$.rocResults)) {
                 result <- private$.rocResults[[predictor]]
@@ -1848,7 +1848,7 @@ enhancedROCClass <- R6::R6Class(
         },
         .populateClinicalMetrics = function() {
             clinTable <- self$results$results$clinicalApplicationMetrics
-            clinTable$deleteRows()   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
+            .deleteTableRows(clinTable)   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
 
             observed_prevalence <- mean(private$.binaryData == levels(private$.binaryData)[2])
             prevalence <- private$.effectivePrevalence(observed_prevalence)
@@ -1955,7 +1955,7 @@ enhancedROCClass <- R6::R6Class(
             }
 
             compTable <- self$results$results$rocComparisons
-            compTable$deleteRows()   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
+            .deleteTableRows(compTable)   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
             # bootstrap and Venkatraman (permutation) tests resample; DeLong does not
             compTable$setNote("seed", if (self$options$comparisonMethod != "delong") .fmt(.("Random seed: {seed}"), seed = self$options$seed))
             compTable$setNote(
@@ -2023,7 +2023,7 @@ enhancedROCClass <- R6::R6Class(
             }
 
             detailTable <- self$results$results$detailedComparison
-            detailTable$deleteRows()   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
+            .deleteTableRows(detailTable)   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
 
             # Get all predictor pairs
             predictors <- names(private$.rocResults)
@@ -2126,7 +2126,7 @@ enhancedROCClass <- R6::R6Class(
             }
 
             statSummaryTable <- self$results$results$statisticalSummary
-            statSummaryTable$deleteRows()   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
+            .deleteTableRows(statSummaryTable)   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
             statSummaryTable$setNote("seed", if (self$options$comparisonMethod != "delong") .fmt(.("Random seed: {seed}"), seed = self$options$seed))
             statSummaryTable$setNote(
                 "no_equivalence",
@@ -2231,7 +2231,7 @@ enhancedROCClass <- R6::R6Class(
             }
 
             paTable <- self$results$results$partialAucAnalysis
-            paTable$deleteRows()   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
+            .deleteTableRows(paTable)   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
             use_pa_boot <- isTRUE(self$options$bootstrapPartialAUC)
             # The interval is seed-dependent, so the seed that produced it has to be on the table.
             paTable$setNote("seed", if (use_pa_boot) .fmt(.("Random seed: {seed}"), seed = self$options$seed))
@@ -2345,7 +2345,7 @@ enhancedROCClass <- R6::R6Class(
         },
         .populateCROCAnalysis = function() {
             crocTable <- self$results$results$crocAnalysisTable
-            crocTable$deleteRows()   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
+            .deleteTableRows(crocTable)   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
             alpha <- self$options$crocAlpha
 
             for (predictor in names(private$.rocResults)) {
@@ -2386,7 +2386,7 @@ enhancedROCClass <- R6::R6Class(
         },
         .populateConvexHull = function() {
             hullTable <- self$results$results$convexHullTable
-            hullTable$deleteRows()   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
+            .deleteTableRows(hullTable)   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
 
             for (predictor in names(private$.rocResults)) {
                 tryCatch(
@@ -2666,7 +2666,7 @@ enhancedROCClass <- R6::R6Class(
         },
         .populateComprehensiveAnalysis = function() {
             compTable <- self$results$results$comprehensiveAnalysisSummary
-            compTable$deleteRows()   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
+            .deleteTableRows(compTable)   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
 
             # Summary statistics
             n_predictors <- length(private$.rocResults)
@@ -3027,7 +3027,7 @@ enhancedROCClass <- R6::R6Class(
             }
 
             prTable <- self$results$results$precisionRecallTable
-            prTable$deleteRows()   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
+            .deleteTableRows(prTable)   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
             outcome <- analysisData[[private$.outcome]]
 
             for (predictor in private$.predictors) {
@@ -4491,12 +4491,12 @@ enhancedROCClass <- R6::R6Class(
             }
 
             calTable <- self$results$results$calibrationSummary
-            calTable$deleteRows()   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
+            .deleteTableRows(calTable)   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
             calTable$setNote(
                 "eo",
                 if (isTRUE(self$options$eoRatio)) .("E/O is the sum of the predicted probabilities divided by the number of events actually observed; 1 means the marker predicts the right number of events overall, above 1 means it over-predicts them. It is reported only for a predictor supplied as a probability between 0 and 1. Where a logistic model had to be fitted here to obtain probabilities, that fit forces the predicted and observed event totals to be equal, so E/O would be exactly 1 for any data at all; the cell is left blank there rather than report a perfect calibration that is an algebraic identity. No confidence interval is given."))
             hlTable <- self$results$results$hosmerLemeshowTable
-            hlTable$deleteRows()   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
+            .deleteTableRows(hlTable)   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
 
             for (predictor in names(private$.rocResults)) {
                 tryCatch(
@@ -5002,7 +5002,7 @@ enhancedROCClass <- R6::R6Class(
             aucTable$setNote("seed", if (isTRUE(self$options$useBootstrap)) .fmt(.("Random seed: {seed}"), seed = self$options$seed))
             # This table still builds its rows in .run(): the row count is not knowable in
             # advance, so deleteRows() is required or every run would stack duplicates.
-            aucTable$deleteRows()
+            .deleteTableRows(aucTable)
             avgTable <- self$results$results$multiClassAverage
             avgTable$setNote(
                 "weighted",
@@ -5018,7 +5018,7 @@ enhancedROCClass <- R6::R6Class(
             # Variables box - macro AUC 0.4938 or 0.7975 on identical data depending purely on
             # list order, with no column saying which marker it belonged to. Clear the declared
             # row and add one per predictor, naming the predictor in the method column.
-            avgTable$deleteRows()
+            .deleteTableRows(avgTable)
 
             # Check if outcome has > 2 levels
             outcome <- if (!is.null(private$.multiClassOutcome)) {
@@ -5350,9 +5350,9 @@ enhancedROCClass <- R6::R6Class(
             impact <- self$results$results$clinicalImpactTable
             decision <- self$results$results$decisionImpactSummary
             workload <- self$results$results$screeningWorkload
-            impact$deleteRows()
-            decision$deleteRows()
-            workload$deleteRows()
+            .deleteTableRows(impact)
+            .deleteTableRows(decision)
+            .deleteTableRows(workload)
             cuts <- .dvNumbers(self$options$impactCutoffs)
             if (!length(cuts)) stop("Enter fixed score cutoffs for workload analysis.")
             scenario <- .dvNumbers(self$options$prevalenceScenarios, 0, 1)

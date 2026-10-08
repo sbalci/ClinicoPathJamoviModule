@@ -1025,7 +1025,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 .populateTable = function(mydata, options_data, group = NULL) {
     table <- self$results$table
     # Clear existing rows - jamovi tables use deleteRows(), not clear()
-    table$deleteRows()
+    .deleteTableRows(table)
     # Bayesian estimates are posterior draws: name the seed they came from
     table$setNote("seed", if (identical(options_data$typestatistics, "bayes"))
         .fmt(.("Random seed: {seed}"), seed = private$.bayesSeed()))

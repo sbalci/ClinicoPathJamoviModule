@@ -275,7 +275,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
 
                 # Populate the results table
                 crosstab_table <- self$results$crosstab
-                crosstab_table$deleteRows() # Clear existing rows to prevent duplicates on re-run
+                .deleteTableRows(crosstab_table) # Clear existing rows to prevent duplicates on re-run
                 for (i in seq_len(nrow(table_data))) {
                     crosstab_table$addRow(rowKey = paste0("pattern_", i), values = list(
                         test_combination = table_data$test_combination[i],

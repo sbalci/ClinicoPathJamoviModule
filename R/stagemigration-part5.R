@@ -4490,7 +4490,7 @@ stagemigrationPart5 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     {
                         table <- self$results$winRatioOverview
 
-                        table$deleteRows()
+                        .deleteTableRows(table)
                         if (!is.null(results$overview) && length(results$overview) > 0) {
                             # Positional keys: these rows carry Characteristic/Value/Description,
                             # so the previous rowKey = result$Analysis was NULL and every addRow
@@ -4514,7 +4514,7 @@ stagemigrationPart5 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 tryCatch(
                     {
                         table <- self$results$winRatioPrimaryResults
-                        table$deleteRows()
+                        .deleteTableRows(table)
 
                         for (result in results) {
                             if (is.list(result)) {
@@ -4531,7 +4531,7 @@ stagemigrationPart5 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 tryCatch(
                     {
                         table <- self$results$winRatioEndpointContributions
-                        table$deleteRows()
+                        .deleteTableRows(table)
 
                         # The key was paste(result$Comparison, result$Endpoint) but these rows
                         # carry Staging_System/Endpoint, so Comparison was NULL and every row
@@ -4552,7 +4552,7 @@ stagemigrationPart5 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 tryCatch(
                     {
                         table <- self$results$winRatioStageSpecific
-                        table$deleteRows()
+                        .deleteTableRows(table)
 
                         # These rows carry Stage, not Comparison, so result$Comparison was NULL
                         # and every addRow failed into the enclosing tryCatch.
@@ -4572,7 +4572,7 @@ stagemigrationPart5 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 tryCatch(
                     {
                         table <- self$results$winRatioSensitivityResults
-                        table$deleteRows()
+                        .deleteTableRows(table)
 
                         # These rows carry Analysis_Type/Scenario, not Comparison/FollowUpCutoff,
                         # so the composed key was the same "_" string for every row.
@@ -4592,7 +4592,7 @@ stagemigrationPart5 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 tryCatch(
                     {
                         table <- self$results$winRatioGeneralizedPairwiseResults
-                        table$deleteRows()
+                        .deleteTableRows(table)
 
                         # These rows carry Metric, not Comparison, so result$Comparison was NULL.
                         for (i in seq_along(results)) {
@@ -4611,7 +4611,7 @@ stagemigrationPart5 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 tryCatch(
                     {
                         table <- self$results$winRatioSummary
-                        table$deleteRows()
+                        .deleteTableRows(table)
 
                         # These rows carry Finding/Statistical_Evidence/..., so result$Analysis
                         # was NULL: the key rendered as "{}" and a second row would fail with

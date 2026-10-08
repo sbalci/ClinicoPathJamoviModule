@@ -62,7 +62,7 @@ clinicaltrialdesignClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 for (name in c("design_summary", "power_results", "sample_size_breakdown",
                                "effect_size_analysis", "assumptions_check", "sensitivity_analysis",
                                "regulatory_considerations"))
-                    self$results[[name]]$deleteRows()
+                    .deleteTableRows(self$results[[name]])
                 for (name in c("clinical_interpretation", "study_protocol_template")) {
                     self$results[[name]]$setContent("")
                     self$results[[name]]$setVisible(!paired && self$options$show_interpretation)
@@ -362,7 +362,7 @@ clinicaltrialdesignClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 for (name in c("design_summary", "power_results", "sample_size_breakdown",
                                "effect_size_analysis", "assumptions_check", "sensitivity_analysis"))
-                    self$results[[name]]$deleteRows()
+                    .deleteTableRows(self$results[[name]])
                 self$results$instructions$setContent(paste0(
                     "<p>Paired t-test planning uses independent complete pairs. Enter d<sub>z</sub>",
                     " = mean within-pair difference / SD of within-pair differences in Effect Size.",

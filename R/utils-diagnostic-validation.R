@@ -1,6 +1,6 @@
 # Shared fixed-model diagnostic validation primitives. No model fitting or cutoff selection.
 .dvProvenance <- function(table, options, text = NULL) {
-  table$deleteRows()
+  .deleteTableRows(table)
   if (!isTRUE(options$showValidationContext)) return(invisible(NULL))
   # Self-contained (no .diag* calls): this file also ships to modules without the comparator
   # helper. File-level code cannot call .(), so a caller wanting translated output passes

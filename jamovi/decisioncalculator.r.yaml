@@ -158,11 +158,12 @@ items:
           type: number
           format: pc
         - name: PostTestProbDisease
-          title: 'Post-test Reference-positive Probability'
+          title: 'Post-test Reference-positive Probability (Positive Test)'
           type: number
           format: pc
-        - name: PostTestProbHealthy
-          title: 'Post-test Reference-negative Probability'
+        # P(reference-positive | negative test) = 1 - NPV, the Fagan nomogram's Post(-).
+        - name: PostTestProbNeg
+          title: 'Post-test Reference-positive Probability (Negative Test)'
           type: number
           format: pc
         - name: LRP
@@ -304,6 +305,11 @@ items:
       refs:
           - epiR
           - DeeksAltman2004
+          - Simel1991
+          - Glas2003
+          - youden1950
+          - AgrestiCaffo2000
+          - LinnGrunau2006
 
 
     # - name:  table1
@@ -417,7 +423,7 @@ items:
       - pprob
       columns:
       - name: source
-        title: Population
+        title: Source
         type: text
       - name: unit
         title: Unit
@@ -425,51 +431,42 @@ items:
       - name: prevalence
         title: Prevalence
         type: number
-        format: dp:6
+        format: pc
       - name: population
         title: Population
         type: number
-        format: dp:6
       - name: tp
         title: True positives
         type: number
-        format: dp:6
       - name: fp
         title: False positives
         type: number
-        format: dp:6
       - name: fn
         title: False negatives
         type: number
-        format: dp:6
       - name: tn
         title: True negatives
         type: number
-        format: dp:6
       - name: flags
         title: Flags
         type: number
-        format: dp:6
       - name: ppv
         title: PPV
         type: number
-        format: dp:6
+        format: pc
       - name: npv
         title: NPV
         type: number
-        format: dp:6
+        format: pc
       - name: flags_per_1000
         title: Flags per 1000
         type: number
-        format: dp:6
       - name: flags_per_detected
         title: Flags per detected positive
         type: number
-        format: dp:6
       - name: tests_per_detected
         title: Tests per detected positive
         type: number
-        format: dp:6
 
 refs:
     - ClinicoPathJamoviModule

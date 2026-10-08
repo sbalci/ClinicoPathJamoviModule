@@ -95,7 +95,7 @@ timeupdatedsurvivalClass <- R6::R6Class(
                     }
                     
                     # Store results for plotting
-                    private$.results <- results
+                    private$.fitResults <- results
                     
                     # Update explanations
                     if (self$options$showExplanations) {
@@ -111,7 +111,7 @@ timeupdatedsurvivalClass <- R6::R6Class(
         
         .plotTimeVarying = function(image, ...) {
             
-            if (is.null(private$.results) || is.null(private$.results$model))
+            if (is.null(private$.fitResults) || is.null(private$.fitResults$model))
                 return()
                 
             plotType <- self$options$plotType
@@ -119,8 +119,8 @@ timeupdatedsurvivalClass <- R6::R6Class(
             if (plotType %in% c("coefficients", "all")) {
                 
                 tryCatch({
-                    p <- private$.createTimeVaryingPlot(private$.results$model, 
-                                                       private$.results$modelType)
+                    p <- private$.createTimeVaryingPlot(private$.fitResults$model, 
+                                                       private$.fitResults$modelType)
                     print(p)
                     TRUE
                 }, error = function(e) {
@@ -134,7 +134,7 @@ timeupdatedsurvivalClass <- R6::R6Class(
 
         .plotSurvival = function(image, ...) {
             
-            if (is.null(private$.results) || is.null(private$.results$model))
+            if (is.null(private$.fitResults) || is.null(private$.fitResults$model))
                 return()
                 
             plotType <- self$options$plotType
@@ -142,8 +142,8 @@ timeupdatedsurvivalClass <- R6::R6Class(
             if (plotType %in% c("survival", "hazards", "cumulative", "all")) {
                 
                 tryCatch({
-                    p <- private$.createSurvivalPlot(private$.results$model,
-                                                   private$.results$modelType, plotType)
+                    p <- private$.createSurvivalPlot(private$.fitResults$model,
+                                                   private$.fitResults$modelType, plotType)
                     print(p)
                     TRUE
                 }, error = function(e) {
@@ -662,10 +662,10 @@ timeupdatedsurvivalClass <- R6::R6Class(
             
             table <- self$results$modelSummary
             
-            # Clear existing rows
-            for (i in seq_len(table$rowCount)) {
-                table$deleteRows(rowNo = 1)
-            }
+            # Clear existing rows. jmvcore has no single-row delete: deleteRows() takes no
+            # arguments, so the old per-row `deleteRows(rowNo = 1)` loop threw on the `rows: 1`
+            # placeholder and every fitted model showed only an error footnote.
+            .deleteTableRows(table)
             
             # Add results
             for (i in seq_len(nrow(modelSummary))) {
@@ -690,9 +690,7 @@ timeupdatedsurvivalClass <- R6::R6Class(
             table <- self$results$timeVaryingEffects
             
             # Clear existing rows
-            for (i in seq_len(table$rowCount)) {
-                table$deleteRows(rowNo = 1)
-            }
+            .deleteTableRows(table)
             
             # Add results
             for (i in seq_len(nrow(timeVaryingEffects))) {
@@ -716,9 +714,7 @@ timeupdatedsurvivalClass <- R6::R6Class(
             table <- self$results$survivalEstimates
             
             # Clear existing rows
-            for (i in seq_len(table$rowCount)) {
-                table$deleteRows(rowNo = 1)
-            }
+            .deleteTableRows(table)
             
             # Add results
             for (i in seq_len(nrow(survivalEsts))) {
@@ -748,9 +744,7 @@ timeupdatedsurvivalClass <- R6::R6Class(
             table <- self$results$goodnessOfFit
             
             # Clear existing rows
-            for (i in seq_len(table$rowCount)) {
-                table$deleteRows(rowNo = 1)
-            }
+            .deleteTableRows(table)
             
             # Add results
             for (i in seq_len(nrow(gofResults))) {
@@ -1015,7 +1009,8 @@ timeupdatedsurvivalClass <- R6::R6Class(
             html$setContent(str)
         },
 
-        # Store results for plotting
-        .results = NULL
+        # Fitted model for the plots. Not `.results`: that is jmvcore Analysis's own private
+        # field holding the results tree, and assigning to it replaced the tree with this list.
+        .fitResults = NULL
     )
 )

@@ -1,24 +1,9 @@
-// cotest.events.js - Clinical preset system for co-testing analysis
-// JavaScript events for intelligent defaults and dynamic UI updates
-
-const clampNumeric = (value, min, max) => {
-    if (!Number.isFinite(value))
-        return value;
-    return Math.min(max, Math.max(min, value));
-};
-
-const getNumericValue = (control, fallback) => {
-    if (!control || typeof control.value !== 'function')
-        return fallback;
-
-    const raw = control.value();
-    const numeric = (typeof raw === 'number') ? raw : parseFloat(raw);
-
-    if (Number.isFinite(numeric))
-        return numeric;
-
-    return fallback;
-};
+// cotest.events.js - worked-example presets for the co-testing analysis
+//
+// No input clamping. The numeric boxes used to clamp an out-of-range entry to the nearest
+// bound, so "80" typed for an 80% sensitivity silently became 0.99 and the analysis ran on
+// it. The jamovi client does not enforce an option's min/max, but jmvcore does: left alone,
+// the same entry stops the analysis with "test1_sens must be between 0.01 and 0.99 (is 80)".
 
 const setControlValue = (control, value) => {
     if (!control || typeof control.setValue !== 'function')
@@ -148,20 +133,6 @@ const applyPresetConfig = (ui, presetKey) => {
         setControlValue(ui.cond_dep_neg, config.cond_dep_neg);
 };
 
-// Clamp an input control to the [min, max] range enforced by cotest.a.yaml.
-const clampControl = (ui, paramName, min, max) => {
-    const control = ui[paramName];
-
-    if (!control)
-        return;
-
-    const value = getNumericValue(control, NaN);
-    const adjusted = clampNumeric(value, min, max);
-
-    if (Number.isFinite(adjusted) && adjusted !== value)
-        setControlValue(control, adjusted);
-};
-
 const events = {
     onChange_preset(ui) {
         const presetControl = ui.preset;
@@ -182,39 +153,6 @@ const events = {
         }
 
         applyPresetConfig(ui, preset);
-    },
-
-    onChange_test1_sens(ui) {
-        clampControl(ui, 'test1_sens', 0.01, 0.99);
-    },
-
-    onChange_test1_spec(ui) {
-        clampControl(ui, 'test1_spec', 0.01, 0.99);
-    },
-
-    onChange_test2_sens(ui) {
-        clampControl(ui, 'test2_sens', 0.01, 0.99);
-    },
-
-    onChange_test2_spec(ui) {
-        clampControl(ui, 'test2_spec', 0.01, 0.99);
-    },
-
-    onChange_prevalence(ui) {
-        clampControl(ui, 'prevalence', 0.001, 0.999);
-    },
-
-    onChange_indep() {
-        // Independence toggle has no client-side side effects; the R backend
-        // selects the dependent/independent calculation branch at run time.
-    },
-
-    onChange_cond_dep_pos(ui) {
-        clampControl(ui, 'cond_dep_pos', -1, 1);
-    },
-
-    onChange_cond_dep_neg(ui) {
-        clampControl(ui, 'cond_dep_neg', -1, 1);
     }
 };
 

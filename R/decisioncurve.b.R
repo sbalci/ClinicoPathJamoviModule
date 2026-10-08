@@ -1790,7 +1790,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             results_table <- self$results$resultsTable
 
             # Clear existing rows
-            results_table$deleteRows()
+            .deleteTableRows(results_table)
 
             # Add columns for each model dynamically
             model_names <- names(private$.dcaResults)
@@ -1848,7 +1848,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             table <- self$results$costBenefitTable
             # Without this the rows appended below accumulate on every run cycle:
             # a three-model comparison becomes six rows, then nine.
-            table$deleteRows()
+            .deleteTableRows(table)
             selected_thresholds <- private$.parseSelectedThresholds()
             model_names <- names(private$.dcaResults)
             
@@ -1923,7 +1923,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             table <- self$results$decisionConsequencesTable
             # Without this the rows appended below accumulate on every run cycle:
             # a three-model comparison becomes six rows, then nine.
-            table$deleteRows()
+            .deleteTableRows(table)
             selected_thresholds <- private$.parseSelectedThresholds()
             model_names <- names(private$.dcaResults)
             
@@ -1958,7 +1958,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             table <- self$results$resourceUtilizationTable
             # Without this the rows appended below accumulate on every run cycle:
             # a three-model comparison becomes six rows, then nine.
-            table$deleteRows()
+            .deleteTableRows(table)
             selected_thresholds <- private$.parseSelectedThresholds()
             model_names <- names(private$.dcaResults)
             pop_size <- self$options$populationSize
@@ -2006,7 +2006,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             table <- self$results$modelComparisonEnhanced
             # Without this the rows appended below accumulate on every run cycle:
             # a three-model comparison becomes six rows, then nine.
-            table$deleteRows()
+            .deleteTableRows(table)
             model_names <- names(private$.dcaResults)
             analysis_data <- private$.analysisData
             outcomes <- private$.analysisOutcomes
@@ -2125,7 +2125,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
         .populateBenefitRangeTable = function() {
             range_table <- self$results$benefitRangeTable
-            range_table$deleteRows()
+            .deleteTableRows(range_table)
 
             model_names <- names(private$.dcaResults)
             has_gap <- character(0)
@@ -2186,7 +2186,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
         .calculateClinicalImpactMetrics = function(outcomes, outcome_positive) {
             clinical_impact_table <- self$results$clinicalImpactTable
-            clinical_impact_table$deleteRows()
+            .deleteTableRows(clinical_impact_table)
 
             selected_thresholds <- private$.parseSelectedThresholds()
             model_names <- names(private$.dcaResults)
@@ -2244,7 +2244,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
         .populateWeightedAUCTable = function() {
             weighted_auc_table <- self$results$weightedAUCTable
-            weighted_auc_table$deleteRows()
+            .deleteTableRows(weighted_auc_table)
 
             model_names <- names(private$.dcaResults)
             thresholds <- private$.dcaResults[[1]]$thresholds
@@ -2315,7 +2315,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
         .performModelComparison = function() {
             comparison_table <- self$results$comparisonTable
-            comparison_table$deleteRows()
+            .deleteTableRows(comparison_table)
 
             model_names <- names(private$.dcaResults)
             analysis_data <- private$.analysisData
