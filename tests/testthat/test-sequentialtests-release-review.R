@@ -243,7 +243,8 @@ test_that("teaching examples are labelled as examples, not clinical guidance", {
     js <- paste(readLines("../../jamovi/js/sequentialtests.events.js", warn = FALSE), collapse = " ")
     a_yaml <- paste(readLines("../../jamovi/sequentialtests.a.yaml", warn = FALSE), collapse = " ")
     u_yaml <- paste(readLines("../../jamovi/sequentialtests.u.yaml", warn = FALSE), collapse = " ")
-    guidance <- run_st()$clinical_guidance$content
+    # The guidance item is visible only with show_explanation and is now built only then.
+    guidance <- run_st(show_explanation = TRUE)$clinical_guidance$content
     expect_match(a_yaml, "not clinical guidance", ignore.case = TRUE)
     expect_match(u_yaml, "Not Clinical Guidance", fixed = TRUE)
     expect_match(guidance, "Teaching examples only", fixed = TRUE)

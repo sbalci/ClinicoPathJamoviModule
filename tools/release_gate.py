@@ -88,9 +88,25 @@ def check_news():
 
 def check_license():
     lic = re.search(r'^License:\s*(.+)$', open('DESCRIPTION', encoding='utf-8').read(), re.M).group(1).strip()
-    if 'GPL' not in lic:
+    if 'AGPL' in lic:
+        FAIL.append('License is %r - the jamovi library does not accept AGPL-3 (dev.jamovi.org '
+                    'Distributing Modules, Step 1)' % lic)
+    elif 'GPL' not in lic:
         WARN.append('License is %r - the reviewer expects an OSI-approved licence' % lic)
-    print('  license: %s' % lic)
+    # jamovi's own advice: "browse the R packages installed in your module's build folder" for
+    # copyleft. A shipped AGPL-3 package (2026-10-08: pander via epiR in meddecide, RhpcBLASctl via
+    # bigutilsr in ClinicoPathDescriptives) is a combined work under a licence the library does
+    # not list; WARN, because only the jamovi team can say whether that blocks a listing.
+    builds = sorted(glob.glob('build/R*'), key=os.path.getmtime)
+    agpl = []
+    for p in glob.glob(os.path.join(builds[-1], '*', 'DESCRIPTION')) if builds else []:
+        m = re.search(r'^License:\s*(.+)$', open(p, encoding='utf-8', errors='replace').read(), re.M)
+        if m and 'AGPL' in m.group(1):
+            agpl.append(os.path.basename(os.path.dirname(p)))
+    if agpl:
+        WARN.append('%s ships AGPL-licensed package(s) %s; the library does not accept AGPL-3 - trace '
+                    'the importing package and ask the jamovi team' % (builds[-1], ', '.join(sorted(agpl))))
+    print('  license: %s; AGPL packages in newest build/: %s' % (lic, len(agpl) if builds else 'no build/'))
 
 
 def check_refs():
@@ -174,7 +190,7 @@ def check_artifacts():
     # tracked + untracked-but-not-ignored: a gitignored local .jmo/.tar.gz is not shipped
     files = subprocess.run(['git', 'ls-files', '-co', '--exclude-standard'],
                            capture_output=True, text=True).stdout.split('\n')
-    arts = [f for f in files if f.endswith(('.tar.gz', '.jmo'))]
+    arts = [f for f in files if f.endswith(('.tar.gz', '.jmo')) or f.startswith(('build/', 'dist/'))]
     if arts:
         FAIL.append('committed build artifacts: %s' % ', '.join(cap(sorted(set(arts)), 6)))
     print('  build artifacts committed: %d' % len(set(arts)))
@@ -983,12 +999,23 @@ def check_dataset_descriptions():
     """Two example datasets that describe themselves identically cannot be told apart in the
     jamovi data picker, and an entry whose .omv is missing is a dead row (2026-09-22 OncoPath
     [LOW]: waterfall_percentage_basic and waterfall_raw_longitudinal - the two input modes the
-    waterfall description itself distinguishes - both read 'Example analysis for Waterfall Plot.')."""
+    waterfall description itself distinguishes - both read 'Example analysis for Waterfall Plot.').
+    The contract itself (dev.jamovi.org Module Datasets): name, path and description are required,
+    name is a unique identifier, and data/ holds .omv or .csv. document_module_omv() derives
+    `name` from the file stem, so two .omv sharing a stem get one name."""
     ds = (_safe_yaml('jamovi/0000.yaml') or {}).get('datasets') or []
-    descs, dup, missing = {}, [], []
+    descs, dup, missing, bad, names = {}, [], [], [], set()
     for d in ds:
         if not isinstance(d, dict):
             continue
+        absent = [k for k in ('name', 'path', 'description') if not str(d.get(k) or '').strip()]
+        if absent:
+            bad.append('%s lacks %s' % (d.get('name') or d.get('path'), '/'.join(absent)))
+        if d.get('name') in names:
+            bad.append('name %r used twice' % d['name'])
+        names.add(d.get('name'))
+        if d.get('path') and not str(d['path']).lower().endswith(('.omv', '.csv')):
+            bad.append('%s is not .omv or .csv' % d['path'])
         t = (d.get('description') or '').strip()
         if t and t in descs:
             dup.append('%s / %s: %r' % (descs[t], d.get('name'), t))
@@ -1002,7 +1029,11 @@ def check_dataset_descriptions():
     if missing:
         FAIL.append('%d datasets: entr%s names a file that is not in data/: %s'
                     % (len(missing), 'y' if len(missing) == 1 else 'ies', ', '.join(cap(missing))))
-    print('  datasets: %d listed, %d duplicate descriptions, %d missing files' % (len(ds), len(dup), len(missing)))
+    if bad:
+        FAIL.append('%d datasets: entr%s break jamovi\'s contract (name/path/description required, '
+                    'unique name, .omv or .csv): %s' % (len(bad), 'y' if len(bad) == 1 else 'ies', '; '.join(cap(bad))))
+    print('  datasets: %d listed, %d duplicate descriptions, %d missing files, %d contract breaks'
+          % (len(ds), len(dup), len(missing), len(bad)))
 
 
 _INSERT = re.compile(r'\$insert\s*\(\s*([0-9]+)\s*,')

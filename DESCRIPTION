@@ -21,7 +21,7 @@ Description: Provides a comprehensive jamovi module designed specifically
  effect size calculations. The package serves as an umbrella coordinating
  multiple specialized sub-modules and can be used through jamovi's GUI or
  directly in 'R' for programmatic analysis. For comments, suggestions, feature requests or reporting bugs, please open an issue at <https://github.com/sbalci/ClinicoPathJamoviModule/issues/>.
-License: GPL-2
+License: GPL (>= 2)
 URL: https://www.serdarbalci.com/ClinicoPathJamoviModule,
         https://github.com/sbalci/ClinicoPathJamoviModule/,
         https://github.com/sbalci/ClinicoPathDescriptives/,

@@ -60,6 +60,8 @@ module is the cheapest way to find a class of defect before it is found in ours.
 - Knowing which fixes the reviewer treats as MEDIUM/HIGH vs. polish
 - **Promoting an analysis out of a `D`/`P`/`T` menuGroup (§24)** — promotion is a release, and
   the debt lives there, not in the shipped surface
+- **Submitting a module or shipping an update (§30)**: jamovi's official requirements, the
+  form at <https://dev.jamovi.org/submit>, example `datasets:`, and bump → push → notify → Monday
 
 **Contents:**
 1. Pre-submission checklist
@@ -90,6 +92,8 @@ module is the cheapest way to find a class of defect before it is found in ours.
 26. **Tabular data belongs in a `Table` result** — HTML loses the theme, Copy, Copy Latex and `.()`
 27. **The module's own prose must agree with itself** — capability claims, one bug-report URL, `>` not `|` in `description: main:`, distinct dataset descriptions
 28. **Seeding the RNG must not outlive the function that did it** — one R process per jamovi session, so a bare `set.seed()` leaves the *next* analysis resampling from a fixed stream; `withr::local_seed()`
+29. **Nothing may be derived from which analyses a module holds today**: a parked analysis makes unused-Import and test readings lie
+30. **The official process (dev.jamovi.org)**: library requirements (name, licence including transitive AGPL-3, clean repo, English), the `datasets:` contract, side-load limits, the submission form, the update flow
 
 **Tooling that goes with it:**
 - `tools/check_state_guards.py` — exits 1 on any unguarded `image$state` read
@@ -98,8 +102,11 @@ module is the cheapest way to find a class of defect before it is found in ours.
 - `tests/testthat/test-zzz-column-formats.R` — §21 as a test; fails on a shipped malformed
   `format:` and reports the unshipped count as promotion debt
 - `tools/release_gate.py` — `check_sentinel_insert` (§13, FAIL), `check_description_newlines`,
-  `check_issue_urls`, `check_dataset_descriptions` (§27), and `check_news`, which mirrors the
+  `check_issue_urls`, `check_dataset_descriptions` (§27, and the §30 `datasets:` contract),
+  `check_license` (§30: AGPL-3 module FAILs, AGPL-3 package in the newest `build/R*/` WARNs),
+  `check_artifacts` (`*.jmo`, `*.tar.gz`, `build/`, `dist/`), and `check_news`, which mirrors the
   release workflow's own version cascade rather than warning on dev builds it never publishes
+- `tools/test_release_gate.py` — self-check that the §30 gate rules fire on a module breaking each one
 - `tools/release_gate.py` — every rule that can be mechanised; FAILs on a shipped hit and prints
   the rest as `promotion debt`. New: `check_column_formats` (§21), `check_fabricated_stats` (§20),
   `check_state_payload` (§17, with a measured `# state-payload:` waiver)

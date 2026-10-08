@@ -173,13 +173,23 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                 if (prevalence <= 0.01) {
                     private$.addNotice('STRONG_WARNING', .('Prevalence Very Low'), sprintf(.('Prevalence is very low (%.3f%%). Even with excellent tests, PPV may be extremely low. Verify the pre-test probability for the intended population.'), prevalence*100))
                 } else if (prevalence < 0.05) {
-                    private$.addNotice('STRONG_WARNING', .('Prevalence Low'), sprintf(.('Prevalence is low (%.2f%%). Below 5%% pre-test probability, PPV is dominated by specificity: a one-percentage-point change in specificity can move PPV by tens of points. Verify the specificity assumptions and the intended population.'), prevalence*100))
+                    # "more than 15 percentage points", not "tens": with specificity capped at 0.99 a one-point change at
+                    # most halves the false-positive rate, and PPV = a / (a + FPR) then moves by at most
+                    # (sqrt(2) - 1)^2 = 17.2 points.
+                    private$.addNotice('STRONG_WARNING', .('Prevalence Low'), sprintf(.('Prevalence is low (%.2f%%). Below 5%% pre-test probability, PPV is dominated by specificity: a one-percentage-point change in specificity can move PPV by more than 15 percentage points. Verify the specificity assumptions and the intended population.'), prevalence*100))
                 }
 
                 # Detect potential test correlation. fixed = TRUE compares the names literally
                 # (fuzzy string similarity), so a test name containing regex metacharacters
                 # (e.g. "CA-125 [serum]") can't throw a malformed-pattern error that aborts .run().
-                test_similarity <- agrepl(test1_name, test2_name, max.distance = 0.3, fixed = TRUE)
+                # The edit budget is floor(30% of the name), passed as an absolute count: agrep turns
+                # a FRACTION into ceiling(0.3 * nchar) edits, one edit for a one-letter name, so "A"
+                # and "B" were reported as similar. 0 edits is an exact substring match. Checked both
+                # ways round, since test order says nothing about similarity ("RT-PCR" then "PCR").
+                similar_name <- function(a, b)
+                    agrepl(a, b, max.distance = floor(0.3 * nchar(a)), fixed = TRUE)
+                test_similarity <- similar_name(test1_name, test2_name) ||
+                    similar_name(test2_name, test1_name)
                 # The exemption is for the UNTOUCHED default pair only. With `&&` on each name
                 # separately the notice was suppressed whenever EITHER box still held its
                 # default, so naming both tests "Confirmatory Test" - the strongest possible
@@ -316,7 +326,9 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                 } else if (strategy == "parallel") {
                     # Parallel testing (both tests for everyone)
                     # Positive if either test is positive
-                    combined_sens <- test1_sens + test2_sens - (test1_sens * test2_sens)
+                    # Same expression as serial-negative (algebraically equal to s1 + s2 - s1 s2), so
+                    # the two strategies the output calls "exactly the same" agree to the last bit.
+                    combined_sens <- test1_sens + (1 - test1_sens) * test2_sens
                     combined_spec <- test1_spec * test2_spec
                     strategy_name <- .("Parallel Testing (Test all)")
                 }
@@ -360,7 +372,13 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                 # NNT = 1 / (prevalence x combined_sens)
                 # This is the number of people needed to screen to find one true positive
                 nnt <- if (prevalence > 0 && combined_sens > 0) {
-                    ceiling(1 / (prevalence * combined_sens))
+                    # ceiling() of a floating reciprocal: parallel's .2 + .75 - .2 * .75 is
+                    # 0.7999999999999999, so 1 / (.625 x .8) came out as 2.0000000000000004 and was
+                    # shown as 3, while serial-negative (same .8, computed another way) showed 2.
+                    # A relative 1e-14 (about 45 ulps) absorbs that error (1-2 ulps observed). A genuine
+                    # value within 1e-14 x NNS above an integer needs inputs carrying more than 14
+                    # decimal digits between them, so typed values are never rounded down.
+                    ceiling((1 / (prevalence * combined_sens)) * (1 - 1e-14))
                 } else {
                     NA_integer_
                 }
@@ -416,11 +434,18 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                         ""
                     }
 
+                    # Parallel testing applies both tests at once; "X followed by Y" described a
+                    # sequence that parallel testing does not have.
+                    tests_phrase <- private$.formatTranslated(
+                        if (strategy == "parallel") .("{first} and {second} applied together")
+                        else .("{first} followed by {second}"),
+                        list(first = private$.safeHtmlOutput(test1_name),
+                             second = private$.safeHtmlOutput(test2_name)))
+
                     summary <- sprintf(
-                        .("<div style='background-color: rgba(33, 149, 188, 0.1);padding:15px;border-left:4px solid #0077be;font-size:1.05em;line-height:1.6; color: inherit;'><strong>Illustrative Summary:</strong> Using a %1$s with %2$s followed by %3$s, the combined test achieves %4$.1f%% sensitivity (detects %5$.0f of every 100 diseased individuals) and %6$.1f%% specificity (correctly rules out %7$.0f of every 100 healthy individuals). At your specified disease prevalence of %8$.1f%%, a positive result indicates a %9$s chance the person truly has the disease (PPV), while a negative result indicates a %10$s chance the person is truly disease-free (NPV).%11$s %12$s <em>These combined figures assume the two tests are conditionally independent given disease status, and they treat the sensitivity, specificity and prevalence you entered as exact, so they carry no confidence interval. If the two tests measure related biology, %13$s.</em></div>"),
+                        .("<div style='background-color: rgba(33, 149, 188, 0.1);padding:15px;border-left:4px solid #0077be;font-size:1.05em;line-height:1.6; color: inherit;'><strong>Illustrative Summary:</strong> Using a %1$s with %2$s, the combined test achieves %3$.1f%% sensitivity (detects %4$.0f of every 100 diseased individuals) and %5$.1f%% specificity (correctly rules out %6$.0f of every 100 healthy individuals). At your specified disease prevalence of %7$.1f%%, a positive result indicates a %8$s chance the person truly has the disease (PPV), while a negative result indicates a %9$s chance the person is truly disease-free (NPV).%10$s %11$s <em>These combined figures assume the two tests are conditionally independent given disease status, and they treat the sensitivity, specificity and prevalence you entered as exact, so they carry no confidence interval. If the two tests are positively dependent in both disease-status groups (for example, because they measure related biology), %12$s.</em></div>"),
                         strategy_desc,
-                        private$.safeHtmlOutput(test1_name),
-                        private$.safeHtmlOutput(test2_name),
+                        tests_phrase,
                         combined_sens*100, combined_sens*100,
                         combined_spec*100, combined_spec*100,
                         prevalence*100,
@@ -476,7 +501,9 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                 )
 
                 # Calculate population flow numbers using the user-specified population size
-                pop_size <- self$options$population_size
+                # An R caller passes a double, and format(100000, big.mark = ",") prints "1e+05" in
+                # the cost title, the explanation and the flow diagram. The option is an Integer.
+                pop_size <- as.integer(self$options$population_size)
                 diseased <- pop_size * prevalence
                 healthy <- pop_size - diseased
 
@@ -675,16 +702,18 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
 
                 # "Number Needed to Screen" is 1 / (prevalence x combined sensitivity): it counts
                 # entries into the pathway. A serial strategy also consumes second tests, which
-                # this single figure does not convey.
+                # this single figure does not convey. The name's usual meaning (Rembold 1998) is
+                # people screened per death or adverse event PREVENTED, which is NNT times larger,
+                # so the note has to say which one this is.
                 summaryTable$setNote(
                     key = "nns_scope",
-                    note = .("<i>Number Needed to Screen</i> counts entries into the pathway, that is first tests only. A serial strategy also performs a second test on part of that group; the Cost Analysis table shows the expected number of each test.")
+                    note = .("<i>Number Needed to Screen</i> here is the number of people entering the pathway per true-positive case detected, 1 / (prevalence \u00D7 combined sensitivity), rounded up. It is not the screening-benefit statistic of the same name, people screened per death or adverse event prevented. It counts first tests only: a serial strategy also performs a second test on part of that group, and the Cost Analysis table shows the expected number of each test.")
                 )
 
                 summaryTable$setNote(
                     key = "independence_warning",
                     note = private$.formatTranslated(
-                        .("Combined figures assume the two tests are <i>conditionally independent</i> \u2014 that, among people with the same disease status, one test's result says nothing about the other's. With positive conditional dependence, {direction}."),
+                        .("Combined figures assume the two tests are <i>conditionally independent</i> \u2014 that, among people with the same disease status, one test's result says nothing about the other's. With positive conditional dependence in both disease-status groups, {direction}. Dependence among people with the disease alone biases the combined sensitivity but not the specificity, and dependence among people without it the reverse; PPV and NPV move with either."),
                         list(direction = dependence_caveat)
                     )
                 )
@@ -773,7 +802,7 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                         )
                     )
                     independence_note <- private$.formatTranslated(
-                        .("<div style='background-color: rgba(138, 155, 172, 0.06);padding:10px;border-radius:6px;margin-top:8px; color: inherit;'><strong>Assumption:</strong> Combined metrics assume conditional independence between tests. With positive conditional dependence, {direction}, and PPV and NPV shift accordingly.</div>"),
+                        .("<div style='background-color: rgba(138, 155, 172, 0.06);padding:10px;border-radius:6px;margin-top:8px; color: inherit;'><strong>Assumption:</strong> Combined metrics assume conditional independence between tests. With positive conditional dependence in both disease-status groups, {direction}, and PPV and NPV shift accordingly.</div>"),
                         list(direction = dependence_caveat)
                     )
                     self$results$explanation_text$setContent(
@@ -781,26 +810,30 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                     )
                 }
 
-                # Populate strategy notes. Named test pairs are teaching examples only; they are
-                # not recommendations, validated pathways, or sources for the illustrative inputs.
-                guidance_html <- .("<div class='jmv-guidance' style='background-color: rgba(138, 155, 172, 0.06);padding:15px;border-radius:6px;margin-top:10px; color: inherit;'><h4>Strategy Notes and Teaching Examples</h4><p><strong>Teaching examples only \u2014 not clinical guidance.</strong> The named pairs illustrate mathematical structure only. They are not recommendations, complete diagnostic algorithms, or validated pathways, and their sensitivity, specificity, prevalence, and cost values are not validated clinical parameters.</p><p><strong>How the strategies combine tests:</strong></p><ul><li><strong>Serial positive:</strong> Test 2 is applied to first-test positives; both tests must be positive. Specificity increases and sensitivity decreases under conditional independence.</li><li><strong>Serial negative:</strong> Test 2 is applied to first-test negatives; either positive makes the final result positive. Sensitivity increases and specificity decreases under conditional independence.</li><li><strong>Parallel:</strong> Both tests are applied to everyone; either positive makes the final result positive. Accuracy is algebraically identical to serial-negative testing, but utilization differs.</li></ul><p><strong>Why conditional dependence matters:</strong> Conditional dependence means that one test result remains informative about the other even after disease status is fixed, for example because the tests share biology, specimen characteristics, or technology. When positive conditional dependence is present in both disease-status groups, independence-based serial-positive calculations can make combined specificity too high and combined sensitivity too low. For serial-negative and parallel interpretation, they can make combined sensitivity too high and combined specificity too low. Gardner et al. (2000), <em>Conditional dependence between tests affects the diagnosis and surveillance of animal diseases</em>, describes these directional effects; see the reference below.</p><p>Test order is an input to explore, not a recommendation. Replace every example value with evidence appropriate to the intended setting.</p><p><strong>Illustrative pair labels:</strong></p><ul>")
+                # Built only when shown: clinical_guidance is visible: (show_explanation), and
+                # filling it on every run populated an item the user had hidden.
+                if (self$options$show_explanation) {
+                    # Populate strategy notes. Named test pairs are teaching examples only; they are
+                    # not recommendations, validated pathways, or sources for the illustrative inputs.
+                    guidance_html <- .("<div class='jmv-guidance' style='background-color: rgba(138, 155, 172, 0.06);padding:15px;border-radius:6px;margin-top:10px; color: inherit;'><h4>Strategy Notes and Teaching Examples</h4><p><strong>Teaching examples only \u2014 not clinical guidance.</strong> The named pairs illustrate mathematical structure only. They are not recommendations, complete diagnostic algorithms, or validated pathways, and their sensitivity, specificity, prevalence, and cost values are not validated clinical parameters.</p><p><strong>How the strategies combine tests:</strong></p><ul><li><strong>Serial positive:</strong> Test 2 is applied to first-test positives; both tests must be positive. Specificity increases and sensitivity decreases under conditional independence.</li><li><strong>Serial negative:</strong> Test 2 is applied to first-test negatives; either positive makes the final result positive. Sensitivity increases and specificity decreases under conditional independence.</li><li><strong>Parallel:</strong> Both tests are applied to everyone; either positive makes the final result positive. Accuracy is algebraically identical to serial-negative testing, but utilization differs.</li></ul><p><strong>Why conditional dependence matters:</strong> Conditional dependence means that one test result remains informative about the other even after disease status is fixed, for example because the tests share biology, specimen characteristics, or technology. When positive conditional dependence is present in both disease-status groups, independence-based serial-positive calculations can make combined specificity too high and combined sensitivity too low. For serial-negative and parallel interpretation, they can make combined sensitivity too high and combined specificity too low. Gardner et al. (2000), <em>Conditional dependence between tests affects the diagnosis and surveillance of animal diseases</em>, describes these directional effects; see the reference below.</p><p>Test order is an input to explore, not a recommendation. Replace every example value with evidence appropriate to the intended setting.</p><p><strong>Illustrative pair labels:</strong></p><ul>")
 
-                if (strategy == "serial_positive") {
-                    guidance_html <- paste0(guidance_html,
-                        .("<li>HIV-style teaching pair (Ag/Ab assay \u2192 differentiation assay); this is not a complete HIV diagnostic algorithm</li><li>Cancer-screening teaching pair (Imaging \u2192 Tissue sampling)</li><li>Respiratory-infection teaching pair (Rapid antigen \u2192 Molecular assay)</li>")
-                    )
-                } else if (strategy == "serial_negative") {
-                    guidance_html <- paste0(guidance_html,
-                        .("<li>Rule-out teaching pair (Initial assessment \u2192 Biomarker)</li><li>Exclusion teaching pair (Clinical score \u2192 Laboratory assay)</li>")
-                    )
-                } else if (strategy == "parallel") {
-                    guidance_html <- paste0(guidance_html,
-                        .("<li>Emergency teaching pair (Physiologic test + Biomarker)</li><li>Acute-imaging teaching pair (Clinical assessment + Imaging)</li>")
-                    )
+                    if (strategy == "serial_positive") {
+                        guidance_html <- paste0(guidance_html,
+                            .("<li>HIV-style teaching pair (Ag/Ab assay \u2192 differentiation assay); this is not a complete HIV diagnostic algorithm</li><li>Cancer-screening teaching pair (Imaging \u2192 Tissue sampling)</li><li>Respiratory-infection teaching pair (Rapid antigen \u2192 Molecular assay)</li>")
+                        )
+                    } else if (strategy == "serial_negative") {
+                        guidance_html <- paste0(guidance_html,
+                            .("<li>Rule-out teaching pair (Initial assessment \u2192 Biomarker)</li><li>Exclusion teaching pair (Clinical score \u2192 Laboratory assay)</li>")
+                        )
+                    } else if (strategy == "parallel") {
+                        guidance_html <- paste0(guidance_html,
+                            .("<li>Emergency teaching pair (Physiologic test + Biomarker)</li><li>Acute-imaging teaching pair (Clinical assessment + Imaging)</li>")
+                        )
+                    }
+
+                    guidance_html <- paste0(guidance_html, "</ul></div>")
+                    self$results$clinical_guidance$setContent(guidance_html)
                 }
-
-                guidance_html <- paste0(guidance_html, "</ul></div>")
-                self$results$clinical_guidance$setContent(guidance_html)
 
                 # Generate formulas HTML if requested
                 if (self$options$show_formulas) {
@@ -1151,7 +1184,7 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                     type = "INFO",
                     title = .("Independence Assumption"),
                     content = private$.formatTranslated(
-                        .('Combined metrics assume conditional independence between tests. If tests have positive conditional dependence (for example, similar biology or technology), {direction}.'),
+                        .('Combined metrics assume conditional independence between tests. If tests have positive conditional dependence in both disease-status groups (for example, similar biology or technology), {direction}. Dependence among people with the disease alone biases the combined sensitivity but not the specificity, and dependence among people without it the reverse; PPV and NPV move with either.'),
                         list(direction = dependence_caveat)
                     )
                 )

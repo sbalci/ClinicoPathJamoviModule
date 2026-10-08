@@ -17,7 +17,7 @@
     "https://github.com/sbalci/jjstatsplot"
   ],
   "issueTracker": "https://github.com/sbalci/ClinicoPathJamoviModule/issues/",
-  "license": "https://spdx.org/licenses/GPL-2.0-only.html",
+  "license": "https://spdx.org/licenses/GPL-2.0-or-later.html",
   "version": "1.0.0",
   "programmingLanguage": {
     "@type": "ComputerLanguage",

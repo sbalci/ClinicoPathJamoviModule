@@ -1,3 +1,27 @@
+# jamovi submission/update process (dev.jamovi.org) — follow-ups from the docs update (2026-10-08)
+
+Docs done: review guide §30, patterns guide (datasets, distributing), vendored `tuts0110`/`tuts0111`/`submit.md`,
+gate (`check_license` AGPL, `check_artifacts` build/dist, `check_dataset_descriptions` contract) +
+`tools/test_release_gate.py`. Measured, not fixed — each is a user decision:
+
+- [ ] **Transitive AGPL-3 in shipped builds**: meddecide ships `pander` (via `epiR`), ClinicoPathDescriptives
+      ships `RhpcBLASctl` (via `bigutilsr`). The library rejects AGPL-3 as a module licence. Ask the jamovi
+      team whether a transitive AGPL package blocks a listing, or replace the importer.
+- [ ] **`.gitignore` lacks `dist/`** in all five submodules (official requirement: `build/`, `dist/`, `*.jmo`).
+      Nothing is committed today; one line per sibling.
+- [ ] **Version scheme is not SemVer**: `1.0.83.06` has four components and a zero-padded part. The docs
+      ask for SemVer, and how jamovi orders four-part versions is unmeasured. A change touches the updater
+      and all five modules.
+- [ ] **`document_module_omv()` derives `name` from the file stem**, so two `.omv` sharing a stem get one
+      `name`, which must be unique. The gate now FAILs it; the generator still produces it.
+- [ ] **PII audit of the 17 shipped example datasets** (they are public downloads); not done.
+- [x] **Licence strings disagree.** FIXED 2026-10-08: all six repos now `GPL (>= 2)` / `GPL-2.0-or-later`
+      (umbrella DESCRIPTION, CITATION.cff, codemeta.json, three tutorial pages; four sibling CITATION.cff). The five `DESCRIPTION`s say `GPL (>= 2)`, but `CITATION.cff` says `GPL-2.0`
+      (the deprecated SPDX id, which means *only*) in jjstatsplot, jsurvival, meddecide and OncoPath;
+      only ClinicoPathDescriptives has the correct `GPL-2.0-or-later`. The umbrella is `GPL-2` /
+      `GPL-2.0-only` since 2025-06-15 (dfa2f872d), which conflicts with the 176 GPL-3/LGPL-3/Apache-2.0
+      packages it imports. It is not submitted, but `GPL (>= 2)` there would match the submodules.
+
 # decisioncalculator — `/fix-function decisioncalculator --apply` (2026-10-08)
 
 Acceptance: the in-house interval rows survive an epiR failure; an empty target-prevalence list raises

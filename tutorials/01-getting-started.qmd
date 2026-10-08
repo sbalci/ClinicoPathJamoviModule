@@ -503,7 +503,7 @@ Congratulations! You've completed your first ClinicoPath analysis. 🎉
 ## Common Questions
 
 **Q: Can I use ClinicoPath for free?**
-A: Yes! Both jamovi and ClinicoPath are completely free and open-source (GPL-2 license).
+A: Yes! Both jamovi and ClinicoPath are completely free and open-source (GPL-2 or later).
 
 **Q: Do I need programming skills?**
 A: No! ClinicoPath is designed for clinicians with no programming experience. Everything is point-and-click.

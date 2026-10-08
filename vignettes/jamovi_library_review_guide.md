@@ -21,7 +21,8 @@ Every rule below is something the reviewer *actually raised*, on real files, wit
 severity attached. Nothing here is speculative. The only exception is the few items
 marked **anticipatory**: they cover the jamovi 28.3 features (File option, Text result,
 Image `mode: vector`), come from the release and dev.jamovi.org, and have not been
-raised by the reviewer yet.
+raised by the reviewer yet. [Section 30](#30-the-official-process-requirements-submission-updates)
+is jamovi's own published submission and update process, not reviewer findings.
 
 ---
 
@@ -56,6 +57,7 @@ raised by the reviewer yet.
 27. [Rule: the module's own prose must agree with itself](#27-rule-the-modules-own-prose-must-agree-with-itself)
 28. [Rule: seeding the RNG must not outlive the function that did it](#28-rule-seeding-the-rng-must-not-outlive-the-function-that-did-it)
 29. [Rule: nothing may be derived from which analyses a module holds today](#29-rule-nothing-may-be-derived-from-which-analyses-a-module-holds-today)
+30. [The official process: requirements, submission, updates](#30-the-official-process-requirements-submission-updates)
 
 ---
 
@@ -127,7 +129,9 @@ Plus the cheap metadata gates the reviewer checks first:
 
 - `Version:` is past `1.0` and **identical** in `DESCRIPTION`, `jamovi/0000.yaml`,
   every `.a.yaml`, and `CITATION.cff`.
-- `License: GPL (>= 2)` (OSI-approved).
+- `License: GPL (>= 2)` (OSI-approved), and no AGPL-3 package in the newest `build/R*/`.
+  The library rejects AGPL-3, and two modules ship one transitively
+  ([section 30](#30-the-official-process-requirements-submission-updates)).
 - Every key in `jamovi/00refs.yaml` is cited **and** every cited key resolves,
   with exact casing. Every entry has `title`, `author`, `url`. Check this in the
   **generated submodule**, not only the umbrella: the umbrella keeps every entry on
@@ -136,7 +140,8 @@ Plus the cheap metadata gates the reviewer checks first:
   any key a shipped analysis cites.
 - Every `clearWith` entry resolves to a real option name.
 - Every `renderFun:` resolves to a real `function(image, ...)` method.
-- No committed build artifacts (`*.tar.gz`, `*.jmo`).
+- No committed build artifacts (`*.tar.gz`, `*.jmo`, anything under `build/` or `dist/`),
+  and `.gitignore` covers `build/`, `dist/` and `*.jmo` (an official requirement).
 - `compilerMode: tame` on every `.u.yaml`.
 - *(anticipatory)* A `type: File` option or `type: Text` result needs `minApp: 28.3.0` in
   `jamovi/0000.yaml`. `minApp` is module-wide, so raising it locks every jamovi 28.2-or-older
@@ -155,7 +160,9 @@ Plus the cheap metadata gates the reviewer checks first:
 - `description: main:` is one `>` folded paragraph with no blank line, in every `.a.yaml`
   ([section 27](#27-rule-the-modules-own-prose-must-agree-with-itself)).
 - One bug-report URL across `DESCRIPTION`, `jamovi/0000.yaml`, `README.md` and `CITATION.cff`, and
-  no two example datasets sharing a `description:`.
+  no two example datasets sharing a `description:`. Every `datasets:` entry has `name`, `path` and
+  `description`, `name` is unique, and the file is a small, PII-free `.omv` or `.csv`
+  ([section 30](#30-the-official-process-requirements-submission-updates)).
 - No `$insert()` at a sentinel index ([section 13](#13-notices-the-native-element-and-the-insert-trap)).
 - `jamovi/i18n` holds only this module's strings: the updater copies the umbrella catalog and
   `jmvtools::i18nUpdate()` trims it at build ([section 9](#9-rule-translatable-strings-are-whole-sentences)).
@@ -2154,5 +2161,118 @@ the whole file, or use the parser.
 - The `learn` sweep that produced this section found the 54 only after the detector was
   widened to `(?:Extra)?[DPT]+$`: a hand-written sweep matching `[TPD]$` saw 30 and missed
   every `...ExtraD` group. Reconcile a detector against a hand list before trusting either.
+
+---
+## 30. The official process: requirements, submission, updates
+
+Sections 2–29 come from the reviewer. This one comes from jamovi's own published process. The submission
+form (added upstream 2026-09-30, linked from the tutorial 2026-10-07) replaced the old
+"email contact@jamovi.org" route:
+[Distributing Modules](https://dev.jamovi.org/tutorial/tuts0111-distributing-modules),
+[Module Datasets](https://dev.jamovi.org/tutorial/tuts0110-module-datasets) and
+[Submit a Module](https://dev.jamovi.org/submit). Copies are vendored (2026-10-08) in
+`development-documentations-dev.jamovi.org-master/` as `tuts0111-distributing-modules.md`,
+`tuts0110-module-datasets.md` and `submit.md`. The "here" column was measured on 2026-10-08
+across the five submodules.
+
+### A `.jmo` is not a release
+
+`jmvtools::install()` writes `<Module>.jmo`, and a tester can side-load it: jamovi library
+(the plus icon) → **Side-load** tab. But a `.jmo` runs only on the OS, the CPU architecture
+**and** the jamovi series (solid or current) it was built on. That gives eight setups, because
+R packages with compiled C/Fortran code are built per R version, OS and architecture. A `.jmo`
+built on this Apple Silicon Mac does nothing for a Windows pathologist. Side-load only to
+testers whose setup matches yours. Only a library listing reaches everyone, because jamovi
+then builds the module for every platform and every future jamovi version.
+
+### Step 1: the library requirements
+
+| Requirement (official wording, condensed) | Here (2026-10-08) | Check |
+|---|---|---|
+| **Name** distinctive, no dot (jamovi fails to load it), does not embed "jamovi"; renaming later touches `0000.yaml`, `DESCRIPTION` and file names | ClinicoPathDescriptives, jjstatsplot, jsurvival, meddecide, OncoPath: all pass | `grep '^name:' jamovi/0000.yaml` |
+| **Documentation**: clear analysis titles and descriptions | §12, §27 | `release_gate.py` |
+| **Example data** bundled as module datasets, plus usage notes in `README.md` or the form's comments box | 17 datasets, all `.omv`, all tagged | see "Datasets" below |
+| **Stability** with missing data, special characters in variable names, and empty datasets (via input checks) | §22, §25 | testthat |
+| **Build**: `jmvtools::install()` runs without errors | checklist item 12 runs `prepare()`; `install()` is the official bar | `jmvtools::install()` |
+| **Metadata**: accurate `DESCRIPTION` summary and authors | §27 | — |
+| **Clean repository**: no `build/`, `dist/` or `*.jmo` in git; `.gitignore` covers them | nothing committed in any module; all five `.gitignore` list `build/` and `*.jmo`, **none lists `dist/`** | `check_artifacts` FAILs a tracked *or unignored* file under `build/`/`dist/` |
+| **Licence**: OSI-approved, declared in `DESCRIPTION`; **AGPL-3 not accepted**; GPL2+ recommended; shipping a GPL package makes a combined work that must be GPL | all five `GPL (>= 2)` | `check_license` (below) |
+| **English** at minimum | English is the source language | — |
+
+**Keep the "or later".** `usethis::use_gpl_license(version = 2)` (2024-11-02, every repo) writes
+`GPL (>= 2)`, not GPL-2-only, and the `(>= 2)` is what makes the dependencies fit. Each submodule
+ships packages under GPL-3, LGPL-3 or Apache-2.0 (`pROC`, `insight`, `timechange`, `RColorBrewer`, …;
+18–38 per module, 4 in OncoPath, measured 2026-10-08). None of those combines with GPL-2-only, but all
+of them combine with `GPL (>= 2)` taken as GPL-3. Its SPDX form, in `CITATION.cff` and `codemeta.json`,
+is `GPL-2.0-or-later`. Bare `GPL-2.0` is the deprecated id for *only* (all six aligned 2026-10-08).
+
+**The licence trap is in the dependencies, not in `DESCRIPTION`.** jamovi's own advice is to
+browse the packages in the module's `build/` folder for copyleft licences. On 2026-10-08 the
+newest builds held two AGPL-3 packages, both pulled in transitively:
+
+| Module | AGPL-3 package | Pulled in by |
+|---|---|---|
+| meddecide | `pander` | `epiR` |
+| ClinicoPathDescriptives | `RhpcBLASctl` | `bigutilsr` |
+
+The page rules out AGPL-3 as the module's licence and says a GPL dependency makes the whole
+a GPL combined work. By the same logic an AGPL-3 dependency makes an AGPL-3 combined work,
+but the page does not say so. Both modules are already listed, and no reviewer has raised it.
+So this is a question to put to the jamovi team, not a verdict. `check_license` WARNs on it
+and FAILs a module whose own licence is AGPL. To trace an AGPL package to the import that
+brings it in, resolve
+`tools::package_dependencies(<Imports>, recursive = TRUE)` against `installed.packages(fields = "License")`.
+
+### Datasets: the `0000.yaml` contract
+
+- Files sit in `data/` at the module root, as `.omv` (recommended: it keeps variable types,
+  descriptions and analysis state) or `.csv`.
+- A top-level `datasets:` block has one entry per file. `name` (a **unique** identifier),
+  `path` (a filename inside `data/`) and `description` are **required**; `tags` is optional
+  and groups datasets in the library.
+- Datasets must be **small**, for demonstration only, and **public**: everyone who installs
+  the module downloads them. They must hold no sensitive, confidential or personally
+  identifiable information. In a pathology project this is the rule with teeth: ship only
+  synthetic data or public de-identified data, never an export from a real cohort. The 17
+  shipped files were not audited for this on 2026-10-08; the largest is 1.9 MB (jjstatsplot).
+- Verify in the app: `jmvtools::install()`, then ☰ → **Open** → **Data Library** → the module.
+- Here, `document_module_omv()` (`_updateModules_utils.R`) appends an entry for every
+  undocumented `.omv`, and builds `name` and `description` from the file stem. Two files that
+  share a stem (the `waterfall_*` pair, §27) therefore get one `name`. `check_dataset_descriptions`
+  FAILs a missing required field, a repeated `name`, a format other than `.omv`/`.csv`, or a
+  missing file, and WARNs on repeated descriptions. Its rules are pinned by
+  `python3 tools/test_release_gate.py`.
+
+### Step 2: submitting
+
+- Use the form at <https://dev.jamovi.org/submit>. It asks for the GitHub repository URL
+  (required), a subdirectory (optional; each of our modules sits at its repository root, so
+  leave it empty), and comments (optional, up to 5000 characters). Use the comments to
+  introduce the module and say how to use its example data.
+- jamovi emails the **`maintainer:` in `jamovi/0000.yaml`** to confirm the submission, and
+  emails the outcome there too. All five modules name
+  `Serdar Balci <serdarbalci@serdarbalci.com>`; that inbox has to be read, or the submission
+  stalls unconfirmed.
+- Review takes 1–2 weeks, by the jamovi team or a community member. Feedback arrives as an
+  email thread or as a GitHub issue on the repository.
+
+### Step 3: updating a listed module (the path this project uses)
+
+1. Increment the version in **both** `jamovi/0000.yaml` and `DESCRIPTION`. jamovi compares
+   these to tell users an update exists.
+2. Push to GitHub.
+3. **Tell the jamovi team** by email or in the jamovi Slack. A push alone publishes nothing.
+4. The team publishes, usually once a week, on Mondays. Plan hotfixes around that: a fix pushed
+   and announced on a Tuesday can reach users six days later.
+
+Two notes for this project:
+
+- `_updateModules.R` already stamps one version into `DESCRIPTION`, `CITATION.cff`, `0000.yaml`
+  and every `.a.yaml` (§1), so step 1 is done on every regeneration.
+- The page asks for [Semantic Versioning](https://semver.org/), e.g. `1.0.1` → `1.0.2`. Our
+  versions are four components and zero-padded (`1.0.83.06`). SemVer allows three components
+  and no leading zeros, and §1 already notes that the release workflow publishes nothing for a
+  four-component version. Nobody has measured how jamovi orders such versions. Changing the
+  scheme touches the updater and all five modules, so that decision is open, not settled here.
 
 ---

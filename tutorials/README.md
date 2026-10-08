@@ -342,7 +342,7 @@ Have suggestions for improving tutorials or ideas for new ones?
 ## License
 
 **Tutorials:** CC-BY-4.0 (Creative Commons Attribution 4.0 International)
-**Software (ClinicoPath):** GPL-2
+**Software (ClinicoPath):** GPL (>= 2)
 
 You are free to:
 

@@ -2,14 +2,14 @@
 
 **Source:** Analysis of jmvbaseR example module and ClinicoPath implementations
 **Date:** 2025-01-17
-**Last Updated:** 2026-09-19
+**Last Updated:** 2026-10-08
 **Purpose:** Document key implementation patterns for jamovi module development
 
 ---
 
 ## Table of Contents
 
-1. [Module Structure](#module-structure)
+1. [Module Structure](#module-structure) (incl. [example datasets](#example-datasets-datasets) and [distributing](#distributing-side-load-vs-library))
 2. [jamovi 28.3 Features (File, Text, Vector Images)](#jamovi-283-features-file-text-vector-images) (incl. [installing jmvtools and jmvcore](#installing-current-jmvtools-and-jmvcore))
 3. [Four-File Architecture](#four-file-architecture)
 4. [Data Handling Patterns](#data-handling-patterns)
@@ -31,6 +31,8 @@ the current jmvcore as in
 > `image$state`, opaque light-theme HTML, fixed table rows built in `.run()`,
 > `setVisible(FALSE)` used to signal failure, named HTML entities, invisible
 > `warning()` calls, spliced `.()` fragments, and undeclared base packages.
+> Its section 30 covers jamovi's official requirements, the submission form at
+> <https://dev.jamovi.org/submit>, and the update flow for a listed module.
 
 ## Module Structure
 
@@ -166,6 +168,39 @@ default branch cannot silently change what a build pulls in.
   `grep -l 'menuGroup: <module>[TPD]' jamovi/*.a.yaml` first; run
   `python3 tools/promotion_screen.py --no-git` to see which parked analyses a module's
   existing entries would break (0 shipped / 54 parked, 2026-09-23). Review guide sections 19 and 29.
+- **Every package a module ships counts for its licence, including transitive ones.** The jamovi
+  library does not accept AGPL-3, and `epiR` (meddecide) and `bigutilsr` (ClinicoPathDescriptives)
+  pull an AGPL-3 package into the build. `release_gate.py` `check_license` WARNs on it.
+  [Review guide section 30](jamovi_library_review_guide.md#30-the-official-process-requirements-submission-updates).
+
+### Example Datasets (`datasets:`)
+
+From [Module Datasets](https://dev.jamovi.org/tutorial/tuts0110-module-datasets). Files go in
+`data/` as `.omv` (recommended: it keeps types, descriptions and analysis state) or `.csv`, and
+each one gets a top-level `0000.yaml` entry:
+
+```yaml
+datasets:
+  - name: histopathology including analysis     # required, unique
+    path: histopathologyMedicalDecision.omv      # required, a file inside data/
+    description: Example analysis for Medical Decision Tests.   # required, and distinct
+    tags:                                        # optional, groups datasets in the library
+      - Kappa
+```
+
+Datasets must be small and public: everyone who installs the module downloads them, so they
+must contain no personally identifiable information. To check one, run `jmvtools::install()`,
+then ☰ → **Open** → **Data Library**. Here `_updateModules.R` appends entries for undocumented
+`.omv` files and `release_gate.py` `check_dataset_descriptions` enforces the contract.
+
+### Distributing: Side-load vs Library
+
+`jmvtools::install()` writes a `.jmo` that testers can side-load (jamovi library → **Side-load**
+tab). It only runs on the OS, CPU architecture and jamovi series (solid/current) it was built on.
+For everyone else, submit the module at <https://dev.jamovi.org/submit>; to update a listed
+module, bump the version in `0000.yaml` and `DESCRIPTION`, push, and tell the jamovi team
+(publishing is weekly, on Mondays). Requirements, review and the update flow:
+[review guide section 30](jamovi_library_review_guide.md#30-the-official-process-requirements-submission-updates).
 
 ---
 
@@ -1111,8 +1146,9 @@ self$results$summary$setContent(jmvcore::format(
 
 - **jmvbaseR Example Module:** `/Users/serdarbalci/Documents/GitHub/jmvbaseR`
 - **jamovi Developer Documentation:** `./development-documentations-dev.jamovi.org-master`
-  (an old snapshot; only `api_option-file.md` and `api_text.md` cover jamovi 28.3, and the
-  live docs are at [dev.jamovi.org](https://dev.jamovi.org))
+  (an old snapshot; only `api_option-file.md` and `api_text.md` cover jamovi 28.3, and
+  `tuts0110-module-datasets.md`, `tuts0111-distributing-modules.md` and `submit.md` were vendored
+  2026-10-08; the live docs are at [dev.jamovi.org](https://dev.jamovi.org))
 - **ClinicoPath Examples:** This repository
 
 ---

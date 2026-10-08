@@ -278,7 +278,9 @@ Checklist:
 - [ ] **Metadata self-consistency** — `description: main:` must be one `>` folded paragraph with no
       blank lines (`tools/release_gate.py` `check_description_newlines`); bug-report URL must match
       across `DESCRIPTION`, `jamovi/0000.yaml`, and `README.md`; example datasets must have distinct
-      descriptions (§27).
+      descriptions (§27). A new example dataset is a small, PII-free `.omv` (or `.csv`) in `data/`
+      with a `0000.yaml` `datasets:` entry carrying a unique `name`, a `path` and a `description`
+      (§30; `check_dataset_descriptions`).
 
 ## Response Format
 
