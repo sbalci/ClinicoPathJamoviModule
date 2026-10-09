@@ -7,6 +7,8 @@
 - **Not implemented (2026-09-22)**: 14 options are commented out of `jamovi/enhancedROC.a.yaml`
   / `.u.yaml` and are absent from this map. They are not wrapper arguments - passing one is an
   "unused argument" error: `harrellCIndex`, `unoCStatistic`, `namDagostino`, `greenwoodNam`, `calibrationBelt`, `optimismCorrection`, `externalValidation`, `transportability`, `bootstrapCutoffCI`, `modelUpdating`, `netBenefitRegression`, `incidentDynamic`, `cumulativeDynamic`, `competingRisksConcordance`.
+- **Retired (2026-10-09)**: `tiedScoreHandling` (ties always count one half; an automatic note under
+  the AUC table gives the bounds). `positiveClass` feeds the new `outcomeCoding` table.
 
 | Feature / Option | UI Binding | Backend Handler | Target Result Item |
 | :--- | :--- | :--- | :--- |
@@ -42,7 +44,6 @@
 | `crocAnalysis` | UI Control `crocAnalysis` | `self$options$crocAnalysis` | Output item / Table |
 | `crocAlpha` | UI Control `crocAlpha` | `self$options$crocAlpha` | Output item / Table |
 | `convexHull` | UI Control `convexHull` | `self$options$convexHull` | Output item / Table |
-| `tiedScoreHandling` | UI Control `tiedScoreHandling` | `self$options$tiedScoreHandling` | Output item / Table |
 | `detectImbalance` | UI Control `detectImbalance` | `self$options$detectImbalance` | Output item / Table |
 | `imbalanceThreshold` | UI Control `imbalanceThreshold` | `self$options$imbalanceThreshold` | Output item / Table |
 | `showImbalanceWarning` | UI Control `showImbalanceWarning` | `self$options$showImbalanceWarning` | Output item / Table |

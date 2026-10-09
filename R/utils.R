@@ -207,3 +207,28 @@ NULL
         table$.__enclos_env__$private$.rowNames <- character()
     invisible(table)
 }
+
+# Which outcome level is the positive class, and why (enhancedROC, psychopdaROC). Never taken
+# from level order: only a NUMERIC 0/1 outcome defaults (1 = positive), as .defineEventIndicator()
+# does. Pure - the analyses translate `status`. A blank "" is missing, like an explicit NA level
+# (R path only: jamovi stores an empty cell as missing); both analyses drop those rows too.
+.rocOutcomeCoding <- function(outcome, positive = NULL) {
+    numeric01 <- is.numeric(outcome) && all(outcome[!is.na(outcome)] %in% c(0, 1))
+    x <- droplevels(factor(if (is.factor(outcome)) outcome else factor(outcome), exclude = c(NA, "")))  # explicit NA level or "" = missing
+    lv <- levels(x)
+    pos <- if (length(positive) && !is.na(positive[1]) && nzchar(positive[1])) as.character(positive[1])
+    status <- if (length(lv) < 2L) "single" else if (!is.null(pos)) (if (pos %in% lv) "selected" else "invalid")
+              else if (numeric01) "default01" else "unset"
+    if (identical(status, "default01")) pos <- "1"
+    list(levels = lv, counts = as.integer(table(x)), positive = pos, status = status,  # table() follows level order; [lv] would miss a level named ""
+         numeric = is.numeric(outcome), n_missing = sum(is.na(x)), values = x)
+}
+# A level or variable name placed in a table note or cell: jamovi parses both as HTML, so break a "<"
+# that would open a tag (never htmlEscape: the client shows entities literally). setNote() also
+# re-translates its text and cuts it at " [", so for notes map [] to (); cells are never translated
+# (jmvcore Cell$asProtoBuf), so a cell passes note = FALSE and keeps the real name.
+.rocLabel <- function(x, note = TRUE) {
+    x <- as.character(x)
+    if (note) x <- chartr("[]", "()", x)
+    gsub("<([A-Za-z/!?])", "< \\1", x)
+}

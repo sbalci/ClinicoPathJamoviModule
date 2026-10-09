@@ -122,7 +122,8 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..positiveClass <- jmvcore::OptionLevel$new(
                 "positiveClass",
                 positiveClass,
-                variable="(classVar)")
+                variable="(classVar)",
+                allowNone=TRUE)
             private$..subGroup <- jmvcore::OptionVariable$new(
                 "subGroup",
                 subGroup,
@@ -359,11 +360,14 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 "calculateNRI",
                 calculateNRI,
                 default=FALSE)
-            private$..refVar <- jmvcore::OptionLevel$new(
+            private$..refVar <- jmvcore::OptionVariable$new(
                 "refVar",
                 refVar,
-                variable="(dependentVars)",
-                allowNone=TRUE)
+                default=NULL,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"))
             private$..nriThresholds <- jmvcore::OptionString$new(
                 "nriThresholds",
                 nriThresholds,
@@ -755,6 +759,7 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         instructions = function() private$.items[["instructions"]],
         procedureNotes = function() private$.items[["procedureNotes"]],
         runSummary = function() private$.items[["runSummary"]],
+        outcomeCoding = function() private$.items[["outcomeCoding"]],
         clinicalInterpretationTable = function() private$.items[["clinicalInterpretationTable"]],
         resultsTable = function() private$.items[["resultsTable"]],
         sensSpecTable = function() private$.items[["sensSpecTable"]],
@@ -815,6 +820,31 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 name="runSummary",
                 title="Analysis Status",
                 visible=TRUE))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="outcomeCoding",
+                title="Outcome coding: which level is positive",
+                rows=0,
+                visible="(classVar)",
+                clearWith=list(
+                    "classVar",
+                    "positiveClass",
+                    "dependentVars",
+                    "subGroup",
+                    "direction"),
+                columns=list(
+                    list(
+                        `name`="level", 
+                        `title`="Outcome level", 
+                        `type`="text"),
+                    list(
+                        `name`="n", 
+                        `title`="N", 
+                        `type`="integer"),
+                    list(
+                        `name`="role", 
+                        `title`="Role in this analysis", 
+                        `type`="text"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="clinicalInterpretationTable",
@@ -1924,10 +1954,12 @@ psychopdaROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param data The data as a data frame.
 #' @param dependentVars Test variable(s) to be evaluated for classification
 #'   performance. Multiple variables can be selected for comparison.
-#' @param classVar Binary classification variable representing the true class
-#'   (gold standard). Must have exactly two levels.
-#' @param positiveClass Specifies which level of the class variable should be
-#'   treated as the positive class.
+#' @param classVar Classification variable representing the true class (gold
+#'   standard). Two or more levels; with more than two, the positive class is
+#'   compared with all other levels combined (one-vs-rest).
+#' @param positiveClass Level of classVar treated as the positive class
+#'   (condition present). Required: NULL leaves the analysis waiting for a
+#'   choice; levels are never inferred from their order.
 #' @param subGroup Optional grouping variable for stratified analysis. ROC
 #'   curves will be calculated separately for each group.
 #' @param method Method for determining the optimal cutpoint. Different
@@ -2019,8 +2051,10 @@ psychopdaROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param calculateNRI Calculate how many patients are correctly reclassified
 #'   when using a new test. NRI (Net Reclassification Index) measures the net
 #'   improvement in patient classification.
-#' @param refVar Reference test variable for IDI and NRI calculations. Other
-#'   variables will be compared against this reference.
+#' @param refVar Reference test for IDI and NRI (a numeric variable; it need
+#'   not be one of the test variables, and it cannot be the class variable).
+#'   Every test variable other than the reference is compared against it. NULL
+#'   uses the first test variable.
 #' @param nriThresholds Comma-separated probability thresholds (0-1) defining
 #'   risk categories for NRI. Leave empty for continuous NRI.
 #' @param idiNriBootRuns Number of bootstrap iterations for IDI and NRI
@@ -2082,8 +2116,8 @@ psychopdaROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   estimation.
 #' @param metaAnalysisMethod Statistical method for combining AUC estimates
 #'   across studies/variables.
-#' @param heterogeneityTest Perform Cochran's Q test and calculate I²
-#'   statistic to assess heterogeneity between AUC estimates.
+#' @param heterogeneityTest Perform Cochran's Q test and calculate the
+#'   I-squared statistic to assess heterogeneity between AUC estimates.
 #' @param forestPlot Create forest plot visualization of individual and pooled
 #'   AUC estimates with confidence intervals.
 #' @param overrideMetaAnalysisWarning ADVANCED OPTION: Bypass the independence
@@ -2096,6 +2130,7 @@ psychopdaROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$procedureNotes} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$runSummary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$outcomeCoding} \tab \tab \tab \tab \tab Class levels with their counts and the role each plays in the analysis \cr
 #'   \code{results$clinicalInterpretationTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$resultsTable} \tab \tab \tab \tab \tab an array of tables \cr
 #'   \code{results$sensSpecTable} \tab \tab \tab \tab \tab an array of htmls \cr
@@ -2134,9 +2169,9 @@ psychopdaROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 #'
-#' \code{results$clinicalInterpretationTable$asDF}
+#' \code{results$outcomeCoding$asDF}
 #'
-#' \code{as.data.frame(results$clinicalInterpretationTable)}
+#' \code{as.data.frame(results$outcomeCoding)}
 #'
 #' @export
 psychopdaROC <- function(
@@ -2189,7 +2224,7 @@ psychopdaROC <- function(
     compareClassifiers = FALSE,
     calculateIDI = FALSE,
     calculateNRI = FALSE,
-    refVar,
+    refVar = NULL,
     nriThresholds = "",
     idiNriBootRuns = 1000,
     effectSizeAnalysis = FALSE,
@@ -2225,12 +2260,14 @@ psychopdaROC <- function(
     if ( ! missing(dependentVars)) dependentVars <- jmvcore::resolveQuo(jmvcore::enquo(dependentVars))
     if ( ! missing(classVar)) classVar <- jmvcore::resolveQuo(jmvcore::enquo(classVar))
     if ( ! missing(subGroup)) subGroup <- jmvcore::resolveQuo(jmvcore::enquo(subGroup))
+    if ( ! missing(refVar)) refVar <- jmvcore::resolveQuo(jmvcore::enquo(refVar))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(dependentVars), dependentVars, NULL),
             `if`( ! missing(classVar), classVar, NULL),
-            `if`( ! missing(subGroup), subGroup, NULL))
+            `if`( ! missing(subGroup), subGroup, NULL),
+            `if`( ! missing(refVar), refVar, NULL))
 
     for (v in classVar) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
     for (v in subGroup) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])

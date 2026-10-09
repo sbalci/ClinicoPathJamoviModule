@@ -1,6 +1,6 @@
-# `positiveClass` and `refVar` are `type: Level` options. The jamovi compiler forbids a default
-# on a Level, so both compile to REQUIRED arguments of the generated wrapper even though the
-# analysis runs perfectly well without a reference variable. This helper supplies just those two.
+# `positiveClass` is a `type: Level` option. The jamovi compiler forbids a default on a Level, so
+# it compiles to a REQUIRED argument of the generated wrapper; this helper supplies just that one.
+# (`refVar`, Reference Test for IDI/NRI, is a `type: Variable` with a NULL default since 2026-10-09.)
 #
 # It used to fill EVERY argument that had no default with "" -- including `dependentVars` and
 # `classVar` -- so a test that forgot a genuinely required variable was silently handed an empty
@@ -8,7 +8,6 @@
 psychopdaROC <- function(...) {
   args <- list(...)
   if (!("positiveClass" %in% names(args))) args$positiveClass <- ""
-  if (!("refVar" %in% names(args))) args["refVar"] <- list(NULL)  # [[<- would drop the element
   do.call(ClinicoPath::psychopdaROC, args)
 }
 

@@ -55,10 +55,14 @@ items:
 refs:
     - ClinicoPathJamoviModule
     - kappaSize
-    # The Notes panel attributes the method to "(Rotondi and Donner)"; both source
-    # papers must be citable from the output, as in kappaSizeCI / kappaSizeFixedN.
+    # The Notes panel attributes the power approach to Donner and Eliasziw (two raters,
+    # binary) and Altaye and colleagues (more raters / categories), as implemented in
+    # kappaSize (Rotondi and Donner, the CI paper that introduced the package). Every
+    # name in that sentence must be citable from the output.
     - rotondiDonnerKappaCI
     - donnerEliasziwKappaGOF
+    - altayeDonnerKlarKappaRaters
+    - altayeDonnerEliasziwKappaGOF
 
 
 ...

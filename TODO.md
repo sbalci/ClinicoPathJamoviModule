@@ -1,3 +1,63 @@
+# enhancedROC + psychopdaROC — fix all `/validate-function` findings (2026-10-09, done, uncommitted)
+
+Source: `development-ideas/enhancedROC-validation-2026-10-09.md` (verdict NOT VALIDATED, VAL-enhancedROC-01..26).
+Acceptance: every VAL finding fixed or answered; the positive class is never taken from level order in either
+analysis (only a numeric 0/1 outcome defaults to 1); a new **Outcome coding** table in both analyses shows which
+level is positive, the counts, and how each predictor was read; `tests/testthat/test-enhancedROC-validation.R` has
+no open-defect skips; `development-scripts/validate_enhancedROC.R` exits 0 twice; ROC test files pass.
+
+- [x] Schema: yaml (both analyses), `00refs.yaml`, shared `.rocOutcomeCoding()`/`.rocLabel()` in `R/utils.R`, `prepare()`
+      (two clean runs; only `enhancedROC.h.R`, `psychopdaROC.h.R` and `00jmv.R` regenerated)
+- [x] enhancedROC backend E1-E16 (positive class, CROC, plot paths, intervals, comparisons, narrative, Youden ties,
+      calibration scale, decision/impact curves, internal validation, ties note, imbalance, multi-class CIs, hull)
+      (5 agents; plan amended after an independent Codex review: `predictionScale` replaces the planned
+      `calibrationScale`, blank cells are "" + footnote, LR bands per Jaeschke 1994, exact Youden ties)
+- [x] psychopdaROC parity PS1-PS8 (no guessing, Outcome coding table, notes that point to Positive class, plot paths)
+- [x] Tests: existing ROC tests updated, validation tests unskipped, psychopdaROC pins rewritten (0 failures/0 skips
+      in every ROC file; 4 pre-existing failures in test-meddecide-library-audit.R belong to sequentialtests/decisioncalculator)
+- [x] Adversarial review: 96-agent workflow (42 findings, 41 confirmed and fixed) + a targeted second round
+      (5 more, fixed); every fix has a regression test that fails on the code before it
+- [x] Release gate with both analyses counted as shipped: 0 blocking, no new advisory for either analysis
+- [x] Validation script run A: 411 checks, 411 PASS, 0 FAIL (Python oracle available)
+- [x] Validation script run B: 411/411 PASS, matrix identical to run A; `devtools::document()` (only the two Rd
+      pages changed); `jmvtools::i18nUpdate()` (66 Turkish strings of removed/reworded enhancedROC text dropped;
+      563 ROC msgids untranslated)
+- [x] CHANGELOG.md lessons (6 entries); vignettes (enhancedROC/psychopdaROC developer docs) updated
+
+**Results.** Code: `R/enhancedROC.b.R`, `R/psychopdaROC.b.R`, `R/utils.R` (`.rocOutcomeCoding()`, `.rocLabel()`),
+`R/enhancedROC-errors.R`; yaml for both analyses + `jamovi/00refs.yaml` (+11 references); generated `.h.R`/`00jmv.R`.
+Tests: every ROC test file 0 failures / 0 errors / 0 skips (`test-enhancedROC-validation.R` 304 expectations,
+`test-psychopdaROC-release-review.R` 240); the only failures in the run are 4 pre-existing ones in
+`test-meddecide-library-audit.R` (sequentialtests, decisioncalculator - not ROC). Not done: Turkish translations of
+the new msgids; viewing the Outcome coding table in the jamovi app itself (the options panels of both analyses
+render cleanly in jamovi's client via `tools/ui_harness/render_ui.sh`).
+
+Follow-ups found on the way (not in this task's scope):
+- [ ] **Sawtooth ROC lines elsewhere (VAL-02 shape).** aivalidation, clinicalprediction, clinicalvalidation,
+      classification, modelperformance, mlpathology, stagemigration, timeroc, treeadvanced, treemedical,
+      multiclassdiagnostics and nogoldstandard draw pROC `$specificities` order; wherever that reaches
+      `geom_line()` (which sorts by x only) the curve zig-zags inside tied runs. Order by (FPR, TPR) or use
+      `geom_path()` on an ordered path. Check each.
+- [ ] **enhancedROC McNemar with few discordant pairs** uses the asymptotic test (guard at 10 pairs); an exact
+      (mid-p) McNemar is preferable at small counts (Fagerland, Lydersen & Laake 2013).
+- [x] `jamovi/enhancedROC.r.yaml`: clinicalImpactTable and decisionImpactSummary listed `prevalence` and
+      `useObservedPrevalence` twice in `clearWith` (tidied 2026-10-09).
+- [ ] **timeroc (draft) Venkatraman comparison ignores direction** (`R/timeroc.b.R` ~440): pROC's paired
+      Venkatraman test ranks the raw predictor and only warns about mixed directions; enhancedROC now hands it
+      the same curve read '<' (`.pairTest`). Apply the same before promoting timeroc.
+- [ ] **`.dvScoreMetrics` separation check** (`R/utils-diagnostic-validation.R` ~126) uses a fitted-value
+      tolerance (1e-8), the heuristic enhancedROC's calibration slope dropped for an exact overlap test on the
+      fitted logits (Albert & Anderson 1984). Not reviewed here; check the frozen-model panel.
+- [ ] **decisioncurve `setContent('')`** (~1084) resets an Html item the same way enhancedROC used to; check
+      whether a stale panel survives a run that returns early.
+- [ ] **Logit-transformed DeLong interval** for a single AUC near 1 (better small-sample coverage than the
+      plain DeLong interval). enhancedROC now warns instead (n_min < 30 or n_min * (1 - AUC) < 6); an
+      alternative interval is a feature, not a fix.
+- [ ] **Docs disagree on setNote() bold.** CLAUDE.md and `vignettes/jamovi_tables_guide.md` say `b`/`strong`
+      are honoured in table notes; the installed jamovi 28.3.0 client (`resultsview` renderFooter -> allow-list
+      em/i/sub/sup) unwraps them (text kept, bold lost). The ROC notes now use `<i>`. Check in the app, then
+      correct whichever is wrong (CLAUDE.md is maintainer-owned).
+
 # sequentialtests (meddecide) — `/release-review-function` (2026-10-08)
 
 Verdict: ready after minor actions. Fixed: `pc` table cells that jamovi rounds to 100.0 %/0.0 % now carry a

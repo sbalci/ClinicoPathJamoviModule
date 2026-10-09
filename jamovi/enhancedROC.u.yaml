@@ -63,6 +63,8 @@ children:
                 name: analysisType
               - type: ComboBox
                 name: direction
+              - type: ComboBox
+                name: predictionScale
               - type: CheckBox
                 name: youdenOptimization
               - type: ComboBox
@@ -239,8 +241,6 @@ children:
             children:
               - type: CheckBox
                 name: convexHull
-              - type: ComboBox
-                name: tiedScoreHandling
               - type: CheckBox
                 name: crocAnalysis
               - type: TextBox
@@ -443,7 +443,7 @@ children:
                   #   name: transportability
 
   - type: CollapseBox
-    label: Deployment prevalence and workload
+    label: Deployment Prevalence and Workload
     collapsed: true
     children:
     - type: TextBox
@@ -463,7 +463,7 @@ children:
       format: string
 
   - type: CollapseBox
-    label: Frozen-model validation
+    label: Frozen-Model Validation
     collapsed: true
     children:
     - type: CheckBox
@@ -483,8 +483,6 @@ children:
       name: samplingDesign
     - type: ComboBox
       name: thresholdSource
-    - type: ComboBox
-      name: predictionScale
     - type: CheckBox
       name: validationBootstrap
     - type: TextBox

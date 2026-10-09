@@ -54,7 +54,7 @@ psychopdaROC(
   compareClassifiers = FALSE,
   calculateIDI = FALSE,
   calculateNRI = FALSE,
-  refVar,
+  refVar = NULL,
   nriThresholds = "",
   idiNriBootRuns = 1000,
   effectSizeAnalysis = FALSE,
@@ -103,11 +103,13 @@ off - every optional analysis has its own checkbox.}
 \item{dependentVars}{Test variable(s) to be evaluated for classification
 performance. Multiple variables can be selected for comparison.}
 
-\item{classVar}{Binary classification variable representing the true class
-(gold standard). Must have exactly two levels.}
+\item{classVar}{Classification variable representing the true class (gold
+standard). Two or more levels; with more than two, the positive class is
+compared with all other levels combined (one-vs-rest).}
 
-\item{positiveClass}{Specifies which level of the class variable should be
-treated as the positive class.}
+\item{positiveClass}{Level of classVar treated as the positive class
+(condition present). Required: NULL leaves the analysis waiting for a
+choice; levels are never inferred from their order.}
 
 \item{subGroup}{Optional grouping variable for stratified analysis. ROC
 curves will be calculated separately for each group.}
@@ -242,8 +244,10 @@ Improvement) measures the average improvement in predicted probabilities.}
 when using a new test. NRI (Net Reclassification Index) measures the net
 improvement in patient classification.}
 
-\item{refVar}{Reference test variable for IDI and NRI calculations. Other
-variables will be compared against this reference.}
+\item{refVar}{Reference test for IDI and NRI (a numeric variable; it need
+not be one of the test variables, and it cannot be the class variable).
+Every test variable other than the reference is compared against it. NULL
+uses the first test variable.}
 
 \item{nriThresholds}{Comma-separated probability thresholds (0-1) defining
 risk categories for NRI. Leave empty for continuous NRI.}
@@ -331,8 +335,8 @@ estimation.}
 \item{metaAnalysisMethod}{Statistical method for combining AUC estimates
 across studies/variables.}
 
-\item{heterogeneityTest}{Perform Cochran's Q test and calculate I²
-statistic to assess heterogeneity between AUC estimates.}
+\item{heterogeneityTest}{Perform Cochran's Q test and calculate the
+I-squared statistic to assess heterogeneity between AUC estimates.}
 
 \item{forestPlot}{Create forest plot visualization of individual and pooled
 AUC estimates with confidence intervals.}
@@ -349,6 +353,7 @@ A results object containing:
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 \code{results$procedureNotes} \tab \tab \tab \tab \tab a html \cr
 \code{results$runSummary} \tab \tab \tab \tab \tab a html \cr
+\code{results$outcomeCoding} \tab \tab \tab \tab \tab Class levels with their counts and the role each plays in the analysis \cr
 \code{results$clinicalInterpretationTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$resultsTable} \tab \tab \tab \tab \tab an array of tables \cr
 \code{results$sensSpecTable} \tab \tab \tab \tab \tab an array of htmls \cr
@@ -387,9 +392,9 @@ A results object containing:
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 
-\code{results$clinicalInterpretationTable$asDF}
+\code{results$outcomeCoding$asDF}
 
-\code{as.data.frame(results$clinicalInterpretationTable)}
+\code{as.data.frame(results$outcomeCoding)}
 }
 \description{
 Receiver Operating Characteristic (ROC) curve analysis with optimal

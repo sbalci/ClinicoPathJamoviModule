@@ -179,11 +179,16 @@ test_that("the never-implemented options are gone from the whole option surface"
     # Trap: a plain grep for "- name: harrellCIndex" MATCHES the commented-out line, because
     # "#     - name: harrellCIndex" contains "    - name: harrellCIndex" as a substring. Comment
     # lines are therefore stripped before anything is concluded about what is live.
+    #
+    # tiedScoreHandling joined them on 2026-10-09: its Upper / Lower choices only raised a notice
+    # and left the AUC unchanged, so it was retired for an automatic tie note with the AUC bounds.
+    # calibrationScale was drafted the same day and dropped before release (Prediction scale is the
+    # one declaration of what the values are); a stale self$options$calibrationScale would raise.
     removed <- c("harrellCIndex", "unoCStatistic", "namDagostino", "greenwoodNam",
                  "calibrationBelt", "optimismCorrection", "externalValidation",
                  "transportability", "bootstrapCutoffCI", "modelUpdating",
                  "netBenefitRegression", "incidentDynamic", "cumulativeDynamic",
-                 "competingRisksConcordance")
+                 "competingRisksConcordance", "tiedScoreHandling", "calibrationScale")
     # implemented on 2026-09-02/09-03 and deliberately still live
     live <- c("decisionImpactCurves", "eoRatio", "calibrationDensity", "bootstrapPartialAUC")
 
@@ -394,7 +399,11 @@ test_that("internal validation labels its interval honestly and fixes the probab
     html_items <- Filter(function(it) inherits(it, "Html"), pr$a$results$results$items)
     txt <- paste(vapply(html_items, function(it) it$content %||% "", character(1)), collapse = " ")
     expect_match(txt, "Internal Validation", fixed = TRUE)
-    expect_match(txt, "shifted by the optimism estimate", fixed = TRUE)
+    # The DeLong interval is labelled as the APPARENT AUC's and is no longer shifted onto the
+    # corrected AUC: an interval that ignores the optimism is not a validated interval for it.
+    expect_match(txt, "DeLong interval of the apparent AUC", fixed = TRUE)
+    expect_match(txt, "No interval is given for the corrected AUC", fixed = TRUE)
+    expect_false(grepl("shifted by the optimism estimate", txt, fixed = TRUE))
     expect_match(txt, "SD across resamples", fixed = TRUE)
     expect_false(grepl("95% CI \\[", txt))
 })

@@ -1,8 +1,10 @@
 # Regression tests from the `kappaSizePower` release review.
 #
 # The sample sizes are checked against the kappaSize package directly, not against the module's
-# own arithmetic. The module is a thin wrapper and reproduced kappaSize exactly across 540
-# swept combinations; what needed fixing was everything around the engine call.
+# own arithmetic. Since 2026-10-09 the module recomputes N with kappaSize's formula from stable
+# cells and an exact lambda (kappaSize cancels to N = 0 at p >= 0.999 with 5-6 raters, and its
+# bisection can leave N a subject off), so parity below holds only where kappaSize is
+# numerically sound; test-kappaSizePower-validation.R checks N against an independent oracle.
 
 first_line <- function(res) trimws(strsplit(res$text1$content, "\n")[[1]][1])
 # text2 is wrapped at ~78 columns at render time; compare it with line breaks collapsed

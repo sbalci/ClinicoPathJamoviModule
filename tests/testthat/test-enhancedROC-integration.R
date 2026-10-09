@@ -228,7 +228,8 @@ test_that("enhancedROC workflow: class imbalance handling", {
 test_that("enhancedROC workflow: multi-class ROC analysis", {
   data(enhancedroc_multiclass, package = "ClinicoPath")
 
-  # Multi-class workflow
+  # Multi-class workflow. No positive class (the local wrapper sends ""): the multi-class
+  # tables run on their own and the binary tables wait for a positive class.
   result <- enhancedROC(
     data = enhancedroc_multiclass,
     outcome = "disease_severity",
@@ -239,6 +240,12 @@ test_that("enhancedROC workflow: multi-class ROC analysis", {
   )
 
   expect_s3_class(result, "enhancedROCResults")
+  # one-vs-rest: one row per class (4) per predictor (3)
+  expect_equal(result$results$multiClassAUC$rowCount, 12)
+  expect_true(all(is.finite(result$results$multiClassAverage$asDF$macro_auc)))
+  expect_equal(result$results$aucSummary$rowCount, 0)
+  expect_match(paste(result$results$notices$content, collapse = " "),
+               "Binary ROC tables need a positive class", fixed = TRUE)
 })
 
 test_that("enhancedROC handles data from CSV import", {

@@ -12,9 +12,9 @@ suppressPackageStartupMessages(suppressWarnings({
 }))
 if (!exists(".")) . <- function(x, ...) x
 
-# These used to source("../../R/psychopdaROC.h.R") and ".b.R" -- capitalised paths that do not
-# exist (the files are psychopdaroc.*), so the file only loaded on a case-insensitive
-# filesystem. The package under test already provides the function.
+# These used to source("../../R/psychopdaROC.h.R") and ".b.R". The files are psychopdaROC.*
+# (mixed case; a lowercase path only resolves on a case-insensitive filesystem), and no source()
+# is needed: the package under test already provides the function.
 psychopdaROC <- ClinicoPath::psychopdaROC
 
 # Helper function to create test data
@@ -513,7 +513,7 @@ test_that("function handles insufficient variables for advanced tests", {
     ,
       refVar = NULL
     )
-  }, "Please specify at least two dependent variables")
+  }, "IDI/NRI need two tests", fixed = TRUE)
 })
 
 test_that("function handles manual cutpoint without score", {

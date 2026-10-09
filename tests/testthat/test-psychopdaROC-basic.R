@@ -1,6 +1,6 @@
-# `positiveClass` and `refVar` are `type: Level` options. The jamovi compiler forbids a default
-# on a Level, so both compile to REQUIRED arguments of the generated wrapper even though the
-# analysis runs perfectly well without a reference variable. This helper supplies just those two.
+# `positiveClass` is a `type: Level` option. The jamovi compiler forbids a default on a Level, so
+# it compiles to a REQUIRED argument of the generated wrapper; this helper supplies just that one.
+# (`refVar`, Reference Test for IDI/NRI, is a `type: Variable` with a NULL default since 2026-10-09.)
 #
 # It used to fill EVERY argument that had no default with "" -- including `dependentVars` and
 # `classVar` -- so a test that forgot a genuinely required variable was silently handed an empty
@@ -8,7 +8,6 @@
 psychopdaROC <- function(...) {
   args <- list(...)
   if (!("positiveClass" %in% names(args))) args$positiveClass <- ""
-  if (!("refVar" %in% names(args))) args["refVar"] <- list(NULL)  # [[<- would drop the element
   do.call(ClinicoPath::psychopdaROC, args)
 }
 
@@ -25,9 +24,11 @@ test_that("psychopdaROC creates proper class", {
   result <- psychopdaROC(
     data = psychopdaROC_test,
     dependentVars = "biomarker",
-    classVar = "disease_status"
+    classVar = "disease_status",
+    positiveClass = "Disease"
   )
   expect_s3_class(result, "psychopdaROCResults")
+  expect_equal(result$aucSummaryTable$rowCount, 1)
 })
 
 test_that("psychopdaROC handles basic ROC analysis", {
@@ -112,9 +113,11 @@ test_that("psychopdaROC handles different optimization metrics", {
       data = psychopdaROC_test,
       dependentVars = "biomarker",
       classVar = "disease_status",
+      positiveClass = "Disease",
       metric = m
     )
     expect_s3_class(result, "psychopdaROCResults")
+    expect_equal(result$resultsTable$get(key = "biomarker")$rowCount, 1, info = m)
   }
 })
 
@@ -124,18 +127,22 @@ test_that("psychopdaROC handles clinical mode selection", {
     data = psychopdaROC_test,
     dependentVars = "biomarker",
     classVar = "disease_status",
+    positiveClass = "Disease",
     clinicalMode = "basic"
   )
   expect_no_error(result_basic)
+  expect_equal(result_basic$aucSummaryTable$rowCount, 1)
 
   # Advanced mode
   result_advanced <- psychopdaROC(
     data = psychopdaROC_test,
     dependentVars = "biomarker",
     classVar = "disease_status",
+    positiveClass = "Disease",
     clinicalMode = "advanced"
   )
   expect_no_error(result_advanced)
+  expect_equal(result_advanced$aucSummaryTable$rowCount, 1)
 })
 
 test_that("the removed clinical-preset option is gone from the schema", {

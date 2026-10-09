@@ -24,11 +24,22 @@ children:
             name: classVar
             maxItemCount: 1
             isTarget: true
+          - type: LevelSelector
+            name: positiveClass
+            label: Positive Class
+            enable: (classVar)
       - type: TargetLayoutBox
         label: Group Variable (Optional)
         children:
           - type: VariablesListBox
             name: subGroup
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Reference Test for IDI/NRI (Optional)
+        children:
+          - type: VariablesListBox
+            name: refVar
             maxItemCount: 1
             isTarget: true
 
@@ -68,10 +79,6 @@ children:
       - type: LayoutBox
         margin: large
         children:
-          - type: LevelSelector
-            name: positiveClass
-            label: Positive Class
-            enable: (classVar)
           - type: CheckBox
             name: usePriorPrev
             label: Adjust for population prevalence (use prior prevalence)
@@ -380,10 +387,6 @@ children:
           - type: CheckBox
             name: calculateNRI
             label: NRI (net reclassification index)
-          - type: LevelSelector
-            name: refVar
-            label: Reference Variable
-            enable: (calculateIDI || calculateNRI)
           - type: TextBox
             name: nriThresholds
             format: string

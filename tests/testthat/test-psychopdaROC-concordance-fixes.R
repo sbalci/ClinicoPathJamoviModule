@@ -117,6 +117,27 @@ test_that("AUC verbal bands match enhancedROC across the whole range", {
     }
 })
 
+test_that("AUC bands read the AUC as displayed, also exactly at a band edge", {
+    # 10 controls at 1..10 and k/10 cases above all of them (the rest below), so the AUC is
+    # exactly k/100. It computes as 0.6999999999999998 and the like, which prints as 0.700 but
+    # used to be read one band too low ("Good" beside a printed 0.900).
+    words <- c(`90` = "Excellent", `80` = "Good", `70` = "Fair")
+    for (k in c(90, 80, 70)) {
+        d <- data.frame(y = factor(rep(c("N", "P"), each = 10), levels = c("N", "P")),
+                        m = c(1:10, rep(11, k / 10), rep(0, 10 - k / 10)))
+        want <- words[[as.character(k)]]
+        P <- pc_run(data = d, classVar = "y", dependentVars = "m", positiveClass = "P", refVar = NULL)
+        ci <- as.data.frame(P$clinicalInterpretationTable)
+        expect_equal(as.numeric(as.data.frame(P$aucSummaryTable)$auc[1]), k / 100, tolerance = 1e-12)
+        expect_identical(as.character(ci$performance_level[1]), want, info = paste("AUC", k / 100))
+        expect_match(ci$interpretation_text[1], paste("indicating", tolower(want)), fixed = TRUE)
+        E <- suppressWarnings(do.call(ClinicoPath::enhancedROC, list(
+            data = d, outcome = "y", predictors = "m", positiveClass = "P", direction = "higher")))
+        expect_identical(as.character(as.data.frame(E$results$aucSummary)$auc_interpretation[1]), want,
+                         info = paste("enhancedROC, AUC", k / 100))
+    }
+})
+
 test_that("neither analysis calls a below-0.5 marker 'reversed' from the point estimate alone", {
     # Under the null the AUC is symmetric about 0.5, so ~49% of uninformative markers land below
     # it by chance (simulated). Asserting reversal there would tell users to flip Direction on

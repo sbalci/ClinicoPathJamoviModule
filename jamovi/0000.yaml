@@ -1485,7 +1485,7 @@ analyses:
   - title: Power Approach for the Number of Subjects Required
     name: kappaSizePower
     ns: ClinicoPath
-    menuGroup: Power
+    menuGroup: PowerT
     menuSubgroup: Power Analysis by meddecide
     menuTitle: Power Approach for the Number of Subjects Required
     menuSubtitle: Find sample size based on power

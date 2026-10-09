@@ -88,7 +88,7 @@ clinicopath_error_handler <- function(error, function_name = "unknown", clinical
     if (clinical_context != "") {
         cat("Clinical Context:", clinical_context, "\n")
     }
-    cat("Timestamp:", format(Sys.time(), "%Y-%m-%d %H:%M:%S"), "\n")
+    cat("Timestamp:", base::format(Sys.time(), "%Y-%m-%d %H:%M:%S"), "\n")  # base: jmvcore's format() masks it here
     cat("Error ID:", .clinicopath_errors$error_count, "\n")
     cat("=== End Error Report ===\n\n")
     
@@ -136,7 +136,7 @@ clinicopath_warning_handler <- function(warning, function_name = "unknown", clin
     if (clinical_context != "") {
         cat("Clinical Context:", clinical_context, "\n")
     }
-    cat("Timestamp:", format(Sys.time(), "%Y-%m-%d %H:%M:%S"), "\n")
+    cat("Timestamp:", base::format(Sys.time(), "%Y-%m-%d %H:%M:%S"), "\n")  # base: jmvcore's format() masks it here
     cat("=== End Warning Report ===\n\n")
     
     return(list(

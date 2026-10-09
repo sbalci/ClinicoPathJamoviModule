@@ -25,13 +25,24 @@
   Optimism-corrected performance is available through `internalValidation` with
   `validationMethod = "bootstrap"`.
 
+- **Date**: 2026-10-09
+- **Summary**: Fixes from the 2026-10-09 validation (`development-ideas/enhancedROC-validation-2026-10-09.md`).
+  `positiveClass` now has `allowNone`: the box starts empty and the positive class is never taken from
+  level order. Only a numeric outcome coded 0/1 defaults (1 = positive); any other outcome waits for a
+  choice, and the new **Outcome coding** table (`results$outcomeCoding`) lists every level with its
+  N, its role and notes saying what sensitivity, PPV and the AUC refer to. `tiedScoreHandling` is
+  retired (ties always count one half; an automatic note under the AUC table gives the bounds), and
+  passing it is an "unused argument" error. `predictionScale` now also decides what calibration, the
+  Brier score, E/O, Hosmer-Lemeshow and the decision and clinical impact curves read: Score (default)
+  fits a logistic model of the marker; values between 0 and 1 are no longer assumed to be probabilities.
+
 ## 2. Options Reference (`.a.yaml`)
 
 | Option | Type | Default | Description |
 | :--- | :--- | :--- | :--- |
 | `data` | `Data` | `NULL` |  |
 | `outcome` | `Variable` | `NULL` | Outcome Variable |
-| `positiveClass` | `Level` | `NULL` | Positive Class |
+| `positiveClass` | `Level` | `NULL` (allowNone) | Positive class; never inferred from level order (numeric 0/1 outcome: 1) |
 | `predictors` | `Variables` | `NULL` | Predictor Variables |
 | `analysisType` | `List` | `single` | Analysis Type |
 | `direction` | `List` | `auto` | Direction |
@@ -61,7 +72,6 @@
 | `crocAnalysis` | `Bool` | `FALSE` | CROC analysis |
 | `crocAlpha` | `Number` | `7` | CROC Alpha Parameter |
 | `convexHull` | `Bool` | `FALSE` | ROC convex hull |
-| `tiedScoreHandling` | `List` | `average` | Tied Score Handling |
 | `detectImbalance` | `Bool` | `FALSE` | Detect class imbalance |
 | `imbalanceThreshold` | `Number` | `3` | Imbalance Threshold |
 | `showImbalanceWarning` | `Bool` | `FALSE` | Imbalance warning |
@@ -80,6 +90,7 @@
 | `showMetricsDiff` | `Bool` | `FALSE` | Metrics differences |
 | `statisticalComparison` | `Bool` | `FALSE` | Statistical model comparison |
 | `calibrationAnalysis` | `Bool` | `FALSE` | Calibration analysis |
+| `predictionScale` | `List` | `score` | Prediction scale (score or probability of the positive class) |
 | `calibrationPlot` | `Bool` | `FALSE` | Calibration plot |
 | `hosmerLemeshow` | `Bool` | `FALSE` | Hosmer-Lemeshow test |
 | `hlGroups` | `Integer` | `10` | Risk groups |

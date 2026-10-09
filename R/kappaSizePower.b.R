@@ -14,6 +14,10 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
         #   paste0(sep=) misuse and binary-branch proportion drop fixed.
         # Resolved 2026-08-23 (review): Notes panel, goodness-of-fit sparse-cell rule,
         #   degenerate-design warnings, i18n wrapping of every user-facing string.
+        # Resolved 2026-10-09 (validation, development-ideas/kappaSizePower-validation-2026-10-09.md):
+        #   N recomputed from stable cells + exact lambda (VAL-01/03), plain-digit panes (VAL-04),
+        #   1-df test named in Methodology (VAL-02), 0.05 gap boundary (VAL-05), small-N wording
+        #   (VAL-06), power-approach sources cited (VAL-07).
 
         # Split the proportions string into numbers. Same format as the siblings
         # (R/kappaSizeFixedN.b.R:.parsePropTokens): commas, semicolons, pipes or whitespace
@@ -140,7 +144,9 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             # and a nearby value as kappa0, where kappa0 should be the agreement to rule out.
             # Worded as "difference", not "improvement", because the swap note above may have
             # just told the user that kappa1 below kappa0 is a legitimate design.
-            if (abs(kappa1 - kappa0) < 0.05) {
+            # A gap typed as exactly 0.05 computes as 0.0499999... (0.45 - 0.40), which fired this
+            # notice at its own threshold for 6 of 10 typed pairs; the tolerance keeps it out.
+            if (abs(kappa1 - kappa0) < 0.05 - 1e-9) {
                 warn <- paste0(warn, block(warn_div,
                     .("Small kappa difference."),
                     .fmt(
@@ -162,11 +168,14 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             # The option ranges still admit designs the method cannot size: alpha just below
             # power gives "A minimum of 2 subjects", kappa 0.01 vs 0.99 gives 1. The engine
             # converges on these instantly, so they have to be caught by their result.
+            # No direction is claimed: this used to say "a lower bound", but exact enumeration of
+            # every two-rater design below 10 subjects found the figure too HIGH (power 0.95-0.99
+            # at N = 9, nominal power first reached at N = 5).
             if (has_n && n_required < 10) {
                 warn <- paste0(warn, block(warn_div,
                     .("Very small sample size."),
                     .fmt(
-                        .("The required sample size is only {n} {subjects}. The large-sample approximation behind this method does not hold for such small studies; treat the figure as a lower bound, not a plan."),
+                        .("The required sample size is only {n} {subjects}. The large-sample approximation behind this method does not hold for such small studies, so the figure is only approximate; treat it as a rough guide, not a plan."),
                         n = private$.fmtN(n_required), subjects = private$.subjects(n_required))))
             }
 
@@ -229,9 +238,27 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     if (!pattern_shown) remedy))
             }
 
+            # The noncentrality has one degree of freedom for every design, so N is calibrated to a
+            # 1-df test of kappa. Simulated under the engine's own model at the shown N, a
+            # likelihood-ratio test of kappa had nominal size and power 0.78-0.84 (2-6 raters,
+            # binary and 3-5 categories), but with three or more raters the chi-square over all
+            # agreement patterns read on 1 df rejected a true kappa0 10-65% of the time at a
+            # nominal 5% (development-ideas/kappaSizePower-validation-2026-10-09.md, VAL-02).
+            # Sources: Donner & Eliasziw 1992 (two raters, binary); Altaye, Donner & Klar 2001 and
+            # Altaye, Donner & Eliasziw 2001 (more raters, more categories). Rotondi & Donner 2012
+            # is the confidence-interval paper that introduced kappaSize.
             info <- block(info_div,
                 .("Methodology."),
-                .("Power-based sample size for a two-sided test of H0: kappa = kappa0 against H1: kappa = kappa1, for the unweighted (nominal-category) kappa coefficient, using the goodness-of-fit (non-central chi-square) approach implemented in the kappaSize package (Rotondi and Donner)."),
+                .("Power-based sample size for a two-sided test of H0: kappa = kappa0 against H1: kappa = kappa1, for the unweighted (nominal-category) kappa coefficient, using the goodness-of-fit (non-central chi-square) approach of Donner and Eliasziw and of Altaye and colleagues, as implemented in the kappaSize package (Rotondi and Donner)."),
+                .("The sample size is for a test of kappa with one degree of freedom, such as a likelihood-ratio test."),
+                if (isTRUE(raters >= 3))
+                    .("With three or more raters, a chi-square computed over all agreement patterns and read on one degree of freedom is not such a test: it rejects a true kappa0 much more often than the stated significance level."),
+                # VAL-08: PowerBinary's cells for 3+ raters are a mixture (all raters copy one call
+                # with probability kappa), while the 3-5 category engines are Dirichlet-multinomial.
+                # At the same kappa a beta-binomial model gives 0.89 to 12.5 times FEWER subjects
+                # than the shown N (median 1.21; 160 designs), so no direction is claimed.
+                if (isTRUE(outcome == 2L && raters >= 3))
+                    .("For a binary outcome with three or more raters the calculation assumes kappaSize's model of rater dependence: with probability kappa every rater gives the same call, otherwise the raters rate independently. Other models with the same kappa, such as the beta-binomial, can need a markedly different number of subjects."),
                 .("It does not apply to weighted kappa for ordered grades; for an ordinal grading study either treat the grades as nominal categories or use a dedicated weighted-kappa method."),
                 .("It answers 'how many subjects do I need to reject kappa0 in favour of kappa1?' - not how precisely kappa will be estimated; for a target interval width use kappaSizeCI instead."),
                 .("Note that kappa0 here is the null hypothesis value, whereas in kappaSizeCI and kappaSizeFixedN it is the agreement you anticipate observing."),
@@ -371,6 +398,35 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                             error = conditionMessage(e)),
                         code = "kappasize_error"))
 
+            # --- Recompute N from stable cells and an exact noncentrality -----
+            # Same formula as kappaSize, N = lambda / sum((P1 - P0)^2 / P0), evaluated where the
+            # engine is numerically fragile. PowerBinary expands its cells as polynomials in
+            # props[1]: with 5-6 raters and the COMMON category typed first (p >= 0.999) a cell
+            # cancels to exactly 0 and N came back as 0 ("0.9999, 0.0001", 5 raters: "0 subjects"
+            # where the design needs 181,129) or NaN (an R error from print()). Its lambda is a
+            # bisection stopped at a CDF error of 1e-5, so N also carried a relative error up to
+            # ~1e-4 and could be a subject off at large N. kappaSizeGofCells() is the binomial /
+            # Dirichlet-multinomial form of the same cells (no cancellation; symmetric in p and
+            # 1 - p), and lambda is solved to 1e-12. Checked against an independent oracle on 900
+            # designs: development-ideas/kappaSizePower-validation-2026-10-09.md (VAL-01, VAL-03).
+            P0 <- kappaSizeGofCells(outcome, raters, props, kappa0)
+            P1 <- kappaSizeGofCells(outcome, raters, props, kappa1)
+            crit <- stats::qchisq(1 - alpha, 1)
+            lambda <- stats::uniroot(
+                function(l) stats::pchisq(crit, 1, ncp = l) - (1 - power),
+                c(0, 100), tol = 1e-12)$root
+            result$N <- lambda / sum((P1 - P0)^2 / P0)
+            # Only a proportion small enough to underflow a cell (props "1e-200") gets here.
+            if (!isTRUE(is.finite(result$N) && result$N > 0))
+                jmvcore::reject(
+                    .("The sample size could not be computed: a proportion is too close to 0 for the agreement-pattern probabilities to be evaluated. Check the proportions."),
+                    code = "n_not_computable")
+
+            # kappaSize's print() and summary() write N with cat(), which prints a round 100000 as
+            # "1e+05" (VAL-04); scipen keeps both panes in plain digits.
+            op <- options(scipen = 999)
+            on.exit(options(op), add = TRUE)
+
             # --- Populate outputs ---------------------------------------------
             # print() gives the headline sentence ("A minimum of N subjects ..."); summary()
             # repeats it and adds the study parameters. The engine prints its cell-count warning
@@ -404,7 +460,7 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 else ""))
 
             # Cochran's rule on the expected counts at N: no cell below 1, at most 20% below 5.
-            e      <- kappaSizeGofCells(outcome, raters, props, kappa0) * as.numeric(result$N)
+            e      <- P0 * as.numeric(result$N)
             sparse <- is.finite(n_required) && (any(e < 1) || mean(e < 5) > 0.2)
 
             # Expected count of each OUTCOME category at N -- the quantity the engine's own

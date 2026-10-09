@@ -17,6 +17,12 @@
 - **Date**: 2026-08-29
 - **Summary**: Comprehensive documentation suite created & verified against active schemas and backend implementation.
 
+- **Date**: 2026-10-09
+- **Summary**: `positiveClass` now has `allowNone`: the box starts empty and the last level is no longer
+  assumed. Nothing is computed until a level is chosen; the new **Outcome coding** table
+  (`results$outcomeCoding`) lists every class level with its N and role, and the notes that used to
+  suggest flipping Classification direction now say to check Positive class first.
+
 ## 2. Options Reference (`.a.yaml`)
 
 | Option | Type | Default | Description |
@@ -27,7 +33,7 @@
 | `data` | `Data` | `NULL` |  |
 | `dependentVars` | `Variables` | `NULL` | Test Variables |
 | `classVar` | `Variable` | `NULL` | Class Variable (Gold Standard) |
-| `positiveClass` | `Level` | `NULL` | Positive Class |
+| `positiveClass` | `Level` | `NULL` (allowNone) | Positive class; required, never inferred from level order |
 | `subGroup` | `Variable` | `NULL` | Subgroup Variable (Optional) |
 | `method` | `List` | `maximize_metric` | Cutpoint Method |
 | `metric` | `List` | `youden` | Optimization Metric |

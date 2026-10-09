@@ -31,13 +31,34 @@ options:
       permitted:
           - factor
           - numeric
-      description: 'Binary outcome variable (disease status)'
+      description: >
+        Outcome variable (disease status). A factor with two levels, or with more than two
+        (choose one as Positive class and the others are pooled as negative, or use
+        Multi-class ROC). A numeric outcome must have exactly two values; 0/1 reads 1 as
+        positive.
 
+    # allowNone: without it the jamovi client pre-selects levels[0] - usually the NEGATIVE
+    # level - and the whole analysis runs reversed. The positive class is never inferred.
     - name: positiveClass
       title: 'Positive class'
       type: Level
       variable: (outcome)
-      description: 'Select which level represents the positive class (disease/condition present)'
+      allowNone: true
+      description:
+          ui: >
+            Choose the outcome level that means the condition is present (for example
+            Malignant). Required for a nominal or ordinal outcome: levels are never chosen
+            from their order. A numeric outcome coded 0/1 is read as 1 = positive without a
+            choice; for any other numeric coding, set the outcome's measure type to Nominal in
+            Data > Setup so its values are listed here. Every other level is analysed as
+            negative. The Outcome coding table shows which level was used and how.
+          R: >
+            Level of outcome treated as the positive class (condition present), matched
+            exactly. Pass NULL to leave it unset: a numeric outcome coded 0/1 then reads 1 as
+            positive, and any other outcome leaves the analysis waiting for a choice, because
+            levels are never chosen from their order. Every other level is analysed as
+            negative (pooled when there are more than two). A numeric outcome must have
+            exactly two values; to choose among more, make it a factor.
 
     - name: predictors
       title: 'Predictor variables'
@@ -198,10 +219,14 @@ options:
             name: delong
           - title: 'Bootstrap'
             name: bootstrap
-          - title: 'Venkatraman (2000)'
+          - title: 'Venkatraman permutation test (equality of ROC curves)'
             name: venkatraman
       default: delong
-      description: 'Method for comparing ROC curves'
+      description: >
+        Method for comparing ROC curves. DeLong et al. (1988) and Bootstrap test whether the
+        two AUCs differ. The Venkatraman permutation test (Venkatraman & Begg 1996, paired
+        data) tests whether the two ROC curves are identical over their whole range, not
+        whether their AUCs differ.
 
     # Output Options
     - name: rocCurve
@@ -296,20 +321,21 @@ options:
       title: "ROC convex hull"
       type: Bool
       default: false
-      description: 'Calculate ROC convex hull (optimal achievable performance)'
+      description: 'Calculate the ROC convex hull (operating points reachable by randomly mixing two cut-offs; in-sample, so optimistic)'
 
-    - name: tiedScoreHandling
-      title: 'Tied score handling'
-      type: List
-      options:
-          - title: 'Average'
-            name: average
-          - title: 'Upper Bound'
-            name: upper
-          - title: 'Lower Bound'
-            name: lower
-      default: average
-      description: 'Method for handling tied predictor scores in ROC calculation'
+    # RETIRED - replaced by an automatic tie note under the AUC table (ties always count one half; the note gives the bounds).
+#     - name: tiedScoreHandling
+#       title: 'Tied score handling'
+#       type: List
+#       options:
+#           - title: 'Average'
+#             name: average
+#           - title: 'Upper Bound'
+#             name: upper
+#           - title: 'Lower Bound'
+#             name: lower
+#       default: average
+#       description: 'Method for handling tied predictor scores in ROC calculation'
 
     # Imbalance Detection Options
     - name: detectImbalance
@@ -504,10 +530,12 @@ options:
       default: false
       description: >
         Fit a flexible calibration curve by logistic regression of the outcome on a natural
-        cubic spline of the logit of the predicted probability (Austin & Steyerberg 2019).
-        Adds the smooth curve to the calibration plot and the integrated calibration index
-        (ICI, the mean absolute difference between the curve and the diagonal) with E50, E90
-        and Emax to the calibration summary. Requires calibrationAnalysis.
+        cubic spline of the logit of the predicted probability, a variant of the flexible
+        calibration curves of Austin & Steyerberg (2019), who used loess and restricted cubic
+        splines on the probability scale. Adds the smooth curve to the calibration plot and
+        the integrated calibration index (ICI, the mean absolute difference between the curve
+        and the diagonal) with E50, E90 and Emax to the calibration summary. Requires
+        calibrationAnalysis.
 
     - name: splineKnots
       title: 'Number of knots'
@@ -842,6 +870,15 @@ options:
         title: Score
       - name: probability
         title: Probability of selected positive class
+      description: >
+        What the predictor values are. Score (default) is any marker or model score: the
+        calibration summary and plot, Brier score, E/O ratio, Hosmer-Lemeshow test and the
+        decision and clinical impact curves then use risks from a logistic model of the score
+        fitted to these data (in-sample). Probability means the values are predicted
+        probabilities of the selected positive class, assessed as supplied; a predictor with a
+        value outside 0 to 1 gets none of those outputs, and a probability is never reversed.
+        Values between 0 and 1 are not taken as probabilities unless this says so. Frozen-model
+        validation uses the same setting.
     - name: patientID
       title: Patient identifier
       type: Variable

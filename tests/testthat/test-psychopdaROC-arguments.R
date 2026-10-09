@@ -1,6 +1,6 @@
-# `positiveClass` and `refVar` are `type: Level` options. The jamovi compiler forbids a default
-# on a Level, so both compile to REQUIRED arguments of the generated wrapper even though the
-# analysis runs perfectly well without a reference variable. This helper supplies just those two.
+# `positiveClass` is a `type: Level` option. The jamovi compiler forbids a default on a Level, so
+# it compiles to a REQUIRED argument of the generated wrapper; this helper supplies just that one.
+# (`refVar`, Reference Test for IDI/NRI, is a `type: Variable` with a NULL default since 2026-10-09.)
 #
 # It used to fill EVERY argument that had no default with "" -- including `dependentVars` and
 # `classVar` -- so a test that forgot a genuinely required variable was silently handed an empty
@@ -8,7 +8,6 @@
 psychopdaROC <- function(...) {
   args <- list(...)
   if (!("positiveClass" %in% names(args))) args$positiveClass <- ""
-  if (!("refVar" %in% names(args))) args["refVar"] <- list(NULL)  # [[<- would drop the element
   do.call(ClinicoPath::psychopdaROC, args)
 }
 
@@ -28,9 +27,11 @@ test_that("psychopdaROC respects different cutpoint methods", {
       data = psychopdaROC_test,
       dependentVars = "biomarker",
       classVar = "disease_status",
+      positiveClass = "Disease",
       method = method
     )
     expect_s3_class(result, "psychopdaROCResults")
+    expect_equal(result$resultsTable$get(key = "biomarker")$rowCount, 1, info = method)
   }
 })
 
@@ -50,10 +51,12 @@ test_that("psychopdaROC respects manual cutpoint", {
     data = psychopdaROC_test,
     dependentVars = "biomarker",
     classVar = "disease_status",
+    positiveClass = "Disease",
     method = "oc_manual",
     specifyCutScore = "60"
   )
   expect_s3_class(result, "psychopdaROCResults")
+  expect_equal(as.numeric(result$resultsTable$get(key = "biomarker")$asDF$cutpoint), 60)
 })
 
 test_that("psychopdaROC respects tie-breaking methods", {
@@ -64,9 +67,11 @@ test_that("psychopdaROC respects tie-breaking methods", {
       data = psychopdaROC_test,
       dependentVars = "biomarker",
       classVar = "disease_status",
+      positiveClass = "Disease",
       break_ties = tie_method
     )
     expect_s3_class(result, "psychopdaROCResults")
+    expect_equal(result$resultsTable$get(key = "biomarker")$rowCount, 1, info = tie_method)
   }
 })
 
@@ -75,9 +80,11 @@ test_that("psychopdaROC respects metric tolerance", {
     data = psychopdaROC_test,
     dependentVars = "biomarker",
     classVar = "disease_status",
+    positiveClass = "Disease",
     tol_metric = 0.1
   )
   expect_s3_class(result, "psychopdaROCResults")
+  expect_equal(result$resultsTable$get(key = "biomarker")$rowCount, 1)
 })
 
 test_that("psychopdaROC handles bootstrapped methods", {
@@ -85,9 +92,11 @@ test_that("psychopdaROC handles bootstrapped methods", {
     data = psychopdaROC_test,
     dependentVars = "biomarker",
     classVar = "disease_status",
+    positiveClass = "Disease",
     method = "maximize_boot_metric"
   )
   expect_s3_class(result, "psychopdaROCResults")
+  expect_equal(result$resultsTable$get(key = "biomarker")$rowCount, 1)
 })
 
 test_that("psychopdaROC handles LOESS smoothed methods", {
@@ -95,9 +104,11 @@ test_that("psychopdaROC handles LOESS smoothed methods", {
     data = psychopdaROC_test,
     dependentVars = "biomarker",
     classVar = "disease_status",
+    positiveClass = "Disease",
     method = "maximize_loess_metric"
   )
   expect_s3_class(result, "psychopdaROCResults")
+  expect_equal(result$resultsTable$get(key = "biomarker")$rowCount, 1)
 })
 
 test_that("psychopdaROC handles cost-benefit optimization", {
@@ -116,8 +127,10 @@ test_that("psychopdaROC handles different metrics with minimize method", {
     data = psychopdaROC_test,
     dependentVars = "biomarker",
     classVar = "disease_status",
+    positiveClass = "Disease",
     method = "minimize_metric",
     metric = "abs_d_sens_spec"
   )
   expect_s3_class(result, "psychopdaROCResults")
+  expect_equal(result$resultsTable$get(key = "biomarker")$rowCount, 1)
 })

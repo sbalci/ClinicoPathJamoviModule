@@ -115,18 +115,29 @@ test_that("declaring the right direction leaves no backwards-marker error on scr
     expect_false(grepl("opposite direction", er_strip(r$results$notices$content), fixed = TRUE))
 })
 
-test_that("calibration also respects direction for a [0,1] marker", {
+test_that("a declared probability is used as supplied, never flipped by the direction", {
+    # Since 2026-10-09 values are read as risks only when Prediction scale = Probability declares
+    # them so (the default Score scale fits a logistic model instead; a [0,1] range alone no longer
+    # makes a marker a risk). A declared probability IS the risk of the positive class, so Direction
+    # cannot turn `lo` into `1 - lo`: its Brier score stays that of the values as given (0.519
+    # against 0.157 for `hi`), and reading a probability with lower values as positive is flagged.
     d <- mirrored_data()
-    brier <- function(v, dir) as.numeric(as.data.frame(er_run(
+    y <- as.integer(d$y == "P")
+    run <- function(v, dir) er_run(
         data = d, outcome = "y", predictors = v, positiveClass = "P", direction = dir,
-        calibrationAnalysis = TRUE, calibrationMetrics = TRUE,
-        brierScore = TRUE)$results$calibrationSummary)$brier_score[1])
-    expect_equal(brier("hi", "higher"), brier("lo", "lower"), tolerance = 1e-9)
-    expect_equal(brier("lo", "auto"),   brier("lo", "lower"), tolerance = 1e-9)
-    # Brier is a calibration loss, not a rank statistic, so it is NOT mirror-invariant by itself:
-    # read `lo` the way it was declared and it really is a bad risk (0.519 against 0.157). That
-    # is the right answer, not a defect - the flip belongs to the declared direction, not to Brier.
-    expect_gt(brier("lo", "higher"), 0.5)
+        calibrationAnalysis = TRUE, calibrationMetrics = TRUE, brierScore = TRUE,
+        predictionScale = "probability")
+    brier <- function(r) as.numeric(as.data.frame(r$results$calibrationSummary)$brier_score[1])
+    flagged <- function(r) grepl("Probabilities read with lower values as positive",
+                                 er_strip(r$results$notices$content), fixed = TRUE)
+    lo <- run("lo", "lower"); hi <- run("hi", "higher"); lo_auto <- run("lo", "auto")
+    expect_equal(brier(lo), mean((d$lo - y)^2), tolerance = 1e-9)
+    expect_gt(brier(lo), 0.5)
+    expect_equal(brier(lo_auto), brier(lo), tolerance = 1e-9)   # auto resolves to ">" here: same values
+    expect_equal(brier(hi), mean((d$hi - y)^2), tolerance = 1e-9)
+    expect_true(flagged(lo))
+    expect_true(flagged(lo_auto))
+    expect_false(flagged(hi))
 })
 
 test_that("fixed score impact does not interpret scores as calibrated risks", {
@@ -343,13 +354,14 @@ test_that("calibration slope is withheld for a predictor we had to model ourselv
 })
 
 test_that("a real probability predictor still gets a real calibration slope", {
+    # Declared as probabilities (Prediction scale = Probability), not inferred from the [0,1] range.
     set.seed(9)
     p <- runif(300)
     y <- rbinom(300, 1, p)
     d <- data.frame(y = factor(ifelse(y == 1, "P", "N"), levels = c("N", "P")), risk = p)
     cs <- as.data.frame(er_run(data = d, outcome = "y", predictors = "risk", positiveClass = "P",
                                calibrationAnalysis = TRUE, calibrationMetrics = TRUE,
-                               brierScore = TRUE)$results$calibrationSummary)
+                               brierScore = TRUE, predictionScale = "probability")$results$calibrationSummary)
     slope <- as.numeric(cs$calibration_slope[1])
     expect_true(is.finite(slope))
     expect_gt(slope, 0.5)

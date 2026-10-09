@@ -23,6 +23,31 @@ items:
       type: Html
       visible: true
 
+    # Which class level is the positive class, and why (filled by .rocOutcomeCoding()).
+    # rows: 0 - one row per observed level, added in .run() after .deleteTableRows().
+    - name: outcomeCoding
+      title: 'Outcome coding: which level is positive'
+      type: Table
+      description: Class levels with their counts and the role each plays in the analysis
+      rows: 0
+      visible: (classVar)
+      clearWith:
+          - classVar
+          - positiveClass
+          - dependentVars
+          - subGroup
+          - direction
+      columns:
+        - name: level
+          title: Outcome level
+          type: text
+        - name: n
+          title: N
+          type: integer
+        - name: role
+          title: Role in this analysis
+          type: text
+
     - name: clinicalInterpretationTable
       title: Clinical Interpretation
       type: Table

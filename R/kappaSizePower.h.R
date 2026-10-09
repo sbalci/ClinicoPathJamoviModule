@@ -113,7 +113,9 @@ kappaSizePowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "ClinicoPathJamoviModule",
                     "kappaSize",
                     "rotondiDonnerKappaCI",
-                    "donnerEliasziwKappaGOF"))
+                    "donnerEliasziwKappaGOF",
+                    "altayeDonnerKlarKappaRaters",
+                    "altayeDonnerEliasziwKappaGOF"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="notices",

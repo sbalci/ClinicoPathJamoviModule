@@ -42,10 +42,11 @@
 #' @param data A data frame containing the variables for analysis
 #' @param dependentVars Character vector of test variable names to evaluate.
 #'   Multiple variables can be specified for comparison.
-#' @param classVar Name of the binary classification variable (gold standard).
-#'   Must have exactly two levels.
-#' @param positiveClass Which level of classVar represents the positive class.
-#'   If not specified, the first level is used.
+#' @param classVar Name of the classification variable (gold standard). With more
+#'   than two levels the positive class is compared with all other levels combined.
+#' @param positiveClass Which level of classVar represents the positive class
+#'   (condition present). Required: with NULL nothing is computed; levels are
+#'   never inferred from their order.
 #' @param subGroup Optional grouping variable for stratified analysis.
 #' @param method Cutpoint optimization method. Options include:
 #' - "maximize_metric": Maximize the specified metric
@@ -270,7 +271,6 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
       .samplePrevalenceList = list(),
       .aucList = list(), # Store AUC values for clinical interpretation
       .runSummaryHead = NULL, # Fixed part of the Analysis Status box, built in .run(); see .renderRunSummary
-      .assumedPositiveClass = NULL, # Set when no positive class was chosen and one was guessed
       .delongUsedFallback = FALSE, # TRUE when the pROC DeLong path failed and the local fallback ran; the table note reports which
       .modeInstructionsHtml = "", # Guidance text built by .applyClinicalModeSettings() and
       # appended to Procedure Notes by .run(). It is NOT written to `instructions`: .init()
@@ -385,18 +385,18 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
       # Standardized error handling with user-friendly messages
       .throwError = function(error_type, details = "", suggestion = "") {
         error_messages <- list(
-          "insufficient_data" = "Insufficient data for analysis",
-          "missing_positive_class" = "Specified positive class not found",
-          "invalid_cutpoint" = "Invalid cutpoint specification",
-          "insufficient_variables" = "Insufficient variables for comparison",
-          "data_mismatch" = "Data dimensions do not match",
-          "analysis_failed" = "Analysis calculation failed"
+          "insufficient_data" = .("Insufficient data for analysis"),
+          "missing_positive_class" = .("Specified positive class not found"),
+          "invalid_cutpoint" = .("Invalid cutpoint specification"),
+          "insufficient_variables" = .("Insufficient variables for comparison"),
+          "data_mismatch" = .("Data dimensions do not match"),
+          "analysis_failed" = .("Analysis calculation failed")
         )
 
-        base_message <- error_messages[[error_type]] %||% "An error occurred"
-        full_message <- paste(base_message, details)
+        base_message <- error_messages[[error_type]] %||% .("An error occurred")
+        full_message <- if (nzchar(details)) paste0(base_message, ": ", details) else base_message
         if (suggestion != "") {
-          full_message <- paste(full_message, "\nSuggestion:", suggestion)
+          full_message <- paste0(full_message, " \n", .("Suggestion:"), " ", suggestion)
         }
 
         jmvcore::reject(full_message)
@@ -409,6 +409,13 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           return(x)
         }
         as.character(x)
+      },
+
+      # The whole class column as 1 (positive) / 0 (negative) / NA (missing), row-aligned with the
+      # markers. An explicit NA level (addNA) is missing, not negative - factor `==` maps it to a
+      # sentinel and returns FALSE - as in .prepareVarData() and the Outcome coding table.
+      .classIndicator = function(data, positiveClass) {
+        as.numeric(factor(data[[private$.escapeVar(self$options$classVar)]], exclude = NA) == positiveClass)
       },
 
       # ============================================================================
@@ -475,6 +482,9 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         # "reversed" would invite the user to flip Direction - and with it the cutpoint,
         # sensitivity and specificity - on noise. The confidence interval in aucSummaryTable
         # is what settles it, and the below-0.5 note there says so.
+        # Band the value as displayed (3 dp): an AUC of exactly 80/100 computes as
+        # 0.7999999999999999 and read "Fair" beside a printed 0.800.
+        auc <- round(auc, 3)
         if (auc >= 0.9) {
           return(.("Excellent"))
         } else if (auc >= 0.8) {
@@ -506,11 +516,12 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
 
         interpretation <- sprintf(.("The test '%1$s' has an AUC of %2$.3f"), var, auc)
 
-        band <- if (auc >= 0.9) {
+        a <- round(auc, 3)   # the displayed value, as in .interpretAUC (same table row)
+        band <- if (a >= 0.9) {
           .("excellent")
-        } else if (auc >= 0.8) {
+        } else if (a >= 0.8) {
           .("good")
-        } else if (auc >= 0.7) {
+        } else if (a >= 0.7) {
           .("fair")
         } else {
           .("poor")
@@ -524,7 +535,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           .("The sensitivity and specificity quoted at the selected cutpoint are a separate matter: those are optimistic, because that cutpoint was searched for on these same data.")
         }
 
-        interpretation <- paste(interpretation, sprintf(.("indicating %1$s discrimination in this sample: the marker ranks a randomly chosen case from the positive class ahead of a randomly chosen case from the negative class about %2$.0f%% of the time, in the classification direction in use. AUC is a ranking property of pairs, computed over all cutpoints; it does not depend on which cutpoint was selected, and it does not describe how reliably any single cutpoint classifies an individual patient, which also depends on the cutpoint and on disease prevalence. This AUC is an in-sample estimate that has not been internally or externally validated. %3$s"), band, auc * 100, cut_clause))
+        interpretation <- paste(interpretation, sprintf(.("indicating %1$s discrimination in this sample: the marker ranks a randomly chosen case from the positive class ahead of a randomly chosen case from the negative class about %2$.0f%% of the time (ties count one half), in the classification direction in use. AUC is a ranking property of pairs, computed over all cutpoints; it does not depend on which cutpoint was selected, and it does not describe how reliably any single cutpoint classifies an individual patient, which also depends on the cutpoint and on disease prevalence. This AUC is an in-sample estimate that has not been internally or externally validated. %3$s"), band, auc * 100, cut_clause))
 
         return(interpretation)
       },
@@ -1294,64 +1305,51 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           classVar <- data[[classVarEscaped]][subGroup %in% groupName]
         }
 
-        # Data validation and cleaning
-        # Remove rows with missing values in either variable
+        # Complete cases. An explicit NA level (addNA) is a missing class, not a negative one,
+        # and only the levels present here count (the same set .rocOutcomeCoding() sees).
+        classVar <- factor(classVar, exclude = NA)
         complete_cases <- !is.na(dependentVar) & !is.na(classVar)
         dependentVar <- dependentVar[complete_cases]
-        classVar <- classVar[complete_cases]
+        classVar <- droplevels(classVar[complete_cases])
 
-        # Ensure classVar is factor
-        classVar <- as.factor(classVar)
-        unique_levels <- levels(classVar)
-
-        # Validate that positive class exists
-        if (!is.null(self$options$positiveClass) && nzchar(self$options$positiveClass) &&
-            !self$options$positiveClass %in% unique_levels) {
-          private$.throwError(
-            "missing_positive_class",
-            paste("'", self$options$positiveClass, "' not found in class variable."),
-            paste("Available levels:", paste(unique_levels, collapse = ", "))
-          )
+        # The positive class was chosen and checked against the whole column in .run(); it is
+        # never re-guessed here. A subgroup, or a marker's complete cases, can still lack it.
+        positiveClass <- self$options$positiveClass
+        if (!positiveClass %in% levels(classVar)) {
+          if (is.null(subGroup)) {
+            private$.throwError("missing_positive_class",
+              sprintf(.("No case of the positive class (%1$s) has a value of %2$s, so %2$s cannot be analysed."), positiveClass, var),
+              .("Check the missing values of this test variable, or remove it from the analysis."))
+          }
+          private$.throwError("missing_positive_class",
+            sprintf(.("Subgroup %1$s has no case of the positive class (%2$s) with a value of %3$s, so %3$s cannot be analysed in that subgroup."), groupName, positiveClass, varName),
+            .("Remove the subgroup variable, or use one in which every subgroup contains cases of the positive class."))
         }
 
-        # Determine default positive class if not specified.
-        #
-        # BEHAVIOUR CHANGE (1.0.4): this used to fall back to the FIRST level. For the ordinary
-        # ways a class variable is coded -- Healthy/Disease, Negative/Positive, Control/Case,
-        # Absent/Present, No/Yes, 0/1 -- the first level is the NEGATIVE one, so the fallback
-        # silently ran the whole analysis backwards: on the bundled example data it reported
-        # AUC 0.1001 where naming the positive class gives 0.8999, with no error and no warning.
-        # The last level is the near-universal convention for the event, and is what pROC and
-        # cutpointr expect to be told. It is still only a guess, so it is disclosed below.
-        actualPositiveClass <- private$.resolvePositiveClass(classVar)
+        # One-vs-rest: every other level is negative. .ovrResponse's sentinel label cannot
+        # collide with a real level (a level named "Other" chosen as positive used to make
+        # duplicate factor levels) and never reaches a displayed output.
+        classVar <- private$.ovrResponse(classVar, positiveClass)
 
+        # Check minimum sample sizes. One thin stratum rejects the whole analysis, so the message
+        # names the marker, the subgroup and the short side (it was English-only and named none).
+        pos_count <- sum(classVar == positiveClass)
+        neg_count <- sum(classVar != positiveClass)
 
-        # Dichotomize: Convert to binary by treating selected level as positive, all others as negative
-        classVar <- factor(
-          ifelse(classVar == actualPositiveClass,
-            actualPositiveClass,
-            "Other"
-          ),
-          levels = c("Other", actualPositiveClass)
-        )
-
-        # Check minimum sample sizes
-        pos_count <- sum(classVar == actualPositiveClass)
-        neg_count <- sum(classVar != actualPositiveClass)
-
-        if (pos_count < 2) {
-          private$.throwError(
-            "insufficient_data",
-            paste("Need at least 2 positive cases, found:", pos_count),
-            "Ensure your data contains sufficient positive cases for reliable analysis"
-          )
-        }
-        if (neg_count < 2) {
-          private$.throwError(
-            "insufficient_data",
-            paste("Need at least 2 negative cases, found:", neg_count),
-            "Ensure your data contains sufficient negative cases for reliable analysis"
-          )
+        if (pos_count < 2 || neg_count < 2) {
+          details <- if (is.null(subGroup)) {
+            if (pos_count < 2)
+              sprintf(.("%1$s has a value for %2$d case(s) of the positive class (%3$s); at least 2 are needed to analyse it."), var, pos_count, positiveClass)
+            else
+              sprintf(.("%1$s has a value for %2$d case(s) outside the positive class (%3$s); at least 2 are needed to analyse it."), var, neg_count, positiveClass)
+          } else if (pos_count < 2) {
+            sprintf(.("Subgroup %1$s has %2$d case(s) of the positive class (%3$s) with a value of %4$s; at least 2 are needed to analyse %4$s in that subgroup."), groupName, pos_count, positiveClass, varName)
+          } else {
+            sprintf(.("Subgroup %1$s has %2$d case(s) outside the positive class (%3$s) with a value of %4$s; at least 2 are needed to analyse %4$s in that subgroup."), groupName, neg_count, positiveClass, varName)
+          }
+          private$.throwError("insufficient_data", details,
+            if (is.null(subGroup)) .("Check the missing values of this test variable, or remove it from the analysis.")
+            else .("Remove the subgroup variable, or use one in which every subgroup has at least 2 positive and 2 negative cases."))
         }
 
         # Nothing on the main path warned about small event counts. The only small-sample
@@ -1462,7 +1460,8 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
       # Generate tables with metrics for each threshold
       # This was the missing method that was causing errors
       .generateTables = function(var, results, confusionMatrix, resultsToDisplay,
-                                 dependentVar, classVar, positiveClass, direction, metric) {
+                                 dependentVar, classVar, positiveClass, direction, metric,
+                                 classLabels) {
         # Initialize lists to store metrics
         sensList <- numeric()
         specList <- numeric()
@@ -1574,7 +1573,6 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
 
         # Populate results table
         resultsTable <- self$results$resultsTable$get(key = var)
-        private$.notePositiveClassGuess(resultsTable)
         private$.noteMetricTolerance(resultsTable)
         private$.noteCutpointOptimism(resultsTable)
         # the bootstrap-metric methods choose the cutpoint over random resamples
@@ -1590,21 +1588,73 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
 
         # A non-finite cutpoint is not an operating point a clinician can apply to a patient.
         # It appears when no threshold achieves a positive Youden index - typically because the
-        # Classification Direction is backwards for this marker - and the row then reads
-        # "cutpoint Inf, sensitivity 0, PPV 0", which is worse than showing nothing. Say what
-        # happened instead of printing it.
-        if (!any(is.finite(resultsToDisplay))) {
-          resultsTable$setNote(
-            key = "no_usable_cutpoint",
-            note = .("No usable cut-point exists for this marker in the classification direction currently selected: no threshold separates the groups better than chance. Check the Classification Direction and the coding of the outcome variable. The AUC and its confidence interval above are unaffected."),
-            init = FALSE
-          )
+        # wrong level is the Positive Class, or the Classification Direction is backwards for
+        # this marker - and the row then reads "cutpoint Inf, sensitivity 0, PPV 0", which is
+        # worse than showing nothing. Say what happened instead of printing it, Positive Class
+        # first as in .noteDirection(). NULL removes a note restored from the previous run.
+        # When some threshold does have J > 0 (exactly, from the counts: tp*n0 + tn*n1 > n1*n0),
+        # it was the method that put the cut at +/-Inf (accuracy, cost or utility in an
+        # imbalanced sample, oc_cost_ratio, or a Metric Tolerance wide enough to pull the
+        # infinite end into the tied set, whose mean is then +/-Inf), and "nothing beats
+        # chance" would be false. That end is where nobody is called positive (cutpointr's
+        # +Inf for ">=", -Inf for "<="), so the note can say "classified negative".
+        cm <- lapply(confusionMatrix[c("tp", "fp", "tn", "fn")], as.numeric)   # doubles: n1 * n0 can pass the integer limit
+        separates <- any(cm$tp * (cm$tn + cm$fp) + cm$tn * (cm$tp + cm$fn) > (cm$tp + cm$fn) * (cm$tn + cm$fp), na.rm = TRUE)
+        resultsTable$setNote(
+          key = "no_usable_cutpoint",
+          note = if (!any(is.finite(resultsToDisplay))) {
+            if (separates)
+              .("No usable cut-point is shown for this marker: the cut-point chosen by the selected method lies beyond the observed values, so every patient would be classified negative, although some cut-points do separate the groups better than chance in the classification direction currently selected. This happens, for example, when accuracy, a misclassification cost or a total utility is optimised in an imbalanced sample, when at the cost ratio entered the cost-benefit method finds classifying every patient negative the least costly choice, or when Metric Tolerance is wide enough to count that choice as tied with the best cut-point. If a cut-point is needed, lower Metric Tolerance or choose another Cutpoint Method or Optimization Metric. The AUC and its confidence interval in the Area Under the ROC Curve table are unaffected.")
+            else
+              sprintf(.("No usable cut-point exists for this marker in the classification direction currently selected: no threshold separates the groups better than chance. First check Positive Class: is %1$s the level that means the condition is present? Only if it is, check Classification Direction. The AUC and its confidence interval in the Area Under the ROC Curve table are unaffected."), .rocLabel(positiveClass))
+          },
+          init = FALSE
+        )
+
+        # A row must hold what the rule "x >= cut" (or "<=") gives at its cut-point. The cut-point
+        # need not be an observed value (mean or median of tied optima, oc_youden_kernel/normal,
+        # oc_manual), and the nearest observed value - the old lookup - can lie on the other side
+        # of it: cut-point 9.333 printed the sensitivity of x >= 9 (0.6), not of x >= 9.333 (0.5).
+        # An observed cut (up to the float noise of mean()/median(), e.g. mean(0.01, 0.07) - 0.04
+        # = 7e-18) keeps its own row; otherwise take the observed threshold the rule maps to, as
+        # cutpointr's get_opt_ind() does: the smallest x.sorted >= cut for ">=", the largest
+        # <= cut for "<=" (the +/-Inf ends cover cuts outside the data). `snap` scales with the
+        # data, so it stays far below the gap between two observed values at any unit.
+        xs <- confusionMatrix$x.sorted
+        snap <- 1e-9 * max(abs(xs[is.finite(xs)]))
+        ruleIdx <- function(cut) {
+          j <- which.min(abs(xs - cut))
+          if (length(j) && abs(xs[j] - cut) <= snap) return(j)
+          hit <- if (direction == ">=") which(xs >= cut) else which(xs <= cut)
+          if (!length(hit)) integer(0) else if (direction == ">=") hit[which.min(xs[hit])] else hit[which.max(xs[hit])]
         }
+
+        # Tied optima are summarised by Tie Breaking Method, and their mean or median is not one of
+        # them and can score lower than each (optima 8, 9 and 11 with J 0.5; mean 9.333 with J 0.4).
+        # Keep the user's choice but say so. Above the default tolerance .noteMetricTolerance()
+        # already explains the averaging.
+        cut1 <- unlist(results$optimal_cutpoint)[1]
+        tol <- self$options$tol_metric
+        tieNote <- NULL
+        if (self$options$method %in% c("maximize_metric", "minimize_metric") &&
+            self$options$break_ties %in% c("mean", "median") && isTRUE(is.finite(cut1)) &&
+            isTRUE(tol <= 1e-05) && any(is.finite(metricList))) {
+          fin <- metricList[is.finite(metricList)]
+          best <- if (self$options$method == "maximize_metric") max(fin) else min(fin)
+          tied <- xs[which(abs(metricList - best) <= tol)]
+          shown <- if (self$options$break_ties == "mean") mean(tied) else stats::median(tied)
+          at <- ruleIdx(cut1)
+          # the note only when these ARE cutpointr's ties and the cut-point is none of them
+          if (length(tied) > 1 && length(at) && isTRUE(abs(shown - cut1) <= snap) && !any(abs(tied - cut1) <= snap))
+            tieNote <- sprintf(.("Several cut-points tie for the best %1$s (%2$s): %3$s. The cut-point shown, %4$s, is computed from them and is not one of them; its %1$s is %5$s. Choose 'All tied cutpoints' in Tie Breaking Method to list each one."),
+              self$options$metric, signif(best, 3), paste(signif(sort(tied), 4), collapse = ", "),
+              signif(cut1, 4), signif(metricList[at], 3))
+        }
+        resultsTable$setNote("tied_optima", tieNote, init = FALSE)
 
         # Add rows for each threshold to display
         for (threshold in resultsToDisplay) {
-          # Find closest threshold in our data
-          idx <- which.min(abs(confusionMatrix$x.sorted - threshold))
+          idx <- ruleIdx(threshold)
 
           if (length(idx) > 0 && is.finite(threshold)) {
             # Add row to results table
@@ -1625,27 +1675,19 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         if (self$options$sensSpecTable) {
           sensSpecTable <- self$results$sensSpecTable$get(key = var)
 
-          # Get optimal cutpoint data - use closest match instead of exact equality
-          # to avoid floating point precision issues
-          optimal_idx <- which.min(abs(confusionMatrix$x.sorted - results$optimal_cutpoint[1]))
-          if (length(optimal_idx) > 0) {
-            # Ensure we get scalar values for the confusion matrix cells
-            tp <- as.numeric(confusionMatrix$tp[optimal_idx])[1]
-            fp <- as.numeric(confusionMatrix$fp[optimal_idx])[1]
-            tn <- as.numeric(confusionMatrix$tn[optimal_idx])[1]
-            fn <- as.numeric(confusionMatrix$fn[optimal_idx])[1]
-
-            # Create HTML table using enhanced formatting
-            html_table <- private$.formatSensSpecTable(
-              Title = paste(
-                "Confusion Matrix for", var, "at Optimal Cutpoint =",
-                round(results$optimal_cutpoint[1], 3)
-              ),
-              TP = tp, FP = fp, TN = tn, FN = fn
-            )
-
-            sensSpecTable$setContent(html_table)
-          }
+          # One matrix per reported cut-point, read with the Results rows' rule. 'All tied
+          # cutpoints' makes optimal_cutpoint a list column (a Results row per tie), and the
+          # arithmetic on its [1] aborted the whole analysis.
+          html <- vapply(unlist(results$optimal_cutpoint), function(cut) {
+            i <- ruleIdx(cut)
+            if (!length(i)) return("")
+            private$.formatSensSpecTable(
+              Title = paste("Confusion Matrix for", var, "at Optimal Cutpoint =", round(cut, 3)),
+              TP = as.numeric(confusionMatrix$tp[i]), FP = as.numeric(confusionMatrix$fp[i]),
+              TN = as.numeric(confusionMatrix$tn[i]), FN = as.numeric(confusionMatrix$fn[i]),
+              labels = classLabels)
+          }, character(1))
+          sensSpecTable$setContent(paste(html, collapse = "<br>"))
         }
 
         return(list(
@@ -1754,25 +1796,8 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           classVar <- as.character(classVar)
         }
 
-        # Safely identify the positive class
-        if (!positiveClass %in% unique(classVar)) {
-          # Try to interpret positiveClass as a position index
-          if (!is.na(suppressWarnings(as.numeric(positiveClass)))) {
-            pos_idx <- as.numeric(positiveClass)
-            if (pos_idx <= length(unique(classVar))) {
-              positiveClass <- unique(classVar)[pos_idx]
-            }
-          }
-          # If still not found, fall back through the single shared resolver rather than to
-          # unique(classVar)[1]. That old fallback took the first value in DATA ORDER, so the
-          # class treated as positive depended on how the rows happened to be sorted, and it
-          # disagreed with the resolution used everywhere else in the analysis. warning() is
-          # also invisible in the jamovi GUI, so the substitution was silent; .resolvePositiveClass
-          # records the assumption so it is disclosed on the results tables instead.
-          if (!positiveClass %in% unique(classVar)) {
-            positiveClass <- private$.resolvePositiveClass(classVar)
-          }
-        }
+        # positiveClass is the user's choice, never reinterpreted (as a position, or by data
+        # order); a class with no rows of it is refused below.
 
         # Check for NA values in classification variable
         if (any(is.na(classVar))) {
@@ -1819,6 +1844,12 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           L[, -ref] <- diag(-1, nrow = nauc - 1, ncol = nauc - 1)
         }
 
+        # The Wilcoxon statistic below counts HIGHER values as positive. Read the markers in the
+        # user's Classification Direction first, as the main AUC table and .enhancedDelongTest do;
+        # otherwise under "<=" every AUC came out as max(AUC, 1 - AUC) and `inverted` named the
+        # wrong markers.
+        if (identical(self$options$direction, "<=")) data <- -data
+
         # Split data into positive and negative cases
         markern <- as.matrix(data[!id.pos, ])
         markerp <- as.matrix(data[id.pos, ])
@@ -1846,7 +1877,9 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         # `direction` straight to pROC and reports the honest, possibly-below-0.5 AUC. So a
         # marker can read 0.35 in the main AUC table and 0.65 here, for the same column, with
         # nothing on screen to explain the difference. `warning()` does not reach a jamovi
-        # user, so the names are returned to the caller and rendered as a visible note.
+        # user, so the names are returned to the caller and rendered as a visible note. The
+        # direction was applied above, so these are exactly the markers the main AUC table
+        # shows below 0.5.
         inverted_vars <- character(0)
         if (any(auc < 0.5)) {
           inverted_vars <- colnames(data)[auc < 0.5]
@@ -2067,65 +2100,65 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         private$.updateMetaAnalysisVisibility()
       },
 
-      # Empty every results table before .run() repopulates them. jmvcore's addRow() appends
-      # unconditionally, so a table filled that way grows on every re-run; tables filled with
-      # setRow() are unaffected but clearing them is harmless because .run() rewrites them.
-      # Discovering the tables from self$results rather than hard-coding a list means a table
-      # added later is covered without anyone having to remember this method.
-      # Single source of truth for which level counts as positive. Three places worked this
-      # out independently -- .prepareVarData, .run() and the procedure notes -- and nothing kept
-      # them in step, so changing one produced a class variable dichotomised one way and an
-      # analysis scored the other way (a reported AUC of exactly 0).
+      # Single source of truth for which level counts as positive: the user's choice, never a
+      # guess from level order (a factor class has no 0/1 default either). Returns the
+      # .rocOutcomeCoding() list (status selected / unset / invalid / single) and fills the
+      # Outcome coding table from the whole column, before anything else is computed.
       .resolvePositiveClass = function(classVar) {
-        lv <- levels(factor(classVar))
-        chosen <- self$options$positiveClass
-        if (!is.null(chosen) && nzchar(chosen) && chosen %in% lv) {
-          return(chosen)
+        coding <- .rocOutcomeCoding(as.factor(classVar), self$options$positiveClass)
+        lv <- coding$levels
+        pos <- coding$positive
+        assigned <- !is.null(pos) && pos %in% lv
+        table <- self$results$outcomeCoding
+        .deleteTableRows(table)
+        for (i in seq_along(lv)) {
+          role <- if (!assigned) .("Not assigned yet")
+            else if (lv[i] == pos) .("Positive (condition present)")
+            else if (length(lv) > 2L) .("Negative (pooled with the other non-positive levels)")
+            else .("Negative")
+          table$addRow(rowKey = paste0("lvl:", lv[i]),
+                       values = list(level = .rocLabel(lv[i], note = FALSE), n = coding$counts[i], role = role))
         }
-        # With exactly two levels, assuming the last one is a reasonable guess (it is the near
-        # universal coding for the event) and it is disclosed on the tables. With three or more
-        # there is no defensible guess: "Disease" and "Severe" are equally plausible positives
-        # and they give materially different answers (0.801 against 0.826 on a 3-level recode of
-        # the bundled data). Refuse rather than silently pick one -- this also matches
-        # enhancedROC, which already declines a multi-level outcome and asks for a positive class.
-        if (length(lv) > 2) {
-          private$.throwError(
-            "multi_level_positive_class",
-            sprintf("The class variable has %d levels (%s), so the positive class cannot be guessed.",
-                    length(lv), paste(lv, collapse = ", ")),
-            "Choose which level represents the positive (disease) group in the Positive Class option."
-          )
+        if (coding$n_missing > 0)
+          table$addRow(rowKey = "missing", values = list(level = .("(missing)"),
+                       n = coding$n_missing, role = .("Excluded: missing outcome")))
+        if (identical(coding$status, "unset"))
+          table$setNote("unset", .("Choose the level that means the condition is present in Positive Class. Nothing is computed until you do: levels are never chosen from their order."))
+        if (identical(coding$status, "selected")) {
+          others <- .rocLabel(setdiff(lv, pos))
+          table$setNote("positive", if (length(others) == 1L)
+            sprintf(.("Positive class: %1$s. Sensitivity, PPV, LR+, every cut-point and the AUC describe how well each test detects %1$s; specificity and NPV refer to %2$s."), .rocLabel(pos), others)
+          else
+            sprintf(.("Positive class: %1$s. Sensitivity, PPV, LR+, every cut-point and the AUC describe how well each test detects %1$s; specificity and NPV refer to the other levels combined (%2$s)."), .rocLabel(pos), paste(others, collapse = ", ")))
+          table$setNote("source", .("Chosen in Positive Class."))
         }
-        assumed <- lv[length(lv)]
-        private$.assumedPositiveClass <- assumed
-        assumed
+        table$setNote("n", .("N counts every row with a class value; each test variable is analysed on its own complete cases."))
+        coding
       },
 
       # State, in one plain sentence, which way the marker was read. Without this a user
       # comparing this analysis against enhancedROC (same menu, same data) sees two different
       # AUCs -- 0.8999 and 0.1001 on an inverted marker -- with nothing on screen explaining
-      # that the two simply read the marker in opposite directions. The wording is deliberately
-      # the same in both analyses so the two outputs can be compared line for line.
-      .noteDirection = function(table) {
+      # that the two simply read the marker in opposite directions.
+      .noteDirection = function(table, key = "direction_used") {
         dir <- tryCatch(self$options$direction, error = function(e) NULL)
         if (is.null(dir) || !nzchar(dir)) return(invisible(NULL))
-        pos <- private$.assumedPositiveClass
-        if (is.null(pos)) {
-          pos <- tryCatch(self$options$positiveClass, error = function(e) NULL)
-        }
-        if (is.null(pos) || !nzchar(pos)) pos <- "the positive class"
+        pos <- .rocLabel(self$options$positiveClass)
         higher <- identical(dir, ">=")
         # Translatable: the msgid must be a string LITERAL, and HIGHER/LOWER plus the
         # opposite direction symbol cannot be spliced through %s (the words carry grammar
         # and the two halves would have to be translated blind), so the two readings are
-        # written out as two complete alternative sentences. English output is unchanged,
-        # which keeps this note byte-identical to enhancedROC's as intended above.
+        # written out as two complete alternative sentences.
+        # Positive Class comes first: naming the wrong level reverses the reading too. Flipping
+        # Direction re-estimates the cutpoint, sensitivity and specificity (both directions
+        # include the cutpoint itself), so they are not simply swapped or complemented.
+        # <i>, not <b>: the client's table-note renderer keeps only em, i, sub and sup.
         note <- if (higher) {
-          sprintf(.("Reading of the test values: <b>HIGHER values were taken to indicate %1$s</b> (Classification Direction = \"%2$s\"). If that is the wrong way round for this marker, every sensitivity, specificity, cutpoint and AUC below is reversed \u2014 switch Classification Direction to \"<=\" and the AUC becomes 1 minus the value shown."), pos, dir)
+          sprintf(.("Reading of the test values: <i>HIGHER values were taken to indicate %1$s</i> (Classification Direction = \"%2$s\"). If that reading looks reversed for this marker, first check Positive Class: is %1$s the level that means the condition is present? Only if it is, switch Classification Direction to \"<=\": the AUC becomes 1 minus the value shown, and the cutpoint, sensitivity and specificity are re-estimated."), pos, dir)
         } else {
-          sprintf(.("Reading of the test values: <b>LOWER values were taken to indicate %1$s</b> (Classification Direction = \"%2$s\"). If that is the wrong way round for this marker, every sensitivity, specificity, cutpoint and AUC below is reversed \u2014 switch Classification Direction to \">=\" and the AUC becomes 1 minus the value shown."), pos, dir)
+          sprintf(.("Reading of the test values: <i>LOWER values were taken to indicate %1$s</i> (Classification Direction = \"%2$s\"). If that reading looks reversed for this marker, first check Positive Class: is %1$s the level that means the condition is present? Only if it is, switch Classification Direction to \">=\": the AUC becomes 1 minus the value shown, and the cutpoint, sensitivity and specificity are re-estimated."), pos, dir)
         }
-        tryCatch(table$setNote("direction_used", note), error = function(e) NULL)
+        tryCatch(table$setNote(key, note), error = function(e) NULL)
       },
 
       # A non-trivial metric tolerance makes cutpointr treat every cutpoint within that
@@ -2146,9 +2179,6 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           error = function(e) NULL)
       },
 
-      # If no positive class was chosen, say which level was assumed. Getting this wrong
-      # inverts every sensitivity, specificity, cutpoint and AUC in the output, so it belongs
-      # beside the numbers rather than only in a console warning.
       # Degenerate-estimate caveats for the AUC tables.
       #
       # Three cases produced a confident-looking number with nothing to qualify it:
@@ -2210,18 +2240,6 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           ), error = function(e) NULL)
         }
         invisible(NULL)
-      },
-
-      .notePositiveClassGuess = function(table) {
-        if (is.null(private$.assumedPositiveClass)) return(invisible(NULL))
-        tryCatch(
-          table$setNote(
-            "assumed_positive_class",
-            # Was raw English; wrapped as a single literal msgid (\u2014, never \u{2014},
-            # which the catalog stores verbatim so the lookup can never match).
-            sprintf(.("No positive class was selected, so \"%s\" was assumed \u2014 the last level of the class variable. If that is the <i>negative</i> group, every sensitivity, specificity, cutpoint and AUC below is reversed. Set Positive Class explicitly."),
-              private$.assumedPositiveClass)),
-          error = function(e) NULL)
       },
 
       # A cutpoint searched on the same data the sensitivity and specificity are then read off
@@ -2291,6 +2309,11 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         tryCatch(table$setNote("cutpoint_optimism", note), error = function(e) NULL)
       },
 
+      # Empty every results table before .run() repopulates them. jmvcore's addRow() appends
+      # unconditionally, so a table filled that way grows on every re-run; tables filled with
+      # setRow() are unaffected but clearing them is harmless because .run() rewrites them.
+      # Discovering the tables from self$results rather than hard-coding a list means a table
+      # added later is covered without anyone having to remember this method.
       .clearTables = function() {
         for (nm in names(self$results)) {
           item <- tryCatch(self$results[[nm]], error = function(e) NULL)
@@ -2322,6 +2345,17 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
             pooled_auc = NA_real_, ci_lower = NA_real_, ci_upper = NA_real_,
             heterogeneity_i2 = NA_real_, tau_squared = NA_real_,
             cochran_q = NA_real_, q_p_value = NA_real_))
+      },
+
+      # 95% limits for an AUC, built on the logit scale with the delta-method SE (se / (a (1 - a)))
+      # and back-transformed, so they stay inside 0-1: the raw a +/- 1.96 se gave a pooled upper
+      # limit of 1.012. An AUC of 0 or 1, or a zero SE, has no logit; it keeps the raw limits,
+      # clamped to 0-1.
+      .aucLimits = function(a, se) {
+        ok <- is.finite(a) & is.finite(se) & a > 0 & a < 1 & se > 0
+        w <- ifelse(ok, 1.96 * se / (a * (1 - a)), NA_real_)
+        list(lower = ifelse(ok, stats::plogis(stats::qlogis(a) - w), pmax(0, a - 1.96 * se)),
+             upper = ifelse(ok, stats::plogis(stats::qlogis(a) + w), pmin(1, a + 1.96 * se)))
       },
 
       # ============================================================================
@@ -2366,7 +2400,16 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         # every option change, so clearing before the gate would wipe the user's computed tables
         # and then return without recomputing them, which is the opposite of what manual mode is
         # for.
-        private$.assumedPositiveClass <- NULL
+        #
+        # runSummary and procedureNotes have no clearWith and are not written in .init(), so
+        # jamovi hands back the previous run's text: the 'Choose the positive class' panel after
+        # a class was chosen, 'Positive Class: X' after it was unset. Clear both here (after the
+        # gate, so manual mode keeps its results). The client keeps what it painted when an Html
+        # turns empty, so one still empty when .run() exits is hidden too.
+        self$results$runSummary$setContent("")
+        self$results$procedureNotes$setContent("")
+        on.exit(for (el in list(self$results$runSummary, self$results$procedureNotes))
+          if (!isTRUE(nzchar(el$content))) el$setVisible(FALSE), add = TRUE)
         private$.delongUsedFallback <- FALSE
         # Per-run storage is keyed by variable name and read back by the threshold table,
         # the combined criterion plot, the prevalence plot and the forest plot renderer.
@@ -2386,6 +2429,33 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
 
         # Update meta-analysis UI visibility based on variable count
         private$.updateMetaAnalysisVisibility()
+
+        # Outcome coding, shown as soon as a class variable is chosen. Without a positive class
+        # the analysis waits (an INFO panel, not an error: choosing it is the normal next step).
+        if (!is.null(self$options$classVar)) {
+          coding <- private$.resolvePositiveClass(self$data[[private$.escapeVar(self$options$classVar)]])
+          if (identical(coding$status, "unset")) {
+            self$results$runSummary$setContent(paste0(
+              "<div style='background-color: rgba(37, 99, 235, 0.08); border-left: 4px solid #93c5fd; padding: 12px; margin: 8px 0; border-radius: 4px; color: inherit;'>",
+              "<strong>", .("Choose the positive class"), "</strong><br>",
+              jmvcore::htmlEscape(sprintf(.("Choose the level of %1$s that means the condition is present in Positive Class. Nothing is computed until a level is chosen; every other level is then analysed as negative (pooled when there are more than two). Levels are never chosen from their order."), self$options$classVar)),
+              "</div>"))
+            return()
+          }
+          if (identical(coding$status, "single")) {
+            private$.throwError("insufficient_data",
+              sprintf(.("The class variable %1$s has fewer than two observed levels; ROC analysis needs cases with and without the condition."), self$options$classVar))
+          }
+          if (identical(coding$status, "invalid")) {
+            # Neutral wording: a typo in R syntax, a level left with no rows (a filter), or a
+            # level kept from the previous class variable - the Positive Class box (allowNone)
+            # then shows '- None -' while the option still holds the old level.
+            private$.throwError("missing_positive_class",
+              sprintf(.("Positive Class is set to %1$s, but no row of %2$s has that level (its observed levels are: %3$s). If the Positive Class box shows '- None -', the class variable was changed after a level was chosen."),
+                      coding$positive, self$options$classVar, paste(coding$levels, collapse = ", ")),
+              .("Choose one of the observed levels in Positive Class."))
+          }
+        }
 
         # Show instructions if required inputs are not provided
         if (is.null(self$options$classVar) || is.null(self$options$dependentVars) ||
@@ -2443,26 +2513,11 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
             "</p>",
             "<p> Class Variable: ",
             jmvcore::htmlEscape(self$options$classVar),
+            "</p>",
+            "<p> Positive Class: ",
+            jmvcore::htmlEscape(coding$positive),
             "</p>"
           )
-
-          # Add positive class info
-          if (is.null(self$options$positiveClass) || !nzchar(self$options$positiveClass)) {
-            procedureNotes <- paste0(
-              procedureNotes,
-              "<p> Positive Class: ",
-              jmvcore::htmlEscape(as.character(private$.resolvePositiveClass(
-                self$data[[private$.escapeVar(self$options$classVar)]]))),
-              " (assumed \u{2014} last level; none was selected)</p>"
-            )
-          } else {
-            procedureNotes <- paste0(
-              procedureNotes,
-              "<p> Positive Class: ",
-              jmvcore::htmlEscape(self$options$positiveClass),
-              "</p>"
-            )
-          }
 
           # Add subgroup info if used
           if (!is.null(self$options$subGroup) && self$options$subGroup != "") {
@@ -2533,34 +2588,25 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
 
         # Get data
         data <- self$data
+        # A blank class value is missing, as the Outcome coding table counts it (.rocOutcomeCoding).
+        # jamovi stores an empty cell as missing; an R data frame can hold "".
+        classCol <- private$.escapeVar(self$options$classVar)
+        data[[classCol]][data[[classCol]] %in% ""] <- NA
 
-        # Determine positive class early for use throughout the analysis
-        # Escape class variable name for safe data access
-        classVarEscaped <- private$.escapeVar(self$options$classVar)
-
-        classVar <- data[[classVarEscaped]]
-        if (!is.null(self$options$positiveClass) && nzchar(self$options$positiveClass) &&
-            !self$options$positiveClass %in% levels(factor(classVar))) {
-          # Say only what is true. This used to assert "Using the last level
-          # instead", which flatly contradicted the hard error that .validateInputs
-          # raises for the same condition -- the user saw a note claiming a
-          # fallback had run next to a red error saying the analysis had not.
-          # .resolvePositiveClass decides what actually happens (guess at two
-          # levels, refuse at three or more); this just reports the mismatch.
-          private$.warnUser(sprintf(
-            .("The Positive Class you selected (%1$s) does not appear in %2$s. Its observed levels are: %3$s."),
-            self$options$positiveClass, self$options$classVar,
-            paste(levels(factor(classVar)), collapse = ", ")))
-        }
-        positiveClass <- private$.resolvePositiveClass(classVar)
+        # The user's level, checked above against the observed levels of the whole column.
+        positiveClass <- coding$positive
+        # The classes by name in the confusion matrix and the dot plot, not a bare Positive/Negative.
+        negLevels <- setdiff(coding$levels, positiveClass)
+        classLabels <- c(positive = sprintf(.("Positive (%s)"), positiveClass),
+                         negative = if (length(negLevels) == 1L) sprintf(.("Negative (%s)"), negLevels) else .("Negative (other levels)"))
 
         # -----------------------------------------------------------------------
         # 2.5. VALIDATION AND SAFEGUARDS
         # -----------------------------------------------------------------------
 
-        # Check class imbalance
-        n_pos <- sum(classVar == positiveClass, na.rm = TRUE)
-        n_total <- sum(!is.na(classVar))
+        # Check class imbalance (the Outcome coding counts: every row with a class value)
+        n_pos <- coding$counts[coding$levels == positiveClass]
+        n_total <- sum(coding$counts)
         prevalence <- if (n_total > 0) n_pos / n_total else NA
 
         if (!is.na(prevalence) && (prevalence < 0.1 || prevalence > 0.9)) {
@@ -2573,8 +2619,8 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         # ROC analysis requires exactly two levels; when more are present a
         # one-vs-rest dichotomization (positive class vs. all other levels combined)
         # is applied. Surface this explicitly rather than collapsing silently.
-        n_class_levels <- nlevels(droplevels(as.factor(classVar)))
-        if (!is.na(n_class_levels) && n_class_levels > 2) {
+        n_class_levels <- length(coding$levels)
+        if (n_class_levels > 2) {
           private$.warnUser(sprintf(
             .("Class variable has %1$d levels, but ROC analysis requires exactly two. A one-vs-rest dichotomization is applied: '%2$s' (positive) vs. all other levels combined."),
             n_class_levels, positiveClass))
@@ -2896,7 +2942,8 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
             classVar = classVar,
             positiveClass = positiveClass,
             direction = direction,
-            metric = metric
+            metric = metric,
+            classLabels = classLabels
           )
           sensList <- metrics_res$sensList
           specList <- metrics_res$specList
@@ -3001,7 +3048,9 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                 rawData <- data.frame(
                   value = dependentVar,
                   class = ifelse(classVar == positiveClass, "Positive", "Negative"),
-                  threshold = rep(results$optimal_cutpoint[1], length(dependentVar)),
+                  label = ifelse(classVar == positiveClass, classLabels[["positive"]], classLabels[["negative"]]),
+                  # unlist: a list column under 'All tied cutpoints'; the renderer draws threshold[1]
+                  threshold = rep(unlist(results$optimal_cutpoint)[1], length(dependentVar)),
                   direction = rep(direction, length(dependentVar)),
                   stringsAsFactors = FALSE
                 )
@@ -3256,9 +3305,11 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                 self$results$delongComparisonTable$setNote(
                   key = "delong_inverted",
                   # Was raw English with the variable list pasted into the middle, so nothing
-                  # was extractable; the whole sentence is one literal with the names as %s.
-                  note = sprintf(.("Score direction was reversed for %s so that DeLong's test could compare them on a common direction. Their AUCs in this table are <b>1 minus</b> the value shown in the main AUC table."),
-                    jmvcore::htmlEscape(paste(inverted, collapse = ", "))),
+                  # was extractable; the whole sentence is one literal with the names as %1$s.
+                  # This table shows differences only; the AUCs are in the DeLong output. <i>,
+                  # not <b>: the client's table-note renderer keeps only em, i, sub and sup.
+                  note = sprintf(.("Score direction was reversed for %1$s so that DeLong's test could compare them on a common direction. Their AUCs in the DeLong output, and the differences in this table, use <i>1 minus</i> the value shown in the main AUC table."),
+                    .rocLabel(paste(inverted, collapse = ", "))),   # notes show entities literally
                   init = FALSE)
             }
 
@@ -3298,8 +3349,8 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         # Counts come from the same classVar the CI block uses, so they reflect the
         # rows actually analysed.
         .degen_class <- tryCatch({
-          cv <- data[[private$.escapeVar(self$options$classVar)]]
-          c(sum(cv == positiveClass, na.rm = TRUE), sum(cv != positiveClass, na.rm = TRUE))
+          cv <- private$.classIndicator(data, positiveClass)   # an addNA level is not a negative
+          c(sum(cv == 1, na.rm = TRUE), sum(cv == 0, na.rm = TRUE))
         }, error = function(e) c(NA_integer_, NA_integer_))
         .degen_const <- tryCatch({
           nm <- names(aucList)
@@ -3318,8 +3369,8 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
 
         # Populate the AUC summary table
         aucSummaryTable <- self$results$aucSummaryTable
-        private$.notePositiveClassGuess(aucSummaryTable)
         private$.noteDirection(aucSummaryTable)
+        private$.noteDirection(self$results$outcomeCoding, "reading")
         private$.noteDegenerateEstimates(aucSummaryTable, unlist(aucList), .degen_class[1], .degen_class[2], .degen_const)
 
         for (var in names(aucList)) {
@@ -3431,18 +3482,20 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         # Surface worse-than-chance discrimination (AUC < 0.5) to the user.
         # A native Notice/HTML banner is not available at this point in the flow,
         # so a prominent table note is used (jamovi renders these under the table).
+        # Same 3-dp reading as the "Below chance" band, so the note and the band agree.
         poor_disc_vars <- names(aucList)[vapply(
-          aucList, function(a) isTRUE(is.finite(a) && a < 0.5), logical(1)
+          aucList, function(a) isTRUE(is.finite(a) && round(a, 3) < 0.5), logical(1)
         )]
         if (length(poor_disc_vars) > 0) {
-          # Was raw English spliced around three interpolations, so no part of it could be
-          # translated. One literal msgid; the three %s are a variable list and two direction
-          # symbols, none of which carry grammar.
-          alt_direction <- if (identical(self$options$direction, ">=")) "&lt;=" else "&gt;="
+          # One literal msgid; the %s are a variable list, the positive level and two direction
+          # symbols. Positive Class is checked first (see .noteDirection). Notes show entities
+          # literally, so nothing is htmlEscaped: names go through .rocLabel, and "<=" is not a tag.
+          alt_direction <- if (identical(self$options$direction, ">=")) "<=" else ">="
           poor_disc_note <- sprintf(
-            .("WARNING: AUC below 0.5 (worse than chance) for: %1$s. An AUC below 0.5 almost always means the marker is being read the wrong way round rather than that it is useless: it separates the groups, but in the opposite direction to the one assumed. Classification Direction is currently \"%2$s\"; switching it to \"%3$s\" will give an AUC of 1 minus the value shown, with sensitivity and specificity swapped accordingly. Change it only if that matches what the marker means clinically."),
-            jmvcore::htmlEscape(paste(poor_disc_vars, collapse = ", ")),
-            jmvcore::htmlEscape(self$options$direction),
+            .("WARNING: AUC below 0.5 (worse than chance) for: %1$s. First check Positive Class: is %2$s the level that means the condition is present? If it is, the marker either separates the groups in the opposite direction to the one in use or does not separate them at all (an uninformative marker falls below 0.5 about half the time by chance, so check whether the confidence interval excludes 0.5). Classification Direction is currently \"%3$s\"; switching it to \"%4$s\" gives an AUC of 1 minus the value shown and re-estimates the cutpoint, sensitivity and specificity. Change it only if that matches what the marker means clinically."),
+            .rocLabel(paste(poor_disc_vars, collapse = ", ")),
+            .rocLabel(positiveClass),
+            self$options$direction,
             alt_direction
           )
           aucSummaryTable$setNote("auc_below_chance", poor_disc_note)
@@ -3780,22 +3833,17 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
 
         # Calculate IDI and NRI if requested
         if (self$options$calculateIDI || self$options$calculateNRI) {
-          # Check if we have enough variables
-          if (length(self$options$dependentVars) < 2) {
-            jmvcore::reject("Please specify at least two dependent variables to calculate IDI/NRI.")
-          }
+          # (enough tests: checked in .validateInputs(), which counts a separate reference test)
           # both are bootstrap estimates
           if (self$options$calculateIDI) self$results$idiTable$setNote("seed", .fmt(.("Random seed: {seed}"), seed = self$options$seed), init = FALSE)
           if (self$options$calculateNRI) self$results$nriTable$setNote("seed", .fmt(.("Random seed: {seed}"), seed = self$options$seed), init = FALSE)
 
-          # IDI/NRI does not support subgroup analysis
-          if (!is.null(self$options$subGroup) && self$options$subGroup != "") {
-            self$results$idiTable$setNote(
-              key = "subgroup_warning",
-              note = .("IDI/NRI calculations do not support subgroup analysis; these results are computed on the full sample, not per subgroup."),
-              init = FALSE
-            )
-          }
+          # IDI/NRI does not support subgroup analysis. Set on every run (NULL removes it) with the
+          # default init: neither table clears with subGroup, so an init = FALSE copy outlived it.
+          sgIdiNri <- if (!is.null(self$options$subGroup) && self$options$subGroup != "")
+            .("IDI/NRI calculations do not support subgroup analysis; these results are computed on the full sample, not per subgroup.")
+          self$results$idiTable$setNote("subgroup_warning", sgIdiNri)
+          self$results$nriTable$setNote("subgroup_warning", sgIdiNri)
 
           # Get reference variable
           using_default_ref <- FALSE
@@ -3812,7 +3860,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
 
           # Get actual class values and convert to binary
           classVar <- data[[classVarEscaped]]
-          actual_binary <- as.numeric(classVar == positiveClass)
+          actual_binary <- private$.classIndicator(data, positiveClass)
 
           # Get direction
           direction <- self$options$direction
@@ -4000,7 +4048,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
 
           # Add note if using default reference variable
           if (using_default_ref) {
-            note_text <- sprintf(.("Note: Using '%s' as reference variable (first variable selected). To use a different reference, select it in the Reference Variable option."), refVar)
+            note_text <- sprintf(.("Reference test: %1$s, the first test variable, because Reference Test for IDI/NRI is empty. To compare against another test, put it in Reference Test for IDI/NRI."), .rocLabel(refVar))
             if (self$options$calculateIDI) {
               self$results$idiTable$setNote(
                 key = "default_ref",
@@ -4021,6 +4069,15 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         # -----------------------------------------------------------------------
         # ADVANCED STATISTICAL ANALYSES
         # -----------------------------------------------------------------------
+
+        # These analyses read the whole class column and each whole marker, so they pool the
+        # subgroups that split every ROC table above. Say so on each table; set on every run (NULL
+        # removes it) with the default init, as none of these tables clears with subGroup.
+        sgNote <- if (!is.null(self$options$subGroup)) .("Computed on the full sample: the subgroup variable is not applied to this table.")
+        for (tbl in list(self$results$effectSizeTable, self$results$powerAnalysisTable,
+                         self$results$bayesianROCTable, self$results$clinicalUtilityTable,
+                         self$results$decisionCurveTable, self$results$metaAnalysisTable))
+          tbl$setNote("subgroup_scope", sgNote)
 
         # Effect size analysis
         if (self$options$effectSizeAnalysis && length(self$options$dependentVars) >= 2) {
@@ -4782,10 +4839,14 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           return(FALSE)
         }
 
+        # x shows the level names, negative class first (older saved states carry only the role).
+        lab <- if (is.null(plotData$label)) plotData$class else plotData$label
+        plotData$label <- factor(lab, levels = unique(lab[order(plotData$class)]))
+
         # Create plot
         plot <- ggplot2::ggplot(
           plotData,
-          ggplot2::aes(x = class, y = value, color = class)
+          ggplot2::aes(x = label, y = value, color = class)
         ) +
           # Add jittered points
           ggplot2::geom_jitter(
@@ -5025,18 +5086,27 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           return(FALSE)
         }
 
+        # One path per marker. Ungrouped, geom_line sorted every marker's points together by x
+        # and drew them as a single zigzag line (the state holds all markers in both modes).
+        # Within a marker the rows are cutpointr's cumulative order, so TPR never drops.
+        n_var <- length(unique(plotData$var))
+        line <- if (n_var > 1) ggplot2::geom_line(ggplot2::aes(colour = var), linewidth = 1)
+                else ggplot2::geom_line(linewidth = 1, color = "steelblue")
         plot <- ggplot2::ggplot(
           plotData,
-          ggplot2::aes(x = 1 - specificity, y = sensitivity)
+          ggplot2::aes(x = 1 - specificity, y = sensitivity, group = var)
         ) +
           ggplot2::geom_abline(intercept = 0, slope = 1, linetype = "dashed", alpha = 0.5) +
-          ggplot2::geom_line(linewidth = 1, color = "steelblue") +
+          line +
           ggplot2::xlab(.("1 - Specificity")) +
           ggplot2::ylab(.("Sensitivity")) +
           ggplot2::xlim(0, 1) +
           ggplot2::ylim(0, 1) +
           ggplot2::ggtitle(.("ROC Curve (static rendering)")) +
           ggtheme
+        if (n_var > 1)   # jamovi's global palette, as in .plotROC
+          plot <- plot + ggplot2::scale_color_manual(name = NULL, values = jmvcore::colorPalette(
+            n_var, if (is.null(theme$palette)) "jmv" else theme$palette, "color"))
 
         print(plot)
         return(TRUE)
@@ -5047,7 +5117,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
       # ============================================================================
 
       # Enhanced HTML table formatting for sensitivity/specificity results
-      .formatSensSpecTable = function(Title, TP, FP, TN, FN) {
+      .formatSensSpecTable = function(Title, TP, FP, TN, FN, labels) {
         # Escape Title once at function entry - callers (e.g. L1385-1390) pass
         # paste("Confusion Matrix for", var, ...) where `var` is a user column
         # name from OptionVariables. Without this escape, a column literally
@@ -5059,8 +5129,9 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         # so each is an extractable msgid.
         lblDecision <- .("DECISION BASED ON MEASURE")
         lblCriterion <- .("CRITERION")
-        lblNegative <- .("Negative")
-        lblPositive <- .("Positive")
+        # "Positive (<level>)" / "Negative (<level>)": level names are user data, and this is Html.
+        lblNegative <- jmvcore::htmlEscape(labels[["negative"]])
+        lblPositive <- jmvcore::htmlEscape(labels[["positive"]])
         res <- paste0(
           "<style type='text/css'>
         .tg  {border-collapse:collapse;border-spacing:0;border-width:1px;border-style:solid;border-color:black;}
@@ -5409,7 +5480,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         # Table visibility is controlled by YAML: visible: (effectSizeAnalysis)
 
         # Get binary outcomes
-        y <- as.numeric(data[[private$.escapeVar(self$options$classVar)]] == positiveClass)
+        y <- private$.classIndicator(data, positiveClass)
 
         # The three "difference" columns held d2 - d1 under the heading "Cohen's d", so a
         # reader took the between-marker difference for a single marker's effect size.
@@ -5537,10 +5608,12 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           init = FALSE
         )
 
-        y <- as.numeric(data[[private$.escapeVar(self$options$classVar)]] == positiveClass)
+        y <- private$.classIndicator(data, positiveClass)
         n_pos <- sum(y, na.rm = TRUE)
         n_neg <- sum(1 - y, na.rm = TRUE)
-        n_total <- length(y)
+        # rows with a class value (the Outcome coding N); length(y) also counted missing classes,
+        # which inflated "current n" and understated the positive fraction behind required n
+        n_total <- n_pos + n_neg
 
         # Use actual options from .a.yaml
         target_power <- self$options$targetPower # Already a proportion (0-1)
@@ -5797,7 +5870,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           init = FALSE
         )
 
-        y <- as.numeric(data[[private$.escapeVar(self$options$classVar)]] == positiveClass)
+        y <- private$.classIndicator(data, positiveClass)
 
         # Use options from .a.yaml
         prior_auc <- self$options$priorAUC # Prior belief about AUC (0.5-1.0)
@@ -5945,7 +6018,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
 
         # Table visibility controlled by YAML: visible: (clinicalUtilityAnalysis)
 
-        y <- as.numeric(data[[private$.escapeVar(self$options$classVar)]] == positiveClass)
+        y <- private$.classIndicator(data, positiveClass)
         prevalence <- mean(y, na.rm = TRUE)
 
         # Use actual options from .a.yaml
@@ -6269,7 +6342,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           init = FALSE
         )
 
-        y <- as.numeric(data[[private$.escapeVar(self$options$classVar)]] == positiveClass)
+        y <- private$.classIndicator(data, positiveClass)
 
         # Collect AUCs and their standard errors.
         # Pre-fill with NA, not 0: a marker that never gets a value must drop out of the
@@ -6343,8 +6416,9 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         weights_fe <- 1 / se_aucs^2
         pooled_auc_fe <- sum(weights_fe * aucs) / sum(weights_fe)
         se_pooled_fe <- sqrt(1 / sum(weights_fe))
-        ci_lower_fe <- pooled_auc_fe - 1.96 * se_pooled_fe
-        ci_upper_fe <- pooled_auc_fe + 1.96 * se_pooled_fe
+        lim_fe <- private$.aucLimits(pooled_auc_fe, se_pooled_fe)
+        ci_lower_fe <- lim_fe$lower
+        ci_upper_fe <- lim_fe$upper
 
         # Calculate heterogeneity statistics (needed for random-effects weights)
         q_stat <- sum(weights_fe * (aucs - pooled_auc_fe)^2)
@@ -6364,8 +6438,13 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         weights_re <- 1 / (se_aucs^2 + tau_squared)
         pooled_auc_re <- sum(weights_re * aucs) / sum(weights_re)
         se_pooled_re <- sqrt(1 / sum(weights_re))
-        ci_lower_re <- pooled_auc_re - 1.96 * se_pooled_re
-        ci_upper_re <- pooled_auc_re + 1.96 * se_pooled_re
+        lim_re <- private$.aucLimits(pooled_auc_re, se_pooled_re)
+        ci_lower_re <- lim_re$lower
+        ci_upper_re <- lim_re$upper
+
+        self$results$metaAnalysisTable$setNote("ci_scale",
+          .("Confidence limits were computed on the logit scale (delta-method standard error) and back-transformed, so they lie between 0 and 1 and need not be symmetric about the pooled AUC."),
+          init = FALSE)
 
         # Fill the rows .init() scaffolded for the selected method
         metaKeys <- names(private$.metaAnalysisRowLabels())
@@ -6437,24 +6516,18 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           return(.("Please specify at least two dependent variables to use DeLong's test."))
         }
 
-        # Enhanced validation for IDI/NRI
+        # Enhanced validation for IDI/NRI. Reference Test for IDI/NRI may be any numeric column, not
+        # only a test variable (jmvcore rejects a non-numeric one before .run(): permitted: numeric);
+        # a reference that is also a test variable is not compared with itself, so count distinct tests.
         if ((self$options$calculateIDI || self$options$calculateNRI) &&
-          length(self$options$dependentVars) < 2) {
-          return(.("Please specify at least two dependent variables for IDI/NRI calculations."))
+          length(union(self$options$dependentVars, self$options$refVar)) < 2) {
+          return(.("IDI/NRI need two tests: put at least two in Test Variables, or one there and a different test in Reference Test for IDI/NRI."))
         }
 
-        # Validation for refVar when IDI/NRI is requested
-        if ((self$options$calculateIDI || self$options$calculateNRI)) {
-          refVar_val <- tryCatch(self$options$refVar, error = function(e) NULL)
-          if (is.null(refVar_val) || refVar_val == "") {
-            # Will use first dependent variable as default - this is OK
-            # Just document this behavior for users
-          } else {
-            # Verify refVar is in dependentVars
-            if (!refVar_val %in% self$options$dependentVars) {
-              return(.("Reference variable for IDI/NRI must be one of the selected test variables."))
-            }
-          }
+        # The class variable is the gold standard; as the reference, every test would be compared with the outcome itself.
+        if ((self$options$calculateIDI || self$options$calculateNRI) &&
+          isTRUE(self$options$refVar %in% self$options$classVar)) {
+          return(.("Reference Test for IDI/NRI holds the class variable, the gold standard itself. Put a test to compare against there, or leave it empty to use the first test variable."))
         }
 
         # Enhanced validation for subgroup analysis with DeLong
@@ -6806,13 +6879,15 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
       .generateMetaAnalysisForestPlot = function(aucs, se_aucs, vars, combined_result) {
         tryCatch(
           {
-            # Create data frame for forest plot
+            # Create data frame for forest plot (limits as in the table, so none falls past the
+            # renderer's 0-1 scale and is silently dropped)
+            lim <- private$.aucLimits(aucs, se_aucs)
             plot_data <- data.frame(
               study = vars,
               auc = aucs,
               se = se_aucs,
-              ci_lower = aucs - 1.96 * se_aucs,
-              ci_upper = aucs + 1.96 * se_aucs,
+              ci_lower = lim$lower,
+              ci_upper = lim$upper,
               stringsAsFactors = FALSE
             )
 

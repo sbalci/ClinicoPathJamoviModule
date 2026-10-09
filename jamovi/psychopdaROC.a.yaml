@@ -83,18 +83,26 @@ options:
         - factor
       description:
           R: >
-            Binary classification variable representing the true class (gold standard).
-            Must have exactly two levels.
+            Classification variable representing the true class (gold standard).
+            Two or more levels; with more than two, the positive class is compared with all
+            other levels combined (one-vs-rest).
 
+    # allowNone: without it the jamovi client pre-selects levels[0] - usually the NEGATIVE
+    # level - and the whole analysis runs reversed. The positive class is never inferred.
     - name: positiveClass
       title: Positive Class
       type: Level
       variable: (classVar)
+      allowNone: true
       description:
           ui: >
-            Select which level of the class variable represents the positive class (disease/condition present).
+            Choose the level that means the condition is present. Nothing is computed until a
+            level is chosen; every other level is analysed as negative (pooled when there are
+            more than two).
           R: >
-            Specifies which level of the class variable should be treated as the positive class.
+            Level of classVar treated as the positive class (condition present). Required:
+            NULL leaves the analysis waiting for a choice; levels are never inferred from
+            their order.
 
     - name: subGroup
       title: Subgroup Variable (Optional)
@@ -591,15 +599,21 @@ options:
             Calculate how many patients are correctly reclassified when using a new test.
             NRI (Net Reclassification Index) measures the net improvement in patient classification.
 
+    # A Variable, not a Level: a LevelSelector bound to the Variables option dependentVars lists
+    # no levels, so the reference could never be chosen in jamovi.
     - name: refVar
-      title: Reference Variable
-      type: Level
-      variable: (dependentVars)
-      allowNone: true
+      title: Reference Test for IDI/NRI
+      type: Variable
+      default: null
+      suggested:
+        - continuous
+      permitted:
+        - numeric
       description:
           R: >
-            Reference test variable for IDI and NRI calculations.
-            Other variables will be compared against this reference.
+            Reference test for IDI and NRI (a numeric variable; it need not be one of the
+            test variables, and it cannot be the class variable). Every test variable other
+            than the reference is compared against it. NULL uses the first test variable.
 
     - name: nriThresholds
       title: NRI Risk Categories
@@ -883,7 +897,7 @@ options:
       default: true
       description:
           R: >
-            Perform Cochran's Q test and calculate I² statistic to assess
+            Perform Cochran's Q test and calculate the I-squared statistic to assess
             heterogeneity between AUC estimates.
 
     - name: forestPlot

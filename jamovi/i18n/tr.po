@@ -512,25 +512,15 @@ msgstr ""
 
 #: R/enhancedROC.b.R
 msgid ""
-"\"No significant difference (p >= 0.05)\" means no difference between the "
-"two AUCs was detected in this sample; it does not establish that the two "
-"predictors perform equally, because the test may lack the power to detect a "
-"difference of the size that would matter here. The p-value is the "
-"probability of seeing a gap at least this large if the two AUCs were "
-"identical, not the probability that they are identical. The Effect Magnitude "
-"column reports only how far apart the two observed AUCs are, so a wide "
-"observed gap and a large p-value can appear on the same row when the sample "
-"is small."
+"\"No significant difference (p >= 0.05)\" means no difference was detected "
+"in this sample; it does not establish that the two predictors perform "
+"equally, because the test may lack the power to detect a difference of the "
+"size that would matter here. The p-value is the probability of a result at "
+"least this extreme if there were no difference, not the probability that "
+"there is none. The Observed AUC difference column reports only how far apart "
+"the two observed AUCs are and which is higher, so a wide observed gap and a "
+"large p-value can appear on the same row when the sample is small."
 msgstr ""
-"\"Anlamlı fark yok (p >= 0.05)\", bu örneklemde iki EAA arasında hiçbir fark "
-"tespit edilmediği anlamına gelir; iki öngörücünün eşit performans "
-"gösterdiğini kanıtlamaz, çünkü test burada önemli olacak büyüklükte bir "
-"farkı tespit etme gücünden yoksun olabilir. p değeri, iki EAA özdeş olsaydı "
-"en az bu kadar büyük bir fark görme olasılığıdır, bunların özdeş olma "
-"olasılığı değildir. Etki Büyüklüğü sütunu yalnızca gözlemlenen iki EAA'nın "
-"birbirinden ne kadar uzak olduğunu bildirir, bu nedenle örneklem küçük "
-"olduğunda aynı satırda geniş bir gözlemlenen fark ve büyük bir p değeri "
-"görünebilir."
 
 #: R/enhancedROC.b.R
 msgid ""
@@ -666,6 +656,11 @@ msgstr ""
 
 #: R/alluvial.b.R
 msgid "(Missing)"
+msgstr ""
+
+#: R/enhancedROC.b.R
+#: R/psychopdaROC.b.R
+msgid "(missing)"
 msgstr ""
 
 #: R/jjhistostats.b.R
@@ -1191,12 +1186,6 @@ msgstr "{level}: {title}: {content}"
 #: R/reportcat.b.R
 msgid "{level}: n = {n}, {percent} of valid cases."
 msgstr "{level}: n = {n}, geçerli vakaların %{percent}'i."
-
-#: R/enhancedROC.b.R
-msgid ""
-"{level}% interval ({lo} to {hi}), the apparent AUC’s interval shifted by the "
-"optimism estimate"
-msgstr ""
 
 #: R/enhancedROC.b.R
 msgid "{lo}-{hi} risk-quantile groups"
@@ -1765,6 +1754,10 @@ msgstr ""
 "uyarılara bakın: yanlış biçimde okunan bir sütun yine de yüksek oranda "
 "ayrıştırılabilir."
 
+#: R/enhancedROC.b.R
+msgid "{pct}% of the way from a random ranking to a perfect one (alpha {a})"
+msgstr ""
+
 #: R/tableone.b.R
 msgid "{percent}% of cases have at least one missing value"
 msgstr "Olguların %{percent} kadarında en az bir eksik değer var"
@@ -1779,7 +1772,15 @@ msgstr ""
 
 #: R/enhancedROC.b.R
 msgid ""
-"{pred} (Bootstrap): Original AUC = {orig}, Optimism = {opt} (SD across "
+"{pred} (Bootstrap): Apparent AUC = {app} (logistic model of the marker; "
+"{level}% DeLong interval of the apparent AUC {lo} to {hi}), Optimism = {opt} "
+"(SD across resamples {sd}), Corrected AUC = {corr}"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"{pred} (Bootstrap): Apparent AUC = {app} (logistic model of the marker; no "
+"DeLong interval, its standard error is 0), Optimism = {opt} (SD across "
 "resamples {sd}), Corrected AUC = {corr}"
 msgstr ""
 
@@ -2662,7 +2663,6 @@ msgid "% Cases"
 msgstr ""
 
 #: comprehensiveSurvivalPower/results/sensitivityTable.columns.title
-#: enhancedROC/results/results/detailedComparison.columns.title
 #: labinterpret/results/deltaChecksTable.columns.title
 #: stagemigration/results/frailtyModelsVarianceComponents.columns.title
 #: tumorgrowth/results/treatmentEffectTable.columns.title
@@ -3159,6 +3159,10 @@ msgstr ""
 msgid "%1$s (%2$s given, %3$s used)"
 msgstr "%1$s (verilen: %2$s, kullanılan: %3$s)"
 
+#: R/enhancedROC.b.R
+msgid "%1$s (%2$s higher)"
+msgstr ""
+
 #: R/agreement.b.R
 msgid "%1$s (CI spans %2$s to %3$s)"
 msgstr "%1$s (GA %2$s ile %3$s arasında uzanıyor)"
@@ -3221,9 +3225,21 @@ msgstr ""
 
 #: R/enhancedROC.b.R
 msgid ""
-"%1$s cutoffs for %2$s share the same best balance of sensitivity and "
-"specificity. The one closest to the top-left corner of the ROC curve is "
-"reported (cutoff %3$s); the others perform equally well by this criterion."
+"%1$s cutoffs for %2$s are equally close to the top-left corner of the ROC "
+"curve: %3$s. By this module's convention the smallest of them is reported "
+"(cutoff %4$s); the others are equally good by this criterion."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"%1$s cutoffs for %2$s reach the same highest Youden index (%3$s): %4$s. By "
+"this module's convention the one closest to the top-left corner of the ROC "
+"curve is reported (cutoff %5$s), and the smallest cutoff if that still ties; "
+"the others are equally good by the Youden criterion."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "%1$s distinct values (%2$s to %3$s)"
 msgstr ""
 
 #: R/sequentialtests.b.R
@@ -3262,14 +3278,28 @@ msgstr ""
 "En yüksek gözlenen dengeli doğruluk %1$s testindeydi, ancak bu test %2$s "
 "testinden anlamlı olarak daha az olguyu doğru sınıflandırdı."
 
+#: R/psychopdaROC.b.R
+msgid ""
+"%1$s has a value for %2$d case(s) of the positive class (%3$s); at least 2 "
+"are needed to analyse it."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"%1$s has a value for %2$d case(s) outside the positive class (%3$s); at "
+"least 2 are needed to analyse it."
+msgstr ""
+
 #: R/enhancedROC.b.R
 msgid ""
-"%1$s has an AUC of %2$s and its whole confidence interval lies below 0.5. "
-"The marker does separate the groups, but in the opposite direction to the "
-"one assumed. • The analysis is currently reading it as: %3$s. • Setting "
-"Direction to '%4$s' would give an AUC of %5$s, with sensitivity and "
-"specificity swapped. • Change it only if that matches what the marker means "
-"clinically — the outcome coding is worth checking too."
+"%1$s has an AUC of %2$s and its whole confidence interval lies below 0.5: it "
+"separates the groups, but in the opposite direction to the one assumed "
+"(%3$s). • First check Positive class: is %4$s the level that means the "
+"condition is present? Naming the wrong level turns the AUC into 1 minus its "
+"true value, exactly this pattern. • Only if it is, setting Direction to "
+"'%5$s' gives an AUC of %6$s and re-estimates the cut-point, sensitivity and "
+"specificity. • Change Direction only if that matches what the marker means "
+"clinically."
 msgstr ""
 
 #: R/enhancedROC.b.R
@@ -3278,8 +3308,20 @@ msgid ""
 "confidence interval still crosses 0.5. • About half of markers carrying no "
 "information at all fall below 0.5 by chance, so this is not evidence that "
 "the marker runs backwards. • It is consistent with a marker that simply does "
-"not discriminate. • If you expected it to run the other way, check the "
-"Direction setting and the outcome coding before drawing any conclusion."
+"not discriminate. • If you expected it to run the other way, first check "
+"Positive class (is %3$s the level that means the condition is present?), "
+"then Direction, before drawing any conclusion."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"%1$s has an AUC of 0: in these data it separates the groups perfectly, but "
+"in the opposite direction to the one assumed (%2$s). • First check Positive "
+"class: is %3$s the level that means the condition is present? Naming the "
+"wrong level turns the AUC into 1 minus its true value, exactly this pattern. "
+"• Only if it is, setting Direction to '%4$s' gives an AUC of 1 and "
+"re-estimates the cut-point, sensitivity and specificity. • Change Direction "
+"only if that matches what the marker means clinically."
 msgstr ""
 
 #: R/lassologistic.b.R
@@ -3342,6 +3384,13 @@ msgstr ""
 msgid "%1$s: %2$s"
 msgstr "%1$s: %2$s"
 
+#: R/enhancedROC.b.R
+msgid ""
+"%1$s: %2$s%% of case-control pairs are tied; ties count one half. If every "
+"tie favoured the cases the AUC would be %3$s, if every tie favoured the "
+"non-cases %4$s."
+msgstr ""
+
 #: R/decisioncompare.b.R
 msgid "%1$s: positive = %2$s; negative = %3$s"
 msgstr "%1$s: pozitif = %2$s; negatif = %3$s"
@@ -3349,6 +3398,13 @@ msgstr "%1$s: pozitif = %2$s; negatif = %3$s"
 #: R/decisioncompare.b.R
 msgid "%1$s: PPA %2$s, NPA %3$s; %4$d analyzed cases, %5$d excluded."
 msgstr "%1$s: PPA %2$s, NPA %3$s; %4$d analiz edilen olgu, %5$d dışlanan."
+
+#: R/enhancedROC.b.R
+msgid ""
+"%1$s: risk groups whose predicted risks were all 0 or all 1 matched their "
+"outcomes exactly (%2$s of them); they carry no information, so they were "
+"left out and the degrees of freedom reduced by the same number."
+msgstr ""
 
 #: R/agreement.b.R
 msgid ""
@@ -3361,6 +3417,20 @@ msgstr ""
 "ve bu nadiren ilgilenilen sorudur; yeterliliği p-değerinden değil, "
 "katsayının kendisinden ve kesinliğinden değerlendirin. Varyansa dayalı "
 "yaklaşım, özellikle değerlendirici varyansı düşük olduğunda yararlıdır."
+
+#: R/enhancedROC.b.R
+msgid ""
+"%1$s%% confidence intervals for the AUC are bootstrap intervals (%2$s) from "
+"%3$s resamples drawn within each outcome class (boot package; Davison & "
+"Hinkley, 1997), random seed %4$s."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"%1$s%% confidence intervals for the AUC are bootstrap intervals (%2$s) from "
+"%3$s resamples of all rows (boot package; Davison & Hinkley, 1997), random "
+"seed %4$s."
+msgstr ""
 
 #: R/swimmerplot.b.R
 msgid "%d after the patient's last end"
@@ -4431,6 +4501,10 @@ msgstr ""
 "özgü bir duyarlılık analizi olmaksızın örtük sınıf parametrelerini tanısal "
 "doğruluk olarak yorumlamayın."
 
+#: R/enhancedROC.b.R
+msgid "%s higher (p < 0.05)"
+msgstr ""
+
 #: R/cotest.b.R
 msgid ""
 "%s is below the chance diagonal (sensitivity plus specificity below 1): a "
@@ -4572,6 +4646,12 @@ msgstr "Yalnızca %s Pozitif LR"
 
 #: R/clinicalscore.b.R
 msgid "%s regression"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"%s rows with a missing outcome were excluded (a blank value or an explicit "
+"missing-value level is not a category)."
 msgstr ""
 
 #: R/lassologistic.b.R
@@ -4740,6 +4820,22 @@ msgstr ""
 msgid "%s: QM(%d) = %.2f, p = %.4g"
 msgstr "%s: QM(%d) = %.2f, p = %.4g"
 
+#: R/enhancedROC.b.R
+msgid ""
+"%s: the AUC is the probability that a randomly chosen case has a HIGHER "
+"value than a randomly chosen non-case (ties count one half)."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"%s: the AUC is the probability that a randomly chosen case has a LOWER value "
+"than a randomly chosen non-case (ties count one half)."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "%s: the selected cutoff has J <= 0 (no better than chance)."
+msgstr ""
+
 #: R/jjbetweenstats.b.R
 msgid "%s: Variances differ significantly between groups (Levene's test p = %.3f)."
 msgstr ""
@@ -4776,6 +4872,12 @@ msgstr "%%%s GA Alt"
 msgid "%s%% CI Upper"
 msgstr "%%%s GA Üst"
 
+#: R/enhancedROC.b.R
+msgid ""
+"%s%% confidence intervals for the AUC use DeLong's method (DeLong et al., "
+"1988)."
+msgstr ""
+
 #: R/diagnosticmeta.b.R
 msgid "%s%% confidence region (dashed)"
 msgstr "%%%s güven bölgesi (kesikli)"
@@ -4787,6 +4889,13 @@ msgstr "%%%s CV (eşik/2)"
 #: R/ihcheterogeneity.b.R
 msgid "%s%% CV threshold"
 msgstr "%%%s CV eşiği"
+
+#: R/enhancedROC.b.R
+msgid ""
+"%s%% intervals for sensitivity and specificity are Clopper-Pearson exact "
+"binomial intervals (Clopper & Pearson, 1934); they treat the cut-point as "
+"fixed and do not reflect its selection on these data."
+msgstr ""
 
 #: R/ihcheterogeneity.b.R
 msgid "%s%% of the comparison mean"
@@ -11576,6 +11685,10 @@ msgstr ""
 msgid "0.5,1,2,3"
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid "0.50 to below 0.60 = Minimal"
+msgstr ""
+
 #: diagnosticsamplesize/ui[1][0]/target_sensitivity.suffix
 #: diagnosticsamplesize/ui[1][0]/target_specificity.suffix
 msgid "0.50-0.99"
@@ -11583,6 +11696,14 @@ msgstr ""
 
 #: bayesianci/options/additional_levels.default
 msgid "0.50,0.80,0.90"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "0.60 to below 0.70 = Poor"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "0.70 to below 0.80 = Fair"
 msgstr ""
 
 #: misclassificationbias/options/senRange.default
@@ -11598,6 +11719,10 @@ msgstr ""
 msgid "0.8,1.0"
 msgstr "0.8,1.0"
 
+#: R/enhancedROC.b.R
+msgid "0.80 to below 0.90 = Good"
+msgstr ""
+
 #: ihcscoring/ui[2][5][0]/confidence_level.suffix
 #: multiplexanalysis/ui[1][7][0]/confidence_level.suffix
 #: simonmakuch/ui[1][0][0]/confidenceLevel.suffix
@@ -11611,6 +11736,10 @@ msgid ""
 msgstr ""
 "0.9 ve üzeri mükemmel, 0.8 ila 0.9 iyi, 0.7 ila 0.8 orta ve 0.7 altı "
 "zayıftır."
+
+#: R/enhancedROC.b.R
+msgid "0.90 or more = Excellent"
+msgstr ""
 
 #: R/psychopdaROC.b.R
 msgid "1 - Specificity"
@@ -13389,6 +13518,14 @@ msgstr ""
 "olmaması) bir Fisher kesin testi çalıştırılmadı, bu nedenle test edilecek "
 "bir karşıtlık yoktur."
 
+#: R/enhancedROC.b.R
+msgid ""
+"A flexible calibration curve gives ICI, E50, E90 and Emax as defined by "
+"Austin & Steyerberg (2019); it is fitted here as a natural cubic spline of "
+"the logit of the predicted risk with %s knots, a variant of their loess and "
+"restricted cubic spline curves on the probability scale."
+msgstr ""
+
 #: R/alluvial.b.R
 msgid ""
 "A further {n} row(s) had no value for the weight variable '{weight}' and "
@@ -13694,6 +13831,15 @@ msgstr ""
 "Nomogram, uydurulan regresyon modelinin öngörülerinin <b>grafiksel bir "
 "gösterimidir</b>."
 
+#: R/enhancedROC.b.R
+msgid ""
+"A non-significant Hosmer-Lemeshow test is not evidence of good calibration: "
+"its power depends on the sample size and on the number of groups, so a small "
+"sample rarely rejects and a large one rejects small misfits. Van Calster et "
+"al. (2019) advise against relying on it; the calibration slope, "
+"calibration-in-the-large and the calibration plot say more."
+msgstr ""
+
 #: R/decisioncompare.b.R
 msgid ""
 "A non-significant McNemar result does not establish that the two tests "
@@ -13875,6 +14021,18 @@ msgstr ""
 
 #: contTablesPaired/results/freqs.description
 msgid "a proportions table"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"A random case has a higher value than a random non-case %.0f%% of the time "
+"(ties count one half)"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"A random case has a lower value than a random non-case %.0f%% of the time "
+"(ties count one half)"
 msgstr ""
 
 #: R/outcomeorganizer.b.R
@@ -14629,6 +14787,13 @@ msgstr ""
 msgid "About Gwet's AC Coefficient"
 msgstr "Gwet'in AC Katsayısı Hakkında"
 
+#: R/enhancedROC.b.R
+msgid ""
+"about half of markers carrying no information land here by chance; only a "
+"confidence interval wholly below 0.50 shows that the marker runs the other "
+"way (check Positive class, then Direction)"
+msgstr ""
+
 #: haralicktexture/results/about.title
 msgid "About Haralick Texture Analysis"
 msgstr ""
@@ -14813,6 +14978,12 @@ msgstr "Toplam Sapma İndeksi (TDI) Hakkında"
 #: R/venn.b.R
 msgid "About Venn Diagrams"
 msgstr "Venn Diyagramları Hakkında"
+
+#: R/enhancedROC.b.R
+msgid ""
+"Above 1: predictions too moderate (Van Calster et al. 2019), suggesting "
+"under-fitting (Austin & Steyerberg 2019)"
+msgstr ""
 
 #: pathagreement/options/positiveRule/gt.title
 msgid "Above cutoff"
@@ -20237,6 +20408,16 @@ msgid ""
 "predictors perform equally."
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid ""
+"Among the %1$d predictors evaluated, %2$s had the highest observed AUC "
+"(%3$.3f). The Venkatraman permutation test in the ROC Curve Comparisons "
+"table asks whether two ROC curves differ anywhere along their range, not "
+"whether their AUCs differ, so even a significant result does not show that "
+"one AUC is higher; a result that is not significant does not establish that "
+"two predictors perform equally."
+msgstr ""
+
 #: R/decisioncompare.b.R
 msgid ""
 "Among the tests evaluated, %1$s were tied for the highest observed balanced "
@@ -20383,6 +20564,10 @@ msgstr ""
 "pozitif düzeyi altında seçilen düzeyin amaçladığınız düzey olduğunu "
 "doğrulayın, ardından her sonucun hastalık olasılığını ne kadar kaydırdığını "
 "değerlendirmek için o sonucun olabilirlik oranını kullanın."
+
+#: R/psychopdaROC.b.R
+msgid "An error occurred"
+msgstr ""
 
 #: R/singlearm.b.R
 msgid "An error occurred during {stage}."
@@ -20644,6 +20829,10 @@ msgstr ""
 #: ihcheterogeneity/results/assumptions.description
 msgid "Analysis assumptions, data requirements, and methodological considerations"
 msgstr "Analiz varsayımları, veri gereksinimleri ve metodolojik değerlendirmeler"
+
+#: R/psychopdaROC.b.R
+msgid "Analysis calculation failed"
+msgstr ""
 
 #: stagemigration/results/comparativeAnalysisDashboard.columns.title
 msgid "Analysis Category"
@@ -21807,12 +21996,6 @@ msgstr ""
 msgid "and"
 msgstr ""
 
-#: R/enhancedROC.b.R
-msgid ""
-"and it is additionally optimistic because this predictor was picked as the "
-"highest-scoring of %d"
-msgstr ""
-
 #: roc2d/options/decision_rule/and.title
 msgid "AND Rule (Both Positive)"
 msgstr ""
@@ -22897,6 +23080,10 @@ msgstr ""
 msgid "Assumed per-sample probability (q)"
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid "assumed prevalence {prev}"
+msgstr ""
+
 #: comprehensiveSurvivalPower/options/survival_distribution.description
 msgid ""
 "Assumed underlying survival distribution. Exponential assumes constant "
@@ -23479,14 +23666,6 @@ msgstr ""
 msgid "At or above cutoff"
 msgstr ""
 
-#: R/enhancedROC.b.R
-msgid "at or above the 0.75 level conventionally quoted for screening"
-msgstr "tarama için geleneksel olarak aktarılan 0.75 düzeyinde veya üzerinde"
-
-#: R/enhancedROC.b.R
-msgid "at or above the 0.80 level conventionally quoted for diagnosis"
-msgstr "tanı için geleneksel olarak aktarılan 0.80 düzeyinde veya üzerinde"
-
 #: pathagreement/options/positiveRule/le.title
 msgid "At or below cutoff"
 msgstr ""
@@ -23551,6 +23730,25 @@ msgid ""
 "thinnest: the smallest expected count is {min} and {below} of {total} cells "
 "are below 5. The calculation rests on a large-sample chi-square "
 "approximation, so the required n is less dependable here."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"At the cutoff closest to the top-left corner of the ROC curve, %1$.3f, "
+"sensitivity was %2$.1f%% and specificity %3$.1f%% (Youden index %4$.3f)."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"At the cutoff that maximised the Youden index, %1$.3f, sensitivity was "
+"%2$.1f%% and specificity %3$.1f%% (Youden index %4$.3f)."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"At the cutoff with the highest Youden index among those meeting the minimum "
+"sensitivity and specificity set for this analysis, %1$.3f, sensitivity was "
+"%2$.1f%% and specificity %3$.1f%% (Youden index %4$.3f)."
 msgstr ""
 
 #: R/decisioncompare.b.R
@@ -23821,6 +24019,10 @@ msgstr ""
 msgid "AUC = %1$s (95%% CI: %2$.3f-%3$.3f)"
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid "AUC 0.90 or more"
+msgstr ""
+
 #: aivalidation/results/performanceTable.columns.title
 #: ordinalroc/results/overallSummary.columns.title
 msgid "AUC 95% CI Lower"
@@ -23877,6 +24079,10 @@ msgstr ""
 msgid "AUC Comparison Test"
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid "AUC Confidence Interval"
+msgstr ""
+
 #: ordinalroc/options/auc_ci_method.title
 msgid "AUC Confidence Interval Method"
 msgstr ""
@@ -23885,12 +24091,15 @@ msgstr ""
 msgid "AUC could not be computed"
 msgstr "AUC hesaplanamadı"
 
-#: enhancedROC/results/results/rocComparisons.columns.title
 #: ordinalroc/results/aucComparisonTests.columns.title
 #: precisionrecall/results/comparisonTable.columns.title
 #: psychopdaROC/results/delongComparisonTable.columns.title
 msgid "AUC Difference"
 msgstr "EAA Farkı"
+
+#: enhancedROC/results/results/rocComparisons.columns.title
+msgid "AUC Difference (1 - 2)"
+msgstr ""
 
 #: vusanalysis/results/pairwiseAUC.description
 msgid "AUC for all pairwise class comparisons"
@@ -23898,6 +24107,24 @@ msgstr ""
 
 #: ordinalroc/results/cumulativeAUC.description
 msgid "AUC for each cumulative split of ordinal categories"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"AUC from 0.50 to below 0.60 - little separation on its own, although the "
+"marker may still contribute inside a multivariable model"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "AUC from 0.60 to below 0.70"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "AUC from 0.70 to below 0.80"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "AUC from 0.80 to below 0.90"
 msgstr ""
 
 #: enhancedROC/results/results/aucSummary.columns.title
@@ -23911,6 +24138,20 @@ msgstr "EAA Yorumu"
 #: R/psychopdaROC.b.R
 msgid "AUC interpretation"
 msgstr "EAA yorumu"
+
+#: R/enhancedROC.b.R
+msgid "AUC limits are %1$s%% bootstrap intervals (%2$s, %3$s resamples)."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "AUC limits are %s%% DeLong intervals (DeLong et al. 1988)."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"AUC limits are %s%% DeLong intervals for each pair of classes (DeLong et al. "
+"1988)."
+msgstr ""
 
 #: enhancedROC/results/results/aucSummary.columns.title
 #: enhancedROC/results/results/multiClassAUC.columns.title
@@ -23962,8 +24203,17 @@ msgid "AUC vs Covariate Plot"
 msgstr ""
 
 #: enhancedROC/results/results/precisionRecallTable.columns.title
-msgid "AUC-PR"
-msgstr "AUC-PR"
+msgid "AUC-PR (trapezoidal)"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"AUC-PR (trapezoidal) joins neighbouring precision-recall points with "
+"straight lines, but linear interpolation in precision-recall space does not "
+"correspond to achievable operating points (Davis & Goadrich 2006). Average "
+"precision is the step-wise estimate: the area under the step curve in the "
+"Precision-Recall plot."
+msgstr ""
 
 #: biomarkerdiscovery/results/signature_performance.columns.title
 #: biomarkerdiscovery/results/cross_validation_results.columns.title
@@ -24522,7 +24772,6 @@ msgstr ""
 msgid "AVE"
 msgstr ""
 
-#: enhancedROC/options/tiedScoreHandling/average.title
 #: jggheatmap/options/clustering_method/average.title
 #: nonparametric/options/ties_method/average.title
 msgid "Average"
@@ -24940,10 +25189,6 @@ msgstr ""
 #: treatmenteffects/results/balance_assessment.columns.title
 msgid "Balance Status"
 msgstr ""
-
-#: R/enhancedROC.b.R
-msgid "Balanced"
-msgstr "Dengeli"
 
 #: R/decisioncombine.b.R
 #: decisioncalculator/results/advancedMetricsTable.columns.title
@@ -25709,6 +25954,10 @@ msgstr ""
 #: dynamicprediction/options/baseline.title
 #: dynamicprediction/ui[0][4].label
 msgid "Baseline Variables"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "basic"
 msgstr ""
 
 #: psychopdaROC/options/clinicalMode/basic.title
@@ -26606,6 +26855,20 @@ msgid "below 0.0001"
 msgstr ""
 
 #: R/enhancedROC.b.R
+msgid "Below 0.50 = Below chance (check Positive class, then Direction)"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"Below 1: predictions too extreme, suggesting over-fitting (Van Calster et "
+"al. 2019)"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "Below a random ranking (alpha {a})"
+msgstr ""
+
+#: R/enhancedROC.b.R
 #: R/psychopdaROC.b.R
 msgid "Below chance"
 msgstr "Şans düzeyinin altında"
@@ -26640,14 +26903,6 @@ msgstr ""
 msgid "Below reference gap (index < 0.7)"
 msgstr "Referans boşluğun altında (indeks < 0,7)"
 
-#: R/enhancedROC.b.R
-msgid "below the 0.75 level conventionally quoted for screening"
-msgstr "tarama için geleneksel olarak aktarılan 0.75 düzeyinin altında"
-
-#: R/enhancedROC.b.R
-msgid "below the 0.80 level conventionally quoted for diagnosis"
-msgstr "tanı için geleneksel olarak aktarılan 0.80 düzeyinin altında"
-
 #: R/pathagreement.b.R
 msgid "Below the conventional 0.667 minimum for tentative conclusions"
 msgstr "Geçici sonuçlar için geleneksel 0.667 alt sınırının altında"
@@ -26655,6 +26910,10 @@ msgstr "Geçici sonuçlar için geleneksel 0.667 alt sınırının altında"
 #: R/ihcheterogeneity.b.R
 msgid "Below the threshold as a point estimate only: %s."
 msgstr "Yalnızca nokta tahmini olarak eşiğin altında: %s."
+
+#: R/enhancedROC.b.R
+msgid "Below your imbalance threshold (%s:1)"
+msgstr ""
 
 #: R/ihcheterogeneity.b.R
 msgid "Below your threshold (< %s)"
@@ -27610,10 +27869,6 @@ msgstr ""
 msgid "Binary Outcome Variable"
 msgstr ""
 
-#: enhancedROC/options/outcome.description
-msgid "Binary outcome variable (disease status)"
-msgstr "İkili sonuç değişkeni (hastalık durumu)"
-
 #: predmodel/options/outcome.description
 msgid "Binary outcome variable (disease/event vs. no disease/no event)."
 msgstr ""
@@ -27649,6 +27904,10 @@ msgstr ""
 
 #: timeroc/results/binaryROCPlot.title
 msgid "Binary ROC Curves"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "Binary ROC tables need a positive class"
 msgstr ""
 
 #: spikeslabpriors/options/spike_slab_type/binary.title
@@ -28822,6 +29081,10 @@ msgstr "Bootstrap güven aralıkları"
 msgid "Bootstrap Confidence Intervals (Any Data Type)"
 msgstr "Bootstrap Güven Aralıkları (Her Tür Veri)"
 
+#: R/enhancedROC.b.R
+msgid "Bootstrap confidence intervals apply to the one-vs-rest strategy only."
+msgstr ""
+
 #: R/stagemigration-part2.R
 msgid "Bootstrap confidence intervals failed"
 msgstr ""
@@ -29416,19 +29679,6 @@ msgstr ""
 msgid "Bootstrap validation suppressed: fewer than 10 events."
 msgstr "Önyükleme doğrulaması baskılandı: 10'dan az olay."
 
-#: R/enhancedROC.b.R
-msgid ""
-"Bootstrap validation uses Harrell's optimism-correction method (Harrell, "
-"2015): corrected AUC = original AUC - mean(optimism), where optimism = "
-"apparent - test performance across bootstrap resamples. Cross-validation "
-"fits logistic models on training folds and evaluates on test folds."
-msgstr ""
-"Bootstrap doğrulaması Harrell'ın iyimserlik düzeltme yöntemini kullanır "
-"(Harrell, 2015): düzeltilmiş EAA = orijinal EAA - ortalama(iyimserlik), "
-"burada iyimserlik = bootstrap yeniden örneklemleri genelinde görünür - test "
-"performansı. Çapraz doğrulama eğitim katlarında lojistik modeller uydurur ve "
-"test katlarında değerlendirir."
-
 #: mixedcox/options/bootstrap_variance.title
 msgid "Bootstrap Variance Estimation"
 msgstr ""
@@ -29503,6 +29753,12 @@ msgid ""
 "Both are effectively zero, so the studies are consistent with a single "
 "common sensitivity and specificity and the correlation between them is not "
 "identifiable - no threshold effect can be assessed from this fit."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"Both are in-sample estimates from these data; the AUC Lower CI and AUC Upper "
+"CI columns show how precisely this sample pins the AUC down."
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -31314,10 +31570,6 @@ msgstr ""
 msgid "Calculate risk score"
 msgstr "Risk skorunu hesapla"
 
-#: enhancedROC/options/convexHull.description
-msgid "Calculate ROC convex hull (optimal achievable performance)"
-msgstr "ROC dışbükey örtüsünü hesapla (elde edilebilir optimal performans)"
-
 #: simpleSurvivalPower/options/analysis_type/sample_size.title
 #: survivalPower/options/analysis_type/sample_size.title
 msgid "Calculate Sample Size"
@@ -31380,6 +31632,12 @@ msgstr ""
 
 #: survivalendpoints/ui[4][0]/showMilestones.label
 msgid "Calculate Survival at Milestones"
+msgstr ""
+
+#: enhancedROC/options/convexHull.description
+msgid ""
+"Calculate the ROC convex hull (operating points reachable by randomly mixing "
+"two cut-offs; in-sample, so optimistic)"
 msgstr ""
 
 #: survivalendpoints/options/calculateTOT.title
@@ -31827,7 +32085,6 @@ msgstr ""
 
 #: clinicalnomograms/results/calibrationResults.columns.title
 #: dynamicprediction/results/accuracyMetrics.columns.title
-#: enhancedROC/results/results/calibrationSummary.columns.title
 #: modelbuilder/results/modelComparisonTable.columns.title
 #: reclassmetrics/results/calibrationComparison.columns.title
 #: stagemigration/results/calibrationAnalysis.columns.title
@@ -31900,6 +32157,10 @@ msgstr "Kalibrasyon grafiği"
 msgid "Calibration Plot Bins"
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid "Calibration Plot Error"
+msgstr ""
+
 #: R/clinicalscore.b.R
 msgid "Calibration plot generated"
 msgstr ""
@@ -31907,6 +32168,10 @@ msgstr ""
 #: enhancedROC/results/results/calibrationPlotImage.description
 msgid "Calibration plot showing observed vs predicted probabilities"
 msgstr "Gözlemlenen ve tahmin edilen olasılıkları gösteren kalibrasyon grafiği"
+
+#: R/enhancedROC.b.R
+msgid "Calibration Plot Unavailable"
+msgstr ""
 
 #: modelbuilder/results/calibrationPlotsArray.title
 #: stagemigration/options/showCalibrationPlots.title
@@ -31993,8 +32258,21 @@ msgstr ""
 msgid "Calibration Time Point"
 msgstr "Kalibrasyon Zaman Noktası"
 
+#: R/enhancedROC.b.R
+msgid ""
+"Calibration treats each predictor's values as predicted probabilities of the "
+"positive class and uses them as supplied (Prediction scale: Probability)."
+msgstr ""
+
 #: measurementuncertainty/options/calibration_uncertainty.title
 msgid "Calibration Uncertainty ( percent)"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"Calibration uses risks from a logistic model of each marker fitted to these "
+"same data (Prediction scale: Score), so it describes that in-sample model, "
+"not an external prediction rule."
 msgstr ""
 
 #: measurementuncertainty/options/type_b_components.default
@@ -32010,14 +32288,6 @@ msgstr ""
 #: modelval/ui[2][0]/showCalibrationLarge.label
 msgid "Calibration-in-the-Large"
 msgstr "Genel Kalibrasyon (Calibration-in-the-Large)"
-
-#: R/enhancedROC.b.R
-msgid "Calibration: %s"
-msgstr "Kalibrasyon: %s"
-
-#: R/enhancedROC.b.R
-msgid "Calibration: Non-Probability Predictor '%s'"
-msgstr "Kalibrasyon: Olasılık Dışı Öngörücü '%s'"
 
 #: R/clinicalscore.b.R
 msgid "Calibration: Predicted vs Observed"
@@ -34697,6 +34967,12 @@ msgstr ""
 msgid "Check the level chosen as positive and any filter applied to the data."
 msgstr "Pozitif olarak seçilen düzeyi ve verilere uygulanan filtreleri kontrol edin."
 
+#: R/psychopdaROC.b.R
+msgid ""
+"Check the missing values of this test variable, or remove it from the "
+"analysis."
+msgstr ""
+
 #: R/lassocox.b.R
 msgid "Check the selected variables and the model options."
 msgstr ""
@@ -35254,6 +35530,14 @@ msgstr ""
 msgid "Choose number of digits to analyze (1-3, default: 2)"
 msgstr "Analiz edilecek basamak sayısını seçin (1-3, varsayılan: 2)"
 
+#: R/enhancedROC.b.R
+msgid "Choose one of the observed levels in Positive class."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid "Choose one of the observed levels in Positive Class."
+msgstr ""
+
 #: R/dataquality.b.R
 msgid "Choose one or more variables to assess"
 msgstr ""
@@ -35370,6 +35654,33 @@ msgid ""
 "Scientific terminology and statistical results remain standardized."
 msgstr ""
 
+#: R/psychopdaROC.b.R
+msgid ""
+"Choose the level of %1$s that means the condition is present in Positive "
+"Class. Nothing is computed until a level is chosen; every other level is "
+"then analysed as negative (pooled when there are more than two). Levels are "
+"never chosen from their order."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"Choose the level that means the condition is present in Positive class. "
+"Nothing is computed until you do: levels are never chosen from their order."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Choose the level that means the condition is present in Positive Class. "
+"Nothing is computed until you do: levels are never chosen from their order."
+msgstr ""
+
+#: psychopdaROC/options/positiveClass.description.ui
+msgid ""
+"Choose the level that means the condition is present. Nothing is computed "
+"until a level is chosen; every other level is analysed as negative (pooled "
+"when there are more than two)."
+msgstr ""
+
 #: venn/options/edgeLineType.description.jamovi
 msgid "Choose the line style for set boundaries."
 msgstr "Küme sınırları için çizgi stilini seçin."
@@ -35386,6 +35697,17 @@ msgstr ""
 msgid "Choose the number of groups automatically (silhouette)"
 msgstr ""
 
+#: enhancedROC/options/positiveClass.description.ui
+msgid ""
+"Choose the outcome level that means the condition is present (for example "
+"Malignant). Required for a nominal or ordinal outcome: levels are never "
+"chosen from their order. A numeric outcome coded 0/1 is read as 1 = positive "
+"without a choice; for any other numeric coding, set the outcome's measure "
+"type to Nominal in Data > Setup so its values are listed here. Every other "
+"level is analysed as negative. The Outcome coding table shows which level "
+"was used and how."
+msgstr ""
+
 #: advancedbarplot/options/theme_style.description.jamovi
 msgid "Choose the overall visual style including authentic Prism styling."
 msgstr ""
@@ -35400,6 +35722,11 @@ msgstr ""
 
 #: jscattermore/options/plot_type.description.jamovi
 msgid "Choose the plotting backend for optimal performance."
+msgstr ""
+
+#: R/enhancedROC.b.R
+#: R/psychopdaROC.b.R
+msgid "Choose the positive class"
 msgstr ""
 
 #: R/nogoldstandard.b.R
@@ -35579,6 +35906,14 @@ msgid ""
 "chosen from the outcome's first and last factor levels because Direction is "
 "set to auto; for an unordered outcome those are merely the alphabetically "
 "first and last levels, so the orientation is arbitrary"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "Chosen in Positive class."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid "Chosen in Positive Class."
 msgstr ""
 
 #: screeningevaluation/options/target_disease/chronic_disease.title
@@ -36068,6 +36403,10 @@ msgstr "Sınıf dengesizliği tespiti"
 msgid "Class Imbalance Metrics"
 msgstr "Sınıf Dengesizliği Ölçütleri"
 
+#: R/enhancedROC.b.R
+msgid "Class in the multi-class analysis"
+msgstr ""
+
 #: R/nogoldstandard.b.R
 msgid ""
 "Class labels are unidentified; the high-positive class is not automatically "
@@ -36099,6 +36438,10 @@ msgid ""
 msgstr ""
 "Sınıf etiketleri tanımlanamaz kalır, bu nedenle tanısal doğruluk "
 "terminolojisi çalışmaya özgü esaslı bir gerekçe gerektirir."
+
+#: psychopdaROC/results/outcomeCoding.description
+msgid "Class levels with their counts and the role each plays in the analysis"
+msgstr ""
 
 #: classification/results/classificationMetrics/class.columns.title
 msgid "class name"
@@ -36276,21 +36619,9 @@ msgstr ""
 msgid "Classifier"
 msgstr ""
 
-#: R/enhancedROC.b.R
-msgid "Classifier is near-optimal; convex hull shows minimal improvement potential"
-msgstr ""
-"Sınıflandırıcı neredeyse optimaldir; dışbükey örtü minimal iyileşme "
-"potansiyeli gösterir"
-
 #: psychopdaROC/results/rocComparisonTable.title
 msgid "Classifier Performance Comparison"
 msgstr "Sınıflandırıcı Performans Karşılaştırması"
-
-#: R/enhancedROC.b.R
-msgid "Classifier performance is good; small optimization potential remains"
-msgstr ""
-"Sınıflandırıcı performansı iyidir; küçük bir optimizasyon potansiyeli "
-"kalmıştır"
 
 #: precisionrecall/options/scores.title
 #: precisionrecall/ui[0][1].label
@@ -37303,7 +37634,6 @@ msgstr ""
 #: differentialdiagnosis/results/likelihoodRatios.columns.title
 #: differentialdiagnosis/results/modelPerformance.columns.title
 #: effectsize/results/results/clinicalSignificance.columns.title
-#: enhancedROC/results/results/detailedComparison.columns.title
 #: enhancedROC/results/results/clinicalApplicationMetrics.columns.title
 #: enhancedtables/results/interpretation.title
 #: enhancedtwowayfrequency/options/clinicalInterpretation.title
@@ -37759,6 +38089,12 @@ msgstr ""
 msgid "Clinical preset"
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid ""
+"Clinical preset in force: %s (it turns Youden optimisation on and may "
+"replace the minimum sensitivity and specificity)."
+msgstr ""
+
 #: jjscatterstats/results/presetInfo.title
 msgid "Clinical Preset Info"
 msgstr ""
@@ -38080,7 +38416,6 @@ msgstr ""
 #: clinicaltrialdesign/results/effect_size_analysis.columns.title
 #: differentialdiagnosis/results/diagnosticProbabilities.columns.title
 #: effectsize/results/results/comprehensiveEffectSizes.columns.title
-#: enhancedROC/results/results/rocComparisons.columns.title
 #: enhancedROC/results/results/comprehensiveAnalysisSummary.columns.title
 #: enhancedfactorvariable/results/results/comprehensiveAnalysisSummary.columns.title
 #: enhancedfrequency/results/results/comprehensiveAnalysisSummary.columns.title
@@ -38448,14 +38783,14 @@ msgstr ""
 msgid "Clinical utility metrics"
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid "Clinical Utility Plot Error"
+msgstr ""
+
 #: biomarkerdiscovery/results/biomarker_ranking.columns.title
 #: clinicalvalidationinteractive/results/prevalenceAnalysis.columns.title
 msgid "Clinical Utility Score"
 msgstr ""
-
-#: enhancedROC/results/results/clinicalUtilityPlot.description
-msgid "Clinical utility showing test consequences across thresholds"
-msgstr "Eşikler boyunca test sonuçlarını gösteren klinik yararlılık"
 
 #: clinicalnomograms/results/decisionCurvePlot.description
 msgid "Clinical utility visualization"
@@ -38555,10 +38890,6 @@ msgstr ""
 #: qtwist/results/sensitivityTable.columns.title
 msgid "Clinically Significant"
 msgstr ""
-
-#: R/enhancedROC.b.R
-msgid "Clinically significant difference"
-msgstr "Klinik olarak anlamlı fark"
 
 #: package/analyses/economistplots.menuSubgroup
 #: package/analyses/bbcplots.menuSubgroup
@@ -38980,6 +39311,10 @@ msgstr "Clopper-Pearson (Kesin)"
 #: package/analyses/diagnosticsamplesize.menuSubtitle
 #: diagnosticsamplesize/options.menuSubtitle
 msgid "Clopper-Pearson precision-based planning (Bujang 2023)"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "Close to 1 (within 0.1, a heuristic band)"
 msgstr ""
 
 #: R/checkdata.b.R
@@ -44198,6 +44533,12 @@ msgid ""
 "{nNon} non-numeric variable(s) was not tested."
 msgstr ""
 
+#: R/psychopdaROC.b.R
+msgid ""
+"Computed on the full sample: the subgroup variable is not applied to this "
+"table."
+msgstr ""
+
 #: agreement/results/computedVariablesInfo.title
 msgid "Computed Variables Added to Dataset"
 msgstr "Veri Setine Eklenen Hesaplanan Değişkenler"
@@ -45705,6 +46046,13 @@ msgid ""
 msgstr ""
 "Güven sınırları, referans kuralını karşılayan gözlemlenen oran için Wilson "
 "puan aralıklarıdır."
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Confidence limits were computed on the logit scale (delta-method standard "
+"error) and back-transformed, so they lie between 0 and 1 and need not be "
+"symmetric about the pooled AUC."
+msgstr ""
 
 #: ihcpredict/results/predictions.columns.title
 #: ihcpredict/results/alternativeDiagnoses.columns.title
@@ -47516,8 +47864,10 @@ msgid "Convex Hull Error: %s"
 msgstr "Dışbükey Örtü Hatası: %s"
 
 #: R/enhancedROC.b.R
-msgid "Convex hull represents optimal achievable performance"
-msgstr "Dışbükey örtü elde edilebilir optimal performansı temsil eder"
+msgid ""
+"Convex hull: operating points reachable by randomly mixing two cut-offs "
+"(Provost & Fawcett 2001); in-sample, so optimistic"
+msgstr ""
 
 #: betabinomialdiagnostic/results/influenceAnalysis.columns.title
 #: treatmentmeta/results/influence.columns.title
@@ -47646,13 +47996,10 @@ msgstr "Rapora hazır cümleler"
 
 #: R/enhancedROC.b.R
 msgid ""
-"Copy-ready report sentences were not generated because %s. Check the "
-"Direction setting and the coding of the outcome variable before quoting any "
-"cut-point from this analysis."
+"Copy-ready report sentences were not generated because %1$s. Check Positive "
+"class (is %2$s the level that means the condition is present?), then "
+"Direction, before quoting any cut-point from this analysis."
 msgstr ""
-"%s nedeniyle kopyalamaya hazır rapor cümleleri oluşturulmadı. Bu analizden "
-"herhangi bir kesme noktasını aktarmadan önce Yön ayarını ve sonuç "
-"değişkeninin kodlamasını kontrol edin."
 
 #: ihcsurvival/results/reportSentence.title
 msgid "Copy-Ready Report Summary"
@@ -50717,24 +51064,12 @@ msgid "CROC AUC"
 msgstr "CROC EAA"
 
 #: R/enhancedROC.b.R
-msgid ""
-"CROC AUC integration yielded a negative value, which may indicate data "
-"ordering issues. Using absolute value."
-msgstr ""
-"CROC EAA entegrasyonu negatif bir değer verdi, bu veri sıralama sorunlarını "
-"gösterebilir. Mutlak değer kullanılıyor."
-
-#: R/enhancedROC.b.R
 msgid "CROC calculation failed for %1$s: %2$s"
 msgstr ""
 
 #: R/enhancedROC.b.R
 msgid "CROC Error: %s"
 msgstr "CROC Hatası: %s"
-
-#: R/enhancedROC.b.R
-msgid "CROC Integration Warning"
-msgstr "CROC Entegrasyon Uyarısı"
 
 #: basegraphics/options/point_type/4.title
 msgid "Cross"
@@ -52564,12 +52899,6 @@ msgstr ""
 msgid "Custom Thresholds"
 msgstr "Özel Eşikler"
 
-#: R/enhancedROC.b.R
-msgid "Custom tied score handling is not supported by pROC; using default averaging."
-msgstr ""
-"Özel bağlı puan işleme pROC tarafından desteklenmemektedir; varsayılan "
-"ortalama alma kullanılıyor."
-
 #: swimmerplot/options/referenceLines/custom.title
 msgid "Custom Time"
 msgstr "Özel Zaman"
@@ -52866,6 +53195,21 @@ msgstr ""
 
 #: stagemigration/results/cutpointValidation.title
 msgid "Cut-point Validation Results"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"Cut-points maximise the Youden index, J = sensitivity + specificity - 1 "
+"(Youden, 1950), over the observed thresholds: the empirical estimator of the "
+"Youden-optimal cut-point (Fluss et al., 2005)."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"Cut-points minimise the squared distance to the top-left corner of the ROC "
+"plot, (1 - sensitivity)^2 + (1 - specificity)^2, over the observed "
+"thresholds (Perkins & Schisterman, 2006); Youden optimisation was switched "
+"off."
 msgstr ""
 
 #: R/stagemigration-part4.R
@@ -53291,6 +53635,10 @@ msgstr "Kesikli"
 msgid "Dashed blue: lambda.min; dotted orange: lambda.1se"
 msgstr "Kesikli mavi: lambda.min; noktalı turuncu: lambda.1se"
 
+#: R/enhancedROC.b.R
+msgid "Dashed line: the utility threshold used in the tables ({pt})"
+msgstr ""
+
 #: tumorgrowth/ui[0].label
 msgid "Data"
 msgstr ""
@@ -53418,6 +53766,10 @@ msgstr ""
 
 #: R/jjwithinstats.b.R
 msgid "Data dimensions are invalid"
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid "Data dimensions do not match"
 msgstr ""
 
 #: synopticcompleteness/results/perItemTable.columns.title
@@ -55031,8 +55383,16 @@ msgstr "Karar eğrisi grafiği"
 msgid "Decision Curve Plot"
 msgstr "Karar Eğrisi Grafiği"
 
+#: R/enhancedROC.b.R
+msgid "Decision Curve Unavailable"
+msgstr ""
+
 #: survivalmodelvalidation/results/decisionCurvePlot.description
 msgid "Decision curve visualization"
+msgstr ""
+
+#: enhancedROC/results/results/clinicalUtilityPlot.description
+msgid "Decision curve: net benefit against threshold probability"
 msgstr ""
 
 #: bayesdca/results/mainPlot.title
@@ -55681,16 +56041,18 @@ msgstr ""
 
 #: R/enhancedROC.b.R
 msgid ""
-"Degrees of freedom are the number of groups minus 2, because a logistic "
-"model with an intercept and a slope was fitted to these same data to obtain "
-"the predicted probabilities."
+"Degrees of freedom are the number of groups because the probabilities were "
+"supplied, not estimated from these patients (Prediction scale: Probability). "
+"Supplied does not prove external: if they come from a model fitted to these "
+"same patients, g - 2 degrees of freedom apply and the p-value shown is too "
+"large."
 msgstr ""
 
 #: R/enhancedROC.b.R
 msgid ""
-"Degrees of freedom are the number of groups, because the predicted "
-"probabilities were supplied rather than estimated from these data (no "
-"parameters were fitted here)."
+"Degrees of freedom are the number of groups minus 2, because a logistic "
+"model with an intercept and a slope was fitted to these same data to obtain "
+"the predicted probabilities."
 msgstr ""
 
 #: relativesurvival/options/spline_df.description.ui
@@ -55721,6 +56083,10 @@ msgstr ""
 msgid "DeLong (Asymptotic)"
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid "DeLong confidence intervals may be too narrow"
+msgstr ""
+
 #: enhancedROC/options/comparisonMethod/delong.title
 msgid "DeLong et al. (1988)"
 msgstr "DeLong ve ark. (1988)"
@@ -55748,6 +56114,18 @@ msgstr "DeLong Testi İkili Karşılaştırmaları"
 
 #: multiclassdiagnostics/results/deLongResults.title
 msgid "DeLong Test Results"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"DeLong's standard error is 0 here (the groups are perfectly separated, or "
+"the marker is constant), so the interval would have zero width."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"DeLong's standard error is 0 or undefined here, so its interval would have "
+"zero width; the interval and the standard error are left blank."
 msgstr ""
 
 #: R/psychopdaROC.b.R
@@ -56104,7 +56482,7 @@ msgid "Dependent Variables (Multiple)"
 msgstr ""
 
 #: enhancedROC/ui[12].label
-msgid "Deployment prevalence and workload"
+msgid "Deployment Prevalence and Workload"
 msgstr ""
 
 #: decisioncalculator/ui[6].label
@@ -58013,7 +58391,6 @@ msgstr ""
 #: decisioncompare/results/diffTable.columns.title
 #: decisioncompare/results/comparatorDifferences.columns.title
 #: directbinomial/results/covariateEffectsTable.columns.title
-#: enhancedROC/results/results/detailedComparison.columns.title
 #: groupedbar/results/posthoctests.columns.title
 #: ihcscoring/results/automatedanalysis/validationcomparison.columns.title
 #: methodcomparison/results/outlierAnalysis.columns.title
@@ -58038,6 +58415,17 @@ msgstr "Fark"
 #: stagemigration/results/cifSummary.columns.title
 #: stagemigration/results/transitionProbabilities.columns.title
 msgid "Difference (%)"
+msgstr ""
+
+#: enhancedROC/results/results/detailedComparison.columns.title
+msgid "Difference (1 - 2)"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"Difference (1 - 2) = value 1 - value 2, as in ROC Curve Comparisons; "
+"Relative difference (%) = 100 × (value 1 - value 2) / value 2. Value 1 "
+"belongs to the first predictor named in Metric."
 msgstr ""
 
 #: agreement/results/pairedAgreementTable.columns.title
@@ -62430,13 +62818,12 @@ msgstr ""
 msgid ""
 "E/O is the sum of the predicted probabilities divided by the number of "
 "events actually observed; 1 means the marker predicts the right number of "
-"events overall, above 1 means it over-predicts them. It is reported only for "
-"a predictor supplied as a probability between 0 and 1. Where a logistic "
-"model had to be fitted here to obtain probabilities, that fit forces the "
-"predicted and observed event totals to be equal, so E/O would be exactly 1 "
-"for any data at all; the cell is left blank there rather than report a "
-"perfect calibration that is an algebraic identity. No confidence interval is "
-"given."
+"events overall, above 1 means it over-predicts them. It is reported only "
+"when Prediction scale is Probability. With Score the risks come from a "
+"logistic model fitted to these data, which forces the predicted and observed "
+"event totals to be equal, so E/O would be exactly 1 for any data at all; the "
+"cell is left blank there rather than report a perfect calibration that is an "
+"algebraic identity. No confidence interval is given."
 msgstr ""
 
 #: enhancedROC/options/eoRatio.title
@@ -62622,6 +63009,15 @@ msgstr "Her modelin benzersiz bir ada ihtiyacı vardır."
 #: R/vartree.b.R
 msgid "Each node shows counts and percentages for variable combinations"
 msgstr "Her düğüm, değişken kombinasyonları için sayıları ve yüzdeleri gösterir"
+
+#: R/enhancedROC.b.R
+msgid ""
+"Each one-vs-one pair is oriented by the outcome's level order: the later "
+"level of the pair is read as the case. For a nominal (unordered) outcome "
+"that order is arbitrary, so the pairwise AUCs depend on how the levels "
+"happen to be ordered; order the levels in Data > Setup when the classes have "
+"a natural order."
+msgstr ""
 
 #: R/outcomeorganizer.b.R
 msgid ""
@@ -62953,10 +63349,6 @@ msgstr ""
 msgid "Each variable should have 3-7 categories for best readability"
 msgstr "En iyi okunabilirlik için her değişkenin 3-7 kategorisi olmalıdır"
 
-#: enhancedROC/results/results/crocAnalysisTable.columns.title
-msgid "Early Retrieval Gain"
-msgstr "Erken Geri Erişim Kazancı"
-
 #: gradientboosting/options/early_stopping.title
 msgid "Early Stopping"
 msgstr ""
@@ -63256,7 +63648,6 @@ msgid "Effect Estimates (Lower)"
 msgstr ""
 
 #: effectsize/results/results/powerAnalysisResults.columns.title
-#: enhancedROC/results/results/statisticalSummary.columns.title
 #: labinterpret/results/medicationEffectsTable.columns.title
 msgid "Effect Magnitude"
 msgstr "Etki Büyüklüğü"
@@ -64054,6 +64445,10 @@ msgstr ""
 msgid "Empirical Cumulative Detection vs Binomial Model"
 msgstr "Ampirik kümülatif saptama ve binomial model"
 
+#: R/enhancedROC.b.R
+msgid "Empirical curve is (almost) convex; the hull adds nothing"
+msgstr ""
+
 #: pathsampling/results/empiricalCumulativeTable.title
 msgid "Empirical Detection Rates by Sample Threshold"
 msgstr ""
@@ -64069,6 +64464,16 @@ msgstr "Ampirik oran (tüm pozitif örnekleri kullanır)"
 #: R/pathsampling.b.R
 msgid "Empirical resampling of cases"
 msgstr "Olguların ampirik yeniden örneklenmesi"
+
+#: R/enhancedROC.b.R
+msgid ""
+"Empirical ROC curves were computed with the pROC package (Robin et al., "
+"2011). The AUC is the Mann-Whitney probability that a randomly chosen case "
+"lies further than a randomly chosen non-case in the direction that indicates "
+"the condition, with ties counted as one half (Hanley & McNeil, 1982); it "
+"equals the Mann-Whitney U statistic divided by the number of case/non-case "
+"pairs (Mann & Whitney, 1947)."
+msgstr ""
 
 #: agreement/ui[15].label
 msgid "Empirical TDI [Continuous] (Prespecified Difference Limit)"
@@ -65677,6 +66082,10 @@ msgstr ""
 
 #: mageeequation/results/individualTable.columns.title
 msgid "Eq. 3"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "Equal"
 msgstr ""
 
 #: jviolin/options/scale_violin/area.title
@@ -68064,6 +68473,12 @@ msgstr ""
 "karşılaştırılacak negatif test sonucu bulunmamaktadır. Verileri, uyarılarda "
 "bildirilen hariç tutmaları ve düzey seçimini kontrol edin."
 
+#: R/enhancedROC.b.R
+msgid ""
+"Every bootstrap resample gave the same AUC, so no bootstrap interval can be "
+"formed; the limits are left blank."
+msgstr ""
+
 #: R/nogoldstandard.b.R
 msgid ""
 "Every case in the analyzed data meets the strict-majority rule, so there is "
@@ -68184,6 +68599,13 @@ msgstr ""
 "kodlayın: zaman 0 sonrasındaki satırlar değerlendirme olarak ele alınır, bu "
 "nedenle %%0 değerindeki başlangıç satırı en iyi yanıta katılır ve "
 "progresyonu gizler."
+
+#: R/enhancedROC.b.R
+msgid ""
+"Every predictor produced a single distinct predicted probability, so there "
+"is nothing to group into calibration bins. This usually means the predictor "
+"is constant within the analysed rows."
+msgstr ""
 
 #: R/decisioncombine.b.R
 msgid ""
@@ -68345,16 +68767,10 @@ msgstr ""
 
 #: R/enhancedROC.b.R
 msgid ""
-"Every value of %s lies between 0 and 1, so they are treated as "
-"pre-calibrated probabilities, inverted because lower values indicate the "
-"positive class. Calibration is assessed on those values as supplied."
-msgstr ""
-
-#: R/enhancedROC.b.R
-msgid ""
-"Every value of %s lies between 0 and 1, so they are treated as "
-"pre-calibrated probabilities. Calibration is assessed on those values as "
-"supplied."
+"Every value of %1$s lies between 0 and 1. Prediction scale is Score, so "
+"calibration and the decision and clinical impact curves use a logistic model "
+"of the marker fitted to these data, not the values themselves. If the values "
+"are predicted probabilities of %2$s, set Prediction scale to Probability."
 msgstr ""
 
 #: R/tableone.b.R
@@ -68399,6 +68815,14 @@ msgstr ""
 #: R/summarydata.b.R
 msgid "evidence of departure from normality"
 msgstr "normallikten sapma lehine kanıt"
+
+#: R/enhancedROC.b.R
+msgid "Evidence of lack of fit (a predicted 0 or 1 was contradicted)"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "Evidence of lack of fit (p < 0.05)"
+msgstr ""
 
 #: differentialdiagnosis/results/clinicalContext.columns.title
 msgid "Evidence Quality"
@@ -68913,12 +69337,6 @@ msgstr ""
 "Mükemmel ayırt etme (eşdeğer AUC 0.80 veya üzeri, 0.90 altı; Youden indeksi "
 "0.60 veya üzeri, 0.80 altı)"
 
-#: R/enhancedROC.b.R
-msgid "Excellent early retrieval performance; classifier performs well at low FPR"
-msgstr ""
-"Mükemmel erken geri erişim performansı; sınıflandırıcı düşük YPO'da iyi "
-"performans gösterir"
-
 #: R/pathsampling.b.R
 msgid "Excellent fit"
 msgstr "Çok iyi uyum"
@@ -69274,6 +69692,11 @@ msgstr "Dışarıda bırakılan:"
 #: R/pathsampling.b.R
 msgid "Excluded: first detection > total"
 msgstr "Dışlanan: ilk saptama > toplam"
+
+#: R/enhancedROC.b.R
+#: R/psychopdaROC.b.R
+msgid "Excluded: missing outcome"
+msgstr ""
 
 #: R/pathsampling.b.R
 msgid "Excluded: missing total samples"
@@ -71739,7 +72162,15 @@ msgid ""
 msgstr ""
 
 #: R/enhancedROC.b.R
+msgid "Failed to create the calibration plot: %s"
+msgstr ""
+
+#: R/enhancedROC.b.R
 msgid "Failed to create the clinical impact curve: %s"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "Failed to create the clinical utility plot: %s"
 msgstr ""
 
 #: R/enhancedROC.b.R
@@ -71906,6 +72337,10 @@ msgstr "Yanlış Pozitiflik Oranı (1 - Özgüllük)"
 #: R/decisioncompare.b.R
 msgid "False positive rate (1 - specificity)"
 msgstr "Yanlış pozitiflik oranı (1 - özgüllük)"
+
+#: R/enhancedROC.b.R
+msgid "False positive rate (ROC curve); f(FPR) with α={a} (CROC curve)"
+msgstr ""
 
 #: R/decision.b.R
 #: R/decisioncurve.b.R
@@ -73337,18 +73772,13 @@ msgstr ""
 #: enhancedROC/options/splineCalibration.description
 msgid ""
 "Fit a flexible calibration curve by logistic regression of the outcome on a "
-"natural cubic spline of the logit of the predicted probability (Austin & "
-"Steyerberg 2019). Adds the smooth curve to the calibration plot and the "
-"integrated calibration index (ICI, the mean absolute difference between the "
-"curve and the diagonal) with E50, E90 and Emax to the calibration summary. "
-"Requires calibrationAnalysis."
+"natural cubic spline of the logit of the predicted probability, a variant of "
+"the flexible calibration curves of Austin & Steyerberg (2019), who used "
+"loess and restricted cubic splines on the probability scale. Adds the smooth "
+"curve to the calibration plot and the integrated calibration index (ICI, the "
+"mean absolute difference between the curve and the diagonal) with E50, E90 "
+"and Emax to the calibration summary. Requires calibrationAnalysis."
 msgstr ""
-"Tahmin edilen olasılığın logitinin doğal kübik spline'ı üzerinde sonucun "
-"lojistik regresyonu ile esnek bir kalibrasyon eğrisi uydurun (Austin ve "
-"Steyerberg 2019). Düzgün eğriyi kalibrasyon grafiğine ve entegre kalibrasyon "
-"indeksini (ICI, eğri ile köşegen arasındaki ortalama mutlak fark) E50, E90 "
-"ve Emaks ile birlikte kalibrasyon özetine ekler. calibrationAnalysis "
-"gerektirir."
 
 #: survival/ui[10][0][0]/use_parametric.label
 msgid "Fit a parametric survival model"
@@ -73619,10 +74049,6 @@ msgstr "Cezalandırılmış EM tarafından kullanılan sabit önsel dağılımla
 
 #: pathsampling/options/setSeed.title
 msgid "Fixed random seed"
-msgstr ""
-
-#: R/enhancedROC.b.R
-msgid "Fixed score cutoff"
 msgstr ""
 
 #: enhancedROC/options/impactCutoffs.title
@@ -74566,6 +74992,21 @@ msgstr ""
 "İkili sonuç için ya tek bir prevalans değeri ya da toplamı 1 olan iki oran "
 "girin."
 
+#: R/kappaSizePower.b.R
+msgid ""
+"For a binary outcome with three or more raters the calculation assumes "
+"kappaSize's model of rater dependence: with probability kappa every rater "
+"gives the same call, otherwise the raters rate independently. Other models "
+"with the same kappa, such as the beta-binomial, can need a markedly "
+"different number of subjects."
+msgstr ""
+"Üç veya daha fazla değerlendiricili ikili bir sonuç için hesaplama, "
+"kappaSize'ın değerlendirici bağımlılığı modelini varsayar: kappa "
+"olasılığıyla tüm değerlendiriciler aynı kararı verir, aksi halde "
+"değerlendiriciler birbirinden bağımsız değerlendirme yapar. Aynı kappa "
+"değerine sahip başka modeller (örneğin beta-binom) belirgin biçimde farklı "
+"sayıda olgu gerektirebilir."
+
 #: R/decisioncurve.b.R
 msgid ""
 "For a defensible clinical claim, supply predictions from an external dataset "
@@ -74772,6 +75213,14 @@ msgstr ""
 "kaybettiği olgular, değişim ve yüzde 95 güven aralığı. En az iki test "
 "gerektirir."
 
+#: R/enhancedROC.b.R
+msgid ""
+"For each marker the AUC is the probability that a randomly chosen case has a "
+"value further in the direction that indicates the condition (higher or "
+"lower, as each marker was read) than a randomly chosen non-case (ties count "
+"one half)."
+msgstr ""
+
 #: R/multisurvival.b.R
 msgid ""
 "For each moderator level the module relevels the moderator so that level is "
@@ -74887,6 +75336,12 @@ msgstr ""
 
 #: R/jjpiestats.b.R
 msgid "For statistical tests: adequate sample size in each category"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"For such a model the calibration slope, intercept, calibration-in-the-large "
+"and E/O are 1, 0, 0 and 1 by construction, so they are left blank."
 msgstr ""
 
 #: spikeslabpriors/options/time_variable.description
@@ -75824,7 +76279,7 @@ msgid "Frozen-model performance and paired differences"
 msgstr ""
 
 #: enhancedROC/ui[13].label
-msgid "Frozen-model validation"
+msgid "Frozen-Model Validation"
 msgstr ""
 
 #: enhancedROC/options/validationPanel.title
@@ -76162,6 +76617,10 @@ msgstr ""
 
 #: hematologicindices/options/albuminUnit/gl.title
 msgid "g/L"
+msgstr ""
+
+#: enhancedROC/results/results/crocAnalysisTable.columns.title
+msgid "Gain over random"
 msgstr ""
 
 #: decisioncurve/results/weightedAUCTable.columns.title
@@ -78051,10 +78510,6 @@ msgstr "İyi uyum"
 msgid "Good agreement for this category"
 msgstr "Bu kategori için iyi uyum"
 
-#: R/enhancedROC.b.R
-msgid "Good calibration slope"
-msgstr ""
-
 #: R/checkdata.b.R
 msgid "Good completeness"
 msgstr ""
@@ -78063,11 +78518,6 @@ msgstr ""
 msgid "Good concordance"
 msgstr "İyi uyum"
 
-#: R/enhancedROC.b.R
-msgid "Good early retrieval performance"
-msgstr "İyi erken geri erişim performansı"
-
-#: R/enhancedROC.b.R
 #: R/pathsampling.b.R
 msgid "Good fit"
 msgstr "İyi uyum"
@@ -80028,6 +80478,13 @@ msgstr ""
 msgid "Harrell C-index"
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid ""
+"Harrell's bootstrap optimism correction (Harrell, 2015) with %s resamples "
+"was applied to a logistic model of each marker: the corrected AUC is the "
+"model's apparent AUC minus the mean optimism."
+msgstr ""
+
 #: R/multisurvival.b.R
 msgid ""
 "Harrell's bootstrap optimism correction; corrected C = apparent C minus mean "
@@ -81829,10 +82286,6 @@ msgstr "Daha yüksek değerler pozitif sonucu gösterir"
 msgid "higher values indicate the positive class"
 msgstr ""
 
-#: R/enhancedROC.b.R
-msgid "HIGHER values of %s"
-msgstr ""
-
 #: mixedcox/ui[1][2][0][1][0].label
 msgid "Higher-Level Cluster"
 msgstr ""
@@ -82992,10 +83445,6 @@ msgstr ""
 msgid "Hull Plot - Group Visualization"
 msgstr ""
 
-#: enhancedROC/results/results/convexHullTable.columns.title
-msgid "Hull Points"
-msgstr "Örtü Noktaları"
-
 #: hullplot/ui[1][0][0].label
 msgid "Hull shape (lower values follow the points more closely)"
 msgstr ""
@@ -83010,6 +83459,10 @@ msgstr ""
 
 #: hullplot/ui[1][0][1].label
 msgid "Hull Transparency (0 = invisible, 1 = solid)"
+msgstr ""
+
+#: enhancedROC/results/results/convexHullTable.columns.title
+msgid "Hull vertices"
 msgstr ""
 
 #: betabinomialdiagnostic/options/tau_squared_method/hunter_schmidt.title
@@ -83748,6 +84201,12 @@ msgstr ""
 "IDI/NRI hesaplamaları alt grup analizini desteklemez; bu sonuçlar alt grup "
 "bazında değil tam örneklem üzerinde hesaplanır."
 
+#: R/psychopdaROC.b.R
+msgid ""
+"IDI/NRI need two tests: put at least two in Test Variables, or one there and "
+"a different test in Reference Test for IDI/NRI."
+msgstr ""
+
 #: R/multisurvival.b.R
 msgid ""
 "If 10 people are followed for 5 years each (50 person-years) and 2 events "
@@ -83886,6 +84345,14 @@ msgstr ""
 "katkıda bulunduysa, o test kendisiyle karşılaştırılıyor demektir ve "
 "görünürdeki doğruluğu şişirilir. Referans, mevcut tüm bilgilerden bir araya "
 "getirilmiş nihai bir tanı olduğunda bunu kazara yapmak kolaydır."
+
+#: R/enhancedROC.b.R
+msgid ""
+"If that reading looks reversed for a marker, first check Positive class: is "
+"%s the level that means the condition is present? Only if it is, change "
+"Direction: the AUC becomes 1 minus the value shown, and the cutpoint, "
+"sensitivity and specificity are re-estimated."
+msgstr ""
 
 #: R/kappaSizeFixedN.b.R
 msgid ""
@@ -84045,6 +84512,13 @@ msgid ""
 "If you have only one tumour burden value per patient (a percent change, or a "
 "single measurement per visit), use the patient-level Treatment Response "
 "analysis instead."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"If you know which way the marker should point, set Direction explicitly; a "
+"low AUC is then a real finding rather than an artefact of the direction "
+"being fitted."
 msgstr ""
 
 #: stagemigration/options/winRatioHandleTies/ignore.title
@@ -85100,12 +85574,13 @@ msgstr "Bu verilerde ICC(2,1) için %%95 GA genişliği: %s."
 #: R/enhancedROC.b.R
 msgid ""
 "In this %1$s sample, %2$s showed %3$s: the AUC was %4$.3f (%5$s%% CI: "
-"%6$s--%7$s). AUC is the probability that a randomly chosen case scores above "
-"a randomly chosen non-case; it is computed over all cutpoints and does not "
-"depend on which cutpoint was selected. This is an in-sample estimate with no "
-"internal or external validation behind it%8$s. The sensitivity and "
-"specificity quoted at the selected cutpoint are a separate matter: those ARE "
-"optimistic, because that cutpoint was searched for on these same data."
+"%6$s--%7$s)."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"In this %1$s sample, %2$s showed %3$s: the AUC was %4$.3f (interval not "
+"estimable)."
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
@@ -86343,12 +86818,13 @@ msgstr ""
 msgid ""
 "indicating %1$s discrimination in this sample: the marker ranks a randomly "
 "chosen case from the positive class ahead of a randomly chosen case from the "
-"negative class about %2$.0f%% of the time, in the classification direction "
-"in use. AUC is a ranking property of pairs, computed over all cutpoints; it "
-"does not depend on which cutpoint was selected, and it does not describe how "
-"reliably any single cutpoint classifies an individual patient, which also "
-"depends on the cutpoint and on disease prevalence. This AUC is an in-sample "
-"estimate that has not been internally or externally validated. %3$s"
+"negative class about %2$.0f%% of the time (ties count one half), in the "
+"classification direction in use. AUC is a ranking property of pairs, "
+"computed over all cutpoints; it does not depend on which cutpoint was "
+"selected, and it does not describe how reliably any single cutpoint "
+"classifies an individual patient, which also depends on the cutpoint and on "
+"disease prevalence. This AUC is an in-sample estimate that has not been "
+"internally or externally validated. %3$s"
 msgstr ""
 
 #: latentbiomarker/results/loadingsTable.columns.title
@@ -86724,6 +87200,24 @@ msgstr "sonsuz (bu hücrede sıfır yanlış sonuç)"
 msgid ""
 "Infinite values: {n} observation(s) are Inf or -Inf and were treated as "
 "missing; they are included in the missing count."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"Infinite: a group whose predicted risks are all 0 contains an event, or one "
+"whose predicted risks are all 1 contains a non-event."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "Infinite: a zero cell in the 2x2 table."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "Infinite: no false positives at this cutoff."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "Infinite: no true negatives at this cutoff."
 msgstr ""
 
 #: ordinalroc/options/clinical_context/inflammation.title
@@ -87462,6 +87956,10 @@ msgstr "Eksik Değerler Kaldırıldıktan Sonra Yetersiz Veri"
 msgid "Insufficient data for a sampling recommendation."
 msgstr "Örnekleme önerisi için yetersiz veri."
 
+#: R/psychopdaROC.b.R
+msgid "Insufficient data for analysis"
+msgstr ""
+
 #: R/waterfall.b.R
 msgid "Insufficient data for clinical interpretation"
 msgstr "Klinik yorum için yetersiz veri"
@@ -87624,6 +88122,10 @@ msgstr ""
 #: R/alluvial.b.R
 msgid "Insufficient Variables"
 msgstr "Yetersiz Değişken"
+
+#: R/psychopdaROC.b.R
+msgid "Insufficient variables for comparison"
+msgstr ""
 
 #: advancedbarplot/options/value_format/integer.title
 #: jggheatmap/options/value_format/integer.title
@@ -88039,6 +88541,10 @@ msgstr "Kesişim"
 msgid "Intercept (ref: %s)"
 msgstr "Kesişim (ref: %s)"
 
+#: enhancedROC/results/results/calibrationSummary.columns.title
+msgid "Intercept (slope model)"
+msgstr ""
+
 #: jointmodeling/options/random_effects/intercept_slope.title
 msgid "Intercept + Slope"
 msgstr ""
@@ -88391,6 +88897,7 @@ msgstr ""
 #: effectsize/results/results/effectSizes.columns.title
 #: effectsize/results/results/varianceExplained.columns.title
 #: effectsize/results/results/rankBasedEffects.columns.title
+#: enhancedROC/results/results/detailedComparison.columns.title
 #: enhancedROC/results/results/crocAnalysisTable.columns.title
 #: enhancedROC/results/results/convexHullTable.columns.title
 #: enhancedROC/results/results/comprehensiveAnalysisSummary.columns.title
@@ -89284,6 +89791,10 @@ msgstr "Geçersiz yarışan risk kodlaması"
 msgid "Invalid cut-off inputs"
 msgstr "Geçersiz kesim değeri girdileri"
 
+#: R/psychopdaROC.b.R
+msgid "Invalid cutpoint specification"
+msgstr ""
+
 #: R/survival.b.R
 msgid ""
 "Invalid data: {count} observation(s) have negative survival times because "
@@ -89872,6 +90383,12 @@ msgstr ""
 "Tam o değerde doğru şekilde hesaplanmıştır, ancak karar eğrisinde "
 "gösterilmez ve çevreleyen satırlar analiz edilen aralıktan gelir."
 
+#: R/enhancedROC.b.R
+msgid ""
+"It is computed over all cutpoints and does not depend on which cutpoint was "
+"selected."
+msgstr ""
+
 #: R/decisioncurve.b.R
 msgid ""
 "It is not an ICER, QALY, cost-effectiveness or net-monetary-benefit analysis "
@@ -90112,6 +90629,14 @@ msgstr ""
 
 #: jiwillsurvive/options/plot_style/iwillsurvive.title
 msgid "iwillsurvive Default"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"J = sensitivity + specificity - 1. The cutoff that maximises it weighs "
+"sensitivity and specificity equally; at prevalence p that counts one missed "
+"case as (1 - p)/p false alarms, the same cost only when half the patients "
+"have the condition. That is a convention, not a clinical optimum."
 msgstr ""
 
 #: ihccluster/options/distanceMethod/jaccard.title
@@ -92604,10 +93129,6 @@ msgstr ""
 msgid "Large dataset processed in {seconds} seconds."
 msgstr ""
 
-#: R/enhancedROC.b.R
-msgid "Large effect"
-msgstr "Büyük etki"
-
 #: R/pathagreement.b.R
 msgid "large effect"
 msgstr ""
@@ -93978,8 +94499,7 @@ msgid ""
 "Limited diagnostic performance for %1$s: AUC=%2$s. • AUC below 0.7 indicates "
 "limited discriminative ability. • Consider: (1) Adding predictor variables "
 "or interaction terms, (2) Verifying data quality and coding, (3) Using "
-"multivariate models to improve discrimination, (4) Checking if direction "
-"setting is appropriate for your biomarker."
+"multivariate models to improve discrimination."
 msgstr ""
 
 #: R/enhancedROC.b.R
@@ -93987,16 +94507,8 @@ msgid "Limited Diagnostic Performance: %s"
 msgstr "Sınırlı Tanısal Performans: %s"
 
 #: R/enhancedROC.b.R
-msgid "Limited diagnostic value"
-msgstr "Sınırlı tanısal değer"
-
-#: R/enhancedROC.b.R
 msgid "limited discrimination"
 msgstr "sınırlı ayırt etme"
-
-#: R/enhancedROC.b.R
-msgid "Limited early retrieval advantage"
-msgstr "Sınırlı erken geri erişim avantajı"
 
 #: R/survival.b.R
 msgid "Limited event count: {count}"
@@ -95961,7 +96473,6 @@ msgstr ""
 
 #: bayesianci/results/credibleIntervals.columns.title
 #: ciSingle/results/citable.columns.title
-#: enhancedROC/options/tiedScoreHandling/lower.title
 #: featurequality/results/outlier_analysis.columns.title
 #: treatmenteffects/results/sensitivity_analysis.columns.title
 msgid "Lower Bound"
@@ -96255,10 +96766,6 @@ msgstr "Daha düşük değerler pozitif sonucu gösterir"
 msgid "lower values indicate the positive class"
 msgstr ""
 
-#: R/enhancedROC.b.R
-msgid "LOWER values of %s"
-msgstr ""
-
 #: labcontrolcharts/results/controlLimits.columns.title
 msgid "Lower Warning Limit (LWL)"
 msgstr ""
@@ -96366,6 +96873,38 @@ msgid ""
 "weak"
 msgstr "LR- <0.1 hastalığa KARŞI güçlü kanıt, LR- 0.1-0.2 orta, LR- 0.2-0.5 zayıf"
 
+#: R/enhancedROC.b.R
+msgid "LR- 0.1 to 0.2: moderate decrease in the probability of the condition."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"LR- 0.2 to 0.5: small but sometimes important decrease in the probability of "
+"the condition."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"LR- 0.5 to 1: small, rarely important decrease in the probability of the "
+"condition."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "LR- 1: a negative result does not change the probability of the condition."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "LR- above 1: a negative result RAISES the probability of the condition."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "LR- below 0.1: large decrease in the probability of the condition."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "LR- not estimable."
+msgstr ""
+
 #: R/decisioncompare.b.R
 msgid "LR- Quality"
 msgstr "LR- Kalitesi"
@@ -96396,9 +96935,37 @@ msgstr ""
 "LR+ >10 hastalık LEHİNE güçlü kanıt, LR+ 5-10 orta, LR+ 2-5 zayıf ama bazen "
 "yararlı"
 
+#: R/enhancedROC.b.R
+msgid ""
+"LR+ 1 to 2: small, rarely important increase in the probability of the "
+"condition."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "LR+ 1: a positive result does not change the probability of the condition."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"LR+ 2 to 5: small but sometimes important increase in the probability of the "
+"condition."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "LR+ 5 to 10: moderate increase in the probability of the condition."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "LR+ above 10: large increase in the probability of the condition."
+msgstr ""
+
 #: R/decisioncompare.b.R
 msgid "LR+ and LR-"
 msgstr "LR+ ve LR-"
+
+#: R/enhancedROC.b.R
+msgid "LR+ below 1: a positive result LOWERS the probability of the condition."
+msgstr ""
 
 #: R/cotest.b.R
 msgid ""
@@ -96416,6 +96983,10 @@ msgstr ""
 "0.1 ile 0.2 arasını orta, 2 ile 5 veya 0.2 ile 0.5 arasını küçük ve 0.5 ile "
 "2 arasını az değişiklik olarak okur; bu bir eşik değil, okumaya yardımcı "
 "olan bir uzlaşımdır."
+
+#: R/enhancedROC.b.R
+msgid "LR+ not estimable."
+msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "LR+ Quality"
@@ -100656,10 +101227,6 @@ msgstr ""
 msgid "Medium (3-6)"
 msgstr ""
 
-#: R/enhancedROC.b.R
-msgid "Medium effect"
-msgstr "Orta etki"
-
 #: R/linechart.b.R
 msgid "Medium effect size"
 msgstr ""
@@ -101299,8 +101866,12 @@ msgid "Method for classifying data into color categories."
 msgstr ""
 
 #: enhancedROC/options/comparisonMethod.description
-msgid "Method for comparing ROC curves"
-msgstr "ROC eğrilerini karşılaştırma yöntemi"
+msgid ""
+"Method for comparing ROC curves. DeLong et al. (1988) and Bootstrap test "
+"whether the two AUCs differ. The Venkatraman permutation test (Venkatraman & "
+"Begg 1996, paired data) tests whether the two ROC curves are identical over "
+"their whole range, not whether their AUCs differ."
+msgstr ""
 
 #: stagemigration/options/competingRisksMethod.description
 msgid ""
@@ -101392,10 +101963,6 @@ msgstr ""
 #: simonmakuch/options/handleTieBreaking.description
 msgid "Method for handling tied event times in Cox regression."
 msgstr ""
-
-#: enhancedROC/options/tiedScoreHandling.description
-msgid "Method for handling tied predictor scores in ROC calculation"
-msgstr "ROC hesaplamasında bağlı öngörücü puanlarını işleme yöntemi"
 
 #: nonparametric/options/ties_method.title
 #: nonparametric/ui[7][0]/ties_method.label
@@ -102561,17 +103128,9 @@ msgstr ""
 msgid "Minimal Depth Analysis (RF)"
 msgstr ""
 
-#: R/enhancedROC.b.R
-msgid "Minimal difference"
-msgstr "Minimal fark"
-
 #: R/pathagreement.b.R
 msgid "Minimal disagreement"
 msgstr ""
-
-#: R/enhancedROC.b.R
-msgid "Minimal effect"
-msgstr "Minimal etki"
 
 #: R/decision.b.R
 msgid "Minimal evidence against disease"
@@ -103706,6 +104265,10 @@ msgstr "Eksik sonuç verisi: %{pct} ({total} satırdan {missing} tanesi)."
 msgid "Missing outcome values excluded"
 msgstr "Eksik sonuç değerleri hariç tutuldu"
 
+#: R/enhancedROC.b.R
+msgid "Missing Outcome Values Excluded"
+msgstr ""
+
 #: R/decisioncurve.b.R
 msgid "Missing Packages"
 msgstr "Eksik Paketler"
@@ -104319,6 +104882,7 @@ msgstr ""
 
 #: R/clinicalscore.b.R
 #: R/decisioncurve.b.R
+#: R/enhancedROC.b.R
 #: aalenhazard/results/modelComparison.columns.title
 #: bayesianclinical/results/model_comparison.columns.title
 #: bayesiandiagnostic/results/modelComparison.columns.title
@@ -104582,16 +105146,6 @@ msgstr ""
 #: survivalmodelvalidation/results/calibrationMetrics.description
 msgid "Model calibration metrics and tests"
 msgstr ""
-
-#: R/enhancedROC.b.R
-msgid ""
-"Model calibration was assessed using the Hosmer-Lemeshow goodness-of-fit "
-"test (Hosmer & Lemeshow, 2000) and Brier score. Calibration plots show "
-"observed vs. predicted probabilities."
-msgstr ""
-"Model kalibrasyonu Hosmer-Lemeshow uyum iyiliği testi (Hosmer ve Lemeshow, "
-"2000) ve Brier puanı kullanılarak değerlendirildi. Kalibrasyon grafikleri "
-"gözlemlenen ve tahmin edilen olasılıkları gösterir."
 
 #: clinicalscore/results/coefficients.title
 #: conditionalgee/results/coefficients.title
@@ -105080,6 +105634,10 @@ msgstr ""
 
 #: explainableai/results/globalexplanations/modelinsightstable.title
 msgid "Model Insights Summary"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "model intercept shifted to that prevalence (Prentice & Pyke 1979)"
 msgstr ""
 
 #: package/analyses/explainableai.menuSubtitle
@@ -105820,7 +106378,6 @@ msgstr ""
 msgid "Models to Compare"
 msgstr ""
 
-#: R/enhancedROC.b.R
 #: R/linechart.b.R
 msgid "moderate"
 msgstr "orta"
@@ -105914,10 +106471,6 @@ msgstr ""
 msgid "Moderate decrease in probability of disease"
 msgstr "Hastalık olasılığında orta derecede azalma"
 
-#: R/enhancedROC.b.R
-msgid "Moderate difference"
-msgstr "Orta derecede fark"
-
 #: R/pathagreement.b.R
 msgid "Moderate difficulty"
 msgstr ""
@@ -105933,10 +106486,6 @@ msgstr ""
 #: R/pathagreement.b.R
 msgid "Moderate disagreement"
 msgstr ""
-
-#: R/enhancedROC.b.R
-msgid "Moderate early retrieval performance"
-msgstr "Orta derecede erken geri erişim performansı"
 
 #: R/pathagreement.b.R
 msgid "moderate effect"
@@ -105963,10 +106512,6 @@ msgstr "Hastalık lehine orta derecede kanıt"
 #: R/decision.b.R
 msgid "moderate evidence for disease when positive"
 msgstr "pozitif olduğunda hastalık lehine orta derecede kanıt"
-
-#: R/enhancedROC.b.R
-msgid "Moderate evidence for positive diagnosis"
-msgstr "Pozitif tanı için orta derecede kanıt"
 
 #: R/pathsampling.b.R
 msgid "Moderate heterogeneity detected (p < 0.05)"
@@ -106037,10 +106582,6 @@ msgid ""
 msgstr ""
 "Orta düzeyde iyimserlik saptandı; düzeltilmiş C-indeksi daha gerçekçi bir "
 "tahmin sağlar."
-
-#: R/enhancedROC.b.R
-msgid "Moderate optimization potential; consider threshold tuning"
-msgstr "Orta derecede optimizasyon potansiyeli; eşik ayarlamasını değerlendirin"
 
 #: R/datetimeconverter.b.R
 msgid "Moderate Parsing Success Rate"
@@ -106919,10 +107460,6 @@ msgstr ""
 #: hierarchicalpathology/options.menuSubtitle
 msgid "Multi-level analysis for nested pathology data"
 msgstr ""
-
-#: R/enhancedROC.b.R
-msgid "Multi-level Outcome Variable Detected"
-msgstr "Çok Düzeyli Sonuç Değişkeni Tespit Edildi"
 
 #: pathologyagreement/results/multimethod_summary.title
 msgid "Multi-Method Analysis Summary"
@@ -107903,6 +108440,22 @@ msgstr ""
 msgid "N Components"
 msgstr ""
 
+#: R/psychopdaROC.b.R
+msgid ""
+"N counts every row with a class value; each test variable is analysed on its "
+"own complete cases."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "N counts every row with an outcome value."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"N counts the rows analysed: outcome and every selected predictor present "
+"(%1$s of %2$s rows)."
+msgstr ""
+
 #: rocreg/results/groupSpecificAUC.columns.title
 msgid "N Diseased"
 msgstr ""
@@ -108618,6 +109171,7 @@ msgstr "İyileştirme gerekli"
 
 #: R/decisioncombine.b.R
 #: R/decisioncompare.b.R
+#: R/enhancedROC.b.R
 #: R/lassologistic.b.R
 #: R/psychopdaROC.b.R
 #: R/sequentialtests.b.R
@@ -108632,6 +109186,19 @@ msgstr ""
 #: R/lassologistic.b.R
 msgid "Negative (-)"
 msgstr "Negatif (-)"
+
+#: R/psychopdaROC.b.R
+msgid "Negative (%s)"
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid "Negative (other levels)"
+msgstr ""
+
+#: R/enhancedROC.b.R
+#: R/psychopdaROC.b.R
+msgid "Negative (pooled with the other non-positive levels)"
+msgstr ""
 
 #: hierarchicalpathology/options/model_type/negative_binomial.title
 msgid "Negative Binomial (Overdispersed counts)"
@@ -109917,6 +110484,14 @@ msgstr ""
 msgid "No asymmetry detected (p >= 0.05)"
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid "No AUC interval can be estimated with %1$s positive and %2$s negative cases."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "No AUC Interval: %s"
+msgstr ""
+
 #: R/jjdotplotstats.b.R
 msgid "No Bayes factor caption is shown because {reason}."
 msgstr ""
@@ -109928,6 +110503,19 @@ msgstr "kovaryatları yok saymaktan daha iyi değil"
 #: R/lassologistic.b.R
 msgid "No better than predicting the base rate"
 msgstr "Temel oranı tahmin etmekten daha iyi değil"
+
+#: R/enhancedROC.b.R
+msgid ""
+"No bootstrap interval could be formed for this partial AUC: every resample "
+"gave the same value, or the requested interval type could not be computed "
+"from these resamples. The limits are left blank."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"No bootstrap interval could be formed: every resample gave the same AUC, or "
+"none held both groups."
+msgstr ""
 
 #: R/agreement.b.R
 msgid ""
@@ -109999,6 +110587,12 @@ msgid ""
 msgstr ""
 "Öngörücü '%s' için hiçbir olgu gözlemi bulunamadı. Sonuç değişkeninizin hem "
 "pozitif hem de negatif olgulara sahip olduğunu kontrol edin."
+
+#: R/psychopdaROC.b.R
+msgid ""
+"No case of the positive class (%1$s) has a value of %2$s, so %2$s cannot be "
+"analysed."
+msgstr ""
 
 #: R/pathsampling.b.R
 msgid ""
@@ -110609,6 +111203,14 @@ msgstr ""
 "Tanısal belirteç mevcut değil. Tanısal metrikler atlandı; tahmin nomogramı "
 "regresyon modelinden yine de üretilebilir."
 
+#: R/enhancedROC.b.R
+msgid "No difference between the curves detected"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "No difference detected (not evidence of equal performance)"
+msgstr ""
+
 #: R/ihcheterogeneity.b.R
 msgid ""
 "No difference in per-case CV between compartments was detected; this does "
@@ -110829,6 +111431,10 @@ msgid ""
 "homogeneity."
 msgstr "0,05 düzeyinde heterojenlik kanıtı yok; bu, homojenliği göstermez."
 
+#: R/enhancedROC.b.R
+msgid "No evidence of lack of fit (p >= 0.05)"
+msgstr ""
+
 #: R/lassocox.b.R
 msgid ""
 "No evidence of non-proportional hazards in an exploratory unpenalized refit "
@@ -110959,6 +111565,14 @@ msgid ""
 "labels its output differently from the version this analysis expects. That "
 "interval table is left blank; the likelihood-ratio, odds-ratio and Youden's "
 "index intervals and the point estimates above are unaffected."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"No interval is given for the corrected AUC. The DeLong interval shown "
+"belongs to the apparent AUC; intervals that ignore the optimism cover the "
+"model's performance in new patients less often than stated, and Noma et al. "
+"(2021) describe bootstrap intervals for the corrected value."
 msgstr ""
 
 #: R/agreement.b.R
@@ -111337,12 +111951,11 @@ msgstr ""
 msgid "No positive cases available for comparison."
 msgstr "Karşılaştırılabilecek pozitif olgu yok."
 
-#: R/psychopdaROC.b.R
+#: R/enhancedROC.b.R
 msgid ""
-"No positive class was selected, so \"%s\" was assumed — the last level of "
-"the class variable. If that is the <i>negative</i> group, every sensitivity, "
-"specificity, cutpoint and AUC below is reversed. Set Positive Class "
-"explicitly."
+"No positive class is chosen, so only the multi-class tables are computed. "
+"Choose the level that means the condition is present in Positive class to "
+"get the binary ROC tables as well."
 msgstr ""
 
 #: R/survivalcont.b.R
@@ -111383,10 +111996,6 @@ msgid ""
 "between-study covariance matrix. The confidence interval above describes "
 "only how precisely the pooled average is estimated, not how much studies "
 "differ."
-msgstr ""
-
-#: R/enhancedROC.b.R
-msgid "No predictor produced usable risk probabilities, so there is nothing to plot."
 msgstr ""
 
 #: jsummarytools/options/cross_proportions/none.title
@@ -111450,6 +112059,12 @@ msgstr ""
 "%s için hiç değerlendirme yok: bu bölüm bunları patolog olarak saymaz ve "
 "satırları boştur; ana tablolar ise seçilen her değerlendirici değişkenini "
 "sayar."
+
+#: R/enhancedROC.b.R
+msgid ""
+"No reading: the recalibration fit did not converge or the predicted risks "
+"separate the outcomes"
+msgstr ""
 
 #: R/swimmerplot.b.R
 msgid "no recorded response"
@@ -111701,10 +112316,6 @@ msgid ""
 "No significant validation issues detected. Data appears suitable for flow "
 "analysis."
 msgstr ""
-
-#: R/enhancedROC.b.R
-msgid "no single reference level is conventional for this context"
-msgstr "bu bağlam için geleneksel tek bir referans düzeyi yoktur"
 
 #: advancedbarplot/options/sort_bars/none.title
 #: jjsegmentedtotalbar/options/sort_categories/none.title
@@ -111958,6 +112569,14 @@ msgstr ""
 msgid "No Test Variables"
 msgstr "Test Değişkeni Yok"
 
+#: R/enhancedROC.b.R
+msgid "No test: too few informative risk groups remain."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "No threshold separates the groups better than chance in the direction used."
+msgstr ""
+
 #: grafify/options/log_transform/none.title
 msgid "No Transformation"
 msgstr ""
@@ -112017,13 +112636,26 @@ msgstr ""
 msgid ""
 "No usable cut-point exists for this marker in the classification direction "
 "currently selected: no threshold separates the groups better than chance. "
-"Check the Classification Direction and the coding of the outcome variable. "
-"The AUC and its confidence interval above are unaffected."
+"First check Positive Class: is %1$s the level that means the condition is "
+"present? Only if it is, check Classification Direction. The AUC and its "
+"confidence interval in the Area Under the ROC Curve table are unaffected."
 msgstr ""
-"Şu anda seçili olan sınıflandırma yönünde bu belirteç için kullanılabilir "
-"kesme noktası yoktur: hiçbir eşik grupları şanstan daha iyi ayırmamaktadır. "
-"Sınıflandırma Yönünü ve sonuç değişkeninin kodlanmasını kontrol edin. "
-"Yukarıdaki EAA ve güven aralığı etkilenmez."
+
+#: R/psychopdaROC.b.R
+msgid ""
+"No usable cut-point is shown for this marker: the cut-point chosen by the "
+"selected method lies beyond the observed values, so every patient would be "
+"classified negative, although some cut-points do separate the groups better "
+"than chance in the classification direction currently selected. This "
+"happens, for example, when accuracy, a misclassification cost or a total "
+"utility is optimised in an imbalanced sample, when at the cost ratio entered "
+"the cost-benefit method finds classifying every patient negative the least "
+"costly choice, or when Metric Tolerance is wide enough to count that choice "
+"as tied with the best cut-point. If a cut-point is needed, lower Metric "
+"Tolerance or choose another Cutpoint Method or Optimization Metric. The AUC "
+"and its confidence interval in the Area Under the ROC Curve table are "
+"unaffected."
+msgstr ""
 
 #: R/advancedraincloud.b.R
 #: R/raincloud.b.R
@@ -113486,6 +114118,18 @@ msgstr "BİRBİRİNİN YERİNE KULLANILMAYA UYGUN DEĞİL:"
 msgid "Not adequate for substitution:"
 msgstr "Birbirinin yerine kullanılmaya uygun değil:"
 
+#: R/enhancedROC.b.R
+msgid ""
+"Not an estimate: E/O is exactly 1 for risks from a model fitted to these "
+"data."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"Not an estimate: risks from a model fitted to these data have slope 1, "
+"intercept 0 and calibration-in-the-large 0 by construction."
+msgstr ""
+
 #: R/cotest.b.R
 msgid ""
 "Not an estimate: with these parameters this result combination cannot occur "
@@ -113549,6 +114193,11 @@ msgid "Not assessed (too few paired values or the same value in every case): %s.
 msgstr ""
 "Değerlendirilmedi (eşleştirilmiş değer sayısı çok az veya her vakada aynı "
 "değer): %s."
+
+#: R/enhancedROC.b.R
+#: R/psychopdaROC.b.R
+msgid "Not assigned yet"
+msgstr ""
 
 #: R/lassocox.b.R
 #: R/lassologistic.b.R
@@ -113733,6 +114382,18 @@ msgstr ""
 msgid "Not estimable - see note"
 msgstr "Tahmin edilemiyor - nota bakınız"
 
+#: R/enhancedROC.b.R
+msgid "Not estimable (0/0 in the 2x2 table)."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "Not estimable (0/0): every patient tests positive at this cutoff."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "Not estimable (0/0): no patient tests positive at this cutoff."
+msgstr ""
+
 #: R/swimmerplot.b.R
 msgid "not estimable (a zero cell)"
 msgstr ""
@@ -113771,6 +114432,10 @@ msgstr "Bu tablo için tahmin edilemez: bir payda sıfırdır veya nicelik tanı
 msgid "Not estimable with fewer than 2 responders"
 msgstr "Tahmin edilemiyor: yanıt veren hasta sayısı 2'den az"
 
+#: R/enhancedROC.b.R
+msgid "Not estimable; see the notice above the results."
+msgstr ""
+
 #: R/diagnosticmeta.b.R
 msgid "Not estimable: all studies have the same effective sample size"
 msgstr ""
@@ -113787,11 +114452,25 @@ msgstr "tahmin edilemiyor: altın standart negatif olgu yok"
 msgid "not estimable: no gold-standard positive cases"
 msgstr "tahmin edilemiyor: altın standart pozitif olgu yok"
 
+#: R/enhancedROC.b.R
+msgid "Not estimable: no patient tests negative at this cutoff."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "Not estimable: no patient tests positive at this cutoff."
+msgstr ""
+
 #: R/waterfall.b.R
 msgid "Not estimable: no responder has an assessment after the first response"
 msgstr ""
 "Tahmin edilemiyor: hiçbir yanıt veren hastada ilk yanıttan sonra "
 "değerlendirme yok"
+
+#: R/enhancedROC.b.R
+msgid ""
+"Not estimable: the recalibration fit did not converge or the predicted risks "
+"separate the outcomes, so no finite slope exists."
+msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "Not estimable: the test was never negative, so LR- is 0/0."
@@ -113949,6 +114628,14 @@ msgstr "YANIT AÇISINDAN DEĞERLENDİRİLEMEZ"
 msgid "Not selected"
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid "Not shown (values outside 0 to 1): {who}"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "Not shown, because they have values outside 0 to 1: %s."
+msgstr ""
+
 #: R/alluvial.b.R
 msgid "Not shown: {variables}"
 msgstr "Gösterilmeyenler: {variables}"
@@ -114027,6 +114714,10 @@ msgstr ""
 msgid "Not testable (constant values)"
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid "Not tested"
+msgstr ""
+
 #: R/multisurvival.b.R
 msgid ""
 "Not tested, because each appears inside a higher-order term and dropping it "
@@ -114034,6 +114725,14 @@ msgid ""
 msgstr ""
 "Test edilmedi; çünkü her biri daha yüksek dereceli bir terimin içinde yer "
 "alıyor ve tek başına çıkarılması model hiyerarşisini bozar: <i>{terms}</i>."
+
+#: R/enhancedROC.b.R
+msgid "Not tested; the notice above says why."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "Not usable: the outcome needs two values"
+msgstr ""
 
 #: R/crosstable.b.R
 msgid "notable (>= 0.2)"
@@ -114392,12 +115091,6 @@ msgstr ""
 msgid ""
 "Note: Unequal time intervals detected. Trend interpretation should account "
 "for irregular spacing."
-msgstr ""
-
-#: R/psychopdaROC.b.R
-msgid ""
-"Note: Using '%s' as reference variable (first variable selected). To use a "
-"different reference, select it in the Reference Variable option."
 msgstr ""
 
 #: R/waterfall.b.R
@@ -115602,7 +116295,7 @@ msgstr "Hasta Sayısı"
 #: enhancedROC/results/results/decisionImpactPlot.description
 msgid ""
 "Number of patients called high risk, and number of true events among them, "
-"per 1000 tested across thresholds"
+"per 1000 tested across threshold probabilities"
 msgstr ""
 
 #: R/swimmerplot.b.R
@@ -116557,17 +117250,9 @@ msgstr ""
 "Gözlenen risk altındaki sayısı ve gözlenen olaylar verideki sayımlardır; "
 "düzeltilmiş eğrinin özellikleri değildir."
 
-#: R/enhancedROC.b.R
-msgid "Observed AUC difference of 0.05 to 0.10"
-msgstr "Gözlemlenen EAA farkı 0.05 ila 0.10"
-
-#: R/enhancedROC.b.R
-msgid "Observed AUC difference of 0.10 or more"
-msgstr "Gözlemlenen EAA farkı 0.10 veya üzeri"
-
-#: R/enhancedROC.b.R
-msgid "Observed AUC difference under 0.05"
-msgstr "Gözlemlenen EAA farkı 0.05 altı"
+#: enhancedROC/results/results/statisticalSummary.columns.title
+msgid "Observed AUC difference"
+msgstr ""
 
 #: progressionsurvival/results/clinical_significance_table.columns.title
 msgid "Observed Benefit"
@@ -116782,6 +117467,10 @@ msgstr "Gözlemlenen Güç"
 #: enhancedROC/options/useObservedPrevalence.title
 msgid "Observed prevalence"
 msgstr "Gözlemlenen prevalans"
+
+#: R/enhancedROC.b.R
+msgid "observed prevalence {prev}"
+msgstr ""
 
 #: R/clinicalscore.b.R
 #: R/enhancedROC.b.R
@@ -117488,6 +118177,12 @@ msgstr "Bir cinsiyet düzeyi otomatik olarak dolduruldu"
 
 #: R/pathagreement.b.R
 msgid "one minus signed Spearman correlation distance"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"One of the two groups has a single patient, so DeLong's standard error "
+"cannot be estimated and no interval is shown."
 msgstr ""
 
 #: R/diagnosticmeta.b.R
@@ -118613,16 +119308,6 @@ msgstr "Optimal Kesme Noktaları ve Performans"
 #: timedependent/results/cutpoint_stability_plot.title
 msgid "Optimal Cutpoints Over Time"
 msgstr ""
-
-#: R/enhancedROC.b.R
-msgid ""
-"Optimal cutpoints were determined by maximizing the Youden Index (J = "
-"Sensitivity + Specificity - 1; Youden, 1950). Custom cutoffs and "
-"sensitivity/specificity thresholds are also supported."
-msgstr ""
-"Optimal kesme noktaları Youden İndeksi maksimize edilerek belirlendi (J = "
-"Duyarlılık + Özgüllük - 1; Youden, 1950). Özel kesme noktaları ve "
-"duyarlılık/özgüllük eşikleri de desteklenir."
 
 #: adaptivetrialdesign/results/decisionAnalysis.columns.title
 msgid "Optimal Decision"
@@ -120110,6 +120795,10 @@ msgid "Outcome & Time Variables"
 msgstr ""
 
 #: R/enhancedROC.b.R
+msgid "Outcome %1$s has the levels %2$s."
+msgstr ""
+
+#: R/enhancedROC.b.R
 msgid "Outcome Balance Warning"
 msgstr "Sonuç Dengesi Uyarısı"
 
@@ -120123,6 +120812,11 @@ msgstr "Sonuç Kategorisi"
 
 #: vusanalysis/options/outcome_order.title
 msgid "Outcome Class Order"
+msgstr ""
+
+#: enhancedROC/results/results/outcomeCoding.title
+#: psychopdaROC/results/outcomeCoding.title
+msgid "Outcome coding: which level is positive"
 msgstr ""
 
 #: bayesianclinical/options/outcome_type.title
@@ -120211,6 +120905,25 @@ msgstr ""
 msgid "Outcome Level"
 msgstr "Sonuç düzeyi"
 
+#: enhancedROC/results/results/outcomeCoding.columns.title
+#: psychopdaROC/results/outcomeCoding.columns.title
+msgid "Outcome level"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"Outcome level %1$s (%2$s rows) has no row with a value for every selected "
+"predictor, so it cannot be analysed: rows are used only when the outcome and "
+"ALL selected predictors are present. • Missing values among those rows: "
+"%3$s. • Remove that predictor, analyse the predictors in separate runs, or "
+"supply the missing values; choosing a different positive class would answer "
+"a different question."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "Outcome Level Lost to Missing Predictor Values"
+msgstr ""
+
 #: R/oddsratio.b.R
 msgid "Outcome level modeled as the event: '{level}'."
 msgstr "Olay olarak modellenen sonuç düzeyi: '{level}'."
@@ -120242,6 +120955,10 @@ msgstr "Sonuç düzeyleri"
 
 #: trichotomousroc/ui/outcomelevels.label
 msgid "Outcome Levels"
+msgstr ""
+
+#: enhancedROC/results/results/outcomeCoding.description
+msgid "Outcome levels with their counts and the role each plays in the analysis"
 msgstr ""
 
 #: populationhealth/results/interventionAnalysisTable.columns.title
@@ -120428,27 +121145,10 @@ msgstr ""
 
 #: R/enhancedROC.b.R
 msgid ""
-"Outcome variable '%1$s' has %2$s levels (%3$s), but ROC analysis needs a "
-"binary outcome. • Choose which level represents the positive outcome in the "
-"Positive Class dropdown; every other level is then combined as negative. • "
-"Or tick Multi-Class ROC if you want a genuine multi-class analysis. • For "
-"example, analysing mortality you might select Dead of Disease as positive "
-"and combine the remaining levels."
-msgstr ""
-
-#: R/enhancedROC.b.R
-msgid ""
 "Outcome variable '%1$s' has only one value: '%2$s'. ROC analysis needs at "
 "least two different outcome values (for example Disease / No Disease). • "
 "Check whether a data filter removed one of the outcome categories. • Verify "
 "the variable contains the values you expect. • Or choose a different outcome "
-"variable."
-msgstr ""
-
-#: R/enhancedROC.b.R
-msgid ""
-"Outcome variable '%1$s' must be binary (exactly 2 unique values), but it has "
-"%2$s. • Recode the outcome to two categories, or select a different outcome "
 "variable."
 msgstr ""
 
@@ -120459,6 +121159,14 @@ msgstr ""
 #: multiclassroc/options/outcome.title
 #: multiclassroc/ui[0][0].label
 msgid "Outcome Variable (Categorical)"
+msgstr ""
+
+#: enhancedROC/options/outcome.description
+msgid ""
+"Outcome variable (disease status). A factor with two levels, or with more "
+"than two (choose one as Positive class and the others are pooled as "
+"negative, or use Multi-class ROC). A numeric outcome must have exactly two "
+"values; 0/1 reads 1 as positive."
 msgstr ""
 
 #: clinicalnomograms/options/outcome_var.description.ui
@@ -121229,10 +121937,6 @@ msgstr ""
 
 #: R/pathagreement.b.R
 msgid "Over-diagnoses '{category}'"
-msgstr ""
-
-#: R/enhancedROC.b.R
-msgid "Over-fitting (slope < 1)"
 msgstr ""
 
 #: R/chisqposttest.b.R
@@ -124079,16 +124783,6 @@ msgstr "Kısmi EAA Bitişi (Özgüllük)"
 msgid "Partial AUC type"
 msgstr "Kısmi EAA türü"
 
-#: R/enhancedROC.b.R
-msgid ""
-"Partial AUC was computed over user-specified specificity/sensitivity ranges "
-"and normalized using the McClish correction (McClish, 1989) to a 0.5-1.0 "
-"scale for comparability."
-msgstr ""
-"Kısmi EAA, kullanıcı tarafından belirtilen özgüllük/duyarlılık aralıkları "
-"üzerinden hesaplanmış ve karşılaştırılabilirlik için McClish düzeltmesi "
-"(McClish, 1989) kullanılarak 0.5-1.0 ölçeğine normalize edilmiştir."
-
 #: R/decisioncalculator.b.R
 msgid "Partial confidence intervals with population prevalence"
 msgstr "Toplum prevalansı ile kısmi güven aralıkları"
@@ -126326,6 +127020,7 @@ msgstr "Çok Küçük Alt Gruplar İçin Yüzdeler Gösteriliyor"
 msgid "Percentile"
 msgstr "Yüzdelik"
 
+#: R/enhancedROC.b.R
 #: R/pathagreement.b.R
 msgid "percentile"
 msgstr "yüzdelik"
@@ -128708,10 +129403,6 @@ msgid "Please specify a cut score for using the manual cutpoint method."
 msgstr ""
 
 #: R/psychopdaROC.b.R
-msgid "Please specify at least two dependent variables for IDI/NRI calculations."
-msgstr ""
-
-#: R/psychopdaROC.b.R
 msgid "Please specify at least two dependent variables to use DeLong's test."
 msgstr ""
 
@@ -130188,6 +130879,12 @@ msgid ""
 "knots on the logit scale"
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid ""
+"Pointwise {level}% bootstrap intervals for sensitivity at specificity "
+"0.1-0.9. Random seed: {seed}"
+msgstr ""
+
 #: decisioncurve/options/ciBand/pointwise.title
 msgid "Pointwise intervals (each threshold separately)"
 msgstr "Noktasal aralıklar (her eşik ayrı ayrı)"
@@ -130807,14 +131504,22 @@ msgstr ""
 #: R/decisioncombine.b.R
 #: R/decisioncompare.b.R
 #: R/lassologistic.b.R
-#: R/psychopdaROC.b.R
 #: R/sequentialtests.b.R
 msgid "Positive"
 msgstr "Pozitif"
 
+#: R/psychopdaROC.b.R
+msgid "Positive (%s)"
+msgstr ""
+
 #: R/lassologistic.b.R
 msgid "Positive (+)"
 msgstr "Pozitif (+)"
+
+#: R/enhancedROC.b.R
+#: R/psychopdaROC.b.R
+msgid "Positive (condition present)"
+msgstr ""
 
 #: ihcscoring/options/outcome_positive.title
 #: ihcscoring/ui[8][2]/outcome_positive.label
@@ -130888,7 +131593,7 @@ msgstr ""
 #: precisionrecall/options/positiveClass.title
 #: precisionrecall/ui[1][0]/positiveClass.label
 #: psychopdaROC/options/positiveClass.title
-#: psychopdaROC/ui[3][0]/positiveClass.label
+#: psychopdaROC/ui[0][1]/positiveClass.label
 #: segmentationmetrics/ui/segmentationType/positive_class.label
 msgid "Positive Class"
 msgstr "Pozitif Sınıf"
@@ -130909,12 +131614,41 @@ msgstr ""
 msgid "Positive Class (for binary)"
 msgstr ""
 
+#: R/psychopdaROC.b.R
+msgid ""
+"Positive Class is set to %1$s, but no row of %2$s has that level (its "
+"observed levels are: %3$s). If the Positive Class box shows '- None -', the "
+"class variable was changed after a level was chosen."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"Positive class is set to %1$s, but no row of %2$s has that level (its "
+"observed levels are: %3$s). If the Positive class box shows '- None -', the "
+"outcome variable was changed after a level was chosen."
+msgstr ""
+
 #: classification/options/positiveClass.title
 msgid "Positive Class Label"
 msgstr ""
 
 #: prauc/options/positive_level.title
 msgid "Positive Class Level"
+msgstr ""
+
+#: R/enhancedROC.b.R
+#: R/psychopdaROC.b.R
+msgid ""
+"Positive class: %1$s. Sensitivity, PPV, LR+, every cut-point and the AUC "
+"describe how well each test detects %1$s; specificity and NPV refer to %2$s."
+msgstr ""
+
+#: R/enhancedROC.b.R
+#: R/psychopdaROC.b.R
+msgid ""
+"Positive class: %1$s. Sensitivity, PPV, LR+, every cut-point and the AUC "
+"describe how well each test detects %1$s; specificity and NPV refer to the "
+"other levels combined (%2$s)."
 msgstr ""
 
 #: R/pathsampling.b.R
@@ -131832,14 +132566,12 @@ msgstr ""
 #: R/gsdesign.b.R
 #: package/analyses/kappaSizeCI.menuGroup
 #: package/analyses/kappaSizeFixedN.menuGroup
-#: package/analyses/kappaSizePower.menuGroup
 #: adaptivetrialdesign/results/operatingCharacteristics.columns.title
 #: advancedSurvivalPower/options/calc_type/power.title
 #: competingRisksPower/results/powerCurveTable.columns.title
 #: comprehensiveSurvivalPower/results/methodComparison.columns.title
 #: kappaSizeCI/options.menuGroup
 #: kappaSizeFixedN/options.menuGroup
-#: kappaSizePower/options.menuGroup
 #: kappaSizePower/ui[3][1][0]/power.label
 msgid "Power"
 msgstr "Güç"
@@ -132112,13 +132844,15 @@ msgstr ""
 msgid ""
 "Power-based sample size for a two-sided test of H0: kappa = kappa0 against "
 "H1: kappa = kappa1, for the unweighted (nominal-category) kappa coefficient, "
-"using the goodness-of-fit (non-central chi-square) approach implemented in "
-"the kappaSize package (Rotondi and Donner)."
+"using the goodness-of-fit (non-central chi-square) approach of Donner and "
+"Eliasziw and of Altaye and colleagues, as implemented in the kappaSize "
+"package (Rotondi and Donner)."
 msgstr ""
 "Ağırlıksız (nominal kategorili) kappa katsayısı için, H0: kappa = kappa0 "
 "hipotezinin H1: kappa = kappa1 hipotezine karşı iki yönlü testine yönelik, "
-"kappaSize paketindeki (Rotondi ve Donner) uyum iyiliği (merkezi olmayan "
-"ki-kare) yaklaşımıyla hesaplanan güce dayalı örneklem büyüklüğü."
+"Donner ve Eliasziw ile Altaye ve arkadaşlarının uyum iyiliği (merkezi "
+"olmayan ki-kare) yaklaşımıyla, kappaSize paketinde (Rotondi ve Donner) "
+"uygulandığı biçimde hesaplanan güce dayalı örneklem büyüklüğü."
 
 #: clinicaltrialdesign/results/sensitivity_analysis.description
 msgid "Power/sample size sensitivity across parameter ranges"
@@ -132127,6 +132861,11 @@ msgstr ""
 #: package/analyses/survivalPower.menuGroup
 #: survivalPower/options.menuGroup
 msgid "PowerP"
+msgstr ""
+
+#: package/analyses/kappaSizePower.menuGroup
+#: kappaSizePower/options.menuGroup
+msgid "PowerT"
 msgstr ""
 
 #: R/pathagreement.b.R
@@ -132917,6 +133656,10 @@ msgstr ""
 "okunabilir. Klinik kullanımdan önce bağımsız bir kohortta puandan olasılığa "
 "eşlemeyi doğrulayın."
 
+#: R/enhancedROC.b.R
+msgid "Predicted probabilities as supplied"
+msgstr ""
+
 #: modelval/options/predicted.description
 msgid "Predicted probabilities from the existing model (0-1 scale)."
 msgstr ""
@@ -133279,6 +134022,43 @@ msgstr "Tahmin Ölçeği"
 msgid "Prediction scale"
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid ""
+"Prediction scale is Probability, but no predictor has all its values between "
+"0 and 1, so there are no risks to plot."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"Prediction scale is Probability, but these predictors have values outside 0 "
+"to 1: %s. Calibration, the Brier score, E/O ratio, Hosmer-Lemeshow test and "
+"the decision and clinical impact curves are not shown for them. If the "
+"values are scores, set Prediction scale to Score: those outputs then use a "
+"logistic model of the marker fitted to these data."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"Prediction scale is Probability, so the values of %1$s are used as supplied, "
+"as predicted probabilities of %2$s, and are never reversed. Direction, "
+"however, reads lower values as indicating %2$s, whereas a probability of "
+"%2$s is higher in the patients more likely to have it. Check Positive class "
+"first (is %2$s the class these probabilities refer to?), then Direction."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"Prediction scale is Probability: each predictor's values are used as "
+"supplied, as predicted probabilities of the positive class."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"Prediction scale is Score: the risks come from a logistic model of each "
+"marker fitted to these same data, so this table describes that in-sample "
+"model, not an external prediction rule."
+msgstr ""
+
 #: bayesianclinical/results/predictive_intervals.columns.title
 msgid "Prediction SE"
 msgstr ""
@@ -133484,16 +134264,6 @@ msgstr ""
 msgid "Predictive Values"
 msgstr "Öngörü Değerleri"
 
-#: R/enhancedROC.b.R
-msgid ""
-"Predictive values (PPV, NPV) were adjusted for prevalence using Bayes' "
-"theorem. Likelihood ratios and diagnostic odds ratios follow standard "
-"definitions."
-msgstr ""
-"Öngörü değerleri (PÖD, NÖD) Bayes teoremi kullanılarak prevalansa göre "
-"düzeltilmiştir. Olabilirlik oranları ve tanısal odds oranları standart "
-"tanımları izler."
-
 #: bayesiandiagnostic/results/predictiveValues.title
 msgid "Predictive Values Analysis"
 msgstr ""
@@ -133533,6 +134303,13 @@ msgstr ""
 #: R/decision.b.R
 msgid "Predictive values depend on disease prevalence in your population"
 msgstr "Öngörü değerleri popülasyonunuzdaki hastalık prevalansına bağlıdır"
+
+#: R/enhancedROC.b.R
+msgid ""
+"Predictive values use Bayes' theorem at the prevalence shown in the table; "
+"likelihood ratios are worded with the bands of Jaeschke, Guyatt & Sackett "
+"(1994)."
+msgstr ""
 
 #: R/enhancedROC.b.R
 msgid "Predictive Values vs Disease Prevalence"
@@ -134927,6 +135704,10 @@ msgstr ""
 
 #: bayesiannetworkma/results/leagueTable.columns.title
 msgid "Probabilities (Upper)"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "Probabilities read with lower values as positive"
 msgstr ""
 
 #: likelihoodratio/ui[4][3]/clinicalThresholds.suffix
@@ -138151,6 +138932,12 @@ msgstr ""
 msgid "Random Perturbation"
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid ""
+"Random ranking: dashed diagonal for the ROC curve, dotted curve for the CROC "
+"curve (CROC area {r})."
+msgstr ""
+
 #: vusanalysis/options/handle_ties/random.title
 msgid "Random Resolution"
 msgstr ""
@@ -138415,6 +139202,10 @@ msgstr ""
 
 #: treatmentmeta/options/model_type/random.title
 msgid "Random-Effects Model (REML)"
+msgstr ""
+
+#: enhancedROC/results/results/crocAnalysisTable.columns.title
+msgid "Random-ranking CROC AUC"
 msgstr ""
 
 #: consortdiagram/ui[2].label
@@ -138795,12 +139586,6 @@ msgstr "Sıralama İçin En Az İki Test Gerekir"
 #: survivalfeaturerank/ui[1][0].label
 msgid "Ranking Options"
 msgstr ""
-
-#: R/enhancedROC.b.R
-msgid "Ranks a random case above a random non-case %.0f%% of the time"
-msgstr ""
-"Zamanın %%%.0f kadarında rastgele bir olguyu rastgele bir olgu olmayan "
-"bireyin üzerine yerleştirir"
 
 #: R/cotest.b.R
 msgid "Rapid antigen"
@@ -139621,27 +140406,40 @@ msgstr ""
 
 #: R/enhancedROC.b.R
 msgid ""
-"Reading of the test values: <b>%1$s were taken to indicate %2$s</b>. %3$s If "
-"that is the wrong way round for a marker, its sensitivity, specificity, "
-"cutpoint and AUC are all reversed."
+"Reading of the test values: <i>HIGHER values of %1$s and LOWER values of "
+"%2$s were taken to indicate %3$s</i>."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"Reading of the test values: <i>HIGHER values of %1$s were taken to indicate "
+"%2$s</i>."
 msgstr ""
 
 #: R/psychopdaROC.b.R
 msgid ""
-"Reading of the test values: <b>HIGHER values were taken to indicate %1$s</b> "
-"(Classification Direction = \"%2$s\"). If that is the wrong way round for "
-"this marker, every sensitivity, specificity, cutpoint and AUC below is "
-"reversed — switch Classification Direction to \"<=\" and the AUC becomes 1 "
-"minus the value shown."
+"Reading of the test values: <i>HIGHER values were taken to indicate %1$s</i> "
+"(Classification Direction = \"%2$s\"). If that reading looks reversed for "
+"this marker, first check Positive Class: is %1$s the level that means the "
+"condition is present? Only if it is, switch Classification Direction to "
+"\"<=\": the AUC becomes 1 minus the value shown, and the cutpoint, "
+"sensitivity and specificity are re-estimated."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"Reading of the test values: <i>LOWER values of %1$s were taken to indicate "
+"%2$s</i>."
 msgstr ""
 
 #: R/psychopdaROC.b.R
 msgid ""
-"Reading of the test values: <b>LOWER values were taken to indicate %1$s</b> "
-"(Classification Direction = \"%2$s\"). If that is the wrong way round for "
-"this marker, every sensitivity, specificity, cutpoint and AUC below is "
-"reversed — switch Classification Direction to \">=\" and the AUC becomes 1 "
-"minus the value shown."
+"Reading of the test values: <i>LOWER values were taken to indicate %1$s</i> "
+"(Classification Direction = \"%2$s\"). If that reading looks reversed for "
+"this marker, first check Positive Class: is %1$s the level that means the "
+"condition is present? Only if it is, switch Classification Direction to "
+"\">=\": the AUC becomes 1 minus the value shown, and the cutpoint, "
+"sensitivity and specificity are re-estimated."
 msgstr ""
 
 #: R/decisioncombine.b.R
@@ -139779,18 +140577,6 @@ msgid ""
 msgstr ""
 "Optimal kesim noktası belirleme ile Alıcı İşlem Karakteristiği (ROC) eğrisi "
 "analizi."
-
-#: R/enhancedROC.b.R
-msgid ""
-"Receiver Operating Characteristic (ROC) curves were generated using the pROC "
-"package (Robin et al., 2011). AUC and confidence intervals were computed "
-"using DeLong's method (DeLong et al., 1988) unless bootstrap CIs were "
-"requested."
-msgstr ""
-"Alıcı İşletim Karakteristiği (ROC) eğrileri pROC paketi kullanılarak "
-"oluşturulmuştur (Robin ve ark., 2011). Bootstrap GA'ları istenmedikçe EAA ve "
-"güven aralıkları DeLong yöntemi kullanılarak hesaplanmıştır (DeLong ve ark., "
-"1988)."
 
 #: curemodels/results/sensitivityTable.columns.title
 msgid "Recensored at horizon"
@@ -140409,6 +141195,7 @@ msgstr ""
 #: R/agreement.b.R
 #: R/clinicalscore.b.R
 #: R/decisioncompare.b.R
+#: R/enhancedROC.b.R
 #: R/ihcheterogeneity.b.R
 #: R/linechart.b.R
 #: agreement/results/confusionMatrixTable.columns.title
@@ -140875,6 +141662,28 @@ msgstr ""
 msgid "Reference table for risk calculation"
 msgstr ""
 
+#: psychopdaROC/options/refVar.title
+msgid "Reference Test for IDI/NRI"
+msgstr ""
+
+#: psychopdaROC/ui[0][3].label
+msgid "Reference Test for IDI/NRI (Optional)"
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Reference Test for IDI/NRI holds the class variable, the gold standard "
+"itself. Put a test to compare against there, or leave it empty to use the "
+"first test variable."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Reference test: %1$s, the first test variable, because Reference Test for "
+"IDI/NRI is empty. To compare against another test, put it in Reference Test "
+"for IDI/NRI."
+msgstr ""
+
 #: bayesiannetworkma/options/reference_treatment.title
 msgid "Reference Treatment"
 msgstr ""
@@ -140919,15 +141728,6 @@ msgstr ""
 
 #: jjdotchart/ui[1][0].label
 msgid "Reference Value to test against"
-msgstr ""
-
-#: psychopdaROC/options/refVar.title
-#: psychopdaROC/ui[9][1]/refVar.label
-msgid "Reference Variable"
-msgstr "Referans Değişken"
-
-#: R/psychopdaROC.b.R
-msgid "Reference variable for IDI/NRI must be one of the selected test variables."
 msgstr ""
 
 #: vartree/ui[0][1].label
@@ -141659,6 +142459,10 @@ msgstr ""
 msgid "Relative Difference (%)"
 msgstr ""
 
+#: enhancedROC/results/results/detailedComparison.columns.title
+msgid "Relative difference (%)"
+msgstr ""
+
 #: robustaft/results/scaleEstimates.columns.title
 msgid "Relative Efficiency"
 msgstr ""
@@ -142022,6 +142826,18 @@ msgstr ""
 #: R/multisurvival.b.R
 msgid "Remove the interaction first if you want to test the main effect."
 msgstr "Ana etkiyi test etmek istiyorsanız önce etkileşimi kaldırın."
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Remove the subgroup variable, or use one in which every subgroup contains "
+"cases of the positive class."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Remove the subgroup variable, or use one in which every subgroup has at "
+"least 2 positive and 2 negative cases."
+msgstr ""
 
 #: tidyplots/options/removeXAxis.title
 msgid "Remove X Axis"
@@ -144584,7 +145400,6 @@ msgid "Risk tables"
 msgstr ""
 
 #: clinicalnomograms/results/decisionCurveResults.columns.title
-#: enhancedROC/results/results/decisionImpactSummary.columns.title
 #: survivalmodelvalidation/results/decisionCurveResults.columns.title
 msgid "Risk Threshold"
 msgstr "Risk Eşiği"
@@ -144632,6 +145447,12 @@ msgstr ""
 #: R/multisurvival.b.R
 msgid "riskRegression package required"
 msgstr "riskRegression paketi gerekli"
+
+#: R/enhancedROC.b.R
+msgid ""
+"Risks from a logistic model of each marker fitted to these data (in-sample, "
+"optimistic)"
+msgstr ""
 
 #: singlearm/options/risktable.title
 msgid "Risktable"
@@ -145423,6 +146244,12 @@ msgstr ""
 msgid "ROC convex hull"
 msgstr "ROC dışbükey örtüsü"
 
+#: enhancedROC/results/results/convexHullTable.description
+msgid ""
+"ROC convex hull - operating points reachable by randomly mixing two cut-offs "
+"(in-sample)"
+msgstr ""
+
 #: enhancedROC/results/results/convexHullTable.title
 msgid "ROC Convex Hull Analysis"
 msgstr "ROC Dışbükey Örtü Analizi"
@@ -145430,10 +146257,6 @@ msgstr "ROC Dışbükey Örtü Analizi"
 #: enhancedROC/results/results/convexHullPlot.title
 msgid "ROC Convex Hull Plot"
 msgstr "ROC Dışbükey Örtü Grafiği"
-
-#: enhancedROC/results/results/convexHullTable.description
-msgid "ROC convex hull showing optimal achievable performance"
-msgstr "Optimal elde edilebilir performansı gösteren ROC dışbükey örtüsü"
 
 #: psychopdaROC/options/correlationROCs.title
 #: psychopdaROC/ui[10][0]/correlationROCs.label
@@ -145585,6 +146408,10 @@ msgstr ""
 msgid "ROC Curves Comparison"
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid "ROC curves differ (p < 0.05)"
+msgstr ""
+
 #: package/analyses/multiclassroc.menuSubtitle
 #: multiclassroc/options.menuSubtitle
 msgid "ROC curves for >2 diagnostic classes"
@@ -145630,13 +146457,14 @@ msgstr "Optimal kesme noktalarıyla ROC eğrileri"
 
 #: R/enhancedROC.b.R
 msgid ""
-"ROC direction for %1$s was chosen automatically: %2$s. The direction was "
-"read from these data — by comparing the two groups' median values — rather "
-"than assumed in advance. Because the same data then supply the AUC, the AUC "
-"is biased upward, and a marker pointing the wrong way is reported as though "
-"it pointed the right way.%3$s If you know which way the marker should point, "
-"set Direction explicitly; a low AUC is then a real finding rather than an "
-"artefact of the direction being fitted."
+"ROC direction for %1$s was chosen automatically: higher values of %1$s were "
+"taken to indicate %2$s (the positive class)."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"ROC direction for %1$s was chosen automatically: lower values of %1$s were "
+"taken to indicate %2$s (the positive class)."
 msgstr ""
 
 #: timedependent/options/roc_times.title
@@ -145729,6 +146557,11 @@ msgstr ""
 
 #: sigmametrics/results/costOfQuality.columns.title
 msgid "ROI Timeframe (months)"
+msgstr ""
+
+#: enhancedROC/results/results/outcomeCoding.columns.title
+#: psychopdaROC/results/outcomeCoding.columns.title
+msgid "Role in this analysis"
 msgstr ""
 
 #: qualityoflife/options/role_emotional_items.title
@@ -145961,6 +146794,13 @@ msgstr ""
 msgid "Rows Analysed"
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid ""
+"Rows are analysed only when the outcome and ALL selected predictors are "
+"present (n = %1$s); a predictor analysed on its own may use more rows "
+"(largest: %2$s)."
+msgstr ""
+
 #: R/decisioncalculator.b.R
 msgid "Rows are not thresholds of one marker"
 msgstr "Satırlar tek bir belirtecin eşikleri değil"
@@ -145996,6 +146836,10 @@ msgstr "Analizden hariç tutulan satırlar"
 msgid ""
 "Rows kept when a large dataset is subsampled; the statistics use only these "
 "rows."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "Rows Missing Any Predictor Are Excluded"
 msgstr ""
 
 #: R/lassocox.b.R
@@ -147864,15 +148708,18 @@ msgstr ""
 msgid "Score Categories"
 msgstr ""
 
+#: enhancedROC/results/results/clinicalImpactTable.columns.title
+#: enhancedROC/results/results/decisionImpactSummary.columns.title
 #: enhancedROC/results/results/screeningWorkload.columns.title
 msgid "Score cutoff"
 msgstr ""
 
 #: R/psychopdaROC.b.R
 msgid ""
-"Score direction was reversed for %s so that DeLong's test could compare them "
-"on a common direction. Their AUCs in this table are <b>1 minus</b> the value "
-"shown in the main AUC table."
+"Score direction was reversed for %1$s so that DeLong's test could compare "
+"them on a common direction. Their AUCs in the DeLong output, and the "
+"differences in this table, use <i>1 minus</i> the value shown in the main "
+"AUC table."
 msgstr ""
 
 #: clinicalscore/results/scoreDistPlot.title
@@ -149709,18 +150556,6 @@ msgstr ""
 msgid "Select whether data represents independent groups or repeated measurements"
 msgstr ""
 
-#: psychopdaROC/options/positiveClass.description.ui
-msgid ""
-"Select which level of the class variable represents the positive class "
-"(disease/condition present)."
-msgstr ""
-"Sınıf değişkeninin hangi düzeyinin pozitif sınıfı temsil ettiğini seçin "
-"(hastalık/durum mevcut)."
-
-#: enhancedROC/options/positiveClass.description
-msgid "Select which level represents the positive class (disease/condition present)"
-msgstr "Hangi düzeyin pozitif sınıfı (hastalık/durum mevcut) temsil ettiğini seçin"
-
 #: datevalidator/ui[4][0].label
 msgid "Select which outputs to display"
 msgstr ""
@@ -150401,6 +151236,10 @@ msgstr "Duyarlılık Analizi: PÖD/NÖD ve Prevalans"
 msgid "Sensitivity and specificity"
 msgstr "Duyarlılık ve özgüllük"
 
+#: R/enhancedROC.b.R
+msgid "Sensitivity and Specificity"
+msgstr ""
+
 #: enhancedROC/results/results/cutoffAnalysisPlot.description
 msgid "Sensitivity and specificity across cutoff values"
 msgstr "Kesme değerleri boyunca duyarlılık ve özgüllük"
@@ -150426,6 +151265,14 @@ msgid ""
 "Sensitivity and specificity are test characteristics; predictive values "
 "depend on disease prevalence. Values calculated from pooled sensitivity "
 "(%s%%) and specificity (%s%%)."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"Sensitivity and specificity intervals are %s%% Clopper-Pearson exact "
+"binomial intervals (Clopper & Pearson 1934). They treat the cutoff as fixed "
+"in advance, although it was chosen on these data, so they understate the "
+"uncertainty."
 msgstr ""
 
 #: R/enhancedROC.b.R
@@ -150624,6 +151471,12 @@ msgstr ""
 
 #: R/enhancedROC.b.R
 msgid ""
+"Sensitivity, PPV, LR+, every cut-point and the AUC describe the level you "
+"choose; every other level is analysed as negative."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
 "Sensitivity, specificity and accuracy are reported at a cutpoint that was "
 "searched for on these same data, so they are optimistic; they are not "
 "cross-validated or externally validated estimates."
@@ -150631,6 +151484,15 @@ msgstr ""
 "Duyarlılık, özgüllük ve doğruluk bu aynı veriler üzerinde aranan bir kesme "
 "noktasında bildirilmiştir, bu nedenle iyimserdir; çapraz doğrulanmış veya "
 "harici olarak doğrulanmış tahminler değildir."
+
+#: R/enhancedROC.b.R
+msgid ""
+"Sensitivity, specificity and accuracy compare each marker at its own "
+"cut-point, chosen on these same patients. McNemar's test (asymptotic, no "
+"continuity correction) treats both cut-points as fixed in advance, so its "
+"p-values ignore that selection. Rows with fewer than 10 discordant patients "
+"are not tested."
+msgstr ""
 
 #: decision/results/epirTable_ratio.title
 msgid "Sensitivity, Specificity and Predictive Values with 95% CI"
@@ -151180,6 +152042,13 @@ msgstr "Kurulum durumu"
 #: venn/options/var7.description.jamovi
 msgid "Seventh variable for 7+ set analysis."
 msgstr "7+ küme analizi için yedinci değişken."
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Several cut-points tie for the best %1$s (%2$s): %3$s. The cut-point shown, "
+"%4$s, is computed from them and is not one of them; its %1$s is %5$s. Choose "
+"'All tied cutpoints' in Tie Breaking Method to list each one."
+msgstr ""
 
 #: R/waterfall.b.R
 msgid "SEVERAL ROWS PER PATIENT"
@@ -155624,10 +156493,6 @@ msgstr ""
 msgid "Significant heterogeneity detected (p < 0.01)"
 msgstr "Anlamlı heterojenlik saptandı (p < 0,01)"
 
-#: R/enhancedROC.b.R
-msgid "Significant lack of fit"
-msgstr ""
-
 #: R/agreement.b.R
 msgid "Significant marginal heterogeneity (p < .05)"
 msgstr "Anlamlı marjinal heterojenlik (p < .05)"
@@ -155643,12 +156508,6 @@ msgstr "Anlamlı negatif korelasyon"
 #: R/agreement.b.R
 msgid "Significant net direction detected"
 msgstr "Anlamlı net yön saptandı"
-
-#: R/enhancedROC.b.R
-msgid "Significant optimization potential; classifier may benefit from recalibration"
-msgstr ""
-"Önemli optimizasyon potansiyeli; sınıflandırıcı yeniden kalibrasyondan "
-"faydalanabilir"
 
 #: R/decisioncompare.b.R
 msgid "Significant overall difference among tests (p<0.01)"
@@ -156398,6 +157257,12 @@ msgstr "hafif uyum"
 msgid "Slope"
 msgstr "Eğim"
 
+#: R/enhancedROC.b.R
+msgid ""
+"Slope 0 or below: no or reversed association between predicted risk and "
+"outcome"
+msgstr ""
+
 #: stagemigration/results/calibrationAnalysis.columns.title
 msgid "Slope 95% CI Lower"
 msgstr ""
@@ -156529,10 +157394,6 @@ msgid ""
 "Small dataset (n<20): Flow patterns may be unstable. Consider larger sample "
 "for reliable results."
 msgstr ""
-
-#: R/enhancedROC.b.R
-msgid "Small effect"
-msgstr "Küçük etki"
 
 #: R/pathagreement.b.R
 msgid "small effect"
@@ -158616,6 +159477,10 @@ msgstr ""
 #: R/agreement.b.R
 msgid "Specified positive category '%1$s' not found in data. Available: %2$s"
 msgstr "Belirtilen pozitif kategori '%1$s' veride bulunamadı. Mevcut: %2$s"
+
+#: R/psychopdaROC.b.R
+msgid "Specified positive class not found"
+msgstr ""
 
 #: R/oddsratio.b.R
 msgid ""
@@ -162371,6 +163236,12 @@ msgstr ""
 "Tabakalı {kappa}: kurum başına değerlerin olgu sayısıyla ağırlıklandırılmış "
 "ortalaması"
 
+#: R/enhancedROC.b.R
+msgid ""
+"Stratified 10-fold cross-validation of a logistic model of each marker gives "
+"the mean and SD of the fold AUCs."
+msgstr ""
+
 #: pathsampling/ui[6].label
 msgid "Stratified Analyses (Requires Sample Type)"
 msgstr ""
@@ -162801,10 +163672,6 @@ msgstr "pozitif olduğunda hastalık lehine güçlü kanıt"
 #: R/diagnosticmeta.b.R
 msgid "Strong evidence FOR disease when test positive"
 msgstr ""
-
-#: R/enhancedROC.b.R
-msgid "Strong evidence for positive diagnosis"
-msgstr "Pozitif tanı için güçlü kanıt"
 
 #: R/agreement.b.R
 msgid "Strong evidence of a net direction"
@@ -163435,6 +164302,24 @@ msgstr ""
 msgid "Subgroup"
 msgstr "Alt grup"
 
+#: R/psychopdaROC.b.R
+msgid ""
+"Subgroup %1$s has %2$d case(s) of the positive class (%3$s) with a value of "
+"%4$s; at least 2 are needed to analyse %4$s in that subgroup."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Subgroup %1$s has %2$d case(s) outside the positive class (%3$s) with a "
+"value of %4$s; at least 2 are needed to analyse %4$s in that subgroup."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Subgroup %1$s has no case of the positive class (%2$s) with a value of %3$s, "
+"so %3$s cannot be analysed in that subgroup."
+msgstr ""
+
 #: betabinomialdiagnostic/options/subgroup_analysis.title
 #: betabinomialdiagnostic/results/subgroupAnalysis.title
 #: idi/results/subgroupAnalysis.title
@@ -163869,6 +164754,7 @@ msgid "Suggested Phenotype"
 msgstr ""
 
 #: R/linechart.b.R
+#: R/psychopdaROC.b.R
 msgid "Suggestion:"
 msgstr ""
 
@@ -169011,9 +169897,13 @@ msgstr ""
 #: R/enhancedROC.b.R
 msgid ""
 "The %1$s predictor demonstrated %2$s diagnostic performance with an AUC of "
-"%3$.3f (%4$s%% CI: %5$s--%6$s). At the optimal cutoff of %7$.3f, the test "
-"achieved %8$s sensitivity (%9$.1f%%) and %10$s specificity (%11$.1f%%), "
-"resulting in a Youden Index of %12$.3f."
+"%3$.3f (%4$s%% CI: %5$s--%6$s)."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"The %1$s predictor demonstrated %2$s diagnostic performance with an AUC of "
+"%3$.3f (interval not estimable)."
 msgstr ""
 
 #: R/diagnosticmeta.b.R
@@ -169416,9 +170306,29 @@ msgid ""
 "{eventAtTime} events are informative at that time."
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid ""
+"The AUC in Context column restates it as a percentage, and the AUC "
+"Interpretation column places the AUC as displayed in a band that includes "
+"its lower edge: Excellent from 0.9, Good from 0.8, Fair from 0.7, Poor from "
+"0.6, Minimal from 0.5, Below chance under 0.5."
+msgstr ""
+
 #: R/psychopdaROC.b.R
 msgid "The AUC is computed over all cutpoints and is not affected by that search."
 msgstr "EAA tüm kesme noktaları üzerinden hesaplanır ve bu aramadan etkilenmez."
+
+#: R/enhancedROC.b.R
+msgid ""
+"The AUC is the probability that a randomly chosen case has a HIGHER value "
+"than a randomly chosen non-case (ties count one half)."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"The AUC is the probability that a randomly chosen case has a LOWER value "
+"than a randomly chosen non-case (ties count one half)."
+msgstr ""
 
 #: R/decisiongraph.b.R
 msgid ""
@@ -169516,8 +170426,8 @@ msgstr ""
 
 #: R/enhancedROC.b.R
 msgid ""
-"the best AUC is {auc}, which is below chance - the marker points the wrong "
-"way, or the Direction setting does not match the data"
+"the best AUC is {auc}, below 0.5 - Positive class may name the wrong level, "
+"Direction may not match the marker, or the marker may not discriminate at all"
 msgstr ""
 
 #: R/enhancedROC.b.R
@@ -169586,6 +170496,12 @@ msgid ""
 "subjects, is what binds here."
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid ""
+"The Brier score is the mean squared difference between the predicted risk "
+"and the outcome."
+msgstr ""
+
 #: R/cotest.b.R
 msgid ""
 "The calculation assumes both tests are performed in parallel and allows "
@@ -169622,6 +170538,14 @@ msgstr ""
 
 #: R/stagemigration-part1.R
 msgid "The calculation returned no result."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"The calibration slope comes from a logistic regression of the outcome on the "
+"logit of the predicted risk, and the Intercept (slope model) column is that "
+"model's intercept; calibration-in-the-large is the intercept with the slope "
+"fixed at 1, which Van Calster et al. (2019) call the calibration intercept."
 msgstr ""
 
 #: R/survival.b.R
@@ -169831,6 +170755,12 @@ msgstr ""
 "Uyum sınırlarının GA'ları Bland & Altman (1999) yaklaşık standart hatasını "
 "kullanır, SD x sqrt(1/n + 1.96^2 / (2(n - 1))); küçük örneklemlerde geniştir."
 
+#: R/psychopdaROC.b.R
+msgid ""
+"The class variable %1$s has fewer than two observed levels; ROC analysis "
+"needs cases with and without the condition."
+msgstr ""
+
 #: R/enhancedROC.b.R
 msgid "The Clinical Application Metrics table reports the PPV at %s."
 msgstr "Klinik Uygulama Ölçütleri tablosu %s düzeyindeki PÖD'yi bildirmektedir."
@@ -169854,6 +170784,13 @@ msgid ""
 msgstr ""
 "Klinik özet oluşturulamadı ({message}); yukarıdaki sayısal sonuçlar "
 "etkilenmez."
+
+#: R/enhancedROC.b.R
+msgid ""
+"The Clopper-Pearson intervals for sensitivity and specificity in the "
+"Diagnostic Performance table treat this cutpoint as fixed in advance, so "
+"they are centred on these optimistic values and understate the uncertainty."
+msgstr ""
 
 #: R/stagemigration-part4.R
 msgid "The cmprsk package is not available."
@@ -170236,6 +171173,17 @@ msgstr ""
 msgid "the criterion belonging to the cutpoint method you selected"
 msgstr "seçtiğiniz kesme noktası yöntemine ait ölçüt"
 
+#: R/enhancedROC.b.R
+msgid ""
+"The CROC AUC weights the ROC curve toward its low false-positive end with an "
+"exponential magnifier of strength alpha (Swamidass et al. 2010). It is never "
+"larger than the ROC AUC, so read it against the random-ranking value, "
+"1/alpha - 1/(exp(alpha) - 1), not against the ROC AUC, and report alpha with "
+"the area. Gain over random = CROC AUC - random-ranking CROC AUC. Tied scores "
+"are integrated along the straight ROC segment that joins their operating "
+"points."
+msgstr ""
+
 #: R/singlearm.b.R
 msgid "The cumulative event probability plot"
 msgstr "Kümülatif olay olasılığı grafiği"
@@ -170396,6 +171344,16 @@ msgstr ""
 "Kesme noktası %s olarak okunurken takip süresi yalnızca %s düzeyine ulaşıyor "
 "- bu, bir tarihin düz bir sayı olarak içe aktarıldığında aldığı görünümdür "
 "ve neredeyse kesinlikle takip süresiyle aynı birimde değildir."
+
+#: R/enhancedROC.b.R
+msgid ""
+"The cut-point was chosen on these same data, so the sensitivity, specificity "
+"and accuracy reported at it are optimistic."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "The cutoff is infinite, so everyone is classified the same way."
+msgstr ""
 
 #: R/psychopdaROC.b.R
 msgid ""
@@ -170894,6 +171852,14 @@ msgstr ""
 #: R/alluvial.b.R
 msgid "The diagram is based on the remaining {n} rows."
 msgstr "Diyagram kalan {n} satıra dayanır."
+
+#: R/enhancedROC.b.R
+msgid ""
+"The direction was read from these data — by comparing the two groups' median "
+"values — rather than assumed in advance. Because the same data then supply "
+"the AUC, the AUC is biased upward, and a marker pointing the wrong way is "
+"reported as though it pointed the right way."
+msgstr ""
 
 #: R/agreement.b.R
 msgid ""
@@ -171915,6 +172881,13 @@ msgstr ""
 "Yatay eksen log lambda, dikey eksen çapraz doğrulamalı kısmi olabilirlik "
 "sapmasıdır. Bu ayarlama ölçütünde daha düşük sapma daha iyidir."
 
+#: R/enhancedROC.b.R
+msgid ""
+"The Hosmer-Lemeshow test (Hosmer, Lemeshow & Sturdivant, 2013) used %s "
+"groups of predicted risk; a non-significant result is not evidence of good "
+"calibration (Van Calster et al., 2019)."
+msgstr ""
+
 #: R/multisurvival.b.R
 msgid ""
 "The HR is the ratio of one variable's hazard ratio between the levels of the "
@@ -171924,6 +172897,13 @@ msgstr ""
 "TO, bir değişkenin tehlike oranının diğerinin düzeyleri arasındaki oranıdır; "
 "küçük bir p, bir değişkenin etkisinin diğerine <b>bağlı olduğuna</b> (etki "
 "değişimi) dair kanıt gösterir."
+
+#: R/enhancedROC.b.R
+msgid ""
+"The hull is {gap} above the empirical AUC; points between empirical "
+"operating points are reachable only by randomly mixing two cut-offs (Provost "
+"& Fawcett 2001); in-sample and optimistic"
+msgstr ""
 
 #: R/diagnosticmeta.b.R
 msgid ""
@@ -172087,6 +173067,12 @@ msgid ""
 msgstr ""
 "Aralık kontrolleri kurum terimi olmadan yürütüldü; kurum terimi varken "
 "aralıklar simülasyonda kontrol edilmemiştir."
+
+#: R/enhancedROC.b.R
+msgid ""
+"The interval shown is the apparent AUC's DeLong interval; none is given for "
+"the corrected AUC (Noma et al., 2021)."
+msgstr ""
 
 #: R/survivalPower.b.R
 msgid ""
@@ -172254,29 +173240,6 @@ msgstr ""
 "öncesinde sona eren denekler hariç tutulur ve zaman daha sonra yer "
 "işaretinden itibaren ölçülür, bu nedenle tüm tahminler o zamana kadar "
 "hayatta kalmaya bağlıdır."
-
-#: R/enhancedROC.b.R
-msgid ""
-"The last column restates each AUC as what it actually is: the probability "
-"that a randomly chosen case scores higher than a randomly chosen non-case. "
-"Where the selected clinical context has a conventionally quoted reference "
-"level (0.75 for screening, 0.80 for diagnosis) it also says which side of "
-"that level this AUC falls; those levels are reporting conventions, not "
-"thresholds for patient care, and the AUC Interpretation column is the same "
-"number placed in the same kind of conventional band. Both are in-sample "
-"estimates from these data; the AUC Lower CI and AUC Upper CI columns show "
-"how precisely this sample pins the AUC down."
-msgstr ""
-"Son sütun, her EAA'yı gerçekte ne olduğunu belirterek yeniden ifade eder: "
-"rastgele seçilen bir olgunun rastgele seçilen bir olgu olmayan bireyden daha "
-"yüksek puan alma olasılığı. Seçilen klinik bağlamın geleneksel olarak "
-"aktarılan bir referans düzeyine sahip olduğu yerlerde (tarama için 0.75, "
-"tanı için 0.80) bu EAA'nın bu düzeyin hangi tarafına düştüğünü de söyler; bu "
-"düzeyler hasta bakımı için eşikler değil raporlama kurallarıdır ve EAA "
-"Yorumu sütunu aynı tür geleneksel banda yerleştirilmiş aynı sayıdır. Her "
-"ikisi de bu verilerden elde edilen örneklem içi tahminlerdir; EAA Alt GA ve "
-"EAA Üst GA sütunları bu örneklemin EAA'yı ne kadar kesin belirlediğini "
-"gösterir."
 
 #: R/agreement.b.R
 msgid "The latent model could not be fitted: %s."
@@ -172470,6 +173433,17 @@ msgid ""
 "was %2$s."
 msgstr "Pozitif sonuçlar için olabilirlik oranı %1$s, negatif sonuçlar için %2$s idi."
 
+#: R/enhancedROC.b.R
+msgid ""
+"The likelihood-ratio wording follows Jaeschke, Guyatt & Sackett (1994): LR+ "
+"above 10 or LR- below 0.1 gives a large change in the probability of the "
+"condition, 5-10 or 0.1-0.2 a moderate one, 2-5 or 0.2-0.5 a small but "
+"sometimes important one, and 1-2 or 0.5-1 a small, rarely important one. The "
+"bands are applied to the ratios at 3 significant figures (jamovi's default "
+"number format); how much a change matters depends on the probability before "
+"testing."
+msgstr ""
+
 #: R/agreement.b.R
 msgid ""
 "The limits of agreement are mean difference +/- %1$.2f x SD, the range "
@@ -172589,6 +173563,26 @@ msgid ""
 msgstr ""
 "Sınır, geçmiş kanıtlara ve klinik öneme dayanan, hastalığa özgü bir gerekçe "
 "gerektirir."
+
+#: R/enhancedROC.b.R
+msgid ""
+"The marker has the same value for every patient analysed, so it cannot "
+"separate the groups: its AUC is 0.5 by construction."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"The marker separates the two groups perfectly in these data (AUC = 1); with "
+"%1$s positive and %2$s negative cases the true AUC could still be well below "
+"1."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"The marker separates the two groups perfectly in these data, in the opposite "
+"direction to the one set (AUC = 0); with %1$s positive and %2$s negative "
+"cases the true AUC could still be well above 0."
+msgstr ""
 
 #: R/decisiongraph.b.R
 msgid ""
@@ -172857,6 +173851,12 @@ msgstr ""
 "Bir hastanın müdahale olmamasına kıyasla müdahaleyi seçeceği minimum "
 "olasılık."
 
+#: R/enhancedROC.b.R
+msgid ""
+"The minimum sensitivity and specificity settings apply only to Youden "
+"optimisation and were not used."
+msgstr ""
+
 #: R/decisioncurve.b.R
 msgid "The minimum threshold is {min}%."
 msgstr "Minimum eşik %{min}'dir."
@@ -173052,6 +174052,14 @@ msgstr ""
 "kontrollerin geçildiği durumlarda gösterilir. Reddedilen bir sayı boş "
 "bırakılır ve tablonun altındaki not nedenini açıklar."
 
+#: R/enhancedROC.b.R
+msgid ""
+"The model's apparent AUC differs from the AUC of {pred} in the AUC table "
+"({auc}) because the model points the marker the way these data do (the sign "
+"of its fitted slope), while the AUC table reads it in the direction set "
+"under Direction."
+msgstr ""
+
 #: R/decisiongraph.b.R
 msgid "The monetary value of health benefits minus the costs"
 msgstr ""
@@ -173194,15 +174202,11 @@ msgstr ""
 
 #: R/enhancedROC.b.R
 msgid ""
-"The Number Needed to Diagnose (1/Youden) was {nnd}. This is a "
+"The number needed to diagnose (1/J; Linn & Grunau 2006) was {nnd}. This is a "
 "prevalence-free index of discriminating power, not a count of patients to "
 "test: the number that must actually be tested to find one additional case "
 "also depends on disease prevalence in the population."
 msgstr ""
-"Teşhis Edilmesi Gereken Sayı (1/Youden) {nnd} olarak bulundu. Bu, test "
-"edilecek hastaların bir sayısı değil, ayırt etme gücünün prevalanstan "
-"bağımsız bir indeksidir: bir ek olgu bulmak için gerçekte test edilmesi "
-"gereken sayı aynı zamanda popülasyondaki hastalık prevalansına da bağlıdır."
 
 #: R/decisioncalculator.b.R
 msgid ""
@@ -173373,6 +174377,13 @@ msgstr ""
 "ORR %%95 GA %.1f yüzde puanlık bir aralığı kapsıyor (%%%.1f-%.1f): veriler "
 "bu aralıktaki herhangi bir oranla uyumludur. Aralığı oranla birlikte "
 "raporlayın."
+
+#: R/enhancedROC.b.R
+msgid ""
+"The outcome is numeric and coded 0/1, so 1 is read as the positive class. If "
+"0 marks the condition, recode the outcome or set it to Nominal in Data > "
+"Setup and choose 0 in Positive class."
+msgstr ""
 
 #: singlearm/options/outcome.description
 msgid ""
@@ -173607,6 +174618,18 @@ msgid ""
 "McClish-normalised value in the next column."
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid ""
+"The partial AUC was computed over sensitivities from %1$s to %2$s and "
+"standardised with the McClish correction (McClish, 1989) to a 0.5-1 scale."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"The partial AUC was computed over specificities from %1$s to %2$s and "
+"standardised with the McClish correction (McClish, 1989) to a 0.5-1 scale."
+msgstr ""
+
 #: R/lassocox.b.R
 msgid ""
 "The path legend uses a compact layout and abbreviates long names. Predictor "
@@ -173747,10 +174770,16 @@ msgstr ""
 "birleştirilmiş binomial tahminler sunulmadı. Alt gruplar aynı kestirici ve "
 "tarama kuralıyla ayrı ayrı değerlendirilir."
 
-#: R/psychopdaROC.b.R
+#: R/enhancedROC.b.R
 msgid ""
-"The Positive Class you selected (%1$s) does not appear in %2$s. Its observed "
-"levels are: %3$s."
+"The positive class (cases) was %1$s and the negative class (non-cases) was "
+"%2$s."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"The positive class (cases) was %1$s; the other levels (%2$s) were combined "
+"as the negative class (non-cases)."
 msgstr ""
 
 #: R/decisioncompare.b.R
@@ -173877,16 +174906,6 @@ msgstr ""
 "gözlemlenen prevalansta ({observed}) hesaplanmıştır. Buradaki aralıklar "
 "onlara değil, bu tahminlere aittir. Duyarlılık ve özgüllük her iki tabloda "
 "da aynıdır."
-
-#: R/enhancedROC.b.R
-msgid ""
-"The predictor '%1$s' values are not in the 0 to 1 probability range "
-"(observed range: %2$s to %3$s). A logistic regression model was fitted to "
-"obtain predicted probabilities for calibration assessment. These calibration "
-"results reflect the fitted model's calibration, NOT the raw biomarker's "
-"calibration. For proper calibration assessment, provide predicted "
-"probabilities from your prediction model."
-msgstr ""
 
 #: kappaSizeFixedN/options/kappa0.description.ui
 msgid ""
@@ -174473,12 +175492,13 @@ msgstr ""
 #: R/kappaSizePower.b.R
 msgid ""
 "The required sample size is only {n} {subjects}. The large-sample "
-"approximation behind this method does not hold for such small studies; treat "
-"the figure as a lower bound, not a plan."
+"approximation behind this method does not hold for such small studies, so "
+"the figure is only approximate; treat it as a rough guide, not a plan."
 msgstr ""
 "Gerekli örneklem büyüklüğü yalnızca {n} {subjects}. Bu yöntemin dayandığı "
-"büyük örneklem yaklaşımı bu kadar küçük çalışmalar için geçerli değildir; bu "
-"sayıyı bir plan değil alt sınır olarak değerlendirin."
+"büyük örneklem yaklaşımı bu kadar küçük çalışmalar için geçerli değildir, bu "
+"nedenle sayı yalnızca yaklaşıktır; bunu bir plan değil kaba bir rehber "
+"olarak değerlendirin."
 
 #: R/chisqposttest.b.R
 msgid "The residual cutoff box is not in use"
@@ -174667,6 +175687,14 @@ msgstr "örneklem ortalaması"
 msgid "the sample median"
 msgstr "örneklem medyanı"
 
+#: R/kappaSizePower.b.R
+msgid ""
+"The sample size could not be computed: a proportion is too close to 0 for "
+"the agreement-pattern probabilities to be evaluated. Check the proportions."
+msgstr ""
+"Örneklem büyüklüğü hesaplanamadı: bir oran, uyum örüntüsü olasılıklarının "
+"hesaplanabilmesi için 0'a çok yakın. Oranları kontrol edin."
+
 #: R/kappaSizeCI.b.R
 msgid ""
 "The sample size delivers the stated limits only if the study observes the "
@@ -174674,6 +175702,14 @@ msgid ""
 "a lower limit short of the target, so plan on a conservative anticipated "
 "kappa or enrol above the figure shown."
 msgstr ""
+
+#: R/kappaSizePower.b.R
+msgid ""
+"The sample size is for a test of kappa with one degree of freedom, such as a "
+"likelihood-ratio test."
+msgstr ""
+"Bu örneklem büyüklüğü, olabilirlik oranı testi gibi tek serbestlik dereceli "
+"bir kappa testi için geçerlidir."
 
 #: R/kappaSizeCI.b.R
 msgid "The sample size was computed but could not be formatted for display: {error}"
@@ -174761,6 +175797,13 @@ msgid ""
 "with FEWER events."
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid ""
+"The search was restricted to cut-points with sensitivity of at least %1$s "
+"and specificity of at least %2$s; where none met both, the unconstrained "
+"optimum was used and a notice says so."
+msgstr ""
+
 #: R/survivalcont.b.R
 msgid "The selected continuous explanatory variable could not be read."
 msgstr "Seçilen sürekli açıklayıcı değişken okunamadı."
@@ -174821,13 +175864,6 @@ msgstr ""
 msgid ""
 "The selected paired test could not be evaluated; p-values are unavailable. "
 "Effect estimates and confidence intervals are reported independently."
-msgstr ""
-
-#: R/enhancedROC.b.R
-msgid ""
-"The selected positive class '%1$s' does not occur in outcome variable "
-"'%2$s'. • Available levels are: %3$s. • Select one of them in the Positive "
-"Class dropdown."
 msgstr ""
 
 #: R/oddsratio.b.R
@@ -174980,6 +176016,13 @@ msgid ""
 msgstr ""
 "Seçilen kesme noktasında aktarılan duyarlılık ve özgüllük ayrı bir konudur: "
 "bunlar iyimserdir, çünkü o kesme noktası bu aynı veriler üzerinde aranmıştır."
+
+#: R/enhancedROC.b.R
+msgid ""
+"The sensitivity and specificity quoted at the selected cutpoint are a "
+"separate matter: those ARE optimistic, because that cutpoint was searched "
+"for on these same data."
+msgstr ""
 
 #: R/decision.b.R
 msgid ""
@@ -175139,6 +176182,28 @@ msgstr ""
 msgid ""
 "The sjPlot package is required but not installed. Please install it using "
 "install.packages(\"sjPlot\")"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"The smaller outcome group has %1$s patients (%2$s positive, %3$s negative); "
+"affected: %4$s. DeLong's interval is a large-sample approximation: for a "
+"single AUC it covers the true value less often than its stated level when "
+"the smaller group is small, and more so the closer the AUC is to 1 or 0 "
+"(Obuchowski & Lieber 1998: more than 200 patients for high-accuracy areas). "
+"Feng, Cortese & Baumgartner (2017) found that interval methods for the AUC "
+"disagree most when the AUC is high and the sample small. In this module's "
+"validation simulation a 95%% DeLong interval covered a true AUC of 0.80 in "
+"91%% of datasets with 15 positive and 15 negative cases, and a true AUC of "
+"0.95 in 87%% with 30 and 30 and in 93%% with 100 and 100. Coverage followed "
+"the smaller group's size times the distance of the AUC from 1 (from 0 for an "
+"AUC below 0.5): it was about 93%% wherever that product was 6, so this "
+"warning appears when the smaller group has fewer than 30 patients or that "
+"product is below 6 (fewer than 60 patients at an AUC of 0.90, fewer than 120 "
+"at 0.95); the cut-off is a heuristic. • Read the interval as approximate and "
+"probably too narrow. • Bootstrap confidence intervals are an alternative, "
+"but no method is exact at this size, and no bootstrap interval can be formed "
+"when the groups are perfectly separated."
 msgstr ""
 
 #: R/enhancedROC.b.R
@@ -176326,6 +177391,10 @@ msgstr ""
 "bağımsız olarak gerekçelendirilmiş bir klinik karar kuralı olmadan tedavi "
 "veya kaynak tahsisi için kullanmayın."
 
+#: R/enhancedROC.b.R
+msgid "These are bounds for how ties are resolved, not a confidence interval."
+msgstr ""
+
 #: R/singlearm.b.R
 msgid ""
 "These are descriptive estimates for one cohort with no comparison group; "
@@ -176427,6 +177496,13 @@ msgstr ""
 "Bunlar yalnızca bu veri setinden elde edilen özet istatistiklerdir; harici "
 "bir doğrulama değildirler ve vakaları sınıflandırmak için kullanılan skor "
 "eşik değerlerindeki uyumu tanımlamazlar."
+
+#: R/enhancedROC.b.R
+msgid ""
+"These bands are a rough teaching scale, not a clinical standard; other "
+"authors label the same ranges differently (Hosmer, Lemeshow & Sturdivant "
+"2013 call 0.7-0.8 acceptable, 0.8-0.9 excellent and 0.9 or more outstanding)."
+msgstr ""
 
 #: R/decision.b.R
 msgid ""
@@ -176874,6 +177950,12 @@ msgid ""
 msgstr ""
 "Her eşiği ayrı ayrı kapsarlar ve eşzamanlı bir bant değillerdir; tüm eğriyi "
 "bir kerede okumak için eşzamanlı bandı seçin."
+
+#: R/enhancedROC.b.R
+msgid ""
+"They describe that probability; they are not a judgement of whether a marker "
+"is fit for patient care."
+msgstr ""
 
 #: R/multisurvival.b.R
 msgid ""
@@ -177610,6 +178692,19 @@ msgstr ""
 "Bu bir GÜÇ hesaplamasıdır: belirtilen anlamlılık düzeyi ve güçte, iki yönlü "
 "bir testte kappa0'ı kappa1 lehine REDDETMEK için gereken olgu sayısını verir."
 
+#: R/enhancedROC.b.R
+msgid ""
+"This is an in-sample estimate with no internal or external validation behind "
+"it, and it is additionally optimistic because this predictor was picked as "
+"the highest-scoring of %d."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"This is an in-sample estimate with no internal or external validation behind "
+"it."
+msgstr ""
+
 #: R/survivalPower.b.R
 msgid ""
 "This is an individual-level survival calculation inflated by 1 + (cluster "
@@ -177980,6 +179075,21 @@ msgid ""
 msgstr ""
 "Bu yalnızca modelleri birbirine göre sıralar; modelin yararlı olduğu "
 "anlamına gelmez."
+
+#: R/enhancedROC.b.R
+msgid ""
+"This outcome is numeric with %s distinct values, so it looks like a "
+"measurement rather than a two-level outcome (condition present / absent). "
+"Choose a different outcome variable, or a 0/1 variable made from this one at "
+"a clinically justified cut-off."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"This outcome is numeric with values %s; only a 0/1 outcome is read without a "
+"choice (1 = positive). Set its measure type to Nominal in Data > Setup so "
+"Positive class lists its values, or recode it 0/1."
+msgstr ""
 
 #: R/lassocox.b.R
 msgid ""
@@ -178483,7 +179593,6 @@ msgstr "Üç Adımlı Kapsamlı Analiz:"
 #: decisioncurve/results/decisionConsequencesTable.columns.title
 #: decisioncurve/results/resourceUtilizationTable.columns.title
 #: deeplearningprediction/results/predictionResults/cumulativeLogitResults.columns.title
-#: enhancedROC/results/results/clinicalImpactTable.columns.title
 #: icccoeff/results/reliability_assessment.columns.title
 #: ihcscoring/results/qualitycontroltable.columns.title
 #: ihcscoring/results/biomarkerspecific/clinicalcutpoints.columns.title
@@ -178653,6 +179762,10 @@ msgstr "Eşik olasılıkları kesinlikle 0 ile 1 arasında olmalıdır."
 #: psychopdaROC/results/clinicalUtilityTable.columns.title
 msgid "Threshold Probability"
 msgstr "Eşik Olasılığı"
+
+#: R/enhancedROC.b.R
+msgid "Threshold probability"
+msgstr ""
 
 #: R/decisioncurve.b.R
 msgid ""
@@ -178884,14 +179997,6 @@ msgstr "Eşit Betimsel Sıralama"
 #: mixedeffectscox/ui[3][0]/ties_method.label
 msgid "Tied Events Method"
 msgstr ""
-
-#: R/enhancedROC.b.R
-msgid "Tied Score Handling"
-msgstr "Bağlı Puan İşleme"
-
-#: enhancedROC/options/tiedScoreHandling.title
-msgid "Tied score handling"
-msgstr "Bağlı puan işleme"
 
 #: adaptivelasso/options/tie_method.title
 #: illnessdeath/options/tie_method.title
@@ -181032,6 +182137,10 @@ msgstr "ila"
 msgid "To (target)"
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid "To analyse every level without choosing one, tick Multi-class ROC analysis."
+msgstr ""
+
 #: riverplot/results/flowTable.columns.title
 #: riverplot/results/transitionMatrix.columns.title
 msgid "To Category"
@@ -182363,10 +183472,6 @@ msgstr ""
 msgid "Transformations Applied"
 msgstr ""
 
-#: R/enhancedROC.b.R
-msgid "Transformed FPR (CROC, α={a})"
-msgstr ""
-
 #: continuousmarkov/results/covariateEffects.columns.title
 #: flexmultistate/results/transitionMatrix.columns.title
 #: flexmultistate/results/transitionModels.columns.title
@@ -182622,6 +183727,10 @@ msgstr ""
 msgid "Treat All"
 msgstr "Herkesi Tedavi Et"
 
+#: R/enhancedROC.b.R
+msgid "Treat all"
+msgstr ""
+
 #: psychopdaROC/results/clinicalUtilityTable.columns.title
 #: stagemigration/results/clinicalUtilityNetBenefit.columns.title
 msgid "Treat All Net Benefit"
@@ -182650,6 +183759,10 @@ msgstr ""
 #: timedependentdca/options/reference_strategy/treat_none.title
 msgid "Treat None"
 msgstr "Hiç Kimseyi Tedavi Et"
+
+#: R/enhancedROC.b.R
+msgid "Treat none"
+msgstr ""
 
 #: psychopdaROC/results/clinicalUtilityTable.columns.title
 #: stagemigration/results/clinicalUtilityNetBenefit.columns.title
@@ -185188,6 +186301,10 @@ msgstr "tanımsız (negatif olgu yok)"
 msgid "undefined (no positive cases)"
 msgstr "tanımsız (pozitif olgu yok)"
 
+#: R/enhancedROC.b.R
+msgid "Undefined because the Model 2 value is 0."
+msgstr ""
+
 #: agreement/results/specificAgreementTable.columns.title
 msgid "Undefined draws"
 msgstr ""
@@ -185222,10 +186339,6 @@ msgstr ""
 
 #: R/pathagreement.b.R
 msgid "Under-diagnoses '{category}'"
-msgstr ""
-
-#: R/enhancedROC.b.R
-msgid "Under-fitting (slope > 1)"
 msgstr ""
 
 #: R/chisqposttest.b.R
@@ -186277,7 +187390,6 @@ msgstr "Üst %95 GA"
 
 #: bayesianci/results/credibleIntervals.columns.title
 #: ciSingle/results/citable.columns.title
-#: enhancedROC/options/tiedScoreHandling/upper.title
 #: featurequality/results/outlier_analysis.columns.title
 #: treatmenteffects/results/sensitivity_analysis.columns.title
 msgid "Upper Bound"
@@ -188526,6 +189638,10 @@ msgid ""
 "encodes the threshold rather than the group."
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid "Values between 0 and 1 analysed as scores"
+msgstr ""
+
 #: R/decisioncurve.b.R
 msgid ""
 "Values between 0 and 1 are accepted as probabilities, but this analysis does "
@@ -188553,6 +189669,10 @@ msgstr "\\u{B1}%.2f değerini aşan değerler işaretlenir."
 #: R/waterfall.b.R
 msgid "VALUES LOOK LIKE RAW MEASUREMENTS"
 msgstr "DEĞERLER HAM ÖLÇÜM GİBİ GÖRÜNÜYOR"
+
+#: R/enhancedROC.b.R
+msgid "Values outside 0 to 1 are not probabilities"
+msgstr ""
 
 #: R/benford.b.R
 msgid ""
@@ -190423,16 +191543,25 @@ msgid "Varimax (Orthogonal)"
 msgstr ""
 
 #: enhancedROC/options/comparisonMethod/venkatraman.title
-msgid "Venkatraman (2000)"
-msgstr "Venkatraman (2000)"
+msgid "Venkatraman permutation test (equality of ROC curves)"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "Venkatraman permutation test of ROC curve equality"
+msgstr ""
 
 #: timeroc/options/rocComparison/venkatraman.title
 msgid "Venkatraman Test"
 msgstr ""
 
 #: R/enhancedROC.b.R
-msgid "Venkatraman Test for AUC Comparison"
-msgstr "EAA Karşılaştırması İçin Venkatraman Testi"
+msgid ""
+"Venkatraman's permutation test (Venkatraman & Begg 1996, paired data; %s "
+"permutations, the Bootstrap samples setting) tests whether the two ROC "
+"curves are identical over their whole range, not whether the AUCs differ: "
+"curves with equal AUCs can still differ, for example when they cross. The "
+"AUC difference is descriptive."
+msgstr ""
 
 #: package/analyses/venn.title
 #: package/analyses/venn.menuTitle
@@ -191873,13 +193002,15 @@ msgstr ""
 
 #: R/psychopdaROC.b.R
 msgid ""
-"WARNING: AUC below 0.5 (worse than chance) for: %1$s. An AUC below 0.5 "
-"almost always means the marker is being read the wrong way round rather than "
-"that it is useless: it separates the groups, but in the opposite direction "
-"to the one assumed. Classification Direction is currently \"%2$s\"; "
-"switching it to \"%3$s\" will give an AUC of 1 minus the value shown, with "
-"sensitivity and specificity swapped accordingly. Change it only if that "
-"matches what the marker means clinically."
+"WARNING: AUC below 0.5 (worse than chance) for: %1$s. First check Positive "
+"Class: is %2$s the level that means the condition is present? If it is, the "
+"marker either separates the groups in the opposite direction to the one in "
+"use or does not separate them at all (an uninformative marker falls below "
+"0.5 about half the time by chance, so check whether the confidence interval "
+"excludes 0.5). Classification Direction is currently \"%3$s\"; switching it "
+"to \"%4$s\" gives an AUC of 1 minus the value shown and re-estimates the "
+"cutpoint, sensitivity and specificity. Change it only if that matches what "
+"the marker means clinically."
 msgstr ""
 
 #: R/survival.b.R
@@ -192136,10 +193267,6 @@ msgstr "Hastalık lehine zayıf kanıt"
 #: R/decision.b.R
 msgid "weak evidence for disease when positive"
 msgstr "pozitif olduğunda hastalık lehine zayıf kanıt"
-
-#: R/enhancedROC.b.R
-msgid "Weak evidence for positive diagnosis"
-msgstr "Pozitif tanı için zayıf kanıt"
 
 #: spikeslabpriors/options/heredity_constraint/weak.title
 msgid "Weak Heredity"
@@ -193020,6 +194147,19 @@ msgstr "Ne Yapar:"
 msgid "What it reports:"
 msgstr "Ne bildirir:"
 
+#: enhancedROC/options/predictionScale.description
+msgid ""
+"What the predictor values are. Score (default) is any marker or model score: "
+"the calibration summary and plot, Brier score, E/O ratio, Hosmer-Lemeshow "
+"test and the decision and clinical impact curves then use risks from a "
+"logistic model of the score fitted to these data (in-sample). Probability "
+"means the values are predicted probabilities of the selected positive class, "
+"assessed as supplied; a predictor with a value outside 0 to 1 gets none of "
+"those outputs, and a probability is never reversed. Values between 0 and 1 "
+"are not taken as probabilities unless this says so. Frozen-model validation "
+"uses the same setting."
+msgstr ""
+
 #: R/jjdotplotstats.b.R
 msgid "What this analysis assumes"
 msgstr ""
@@ -193472,6 +194612,19 @@ msgstr ""
 "Her vakanın tam olarak aynı miktarda farklı olduğu durumlarda örnekleme "
 "varyansı yoktur, bu nedenle p-değeri veya etki büyüklüğü raporlanmaz; "
 "sapmanın kendisi kesindir."
+
+#: R/enhancedROC.b.R
+msgid ""
+"Where several cut-points tie on this criterion (ties are found exactly from "
+"the counts), this module reports the one closest to the top-left corner and "
+"then the smallest cutoff; a notice lists the alternatives."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"Where some resamples held a single outcome class, the percentile interval "
+"replaced BCa (see the notice)."
+msgstr ""
 
 #: R/ihcheterogeneity.b.R
 msgid ""
@@ -194198,6 +195351,13 @@ msgstr ""
 "%%%.1f özgüllük ile, sağlıklı 100 bireyden %.0f kadarı pozitif test sonucu "
 "verebilir."
 
+#: R/enhancedROC.b.R
+msgid ""
+"With %1$d positive and %2$d negative cases, a marker carrying no information "
+"at all would still be reported at an AUC of about %3$.2f under automatic "
+"detection, so treat a modest AUC here with caution."
+msgstr ""
+
 #: R/singlearm.b.R
 msgid ""
 "with %d event(s) and %d censored observation(s) among %d subjects (%.1f%% "
@@ -194375,6 +195535,17 @@ msgstr ""
 "ulaşmayı bekleyebileceği tek yönlü %100(1 - alfa) güven aralığının alt "
 "sınırını bildirir (Donner ve Eliasziw; Rotondi ve Donner); eşit marjinal "
 "sıklıklı iki değerlendiricide bu Cohen kappasıyla örtüşür."
+
+#: R/kappaSizePower.b.R
+msgid ""
+"With three or more raters, a chi-square computed over all agreement patterns "
+"and read on one degree of freedom is not such a test: it rejects a true "
+"kappa0 much more often than the stated significance level."
+msgstr ""
+"Üç veya daha fazla değerlendirici olduğunda, tüm uyum örüntüleri üzerinden "
+"hesaplanıp tek serbestlik derecesiyle değerlendirilen bir ki-kare böyle bir "
+"test değildir: doğru bir kappa0'ı belirtilen anlamlılık düzeyinin "
+"öngördüğünden çok daha sık reddeder."
 
 #: R/nogoldstandard.b.R
 msgid ""

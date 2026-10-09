@@ -5,6 +5,141 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-10-09 — kappaSizePower: parity with the wrapped package hid a numerically broken engine
+
+- **Failure mode:** the module displayed kappaSize's N, and its tests asserted parity with kappaSize.
+  `PowerBinary` evaluates its cells as expanded polynomials in the first-typed proportion. With 5-6
+  raters and a finding at or below 0.1% typed common-category first, a cell cancelled to exactly 0. Every
+  pane then read "0 subjects" where 181,129 were needed, or the engine's `print()` threw an R error. Its
+  noncentrality is a bisection stopped at a CDF error of 1e-5, so N also drifted by up to ~1e-4 relative:
+  one subject near an integer, 511 at N = 5.5 million.
+- **Detection signal:** an oracle built without kappaSize (normal-tail lambda; cells by enumerating every
+  rating pattern, or through `lbeta`) over 900 designs. A sweep of every 3-5-decimal prevalence in both
+  entry orders found 38 of 9,800 designs failing, all common-first and none rare-first.
+- **Prevention rule:** parity with the package you wrap is EXEC-WIRE, not validation. Validate displayed
+  numbers against an independent oracle. Probe every input whose order "does not matter" in both orders,
+  at its extremes. When the module already holds a numerically stable closed form (`kappaSizeGofCells`),
+  compute the displayed number from it.
+
+---
+
+## 2026-10-09 — kappaSizePower: a sample size for a test the output never named
+
+- **Failure mode:** kappaSize sizes every design with a 1-df noncentral chi-square, and the Notes called
+  it "the goodness-of-fit approach".
+  - With three or more raters, the goodness-of-fit chi-square over all agreement patterns read on 1 df
+    rejected a true kappa0 10-65% of the time at a nominal 5%. Read on its own df, it had 51-69% power at
+    the shown N.
+  - The N fits a 1-df likelihood-ratio test of kappa: nominal size, power 0.78-0.84.
+  - For binary designs with 3+ raters the N also depends on kappaSize's rater-dependence model. At the
+    same kappa a beta-binomial model needs 0.89-12.5x fewer or more subjects, and nothing said so (VAL-08).
+- **Detection signal:** simulation under the engine's own model, with three tests pre-registered before
+  any run: the reading the label invites, the same statistic on its Pearson df, and a likelihood-ratio
+  test. Then a 160-design comparison of the two dependence models.
+- **Prevention rule:** when a power formula assumes a particular test or model, name it where the number
+  is printed. Simulate the naive reading the label invites, not only the intended one.
+
+---
+
+## 2026-10-09 — kappaSizePower validation: three harness mistakes caught before they were reported
+
+- **Failure mode:**
+  - An adjudication likelihood-ratio test reported a "size" of 0.82-0.92. BFGS on logit(kappa) stepped
+    to kappa ~ 1e-22, where `lgamma(theta + x) - lgamma(theta)` at theta ~ 1e21 is noise.
+  - The round-N fixture (`1e+05`) solved kappa1 against kappaSize's own N. Once the module computed N
+    exactly, the design landed on 99,999, and the check would have passed without ever printing a round
+    number.
+  - The report first called the binary model dependence "conservative, up to 57%" from two designs.
+    160 designs gave 0.89-12.5x, in both directions.
+- **Detection signal:**
+  - A valid 1-df test cannot reject a true null 82% of the time; a single-start replicate loop gave 0.08.
+  - A smoke run after the fix showed N = 99,999.
+  - The grid was widened before the disclosure sentence was written.
+- **Prevention rule:**
+  - Check a simulation's null distribution (mean statistic near its df) before believing an
+    adjudication, and box nuisance parameters away from numerically degenerate regions.
+  - Build boundary fixtures from the oracle, and assert the precondition (the shown N is the boundary
+    value) before asserting behaviour.
+  - Never state the direction of an effect from two designs.
+
+---
+
+## 2026-10-09 — enhancedROC / psychopdaROC: the positive class came from level order
+
+- **Failure mode:** `positiveClass` was a Level option without `allowNone`, so jamovi's LevelSelector
+  pre-selected `levels[0]` - for 0/1, Healthy/Disease, Benign/Malignant that is the NEGATIVE group - and
+  the whole analysis ran reversed (AUC 1 - AUC; sensitivity, PPV and every cut-point describing the wrong
+  group) with nothing on screen saying so. From R the same NULL meant level 2 (enhancedROC) or the last
+  level (psychopdaROC), so the GUI and the R API disagreed.
+- **Detection signal:** reading the client's LevelSelector `update()` (`setValue(levels[defaultLevelIndex])`,
+  index 0) and checking the level order of every bundled dataset during `/validate-function`.
+- **Prevention rule:** a Level option that names the event or positive class gets `allowNone: true`; when it
+  is NULL the analysis waits (INFO notice + the Outcome coding table) instead of choosing. Only a numeric
+  0/1 outcome defaults (1 = positive). When touching a coder, grep `levels(...)[2]`, `available_levels[2]`
+  and `lv[length(lv)]`.
+
+---
+
+## 2026-10-09 — enhancedROC: ROC paths integrated and drawn in pROC's point order
+
+- **Failure mode:** pROC stores `$sensitivities` in increasing-threshold order, so inside a vertical run of
+  tied scores TPR descends. The CROC trapezoid (sorted by FPR only) and `geom_line()` (which sorts by x
+  only) both used that order: a wrong CROC AUC and zig-zag ROC lines.
+- **Detection signal:** an exact piecewise-linear CROC integral as the oracle, and a path-drop count (TPR
+  must never fall along an ordered path).
+- **Prevention rule:** order every ROC path by (FPR, TPR) before integrating or drawing; integrate along the
+  segments exactly. Twelve other analyses still draw pROC order (TODO.md).
+
+---
+
+## 2026-10-09 — enhancedROC: a fix plan that added a second option for one fact
+
+- **Failure mode:** the plan added `calibrationScale` while `predictionScale` already declared "score or
+  probability of the positive class" (two options that could contradict); it said "leave the cell NULL"
+  for a blank cell (NULL renders "."); and its Youden tie-break (higher sensitivity) was not invariant to
+  relabelling the classes.
+- **Detection signal:** an independent Codex review of the written plan, before any code was changed.
+- **Prevention rule:** grep the `.a.yaml` for an option that records the same fact before adding one; a blank
+  cell is `""` + footnote; a tie-break must give the same answer after relabelling the classes and flipping
+  Direction (enhancedROC: closest to (0,1), then the smallest cutoff).
+
+---
+
+## 2026-10-09 — enhancedROC: pROC's Venkatraman test ignores each curve's direction
+
+- **Failure mode:** `pROC::roc.test(method = "venkatraman")` ranks the raw predictor and only WARNS when the
+  two curves have different directions. jamovi shows no R warnings, so under Direction = auto two markers
+  with the same displayed curve were reported "Significantly different".
+- **Detection signal:** the statistics lens of an adversarial review, reproduced with mixed directions.
+- **Prevention rule:** when a third-party test takes objects that carry a direction (or levels), check that it
+  honours them; never rely on a package warning reaching the user.
+
+---
+
+## 2026-10-09 — enhancedROC: citations that did not support the sentence printed
+
+- **Failure mode:** "ties counted as one half (Mann & Whitney 1947)" (the half-credit is Hanley & McNeil
+  1982), an under-coverage direction attributed to Feng et al. 2017, "under-fitting (Van Calster 2019)", "the
+  Youden cut-off counts a missed case and a false alarm as equally costly" (it weighs the error RATES
+  equally), and "optimal achievable performance" for the convex hull.
+- **Detection signal:** `cite()` rows in `development-scripts/validate_enhancedROC.R` that grade each printed
+  sentence against its source, re-run after the wording changed.
+- **Prevention rule:** every citation in user-visible text gets a graded row; re-grade whenever the sentence
+  changes, and grade the sentence, not just the reference.
+
+---
+
+## 2026-10-09 — psychopdaROC: a Level option bound to a Variables option
+
+- **Failure mode:** `refVar` (IDI/NRI reference) was `type: Level, variable: (dependentVars)`. A LevelSelector
+  lists the levels of ONE variable, so it showed nothing and the reference could never be chosen in jamovi,
+  while a note told users to choose it.
+- **Detection signal:** the psychopdaROC lens of the adversarial review.
+- **Prevention rule:** a Level's `variable:` must name a single Variable option. To pick "one of the selected
+  variables", use a Variable option of its own (now "Reference Test for IDI/NRI").
+
+---
+
 ## 2026-10-08 — sequentialtests: a ponytail ceiling that ordinary vocabulary reached
 
 - **Failure mode:** the flow diagram's `ponytail:` comment said a single word "much longer than ~15

@@ -384,6 +384,7 @@ refs:
         publisher: Proceedings of the 23rd International Conference on Machine Learning
         pages: 233-240
         doi: 10.1145/1143844.1143874
+        url: "https://doi.org/10.1145/1143844.1143874"
 
     DeLong1988:
         type: article
@@ -1283,6 +1284,7 @@ refs:
         issue: 3
         pages: e0118432
         doi: 10.1371/journal.pone.0118432
+        url: "https://doi.org/10.1371/journal.pone.0118432"
 
     SchemperSmith1996:
         type: article
@@ -2084,6 +2086,28 @@ refs:
         pages: 1511-1519
         doi: 10.1002/sim.4780111109
         url: "https://doi.org/10.1002/sim.4780111109"
+
+    altayeDonnerKlarKappaRaters:
+        type: article
+        author: Altaye M, Donner A, Klar N.
+        year: 2001
+        title: "Inference procedures for assessing interobserver agreement among multiple raters"
+        publisher: Biometrics.
+        volume: 57
+        pages: 584-588
+        doi: 10.1111/j.0006-341x.2001.00584.x
+        url: "https://doi.org/10.1111/j.0006-341x.2001.00584.x"
+
+    altayeDonnerEliasziwKappaGOF:
+        type: article
+        author: Altaye M, Donner A, Eliasziw M.
+        year: 2001
+        title: "A general goodness-of-fit approach for inference procedures concerning the kappa statistic"
+        publisher: Statistics in Medicine.
+        volume: 20
+        pages: 2479-2488
+        doi: 10.1002/sim.911
+        url: "https://doi.org/10.1002/sim.911"
 
     dplyr:
         type: software
@@ -2944,6 +2968,7 @@ refs:
         year: 2018
         title: "kappaSize: Sample Size Estimation Functions for Studies of Interobserver Agreement"
         publisher: "[R package]. Retrieved from https://cran.r-project.org/web/packages/kappaSize/"
+        doi: 10.32614/CRAN.package.kappaSize
         url: "https://cran.r-project.org/web/packages/kappaSize/"
 
     kernlab:
@@ -3438,9 +3463,9 @@ refs:
     pROC:
         type: software
         author: Xavier Robin
-        year: 2025
+        year: 2026
         title: "pROC: Display and Analyze ROC Curves"
-        publisher: "[R package version 1.19.0.1]. Retrieved from https://CRAN.R-project.org/package=pROC"
+        publisher: "[R package version 1.19.1]. Retrieved from https://CRAN.R-project.org/package=pROC"
         url: "https://CRAN.R-project.org/package=pROC"
 
     padjust:
@@ -5002,5 +5027,140 @@ refs:
         pages: 101-133
         doi: 10.1214/ss/1009213286
         url: "https://doi.org/10.1214/ss/1009213286"
+
+    Fluss2005:
+        type: article
+        author: "Fluss, R., Faraggi, D., & Reiser, B."
+        year: 2005
+        title: Estimation of the Youden Index and its associated cutoff point
+        publisher: Biometrical Journal
+        volume: 47
+        issue: 4
+        pages: 458-472
+        doi: 10.1002/bimj.200410135
+        pmid: 16161804
+        url: "https://doi.org/10.1002/bimj.200410135"
+
+    PerkinsSchisterman2006:
+        type: article
+        author: "Perkins, N. J., & Schisterman, E. F."
+        year: 2006
+        title: 'The inconsistency of "optimal" cutpoints obtained using two criteria based on the receiver operating characteristic curve'
+        publisher: American Journal of Epidemiology
+        volume: 163
+        issue: 7
+        pages: 670-675
+        doi: 10.1093/aje/kwj063
+        pmid: 16410346
+        url: "https://doi.org/10.1093/aje/kwj063"
+
+    VenkatramanBegg1996:
+        type: article
+        author: "Venkatraman, E. S., & Begg, C. B."
+        year: 1996
+        title: A distribution-free procedure for comparing receiver operating characteristic curves from a paired experiment
+        publisher: Biometrika
+        volume: 83
+        issue: 4
+        pages: 835-848
+        doi: 10.1093/biomet/83.4.835
+        url: "https://doi.org/10.1093/biomet/83.4.835"
+
+    MannWhitney1947:
+        type: article
+        author: "Mann, H. B., & Whitney, D. R."
+        year: 1947
+        title: On a test of whether one of two random variables is stochastically larger than the other
+        publisher: The Annals of Mathematical Statistics
+        volume: 18
+        issue: 1
+        pages: 50-60
+        doi: 10.1214/aoms/1177730491
+        url: "https://doi.org/10.1214/aoms/1177730491"
+
+    VanCalster2019Calibration:
+        type: article
+        author: "Van Calster, B., McLernon, D. J., van Smeden, M., Wynants, L., & Steyerberg, E. W."
+        year: 2019
+        title: "Calibration: the Achilles heel of predictive analytics"
+        publisher: BMC Medicine
+        volume: 17
+        pages: 230
+        doi: 10.1186/s12916-019-1466-7
+        url: "https://doi.org/10.1186/s12916-019-1466-7"
+
+    ProvostFawcett2001:
+        type: article
+        author: "Provost, F., & Fawcett, T."
+        year: 2001
+        title: Robust classification for imprecise environments
+        publisher: Machine Learning
+        volume: 42
+        issue: 3
+        pages: 203-231
+        doi: "10.1023/A:1007601015854"
+        url: "https://doi.org/10.1023/A:1007601015854"
+
+    Robin2011:
+        type: article
+        author: "Robin, X., Turck, N., Hainard, A., et al."
+        year: 2011
+        title: "pROC: an open-source package for R and S+ to analyze and compare ROC curves"
+        publisher: BMC Bioinformatics
+        volume: 12
+        pages: 77
+        doi: 10.1186/1471-2105-12-77
+        url: "https://doi.org/10.1186/1471-2105-12-77"
+
+    HanleyMcNeil1982:
+        type: article
+        author: "Hanley, J. A., & McNeil, B. J."
+        year: 1982
+        title: The meaning and use of the area under a receiver operating characteristic (ROC) curve
+        publisher: Radiology
+        volume: 143
+        issue: 1
+        pages: 29-36
+        doi: 10.1148/radiology.143.1.7063747
+        pmid: 7063747
+        url: "https://doi.org/10.1148/radiology.143.1.7063747"
+
+    ObuchowskiLieber1998:
+        type: article
+        author: "Obuchowski, N. A., & Lieber, M. L."
+        year: 1998
+        title: Confidence intervals for the receiver operating characteristic area in studies with small samples
+        publisher: Academic Radiology
+        volume: 5
+        issue: 8
+        pages: 561-571
+        doi: 10.1016/s1076-6332(98)80208-0
+        pmid: 9702267
+        url: "https://doi.org/10.1016/s1076-6332(98)80208-0"
+
+    FengCorteseBaumgartner2017:
+        type: article
+        author: "Feng, D., Cortese, G., & Baumgartner, R."
+        year: 2017
+        title: A comparison of confidence/credible interval methods for the area under the ROC curve for continuous diagnostic tests with small sample size
+        publisher: Statistical Methods in Medical Research
+        volume: 26
+        issue: 6
+        pages: 2603-2621
+        doi: 10.1177/0962280215602040
+        pmid: 26323286
+        url: "https://doi.org/10.1177/0962280215602040"
+
+    PrenticePyke1979:
+        type: article
+        author: "Prentice, R. L., & Pyke, R."
+        year: 1979
+        title: Logistic disease incidence models and case-control studies
+        publisher: Biometrika
+        volume: 66
+        issue: 3
+        pages: 403-411
+        doi: 10.1093/biomet/66.3.403
+        url: "https://doi.org/10.1093/biomet/66.3.403"
 
 ...
