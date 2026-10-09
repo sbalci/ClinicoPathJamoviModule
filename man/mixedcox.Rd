@@ -11,7 +11,6 @@ mixedcox(
   dxdate = NULL,
   fudate = NULL,
   timetypedata = "ymd",
-  timetypeoutput = "months",
   outcome = NULL,
   outcomeLevel,
   fixed_effects = NULL,
@@ -21,29 +20,11 @@ mixedcox(
   random_slope_var = NULL,
   nested_clustering = FALSE,
   nested_cluster_var = NULL,
-  correlation_structure = "unstructured",
   sparse_matrix = TRUE,
-  optimization_method = "penalized",
-  likelihood_ratio_test = TRUE,
-  random_effects_significance = TRUE,
   icc_calculation = TRUE,
-  residual_analysis = FALSE,
-  influence_diagnostics = FALSE,
-  random_effects_prediction = FALSE,
-  fixed_effects_plot = TRUE,
-  random_effects_plot = FALSE,
-  cluster_survival_plot = FALSE,
-  n_clusters_plot = 5,
-  variance_components = TRUE,
-  confidence_intervals = TRUE,
-  bootstrap_variance = FALSE,
-  bootstrap_samples = 500,
   show_fixed_effects = TRUE,
   show_random_effects = TRUE,
-  show_model_comparison = TRUE,
-  show_cluster_summary = FALSE,
-  showSummaries = FALSE,
-  showExplanations = FALSE
+  show_model_comparison = TRUE
 )
 }
 \arguments{
@@ -53,8 +34,12 @@ contain survival variables, fixed effects, and clustering variables.}
 \item{elapsedtime}{The numeric variable representing follow-up time until
 the event or censoring.}
 
-\item{tint}{If true, survival time will be calculated from diagnosis and
-follow-up dates.}
+\item{tint}{If true, survival time is calculated in days from the diagnosis
+and follow-up dates, and the elapsed-time variable is not used. Rows with
+an empty or missing date are excluded and counted in a note; a non-blank
+date that does not have the selected layout (4-digit year, with '-', '/' or
+'.' between the parts) stops the analysis with a message, because a wrong
+day-month order would otherwise give wrong survival times.}
 
 \item{dxdate}{Date of diagnosis or start of follow-up. Required if tint =
 true.}
@@ -64,9 +49,6 @@ true.}
 
 \item{timetypedata}{Specifies the format of date variables in the input
 data.}
-
-\item{timetypeoutput}{The units in which survival time is reported in the
-output.}
 
 \item{outcome}{The outcome variable indicating event status (e.g., death,
 recurrence).}
@@ -84,78 +66,50 @@ family). Observations within the same cluster are assumed correlated.}
 
 \item{random_effects}{Type of random effects to include in the model.}
 
-\item{random_slope_var}{Variable for random slopes when random_effects
-includes slopes.}
+\item{random_slope_var}{Numeric variable whose effect varies between
+clusters when random_effects includes slopes (coxme cannot fit random
+slopes for categorical variables). It is added to the fixed effects if it
+is not already there, so the cluster slopes vary around a population slope.}
 
 \item{nested_clustering}{Whether to model nested clustering structure
-(e.g., patients within hospitals).}
+(e.g., patients within hospitals). Used only with random_effects =
+"intercept"; it is ignored, with a note, for random-slope models.}
 
 \item{nested_cluster_var}{Higher-level clustering variable for nested
-structures.}
+structures (random intercept models only).}
 
-\item{correlation_structure}{Correlation structure for random effects.}
+\item{sparse_matrix}{Use coxme's sparse approximation for the random
+intercept (coxme.control(sparse = c(50, 0.02)), the coxme default): when
+the grouping has at least 50 levels, the second-derivative terms between
+groups that each hold 2 percent or less of the rows are treated as zero. It
+is an approximation that can change the estimates slightly. With nested
+clustering the grouping is the (higher-level, cluster) pairs and more than
+50 of them are needed, so a clustering variable with few levels (for
+example wards numbered 1 to 5 in every hospital) is still approximated when
+it is nested in enough higher-level units. Random-slope-only models are
+never approximated. When false, the full (non-sparse) matrix is always
+used.}
 
-\item{sparse_matrix}{Use sparse matrix methods for computational efficiency
-with large datasets.}
-
-\item{optimization_method}{Method for optimizing the mixed-effects model
-likelihood.}
-
-\item{likelihood_ratio_test}{Perform likelihood ratio test comparing
-mixed-effects vs standard Cox model.}
-
-\item{random_effects_significance}{Test significance of random effects
-using appropriate methods.}
-
-\item{icc_calculation}{Calculate intracluster correlation coefficient
-(ICC).}
-
-\item{residual_analysis}{Perform residual analysis for mixed-effects Cox
-model.}
-
-\item{influence_diagnostics}{Calculate influence diagnostics for clusters
-and observations.}
-
-\item{random_effects_prediction}{Predict random effects (BLUPs) for each
-cluster.}
-
-\item{fixed_effects_plot}{Generate forest plot for fixed effects
-coefficients.}
-
-\item{random_effects_plot}{Generate plots for random effects distribution.}
-
-\item{cluster_survival_plot}{Generate survival curves for selected
-clusters.}
-
-\item{n_clusters_plot}{Number of clusters to display in cluster-specific
-plots.}
-
-\item{variance_components}{Estimate and display variance components for
-random effects.}
-
-\item{confidence_intervals}{Calculate confidence intervals for fixed and
-random effects.}
-
-\item{bootstrap_variance}{Use bootstrap methods for variance estimation.}
-
-\item{bootstrap_samples}{Number of bootstrap samples for variance
-estimation.}
+\item{icc_calculation}{Show an approximate variance fraction on the latent
+log-hazard scale, sigma^2 / (sigma^2 + pi^2/6), where pi^2/6 is the
+variance of the standard extreme-value error of a proportional-hazards
+model. Nested models use both variance components; intercept-and-slope
+models report it at a slope-variable value of 0. It is not an intracluster
+correlation of observed event times and is not shown for random-slope-only
+models.}
 
 \item{show_fixed_effects}{Display table of fixed effects estimates.}
 
 \item{show_random_effects}{Display summary of random effects variance
 components.}
 
-\item{show_model_comparison}{Display comparison between mixed-effects and
-standard Cox models.}
-
-\item{show_cluster_summary}{Display summary statistics by cluster.}
-
-\item{showSummaries}{Display natural language summaries alongside tables
-and plots for interpretation of mixed-effects Cox regression results.}
-
-\item{showExplanations}{Display detailed explanations of mixed-effects Cox
-regression methods and interpretation guidelines.}
+\item{show_model_comparison}{Display the standard Cox and mixed-effects
+(integrated) log partial likelihoods and their likelihood-ratio statistic,
+truncated at 0. When the model has a single variance component, a
+boundary-corrected p-value from the 50:50 mixture of chi-square(0) and
+chi-square(1) is shown (half the chi-square(1) tail probability, or 1 when
+the statistic is 0); models with several variance parameters get no
+p-value.}
 }
 \value{
 A results object containing:
@@ -164,24 +118,7 @@ A results object containing:
 \code{results$modelSummary} \tab \tab \tab \tab \tab a html \cr
 \code{results$fixedEffectsTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$randomEffectsSummary} \tab \tab \tab \tab \tab a html \cr
-\code{results$varianceTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$iccTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$modelComparison} \tab \tab \tab \tab \tab a html \cr
-\code{results$likelihoodRatioTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$clusterSummaryTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$randomEffectsPredTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$diagnosticsTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$fixedEffectsPlot} \tab \tab \tab \tab \tab an image \cr
-\code{results$randomEffectsPlot} \tab \tab \tab \tab \tab an image \cr
-\code{results$clusterSurvivalPlot} \tab \tab \tab \tab \tab an image \cr
-\code{results$residualPlot} \tab \tab \tab \tab \tab an image \cr
-\code{results$analysisSummary} \tab \tab \tab \tab \tab a html \cr
-\code{results$methodExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$clusteringExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$randomEffectsExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$iccExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$modelSelectionExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$bootstrapTable} \tab \tab \tab \tab \tab a table \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
