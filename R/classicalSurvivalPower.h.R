@@ -17,7 +17,6 @@ classicalSurvivalPowerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) 
             allocation_ratio = 1,
             alpha = 0.025,
             beta = 0.1,
-            power = 0.9,
             sided = "one_sided",
             entry_type = "unif",
             gamma = 0,
@@ -108,12 +107,6 @@ classicalSurvivalPowerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) 
                 min=0.01,
                 max=0.5,
                 default=0.1)
-            private$..power <- jmvcore::OptionNumber$new(
-                "power",
-                power,
-                min=0.5,
-                max=0.99,
-                default=0.9)
             private$..sided <- jmvcore::OptionList$new(
                 "sided",
                 sided,
@@ -190,7 +183,6 @@ classicalSurvivalPowerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) 
             self$.addOption(private$..allocation_ratio)
             self$.addOption(private$..alpha)
             self$.addOption(private$..beta)
-            self$.addOption(private$..power)
             self$.addOption(private$..sided)
             self$.addOption(private$..entry_type)
             self$.addOption(private$..gamma)
@@ -217,7 +209,6 @@ classicalSurvivalPowerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) 
         allocation_ratio = function() private$..allocation_ratio$value,
         alpha = function() private$..alpha$value,
         beta = function() private$..beta$value,
-        power = function() private$..power$value,
         sided = function() private$..sided$value,
         entry_type = function() private$..entry_type$value,
         gamma = function() private$..gamma$value,
@@ -243,7 +234,6 @@ classicalSurvivalPowerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) 
         ..allocation_ratio = NA,
         ..alpha = NA,
         ..beta = NA,
-        ..power = NA,
         ..sided = NA,
         ..entry_type = NA,
         ..gamma = NA,
@@ -303,7 +293,6 @@ classicalSurvivalPowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) 
                     "accrual_duration",
                     "alpha",
                     "beta",
-                    "power",
                     "allocation_ratio",
                     "sample_size_input",
                     "events_input")))
@@ -329,8 +318,7 @@ classicalSurvivalPowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) 
                     "hazard_treatment",
                     "hazard_ratio",
                     "alpha",
-                    "beta",
-                    "power")))
+                    "beta")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="power_plot",
@@ -347,10 +335,17 @@ classicalSurvivalPowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) 
                     "hazard_control",
                     "hazard_treatment",
                     "hazard_ratio",
+                    "study_duration",
+                    "accrual_duration",
+                    "dropout_rate",
                     "alpha",
                     "beta",
-                    "power",
+                    "sided",
                     "allocation_ratio",
+                    "entry_type",
+                    "gamma",
+                    "sample_size_input",
+                    "events_input",
                     "power_plot_range")))
             self$add(jmvcore::Image$new(
                 options=options,
@@ -428,11 +423,12 @@ classicalSurvivalPowerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
 #' @param dropout_rate Equal dropout hazard rate for both groups.
 #' @param allocation_ratio Randomization ratio (treatment:control).
 #' @param alpha Type I error rate (significance level).
-#' @param beta Type II error rate (1 - power).
-#' @param power Statistical power (1 - beta).
+#' @param beta Type II error rate; the target power is 1 - beta (0.1 gives 90
+#'   percent power).
 #' @param sided One-sided or two-sided statistical test.
 #' @param entry_type Pattern of patient entry into the study.
-#' @param gamma Rate parameter for exponential entry (0 if uniform entry).
+#' @param gamma Rate parameter for exponential entry; must be non-zero when
+#'   entry_type is 'expo' (ignored for uniform entry).
 #' @param sample_size_input Total sample size when calculating power.
 #' @param events_input Number of events when calculating power with Schoenfeld
 #'   method.
@@ -443,8 +439,8 @@ classicalSurvivalPowerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
 #' @param show_power_plot Whether to display power curve visualization.
 #' @param show_timeline_plot Whether to display study timeline visualization
 #'   for Lachin-Foulkes method.
-#' @param power_plot_range Sample size range for power plots (format 'min,max'
-#'   or 'auto').
+#' @param power_plot_range Sample size range for Lachin-Foulkes or event-count
+#'   range for Schoenfeld (format 'min,max' or 'auto').
 #' @param export_results Whether to show an on-screen summary of the computed
 #'   power analysis result.
 #' @param export_power_curve Whether to show an on-screen summary of the power
@@ -474,7 +470,6 @@ classicalSurvivalPower <- function(
     allocation_ratio = 1,
     alpha = 0.025,
     beta = 0.1,
-    power = 0.9,
     sided = "one_sided",
     entry_type = "unif",
     gamma = 0,
@@ -509,7 +504,6 @@ classicalSurvivalPower <- function(
         allocation_ratio = allocation_ratio,
         alpha = alpha,
         beta = beta,
-        power = power,
         sided = sided,
         entry_type = entry_type,
         gamma = gamma,
