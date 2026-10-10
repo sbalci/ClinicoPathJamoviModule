@@ -3,7 +3,7 @@
 **What the jamovi library reviewer actually checks — and how to pass first time.**
 
 This guide is distilled from the real audit reports issued by the jamovi library
-reviewer against this project's submodules:
+reviewer against this project's submodules, with external learning sources identified separately:
 
 | Report | Module | Date |
 |---|---|---|
@@ -16,6 +16,7 @@ reviewer against this project's submodules:
 | `jamovi-library-audit/2026-09-15 jsurvival.md` | jsurvival (round 3) | 2026-09-15 |
 | `jamovi-library-audit/2026-09-16 <Module>.md` (×4) | OncoPath, ClinicoPathDescriptives, jjstatsplot, meddecide (round 4) | 2026-09-16 |
 | `jamovi-library-audit/2026-09-22 OncoPath.md` | OncoPath (round 5) | 2026-09-22 |
+| User-supplied `2026-10-03 jYS.md` and `MODIFICATIONS_REPORT_EN.md` | external jYS 1.1.5; audit plus remediation account, not our closure evidence | 2026-10-03 / 2026-10-10 |
 
 Every rule below is something the reviewer *actually raised*, on real files, with
 severity attached. Nothing here is speculative. The only exception is the few items
@@ -23,6 +24,8 @@ marked **anticipatory**: they cover the jamovi 28.3 features (File option, Text 
 Image `mode: vector`), come from the release and dev.jamovi.org, and have not been
 raised by the reviewer yet. [Section 30](#30-the-official-process-requirements-submission-updates)
 is jamovi's own published submission and update process, not reviewer findings.
+The external jYS pair is reconciled in [section 31](#31-learning-from-external-audits):
+reported remedies and test counts remain attributed until independently verified.
 
 ---
 
@@ -58,6 +61,7 @@ is jamovi's own published submission and update process, not reviewer findings.
 28. [Rule: seeding the RNG must not outlive the function that did it](#28-rule-seeding-the-rng-must-not-outlive-the-function-that-did-it)
 29. [Rule: nothing may be derived from which analyses a module holds today](#29-rule-nothing-may-be-derived-from-which-analyses-a-module-holds-today)
 30. [The official process: requirements, submission, updates](#30-the-official-process-requirements-submission-updates)
+31. [Learning from external audits](#31-learning-from-external-audits)
 
 ---
 
@@ -139,6 +143,13 @@ Plus the cheap metadata gates the reviewer checks first:
   A missing `url` is only a WARN in `tools/release_gate.py` — treat it as blocking for
   any key a shipped analysis cites.
 - Every `clearWith` entry resolves to a real option name.
+- Trace **all dependencies** of each cached result, including seed, reference/event level,
+  preprocessing and nested image/Output dependencies. `check_clearwith` validates names only;
+  compare an existing A → B analysis with a fresh B analysis to detect stale results (§31).
+- Saved outputs preserve original spreadsheet row IDs through filtering, missingness and sorting:
+  `setRowNums()` and `setValues()` use the same prediction frame and order (§31).
+- Numerical tests assert the displayed value against an independent oracle, including class
+  coding, metric definition and training/CV/OOB population; an object-class test is insufficient.
 - Every `renderFun:` resolves to a real `function(image, ...)` method.
 - No committed build artifacts (`*.tar.gz`, `*.jmo`, anything under `build/` or `dist/`),
   and `.gitignore` covers `build/`, `dist/` and `*.jmo` (an official requirement).
@@ -199,6 +210,9 @@ problems, not one-off bugs** — when one function does it, the whole module doe
 **The lesson:** when a review names one instance, grep for the class and fix all
 of it. The reviewer explicitly rewards this — "several of them by fixing the
 class of problem rather than the instance."
+
+External lessons are recorded separately in the [jYS classification table](jamovi_external_audit_learning_guide.md#8-finding-classification-and-check-coverage).
+Its 35 findings are not additional hits in the five-module counts above.
 
 ---
 
@@ -1414,6 +1428,15 @@ is not a measurement of the module. Check the routing before believing the instr
 
 ---
 
+### External learning (2026-10-03 jYS; remediation account 2026-10-10)
+
+The jYS audit passed schema-name consistency while finding incomplete `clearWith` dependencies,
+wrong metric encodings and shifted saved predictions. The subsequent account reports an export
+repair despite the audit's positive static rendering assessment. These are different checks:
+schema validity, arithmetic, row identity, cache transitions and desktop lifecycle. None proves
+the others. See the [external learning guide](jamovi_external_audit_learning_guide.md) for all
+35 findings, concrete test recipes, existing detector limits and remedies not adopted verbatim.
+
 ## 19. Rule: a bare symbol must be importable from the submodule's own namespace
 
 ### Why
@@ -2023,6 +2046,11 @@ Seed **scoped to the function**, never globally.
 `.Random.seed` save/restore pair are equally correct and are not flagged; three idioms in one
 module is a readability problem, not a defect.
 
+The scope must begin **before the first random operation**, including feature selection,
+preprocessing, fold allocation and threshold-CI bootstraps. A seed before the final fit can be
+too late (external jYS mLR audit, 2026-10-03). Verify repeatability and restoration on normal/error
+exits, with and without an existing `.Random.seed`. `check_bare_set_seed` does not prove timing.
+
 **Say which seed produced the numbers.** Whenever the result the user reads depends on the
 seed — bootstrap CIs, permutation p-values, MCMC — expose the seed as an option with a default
 and print it beside the result, so the run can be reproduced. Which `statsExpressions` results
@@ -2276,3 +2304,28 @@ Two notes for this project:
   scheme touches the updater and all five modules, so that decision is open, not settled here.
 
 ---
+
+## 31. Learning from external audits
+
+The user-supplied jYS audit of 2026-10-03 and modification report of 2026-10-10 cover jYS 1.1.5.
+The audit has 35 headings (1 HIGH, 14 MEDIUM, 18 LOW, 2 INFO); the modification report addresses
+the first 15 plus a plot export/restoration issue. Its 186 reported passing tests were not run
+here. Neither document establishes the presence or absence of a defect in our modules.
+
+The [external audit learning guide](jamovi_external_audit_learning_guide.md) contains source
+fingerprints, a classification of every finding, detector limits and concrete regression recipes.
+Use its checks when the corresponding surface is present:
+
+- A → B cache transitions compared with fresh B, including nested images and Output columns.
+- Exact original-row-ID/value pairs after filtering, missingness and reordering.
+- Class-label encodings, probability meaning, Brier versus accuracy, and training/CV/OOB provenance.
+- Scoped seeding before selection; preprocessing confined to training folds.
+- Survival origin, start-stop compatibility, subject-level standardisation and variance labels.
+- Shared UI controls, non-destructive enable conditions, structural row keys and numeric missingness.
+- Separate resize, protobuf restoration, `.omv` reopen and native PNG/PDF export evidence.
+
+**Enforcement boundary:** existing static gates catch some syntax and state patterns. They cannot
+prove these semantic properties. Add analysis-specific numerical or lifecycle tests when working
+on an affected analysis; do not mark a module clean because a generic gate passed. A documentation
+learning pass records those gaps and updates the teaching material without inventing a fix count
+or importing the external module's build restrictions, punctuation rules or unverified overrides.

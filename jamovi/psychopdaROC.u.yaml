@@ -59,10 +59,8 @@ children:
   # ==============================================
   - type: CheckBox
     name: manualRun
-    children:
-      - type: ActionButton
-        name: run
-        enable: (manualRun)
+  - type: ActionButton
+    name: run
 
   # ==============================================
   # 2. ANALYSIS CONFIGURATION (always visible)
@@ -430,7 +428,7 @@ children:
         children:
           - type: CheckBox
             name: powerAnalysis
-            label: Statistical power analysis
+            label: Statistical power (AUC vs. 0.5)
           - type: ComboBox
             name: powerAnalysisType
             label: Power analysis type
@@ -438,7 +436,7 @@ children:
           - type: TextBox
             name: expectedAUCDifference
             format: number
-            label: Expected AUC difference
+            label: Target AUC minus 0.5
             enable: (powerAnalysis)
           - type: TextBox
             name: targetPower
@@ -449,11 +447,6 @@ children:
             name: significanceLevel
             format: number
             label: Significance level
-            enable: (powerAnalysis)
-          - type: TextBox
-            name: correlationROCs
-            format: number
-            label: ROC correlation
             enable: (powerAnalysis)
 
   # ==============================================

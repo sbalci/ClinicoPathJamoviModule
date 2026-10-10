@@ -3,7 +3,11 @@
 
 library(testthat)
 
-pc_run <- function(...) suppressWarnings(do.call(ClinicoPath::psychopdaROC, list(...)))
+pc_run <- function(...) {
+    args <- list(...)
+    if (!("run" %in% names(args))) args$run <- TRUE
+    suppressWarnings(do.call(ClinicoPath::psychopdaROC, args))
+}
 pc_data <- function(seed = 42, n = 300) {
     set.seed(seed)
     g <- rbinom(n, 1, 0.34)

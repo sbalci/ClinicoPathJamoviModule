@@ -53,6 +53,8 @@ jsurvival, meddecide, OncoPath, jjstatsplot — rounds 2026-07-13, 2026-08-17/18
 plus the same reviewer's audits of four OTHER modules — MetaJam, snowRMM, CompositeSEM and jYS
 (2026-09-15 to 2026-09-21) — which is where §20–§23 come from. Reading an audit of someone else's
 module is the cheapest way to find a class of defect before it is found in ours.
+The user-supplied jYS follow-up (2026-10-03) and remediation account (2026-10-10) are reconciled
+in §31 and the [external audit learning guide](jamovi_external_audit_learning_guide.md).
 
 **Use this guide for:**
 - The pre-submission checklist (runnable commands, one per finding class)
@@ -94,6 +96,9 @@ module is the cheapest way to find a class of defect before it is found in ours.
 28. **Seeding the RNG must not outlive the function that did it** — one R process per jamovi session, so a bare `set.seed()` leaves the *next* analysis resampling from a fixed stream; `withr::local_seed()`
 29. **Nothing may be derived from which analyses a module holds today**: a parked analysis makes unused-Import and test readings lie
 30. **The official process (dev.jamovi.org)**: library requirements (name, licence including transitive AGPL-3, clean repo, English), the `datasets:` contract, side-load limits, the submission form, the update flow
+31. **Learning from external audits**: all 35 jYS findings plus the reported export repair;
+    row identity, complete cache dependencies, metric provenance, survival design and lifecycle
+    checks. Reported external fixes/test counts are not local verification.
 
 **Tooling that goes with it:**
 - `tools/check_state_guards.py` — exits 1 on any unguarded `image$state` read
@@ -107,9 +112,12 @@ module is the cheapest way to find a class of defect before it is found in ours.
   `check_artifacts` (`*.jmo`, `*.tar.gz`, `build/`, `dist/`), and `check_news`, which mirrors the
   release workflow's own version cascade rather than warning on dev builds it never publishes
 - `tools/test_release_gate.py` — self-check that the §30 gate rules fire on a module breaking each one
-- `tools/release_gate.py` — every rule that can be mechanised; FAILs on a shipped hit and prints
+- `tools/release_gate.py` — implemented static checks; FAILs on a shipped hit and prints
   the rest as `promotion debt`. New: `check_column_formats` (§21), `check_fabricated_stats` (§20),
   `check_state_payload` (§17, with a measured `# state-payload:` waiver)
+- `jamovi_external_audit_learning_guide.md` — per-finding coverage map and test recipes;
+  explicitly records what the generic gates cannot prove, including `clearWith` completeness,
+  numerical encodings, row mapping and saved-file/export behaviour
 - `tools/promotion_screen.py` — ranks the 331 dev/test analyses; its `conventions` penalty is the
   §24 debt, so an analysis carrying it scores lower as a promotion candidate
 
@@ -339,6 +347,9 @@ New guides should follow this structure:
 **Last Updated:** 2026-10-08
 
 **Recent additions:**
+- 2026-10-10: external jYS audit learning - 35 findings reconciled with the remediation account;
+  cache transitions, row identity, metric provenance, survival design and restoration/export recipes;
+  see `jamovi_external_audit_learning_guide.md` and library review guide §31
 - 2026-10-08: docs sync (`jamovi_docs_sync_2026-10.md`) - `setSize2` (2.7.16), `weightsSupport`, upstream `type: Notice` docs vs our empirical result, 28.4-28.8 release notes (see `jamovi_module_patterns_guide.md` → "Later Releases")
 - 2026-09-19: jamovi 28.3 / jmvtools 28.3.1 - `File` option, `Text` result (markdown), Image `mode: vector`; installing current jmvtools and jmvcore, `minApp` gating and CRAN-jmvcore test guards (see `jamovi_module_patterns_guide.md` → "jamovi 28.3 Features")
 - 2026-06-22: Documented jmvtools DESCRIPTION `Imports`/`Remotes` behavior - a package may now appear in both fields; jmvtools suppresses the CRAN-mirror download of an import when it also appears in `Remotes` (see `jamovi_module_patterns_guide.md` → "DESCRIPTION: Dependencies")

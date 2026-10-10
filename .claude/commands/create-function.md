@@ -221,6 +221,14 @@ Rscript -e 'testthat::test_file("tests/testthat/test-zzz-results-rendering-contr
 
 Checklist:
 
+- [ ] Build a dependency map before adding selective `clearWith` lists. Include preprocessing,
+      model, seed, level/ID and drawing dependencies; keep default clearing if completeness is
+      uncertain. Reuse A → B and compare with fresh B; a schema-name check cannot prove freshness.
+- [ ] Save outputs with original row IDs from the same frame/order as the computed values; test
+      filters plus missingness. Never use spreadsheet IDs as positions in a shortened vector.
+- [ ] Use exact numerical fixtures for class encodings and metric labels, not only object-class
+      assertions. Prepare all sibling plot state before rendering and test native restoration/export.
+      Recipes: `vignettes/jamovi_external_audit_learning_guide.md`.
 - [ ] Every `x <- image$state` read is followed by `if (is.null(x)) return(FALSE)`;
       every `image$state$field` read is preceded by a guard on the parent.
 - [ ] No `style=` attribute sets a hex `background-color` without a `color:`. Pale

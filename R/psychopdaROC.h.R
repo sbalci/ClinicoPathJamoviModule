@@ -453,6 +453,7 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..correlationROCs <- jmvcore::OptionNumber$new(
                 "correlationROCs",
                 correlationROCs,
+                hidden=TRUE,
                 default=0.5,
                 min=-1,
                 max=1)
@@ -1288,6 +1289,7 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     height=450,
                     renderFun=".plotROC",
                     clearWith=list(
+                        "run",
                         "dependentVars",
                         "patientID",
                         "analysisUnit",
@@ -1326,6 +1328,7 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 renderFun=".plotInteractiveROC",
                 visible="(plotROC && interactiveROC)",
                 clearWith=list(
+                    "run",
                     "dependentVars",
                     "patientID",
                     "analysisUnit",
@@ -1345,6 +1348,7 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     height=450,
                     renderFun=".plotFixedSensSpecROC",
                     clearWith=list(
+                        "run",
                         "dependentVars",
                         "patientID",
                         "analysisUnit",
@@ -1372,6 +1376,7 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     height=400,
                     renderFun=".plotCriterion",
                     clearWith=list(
+                        "run",
                         "dependentVars",
                         "patientID",
                         "analysisUnit",
@@ -1403,6 +1408,7 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     height=400,
                     renderFun=".plotPrevalence",
                     clearWith=list(
+                        "run",
                         "dependentVars",
                         "patientID",
                         "analysisUnit",
@@ -1435,6 +1441,7 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     height=400,
                     renderFun=".plotDot",
                     clearWith=list(
+                        "run",
                         "dependentVars",
                         "patientID",
                         "analysisUnit",
@@ -1471,6 +1478,7 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     height=450,
                     renderFun=".plotPrecisionRecall",
                     clearWith=list(
+                        "run",
                         "dependentVars",
                         "patientID",
                         "analysisUnit",
@@ -2060,6 +2068,7 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     height=400,
                     renderFun=".plotEffectSize",
                     clearWith=list(
+                        "run",
                         "dependentVars",
                         "patientID",
                         "analysisUnit",
@@ -2077,6 +2086,7 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     height=450,
                     renderFun=".plotPowerCurves",
                     clearWith=list(
+                        "run",
                         "dependentVars",
                         "patientID",
                         "analysisUnit",
@@ -2101,6 +2111,7 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     height=500,
                     renderFun=".plotBayesianTrace",
                     clearWith=list(
+                        "run",
                         "seed",
                         "direction",
                         "bayesianAnalysis",
@@ -2123,6 +2134,7 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     height=500,
                     renderFun=".plotDecisionCurve",
                     clearWith=list(
+                        "run",
                         "dependentVars",
                         "patientID",
                         "analysisUnit",
@@ -2155,6 +2167,7 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     height=600,
                     renderFun=".plotMetaAnalysisForest",
                     clearWith=list(
+                        "run",
                         "metaAnalysis",
                         "overrideMetaAnalysisWarning",
                         "dependentVars",
@@ -2175,7 +2188,7 @@ psychopdaROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "psychopdaROC",
-                version = c(1,0,90),
+                version = c(1,0,91),
                 options = options,
                 results = psychopdaROCResults$new(options=options),
                 data = data,
@@ -2199,9 +2212,10 @@ psychopdaROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' apparent performance and require validation in the intended setting.
 #' 
 #' @param manualRun When TRUE, results are only computed after clicking the
-#'   Run button. Useful for skipping intermediate recomputes while adjusting
-#'   options on slow bootstrap or cutpoint analyses.
-#' @param run .
+#'   Run button. Intensive options and datasets with more than 10000 selected
+#'   marker values always require Run, even when this option is FALSE.
+#' @param run Set TRUE to run intensive options, large datasets, or manual
+#'   mode.
 #' @param showExplanations Show optional educational interpretation and
 #'   procedure details. Input and scope notices remain visible.
 #' @param clinicalMode Selects which guidance notes are shown in the Procedure
@@ -2352,24 +2366,20 @@ psychopdaROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param effectSizeAnalysis Calculate within-marker standardized differences
 #'   between outcome classes and pairwise differences in those effects. Size
 #'   bands are descriptive conventions only.
-#' @param powerAnalysis Perform statistical power analysis for ROC curve
-#'   comparisons including sample size estimation and power calculations for
-#'   detecting AUC differences.
+#' @param powerAnalysis Approximate power and sample size for each marker's
+#'   AUC against 0.5. Does not calculate power for a difference between markers.
 #' @param powerAnalysisType Type of power analysis to perform.
 #' @param expectedAUCDifference Target AUC above chance (target AUC = 0.5 +
-#'   this value) for prospective power and sample size estimation. Multiple
-#'   markers use an equal-variance correlation adjustment, not a fitted paired
-#'   ROC power model. A target AUC of exactly 1 is degenerate and has no sample
+#'   this value) for prospective power and sample size estimation, separately
+#'   for each marker. A target AUC of exactly 1 is degenerate and has no sample
 #'   size recommendation.
 #' @param targetPower Target statistical power for sample size calculations
 #'   (typically 0.8 or 0.9).
 #' @param significanceLevel Type I error rate for power calculations
 #'   (typically 0.05).
-#' @param correlationROCs Expected correlation between paired ROC curves for
-#'   power calculations. Use a correlation justified for the intended study.
-#'   Zero means uncorrelated AUC estimates in this equal-variance planning
-#'   approximation; it does not establish that paired observations are
-#'   independent samples.
+#' @param correlationROCs Deprecated compatibility option, ignored. Power
+#'   compares each marker's AUC with 0.5; there is no paired AUC comparison in
+#'   this calculation.
 #' @param bayesianAnalysis Perform bootstrap-based ROC analysis with optional
 #'   prior weighting to estimate uncertainty in AUC. Uses bootstrap resampling
 #'   to create an empirical distribution. NOTE: This is NOT full Bayesian MCMC

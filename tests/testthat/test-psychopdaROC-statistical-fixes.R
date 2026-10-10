@@ -7,6 +7,7 @@
   args <- utils::modifyList(list(data = data, dependentVars = c("x", "z"),
     classVar = "status", positiveClass = "positive", negativeClass = "negative",
     refVar = NULL), list(...), keep.null = TRUE)
+  if (!("run" %in% names(args))) args$run <- TRUE
   suppressMessages(suppressWarnings(do.call(ClinicoPath::psychopdaROC, args)))
 }
 

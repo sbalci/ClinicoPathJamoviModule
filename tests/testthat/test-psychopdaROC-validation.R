@@ -9,6 +9,7 @@
 .valROC_run <- function(d = .valROC_data(), vars = "x", ...) {
   args <- utils::modifyList(list(data = d, dependentVars = vars, classVar = "status",
     positiveClass = "pos", negativeClass = "neg", refVar = NULL, plotROC = FALSE), list(...), keep.null = TRUE)
+  if (!("run" %in% names(args))) args$run <- TRUE
   suppressMessages(suppressWarnings(do.call(ClinicoPath::psychopdaROC, args)))
 }
 
@@ -153,7 +154,7 @@ test_that("ROC Wilson ribbon is a pointwise score interval", {
 
 test_that("ROC exported syntax round-trips in two clean R sessions", {
   d <- .valROC_data()
-  opts <- list(dependentVars = c("x", "z"), classVar = "status", positiveClass = "pos", negativeClass = "neg",
+  opts <- list(run = TRUE, dependentVars = c("x", "z"), classVar = "status", positiveClass = "pos", negativeClass = "neg",
     refVar = NULL, method = "oc_manual", specifyCutScore = "3", plotROC = FALSE,
     delongTest = TRUE, usePriorPrev = TRUE, priorPrev = .1)
   # asSource belongs to the analysis instance, not the public wrapper's Results.

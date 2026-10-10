@@ -564,6 +564,18 @@ after `prepare()`.
 
 ### Enable Conditions
 
+Review an enable condition against **all consumers** of the option. A shared multiplicity
+control cannot depend only on association testing when an HWE table also uses it; a shared time
+horizon cannot depend only on KM when CIF also uses it. Verify both the option names and the
+List values referenced by expressions. Nest counts/seeds under their parent feature, and keep
+shared settings where their scope is visible.
+
+Disabling a control should preserve its value. Test feature off → on and confirm the user's
+choice returns; do not add event handlers that reset choices or duplicate schema bounds.
+Backend validation still needs to handle invalid saved/direct-R configurations. Explicit
+event/censor selection must agree with the coding shown in results; a deterministic guess is
+not a substitute. See [UI and bounds recipe](jamovi_external_audit_learning_guide.md#5-validate-input-bounds-and-ui-dependencies-in-both-layers).
+
 #### Simple Boolean Conditions
 ```yaml
 # Enable when checkbox is checked

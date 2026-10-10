@@ -15,7 +15,7 @@ if (!exists(".")) . <- function(x, ...) x
 # These used to source("../../R/psychopdaROC.h.R") and ".b.R". The files are psychopdaROC.*
 # (mixed case; a lowercase path only resolves on a case-insensitive filesystem), and no source()
 # is needed: the package under test already provides the function.
-psychopdaROC <- ClinicoPath::psychopdaROC
+psychopdaROC <- function(..., run = TRUE) ClinicoPath::psychopdaROC(..., run = run)
 
 # Helper function to create test data
 create_roc_test_data <- function(n = 200, seed = 123) {

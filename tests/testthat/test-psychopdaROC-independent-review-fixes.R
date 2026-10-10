@@ -8,6 +8,7 @@
   args <- utils::modifyList(list(data = d, dependentVars = vars, classVar = "y",
     positiveClass = "positive", negativeClass = "negative", refVar = NULL, plotROC = FALSE, seed = 314159),
     list(...), keep.null = TRUE)
+  if (!("run" %in% names(args))) args$run <- TRUE
   suppressMessages(suppressWarnings(do.call(ClinicoPath::psychopdaROC, args)))
 }
 
@@ -17,7 +18,7 @@
 }
 
 .irROC_private <- function(d = .irROC_data(), vars = c("x", "z")) {
-  options <- ClinicoPath:::psychopdaROCOptions$new(dependentVars = vars, classVar = "y",
+  options <- ClinicoPath:::psychopdaROCOptions$new(run = TRUE, dependentVars = vars, classVar = "y",
     positiveClass = "positive", negativeClass = "negative", refVar = NULL, plotROC = FALSE, delongTest = TRUE)
   analysis <- ClinicoPath:::psychopdaROCClass$new(options = options, data = d)
   analysis$init()

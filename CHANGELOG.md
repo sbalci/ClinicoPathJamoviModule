@@ -5,6 +5,54 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-10-10 — psychopdaROC: align power with its null hypothesis and repair reruns
+
+- Power and required sample size now test each marker's AUC against 0.5 regardless
+  of how many markers are selected. Adding a duplicate marker with legacy ROC
+  correlation 0.99 previously changed a balanced 20-observation example from 12.1%
+  power / N=250 to 99.98% / N=6, although the displayed target remained AUC 0.6.
+  The legacy `correlationROCs` argument remains accepted but is hidden and ignored.
+  UI labels, generated help, and the method note now describe the single-AUC
+  approximation. Paired ROC power is a different hypothesis and is not implemented
+  here; see [pROC's power documentation](https://search.r-project.org/CRAN/refmans/pROC/html/power.roc.test.html).
+- PPV/NPV notes and prevalence-plot annotations identify a user-specified target
+  prevalence separately from observed sample prevalence.
+- Patient summaries treat blank outcomes consistently with missing outcomes,
+  while still rejecting conflicting observed levels for the same patient.
+- Exported R syntax requests execution even after jamovi releases its dataset.
+  The Run action invalidates saved result images, and hidden ROC plots do not fit
+  smoothing overlays.
+- Regression coverage includes numerical integration of normal rejection tails,
+  marker/correlation invariance, prevalence labels after reruns, patient outcome
+  coding, syntax replay, and saved-image invalidation. These focused checks do not
+  establish desktop jamovi acceptance or simulation-based power calibration.
+
+## 2026-10-10 — external jYS audit: valid schemas and passing tests can miss wrong results
+
+### Metrics, saved rows and cached plots need different evidence
+
+- **Failure mode (reported externally):** the jYS 1.1.5 audit (`2026-10-03 jYS.md`) found
+  class indices compared with 0/1 targets, Brier loss labelled as accuracy, predictions mapped by
+  position after filtering, and incomplete `clearWith` lists leaving plots/Output columns stale.
+  It also raised survival design/subject-weighting issues and destructive UI dependencies.
+- **Detection signal:** the audit has 35 headings (1 HIGH, 14 MEDIUM, 18 LOW, 2 INFO).
+  `MODIFICATIONS_REPORT_EN.md` (2026-10-10) reports fixes for the 15 HIGH/MEDIUM findings plus
+  an array persistence/export issue and 186 passing tests. The external code/tests were not
+  supplied or executed here; those claims do not close the remaining 20 audit headings.
+- **Prevention rule:** check exact class/metric and row-ID/value fixtures, A → B cache transitions
+  against fresh B, RNG scope before selection, training-fold isolation, survival design/estimand
+  agreement and separate restoration/native-export paths. `check_clearwith` checks names only;
+  `check_bare_set_seed` does not establish timing; renderer scans do not certify desktop export.
+  Target-specific test recipes and known coverage gaps are in
+  `vignettes/jamovi_external_audit_learning_guide.md`; review guide §31 links all 35 findings.
+- **Teaching changes:** backend/results/plots/UI guides, create/review/validate commands, and
+  library-audit/audit-module/release-review skills now carry these checks. External learn mode
+  separates reports, remedies, primary API facts and local execution; it does not import jYS's
+  no-build/punctuation/catalog policies, automatic clinical level guesses or `.savePart` override.
+  This was a documentation/skill pass, not analysis remediation or release verification.
+
+---
+
 ## 2026-10-09 — kappaSizePower: parity with the wrapped package hid a numerically broken engine
 
 - **Failure mode:** the module displayed kappaSize's N, and its tests asserted parity with kappaSize.

@@ -5,6 +5,7 @@
 .relROC_run <- function(data = .relROC_data(), ...) {
   args <- utils::modifyList(list(data = data, dependentVars = "marker", classVar = "status",
     positiveClass = "positive", negativeClass = "negative", refVar = NULL), list(...), keep.null = TRUE)
+  if (!("run" %in% names(args))) args$run <- TRUE
   suppressMessages(suppressWarnings(do.call(ClinicoPath::psychopdaROC, args)))
 }
 

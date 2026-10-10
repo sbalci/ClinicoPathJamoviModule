@@ -4,7 +4,7 @@ title: Advanced ROC Analysis
 menuGroup: meddecideT
 menuSubgroup: ROC
 menuSubtitle: Advanced ROC analysis with statistical comparisons and effect sizes
-version: '1.0.83'
+version: '1.0.91'
 jas: '1.2'
 
 description:
@@ -22,18 +22,20 @@ options:
     # ==========================================
 
     - name: manualRun
-      title: Run manually
+      title: Run all analyses manually
       type: Bool
       default: false
       description:
           R: >
             When TRUE, results are only computed after clicking the Run button.
-            Useful for skipping intermediate recomputes while adjusting options
-            on slow bootstrap or cutpoint analyses.
+            Intensive options and datasets with more than 10000 selected marker
+            values always require Run, even when this option is FALSE.
 
     - name: run
-      title: Run
+      title: Run selected analyses
       type: Action
+      description:
+          R: Set TRUE to run intensive options, large datasets, or manual mode.
 
     # ==========================================
     # CLINICAL ANALYSIS MODE SELECTION
@@ -732,13 +734,13 @@ options:
             and pairwise differences in those effects. Size bands are descriptive conventions only.
 
     - name: powerAnalysis
-      title: Statistical power analysis
+      title: Statistical power (AUC vs. 0.5)
       type: Bool
       default: false
       description:
           R: >
-            Perform statistical power analysis for ROC curve comparisons including
-            sample size estimation and power calculations for detecting AUC differences.
+            Approximate power and sample size for each marker's AUC against 0.5.
+            Does not calculate power for a difference between markers.
 
     - name: powerAnalysisType
       title: Power Analysis Type
@@ -756,7 +758,7 @@ options:
             Type of power analysis to perform.
 
     - name: expectedAUCDifference
-      title: Expected AUC Difference
+      title: Target AUC minus 0.5
       type: Number
       default: 0.1
       min: 0.01
@@ -764,8 +766,7 @@ options:
       description:
           R: >
             Target AUC above chance (target AUC = 0.5 + this value) for prospective
-            power and sample size estimation. Multiple markers use an equal-variance
-            correlation adjustment, not a fitted paired ROC power model. A target AUC
+            power and sample size estimation, separately for each marker. A target AUC
             of exactly 1 is degenerate and has no sample size recommendation.
 
     - name: targetPower
@@ -789,17 +790,16 @@ options:
             Type I error rate for power calculations (typically 0.05).
 
     - name: correlationROCs
-      title: ROC Correlation
+      hidden: true
+      title: Legacy ROC correlation (ignored)
       type: Number
       default: 0.5
       min: -1.0
       max: 1.0
       description:
           R: >
-            Expected correlation between paired ROC curves for power calculations.
-            Use a correlation justified for the intended study. Zero means uncorrelated
-            AUC estimates in this equal-variance planning approximation; it does not
-            establish that paired observations are independent samples.
+            Deprecated compatibility option, ignored. Power compares each marker's
+            AUC with 0.5; there is no paired AUC comparison in this calculation.
 
     - name: bayesianAnalysis
       title: Bootstrap ROC analysis with prior weighting

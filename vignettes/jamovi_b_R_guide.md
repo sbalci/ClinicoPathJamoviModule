@@ -442,6 +442,10 @@ A user-selected side file (a lexicon, a reference table) does not arrive through
 
 ### Data Cleaning and Preprocessing
 
+**Preserve row identity.** If the analysis saves predictions, residuals or scores, carry the
+original spreadsheet row IDs through every filter, omission, sort and join. Do not assume a
+tidy-data conversion preserves row names; keep an explicit ID vector where necessary.
+
 ```R
 .cleanData = function() {
     # Get raw data
@@ -809,6 +813,25 @@ test_that("lexicon is read from the File option", {
 ```
 
 ## 6. Results Population Patterns
+
+### Saved outputs: original row IDs, not positions
+
+With filters active, `self$data` can have nonconsecutive original row names. Use the IDs of the
+exact frame used to compute the values, in the same order:
+
+```r
+# clean_data has retained original jamovi row names throughout preprocessing.
+stopifnot(length(predictions) == nrow(clean_data))
+self$results$predictions$setRowNums(rownames(clean_data))
+self$results$predictions$setValues(predictions)
+```
+
+Never pad a vector of length `nrow(self$data)` by indexing it with original spreadsheet IDs, and
+never replace those IDs with `seq_len(nrow(clean_data))`. Both confuse identity with position.
+Test exact ID/value pairs with leading rows filtered out, an internal missing value, reordering,
+and a subsequent filter change that must clear old saved values. See the
+[Output API](https://dev.jamovi.org/api/output) and
+[row-identity recipe](jamovi_external_audit_learning_guide.md#2-keep-spreadsheet-row-identity-separate-from-vector-position).
 
 ### Table Population
 

@@ -9,6 +9,7 @@ psychopdaROC <- function(...) {
   args <- list(...)
   if (!("positiveClass" %in% names(args))) args$positiveClass <- ""
   if (!("negativeClass" %in% names(args))) args$negativeClass <- ""
+  if (!("run" %in% names(args))) args$run <- TRUE
   do.call(ClinicoPath::psychopdaROC, args)
 }
 

@@ -179,7 +179,8 @@ visible: (enablePlots && hasData && !errorState)
 
 ### Clear Conditions
 
-Specify when plots should be refreshed:
+Specify when plots should be refreshed. Every name below must be an actual option in the
+analysis; replace the illustrative `plotOptions` with the concrete drawing options it uses:
 
 ```yaml
 clearWith:
@@ -188,6 +189,13 @@ clearWith:
   - plotOptions    # Refresh when plot options change
   - data          # Refresh when data changes
 ```
+
+Trace model and preprocessing dependencies too: seed, event/reference level, subject ID, start
+time and correction method can all change a plot. Omitting `clearWith` retains the default of
+clearing on any option change. A selective list must be verified by updating an existing analysis
+and comparing it with a fresh run at the new options. Merely setting new state is not a cache
+invalidation test; `check_clearwith` checks names only. Details:
+[dependency recipe](jamovi_external_audit_learning_guide.md#1-trace-invalidation-through-every-result-dependency).
 
 ### Array Plots for Multiple Visualizations
 
@@ -430,8 +438,25 @@ rationale: `vignettes/jamovi_library_review_guide.md` §15.
 `image$state` is saved into the `.omv`. Store the extracted numbers the plot draws —
 a coefficient table, a `time × estimate × group` frame, `summary(survfit)` columns —
 never a `coxph`/`glm`/`survfit`/`cv.glmnet` object or the cleaned dataset. Visual
-options still belong in state so the plot refreshes when they change. See
+options needed to draw still belong in state; the corresponding dependencies must also invalidate
+the image through `clearWith`. A state payload alone does not prove freshness. See
 `vignettes/jamovi_library_review_guide.md` §17.
+
+### Dynamic arrays, restoration and export
+
+Populate titles and drawing data before rendering. No renderer should initialise a sibling
+image or change unrelated results; export order must not affect the result. Recreate stable
+option/data-shape item keys during `.init()` where possible, and define a restoration strategy
+for model-derived keys. Keep item state small and retain NULL guards, including around any
+parent-state fallback. Do not clear an array unconditionally when its saved state is needed.
+
+Test initial rendering, resize without `.run()`, restoration into a fresh analysis and export of
+each item first, including zero/one/multiple items. Use `.createImage()`/the native export path
+when `requiresData` matters; calling a private renderer alone is insufficient. Check actual
+`.omv` reopen and PNG/PDF contents separately in jamovi. A file's existence or size does not
+establish that it contains the intended plot. The jYS remediation report's `.savePart` override
+is an unverified external workaround, not a template to copy. See the
+[lifecycle recipe](jamovi_external_audit_learning_guide.md#6-test-restoration-and-export-as-separate-lifecycle-paths).
 
 ### State Data Structure Best Practices
 

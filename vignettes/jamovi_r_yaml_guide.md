@@ -154,7 +154,7 @@ These properties can be used with any result element type:
   visible: (addPValue)             # Visible when addPValue option is checked
   ```
 
-#### `clearWith` (Recommended)
+#### `clearWith` (Optional; explicit lists require a dependency review)
 - **Type**: Array of option names
 - **Purpose**: Clears element content when specified options change
 - **Critical**: Ensures results stay synchronized with analysis parameters
@@ -165,6 +165,19 @@ These properties can be used with any result element type:
       - covariates
       - method
   ```
+
+Omitting this property keeps jamovi's default of clearing on any option change. A selective list
+must include every option that changes the result, directly or through preprocessing/helpers.
+The example above is complete only if those three options are its entire dependency set.
+Seed, event/reference level, start time, subject ID, correction method and thresholds are common
+omissions. Check nested Array templates and saved Output columns as well as tables and images.
+`visible:` and a new `setState()` payload do not prove that an old cached result was invalidated.
+
+The release gate checks that entries **exist**, not that the list is **complete**. Reuse an
+analysis at A, change one dependency to B, and compare with a fresh analysis at B. Retain renderer
+NULL guards; review cache-reuse guards in `.run()` separately. See
+[external audit recipe 1](jamovi_external_audit_learning_guide.md#1-trace-invalidation-through-every-result-dependency)
+and the [official state contract](https://dev.jamovi.org/tutorial/tuts0203-state).
 
 #### `description` (Optional)
 - **Type**: String

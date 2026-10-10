@@ -47,6 +47,10 @@
 #' exploratory apparent estimates with percentile intervals and no significance
 #' test. Within-cohort meta-analysis is unavailable, including legacy overrides.
 #'
+#' Computationally intensive options and more than 10000 selected marker values
+#' require the Run selected analyses button. In R, pass `run = TRUE`.
+#' Basic analysis otherwise updates automatically unless manual mode is enabled.
+#'
 #' @param data A data frame containing the variables for analysis
 #' @param patientID Optional patient identifier; required for patient summaries.
 #' @param analysisUnit Independent rows (default), patientMean or patientMedian.
@@ -87,6 +91,8 @@
 #' @param precisionRecallCurve Logical. Generate precision-recall curves
 #' @param compareClassifiers Logical. Generate classifier comparison metrics
 #' @param ... Additional parameters for fine-tuning analysis
+#' @param run Set TRUE to explicitly run computationally intensive options or manual mode.
+#' @param manualRun When TRUE, defer basic analysis as well until Run is requested.
 #'
 #' @return A psychopdaROCResults object containing:
 #' - `resultsTable`: Detailed results for each threshold
@@ -113,6 +119,7 @@
 #'
 #' # Compare multiple biomarkers with DeLong test
 #' result2 <- psychopdaROC(
+#'   run = TRUE,
 #'   data = medical_roc_data,
 #'   dependentVars = c("biomarker1", "biomarker2", "biomarker3"),
 #'   classVar = "disease_status",
@@ -124,6 +131,7 @@
 #'
 #' # Advanced analysis with IDI/NRI
 #' result3 <- psychopdaROC(
+#'   run = TRUE,
 #'   data = medical_roc_data,
 #'   dependentVars = c("biomarker1", "biomarker2"),
 #'   classVar = "disease_status",
@@ -157,6 +165,7 @@
 #'
 #' # Comprehensive analysis with all features
 #' result6 <- psychopdaROC(
+#'   run = TRUE,
 #'   data = medical_roc_data,
 #'   dependentVars = c("biomarker1", "biomarker2"),
 #'   classVar = "disease_status",
@@ -179,6 +188,7 @@
 #' data(financial_roc_data)
 #'
 #' financial_result <- psychopdaROC(
+#'   run = TRUE,
 #'   data = financial_roc_data,
 #'   dependentVars = c("credit_score", "income_debt_ratio", "employment_score"),
 #'   classVar = "default_status",
@@ -194,6 +204,7 @@
 #' data(education_roc_data)
 #'
 #' education_result <- psychopdaROC(
+#'   run = TRUE,
 #'   data = education_roc_data,
 #'   dependentVars = c("exam_score", "project_score", "peer_score"),
 #'   classVar = "pass_status",
@@ -209,6 +220,7 @@
 #' data(manufacturing_roc_data)
 #'
 #' quality_result <- psychopdaROC(
+#'   run = TRUE,
 #'   data = manufacturing_roc_data,
 #'   dependentVars = c("dimension_score", "surface_score", "strength_score"),
 #'   classVar = "quality_status",
@@ -326,7 +338,10 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
       # Power of a two-sided z-test of AUC = 0.5 at total n with positive fraction
       # pos_frac, Hanley-McNeil variance. Shared by .requiredNforPower and the power
       # curve plot, so the figure can no longer disagree with the table.
-      .hanleyMcNeilPower = function(auc, n, pos_frac, alpha, adjustment_factor = 1) {
+      .hanleyMcNeilPower = function(auc, n, pos_frac, alpha) {
+        if (!is.finite(auc) || auc <= 0 || auc >= 1 || !is.finite(n) || n <= 0 ||
+            !is.finite(pos_frac) || pos_frac <= 0 || pos_frac >= 1 ||
+            !is.finite(alpha) || alpha <= 0 || alpha >= 1) return(NA_real_)
         z_alpha <- stats::qnorm(1 - alpha / 2)
         n_a <- n * pos_frac
         n_n <- n * (1 - pos_frac)
@@ -335,21 +350,17 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         q2 <- 2 * auc^2 / (1 + auc)
         v <- (auc * (1 - auc) + (n_a - 1) * (q1 - auc^2) +
               (n_n - 1) * (q2 - auc^2)) / (n_a * n_n)
-        se <- sqrt(max(v, 0)) * adjustment_factor
-        if (!is.finite(se) || se <= 0) return(1)
+        se <- sqrt(max(v, 0))
+        if (!is.finite(se) || se <= 0) return(NA_real_)
         z <- abs(auc - 0.5) / se
         stats::pnorm(z - z_alpha) + stats::pnorm(-z - z_alpha)
       },
 
       .requiredNforPower = function(auc, alpha, target_power, pos_frac,
-                                    adjustment_factor = 1, n_max = 1e7) {
+                                    n_max = 1e7) {
         if (!is.finite(auc) || auc <= 0 || auc >= 1 || auc == 0.5 || !is.finite(pos_frac) ||
             pos_frac <= 0 || pos_frac >= 1) return(NA_integer_)
-        # A non-finite or non-positive adjustment means the comparison is
-        # degenerate (perfectly correlated markers). Refuse rather than return a
-        # number: adj -> 0 makes the SE vanish and yields an absurd n of 6.
-        if (!is.finite(adjustment_factor) || adjustment_factor <= 0) return(NA_integer_)
-        powr <- function(n) private$.hanleyMcNeilPower(auc, n, pos_frac, alpha, adjustment_factor)
+        powr <- function(n) private$.hanleyMcNeilPower(auc, n, pos_frac, alpha)
         if (powr(n_max) < target_power) return(NA_integer_)
         lo <- 4; hi <- 16
         while (hi < n_max && powr(hi) < target_power) { lo <- hi; hi <- hi * 2 }
@@ -1754,26 +1765,8 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         np <- sum(id.pos) # Number of positive cases
         nauc <- ncol(data) # Number of tests
 
-        # Set up comparison matrix based on reference or pairwise
-        if (is.null(ref)) {
-          # Create matrix for all pairwise comparisons
-          L <- matrix(0, nrow = nauc * (nauc - 1) / 2, ncol = nauc)
-          newa <- 0
-          for (i in 1:(nauc - 1)) {
-            newl <- nauc - i
-            L[(newa + 1):(newa + newl), i] <- rep(1, newl)
-            L[(newa + 1):(newa + newl), ((i + 1):(i + newl))] <-
-              diag(-1, nrow = newl, ncol = newl)
-            newa <- newa + newl
-          }
-        } else {
-          # Create matrix for comparing all tests against a reference
-          if (ref > nauc) {
-            jmvcore::reject(paste("Reference ref must be one of the markers (1...", nauc, " in this case)", sep = ""))
-          }
-          L <- matrix(1, ncol = nauc, nrow = nauc - 1)
-          L[, -ref] <- diag(-1, nrow = nauc - 1, ncol = nauc - 1)
-        }
+        if (!is.null(ref) && ref > nauc)
+          jmvcore::reject(paste("Reference ref must be one of the markers (1...", nauc, " in this case)", sep = ""))
 
         # The Wilcoxon statistic below counts HIGHER values as positive. Read the markers in the
         # user's Classification Direction first, as the main AUC table and .enhancedDelongTest do;
@@ -1844,9 +1837,9 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         zdelong <- ifelse(diag_S > 0, (auc - 0.5) / sqrt(diag_S), NA)
         pdelong <- ifelse(!is.na(zdelong), 2 * pnorm(-abs(zdelong)), NA)
 
-        # Global test for difference between AUCs
-        aucdiff <- L %*% auc
-        global <- private$.delongGlobalInference(aucdiff, L %*% S %*% t(L))
+        # The k - 1 independent contrasts span the same hypothesis as all k(k - 1)/2 pairs.
+        G <- cbind(1, -diag(nauc - 1L))
+        global <- private$.delongGlobalInference(G %*% auc, G %*% S %*% t(G))
         z <- global$statistic
         p <- global$p
 
@@ -1856,6 +1849,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           # All pairwise comparisons
           cor.auc <- matrix(ncol = 1, nrow = nauc * (nauc - 1) / 2)
           ci <- matrix(ncol = 2, nrow = nauc * (nauc - 1) / 2)
+          aucdiff <- matrix(NA_real_, nrow = nrow(ci), ncol = 1L)
           ctr <- 1
           rows <- vector("character", length = (nauc * (nauc - 1) / 2))
           pair_labels <- character(length(rows))
@@ -1870,6 +1864,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
               cor.auc[ctr] <- if (denom_cor > 0) S[i, j] / sqrt(denom_cor) else NA
 
               # Calculate confidence interval for the difference
+              aucdiff[ctr] <- auc[i] - auc[j]
               pair <- private$.delongPairInference(aucdiff[ctr], S[c(i, j), c(i, j)], quantil)
               pairp[ctr] <- pair$p
               pair_z[ctr] <- pair$z
@@ -1883,6 +1878,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           # Comparisons against a reference
           cor.auc <- matrix(ncol = 1, nrow = nauc - 1)
           ci <- matrix(ncol = 2, nrow = nauc - 1)
+          aucdiff <- matrix(NA_real_, nrow = nrow(ci), ncol = 1L)
           rows <- vector("character", length = nauc - 1)
           pair_labels <- character(length(rows))
           pair_z <- numeric(length(rows))
@@ -1895,6 +1891,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
             cor.auc[i] <- if (denom_cor_i > 0) S[ref, comp[i]] / sqrt(denom_cor_i) else NA
 
             # Calculate confidence interval for the difference
+            aucdiff[i] <- auc[ref] - auc[comp[i]]
             pair <- private$.delongPairInference(aucdiff[i],
               S[c(ref, comp[i]), c(ref, comp[i])], quantil)
             pairp[i] <- pair$p
@@ -2117,12 +2114,14 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
       .notePredictiveValues = function(table, prevalence) {
         if (is.null(prevalence) || !is.finite(prevalence)) return(invisible(NULL))
         extreme <- prevalence < 0.10 || prevalence > 0.90
-        msg <- sprintf(
+        msg <- if (isTRUE(self$options$usePriorPrev)) sprintf(
+          .("PPV and NPV below are adjusted to the user-specified target prevalence (%.1f%%), not the prevalence observed in this sample. Transport to that population assumes comparable case mix and conditional score distributions."),
+          prevalence * 100) else sprintf(
           .("PPV and NPV below are computed at the prevalence of this sample (%.1f%%) and do not carry over to a population where the condition is more or less common - sensitivity and specificity also require comparable case mix and conditional score distributions. Recompute them for your own setting's prevalence before quoting them."),
           prevalence * 100)
         if (extreme) {
           msg <- paste(msg, sprintf(
-            .("At %1$.1f%% this sample is strongly imbalanced, so the %2$s is especially fragile: a small shift in prevalence moves it a long way."),
+            .("At a prevalence of %1$.1f%%, the %2$s is especially sensitive to changes in prevalence."),
             prevalence * 100,
             if (prevalence < 0.10) .("PPV") else .("NPV")))
         }
@@ -2156,7 +2155,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         if (length(constant_vars) > 0) {
           tryCatch(table$setNote(
             "constant_marker",
-            sprintf(.("These markers take the same value in every case and carry no discrimination information: %s. Their AUC of 0.500 has zero empirical variance; the AUC summary withholds the interval and p-value. No clinically useful cutpoint can distinguish the classes. Remove them from the analysis."), paste(constant_vars, collapse = ", "))
+            sprintf(.("These markers take the same value in every case and carry no discrimination information: %s. Their AUC of 0.500 has zero empirical variance; the AUC summary withholds the interval and p-value. No clinically useful cutpoint can distinguish the classes. Remove them from the analysis."), paste(.rocLabel(constant_vars), collapse = ", "))
           ), error = function(e) NULL)
         }
         invisible(NULL)
@@ -2292,6 +2291,22 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
       # ============================================================================
 
       # Execute the ROC analysis
+      # A checkbox change configures expensive work; only the Run action starts it.
+      .requiresExplicitRun = function() {
+        options <- self$options
+        intensive <- c("delongTest", "bootstrapCI", "calculateIDI", "calculateNRI",
+          "bayesianAnalysis", "clinicalUtilityAnalysis", "powerAnalysis",
+          "effectSizeAnalysis", "partialAUC", "allObserved")
+        isTRUE(options$manualRun) ||
+          any(vapply(intensive, function(name) isTRUE(options[[name]]), logical(1))) ||
+          isTRUE(options$boot_runs > 0) ||
+          options$method %in% c("maximize_boot_metric", "minimize_boot_metric",
+            "maximize_loess_metric", "minimize_loess_metric", "oc_youden_kernel") ||
+          !identical(options$rocSmoothingMethod, "none") ||
+          (isTRUE(options$plotROC) && isTRUE(options$smoothing)) ||
+          isTRUE(nrow(self$data) * length(options$dependentVars) > 10000L)
+      },
+
       .run = function() {
         # jamovi reuses the R6 instance across runs, so a warning raised once
         # would otherwise persist into every later run of the analysis.
@@ -2303,13 +2318,16 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         # -----------------------------------------------------------------------
         # 0a. MANUAL RUN GATE
         # -----------------------------------------------------------------------
-        if (isTRUE(self$options$manualRun) && !isTRUE(self$options$run)) {
-          self$results$instructions$setContent(
-            "<html><body><div class='instructions'>
-            <p><b>Manual run mode active.</b></p>
-            <p>Adjust options as needed, then click the <b>Run</b> button to compute results.</p>
-          </div></body></html>"
-          )
+        if (private$.requiresExplicitRun() && !isTRUE(self$options$run)) {
+          self$results$instructions$setVisible(TRUE)
+          self$results$instructions$setContent(paste0("<div class='instructions'><p><b>",
+            .("Ready to run"), "</b></p><p>",
+            .("Adjust your settings, then click Run selected analyses. Computationally intensive options and large datasets always wait for Run; Run all analyses manually also pauses basic analysis."),
+            "</p></div>"))
+          self$results$runSummary$setVisible(TRUE)
+          self$results$runSummary$setContent(paste0("<p>",
+            .("Results have not been updated for the current settings. Any displayed estimates are from the previous run."),
+            "</p>"))
           return()
         }
 
@@ -3432,7 +3450,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           # %% escapes the literal percent sign for sprintf.
           fallback_note <- sprintf(
             .("DeLong intervals could not be computed for %s. The Hanley-McNeil approximation was used instead. Its distributional assumptions may not hold, and its intervals need not be conservative. Nominal coverage is not guaranteed, especially in modest or imbalanced samples."),
-            paste(fallback_vars, collapse = ", ")
+            paste(.rocLabel(fallback_vars), collapse = ", ")
           )
           aucSummaryTable$setNote("ci_method_fallback", fallback_note)
           private$.setNotice("aucFallback",
@@ -3828,7 +3846,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                     key = paste0("insufficient_", make.names(var)),
                     note = .fmt(
                       .("IDI for {variable} was not computed because fewer than 10 complete cases were available."),
-                      variable = var
+                      variable = .rocLabel(var)
                     ),
                     init = FALSE
                   )
@@ -3856,8 +3874,8 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                     key = paste0("fit_", make.names(var)),
                     note = .fmt(
                       .("IDI caution for {variable}: {details}"),
-                      variable = var,
-                      details = paste(unique(idi_warnings), collapse = " ")
+                      variable = .rocLabel(var),
+                      details = .rocLabel(paste(unique(idi_warnings), collapse = " "))
                     ),
                     init = FALSE
                   )
@@ -3934,7 +3952,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                     key = paste0("insufficient_", make.names(var)),
                     note = .fmt(
                       .("NRI for {variable} was not computed because fewer than 10 complete cases were available."),
-                      variable = var
+                      variable = .rocLabel(var)
                     ),
                     init = FALSE
                   )
@@ -3963,8 +3981,8 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                     key = paste0("fit_", make.names(var)),
                     note = .fmt(
                       .("NRI caution for {variable}: {details}"),
-                      variable = var,
-                      details = paste(unique(nri_warnings), collapse = " ")
+                      variable = .rocLabel(var),
+                      details = .rocLabel(paste(unique(nri_warnings), collapse = " "))
                     ),
                     init = FALSE
                   )
@@ -4066,6 +4084,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
       # (confidence bands, quantile CIs), predictor quantiles at the requested probabilities, and the
       # smoothed curve. Counts and quantiles, not the predictor values, so the .omv holds no raw data.
       .attachRocOverlayState = function() {
+        if (!isTRUE(self$options$plotROC)) return(invisible(NULL))
         probs <- private$.quantileProbs
         plots <- self$results$plotROC
         for (key in plots$itemKeys) {
@@ -4093,8 +4112,28 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
             sm <- private$.smoothedRocDataList[[v]]
             if (!is.null(sm)) smooth <- rbind(smooth, as.data.frame(sm))
           }
+          # Fit LOESS only during an explicitly requested run, never on plot resize/export.
+          loess <- if (is.data.frame(st)) NULL else st$loess
+          if (!isTRUE(self$options$smoothing)) loess <- NULL
+          if (isTRUE(self$options$smoothing) && is.null(loess)) {
+            loess <- tryCatch({
+              fit <- ggplot2::ggplot(as.data.frame(curve), ggplot2::aes(
+                x = 1 - specificity, y = sensitivity, group = var)) +
+                ggplot2::geom_smooth(method = "loess", formula = y ~ x,
+                  se = self$options$displaySE, level = 0.95)
+              fitted <- ggplot2::ggplot_build(fit)$data[[1]]
+              if (nrow(fitted) > 0) {
+                fitted$var <- sort(unique(as.character(curve$var)))[fitted$group]
+                fitted[intersect(c("x", "y", "ymin", "ymax", "var"), names(fitted))]
+              } else NULL
+            }, error = function(e) {
+              private$.warnUser(.fmt(.("LOESS smoothing could not be computed: {reason}"),
+                reason = conditionMessage(e)))
+              NULL
+            })
+          }
           image$setState(list(curve = as.data.frame(curve), counts = counts,
-                              quantiles = quantiles, smooth = smooth))
+                              quantiles = quantiles, smooth = smooth, loess = loess))
         }
       },
 
@@ -4115,7 +4154,8 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
 
       .plotROC = function(image, ggtheme, theme = NULL, ...) {
         state <- image$state
-        # list(curve, counts, quantiles, smooth) - see .attachRocOverlayState(). A bare data frame is
+        # Cached overlays are fitted in .run(); repainting only draws their saved coordinates.
+        # list(curve, counts, quantiles, smooth, loess). A bare data frame is
         # the curve-only state of older saved analyses: it draws without overlays.
         overlay <- if (is.data.frame(state)) list() else state
         plotData <- data.frame(if (is.data.frame(state) || is.null(state$curve)) state else state$curve)
@@ -4289,16 +4329,20 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           }
         }
 
-        # Add smoothing if requested
-        if (self$options$smoothing) {
-          plot <- plot + if (length(marker_levels) > 1L) {
-            ggplot2::geom_smooth(ggplot2::aes(fill = var), method = "loess",
-              formula = y ~ x, se = self$options$displaySE, level = 0.95)
-          } else {
-            ggplot2::geom_smooth(method = "loess", formula = y ~ x,
-              se = self$options$displaySE, level = 0.95,
-              colour = unname(marker_colours[1]), fill = unname(marker_colours[1]))
+        # Reuse the fitted overlay; changing a display option cannot start another fit.
+        loess_data <- overlay$loess
+        if (isTRUE(self$options$smoothing) && !is.null(loess_data) && nrow(loess_data) > 0) {
+          combined <- length(marker_levels) > 1L
+          if (isTRUE(self$options$displaySE) &&
+              all(c("ymin", "ymax") %in% names(loess_data))) {
+            plot <- plot + ggplot2::geom_ribbon(data = loess_data,
+              ggplot2::aes(x = x, ymin = ymin, ymax = ymax, fill = var, group = var),
+              inherit.aes = FALSE, alpha = 0.4, show.legend = combined)
           }
+          plot <- plot + ggplot2::geom_line(data = loess_data,
+            ggplot2::aes(x = x, y = y, colour = var, group = var),
+            inherit.aes = FALSE, linewidth = 1, show.legend = combined)
+          if (!combined) plot <- plot + ggplot2::scale_colour_manual(values = marker_colours)
         }
 
         # Mark optimal points if not clean plot or if specifically requested
@@ -4753,7 +4797,8 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
             "text",
             x = prevalence,
             y = 0.1,
-            label = sprintf(.("Sample prevalence: %.2f"), prevalence),
+            label = sprintf(if (isTRUE(self$options$usePriorPrev))
+              .("Target prevalence: %.2f") else .("Sample prevalence: %.2f"), prevalence),
             hjust = -0.1
           ) +
           ggtheme
@@ -5193,27 +5238,12 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           }
         }
 
-        # Construct Contrast Matrix L for Global Test
-        if (is.null(ref)) {
-          # Matrix for all pairwise differences (sequential construction matching original)
-          L <- matrix(0, nrow = nauc * (nauc - 1) / 2, ncol = nauc)
-          newa <- 0
-          for (i in 1:(nauc - 1)) {
-            newl <- nauc - i
-            L[(newa + 1):(newa + newl), i] <- rep(1, newl)
-            L[(newa + 1):(newa + newl), ((i + 1):(i + newl))] <-
-              diag(-1, nrow = newl, ncol = newl)
-            newa <- newa + newl
-          }
-        } else {
-          # Compare against reference
-          if (ref > nauc) jmvcore::reject(paste("Reference ref must be one of the markers (1...", nauc, ")", sep = ""), code = "delong_validation")
-          L <- matrix(1, ncol = nauc, nrow = nauc - 1)
-          L[, -ref] <- diag(-1, nrow = nauc - 1, ncol = nauc - 1)
-        }
+        if (!is.null(ref) && ref > nauc)
+          jmvcore::reject(paste("Reference ref must be one of the markers (1...", nauc, ")", sep = ""), code = "delong_validation")
 
-        # Calculate Global Test Statistics
-        aucdiff <- L %*% auc_values
+        # Avoid the quartic-size covariance of redundant pairwise contrasts.
+        G <- cbind(1, -diag(nauc - 1L))
+        aucdiff <- G %*% auc_values
 
         # Initialize before tryCatch (error handler creates local scope)
         z_score <- NA
@@ -5222,7 +5252,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         # Singular contrasts are valid only in their estimable covariance subspace.
         tryCatch(
           {
-            inference <- private$.delongGlobalInference(aucdiff, L %*% S %*% t(L))
+            inference <- private$.delongGlobalInference(aucdiff, G %*% S %*% t(G))
             z_score <- inference$statistic
             global_p <- inference$p
           },
@@ -5522,14 +5552,14 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         self$results$powerAnalysisTable$setNote(
           key = "method_reference",
           # Was raw English.
-          note = .("Power calculations based on: Obuchowski NA, McClish DK (1997). Sample size determination for diagnostic accuracy studies involving binormal ROC curve indices. Statistics in Medicine 16(13):1529-1542; Hanley JA, McNeil BJ (1982). The meaning and use of the area under a ROC curve. Radiology 143(1):29-36."),
+          note = .("Power uses a two-sided normal approximation with the AUC variance approximation of Hanley JA, McNeil BJ (1982). The meaning and use of the area under a ROC curve. Radiology 143(1):29-36. This is approximate planning, not an exact or simulation-validated sample-size guarantee."),
           init = FALSE
         )
 
         self$results$powerAnalysisTable$setNote("target_definition",
           .("Target |AUC - 0.5| is the absolute distance from chance used in this calculation. Post-hoc power uses the observed AUC; prospective and sample-size calculations use the specified target."))
         self$results$powerAnalysisTable$setNote("approximation",
-          .("Power includes both tails of the two-sided normal approximation. Current N and the class ratio use complete marker/outcome pairs. With multiple markers, the correlation adjustment assumes equal AUC variances and is a planning approximation, not a fitted paired ROC power model."), init = FALSE)
+          .("Each marker is tested separately against AUC = 0.5 using both tails of the normal approximation. Current N and the class ratio use that marker's complete cases. Selecting other markers does not change this estimand. This does not calculate power for a difference between markers; the legacy correlationROCs setting is ignored."), init = FALSE)
 
         y <- private$.classIndicator(data, positiveClass)
 
@@ -5537,7 +5567,6 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         target_power <- self$options$targetPower # Already a proportion (0-1)
         expected_auc_diff <- self$options$expectedAUCDifference # Use this as effect size
         significance_level <- self$options$significanceLevel
-        correlation <- self$options$correlationROCs
         analysis_type <- self$options$powerAnalysisType # post_hoc, prospective, sample_size
 
         for (var in vars) {
@@ -5563,8 +5592,6 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                   (sum(y_complete) * sum(1 - y_complete)))
 
                 z_alpha <- qnorm(1 - significance_level / 2)
-                z_beta <- qnorm(target_power)
-                adjustment_factor <- 1 # post-hoc: single AUC against 0.5; other branches reassign
 
                 # Switch logic based on analysis type
                 if (analysis_type == "post_hoc") {
@@ -5577,8 +5604,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                   target_auc <- observed_auc
                   required_n <- private$.requiredNforPower(
                     auc = target_auc, alpha = significance_level,
-                    target_power = target_power, pos_frac = n_pos / n_total,
-                    adjustment_factor = 1)
+                    target_power = target_power, pos_frac = n_pos / n_total)
 
                   power_adequacy <- .("Not informative (post-hoc)")
                   # Observed power computed from the observed effect is a one-to-one transform of
@@ -5592,53 +5618,18 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                   # Prospective power: Calculate power for expected effect with current N
                   expected_auc <- 0.5 + expected_auc_diff
 
-                  # Adjust for correlation when comparing two tests.
-                  #
-                  # The `correlation != 0` guard was a bug: it sent r = 0 down the
-                  # ELSE branch to adjustment_factor = 1, which is exactly what the
-                  # default r = 0.5 already yields (sqrt(2 * 0.5) == 1). So both ends
-                  # of the range collapsed to "no adjustment", and r = 0 -- which the
-                  # option's own help text calls "independent samples" and which
-                  # should give the LARGEST inflation, sqrt(2) = 1.414 -- silently
-                  # returned the paired answer instead.
-                  adjustment_factor <- if (length(vars) > 1) {
-                    sqrt(max(0, 2 * (1 - correlation)))
-                  } else {
-                    1
-                  }
-                  # r = 1 (the option's own maximum) means the two AUCs are
-                  # perfectly correlated, so their difference has zero variance:
-                  # the adjustment collapses to 0, expected_se becomes 0, z becomes
-                  # NA, and `if (NA)` threw inside a bare tryCatch(error=...) that
-                  # swallowed it -- the table came back with 0 rows and no message.
-                  # A note on the table itself rather than .warnUser(): it sits
-                  # next to the affected numbers, which is where it is needed.
-                  if (!is.finite(adjustment_factor) || adjustment_factor <= 0) {
-                    tryCatch(self$results$powerAnalysisTable$setNote(
-                      "degenerate_correlation",
-                      .("A correlation of 1 gives zero variance for the paired contrast under this equal-variance planning approximation. Power and required sample size are unavailable, so those cells and the power curve are left blank. Specify a correlation below 1 that is justified for the intended study.")
-                    ), error = function(e) NULL)
-                    adjustment_factor <- NA_real_
-                  }
-
                   expected_se <- sqrt((expected_auc * (1 - expected_auc) +
                     (n_pos - 1) * (expected_auc / (2 - expected_auc) - expected_auc^2) +
                     (n_neg - 1) * (2 * expected_auc^2 / (1 + expected_auc) - expected_auc^2)) /
-                    (n_pos * n_neg)) * adjustment_factor
+                    (n_pos * n_neg))
 
-                  # is.finite(), not just > 0: adjustment_factor is NA_real_ for the
-                  # degenerate correlation = 1 case above, so expected_se is NA and the bare
-                  # `if (expected_se > 0)` raised "missing value where TRUE/FALSE needed".
-                  # The enclosing per-variable tryCatch swallowed it, so NO row was added for
-                  # ANY variable and the whole table rendered empty under a note that spoke
-                  # about a blank cell.
+                  # A target AUC of 1 has no nondegenerate variance under this approximation.
                   z_stat_expected <- if (is.finite(expected_se) && expected_se > 0) (expected_auc - 0.5) / expected_se else NA
                   observed_power <- if (!is.na(z_stat_expected)) pnorm(abs(z_stat_expected) - z_alpha) + pnorm(-abs(z_stat_expected) - z_alpha) else NA
 
                   required_n <- private$.requiredNforPower(
                     auc = expected_auc, alpha = significance_level,
-                    target_power = target_power, pos_frac = n_pos / n_total,
-                    adjustment_factor = adjustment_factor)
+                    target_power = target_power, pos_frac = n_pos / n_total)
 
                   # power_adequacy is recomputed NA-safely below for every branch; the
                   # assignment that used to be here was dead AND crashed on a NA power.
@@ -5653,41 +5644,15 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                   # Sample size calculation: N needed for target power and expected effect
                   expected_auc <- 0.5 + expected_auc_diff
 
-                  # Correlation adjustment
-                  # Same correction as the prospective branch above: r = 0 must
-                  # give the largest inflation, not fall through to no adjustment.
-                  adjustment_factor <- if (length(vars) > 1) {
-                    sqrt(max(0, 2 * (1 - correlation)))
-                  } else {
-                    1
-                  }
-                  # r = 1 (the option's own maximum) means the two AUCs are
-                  # perfectly correlated, so their difference has zero variance:
-                  # the adjustment collapses to 0, expected_se becomes 0, z becomes
-                  # NA, and `if (NA)` threw inside a bare tryCatch(error=...) that
-                  # swallowed it -- the table came back with 0 rows and no message.
-                  # A note on the table itself rather than .warnUser(): it sits
-                  # next to the affected numbers, which is where it is needed.
-                  if (!is.finite(adjustment_factor) || adjustment_factor <= 0) {
-                    tryCatch(self$results$powerAnalysisTable$setNote(
-                      "degenerate_correlation",
-                      .("A correlation of 1 gives zero variance for the paired contrast under this equal-variance planning approximation. Power and required sample size are unavailable, so those cells and the power curve are left blank. Specify a correlation below 1 that is justified for the intended study.")
-                    ), error = function(e) NULL)
-                    adjustment_factor <- NA_real_
-                  }
-
                   required_n <- private$.requiredNforPower(
                     auc = expected_auc, alpha = significance_level,
-                    target_power = target_power, pos_frac = n_pos / n_total,
-                    adjustment_factor = adjustment_factor)
+                    target_power = target_power, pos_frac = n_pos / n_total)
 
                   # Calculate what power we would have with current N
                   current_se <- sqrt((expected_auc * (1 - expected_auc) +
                     (n_pos - 1) * (expected_auc / (2 - expected_auc) - expected_auc^2) +
                     (n_neg - 1) * (2 * expected_auc^2 / (1 + expected_auc) - expected_auc^2)) /
-                    (n_pos * n_neg)) * adjustment_factor
-                  # Same NA guard as the prospective branch: current_se is NA when the
-                  # correlation adjustment is degenerate, and `if (NA > 0)` threw.
+                    (n_pos * n_neg))
                   z_stat_current <- if (is.finite(current_se) && current_se > 0) (expected_auc - 0.5) / current_se else NA
                   observed_power <- if (!is.na(z_stat_current)) pnorm(abs(z_stat_current) - z_alpha) + pnorm(-abs(z_stat_current) - z_alpha) else NA
 
@@ -5696,8 +5661,8 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                   recommendation <- if (is.na(required_n)) {
                     .("Power and required sample size cannot be computed for this configuration.")
                   } else {
-                    sprintf(.("Need n=%1$d (current n=%2$d) for %3$.1f%% power at an AUC distance from 0.5 of %4$s. Correlation setting: %5$s."),
-                      required_n, n_total, 100 * target_power, expected_auc_diff, correlation)
+                    sprintf(.("Need n=%1$d (current n=%2$d) for %3$.1f%% power at an AUC distance from 0.5 of %4$s."),
+                      required_n, n_total, 100 * target_power, expected_auc_diff)
                   }
                 }
 
@@ -5721,13 +5686,12 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                 ))
 
                 # Set state for power curve plot
-                plot_ready <- is.finite(adjustment_factor) && adjustment_factor > 0 &&
-                  is.finite(observed_power) &&
+                plot_ready <- is.finite(observed_power) &&
                   if (analysis_type == "post_hoc") observed_auc > 0 && observed_auc < 1 else
                     expected_auc > 0.5 && expected_auc < 1
                 if (!plot_ready) {
                   private$.warnUser(.fmt(
-                    .("The power curve for '{var}' is unavailable for this degenerate configuration. Use a nondegenerate target AUC and, for paired planning, a correlation below 1."),
+                    .("The power curve for '{var}' is unavailable for this degenerate configuration. Use a target AUC strictly between 0.5 and 1 for prospective planning."),
                     var = var))
                 }
                 if (self$options$powerAnalysis) {
@@ -5743,7 +5707,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                       significance_level = significance_level,
                       n_total = n_total,
                       pos_frac = n_pos / n_total,
-                      adjustment_factor = adjustment_factor,
+                      adjustment_factor = 1,
                       # the AUC the table's power/required N refer to
                       auc_target = if (analysis_type == "post_hoc") observed_auc else 0.5 + expected_auc_diff,
                       required_n = required_n
@@ -6028,7 +5992,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                   private$.warnUser(fit_note, type = jmvcore::NoticeType$STRONG_WARNING)
                   for (table in list(self$results$clinicalUtilityTable,
                                      self$results$decisionCurveTable))
-                    table$setNote(paste0("fit_", var), fit_note)
+                    table$setNote(paste0("fit_", var), .rocLabel(fit_note))
                 }
                 n_v <- length(y_complete)
                 prevalence_v <- mean(y_complete)
@@ -6047,7 +6011,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                     key = paste0("dir_", var),
                     note = sprintf(
                       .("%s: net benefit is computed on the direction the data support, which is the opposite of the Classification Direction you selected. Under the direction you selected this marker performs worse than shown here."),
-                      var),
+                      .rocLabel(var)),
                     init = FALSE
                   )
                 }
@@ -6356,7 +6320,8 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
               is.null(alpha) || !is.finite(alpha)) {
             return(FALSE)
           }
-          if (!isTRUE(state$ready) || is.null(adj) || !is.finite(adj) || adj <= 0)
+          # Older saved paired-adjustment states do not represent this single-AUC test.
+          if (!isTRUE(state$ready) || is.null(adj) || !is.finite(adj) || adj != 1)
             return(FALSE)
           target_power <- state$target_power
           n_total <- state$n_total
@@ -6370,7 +6335,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
             auc_grid <- sort(unique(c(auc_grid, auc_target)))
           }
           power_data <- expand.grid(auc = auc_grid, n = sample_sizes)
-          power_data$power <- mapply(function(a, n) private$.hanleyMcNeilPower(a, n, pos_frac, alpha, adj),
+          power_data$power <- mapply(function(a, n) private$.hanleyMcNeilPower(a, n, pos_frac, alpha),
                                      power_data$auc, power_data$n)
           power_data$curve <- ifelse(is.finite(auc_target) & power_data$auc == auc_target,
                                      sprintf("%.3f (target)", power_data$auc), sprintf("%.2f", power_data$auc))
@@ -6381,9 +6346,8 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
             ggplot2::geom_vline(xintercept = n_total, linetype = "dotted") +
             ggplot2::labs(
               title = .("Power to detect AUC different from 0.5 (Hanley-McNeil)"),
-              subtitle = sprintf(.("alpha = %1$s, positive fraction = %2$.1f%%, dotted line = current n = %3$d%4$s"),
-                                 format(alpha), 100 * pos_frac, as.integer(n_total),
-                                 if (adj != 1) paste0(", ", sprintf(.("correlation adjustment = %.2f"), adj)) else ""),
+              subtitle = sprintf(.("alpha = %1$s, positive fraction = %2$.1f%%, dotted line = current n = %3$d"),
+                                 format(alpha), 100 * pos_frac, as.integer(n_total)),
               x = .("Total sample size"),
               y = .("Statistical power"),
               color = .("AUC")
@@ -6734,11 +6698,18 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           return("")
         }
 
-        # Get arguments using base helper (if available)
-        args <- ""
-        if (!is.null(private$.asArgs)) {
-          args <- private$.asArgs(incData = FALSE)
-        }
+        # Serialize values as literals: older jmvcore versions emit variable names as code.
+        argument_names <- names(formals(psychopdaROCOptions$public_methods$initialize))
+        args <- vapply(self$options$options, function(option) {
+          if (!option$name %in% argument_names) return("")
+          value <- option$value
+          # Running copied R syntax is an explicit request, even after the UI action resets.
+          if (identical(option$name, "run")) value <- TRUE
+          if (identical(value, option$default)) return("")
+          paste0(option$name, " = ",
+            paste(deparse(value, width.cutoff = 500L), collapse = "\n"))
+        }, character(1))
+        args <- paste(args[nzchar(args)], collapse = ",\n    ")
         if (args != "") {
           args <- paste0(",\n    ", args)
         }

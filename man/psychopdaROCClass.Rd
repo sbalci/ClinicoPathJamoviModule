@@ -69,6 +69,10 @@ calculations. They estimate patient-summary accuracy, not lesion-level accuracy.
 Pairwise DeLong output includes raw and Holm-adjusted p-values. IDI/NRI remain
 exploratory apparent estimates with percentile intervals and no significance
 test. Within-cohort meta-analysis is unavailable, including legacy overrides.
+
+Computationally intensive options and more than 10000 selected marker values
+require the Run selected analyses button. In R, pass \code{run = TRUE}.
+Basic analysis otherwise updates automatically unless manual mode is enabled.
 }
 \note{
 This function originally developed by Lucas Friesen in the psychoPDA module.
@@ -90,6 +94,7 @@ result1 <- psychopdaROC(
 
 # Compare multiple biomarkers with DeLong test
 result2 <- psychopdaROC(
+  run = TRUE,
   data = medical_roc_data,
   dependentVars = c("biomarker1", "biomarker2", "biomarker3"),
   classVar = "disease_status",
@@ -101,6 +106,7 @@ result2 <- psychopdaROC(
 
 # Advanced analysis with IDI/NRI
 result3 <- psychopdaROC(
+  run = TRUE,
   data = medical_roc_data,
   dependentVars = c("biomarker1", "biomarker2"),
   classVar = "disease_status",
@@ -134,6 +140,7 @@ result5 <- psychopdaROC(
 
 # Comprehensive analysis with all features
 result6 <- psychopdaROC(
+  run = TRUE,
   data = medical_roc_data,
   dependentVars = c("biomarker1", "biomarker2"),
   classVar = "disease_status",
@@ -156,6 +163,7 @@ result6 <- psychopdaROC(
 data(financial_roc_data)
 
 financial_result <- psychopdaROC(
+  run = TRUE,
   data = financial_roc_data,
   dependentVars = c("credit_score", "income_debt_ratio", "employment_score"),
   classVar = "default_status",
@@ -171,6 +179,7 @@ financial_result <- psychopdaROC(
 data(education_roc_data)
 
 education_result <- psychopdaROC(
+  run = TRUE,
   data = education_roc_data,
   dependentVars = c("exam_score", "project_score", "peer_score"),
   classVar = "pass_status",
@@ -186,6 +195,7 @@ education_result <- psychopdaROC(
 data(manufacturing_roc_data)
 
 quality_result <- psychopdaROC(
+  run = TRUE,
   data = manufacturing_roc_data,
   dependentVars = c("dimension_score", "surface_score", "strength_score"),
   classVar = "quality_status",

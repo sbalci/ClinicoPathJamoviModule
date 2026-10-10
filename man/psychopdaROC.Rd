@@ -92,10 +92,11 @@ psychopdaROC(
 }
 \arguments{
 \item{manualRun}{When TRUE, results are only computed after clicking the
-Run button. Useful for skipping intermediate recomputes while adjusting
-options on slow bootstrap or cutpoint analyses.}
+Run button. Intensive options and datasets with more than 10000 selected
+marker values always require Run, even when this option is FALSE.}
 
-\item{run}{.}
+\item{run}{Set TRUE to run intensive options, large datasets, or manual
+mode.}
 
 \item{showExplanations}{Show optional educational interpretation and
 procedure details. Input and scope notices remain visible.}
@@ -303,16 +304,14 @@ confidence intervals.}
 between outcome classes and pairwise differences in those effects. Size
 bands are descriptive conventions only.}
 
-\item{powerAnalysis}{Perform statistical power analysis for ROC curve
-comparisons including sample size estimation and power calculations for
-detecting AUC differences.}
+\item{powerAnalysis}{Approximate power and sample size for each marker's
+AUC against 0.5. Does not calculate power for a difference between markers.}
 
 \item{powerAnalysisType}{Type of power analysis to perform.}
 
 \item{expectedAUCDifference}{Target AUC above chance (target AUC = 0.5 +
-this value) for prospective power and sample size estimation. Multiple
-markers use an equal-variance correlation adjustment, not a fitted paired
-ROC power model. A target AUC of exactly 1 is degenerate and has no sample
+this value) for prospective power and sample size estimation, separately
+for each marker. A target AUC of exactly 1 is degenerate and has no sample
 size recommendation.}
 
 \item{targetPower}{Target statistical power for sample size calculations
@@ -321,11 +320,9 @@ size recommendation.}
 \item{significanceLevel}{Type I error rate for power calculations
 (typically 0.05).}
 
-\item{correlationROCs}{Expected correlation between paired ROC curves for
-power calculations. Use a correlation justified for the intended study.
-Zero means uncorrelated AUC estimates in this equal-variance planning
-approximation; it does not establish that paired observations are
-independent samples.}
+\item{correlationROCs}{Deprecated compatibility option, ignored. Power
+compares each marker's AUC with 0.5; there is no paired AUC comparison in
+this calculation.}
 
 \item{bayesianAnalysis}{Perform bootstrap-based ROC analysis with optional
 prior weighting to estimate uncertainty in AUC. Uses bootstrap resampling

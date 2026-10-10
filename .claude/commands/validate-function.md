@@ -671,6 +671,28 @@ write, not a conclusion. Obey E3: read the default, do not recall it.
   uninterpretable, use NMB; PSA distributions (beta for probabilities and utilities, gamma or
   log-normal for costs, log-normal for ratios, Dirichlet for multinomial).
 
+**Classifier lessons from the external jYS audit (2026-10-03)**
+
+The full provenance and limits are in `vignettes/jamovi_external_audit_learning_guide.md`.
+Its remediation report's test totals are not local evidence. For relevant analyses:
+
+- Compare class labels, factor indices and 0/1 targets through an explicit mapping. Use perfect,
+  wrong and mixed predictions with independently counted confusion matrices; repeat after changing
+  level and probability-column order. Check permutation importance with the same metric contract.
+- Verify probability domain and meaning: P(selected positive class) differs from P(predicted class).
+  Scores can support ROC ranking but are not probabilities. Test simplex sums where classes are
+  mutually exclusive; do not repair a wrong output layer by silently clipping its values.
+- Trace training/CV/hold-out/OOB predictions into every displayed metric and saved column. In
+  ranger probability forests, Brier loss is not misclassification error; compute accuracy from
+  labels. Verify sources rather than asserting training and OOB must always differ.
+- Establish seed scope before the first random operation, including selection and folds. Test
+  restoration with/without a pre-existing `.Random.seed` and on errors. Fit imputation, scaling
+  and selection within each training fold; a fixed seed does not eliminate leakage.
+- Distinguish mean fold/repeat AUC from AUC of pooled/averaged predictions; disclose post-selection
+  inference. If custom activation gradients are implemented, check them by finite differences.
+- CV above chance or close to training performance is not a numerical oracle. Assert exact
+  expected metrics on constructed predictions through the analysis's actual output path.
+
 **Survival**
 
 - Event coding and which level is the event; this module's multi-state outcome options (`dod`,
@@ -716,6 +738,17 @@ write, not a conclusion. Obey E3: read the default, do not recall it.
   test vs cause-specific log-rank; Fine-Gray subdistribution HR is not a cause-specific HR and must
   not be interpreted as one; censoring code vs competing-event code.
 - RMST: tau no later than the smallest maximum follow-up across arms; difference and ratio.
+- External jYS lessons: distinguish time-varying coefficients (`x + tt(x)`) from changing covariate
+  values. Do not pass start-stop interval rows to `cmprsk::cuminc` as independent subjects; a note
+  does not make an unsupported Gray test valid, and collapsing to the last row can discard delayed
+  entry. Verify the interface/design and suppress unsupported results.
+- Check survival before/at/after the first event and the cumulative-hazard zero at the origin,
+  including bootstrap/plot paths. For baseline standardisation, splitting an unchanged subject's
+  interval must not increase that subject's weight; define the baseline population explicitly.
+- Track original subject IDs through Fine–Gray expansion and Aalen–Johansen fits. Verify the
+  variance actually computed before labelling a column Robust SE; check row count versus subject
+  count. Seed threshold-CI bootstraps too. Reorder/rename event levels and require explicit coding
+  to stay consistent across the R interface, GUI and reported outcome mapping.
 - Optimal cut-point by minimum p: p must be corrected (Lausen-Schumacher, `maxstat`) and the HR is
   optimistically biased (Altman 1994).
 - Staging comparison and stage migration: not by p-values alone; C-index difference with CI,

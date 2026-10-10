@@ -3,7 +3,7 @@
   marker = c(-2, -1, 0, 1, 2, 3, 4, 5, 6, 7, -1, 1, 2, 3, 4, 5, 6, 7, 8, 9))
 
 .releaseROC_run <- function(data = .releaseROC_data()) {
-  suppressMessages(ClinicoPath::psychopdaROC(data = data, dependentVars = "marker",
+  suppressMessages(ClinicoPath::psychopdaROC(run = TRUE, data = data, dependentVars = "marker",
     classVar = "outcome", positiveClass = "positive", negativeClass = "negative",
     refVar = NULL, clinicalUtilityAnalysis = TRUE, treatmentThreshold = "0.1,0.9,0.2"))
 }
@@ -36,7 +36,7 @@ test_that("decision curves are invariant to affine changes of marker units", {
 
 test_that("decision-curve fitting warnings reach native notices and clear on recovery", {
   d <- .releaseROC_data()
-  options <- ClinicoPath:::psychopdaROCOptions$new(dependentVars = "marker",
+  options <- ClinicoPath:::psychopdaROCOptions$new(run = TRUE, dependentVars = "marker",
     classVar = "outcome", positiveClass = "positive", negativeClass = "negative",
     refVar = NULL, clinicalUtilityAnalysis = TRUE)
   analysis <- ClinicoPath:::psychopdaROCClass$new(options = options, data = d)
@@ -67,7 +67,7 @@ test_that("decision-curve fitting warnings reach native notices and clear on rec
 })
 
 test_that("a failed clinical-risk fit is disclosed instead of silently dropping its curve", {
-  options <- ClinicoPath:::psychopdaROCOptions$new(dependentVars = "marker",
+  options <- ClinicoPath:::psychopdaROCOptions$new(run = TRUE, dependentVars = "marker",
     classVar = "outcome", positiveClass = "positive", negativeClass = "negative",
     refVar = NULL, clinicalUtilityAnalysis = TRUE)
   analysis <- ClinicoPath:::psychopdaROCClass$new(options = options, data = .releaseROC_data())
@@ -97,7 +97,7 @@ test_that("multiple DeLong comparisons retain raw inference and add Holm adjustm
   d$other <- d$marker + rep(c(-2, 1, 2, -1), 5)
   d$third <- rev(d$marker)
   vars <- c("marker", "other", "third")
-  result <- suppressMessages(ClinicoPath::psychopdaROC(data = d,
+  result <- suppressMessages(ClinicoPath::psychopdaROC(run = TRUE, data = d,
     dependentVars = c("marker", "other", "third"),
     classVar = "outcome", positiveClass = "positive", negativeClass = "negative",
     refVar = NULL, delongTest = TRUE))

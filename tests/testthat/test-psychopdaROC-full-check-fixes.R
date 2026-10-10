@@ -10,6 +10,7 @@
   args <- utils::modifyList(list(dependentVars = c("marker_a", "marker_b"),
     classVar = "outcome", positiveClass = "Positive", negativeClass = "Negative", refVar = NULL),
     list(...), keep.null = TRUE)
+  if (!("run" %in% names(args))) args$run <- TRUE
   suppressMessages(suppressWarnings(do.call(ClinicoPath::psychopdaROC,
     c(list(data = data), args))))
 }
@@ -70,11 +71,12 @@ test_that("F02 bootstrap traces invalidate changed seed and direction", {
 
 test_that("F03 invalid power does not draw a substitute model", {
   for (type in c("prospective", "sample_size")) {
-    r <- .fullROC_run(powerAnalysis = TRUE, powerAnalysisType = type, correlationROCs = 1)
+    r <- .fullROC_run(powerAnalysis = TRUE, powerAnalysisType = type,
+      expectedAUCDifference = 0.5)
     expect_true(all(is.na(r$powerAnalysisTable$asDF$required_n)))
     expect_false(.fullROC_capture(r, "powerCurvePlot", ".plotPowerCurves")$value)
     expect_match(r$runSummary$content, "power curve.*unavailable")
-    .fullROC_change(r, "correlationROCs", 0.5)
+    .fullROC_change(r, "expectedAUCDifference", 0.1)
     expect_true(all(is.finite(r$powerAnalysisTable$asDF$required_n)))
     expect_true(.fullROC_capture(r, "powerCurvePlot", ".plotPowerCurves")$value)
     expect_false("degenerate_correlation" %in% names(r$powerAnalysisTable$notes))
@@ -223,15 +225,21 @@ test_that("F12 decision curve grids are bounded before allocation and preserved"
 
 test_that("F13 LOESS is explicit even above ggplot's automatic GAM boundary", {
   r <- .fullROC_run(plotROC = TRUE, smoothing = TRUE, displaySE = TRUE)
-  plot <- .fullROC_capture(r, "plotROC", ".plotROC")$plot
-  smooth <- Filter(function(x) inherits(x$stat, "StatSmooth"), plot$layers)[[1]]
-  expect_identical(smooth$stat_params$method, "loess")
-  expect_equal(smooth$stat_params$level, 0.95)
-  expect_true(smooth$stat_params$se)
   dense <- data.frame(specificity = seq(1, 0, length.out = 1200),
     sensitivity = sqrt(seq(0, 1, length.out = 1200)), var = "marker_a", AUC = 2/3)
   r$plotROC$get("marker_a")$setState(list(curve = dense))
+  r$analysis$.__enclos_env__$private$.attachRocOverlayState()
+  saved <- r$plotROC$get("marker_a")$state$loess
+  dense$fpr <- 1 - dense$specificity
+  reference <- stats::loess(sensitivity ~ fpr, data = dense)
+  prediction <- stats::predict(reference, newdata = data.frame(fpr = saved$x), se = TRUE)
+  margin <- stats::qt(.975, prediction$df) * prediction$se.fit
+  expect_equal(saved$y, unname(prediction$fit), tolerance = 1e-10)
+  expect_equal(saved$ymin, unname(prediction$fit - margin), tolerance = 1e-10)
+  expect_equal(saved$ymax, unname(prediction$fit + margin), tolerance = 1e-10)
   plot <- .fullROC_capture(r, "plotROC", ".plotROC")$plot
+  expect_false(any(vapply(plot$layers, function(layer)
+    inherits(layer$stat, "StatSmooth"), logical(1))))
   expect_no_error(suppressWarnings(ggplot2::ggplot_build(plot)))
 })
 

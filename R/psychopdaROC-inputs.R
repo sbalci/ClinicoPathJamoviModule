@@ -106,6 +106,7 @@
   all_groups <- split(seq_len(nrow(data)), match(ids, selected_ids))
   for (idx in all_groups) {
     values <- unique(as.character(data[[outcome]][idx]))
+    values[values == ""] <- NA_character_
     if (length(values[!is.na(values)]) > 1L)
       stop("patient_outcome",
         call. = FALSE)

@@ -23,6 +23,8 @@ _Note: This command intentionally avoids emoji and uses UI toggles to control vi
 - `vignettes/jamovi_b_R_guide.md` -- backend implementation
 - `vignettes/jamovi_tables_guide.md`, `jamovi_plots_guide.md` -- output patterns
 - `vignettes/jamovi_i18n_guide.md` -- internationalization checklist
+- `vignettes/jamovi_external_audit_learning_guide.md` -- external jYS lessons, exact test recipes
+  and the limits of static checks (reported fixes are not local verification)
 
 You are an expert R package and jamovi developer, and an expert biostatistician working closely with pathologists and clinicians. You are conducting a thorough, critical review of the jamovi function `$ARGUMENTS`, focusing on mathematical and statistical correctness, clinical readiness, code quality, best practices, performance, and maintainability.
 
@@ -186,6 +188,15 @@ Rscript -e 'testthat::test_file("tests/testthat/test-zzz-results-rendering-contr
 
 Checklist:
 
+- [ ] Every explicit `clearWith` list covers preprocessing, model, helper and drawing dependencies,
+      including seeds, levels and IDs where relevant. Name validity is not completeness; compare an
+      existing A → B run with fresh B, including nested images and filled Output columns.
+- [ ] Saved predictions/residuals pair original spreadsheet row IDs with values from the same
+      cleaned/reordered frame. Check nonconsecutive IDs, internal missingness and filter changes.
+- [ ] Renderers do not prepare sibling results. Dynamic array keys/state survive restoration;
+      record resize, protobuf replay, native export and desktop `.omv` checks separately.
+- [ ] Shared controls remain available for every active consumer; `enable:` values exist, and
+      off/on toggles preserve user choices. UI bounds are also validated in the backend.
 - [ ] Every `x <- image$state` read is followed by `if (is.null(x)) return(FALSE)`;
       every `image$state$field` read is preceded by a guard on the parent.
 - [ ] No `style=` attribute sets a hex `background-color` without a `color:`. Pale
@@ -253,6 +264,12 @@ Checklist:
 - Treatment of ties, censoring, competing risks, and clustering when applicable.
 - Handling of missing data (complete‑case vs imputation vs weighting) and clear communication of what is done.
 - Alignment with reference implementations (e.g., base R, survival, pROC, irr, cmprsk, lme4, etc.) for the same inputs.
+- Class-label/0–1/index encodings checked against exact confusion matrices; probabilities matched
+  by class name, bounded and labelled by their meaning. Training/CV/OOB provenance and Brier versus
+  accuracy verified independently. A class assertion or CV/training-closeness test is insufficient.
+- Seed scope begins before feature selection/fold allocation; learned preprocessing stays inside
+  training folds. Survival calculations respect start-stop data, subject identity, time origin and
+  the stated standardisation/variance target. See the external learning guide, recipes 3–4.
 
 ### Clinical & Release Readiness
 

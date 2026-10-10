@@ -12,6 +12,7 @@
   args <- utils::modifyList(list(data = data, dependentVars = c("m1", "m2"),
     classVar = "outcome", positiveClass = "case", negativeClass = "control",
     refVar = NULL, seed = 88), list(...), keep.null = TRUE)
+  if (!("run" %in% names(args))) args$run <- TRUE
   suppressMessages(suppressWarnings(do.call(ClinicoPath::psychopdaROC, args)))
 }
 .classes_capture <- function(result, array, renderer, key = NULL) {

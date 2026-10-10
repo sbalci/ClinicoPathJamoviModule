@@ -13,6 +13,7 @@ run_ps <- function(...) {
     args <- utils::modifyList(
         list(classVar = "disease_status", positiveClass = "Disease", negativeClass = "Healthy", refVar = NULL),
         list(...))
+    if (!("run" %in% names(args))) args$run <- TRUE
     do.call(ClinicoPath::psychopdaROC, args)
 }
 
@@ -24,7 +25,7 @@ tnote <- function(table, key) {
 }
 
 ps_private <- function(...) {
-    o <- do.call(ClinicoPath:::psychopdaROCOptions$new, list(...))
+    o <- do.call(ClinicoPath:::psychopdaROCOptions$new, utils::modifyList(list(run = TRUE), list(...), keep.null = TRUE))
     a <- ClinicoPath:::psychopdaROCClass$new(options = o, data = ps_data())
     a$init()
     list(a = a, p = a$.__enclos_env__$private)
@@ -86,7 +87,7 @@ test_that("tables do not accumulate rows across re-runs", {
     set.seed(7)
     d$marker2 <- d$biomarker + rnorm(nrow(d), 0, 1.5)
     o <- ClinicoPath:::psychopdaROCOptions$new(
-        dependentVars = c("biomarker", "marker2"), classVar = "disease_status",
+        run = TRUE, dependentVars = c("biomarker", "marker2"), classVar = "disease_status",
         positiveClass = "Disease", negativeClass = "Healthy", refVar = "biomarker",
         sensSpecTable = TRUE, delongTest = TRUE, partialAUC = TRUE,
         clinicalUtilityAnalysis = TRUE, effectSizeAnalysis = TRUE, powerAnalysis = TRUE)
@@ -380,7 +381,8 @@ test_that("every active option is read and retired options are hidden", {
     a_yaml <- readLines("../../jamovi/psychopdaROC.a.yaml", warn = FALSE)
     declared <- sub("^    - name: ", "", grep("^    - name: [A-Za-z0-9_]+$", a_yaml, value = TRUE))
     schema <- yaml::read_yaml("../../jamovi/psychopdaROC.a.yaml")
-    retired <- c("metaAnalysisMethod", "heterogeneityTest", "forestPlot", "overrideMetaAnalysisWarning")
+    retired <- c("correlationROCs", "metaAnalysisMethod", "heterogeneityTest",
+      "forestPlot", "overrideMetaAnalysisWarning")
     for (option in Filter(function(x) x$name %in% retired, schema$options))
         expect_true(isTRUE(option$hidden), info = option$name)
     declared <- setdiff(declared, c("data", retired))
@@ -399,7 +401,7 @@ test_that("the DeLong fallback preserves the declared score direction", {
     d$good <- c(rnorm(n / 2, 1), rnorm(n / 2, 0))   # higher in positives
     d$flip <- c(rnorm(n / 2, 0), rnorm(n / 2, 1))   # lower  in positives -> AUC < 0.5
 
-    o <- ClinicoPath:::psychopdaROCOptions$new(dependentVars = c("good", "flip"),
+    o <- ClinicoPath:::psychopdaROCOptions$new(run = TRUE, dependentVars = c("good", "flip"),
              classVar = "cls", positiveClass = "pos", negativeClass = "neg", direction = ">=", delongTest = TRUE)
     a <- ClinicoPath:::psychopdaROCClass$new(options = o, data = d)
     res <- a$.__enclos_env__$private$.deLongTest(
@@ -436,7 +438,7 @@ test_that("DeLong's test warns when a class is too small for its asymptotics", {
         d <- data.frame(cls = c(rep("pos", npos), rep("neg", nneg)))
         d$m1 <- c(rnorm(npos, 1),   rnorm(nneg, 0))
         d$m2 <- c(rnorm(npos, 0.6), rnorm(nneg, 0))
-        o <- ClinicoPath:::psychopdaROCOptions$new(dependentVars = c("m1", "m2"),
+        o <- ClinicoPath:::psychopdaROCOptions$new(run = TRUE, dependentVars = c("m1", "m2"),
                  classVar = "cls", positiveClass = "pos", negativeClass = "neg", direction = ">=", delongTest = TRUE)
         a <- ClinicoPath:::psychopdaROCClass$new(options = o, data = d)
         a$init(); a$.__enclos_env__$private$.run()
@@ -455,7 +457,7 @@ test_that("DeLong's test warns when a class is too small for its asymptotics", {
 # --- 2026-09-03 /fix-function: stale per-run state, late warnings, NULL positive class, NA strata ---
 
 ps_private_data <- function(d, ...) {
-    o <- do.call(ClinicoPath:::psychopdaROCOptions$new, list(...))
+    o <- do.call(ClinicoPath:::psychopdaROCOptions$new, utils::modifyList(list(run = TRUE), list(...), keep.null = TRUE))
     a <- ClinicoPath:::psychopdaROCClass$new(options = o, data = d)
     a$init()
     list(a = a, p = a$.__enclos_env__$private)
@@ -568,7 +570,7 @@ test_that("power curve plot uses the table's Hanley-McNeil power and renders", {
     expect_equal(st$auc_target, 0.7)
     expect_equal(st$required_n, tab$required_n)
     # the required N is the smallest n reaching the target on the SAME power function the plot draws
-    powr <- function(n) pr$p$.hanleyMcNeilPower(0.7, n, st$pos_frac, 0.05, st$adjustment_factor)
+    powr <- function(n) pr$p$.hanleyMcNeilPower(0.7, n, st$pos_frac, 0.05)
     expect_gte(powr(tab$required_n), 0.8)
     expect_lt(powr(tab$required_n - 1), 0.8)
     expect_true(pr$p$.plotPowerCurves(pr$a$results$powerCurvePlot$get(key = "biomarker"), ggplot2::theme_minimal(), NULL))
@@ -839,7 +841,7 @@ test_that("Analysis Status and Procedure Notes are emptied and hidden when the s
     # Neither clears with an option, and jamovi hands back an Html item's previous content: after the positive
     # class was unset, 'Positive Class: Disease' stayed on screen.
     mk <- function(...) {
-        a <- ClinicoPath:::psychopdaROCClass$new(options = do.call(ClinicoPath:::psychopdaROCOptions$new, list(...)), data = ps_data())
+        a <- ClinicoPath:::psychopdaROCClass$new(options = do.call(ClinicoPath:::psychopdaROCOptions$new, utils::modifyList(list(run = TRUE), list(...), keep.null = TRUE)), data = ps_data())
         a$init()
         a
     }
@@ -906,7 +908,7 @@ test_that("the DeLong fallback reads the markers in the chosen Classification Di
     d <- ps_data()
     set.seed(5)
     S <- data.frame(biomarker = d$biomarker, m2 = d$biomarker + rnorm(nrow(d), 0, 15))
-    o <- ClinicoPath:::psychopdaROCOptions$new(dependentVars = names(S), classVar = "cls", positiveClass = "Healthy", negativeClass = "Disease",
+    o <- ClinicoPath:::psychopdaROCOptions$new(run = TRUE, dependentVars = names(S), classVar = "cls", positiveClass = "Healthy", negativeClass = "Disease",
                                                direction = "<=", refVar = NULL)
     a <- ClinicoPath:::psychopdaROCClass$new(options = o, data = cbind(S, cls = d$disease_status))
     r <- a$.__enclos_env__$private$.deLongTest(data = S, classVar = as.character(d$disease_status), positiveClass = "Healthy")
