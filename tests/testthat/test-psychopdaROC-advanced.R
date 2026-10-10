@@ -1,5 +1,5 @@
-# `positiveClass` is a `type: Level` option. The jamovi compiler forbids a default on a Level, so
-# it compiles to a REQUIRED argument of the generated wrapper; this helper supplies just that one.
+# Both class selectors are Level options with required wrapper arguments.
+# Supply only empty selections when omitted; never infer a class from the data.
 # (`refVar`, Reference Test for IDI/NRI, is a `type: Variable` with a NULL default since 2026-10-09.)
 #
 # It used to fill EVERY argument that had no default with "" -- including `dependentVars` and
@@ -8,6 +8,7 @@
 psychopdaROC <- function(...) {
   args <- list(...)
   if (!("positiveClass" %in% names(args))) args$positiveClass <- ""
+  if (!("negativeClass" %in% names(args))) args$negativeClass <- ""
   do.call(ClinicoPath::psychopdaROC, args)
 }
 
@@ -62,7 +63,7 @@ test_that("effect size analysis works with two variables", {
       data = data,
       dependentVars = c("marker_excellent", "marker_good"),
       classVar = "diagnosis",
-      positiveClass = "Positive",
+      positiveClass = "Positive", negativeClass = "Negative",
       effectSizeAnalysis = TRUE
     )
   })
@@ -76,7 +77,7 @@ test_that("effect size analysis works with multiple variables", {
       data = data,
       dependentVars = c("marker_excellent", "marker_good", "marker_moderate"),
       classVar = "diagnosis",
-      positiveClass = "Positive",
+      positiveClass = "Positive", negativeClass = "Negative",
       effectSizeAnalysis = TRUE
     )
   })
@@ -94,7 +95,7 @@ test_that("post-hoc power analysis works", {
       data = data,
       dependentVars = "marker_excellent",
       classVar = "diagnosis",
-      positiveClass = "Positive",
+      positiveClass = "Positive", negativeClass = "Negative",
       powerAnalysis = TRUE,
       powerAnalysisType = "post_hoc"
     )
@@ -109,7 +110,7 @@ test_that("prospective power analysis works", {
       data = data,
       dependentVars = "marker_excellent",
       classVar = "diagnosis",
-      positiveClass = "Positive",
+      positiveClass = "Positive", negativeClass = "Negative",
       powerAnalysis = TRUE,
       powerAnalysisType = "prospective",
       expectedAUCDifference = 0.1,
@@ -127,7 +128,7 @@ test_that("sample size estimation works", {
       data = data,
       dependentVars = "marker_excellent",
       classVar = "diagnosis",
-      positiveClass = "Positive",
+      positiveClass = "Positive", negativeClass = "Negative",
       powerAnalysis = TRUE,
       powerAnalysisType = "sample_size",
       expectedAUCDifference = 0.15,
@@ -148,7 +149,7 @@ test_that("Bayesian/bootstrap ROC analysis works with defaults", {
       data = data,
       dependentVars = "marker_excellent",
       classVar = "diagnosis",
-      positiveClass = "Positive",
+      positiveClass = "Positive", negativeClass = "Negative",
       bayesianAnalysis = TRUE,
       bootstrapReps = 200  # Reduced for testing speed
     )
@@ -163,7 +164,7 @@ test_that("Bayesian analysis respects prior parameters", {
       data = data,
       dependentVars = "marker_excellent",
       classVar = "diagnosis",
-      positiveClass = "Positive",
+      positiveClass = "Positive", negativeClass = "Negative",
       bayesianAnalysis = TRUE,
       priorAUC = 0.8,
       priorPrecision = 20,
@@ -180,7 +181,7 @@ test_that("Bayesian analysis works with multiple variables", {
       data = data,
       dependentVars = c("marker_excellent", "marker_good"),
       classVar = "diagnosis",
-      positiveClass = "Positive",
+      positiveClass = "Positive", negativeClass = "Negative",
       bayesianAnalysis = TRUE,
       bootstrapReps = 200
     )
@@ -199,7 +200,7 @@ test_that("clinical utility analysis works with defaults", {
       data = data,
       dependentVars = "marker_excellent",
       classVar = "diagnosis",
-      positiveClass = "Positive",
+      positiveClass = "Positive", negativeClass = "Negative",
       clinicalUtilityAnalysis = TRUE
     )
   })
@@ -213,7 +214,7 @@ test_that("clinical utility respects treatment threshold range", {
       data = data,
       dependentVars = "marker_excellent",
       classVar = "diagnosis",
-      positiveClass = "Positive",
+      positiveClass = "Positive", negativeClass = "Negative",
       clinicalUtilityAnalysis = TRUE,
       treatmentThreshold = "0.1,0.4,0.1"
     )
@@ -228,7 +229,7 @@ test_that("clinical utility respects harm-benefit ratio", {
       data = data,
       dependentVars = "marker_excellent",
       classVar = "diagnosis",
-      positiveClass = "Positive",
+      positiveClass = "Positive", negativeClass = "Negative",
       clinicalUtilityAnalysis = TRUE,
       harmBenefitRatio = 0.5
     )
@@ -243,7 +244,7 @@ test_that("clinical utility with intervention cost analysis", {
       data = data,
       dependentVars = "marker_excellent",
       classVar = "diagnosis",
-      positiveClass = "Positive",
+      positiveClass = "Positive", negativeClass = "Negative",
       clinicalUtilityAnalysis = TRUE,
       interventionCost = TRUE
     )
@@ -262,7 +263,7 @@ test_that("meta-analysis works with 3+ variables", {
       data = data,
       dependentVars = c("marker_excellent", "marker_good", "marker_moderate"),
       classVar = "diagnosis",
-      positiveClass = "Positive",
+      positiveClass = "Positive", negativeClass = "Negative",
       metaAnalysis = TRUE,
       overrideMetaAnalysisWarning = TRUE
     )
@@ -277,7 +278,7 @@ test_that("meta-analysis fixed effects model works", {
       data = data,
       dependentVars = c("marker_excellent", "marker_good", "marker_moderate", "marker_fair"),
       classVar = "diagnosis",
-      positiveClass = "Positive",
+      positiveClass = "Positive", negativeClass = "Negative",
       metaAnalysis = TRUE,
       metaAnalysisMethod = "fixed",
       overrideMetaAnalysisWarning = TRUE
@@ -293,7 +294,7 @@ test_that("meta-analysis random effects model works", {
       data = data,
       dependentVars = c("marker_excellent", "marker_good", "marker_moderate"),
       classVar = "diagnosis",
-      positiveClass = "Positive",
+      positiveClass = "Positive", negativeClass = "Negative",
       metaAnalysis = TRUE,
       metaAnalysisMethod = "random",
       overrideMetaAnalysisWarning = TRUE
@@ -309,7 +310,7 @@ test_that("meta-analysis both models works", {
       data = data,
       dependentVars = c("marker_excellent", "marker_good", "marker_moderate"),
       classVar = "diagnosis",
-      positiveClass = "Positive",
+      positiveClass = "Positive", negativeClass = "Negative",
       metaAnalysis = TRUE,
       metaAnalysisMethod = "both",
       heterogeneityTest = TRUE,
@@ -326,7 +327,7 @@ test_that("meta-analysis forest plot works", {
       data = data,
       dependentVars = c("marker_excellent", "marker_good", "marker_moderate"),
       classVar = "diagnosis",
-      positiveClass = "Positive",
+      positiveClass = "Positive", negativeClass = "Negative",
       metaAnalysis = TRUE,
       forestPlot = TRUE,
       overrideMetaAnalysisWarning = TRUE
@@ -343,7 +344,7 @@ test_that("meta-analysis with 5 variables works", {
       dependentVars = c("marker_excellent", "marker_good", "marker_moderate",
                         "marker_fair", "marker_poor"),
       classVar = "diagnosis",
-      positiveClass = "Positive",
+      positiveClass = "Positive", negativeClass = "Negative",
       metaAnalysis = TRUE,
       metaAnalysisMethod = "both",
       heterogeneityTest = TRUE,
@@ -365,7 +366,7 @@ test_that("fixed sensitivity analysis works", {
       data = data,
       dependentVars = "marker_excellent",
       classVar = "diagnosis",
-      positiveClass = "Positive",
+      positiveClass = "Positive", negativeClass = "Negative",
       fixedSensSpecAnalysis = TRUE,
       fixedAnalysisType = "sensitivity",
       fixedSensitivityValue = 0.90
@@ -381,7 +382,7 @@ test_that("fixed specificity analysis works", {
       data = data,
       dependentVars = "marker_excellent",
       classVar = "diagnosis",
-      positiveClass = "Positive",
+      positiveClass = "Positive", negativeClass = "Negative",
       fixedSensSpecAnalysis = TRUE,
       fixedAnalysisType = "specificity",
       fixedSpecificityValue = 0.95
@@ -398,7 +399,7 @@ test_that("fixed sensitivity with different interpolation methods", {
         data = data,
         dependentVars = "marker_excellent",
         classVar = "diagnosis",
-        positiveClass = "Positive",
+        positiveClass = "Positive", negativeClass = "Negative",
         fixedSensSpecAnalysis = TRUE,
         fixedAnalysisType = "sensitivity",
         fixedSensitivityValue = 0.90,
@@ -416,7 +417,7 @@ test_that("fixed sensitivity ROC plot works", {
       data = data,
       dependentVars = "marker_excellent",
       classVar = "diagnosis",
-      positiveClass = "Positive",
+      positiveClass = "Positive", negativeClass = "Negative",
       fixedSensSpecAnalysis = TRUE,
       fixedAnalysisType = "sensitivity",
       fixedSensitivityValue = 0.90,
@@ -434,7 +435,7 @@ test_that("fixed analysis with multiple variables", {
       data = data,
       dependentVars = c("marker_excellent", "marker_good"),
       classVar = "diagnosis",
-      positiveClass = "Positive",
+      positiveClass = "Positive", negativeClass = "Negative",
       fixedSensSpecAnalysis = TRUE,
       fixedAnalysisType = "sensitivity",
       fixedSensitivityValue = 0.85
@@ -454,7 +455,7 @@ test_that("partial AUC with default range", {
       data = data,
       dependentVars = "marker_excellent",
       classVar = "diagnosis",
-      positiveClass = "Positive",
+      positiveClass = "Positive", negativeClass = "Negative",
       partialAUC = TRUE,
       partialAUCfrom = 0.8,
       partialAUCto = 1.0
@@ -470,7 +471,7 @@ test_that("partial AUC with custom range", {
       data = data,
       dependentVars = "marker_excellent",
       classVar = "diagnosis",
-      positiveClass = "Positive",
+      positiveClass = "Positive", negativeClass = "Negative",
       partialAUC = TRUE,
       partialAUCfrom = 0.6,
       partialAUCto = 0.9
@@ -486,7 +487,7 @@ test_that("partial AUC with multiple variables", {
       data = data,
       dependentVars = c("marker_excellent", "marker_good"),
       classVar = "diagnosis",
-      positiveClass = "Positive",
+      positiveClass = "Positive", negativeClass = "Negative",
       partialAUC = TRUE,
       partialAUCfrom = 0.8,
       partialAUCto = 1.0
@@ -506,7 +507,7 @@ test_that("bootstrap CIs work with reduced replications", {
       data = data,
       dependentVars = "marker_excellent",
       classVar = "diagnosis",
-      positiveClass = "Positive",
+      positiveClass = "Positive", negativeClass = "Negative",
       bootstrapCI = TRUE,
       bootstrapReps = 200
     )
@@ -521,7 +522,7 @@ test_that("bootstrap CIs work with multiple variables", {
       data = data,
       dependentVars = c("marker_excellent", "marker_good"),
       classVar = "diagnosis",
-      positiveClass = "Positive",
+      positiveClass = "Positive", negativeClass = "Negative",
       bootstrapCI = TRUE,
       bootstrapReps = 200
     )
@@ -540,7 +541,7 @@ test_that("binormal ROC smoothing works", {
       data = data,
       dependentVars = "marker_excellent",
       classVar = "diagnosis",
-      positiveClass = "Positive",
+      positiveClass = "Positive", negativeClass = "Negative",
       rocSmoothingMethod = "binormal"
     )
   })
@@ -554,7 +555,7 @@ test_that("density-based ROC smoothing works", {
       data = data,
       dependentVars = "marker_excellent",
       classVar = "diagnosis",
-      positiveClass = "Positive",
+      positiveClass = "Positive", negativeClass = "Negative",
       rocSmoothingMethod = "density"
     )
   })
@@ -572,7 +573,7 @@ test_that("IDI with reference variable selection", {
       data = data,
       dependentVars = c("marker_excellent", "marker_good", "marker_moderate"),
       classVar = "diagnosis",
-      positiveClass = "Positive",
+      positiveClass = "Positive", negativeClass = "Negative",
       calculateIDI = TRUE,
       refVar = "marker_excellent",
       idiNriBootRuns = 200
@@ -588,7 +589,7 @@ test_that("NRI with custom thresholds", {
       data = data,
       dependentVars = c("marker_excellent", "marker_good"),
       classVar = "diagnosis",
-      positiveClass = "Positive",
+      positiveClass = "Positive", negativeClass = "Negative",
       calculateNRI = TRUE,
       refVar = "marker_excellent",
       nriThresholds = "0.2,0.5,0.8",
@@ -605,7 +606,7 @@ test_that("continuous NRI works (empty thresholds)", {
       data = data,
       dependentVars = c("marker_excellent", "marker_good"),
       classVar = "diagnosis",
-      positiveClass = "Positive",
+      positiveClass = "Positive", negativeClass = "Negative",
       calculateNRI = TRUE,
       refVar = "marker_excellent",
       nriThresholds = "",
@@ -622,7 +623,7 @@ test_that("combined IDI and NRI analysis", {
       data = data,
       dependentVars = c("marker_excellent", "marker_good"),
       classVar = "diagnosis",
-      positiveClass = "Positive",
+      positiveClass = "Positive", negativeClass = "Negative",
       calculateIDI = TRUE,
       calculateNRI = TRUE,
       refVar = "marker_excellent",
@@ -643,7 +644,7 @@ test_that("classifier comparison with multiple variables", {
       data = data,
       dependentVars = c("marker_excellent", "marker_good", "marker_moderate"),
       classVar = "diagnosis",
-      positiveClass = "Positive",
+      positiveClass = "Positive", negativeClass = "Negative",
       compareClassifiers = TRUE
     )
   })
@@ -661,7 +662,7 @@ test_that("prior prevalence adjustment works", {
       data = data,
       dependentVars = "marker_excellent",
       classVar = "diagnosis",
-      positiveClass = "Positive",
+      positiveClass = "Positive", negativeClass = "Negative",
       usePriorPrev = TRUE,
       priorPrev = 0.1
     )
@@ -676,7 +677,7 @@ test_that("prior prevalence with high prevalence", {
       data = data,
       dependentVars = "marker_excellent",
       classVar = "diagnosis",
-      positiveClass = "Positive",
+      positiveClass = "Positive", negativeClass = "Negative",
       usePriorPrev = TRUE,
       priorPrev = 0.8
     )
@@ -695,7 +696,7 @@ test_that("clean publication plot works", {
       data = data,
       dependentVars = "marker_excellent",
       classVar = "diagnosis",
-      positiveClass = "Positive",
+      positiveClass = "Positive", negativeClass = "Negative",
       plotROC = TRUE,
       cleanPlot = TRUE
     )
@@ -710,7 +711,7 @@ test_that("confidence bands on ROC curve", {
       data = data,
       dependentVars = "marker_excellent",
       classVar = "diagnosis",
-      positiveClass = "Positive",
+      positiveClass = "Positive", negativeClass = "Negative",
       plotROC = TRUE,
       showConfidenceBands = TRUE
     )
@@ -725,7 +726,7 @@ test_that("quantile CIs on ROC curve", {
       data = data,
       dependentVars = "marker_excellent",
       classVar = "diagnosis",
-      positiveClass = "Positive",
+      positiveClass = "Positive", negativeClass = "Negative",
       plotROC = TRUE,
       quantileCIs = TRUE,
       quantiles = "0.25,0.5,0.75"
@@ -741,7 +742,7 @@ test_that("direct curve labels work", {
       data = data,
       dependentVars = c("marker_excellent", "marker_good"),
       classVar = "diagnosis",
-      positiveClass = "Positive",
+      positiveClass = "Positive", negativeClass = "Negative",
       plotROC = TRUE,
       combinePlots = TRUE,
       directLabel = TRUE
@@ -758,7 +759,7 @@ test_that("different legend positions work", {
         data = data,
         dependentVars = c("marker_excellent", "marker_good"),
         classVar = "diagnosis",
-        positiveClass = "Positive",
+        positiveClass = "Positive", negativeClass = "Negative",
         plotROC = TRUE,
         combinePlots = TRUE,
         legendPosition = pos
@@ -775,7 +776,7 @@ test_that("LOESS smoothing with SE bands", {
       data = data,
       dependentVars = "marker_excellent",
       classVar = "diagnosis",
-      positiveClass = "Positive",
+      positiveClass = "Positive", negativeClass = "Negative",
       plotROC = TRUE,
       smoothing = TRUE,
       displaySE = TRUE

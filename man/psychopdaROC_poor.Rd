@@ -29,7 +29,7 @@ Tests proper handling and warning messages for biomarkers with no diagnostic val
 \examples{
 data(psychopdaROC_poor)
 psychopdaROC(data = psychopdaROC_poor, dependentVars = "poor_marker",
-             classVar = "status", positiveClass = "Case",
+             classVar = "status", positiveClass = "Case", negativeClass = "Control",
              refVar = "poor_marker")
 
 }

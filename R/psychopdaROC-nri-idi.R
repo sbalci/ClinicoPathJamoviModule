@@ -245,6 +245,13 @@ computeNRI <- function(new_values, ref_values, actual,
                     fit_warning = fit_warning))
     }
 
+    # Fitted probabilities can differ by roundoff for the same model in different
+    # units. Treat differences within sqrt(machine epsilon) as numerical ties,
+    # including at category boundaries; this is not a clinical risk threshold.
+    probability_tolerance <- sqrt(.Machine$double.eps)
+    tied <- usable & abs(new_probs - ref_probs) <= probability_tolerance
+    new_probs[tied] <- ref_probs[tied]
+
     if (is.null(thresholds) || length(thresholds) == 0) {
         # Continuous NRI
         up_events <- sum(new_probs[events] > ref_probs[events], na.rm = TRUE)
@@ -314,8 +321,10 @@ computeNRI <- function(new_values, ref_values, actual,
 
 # Only psychopdaROC uses these, so they ship with meddecide/jsurvival/JamoviTest.
 
-#' Convert raw test values to predicted probabilities using ROC curve
-#' @description Maps raw test values to probabilities based on their position in the ROC curve
+#' Convert raw test values to fitted logistic probabilities
+#' @description Fits a logistic regression of the binary outcome on the marker.
+#'   The predictor is centered and scaled internally to keep fitted probabilities
+#'   stable when measurement units change.
 #' @param values Raw test values
 #' @param actual Binary outcomes (0/1)
 #' @param direction Direction of test (">=" or "<=")
@@ -355,8 +364,15 @@ raw_to_prob <- function(values, actual, direction = ">=", warn = TRUE) {
     fit_warnings <- character(0)
     glm_result <- tryCatch(
         withCallingHandlers({
+            center <- mean(predictor)
+            spread <- max(abs(predictor - center))
+            if (!is.finite(center) || !is.finite(spread))
+                stop("Marker values must be finite")
+            if (spread == 0) spread <- 1
+            predictor <- (predictor - center) / spread
             model <- stats::glm(actual_clean ~ predictor, family = binomial(link = "logit"))
             new_predictor <- if (direction == "<=") -values else values
+            new_predictor <- (new_predictor - center) / spread
             stats::predict(model, newdata = data.frame(predictor = new_predictor), type = "response")
         }, warning = function(w) {
             fit_warnings <<- c(fit_warnings, conditionMessage(w))

@@ -28,7 +28,7 @@
 #' @examples
 #' data(psychopdaROC_test)
 #' psychopdaROC(data = psychopdaROC_test, dependentVars = "biomarker",
-#'              classVar = "disease_status", positiveClass = "Disease",
+#'              classVar = "disease_status", positiveClass = "Disease", negativeClass = "Healthy",
 #'              refVar = "biomarker")
 #'
 #' @source Generated test data for ClinicoPath package
@@ -61,7 +61,7 @@
 #' data(psychopdaROC_screening)
 #' psychopdaROC(data = psychopdaROC_screening,
 #'              dependentVars = c("psa_level", "ca125"),
-#'              classVar = "cancer", positiveClass = "Cancer",
+#'              classVar = "cancer", positiveClass = "Cancer", negativeClass = "No_Cancer",
 #'              refVar = "psa_level")
 #'
 #' @source Generated test data for ClinicoPath package
@@ -92,7 +92,7 @@
 #' data(psychopdaROC_cardiac)
 #' psychopdaROC(data = psychopdaROC_cardiac,
 #'              dependentVars = c("troponin", "creatinine", "bnp"),
-#'              classVar = "mi_status", positiveClass = "MI",
+#'              classVar = "mi_status", positiveClass = "MI", negativeClass = "No_MI",
 #'              refVar = "troponin",
 #'              method = "maximize_metric", metric = "youden")
 #'
@@ -124,7 +124,7 @@
 #' data(psychopdaROC_multibiomarker)
 #' psychopdaROC(data = psychopdaROC_multibiomarker,
 #'              dependentVars = c("marker1", "marker2", "marker3", "combined_score"),
-#'              classVar = "diagnosis", positiveClass = "Positive",
+#'              classVar = "diagnosis", positiveClass = "Positive", negativeClass = "Negative",
 #'              refVar = "marker1",
 #'              clinicalMode = "comprehensive")
 #'
@@ -155,7 +155,7 @@
 #' data(psychopdaROC_subgroup)
 #' psychopdaROC(data = psychopdaROC_subgroup,
 #'              dependentVars = "test_score", classVar = "disease",
-#'              positiveClass = "Disease", refVar = "test_score",
+#'              positiveClass = "Disease", negativeClass = "Healthy", refVar = "test_score",
 #'              subGroup = "age_group")
 #'
 #' @source Generated test data for ClinicoPath package
@@ -182,7 +182,7 @@
 #' @examples
 #' data(psychopdaROC_perfect)
 #' psychopdaROC(data = psychopdaROC_perfect, dependentVars = "perfect_test",
-#'              classVar = "condition", positiveClass = "Positive",
+#'              classVar = "condition", positiveClass = "Positive", negativeClass = "Negative",
 #'              refVar = "perfect_test")
 #'
 #' @source Generated test data for ClinicoPath package
@@ -208,7 +208,7 @@
 #' @examples
 #' data(psychopdaROC_poor)
 #' psychopdaROC(data = psychopdaROC_poor, dependentVars = "poor_marker",
-#'              classVar = "status", positiveClass = "Case",
+#'              classVar = "status", positiveClass = "Case", negativeClass = "Control",
 #'              refVar = "poor_marker")
 #'
 #' @source Generated test data for ClinicoPath package
@@ -236,7 +236,7 @@
 #' @examples
 #' data(psychopdaROC_overlap)
 #' psychopdaROC(data = psychopdaROC_overlap, dependentVars = "test_value",
-#'              classVar = "diagnosis", positiveClass = "Diseased",
+#'              classVar = "diagnosis", positiveClass = "Diseased", negativeClass = "Non_Diseased",
 #'              refVar = "test_value")
 #'
 #' @source Generated test data for ClinicoPath package
@@ -263,7 +263,7 @@
 #' @examples
 #' data(psychopdaROC_rare)
 #' psychopdaROC(data = psychopdaROC_rare, dependentVars = "biomarker",
-#'              classVar = "rare_disease", positiveClass = "Disease",
+#'              classVar = "rare_disease", positiveClass = "Disease", negativeClass = "No_Disease",
 #'              refVar = "biomarker")
 #'
 #' @source Generated test data for ClinicoPath package
@@ -292,7 +292,7 @@
 #' @examples
 #' data(psychopdaROC_costbenefit)
 #' psychopdaROC(data = psychopdaROC_costbenefit, dependentVars = "risk_score",
-#'              classVar = "outcome", positiveClass = "Event",
+#'              classVar = "outcome", positiveClass = "Event", negativeClass = "No_Event",
 #'              refVar = "risk_score",
 #'              method = "oc_cost_ratio")
 #'
@@ -321,7 +321,7 @@
 #' @examples
 #' data(psychopdaROC_spectrum)
 #' psychopdaROC(data = psychopdaROC_spectrum, dependentVars = "continuous_marker",
-#'              classVar = "binary_status", positiveClass = "Positive",
+#'              classVar = "binary_status", positiveClass = "Positive", negativeClass = "Negative",
 #'              refVar = "continuous_marker")
 #'
 #' @source Generated test data for ClinicoPath package
@@ -351,7 +351,7 @@
 #' data(psychopdaROC_timedep)
 #' psychopdaROC(data = psychopdaROC_timedep,
 #'              dependentVars = c("baseline_marker", "followup_marker"),
-#'              classVar = "outcome", positiveClass = "Event",
+#'              classVar = "outcome", positiveClass = "Event", negativeClass = "No_Event",
 #'              refVar = "baseline_marker")
 #'
 #' @source Generated test data for ClinicoPath package
@@ -377,7 +377,7 @@
 #' @examples
 #' data(psychopdaROC_small)
 #' psychopdaROC(data = psychopdaROC_small, dependentVars = "marker",
-#'              classVar = "class", positiveClass = "Positive",
+#'              classVar = "class", positiveClass = "Positive", negativeClass = "Negative",
 #'              refVar = "marker")
 #'
 #' @source Generated test data for ClinicoPath package
@@ -404,7 +404,7 @@
 #' @examples
 #' data(psychopdaROC_imbalanced)
 #' psychopdaROC(data = psychopdaROC_imbalanced, dependentVars = "predictor",
-#'              classVar = "rare_outcome", positiveClass = "Event",
+#'              classVar = "rare_outcome", positiveClass = "Event", negativeClass = "No_Event",
 #'              refVar = "predictor")
 #'
 #' @source Generated test data for ClinicoPath package
@@ -434,7 +434,7 @@
 #' data(psychopdaROC_missing)
 #' psychopdaROC(data = psychopdaROC_missing,
 #'              dependentVars = c("test_a", "test_b"),
-#'              classVar = "diagnosis", positiveClass = "Disease",
+#'              classVar = "diagnosis", positiveClass = "Disease", negativeClass = "Healthy",
 #'              refVar = "test_a")
 #'
 #' @source Generated test data for ClinicoPath package
@@ -460,7 +460,7 @@
 #' @examples
 #' data(psychopdaROC_constant)
 #' psychopdaROC(data = psychopdaROC_constant, dependentVars = "constant_marker",
-#'              classVar = "outcome", positiveClass = "Positive",
+#'              classVar = "outcome", positiveClass = "Positive", negativeClass = "Negative",
 #'              refVar = "constant_marker")
 #'
 #' @source Generated test data for ClinicoPath package
@@ -493,7 +493,7 @@
 #' data(psychopdaROC_large)
 #' psychopdaROC(data = psychopdaROC_large,
 #'              dependentVars = c("biomarker1", "biomarker2"),
-#'              classVar = "disease_status", positiveClass = "Disease",
+#'              classVar = "disease_status", positiveClass = "Disease", negativeClass = "No_Disease",
 #'              refVar = "biomarker1")
 #'
 #' @source Generated test data for ClinicoPath package

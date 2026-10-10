@@ -103,7 +103,7 @@ tryCatch({
     data = data_clean,
     dependentVars = "test1",
     classVar = "outcome",
-    positiveClass = "Disease"
+    positiveClass = "Disease", negativeClass = "Healthy"
   )
   cat("✓ PASS\n")
   test_results$test_1_1 <- "PASS"
@@ -119,7 +119,7 @@ tryCatch({
     data = data_clean,
     dependentVars = c("test1", "test2", "test3"),
     classVar = "outcome",
-    positiveClass = "Disease"
+    positiveClass = "Disease", negativeClass = "Healthy"
   )
   cat("✓ PASS\n")
   test_results$test_1_2 <- "PASS"
@@ -135,7 +135,7 @@ tryCatch({
     data = data_with_na,
     dependentVars = "test1",
     classVar = "outcome",
-    positiveClass = "Disease"
+    positiveClass = "Disease", negativeClass = "Healthy"
   )
   cat("✓ PASS\n")
   test_results$test_1_3 <- "PASS"
@@ -151,7 +151,7 @@ tryCatch({
     data = data_clean,
     dependentVars = "test1",
     classVar = "outcome",
-    positiveClass = "Disease",
+    positiveClass = "Disease", negativeClass = "Healthy",
     subGroup = "subgroup"
   )
   cat("✓ PASS\n")
@@ -194,7 +194,7 @@ for (i in seq_along(cutpoint_methods)) {
         data = data_clean,
         dependentVars = "test1",
         classVar = "outcome",
-        positiveClass = "Disease",
+        positiveClass = "Disease", negativeClass = "Healthy",
         method = method,
         specifyCutScore = "2.0"
       )
@@ -203,7 +203,7 @@ for (i in seq_along(cutpoint_methods)) {
         data = data_clean,
         dependentVars = "test1",
         classVar = "outcome",
-        positiveClass = "Disease",
+        positiveClass = "Disease", negativeClass = "Healthy",
         method = method
       )
     }
@@ -245,7 +245,7 @@ for (i in seq_along(metrics)) {
       data = data_clean,
       dependentVars = "test1",
       classVar = "outcome",
-      positiveClass = "Disease",
+      positiveClass = "Disease", negativeClass = "Healthy",
       method = "maximize_metric",
       metric = metric
     )
@@ -270,7 +270,7 @@ tryCatch({
     data = data_clean,
     dependentVars = c("test1", "test2"),
     classVar = "outcome",
-    positiveClass = "Disease",
+    positiveClass = "Disease", negativeClass = "Healthy",
     delongTest = TRUE
   )
   cat("✓ PASS\n")
@@ -287,7 +287,7 @@ tryCatch({
     data = data_with_na,
     dependentVars = c("test1", "test2"),
     classVar = "outcome",
-    positiveClass = "Disease",
+    positiveClass = "Disease", negativeClass = "Healthy",
     delongTest = TRUE
   )
   cat("✓ PASS\n")
@@ -304,7 +304,7 @@ tryCatch({
     data = data_clean,
     dependentVars = c("test1", "test2"),
     classVar = "outcome",
-    positiveClass = "Disease",
+    positiveClass = "Disease", negativeClass = "Healthy",
     calculateIDI = TRUE,
     refVar = "test1",
     idiNriBootRuns = 50
@@ -323,7 +323,7 @@ tryCatch({
     data = data_clean,
     dependentVars = c("test1", "test2"),
     classVar = "outcome",
-    positiveClass = "Disease",
+    positiveClass = "Disease", negativeClass = "Healthy",
     calculateNRI = TRUE,
     refVar = "test1",
     nriThresholds = "0.3,0.7",
@@ -349,7 +349,7 @@ tryCatch({
     data = data_clean,
     dependentVars = "test1",
     classVar = "outcome",
-    positiveClass = "Disease",
+    positiveClass = "Disease", negativeClass = "Healthy",
     plotROC = TRUE
   )
   cat("✓ PASS\n")
@@ -366,7 +366,7 @@ tryCatch({
     data = data_clean,
     dependentVars = c("test1", "test2"),
     classVar = "outcome",
-    positiveClass = "Disease",
+    positiveClass = "Disease", negativeClass = "Healthy",
     plotROC = TRUE,
     combinePlots = TRUE
   )
@@ -384,7 +384,7 @@ tryCatch({
     data = data_clean,
     dependentVars = "test1",
     classVar = "outcome",
-    positiveClass = "Disease",
+    positiveClass = "Disease", negativeClass = "Healthy",
     showCriterionPlot = TRUE
   )
   cat("✓ PASS\n")
@@ -401,7 +401,7 @@ tryCatch({
     data = data_clean,
     dependentVars = "test1",
     classVar = "outcome",
-    positiveClass = "Disease",
+    positiveClass = "Disease", negativeClass = "Healthy",
     precisionRecallCurve = TRUE
   )
   cat("✓ PASS\n")
@@ -424,7 +424,7 @@ tryCatch({
     data = data_clean,
     dependentVars = "test1",
     classVar = "outcome",
-    positiveClass = "Disease",
+    positiveClass = "Disease", negativeClass = "Healthy",
     partialAUC = TRUE,
     partialAUCfrom = 0.8,
     partialAUCto = 1.0
@@ -443,7 +443,7 @@ tryCatch({
     data = data_clean,
     dependentVars = "test1",
     classVar = "outcome",
-    positiveClass = "Disease",
+    positiveClass = "Disease", negativeClass = "Healthy",
     bootstrapCI = TRUE,
     bootstrapReps = 50
   )
@@ -461,7 +461,7 @@ tryCatch({
     data = data_clean,
     dependentVars = c("test1", "test2"),
     classVar = "outcome",
-    positiveClass = "Disease",
+    positiveClass = "Disease", negativeClass = "Healthy",
     effectSizeAnalysis = TRUE
   )
   cat("✓ PASS\n")
@@ -478,7 +478,7 @@ tryCatch({
     data = data_clean,
     dependentVars = c("test1", "test2"),
     classVar = "outcome",
-    positiveClass = "Disease",
+    positiveClass = "Disease", negativeClass = "Healthy",
     powerAnalysis = TRUE,
     expectedAUCDifference = 0.1,
     targetPower = 0.8
@@ -503,7 +503,7 @@ tryCatch({
     data = data_clean,
     dependentVars = "test1",
     classVar = "outcome",
-    positiveClass = "Disease",
+    positiveClass = "Disease", negativeClass = "Healthy",
     fixedSensSpecAnalysis = TRUE,
     fixedAnalysisType = "sensitivity",
     fixedSensitivityValue = 0.9
@@ -522,7 +522,7 @@ tryCatch({
     data = data_clean,
     dependentVars = "test1",
     classVar = "outcome",
-    positiveClass = "Disease",
+    positiveClass = "Disease", negativeClass = "Healthy",
     fixedSensSpecAnalysis = TRUE,
     fixedAnalysisType = "specificity",
     fixedSpecificityValue = 0.9
@@ -545,7 +545,7 @@ for (i in seq_along(interpolation_methods)) {
       data = data_clean,
       dependentVars = "test1",
       classVar = "outcome",
-      positiveClass = "Disease",
+      positiveClass = "Disease", negativeClass = "Healthy",
       fixedSensSpecAnalysis = TRUE,
       fixedAnalysisType = "sensitivity",
       fixedSensitivityValue = 0.85,
@@ -576,7 +576,7 @@ for (i in seq_along(clinical_modes)) {
       data = data_clean,
       dependentVars = "test1",
       classVar = "outcome",
-      positiveClass = "Disease",
+      positiveClass = "Disease", negativeClass = "Healthy",
       clinicalMode = mode
     )
     cat("✓ PASS\n")
@@ -598,7 +598,7 @@ for (i in seq_along(clinical_presets)) {
       data = data_clean,
       dependentVars = "test1",
       classVar = "outcome",
-      positiveClass = "Disease",
+      positiveClass = "Disease", negativeClass = "Healthy",
       clinicalPreset = preset
     )
     cat("✓ PASS\n")

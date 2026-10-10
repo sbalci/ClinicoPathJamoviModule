@@ -2,7 +2,7 @@
 % Please edit documentation in R/psychopdaROC-nri-idi.R
 \name{raw_to_prob}
 \alias{raw_to_prob}
-\title{Convert raw test values to predicted probabilities using ROC curve}
+\title{Convert raw test values to fitted logistic probabilities}
 \usage{
 raw_to_prob(values, actual, direction = ">=", warn = TRUE)
 }
@@ -21,6 +21,8 @@ set this to \code{FALSE} and report one aggregate diagnostic instead.}
 Vector of predicted probabilities
 }
 \description{
-Maps raw test values to probabilities based on their position in the ROC curve
+Fits a logistic regression of the binary outcome on the marker.
+The predictor is centered and scaled internally to keep fitted probabilities
+stable when measurement units change.
 }
 \keyword{internal}

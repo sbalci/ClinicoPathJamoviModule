@@ -33,7 +33,7 @@ generalizability across populations.
 data(psychopdaROC_subgroup)
 psychopdaROC(data = psychopdaROC_subgroup,
              dependentVars = "test_score", classVar = "disease",
-             positiveClass = "Disease", refVar = "test_score",
+             positiveClass = "Disease", negativeClass = "Healthy", refVar = "test_score",
              subGroup = "age_group")
 
 }

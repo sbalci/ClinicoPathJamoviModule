@@ -74,7 +74,7 @@ test_that("basic ROC analysis works with default parameters", {
       data = data,
       dependentVars = "test1",
       classVar = "outcome",
-      positiveClass = "Disease"
+      positiveClass = "Disease", negativeClass = "Healthy"
     ,
       refVar = NULL
     )
@@ -85,7 +85,7 @@ test_that("basic ROC analysis works with default parameters", {
     data = data,
     dependentVars = "test1", 
     classVar = "outcome",
-    positiveClass = "Disease"
+    positiveClass = "Disease", negativeClass = "Healthy"
   ,
       refVar = NULL
     )
@@ -103,7 +103,7 @@ test_that("multiple test variables work correctly", {
       data = data,
       dependentVars = c("test1", "test2", "test3"),
       classVar = "outcome", 
-      positiveClass = "Disease",
+      positiveClass = "Disease", negativeClass = "Healthy",
       combinePlots = TRUE
     ,
       refVar = NULL
@@ -128,7 +128,7 @@ test_that("different cutpoint methods work correctly", {
           data = data,
           dependentVars = "test1",
           classVar = "outcome",
-          positiveClass = "Disease",
+          positiveClass = "Disease", negativeClass = "Healthy",
           method = method,
           specifyCutScore = "2.0"
         ,
@@ -141,7 +141,7 @@ test_that("different cutpoint methods work correctly", {
           data = data,
           dependentVars = "test1", 
           classVar = "outcome",
-          positiveClass = "Disease",
+          positiveClass = "Disease", negativeClass = "Healthy",
           method = method
         ,
       refVar = NULL
@@ -163,7 +163,7 @@ test_that("custom cutpoint methods work correctly", {
         data = data,
         dependentVars = "test1",
         classVar = "outcome", 
-        positiveClass = "Disease",
+        positiveClass = "Disease", negativeClass = "Healthy",
         method = method
       ,
       refVar = NULL
@@ -184,7 +184,7 @@ test_that("different optimization metrics work correctly", {
         data = data,
         dependentVars = "test1",
         classVar = "outcome",
-        positiveClass = "Disease", 
+        positiveClass = "Disease", negativeClass = "Healthy",
         metric = metric
       ,
       refVar = NULL
@@ -205,7 +205,7 @@ test_that("DeLong test works for comparing multiple AUCs", {
       data = data,
       dependentVars = c("test1", "test2"),
       classVar = "outcome",
-      positiveClass = "Disease",
+      positiveClass = "Disease", negativeClass = "Healthy",
       delongTest = TRUE
     ,
       refVar = NULL
@@ -217,7 +217,7 @@ test_that("DeLong test works for comparing multiple AUCs", {
     data = data,
     dependentVars = c("test1", "test2"),
     classVar = "outcome", 
-    positiveClass = "Disease",
+    positiveClass = "Disease", negativeClass = "Healthy",
     delongTest = TRUE
   ,
       refVar = NULL
@@ -234,7 +234,7 @@ test_that("IDI calculation works correctly", {
       data = data,
       dependentVars = c("test1", "test2"),
       classVar = "outcome",
-      positiveClass = "Disease",
+      positiveClass = "Disease", negativeClass = "Healthy",
       calculateIDI = TRUE,
       refVar = "test1",
       idiNriBootRuns = 100  # Reduced for faster testing
@@ -250,7 +250,7 @@ test_that("NRI calculation works correctly", {
       data = data,
       dependentVars = c("test1", "test2"), 
       classVar = "outcome",
-      positiveClass = "Disease",
+      positiveClass = "Disease", negativeClass = "Healthy",
       calculateNRI = TRUE,
       refVar = "test1",
       nriThresholds = "0.3,0.7",
@@ -267,7 +267,7 @@ test_that("partial AUC calculation works", {
       data = data,
       dependentVars = "test1",
       classVar = "outcome",
-      positiveClass = "Disease",
+      positiveClass = "Disease", negativeClass = "Healthy",
       partialAUC = TRUE,
       partialAUCfrom = 0.8,
       partialAUCto = 1.0
@@ -285,7 +285,7 @@ test_that("bootstrap confidence intervals work", {
       data = data,
       dependentVars = "test1",
       classVar = "outcome",
-      positiveClass = "Disease",
+      positiveClass = "Disease", negativeClass = "Healthy",
       bootstrapCI = TRUE,
       bootstrapReps = 100  # Reduced for faster testing
     ,
@@ -306,7 +306,7 @@ test_that("subgroup analysis works correctly", {
       data = data,
       dependentVars = "test1",
       classVar = "outcome",
-      positiveClass = "Disease",
+      positiveClass = "Disease", negativeClass = "Healthy",
       subGroup = "subgroup"
     ,
       refVar = NULL
@@ -322,7 +322,7 @@ test_that("subgroup analysis with DeLong test throws appropriate error", {
       data = data,
       dependentVars = c("test1", "test2"),
       classVar = "outcome",
-      positiveClass = "Disease",
+      positiveClass = "Disease", negativeClass = "Healthy",
       subGroup = "subgroup",
       delongTest = TRUE
     ,
@@ -343,7 +343,7 @@ test_that("basic ROC plotting works", {
       data = data,
       dependentVars = "test1", 
       classVar = "outcome",
-      positiveClass = "Disease",
+      positiveClass = "Disease", negativeClass = "Healthy",
       plotROC = TRUE
     ,
       refVar = NULL
@@ -359,7 +359,7 @@ test_that("combined plotting works with multiple variables", {
       data = data,
       dependentVars = c("test1", "test2"),
       classVar = "outcome",
-      positiveClass = "Disease",
+      positiveClass = "Disease", negativeClass = "Healthy",
       plotROC = TRUE,
       combinePlots = TRUE
     ,
@@ -376,7 +376,7 @@ test_that("additional plot types work", {
       data = data,
       dependentVars = "test1",
       classVar = "outcome", 
-      positiveClass = "Disease",
+      positiveClass = "Disease", negativeClass = "Healthy",
       plotROC = TRUE,
       showCriterionPlot = TRUE,
       showPrevalencePlot = TRUE,
@@ -395,7 +395,7 @@ test_that("precision-recall curves work", {
       data = data,
       dependentVars = "test1",
       classVar = "outcome",
-      positiveClass = "Disease", 
+      positiveClass = "Disease", negativeClass = "Healthy",
       precisionRecallCurve = TRUE
     ,
       refVar = NULL
@@ -415,7 +415,7 @@ test_that("sensitivity/specificity table works", {
       data = data,
       dependentVars = "test1",
       classVar = "outcome",
-      positiveClass = "Disease",
+      positiveClass = "Disease", negativeClass = "Healthy",
       sensSpecTable = TRUE
     ,
       refVar = NULL
@@ -431,7 +431,7 @@ test_that("threshold table works", {
       data = data,
       dependentVars = "test1",
       classVar = "outcome",
-      positiveClass = "Disease",
+      positiveClass = "Disease", negativeClass = "Healthy",
       showThresholdTable = TRUE,
       maxThresholds = 10
     ,
@@ -448,7 +448,7 @@ test_that("classifier comparison table works", {
       data = data,
       dependentVars = c("test1", "test2"),
       classVar = "outcome", 
-      positiveClass = "Disease",
+      positiveClass = "Disease", negativeClass = "Healthy",
       compareClassifiers = TRUE
     ,
       refVar = NULL
@@ -468,7 +468,7 @@ test_that("function handles missing inputs appropriately", {
     result <- psychopdaROC(
       data = data,
       classVar = "outcome",
-      positiveClass = "Disease"
+      positiveClass = "Disease", negativeClass = "Healthy"
     ,
       refVar = NULL
     )
@@ -479,7 +479,7 @@ test_that("function handles missing inputs appropriately", {
     result <- psychopdaROC(
       data = data,
       dependentVars = "test1",
-      positiveClass = "Disease"
+      positiveClass = "Disease", negativeClass = "Healthy"
     ,
       refVar = NULL
     )
@@ -495,7 +495,7 @@ test_that("function handles insufficient variables for advanced tests", {
       data = data,
       dependentVars = "test1",
       classVar = "outcome",
-      positiveClass = "Disease", 
+      positiveClass = "Disease", negativeClass = "Healthy",
       delongTest = TRUE
     ,
       refVar = NULL
@@ -508,7 +508,7 @@ test_that("function handles insufficient variables for advanced tests", {
       data = data,
       dependentVars = "test1",
       classVar = "outcome",
-      positiveClass = "Disease",
+      positiveClass = "Disease", negativeClass = "Healthy",
       calculateIDI = TRUE
     ,
       refVar = NULL
@@ -524,7 +524,7 @@ test_that("function handles manual cutpoint without score", {
       data = data,
       dependentVars = "test1",
       classVar = "outcome",
-      positiveClass = "Disease",
+      positiveClass = "Disease", negativeClass = "Healthy",
       method = "oc_manual",
       specifyCutScore = ""
     ,
@@ -545,7 +545,7 @@ test_that("function handles small sample sizes", {
       data = data,
       dependentVars = "test1",
       classVar = "outcome",
-      positiveClass = "Disease"
+      positiveClass = "Disease", negativeClass = "Healthy"
     ,
       refVar = NULL
     ))
@@ -567,7 +567,7 @@ test_that("function handles imbalanced classes", {
       data = data,
       dependentVars = "test_vals",
       classVar = "outcome",
-      positiveClass = "Disease"
+      positiveClass = "Disease", negativeClass = "Healthy"
     ,
       refVar = NULL
     ))
@@ -589,7 +589,7 @@ test_that("function handles perfect separation", {
       data = data,
       dependentVars = "test_vals", 
       classVar = "outcome",
-      positiveClass = "Disease"
+      positiveClass = "Disease", negativeClass = "Healthy"
     ,
       refVar = NULL
     ))
@@ -683,7 +683,7 @@ test_that("function performs reasonably with larger datasets", {
       data = data,
       dependentVars = c("test1", "test2"),
       classVar = "outcome",
-      positiveClass = "Disease"
+      positiveClass = "Disease", negativeClass = "Healthy"
     ,
       refVar = NULL
     )
@@ -706,7 +706,7 @@ test_that("comprehensive analysis with all features works", {
       data = data,
       dependentVars = c("test1", "test2"),
       classVar = "outcome",
-      positiveClass = "Disease",
+      positiveClass = "Disease", negativeClass = "Healthy",
       method = "maximize_metric",
       metric = "youden", 
       plotROC = TRUE,
@@ -731,7 +731,7 @@ test_that("results contain expected components", {
     data = data,
     dependentVars = "test1",
     classVar = "outcome", 
-    positiveClass = "Disease",
+    positiveClass = "Disease", negativeClass = "Healthy",
     sensSpecTable = TRUE,
     showThresholdTable = TRUE
   ,

@@ -1,92 +1,42 @@
-# Internationalization (i18n) Translation Plan: psychopdaROC → Turkish (TR)
+# psychopdaROC Turkish translation preparation
 
-## 0) Argument Normalization
+Analysis 1.0.88; verified 2026-10-10. The source imports `jmvcore`, making its `.`
+translation helper available. All option, result and UI YAML strings are extracted
+by the jamovi compiler. Newly changed backend messages use complete `.()` templates,
+with positional or named substitution tokens preserved.
 
-**SANITIZED_FN**: `psychopdaROC`
+The current isolated extraction contains **626 target entries**, all with nonempty
+Turkish translations and none fuzzy. This includes all **313 marked backend messages**.
+The earlier procedure, fixed-sensitivity/specificity guidance and power-recommendation
+fragments were rewritten as complete translatable sentences. User-supplied marker and
+outcome names remain literal labels. The new class controls, exclusions and power target
+are included in the catalog.
 
-**Target files analysis**:
-- ✅ `jamovi/psychopdaROC.a.yaml` (options)
-- ✅ `jamovi/psychopdaROC.u.yaml` (UI)
-- ✅ `jamovi/psychopdaROC.r.yaml` (results)
-- ✅ `R/psychopdaROC.b.R` (backend)
+Catalog updates retain every existing nonempty translation and every unrelated entry.
+The first pass added 139 extracted entries to each of `catalog.pot`, `en.po`, and
+`tr.po`, filling 59 Turkish entries. A second pass filled 200 existing empty target
+entries. Historical unused messages remain in the umbrella catalog; the coverage count
+uses current compiler references, not obsolete strings. Both `sprintf` and named
+placeholders were checked, including literal percentage signs and italic markup.
 
-All required files are verified and present in the package codebase.
+Executed checks:
 
----
-
-## 1) NAMESPACE i18n Hook Status
-
-✅ **ALREADY CONFIGURED**: `NAMESPACE` contains `import(jmvcore)` and `importFrom(jmvcore, .)`, enabling runtime internationalization and extraction.
-
----
-
-## 2) Translatable String Analysis
-
-### 2.1 Current State Assessment
-- ✅ All user-visible strings in `R/psychopdaROC.b.R` and YAML definitions are wrapped in `.(...)` or declared in schemas.
-- ✅ Error notices, warning banners, and clinical interpretations use proper placeholder tokens `{var}`, `{n}`, etc.
-- ✅ Programmatic identifiers, column keys, formulas, and factor codes remain un-wrapped.
-
----
-
-## 3) Extraction & Update Commands
-
-```r
-# In R console at package root:
-jmvtools::i18nCreate("en")
-jmvtools::i18nUpdate("en")
-jmvtools::i18nCreate("tr")
-jmvtools::i18nUpdate("tr")
+```sh
+msgfmt -c -o /dev/null jamovi/i18n/tr.po
+Rscript --vanilla -e 'jmvtools::i18nUpdate(pkg="/private/tmp/psychopdaROC-classes-20261010")'
+Rscript --vanilla tools/i18n_rebuild_json.R /private/tmp/psychopdaROC-classes-20261010
 ```
 
----
+The generated Turkish JSON contains all 626 current target entries. The isolated
+native test module also builds with the completed catalogs. The umbrella repository's
+`inst/i18n` has no checked-in runtime JSON; the build generates it from the catalogs.
+No application language preference was changed. A native Turkish layout/terminology
+review remains a localization acceptance check; catalog coverage is not that review.
 
-## 4) Turkish Translation Dictionary
+Evidence: [catalog coverage](../development-ideas/psychopdaROC-explicit-classes-fixes-2026-10-10/i18n-final-summary.json),
+[catalog changes](../development-ideas/psychopdaROC-explicit-classes-fixes-2026-10-10/catalog-update-summary.json),
+and [translation mappings](../development-ideas/psychopdaROC-explicit-classes-fixes-2026-10-10/completed-translations.json).
 
-| English (msgid) | Suggested Turkish (TR) | Context / Notes |
-| :--- | :--- | :--- |
-| `Advanced ROC Analysis` | `İleri ROC Analizi` | Başlık |
-| `Run manually` | `Run manually` | Seçenek başlığı |
-| `Run` | `Run` | Seçenek başlığı |
-| `Analysis Level` | `Analysis Level` | Seçenek başlığı |
-| `Test Variables` | `Test Variables` | Seçenek başlığı |
-| `Class Variable (Gold Standard)` | `Class Variable (Gold Standard)` | Seçenek başlığı |
-| `Positive Class` | `Positive Class` | Seçenek başlığı |
-| `Subgroup Variable (Optional)` | `Subgroup Variable (Optional)` | Seçenek başlığı |
-| `Cutpoint Method` | `Cutpoint Method` | Seçenek başlığı |
-| `Optimization Metric` | `Optimization Metric` | Seçenek başlığı |
-| `Classification Direction` | `Classification Direction` | Seçenek başlığı |
-| `Manual Cutpoint Value` | `Manual Cutpoint Value` | Seçenek başlığı |
-| `Metric Tolerance` | `Metric Tolerance` | Seçenek başlığı |
-| `Tie Breaking Method` | `Tie Breaking Method` | Seçenek başlığı |
-| `All observed cutpoints` | `All observed cutpoints` | Seçenek başlığı |
-| `Bootstrap Iterations` | `Bootstrap Iterations` | Seçenek başlığı |
-| `Random Seed` | `Random Seed` | Seçenek başlığı |
-| `Use prior prevalence` | `Use prior prevalence` | Seçenek başlığı |
-| `Prior Prevalence Value` | `Prior Prevalence Value` | Seçenek başlığı |
-| `Cost Ratio (FP:FN)` | `Cost Ratio (FP:FN)` | Seçenek başlığı |
-
----
-
-## 5) Consistency & Glossary (TR)
-
-```text
-Confidence Interval (CI) → Güven Aralığı (GA)
-Hazard Ratio (HR) → Tehlike Oranı (TO)
-Odds Ratio (OR) → Odds Oranı (OO)
-Sensitivity / Specificity → Duyarlılık / Özgüllük
-p-value → p-değeri
-Sample size (n) → Örneklem büyüklüğü (n)
-Median / Mean → Medyan / Ortalama
-Survival probability → Sağkalım olasılığı
-```
-
----
-
-## 6) QA Checklist
-
-- [x] User-facing strings in `R/psychopdaROC.b.R` properly wrapped in `.(...)`.
-- [x] Schema files (`.a.yaml`, `.u.yaml`, `.r.yaml`) synchronized with backend.
-- [x] Turkish terminology conforms to clinical and statistical guidelines.
-- [x] Catalogs updated via `jmvtools::i18nUpdate()`.
-
+Future changes should keep a complete message inside `.()`, regenerate with the compiler,
+merge only target changes into the umbrella catalogs, check placeholders, and rebuild
+runtime JSON before installing the intended distribution.

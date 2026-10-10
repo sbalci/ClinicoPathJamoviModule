@@ -13,7 +13,7 @@ items:
       
     - name: procedureNotes
       type: Html
-      visible: true
+      visible: (showExplanations)
 
     # ==========================================
     # SUMMARY RESULTS - Most important information first
@@ -23,10 +23,10 @@ items:
       type: Html
       visible: true
 
-    # Which class level is the positive class, and why (filled by .rocOutcomeCoding()).
+    # Which class level is the positive class, and why (filled by .psychopdaClassCoding()).
     # rows: 0 - one row per observed level, added in .run() after .deleteTableRows().
     - name: outcomeCoding
-      title: 'Outcome coding: which level is positive'
+      title: 'Outcome coding: positive and negative classes'
       type: Table
       description: Class levels with their counts and the role each plays in the analysis
       rows: 0
@@ -34,6 +34,7 @@ items:
       clearWith:
           - classVar
           - positiveClass
+          - negativeClass
           - dependentVars
           - subGroup
           - direction
@@ -52,15 +53,12 @@ items:
       title: Clinical Interpretation
       type: Table
       rows: 0
-      # Was `visible: (clinicalMode:basic || clinicalMode:advanced || clinicalMode:comprehensive)`,
-      # which lists every level the option has and so was a tautology dressed up as a gate.
-      # clinicalMode is dropped from clearWith too: nothing in this table's contents
-      # depends on it.
-      visible: true
+      visible: (showExplanations)
       clearWith:
           - dependentVars
           - classVar
           - positiveClass
+          - negativeClass
           - subGroup
           - direction
       columns:
@@ -90,6 +88,7 @@ items:
         - dependentVars
         - classVar
         - positiveClass
+        - negativeClass
         - subGroup
         - method
         - metric
@@ -103,6 +102,7 @@ items:
         - priorPrev
       template:
         type: Table
+        title: $key
         rows: 0
         columns:
           - name: cutpoint
@@ -145,6 +145,7 @@ items:
         - dependentVars
         - classVar
         - positiveClass
+        - negativeClass
         - subGroup
         - method
         - allObserved
@@ -165,6 +166,7 @@ items:
         - dependentVars
         - classVar
         - positiveClass
+        - negativeClass
         - subGroup
         - direction
         - usePriorPrev
@@ -221,11 +223,16 @@ items:
         - dependentVars
         - classVar
         - positiveClass
+        - negativeClass
         - fixedAnalysisType
         - fixedSensitivityValue
         - fixedSpecificityValue
         - fixedInterpolation
         - direction
+        - subGroup
+        - usePriorPrev
+        - priorPrev
+        - fixedSensSpecAnalysis
       columns:
         - name: variable
           title: Variable
@@ -285,6 +292,7 @@ items:
           - dependentVars
           - classVar
           - positiveClass
+          - negativeClass
           - subGroup
           - direction
       columns:
@@ -307,6 +315,9 @@ items:
           title: p-value
           type: number
           format: zto,pvalue
+      refs:
+        - DeLong1988
+        - ObuchowskiLieber1998
 
     - name: delongComparisonTable
       title: DeLong Test Pairwise Comparisons
@@ -320,6 +331,7 @@ items:
         - dependentVars
         - classVar
         - positiveClass
+        - negativeClass
         - direction
         - delongTest
       columns:
@@ -354,6 +366,7 @@ items:
         - dependentVars
         - classVar
         - positiveClass
+        - negativeClass
         - direction
         - delongTest
       refs:
@@ -375,6 +388,7 @@ items:
           - dependentVars
           - classVar
           - positiveClass
+          - negativeClass
           - subGroup
           - direction
           - smoothing
@@ -393,18 +407,29 @@ items:
           - displaySE
           - directLabel
           - quantiles
+          - method
+          - metric
+          - specifyCutScore
+          - tol_metric
+          - break_ties
+          - costratioFP
+          - usePriorPrev
+          - priorPrev
+          - seed
+          - boot_runs
 
     - name: interactivePlot
-      title: Interactive ROC Plot
+      title: Additional Static ROC Plot
       type: Image
       width: 650
       height: 500
       renderFun: .plotInteractiveROC
-      visible: (interactiveROC)
+      visible: (plotROC && interactiveROC)
       clearWith:
         - dependentVars
         - classVar
         - positiveClass
+        - negativeClass
         - subGroup
         - direction
       # The plotROC package ref was removed: grep 'plotROC::' over the backend returns 0 -
@@ -425,12 +450,16 @@ items:
           - dependentVars
           - classVar
           - positiveClass
+          - negativeClass
           - subGroup
           - fixedAnalysisType
           - fixedSensitivityValue
           - fixedSpecificityValue
           - fixedInterpolation
           - direction
+          - fixedSensSpecAnalysis
+          - showFixedROC
+          - combinePlots
 
     # ==========================================
     # ADDITIONAL PLOTS
@@ -449,11 +478,20 @@ items:
           - dependentVars
           - classVar
           - positiveClass
+          - negativeClass
           - subGroup
           - method
           - metric
           - direction
           - combinePlots
+          - specifyCutScore
+          - tol_metric
+          - break_ties
+          - costratioFP
+          - usePriorPrev
+          - priorPrev
+          - seed
+          - boot_runs
 
     - name: prevalencePlot
       title: Predictive Values vs. Prevalence
@@ -469,10 +507,21 @@ items:
           - dependentVars
           - classVar
           - positiveClass
+          - negativeClass
           - subGroup
           - usePriorPrev
           - priorPrev
           - combinePlots
+          - method
+          - metric
+          - direction
+          - specifyCutScore
+          - tol_metric
+          - break_ties
+          - costratioFP
+          - seed
+          - boot_runs
+          - showPrevalencePlot
 
     - name: dotPlot
       title: Test Values Distribution
@@ -491,9 +540,21 @@ items:
           - dependentVars
           - classVar
           - positiveClass
+          - negativeClass
           - subGroup
           - direction
           - combinePlots
+          - method
+          - metric
+          - specifyCutScore
+          - tol_metric
+          - break_ties
+          - costratioFP
+          - usePriorPrev
+          - priorPrev
+          - seed
+          - boot_runs
+          - showDotPlot
 
     - name: dotPlotMessage
       title: Dot Plot Note
@@ -513,6 +574,7 @@ items:
           - dependentVars
           - classVar
           - positiveClass
+          - negativeClass
           - subGroup
           - direction
           - combinePlots
@@ -529,6 +591,7 @@ items:
         - dependentVars
         - classVar
         - positiveClass
+        - negativeClass
         - refVar
         - idiNriBootRuns
         - direction
@@ -567,6 +630,7 @@ items:
         - dependentVars
         - classVar
         - positiveClass
+        - negativeClass
         - refVar
         - nriThresholds
         - idiNriBootRuns
@@ -618,6 +682,7 @@ items:
         - dependentVars
         - classVar
         - positiveClass
+        - negativeClass
         - direction
       columns:
         - name: comparison
@@ -639,7 +704,7 @@ items:
           title: Δ Hedges' g
           type: number
         - name: effect_magnitude
-          title: Size of difference
+          title: Descriptive size band
           type: text
         - name: clinical_importance
           title: Interpretation
@@ -657,10 +722,14 @@ items:
         - dependentVars
         - classVar
         - positiveClass
+        - negativeClass
         - targetPower
         - expectedAUCDifference
         - significanceLevel
         - direction
+        - powerAnalysis
+        - powerAnalysisType
+        - correlationROCs
       columns:
         - name: variable
           title: Variable
@@ -673,7 +742,7 @@ items:
           title: Required N
           type: integer
         - name: target_effect_size
-          title: Target Effect Size
+          title: Target |AUC - 0.5|
           type: number
         - name: power_adequacy
           title: Power Adequacy
@@ -696,6 +765,7 @@ items:
         - dependentVars
         - classVar
         - positiveClass
+        - negativeClass
         - priorAUC
         - priorPrecision
         - direction
@@ -725,7 +795,7 @@ items:
           title: Evidence Strength
           type: text
         - name: prior_influence
-          title: Prior Influence
+          title: Prior Weight
           type: text
       # refs Kruschke2014 / McElreath2020 removed: nothing in this table is Bayesian.
       # The "Bootstrap Evidence Ratio" is a bootstrap tail count, not a Bayes factor, and
@@ -741,6 +811,7 @@ items:
         - dependentVars
         - classVar
         - positiveClass
+        - negativeClass
         - treatmentThreshold
         - harmBenefitRatio
         - interventionCost
@@ -781,20 +852,25 @@ items:
       type: Html
       visible: (metaAnalysis)
       clearWith:
+        - metaAnalysis
         - dependentVars
         - classVar
         - positiveClass
+        - negativeClass
         - overrideMetaAnalysisWarning
 
     - name: metaAnalysisTable
       title: Meta-Analysis Results
       type: Table
       rows: 0
-      visible: (metaAnalysis)
+      visible: (metaAnalysis && overrideMetaAnalysisWarning)
       clearWith:
+        - metaAnalysis
+        - overrideMetaAnalysisWarning
         - dependentVars
         - classVar
         - positiveClass
+        - negativeClass
         - direction
         - metaAnalysisMethod
         - heterogeneityTest
@@ -841,6 +917,7 @@ items:
         - dependentVars
         - classVar
         - positiveClass
+        - negativeClass
         - treatmentThreshold
         - harmBenefitRatio
         - interventionCost
@@ -858,10 +935,10 @@ items:
           type: number
           format: zto
         - name: interventions_avoided
-          title: Interventions Avoided
+          title: Net Interventions Avoided per 100
           type: integer
         - name: cases_detected
-          title: Cases Detected
+          title: Cases Detected in Sample
           type: integer
         - name: clinical_value
           title: Clinical Value
@@ -879,9 +956,15 @@ items:
         - dependentVars
         - classVar
         - positiveClass
+        - negativeClass
         - partialAUCfrom
         - partialAUCto
         - direction
+        - subGroup
+        - partialAUC
+        - bootstrapCI
+        - bootstrapReps
+        - seed
       columns:
         - name: variable
           title: Variable
@@ -895,11 +978,11 @@ items:
           type: number
           format: zto
         - name: ci_lower
-          title: 95% CI Lower
+          title: Raw pAUC 95% CI Lower
           type: number
           format: zto
         - name: ci_upper
-          title: 95% CI Upper
+          title: Raw pAUC 95% CI Upper
           type: number
           format: zto
         - name: spec_range
@@ -909,7 +992,7 @@ items:
         - McClish1989
 
     - name: bootstrapCITable
-      title: Bootstrap Confidence Intervals
+      title: Bootstrap Intervals (AUC and Youden Reference)
       type: Table
       rows: 0
       visible: (bootstrapCI)
@@ -917,8 +1000,12 @@ items:
         - dependentVars
         - classVar
         - positiveClass
+        - negativeClass
         - bootstrapReps
         - direction
+        - subGroup
+        - bootstrapCI
+        - seed
       columns:
         - name: variable
           title: Variable
@@ -948,7 +1035,10 @@ items:
         - dependentVars
         - classVar
         - positiveClass
+        - negativeClass
         - direction
+        - subGroup
+        - compareClassifiers
       columns:
         - name: variable
           title: Variable
@@ -997,6 +1087,7 @@ items:
           - dependentVars
           - classVar
           - positiveClass
+          - negativeClass
 
     - name: powerCurvePlot
       title: Power Analysis Curves
@@ -1011,9 +1102,14 @@ items:
           - dependentVars
           - classVar
           - positiveClass
+          - negativeClass
           - targetPower
           - expectedAUCDifference
           - significanceLevel
+          - powerAnalysis
+          - powerAnalysisType
+          - correlationROCs
+          - direction
 
     - name: bayesianTracePlot
       title: Bootstrap AUC Traces
@@ -1025,9 +1121,13 @@ items:
         height: 500
         renderFun: .plotBayesianTrace
         clearWith:
+          - seed
+          - direction
+          - bayesianAnalysis
           - dependentVars
           - classVar
           - positiveClass
+          - negativeClass
           - priorAUC
           - priorPrecision
 
@@ -1044,6 +1144,7 @@ items:
           - dependentVars
           - classVar
           - positiveClass
+          - negativeClass
           - treatmentThreshold
           - harmBenefitRatio
           - interventionCost
@@ -1051,16 +1152,29 @@ items:
     - name: metaAnalysisForestPlot
       title: Meta-Analysis Forest Plot
       type: Array
-      visible: (metaAnalysis && forestPlot)
+      visible: (metaAnalysis && forestPlot && overrideMetaAnalysisWarning)
+      clearWith:
+        - metaAnalysis
+        - overrideMetaAnalysisWarning
+        - dependentVars
+        - classVar
+        - positiveClass
+        - negativeClass
+        - direction
+        - metaAnalysisMethod
+        - forestPlot
       template:
         type: Image
         width: 800
         height: 600
         renderFun: .plotMetaAnalysisForest
         clearWith:
+          - metaAnalysis
+          - overrideMetaAnalysisWarning
           - dependentVars
           - classVar
           - positiveClass
+          - negativeClass
           - metaAnalysisMethod
           - forestPlot
           - direction

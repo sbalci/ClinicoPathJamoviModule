@@ -34,7 +34,7 @@ provide complementary diagnostic information.
 data(psychopdaROC_cardiac)
 psychopdaROC(data = psychopdaROC_cardiac,
              dependentVars = c("troponin", "creatinine", "bnp"),
-             classVar = "mi_status", positiveClass = "MI",
+             classVar = "mi_status", positiveClass = "MI", negativeClass = "No_MI",
              refVar = "troponin",
              method = "maximize_metric", metric = "youden")
 

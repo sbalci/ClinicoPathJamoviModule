@@ -440,7 +440,7 @@ test_that("psychopdaROC meta-analysis forest plot redraws from state alone", {
   )
   ran <- suppressWarnings(psychopdaROC(
     data = d, dependentVars = c("marker1", "marker2", "marker3"), classVar = "status",
-    positiveClass = "Disease", refVar = NULL, metaAnalysis = TRUE, forestPlot = TRUE,
+    positiveClass = "Disease", negativeClass = "Healthy", refVar = NULL, metaAnalysis = TRUE, forestPlot = TRUE,
     overrideMetaAnalysisWarning = TRUE
   ))
   state <- ran$metaAnalysisForestPlot$get(key = "forestPlot")$state
@@ -476,7 +476,7 @@ test_that("psychopdaROC overlays survive a redraw without .run()", {
   quiet <- function(expr) suppressWarnings(suppressMessages(expr))
   ran <- quiet(psychopdaROC(
     data = d, dependentVars = c("marker1", "marker2"), classVar = "status",
-    positiveClass = "Disease", refVar = NULL, plotROC = TRUE, combinePlots = FALSE,
+    positiveClass = "Disease", negativeClass = "Healthy", refVar = NULL, plotROC = TRUE, combinePlots = FALSE,
     showConfidenceBands = TRUE, quantileCIs = TRUE, rocSmoothingMethod = "binormal"
   ))
   analysis <- ran$.__enclos_env__$private$.parent

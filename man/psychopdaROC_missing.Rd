@@ -33,7 +33,7 @@ with appropriate warnings or exclusions.
 data(psychopdaROC_missing)
 psychopdaROC(data = psychopdaROC_missing,
              dependentVars = c("test_a", "test_b"),
-             classVar = "diagnosis", positiveClass = "Disease",
+             classVar = "diagnosis", positiveClass = "Disease", negativeClass = "Healthy",
              refVar = "test_a")
 
 }

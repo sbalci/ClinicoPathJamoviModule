@@ -21,7 +21,7 @@ test_that("AUC and its DeLong interval agree between the two analyses and with p
     E <- cc_run(ClinicoPath::enhancedROC, data = d, outcome = "gold", predictors = c("m1", "m2"),
                 positiveClass = "Positive")
     P <- cc_run(ClinicoPath::psychopdaROC, data = d, classVar = "gold", dependentVars = c("m1", "m2"),
-                positiveClass = "Positive", refVar = NULL)
+                positiveClass = "Positive", negativeClass = "Negative", refVar = NULL)
     ea <- as.data.frame(E$results$aucSummary)
     pa <- as.data.frame(P$aucSummaryTable)
     for (i in 1:2) {
@@ -40,7 +40,7 @@ test_that("the DeLong comparison agrees between the two analyses and with pROC",
     E <- cc_run(ClinicoPath::enhancedROC, data = d, outcome = "gold", predictors = c("m1", "m2"),
                 positiveClass = "Positive", analysisType = "comparative", pairwiseComparisons = TRUE)
     P <- cc_run(ClinicoPath::psychopdaROC, data = d, classVar = "gold", dependentVars = c("m1", "m2"),
-                positiveClass = "Positive", refVar = NULL, delongTest = TRUE)
+                positiveClass = "Positive", negativeClass = "Negative", refVar = NULL, delongTest = TRUE)
     er <- as.data.frame(E$results$rocComparisons)
     pd <- as.data.frame(P$delongComparisonTable)
     r1 <- pROC::roc(d$gold, d$m1, levels = c("Negative", "Positive"), direction = "<", quiet = TRUE)
@@ -57,7 +57,7 @@ test_that("partial AUC agrees between the two analyses and with pROC", {
     E <- cc_run(ClinicoPath::enhancedROC, data = d, outcome = "gold", predictors = c("m1", "m2"),
                 positiveClass = "Positive", partialAuc = TRUE, partialRange = "0.8,1.0")
     P <- cc_run(ClinicoPath::psychopdaROC, data = d, classVar = "gold", dependentVars = c("m1", "m2"),
-                positiveClass = "Positive", refVar = NULL, partialAUC = TRUE,
+                positiveClass = "Positive", negativeClass = "Negative", refVar = NULL, partialAUC = TRUE,
                 partialAUCfrom = 0.8, partialAUCto = 1.0)
     ep <- as.data.frame(E$results$partialAucAnalysis)
     pp <- as.data.frame(P$partialAUCTable)

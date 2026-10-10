@@ -185639,3 +185639,785 @@ msgstr ""
 #: contTables/results/chiSq.title
 msgid "χ² Tests"
 msgstr ""
+
+
+#: R/psychopdaROC.b.R
+msgid "{var}: {positive} positive, {negative} negative complete observations"
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"%1$s has a value for %2$d case(s) of the negative class (%3$s); at least 2 "
+"are needed to analyse it."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"A correlation of 1 gives zero variance for the paired contrast under this "
+"equal-variance planning approximation. Power and required sample size are "
+"unavailable, so those cells and the power curve are left blank. Specify a "
+"correlation below 1 that is justified for the intended study."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"A predictive value is undefined and shown as blank when its conditioning "
+"group has no observations or its adjusted denominator is zero."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"A required sample size is unavailable for this null or degenerate observed "
+"AUC."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Achieved rates and accuracy classify the observed complete cases at the "
+"displayed cutoff. An interpolated cutoff can miss the target; Stepwise meets "
+"or exceeds it. Empty predicted groups have undefined predictive values, "
+"shown as blank cells."
+msgstr ""
+
+#: psychopdaROC/options/interactiveROC.title
+#: psychopdaROC/ui[7][0][0][1]/interactiveROC.label
+msgid "Additional static ROC plot"
+msgstr ""
+
+#: psychopdaROC/results/interactivePlot.title
+msgid "Additional Static ROC Plot"
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"After changing the class variable or filtering rows, reselect both outcome "
+"levels."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid "All Observed Cutpoints"
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"At least one AUC is below 0.5. Check Positive Class and Classification "
+"Direction against the clinical meaning of the marker."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"AUC 95% confidence intervals and tests use the asymptotic DeLong "
+"approximation. Nominal coverage and type-I error are not guaranteed in "
+"modest or imbalanced samples, even with ten or more observations per class. "
+"Interpret the uncertainty cautiously; a bootstrap interval is not "
+"automatically a remedy (Obuchowski and Lieber, 1998)."
+msgstr ""
+
+#: psychopdaROC/ui[6][0]/delongTest.label
+msgid "AUC comparison (DeLong's test)"
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"AUC intervals refer to the full AUC. Threshold, sensitivity and specificity "
+"describe a separate Youden reference, not the main table's selected cutoff "
+"method. Youden is reselected in each stratified bootstrap sample; tied "
+"optima are selected randomly using the stated seed, including for the point "
+"estimate. These are percentile intervals, not externally validated "
+"performance intervals."
+msgstr ""
+
+#: psychopdaROC/options/clinicalMode/basic.title
+msgid "Basic (recommended)"
+msgstr ""
+
+#: psychopdaROC/results/bootstrapCITable.title
+msgid "Bootstrap Intervals (AUC and Youden Reference)"
+msgstr ""
+
+#: psychopdaROC/ui[4][1]/boot_runs.label
+msgid "Bootstrap iterations"
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Bootstrap Youden-reference coordinate intervals are unavailable ({msg}). "
+"Point estimates are shown with blank interval cells."
+msgstr ""
+
+#: psychopdaROC/results/decisionCurveTable.columns.title
+msgid "Cases Detected in Sample"
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Check Classification Direction. Unselected outcome levels and missing "
+"outcomes are excluded and counted."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Choose any optional tables, ROC curves, or comparisons; checkboxes start "
+"unchecked."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid "Choose distinct observed levels in Positive Class and Negative Class."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Choose distinct observed levels in Positive Class and Negative Class. "
+"Nothing is computed until both are selected; levels are never chosen from "
+"their order."
+msgstr ""
+
+#: psychopdaROC/options/negativeClass.description.ui
+msgid ""
+"Choose the level that means the condition is absent. It must differ from "
+"Positive Class. All other outcome levels are excluded, not pooled."
+msgstr ""
+
+#: psychopdaROC/options/positiveClass.description.ui
+msgid ""
+"Choose the level that means the condition is present. Also choose a distinct "
+"Negative Class. Nothing is computed until both observed levels are selected."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Choose the positive and negative classes. Nothing is computed until both are "
+"selected. Other outcome levels and missing outcomes will be excluded."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid "Chosen in Positive Class and Negative Class."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Class imbalance detected (Prevalence: %.1f%%). PPV and NPV depend on "
+"prevalence and may not transfer to your clinical population. Consider "
+"Precision-Recall curves and validate in the intended setting."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid "Class Variable"
+msgstr ""
+
+#: psychopdaROC/ui[0][1].label
+msgid "Class variable (gold standard)"
+msgstr ""
+
+#: psychopdaROC/ui[9][0]/compareClassifiers.label
+msgid "Classifier performance comparison"
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Cohen's d is the standardized difference in a marker's mean between the "
+"positive and negative classes (pooled SD), given for each marker of the "
+"pair. The three difference columns are second marker minus first marker; "
+"Glass' delta uses the negative-class SD and Hedges' g applies the "
+"small-sample correction J to each d before differencing. No interval or test "
+"accompanies these point estimates. The 0.2/0.5/0.8 size bands are "
+"descriptive conventions only; they have not been validated as clinical "
+"thresholds for a difference between two marker effects."
+msgstr ""
+
+#: psychopdaROC/ui[7][0][0][0]/combinePlots.label
+msgid "Combined ROC curves"
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Compare diagnostic markers and select cutpoints for explicitly selected "
+"positive and negative classes."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Continuous (category-free) NRI: no usable risk category boundaries were "
+"supplied, so reclassification counts changes in predicted risk rather than "
+"crossings of category boundaries."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid "Current n=%1$d provides %2$.1f%% power at an AUC distance from 0.5 of %3$s."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Cutpoints selected on these data require external validation before clinical "
+"use."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"DeLong intervals could not be computed for %s. The Hanley-McNeil "
+"approximation was used instead. Its distributional assumptions may not hold, "
+"and its intervals need not be conservative. Nominal coverage is not "
+"guaranteed, especially in modest or imbalanced samples."
+msgstr ""
+
+#: psychopdaROC/results/effectSizeTable.columns.title
+msgid "Descriptive size band"
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid "Direction (relative to cutpoint)"
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Each row must be an independent observation. Repeated measurements from the "
+"same patient require a method that accounts for clustering."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Each row must represent an independent observation. These confidence "
+"intervals, tests and bootstrap resamples do not account for clustering or "
+"repeated measurements. Multiple lesions, blocks, slides or visits from the "
+"same patient require a prespecified patient-level summary or a method that "
+"accounts for clustering; do not treat them as independent patients."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Effect size comparisons require at least two test variables. Add another "
+"test variable or disable Effect Size Analysis."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid "Excluded: unselected outcome level"
+msgstr ""
+
+#: psychopdaROC/ui[10][0]/expectedAUCDifference.label
+msgid "Expected AUC difference"
+msgstr ""
+
+#: package/analyses/psychopdaROC.description
+#: psychopdaROC/options.description.main
+msgid ""
+"Exploratory Receiver Operating Characteristic (ROC) curve analysis with "
+"optimal cutpoint determination. Each row must be an independent observation. "
+"Intervals, tests and bootstrap resampling do not account for repeated "
+"measurements or clustering within patients; use a prespecified patient-level "
+"summary or a method that accounts for clustering. Nominal coverage is not "
+"guaranteed in small or imbalanced samples. Cutpoints selected on these data "
+"report apparent performance and require validation in the intended setting."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Exploratory ROC analysis: rows must be independent; selected cutpoints need "
+"validation. Nominal interval coverage is not guaranteed in small or "
+"imbalanced samples."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"F1 and accuracy use a single Youden reference cutoff; ties choose the "
+"greatest sensitivity. This is separate from the main table's cutoff method. "
+"Brier score assumes that input values between 0 and 1 are positive-class "
+"probabilities; a normalized assay is not necessarily a probability. All "
+"performance estimates are apparent, in-sample values."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Find a cutpoint for target sensitivity %1$.3f (%2$.1f%%), then report the "
+"achieved sensitivity and corresponding specificity."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Find a cutpoint for target specificity %1$.3f (%2$.1f%%), then report the "
+"achieved specificity and corresponding sensitivity."
+msgstr ""
+
+#: psychopdaROC/ui[5][0]/fixedSensSpecAnalysis.label
+msgid "Fixed sensitivity/specificity analysis"
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"For reference, n=%1$d would be required for %2$.1f%% power against an AUC of "
+"%3$.3f."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid "Further reading"
+msgstr ""
+
+#: psychopdaROC/ui[0][2].label
+msgid "Group variable (optional)"
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Guidance for statistical comparisons, effect sizes, and bootstrap ROC "
+"analysis with prior weighting. Select each optional analysis separately."
+msgstr ""
+
+#: psychopdaROC/ui[12][0]/harmBenefitRatio.label
+msgid "Harm-benefit ratio"
+msgstr ""
+
+#: psychopdaROC/ui[13][0]/heterogeneityTest.label
+msgid "Heterogeneity test (Q-test, I-squared)"
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Higher sensitivity reduces missed cases but may increase false positives. A "
+"negative result supports exclusion only when the negative likelihood ratio, "
+"(1 - sensitivity) / specificity, is sufficiently small for the clinical "
+"context."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Higher specificity reduces false positives but may increase missed cases. A "
+"positive result supports confirmation only when the positive likelihood "
+"ratio, sensitivity / (1 - specificity), is sufficiently large for the "
+"clinical context."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid "How to read these results"
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Inference assumes independent observations. These intervals, tests and "
+"bootstrap resamples do not account for repeated measurements or clustering "
+"within patients; use a prespecified patient-level summary or a method that "
+"accounts for clustering."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid "Interpolation and achieved performance"
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid "Linear cutoff; empirical rates"
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Linear interpolation estimates a cutoff between ROC points. Reported rates "
+"are recalculated from observations at that cutoff, so a discrete sample may "
+"miss the requested target. If interpolation involves infinity, the endpoint "
+"meeting the target is used."
+msgstr ""
+
+#: psychopdaROC/ui[4][0]/specifyCutScore.label
+msgid "Manual cut score"
+msgstr ""
+
+#: psychopdaROC/options/showOptimalPoint.title
+msgid "Mark selected cutpoint"
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid "Measure Variable(s)"
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Meta-analysis is blocked because these markers are not independent studies. "
+"See Meta-Analysis Warning for the assumptions and alternatives."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Meta-analysis override is active for correlated markers from one dataset. "
+"Pooled estimates and intervals are exploratory and must not be used for "
+"formal inference."
+msgstr ""
+
+#: psychopdaROC/ui[4][1]/tol_metric.label
+msgid "Metric tolerance"
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"N counts every row with each outcome value before exclusions. Each test is "
+"analysed on its complete cases within the two selected classes."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Nearest point uses the observed cutoff closest to the requested target. It "
+"does not interpolate and may fall below or above the target."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Need n=%1$d (current n=%2$d) for %3$.1f%% power at an AUC distance from 0.5 "
+"of %4$s. Correlation setting: %5$s."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid "Need n=%1$d for %2$.1f%% power at an AUC distance from 0.5 of %3$s."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid "Negative (condition absent)"
+msgstr ""
+
+#: R/psychopdaROC.b.R
+#: psychopdaROC/options/negativeClass.title
+msgid "Negative Class"
+msgstr ""
+
+#: psychopdaROC/ui[0][1]/negativeClass.label
+msgid "Negative class"
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Negative Class is set to %1$s, but no row of %2$s has that level. Choose an "
+"observed level in Negative Class."
+msgstr ""
+
+#: psychopdaROC/results/decisionCurveTable.columns.title
+msgid "Net Interventions Avoided per 100"
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Observed (post-hoc) power is a deterministic function of the observed "
+"p-value and adds no information beyond it. Use the confidence interval for "
+"the observed AUC (%1$.3f), or plan against a prespecified target AUC."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Only {kept} of {given} ROC quantiles are valid probabilities from 0 to 1. "
+"Enter comma-separated values such as 0.1,0.5,0.9. Error bars use the "
+"accepted values; none are drawn if no value is valid."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Only %d cases in the smaller outcome class. The AUC, interval and p-value "
+"can be unstable in sparse samples. Ten per class is a warning threshold, not "
+"a guarantee of reliable inference above it; imbalance and score "
+"distributions also affect coverage. Treat these estimates as provisional."
+msgstr ""
+
+#: psychopdaROC/results/outcomeCoding.title
+msgid "Outcome coding: positive and negative classes"
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Outcome selection excluded %1$d row(s) in unselected levels and %2$d row(s) "
+"with missing outcomes. All analyses use only %3$s (positive) and %4$s "
+"(negative), with marker-specific complete cases."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Overall test: unavailable (contrast covariance is degenerate or inference "
+"could not be computed)."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Partial AUC requires the specificity From value to be smaller than the To "
+"value. Choose a range with positive width."
+msgstr ""
+
+#: psychopdaROC/ui[3][0]/usePriorPrev.label
+msgid "Population prevalence adjustment"
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid "Positive Class and Negative Class must be different observed levels."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Positive Class is set to %1$s, but no row of %2$s has that level. Choose an "
+"observed level in Positive Class."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Positive class: %1$s. Negative class: %2$s. Sensitivity, PPV, LR+, every "
+"cutpoint and the AUC describe detection of %1$s relative to %2$s. Other "
+"outcome levels are excluded."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Power includes both tails of the two-sided normal approximation. Current N "
+"and the class ratio use complete marker/outcome pairs. With multiple "
+"markers, the correlation adjustment assumes equal AUC variances and is a "
+"planning approximation, not a fitted paired ROC power model."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid "Power to detect AUC different from 0.5 (Hanley-McNeil)"
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"PPV and NPV below are computed at the prevalence of this sample (%.1f%%) and "
+"do not carry over to a population where the condition is more or less common "
+"- sensitivity and specificity also require comparable case mix and "
+"conditional score distributions. Recompute them for your own setting's "
+"prevalence before quoting them."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"PPV and NPV depend on prevalence. A prior prevalence setting adjusts "
+"predictive values, while sensitivity, specificity and accuracy remain "
+"empirical sample rates."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"PPV and NPV use each marker's complete-case sample prevalence. They require "
+"recalculation for another prevalence; transport also requires comparable "
+"case mix and conditional score distributions."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Predicted risks differing by at most sqrt(machine epsilon), approximately "
+"1.5e-8, are treated as numerical ties in both continuous and categorical "
+"NRI. This prevents numerical roundoff from becoming reclassification and is "
+"not a threshold for clinical importance."
+msgstr ""
+
+#: psychopdaROC/ui[11][0]/priorPrecision.label
+msgid "Prior precision"
+msgstr ""
+
+#: psychopdaROC/results/bayesianROCTable.columns.title
+msgid "Prior Weight"
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid "Prior weight %.1f%%"
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid "Procedure Notes"
+msgstr ""
+
+#: psychopdaROC/results/partialAUCTable.columns.title
+msgid "Raw pAUC 95% CI Lower"
+msgstr ""
+
+#: psychopdaROC/results/partialAUCTable.columns.title
+msgid "Raw pAUC 95% CI Upper"
+msgstr ""
+
+#: psychopdaROC/ui[0][3].label
+msgid "Reference test for IDI/NRI (optional)"
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Repeated NRI risk category boundaries were removed. The sorted, distinct "
+"boundaries used are listed below the NRI table."
+msgstr ""
+
+#: psychopdaROC/ui[10][0]/correlationROCs.label
+msgid "ROC correlation"
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid "Seed"
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid "Select one or more numeric Test Variables."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Select the Class Variable (Gold Standard), then explicitly choose Positive "
+"Class and Negative Class."
+msgstr ""
+
+#: psychopdaROC/ui[7][0][0][0]/showOptimalPoint.label
+msgid "Selected cutpoint"
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Sensitivity and specificity use the positive and negative groups separately. "
+"They can change with case mix. Small class counts make both the cutpoint and "
+"the achieved rates unstable."
+msgstr ""
+
+#: psychopdaROC/ui[7][0][1][1]/showCriterionPlot.label
+msgid "Sensitivity/specificity vs. threshold"
+msgstr ""
+
+#: psychopdaROC/options/showExplanations.title
+msgid "Show interpretation and procedure notes"
+msgstr ""
+
+#: psychopdaROC/options/displaySE.title
+msgid "Smoothed-curve confidence band"
+msgstr ""
+
+#: psychopdaROC/ui[7][0][0][1]/displaySE.label
+msgid "Smoothed-curve confidence band (95%)"
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Some DeLong inference is unavailable because a contrast has zero or "
+"non-estimable variance. AUC differences remain descriptive point estimates; "
+"blank intervals and p-values do not establish equality or a definite "
+"difference. This can occur with identical markers or perfect rankings."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Some DeLong intervals could not be computed. The AUC table identifies the "
+"markers using a Hanley-McNeil approximation; interpret those intervals "
+"cautiously."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Stepwise uses an observed cutoff that meets or exceeds the target while "
+"retaining the best corresponding specificity or sensitivity. Ties and "
+"discrete values can make the achieved rate exceed the target."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Subgroup %1$s has %2$d case(s) of the negative class (%3$s) with a value of "
+"%4$s; at least 2 are needed to analyse %4$s in that subgroup."
+msgstr ""
+
+#: psychopdaROC/results/powerAnalysisTable.columns.title
+msgid "Target |AUC - 0.5|"
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Target |AUC - 0.5| is the absolute distance from chance used in this "
+"calculation. Post-hoc power uses the observed AUC; prospective and "
+"sample-size calculations use the specified target."
+msgstr ""
+
+#: psychopdaROC/ui[10][0]/targetPower.label
+msgid "Target power"
+msgstr ""
+
+#: psychopdaROC/ui[5][0]/fixedSensitivityValue.label
+msgid "Target sensitivity"
+msgstr ""
+
+#: psychopdaROC/ui[5][0]/fixedSpecificityValue.label
+msgid "Target specificity"
+msgstr ""
+
+#: psychopdaROC/ui[0][0].label
+msgid "Test variables"
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"The achieved value is the rate in this sample at the selected cutpoint. It "
+"is not guaranteed in another sample. Cutpoint selection and performance "
+"assessment use the same observations, so these are apparent estimates "
+"requiring independent validation."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"The bootstrap confidence limits refer to the raw partial AUC, not the "
+"normalized partial AUC."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"The minimal/poor/fair/good/excellent AUC bands are descriptive conventions, "
+"not validated clinical decision thresholds. Clinical value depends on the "
+"intended cutoff, uncertainty, case mix and consequences of errors."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"The normalized partial AUC is unavailable. The correction is undefined when "
+"the partial curve falls below the diagonal; the raw partial AUC is reported "
+"separately."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"The power curve for '{var}' is unavailable for this degenerate "
+"configuration. Use a nondegenerate target AUC and, for paired planning, a "
+"correlation below 1."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"The raw partial AUC could not be estimated for the requested specificity "
+"range; its cell is blank."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"The requested treatment threshold grid exceeds 100 points. Tables and plots "
+"use 100 equally spaced thresholds spanning the requested minimum and maximum."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid "The ROC analysis used the following specifications."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"The subgroup variable has no observed levels. Remove it or provide "
+"nonmissing subgroup values."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"The Treatment Threshold Range could not be read as \"min,max,step\" with 0 < "
+"min <= max < 1 and a positive step. The default range 0.05 to 0.50 in steps "
+"of 0.05 was used instead."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"These markers take the same value in every case and carry no discrimination "
+"information: %s. Their AUC of 0.500 with a zero-width interval is "
+"degenerate, not evidence of precision. No clinically useful cutpoint can "
+"distinguish the classes. Remove them from the analysis."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid "Tie Breakers"
+msgstr ""
+
+#: psychopdaROC/ui[12][0]/treatmentThreshold.label
+msgid "Treatment threshold (min,max,step)"
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Validate the cutpoint and its uncertainty in the intended population before "
+"clinical use."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Youden's J equals sensitivity plus specificity minus one. Use the actual "
+"trade-off and clinical consequences when assessing a cutpoint."
+msgstr ""

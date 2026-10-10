@@ -29,7 +29,7 @@ determination with small datasets. Wide confidence intervals expected.
 \examples{
 data(psychopdaROC_small)
 psychopdaROC(data = psychopdaROC_small, dependentVars = "marker",
-             classVar = "class", positiveClass = "Positive",
+             classVar = "class", positiveClass = "Positive", negativeClass = "Negative",
              refVar = "marker")
 
 }

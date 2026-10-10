@@ -23,7 +23,7 @@ result1 <- tryCatch({
     data = test_data,
     dependentVars = "Patient Age",
     classVar = "Disease Status",
-    positiveClass = "Disease",
+    positiveClass = "Disease", negativeClass = "Healthy",
     plotROC = FALSE
   )
   "✅ PASSED"
@@ -39,7 +39,7 @@ result2 <- tryCatch({
     data = test_data,
     dependentVars = "Marker-1",
     classVar = "Disease Status",
-    positiveClass = "Disease",
+    positiveClass = "Disease", negativeClass = "Healthy",
     plotROC = FALSE
   )
   "✅ PASSED"
@@ -55,7 +55,7 @@ result3 <- tryCatch({
     data = test_data,
     dependentVars = "Test (New)",
     classVar = "Disease Status",
-    positiveClass = "Disease",
+    positiveClass = "Disease", negativeClass = "Healthy",
     plotROC = FALSE
   )
   "✅ PASSED"
@@ -71,7 +71,7 @@ result4 <- tryCatch({
     data = test_data,
     dependentVars = "Score/Total",
     classVar = "Disease Status",
-    positiveClass = "Disease",
+    positiveClass = "Disease", negativeClass = "Healthy",
     plotROC = FALSE
   )
   "✅ PASSED"
@@ -87,7 +87,7 @@ result5 <- tryCatch({
     data = test_data,
     dependentVars = c("Patient Age", "Marker-1", "Test (New)"),
     classVar = "Disease Status",
-    positiveClass = "Disease",
+    positiveClass = "Disease", negativeClass = "Healthy",
     delongTest = TRUE,
     plotROC = FALSE
   )
@@ -104,7 +104,7 @@ result6 <- tryCatch({
     data = test_data,
     dependentVars = c("Patient Age", "Marker-1"),
     classVar = "Disease Status",
-    positiveClass = "Disease",
+    positiveClass = "Disease", negativeClass = "Healthy",
     calculateIDI = TRUE,
     calculateNRI = TRUE,
     refVar = "Patient Age",
@@ -126,7 +126,7 @@ result7 <- tryCatch({
     data = test_data2,
     dependentVars = "Patient Age",
     classVar = "Disease Status (Confirmed)",
-    positiveClass = "Disease",
+    positiveClass = "Disease", negativeClass = "Healthy",
     plotROC = FALSE
   )
   "✅ PASSED"

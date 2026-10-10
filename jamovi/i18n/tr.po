@@ -267,7 +267,7 @@ msgid ""
 "'{var}' was analysed with only {pos} positive and {neg} negative case(s). "
 "Below about 10 per class the AUC, its confidence interval and the selected "
 "cutpoint are unstable; treat these results as exploratory."
-msgstr ""
+msgstr "'{var}', yalnızca {pos} pozitif ve {neg} negatif olguyla analiz edildi. Sınıf başına yaklaşık 10 olgunun altında AUC, güven aralığı ve seçilen kesim noktası kararsızdır; bu sonuçları keşifsel olarak değerlendirin."
 
 #: R/alluvial.b.R
 msgid ""
@@ -661,7 +661,7 @@ msgstr ""
 #: R/enhancedROC.b.R
 #: R/psychopdaROC.b.R
 msgid "(missing)"
-msgstr ""
+msgstr "(eksik)"
 
 #: R/jjhistostats.b.R
 msgid "(no evidence against normality)"
@@ -1460,7 +1460,7 @@ msgstr ""
 msgid ""
 "{n} of {total} bootstrap resamples for '{var}' contained only one outcome "
 "class and were dropped; the bootstrap AUC summary uses the remaining {kept}."
-msgstr ""
+msgstr "'{var}' için {total} bootstrap yeniden örnekleminin {n} tanesi yalnızca tek sonuç sınıfı içerdiğinden çıkarıldı; bootstrap AUC özeti kalan {kept} yeniden örneklemi kullanır."
 
 #: R/agreement.b.R
 msgid ""
@@ -3135,7 +3135,7 @@ msgstr ""
 msgid ""
 "%1$d row(s) with a missing value in the subgroup variable (%2$s) were "
 "excluded from the subgroup analysis."
-msgstr ""
+msgstr "Alt grup değişkeninde (%2$s) eksik değer bulunan %1$d satır alt grup analizinden çıkarıldı."
 
 #: R/lassologistic.b.R
 msgid ""
@@ -3183,7 +3183,7 @@ msgstr ""
 
 #: R/psychopdaROC.b.R
 msgid "%1$s (treat all: %2$.4f, treat none: 0)"
-msgstr ""
+msgstr "%1$s (tümünü tedavi et: %2$.4f, hiçbirini tedavi etme: 0)"
 
 #: R/decisioncompare.b.R
 msgid ""
@@ -3282,7 +3282,7 @@ msgstr ""
 msgid ""
 "%1$s has a value for %2$d case(s) of the positive class (%3$s); at least 2 "
 "are needed to analyse it."
-msgstr ""
+msgstr "%1$s için pozitif sınıftaki (%3$s) %2$d olgunun değeri vardır; analiz için en az 2 olgu gerekir."
 
 #: R/psychopdaROC.b.R
 msgid ""
@@ -3370,7 +3370,7 @@ msgstr ""
 msgid ""
 "%1$s was skipped because the %2$s package is not installed. Install it and "
 "re-run to enable that output."
-msgstr ""
+msgstr "%2$s paketi yüklü olmadığından %1$s atlandı. Bu çıktıyı etkinleştirmek için paketi yükleyip analizi yeniden çalıştırın."
 
 #: R/decisioncompare.b.R
 msgid ""
@@ -11743,7 +11743,7 @@ msgstr ""
 
 #: R/psychopdaROC.b.R
 msgid "1 - Specificity"
-msgstr ""
+msgstr "1 - Özgüllük"
 
 #: R/enhancedROC.b.R
 #: R/psychopdaROC.b.R
@@ -13042,11 +13042,11 @@ msgstr ""
 
 #: psychopdaROC/results/bayesianROCTable.columns.title
 msgid "95% Interval Lower (weighted AUC)"
-msgstr ""
+msgstr "%95 Aralık Alt Sınırı (ağırlıklı AUC)"
 
 #: psychopdaROC/results/bayesianROCTable.columns.title
 msgid "95% Interval Upper (weighted AUC)"
-msgstr ""
+msgstr "%95 Aralık Üst Sınırı (ağırlıklı AUC)"
 
 #: R/decision.b.R
 msgid ""
@@ -16790,7 +16790,7 @@ msgstr ""
 
 #: R/psychopdaROC.b.R
 msgid "Adequate"
-msgstr ""
+msgstr "Yeterli"
 
 #: R/multisurvival.b.R
 msgid "Adequate Information:"
@@ -17975,7 +17975,7 @@ msgstr ""
 
 #: psychopdaROC/options/clinicalMode/advanced.title
 msgid "Advanced research"
-msgstr ""
+msgstr "İleri araştırma"
 
 #: package/analyses/jjridges.title
 #: package/analyses/jjridges.menuTitle
@@ -19644,7 +19644,7 @@ msgstr ""
 
 #: psychopdaROC/results/effectSizePlot.template.title
 msgid "All pairwise comparisons"
-msgstr ""
+msgstr "Tüm ikili karşılaştırmalar"
 
 #: R/agreement.b.R
 msgid "All pathologists"
@@ -20175,7 +20175,7 @@ msgstr ""
 msgid ""
 "alpha = %1$s, positive fraction = %2$.1f%%, dotted line = current n = "
 "%3$d%4$s"
-msgstr ""
+msgstr "alfa = %1$s, pozitif oranı = %2$.1f%%, noktalı çizgi = mevcut n = %3$d%4$s"
 
 #: advancedtrials/results/adaptive_design_parameters.columns.title
 msgid "Alpha Adjustment"
@@ -20567,7 +20567,7 @@ msgstr ""
 
 #: R/psychopdaROC.b.R
 msgid "An error occurred"
-msgstr ""
+msgstr "Bir hata oluştu"
 
 #: R/singlearm.b.R
 msgid "An error occurred during {stage}."
@@ -20832,7 +20832,7 @@ msgstr "Analiz varsayımları, veri gereksinimleri ve metodolojik değerlendirme
 
 #: R/psychopdaROC.b.R
 msgid "Analysis calculation failed"
-msgstr ""
+msgstr "Analiz hesaplaması başarısız oldu"
 
 #: stagemigration/results/comparativeAnalysisDashboard.columns.title
 msgid "Analysis Category"
@@ -22645,7 +22645,7 @@ msgstr ""
 
 #: R/psychopdaROC.b.R
 msgid "Area Under the Curve (AUC)"
-msgstr ""
+msgstr "Eğri Altında Kalan Alan (AUC)"
 
 #: enhancedROC/results/results/aucSummary.title
 msgid "Area Under the Curve (AUC) Summary"
@@ -23294,7 +23294,7 @@ msgstr "%{prevalence} prevalansta"
 msgid ""
 "At %1$.1f%% this sample is strongly imbalanced, so the %2$s is especially "
 "fragile: a small shift in prevalence moves it a long way."
-msgstr ""
+msgstr "%1$.1f%% ile bu örneklem belirgin biçimde dengesizdir; bu nedenle %2$s özellikle kırılgandır: prevalanstaki küçük bir değişiklik onu büyük ölçüde değiştirir."
 
 #: R/survivalPower.b.R
 msgid ""
@@ -23660,7 +23660,7 @@ msgstr ""
 
 #: R/psychopdaROC.b.R
 msgid "At optimal threshold = %1$s (sensitivity %2$s%%, specificity %3$s%%)"
-msgstr ""
+msgstr "En uygun eşik = %1$s (duyarlılık %2$s%%, özgüllük %3$s%%)"
 
 #: pathagreement/options/positiveRule/ge.title
 msgid "At or above cutoff"
@@ -24039,19 +24039,19 @@ msgstr ""
 
 #: R/psychopdaROC.b.R
 msgid "AUC above 0.5 in >50% of resamples"
-msgstr ""
+msgstr "Yeniden örneklemlerin %50'den fazlasında AUC 0.5'in üzerinde"
 
 #: R/psychopdaROC.b.R
 msgid "AUC above 0.5 in >75% of resamples"
-msgstr ""
+msgstr "Yeniden örneklemlerin %75'ten fazlasında AUC 0.5'in üzerinde"
 
 #: R/psychopdaROC.b.R
 msgid "AUC above 0.5 in >91% of resamples"
-msgstr ""
+msgstr "Yeniden örneklemlerin %91'den fazlasında AUC 0.5'in üzerinde"
 
 #: R/psychopdaROC.b.R
 msgid "AUC above 0.5 in no more than 50% of resamples"
-msgstr ""
+msgstr "Yeniden örneklemlerin en fazla %50'sinde AUC 0.5'in üzerinde"
 
 #: R/enhancedROC.b.R
 msgid "AUC Below Chance: %s"
@@ -24188,7 +24188,7 @@ msgstr "Çok sınıflı analizde her sınıf için EAA değerleri"
 
 #: R/psychopdaROC.b.R
 msgid "AUC values with 95% confidence intervals"
-msgstr ""
+msgstr "%95 güven aralıklarıyla AUC değerleri"
 
 #: enhancedROC/results/results/aucSummary.description
 msgid "AUC values with confidence intervals for each predictor"
@@ -24246,7 +24246,7 @@ msgstr "AUPRC"
 
 #: R/psychopdaROC.b.R
 msgid "AUPRC = %.3f"
-msgstr ""
+msgstr "AUPRC = %.3f"
 
 #: advancedbarplot/options/value_format/auto.title
 #: enhancedtables/options/table_width/auto.title
@@ -26652,7 +26652,7 @@ msgstr ""
 msgid ""
 "Bayesian ROC analysis for '{var}' failed ({msg}), so it has no row in the "
 "Bayesian table."
-msgstr ""
+msgstr "'{var}' için Bayesçi ROC analizi başarısız oldu ({msg}); bu nedenle Bayesçi tabloda bu değişken için satır yoktur."
 
 #: jjcorrmat/options/bayesseed.title
 msgid "Bayesian seed"
@@ -28929,7 +28929,7 @@ msgstr ""
 
 #: R/psychopdaROC.b.R
 msgid "Bootstrap AUC Samples"
-msgstr ""
+msgstr "Bootstrap AUC Örnekleri"
 
 #: psychopdaROC/results/bayesianTracePlot.title
 msgid "Bootstrap AUC Traces"
@@ -28966,7 +28966,7 @@ msgstr "Bootstrap GA Başarısız: %s"
 
 #: R/psychopdaROC.b.R
 msgid "Bootstrap CI for {param} of '{var}' could not be added to the table ({msg})."
-msgstr ""
+msgstr "'{var}' değişkeninin {param} değeri için bootstrap güven aralığı tabloya eklenemedi ({msg})."
 
 #: enhancedROC/options/bootstrapPartialAUC.title
 msgid "Bootstrap CI for partial AUC"
@@ -29202,7 +29202,7 @@ msgstr "Bootstrap aralıkları hesaplanmadı"
 
 #: R/psychopdaROC.b.R
 msgid "Bootstrap Iteration"
-msgstr ""
+msgstr "Bootstrap Yinelemesi"
 
 #: aivalidation/options/nBootstrap.title
 #: aivalidation/ui/bootstrapOptions/nBootstrap.label
@@ -29412,7 +29412,7 @@ msgstr "Öncül Ağırlıklandırmalı Bootstrap ROC"
 #: mlpathology/options/bootstrap_runs.title
 #: optimalcutpoint/options/bootstrap_runs.title
 msgid "Bootstrap Runs"
-msgstr ""
+msgstr "Bootstrap Tekrarları"
 
 #: adaptivelasso/options/bootstrap_samples.title
 #: biomarkerdiscovery/options/n_bootstrap_samples.title
@@ -32444,7 +32444,7 @@ msgstr ""
 
 #: R/psychopdaROC.b.R
 msgid "Cannot compute"
-msgstr ""
+msgstr "Hesaplanamıyor"
 
 #: R/agreement.b.R
 msgid "Cannot compute: one rater has zero variance (all values identical)"
@@ -33257,7 +33257,7 @@ msgstr ""
 
 #: R/psychopdaROC.b.R
 msgid "Categorical NRI, using risk category boundaries at {thr}."
-msgstr ""
+msgstr "{thr} risk kategorisi sınırlarını kullanan kategorik NRI."
 
 #: package/analyses/riverplot.menuSubgroup
 #: riverplot/options.menuSubgroup
@@ -34971,7 +34971,7 @@ msgstr "Pozitif olarak seçilen düzeyi ve verilere uygulanan filtreleri kontrol
 msgid ""
 "Check the missing values of this test variable, or remove it from the "
 "analysis."
-msgstr ""
+msgstr "Bu test değişkeninin eksik değerlerini kontrol edin veya değişkeni analizden çıkarın."
 
 #: R/lassocox.b.R
 msgid "Check the selected variables and the model options."
@@ -36441,7 +36441,7 @@ msgstr ""
 
 #: psychopdaROC/results/outcomeCoding.description
 msgid "Class levels with their counts and the role each plays in the analysis"
-msgstr ""
+msgstr "Sınıf düzeyleri, sayıları ve her birinin analizdeki rolü"
 
 #: classification/results/classificationMetrics/class.columns.title
 msgid "class name"
@@ -38716,7 +38716,7 @@ msgstr "Klinik yararlılık analizi"
 msgid ""
 "Clinical utility analysis for '{var}' failed ({msg}), so it has no row in "
 "the Clinical Utility table."
-msgstr ""
+msgstr "'{var}' için klinik yarar analizi başarısız oldu ({msg}); bu nedenle Klinik Yarar tablosunda bu değişken için satır yoktur."
 
 #: clinicalnomograms/results/decisionCurveResults.description
 msgid "Clinical utility assessment"
@@ -43533,7 +43533,7 @@ msgstr ""
 #: clinicalcalculators/options/performance_metrics/comprehensive.title
 #: psychopdaROC/options/clinicalMode/comprehensive.title
 msgid "Comprehensive"
-msgstr ""
+msgstr "Kapsamlı"
 
 #: stagemigration/options/clinicalUtilityThresholds/comprehensive.title
 msgid "Comprehensive (5-95 percent)"
@@ -44537,7 +44537,7 @@ msgstr ""
 msgid ""
 "Computed on the full sample: the subgroup variable is not applied to this "
 "table."
-msgstr ""
+msgstr "Tüm örneklem üzerinden hesaplanmıştır: alt grup değişkeni bu tabloya uygulanmaz."
 
 #: agreement/results/computedVariablesInfo.title
 msgid "Computed Variables Added to Dataset"
@@ -45281,7 +45281,7 @@ msgid ""
 "intervals for both sensitivity and specificity. Each is computed separately "
 "at its operating point, so neither is a simultaneous confidence region for "
 "the curve as a whole."
-msgstr ""
+msgstr "ROC grafiğindeki güven bantları, duyarlılık için noktasal %95 Wilson skor aralıklarıdır; kantil hata çubukları ise hem duyarlılık hem özgüllük için noktasal %95 Wilson skor aralıklarıdır. Her biri kendi çalışma noktasında ayrı hesaplandığından, hiçbiri eğrinin tamamı için eşzamanlı güven bölgesi değildir."
 
 #: variablebiplot/options/showConfidenceEllipse.title
 msgid "Confidence Ellipses"
@@ -46052,7 +46052,7 @@ msgid ""
 "Confidence limits were computed on the logit scale (delta-method standard "
 "error) and back-transformed, so they lie between 0 and 1 and need not be "
 "symmetric about the pooled AUC."
-msgstr ""
+msgstr "Güven sınırları logit ölçeğinde (delta yöntemiyle standart hata) hesaplanıp geri dönüştürüldüğünden 0 ile 1 arasındadır ve birleştirilmiş AUC etrafında simetrik olmak zorunda değildir."
 
 #: ihcpredict/results/predictions.columns.title
 #: ihcpredict/results/alternativeDiagnoses.columns.title
@@ -48304,7 +48304,7 @@ msgstr ""
 
 #: R/psychopdaROC.b.R
 msgid "correlation adjustment = %.2f"
-msgstr ""
+msgstr "korelasyon düzeltmesi = %.2f"
 
 #: package/analyses/jcorrelation.title
 #: package/analyses/jcorrelation.menuTitle
@@ -50932,7 +50932,7 @@ msgstr ""
 
 #: R/psychopdaROC.b.R
 msgid "CRITERION"
-msgstr ""
+msgstr "ÖLÇÜT"
 
 #: decisioncompare/results/opaTable.columns.title
 msgid "Criterion Met?"
@@ -53049,7 +53049,7 @@ msgstr "Sürekli Tahmin Ediciler İçin Kesim Noktası"
 
 #: R/psychopdaROC.b.R
 msgid "Cut score must be a valid finite number."
-msgstr ""
+msgstr "Kesim puanı geçerli, sonlu bir sayı olmalıdır."
 
 #: ihcscoring/results/multiplecutoffs/comparisonstats.columns.title
 #: psychopdaROC/results/thresholdTable.columns.title
@@ -53316,7 +53316,7 @@ msgid ""
 "cutpointr could not analyse %1$s (%2$s). A built-in Youden-index search was "
 "used instead, so the selected cutpoint method, metric and tolerance were not "
 "applied to that marker."
-msgstr ""
+msgstr "cutpointr, %1$s değişkenini analiz edemedi (%2$s). Bunun yerine yerleşik Youden indeksi araması kullanıldı; dolayısıyla seçilen kesim noktası yöntemi, ölçüt ve tolerans bu belirtece uygulanmadı."
 
 #: multisurvival/options/cutp.title
 #: singlearm/options/cutp.title
@@ -53770,7 +53770,7 @@ msgstr ""
 
 #: R/psychopdaROC.b.R
 msgid "Data dimensions do not match"
-msgstr ""
+msgstr "Veri boyutları eşleşmiyor"
 
 #: synopticcompleteness/results/perItemTable.columns.title
 msgid "Data Element"
@@ -55173,7 +55173,7 @@ msgstr ""
 
 #: R/psychopdaROC.b.R
 msgid "DECISION BASED ON MEASURE"
-msgstr ""
+msgstr "ÖLÇÜME DAYALI KARAR"
 
 #: package/analyses/decisioncalculator.menuSubgroup
 #: package/analyses/cotest.menuSubgroup
@@ -56132,7 +56132,7 @@ msgstr ""
 msgid ""
 "DeLong's test does not currently support the group variable. Please remove "
 "grouping or disable DeLong test."
-msgstr ""
+msgstr "DeLong testi şu anda grup değişkenini desteklemiyor. Lütfen gruplamayı kaldırın veya DeLong testini devre dışı bırakın."
 
 #: R/psychopdaROC.b.R
 msgid ""
@@ -56140,7 +56140,7 @@ msgid ""
 "DeLong ER, DeLong DM, Clarke-Pearson DL (1988). Comparing the areas under "
 "two or more correlated ROC curves: a nonparametric approach. Biometrics "
 "44(3):837-845."
-msgstr ""
+msgstr "DeLong testi, pROC paketinin doğrulanmış uygulamasını kullanır. Kaynak: DeLong ER, DeLong DM, Clarke-Pearson DL (1988). Comparing the areas under two or more correlated ROC curves: a nonparametric approach. Biometrics 44(3):837-845."
 
 #: R/psychopdaROC.b.R
 msgid ""
@@ -56149,7 +56149,7 @@ msgid ""
 "DeLong ER, DeLong DM, Clarke-Pearson DL (1988). Comparing the areas under "
 "two or more correlated ROC curves: a nonparametric approach. Biometrics "
 "44(3):837-845."
-msgstr ""
+msgstr "pROC yolu başarısız olduğundan DeLong testi pROC tarafından değil, bu modülün kendi yedek uygulamasıyla hesaplandı; yukarıdaki uyarıya bakın. Kaynak: DeLong ER, DeLong DM, Clarke-Pearson DL (1988). Comparing the areas under two or more correlated ROC curves: a nonparametric approach. Biometrics 44(3):837-845."
 
 #: advancedimputation/options/mnar_type/delta_adjustment.title
 msgid "Delta Adjustment Method"
@@ -61693,7 +61693,7 @@ msgstr ""
 
 #: R/psychopdaROC.b.R
 msgid "Distribution of Values by Class"
-msgstr ""
+msgstr "Sınıflara Göre Değer Dağılımı"
 
 #: jjpubr/ui[4].label
 msgid "Distribution Options"
@@ -64044,7 +64044,7 @@ msgstr ""
 msgid ""
 "Effect sizes for '{var1}' vs '{var2}' could not be computed ({msg}), so that "
 "comparison is omitted."
-msgstr ""
+msgstr "'{var1}' ile '{var2}' arasındaki etki büyüklükleri hesaplanamadı ({msg}); bu nedenle bu karşılaştırma atlandı."
 
 #: R/nonparametric.b.R
 msgid "Effect sizes were calculated using {}."
@@ -69696,7 +69696,7 @@ msgstr "Dışlanan: ilk saptama > toplam"
 #: R/enhancedROC.b.R
 #: R/psychopdaROC.b.R
 msgid "Excluded: missing outcome"
-msgstr ""
+msgstr "Dışlandı: eksik sonuç"
 
 #: R/pathsampling.b.R
 msgid "Excluded: missing total samples"
@@ -73969,7 +73969,7 @@ msgstr "Sabit kesme değeri"
 #: mixedmodelanova/results/fixed_effects.title
 #: ordinalmixedmodel/results/fixedEffects.title
 msgid "Fixed Effects"
-msgstr ""
+msgstr "Sabit Etkiler"
 
 #: diagnosticmeta/options/method/fixed.title
 msgid "Fixed effects"
@@ -74065,7 +74065,7 @@ msgstr "Sabit Duyarlılık / Özgüllük Analizi"
 
 #: R/psychopdaROC.b.R
 msgid "Fixed Sensitivity ROC: {var}"
-msgstr ""
+msgstr "Sabit Duyarlılıklı ROC: {var}"
 
 #: psychopdaROC/options/fixedSensSpecAnalysis.title
 #: psychopdaROC/ui[5][0]/fixedSensSpecAnalysis.label
@@ -74090,7 +74090,7 @@ msgstr "Sabit Özgüllük"
 
 #: R/psychopdaROC.b.R
 msgid "Fixed Specificity ROC: {var}"
-msgstr ""
+msgstr "Sabit Özgüllüklü ROC: {var}"
 
 #: trichotomousroc/options/threshold_method/fixed.title
 msgid "Fixed Thresholds (User-Specified)"
@@ -80155,11 +80155,11 @@ msgstr ""
 
 #: psychopdaROC/options/clinicalMode.title
 msgid "Guidance Level"
-msgstr ""
+msgstr "Açıklama Düzeyi"
 
 #: psychopdaROC/ui[2]/clinicalMode.label
 msgid "Guidance level"
-msgstr ""
+msgstr "Rehberlik düzeyi"
 
 #: R/outcomeorganizer.b.R
 msgid ""
@@ -80460,7 +80460,7 @@ msgstr "Zarar-Fayda Oranı"
 
 #: R/psychopdaROC.b.R
 msgid "harm:benefit %1$.2f (threshold %2$.0f%%)"
-msgstr ""
+msgstr "zarar:yarar %1$.2f (eşik %2$.0f%%)"
 
 #: R/decisioncalculator.b.R
 msgid ""
@@ -84205,7 +84205,7 @@ msgstr ""
 msgid ""
 "IDI/NRI need two tests: put at least two in Test Variables, or one there and "
 "a different test in Reference Test for IDI/NRI."
-msgstr ""
+msgstr "IDI/NRI için iki test gerekir: Test Değişkenlerine en az iki test ya da buraya bir test ve IDI/NRI için Referans Test alanına farklı bir test ekleyin."
 
 #: R/multisurvival.b.R
 msgid ""
@@ -85727,7 +85727,7 @@ msgstr ""
 
 #: R/psychopdaROC.b.R
 msgid "Inadequate"
-msgstr ""
+msgstr "Yetersiz"
 
 #: R/ihcheterogeneity.b.R
 msgid "INADEQUATE SAMPLING:"
@@ -86825,7 +86825,7 @@ msgid ""
 "classifies an individual patient, which also depends on the cutpoint and on "
 "disease prevalence. This AUC is an in-sample estimate that has not been "
 "internally or externally validated. %3$s"
-msgstr ""
+msgstr "bu örneklemde %1$s ayırt etme gücüne işaret eder: kullanılan sınıflandırma yönünde, belirteç pozitif sınıftan rastgele seçilen bir olguyu negatif sınıftan rastgele seçilen bir olgunun önünde yaklaşık %2$.0f%% sıklıkla sıralar (eşitlikler yarım sayılır). AUC, tüm kesim noktaları üzerinden hesaplanan ikili sıralama özelliğidir; seçilen kesim noktasına bağlı değildir ve tek bir kesim noktasının bir hastayı ne kadar güvenilir sınıflandırdığını göstermez; bu, kesim noktasına ve hastalık prevalansına da bağlıdır. Bu AUC, iç veya dış doğrulaması yapılmamış örneklem içi bir kestirimdir. %3$s"
 
 #: latentbiomarker/results/loadingsTable.columns.title
 msgid "Indicator"
@@ -87958,7 +87958,7 @@ msgstr "Örnekleme önerisi için yetersiz veri."
 
 #: R/psychopdaROC.b.R
 msgid "Insufficient data for analysis"
-msgstr ""
+msgstr "Analiz için yetersiz veri"
 
 #: R/waterfall.b.R
 msgid "Insufficient data for clinical interpretation"
@@ -88125,7 +88125,7 @@ msgstr "Yetersiz Değişken"
 
 #: R/psychopdaROC.b.R
 msgid "Insufficient variables for comparison"
-msgstr ""
+msgstr "Karşılaştırma için yetersiz değişken"
 
 #: advancedbarplot/options/value_format/integer.title
 #: jggheatmap/options/value_format/integer.title
@@ -89793,7 +89793,7 @@ msgstr "Geçersiz kesim değeri girdileri"
 
 #: R/psychopdaROC.b.R
 msgid "Invalid cutpoint specification"
-msgstr ""
+msgstr "Geçersiz kesim noktası belirtimi"
 
 #: R/survival.b.R
 msgid ""
@@ -93050,7 +93050,7 @@ msgstr ""
 #: ihcscoring/ui[9][0]/font_size/large.title
 #: tinytable/options/font_size/large.title
 msgid "Large"
-msgstr ""
+msgstr "Büyük"
 
 #: R/chisqposttest.b.R
 msgid "large"
@@ -99396,7 +99396,7 @@ msgstr ""
 
 #: R/psychopdaROC.b.R
 msgid "Mean = %1$.3f, 95%% CI (%2$.3f to %3$.3f)"
-msgstr ""
+msgstr "Ortalama = %1$.3f, 95%% GA (%2$.3f ile %3$.3f)"
 
 #: explainableai/results/shapanalysis/shapvaluestable.columns.title
 msgid "Mean |SHAP Value|"
@@ -101212,7 +101212,7 @@ msgstr "orta"
 #: R/nonparametric.b.R
 #: R/psychopdaROC.b.R
 msgid "Medium"
-msgstr ""
+msgstr "Orta"
 
 #: curemodels/options/npcure_bandwidth/medium.title
 msgid "Medium (0.3)"
@@ -101423,7 +101423,7 @@ msgstr ""
 msgid ""
 "Meta-analysis requires at least 3 test variables; {n} selected. Add more "
 "test variables to enable it."
-msgstr ""
+msgstr "Meta-analiz en az 3 test değişkeni gerektirir; {n} değişken seçildi. Etkinleştirmek için daha fazla test değişkeni ekleyin."
 
 #: bayesiandiagnostic/results/metaAnalysisResults.title
 #: psychopdaROC/results/metaAnalysisTable.title
@@ -101446,7 +101446,7 @@ msgstr "Meta-Analiz Uyarısı"
 msgid ""
 "Meta-analysis: marker {var} was excluded because its AUC could not be "
 "estimated ({msg})."
-msgstr ""
+msgstr "Meta-analiz: {var} belirtecinin AUC'si kestirilemediğinden dışlandı ({msg})."
 
 #: bayesiannetworkma/options/baseline_model/meta_regression.title
 msgid "Meta-Regression"
@@ -102615,7 +102615,7 @@ msgid ""
 "is therefore <i>not</i> necessarily the cutpoint that maximises the metric, "
 "and its sensitivity and specificity can differ appreciably from the maximum. "
 "Set the tolerance to 0 to report the maximising cutpoint itself."
-msgstr ""
+msgstr "Ölçüt toleransı %1$s: en iyi %3$s değerinin %2$s yakınındaki tüm kesim noktaları eşdeğer kabul edildi ve bildirilen kesim noktası bunların %4$s değeridir. Dolayısıyla bu, ölçütü en çok artıran kesim noktası olmak <i>zorunda değildir</i>; duyarlılığı ve özgüllüğü en yüksek ölçüte sahip noktadan belirgin biçimde farklı olabilir. Ölçütü en çok artıran kesim noktasının kendisini bildirmek için toleransı 0 yapın."
 
 #: R/decisioncompare.b.R
 msgid "Metric Unavailable"
@@ -109189,7 +109189,7 @@ msgstr "Negatif (-)"
 
 #: R/psychopdaROC.b.R
 msgid "Negative (%s)"
-msgstr ""
+msgstr "Negatif (%s)"
 
 #: R/psychopdaROC.b.R
 msgid "Negative (other levels)"
@@ -109503,7 +109503,7 @@ msgstr "ihmal edilebilir"
 #: R/nonparametric.b.R
 #: R/psychopdaROC.b.R
 msgid "Negligible"
-msgstr ""
+msgstr "İhmal edilebilir"
 
 #: R/crosstable.b.R
 msgid "negligible (< 0.1)"
@@ -110592,7 +110592,7 @@ msgstr ""
 msgid ""
 "No case of the positive class (%1$s) has a value of %2$s, so %2$s cannot be "
 "analysed."
-msgstr ""
+msgstr "Pozitif sınıfta (%1$s) hiçbir olgunun %2$s değeri yoktur; bu nedenle %2$s analiz edilemez."
 
 #: R/pathsampling.b.R
 msgid ""
@@ -112639,7 +112639,7 @@ msgid ""
 "First check Positive Class: is %1$s the level that means the condition is "
 "present? Only if it is, check Classification Direction. The AUC and its "
 "confidence interval in the Area Under the ROC Curve table are unaffected."
-msgstr ""
+msgstr "Seçili sınıflandırma yönünde bu belirteç için kullanılabilir bir kesim noktası yoktur: hiçbir eşik grupları şanstan daha iyi ayırmaz. Önce Pozitif Sınıfı kontrol edin: %1$s, durumun varlığını belirten düzey mi? Yalnızca öyleyse Sınıflandırma Yönünü kontrol edin. ROC Eğrisi Altında Kalan Alan tablosundaki AUC ve güven aralığı etkilenmez."
 
 #: R/psychopdaROC.b.R
 msgid ""
@@ -112655,7 +112655,7 @@ msgid ""
 "Tolerance or choose another Cutpoint Method or Optimization Metric. The AUC "
 "and its confidence interval in the Area Under the ROC Curve table are "
 "unaffected."
-msgstr ""
+msgstr "Bu belirteç için kullanılabilir bir kesim noktası gösterilmez: seçilen yöntemin belirlediği kesim noktası gözlenen değerlerin dışındadır ve tüm hastaları negatif sınıflandırır; oysa bazı kesim noktaları, seçili sınıflandırma yönünde grupları şanstan daha iyi ayırır. Bu durum örneğin dengesiz bir örneklemde doğruluk, yanlış sınıflandırma maliyeti veya toplam yarar eniyilenirken, girilen maliyet oranında maliyet-yarar yöntemi tüm hastaları negatif sınıflandırmayı en düşük maliyetli seçenek bulduğunda ya da Ölçüt Toleransı bu seçeneği en iyi kesim noktasıyla eşit sayacak kadar geniş olduğunda oluşur. Bir kesim noktası gerekiyorsa Ölçüt Toleransını azaltın veya başka bir Kesim Noktası Yöntemi ya da Eniyileme Ölçütü seçin. ROC Eğrisi Altında Kalan Alan tablosundaki AUC ve güven aralığı etkilenmez."
 
 #: R/advancedraincloud.b.R
 #: R/raincloud.b.R
@@ -114197,7 +114197,7 @@ msgstr ""
 #: R/enhancedROC.b.R
 #: R/psychopdaROC.b.R
 msgid "Not assigned yet"
-msgstr ""
+msgstr "Henüz atanmadı"
 
 #: R/lassocox.b.R
 #: R/lassologistic.b.R
@@ -114564,7 +114564,7 @@ msgstr "Dahil edilmedi"
 
 #: R/psychopdaROC.b.R
 msgid "Not informative (post-hoc)"
-msgstr ""
+msgstr "Bilgi sağlamaz (post-hoc)"
 
 #: R/decisioncompare.b.R
 msgid "Not informative: no discordant pairs (p = 1 by convention)"
@@ -114860,7 +114860,7 @@ msgid ""
 "Note: %d row(s) with a missing value in the classification variable or in "
 "any of the compared test variables were excluded from the DeLong test, so "
 "all curves are estimated on the same patients."
-msgstr ""
+msgstr "Not: Sınıflandırma değişkeninde veya karşılaştırılan test değişkenlerinden herhangi birinde eksik değer bulunan %d satır DeLong testinden çıkarıldı; böylece tüm eğriler aynı hastalar üzerinden kestirilir."
 
 #: aivalidation/ui/bootstrapOptions[2].label
 msgid "Note: Bootstrap is slower but more robust for small samples"
@@ -118487,14 +118487,14 @@ msgid ""
 "Only {kept} of {total} bootstrap resamples for '{var}' contained both "
 "outcome classes, which is too few for a stable interval, so no bootstrap AUC "
 "summary is reported for it."
-msgstr ""
+msgstr "'{var}' için {total} bootstrap yeniden örnekleminin yalnızca {kept} tanesi her iki sonuç sınıfını içerdi. Bu sayı kararlı bir aralık için yetersiz olduğundan bootstrap AUC özeti bildirilmez."
 
 #: R/psychopdaROC.b.R
 msgid ""
 "Only {kept} of the {given} NRI risk threshold(s) entered could be read as a "
 "number strictly between 0 and 1. Enter them as comma-separated proportions, "
 "for example: 0.2, 0.5"
-msgstr ""
+msgstr "Girilen {given} NRI risk eşiğinin yalnızca {kept} tanesi 0 ile 1 arasında bir sayı olarak okunabildi. Bunları virgülle ayrılmış oranlar olarak girin; örneğin: 0.2, 0.5"
 
 #: R/vartree.b.R
 msgid ""
@@ -120908,7 +120908,7 @@ msgstr "Sonuç düzeyi"
 #: enhancedROC/results/results/outcomeCoding.columns.title
 #: psychopdaROC/results/outcomeCoding.columns.title
 msgid "Outcome level"
-msgstr ""
+msgstr "Sonuç düzeyi"
 
 #: R/enhancedROC.b.R
 msgid ""
@@ -129400,11 +129400,11 @@ msgstr ""
 
 #: R/psychopdaROC.b.R
 msgid "Please specify a cut score for using the manual cutpoint method."
-msgstr ""
+msgstr "Elle girilen kesim noktası yöntemini kullanmak için lütfen bir kesim puanı belirtin."
 
 #: R/psychopdaROC.b.R
 msgid "Please specify at least two dependent variables to use DeLong's test."
-msgstr ""
+msgstr "DeLong testini kullanmak için lütfen en az iki bağımlı değişken belirtin."
 
 #: R/decisiongraph.b.R
 msgid ""
@@ -131510,7 +131510,7 @@ msgstr "Pozitif"
 
 #: R/psychopdaROC.b.R
 msgid "Positive (%s)"
-msgstr ""
+msgstr "Pozitif (%s)"
 
 #: R/lassologistic.b.R
 msgid "Positive (+)"
@@ -131519,7 +131519,7 @@ msgstr "Pozitif (+)"
 #: R/enhancedROC.b.R
 #: R/psychopdaROC.b.R
 msgid "Positive (condition present)"
-msgstr ""
+msgstr "Pozitif (durum var)"
 
 #: ihcscoring/options/outcome_positive.title
 #: ihcscoring/ui[8][2]/outcome_positive.label
@@ -132700,7 +132700,7 @@ msgstr "Güç Analizi Eğrileri"
 msgid ""
 "Power analysis for '{var}' failed ({msg}), so it has no row in the Power "
 "Analysis table."
-msgstr ""
+msgstr "'{var}' için güç analizi başarısız oldu ({msg}); bu nedenle Güç Analizi tablosunda bu değişken için satır yoktur."
 
 #: comprehensiveSurvivalPower/results/instructions.title
 msgid "Power Analysis Instructions"
@@ -132740,7 +132740,7 @@ msgstr ""
 
 #: R/psychopdaROC.b.R
 msgid "Power and required sample size cannot be computed for this configuration."
-msgstr ""
+msgstr "Bu yapılandırma için güç ve gerekli örneklem büyüklüğü hesaplanamıyor."
 
 #: psychopdaROC/ui[10].label
 msgid "Power and Sample Size Analysis"
@@ -132778,7 +132778,7 @@ msgid ""
 "indices. Statistics in Medicine 16(13):1529-1542; Hanley JA, McNeil BJ "
 "(1982). The meaning and use of the area under a ROC curve. Radiology "
 "143(1):29-36."
-msgstr ""
+msgstr "Güç hesaplamalarının dayanakları: Obuchowski NA, McClish DK (1997). Sample size determination for diagnostic accuracy studies involving binormal ROC curve indices. Statistics in Medicine 16(13):1529-1542; Hanley JA, McNeil BJ (1982). The meaning and use of the area under a ROC curve. Radiology 143(1):29-36."
 
 #: competingRisksPower/results/sensitivityTable.columns.title
 msgid "Power Change (%)"
@@ -133321,7 +133321,7 @@ msgstr ""
 
 #: R/psychopdaROC.b.R
 msgid "Precision (Positive Predictive Value)"
-msgstr ""
+msgstr "Kesinlik (Pozitif Öngörü Değeri)"
 
 #: R/enhancedROC.b.R
 #: R/lassologistic.b.R
@@ -134321,7 +134321,7 @@ msgstr "Öngörü değerleri ve prevalans"
 
 #: R/psychopdaROC.b.R
 msgid "Predictive Values vs. Disease Prevalence"
-msgstr ""
+msgstr "Hastalık Prevalansına Göre Öngörü Değerleri"
 
 #: bayesiandiagnostic/results/predictiveValuesPlot.title
 #: psychopdaROC/results/prevalencePlot.title
@@ -138712,7 +138712,7 @@ msgstr ""
 #: mixedmodelanova/results/random_effects.title
 #: ordinalmixedmodel/results/randomEffects.title
 msgid "Random Effects"
-msgstr ""
+msgstr "Rastgele Etkiler"
 
 #: mendelianrandomization/options/ivw_model/random.title
 msgid "Random Effects (DerSimonian-Laird)"
@@ -140424,7 +140424,7 @@ msgid ""
 "condition is present? Only if it is, switch Classification Direction to "
 "\"<=\": the AUC becomes 1 minus the value shown, and the cutpoint, "
 "sensitivity and specificity are re-estimated."
-msgstr ""
+msgstr "Test değerlerinin yorumu: <i>DAHA YÜKSEK değerlerin %1$s durumunu gösterdiği kabul edildi</i> (Sınıflandırma Yönü = \"%2$s\"). Bu yorum bu belirteç için ters görünüyorsa önce Pozitif Sınıfı kontrol edin: %1$s, durumun varlığını belirten düzey mi? Yalnızca öyleyse Sınıflandırma Yönünü \"<=\" olarak değiştirin: AUC, 1 eksi gösterilen değer olur; kesim noktası, duyarlılık ve özgüllük yeniden kestirilir."
 
 #: R/enhancedROC.b.R
 msgid ""
@@ -140440,7 +140440,7 @@ msgid ""
 "condition is present? Only if it is, switch Classification Direction to "
 "\">=\": the AUC becomes 1 minus the value shown, and the cutpoint, "
 "sensitivity and specificity are re-estimated."
-msgstr ""
+msgstr "Test değerlerinin yorumu: <i>DAHA DÜŞÜK değerlerin %1$s durumunu gösterdiği kabul edildi</i> (Sınıflandırma Yönü = \"%2$s\"). Bu yorum bu belirteç için ters görünüyorsa önce Pozitif Sınıfı kontrol edin: %1$s, durumun varlığını belirten düzey mi? Yalnızca öyleyse Sınıflandırma Yönünü \">=\" olarak değiştirin: AUC, 1 eksi gösterilen değer olur; kesim noktası, duyarlılık ve özgüllük yeniden kestirilir."
 
 #: R/decisioncombine.b.R
 msgid "Reading the columns"
@@ -141664,7 +141664,7 @@ msgstr ""
 
 #: psychopdaROC/options/refVar.title
 msgid "Reference Test for IDI/NRI"
-msgstr ""
+msgstr "IDI/NRI için Referans Test"
 
 #: psychopdaROC/ui[0][3].label
 msgid "Reference Test for IDI/NRI (Optional)"
@@ -141675,14 +141675,14 @@ msgid ""
 "Reference Test for IDI/NRI holds the class variable, the gold standard "
 "itself. Put a test to compare against there, or leave it empty to use the "
 "first test variable."
-msgstr ""
+msgstr "IDI/NRI için Referans Test alanında sınıf değişkeni, yani altın standardın kendisi bulunuyor. Buraya karşılaştırılacak bir test koyun veya ilk test değişkenini kullanmak için boş bırakın."
 
 #: R/psychopdaROC.b.R
 msgid ""
 "Reference test: %1$s, the first test variable, because Reference Test for "
 "IDI/NRI is empty. To compare against another test, put it in Reference Test "
 "for IDI/NRI."
-msgstr ""
+msgstr "Referans test: IDI/NRI için Referans Test alanı boş olduğundan ilk test değişkeni olan %1$s kullanılıyor. Başka bir testle karşılaştırmak için onu IDI/NRI için Referans Test alanına koyun."
 
 #: bayesiannetworkma/options/reference_treatment.title
 msgid "Reference Treatment"
@@ -142831,13 +142831,13 @@ msgstr "Ana etkiyi test etmek istiyorsanız önce etkileşimi kaldırın."
 msgid ""
 "Remove the subgroup variable, or use one in which every subgroup contains "
 "cases of the positive class."
-msgstr ""
+msgstr "Alt grup değişkenini kaldırın veya her alt grubunda pozitif sınıftan olgular bulunan bir değişken kullanın."
 
 #: R/psychopdaROC.b.R
 msgid ""
 "Remove the subgroup variable, or use one in which every subgroup has at "
 "least 2 positive and 2 negative cases."
-msgstr ""
+msgstr "Alt grup değişkenini kaldırın veya her alt grubunda en az 2 pozitif ve 2 negatif olgu bulunan bir değişken kullanın."
 
 #: tidyplots/options/removeXAxis.title
 msgid "Remove X Axis"
@@ -146285,7 +146285,7 @@ msgstr "ROC Eğrisi (EAA = %s)"
 
 #: R/psychopdaROC.b.R
 msgid "ROC Curve (static rendering)"
-msgstr ""
+msgstr "ROC Eğrisi (statik çizim)"
 
 #: R/enhancedROC.b.R
 #: clinicalprediction/results/roc_plot.title
@@ -146356,11 +146356,11 @@ msgstr "Dışbükey örtü katmanlı ROC eğrisi"
 
 #: R/psychopdaROC.b.R
 msgid "ROC Curve with Fixed Sensitivity Point"
-msgstr ""
+msgstr "Sabit Duyarlılık Noktalı ROC Eğrisi"
 
 #: R/psychopdaROC.b.R
 msgid "ROC Curve with Fixed Specificity Point"
-msgstr ""
+msgstr "Sabit Özgüllük Noktalı ROC Eğrisi"
 
 #: greyzoneroc/options/plot_grey_zone_roc.title
 #: greyzoneroc/results/greyZoneROCPlot.title
@@ -146562,7 +146562,7 @@ msgstr ""
 #: enhancedROC/results/results/outcomeCoding.columns.title
 #: psychopdaROC/results/outcomeCoding.columns.title
 msgid "Role in this analysis"
-msgstr ""
+msgstr "Bu analizdeki rolü"
 
 #: qualityoflife/options/role_emotional_items.title
 msgid "Role-Emotional Items"
@@ -147341,7 +147341,7 @@ msgstr ""
 
 #: R/psychopdaROC.b.R
 msgid "Sample prevalence: %.2f"
-msgstr ""
+msgstr "Örneklem prevalansı: %.2f"
 
 #: R/benford.b.R
 #: R/decisioncurve.b.R
@@ -151281,7 +151281,7 @@ msgstr "Duyarlılık ve Özgüllük - Eşik"
 
 #: R/psychopdaROC.b.R
 msgid "Sensitivity and Specificity vs. Threshold"
-msgstr ""
+msgstr "Eşiğe Göre Duyarlılık ve Özgüllük"
 
 #: R/psychopdaROC.b.R
 msgid "Sensitivity and Specificity vs. Threshold: Combined"
@@ -152048,7 +152048,7 @@ msgid ""
 "Several cut-points tie for the best %1$s (%2$s): %3$s. The cut-point shown, "
 "%4$s, is computed from them and is not one of them; its %1$s is %5$s. Choose "
 "'All tied cutpoints' in Tie Breaking Method to list each one."
-msgstr ""
+msgstr "Birden fazla kesim noktası en iyi %1$s (%2$s) değeri için eşittir: %3$s. Gösterilen kesim noktası %4$s, bunlardan hesaplanmıştır ve bunlardan biri değildir; %1$s değeri %5$s olur. Her birini listelemek için Eşitlikleri Çözme Yönteminde 'Tüm eşit kesim noktaları' seçeneğini seçin."
 
 #: R/waterfall.b.R
 msgid "SEVERAL ROWS PER PATIENT"
@@ -152179,7 +152179,7 @@ msgstr ""
 msgid ""
 "Shaded bands are pointwise 95% Wilson score intervals for sensitivity; they "
 "are not a simultaneous confidence region for the whole curve."
-msgstr ""
+msgstr "Gölgeli bantlar duyarlılık için noktasal %95 Wilson skor aralıklarıdır; tüm eğri için eşzamanlı güven bölgesi değildir."
 
 #: R/decisioncurve.b.R
 msgid "Shaded: {level}% pointwise CI"
@@ -157324,7 +157324,7 @@ msgstr ""
 #: R/psychopdaROC.b.R
 #: tinytable/options/font_size/small.title
 msgid "Small"
-msgstr ""
+msgstr "Küçük"
 
 #: R/chisqposttest.b.R
 msgid "small"
@@ -157630,7 +157630,7 @@ msgid ""
 "than 10 cases in a class the p-values and confidence intervals below are "
 "unreliable and are likely to be too narrow. Treat any difference as "
 "provisional and confirm it in a larger sample."
-msgstr ""
+msgstr "Küçük örneklem: %1$d pozitif ve %2$d negatif olgu. DeLong testi, AUC varyansı için büyük örneklem yaklaşımına dayanır; bu nedenle bir sınıfta 10'dan az olgu olduğunda aşağıdaki p-değerleri ve güven aralıkları güvenilir değildir ve aralıklar gereğinden dar olabilir. Herhangi bir farkı geçici bulgu olarak değerlendirin ve daha büyük bir örneklemde doğrulayın."
 
 #: R/decisioncombine.b.R
 msgid "Small sample: n = {n} complete cases"
@@ -159480,7 +159480,7 @@ msgstr "Belirtilen pozitif kategori '%1$s' veride bulunamadı. Mevcut: %2$s"
 
 #: R/psychopdaROC.b.R
 msgid "Specified positive class not found"
-msgstr ""
+msgstr "Belirtilen pozitif sınıf bulunamadı"
 
 #: R/oddsratio.b.R
 msgid ""
@@ -164306,7 +164306,7 @@ msgstr "Alt grup"
 msgid ""
 "Subgroup %1$s has %2$d case(s) of the positive class (%3$s) with a value of "
 "%4$s; at least 2 are needed to analyse %4$s in that subgroup."
-msgstr ""
+msgstr "%1$s alt grubunda, pozitif sınıftaki (%3$s) %2$d olgunun %4$s değeri vardır; bu alt grupta %4$s analizi için en az 2 olgu gerekir."
 
 #: R/psychopdaROC.b.R
 msgid ""
@@ -164318,7 +164318,7 @@ msgstr ""
 msgid ""
 "Subgroup %1$s has no case of the positive class (%2$s) with a value of %3$s, "
 "so %3$s cannot be analysed in that subgroup."
-msgstr ""
+msgstr "%1$s alt grubunda, pozitif sınıftaki (%2$s) hiçbir olgunun %3$s değeri yoktur; bu nedenle bu alt grupta %3$s analiz edilemez."
 
 #: betabinomialdiagnostic/options/subgroup_analysis.title
 #: betabinomialdiagnostic/results/subgroupAnalysis.title
@@ -164756,7 +164756,7 @@ msgstr ""
 #: R/linechart.b.R
 #: R/psychopdaROC.b.R
 msgid "Suggestion:"
-msgstr ""
+msgstr "Öneri:"
 
 #: R/swimmerplot.b.R
 msgid "Suggestions:"
@@ -167713,7 +167713,7 @@ msgstr ""
 
 #: R/psychopdaROC.b.R
 msgid "Target sensitivity %1$s | achieved %2$s | cutpoint %3$s"
-msgstr ""
+msgstr "Hedef duyarlılık %1$s | elde edilen %2$s | kesim noktası %3$s"
 
 #: assayoptimization/options/optimization_goal/target_value.title
 msgid "Target Specific Value"
@@ -167731,7 +167731,7 @@ msgstr ""
 
 #: R/psychopdaROC.b.R
 msgid "Target specificity %1$s | achieved %2$s | cutpoint %3$s"
-msgstr ""
+msgstr "Hedef özgüllük %1$s | elde edilen %2$s | kesim noktası %3$s"
 
 #: labcontrolcharts/options/target_sd.title
 #: qualitycontrol/options/target_sd.title
@@ -169418,7 +169418,7 @@ msgstr "Test değerleri dağılımı"
 #: likelihoodratio/options/testVariable.title
 #: psychopdaROC/results/thresholdTable.columns.title
 msgid "Test Variable"
-msgstr ""
+msgstr "Test Değişkeni"
 
 #: R/decision.b.R
 msgid "Test variable levels excluded from analysis: {lvls}"
@@ -170759,7 +170759,7 @@ msgstr ""
 msgid ""
 "The class variable %1$s has fewer than two observed levels; ROC analysis "
 "needs cases with and without the condition."
-msgstr ""
+msgstr "%1$s sınıf değişkeninin gözlenen düzey sayısı ikiden azdır; ROC analizi durumun bulunduğu ve bulunmadığı olguları gerektirir."
 
 #: R/enhancedROC.b.R
 msgid "The Clinical Application Metrics table reports the PPV at %s."
@@ -173058,7 +173058,7 @@ msgid ""
 "interval is 83% as wide as the bootstrap interval for the AUC, and it "
 "narrows further as you raise the precision. Read the AUC Summary table for "
 "an interval that refers to the AUC itself."
-msgstr ""
+msgstr "Aralık, AUC'nin kendisini değil, yan sütundaki Ağırlıklı Bootstrap AUC'yi çevreler. Önsel değer sabit ve bilinen bir sayı olarak ele alınır; bu nedenle ağırlıklandırma hem kestirimi hem aralık genişliğini n / (n + önsel kesinlik) ile çarpar: önsel kesinlik 20 ve eksiksiz olgu sayısı 100 olduğunda aralık, AUC bootstrap aralığının %83'ü kadar geniştir; kesinlik artırıldıkça daha da daralır. AUC'nin kendisine ait aralık için AUC Özeti tablosuna bakın."
 
 #: R/agreement.b.R
 msgid ""
@@ -176586,7 +176586,7 @@ msgstr ""
 
 #: R/psychopdaROC.b.R
 msgid "The test '%1$s' has an AUC of %2$.3f"
-msgstr ""
+msgstr "'%1$s' testinin AUC değeri %2$.3f"
 
 #: R/decision.b.R
 msgid "The test and the reference standard agree on every analysed case."
@@ -178214,7 +178214,7 @@ msgid ""
 "because no marginal likelihood is computed. Do not read it against Bayes "
 "factor evidence thresholds. For genuine Bayesian inference use dedicated "
 "software such as Stan or JAGS."
-msgstr ""
+msgstr "Bu analiz, verileri bootstrap ile yeniden örnekler ve sonucu önsel AUC'ye doğru daraltır. MCMC çalıştırmaz ve Bayesçi sonsal dağılım üretmez: gösterilen aralık bir bootstrap yüzdelik aralığıdır, Bayesçi güvenilirlik aralığı değildir. Bootstrap Kanıt Oranı bir yeniden örnekleme sıklığıdır: AUC'si 0.5'i aşan bootstrap örneklemlerinin sayısının, aşmayanların sayısına bir eklenerek elde edilen sayıya bölünmesidir. Marjinal olabilirlik hesaplanmadığından Bayes faktörü değildir. Bunu Bayes faktörü kanıt eşiklerine göre yorumlamayın. Bayesçi çıkarım için Stan veya JAGS gibi özel yazılımlar kullanın."
 
 #: R/markovmultistate.b.R
 msgid ""
@@ -188545,7 +188545,7 @@ msgid ""
 "despite violation of independence assumption. These results should NOT be "
 "used for formal statistical inference. Provided for exploratory purposes "
 "only with full awareness of statistical invalidity."
-msgstr ""
+msgstr "KULLANICI GEÇERSİZ KILMA SEÇENEĞİ ETKİN: Bağımsızlık varsayımı ihlal edilmesine rağmen bağımsız olmayan veriler üzerinde meta-analiz yapıldı. Bu sonuçlar resmi istatistiksel çıkarım için KULLANILMAMALIDIR. İstatistiksel geçersizlik bilinerek yalnızca keşifsel amaçla sunulmuştur."
 
 #: R/decisioncompare.b.R
 msgid ""
@@ -193011,7 +193011,7 @@ msgid ""
 "to \"%4$s\" gives an AUC of 1 minus the value shown and re-estimates the "
 "cutpoint, sensitivity and specificity. Change it only if that matches what "
 "the marker means clinically."
-msgstr ""
+msgstr "UYARI: Şanstan daha düşük, 0.5'in altında AUC: %1$s. Önce Pozitif Sınıfı kontrol edin: %2$s, durumun varlığını belirten düzey mi? Öyleyse belirteç grupları kullanılan yönün tersinde ayırıyor veya hiç ayırmıyor olabilir (bilgi taşımayan bir belirteç şans eseri yaklaşık yarı yarıya 0.5'in altında kalır; bu nedenle güven aralığının 0.5'i dışlayıp dışlamadığını kontrol edin). Sınıflandırma Yönü şu anda \"%3$s\"; bunu \"%4$s\" yapmak AUC'yi 1 eksi gösterilen değere dönüştürür ve kesim noktasını, duyarlılığı ve özgüllüğü yeniden kestirir. Yalnızca belirtecin klinik anlamına uyuyorsa değiştirin."
 
 #: R/survival.b.R
 msgid ""
@@ -197435,3 +197435,784 @@ msgstr ""
 #: contTables/results/chiSq.title
 msgid "χ² Tests"
 msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid "{var}: {positive} positive, {negative} negative complete observations"
+msgstr "{var}: {positive} pozitif, {negative} negatif eksiksiz gözlem"
+
+#: R/psychopdaROC.b.R
+msgid ""
+"%1$s has a value for %2$d case(s) of the negative class (%3$s); at least 2 "
+"are needed to analyse it."
+msgstr "%1$s için negatif sınıftaki (%3$s) %2$d olgunun değeri vardır; analiz için en az 2 olgu gerekir."
+
+#: R/psychopdaROC.b.R
+msgid ""
+"A correlation of 1 gives zero variance for the paired contrast under this "
+"equal-variance planning approximation. Power and required sample size are "
+"unavailable, so those cells and the power curve are left blank. Specify a "
+"correlation below 1 that is justified for the intended study."
+msgstr "Bu eşit varyanslı planlama yaklaşımında 1 korelasyonu, eşleştirilmiş karşılaştırma için sıfır varyans verir. Güç ve gerekli örneklem büyüklüğü hesaplanamadığından ilgili hücreler ve güç eğrisi boş bırakılır. Amaçlanan çalışma için gerekçelendirilmiş, 1'den küçük bir korelasyon belirtin."
+
+#: R/psychopdaROC.b.R
+msgid ""
+"A predictive value is undefined and shown as blank when its conditioning "
+"group has no observations or its adjusted denominator is zero."
+msgstr "Koşullama grubunda gözlem bulunmadığında veya düzeltilmiş payda sıfır olduğunda öngörü değeri tanımsızdır ve boş gösterilir."
+
+#: R/psychopdaROC.b.R
+msgid ""
+"A required sample size is unavailable for this null or degenerate observed "
+"AUC."
+msgstr "Bu sıfır etkiyi gösteren veya dejenere gözlenen AUC için gerekli örneklem büyüklüğü hesaplanamaz."
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Achieved rates and accuracy classify the observed complete cases at the "
+"displayed cutoff. An interpolated cutoff can miss the target; Stepwise meets "
+"or exceeds it. Empty predicted groups have undefined predictive values, "
+"shown as blank cells."
+msgstr "Elde edilen oranlar ve doğruluk, gözlenen eksiksiz olguları gösterilen kesim noktasında sınıflandırır. İnterpolasyonla bulunan kesim noktası hedefi tutturamayabilir; Basamaklı yöntem hedefi karşılar veya aşar. Tahmin edilen gruplardan biri boşsa ilgili öngörü değerleri tanımsızdır ve boş hücrelerle gösterilir."
+
+#: psychopdaROC/options/interactiveROC.title
+#: psychopdaROC/ui[7][0][0][1]/interactiveROC.label
+msgid "Additional static ROC plot"
+msgstr "Ek statik ROC grafiği"
+
+#: psychopdaROC/results/interactivePlot.title
+msgid "Additional Static ROC Plot"
+msgstr "Ek Statik ROC Grafiği"
+
+#: R/psychopdaROC.b.R
+msgid ""
+"After changing the class variable or filtering rows, reselect both outcome "
+"levels."
+msgstr "Sınıf değişkenini değiştirdikten veya satırları filtreledikten sonra her iki sonuç düzeyini yeniden seçin."
+
+#: R/psychopdaROC.b.R
+msgid "All Observed Cutpoints"
+msgstr "Gözlenen Tüm Kesim Noktaları"
+
+#: R/psychopdaROC.b.R
+msgid ""
+"At least one AUC is below 0.5. Check Positive Class and Classification "
+"Direction against the clinical meaning of the marker."
+msgstr "En az bir AUC 0.5'in altındadır. Pozitif Sınıf ve Sınıflandırma Yönü ayarlarını belirtecin klinik anlamına göre kontrol edin."
+
+#: R/psychopdaROC.b.R
+msgid ""
+"AUC 95% confidence intervals and tests use the asymptotic DeLong "
+"approximation. Nominal coverage and type-I error are not guaranteed in "
+"modest or imbalanced samples, even with ten or more observations per class. "
+"Interpret the uncertainty cautiously; a bootstrap interval is not "
+"automatically a remedy (Obuchowski and Lieber, 1998)."
+msgstr "AUC için %95 güven aralıkları ve testler asimptotik DeLong yaklaşımını kullanır. Her sınıfta on veya daha fazla gözlem olsa bile, küçük ya da dengesiz örneklemlerde nominal kapsama ve tip I hata oranı garanti edilmez. Belirsizliği dikkatle yorumlayın; bootstrap aralığı kendiliğinden bir çözüm değildir (Obuchowski ve Lieber, 1998)."
+
+#: psychopdaROC/ui[6][0]/delongTest.label
+msgid "AUC comparison (DeLong's test)"
+msgstr "AUC karşılaştırması (DeLong testi)"
+
+#: R/psychopdaROC.b.R
+msgid ""
+"AUC intervals refer to the full AUC. Threshold, sensitivity and specificity "
+"describe a separate Youden reference, not the main table's selected cutoff "
+"method. Youden is reselected in each stratified bootstrap sample; tied "
+"optima are selected randomly using the stated seed, including for the point "
+"estimate. These are percentile intervals, not externally validated "
+"performance intervals."
+msgstr "AUC aralıkları tam AUC'ye aittir. Eşik, duyarlılık ve özgüllük, ana tablonun seçilen kesim noktası yönteminden ayrı bir Youden referansını tanımlar. Her tabakalı bootstrap örnekleminde Youden yeniden seçilir; nokta kestirimi de dahil olmak üzere eşit en iyi değerlerden biri belirtilen tohum kullanılarak rastgele seçilir. Bunlar yüzdelik aralıklardır; dış doğrulamaya dayalı performans aralıkları değildir."
+
+#: psychopdaROC/options/clinicalMode/basic.title
+msgid "Basic (recommended)"
+msgstr "Temel (önerilen)"
+
+#: psychopdaROC/results/bootstrapCITable.title
+msgid "Bootstrap Intervals (AUC and Youden Reference)"
+msgstr "Bootstrap Aralıkları (AUC ve Youden Referansı)"
+
+#: psychopdaROC/ui[4][1]/boot_runs.label
+msgid "Bootstrap iterations"
+msgstr "Bootstrap yinelemeleri"
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Bootstrap Youden-reference coordinate intervals are unavailable ({msg}). "
+"Point estimates are shown with blank interval cells."
+msgstr "Youden referans koordinatları için bootstrap aralıkları hesaplanamadı ({msg}). Nokta kestirimleri gösterilir; aralık hücreleri boş bırakılır."
+
+#: psychopdaROC/results/decisionCurveTable.columns.title
+msgid "Cases Detected in Sample"
+msgstr "Örneklemde Saptanan Olgular"
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Check Classification Direction. Unselected outcome levels and missing "
+"outcomes are excluded and counted."
+msgstr "Sınıflandırma Yönünü kontrol edin. Seçilmeyen sonuç düzeyleri ve eksik sonuçlar dışlanır ve sayıları bildirilir."
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Choose any optional tables, ROC curves, or comparisons; checkboxes start "
+"unchecked."
+msgstr "İsteğe bağlı tabloları, ROC eğrilerini veya karşılaştırmaları seçin; onay kutuları başlangıçta işaretli değildir."
+
+#: R/psychopdaROC.b.R
+msgid "Choose distinct observed levels in Positive Class and Negative Class."
+msgstr "Pozitif Sınıf ve Negatif Sınıf için gözlenen, birbirinden farklı düzeyleri seçin."
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Choose distinct observed levels in Positive Class and Negative Class. "
+"Nothing is computed until both are selected; levels are never chosen from "
+"their order."
+msgstr "Pozitif Sınıf ve Negatif Sınıf için gözlenen, birbirinden farklı düzeyleri seçin. İkisi de seçilmeden hesaplama yapılmaz; düzeyler sıralarına göre seçilmez."
+
+#: psychopdaROC/options/negativeClass.description.ui
+msgid ""
+"Choose the level that means the condition is absent. It must differ from "
+"Positive Class. All other outcome levels are excluded, not pooled."
+msgstr "Durumun yokluğunu belirten düzeyi seçin. Pozitif Sınıftan farklı olmalıdır. Diğer tüm sonuç düzeyleri birleştirilmez; dışlanır."
+
+#: psychopdaROC/options/positiveClass.description.ui
+msgid ""
+"Choose the level that means the condition is present. Also choose a distinct "
+"Negative Class. Nothing is computed until both observed levels are selected."
+msgstr "Durumun varlığını belirten düzeyi seçin. Ayrıca farklı bir Negatif Sınıf seçin. Gözlenen her iki düzey de seçilmeden hesaplama yapılmaz."
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Choose the positive and negative classes. Nothing is computed until both are "
+"selected. Other outcome levels and missing outcomes will be excluded."
+msgstr "Pozitif ve negatif sınıfları seçin. İkisi de seçilmeden hesaplama yapılmaz. Diğer sonuç düzeyleri ve eksik sonuçlar dışlanacaktır."
+
+#: R/psychopdaROC.b.R
+msgid "Chosen in Positive Class and Negative Class."
+msgstr "Pozitif Sınıf ve Negatif Sınıf alanlarında seçildi."
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Class imbalance detected (Prevalence: %.1f%%). PPV and NPV depend on "
+"prevalence and may not transfer to your clinical population. Consider "
+"Precision-Recall curves and validate in the intended setting."
+msgstr "Sınıf dengesizliği saptandı (prevalans: %.1f%%). PPV ve NPV prevalansa bağlıdır ve klinik popülasyonunuza taşınamayabilir. Kesinlik-duyarlılık eğrilerini değerlendirin ve amaçlanan ortamda doğrulayın."
+
+#: R/psychopdaROC.b.R
+msgid "Class Variable"
+msgstr "Sınıf Değişkeni"
+
+#: psychopdaROC/ui[0][1].label
+msgid "Class variable (gold standard)"
+msgstr "Sınıf değişkeni (altın standart)"
+
+#: psychopdaROC/ui[9][0]/compareClassifiers.label
+msgid "Classifier performance comparison"
+msgstr "Sınıflandırıcı performans karşılaştırması"
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Cohen's d is the standardized difference in a marker's mean between the "
+"positive and negative classes (pooled SD), given for each marker of the "
+"pair. The three difference columns are second marker minus first marker; "
+"Glass' delta uses the negative-class SD and Hedges' g applies the "
+"small-sample correction J to each d before differencing. No interval or test "
+"accompanies these point estimates. The 0.2/0.5/0.8 size bands are "
+"descriptive conventions only; they have not been validated as clinical "
+"thresholds for a difference between two marker effects."
+msgstr "Cohen d, bir belirtecin pozitif ve negatif sınıflardaki ortalamaları arasındaki standartlaştırılmış farktır (birleşik standart sapma); çiftteki her belirteç için ayrı verilir. Üç fark sütunu, ikinci belirteç eksi birinci belirteç biçimindedir; Glass delta negatif sınıfın standart sapmasını kullanır ve Hedges g, fark alınmadan önce her d değerine küçük örneklem düzeltmesi J'yi uygular. Bu nokta kestirimlerinin yanında aralık veya test yoktur. 0.2/0.5/0.8 büyüklük sınırları yalnızca betimsel uzlaşımlardır; iki belirteç etkisi arasındaki fark için klinik eşik olarak doğrulanmamıştır."
+
+#: psychopdaROC/ui[7][0][0][0]/combinePlots.label
+msgid "Combined ROC curves"
+msgstr "Birleşik ROC eğrileri"
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Compare diagnostic markers and select cutpoints for explicitly selected "
+"positive and negative classes."
+msgstr "Açıkça seçilen pozitif ve negatif sınıflar için tanısal belirteçleri karşılaştırın ve kesim noktalarını seçin."
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Continuous (category-free) NRI: no usable risk category boundaries were "
+"supplied, so reclassification counts changes in predicted risk rather than "
+"crossings of category boundaries."
+msgstr "Sürekli (kategorisiz) NRI: kullanılabilir risk kategorisi sınırları verilmediğinden, yeniden sınıflandırma kategori sınırı geçişleri yerine tahmin edilen riskteki değişimleri sayar."
+
+#: R/psychopdaROC.b.R
+msgid "Current n=%1$d provides %2$.1f%% power at an AUC distance from 0.5 of %3$s."
+msgstr "Mevcut n=%1$d, AUC'nin 0.5'ten uzaklığı %3$s olduğunda %2$.1f%% güç sağlar."
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Cutpoints selected on these data require external validation before clinical "
+"use."
+msgstr "Bu verilerde seçilen kesim noktaları klinik kullanım öncesinde dış doğrulama gerektirir."
+
+#: R/psychopdaROC.b.R
+msgid ""
+"DeLong intervals could not be computed for %s. The Hanley-McNeil "
+"approximation was used instead. Its distributional assumptions may not hold, "
+"and its intervals need not be conservative. Nominal coverage is not "
+"guaranteed, especially in modest or imbalanced samples."
+msgstr "%s için DeLong aralıkları hesaplanamadı. Bunun yerine Hanley-McNeil yaklaşımı kullanıldı. Dağılım varsayımları sağlanmayabilir ve aralıklarının temkinli olması garanti değildir. Özellikle küçük veya dengesiz örneklemlerde nominal kapsama garanti edilmez."
+
+#: psychopdaROC/results/effectSizeTable.columns.title
+msgid "Descriptive size band"
+msgstr "Betimsel büyüklük aralığı"
+
+#: R/psychopdaROC.b.R
+msgid "Direction (relative to cutpoint)"
+msgstr "Yön (kesim noktasına göre)"
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Each row must be an independent observation. Repeated measurements from the "
+"same patient require a method that accounts for clustering."
+msgstr "Her satır bağımsız bir gözlem olmalıdır. Aynı hastanın tekrarlanan ölçümleri, kümelenmeyi hesaba katan bir yöntem gerektirir."
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Each row must represent an independent observation. These confidence "
+"intervals, tests and bootstrap resamples do not account for clustering or "
+"repeated measurements. Multiple lesions, blocks, slides or visits from the "
+"same patient require a prespecified patient-level summary or a method that "
+"accounts for clustering; do not treat them as independent patients."
+msgstr "Her satır bağımsız bir gözlemi temsil etmelidir. Bu güven aralıkları, testler ve bootstrap yeniden örneklemleri, kümelenmeyi veya tekrarlanan ölçümleri hesaba katmaz. Aynı hastaya ait birden fazla lezyon, blok, lam veya ziyaret için önceden belirlenmiş hasta düzeyinde bir özet ya da kümelenmeyi hesaba katan bir yöntem gerekir; bunları bağımsız hastalar olarak değerlendirmeyin."
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Effect size comparisons require at least two test variables. Add another "
+"test variable or disable Effect Size Analysis."
+msgstr "Etki büyüklüğü karşılaştırmaları en az iki test değişkeni gerektirir. Başka bir test değişkeni ekleyin veya Etki Büyüklüğü Analizini devre dışı bırakın."
+
+#: R/psychopdaROC.b.R
+msgid "Excluded: unselected outcome level"
+msgstr "Dışlandı: seçilmeyen sonuç düzeyi"
+
+#: psychopdaROC/ui[10][0]/expectedAUCDifference.label
+msgid "Expected AUC difference"
+msgstr "Beklenen AUC farkı"
+
+#: package/analyses/psychopdaROC.description
+#: psychopdaROC/options.description.main
+msgid ""
+"Exploratory Receiver Operating Characteristic (ROC) curve analysis with "
+"optimal cutpoint determination. Each row must be an independent observation. "
+"Intervals, tests and bootstrap resampling do not account for repeated "
+"measurements or clustering within patients; use a prespecified patient-level "
+"summary or a method that accounts for clustering. Nominal coverage is not "
+"guaranteed in small or imbalanced samples. Cutpoints selected on these data "
+"report apparent performance and require validation in the intended setting."
+msgstr "En uygun kesim noktası belirlemeyi içeren keşifsel ROC eğrisi analizi. Her satır bağımsız bir gözlem olmalıdır. Aralıklar, testler ve bootstrap yeniden örneklemesi, tekrarlanan ölçümleri veya hasta içi kümelenmeyi hesaba katmaz; önceden belirlenmiş hasta düzeyinde bir özet ya da kümelenmeyi hesaba katan bir yöntem kullanın. Küçük veya dengesiz örneklemlerde nominal kapsama garanti edilmez. Bu verilerde seçilen kesim noktaları görünür performansı bildirir ve amaçlanan ortamda doğrulama gerektirir."
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Exploratory ROC analysis: rows must be independent; selected cutpoints need "
+"validation. Nominal interval coverage is not guaranteed in small or "
+"imbalanced samples."
+msgstr "Keşifsel ROC analizi: satırlar bağımsız olmalıdır; seçilen kesim noktaları doğrulama gerektirir. Küçük veya dengesiz örneklemlerde nominal aralık kapsaması garanti edilmez."
+
+#: R/psychopdaROC.b.R
+msgid ""
+"F1 and accuracy use a single Youden reference cutoff; ties choose the "
+"greatest sensitivity. This is separate from the main table's cutoff method. "
+"Brier score assumes that input values between 0 and 1 are positive-class "
+"probabilities; a normalized assay is not necessarily a probability. All "
+"performance estimates are apparent, in-sample values."
+msgstr "F1 ve doğruluk, tek bir Youden referans kesim noktasını kullanır; eşitliklerde en yüksek duyarlılık seçilir. Bu, ana tablonun kesim noktası yönteminden ayrıdır. Brier skoru, 0 ile 1 arasındaki girdi değerlerinin pozitif sınıf olasılıkları olduğunu varsayar; normalize edilmiş bir test değeri mutlaka olasılık değildir. Tüm performans kestirimleri görünür, örneklem içi değerlerdir."
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Find a cutpoint for target sensitivity %1$.3f (%2$.1f%%), then report the "
+"achieved sensitivity and corresponding specificity."
+msgstr "Hedef duyarlılık %1$.3f (%2$.1f%%) için bir kesim noktası bulun; ardından elde edilen duyarlılığı ve buna karşılık gelen özgüllüğü bildirin."
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Find a cutpoint for target specificity %1$.3f (%2$.1f%%), then report the "
+"achieved specificity and corresponding sensitivity."
+msgstr "Hedef özgüllük %1$.3f (%2$.1f%%) için bir kesim noktası bulun; ardından elde edilen özgüllüğü ve buna karşılık gelen duyarlılığı bildirin."
+
+#: psychopdaROC/ui[5][0]/fixedSensSpecAnalysis.label
+msgid "Fixed sensitivity/specificity analysis"
+msgstr "Sabit duyarlılık/özgüllük analizi"
+
+#: R/psychopdaROC.b.R
+msgid ""
+"For reference, n=%1$d would be required for %2$.1f%% power against an AUC of "
+"%3$.3f."
+msgstr "Referans olarak, %3$.3f AUC için %2$.1f%% güç elde etmek üzere n=%1$d gerekir."
+
+#: R/psychopdaROC.b.R
+msgid "Further reading"
+msgstr "Ek okuma"
+
+#: psychopdaROC/ui[0][2].label
+msgid "Group variable (optional)"
+msgstr "Grup değişkeni (isteğe bağlı)"
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Guidance for statistical comparisons, effect sizes, and bootstrap ROC "
+"analysis with prior weighting. Select each optional analysis separately."
+msgstr "İstatistiksel karşılaştırmalar, etki büyüklükleri ve önsel ağırlıklandırmalı bootstrap ROC analizi için rehber. Her isteğe bağlı analizi ayrı seçin."
+
+#: psychopdaROC/ui[12][0]/harmBenefitRatio.label
+msgid "Harm-benefit ratio"
+msgstr "Zarar-yarar oranı"
+
+#: psychopdaROC/ui[13][0]/heterogeneityTest.label
+msgid "Heterogeneity test (Q-test, I-squared)"
+msgstr "Heterojenlik testi (Q testi, I-kare)"
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Higher sensitivity reduces missed cases but may increase false positives. A "
+"negative result supports exclusion only when the negative likelihood ratio, "
+"(1 - sensitivity) / specificity, is sufficiently small for the clinical "
+"context."
+msgstr "Daha yüksek duyarlılık, kaçırılan olguları azaltır ancak yanlış pozitifleri artırabilir. Negatif bir sonuç, yalnızca negatif olabilirlik oranı, (1 - duyarlılık) / özgüllük, klinik bağlam için yeterince küçük olduğunda dışlamayı destekler."
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Higher specificity reduces false positives but may increase missed cases. A "
+"positive result supports confirmation only when the positive likelihood "
+"ratio, sensitivity / (1 - specificity), is sufficiently large for the "
+"clinical context."
+msgstr "Daha yüksek özgüllük, yanlış pozitifleri azaltır ancak kaçırılan olguları artırabilir. Pozitif bir sonuç, yalnızca pozitif olabilirlik oranı, duyarlılık / (1 - özgüllük), klinik bağlam için yeterince büyük olduğunda doğrulamayı destekler."
+
+#: R/psychopdaROC.b.R
+msgid "How to read these results"
+msgstr "Bu sonuçlar nasıl okunur?"
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Inference assumes independent observations. These intervals, tests and "
+"bootstrap resamples do not account for repeated measurements or clustering "
+"within patients; use a prespecified patient-level summary or a method that "
+"accounts for clustering."
+msgstr "Çıkarım, bağımsız gözlemler varsayar. Bu aralıklar, testler ve bootstrap yeniden örneklemleri, tekrarlanan ölçümleri veya hasta içi kümelenmeyi hesaba katmaz; önceden belirlenmiş hasta düzeyinde bir özet ya da kümelenmeyi hesaba katan bir yöntem kullanın."
+
+#: R/psychopdaROC.b.R
+msgid "Interpolation and achieved performance"
+msgstr "İnterpolasyon ve elde edilen performans"
+
+#: R/psychopdaROC.b.R
+msgid "Linear cutoff; empirical rates"
+msgstr "Doğrusal kesim noktası; ampirik oranlar"
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Linear interpolation estimates a cutoff between ROC points. Reported rates "
+"are recalculated from observations at that cutoff, so a discrete sample may "
+"miss the requested target. If interpolation involves infinity, the endpoint "
+"meeting the target is used."
+msgstr "Doğrusal interpolasyon, ROC noktaları arasında bir eşik kestirir. Bildirilen oranlar bu eşikteki gözlemlerden yeniden hesaplanır; bu nedenle kesikli bir örneklem istenen hedefi tutturamayabilir. İnterpolasyon sonsuz bir değer içeriyorsa hedefi karşılayan uç nokta kullanılır."
+
+#: psychopdaROC/ui[4][0]/specifyCutScore.label
+msgid "Manual cut score"
+msgstr "Elle girilen kesim puanı"
+
+#: psychopdaROC/options/showOptimalPoint.title
+msgid "Mark selected cutpoint"
+msgstr "Seçilen kesim noktasını işaretle"
+
+#: R/psychopdaROC.b.R
+msgid "Measure Variable(s)"
+msgstr "Ölçüm Değişken(ler)i"
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Meta-analysis is blocked because these markers are not independent studies. "
+"See Meta-Analysis Warning for the assumptions and alternatives."
+msgstr "Bu belirteçler bağımsız çalışmalardan gelmediği için meta-analiz engellendi. Varsayımlar ve alternatifler için Meta-Analiz Uyarısına bakın."
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Meta-analysis override is active for correlated markers from one dataset. "
+"Pooled estimates and intervals are exploratory and must not be used for "
+"formal inference."
+msgstr "Tek veri kümesindeki ilişkili belirteçler için meta-analiz kısıtını geçersiz kılma seçeneği etkindir. Birleştirilmiş kestirimler ve aralıklar keşifseldir ve resmi istatistiksel çıkarım için kullanılmamalıdır."
+
+#: psychopdaROC/ui[4][1]/tol_metric.label
+msgid "Metric tolerance"
+msgstr "Ölçüt toleransı"
+
+#: R/psychopdaROC.b.R
+msgid ""
+"N counts every row with each outcome value before exclusions. Each test is "
+"analysed on its complete cases within the two selected classes."
+msgstr "N, dışlamalar öncesinde her sonuç değerine sahip tüm satırları sayar. Her test, seçilen iki sınıfta eksiksiz verisi bulunan olgularda analiz edilir."
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Nearest point uses the observed cutoff closest to the requested target. It "
+"does not interpolate and may fall below or above the target."
+msgstr "En yakın nokta, istenen hedefe en yakın gözlenen eşiği kullanır. İnterpolasyon yapmaz; hedefin altında veya üstünde kalabilir."
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Need n=%1$d (current n=%2$d) for %3$.1f%% power at an AUC distance from 0.5 "
+"of %4$s. Correlation setting: %5$s."
+msgstr "AUC'nin 0.5'ten uzaklığı %4$s olduğunda %3$.1f%% güç için n=%1$d gerekir (mevcut n=%2$d). Korelasyon ayarı: %5$s."
+
+#: R/psychopdaROC.b.R
+msgid "Need n=%1$d for %2$.1f%% power at an AUC distance from 0.5 of %3$s."
+msgstr "AUC'nin 0.5'ten uzaklığı %3$s olduğunda %2$.1f%% güç için n=%1$d gerekir."
+
+#: R/psychopdaROC.b.R
+msgid "Negative (condition absent)"
+msgstr "Negatif (durum yok)"
+
+#: R/psychopdaROC.b.R
+#: psychopdaROC/options/negativeClass.title
+msgid "Negative Class"
+msgstr "Negatif Sınıf"
+
+#: psychopdaROC/ui[0][1]/negativeClass.label
+msgid "Negative class"
+msgstr "Negatif sınıf"
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Negative Class is set to %1$s, but no row of %2$s has that level. Choose an "
+"observed level in Negative Class."
+msgstr "Negatif Sınıf %1$s olarak ayarlanmış, ancak %2$s değişkeninin hiçbir satırında bu düzey yok. Negatif Sınıf için gözlenen bir düzey seçin."
+
+#: psychopdaROC/results/decisionCurveTable.columns.title
+msgid "Net Interventions Avoided per 100"
+msgstr "100 Kişide Kaçınılan Net Müdahale"
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Observed (post-hoc) power is a deterministic function of the observed "
+"p-value and adds no information beyond it. Use the confidence interval for "
+"the observed AUC (%1$.3f), or plan against a prespecified target AUC."
+msgstr "Gözlenen (post-hoc) güç, gözlenen p-değerinin deterministik bir fonksiyonudur ve bunun ötesinde bilgi sağlamaz. Gözlenen AUC (%1$.3f) için güven aralığını kullanın veya önceden belirlenmiş bir hedef AUC'ye göre planlama yapın."
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Only {kept} of {given} ROC quantiles are valid probabilities from 0 to 1. "
+"Enter comma-separated values such as 0.1,0.5,0.9. Error bars use the "
+"accepted values; none are drawn if no value is valid."
+msgstr "{given} ROC kantilinin yalnızca {kept} tanesi 0 ile 1 arasında geçerli olasılıklardır. 0.1,0.5,0.9 gibi virgülle ayrılmış değerler girin. Hata çubukları kabul edilen değerleri kullanır; geçerli değer yoksa çizilmez."
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Only %d cases in the smaller outcome class. The AUC, interval and p-value "
+"can be unstable in sparse samples. Ten per class is a warning threshold, not "
+"a guarantee of reliable inference above it; imbalance and score "
+"distributions also affect coverage. Treat these estimates as provisional."
+msgstr "Daha küçük sonuç sınıfında yalnızca %d olgu vardır. Küçük örneklemlerde AUC, aralık ve p-değeri kararsız olabilir. Sınıf başına on olgu bir uyarı sınırıdır; bu sınırın üstünde güvenilir çıkarım garantisi değildir. Dengesizlik ve skor dağılımları da kapsamayı etkiler. Bu kestirimleri geçici bulgular olarak değerlendirin."
+
+#: psychopdaROC/results/outcomeCoding.title
+msgid "Outcome coding: positive and negative classes"
+msgstr "Sonuç kodlaması: pozitif ve negatif sınıflar"
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Outcome selection excluded %1$d row(s) in unselected levels and %2$d row(s) "
+"with missing outcomes. All analyses use only %3$s (positive) and %4$s "
+"(negative), with marker-specific complete cases."
+msgstr "Sonuç seçimi nedeniyle seçilmeyen düzeylerdeki %1$d satır ve sonucu eksik %2$d satır dışlandı. Tüm analizler yalnızca %3$s (pozitif) ve %4$s (negatif) sınıflarını, belirtece özgü eksiksiz olgularla kullanır."
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Overall test: unavailable (contrast covariance is degenerate or inference "
+"could not be computed)."
+msgstr "Genel test: hesaplanamıyor (karşılaştırma kovaryansı dejenere veya çıkarım hesaplanamadı)."
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Partial AUC requires the specificity From value to be smaller than the To "
+"value. Choose a range with positive width."
+msgstr "Kısmi AUC için özgüllük Başlangıç değeri Bitiş değerinden küçük olmalıdır. Genişliği pozitif olan bir aralık seçin."
+
+#: psychopdaROC/ui[3][0]/usePriorPrev.label
+msgid "Population prevalence adjustment"
+msgstr "Popülasyon prevalansı düzeltmesi"
+
+#: R/psychopdaROC.b.R
+msgid "Positive Class and Negative Class must be different observed levels."
+msgstr "Pozitif Sınıf ve Negatif Sınıf, gözlenen ve birbirinden farklı düzeyler olmalıdır."
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Positive Class is set to %1$s, but no row of %2$s has that level. Choose an "
+"observed level in Positive Class."
+msgstr "Pozitif Sınıf %1$s olarak ayarlanmış, ancak %2$s değişkeninin hiçbir satırında bu düzey yok. Pozitif Sınıf için gözlenen bir düzey seçin."
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Positive class: %1$s. Negative class: %2$s. Sensitivity, PPV, LR+, every "
+"cutpoint and the AUC describe detection of %1$s relative to %2$s. Other "
+"outcome levels are excluded."
+msgstr "Pozitif sınıf: %1$s. Negatif sınıf: %2$s. Duyarlılık, PPV, LR+, tüm kesim noktaları ve AUC, %2$s karşısında %1$s saptanmasını tanımlar. Diğer sonuç düzeyleri dışlanır."
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Power includes both tails of the two-sided normal approximation. Current N "
+"and the class ratio use complete marker/outcome pairs. With multiple "
+"markers, the correlation adjustment assumes equal AUC variances and is a "
+"planning approximation, not a fitted paired ROC power model."
+msgstr "Güç, iki yönlü normal yaklaşımın her iki kuyruğunu içerir. Mevcut N ve sınıf oranı, eksiksiz belirteç/sonuç çiftlerini kullanır. Birden fazla belirteç olduğunda korelasyon düzeltmesi eşit AUC varyansları varsayar; veriye uydurulmuş eşleştirilmiş ROC güç modeli değil, bir planlama yaklaşımıdır."
+
+#: R/psychopdaROC.b.R
+msgid "Power to detect AUC different from 0.5 (Hanley-McNeil)"
+msgstr "AUC'nin 0.5'ten farklı olduğunu saptama gücü (Hanley-McNeil)"
+
+#: R/psychopdaROC.b.R
+msgid ""
+"PPV and NPV below are computed at the prevalence of this sample (%.1f%%) and "
+"do not carry over to a population where the condition is more or less common "
+"- sensitivity and specificity also require comparable case mix and "
+"conditional score distributions. Recompute them for your own setting's "
+"prevalence before quoting them."
+msgstr "Aşağıdaki PPV ve NPV, bu örneklemin prevalansında (%.1f%%) hesaplanır ve durumun daha sık veya daha seyrek olduğu bir popülasyona doğrudan taşınamaz; duyarlılık ve özgüllük de benzer olgu dağılımı ve koşullu skor dağılımları gerektirir. Bunları bildirmeden önce kendi ortamınızın prevalansına göre yeniden hesaplayın."
+
+#: R/psychopdaROC.b.R
+msgid ""
+"PPV and NPV depend on prevalence. A prior prevalence setting adjusts "
+"predictive values, while sensitivity, specificity and accuracy remain "
+"empirical sample rates."
+msgstr "PPV ve NPV prevalansa bağlıdır. Önsel prevalans ayarı öngörü değerlerini düzeltirken duyarlılık, özgüllük ve doğruluk örneklemde gözlenen oranlar olarak kalır."
+
+#: R/psychopdaROC.b.R
+msgid ""
+"PPV and NPV use each marker's complete-case sample prevalence. They require "
+"recalculation for another prevalence; transport also requires comparable "
+"case mix and conditional score distributions."
+msgstr "PPV ve NPV, her belirtecin eksiksiz olgularındaki örneklem prevalansını kullanır. Başka bir prevalans için yeniden hesaplanmaları gerekir; aktarılabilirlik ayrıca benzer olgu dağılımı ve koşullu skor dağılımları gerektirir."
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Predicted risks differing by at most sqrt(machine epsilon), approximately "
+"1.5e-8, are treated as numerical ties in both continuous and categorical "
+"NRI. This prevents numerical roundoff from becoming reclassification and is "
+"not a threshold for clinical importance."
+msgstr "En fazla sqrt(makine epsilonu), yaklaşık 1.5e-8, kadar farklı olan tahmini riskler hem sürekli hem kategorik NRI'de sayısal eşitlik olarak değerlendirilir. Bu, sayısal yuvarlamanın yeniden sınıflandırma sayılmasını önler; klinik önem eşiği değildir."
+
+#: psychopdaROC/ui[11][0]/priorPrecision.label
+msgid "Prior precision"
+msgstr "Önsel kesinlik"
+
+#: psychopdaROC/results/bayesianROCTable.columns.title
+msgid "Prior Weight"
+msgstr "Önsel Ağırlık"
+
+#: R/psychopdaROC.b.R
+msgid "Prior weight %.1f%%"
+msgstr "Önsel ağırlık %.1f%%"
+
+#: R/psychopdaROC.b.R
+msgid "Procedure Notes"
+msgstr "İşlem Notları"
+
+#: psychopdaROC/results/partialAUCTable.columns.title
+msgid "Raw pAUC 95% CI Lower"
+msgstr "Ham pAUC %95 GA Alt Sınırı"
+
+#: psychopdaROC/results/partialAUCTable.columns.title
+msgid "Raw pAUC 95% CI Upper"
+msgstr "Ham pAUC %95 GA Üst Sınırı"
+
+#: psychopdaROC/ui[0][3].label
+msgid "Reference test for IDI/NRI (optional)"
+msgstr "IDI/NRI için referans test (isteğe bağlı)"
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Repeated NRI risk category boundaries were removed. The sorted, distinct "
+"boundaries used are listed below the NRI table."
+msgstr "Tekrarlanan NRI risk kategorisi sınırları çıkarıldı. Kullanılan sıralı ve farklı sınırlar NRI tablosunun altında listelenir."
+
+#: psychopdaROC/ui[10][0]/correlationROCs.label
+msgid "ROC correlation"
+msgstr "ROC korelasyonu"
+
+#: R/psychopdaROC.b.R
+msgid "Seed"
+msgstr "Rastgele Sayı Tohumu"
+
+#: R/psychopdaROC.b.R
+msgid "Select one or more numeric Test Variables."
+msgstr "Bir veya daha fazla sayısal Test Değişkeni seçin."
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Select the Class Variable (Gold Standard), then explicitly choose Positive "
+"Class and Negative Class."
+msgstr "Sınıf Değişkenini (Altın Standart) seçin; ardından Pozitif Sınıfı ve Negatif Sınıfı açıkça belirtin."
+
+#: psychopdaROC/ui[7][0][0][0]/showOptimalPoint.label
+msgid "Selected cutpoint"
+msgstr "Seçilen kesim noktası"
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Sensitivity and specificity use the positive and negative groups separately. "
+"They can change with case mix. Small class counts make both the cutpoint and "
+"the achieved rates unstable."
+msgstr "Duyarlılık ve özgüllük, pozitif ve negatif grupları ayrı ayrı kullanır. Olgu dağılımıyla değişebilirler. Sınıflardaki olgu sayılarının az olması hem kesim noktasını hem de elde edilen oranları kararsızlaştırır."
+
+#: psychopdaROC/ui[7][0][1][1]/showCriterionPlot.label
+msgid "Sensitivity/specificity vs. threshold"
+msgstr "Eşiğe göre duyarlılık/özgüllük"
+
+#: psychopdaROC/options/showExplanations.title
+msgid "Show interpretation and procedure notes"
+msgstr "Yorum ve işlem notlarını göster"
+
+#: psychopdaROC/options/displaySE.title
+msgid "Smoothed-curve confidence band"
+msgstr "Düzleştirilmiş eğri güven bandı"
+
+#: psychopdaROC/ui[7][0][0][1]/displaySE.label
+msgid "Smoothed-curve confidence band (95%)"
+msgstr "Düzleştirilmiş eğri güven bandı (%95)"
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Some DeLong inference is unavailable because a contrast has zero or "
+"non-estimable variance. AUC differences remain descriptive point estimates; "
+"blank intervals and p-values do not establish equality or a definite "
+"difference. This can occur with identical markers or perfect rankings."
+msgstr "Bir karşılaştırmanın varyansı sıfır olduğu veya kestirilemediği için bazı DeLong çıkarımları hesaplanamıyor. AUC farkları betimsel nokta kestirimleri olarak kalır; boş aralıklar ve p-değerleri eşitliği veya kesin bir farkı göstermez. Bu durum özdeş belirteçlerde veya kusursuz sıralamalarda oluşabilir."
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Some DeLong intervals could not be computed. The AUC table identifies the "
+"markers using a Hanley-McNeil approximation; interpret those intervals "
+"cautiously."
+msgstr "Bazı DeLong aralıkları hesaplanamadı. AUC tablosu Hanley-McNeil yaklaşımı kullanılan belirteçleri belirtir; bu aralıkları dikkatle yorumlayın."
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Stepwise uses an observed cutoff that meets or exceeds the target while "
+"retaining the best corresponding specificity or sensitivity. Ties and "
+"discrete values can make the achieved rate exceed the target."
+msgstr "Basamaklı yöntem, hedefi karşılayan veya aşan gözlenen bir eşiği seçerken buna karşılık gelen en iyi özgüllüğü veya duyarlılığı korur. Eşitlikler ve kesikli değerler, elde edilen oranın hedefi aşmasına neden olabilir."
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Subgroup %1$s has %2$d case(s) of the negative class (%3$s) with a value of "
+"%4$s; at least 2 are needed to analyse %4$s in that subgroup."
+msgstr "%1$s alt grubunda, negatif sınıftaki (%3$s) %2$d olgunun %4$s değeri vardır; bu alt grupta %4$s analizi için en az 2 olgu gerekir."
+
+#: psychopdaROC/results/powerAnalysisTable.columns.title
+msgid "Target |AUC - 0.5|"
+msgstr "Hedef |AUC - 0.5|"
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Target |AUC - 0.5| is the absolute distance from chance used in this "
+"calculation. Post-hoc power uses the observed AUC; prospective and "
+"sample-size calculations use the specified target."
+msgstr "Hedef |AUC - 0.5|, bu hesaplamada kullanılan şans düzeyinden mutlak uzaklıktır. Post-hoc güç gözlenen AUC'yi; ileriye dönük ve örneklem büyüklüğü hesaplamaları belirtilen hedefi kullanır."
+
+#: psychopdaROC/ui[10][0]/targetPower.label
+msgid "Target power"
+msgstr "Hedef güç"
+
+#: psychopdaROC/ui[5][0]/fixedSensitivityValue.label
+msgid "Target sensitivity"
+msgstr "Hedef duyarlılık"
+
+#: psychopdaROC/ui[5][0]/fixedSpecificityValue.label
+msgid "Target specificity"
+msgstr "Hedef özgüllük"
+
+#: psychopdaROC/ui[0][0].label
+msgid "Test variables"
+msgstr "Test değişkenleri"
+
+#: R/psychopdaROC.b.R
+msgid ""
+"The achieved value is the rate in this sample at the selected cutpoint. It "
+"is not guaranteed in another sample. Cutpoint selection and performance "
+"assessment use the same observations, so these are apparent estimates "
+"requiring independent validation."
+msgstr "Elde edilen değer, seçilen kesim noktasında bu örneklemde gözlenen orandır. Başka bir örneklemde aynı oran garanti edilmez. Kesim noktası seçimi ve performans değerlendirmesi aynı gözlemleri kullanır; dolayısıyla bu görünen performans kestirimleri bağımsız doğrulama gerektirir."
+
+#: R/psychopdaROC.b.R
+msgid ""
+"The bootstrap confidence limits refer to the raw partial AUC, not the "
+"normalized partial AUC."
+msgstr "Bootstrap güven sınırları normalize edilmiş kısmi AUC'ye değil, ham kısmi AUC'ye aittir."
+
+#: R/psychopdaROC.b.R
+msgid ""
+"The minimal/poor/fair/good/excellent AUC bands are descriptive conventions, "
+"not validated clinical decision thresholds. Clinical value depends on the "
+"intended cutoff, uncertainty, case mix and consequences of errors."
+msgstr "Minimal/zayıf/orta/iyi/mükemmel AUC aralıkları betimsel uzlaşımlardır; doğrulanmış klinik karar eşikleri değildir. Klinik değer, amaçlanan kesim noktasına, belirsizliğe, olgu dağılımına ve hataların sonuçlarına bağlıdır."
+
+#: R/psychopdaROC.b.R
+msgid ""
+"The normalized partial AUC is unavailable. The correction is undefined when "
+"the partial curve falls below the diagonal; the raw partial AUC is reported "
+"separately."
+msgstr "Normalize edilmiş kısmi AUC hesaplanamıyor. Kısmi eğri köşegenin altına düştüğünde düzeltme tanımsızdır; ham kısmi AUC ayrı bildirilir."
+
+#: R/psychopdaROC.b.R
+msgid ""
+"The power curve for '{var}' is unavailable for this degenerate "
+"configuration. Use a nondegenerate target AUC and, for paired planning, a "
+"correlation below 1."
+msgstr "'{var}' için güç eğrisi bu dejenere yapılandırmada hesaplanamıyor. Dejenere olmayan bir hedef AUC ve eşleştirilmiş planlama için 1'den küçük bir korelasyon kullanın."
+
+#: R/psychopdaROC.b.R
+msgid ""
+"The raw partial AUC could not be estimated for the requested specificity "
+"range; its cell is blank."
+msgstr "İstenen özgüllük aralığı için ham kısmi AUC kestirilemedi; hücresi boş bırakıldı."
+
+#: R/psychopdaROC.b.R
+msgid ""
+"The requested treatment threshold grid exceeds 100 points. Tables and plots "
+"use 100 equally spaced thresholds spanning the requested minimum and maximum."
+msgstr "İstenen tedavi eşiği ızgarası 100 noktayı aşıyor. Tablolar ve grafikler, istenen en küçük ve en büyük değerler arasında eşit aralıklı 100 eşik kullanır."
+
+#: R/psychopdaROC.b.R
+msgid "The ROC analysis used the following specifications."
+msgstr "ROC analizinde aşağıdaki ayarlar kullanıldı."
+
+#: R/psychopdaROC.b.R
+msgid ""
+"The subgroup variable has no observed levels. Remove it or provide "
+"nonmissing subgroup values."
+msgstr "Alt grup değişkeninin gözlenen düzeyi yoktur. Bu değişkeni kaldırın veya eksik olmayan alt grup değerleri sağlayın."
+
+#: R/psychopdaROC.b.R
+msgid ""
+"The Treatment Threshold Range could not be read as \"min,max,step\" with 0 < "
+"min <= max < 1 and a positive step. The default range 0.05 to 0.50 in steps "
+"of 0.05 was used instead."
+msgstr "Tedavi Eşiği Aralığı, 0 < en küçük <= en büyük < 1 ve pozitif adım koşullarıyla \"en küçük,en büyük,adım\" olarak okunamadı. Bunun yerine 0.05 ile 0.50 arasında 0.05 adımlı varsayılan aralık kullanıldı."
+
+#: R/psychopdaROC.b.R
+msgid ""
+"These markers take the same value in every case and carry no discrimination "
+"information: %s. Their AUC of 0.500 with a zero-width interval is "
+"degenerate, not evidence of precision. No clinically useful cutpoint can "
+"distinguish the classes. Remove them from the analysis."
+msgstr "Bu belirteçler her olguda aynı değeri alır ve ayırt etme bilgisi taşımaz: %s. Sıfır genişlikli aralıkla 0.500 AUC değerleri dejenere bir durumdur; kesinlik kanıtı değildir. Klinik açıdan yararlı hiçbir kesim noktası sınıfları ayıramaz. Bunları analizden çıkarın."
+
+#: R/psychopdaROC.b.R
+msgid "Tie Breakers"
+msgstr "Eşitlikleri Çözme Yöntemi"
+
+#: psychopdaROC/ui[12][0]/treatmentThreshold.label
+msgid "Treatment threshold (min,max,step)"
+msgstr "Tedavi eşiği (en küçük,en büyük,adım)"
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Validate the cutpoint and its uncertainty in the intended population before "
+"clinical use."
+msgstr "Klinik kullanım öncesinde kesim noktasını ve belirsizliğini hedef popülasyonda doğrulayın."
+
+#: R/psychopdaROC.b.R
+msgid ""
+"Youden's J equals sensitivity plus specificity minus one. Use the actual "
+"trade-off and clinical consequences when assessing a cutpoint."
+msgstr "Youden J indeksi, duyarlılık artı özgüllük eksi birdir. Bir kesim noktasını değerlendirirken gerçek duyarlılık-özgüllük dengesini ve klinik sonuçları dikkate alın."

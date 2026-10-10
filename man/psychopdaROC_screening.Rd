@@ -36,7 +36,7 @@ cases (mean: 65 vs 25).
 data(psychopdaROC_screening)
 psychopdaROC(data = psychopdaROC_screening,
              dependentVars = c("psa_level", "ca125"),
-             classVar = "cancer", positiveClass = "Cancer",
+             classVar = "cancer", positiveClass = "Cancer", negativeClass = "No_Cancer",
              refVar = "psa_level")
 
 }

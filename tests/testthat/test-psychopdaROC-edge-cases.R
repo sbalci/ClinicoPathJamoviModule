@@ -1,5 +1,5 @@
-# `positiveClass` is a `type: Level` option. The jamovi compiler forbids a default on a Level, so
-# it compiles to a REQUIRED argument of the generated wrapper; this helper supplies just that one.
+# Both class selectors are Level options with required wrapper arguments.
+# Supply only empty selections when omitted; never infer a class from the data.
 # (`refVar`, Reference Test for IDI/NRI, is a `type: Variable` with a NULL default since 2026-10-09.)
 #
 # It used to fill EVERY argument that had no default with "" -- including `dependentVars` and
@@ -8,6 +8,7 @@
 psychopdaROC <- function(...) {
   args <- list(...)
   if (!("positiveClass" %in% names(args))) args$positiveClass <- ""
+  if (!("negativeClass" %in% names(args))) args$negativeClass <- ""
   do.call(ClinicoPath::psychopdaROC, args)
 }
 
@@ -30,7 +31,7 @@ test_that("psychopdaROC handles small datasets", {
     data = psychopdaROC_small,
     dependentVars = "marker",
     classVar = "class",
-    positiveClass = "Positive"
+    positiveClass = "Positive", negativeClass = "Negative"
   )
   expect_s3_class(result, "psychopdaROCResults")
   expect_equal(result$aucSummaryTable$rowCount, 1)
@@ -43,7 +44,7 @@ test_that("psychopdaROC handles perfect separation", {
       data = psychopdaROC_perfect,
       dependentVars = "perfect_test",
       classVar = "condition",
-      positiveClass = "Positive"
+      positiveClass = "Positive", negativeClass = "Negative"
     )
   )
   expect_s3_class(result, "psychopdaROCResults")
@@ -54,7 +55,7 @@ test_that("psychopdaROC handles poor discrimination", {
     data = psychopdaROC_poor,
     dependentVars = "poor_marker",
     classVar = "status",
-    positiveClass = "Case"
+    positiveClass = "Case", negativeClass = "Control"
   )
   expect_s3_class(result, "psychopdaROCResults")
   expect_equal(result$aucSummaryTable$rowCount, 1)
@@ -65,7 +66,7 @@ test_that("psychopdaROC handles overlapping distributions", {
     data = psychopdaROC_overlap,
     dependentVars = "test_value",
     classVar = "diagnosis",
-    positiveClass = "Diseased"
+    positiveClass = "Diseased", negativeClass = "Non_Diseased"
   )
   expect_s3_class(result, "psychopdaROCResults")
 })
@@ -75,7 +76,7 @@ test_that("psychopdaROC handles rare disease prevalence", {
     data = psychopdaROC_rare,
     dependentVars = "biomarker",
     classVar = "rare_disease",
-    positiveClass = "Disease"
+    positiveClass = "Disease", negativeClass = "No_Disease"
   )
   expect_s3_class(result, "psychopdaROCResults")
   # Check prevalence is low
@@ -88,7 +89,7 @@ test_that("psychopdaROC handles severely imbalanced classes", {
     data = psychopdaROC_imbalanced,
     dependentVars = "predictor",
     classVar = "rare_outcome",
-    positiveClass = "Event"
+    positiveClass = "Event", negativeClass = "No_Event"
   )
   expect_s3_class(result, "psychopdaROCResults")
 })
@@ -98,7 +99,7 @@ test_that("psychopdaROC handles missing data in predictors", {
     data = psychopdaROC_missing,
     dependentVars = c("test_a", "test_b"),
     classVar = "diagnosis",
-    positiveClass = "Disease"
+    positiveClass = "Disease", negativeClass = "Healthy"
   )
   expect_s3_class(result, "psychopdaROCResults")
   expect_equal(result$aucSummaryTable$rowCount, 2)
@@ -111,7 +112,7 @@ test_that("psychopdaROC handles missing data in class variable", {
     data = psychopdaROC_missing,
     dependentVars = "test_a",
     classVar = "diagnosis",
-    positiveClass = "Disease"
+    positiveClass = "Disease", negativeClass = "Healthy"
   )
   expect_s3_class(result, "psychopdaROCResults")
   expect_equal(result$aucSummaryTable$rowCount, 1)
@@ -126,7 +127,7 @@ test_that("psychopdaROC handles constant predictor", {
     data = psychopdaROC_constant,
     dependentVars = "constant_marker",
     classVar = "outcome",
-    positiveClass = "Positive"
+    positiveClass = "Positive", negativeClass = "Negative"
   )
   expect_s3_class(result, "psychopdaROCResults")
   expect_equal(result$aucSummaryTable$asDF$auc[1], 0.5)
@@ -139,7 +140,7 @@ test_that("psychopdaROC handles large datasets efficiently", {
     data = psychopdaROC_large,
     dependentVars = c("biomarker1", "biomarker2"),
     classVar = "disease_status",
-    positiveClass = "Disease"
+    positiveClass = "Disease", negativeClass = "No_Disease"
   )
   expect_s3_class(result, "psychopdaROCResults")
   expect_true(nrow(psychopdaROC_large) == 500)
@@ -151,7 +152,7 @@ test_that("psychopdaROC handles single predictor with small sample", {
     data = test_data,
     dependentVars = "marker",
     classVar = "class",
-    positiveClass = "Positive"
+    positiveClass = "Positive", negativeClass = "Negative"
   )
   expect_s3_class(result, "psychopdaROCResults")
   expect_equal(result$aucSummaryTable$rowCount, 1)
@@ -167,7 +168,7 @@ test_that("psychopdaROC handles all positive cases", {
       data = test_data,
       dependentVars = "marker",
       classVar = "class",
-      positiveClass = "Positive"
+      positiveClass = "Positive", negativeClass = "Negative"
     ),
     "fewer than two observed levels"
   )
@@ -181,7 +182,7 @@ test_that("psychopdaROC handles extreme values in predictor", {
     data = test_data,
     dependentVars = "biomarker",
     classVar = "disease_status",
-    positiveClass = "Disease"
+    positiveClass = "Disease", negativeClass = "Healthy"
   )
   expect_s3_class(result, "psychopdaROCResults")
   expect_equal(result$aucSummaryTable$rowCount, 1)

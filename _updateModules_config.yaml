@@ -47,8 +47,8 @@
 # ==============================================
 
 
-new_version: "1.0.83.06"
-new_date: "2026-10-03"
+new_version: "1.0.83.07"
+new_date: "2026-10-10"
 quick: false
 TEST: true
 jjstatsplot: false
@@ -296,6 +296,7 @@ modules:
       - "histopathology.rda"
       - "ihcheterogeneity_test.rda"   # the ihcheterogeneity help example
       - "ihc_reader_reproducibility.rda" # pathagreement independent-reader example
+      - "psychopdaROC_release.rda"      # psychopdaROC regression and help examples
 
 # Vignette folder-to-module mapping (used when modes$copy_vignettes is true)
 vignette_folders:

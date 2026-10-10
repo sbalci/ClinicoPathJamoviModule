@@ -4,12 +4,17 @@ title: Advanced ROC Analysis
 menuGroup: meddecideT
 menuSubgroup: ROC
 menuSubtitle: Advanced ROC analysis with statistical comparisons and effect sizes
-version: '1.0.83'
+version: '1.0.88'
 jas: '1.2'
 
 description:
     main: >
-        Receiver Operating Characteristic (ROC) curve analysis with optimal cutpoint determination.
+        Exploratory Receiver Operating Characteristic (ROC) curve analysis with optimal cutpoint determination.
+        Each row must be an independent observation. Intervals, tests and bootstrap resampling
+        do not account for repeated measurements or clustering within patients; use a prespecified
+        patient-level summary or a method that accounts for clustering.
+        Nominal coverage is not guaranteed in small or imbalanced samples. Cutpoints selected
+        on these data report apparent performance and require validation in the intended setting.
 
 options:
     # ==========================================
@@ -34,12 +39,19 @@ options:
     # CLINICAL ANALYSIS MODE SELECTION
     # ==========================================
 
+    - name: showExplanations
+      title: Show interpretation and procedure notes
+      type: Bool
+      default: false
+      description:
+          R: Show optional educational interpretation and procedure details. Input and scope notices remain visible.
+
     - name: clinicalMode
       title: Guidance Level
       type: List
       options:
         - name: basic
-          title: Basic (recommended for clinical use)
+          title: Basic (recommended)
         - name: advanced
           title: Advanced research
         - name: comprehensive
@@ -60,7 +72,7 @@ options:
     - name: data
       type: Data
       description:
-          R: The data as a data frame.
+          R: The data as a data frame, with one independent observation per row.
 
     - name: dependentVars
       title: Test Variables
@@ -84,8 +96,8 @@ options:
       description:
           R: >
             Classification variable representing the true class (gold standard).
-            Two or more levels; with more than two, the positive class is compared with all
-            other levels combined (one-vs-rest).
+            Choose one positive and one negative level. Only observations in those two
+            levels are analysed; other levels and missing outcomes are excluded and counted.
 
     # allowNone: without it the jamovi client pre-selects levels[0] - usually the NEGATIVE
     # level - and the whole analysis runs reversed. The positive class is never inferred.
@@ -96,13 +108,25 @@ options:
       allowNone: true
       description:
           ui: >
-            Choose the level that means the condition is present. Nothing is computed until a
-            level is chosen; every other level is analysed as negative (pooled when there are
-            more than two).
+            Choose the level that means the condition is present. Also choose a distinct
+            Negative Class. Nothing is computed until both observed levels are selected.
           R: >
             Level of classVar treated as the positive class (condition present). Required:
             NULL leaves the analysis waiting for a choice; levels are never inferred from
             their order.
+
+    - name: negativeClass
+      title: Negative Class
+      type: Level
+      variable: (classVar)
+      allowNone: true
+      description:
+          ui: >
+            Choose the level that means the condition is absent. It must differ from
+            Positive Class. All other outcome levels are excluded, not pooled.
+          R: >
+            Level of classVar treated as the negative class (condition absent). Required:
+            NULL leaves the analysis waiting for a choice. Other levels are excluded.
 
     - name: subGroup
       title: Subgroup Variable (Optional)
@@ -195,7 +219,9 @@ options:
       description:
           R: >
             Metric to optimize when determining the cutpoint. 
-            Only applies to maximize/minimize methods.
+            Only applies to maximize/minimize methods. The legacy p_chisquared option
+            identifier denotes the Pearson chi-squared statistic (without continuity
+            correction), not its p-value.
 
     - name: direction
       title: Classification Direction
@@ -362,7 +388,7 @@ options:
     - name: plotROC
       title: ROC curves
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Display ROC curves for visual assessment of classifier performance.
@@ -370,7 +396,7 @@ options:
     - name: combinePlots
       title: Combine multiple ROC curves
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             When multiple test variables are selected, combine all ROC curves in a single plot.
@@ -384,20 +410,23 @@ options:
             Create clean ROC curves without annotations, suitable for publications.
 
     - name: showOptimalPoint
-      title: Mark optimal cutpoint
-      type: Bool
-      default: true
-      description:
-          R: >
-            Display the optimal cutpoint on the ROC curve.
-
-    - name: displaySE
-      title: Standard error bands
+      title: Mark selected cutpoint
       type: Bool
       default: false
       description:
           R: >
-            Display standard error bands on ROC curves (when LOESS smoothing is applied).
+            Display the selected cutpoint on the ROC curve. When all tied cutpoints
+            are listed, mark the first selected cutpoint.
+
+    - name: displaySE
+      title: Smoothed-curve confidence band
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display the pointwise 95% confidence band for the fitted LOESS smooth.
+            This describes uncertainty in the visual smooth, not the Wilson intervals
+            for ROC sensitivity and specificity or a simultaneous ROC confidence region.
 
     - name: smoothing
       title: LOESS smoothing
@@ -443,12 +472,13 @@ options:
             Label curves directly on the plot instead of using a legend.
 
     - name: interactiveROC
-      title: Interactive plot
+      title: Additional static ROC plot
       type: Bool
       default: false
       description:
           R: >
-            Create an interactive HTML ROC plot (requires plotROC package).
+            Create an additional static ROC plot. The stable option name is retained
+            for saved analyses; the jamovi Image output does not provide HTML interaction.
 
     # ==========================================
     # ADDITIONAL PLOTS
@@ -541,7 +571,10 @@ options:
       default: false
       description:
           R: >
-            Calculate bootstrap confidence intervals for AUC and optimal cutpoints.
+            Calculate bootstrap confidence intervals for full AUC and a separate Youden
+            reference cutoff, sensitivity and specificity. This does not follow the main
+            Cutpoint Method. Tied Youden optima use seeded random selection in both the
+            original sample and stratified bootstrap replicates.
 
     - name: bootstrapReps
       title: Bootstrap Replications
@@ -622,7 +655,9 @@ options:
       description:
           R: >
             Comma-separated probability thresholds (0-1) defining risk categories for NRI.
-            Leave empty for continuous NRI.
+            Leave empty for continuous NRI. In both variants, predicted risks differing by at
+            most sqrt(machine epsilon), approximately 1.5e-8, are treated as numerical ties.
+            This tolerance removes numerical roundoff and is not a clinically meaningful change threshold.
 
     - name: idiNriBootRuns
       title: IDI/NRI Bootstrap Iterations
@@ -644,8 +679,8 @@ options:
       default: false
       description:
           R: >
-            Calculate effect sizes for ROC curve differences using Cohen's conventions
-            and standardized mean differences between AUC values.
+            Calculate within-marker standardized differences between outcome classes
+            and pairwise differences in those effects. Size bands are descriptive conventions only.
 
     - name: powerAnalysis
       title: Statistical power analysis
@@ -679,7 +714,10 @@ options:
       max: 0.5
       description:
           R: >
-            Expected difference in AUC values for power calculations and sample size estimation.
+            Target AUC above chance (target AUC = 0.5 + this value) for prospective
+            power and sample size estimation. Multiple markers use an equal-variance
+            correlation adjustment, not a fitted paired ROC power model. A target AUC
+            of exactly 1 is degenerate and has no sample size recommendation.
 
     - name: targetPower
       title: Target Statistical Power
@@ -710,7 +748,9 @@ options:
       description:
           R: >
             Expected correlation between paired ROC curves for power calculations.
-            Use 0.5 for moderate correlation, 0.0 for independent samples.
+            Use a correlation justified for the intended study. Zero means uncorrelated
+            AUC estimates in this equal-variance planning approximation; it does not
+            establish that paired observations are independent samples.
 
     - name: bayesianAnalysis
       title: Bootstrap ROC analysis with prior weighting
@@ -834,7 +874,7 @@ options:
     - name: showFixedROC
       title: Fixed point ROC curve
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Display separate ROC curve highlighting the fixed sensitivity/specificity point.
@@ -852,12 +892,14 @@ options:
       default: linear
       description:
           R: >
-            Method for interpolating between observed points to achieve target sensitivity/specificity.
+            Method for selecting a cutoff near the target sensitivity/specificity.
+            Achieved rates always use empirical classifications at the returned cutoff.
+            Linear interpolation may miss the target; Stepwise meets or exceeds it.
 
     - name: showFixedExplanation
       title: Analysis guide
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Display explanatory guide for fixed sensitivity/specificity analysis including 
@@ -894,7 +936,7 @@ options:
     - name: heterogeneityTest
       title: Test for heterogeneity
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Perform Cochran's Q test and calculate the I-squared statistic to assess

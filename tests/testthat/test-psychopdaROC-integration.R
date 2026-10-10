@@ -1,5 +1,5 @@
-# `positiveClass` is a `type: Level` option. The jamovi compiler forbids a default on a Level, so
-# it compiles to a REQUIRED argument of the generated wrapper; this helper supplies just that one.
+# Both class selectors are Level options with required wrapper arguments.
+# Supply only empty selections when omitted; never infer a class from the data.
 # (`refVar`, Reference Test for IDI/NRI, is a `type: Variable` with a NULL default since 2026-10-09.)
 #
 # It used to fill EVERY argument that had no default with "" -- including `dependentVars` and
@@ -8,6 +8,7 @@
 psychopdaROC <- function(...) {
   args <- list(...)
   if (!("positiveClass" %in% names(args))) args$positiveClass <- ""
+  if (!("negativeClass" %in% names(args))) args$negativeClass <- ""
   do.call(ClinicoPath::psychopdaROC, args)
 }
 
@@ -39,7 +40,7 @@ test_that("research publication workflow: DeLong + IDI/NRI + effect size", {
       data = data,
       dependentVars = c("marker_a", "marker_b", "marker_c"),
       classVar = "diagnosis",
-      positiveClass = "Positive",
+      positiveClass = "Positive", negativeClass = "Negative",
       clinicalMode = "comprehensive",
       # Statistical comparisons
       delongTest = TRUE,
@@ -71,7 +72,7 @@ test_that("comprehensive output: all tables and basic plots", {
       data = data,
       dependentVars = c("marker_a", "marker_b"),
       classVar = "diagnosis",
-      positiveClass = "Positive",
+      positiveClass = "Positive", negativeClass = "Negative",
       # All table outputs
       sensSpecTable = TRUE,
       showThresholdTable = TRUE,
@@ -101,7 +102,7 @@ test_that("clinical utility workflow: decision curves + fixed sens/spec", {
       data = data,
       dependentVars = "marker_a",
       classVar = "diagnosis",
-      positiveClass = "Positive",
+      positiveClass = "Positive", negativeClass = "Negative",
       # Clinical utility
       clinicalUtilityAnalysis = TRUE,
       treatmentThreshold = "0.05,0.5,0.05",
@@ -128,7 +129,7 @@ test_that("advanced ROC: bootstrap CI + partial AUC + smoothing", {
       data = data,
       dependentVars = "marker_a",
       classVar = "diagnosis",
-      positiveClass = "Positive",
+      positiveClass = "Positive", negativeClass = "Negative",
       # Bootstrap
       bootstrapCI = TRUE,
       bootstrapReps = 200,
@@ -157,7 +158,7 @@ test_that("power and Bayesian workflow: power analysis + Bayesian ROC", {
       data = data,
       dependentVars = "marker_a",
       classVar = "diagnosis",
-      positiveClass = "Positive",
+      positiveClass = "Positive", negativeClass = "Negative",
       # Power analysis
       powerAnalysis = TRUE,
       powerAnalysisType = "post_hoc",
@@ -184,7 +185,7 @@ test_that("meta-analysis workflow: 4 markers with forest plot", {
       data = data,
       dependentVars = c("marker_a", "marker_b", "marker_c", "marker_d"),
       classVar = "diagnosis",
-      positiveClass = "Positive",
+      positiveClass = "Positive", negativeClass = "Negative",
       # Meta-analysis
       metaAnalysis = TRUE,
       metaAnalysisMethod = "both",
@@ -210,7 +211,7 @@ test_that("subgroup workflow: stratified ROC by hospital", {
       data = data,
       dependentVars = "marker_a",
       classVar = "diagnosis",
-      positiveClass = "Positive",
+      positiveClass = "Positive", negativeClass = "Negative",
       subGroup = "hospital",
       method = "maximize_metric",
       metric = "youden",
@@ -233,7 +234,7 @@ test_that("prevalence adjustment: prior prevalence + prevalence plot", {
       data = data,
       dependentVars = "marker_a",
       classVar = "diagnosis",
-      positiveClass = "Positive",
+      positiveClass = "Positive", negativeClass = "Negative",
       usePriorPrev = TRUE,
       priorPrev = 0.05,  # Low prevalence screening
       showPrevalencePlot = TRUE,
@@ -254,7 +255,7 @@ test_that("kitchen sink: all non-conflicting features enabled", {
       data = data,
       dependentVars = c("marker_a", "marker_b", "marker_c"),
       classVar = "diagnosis",
-      positiveClass = "Positive",
+      positiveClass = "Positive", negativeClass = "Negative",
       clinicalMode = "comprehensive",
       # Cutpoint
       method = "maximize_metric",
@@ -302,7 +303,7 @@ test_that("reversed direction with comprehensive analysis", {
       data = data,
       dependentVars = "marker_a",
       classVar = "diagnosis",
-      positiveClass = "Positive",
+      positiveClass = "Positive", negativeClass = "Negative",
       direction = "<=",
       plotROC = TRUE,
       sensSpecTable = TRUE,
@@ -324,7 +325,7 @@ test_that("performance: large dataset with multiple features", {
       data = data,
       dependentVars = c("marker_a", "marker_b", "marker_c"),
       classVar = "diagnosis",
-      positiveClass = "Positive",
+      positiveClass = "Positive", negativeClass = "Negative",
       delongTest = TRUE,
       compareClassifiers = TRUE,
       plotROC = TRUE,

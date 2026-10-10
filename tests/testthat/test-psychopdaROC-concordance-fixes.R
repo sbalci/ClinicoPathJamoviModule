@@ -23,7 +23,7 @@ test_that("net benefit matches Vickers & Elkin, not a frozen Youden rule", {
     # weight - a different estimand, reading 0.2152 where the published formula gives 0.2759.
     d <- pc_data()
     for (pt in c(0.10, 0.20, 0.30)) {
-        r <- pc_run(data = d, classVar = "gold", dependentVars = "m1", positiveClass = "Positive",
+        r <- pc_run(data = d, classVar = "gold", dependentVars = "m1", positiveClass = "Positive", negativeClass = "Negative",
                     refVar = NULL, clinicalUtilityAnalysis = TRUE,
                     treatmentThreshold = sprintf("%s,%s,0.1", pt, pt))
         cu <- as.data.frame(r$clinicalUtilityTable)
@@ -34,7 +34,7 @@ test_that("net benefit matches Vickers & Elkin, not a frozen Youden rule", {
 
 test_that("psychopdaROC and enhancedROC agree on net benefit at a matched threshold", {
     d <- pc_data()
-    P <- pc_run(data = d, classVar = "gold", dependentVars = "m1", positiveClass = "Positive",
+    P <- pc_run(data = d, classVar = "gold", dependentVars = "m1", positiveClass = "Positive", negativeClass = "Negative",
                 refVar = NULL, clinicalUtilityAnalysis = TRUE, treatmentThreshold = "0.1,0.1,0.1")
     # Supply the same fitted risks explicitly; enhancedROC no longer fits them silently.
     y <- as.integer(d$gold == "Positive")
@@ -55,7 +55,7 @@ test_that("the treatment threshold range actually drives the decision curve", {
     d <- pc_data()
     grab <- function(rng) {
         dc <- as.data.frame(pc_run(data = d, classVar = "gold", dependentVars = "m1",
-                                   positiveClass = "Positive", refVar = NULL,
+                                   positiveClass = "Positive", negativeClass = "Negative", refVar = NULL,
                                    clinicalUtilityAnalysis = TRUE,
                                    treatmentThreshold = rng)$decisionCurveTable)
         round(as.numeric(dc$threshold), 6)
@@ -68,7 +68,7 @@ test_that("the treatment threshold range actually drives the decision curve", {
 test_that("a malformed threshold range falls back instead of aborting", {
     d <- pc_data()
     r <- expect_no_error(pc_run(data = d, classVar = "gold", dependentVars = "m1",
-                                positiveClass = "Positive", refVar = NULL,
+                                positiveClass = "Positive", negativeClass = "Negative", refVar = NULL,
                                 clinicalUtilityAnalysis = TRUE, treatmentThreshold = "garbage"))
     expect_gt(nrow(as.data.frame(r$decisionCurveTable)), 0)
 })
@@ -76,7 +76,7 @@ test_that("a malformed threshold range falls back instead of aborting", {
 test_that("each decision-curve row names the strategies it has to beat", {
     d <- pc_data()
     dc <- as.data.frame(pc_run(data = d, classVar = "gold", dependentVars = "m1",
-                               positiveClass = "Positive", refVar = NULL,
+                               positiveClass = "Positive", negativeClass = "Negative", refVar = NULL,
                                clinicalUtilityAnalysis = TRUE,
                                treatmentThreshold = "0.1,0.2,0.1")$decisionCurveTable)
     expect_true(all(grepl("treat all", dc$clinical_value, fixed = TRUE)))
@@ -90,7 +90,7 @@ test_that("accuracy stays empirical when a prior prevalence is assumed", {
     d <- pc_data()
     grab <- function(...) {
         tt <- as.data.frame(pc_run(data = d, classVar = "gold", dependentVars = "m1",
-                                   positiveClass = "Positive", refVar = NULL,
+                                   positiveClass = "Positive", negativeClass = "Negative", refVar = NULL,
                                    showThresholdTable = TRUE, ...)$thresholdTable)
         as.numeric(tt$accuracy)
     }
@@ -110,7 +110,7 @@ test_that("AUC verbal bands match enhancedROC across the whole range", {
         d <- data.frame(y = factor(ifelse(g == 1, "P", "N"), levels = c("N", "P")), m = m)
         E <- suppressWarnings(do.call(ClinicoPath::enhancedROC, list(
             data = d, outcome = "y", predictors = "m", positiveClass = "P", direction = "higher")))
-        P <- pc_run(data = d, classVar = "y", dependentVars = "m", positiveClass = "P", refVar = NULL)
+        P <- pc_run(data = d, classVar = "y", dependentVars = "m", positiveClass = "P", negativeClass = "N", refVar = NULL)
         eb <- as.character(as.data.frame(E$results$aucSummary)$auc_interpretation[1])
         pb <- as.character(as.data.frame(P$clinicalInterpretationTable)$performance_level[1])
         expect_identical(eb, pb, info = paste("target AUC", target))
@@ -126,7 +126,7 @@ test_that("AUC bands read the AUC as displayed, also exactly at a band edge", {
         d <- data.frame(y = factor(rep(c("N", "P"), each = 10), levels = c("N", "P")),
                         m = c(1:10, rep(11, k / 10), rep(0, 10 - k / 10)))
         want <- words[[as.character(k)]]
-        P <- pc_run(data = d, classVar = "y", dependentVars = "m", positiveClass = "P", refVar = NULL)
+        P <- pc_run(data = d, classVar = "y", dependentVars = "m", positiveClass = "P", negativeClass = "N", refVar = NULL)
         ci <- as.data.frame(P$clinicalInterpretationTable)
         expect_equal(as.numeric(as.data.frame(P$aucSummaryTable)$auc[1]), k / 100, tolerance = 1e-12)
         expect_identical(as.character(ci$performance_level[1]), want, info = paste("AUC", k / 100))
@@ -156,14 +156,14 @@ test_that("a non-finite cut-point is suppressed rather than printed", {
     g <- rbinom(n, 1, 0.45)
     d <- data.frame(y = factor(ifelse(g == 1, "P", "N"), levels = c("N", "P")),
                     m = -(g * 1.4 + rnorm(n)))                    # LOWER = disease
-    P <- pc_run(data = d, classVar = "y", dependentVars = "m", positiveClass = "P", refVar = NULL)
+    P <- pc_run(data = d, classVar = "y", dependentVars = "m", positiveClass = "P", negativeClass = "N", refVar = NULL)
     rt <- as.data.frame(P$resultsTable$get(key = "m"))
     expect_equal(nrow(rt), 0L)
     # the AUC is still reported - only the unusable operating point is withheld
     expect_true(is.finite(as.numeric(as.data.frame(P$aucSummaryTable)$auc[1])))
     # and the correctly-oriented marker still gets a real cut-point
     d2 <- data.frame(y = d$y, m = -d$m)
-    P2 <- pc_run(data = d2, classVar = "y", dependentVars = "m", positiveClass = "P", refVar = NULL)
+    P2 <- pc_run(data = d2, classVar = "y", dependentVars = "m", positiveClass = "P", negativeClass = "N", refVar = NULL)
     rt2 <- as.data.frame(P2$resultsTable$get(key = "m"))
     expect_equal(nrow(rt2), 1L)
     expect_true(is.finite(as.numeric(rt2$cutpoint[1])))
@@ -174,7 +174,7 @@ test_that("the seed option really is wired (it is - do not 'fix' it)", {
     d <- pc_data()
     ci <- function(sd) {
         b <- as.data.frame(pc_run(data = d, classVar = "gold", dependentVars = "m1",
-                                  positiveClass = "Positive", refVar = NULL,
+                                  positiveClass = "Positive", negativeClass = "Negative", refVar = NULL,
                                   bootstrapCI = TRUE, bootstrapReps = 200, seed = sd)$bootstrapCITable)
         as.numeric(b$ci_lower[1])
     }

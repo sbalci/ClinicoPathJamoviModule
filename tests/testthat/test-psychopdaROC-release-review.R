@@ -11,7 +11,7 @@ ps_data <- function() {
 
 run_ps <- function(...) {
     args <- utils::modifyList(
-        list(classVar = "disease_status", positiveClass = "Disease", refVar = NULL),
+        list(classVar = "disease_status", positiveClass = "Disease", negativeClass = "Healthy", refVar = NULL),
         list(...))
     do.call(ClinicoPath::psychopdaROC, args)
 }
@@ -87,7 +87,7 @@ test_that("tables do not accumulate rows across re-runs", {
     d$marker2 <- d$biomarker + rnorm(nrow(d), 0, 1.5)
     o <- ClinicoPath:::psychopdaROCOptions$new(
         dependentVars = c("biomarker", "marker2"), classVar = "disease_status",
-        positiveClass = "Disease", refVar = "biomarker",
+        positiveClass = "Disease", negativeClass = "Healthy", refVar = "biomarker",
         sensSpecTable = TRUE, delongTest = TRUE, partialAUC = TRUE,
         clinicalUtilityAnalysis = TRUE, effectSizeAnalysis = TRUE, powerAnalysis = TRUE)
     a <- ClinicoPath:::psychopdaROCClass$new(options = o, data = d)
@@ -114,7 +114,7 @@ test_that("manual run mode keeps its results when an option changes", {
     d <- ps_data()
     o <- ClinicoPath:::psychopdaROCOptions$new(
         dependentVars = "biomarker", classVar = "disease_status",
-        positiveClass = "Disease", refVar = NULL, manualRun = TRUE, run = TRUE)
+        positiveClass = "Disease", negativeClass = "Healthy", refVar = NULL, manualRun = TRUE, run = TRUE)
     a <- ClinicoPath:::psychopdaROCClass$new(options = o, data = d)
     p <- a$.__enclos_env__$private
     a$init()
@@ -144,7 +144,7 @@ test_that("an unset positive class waits for a choice; no level is guessed", {
     d <- ps_data()
     expect_equal(levels(d$disease_status), c("Healthy", "Disease"))
 
-    unset <- expect_no_error(run_ps(data = d, dependentVars = "biomarker", positiveClass = ""))
+    unset <- expect_no_error(run_ps(data = d, dependentVars = "biomarker", positiveClass = "", negativeClass = "Healthy"))
     expect_equal(unset$aucSummaryTable$rowCount, 0)
     oc <- unset$outcomeCoding$asDF
     expect_equal(oc$level, c("Healthy", "Disease"))
@@ -152,12 +152,12 @@ test_that("an unset positive class waits for a choice; no level is guessed", {
     expect_equal(oc$role, rep("Not assigned yet", 2))
     expect_match(tnote(unset$outcomeCoding, "unset"), "levels are never chosen from their order", fixed = TRUE)
     expect_equal(tnote(unset$outcomeCoding, "positive"), "(none)")
-    expect_match(unset$runSummary$content, "Choose the positive class", fixed = TRUE)
-    expect_match(unset$runSummary$content, "color: inherit", fixed = TRUE)   # theme-safe INFO panel
+    expect_match(unset$runSummary$content, "Choose the positive and negative classes", fixed = TRUE)
+    expect_match(unset$runSummary$content, "<p>", fixed = TRUE)   # inherits the result theme
 
     # naming a level runs it; naming the other level legitimately inverts it (the user's choice)
-    named <- run_ps(data = d, dependentVars = "biomarker", positiveClass = "Disease")
-    inv <- run_ps(data = d, dependentVars = "biomarker", positiveClass = "Healthy")
+    named <- run_ps(data = d, dependentVars = "biomarker", positiveClass = "Disease", negativeClass = "Healthy")
+    inv <- run_ps(data = d, dependentVars = "biomarker", positiveClass = "Healthy", negativeClass = "Disease")
     expect_equal(named$aucSummaryTable$asDF$auc[1],
                  mw_auc(d$biomarker, d$disease_status == "Disease"), tolerance = 1e-9)
     expect_equal(inv$aucSummaryTable$asDF$auc[1],
@@ -174,16 +174,16 @@ test_that("the positive class is resolved in exactly one place", {
     backend <- paste(readLines("../../R/psychopdaROC.b.R", warn = FALSE), collapse = "\n")
     # no surviving "first level" fallbacks
     expect_false(grepl("levels(factor(classVar))[1]", backend, fixed = TRUE))
-    expect_equal(length(gregexpr(".resolvePositiveClass = function", backend, fixed = TRUE)[[1]]), 1L)
+    expect_equal(length(gregexpr(".resolveOutcomeClasses = function", backend, fixed = TRUE)[[1]]), 1L)
 
     # and it never guesses: an unset class stays unset, a chosen level is used as chosen
     cls <- factor(c("Healthy", "Disease"), levels = c("Healthy", "Disease"))
     unset <- ps_private(dependentVars = "biomarker", classVar = "disease_status",
-                        positiveClass = "", refVar = NULL)$p$.resolvePositiveClass(cls)
+                        positiveClass = "", negativeClass = "Healthy", refVar = NULL)$p$.resolveOutcomeClasses(cls)
     expect_identical(unset$status, "unset")
     expect_null(unset$positive)
     chosen <- ps_private(dependentVars = "biomarker", classVar = "disease_status",
-                         positiveClass = "Disease", refVar = NULL)$p$.resolvePositiveClass(cls)
+                         positiveClass = "Disease", negativeClass = "Healthy", refVar = NULL)$p$.resolveOutcomeClasses(cls)
     expect_identical(chosen$status, "selected")
     expect_identical(chosen$positive, "Disease")
 })
@@ -248,26 +248,25 @@ test_that("refVar is an optional wrapper argument with a NULL default", {
 
     d <- ps_data()
     expect_no_error(ClinicoPath::psychopdaROC(data = d, dependentVars = "biomarker",
-                                              classVar = "disease_status", positiveClass = "Disease"))
+                                              classVar = "disease_status", positiveClass = "Disease", negativeClass = "Healthy"))
     expect_no_error(run_ps(data = d, dependentVars = "biomarker"))
 })
 
 
 test_that("a multi-level class variable waits for a positive class: no guess, no error", {
     # There is no defensible guess: on this 3-level recode of the bundled data, taking "Disease"
-    # gives AUC 0.801152 and "Severe" 0.826320. Unset is the same pending state as for two
-    # levels (it used to be an error); a named level is compared with the other two combined.
+    # yields different estimands. Both selected levels are explicit; unselected levels are excluded.
     d <- ps_data3()
     pending <- expect_no_error(run_ps(data = d, dependentVars = "biomarker", classVar = "ds3",
-                                      positiveClass = ""))
+                                      positiveClass = "", negativeClass = "Healthy"))
     expect_equal(pending$aucSummaryTable$rowCount, 0)
     expect_equal(pending$outcomeCoding$asDF$role, rep("Not assigned yet", 3))
     expect_equal(as.integer(pending$outcomeCoding$asDF$n), as.integer(table(d$ds3)))
-    expect_match(pending$runSummary$content, "Choose the positive class", fixed = TRUE)
+    expect_match(pending$runSummary$content, "Choose the positive and negative classes", fixed = TRUE)
 
     severe <- expect_no_error(run_ps(data = d, dependentVars = "biomarker", classVar = "ds3",
-                                     positiveClass = "Severe"))
-    expect_equal(severe$aucSummaryTable$asDF$auc[1], mw_auc(d$biomarker, d$ds3 == "Severe"),
+                                     positiveClass = "Severe", negativeClass = "Healthy"))
+    expect_equal(severe$aucSummaryTable$asDF$auc[1], mw_auc(d$biomarker[d$ds3 != "Disease"], d$ds3[d$ds3 != "Disease"] == "Severe"),
                  tolerance = 1e-9)
 })
 
@@ -316,13 +315,11 @@ test_that("psychopdaROC agrees with enhancedROC once both are told the same dire
 })
 
 
-test_that("the Hanley-McNeil fallback footnote states the right direction", {
-    # The footnote said the approximation "may produce narrower confidence intervals than
-    # appropriate". On the shipped data its SE is 0.025863 against DeLong's 0.021092 -- 22.6%
-    # WIDER, i.e. conservative, the opposite of what the note warned about.
+test_that("the Hanley-McNeil fallback does not promise conservative intervals", {
+    # Width in one bundled fixture does not establish coverage or a universal ordering.
     backend <- paste(readLines("../../R/psychopdaROC.b.R", warn = FALSE), collapse = "\n")
     expect_false(grepl("may produce narrower confidence intervals", backend, fixed = TRUE))
-    expect_true(grepl("wider</i> than DeLong", backend, fixed = TRUE))
+    expect_true(grepl("intervals need not be conservative", backend, fixed = TRUE))
 
     # and the underlying formula really is wider here
     d <- ps_data()
@@ -390,13 +387,8 @@ test_that("every declared option is read by the backend", {
 })
 
 
-test_that("the DeLong fallback reports the score inversion it performs", {
-    # `.enhancedDelongTest` (the primary path) passes the user's `direction` straight to pROC
-    # and reports the honest AUC, which may be below 0.5. The `.deLongTest` fallback instead
-    # FLIPS any marker whose AUC came out below 0.5 -- standard for DeLong, but the flipped
-    # value is what gets displayed. Measured below: the same column reads 0.206 in the main
-    # AUC table and 0.794 in the DeLong output. Previously the only signal was warning(),
-    # which never reaches a jamovi user.
+test_that("the DeLong fallback preserves the declared score direction", {
+    # A fallback must preserve the same below-chance estimand as the primary path.
     skip_if_not_installed("pROC")
     set.seed(42); n <- 120
     d <- data.frame(cls = rep(c("pos", "neg"), each = n / 2))
@@ -404,30 +396,29 @@ test_that("the DeLong fallback reports the score inversion it performs", {
     d$flip <- c(rnorm(n / 2, 0), rnorm(n / 2, 1))   # lower  in positives -> AUC < 0.5
 
     o <- ClinicoPath:::psychopdaROCOptions$new(dependentVars = c("good", "flip"),
-             classVar = "cls", positiveClass = "pos", direction = ">=", delongTest = TRUE)
+             classVar = "cls", positiveClass = "pos", negativeClass = "neg", direction = ">=", delongTest = TRUE)
     a <- ClinicoPath:::psychopdaROCClass$new(options = o, data = d)
     res <- a$.__enclos_env__$private$.deLongTest(
         data = d[, c("good", "flip")], classVar = d$cls, positiveClass = "pos")
 
-    expect_equal(res$inverted, "flip")
+    expect_equal(res$inverted, character(0))
 
     honest <- as.numeric(pROC::auc(pROC::roc(d$cls, d$flip, levels = c("neg", "pos"),
                                              direction = "<", quiet = TRUE)))
     expect_lt(honest, 0.5)                                   # the marker really is inverted
-    expect_equal(unname(res$AUC[2, "AUC"]), 1 - honest, tolerance = 1e-6)   # and it was flipped
+    expect_equal(unname(res$AUC[2, "AUC"]), honest, tolerance = 1e-6)
 
     # a marker that needs no flip is not named
     res2 <- a$.__enclos_env__$private$.deLongTest(
         data = d[, c("good", "good")], classVar = d$cls, positiveClass = "pos")
     expect_equal(res2$inverted, character(0))
 
-    # the render path turns $inverted into visible text, not a silent warning()
-    src <- paste(readLines("../../R/psychopdaROC.b.R", warn = FALSE), collapse = "\n")
-    expect_match(src, "delongResults$inverted", fixed = TRUE)
-    expect_match(src, "REVERSING the score direction for", fixed = TRUE)
-    expect_match(src, "delong_inverted", fixed = TRUE)
-    # and the helper no longer relies on warning() alone
-    expect_false(grepl("Test direction was inverted for these variables", src, fixed = TRUE))
+    primary <- a$.__enclos_env__$private$.enhancedDelongTest(
+        data = d[, c("good", "flip")], classVar = d$cls, pos_class = "pos")
+    expect_equal(res$difference[, "AUC Difference"], primary$difference[, "AUC Difference"], tolerance = 1e-12)
+    expect_equal(res$difference[, "P.Value"], primary$difference[, "P.Value"], tolerance = 1e-12)
+    expect_equal(res$covariance, primary$covariance, tolerance = 1e-12, ignore_attr = TRUE)
+
 })
 
 
@@ -442,7 +433,7 @@ test_that("DeLong's test warns when a class is too small for its asymptotics", {
         d$m1 <- c(rnorm(npos, 1),   rnorm(nneg, 0))
         d$m2 <- c(rnorm(npos, 0.6), rnorm(nneg, 0))
         o <- ClinicoPath:::psychopdaROCOptions$new(dependentVars = c("m1", "m2"),
-                 classVar = "cls", positiveClass = "pos", direction = ">=", delongTest = TRUE)
+                 classVar = "cls", positiveClass = "pos", negativeClass = "neg", direction = ">=", delongTest = TRUE)
         a <- ClinicoPath:::psychopdaROCClass$new(options = o, data = d)
         a$init(); a$.__enclos_env__$private$.run()
         names(a$results$delongComparisonTable$notes)
@@ -468,7 +459,7 @@ ps_private_data <- function(d, ...) {
 
 test_that("a second run with smoothing, the threshold table and the combined criterion plot does not crash", {
     skip_if_not_installed("pROC")
-    pr <- ps_private(dependentVars = "biomarker", classVar = "disease_status", positiveClass = "Disease",
+    pr <- ps_private(dependentVars = "biomarker", classVar = "disease_status", positiveClass = "Disease", negativeClass = "Healthy",
                      refVar = NULL, rocSmoothingMethod = "binormal", showThresholdTable = TRUE,
                      combinePlots = TRUE, showCriterionPlot = TRUE)
     expect_no_error(pr$p$.run())
@@ -476,7 +467,8 @@ test_that("a second run with smoothing, the threshold table and the combined cri
     # used to fail with "numbers of columns of arguments do not match": the previous run's
     # biomarker_smooth frame was still in private$.rocDataList when the criterion plot rbind() ran
     expect_no_error(pr$p$.run())
-    expect_setequal(names(pr$p$.rocDataList), c("biomarker", "biomarker_smooth"))
+    expect_setequal(names(pr$p$.rocDataList), "biomarker")
+    expect_setequal(names(pr$p$.smoothedRocDataList), "biomarker")
     expect_equal(nrow(pr$a$results$thresholdTable$asDF), n1)
 })
 
@@ -487,7 +479,7 @@ test_that("no positive class selected (NULL): the analysis waits instead of cras
     expect_no_error(pr$p$.run())   # was: argument is of length zero; then a guessed last level
     expect_equal(pr$a$results$aucSummaryTable$rowCount, 0)
     expect_equal(pr$a$results$outcomeCoding$asDF$role, rep("Not assigned yet", 2))
-    expect_match(pr$a$results$runSummary$content, "Choose the positive class", fixed = TRUE)
+    expect_match(pr$a$results$runSummary$content, "Choose the positive and negative classes", fixed = TRUE)
     expect_equal(tnote(pr$a$results$aucSummaryTable, "assumed_positive_class"), "(none)")
 })
 
@@ -496,14 +488,14 @@ test_that("a missing value in the subgroup variable drops that row, not the whol
     d$grp <- factor(rep(c("A", "B"), length.out = nrow(d)))
     d$grp[1] <- NA
     pr <- ps_private_data(d, dependentVars = "biomarker", classVar = "disease_status",
-                          positiveClass = "Disease", refVar = NULL, subGroup = "grp")
+                          positiveClass = "Disease", negativeClass = "Healthy", refVar = NULL, subGroup = "grp")
     expect_no_error(pr$p$.run())   # was: "Insufficient data ... found: 0" from a "biomarker ::: NA" stratum
     expect_setequal(pr$a$results$resultsTable$itemKeys, c("biomarker ::: A", "biomarker ::: B"))
     expect_match(pr$a$results$runSummary$content, "1 row(s) with a missing value", fixed = TRUE)
 })
 
 test_that("warnings raised after the Analysis Status box is built still reach it", {
-    pr <- ps_private(dependentVars = "biomarker", classVar = "disease_status", positiveClass = "Disease",
+    pr <- ps_private(dependentVars = "biomarker", classVar = "disease_status", positiveClass = "Disease", negativeClass = "Healthy",
                      refVar = NULL, partialAUC = TRUE)
     env <- pr$p
     unlockBinding(".checkPackageDependencies", env)
@@ -515,7 +507,7 @@ test_that("warnings raised after the Analysis Status box is built still reach it
 })
 
 test_that("Analysis Status warnings are HTML-escaped once", {
-    pr <- ps_private(dependentVars = "biomarker", classVar = "disease_status", positiveClass = "Disease", refVar = NULL)
+    pr <- ps_private(dependentVars = "biomarker", classVar = "disease_status", positiveClass = "Disease", negativeClass = "Healthy", refVar = NULL)
     pr$p$.run()
     pr$p$.warnUser("<b>x</b> & y")
     pr$p$.renderRunSummary()
@@ -526,7 +518,7 @@ test_that("Analysis Status warnings are HTML-escaped once", {
 
 test_that("a cutpointr failure is disclosed, not silently replaced by the Youden fallback", {
     d <- ps_data()
-    pr <- ps_private(dependentVars = "biomarker", classVar = "disease_status", positiveClass = "Disease", refVar = NULL)
+    pr <- ps_private(dependentVars = "biomarker", classVar = "disease_status", positiveClass = "Disease", negativeClass = "Healthy", refVar = NULL)
     r <- pr$p$.runCutpointrMetrics(dependentVar = d$biomarker, classVar = d$disease_status,
                                    positiveClass = "Disease", method = function(...) stop("boom"),
                                    score = NULL, metric = cutpointr::youden, direction = ">=",
@@ -543,7 +535,7 @@ test_that("effect-size table gives each marker's d and labels the differences as
     set.seed(3)
     d$m2 <- d$biomarker + rnorm(nrow(d), 0, 20)
     pr <- ps_private_data(d, dependentVars = c("biomarker", "m2"), classVar = "disease_status",
-                          positiveClass = "Disease", refVar = NULL, effectSizeAnalysis = TRUE)
+                          positiveClass = "Disease", negativeClass = "Healthy", refVar = NULL, effectSizeAnalysis = TRUE)
     pr$p$.run()
     es <- pr$a$results$effectSizeTable$asDF
     expect_equal(nrow(es), 1)
@@ -563,7 +555,7 @@ test_that("effect-size table gives each marker's d and labels the differences as
 
 test_that("power curve plot uses the table's Hanley-McNeil power and renders", {
     skip_if_not_installed("pROC")
-    pr <- ps_private(dependentVars = "biomarker", classVar = "disease_status", positiveClass = "Disease",
+    pr <- ps_private(dependentVars = "biomarker", classVar = "disease_status", positiveClass = "Disease", negativeClass = "Healthy",
                      refVar = NULL, powerAnalysis = TRUE, powerAnalysisType = "sample_size",
                      expectedAUCDifference = 0.2, targetPower = 0.8, significanceLevel = 0.05)
     pr$p$.run()
@@ -584,7 +576,7 @@ test_that("decision-curve plot state uses the complete-case prevalence and the t
     d$biomarker[1:20] <- NA                      # missingness in the marker
     d$sep <- ifelse(d$disease_status == "Disease", 1, 0) + runif(nrow(d), 0, 0.1)   # complete separation
     pr <- ps_private_data(d, dependentVars = c("biomarker", "sep"), classVar = "disease_status",
-                          positiveClass = "Disease", refVar = NULL, clinicalUtilityAnalysis = TRUE)
+                          positiveClass = "Disease", negativeClass = "Healthy", refVar = NULL, clinicalUtilityAnalysis = TRUE)
     pr$p$.run()
     st <- pr$a$results$decisionCurvePlot$get(key = "biomarker")$state
     expect_equal(st$prevalence, mean(st$outcome))               # was: all-rows prevalence
@@ -600,10 +592,10 @@ test_that("subgroup analysis: DeLong is an explicit error, IDI/NRI say they use 
     set.seed(5)
     d$m2 <- d$biomarker + rnorm(nrow(d), 0, 20)
     pr <- ps_private_data(d, dependentVars = c("biomarker", "m2"), classVar = "disease_status",
-                          positiveClass = "Disease", refVar = NULL, subGroup = "sex", delongTest = TRUE)
+                          positiveClass = "Disease", negativeClass = "Healthy", refVar = NULL, subGroup = "sex", delongTest = TRUE)
     expect_error(pr$p$.run(), "DeLong")     # .validateInputs(): actionable, not a silent skip
     pr <- ps_private_data(d, dependentVars = c("biomarker", "m2"), classVar = "disease_status",
-                          positiveClass = "Disease", refVar = NULL, subGroup = "sex",
+                          positiveClass = "Disease", negativeClass = "Healthy", refVar = NULL, subGroup = "sex",
                           calculateIDI = TRUE, calculateNRI = TRUE)
     expect_no_error(pr$p$.run())
     html <- pr$a$results$runSummary$content
@@ -648,26 +640,26 @@ test_that("Outcome coding: a binary class names its positive and its negative le
     oc <- res$outcomeCoding$asDF
     expect_equal(oc$level, c("Healthy", "Disease"))
     expect_equal(as.integer(oc$n), as.integer(table(d$disease_status)))
-    expect_equal(oc$role, c("Negative", "Positive (condition present)"))
+    expect_equal(oc$role, c("Negative (condition absent)", "Positive (condition present)"))
     expect_match(tnote(res$outcomeCoding, "positive"), "Positive class: Disease.", fixed = TRUE)
-    expect_match(tnote(res$outcomeCoding, "positive"), "specificity and NPV refer to Healthy.", fixed = TRUE)
-    expect_identical(tnote(res$outcomeCoding, "source"), "Chosen in Positive Class.")
-    expect_match(tnote(res$outcomeCoding, "n"), "N counts every row with a class value", fixed = TRUE)
+    expect_match(tnote(res$outcomeCoding, "positive"), "Negative class: Healthy.", fixed = TRUE)
+    expect_identical(tnote(res$outcomeCoding, "source"), "Chosen in Positive Class and Negative Class.")
+    expect_match(tnote(res$outcomeCoding, "n"), "N counts every row with each outcome value", fixed = TRUE)
     expect_equal(tnote(res$outcomeCoding, "unset"), "(none)")
     # the reading of the marker sits next to the coding, word for word the AUC table's note
     expect_match(tnote(res$outcomeCoding, "reading"), "HIGHER values were taken to indicate Disease", fixed = TRUE)
     expect_identical(tnote(res$outcomeCoding, "reading"), tnote(res$aucSummaryTable, "direction_used"))
 })
 
-test_that("Outcome coding: with three levels the other two are pooled and the AUC is positive-vs-rest", {
+test_that("Outcome coding: with three levels the unselected level is excluded", {
     d <- ps_data3()
-    res <- run_ps(data = d, dependentVars = "biomarker", classVar = "ds3", positiveClass = "Severe")
-    pooled <- "Negative (pooled with the other non-positive levels)"
-    expect_equal(oc_roles(res), c(Healthy = pooled, Disease = pooled, Severe = "Positive (condition present)"))
+    res <- run_ps(data = d, dependentVars = "biomarker", classVar = "ds3", positiveClass = "Severe", negativeClass = "Healthy")
+    expect_equal(oc_roles(res), c(Healthy = "Negative (condition absent)",
+      Disease = "Excluded: unselected outcome level", Severe = "Positive (condition present)"))
     expect_equal(as.integer(res$outcomeCoding$asDF$n), as.integer(table(d$ds3)))
     expect_match(tnote(res$outcomeCoding, "positive"),
-                 "refer to the other levels combined (Healthy, Disease).", fixed = TRUE)
-    expect_equal(res$aucSummaryTable$asDF$auc[1], mw_auc(d$biomarker, d$ds3 == "Severe"), tolerance = 1e-9)
+                 "Other outcome levels are excluded.", fixed = TRUE)
+    expect_equal(res$aucSummaryTable$asDF$auc[1], mw_auc(d$biomarker[d$ds3 != "Disease"], d$ds3[d$ds3 != "Disease"] == "Severe"), tolerance = 1e-9)
 })
 
 test_that("Outcome coding: a level literally named 'Other' can be the positive class", {
@@ -678,11 +670,12 @@ test_that("Outcome coding: a level literally named 'Other' can be the positive c
                         levels = c("Healthy", "Other", "Disease"))
     for (pos in c("Other", "Disease")) {
         res <- expect_no_error(run_ps(data = d, dependentVars = "biomarker", classVar = "dsOther",
-                                      positiveClass = pos))
-        expect_equal(res$aucSummaryTable$asDF$auc[1], mw_auc(d$biomarker, d$dsOther == pos),
+                                      positiveClass = pos, negativeClass = "Healthy"))
+        expect_equal(res$aucSummaryTable$asDF$auc[1], mw_auc(d$biomarker[d$dsOther %in% c(pos, "Healthy")],
+                       d$dsOther[d$dsOther %in% c(pos, "Healthy")] == pos),
                      tolerance = 1e-9, label = pos)
         expect_identical(unname(oc_roles(res)[pos]), "Positive (condition present)")
-        expect_equal(sum(oc_roles(res) == "Negative (pooled with the other non-positive levels)"), 2)
+        expect_equal(sum(oc_roles(res) == "Negative (condition absent)"), 1)
     }
 })
 
@@ -692,7 +685,7 @@ test_that("Outcome coding: an explicit NA level is a '(missing)' row, not a nega
     d <- data.frame(status = c(rep("Benign", 10), rep("Malignant", 10)),
                     marker = c(1, 2, 3, 3, 4, 5, 6, 7, 8, 10,   3, 5, 6, 8, 9, 11, 12, 13, 14, 15))
     d$status <- addNA(factor(replace(d$status, 19:20, NA), levels = c("Benign", "Malignant")))
-    res <- run_ps(data = d, dependentVars = "marker", classVar = "status", positiveClass = "Malignant")
+    res <- run_ps(data = d, dependentVars = "marker", classVar = "status", positiveClass = "Malignant", negativeClass = "Benign")
     oc <- res$outcomeCoding$asDF
     expect_equal(oc$level, c("Benign", "Malignant", "(missing)"))
     expect_equal(as.integer(oc$n), c(10L, 8L, 2L))
@@ -721,7 +714,7 @@ test_that("no output says a positive class was assumed, guessed or taken from le
     d <- ps_data()
     d$inv <- -d$biomarker    # one marker reads below 0.5 either way, so the below-chance note shows
     for (pos in c("Disease", "Healthy")) {
-        res <- run_ps(data = d, dependentVars = c("biomarker", "inv"), positiveClass = pos,
+        res <- run_ps(data = d, dependentVars = c("biomarker", "inv"), positiveClass = pos, negativeClass = if (pos == "Disease") "Healthy" else "Disease",
                       sensSpecTable = TRUE, showThresholdTable = TRUE, delongTest = TRUE)
         txt <- ps_text(res)
         expect_gt(length(txt), 20)
@@ -746,15 +739,15 @@ test_that("confusion matrices and dot plots name the actual levels", {
                  as.vector(table(d$disease_status)))
 
     three <- run_ps(data = ps_data3(), dependentVars = "biomarker", classVar = "ds3",
-                    positiveClass = "Severe", sensSpecTable = TRUE)
+                    positiveClass = "Severe", negativeClass = "Healthy", sensSpecTable = TRUE)
     html3 <- three$sensSpecTable$get(key = "biomarker")$content
     expect_match(html3, "Positive (Severe)", fixed = TRUE)
-    expect_match(html3, "Negative (other levels)", fixed = TRUE)
+    expect_match(html3, "Negative (Healthy)", fixed = TRUE)
 
     # level names are user data: escaped inside the Html
     d$lt <- factor(ifelse(d$disease_status == "Disease", "Ca <b>", "Benign & co"),
                    levels = c("Benign & co", "Ca <b>"))
-    esc <- run_ps(data = d, dependentVars = "biomarker", classVar = "lt", positiveClass = "Ca <b>",
+    esc <- run_ps(data = d, dependentVars = "biomarker", classVar = "lt", positiveClass = "Ca <b>", negativeClass = "Benign & co",
                   sensSpecTable = TRUE)
     html_e <- esc$sensSpecTable$get(key = "biomarker")$content
     expect_match(html_e, "Positive (Ca &lt;b&gt;)", fixed = TRUE)
@@ -768,7 +761,7 @@ test_that("the interactive ROC plot draws one path per marker", {
     d <- ps_data()
     d$b2 <- round(d$biomarker)
     pr <- ps_private_data(d, dependentVars = c("biomarker", "b2"), classVar = "disease_status",
-                          positiveClass = "Disease", refVar = NULL, plotROC = TRUE, interactiveROC = TRUE)
+                          positiveClass = "Disease", negativeClass = "Healthy", refVar = NULL, plotROC = TRUE, interactiveROC = TRUE)
     pr$p$.run()
     expect_true(pr$p$.plotInteractiveROC(pr$a$results$interactivePlot, ggplot2::theme_grey(), NULL))
     ld <- ggplot2::layer_data(ggplot2::last_plot(), 2)   # layer 1 is the chance diagonal
@@ -786,7 +779,7 @@ ps_d1 <- function() data.frame(status = factor(rep(c("Benign", "Malignant"), eac
                                marker = c(1, 2, 3, 3, 4, 5, 6, 7, 8, 10, 3, 5, 6, 8, 9, 11, 12, 13, 14, 15))
 
 test_that("no usable cut-point: the note sends the user to Positive Class first, naming the level", {
-    res <- run_ps(data = ps_data(), dependentVars = "biomarker", positiveClass = "Healthy")
+    res <- run_ps(data = ps_data(), dependentVars = "biomarker", positiveClass = "Healthy", negativeClass = "Disease")
     n <- tnote(res$resultsTable$get(key = "biomarker"), "no_usable_cutpoint")
     expect_match(n, "First check Positive Class: is Healthy the level that means the condition is present?", fixed = TRUE)
     expect_lt(regexpr("First check Positive Class", n, fixed = TRUE), regexpr("check Classification Direction", n, fixed = TRUE))
@@ -799,7 +792,7 @@ test_that("a cut-point between observed values is read with its own rule, and ti
     # break_ties = mean shows 9.333, the mean of the tied optima 8, 9 and 11. The row printed the metrics of the
     # NEAREST observed value (x >= 9: sensitivity 0.6), not of x >= 9.333 (0.5).
     d <- ps_d1()
-    res <- run_ps(data = d, dependentVars = "marker", classVar = "status", positiveClass = "Malignant", sensSpecTable = TRUE)
+    res <- run_ps(data = d, dependentVars = "marker", classVar = "status", positiveClass = "Malignant", negativeClass = "Benign", sensSpecTable = TRUE)
     rt <- res$resultsTable$get(key = "marker")
     row <- rt$asDF
     cut <- row$cutpoint[1]
@@ -815,7 +808,7 @@ test_that("a cut-point between observed values is read with its own rule, and ti
 })
 
 test_that("'All tied cutpoints' gives one confusion matrix per tie and a dot plot, without an error", {
-    res <- expect_no_error(run_ps(data = ps_d1(), dependentVars = "marker", classVar = "status", positiveClass = "Malignant",
+    res <- expect_no_error(run_ps(data = ps_d1(), dependentVars = "marker", classVar = "status", positiveClass = "Malignant", negativeClass = "Benign",
                                   break_ties = "c", sensSpecTable = TRUE, showDotPlot = TRUE, combinePlots = FALSE))
     expect_equal(sort(res$resultsTable$get(key = "marker")$asDF$cutpoint), c(8, 9, 11))
     html <- res$sensSpecTable$get(key = "marker")$content
@@ -846,7 +839,7 @@ test_that("Analysis Status and Procedure Notes are emptied and hidden when the s
         a$init()
         a
     }
-    full <- mk(classVar = "disease_status", positiveClass = "Disease", dependentVars = "biomarker", refVar = NULL)
+    full <- mk(classVar = "disease_status", positiveClass = "Disease", negativeClass = "Healthy", dependentVars = "biomarker", refVar = NULL)
     suppressMessages(full$run())
     expect_match(full$results$procedureNotes$content, "Positive Class: Disease", fixed = TRUE)
     unset <- mk(classVar = "disease_status", positiveClass = NULL, dependentVars = "biomarker", refVar = NULL)
@@ -858,7 +851,7 @@ test_that("Analysis Status and Procedure Notes are emptied and hidden when the s
     suppressMessages(unset$run())
     expect_identical(unset$results$procedureNotes$content, "")
     expect_false(isTRUE(unset$results$procedureNotes$visible))
-    expect_match(unset$results$runSummary$content, "Choose the positive class", fixed = TRUE)
+    expect_match(unset$results$runSummary$content, "Choose the positive and negative classes", fixed = TRUE)
 })
 
 test_that("the direction notes emphasise with <i>, not <b>", {
@@ -872,9 +865,9 @@ test_that("the direction notes emphasise with <i>, not <b>", {
 
 test_that("a Positive Class that no row has is explained neutrally, including the '- None -' case", {
     e <- expect_error(run_ps(data = ps_data(), dependentVars = "biomarker", classVar = "sex"),
-                      "Positive Class is set to Disease, but no row of sex has that level (its observed levels are: Female, Male).",
+                      "Positive Class is set to Disease, but no row of sex has that level. Choose an observed level in Positive Class.",
                       fixed = TRUE)
-    expect_match(conditionMessage(e), "If the Positive Class box shows '- None -', the class variable was changed after a level was chosen.",
+    expect_match(conditionMessage(e), "After changing the class variable or filtering rows, reselect both outcome levels.",
                  fixed = TRUE)
 })
 
@@ -909,7 +902,7 @@ test_that("the DeLong fallback reads the markers in the chosen Classification Di
     d <- ps_data()
     set.seed(5)
     S <- data.frame(biomarker = d$biomarker, m2 = d$biomarker + rnorm(nrow(d), 0, 15))
-    o <- ClinicoPath:::psychopdaROCOptions$new(dependentVars = names(S), classVar = "cls", positiveClass = "Healthy",
+    o <- ClinicoPath:::psychopdaROCOptions$new(dependentVars = names(S), classVar = "cls", positiveClass = "Healthy", negativeClass = "Disease",
                                                direction = "<=", refVar = NULL)
     a <- ClinicoPath:::psychopdaROCClass$new(options = o, data = cbind(S, cls = d$disease_status))
     r <- a$.__enclos_env__$private$.deLongTest(data = S, classVar = as.character(d$disease_status), positiveClass = "Healthy")
@@ -920,13 +913,13 @@ test_that("the DeLong fallback reads the markers in the chosen Classification Di
 
 test_that("meta-analysis confidence limits are logit-Wald limits and stay within 0-1", {
     data(psychopdaROC_advanced, package = "ClinicoPath", envir = environment())
-    res <- run_ps(data = psychopdaROC_advanced, classVar = "diagnosis", positiveClass = "Positive",
+    res <- run_ps(data = psychopdaROC_advanced, classVar = "diagnosis", positiveClass = "Positive", negativeClass = "Negative",
                   dependentVars = c("marker_excellent", "marker_good", "marker_moderate"),
                   metaAnalysis = TRUE, overrideMetaAnalysisWarning = TRUE, forestPlot = TRUE)
     tab <- res$metaAnalysisTable$asDF
     expect_true(all(tab$ci_lower >= 0 & tab$ci_upper <= 1))       # the random-effects upper limit was 1.012
-    # every limit is plogis(logit(a) -/+ 1.96 se / (a (1 - a))) for the AUC and SE shown (delta method)
-    lw <- function(a, se) stats::plogis(stats::qlogis(a) + c(-1, 1) * 1.96 * se / (a * (1 - a)))
+    # every limit is plogis(logit(a) -/+ qnorm(.975) se / (a (1 - a))) for the AUC and SE shown (delta method)
+    lw <- function(a, se) stats::plogis(stats::qlogis(a) + c(-1, 1) * qnorm(.975) * se / (a * (1 - a)))
     st <- res$metaAnalysisForestPlot$get(key = "forestPlot")$state$data
     for (i in seq_len(nrow(st)))
         expect_equal(c(st$ci_lower[i], st$ci_upper[i]), lw(st$auc[i], st$se[i]), tolerance = 1e-9, label = st$study[i])
@@ -942,7 +935,7 @@ test_that("meta-analysis confidence limits are logit-Wald limits and stay within
 test_that("Outcome coding cells show a level name as it is; only the notes map [] to ()", {
     d <- ps_d1()
     d$status <- factor(ifelse(d$status == "Malignant", "Grade [II]", "Grade [I]"), levels = c("Grade [I]", "Grade [II]"))
-    res <- run_ps(data = d, dependentVars = "marker", classVar = "status", positiveClass = "Grade [II]")
+    res <- run_ps(data = d, dependentVars = "marker", classVar = "status", positiveClass = "Grade [II]", negativeClass = "Grade [I]")
     expect_identical(res$outcomeCoding$asDF$level, c("Grade [I]", "Grade [II]"))
     expect_match(tnote(res$outcomeCoding, "positive"), "Positive class: Grade (II).", fixed = TRUE)
 })
@@ -989,13 +982,13 @@ test_that("the class variable itself cannot be the Reference Test for IDI/NRI", 
     d <- ps_d1()
     d$out <- factor(as.integer(d$status == "Malignant"))
     attr(d$out, "values") <- c(0L, 1L)
-    expect_error(run_ps(data = d, dependentVars = "marker", classVar = "out", positiveClass = "1", refVar = "out", calculateIDI = TRUE),
+    expect_error(run_ps(data = d, dependentVars = "marker", classVar = "out", positiveClass = "1", negativeClass = "0", refVar = "out", calculateIDI = TRUE),
                  "Reference Test for IDI/NRI holds the class variable, the gold standard itself.", fixed = TRUE)
 })
 
 test_that("no usable cut-point although some separate: the note names the method or Metric Tolerance, not the marker", {
     # J = 0.5 at the best cut-points of ps_d1(); a tolerance of 0.55 counts calling everyone negative (+Inf) as tied
-    rt <- run_ps(data = ps_d1(), dependentVars = "marker", classVar = "status", positiveClass = "Malignant",
+    rt <- run_ps(data = ps_d1(), dependentVars = "marker", classVar = "status", positiveClass = "Malignant", negativeClass = "Benign",
                  tol_metric = 0.55)$resultsTable$get(key = "marker")
     expect_equal(rt$rowCount, 0)
     n <- tnote(rt, "no_usable_cutpoint")

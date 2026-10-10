@@ -7,11 +7,13 @@
 psychopdaROC(
   manualRun = FALSE,
   run = FALSE,
+  showExplanations = FALSE,
   clinicalMode = "basic",
   data,
   dependentVars,
   classVar,
   positiveClass,
+  negativeClass,
   subGroup = NULL,
   method = "maximize_metric",
   metric = "youden",
@@ -29,10 +31,10 @@ psychopdaROC(
   showThresholdTable = FALSE,
   maxThresholds = 20,
   delongTest = FALSE,
-  plotROC = TRUE,
-  combinePlots = TRUE,
+  plotROC = FALSE,
+  combinePlots = FALSE,
   cleanPlot = FALSE,
-  showOptimalPoint = TRUE,
+  showOptimalPoint = FALSE,
   displaySE = FALSE,
   smoothing = FALSE,
   showConfidenceBands = FALSE,
@@ -75,12 +77,12 @@ psychopdaROC(
   fixedAnalysisType = "sensitivity",
   fixedSensitivityValue = 0.9,
   fixedSpecificityValue = 0.9,
-  showFixedROC = TRUE,
+  showFixedROC = FALSE,
   fixedInterpolation = "linear",
-  showFixedExplanation = TRUE,
+  showFixedExplanation = FALSE,
   metaAnalysis = FALSE,
   metaAnalysisMethod = "both",
-  heterogeneityTest = TRUE,
+  heterogeneityTest = FALSE,
   forestPlot = FALSE,
   overrideMetaAnalysisWarning = FALSE
 )
@@ -92,24 +94,33 @@ options on slow bootstrap or cutpoint analyses.}
 
 \item{run}{.}
 
+\item{showExplanations}{Show optional educational interpretation and
+procedure details. Input and scope notices remain visible.}
+
 \item{clinicalMode}{Selects which guidance notes are shown in the Procedure
 Notes panel. Basic explains the AUC bands and warns that a cutpoint
 searched on these data is optimistic; Advanced and Comprehensive give a
 shorter research framing. This option does not switch any analysis on or
 off - every optional analysis has its own checkbox.}
 
-\item{data}{The data as a data frame.}
+\item{data}{The data as a data frame, with one independent observation per
+row.}
 
 \item{dependentVars}{Test variable(s) to be evaluated for classification
 performance. Multiple variables can be selected for comparison.}
 
 \item{classVar}{Classification variable representing the true class (gold
-standard). Two or more levels; with more than two, the positive class is
-compared with all other levels combined (one-vs-rest).}
+standard). Choose one positive and one negative level. Only observations in
+those two levels are analysed; other levels and missing outcomes are
+excluded and counted.}
 
 \item{positiveClass}{Level of classVar treated as the positive class
 (condition present). Required: NULL leaves the analysis waiting for a
 choice; levels are never inferred from their order.}
+
+\item{negativeClass}{Level of classVar treated as the negative class
+(condition absent). Required: NULL leaves the analysis waiting for a
+choice. Other levels are excluded.}
 
 \item{subGroup}{Optional grouping variable for stratified analysis. ROC
 curves will be calculated separately for each group.}
@@ -118,7 +129,9 @@ curves will be calculated separately for each group.}
 methods optimize different aspects of classifier performance.}
 
 \item{metric}{Metric to optimize when determining the cutpoint.  Only
-applies to maximize/minimize methods.}
+applies to maximize/minimize methods. The legacy p_chisquared option
+identifier denotes the Pearson chi-squared statistic (without continuity
+correction), not its p-value.}
 
 \item{direction}{Direction of classification relative to the cutpoint. Use
 '>=' when higher test values indicate the positive class.}
@@ -180,10 +193,13 @@ ROC curves in a single plot.}
 \item{cleanPlot}{Create clean ROC curves without annotations, suitable for
 publications.}
 
-\item{showOptimalPoint}{Display the optimal cutpoint on the ROC curve.}
+\item{showOptimalPoint}{Display the selected cutpoint on the ROC curve.
+When all tied cutpoints are listed, mark the first selected cutpoint.}
 
-\item{displaySE}{Display standard error bands on ROC curves (when LOESS
-smoothing is applied).}
+\item{displaySE}{Display the pointwise 95\\% confidence band for the fitted
+LOESS smooth. This describes uncertainty in the visual smooth, not the
+Wilson intervals for ROC sensitivity and specificity or a simultaneous ROC
+confidence region.}
 
 \item{smoothing}{Apply LOESS smoothing to ROC curves for visualization.}
 
@@ -195,8 +211,9 @@ curves.}
 \item{directLabel}{Label curves directly on the plot instead of using a
 legend.}
 
-\item{interactiveROC}{Create an interactive HTML ROC plot (requires plotROC
-package).}
+\item{interactiveROC}{Create an additional static ROC plot. The stable
+option name is retained for saved analyses; the jamovi Image output does
+not provide HTML interaction.}
 
 \item{showCriterionPlot}{Plot showing how sensitivity and specificity
 change across different thresholds.}
@@ -221,8 +238,11 @@ calculation.}
 \item{rocSmoothingMethod}{Method for smoothing the ROC curve (requires pROC
 package).}
 
-\item{bootstrapCI}{Calculate bootstrap confidence intervals for AUC and
-optimal cutpoints.}
+\item{bootstrapCI}{Calculate bootstrap confidence intervals for full AUC
+and a separate Youden reference cutoff, sensitivity and specificity. This
+does not follow the main Cutpoint Method. Tied Youden optima use seeded
+random selection in both the original sample and stratified bootstrap
+replicates.}
 
 \item{bootstrapReps}{Number of bootstrap replications for confidence
 interval calculation.}
@@ -250,14 +270,17 @@ Every test variable other than the reference is compared against it. NULL
 uses the first test variable.}
 
 \item{nriThresholds}{Comma-separated probability thresholds (0-1) defining
-risk categories for NRI. Leave empty for continuous NRI.}
+risk categories for NRI. Leave empty for continuous NRI. In both variants,
+predicted risks differing by at most sqrt(machine epsilon), approximately
+1.5e-8, are treated as numerical ties. This tolerance removes numerical
+roundoff and is not a clinically meaningful change threshold.}
 
 \item{idiNriBootRuns}{Number of bootstrap iterations for IDI and NRI
 confidence intervals.}
 
-\item{effectSizeAnalysis}{Calculate effect sizes for ROC curve differences
-using Cohen's conventions and standardized mean differences between AUC
-values.}
+\item{effectSizeAnalysis}{Calculate within-marker standardized differences
+between outcome classes and pairwise differences in those effects. Size
+bands are descriptive conventions only.}
 
 \item{powerAnalysis}{Perform statistical power analysis for ROC curve
 comparisons including sample size estimation and power calculations for
@@ -265,8 +288,11 @@ detecting AUC differences.}
 
 \item{powerAnalysisType}{Type of power analysis to perform.}
 
-\item{expectedAUCDifference}{Expected difference in AUC values for power
-calculations and sample size estimation.}
+\item{expectedAUCDifference}{Target AUC above chance (target AUC = 0.5 +
+this value) for prospective power and sample size estimation. Multiple
+markers use an equal-variance correlation adjustment, not a fitted paired
+ROC power model. A target AUC of exactly 1 is degenerate and has no sample
+size recommendation.}
 
 \item{targetPower}{Target statistical power for sample size calculations
 (typically 0.8 or 0.9).}
@@ -275,8 +301,10 @@ calculations and sample size estimation.}
 (typically 0.05).}
 
 \item{correlationROCs}{Expected correlation between paired ROC curves for
-power calculations. Use 0.5 for moderate correlation, 0.0 for independent
-samples.}
+power calculations. Use a correlation justified for the intended study.
+Zero means uncorrelated AUC estimates in this equal-variance planning
+approximation; it does not establish that paired observations are
+independent samples.}
 
 \item{bayesianAnalysis}{Perform bootstrap-based ROC analysis with optional
 prior weighting to estimate uncertainty in AUC. Uses bootstrap resampling
@@ -321,8 +349,10 @@ the corresponding cutoff and sensitivity.}
 \item{showFixedROC}{Display separate ROC curve highlighting the fixed
 sensitivity/specificity point.}
 
-\item{fixedInterpolation}{Method for interpolating between observed points
-to achieve target sensitivity/specificity.}
+\item{fixedInterpolation}{Method for selecting a cutoff near the target
+sensitivity/specificity. Achieved rates always use empirical
+classifications at the returned cutoff. Linear interpolation may miss the
+target; Stepwise meets or exceeds it.}
 
 \item{showFixedExplanation}{Display explanatory guide for fixed
 sensitivity/specificity analysis including  clinical interpretation,
@@ -397,6 +427,12 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$outcomeCoding)}
 }
 \description{
-Receiver Operating Characteristic (ROC) curve analysis with optimal
-cutpoint determination.
+Exploratory Receiver Operating Characteristic (ROC) curve analysis with
+optimal cutpoint determination. Each row must be an independent
+observation. Intervals, tests and bootstrap resampling do not account for
+repeated measurements or clustering within patients; use a prespecified
+patient-level summary or a method that accounts for clustering. Nominal
+coverage is not guaranteed in small or imbalanced samples. Cutpoints
+selected on these data report apparent performance and require validation
+in the intended setting.
 }

@@ -12,13 +12,13 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Test Variables
+        label: Test variables
         children:
           - type: VariablesListBox
             name: dependentVars
             isTarget: true
       - type: TargetLayoutBox
-        label: Class Variable (Gold Standard)
+        label: Class variable (gold standard)
         children:
           - type: VariablesListBox
             name: classVar
@@ -26,17 +26,21 @@ children:
             isTarget: true
           - type: LevelSelector
             name: positiveClass
-            label: Positive Class
+            label: Positive class
+            enable: (classVar)
+          - type: LevelSelector
+            name: negativeClass
+            label: Negative class
             enable: (classVar)
       - type: TargetLayoutBox
-        label: Group Variable (Optional)
+        label: Group variable (optional)
         children:
           - type: VariablesListBox
             name: subGroup
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Reference Test for IDI/NRI (Optional)
+        label: Reference test for IDI/NRI (optional)
         children:
           - type: VariablesListBox
             name: refVar
@@ -64,6 +68,9 @@ children:
       - type: ComboBox
         name: clinicalMode
         label: Guidance level
+        enable: (showExplanations)
+      - type: CheckBox
+        name: showExplanations
       - type: ComboBox
         name: direction
         label: Classification direction
@@ -81,7 +88,7 @@ children:
         children:
           - type: CheckBox
             name: usePriorPrev
-            label: Adjust for population prevalence (use prior prevalence)
+            label: Population prevalence adjustment
           - type: TextBox
             name: priorPrev
             format: number
@@ -117,7 +124,7 @@ children:
             name: specifyCutScore
             format: string
             enable: (method:oc_manual)
-            label: Manual Cut Score
+            label: Manual cut score
       - type: LayoutBox
         margin: large
         children:
@@ -126,22 +133,23 @@ children:
           - type: TextBox
             name: tol_metric
             format: number
-            label: Metric Tolerance
+            label: Metric tolerance
             enable: >-
               (method:maximize_metric || method:minimize_metric ||
-              method:maximize_loess_metric || method:minimize_loess_metric)
+              method:maximize_loess_metric || method:minimize_loess_metric ||
+              method:maximize_boot_metric || method:minimize_boot_metric)
           - type: ComboBox
             name: break_ties
             label: Tie breaking method
           - type: TextBox
             name: boot_runs
             format: number
-            label: Bootstrap Iterations
+            label: Bootstrap iterations
             enable: (method:maximize_boot_metric || method:minimize_boot_metric)
           - type: TextBox
             name: seed
             format: number
-            label: Random Seed
+            label: Random seed
             enable: >-
               (method:maximize_boot_metric || method:minimize_boot_metric ||
               bootstrapCI || calculateIDI || calculateNRI || bayesianAnalysis)
@@ -162,7 +170,7 @@ children:
         children:
           - type: CheckBox
             name: fixedSensSpecAnalysis
-            label: Fixed sensitivity/Specificity analysis
+            label: Fixed sensitivity/specificity analysis
           - type: ComboBox
             name: fixedAnalysisType
             label: Analysis type
@@ -170,12 +178,12 @@ children:
           - type: TextBox
             name: fixedSensitivityValue
             format: number
-            label: Target Sensitivity
+            label: Target sensitivity
             enable: (fixedSensSpecAnalysis && fixedAnalysisType:sensitivity)
           - type: TextBox
             name: fixedSpecificityValue
             format: number
-            label: Target Specificity
+            label: Target specificity
             enable: (fixedSensSpecAnalysis && fixedAnalysisType:specificity)
           - type: ComboBox
             name: fixedInterpolation
@@ -214,7 +222,7 @@ children:
             enable: (showThresholdTable)
           - type: CheckBox
             name: delongTest
-            label: Compare AUCs (DeLong's test)
+            label: AUC comparison (DeLong's test)
 
   # ==============================================
   # 7. VISUALIZATION - ROC Curve Plots
@@ -241,15 +249,15 @@ children:
                     label: ROC curves
                   - type: CheckBox
                     name: combinePlots
-                    label: Combine all curves in one plot
+                    label: Combined ROC curves
                     enable: (plotROC)
                   - type: CheckBox
                     name: showOptimalPoint
-                    label: Optimal cutpoint
+                    label: Selected cutpoint
                     enable: (plotROC)
                   - type: CheckBox
                     name: directLabel
-                    label: Label curves directly
+                    label: Direct curve labels
                     enable: (plotROC && combinePlots)
               - type: LayoutBox
                 margin: large
@@ -270,11 +278,11 @@ children:
                     enable: (plotROC)
                   - type: CheckBox
                     name: displaySE
-                    label: Standard error bands
+                    label: Smoothed-curve confidence band (95%)
                     enable: (plotROC && smoothing && !cleanPlot)
                   - type: CheckBox
                     name: interactiveROC
-                    label: Interactive plot
+                    label: Additional static ROC plot
                     enable: (plotROC)
           - type: LayoutBox
             cell: { column: 1, row: 0 }
@@ -305,7 +313,7 @@ children:
                     label: Diagnostic Plots
                   - type: CheckBox
                     name: showCriterionPlot
-                    label: Sensitivity/Specificity vs. threshold
+                    label: Sensitivity/specificity vs. threshold
                   - type: CheckBox
                     name: showPrevalencePlot
                     label: Predictive values vs. prevalence
@@ -372,7 +380,7 @@ children:
         children:
           - type: CheckBox
             name: compareClassifiers
-            label: Compare classifier performance
+            label: Classifier performance comparison
           - type: CheckBox
             name: effectSizeAnalysis
             label: Effect size analysis
@@ -419,22 +427,22 @@ children:
           - type: TextBox
             name: expectedAUCDifference
             format: number
-            label: Expected AUC Difference
+            label: Expected AUC difference
             enable: (powerAnalysis)
           - type: TextBox
             name: targetPower
             format: number
-            label: Target Power
+            label: Target power
             enable: (powerAnalysis)
           - type: TextBox
             name: significanceLevel
             format: number
-            label: Significance Level
+            label: Significance level
             enable: (powerAnalysis)
           - type: TextBox
             name: correlationROCs
             format: number
-            label: ROC Correlation
+            label: ROC correlation
             enable: (powerAnalysis)
 
   # ==============================================
@@ -459,7 +467,7 @@ children:
           - type: TextBox
             name: priorPrecision
             format: number
-            label: Prior Precision
+            label: Prior precision
             enable: (bayesianAnalysis)
 
   # ==============================================
@@ -479,12 +487,12 @@ children:
           - type: TextBox
             name: treatmentThreshold
             format: string
-            label: Treatment Threshold (min,max,step)
+            label: Treatment threshold (min,max,step)
             enable: (clinicalUtilityAnalysis)
           - type: TextBox
             name: harmBenefitRatio
             format: number
-            label: Harm-Benefit Ratio
+            label: Harm-benefit ratio
             enable: (clinicalUtilityAnalysis)
           - type: CheckBox
             name: interventionCost
@@ -512,7 +520,7 @@ children:
             enable: (metaAnalysis)
           - type: CheckBox
             name: heterogeneityTest
-            label: Test for heterogeneity (Q-test, I-squared)
+            label: Heterogeneity test (Q-test, I-squared)
             enable: (metaAnalysis)
           - type: CheckBox
             name: forestPlot

@@ -1,5 +1,5 @@
-# `positiveClass` is a `type: Level` option. The jamovi compiler forbids a default on a Level, so
-# it compiles to a REQUIRED argument of the generated wrapper; this helper supplies just that one.
+# Both class selectors are Level options with required wrapper arguments.
+# Supply only empty selections when omitted; never infer a class from the data.
 # (`refVar`, Reference Test for IDI/NRI, is a `type: Variable` with a NULL default since 2026-10-09.)
 #
 # It used to fill EVERY argument that had no default with "" -- including `dependentVars` and
@@ -8,6 +8,7 @@
 psychopdaROC <- function(...) {
   args <- list(...)
   if (!("positiveClass" %in% names(args))) args$positiveClass <- ""
+  if (!("negativeClass" %in% names(args))) args$negativeClass <- ""
   do.call(ClinicoPath::psychopdaROC, args)
 }
 
@@ -25,7 +26,7 @@ test_that("psychopdaROC creates proper class", {
     data = psychopdaROC_test,
     dependentVars = "biomarker",
     classVar = "disease_status",
-    positiveClass = "Disease"
+    positiveClass = "Disease", negativeClass = "Healthy"
   )
   expect_s3_class(result, "psychopdaROCResults")
   expect_equal(result$aucSummaryTable$rowCount, 1)
@@ -36,7 +37,7 @@ test_that("psychopdaROC handles basic ROC analysis", {
     data = psychopdaROC_test,
     dependentVars = "biomarker",
     classVar = "disease_status",
-    positiveClass = "Disease"
+    positiveClass = "Disease", negativeClass = "Healthy"
   )
   expect_s3_class(result, "psychopdaROCResults")
 })
@@ -46,7 +47,7 @@ test_that("psychopdaROC handles cancer screening data", {
     data = psychopdaROC_screening,
     dependentVars = c("psa_level", "ca125"),
     classVar = "cancer",
-    positiveClass = "Cancer"
+    positiveClass = "Cancer", negativeClass = "No_Cancer"
   )
   expect_s3_class(result, "psychopdaROCResults")
 })
@@ -56,7 +57,7 @@ test_that("psychopdaROC handles cardiac biomarkers", {
     data = psychopdaROC_cardiac,
     dependentVars = c("troponin", "creatinine", "bnp"),
     classVar = "mi_status",
-    positiveClass = "MI"
+    positiveClass = "MI", negativeClass = "No_MI"
   )
   expect_s3_class(result, "psychopdaROCResults")
 })
@@ -66,7 +67,7 @@ test_that("psychopdaROC handles multiple biomarkers", {
     data = psychopdaROC_multibiomarker,
     dependentVars = c("marker1", "marker2", "marker3", "combined_score"),
     classVar = "diagnosis",
-    positiveClass = "Positive"
+    positiveClass = "Positive", negativeClass = "Negative"
   )
   expect_s3_class(result, "psychopdaROCResults")
 })
@@ -76,7 +77,7 @@ test_that("psychopdaROC handles Youden index method", {
     data = psychopdaROC_test,
     dependentVars = "biomarker",
     classVar = "disease_status",
-    positiveClass = "Disease",
+    positiveClass = "Disease", negativeClass = "Healthy",
     method = "maximize_metric",
     metric = "youden"
   )
@@ -89,7 +90,7 @@ test_that("psychopdaROC handles different classification directions", {
     data = psychopdaROC_test,
     dependentVars = "biomarker",
     classVar = "disease_status",
-    positiveClass = "Disease",
+    positiveClass = "Disease", negativeClass = "Healthy",
     direction = ">="
   )
   expect_no_error(result_higher)
@@ -99,7 +100,7 @@ test_that("psychopdaROC handles different classification directions", {
     data = psychopdaROC_test,
     dependentVars = "biomarker",
     classVar = "disease_status",
-    positiveClass = "Disease",
+    positiveClass = "Disease", negativeClass = "Healthy",
     direction = "<="
   )
   expect_no_error(result_lower)
@@ -113,7 +114,7 @@ test_that("psychopdaROC handles different optimization metrics", {
       data = psychopdaROC_test,
       dependentVars = "biomarker",
       classVar = "disease_status",
-      positiveClass = "Disease",
+      positiveClass = "Disease", negativeClass = "Healthy",
       metric = m
     )
     expect_s3_class(result, "psychopdaROCResults")
@@ -127,7 +128,7 @@ test_that("psychopdaROC handles clinical mode selection", {
     data = psychopdaROC_test,
     dependentVars = "biomarker",
     classVar = "disease_status",
-    positiveClass = "Disease",
+    positiveClass = "Disease", negativeClass = "Healthy",
     clinicalMode = "basic"
   )
   expect_no_error(result_basic)
@@ -138,7 +139,7 @@ test_that("psychopdaROC handles clinical mode selection", {
     data = psychopdaROC_test,
     dependentVars = "biomarker",
     classVar = "disease_status",
-    positiveClass = "Disease",
+    positiveClass = "Disease", negativeClass = "Healthy",
     clinicalMode = "advanced"
   )
   expect_no_error(result_advanced)

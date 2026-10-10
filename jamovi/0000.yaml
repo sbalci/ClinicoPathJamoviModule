@@ -1500,15 +1500,20 @@ analyses:
   - title: Advanced ROC Analysis
     name: psychopdaROC
     ns: ClinicoPath
+    category: analyses
     menuGroup: meddecideT
-    menuTitle: Advanced ROC Analysis
     menuSubgroup: ROC
+    menuTitle: Advanced ROC Analysis
     menuSubtitle: Advanced ROC analysis with statistical comparisons and effect sizes
     description: >
-      Receiver Operating Characteristic (ROC) curve analysis with optimal
-      cutpoint determination.
-    ribbon: analyses
-    category: analyses
+      Exploratory Receiver Operating Characteristic (ROC) curve analysis with
+      optimal cutpoint determination. Each row must be an independent
+      observation. Intervals, tests and bootstrap resampling do not account for
+      repeated measurements or clustering within patients; use a prespecified
+      patient-level summary or a method that accounts for clustering. Nominal
+      coverage is not guaranteed in small or imbalanced samples. Cutpoints
+      selected on these data report apparent performance and require validation
+      in the intended setting.
   - title: Combine Medical Decision Tests
     name: decisioncombine
     ns: ClinicoPath

@@ -45,8 +45,8 @@
   if (!higher) threshold <- -threshold
   f1 <- ifelse(precision + recall > 0, 2 * precision * recall / (precision + recall), 0)
   best <- which.max(f1)
-  list(auprc = sum(diff(recall) * (head(precision, -1) + tail(precision, -1)) / 2),
-       avg_precision = sum(diff(recall) * tail(precision, -1)),
+  list(auprc = sum(diff(recall) * (utils::head(precision, -1) + utils::tail(precision, -1)) / 2),
+       avg_precision = sum(diff(recall) * utils::tail(precision, -1)),
        max_f1 = f1[best], precision = precision[best], recall = recall[best],
        curve = data.frame(threshold = threshold, recall = recall, precision = precision),
        prevalence = mean(y), n_positive = sum(y), n_negative = sum(1 - y))

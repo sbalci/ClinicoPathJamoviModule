@@ -33,7 +33,7 @@ optimal cutpoint determination using Youden index or other metrics.
 \examples{
 data(psychopdaROC_test)
 psychopdaROC(data = psychopdaROC_test, dependentVars = "biomarker",
-             classVar = "disease_status", positiveClass = "Disease",
+             classVar = "disease_status", positiveClass = "Disease", negativeClass = "Healthy",
              refVar = "biomarker")
 
 }

@@ -2,6 +2,51 @@
 
 ## Unreleased — rare-disease AI validation and workload
 
+- `psychopdaROC` analysis 1.0.88 requires explicit Positive Class and Negative Class
+  selections. Both start empty; only the selected pair enters any analysis. Other
+  levels and missing outcomes are excluded with counts in Outcome coding. Existing
+  saved analyses must select Negative Class before recomputing, and R calls must
+  supply `negativeClass`. Pair identities are independent of marker names, so
+  delimiters in names cannot change DeLong results or duplicate effect-size rows.
+  The DeLong fallback retains the selected direction. Post-hoc power reports the
+  actual target distance from 0.5 and plots the exact target AUC in either direction.
+  Interpretation/procedure notes are optional and start hidden; essential scope
+  notices remain visible. Long marker-pair labels use a horizontal effect-size plot.
+  Unavailable DeLong inference uses missing cells in native output. Turkish catalogs
+  now cover all 626 currently extracted target messages, preserving existing translations.
+
+- In module 1.0.81.01, `psychopdaROC` analysis 1.0.87 repairs meta-analysis visibility,
+  saved bootstrap traces, invalid power plots, stale notes, confidence-band colours,
+  and observed-cutpoint exports. Per-marker cutpoint tables identify their marker.
+  Subgroup names retain literal delimiters; partial-AUC
+  ranges and free-text probability inputs are checked. Decision curves use one bounded
+  grid for tables and plots, LOESS is explicit, and threshold tables respect their cap.
+  Native notices supplement detailed guidance. Empty R input mappings reach the welcome
+  panel, bootstrap tolerance controls are enabled, and the release fixture routes to
+  JamoviTest. Documentation retains the exploratory scope and measured inference limits.
+- Release-profile checks for module 1.0.81.01, `psychopdaROC` analysis 1.0.86:
+  all optional checkboxes now start unchecked, including plots and heterogeneity tests.
+  A shared, translatable welcome panel explains positive-class selection, direction,
+  and independent observations. Diagnostic plots now work with ROC curves unchecked;
+  cutpoint changes invalidate saved dot plots. The additional ROC image is correctly
+  labelled as static and follows the parent ROC visibility control.
+  Documentation and a reproducible synthetic CSV describe
+  the current options and retained statistical limitations. Existing saved option values
+  remain explicit; the analysis stays in JamoviTest pending release validation.
+- In module 1.0.81.01, `psychopdaROC` analysis 1.0.85 treats fitted-risk roundoff as
+  ties in NRI and stabilizes logistic calibration across marker units. Degenerate DeLong
+  contrasts retain their AUC differences but leave unsupported intervals and tests unavailable.
+  Fallback AUC uncertainty uses each marker's complete-case class counts, now shown in a note.
+  Results state the independent-observation requirement; repeated patient measurements require
+  aggregation or a method that accounts for clustering. Comprehensive guidance correctly names
+  prior-weighted bootstrap analysis. Previously documented finite-sample limitations remain.
+- In module 1.0.81.01, `psychopdaROC` analysis 1.0.84 corrects partial-AUC intervals,
+  empirical fixed-cutoff metrics and prevalence adjustment, classifier ties, selected-cutoff
+  plot points, quantile operating points, undefined predictive values, and Pearson chi-squared
+  statistics. Power uses complete observations and both rejection tails without clamping
+  below-chance AUCs. Bootstrap coordinate intervals now handle ties and name their separate
+  Youden reference; fixed-point plots render in either plot mode. Finite-sample inference
+  limits and descriptive interpretation bands are explicit. The analysis remains in JamoviTest.
 - `nogoldstandard` now rejects a variable chosen for two test slots with a clear message;
   previously the composite method stopped with an R error. The bootstrap sample count is now
   a whole number, so a fractional value no longer stops the analysis. Latent estimates at 0%

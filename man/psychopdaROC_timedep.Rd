@@ -33,7 +33,7 @@ or follow-up values.
 data(psychopdaROC_timedep)
 psychopdaROC(data = psychopdaROC_timedep,
              dependentVars = c("baseline_marker", "followup_marker"),
-             classVar = "outcome", positiveClass = "Event",
+             classVar = "outcome", positiveClass = "Event", negativeClass = "No_Event",
              refVar = "baseline_marker")
 
 }

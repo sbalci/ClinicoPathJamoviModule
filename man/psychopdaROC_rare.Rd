@@ -30,7 +30,7 @@ sensitivity and specificity.
 \examples{
 data(psychopdaROC_rare)
 psychopdaROC(data = psychopdaROC_rare, dependentVars = "biomarker",
-             classVar = "rare_disease", positiveClass = "Disease",
+             classVar = "rare_disease", positiveClass = "Disease", negativeClass = "No_Disease",
              refVar = "biomarker")
 
 }

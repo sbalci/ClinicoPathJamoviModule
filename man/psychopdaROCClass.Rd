@@ -51,7 +51,7 @@ basic ROC curve generation. Key features include:
 \item Predictive value vs prevalence plots
 \item Precision-recall curves
 \item Dot plots showing class distributions
-\item Interactive ROC plots
+\item Additional static ROC visualization
 \item Confidence bands and quantile confidence intervals
 }
 
@@ -76,7 +76,7 @@ result1 <- psychopdaROC(
   data = medical_roc_data,
   dependentVars = "biomarker1",
   classVar = "disease_status",
-  positiveClass = "Disease",
+  positiveClass = "Disease", negativeClass = "Healthy",
   refVar = NULL
 )
 
@@ -85,7 +85,7 @@ result2 <- psychopdaROC(
   data = medical_roc_data,
   dependentVars = c("biomarker1", "biomarker2", "biomarker3"),
   classVar = "disease_status",
-  positiveClass = "Disease",
+  positiveClass = "Disease", negativeClass = "Healthy",
   delongTest = TRUE,
   combinePlots = TRUE,
   refVar = NULL
@@ -96,7 +96,7 @@ result3 <- psychopdaROC(
   data = medical_roc_data,
   dependentVars = c("biomarker1", "biomarker2"),
   classVar = "disease_status",
-  positiveClass = "Disease",
+  positiveClass = "Disease", negativeClass = "Healthy",
   calculateIDI = TRUE,
   calculateNRI = TRUE,
   refVar = "biomarker1",
@@ -108,7 +108,7 @@ result4 <- psychopdaROC(
   data = medical_roc_data,
   dependentVars = "biomarker1",
   classVar = "disease_status",
-  positiveClass = "Disease",
+  positiveClass = "Disease", negativeClass = "Healthy",
   method = "oc_cost_ratio",
   costratioFP = 2.5,  # False positives cost 2.5x false negatives
   refVar = NULL
@@ -119,7 +119,7 @@ result5 <- psychopdaROC(
   data = medical_roc_data,
   dependentVars = "biomarker1",
   classVar = "disease_status",
-  positiveClass = "Disease",
+  positiveClass = "Disease", negativeClass = "Healthy",
   subGroup = "hospital",
   refVar = NULL
 )
@@ -129,7 +129,7 @@ result6 <- psychopdaROC(
   data = medical_roc_data,
   dependentVars = c("biomarker1", "biomarker2"),
   classVar = "disease_status",
-  positiveClass = "Disease",
+  positiveClass = "Disease", negativeClass = "Healthy",
   method = "maximize_metric",
   metric = "youden",
   plotROC = TRUE,
@@ -151,12 +151,11 @@ financial_result <- psychopdaROC(
   data = financial_roc_data,
   dependentVars = c("credit_score", "income_debt_ratio", "employment_score"),
   classVar = "default_status",
-  positiveClass = "Default",
+  positiveClass = "Default", negativeClass = "No_Default",
   direction = "<=", # Lower credit scores indicate higher risk
   method = "oc_cost_ratio",
   costratioFP = 0.1, # False positives (rejected good clients) cost less
-  delongTest = TRUE,
-  subGroup = "client_type",
+  subGroup = "client_type", # DeLong comparisons require an ungrouped analysis
   refVar = NULL
 )
 
@@ -167,7 +166,7 @@ education_result <- psychopdaROC(
   data = education_roc_data,
   dependentVars = c("exam_score", "project_score", "peer_score"),
   classVar = "pass_status",
-  positiveClass = "Pass",
+  positiveClass = "Pass", negativeClass = "Fail",
   method = "maximize_metric",
   metric = "accuracy",
   calculateIDI = TRUE,
@@ -182,7 +181,7 @@ quality_result <- psychopdaROC(
   data = manufacturing_roc_data,
   dependentVars = c("dimension_score", "surface_score", "strength_score"),
   classVar = "quality_status",
-  positiveClass = "Defect",
+  positiveClass = "Defect", negativeClass = "Pass",
   method = "oc_equal_sens_spec", # Balanced sensitivity/specificity
   plotROC = TRUE,
   showCriterionPlot = TRUE,
@@ -221,6 +220,7 @@ Youden, W. J. (1950). Index for rating diagnostic tests. Cancer, 3(1), 32-35.
 \section{Methods}{
 \subsection{Public methods}{
   \itemize{
+    \item \href{#method-psychopdaROCClass-init}{\code{psychopdaROCClass$init()}}
     \item \href{#method-psychopdaROCClass-asSource}{\code{psychopdaROCClass$asSource()}}
     \item \href{#method-psychopdaROCClass-clone}{\code{psychopdaROCClass$clone()}}
   }
@@ -244,7 +244,6 @@ Youden, W. J. (1950). Index for rating diagnostic tests. Cancer, 3(1), 32-35.
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="addAddon"><a href='../../jmvcore/html/Analysis.html#method-Analysis-addAddon'><code>jmvcore::Analysis$addAddon()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="asProtoBuf"><a href='../../jmvcore/html/Analysis.html#method-Analysis-asProtoBuf'><code>jmvcore::Analysis$asProtoBuf()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="check"><a href='../../jmvcore/html/Analysis.html#method-Analysis-check'><code>jmvcore::Analysis$check()</code></a></span></li>
-  <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="init"><a href='../../jmvcore/html/Analysis.html#method-Analysis-init'><code>jmvcore::Analysis$init()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="optionsChangedHandler"><a href='../../jmvcore/html/Analysis.html#method-Analysis-optionsChangedHandler'><code>jmvcore::Analysis$optionsChangedHandler()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="postInit"><a href='../../jmvcore/html/Analysis.html#method-Analysis-postInit'><code>jmvcore::Analysis$postInit()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="print"><a href='../../jmvcore/html/Analysis.html#method-Analysis-print'><code>jmvcore::Analysis$print()</code></a></span></li>
@@ -258,17 +257,38 @@ Youden, W. J. (1950). Index for rating diagnostic tests. Cancer, 3(1), 32-35.
 </ul>
 </details>}}
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-psychopdaROCClass-asSource"></a>}}
-\if{latex}{\out{\hypertarget{method-psychopdaROCClass-asSource}{}}}
-\subsection{\code{psychopdaROCClass$asSource()}}{
+\if{html}{\out{<a id="method-psychopdaROCClass-init"></a>}}
+\if{latex}{\out{\hypertarget{method-psychopdaROCClass-init}{}}}
+\subsection{\code{psychopdaROCClass$init()}}{
+  Initialize safely when an R caller has not selected any variables.
+
+
   Generate R source code for psychopdaROC analysis
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{psychopdaROCClass$asSource()}
+    \preformatted{psychopdaROCClass$init(noThrow = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{noThrow}}{Capture initialization errors in the analysis error state when TRUE.}
+    }
     \if{html}{\out{</div>}}
   }
   \subsection{Returns}{
     Character string with R syntax for reproducible analysis
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-psychopdaROCClass-asSource"></a>}}
+\if{latex}{\out{\hypertarget{method-psychopdaROCClass-asSource}{}}}
+\subsection{\code{psychopdaROCClass$asSource()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{psychopdaROCClass$asSource()}
+    \if{html}{\out{</div>}}
   }
 }
 

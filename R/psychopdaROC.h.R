@@ -8,10 +8,12 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         initialize = function(
             manualRun = FALSE,
             run = FALSE,
+            showExplanations = FALSE,
             clinicalMode = "basic",
             dependentVars = NULL,
             classVar = NULL,
             positiveClass = NULL,
+            negativeClass = NULL,
             subGroup = NULL,
             method = "maximize_metric",
             metric = "youden",
@@ -29,10 +31,10 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             showThresholdTable = FALSE,
             maxThresholds = 20,
             delongTest = FALSE,
-            plotROC = TRUE,
-            combinePlots = TRUE,
+            plotROC = FALSE,
+            combinePlots = FALSE,
             cleanPlot = FALSE,
-            showOptimalPoint = TRUE,
+            showOptimalPoint = FALSE,
             displaySE = FALSE,
             smoothing = FALSE,
             showConfidenceBands = FALSE,
@@ -75,12 +77,12 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             fixedAnalysisType = "sensitivity",
             fixedSensitivityValue = 0.9,
             fixedSpecificityValue = 0.9,
-            showFixedROC = TRUE,
+            showFixedROC = FALSE,
             fixedInterpolation = "linear",
-            showFixedExplanation = TRUE,
+            showFixedExplanation = FALSE,
             metaAnalysis = FALSE,
             metaAnalysisMethod = "both",
-            heterogeneityTest = TRUE,
+            heterogeneityTest = FALSE,
             forestPlot = FALSE,
             overrideMetaAnalysisWarning = FALSE, ...) {
 
@@ -97,6 +99,10 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..run <- jmvcore::OptionAction$new(
                 "run",
                 run)
+            private$..showExplanations <- jmvcore::OptionBool$new(
+                "showExplanations",
+                showExplanations,
+                default=FALSE)
             private$..clinicalMode <- jmvcore::OptionList$new(
                 "clinicalMode",
                 clinicalMode,
@@ -122,6 +128,11 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..positiveClass <- jmvcore::OptionLevel$new(
                 "positiveClass",
                 positiveClass,
+                variable="(classVar)",
+                allowNone=TRUE)
+            private$..negativeClass <- jmvcore::OptionLevel$new(
+                "negativeClass",
+                negativeClass,
                 variable="(classVar)",
                 allowNone=TRUE)
             private$..subGroup <- jmvcore::OptionVariable$new(
@@ -246,11 +257,11 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..plotROC <- jmvcore::OptionBool$new(
                 "plotROC",
                 plotROC,
-                default=TRUE)
+                default=FALSE)
             private$..combinePlots <- jmvcore::OptionBool$new(
                 "combinePlots",
                 combinePlots,
-                default=TRUE)
+                default=FALSE)
             private$..cleanPlot <- jmvcore::OptionBool$new(
                 "cleanPlot",
                 cleanPlot,
@@ -258,7 +269,7 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..showOptimalPoint <- jmvcore::OptionBool$new(
                 "showOptimalPoint",
                 showOptimalPoint,
-                default=TRUE)
+                default=FALSE)
             private$..displaySE <- jmvcore::OptionBool$new(
                 "displaySE",
                 displaySE,
@@ -478,7 +489,7 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..showFixedROC <- jmvcore::OptionBool$new(
                 "showFixedROC",
                 showFixedROC,
-                default=TRUE)
+                default=FALSE)
             private$..fixedInterpolation <- jmvcore::OptionList$new(
                 "fixedInterpolation",
                 fixedInterpolation,
@@ -490,7 +501,7 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..showFixedExplanation <- jmvcore::OptionBool$new(
                 "showFixedExplanation",
                 showFixedExplanation,
-                default=TRUE)
+                default=FALSE)
             private$..metaAnalysis <- jmvcore::OptionBool$new(
                 "metaAnalysis",
                 metaAnalysis,
@@ -506,7 +517,7 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             private$..heterogeneityTest <- jmvcore::OptionBool$new(
                 "heterogeneityTest",
                 heterogeneityTest,
-                default=TRUE)
+                default=FALSE)
             private$..forestPlot <- jmvcore::OptionBool$new(
                 "forestPlot",
                 forestPlot,
@@ -518,10 +529,12 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 
             self$.addOption(private$..manualRun)
             self$.addOption(private$..run)
+            self$.addOption(private$..showExplanations)
             self$.addOption(private$..clinicalMode)
             self$.addOption(private$..dependentVars)
             self$.addOption(private$..classVar)
             self$.addOption(private$..positiveClass)
+            self$.addOption(private$..negativeClass)
             self$.addOption(private$..subGroup)
             self$.addOption(private$..method)
             self$.addOption(private$..metric)
@@ -597,10 +610,12 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
     active = list(
         manualRun = function() private$..manualRun$value,
         run = function() private$..run$value,
+        showExplanations = function() private$..showExplanations$value,
         clinicalMode = function() private$..clinicalMode$value,
         dependentVars = function() private$..dependentVars$value,
         classVar = function() private$..classVar$value,
         positiveClass = function() private$..positiveClass$value,
+        negativeClass = function() private$..negativeClass$value,
         subGroup = function() private$..subGroup$value,
         method = function() private$..method$value,
         metric = function() private$..metric$value,
@@ -675,10 +690,12 @@ psychopdaROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
     private = list(
         ..manualRun = NA,
         ..run = NA,
+        ..showExplanations = NA,
         ..clinicalMode = NA,
         ..dependentVars = NA,
         ..classVar = NA,
         ..positiveClass = NA,
+        ..negativeClass = NA,
         ..subGroup = NA,
         ..method = NA,
         ..metric = NA,
@@ -814,7 +831,7 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$add(jmvcore::Html$new(
                 options=options,
                 name="procedureNotes",
-                visible=TRUE))
+                visible="(showExplanations)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="runSummary",
@@ -823,12 +840,13 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$add(jmvcore::Table$new(
                 options=options,
                 name="outcomeCoding",
-                title="Outcome coding: which level is positive",
+                title="Outcome coding: positive and negative classes",
                 rows=0,
                 visible="(classVar)",
                 clearWith=list(
                     "classVar",
                     "positiveClass",
+                    "negativeClass",
                     "dependentVars",
                     "subGroup",
                     "direction"),
@@ -850,11 +868,12 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 name="clinicalInterpretationTable",
                 title="Clinical Interpretation",
                 rows=0,
-                visible=TRUE,
+                visible="(showExplanations)",
                 clearWith=list(
                     "dependentVars",
                     "classVar",
                     "positiveClass",
+                    "negativeClass",
                     "subGroup",
                     "direction"),
                 columns=list(
@@ -885,6 +904,7 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "dependentVars",
                     "classVar",
                     "positiveClass",
+                    "negativeClass",
                     "subGroup",
                     "method",
                     "metric",
@@ -898,6 +918,7 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "priorPrev"),
                 template=jmvcore::Table$new(
                     options=options,
+                    title="$key",
                     rows=0,
                     columns=list(
                         list(
@@ -948,6 +969,7 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "dependentVars",
                     "classVar",
                     "positiveClass",
+                    "negativeClass",
                     "subGroup",
                     "method",
                     "allObserved",
@@ -965,6 +987,7 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "dependentVars",
                     "classVar",
                     "positiveClass",
+                    "negativeClass",
                     "subGroup",
                     "direction",
                     "usePriorPrev",
@@ -1026,11 +1049,16 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "dependentVars",
                     "classVar",
                     "positiveClass",
+                    "negativeClass",
                     "fixedAnalysisType",
                     "fixedSensitivityValue",
                     "fixedSpecificityValue",
                     "fixedInterpolation",
-                    "direction"),
+                    "direction",
+                    "subGroup",
+                    "usePriorPrev",
+                    "priorPrev",
+                    "fixedSensSpecAnalysis"),
                 columns=list(
                     list(
                         `name`="variable", 
@@ -1098,6 +1126,7 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "dependentVars",
                     "classVar",
                     "positiveClass",
+                    "negativeClass",
                     "subGroup",
                     "direction"),
                 columns=list(
@@ -1124,7 +1153,10 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                         `name`="p", 
                         `title`="p-value", 
                         `type`="number", 
-                        `format`="zto,pvalue"))))
+                        `format`="zto,pvalue")),
+                refs=list(
+                    "DeLong1988",
+                    "ObuchowskiLieber1998")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="delongComparisonTable",
@@ -1135,6 +1167,7 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "dependentVars",
                     "classVar",
                     "positiveClass",
+                    "negativeClass",
                     "direction",
                     "delongTest"),
                 columns=list(
@@ -1175,6 +1208,7 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "dependentVars",
                     "classVar",
                     "positiveClass",
+                    "negativeClass",
                     "direction",
                     "delongTest"),
                 refs=list(
@@ -1193,6 +1227,7 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                         "dependentVars",
                         "classVar",
                         "positiveClass",
+                        "negativeClass",
                         "subGroup",
                         "direction",
                         "smoothing",
@@ -1205,19 +1240,30 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                         "rocSmoothingMethod",
                         "displaySE",
                         "directLabel",
-                        "quantiles"))))
+                        "quantiles",
+                        "method",
+                        "metric",
+                        "specifyCutScore",
+                        "tol_metric",
+                        "break_ties",
+                        "costratioFP",
+                        "usePriorPrev",
+                        "priorPrev",
+                        "seed",
+                        "boot_runs"))))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="interactivePlot",
-                title="Interactive ROC Plot",
+                title="Additional Static ROC Plot",
                 width=650,
                 height=500,
                 renderFun=".plotInteractiveROC",
-                visible="(interactiveROC)",
+                visible="(plotROC && interactiveROC)",
                 clearWith=list(
                     "dependentVars",
                     "classVar",
                     "positiveClass",
+                    "negativeClass",
                     "subGroup",
                     "direction")))
             self$add(jmvcore::Array$new(
@@ -1234,12 +1280,16 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                         "dependentVars",
                         "classVar",
                         "positiveClass",
+                        "negativeClass",
                         "subGroup",
                         "fixedAnalysisType",
                         "fixedSensitivityValue",
                         "fixedSpecificityValue",
                         "fixedInterpolation",
-                        "direction"))))
+                        "direction",
+                        "fixedSensSpecAnalysis",
+                        "showFixedROC",
+                        "combinePlots"))))
             self$add(jmvcore::Array$new(
                 options=options,
                 name="criterionPlot",
@@ -1255,11 +1305,20 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                         "dependentVars",
                         "classVar",
                         "positiveClass",
+                        "negativeClass",
                         "subGroup",
                         "method",
                         "metric",
                         "direction",
-                        "combinePlots"))))
+                        "combinePlots",
+                        "specifyCutScore",
+                        "tol_metric",
+                        "break_ties",
+                        "costratioFP",
+                        "usePriorPrev",
+                        "priorPrev",
+                        "seed",
+                        "boot_runs"))))
             self$add(jmvcore::Array$new(
                 options=options,
                 name="prevalencePlot",
@@ -1275,10 +1334,21 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                         "dependentVars",
                         "classVar",
                         "positiveClass",
+                        "negativeClass",
                         "subGroup",
                         "usePriorPrev",
                         "priorPrev",
-                        "combinePlots"))))
+                        "combinePlots",
+                        "method",
+                        "metric",
+                        "direction",
+                        "specifyCutScore",
+                        "tol_metric",
+                        "break_ties",
+                        "costratioFP",
+                        "seed",
+                        "boot_runs",
+                        "showPrevalencePlot"))))
             self$add(jmvcore::Array$new(
                 options=options,
                 name="dotPlot",
@@ -1294,9 +1364,21 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                         "dependentVars",
                         "classVar",
                         "positiveClass",
+                        "negativeClass",
                         "subGroup",
                         "direction",
-                        "combinePlots"))))
+                        "combinePlots",
+                        "method",
+                        "metric",
+                        "specifyCutScore",
+                        "tol_metric",
+                        "break_ties",
+                        "costratioFP",
+                        "usePriorPrev",
+                        "priorPrev",
+                        "seed",
+                        "boot_runs",
+                        "showDotPlot"))))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="dotPlotMessage",
@@ -1316,6 +1398,7 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                         "dependentVars",
                         "classVar",
                         "positiveClass",
+                        "negativeClass",
                         "subGroup",
                         "direction",
                         "combinePlots"))))
@@ -1329,6 +1412,7 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "dependentVars",
                     "classVar",
                     "positiveClass",
+                    "negativeClass",
                     "refVar",
                     "idiNriBootRuns",
                     "direction"),
@@ -1373,6 +1457,7 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "dependentVars",
                     "classVar",
                     "positiveClass",
+                    "negativeClass",
                     "refVar",
                     "nriThresholds",
                     "idiNriBootRuns",
@@ -1429,6 +1514,7 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "dependentVars",
                     "classVar",
                     "positiveClass",
+                    "negativeClass",
                     "direction"),
                 columns=list(
                     list(
@@ -1457,7 +1543,7 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                         `type`="number"),
                     list(
                         `name`="effect_magnitude", 
-                        `title`="Size of difference", 
+                        `title`="Descriptive size band", 
                         `type`="text"),
                     list(
                         `name`="clinical_importance", 
@@ -1476,10 +1562,14 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "dependentVars",
                     "classVar",
                     "positiveClass",
+                    "negativeClass",
                     "targetPower",
                     "expectedAUCDifference",
                     "significanceLevel",
-                    "direction"),
+                    "direction",
+                    "powerAnalysis",
+                    "powerAnalysisType",
+                    "correlationROCs"),
                 columns=list(
                     list(
                         `name`="variable", 
@@ -1496,7 +1586,7 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                         `type`="integer"),
                     list(
                         `name`="target_effect_size", 
-                        `title`="Target Effect Size", 
+                        `title`="Target |AUC - 0.5|", 
                         `type`="number"),
                     list(
                         `name`="power_adequacy", 
@@ -1516,6 +1606,7 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "dependentVars",
                     "classVar",
                     "positiveClass",
+                    "negativeClass",
                     "priorAUC",
                     "priorPrecision",
                     "direction"),
@@ -1549,7 +1640,7 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                         `type`="text"),
                     list(
                         `name`="prior_influence", 
-                        `title`="Prior Influence", 
+                        `title`="Prior Weight", 
                         `type`="text"))))
             self$add(jmvcore::Table$new(
                 options=options,
@@ -1561,6 +1652,7 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "dependentVars",
                     "classVar",
                     "positiveClass",
+                    "negativeClass",
                     "treatmentThreshold",
                     "harmBenefitRatio",
                     "interventionCost",
@@ -1608,20 +1700,25 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 title="Meta-Analysis Warning",
                 visible="(metaAnalysis)",
                 clearWith=list(
+                    "metaAnalysis",
                     "dependentVars",
                     "classVar",
                     "positiveClass",
+                    "negativeClass",
                     "overrideMetaAnalysisWarning")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="metaAnalysisTable",
                 title="Meta-Analysis Results",
                 rows=0,
-                visible="(metaAnalysis)",
+                visible="(metaAnalysis && overrideMetaAnalysisWarning)",
                 clearWith=list(
+                    "metaAnalysis",
+                    "overrideMetaAnalysisWarning",
                     "dependentVars",
                     "classVar",
                     "positiveClass",
+                    "negativeClass",
                     "direction",
                     "metaAnalysisMethod",
                     "heterogeneityTest"),
@@ -1676,6 +1773,7 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "dependentVars",
                     "classVar",
                     "positiveClass",
+                    "negativeClass",
                     "treatmentThreshold",
                     "harmBenefitRatio",
                     "interventionCost",
@@ -1697,11 +1795,11 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                         `format`="zto"),
                     list(
                         `name`="interventions_avoided", 
-                        `title`="Interventions Avoided", 
+                        `title`="Net Interventions Avoided per 100", 
                         `type`="integer"),
                     list(
                         `name`="cases_detected", 
-                        `title`="Cases Detected", 
+                        `title`="Cases Detected in Sample", 
                         `type`="integer"),
                     list(
                         `name`="clinical_value", 
@@ -1717,9 +1815,15 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "dependentVars",
                     "classVar",
                     "positiveClass",
+                    "negativeClass",
                     "partialAUCfrom",
                     "partialAUCto",
-                    "direction"),
+                    "direction",
+                    "subGroup",
+                    "partialAUC",
+                    "bootstrapCI",
+                    "bootstrapReps",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="variable", 
@@ -1737,12 +1841,12 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                         `format`="zto"),
                     list(
                         `name`="ci_lower", 
-                        `title`="95% CI Lower", 
+                        `title`="Raw pAUC 95% CI Lower", 
                         `type`="number", 
                         `format`="zto"),
                     list(
                         `name`="ci_upper", 
-                        `title`="95% CI Upper", 
+                        `title`="Raw pAUC 95% CI Upper", 
                         `type`="number", 
                         `format`="zto"),
                     list(
@@ -1754,15 +1858,19 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$add(jmvcore::Table$new(
                 options=options,
                 name="bootstrapCITable",
-                title="Bootstrap Confidence Intervals",
+                title="Bootstrap Intervals (AUC and Youden Reference)",
                 rows=0,
                 visible="(bootstrapCI)",
                 clearWith=list(
                     "dependentVars",
                     "classVar",
                     "positiveClass",
+                    "negativeClass",
                     "bootstrapReps",
-                    "direction"),
+                    "direction",
+                    "subGroup",
+                    "bootstrapCI",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="variable", 
@@ -1797,7 +1905,10 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "dependentVars",
                     "classVar",
                     "positiveClass",
-                    "direction"),
+                    "negativeClass",
+                    "direction",
+                    "subGroup",
+                    "compareClassifiers"),
                 columns=list(
                     list(
                         `name`="variable", 
@@ -1847,7 +1958,8 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     clearWith=list(
                         "dependentVars",
                         "classVar",
-                        "positiveClass"))))
+                        "positiveClass",
+                        "negativeClass"))))
             self$add(jmvcore::Array$new(
                 options=options,
                 name="powerCurvePlot",
@@ -1862,9 +1974,14 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                         "dependentVars",
                         "classVar",
                         "positiveClass",
+                        "negativeClass",
                         "targetPower",
                         "expectedAUCDifference",
-                        "significanceLevel"))))
+                        "significanceLevel",
+                        "powerAnalysis",
+                        "powerAnalysisType",
+                        "correlationROCs",
+                        "direction"))))
             self$add(jmvcore::Array$new(
                 options=options,
                 name="bayesianTracePlot",
@@ -1876,9 +1993,13 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     height=500,
                     renderFun=".plotBayesianTrace",
                     clearWith=list(
+                        "seed",
+                        "direction",
+                        "bayesianAnalysis",
                         "dependentVars",
                         "classVar",
                         "positiveClass",
+                        "negativeClass",
                         "priorAUC",
                         "priorPrecision"))))
             self$add(jmvcore::Array$new(
@@ -1895,6 +2016,7 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                         "dependentVars",
                         "classVar",
                         "positiveClass",
+                        "negativeClass",
                         "treatmentThreshold",
                         "harmBenefitRatio",
                         "interventionCost"))))
@@ -1902,16 +2024,29 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 options=options,
                 name="metaAnalysisForestPlot",
                 title="Meta-Analysis Forest Plot",
-                visible="(metaAnalysis && forestPlot)",
+                visible="(metaAnalysis && forestPlot && overrideMetaAnalysisWarning)",
+                clearWith=list(
+                    "metaAnalysis",
+                    "overrideMetaAnalysisWarning",
+                    "dependentVars",
+                    "classVar",
+                    "positiveClass",
+                    "negativeClass",
+                    "direction",
+                    "metaAnalysisMethod",
+                    "forestPlot"),
                 template=jmvcore::Image$new(
                     options=options,
                     width=800,
                     height=600,
                     renderFun=".plotMetaAnalysisForest",
                     clearWith=list(
+                        "metaAnalysis",
+                        "overrideMetaAnalysisWarning",
                         "dependentVars",
                         "classVar",
                         "positiveClass",
+                        "negativeClass",
                         "metaAnalysisMethod",
                         "forestPlot",
                         "direction"))))}))
@@ -1924,7 +2059,7 @@ psychopdaROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "psychopdaROC",
-                version = c(1,0,83),
+                version = c(1,0,88),
                 options = options,
                 results = psychopdaROCResults$new(options=options),
                 data = data,
@@ -1939,33 +2074,48 @@ psychopdaROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Advanced ROC Analysis
 #'
-#' Receiver Operating Characteristic (ROC) curve analysis with optimal 
-#' cutpoint determination.
+#' Exploratory Receiver Operating Characteristic (ROC) curve analysis with 
+#' optimal cutpoint determination. Each row must be an independent 
+#' observation. Intervals, tests and bootstrap resampling do not account for 
+#' repeated measurements or clustering within patients; use a prespecified 
+#' patient-level summary or a method that accounts for clustering. Nominal 
+#' coverage is not guaranteed in small or imbalanced samples. Cutpoints 
+#' selected on these data report apparent performance and require validation 
+#' in the intended setting.
 #' 
 #' @param manualRun When TRUE, results are only computed after clicking the
 #'   Run button. Useful for skipping intermediate recomputes while adjusting
 #'   options on slow bootstrap or cutpoint analyses.
 #' @param run .
+#' @param showExplanations Show optional educational interpretation and
+#'   procedure details. Input and scope notices remain visible.
 #' @param clinicalMode Selects which guidance notes are shown in the Procedure
 #'   Notes panel. Basic explains the AUC bands and warns that a cutpoint
 #'   searched on these data is optimistic; Advanced and Comprehensive give a
 #'   shorter research framing. This option does not switch any analysis on or
 #'   off - every optional analysis has its own checkbox.
-#' @param data The data as a data frame.
+#' @param data The data as a data frame, with one independent observation per
+#'   row.
 #' @param dependentVars Test variable(s) to be evaluated for classification
 #'   performance. Multiple variables can be selected for comparison.
 #' @param classVar Classification variable representing the true class (gold
-#'   standard). Two or more levels; with more than two, the positive class is
-#'   compared with all other levels combined (one-vs-rest).
+#'   standard). Choose one positive and one negative level. Only observations in
+#'   those two levels are analysed; other levels and missing outcomes are
+#'   excluded and counted.
 #' @param positiveClass Level of classVar treated as the positive class
 #'   (condition present). Required: NULL leaves the analysis waiting for a
 #'   choice; levels are never inferred from their order.
+#' @param negativeClass Level of classVar treated as the negative class
+#'   (condition absent). Required: NULL leaves the analysis waiting for a
+#'   choice. Other levels are excluded.
 #' @param subGroup Optional grouping variable for stratified analysis. ROC
 #'   curves will be calculated separately for each group.
 #' @param method Method for determining the optimal cutpoint. Different
 #'   methods optimize different aspects of classifier performance.
 #' @param metric Metric to optimize when determining the cutpoint.  Only
-#'   applies to maximize/minimize methods.
+#'   applies to maximize/minimize methods. The legacy p_chisquared option
+#'   identifier denotes the Pearson chi-squared statistic (without continuity
+#'   correction), not its p-value.
 #' @param direction Direction of classification relative to the cutpoint. Use
 #'   '>=' when higher test values indicate the positive class.
 #' @param specifyCutScore Specific cutpoint value to use when method is set to
@@ -2009,17 +2159,21 @@ psychopdaROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   ROC curves in a single plot.
 #' @param cleanPlot Create clean ROC curves without annotations, suitable for
 #'   publications.
-#' @param showOptimalPoint Display the optimal cutpoint on the ROC curve.
-#' @param displaySE Display standard error bands on ROC curves (when LOESS
-#'   smoothing is applied).
+#' @param showOptimalPoint Display the selected cutpoint on the ROC curve.
+#'   When all tied cutpoints are listed, mark the first selected cutpoint.
+#' @param displaySE Display the pointwise 95\% confidence band for the fitted
+#'   LOESS smooth. This describes uncertainty in the visual smooth, not the
+#'   Wilson intervals for ROC sensitivity and specificity or a simultaneous ROC
+#'   confidence region.
 #' @param smoothing Apply LOESS smoothing to ROC curves for visualization.
 #' @param showConfidenceBands Display confidence bands around the ROC curve.
 #' @param legendPosition Position of the legend in plots with multiple ROC
 #'   curves.
 #' @param directLabel Label curves directly on the plot instead of using a
 #'   legend.
-#' @param interactiveROC Create an interactive HTML ROC plot (requires plotROC
-#'   package).
+#' @param interactiveROC Create an additional static ROC plot. The stable
+#'   option name is retained for saved analyses; the jamovi Image output does
+#'   not provide HTML interaction.
 #' @param showCriterionPlot Plot showing how sensitivity and specificity
 #'   change across different thresholds.
 #' @param showPrevalencePlot Plot showing how PPV and NPV change with disease
@@ -2035,8 +2189,11 @@ psychopdaROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   calculation.
 #' @param rocSmoothingMethod Method for smoothing the ROC curve (requires pROC
 #'   package).
-#' @param bootstrapCI Calculate bootstrap confidence intervals for AUC and
-#'   optimal cutpoints.
+#' @param bootstrapCI Calculate bootstrap confidence intervals for full AUC
+#'   and a separate Youden reference cutoff, sensitivity and specificity. This
+#'   does not follow the main Cutpoint Method. Tied Youden optima use seeded
+#'   random selection in both the original sample and stratified bootstrap
+#'   replicates.
 #' @param bootstrapReps Number of bootstrap replications for confidence
 #'   interval calculation.
 #' @param quantileCIs Display confidence intervals at specific quantiles of
@@ -2056,25 +2213,33 @@ psychopdaROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   Every test variable other than the reference is compared against it. NULL
 #'   uses the first test variable.
 #' @param nriThresholds Comma-separated probability thresholds (0-1) defining
-#'   risk categories for NRI. Leave empty for continuous NRI.
+#'   risk categories for NRI. Leave empty for continuous NRI. In both variants,
+#'   predicted risks differing by at most sqrt(machine epsilon), approximately
+#'   1.5e-8, are treated as numerical ties. This tolerance removes numerical
+#'   roundoff and is not a clinically meaningful change threshold.
 #' @param idiNriBootRuns Number of bootstrap iterations for IDI and NRI
 #'   confidence intervals.
-#' @param effectSizeAnalysis Calculate effect sizes for ROC curve differences
-#'   using Cohen's conventions and standardized mean differences between AUC
-#'   values.
+#' @param effectSizeAnalysis Calculate within-marker standardized differences
+#'   between outcome classes and pairwise differences in those effects. Size
+#'   bands are descriptive conventions only.
 #' @param powerAnalysis Perform statistical power analysis for ROC curve
 #'   comparisons including sample size estimation and power calculations for
 #'   detecting AUC differences.
 #' @param powerAnalysisType Type of power analysis to perform.
-#' @param expectedAUCDifference Expected difference in AUC values for power
-#'   calculations and sample size estimation.
+#' @param expectedAUCDifference Target AUC above chance (target AUC = 0.5 +
+#'   this value) for prospective power and sample size estimation. Multiple
+#'   markers use an equal-variance correlation adjustment, not a fitted paired
+#'   ROC power model. A target AUC of exactly 1 is degenerate and has no sample
+#'   size recommendation.
 #' @param targetPower Target statistical power for sample size calculations
 #'   (typically 0.8 or 0.9).
 #' @param significanceLevel Type I error rate for power calculations
 #'   (typically 0.05).
 #' @param correlationROCs Expected correlation between paired ROC curves for
-#'   power calculations. Use 0.5 for moderate correlation, 0.0 for independent
-#'   samples.
+#'   power calculations. Use a correlation justified for the intended study.
+#'   Zero means uncorrelated AUC estimates in this equal-variance planning
+#'   approximation; it does not establish that paired observations are
+#'   independent samples.
 #' @param bayesianAnalysis Perform bootstrap-based ROC analysis with optional
 #'   prior weighting to estimate uncertainty in AUC. Uses bootstrap resampling
 #'   to create an empirical distribution. NOTE: This is NOT full Bayesian MCMC
@@ -2106,8 +2271,10 @@ psychopdaROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   the corresponding cutoff and sensitivity.
 #' @param showFixedROC Display separate ROC curve highlighting the fixed
 #'   sensitivity/specificity point.
-#' @param fixedInterpolation Method for interpolating between observed points
-#'   to achieve target sensitivity/specificity.
+#' @param fixedInterpolation Method for selecting a cutoff near the target
+#'   sensitivity/specificity. Achieved rates always use empirical
+#'   classifications at the returned cutoff. Linear interpolation may miss the
+#'   target; Stepwise meets or exceeds it.
 #' @param showFixedExplanation Display explanatory guide for fixed
 #'   sensitivity/specificity analysis including  clinical interpretation,
 #'   interpolation methods, and usage recommendations.
@@ -2177,11 +2344,13 @@ psychopdaROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 psychopdaROC <- function(
     manualRun = FALSE,
     run = FALSE,
+    showExplanations = FALSE,
     clinicalMode = "basic",
     data,
     dependentVars,
     classVar,
     positiveClass,
+    negativeClass,
     subGroup = NULL,
     method = "maximize_metric",
     metric = "youden",
@@ -2199,10 +2368,10 @@ psychopdaROC <- function(
     showThresholdTable = FALSE,
     maxThresholds = 20,
     delongTest = FALSE,
-    plotROC = TRUE,
-    combinePlots = TRUE,
+    plotROC = FALSE,
+    combinePlots = FALSE,
     cleanPlot = FALSE,
-    showOptimalPoint = TRUE,
+    showOptimalPoint = FALSE,
     displaySE = FALSE,
     smoothing = FALSE,
     showConfidenceBands = FALSE,
@@ -2245,12 +2414,12 @@ psychopdaROC <- function(
     fixedAnalysisType = "sensitivity",
     fixedSensitivityValue = 0.9,
     fixedSpecificityValue = 0.9,
-    showFixedROC = TRUE,
+    showFixedROC = FALSE,
     fixedInterpolation = "linear",
-    showFixedExplanation = TRUE,
+    showFixedExplanation = FALSE,
     metaAnalysis = FALSE,
     metaAnalysisMethod = "both",
-    heterogeneityTest = TRUE,
+    heterogeneityTest = FALSE,
     forestPlot = FALSE,
     overrideMetaAnalysisWarning = FALSE) {
 
@@ -2275,10 +2444,12 @@ psychopdaROC <- function(
     options <- psychopdaROCOptions$new(
         manualRun = manualRun,
         run = run,
+        showExplanations = showExplanations,
         clinicalMode = clinicalMode,
         dependentVars = dependentVars,
         classVar = classVar,
         positiveClass = positiveClass,
+        negativeClass = negativeClass,
         subGroup = subGroup,
         method = method,
         metric = metric,
