@@ -44,11 +44,38 @@
 
 ## 1b. Interpretation and input contracts
 
-This function is for exploratory analysis of independent observations. Selected cutpoints
-report apparent performance. AUC intervals and tests use asymptotic approximations;
-nominal coverage is not guaranteed in small or imbalanced samples. The function does not
-supply cluster-aware inference or general calibration guarantees for IDI/NRI. Prior
-simulation failures remain failures; these repairs do not change their acceptance criteria.
+Analysis **1.0.90** uses logit-transformed DeLong uncertainty by default for a single
+AUC. The 95% interval is `plogis(qlogis(AUC) +/- 1.96 * SE / (AUC * (1-AUC)))`;
+the two-sided test against AUC 0.5 uses the same transformed standard error.
+`aucInference="delong"` retains the untransformed normal approximation for reproducibility.
+Both methods withhold intervals and tests for boundary AUCs or zero empirical variance.
+The logit method is described in the [AUC interval comparison by Kottas et al.](https://doi.org/10.1186/1471-2288-14-26).
+It remains asymptotic and is not a universal finite-sample guarantee.
+
+Choose `analysisUnit="patientMean"` or `"patientMedian"` with `patientID` for a clinically
+prespecified patient summary. The observed scores for each patient and marker are summarized
+before **every** calculation, including the separate IDI/NRI reference and all resampling.
+Each patient must have a consistent outcome and subgroup. Missing IDs are rejected; an entirely
+missing patient-marker summary stays missing. Outcome coding counts the original input rows;
+effective sample sizes and prevalence use the analysed patient summaries. These are patient-level
+estimands; lesion-level or visit-level clustered ROC inference is not implemented. In the default
+independent-row mode, a supplied patient ID detects and rejects repeated patients.
+
+Paired DeLong tables retain raw p-values and add `p_holm`, adjusted across the complete displayed
+family (including unavailable contrasts). Pairwise intervals remain pointwise 95% intervals and
+are labelled unadjusted. The global joint test remains separate.
+
+IDI/NRI are descriptive comparisons of apparent risks from separately fitted logistic models.
+Percentile bootstrap intervals refit both models; no calibrated significance test is claimed.
+The exported helper field `p_value` remains for compatibility but is `NA`, and the analysis hides
+its legacy p column. See [Pepe et al. on NRI significance tests](https://pmc.ncbi.nlm.nih.gov/articles/PMC3982889/).
+Within-cohort meta-analysis is unavailable even with a saved legacy override; no pooled AUC,
+interval, heterogeneity test or pooled forest plot is emitted. Legacy arguments remain accepted.
+
+The 1.0.89 decision-curve repairs remain: centered/scaled logistic fitting, one shared risk fit,
+visible fitting diagnostics and removal of a preceding curve when fitting fails. Selected
+cutpoints, internally fitted risks and net benefit are still apparent results requiring external
+validation. Prior-weighted bootstrap summaries are not Bayesian posterior inference.
 
 - Positive and negative classes must be distinct, observed outcome levels. No class is inferred or pooled.
 - Partial AUC requires `partialAUCfrom < partialAUCto`.
@@ -64,13 +91,18 @@ simulation failures remain failures; these repairs do not change their acceptanc
 - `maxThresholds` is a maximum per marker, including the Youden optimum and endpoints.
 - Power plots and table values use the same configuration. Degenerate correlation or target
   AUC leaves unavailable results blank with an explanation; another model is never substituted.
-- Meta-analysis remains blocked without the explicit override. Disabling it or revoking that
-  override clears the forest plot and hides dependent results. Correlated-marker pooling is
-  exploratory and unsuitable for formal inference even when the override is enabled.
+- Within-cohort meta-analysis is blocked, including the legacy override; paired marker
+  comparisons remain available.
 
 ## 2. Options Reference (`.a.yaml`)
 
-Analysis 1.0.88; all optional checkboxes default to false. `data` is supplied through the dataset, not a UI control. `positiveClass` and `negativeClass` are required arguments in R syntax; `refVar` is an optional numeric Variable.
+New in 1.0.90: `patientID` (optional variable, `NULL`), `analysisUnit` (`rows`,
+`patientMean`, `patientMedian`; default `rows`), and `aucInference` (`logit`, `delong`;
+default `logit`). Legacy meta-analysis method, heterogeneity, forest and override options
+are retained only for saved-analysis/R compatibility and hidden from the UI.
+
+
+Analysis 1.0.89; all optional checkboxes default to false. `data` is supplied through the dataset, not a UI control. `positiveClass` and `negativeClass` are required arguments in R syntax; `refVar` is an optional numeric Variable.
 
 | Option | Type | Default | Description |
 |---|---|---|---|
@@ -153,7 +185,7 @@ Analysis 1.0.88; all optional checkboxes default to false. `data` is supplied th
 | `metaAnalysisMethod` | `List` | `both` | Meta-Analysis Method |
 | `heterogeneityTest` | `Bool` | `FALSE` | Test for heterogeneity |
 | `forestPlot` | `Bool` | `FALSE` | Forest plot |
-| `overrideMetaAnalysisWarning` | `Bool` | `FALSE` | Override independence warning (advanced users only) |
+| `overrideMetaAnalysisWarning` | `Bool` | `FALSE` | Deprecated, hidden and ignored; pooling is unavailable |
 
 ## 3. Results Definition (`.r.yaml`)
 
@@ -264,13 +296,13 @@ sequenceDiagram
 
 ## 7. Current use and limitations
 
-Every row must be an independent observation. Repeated lesions, blocks, slides or visits from a patient require a prespecified patient-level summary or a method that accounts for clustering. The analysis has no cluster identifier or cluster-resampling option.
+The analysis unit must be independent: either an original row or a prespecified patient mean/median selected with `patientID`. Patient summary mode changes the estimand and uses independent patients for all downstream calculations; it is not lesion-level cluster inference.
 
-The AUC estimates use the chosen direction and the explicitly selected positive and negative classes. Other outcome levels are excluded with counts. AUC intervals/tests are asymptotic: the independent 2026-10-10 audit found 90.3% coverage for nominal 95% intervals with 10 positive and 50 negative observations. A warning threshold of ten per class is not a validity guarantee. Zero-variance DeLong comparisons retain differences but leave inference unavailable.
+The AUC estimates use the chosen direction and the explicitly selected positive and negative classes. Other outcome levels are excluded with counts. The historical untransformed interval achieved 90.3% coverage for nominal 95% intervals with 10 positive and 50 negative observations. Version 1.0.90 changes the default to logit DeLong and assesses it against the same data-generating process and unchanged acceptance band; see the statistical repair report. A warning threshold of ten per class is not a validity guarantee. Zero-variance DeLong comparisons retain differences but leave inference unavailable.
 
 NRI compares logistic-calibrated risks, treating differences at most `sqrt(.Machine$double.eps)` as numerical ties. This is a numerical rule, not a clinical risk-change threshold. IDI/NRI bootstrap uncertainty has not received general calibration validation. The option whose stable identifier is `bayesianAnalysis` computes a prior-weighted bootstrap summary, not a Bayesian posterior.
 
-Selected cutpoints and their performance are estimated on the same data and require external validation. Predictive values based on an entered prevalence additionally require comparable case mix and conditional score distributions. Meta-analysis of correlated markers from the same patients is inappropriate; its independence override does not correct dependence.
+Selected cutpoints and their performance are estimated on the same data and require external validation. Predictive values based on an entered prevalence additionally require comparable case mix and conditional score distributions. Meta-analysis of correlated markers from the same patients is inappropriate; its former independence override is now ignored and no pooled inference is computed.
 
 Diagnostic plot controls work independently of the ROC curves checkbox. The stable option `interactiveROC` draws an additional static image and requires `plotROC`; it does not provide HTML interaction.
 

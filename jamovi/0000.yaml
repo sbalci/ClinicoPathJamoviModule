@@ -1507,13 +1507,12 @@ analyses:
     menuSubtitle: Advanced ROC analysis with statistical comparisons and effect sizes
     description: >
       Exploratory Receiver Operating Characteristic (ROC) curve analysis with
-      optimal cutpoint determination. Each row must be an independent
-      observation. Intervals, tests and bootstrap resampling do not account for
-      repeated measurements or clustering within patients; use a prespecified
-      patient-level summary or a method that accounts for clustering. Nominal
-      coverage is not guaranteed in small or imbalanced samples. Cutpoints
-      selected on these data report apparent performance and require validation
-      in the intended setting.
+      optimal cutpoint determination. Analyse independent rows or a prespecified
+      mean or median per patient. Patient summaries require an ID and a
+      consistent outcome within each patient; all calculations and resampling
+      then use one summary per patient. Nominal coverage is not guaranteed in
+      small or imbalanced samples. Cutpoints selected on these data report
+      apparent performance and require validation in the intended setting.
   - title: Combine Medical Decision Tests
     name: decisioncombine
     ns: ClinicoPath

@@ -16,7 +16,9 @@
 #' @param thresholds Risk category thresholds (NULL for continuous NRI)
 #' @param n_boot Number of bootstrap iterations
 #' @param conf_level Confidence level (default 0.95)
-#' @return List with NRI components and confidence intervals
+#' @return List with NRI components and exploratory percentile intervals. The
+#'   compatibility field `p_value` is `NA`: refitted apparent bootstrap tail
+#'   fractions are not calibrated null-hypothesis tests.
 #' @export
 bootstrapNRI <- function(new_values, ref_values, actual,
                          direction = ">=", thresholds = NULL,
@@ -133,18 +135,10 @@ bootstrapNRI <- function(new_values, ref_values, actual,
     ci_lower <- quantile(boot_nri, alpha/2, na.rm = TRUE)
     ci_upper <- quantile(boot_nri, 1 - alpha/2, na.rm = TRUE)
 
-    # Calculate p-value.
-    #
-    # (1 + count) / (B + 1) rather than count / B -- the uncorrected form
-    # returns exactly 0 whenever every replicate falls on one side, implying
-    # precision a finite bootstrap cannot deliver. Same correction as
-    # bootstrapIDI() in utils.R.
-    boot_nri_valid <- boot_nri[!is.na(boot_nri)]
-    B <- length(boot_nri_valid)
-    p_value <- if (B == 0) NA_real_ else min(1, 2 * min(
-        (1 + sum(boot_nri_valid <= 0)) / (B + 1),
-        (1 + sum(boot_nri_valid >= 0)) / (B + 1)
-    ))
+    # These are refitted, in-sample bootstrap estimates, not draws under a null
+    # hypothesis. Retain the API field as unavailable rather than label a tail
+    # fraction as a calibrated significance test.
+    p_value <- NA_real_
 
     return(list(
         nri = original_nri$nri,
@@ -422,7 +416,8 @@ raw_to_prob <- function(values, actual, direction = ">=", warn = TRUE) {
 #' @param n_boot Number of bootstrap iterations
 #' @param conf_level Confidence level (default 0.95)
 #' @keywords internal
-#' @return List with IDI, confidence intervals, and p-value
+#' @return List with apparent IDI and exploratory percentile intervals. The
+#'   compatibility field `p_value` is `NA`; no null test is provided.
 #' @export
 bootstrapIDI <- function(new_values, ref_values, actual,
                          direction = ">=", n_boot = 1000,
@@ -548,18 +543,9 @@ bootstrapIDI <- function(new_values, ref_values, actual,
     ci_lower <- quantile(boot_idi_valid, alpha/2, na.rm = TRUE)
     ci_upper <- quantile(boot_idi_valid, 1 - alpha/2, na.rm = TRUE)
     
-    # Calculate p-value (two-sided test for IDI = 0).
-    #
-    # (1 + count) / (B + 1) rather than count / B: a bootstrap p-value can never
-    # legitimately be exactly 0, and the uncorrected form returned 0 whenever
-    # every replicate fell on one side, implying impossible precision from a
-    # finite number of replicates.
-    B <- length(boot_idi_valid)
-    p_value <- min(1, 2 * min(
-        (1 + sum(boot_idi_valid <= 0)) / (B + 1),
-        (1 + sum(boot_idi_valid >= 0)) / (B + 1)
-    ))
-    
+    # No justified null reference distribution for the refitted apparent IDI.
+    p_value <- NA_real_
+
     return(list(
         idi = original_idi,
         ci_lower = as.numeric(ci_lower),

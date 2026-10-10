@@ -36,6 +36,8 @@ items:
           - positiveClass
           - negativeClass
           - dependentVars
+          - patientID
+          - analysisUnit
           - subGroup
           - direction
       columns:
@@ -56,6 +58,8 @@ items:
       visible: (showExplanations)
       clearWith:
           - dependentVars
+          - patientID
+          - analysisUnit
           - classVar
           - positiveClass
           - negativeClass
@@ -86,6 +90,8 @@ items:
         - cutpointr
       clearWith:
         - dependentVars
+        - patientID
+        - analysisUnit
         - classVar
         - positiveClass
         - negativeClass
@@ -143,6 +149,8 @@ items:
       visible: (sensSpecTable)
       clearWith:
         - dependentVars
+        - patientID
+        - analysisUnit
         - classVar
         - positiveClass
         - negativeClass
@@ -164,6 +172,8 @@ items:
       visible: (showThresholdTable)
       clearWith:
         - dependentVars
+        - patientID
+        - analysisUnit
         - classVar
         - positiveClass
         - negativeClass
@@ -221,6 +231,8 @@ items:
       visible: (fixedSensSpecAnalysis)
       clearWith:
         - dependentVars
+        - patientID
+        - analysisUnit
         - classVar
         - positiveClass
         - negativeClass
@@ -290,11 +302,14 @@ items:
       visible: true
       clearWith:
           - dependentVars
+          - patientID
+          - analysisUnit
           - classVar
           - positiveClass
           - negativeClass
           - subGroup
           - direction
+          - aucInference
       columns:
         - name: variable
           title: Variable
@@ -329,6 +344,8 @@ items:
       # appends a second copy of every pairwise comparison.
       clearWith:
         - dependentVars
+        - patientID
+        - analysisUnit
         - classVar
         - positiveClass
         - negativeClass
@@ -354,7 +371,11 @@ items:
           title: Z-statistic
           type: number
         - name: p
-          title: p-value
+          title: p (raw)
+          type: number
+          format: zto,pvalue
+        - name: p_holm
+          title: p (Holm)
           type: number
           format: zto,pvalue
 
@@ -364,6 +385,8 @@ items:
       visible: (delongTest)
       clearWith:
         - dependentVars
+        - patientID
+        - analysisUnit
         - classVar
         - positiveClass
         - negativeClass
@@ -386,6 +409,8 @@ items:
         renderFun: .plotROC
         clearWith:
           - dependentVars
+          - patientID
+          - analysisUnit
           - classVar
           - positiveClass
           - negativeClass
@@ -427,6 +452,8 @@ items:
       visible: (plotROC && interactiveROC)
       clearWith:
         - dependentVars
+        - patientID
+        - analysisUnit
         - classVar
         - positiveClass
         - negativeClass
@@ -448,6 +475,8 @@ items:
         renderFun: .plotFixedSensSpecROC
         clearWith:
           - dependentVars
+          - patientID
+          - analysisUnit
           - classVar
           - positiveClass
           - negativeClass
@@ -476,6 +505,8 @@ items:
         renderFun: .plotCriterion
         clearWith:
           - dependentVars
+          - patientID
+          - analysisUnit
           - classVar
           - positiveClass
           - negativeClass
@@ -505,6 +536,8 @@ items:
         renderFun: .plotPrevalence
         clearWith:
           - dependentVars
+          - patientID
+          - analysisUnit
           - classVar
           - positiveClass
           - negativeClass
@@ -538,6 +571,8 @@ items:
         renderFun: .plotDot
         clearWith:
           - dependentVars
+          - patientID
+          - analysisUnit
           - classVar
           - positiveClass
           - negativeClass
@@ -572,6 +607,8 @@ items:
         renderFun: .plotPrecisionRecall
         clearWith:
           - dependentVars
+          - patientID
+          - analysisUnit
           - classVar
           - positiveClass
           - negativeClass
@@ -589,6 +626,8 @@ items:
       visible: (calculateIDI)
       clearWith:
         - dependentVars
+        - patientID
+        - analysisUnit
         - classVar
         - positiveClass
         - negativeClass
@@ -615,6 +654,7 @@ items:
           type: number
           format: zto
         - name: p
+          visible: false
           title: p-value
           type: number
           format: zto,pvalue
@@ -628,6 +668,8 @@ items:
       visible: (calculateNRI)
       clearWith:
         - dependentVars
+        - patientID
+        - analysisUnit
         - classVar
         - positiveClass
         - negativeClass
@@ -663,6 +705,7 @@ items:
           type: number
           format: zto
         - name: p
+          visible: false
           title: p-value
           type: number
           format: zto,pvalue
@@ -680,6 +723,8 @@ items:
       visible: (effectSizeAnalysis)
       clearWith:
         - dependentVars
+        - patientID
+        - analysisUnit
         - classVar
         - positiveClass
         - negativeClass
@@ -720,6 +765,8 @@ items:
       visible: (powerAnalysis)
       clearWith:
         - dependentVars
+        - patientID
+        - analysisUnit
         - classVar
         - positiveClass
         - negativeClass
@@ -763,6 +810,8 @@ items:
       visible: (bayesianAnalysis)
       clearWith:
         - dependentVars
+        - patientID
+        - analysisUnit
         - classVar
         - positiveClass
         - negativeClass
@@ -809,6 +858,8 @@ items:
       visible: (clinicalUtilityAnalysis)
       clearWith:
         - dependentVars
+        - patientID
+        - analysisUnit
         - classVar
         - positiveClass
         - negativeClass
@@ -854,6 +905,8 @@ items:
       clearWith:
         - metaAnalysis
         - dependentVars
+        - patientID
+        - analysisUnit
         - classVar
         - positiveClass
         - negativeClass
@@ -868,6 +921,8 @@ items:
         - metaAnalysis
         - overrideMetaAnalysisWarning
         - dependentVars
+        - patientID
+        - analysisUnit
         - classVar
         - positiveClass
         - negativeClass
@@ -915,6 +970,8 @@ items:
       visible: (clinicalUtilityAnalysis)
       clearWith:
         - dependentVars
+        - patientID
+        - analysisUnit
         - classVar
         - positiveClass
         - negativeClass
@@ -954,6 +1011,8 @@ items:
       visible: (partialAUC)
       clearWith:
         - dependentVars
+        - patientID
+        - analysisUnit
         - classVar
         - positiveClass
         - negativeClass
@@ -998,6 +1057,8 @@ items:
       visible: (bootstrapCI)
       clearWith:
         - dependentVars
+        - patientID
+        - analysisUnit
         - classVar
         - positiveClass
         - negativeClass
@@ -1033,6 +1094,8 @@ items:
       visible: (compareClassifiers)
       clearWith:
         - dependentVars
+        - patientID
+        - analysisUnit
         - classVar
         - positiveClass
         - negativeClass
@@ -1085,6 +1148,8 @@ items:
         renderFun: .plotEffectSize
         clearWith:
           - dependentVars
+          - patientID
+          - analysisUnit
           - classVar
           - positiveClass
           - negativeClass
@@ -1100,6 +1165,8 @@ items:
         renderFun: .plotPowerCurves
         clearWith:
           - dependentVars
+          - patientID
+          - analysisUnit
           - classVar
           - positiveClass
           - negativeClass
@@ -1125,6 +1192,8 @@ items:
           - direction
           - bayesianAnalysis
           - dependentVars
+          - patientID
+          - analysisUnit
           - classVar
           - positiveClass
           - negativeClass
@@ -1142,6 +1211,8 @@ items:
         renderFun: .plotDecisionCurve
         clearWith:
           - dependentVars
+          - patientID
+          - analysisUnit
           - classVar
           - positiveClass
           - negativeClass
@@ -1157,6 +1228,8 @@ items:
         - metaAnalysis
         - overrideMetaAnalysisWarning
         - dependentVars
+        - patientID
+        - analysisUnit
         - classVar
         - positiveClass
         - negativeClass
@@ -1172,6 +1245,8 @@ items:
           - metaAnalysis
           - overrideMetaAnalysisWarning
           - dependentVars
+          - patientID
+          - analysisUnit
           - classVar
           - positiveClass
           - negativeClass

@@ -34,7 +34,7 @@ test_that("IR01 affine marker units cannot create NRI", {
       row <- r$nriTable$asDF
       expect_equal(unlist(row[c("nri", "event_nri", "non_event_nri",
         "ci_lower", "ci_upper")], use.names = FALSE), rep(0, 5))
-      expect_equal(row$p, 1)
+      expect_true(all(is.na(row$p)))
       expect_equal(r$idiTable$asDF$idi, 0, tolerance = 1e-9)
       expect_match(.irROC_note(r$nriTable, "numerical_ties"), "1.5e-8", fixed = TRUE)
     }
@@ -114,7 +114,7 @@ test_that("IR02 fallback also withholds zero-variance comparison inference", {
 
 test_that("IR03 fallback uncertainty uses the effective complete-case counts", {
   d <- .irROC_data(); d$x[c(1, 2, 7, 8)] <- NA_real_
-  r <- testthat::with_mocked_bindings(.irROC_run(d),
+  r <- testthat::with_mocked_bindings(.irROC_run(d, aucInference = "delong"),
     roc = function(...) stop("injected ROC failure"), .package = "pROC")
   row <- r$aucSummaryTable$asDF
   # Eight complete observations, four per class; exact rank AUC = 3/4.

@@ -4,15 +4,15 @@ title: Advanced ROC Analysis
 menuGroup: meddecideT
 menuSubgroup: ROC
 menuSubtitle: Advanced ROC analysis with statistical comparisons and effect sizes
-version: '1.0.88'
+version: '1.0.83'
 jas: '1.2'
 
 description:
     main: >
         Exploratory Receiver Operating Characteristic (ROC) curve analysis with optimal cutpoint determination.
-        Each row must be an independent observation. Intervals, tests and bootstrap resampling
-        do not account for repeated measurements or clustering within patients; use a prespecified
-        patient-level summary or a method that accounts for clustering.
+        Analyse independent rows or a prespecified mean or median per patient.
+        Patient summaries require an ID and a consistent outcome within each patient;
+        all calculations and resampling then use one summary per patient.
         Nominal coverage is not guaranteed in small or imbalanced samples. Cutpoints selected
         on these data report apparent performance and require validation in the intended setting.
 
@@ -73,6 +73,55 @@ options:
       type: Data
       description:
           R: The data as a data frame, with one independent observation per row.
+
+    - name: patientID
+      title: Patient ID (optional for independent rows)
+      type: Variable
+      default: NULL
+      suggested:
+        - nominal
+      permitted:
+        - factor
+        - numeric
+      description:
+          R: >
+            Identifier for independent patients. Required for patient summaries. With independent
+            rows, supplying an ID checks for duplicates and rejects repeated patients.
+
+    - name: analysisUnit
+      title: Analysis unit
+      type: List
+      options:
+        - name: rows
+          title: Independent rows
+        - name: patientMean
+          title: Patient mean
+        - name: patientMedian
+          title: Patient median
+      default: rows
+      description:
+          R: >
+            Choose a clinically prespecified summary before inspecting results. The mean or median
+            of observed scores is calculated for each patient and marker, including a separate
+            IDI/NRI reference. Patients with all scores missing for a marker are excluded for that
+            marker. Outcomes and subgroups must be consistent within patients. This estimates
+            patient-level accuracy of the summary, not accuracy of individual lesions or visits.
+
+    - name: aucInference
+      title: Single-AUC interval and test
+      type: List
+      options:
+        - name: logit
+          title: Logit DeLong
+        - name: delong
+          title: Untransformed DeLong (legacy)
+      default: logit
+      description:
+          R: >
+            Logit DeLong uses the DeLong standard error with a logit delta transformation for
+            the 95% interval and matching two-sided test against AUC 0.5. The legacy option uses
+            the untransformed normal approximation. Both remain asymptotic; unavailable or zero
+            variance gives missing inference. Pairwise AUC comparisons use ordinary paired DeLong.
 
     - name: dependentVars
       title: Test Variables
@@ -909,17 +958,19 @@ options:
     # META-ANALYSIS OPTIONS
     # ==========================================
 
+    # Retained for saved analyses and R-call compatibility. No within-cohort pooling is valid.
     - name: metaAnalysis
-      title: Meta-analysis of ROC curves
+      title: Explain meta-analysis limitation
       type: Bool
       default: false
       description:
           R: >
-            Perform meta-analysis of AUC values across multiple test variables.
-            Requires at least 3 test variables to enable pooled effect estimation.
+            Shows why marker columns from one cohort cannot be pooled as independent studies.
+            No pooled estimate or inference is computed, including with the legacy override.
 
     - name: metaAnalysisMethod
-      title: Meta-Analysis Method
+      hidden: true
+      title: Legacy meta-analysis method (inactive)
       type: List
       options:
         - name: fixed
@@ -930,37 +981,30 @@ options:
           title: Both Fixed and Random Effects
       default: both
       description:
-          R: >
-            Statistical method for combining AUC estimates across studies/variables.
+          R: Deprecated compatibility option. Within-cohort meta-analysis is unavailable.
 
     - name: heterogeneityTest
-      title: Test for heterogeneity
+      hidden: true
+      title: Legacy heterogeneity test (inactive)
       type: Bool
       default: false
       description:
-          R: >
-            Perform Cochran's Q test and calculate the I-squared statistic to assess
-            heterogeneity between AUC estimates.
+          R: Deprecated compatibility option. No heterogeneity inference is computed.
 
     - name: forestPlot
-      title: Forest plot
+      hidden: true
+      title: Legacy forest plot (inactive)
       type: Bool
       default: false
       description:
-          R: >
-            Create forest plot visualization of individual and pooled AUC estimates
-            with confidence intervals.
+          R: Deprecated compatibility option. No pooled forest plot is computed.
 
     - name: overrideMetaAnalysisWarning
-      title: Override independence warning (advanced users only)
+      hidden: true
+      title: Legacy override (inactive)
       type: Bool
       default: false
       description:
-          R: >
-            ADVANCED OPTION: Bypass the independence assumption check for meta-analysis.
-            WARNING - Only use if you fully understand the statistical implications.
-            Meta-analysis on non-independent data produces invalid results and should
-            NOT be used for formal inference. Use DeLong's test instead for within-study
-            comparisons of multiple markers.
+          R: Deprecated and ignored. An override cannot correct dependence between markers.
 
 ...

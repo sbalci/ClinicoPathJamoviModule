@@ -63,3 +63,67 @@
 .psychopdaPairLabel <- function(first, second) {
   paste(encodeString(first, quote = '"'), "vs.", encodeString(second, quote = '"'))
 }
+.psychopdaAUCInference <- function(auc, se, method = "logit") {
+  unavailable <- list(ci = c(NA_real_, NA_real_), p = NA_real_)
+  if (!is.finite(auc) || !is.finite(se) || se <= 0 || auc <= 0 || auc >= 1)
+    return(unavailable)
+  if (identical(method, "delong")) {
+    return(list(ci = pmax(0, pmin(1, auc + c(-1, 1) * stats::qnorm(.975) * se)),
+      p = 2 * stats::pnorm(-abs((auc - .5) / se))))
+  }
+  # Delta-method logit interval and the matching test of logit(AUC) = 0.
+  logit_se <- se / (auc * (1 - auc))
+  list(ci = stats::plogis(stats::qlogis(auc) + c(-1, 1) * stats::qnorm(.975) * logit_se),
+    p = 2 * stats::pnorm(-abs(stats::qlogis(auc) / logit_se)))
+}
+
+.psychopdaPatientData <- function(data, included, id, markers, outcome,
+                                 subgroup = NULL, method = "rows") {
+  selected <- data[included, , drop = FALSE]
+  if (is.null(id) || !nzchar(id)) {
+    if (!identical(method, "rows"))
+      stop("patient_id_required", call. = FALSE)
+    return(list(data = selected, rows = nrow(selected), patients = NA_integer_))
+  }
+  if (id %in% c(markers, outcome, subgroup))
+    stop("patient_id_role",
+      call. = FALSE)
+  # Keep the original values: formatting numeric IDs as text can merge distinct
+  # large identifiers through rounding before grouping.
+  ids <- data[[id]]
+  if (anyNA(ids[included]) || any(!nzchar(trimws(as.character(ids[included])))))
+    stop("patient_id_missing",
+      call. = FALSE)
+  selected_ids <- unique(ids[included])
+  if (identical(method, "rows")) {
+    if (anyDuplicated(ids[included]))
+      stop("patient_repeated",
+        call. = FALSE)
+    return(list(data = selected, rows = nrow(selected), patients = length(selected_ids)))
+  }
+  groups <- split(which(included), match(ids[included], selected_ids))
+  # Check all observed outcomes for included patients, including otherwise excluded levels.
+  all_groups <- split(seq_len(nrow(data)), match(ids, selected_ids))
+  for (idx in all_groups) {
+    values <- unique(as.character(data[[outcome]][idx]))
+    if (length(values[!is.na(values)]) > 1L)
+      stop("patient_outcome",
+        call. = FALSE)
+  }
+  if (!is.null(subgroup) && nzchar(subgroup)) {
+    if (any(vapply(groups, function(idx) length(unique(data[[subgroup]][idx])) > 1L,
+      logical(1))))
+      stop("patient_subgroup",
+        call. = FALSE)
+  }
+  result <- data[vapply(groups, `[`, integer(1), 1L), , drop = FALSE]
+  summarize <- if (identical(method, "patientMedian")) stats::median else mean
+  for (marker in unique(markers)) {
+    result[[marker]] <- vapply(groups, function(idx) {
+      values <- jmvcore::toNumeric(data[[marker]][idx])
+      if (all(is.na(values))) NA_real_ else summarize(values, na.rm = TRUE)
+    }, numeric(1))
+  }
+  rownames(result) <- NULL
+  list(data = result, rows = nrow(selected), patients = nrow(result))
+}

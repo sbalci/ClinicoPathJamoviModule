@@ -1,6 +1,27 @@
 # psychopdaROC release checklist
 
-Analysis **1.0.88**, module **1.0.81.01**; checked 2026-10-10. The analysis remains in
+Current statistical revision: **1.0.90**. The default single-AUC inference is logit
+DeLong; independent-row legacy DeLong remains selectable. Patient mean/median mode
+uses one summary per identified patient across all outputs. Holm p-values supplement
+raw paired tests. Unsupported IDI/NRI significance tests and within-cohort meta-analysis
+inference have been removed. See the [statistical repair report](../development-ideas/psychopdaROC-statistical-fixes-2026-10-10/report.md)
+for current tests and the repeated original calibration design. Earlier results below
+remain historical and do not imply native validation of this revision.
+
+
+Historical source review: analysis **1.0.89**, module **1.0.81.01**. That release review
+repairs decision-curve instability under large marker offsets and exposes logistic
+fitting warnings/failures. See the [earlier release-review report](../development-ideas/psychopdaROC-release-review-2026-10-10/report.md)
+for numerical evidence and the final test results. Generated metadata and the
+intended-module copy still need updating; **clinical release is not signed off**.
+
+Current evidence: the focused source suite passed 1,076 assertions with two existing
+perfect-AUC pROC warnings. Final touched-path checks passed 383 assertions in existing
+files and all 39 assertions in the four new regression blocks. The 20-check scoped
+release gate and real-client UI harness pass; normal regeneration and native checks
+on the regenerated revision remain pending.
+
+The following evidence is historical for analysis **1.0.88**, checked 2026-10-10. The analysis remains in
 `meddecideT` / JamoviTest. The three post-fix review defects and explicit positive/negative
 class selection are repaired. **Clinical release is not signed off**; the statistical
 limits below remain explicit.

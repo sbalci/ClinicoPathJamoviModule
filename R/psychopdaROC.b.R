@@ -39,7 +39,18 @@
 #' - Cost-benefit optimization with custom cost ratios
 #' - Hospital/site comparisons
 #'
+#' Single-AUC inference defaults to a logit transformation of the DeLong
+#' standard error; the legacy untransformed approximation remains selectable.
+#' Patient summaries use one prespecified mean or median per patient for all
+#' calculations. They estimate patient-summary accuracy, not lesion-level accuracy.
+#' Pairwise DeLong output includes raw and Holm-adjusted p-values. IDI/NRI remain
+#' exploratory apparent estimates with percentile intervals and no significance
+#' test. Within-cohort meta-analysis is unavailable, including legacy overrides.
+#'
 #' @param data A data frame containing the variables for analysis
+#' @param patientID Optional patient identifier; required for patient summaries.
+#' @param analysisUnit Independent rows (default), patientMean or patientMedian.
+#' @param aucInference Single-AUC inference: logit (default) or legacy delong.
 #' @param dependentVars Character vector of test variable names to evaluate.
 #'   Multiple variables can be specified for comparison.
 #' @param classVar Name of the classification variable (gold standard). Select two
@@ -212,6 +223,13 @@
 #' }
 #'
 #' @references
+#' Kottas, M., Kuss, O., & Zapf, A. (2014). A modified Wald interval for the
+#' area under the ROC curve (AUC) in diagnostic case-control studies.
+#' BMC Medical Research Methodology, 14, 26. doi:10.1186/1471-2288-14-26.
+#'
+#' Pepe, M. S., Janes, H., & Li, C. I. (2014). Net risk reclassification
+#' P values: valid or misleading? JNCI, 106(4), dju041. doi:10.1093/jnci/dju041.
+#'
 #' DeLong, E. R., DeLong, D. M., & Clarke-Pearson, D. L. (1988).
 #' Comparing the areas under two or more correlated receiver operating
 #' characteristic curves: a nonparametric approach. Biometrics, 44(3), 837-845.
@@ -2123,7 +2141,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         if (length(finite_auc) > 0 && any(finite_auc >= 0.9995)) {
           tryCatch(table$setNote(
             "perfect_separation",
-            .("At least one marker separates the two classes completely in this sample (AUC 1.000). The confidence interval collapses to a single point and the p-value is undefined because the variance is zero - those columns are not showing precision, they are showing that the estimate is degenerate. Complete separation in a sample this size is far more often label leakage, an outcome-derived predictor, or overfitting than a genuinely perfect test. Validate externally before drawing any conclusion.")
+            .("At least one marker separates the two classes completely in this sample (AUC 1.000). The empirical variance may be zero; the AUC summary withholds the interval and p-value rather than presenting degenerate inference as precision. Complete separation in a sample this size is far more often label leakage, an outcome-derived predictor, or overfitting than a genuinely perfect test. Validate externally before drawing any conclusion.")
           ), error = function(e) NULL)
         }
 
@@ -2138,7 +2156,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         if (length(constant_vars) > 0) {
           tryCatch(table$setNote(
             "constant_marker",
-            sprintf(.("These markers take the same value in every case and carry no discrimination information: %s. Their AUC of 0.500 with a zero-width interval is degenerate, not evidence of precision. No clinically useful cutpoint can distinguish the classes. Remove them from the analysis."), paste(constant_vars, collapse = ", "))
+            sprintf(.("These markers take the same value in every case and carry no discrimination information: %s. Their AUC of 0.500 has zero empirical variance; the AUC summary withholds the interval and p-value. No clinically useful cutpoint can distinguish the classes. Remove them from the analysis."), paste(constant_vars, collapse = ", "))
           ), error = function(e) NULL)
         }
         invisible(NULL)
@@ -2479,13 +2497,15 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           if (isTRUE(self$options$showExplanations)) private$.applyClinicalModeSettings()
           else private$.modeInstructionsHtml <- ""
           private$.setNotice("scope",
-            .("Exploratory ROC analysis: rows must be independent; selected cutpoints need validation. Nominal interval coverage is not guaranteed in small or imbalanced samples."))
+            .("Exploratory ROC analysis: analysis units must be independent; selected cutpoints need validation. Nominal interval coverage is not guaranteed in small or imbalanced samples."))
 
           # Close notes
           procedureNotes <- paste0(
             procedureNotes,
             private$.modeInstructionsHtml,
-            "<p>", .("Each row must represent an independent observation. These confidence intervals, tests and bootstrap resamples do not account for clustering or repeated measurements. Multiple lesions, blocks, slides or visits from the same patient require a prespecified patient-level summary or a method that accounts for clustering; do not treat them as independent patients."), "</p>",
+            "<p>", if (identical(self$options$analysisUnit, "rows"))
+              .("Each row must represent an independent observation. These confidence intervals, tests and bootstrap resamples do not account for clustering or repeated measurements. Multiple lesions, blocks, slides or visits from the same patient require a prespecified patient-level summary or a method that accounts for clustering; do not treat them as independent patients.")
+            else .("Patient summaries are the independent analysis units. Choose the mean or median before inspecting performance; the resulting accuracy describes that patient summary. This does not estimate lesion-level or visit-level accuracy with cluster-adjusted uncertainty."), "</p>",
             "<hr /></body></html>"
           )
           self$results$procedureNotes$setContent(procedureNotes)
@@ -2498,15 +2518,38 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
 
         # Every analysis receives the same explicit pair. Unselected levels cannot become
         # negatives in an optional path, a subgroup, a prevalence estimate or a resample.
-        data <- self$data[coding$included, , drop = FALSE]
         classCol <- private$.escapeVar(self$options$classVar)
+        patient_data <- tryCatch(.psychopdaPatientData(self$data, coding$included,
+          self$options$patientID,
+          unique(c(self$options$dependentVars, self$options$refVar)), classCol,
+          self$options$subGroup, self$options$analysisUnit), error = identity)
+        if (inherits(patient_data, "error")) {
+          message <- switch(conditionMessage(patient_data),
+            patient_id_required = .("Select a Patient ID before using patient-level summaries."),
+            patient_id_role = .("Patient ID must be different from the markers, outcome and subgroup variables."),
+            patient_id_missing = .("Patient ID is missing for an included observation. Supply an ID for every included row."),
+            patient_repeated = .("Repeated Patient IDs require a prespecified patient mean or median. Independent-row inference cannot treat repeated patients as separate observations."),
+            patient_outcome = .("A patient has conflicting outcome levels. Patient summaries require one outcome per patient."),
+            patient_subgroup = .("A patient has conflicting or partly missing subgroup values. Use one subgroup per patient."),
+            conditionMessage(patient_data))
+          private$.setNotice("patientData", message, jmvcore::NoticeType$ERROR)
+          jmvcore::reject(message)
+        }
+        data <- patient_data$data
+        unit_note <- if (!identical(self$options$analysisUnit, "rows")) .fmt(
+          .("Patient-level analysis: {rows} included rows were reduced to {patients} patients using the prespecified {method} of available scores for each marker. All cutpoints, models, intervals and resamples use these patient summaries. This estimates accuracy of the patient summary, not of individual lesions or visits. Patients with no observed score for a marker are excluded for that marker."),
+          rows = patient_data$rows, patients = patient_data$patients,
+          method = if (identical(self$options$analysisUnit, "patientMedian")) .("median") else .("mean"))
+        else .("Independent-row analysis: each analysed row must represent an independent observation.")
+        private$.setNotice("analysisUnit", unit_note)
+        self$results$outcomeCoding$setNote("analysis_unit", unit_note)
         positiveClass <- coding$positive
         negativeClass <- coding$negative
         data[[classCol]] <- private$.binaryResponse(data[[classCol]], positiveClass)
         classLabels <- c(positive = sprintf(.("Positive (%s)"), positiveClass),
           negative = sprintf(.("Negative (%s)"), negativeClass))
-        n_pos <- coding$counts[coding$levels == positiveClass]
-        n_total <- sum(coding$counts[coding$levels %in% c(negativeClass, positiveClass)])
+        n_pos <- sum(data[[classCol]] == positiveClass)
+        n_total <- nrow(data)
         prevalence <- n_pos / n_total
 
         if (coding$n_other > 0 || coding$n_missing > 0) {
@@ -3184,7 +3227,13 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
               )
             }
 
-            self$results$delongTest$setContent(private$.printEnhancedDeLong(delongResults))
+            delongResults$difference[["P.Holm"]] <- stats::p.adjust(
+              delongResults$difference[["P.Value"]], method = "holm",
+              n = nrow(delongResults$difference))
+            multiplicity_note <- .("Raw and Holm-adjusted pairwise p-values are shown. Holm adjustment controls family-wise error across all displayed pairs under the individual tests' assumptions. The 95% confidence intervals are pointwise and unadjusted; the global test evaluates joint equality of the AUCs.")
+            self$results$delongComparisonTable$setNote("multiplicity", multiplicity_note)
+            self$results$delongTest$setContent(paste(c(
+              private$.printEnhancedDeLong(delongResults), multiplicity_note), collapse = "\n\n"))
 
             # Format results for the DeLong comparison table
             delongTable <- self$results$delongComparisonTable
@@ -3209,7 +3258,8 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                 z = if ("Z" %in% colnames(diff_data)) diff_data[i, "Z"]
                     else sign(diff_data[i, "AUC Difference"]) *
                          sqrt(qchisq(1 - min(diff_data[i, "P.Value"], 1 - 1e-16), df = 1)),
-                p = diff_data[i, "P.Value"]
+                p = diff_data[i, "P.Value"],
+                p_holm = diff_data[i, "P.Holm"]
               )
               # jmvcore serializes numeric NA as NaN; logical NA is a missing cell.
               row_values <- lapply(row_values, function(value) {
@@ -3285,18 +3335,15 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                     positiveClass
                   ),
                   direction = pROC_direction,
-                  ci = TRUE,
-                  ci.method = "delong",
+                  ci = FALSE,
                   quiet = TRUE
                 )
-                auc_lci <- as.numeric(roc_obj$ci[1])
-                auc_uci <- as.numeric(roc_obj$ci[3])
-
                 auc_se_delong <- sqrt(pROC::var(roc_obj))
-                if (!is.na(auc_se_delong) && auc_se_delong > 0) {
-                  z_stat <- (auc_value - 0.5) / auc_se_delong
-                  p_val <- 2 * pnorm(-abs(z_stat))
-                }
+                inference <- .psychopdaAUCInference(auc_value, auc_se_delong,
+                  self$options$aucInference)
+                auc_lci <- inference$ci[1]
+                auc_uci <- inference$ci[2]
+                p_val <- inference$p
                 ci_methods_used[[var]] <- "delong"
               },
               error = function(e) {
@@ -3307,11 +3354,11 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                   (n_pos - 1) * (q1 - auc_value^2) +
                   (n_neg - 1) * (q2 - auc_value^2)) / (n_pos * n_neg))
                 if (!is.na(auc_se) && auc_se > 0) {
-                  z_critical <- qnorm(0.975)
-                  auc_lci <<- max(0, auc_value - z_critical * auc_se)
-                  auc_uci <<- min(1, auc_value + z_critical * auc_se)
-                  z_stat <- (auc_value - 0.5) / auc_se
-                  p_val <<- 2 * pnorm(-abs(z_stat))
+                  inference <- .psychopdaAUCInference(auc_value, auc_se,
+                    self$options$aucInference)
+                  auc_lci <<- inference$ci[1]
+                  auc_uci <<- inference$ci[2]
+                  p_val <<- inference$p
                 }
                 if (is.null(ci_methods_used[[var]])) {
                   ci_methods_used[[var]] <<- "hanley_mcneil"
@@ -3324,9 +3371,9 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           row_values <- list(
             variable = as.character(var),
             auc = auc_value,
-            ci_lower = auc_lci,
-            ci_upper = auc_uci,
-            p = p_val
+            ci_lower = if (is.finite(auc_lci)) auc_lci else NA,
+            ci_upper = if (is.finite(auc_uci)) auc_uci else NA,
+            p = if (is.finite(p_val)) p_val else NA
           )
           tryCatch(
             aucSummaryTable$setRow(rowKey = var, values = row_values),
@@ -3344,6 +3391,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         aucSummaryTable$setNote("effective_n", paste(effective_counts, collapse = "; "),
           init = FALSE)
         independence_note <- .("Inference assumes independent observations. These intervals, tests and bootstrap resamples do not account for repeated measurements or clustering within patients; use a prespecified patient-level summary or a method that accounts for clustering.")
+        if (!identical(self$options$analysisUnit, "rows")) independence_note <- unit_note
         for (table in list(aucSummaryTable, self$results$delongComparisonTable,
           self$results$partialAUCTable, self$results$bootstrapCITable,
           self$results$nriTable, self$results$idiTable, self$results$bayesianROCTable)) {
@@ -3394,6 +3442,9 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           # Was raw English.
           aucSummaryTable$setNote("ci_method", .("AUC 95% confidence intervals and tests use the asymptotic DeLong approximation. Nominal coverage and type-I error are not guaranteed in modest or imbalanced samples, even with ten or more observations per class. Interpret the uncertainty cautiously; a bootstrap interval is not automatically a remedy (Obuchowski and Lieber, 1998)."))
         }
+        aucSummaryTable$setNote("inference_scale", if (identical(self$options$aucInference, "logit"))
+          .("Single-AUC 95% intervals and two-sided tests against AUC 0.5 use a logit delta transformation of the DeLong standard error (or the explicitly labelled fallback standard error). This improves the audited small-sample coverage but remains an asymptotic approximation. It does not change paired DeLong comparisons. Boundary AUCs or zero variance have unavailable inference.")
+        else .("Single-AUC inference uses the legacy untransformed normal approximation. Boundary AUCs or zero variance have unavailable inference. This method undercovered in the audited small, imbalanced sample."))
 
         aucSummaryTable$setNote("auc_bands",
           .("The minimal/poor/fair/good/excellent AUC bands are descriptive conventions, not validated clinical decision thresholds. Clinical value depends on the intended cutoff, uncertainty, case mix and consequences of errors."), init = FALSE)
@@ -3719,6 +3770,10 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           # both are bootstrap estimates
           if (self$options$calculateIDI) self$results$idiTable$setNote("seed", .fmt(.("Random seed: {seed}"), seed = self$options$seed), init = FALSE)
           if (self$options$calculateNRI) self$results$nriTable$setNote("seed", .fmt(.("Random seed: {seed}"), seed = self$options$seed), init = FALSE)
+          for (table in list(self$results$idiTable, self$results$nriTable)) {
+            table$setNote("descriptive_inference",
+              .("IDI/NRI compare apparent risks from separate logistic models fitted and evaluated on these data. Intervals are exploratory percentile bootstrap intervals with both models refitted per resample. No p-value is reported: bootstrap tail fractions are not a validated null test here. These results do not establish incremental clinical value or external calibration."))
+          }
 
           # IDI/NRI does not support subgroup analysis. Set on every run (NULL removes it) with the
           # default init: neither table clears with subGroup, so an init = FALSE copy outlived it.
@@ -3815,7 +3870,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                   idi = idi_result$idi,
                   ci_lower = idi_result$ci_lower,
                   ci_upper = idi_result$ci_upper,
-                  p = idi_result$p_value
+                  p = NA
                 ))
               }
             }
@@ -3924,7 +3979,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                   non_event_nri = nri_result$non_event_nri,
                   ci_lower = nri_result$ci_lower,
                   ci_upper = nri_result$ci_upper,
-                  p = nri_result$p_value
+                  p = NA
                 ))
               }
             }
@@ -3991,10 +4046,8 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         }
 
         # Meta-analysis
-        if (self$options$metaAnalysis && length(self$options$dependentVars) >= 3) {
-          # Checkpoint before expensive meta-analysis computation
-          private$.checkpoint()
-          private$.calculateMetaAnalysis(data, classVar, positiveClass)
+        if (self$options$metaAnalysis) {
+          private$.calculateMetaAnalysis()
         }
       },
 
@@ -5307,7 +5360,8 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
 
         # Format AUC table
         output <- c(output, "Estimated AUC's:")
-        auc_formatted <- base::format(round(x$AUC, digits = digits, ...), nsmall = digits, ...)
+        auc_formatted <- base::format(round(x$AUC[, c("AUC", "SD(DeLong)"), drop = FALSE],
+          digits = digits, ...), nsmall = digits, ...)
         output <- c(output, capture.output(print(auc_formatted, quote = FALSE)))
 
         # Format pairwise comparisons
@@ -5530,7 +5584,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                   # Observed power computed from the observed effect is a one-to-one transform of
                   # the p-value, so it can never say anything the p-value did not already say.
                   recommendation <- paste(
-                    sprintf(.("Observed (post-hoc) power is a deterministic function of the observed p-value and adds no information beyond it. Use the confidence interval for the observed AUC (%1$.3f), or plan against a prespecified target AUC."), observed_auc),
+                    sprintf(.("Observed (post-hoc) power uses the AUC estimated from these same data and adds no independent evidence about discrimination. Use the confidence interval for the observed AUC (%1$.3f), or plan against a prespecified target AUC."), observed_auc),
                     if (is.na(required_n))
                       .("A required sample size is unavailable for this null or degenerate observed AUC.")
                     else sprintf(.("For reference, n=%1$d would be required for %2$.1f%% power against an AUC of %3$.3f."), required_n, 100 * target_power, observed_auc))
@@ -5884,6 +5938,8 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
       # Calculate clinical utility analysis (decision curves)
       .calculateClinicalUtility = function(data, classVar, positiveClass) {
         vars <- self$options$dependentVars
+        # A failed fit on a rerun must not leave the preceding model's curve visible.
+        self$results$decisionCurvePlot$clear()
 
         # Table visibility controlled by YAML: visible: (clinicalUtilityAnalysis)
 
@@ -5944,13 +6000,35 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                 # Youden point (0.2152 against a hand-computed 0.2793 at pt = 0.10). It also
                 # disagreed with this analysis's own decisionCurveTable, which already used the
                 # correct rule, by about 29%.
-                nb_fit <- tryCatch(
-                  stats::glm(y_complete ~ x_complete, family = stats::binomial()),
-                  error = function(e) NULL)
-                nb_risk <- if (is.null(nb_fit)) NULL else
-                  tryCatch(as.numeric(stats::fitted(nb_fit)), error = function(e) NULL)
-                if (is.null(nb_risk) || length(nb_risk) != length(y_complete)) {
-                  next
+                # Center and scale before fitting: a large measurement offset can make
+                # glm drop the raw predictor as collinear with its intercept. This is
+                # a change of coordinates, so the fitted risks must remain unchanged.
+                x_center <- mean(x_complete)
+                x_spread <- max(abs(x_complete - x_center))
+                if (!is.finite(x_center) || !is.finite(x_spread))
+                  stop(.("The marker could not be scaled to finite values."))
+                if (x_spread == 0) x_spread <- 1
+                x_scaled <- (x_complete - x_center) / x_spread
+                fit_warnings <- character(0)
+                nb_fit <- withCallingHandlers(
+                  stats::glm(y_complete ~ x_scaled, family = stats::binomial()),
+                  warning = function(w) {
+                    fit_warnings <<- c(fit_warnings, conditionMessage(w))
+                    invokeRestart("muffleWarning")
+                  })
+                nb_risk <- as.numeric(stats::fitted(nb_fit))
+                if (length(nb_risk) != length(y_complete) || any(!is.finite(nb_risk)))
+                  stop(.("The fitted risk probabilities are unavailable."))
+                if (!isTRUE(nb_fit$converged))
+                  fit_warnings <- c(fit_warnings, .("The logistic model did not converge."))
+                if (length(fit_warnings)) {
+                  fit_note <- .fmt(
+                    .("Decision-curve risk fitting for '{var}' reported: {details}. The apparent net benefit may be unreliable; check separation and model convergence before interpreting it."),
+                    var = var, details = paste(unique(fit_warnings), collapse = "; "))
+                  private$.warnUser(fit_note, type = jmvcore::NoticeType$STRONG_WARNING)
+                  for (table in list(self$results$clinicalUtilityTable,
+                                     self$results$decisionCurveTable))
+                    table$setNote(paste0("fit_", var), fit_note)
                 }
                 n_v <- length(y_complete)
                 prevalence_v <- mean(y_complete)
@@ -6027,15 +6105,9 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                 # makes a HIGHER treatment threshold treat MORE patients, the exact
                 # opposite of what a threshold probability means. Net benefit was
                 # off by up to 4.69 against the dcurves reference.
-                # NOTE: only errors are caught here. Catching warnings too would null the risk
-                # vector on "fitted probabilities numerically 0 or 1 occurred" - the complete-
-                # separation warning - and so silently empty the decision curve for exactly the
-                # strongest markers, the ones a user most wants a curve for.
-                dca_tbl_fit <- tryCatch(
-                  suppressWarnings(stats::glm(y_complete ~ x_complete, family = stats::binomial())),
-                  error = function(e) NULL)
-                dca_tbl_risk <- if (is.null(dca_tbl_fit)) NULL else
-                  tryCatch(as.numeric(stats::fitted(dca_tbl_fit)), error = function(e) NULL)
+                # One fit drives the summary, threshold table and saved plot state.
+                # Fitting warnings have already been surfaced as notices and table notes.
+                dca_tbl_risk <- nb_risk
                 n_dca_tbl <- length(y_complete)
 
                 for (t in detail_thresholds) {
@@ -6139,220 +6211,18 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
       },
 
       # Calculate meta-analysis across multiple predictors
-      .calculateMetaAnalysis = function(data, classVar, positiveClass) {
-        vars <- self$options$dependentVars
-        if (length(vars) < 3) {
-          return()
-        }
-
-        # Table visibility is controlled by YAML: visible: (metaAnalysis)
-
-        # BLOCK analysis instead of just warning - meta-analysis requires independent studies
-        if (!isTRUE(self$options$overrideMetaAnalysisWarning)) {
-          error_html <- paste0(
-            "<div style='padding: 15px; background-color: rgba(216, 33, 50, 0.18); border: 2px solid #f5c6cb; border-radius: 4px; color: inherit;'>",
-            "<h4 style='margin-top: 0;'> Meta-Analysis Not Recommended</h4>",
-            "<p><strong>Issue:</strong> Standard meta-analysis assumes <em>independent studies</em>. ",
-            "Comparing multiple markers from the <strong>same dataset</strong> violates this fundamental assumption.</p>",
-            "<p><strong>Consequences of proceeding:</strong></p>",
-            "<ul>",
-            "<li> Artificially narrow confidence intervals</li>",
-            "<li> Inflated Type I error rate (false positives)</li>",
-            "<li> Invalid pooled estimates</li>",
-            "<li> Misleading conclusions</li>",
-            "</ul>",
-            "<p><strong> Recommended alternatives for within-study comparisons:</strong></p>",
-            "<ul>",
-            "<li><strong>DeLong's test</strong> - Statistically valid method for comparing AUCs from the same dataset</li>",
-            "<li><strong>IDI/NRI analysis</strong> - Model improvement indices for comparing predictors</li>",
-            "<li><strong>Effect size analysis</strong> - Standardized differences between markers</li>",
-            "</ul>",
-            "<p><strong>Note:</strong> If you have <em>multiple independent datasets</em> (e.g., different hospitals, cohorts, or time periods), ",
-            "analyze each separately, then perform meta-analysis on those independent results.</p>",
-            "<p style='margin-bottom: 0; font-size: 0.9em;'><em>Advanced users only: To override this protection and proceed anyway, ",
-            "set <code>overrideMetaAnalysisWarning = TRUE</code> in analysis options. Results should NOT be used for formal inference.</em></p>",
-            "</div>"
-          )
-
-          self$results$metaAnalysisWarning$setVisible(TRUE)
-          self$results$metaAnalysisWarning$setContent(error_html)
-          self$results$metaAnalysisTable$setVisible(FALSE)
-          self$results$metaAnalysisForestPlot$clear()
-          self$results$metaAnalysisForestPlot$setVisible(FALSE)
-          private$.warnUser(.("Meta-analysis is blocked because these markers are not independent studies. See Meta-Analysis Warning for the assumptions and alternatives."),
-            type = jmvcore::NoticeType$STRONG_WARNING)
-          return()
-        }
-
-        # User overrode warning - hide warning and show table
-        self$results$metaAnalysisWarning$setVisible(FALSE)
-        self$results$metaAnalysisTable$setVisible(TRUE)
+      .calculateMetaAnalysis = function() {
+        # This analysis has marker columns from one cohort, not independent studies.
+        # A legacy override cannot supply the missing study-level sampling design.
+        self$results$metaAnalysisTable$setVisible(FALSE)
         self$results$metaAnalysisForestPlot$clear()
         self$results$metaAnalysisForestPlot$setVisible(FALSE)
-        private$.warnUser(.("Meta-analysis override is active for correlated markers from one dataset. Pooled estimates and intervals are exploratory and must not be used for formal inference."),
-          type = jmvcore::NoticeType$STRONG_WARNING)
-
-        # If user explicitly overrides, add strong warning
-        self$results$metaAnalysisTable$setNote(
-          key = "override_warning",
-          # Was raw English, and began with a stray leading space - padding must never sit
-          # inside a msgid, so it is simply dropped.
-          note = .("USER OVERRIDE ACTIVE: Meta-analysis performed on non-independent data despite violation of independence assumption. These results should NOT be used for formal statistical inference. Provided for exploratory purposes only with full awareness of statistical invalidity."),
-          init = FALSE
-        )
-
-        y <- private$.classIndicator(data, positiveClass)
-
-        # Collect AUCs and their standard errors.
-        # Pre-fill with NA, not 0: a marker that never gets a value must drop out of the
-        # pool below rather than enter it as a perfect-zero AUC.
-        aucs <- rep(NA_real_, length(vars))
-        se_aucs <- rep(NA_real_, length(vars))
-
-        for (i in seq_along(vars)) {
-          var <- vars[i]
-          x <- jmvcore::toNumeric(data[[var]])
-          complete_cases <- complete.cases(x, y)
-          x_complete <- x[complete_cases]
-          y_complete <- y[complete_cases]
-
-          # Was: `aucs[i] <- NA` INSIDE `error = function(e)`, which assigns in the
-          # handler's own frame and left the outer slot at its initial 0 - a failed marker
-          # then entered the pool with AUC 0 and SE 0 (floored to 1e-10 -> weight 1e20) and
-          # dragged the pooled AUC to ~0. Take the VALUE tryCatch returns instead, and treat
-          # a missing pROC as a failure rather than silently leaving the slot untouched.
-          fit <- tryCatch(
-            {
-              if (!requireNamespace("pROC", quietly = TRUE))
-                stop("package 'pROC' is not installed")
-
-              roc_obj <- pROC::roc(y_complete, x_complete, levels = c(0, 1), direction = ifelse(self$options$direction == ">=", "<", ">"), quiet = TRUE)
-              auc_i <- as.numeric(pROC::auc(roc_obj))
-
-              # Calculate standard error of AUC
-              n_pos <- sum(y_complete)
-              n_neg <- sum(1 - y_complete)
-
-              # Hanley-McNeil formula
-              q1 <- auc_i / (2 - auc_i)
-              q2 <- (2 * auc_i^2) / (1 + auc_i)
-
-              se_i <- sqrt((auc_i * (1 - auc_i) +
-                (n_pos - 1) * (q1 - auc_i^2) +
-                (n_neg - 1) * (q2 - auc_i^2)) / (n_pos * n_neg))
-
-              c(auc_i, se_i)
-            },
-            error = function(e) {
-              private$.warnUser(.fmt(
-                .("Meta-analysis: marker {var} was excluded because its AUC could not be estimated ({msg})."),
-                var = var, msg = conditionMessage(e)
-              ))
-              c(NA_real_, NA_real_)
-            }
-          )
-
-          aucs[i] <- fit[1]
-          se_aucs[i] <- fit[2]
-        }
-
-        # Remove missing values. `vars` MUST be filtered by the same index: it is the label
-        # vector for the forest plot below, and leaving it at full length either aborted the
-        # plot (data.frame() refuses 5 labels against 3 estimates) or, whenever the lengths
-        # happened to be multiples, silently recycled the estimates and printed each AUC
-        # under the wrong marker's name.
-        valid_idx <- !is.na(aucs) & !is.na(se_aucs)
-        aucs <- aucs[valid_idx]
-        se_aucs <- se_aucs[valid_idx]
-        vars <- vars[valid_idx]
-
-        if (length(aucs) < 3) {
-          return()
-        }
-
-        # Fixed effects meta-analysis (guard against zero SE)
-        se_aucs[se_aucs < 1e-10] <- 1e-10
-        weights_fe <- 1 / se_aucs^2
-        pooled_auc_fe <- sum(weights_fe * aucs) / sum(weights_fe)
-        se_pooled_fe <- sqrt(1 / sum(weights_fe))
-        lim_fe <- private$.aucLimits(pooled_auc_fe, se_pooled_fe)
-        ci_lower_fe <- lim_fe$lower
-        ci_upper_fe <- lim_fe$upper
-
-        # Calculate heterogeneity statistics (needed for random-effects weights)
-        q_stat <- sum(weights_fe * (aucs - pooled_auc_fe)^2)
-        df <- length(aucs) - 1
-        q_p_value <- pchisq(q_stat, df, lower.tail = FALSE)
-        i_squared <- max(0, (q_stat - df) / q_stat)
-        tau_squared <- max(0, (q_stat - df) / (sum(weights_fe) - sum(weights_fe^2) / sum(weights_fe)))
-
-        # Only report heterogeneity if the user enabled it
-        show_het <- self$options$heterogeneityTest
-        het_i2 <- if (show_het) i_squared else NA
-        het_tau2 <- if (show_het) tau_squared else NA
-        het_q <- if (show_het) q_stat else NA
-        het_qp <- if (show_het) q_p_value else NA
-
-        # Random effects meta-analysis (DerSimonian-Laird)
-        weights_re <- 1 / (se_aucs^2 + tau_squared)
-        pooled_auc_re <- sum(weights_re * aucs) / sum(weights_re)
-        se_pooled_re <- sqrt(1 / sum(weights_re))
-        lim_re <- private$.aucLimits(pooled_auc_re, se_pooled_re)
-        ci_lower_re <- lim_re$lower
-        ci_upper_re <- lim_re$upper
-
-        self$results$metaAnalysisTable$setNote("ci_scale",
-          .("Confidence limits were computed on the logit scale (delta-method standard error) and back-transformed, so they lie between 0 and 1 and need not be symmetric about the pooled AUC."),
-          init = FALSE)
-
-        # Fill the rows .init() scaffolded for the selected method
-        metaKeys <- names(private$.metaAnalysisRowLabels())
-        if ("fixed" %in% metaKeys) {
-          self$results$metaAnalysisTable$setRow(rowKey = "fixed", values = list(
-            pooled_auc = pooled_auc_fe,
-            ci_lower = ci_lower_fe,
-            ci_upper = ci_upper_fe,
-            heterogeneity_i2 = het_i2,
-            tau_squared = het_tau2,
-            cochran_q = het_q,
-            q_p_value = het_qp
-          ))
-        }
-
-        if ("random" %in% metaKeys) {
-          self$results$metaAnalysisTable$setRow(rowKey = "random", values = list(
-            pooled_auc = pooled_auc_re,
-            ci_lower = ci_lower_re,
-            ci_upper = ci_upper_re,
-            heterogeneity_i2 = het_i2,
-            tau_squared = het_tau2,
-            cochran_q = het_q,
-            q_p_value = het_qp
-          ))
-        }
-
-        # Generate forest plot if requested
-        if (self$options$forestPlot) {
-          # Construct combined result based on selected method
-          if (self$options$metaAnalysisMethod %in% c("random", "both")) {
-            combined_result <- list(
-              auc = pooled_auc_re, se = se_pooled_re,
-              ci_lower = ci_lower_re, ci_upper = ci_upper_re
-            )
-          } else {
-            combined_result <- list(
-              auc = pooled_auc_fe, se = se_pooled_fe,
-              ci_lower = ci_lower_fe, ci_upper = ci_upper_fe
-            )
-          }
-          private$.generateMetaAnalysisForestPlot(aucs, se_aucs, vars, combined_result)
-          self$results$metaAnalysisForestPlot$setVisible(TRUE)
-        } else {
-          # The setVisible(TRUE) above overrides the declarative
-          # visible: (metaAnalysis && forestPlot) and had no counterpart, so once the plot
-          # had been shown it stayed on screen after the user unticked Forest plot.
-          self$results$metaAnalysisForestPlot$setVisible(FALSE)
-        }
+        message <- .("Meta-analysis is unavailable: markers from the same cohort are not independent studies. No pooled AUC, interval, heterogeneity statistic or forest plot is computed. Use paired DeLong comparisons for these markers, or a study-level meta-analysis with independent cohorts.")
+        if (isTRUE(self$options$overrideMetaAnalysisWarning)) message <- paste(message,
+          .("The saved legacy override is ignored because it cannot correct dependence between markers."))
+        self$results$metaAnalysisWarning$setContent(paste0("<p>", message, "</p>"))
+        self$results$metaAnalysisWarning$setVisible(TRUE)
+        private$.warnUser(message, type = jmvcore::NoticeType$STRONG_WARNING)
       },
 
       # Enhanced input validation inspired by old testroc implementation
@@ -6831,20 +6701,12 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
 
       # Update meta-analysis visibility based on number of variables
       .updateMetaAnalysisVisibility = function() {
-        num_vars <- length(self$options$dependentVars)
-        enabled <- isTRUE(self$options$metaAnalysis) && num_vars >= 3L
-        allowed <- enabled && isTRUE(self$options$overrideMetaAnalysisWarning)
-        self$results$metaAnalysisWarning$setVisible(enabled && !allowed)
-        self$results$metaAnalysisTable$setVisible(allowed)
-        self$results$metaAnalysisForestPlot$setVisible(allowed && isTRUE(self$options$forestPlot))
-        if (!enabled || allowed) self$results$metaAnalysisWarning$setContent("")
-        if (!allowed || !isTRUE(self$options$forestPlot))
-          self$results$metaAnalysisForestPlot$clear()
-        if (isTRUE(self$options$metaAnalysis) && num_vars > 0L && num_vars < 3L) {
-          private$.warnUser(.fmt(
-            .("Meta-analysis requires at least 3 test variables; {n} selected. Add more test variables to enable it."),
-            n = num_vars))
-        }
+        enabled <- isTRUE(self$options$metaAnalysis)
+        self$results$metaAnalysisWarning$setVisible(enabled)
+        self$results$metaAnalysisTable$setVisible(FALSE)
+        self$results$metaAnalysisForestPlot$setVisible(FALSE)
+        self$results$metaAnalysisForestPlot$clear()
+        if (!enabled) self$results$metaAnalysisWarning$setContent("")
         enabled
       }
     ), # End of private list

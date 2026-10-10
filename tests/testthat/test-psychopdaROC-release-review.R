@@ -376,10 +376,14 @@ test_that("the output states which way the marker was read", {
 })
 
 
-test_that("every declared option is read by the backend", {
+test_that("every active option is read and retired options are hidden", {
     a_yaml <- readLines("../../jamovi/psychopdaROC.a.yaml", warn = FALSE)
     declared <- sub("^    - name: ", "", grep("^    - name: [A-Za-z0-9_]+$", a_yaml, value = TRUE))
-    declared <- setdiff(declared, "data")
+    schema <- yaml::read_yaml("../../jamovi/psychopdaROC.a.yaml")
+    retired <- c("metaAnalysisMethod", "heterogeneityTest", "forestPlot", "overrideMetaAnalysisWarning")
+    for (option in Filter(function(x) x$name %in% retired, schema$options))
+        expect_true(isTRUE(option$hidden), info = option$name)
+    declared <- setdiff(declared, c("data", retired))
     backend <- paste(readLines("../../R/psychopdaROC.b.R", warn = FALSE), collapse = "\n")
     unread <- declared[!vapply(declared, function(o)
         grepl(paste0("options\\$", o, "\\b"), backend), logical(1))]
@@ -911,21 +915,15 @@ test_that("the DeLong fallback reads the markers in the chosen Classification Di
     expect_equal(unname(r$AUC[, "AUC"]), c(mw_auc(-S$biomarker, healthy), mw_auc(-S$m2, healthy)), tolerance = 1e-9)
 })
 
-test_that("meta-analysis confidence limits are logit-Wald limits and stay within 0-1", {
+test_that("legacy meta-analysis overrides cannot emit invalid pooled inference", {
     data(psychopdaROC_advanced, package = "ClinicoPath", envir = environment())
     res <- run_ps(data = psychopdaROC_advanced, classVar = "diagnosis", positiveClass = "Positive", negativeClass = "Negative",
                   dependentVars = c("marker_excellent", "marker_good", "marker_moderate"),
                   metaAnalysis = TRUE, overrideMetaAnalysisWarning = TRUE, forestPlot = TRUE)
-    tab <- res$metaAnalysisTable$asDF
-    expect_true(all(tab$ci_lower >= 0 & tab$ci_upper <= 1))       # the random-effects upper limit was 1.012
-    # every limit is plogis(logit(a) -/+ qnorm(.975) se / (a (1 - a))) for the AUC and SE shown (delta method)
-    lw <- function(a, se) stats::plogis(stats::qlogis(a) + c(-1, 1) * qnorm(.975) * se / (a * (1 - a)))
-    st <- res$metaAnalysisForestPlot$get(key = "forestPlot")$state$data
-    for (i in seq_len(nrow(st)))
-        expect_equal(c(st$ci_lower[i], st$ci_upper[i]), lw(st$auc[i], st$se[i]), tolerance = 1e-9, label = st$study[i])
-    re <- tab[tab$model_type == "Random Effects", ]
-    cmb <- st[st$study == "Combined", ]
-    expect_equal(c(re$pooled_auc, re$ci_lower, re$ci_upper), c(cmb$auc, lw(cmb$auc, cmb$se)), tolerance = 1e-9)
+    expect_false(res$metaAnalysisTable$visible)
+    expect_true(all(is.na(res$metaAnalysisTable$asDF$pooled_auc)))
+    expect_length(res$metaAnalysisForestPlot$itemKeys, 0)
+    expect_match(res$metaAnalysisWarning$content, "override is ignored")
 })
 
 # --- 2026-10-09 (third pass): one regression test per fix ---

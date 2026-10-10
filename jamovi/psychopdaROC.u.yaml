@@ -40,6 +40,13 @@ children:
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
+        label: Patient ID
+        children:
+          - type: VariablesListBox
+            name: patientID
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
         label: Reference test for IDI/NRI (optional)
         children:
           - type: VariablesListBox
@@ -74,6 +81,10 @@ children:
       - type: ComboBox
         name: direction
         label: Classification direction
+      - type: ComboBox
+        name: analysisUnit
+      - type: ComboBox
+        name: aucInference
 
   # ==============================================
   # 3. CLINICAL PARAMETERS
@@ -499,34 +510,6 @@ children:
             label: Intervention cost analysis
             enable: (clinicalUtilityAnalysis)
 
-  # ==============================================
-  # 13. META-ANALYSIS (special use case, at end)
-  # ==============================================
-  - type: CollapseBox
-    label: Meta-Analysis (3+ Test Variables Required)
-    margin: normal
-    collapsed: true
-    children:
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: CheckBox
-            name: metaAnalysis
-            label: Meta-analysis of AUC values
-            enable: (dependentVars)
-          - type: ComboBox
-            name: metaAnalysisMethod
-            label: Meta-analysis method
-            enable: (metaAnalysis)
-          - type: CheckBox
-            name: heterogeneityTest
-            label: Heterogeneity test (Q-test, I-squared)
-            enable: (metaAnalysis)
-          - type: CheckBox
-            name: forestPlot
-            label: Forest plot
-            enable: (metaAnalysis)
-          - type: CheckBox
-            name: overrideMetaAnalysisWarning
-            label: Override independence warning (advanced users only)
-            enable: (metaAnalysis)
+  - type: CheckBox
+    name: metaAnalysis
+    label: Explain why within-cohort meta-analysis is unavailable

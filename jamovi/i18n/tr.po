@@ -122518,7 +122518,7 @@ msgstr ""
 
 #: nonparametric/results/posthoc.columns.title
 msgid "p (raw)"
-msgstr ""
+msgstr "p (ham)"
 
 #: R/raincloud.b.R
 msgid "p &lt; 0.001"
@@ -198216,3 +198216,123 @@ msgid ""
 "Youden's J equals sensitivity plus specificity minus one. Use the actual "
 "trade-off and clinical consequences when assessing a cutpoint."
 msgstr "Youden J indeksi, duyarlılık artı özgüllük eksi birdir. Bir kesim noktasını değerlendirirken gerçek duyarlılık-özgüllük dengesini ve klinik sonuçları dikkate alın."
+
+#: R/psychopdaROC.b.R
+msgid "The marker could not be scaled to finite values."
+msgstr "Belirteç sonlu değerlere ölçeklenemedi."
+
+#: R/psychopdaROC.b.R
+msgid "The fitted risk probabilities are unavailable."
+msgstr "Modelden tahmin edilen risk olasılıkları elde edilemedi."
+
+#: R/psychopdaROC.b.R
+msgid "The logistic model did not converge."
+msgstr "Lojistik model yakınsamadı."
+
+#: R/psychopdaROC.b.R
+msgid "Decision-curve risk fitting for '{var}' reported: {details}. The apparent net benefit may be unreliable; check separation and model convergence before interpreting it."
+msgstr "'{var}' için karar eğrisi risk modeli şu uyarıları verdi: {details}. Aynı veride hesaplanan net fayda güvenilir olmayabilir; yorumlamadan önce ayrışmayı ve modelin yakınsamasını kontrol edin."
+
+#: R/psychopdaROC.b.R
+msgid "Pairwise p-values and 95% confidence intervals are unadjusted for multiple comparisons. The global test evaluates joint equality of all AUCs; it does not adjust the pairwise tests."
+msgstr "İkili karşılaştırmaların p değerleri ve %95 güven aralıkları çoklu karşılaştırmalar için düzeltilmemiştir. Genel test tüm AUC değerlerinin birlikte eşitliğini değerlendirir; ikili testleri düzeltmez."
+
+
+msgid "A patient has conflicting or partly missing subgroup values. Use one subgroup per patient."
+msgstr "Bir hastanın alt grup değerleri çelişkili veya kısmen eksiktir. Her hasta için tek bir alt grup kullanın."
+
+msgid "A patient has conflicting outcome levels. Patient summaries require one outcome per patient."
+msgstr "Bir hastanın sonuç düzeyleri çelişkilidir. Hasta özetleri her hasta için tek bir sonuç gerektirir."
+
+msgid "Analysis unit"
+msgstr "Analiz birimi"
+
+msgid "At least one marker separates the two classes completely in this sample (AUC 1.000). The empirical variance may be zero; the AUC summary withholds the interval and p-value rather than presenting degenerate inference as precision. Complete separation in a sample this size is far more often label leakage, an outcome-derived predictor, or overfitting than a genuinely perfect test. Validate externally before drawing any conclusion."
+msgstr "En az bir belirteç bu örneklemde iki sınıfı tamamen ayırmaktadır (AUC 1.000). Ampirik varyans sıfır olabilir; AUC özeti, dejenere çıkarımı kesinlik gibi sunmak yerine aralığı ve p değerini göstermez. Bu büyüklükteki bir örneklemde tam ayrışma, gerçekten kusursuz bir testten çok etiket sızıntısı, sonuçtan türetilmiş bir yordayıcı veya aşırı uyumdan kaynaklanır. Sonuç çıkarmadan önce harici doğrulama yapın."
+
+msgid "Explain meta-analysis limitation"
+msgstr "Meta-analiz kısıtını açıkla"
+
+msgid "Explain why within-cohort meta-analysis is unavailable"
+msgstr "Aynı kohort içinde meta-analizin neden kullanılamadığını açıkla"
+
+msgid "IDI/NRI compare apparent risks from separate logistic models fitted and evaluated on these data. Intervals are exploratory percentile bootstrap intervals with both models refitted per resample. No p-value is reported: bootstrap tail fractions are not a validated null test here. These results do not establish incremental clinical value or external calibration."
+msgstr "IDI/NRI, bu verilerde kurulan ve değerlendirilen ayrı lojistik modellerin görünen risklerini karşılaştırır. Aralıklar, her yeniden örneklemede iki modelin de yeniden kurulduğu keşifsel yüzdelik bootstrap aralıklarıdır. P değeri bildirilmez: bootstrap kuyruk oranları burada doğrulanmış bir sıfır hipotezi testi değildir. Bu sonuçlar ek klinik değeri veya harici kalibrasyonu kanıtlamaz."
+
+msgid "Independent rows"
+msgstr "Bağımsız satırlar"
+
+msgid "Independent-row analysis: each analysed row must represent an independent observation."
+msgstr "Bağımsız satır analizi: analiz edilen her satır bağımsız bir gözlemi temsil etmelidir."
+
+msgid "Legacy forest plot (inactive)"
+msgstr "Eski orman grafiği (etkin değil)"
+
+msgid "Legacy heterogeneity test (inactive)"
+msgstr "Eski heterojenlik testi (etkin değil)"
+
+msgid "Legacy meta-analysis method (inactive)"
+msgstr "Eski meta-analiz yöntemi (etkin değil)"
+
+msgid "Legacy override (inactive)"
+msgstr "Eski geçersiz kılma seçeneği (etkin değil)"
+
+msgid "Logit DeLong"
+msgstr "Logit DeLong"
+
+msgid "Meta-analysis is unavailable: markers from the same cohort are not independent studies. No pooled AUC, interval, heterogeneity statistic or forest plot is computed. Use paired DeLong comparisons for these markers, or a study-level meta-analysis with independent cohorts."
+msgstr "Meta-analiz kullanılamaz: aynı kohorttan gelen belirteçler bağımsız çalışmalar değildir. Birleştirilmiş AUC, aralık, heterojenlik istatistiği veya orman grafiği hesaplanmaz. Bu belirteçler için eşleştirilmiş DeLong karşılaştırmalarını veya bağımsız kohortlarla çalışma düzeyinde bir meta-analizi kullanın."
+
+msgid "Observed (post-hoc) power uses the AUC estimated from these same data and adds no independent evidence about discrimination. Use the confidence interval for the observed AUC (%1$.3f), or plan against a prespecified target AUC."
+msgstr "Gözlenen (post-hoc) güç, aynı verilerden kestirilen AUC değerini kullanır ve ayırt etme hakkında bağımsız kanıt sağlamaz. Gözlenen AUC (%1$.3f) için güven aralığını kullanın veya önceden belirlenmiş bir hedef AUC ile planlama yapın."
+
+msgid "Patient ID (optional for independent rows)"
+msgstr "Hasta kimliği (bağımsız satırlar için isteğe bağlı)"
+
+msgid "Patient ID is missing for an included observation. Supply an ID for every included row."
+msgstr "Dahil edilen bir gözlemde hasta kimliği eksiktir. Dahil edilen her satır için bir kimlik sağlayın."
+
+msgid "Patient ID must be different from the markers, outcome and subgroup variables."
+msgstr "Hasta kimliği; belirteç, sonuç ve alt grup değişkenlerinden farklı olmalıdır."
+
+msgid "Patient mean"
+msgstr "Hasta ortalaması"
+
+msgid "Patient median"
+msgstr "Hasta medyanı"
+
+msgid "Patient summaries are the independent analysis units. Choose the mean or median before inspecting performance; the resulting accuracy describes that patient summary. This does not estimate lesion-level or visit-level accuracy with cluster-adjusted uncertainty."
+msgstr "Hasta özetleri bağımsız analiz birimleridir. Performansı incelemeden önce ortalama veya medyanı seçin; elde edilen doğruluk bu hasta özetini tanımlar. Bu yöntem, kümelenmeye göre düzeltilmiş belirsizlik ile lezyon veya ziyaret düzeyindeki doğruluğu kestirmez."
+
+msgid "Patient-level analysis: {rows} included rows were reduced to {patients} patients using the prespecified {method} of available scores for each marker. All cutpoints, models, intervals and resamples use these patient summaries. This estimates accuracy of the patient summary, not of individual lesions or visits. Patients with no observed score for a marker are excluded for that marker."
+msgstr "Hasta düzeyinde analiz: dahil edilen {rows} satır, her belirtecin mevcut skorları için önceden belirlenen {method} kullanılarak {patients} hastaya indirgenmiştir. Tüm kesim noktaları, modeller, aralıklar ve yeniden örneklemeler bu hasta özetlerini kullanır. Bu, tek tek lezyon veya ziyaretlerin değil, hasta özetinin doğruluğunu kestirir. Bir belirteç için gözlenen skoru olmayan hastalar o belirtecin analizinden dışlanır."
+
+msgid "Raw and Holm-adjusted pairwise p-values are shown. Holm adjustment controls family-wise error across all displayed pairs under the individual tests' assumptions. The 95% confidence intervals are pointwise and unadjusted; the global test evaluates joint equality of the AUCs."
+msgstr "Ham ve Holm düzeltmeli ikili p değerleri gösterilir. Holm düzeltmesi, tek tek testlerin varsayımları altında gösterilen tüm çiftler için aile düzeyindeki hata oranını kontrol eder. %95 güven aralıkları noktasaldır ve düzeltilmemiştir; genel test AUC değerlerinin ortak eşitliğini değerlendirir."
+
+msgid "Repeated Patient IDs require a prespecified patient mean or median. Independent-row inference cannot treat repeated patients as separate observations."
+msgstr "Tekrarlanan hasta kimlikleri, önceden belirlenmiş bir hasta ortalaması veya medyanı gerektirir. Bağımsız satır çıkarımı, tekrarlanan hastaları ayrı gözlemler olarak değerlendiremez."
+
+msgid "Select a Patient ID before using patient-level summaries."
+msgstr "Hasta düzeyinde özetleri kullanmadan önce bir hasta kimliği seçin."
+
+msgid "Single-AUC 95% intervals and two-sided tests against AUC 0.5 use a logit delta transformation of the DeLong standard error (or the explicitly labelled fallback standard error). This improves the audited small-sample coverage but remains an asymptotic approximation. It does not change paired DeLong comparisons. Boundary AUCs or zero variance have unavailable inference."
+msgstr "Tek AUC için %95 aralıklar ve AUC 0.5'e karşı iki yönlü testler, DeLong standart hatasının (veya açıkça belirtilen yedek standart hatanın) logit delta dönüşümünü kullanır. Bu yöntem denetlenen küçük örneklemde kapsamayı iyileştirir, ancak asimptotik bir yaklaşım olmaya devam eder. Eşleştirilmiş DeLong karşılaştırmalarını değiştirmez. Sınırdaki AUC değerlerinde veya sıfır varyansta çıkarım kullanılamaz."
+
+msgid "Single-AUC inference uses the legacy untransformed normal approximation. Boundary AUCs or zero variance have unavailable inference. This method undercovered in the audited small, imbalanced sample."
+msgstr "Tek AUC çıkarımı, eski dönüştürülmemiş normal yaklaşımı kullanır. Sınırdaki AUC değerlerinde veya sıfır varyansta çıkarım kullanılamaz. Bu yöntem, denetlenen küçük ve dengesiz örneklemde nominal düzeyin altında kapsama sağlamıştır."
+
+msgid "Single-AUC interval and test"
+msgstr "Tek AUC aralığı ve testi"
+
+msgid "The saved legacy override is ignored because it cannot correct dependence between markers."
+msgstr "Kaydedilmiş eski geçersiz kılma seçeneği, belirteçler arasındaki bağımlılığı düzeltemediği için yok sayılır."
+
+msgid "These markers take the same value in every case and carry no discrimination information: %s. Their AUC of 0.500 has zero empirical variance; the AUC summary withholds the interval and p-value. No clinically useful cutpoint can distinguish the classes. Remove them from the analysis."
+msgstr "Bu belirteçler her olguda aynı değeri alır ve ayırt etme bilgisi taşımaz: %s. AUC değerleri 0.500 olup ampirik varyansları sıfırdır; AUC özeti aralığı ve p değerini göstermez. Klinik olarak yararlı hiçbir kesim noktası sınıfları ayıramaz. Bunları analizden çıkarın."
+
+msgid "Untransformed DeLong (legacy)"
+msgstr "Dönüştürülmemiş DeLong (eski)"
+
+msgid "Exploratory ROC analysis: analysis units must be independent; selected cutpoints need validation. Nominal interval coverage is not guaranteed in small or imbalanced samples."
+msgstr "Keşifsel ROC analizi: analiz birimleri bağımsız olmalıdır; seçilen kesim noktaları doğrulama gerektirir. Küçük veya dengesiz örneklemlerde nominal aralık kapsaması garanti edilmez."

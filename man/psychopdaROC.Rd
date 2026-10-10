@@ -10,6 +10,9 @@ psychopdaROC(
   showExplanations = FALSE,
   clinicalMode = "basic",
   data,
+  patientID = NULL,
+  analysisUnit = "rows",
+  aucInference = "logit",
   dependentVars,
   classVar,
   positiveClass,
@@ -105,6 +108,24 @@ off - every optional analysis has its own checkbox.}
 
 \item{data}{The data as a data frame, with one independent observation per
 row.}
+
+\item{patientID}{Identifier for independent patients. Required for patient
+summaries. With independent rows, supplying an ID checks for duplicates and
+rejects repeated patients.}
+
+\item{analysisUnit}{Choose a clinically prespecified summary before
+inspecting results. The mean or median of observed scores is calculated for
+each patient and marker, including a separate IDI/NRI reference. Patients
+with all scores missing for a marker are excluded for that marker. Outcomes
+and subgroups must be consistent within patients. This estimates
+patient-level accuracy of the summary, not accuracy of individual lesions
+or visits.}
+
+\item{aucInference}{Logit DeLong uses the DeLong standard error with a
+logit delta transformation for the 95\\% interval and matching two-sided
+test against AUC 0.5. The legacy option uses the untransformed normal
+approximation. Both remain asymptotic; unavailable or zero variance gives
+missing inference. Pairwise AUC comparisons use ordinary paired DeLong.}
 
 \item{dependentVars}{Test variable(s) to be evaluated for classification
 performance. Multiple variables can be selected for comparison.}
@@ -358,24 +379,21 @@ target; Stepwise meets or exceeds it.}
 sensitivity/specificity analysis including  clinical interpretation,
 interpolation methods, and usage recommendations.}
 
-\item{metaAnalysis}{Perform meta-analysis of AUC values across multiple
-test variables. Requires at least 3 test variables to enable pooled effect
-estimation.}
+\item{metaAnalysis}{Shows why marker columns from one cohort cannot be
+pooled as independent studies. No pooled estimate or inference is computed,
+including with the legacy override.}
 
-\item{metaAnalysisMethod}{Statistical method for combining AUC estimates
-across studies/variables.}
+\item{metaAnalysisMethod}{Deprecated compatibility option. Within-cohort
+meta-analysis is unavailable.}
 
-\item{heterogeneityTest}{Perform Cochran's Q test and calculate the
-I-squared statistic to assess heterogeneity between AUC estimates.}
+\item{heterogeneityTest}{Deprecated compatibility option. No heterogeneity
+inference is computed.}
 
-\item{forestPlot}{Create forest plot visualization of individual and pooled
-AUC estimates with confidence intervals.}
+\item{forestPlot}{Deprecated compatibility option. No pooled forest plot is
+computed.}
 
-\item{overrideMetaAnalysisWarning}{ADVANCED OPTION: Bypass the independence
-assumption check for meta-analysis. WARNING - Only use if you fully
-understand the statistical implications. Meta-analysis on non-independent
-data produces invalid results and should NOT be used for formal inference.
-Use DeLong's test instead for within-study comparisons of multiple markers.}
+\item{overrideMetaAnalysisWarning}{Deprecated and ignored. An override
+cannot correct dependence between markers.}
 }
 \value{
 A results object containing:
@@ -428,11 +446,10 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 }
 \description{
 Exploratory Receiver Operating Characteristic (ROC) curve analysis with
-optimal cutpoint determination. Each row must be an independent
-observation. Intervals, tests and bootstrap resampling do not account for
-repeated measurements or clustering within patients; use a prespecified
-patient-level summary or a method that accounts for clustering. Nominal
-coverage is not guaranteed in small or imbalanced samples. Cutpoints
-selected on these data report apparent performance and require validation
-in the intended setting.
+optimal cutpoint determination. Analyse independent rows or a prespecified
+mean or median per patient. Patient summaries require an ID and a
+consistent outcome within each patient; all calculations and resampling
+then use one summary per patient. Nominal coverage is not guaranteed in
+small or imbalanced samples. Cutpoints selected on these data report
+apparent performance and require validation in the intended setting.
 }

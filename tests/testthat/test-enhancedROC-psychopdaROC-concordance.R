@@ -16,12 +16,12 @@ cc_data <- function(seed = 101, n = 300) {
 
 # ── The shared estimators must agree exactly ─────────────────────────────────
 
-test_that("AUC and its DeLong interval agree between the two analyses and with pROC", {
+test_that("AUC and legacy untransformed DeLong intervals agree with enhancedROC and pROC", {
     d <- cc_data()
     E <- cc_run(ClinicoPath::enhancedROC, data = d, outcome = "gold", predictors = c("m1", "m2"),
                 positiveClass = "Positive")
     P <- cc_run(ClinicoPath::psychopdaROC, data = d, classVar = "gold", dependentVars = c("m1", "m2"),
-                positiveClass = "Positive", negativeClass = "Negative", refVar = NULL)
+                positiveClass = "Positive", negativeClass = "Negative", refVar = NULL, aucInference = "delong")
     ea <- as.data.frame(E$results$aucSummary)
     pa <- as.data.frame(P$aucSummaryTable)
     for (i in 1:2) {

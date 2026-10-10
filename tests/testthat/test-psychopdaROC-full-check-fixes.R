@@ -35,14 +35,14 @@
 test_that("F01 meta-analysis disables and revokes all dependent outputs", {
   r <- .fullROC_run(dependentVars = c("marker_a", "marker_b", "marker_c"),
     metaAnalysis = TRUE, overrideMetaAnalysisWarning = TRUE, forestPlot = TRUE)
-  expect_true(r$metaAnalysisTable$visible)
-  expect_true(r$metaAnalysisForestPlot$visible)
+  expect_false(r$metaAnalysisTable$visible)
+  expect_false(r$metaAnalysisForestPlot$visible)
   .fullROC_change(r, "metaAnalysis", FALSE)
   expect_false(r$metaAnalysisTable$visible)
   expect_false(r$metaAnalysisForestPlot$visible)
   expect_length(r$metaAnalysisForestPlot$itemKeys, 0)
   .fullROC_change(r, "metaAnalysis", TRUE)
-  expect_true(r$metaAnalysisForestPlot$visible)
+  expect_false(r$metaAnalysisForestPlot$visible)
   .fullROC_change(r, "overrideMetaAnalysisWarning", FALSE)
   expect_true(r$metaAnalysisWarning$visible)
   expect_false(r$metaAnalysisTable$visible)
@@ -51,7 +51,7 @@ test_that("F01 meta-analysis disables and revokes all dependent outputs", {
   .fullROC_change(r, "overrideMetaAnalysisWarning", TRUE)
   .fullROC_change(r, "dependentVars", c("marker_a", "marker_b"))
   expect_false(r$metaAnalysisForestPlot$visible)
-  expect_match(r$runSummary$content, "requires at least 3")
+  expect_match(r$runSummary$content, "not independent studies")
 })
 
 test_that("F02 bootstrap traces invalidate changed seed and direction", {

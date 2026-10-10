@@ -61,6 +61,14 @@ basic ROC curve generation. Key features include:
 \item Cost-benefit optimization with custom cost ratios
 \item Hospital/site comparisons
 }
+
+Single-AUC inference defaults to a logit transformation of the DeLong
+standard error; the legacy untransformed approximation remains selectable.
+Patient summaries use one prespecified mean or median per patient for all
+calculations. They estimate patient-summary accuracy, not lesion-level accuracy.
+Pairwise DeLong output includes raw and Holm-adjusted p-values. IDI/NRI remain
+exploratory apparent estimates with percentile intervals and no significance
+test. Within-cohort meta-analysis is unavailable, including legacy overrides.
 }
 \note{
 This function originally developed by Lucas Friesen in the psychoPDA module.
@@ -193,6 +201,13 @@ quality_result <- psychopdaROC(
 
 }
 \references{
+Kottas, M., Kuss, O., & Zapf, A. (2014). A modified Wald interval for the
+area under the ROC curve (AUC) in diagnostic case-control studies.
+BMC Medical Research Methodology, 14, 26. doi:10.1186/1471-2288-14-26.
+
+Pepe, M. S., Janes, H., & Li, C. I. (2014). Net risk reclassification
+P values: valid or misleading? JNCI, 106(4), dju041. doi:10.1093/jnci/dju041.
+
 DeLong, E. R., DeLong, D. M., & Clarke-Pearson, D. L. (1988).
 Comparing the areas under two or more correlated receiver operating
 characteristic curves: a nonparametric approach. Biometrics, 44(3), 837-845.
@@ -261,9 +276,6 @@ Youden, W. J. (1950). Index for rating diagnostic tests. Cancer, 3(1), 32-35.
 \if{latex}{\out{\hypertarget{method-psychopdaROCClass-init}{}}}
 \subsection{\code{psychopdaROCClass$init()}}{
   Initialize safely when an R caller has not selected any variables.
-
-
-  Generate R source code for psychopdaROC analysis
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{psychopdaROCClass$init(noThrow = FALSE)}
@@ -276,19 +288,20 @@ Youden, W. J. (1950). Index for rating diagnostic tests. Cancer, 3(1), 32-35.
     }
     \if{html}{\out{</div>}}
   }
-  \subsection{Returns}{
-    Character string with R syntax for reproducible analysis
-  }
 }
 
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-psychopdaROCClass-asSource"></a>}}
 \if{latex}{\out{\hypertarget{method-psychopdaROCClass-asSource}{}}}
 \subsection{\code{psychopdaROCClass$asSource()}}{
+  Generate R source code for psychopdaROC analysis
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{psychopdaROCClass$asSource()}
     \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    Character string with R syntax for reproducible analysis
   }
 }
 

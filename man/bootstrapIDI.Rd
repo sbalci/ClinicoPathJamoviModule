@@ -27,7 +27,8 @@ bootstrapIDI(
 \item{conf_level}{Confidence level (default 0.95)}
 }
 \value{
-List with IDI, confidence intervals, and p-value
+List with apparent IDI and exploratory percentile intervals. The
+compatibility field \code{p_value} is \code{NA}; no null test is provided.
 }
 \description{
 Calculates Integrated Discrimination Improvement with bootstrap confidence intervals

@@ -30,7 +30,9 @@ bootstrapNRI(
 \item{conf_level}{Confidence level (default 0.95)}
 }
 \value{
-List with NRI components and confidence intervals
+List with NRI components and exploratory percentile intervals. The
+compatibility field \code{p_value} is \code{NA}: refitted apparent bootstrap tail
+fractions are not calibrated null-hypothesis tests.
 }
 \description{
 Bootstrap NRI calculation with confidence intervals

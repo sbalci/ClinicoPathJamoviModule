@@ -2,6 +2,23 @@
 
 ## Unreleased — rare-disease AI validation and workload
 
+- `psychopdaROC` analysis 1.0.90 changes single-AUC inference to logit DeLong by
+  default, retaining the untransformed option for reproducibility and withholding
+  zero-variance inference. Patient ID and prespecified mean/median summaries support
+  independent-patient analyses across all outputs. Paired DeLong adds Holm-adjusted
+  p-values alongside raw values. IDI/NRI no longer label bootstrap tail counts as
+  significance tests. Within-cohort meta-analysis is blocked even with legacy overrides.
+  Recomputing saved analyses can change intervals/p-values; the analysis stays in JamoviTest.
+
+- In module 1.0.81.01, `psychopdaROC` analysis 1.0.89 centers and scales the marker
+  before fitting decision-curve risks. Large measurement offsets can no longer
+  silently remove the predictor and change net benefit. The summary, threshold
+  table and plot now share one fit. Fitting warnings appear in native notices and
+  table notes; a failed fit has an explicit notice and clears the preceding curve.
+  Multiple DeLong comparisons explicitly identify their unadjusted p-values and
+  intervals. No statistical defaults changed.
+  The analysis remains in JamoviTest. This entry records the 1.0.89 changes.
+
 - `psychopdaROC` analysis 1.0.88 requires explicit Positive Class and Negative Class
   selections. Both start empty; only the selected pair enters any analysis. Other
   levels and missing outcomes are excluded with counts in Outcome coding. Existing

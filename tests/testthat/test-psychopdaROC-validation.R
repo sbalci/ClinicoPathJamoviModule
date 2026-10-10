@@ -33,7 +33,7 @@ test_that("ROC AUC and DeLong uncertainty match independent placements", {
   variance <- 347 / 12960
   # The reported DeLong interval is intersected with the AUC parameter space.
   expected_ci <- pmax(0, pmin(1, expected_auc + c(-1, 1) * qnorm(.975) * sqrt(variance)))
-  r <- .valROC_run()$aucSummaryTable$asDF
+  r <- .valROC_run(aucInference = "delong")$aucSummaryTable$asDF
   expect_equal(r$auc, expected_auc, tolerance = 1e-12)
   expect_equal(c(r$ci_lower, r$ci_upper), expected_ci, tolerance = 1e-12)
   expect_equal(r$p, 2 * pnorm(-abs((expected_auc - .5) / sqrt(variance))), tolerance = 1e-12)
@@ -117,8 +117,8 @@ test_that("ROC identical markers have zero reclassification improvement", {
   expect_equal(r$nriTable$asDF$nri, 0)
   expect_equal(r$nriTable$asDF$event_nri, 0)
   expect_equal(r$nriTable$asDF$non_event_nri, 0)
-  expect_equal(r$idiTable$asDF$p, 1)
-  expect_equal(r$nriTable$asDF$p, 1)
+  expect_true(all(is.na(r$idiTable$asDF$p)))
+  expect_true(all(is.na(r$nriTable$asDF$p)))
 })
 
 test_that("ROC requires a declared positive level and guards non-independent pooling", {
