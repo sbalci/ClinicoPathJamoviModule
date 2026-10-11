@@ -2,6 +2,20 @@
 
 ## Unreleased — rare-disease AI validation and workload
 
+- In module 1.0.81.01, `enhancedROC` analysis 1.0.84 reports the actual AUC
+  interval method for each marker, including DeLong fallbacks and BCa-to-percentile
+  downgrades. DeLong fallback rows retain their matching standard errors. Distinct
+  marker and class names now have distinct internal table keys. The ordinary ROC
+  workflow consistently requires 20 complete observations across the outcome and
+  selected predictors; adding missing rows no longer bypasses this existing minimum.
+  The frozen-model validation workflow retains its separate eligibility rules.
+  ROC curves and confidence ribbons now follow jamovi's global color palette.
+  Each plot saves its own coordinates and summaries; redraws no longer retain
+  cleaned input rows or refit models. Seeded confidence bands are cached with the
+  analysis. Older saved plot states display a request to recalculate. Four cited
+  reference page fields now serialize correctly when saving a jamovi document.
+  The analysis remains in JamoviTest pending production promotion.
+
 - `psychopdaROC` analysis 1.0.90 changes single-AUC inference to logit DeLong by
   default, retaining the untransformed option for reproducibility and withholding
   zero-variance inference. Patient ID and prespecified mean/median summaries support

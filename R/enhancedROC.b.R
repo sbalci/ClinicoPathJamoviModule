@@ -59,11 +59,15 @@ enhancedROCClass <- R6::R6Class(
         .instructionsHtml = "", # Accumulator for instructions panel content
         .analysisSummaryHtml = "", # Accumulator for analysis summary content
 
-        # Variable name escaping utility for special characters
+        # Preserve simple legacy keys. All other names use a reserved prefix and
+        # UTF-8 hex: no two names collapse, including names resembling an encoded
+        # key. Only the prefix contains an underscore, keeping joined keys distinct.
         .escapeVar = function(x) {
             if (is.character(x)) {
-                # Mirror modelbuilder/jmvcore behavior
-                x <- gsub("[^A-Za-z0-9_]", "_", make.names(x))
+                x <- vapply(enc2utf8(x), function(value) {
+                    if (grepl("^[A-Za-z][A-Za-z0-9]*$", value)) return(value)
+                    paste0("_x", paste(sprintf("%02x", as.integer(charToRaw(value))), collapse = ""))
+                }, character(1), USE.NAMES = FALSE)
             }
             return(x)
         },
@@ -240,64 +244,116 @@ enhancedROCClass <- R6::R6Class(
               "decisionImpactPlot")
         },
 
-        # Every renderer reads private$.rocResults and friends, which only exist after .run()
-        # has executed in THIS R6 instance. jamovi re-renders on resize, theme change and when
-        # a saved .omv is reopened, none of which re-runs the analysis, so those renders drew
-        # nothing. The payload below is what a render needs and nothing that protobuf cannot
-        # serialise (no pROC objects, no caret objects, no functions): the cleaned data, the
-        # names, the direction chosen per predictor, the optimal-cutoff numbers and the custom
-        # cutoff table. .restoreFromState() rebuilds the pROC objects from it, which is
-        # deterministic given the direction.
+        # Store only coordinates and displayed summaries. No individual outcomes,
+        # predictors, fitted models or environments belong in saved image state.
         .plotStatePayload = function() {
-            # A multi-class run without a positive class has no ROC results but still draws.
-            if (length(private$.rocResults) == 0 && is.null(private$.multiClassOutcome)) return(NULL)
-            ad <- private$.analysisData
-            if (is.null(ad)) return(NULL)
-            keep <- intersect(c(private$.outcome, private$.predictors), names(ad))
-            ad <- as.data.frame(ad)[, keep, drop = FALSE]
-            rownames(ad) <- NULL
-            factor_levels <- list()
-            for (col in names(ad)) {
-                if (is.factor(ad[[col]])) {
-                    factor_levels[[col]] <- levels(ad[[col]])
-                    ad[[col]] <- as.character(ad[[col]])
-                }
-            }
+            if (is.null(private$.analysisData)) return(NULL)
+            withr::local_seed(if (is.finite(self$options$seed)) self$options$seed else 0)
             num_fields <- c("cutoff", "sensitivity", "specificity", "youden_index", "accuracy",
                             "true_positive", "true_negative", "false_positive", "false_negative")
-            roc <- lapply(private$.rocResults, function(r) {
+            roc <- lapply(names(private$.rocResults), function(predictor) {
+                r <- private$.rocResults[[predictor]]
+                curve <- r$roc
+                smoothed <- private$.rocSmoothed[[predictor]]
                 oc <- r$optimal_cutoff
                 oc_num <- if (is.null(oc)) NULL else lapply(oc[intersect(num_fields, names(oc))], as.numeric)
                 if (!is.null(oc) && !is.null(oc$method)) oc_num$method <- oc$method
                 cc <- r$custom_cutoffs
                 if (!is.null(cc)) { cc <- as.data.frame(cc); rownames(cc) <- NULL }
-                list(direction = r$roc$direction, optimal_cutoff = oc_num, custom_cutoffs = cc)
+                bands <- NULL
+                band_error <- NULL
+                if (isTRUE(self$options$rocCurve) && isTRUE(self$options$showConfidenceBands)) {
+                    bands <- tryCatch({
+                        private$.checkpoint()
+                        spec <- seq(0.1, 0.9, by = 0.1)
+                        ci <- pROC::ci.coords(curve, x = spec, input = "specificity",
+                            ret = "sensitivity", boot.n = self$options$bootstrapSamples,
+                            conf.level = self$options$confidenceLevel / 100)$sensitivity
+                        data.frame(FPR = 1 - spec, TPR_lower = ci[, 1], TPR_upper = ci[, 3])
+                    }, error = function(e) {
+                        if (identical(e$code, "restart")) stop(e)
+                        band_error <<- conditionMessage(e)
+                        NULL
+                    })
+                }
+                list(roc = list(sensitivities = as.numeric(curve$sensitivities),
+                                specificities = as.numeric(curve$specificities),
+                                thresholds = as.numeric(curve$thresholds),
+                                direction = curve$direction, auc = as.numeric(curve$auc)),
+                     smoothed = if (is.null(smoothed)) NULL else
+                         list(sensitivities = as.numeric(smoothed$sensitivities),
+                              specificities = as.numeric(smoothed$specificities)),
+                     optimal_cutoff = oc_num, custom_cutoffs = cc,
+                     bands = bands, band_error = band_error)
             })
-            mco <- private$.multiClassOutcome
-            list(
-                outcome = private$.outcome,
-                predictors = private$.predictors,
-                positiveClass = private$.positiveClass,
-                analysisData = ad,
-                factorLevels = factor_levels,
-                multiClassOutcome = if (is.null(mco)) NULL else as.character(mco),
-                multiClassLevels = if (is.null(mco)) NULL else levels(mco),
-                roc = roc
-            )
+            names(roc) <- names(private$.rocResults)
+            list(schema = 2L, sampleSize = nrow(private$.analysisData),
+                 predictors = private$.predictors, roc = roc,
+                 prevalence = if (length(roc)) private$.effectivePrevalence(
+                     mean(private$.binaryData == private$.positiveClass)) else NULL)
         },
 
-        # jamovi stores each image's state as a compressed RDS and warns above 500 KB, so
-        # the cleaned data frame is carried by rocCurvePlot only; the other images get the
-        # light payload and .restoreFromState() borrows the data frame from rocCurvePlot.
+        .prPlotData = function() {
+            if (!isTRUE(self$options$detectImbalance) || !length(private$.rocResults)) return(NULL)
+            curves <- lapply(names(private$.rocResults), function(predictor) {
+                pr <- private$.computePRMetrics(private$.analysisData[[predictor]],
+                    private$.analysisData[[private$.outcome]], private$.positiveClass,
+                    private$.rocObjects[[predictor]]$direction)
+                if (is.null(pr)) return(NULL)
+                list(data = data.frame(Recall = pr$curve$recall, Precision = pr$curve$precision,
+                                       Predictor = predictor), baseline = pr$prevalence)
+            })
+            curves <- Filter(Negate(is.null), curves)
+            if (!length(curves)) return(NULL)
+            list(data = do.call(rbind, lapply(curves, `[[`, "data")), baseline = curves[[1]]$baseline)
+        },
+
+        .multiClassPlotData = function() {
+            if (!isTRUE(self$options$multiClassROC) || is.null(private$.analysisData)) return(NULL)
+            outcome <- private$.multiClassOutcome %||% private$.analysisData[[private$.outcome]]
+            result <- list(nlevels = nlevels(outcome), predictors = private$.predictors, data = NULL)
+            if (nlevels(outcome) < 3 || self$options$multiClassStrategy != "ovr") return(result)
+            curves <- list()
+            for (predictor in private$.predictors) {
+                values <- private$.analysisData[[predictor]]
+                direction <- private$.ovrDirection(outcome, values)
+                for (level in levels(outcome)) {
+                    binary <- factor(ifelse(outcome == level, "Positive", "Negative"),
+                                     levels = c("Negative", "Positive"))
+                    roc <- pROC::roc(binary, values, direction = direction, quiet = TRUE)
+                    curves[[length(curves) + 1L]] <- data.frame(
+                        FPR = 1 - roc$specificities, TPR = roc$sensitivities,
+                        Class = level, Predictor = predictor)
+                }
+            }
+            result$data <- do.call(rbind, curves)
+            result
+        },
+
         .publishPlotStates = function() {
-            st <- tryCatch(private$.plotStatePayload(), error = function(e) NULL)
-            light <- if (is.null(st)) NULL else st[setdiff(names(st), "analysisData")]
-            extra <- list(calibrationPlotImage = list(calibration = private$.calibrationPlot),
-                          clinicalUtilityPlot = list(curves = private$.decisionCurves),
-                          decisionImpactPlot = list(curves = private$.decisionCurves))
+            st <- private$.plotStatePayload()
+            pr <- private$.prPlotData()
+            multi <- private$.multiClassPlotData()
             for (nm in private$.plotImageNames()) {
-                img <- tryCatch(self$results$results$get(nm), error = function(e) NULL)
-                if (!is.null(img)) img$setState(if (nm == "rocCurvePlot") st else c(light, extra[[nm]]))
+                payload <- switch(nm,
+                    calibrationPlotImage = list(calibration = private$.calibrationPlot),
+                    clinicalUtilityPlot = list(curves = private$.decisionCurves),
+                    decisionImpactPlot = list(curves = private$.decisionCurves),
+                    prcPlot = list(pr = pr),
+                    multiClassROCPlot = list(multi = multi),
+                    st)
+                if (!is.null(payload)) payload$schema <- 2L
+                # These two images are the only consumers of threshold coordinates.
+                if (!is.null(payload$roc)) {
+                    payload$roc <- lapply(payload$roc, function(r) {
+                        if (!nm %in% c("cutoffAnalysisPlot", "youdenIndexPlot")) r$roc$thresholds <- NULL
+                        if (nm != "rocCurvePlot") { r$bands <- NULL; r$band_error <- NULL }
+                        if (nm == "clinicalDecisionPlot") { r$roc <- NULL; r$smoothed <- NULL }
+                        r
+                    })
+                }
+                img <- self$results$results$get(nm)
+                img$setState(payload)
             }
         },
 
@@ -308,52 +364,25 @@ enhancedROCClass <- R6::R6Class(
             }
         },
 
-        # First call in every renderer. A no-op after a live .run(); otherwise rebuilds the
-        # private fields from the state this image carries.
+        # Restore the current image's coordinates, without a fit or a sibling image.
+        # These are plain plotting lists, not partially reconstructed pROC models.
         .restoreFromState = function(image) {
-            if (!is.null(private$.rocResults) && length(private$.rocResults) > 0) return(invisible(NULL))
             st <- tryCatch(image$state, error = function(e) NULL)
-            if (is.null(st) || is.null(st$roc)) return(invisible(NULL))
-            if (is.null(st$analysisData)) {
-                st$analysisData <- tryCatch(self$results$results$get("rocCurvePlot")$state$analysisData,
-                                            error = function(e) NULL)
-            }
-            if (is.null(st$analysisData)) return(invisible(NULL))
-            ad <- as.data.frame(st$analysisData)
-            for (col in names(st$factorLevels)) {
-                if (col %in% names(ad)) ad[[col]] <- factor(ad[[col]], levels = st$factorLevels[[col]])
-            }
-            private$.analysisData <- ad
-            private$.outcome <- st$outcome
+            if (is.null(st) || !identical(st$schema, 2L) || !length(st$roc)) return(FALSE)
             private$.predictors <- st$predictors
-            private$.positiveClass <- st$positiveClass
-            private$.binaryData <- ad[[st$outcome]]
-            private$.multiClassOutcome <- if (is.null(st$multiClassOutcome)) NULL else
-                factor(st$multiClassOutcome, levels = st$multiClassLevels)
-            results <- list(); objects <- list(); smoothed_list <- list()
-            smooth_method <- switch(as.character(self$options$smoothMethod %||% "none"),
-                                    binormal = "binormal", kernel = "density", NULL)
-            for (p in names(st$roc)) {
-                r <- st$roc[[p]]
-                if (!p %in% names(ad)) next
-                roc_obj <- tryCatch(.quietly(pROC::roc(
-                    response = ad[[st$outcome]], predictor = ad[[p]],
-                    direction = r$direction %||% "auto", ci = TRUE,
-                    conf.level = (self$options$confidenceLevel %||% 95) / 100, quiet = TRUE
-                )), error = function(e) NULL)
-                if (is.null(roc_obj)) next
-                if (!is.null(smooth_method)) {
-                    sm <- tryCatch(pROC::smooth(roc_obj, method = smooth_method), error = function(e) NULL)
-                    if (!is.null(sm)) smoothed_list[[p]] <- sm
-                }
-                objects[[p]] <- roc_obj
-                results[[p]] <- list(roc = roc_obj, optimal_cutoff = r$optimal_cutoff,
-                                     custom_cutoffs = r$custom_cutoffs, predictor = p)
+            private$.rocResults <- st$roc
+            private$.rocObjects <- lapply(st$roc, `[[`, "roc")
+            private$.rocSmoothed <- lapply(st$roc, `[[`, "smoothed")
+            TRUE
+        },
+
+        .plotStateUnavailable = function(image, ggtheme) {
+            st <- image$state
+            if (!is.null(st) && !identical(st$schema, 2L)) {
+                return(private$.plotMessage(ggtheme, .("Saved Plot Needs Recalculation"),
+                    .("This plot was saved by an earlier analysis version. Re-run the analysis to create updated plotting coordinates, then save the document again.")))
             }
-            private$.rocObjects <- objects
-            private$.rocSmoothed <- smoothed_list
-            private$.rocResults <- results
-            invisible(NULL)
+            FALSE
         },
         .run = function() {
             # Reset notice list, instructions, summary, and preset config at start of every run
@@ -711,7 +740,8 @@ enhancedROCClass <- R6::R6Class(
                 validation_result <- validate_clinical_data(
                     data = self$data,
                     required_vars = c(private$.outcome, private$.predictors),
-                    min_observations = 20,
+                    # Enforce the analysis minimum on complete cases below, not raw rows.
+                    min_observations = 1,
                     clinical_checks = TRUE
                 )
 
@@ -911,12 +941,13 @@ enhancedROCClass <- R6::R6Class(
                 return(NULL)
             }
 
-            # Check for insufficient data after removing missing values
-            if (nrow(data) < 10) {
+            # One analysis policy, independent of the optional validation helper:
+            # adding missing rows cannot make an undersized cohort eligible.
+            if (nrow(data) < 20) {
                 private$.addNotice(
                     type = "ERROR",
-                    title = .("Insufficient Data After Removing Missing Values"),
-                    content = sprintf(.("Only %s complete observations remain, which is too few to fit a ROC curve. \u2022 At least 10 are needed to compute anything at all, and far more than 10 are needed for a usable confidence interval \u2014 at 5 cases and 5 non-cases a 95%% interval around an AUC of 0.80 still runs from roughly 0.51 to 1.00. \u2022 Check whether missing values in the outcome or the predictors are removing more rows than you expect."), nrow(data))
+                    title = .("Data Validation Failed"),
+                    content = sprintf(.("Only %s complete observations remain. This analysis requires at least 20 observations with a recorded outcome and every selected predictor. This is a minimum sample-size policy, not a guarantee of reliable estimates; substantially larger samples may be needed. Check whether missing values are removing more rows than expected."), nrow(data))
                 )
                 return(NULL)
             }
@@ -1110,11 +1141,43 @@ enhancedROCClass <- R6::R6Class(
             ci <- c(limits[1], point_est, limits[2])
             attr(ci, "conf.level") <- conf_level
             attr(ci, "method") <- "bootstrap"
+            attr(ci, "boot.type") <- boot_type
             attr(ci, "boot.n") <- boot_n
+            attr(ci, "boot.used") <- sum(ok)
             attr(ci, "boot.stratified") <- boot_strat
             attr(ci, "auc") <- point_est
             class(ci) <- c("ci.auc", "ci", "numeric")
             ci
+        },
+
+        # Report the method that produced an interval, including BCa downgrades.
+        .bootstrapCiText = function(ci) {
+            type <- switch(attr(ci, "boot.type"),
+                perc = .("percentile"), basic = .("basic"), bca = "BCa", .("unspecified"))
+            sprintf(if (isTRUE(attr(ci, "boot.stratified"))) {
+                .("%1$s%% confidence intervals for the AUC are bootstrap intervals (%2$s) from %3$s usable resamples of %4$s attempted, drawn within each outcome class (boot package; Davison & Hinkley, 1997), random seed %5$s.")
+            } else {
+                .("%1$s%% confidence intervals for the AUC are bootstrap intervals (%2$s) from %3$s usable resamples of %4$s attempted, drawn from all rows (boot package; Davison & Hinkley, 1997), random seed %5$s.")
+            }, 100 * attr(ci, "conf.level"), type, attr(ci, "boot.used"),
+               attr(ci, "boot.n"), self$options$seed)
+        },
+
+        .aucCiText = function() {
+            vapply(names(private$.rocResults), function(predictor) {
+                result <- private$.rocResults[[predictor]]
+                ci <- result$roc$ci
+                text <- if (!is.null(result$ci_issue)) {
+                    .("No AUC confidence interval is reported because the interval is not estimable.")
+                } else if (identical(attr(ci, "method"), "bootstrap")) {
+                    private$.bootstrapCiText(ci)
+                } else {
+                    sprintf(.("%s%% confidence intervals for the AUC use DeLong's method (DeLong et al., 1988)."), self$options$confidenceLevel)
+                }
+                if (isTRUE(attr(ci, "bootstrap.failed"))) {
+                    text <- paste(text, .("The requested bootstrap interval could not be computed; DeLong's method was used as the fallback."))
+                }
+                paste0(predictor, ": ", text)
+            }, character(1), USE.NAMES = FALSE)
         },
 
         # Why no AUC interval can be shown (VAL-04), or NULL when one can. DeLong's variance is 0
@@ -1160,7 +1223,7 @@ enhancedROCClass <- R6::R6Class(
         # pair has one p-value. boot.n = Bootstrap samples: resamples for the bootstrap test,
         # permutations for Venkatraman's; DeLong ignores it. A failure is cached and re-raised.
         .pairTest = function(pred1, pred2) {
-            key <- paste(pred1, pred2, sep = "\n")
+            key <- paste(private$.escapeVar(pred1), private$.escapeVar(pred2), sep = "_vs_")
             res <- private$.rocTestCache[[key]]
             if (is.null(res)) {
                 r1 <- private$.rocResults[[pred1]]$roc
@@ -1248,15 +1311,16 @@ enhancedROCClass <- R6::R6Class(
                                 error = function(e) e
                             )
                             if (inherits(boot_ci, "error") || is.null(boot_ci)) {
+                                attr(roc_obj$ci, "bootstrap.failed") <- TRUE
                                 private$.addNotice(
                                     type = "WARNING",
                                     title = sprintf(.("Bootstrap CI Failed: %s"), predictor),
                                     # Two complete sentences instead of splicing an untranslated
                                     # English fragment through %s.
                                     content = if (inherits(boot_ci, "error")) {
-                                        sprintf(.("Bootstrap confidence interval computation failed for %1$s: %2$s. The DeLong interval is reported instead."), predictor, conditionMessage(boot_ci))
+                                        sprintf(.("Bootstrap confidence interval computation failed for %1$s: %2$s. DeLong's method is used instead; limits are shown only when estimable."), predictor, conditionMessage(boot_ci))
                                     } else {
-                                        sprintf(.("Bootstrap confidence interval computation failed for %s because no resample contained both outcome classes. The DeLong interval is reported instead."), predictor)
+                                        sprintf(.("Bootstrap confidence interval computation failed for %s because no resample contained both outcome classes. DeLong's method is used instead; limits are shown only when estimable."), predictor)
                                     }
                                 )
                             } else {
@@ -1376,7 +1440,7 @@ enhancedROCClass <- R6::R6Class(
                             )
                         }
 
-                        # Small sample size notice (fewer than 10 complete rows never get here:
+                        # Small sample size notice (fewer than 20 complete rows never get here:
                         # .prepareData() refuses them)
                         if (n_obs < 30) {
                             private$.addNotice(
@@ -1793,22 +1857,25 @@ enhancedROCClass <- R6::R6Class(
                       .("Both are in-sample estimates from these data; the AUC Lower CI and AUC Upper CI columns show how precisely this sample pins the AUC down.")), collapse = " ")
             )
 
-            # Finding: ticking "Use bootstrap CI" blanks Std. Error across every row, because a
-            # DeLong variance does not describe a bootstrap interval. That is the right call, but
-            # nothing said so and a reader assumes the computation failed.
+            # A failed bootstrap can leave some rows with DeLong limits. Match the
+            # standard error and the method note to each row's actual interval.
+            has_boot <- any(vapply(private$.rocResults, function(r) {
+                identical(attr(r$roc$ci, "method"), "bootstrap")
+            }, logical(1)))
+            aucTable$setNote("ci_method", paste(.rocLabel(private$.aucCiText()), collapse = "\n\n"))
             aucTable$setNote(
                 "std_error_blank",
-                if (isTRUE(self$options$useBootstrap)) {
-                    .("The Std. Error column is empty because the confidence limits are bootstrap limits. The standard error jamovi would otherwise show is DeLong's, which describes a DeLong interval and not this one; quoting it beside bootstrap limits would invite combining two different methods. Read the precision off the AUC Lower CI and AUC Upper CI columns instead.")
+                if (has_boot) {
+                    .("Std. Error is empty for rows whose confidence limits are bootstrap limits. DeLong's standard error is shown only beside an estimable DeLong interval, including a DeLong fallback after bootstrap failure. Read bootstrap precision from the AUC Lower CI and AUC Upper CI columns.")
                 } else {
                     NULL
                 }
             )
 
-            use_boot <- isTRUE(self$options$useBootstrap)
             for (predictor in names(private$.rocResults)) {
                 result <- private$.rocResults[[predictor]]
                 roc_obj <- result$roc
+                use_boot <- identical(attr(roc_obj$ci, "method"), "bootstrap")
 
                 # AUC interpretation
                 auc_value <- as.numeric(roc_obj$auc)
@@ -2977,21 +3044,11 @@ enhancedROCClass <- R6::R6Class(
             out <- c(paste0("<h3>", .("Statistical Methods and References"), "</h3>"),
                      para(.("ROC Curve Analysis"), .("Empirical ROC curves were computed with the pROC package (Robin et al., 2011). The AUC is the Mann-Whitney probability that a randomly chosen case lies further than a randomly chosen non-case in the direction that indicates the condition, with ties counted as one half (Hanley & McNeil, 1982); it equals the Mann-Whitney U statistic divided by the number of case/non-case pairs (Mann & Whitney, 1947).")))
 
-            if (isTRUE(o$useBootstrap)) {
-                type <- switch(o$bootstrapMethod, percentile = .("percentile"), basic = .("basic"), "BCa")
-                ci <- sprintf(if (isTRUE(o$stratifiedBootstrap)) {
-                    .("%1$s%% confidence intervals for the AUC are bootstrap intervals (%2$s) from %3$s resamples drawn within each outcome class (boot package; Davison & Hinkley, 1997), random seed %4$s.")
-                } else {
-                    .("%1$s%% confidence intervals for the AUC are bootstrap intervals (%2$s) from %3$s resamples of all rows (boot package; Davison & Hinkley, 1997), random seed %4$s.")
-                }, o$confidenceLevel, type, o$bootstrapSamples, o$seed)
-                if (isTRUE(private$.bcaFellBackToPercentile)) {
-                    ci <- c(ci, .("Where some resamples held a single outcome class, the percentile interval replaced BCa (see the notice)."))
-                }
-                cited <- c(cited, "davison")
-            } else {
-                ci <- sprintf(.("%s%% confidence intervals for the AUC use DeLong's method (DeLong et al., 1988)."), o$confidenceLevel)
-                cited <- c(cited, "delong")
-            }
+            ci <- private$.safeHtmlOutput(private$.aucCiText())
+            methods <- vapply(private$.rocResults, function(r) {
+                if (identical(attr(r$roc$ci, "method"), "bootstrap")) "davison" else "delong"
+            }, character(1))
+            cited <- c(cited, unique(methods))
             if (isTRUE(private$.delongWarned)) cited <- c(cited, "obuchowski", "feng")   # cited by the DeLong WARNING
             out <- c(out, para(.("AUC Confidence Interval"), ci))
 
@@ -3707,13 +3764,13 @@ enhancedROCClass <- R6::R6Class(
             report_html <- paste0(report_html, "<h5>", .("Methods Section"), ":</h5>")
             report_html <- paste0(report_html, "<div style='background-color: rgba(127, 127, 127, 0.06); color: inherit; padding: 10px; border-left: 4px solid #0066cc; margin: 5px 0;'>")
             methods_text <- sprintf(
-                .("ROC analysis was performed to evaluate the diagnostic performance of %1$s in predicting %2$s using %3$d observations. The analysis was conducted using the pROC package in R, with AUC calculation and %4$s%% confidence intervals determined using %5$s methodology."),
+                .("ROC analysis was performed to evaluate the diagnostic performance of %1$s in predicting %2$s using %3$d observations. Empirical AUCs were calculated using the pROC package in R."),
                 ifelse(n_predictors == 1, paste0("'", private$.safeHtmlOutput(best_predictor), "'"), paste(n_predictors, "predictors")),
                 private$.safeHtmlOutput(private$.outcome),
-                n_obs,
-                format(self$options$confidenceLevel),
-                ifelse(self$options$useBootstrap, "bootstrap", "DeLong")
+                n_obs
             )
+            methods_text <- paste(methods_text,
+                paste(private$.safeHtmlOutput(private$.aucCiText()), collapse = " "))
             # Which level is positive travels with the pasted text (the Outcome coding table does
             # not): "case" and "non-case" below mean these levels.
             pos_html <- private$.safeHtmlOutput(private$.positiveClass)
@@ -4064,13 +4121,9 @@ enhancedROCClass <- R6::R6Class(
 
         # Plotting functions
         .plotROCCurve = function(image, ggtheme, theme, ...) {
-            # The confidence bands come from pROC::ci.coords(), which is a stratified
-            # bootstrap with no analytic alternative, and it runs in this renderer - after
-            # .run()'s withr::local_seed() has already been restored. Unseeded, the bands
-            # moved on every resize, .omv reopen and export, and the user's seed option
-            # could not reach them at all.
-            withr::local_seed(if (is.finite(self$options$seed)) self$options$seed else 0)
-            private$.restoreFromState(image)
+            # Seeded pointwise bands were computed with the analysis and saved as
+            # coordinates. Resizing or exporting never resamples or refits.
+            if (!private$.restoreFromState(image)) return(private$.plotStateUnavailable(image, ggtheme))
             # Check if ROC curve plotting is enabled
             if (!self$options$rocCurve) {
                 return(FALSE)
@@ -4098,7 +4151,7 @@ enhancedROCClass <- R6::R6Class(
                         roc_obj <- private$.rocResults[[predictor]]$roc
 
                         # Validate ROC object
-                        if (is.null(roc_obj) || !inherits(roc_obj, "roc")) {
+                        if (is.null(roc_obj) || !length(roc_obj$sensitivities)) {
                             next
                         }
 
@@ -4124,6 +4177,12 @@ enhancedROCClass <- R6::R6Class(
                     # by (FPR, TPR) first draws the staircase the tables describe.
                     plot_data <- plot_data[order(plot_data$Predictor, plot_data$FPR, plot_data$TPR), ]
 
+                    # Curves and confidence ribbons share jamovi's selected palette.
+                    n_colors <- length(unique(plot_data$Predictor))
+                    cb_colors <- tryCatch(
+                        jmvcore::colorPalette(n_colors, theme$palette, "color"),
+                        error = function(e) private$.getColorblindSafePalette(n_colors))
+
                     # Create the plot
                     p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = FPR, y = TPR, color = Predictor)) +
                         ggplot2::geom_line(linewidth = 1.2) +
@@ -4136,6 +4195,7 @@ enhancedROCClass <- R6::R6Class(
                         ) +
                         ggplot2::xlim(0, 1) +
                         ggplot2::ylim(0, 1) +
+                        ggplot2::scale_color_manual(values = cb_colors) +
                         ggtheme +
                         private$.plotThemeFor() +
                         ggplot2::theme(
@@ -4143,26 +4203,18 @@ enhancedROCClass <- R6::R6Class(
                             legend.position = "bottom"
                         )
 
-                    # Apply colorblind-safe palette
-                    cb_colors <- private$.getColorblindSafePalette(length(unique(plot_data$Predictor)))
-                    p <- p + ggplot2::scale_color_manual(values = cb_colors)
-
                     # Pointwise bootstrap intervals for sensitivity at nine fixed specificities, not a
                     # simultaneous band: ONE ci.coords() call per predictor (all nine from the same
                     # resamples) with the user's Bootstrap samples rather than pROC's default 2000.
                     if (self$options$showConfidenceBands) {
-                        spec_grid <- seq(0.1, 0.9, by = 0.1)
-                        band_list <- list()
-                        for (predictor in names(private$.rocResults)) {
-                            roc_obj <- private$.rocResults[[predictor]]$roc
-                            if (is.null(roc_obj$ci)) next
-                            private$.checkpoint()
-                            sens <- pROC::ci.coords(roc_obj, x = spec_grid, input = "specificity",
-                                ret = "sensitivity", boot.n = self$options$bootstrapSamples,
-                                conf.level = self$options$confidenceLevel / 100)$sensitivity
-                            band_list[[predictor]] <- data.frame(FPR = 1 - spec_grid, TPR_lower = sens[, 1],
-                                                                 TPR_upper = sens[, 3], Predictor = predictor)
-                        }
+                        band_list <- lapply(names(private$.rocResults), function(predictor) {
+                            result <- private$.rocResults[[predictor]]
+                            if (!is.null(result$band_error)) stop(result$band_error)
+                            band <- result$bands
+                            if (is.null(band)) return(NULL)
+                            band$Predictor <- predictor
+                            band
+                        })
                         ci_data <- do.call(rbind, band_list)
                         if (!is.null(ci_data)) ci_data <- ci_data[stats::complete.cases(ci_data), , drop = FALSE]
                         if (!is.null(ci_data) && nrow(ci_data) > 0) {
@@ -4222,7 +4274,7 @@ enhancedROCClass <- R6::R6Class(
             )
         },
         .plotComparativeROC = function(image, ggtheme, theme, ...) {
-            private$.restoreFromState(image)
+            if (!private$.restoreFromState(image)) return(private$.plotStateUnavailable(image, ggtheme))
             if (is.null(private$.rocResults) || length(private$.rocResults) < 2) {
                 return(FALSE)
             }
@@ -4366,7 +4418,7 @@ enhancedROCClass <- R6::R6Class(
             )
         },
         .plotCutoffAnalysis = function(image, ggtheme, theme, ...) {
-            private$.restoreFromState(image)
+            if (!private$.restoreFromState(image)) return(private$.plotStateUnavailable(image, ggtheme))
             if (is.null(private$.rocResults) || length(private$.rocResults) == 0) {
                 return(FALSE)
             }
@@ -4384,7 +4436,8 @@ enhancedROCClass <- R6::R6Class(
 
                     for (predictor in names(private$.rocResults)) {
                         roc_obj <- private$.rocResults[[predictor]]$roc
-                        coords <- pROC::coords(roc_obj, "all", ret = c("threshold", "sensitivity", "specificity"))
+                        coords <- data.frame(threshold = roc_obj$thresholds, sensitivity = roc_obj$sensitivities,
+                                             specificity = roc_obj$specificities)
 
                         # Prepare data for long format
                         threshold_data <- data.frame(
@@ -4437,7 +4490,7 @@ enhancedROCClass <- R6::R6Class(
             )
         },
         .plotYoudenIndex = function(image, ggtheme, theme, ...) {
-            private$.restoreFromState(image)
+            if (!private$.restoreFromState(image)) return(private$.plotStateUnavailable(image, ggtheme))
             if (is.null(private$.rocResults) || length(private$.rocResults) == 0) {
                 return(FALSE)
             }
@@ -4455,7 +4508,8 @@ enhancedROCClass <- R6::R6Class(
 
                     for (predictor in names(private$.rocResults)) {
                         roc_obj <- private$.rocResults[[predictor]]$roc
-                        coords <- pROC::coords(roc_obj, "all", ret = c("threshold", "sensitivity", "specificity"))
+                        coords <- data.frame(threshold = roc_obj$thresholds, sensitivity = roc_obj$sensitivities,
+                                             specificity = roc_obj$specificities)
                         youden <- coords$sensitivity + coords$specificity - 1
 
                         youden_data <- data.frame(
@@ -4510,7 +4564,7 @@ enhancedROCClass <- R6::R6Class(
             )
         },
         .plotClinicalDecision = function(image, ggtheme, theme, ...) {
-            private$.restoreFromState(image)
+            if (!private$.restoreFromState(image)) return(private$.plotStateUnavailable(image, ggtheme))
             if (is.null(private$.rocResults) || length(private$.rocResults) == 0) {
                 return(FALSE)
             }
@@ -4579,9 +4633,7 @@ enhancedROCClass <- R6::R6Class(
                     # otherwise the reference line contradicts them whenever "use observed
                     # prevalence" is ticked.
                     ref_prev <- tryCatch(
-                        private$.effectivePrevalence(
-                            mean(private$.binaryData == levels(private$.binaryData)[2])
-                        ),
+                        image$state$prevalence,
                         error = function(e) NULL
                     )
                     if (!is.null(ref_prev) && !is.na(ref_prev)) {
@@ -4605,37 +4657,15 @@ enhancedROCClass <- R6::R6Class(
             )
         },
         .plotPRC = function(image, ggtheme, theme, ...) {
-            private$.restoreFromState(image)
-            # No ROC results (e.g. multi-class mode without a positive class): nothing binary to draw.
-            if (!self$options$detectImbalance || length(private$.rocResults) == 0) {
-                return(FALSE)
+            st <- image$state
+            if (!isTRUE(self$options$detectImbalance)) return(FALSE)
+            if (is.null(st) || !identical(st$schema, 2L) || is.null(st[["pr"]])) {
+                return(private$.plotStateUnavailable(image, ggtheme))
             }
-
-            # Plot size is applied with setSize() in .init(). setState() here only stored
-            # render-time payload and never reached jamovi's image sizing, so plotWidth /
-            # plotHeight had no effect on the output at all.
-
             tryCatch(
                 {
-                    # ggplot2 available via package Imports
-
-                    plot_data <- data.frame()
-                    baseline <- NA_real_
-                    data <- private$.analysisData
-
-                    # The table's own curve (.computePRMetrics), in decreasing-threshold order and
-                    # drawn as a 'vh' step: precision holds between operating points, so the step
-                    # encloses exactly the average precision. Straight lines in PR space would pass
-                    # through unreachable points (Davis & Goadrich 2006).
-                    for (predictor in names(private$.rocResults)) {
-                        pr <- private$.computePRMetrics(data[[predictor]], data[[private$.outcome]],
-                                                        private$.positiveClass,
-                                                        private$.rocObjects[[predictor]]$direction %||% "<")
-                        if (is.null(pr)) next
-                        baseline <- pr$prevalence
-                        plot_data <- rbind(plot_data, data.frame(Recall = pr$curve$recall,
-                            Precision = pr$curve$precision, Predictor = predictor))
-                    }
+                    plot_data <- as.data.frame(st$pr$data)
+                    baseline <- st$pr$baseline
 
                     if (nrow(plot_data) == 0) {
                         return(FALSE)
@@ -4673,7 +4703,7 @@ enhancedROCClass <- R6::R6Class(
             )
         },
         .plotCROC = function(image, ggtheme, theme, ...) {
-            private$.restoreFromState(image)
+            if (!private$.restoreFromState(image)) return(private$.plotStateUnavailable(image, ggtheme))
             if (is.null(private$.rocResults) || length(private$.rocResults) == 0) {
                 return(FALSE)
             }
@@ -4761,7 +4791,7 @@ enhancedROCClass <- R6::R6Class(
             )
         },
         .plotConvexHull = function(image, ggtheme, theme, ...) {
-            private$.restoreFromState(image)
+            if (!private$.restoreFromState(image)) return(private$.plotStateUnavailable(image, ggtheme))
             if (is.null(private$.rocResults) || length(private$.rocResults) == 0) {
                 return(FALSE)
             }
@@ -5421,9 +5451,12 @@ enhancedROCClass <- R6::R6Class(
                 suppressWarnings(pROC::ci.auc(roc_obj, conf.level = self$options$confidenceLevel / 100, method = "delong"))
             }
             lim <- as.numeric(ci)[c(1, 3)]
-            if (length(ci) == 3 && all(is.finite(lim)) && lim[2] > lim[1]) return(lim)
+            if (length(ci) == 3 && all(is.finite(lim)) && lim[2] > lim[1]) {
+                if (boot) attr(lim, "method_note") <- private$.bootstrapCiText(ci)
+                return(lim)
+            }
             if (boot) {
-                .("No bootstrap interval could be formed: every resample gave the same AUC, or none held both groups.")
+                .("No bootstrap interval could be formed: resamples lacked variation or both groups, or the requested interval type could not be computed.")
             } else if (min(length(roc_obj$cases), length(roc_obj$controls)) < 2) {
                 # pROC returns no DeLong interval at all then; with both groups of 2 or more a
                 # rejected interval means a variance of exactly 0 (the branch below).
@@ -5446,7 +5479,7 @@ enhancedROCClass <- R6::R6Class(
             level <- self$options$confidenceLevel
             aucTable$setNote("seed", if (boot) .fmt(.("Random seed: {seed}"), seed = self$options$seed))
             aucTable$setNote("ci", if (boot) {
-                sprintf(.("AUC limits are %1$s%% bootstrap intervals (%2$s, %3$s resamples)."), level,
+                sprintf(.("AUC limits use %1$s%% bootstrap intervals when estimable (requested type: %2$s; %3$s attempted resamples). Each interval's footnote identifies the actual type and usable resample count."), level,
                         switch(self$options$bootstrapMethod, percentile = .("percentile"), basic = .("basic"), "BCa"), self$options$bootstrapSamples)
             } else if (ovr) {
                 sprintf(.("AUC limits are %s%% DeLong intervals (DeLong et al. 1988)."), level)
@@ -5548,6 +5581,11 @@ enhancedROCClass <- R6::R6Class(
                                 )
                                 aucTable$addRow(rowKey = key, values = row)
                                 if (is.character(class_ci)) private$.blankCells(aucTable, key, c("auc_lower", "auc_upper"), class_ci)
+                                if (!is.null(attr(class_ci, "method_note"))) {
+                                    for (col in c("auc_lower", "auc_upper"))
+                                        aucTable$addFootnote(col = col, rowKey = key,
+                                            note = attr(class_ci, "method_note"))
+                                }
                             }
 
                             # OVR Macro Average
@@ -5684,27 +5722,17 @@ enhancedROCClass <- R6::R6Class(
             }
         },
         .plotMultiClassROC = function(image, ggtheme, theme, ...) {
-            private$.restoreFromState(image)
-            if (!self$options$multiClassROC) {
-                return(FALSE)
+            st <- image$state
+            if (!isTRUE(self$options$multiClassROC)) return(FALSE)
+            if (is.null(st) || !identical(st$schema, 2L) || is.null(st[["multi"]])) {
+                return(private$.plotStateUnavailable(image, ggtheme))
             }
-
-            # Plot size is applied with setSize() in .init(). setState() here only stored
-            # render-time payload and never reached jamovi's image sizing, so plotWidth /
-            # plotHeight had no effect on the output at all.
-
             tryCatch(
                 {
-                    # ggplot2 available via package Imports
+                    plot_data <- as.data.frame(st$multi$data)
+                    n_levels <- st$multi$nlevels
 
-                    plot_data <- data.frame()
-                    outcome <- if (!is.null(private$.multiClassOutcome)) {
-                        private$.multiClassOutcome
-                    } else {
-                        private$.analysisData[[private$.outcome]]
-                    }
-
-                    if (nlevels(outcome) < 3) {
+                    if (n_levels < 3) {
                         # The panel is shown whenever multiClassROC is ticked, because the
                         # declarative visible: rule in the .r.yaml cannot count outcome levels.
                         # Say why it is empty rather than leaving a blank panel.
@@ -5712,7 +5740,7 @@ enhancedROCClass <- R6::R6Class(
                             ggtheme,
                             "Multi-Class ROC Needs 3 or More Outcome Levels",
                             paste0(
-                                "The outcome variable has ", nlevels(outcome),
+                                "The outcome variable has ", n_levels,
                                 " levels, so there is no multi-class curve to draw. For a two-level ",
                                 "outcome the standard ROC results already give the complete analysis."
                             )
@@ -5736,34 +5764,6 @@ enhancedROCClass <- R6::R6Class(
                                 "one-vs-one pairwise AUC, and the two do not agree."
                             )
                         ))
-                    }
-
-                    for (predictor in private$.predictors) {
-                        pred_vals <- private$.analysisData[[predictor]]
-
-                        if (self$options$multiClassStrategy == "ovr") {
-                            ovr_dir <- private$.ovrDirection(outcome, pred_vals)
-                            for (lvl in levels(outcome)) {
-                                binary_outcome <- factor(ifelse(outcome == lvl, "Positive", "Negative"),
-                                    levels = c("Negative", "Positive")
-                                )
-
-                                roc_obj <- pROC::roc(
-                                    response = binary_outcome, predictor = pred_vals,
-                                    direction = ovr_dir, quiet = TRUE
-                                )
-
-                                coords <- pROC::coords(roc_obj, "all", ret = c("specificity", "sensitivity"))
-
-                                df <- data.frame(
-                                    FPR = 1 - coords$specificity,
-                                    TPR = coords$sensitivity,
-                                    Class = lvl,
-                                    Predictor = predictor
-                                )
-                                plot_data <- rbind(plot_data, df)
-                            }
-                        }
                     }
 
                     if (nrow(plot_data) == 0) {
@@ -5791,7 +5791,7 @@ enhancedROCClass <- R6::R6Class(
                             legend.position = "bottom"
                         )
 
-                    if (length(private$.predictors) > 1) {
+                    if (length(st$multi$predictors) > 1) {
                         p <- p + ggplot2::facet_wrap(~Predictor)
                     }
 

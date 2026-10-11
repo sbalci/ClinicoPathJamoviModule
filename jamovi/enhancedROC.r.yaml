@@ -806,6 +806,7 @@ items:
                 - predictors
                 - positiveClass
                 - direction
+                - smoothMethod
                 - showCutoffPoints
                 - showConfidenceBands
                 - confidenceLevel

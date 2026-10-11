@@ -446,9 +446,11 @@ test_that("C113 ties count one half and a note gives the bounds for how they are
 })
 
 test_that("C93 an explicit NA outcome level is excluded, not counted negative (VAL-enhancedROC-15)", {
-    d <- erv_d1(); d$status <- addNA(factor(c(as.character(d$status[1:18]), NA, NA), levels = c("Benign", "Malignant")))
+    # Retain 20 complete rows under the analysis minimum; add two explicit NA levels.
+    d <- rbind(erv_d1(), erv_d1()[19:20, ])
+    d$status <- addNA(factor(c(as.character(d$status[1:20]), NA, NA), levels = c("Benign", "Malignant")))
     r <- erv_run(d, "status", "marker", "Malignant")
-    auc <- mean(erv_psi(d$marker[1:18][d$status[1:18] == "Malignant"], d$marker[1:18][d$status[1:18] == "Benign"]))
+    auc <- mean(erv_psi(d$marker[1:20][d$status[1:20] == "Malignant"], d$marker[1:20][d$status[1:20] == "Benign"]))
     expect_equal(erv_cell(r$results$aucSummary, "marker", "auc"), auc)
 })
 

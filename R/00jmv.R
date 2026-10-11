@@ -1359,7 +1359,7 @@
         `title`="A simple, step-by-step guide to interpreting decision curve analysis", 
         `publisher`="Diagnostic and Prognostic Research", 
         `volume`=3, 
-        `pages`=18, 
+        `pages`="18", 
         `doi`="10.1186/s41512-019-0064-7", 
         `url`="https://doi.org/10.1186/s41512-019-0064-7"), 
     `Vickers2023DCAInference`=list(
@@ -4329,7 +4329,7 @@
         `publisher`="Epidemiologic Perspectives & Innovations", 
         `volume`=3, 
         `issue`=1, 
-        `pages`=11, 
+        `pages`="11", 
         `doi`="10.1186/1742-5573-3-11", 
         `url`="https://doi.org/10.1186/1742-5573-3-11"), 
     `anscombe1956`=list(
@@ -4545,7 +4545,7 @@
         `title`="Calibration: the Achilles heel of predictive analytics", 
         `publisher`="BMC Medicine", 
         `volume`=17, 
-        `pages`=230, 
+        `pages`="230", 
         `doi`="10.1186/s12916-019-1466-7", 
         `url`="https://doi.org/10.1186/s12916-019-1466-7"), 
     `ProvostFawcett2001`=list(
@@ -4566,7 +4566,7 @@
         `title`="pROC: an open-source package for R and S+ to analyze and compare ROC curves", 
         `publisher`="BMC Bioinformatics", 
         `volume`=12, 
-        `pages`=77, 
+        `pages`="77", 
         `doi`="10.1186/1471-2105-12-77", 
         `url`="https://doi.org/10.1186/1471-2105-12-77"), 
     `HanleyMcNeil1982`=list(

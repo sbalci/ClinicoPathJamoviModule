@@ -1742,6 +1742,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                 "predictors",
                                 "positiveClass",
                                 "direction",
+                                "smoothMethod",
                                 "showCutoffPoints",
                                 "showConfidenceBands",
                                 "confidenceLevel",
@@ -2548,7 +2549,7 @@ enhancedROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "enhancedROC",
-                version = c(1,0,83),
+                version = c(1,0,84),
                 options = options,
                 results = enhancedROCResults$new(options=options),
                 data = data,

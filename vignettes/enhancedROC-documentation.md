@@ -14,6 +14,21 @@
 
 ## 1a. Changelog
 
+- **Date**: 2026-10-11, analysis version 1.0.84
+- **Summary**: AUC table notes, methods, and copy-ready reports identify the actual
+  interval method per marker, including bootstrap failures followed by DeLong and
+  BCa downgrades to percentile. DeLong fallback rows show their matching standard
+  errors. Distinct marker and class labels have distinct internal keys, including
+  punctuation and Unicode. Ordinary ROC analyses require 20 complete observations
+  across the outcome and all selected predictors. This minimum is an analysis
+  policy, not a mathematical requirement or an assurance of adequate precision.
+  Adding missing rows cannot bypass it. Frozen-model validation uses its separate
+  eligibility checks. Statistical defaults are unchanged. Plots save their own
+  coordinates and summaries, without cleaned input rows or model objects.
+  Resizing/exporting reuses those coordinates, including seeded confidence bands.
+  Recalculate older saved plot states when prompted. ROC curves and ribbons follow
+  the global jamovi palette. Citation metadata now survives document serialization.
+
 - **Date**: 2026-08-29
 - **Summary**: Comprehensive documentation suite created & verified against active schemas and backend implementation.
 
@@ -45,7 +60,7 @@
 | `positiveClass` | `Level` | `NULL` (allowNone) | Positive class; never inferred from level order (numeric 0/1 outcome: 1) |
 | `predictors` | `Variables` | `NULL` | Predictor Variables |
 | `analysisType` | `List` | `single` | Analysis Type |
-| `direction` | `List` | `auto` | Direction |
+| `direction` | `List` | `higher` | Direction |
 | `youdenOptimization` | `Bool` | `TRUE` | Youden index optimization |
 | `customCutoffs` | `String` | `` | Custom Cutoffs |
 | `sensitivityThreshold` | `Number` | `0` | Minimum sensitivity |
@@ -179,4 +194,3 @@ sequenceDiagram
 - **Data Filtering**: Ensure observations with missing values are handled gracefully according to analysis options.
 - **Formula Conflicts**: Use isolated environment calls or base formula methods when interacting with `ggstatsplot` or formula parsers.
 - **Safe Deparsing**: Use `deparse(val)` in syntax generation (`asSource()`) to escape column names with spaces or special symbols.
-
