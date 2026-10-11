@@ -578,7 +578,6 @@ importFrom(Hmisc,
   rcorr.cens,
   rcorrp.cens
 )
-importFrom(MASS,ginv)
 importFrom(PRROC,pr.curve)
 importFrom(R6,R6Class)
 importFrom(RColorBrewer,brewer.pal)

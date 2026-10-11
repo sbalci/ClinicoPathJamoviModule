@@ -5,6 +5,131 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-10-11 — meddecide audit tests: "known failures" hid two real defects among stale pins
+
+- **Failure mode:** after the psychopdaROC refactor (2026-10-10) and two decisioncalculator passes,
+  `test-meddecide-library-audit.R` had 9 red blocks and the meddecide release test had 2. They were
+  carried for a day as "pre-existing, not ROC". 9 of the 11 pinned behaviour that had changed on
+  purpose: a Run gate, an explicit negative class, a refused meta-analysis, rows moved to another
+  table. The other two were real: a checkbox title starting with "Show", and a stale
+  `@importFrom MASS ginv` that nothing called.
+- **Detection signal:** reading every failure message instead of counting them.
+- **Prevention rule:**
+  - A refactor that changes behaviour on purpose updates the tests that pin the old behaviour in
+    the same pass.
+  - A failure stays in a "known" list only with a one-line diagnosis of each block, so a real
+    defect cannot hide behind a count.
+  - When an audit regex fires on correct code ("95% interval" read as `% i`), narrow the regex;
+    do not reword the code.
+
+---
+
+## 2026-10-11 — enhancedROC: fixing a wrong sentence by moving it deleted a useful one
+
+- **Failure mode:** "N of M rows were analysed" appeared beside "Nothing is computed until you
+  choose a positive class". The first fix moved the "Rows Excluded" notice after every early
+  return. That also removed it from runs refused for too few rows, which is where knowing how many
+  rows were dropped matters most.
+- **Detection signal:** two existing validation tests ("2 rows had a missing outcome", 18 of 20
+  rows) failed after the move. Both runs end with an ERROR, not with the unset-class INFO.
+- **Prevention rule:** when a message is false on one path, fix the words before moving the
+  message. List every early return the move would skip, and ask whether the message helps there.
+  Here the fix was "can be analysed", with the notice kept where it was.
+
+---
+
+## 2026-10-11 — enhancedROC: hiding table notes by default also hid why a cell was blank
+
+- **Failure mode:** the opt-in table-notes pass (`.applyTableNotesOption`, notes off by default) strips every cell
+  footnote. That includes the one `.blankCells()` attaches to say why a statistic is not shown, so a McClish pAUC
+  cell came out empty with no word anywhere on the page. The "computed, never defaulted" rule allows a blank cell
+  only together with the reason.
+- **Detection signal:** `/review-function` reproduction: partial range 0.9-1.0 with extreme controls gave a blank
+  normalized pAUC; the explanation appeared only with Table notes ticked.
+- **Prevention rule:** a display-wide switch that hides notes must exempt the notes another rule requires.
+  Before adding one, list every rule-mandated note (blank-cell reason, seed) and test each with the switch off.
+
+---
+
+## 2026-10-11 — enhancedROC: one seed per run made every resampled number depend on what ran before it
+
+- **Failure mode:** `.run()` called `withr::local_seed(seed)` once, and every bootstrap CI, band, comparison
+  test and validation loop drew from that one stream in turn. A predictor's bootstrap CI changed with the order
+  of the predictors (imaging_score 0.7810-0.8718 listed second, 0.7794-0.8714 alone), and a Venkatraman p with
+  Bootstrap CIs on or off. The note "Random seed: 123" printed beside each of them reproduced neither. The same
+  pass found pROC's permutation p passed through raw: p = 0 with 200 permutations, shown as "p < 0.001".
+- **Detection signal:** `/check-function-full` oracle checks: re-running one predictor alone against the same
+  seed did not reproduce its interval; the Venkatraman p moved when an unrelated option was toggled.
+- **Prevention rule:** wrap each resampling call (not each draw, and not the whole run) in
+  `withr::with_seed(seed, ...)`; test that a resampled result is identical with and without the other
+  predictors/options. A Monte Carlo p is `(b + 1) / (B + 1)`, never `b / B`.
+
+---
+
+## 2026-10-11 — enhancedROC: a default-settings differential run called a live control unused
+
+- **Failure mode:** the differential run showed `workloadPopulationSize` changing nothing, and the fix plan
+  disabled it unless Observed prevalence was unticked. The additional-prevalence scenarios use it whatever that
+  checkbox says, so the plan would have greyed out a control that still drives projected rows.
+- **Detection signal:** the Codex plan review traced every reader of the option (`R/enhancedROC.b.R` workload
+  rows, `R/enhancedROC-validation.R:130`) and found the second consumer.
+- **Prevention rule:** NO-CHANGE in a differential run is a statement about one context, not about the option.
+  Before adding `enable:`/removing an option, grep every reader of `self$options$<x>` and `options$<x>`
+  (helpers included) and re-run the differential in each reader's context.
+
+---
+
+## 2026-10-11 — enhancedROC: two agents built the same option at once
+
+- **Failure mode:** a Claude session and a Codex session implemented the table-notes toggle in parallel.
+  Each added a `showTableNotes` option and checkbox, which left a duplicate option in `.a.yaml` and a
+  duplicate control in `.u.yaml` (a stuck skeleton in jamovi). The Codex session's search-replace also
+  rewrote the inside of the Claude helper. `ListAgents` reported no peers: it lists Claude sessions only.
+- **Detection signal:** the `.a.yaml` and `.u.yaml` were reported as "changed on disk" right after `prepare()`.
+  `.b.R`, `.r.yaml` and six test files had mtimes under a minute old, and `ps` showed Codex app-server processes.
+- **Prevention rule:** an empty `ListAgents` does not mean no peer. Before a batch of edits, also check
+  `stat -f %Sm` on the analysis files. After each `prepare()`, grep for duplicate option names.
+
+---
+
+## 2026-10-11 — enhancedROC: the code moved while the audit was being adjudicated
+
+- **Failure mode:** an independent audit tested commit `d6d3c71d6`; while its findings were still being
+  adjudicated, commit `9fc5a9b48` changed `R/enhancedROC.b.R`. Adjudicators reproducing findings on the working
+  tree would have "refuted" defects that were real in the audited version.
+- **Detection signal:** the md5 of `R/enhancedROC.b.R` no longer matched the hash recorded in the report header.
+- **Prevention rule:** record the audited commit and file hashes, and adjudicate against an exact copy of that
+  version (`git show <commit>:R/...`); report each finding's status on the new HEAD separately.
+
+---
+
+## 2026-10-11 — kappaSizePower: notes written from abstracts named the wrong test and checked the wrong cells
+
+- **Failure mode:** with the method papers paywalled, the 2026-10-09 notes on the test behind the N
+  were written from abstracts and our own simulations.
+  - **The 3+-rater warning was blamed on the wrong cause for 3-5 categories.** It blamed "a
+    chi-square over all agreement patterns". But those cells are already pooled (Altaye, Donner &
+    Eliasziw p.2482), and the measured size inflation came from plugging in the raw rating
+    proportions instead of the paper's ML re-estimate at κ0 (p.2483).
+  - **The likelihood-ratio test was named instead of the papers' own test.** The papers' own
+    1-df test is the goodness-of-fit chi-square on all-agree cells plus one pooled disagreement
+    cell.
+  - **The binary rater model was credited to kappaSize, not its authors.** It is the published
+    Altaye, Donner & Klar eq. (4) model.
+  - **The binary 3+-rater sparse-cell notice judged the wrong cells.** It used the unpooled
+    "exactly k of n" cells that the published test does not use (6 raters with a 5% finding was
+    flagged at 0.0003, while its pooled cells are all at least 6.3).
+- **Detection signal:** the full texts. Two independent readers per paper, reproduction of every
+  published sample size (66, 66/40 and Table IV), three judges per claim, and the decisive pages
+  re-read in session.
+- **Prevention rule:**
+  - Do not put a statement about what a published method does into a user-facing string on the
+    strength of its abstract. Mark it as pending in the report until the full text is read.
+  - A guard that protects an approximation must check the quantities the approximation actually
+    uses: here, the cells of the test the N is sized for.
+
+---
+
 ## 2026-10-10 — psychopdaROC: align power with its null hypothesis and repair reruns
 
 - Power and required sample size now test each marker's AUC against 0.5 regardless

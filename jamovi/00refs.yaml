@@ -5058,7 +5058,7 @@ refs:
         type: article
         author: "Venkatraman, E. S., & Begg, C. B."
         year: 1996
-        title: A distribution-free procedure for comparing receiver operating characteristic curves from a paired experiment
+        title: A distribution-free procedure for comparing receiver operating characteristic curves for a paired experiment
         publisher: Biometrika
         volume: 83
         issue: 4
@@ -5162,5 +5162,39 @@ refs:
         pages: 403-411
         doi: 10.1093/biomet/66.3.403
         url: "https://doi.org/10.1093/biomet/66.3.403"
+
+    Keilwagen2014:
+        type: article
+        author: "Keilwagen, J., Grosse, I., & Grau, J."
+        year: 2014
+        title: Area under precision-recall curves for weighted and unweighted data
+        publisher: PLoS ONE
+        volume: 9
+        issue: 3
+        pages: e92209
+        doi: 10.1371/journal.pone.0092209
+        url: "https://doi.org/10.1371/journal.pone.0092209"
+
+    DavisonHinkley1997:
+        type: book
+        author: "Davison, A. C., & Hinkley, D. V."
+        year: 1997
+        title: Bootstrap Methods and their Application
+        publisher: Cambridge University Press
+        doi: 10.1017/CBO9780511802843
+        url: "https://doi.org/10.1017/CBO9780511802843"
+
+    Noma2021:
+        type: article
+        author: "Noma, H., Shinozaki, T., Iba, K., Teramukai, S., & Furukawa, T. A."
+        year: 2021
+        title: Confidence intervals of prediction accuracy measures for multivariable prediction models based on the bootstrap-based optimism correction methods
+        publisher: Statistics in Medicine
+        volume: 40
+        issue: 26
+        pages: 5691-5701
+        doi: 10.1002/sim.9148
+        pmid: 34302372
+        url: "https://doi.org/10.1002/sim.9148"
 
 ...

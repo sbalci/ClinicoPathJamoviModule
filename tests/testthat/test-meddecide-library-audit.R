@@ -96,10 +96,13 @@ test_that("free-text sequential test names are compared literally", {
     file.path(root, "R", "sequentialtests.b.R"),
     warn = FALSE
   )
-  call_line <- grep("test_similarity <- agrepl", source_lines, value = TRUE)
+  # The comparison now runs through a small similar_name() helper (both directions, 2026-10-08), so
+  # check every agrepl() call in code rather than one exact assignment line.
+  code <- source_lines[!grepl("^\\s*#", source_lines)]
+  call_lines <- grep("agrepl(", code, value = TRUE, fixed = TRUE)
 
-  expect_length(call_line, 1L)
-  expect_match(call_line, "fixed = TRUE", fixed = TRUE)
+  expect_gte(length(call_lines), 1L)
+  for (line in call_lines) expect_match(line, "fixed = TRUE", fixed = TRUE)
 })
 
 test_that("AUC summary invalidation matches its fixed DeLong calculation", {
@@ -119,9 +122,13 @@ test_that("AUC summary invalidation matches its fixed DeLong calculation", {
     grep("^          - ", block, value = TRUE)
   )
 
+  # Every entry changes the AUC summary: patientID/analysisUnit aggregate rows to patients,
+  # negativeClass decides which rows are negatives, aucInference picks the interval (psychopdaROC
+  # refactor 2026-10-10). Bootstrap and display options must stay out.
   expect_identical(
     clear_with,
-    c("dependentVars", "classVar", "positiveClass", "subGroup", "direction")
+    c("dependentVars", "patientID", "analysisUnit", "classVar", "positiveClass",
+      "negativeClass", "subGroup", "direction", "aucInference")
   )
 })
 
@@ -425,8 +432,11 @@ test_that("fixed decision tables are populated without changing row structure", 
 })
 
 # library-audit 2026-09-16 meddecide [HIGH] DONE: renderers draw from image$state; export and .omv reopen
-#   rebuild the analysis without .run(), so private$ fields filled there are NULL (guide section 15)
-test_that("psychopdaROC meta-analysis forest plot redraws from state alone", {
+#   rebuild the analysis without .run(), so private$ fields filled there are NULL (guide section 15).
+# Since the 2026-10-10 refactor psychopdaROC refuses this meta-analysis outright: markers measured on
+# the same cohort are not independent studies, so there is no pooled AUC and no forest plot to redraw.
+# The test now pins the refusal (and that nothing is drawn or shown in its place).
+test_that("psychopdaROC refuses a meta-analysis of markers from one cohort and draws no forest plot", {
   audit_skip_unloaded("psychopdaROC")
   skip_if_not_installed("pROC")
   set.seed(20260916)
@@ -443,21 +453,12 @@ test_that("psychopdaROC meta-analysis forest plot redraws from state alone", {
     positiveClass = "Disease", negativeClass = "Healthy", refVar = NULL, metaAnalysis = TRUE, forestPlot = TRUE,
     overrideMetaAnalysisWarning = TRUE
   ))
-  state <- ran$metaAnalysisForestPlot$get(key = "forestPlot")$state
-  expect_true(is.data.frame(state$data) && nrow(state$data) == 4)
-
-  # What jamovi does on export: a fresh analysis, no .run(), each image's state restored.
-  analysis <- ran$.__enclos_env__$private$.parent
-  fresh <- psychopdaROCClass$new(options = analysis$options, data = NULL)
-  fresh$.setReadDatasetHeaderSource(function(vars) d[0, intersect(unlist(vars), names(d)), drop = FALSE])
-  quiet <- function(expr) suppressWarnings(suppressMessages(expr))
-  quiet(fresh$init())
-  image <- fresh$results$metaAnalysisForestPlot$addItem(key = "forestPlot")
-  image$setState(state)
-  grDevices::pdf(NULL)
-  on.exit(grDevices::dev.off(), add = TRUE)
-  drawn <- quiet(fresh$.createImage(image$.__enclos_env__$private$.renderFun, image))
-  expect_true(isTRUE(drawn))
+  expect_length(ran$metaAnalysisForestPlot$itemKeys, 0L)
+  expect_false(ran$metaAnalysisForestPlot$visible)
+  expect_false(ran$metaAnalysisTable$visible)
+  expect_true(all(is.na(ran$metaAnalysisTable$asDF$pooled_auc)))
+  expect_match(ran$metaAnalysisWarning$content, "markers from the same cohort are not independent studies",
+               fixed = TRUE)
 })
 
 # library-audit 2026-09-16 meddecide [MEDIUM] DONE: ROC overlays (smoothed curve, confidence bands,
@@ -477,7 +478,8 @@ test_that("psychopdaROC overlays survive a redraw without .run()", {
   ran <- quiet(psychopdaROC(
     data = d, dependentVars = c("marker1", "marker2"), classVar = "status",
     positiveClass = "Disease", negativeClass = "Healthy", refVar = NULL, plotROC = TRUE, combinePlots = FALSE,
-    showConfidenceBands = TRUE, quantileCIs = TRUE, rocSmoothingMethod = "binormal"
+    showConfidenceBands = TRUE, quantileCIs = TRUE, rocSmoothingMethod = "binormal",
+    run = TRUE   # smoothing is an intensive option: it waits for the Run action (refactor 2026-10-10)
   ))
   analysis <- ran$.__enclos_env__$private$.parent
 
@@ -785,10 +787,11 @@ test_that("every seed-dependent meddecide result shows the seed that drew it", {
 
   if ("psychopdaROC" %in% loaded) {
     # psychopdaROC: bootstrap cutpoint, bootstrap and partial-AUC intervals, IDI/NRI, bootstrap "Bayesian" ROC
+    # an explicit negative class and the Run action are required since the 2026-10-10 refactor
     pr <- run("psychopdaROC", d, dependentVars = c("m1", "m2"), classVar = "truth", positiveClass = "Yes",
-              method = "maximize_boot_metric", seed = 777, bootstrapCI = TRUE, bootstrapReps = 100,
-              partialAUC = TRUE, calculateIDI = TRUE, calculateNRI = TRUE, idiNriBootRuns = 100,
-              bayesianAnalysis = TRUE)
+              negativeClass = "No", method = "maximize_boot_metric", seed = 777, bootstrapCI = TRUE,
+              bootstrapReps = 100, partialAUC = TRUE, calculateIDI = TRUE, calculateNRI = TRUE,
+              idiNriBootRuns = 100, bayesianAnalysis = TRUE, run = TRUE)
     expect_true(shown %in% notes(pr$results$resultsTable$get(key = "m1")))
     for (t in c("bootstrapCITable", "partialAUCTable", "idiTable", "nriTable", "bayesianROCTable"))
       expect_true(shown %in% notes(pr$results[[t]]), info = paste("psychopdaROC", t))
@@ -907,7 +910,11 @@ test_that("fixed epiR rows are scaffolded in .init() and footnotes follow their 
     # are the scaffold's, in .init() order, because .run() only fills them.
     calc <- quiet(decisioncalculator(TP = 90, TN = 80, FP = 20, FN = 10, ci = TRUE))
     expect_identical(calc$epirTable_number$rowKeys, as.list(number_keys))
-    expect_true(all(c("se", "sp", "bal.acc", "f1.score") %in% unlist(calc$epirTable_ratio$rowKeys)))
+    expect_true(all(c("se", "sp") %in% unlist(calc$epirTable_ratio$rowKeys)))
+    # Balanced accuracy and F1 have no interval, so they left this interval table (their limits printed
+    # "NaN", 2026-10-08) and are shown in advancedMetricsTable instead.
+    expect_false(any(c("bal.acc", "f1.score") %in% unlist(calc$epirTable_ratio$rowKeys)))
+    expect_true(all(is.finite(unlist(calc$advancedMetricsTable$asDF[c("balancedAccuracy", "f1Score")]))))
     expect_true(all(is.finite(calc$epirTable_number$asDF$est)))
   }
   audit_skip_unloaded(wanted)
@@ -1019,7 +1026,9 @@ test_that("no meddecide msgid is a fragment, carries padding, or cannot be reord
         segs <- strsplit(body, "%%", fixed = TRUE)[[1]]
         convs <- unlist(regmatches(
           segs,
-          gregexpr("%(\\d+\\$)?[-+0# ]*(\\*|\\d+)?(\\.\\d+)?[sdifeEgGxX]", segs, perl = TRUE)
+          # no space flag: in prose "95% interval" would read as the conversion "% i"; no meddecide
+          # msgid uses a space-flag conversion
+          gregexpr("%(\\d+\\$)?[-+0#]*(\\*|\\d+)?(\\.\\d+)?[sdifeEgGxX]", segs, perl = TRUE)
         ))
         if (length(convs) >= 2 && !any(grepl("\\$", convs))) {
           unordered <- c(unordered, paste0(tag, ":", i))

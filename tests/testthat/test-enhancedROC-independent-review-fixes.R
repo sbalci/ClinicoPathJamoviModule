@@ -10,7 +10,8 @@ ir_roc_data <- function() {
 ir_roc_object <- function(data = ir_roc_data(), ...) {
     args <- utils::modifyList(list(outcome = "outcome", positiveClass = "positive",
         predictors = "score", direction = "higher", rocCurve = FALSE,
-        comprehensive_output = TRUE), list(...), keep.null = TRUE)
+        comprehensive_output = TRUE, showTableNotes = TRUE, showAnalysisSummary = TRUE,
+        showClinicalReport = TRUE), list(...), keep.null = TRUE)
     options <- do.call(ClinicoPath:::enhancedROCOptions$new, args)
     analysis <- ClinicoPath:::enhancedROCClass$new(options = options, data = data)
     analysis$init()

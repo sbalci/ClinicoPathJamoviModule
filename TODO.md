@@ -1,3 +1,202 @@
+# enhancedROC — `/fix-function` of the `/review-function` findings (2026-10-11, done, uncommitted)
+
+Goal: fix every item of the review below, plus (user decision) opt-in checkboxes for Analysis Summary and
+Clinical Report, default off. Acceptance: each fix has a regression test in
+`tests/testthat/test-enhancedROC-review-2026-10-11.R` that fails on the backup (session scratchpad
+`backup-prefix/`); every enhancedROC test file passes; `jmvtools::prepare()` clean; release gate with enhancedROC
+counted as shipped identical to the normal run; new msgids extracted and translated to Turkish; `msgfmt -c` clean.
+Constraint: `R/enhancedROC-errors.R` keeps an enhancedROC caller (the file-naming test ties it to its owner, and
+`enhanced_wrapper_example.R` removal is a recorded API decision), so the handler is fixed, not orphaned.
+- [x] Slice 1 (numbers): finite constrained cut-off; constant predictor skipped in the cut-point tables, the
+      Detailed comparison cut-point rows and the plots' optimal points (Codex review); two perfect curves
+      (DeLong/bootstrap) not tested; NaN cells blanked with reasons (impact, decision, workload, frozen tables)
+- [x] Slice 2 (disclosure): blank-cell footnotes survive notes-off; empty notices panel hidden; Rows Excluded
+      kept where it was but says "can be analysed" (moving it lost it on ERROR runs - CHANGELOG); seed note on
+      Detailed comparison and frozen metrics; HL Methods wording
+- [x] Slice 3 (options/UI): `showAnalysisSummary` / `showClinicalReport` (default false; summary also shown with
+      Internal validation, which writes there); imbalance `enable:` lines removed; `prepare()`
+- [x] Slice 4 (plots, errors.R, cleanup): minor-grid overrides and darkblue annotation; handler drops
+      `sys.calls()`/`sessionInfo()`, enhancedROC stops calling it; stale seed comment
+- [x] Slice 5 (i18n): wrapped strings; `.choiceLabel()` for option keys; `.metricLabel()`; 80 new + 481 backlog
+      msgids translated (enhancedROC untranslated 485 -> 0); `msgfmt -c` clean; 137 sprintf msgstrs run in R
+- [x] Verify: see Results
+
+**Results.** Code: `R/enhancedROC.b.R`, `R/enhancedROC-errors.R`; yaml: `.a.yaml` (2 options), `.u.yaml` (2
+checkboxes, 2 `enable:` removed), `.r.yaml` (2 visible/clearWith); generated `R/enhancedROC.h.R`,
+`man/enhancedROC.Rd`; `jamovi/i18n/*`. Tests: new `test-enhancedROC-review-2026-10-11.R` (13 blocks, 13/13 red on
+the backup, green now); narrative-reading helpers opt in (validation, release-2026-10-11, review-fixes,
+independent-review-fixes); table-notes helper skips blank-cell footnotes; C29 and the constant-marker test
+updated; production pin "can be analysed"; `development-scripts/validate_enhancedROC.R` labels updated.
+Verification: 20 enhancedROC/contract/naming/gaspath files, 1721 expectations, 0 failures/errors/skips;
+`test-meddecide-library-audit.R` keeps its 9 pre-existing non-enhancedROC failures (psychopdaROC, sequentialtests,
+decisioncalculator, MASS); `prepare()` clean (only `enhancedROC.h.R` changed); scoped lintr unchanged (style only);
+release gate with enhancedROC counted as shipped identical to the normal run (0 blocking, same 10 advisories).
+- [ ] Follow-ups: Turkish backlog uses "AUC" where some yaml titles say "EAA" (catalogue was already mixed); check
+      "- None -" and the Turkish panels in the jamovi app; `development-scripts/audit_enhancedROC.R` reads the
+      narrative panels with default options (opt in before re-running); frozen-model context labels in
+      `R/enhancedROC-validation.R` are English (file-level helper, cannot call `.()`)
+
+## `/review-function` findings (2026-10-11)
+
+Review only, run on the uncommitted 1.0.85 tree after the production pass below. Baseline: 1539 enhancedROC +
+rendering-contract expectations pass (0 failed/errors/skips); release gate with enhancedROC counted as shipped is
+identical to the normal run (0 blocking); scoped lintr has only style hits; hygiene greps clean. Every item below was
+reproduced in R (scripts in the session scratchpad) or read off the code. Line numbers are `R/enhancedROC.b.R`.
+- [ ] **Constrained cut-off can be ±Inf** (~1938-1955): with one minimum set, the +Inf row (Sp 1) or the -Inf row
+      (Se 1) always qualifies, so the "no cutoff meets your minimums" fallback never fires. aSAH wfns with
+      specificityThreshold 0.95 reports cutoff Inf, J 0, Se 0, and the "Clinical Report Withheld" notice then says
+      no usable cut-point exists (unconstrained optimum is 3.5, J 0.467). Fix: `& is.finite(cr$threshold)` when any
+      minimum > 0.
+- [ ] **Notes-off strips the reason for a blank cell** (`.applyTableNotesOption` ~1373-1390): with
+      `showTableNotes` off (default) every cell footnote goes, including the one `.blankCells()` adds (McClish pAUC
+      ~2972-2980): an empty cell with no explanation. Keep footnotes on cells whose value is "".
+- [ ] **Empty notices panel keeps the previous run's content** (`.renderNotices` ~118-120): `setContent("")` does
+      not clear jamovi's Html view (see the file's own comment ~419-421). A frozen-model report run ends with no
+      notices and still shows the last run's "Analysis Complete" and warnings. Add `setVisible(FALSE)` there.
+- [ ] **Imbalance controls greyed out while in use** (`enhancedROC.u.yaml` ~265-272): `imbalanceThreshold` and
+      `recommendPRC` have `enable: (detectImbalance)`, but `.checkClassImbalance()` runs every time (~649) and reads
+      both (threshold 1.5 raises the WARNING with detectImbalance off). Remove the two `enable:` lines.
+- [ ] **NaN cells in the impact tables** (~6164-6178): `nnt`/`nnd` (NB <= 0, Se+Sp <= 1) and `.dvWorkload()` ppv/npv
+      (nobody / everybody flagged) are numeric NA, which jamovi prints "NaN". Blank them with `.blankCells()` + note.
+- [ ] Two AUC = 1 curves: `roc.test` returns a hard-coded Z 0 / p 1 (pROC warns, jamovi never shows it), printed as
+      "Not significantly different" in ROC Comparisons, Statistical Summary and Detailed comparison (~2622, ~2809,
+      ~4243). Blank statistic and p with one note when both curves are separated.
+- [ ] Constant predictor: the ERROR says no cut-point exists (~1660) but Optimal Cutoffs / Diagnostic Performance
+      still print a -Inf row with Se 1, Sp 0. Skip or blank those rows.
+- [ ] Seed missing beside seed-dependent results: Detailed comparison AUC p (bootstrap/Venkatraman, ~2667-2676) and
+      frozen-model bootstrap intervals (`R/enhancedROC-validation.R:98`, note ~513).
+- [ ] "Rows Excluded ... N rows were analysed" is written (~991) before the early returns (~997-1093), so it shows
+      beside "Nothing is computed until you do". Move the call to just before `return(data)` (~1097).
+- [ ] Methods sentence quotes the requested Hosmer-Lemeshow groups (~3396), not the merged count the HL table shows.
+- [ ] Comparative ROC, CROC and hull plots force `panel.grid.minor = "gray95"` after `.plotThemeFor()` (~4616, ~5037,
+      ~5132): Classic gets a grid, dark theme a glaring one. Annotation `color = "darkblue"` (~4661).
+- [ ] `R/enhancedROC-errors.R`: `clinicopath_error_handler` stores `sys.calls()` and `sessionInfo()` in a
+      package-global log (73, 76) and `cat()`s to the console; `validate_clinical_data` warnings are discarded
+      (~925). Only three helpers are called (behind `exists()`, ~215/871/1809); the rest are exported but unused.
+      Drop the calls (notices already cover each case) and the dead exports.
+- [ ] Strings never extracted for translation (separate from the pending Turkish): ~2305, ~2546-2555, ~2727,
+      ~2904/2910, ~3272/3276 (raw option keys shown), ~3451-3523, ~4092, ~4324-4385, `.plotMessage` titles/bodies
+      (~4537 to ~6076). About 487 enhancedROC references in `tr.po` are still untranslated.
+- [ ] Analysis Summary and Clinical Report are `visible: true` with no option (playbook: narrative panels are
+      opt-in). Decide whether to add a checkbox; the report also names the highest-AUC predictor without saying it
+      was selected from several.
+- [ ] Cleanup: stale "one stream" seed comment (~462-467) and the defensive `tryCatch(self$options$seed)` (~471),
+      both outdated since per-call `.withSeed()`.
+
+# enhancedROC — `/fix-function` production pass (2026-10-11, done, uncommitted)
+
+Goal: fix every item of the `/check-function-full` audit below. Acceptance: each fix has a regression test in
+`tests/testthat/test-enhancedROC-production-2026-10-11.R` that fails on the pre-fix code (backup in the session
+scratchpad); every enhancedROC test file passes; `jmvtools::prepare()` clean; release gate (enhancedROC counted as
+shipped) 0 blocking; differential harness re-run shows no option regressed to NO-CHANGE.
+- [x] Slice 1 (numbers): Venkatraman p floored at (b+1)/(B+1); every resampling call re-seeded (`.withSeed()`)
+- [x] Slice 2 (disclosure): one "Rows Excluded" notice; constant-predictor ERROR; class-count / small-n notices once
+      per run; all predictors failed -> ERROR; "Analysis Finished with Warnings"; notices sorted by severity with a
+      text label; instructions-panel warning channel removed (screening note + user prevalence are notices)
+- [x] Slice 3 (wiring): u.yaml enables (bootstrap controls live; comparisonMethod on any comparison; prevalence
+      gated; workloadPopulationSize left live - the scenarios use it); `stratifiedBootstrap` in 4 clearWith;
+      bad `impactCutoffs`/`prevalenceScenarios` -> WARNING, the three impact tables empty, run continues
+- [x] Slice 4 (wording): kept notes `rule`, `cutpoint_optimism`, `venkatraman`, `multiplicity` (plus `seed`);
+      the 95% simulation sentence only at 95%; UI labels not option keys; Insufficient Predictors once for all
+      three comparison tables; p-value-failure wording; "no interval" not "interval crosses 0.5"; zero-width
+      bootstrap interval treated as no interval
+- [x] Slice 5 (plots): `clinical` grid in `.plotThemeFor()` for all 12 plots (translucent, no white panel); a
+      failed or all-NA band keeps the ROC curve, captioned, with a WARNING raised in `.run()`
+- [x] Slice 6 (docs): every option described; seed UI help; bootstrapSamples scope; research preset renamed
+      'Research (Youden with Your Minimums)'; runnable `pROC::aSAH` example; stale r.yaml comment
+- [x] Verify: see Results
+
+**Decisions for the maintainer.** (1) Kept-with-notes-off list widened from `seed` to five keys - revert in
+`.keptTableNotes` if the opt-in decision should stay absolute. (2) Default `clinical` plot theme now draws a light
+grid on all 12 plots (it drew a white panel + grid on 3, nothing on 9). (3) Constant predictor is an ERROR.
+
+**Results.** Code: `R/enhancedROC.b.R`; yaml: `jamovi/enhancedROC.a.yaml` (descriptions, example, preset title),
+`.u.yaml` (enables), `.r.yaml` (clearWith, comment); generated `R/enhancedROC.h.R`, `R/00jmv.R`;
+`jamovi/i18n/*` (58 new msgids + 'Important', all with Turkish; 23 stale dropped). Tests: new
+`test-enhancedROC-production-2026-10-11.R` (15 blocks, all red before the fix); updated pins in
+`test-enhancedROC-release-2026-10-11.R` (renamed notices; CV oracle seeded per step),
+`test-enhancedROC-validation.R` (notice wording), `test-enhancedROC-table-notes.R` (kept keys).
+Verification: every enhancedROC test file + rendering contract + gaspath under `load_all()`: 1615 expectations,
+0 failures (`test-meddecide-library-audit.R` keeps its 9 pre-existing non-enhancedROC failures, listed below);
+new file 15/15 red on the backup code; `prepare()` clean (only `enhancedROC.h.R`, `00jmv.R` changed); release gate
+with enhancedROC as shipped identical to the pre-fix run (0 blocking); differential harness 96 specs, NO-CHANGE only
+for the documented no-ops and context-bound options; `msgfmt -c` clean; R usage example runs (s100b AUC 0.731).
+- [ ] Follow-ups: Venkatraman pair order is not canonical (swapping two predictors changes the permutation draw);
+      F-02/F-05/F-50 below are untouched; check the notice panel, the Clinical grid and the
+      'Research (Youden with Your Minimums)' label in the jamovi app (JamoviTest after the updater runs).
+
+## `/check-function-full` audit (2026-10-11) — findings the pass above fixes
+
+Differential runs: 86/88 options change output (the two no-ops are the documented F-32/F-52). 9 oracle checks
+(pROC, boot, closed forms) all match. Release gate with enhancedROC counted as shipped: 0 blocking. New items only;
+F-02/F-05/F-50/F-51 are tracked below. Line numbers are `R/enhancedROC.b.R` unless named.
+- [ ] **Venkatraman p = 0.** `.pairTest` (~1380) passes pROC's raw permutation p through; with 200 permutations
+      the Statistical Summary says "Highly significant difference (p < 0.001)" (~2738). Floor at (b+1)/(B+1).
+- [ ] **Seed does not reproduce a result.** One RNG stream seeded once (~453) feeds every predictor's bootstrap,
+      pAUC, comparisons and validation: imaging_score's CI (seed 123) is 0.7810-0.8718 listed second, 0.7794-0.8714
+      alone. Re-seed per resampling call.
+- [ ] **Excluded rows not disclosed.** "Missing Outcome Values Excluded" (~938) counts only blank/NA-level values
+      (2) while Outcome coding shows (missing) 7; with one predictor, rows missing it vanish (400 -> 390) and the
+      only statement is a table note stripped by default (`showTableNotes`).
+- [ ] **Bootstrap controls greyed out while in use** (`enhancedROC.u.yaml` ~187-196): `bootstrapSamples`,
+      `bootstrapMethod`, `stratifiedBootstrap` need `useBootstrap`, yet drive the bands, roc.test bootstrap,
+      Venkatraman permutations, the pAUC bootstrap and internal validation. Same shape: `comparisonMethod` enabled
+      by `pairwiseComparisons` only; `plotTheme` by `rocCurve` only; `workloadPopulationSize`/`prevalence` live
+      while `useObservedPrevalence` makes them inert.
+- [ ] **Stale band plot:** `rocCurvePlot` clearWith lacks `stratifiedBootstrap` (bands use it, ~269-271).
+- [ ] Notices: rendered in insertion order, severity by colour only (every icon "", type never printed,
+      ~115-140); "completed successfully" beside STRONG_WARNINGs and for a constant marker (no constant-predictor
+      notice); Low Per-Class Count / Small Sample Size repeated per predictor (~1576/1586); a second, untranslated
+      warning channel in `instructions` (~870-876, ~2386-2391).
+- [ ] Wording: cut-off rule (>= for higher, pROC midpoint thresholds) never stated, Methods says "observed
+      thresholds" (~3253/3261); "95%" hard-coded in the backwards-marker text (~1653); `.()` splices of English
+      fragments (~702, ~739, ~1611, ~1816, ~3965, ~5957); option keys shown instead of UI labels (~663, ~1829).
+- [ ] `plotTheme` Classic renders identically to Clinical on every plot except the ROC curve (it strips grid and
+      border that jamovi's ggtheme already omits, ~3766).
+- [ ] Docs: 11 options have no `description:` (utilityThreshold, workloadPopulationSize, prevalenceScenarios,
+      validationPanel, validationNegative, referenceDescription, modelVersion, siteID, partitionID,
+      validationBootstrap, validationDraws); no `@examples`; two near-duplicate developer docs
+      (`vignettes/enhancedROC-documentation.md`, `vignettes/enhancedROC_documentation.md`); stale
+      `enhancedROC.r.yaml:11` comment blaming serialization for the HTML notices.
+
+# enhancedROC — `/independent-reviewer` findings: release-review fix pass (2026-10-11, uncommitted)
+
+Report: `development-ideas/enhancedROC-independent-review-2026-10-09.md`. Fixed earlier at `9fc5a9b48`: F-01, F-11,
+F-13, F-33, F-35, F-40. Fixed in this pass (analysis 1.0.85; tests `tests/testthat/test-enhancedROC-release-2026-10-11.R`,
+37 blocks, each failing on the pre-fix code): F-02 (WARNING only), F-03, F-04, F-05, F-06 to F-10, F-12, F-14 to F-31,
+F-34, F-36 to F-48, F-53, plus the Analysis Summary band splice. Decisions taken by the maintainer: Stratified bootstrap
+stays off by default (now also governs the comparison test and bands); Sampling design default = Other / unknown;
+no-op options documented, not removed.
+- [ ] **F-02 follow-up:** patient-cluster inference on the main path (Obuchowski 1997 clustered AUC variance for the
+      AUC row and paired comparisons). Today repeated patient IDs only raise a WARNING.
+- [ ] **F-05 follow-up (shared):** `.dvPR()` in `R/utils-diagnostic-validation.R` still returns the PR-space trapezoid
+      for psychopdaROC, precisionrecall and enhancedROC's frozen panel (`tests/testthat/test-gaspath-validation.R:11`
+      pins .75). Move the interpolated closed form there.
+- [ ] F-32/F-52: decide whether to remove analysisType 'comprehensive' and multiClassAveraging (documented as no-op).
+- [ ] F-50 (Youden tie-break sign-dependent), F-51 (an invalid optional input aborts every output): optional.
+- [ ] Frozen-model context prints 'Reference standard' as NA when referenceDescription is empty (pre-existing).
+- [x] Table notes opt-in (2026-10-11): `showTableNotes` (Output Options > Tables, default off). With it off,
+      `.applyTableNotesOption()` (on.exit in `.run()`) strips every table note except `seed` and every cell footnote.
+      Tests: `test-enhancedROC-table-notes.R`; note-reading tests pass `showTableNotes = TRUE`. 1474 enhancedROC
+      expectations pass; release gate identical with enhancedROC counted as shipped; rendering contract passes.
+- [ ] Turkish for the new/changed enhancedROC msgids (incl. the "Table notes" option title/description); check the notices and the Outcome coding table in the jamovi app
+      (JamoviTest after the updater runs).
+- [ ] `development-scripts/validate_enhancedROC.R` and `audit_enhancedROC.R` pin pre-1.0.85 behaviour in places
+      (AUC-PR trapezoid, OVR band, bootstrap limits with one case): refresh before re-running them.
+- [x] `test-meddecide-library-audit.R` (9 failing blocks) and `test-zzz-meddecide-release-20260921.R` (2) fixed
+      2026-10-11. Code: psychopdaROC checkbox title "Show interpretation and procedure notes" -> "Interpretation
+      and procedure notes" (+ Turkish); stale `@importFrom MASS ginv` removed from `R/psychopdaROC.b.R` (NAMESPACE
+      loses `importFrom(MASS,ginv)`; crosstable calls `MASS::ginv`, MASS stays in Imports). Tests (behaviour
+      changed on purpose, pins were stale): sequentialtests agrepl helper; psychopdaROC AUC clearWith (+4 real
+      inputs); meta-analysis refusal instead of a forest-plot redraw; `run = TRUE` (+ `negativeClass`) for
+      intensive psychopdaROC options; decisioncalculator bal.acc/F1 in advancedMetricsTable; msgid conversion
+      regex without the space flag ("95% interval"); explicit positive/negative pair with an exclusion notice
+      instead of one-vs-rest; a Cell kept whole for its footnotes. Both files: 251 expectations, 0 failures.
+- [ ] Pre-existing, unrelated (same failure with the old NAMESPACE): `test-crosstable2.R` "object 'NAgroup' not
+      found" inside `crosstable2()` (a third-party table call). Not investigated.
+- [ ] meddecide sibling: MASS stays in its DESCRIPTION Imports. Do NOT add a `prune_imports` entry: parked
+      `clinicalscore` (meddecide[TPD]) uses MASS, so it is needed on promotion.
+
 # enhancedROC + psychopdaROC — fix all `/validate-function` findings (2026-10-09, done, uncommitted)
 
 Source: `development-ideas/enhancedROC-validation-2026-10-09.md` (verdict NOT VALIDATED, VAL-enhancedROC-01..26).

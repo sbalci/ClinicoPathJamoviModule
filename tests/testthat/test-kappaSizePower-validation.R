@@ -60,6 +60,27 @@ test_that("VAL C01: hand-calculated sample sizes (A1-A3)", {
 })
 
 
+test_that("VAL C01: the method papers' own published sample sizes are reproduced", {
+    # Donner & Eliasziw 1992 p.1518 and Altaye, Donner & Klar 2001 p.587: kappa 0.6 -> 0.9,
+    # prevalence 0.3, alpha 0.05, power 0.80 need 66 subjects with 2 raters and 40 with 3.
+    expect_equal(vkp_n(vkp_run(kappa0 = 0.6, kappa1 = 0.9, props = "0.3", raters = "2")), 66)
+    expect_equal(vkp_n(vkp_run(kappa0 = 0.6, kappa1 = 0.9, props = "0.3", raters = "3")), 40)
+    # Altaye, Donner & Eliasziw 2001 Table IV (p.2486), k = 3, pi = 0.1/0.1/0.8, 2-6 raters. The
+    # paper rounds to the nearest subject and the module rounds up, so the module shows the
+    # printed value or one more - always the ceiling of the unrounded N.
+    tab <- list(list(k = c(0.4, 0.6), n = c(205, 113, 83, 68, 59)),
+                list(k = c(0.6, 0.8), n = c(172, 102, 77, 65, 57)))
+    for (row in tab) for (i in 1:5) {
+        exact <- vkp_N(3, i + 1, c(0.1, 0.1, 0.8), row$k[1], row$k[2])
+        expect_equal(round(exact), row$n[i])            # the oracle reproduces the printed table
+        shown <- vkp_n(vkp_run(outcome = "3", props = "0.1, 0.1, 0.8", raters = as.character(i + 1),
+                               kappa0 = row$k[1], kappa1 = row$k[2]))
+        expect_equal(shown, ceiling(exact))
+        expect_true((shown - row$n[i]) %in% c(0, 1))
+    }
+})
+
+
 test_that("VAL C01: displayed N equals ceiling(oracle N) across outcomes and raters", {
     designs <- list(list(2, "0.3"), list(2, "0.1"), list(3, "0.3, 0.6, 0.1"),
                     list(4, "0.1, 0.2, 0.3, 0.4"), list(5, "0.1, 0.2, 0.2, 0.2, 0.3"))
@@ -135,18 +156,22 @@ test_that("VAL C09: a sum within 0.001 of 1 is renormalised before sizing", {
 })
 
 
-test_that("VAL C15: sparse-cell notice reports the oracle's expected counts", {
-    # 6 raters, 5% finding: cells at kappa0 times N (the module uses the unrounded N)
-    res <- vkp_run(props = "0.05", raters = "6")
-    N <- vkp_N(2, 6, 0.05, 0.4, 0.6)
-    e <- vkp_cells_bin(6, 0.05, 0.4) * N
+test_that("VAL C15: sparse-cell notice reports the oracle's expected counts on the pooled test cells", {
+    # Binary, 3+ raters: the 1-df test pools every split call into one cell (Altaye, Donner & Klar
+    # 2001 p.586), so the notice judges all absent / any disagreement / all present at kappa0 x N.
+    pooled <- function(k, p, kap) { P <- vkp_cells_bin(k, p, kap); c(P[1], sum(P[2:k]), P[k + 1]) }
+    # pooling leaves N unchanged under their model
+    Np <- vkp_lambda(0.05, 0.80) / sum((pooled(6, 0.05, 0.5) - pooled(6, 0.05, 0.2))^2 / pooled(6, 0.05, 0.2))
+    expect_equal(Np, vkp_N(2, 6, 0.05, 0.2, 0.5), tolerance = 1e-10)
+    res <- vkp_run(props = "0.05", raters = "6", kappa0 = 0.2, kappa1 = 0.5)
+    e <- pooled(6, 0.05, 0.2) * vkp_N(2, 6, 0.05, 0.2, 0.5)
     expect_true(vkp_has(res, "Sparse categories."))
     expect_match(res$notices$content, sprintf("smallest expected count is %s and %d of %d cells",
                  base::format(signif(min(e), 2), scientific = FALSE), sum(e < 5), length(e)), fixed = TRUE)
-    # Cochran: one cell of five below 5 (and none below 1) is 20%, not more than 20% -> silent
-    e4 <- vkp_cells_bin(4, 0.3, 0.4) * vkp_N(2, 4, 0.3, 0.4, 0.6)
-    expect_equal(c(sum(e4 < 5), sum(e4 < 1)), c(1L, 0L))
-    expect_false(vkp_has(vkp_run(props = "0.3", raters = "4"), "Sparse categories."))
+    # 6 raters, 5% finding, kappa 0.4 -> 0.6: unpooled cells reach 0.0003, pooled cells are all >= 5
+    e6 <- pooled(6, 0.05, 0.4) * vkp_N(2, 6, 0.05, 0.4, 0.6)
+    expect_gte(min(e6), 5)
+    expect_false(vkp_has(vkp_run(props = "0.05", raters = "6"), "Sparse categories."))
 })
 
 
@@ -190,11 +215,20 @@ test_that("VAL C05: two raters, binary - the GOF test at the shown N has nominal
 
 
 test_that("VAL C17: the Methodology names the test the N is valid for when there are 3+ raters (fixed: VAL-kappaSizePower-02)", {
+    # The N is for the papers' own 1-df goodness-of-fit test (all-agree cells plus ONE pooled
+    # disagreement cell; Altaye, Donner & Klar 2001 p.586, Altaye, Donner & Eliasziw 2001 p.2482).
     res <- vkp_run(props = "0.3", raters = "4")
+    expect_match(res$notices$content, "plus one pooled cell for any disagreement", fixed = TRUE)
     expect_match(res$notices$content, "likelihood[- ]ratio", ignore.case = TRUE)
-    expect_match(res$notices$content, "With three or more raters", fixed = TRUE)
-    # two raters: the agreement-pattern chi-square IS a 1-df test, so no warning
-    expect_false(grepl("With three or more raters", vkp_run(props = "0.3")$notices$content, fixed = TRUE))
+    # binary 3+ raters: the all-counts chi-square has raters - 1 df (ADK p.586)
+    expect_match(res$notices$content, "every count of raters calling the finding present", fixed = TRUE)
+    # 3+ categories with 3+ raters: prevalences re-estimated by ML at kappa0 (ADE p.2483)
+    cat3 <- vkp_run(outcome = "3", props = "0.3, 0.6, 0.1", raters = "4")$notices$content
+    expect_match(cat3, "maximum likelihood with kappa held at kappa0", fixed = TRUE)
+    expect_false(grepl("every count of raters", cat3, fixed = TRUE))
+    # two raters: the published test is already 1 df on three cells, so neither warning shows
+    two <- vkp_run(props = "0.3")$notices$content
+    expect_false(grepl("With three or more raters", two, fixed = TRUE))
 })
 
 
@@ -242,7 +276,9 @@ test_that("VAL C17: the power approach is attributed to its sources and they are
     # approach is Donner & Eliasziw 1992 (PMID 1410963) and Altaye et al. 2001 (PMIDs 11414588,
     # 11512137), verified on PubMed 2026-10-09.
     notes <- vkp_run()$notices$content
-    expect_match(notes, "approach of Donner and Eliasziw and of Altaye and colleagues", fixed = TRUE)
+    expect_match(notes, "approach of Donner and Eliasziw (two raters, binary outcome), Altaye, Donner and Klar (binary outcome, more raters) and Altaye, Donner and Eliasziw (three to five categories)", fixed = TRUE)
+    # the estimand all four papers share: intraclass kappa, no rater bias (DE1992 p.1512, p.1518)
+    expect_match(notes, "unweighted intraclass kappa", fixed = TRUE)
     refs <- yaml::read_yaml(file.path("../../jamovi", "kappaSizePower.r.yaml"))$refs
     expect_true(all(c("donnerEliasziwKappaGOF", "altayeDonnerKlarKappaRaters",
                       "altayeDonnerEliasziwKappaGOF") %in% refs))
@@ -269,7 +305,11 @@ test_that("VAL C06: binary designs with 3+ raters disclose the rater-dependence 
     mix <- nb(function(kap) vkp_cells_bin(6, 0.1, kap)); bb <- nb(function(kap) vkp_bb(6, 0.1, kap))
     expect_gt(abs(mix / bb - 1), 0.2)                       # the model matters for this design
     expect_equal(vkp_cells_bin(2, 0.3, 0.4), vkp_bb(2, 0.3, 0.4), tolerance = 1e-12)  # not at 2 raters
-    msg <- "the calculation assumes kappaSize's model of rater dependence"
+    # The mixture is the published model of Altaye, Donner & Klar 2001: their eq. (4),
+    # lambda_k = pi^k + rho (1 - pi) sum_{j=1}^{k-1} pi^(k-j) = (1 - rho) pi^k + rho pi.
+    lam_k <- function(k, p, r) p^k + r * (1 - p) * sum(p^(k - seq_len(k - 1)))
+    expect_equal(lam_k(4, 0.3, 0.4), (1 - 0.4) * 0.3^4 + 0.4 * 0.3, tolerance = 1e-14)
+    msg <- "uses the rater-dependence model of Altaye, Donner and Klar"
     expect_match(vkp_run(props = "0.1", raters = "6")$notices$content, msg, fixed = TRUE)
     expect_false(grepl(msg, vkp_run(props = "0.1", raters = "2")$notices$content, fixed = TRUE))
     expect_false(grepl(msg, vkp_run(outcome = "3", props = "0.3, 0.6, 0.1", raters = "4")$notices$content, fixed = TRUE))

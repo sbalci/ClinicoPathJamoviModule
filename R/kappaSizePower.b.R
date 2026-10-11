@@ -18,6 +18,10 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
         #   N recomputed from stable cells + exact lambda (VAL-01/03), plain-digit panes (VAL-04),
         #   1-df test named in Methodology (VAL-02), 0.05 gap boundary (VAL-05), small-N wording
         #   (VAL-06), power-approach sources cited (VAL-07).
+        # Resolved 2026-10-11 (full texts of the four method papers): Methodology names the
+        #   papers' pooled-cell goodness-of-fit test, the intraclass/no-rater-bias estimand and the
+        #   Altaye-Donner-Klar binary model; the 3+-rater warning is split by outcome type; the
+        #   binary 3+-rater sparse check uses the pooled cells of that test.
 
         # Split the proportions string into numbers. Same format as the siblings
         # (R/kappaSizeFixedN.b.R:.parsePropTokens): commas, semicolons, pipes or whitespace
@@ -99,7 +103,7 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             paste0(
                 private$.wrap(paste(
                     .("This is a POWER calculation: it returns the number of subjects needed to REJECT kappa0 in favour of kappa1 in a two-sided test at the stated significance level and power."),
-                    .("It answers a different question from the confidence-interval approach (kappaSizeCI), which sizes a study to achieve a target interval width, so the two will not agree on a sample size for the same study - pick the one that matches how the result will be reported."))),
+                    .("It answers a different question from the confidence-interval approach (kappaSizeCI), which sizes a study so that the expected confidence limits around an anticipated kappa fall at chosen values, so the two will not agree on a sample size for the same study - pick the one that matches how the result will be reported."))),
                 "\n\n",
                 private$.wrap(.fmt(
                     .("Researchers would like to determine the required sample size to test the null hypothesis kappa = {kappa0} against the alternative kappa = {kappa1} at a two-sided significance level of {alpha} with power {power}, in a study of interobserver agreement with {raters} raters."),
@@ -156,12 +160,15 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
             # A large n has three drivers -- a rare finding, a small kappa gap, high power --
             # and the kappa gap is often NOT the one (prevalence 1% with the default kappas
-            # needs 3,429), so this block names all three rather than blaming one.
+            # needs 3,429), so this block names all three rather than blaming one. The gap and
+            # the power act on every design; the prevalence usually does (Altaye, Donner &
+            # Eliasziw 2001 p.2486), but for 3-5 categories the driver is UNEQUAL proportions, not
+            # distance from 0.5 (their Table IV: 0.1/0.4/0.5 needs more subjects than 0.3/0.3/0.4).
             if (has_n && n_required > 2000) {
                 warn <- paste0(warn, block(warn_div,
                     .("Very large sample size."),
                     .fmt(
-                        .("The design needs {n} subjects; few agreement studies can enrol this many. A rare finding (prevalence far from 0.5), a small difference between kappa0 and kappa1, and a high power target all inflate the sample size - revisit whichever of these is not a firm requirement."),
+                        .("The design needs {n} subjects; few agreement studies can enrol this many. A small difference between kappa0 and kappa1 and a high power target always inflate the sample size, and a rare finding usually does too (for a binary outcome, a prevalence far from 0.5; with more categories, very unequal category proportions) - revisit whichever of these is not a firm requirement."),
                         n = private$.fmtN(n_required))))
             }
 
@@ -208,7 +215,7 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 warn <- paste0(warn, block(warn_div,
                     .("Sparse categories."),
                     .fmt(
-                        .("At the required sample size the agreement-pattern cells (for example, exactly k of the raters calling the finding present, or all raters agreeing on one category) are too sparse: the smallest expected count is {min} and {below} of {total} cells are below 5. The calculation rests on a large-sample chi-square approximation, so the sample size shown is less dependable here."),
+                        .("At the required sample size the goodness-of-fit cells (all raters agreeing on one category, or the single pooled cell for any disagreement) are too sparse: the smallest expected count is {min} and {below} of {total} cells are below 5. The calculation rests on a large-sample chi-square approximation, so the sample size shown is less dependable here."),
                         min = private$.fmtCount(sparse_min), below = sparse_below5,
                         total = sparse_total),
                     remedy))
@@ -238,29 +245,36 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     if (!pattern_shown) remedy))
             }
 
-            # The noncentrality has one degree of freedom for every design, so N is calibrated to a
-            # 1-df test of kappa. Simulated under the engine's own model at the shown N, a
-            # likelihood-ratio test of kappa had nominal size and power 0.78-0.84 (2-6 raters,
-            # binary and 3-5 categories), but with three or more raters the chi-square over all
-            # agreement patterns read on 1 df rejected a true kappa0 10-65% of the time at a
-            # nominal 5% (development-ideas/kappaSizePower-validation-2026-10-09.md, VAL-02).
-            # Sources: Donner & Eliasziw 1992 (two raters, binary); Altaye, Donner & Klar 2001 and
-            # Altaye, Donner & Eliasziw 2001 (more raters, more categories). Rotondi & Donner 2012
-            # is the confidence-interval paper that introduced kappaSize.
+            # Every sentence below was checked against the full texts (2026-10-11,
+            # development-ideas/kappaSizePower_refs_audit.md):
+            # - N formula, two-sided, 1-df noncentral chi-square: Donner & Eliasziw 1992 p.1517-1518
+            #   (N = 66 example, reproduced); Altaye, Donner & Klar 2001 p.587 (N = 66 and 40,
+            #   reproduced); Altaye, Donner & Eliasziw 2001 p.2486 (Table IV, reproduced to within
+            #   the paper's nearest-integer rounding; this module rounds up).
+            # - Intraclass kappa, no rater bias: Donner & Eliasziw p.1512 and p.1518 ("When there is
+            #   rater bias, methods described by Fleiss ... are more appropriate"); ADE p.2482.
+            # - The test the N is for pools every disagreement into one cell: ADK p.586 (2 df over
+            #   all four 3-rater cells, 1 df after pooling; pooling leaves N unchanged under eq. 4);
+            #   ADE p.2482. ADE p.2483 re-estimates the prevalences by ML at kappa0; plugging in the
+            #   raw proportions instead rejected a true kappa0 10-22% of the time at a nominal 5%
+            #   with 3+ raters (validation VAL-02 simulation), while the binary all-counts chi-square
+            #   has raters - 1 df (ADK p.586), size 0.16-0.65 when read on 1 df.
+            # - Binary 3+ raters: the cells are ADK's eq. (4) model, lambda_k = (1 - rho) pi^k + rho pi,
+            #   i.e. the mixture; ADE's model reduces to the beta-binomial for two categories (p.2483),
+            #   which gives 0.89 to 12.5 times the subjects of this N at the same kappa (VAL-08).
             info <- block(info_div,
                 .("Methodology."),
-                .("Power-based sample size for a two-sided test of H0: kappa = kappa0 against H1: kappa = kappa1, for the unweighted (nominal-category) kappa coefficient, using the goodness-of-fit (non-central chi-square) approach of Donner and Eliasziw and of Altaye and colleagues, as implemented in the kappaSize package (Rotondi and Donner)."),
-                .("The sample size is for a test of kappa with one degree of freedom, such as a likelihood-ratio test."),
-                if (isTRUE(raters >= 3))
-                    .("With three or more raters, a chi-square computed over all agreement patterns and read on one degree of freedom is not such a test: it rejects a true kappa0 much more often than the stated significance level."),
-                # VAL-08: PowerBinary's cells for 3+ raters are a mixture (all raters copy one call
-                # with probability kappa), while the 3-5 category engines are Dirichlet-multinomial.
-                # At the same kappa a beta-binomial model gives 0.89 to 12.5 times FEWER subjects
-                # than the shown N (median 1.21; 160 designs), so no direction is claimed.
+                .("Power-based sample size for a two-sided test of H0: kappa = kappa0 against H1: kappa = kappa1, using the goodness-of-fit (non-central chi-square) approach of Donner and Eliasziw (two raters, binary outcome), Altaye, Donner and Klar (binary outcome, more raters) and Altaye, Donner and Eliasziw (three to five categories), as implemented in the kappaSize package (Rotondi and Donner)."),
+                .("Kappa here is the unweighted intraclass kappa for nominal categories (Scott's pi for two raters, Fleiss' kappa for more), which assumes that all raters share the same category prevalences; when raters differ systematically (rater bias), other methods are more appropriate."),
+                .("The sample size is for the papers' goodness-of-fit chi-square test on one degree of freedom, computed over the cells in which all raters agree on a category plus one pooled cell for any disagreement; a likelihood-ratio test of kappa is an approximate alternative."),
                 if (isTRUE(outcome == 2L && raters >= 3))
-                    .("For a binary outcome with three or more raters the calculation assumes kappaSize's model of rater dependence: with probability kappa every rater gives the same call, otherwise the raters rate independently. Other models with the same kappa, such as the beta-binomial, can need a markedly different number of subjects."),
+                    .("With three or more raters, do not compute the chi-square over every count of raters calling the finding present (none, one, ..., all): that statistic has more than one degree of freedom and, read on one, rejects a true kappa0 much more often than the stated significance level."),
+                if (isTRUE(outcome >= 3L && raters >= 3))
+                    .("With three or more raters, estimate the category prevalences by maximum likelihood with kappa held at kappa0, as Altaye, Donner and Eliasziw do; plugging in the overall proportions of ratings makes the test reject a true kappa0 too often."),
+                if (isTRUE(outcome == 2L && raters >= 3))
+                    .("For a binary outcome with three or more raters the calculation uses the rater-dependence model of Altaye, Donner and Klar: with probability kappa all raters give one shared call, otherwise each rater calls independently. Other models with the same kappa, such as the beta-binomial (the two-category case of the model of Altaye, Donner and Eliasziw), can need a markedly different number of subjects."),
                 .("It does not apply to weighted kappa for ordered grades; for an ordinal grading study either treat the grades as nominal categories or use a dedicated weighted-kappa method."),
-                .("It answers 'how many subjects do I need to reject kappa0 in favour of kappa1?' - not how precisely kappa will be estimated; for a target interval width use kappaSizeCI instead."),
+                .("It answers 'how many subjects do I need to reject kappa0 in favour of kappa1?' - not how precisely kappa will be estimated; to plan the expected confidence limits around an anticipated kappa, use kappaSizeCI instead."),
                 .("Note that kappa0 here is the null hypothesis value, whereas in kappaSizeCI and kappaSizeFixedN it is the agreement you anticipate observing."),
                 if (has_n)
                     .fmt(
@@ -459,8 +473,16 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         subjects = private$.subjects(n_required)))
                 else ""))
 
-            # Cochran's rule on the expected counts at N: no cell below 1, at most 20% below 5.
-            e      <- P0 * as.numeric(result$N)
+            # Cochran's rule on the expected counts at N: no cell below 1, at most 20% below 5,
+            # judged on the cells of the test the N is for. With a binary outcome and 3+ raters
+            # that test pools every split call into one disagreement cell (Altaye, Donner & Klar
+            # 2001 p.586), so the 'exactly k of n raters' cells are pooled here too; under their
+            # eq. (4) model pooling leaves N unchanged. Judging the unpooled cells flagged designs
+            # whose pooled cells are comfortable (6 raters, 5% finding: smallest pooled count 6.3,
+            # smallest unpooled 0.0003). Two raters and 3-5 categories already use pooled cells.
+            gof    <- if (outcome == 2L && raters >= 3)
+                          c(P0[1], sum(P0[2:raters]), P0[raters + 1]) else P0
+            e      <- gof * as.numeric(result$N)
             sparse <- is.finite(n_required) && (any(e < 1) || mean(e < 5) > 0.2)
 
             # Expected count of each OUTCOME category at N -- the quantity the engine's own

@@ -266,7 +266,6 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @importFrom cutpointr cutpointr
-#' @importFrom MASS ginv
 # ============================================================================
 # MAIN ANALYSIS CLASS
 # ============================================================================

@@ -229,29 +229,30 @@ test_that("sparse expected cells are lifted into the Notes panel and not repeate
 })
 
 
-test_that("sparse agreement-pattern cells are detected, not just sparse categories", {
-    # kappaSize sizes the study with a chi-square over agreement patterns (exactly j of n
-    # raters positive), but both its own warning and the module's first rule looked only at
-    # the category marginals. With 6 raters and a 5% finding the marginal is 0.05 * 316 = 16
-    # while three of the seven pattern cells have expected counts of 0.41, 0.016 and 0.0003.
+test_that("sparse goodness-of-fit cells are judged on the cells of the published test", {
+    # The category marginals (kappaSize's own warning) miss sparse goodness-of-fit cells, so the
+    # Notes judge the chi-square cells. With a binary outcome and 3+ raters those are the cells of
+    # the 1-df test the N is sized for, which pools every split call into one disagreement cell
+    # (Altaye, Donner & Klar 2001 p.586): all absent / any disagreement / all present. Until
+    # 2026-10-11 the unpooled 'exactly k of n' cells were judged, and 6 raters with a 5% finding
+    # (unpooled cells 0.41, 0.016, 0.0003) was flagged although its smallest pooled count is 6.3.
     six <- run_kp(kappa0 = 0.4, kappa1 = 0.6, props = "0.05", raters = "6")
     expect_equal(n_from(six), 316L)
-    expect_match(six$notices$content, "Sparse categories")
-    expect_match(six$notices$content, "agreement-pattern cell")
-    expect_match(six$notices$content, "enriching the case series")
-    expect_match(six$notices$content, "smallest expected count is 0.00034 and 3 of 7 cells")
-    # Cochran's rule, not "any cell < 5": at prevalence 0.30, four raters has a single cell
-    # of 3.7 out of five and five raters one of 1.17 out of six (both pass); six raters has
-    # a cell of 0.38 (fails)
-    expect_false(grepl("Sparse categories", run_kp(raters = "4")$notices$content))
-    expect_false(grepl("Sparse categories", run_kp(raters = "5")$notices$content))
-    expect_match(run_kp(raters = "6")$notices$content, "Sparse categories")
+    expect_false(grepl("Sparse categories", six$notices$content))
+    # a genuinely sparse pooled cell is still flagged: 6 raters, 5% finding, kappa 0.2 -> 0.5,
+    # N = 137, all-present cell 0.01 x 136.2 = 1.36, so 1 of the 3 cells is below 5
+    sp <- run_kp(kappa0 = 0.2, kappa1 = 0.5, props = "0.05", raters = "6")
+    expect_equal(n_from(sp), 137L)
+    expect_match(sp$notices$content, "Sparse categories")
+    expect_match(sp$notices$content, "goodness-of-fit cells")
+    expect_match(sp$notices$content, "enriching the case series")
+    expect_match(sp$notices$content, "smallest expected count is 1.4 and 1 of 3 cells")
+    # prevalence 0.30 with 4, 5 and 6 raters: smallest pooled counts 10.1, 8.3 and 7.4
+    for (r in c("4", "5", "6"))
+        expect_false(grepl("Sparse categories", run_kp(raters = r)$notices$content), label = r)
     # the engine's own marginal warning is absent for this design, so the Notes panel is
-    # the only place it can be seen
+    # the only place a sparse cell could be seen
     expect_false(grepl("expected cell count", six$text1$content))
-    # 4 raters at 10% prevalence: N = 218, one cell at 0.47
-    expect_match(run_kp(kappa0 = 0.4, kappa1 = 0.6, props = "0.10", raters = "4")$notices$content,
-                 "Sparse categories")
     # 3 categories, 2 raters: the "both agree on category j" cells are p_j^2 + k p_j (1 - p_j)
     three <- run_kp(outcome = "3", kappa0 = 0.2, kappa1 = 0.5, props = "0.05, 0.45, 0.50")
     expect_match(three$notices$content, "Sparse categories")
@@ -307,7 +308,8 @@ test_that("degenerate designs inside the option ranges are flagged, not answered
     # and the default design carries none of them
     ok <- run_kp()$notices$content
     expect_false(grepl("Very small|Low power|Very large|Small kappa", ok))
-    expect_match(ok, "unweighted \\(nominal-category\\) kappa")
+    # the estimand of all four method papers: intraclass kappa, no rater bias (2026-10-11)
+    expect_match(ok, "unweighted intraclass kappa for nominal categories", fixed = TRUE)
     expect_match(ok, "each rated by all 2 raters")
 })
 

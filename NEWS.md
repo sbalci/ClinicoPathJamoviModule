@@ -2,6 +2,35 @@
 
 ## Unreleased — rare-disease AI validation and workload
 
+- `enhancedROC` analysis 1.0.85 resolves the independent review of 2026-10-11. Changes a user can
+  see in the numbers: AUC-PR is now the interpolated precision-recall area (Davis & Goadrich 2006;
+  Keilwagen et al. 2014), no longer the PR-space trapezoid that inflated tied scores; the
+  bootstrap AUC interval is left blank when a class has a single member; the One-vs-Rest
+  multi-class averages no longer carry an AUC band; the internal-validation optimism uses the
+  exact slope sign, and a cross-validation failure no longer discards the bootstrap result.
+  "Stratified bootstrap" now also reaches the bootstrap comparison test and the confidence
+  bands; it stays off by default, so those two are no longer always stratified and their
+  p-values and bands can differ from earlier versions. The frozen-model "Sampling design"
+  default is now "Other / unknown", and untouched declarations are printed as defaults. New
+  warnings: several rows per patient, impact cutoffs outside the marker's range, minimums
+  ignored when Youden optimisation is off, unreadable custom cutoffs. Copy-ready text, notices
+  and option help were rewritten so that no sentence overstates what the analysis shows.
+  Table notes are now opt-in: the new "Table notes" checkbox (Output Options > Tables, off by
+  default) shows the explanatory notes and cell footnotes under the tables. The random seed of a
+  resampled result is always shown.
+  The Analysis Summary and the copy-ready Clinical Report are now opt-in too: "Analysis summary"
+  and "Report sentences" under Reporting Options, both off by default (the summary panel still
+  appears when Internal validation is ticked, which reports there). A review on 2026-10-11 also
+  fixed these: a minimum sensitivity or specificity could return an infinite "test nobody / test
+  everybody" cutoff, and now falls back with a notice; a constant predictor no longer gets
+  cut-point rows; two perfectly separating markers are reported as not testable, not as p = 1; an
+  undefined NNT, NND, PPV or workload ratio is a blank cell with its reason instead of "NaN"; a
+  blanked cell keeps its explanation when table notes are off; an empty notices panel no longer
+  shows the previous run's notices; the imbalance threshold is no longer greyed out while in use;
+  the comparison, CROC and hull plots follow the plot theme. Every enhancedROC string now has a
+  Turkish translation.
+  The analysis remains in JamoviTest pending production promotion.
+
 - In module 1.0.81.01, `enhancedROC` analysis 1.0.84 reports the actual AUC
   interval method for each marker, including DeLong fallbacks and BCa-to-percentile
   downgrades. DeLong fallback rows retain their matching standard errors. Distinct

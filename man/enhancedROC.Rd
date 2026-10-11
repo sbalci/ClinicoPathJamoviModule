@@ -47,6 +47,9 @@ enhancedROC(
   clinicalPresets = "custom",
   comprehensive_output = FALSE,
   clinical_interpretation = FALSE,
+  showAnalysisSummary = FALSE,
+  showClinicalReport = FALSE,
+  showTableNotes = FALSE,
   plotTheme = "clinical",
   plotWidth = 600,
   plotHeight = 600,
@@ -84,7 +87,7 @@ enhancedROC(
   referenceDescription = "",
   modelVersion = "",
   cohortRole = "frozen",
-  samplingDesign = "consecutive",
+  samplingDesign = "other",
   thresholdSource = "prespecified",
   predictionScale = "score",
   patientID = NULL,
@@ -100,7 +103,8 @@ enhancedROC(
 \item{outcome}{Outcome variable (disease status). A factor with two levels,
 or with more than two (choose one as Positive class and the others are
 pooled as negative, or use Multi-class ROC). A numeric outcome must have
-exactly two values; 0/1 reads 1 as positive.}
+exactly two values; 0/1 reads 1 as positive. Each row must be a different
+patient: every interval and test assumes independent rows.}
 
 \item{positiveClass}{Level of outcome treated as the positive class
 (condition present), matched exactly. Pass NULL to leave it unset: a
@@ -110,9 +114,13 @@ from their order. Every other level is analysed as negative (pooled when
 there are more than two). A numeric outcome must have exactly two values;
 to choose among more, make it a factor.}
 
-\item{predictors}{Numeric predictor variables for ROC analysis}
+\item{predictors}{Numeric predictor variables for ROC analysis, one value
+per patient (row).}
 
-\item{analysisType}{Type of ROC analysis to perform}
+\item{analysisType}{Single analyses each predictor on its own; Comparative
+adds the pairwise comparison tables and the comparative ROC plot.
+Comprehensive Diagnostic Performance currently gives the same output as
+Single.}
 
 \item{direction}{Direction of the predictor-outcome relationship. The
 default is "Higher values indicate positive outcome" because it is a stated
@@ -133,7 +141,9 @@ say so.
 \item{youdenOptimization}{Find the optimal cutoff by maximising the Youden
 index (sensitivity + specificity - 1), subject to the minimum
 sensitivity/specificity below. When off, the cutoff closest to the top-left
-corner of the ROC curve is reported instead.}
+corner of the ROC curve is reported instead. The minimum sensitivity and
+specificity are used only by the Youden search; with this off they are not
+applied and a warning says so.}
 
 \item{customCutoffs}{Comma-separated list of custom cutoffs to evaluate
 (e.g., 0.1, 0.5, 0.9)}
@@ -143,38 +153,49 @@ considered. 0 (the default) searches for the overall Youden optimum with no
 constraint. Raising it restricts the search, which is what you want for a
 screening test, but the reported cutoff is then the best one meeting your
 minimum rather than the Youden maximum - a notice says so when the two
-differ.}
+differ. Used only when Youden index optimization is on.}
 
 \item{specificityThreshold}{Minimum specificity a cutoff must achieve to be
 considered. 0 (the default) searches for the overall Youden optimum with no
 constraint. Raising it restricts the search, which is what you want for a
 confirmatory test, but the reported cutoff is then the best one meeting
 your minimum rather than the Youden maximum - a notice says so when the two
-differ.}
+differ. Used only when Youden index optimization is on.}
 
 \item{confidenceLevel}{Confidence level for AUC confidence intervals}
 
-\item{bootstrapSamples}{Number of bootstrap samples for confidence
-intervals}
+\item{bootstrapSamples}{Number of resamples for every resampling step
+except the frozen-model report: bootstrap confidence intervals (AUC,
+partial AUC, multi-class), the ROC confidence bands, the bootstrap
+comparison test, and the number of permutations for Venkatraman's test.
+With B permutations no p-value below 1/(B + 1) can be shown, so keep at
+least 1000 for a test.}
 
 \item{useBootstrap}{Use bootstrap methods for confidence intervals}
 
 \item{bootstrapMethod}{Method for calculating bootstrap confidence
-intervals. BCa provides better coverage but requires more computation.}
+intervals. BCa corrects for bias and skewness and is second-order accurate
+in large samples; for a single AUC in small samples no interval method is
+uniformly best (Obuchowski and Lieber 1998; Feng et al. 2017).}
 
 \item{bootstrapPartialAUC}{Bootstrap confidence interval for the partial
 AUC, using the resample count, interval type (BCa/percentile/basic) and
 stratification set above. The interval is for the raw partial AUC on the
 chosen focus range, not for the McClish-normalised value.}
 
-\item{stratifiedBootstrap}{Maintain outcome class proportions in bootstrap
-samples (recommended for imbalanced data)}
+\item{stratifiedBootstrap}{Resample cases and controls separately, keeping
+the outcome proportions, in every bootstrap of this analysis: the AUC and
+partial-AUC intervals, the bootstrap comparison test and the ROC confidence
+bands (recommended for imbalanced data). Off by default: unticked, these
+bootstraps resample patients without regard to outcome.}
 
 \item{seed}{Random seed used for every resampling step - bootstrap
 confidence intervals, bootstrap ROC comparisons, and internal validation
-resamples or cross-validation folds. Fixing it makes a run reproducible:
-the same data and options give the same intervals every time. Change it to
-check how sensitive a result is to the particular resamples drawn.}
+resamples or cross-validation folds. Each step starts from this seed, so a
+predictor's result does not depend on which predictors or options were
+resampled before it. Fixing it makes a run reproducible: the same data and
+options give the same intervals every time. Change it to check how
+sensitive a result is to the particular resamples drawn.}
 
 \item{pairwiseComparisons}{Perform pairwise comparisons between ROC curves}
 
@@ -227,8 +248,8 @@ PRC when appropriate}
 class-imbalance warning. The warning itself is always shown when imbalance
 is detected; this only controls how much it explains.}
 
-\item{recommendPRC}{Recommend using Precision-Recall curves when imbalance
-is detected}
+\item{recommendPRC}{Recommend adding the Precision-Recall curve alongside
+the ROC curve when imbalance is detected.}
 
 \item{prevalence}{Disease prevalence to assume when computing predictive
 values. Used only when "Use observed prevalence" is unticked - set it to
@@ -243,13 +264,30 @@ used in. The prevalence actually used is printed in the results.}
 
 \item{clinicalContext}{Clinical application context for interpretation}
 
-\item{clinicalPresets}{Pre-configured settings for common clinical
-scenarios}
+\item{clinicalPresets}{Sets how the optimal cutoff is searched for: each
+preset turns Youden index optimization on and sets the minimums (Screening:
+sensitivity 0.90; Diagnostic validation: 0.80 and 0.80; Confirmatory:
+specificity 0.95; Research: keeps the minimums you enter, so it differs
+from Custom only by switching Youden optimization on). No other option
+changes.}
 
 \item{comprehensive_output}{Include comprehensive statistical details}
 
 \item{clinical_interpretation}{Provide clinical context for ROC analysis
 results}
+
+\item{showAnalysisSummary}{A plain-language summary of the main results:
+the best AUC with its interval and the cutoff with its sensitivity and
+specificity. Internal validation results appear in the same panel whenever
+Internal validation is ticked.}
+
+\item{showClinicalReport}{Copy-ready Methods and Results sentences built
+from these results. Check them against the tables before pasting them into
+a report.}
+
+\item{showTableNotes}{Show explanatory notes and cell footnotes below the
+results tables, including methods, definitions and cautions for reading
+each table. The random seed of a resampled result is always shown.}
 
 \item{plotTheme}{Visual theme for ROC plots}
 
@@ -316,7 +354,9 @@ levels}
 averages are reported side by side for the One-vs-Rest strategy: Macro
 weights every class equally, Weighted weights each class by how many cases
 it contains. The One-vs-One strategy reports only its own unweighted
-average over class pairs, which is what that statistic is defined as.}
+average over class pairs, which is what that statistic is defined as. Both
+averages are always shown, so this setting changes no displayed value; with
+One-vs-One, Weighted only raises a notice.}
 
 \item{clinicalImpact}{Calculate observed or projected workload at
 independently supplied score cutoffs}
@@ -332,35 +372,73 @@ consequences}
 \item{internalValidation}{Perform internal validation using
 cross-validation or bootstrap}
 
-\item{validationMethod}{Method for internal validation}
+\item{validationMethod}{Bootstrap: Harrell's optimism-corrected AUC of a
+logistic model of the marker (resamples holding one outcome group are
+dropped and counted). Cross-validation: stratified 10-fold, or one fold per
+patient of the smaller outcome group when it has fewer than 10, reporting
+the mean fold AUC and the SD across folds, which is not a standard error.}
 
 \item{decisionImpactCurves}{Plot the clinical impact curve: how many of
 1000 tested patients would be called high risk at each threshold
 probability, and how many of those actually have the event.}
 
-\item{impactCutoffs}{.}
+\item{impactCutoffs}{Fixed score cutoffs on the marker's own scale, comma
+separated. The default 0.5 is meant for predicted probabilities (Prediction
+scale = probability); for a raw marker enter cutoffs inside its observed
+range. A warning names any cutoff that classifies every analysed patient
+the same way.}
 
-\item{utilityThreshold}{.}
+\item{utilityThreshold}{Threshold probability for net benefit: the risk at
+which a clinician is indifferent between acting and not acting, so its odds
+are the harm of a false positive relative to the benefit of a true positive
+(0.1 means one true positive is worth nine false positives). Used by the
+clinical impact and workload tables; it is not a score cutoff.}
 
-\item{workloadPopulationSize}{.}
+\item{workloadPopulationSize}{Size of the population the projected workload
+counts are scaled to. Used for every projected row: the main prevalence
+when Observed prevalence is unticked, and every additional target
+prevalence. Observed rows count the analysed patients instead.}
 
-\item{analysisUnit}{.}
+\item{analysisUnit}{What one row is (slide, core, patient...). Printed in
+the frozen-model report; every analysed row weighs equally in its metrics.}
 
-\item{prevalenceScenarios}{.}
+\item{prevalenceScenarios}{Extra target-population prevalences, as
+proportions between 0 and 1 separated by commas (for example 0.05, 0.2).
+Each adds projected rows to the workload table at the same fixed cutoffs.
+Leave blank for none; an unreadable entry is ignored with a warning.}
 
-\item{validationPanel}{.}
+\item{validationPanel}{Evaluates an already-fitted model or score at
+prespecified fixed cutoffs, without refitting or choosing a cutoff from
+these data, and replaces every other output with the validation context,
+denominator ledger and frozen-model metrics. Needs a positive class, an
+explicit negative level, an explicit Direction and the fixed score cutoffs.}
 
-\item{validationNegative}{.}
+\item{validationNegative}{The outcome level that means the condition is
+absent, typed exactly as it appears in the data. Required by the
+frozen-model report, which refuses any outcome level that is neither this
+nor the positive class instead of pooling it as negative.}
 
-\item{referenceDescription}{.}
+\item{referenceDescription}{Free text describing the reference standard and
+whether its readers were blinded to the score (for example histology,
+blinded). Printed in the frozen-model validation context.}
 
-\item{modelVersion}{.}
+\item{modelVersion}{Identifier of the fitted model or score version being
+evaluated. Required when Cohort role is frozen, so the report names exactly
+which model the metrics belong to.}
 
-\item{cohortRole}{.}
+\item{cohortRole}{Declared by you and printed in the frozen-model report;
+the analysis does not check it. A value left at its default is printed as
+(default setting).}
 
-\item{samplingDesign}{.}
+\item{samplingDesign}{Declared by you and printed in the frozen-model
+report; the analysis does not check it. A value left at its default is
+printed as (default setting). The default is Other / unknown so that an
+untouched report does not assert a sampling design; how PPV and NPV should
+be read depends on it.}
 
-\item{thresholdSource}{.}
+\item{thresholdSource}{Declared by you and printed in the frozen-model
+report; the analysis does not check it. A value left at its default is
+printed as (default setting).}
 
 \item{predictionScale}{What the predictor values are. Score (default) is
 any marker or model score: the calibration summary and plot, Brier score,
@@ -372,15 +450,29 @@ outside 0 to 1 gets none of those outputs, and a probability is never
 reversed. Values between 0 and 1 are not taken as probabilities unless this
 says so. Frozen-model validation uses the same setting.}
 
-\item{patientID}{.}
+\item{patientID}{Patient identifier. On the main analysis it is used only
+to warn when a patient has several rows: every panel except the
+Frozen-model validation report treats each row as an independent patient,
+so their intervals and tests are too narrow then. Only the Frozen-model
+validation report resamples whole patients.}
 
-\item{siteID}{.}
+\item{siteID}{Optional site or centre of each row. The frozen-model report
+then adds one set of metrics per site, conditional on the observed sites,
+and resamples within sites. Every row needs a site, and a patient may not
+appear at two sites.}
 
-\item{partitionID}{.}
+\item{partitionID}{Optional development or validation label of each row,
+used by the frozen-model report to check that no patient appears in more
+than one partition (leakage). Requires a patient identifier.}
 
-\item{validationBootstrap}{.}
+\item{validationBootstrap}{Adds percentile confidence intervals to the
+frozen-model metrics, resampling whole patients when a patient identifier
+is given (jointly across models, within sites). Without it the report shows
+point estimates only.}
 
-\item{validationDraws}{.}
+\item{validationDraws}{Number of patient-level bootstrap replicates for the
+frozen-model intervals. Separate from Bootstrap samples, which serves the
+other panels.}
 }
 \value{
 A results object containing:
@@ -436,4 +528,15 @@ evaluation. Includes ROC curve analysis, Youden Index optimization,
 sensitivity/specificity analysis, optimal cutoff determination, and
 comparative ROC analysis. Essential for biomarker validation, diagnostic
 test evaluation, and clinical decision support in medical research.
+}
+\examples{
+\donttest{
+# pROC::aSAH ships with pROC, an Import, so the example runs in every module that
+# carries this analysis. positiveClass is a Level option: always a required argument.
+enhancedROC(
+    data = pROC::aSAH,
+    outcome = "outcome",
+    positiveClass = "Poor",
+    predictors = c("s100b", "ndka"))
+}
 }

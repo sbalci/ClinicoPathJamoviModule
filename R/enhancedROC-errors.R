@@ -70,10 +70,10 @@ clinicopath_error_handler <- function(error, function_name = "unknown", clinical
         error_message = conditionMessage(error),
         error_class = class(error),
         clinical_context = clinical_context,
-        call_stack = sys.calls(),
+        # No sys.calls() or sessionInfo(): the log is package-global, so a captured call stack
+        # pinned every frame it referenced (data included) until the next init, and nothing read it.
         function_stack = .clinicopath_errors$function_stack,
-        error_number = .clinicopath_errors$error_count,
-        session_info = sessionInfo()$R.version$version.string
+        error_number = .clinicopath_errors$error_count
     )
     
     .clinicopath_errors$error_log[[.clinicopath_errors$error_count]] <- error_entry
@@ -119,8 +119,7 @@ clinicopath_warning_handler <- function(warning, function_name = "unknown", clin
         warning_message = conditionMessage(warning),
         warning_class = class(warning),
         clinical_context = clinical_context,
-        call_stack = sys.calls(),
-        function_stack = .clinicopath_errors$function_stack,
+        function_stack = .clinicopath_errors$function_stack,   # no sys.calls(): see the error handler
         warning_number = .clinicopath_errors$warning_count
     )
     

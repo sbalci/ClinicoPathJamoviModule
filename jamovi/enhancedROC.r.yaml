@@ -8,7 +8,8 @@ items:
       name: results
       type: Group
       items:
-          # Notice outputs converted to HTML to avoid serialization errors
+          # Notices render as one HTML panel for multi-line, severity-ordered content (jmvcore::Notice
+          # serializes fine; the earlier serialization rationale was wrong - CLAUDE.md, review guide 13).
           - name: notices
             title: Important Information
             type: Html
@@ -39,6 +40,7 @@ items:
             visible: (length(outcome) > 0 && !validationPanel)
             rows: 0
             clearWith:
+                - showTableNotes
                 - outcome
                 - positiveClass
                 - predictors
@@ -61,6 +63,7 @@ items:
             type: Table
             visible: (detectImbalance && !validationPanel)
             clearWith:
+                - showTableNotes
                 - outcome
                 - predictors
                 - positiveClass
@@ -100,7 +103,9 @@ items:
             visible: (detectImbalance && !validationPanel)
             refs:
                 - Davis2006
+                - Keilwagen2014
             clearWith:
+                - showTableNotes
                 - outcome
                 - predictors
                 - positiveClass
@@ -111,7 +116,7 @@ items:
                   title: 'Predictor'
                   type: text
                 - name: auc_pr
-                  title: 'AUC-PR (trapezoidal)'
+                  title: 'AUC-PR (interpolated)'
                   type: number
                   format: zto
                 - name: f1_score
@@ -135,8 +140,10 @@ items:
           - name: analysisSummary
             title: Analysis Summary
             type: Html
-            visible: true
+            # Internal validation writes its results into this panel, so it shows it on its own
+            visible: (showAnalysisSummary || internalValidation)
             clearWith:
+                - showAnalysisSummary
                 - outcome
                 - predictors
                 - positiveClass
@@ -153,8 +160,9 @@ items:
           - name: clinicalReport
             title: Clinical Report Sentences
             type: Html
-            visible: true
+            visible: (showClinicalReport)
             clearWith:
+                - showClinicalReport
                 - outcome
                 - predictors
                 - positiveClass
@@ -191,6 +199,7 @@ items:
                 - FengCorteseBaumgartner2017
                 - HosmerLemeshow2013
             clearWith:
+                - showTableNotes
                 - outcome
                 - predictors
                 - positiveClass
@@ -240,12 +249,14 @@ items:
                 - DeLong1988
                 - VenkatramanBegg1996
             clearWith:
+                - showTableNotes
                 - outcome
                 - predictors
                 - positiveClass
                 - comparisonMethod
                 - clinicalContext
                 - bootstrapSamples
+                - stratifiedBootstrap
                 - seed
                 - direction
 
@@ -281,12 +292,14 @@ items:
                 - DeLong1988
                 - VenkatramanBegg1996
             clearWith:
+                - showTableNotes
                 - outcome
                 - predictors
                 - positiveClass
                 - direction
                 - comparisonMethod
                 - bootstrapSamples
+                - stratifiedBootstrap
                 - seed
                 - youdenOptimization
                 - sensitivityThreshold
@@ -334,11 +347,13 @@ items:
                 - DeLong1988
                 - VenkatramanBegg1996
             clearWith:
+                - showTableNotes
                 - outcome
                 - predictors
                 - positiveClass
                 - comparisonMethod
                 - bootstrapSamples
+                - stratifiedBootstrap
                 - seed
                 - direction
 
@@ -371,6 +386,7 @@ items:
                 - Fluss2005
                 - PerkinsSchisterman2006
             clearWith:
+                - showTableNotes
                 - outcome
                 - predictors
                 - positiveClass
@@ -415,6 +431,7 @@ items:
             description: Comprehensive analysis across multiple cutoff values
             visible: (cutoffTable && !validationPanel)
             clearWith:
+                - showTableNotes
                 - outcome
                 - predictors
                 - positiveClass
@@ -473,6 +490,7 @@ items:
             refs:
                 - ClopperPearson1934
             clearWith:
+                - showTableNotes
                 - outcome
                 - predictors
                 - positiveClass
@@ -522,6 +540,7 @@ items:
             refs:
                 - jaeschke1994
             clearWith:
+                - showTableNotes
                 - outcome
                 - predictors
                 - positiveClass
@@ -570,6 +589,7 @@ items:
             description: Partial AUC analysis for specific sensitivity/specificity ranges
             visible: (partialAuc && !validationPanel)
             clearWith:
+                - showTableNotes
                 - outcome
                 - predictors
                 - positiveClass
@@ -628,6 +648,7 @@ items:
             description: Concentrated ROC analysis with early retrieval focus
             visible: (crocAnalysis && !validationPanel)
             clearWith:
+                - showTableNotes
                 - outcome
                 - predictors
                 - positiveClass
@@ -670,6 +691,7 @@ items:
             refs:
                 - ProvostFawcett2001
             clearWith:
+                - showTableNotes
                 - outcome
                 - predictors
                 - positiveClass
@@ -705,6 +727,7 @@ items:
             description: Enhanced statistical summary for comprehensive output
             visible: (comprehensive_output && !validationPanel)
             clearWith:
+                - showTableNotes
                 - outcome
                 - predictors
                 - positiveClass
@@ -746,6 +769,10 @@ items:
                 - outcome
                 - predictors
                 - positiveClass
+            refs:
+                - harrell2015
+                - DavisonHinkley1997
+                - Noma2021
 
           # ROC Curve Plot
           - name: rocCurvePlot
@@ -764,6 +791,7 @@ items:
                 - showConfidenceBands
                 - confidenceLevel
                 - bootstrapSamples
+                - stratifiedBootstrap
                 - seed
                 - plotTheme
                 - plotWidth
@@ -930,6 +958,7 @@ items:
             refs:
                 - VanCalster2019Calibration
             clearWith:
+                - showTableNotes
                 - outcome
                 - predictors
                 - positiveClass
@@ -1007,6 +1036,7 @@ items:
                 - HosmerLemeshow2013
                 - VanCalster2019Calibration
             clearWith:
+                - showTableNotes
                 - outcome
                 - predictors
                 - positiveClass
@@ -1063,6 +1093,7 @@ items:
             description: AUC values for each class in multi-class analysis
             visible: (multiClassROC && !validationPanel)
             clearWith:
+                - showTableNotes
                 - direction
                 - outcome
                 - predictors
@@ -1106,6 +1137,7 @@ items:
             description: Averaged AUC across all classes
             visible: (multiClassROC && !validationPanel)
             clearWith:
+                - showTableNotes
                 - direction
                 - outcome
                 - predictors
@@ -1154,6 +1186,7 @@ items:
             description: Number needed to test and clinical utility metrics
             visible: (clinicalImpact && !validationPanel)
             clearWith:
+                - showTableNotes
                 - impactCutoffs
                 - utilityThreshold
                 - workloadPopulationSize
@@ -1202,6 +1235,7 @@ items:
             description: Clinical consequences at various decision thresholds
             visible: (clinicalImpact && decisionImpactTable && !validationPanel)
             clearWith:
+                - showTableNotes
                 - impactCutoffs
                 - utilityThreshold
                 - workloadPopulationSize
@@ -1297,6 +1331,7 @@ items:
             type: Table
             visible: (clinicalImpact)
             clearWith: &id001
+            - showTableNotes
             - outcome
             - predictors
             - positiveClass

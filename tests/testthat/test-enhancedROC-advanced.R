@@ -151,12 +151,13 @@ tied_biomarker <- function() {
   d
 }
 
-test_that("tied scores get the automatic tie note with the AUC bounds", {
+test_that("tied scores get the selected tie note with the AUC bounds", {
   d <- tied_biomarker()
   o <- tie_oracle(d, "tied_marker")
   expect_gt(o$share, 0.1)   # the fixture really is heavily tied
 
   result <- enhancedROC(
+    showTableNotes = TRUE,
     data = d,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -177,6 +178,7 @@ test_that("the tie bounds follow the declared direction", {
   o <- tie_oracle(d, "tied_marker", higher = FALSE)
 
   result <- enhancedROC(
+    showTableNotes = TRUE,
     data = d,
     outcome = "disease_status",
     positiveClass = "Disease",
@@ -194,6 +196,7 @@ test_that("a marker with no tied case-control pair gets no tie note", {
   expect_equal(tie_oracle(enhancedroc_biomarker, "biomarker1")$share, 0)
 
   result <- enhancedROC(
+    showTableNotes = TRUE,
     data = enhancedroc_biomarker,
     outcome = "disease_status",
     positiveClass = "Disease",

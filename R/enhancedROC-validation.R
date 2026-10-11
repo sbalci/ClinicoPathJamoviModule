@@ -61,22 +61,30 @@
   if (probability && (any(score < 0 | score > 1) || !higher)) {
     stop("Probability inputs must be in [0,1] for the selected positive class; direction must be higher.")
   }
+  # F-20: a setting still at its default is printed as the default, not as a user declaration
+  # (an untouched panel read 'Sampling design = consecutive'; no calculation reads that option).
+  declared <- function(value, name) {
+    default <- tryCatch(options$option(name)$default, error = function(e) NULL)
+    if (identical(value, default)) paste0(value, " (default setting)") else value
+  }
+  # F-47: metrics weight every analysed row equally, whatever the declared unit.
+  unit <- if (length(options$analysisUnit) && nzchar(trimws(options$analysisUnit))) options$analysisUnit else "row"
   context <- c(
-    "Cohort role (user declared)" = options$cohortRole,
-    "Sampling design" = options$samplingDesign,
+    "Cohort role (declared, not verified)" = declared(options$cohortRole, "cohortRole"),
+    "Sampling design" = declared(options$samplingDesign, "samplingDesign"),
     "Model version" = options$modelVersion,
     "Reference standard" = options$referenceDescription,
     "Positive / negative" = paste(positive, "/", negative),
-    "Threshold source" = options$thresholdSource,
+    "Threshold source" = declared(options$thresholdSource, "thresholdSource"),
     "Unit of observation" = options$analysisUnit,
     "Prediction scale" = options$predictionScale,
     "Analyzed independent units" = as.character(length(unique(patient))),
     "Positive independent units" = as.character(length(unique(patient[y == 1]))),
     "Negative independent units" = as.character(length(unique(patient[y == 0]))),
-    "Resampling unit" = if (patient_selected) "Patient; all slides retained" else "Row; independence assumed",
+    "Resampling unit" = if (patient_selected) paste0("Patient; all of the patient's rows (", unit, ") retained") else "Row; independence assumed",
     "Site inference" = "Conditional on observed sites; no site-population extrapolation",
     "Partition audit" = if (partition_selected) "No patient overlap in supplied partition labels" else "Not assessed; no partition manifest",
-    "Interpretation" = "Frozen scores; no refitting or threshold optimization. Slide-weighted metrics; paired differences use common cases.")
+    "Interpretation" = paste0("Frozen scores; no refitting or threshold optimization. Every analysed row (", unit, ") weighs equally in the metrics; paired differences use common cases."))
   rows <- list()
   subsets <- list(All = seq_along(y))
   if (site_selected) for (s in unique(site)) subsets[[paste0("Site: ", s)]] <- which(site == s)
@@ -128,5 +136,6 @@
   }
   list(workload = if (length(workload)) do.call(rbind, workload) else data.frame(),
        context = data.frame(setting = names(context), value = unname(context)),
-       ledger = ledger, metrics = do.call(rbind, rows))
+       ledger = ledger, metrics = do.call(rbind, rows),
+       scores = as.data.frame(score))   # the analysed rows: enhancedROC checks the cutoffs against them (F-09)
 }

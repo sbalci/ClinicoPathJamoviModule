@@ -4,7 +4,9 @@
 
 library(testthat)
 
-er_run <- function(...) suppressWarnings(do.call(ClinicoPath::enhancedROC, list(...)))
+er_run <- function(...) suppressWarnings(do.call(ClinicoPath::enhancedROC,
+    utils::modifyList(list(showTableNotes = TRUE, showAnalysisSummary = TRUE, showClinicalReport = TRUE),
+        list(...), keep.null = TRUE)))
 er_strip <- function(x) trimws(gsub("[[:space:]]+", " ", gsub("<[^>]+>", " ", if (is.null(x)) "" else x)))
 
 # ── C-3  Precision-recall must not depend on spreadsheet row order ────────────
@@ -46,8 +48,12 @@ test_that("tie-pooled PR values match a hand computation", {
     pr <- as.data.frame(er_run(data = d, outcome = "y", predictors = "m",
                                positiveClass = "P", detectImbalance = TRUE)$results$precisionRecallTable)
     expect_equal(as.numeric(pr$average_precision[1]), sum(diff(rec) * pre[-1]), tolerance = 1e-9)
+    # AUC-PR is no longer the trapezoid from (recall 0, precision 1), which tied scores inflate
+    # (F-05, 2026-10-11): it interpolates linearly in (TP, FP) counts, integrated exactly, as
+    # PRROC's auc.integral (Keilwagen et al. 2014) does.
     expect_equal(as.numeric(pr$auc_pr[1]),
-                 sum(diff(rec) * (pre[-1] + pre[-length(pre)]) / 2), tolerance = 1e-9)
+                 PRROC::pr.curve(scores.class0 = d$m[yy == 1], scores.class1 = d$m[yy == 0])$auc.integral,
+                 tolerance = 1e-9)
 })
 
 # ── C-1  A [0,1] predictor must respect ROC direction ─────────────────────────

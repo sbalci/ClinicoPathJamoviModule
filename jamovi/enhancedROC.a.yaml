@@ -4,7 +4,7 @@ title: Clinical ROC Analysis
 menuGroup: meddecideT
 menuSubgroup: ROC
 menuSubtitle: "Clinical ROC analysis with diagnostic metrics and optimal cutoffs"
-version: '1.0.84'
+version: '1.0.85'
 jas: '1.2'
 
 description:
@@ -14,6 +14,16 @@ description:
         sensitivity/specificity analysis, optimal cutoff determination, and
         comparative ROC analysis. Essential for biomarker validation, diagnostic
         test evaluation, and clinical decision support in medical research.
+    R:
+        dontrun: true
+        usage: |
+            # pROC::aSAH ships with pROC, an Import, so the example runs in every module that
+            # carries this analysis. positiveClass is a Level option: always a required argument.
+            enhancedROC(
+                data = pROC::aSAH,
+                outcome = "outcome",
+                positiveClass = "Poor",
+                predictors = c("s100b", "ndka"))
 
 options:
     - name: data
@@ -32,10 +42,10 @@ options:
           - factor
           - numeric
       description: >
-        Outcome variable (disease status). A factor with two levels, or with more than two
-        (choose one as Positive class and the others are pooled as negative, or use
-        Multi-class ROC). A numeric outcome must have exactly two values; 0/1 reads 1 as
-        positive.
+          Outcome variable (disease status). A factor with two levels, or with more than two
+          (choose one as Positive class and the others are pooled as negative, or use Multi-class
+          ROC). A numeric outcome must have exactly two values; 0/1 reads 1 as positive. Each row
+          must be a different patient: every interval and test assumes independent rows.
 
     # allowNone: without it the jamovi client pre-selects levels[0] - usually the NEGATIVE
     # level - and the whole analysis runs reversed. The positive class is never inferred.
@@ -67,7 +77,8 @@ options:
           - continuous
       permitted:
           - numeric
-      description: 'Numeric predictor variables for ROC analysis'
+      description: >
+          Numeric predictor variables for ROC analysis, one value per patient (row).
 
     - name: analysisType
       title: 'Analysis type'
@@ -80,7 +91,10 @@ options:
           - title: 'Comprehensive Diagnostic Performance'
             name: comprehensive
       default: single
-      description: 'Type of ROC analysis to perform'
+      description: >
+          Single analyses each predictor on its own; Comparative adds the pairwise comparison
+          tables and the comparative ROC plot. Comprehensive Diagnostic Performance currently
+          gives the same output as Single.
 
     - name: direction
       title: 'Direction'
@@ -110,7 +124,12 @@ options:
       title: "Youden index optimization"
       type: Bool
       default: true
-      description: 'Find the optimal cutoff by maximising the Youden index (sensitivity + specificity - 1), subject to the minimum sensitivity/specificity below. When off, the cutoff closest to the top-left corner of the ROC curve is reported instead.'
+      description: >
+          Find the optimal cutoff by maximising the Youden index (sensitivity + specificity - 1),
+          subject to the minimum sensitivity/specificity below. When off, the cutoff closest to
+          the top-left corner of the ROC curve is reported instead. The minimum sensitivity and
+          specificity are used only by the Youden search; with this off they are not applied and a
+          warning says so.
 
     - name: customCutoffs
       title: 'Custom cutoffs'
@@ -124,7 +143,12 @@ options:
       default: 0.0
       min: 0.0
       max: 1.0
-      description: 'Minimum sensitivity a cutoff must achieve to be considered. 0 (the default) searches for the overall Youden optimum with no constraint. Raising it restricts the search, which is what you want for a screening test, but the reported cutoff is then the best one meeting your minimum rather than the Youden maximum - a notice says so when the two differ.'
+      description: >
+          Minimum sensitivity a cutoff must achieve to be considered. 0 (the default) searches for
+          the overall Youden optimum with no constraint. Raising it restricts the search, which is
+          what you want for a screening test, but the reported cutoff is then the best one meeting
+          your minimum rather than the Youden maximum - a notice says so when the two differ. Used
+          only when Youden index optimization is on.
 
     - name: specificityThreshold
       title: 'Minimum specificity'
@@ -132,7 +156,12 @@ options:
       default: 0.0
       min: 0.0
       max: 1.0
-      description: 'Minimum specificity a cutoff must achieve to be considered. 0 (the default) searches for the overall Youden optimum with no constraint. Raising it restricts the search, which is what you want for a confirmatory test, but the reported cutoff is then the best one meeting your minimum rather than the Youden maximum - a notice says so when the two differ.'
+      description: >
+          Minimum specificity a cutoff must achieve to be considered. 0 (the default) searches for
+          the overall Youden optimum with no constraint. Raising it restricts the search, which is
+          what you want for a confirmatory test, but the reported cutoff is then the best one
+          meeting your minimum rather than the Youden maximum - a notice says so when the two
+          differ. Used only when Youden index optimization is on.
 
     # Statistical Options
     - name: confidenceLevel
@@ -149,7 +178,11 @@ options:
       default: 1000
       min: 100
       max: 10000
-      description: 'Number of bootstrap samples for confidence intervals'
+      description: >
+          Number of resamples for every resampling step except the frozen-model report: bootstrap
+          confidence intervals (AUC, partial AUC, multi-class), the ROC confidence bands, the
+          bootstrap comparison test, and the number of permutations for Venkatraman's test. With
+          B permutations no p-value below 1/(B + 1) can be shown, so keep at least 1000 for a test.
 
     - name: useBootstrap
       title: "Bootstrap confidence intervals"
@@ -168,7 +201,11 @@ options:
           - title: 'Basic Bootstrap'
             name: basic
       default: bca
-      description: 'Method for calculating bootstrap confidence intervals. BCa provides better coverage but requires more computation.'
+      description: >
+          Method for calculating bootstrap confidence intervals. BCa corrects for bias and
+          skewness and is second-order accurate in large samples; for a single AUC in small
+          samples no interval method is uniformly best (Obuchowski and Lieber 1998; Feng et al.
+          2017).
 
     # NOT IMPLEMENTED - commented out so jamovi does not offer a control that produces no output.
 #     - name: bootstrapCutoffCI
@@ -190,17 +227,25 @@ options:
       title: "Stratified bootstrap"
       type: Bool
       default: false
-      description: 'Maintain outcome class proportions in bootstrap samples (recommended for imbalanced data)'
+      description: >
+          Resample cases and controls separately, keeping the outcome proportions, in every
+          bootstrap of this analysis: the AUC and partial-AUC intervals, the bootstrap comparison
+          test and the ROC confidence bands (recommended for imbalanced data). Off by default:
+          unticked, these bootstraps resample patients without regard to outcome.
 
     - name: seed
       title: "Random seed"
       type: Integer
       default: 0
       description:
+          ui: >
+            Seed for every resampling step. Each interval, band and test starts from it, so the
+            same data and options always give the same result.
           R: >
             Random seed used for every resampling step - bootstrap confidence intervals,
             bootstrap ROC comparisons, and internal validation resamples or cross-validation
-            folds. Fixing it makes a run reproducible: the same data and options give the
+            folds. Each step starts from this seed, so a predictor's result does not depend on
+            which predictors or options were resampled before it. Fixing it makes a run reproducible: the same data and options give the
             same intervals every time. Change it to check how sensitive a result is to the
             particular resamples drawn.
 
@@ -365,7 +410,9 @@ options:
       title: "PRC recommendation for imbalanced data"
       type: Bool
       default: false
-      description: 'Recommend using Precision-Recall curves when imbalance is detected'
+      description: >
+          Recommend adding the Precision-Recall curve alongside the ROC curve when imbalance is
+          detected.
 
     # Clinical Context
     - name: prevalence
@@ -411,10 +458,14 @@ options:
             name: diagnostic_validation
           - title: 'Confirmatory Testing (High Specificity)'
             name: confirmatory_testing
-          - title: 'Research Analysis (Comprehensive)'
+          - title: 'Research (Youden with Your Minimums)'
             name: research_comprehensive
       default: custom
-      description: 'Pre-configured settings for common clinical scenarios'
+      description: >
+          Sets how the optimal cutoff is searched for: each preset turns Youden index optimization
+          on and sets the minimums (Screening: sensitivity 0.90; Diagnostic validation: 0.80 and
+          0.80; Confirmatory: specificity 0.95; Research: keeps the minimums you enter, so it differs
+          from Custom only by switching Youden optimization on). No other option changes.
 
     # Advanced Output Options
     - name: comprehensive_output
@@ -428,6 +479,32 @@ options:
       type: Bool
       default: false
       description: 'Provide clinical context for ROC analysis results'
+
+    - name: showAnalysisSummary
+      title: "Analysis summary"
+      type: Bool
+      default: false
+      description: >
+          A plain-language summary of the main results: the best AUC with its interval and the
+          cutoff with its sensitivity and specificity. Internal validation results appear in the
+          same panel whenever Internal validation is ticked.
+
+    - name: showClinicalReport
+      title: "Report sentences"
+      type: Bool
+      default: false
+      description: >
+          Copy-ready Methods and Results sentences built from these results. Check them against
+          the tables before pasting them into a report.
+
+    - name: showTableNotes
+      title: "Table notes"
+      type: Bool
+      default: false
+      description: >
+          Show explanatory notes and cell footnotes below the results tables, including
+          methods, definitions and cautions for reading each table. The random seed of a
+          resampled result is always shown.
 
     # Plotting Options
     - name: plotTheme
@@ -615,10 +692,12 @@ options:
             name: weighted
       default: macro
       description: >
-        Method for averaging AUC across classes. Both averages are reported side by side for the
-        One-vs-Rest strategy: Macro weights every class equally, Weighted weights each class by
-        how many cases it contains. The One-vs-One strategy reports only its own unweighted
-        average over class pairs, which is what that statistic is defined as.
+          Method for averaging AUC across classes. Both averages are reported side by side for the
+          One-vs-Rest strategy: Macro weights every class equally, Weighted weights each class by
+          how many cases it contains. The One-vs-One strategy reports only its own unweighted
+          average over class pairs, which is what that statistic is defined as. Both averages are
+          always shown, so this setting changes no displayed value; with One-vs-One, Weighted only
+          raises a notice.
 
     # Time-Dependent ROC Options (NOT IMPLEMENTED - COMMENTED OUT)
     # - name: timeDependentROC
@@ -735,7 +814,11 @@ options:
           - title: 'Both Methods'
             name: both
       default: bootstrap
-      description: 'Method for internal validation'
+      description: >
+          Bootstrap: Harrell's optimism-corrected AUC of a logistic model of the marker (resamples
+          holding one outcome group are dropped and counted). Cross-validation: stratified
+          10-fold, or one fold per patient of the smaller outcome group when it has fewer than 10,
+          reporting the mean fold AUC and the SD across folds, which is not a standard error.
 
     # NOT IMPLEMENTED - commented out so jamovi does not offer a control that produces no output.
     # Triage 2026-09-21: this duplicates the existing Internal Validation option with
@@ -792,42 +875,78 @@ options:
       title: Fixed score cutoffs (comma separated)
       type: String
       default: '0.5'
+      description: >
+          Fixed score cutoffs on the marker's own scale, comma separated. The default 0.5 is meant
+          for predicted probabilities (Prediction scale = probability); for a raw marker enter
+          cutoffs inside its observed range. A warning names any cutoff that classifies every
+          analysed patient the same way.
     - name: utilityThreshold
       title: Utility threshold (harm/benefit)
       type: Number
       default: 0.1
       min: 1.0e-09
       max: 0.999999999
+      description: >
+          Threshold probability for net benefit: the risk at which a clinician is indifferent between
+          acting and not acting, so its odds are the harm of a false positive relative to the benefit
+          of a true positive (0.1 means one true positive is worth nine false positives). Used by the
+          clinical impact and workload tables; it is not a score cutoff.
     - name: workloadPopulationSize
       title: Target population size
       type: Integer
       default: 1000
       min: 1
       max: 1000000000
+      description: >
+          Size of the population the projected workload counts are scaled to. Used for every
+          projected row: the main prevalence when Observed prevalence is unticked, and every
+          additional target prevalence. Observed rows count the analysed patients instead.
     - name: analysisUnit
       title: Unit of observation
       type: String
       default: slide
+      description: >
+          What one row is (slide, core, patient...). Printed in the frozen-model report; every
+          analysed row weighs equally in its metrics.
     - name: prevalenceScenarios
       title: Additional target prevalences (proportions)
       type: String
       default: ''
+      description: >
+          Extra target-population prevalences, as proportions between 0 and 1 separated by commas
+          (for example 0.05, 0.2). Each adds projected rows to the workload table at the same fixed
+          cutoffs. Leave blank for none; an unreadable entry is ignored with a warning.
     - name: validationPanel
       title: Frozen-model validation report
       type: Bool
       default: false
+      description: >
+          Evaluates an already-fitted model or score at prespecified fixed cutoffs, without
+          refitting or choosing a cutoff from these data, and replaces every other output with the
+          validation context, denominator ledger and frozen-model metrics. Needs a positive class, an
+          explicit negative level, an explicit Direction and the fixed score cutoffs.
     - name: validationNegative
       title: Explicit negative reference level
       type: String
       default: ''
+      description: >
+          The outcome level that means the condition is absent, typed exactly as it appears in the
+          data. Required by the frozen-model report, which refuses any outcome level that is neither
+          this nor the positive class instead of pooling it as negative.
     - name: referenceDescription
       title: Reference standard and blinding
       type: String
       default: ''
+      description: >
+          Free text describing the reference standard and whether its readers were blinded to the
+          score (for example histology, blinded). Printed in the frozen-model validation context.
     - name: modelVersion
       title: Frozen model version
       type: String
       default: ''
+      description: >
+          Identifier of the fitted model or score version being evaluated. Required when Cohort role
+          is frozen, so the report names exactly which model the metrics belong to.
     - name: cohortRole
       title: Cohort role
       type: List
@@ -837,10 +956,13 @@ options:
         title: Development / exploratory
       - name: frozen
         title: Frozen external / temporal evaluation
+      description: >
+          Declared by you and printed in the frozen-model report; the analysis does not check it.
+          A value left at its default is printed as (default setting).
     - name: samplingDesign
       title: Sampling design
       type: List
-      default: consecutive
+      default: other
       options:
       - name: consecutive
         title: Consecutive
@@ -850,6 +972,11 @@ options:
         title: Positive only
       - name: other
         title: Other / unknown
+      description: >
+          Declared by you and printed in the frozen-model report; the analysis does not check it.
+          A value left at its default is printed as (default setting). The default is Other /
+          unknown so that an untouched report does not assert a sampling design; how PPV and NPV
+          should be read depends on it.
     - name: thresholdSource
       title: Threshold source
       type: List
@@ -861,6 +988,9 @@ options:
         title: Selected in development
       - name: exploratory
         title: Selected in evaluation data
+      description: >
+          Declared by you and printed in the frozen-model report; the analysis does not check it.
+          A value left at its default is printed as (default setting).
     - name: predictionScale
       title: Prediction scale
       type: List
@@ -888,6 +1018,11 @@ options:
       permitted:
       - factor
       - numeric
+      description: >
+          Patient identifier. On the main analysis it is used only to warn when a patient has
+          several rows: every panel except the Frozen-model validation report treats each row as
+          an independent patient, so their intervals and tests are too narrow then. Only the
+          Frozen-model validation report resamples whole patients.
     - name: siteID
       title: Site identifier
       type: Variable
@@ -897,6 +1032,10 @@ options:
       permitted:
       - factor
       - numeric
+      description: >
+          Optional site or centre of each row. The frozen-model report then adds one set of metrics
+          per site, conditional on the observed sites, and resamples within sites. Every row needs
+          a site, and a patient may not appear at two sites.
     - name: partitionID
       title: Development / validation partition identifier
       type: Variable
@@ -906,13 +1045,24 @@ options:
       permitted:
       - factor
       - numeric
+      description: >
+          Optional development or validation label of each row, used by the frozen-model report to
+          check that no patient appears in more than one partition (leakage). Requires a patient
+          identifier.
     - name: validationBootstrap
       title: Bootstrap frozen-model metrics
       type: Bool
       default: false
+      description: >
+          Adds percentile confidence intervals to the frozen-model metrics, resampling whole patients
+          when a patient identifier is given (jointly across models, within sites). Without it the
+          report shows point estimates only.
     - name: validationDraws
       title: Bootstrap replicates
       type: Integer
       default: 999
       min: 100
       max: 10000
+      description: >
+          Number of patient-level bootstrap replicates for the frozen-model intervals. Separate from
+          Bootstrap samples, which serves the other panels.

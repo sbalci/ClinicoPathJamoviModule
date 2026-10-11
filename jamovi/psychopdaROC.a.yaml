@@ -42,7 +42,7 @@ options:
     # ==========================================
 
     - name: showExplanations
-      title: Show interpretation and procedure notes
+      title: Interpretation and procedure notes
       type: Bool
       default: false
       description:

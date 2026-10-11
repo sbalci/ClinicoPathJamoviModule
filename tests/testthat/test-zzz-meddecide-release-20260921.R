@@ -61,27 +61,26 @@ test_that("mean correlation across rater pairs is the plain arithmetic mean", {
 })
 
 
-test_that("psychopdaROC dichotomises one-vs-rest instead of dropping the other levels", {
+test_that("psychopdaROC analyses an explicit positive/negative pair and counts the levels it excludes", {
+    # 2026-09-21 the bug was a SILENT drop: levels = c(<one non-positive level>, positive) made pROC
+    # discard every other level without a word. The 2026-10-10 refactor replaced one-vs-rest with an
+    # explicit Negative Class (option help: "All other outcome levels are excluded, not pooled"), and
+    # every excluded row is counted in a notice. A setdiff()-based levels= must not come back.
     src <- read_b("psychopdaROC")
-    expect_true(any(grepl(".ovrResponse = function(class, positiveClass)", src, fixed = TRUE)))
-    # the old form kept only ONE of the non-positive levels, so pROC silently dropped the
-    # rest. Comments are stripped first: the helper documents the old form verbatim.
     code <- src[!grepl("^\\s*#", src)]
     expect_false(any(grepl("levels = c(setdiff(", code, fixed = TRUE)),
-                 info = "a setdiff()-based levels= is back; it is not one-vs-rest")
+                 info = "a setdiff()-based levels= is back; it drops levels without saying so")
 
     skip_if_not_installed("pROC")
-    ovr <- function(class, pos) {
-        other <- ".__rest__"; cls <- as.character(class)
-        factor(ifelse(is.na(cls), NA_character_, ifelse(cls == pos, pos, other)),
-               levels = c(other, pos))
-    }
     set.seed(1)
-    class <- factor(rep(c("Benign", "Borderline", "Malignant"), each = 30))
-    x <- c(rnorm(30, 2), rnorm(30, 4), rnorm(30, 6))
-    r <- pROC::roc(response = ovr(class, "Malignant"), predictor = x,
-                   direction = "<", quiet = TRUE)
-    expect_equal(length(r$cases) + length(r$controls), 90)   # was 60: Borderline was dropped
+    d <- data.frame(class = factor(rep(c("Benign", "Borderline", "Malignant"), each = 30)),
+                    x = c(rnorm(30, 2), rnorm(30, 4), rnorm(30, 6)))
+    r <- suppressWarnings(suppressMessages(psychopdaROC(data = d, dependentVars = "x", classVar = "class",
+        positiveClass = "Malignant", negativeClass = "Benign", refVar = NULL)))
+    note <- r[["psychopdaROC_excludedOutcomes"]]
+    expect_false(is.null(note))
+    expect_match(note$content, "excluded 30 row(s) in unselected levels", fixed = TRUE)
+    expect_match(note$content, "Malignant (positive) and Benign (negative)", fixed = TRUE)
 })
 
 
@@ -93,6 +92,14 @@ test_that("getCell() values are unwrapped with $value", {
         code <- code[!grepl("^\\s*#", code)]
         bad <- grep("\\$getCell\\([^)]*\\)\\s*(,|$|\\))", code, value = TRUE)
         bad <- bad[!grepl("\\$getCell\\([^)]*\\)\\$value", bad)]
+        # A Cell kept whole on purpose (x <- ...$getCell(...), then x$footnotes / x$value) is used
+        # as a Cell, not passed to round(): enhancedROC's table-notes strip reads its footnotes.
+        as_cell <- vapply(bad, function(line) {
+            v <- sub("^\\s*([A-Za-z.][A-Za-z0-9._]*)\\s*<-.*$", "\\1", line)
+            !identical(v, line) &&
+                any(grepl(paste0(gsub(".", "\\.", v, fixed = TRUE), "\\$(value|footnotes|sups)"), code))
+        }, logical(1))
+        bad <- bad[!as_cell]
         expect_length(bad, 0)
     }
 })

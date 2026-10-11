@@ -35,7 +35,9 @@ erv_perfect <- function() data.frame(y = factor(rep(c("neg", "pos"), each = 15),
 # do.call so that a variable holding a column name is passed as a value, not read as a bare symbol.
 erv_run <- function(data, outcome, predictors, positiveClass, ...)
     suppressWarnings(suppressMessages(do.call(ClinicoPath::enhancedROC,
-        c(list(data = data, outcome = outcome, predictors = predictors, positiveClass = positiveClass), list(...)))))
+        utils::modifyList(list(data = data, outcome = outcome, predictors = predictors,
+            positiveClass = positiveClass, showTableNotes = TRUE,
+            showAnalysisSummary = TRUE, showClinicalReport = TRUE), list(...), keep.null = TRUE))))
 erv_cell <- function(tab, key, col) {
     df <- tab$asDF
     rownames(df) <- gsub('^"|"$', "", rownames(df))
@@ -468,7 +470,7 @@ test_that("C42 hull point count includes the (0,0) vertex (VAL-enhancedROC-17)",
 test_that("C29 both comparison tables use one sign convention for an AUC difference (VAL-enhancedROC-18)", {
     r <- erv_run(erv_two(), "y", c("A", "B"), "pos", analysisType = "comparative", pairwiseComparisons = TRUE, showMetricsDiff = TRUE)
     dc <- r$results$detailedComparison$asDF
-    expect_equal(dc$difference[dc$metric == "AUC ( A vs B )"], erv_cell(r$results$rocComparisons, "A_vs_B", "auc_difference"))
+    expect_equal(dc$difference[dc$metric == "AUC (A vs B)"], erv_cell(r$results$rocComparisons, "A_vs_B", "auc_difference"))
 })
 
 test_that("C45 imbalance severity and recommendation agree (VAL-enhancedROC-19)", {
@@ -579,7 +581,7 @@ test_that("Outcome coding: an explicit NA level is a '(missing)' row, not a cate
     expect_equal(c(erv_cell(oc, "lvl:Benign", "n"), erv_cell(oc, "lvl:Malignant", "n"), erv_cell(oc, "missing", "n")), c(10, 8, 2))
     expect_identical(erv_cell(oc, "missing", "role"), "Excluded: missing outcome")
     expect_match(erv_tnotes(oc)[["n"]], "(18 of 20 rows)", fixed = TRUE)
-    expect_match(erv_notices(r), "2 rows with a missing outcome were excluded", fixed = TRUE)
+    expect_match(erv_notices(r), "2 rows had a missing outcome", fixed = TRUE)   # "Rows Excluded" since the production pass
     erv_clean_notes(erv_tnotes(oc), "outcomeCoding")
 })
 
@@ -651,15 +653,14 @@ test_that("a degenerate AUC interval is never quoted: blank bootstrap limits, 'i
     report <- erv_run(erv_perfect(), "y", "x", "pos")$results$clinicalReport$content
     expect_match(report, "(interval not estimable)", fixed = TRUE)
     expect_false(grepl("1--1", report, fixed = TRUE))
-    # A constant marker: AUC 0.5 by construction, blank limits, and the J <= 0 cut-point is explained.
+    # A constant marker: AUC 0.5 by construction, blank limits, and no cut-point row - its ERROR
+    # says no cut-point exists (review 2026-10-11; it used to print a -Inf row explained by a note).
     d <- erv_d1(); d$marker <- 5
     rk <- erv_run(d, "status", "marker", "Malignant")
     expect_equal(erv_cell(rk$results$aucSummary, "marker", "auc"), 0.5)
     expect_true(is.na(erv_cell(rk$results$aucSummary, "marker", "auc_lower")))
-    chance <- rk$results$optimalCutoffSummary$notes[["chance"]]$note
-    expect_match(chance, "J <= 0", fixed = TRUE)
-    expect_match(chance, "No threshold separates the groups better than chance", fixed = TRUE)
-    expect_match(chance, "everyone is classified the same way", fixed = TRUE)
+    expect_equal(rk$results$optimalCutoffSummary$rowCount, 0L)
+    expect_match(erv_notices(rk), "Constant Predictor: marker", fixed = TRUE)
 })
 
 test_that("every Detailed Model Comparison row is value 1 - value 2, relative to value 2", {
@@ -682,7 +683,8 @@ test_that("McNemar is computed when one marker calls every case positive (the 2 
 # ---- second-round validation fixes: one regression test per fix ------------------------------------
 # Each test below fails on R/enhancedROC.b.R as it was before these fixes (checked against a saved copy).
 erv_private <- function(data, ...) {               # the analysis object, for the helpers checked directly
-    o <- do.call(ClinicoPath:::enhancedROCOptions$new, list(...))
+    o <- do.call(ClinicoPath:::enhancedROCOptions$new,
+        utils::modifyList(list(showTableNotes = TRUE), list(...), keep.null = TRUE))
     a <- ClinicoPath:::enhancedROCClass$new(options = o, data = data)
     list(a = a, p = a$.__enclos_env__$private)
 }
@@ -1067,7 +1069,7 @@ test_that("an AUC of 0 is a result: it is named best predictor, and the report i
     expect_false(grepl("No Valid ROC Results", txt, fixed = TRUE))
     cs <- r$results$comprehensiveAnalysisSummary$asDF
     expect_match(cs$value[cs$measure == "Best Predictor"], "^m \\(AUC")
-    expect_match(r$results$analysisSummary$content, "with an AUC of 0.000 (", fixed = TRUE)
+    expect_match(r$results$analysisSummary$content, "with an AUC of 0.000.", fixed = TRUE)  # no band word since 2026-10-11 (summary sentence)
 })
 
 test_that("a blank outcome value is missing, as an NA is, in the table, the notices and the analysis", {
@@ -1082,8 +1084,8 @@ test_that("a blank outcome value is missing, as an NA is, in the table, the noti
     expect_equal(r$results$aucSummary$asDF, erv_run(dn, "y", c("m", "m2"), "pos")$results$aucSummary$asDF)
     expect_equal(erv_cell(r$results$outcomeCoding, "missing", "n"), 6)
     txt <- erv_notices(r)
-    expect_match(txt, "6 rows with a missing outcome were excluded (a blank value or an explicit missing-value level is not a category).", fixed = TRUE)
-    expect_match(txt, "a predictor analysed on its own may use more rows (largest: 60)", fixed = TRUE)   # blanks have no outcome
+    expect_match(txt, "6 rows had a missing outcome (a blank value or a missing-value level is missing, not a category).", fixed = TRUE)
+    expect_match(txt, "A predictor analysed on its own could use up to 60 rows.", fixed = TRUE)   # blanks have no outcome
 })
 
 test_that("the missing-outcome notice counts the rows the (missing) row counts, also one that lacks a predictor", {
@@ -1094,5 +1096,5 @@ test_that("the missing-outcome notice counts the rows the (missing) row counts, 
     d$m2[19] <- NA          # row 19: blank outcome AND a missing predictor, so naOmit() drops it first
     r <- erv_run(d, "status", c("marker", "m2"), "Malignant")
     expect_equal(erv_cell(r$results$outcomeCoding, "missing", "n"), 3)
-    expect_match(erv_notices(r), "3 rows with a missing outcome were excluded", fixed = TRUE)
+    expect_match(erv_notices(r), "3 rows had a missing outcome", fixed = TRUE)
 })

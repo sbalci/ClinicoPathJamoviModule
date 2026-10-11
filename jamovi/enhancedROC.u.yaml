@@ -109,6 +109,8 @@ children:
                     name: diagnosticMetrics
                   - type: CheckBox
                     name: clinicalMetrics
+                  - type: CheckBox
+                    name: showTableNotes
           - type: LayoutBox
             cell:
               column: 1
@@ -127,7 +129,6 @@ children:
                     enable: (rocCurve)
                   - type: ComboBox
                     name: plotTheme
-                    enable: (rocCurve)
                   - type: CheckBox
                     name: showMetricsDiff
                   - type: CheckBox
@@ -151,6 +152,7 @@ children:
                   - type: TextBox
                     name: prevalence
                     format: number
+                    enable: (!useObservedPrevalence)
                   - type: CheckBox
                     name: useObservedPrevalence
           - type: LayoutBox
@@ -165,6 +167,10 @@ children:
                     name: comprehensive_output
                   - type: CheckBox
                     name: clinical_interpretation
+                  - type: CheckBox
+                    name: showAnalysisSummary
+                  - type: CheckBox
+                    name: showClinicalReport
   - type: CollapseBox
     label: Statistical Options
     collapsed: true
@@ -182,16 +188,18 @@ children:
                 format: number
               - type: CheckBox
                 name: useBootstrap
+              # Bootstrap samples and stratification also drive the confidence bands, the
+              # bootstrap and Venkatraman comparison tests and the partial-AUC bootstrap, so they
+              # stay live with Bootstrap confidence intervals off; the interval type serves only the
+              # bootstrap intervals.
               - type: TextBox
                 name: bootstrapSamples
                 format: number
-                enable: (useBootstrap)
               - type: ComboBox
                 name: bootstrapMethod
-                enable: (useBootstrap)
+                enable: (useBootstrap || (partialAuc && bootstrapPartialAUC))
               - type: CheckBox
                 name: stratifiedBootstrap
-                enable: (useBootstrap)
               - type: TextBox
                 name: seed
                 format: number
@@ -202,7 +210,7 @@ children:
                 name: pairwiseComparisons
               - type: ComboBox
                 name: comparisonMethod
-                enable: (pairwiseComparisons)
+                enable: (pairwiseComparisons || showMetricsDiff || statisticalComparison)
           # NOT IMPLEMENTED - bootstrapCutoffCI is commented out in enhancedROC.a.yaml,
           # so its LayoutBox held no children at all and `children:` parsed as NULL --
           # the only null children node in this module's .u.yaml files. The box is removed
@@ -260,12 +268,10 @@ children:
           - type: TextBox
             name: imbalanceThreshold
             format: number
-            enable: (detectImbalance)
           - type: CheckBox
             name: showImbalanceWarning
           - type: CheckBox
             name: recommendPRC
-            enable: (detectImbalance)
   - type: CollapseBox
     label: Calibration Analysis
     collapsed: true

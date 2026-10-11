@@ -14,7 +14,7 @@ er_data <- function(seed = 1, n = 200) {
 
 run_er <- function(...) {
     args <- utils::modifyList(
-        list(outcome = "status", positiveClass = "pos"), list(...))
+        list(outcome = "status", positiveClass = "pos", showTableNotes = TRUE), list(...))
     do.call(ClinicoPath::enhancedROC, args)
 }
 
@@ -310,7 +310,7 @@ test_that("spline calibration runs end to end, draws, and is no longer reported 
 # --- 2026-09-03 /fix-function: cutoff direction, plot state, Youden toggle, validation, OVR, notices ---
 
 er_private_data <- function(d, ...) {
-    o <- do.call(ClinicoPath:::enhancedROCOptions$new, list(...))
+    o <- do.call(ClinicoPath:::enhancedROCOptions$new, utils::modifyList(list(showTableNotes = TRUE), list(...)))
     a <- ClinicoPath:::enhancedROCClass$new(options = o, data = d)
     a$init()
     list(a = a, o = o, p = a$.__enclos_env__$private)
