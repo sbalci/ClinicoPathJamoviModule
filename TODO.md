@@ -1,3 +1,45 @@
+# enhancedROC — `/fix-function --apply` (2026-10-11, done, uncommitted)
+
+Fresh diagnosis after the release review: wiring script (90 options, 44 results, clearWith, u.yaml enables,
+column formats), 14-case edge harness with every output on and every plot rendered, re-run idempotence, timing
+(1.7 s all-on, 200 resamples), frozen panel with bootstrap/patient/site. Everything else clean. Three defects;
+acceptance: each has a test in `tests/testthat/test-enhancedROC-fix-2026-10-11.R` that fails on the backup
+(session scratchpad `backup/`), every enhancedROC test file passes, new msgids translated, `msgfmt -c` clean.
+- [x] X-01 Detailed Cutoff Analysis lists pROC's -Inf/+Inf sentinels as "Sampled" cut-offs (every predictor)
+- [x] X-02 (F-51) an invalid Partial AUC range is an ERROR that empties every table; make it a WARNING that
+      skips only the partial AUC (as impactCutoffs / prevalenceScenarios already do)
+- [x] X-03 frozen-panel input errors (`R/enhancedROC-validation.R` stop()s; default empty negative level or model
+      version reaches them) put the whole analysis in jamovi's error state in English; show a translated ERROR
+      notice instead, like every main-path error
+- [x] Verify: new tests red on backup, green after; all enhancedROC tests; i18n; release gate
+- Stale TODO item found: frozen context already prints "Not stated" for an empty reference standard.
+
+**Results.** Code: `R/enhancedROC.b.R` only (finite filter before the cut-off sampling; `.partialRangeValues()`
+shared by the validation WARNING, `.populatePartialAUC()` and the Methods text; frozen helper errors caught
+into an ERROR notice through `.frozenError()`). No yaml changed, so no `prepare()`. i18n: 18 new msgids with
+Turkish (`i18nUpdate()` x3, nothing removed, `msgfmt -c` clean on tr/en); one msgid reworded to avoid the
+` [0,1]` context-suffix truncation. Tests: new `test-enhancedROC-fix-2026-10-11.R` (3 blocks, all red on the
+backup, 36 expectations green); `test-enhancedROC-smoothing-and-pr.R` "fatal validation error" test moved to a
+still-fatal input (wrong positive class). Verification: 18 enhancedROC files + gaspath x2 + file-naming +
+rendering contract = 22 files, 1799 expectations, 0 failures/errors/skips; release gate with enhancedROC
+counted as shipped identical to the normal run (0 blocking, same 10 advisories).
+
+# enhancedROC — `/release-review-function` (2026-10-11, done, uncommitted)
+
+Verdict: ready after minor actions (see the session report). Fixed: frozen-panel AUC-PR now the interpolated
+area (`.dvAuprc()` in `R/utils-diagnostic-validation.R`, shared with the main path); frozen tables show labels,
+not keys (`.frozenRow()`); INFO notice when Calibration analysis has no measure ticked; mis-cased test file
+renamed to `test-enhancedROC-pr-clinical.R` (it had never run under the case-sensitive filter). No yaml changed,
+so no regeneration needed. Independent verification script (25/25 against hand formulas / pROC / PRROC / glm) in
+the session scratchpad. Release gate with enhancedROC counted as shipped: 0 blocking.
+- [ ] Before promotion out of `meddecideT`: check in the jamovi app (notices panel hiding, Turkish panels, the
+      two new Reporting checkboxes, Clinical-theme grid on the dark theme); run the updater and
+      `Rscript --vanilla tools/submodule_smoke.R` on meddecide; bump `.a.yaml` `version:` (1.0.85 is unreleased
+      and carries every 2026-10-11 change).
+- [ ] Known limitations kept: F-02 (patient-cluster inference only on the frozen panel; main path WARNs), F-50
+      (Youden tie-break convention), F-32/F-52 (documented no-op options), exact McNemar at few discordant
+      pairs (blanked below 10), logit DeLong near AUC 1 (WARNs).
+
 # enhancedROC — `/fix-function` of the `/review-function` findings (2026-10-11, done, uncommitted)
 
 Goal: fix every item of the review below, plus (user decision) opt-in checkboxes for Analysis Summary and
@@ -33,8 +75,9 @@ decisioncalculator, MASS); `prepare()` clean (only `enhancedROC.h.R` changed); s
 release gate with enhancedROC counted as shipped identical to the normal run (0 blocking, same 10 advisories).
 - [ ] Follow-ups: Turkish backlog uses "AUC" where some yaml titles say "EAA" (catalogue was already mixed); check
       "- None -" and the Turkish panels in the jamovi app; `development-scripts/audit_enhancedROC.R` reads the
-      narrative panels with default options (opt in before re-running); frozen-model context labels in
-      `R/enhancedROC-validation.R` are English (file-level helper, cannot call `.()`)
+      narrative panels with default options (opt in before re-running). Frozen-panel labels: fixed in the
+      release review (`.frozenRow()` translates the helper's fixed strings); its `stop()` messages
+      (R/enhancedROC-validation.R) still reach the user in English as the analysis error.
 
 ## `/review-function` findings (2026-10-11)
 
@@ -169,12 +212,16 @@ stays off by default (now also governs the comparison test and bands); Sampling 
 no-op options documented, not removed.
 - [ ] **F-02 follow-up:** patient-cluster inference on the main path (Obuchowski 1997 clustered AUC variance for the
       AUC row and paired comparisons). Today repeated patient IDs only raise a WARNING.
-- [ ] **F-05 follow-up (shared):** `.dvPR()` in `R/utils-diagnostic-validation.R` still returns the PR-space trapezoid
-      for psychopdaROC, precisionrecall and enhancedROC's frozen panel (`tests/testthat/test-gaspath-validation.R:11`
-      pins .75). Move the interpolated closed form there.
+- [x] **F-05 for enhancedROC (2026-10-11 release review):** the interpolated AUC-PR is now `.dvAuprc()` in
+      `R/utils-diagnostic-validation.R`, used by the main path and the frozen panel (`.dvScoreMetrics()`).
+- [ ] **F-05 for psychopdaROC and precisionrecall:** both still report `.dvPR()`'s PR-space trapezoid
+      (`tests/testthat/test-gaspath-validation.R:11` pins .75 for `.dvPR()` itself). Switch them to `.dvAuprc()`
+      in their own review passes (their numbers change).
 - [ ] F-32/F-52: decide whether to remove analysisType 'comprehensive' and multiClassAveraging (documented as no-op).
-- [ ] F-50 (Youden tie-break sign-dependent), F-51 (an invalid optional input aborts every output): optional.
-- [ ] Frozen-model context prints 'Reference standard' as NA when referenceDescription is empty (pre-existing).
+- [ ] F-50 (Youden tie-break sign-dependent): optional. F-51 fixed 2026-10-11 (`/fix-function --apply`, X-02/X-03;
+      empty/bad impactCutoffs already warned).
+- [x] Frozen-model context prints 'Reference standard' as NA when referenceDescription is empty: already
+      prints "Not stated" (checked 2026-10-11, `/fix-function --apply`).
 - [x] Table notes opt-in (2026-10-11): `showTableNotes` (Output Options > Tables, default off). With it off,
       `.applyTableNotesOption()` (on.exit in `.run()`) strips every table note except `seed` and every cell footnote.
       Tests: `test-enhancedROC-table-notes.R`; note-reading tests pass `showTableNotes = TRUE`. 1474 enhancedROC

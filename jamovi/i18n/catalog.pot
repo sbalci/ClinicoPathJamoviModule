@@ -730,6 +730,10 @@ msgstr ""
 msgid "{a} and {b}"
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid "{a} minus {b}"
+msgstr ""
+
 #: R/chisqposttest.b.R
 #: R/decisioncurve.b.R
 #: R/nogoldstandard.b.R
@@ -1864,6 +1868,10 @@ msgid ""
 msgstr ""
 "{v1} lists excluded: use unique integer positions within the total count, "
 "consistent with first detection and the positive count when supplied."
+
+#: R/enhancedROC.b.R
+msgid "{value} (default setting)"
+msgstr ""
 
 #: R/decisioncurve.b.R
 msgid "{var} ({level} = positive)"
@@ -12069,6 +12077,10 @@ msgid ""
 "side is not overall superiority."
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid "A partition audit requires patient identifiers."
+msgstr ""
+
 #: R/psychopdaROC.b.R
 msgid ""
 "A patient has conflicting or partly missing subgroup values. Use one "
@@ -17298,6 +17310,10 @@ msgstr ""
 msgid "all"
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid "All"
+msgstr ""
+
 #: R/agepyramid.b.R
 msgid ""
 "All {n} analysed observations fall in the female group, so the figure is a "
@@ -19630,15 +19646,31 @@ msgstr ""
 msgid "Analyzed (n)"
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid "Analyzed common cases"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "Analyzed independent units"
+msgstr ""
+
 #: decisioncompare/results/comparisonTable.columns.title
 #: decisioncompare/results/opaTable.columns.title
 #: decisioncompare/results/stratifiedTable.columns.title
 msgid "Analyzed N"
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid "Analyzed negative"
+msgstr ""
+
 #: decision/results/comparatorPopulation.columns.title
 #: decisioncompare/results/comparatorPopulation.columns.title
 msgid "Analyzed pairs"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "Analyzed positive"
 msgstr ""
 
 #: enhancedROC/results/results/frozenMetrics.columns.title
@@ -21287,6 +21319,10 @@ msgstr "At least two sample types are required."
 msgid "At least two tests with positive levels must be specified"
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid "At most 100 scenario values or cutoffs are allowed."
+msgstr ""
+
 #: R/lassocox.b.R
 msgid ""
 "At most 30 paths are shown, ranked by summed absolute coefficients across "
@@ -21878,6 +21914,7 @@ msgstr ""
 msgid "AUC vs Covariate Plot"
 msgstr ""
 
+#: R/enhancedROC.b.R
 #: enhancedROC/results/results/precisionRecallTable.columns.title
 msgid "AUC-PR (interpolated)"
 msgstr ""
@@ -22551,6 +22588,10 @@ msgstr ""
 
 #: enhancedROC/results/results/precisionRecallTable.columns.title
 msgid "Average Precision"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "Average precision"
 msgstr ""
 
 #: precisionrecall/options/aucMethod/average_precision.title
@@ -27889,6 +27930,7 @@ msgstr ""
 msgid "Brier Score"
 msgstr ""
 
+#: R/enhancedROC.b.R
 #: R/multisurvival.b.R
 #: enhancedROC/options/brierScore.title
 msgid "Brier score"
@@ -29508,6 +29550,14 @@ msgstr ""
 msgid "Calibration analysis failed for %1$s: %2$s"
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid ""
+"Calibration analysis is on, but no measure is ticked, so the calibration "
+"table has no values. Tick one or more of Brier score, Calibration metrics, "
+"Hosmer-Lemeshow test, E/O ratio, Spline calibration curve or Calibration "
+"plot."
+msgstr ""
+
 #: R/survival.b.R
 msgid "Calibration assessed at t = {t}. N = {n} patients in {k} risk groups."
 msgstr ""
@@ -29585,6 +29635,10 @@ msgstr ""
 #: stagemigration/results/calibrationAnalysis.columns.title
 #: survivalcalibration/results/calibrationMetrics.columns.title
 msgid "Calibration Intercept"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "Calibration intercept"
 msgstr ""
 
 #: survivalmodelvalidation/options/calibration_method.title
@@ -29709,6 +29763,7 @@ msgstr ""
 msgid "Calibration Slope"
 msgstr ""
 
+#: R/enhancedROC.b.R
 #: R/lassologistic.b.R
 #: R/survival.b.R
 msgid "Calibration slope"
@@ -29774,6 +29829,10 @@ msgstr ""
 #: modelval/options/showCalibrationLarge.title
 #: modelval/ui[2][0]/showCalibrationLarge.label
 msgid "Calibration-in-the-Large"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "Calibration-in-the-large"
 msgstr ""
 
 #: R/clinicalscore.b.R
@@ -33450,6 +33509,10 @@ msgstr ""
 
 #: agreement/results/specificAgreementTable.columns.title
 msgid "CI method/status"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "CI not requested"
 msgstr ""
 
 #: rmstregression/results/bootstrapResults.columns.title
@@ -37746,6 +37809,10 @@ msgstr ""
 #: decisioncompare/options/cohortRole.title
 #: enhancedROC/options/cohortRole.title
 msgid "Cohort role"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "Cohort role (declared, not verified)"
 msgstr ""
 
 #: epidemiosurvival/options/cohort_design.title
@@ -42256,6 +42323,10 @@ msgstr ""
 msgid "Conditional Mean"
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid "Conditional on observed sites; no site-population extrapolation"
+msgstr ""
+
 #: progressionsurvival/results/landmark_results.columns.title
 msgid "Conditional PFS (%)"
 msgstr ""
@@ -43545,6 +43616,7 @@ msgstr ""
 msgid "Conover-Iman test"
 msgstr ""
 
+#: R/enhancedROC.b.R
 #: enhancedROC/options/samplingDesign/consecutive.title
 msgid "Consecutive"
 msgstr ""
@@ -52829,6 +52901,10 @@ msgstr ""
 msgid "Definitions of statistical terms with clinical interpretations"
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid "Degenerate bootstrap; interval unavailable"
+msgstr ""
+
 #: splinehazard/results/modelSummary.columns.title
 #: splinehazard/results/modelComparison.columns.title
 #: venn/options/sortBy/degree.title
@@ -54271,6 +54347,7 @@ msgid ""
 "for model validation and documentation."
 msgstr ""
 
+#: R/enhancedROC.b.R
 #: enhancedROC/options/cohortRole/development.title
 msgid "Development / exploratory"
 msgstr ""
@@ -62014,6 +62091,7 @@ msgstr ""
 msgid "Enhancement Pattern"
 msgstr ""
 
+#: R/enhancedROC.b.R
 #: enhancedROC/options/samplingDesign/enriched.title
 msgid "Enriched"
 msgstr ""
@@ -62182,12 +62260,20 @@ msgstr ""
 msgid "Enter a title for your plot."
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid "Enter at least one fixed score cutoff."
+msgstr ""
+
 #: economistplots/options/caption_text.description.jamovi
 msgid "Enter caption text (data source, notes, etc.)."
 msgstr ""
 
 #: advancedbarplot/options/highlight_bars.description.jamovi
 msgid "Enter category names to highlight (comma-separated)."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "Enter comma-separated numbers within the allowed range."
 msgstr ""
 
 #: jsjplot/options/axis_labels.description.jamovi
@@ -68005,6 +68091,7 @@ msgid "F1 Score"
 msgstr ""
 
 #: R/decisioncalculator.b.R
+#: R/enhancedROC.b.R
 msgid "F1 score"
 msgstr ""
 
@@ -70360,6 +70447,10 @@ msgstr ""
 msgid "Flagged Observations"
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid "Flagged per 1000"
+msgstr ""
+
 #: pathagreement/ui[8][0]/tie_breaking/arbitration.title
 msgid "Flagging for expert arbitration"
 msgstr ""
@@ -72332,12 +72423,33 @@ msgstr ""
 msgid "From State Variable"
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid ""
+"Frozen evaluation requires a model version and an independently selected "
+"threshold. Use Development / exploratory for data-selected thresholds."
+msgstr ""
+
+#: R/enhancedROC.b.R
 #: enhancedROC/options/cohortRole/frozen.title
 msgid "Frozen external / temporal evaluation"
 msgstr ""
 
 #: enhancedROC/options/modelVersion.title
 msgid "Frozen model version"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"Frozen scores; no refitting or threshold optimization. Every analysed row "
+"({unit}) weighs equally in the metrics; paired differences use common cases."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "Frozen-Model Evaluation Not Run"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "Frozen-model evaluation requires an explicit score direction."
 msgstr ""
 
 #: enhancedROC/results/results/frozenMetrics.title
@@ -83254,6 +83366,10 @@ msgstr ""
 msgid "Input Mode"
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid "Input rows"
+msgstr ""
+
 #: R/jjpiestats.b.R
 msgid "input rows (before exclusions; frequencies may differ)"
 msgstr ""
@@ -83851,6 +83967,10 @@ msgstr ""
 msgid ""
 "Insufficient valid observations for age-as-time-scale analysis. Check that "
 "age and follow-up time are in compatible units."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "Insufficient valid replicates"
 msgstr ""
 
 #: R/alluvial.b.R
@@ -84525,6 +84645,7 @@ msgstr ""
 
 #: R/clinicalscore.b.R
 #: R/decisiongraph.b.R
+#: R/enhancedROC.b.R
 #: adaptivelasso/results/modelDiagnostics.columns.title
 #: advancedanova/results/assumptions.columns.title
 #: advancedanova/results/anova.columns.title
@@ -97762,6 +97883,10 @@ msgstr ""
 msgid "Metric Unavailable"
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid "Metric undefined"
+msgstr ""
+
 #: clinicalheatmap/results/optimalKAnalysis/optimalKTable.columns.title
 #: timedependent/results/model_comparison.columns.title
 msgid "Metric Value"
@@ -99085,6 +99210,10 @@ msgstr ""
 msgid "Missing {pct}%"
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid "Missing / nonfinite score"
+msgstr ""
+
 #: batcheffect/results/feature_quality.columns.title
 #: clinicalheatmap/results/dataSummary/missingData.columns.title
 #: enhancedfactorvariable/results/results/nominalSummary.columns.title
@@ -99419,6 +99548,10 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "Missing Positive Levels"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "Missing reference"
 msgstr ""
 
 #: R/diagnosticmeta.b.R
@@ -101269,6 +101402,7 @@ msgid "Model Validation Dashboard"
 msgstr ""
 
 #: R/decisioncompare.b.R
+#: R/enhancedROC.b.R
 #: decision/options/modelVersion.title
 #: decisioncompare/options/modelVersion.title
 msgid "Model version"
@@ -104258,6 +104392,10 @@ msgstr ""
 msgid "Negative Impact %"
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid "Negative independent units"
+msgstr ""
+
 #: trichotomousroc/options/negative_level.title
 #: trichotomousroc/ui/outcomelevels/negative_level.label
 msgid "Negative Level"
@@ -105485,6 +105623,10 @@ msgstr ""
 msgid "no bootstrap resample held both outcome groups"
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid "No Calibration Measure Selected"
+msgstr ""
+
 #: R/decisioncombine.b.R
 msgid ""
 "No candidate rule has an estimable Youden index with at least 10 "
@@ -105736,6 +105878,10 @@ msgstr ""
 msgid ""
 "No complete records remain after applying the selected variables and "
 "landmark restriction."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "No complete reference and score rows remain."
 msgstr ""
 
 #: R/lassocox.b.R
@@ -106624,6 +106770,10 @@ msgstr ""
 
 #: R/chisqposttest.b.R
 msgid "no pairwise sub-comparisons for this table shape"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "No patient overlap in supplied partition labels"
 msgstr ""
 
 #: R/waterfall.b.R
@@ -108711,6 +108861,10 @@ msgid "Not assessed (too few paired values or the same value in every case): %s.
 msgstr ""
 
 #: R/enhancedROC.b.R
+msgid "Not assessed; no partition manifest"
+msgstr ""
+
+#: R/enhancedROC.b.R
 #: R/psychopdaROC.b.R
 msgid "Not assigned yet"
 msgstr ""
@@ -109155,6 +109309,10 @@ msgstr ""
 msgid "Not specified"
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid "Not stated"
+msgstr ""
+
 #: R/linechart.b.R
 #: R/survival.b.R
 msgid "not statistically significant"
@@ -109590,6 +109748,7 @@ msgstr ""
 #: R/decisioncalculator.b.R
 #: R/decisioncombine.b.R
 #: R/decisioncompare.b.R
+#: R/enhancedROC.b.R
 #: R/psychopdaROC.b.R
 #: R/sequentialtests.b.R
 #: biomarkerresponse/results/threshold.columns.title
@@ -114751,6 +114910,7 @@ msgstr ""
 msgid "Other"
 msgstr ""
 
+#: R/enhancedROC.b.R
 #: enhancedROC/options/samplingDesign/other.title
 msgid "Other / unknown"
 msgstr ""
@@ -118937,8 +119097,16 @@ msgstr ""
 msgid "Particle Filtering"
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid "Partition audit"
+msgstr ""
+
 #: enhancedROC/ui[0][4].label
 msgid "Partition identifier"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "Partition labels must be complete."
 msgstr ""
 
 #: hierarchicalpathology/results/variancecomponents.description
@@ -119419,6 +119587,16 @@ msgid ""
 "whole patients."
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid "Patient IDs must be complete; none were silently dropped."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"Patient IDs span sites; use globally unique patient IDs and resolve "
+"cross-site duplicates."
+msgstr ""
+
 #: qualityoflife/results/clinical_interpretation_summary.columns.title
 msgid "Patient Impact"
 msgstr ""
@@ -119482,6 +119660,12 @@ msgstr ""
 
 #: patientdashboard/options/patient_outcomes.title
 msgid "Patient Outcomes Tracking"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"Patient overlap across partitions detected. Resolve leakage before "
+"evaluation."
 msgstr ""
 
 #: timeupdatesurvival/results/dynamicPredictions.columns.title
@@ -119586,6 +119770,10 @@ msgstr ""
 
 #: clinicalalerts/options/patient_analysis.title
 msgid "Patient-Specific Analysis"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "Patient; all of the patient's rows ({unit}) retained"
 msgstr ""
 
 #: agreement/ui[32][0][5][0].label
@@ -120988,6 +121176,10 @@ msgstr ""
 
 #: rmst/options/tau_method/percentile.title
 msgid "Percentile of max follow-up"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "Percentile; fixed model and sites"
 msgstr ""
 
 #: R/agreement.b.R
@@ -125309,6 +125501,10 @@ msgstr ""
 msgid "Positive / Event Level"
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid "Positive / negative"
+msgstr ""
+
 #: ihcthreshold/results/summaryTable.columns.title
 msgid "Positive % Range"
 msgstr ""
@@ -125451,6 +125647,10 @@ msgstr "Positive counts for probability models"
 msgid "Positive Impact %"
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid "Positive independent units"
+msgstr ""
+
 #: aivalidation/options/positiveLevel.title
 #: aivalidation/ui[0][1]/positiveLevel.label
 #: decisionpanel/options/test1Positive.title
@@ -125580,6 +125780,7 @@ msgstr ""
 msgid "Positive Nuclei"
 msgstr ""
 
+#: R/enhancedROC.b.R
 #: enhancedROC/options/samplingDesign/positive_only.title
 msgid "Positive only"
 msgstr ""
@@ -126650,6 +126851,7 @@ msgstr ""
 #: R/decisioncalculator.b.R
 #: R/decisioncombine.b.R
 #: R/decisioncompare.b.R
+#: R/enhancedROC.b.R
 #: R/psychopdaROC.b.R
 #: R/sequentialtests.b.R
 #: biomarkerresponse/results/threshold.columns.title
@@ -127741,6 +127943,7 @@ msgstr ""
 msgid "Prediction Scale"
 msgstr ""
 
+#: R/enhancedROC.b.R
 #: enhancedROC/options/predictionScale.title
 msgid "Prediction scale"
 msgstr ""
@@ -128453,6 +128656,7 @@ msgstr ""
 msgid "Presmoothed Kaplan-Meier"
 msgstr ""
 
+#: R/enhancedROC.b.R
 #: enhancedROC/options/thresholdSource/prespecified.title
 msgid "Prespecified independently"
 msgstr ""
@@ -129403,6 +129607,12 @@ msgstr ""
 msgid "Probability Influence"
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid ""
+"Probability inputs must lie between 0 and 1 for the selected positive class, "
+"and the direction must be higher."
+msgstr ""
+
 #: pathsampling/ui[8][0].label
 msgid "Probability Models"
 msgstr "Probability Models"
@@ -129499,6 +129709,7 @@ msgid ""
 "II error). Conventional values are 0.80 or 0.90; must exceed alpha."
 msgstr ""
 
+#: R/enhancedROC.b.R
 #: enhancedROC/options/predictionScale/probability.title
 msgid "Probability of selected positive class"
 msgstr ""
@@ -135102,6 +135313,7 @@ msgstr ""
 msgid "Reference Standard"
 msgstr ""
 
+#: R/enhancedROC.b.R
 #: R/pathagreement.b.R
 msgid "Reference standard"
 msgstr ""
@@ -135114,6 +135326,10 @@ msgstr ""
 
 #: enhancedROC/options/referenceDescription.title
 msgid "Reference standard and blinding"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "Reference status is inconsistent within a patient."
 msgstr ""
 
 #: R/decisioncurve.b.R
@@ -136954,6 +137170,10 @@ msgid ""
 "bootstrap comparison test and the ROC confidence bands (recommended for "
 "imbalanced data). Off by default: unticked, these bootstraps resample "
 "patients without regard to outcome."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "Resampling unit"
 msgstr ""
 
 #: R/enhancedROC.b.R
@@ -140132,6 +140352,10 @@ msgstr ""
 msgid "Row-wise Pairwise Comparisons"
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid "Row; independence assumed"
+msgstr ""
+
 #: clinicalheatmap/options/rowClusterPrefix.default
 msgid "RowCluster"
 msgstr ""
@@ -141173,6 +141397,7 @@ msgid "Sampling Bias:"
 msgstr ""
 
 #: R/decisioncompare.b.R
+#: R/enhancedROC.b.R
 #: decision/options/samplingDesign.title
 #: decisioncompare/options/samplingDesign.title
 #: enhancedROC/options/samplingDesign.title
@@ -141913,6 +142138,7 @@ msgstr ""
 msgid "Scope:"
 msgstr ""
 
+#: R/enhancedROC.b.R
 #: enhancedROC/options/predictionScale/score.title
 #: explainableai/results/validationmetrics/validationtable.columns.title
 #: hematologicindices/results/gpsTable.columns.title
@@ -143029,6 +143255,12 @@ msgstr ""
 msgid "Select a Patient ID before using patient-level summaries."
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid ""
+"Select a positive reference level and enter a distinct negative reference "
+"level."
+msgstr ""
+
 #: decisioncompare/options/test2.description.ui
 msgid ""
 "Select a second diagnostic test to compare with Test 1. This enables "
@@ -143750,10 +143982,12 @@ msgstr ""
 msgid "Selected Groups"
 msgstr ""
 
+#: R/enhancedROC.b.R
 #: enhancedROC/options/thresholdSource/development.title
 msgid "Selected in development"
 msgstr ""
 
+#: R/enhancedROC.b.R
 #: enhancedROC/options/thresholdSource/exploratory.title
 msgid "Selected in evaluation data"
 msgstr ""
@@ -150049,6 +150283,18 @@ msgstr ""
 #: enhancedROC/options/siteID.title
 #: enhancedROC/ui[0][3].label
 msgid "Site identifier"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "Site IDs must be complete; none were silently dropped."
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "Site inference"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "Site: {site}"
 msgstr ""
 
 #: package/analyses/sigmametrics.description
@@ -166268,6 +166514,10 @@ msgid ""
 msgstr ""
 
 #: R/enhancedROC.b.R
+msgid "The partial AUC is not computed; the rest of the analysis is."
+msgstr ""
+
+#: R/enhancedROC.b.R
 msgid ""
 "The partial AUC was computed over sensitivities from %1$s to %2$s and "
 "standardised with the McClish correction (McClish, 1989) to a 0.5-1 scale."
@@ -170432,6 +170682,7 @@ msgid "Threshold Settings (Advanced)"
 msgstr ""
 
 #: R/decisioncompare.b.R
+#: R/enhancedROC.b.R
 #: decision/options/thresholdSource.title
 #: decisioncompare/options/thresholdSource.title
 #: enhancedROC/options/thresholdSource.title
@@ -172884,6 +173135,10 @@ msgstr ""
 
 #: R/jjpiestats.b.R
 msgid "Too few discordant pairs to reach p < 0.05"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "Too few independent clusters per site"
 msgstr ""
 
 #: R/lassologistic.b.R
@@ -177375,6 +177630,7 @@ msgid "Unit for landmark time"
 msgstr ""
 
 #: R/decisioncompare.b.R
+#: R/enhancedROC.b.R
 #: decision/options/analysisUnit.title
 #: decisioncalculator/options/analysisUnit.title
 #: decisioncompare/options/analysisUnit.title
@@ -177513,6 +177769,10 @@ msgstr ""
 msgid ""
 "Unlike zero-order (regular) correlations, partial correlations remove the "
 "influence of confounding variables"
+msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "Unmapped reference levels; explicitly recode before evaluation: {levels}"
 msgstr ""
 
 #: treatmenteffects/results/matching_summary.columns.title

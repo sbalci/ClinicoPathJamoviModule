@@ -92,6 +92,27 @@
     fn = sum(!flag & y == 1), tn = sum(!flag & y == 0))
 }
 
+# Area under the precision-recall curve interpolated linearly in (TP, FP) counts between
+# neighbouring thresholds, which traces achievable operating points (Davis & Goadrich 2006),
+# integrated exactly (Keilwagen, Grosse & Grau 2014; equal to PRROC's auc.integral). Per step a->b:
+# precision(t) = (A + B t) / (C + D t) and recall gains B / P, so the area is
+# B/P * [B/D + (A D - B C) / D^2 * log((C + D) / C)], or B/P * B/D at C = 0.
+# .dvPR()'s $auprc is the PR-space trapezoid from a (recall 0, precision 1) anchor, which overstates
+# the area when scores tie across classes; psychopdaROC and precisionrecall still report that one.
+.dvAuprc <- function(scores, labels, positive, higher = TRUE) {
+  keep <- is.finite(scores) & !is.na(labels)
+  y <- as.integer(labels[keep] == positive)
+  if (!length(y) || length(unique(y)) < 2L) return(NA_real_)
+  x <- if (higher) scores[keep] else -scores[keep]
+  ord <- order(x, decreasing = TRUE)
+  ends <- c(which(diff(x[ord]) != 0), length(x))
+  tp <- c(0, cumsum(y[ord])[ends])
+  n <- c(0, ends)
+  A <- utils::head(tp, -1); B <- diff(tp); C <- utils::head(n, -1); D <- diff(n)
+  step <- ifelse(C == 0, B / D, B / D + (A * D - B * C) / D^2 * log((C + D) / C))
+  sum(B / sum(y) * step)
+}
+
 .dvScoreMetrics <- function(y, scores, cutoff, higher = TRUE, probability = FALSE) {
   z <- .dvCounts(y, scores, cutoff, higher)
   div <- function(a, b) if (b > 0) unname(a / b) else NA_real_
@@ -101,7 +122,7 @@
   ranks <- rank(if (higher) scores else -scores)
   auc <- if (n1 * n0 > 0) (sum(ranks[y == 1]) - n1 * (n1 + 1) / 2) / (n1 * n0) else NA_real_
   ans <- c(auc = auc, ap = if (is.null(pr)) NA_real_ else pr$avg_precision,
-           pr_auc = if (is.null(pr)) NA_real_ else pr$auprc,
+           pr_auc = if (is.null(pr)) NA_real_ else .dvAuprc(scores, y, 1, higher),   # interpolated, as the main path
            sensitivity = div(z['tp'], n1), specificity = div(z['tn'], n0),
            ppv = div(z['tp'], z['tp'] + z['fp']),
            npv = div(z['tn'], z['tn'] + z['fn']),

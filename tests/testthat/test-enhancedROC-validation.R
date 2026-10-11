@@ -258,7 +258,7 @@ test_that("C82 frozen-model metrics at a fixed cutoff (no refitting, no optimisa
                  modelVersion = "v1", impactCutoffs = "7.5")
     fm <- r$results$frozenMetrics$asDF
     est <- function(m) fm$estimate[fm$metric == m & fm$model == "marker" & fm$site == "All"]
-    expect_equal(c(est("auc"), est("sensitivity"), est("specificity"), est("ppv"), est("npv"), est("f1")),
+    expect_equal(c(est("AUC"), est("Sensitivity"), est("Specificity"), est("PPV"), est("NPV"), est("F1 score")),   # display labels
                  c(0.825, 0.7, 0.8, 7 / 9, 8 / 11, 14 / 19), tolerance = 1e-12)
 })
 
@@ -272,7 +272,9 @@ test_that("C83 patient-cluster bootstrap resamples whole patients", {
     fb <- function(d, ...) {
         f <- erv_run(d, "y", "s", "pos", validationPanel = TRUE, validationNegative = "neg", modelVersion = "v1", impactCutoffs = "0.5",
                      validationBootstrap = TRUE, validationDraws = 200, seed = 11, ...)$results$frozenMetrics$asDF
-        unlist(f[f$metric == "auc" & f$model == "s" & f$site == "All", c("lower", "upper")])
+        out <- unlist(f[f$metric == "AUC" & f$model == "s" & f$site == "All", c("lower", "upper")])
+        expect_length(out, 2L)   # an empty match would make the comparison below vacuous
+        out
     }
     expect_equal(fb(d2, patientID = "pid"), fb(d1))
 })

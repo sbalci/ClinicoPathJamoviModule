@@ -830,6 +830,10 @@ msgstr ""
 msgid "{a} and {b}"
 msgstr "{a} ve {b}"
 
+#: R/enhancedROC.b.R
+msgid "{a} minus {b}"
+msgstr "{a} eksi {b}"
+
 #: R/chisqposttest.b.R
 #: R/decisioncurve.b.R
 #: R/nogoldstandard.b.R
@@ -2218,6 +2222,10 @@ msgid ""
 msgstr ""
 "{v1} liste dışlandı: toplamı aşmayan, ilk saptama ve varsa pozitif sayısıyla "
 "tutarlı, tekrarsız tam sayı konumları kullanın."
+
+#: R/enhancedROC.b.R
+msgid "{value} (default setting)"
+msgstr "{value} (varsayılan ayar)"
 
 #: R/decisioncurve.b.R
 msgid "{var} ({level} = positive)"
@@ -14127,6 +14135,10 @@ msgstr ""
 "aralığıdır. Kazancı kayba karşı tartın: bir taraftaki kazanç genel üstünlük "
 "anlamına gelmez."
 
+#: R/enhancedROC.b.R
+msgid "A partition audit requires patient identifiers."
+msgstr "Bölümleme denetimi hasta tanımlayıcıları gerektirir."
+
 #: R/psychopdaROC.b.R
 msgid ""
 "A patient has conflicting or partly missing subgroup values. Use one "
@@ -19762,6 +19774,10 @@ msgstr "Hastalıksız yaşıyor"
 msgid "all"
 msgstr "tümü"
 
+#: R/enhancedROC.b.R
+msgid "All"
+msgstr "Tümü"
+
 #: R/agepyramid.b.R
 msgid ""
 "All {n} analysed observations fall in the female group, so the figure is a "
@@ -22291,16 +22307,32 @@ msgstr ""
 msgid "Analyzed (n)"
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid "Analyzed common cases"
+msgstr "Analiz edilen ortak olgular"
+
+#: R/enhancedROC.b.R
+msgid "Analyzed independent units"
+msgstr "Analiz edilen bağımsız birimler"
+
 #: decisioncompare/results/comparisonTable.columns.title
 #: decisioncompare/results/opaTable.columns.title
 #: decisioncompare/results/stratifiedTable.columns.title
 msgid "Analyzed N"
 msgstr "Analiz Edilen N"
 
+#: R/enhancedROC.b.R
+msgid "Analyzed negative"
+msgstr "Analiz edilen negatif"
+
 #: decision/results/comparatorPopulation.columns.title
 #: decisioncompare/results/comparatorPopulation.columns.title
 msgid "Analyzed pairs"
 msgstr "Analiz edilen çiftler"
+
+#: R/enhancedROC.b.R
+msgid "Analyzed positive"
+msgstr "Analiz edilen pozitif"
 
 #: enhancedROC/results/results/frozenMetrics.columns.title
 msgid "Analyzed rows"
@@ -24042,6 +24074,10 @@ msgstr "En az iki örnek türü gereklidir."
 msgid "At least two tests with positive levels must be specified"
 msgstr "Pozitif düzeylere sahip en az iki test belirtilmelidir"
 
+#: R/enhancedROC.b.R
+msgid "At most 100 scenario values or cutoffs are allowed."
+msgstr "En fazla 100 senaryo değeri veya kesme noktası girilebilir."
+
 #: R/lassocox.b.R
 msgid ""
 "At most 30 paths are shown, ranked by summed absolute coefficients across "
@@ -24708,6 +24744,7 @@ msgstr ""
 msgid "AUC vs Covariate Plot"
 msgstr ""
 
+#: R/enhancedROC.b.R
 #: enhancedROC/results/results/precisionRecallTable.columns.title
 msgid "AUC-PR (interpolated)"
 msgstr "AUC-PR (enterpolasyonlu)"
@@ -25409,6 +25446,10 @@ msgstr "Ortalama net fayda tablosu"
 #: enhancedROC/results/results/precisionRecallTable.columns.title
 msgid "Average Precision"
 msgstr "Ortalama Kesinlik"
+
+#: R/enhancedROC.b.R
+msgid "Average precision"
+msgstr "Ortalama kesinlik"
 
 #: precisionrecall/options/aucMethod/average_precision.title
 msgid "Average precision (step area)"
@@ -30940,6 +30981,7 @@ msgstr ""
 msgid "Brier Score"
 msgstr "Brier Skoru"
 
+#: R/enhancedROC.b.R
 #: R/multisurvival.b.R
 #: enhancedROC/options/brierScore.title
 msgid "Brier score"
@@ -32598,6 +32640,18 @@ msgstr ""
 msgid "Calibration analysis failed for %1$s: %2$s"
 msgstr "%1$s için kalibrasyon analizi başarısız oldu: %2$s"
 
+#: R/enhancedROC.b.R
+msgid ""
+"Calibration analysis is on, but no measure is ticked, so the calibration "
+"table has no values. Tick one or more of Brier score, Calibration metrics, "
+"Hosmer-Lemeshow test, E/O ratio, Spline calibration curve or Calibration "
+"plot."
+msgstr ""
+"Kalibrasyon analizi açık, ancak hiçbir ölçüt işaretlenmediği için "
+"kalibrasyon tablosunda değer yok. Brier skoru, Kalibrasyon ölçütleri, "
+"Hosmer-Lemeshow testi, B/G oranı, Spline kalibrasyon eğrisi veya Kalibrasyon "
+"grafiği seçeneklerinden birini ya da birkaçını işaretleyin."
+
 #: R/survival.b.R
 msgid "Calibration assessed at t = {t}. N = {n} patients in {k} risk groups."
 msgstr ""
@@ -32678,6 +32732,10 @@ msgstr ""
 #: survivalcalibration/results/calibrationMetrics.columns.title
 msgid "Calibration Intercept"
 msgstr "Kalibrasyon Kesişimi"
+
+#: R/enhancedROC.b.R
+msgid "Calibration intercept"
+msgstr "Kalibrasyon sabit terimi"
 
 #: survivalmodelvalidation/options/calibration_method.title
 #: survivalmodelvalidation/results/calibrationMetrics.columns.title
@@ -32801,6 +32859,7 @@ msgstr ""
 msgid "Calibration Slope"
 msgstr "Kalibrasyon Eğimi"
 
+#: R/enhancedROC.b.R
 #: R/lassologistic.b.R
 #: R/survival.b.R
 msgid "Calibration slope"
@@ -32881,6 +32940,10 @@ msgstr ""
 #: modelval/ui[2][0]/showCalibrationLarge.label
 msgid "Calibration-in-the-Large"
 msgstr "Genel Kalibrasyon (Calibration-in-the-Large)"
+
+#: R/enhancedROC.b.R
+msgid "Calibration-in-the-large"
+msgstr "Genel kalibrasyon (calibration-in-the-large)"
 
 #: R/clinicalscore.b.R
 msgid "Calibration: Predicted vs Observed"
@@ -36739,6 +36802,10 @@ msgstr "Uyum için GA Yöntemi"
 #: agreement/results/specificAgreementTable.columns.title
 msgid "CI method/status"
 msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "CI not requested"
+msgstr "GA istenmedi"
 
 #: rmstregression/results/bootstrapResults.columns.title
 msgid "CI Type"
@@ -41144,6 +41211,10 @@ msgstr ""
 #: enhancedROC/options/cohortRole.title
 msgid "Cohort role"
 msgstr "Kohort rolü"
+
+#: R/enhancedROC.b.R
+msgid "Cohort role (declared, not verified)"
+msgstr "Kohort rolü (beyan edilen, doğrulanmamış)"
 
 #: epidemiosurvival/options/cohort_design.title
 msgid "Cohort Study Design"
@@ -45793,6 +45864,10 @@ msgstr ""
 msgid "Conditional Mean"
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid "Conditional on observed sites; no site-population extrapolation"
+msgstr "Gözlenen merkezlere koşullu; merkez popülasyonuna genelleme yapılmaz"
+
 #: progressionsurvival/results/landmark_results.columns.title
 msgid "Conditional PFS (%)"
 msgstr ""
@@ -47160,6 +47235,7 @@ msgstr ""
 msgid "Conover-Iman test"
 msgstr ""
 
+#: R/enhancedROC.b.R
 #: enhancedROC/options/samplingDesign/consecutive.title
 msgid "Consecutive"
 msgstr "Ardışık"
@@ -56852,6 +56928,10 @@ msgstr "Analizde kullanılan temel istatistiksel terimlerin tanımları"
 msgid "Definitions of statistical terms with clinical interpretations"
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid "Degenerate bootstrap; interval unavailable"
+msgstr "Dejenere bootstrap; aralık hesaplanamıyor"
+
 #: splinehazard/results/modelSummary.columns.title
 #: splinehazard/results/modelComparison.columns.title
 #: venn/options/sortBy/degree.title
@@ -58335,6 +58415,7 @@ msgid ""
 "for model validation and documentation."
 msgstr ""
 
+#: R/enhancedROC.b.R
 #: enhancedROC/options/cohortRole/development.title
 msgid "Development / exploratory"
 msgstr "Geliştirme / keşifsel"
@@ -66540,6 +66621,7 @@ msgstr ""
 msgid "Enhancement Pattern"
 msgstr ""
 
+#: R/enhancedROC.b.R
 #: enhancedROC/options/samplingDesign/enriched.title
 msgid "Enriched"
 msgstr "Zenginleştirilmiş"
@@ -66712,6 +66794,10 @@ msgstr ""
 msgid "Enter a title for your plot."
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid "Enter at least one fixed score cutoff."
+msgstr "En az bir sabit skor kesme noktası girin."
+
 #: economistplots/options/caption_text.description.jamovi
 msgid "Enter caption text (data source, notes, etc.)."
 msgstr ""
@@ -66719,6 +66805,10 @@ msgstr ""
 #: advancedbarplot/options/highlight_bars.description.jamovi
 msgid "Enter category names to highlight (comma-separated)."
 msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "Enter comma-separated numbers within the allowed range."
+msgstr "İzin verilen aralıkta virgülle ayrılmış sayılar girin."
 
 #: jsjplot/options/axis_labels.description.jamovi
 msgid "Enter custom axis labels separated by commas."
@@ -72902,6 +72992,7 @@ msgid "F1 Score"
 msgstr "F1 Skoru"
 
 #: R/decisioncalculator.b.R
+#: R/enhancedROC.b.R
 msgid "F1 score"
 msgstr "F1 puanı"
 
@@ -75369,6 +75460,10 @@ msgstr ""
 msgid "Flagged Observations"
 msgstr "İşaretlenen Gözlemler"
 
+#: R/enhancedROC.b.R
+msgid "Flagged per 1000"
+msgstr "1000 başına işaretlenen"
+
 #: pathagreement/ui[8][0]/tie_breaking/arbitration.title
 msgid "Flagging for expert arbitration"
 msgstr ""
@@ -77496,6 +77591,16 @@ msgstr ""
 msgid "From State Variable"
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid ""
+"Frozen evaluation requires a model version and an independently selected "
+"threshold. Use Development / exploratory for data-selected thresholds."
+msgstr ""
+"Dondurulmuş değerlendirme bir model sürümü ve bağımsız olarak seçilmiş bir "
+"eşik gerektirir. Veriden seçilen eşikler için Geliştirme / keşifsel "
+"seçeneğini kullanın."
+
+#: R/enhancedROC.b.R
 #: enhancedROC/options/cohortRole/frozen.title
 msgid "Frozen external / temporal evaluation"
 msgstr "Dondurulmuş dış / zamansal değerlendirme"
@@ -77503,6 +77608,25 @@ msgstr "Dondurulmuş dış / zamansal değerlendirme"
 #: enhancedROC/options/modelVersion.title
 msgid "Frozen model version"
 msgstr "Dondurulmuş model sürümü"
+
+#: R/enhancedROC.b.R
+msgid ""
+"Frozen scores; no refitting or threshold optimization. Every analysed row "
+"({unit}) weighs equally in the metrics; paired differences use common cases."
+msgstr ""
+"Dondurulmuş skorlar; yeniden model kurma veya eşik optimizasyonu yapılmaz. "
+"Analiz edilen her satır ({unit}) ölçütlerde eşit ağırlık taşır; "
+"eşleştirilmiş farklar ortak olguları kullanır."
+
+#: R/enhancedROC.b.R
+msgid "Frozen-Model Evaluation Not Run"
+msgstr "Dondurulmuş Model Değerlendirmesi Çalıştırılmadı"
+
+#: R/enhancedROC.b.R
+msgid "Frozen-model evaluation requires an explicit score direction."
+msgstr ""
+"Dondurulmuş model değerlendirmesi açıkça belirtilmiş bir skor yönü "
+"gerektirir."
 
 #: enhancedROC/results/results/frozenMetrics.title
 msgid "Frozen-model performance and paired differences"
@@ -88859,6 +88983,10 @@ msgstr ""
 msgid "Input Mode"
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid "Input rows"
+msgstr "Girdi satırları"
+
 #: R/jjpiestats.b.R
 msgid "input rows (before exclusions; frequencies may differ)"
 msgstr ""
@@ -89497,6 +89625,10 @@ msgid ""
 msgstr ""
 "Zaman ölçeği olarak yaş analizi için yetersiz geçerli gözlem. Yaş ve takip "
 "süresinin uyumlu birimlerde olduğunu kontrol edin."
+
+#: R/enhancedROC.b.R
+msgid "Insufficient valid replicates"
+msgstr "Yetersiz geçerli tekrar"
 
 #: R/alluvial.b.R
 msgid "Insufficient Variables"
@@ -90200,6 +90332,7 @@ msgstr ""
 
 #: R/clinicalscore.b.R
 #: R/decisiongraph.b.R
+#: R/enhancedROC.b.R
 #: adaptivelasso/results/modelDiagnostics.columns.title
 #: advancedanova/results/assumptions.columns.title
 #: advancedanova/results/anova.columns.title
@@ -104103,6 +104236,10 @@ msgstr ""
 msgid "Metric Unavailable"
 msgstr "Ölçüt Kullanılamıyor"
 
+#: R/enhancedROC.b.R
+msgid "Metric undefined"
+msgstr "Ölçüt tanımsız"
+
 #: clinicalheatmap/results/optimalKAnalysis/optimalKTable.columns.title
 #: timedependent/results/model_comparison.columns.title
 msgid "Metric Value"
@@ -105465,6 +105602,10 @@ msgstr "Eksik (NA)"
 msgid "Missing {pct}%"
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid "Missing / nonfinite score"
+msgstr "Eksik / sonlu olmayan skor"
+
 #: batcheffect/results/feature_quality.columns.title
 #: clinicalheatmap/results/dataSummary/missingData.columns.title
 #: enhancedfactorvariable/results/results/nominalSummary.columns.title
@@ -105805,6 +105946,10 @@ msgstr "Pozitif Düzey Eksik"
 #: R/decisioncompare.b.R
 msgid "Missing Positive Levels"
 msgstr "Pozitif Düzeyler Eksik"
+
+#: R/enhancedROC.b.R
+msgid "Missing reference"
+msgstr "Eksik referans"
 
 #: R/diagnosticmeta.b.R
 msgid "Missing required columns for proportional-hazards SROC analysis"
@@ -107692,6 +107837,7 @@ msgid "Model Validation Dashboard"
 msgstr ""
 
 #: R/decisioncompare.b.R
+#: R/enhancedROC.b.R
 #: decision/options/modelVersion.title
 #: decisioncompare/options/modelVersion.title
 msgid "Model version"
@@ -110783,6 +110929,10 @@ msgstr "Negatif sayılar tespit edildi"
 msgid "Negative Impact %"
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid "Negative independent units"
+msgstr "Negatif bağımsız birimler"
+
 #: trichotomousroc/options/negative_level.title
 #: trichotomousroc/ui/outcomelevels/negative_level.label
 msgid "Negative Level"
@@ -112110,6 +112260,10 @@ msgstr "hiçbir bootstrap yeniden örneklemi sonlu sınırlar vermedi"
 msgid "no bootstrap resample held both outcome groups"
 msgstr "hiçbir bootstrap yeniden örneklemi her iki sonlanım grubunu da içermiyordu"
 
+#: R/enhancedROC.b.R
+msgid "No Calibration Measure Selected"
+msgstr "Kalibrasyon Ölçütü Seçilmedi"
+
 #: R/decisioncombine.b.R
 msgid ""
 "No candidate rule has an estimable Youden index with at least 10 "
@@ -112407,6 +112561,10 @@ msgid ""
 msgstr ""
 "Seçilen değişkenler ve sınır noktası kısıtlaması uygulandıktan sonra geriye "
 "tam bir kayıt kalmadı."
+
+#: R/enhancedROC.b.R
+msgid "No complete reference and score rows remain."
+msgstr "Referansı ve skoru eksiksiz olan satır kalmadı."
 
 #: R/lassocox.b.R
 msgid ""
@@ -113484,6 +113642,10 @@ msgstr ""
 #: R/chisqposttest.b.R
 msgid "no pairwise sub-comparisons for this table shape"
 msgstr "bu tablo şekli için ikili alt karşılaştırma yok"
+
+#: R/enhancedROC.b.R
+msgid "No patient overlap in supplied partition labels"
+msgstr "Verilen bölümleme etiketlerinde hasta çakışması yok"
 
 #: R/waterfall.b.R
 msgid ""
@@ -115814,6 +115976,10 @@ msgstr ""
 "değer): %s."
 
 #: R/enhancedROC.b.R
+msgid "Not assessed; no partition manifest"
+msgstr "Değerlendirilmedi; bölümleme listesi yok"
+
+#: R/enhancedROC.b.R
 #: R/psychopdaROC.b.R
 msgid "Not assigned yet"
 msgstr "Henüz atanmadı"
@@ -116319,6 +116485,10 @@ msgstr "Anlamlı derecede farklı değil"
 msgid "Not specified"
 msgstr "Belirtilmedi"
 
+#: R/enhancedROC.b.R
+msgid "Not stated"
+msgstr "Belirtilmedi"
+
 #: R/linechart.b.R
 #: R/survival.b.R
 msgid "not statistically significant"
@@ -116804,6 +116974,7 @@ msgstr ""
 #: R/decisioncalculator.b.R
 #: R/decisioncombine.b.R
 #: R/decisioncompare.b.R
+#: R/enhancedROC.b.R
 #: R/psychopdaROC.b.R
 #: R/sequentialtests.b.R
 #: biomarkerresponse/results/threshold.columns.title
@@ -122416,6 +122587,7 @@ msgstr ""
 msgid "Other"
 msgstr "Diğer"
 
+#: R/enhancedROC.b.R
 #: enhancedROC/options/samplingDesign/other.title
 msgid "Other / unknown"
 msgstr "Diğer / bilinmiyor"
@@ -126810,9 +126982,17 @@ msgstr ""
 msgid "Particle Filtering"
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid "Partition audit"
+msgstr "Bölümleme denetimi"
+
 #: enhancedROC/ui[0][4].label
 msgid "Partition identifier"
 msgstr "Bölümleme tanımlayıcısı"
+
+#: R/enhancedROC.b.R
+msgid "Partition labels must be complete."
+msgstr "Bölümleme etiketleri eksiksiz olmalıdır."
 
 #: hierarchicalpathology/results/variancecomponents.description
 msgid "Partition of variance across hierarchical levels"
@@ -127307,6 +127487,18 @@ msgstr ""
 "durumda aralıkları ve testleri gereğinden dar kalır. Yalnızca Dondurulmuş "
 "model doğrulama raporu hastaları bütün olarak yeniden örnekler."
 
+#: R/enhancedROC.b.R
+msgid "Patient IDs must be complete; none were silently dropped."
+msgstr "Hasta kimlikleri eksiksiz olmalıdır; hiçbiri sessizce dışlanmadı."
+
+#: R/enhancedROC.b.R
+msgid ""
+"Patient IDs span sites; use globally unique patient IDs and resolve "
+"cross-site duplicates."
+msgstr ""
+"Hasta kimlikleri birden fazla merkeze yayılıyor; tüm merkezlerde benzersiz "
+"hasta kimlikleri kullanın ve merkezler arası yinelenen kayıtları giderin."
+
 #: qualityoflife/results/clinical_interpretation_summary.columns.title
 msgid "Patient Impact"
 msgstr ""
@@ -127371,6 +127563,14 @@ msgstr ""
 #: patientdashboard/options/patient_outcomes.title
 msgid "Patient Outcomes Tracking"
 msgstr ""
+
+#: R/enhancedROC.b.R
+msgid ""
+"Patient overlap across partitions detected. Resolve leakage before "
+"evaluation."
+msgstr ""
+"Bölümler arasında hasta örtüşmesi saptandı. Değerlendirmeden önce sızıntıyı "
+"giderin."
 
 #: timeupdatesurvival/results/dynamicPredictions.columns.title
 msgid "Patient Profile"
@@ -127485,6 +127685,10 @@ msgstr ""
 #: clinicalalerts/options/patient_analysis.title
 msgid "Patient-Specific Analysis"
 msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "Patient; all of the patient's rows ({unit}) retained"
+msgstr "Hasta; hastanın tüm satırları ({unit}) korunur"
 
 #: agreement/ui[32][0][5][0].label
 #: pathagreement/ui[2][1].label
@@ -128983,6 +129187,10 @@ msgstr "Yüzdelik Yöntemi"
 #: rmst/options/tau_method/percentile.title
 msgid "Percentile of max follow-up"
 msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "Percentile; fixed model and sites"
+msgstr "Persentil; sabit model ve merkezler"
 
 #: R/agreement.b.R
 msgid "Perfect agreement (100%) - every rater who rated the case concurs"
@@ -133464,6 +133672,10 @@ msgstr "Pozitif (durum var)"
 msgid "Positive / Event Level"
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid "Positive / negative"
+msgstr "Pozitif / negatif"
+
 #: ihcthreshold/results/summaryTable.columns.title
 msgid "Positive % Range"
 msgstr ""
@@ -133629,6 +133841,10 @@ msgstr ""
 msgid "Positive Impact %"
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid "Positive independent units"
+msgstr "Pozitif bağımsız birimler"
+
 #: aivalidation/options/positiveLevel.title
 #: aivalidation/ui[0][1]/positiveLevel.label
 #: decisionpanel/options/test1Positive.title
@@ -133765,6 +133981,7 @@ msgstr ""
 msgid "Positive Nuclei"
 msgstr ""
 
+#: R/enhancedROC.b.R
 #: enhancedROC/options/samplingDesign/positive_only.title
 msgid "Positive only"
 msgstr "Yalnızca pozitif"
@@ -134886,6 +135103,7 @@ msgstr ""
 #: R/decisioncalculator.b.R
 #: R/decisioncombine.b.R
 #: R/decisioncompare.b.R
+#: R/enhancedROC.b.R
 #: R/psychopdaROC.b.R
 #: R/sequentialtests.b.R
 #: biomarkerresponse/results/threshold.columns.title
@@ -136048,6 +136266,7 @@ msgstr ""
 msgid "Prediction Scale"
 msgstr "Tahmin Ölçeği"
 
+#: R/enhancedROC.b.R
 #: enhancedROC/options/predictionScale.title
 msgid "Prediction scale"
 msgstr "Tahmin ölçeği"
@@ -136815,6 +137034,7 @@ msgstr ""
 msgid "Presmoothed Kaplan-Meier"
 msgstr ""
 
+#: R/enhancedROC.b.R
 #: enhancedROC/options/thresholdSource/prespecified.title
 msgid "Prespecified independently"
 msgstr "Bağımsız olarak önceden belirlendi"
@@ -137814,6 +138034,14 @@ msgstr ""
 msgid "Probability Influence"
 msgstr ""
 
+#: R/enhancedROC.b.R
+msgid ""
+"Probability inputs must lie between 0 and 1 for the selected positive class, "
+"and the direction must be higher."
+msgstr ""
+"Olasılık girdileri seçilen pozitif sınıf için 0 ile 1 arasında olmalı ve yön "
+"yüksek olmalıdır."
+
 #: pathsampling/ui[8][0].label
 msgid "Probability Models"
 msgstr ""
@@ -137931,6 +138159,7 @@ msgstr ""
 "Gerçek uyum kappa1 iken kappa0'ın reddedilme olasılığı (1 - tip II hata). "
 "Alışılmış değerler 0.80 veya 0.90'dır; alfadan büyük olmalıdır."
 
+#: R/enhancedROC.b.R
 #: enhancedROC/options/predictionScale/probability.title
 msgid "Probability of selected positive class"
 msgstr "Seçilen pozitif sınıfın olasılığı"
@@ -143731,9 +143960,10 @@ msgstr ""
 msgid "Reference Standard"
 msgstr ""
 
+#: R/enhancedROC.b.R
 #: R/pathagreement.b.R
 msgid "Reference standard"
-msgstr ""
+msgstr "Referans standart"
 
 #: decision/ui[1][0].label
 #: likelihoodratio/options/referenceStandard.title
@@ -143744,6 +143974,10 @@ msgstr "Referans Standart (Altın Standart)"
 #: enhancedROC/options/referenceDescription.title
 msgid "Reference standard and blinding"
 msgstr "Referans standart ve körleme"
+
+#: R/enhancedROC.b.R
+msgid "Reference status is inconsistent within a patient."
+msgstr "Referans durumu bir hasta içinde tutarsız."
 
 #: R/decisioncurve.b.R
 msgid "Reference Strategies"
@@ -145708,6 +145942,10 @@ msgstr ""
 "aralıkları, bootstrap karşılaştırma testi ve ROC güven bantları (dengesiz "
 "veriler için önerilir). Varsayılan olarak kapalıdır: işaretlenmediğinde bu "
 "bootstrap işlemleri hastaları sonlanımdan bağımsız olarak yeniden örnekler."
+
+#: R/enhancedROC.b.R
+msgid "Resampling unit"
+msgstr "Yeniden örnekleme birimi"
 
 #: R/enhancedROC.b.R
 #: enhancedROC/options/clinicalPresets/research_comprehensive.title
@@ -149006,6 +149244,10 @@ msgstr "Satır-normalize (duyarlılık)"
 msgid "Row-wise Pairwise Comparisons"
 msgstr "Satır Bazında İkili Karşılaştırmalar"
 
+#: R/enhancedROC.b.R
+msgid "Row; independence assumed"
+msgstr "Satır; bağımsızlık varsayılır"
+
 #: clinicalheatmap/options/rowClusterPrefix.default
 msgid "RowCluster"
 msgstr ""
@@ -150141,6 +150383,7 @@ msgid "Sampling Bias:"
 msgstr "Örnekleme Yanlılığı:"
 
 #: R/decisioncompare.b.R
+#: R/enhancedROC.b.R
 #: decision/options/samplingDesign.title
 #: decisioncompare/options/samplingDesign.title
 #: enhancedROC/options/samplingDesign.title
@@ -150915,6 +151158,7 @@ msgstr "Kapsam uyarısı:"
 msgid "Scope:"
 msgstr "Kapsam:"
 
+#: R/enhancedROC.b.R
 #: enhancedROC/options/predictionScale/score.title
 #: explainableai/results/validationmetrics/validationtable.columns.title
 #: hematologicindices/results/gpsTable.columns.title
@@ -152077,6 +152321,14 @@ msgstr "Doğal olarak oluşan sayıları içeren sayısal bir değişken seçin"
 msgid "Select a Patient ID before using patient-level summaries."
 msgstr "Hasta düzeyinde özetleri kullanmadan önce bir hasta kimliği seçin."
 
+#: R/enhancedROC.b.R
+msgid ""
+"Select a positive reference level and enter a distinct negative reference "
+"level."
+msgstr ""
+"Bir pozitif referans düzeyi seçin ve ondan farklı bir negatif referans "
+"düzeyi girin."
+
 #: decisioncompare/options/test2.description.ui
 msgid ""
 "Select a second diagnostic test to compare with Test 1. This enables "
@@ -152901,10 +153153,12 @@ msgstr ""
 msgid "Selected Groups"
 msgstr ""
 
+#: R/enhancedROC.b.R
 #: enhancedROC/options/thresholdSource/development.title
 msgid "Selected in development"
 msgstr "Geliştirme verisinde seçildi"
 
+#: R/enhancedROC.b.R
 #: enhancedROC/options/thresholdSource/exploratory.title
 msgid "Selected in evaluation data"
 msgstr "Değerlendirme verisinde seçildi"
@@ -159431,6 +159685,18 @@ msgstr "Merkez"
 #: enhancedROC/ui[0][3].label
 msgid "Site identifier"
 msgstr "Merkez tanımlayıcısı"
+
+#: R/enhancedROC.b.R
+msgid "Site IDs must be complete; none were silently dropped."
+msgstr "Merkez kimlikleri eksiksiz olmalıdır; hiçbiri sessizce dışlanmadı."
+
+#: R/enhancedROC.b.R
+msgid "Site inference"
+msgstr "Merkez çıkarımı"
+
+#: R/enhancedROC.b.R
+msgid "Site: {site}"
+msgstr "Merkez: {site}"
 
 #: package/analyses/sigmametrics.description
 #: sigmametrics/options.description.main
@@ -177431,6 +177697,10 @@ msgstr ""
 "McClish ile normalize edilmiş değer için DEĞİLDİR."
 
 #: R/enhancedROC.b.R
+msgid "The partial AUC is not computed; the rest of the analysis is."
+msgstr "Kısmi EAA hesaplanmadı; analizin geri kalanı hesaplandı."
+
+#: R/enhancedROC.b.R
 msgid ""
 "The partial AUC was computed over sensitivities from %1$s to %2$s and "
 "standardised with the McClish correction (McClish, 1989) to a 0.5-1 scale."
@@ -182850,6 +183120,7 @@ msgid "Threshold Settings (Advanced)"
 msgstr "Eşik Ayarları (Gelişmiş)"
 
 #: R/decisioncompare.b.R
+#: R/enhancedROC.b.R
 #: decision/options/thresholdSource.title
 #: decisioncompare/options/thresholdSource.title
 #: enhancedROC/options/thresholdSource.title
@@ -185406,6 +185677,10 @@ msgstr ""
 #: R/jjpiestats.b.R
 msgid "Too few discordant pairs to reach p < 0.05"
 msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "Too few independent clusters per site"
+msgstr "Merkez başına çok az bağımsız küme"
 
 #: R/lassologistic.b.R
 msgid "Too few non-degenerate predictor columns."
@@ -190017,6 +190292,7 @@ msgid "Unit for landmark time"
 msgstr ""
 
 #: R/decisioncompare.b.R
+#: R/enhancedROC.b.R
 #: decision/options/analysisUnit.title
 #: decisioncalculator/options/analysisUnit.title
 #: decisioncompare/options/analysisUnit.title
@@ -190162,6 +190438,12 @@ msgid ""
 "Unlike zero-order (regular) correlations, partial correlations remove the "
 "influence of confounding variables"
 msgstr ""
+
+#: R/enhancedROC.b.R
+msgid "Unmapped reference levels; explicitly recode before evaluation: {levels}"
+msgstr ""
+"Eşlenmemiş referans düzeyleri; değerlendirmeden önce açıkça yeniden "
+"kodlayın: {levels}"
 
 #: treatmenteffects/results/matching_summary.columns.title
 msgid "Unmatched Control"

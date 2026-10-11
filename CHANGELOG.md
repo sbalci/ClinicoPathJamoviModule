@@ -5,6 +5,54 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-10-11 — enhancedROC: demoting an ERROR to a WARNING left a test exercising nothing
+
+- **Failure mode:** an invalid Partial AUC range became a WARNING (F-51). A test titled "a fatal validation
+  error leaves the instructions panel intact" used that range as its fatal case. It still passed, because
+  it only checked the notice title, but it no longer reached any fatal path.
+- **Detection signal:** grepping the tests for the old behaviour (`partialRange = "not,numbers"`) before
+  running them, and reading what each hit was meant to prove.
+- **Prevention rule:**
+  - When a refusal changes severity, read every test that triggers it for its purpose, not its assertion.
+    Move a test that needs the old severity to another input that still has it (here, a positive class
+    absent from the data).
+  - A display string built from parsed numbers loses the user's notation (`as.numeric("1.0")` prints
+    `1`). Validate with the parsed value and display the user's trimmed text.
+
+---
+
+## 2026-10-11 — enhancedROC syntax-pane fix: `inherits(option, "OptionString")` also matched Variables
+
+- **Failure mode:** the codegen fix escaped String and Level options in `.sourcifyOption()` with an
+  `inherits(option, "OptionString")` branch. jmvcore's `OptionVariable` inherits `OptionString`
+  (`OptionVariable > OptionString > Option`), so a syntactic outcome name came out as
+  `outcome = "y"` instead of jmvcore's bare `outcome = y`. Only `OptionVariables` sits outside
+  that chain.
+- **Detection signal:** the existing F-34 round-trip test failed. Re-running it with the old method
+  patched back in passed, which isolated the new branch.
+- **Prevention rule:**
+  - Before branching on an R6 class, print `class(<Option>$new(...))` for every option type the
+    method sees. Inheritance in jmvcore does not follow the names.
+  - Run the analysis's existing `asSource()` tests after any `.sourcifyOption()` change, not only
+    the new ones.
+
+---
+
+## 2026-10-11 — enhancedROC: a lowercase test file never ran in any filtered test run
+
+- **Failure mode:** every enhancedROC test run this session used
+  `devtools::test(filter = "enhancedROC")`. The filter is case-sensitive, so
+  `test-enhancedroc-pr-clinical.R` never ran. Each run reported "0 failures" for a set that was
+  missing a file.
+- **Detection signal:** the release review's case and naming gate (`ls tests/testthat | grep -i`)
+  listed a file that the filtered runs had never counted.
+- **Prevention rule:**
+  - Name test files with the exact `.a.yaml` `name:` case.
+  - Before quoting a filtered test total, compare `ls tests/testthat | grep -ic <fn>` with the
+    number of files the run reported.
+
+---
+
 ## 2026-10-11 — meddecide audit tests: "known failures" hid two real defects among stale pins
 
 - **Failure mode:** after the psychopdaROC refactor (2026-10-10) and two decisioncalculator passes,

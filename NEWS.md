@@ -28,7 +28,16 @@
   blanked cell keeps its explanation when table notes are off; an empty notices panel no longer
   shows the previous run's notices; the imbalance threshold is no longer greyed out while in use;
   the comparison, CROC and hull plots follow the plot theme. Every enhancedROC string now has a
-  Turkish translation.
+  Turkish translation. The release review then made the Frozen-model validation report use the
+  same interpolated AUC-PR as the main analysis (it used the PR-space trapezoid, which overstates
+  the area with tied scores), show metric names, statuses and settings as labels instead of
+  internal keys (`pr_auc`, `flags_per_1000`, `frozen`), and say when Calibration analysis is ticked
+  without any calibration measure.
+  A last fix pass dropped the "test everyone / test nobody" end points (cut-offs of minus and plus
+  infinity) from the Detailed Cutoff Analysis; made an unreadable Partial AUC range a warning that
+  skips only the partial AUC (it used to empty every table); and shows the Frozen-model report's
+  input problems (for example a missing negative reference level or model version) as a
+  translated notice instead of an English analysis error.
   The analysis remains in JamoviTest pending production promotion.
 
 - In module 1.0.81.01, `enhancedROC` analysis 1.0.84 reports the actual AUC

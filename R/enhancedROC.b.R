@@ -493,7 +493,15 @@ enhancedROCClass <- R6::R6Class(
                 .deleteTableRows(self$results$results$get(name))
             }
             if (isTRUE(self$options$validationPanel)) {
-                report <- .enhancedROCValidation(self$data, self$options)
+                # The helper refuses bad input with stop(); shown as a translated ERROR notice like
+                # every other refusal, instead of jamovi's error state in English. The helper calls
+                # no jmvcore::reject() or .checkpoint(), so catching every error here hides neither.
+                report <- tryCatch(.enhancedROCValidation(self$data, self$options), error = function(e) e)
+                if (inherits(report, "error")) {
+                    private$.addNotice(type = "ERROR", title = .("Frozen-Model Evaluation Not Run"),
+                                       content = private$.frozenError(conditionMessage(report)))
+                    return()
+                }
                 for (pair in list(c("validationContext", "context"), c("denominatorLedger", "ledger"),
                                   c("frozenMetrics", "metrics"), c("screeningWorkload", "workload"))) {
                     table <- self$results$results$get(pair[1])
@@ -501,12 +509,7 @@ enhancedROCClass <- R6::R6Class(
                     # NA would print as "NaN"; frozenMetrics' status column already says why a cell is empty
                     reasons <- if (identical(pair[1], "screeningWorkload")) private$.undefinedRatioNotes() else list()
                     for (i in seq_len(nrow(frame))) {
-                        values <- as.list(frame[i, ])
-                        # the file-level helper cannot translate; its source labels are translated here
-                        if (identical(pair[1], "screeningWorkload")) {
-                            src <- as.character(values$source)
-                            values$source <- switch(src, Observed = .("Observed"), Projected = .("Projected"), src)
-                        }
+                        values <- private$.frozenRow(pair[1], as.list(frame[i, ]))   # display labels
                         table$addRow(rowKey = as.character(i), values = values)
                         private$.blankUndefined(table, as.character(i), values, reasons)
                     }
@@ -900,37 +903,23 @@ enhancedROCClass <- R6::R6Class(
 
             # Validate partialRange only when partial AUC is actually being computed. This used
             # to run unconditionally, so leftover text in a box the user had since switched off
-            # aborted the entire analysis.
-            if (isTRUE(self$options$partialAuc) &&
-                !is.null(self$options$partialRange) && self$options$partialRange != "") {
-                range_parts <- trimws(strsplit(self$options$partialRange, ",")[[1]])
-                if (length(range_parts) != 2) {
-                    private$.addNotice(
-                        type = "ERROR",
-                        title = .("Invalid Partial AUC Range"),
-                        content = .("Partial AUC range must contain exactly two comma-separated numbers, for example 0.8,1.0.")
-                    )
-                    return(NULL)
-                }
-
+            # aborted the entire analysis. A bad range skips the partial AUC only (F-51), as a bad
+            # impactCutoffs / prevalenceScenarios skips only its own tables.
+            if (isTRUE(self$options$partialAuc) && is.null(private$.partialRangeValues())) {
+                range_parts <- trimws(strsplit(self$options$partialRange %||% "", ",", fixed = TRUE)[[1]])
                 range_values <- suppressWarnings(as.numeric(range_parts))
-                if (any(is.na(range_values))) {
-                    private$.addNotice(
-                        type = "ERROR",
-                        title = .("Invalid Partial AUC Range"),
-                        content = .("Partial AUC range values must be numeric, for example 0.8,1.0.")
-                    )
-                    return(NULL)
+                problem <- if (length(range_parts) != 2) {
+                    .("Partial AUC range must contain exactly two comma-separated numbers, for example 0.8,1.0.")
+                } else if (anyNA(range_values)) {
+                    .("Partial AUC range values must be numeric, for example 0.8,1.0.")
+                } else {
+                    .("Partial AUC range must be valid: the first value must be less than the second, and both must lie between 0 and 1, for example 0.8,1.0.")
                 }
-
-                if (range_values[1] >= range_values[2] || range_values[1] < 0 || range_values[2] > 1) {
-                    private$.addNotice(
-                        type = "ERROR",
-                        title = .("Invalid Partial AUC Range"),
-                        content = .("Partial AUC range must be valid: the first value must be less than the second, and both must lie between 0 and 1, for example 0.8,1.0.")
-                    )
-                    return(NULL)
-                }
+                private$.addNotice(
+                    type = "WARNING",
+                    title = .("Invalid Partial AUC Range"),
+                    content = paste(problem, .("The partial AUC is not computed; the rest of the analysis is."))
+                )
             }
 
             # validate_clinical_data()'s warnings (untranslated, pasted into the instructions panel)
@@ -1450,6 +1439,136 @@ enhancedROCClass <- R6::R6Class(
                 if (length(v) != 1L || !is.numeric(v) || is.finite(v)) next
                 private$.blankCells(table, rowKey, col, reasons[[col]])
             }
+        },
+
+        # The frozen-model helper (R/enhancedROC-validation.R, R/utils-diagnostic-validation.R) is
+        # file level and cannot call .(): it returns fixed English labels, metric keys (pr_auc,
+        # flags_per_1000) and option keys (frozen, prespecified). Each text cell of a frozen table is
+        # turned into its display label here, matched exactly; anything else (numbers, user text,
+        # predictor names) passes through unchanged.
+        # Same idea for the helpers' stop() messages: each fixed English message, matched exactly, to
+        # its translation; anything else (an unexpected error) is shown as it is.
+        .frozenError = function(message) {
+            prefix <- "Unmapped reference levels; explicitly recode before evaluation: "
+            if (startsWith(message, prefix))
+                return(.fmt(.("Unmapped reference levels; explicitly recode before evaluation: {levels}"),
+                            levels = substring(message, nchar(prefix) + 1L)))
+            known <- list(
+                "Select a positive reference level and enter a distinct negative reference level." =
+                    .("Select a positive reference level and enter a distinct negative reference level."),
+                "Frozen-model evaluation requires an explicit score direction." =
+                    .("Frozen-model evaluation requires an explicit score direction."),
+                "Frozen evaluation requires a model version and an independently selected threshold. Use Development / exploratory for data-selected thresholds." =
+                    .("Frozen evaluation requires a model version and an independently selected threshold. Use Development / exploratory for data-selected thresholds."),
+                "Enter at least one fixed score cutoff." = .("Enter at least one fixed score cutoff."),
+                "Enter comma-separated numbers within the allowed range." =
+                    .("Enter comma-separated numbers within the allowed range."),
+                "At most 100 scenario values or cutoffs are allowed." =
+                    .("At most 100 scenario values or cutoffs are allowed."),
+                "Patient IDs must be complete; none were silently dropped." =
+                    .("Patient IDs must be complete; none were silently dropped."),
+                "Site IDs must be complete; none were silently dropped." =
+                    .("Site IDs must be complete; none were silently dropped."),
+                "A partition audit requires patient identifiers." = .("A partition audit requires patient identifiers."),
+                "Reference status is inconsistent within a patient." =
+                    .("Reference status is inconsistent within a patient."),
+                "Patient IDs span sites; use globally unique patient IDs and resolve cross-site duplicates." =
+                    .("Patient IDs span sites; use globally unique patient IDs and resolve cross-site duplicates."),
+                "Partition labels must be complete." = .("Partition labels must be complete."),
+                "Patient overlap across partitions detected. Resolve leakage before evaluation." =
+                    .("Patient overlap across partitions detected. Resolve leakage before evaluation."),
+                "No complete reference and score rows remain." = .("No complete reference and score rows remain."),
+                "Probability inputs must be in [0,1] for the selected positive class; direction must be higher." =
+                    # no " [" inside .(): the translator reads it as a context suffix and drops the rest
+                    .("Probability inputs must lie between 0 and 1 for the selected positive class, and the direction must be higher."))
+            known[[message]] %||% message
+        },
+        .frozenRow = function(table, values) {
+            o <- self$options
+            unit <- if (length(o$analysisUnit) && nzchar(trimws(o$analysisUnit))) o$analysisUnit else "row"
+            preds <- o$predictors
+            pick <- function(x, map) if (length(x) == 1L && !is.na(x) && !is.null(map[[x]])) map[[x]] else x
+            status <- list(
+                "CI not requested" = .("CI not requested"),
+                "Metric undefined" = .("Metric undefined"),
+                "Too few independent clusters per site" = .("Too few independent clusters per site"),
+                "Insufficient valid replicates" = .("Insufficient valid replicates"),
+                "Degenerate bootstrap; interval unavailable" = .("Degenerate bootstrap; interval unavailable"),
+                "Percentile; fixed model and sites" = .("Percentile; fixed model and sites"))
+            if (identical(table, "frozenMetrics")) {
+                metric <- list(auc = .("AUC"), ap = .("Average precision"), pr_auc = .("AUC-PR (interpolated)"),
+                    sensitivity = .("Sensitivity"), specificity = .("Specificity"), ppv = .("PPV"), npv = .("NPV"),
+                    f1 = .("F1 score"), flags_per_1000 = .("Flagged per 1000"), brier = .("Brier score"),
+                    calibration_intercept = .("Calibration intercept"), calibration_slope = .("Calibration slope"),
+                    calibration_in_large = .("Calibration-in-the-large"))
+                values$metric <- pick(as.character(values$metric), metric)
+                values$status <- pick(as.character(values$status), status)
+                if (length(preds) > 1) {
+                    minus <- stats::setNames(lapply(preds[-1], function(p) .fmt(.("{a} minus {b}"), a = p, b = preds[1])),
+                                             paste(preds[-1], "minus", preds[1]))
+                    values$model <- pick(as.character(values$model), minus)
+                }
+                site <- as.character(values$site)
+                values$site <- if (identical(site, "All")) .("All") else if (isTRUE(startsWith(site, "Site: ")))
+                    .fmt(.("Site: {site}"), site = substring(site, 7)) else site
+            } else if (identical(table, "denominatorLedger")) {
+                values$status <- pick(as.character(values$status), list(
+                    "Input rows" = .("Input rows"), "Missing reference" = .("Missing reference"),
+                    "Missing / nonfinite score" = .("Missing / nonfinite score"),
+                    "Analyzed common cases" = .("Analyzed common cases"),
+                    "Analyzed positive" = .("Analyzed positive"), "Analyzed negative" = .("Analyzed negative")))
+            } else if (identical(table, "validationContext")) {
+                setting <- as.character(values$setting)
+                value <- as.character(values$value)
+                titles <- list(
+                    "Cohort role (declared, not verified)" = list(development = .("Development / exploratory"),
+                        frozen = .("Frozen external / temporal evaluation")),
+                    "Sampling design" = list(consecutive = .("Consecutive"), enriched = .("Enriched"),
+                        positive_only = .("Positive only"), other = .("Other / unknown")),
+                    "Threshold source" = list(prespecified = .("Prespecified independently"),
+                        development = .("Selected in development"), exploratory = .("Selected in evaluation data")),
+                    "Prediction scale" = list(score = .("Score"), probability = .("Probability of selected positive class")))
+                if (!is.null(titles[[setting]])) {
+                    default <- isTRUE(endsWith(value, " (default setting)"))
+                    key <- if (default) substring(value, 1, nchar(value) - nchar(" (default setting)")) else value
+                    title <- pick(key, titles[[setting]])
+                    value <- if (default) .fmt(.("{value} (default setting)"), value = title) else title
+                } else if (identical(setting, "Reference standard") && (is.na(value) || !nzchar(value))) {
+                    value <- .("Not stated")
+                } else {
+                    value <- pick(value, stats::setNames(list(
+                        .("Row; independence assumed"),
+                        .("Conditional on observed sites; no site-population extrapolation"),
+                        .("No patient overlap in supplied partition labels"),
+                        .("Not assessed; no partition manifest"),
+                        .fmt(.("Patient; all of the patient's rows ({unit}) retained"), unit = unit),
+                        .fmt(.("Frozen scores; no refitting or threshold optimization. Every analysed row ({unit}) weighs equally in the metrics; paired differences use common cases."), unit = unit)),
+                        c("Row; independence assumed",
+                          "Conditional on observed sites; no site-population extrapolation",
+                          "No patient overlap in supplied partition labels",
+                          "Not assessed; no partition manifest",
+                          paste0("Patient; all of the patient's rows (", unit, ") retained"),
+                          paste0("Frozen scores; no refitting or threshold optimization. Every analysed row (", unit, ") weighs equally in the metrics; paired differences use common cases."))))
+                }
+                values$value <- value
+                values$setting <- pick(setting, list(
+                    "Cohort role (declared, not verified)" = .("Cohort role (declared, not verified)"),
+                    "Sampling design" = .("Sampling design"), "Model version" = .("Model version"),
+                    "Reference standard" = .("Reference standard"), "Positive / negative" = .("Positive / negative"),
+                    "Threshold source" = .("Threshold source"), "Unit of observation" = .("Unit of observation"),
+                    "Prediction scale" = .("Prediction scale"),
+                    "Analyzed independent units" = .("Analyzed independent units"),
+                    "Positive independent units" = .("Positive independent units"),
+                    "Negative independent units" = .("Negative independent units"),
+                    "Resampling unit" = .("Resampling unit"), "Site inference" = .("Site inference"),
+                    "Partition audit" = .("Partition audit"), "Interpretation" = .("Interpretation")))
+            } else if (identical(table, "screeningWorkload")) {
+                values$source <- pick(as.character(values$source), list(Observed = .("Observed"), Projected = .("Projected")))
+            }
+            # User text (model version, reference standard, unit, levels, site and predictor names)
+            # is parsed as HTML in a cell: "<Histology> review" showed " review". After matching.
+            values[] <- lapply(values, function(v) if (is.character(v)) .rocLabel(v, note = FALSE) else v)
+            values
         },
 
         # Why each impact / workload ratio can be undefined at a fixed cutoff (.dvWorkload() gives NA).
@@ -2199,6 +2318,12 @@ enhancedROCClass <- R6::R6Class(
                 auc_interp <- private$.interpretAUC(auc_value)
                 clinical_utility <- private$.assessClinicalUtility(auc_value, roc_obj$direction)
 
+                # TODO (UX): predictor names reach cells raw, and a cell is parsed as HTML: a column
+                # named "<LOD flag" shows as blank (no XSS - the client keeps only em/i/sub/sup). Wrap
+                # with .rocLabel(x, note = FALSE) at the cell, never at the row key or a lookup, as
+                # outcomeCoding, .frozenRow() and the multi-class class cells do. Same at L2367,
+                # L2446, L2466, L2504, L2546, L2727, L2797-2798, L2899 (a/b), L3014 (a/b), L3132, L3183,
+                # L3222, L3469, L3981, L5517, L5623, L6050, L6120, L6325, L6333, L6341 (18 tables).
                 row <- list(
                     predictor = predictor,
                     auc = auc_value,
@@ -2389,6 +2514,9 @@ enhancedROCClass <- R6::R6Class(
                 coords_result <- pROC::coords(roc_obj, "all",
                     ret = c("threshold", "sensitivity", "specificity")
                 )
+                # pROC's first and last thresholds are -Inf / Inf ("test everyone" / "test nobody"):
+                # curve ends, not cut-offs a clinician can apply, and the even sampling below always hit them.
+                coords_result <- coords_result[is.finite(coords_result$threshold), , drop = FALSE]
 
                 # Sample additional cutoffs for display (max 15 more rows per predictor)
                 n_cutoffs <- min(nrow(coords_result), 15)
@@ -2938,13 +3066,17 @@ enhancedROCClass <- R6::R6Class(
                 }
             }
         },
+        # The Partial AUC range as c(min, max), or NULL when it does not parse to 0 <= min < max <= 1.
+        .partialRangeValues = function() {
+            x <- suppressWarnings(as.numeric(trimws(strsplit(self$options$partialRange %||% "", ",", fixed = TRUE)[[1]])))
+            if (length(x) != 2L || anyNA(x) || x[1] >= x[2] || x[1] < 0 || x[2] > 1) return(NULL)
+            x
+        },
         .populatePartialAUC = function() {
-            if (is.null(self$options$partialRange) || self$options$partialRange == "") {
-                return()
-            }
-
             paTable <- self$results$results$partialAucAnalysis
             .deleteTableRows(paTable)   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
+            range_values <- private$.partialRangeValues()
+            if (is.null(range_values)) return()   # .prepareData() raised the WARNING
             use_pa_boot <- isTRUE(self$options$bootstrapPartialAUC)
             # The interval is seed-dependent, so the seed that produced it has to be on the table.
             paTable$setNote("seed", if (use_pa_boot) .fmt(.("Random seed: {seed}"), seed = self$options$seed))
@@ -2959,14 +3091,8 @@ enhancedROCClass <- R6::R6Class(
                     .("The partial AUC confidence interval is a bootstrap interval of the requested type '%1$s' from %2$s resamples. If any resample contained a single outcome class it is dropped, and a BCa interval is then reported as a percentile interval instead \u2014 a notice appears when that happens. The interval is for the raw partial AUC over the chosen focus range, NOT for the McClish-normalised value in the next column."),
                     self$options$bootstrapMethod, self$options$bootstrapSamples))
 
-            # Parse partial range
-            range_parts <- strsplit(self$options$partialRange, ",")[[1]]
-            if (length(range_parts) != 2) {
-                return()
-            }
-
-            range_min <- as.numeric(trimws(range_parts[1]))
-            range_max <- as.numeric(trimws(range_parts[2]))
+            range_min <- range_values[1]
+            range_max <- range_values[2]
 
             # Determine if using sensitivity or specificity range
             range_type_name <- self$options$partialAucType
@@ -3443,8 +3569,11 @@ enhancedROCClass <- R6::R6Class(
                 cited <- c(cited, "clopper")
             }
 
-            if (isTRUE(o$partialAuc)) {
-                rng <- trimws(strsplit(o$partialRange, ",", fixed = TRUE)[[1]])
+            # Only a range the partial AUC table used: a cleared box printed "from NA to NA", a
+            # reversed one described a partial AUC that was never computed.
+            if (isTRUE(o$partialAuc) && !is.null(private$.partialRangeValues())) {
+                # the user's own notation ("1.0", not "1")
+                rng <- private$.safeHtmlOutput(trimws(strsplit(o$partialRange, ",", fixed = TRUE)[[1]]))
                 out <- c(out, para(.("Partial AUC"), sprintf(if (identical(o$partialAucType, "sensitivity")) {
                     .("The partial AUC was computed over sensitivities from %1$s to %2$s and standardised with the McClish correction (McClish, 1989) to a 0.5-1 scale.")
                 } else {
@@ -3855,26 +3984,10 @@ enhancedROCClass <- R6::R6Class(
         .computePRMetrics = function(scores, labels, positive_label, roc_direction = "<") {
             pr <- .dvPR(scores, labels, positive_label, higher = roc_direction != ">")
             if (is.null(pr)) return(NULL)
-            # F-05: .dvPR()'s AUC-PR is a trapezoid in PR space from a (recall 0, precision 1)
-            # anchor. With scores tied across classes that anchor is no operating point and the
-            # straight line overstates the curve (a constant marker read 0.75 against a 0.5
-            # baseline). Replace it here by the area under the curve interpolated linearly in
-            # (TP, FP) counts between neighbouring thresholds (Davis & Goadrich 2006), integrated
-            # exactly (Keilwagen, Grosse & Grau 2014; PRROC's auc.integral, equal to 15 digits).
-            # Per step a->b: precision(t) = (A + B t) / (C + D t), recall gains B / P, so the
-            # area is B/P * [B/D + (A D - B C) / D^2 * log((C + D) / C)], or B/P * B/D at C = 0.
-            # ponytail: local to enhancedROC; the shared .dvPR() (psychopdaROC, precisionrecall)
-            # still returns the anchored trapezoid.
-            keep <- is.finite(scores) & !is.na(labels)
-            y <- as.integer(labels[keep] == positive_label)
-            x <- if (identical(roc_direction, ">")) -scores[keep] else scores[keep]
-            ord <- order(x, decreasing = TRUE)
-            ends <- c(which(diff(x[ord]) != 0), length(x))
-            tp <- c(0, cumsum(y[ord])[ends])
-            n <- c(0, ends)
-            A <- utils::head(tp, -1); B <- diff(tp); C <- utils::head(n, -1); D <- diff(n)
-            step <- ifelse(C == 0, B / D, B / D + (A * D - B * C) / D^2 * log((C + D) / C))
-            pr$auprc <- sum(B / sum(y) * step)
+            # F-05: .dvPR()'s AUC-PR is the PR-space trapezoid, which overstates the area with
+            # tied scores (a constant marker read 0.75 against a 0.5 baseline). The interpolated
+            # area (.dvAuprc(), Davis & Goadrich 2006) replaces it here and in the frozen panel.
+            pr$auprc <- .dvAuprc(scores, labels, positive_label, higher = roc_direction != ">")
             pr
         },
         .populatePrecisionRecall = function(analysisData) {
@@ -5266,6 +5379,13 @@ enhancedROCClass <- R6::R6Class(
 
             calTable <- self$results$results$calibrationSummary
             .deleteTableRows(calTable)   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
+            # Every measure has its own checkbox, all off by default: ticking Calibration analysis
+            # alone gave a table with a predictor name and nothing else, and no word why.
+            measures <- c("brierScore", "calibrationMetrics", "hosmerLemeshow", "eoRatio", "splineCalibration", "calibrationPlot")
+            if (!any(vapply(measures, function(m) isTRUE(self$options[[m]]), logical(1)))) {
+                private$.addNotice(type = "INFO", title = .("No Calibration Measure Selected"),
+                    content = .("Calibration analysis is on, but no measure is ticked, so the calibration table has no values. Tick one or more of Brier score, Calibration metrics, Hosmer-Lemeshow test, E/O ratio, Spline calibration curve or Calibration plot."))
+            }
             calTable$setNote(
                 "eo",
                 if (isTRUE(self$options$eoRatio)) .("E/O is the sum of the predicted probabilities divided by the number of events actually observed; 1 means the marker predicts the right number of events overall, above 1 means it over-predicts them. It is reported only when Prediction scale is Probability. With Score the risks come from a logistic model fitted to these data, which forces the predicted and observed event totals to be equal, so E/O would be exactly 1 for any data at all; the cell is left blank there rather than report a perfect calibration that is an algebraic identity. No confidence interval is given."))
@@ -5921,7 +6041,7 @@ enhancedROCClass <- R6::R6Class(
                                     # No predictor column exists in this table, so with more than
                                     # one predictor the rows were indistinguishable - six rows
                                     # showing three class labels twice over. Name it here.
-                                    class = if (length(private$.predictors) > 1) paste0(predictor, ": ", lvl) else lvl,
+                                    class = .rocLabel(if (length(private$.predictors) > 1) paste0(predictor, ": ", lvl) else lvl, note = FALSE),
                                     strategy = .("One-vs-Rest"),
                                     auc = ovr_aucs[j],
                                     auc_lower = if (is.character(class_ci)) NA else class_ci[1],
@@ -6012,9 +6132,9 @@ enhancedROCClass <- R6::R6Class(
                                 key <- paste0(private$.escapeVar(predictor), "_", private$.escapeVar(class1), "_", private$.escapeVar(class2))
 
                                 row <- list(
-                                    class = if (length(private$.predictors) > 1)
+                                    class = .rocLabel(if (length(private$.predictors) > 1)
                                         paste0(predictor, ": ", class1, " vs ", class2)
-                                    else paste(class1, "vs", class2),
+                                    else paste(class1, "vs", class2), note = FALSE),
                                     strategy = .("One-vs-One"),
                                     auc = pair_aucs[i],
                                     auc_lower = if (is.character(pair_ci)) NA else pair_ci[1],
@@ -6252,7 +6372,7 @@ enhancedROCClass <- R6::R6Class(
                         row <- .dvWorkload(se, sp, scenarios[i], if (i == 1) size else population, utility)
                         values <- c(list(predictor = predictor, cutoff = cut,
                                          source = if (i == 1 && observed) .("Observed") else .("Projected"),
-                                         unit = self$options$analysisUnit), as.list(row))
+                                         unit = .rocLabel(self$options$analysisUnit, note = FALSE)), as.list(row))
                         workload$addRow(rowKey = paste(key, i, sep = "_"), values = values)
                         private$.blankUndefined(workload, paste(key, i, sep = "_"), values, undefined)
                     }
@@ -6653,6 +6773,13 @@ enhancedROCClass <- R6::R6Class(
                 return(paste0(option$name, " = ",
                     if (length(quoted) == 1L) quoted else paste0("c(", paste(quoted, collapse = ", "), ")")))
             }
+            # jmvcore's sourcify() quotes free text and level labels (OptionLevel is an OptionString)
+            # without escaping them, so a `"` closed the literal and the rest of the value became R
+            # code in the syntax pane. Skipped at its default, as jmvcore's own method does.
+            # OptionVariable is an OptionString too: a syntactic name keeps the bare form (F-34).
+            if (inherits(option, "OptionString") && !inherits(option, "OptionVariable") &&
+                is.character(value) && length(value) == 1L && !identical(value, option$default))
+                return(paste0(option$name, " = ", encodeString(value, quote = '"')))
             super$.sourcifyOption(option)
         }
     ), # End of private list

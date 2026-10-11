@@ -66,8 +66,8 @@ test_that("compiled frozen report supplies denominators and keeps bootstrap pair
   expect_equal(unique(m$n), 20)
   expect_equal(unique(m$positives), 10)
   expect_equal(unique(m$clusters), 20)
-  expect_equal(m$estimate[m$model == "score" & m$metric == "sensitivity"], .8)
-  expect_equal(m$estimate[m$model == "score" & m$metric == "specificity"], .9)
+  expect_equal(m$estimate[m$model == "score" & m$metric == "Sensitivity"], .8)   # display labels since the release review
+  expect_equal(m$estimate[m$model == "score" & m$metric == "Specificity"], .9)
   paired <- m[m$model == "other minus score", ]
   expect_true(all(is.na(paired$lower)))
   expect_equal(a$results$results$screeningWorkload$rowCount, 4)

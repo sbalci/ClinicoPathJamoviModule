@@ -616,15 +616,15 @@ test_that("F-19 / F-42 / F-43: the instructions drop survival status, the 'healt
 test_that("F-20 / F-47: the frozen panel marks defaults as defaults and states the declared unit", {
     ctx <- rel11_frozen(analysisUnit = "patient")
     v <- ctx$results$results$validationContext$asDF
-    expect_identical(v$value[v$setting == "Sampling design"], "other (default setting)")  # default changed to Other / unknown (F-20, 2026-10-11)
-    expect_identical(v$value[v$setting == "Threshold source"], "prespecified (default setting)")
-    expect_identical(v$value[v$setting == "Cohort role (declared, not verified)"], "frozen (default setting)")
+    expect_identical(v$value[v$setting == "Sampling design"], "Other / unknown (default setting)")  # default changed to Other / unknown (F-20); labels, not keys (release review)
+    expect_identical(v$value[v$setting == "Threshold source"], "Prespecified independently (default setting)")
+    expect_identical(v$value[v$setting == "Cohort role (declared, not verified)"], "Frozen external / temporal evaluation (default setting)")
     expect_match(v$value[v$setting == "Interpretation"], "Every analysed row (patient) weighs equally", fixed = TRUE)
     note <- rel11_note(ctx$results$results$frozenMetrics, "scope")
     expect_match(note, "Counts and metrics weight every analysed row equally (unit of observation: patient).", fixed = TRUE)
     for (txt in c(note, v$value)) expect_false(grepl("slide", txt, ignore.case = TRUE))
     set_by_user <- rel11_frozen(samplingDesign = "enriched")$results$results$validationContext$asDF
-    expect_identical(set_by_user$value[set_by_user$setting == "Sampling design"], "enriched")
+    expect_identical(set_by_user$value[set_by_user$setting == "Sampling design"], "Enriched")
 })
 
 test_that("F-22 / F-38: the DeLong WARNING says its coverages are design-level averages for equal-variance binormal data", {
@@ -710,4 +710,32 @@ test_that("FIX-B nit: the single-case bootstrap line does not call DeLong's stan
     html <- rel11_iv(rel11_obj(d, outcome = "y", positiveClass = "pos", predictors = "x", internalValidation = TRUE,
                                validationMethod = "bootstrap", seed = 1))
     expect_match(html, "no DeLong interval, its standard error is 0 or undefined", fixed = TRUE)
+})
+
+# ---- Security audit 2026-10-11: syntax pane, user text in cells, Methods partial range ----
+
+test_that("SEC-1: a quote in free text or a level cannot inject code into asSource()", {
+    payload <- 'v1", seed = {stop("injected")}, referenceDescription = "'
+    d <- data.frame(y = factor(rep(c("neg", 'p"os'), each = 15), levels = c("neg", 'p"os')), x = c(1:15, 6:20))
+    src <- enhancedROCClass$new(options = enhancedROCOptions$new(outcome = "y", positiveClass = 'p"os',
+        predictors = "x", modelVersion = payload), data = d)$asSource()
+    args <- as.list(str2lang(src))
+    expect_identical(args$modelVersion, payload)
+    expect_identical(args$positiveClass, 'p"os')
+    expect_false("seed" %in% names(args))
+})
+
+test_that("SEC-2: user text in frozen and multi-class cells is not read as markup", {
+    v <- rel11_frozen(referenceDescription = "<Histology> review")$results$results$validationContext$asDF
+    expect_identical(v$value[v$setting == "Reference standard"], "< Histology> review")
+    d <- data.frame(y = factor(rep(c("<LOD", "low", "high"), each = 10)), x = c(1:10, 11:20, 21:30))
+    mc <- rel11_obj(d, outcome = "y", predictors = "x", multiClassROC = TRUE)$results$results$multiClassAUC$asDF
+    expect_true("< LOD" %in% mc$class)
+})
+
+test_that("SEC-3: the Methods quote the partial AUC range only when it parses", {
+    me <- function(...) rel11_obj(rel11_k(), outcome = "y", positiveClass = "Malignant", predictors = "m",
+                                  comprehensive_output = TRUE, partialAuc = TRUE, ...)$results$results$methodsExplanation$content
+    expect_match(me(), "from 0.8 to 1.0", fixed = TRUE)
+    expect_false(grepl("NA to NA", me(partialRange = ""), fixed = TRUE))
 })

@@ -215,3 +215,46 @@ test_that("R-13: the error handler no longer pins the call stack in a package-gl
     w <- utils::capture.output(wres <- clinicopath_warning_handler(simpleWarning("y"), "enhancedROC"))
     expect_null(wres$detailed_log$call_stack)
 })
+
+# --- /release-review-function pass (2026-10-11) ---
+
+rv_frozen <- function(...) {
+    d <- rv_asah()[, c("outcome", "s100b", "ndka")]
+    rv_obj(d, outcome = "outcome", positiveClass = "Poor", predictors = c("s100b", "ndka"), validationPanel = TRUE,
+           validationNegative = "Good", direction = "higher", modelVersion = "v1", impactCutoffs = "0.2", ...)
+}
+
+test_that("R-14: the frozen panel's AUC-PR is the interpolated area, as on the main path", {
+    # tied scores: the PR-space trapezoid reads 0.75 for a marker with no information
+    expect_equal(.dvAuprc(rep(1, 4), c(0, 0, 1, 1), 1), 0.5)
+    expect_equal(.dvPR(rep(1, 4), c(0, 0, 1, 1), 1)$auprc, 0.75)          # shared helper unchanged
+    expect_equal(.dvScoreMetrics(c(0, 0, 1, 1), rep(1, 4), 0.5)[["pr_auc"]], 0.5)
+    skip_if_not_installed("PRROC")
+    d <- rv_asah()
+    m <- rv_frozen()$results$results$frozenMetrics$asDF
+    pr_auc <- m$estimate[m$model == "s100b" & m$site == "All" & m$metric == "AUC-PR (interpolated)"]
+    oracle <- PRROC::pr.curve(scores.class0 = d$s100b[d$outcome == "Poor"],
+                              scores.class1 = d$s100b[d$outcome == "Good"])$auc.integral
+    expect_equal(pr_auc, oracle, tolerance = 1e-10)
+})
+
+test_that("R-15: frozen tables show labels, not internal keys", {
+    r <- rv_frozen()$results$results
+    m <- r$frozenMetrics$asDF
+    expect_false(any(c("pr_auc", "flags_per_1000", "calibration_in_large", "ap") %in% m$metric))
+    expect_true(all(c("AUC-PR (interpolated)", "Flagged per 1000", "Calibration-in-the-large") %in% m$metric))
+    expect_true("ndka minus s100b" %in% m$model)
+    expect_true("CI not requested" %in% m$status)
+    ctx <- r$validationContext$asDF
+    value <- function(s) ctx$value[ctx$setting == s]
+    expect_identical(value("Cohort role (declared, not verified)"), "Frozen external / temporal evaluation (default setting)")
+    expect_identical(value("Prediction scale"), "Score")
+    expect_identical(value("Reference standard"), "Not stated")
+    expect_true("Analyzed common cases" %in% r$denominatorLedger$asDF$status)
+})
+
+test_that("R-16: Calibration analysis with no measure ticked says so", {
+    base <- list(rv_asah(), outcome = "outcome", positiveClass = "Poor", predictors = "s100b", calibrationAnalysis = TRUE)
+    expect_length(rv_titled(do.call(rv_obj, base), "No Calibration Measure Selected"), 1L)
+    expect_length(rv_titled(do.call(rv_obj, c(base, brierScore = TRUE)), "No Calibration Measure Selected"), 0L)
+})

@@ -189,9 +189,10 @@ test_that("hlGroups drives the calibration plot, not just the H-L test", {
 test_that("a fatal validation error leaves the instructions panel intact", {
     # Ten validation failures used to setContent() the shared instructions item, replacing the
     # whole welcome/glossary panel with a bare error paragraph.
-    res <- run_er(partialAuc = TRUE, partialRange = "not,numbers")
+    # (A bad partial-AUC range was the fatal case here; since F-51 it is a WARNING.)
+    res <- run_er(positiveClass = "Nope")
     expect_gt(nchar(res$results$instructions$content), 3000)
-    expect_match(res$results$notices$content, "Invalid Partial AUC Range")
+    expect_match(res$results$notices$content, "Invalid Positive Class Selection")
 })
 
 test_that("multi-class ROC on a binary outcome explains itself instead of going blank", {
