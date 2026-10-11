@@ -246,8 +246,9 @@ prevalence.}
 \item{showDotPlot}{Dot plot showing the distribution of test values by
 class.}
 
-\item{precisionRecallCurve}{Display precision-recall curves alongside ROC
-curves.}
+\item{precisionRecallCurve}{Display precision-recall step curves with
+average precision. The classifier comparison table reports the separate
+interpolated AUC-PR estimate.}
 
 \item{partialAUC}{Calculate AUC for a specific region of the ROC curve.}
 

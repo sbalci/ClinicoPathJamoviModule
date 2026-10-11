@@ -4,7 +4,7 @@ title: Advanced ROC Analysis
 menuGroup: meddecideT
 menuSubgroup: ROC
 menuSubtitle: Advanced ROC analysis with statistical comparisons and effect sizes
-version: '1.0.91'
+version: '1.0.92'
 jas: '1.2'
 
 description:
@@ -565,7 +565,8 @@ options:
       default: false
       description:
           R: >
-            Display precision-recall curves alongside ROC curves.
+            Display precision-recall step curves with average precision. The classifier
+            comparison table reports the separate interpolated AUC-PR estimate.
 
     # ==========================================
     # ADVANCED ANALYSES

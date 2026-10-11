@@ -1618,7 +1618,10 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         pr <- .dvPR(x, class, positiveClass, self$options$direction == ">=")
         if (is.null(pr)) return(list(threshold = numeric(), precision = numeric(),
                                     recall = numeric(), auprc = NA_real_))
-        c(as.list(pr$curve), list(auprc = pr$auprc, avg_precision = pr$avg_precision))
+        # Interpolate in TP/FP counts, not with straight lines in PR space.
+        # The latter inflates a constant marker from prevalence to (1 + prevalence) / 2.
+        area <- .dvAuprc(x, class, positiveClass, higher = self$options$direction == ">=")
+        c(as.list(pr$curve), list(auprc = area, avg_precision = pr$avg_precision))
       },
 
       # Calculate comprehensive performance metrics for classifier comparison
@@ -2536,6 +2539,12 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         # Every analysis receives the same explicit pair. Unselected levels cannot become
         # negatives in an optional path, a subgroup, a prevalence estimate or a resample.
         classCol <- private$.escapeVar(self$options$classVar)
+        coded_markers <- Filter(function(marker) is.factor(self$data[[marker]]) &&
+          !is.null(attr(self$data[[marker]], "values")),
+          unique(c(self$options$dependentVars, self$options$refVar)))
+        if (length(coded_markers)) private$.setNotice("numericCodes", sprintf(
+          .("%s: an integer column set to Nominal or Ordinal was analysed by its numeric values, as ordered codes read in the direction set under Direction. This is right for an ordinal rating scale; if the numbers merely label unordered categories, the AUC depends on the arbitrary numbering and is meaningless."),
+          paste(coded_markers, collapse = ", ")))
         patient_data <- tryCatch(.psychopdaPatientData(self$data, coding$included,
           self$options$patientID,
           unique(c(self$options$dependentVars, self$options$refVar)), classCol,
@@ -2949,12 +2958,25 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                   .("Fixed Sensitivity ROC: {var}") else .("Fixed Specificity ROC: {var}"),
                 var = var))
               fixedImage$setState(
-                data.frame(
-                  var = rep(var, length(confusionMatrix$x.sorted)),
-                  cutpoint = confusionMatrix$x.sorted,
-                  sensitivity = sensList,
-                  specificity = specList,
-                  stringsAsFactors = FALSE
+                list(
+                  schema = 2L,
+                  data = data.frame(
+                    var = rep(var, length(confusionMatrix$x.sorted)),
+                    cutpoint = confusionMatrix$x.sorted,
+                    sensitivity = sensList,
+                    specificity = specList,
+                    stringsAsFactors = FALSE
+                  ),
+                  fixed_point = list(
+                    cutpoint = self$results$fixedSensSpecTable$getCell(rowKey = var, "cutpoint")$value,
+                    achieved_sensitivity = self$results$fixedSensSpecTable$getCell(
+                      rowKey = var, "achieved_sensitivity")$value,
+                    achieved_specificity = self$results$fixedSensSpecTable$getCell(
+                      rowKey = var, "achieved_specificity")$value
+                  ),
+                  analysis_type = self$options$fixedAnalysisType,
+                  target_value = if (self$options$fixedAnalysisType == "sensitivity")
+                    self$options$fixedSensitivityValue else self$options$fixedSpecificityValue
                 )
               )
             }
@@ -3713,6 +3735,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                     precision = pr_results$precision,
                     recall = pr_results$recall,
                     auprc = rep(pr_results$auprc, length(pr_results$threshold)),
+                    avg_precision = rep(pr_results$avg_precision, length(pr_results$threshold)),
                     var = rep(var, length(pr_results$threshold))
                   )
                 )
@@ -3727,7 +3750,8 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                     threshold = pr_results$threshold,
                     precision = pr_results$precision,
                     recall = pr_results$recall,
-                    auprc = rep(pr_results$auprc, length(pr_results$threshold))
+                    auprc = rep(pr_results$auprc, length(pr_results$threshold)),
+                    avg_precision = rep(pr_results$avg_precision, length(pr_results$threshold))
                   )
                 )
               }
@@ -3744,6 +3768,8 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
 
         # Compare classifier performance if requested
         if (self$options$compareClassifiers) {
+          self$results$rocComparisonTable$setNote("pr_area",
+            .("AUC-PR uses interpolation linear in true- and false-positive counts (Davis & Goadrich 2006; Keilwagen et al. 2014), matching Clinical ROC Analysis. Tied scores enter together. The precision-recall step plot instead shows average precision. A constant marker has both areas equal to the sample prevalence."), init = FALSE)
           self$results$rocComparisonTable$setNote("classifier_rule",
             .("F1 and accuracy use a single Youden reference cutoff; ties choose the greatest sensitivity. This is separate from the main table's cutoff method. Brier score assumes that input values between 0 and 1 are positive-class probabilities; a normalized assay is not necessarily a probability. All performance estimates are apparent, in-sample values."), init = FALSE)
           # Set up comparison table
@@ -4829,8 +4855,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         ) +
           # Add jittered points
           ggplot2::geom_jitter(
-            width = 0.3,
-            height = 0,
+            position = ggplot2::position_jitter(width = 0.3, height = 0, seed = 0),
             alpha = 0.7,
             size = 3
           ) +
@@ -4888,6 +4913,8 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         # Determine if this is a combined or individual plot
         if ("var" %in% names(plotData)) {
           # Combined plot with multiple variables
+          marker_colours <- jmvcore::colorPalette(length(unique(plotData$var)),
+            if (is.null(theme$palette)) "jmv" else theme$palette)
           plot <- ggplot2::ggplot(
             plotData,
             ggplot2::aes(
@@ -4897,8 +4924,8 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
               linetype = var
             )
           ) +
-            ggplot2::geom_line(linewidth = 1) +
-            ggplot2::scale_color_brewer(palette = "Set1") +
+            ggplot2::geom_step(direction = "vh", linewidth = 1) +
+            ggplot2::scale_color_manual(values = marker_colours) +
             ggplot2::scale_linetype_manual(
               values = rep(c("solid", "dashed", "dotted", "longdash"),
                 length.out = length(unique(plotData$var))
@@ -4913,16 +4940,23 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
               y = precision
             )
           ) +
-            ggplot2::geom_line(linewidth = 1) +
+            ggplot2::geom_step(direction = "vh", linewidth = 1) +
             ggplot2::geom_point(size = 0.5, alpha = 0.7)
         }
 
-        # Add AUPRC annotations
-        if ("auprc" %in% names(plotData)) {
+        # Recompute AP from saved coordinates so older states containing only the
+        # trapezoidal `auprc` are never relabelled as interpolated AUC-PR.
+        average_precision <- function(d) {
+          sum(diff(d$recall) * utils::tail(d$precision, -1))
+        }
+        if (all(c("recall", "precision") %in% names(plotData))) {
           if ("var" %in% names(plotData)) {
             # For combined plot
-            auprc_data <- aggregate(auprc ~ var, data = plotData, FUN = function(x) x[1])
-            auprc_data$label <- sprintf("AUPRC = %.3f", auprc_data$auprc)
+            auprc_data <- data.frame(
+              var = unique(plotData$var),
+              avg_precision = vapply(unique(plotData$var), function(v)
+                average_precision(plotData[plotData$var == v, , drop = FALSE]), numeric(1)))
+            auprc_data$label <- sprintf(.("Average precision = %.3f"), auprc_data$avg_precision)
             auprc_data$x <- 0.25
             auprc_data$y <- seq(0.3, 0.1, length.out = nrow(auprc_data))
 
@@ -4940,7 +4974,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                 "text",
                 x = 0.25,
                 y = 0.25,
-                label = sprintf(.("AUPRC = %.3f"), unique(plotData$auprc)[1])
+                label = sprintf(.("Average precision = %.3f"), average_precision(plotData))
               )
           }
         }
@@ -4959,7 +4993,10 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
 
       # Fixed Sensitivity/Specificity ROC plotting function
       .plotFixedSensSpecROC = function(image, ggtheme, theme, ...) {
-        plotData <- image$state
+        state <- image$state
+        if (is.null(state)) return(FALSE)
+        saved_point <- if (is.list(state) && !is.data.frame(state)) state$fixed_point else NULL
+        plotData <- if (!is.null(saved_point)) state$data else state
 
         if (!self$options$fixedSensSpecAnalysis || is.null(plotData)) {
           return(FALSE)
@@ -4972,18 +5009,19 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         }
 
         # Get fixed analysis parameters
-        analysis_type <- self$options$fixedAnalysisType
-        target_value <- if (analysis_type == "sensitivity") {
+        analysis_type <- if (!is.null(saved_point)) state$analysis_type else self$options$fixedAnalysisType
+        target_value <- if (!is.null(saved_point)) state$target_value else if (analysis_type == "sensitivity") {
           self$options$fixedSensitivityValue
         } else {
           self$options$fixedSpecificityValue
         }
 
-        # Get the fixed point from the results table
+        # Current states are self-contained for native image-only export. Retain the
+        # table fallback for saved analyses created before state schema 2.
         fixedTable <- self$results$fixedSensSpecTable
-        fixed_row <- NULL
+        fixed_row <- saved_point
 
-        if (length(fixedTable$rowKeys) > 0) {
+        if (is.null(fixed_row) && length(fixedTable$rowKeys) > 0) {
           # rowKey is the variable name (see .populateFixedSensSpecTable line 791)
           # So we can compare directly without extracting from cells
           if (var %in% fixedTable$rowKeys) {
@@ -5435,6 +5473,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           note = .("Cohen's d is the standardized difference in a marker's mean between the positive and negative classes (pooled SD), given for each marker of the pair. The three difference columns are second marker minus first marker; Glass' delta uses the negative-class SD and Hedges' g applies the small-sample correction J to each d before differencing. No interval or test accompanies these point estimates. The 0.2/0.5/0.8 size bands are descriptive conventions only; they have not been validated as clinical thresholds for a difference between two marker effects."),
           init = FALSE
         )
+        plot_rows <- list()
 
         for (i in 1:(length(vars) - 1)) {
           for (j in (i + 1):length(vars)) {
@@ -5520,15 +5559,10 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                   clinical_importance = clinical_importance
                 ))
 
-                # Activate the single all-pairs plot. The renderer reads the whole
-                # effectSizeTable, so the state only has to be non-NULL; it used to be
-                # written to the item keyed by var1, which meant item 1 was overwritten by
-                # each pair in turn and the last variable's item was never written at all.
-                if (self$options$effectSizeAnalysis &&
-                    "all" %in% self$results$effectSizePlot$itemKeys) {
-                  image <- self$results$effectSizePlot$get(key = "all")
-                  if (!is.null(image)) image$setState(list(ready = TRUE))
-                }
+                plot_rows[[length(plot_rows) + 1L]] <- data.frame(
+                  comparison = .psychopdaPairLabel(var1, var2),
+                  cohens_d = cohens_d, magnitude = effect_magnitude,
+                  stringsAsFactors = FALSE)
               },
               error = function(e) {
                 # Was silent: the comparison simply vanished from the table.
@@ -5538,6 +5572,12 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
               }
             )
           }
+        }
+        if (self$options$effectSizeAnalysis &&
+            "all" %in% self$results$effectSizePlot$itemKeys) {
+          image <- self$results$effectSizePlot$get(key = "all")
+          image$setState(list(schema = 2L, ready = length(plot_rows) > 0,
+            data = if (length(plot_rows)) do.call(rbind, plot_rows) else data.frame()))
         }
       },
 
@@ -6246,30 +6286,35 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
 
         # Create effect size comparison plot
         if (private$.checkPackageDependencies("ggplot2", "effect size visualization")) {
-          # Prepare data for plotting from the effectSizeTable
-          plot_data <- data.frame(
-            comparison = character(0),
-            cohens_d = numeric(0),
-            magnitude = character(0)
-          )
+          plot_data <- image$state$data
+          # Legacy states carried only a ready flag. Their full saved analysis still
+          # provides the table; schema 2 redraws from the image state alone.
+          if (is.null(plot_data)) {
+            # Prepare data for plotting from the effectSizeTable
+            plot_data <- data.frame(
+              comparison = character(0),
+              cohens_d = numeric(0),
+              magnitude = character(0)
+            )
 
-          # Extract data from results table
-          vars <- self$options$dependentVars
-          for (i in 1:(length(vars) - 1)) {
-            for (j in (i + 1):length(vars)) {
-              row_key <- .psychopdaPairKey(i, j)
-              if (length(self$results$effectSizeTable$rowKeys) > 0 &&
-                row_key %in% self$results$effectSizeTable$rowKeys) {
-                row_data <- self$results$effectSizeTable$getRow(rowKey = row_key)
-                comp_val <- if (inherits(row_data$comparison, "R6")) row_data$comparison$value else row_data$comparison
-                d_val <- if (inherits(row_data$cohens_d, "R6")) row_data$cohens_d$value else row_data$cohens_d
-                mag_val <- if (inherits(row_data$effect_magnitude, "R6")) row_data$effect_magnitude$value else row_data$effect_magnitude
-                plot_data <- rbind(plot_data, data.frame(
-                  comparison = as.character(comp_val),
-                  cohens_d = as.numeric(d_val),
-                  magnitude = as.character(mag_val),
-                  stringsAsFactors = FALSE
-                ))
+            # Extract data from results table
+            vars <- self$options$dependentVars
+            for (i in 1:(length(vars) - 1)) {
+              for (j in (i + 1):length(vars)) {
+                row_key <- .psychopdaPairKey(i, j)
+                if (length(self$results$effectSizeTable$rowKeys) > 0 &&
+                  row_key %in% self$results$effectSizeTable$rowKeys) {
+                  row_data <- self$results$effectSizeTable$getRow(rowKey = row_key)
+                  comp_val <- if (inherits(row_data$comparison, "R6")) row_data$comparison$value else row_data$comparison
+                  d_val <- if (inherits(row_data$cohens_d, "R6")) row_data$cohens_d$value else row_data$cohens_d
+                  mag_val <- if (inherits(row_data$effect_magnitude, "R6")) row_data$effect_magnitude$value else row_data$effect_magnitude
+                  plot_data <- rbind(plot_data, data.frame(
+                    comparison = as.character(comp_val),
+                    cohens_d = as.numeric(d_val),
+                    magnitude = as.character(mag_val),
+                    stringsAsFactors = FALSE
+                  ))
+                }
               }
             }
           }

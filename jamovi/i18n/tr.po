@@ -200926,3 +200926,15 @@ msgstr ""
 #: contTables/results/chiSq.title
 msgid "χ² Tests"
 msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid "Average precision = %.3f"
+msgstr "Ortalama kesinlik = %.3f"
+
+#: R/psychopdaROC.b.R
+msgid "AUC-PR uses interpolation linear in true- and false-positive counts (Davis & Goadrich 2006; Keilwagen et al. 2014), matching Clinical ROC Analysis. Tied scores enter together. The precision-recall step plot instead shows average precision. A constant marker has both areas equal to the sample prevalence."
+msgstr "AUC-PR, Klinik ROC Analizi ile uyumlu olarak doğru ve yanlış pozitif sayılarında doğrusal enterpolasyon kullanır (Davis ve Goadrich 2006; Keilwagen ve ark. 2014). Eşit puanlar birlikte değerlendirilir. Kesinlik-duyarlılık basamak grafiği ise ortalama kesinliği gösterir. Sabit bir belirteç için her iki alan da örneklem prevalansına eşittir."
+
+#: R/psychopdaROC.b.R
+msgid "Display precision-recall step curves with average precision. The classifier comparison table reports the separate interpolated AUC-PR estimate."
+msgstr "Ortalama kesinlik ile kesinlik-duyarlılık basamak eğrilerini gösterir. Sınıflandırıcı karşılaştırma tablosu, ayrı bir ölçü olan enterpolasyonlu AUC-PR tahminini raporlar."

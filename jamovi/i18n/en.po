@@ -187552,3 +187552,15 @@ msgstr ""
 #: contTables/results/chiSq.title
 msgid "χ² Tests"
 msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid "Average precision = %.3f"
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid "AUC-PR uses interpolation linear in true- and false-positive counts (Davis & Goadrich 2006; Keilwagen et al. 2014), matching Clinical ROC Analysis. Tied scores enter together. The precision-recall step plot instead shows average precision. A constant marker has both areas equal to the sample prevalence."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid "Display precision-recall step curves with average precision. The classifier comparison table reports the separate interpolated AUC-PR estimate."
+msgstr ""

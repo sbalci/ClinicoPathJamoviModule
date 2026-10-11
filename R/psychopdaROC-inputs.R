@@ -79,15 +79,18 @@
 
 .psychopdaPatientData <- function(data, included, id, markers, outcome,
                                  subgroup = NULL, method = "rows") {
+  if (!is.null(id) && nzchar(id) && id %in% c(markers, outcome, subgroup))
+    stop("patient_id_role", call. = FALSE)
+  # [.factor drops jamovi's numeric 'values' attribute. Convert the whole marker
+  # before outcome filtering, subgrouping or patient aggregation can erase it.
+  # Patient identifiers retain their original values throughout grouping.
+  for (marker in unique(markers)) data[[marker]] <- jmvcore::toNumeric(data[[marker]])
   selected <- data[included, , drop = FALSE]
   if (is.null(id) || !nzchar(id)) {
     if (!identical(method, "rows"))
       stop("patient_id_required", call. = FALSE)
     return(list(data = selected, rows = nrow(selected), patients = NA_integer_))
   }
-  if (id %in% c(markers, outcome, subgroup))
-    stop("patient_id_role",
-      call. = FALSE)
   # Keep the original values: formatting numeric IDs as text can merge distinct
   # large identifiers through rounding before grouping.
   ids <- data[[id]]
@@ -121,7 +124,7 @@
   summarize <- if (identical(method, "patientMedian")) stats::median else mean
   for (marker in unique(markers)) {
     result[[marker]] <- vapply(groups, function(idx) {
-      values <- jmvcore::toNumeric(data[[marker]][idx])
+      values <- data[[marker]][idx]
       if (all(is.na(values))) NA_real_ else summarize(values, na.rm = TRUE)
     }, numeric(1))
   }

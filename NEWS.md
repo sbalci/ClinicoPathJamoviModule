@@ -2,6 +2,20 @@
 
 ## Unreleased — rare-disease AI validation and workload
 
+- In module 1.0.81.01, `psychopdaROC` analysis 1.0.92 aligns its AUC-PR with
+  `enhancedROC`: both integrate the curve interpolated in true- and false-positive
+  counts. The former trapezoidal calculation overstated tied-score performance
+  (a constant marker at 10% prevalence reported 0.55 instead of 0.10).
+  Precision-recall plots now show a step curve labelled average precision, including
+  when redrawn from older saved coordinates. The classifier table names the
+  interpolated estimator, and combined PR plots follow the jamovi palette.
+  Fixed-rate and effect-size plots now carry their own export state, and dot-plot
+  jitter is reproducible when reopening or exporting a saved analysis.
+  Numeric columns imported as Nominal or Ordinal now retain their actual codes
+  through outcome filtering and patient summaries; loss of those codes could
+  produce incorrect metrics or stop fixed-rate analysis in the desktop app.
+  ROC AUC, confidence-interval defaults and cutoff-selection defaults are unchanged.
+
 - `enhancedROC` analysis 1.0.85 resolves the independent review of 2026-10-11. Changes a user can
   see in the numbers: AUC-PR is now the interpolated precision-recall area (Davis & Goadrich 2006;
   Keilwagen et al. 2014), no longer the PR-space trapezoid that inflated tied scores; the

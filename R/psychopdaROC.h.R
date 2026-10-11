@@ -1471,6 +1471,9 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 options=options,
                 name="precisionRecallPlot",
                 title="Precision-Recall Curves",
+                refs=list(
+                    "Davis2006",
+                    "Keilwagen2014"),
                 visible="(precisionRecallCurve)",
                 template=jmvcore::Image$new(
                     options=options,
@@ -2009,6 +2012,9 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 options=options,
                 name="rocComparisonTable",
                 title="Classifier Performance Comparison",
+                refs=list(
+                    "Davis2006",
+                    "Keilwagen2014"),
                 rows=0,
                 visible="(compareClassifiers)",
                 clearWith=list(
@@ -2033,7 +2039,7 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                         `format`="zto"),
                     list(
                         `name`="auprc", 
-                        `title`="AUPRC", 
+                        `title`="AUC-PR (interpolated)", 
                         `type`="number", 
                         `format`="zto"),
                     list(
@@ -2188,7 +2194,7 @@ psychopdaROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "psychopdaROC",
-                version = c(1,0,91),
+                version = c(1,0,92),
                 options = options,
                 results = psychopdaROCResults$new(options=options),
                 data = data,
@@ -2324,8 +2330,9 @@ psychopdaROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   prevalence.
 #' @param showDotPlot Dot plot showing the distribution of test values by
 #'   class.
-#' @param precisionRecallCurve Display precision-recall curves alongside ROC
-#'   curves.
+#' @param precisionRecallCurve Display precision-recall step curves with
+#'   average precision. The classifier comparison table reports the separate
+#'   interpolated AUC-PR estimate.
 #' @param partialAUC Calculate AUC for a specific region of the ROC curve.
 #' @param partialAUCfrom Lower bound of specificity range for partial AUC
 #'   calculation.

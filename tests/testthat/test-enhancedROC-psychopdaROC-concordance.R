@@ -1,6 +1,7 @@
 # The two ROC analyses in meddecide > ROC must agree wherever they compute the same thing.
-# Each is an independent implementation (enhancedROC on pROC, psychopdaROC on cutpointr), so
-# agreement is a mutual validation and a divergence is a defect in one of them.
+# They share pROC for several inferential outputs; parity here verifies wiring.
+# Independent numerical oracles are required separately, and different estimands/defaults
+# must be aligned before treating a divergence as a defect.
 
 library(testthat)
 

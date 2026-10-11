@@ -98,7 +98,7 @@
 # precision(t) = (A + B t) / (C + D t) and recall gains B / P, so the area is
 # B/P * [B/D + (A D - B C) / D^2 * log((C + D) / C)], or B/P * B/D at C = 0.
 # .dvPR()'s $auprc is the PR-space trapezoid from a (recall 0, precision 1) anchor, which overstates
-# the area when scores tie across classes; psychopdaROC and precisionrecall still report that one.
+# the area when scores tie across classes; precisionrecall still reports that legacy estimate.
 .dvAuprc <- function(scores, labels, positive, higher = TRUE) {
   keep <- is.finite(scores) & !is.na(labels)
   y <- as.integer(labels[keep] == positive)

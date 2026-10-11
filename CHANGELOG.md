@@ -5,6 +5,27 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-10-11 — dual ROC comparison: PR estimators diverged after a sibling repair
+
+- **Failure mode:** `enhancedROC` used count-interpolated PR area while
+  `psychopdaROC` still exposed the shared legacy trapezoid as unqualified AUPRC.
+  Constant-score controls revealed the inflation: prevalence 0.10 became 0.55.
+- **Detection:** compare both public wrappers against independent tie-aggregated
+  integration and PRROC, then inspect plotted coordinates and metric labels.
+- **Repair:** call the existing interpolated-area helper in `psychopdaROC`; keep
+  average precision distinct and draw its step curve. Test constant and tied scores,
+  both score directions, and saved-image restoration in both analyses.
+- **Rule:** equal ROC AUC does not establish equal PR area, cutoff rules or analysis
+  populations. Align the estimand, preprocessing and interval method before comparison.
+- **Desktop-only failure:** base factor row-subsetting dropped jamovi's numeric
+  `values` attribute before `toNumeric()` was called. Ordinary numeric fixtures
+  passed, but an imported integer-nominal score reached cutpointr as a factor and
+  produced missing confusion counts. Convert complete marker columns before any
+  filtering or patient aggregation, while preserving original patient IDs.
+- **Export failures:** fixed-rate and effect-size images read sibling tables, and
+  unseeded dot-plot jitter moved between exports. Save primitive plot inputs in each
+  image state and give jitter a local fixed seed; verify native saved-state redraws.
+
 ## 2026-10-11 — enhancedROC: demoting an ERROR to a WARNING left a test exercising nothing
 
 - **Failure mode:** an invalid Partial AUC range became a WARNING (F-51). A test titled "a fatal validation
