@@ -2492,6 +2492,10 @@ msgstr ""
 msgid "%, comma-separated"
 msgstr ""
 
+#: R/lassologistic.b.R
+msgid "%.0f%% better than predicting the base rate (Brier skill score)"
+msgstr ""
+
 #: R/agreement.b.R
 msgid ""
 "%.0f%% confidence interval from the non-null asymptotic standard error "
@@ -2757,6 +2761,19 @@ msgid ""
 "analysed."
 msgstr ""
 
+#: R/lassologistic.b.R
+msgid ""
+"%1$d term(s) were retained (largest absolute standardized coefficient "
+"first): %2$s."
+msgstr ""
+
+#: R/lassologistic.b.R
+msgid ""
+"%1$d terms were retained, including the five with the largest absolute "
+"standardized coefficients: %2$s (all are listed in the Selected Variables "
+"table)."
+msgstr ""
+
 #: R/agreement.b.R
 msgid "%1$d used of %2$d declared"
 msgstr ""
@@ -2834,6 +2851,14 @@ msgid ""
 "this module's convention the one closest to the top-left corner of the ROC "
 "curve is reported (cutoff %5$s), and the smallest cutoff if that still ties; "
 "the others are equally good by the Youden criterion."
+msgstr ""
+
+#: R/lassologistic.b.R
+msgid "%1$s denotes %2$s = %3$s"
+msgstr ""
+
+#: R/lassologistic.b.R
+msgid "%1$s denotes numeric predictor %2$s"
 msgstr ""
 
 #: R/enhancedROC.b.R
@@ -2948,8 +2973,8 @@ msgstr ""
 msgid ""
 "%1$s logistic regression with %2$s lambda selection and %3$d-fold "
 "cross-validation was applied to %4$d candidate variables (%5$d model terms "
-"after dummy coding) in %6$d patients (%7$d events, %8$d non-events). %9$d "
-"term(s) were retained: %10$s."
+"after dummy coding) in %6$d independent observations (%7$d events, %8$d "
+"non-events)."
 msgstr ""
 
 #: R/decisioncompare.b.R
@@ -3766,10 +3791,6 @@ msgstr ""
 msgid "%d variables, %d model terms"
 msgstr ""
 
-#: R/lassologistic.b.R
-msgid "%d were in an outcome level outside the two being compared"
-msgstr ""
-
 #: R/diagnosticmeta.b.R
 msgid "%d with missing counts"
 msgstr ""
@@ -3830,6 +3851,10 @@ msgstr ""
 
 #: R/clinicalscore.b.R
 msgid "%s (ordinal: %s)"
+msgstr ""
+
+#: R/lassologistic.b.R
+msgid "%s (penalized)"
 msgstr ""
 
 #: R/agreement.b.R
@@ -3993,6 +4018,10 @@ msgid ""
 "if that is not intended."
 msgstr ""
 
+#: R/lassologistic.b.R
+msgid "%s Logistic Regression Coefficients"
+msgstr ""
+
 #: R/diagnosticmeta.b.R
 msgid ""
 "%s meta-regression not run: after excluding studies this model cannot use, "
@@ -4055,8 +4084,8 @@ msgstr ""
 
 #: R/lassologistic.b.R
 msgid ""
-"%s The risk groups in the Score-to-Probability Lookup table are not "
-"meaningful either. Do not publish or apply this score."
+"%s The risk groups in the Score Lookup table are not meaningful either. Do "
+"not publish or apply this score."
 msgstr ""
 
 #: R/lassologistic.b.R
@@ -4156,6 +4185,7 @@ msgid "%s: %d of %d responded (%.1f%%)"
 msgstr ""
 
 #: R/enhancedROC.b.R
+#: R/psychopdaROC.b.R
 msgid ""
 "%s: an integer column set to Nominal or Ordinal was analysed by its numeric "
 "values, as ordered codes read in the direction set under Direction. This is "
@@ -6931,14 +6961,15 @@ msgstr ""
 
 #: R/lassologistic.b.R
 msgid ""
-"<li><strong>Standardization (default on):</strong> predictors are centered "
-"and scaled before fitting, so the penalty treats variables with different "
-"units comparably. The Coefficient and Odds Ratio columns of the Selected "
-"Variables table are then back-transformed to the <strong>original "
-"measurement scale</strong> (per 1 unit of a continuous predictor, or present "
-"vs absent for a binary one). The Importance column and the Coefficient Plot "
-"stay on the per-standard-deviation scale, which is the quantity that is "
-"comparable across predictors with different units.</li>"
+"<li><strong>Standardization (default on):</strong> glmnet learns centering "
+"and scaling within each training fold and each bootstrap fit, so held-out "
+"observations do not determine those transforms. It uses the population (1/n) "
+"standard deviation. The Coefficient and Odds Ratio columns of the Selected "
+"Variables table are returned on the <strong>original measurement "
+"scale</strong> (per 1 unit of a continuous predictor, or present vs absent "
+"for a binary one). The Importance column and the Coefficient Plot use the "
+"sample-standard-deviation scale, which is the quantity that is comparable "
+"across predictors with different units.</li>"
 msgstr ""
 
 #: R/pathagreement.b.R
@@ -6996,8 +7027,18 @@ msgstr ""
 
 #: R/lassologistic.b.R
 msgid ""
-"<li>Bootstrap optimism correction estimates how much the apparent AUC "
-"overestimates true performance.</li>"
+"<li>An events-per-variable (EPV) of 10 is a rule of thumb (Peduzzi et al. "
+"1996), not a guarantee. Sample-size criteria for prediction models (Riley et "
+"al. 2019, 2020) are preferred, and penalization does not make a small sample "
+"reliable (Riley et al. 2021).</li>"
+msgstr ""
+
+#: R/lassologistic.b.R
+msgid ""
+"<li>Bootstrap optimism correction repeats scaling and lambda selection in "
+"every resample. Copies of the same observation stay in one cross-validation "
+"fold. It estimates optimism in model performance; it does not validate the "
+"simplified score or replace external validation.</li>"
 msgstr ""
 
 #: R/pathagreement.b.R
@@ -7043,9 +7084,9 @@ msgstr ""
 #: R/lassologistic.b.R
 msgid ""
 "<li>Continuous predictors in the scoring system are dichotomized at %s (set "
-"by 'Cut Point for Continuous Predictors'); the score-based performance "
+"by 'Cut point for continuous predictors'); the score-based performance "
 "therefore reflects a simplified point model and may differ from the "
-"continuous LASSO model's AUC.</li>"
+"continuous penalized model's AUC.</li>"
 msgstr ""
 
 #: R/sequentialtests.b.R
@@ -7097,12 +7138,6 @@ msgid ""
 "test</li>"
 msgstr ""
 
-#: R/lassologistic.b.R
-msgid ""
-"<li>Events-per-variable (EPV) should be >=10. Below 5, results are "
-"unreliable regardless of regularization.</li>"
-msgstr ""
-
 #: R/pathagreement.b.R
 msgid "<li>Example: Diagnostic categories, present/absent classifications</li>"
 msgstr ""
@@ -7131,8 +7166,9 @@ msgstr ""
 
 #: R/lassologistic.b.R
 msgid ""
-"<li>Higher total scores indicate higher probability of the event (positive "
-"class).</li>"
+"<li>Higher total scores indicate a higher event rate only when the score "
+"discriminates in the right direction (score AUC above 0.5 in the Scoring "
+"System Performance table); a warning is shown when it does not.</li>"
 msgstr ""
 
 #: R/sequentialtests.b.R
@@ -7151,12 +7187,6 @@ msgstr ""
 
 #: R/pathagreement.b.R
 msgid "<li>Large disagreements are disproportionately more serious</li>"
-msgstr ""
-
-#: R/lassologistic.b.R
-msgid ""
-"<li>LASSO coefficients do not have standard errors or p-values. Use "
-"bootstrap validation for inference.</li>"
 msgstr ""
 
 #: R/pathagreement.b.R
@@ -7203,15 +7233,25 @@ msgid ""
 "practical implications</li>"
 msgstr ""
 
+#: R/lassologistic.b.R
+msgid ""
+"<li>Penalized coefficients do not have standard errors or p-values, and this "
+"analysis provides no coefficient inference. Bootstrap validation estimates "
+"optimism-corrected performance (AUC, Brier score, calibration slope), not "
+"coefficient uncertainty.</li>"
+msgstr ""
+
 #: R/sequentialtests.b.R
 msgid "<li>PPV = numerator/denominator = {numerator}/{denominator} = {ppv}</li>"
 msgstr ""
 
 #: R/lassologistic.b.R
 msgid ""
-"<li>Predictors were <strong>not</strong> standardized; coefficients, odds "
-"ratios, importance, and the Coefficient Plot are all on the original "
-"measurement scale of each variable.</li>"
+"<li>Predictors were <strong>not</strong> standardized, so the penalty acts "
+"on each coefficient in its own units. Coefficients, odds ratios and the "
+"Coefficient Plot are on the original measurement scale; the Importance "
+"columns are per standard deviation, so they remain comparable across "
+"predictors.</li>"
 msgstr ""
 
 #: R/sequentialtests.b.R
@@ -7293,8 +7333,10 @@ msgstr ""
 
 #: R/lassologistic.b.R
 msgid ""
-"<li>Selected variables are the features most useful for distinguishing the "
-"two groups.</li>"
+"<li>Selected variables are those the model retained at the chosen lambda. "
+"LASSO selection is unstable: with a different sample it can retain different "
+"variables, including ones that carry no signal, so a selected variable is "
+"not thereby shown to be a marker of the event.</li>"
 msgstr ""
 
 #: R/decisioncompare.b.R
@@ -16752,17 +16794,17 @@ msgstr ""
 #: package/analyses/pathologyagreement.menuSubgroup
 #: package/analyses/modalitycomparison.menuSubgroup
 #: package/analyses/pathagreement.menuSubgroup
+#: package/analyses/agreementintro.menuSubgroup
 #: agreement/options.menuSubgroup
 #: agreement/results/allPairsKappaTable.columns.title
 #: agreement/results/subgroupAgreementTable.columns.title
+#: agreementintro/options.menuSubgroup
 #: icccoeff/options.menuSubgroup
 #: modalitycomparison/options.menuSubgroup
 #: nogoldstandard/results/agreement_stats.columns.title
 #: pathagreement/options.menuSubgroup
 #: pathologyagreement/options.menuSubgroup
 #: survivalPower/results/simulation_validation_table.columns.title
-#: package/analyses/agreementintro.menuSubgroup
-#: agreementintro/options.menuSubgroup
 msgid "Agreement"
 msgstr ""
 
@@ -16963,7 +17005,6 @@ msgstr ""
 msgid "Agreement Level:"
 msgstr ""
 
-#: package.title
 #: package/analyses/agreementintro.title
 #: agreementintro/options.title
 #: agreementintro/ui.title
@@ -17704,6 +17745,14 @@ msgstr ""
 msgid "All Possible Pairs"
 msgstr ""
 
+#: R/lassologistic.b.R
+msgid ""
+"All predictor gradients are zero at the intercept-only fit. A fixed positive "
+"lambda grid (1 to 0.000001) was used because the automatic path degenerates "
+"at zero. The fitted model assigns the overall event rate to every "
+"observation and has no discrimination."
+msgstr ""
+
 #: jpps/options/analysis_type/predictors.title
 msgid "All Predictors vs Target"
 msgstr ""
@@ -17794,7 +17843,9 @@ msgid "All Tests Positive"
 msgstr ""
 
 #: R/lassologistic.b.R
-msgid "All three methods shown for comparison"
+msgid ""
+"All three methods are shown for comparison; Points (Selected), the score "
+"performance and the lookup table use Max-scaled"
 msgstr ""
 
 #: psychopdaROC/options/break_ties/c.title
@@ -18611,7 +18662,7 @@ msgstr ""
 msgid ""
 "An unpenalized logistic refit in the Model Comparison table showed "
 "complete/quasi-complete separation (non-convergence or fitted probabilities "
-"at 0/1). Its AUC/AIC are unreliable; prefer the penalized LASSO row."
+"at 0/1). Its AUC/AIC are unreliable; prefer the penalized row."
 msgstr ""
 
 #: R/pathsampling.b.R
@@ -18677,6 +18728,9 @@ msgstr ""
 #: adaptivetrialdesign/results/bayesFactors.columns.title
 #: adaptivetrialdesign/results/predictivePower.columns.title
 #: advancedtrials/results/group_sequential_boundaries.columns.title
+#: agreementintro/results/recommendations.columns.title
+#: agreementintro/results/settings.columns.title
+#: agreementintro/results/catalogue.columns.title
 #: causespecifichazards/results/overview.columns.title
 #: comprehensiveSurvivalPower/results/sequentialDesign.columns.title
 #: distributionfit/results/todo.title
@@ -18700,9 +18754,6 @@ msgstr ""
 #: timevarycox/results/todo.title
 #: treatmentmeta/results/trim_fill_results.columns.title
 #: weightedlogrank/results/todo.title
-#: agreementintro/results/recommendations.columns.title
-#: agreementintro/results/settings.columns.title
-#: agreementintro/results/catalogue.columns.title
 msgid "Analysis"
 msgstr ""
 
@@ -19627,6 +19678,10 @@ msgstr ""
 msgid "Analysis unit"
 msgstr ""
 
+#: R/lassologistic.b.R
+msgid "Analysis unit: independent observations"
+msgstr ""
+
 #: R/agreementintro.b.R
 msgid ""
 "Analysis unit: the independent entity relevant to the question. A patient "
@@ -20171,6 +20226,10 @@ msgstr ""
 msgid ""
 "Apparent (in-sample) discrimination was AUC = %.3f; enable Bootstrap "
 "Internal Validation for an optimism-corrected estimate."
+msgstr ""
+
+#: R/lassologistic.b.R
+msgid "Apparent (in-sample): does not account for model fitting or selection"
 msgstr ""
 
 #: lassocox/results/modelComparison.columns.title
@@ -21854,7 +21913,7 @@ msgid "AUC (5-year)"
 msgstr ""
 
 #: R/lassologistic.b.R
-msgid "AUC (apparent)"
+msgid "AUC (apparent; DeLong 95% CI)"
 msgstr ""
 
 #: R/enhancedROC.b.R
@@ -21891,13 +21950,6 @@ msgstr ""
 
 #: R/lassologistic.b.R
 msgid ""
-"AUC = %.3f indicates poor discrimination and is below the level generally "
-"regarded as clinically usable. Consider adding more informative predictors "
-"or using a different model."
-msgstr ""
-
-#: R/lassologistic.b.R
-msgid ""
 "AUC = %.3f is BELOW 0.500, so the model ranks cases the wrong way round: "
 "patients it scores high are less likely to have the event than patients it "
 "scores low. Do not read the odds ratios as they stand. Check that the event "
@@ -21906,7 +21958,14 @@ msgid ""
 msgstr ""
 
 #: R/lassologistic.b.R
-msgid "AUC = %1$s (95%% CI: %2$.3f-%3$.3f)"
+msgid ""
+"AUC = %.3f is in the poor band (below 0.7) of the Hosmer-Lemeshow "
+"convention. Consider adding more informative predictors or using a different "
+"model."
+msgstr ""
+
+#: R/lassologistic.b.R
+msgid "AUC = %1$s (in-sample DeLong 95%% CI: %2$.3f-%3$.3f)"
 msgstr ""
 
 #: R/enhancedROC.b.R
@@ -21946,6 +22005,14 @@ msgstr ""
 
 #: R/psychopdaROC.b.R
 msgid "AUC above 0.5 in no more than 50% of resamples"
+msgstr ""
+
+#: R/lassologistic.b.R
+msgid ""
+"AUC bands follow the convention of Hosmer, Lemeshow and Sturdivant (2013, p. "
+"177): 0.5 no discrimination, above 0.5 and below 0.7 poor, 0.7 to 0.8 "
+"acceptable, 0.8 to 0.9 excellent, 0.9 and above outstanding. They are graded "
+"on the AUC as displayed."
 msgstr ""
 
 #: R/enhancedROC.b.R
@@ -22120,6 +22187,7 @@ msgstr ""
 
 #: R/enhancedROC.b.R
 #: enhancedROC/results/results/precisionRecallTable.columns.title
+#: psychopdaROC/results/rocComparisonTable.columns.title
 msgid "AUC-PR (interpolated)"
 msgstr ""
 
@@ -22167,14 +22235,6 @@ msgid ""
 "proportion of required data elements present per report, per required "
 "element, and by subspecialty or reporting pathologist, with an optional "
 "completeness trend over time."
-msgstr ""
-
-#: psychopdaROC/results/rocComparisonTable.columns.title
-msgid "AUPRC"
-msgstr ""
-
-#: R/psychopdaROC.b.R
-msgid "AUPRC = %.3f"
 msgstr ""
 
 #: advancedbarplot/options/value_format/auto.title
@@ -22932,8 +22992,8 @@ msgid ""
 "which is the contrast the points represent - so points and odds ratios are "
 "on the same footing here. A cut derived from this dataset (median, mean, "
 "tertile or quartile) is not an externally established clinical threshold and "
-"will differ in another cohort; supplying manual cut points from the "
-"literature is what makes a score portable. The score has not been validated "
+"will differ in another cohort; manual cut points fix the scoring thresholds "
+"but do not establish transportability. The score has not been validated "
 "outside these data."
 msgstr ""
 
@@ -25155,8 +25215,13 @@ msgid "Beta10 (coefficient x scale, rounded)"
 msgstr ""
 
 #: R/clinicalscore.b.R
-#: R/lassologistic.b.R
 msgid "Beta10 method (Zhang et al. Ann Transl Med 2017)"
+msgstr ""
+
+#: R/lassologistic.b.R
+msgid ""
+"Beta10 method: each contribution x 10, rounded (Mehta et al. J Clin "
+"Epidemiol 2016)"
 msgstr ""
 
 #: ihcsurvival/results/regionalComparison.columns.title
@@ -26479,10 +26544,6 @@ msgstr ""
 msgid "blue"
 msgstr ""
 
-#: R/lassologistic.b.R
-msgid "Blue dashed: lambda.min; orange dotted: lambda.1se"
-msgstr ""
-
 #: tidyplots/options/colorScheme/blue2brown.title
 msgid "Blue to Brown"
 msgstr ""
@@ -27030,7 +27091,6 @@ msgstr ""
 #: ihcadvanced/options/nBootstrap.title
 #: ihccluster/options/nBootstrap.title
 #: ihccluster/ui[6][1][0].label
-#: lassologistic/options/bootstrapN.title
 #: pathsampling/options/bootstrapIterations.title
 #: psychopdaROC/options/boot_runs.title
 #: rmst/options/bootstrap_n.title
@@ -27041,6 +27101,7 @@ msgstr ""
 msgid "Bootstrap Iterations"
 msgstr ""
 
+#: lassologistic/options/bootstrapN.title
 #: psychopdaROC/ui[5][1]/boot_runs.label
 msgid "Bootstrap iterations"
 msgstr ""
@@ -30015,10 +30076,15 @@ msgstr ""
 
 #: R/lassologistic.b.R
 msgid ""
-"Calibration slope: 1.0 = ideal. A corrected slope below 1 means predicted "
-"probabilities are too extreme (overfitted) and would benefit from shrinkage; "
-"an apparent slope above 1 is expected for penalized models on their training "
-"data."
+"Calibration slope: 1.0 = ideal. A corrected slope below 1 means the "
+"predicted probabilities are too extreme (overfitted). A corrected slope "
+"above 1 means they are too moderate: the penalty pulled them too far toward "
+"the overall event rate, so high risks are under-stated and low risks "
+"over-stated. This is common with the 1SE rule, and the Minimum CV Error "
+"lambda shrinks less. The apparent slope is above 1 for any penalized model "
+"and is not itself a calibration check. These readings assume the model "
+"discriminates; when the corrected AUC is close to 0.5 the slope says little "
+"about calibration."
 msgstr ""
 
 #: clinicalvalidation/results/calibrationtable.columns.title
@@ -30448,6 +30514,8 @@ msgid "Case group (data order)"
 msgstr ""
 
 #: agreement/results/caseClusterTable.columns.title
+#: agreementintro/options/caseID.title
+#: agreementintro/ui[2][2][2].label
 #: entropyanalysis/results/caseLevelTable.columns.title
 #: extratrees/results/oobPredictions.columns.title
 #: gradientboosting/results/predictions.columns.title
@@ -30467,8 +30535,6 @@ msgstr ""
 #: pathagreement/results/consensusTable.columns.title
 #: pathagreement/results/caseDifficultyTable.columns.title
 #: pathagreement/results/discordantCasesCluster.columns.title
-#: agreementintro/options/caseID.title
-#: agreementintro/ui[2][2][2].label
 msgid "Case ID"
 msgstr ""
 
@@ -30660,6 +30726,7 @@ msgstr ""
 msgid "Case/Patient ID (Optional)"
 msgstr ""
 
+#: R/agreementintro.b.R
 #: R/pathagreement.b.R
 #: agreement/results/krippTable.columns.title
 #: agreement/results/lightKappaTable.columns.title
@@ -30697,7 +30764,6 @@ msgstr ""
 #: pathsampling/results/lnrClassification.columns.title
 #: pathsampling/results/ajccNStage.columns.title
 #: pathsampling/results/adequacyByELN.columns.title
-#: R/agreementintro.b.R
 msgid "Cases"
 msgstr ""
 
@@ -31132,11 +31198,11 @@ msgstr ""
 
 #: R/agreement.b.R
 #: agreement/results/finnTable.columns.title
+#: agreementintro/results/columnSummary.columns.title
 #: enhancedfrequency/results/results/variableSummary.columns.title
 #: jjsegmentedtotalbar/results/summary.columns.title
 #: modalitycomparison/results/overviewTable.columns.title
 #: pathagreement/results/overviewTable.columns.title
-#: agreementintro/results/columnSummary.columns.title
 msgid "Categories"
 msgstr ""
 
@@ -33305,6 +33371,17 @@ msgstr ""
 msgid "Choose Style:"
 msgstr ""
 
+#: R/lassologistic.b.R
+msgid "Choose the 'Event level' of the outcome."
+msgstr ""
+
+#: R/lassologistic.b.R
+msgid ""
+"Choose the 'Event level': the outcome level that means the condition is "
+"present (for example Malignant). It is never taken from the order of the "
+"levels."
+msgstr ""
+
 #: R/venn.b.R
 msgid ""
 "Choose the 'true' level for each variable (e.g., 'Positive', 'Present', "
@@ -33356,6 +33433,10 @@ msgstr ""
 #: R/decision.b.R
 #: R/decisioncombine.b.R
 msgid "Choose the diagnostic test you want to evaluate"
+msgstr ""
+
+#: R/lassologistic.b.R
+msgid "Choose the event level"
 msgstr ""
 
 #: R/lassocox.b.R
@@ -37986,8 +38067,8 @@ msgstr ""
 msgid "Cohen's Kappa"
 msgstr ""
 
-#: R/pathagreement.b.R
 #: R/agreementintro.b.R
+#: R/pathagreement.b.R
 msgid "Cohen's kappa"
 msgstr ""
 
@@ -38674,12 +38755,12 @@ msgid ""
 "place of the default red/green rotation"
 msgstr ""
 
+#: agreementintro/results/columnSummary.columns.title
 #: contTables/options/pcCol.title
 #: contTablesPaired/options/pcCol.title
 #: esquisseauto/options/manualGeom/col.title
 #: jggheatmap/options/scaling/column.title
 #: jggheatmap/results/matrixtab.columns.title
-#: agreementintro/results/columnSummary.columns.title
 msgid "Column"
 msgstr ""
 
@@ -44701,7 +44782,7 @@ msgid ""
 "Continuous predictors are scored by dichotomizing at %s: the full point "
 "block is awarded above the cut and nothing below it. The performance shown "
 "here reflects this simplified integer point system and may differ from the "
-"continuous LASSO model in the Classification Performance table."
+"continuous penalized model in the Classification Performance table."
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -48626,7 +48707,7 @@ msgid "Cross-validation folds reduced"
 msgstr ""
 
 #: R/lassologistic.b.R
-msgid "Cross-Validation for LASSO Logistic Regression"
+msgid "Cross-Validation for %s Logistic Regression"
 msgstr ""
 
 #: aivalidation/options/crossValidation.title
@@ -50367,7 +50448,7 @@ msgid "Cut Point"
 msgstr ""
 
 #: lassologistic/options/scoreCutMethod.title
-msgid "Cut Point for Continuous Predictors"
+msgid "Cut point for continuous predictors"
 msgstr ""
 
 #: R/psychopdaROC.b.R
@@ -50957,6 +51038,10 @@ msgstr ""
 
 #: R/enhancedROC.b.R
 msgid "Dashed line: the utility threshold used in the tables ({pt})"
+msgstr ""
+
+#: R/lassologistic.b.R
+msgid "Dashed: lambda.min; dotted: lambda.1se"
 msgstr ""
 
 #: tumorgrowth/ui[0].label
@@ -51602,10 +51687,6 @@ msgstr ""
 msgid ""
 "Data suitability: %d minor concern(s). Enable bootstrap validation to assess "
 "overfitting risk."
-msgstr ""
-
-#: R/lassologistic.b.R
-msgid "Data suitable for LASSO logistic"
 msgstr ""
 
 #: R/agepyramid.b.R
@@ -52415,6 +52496,7 @@ msgstr ""
 #: package/analyses/decisiongraph.menuSubgroup
 #: package/analyses/decisionpanel.menuSubgroup
 #: adaptivetrialdesign/results/interimResults.columns.title
+#: agreementintro/results/status.title
 #: decision/options.menuSubgroup
 #: decisioncombine/options.menuSubgroup
 #: decisioncompare/options.menuSubgroup
@@ -52425,7 +52507,6 @@ msgstr ""
 #: nogoldstandard/options.menuSubgroup
 #: screeningcalculator/options.menuSubgroup
 #: stagemigration/results/nestedModelTests.columns.title
-#: agreementintro/results/status.title
 msgid "Decision"
 msgstr ""
 
@@ -56651,9 +56732,9 @@ msgstr ""
 msgid "Disease reference"
 msgstr ""
 
+#: agreementintro/options/referenceType/disease.title
 #: diagnosticsamplesize/options/referenceType/disease.title
 #: pathagreement/options/referenceType/disease.title
-#: agreementintro/options/referenceType/disease.title
 msgid "Disease reference standard"
 msgstr ""
 
@@ -57946,12 +58027,6 @@ msgstr ""
 msgid ""
 "Display Precision-Recall curve analysis. Recommended for imbalanced datasets "
 "where ROC curves may be misleading (Saito & Rehmsmeier, 2015)."
-msgstr ""
-
-#: R/psychopdaROC.b.R
-msgid ""
-"Display precision-recall step curves with average precision. The classifier "
-"comparison table reports the separate interpolated AUC-PR estimate."
 msgstr ""
 
 #: directbinomial/options/predictions.description
@@ -59986,6 +60061,14 @@ msgstr ""
 msgid "E90"
 msgstr ""
 
+#: R/lassologistic.b.R
+msgid ""
+"Each analyzed row is treated as one independent observation. Repeated "
+"lesions, visits, or readings from the same patient violate this assumption. "
+"Supply the optional patient ID to check for repeated patients; this analysis "
+"does not model clustering."
+msgstr ""
+
 #: R/vartree.b.R
 msgid "Each branch represents a unique combination of patient characteristics"
 msgstr ""
@@ -60044,6 +60127,14 @@ msgstr ""
 msgid ""
 "Each difference is the first-named test minus the second: for 'A vs B', a "
 "positive value favours A and a negative value favours B."
+msgstr ""
+
+#: R/lassologistic.b.R
+msgid ""
+"Each factor term is compared with its predictor's reference (first) level: "
+"%s. The penalized estimates depend on that choice: with another reference "
+"level the coefficients differ, and LASSO or Elastic Net can retain a "
+"different set of terms."
 msgstr ""
 
 #: agreementintro/options/comparisonGoal/readerModality.title
@@ -61366,7 +61457,7 @@ msgid "Elastic Net Logistic Regression"
 msgstr ""
 
 #: lassologistic/options/alpha.title
-msgid "Elastic Net Mixing (0=Ridge, 1=LASSO)"
+msgid "Elastic net mixing (0 = ridge, 1 = LASSO)"
 msgstr ""
 
 #: adaptivelasso/options/alpha.title
@@ -63046,10 +63137,6 @@ msgid ""
 msgstr ""
 
 #: R/lassologistic.b.R
-msgid "EPV = %.1f (>=10: adequate)"
-msgstr ""
-
-#: R/lassologistic.b.R
 msgid "EPV = %.1f (5-10: marginal, results may be unstable)"
 msgstr ""
 
@@ -63057,6 +63144,10 @@ msgstr ""
 msgid ""
 "EPV = %.1f (marginal). Enable bootstrap validation to assess overfitting "
 "risk."
+msgstr ""
+
+#: R/lassologistic.b.R
+msgid "EPV = %.1f (meets the EPV >= 10 convention)"
 msgstr ""
 
 #: R/clinicalscore.b.R
@@ -64678,7 +64769,6 @@ msgstr ""
 #: hematologicindices/ui[1]/eventLevel.label
 #: highdimcox/options/outcomeLevel.title
 #: highdimcox/ui[1][0]/outcomeLevel.label
-#: lassologistic/options/outcomeLevel.title
 #: leaveonecenterout/options/outcomeLevel.title
 #: lymphnoderatio/options/eventLevel.title
 #: lymphnoderatio/ui[1]/eventLevel.label
@@ -64724,6 +64814,7 @@ msgid "Event Level"
 msgstr ""
 
 #: lassocox/options/outcomeLevel.title
+#: lassologistic/options/outcomeLevel.title
 #: latentbiomarker/options/event_level.title
 #: latentbiomarker/ui[0][1]/event_level.label
 #: survivalcont/options/outcomeLevel.title
@@ -67062,8 +67153,8 @@ msgstr ""
 msgid "Expert consensus (agreement)"
 msgstr ""
 
-#: pathagreement/options/referenceType/consensus.title
 #: agreementintro/options/referenceType/consensus.title
+#: pathagreement/options/referenceType/consensus.title
 msgid "Expert consensus comparator"
 msgstr ""
 
@@ -69270,6 +69361,7 @@ msgstr ""
 msgid "Feasibility"
 msgstr ""
 
+#: agreementintro/results/dataSummary.columns.title
 #: batcheffect/results/feature_quality.columns.title
 #: clinicalprediction/results/feature_selection_results.columns.title
 #: clinicalprediction/results/feature_importance.columns.title
@@ -69295,7 +69387,6 @@ msgstr ""
 #: superpc/results/component_loadings.columns.title
 #: survivalfeaturerank/results/rankingTable.columns.title
 #: treeadvanced/results/featurecontributions.columns.title
-#: agreementintro/results/dataSummary.columns.title
 msgid "Feature"
 msgstr ""
 
@@ -70979,8 +71070,8 @@ msgstr ""
 msgid "Fleiss' Kappa"
 msgstr ""
 
-#: R/pathagreement.b.R
 #: R/agreementintro.b.R
+#: R/pathagreement.b.R
 msgid "Fleiss' kappa"
 msgstr ""
 
@@ -74942,13 +75033,13 @@ msgstr ""
 msgid "Global Tests"
 msgstr ""
 
+#: agreementintro/options/showGlossary.title
+#: agreementintro/results/glossary.title
 #: jjarcdiagram/options/showGlossary.title
 #: lassointro/options/showGlossary.title
 #: lassointro/results/glossary.title
 #: patientfollowupintro/options/showGlossary.title
 #: patientfollowupintro/results/glossary.title
-#: agreementintro/options/showGlossary.title
-#: agreementintro/results/glossary.title
 msgid "Glossary"
 msgstr ""
 
@@ -75070,7 +75161,6 @@ msgstr ""
 #: R/checkdata.b.R
 #: R/clinicalscore.b.R
 #: R/enhancedROC.b.R
-#: R/lassologistic.b.R
 #: R/psychopdaROC.b.R
 #: R/riverplot.b.R
 #: R/survival.b.R
@@ -75083,10 +75173,6 @@ msgstr ""
 
 #: R/checkdata.b.R
 msgid "Good - Minimal missing data"
-msgstr ""
-
-#: R/lassologistic.b.R
-msgid "Good (%.0f%% better than predicting the base rate)"
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
@@ -83737,10 +83823,6 @@ msgstr ""
 msgid "Info Loss (%)"
 msgstr ""
 
-#: lassologistic/results/methodComparison.columns.title
-msgid "Info Loss vs Full Model (%)"
-msgstr ""
-
 #: R/lassologistic.b.R
 #: R/oddsratio.b.R
 #: R/pathagreement.b.R
@@ -83908,8 +83990,8 @@ msgstr ""
 msgid "Input Mode"
 msgstr ""
 
-#: R/enhancedROC.b.R
 #: R/agreementintro.b.R
+#: R/enhancedROC.b.R
 msgid "Input rows"
 msgstr ""
 
@@ -84944,6 +85026,10 @@ msgstr ""
 
 #: jointmodeling/options/random_effects/intercept.title
 msgid "Intercept Only"
+msgstr ""
+
+#: R/lassologistic.b.R
+msgid "Intercept-only optimum"
 msgstr ""
 
 #: ihcscoring/options/language.title
@@ -88304,8 +88390,8 @@ msgstr ""
 msgid "Krippendorff's Alpha"
 msgstr ""
 
-#: agreement/options/kripp.title
 #: R/agreementintro.b.R
+#: agreement/options/kripp.title
 msgid "Krippendorff's alpha"
 msgstr ""
 
@@ -88871,7 +88957,7 @@ msgid "Lambda selection"
 msgstr ""
 
 #: lassologistic/options/lambda.title
-msgid "Lambda Selection Method"
+msgid "Lambda selection method"
 msgstr ""
 
 #: lassocox/options/lambda.title
@@ -89325,14 +89411,11 @@ msgid "LASSO (L1)"
 msgstr ""
 
 #: R/lassologistic.b.R
-msgid "LASSO (penalized)"
-msgstr ""
-
-#: R/lassologistic.b.R
 msgid ""
 "LASSO coefficients are penalized (shrunken) and have no valid standard "
-"confidence intervals; they are omitted rather than shown as blanks. Use "
-"bootstrap validation for performance inference,"
+"confidence intervals; they are omitted rather than shown as blanks. "
+"Bootstrap validation estimates optimism-corrected performance (AUC, Brier "
+"score, calibration slope), not coefficient uncertainty."
 msgstr ""
 
 #: package/analyses/lassocox.menuTitle
@@ -89375,14 +89458,6 @@ msgid "LASSO Logistic Regression"
 msgstr ""
 
 #: R/lassologistic.b.R
-msgid "LASSO Logistic Regression Coefficients"
-msgstr ""
-
-#: R/lassologistic.b.R
-msgid "LASSO model fitting failed: %s"
-msgstr ""
-
-#: R/lassologistic.b.R
 msgid ""
 "LASSO performs variable SELECTION, so it needs a set of candidate predictors "
 "to choose among; with a single predictor there is nothing to select and a "
@@ -89407,18 +89482,10 @@ msgid ""
 msgstr ""
 
 #: R/lassologistic.b.R
-msgid "LASSO selected zero variables at the chosen lambda. %s"
-msgstr ""
-
-#: R/lassologistic.b.R
 msgid ""
 "LASSO uses listwise deletion, so a single sparsely-measured predictor can "
 "remove a large share of the cohort; check which predictor is driving the "
 "exclusions before interpreting these results."
-msgstr ""
-
-#: lassologistic/results/modelComparison.title
-msgid "LASSO vs Unpenalized Logistic"
 msgstr ""
 
 #: sparsegrouplasso/options/weight_type/lasso_based.title
@@ -90182,6 +90249,10 @@ msgstr ""
 
 #: mixedmodelanova/results/model_info.columns.title
 msgid "Levels by grouping variable"
+msgstr ""
+
+#: R/lassologistic.b.R
+msgid "Levels found:"
 msgstr ""
 
 #: grafify/options/comparison_method/levelwise.title
@@ -91806,7 +91877,7 @@ msgid "Logistic (Binary outcome)"
 msgstr ""
 
 #: R/lassologistic.b.R
-msgid "Logistic (LASSO-selected vars)"
+msgid "Logistic (retained terms)"
 msgstr ""
 
 #: tumorgrowth/options/growthModel/logistic.title
@@ -93584,11 +93655,8 @@ msgid "Manual Configuration"
 msgstr ""
 
 #: lassologistic/options/scoreCutMethod/manual.title
-msgid "Manual cut points"
-msgstr ""
-
 #: lassologistic/options/scoreCutPoints.title
-msgid "Manual Cut Points"
+msgid "Manual cut points"
 msgstr ""
 
 #: psychopdaROC/ui[5][0]/specifyCutScore.label
@@ -93729,10 +93797,6 @@ msgstr "Margin Sampling Recommendations"
 #: simpleSurvivalPower/results/non_inferiority_table.columns.title
 #: survivalPower/results/non_inferiority_table.columns.title
 msgid "Margin Type"
-msgstr ""
-
-#: R/lassologistic.b.R
-msgid "Marginal (%.0f%% better than base rate)"
 msgstr ""
 
 #: pathsampling/results/incrementalYieldTable.title
@@ -94483,6 +94547,10 @@ msgstr ""
 msgid "Max-scaled"
 msgstr ""
 
+#: R/lassologistic.b.R
+msgid "Max-scaled (primary)"
+msgstr ""
+
 #: lassologistic/options/scoringMethod/maxscaled.title
 msgid "Max-scaled (strongest predictor = max points)"
 msgstr ""
@@ -94846,8 +94914,11 @@ msgid "Maximum points on nomogram scale"
 msgstr ""
 
 #: clinicalscore/options/maxPoints.title
-#: lassologistic/options/scoringMaxPoints.title
 msgid "Maximum Points per Feature"
+msgstr ""
+
+#: lassologistic/options/scoringMaxPoints.title
+msgid "Maximum points per feature"
 msgstr ""
 
 #: likelihoodratio/options/customPrevalenceMax.title
@@ -96197,11 +96268,9 @@ msgstr ""
 #: package/analyses/decisioncurve.menuGroup
 #: package/analyses/betabinomialdiagnostic.menuSubgroup
 #: package/analyses/hierarchicalbayes.menuSubgroup
-#: package/analyses/lassologistic.menuGroup
 #: betabinomialdiagnostic/options.menuSubgroup
 #: decisioncurve/options.menuGroup
 #: hierarchicalbayes/options.menuSubgroup
-#: lassologistic/options.menuGroup
 msgid "meddecide"
 msgstr ""
 
@@ -96342,18 +96411,20 @@ msgstr ""
 #: package/analyses/cotest.menuGroup
 #: package/analyses/sequentialtests.menuGroup
 #: package/analyses/enhancedROC.menuGroup
+#: package/analyses/lassologistic.menuGroup
+#: package/analyses/agreementintro.menuGroup
 #: agreement/options.menuGroup
+#: agreementintro/options.menuGroup
 #: cotest/options.menuGroup
 #: decision/options.menuGroup
 #: decisioncalculator/options.menuGroup
 #: decisioncombine/options.menuGroup
 #: decisioncompare/options.menuGroup
 #: enhancedROC/options.menuGroup
+#: lassologistic/options.menuGroup
 #: nogoldstandard/options.menuGroup
 #: psychopdaROC/options.menuGroup
 #: sequentialtests/options.menuGroup
-#: package/analyses/agreementintro.menuGroup
-#: agreementintro/options.menuGroup
 msgid "meddecideT"
 msgstr ""
 
@@ -97501,6 +97572,7 @@ msgstr ""
 #: agreement/results/maxwellRETable.columns.title
 #: agreement/results/interIntraRaterInterTable.columns.title
 #: agreement/results/iotaTable.columns.title
+#: agreementintro/results/recommendations.columns.title
 #: aivalidation/ui/crossValidationOptions/crossValidation.label
 #: biomarkerresponse/results/correlation.columns.title
 #: checkdata/results/outlierMethodSummary.columns.title
@@ -97552,7 +97624,6 @@ msgstr ""
 #: treatmentswitching/results/treatmentEffectTable.columns.title
 #: treatmentswitching/results/methodComparisonTable.columns.title
 #: treatmentswitching/results/bootstrapTable.columns.title
-#: agreementintro/results/recommendations.columns.title
 msgid "Method"
 msgstr ""
 
@@ -98009,10 +98080,10 @@ msgid "Method for variable selection."
 msgstr ""
 
 #: package/analyses/lassointro.menuTitle
-#: lassointro/options.menuTitle
-#: nogoldstandard/options/showMethodGuide.title
 #: package/analyses/agreementintro.menuTitle
 #: agreementintro/options.menuTitle
+#: lassointro/options.menuTitle
+#: nogoldstandard/options/showMethodGuide.title
 msgid "Method Guide"
 msgstr ""
 
@@ -99809,6 +99880,7 @@ msgstr ""
 #: R/reportcat.b.R
 #: R/summarydata.b.R
 #: advancedimputation/results/summary.columns.title
+#: agreementintro/results/columnSummary.columns.title
 #: dendrogram/results/summary.columns.title
 #: icccoeff/results/descriptive_stats.columns.title
 #: jsummarytools/results/data_summary_table.columns.title
@@ -99816,7 +99888,6 @@ msgstr ""
 #: parallelplot/results/summary.columns.title
 #: pathagreement/results/readerDataSummary.columns.title
 #: toolssummary/results/summary.columns.title
-#: agreementintro/results/columnSummary.columns.title
 msgid "Missing"
 msgstr ""
 
@@ -102126,6 +102197,12 @@ msgstr ""
 msgid "Model-free tables only; the notes under the model tables give the reason."
 msgstr ""
 
+#: R/lassologistic.b.R
+msgid ""
+"Model-term names overlap, so unique labels are used: %s. Manual cut points "
+"use the original predictor names."
+msgstr ""
+
 #: R/agreement.b.R
 msgid ""
 "Model: %1$s; %2$s observations; %3$s raters; %4$s cases; %5$s conditions. "
@@ -104138,11 +104215,11 @@ msgid "N = %d (<50: small, consider fewer predictors)"
 msgstr ""
 
 #: R/lassologistic.b.R
-msgid "N = %d (>=100: adequate)"
+msgid "N = %d (50-100: marginal)"
 msgstr ""
 
 #: R/lassologistic.b.R
-msgid "N = %d (50-100: marginal)"
+msgid "N = %d (meets the N >= 100 convention)"
 msgstr ""
 
 #: R/agreement.b.R
@@ -104519,6 +104596,10 @@ msgstr ""
 msgid "N Target Lesions"
 msgstr ""
 
+#: lassologistic/results/modelComparison.columns.title
+msgid "N Terms"
+msgstr ""
+
 #: leaveonecenterout/results/perCenterResults.columns.title
 #: stagemigration/results/crossValidationResults.columns.title
 msgid "N Test"
@@ -104555,7 +104636,6 @@ msgid "N Valid"
 msgstr ""
 
 #: lassocox/results/modelComparison.columns.title
-#: lassologistic/results/modelComparison.columns.title
 msgid "N Variables"
 msgstr ""
 
@@ -106155,10 +106235,10 @@ msgstr ""
 #: R/decisioncompare.b.R
 #: R/jjarcdiagram.b.R
 #: R/lassocox.b.R
-#: enhancedcrosstable/options/showNA/no.title
-#: gtsummary/options/includeMissing/no.title
 #: agreementintro/options/missingRatings/no.title
 #: agreementintro/options/repeatedReadings/no.title
+#: enhancedcrosstable/options/showNA/no.title
+#: gtsummary/options/includeMissing/no.title
 msgid "No"
 msgstr ""
 
@@ -106286,6 +106366,13 @@ msgid ""
 "full set of categories, in the same sequence, on every rater variable, or "
 "choose the Nominal data type, which only asks whether two ratings are the "
 "same and needs no order."
+msgstr ""
+
+#: R/lassologistic.b.R
+msgid ""
+"No bootstrap replicate produced a calibration slope (each replicate model "
+"gave every case the same probability), so the apparent slope could not be "
+"corrected."
 msgstr ""
 
 #: R/enhancedROC.b.R
@@ -106565,6 +106652,10 @@ msgstr ""
 msgid ""
 "No concern was identified by these limited checks; formal sample-size "
 "planning and validation are still required."
+msgstr ""
+
+#: R/lassologistic.b.R
+msgid "No concerns flagged by these checks"
 msgstr ""
 
 #: R/agreement.b.R
@@ -106918,6 +107009,10 @@ msgid ""
 "No discordant pairs: none of the %1$d paired cases was classified correctly "
 "by only one of %2$s and %3$s, so McNemar's test has no information about a "
 "difference in accuracy (its p-value is set to 1 by convention, not computed)."
+msgstr ""
+
+#: R/lassologistic.b.R
+msgid "No discrimination"
 msgstr ""
 
 #: R/decision.b.R
@@ -107989,6 +108084,10 @@ msgstr ""
 msgid "No term can be dropped while preserving model hierarchy."
 msgstr ""
 
+#: R/lassologistic.b.R
+msgid "No term was retained."
+msgstr ""
+
 #: R/singlearm.b.R
 msgid "No terminal event observed; point estimate remains 0"
 msgstr ""
@@ -108554,10 +108653,6 @@ msgid ""
 "from multivariable models."
 msgstr ""
 
-#: R/lassologistic.b.R
-msgid "Non-Binary Outcome"
-msgstr ""
-
 #: crosstablepivot/ui[0][0][2].label
 msgid "Non-breaking addition to existing crosstable module"
 msgstr ""
@@ -108932,6 +109027,10 @@ msgstr ""
 msgid "Non-terminal node that splits into further branches"
 msgstr ""
 
+#: R/lassologistic.b.R
+msgid "Non-zero terms"
+msgstr ""
+
 #: R/pathagreement.b.R
 msgid ""
 "Nondiagnostic readings remain in observed reference-class denominators and "
@@ -109027,7 +109126,6 @@ msgstr ""
 
 #: R/agreement.b.R
 #: R/lassocox.b.R
-#: R/lassologistic.b.R
 #: jjbetweenstats/options/padjustmethod/none.title
 #: jjwithinstats/options/padjustmethod/none.title
 #: multisurvival/options/medianline/none.title
@@ -110003,10 +110101,6 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 #: R/pathagreement.b.R
-#: decision/options/referenceType/legacy.title
-#: decisioncompare/options/referenceType/legacy.title
-#: ihcheterogeneity/options/sampling_strategy/unknown.title
-#: pathagreement/options/referenceType/legacy.title
 #: agreementintro/options/purpose/unspecified.title
 #: agreementintro/options/scale/unspecified.title
 #: agreementintro/options/panel/unspecified.title
@@ -110023,6 +110117,10 @@ msgstr ""
 #: agreementintro/options/planningGoal/unspecified.title
 #: agreementintro/options/cutoffDirection/unspecified.title
 #: agreementintro/options/cutoffPrespecified/unspecified.title
+#: decision/options/referenceType/legacy.title
+#: decisioncompare/options/referenceType/legacy.title
+#: ihcheterogeneity/options/sampling_strategy/unknown.title
+#: pathagreement/options/referenceType/legacy.title
 msgid "Not specified"
 msgstr ""
 
@@ -111119,12 +111217,12 @@ msgid "Number of cut-offs"
 msgstr ""
 
 #: highdimcox/ui[3][0]/cv_folds.label
-#: lassologistic/options/nfolds.title
 #: treemedical/options/cv_folds.title
 msgid "Number of CV Folds"
 msgstr ""
 
 #: lassocox/options/nfolds.title
+#: lassologistic/options/nfolds.title
 msgid "Number of CV folds"
 msgstr ""
 
@@ -112059,9 +112157,9 @@ msgstr ""
 msgid "Numerator marker for ratio calculation"
 msgstr ""
 
+#: R/agreementintro.b.R
 #: R/tableone.b.R
 #: jjcoefstats/options/pValueDisplay/numeric.title
-#: R/agreementintro.b.R
 msgid "Numeric"
 msgstr ""
 
@@ -112124,10 +112222,6 @@ msgid ""
 "censored / 1 = event, or choose the value that represents the event in Event "
 "Level (in jamovi, first set the column's measure type to Nominal in Data > "
 "Setup so its values are listed)."
-msgstr ""
-
-#: R/lassologistic.b.R
-msgid "Numeric outcome must have at least 2 observed values."
 msgstr ""
 
 #: R/lassocox.b.R
@@ -112445,6 +112539,7 @@ msgstr ""
 
 #: R/decisioncalculator.b.R
 #: R/enhancedROC.b.R
+#: agreementintro/results/columnSummary.columns.title
 #: continuousmarkov/results/transitionMatrix.columns.title
 #: flexmultistate/results/transitionMatrix.columns.title
 #: hiddenmarkov/results/viterbiStates.columns.title
@@ -112456,7 +112551,6 @@ msgstr ""
 #: standardizedratio/results/overallTable.columns.title
 #: standardizedratio/results/stratumTable.columns.title
 #: survivalbart/results/posteriorPredictive.columns.title
-#: agreementintro/results/columnSummary.columns.title
 msgid "Observed"
 msgstr ""
 
@@ -112647,6 +112741,19 @@ msgstr ""
 
 #: R/singlearm.b.R
 msgid "Observed Event Proportion"
+msgstr ""
+
+#: lassologistic/results/lookupTable.columns.title
+msgid "Observed Event Rate"
+msgstr ""
+
+#: R/lassologistic.b.R
+msgid ""
+"Observed Event Rate is the share of cases with each total score that had the "
+"event, in this dataset (events / N): an in-sample proportion, not a model "
+"prediction, so it need not rise with the score, and scores based on few "
+"cases are unstable and can read as 0% or 100%. Validate the score-to-risk "
+"mapping on an independent cohort before clinical use."
 msgstr ""
 
 #: curemodels/results/survivalPlot.title
@@ -115153,18 +115260,6 @@ msgstr ""
 msgid "OR Rule (Either Positive)"
 msgstr ""
 
-#: R/lassologistic.b.R
-msgid ""
-"or the Model Comparison table for unpenalized estimates on the selected "
-"variables."
-msgstr ""
-
-#: R/lassologistic.b.R
-msgid ""
-"or tick 'Model comparison analysis' under Explanatory Output to see "
-"unpenalized estimates on the selected variables."
-msgstr ""
-
 #: R/oddsratio.b.R
 msgid "OR, 95% CI (Firth penalized)"
 msgstr ""
@@ -115218,8 +115313,8 @@ msgid ""
 "ordered dose or exposure levels."
 msgstr ""
 
-#: categorize/options/ordered.title
 #: R/agreementintro.b.R
+#: categorize/options/ordered.title
 msgid "Ordered factor"
 msgstr ""
 
@@ -115346,6 +115441,13 @@ msgstr ""
 #: ordinalroc/options/ordinal_outcome.title
 #: ordinalroc/ui[0][1].label
 msgid "Ordinal Outcome Variable"
+msgstr ""
+
+#: R/lassologistic.b.R
+msgid ""
+"Ordinal predictor(s) %s are coded with one indicator per level, each "
+"compared with that predictor's lowest level; they are not modelled as a "
+"linear trend."
 msgstr ""
 
 #: R/agreementintro.b.R
@@ -115946,18 +116048,6 @@ msgstr ""
 msgid "Outcome GWAS Data"
 msgstr ""
 
-#: R/lassologistic.b.R
-msgid ""
-"Outcome has %1$d distinct numeric values; only %2$s (event) vs %3$s "
-"(reference) are modeled. Other cases are excluded."
-msgstr ""
-
-#: R/lassologistic.b.R
-msgid ""
-"Outcome has %1$d observed levels; only '%2$s' (event) vs '%3$s' (reference) "
-"are modeled. Cases in other levels are excluded."
-msgstr ""
-
 #: R/lassocox.b.R
 msgid ""
 "Outcome imbalance may make folds and performance estimates unstable; inspect "
@@ -116006,10 +116096,6 @@ msgstr ""
 
 #: R/oddsratio.b.R
 msgid "Outcome level modeled as the event: '{level}'."
-msgstr ""
-
-#: R/lassologistic.b.R
-msgid "outcome level not modelled"
 msgstr ""
 
 #: ordinalroc/options/outcome_order.title
@@ -116962,6 +117048,10 @@ msgstr ""
 
 #: R/decision.b.R
 msgid "outstanding"
+msgstr ""
+
+#: R/lassologistic.b.R
+msgid "Outstanding"
 msgstr ""
 
 #: R/agreement.b.R
@@ -118524,8 +118614,8 @@ msgstr ""
 msgid "Paired Agreement Comparison"
 msgstr ""
 
-#: agreement/options/pairedAgreementTest.title
 #: R/agreementintro.b.R
+#: agreement/options/pairedAgreementTest.title
 msgid "Paired agreement comparison"
 msgstr ""
 
@@ -120029,10 +120119,11 @@ msgstr ""
 msgid ""
 "Path Inclusion Proportion is the fraction of the single cross-validated "
 "lambda path on which each predictor has a non-zero coefficient (apparent), "
-"NOT a bootstrap/resampling stability-selection frequency. Importance Rank "
-"orders predictors by their maximum absolute coefficient along that path. "
-"Because Ridge (L1 weight = 0) never shrinks coefficients to zero, every "
-"predictor is retained at all lambdas and the proportion is trivially 1.0."
+"NOT a bootstrap/resampling stability-selection frequency. Importance Score "
+"is the largest per-standard-deviation coefficient magnitude along that path, "
+"and Importance Rank orders predictors by it. Because Ridge (L1 weight = 0) "
+"never shrinks coefficients to zero, every predictor is retained at all "
+"lambdas and the proportion is trivially 1.0."
 msgstr ""
 
 #: spatialbayesiansurvival/options/adjacency_matrix.description
@@ -120335,6 +120426,14 @@ msgstr ""
 msgid "Patient ID"
 msgstr ""
 
+#: lassologistic/options/patientID.title
+msgid "Patient ID (optional duplicate check)"
+msgstr ""
+
+#: lassologistic/ui[0][2].label
+msgid "Patient ID (Optional Duplicate Check)"
+msgstr ""
+
 #: psychopdaROC/options/patientID.title
 msgid "Patient ID (optional for independent rows)"
 msgstr ""
@@ -120424,6 +120523,19 @@ msgid ""
 "report treats each row as an independent patient, so their intervals and "
 "tests are too narrow then. Only the Frozen-model validation report resamples "
 "whole patients."
+msgstr ""
+
+#: R/lassologistic.b.R
+msgid ""
+"Patient IDs are missing among the complete analysis rows. Supply an ID for "
+"every analyzed observation."
+msgstr ""
+
+#: R/lassologistic.b.R
+msgid ""
+"Patient IDs are unique among the analyzed rows. Fitting, cross-validation, "
+"and bootstrap validation assume that these observations are independent; "
+"unique IDs alone cannot establish independence."
 msgstr ""
 
 #: R/enhancedROC.b.R
@@ -121238,6 +121350,10 @@ msgstr ""
 msgid "Penalization Parameter"
 msgstr ""
 
+#: R/lassologistic.b.R
+msgid "Penalized"
+msgstr ""
+
 #: R/oddsratio.b.R
 msgid "Penalized AIC: {aic} (-2 x penalized log-likelihood + 2 x {nPar} parameters)."
 msgstr ""
@@ -121371,6 +121487,10 @@ msgid ""
 "classification."
 msgstr ""
 
+#: R/lassologistic.b.R
+msgid "Penalized model fitting failed: %s"
+msgstr ""
+
 #: modelbuilder/options/penalizedRegression.title
 msgid "Penalized Regression"
 msgstr ""
@@ -121391,6 +121511,10 @@ msgstr ""
 
 #: smoothtimevary/options/smoothing_method/penalized_spline.title
 msgid "Penalized Splines"
+msgstr ""
+
+#: lassologistic/results/modelComparison.title
+msgid "Penalized vs Unpenalized Logistic"
 msgstr ""
 
 #: sparsegrouplasso/ui[3].label
@@ -121423,13 +121547,13 @@ msgid "Penalty Selected By"
 msgstr ""
 
 #: grouplasso/options/penalty_type.title
-#: lassologistic/options/penalty.title
 #: lassologistic/ui[2][0].label
 #: modelbuilder/options/penaltyType.title
 msgid "Penalty Type"
 msgstr ""
 
 #: R/lassologistic.b.R
+#: lassologistic/options/penalty.title
 msgid "Penalty type"
 msgstr ""
 
@@ -128123,9 +128247,9 @@ msgstr ""
 
 #: R/lassologistic.b.R
 msgid ""
-"Precision (PPV) and the F1 score are left blank because this model predicts "
-"no positive cases at the chosen threshold, which makes both quantities "
-"undefined rather than zero."
+"Precision (PPV) is left blank because this model predicts no positive cases "
+"at the chosen threshold. F1 is computed as 2TP/(2TP+FP+FN), which is zero "
+"when events are present but none are predicted."
 msgstr ""
 
 #: agreement/results/linCCCTable.columns.title
@@ -128441,13 +128565,6 @@ msgstr ""
 msgid "Predicted probabilities"
 msgstr ""
 
-#: R/lassologistic.b.R
-msgid ""
-"Predicted probabilities are in-sample empirical event rates; scores based on "
-"few cases (small N) are unstable and can read as 0% or 100%. Validate the "
-"score-to-probability mapping on an independent cohort before clinical use."
-msgstr ""
-
 #: R/enhancedROC.b.R
 msgid "Predicted probabilities as supplied"
 msgstr ""
@@ -128464,10 +128581,19 @@ msgstr ""
 msgid "Predicted probabilities or survival probabilities from the enhanced model."
 msgstr ""
 
+#: R/lassologistic.b.R
+msgid ""
+"Predicted probabilities, including the saved Predicted Probability column, "
+"come from the penalized model: the penalty pulls them toward the overall "
+"event rate, most strongly with the 1SE rule, so high risks tend to be "
+"under-stated and low risks over-stated. They rank patients by the model, but "
+"check the corrected calibration slope (Bootstrap Internal Validation) before "
+"reading them as absolute risks."
+msgstr ""
+
 #: R/clinicalscore.b.R
 #: R/enhancedROC.b.R
 #: clinicalprediction/results/individual_explanations.columns.title
-#: lassologistic/results/lookupTable.columns.title
 #: modelval/options/predicted.title
 #: modelval/ui/variablesupplier[1].label
 msgid "Predicted Probability"
@@ -129352,6 +129478,15 @@ msgstr ""
 
 #: R/multisurvival.b.R
 msgid "Predictors included:"
+msgstr ""
+
+#: R/lassologistic.b.R
+msgid ""
+"Predictors were NOT standardized, so the penalty acts on each coefficient in "
+"that predictor's own units and a predictor recorded on a large scale is "
+"penalized less. Coefficient and Odds Ratio are per 1 unit; the Importance "
+"column is the per-standard-deviation magnitude, so it can still be compared "
+"across predictors. Odds ratios remain penalized (shrunk toward 1)."
 msgstr ""
 
 #: R/lassologistic.b.R
@@ -130250,11 +130385,11 @@ msgstr ""
 msgid "Prior-Posterior Comparison"
 msgstr ""
 
+#: agreementintro/results/recommendations.columns.title
 #: clinicalalerts/results/clinicalRecommendations.columns.title
 #: labcontrolcharts/results/correctiveActions.columns.title
 #: patientdashboard/results/activeAlertsTable.columns.title
 #: sigmametrics/results/improvementRecommendations.columns.title
-#: agreementintro/results/recommendations.columns.title
 msgid "Priority"
 msgstr ""
 
@@ -133315,6 +133450,13 @@ msgid ""
 "need."
 msgstr ""
 
+#: R/lassologistic.b.R
+msgid ""
+"Raised from 0 to 1 point (of the predictor's sign) so that every selected "
+"predictor counts: %s. Their weight is overstated relative to the other "
+"predictors."
+msgstr ""
+
 #: R/cotest.b.R
 msgid "raised to %sx of prevalence"
 msgstr ""
@@ -133625,7 +133767,6 @@ msgstr ""
 #: ihcadvanced/options/randomSeed.title
 #: ihccluster/options/seed.title
 #: illnessdeath/options/random_seed.title
-#: lassologistic/options/random_seed.title
 #: leaveonecenterout/options/random_seed.title
 #: likelihoodratio/options/randomSeed.title
 #: likelihoodratio/ui[8][4][0].label
@@ -133677,6 +133818,7 @@ msgstr ""
 #: jjscatterstats/options/seed.title
 #: jjwithinstats/options/seed.title
 #: lassocox/options/random_seed.title
+#: lassologistic/options/random_seed.title
 #: nogoldstandard/ui[2][0]/seed.label
 #: outlierdetection/options/seed.title
 #: pathagreement/options/seed.title
@@ -135018,9 +135160,9 @@ msgstr ""
 msgid "Reader input format"
 msgstr ""
 
-#: pathagreement/options/readerNegative.title
 #: agreementintro/options/negativeLabel.title
 #: agreementintro/ui[1][10].label
+#: pathagreement/options/readerNegative.title
 msgid "Reader negative label"
 msgstr ""
 
@@ -135028,9 +135170,9 @@ msgstr ""
 msgid "Reader pairs"
 msgstr ""
 
-#: pathagreement/options/readerPositive.title
 #: agreementintro/options/positiveLabel.title
 #: agreementintro/ui[1][9].label
+#: pathagreement/options/readerPositive.title
 msgid "Reader positive label"
 msgstr ""
 
@@ -135377,6 +135519,7 @@ msgstr ""
 
 #: adaptivetrialdesign/results/interimResults.columns.title
 #: advancedtrials/results/futility_analysis_results.columns.title
+#: agreementintro/ui[3].label
 #: batcheffect/results/summary.columns.title
 #: batcheffect/results/feature_quality.columns.title
 #: batcheffect/results/redundancy.columns.title
@@ -135440,7 +135583,6 @@ msgstr ""
 #: treatmentoptim/results/treatmentComparison.columns.title
 #: treatmentswitching/results/methodComparisonTable.columns.title
 #: treecompare/results/ranking_table.columns.title
-#: agreementintro/ui[3].label
 msgid "Recommendation"
 msgstr ""
 
@@ -136105,9 +136247,9 @@ msgstr ""
 msgid "Reference negative given negative call"
 msgstr ""
 
-#: pathagreement/options/referenceNegative.title
 #: agreementintro/options/referenceNegative.title
 #: agreementintro/ui[1][12].label
+#: pathagreement/options/referenceNegative.title
 msgid "Reference negative label"
 msgstr ""
 
@@ -136167,9 +136309,9 @@ msgid ""
 "calls \"{tpos}\"."
 msgstr ""
 
-#: pathagreement/options/referencePositive.title
 #: agreementintro/options/referencePositive.title
 #: agreementintro/ui[1][11].label
+#: pathagreement/options/referencePositive.title
 msgid "Reference positive label"
 msgstr ""
 
@@ -137043,6 +137185,10 @@ msgstr ""
 msgid "Relative %"
 msgstr ""
 
+#: lassologistic/results/methodComparison.columns.title
+msgid "Relative AUC Loss vs Full Model (%)"
+msgstr ""
+
 #: bayesianclinical/results/sensitivity_to_priors.columns.title
 msgid "Relative Change (%)"
 msgstr ""
@@ -137579,6 +137725,14 @@ msgid ""
 "Repeated Patient IDs require a prespecified patient mean or median. "
 "Independent-row inference cannot treat repeated patients as separate "
 "observations."
+msgstr ""
+
+#: R/lassologistic.b.R
+msgid ""
+"Repeated patient IDs were found among the analysis rows. This analysis "
+"requires independent observations and does not support repeated lesions, "
+"visits, or readings. Create a justified patient-level summary or use a model "
+"and validation method that account for clustering."
 msgstr ""
 
 #: R/agreementintro.b.R
@@ -142991,21 +143145,11 @@ msgstr ""
 msgid "Scenario name"
 msgstr ""
 
-#: lassologistic/results/scoringTable.columns.title
-msgid "Schneeweiss"
-msgstr ""
-
 #: clinicalscore/options/scoringMethod/schneeweiss.title
-#: lassologistic/options/scoringMethod/schneeweiss.title
 msgid "Schneeweiss (divide by smallest coefficient)"
 msgstr ""
 
-#: R/lassologistic.b.R
-msgid "Schneeweiss (primary)"
-msgstr ""
-
 #: R/clinicalscore.b.R
-#: R/lassologistic.b.R
 msgid "Schneeweiss method (Mehta et al. J Clin Epidemiol 2016)"
 msgstr ""
 
@@ -143172,6 +143316,14 @@ msgstr ""
 msgid "Score estimation"
 msgstr ""
 
+#: lassologistic/results/lookupTable.title
+msgid "Score Lookup (Observed Event Rates)"
+msgstr ""
+
+#: lassologistic/options/scoreLookupTable.title
+msgid "Score lookup table (observed event rates)"
+msgstr ""
+
 #: patientreported/results/score_distribution.columns.title
 #: qualityoflife/results/domain_configuration.columns.title
 msgid "Score Range"
@@ -143211,16 +143363,8 @@ msgstr ""
 msgid "Score-Outcome R-squared"
 msgstr ""
 
-#: lassologistic/results/lookupTable.title
-msgid "Score-to-Probability Lookup"
-msgstr ""
-
 #: clinicalscore/options/scoreLookup.title
 msgid "Score-to-Probability Lookup Table"
-msgstr ""
-
-#: lassologistic/options/scoreLookupTable.title
-msgid "Score-to-probability lookup table"
 msgstr ""
 
 #: clinicalscore/results/lookupTable.title
@@ -143267,13 +143411,13 @@ msgid "Scoring Distribution Plot"
 msgstr ""
 
 #: clinicalscore/options/scoringMethod.title
-#: lassologistic/options/scoringMethod.title
 #: patientreported/options/scoring_method.title
 msgid "Scoring Method"
 msgstr ""
 
 #: R/clinicalscore.b.R
 #: R/lassologistic.b.R
+#: lassologistic/options/scoringMethod.title
 msgid "Scoring method"
 msgstr ""
 
@@ -143284,10 +143428,6 @@ msgstr ""
 
 #: R/clinicalscore.b.R
 msgid "Scoring Methods:"
-msgstr ""
-
-#: R/lassologistic.b.R
-msgid "Scoring Scale Not Usable"
 msgstr ""
 
 #: clinicalscore/results/scoringTable.title
@@ -150357,6 +150497,12 @@ msgid ""
 "statistics and every other table use all %d patients."
 msgstr ""
 
+#: R/lassologistic.b.R
+msgid ""
+"Shown and applied as the shortest number that divides these cases exactly as "
+"the computed cut does, so the same patients earn the points: %s."
+msgstr ""
+
 #: R/ihcheterogeneity.b.R
 msgid "Shown to be below the threshold on their own (upper 95%% limit below it): %s."
 msgstr ""
@@ -151919,6 +152065,22 @@ msgstr ""
 
 #: R/nonparametric.b.R
 msgid "Smallest group: n=%d"
+msgstr ""
+
+#: lassologistic/options/scoringMethod/smallest.title
+msgid "Smallest-contribution units (divide by the smallest)"
+msgstr ""
+
+#: R/lassologistic.b.R
+#: lassologistic/results/scoringTable.columns.title
+msgid "Smallest-unit"
+msgstr ""
+
+#: R/lassologistic.b.R
+msgid ""
+"Smallest-unit method: each contribution divided by the smallest, rounded; a "
+"Sullivan-type scale with one point per smallest contribution (Sullivan et "
+"al. Stat Med 2004)"
 msgstr ""
 
 #: riverplot/options/smart_detection.title
@@ -153671,12 +153833,6 @@ msgstr ""
 msgid ""
 "Specified event level '%1$s' not found in the outcome variable. Observed "
 "levels: %2$s."
-msgstr ""
-
-#: R/lassologistic.b.R
-msgid ""
-"Specified event level '%1$s' not found in the outcome variable. Observed "
-"values: %2$s."
 msgstr ""
 
 #: R/agreement.b.R
@@ -158890,6 +159046,10 @@ msgstr ""
 msgid "suitable for analyzing treatment decision pathways and resource flows"
 msgstr ""
 
+#: R/lassologistic.b.R
+msgid "Sullivan-type (Sullivan et al. 2004), B = smallest contribution"
+msgstr ""
+
 #: clinicalscore/options/scoringMethod/sullivan.title
 msgid "Sullivan/D'Agostino (Framingham method)"
 msgstr ""
@@ -163496,9 +163656,9 @@ msgstr ""
 msgid "Tested Positive (%)"
 msgstr ""
 
+#: R/agreementintro.b.R
 #: classification/options/testing.title
 #: classification/ui[1][0][0].label
-#: R/agreementintro.b.R
 msgid "Testing"
 msgstr ""
 
@@ -163637,8 +163797,8 @@ msgstr ""
 msgid "Tetrachoric (binary-binary)"
 msgstr ""
 
-#: jjtreemap/ui[2][0].label
 #: R/agreementintro.b.R
+#: jjtreemap/ui[2][0].label
 msgid "Text"
 msgstr ""
 
@@ -163738,9 +163898,9 @@ msgstr ""
 #: R/lassologistic.b.R
 msgid ""
 "The 'Logistic' rows are unpenalized refits (shown for AIC comparability); "
-"their apparent AUC is typically higher than the penalized LASSO row because "
-"refitting removes LASSO shrinkage. All metrics are apparent (in-sample) - "
-"use Bootstrap Internal Validation for optimism-corrected discrimination."
+"their apparent AUC is typically higher than the penalized row because "
+"refitting removes shrinkage. All metrics are apparent (in-sample) - use "
+"Bootstrap Internal Validation for optimism-corrected discrimination."
 msgstr ""
 
 #: R/vartree.b.R
@@ -164439,6 +164599,29 @@ msgid ""
 "The same optimism affects the other rows in this table."
 msgstr ""
 
+#: R/lassologistic.b.R
+msgid ""
+"The calibration slope is not estimable: every case received the same "
+"predicted probability, so there is no linear predictor to calibrate."
+msgstr ""
+
+#: R/lassologistic.b.R
+msgid ""
+"The calibration slope is not estimable: the predicted probabilities separate "
+"the two outcome classes completely on these data, so the slope is infinite "
+"rather than a number. Treat the apparent performance as an artefact of "
+"separation."
+msgstr ""
+
+#: R/lassologistic.b.R
+msgid ""
+"The calibration-slope optimism rests on %1$d of the %2$d completed "
+"replicates: in the others the replicate model separated the outcome classes "
+"or gave every case the same probability, so it had no finite slope. "
+"Separation is most likely in the replicates that overfit most, so this "
+"correction may be too small."
+msgstr ""
+
 #: R/survivalcont.b.R
 msgid ""
 "The candidate space contains %s cut-off combinations. A reproducible random "
@@ -164869,6 +165052,17 @@ msgid ""
 "than, guessing."
 msgstr ""
 
+#: R/lassologistic.b.R
+msgid ""
+"The corrected AUC (%1$.3f) is in the poor band (below 0.7), so read the "
+"corrected calibration slope (%2$.3f) with caution: with this little "
+"discrimination it is unstable and may reflect chance associations rather "
+"than how far the penalty shrank the predictions. The bootstrap estimates the "
+"average optimism of the whole selection procedure, so when chance "
+"associations were selected in this dataset it can understate this model's "
+"optimism, and the corrected AUC may also be too high."
+msgstr ""
+
 #: R/enhancedROC.b.R
 msgid ""
 "The correction shown is the optimism of a logistic regression of the outcome "
@@ -165042,6 +165236,15 @@ msgid ""
 "Format (%s), so it was ignored and the reference line falls back to Custom "
 "Reference Time measured from the earliest start date. Enter the date in the "
 "same format as your data, or clear the box to use the offset deliberately."
+msgstr ""
+
+#: R/lassologistic.b.R
+msgid ""
+"The cut point for %s left no case on one side (nobody above it, or "
+"everybody), so it could separate no one and its points would rest on no "
+"contrast. It was moved to the sample median, or to just below the highest "
+"value when ties make the median the maximum. The criterion column shows the "
+"cut actually applied."
 msgstr ""
 
 #: R/lassologistic.b.R
@@ -165661,6 +165864,14 @@ msgid ""
 "confidence-interval tables are empty."
 msgstr ""
 
+#: R/lassologistic.b.R
+msgid ""
+"The EPV threshold of 10 comes from Peduzzi et al. (1996); the other bands "
+"are conventions. Rules of thumb like these should give way to sample-size "
+"criteria for prediction models (Riley et al. 2019, 2020), and penalization "
+"does not make a small sample reliable (Riley et al. 2021)."
+msgstr ""
+
 #: R/pathagreement.b.R
 msgid ""
 "The estimate is the mean of individual rater kappas against the reference "
@@ -166037,11 +166248,9 @@ msgstr ""
 
 #: R/lassologistic.b.R
 msgid ""
-"The generated scoring system reaches %d points for a single factor. A usable "
-"clinical score is typically under 20 points in total; this one is dominated "
-"by the ratio between the largest and smallest selected effects. Switch to "
-"the Max-scaled method or remove the near-zero predictor before using this "
-"score."
+"The generated scoring system gives a single factor %d points, more than the "
+"20 the Max-scaled method allows. Switch to the Max-scaled method before "
+"using this score at the bedside."
 msgstr ""
 
 #: eurostatmap/options/geo_level.description.jamovi
@@ -166440,6 +166649,16 @@ msgid ""
 "The interpretation column applies this module's own cut-points to each "
 "component's share of the total variance. They are a reading aid, not a "
 "published standard, so judge each share against the purpose of the study."
+msgstr ""
+
+#: R/lassologistic.b.R
+msgid ""
+"The interval beside the apparent AUC is DeLong's 95% CI computed on these "
+"fitted probabilities as if they were a fixed, pre-specified marker. It does "
+"not account for fitting the coefficients or for selecting the variables and "
+"lambda on the same patients, so it is centred on an optimistic estimate and "
+"can under-cover the model's discrimination in new patients. Enable Bootstrap "
+"Internal Validation for an optimism-corrected AUC."
 msgstr ""
 
 #: R/psychopdaROC.b.R
@@ -167567,6 +167786,13 @@ msgid ""
 "rate."
 msgstr ""
 
+#: R/lassologistic.b.R
+msgid ""
+"The outcome has %1$d observed levels (%2$s), but this analysis compares "
+"exactly two. Filter the data to the two levels to compare, or recode the "
+"outcome into two groups."
+msgstr ""
+
 #: R/enhancedROC.b.R
 msgid ""
 "The outcome is numeric and coded 0/1, so 1 is read as the positive class. If "
@@ -167624,6 +167850,10 @@ msgid ""
 "represents %s. Code 0 represents %s. The recoded variable '<b>myoutcome</b>' "
 "contains <b>%d %s (%.1f%%)</b> and <b>%d coded 0 (%.1f%%)</b> out of %d "
 "coded records.%s"
+msgstr ""
+
+#: R/lassologistic.b.R
+msgid "The outcome variable cannot also be an explanatory variable."
 msgstr ""
 
 #: coefplot/options/dep.description
@@ -167832,6 +168062,10 @@ msgid ""
 "tendencies cannot be compared on one scale; the model is not fitted."
 msgstr ""
 
+#: R/lassologistic.b.R
+msgid "The patient ID must be a separate identifier, not an outcome or predictor."
+msgstr ""
+
 #: R/vartree.b.R
 msgid ""
 "The pattern table could not be built for this combination of variables and "
@@ -167860,6 +168094,10 @@ msgid ""
 "The penalized (Firth) forest plot could not be produced, so the forest plot "
 "shows unpenalized maximum-likelihood odds ratios. These will not match the "
 "penalized estimates in the table above."
+msgstr ""
+
+#: R/lassologistic.b.R
+msgid "The penalized model retained no informative terms at the chosen lambda. %s"
 msgstr ""
 
 #: R/nogoldstandard.b.R
@@ -169680,8 +169918,8 @@ msgstr ""
 
 #: R/lassologistic.b.R
 msgid ""
-"The unpenalized refit on the LASSO-selected variables could not be fitted "
-"(%s), so its row is omitted."
+"The unpenalized refit on the retained terms could not be fitted (%s), so its "
+"row is omitted."
 msgstr ""
 
 #: R/categorize.b.R
@@ -171378,6 +171616,13 @@ msgid ""
 "external validation in the intended population."
 msgstr ""
 
+#: R/lassologistic.b.R
+msgid ""
+"This numeric outcome is not coded 0/1, so neither value can be assumed to be "
+"the event. Set the outcome's measure type to Nominal, then choose the 'Event "
+"level'."
+msgstr ""
+
 #: R/decisioncurve.b.R
 msgid ""
 "This only ranks the models against each other; it does not mean the model is "
@@ -171420,11 +171665,12 @@ msgstr ""
 
 #: R/lassologistic.b.R
 msgid ""
-"This point scale spans up to %d points per factor, which is too wide to be "
-"used as a bedside score. It happens when one selected predictor has a far "
-"smaller effect than the others and the chosen method scales relative to it. "
-"Try the Max-scaled method, which caps the strongest predictor at the Maximum "
-"Points you set, or drop the negligible predictor."
+"This point scale gives a single factor up to %d points, more than the 20 the "
+"Max-scaled method allows, which makes the total hard to add up at the "
+"bedside. Smallest-unit widens the scale when one selected predictor has a "
+"far smaller effect than the others; Beta10 does when a predictor's effect is "
+"large. Max-scaled caps the strongest predictor at the 'Maximum points per "
+"feature' you set."
 msgstr ""
 
 #: R/decisioncurve.b.R
@@ -177577,6 +177823,7 @@ msgstr ""
 #: R/reportcat.b.R
 #: R/summarydata.b.R
 #: agreement/results/levelInfoTable.columns.title
+#: agreementintro/results/columnSummary.columns.title
 #: classification/results/printRandForest/randomForestModel.columns.title
 #: crosstable/results/smdTable.columns.title
 #: decisiongraph/results/nodeTable.columns.title
@@ -177592,7 +177839,6 @@ msgstr ""
 #: survivalfeaturerank/results/rankingTable.columns.title
 #: toolssummary/results/summary.columns.title
 #: waterfallrecist/results/lesionTable.columns.title
-#: agreementintro/results/columnSummary.columns.title
 msgid "Type"
 msgstr ""
 
@@ -181180,6 +181426,7 @@ msgstr ""
 #: agreement/results/interIntraRaterIntraTable.columns.title
 #: agreement/results/interIntraRaterInterTable.columns.title
 #: agreement/results/agreementSampleSizeTable.columns.title
+#: agreementintro/results/settings.columns.title
 #: batcheffect/results/summary.columns.title
 #: bayesianci/results/dataInfo.columns.title
 #: bayesianclinical/results/bayesian_overview.columns.title
@@ -181475,7 +181722,6 @@ msgstr ""
 #: waterfall/results/responseDurationTable.columns.title
 #: waterfallrecist/results/recistSummary/orrConfirmed.columns.title
 #: waterfallrecist/results/recistSummary/dcrConfirmed.columns.title
-#: agreementintro/results/settings.columns.title
 msgid "Value"
 msgstr ""
 
@@ -186706,6 +186952,10 @@ msgstr ""
 
 #: R/jjridges.b.R
 msgid "Wide ridges = high variability; narrow ridges = consistent values"
+msgstr ""
+
+#: R/lassologistic.b.R
+msgid "Wide Scoring Scale"
 msgstr ""
 
 #: R/decisioncurve.b.R

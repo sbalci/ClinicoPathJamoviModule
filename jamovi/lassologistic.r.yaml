@@ -99,7 +99,6 @@ items:
           - nfolds
           - standardize
           - random_seed
-          - showModelComparison
 
     - name: performance
       title: Classification Performance
@@ -225,8 +224,10 @@ items:
         # A percentage (0-100), not a [0,1] proportion: zto forced it to three
         # fixed decimals ("3.200") and disabled scientific notation.
         # NOT `format: pc` either - the value is already multiplied by 100.
+        # (1 - score AUC / full-model AUC) x 100, both apparent. Not an information
+        # measure, hence not "Info Loss".
         - name: info_loss
-          title: "Info Loss vs Full Model (%)"
+          title: "Relative AUC Loss vs Full Model (%)"
           type: number
         - name: reference
           title: "Reference"
@@ -501,8 +502,9 @@ items:
         - name: model_type
           title: "Model Type"
           type: text
+        # Model terms (a k-level factor is k-1), as in the Model Summary.
         - name: n_variables
-          title: "N Variables"
+          title: "N Terms"
           type: integer
         - name: auc
           title: "AUC"

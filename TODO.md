@@ -1,3 +1,75 @@
+# lassologistic — fixes from `/check-function-full` (2026-10-12, done, uncommitted)
+
+Acceptance: each finding has a test that fails on HEAD's `.b.R`/`.h.R` and passes now; every lassologistic test
+file green with 0 skips; the bootstrap oracle still exact; `prepare()` changes only `lassologistic.h.R`; release
+gate with lassologistic counted as shipped unchanged; lassologistic Turkish restored (`msgfmt -c` clean).
+- [x] M1 default `scoringMethod` = maxscaled (also the compare-mode primary); wide-scale guard at 20 points/factor
+- [x] M2 notices sorted most severe first (`.renderNotices`)
+- [x] M3 bootstrap summary cached in `validationTable` state with an input key; rows and notes rebuilt each run
+- [x] L4 outcome listed as a predictor is refused (R API)
+- [x] L5 >2 observed outcome levels refused (was: reference inferred from level order); dead accounting removed
+- [x] L6 ROC caveat moved to the subtitle; the legend keeps the short AUC line at bottom-right
+- [x] L7/L8 column titles "Relative AUC Loss vs Full Model (%)" and "N Terms"
+- [x] L9 note when the slope optimism rests on a subset of replicates (common: 20 of 24 small fixtures)
+- [x] L10 `i18nUpdate()` + Turkish for the 121 untranslated lassologistic msgids (45 lost to rewording today)
+- [x] L11 spurious `showModelComparison` in coefficients clearWith; unreachable `.computePoints` branch
+- Not done, by decision: guarding the predictions Output with `enabled` - R's OptionOutput is FALSE and the
+  wrapper cannot set it, so 5 oracle tests (C17/C55 filtered rows) would lose the values they check.
+- [x] Verify: tests, old-vs-new, oracle, gate, `document()`, PNG
+
+**Results.** Code: `R/lassologistic.b.R` (`.renderNotices` sort; `.bootstrapValidation` now caches
+`.bootstrapSummary()` in `validationTable` state keyed on options + data fingerprint; two `reject()`s in
+`.cleanData`; scoring default/guard; ROC caveat as `plot(sub=)`), `jamovi/lassologistic.a.yaml` (default),
+`jamovi/lassologistic.r.yaml` (two titles, one clearWith entry). Regenerated: `R/lassologistic.h.R` (8 lines,
+only file `prepare()` changed), `man/lassologistic.Rd`. i18n: lassologistic 394/394 in Turkish (was 325/366;
+121 new via three translation batches, terms harmonised: tekrar, görünürdeki, Puan Başvuru Tablosu, PPD),
+`msgfmt -c` clean on tr/en, no other analysis's Turkish changed. Tests: new
+`test-lassologistic-fix-2026-10-12.R` (6 blocks, all red on HEAD's `.b.R`/`.h.R`); four existing blocks in
+`test-lassologistic.R` moved to the new >2-level refusal and wide-scale threshold. 7 files, 123 blocks,
+0 failures/skips. Bootstrap still matches an independent Harrell replication (2.8e-17); a cached re-run
+takes 0.39 s instead of 25.6 s (n = 1500, p = 30, B = 200) with an identical table; state is 961 bytes.
+- [ ] Before promotion: open in jamovi and toggle a checkbox with bootstrap on (expect instant, notes intact);
+      change a row filter (expect a recompute); check the Turkish panels.
+
+## lassologistic — `/review-function` follow-ups (2026-10-12, done, uncommitted)
+
+Acceptance: each of R1-R8 has a test that fails before the change and passes after; every lassologistic test
+file green with 0 skips; `prepare()` clean; release gate with lassologistic counted as shipped unchanged; new
+msgids translated, `msgfmt -c` clean; the regenerated `lassologistic_pannen` gives apparent AUC < 1 and an
+estimable calibration slope under the defaults and lambda.min.
+- [x] R1 `slope_low_auc` caution note when the corrected AUC is in the poor band; `calibration_note` qualified
+- [x] R2 `lassologistic_pannen` regenerated (n = 200, overlapping classes): apparent AUC 0.961 (1SE) / 0.974
+      (min), ~0.94 in new data, corrected slope 1.64 / 1.06, every bootstrap slope finite, EPV not red
+- [x] R3 `reference_note` names each selected factor's reference level
+- [x] R4 lambda printed `%.4g`
+- [x] R5 data-derived cuts printed and applied as the shortest decimal with identical awards (`.niceCut`),
+      disclosed in a `cut_rounded` note; typed cuts untouched
+- [x] R6 character/logical predictors become factors (R API)
+- [x] R7 eleven option titles sentence case; backend sentences quote the new labels
+- [x] R8 CV plot top axis "Non-zero terms", counted with the coefficient table's zero rule (`.pathKept`, shared
+      with Variable Importance)
+- [x] Codex plan critique adopted: complete-case `droplevels()` + contrasts attribute stripped (an unused
+      first level left the dummies collinear against an empty reference), `rlang::hash()` bootstrap cache key
+      (sums + index-weighted sums collided), softer R1 wording, WHO grading wording in the generator.
+      Declined: an exact 1074-digit grid search for subnormal cuts (marked `ponytail:`), versioning the CV state.
+- [x] Verify: tests, red-on-backup, prepare(), document(), gate, i18n, PNG, oracle script
+
+**Results.** Code: `R/lassologistic.b.R`; `jamovi/lassologistic.a.yaml` (titles only); data:
+`data-raw/create_lassologistic_test_data.R`, `data/lassologistic_pannen.rda`, `data-raw/non-rda/lassologistic_pannen.{csv,omv}`,
+`R/data-datasets.R` → `man/lassologistic_pannen-data.Rd` (the only file `document()` changed). `prepare()` changed no
+file (titles are not in `.h.R`). i18n: 14 msgids added, 10 obsolete pruned, all Turkish (299/299 backend msgids),
+no other translation changed, `msgfmt -c` clean. Tests: new `test-lassologistic-review-2026-10-12.R` (9 blocks,
+all red on the backed-up code and data); five existing tests moved off old behaviour (separation fixture made
+synthetic; mean/median/fallback cut tests assert identical awards; M2 serious-warning fixture; M3 hash tamper;
+lambda format). 6 lassologistic files + rendering contract + file naming: 132 blocks, 622 expectations, 0
+failures/skips. Gate with lassologistic as shipped identical to the normal run (0 blocking). Oracle script
+`development-scripts/validate_lassologistic.R` (untracked): cut and lambda rules updated; versus a baseline run on
+the pre-change code it has 0 new FAILs and 1 fewer.
+- [ ] Oracle script is stale: 31 FAILs predate these fixes (C58 ROC state schema, C20/C27 wording, C18 scale
+      note, C14 scaling assumptions, section D 3-level fixture) - refresh it against today's intended behaviour.
+- [x] Stale `.git/index.lock` (0 bytes, 15:05) blocked git writes; no git process was running. Removed.
+- [ ] Before promotion: the in-jamovi check above, plus the CV plot top axis and the new notes in Turkish.
+
 # enhancedROC — `/fix-function --apply` (2026-10-11, done, uncommitted)
 
 Fresh diagnosis after the release review: wiring script (90 options, 44 results, clearWith, u.yaml enables,

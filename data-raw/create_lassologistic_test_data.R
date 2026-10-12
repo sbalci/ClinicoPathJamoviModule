@@ -8,78 +8,71 @@
 set.seed(2026)
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# Dataset 1: PanNEN Diagnostic Classification (n=120)
-# Modeled after Kinowaki et al. 2026 PanNET G3 vs PanNEC study
+# Dataset 1: PanNEN Diagnostic Classification (n=200)
+# Loosely modeled on PanNET G3 vs PanNEC series.
+#
+# The classes OVERLAP on purpose. The first version (n = 120) separated them
+# completely: mitoses Poisson(8) vs Poisson(22) nearly split the classes alone,
+# coexisting carcinoma never occurred in a NET, and half the NET G3 had Ki-67 at or
+# below 20% with mitoses mostly under 20/2 mm2, which is grade 2, not grade 3. Under
+# the defaults the demo then showed an apparent AUC of 1.000, a calibration slope
+# that could not be estimated, and scoring odds ratios in the tens of thousands. Now (seed 2026, all 12 candidates):
+# apparent AUC 0.961 with the 1SE rule and 0.974 with Minimum CV Error, about 0.94
+# in new data from this generator, and an estimable calibration slope.
+# n = 200 keeps the events per model term above 5 with all 12 candidates.
 # ═══════════════════════════════════════════════════════════════════════════════
 
-n <- 120
-n_net <- 60  # PanNET G3
-n_nec <- 60  # PanNEC
+n_net <- 100  # PanNET G3
+n_nec <- 100  # PanNEC
+n <- n_net + n_nec
 
 diagnosis <- factor(c(rep("PanNET_G3", n_net), rep("PanNEC", n_nec)))
 
-# IHC markers with realistic discriminative power
-# p53: aberrant in ~10% NET G3, ~80% NEC
-p53_aberrant <- factor(c(
-  rbinom(n_net, 1, 0.10),
-  rbinom(n_nec, 1, 0.80)
-), labels = c("Normal", "Aberrant"))
+# A binary feature with probability p[1] in NET G3 and p[2] in NEC. levels = 0:1 keeps
+# both labels even if a draw happens to contain one value only.
+by_class <- function(p, labels) factor(c(rbinom(n_net, 1, p[1]), rbinom(n_nec, 1, p[2])),
+                                       levels = 0:1, labels = labels)
 
-# Rb1: lost in ~7% NET G3, ~75% NEC
-rb1_loss <- factor(c(
-  rbinom(n_net, 1, 0.07),
-  rbinom(n_nec, 1, 0.75)
-), labels = c("Retained", "Lost"))
+# p53: aberrant in ~12% NET G3, ~65% NEC
+p53_aberrant <- by_class(c(0.12, 0.65), c("Normal", "Aberrant"))
 
-# SSTR2A score (ordinal 0-3): high in NET G3, low in NEC
+# Rb1: lost in ~8% NET G3, ~55% NEC
+rb1_loss <- by_class(c(0.08, 0.55), c("Retained", "Lost"))
+
+# SSTR2A score (ordinal 0-3): higher in NET G3, lower in NEC
 sstr2a_score <- c(
-  sample(0:3, n_net, replace = TRUE, prob = c(0.05, 0.05, 0.25, 0.65)),
-  sample(0:3, n_nec, replace = TRUE, prob = c(0.50, 0.25, 0.15, 0.10))
+  sample(0:3, n_net, replace = TRUE, prob = c(0.15, 0.15, 0.30, 0.40)),
+  sample(0:3, n_nec, replace = TRUE, prob = c(0.35, 0.25, 0.25, 0.15))
 )
 
 # SSTR2A 3+ (binary threshold)
 sstr2a_3plus <- factor(ifelse(sstr2a_score >= 3, "Positive", "Negative"))
 
-# Ki-67 index (continuous, right-skewed)
+# Ki-67 index. Simulated NET G3 are grade 3 through Ki-67 (> 20%; WHO grades by the higher of
+# Ki-67 and the mitotic count). NET G3 median ~36%, NEC ~60%, with the overlap seen in practice.
 ki67_pct <- c(
-  pmax(3, pmin(95, rlnorm(n_net, meanlog = 3.0, sdlog = 0.4))),   # NET G3: median ~20%
-  pmax(3, pmin(95, rlnorm(n_nec, meanlog = 3.8, sdlog = 0.5)))    # NEC: median ~45%
+  pmin(95, 20 + rlnorm(n_net, meanlog = log(16), sdlog = 0.75)),
+  pmin(98, pmax(21, rnorm(n_nec, mean = 60, sd = 20)))
 )
 
 # Ki-67 >40% (binary threshold)
-ki67_above40 <- factor(ifelse(ki67_pct > 40, "Above_40", "Below_40"))
+# Below_40 is the reference level, so the model term reads "Above_40 vs Below_40".
+ki67_above40 <- factor(ifelse(ki67_pct > 40, "Above_40", "Below_40"), levels = c("Below_40", "Above_40"))
 
-# DAXX/ATRX loss: ~48% in NET G3, ~10% in NEC
-daxx_atrx_loss <- factor(c(
-  rbinom(n_net, 1, 0.48),
-  rbinom(n_nec, 1, 0.10)
-), labels = c("Retained", "Lost"))
+# DAXX/ATRX loss: ~40% in NET G3, ~12% in NEC
+daxx_atrx_loss <- by_class(c(0.40, 0.12), c("Retained", "Lost"))
 
-# Morphologic features
-organoid_pattern <- factor(c(
-  rbinom(n_net, 1, 0.83),
-  rbinom(n_nec, 1, 0.41)
-), labels = c("Absent", "Present"))
+# Morphologic features (weakly discriminating)
+organoid_pattern <- by_class(c(0.65, 0.50), c("Absent", "Present"))
+plasmacytoid_cells <- by_class(c(0.50, 0.40), c("Absent", "Present"))
+interstitial_reaction <- by_class(c(0.45, 0.60), c("Absent", "Present"))
+coexist_carcinoma <- by_class(c(0.03, 0.20), c("No", "Yes"))
 
-plasmacytoid_cells <- factor(c(
-  rbinom(n_net, 1, 0.83),
-  rbinom(n_nec, 1, 0.38)
-), labels = c("Absent", "Present"))
-
-interstitial_reaction <- factor(c(
-  rbinom(n_net, 1, 0.38),
-  rbinom(n_nec, 1, 0.79)
-), labels = c("Absent", "Present"))
-
-coexist_carcinoma <- factor(c(
-  rbinom(n_net, 1, 0.00),
-  rbinom(n_nec, 1, 0.35)
-), labels = c("No", "Yes"))
-
-# Mitotic count per 10 HPF (count data)
+# Mitotic count per 2 mm2 (WHO): overdispersed counts that overlap between the grades. Many NET G3
+# fall below the 20/2 mm2 grade 3 threshold, which is consistent with grade 3 by Ki-67.
 mitotic_count <- c(
-  rpois(n_net, lambda = 8),
-  rpois(n_nec, lambda = 22)
+  rnbinom(n_net, mu = 14, size = 2),
+  rnbinom(n_nec, mu = 22, size = 2)
 )
 
 # Continuous covariates
@@ -164,7 +157,8 @@ readr::write_csv(lassologistic_pannen,
 # OMV
 if (requireNamespace("jmvReadWrite", quietly = TRUE)) {
   jmvReadWrite::write_omv(lassologistic_pannen,
-                          here::here("data-raw", "non-rda", "lassologistic_pannen.omv"))
+                          here::here("data-raw", "non-rda", "lassologistic_pannen.omv"),
+                          frcWrt = TRUE)
 }
 
 cat("Test data generation complete.\n")

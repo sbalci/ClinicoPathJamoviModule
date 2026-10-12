@@ -30,8 +30,10 @@ test_that("IR-01 printed scoring rules reproduce every award, including tiny cut
   st <- r$scoringTable$asDF
   expect_true("x1" %in% st$variable)
   cut <- as.numeric(sub("^> ", "", st$criterion))
-  raw_cut <- vapply(st$variable, function(v) median(d[[v]]), 0)
-  expect_identical(cut, unname(raw_cut))
+  raw_cut <- unname(vapply(st$variable, function(v) median(d[[v]]), 0))
+  # Printed as the shortest decimal that splits like the median (review R5, 2026-10-12), so the
+  # cut need not equal the median, but it must award exactly the same cases, tiny cuts included.
+  for (i in seq_along(cut)) expect_identical(d[[st$variable[i]]] > cut[i], d[[st$variable[i]]] > raw_cut[i])
   published <- rowSums(vapply(seq_len(nrow(st)), function(i)
     (d[[st$variable[i]]] > cut[i]) * st$points[i], numeric(nrow(d))))
   expected <- rowSums(vapply(seq_len(nrow(st)), function(i)

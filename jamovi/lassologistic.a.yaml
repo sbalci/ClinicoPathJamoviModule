@@ -38,7 +38,7 @@ options:
     # allowNone: without it the jamovi client pre-selects levels[0] - usually the
     # reference level - and every odds ratio comes out inverted. Never inferred.
     - name: outcomeLevel
-      title: Event Level
+      title: Event level
       type: Level
       variable: (outcome)
       allowNone: true
@@ -63,7 +63,7 @@ options:
           Constant variables are removed automatically.
 
     - name: penalty
-      title: Penalty Type
+      title: Penalty type
       type: List
       options:
         - title: LASSO (L1)
@@ -80,7 +80,7 @@ options:
           Elastic Net combines both.
 
     - name: alpha
-      title: Elastic Net Mixing (0=Ridge, 1=LASSO)
+      title: Elastic net mixing (0 = ridge, 1 = LASSO)
       type: Number
       default: 0.5
       min: 0.01
@@ -90,7 +90,7 @@ options:
           Mixing parameter for elastic net. Only used when penalty is elasticnet.
 
     - name: lambda
-      title: Lambda Selection Method
+      title: Lambda selection method
       type: List
       options:
         - title: Minimum CV Error
@@ -104,7 +104,7 @@ options:
           1SE rule tends to select fewer variables (more conservative).
 
     - name: nfolds
-      title: Number of CV Folds
+      title: Number of CV folds
       type: Integer
       default: 10
       min: 3
@@ -114,7 +114,7 @@ options:
           when sample size is limited.
 
     - name: random_seed
-      title: Random Seed
+      title: Random seed
       type: Integer
       default: 123456
       min: 1
@@ -153,7 +153,7 @@ options:
           observation in a bootstrap sample remain in the same CV fold.
 
     - name: bootstrapN
-      title: Bootstrap Iterations
+      title: Bootstrap iterations
       type: Integer
       default: 200
       min: 50
@@ -192,7 +192,7 @@ options:
           Multiple methods available following published standards.
 
     - name: scoringMethod
-      title: Scoring Method
+      title: Scoring method
       type: List
       options:
         - title: "Beta10 (coefficient x 10, rounded)"
@@ -203,7 +203,7 @@ options:
           name: maxscaled
         - title: "Compare All Methods"
           name: compare
-      default: smallest
+      default: maxscaled
       description:
         R: >
           Method for converting each predictor's log-odds contribution (the coefficient
@@ -219,12 +219,13 @@ options:
           option was previously labelled "Sullivan/D'Agostino"; it is not the Sullivan 2004
           Framingham procedure, which awards points per category of each factor relative to a
           reference factor's per-category distance.
-          Compare: generate all three and show performance comparison. Every method
+          Compare: generate all three and show performance comparison; the selected points
+          and score performance then use Max-scaled, the default. Every method
           gives a selected predictor at least one point (of its sign) when its points
           would round to zero, and caps a single predictor at 1000 points.
 
     - name: scoringMaxPoints
-      title: Maximum Points per Feature
+      title: Maximum points per feature
       type: Integer
       default: 10
       min: 3
@@ -236,7 +237,7 @@ options:
           smallest contribution and also ignores it.
 
     - name: scoreCutMethod
-      title: Cut Point for Continuous Predictors
+      title: Cut point for continuous predictors
       type: List
       options:
         - title: "Median of this dataset"
@@ -260,7 +261,7 @@ options:
           transportability; the score still requires external validation.
 
     - name: scoreCutPoints
-      title: Manual Cut Points
+      title: Manual cut points
       type: String
       default: ''
       description:

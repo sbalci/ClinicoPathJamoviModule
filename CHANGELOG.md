@@ -5,6 +5,45 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-10-12 — lassologistic: a demo that only showed the guards, and a fingerprint that was not a hash
+
+- **Failure mode:** the bundled `lassologistic_pannen` separated the classes completely, so the default
+  demo showed apparent AUC 1.000, "not estimable" calibration and scoring odds ratios of 5.3e4. Two
+  tests used that demo AS their separation fixture, so fixing the data broke them. The bootstrap cache
+  key (column sums + index-weighted sums) kept its value when (1, -2, 1) was added to three
+  consecutive rows. The calibration note read a corrected slope > 1 as "too moderate" even when no
+  predictor carried signal.
+- **Detection:** `/review-function` ran the defaults on the bundled data and simulated bootstrap-corrected
+  against external performance (12 null datasets: corrected AUC up to 0.64, slope up to 2.3, external
+  AUC 0.50). A Codex plan critique found the fingerprint collision and the first-level-unused reference.
+- **Repair:** regenerated example data with clinical overlap (apparent AUC 0.961, about 0.94 in new
+  data); synthetic fixtures for the separated and serious-warning tests; `rlang::hash()` cache key;
+  a caution note when the corrected AUC is poor. Tests in `test-lassologistic-review-2026-10-12.R`.
+- **Rule:** an example dataset must exercise the normal path. Run the defaults on it and check that no
+  degenerate branch fires. A test of a degenerate branch builds its own fixture, never the demo data.
+  A cache key over data is a hash, not a set of moments.
+
+---
+
+## 2026-10-12 — lassologistic: a guard that contradicted itself, and a cache that must rebuild its notes
+
+- **Failure mode:** the wide-score guard fired above 100 points for one factor while its own text said a
+  usable score stays under 20 in total, so the default Smallest-unit score on the bundled PanNEN data
+  (-23 to 120) passed with no warning. Separately, every option toggle re-ran 200 bootstrap `cv.glmnet`
+  refits (26 s at n = 1500, p = 30), and notices rendered in the order raised, so an INFO sat above
+  every warning.
+- **Detection:** `/check-function-full` comparing the three scoring methods on the bundled example,
+  timing the bootstrap, and reading the rendered notice order.
+- **Repair:** Max-scaled is the default and the compare-mode primary; the guard uses 20 points, the
+  `scoringMaxPoints` maximum. The bootstrap summary is kept in `validationTable$setState()` with a key
+  over the options and a data fingerprint, and rows AND notes are rebuilt from it every run.
+  `.renderNotices()` sorts by severity. Tests in `test-lassologistic-fix-2026-10-12.R`, all red on HEAD.
+- **Rule:** a guard's threshold and its message must state the same number. When a `.run()` result is
+  cached across runs, rebuild its notes from the cache: jmvcore restores cells and `state` from the saved
+  result but never the notes set in `.run()`, so caching values alone shows a table stripped of caveats.
+
+---
+
 ## 2026-10-12 — lassologistic: ordinal predictors, scoring eponyms, an unseen plot line
 
 - **Failure mode:** an Ordinal (ordered-factor) predictor went through `model.matrix`

@@ -219,8 +219,8 @@ test_that("C31-C37 points, criteria and odds ratios follow the documented rules 
   expect_equal(st$oddsRatio, unname(exp(contrib)), tolerance = 1e-8)
   expect_equal(as.numeric(st$points), unname(as.numeric(pts)))
   if ("Ki-67 (%)" %in% ct$terms)
-    expect_equal(st$criterion[st$variable == "Ki-67 (%)"],
-                 sprintf("> %s", sprintf("%.17g", stats::median(d[["Ki-67 (%)"]]))))
+    expect_identical(as.numeric(sub("^> ", "", st$criterion[st$variable == "Ki-67 (%)"])),
+                     stats::median(d[["Ki-67 (%)"]]))
 })
 
 # ── RNG hygiene ──────────────────────────────────────────────────────────────

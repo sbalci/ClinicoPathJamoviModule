@@ -22,7 +22,7 @@ lassologisticOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             coef_plot = TRUE,
             roc_plot = TRUE,
             scoringSystem = FALSE,
-            scoringMethod = "smallest",
+            scoringMethod = "maxscaled",
             scoringMaxPoints = 10,
             scoreCutMethod = "median",
             scoreCutPoints = "",
@@ -139,7 +139,7 @@ lassologisticOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "smallest",
                     "maxscaled",
                     "compare"),
-                default="smallest")
+                default="maxscaled")
             private$..scoringMaxPoints <- jmvcore::OptionInteger$new(
                 "scoringMaxPoints",
                 scoringMaxPoints,
@@ -435,8 +435,7 @@ lassologisticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "alpha",
                     "nfolds",
                     "standardize",
-                    "random_seed",
-                    "showModelComparison")))
+                    "random_seed")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="performance",
@@ -576,7 +575,7 @@ lassologisticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `format`="zto"),
                     list(
                         `name`="info_loss", 
-                        `title`="Info Loss vs Full Model (%)", 
+                        `title`="Relative AUC Loss vs Full Model (%)", 
                         `type`="number"),
                     list(
                         `name`="reference", 
@@ -859,7 +858,7 @@ lassologisticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `type`="text"),
                     list(
                         `name`="n_variables", 
-                        `title`="N Variables", 
+                        `title`="N Terms", 
                         `type`="integer"),
                     list(
                         `name`="auc", 
@@ -969,7 +968,8 @@ lassologisticBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   maximum. This option was previously labelled "Sullivan/D'Agostino"; it is
 #'   not the Sullivan 2004 Framingham procedure, which awards points per
 #'   category of each factor relative to a reference factor's per-category
-#'   distance. Compare: generate all three and show performance comparison.
+#'   distance. Compare: generate all three and show performance comparison; the
+#'   selected points and score performance then use Max-scaled, the default.
 #'   Every method gives a selected predictor at least one point (of its sign)
 #'   when its points would round to zero, and caps a single predictor at 1000
 #'   points.
@@ -1056,7 +1056,7 @@ lassologistic <- function(
     coef_plot = TRUE,
     roc_plot = TRUE,
     scoringSystem = FALSE,
-    scoringMethod = "smallest",
+    scoringMethod = "maxscaled",
     scoringMaxPoints = 10,
     scoreCutMethod = "median",
     scoreCutPoints = "",

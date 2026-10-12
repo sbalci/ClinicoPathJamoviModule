@@ -53,7 +53,7 @@ test_that("lambda, coefficients and apparent AUC match a hand-built glmnet pipel
   d <- ll_fixture(); ref <- ll_reference(d)
   res <- ll_run(d)
   ms <- res$modelSummary$asDF
-  expect_equal(ms$value[ms$statistic == "Lambda (optimal)"], sprintf("%.4f", ref$lambda))
+  expect_equal(ms$value[ms$statistic == "Lambda (optimal)"], sprintf("%.4g", ref$lambda))
   expect_equal(as.integer(ms$value[ms$statistic == "Terms selected"]), length(ref$sel))
 
   cf <- res$coefficients$asDF
@@ -176,8 +176,11 @@ test_that("IR-03 a manual cut above every value is moved inside the data, never 
   res <- ll_run(d, scoringSystem = TRUE, scoreCutMethod = "manual", scoreCutPoints = "ki67=1000")
   st <- res$scoringTable$asDF
   expect_true("ki67" %in% st$variable)
-  expect_equal(st$criterion[st$variable == "ki67"],
-               paste0("> ", sprintf("%.17g", stats::median(d$ki67))))
+  # the printed cut is the applied cut and splits the cases exactly as the median does (printed as
+  # the shortest such decimal since review R5, 2026-10-12)
+  crit <- st$criterion[st$variable == "ki67"]
+  expect_match(crit, "^> ")
+  expect_identical(d$ki67 > as.numeric(sub("^> ", "", crit)), d$ki67 > stats::median(d$ki67))
   notes <- ll_notes(res$scoringTable)
   expect_true(any(grepl("ki67", notes, fixed = TRUE) & grepl("left no case on one side", notes, fixed = TRUE)))
 })
@@ -235,4 +238,39 @@ test_that("IR-07/IR-10 guidance and suitability text do not overclaim", {
   res <- ll_run(d, includeClinicalGuidance = TRUE)
   expect_false(grepl("most useful", res$clinicalGuidance$content, fixed = TRUE))
   expect_false(grepl("adequate", res$suitabilityReport$content, fixed = TRUE))
+})
+
+test_that("Printed cut points are exact and readable: a typed 19.65 prints as 19.65", {
+  # %.17g printed "19.649999999999999"; rounding to 3 dp misstated the rule applied.
+  d <- ll_fixture()
+  res <- ll_run(d, scoringSystem = TRUE, scoreCutMethod = "manual", scoreCutPoints = "ki67=19.65")
+  st <- res$scoringTable$asDF
+  expect_true("ki67" %in% st$variable)
+  expect_equal(st$criterion[st$variable == "ki67"], "> 19.65")
+  # A data-derived cut is printed as the shortest decimal that splits the cases exactly as the
+  # mean does (review R5, 2026-10-12): it used to print all 15 digits of mean(ki67).
+  res_mean <- ll_run(d, scoringSystem = TRUE, scoreCutMethod = "mean")
+  crit <- res_mean$scoringTable$asDF$criterion[res_mean$scoringTable$asDF$variable == "ki67"]
+  cut <- as.numeric(sub("^> ", "", crit))
+  expect_identical(d$ki67 > cut, d$ki67 > mean(d$ki67))
+  expect_lte(nchar(sub("^> ", "", crit)), 6)
+})
+
+test_that("A separated model reports no calibration slope instead of an arbitrary glm value", {
+  # The bundled PanNEN example used to separate completely at lambda.1se (apparent AUC 1); glm then
+  # stopped at slope 11.9 (apparent) and 48.6 (corrected), shown as calibration slopes. That data
+  # now overlaps (review R2, 2026-10-12), so the separation is built here: x1 splits the classes.
+  set.seed(11)
+  y <- rep(0:1, each = 40)
+  d <- data.frame(x1 = ifelse(y == 1, runif(80, 3, 5), runif(80, 0, 2)), x2 = rnorm(80), x3 = rnorm(80),
+                  dx = factor(ifelse(y == 1, "case", "ctrl")))
+  args <- list(data = d, outcome = "dx", outcomeLevel = "case", explanatory = c("x1", "x2", "x3"),
+               bootstrapValidation = TRUE, bootstrapN = 50)
+  res <- suppressWarnings(do.call(ClinicoPath::lassologistic, args))
+  vt <- res$validationTable$asDF
+  slope <- vt[gsub('^"|"$', "", rownames(vt)) == "slope", ]
+  expect_true(is.na(slope$apparent) && is.na(slope$optimism) && is.na(slope$corrected))
+  expect_true(any(grepl("separate the two outcome classes completely", ll_notes(res$validationTable), fixed = TRUE)))
+  auc <- vt[gsub('^"|"$', "", rownames(vt)) == "auc", ]
+  expect_true(is.finite(auc$corrected))
 })

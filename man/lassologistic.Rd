@@ -22,7 +22,7 @@ lassologistic(
   coef_plot = TRUE,
   roc_plot = TRUE,
   scoringSystem = FALSE,
-  scoringMethod = "smallest",
+  scoringMethod = "maxscaled",
   scoringMaxPoints = 10,
   scoreCutMethod = "median",
   scoreCutPoints = "",
@@ -107,7 +107,8 @@ multiply by scoringMaxPoints, so the strongest predictor scores exactly the
 maximum. This option was previously labelled "Sullivan/D'Agostino"; it is
 not the Sullivan 2004 Framingham procedure, which awards points per
 category of each factor relative to a reference factor's per-category
-distance. Compare: generate all three and show performance comparison.
+distance. Compare: generate all three and show performance comparison; the
+selected points and score performance then use Max-scaled, the default.
 Every method gives a selected predictor at least one point (of its sign)
 when its points would round to zero, and caps a single predictor at 1000
 points.}

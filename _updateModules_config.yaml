@@ -167,6 +167,11 @@ modules:
       # is promoted, uncomment: the Pathologist Grading Analysis example (6 pathologists x 150
       # biopsies, ISUP grade groups, incomplete design, known truth; data-raw/generate_agreement_grading_data.R).
       # - "agreement_grading.rda"
+      # lassologistic is parked (menuGroup: meddecideT), so its example data do not ship yet. When
+      # it is promoted, uncomment: PanNET G3 vs PanNEC (n = 120, IHC + morphology + clinical) and a
+      # small 40-row fixture; data-raw/create_lassologistic_test_data.R.
+      # - "lassologistic_pannen.rda"
+      # - "lassologistic_small.rda"
   jsurvival:
     directory: "/Users/serdarbalci/Documents/GitHub/jsurvival"
     menu_groups: ["Survival"]

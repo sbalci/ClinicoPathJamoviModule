@@ -362,19 +362,22 @@ test_that("Invalid outcomeLevel is rejected with a clear message", {
   )
 })
 
-test_that("More than two outcome levels warns and models two classes", {
+test_that("More than two outcome levels is refused, not narrowed to an inferred pair", {
+  # The reference used to be the first non-event level in level order and the other
+  # levels were dropped, so which two groups were compared was inferred, not chosen.
   set.seed(4)
   n <- 150
   d <- data.frame(
     y = factor(sample(c("A", "B", "C"), n, replace = TRUE), levels = c("A", "B", "C")),
     x1 = rnorm(n), x2 = rnorm(n), x3 = rnorm(n)
   )
-
-  result <- ll(d, outcome = "y", explanatory = c("x1", "x2", "x3"),
-               outcomeLevel = "B", lambda = "lambda.min")
-
-  # A non-binary WARNING notice is rendered into the notices HTML block.
-  expect_match(result$notices$content, "observed levels")
+  expect_error(ll(d, outcome = "y", explanatory = c("x1", "x2", "x3"), outcomeLevel = "B"),
+               "3 observed levels (A, B, C)", fixed = TRUE)
+  # filtered to the two levels to compare, the same data runs
+  d2 <- droplevels(d[d$y != "C", ])
+  res <- ll(d2, outcome = "y", explanatory = c("x1", "x2", "x3"), outcomeLevel = "B")
+  expect_equal(res$modelSummary$asDF$value[res$modelSummary$asDF$statistic == "Reference class"],
+               sprintf("A (n=%d)", sum(d2$y == "A")))
 })
 
 test_that("Coefficients table no longer exposes empty CI columns", {
@@ -521,26 +524,23 @@ test_that("complete-case exclusions are disclosed", {
   expect_true(any(grepl("predictor missing", ms[[1]])))
 })
 
-test_that("out-of-model outcome levels are not blamed on missing predictors", {
+test_that("a >2-level outcome is refused before any row is dropped as out of scope", {
   skip_if_not_installed("glmnet")
-  # A >2-level outcome drops the non-modelled levels. Those rows are out of
-  # scope, NOT incomplete: reporting them as "at least one selected variable
-  # was missing" sent the reader hunting a sparse predictor that did not exist.
+  # It used to drop the non-modelled levels and report them as excluded rows; the
+  # analysis now refuses and names the levels, so no row is silently out of scope.
   d <- lasso_fixture()
   d$site <- factor(rep(c("A", "B", "C", "D"), length.out = nrow(d)))
-  res <- ClinicoPath::lassologistic(
+  expect_error(ClinicoPath::lassologistic(
     data = d, outcome = "site", outcomeLevel = "A",
-    explanatory = c("p53", "Rb1", "ki67", "age"))
+    explanatory = c("p53", "Rb1", "ki67", "age")), "compares exactly two")
+})
 
-  txt <- gsub("<[^>]+>", " ", res$notices$content)
-  expect_match(txt, "outcome level outside the two being compared")
-  # no predictor is missing in this fixture, so listwise-deletion advice must
-  # NOT appear - that advice is what mis-directed the reader
-  expect_false(grepl("listwise deletion", txt))
-
-  ms <- res$modelSummary$asDF
-  expect_true(any(grepl("outcome level not modelled", ms[[1]])))
-  expect_false(any(grepl("predictor missing", ms[[1]])))
+test_that("the outcome cannot also be an explanatory variable (R API)", {
+  skip_if_not_installed("glmnet")
+  d <- lasso_fixture()
+  expect_error(ClinicoPath::lassologistic(
+    data = d, outcome = "dx", outcomeLevel = "NEC",
+    explanatory = c("dx", "p53", "ki67")), "cannot also be an explanatory variable")
 })
 
 test_that("constant predictors are reported, not silently dropped", {
@@ -875,8 +875,9 @@ test_that("the degenerate notice names the metric that actually hit 1.000", {
   skip_if_not_installed("glmnet")
   # Which of sensitivity/specificity saturates depends on which side of 0.500
   # the constant probability lands on; the notice must not assume "positive".
+  # A two-level outcome unrelated to the predictors (>2 levels are now refused).
   d <- lasso_fixture()
-  d$site <- factor(rep(c("A", "B", "C", "D"), length.out = nrow(d)))
+  d$site <- factor(rep(c("A", "B"), length.out = nrow(d)))
   res <- ClinicoPath::lassologistic(
     data = d, outcome = "site", outcomeLevel = "A",
     explanatory = c("p53", "Rb1", "ki67", "age"))
@@ -953,8 +954,9 @@ test_that("exclusion breakdown rows sit directly under their parent row", {
   # insert pushed the whole breakdown one slot down - it appeared under
   # "Event class (positive)".
   d <- lasso_fixture()
-  d$site <- factor(rep(c("A", "B", "C", "D"), length.out = nrow(d)))
+  d$site <- factor(rep(c("A", "B"), length.out = nrow(d)))
   d$ki67[1:20] <- NA
+  d$site[21:25] <- NA      # a second cause, so the breakdown has two rows
   res <- ClinicoPath::lassologistic(
     data = d, outcome = "site", outcomeLevel = "A",
     explanatory = c("p53", "Rb1", "ki67", "age"))
@@ -962,7 +964,7 @@ test_that("exclusion breakdown rows sit directly under their parent row", {
   lab <- res$modelSummary$asDF[[1]]
   parent <- which(lab == "Excluded from analysis")
   kids <- which(grepl("^  - ", lab))
-  expect_gt(length(kids), 0)
+  expect_equal(length(kids), 2)
   # every breakdown row is contiguous with, and immediately after, the parent
   expect_equal(kids, seq(parent + 1, parent + length(kids)))
 })
@@ -1110,10 +1112,10 @@ test_that("a degenerate point scale is flagged, not silently emitted", {
   expect_gt(nrow(st), 0)
   expect_false(anyNA(st$points))                 # no integer-overflow NAs
   expect_true(all(is.finite(st$points)))
-  # and the resulting scale, being unusable, must say so rather than pass as a score
-  if (max(abs(st$points)) > 100) {
-    expect_match(note_of(res$scoringTable, "wide_scale"), "too wide to be used")
-    expect_match(gsub("<[^>]+>", " ", res$notices$content), "Scoring Scale Not Usable")
+  # and a scale beyond Max-scaled's 20-point ceiling must say so rather than pass as a score
+  if (max(abs(st$points)) > 20) {
+    expect_match(note_of(res$scoringTable, "wide_scale"), "more than the 20 the Max-scaled method allows")
+    expect_match(gsub("<[^>]+>", " ", res$notices$content), "Wide Scoring Scale")
   }
 })
 
