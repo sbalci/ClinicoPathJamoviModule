@@ -52,7 +52,7 @@ children:
         label: Analysis Configuration
       - type: ComboBox
         name: clinicalMode
-        label: Analysis level
+        label: Guidance level
       - type: ComboBox
         name: direction
         label: Classification direction
@@ -463,7 +463,7 @@ children:
   # 12. CLINICAL UTILITY ANALYSIS
   # ==============================================
   - type: CollapseBox
-    label: Clinical utility analysis
+    label: Clinical Utility Analysis
     margin: normal
     collapsed: true
     children:

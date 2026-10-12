@@ -111,10 +111,10 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         # statement about the whole selection.
         scope_note <- if (n_non_numeric > 0) {
             paste0(" ", .fmt(
-                .("Computed on the {n_num} numeric variable(s) ({names}); missingness in the {n_non} non-numeric variable(s) was not tested."),
-                n_num = ncol(numeric_data),
+                .("Computed on the {nNum} numeric variable(s) ({names}); missingness in the {nNon} non-numeric variable(s) was not tested."),
+                nNum = ncol(numeric_data),
                 names = paste(names(numeric_data), collapse = ", "),
-                n_non = n_non_numeric
+                nNon = n_non_numeric
             ))
         } else {
             ""

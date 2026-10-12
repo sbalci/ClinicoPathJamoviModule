@@ -28,7 +28,7 @@ children:
             isTarget: true
           - type: LevelSelector
             name: test1Positive
-            label: Positive Level
+            label: Positive level
 
       - type: TargetLayoutBox
         label: Test 2 (Required for Combinations)
@@ -39,7 +39,8 @@ children:
             isTarget: true
           - type: LevelSelector
             name: test2Positive
-            label: Positive Level
+            label: Positive level
+            enable: (test2)
 
       - type: TargetLayoutBox
         label: Test 3 (Optional)
@@ -51,7 +52,7 @@ children:
             enable: (test2)
           - type: LevelSelector
             name: test3Positive
-            label: Positive Level
+            label: Positive level
             enable: (test3)
 
   - type: CollapseBox

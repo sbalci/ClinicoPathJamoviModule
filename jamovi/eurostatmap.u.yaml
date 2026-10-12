@@ -23,14 +23,14 @@ children:
             name: use_local_data
           - type: CheckBox
             name: cache_data
-            enable: (use_local_data == false)
+            enable: (!use_local_data)
           - type: CheckBox
             name: add_to_data
-            enable: (use_local_data == false)
+            enable: (!use_local_data)
       - type: TextBox
         name: dataset_id
         format: string
-        enable: (use_local_data == false)
+        enable: (!use_local_data)
       - type: VariableSupplier
         name: indicatorSupplier
         populate: auto

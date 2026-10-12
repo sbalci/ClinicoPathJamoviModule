@@ -208,21 +208,21 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # 1. Check if required variables exist in data
             if (!is.null(outcome_var) && length(outcome_var) > 0 && !outcome_var %in% names(mydata)) {
                 validation_results$errors <- c(validation_results$errors,
-                    jmvcore::format(.("Outcome variable '{var}' not found in dataset (possibly lost during name cleaning)."), var = outcome_var))
+                    .fmt(.("Outcome variable '{var}' not found in dataset (possibly lost during name cleaning)."), var = outcome_var))
                 validation_results$should_stop <- TRUE
             }
             
             # 2. Check recurrence variable if specified
             if (!is.null(recurrence_var) && length(recurrence_var) > 0 && !recurrence_var %in% names(mydata)) {
                 validation_results$errors <- c(validation_results$errors,
-                    jmvcore::format(.("Recurrence variable '{var}' not found in dataset."), var = recurrence_var))
+                    .fmt(.("Recurrence variable '{var}' not found in dataset."), var = recurrence_var))
                 validation_results$should_stop <- TRUE
             }
             
             # 3. Check patient ID variable if specified
             if (!is.null(id_var) && length(id_var) > 0 && !id_var %in% names(mydata)) {
                 validation_results$errors <- c(validation_results$errors,
-                    jmvcore::format(.("Patient ID variable '{var}' not found in dataset."), var = id_var))
+                    .fmt(.("Patient ID variable '{var}' not found in dataset."), var = id_var))
                 validation_results$should_stop <- TRUE
             }
             
@@ -257,7 +257,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         validation_results$should_stop <- TRUE
                     } else {
                         validation_results$info <- c(validation_results$info,
-                            jmvcore::format(.("Outcome variable has {count} unique values: {values}{more}"), 
+                            .fmt(.("Outcome variable has {count} unique values: {values}{more}"), 
                                 count = outcome_count,
                                 values = paste(head(unique_outcomes, 5), collapse=", "),
                                 more = if(outcome_count > 5) "..." else ""))
@@ -269,7 +269,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             valid_analysis_types <- c("os", "cause", "compete", "rfs", "pfs", "dfs", "ttp", "multistate")
             if (!analysistype %in% valid_analysis_types) {
                 validation_results$errors <- c(validation_results$errors,
-                    jmvcore::format(.("Invalid analysis type '{type}'. Must be one of: {valid}"), 
+                    .fmt(.("Invalid analysis type '{type}'. Must be one of: {valid}"), 
                         type = analysistype,
                         valid = paste(valid_analysis_types, collapse=", ")))
                 validation_results$should_stop <- TRUE
@@ -280,7 +280,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # This remains a warning as technically one could abuse these modes without recurrence, 
                 # but strongly advised against.
                 validation_results$warnings <- c(validation_results$warnings,
-                    jmvcore::format(.("Analysis type '{type}' typically requires a recurrence/progression variable. You are analyzing death/event only."), type = analysistype))
+                    .fmt(.("Analysis type '{type}' typically requires a recurrence/progression variable. You are analyzing death/event only."), type = analysistype))
             }
 
             if (analysistype == "multistate" && !multievent) {
@@ -302,10 +302,10 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Check for minimum sample size
                 if (total_rows < 10) {
                     validation_results$strong_warnings <- c(validation_results$strong_warnings,
-                        jmvcore::format(.("Very small sample size: {n} observations. Results may be unreliable."), n = total_rows))
+                        .fmt(.("Very small sample size: {n} observations. Results may be unreliable."), n = total_rows))
                 } else if (total_rows < 30) {
                     validation_results$warnings <- c(validation_results$warnings,
-                        jmvcore::format(.("Small sample size: {n} observations. Consider larger sample for more reliable estimates."), n = total_rows))
+                        .fmt(.("Small sample size: {n} observations. Consider larger sample for more reliable estimates."), n = total_rows))
                 }
 
                 # Check for missing data patterns
@@ -315,13 +315,13 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                     if (missing_proportion > 0.1) {
                         validation_results$warnings <- c(validation_results$warnings,
-                            jmvcore::format(.("Large amount of missing outcome data: {pct}% ({missing} out of {total} rows)."), 
+                            .fmt(.("Large amount of missing outcome data: {pct}% ({missing} out of {total} rows)."), 
                                 pct = round(missing_proportion * 100, 1),
                                 missing = missing_outcome,
                                 total = total_rows))
                     } else if (missing_proportion > 0) {
                         validation_results$info <- c(validation_results$info,
-                            jmvcore::format(.("Missing outcome data: {pct}% ({missing} out of {total} rows)."), 
+                            .fmt(.("Missing outcome data: {pct}% ({missing} out of {total} rows)."), 
                                 pct = round(missing_proportion * 100, 1),
                                 missing = missing_outcome,
                                 total = total_rows))
@@ -346,9 +346,9 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     }
                     if (!is.na(n_ev) && n_nonmissing > 0 && n_ev < 5) {
                         validation_results$warnings <- c(validation_results$warnings,
-                            jmvcore::format(.("Few events: only {n_ev} of {n_total} non-missing outcomes ({pct}%) are '{level}'. Kaplan-Meier and Cox estimates are unstable with fewer than 5 events."), 
-                                n_ev = n_ev,
-                                n_total = n_nonmissing,
+                            .fmt(.("Few events: only {nEv} of {nTotal} non-missing outcomes ({pct}%) are '{level}'. Kaplan-Meier and Cox estimates are unstable with fewer than 5 events."), 
+                                nEv = n_ev,
+                                nTotal = n_nonmissing,
                                 pct = round(100 * n_ev / n_nonmissing, 1),
                                 level = rare_lvl))
                     }
@@ -1293,18 +1293,18 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                        "1" = .("Disease state (1)"),
                        "2" = .("Death from disease (2)"),
                        "3" = .("Death from other causes (3)"),
-                       jmvcore::format(.("Unknown ({value})"), value = value))
+                       .fmt(.("Unknown ({value})"), value = value))
             } else if (multievent && analysistype == 'compete') {
                 switch(val_str,
                        "0" = .("Censored (0)"),
                        "1" = .("Disease event (1)"),
                        "2" = .("Competing event (2)"),
-                       jmvcore::format(.("Unknown ({value})"), value = value))
+                       .fmt(.("Unknown ({value})"), value = value))
             } else {
                 switch(val_str,
                        "0" = .("Censored (0)"),
                        "1" = .("Event (1)"),
-                       jmvcore::format(.("Unknown ({value})"), value = value))
+                       .fmt(.("Unknown ({value})"), value = value))
             }
         },
 
@@ -1446,13 +1446,13 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (length(missing_levels) > 0) {
                     # Add informative notice about available levels
                     private$.addNotice(jmvcore::NoticeType$INFO,
-                        jmvcore::format(.("Outcome variable has {count} unique values: {values}"), 
+                        .fmt(.("Outcome variable has {count} unique values: {values}"), 
                             count = length(unique_outcomes),
                             values = paste(unique_outcomes, collapse = ", ")))
 
                     # Add strong warning about missing selections
                     private$.addNotice(jmvcore::NoticeType$STRONG_WARNING,
-                        jmvcore::format(.("Multiple Event Types is enabled but no outcome level has been assigned to a category. Assign each level of your outcome variable to one of: {categories}. A category with no patients in this cohort is fine and can be left empty - what matters is that every level present in the data is assigned somewhere."), 
+                        .fmt(.("Multiple Event Types is enabled but no outcome level has been assigned to a category. Assign each level of your outcome variable to one of: {categories}. A category with no patients in this cohort is fine and can be left empty - what matters is that every level present in the data is assigned somewhere."), 
                             categories = paste(missing_levels, collapse = ", ")))
 
                     # Add guidance notice
@@ -1664,7 +1664,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (isTRUE(applied$hierarchy)) {
                 summary_text <- paste(summary_text, paste0(
                     "<br><b>", .("Event Hierarchy Applied:"), "</b> ",
-                    jmvcore::format(.("If multiple events occur, priority is given to type {type}."), type = self$options$eventPriority),
+                    .fmt(.("If multiple events occur, priority is given to type {type}."), type = self$options$eventPriority),
                     "<br>"
                 ))
             }
@@ -1961,7 +1961,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                 htmltools::htmlEscape(private$.getOutcomeLabel(v, analysistype, self$options$multievent, codes_present)),
                                 cnt, pct)
                     }, character(1))
-                    state_breakdown <- paste0(" ", jmvcore::format(.("Full state breakdown (of {total} coded records): {states}."), 
+                    state_breakdown <- paste0(" ", .fmt(.("Full state breakdown (of {total} coded records): {states}."), 
                         total = total_n,
                         states = paste(state_lines, collapse = "; ")))
                 }

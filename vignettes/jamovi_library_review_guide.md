@@ -15,6 +15,7 @@ reviewer against this project's submodules:
 | `jamovi-library-audit/2026-08-18 jjstatsplot.md` | jjstatsplot | 2026-08-18 |
 | `jamovi-library-audit/2026-09-15 jsurvival.md` | jsurvival (round 3) | 2026-09-15 |
 | `jamovi-library-audit/2026-09-16 <Module>.md` (×4) | OncoPath, ClinicoPathDescriptives, jjstatsplot, meddecide (round 4) | 2026-09-16 |
+| `jamovi-library-audit/2026-09-22 OncoPath.md` | OncoPath (round 5) | 2026-09-22 |
 
 Every rule below is something the reviewer *actually raised*, on real files, with
 severity attached. Nothing here is speculative. The only exception is the few items
@@ -38,7 +39,7 @@ raised by the reviewer yet.
 10. [Rule: every package used must be declared — including base packages](#10-rule-every-package-used-must-be-declared--including-base-packages)
 11. [Rule: dead code must not reference a schema that no longer exists](#11-rule-dead-code-must-not-reference-a-schema-that-no-longer-exists)
 12. [Rule: UI label conventions](#12-rule-ui-label-conventions)
-13. [The `type: Notice` trap](#13-the-type-notice-trap)
+13. [Notices: the native element, and the `insert()` trap](#13-notices-the-native-element-and-the-insert-trap)
 14. [Encoding review findings as tests](#14-encoding-review-findings-as-tests)
 15. [Rule: `requiresData` is a contract with `self$data` at render time](#15-rule-requiresdata-is-a-contract-with-selfdata-at-render-time)
 16. [Rule: never wrap `jmvcore::reject()` in a catch-all `tryCatch`](#16-rule-never-wrap-jmvcorereject-in-a-catch-all-trycatch)
@@ -50,6 +51,11 @@ raised by the reviewer yet.
 22. [Rule: a user's column name is not a regular expression](#22-rule-a-users-column-name-is-not-a-regular-expression)
 23. [Rule: plot colours come from jamovi's palette](#23-rule-plot-colours-come-from-jamovis-palette)
 24. [Where the debt actually lives: promotion, not release](#24-where-the-debt-actually-lives-promotion-not-release)
+25. [Rule: an unconfigured analysis is not an error](#25-rule-an-unconfigured-analysis-is-not-an-error)
+26. [Rule: tabular data belongs in a `Table` result](#26-rule-tabular-data-belongs-in-a-table-result)
+27. [Rule: the module's own prose must agree with itself](#27-rule-the-modules-own-prose-must-agree-with-itself)
+28. [Rule: seeding the RNG must not outlive the function that did it](#28-rule-seeding-the-rng-must-not-outlive-the-function-that-did-it)
+29. [Rule: nothing may be derived from which analyses a module holds today](#29-rule-nothing-may-be-derived-from-which-analyses-a-module-holds-today)
 
 ---
 
@@ -72,7 +78,11 @@ grep -oh "&[a-zA-Z][a-zA-Z0-9]\{1,12\};" R/*.R | sort -u
 grep -n "setVisible(FALSE)" R/*.b.R      # each hit must be option-driven
 
 # 5. addRow() in .run() against a fixed / option-determined row set      [MEDIUM]
-grep -n "addRow(rowKey *= *[\"']" R/*.b.R
+#    the bare grep is 620 hits umbrella-wide and so is never read: most are one
+#    extra conditional row on top of an .init() skeleton, which does not blink.
+#    release_gate.py check_init_row_structure (item 9) asks the table-level
+#    question instead - 1 shipped hit across all five modules on 2026-09-23.
+python3 tools/release_gate.py --root ../<Module> | grep "fixed rows built"
 
 # 6. Bare warning() reaching a user-relevant condition                   [MEDIUM]
 grep -n "^\s*warning(" R/*.b.R
@@ -92,7 +102,8 @@ Rscript --vanilla tools/submodule_smoke.R ../<Module>   # installed namespace of
 # 9. requiresData contract, CollapseBox Title Case, .() padding, refs,
 #    clearWith, renderFun, entities, versions, NEWS.md heading,
 #    catalog scope, " [..]" and \u{} inside .(), translated sprintf
-#    specifiers, notice title colours                                    [CRITICAL..LOW]
+#    specifiers, notice title colours, sentinel $insert() index,
+#    description block scalars, bug-report URL, dataset descriptions  [CRITICAL..LOW]
 python3 tools/release_gate.py      # FAIL lines block; read every WARN for shipped analyses
 python3 tools/release_gate.py --root ../<Module>   # the same checks on the tree the reviewer reads
 
@@ -103,7 +114,12 @@ grep -nE 'type: (File|Text) *$|mode: vector' jamovi/*.a.yaml jamovi/*.r.yaml
 #    check_min_app (run in item 9) skips columns, FAILs File/Text under minApp < 28.3.0
 #    and WARNs on mode: vector
 
-# 11. Everything still compiles
+# 11. An ERROR the user sees before they have configured anything      [MEDIUM]
+#     each hit must be INFO (partial selection) or silent (nothing selected)
+grep -nE '\.addNotice\(\s*["\x27]ERROR' R/*.b.R      # then trace each guard (section 25)
+grep -nB3 'return\(NULL\)' R/*.b.R | grep -i 'ERROR'  # fatal via banner - use jmvcore::reject()
+
+# 12. Everything still compiles
 Rscript -e 'Sys.unsetenv("ELECTRON_RUN_AS_NODE"); jmvtools::prepare(".")'
 ```
 
@@ -127,9 +143,20 @@ Plus the cheap metadata gates the reviewer checks first:
   user out of the whole module: a deliberate release decision, never a side effect. Setup,
   gating and testing: [jamovi 28.3 Features](jamovi_module_patterns_guide.md#jamovi-283-features-file-text-vector-images)
   and [Installing Current jmvtools and jmvcore](jamovi_module_patterns_guide.md#installing-current-jmvtools-and-jmvcore).
-- `NEWS.md` has a heading for the exact `DESCRIPTION` version. `_updateModules.R` rewrites
-  `Version:` on every regeneration and never writes `NEWS.md`, so after each regeneration the
-  submodule's changelog is one release behind until a person writes it (2026-09-16 OncoPath).
+- `NEWS.md` has a heading the **release workflow** can match, for any version it would actually
+  publish. `.github/workflows/release.yaml` extracts the release body with
+  `(^|[^0-9.])<version>([^0-9.]|$)` and falls back to the placeholder `Release <v>.` on a miss;
+  a four-component version publishes nothing at all, and a three-component one with a multi-digit
+  last part is a pre-release. `_updateModules.R` rewrites `Version:` in `DESCRIPTION`,
+  `CITATION.cff`, `0000.yaml` and every `.a.yaml` on every regeneration and never touches
+  `NEWS.md`. **Write the heading before the version bump** - the workflow skips a version whose
+  tag exists, so a release cannot be re-cut (2026-09-16 and 2026-09-22 OncoPath; 14 of the 16
+  workflow-era releases shipped with the placeholder).
+- `description: main:` is one `>` folded paragraph with no blank line, in every `.a.yaml`
+  ([section 27](#27-rule-the-modules-own-prose-must-agree-with-itself)).
+- One bug-report URL across `DESCRIPTION`, `jamovi/0000.yaml`, `README.md` and `CITATION.cff`, and
+  no two example datasets sharing a `description:`.
+- No `$insert()` at a sentinel index ([section 13](#13-notices-the-native-element-and-the-insert-trap)).
 - `jamovi/i18n` holds only this module's strings: the updater copies the umbrella catalog and
   `jmvtools::i18nUpdate()` trims it at build ([section 9](#9-rule-translatable-strings-are-whole-sentences)).
 
@@ -144,7 +171,7 @@ problems, not one-off bugs** — when one function does it, the whole module doe
 |---|---|---|---|
 | 1 | Render function reads `image$state` with no NULL guard | 3 of 5 | MEDIUM |
 | 2 | `.run()` methods far past ~120 lines | 5 of 5 | LOW |
-| 3 | Fixed-structure tables built with `addRow()` in `.run()` | 4 of 5 | MEDIUM |
+| 3 | Fixed-structure tables built with `addRow()` in `.run()` | 4 of 5; meddecide in **all three** of its rounds | MEDIUM→LOW |
 | 4 | Spliced `.()` translation fragments | 5 of 5 | LOW |
 | 5 | Named HTML entities that will render literally | 3 of 5 | MEDIUM |
 | 6 | `setVisible(FALSE)` used to signal a failure | 3 of 5 | MEDIUM–HIGH |
@@ -155,6 +182,12 @@ problems, not one-off bugs** — when one function does it, the whole module doe
 | 11 | `requiresData: true` on renderers that draw from state only | 5 of 5 (rounds 3–4) | LOW |
 | 12 | Translation catalogs inherited from the umbrella | 3 of 5 (round 4) | MEDIUM–LOW |
 | 13 | `NEWS.md` behind the `DESCRIPTION` version | 2 of 5 (round 4) | LOW–INFO |
+| 14 | Tabular data drawn as hand-built HTML instead of a `Table` | 5 of 5 (round 5 sweep) | MEDIUM |
+| 15 | Red ERROR on an analysis the user has not configured yet; fatal condition via a banner instead of `jmvcore::reject()` | 4 of 5 (rounds 1, 2, 5) | MEDIUM |
+| 16 | `description: main:` keeps newlines, so the library listing breaks or truncates | 4 of 5 (round 5 sweep) | LOW |
+| 17 | The module's own prose disagrees with itself (capability claims, bug-report URL) | 4 of 6 trees (round 5) | LOW |
+| 18 | Bare `set.seed()` leaking a fixed RNG stream into the shared engine process | 1 of 5 (round 4) | LOW |
+| 19 | Config or a test derived from which analyses a module holds today (`prune_imports`, hard-coded analysis lists) | 4 of 5 (round 6) | LOW |
 
 **The lesson:** when a review names one instance, grep for the class and fix all
 of it. The reviewer explicitly rewards this — "several of them by fixing the
@@ -372,7 +405,7 @@ at round 4). `theme_safe_html.py` cannot see coloured text on a translucent tint
 ### What you cannot do
 
 You cannot fix this by declaring a `Notice` in `.r.yaml` — see
-[section 13](#13-the-type-notice-trap).
+[section 13](#13-notices-the-native-element-and-the-insert-trap).
 
 *(anticipatory)* What you can do from jamovi 28.3: move plain narrative with no severity to a
 `type: Text` element (module-wide `minApp: 28.3.0`, see [Version Gating: minApp](jamovi_module_patterns_guide.md#version-gating-minapp)).
@@ -488,6 +521,27 @@ A `deleteRows()` call at the top of a population method is a tell — it exists 
 stop rows accumulating across runs, and it becomes unnecessary once the rows are
 created once in `.init()`. jamovi rebuilds the results skeleton from the schema
 on every run anyway.
+
+### Enforce it
+
+`tools/release_gate.py` → `check_init_row_structure` (WARN). The unit it checks is the
+**table**, not the `addRow()` call. It flags a table only when all three hold:
+
+- the `.r.yaml` declares no `rows:`,
+- nothing reachable from `.init()` (following `private$.helper()` calls transitively) names it,
+- **every** `addRow()` it receives uses a literal string `rowKey`.
+
+The third condition is the proof: a literal key means the row set was known when the code was
+written. A table that has an `.init()` skeleton and gains one extra *conditional* row in `.run()`
+— `waterfall`'s `recist_Unknown`, `checkdata`'s `rare_categories` — does not blink and is not
+flagged; a call-level detector reported 8 shipped hits of which 6 were exactly that shape.
+
+**Known blind spot:** a loop index over a fixed-length result
+(`for (i in 1:nrow(res)) tbl$addRow(rowKey = i, ...)`) is not a literal key, so it is invisible
+here. That is the shape the 2026-09-16 meddecide report named in `decision.b.R` and
+`decisioncalculator.b.R` — always-four `epiR` rows written under a loop index. **A 0 from this
+check is not proof**; when you touch a table built in `.run()`, ask the question in "The test"
+above yourself.
 
 ### Related: don't push numbers through a text column
 
@@ -854,88 +908,144 @@ collapsed `CollapseBox` groups.
 
 ---
 
-## 13. The `type: Notice` trap
+## 13. Notices: the native element, and the `insert()` trap
 
-The ClinicoPathDescriptives audit suggests replacing hand-styled HTML panels with
-`type: Notice` result elements declared in `.r.yaml`, on the grounds that the
-serialization problem is specific to *constructing* Notice objects dynamically.
+Two separate facts, held apart for a year by one sentence that merged them. Round 2 suggested a
+native notice, we rejected it, and round 5 (2026-09-22 OncoPath [LOW]) came back to correct *us*:
 
-**That reasoning is right, but the option is not available today.** Verified
-empirically against jamovi 28.1.0 / jmvtools 28.3 / jamovi-compiler 0.3.5:
+> "You were right to reject that suggestion as written, and I owe you a correction. The audit on
+> 2026-09-16 pointed you at `type: Notice` in `.r.yaml`. That's the wrong place, and the schema is
+> correct to refuse it. jamovi's notices aren't declared in the results definition. They're created
+> in R and inserted into the results tree at run time."
+
+### 13.1 `type: Notice` in `.r.yaml` does not compile — still true
+
+Verified against jamovi 28.1.0 / jmvtools 28.3 / jamovi-compiler 0.3.5, re-verified 2026-09-17
+(jmvtools 28.3) and 2026-09-19 against the jmvtools 28.3.1 schema:
 
 ```
-$ jmvtools::prepare(".")
 Unable to compile 'nt.r.yaml':
 	results.items[0].type is not one of enum values:
-	Table,Group,Array,Image,Preformatted,Html,State,Property,Output,Notification,Action
+	Table,Group,Array,Image,Preformatted,Text,Html,Svg,State,Property,Output,Notification,Action
 ```
 
-The compiler's `schemas/resultsschema.yaml` enum does not include `Notice`, even
-though `compiler.js` has a `Notice` branch in `sourcifyResults` and jamovi's
-protobuf defines `ResultsNotice` with `NoticeType {ERROR=0, STRONG_WARNING=1,
-WARNING=2, INFO=3}`. The toolchain is mid-migration.
+No `Notice`. **`Notification` is worse:** it *is* in the enum, so it compiles, and emits
+`self$add(list(name=..., type="Notification"))` — a plain list, because `jmvcore::Notification`
+does not exist. It fails at run time instead of at compile time. `Svg` exists upstream but is
+undocumented; do not use it yet.
 
-**`Notification` is a worse trap.** It *is* in the enum, so it compiles — and
-generates:
+### 13.2 `jmvcore::Notice` at run time works — the old claim here was FALSE
+
+This guide used to say Notice objects "hold function references that jamovi's protobuf layer cannot
+serialize". **That is wrong, and it was never measured.** `Notice$asProtoBuf` is two scalar
+assignments; `Notice`'s only private fields are `.content` and `.type`. jamovi's own `jmv` uses the
+API in four shipping places (`setAnalysisNotice`, `conttables`, `linReg`, `descriptives`).
+
+Measured 2026-09-22, jmvcore 2.7.38 as bundled by jamovi 28.3.0.0, on a real analysis
+(`waterfall`, 21 results items), through `Analysis$asProtoBuf(final = TRUE)` — the call the engine
+makes to send results to the client and to write the `.omv` — then `RProtoBuf::serialize` and read
+back:
+
+| insert index | items after | `NULL`s | serialize |
+|---|---|---|---|
+| — (baseline) | 21 | 0 | OK, 12419 B |
+| `insert(1, Notice)` | 22 | 0 | **OK** — `type` and `content` intact after the round trip |
+| `insert(21, …)` (== length) | 22 | 0 | OK |
+| `insert(22, …)` (length + 1) | 24 | 1 | **`attempt to apply non-function`** |
+| `insert(999, Notice)` | 1978 | 1955 | **`attempt to apply non-function`** |
+| **`insert(999, jmvcore::Html)`** | 1978 | 1955 | **fails identically** |
+
+### 13.3 The real defect: `Group$insert()` has no bounds check
 
 ```r
-self$add(list(`name`="warn", `title`="Warning", `type`="Notification"))
+Group$insert = function (index, item) {
+    ...
+    after <- private$.items[index:length(private$.items)]   # 999:21 counts DOWN
+    private$.items <- c(before, between, after)
+}
 ```
 
-a plain list, not a results element, because `jmvcore::Notification` does not
-exist. It fails at runtime instead of at compile time.
+R's `:` counts down when the left operand is larger, so both slices run off the end and fill with
+`NULL`. `Group$asProtoBuf` then walks `private$.items` and calls `item$asProtoBuf(...)`;
+`NULL$asProtoBuf` is `NULL`, and `NULL(...)` is `attempt to apply non-function`. The element type
+never enters into it. The body of `Group$insert` is byte-identical in every jmvcore from 2.3.4
+(2022) to 2.7.38, so this is not version-specific.
+
+**There is no append index.** The traps, all measured:
+
+| You want | Use | Never |
+|---|---|---|
+| bottom of the results | `self$results$add(item)` | `insert(999, item)` — and `insert(length+1, item)` is the same bug |
+| top | `self$results$insert(1, item)` on a **non-empty** group | `insert(1, item)` into an **empty** group — `1:0` is `c(1, 0)`, so it inserts a `NULL` too |
+| a notice on an `Array` | `array$setHeader(notice)` | `array$insert(...)` — Arrays have no `insert` |
+| the content | `notice$setContent(...)` after construction | `Notice$new(..., content = )` alone — it leaves `.stale = TRUE`, `results$isFilled()` goes FALSE and the analysis never reaches `complete` |
+
+Two more measured properties: notices **accumulate** across runs (three inserts of the same `name`
+ship as three elements), and `Group$remove()` removes nothing — its own `after` slice re-includes
+the item it was asked to drop. jamovi's four `jmv` sites are all in `.init()`/`.initPlots()`,
+never in `.run()`, which is why upstream never meets either problem.
+
+### 13.4 How the false claim happened, and what it cost
+
+Worth reading as a case study in inference dressed as measurement.
+
+1. **2025-11-14 `9ab6a3114`** — the first `jmvcore::Notice` use lands, *and* `.claude/commands/fix-notices.md`
+   lands with it, teaching `self$results$insert(999, n)` for "INFO — analysis summary (bottom)".
+2. The template is followed faithfully. Active `insert(` calls go 91 → **450, of which 321 at `999`**,
+   across 47 files by 2025-12-29.
+3. **2025-12-27** — `survival` crashes. `tests/SURVIVAL_SERIALIZATION_FIX.md` blames
+   `insert(1, na_notice)`; removing it does not help (the one `insert(999,)` at `survival.b.R:1468`
+   is still live). All ten notices are removed; the error goes. `tests/SURVIVAL_ALL_NOTICES_REMOVED.md`
+   records the conclusion: *"ALL dynamically inserted `jmvcore::Notice` objects cause serialization errors."*
+4. **2025-11-16 `68c2065fa`** had already written that into `CLAUDE.md` as mechanism —
+   *"contain function references that cannot be serialized"* — six weeks before the incident it
+   purports to explain. Every later write-up cites `CLAUDE.md` as its authority. None tests it.
+5. **2026-06-07 `d1b6465f7`** replaces the API with hand-rolled HTML. Today: **80 `.addNotice()`
+   helpers, 1,408 call sites, 0 uses of the native element.**
+
+The *symptom* was real and was observed in the app, twice. The *cause* was inferred once, from a
+file that mixed nine valid indices with one sentinel, and then propagated into `CLAUDE.md`, this
+guide, the notices guide, five command files and a code breadcrumb the reviewer reads.
+
+### 13.5 What this does and does not license
+
+It does **not** license migrating the HTML helpers back to `Notice`. They are kept for reasons the
+experiment never touched: notice content renders as **escaped plain text** and takes **no
+newlines** (standing user decision, reaffirmed), and this project wants multi-line panels. The
+rendering side has never been measured. Change it only on evidence about *rendering*, not about
+serialization.
 
 ### Where this leaves you
 
 | Need | Use |
 |---|---|
-| Fatal validation error | `jmvcore::reject(.("..."), code = "...")` |
+| Fatal validation error | `jmvcore::reject(.("..."), code = "...")` — see [section 25](#25-rule-an-unconfigured-analysis-is-not-an-error) |
 | Non-fatal warning shown inline | `type: Html` element + theme-safe styling ([section 4](#4-rule-html-output-must-be-theme-safe)) |
-| Narrative / explanatory text, no severity *(anticipatory)* | `type: Text` (jamovi 28.3+, module-wide `minApp: 28.3.0`); module cannot add CSS |
-| Dynamic notice | `jmvcore::Notice` **only** if you are not inserting it with `insert()` — see below |
+| Narrative / explanatory text, no severity | `type: Text` (jamovi 28.3+, module-wide `minApp: 28.3.0`) |
+| A native severity banner | `jmvcore::Notice` + `$setContent()` + `$add()`/`insert(1, …)` — works, but plain text and single-line |
+| Tabular reference data | a `Table` result, never HTML ([section 26](#26-rule-tabular-data-belongs-in-a-table-result)) |
 
-**Do not use `self$results$insert(999, notice)` with a `jmvcore::Notice`.** Notice
-objects hold function references that jamovi's protobuf layer cannot serialize;
-the symptom is `attempt to apply non-function`. See `R/waterfall.b.R`
-(`.addNotice()` / `.renderNotices()`) for the conversion pattern.
+### Enforce it
 
-**Re-check this section when jmvtools updates.** The moment the compiler enum
-gains `Notice`, declarative notices become the right answer for every hand-styled
-panel in the module, and the theme-safety problem in [section 4](#4-rule-html-output-must-be-theme-safe)
-disappears — jamovi styles notices itself, in whichever theme is active.
-
-Re-test with:
-
-```r
-# a scratch module with one `type: Notice` item in its .r.yaml
-Sys.unsetenv("ELECTRON_RUN_AS_NODE")   # VS Code sets this and breaks prepare()
-jmvtools::prepare(".")
-```
-
-**Re-verified 2026-09-17** (jmvtools 28.3, jmvcore 2.7.38) on a clone of OncoPath: `type: Notice`
-still fails the schema; `type: Notification` compiles and `<fn>Results$new()` then fails with
-*attempt to apply non-function*.
-
-**Re-checked 2026-09-19 against jmvtools 28.3.1 (schema read, `prepare()` not re-run):** the
-installed `resultsschema.yaml` enum is now `Table, Group, Array, Image, Preformatted, Text, Html,
-Svg, State, Property, Output, Notification, Action`. Still no `Notice`, so the REJECTED comment
-below stays valid. `Svg` exists upstream but is undocumented: do not use it yet
-([Exists Upstream, Not Yet Documented](jamovi_module_patterns_guide.md#exists-upstream-not-yet-documented)).
+`tools/release_gate.py` `check_sentinel_insert` — **FAIL**, and green at 0 hits in the umbrella and
+all five siblings on 2026-09-22, so it is a gate that can stay red-free. It flags any
+`$insert(<literal ≥ 100>, …)` in `R/`; the largest results tree measured in this project has 21
+items, so a three-digit literal is always the sentinel bug.
 
 ### Say so in the code
 
-Round 2 rejected this suggestion for ClinicoPathDescriptives and meddecide, and round 4
-(2026-09-16 OncoPath [INFO]) raised it again: the rejection lived only in our responses, which the
-reviewer never reads. Every hand-rolled notice helper now carries a comment the reviewer will see:
+The breadcrumb above every `.addNotice()` helper used to read *"REJECTED: no native notice
+element"*. Those three words were the false part, and the reviewer read them and wrote a finding to
+correct them. The channel worked; the content was wrong. Replace with:
 
 ```r
-# library-audit 2026-09-16 OncoPath [INFO] REJECTED: no native notice element - type: Notice fails the
-#   .r.yaml schema, type: Notification builds no results object (guide section 13)
+# library-audit 2026-09-22 OncoPath [LOW]: a native notice DOES exist - jmvcore::Notice built in R
+#   and inserted with $add()/insert(1, ...). Not adopted here because notice content renders as
+#   escaped plain text with no newlines, and these panels are multi-line. `type: Notice` in .r.yaml
+#   is separately impossible (not in the compiler enum). Guide section 13.
 .addNotice = function(type, title, content) {
 ```
 
-Put that line above `.addNotice()` in any analysis you touch. The theme concern that motivates
-the suggestion *is* fixable in HTML — [section 4](#4-rule-html-output-must-be-theme-safe).
 
 ---
 
@@ -1210,6 +1320,90 @@ Eight findings; five were caused by our own earlier remediation.
    (§9) and the Turkish catalog can.
 4. **A comment that asserts a measurable property must have been measured.** Contrast, sizes,
    counts.
+
+### Round 4 (2026-09-16 meddecide)
+
+Fifteen findings. The module's **third** audit, and the third time two of the same classes came
+back — the interesting part is *which* ones, and why.
+
+| Finding | Rule existed? | Why it came back |
+|---|---|---|
+| Forest plot exports blank — renderer reads a `private$` cache, not `image$state` (HIGH) | Yes, §3 + §15 | INSTANCE. `psychopdaROC` set the state correctly and then never read it; every *other* plot in the same file reads `image$state`. §3 was written about a missing NULL guard, and nobody generalised it to "the renderer's only input is its state". Now `check_render_private_state`, which traces each `renderFun` through its `private$` helpers. |
+| ROC overlays drawn from `private$.rocDataList` (MEDIUM) | Same | Same class, same file, and **worse than a crash**: the guards made `NULL` degrade silently, so the exported figure simply lacked the confidence bands the user ticked. A failure that does not fail is the expensive kind. |
+| Fixed-row `epiR` tables still built with `addRow()` in `.run()` (LOW) | Yes, §6 — raised in **all three** meddecide rounds | NO-CHECK. §6 has been written since round 1; the only enforcement was checklist item 5, a grep returning **620 hits** umbrella-wide, so it was never read (the same failure mode as the `.()` padding grep in round 3). Now `check_init_row_structure`, which asks the question at the **table** level: 1 shipped hit across all five modules. |
+| `.()` fragments and padded literals (LOW) | Yes, §9 — raised in all three rounds | INSTANCE ×3. Rounds 1 and 2 fixed the *named sites*; the class detector (`check_i18n_padding`) arrived only in round 4 and reads 0 in the umbrella against 6 in the shipped tree — the sibling had not been regenerated, which is why this one is answered PARTIAL rather than DONE. |
+| Catalogs inherited from the umbrella, 15 MB, 2/3 of the module's strings missing (LOW) | No | OUR-FIX, exactly as in OncoPath: rounds 1 and 2 said "no catalogs", we answered by copying the umbrella's. The remedy (`i18nUpdate()` at build + `check_i18n_catalog_scope`) also **orphans 576 translated Turkish entries**, because closing the fragment finding rewrote the msgids. Recorded on the response as a measured, deliberate trade: an orphan falls back to English, an unreorderable multi-conversion template makes `sprintf()` raise mid-analysis. |
+| Bare `set.seed()` leaks a fixed RNG stream into the engine (LOW) | No | NO-RULE. Three idioms coexisted in one module — `withr::local_seed()`, a hand-rolled save/restore, and a bare call. Nothing user-visible fails; the *next* analysis in the same session quietly resamples from a deterministic stream. Now `check_bare_set_seed`. |
+| Six declared dependencies never used (LOW) | Yes, §10 | §10 was written for the *opposite* direction (used but undeclared). `R/zzz_imports.R` existed to silence the R CMD check NOTE, which is precisely what let unused entries sit there. Now `check_unused_imports`; `rlang` was correctly kept — the reviewer missed the `.data` pronouns. |
+| Surplus `requiresData: true` on eighteen images (LOW) | Yes, §15 | WARN-SKIMMED, the same as OncoPath the same day: the check existed and reported, and the WARN was not acted on. |
+| Tables/plots with no `clearWith` blink on a display toggle (LOW) | Partly, §1 | `check_clearwith` verifies that entries *resolve*; nothing asks whether an element that has **no** `clearWith` should have one. Still no detector — the judgement ("is this option purely cosmetic?") is not mechanical. Recorded as a known gap. |
+| Error-handling scaffolding grows a stack per panel open (LOW) | No | NEW, and a real leak: `clinicopath_init()` appended to a package-level vector and captured `sys.calls()`; the only popper was never called. Fixed by making init **set** rather than append. |
+| `caret` cited nowhere while `enhancedROC` computes its metrics with it (LOW) | Yes, §1 | `check_refs` already reports dangling keys; the fix is one line in a `refs:` list. |
+| Long `.run()` methods (LOW) | Known | Deferred for the fourth time. |
+| One-choice combo box, `NEWS.md` heading, three `TODO`s (INFO) | Mixed | The `TODO`s were raised in all three rounds and deferred all three times — NO-CHANNEL: the reasoning lives in the report the reviewer cannot see, so a comment that *records a decision* still reads as forgotten work. If a marker is deliberate, say so on the line and drop the `TODO` keyword. |
+
+**What to do differently (round 4, meddecide):**
+
+1. **A grep with 620 hits is not a check.** Item 5 had been in the checklist since round 1 and the
+   class came back three times. The fix was not a better grep but a better *unit*: asking the
+   question of the table instead of the `addRow()` call took 620 unreadable hits down to 1
+   actionable one, because "one extra conditional row on an `.init()` skeleton" is not the defect.
+2. **Silent degradation outranks a crash.** The ROC overlays were `NULL`-guarded so well that the
+   export simply lost the bands. Guard to a state the user can *see* — a missing plot, a note —
+   not to a plausible-looking wrong one.
+3. **State is the renderer's only input.** §3 said "NULL-guard `image$state`"; the defect was a
+   renderer that never *read* it. State the mechanism (the renderer runs without `.run()`), not
+   the symptom.
+4. **Answering "it is missing" by copying the umbrella's version creates the next finding.**
+   Twice now, for catalogs. Whatever we copy in has to be trimmed to the module at build time.
+5. **A deliberate `TODO` is a contradiction.** Three rounds of "these are intentional" never
+   reached the reviewer. Write the decision as a decision; keep the keyword for real debt.
+
+### Round 5 (2026-09-22 OncoPath)
+
+| Finding | Rule existed? | Why it came back |
+|---|---|---|
+| Red ERROR before the user has configured anything; fatal via a banner (MEDIUM) | Yes, twice — R1 raised the fatal half, R2 the empty-state half, both marked DONE | INSTANCE, and OUR-FIX. R2's fix moved the banners into a new `notices` channel and re-created them there (`0dbd3d348`); `48b8edb13`, **one day before this audit**, fixed `swimmerplot` alone and wrote the reasoning the reviewer quoted back at us, without sweeping. No detector either time. Now §25, and a measured reason the gate is not on yet. |
+| Reference tables drawn as HTML, not `Table` (MEDIUM) | No | NO-RULE. `theme_safe_html.py` cannot see them — the sites use `#ddd` borders and an `rgba(…,0.06)` header, and the script only flags opaque backgrounds. The sweep found **97 shipped blocks, not 2**. Now §26. |
+| Notices: the reviewer corrects *their own* advice (LOW) | Yes, §13 — and §13 was half wrong | **WRONG-DONE, and the channel worked.** R4's remedy (a breadcrumb the reviewer can read) succeeded exactly as designed: they read it and answered. What failed was its content — three words, `no native notice element`, generalising a verified `.r.yaml`-schema fact into a claim about the platform. The underlying "Notice cannot be serialized" was inferred once in 2025-11, six weeks *before* the incident it explains, and never tested. See §13.4. |
+| `stringr` declared, unused (LOW) | Yes, §10 | WARN-SKIMMED + OUR-FIX. `check_unused_imports` fired and named **two** packages — `psych` as well, which the reviewer missed. Our own rework (`8570f416f`, three days earlier) removed the last `str_to_title()`. Two standing written claims are now false: `R/zzz_imports.R` says "Every package below IS used … Do NOT prune them" and `_updateModules_config.yaml` repeats it naming `psych` and `stringr`. |
+| `NEWS.md` has no 1.0.83 heading (LOW) | Yes, §1 + `check_news` | WARN-SKIMMED — and the check was **wrong**, not merely weak. It warned on four-component dev builds the release workflow never publishes, so all five modules sat permanently red and the one module about to ship a placeholder was invisible. Now the check mirrors the workflow's own cascade: 5/5 red → 1/5. |
+| Module describes itself inconsistently (LOW) | No | NO-RULE, and UMBRELLA-SCOPE for the RECIST half: the careful wording was added where we author (`jamovi/waterfall.a.yaml`, `0000.yaml`) and never reached `DESCRIPTION` / `README.md`, which the updater does not write. Now §27 and three gate checks. |
+| Long functions (LOW) | Known | Deferred, by the standing decision recorded in R2, R3 and R4. |
+| `waterfall` `requiresData: true` is correct (INFO) | Yes, §15 | **Closed the right way.** Our R4 rejection lived in a breadcrumb in `jamovi/waterfall.r.yaml`; the reviewer read it and agreed on the record. The remedy for NO-CHANNEL works. |
+
+**What to do differently (round 5):**
+
+1. **A WARN that is red everywhere is a broken check, not a known problem.** `check_news` was
+   5/5 red because it asked the wrong question. Before adding hits to the backlog, confirm the
+   check's question matches the thing that actually breaks — here, what the release workflow
+   publishes.
+2. **When a suggestion is rejected, write down the narrow fact, not the general one.** `type:
+   Notice` does not compile is verified and narrow. *No native notice element* is a claim about
+   the platform, and it was wrong. A breadcrumb is read by someone who knows more than we do.
+3. **An inferred cause must be labelled as inferred.** The 2025-11 claim was written into
+   `CLAUDE.md` as mechanism six weeks before the incident it explains, then cited as authority by
+   six later write-ups, none of which tested it. Cost: 80 hand-rolled helpers and 1,408 call
+   sites, replacing an API that worked.
+4. **Fixing the third instance is not sweeping the class.** `swimmerplot` was fixed one day
+   before the audit that found the same shape in two siblings — and the audit missed
+   `swimmerplot`'s *own* second instance.
+
+### Round 6 (2026-09-16 meddecide, closing pass)
+
+| Finding | Rule existed? | Why it came back |
+|---|---|---|
+| `prune_imports` deleted five packages `agreement` calls | §19 (partly) | §19 covers a tag leaving WITH a re-routed analysis. Nobody had written the inverse: the analysis leaves, its packages look unused, and the delete order outlives the routing. |
+| Audit test errored on an absent analysis | no | The test's analysis list was a hard-coded snapshot of membership. No rule said membership is derived, not recorded. |
+
+Both are one mechanism, now §29. Neither was a shipped defect: `prune_conflicts()` stopped
+the first at plan time and the second only broke a test. What they cost was a day of
+reading a clean module as a broken one — the gate said `6 unused Imports`, which looked
+like a closed finding regressing, and the suite said eight failures, which looked like
+code. Both were reporting a `menuGroup` suffix.
+
+The lesson is narrower than "be careful": a measurement taken while an analysis is parked
+is not a measurement of the module. Check the routing before believing the instrument.
 
 ---
 
@@ -1578,6 +1772,7 @@ analysis ships (a production `menuGroup`) or not (`D` draft / `P` pending /
 | Renderer reads a `private$` cache (§3, §15) | 23 | 190 |
 | Fitted object or dataset in state (§17) | 1 | 46 |
 | Long loop with no `.checkpoint()` | 17 | 96 |
+| `prune_imports` entry a parked analysis calls (§29) | 0 | 54 |
 
 The shipped column is small **because the audits swept it**. The unshipped column
 has never been swept, and none of it is inert: an analysis is promoted by editing
@@ -1598,3 +1793,366 @@ promotion candidate.
 
 Before moving any analysis out of a `D`/`P`/`T` group, run the gate and clear its
 hits first. Promotion is a release.
+
+---
+
+## 25. Rule: an unconfigured analysis is not an error
+
+### Why
+
+2026-09-22 OncoPath [MEDIUM]:
+
+> "In both analyses, opening the analysis on a loaded dataset runs `.run()` with no variables
+> assigned. That run lands in this branch, so the first thing every user sees is a red
+> 'ERROR: Variables required' banner next to the welcome panel. They haven't made a mistake."
+
+This is the third round for it. 2026-07-13 raised the fatal half (*validation errors use raw
+styled HTML instead of `jmvcore::reject()`*), 2026-08-18 raised the empty-state half (*"a
+first-time user who hasn't picked variables yet can end up looking at error styling"*) and we
+marked it DONE — by moving the banners to a dedicated `notices` channel and then re-creating
+them there (`0dbd3d348`). One day before this audit we fixed `swimmerplot` alone (`48b8edb13`)
+and wrote the reasoning the reviewer quoted back at us, without sweeping the class.
+
+### The rule
+
+Two distinct branches, two distinct mechanisms.
+
+**Empty state.** Nothing assigned → emit **nothing** and let the instructions panel speak.
+Partially assigned → **INFO** naming the boxes that are still empty, one whole translatable
+sentence each. Never ERROR. Reference: `swimmerplot.b.R:2307-2338`.
+
+```r
+# WRONG - fires on open, before the user has done anything
+if (!all_provided) {
+    private$.addNotice("ERROR", .("Variables required"), .("Select the study identifier and ..."))
+    return()
+}
+
+# RIGHT
+n_set <- sum(!vapply(list(patientID, startTime, endTime), is.null, logical(1)))
+if (n_set < 3L) {
+    if (n_set > 0L) {                       # partial: guidance, named boxes, INFO
+        still_empty <- c(if (is.null(patientID)) .("Patient ID is still empty."),
+                         if (is.null(startTime)) .("Start time is still empty."))
+        private$.addNotice('INFO', .("Keep going - a few variables to add"),
+                           paste(still_empty, collapse = " "))
+    }                                       # nothing set: no notice at all
+    self$results$instructions$setContent(private$.generateInstructions())
+    return()
+}
+```
+
+Populate static panels (glossary, about, instructions) **before** the early return, or they ship
+as empty shells.
+
+**Fatal.** A genuine processing failure is not a banner. `jmvcore::reject()` greys the results and
+gives jamovi's own analysis-level error presentation; a banner plus `return(NULL)` leaves the pane
+looking like a normal, if empty, set of results. `reject()` is not `stop()` — it preserves the
+message, so it is also the fix for a specific message being overwritten by an outer handler.
+
+```r
+# WRONG
+private$.addNotice("ERROR", .("DATA PROCESSING ERROR"), processed$message); return(NULL)
+# RIGHT
+jmvcore::reject("{}", msg = processed$message)     # "{}" + msg= when the text carries user data
+```
+
+### Measured
+
+Shipped hits when the class was first swept (2026-09-22), against the reviewer's three named sites:
+**7 empty-state-as-ERROR** (OncoPath `diagnosticmeta.b.R:379`, `waterfall.b.R:1547`;
+ClinicoPathDescriptives `alluvial.b.R:284`; meddecide `decisioncombine.b.R:527,:548`,
+`enhancedROC.b.R:364,:727`) and **9 fatal-via-banner** — including **`swimmerplot.b.R:2392,:2410`,
+which the reviewer missed** while holding swimmerplot up as the model: they examined only its
+empty-state path. Debt: 34 and 13.
+
+### Enforce it
+
+No gate yet, and the honest reason is a measured false-positive rate: a detector keying on
+"ERROR-severity emission inside a branch guarded by an unset option" runs at 53% false positives
+on the shipped surface (it catches guards that are already unreachable behind a silent early
+return, `type: String` options that carry a default, and data-content checks). Two refinements
+drive it to 0/15 on this corpus — require the guard's option to be `Variable`/`Variables`/`Level`
+in the `.a.yaml`, and suppress a guard whose options a *silent* earlier return already covers —
+and it should be built with those before it is turned on. Note the known false **negative**: an
+option unset into an `NA_character_` sentinel (`decision.b.R:477`) looks like a data check.
+
+---
+
+## 26. Rule: tabular data belongs in a `Table` result
+
+### Why
+
+2026-09-22 OncoPath [MEDIUM], on two reference tables in the Clinical Interpretation panel:
+
+> "as HTML they lose everything a jamovi table does. They ignore the results theme … there's no
+> **Copy Latex**, and **Copy** puts markup on the clipboard instead of a grid."
+
+And they cannot be translated: a `Table`'s column titles and row labels go through `.()` like any
+other string, an HTML literal does not.
+
+### The rule
+
+If the rows carry values — computed or reference — declare a `Table`. Fill computed rows in
+`.run()`, static rows in `.init()` (section 6), and put the explaining sentence in `setNote()`.
+
+Exempt, and the reviewer says so explicitly: **empty-state help** — a quick-start panel, a
+glossary, an illustration of the expected data format, a two-column layout scaffold. Those are
+prose in a grid shape, not data.
+
+**Second-order:** a static table beside numbers the analysis already computed is a missed
+opportunity, and sometimes a defect. The reviewer's case is a PPV/NPV table hardcoded at
+Sen = 90% / Spe = 80% while `private$.pooled_sensitivity` and `private$.pooled_specificity` sit in
+the same object — the one table about predictive values says nothing about the user's own test.
+Worse in the same class: `meddecide/R/agreement.b.R:413,:462` print linear and quadratic kappa
+weights (`1.00 / 0.75 / 0.50 / 0.00`) as "the weights this analysis is applying", with no caveat.
+The formula printed two lines above is `1 - |i - j| / (k - 1)`, so those numbers are correct only
+at k = 5. That is [section 20](#20-rule-a-displayed-statistic-is-computed-never-defaulted) wearing
+a table's clothes. Counter-example to copy: `meddecide/R/decisioncalculator.b.R:1279` renders the
+same panel shape and derives every number.
+
+### Measured
+
+97 HTML `<table>` blocks across the shipped surface of the five modules (187 more in promotion
+debt) — **not 2**. Of the shipped ones: 33 carry computed values, 25 are static numeric grids, 27
+are all-prose, 12 are exempt help. Per module: meddecide 47, jsurvival 25, jjstatsplot 13,
+ClinicoPathDescriptives 9, OncoPath 3.
+
+### Enforce it
+
+Not gated. A bare `grep '<table'` would fail all 97, 12 of which the reviewer explicitly blessed —
+~40% noise, which is how a gate gets ignored. The measured pair worth building is: **interpolated
+cells** (an R value spliced between `",` and `"`, or a glue `{obj$field}`) — 35 shipped hits, 33/33
+precision once "at least one interpolated cell is not a bare `.()` call" is added; plus **static
+numeric grid** (a header row and ≥2 threshold-shaped cells) — 16 shipped hits, catching both sites
+the reviewer named. Union ≈ 51 shipped at ≈94% precision, with the exemption keyed on the
+*calling method name* (`.populateInstructions`, `.populateIntro`, todo-style builders), not on the
+markup. Note that the interpolation detector scores **zero** on the file the reviewer was reading —
+all three `diagnosticmeta` tables are static literals.
+
+---
+
+## 27. Rule: the module's own prose must agree with itself
+
+### Why
+
+2026-09-22 OncoPath [LOW]: four ways a module contradicts itself in the files a prospective user
+reads first. `DESCRIPTION`, `README.md` and `jamovi/0000.yaml` are read by different people
+through different doors, and only `0000.yaml` is generated from the umbrella — so a correction
+made where we author does not reach where the user reads.
+
+### The rule
+
+**Capability claims.** If one file qualifies a named clinical standard, every file must.
+OncoPath's `0000.yaml` says the waterfall thresholds are *"adapted from RECIST v1.1, but this is
+NOT a RECIST v1.1 implementation"* and explains why; `DESCRIPTION:13` advertises *"RECIST …
+criteria analysis"* and `README.md:59` promises *"Built-in … RECIST guidelines"* — 6 claim sites
+against 1 disclaimer. For a clinical audience that is a claim they will act on. Worse, and found
+in the same sweep: `jsurvival/README.md` advertises **five analyses the module does not contain**
+(stage migration, alluvial, subgroup forest, time-dependent ROC, IDI — all of them `D`/`P` in the
+umbrella or shipped elsewhere). Not gate-able: judging whether a claim is qualified needs a
+reader. It belongs on the release checklist.
+
+**One bug-report URL.** OncoPath sent `DESCRIPTION`'s readers to `sbalci/OncoPath/issues` and the
+jamovi library's readers to `sbalci/ClinicoPathJamoviModule/issues`. Four of the six trees
+disagreed with themselves. Watch for "Discussions" links that point at `/issues`.
+
+**Description block scalars.** `description: main:` must be **one `>` folded paragraph with no
+blank line**. A `|` literal block keeps every newline, and jamovi renders each as a paragraph
+break; jmvtools additionally truncates at the first blank line and silently drops the rest.
+Measured: `jjdotchart` lost 25 of its 28 lines, `crosstable` 11 of 12, `sequentialtests` 10 of 14 —
+none of it visible except in the library listing. Test the **resolved value**, not the block style:
+a `>` block containing a blank line folds to a newline too, and a single-line `|` is harmless.
+`options[].description.R` is out of scope — it reaches `man/*.Rd`, where newlines do not matter.
+
+**Dataset descriptions.** Two example datasets that describe themselves identically cannot be told
+apart in the data picker. OncoPath's `waterfall_percentage_basic.omv` and
+`waterfall_raw_longitudinal.omv` — the two input modes the waterfall description itself
+distinguishes — both read *"Example analysis for Waterfall Plot."*
+
+### Enforce it
+
+`tools/release_gate.py`: `check_description_newlines` (23 shipped / 139 debt when added — WARN
+until the sweep clears it, then FAIL), `check_issue_urls` (4 of 6 trees red when added),
+`check_dataset_descriptions` (1 hit; also FAILs a `datasets:` entry whose `.omv` is missing).
+The capability-claim half has no detector and says so above.
+
+---
+
+## 28. Rule: seeding the RNG must not outlive the function that did it
+
+### Why
+
+Every analysis in a jamovi session runs in **one** R process. A bare `set.seed(42)` therefore
+does not seed *your* bootstrap — it seeds the engine. The next analysis the user adds, which
+resamples without setting a seed of its own because it has no reason to, now draws from a
+deterministic stream and returns the same "random" bootstrap CI on every run, for the rest of
+the session. Nothing errors and nothing looks wrong; the numbers are simply no longer random.
+
+The 2026-09-16 meddecide audit found the same module using three idioms at once —
+`withr::local_seed()` in `nogoldstandard` and `psychopdaROC`, a hand-rolled `.Random.seed`
+save/restore in `enhancedROC` and `decisioncurve`, and six bare `set.seed()` calls in
+`agreement` and `lassologistic`. Only the third shape leaks.
+
+### The rule
+
+Seed **scoped to the function**, never globally.
+
+```r
+# WRONG - the engine keeps this seed after the function returns
+.bootstrapCI = function(x) {
+    set.seed(self$options$random_seed)
+    replicate(1000, mean(sample(x, replace = TRUE)))
+}
+
+# RIGHT - withr restores the previous RNG state on exit
+.bootstrapCI = function(x) {
+    withr::local_seed(self$options$random_seed)
+    replicate(1000, mean(sample(x, replace = TRUE)))
+}
+```
+
+`withr::local_seed()` is the house idiom. `withr::with_seed(seed, expr)` and an explicit
+`.Random.seed` save/restore pair are equally correct and are not flagged; three idioms in one
+module is a readability problem, not a defect.
+
+**Say which seed produced the numbers.** Whenever the result the user reads depends on the
+seed — bootstrap CIs, permutation p-values, MCMC — expose the seed as an option with a default
+and print it beside the result, so the run can be reproduced. Which `statsExpressions` results
+are seed-dependent is tabulated in the memory note `reference_statsexpressions_seed_dependent_results`.
+
+### Enforce it
+
+`tools/release_gate.py` → `check_bare_set_seed` (WARN). It splits each file into functions,
+blanks string literals and comments first (so generated R code in a `.asSource()` template is
+not a hit), and flags a function that calls `set.seed()` without also mentioning `.Random.seed`
+or `preserve_seed`. Shipped count across all five modules on 2026-09-23: **0**.
+
+---
+
+
+## 29. Rule: nothing may be derived from which analyses a module holds today
+
+### Why
+
+A module's membership is not a property of the module. It is one line per analysis —
+`menuGroup:` in `jamovi/<fn>.a.yaml` — and a `T` / `P` / `D` suffix moves an analysis out
+of the production module for as long as someone is working on it. `_updateModules.R` then
+deletes that analysis's files from the generated sibling. Membership is a *verb*.
+
+Everything derived from a snapshot of that membership silently becomes a claim about a
+moment rather than about the module. Three instances, all of them measured:
+
+1. **The dependency list.** While `agreement` sat at `menuGroup: meddecideT` (2026-09-23),
+   six packages it alone used — `DescTools`, `irrCAC`, `lme4`, `lmerTest`, `psych`, `vcd` —
+   had no caller left in meddecide. They were added to `prune_imports` in
+   `_updateModules_config.yaml` and their `@importFrom` tags deleted from the sibling's
+   hand-maintained `R/zzz_imports.R`. Every signal agreed: the gate read
+   `Imports: 31 checked, 6 unused`, and the module built and installed cleanly.
+   `prune_imports` is a standing DELETE order — the only way to remove an Import — so this
+   wrote a temporary state into permanent config. Restoring `menuGroup: meddecide` made
+   `prune_conflicts()` raise a plan error naming five of the six. Without that guard
+   meddecide would have shipped `agreement` installed but unable to run: the exact shape of
+   the 2026-09-16 OncoPath CRITICAL, where pruning `magrittr` left `waterfall` unrunnable.
+
+2. **The audit test's analysis list.** `tests/testthat/test-meddecide-library-audit.R`
+   reads `R/<name>.b.R` for a hard-coded list of 15 analyses. With `agreement` parked, its
+   files were absent from the sibling and seven tests ERRORED with `cannot open the
+   connection`. Nothing in that output said "this analysis is not in this module" — a
+   clean module read as eight failures. Bringing `agreement` back took it to zero with no
+   change to any test.
+
+3. **A sibling's `importFrom` tags** — §19, already documented: `swimmerplot` got
+   jmvcore's `.()` from `waterfall.b.R`, so suffixing `waterfall`'s `menuGroup` with `T`
+   took the only tag out of OncoPath.
+
+### The rule
+
+Derive membership; never record it. When you must record it, record *why*, and make the
+recording fail loudly when the reason expires.
+
+Concretely, before adding a `prune_imports` entry:
+
+```sh
+# Is any analysis of this module parked right now? If yes, the Imports you see are a lie.
+grep -l 'menuGroup: <module>[TPD]' jamovi/*.a.yaml
+```
+
+WRONG — derived from what ships today, with no record that it was a snapshot:
+
+```yaml
+    prune_imports:
+      - "DescTools"   # nothing in meddecide calls it
+      - "vcd"
+```
+
+RIGHT — the entry names the condition under which it stops being true, or it is not made
+at all:
+
+```yaml
+    prune_imports:
+      # `psych` stays: every psych:: in agreement.b.R is a comment or a user-facing string
+      # saying the result agrees with psych::cohen.kappa -- not one call. prune_conflicts()
+      # PARSES, so comments are not uses; never re-implement it as a grep.
+      - "psych"
+```
+
+For a test, derive the list instead of writing it down:
+
+```r
+# WRONG - a claim about a moment
+analyses <- c("agreement", "cotest", "decision", ...)
+
+# RIGHT - a claim about the tree under test
+analyses <- sub("[.]a[.]yaml$", "",
+                basename(list.files(file.path(root, "jamovi"), pattern = "[.]a[.]yaml$")))
+```
+
+and when a specific analysis genuinely must be present, say so by name:
+
+```r
+skip_if_not(file.exists(f), "agreement does not ship in this module")
+```
+
+A skip naming the analysis is diagnostic. `cannot open the connection` is not.
+
+### A mention is not a use
+
+Deciding "unused" is the load-bearing step, and grep cannot do it. Measured on
+`R/agreement.b.R` against R's own parser (`SYMBOL_PACKAGE` tokens), 2026-09-23:
+
+| package | raw grep | line-at-a-time masker | whole-file masker | R parser |
+|---|---:|---:|---:|---:|
+| `psych` | 7 | 1 | **0** | **0** |
+| `vcd` | 18 | 4 | **3** | **3** |
+| `DescTools` | 3 | 1 | **1** | **1** |
+
+All seven `psych::` occurrences are comments or user-facing strings. A line-at-a-time
+masker still reports one, because `agreement.b.R:7616`
+(`<code>psych::cohen.kappa()</code>`) sits inside a multi-line HTML string whose own line
+carries no quote character. That single false positive is the whole difference between
+"psych is prunable" (true) and "psych is used" (false). Strip strings and comments across
+the whole file, or use the parser.
+
+### Enforce it
+
+- `prune_conflicts()` (`_updateModules_utils.R:612`, called from `_updateModules_plan.R`)
+  already refuses at **plan** time when a prune entry collides with a file the module will
+  ship, so nothing broken reaches disk. It parses, and it deliberately counts only shipped
+  files — `tests/testthat/test-update-modules-plan.R:396` and `:410` pin both behaviours.
+  That guard fires on the way *back*, after the promotion work is already done.
+- `tools/promotion_screen.py` now counts the collision *in advance*, as a promotion
+  blocker weighted like any other (§24). Run it before promoting anything:
+
+  ```sh
+  python3 tools/promotion_screen.py --no-git   # ends with the prune_imports collision list
+  ```
+
+  Measured 2026-09-23: **0 shipped**, **54 parked analyses** across meddecide (29),
+  OncoPath (17), jsurvival (4) and ClinicoPathDescriptives (3). Every one of those is a
+  plan error waiting for whoever removes its suffix.
+- The `learn` sweep that produced this section found the 54 only after the detector was
+  widened to `(?:Extra)?[DPT]+$`: a hand-written sweep matching `[TPD]$` saw 30 and missed
+  every `...ExtraD` group. Reconcile a detector against a hand list before trusting either.
+
+---

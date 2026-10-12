@@ -77,25 +77,13 @@ items:
         - name: percent
           title: "Percentage"
           type: number
-          format: percent
+          format: pc
       clearWith:
          - patientID
          - responseVar
          - timeVar
          - inputType
          - responseCategoryVar
-
-
-    # - name: summaryTable_explanation
-    #   title: summaryTable
-    #   type: Html
-    #   clearWith:
-    #      - patientID
-    #      - responseVar
-    #      - timeVar
-    #      - inputType
-
-
 
     - name: personTimeTable
       title: Person-Time Analysis
@@ -161,6 +149,8 @@ items:
       renderFun: .waterfallplot
       # library-audit 2026-09-16 OncoPath [LOW] REJECTED: .annotationTrack() reads self$data at render;
       #   without the flag the tracks vanish on resize/.omv reopen/export (guide section 15)
+      # library-audit 2026-09-22 OncoPath [INFO] DONE: reviewer confirmed requiresData: true is correct
+      #   trade-off; lifting patient covariates into image state noted for future overhaul (guide section 15)
       requiresData: true
       visible: (showWaterfallPlot)
       clearWith:
@@ -404,11 +394,6 @@ items:
          # the override rewrites exported categories; without this entry the
          # isNotFilled() guard keeps a stale column after the override changes
          - responseCategoryVar
-
-
-    # - name: mydataview
-    #   title: mydataview
-    #   type: Preformatted
 
 
     # Notice outputs converted to HTML to avoid serialization errors

@@ -1,10 +1,10 @@
+# Do not source() R/*.h.R / R/*.b.R here: a source() preamble detaches the package namespace,
+# jmvcore's .() helper leaves scope and any .() string dies with `could not find function "."`
+# (project reference test-source-preamble-breaks-dot-translate). The package provides these.
+
 test_that("timedependentdca runs with synthetic data", {
     skip_if_not_installed('jmvReadWrite')
     skip_if_not_installed('survival')
-    if (!exists("timedependentdca")) {
-        source("../../R/timedependentdca.h.R")
-        source("../../R/timedependentdca.b.R")
-    }
     
     set.seed(123)
     n <- 200

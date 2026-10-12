@@ -44,7 +44,7 @@ children:
           - type: TextBox
             name: alpha
             format: number
-            enable: (penalty == 'elasticnet')
+            enable: (penalty:elasticnet)
       - type: Label
         label: Lambda Selection
         children:

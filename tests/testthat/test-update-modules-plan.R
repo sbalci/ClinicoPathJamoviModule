@@ -3,6 +3,10 @@
 
 plan_path <- testthat::test_path("..", "..", "_updateModules_plan.R")
 plan_env <- new.env(parent = globalenv())
+# The planner calls prune_conflicts() from the utils file (the prune_imports guard), so the
+# planner alone is not a loadable unit any more -- source both, as _updateModules.R does.
+plan_utils_path <- testthat::test_path("..", "..", "_updateModules_utils.R")
+if (file.exists(plan_utils_path)) sys.source(plan_utils_path, envir = plan_env)
 if (file.exists(plan_path)) sys.source(plan_path, envir = plan_env)
 
 skip_if_plan_missing <- function() {
@@ -331,4 +335,87 @@ testthat::test_that("planned_analysis_yaml returns the umbrella .a.yaml sources 
 
   testthat::expect_identical(env$planned_analysis_yaml(plan),
                              c("/U/jamovi/a.a.yaml", "/U/jamovi/b.a.yaml"))
+})
+
+# prune_imports guard -------------------------------------------------------------
+# prune_configured_module_imports() deletes a package from the generated DESCRIPTION
+# unconditionally. A stale entry is therefore invisible until users hit it: `magrittr` was
+# pruned from OncoPath on 2026-09-16 and `waterfall` could not run in jamovi at all. The
+# planner now re-derives every entry against the files the module actually ships, so a wrong
+# entry is a plan error and --dry-run reports it before anything is written.
+#
+# There is deliberately no test here against the real _updateModules_config.yaml: reproducing
+# what each module ships needs the five sibling repos on disk, and `Rscript _updateModules.R
+# --dry-run` already IS that check. These cover the detector's logic.
+
+prune_fixture <- function(body, prune, group = "Survival") {
+  u <- base_umbrella(analysis_files("aa", group, b = body))
+  d <- module_dir("jsurvival")
+  write_tree(d, list("R/zzz_imports.R" = "# hand"))
+  plan_env$compute_distribution_plan(
+    fixture_registry(u, list(jsurvival = list(directory = d, menu_groups = "Survival",
+                                              prune_imports = as.list(prune)))))$errors
+}
+
+testthat::test_that("prune guard: a pruned package called as pkg:: in a shipped file is a plan error", {
+  skip_if_plan_missing()
+  errs <- prune_fixture("f <- function(x) vcd::Kappa(x)", "vcd")
+  testthat::expect_true(any(grepl("prune_imports would remove vcd", errs, fixed = TRUE)))
+})
+
+testthat::test_that("prune guard: a roxygen @importFrom tag in a shipped file is a plan error", {
+  skip_if_plan_missing()
+  errs <- prune_fixture(c("#' @importFrom vcd Kappa", "f <- function(x) 1"), "vcd")
+  testthat::expect_true(any(grepl("prune_imports would remove vcd", errs, fixed = TRUE)))
+})
+
+testthat::test_that("prune guard: requireNamespace-guarded use still blocks the prune", {
+  skip_if_plan_missing()
+  # jamovi installs Imports and never Suggests, so pruning a guarded package does not make the
+  # capability optional -- it makes it dead for every user.
+  errs <- prune_fixture(
+    'f <- function() if (requireNamespace("vcd", quietly = TRUE)) vcd::Kappa(1) else NULL', "vcd")
+  testthat::expect_true(any(grepl("prune_imports would remove vcd", errs, fixed = TRUE)))
+})
+
+testthat::test_that("prune guard: a pkg:: call in a formals DEFAULT still blocks the prune", {
+  skip_if_plan_missing()
+  # Formals are a pairlist, not a call, so the usage walker used to step straight over a
+  # default value and report nothing. Found by the 2026-09-22 adversarial review of this guard.
+  errs <- prune_fixture(".ccc <- function(x, engine = vcd::Kappa) engine(x)", "vcd")
+  testthat::expect_true(any(grepl("prune_imports would remove vcd", errs, fixed = TRUE)))
+})
+
+testthat::test_that("prune guard: a parameter with no default does not error the walker", {
+  skip_if_plan_missing()
+  # The empty symbol must never be bound to a variable -- referencing it raises
+  # "argument is missing, with no default" and would abort the whole plan.
+  testthat::expect_length(prune_fixture("f <- function(a, b, c) a + b + c", "vcd"), 0)
+})
+
+testthat::test_that("prune guard: a pkg:: mention in a COMMENT is not a use", {
+  skip_if_plan_missing()
+  # The scan parses, so comments are gone before anything is recorded. A grep implementation
+  # would wrongly block robustbase (ClinicoPathDescriptives) and psych (OncoPath), whose only
+  # shipped-file hits are comment lines.
+  testthat::expect_length(prune_fixture(c("# psych::ICC() is what this reimplements", "f <- function(x) x"),
+                                        "psych"), 0)
+})
+
+testthat::test_that("prune guard: a package no shipped file uses is pruned without complaint", {
+  skip_if_plan_missing()
+  testthat::expect_length(prune_fixture("f <- function(x) stats::sd(x)", "vcd"), 0)
+})
+
+testthat::test_that("prune guard: only files THIS module ships count", {
+  skip_if_plan_missing()
+  # `bb` is menuGroup SurvivalD -- umbrella-only, shipped nowhere. Its vcd:: call must not
+  # block jsurvival's legitimate prune, or every prune entry in the config would be unusable.
+  u <- base_umbrella(c(analysis_files("aa", "Survival", b = "f <- function(x) stats::sd(x)"),
+                       analysis_files("bb", "SurvivalD", b = "g <- function(x) vcd::Kappa(x)")))
+  d <- module_dir("jsurvival")
+  write_tree(d, list("R/zzz_imports.R" = "# hand"))
+  reg <- fixture_registry(u, list(jsurvival = list(directory = d, menu_groups = "Survival",
+                                                   prune_imports = list("vcd"))))
+  testthat::expect_length(plan_env$compute_distribution_plan(reg)$errors, 0)
 })

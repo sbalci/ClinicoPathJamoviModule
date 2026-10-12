@@ -4,17 +4,17 @@ title: Medical Decision Calculator
 menuGroup: meddecide
 menuSubgroup: Decision Calculators
 menuSubtitle: Sensitivity, Specificity, PPV, NPV, ...
-version: '1.0.81'
+version: '1.0.83'
 jas: '1.2'
 
 description:
-    main: |
-        Medical Decision Calculator for diagnostic test evaluation when you have 
-        the four key counts: True Positives (TP), False Positives (FP), True 
-        Negatives (TN), and False Negatives (FN). Calculates comprehensive 
-        diagnostic performance metrics including sensitivity, specificity, 
-        positive and negative predictive values, likelihood ratios, and 
-        post-test probabilities. Supports confidence interval estimation and 
+    main: >
+        Medical Decision Calculator for diagnostic test evaluation when you have
+        the four key counts: True Positives (TP), False Positives (FP), True
+        Negatives (TN), and False Negatives (FN). Calculates comprehensive
+        diagnostic performance metrics including sensitivity, specificity,
+        positive and negative predictive values, likelihood ratios, and
+        post-test probabilities. Supports confidence interval estimation and
         Fagan nomogram visualization for educational interpretation. Presets and
         examples are illustrative only and are not clinical guides.
     R:
@@ -22,16 +22,21 @@ description:
         usage: |
             # Illustrative examples only; these are not clinical guides.
             result1 <- decisioncalculator(
-              TP = 90, FN = 10, TN = 80, FP = 20
+              TP = 90, FN = 20, TN = 80, FP = 30
             )
 
             result2 <- decisioncalculator(
-              TP = 90, FN = 10, TN = 80, FP = 20,
+              TP = 90, FN = 20, TN = 80, FP = 30,
               ci = TRUE, pp = TRUE, pprob = 0.15, fagan = TRUE
             )
 
 
 options:
+    # The four counts (and the illustrative cut-off counts below) carry no `min:`.
+    # jmvcore validates options before .run(), so a `min: 0` hard-rejects a negative
+    # value with a raw "TP must be between 0 and Inf (is -10)" and makes the backend's
+    # "Negative counts detected" ERROR notice unreachable dead code. Without it the
+    # value reaches .run() and the user - GUI or R - gets the clinical notice instead.
     - name: TP
       title: 'True Positive (TP)'
       type: Number

@@ -101,7 +101,7 @@ children:
                 name: confidenceLevel
                 format: number
                 label: Confidence Level
-                suffix: (0.80-0.99)
+                suffix: 0.80-0.99
           - type: Label
             label: Multiple Variables
             children:
@@ -126,13 +126,13 @@ children:
             format: string
             enable: (performLandmarkAnalysis)
             label: Landmark Time Points
-            suffix: (comma-separated)
+            suffix: comma-separated
           - type: TextBox
             name: landmarkWindow
             format: number
             enable: (performLandmarkAnalysis)
             label: Landmark Window Size
-            suffix: (time units)
+            suffix: time units
 
   # Time-Dependent Cox Regression
   - type: CollapseBox
@@ -232,7 +232,7 @@ children:
                 name: plotTimeRange
                 format: string
                 label: Plot Time Range
-                suffix: (months or 'auto')
+                suffix: months or 'auto'
               - type: CheckBox
                 name: showConfidenceIntervals
                 label: Show Confidence Intervals
@@ -288,7 +288,7 @@ children:
                 format: number
                 enable: (performBootstrapValidation)
                 label: Bootstrap Samples
-                suffix: (100-2000)
+                suffix: 100-2000
           - type: Label
             label: Sensitivity Analysis
             children:

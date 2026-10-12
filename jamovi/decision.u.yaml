@@ -9,7 +9,7 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Gold Standard (Reference Test)
+        label: Reference Standard (Gold Standard)
         children:
           - type: VariablesListBox
             name: gold
@@ -22,7 +22,7 @@ children:
             name: goldNegative
             enable: (gold)
       - type: TargetLayoutBox
-        label: New Test
+        label: Test Under Evaluation
         children:
           - type: VariablesListBox
             name: newtest
@@ -61,7 +61,7 @@ children:
         label: Known population prevalence
       - type: TextBox
         name: pprob
-        label: Disease prevalence in target population (0.0-1.0)
+        label: Disease prevalence in target population (0.001-0.999)
         format: number
         enable: (pp)
   - type: CollapseBox
@@ -83,7 +83,7 @@ children:
         label: Clinical interpretation guide
       - type: CheckBox
         name: showReportTemplate
-        label: Copy-ready report
+        label: Copy-ready results paragraph
       - type: CheckBox
         name: showAboutAnalysis
         label: About this analysis

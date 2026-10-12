@@ -10,7 +10,7 @@ enhancedROC(
   positiveClass,
   predictors,
   analysisType = "single",
-  direction = "auto",
+  direction = "higher",
   youdenOptimization = TRUE,
   customCutoffs = "",
   sensitivityThreshold = 0,
@@ -19,7 +19,6 @@ enhancedROC(
   bootstrapSamples = 1000,
   useBootstrap = FALSE,
   bootstrapMethod = "bca",
-  bootstrapCutoffCI = FALSE,
   bootstrapPartialAUC = FALSE,
   stratifiedBootstrap = FALSE,
   seed = 0,
@@ -65,9 +64,6 @@ enhancedROC(
   splineCalibration = FALSE,
   splineKnots = 4,
   eoRatio = FALSE,
-  namDagostino = FALSE,
-  greenwoodNam = FALSE,
-  calibrationBelt = FALSE,
   calibrationDensity = FALSE,
   multiClassROC = FALSE,
   multiClassStrategy = "ovr",
@@ -76,19 +72,9 @@ enhancedROC(
   nntCalculation = FALSE,
   clinicalUtilityCurve = FALSE,
   decisionImpactTable = FALSE,
-  harrellCIndex = FALSE,
-  unoCStatistic = FALSE,
-  incidentDynamic = FALSE,
-  cumulativeDynamic = FALSE,
-  competingRisksConcordance = FALSE,
   internalValidation = FALSE,
   validationMethod = "bootstrap",
-  optimismCorrection = FALSE,
-  externalValidation = FALSE,
-  decisionImpactCurves = FALSE,
-  netBenefitRegression = FALSE,
-  modelUpdating = FALSE,
-  transportability = FALSE
+  decisionImpactCurves = FALSE
 )
 }
 \arguments{
@@ -103,7 +89,21 @@ enhancedROC(
 
 \item{analysisType}{Type of ROC analysis to perform}
 
-\item{direction}{Direction of the predictor-outcome relationship}
+\item{direction}{Direction of the predictor-outcome relationship. The
+default is "Higher values indicate positive outcome" because it is a stated
+hypothesis rather than an estimate. "Auto" reads the orientation off the
+same data that supply the AUC - pROC compares the two groups' median values
+\itemize{
+\item so the direction is fitted rather than assumed, and every AUC is biased
+upward (for n = 20 the AUC expected under no association is about 0.60, not
+0.50, and exceeds 0.60 in roughly 45 of every 100 markers carrying no
+information at all). It is not floored at 0.5 either: a median split can
+disagree with the ranks, so about 12 of those 100 null markers are still
+reported below 0.5. "Auto" can also silently invert a marker and report
+0.825 where the un-inverted reading is 0.175. Use "Auto" only for
+exploratory screening of markers whose direction is genuinely unknown, and
+say so.
+}}
 
 \item{youdenOptimization}{Find the optimal cutoff by maximising the Youden
 index (sensitivity + specificity - 1), subject to the minimum
@@ -137,12 +137,10 @@ intervals}
 \item{bootstrapMethod}{Method for calculating bootstrap confidence
 intervals. BCa provides better coverage but requires more computation.}
 
-\item{bootstrapCutoffCI}{NOT YET IMPLEMENTED - selecting this produces no
-output. Calculate bootstrap confidence intervals for sensitivity and
-specificity at optimal cutoff}
-
-\item{bootstrapPartialAUC}{NOT YET IMPLEMENTED - selecting this produces no
-output. Calculate bootstrap confidence intervals for partial AUC estimates}
+\item{bootstrapPartialAUC}{Bootstrap confidence interval for the partial
+AUC, using the resample count, interval type (BCa/percentile/basic) and
+stratification set above. The interval is for the raw partial AUC on the
+chosen focus range, not for the McClish-normalised value.}
 
 \item{stratifiedBootstrap}{Maintain outcome class proportions in bootstrap
 samples (recommended for imbalanced data)}
@@ -199,8 +197,9 @@ PRC when appropriate}
 \item{imbalanceThreshold}{Ratio threshold for imbalance detection (e.g.,
 3.0 means 3:1 or 1:3 ratio)}
 
-\item{showImbalanceWarning}{Display warning message when class imbalance is
-detected}
+\item{showImbalanceWarning}{Add the explanatory detail to the
+class-imbalance warning. The warning itself is always shown when imbalance
+is detected; this only controls how much it explains.}
 
 \item{recommendPRC}{Recommend using Precision-Recall curves when imbalance
 is detected}
@@ -270,32 +269,26 @@ spline has knots - 1 degrees of freedom; more knots follow the data more
 closely but need more events per knot. Used only when splineCalibration is
 on.}
 
-\item{eoRatio}{NOT YET IMPLEMENTED - selecting this produces no output.
-Calculate Expected/Observed ratio for overall calibration assessment}
+\item{eoRatio}{Expected/Observed ratio for overall calibration. Reported
+only when the predictor is supplied as a probability in 0 to 1; when a
+logistic model has to be fitted here to get probabilities the ratio is 1 by
+construction and the cell is left blank.}
 
-\item{namDagostino}{NOT YET IMPLEMENTED - selecting this produces no
-output. Perform Nam-D'Agostino calibration test (more powerful than H-L)}
-
-\item{greenwoodNam}{NOT YET IMPLEMENTED - selecting this produces no
-output. Greenwood-Nam-D'Agostino test for survival model calibration}
-
-\item{calibrationBelt}{NOT YET IMPLEMENTED - selecting this produces no
-output. Display calibration belt showing uncertainty around calibration
-curve}
-
-\item{calibrationDensity}{NOT YET IMPLEMENTED - selecting this produces no
-output. Show distribution of predicted probabilities as density overlay}
+\item{calibrationDensity}{Overlay the distribution of predicted
+probabilities along the bottom of the calibration plot, so a calibration
+point backed by two patients is not read like one backed by two hundred.
+Skipped when there are fewer than 10 usable probabilities to smooth.}
 
 \item{multiClassROC}{Enable multi-class ROC analysis for outcomes with >2
 levels}
 
 \item{multiClassStrategy}{Strategy for multi-class ROC analysis}
 
-\item{multiClassAveraging}{Method for averaging AUC across classes. Only
-the unweighted Macro Average is computed; Weighted Average (by prevalence)
-is NOT YET IMPLEMENTED - selecting it changes nothing, and the value
-reported stays the unweighted macro average of the One-vs-Rest AUCs (OVR
-strategy) or the Hand-Till pairwise AUC (OVO strategy)}
+\item{multiClassAveraging}{Method for averaging AUC across classes. Both
+averages are reported side by side for the One-vs-Rest strategy: Macro
+weights every class equally, Weighted weights each class by how many cases
+it contains. The One-vs-One strategy reports only its own unweighted
+average over class pairs, which is what that statistic is defined as.}
 
 \item{clinicalImpact}{Calculate clinical impact metrics (NNT, NND, clinical
 utility)}
@@ -309,46 +302,14 @@ consequences}
 
 \item{decisionImpactTable}{Show decision impact at various thresholds}
 
-\item{harrellCIndex}{NOT YET IMPLEMENTED - selecting this produces no
-output. Calculate Harrell's concordance index for time-to-event outcomes}
-
-\item{unoCStatistic}{NOT YET IMPLEMENTED - selecting this produces no
-output. Calculate Uno's C-statistic (more robust to censoring)}
-
-\item{incidentDynamic}{NOT YET IMPLEMENTED - selecting this produces no
-output. Calculate incident/dynamic AUC (sensitivity for events at specific
-time)}
-
-\item{cumulativeDynamic}{NOT YET IMPLEMENTED - selecting this produces no
-output. Calculate cumulative/dynamic AUC (sensitivity for events by
-specific time)}
-
-\item{competingRisksConcordance}{NOT YET IMPLEMENTED - selecting this
-produces no output. Calculate cause-specific concordance for competing
-risks}
-
 \item{internalValidation}{Perform internal validation using
 cross-validation or bootstrap}
 
 \item{validationMethod}{Method for internal validation}
 
-\item{optimismCorrection}{NOT YET IMPLEMENTED - selecting this produces no
-output. Apply optimism correction to performance metrics}
-
-\item{externalValidation}{NOT YET IMPLEMENTED - selecting this produces no
-output. Enable external validation reporting framework}
-
-\item{decisionImpactCurves}{NOT YET IMPLEMENTED - selecting this produces
-no output. Plot decision impact curves showing clinical consequences}
-
-\item{netBenefitRegression}{NOT YET IMPLEMENTED - selecting this produces
-no output. Model net benefit as function of threshold probabilities}
-
-\item{modelUpdating}{NOT YET IMPLEMENTED - selecting this produces no
-output. Analyze need for model recalibration or updating}
-
-\item{transportability}{NOT YET IMPLEMENTED - selecting this produces no
-output. Assess model transportability across populations}
+\item{decisionImpactCurves}{Plot the clinical impact curve: how many of
+1000 tested patients would be called high risk at each threshold
+probability, and how many of those actually have the event.}
 }
 \value{
 A results object containing:
@@ -390,6 +351,7 @@ A results object containing:
 \code{results$results$clinicalImpactTable} \tab \tab \tab \tab \tab Number needed to test and clinical utility metrics \cr
 \code{results$results$decisionImpactSummary} \tab \tab \tab \tab \tab Clinical consequences at various decision thresholds \cr
 \code{results$results$clinicalUtilityPlot} \tab \tab \tab \tab \tab Clinical utility showing test consequences across thresholds \cr
+\code{results$results$decisionImpactPlot} \tab \tab \tab \tab \tab Number of patients called high risk, and number of true events among them, per 1000 tested across thresholds \cr
 }
 }
 \description{

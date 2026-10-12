@@ -29,16 +29,22 @@ clinicopath_init <- function(function_name, context = "") {
     .clinicopath_errors$error_log <- list()
     .clinicopath_errors$warning_log <- list()
     
-    # Track function stack
-    .clinicopath_errors$function_stack <- c(.clinicopath_errors$function_stack, function_name)
+    # library-audit 2026-09-16 meddecide [LOW] DONE: SET the stack, do not append to it.
+    # This runs on every panel open, clinicopath_cleanup() -- the only thing that pops --
+    # is never called anywhere, so the vector grew by one entry for the life of the engine
+    # process. The readers (clinicopath_error_handler, generate_user_friendly_error) only
+    # ever want tail(stack, 1), and nothing calls this re-entrantly, so a single entry is
+    # both correct and bounded. Every other counter in this function is already reset here.
+    .clinicopath_errors$function_stack <- function_name
     
-    # Log function initialization
+    # Log function initialization. sys.calls() is deliberately NOT captured: it pinned the
+    # whole jamovi call stack (and everything its frames referenced) for the life of the
+    # process, and nothing ever read it back.
     timestamp <- Sys.time()
     init_log <- list(
         timestamp = timestamp,
         function_name = function_name,
-        context = context,
-        call_stack = sys.calls()
+        context = context
     )
     
     .clinicopath_errors$init_log <- init_log

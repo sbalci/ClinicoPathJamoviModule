@@ -299,3 +299,53 @@ test_that("decision handles all output options with small sample", {
   )
   expect_s3_class(result, "decisionResults")
 })
+
+test_that("decision: names with spaces, punctuation and Unicode; an empty dataset", {
+  # Column and level names reach data[[ ]], dplyr's .data[[ ]], table() and the notes
+  # verbatim. TP 45, FP 10, FN 6, TN 59, counted by hand.
+  pos <- "Malignant/High-grade"; neg <- "Benign <20%"
+  tpos <- "IHC ≥ 2+"; tneg <- "IHC 0-1+"
+  d <- data.frame(g = factor(rep(c(pos, pos, neg, neg), c(45, 6, 10, 59))),
+                  t = factor(rep(c(tpos, tneg, tpos, tneg), c(45, 6, 10, 59))))
+  names(d) <- c("Final diagnosis (biopsy)", "IHC score ç/≥ A+B")
+  run <- function(data) decision(data = data, gold = names(d)[1], goldPositive = pos,
+                                 goldNegative = neg, newtest = names(d)[2],
+                                 testPositive = tpos, testNegative = tneg,
+                                 od = TRUE, showMisclassified = TRUE)
+  r <- run(d)
+  rt <- as.data.frame(r$ratioTable)
+  expect_equal(rt$Sens, 45 / 51)
+  expect_equal(rt$Spec, 59 / 69)
+  raw <- as.data.frame(r$rawContingency)
+  expect_equal(raw$test_level, c(tpos, tneg, "Total"))
+  expect_equal(raw$gold_pos, c(45, 6, 51))
+  expect_equal(nrow(as.data.frame(r$falsePositiveTable)), 10)
+  expect_equal(nrow(as.data.frame(r$falseNegativeTable)), 6)
+
+  r0 <- run(d[0, ])
+  expect_match(r0$notices$content, "No data available for analysis", fixed = TRUE)
+})
+
+test_that("decision: a backslash in a column name; a level that reads as an HTML tag", {
+  # Security audit 2026-09-27. (1) Column names went through constructFormula() ->
+  # decomposeFormula(), which reads "\" as an escape: "IHC\score" became "IHCscore",
+  # data[[ ]] was NULL and the run stopped with a false "level not found" error.
+  # (2) Text cells and column titles are parsed as HTML by the jamovi client, so a level
+  # "<LOD" was read as an unclosed tag and showed as an empty cell. A "<" before a
+  # letter is now followed by a space. TP 45, FP 10, FN 6, TN 59.
+  d <- data.frame(g = factor(rep(c("Pos", "Pos", "Neg", "Neg"), c(45, 6, 10, 59))),
+                  t = factor(rep(c("Detected", "<LOD", "Detected", "<LOD"), c(45, 6, 10, 59))))
+  names(d) <- c("Gold\\final", "IHC\\score")
+  r <- decision(data = d, gold = names(d)[1], goldPositive = "Pos", goldNegative = "Neg",
+                newtest = names(d)[2], testPositive = "Detected", testNegative = "<LOD",
+                od = TRUE, showMisclassified = TRUE)
+  expect_false(grepl("not found", r$notices$content, fixed = TRUE))
+  rt <- as.data.frame(r$ratioTable)
+  expect_equal(rt$Sens, 45 / 51)
+  expect_equal(rt$Spec, 59 / 69)
+  expect_equal(r$rawContingency$getColumn("test_level")$title, "IHC\\score")
+  expect_equal(r$rawContingency$getColumn("gold_pos")$superTitle, "Gold\\final")
+  expect_equal(as.data.frame(r$rawContingency)$test_level, c("Detected", "< LOD", "Total"))
+  expect_true("< LOD" %in% as.data.frame(r$rawCounts)$test_level)
+  expect_equal(unique(as.data.frame(r$falseNegativeTable)$test_value), "< LOD")
+})

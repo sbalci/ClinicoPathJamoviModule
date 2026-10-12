@@ -905,7 +905,7 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # above .jenksExactMaxN the natural breaks come from a random subsample
             breakTable$setNote("seed", if (method == "jenks" && requireNamespace("classInt", quietly = TRUE) &&
                                            length(x_clean) > private$.jenksExactMaxN)
-                jmvcore::format(.("Random seed: {seed}"), seed = self$options$seed))
+                .fmt(.("Random seed: {seed}"), seed = self$options$seed))
             for (i in seq_along(breaks)) {
                 breakTable$addRow(rowKey = i, values = list(
                     index = i,

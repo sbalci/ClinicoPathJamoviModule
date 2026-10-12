@@ -5,11 +5,11 @@ menuGroup: meddecide
 menuSubgroup: Prediction Models
 menuTitle: LASSO Logistic
 menuSubtitle: Penalized feature selection for binary classification
-version: '1.0.81'
+version: '1.0.83'
 jas: '1.2'
 
 description:
-    main: |
+    main: >
         Performs LASSO-penalized logistic regression for variable selection in binary
         classification problems. Ideal for diagnostic pathology studies that build
         classifiers (e.g., tumor type A vs B) with automatic feature selection.
@@ -118,7 +118,7 @@ options:
         R: Random seed for reproducible cross-validation fold assignment.
 
     - name: standardize
-      title: Standardize variables
+      title: Variable standardization
       type: Bool
       default: true
       description:
@@ -264,7 +264,7 @@ options:
           predicted probability of the positive class.
 
     - name: predictions
-      title: Add Predicted Probabilities
+      title: Predicted probabilities
       type: Output
       description:
         R: Adds predicted probabilities to the dataset.

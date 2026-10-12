@@ -222,7 +222,20 @@ sequentialtestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="plain_summary",
                 title="Summary (Plain Language)",
-                visible="(show_explanation)"))
+                visible="(show_explanation)",
+                clearWith=list(
+                    "preset",
+                    "test1_name",
+                    "test1_sens",
+                    "test1_spec",
+                    "test1_cost",
+                    "test2_name",
+                    "test2_sens",
+                    "test2_spec",
+                    "test2_cost",
+                    "strategy",
+                    "prevalence",
+                    "population_size")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="summary_table",
@@ -269,7 +282,20 @@ sequentialtestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     list(
                         `name`="nnt", 
                         `title`="Number Needed to Screen", 
-                        `type`="integer"))))
+                        `type`="integer")),
+                clearWith=list(
+                    "preset",
+                    "test1_name",
+                    "test1_sens",
+                    "test1_spec",
+                    "test1_cost",
+                    "test2_name",
+                    "test2_sens",
+                    "test2_spec",
+                    "test2_cost",
+                    "strategy",
+                    "prevalence",
+                    "population_size")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="individual_tests_table",
@@ -307,7 +333,20 @@ sequentialtestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     list(
                         `name`="nlr", 
                         `title`="Negative LR", 
-                        `type`="number"))))
+                        `type`="number")),
+                clearWith=list(
+                    "preset",
+                    "test1_name",
+                    "test1_sens",
+                    "test1_spec",
+                    "test1_cost",
+                    "test2_name",
+                    "test2_sens",
+                    "test2_spec",
+                    "test2_cost",
+                    "strategy",
+                    "prevalence",
+                    "population_size")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="population_flow_table",
@@ -403,12 +442,38 @@ sequentialtestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="explanation_text",
                 title="Explanation",
-                visible="(show_explanation)"))
+                visible="(show_explanation)",
+                clearWith=list(
+                    "preset",
+                    "test1_name",
+                    "test1_sens",
+                    "test1_spec",
+                    "test1_cost",
+                    "test2_name",
+                    "test2_sens",
+                    "test2_spec",
+                    "test2_cost",
+                    "strategy",
+                    "prevalence",
+                    "population_size")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="formulas_text",
                 title="Formulas Used",
-                visible="(show_formulas)"))
+                visible="(show_formulas)",
+                clearWith=list(
+                    "preset",
+                    "test1_name",
+                    "test1_sens",
+                    "test1_spec",
+                    "test1_cost",
+                    "test2_name",
+                    "test2_sens",
+                    "test2_spec",
+                    "test2_cost",
+                    "strategy",
+                    "prevalence",
+                    "population_size")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot_flow_diagram",
@@ -416,7 +481,20 @@ sequentialtestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 width=600,
                 height=400,
                 renderFun=".plot_flow_diagram",
-                visible="(show_plots)"))
+                visible="(show_plots)",
+                clearWith=list(
+                    "preset",
+                    "test1_name",
+                    "test1_sens",
+                    "test1_spec",
+                    "test1_cost",
+                    "test2_name",
+                    "test2_sens",
+                    "test2_spec",
+                    "test2_cost",
+                    "strategy",
+                    "prevalence",
+                    "population_size")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot_performance",
@@ -424,7 +502,20 @@ sequentialtestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 width=600,
                 height=400,
                 renderFun=".plot_performance",
-                visible="(show_plots)"))
+                visible="(show_plots)",
+                clearWith=list(
+                    "preset",
+                    "test1_name",
+                    "test1_sens",
+                    "test1_spec",
+                    "test1_cost",
+                    "test2_name",
+                    "test2_sens",
+                    "test2_spec",
+                    "test2_cost",
+                    "strategy",
+                    "prevalence",
+                    "population_size")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot_probability",
@@ -432,7 +523,20 @@ sequentialtestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 width=600,
                 height=400,
                 renderFun=".plot_probability",
-                visible="(show_plots)"))
+                visible="(show_plots)",
+                clearWith=list(
+                    "preset",
+                    "test1_name",
+                    "test1_sens",
+                    "test1_spec",
+                    "test1_cost",
+                    "test2_name",
+                    "test2_sens",
+                    "test2_spec",
+                    "test2_cost",
+                    "strategy",
+                    "prevalence",
+                    "population_size")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot_population_flow",
@@ -440,7 +544,20 @@ sequentialtestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 width=600,
                 height=400,
                 renderFun=".plot_population_flow",
-                visible="(show_plots)"))
+                visible="(show_plots)",
+                clearWith=list(
+                    "preset",
+                    "test1_name",
+                    "test1_sens",
+                    "test1_spec",
+                    "test1_cost",
+                    "test2_name",
+                    "test2_sens",
+                    "test2_spec",
+                    "test2_cost",
+                    "strategy",
+                    "prevalence",
+                    "population_size")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot_sensitivity_analysis",
@@ -448,12 +565,38 @@ sequentialtestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 width=600,
                 height=400,
                 renderFun=".plot_sensitivity_analysis",
-                visible="(show_plots)"))
+                visible="(show_plots)",
+                clearWith=list(
+                    "preset",
+                    "test1_name",
+                    "test1_sens",
+                    "test1_spec",
+                    "test1_cost",
+                    "test2_name",
+                    "test2_sens",
+                    "test2_spec",
+                    "test2_cost",
+                    "strategy",
+                    "prevalence",
+                    "population_size")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="clinical_guidance",
                 title="Strategy Notes and Teaching Examples",
-                visible="(show_explanation)"))}))
+                visible="(show_explanation)",
+                clearWith=list(
+                    "preset",
+                    "test1_name",
+                    "test1_sens",
+                    "test1_spec",
+                    "test1_cost",
+                    "test2_name",
+                    "test2_sens",
+                    "test2_spec",
+                    "test2_cost",
+                    "strategy",
+                    "prevalence",
+                    "population_size")))}))
 
 sequentialtestsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "sequentialtestsBase",
@@ -463,7 +606,7 @@ sequentialtestsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             super$initialize(
                 package = "ClinicoPath",
                 name = "sequentialtests",
-                version = c(1,0,81),
+                version = c(1,0,83),
                 options = options,
                 results = sequentialtestsResults$new(options=options),
                 data = data,
@@ -479,27 +622,16 @@ sequentialtestsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' Sequential Testing Analysis
 #'
 #' Analyzes how diagnostic accuracy changes when applying two tests in 
-#' sequence,
-#' comparing three different testing strategies: serial positive 
-#' (confirmation),
-#' serial negative (exclusion), and parallel testing. Provides comprehensive
-#' analysis including population flow, cost implications, and diagnostic 
-#' plots.
-#' 
-#' The named scenarios and their values are teaching examples only, not 
-#' clinical
-#' guidance or validated diagnostic pathways. Replace all example parameters 
-#' with
-#' estimates applicable to the intended population before interpreting 
-#' results.
-#' 
-#' This analysis is particularly useful for:
-#' • Exploring how diagnostic strategies behave under explicit assumptions
-#' • Comparing hypothetical test sequences for teaching or planning
-#' • Understanding trade-offs between sensitivity and specificity
-#' • Illustrating expected testing volume and cost under user-supplied 
-#' assumptions
-#' • Teaching sequential testing concepts and Bayesian probability
+#' sequence, comparing three different testing strategies: serial positive 
+#' (confirmation), serial negative (exclusion), and parallel testing. Provides 
+#' comprehensive analysis including population flow, cost implications, and 
+#' diagnostic plots, so you can explore how diagnostic strategies behave under 
+#' explicit assumptions, compare hypothetical test sequences, weigh trade-offs 
+#' between sensitivity and specificity, and illustrate expected testing volume 
+#' and cost under user-supplied assumptions. The named scenarios and their 
+#' values are teaching examples only, not clinical guidance or validated 
+#' diagnostic pathways. Replace all example parameters with estimates 
+#' applicable to the intended population before interpreting results.
 #' 
 #' @param preset Select a teaching example or use custom values. Examples load
 #'   rounded, hypothetical parameters chosen only to demonstrate how each

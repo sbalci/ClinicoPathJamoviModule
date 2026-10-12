@@ -489,7 +489,7 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `name`="percent", 
                         `title`="Percentage", 
                         `type`="number", 
-                        `format`="percent")),
+                        `format`="pc")),
                 clearWith=list(
                     "patientID",
                     "responseVar",
@@ -832,7 +832,7 @@ waterfallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "waterfall",
-                version = c(1,0,82),
+                version = c(1,0,83),
                 options = options,
                 results = waterfallResults$new(options=options),
                 data = data,

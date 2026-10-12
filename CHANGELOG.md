@@ -5,6 +5,1317 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-09-30 — fixing the `/check-function-full decisioncombine` findings: a notice graded on one rule that spoke for all, a `%` that broke the Rd, and two searches that found nothing
+
+- **Failure modes:**
+  - My first version of the new discrimination notice graded only the top rule's Agresti-Caffo interval,
+    but its text spoke for every rule ("no evidence that any rule scored here separates..."). Intervals
+    differ in width between rules, so another rule could exclude 0 or reach 0.40. It also made
+    "Discrimination Not Established" a serious warning, which fired on about a third of samples of an
+    acceptable test (true J 0.45) at 10 to 15 patients per group.
+  - The same flaw sat in an older notice. With one test, "No Rule Performs Better Than Chance" was a serious
+    warning fired whenever J <= 0. That is 27% of samples of a correctly coded test with true J 0.15 at 15
+    per group, and the warning told the user the test was anti-predictive and to review its level. Fixed the
+    same day: such a test now gets the chance-level note and the graded discrimination notice.
+  - I wrote "95%" into an `.r.yaml` description. It reached the Rd as `95\\%`, which opens an Rd comment and
+    swallowed the rest of the results-table row. The neighbouring descriptions spell "95 percent" for this
+    reason, and a memory note already said so.
+  - Two searches returned nothing, and I read that as "nothing there":
+    - A grep of the `.po` files for an `.a.yaml` help-text phrase: long msgids are wrapped over several
+      lines, so the phrase was split.
+    - A grep of the tests for an old ranking sentence: IR-01b built it from `paste0()` pieces, and the first
+      suite run failed on it.
+- **Detection signal:**
+  - Codex's post-implementation review gave a 20 + 20 counterexample. The statistics, regression and
+    calibration lenses of a 45-agent review workflow found the same defect independently, and the
+    calibration lens measured the alarm rate.
+  - `tools::checkRd()` on the regenerated Rd reported "Only 6 columns allowed in this table (row 3 has 11)".
+  - `jmvtools::i18nUpdate()` listed the help texts as catalogue entries.
+- **Prevention rules:**
+  - A notice that makes a claim about every rule is graded on every rule. A check on the top-ranked row
+    licenses a sentence about that row only.
+  - Before choosing a new notice's severity, simulate how often it fires on an acceptable input at small n.
+    This is the 2026-09-29 rule applied to a new notice, not just to an old guard.
+  - Run `tools::checkRd()` on every regenerated `.Rd`. Never put `%` in a `.yaml` description; write "percent".
+  - Search `.po` catalogues with a parser, not grep. Search tests for an old sentence by a short distinctive
+    fragment (three or four words), because tests split long strings with `paste0()`.
+
+---
+
+## 2026-09-29 — `/check-function decisioncombine --profile release`: a version bump the updater undoes, and a comment about a panel that did not exist
+
+- **Failure modes:**
+  - The review pass earlier today bumped `decisioncombine.a.yaml` to 1.0.84 and regenerated the header.
+    The user's `_updateModules.R` run then set the yaml back to 1.0.83: `set_analysis_versions()` writes
+    `new_version`[1:3] into the umbrella's own `.a.yaml` of every analysis it ships, and a `meddecideT`
+    analysis ships to JamoviTest. The header stayed at 1.0.84. The 09-27 entry below saw the same rollback
+    for decision and recorded it only as "the yaml was rewritten".
+  - `.validateInputs()` returned quietly on an empty selection "to let the instructions panel speak". No
+    such panel existed, so a new analysis showed three empty tables and nothing else. The comment dates
+    from 2026-09-23 (`cf4537d63`), and every review pass since then read past it.
+- **Detection signal:**
+  - The yaml's mtime moved to 18:49:38 while the user's run was going; only the `version:` line differed.
+    A grep of the updater for writes to `^version:` found `set_analysis_versions()`.
+  - The `style_welcome` step asked what the user sees before choosing anything, and the `.r.yaml` had no
+    item for it.
+- **Prevention rules:**
+  - Never bump one analysis's version by hand as part of a fix. The updater owns it through `new_version`.
+    After an updater run, regenerate the umbrella header so it matches the stamped yaml.
+  - A comment that names another results item ("the instructions panel", "the table below") gets checked
+    against the `.r.yaml` like any other claim.
+
+---
+
+## 2026-09-29 — fixing decisioncombine IR-02: a guard on a bare point estimate raised a false alarm half the time
+
+- **Failure modes:**
+  - My first fix raised "Positive Levels May Be Inverted" whenever any test's Youden's J was below
+    0. For a correctly coded test with no diagnostic value, J is below 0 about half the time at ANY
+    sample size, so the serious warning fired on 41 of 100 such analyses. In a single-test
+    analysis it also replaced the accurate "No Rule Performs Better Than Chance" notice.
+  - The older collective check ("-/-" ranks first, or every named rule is at or below chance) had
+    the same flaw and predates this fix: about 27% false alarms with two tests unrelated to the
+    disease. Graded the same way (the pattern behind it must clear chance); all inversion
+    warnings together now fire on about 7% of such samples.
+  - Adding single-test and pairwise rows made identical classifiers common (Test 1 alone equals
+    Parallel when Test 2 adds nothing). The ranking's runner-up was the winner's own twin, so an
+    exact identity was reported as possible "sampling variation".
+- **Detection signal:** a 4-lens adversarial review workflow (22 agents). The statistics lens
+  simulated the guard under the null and measured the alarm rate; the regression lens compared
+  1,000+ outputs with the shipped copy. My own smoke tests used only informative fixtures, where
+  every alarm was a true alarm.
+- **Prevention rules:**
+  - A guard that fires when a point estimate crosses a threshold must be graded by its sampling
+    error: fire the serious notice only when the confidence interval clears the threshold (here the
+    Agresti-Caffo 95% interval for J, the method decision.b.R uses), and give a quieter note inside
+    the interval.
+  - Before shipping any guard, simulate its false-alarm rate on correctly coded null data, not just
+    its detection rate on the data it was written for.
+  - When rows that can duplicate each other are added, re-check every consumer of "the next-best
+    row" and "the tie list".
+
+---
+
+## 2026-09-29 — `/independent-reviewer decisioncombine`: a two-scenario simulation became a blanket "conservative" claim
+
+- **Failure modes:**
+  - The 09-27 validation simulated LR/DOR interval coverage in 2 scenarios, saw over-coverage,
+    and the 09-28 fix wrote it into the sparse-cell notice as "conservative, most of all where
+    the 0.5 correction was applied". On a 24-design grid, LR+/LR- cover 0.888/0.894 for a
+    near-perfect test on 10/30 patients, exactly where the correction fires. Fagerland 2015
+    §6.3.1 reports the same.
+  - Both earlier passes checked every displayed number and missed what the ranking leaves out.
+    Single tests are never candidates, so it named Parallel (J 0.50) beside Test 1 alone (J 0.80).
+  - Harness: `exists("rf")` found `stats::rf` when my result object was absent. Also, `gold = gold`
+    passed to a generated wrapper is read by `enquo()` as a column literally named "gold".
+- **Detection signal:**
+  - An independent pass with a parameter grid covering the regions where the notice fires.
+  - A literature check on the claim's direction.
+  - A check that asks what the ranking should contain, not only whether its numbers are right.
+- **Prevention rules:**
+  - A simulation result becomes user-facing text only when the grid spans the conditions that
+    trigger that text (near-perfect tests, rare patterns, small n), and a primary source agrees.
+    Otherwise say "approximate".
+  - For any ranking or "best rule" output, test the candidate set: include the obvious
+    comparators, such as each single test.
+  - In audit scripts, call `exists(x, inherits = FALSE)`, and pass wrapper arguments by value with
+    `do.call()`.
+
+---
+
+## 2026-09-28 — `jamovi/i18n/tr.po`: an escaping filler double-escaped, and a blanket "repair" corrupted six other entries
+
+- **Failure mode:**
+  - To fill three reworded Turkish msgstr, I edited the old translations read back from `tr.po`.
+    That text was already PO-escaped (`\"`), and my filler escaped it again (`\\"`), so
+    `msgfmt` failed.
+  - My first repair was a file-wide replace of the escape sequence I assumed was broken. It missed
+    the real one and instead rewrote six LEGITIMATE `\\\"` sequences in other analyses'
+    translations.
+- **Detection signal:**
+  - `msgfmt -c` reported "keyword level unknown".
+  - The repair's own count (6 replaced against 5 grep lines) did not match the defect.
+  - An entry-level diff against the pre-round snapshot showed what had really changed.
+- **Prevention rule:**
+  - Unescape text read from a PO file before re-escaping it.
+  - Never repair escape sequences with a file-wide replace: fix the exact entries, restore any
+    collateral line from the snapshot, then require `msgfmt -c` clean plus an entry-level diff
+    showing 0 changed and 0 lost translations.
+  - Snapshot `jamovi/i18n` before every `i18nUpdate()`.
+
+---
+
+## 2026-09-28 — decisioncombine forest plot (VAL-04): my fix shipped a regression that only an adversarial review found
+
+- **Failure modes:**
+  - The first redesign set the image size in `.run()`. jamovi's export and redraw path builds a
+    fresh object and never runs `.run()`, so the exported figure fell back to 800 x 600 and the
+    overprinting VAL-04 was about came back, on exactly the image a clinician pastes into a
+    report.
+  - `scales::label_number()` rounded log ticks to one shared accuracy (0.001 printed as "0").
+  - My "label both sides of 1" fallback read `lim` as the data range. For a transformed scale
+    ggplot passes the EXPANDED range, and `geom_vline(xintercept = 1)` pulls 1 into it. So every
+    facet whose intervals sat on one side of 1 got 2-4 labels crammed into the 5% padding.
+- **Detection signal:** a 4-lens probe workflow (144-cell option grid, degenerate data, the
+  export path, visual read), then a second workflow that re-ran the repros against the patch and
+  hunted regressions. Three lenses independently found the overprint. All my own checks had
+  passed, because they looked at the facets the fix targeted, not at the one-sided ones.
+- **Prevention rules:**
+  - Set an Image's size in `.init()` from the options (house pattern: `enhancedROC.b.R`) when it
+    must survive export or reopen.
+  - A breaks function sees expanded limits: guard any "missing side" logic by a share of the
+    span, and thin breaks to a minimum gap.
+  - Label log axes with base `format()`, not `label_number()`.
+  - After fixing a plot, re-run an independent review over the whole option and data space, not
+    only over the cases the fix was written for.
+
+---
+
+## 2026-09-28 — `/validate-function` + `/fix-function decisioncombine`: five defects no parity test could see
+
+- **Failure modes (code):**
+  - A notice promised "reported as blank" while the table printed NPV 0% with a Wilson interval.
+  - The ranking de-duplicated rules on their tp|fp|fn|tn string, which merged DIFFERENT rules that
+    shared a 2x2, so "2 rules tie" was reported when 3 did.
+  - jmvcore's `OptionVariable$valueAsSource` returns the bare column name, so the exported syntax
+    `gold = Golden Standart` did not parse.
+  - One `facet_wrap(scales = "free_x")` put log-symmetric ratio intervals on a linear axis with no
+    line at 1.
+  - A single-test analysis had no inversion guard below 10 cases per group.
+
+  Every tabulated number was right: 328 checks against hand arithmetic, a blinded oracle and epiR
+  all passed.
+- **Failure modes (process):**
+  - I edited `development-scripts/validate_decisioncombine.R` while two `Rscript` runs were
+    executing it. R reads a `--file` script incrementally, so the runs would have read
+    byte-shifted code.
+  - The validation script's `ggplot_build()` opened the default pdf device and rewrote the tracked
+    `Rplots.pdf` in the repo root.
+- **Detection signal:**
+  - Code: a notice sentence checked against the table cell it describes; a fixture built so two
+    distinct rules share counts; the exported syntax run in `Rscript --vanilla` with a
+    non-syntactic column name; the rendered PNG looked at.
+  - Process: `git status` showed `M Rplots.pdf`, which was clean at session start.
+- **Prevention rules:**
+  - Test what a notice says against the table, not only that the notice fires.
+  - De-duplicate on identity (which rule), never on value (which counts).
+  - Any analysis that exports syntax needs a `.sourcifyOption` override for Variable options
+    (house pattern: `R/tableone.b.R`). The jmvcore default is unparseable for non-syntactic names.
+  - Ratios go on a log axis with a null line, in their own panel.
+  - Never edit a script a running R process is reading: snapshot it and run the copy.
+  - Start any script that builds plots outside a render call with `grDevices::pdf(NULL)`.
+
+---
+
+## 2026-09-27 — `/fix-function decision`: a version bump that reached the header but not the yaml
+
+- **Failure mode:** the release review bumped `jamovi/decision.a.yaml` to `1.0.84` and ran `prepare()`, so
+  `R/decision.h.R` and NEWS.md said 1.0.84. Three minutes later the yaml was rewritten and went back to
+  `1.0.83`, and that is the version that was committed. The yaml is the source of truth, so the next
+  `prepare()` would have rolled the header back to 1.0.83 with nothing on screen.
+- **Detection signal:** `stat` put the yaml's mtime (18:22) after the header's (18:19), and
+  `version = c(1,0,84)` in the header disagreed with `version: '1.0.83'` in the yaml. `release_gate.py`
+  checks only the package version.
+- **Prevention rule:** after the last yaml edit of a pass, regenerate the header and compare it with the yaml.
+  A header older than its yaml is stale. To check one analysis without module-wide `prepare()` writes, copy its
+  three yaml files and a one-entry `0000.yaml` into a scratch dir and run `jmvtools::prepare()` there
+  (`env -u ELECTRON_RUN_AS_NODE`). A gate check is filed in TODO.md.
+
+---
+
+## 2026-09-27 — `/security-audit-function decision`: a renderer claim read off minified code was half wrong
+
+- **Failure mode:** the audit read jamovi's minified `bt()` renderer and stated that it drops a
+  non-allowed tag "WITH its text". The code comment on `.richText()` and the regression test's
+  comment repeated that. In fact `bt()` unwraps a non-allowed tag and keeps its inner text; only
+  script/style lose content. `<LOD` renders blank because it is an unclosed tag, discarded at end
+  of input. `<Negative>` renders blank because it is an empty element. The fix was right; the
+  explanation was not.
+- **Detection signal:** two independent verifiers disagreed with the claim. One re-read `yt()`
+  (`return l` keeps the children). The other ran the extracted `bt/yt/gt` under jsdom:
+  `"<x>kept?</x>"` renders `kept?`.
+- **Prevention rule:** a statement about client rendering goes into a comment only after the
+  client code has been RUN on the input (extract the function from
+  `/Applications/jamovi.app/.../client/dist/assets/*.js`, evaluate it under jsdom). Reading
+  minified code is enough to find the renderer, not to describe what it does.
+
+---
+
+## 2026-09-27 — `/release-review-function decision`: five passes changed the numbers, none said so
+
+### Numbers changed with no version bump and no release note
+
+- **Failure mode:** the 09-25, 09-26 and 09-27 passes changed displayed numbers:
+  - levels are excluded instead of pooled;
+  - only one likelihood ratio is corrected;
+  - Youden's index has an Agresti-Caffo interval.
+
+  None of them bumped the analysis `version:` or wrote a NEWS entry. The last shipped meddecide
+  copy was `1.0.83`, and the umbrella still said `1.0.83` while behaving differently. The newest
+  `decision` release note was from August.
+- **Detection signal:** the release review compared `git -C ../meddecide show
+  <last>^:jamovi/decision.a.yaml` against the umbrella, and grepped NEWS.md for the changed
+  behaviours. `release_gate.py` checks only that the package version agrees across files, so it
+  stayed green.
+- **Prevention rule:**
+  - A pass that changes a displayed number, a verdict or a default bumps the `.a.yaml`
+    `version:`.
+  - The same pass adds its user-facing entry to NEWS.md. CHANGELOG.md is for developers and
+    does not replace it.
+  - Before a release verdict, compare the analysis version with the last shipped submodule copy.
+
+### A recorded recipe that had never run as written
+
+- **Failure mode:** the memory recipe that runs `release_gate.py` with one parked analysis counted
+  as shipped died with `NameError: __file__`. It exited 1 before any check ran, so a diff against
+  the normal run looked like a finding.
+- **Detection signal:** the traceback in the diff.
+- **Prevention rule:** run a recipe once before saving it, and check its exit status before reading
+  a diff of its output. The recipe is fixed.
+
+## 2026-09-27 — `/check-function-full decision` + fixes: an invariant asserted from the check's message, not its code
+
+### "Unreachable" was argued from what a check says it catches
+
+- **Failure mode:** the audit called the NA guards on sensitivity, specificity and the predictive
+  values unreachable because `.prepareAnalysisData()` refuses anything but a 2x2 table. But the
+  recoded factor levels were fixed before the joint filter that drops the OTHER variable's
+  unselected levels. So an emptied margin kept its level, and the table was still 2x2. Gold
+  `N,N,N,N,P` against test `P,N,P,N,E` loses its only disease-present case with `E`. The analysis
+  ran on and showed a blank sensitivity beside a specificity. With no positive test at all, it
+  printed LR+ = LR- = 1.00 from the corrected table. The first cut of the fix deleted the guards
+  and turned those blanks into `NaN`.
+- **Detection signal:** a second-model review (Codex) asked to verify the reachability claim built
+  a static counterexample. Re-running it on the original and on the edited code showed both
+  outputs.
+- **Prevention rule:**
+  - Before deleting a guard as unreachable, construct the input that would reach it, one per
+    exclusion path (missing values, explicit NA level, each variable's unselected levels, their
+    combination), and run it on the old code.
+  - A check that tests a SHAPE (`dim == c(2, 2)`) only guarantees non-empty margins if the levels
+    were re-derived after the last row filter (`droplevels()`).
+
+### Notices rendered in the order the code raised them
+
+- **Failure mode:** the notices panel showed notices in insertion order. The worse-than-chance
+  ERROR ("check the level selection before reading any number") is raised late in `.run()`, so it
+  sat below missing-data warnings and a sample-size note.
+- **Detection signal:** a differential run with an inverted test and a few missing rows, reading
+  the rendered severity words in order.
+- **Prevention rule:** a notice collector sorts by severity at render time (stable `order()`),
+  whatever order the validators run in. A test asserts the rendered order, not only that the
+  ERROR is present.
+
+### A translation that adds the percent sign the value already has
+
+- **Failure mode:** 9 Turkish msgstrs wrote `%{pct}` (Turkish puts `%` before the number), but
+  `{pct}` is filled with `sprintf("%.1f%%")`. Turkish users saw "(%12.3%)" in the exclusion summary,
+  the prevalence notices and the misclassification panel. Every English test passed.
+- **Detection signal:** a mechanical msgid/msgstr check: placeholders, HTML tags, sprintf
+  conversions, newlines, and no `%` next to a placeholder that carries its own. It was run over
+  the existing translations, not only the new ones.
+- **Prevention rule:**
+  - When a placeholder's value is pre-formatted with its unit, the msgstr must not add the unit.
+  - Validate every translation of the analysis, old and new, before writing `tr.po`.
+  - Then run the analysis under the real Turkish catalog (`tools/i18n_rebuild_json.R` into a temp
+    tree, injected into `jmvcore`'s `.i18n` cache) and scan for `NaN`/`Inf`, `…` (unfilled
+    placeholder) and doubled percent signs.
+
+### A sort that turned "above" into "below"
+
+- **Failure mode:** once the notices were sorted by severity, three ERRORs still ended "Check the
+  data, any exclusions reported above". The exclusion WARNINGs they point to now render BELOW them.
+  The order test passed because it checked severities, not what the text says about position.
+- **Detection signal:** an adversarial review of the fix, reading the rendered notices on the
+  error paths. Two independent skeptics reproduced it.
+- **Prevention rule:** when you change the order of rendered items, grep their texts for
+  positional words (above, below, following, preceding) and make them position-free.
+
+### A bare word as a msgid is shared with every analysis that uses it
+
+- **Failure mode:** decision filled its discrimination word with `.("no")`. jjdotplotstats uses
+  the same msgid in "with {adjustment} adjustment". Translating it for decision ("sıfır", zero)
+  put a Turkish word meaning "zero" into jjdotplotstats' still-English sentence.
+- **Detection signal:** a catalog review listed every previously empty msgstr the session filled
+  and checked each one's `#:` sources.
+- **Prevention rule:**
+  - Before filling a msgstr, check every `#:` source of that msgid.
+  - Give short band or role words an analysis-specific msgid ("chance-level", not "no").
+  - The jamovi string extractor also reads `.("...")` inside R comments, so do not quote a `.()`
+    call in a comment.
+
+### A stale test read as a missing seed
+
+- **Failure mode:** `test-meddecide-library-audit.R` expected "Random seed: 777" under
+  agreement's Krippendorff and TDI tables. The 2026-09 agreement fixes changed both on purpose,
+  and the test was not updated:
+  - TDI's percentile bootstrap became a distribution-free order-statistic interval, so there is no
+    resampling and no seed to show.
+  - Nominal alpha on continuous measurements is now refused, so the test's continuous data never
+    reached the bootstrap.
+
+  The failure looked like a code defect in a module the session had not touched.
+- **Detection signal:** reading the code at each asserted table and running both data types. The
+  seed note appears with Interval alpha, and TDI has no random part.
+- **Prevention rule:**
+  - A deliberate change that removes randomness or refuses an input updates every test that
+    asserts the old random output.
+  - A seed assertion states the option that makes the random part run (`krippMethod = "interval"`)
+    and asserts no seed where nothing is random.
+
+### A mutation harness that replaced the wrong copy
+
+- **Failure mode:** mutants of `agreement.b.R` loaded with `sys.source()` into the namespace
+  passed the seed test. The test builds `agreementClass` directly, and under `load_all()` it finds
+  the copy exported into `package:ClinicoPath`, not the namespace copy.
+- **Detection signal:** two mutants that should fail both passed. That is too clean to trust.
+- **Prevention rule:**
+  - Replace a class in the namespace AND in `package:ClinicoPath` when a test references it by
+    name.
+  - Treat "every mutant passed" as a harness bug until one mutant is shown to fail.
+
+### Two bands of one scale shared a Turkish word
+
+- **Failure mode:** the shared msgid "Fair" was translated "Orta", the same word as "Moderate".
+  In agreement's and pathagreement's kappa Interpretation column, Turkish users could not tell the
+  Landis-Koch Fair band (0.20-0.40) from Moderate (0.40-0.60). The new notes that say "0.20 reads
+  Makul" named a label that never appeared.
+- **Detection signal:** the skeptics of an independent fidelity review rejected a proposed
+  correction because the new string was fine. Both pointed to the existing shared entry instead.
+- **Prevention rule:** after a translation pass, list distinct short English labels that share a
+  Turkish msgstr. Any pair from one scale (a band function, a `switch()`) is a defect. Check every
+  `#:` caller of the shared msgid before changing it ("Makul" also fits the Excellent/Good/Fair/Poor
+  scales of checkdata, enhancedROC, psychopdaROC and riverplot).
+
+### A complete catalog does not mean translated output
+
+- **Failure mode:** after agreement's catalog reached 1294/1295 translated entries, a Turkish run
+  still showed an English interpretation table. Its 37 guide panels are hard-coded HTML string
+  literals: 38 blocks, about 12,000 words, never inside a translation call. The extractor never
+  sees them, and no catalog measure counts them.
+- **Detection signal:** running the analysis under the real Turkish catalog and counting which
+  English sentences still appear verbatim: 2 of 352, and one of them was a guide sentence.
+- **Prevention rule:** measure translation coverage on the rendered output, not only on the
+  catalog. A long plain string literal assigned to an HTML variable in a `.b.R` is untranslatable
+  by construction. Filed as a TODO (i18n) at `.populateGwetExplanation`.
+
+### Severity from the sign of a point estimate
+
+- **Failure mode:** decision raised its ERROR "worse than chance… check the level selection before
+  reading any number" whenever Youden's index was below 0. A coin-flip test at -0.005 (n = 201,
+  Agresti-Caffo interval -0.142 to 0.132) got it; the same test at +0.005 got a warning.
+- **Detection signal:** a parallel read-only `/review-function decision` in another session, which
+  probed both sides of 0 with mirror fixtures.
+- **Prevention rule:** a notice that claims a direction ("worse than", "inverted") is keyed on an
+  interval that excludes the null, not on the estimate's sign. When the interval includes the
+  null, say "no evidence" and report both sides alike.
+
+### A copy-ready paragraph without its exclusions
+
+- **Failure mode:** the manuscript paragraph gave only the analysed n ("in 67 cases"). The 13
+  excluded cases (3 missing, 10 at an unselected level) went unmentioned, although the exclusion
+  notices tell the user to report them (STARD 2015).
+- **Detection signal:** the same parallel review, reading the paragraph against the notices shown
+  beside it.
+- **Prevention rule:** text meant to be pasted into a manuscript carries its own denominators: the
+  total, and the excluded cases with their reasons.
+
+### A mutant that the render test could not see
+
+- **Failure mode:** the first Fagan render test asserted `file.size > 5000` after
+  `image$saveAs()`. `saveAs()` writes a blank canvas of about 5 KB even when the renderer returns
+  `FALSE`, so a mutant that drew nothing passed.
+- **Detection signal:** running every new test against a mutant of its fix.
+- **Prevention rule:** measure the empty baseline of an image before choosing a size threshold.
+  The nomogram is about 70 KB, so assert well above the blank canvas.
+
+## 2026-09-26 — `/check-function decision --profile release`: generated docs that outlived the code
+
+- **Failure mode:** the 2026-08-29 `/document-function` output (`vignettes/decision-documentation.md`,
+  `testing_decision.md`) still listed five pre-rename titles (e.g. "Copy-Ready Report", "EpiR Table
+  Ratios") after the 09-25/26 review, and ticked "translation plans completed". At the time 112 of
+  327 `.()` strings were missing from `catalog.pot` and 125 had no Turkish translation.
+- **Detection signal:** the release profile's documentation-completeness step; the stale titles
+  were found by diffing the docs' tables against the `.r.yaml`, the i18n gap by comparing the file's
+  `.()` literals with `catalog.pot` and `tr.po` using `tools/release_gate.py`'s own parsers.
+- **Prevention rule:** a review that renames an option or output also greps
+  `vignettes/<fn>*documentation.md` and `testing_<fn>.md`. A checklist box is ticked only on a
+  measurement made that day, never carried over from a generator's template.
+
+## 2026-09-26 — `/independent-reviewer decision` + repair: rounding that is fair in one direction only, and trusting a documented contract
+
+### A precision rule in absolute decimals applied to a ratio-scale quantity
+
+- **Failure mode:** the previous day's repair banded likelihood ratios "on the printed value" at two
+  decimals. That keeps 0.05% relative precision at LR+ 10 but only 5% at LR- 0.1, so LR- 0.0969
+  printed "0.10" and read "moderate" while its reciprocal, 10.3, read "strong".
+- **Detection signal:** an independent audit fixture sitting just below a boundary (0.0969), plus a
+  metamorphic check: swapping both positive levels must mirror the band.
+- **Prevention rule:** round ratio-scale quantities to significant figures, not decimals. Test every
+  band on both sides of 1 through the level-swap mirror. Put fixtures just inside each boundary,
+  not only on it.
+
+### A repair changed which table feeds a number and silently broke an identity stated elsewhere
+
+- **Failure mode:** correcting only the likelihood ratio whose formula contains the zero cell was
+  right. But the DOR stayed on the corrected table, so on a one-sided zero cell the displayed DOR
+  no longer equalled LR+/LR- (115.5 vs 126.2). A footnote still said it did.
+- **Detection signal:** a cross-output invariant (DOR = LR+/LR-) run on the zero-cell fixture, not
+  only on clean tables.
+- **Prevention rule:** after changing which inputs feed any displayed number, re-run every
+  cross-output identity on the degenerate fixtures and grep the text that asserts the identity.
+  Cover both mirror cases (LR+-only and LR--only corrected); a mutant that breaks one side passed
+  the first version of the tests.
+
+### Validation checked the numbers, not what the screen fails to say
+
+- **Failure mode:** 363 passing checks, yet the default output never named which level was
+  "positive". Inverting both levels mirrors every headline and no guard fires. The
+  one-row-per-patient assumption was also never stated.
+- **Detection signal:** searching the default visible output for the chosen level names, after
+  first confirming the searched text was not empty.
+- **Prevention rule:** an audit includes "what the user cannot see" checks: coding definitions shown
+  by default, and design assumptions the data cannot reveal disclosed.
+
+### The repair itself: a documented contract that the client does not honour, and a known trap re-learned
+
+- **Failure mode:** four defects in the first version of the fix.
+  1. `format: sf:3` was added so the table would match the narrative, per the documented token
+     list. jamovi 28.3 reads only log10/pvalue/zto/pc from a column format, so it did nothing.
+  2. Entity-escaping user labels in a `setNote()` made them show literally (`&lt;20%`), because
+     the note renderer escapes `&` itself.
+  3. Bracketed names ("Histology [final]") truncated the note. This trap was already in memory.
+  4. `sprintf` was replaced with `formatC`, which follows `OutDec`, so a comma locale sent every
+     narrative panel to its fallback text.
+- **Detection signal:** an adversarial review that ran jamovi's own client JavaScript and note
+  renderer. Each new test was then checked with a mutant.
+- **Prevention rule:**
+  - Verify any rendering claim against the renderer (client code, jsdom), not the guide.
+  - Before touching an API (`setNote`, `.fmt`), read the memory entries that name it.
+  - When swapping a formatting function, pin `decimal.mark`.
+  - A regression test counts only once a mutant of the fix makes it fail.
+
+### Wording that was true when written stops being true when the code around it changes
+
+- **Failure mode:** a review of every visible string, rendered across 12 scenarios, found
+  sentences that the code no longer honoured:
+  - The "uninformative" notice said sensitivity + specificity is "exactly 1" and that both LRs
+    equal 1, but it fires on a three-decimal Youden, so LR+ 1.67 could appear beside it.
+  - The zero-cell notice warned of "infinite likelihood ratios" that the correction had
+    already made finite.
+  - The missing-data notice gave an N that later exclusions made wrong.
+  - One-sided bands ("more than 1 in 5 missed") were given even at 0% sensitivity.
+  - The "Copy-Ready Clinical Report" invited pasting study estimates into a patient report.
+- **Detection signal:** reviewers read the RENDERED output per scenario, not the source. Two
+  skeptics then checked each finding, and the same concept was compared across panels.
+- **Prevention rule:**
+  - When a number or rule changes, grep every sentence that describes it.
+  - Prefer exact figures ("27 of 258 missed") over bands.
+  - Name what a panel is for, and what it is not for.
+  - Re-render all scenarios after rewording, because new text can mislead too.
+
+### References on an always-visible item are listed on every run
+
+- **Failure mode:** jamovi lists the references of every visible item. The notices panel is
+  always visible, so its YAML references were listed even when no notice cited them. A user
+  copying the reference list would cite Haldane-Anscombe with no zero cell, or Schuetz with no
+  exclusion.
+- **Prevention rule:** give each notice its own references (`.addNotice(refs = )`) and
+  `setRefs()` the panel from the notices shown. Drop a correction's references from items when
+  the correction did not run. `setRefs()` is serialized each run and never restored, so it is
+  what jamovi lists.
+
+### A claim that cannot be sourced may simply be wrong
+
+- **Failure mode:** About and the `pprob` help gave "rare diseases (0.001-0.01)" as a typical
+  range. No source supports it, and rare-disease definitions put the threshold near 0.0005 (EU:
+  under 5 per 10,000).
+- **Detection signal:** a literature agent tasked with citing the sentence found only sources
+  that contradict it.
+- **Prevention rule:** when adding references, treat "no source found" as a finding about the
+  claim. Remove or correct the claim; never leave it unreferenced or cite something adjacent.
+
+### Existence is not appropriateness
+
+- **Failure mode:** a same-day reference audit graded every reference as existing and on topic.
+  An adversarial vote (three lenses per reference) still found four placements a reviewer would
+  reject:
+  - a SARS-CoV-2 review as the general reference;
+  - two web pages duplicating archival sources;
+  - a DOR paper on a table that shows no DOR.
+- **Prevention rule:** judge each reference against the output item it is attached to, and against
+  the stronger sources already cited there.
+
+## 2026-09-25 — `/validate-function decision` + `/fix-function decision`: numbers inherited, bands on doubles
+
+### An interval taken from a dependency without checking what it is
+
+- **Failure mode:** decision showed epiR's Youden and NNDx intervals. The Youden interval is the
+  sum of the two Clopper-Pearson bounds, with 99.7% exact coverage under a "95%" label. The NNDx
+  interval takes min/max of 1/bounds, so whenever the Youden interval crossed 0 it printed an
+  interval that excluded its own estimate (6.67 shown as -3.08 to 1.73). An inverted test got a
+  negative "number needed". Parity with epiR passed throughout, because parity was all it tested.
+- **Detection signal:** a within-run invariant (every interval contains its estimate), then
+  coverage simulation: 3.7% for NNDx at se .60 / sp .55, n 25+25.
+- **Prevention rule:** agreement with the wrapped package (EXEC-WIRE) proves plumbing, not
+  validity. Every displayed interval gets a containment invariant and a coverage check against an
+  independent method. Youden's index is a difference of two independent proportions (now the
+  Agresti-Caffo interval, see below). NNDx is the inverse of the positive part of that interval.
+
+### A narrative band tested `== 1` on a derived double
+
+- **Failure mode:** sens 1/3, spec 2/3 gives LR+ = 0.99999999999999989. Three panels banded the
+  same LR with `==`, `>` and `>=` in different places. An exactly uninformative test read
+  "evidence AGAINST disease ... level inverted", and LR+ = 10 was "moderate" in one panel and
+  "strong" in the other two.
+- **Detection signal:** brute force over all rational-uninformative tables up to n = 40 (917
+  mis-banded), and an exact-boundary fixture (LR+ = 0.625/0.0625).
+- **Prevention rule:** one classifier per concept (`.lrBand`, `.discriminationBand`), shared by
+  every panel. Compare derived values to a boundary with a tolerance, and cite the convention in
+  the classifier (Jaeschke 1994; Hosmer, Lemeshow & Sturdivant 2013).
+
+### A replacement interval judged on the wrong part of the parameter space
+
+- **Failure mode:** the first replacement for epiR's Youden interval (Newcombe hybrid score) was
+  judged on a sensitivity/FPR grid of 0.05-0.95, where it averaged 0.95. The adversarial review
+  enumerated sensitivity = specificity = 0.98 at n 20+20 and found coverage of 0.88. That is the
+  corner accurate tests occupy. Agresti-Caffo stays at or above 0.935 there and everywhere else
+  in 0.50-0.98, n 15-50. Separately, a single-point simulation (0.927 against 0.95 +/- 0.015)
+  looked like an implementation defect but was the method's exact coverage at that point
+  (0.9377, identical to DescTools).
+- **Detection signal:** exact enumeration over every (TP, FP) table, grid restricted to where
+  diagnostic tests sit, three methods side by side.
+- **Prevention rule:** judge an approximate interval by exact coverage (mean and minimum) over
+  the region the analysis will actually see. For accuracy statistics that means sensitivity and
+  specificity up to 0.98 at small n. At a single point, the oracle is the method's exact
+  coverage there, not the nominal level.
+
+### A ggplot scale limit deleted the line it was meant to frame
+
+- **Failure mode:** `scale_y_continuous(limits = )` in the shared nomogram helper censored any
+  post-test probability below 0.317% to NA. The negative-result pathway then vanished for a
+  strong rule-out test at 5% prevalence, and for every prior at the 0.1% UI minimum.
+- **Detection signal:** `ggplot_build()` layer data had one finite point in the negative group,
+  confirmed by looking at the rendered PNG.
+- **Prevention rule:** axis limits must contain every plotted endpoint (widen them), or use
+  `coord_cartesian()`, which clips without deleting. Assert the number of finite points per
+  group in the layer data.
+
+### Two tooling traps met on the way
+
+- `.claude/completions/update_refs.sh` counts packages in commented-out code
+  (`#     htmlTable::htmlTable()`) and added `htmlTable` to decision's refs. Review what it adds
+  and revert false positives.
+- Two footnotes copied verbatim from epiR's help page were wrong definitions (DOR, NNDx), and
+  two tests pinned the wrong wording. When a text fix lands, grep `tests/` for the old sentence
+  in the same pass.
+
+---
+
+## 2026-09-25 — `/fix-function agreement` (afternoon): guards that tested a symptom
+
+### An exact-fit guard waited for a NaN that never came
+
+- **Failure mode:** the Bland-Altman slope guard treated a p-value as "no test" only when it was
+  not finite. For B = 2A the residuals are rounding error and `summary.lm()` returns a finite
+  p = 3e-283, which printed "< .001" under the proportional-bias caveat.
+- **Detection signal:** a deferred lead ("exact relation prints p = 0 with no note"), reproduced
+  in two lines of base R before any edit.
+- **Prevention rule:** decide "degenerate" from the data (relative residual SD against machine
+  precision), never from what the downstream routine happens to return. Test the degenerate case
+  with an input that produces a finite, tiny p-value, not only one that produces NaN.
+
+### A source-grep test pinned a decision that was later reversed
+
+- **Failure mode:** `test-zzz-meddecide-release-20260921.R` required the Fisher-z mean of pairwise
+  correlations. The release review replaced it with the plain mean, on purpose (the Fisher-z form
+  jumped at |r| = 1), and the test failed for a day as "pre-existing".
+- **Detection signal:** 4 failures in the zzz contract file on an otherwise green suite.
+- **Prevention rule:** when a pass reverses a documented decision, grep `tests/` for the old
+  decision's source pattern in the same pass and rewrite that test to pin the new one.
+
+### A test error that was the shell's locale
+
+- **Failure mode:** FIX-18 errored in a batch run. The Bash tool starts Rscript with no `LANG`,
+  so `yaml::read_yaml()` fails on the κ in `agreement.r.yaml`.
+- **Detection signal:** the error disappeared under `LANG=en_US.UTF-8`, and the file is unchanged
+  from HEAD in that region.
+- **Prevention rule:** test drivers set `LANG`/`LC_ALL` to UTF-8. Re-run a lone error in isolation
+  before counting it as a regression.
+
+---
+
+## 2026-09-25 — release review of `agreement`: the same lesson, relearned the same day
+
+### I checked Krippendorff's alpha against the routine the analysis calls
+
+- **Failure mode:** my headline oracle script compared the Krippendorff table with
+  `irr::kripp.alpha`, which is what the table calls, and reported OK. irr divides each case's pairs
+  by m_u − 1 only when the matrix holds an NA, and by 1 on complete data, so alpha with 3+ raters
+  was off (0.4355 against 0.4374). It also returns 1 for a single category.
+- **Detection signal:** a read-only verifier computed the coincidence-matrix formula by hand and
+  cross-checked it with `irrCAC::krippen.alpha.raw`.
+- **Prevention rule:** in any verification script, the oracle line must not call the function that
+  the analysis calls. Grep the script for the analysis's own `pkg::fn` before trusting an OK.
+
+### `make.names()` used as a column id merged two categories
+
+- **Failure mode:** the frequency table keyed columns by `make.names(label)`. "ER+" and "ER-" both
+  map to `ER.`, so one column showed the second category's counts.
+- **Detection signal:** a lead from the adversarial review, reproduced with ER-/ER+.
+- **Prevention rule:** give data-driven columns positional ids (`c1`, `c2`, …) and put the label in
+  the title. Refresh titles on every run, because the column outlives the run.
+
+### A hand-listed reset set drifted from the tables it had to cover
+
+- **Failure mode:** `.run()` cleared notes on 12 named tables. Twenty `rows: 1` tables and the
+  All-Pairs, Item-Modal, Pairwise, bootstrap and inter-rater notes were not in the list.
+- **Detection signal:** the stale-output class kept reappearing in leads, one table at a time.
+- **Prevention rule:** derive reset sets from `self$results$items`, never list them. A new table
+  then cannot miss the reset.
+
+### A new option changed the unit of analysis, and the model did not follow
+
+- **Failure mode:** `caseIdVariable` linked a case's rows across conditions, but the mixed model
+  kept `(1|case_id) + (1|rater)` with no case-by-condition term. It treated the three ratings of one
+  case under one condition as independent replicates. Type I error was 0.175 at nominal 0.05.
+- **Detection signal:** a statistical reviewer simulated null data and compared the result with a
+  paired t-test on the case means.
+- **Prevention rule:** before shipping an option that changes what a case is, simulate the null
+  Type I error, and compare with the simplest valid test of the same hypothesis.
+
+### Quantile cut-points over data with a point mass at the ceiling
+
+- **Failure mode:** quartiles of agreement percentages included the unanimous cases. With a quarter
+  or more of cases at 100%, the upper quartile was 100%. Every band then shifted, and "Poor" was
+  written into the dataset for cases where 4 of 6 raters agreed.
+- **Detection signal:** a verifier counted band sizes by hand on a realistic 6-rater fixture.
+- **Prevention rule:** take data-driven cut-points only over the cases the cut-points actually sort.
+
+### `factor(x, lv, TRUE)` is `labels = TRUE`, not `ordered = TRUE`
+
+- **Failure mode:** my test fixtures built factors with levels "TRUE1", "TRUE2" and no order.
+- **Detection signal:** a control expectation, placed before the assertion, failed.
+- **Prevention rule:** always name `ordered =`, and put a control expectation in every fixture test.
+
+---
+
+## 2026-09-25 — the wrapped library was treated as the oracle (`agreement` fix pass)
+
+### Three irr routines were wrong, and a parity test on easy data said they matched
+
+- **Failure mode:**
+  - `irr::stuart.maxwell.mh` drops every category with equal marginals and pairs categories by
+    position on a non-square table. It printed X² = 4.00, p = 0.046 where the test gives 0.145,
+    p = 0.930.
+  - `irr::kappa2` without `sort.levels = TRUE` puts levels in the order the two raters used them,
+    so weighted kappa read 0.370 instead of 0.213.
+  - `irr::finn`'s two-way model uses the one-way df.
+  - The 2026-09-23 validation recorded "Stuart-Maxwell matches DescTools", but its fixture had
+    no category with equal marginals.
+- **Detection signal:** a reviewer searched 20,000 random tables for the ones where the two
+  implementations disagree, instead of checking one table.
+- **Prevention rule:**
+  - A package the analysis calls is not an oracle for it. Compare against an independent
+    implementation or the formula, on a fixture built to hit the edge: equal marginals, a category
+    one rater never used, raters using different level sets.
+  - Before crediting a match, run the test against the old code and see it fail.
+
+### Removing a hard stop exposed every path it had been shielding
+
+- **Failure mode:** the 2-rater headline used `reject()` for weights on unordered factors.
+  Replacing it with a note would have let subgroup, bootstrap and hierarchical kappa lay weights
+  over the alphabetical order. They had never seen that input. The paired comparison even
+  carried a comment saying its guard was "NOT REACHABLE TODAY".
+- **Detection signal:** `grep self$options$wght` after the change, looking for readers that
+  lacked their own guard.
+- **Prevention rule:** before relaxing a `reject()` or an early return, list every later reader
+  of the input it filtered out, and give each one the guard (here `private$.wghtEffective()`).
+
+### Interpretation bands copied from the ICC onto coefficients whose chance level is 1/m
+
+- **Failure mode:** Robinson's A and Kendall's W are about 1/m for raters who agree no better than
+  chance, not 0. On ICC-style bands, 46% of pairs of independent raters read "Moderate agreement".
+- **Detection signal:** a simulation of independent raters, run through the labels.
+- **Prevention rule:** before banding a coefficient, simulate independent raters and check the
+  label they get. Band the chance-corrected form, (mA − 1)/(m − 1) or (mW − 1)/(m − 1).
+
+### A new refusal path left the previous run's output in place
+
+- **Failure mode:** four of the fixes added early returns or refusals: Bland-Altman below 3
+  pairs, Krippendorff on measurements, consensus and level of agreement on measurements. Each
+  wrote its note but left cells, plot state, a seed note or dataset columns from the previous run,
+  because jamovi restores a table's cells and keeps state on the same analysis object. Tests on a
+  fresh object pass, and the stale output only appears on a rerun.
+- **Detection signal:** two Codex review passes (`npx -y codex-mcp-server`), which reran one
+  analysis object with the data swapped.
+- **Prevention rule:** every new early return or refusal blanks everything the success path
+  writes (cells, state, notes, Output columns), preferably once at the top of the function. Test
+  it with the rerun-with-swapped-data pattern (`agr_rerun_with`, `rerun25`), not a fresh call.
+
+### `cor(x, x)` is not exactly 1
+
+- **Failure mode:** a perfect pair returned 1 − 2e-16. It passed an `abs(r) >= 1` check and its
+  Fisher z of 18.7 set the mean correlation to 0.99.
+- **Detection signal:** the new regression test failed on the fixed code.
+- **Prevention rule:** compare against 1 with a tolerance (`1 - sqrt(.Machine$double.eps)`)
+  wherever a transform has a singularity at the boundary.
+
+---
+
+## 2026-09-24 — explanatory text drifted from the limits it explains (`agreement` grading section)
+
+### The guide and the refusal sentences quoted figures the gates never used
+
+- **Failure mode:** the simulation grid was rerun and `AGREEMENT_LATENT_GATES` updated, but the
+  guide still said "model-based kappa from 30 cases", "intervals only with 4 pathologists" and
+  "a median of 6 ratings per case", against gates of 50 cases, 3 pathologists and never shown.
+  The refusal for 3-pathologist intervals quoted 85-91% coverage, but that was measured at 30-50
+  cases. At 100 or more cases, 3 pathologists covered 0.922-0.979, so the limit itself was set
+  on evidence from the wrong region. The skew sentence blamed a 70% result on every share from
+  50% up, when κ_m passed at 58%.
+- **Detection signal:** an adversarial review that read every sentence against the constants and
+  against `summary_latent.csv`, not against the code.
+- **Prevention rule:** a number that explains a gate is built from the gate's constant
+  (`sprintf(.(…), G$…)`), never typed. A simulation figure quoted to a user names the cell region
+  it came from. When a limit moves, re-derive every quoted figure from the summary file. The
+  pinned-constants test says which texts assume which constants.
+
+### The all-ratings kappa fix reached the headline and missed three siblings
+
+- **Failure mode:** the headline Fleiss/Conger moved to every observed rating
+  (`.fleissAllRatings`). The bootstrap row (same label), the hierarchical per-institution kappa
+  and the bootstrap percent agreement still dropped cases, or counted a single rating as
+  agreement. On incomplete data each printed a different number under the headline's name.
+- **Detection signal:** the review; tests now compare each sibling with the headline on data
+  with missing ratings (`test-agreement-fixes-2026-09-24.R`).
+- **Prevention rule:** same as the entry below. After changing how a statistic is computed,
+  `grep` for every other site that prints it under the same label, and test them against the
+  headline on the input that exposed the difference (here, missing ratings).
+
+### The grid checked validity at study sizes up to 200 x 10; nobody timed 1000 x 20
+
+- **Failure mode:** the grading-tendency fit (`clmm`, one fixed effect per pathologist) scales with
+  ratings x pathologists: 14 s at 300 x 10, 439 s at 1000 x 20, with no guard and no warning. The
+  simulation grid had never gone above 200 cases or 10 raters, so the tests only ever saw fast fits.
+- **Detection signal:** a runtime reviewer that stress-tested sizes beyond the grid.
+- **Prevention rule:** for any model fitted inside an analysis, time it at the largest study a
+  user plausibly has, not just at the validation sizes, and add a pre-fit ceiling with a note
+  when the fit cannot be made fast. The same reviewer found that single-read cases counted toward
+  the case minimums: a gate must count what the simulation counted.
+
+### A section's tests reported 0 pass, 3 skip, and looked green
+
+- **Failure mode:** `test-agreement-grading-section.R` uses `skip_on_cran()`. When run through
+  `testthat::test_file()` from `Rscript`, `NOT_CRAN` is unset, so every block was skipped and the
+  file printed no failures.
+- **Detection signal:** a per-file skip count in the suite runner.
+- **Prevention rule:** set `Sys.setenv(NOT_CRAN = "true")` in any runner outside
+  `devtools::test()`, and treat a skip count above zero as something to explain.
+
+---
+
+## 2026-09-24 — a fix applied to one member of a family is the dominant failure in `agreement`
+
+### Eleven defects were the SAME shape: correct at one site, missed at its siblings
+
+- **Failure mode:** `/check-function-full agreement` found that most of its defects were fixes
+  applied to one member of a family and not to the others. `.checkpoint()` was in 3 of 4
+  `nBoot`/`pairedBootN` loops, so the fourth froze the pane uncancellably at up to 10,000
+  replicates. The `dropped_replicates` disclosure was in 1 of 2 bootstrap tables.
+  `.mergeDeclaredLevels()` was used by 2 of 4 scale-building sites; Gwet AC2 and Krippendorff
+  built their ordinal scale from the column-order union, so G1 < G3 < G2. The
+  `vapply(as.character)` factor-code fix was at 3 of 6 row conversions. The `.init()` retitle of
+  mislabelled ICC columns covered 2 of 3. Finn's scale-size guard protected the factor path and
+  not coded-numeric ratings, where `finnLevels = 10` turned 0.000 "Poor" into 0.919
+  "Outstanding" in silence. The 0/0-to-`NA` rule was fixed in one per-class F1 table and not the
+  other.
+- **Detection signal:** reading each sibling after finding the first. A parallel sweep per defect
+  class found siblings the audit had missed: Robinson's A's bootstrap and three per-case loops had
+  no checkpoint, a fourth naive union sat in `.calculateBootstrapCI`, and Robinson's A and case
+  clustering had error handlers that would swallow a restart.
+- **Prevention rule:** after fixing any defect, state its CLASS and sweep every member before
+  closing, preferably with a whole-file mechanical check. Two now exist for this file: every
+  `.checkpoint()` inside a `tryCatch` must sit under a handler that re-raises
+  `code == "restart"`, and every `self$options$X` read must name an option in `.a.yaml`. The
+  second caught a read of a non-existent `caseClusterHeatmap` option minutes after it was
+  written; jmvcore raises on it.
+
+### A formula oracle is not a truth oracle
+
+- **Failure mode:** the new binary route's latent-scale ICC matched a direct `lme4::glmer` refit
+  to 1e-5, so the implementation was right, but the NUMBER was wrong. glmer's Laplace
+  approximation shrinks the case variance with few ratings per case. In simulation the latent ICC
+  ran -0.19 low at 2 raters, -0.08 at 3, -0.05 at 4 and -0.02 at 5
+  (`development-scripts/validate_agreement_latent_icc_bias.R`), and 2 raters is the commonest
+  pathology design.
+- **Detection signal:** one simulated dataset came back 0.507 against a true 0.556. It was
+  quantified before being dismissed as noise.
+- **Prevention rule:** a new estimator gets two checks, never one. Check the formula against an
+  independent call, and check recovery against simulated truth across the design range users will
+  hit. The route is now withheld below 5 raters, with the measured figures in its note.
+
+### Tests that pinned the defect
+
+- **Failure mode:** three existing tests asserted the old wrong behaviour and failed only when it
+  was fixed. `test-agreement-itemmodal.R` asserted the zero-width `[1, 1]` interval, a fabricated
+  claim of perfect precision. `test-agreement-release-review.R` asserted the min-single-cell
+  sparse note, which fires on nearly every 3x3 table. VAL-agreement-06 asserted that categorical
+  ratings fill no hierarchical table. Separately, 136 of 269 agreement `test_that` blocks were
+  smoke-only (`expect_s3_class`), including the block that loads `agreement_perfect` and asserts
+  nothing about its kappa.
+- **Detection signal:** the full-suite run after the fix, compared against a baseline taken before
+  any edit (744 pass / 0 fail).
+- **Prevention rule:** take the baseline first. Read every newly failing test before touching it,
+  because a test that pins a defect is updated to the corrected contract with the reason in a
+  comment, not deleted. Run every new regression test against the UNFIXED code too: all 18 new ones
+  failed there, which is the only evidence they guard anything.
+
+---
+
+## 2026-09-23 — a new option can change a table's numbers without being one of its dependencies
+
+### `kappaCIMethod` reached five tables and was in none of their `clearWith` lists
+
+- **Failure mode:** the *Kappa interval method* option (added the same day) changes the limits in
+  five tables through one shared helper, `.pairKappaWithCI()`. No `.r.yaml` item named it under
+  `clearWith`, so in jamovi a user switching Wald to Fisher z kept the old interval on screen until
+  the re-run overwrote it. (Row duplication could not follow here: the reset block at the top of
+  `.run()` calls `deleteRows()` on every `rows: 0` table. An earlier draft of this entry said
+  otherwise; an adversarial review of the pass caught it.)
+  Every test passed: the R wrapper builds a fresh results object per call, so a missing
+  `clearWith` is invisible to testthat by construction.
+
+- **Detection signal:** `/check-function agreement --profile release`. The option inventory
+  records, per option, whether the `.r.yaml` mentions it anywhere (`visible:` or `clearWith`);
+  `kappaCIMethod` was the only computational option with no `.r.yaml` reference at all. That
+  column, not a test, found it.
+
+- **Prevention rule:** an option is either cosmetic or a dependency. When a new option is read by
+  a method that writes into a table, add it to that table's `clearWith` in the same edit, and
+  trace the helper to every *consumer of its output*, not every caller. This pass traced the five
+  callers of `.pairKappaWithCI()` and still got two things wrong: the intra-rater caller took the
+  helper's SE and rebuilt its own Wald interval, so the option never reached that table although
+  the description now said it did; and the subgroup forest plot and the summary panel draw the
+  same interval without being callers at all, so they kept stale limits. A release gate check for "option read by a
+  table-writing method but absent from that table's `clearWith`" is filed in TODO.md.
+
+- **Same pass, same shape:** two tables declared CI columns that `.init()` hid unconditionally
+  and `.run()` never filled — a structural fact expressed as a runtime toggle. The declarative
+  form (no column) removed eleven lines and a `setVisible(FALSE)` that the review checklist
+  reads as a failure signal.
+
+- **Same pass, `check_external`:** `irrCAC::gwet.ac1.raw()` in irrCAC 1.4 (CRAN 2026-04-27)
+  returns a ONE-SIDED p, `1 - pt(AC/SE, n-1)`; irrCAC 1.0 (CRAN 2019-09-23, the only earlier
+  release) returned the two-sided `2*(1-pt(|AC/SE|, n-1))`. The analysis displayed the 1.4 value
+  as *p-value* beside two-sided kappa tests. The validation suite pinned Gwet's *coefficient*
+  against irrCAC and never its p. Found by deparsing the installed 1.4 function; the package ships
+  no NEWS. Rule: when a table cell comes straight from an upstream field, pin every displayed
+  cell (estimate, SE, interval, p), and read the upstream formula for the p once.
+
+- **The first fix was wrong too, and its test could not tell.** The pass folded irrCAC's value,
+  `2 * min(p, 1 - p)`. That is right on 1.4 and doubles the p on 1.0, and `DESCRIPTION` does not
+  pin irrCAC. The fix now recomputes the two-sided p from the coefficient and SE, which both
+  versions return. The pass's regression test compared `2 * min(p1, 1 - p1)` with the module on a
+  fixture where AC/SE was 13: `1 - pt(13, 66)` is exactly 0 in double precision, so the test
+  compared 0 with 0 and passed against the unfixed code as well. **Prevention rule: before a
+  p-value regression test is credited, compute the old and the new value on its fixture and
+  assert they differ** (`expect_gt(abs(new - old), tol)`). A strong-signal fixture underflows
+  every p to 0, and every p-value transform agrees at 0. Pick a fixture with the statistic near
+  1 to 3, and add one on the other side of zero when the transform has a sign.
+
+---
+
+## 2026-09-23 — a bad argument in a vignette was hiding a bug in the analysis
+
+### Correcting a test input revealed a defect that errored a whole feature
+
+- **Failure mode:** `agreement`'s Mixed-Effects Comparison passed the
+  `multipleTestCorrection` OPTION LEVEL straight into `stats::p.adjust()`. Those are two different
+  vocabularies: the level for Benjamini-Hochberg is `bh`, while `p.adjust()`'s methods are
+  `holm`/`hochberg`/`hommel`/`bonferroni`/`BH`/`BY`/`fdr`/`none`. So selecting
+  "Benjamini-Hochberg (FDR)" reached `match.arg()` and **errored the whole analysis** — the user got
+  no result, not a wrong one. The sibling call site in the same file mapped the level through a
+  `switch()` correctly; only one of the two did.
+
+- **Detection signal:** nothing in the module. The shipped vignette had been calling the analysis
+  with `multipleTestCorrection = "BH"` — an *invalid option level*, which jamovi's own option layer
+  rejected first. That rejection masked the backend bug completely. The defect only appeared when
+  the vignette was corrected to pass the real level `bh`, and the error moved one layer down from
+  the option validator to `p.adjust()`. Two wrongs had been cancelling for as long as both existed.
+
+- **Prevention rule:** **an invalid input in a test or a vignette is not a cosmetic problem — it is
+  a blindfold.** When a fixture supplies a value the schema rejects, every layer behind that
+  validator goes untested, and the document that was supposed to demonstrate the feature is
+  demonstrating the error message instead. Fix invalid fixture arguments when you find them, and
+  re-run: the interesting failures are the ones that appear afterwards. Related: `error = TRUE` in a
+  knitr chunk turns every failure into rendered output, so "render succeeded" says nothing about
+  whether the document is correct. Check the rendered artefact for `Error`, not the exit status —
+  this vignette re-knitted "successfully" at one point into 135 KB of cascading errors, down from
+  2.5 MB, because a data path did not resolve.
+
+- **Second rule:** **an option level is not an API argument.** Wherever a `type: List` level is
+  handed to a third-party function, the mapping belongs in one named helper that both ends share.
+  Two call sites, one mapped and one not, is the shape this defect always takes.
+
+---
+
+## 2026-09-23 — a green suite can be green because it stopped looking
+
+### Three vacuous guards, found only because something forced them to be re-read
+
+- **Failure mode:** across three rounds of work on `agreement`, three separate checks reported
+  success while testing nothing. (1) `IR2-07b` in the acceptance harness was written with the
+  literal string `"PASS"` in its result column; it reported PASS while its observed value was `NA`,
+  and had never compared anything. (2) A neighbouring assertion compared six cells that were all
+  `NA` on both sides — `all.equal(NA, NA)` is `TRUE`, so it passed vacuously; the fixture had
+  drifted onto the variance boundary where the fix correctly blanks those cells. (3)
+  `test-benford-release-review.R` walks benford's AST for `jmvcore::format` calls — the moment the
+  module-wide sweep converted all 47 of them, that walk would find zero, `problems` would be
+  `character(0)`, and the test would have gone green **because its subject no longer existed**.
+  Nobody would have noticed: the file's name and its passing status would both look right.
+
+- **Detection signal:** none of the three was caught by running the suite — running the suite is
+  what produced the false green. (1) was caught by reading the matrix CSV and noticing an
+  `observed` column that said `NA` next to a `PASS`. (2) was caught by asking why (1)'s fixture had
+  no numbers in it. (3) was caught by an agent scoping the sweep, which asked what each existing
+  test would still be testing *after* the change it was about to make.
+
+- **Prevention rule:** **a check that can only be read as passing is not a check.** Three concrete
+  habits, all of which paid here. Never write a literal verdict into a result table — compute it
+  from the comparison, so the row can go red. Before crediting any numeric agreement, require the
+  compared values to be finite; `all.equal` treats `NA == NA` as agreement, and so does
+  `all(is.na(x))` on a zero-length vector. And when a change removes the thing a test searches for,
+  the test is part of the change: retarget it in the same pass, or it becomes a permanent
+  false green.
+
+- **Second rule, same pass:** **when a mechanical sweep is proposed, the deliverable is the trap
+  list, not the sweep.** A 430-site rewrite across 34 files was safe as a one-line `sed` for 429 of
+  them — but only because a scoping pass first enumerated the call shapes and found the three that
+  were not: a `do.call` form that would have *errored* at runtime under a token swap, a call
+  passing `context =`, which is a real formal of `jmvcore::format` and was silently swallowing the
+  value instead of substituting it (a live bug the sweep would have preserved byte-for-byte), and
+  `R/utils.R` itself, where the swap would have turned the wrapper's own delegation into infinite
+  recursion. The same pass measured that the guard test's glob `R/*.b.R` had been blind to 13 live
+  calls in `R/stagemigration-part*.R` the whole time.
+
+- **Third rule:** **prove provenance before claiming it.** The sweep's verification run showed 9
+  failures across 231 files. Two were genuinely exposed by the work; the rest were pre-existing —
+  but that was established by swapping the pre-sweep sources back in and re-running the identical
+  harness, not by reasoning about byte-identity. One of the nine looked like a regression
+  (`pathagreement-wiring`, 0 failures before, 1 after) and was not: it passes in isolation and in a
+  six-file harness both before and after, and only fails inside a 231-file batch. A large batch is
+  evidence about the batch.
+
+---
+
+## 2026-09-23 — a fix pass needs its own adversarial review, because it writes new defects
+
+### The `agreement` remediation closed 16 findings and introduced a BLOCKING one
+
+- **Failure mode:** closing the audit's FIX-07 meant letting the rater variance decomposition
+  accept ordered factors. It did that by merging both rater columns' declared levels with
+  `lv_list[order(-lengths(lv_list))]` then `Reduce(union, lv_list)`. When neither column's level
+  set contains the other — an `Absent < Focal < Diffuse` scale where rater A never used Focal and
+  rater B never used Diffuse, which is exactly what jamovi produces from a CSV — the merged order
+  is **not determined by the data**. It depends on which variable the user dropped into the box
+  first. Measured on one dataset: `vars = c("RA","RB")` reported *"Most of the disagreement is a
+  systematic offset between raters"* (systematic share 0.70) and `vars = c("RB","RA")` reported
+  *"No systematic rater offset is identifiable in these data"*. A second fixture moved the rater
+  component 20-fold. The `ordinal_codes` note truthfully printed the fabricated order, so the
+  disclosure was present and the number was still wrong. The pre-fix code refused non-numeric
+  ratings outright, so this failure mode did not exist before the fix.
+
+- **Detection signal:** not the acceptance harness. `development-scripts/audit_agreement_2026-09-23.R`
+  went 16 CONFIRMED-DEFECT → 29/29 PASS and the 11 `test-agreement*` suites went 517 → 616 passing,
+  with the defect live the whole time. It was found by an adversarial review run **after** the
+  fixes, by a reviewer told to assume the fix was wrong, which built the degenerate level sets on
+  purpose. Three of the four reviewers also caught majors: a quantitative iota graded on the kappa
+  scale beside an ICC panel grading the same number differently; a note asserting Pearson publishes
+  no interpretive bands when a widely cited medical rule of thumb does; and three tables rendering
+  `90% CI` as a span over columns still titled `95% CI Lower`.
+
+- **Prevention rule:** **a fix pass is a change, and changes get reviewed — by someone who did not
+  design them.** A green acceptance harness proves the reported defects are closed; it says nothing
+  about what the fix wrote. Budget an adversarial pass over the fix diff, with the reviewers told to
+  assume it is wrong, and give at least one of them the pre-fix source so it can A/B replay every
+  result table. That reviewer diffed 45 tables at 1e-10 against the pre-fix build and separated
+  "this pass broke it" from "this was already broken" — a distinction no amount of after-the-fact
+  reading recovers.
+
+- **Second rule, from the same pass:** **a merged ordinal scale must be unique, not merely
+  consistent.** The old check asked whether each column's order *contradicted* the merge; the
+  failing cases were *underdetermined*, not contradictory, and passed it. The condition to test is
+  nestedness by inclusion — every level set a subsequence of the largest — which makes the merged
+  order unique. The same helper backed weighted kappa in six other places, so one fabricated scale
+  could reach the headline coefficient; fixing it at the helper also surfaced a latent bug where
+  All-Pairs Kappa let every rater pair re-derive its own scale.
+
+- **Third rule:** **a hard-coded verdict in a test harness is not a test.** `IR2-07b` in the audit
+  script was written with the literal string `"PASS"` in the result column. It reported PASS while
+  its observed value was `NA` — it had never compared anything. `all.equal(NA, NA)` is `TRUE`, so a
+  neighbouring assertion was passing vacuously too. Every verdict in a harness is computed from the
+  comparison, and any comparison that can see `NA` needs a finiteness guard before its result is
+  credited.
+
+---
+
+## 2026-09-23 — a measurement taken while an analysis is parked is not a measurement of the module
+
+### A clean module read as six unused dependencies and eight test failures
+
+- **Failure mode:** `agreement` was moved to `menuGroup: meddecideT` so it could be worked on in
+  isolation. `_updateModules.R` then stopped shipping it and deleted its files from
+  `../meddecide`, and every instrument that reads the module reported the consequences as
+  defects. `release_gate.py --root ../meddecide` said `Imports: 31 checked, 6 unused` — so the six
+  packages only `agreement` calls (`DescTools`, `irrCAC`, `lme4`, `lmerTest`, `psych`, `vcd`) were
+  added to `prune_imports` and their `@importFrom` tags deleted from the sibling's
+  hand-maintained `R/zzz_imports.R`. The sibling test suite said eight failures — seven of them
+  `cannot open the connection` from `readLines(file.path(root, "R", "agreement.b.R"))`, because
+  the audit test's analysis list is a hard-coded snapshot of membership. Nothing in either output
+  named the cause. `prune_imports` is a standing DELETE order, the only way to remove an Import,
+  so a reading taken during a temporary routing state was written into permanent config.
+
+- **Detection signal:** `prune_conflicts()` — the plan-time guard added the previous day
+  (2026-09-22, below) — raised `prune_imports would remove DescTools, irrCAC, lme4, lmerTest, vcd,
+  which shipped R code uses` the moment `menuGroup: meddecide` was restored, and `--dry-run`
+  reported it before anything was written. The guard worked exactly as designed. What it cannot
+  do is fire at *authoring* time: while the analysis is parked the entry is genuinely correct for
+  what the module ships, so the collision is invisible until someone promotes. It also does not
+  read `R/zzz_imports.R`, so the deleted tags were nobody's finding. The 2026-09-22 note recorded
+  "all 17 current entries across four modules are clean"; that was true, and was measured against
+  *shipped* files only — the question nobody had asked was what the entries do to the *parked*ate
+  ones.
+
+- **Prevention rule:** nothing may be derived from which analyses a module holds today —
+  membership is one `menuGroup:` line per analysis and changes without notice. Derive it, never
+  record it; where it must be recorded, record the condition under which the record expires.
+  A test names its analyses by listing `jamovi/*.a.yaml`, or guards each read with
+  `skip_if_not(file.exists(f), "<name> does not ship in this module")` — a skip naming the
+  analysis is diagnostic, `cannot open the connection` is not. Before adding a `prune_imports`
+  entry, check `grep -l 'menuGroup: <module>[TPD]' jamovi/*.a.yaml`: if anything is parked, the
+  Imports you are reading are a snapshot. Enforced by `tools/promotion_screen.py`, which now
+  counts a pruned package a parked analysis calls as a promotion blocker and prints the list;
+  guide §29. Measured 2026-09-23: **0 shipped, 54 parked** — meddecide 29, OncoPath 17,
+  jsurvival 4, ClinicoPathDescriptives 3. Every one is a plan error waiting for whoever removes
+  that analysis's suffix.
+
+- **Two things the sweep itself taught.** (1) A hand-written sweep matching `<Group>[TPD]$` found
+  30 collisions; the detector matching `(?:Extra)?[DPT]+$` found 54. The 24 it missed were all
+  `...ExtraD` groups. Reconcile a detector against a hand list *in both directions* before
+  trusting either. (2) Deciding "unused" needs the parser or a whole-file masker, never a
+  line-at-a-time one. On `R/agreement.b.R`, `psych::` appears 7 times raw; a line-at-a-time
+  string/comment masker still reports 1, because `:7616` (`<code>psych::cohen.kappa()</code>`)
+  sits inside a multi-line HTML string whose own line carries no quote character. A whole-file
+  masker and R's parser both report 0. That single false positive is the difference between
+  "psych is prunable" (true, and it stayed pruned) and "psych is used" (false).
+
+---
+
+## 2026-09-23 — library audit round 4 (meddecide): a grep with 620 hits is not a check
+
+### A table appeared empty and then jumped — the third audit in a row to say so
+
+- **Failure mode:** a table whose whole row set is known before the data is seen
+  (`epiR::epi.tests()` always returns LR+, LR-, DOR, Youden, NNDx) was declared `rows: 0` and
+  built with `addRow()` inside `.run()`. jamovi draws the empty header first and restructures
+  when the computation returns, so the user watches the table jump on every run. The rule
+  against it — review guide §6 — has been written since round 1 (2026-07-13), and meddecide was
+  told about the same class in **all three** of its audits: MEDIUM, MEDIUM, then LOW.
+
+- **Detection signal:** the library reviewer (`2026-09-16 meddecide` [LOW]), three times.
+  Locally, pre-submission checklist item 5 was `grep -n "addRow(rowKey *= *[\"']" R/*.b.R` —
+  **620 hits across the umbrella**, because almost every hit is one extra *conditional* row
+  added to a table that already has an `.init()` skeleton, which is correct and does not blink.
+  An unreadable check is an absent check; this is the same failure the `.()` padding grep had in
+  round 3 (200 hits, 14 real).
+
+- **Prevention rule:** change the **unit**, not the pattern. `check_init_row_structure` in
+  `tools/release_gate.py` asks the question of the *table*: no `rows:` in the `.r.yaml`, nothing
+  reachable from `.init()` (following `private$.helper()` calls transitively) names it, and
+  **every** `addRow()` it receives uses a literal string `rowKey` — the proof that the row set
+  was known when the code was written. That is **1 shipped hit** across all five modules
+  (`OncoPath waterfall::responseDurationTable`) and 57 promotion-debt hits, against 8 shipped
+  from a call-level probe of which 6 were the benign conditional-row shape. Guide §6 "Enforce
+  it"; the checklist item and the `create-function` / `release-review-function` templates now
+  call the gate instead of the grep. **Known blind spot, documented at every copy:** a loop index
+  over a fixed-length result (`for (i in 1:nrow(res)) addRow(rowKey = i)`) is not a literal key,
+  and that is precisely the shape this report named — a 0 here is not proof.
+
+### A seed set for one bootstrap stayed set for the whole session
+
+- **Failure mode:** every analysis in a jamovi session runs in one R process. `agreement` and
+  `lassologistic` called `set.seed(seed_val)` and never restored the RNG state, so the next
+  analysis the user added — resampling without a seed of its own, because it had no reason to —
+  drew from a deterministic stream and returned the same "random" bootstrap CI on every run.
+  Nothing errors; the numbers just stop being random. One module was using three idioms at once:
+  `withr::local_seed()`, a hand-rolled `.Random.seed` save/restore, and the bare call.
+
+- **Detection signal:** the library reviewer (`2026-09-16 meddecide` [LOW]). No local check, and
+  no rule anywhere — the response filed at the time cited the review guide for a section that
+  did not exist.
+
+- **Prevention rule:** seed scoped to the function — `withr::local_seed()` — never globally;
+  and show the seed beside any result that depends on it. Guide §28; enforced by
+  `check_bare_set_seed` (WARN, 0 shipped across all five modules), which blanks strings and
+  comments first so generated R code in an `.asSource()` template is not a false hit.
+
+---
+
+## 2026-09-22 — `prune_imports` was an unchecked standing order
+
+### A config list deleted dependencies the code still needed, and only users found out
+
+- **Failure mode:** `prune_configured_module_imports()` deletes each configured package from a
+  generated submodule's DESCRIPTION **unconditionally** — the list says "remove P" and P is
+  removed, whether or not the module still needs it. It exists because
+  `sync_namespace_with_description()` is add-only: nothing else can ever remove a stale Import
+  from a sibling repo's persistent DESCRIPTION. That makes every entry a claim about the code
+  that silently expires the moment a newly shipped analysis starts using the package.
+  It expired once already: `magrittr` was pruned from OncoPath (2026-09-16), `%>%` vanished
+  from the generated DESCRIPTION, and `waterfall` could not run in jamovi at all.
+
+- **Detection signal:** none at the time. Since then three checks in `verify_module()` block
+  the module before install (undeclared `pkg::`, "prune_imports still imported", bare-symbol
+  resolution) — but all three run *after* apply, prepare and document, i.e. after the sibling
+  working tree has been rewritten, and all three are skipped entirely under
+  `modes$extended: false`, which still lets the prune itself run. The user's question — "if I
+  add another function they may need, doesn't that cause a problem?" — was the real signal.
+
+- **Prevention rule:** a standing instruction is re-derived from reality on every run, as early
+  as the data allows. `prune_conflicts()` (`_updateModules_utils.R`) now re-checks every entry
+  at **plan** time against the umbrella sources the module is about to ship, so a stale entry is
+  a plan error that `--dry-run` reports before anything is written. A `requireNamespace()`-gated
+  use counts as a use: jamovi installs Imports and never Suggests, so pruning a guarded package
+  does not make the capability optional, it makes it dead. Measured against the real config, all
+  17 current entries across four modules are clean — the guard costs nothing today.
+  Its limits are stated in its own comment: it cannot see the `magrittr` shape itself (a bare
+  symbol with no tag names no package, so no source scan can find it); that class stays with the
+  bare-symbol check in `verify_module()`, which has a real NAMESPACE to resolve against.
+  Secondary fix: the "prune_imports still imported" message used to say *"remove its
+  @import/@importFrom tag"* — advice that is exactly backwards when the config is the stale side.
+  It now names both remedies and says not to assume the config is right.
+  Tests: eight cases in `tests/testthat/test-update-modules-plan.R`, plus the OncoPath audit
+  test, whose pinned `c("cluster", "tidyr")` had already gone stale against the working tree and
+  is now the invariant (`prune_conflicts()` returns nothing) plus the one literal worth keeping:
+  `magrittr` must never enter that list.
+
+- **What the adversarial review of the new guard found (65 agents, 25 confirmed findings).**
+  Two mattered here. (1) A `pkg::` call in a **formals default** — `function(x, engine =
+  DescTools::CCC)` — was invisible: formals are a pairlist, not a call, so the walker stepped
+  over them. That was a hole in `scan_r_package_usage` itself, so it blinded the new plan guard
+  AND the long-standing `pkg::`-declaration check in `verify_module()`. Fixed in the walker, so
+  both gain at once; all five submodules stay clean and all 17 prune entries still pass. Trap
+  worth remembering: a parameter with no default is the empty symbol, and `for (d in
+  as.list(formals))` raises *"argument 'd' is missing, with no default"* — index straight into
+  `is.call()`, never bind it. (2) A grep implementation of this guard would have been wrong:
+  over all umbrella `R/`, 15 of 17 entries have a `P::` hit (the umbrella carries every draft),
+  and even scoped to shipped files, `robustbase` and `psych` hit **comment lines only**. Parsing
+  with `keep.source = FALSE` is what makes the guard usable; there is a regression test for it.
+
+---
+
+## 2026-09-22 — library audit round 5 (OncoPath): an inferred cause, believed for ten months
+
+### Users saw `attempt to apply non-function` and we blamed the wrong object
+
+- **Failure mode:** `jmvcore::Group$insert(index, item)` has no bounds check. For any index above
+  `length(items)` it evaluates `.items[index:length(.items)]`; R's `:` counts DOWN, so both slices
+  run off the end and the results tree fills with `NULL`. The next traversal calls
+  `NULL$asProtoBuf()` — which is exactly `attempt to apply non-function`, arriving through the
+  serialization path. Measured on jmvcore 2.7.38 against a real `waterfall` run: 21 items,
+  `insert(999,)` → 1978 items / 1955 `NULL`s; `insert(22,)` → 1 `NULL`. **A `jmvcore::Html` at the
+  same index fails identically** — the element type is irrelevant. `insert(1, ...)` into an *empty*
+  group is the same bug (`1:0` is `c(1, 0)`).
+
+  What we concluded instead, in 2025-12: *"ALL dynamically inserted `jmvcore::Notice` objects cause
+  serialization errors."* `R/survival.b.R` had ten notices — nine at index 1 or 2, one at 999.
+  Removing the `insert(1, ...)` did not help (the 999 was still live), removing all ten did, and
+  the wrong lesson was drawn from the difference. The claim had in fact been written into
+  `CLAUDE.md` as mechanism on 2025-11-16, **six weeks before the incident it purports to explain**,
+  and six later write-ups in `tests/*.md` each cite `CLAUDE.md` as their authority. None tested it.
+  Cost: `jmvcore::Notice` was abandoned for hand-rolled HTML — **80 `.addNotice()` helpers,
+  1,408 call sites, 0 uses of the native element** — and the false mechanism propagated into
+  `CLAUDE.md`, three guides, five command files, a template library and a code breadcrumb the
+  jamovi library reviewer reads.
+
+- **Detection signal:** the library reviewer (`2026-09-22 OncoPath` [LOW]) — correcting *their own*
+  earlier advice, and reading our breadcrumb to do it. Every local check missed it because nothing
+  tested the claim: it was documentation agreeing with itself. `.claude/commands/fix-notices.md`
+  had taught `self$results$insert(999, n)` since 2025-11-14, and the pattern spread to 321 call
+  sites at index 999 before the first crash.
+
+- **Prevention rule:** an inferred cause is labelled as inferred until it is measured, and a fix
+  that removes N things at once has not identified which one mattered. Enforced by
+  `tools/release_gate.py` `check_sentinel_insert` (**FAIL**; 0 hits in the umbrella and all five
+  siblings the day it was written) plus the corrected teaching sites; guide §13.
+
+### A WARN that is red in every module is a broken check
+
+- **Failure mode:** `check_news` warned that `NEWS.md` had no heading for the `DESCRIPTION`
+  version, in all five siblings, forever. But `.github/workflows/release.yaml` publishes nothing at
+  all for a four-component version, which is what the updater writes on every regeneration. Four of
+  the five warnings were about a file the release pipeline never opens, and they buried the fifth —
+  OncoPath at 1.0.83, genuinely about to publish a release whose body would read `Release 1.0.83.`
+  It had already happened 14 times in 16 workflow-era releases.
+- **Detection signal:** the reviewer supplied the consequence we had not traced (the extractor's
+  `(^|[^0-9.])<version>([^0-9.]|$)` regex and its placeholder fallback). The gate itself had been
+  reporting the symptom since 2026-09-18 and was skimmed, exactly as a permanently red line is.
+- **Prevention rule:** a detector must ask the question that matches the thing that breaks. Rewritten
+  to mirror the workflow's own cascade — silent on dev builds, and it names the placeholder body it
+  would publish. 5/5 red → 1/5. Related: the heading must be written **before** the version bump,
+  because the workflow skips a version whose tag exists, so a release cannot be re-cut.
+
+### Fixing the third instance is not sweeping the class
+
+- **Failure mode:** `diagnosticmeta` and `waterfall` greet a user with a red
+  `ERROR: Variables required` the moment the analysis is opened, before anything has been chosen.
+  Round 1 raised the fatal half of this class, round 2 the empty-state half; both were marked DONE.
+  Round 2's fix moved the banners into a new `notices` channel and re-created them there
+  (`0dbd3d348`), and `48b8edb13` — **one day before this audit** — fixed `swimmerplot` alone and
+  wrote the reasoning the reviewer then quoted back at us.
+- **Detection signal:** the reviewer, at three named sites. A class sweep found **7 empty-state and
+  9 fatal-via-banner shipped hits** across the five modules — including `swimmerplot`'s own second
+  instance, which the reviewer missed while holding swimmerplot up as the model.
+- **Prevention rule:** guide §25, with the empty-state / fatal split and the two detector
+  refinements (measured: 53% false positives without them, 0/15 with). Not gated yet, and the guide
+  says why rather than shipping a noisy gate.
+
+### Tabular data rendered as raw HTML ignores results theme and loses user interactions
+
+- **Failure mode:** reference tables in `diagnosticmeta` were rendered inside HTML blocks using raw
+  `<table style="...">` markup with fixed `#ddd` borders and light headers. They ignore jamovi's
+  dark results theme, cannot be copied as LaTeX or tabular data (Copy outputs raw markup rather than
+  a grid), and cannot be translated via `.()`.
+- **Detection signal:** the reviewer (`2026-09-22 OncoPath` [MEDIUM]). The sweep found 97 shipped
+  `<table>` blocks across five modules (33 computed, 25 static grids, 27 prose, 12 exempt help).
+- **Prevention rule:** tabular data belongs in a `type: Table` result in `.r.yaml`, with static rows
+  in `.init()` and computed values in `.run()`. Reserve `type: Html` solely for complex packages with
+  mature HTML rendering engines (gt/gtsummary) or empty-state layouts. Guide §26.
+
+### Module self-description contradictions propagate through separate authorship channels
+
+- **Failure mode:** capability claims (RECIST v1.1 compliance vs adaptation) differed between
+  `DESCRIPTION`, `README.md` and `jamovi/0000.yaml`; bug-report URLs pointed to different repositories;
+  `diagnosticmeta.a.yaml` used a `|` literal block scalar so description lines were rendered with
+  awkward paragraph breaks; example datasets shared identical descriptions.
+- **Detection signal:** the reviewer (`2026-09-22 OncoPath` [LOW]).
+- **Prevention rule:** single source of truth for repository URLs, folded `>` block scalars for
+  analysis descriptions, distinct dataset descriptions, and aligned clinical standard qualifications.
+  Enforced by `check_description_newlines`, `check_issue_urls`, and `check_dataset_descriptions` in
+  `tools/release_gate.py`; guide §27.
+
+### Declared-but-unused dependencies left behind after refactoring
+
+- **Failure mode:** `stringr` remained declared in `DESCRIPTION` `Imports:` and `R/zzz_imports.R`
+  after its sole call (`str_to_title()`) was removed in a refactor. The `@importFrom` tag hid the
+  staleness from `R CMD check`, forcing every user install to resolve and load an unused package.
+- **Detection signal:** the reviewer (`2026-09-22 OncoPath` [LOW]); `check_unused_imports` in
+  `tools/release_gate.py` (which also found `psych`).
+- **Prevention rule:** remove unused dependencies from `DESCRIPTION` and `R/zzz_imports.R`; guide §10.
+
+---
+
 ## 2026-09-20 — routing an analysis out of a module took its imports with it
 
 `Rscript _updateModules.R` stopped OncoPath at verify: `called but not resolvable from the

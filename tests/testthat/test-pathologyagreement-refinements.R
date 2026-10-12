@@ -1,11 +1,7 @@
 
 context("pathologyagreement refinements")
 
-# Source necessary files
-testthat::source_test_helpers(env = environment())
-. <- function(x) x # Dummy translation function
-source('/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/pathologyagreement.b.R', local = TRUE)
-source('/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/pathologyagreement.h.R', local = TRUE)
+# test_check()/test_local() load the package: test its analysis, never source() R/ copies.
 
 test_that("Sample size warning triggers for N < 30", {
   skip_if_not_installed('jmvReadWrite')

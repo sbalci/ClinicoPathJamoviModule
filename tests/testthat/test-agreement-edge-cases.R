@@ -26,6 +26,11 @@ test_that("agreement handles perfect agreement (kappa = 1.0)", {
   )
 
   expect_s3_class(result, "agreementResults")
+  # The raters are identical on every case (3 categories used), so kappa is exactly 1
+  # and raw agreement is 100 percent. This block used to assert only the class.
+  tb <- result$irrtable$asDF
+  expect_equal(tb$kappa[1], 1)
+  expect_equal(tb$peragree[1], 100)
 })
 
 test_that("agreement handles perfect continuous agreement (ICC = 1.0)", {
@@ -45,6 +50,8 @@ test_that("agreement handles perfect continuous agreement (ICC = 1.0)", {
   )
 
   expect_s3_class(result, "agreementResults")
+  # Identical measurements: every ICC form is 1.
+  expect_equal(result$iccTable$asDF$icc_value[1], 1, tolerance = 1e-10)
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -52,22 +59,30 @@ test_that("agreement handles perfect continuous agreement (ICC = 1.0)", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("agreement handles poor agreement (kappa ≈ 0)", {
+  skip_if_not_installed("irr")
   result <- agreement(
     data = agreement_poor,
     vars = c("PathologistA", "PathologistB")
   )
 
   expect_s3_class(result, "agreementResults")
+  # Oracle: irr::kappa2 on the same two columns (about 0.10 for this dataset).
+  oracle <- irr::kappa2(agreement_poor[c("PathologistA", "PathologistB")])$value
+  expect_equal(result$irrtable$asDF$kappa[1], oracle, tolerance = 1e-10)
+  expect_lt(result$irrtable$asDF$kappa[1], 0.20)
 })
 
 test_that("agreement handles negative kappa values", {
-  # Negative kappa can occur when agreement is worse than chance
-  result <- agreement(
-    data = agreement_poor,
-    vars = c("PathologistA", "PathologistB")
-  )
+  # Negative kappa occurs when agreement is worse than chance. agreement_poor (kappa
+  # about 0.10) never showed one, so build it: two raters who disagree on EVERY case,
+  # with balanced margins, give observed agreement 0, chance agreement 0.5 and
+  # kappa = (0 - 0.5) / (1 - 0.5) = -1 exactly.
+  d <- data.frame(a = factor(rep(c("Pos", "Neg"), 20)), b = factor(rep(c("Neg", "Pos"), 20)))
+  result <- agreement(data = d, vars = c("a", "b"))
 
   expect_s3_class(result, "agreementResults")
+  expect_equal(result$irrtable$asDF$kappa[1], -1)
+  expect_equal(result$irrtable$asDF$peragree[1], 0)
 })
 
 # ═══════════════════════════════════════════════════════════

@@ -425,7 +425,7 @@ The backend uses `jmvcore::Notice` objects inserted via `self$results$insert()`.
 | `overfitRisk` | STRONG_WARNING | AUC > 0.95 and N < 100 | "AUC = X with N=Y: likely overfitted. Enable bootstrap validation." |
 | `analysisComplete` | INFO | End of `.run()` | "Scoring system built using {type} regression with {p} predictors (N={n}, {events} events). Method: {method}." |
 
-**Known limitation:** These use `self$results$insert()` with `jmvcore::Notice` objects, which contain function references that may fail protobuf serialization. See `CLAUDE.md` for the migration path to HTML-based notices.
+**Note (corrected 2026-09-22):** these use `self$results$insert()` with `jmvcore::Notice` objects. `Notice` serializes fine — the old claim about "function references" was wrong. What does break is an insert index above `length(results$items)`: `jmvcore::Group$insert()` has no bounds check, so the results tree fills with `NULL`s and serialization dies with `attempt to apply non-function` (any element type, not just `Notice`). Use `self$results$add()` to append. See `vignettes/jamovi_library_review_guide.md` §13.
 
 ---
 

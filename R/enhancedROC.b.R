@@ -39,6 +39,9 @@ enhancedROCClass <- R6::R6Class(
         .presetNoticeShown = FALSE,
         .prevalenceNoticeShown = FALSE, # extreme prevalence is a property of the sample, not of each predictor
         .metricPValueFailures = character(0), # metric comparisons whose test failed (reported once)
+        # A BCa interval silently degraded to percentile because some resamples had no AUC
+        # (see .bootstrapAucCi); disclosed once per run rather than once per predictor.
+        .bcaFellBackToPercentile = FALSE,
         .instructionsHtml = "", # Accumulator for instructions panel content
         .analysisSummaryHtml = "", # Accumulator for analysis summary content
 
@@ -80,16 +83,23 @@ enhancedROCClass <- R6::R6Class(
 
         # Render collected notices as HTML
         .renderNotices = function() {
+            # An empty list must CLEAR the panel, not leave it alone: the Html item keeps
+            # whatever the PREVIOUS run wrote until something overwrites it. Every early return
+            # in .run()/.prepareData() adds a notice first, so this branch is reached only via
+            # the on.exit() registered in .run() - a throw raised before the first .addNotice().
+            # That is exactly the case where the last run's ERROR panel would otherwise stand
+            # above tables computed from new options.
             if (length(private$.noticeList) == 0) {
+                self$results$results$notices$setContent("")
                 return()
             }
 
             # Map notice types to colors and icons
             typeStyles <- list(
-                ERROR = list(color = "#dc2626", bgcolor = "#fef2f2", border = "#fca5a5", icon = ""),
-                STRONG_WARNING = list(color = "#ea580c", bgcolor = "#fff7ed", border = "#fdba74", icon = ""),
-                WARNING = list(color = "#ca8a04", bgcolor = "#fefce8", border = "#fde047", icon = ""),
-                INFO = list(color = "#2563eb", bgcolor = "#eff6ff", border = "#93c5fd", icon = "")
+                ERROR = list(bgcolor = "rgba(220, 38, 38, 0.10)", border = "#fca5a5", icon = ""),
+                STRONG_WARNING = list(bgcolor = "rgba(234, 88, 12, 0.10)", border = "#fdba74", icon = ""),
+                WARNING = list(bgcolor = "rgba(202, 138, 4, 0.12)", border = "#fde047", icon = ""),
+                INFO = list(bgcolor = "rgba(37, 99, 235, 0.08)", border = "#93c5fd", icon = "")
             )
 
             html <- "<div style='margin: 10px 0;'>"
@@ -102,7 +112,7 @@ enhancedROCClass <- R6::R6Class(
                     "<div style='background-color: ", style$bgcolor, "; ",
                     "border-left: 4px solid ", style$border, "; ",
                     "padding: 12px; margin: 8px 0; border-radius: 4px;'>",
-                    "<strong style='color: ", style$color, ";'>",
+                    "<strong>",
                     style$icon, " ", private$.safeHtmlOutput(notice$title), "</strong><br>",
                     "<span style='color: inherit;'>", private$.safeHtmlOutput(notice$content), "</span>",
                     "</div>"
@@ -127,7 +137,18 @@ enhancedROCClass <- R6::R6Class(
         .plotMessage = function(ggtheme, title, message) {
             tryCatch(
                 {
-                    txt_col <- tryCatch(ggtheme$text$colour, error = function(e) NULL) %||% "black"
+                    # jamovi's `ggtheme` is a LIST of [theme, palette scales], so `ggtheme$text`
+                    # is ALWAYS NULL and every on-plot message was drawn in black - unreadable on
+                    # jamovi's dark theme. Pull the theme element out of the list and resolve the
+                    # "text" element against it, which is where the real foreground colour lives.
+                    txt_col <- tryCatch(
+                        {
+                            els <- if (inherits(ggtheme, "theme")) list(ggtheme) else as.list(ggtheme)
+                            thm <- Filter(function(el) inherits(el, "theme"), els)[[1]]
+                            ggplot2::calc_element("text", thm)$colour
+                        },
+                        error = function(e) NULL
+                    ) %||% "black"
                     p <- ggplot2::ggplot() +
                         ggplot2::annotate("text",
                             x = 0.5, y = 0.62, label = title,
@@ -186,12 +207,23 @@ enhancedROCClass <- R6::R6Class(
             for (imgName in private$.plotImageNames()) {
                 self$results$results$get(imgName)$setSize(plot_w, plot_h)
             }
+
+            # The sensitivity/specificity limits are Clopper-Pearson intervals at the user's
+            # Confidence level (see .calculateBinomialCI()), so the heading has to say which
+            # level rather than the hard-coded "95%" it used to carry.
+            conf_pct <- format(self$options$confidenceLevel %||% 95)
+            diagTable <- self$results$results$diagnosticPerformance
+            diagTable$getColumn("sensitivity_ci")$setTitle(
+                .fmt(.("Sensitivity {pct}% CI"), pct = conf_pct))
+            diagTable$getColumn("specificity_ci")$setTitle(
+                .fmt(.("Specificity {pct}% CI"), pct = conf_pct))
         },
 
         .plotImageNames = function() {
             c("rocCurvePlot", "prcPlot", "comparativeROCPlot", "cutoffAnalysisPlot",
               "youdenIndexPlot", "clinicalDecisionPlot", "crocCurvePlot", "convexHullPlot",
-              "calibrationPlotImage", "multiClassROCPlot", "clinicalUtilityPlot")
+              "calibrationPlotImage", "multiClassROCPlot", "clinicalUtilityPlot",
+              "decisionImpactPlot")
         },
 
         # Every renderer reads private$.rocResults and friends, which only exist after .run()
@@ -308,6 +340,12 @@ enhancedROCClass <- R6::R6Class(
         .run = function() {
             # Reset notice list, instructions, summary, and preset config at start of every run
             private$.noticeList <- list()
+            # Notices are rendered on EVERY exit path: the early returns below, normal
+            # completion, and any stop() raised after the last .addNotice() - a throw inside
+            # private$.publishPlotStates(), say. Such a run used to skip the tail call entirely
+            # and leave the PREVIOUS run's panel on screen above tables it did not produce.
+            # Same idiom as R/stagemigration.b.R.
+            on.exit(private$.renderNotices(), add = TRUE)
             private$.instructionsHtml <- private$.getInstructions()
             private$.presetConfig <- NULL
             private$.presetNoticeShown <- FALSE
@@ -318,6 +356,14 @@ enhancedROCClass <- R6::R6Class(
             private$.multiClassOutcome <- NULL
             private$.prevalenceNoticeShown <- FALSE
             private$.metricPValueFailures <- character(0)
+            private$.bcaFellBackToPercentile <- FALSE
+            # These used to be reset inside .runROCAnalysis() only. When .prepareData() returns
+            # NULL the run aborts BEFORE that point, so the previous run's ROC objects stayed in
+            # the R6 instance and .restoreFromState() short-circuited on them - a resize redrew
+            # every plot from the aborted run's predecessor.
+            private$.rocResults <- list()
+            private$.rocObjects <- list()
+            private$.rocSmoothed <- list()
             # A run that fails or returns early must leave no plot state behind, or the
             # renderers would restore the PREVIOUS run's data.
             private$.clearPlotStates()
@@ -340,9 +386,8 @@ enhancedROCClass <- R6::R6Class(
                 private$.addNotice(
                     type = "ERROR",
                     title = .("Missing Variables"),
-                    content = .("Please select an outcome variable and at least one predictor variable for ROC analysis. \u{2022} Outcome variable: required (binary/factor). \u{2022} Predictor variables: at least one numeric variable required for ROC curve calculation.")
+                    content = .("Please select an outcome variable and at least one predictor variable for ROC analysis. \u2022 Outcome variable: required (binary/factor). \u2022 Predictor variables: at least one numeric variable required for ROC curve calculation.")
                 )
-                private$.renderNotices()
                 return()
             }
 
@@ -352,7 +397,6 @@ enhancedROCClass <- R6::R6Class(
             # Prepare and validate data
             analysisData <- private$.prepareData()
             if (is.null(analysisData)) {
-                private$.renderNotices()
                 return()
             }
 
@@ -374,13 +418,20 @@ enhancedROCClass <- R6::R6Class(
                 private$.addNotice(
                     type = "INFO",
                     title = .("Smoothing Applies to the Curve Only"),
-                    content = sprintf(.("The displayed ROC curve is smoothed (%s), but every reported statistic \u{2014} AUC, confidence intervals, optimal cut-points and all sensitivity/specificity values \u{2014} is computed from the empirical curve. A smoothed curve carries no thresholds, so it cannot produce a cut-point."), if (self$options$smoothMethod == "binormal") "binormal" else "kernel density")
+                    content = sprintf(.("The displayed ROC curve is smoothed (%s), but every reported statistic \u2014 AUC, confidence intervals, optimal cut-points and all sensitivity/specificity values \u2014 is computed from the empirical curve. A smoothed curve carries no thresholds, so it cannot produce a cut-point."), if (self$options$smoothMethod == "binormal") "binormal" else "kernel density")
                 )
             }
 
-            # Check for class imbalance
+            # Check for class imbalance. Detection is unconditional: a display checkbox may
+            # decide whether a panel is SHOWN, never whether a condition that invalidates the
+            # AUC is LOOKED FOR. detectImbalance and showImbalanceWarning both default to false,
+            # so a 20:1 outcome used to produce an AUC, a confidence interval and an optimal
+            # cut-point with no caution anywhere on the page. The metrics table this fills is
+            # still `visible: (detectImbalance)`, so nothing new appears unless asked for -
+            # only the notice is now guaranteed. The precision-recall panel stays opt-in: it is
+            # extra computation for an extra table, not a safety check.
+            private$.checkClassImbalance(analysisData)
             if (self$options$detectImbalance) {
-                private$.checkClassImbalance(analysisData)
                 private$.populatePrecisionRecall(analysisData)
             }
 
@@ -423,7 +474,7 @@ enhancedROCClass <- R6::R6Class(
                 private$.addNotice(
                     type = "WARNING",
                     title = .("Comparison Options Need Comparative Analysis"),
-                    content = sprintf(.("%s produced no output because Analysis Type is set to \"%s\". Set Analysis Type to \"Comparative ROC Analysis\" to compare predictors."), paste(names(comparison_opts)[comparison_opts], collapse = ", "), self$options$analysisType)
+                    content = sprintf(.("%1$s produced no output because Analysis Type is set to \"%2$s\". Set Analysis Type to \"Comparative ROC Analysis\" to compare predictors."), paste(names(comparison_opts)[comparison_opts], collapse = ", "), self$options$analysisType)
                 )
             }
 
@@ -484,38 +535,18 @@ enhancedROCClass <- R6::R6Class(
             }
 
 
-            # Notify user about unimplemented features that are toggled on
-            unimplemented <- c()
-            if (isTRUE(self$options$harrellCIndex)) unimplemented <- c(unimplemented, "Harrell C-Index")
-            if (isTRUE(self$options$unoCStatistic)) unimplemented <- c(unimplemented, "Uno C-Statistic")
-            if (isTRUE(self$options$incidentDynamic)) unimplemented <- c(unimplemented, "Incident/Dynamic AUC")
-            if (isTRUE(self$options$cumulativeDynamic)) unimplemented <- c(unimplemented, "Cumulative/Dynamic AUC")
-            if (isTRUE(self$options$competingRisksConcordance)) unimplemented <- c(unimplemented, "Competing Risks Concordance")
-            if (isTRUE(self$options$eoRatio)) unimplemented <- c(unimplemented, "E/O Ratio")
-            if (isTRUE(self$options$namDagostino)) unimplemented <- c(unimplemented, "Nam-D'Agostino Test")
-            if (isTRUE(self$options$greenwoodNam)) unimplemented <- c(unimplemented, "Greenwood-Nam-D'Agostino Test")
-            if (isTRUE(self$options$calibrationBelt)) unimplemented <- c(unimplemented, "Calibration Belt")
-            if (isTRUE(self$options$calibrationDensity)) unimplemented <- c(unimplemented, "Calibration Density")
-            if (isTRUE(self$options$optimismCorrection)) unimplemented <- c(unimplemented, "Optimism Correction")
-            if (isTRUE(self$options$externalValidation)) unimplemented <- c(unimplemented, "External Validation")
-            if (isTRUE(self$options$decisionImpactCurves)) unimplemented <- c(unimplemented, "Decision Impact Curves")
-            if (isTRUE(self$options$netBenefitRegression)) unimplemented <- c(unimplemented, "Net Benefit Regression")
-            if (isTRUE(self$options$modelUpdating)) unimplemented <- c(unimplemented, "Model Updating")
-            if (isTRUE(self$options$transportability)) unimplemented <- c(unimplemented, "Transportability")
-            if (isTRUE(self$options$bootstrapPartialAUC)) unimplemented <- c(unimplemented, "Bootstrap CI for Partial AUC")
-            if (isTRUE(self$options$bootstrapCutoffCI)) unimplemented <- c(unimplemented, "Bootstrap CI for Cutoffs")
-            if (self$options$multiClassAveraging != "macro" && isTRUE(self$options$multiClassROC)) unimplemented <- c(unimplemented, "Weighted/Micro Multi-Class AUC Averaging")
-
-            if (length(unimplemented) > 0) {
-                # These are not hidden options: all 20 have live checkboxes in
-                # jamovi/enhancedroc.u.yaml, so a user can tick one and get no output at all.
-                # An INFO notice is the quietest level available and is easy to scroll past when
-                # you are looking for a table that is never going to appear. Something the user
-                # explicitly asked for and did not receive is a warning.
+            # Nineteen of the twenty "not yet implemented" checkboxes are gone: seven were
+            # implemented, and twelve are now commented out in jamovi/enhancedROC.a.yaml.
+            # self$options$<name> RAISES for an option that no longer exists, so a commented-out
+            # option must not be referenced here at all. Weighted AUC averaging is the one case
+            # that is still genuinely unavailable, and only for the One-vs-One strategy.
+            if (isTRUE(self$options$multiClassROC) &&
+                identical(self$options$multiClassAveraging, "weighted") &&
+                identical(self$options$multiClassStrategy, "ovo")) {
                 private$.addNotice(
                     type = "WARNING",
-                    title = .("Selected Features Produced No Output"),
-                    content = sprintf(.("You selected %s%snot yet implemented, so nothing was computed for %s: %s. The rest of the analysis is unaffected. Clear these boxes to remove this message."), length(unimplemented), if (length(unimplemented) == 1) " option that is " else " options that are ", if (length(unimplemented) == 1) "it" else "them", paste(unimplemented, collapse = ", "))
+                    title = .("Weighted Averaging Is Not Available with the One-vs-One Strategy"),
+                    content = .("The one-vs-one pairwise AUC is defined as an unweighted average over class PAIRS, so there is no prevalence-weighted version of it and none was computed; the Multi-Class Average AUC table reports the unweighted pairwise value instead. Choose the One-vs-Rest strategy if you want a prevalence-weighted average.")
                 )
             }
 
@@ -555,14 +586,20 @@ enhancedROCClass <- R6::R6Class(
                 private$.addNotice(
                     type = "INFO",
                     title = .("Analysis Complete"),
-                    content = sprintf(.("ROC analysis completed successfully. \u{2022} Analyzed %s with n=%s observations. \u{2022} Review AUC values, confidence intervals, and optimal cutoffs in results tables below. \u{2022} Check any warnings or recommendations above for data quality concerns."), predictor_text, n_obs)
+                    content = sprintf(.("ROC analysis completed successfully. \u2022 Analyzed %1$s with n=%2$s observations. \u2022 Review AUC values, confidence intervals, and optimal cutoffs in results tables below. \u2022 Check any warnings or recommendations above for data quality concerns."), predictor_text, n_obs)
+                )
+            }
+
+            # Disclosed once per run: the interval on screen is not the one the user asked for.
+            if (isTRUE(private$.bcaFellBackToPercentile)) {
+                private$.addNotice(
+                    type = "WARNING",
+                    title = .("Bias-Corrected Interval Not Available"),
+                    content = .("Some bootstrap resamples contained only one outcome class, so no AUC could be computed for them. The bias-corrected and accelerated (BCa) method needs every resample to line up with its own index vector, which is no longer true once those resamples are dropped, so the percentile interval is reported instead. \u2022 The AUC confidence limits shown are percentile bootstrap limits. \u2022 This usually means one class is rare; stratified resampling or a larger sample will restore BCa.")
                 )
             }
 
             private$.publishPlotStates()
-
-            # Render all collected notices as HTML (must be last step)
-            private$.renderNotices()
         },
         .prepareData = function() {
             # Validate data using enhanced error handling if available.
@@ -581,7 +618,7 @@ enhancedROCClass <- R6::R6Class(
                     private$.addNotice(
                         type = "ERROR",
                         title = .("Data Validation Failed"),
-                        content = sprintf(.("The data did not pass clinical validation. \u{2022} %s"), paste(validation_result$errors, collapse = " \u{2022} "))
+                        content = sprintf(.("The data did not pass clinical validation. \u2022 %s"), paste(validation_result$errors, collapse = " \u{2022} "))
                     )
                     return(NULL)
                 }
@@ -651,7 +688,7 @@ enhancedROCClass <- R6::R6Class(
                     private$.addNotice(
                         type = "ERROR",
                         title = .("Outcome Variable Not Binary"),
-                        content = sprintf(.("Outcome variable '%s' must be binary (exactly 2 unique values), but it has %s. \u{2022} Recode the outcome to two categories, or select a different outcome variable."), private$.outcome, unique_vals)
+                        content = sprintf(.("Outcome variable '%1$s' must be binary (exactly 2 unique values), but it has %2$s. \u2022 Recode the outcome to two categories, or select a different outcome variable."), private$.outcome, unique_vals)
                     )
                     return(NULL)
                 }
@@ -667,7 +704,7 @@ enhancedROCClass <- R6::R6Class(
                 private$.addNotice(
                     type = "ERROR",
                     title = .("Insufficient Outcome Variable Levels"),
-                    content = sprintf(.("Outcome variable '%s' has only one value: '%s'. ROC analysis needs at least two different outcome values (for example Disease / No Disease). \u{2022} Check whether a data filter removed one of the outcome categories. \u{2022} Verify the variable contains the values you expect. \u{2022} Or choose a different outcome variable."), private$.outcome, levels(outcome_var)[1])
+                    content = sprintf(.("Outcome variable '%1$s' has only one value: '%2$s'. ROC analysis needs at least two different outcome values (for example Disease / No Disease). \u2022 Check whether a data filter removed one of the outcome categories. \u2022 Verify the variable contains the values you expect. \u2022 Or choose a different outcome variable."), private$.outcome, levels(outcome_var)[1])
                 )
                 return(NULL)
             } else if (levels_count > 2) {
@@ -714,7 +751,7 @@ enhancedROCClass <- R6::R6Class(
                         private$.addNotice(
                             type = "ERROR",
                             title = .("Multi-level Outcome Variable Detected"),
-                            content = sprintf(.("Outcome variable '%s' has %s levels (%s), but ROC analysis needs a binary outcome. \u{2022} Choose which level represents the positive outcome in the Positive Class dropdown; every other level is then combined as negative. \u{2022} Or tick Multi-Class ROC if you want a genuine multi-class analysis. \u{2022} For example, analysing mortality you might select Dead of Disease as positive and combine the remaining levels."), private$.outcome, levels_count, paste(available_levels, collapse = ", "))
+                            content = sprintf(.("Outcome variable '%1$s' has %2$s levels (%3$s), but ROC analysis needs a binary outcome. \u2022 Choose which level represents the positive outcome in the Positive Class dropdown; every other level is then combined as negative. \u2022 Or tick Multi-Class ROC if you want a genuine multi-class analysis. \u2022 For example, analysing mortality you might select Dead of Disease as positive and combine the remaining levels."), private$.outcome, levels_count, paste(available_levels, collapse = ", "))
                         )
                         return(NULL)
                     }
@@ -752,7 +789,7 @@ enhancedROCClass <- R6::R6Class(
                         private$.addNotice(
                             type = "ERROR",
                             title = .("Invalid Positive Class Selection"),
-                            content = sprintf(.("The selected positive class '%s' does not occur in outcome variable '%s'. \u{2022} Available levels are: %s. \u{2022} Select one of them in the Positive Class dropdown."), positive_class, private$.outcome, paste(available_levels, collapse = ", "))
+                            content = sprintf(.("The selected positive class '%1$s' does not occur in outcome variable '%2$s'. \u2022 Available levels are: %3$s. \u2022 Select one of them in the Positive Class dropdown."), positive_class, private$.outcome, paste(available_levels, collapse = ", "))
                         )
                         return(NULL)
                     }
@@ -796,7 +833,7 @@ enhancedROCClass <- R6::R6Class(
                 private$.addNotice(
                     type = "ERROR",
                     title = .("Non-numeric Predictor Variables"),
-                    content = sprintf(.("The following predictor variable(s) are not numeric: %s. ROC analysis requires continuous or ordinal numeric predictors, such as biomarker levels, test scores or measurements. \u{2022} If the variable is ORDINAL, recode it to numbers in rank order (for example Low=1, Medium=2, High=3). \u{2022} Do not number a NOMINAL variable such as tumour site or histological subtype: the AUC would then be decided by the order you happened to assign rather than by the marker. \u{2022} For a nominal predictor use contingency table analysis instead."), paste(non_numeric_preds, collapse = ", "))
+                    content = sprintf(.("The following predictor variable(s) are not numeric: %s. ROC analysis requires continuous or ordinal numeric predictors, such as biomarker levels, test scores or measurements. \u2022 If the variable is ORDINAL, recode it to numbers in rank order (for example Low=1, Medium=2, High=3). \u2022 Do not number a NOMINAL variable such as tumour site or histological subtype: the AUC would then be decided by the order you happened to assign rather than by the marker. \u2022 For a nominal predictor use contingency table analysis instead."), paste(non_numeric_preds, collapse = ", "))
                 )
                 return(NULL)
             }
@@ -806,7 +843,7 @@ enhancedROCClass <- R6::R6Class(
                 private$.addNotice(
                     type = "ERROR",
                     title = .("Insufficient Data After Removing Missing Values"),
-                    content = sprintf(.("Only %s complete observations remain, which is too few to fit a ROC curve. \u{2022} At least 10 are needed to compute anything at all, and far more than 10 are needed for a usable confidence interval \u{2014} at 5 cases and 5 non-cases a 95%% interval around an AUC of 0.80 still runs from roughly 0.51 to 1.00. \u{2022} Check whether missing values in the outcome or the predictors are removing more rows than you expect."), nrow(data))
+                    content = sprintf(.("Only %s complete observations remain, which is too few to fit a ROC curve. \u2022 At least 10 are needed to compute anything at all, and far more than 10 are needed for a usable confidence interval \u2014 at 5 cases and 5 non-cases a 95%% interval around an AUC of 0.80 still runs from roughly 0.51 to 1.00. \u2022 Check whether missing values in the outcome or the predictors are removing more rows than you expect."), nrow(data))
                 )
                 return(NULL)
             }
@@ -834,7 +871,15 @@ enhancedROCClass <- R6::R6Class(
         # boot::boot.ci() (already an Import; used the same way in R/idi.b.R) apply the requested
         # interval type. Returns a length-3 numeric c(lower, auc, upper) shaped like pROC's own
         # ci.auc object, or NULL when no resample yielded a usable AUC.
-        .bootstrapAucCi = function(roc_obj) {
+        #
+        # `auc_fun` is the statistic to resample; it defaults to the full AUC, and
+        # .populatePartialAUC passes a partial-AUC closure so the user's interval type is honoured
+        # there too. `clamp` is the range the statistic can legitimately occupy - [0, 1] for an
+        # AUC, [0, range width] for a partial AUC - because the basic bootstrap reflects limits
+        # about the point estimate and can push them outside it.
+        .bootstrapAucCi = function(roc_obj,
+                                   auc_fun = function(r) as.numeric(pROC::auc(r)),
+                                   clamp = c(0, 1)) {
             boot_n <- self$options$bootstrapSamples %||% 200
             boot_strat <- if (is.null(self$options$stratifiedBootstrap)) TRUE else isTRUE(self$options$stratifiedBootstrap)
             boot_type <- switch(self$options$bootstrapMethod,
@@ -854,7 +899,7 @@ enhancedROCClass <- R6::R6Class(
                 if (length(unique(s$resp)) < 2L) {
                     return(NA_real_)
                 }
-                as.numeric(pROC::auc(.quietly(pROC::roc(
+                as.numeric(auc_fun(.quietly(pROC::roc(
                     response = s$resp,
                     predictor = s$pred,
                     levels = roc_levels,
@@ -876,6 +921,18 @@ enhancedROCClass <- R6::R6Class(
             if (!all(ok)) {
                 boot_res$t <- boot_res$t[ok, , drop = FALSE]
                 boot_res$R <- sum(ok)
+                # BCa gets its acceleration constant from empinf() -> boot.array(), which
+                # REGENERATES the first boot_res$R index rows from the stored seed. After the
+                # line above those are the first sum(ok) resamples, not the sum(ok) that
+                # survived, so every (index, statistic) pair feeding the acceleration constant
+                # is mismatched and the limits are neither BCa nor anything else defensible
+                # (verified: 92 of 100 kept -> boot.array() returns a 92-row matrix rebuilt
+                # from the seed; BCa [-0.3885, 0.2127] vs percentile [-0.3849, 0.2206]).
+                # The percentile interval reads t directly and is unaffected by the reordering.
+                if (identical(boot_type, "bca")) {
+                    boot_type <- "perc"
+                    private$.bcaFellBackToPercentile <- TRUE
+                }
             }
 
             boot_ci <- suppressWarnings(boot::boot.ci(boot_res, conf = conf_level, type = boot_type))
@@ -885,16 +942,17 @@ enhancedROCClass <- R6::R6Class(
                 basic = boot_ci$basic[4:5]
             )
             # The basic bootstrap reflects limits about the point estimate and can push them
-            # outside [0, 1]. An AUC cannot live there, so clamp rather than show a pathologist
-            # an upper confidence limit of 1.16.
-            limits <- pmin(pmax(as.numeric(limits), 0), 1)
+            # outside the range the statistic can occupy. An AUC cannot live above 1, so clamp
+            # rather than show a pathologist an upper confidence limit of 1.16.
+            limits <- pmin(pmax(as.numeric(limits), clamp[1]), clamp[2])
 
-            ci <- c(limits[1], as.numeric(roc_obj$auc), limits[2])
+            point_est <- as.numeric(auc_fun(roc_obj))
+            ci <- c(limits[1], point_est, limits[2])
             attr(ci, "conf.level") <- conf_level
             attr(ci, "method") <- "bootstrap"
             attr(ci, "boot.n") <- boot_n
             attr(ci, "boot.stratified") <- boot_strat
-            attr(ci, "auc") <- roc_obj$auc
+            attr(ci, "auc") <- point_est
             class(ci) <- c("ci.auc", "ci", "numeric")
             ci
         },
@@ -915,7 +973,7 @@ enhancedROCClass <- R6::R6Class(
                         # This prevents AUC inversion for biomarkers where higher values indicate disease
                         direction_param <- self$options$direction
                         if (direction_param == "auto") {
-                            direction <- "auto" # Let pROC::roc() auto-detect based on AUC maximization
+                            direction <- "auto" # pROC picks "<" or ">" by comparing the two groups' medians
                         } else if (direction_param == "higher") {
                             direction <- "<" # pROC: "<" means controls < cases (higher values = positive)
                         } else if (direction_param == "lower") {
@@ -978,8 +1036,13 @@ enhancedROCClass <- R6::R6Class(
                                 private$.addNotice(
                                     type = "WARNING",
                                     title = sprintf(.("Bootstrap CI Failed: %s"), predictor),
-                                    content = sprintf(.("Bootstrap confidence interval computation failed for %s%s. The DeLong interval is reported instead."), predictor, if (inherits(boot_ci, "error")) paste0(": ", conditionMessage(boot_ci)) else
-                                            ": no resample contained both outcome classes")
+                                    # Two complete sentences instead of splicing an untranslated
+                                    # English fragment through %s.
+                                    content = if (inherits(boot_ci, "error")) {
+                                        sprintf(.("Bootstrap confidence interval computation failed for %1$s: %2$s. The DeLong interval is reported instead."), predictor, conditionMessage(boot_ci))
+                                    } else {
+                                        sprintf(.("Bootstrap confidence interval computation failed for %s because no resample contained both outcome classes. The DeLong interval is reported instead."), predictor)
+                                    }
                                 )
                             } else {
                                 roc_obj$ci <- boot_ci
@@ -1003,7 +1066,7 @@ enhancedROCClass <- R6::R6Class(
                                     private$.addNotice(
                                         type = "WARNING",
                                         title = sprintf(.("Smoothing Failed: %s"), predictor),
-                                        content = sprintf(.("ROC smoothing could not be applied to %s (%s). The empirical ROC curve is shown instead; all reported statistics are unaffected."), predictor, conditionMessage(smoothed))
+                                        content = sprintf(.("ROC smoothing could not be applied to %1$s (%2$s). The empirical ROC curve is shown instead; all reported statistics are unaffected."), predictor, conditionMessage(smoothed))
                                     )
                                 } else {
                                     private$.rocSmoothed[[predictor]] <- smoothed
@@ -1016,11 +1079,6 @@ enhancedROCClass <- R6::R6Class(
                         # Surface the auto-detected direction for clinical safety
                         if (direction_param == "auto") {
                             dir_label <- if (roc_obj$direction == "<") "higher predictor values classify as positive (disease)" else "lower predictor values classify as positive (disease)"
-                            # Auto-detection picks whichever direction MAXIMISES the AUC, so the
-                            # reported AUC can never fall below 0.5 no matter how uninformative
-                            # -- or how inverted -- the predictor is. A marker whose true
-                            # discrimination is 0.20 is reported as 0.80. That consequence, not
-                            # just the chosen direction, is what the reader needs.
                             # Quantify the upward bias at THIS sample size.
                             #
                             # pROC's direction = "auto" compares the two groups' MEDIANS; it does
@@ -1030,8 +1088,10 @@ enhancedROCClass <- R6::R6Class(
                             # direction is read from the same data used to compute the AUC, the
                             # result is still biased upward, and badly so in small samples --
                             # simulating a marker with no information at all gives a mean reported
-                            # AUC of 0.593 at n = 20 and 0.565 at n = 40, against 0.502 with the
-                            # direction fixed in advance, exceeding 0.60 in 43% of runs at n = 20.
+                            # AUC of about 0.60 at n = 20 and about 0.57 at n = 40, against 0.50
+                            # with the direction fixed in advance, and exceeds 0.60 in roughly 45
+                            # of every 100 runs at n = 20 (1000 reps; the same figures the
+                            # Direction option's description quotes).
                             # 0.5 + se * sqrt(2/pi) with the Hanley-McNeil null standard error is
                             # a close approximation to that mean (0.606 at n = 20, 0.515 at
                             # n = 1000) and is what is quoted below. This bias is what turns a null
@@ -1055,7 +1115,7 @@ enhancedROCClass <- R6::R6Class(
                             private$.addNotice(
                                 type = "WARNING",
                                 title = sprintf(.("Direction Auto-Detected: %s"), predictor),
-                                content = sprintf(.("ROC direction for %s was chosen automatically: %s. The direction was read from these data \u{2014} by comparing the two groups' median values \u{2014} rather than assumed in advance. Because the same data then supply the AUC, the AUC is biased upward, and a marker pointing the wrong way is reported as though it pointed the right way.%s If you know which way the marker should point, set Direction explicitly; a low AUC is then a real finding rather than an artefact of the direction being fitted."), predictor, dir_label, size_note)
+                                content = sprintf(.("ROC direction for %1$s was chosen automatically: %2$s. The direction was read from these data \u2014 by comparing the two groups' median values \u2014 rather than assumed in advance. Because the same data then supply the AUC, the AUC is biased upward, and a marker pointing the wrong way is reported as though it pointed the right way.%3$s If you know which way the marker should point, set Direction explicitly; a low AUC is then a real finding rather than an artefact of the direction being fitted."), predictor, dir_label, size_note)
                             )
                         }
 
@@ -1080,12 +1140,17 @@ enhancedROCClass <- R6::R6Class(
                         n_negative <- sum(roc_obj$response == levels(roc_obj$response)[1])
                         prevalence <- n_positive / n_obs
 
-                        # Per-class event count guard
+                        # Per-class event count guard. ERROR, not STRONG_WARNING: the clinical
+                        # threshold checklist puts fewer than 10 events in a class at ERROR, and
+                        # the pane this sits above is a full results pane - AUC, confidence
+                        # interval and an optimal cut-point - computed from as few as 4 events in
+                        # a 200-patient dataset. None of those quantities means anything there,
+                        # so the banner has to read as a stop sign rather than a caution.
                         if (n_positive < 10 || n_negative < 10) {
                             private$.addNotice(
-                                type = "STRONG_WARNING",
+                                type = "ERROR",
                                 title = sprintf(.("Low Per-Class Count: %s"), predictor),
-                                content = sprintf(.("Very few events in one or both classes for %s: %s positive, %s negative. ROC estimates, confidence intervals, and optimal cutoffs are unreliable with fewer than 10 events per class. Collect more data before drawing clinical conclusions."), predictor, n_positive, n_negative)
+                                content = sprintf(.("Very few events in one or both classes for %1$s: %2$s positive, %3$s negative. ROC estimates, confidence intervals, and optimal cutoffs are unreliable with fewer than 10 events per class. Collect more data before drawing clinical conclusions."), predictor, n_positive, n_negative)
                             )
                         }
 
@@ -1100,7 +1165,7 @@ enhancedROCClass <- R6::R6Class(
                             private$.addNotice(
                                 type = notice_type,
                                 title = sprintf(.("Small Sample Size: %s"), predictor),
-                                content = sprintf(.("Small sample size for %s: n=%s (%s positive, %s negative). \u{2022} ROC curve confidence intervals may be unreliable with limited data. \u{2022} Consider collecting more data or using bootstrap resampling for more stable estimates. \u{2022} Results should be interpreted cautiously and validated in larger samples."), predictor, n_obs, n_positive, n_negative)
+                                content = sprintf(.("Small sample size for %1$s: n=%2$s (%3$s positive, %4$s negative). \u2022 ROC curve confidence intervals may be unreliable with limited data. \u2022 Consider collecting more data or using bootstrap resampling for more stable estimates. \u2022 Results should be interpreted cautiously and validated in larger samples."), predictor, n_obs, n_positive, n_negative)
                             )
                         }
 
@@ -1112,12 +1177,15 @@ enhancedROCClass <- R6::R6Class(
                         # other way. Wording aligned with the sibling analysis psychopdaROC, which
                         # states the direction currently in use and what switching it would give.
                         if (auc_value < 0.5) {
+                            # Was an untranslated English fragment spliced through %s, so a
+                            # translated notice carried an English clause mid-sentence and a
+                            # word order fixed to English grammar. Translate the whole clause.
                             dir_now <- if (identical(roc_obj$direction, "<")) {
-                                "higher values indicate the positive class"
+                                .("higher values indicate the positive class")
                             } else {
-                                "lower values indicate the positive class"
+                                .("lower values indicate the positive class")
                             }
-                            dir_alt <- if (identical(roc_obj$direction, "<")) "lower" else "higher"
+                            dir_alt <- if (identical(roc_obj$direction, "<")) .("lower") else .("higher")
 
                             # Only claim the marker is REVERSED when the interval supports it.
                             # Under the null the AUC is symmetric about 0.5, so roughly half of
@@ -1134,20 +1202,20 @@ enhancedROCClass <- R6::R6Class(
                                 private$.addNotice(
                                     type = "ERROR",
                                     title = sprintf(.("Marker Reads Backwards: %s"), predictor),
-                                    content = sprintf(.("%s has an AUC of %s and its whole confidence interval lies below 0.5. The marker does separate the groups, but in the opposite direction to the one assumed. \u{2022} The analysis is currently reading it as: %s. \u{2022} Setting Direction to '%s' would give an AUC of %s, with sensitivity and specificity swapped. \u{2022} Change it only if that matches what the marker means clinically \u{2014} the outcome coding is worth checking too."), predictor, round(auc_value, 3), dir_now, dir_alt, round(1 - auc_value, 3))
+                                    content = sprintf(.("%1$s has an AUC of %2$s and its whole confidence interval lies below 0.5. The marker does separate the groups, but in the opposite direction to the one assumed. \u2022 The analysis is currently reading it as: %3$s. \u2022 Setting Direction to '%4$s' would give an AUC of %5$s, with sensitivity and specificity swapped. \u2022 Change it only if that matches what the marker means clinically \u2014 the outcome coding is worth checking too."), predictor, round(auc_value, 3), dir_now, dir_alt, round(1 - auc_value, 3))
                                 )
                             } else {
                                 private$.addNotice(
                                     type = "STRONG_WARNING",
                                     title = sprintf(.("AUC Below Chance: %s"), predictor),
-                                    content = sprintf(.("%s has an AUC of %s, below the 0.5 expected from a coin toss, but its confidence interval still crosses 0.5. \u{2022} About half of markers carrying no information at all fall below 0.5 by chance, so this is not evidence that the marker runs backwards. \u{2022} It is consistent with a marker that simply does not discriminate. \u{2022} If you expected it to run the other way, check the Direction setting and the outcome coding before drawing any conclusion."), predictor, round(auc_value, 3))
+                                    content = sprintf(.("%1$s has an AUC of %2$s, below the 0.5 expected from a coin toss, but its confidence interval still crosses 0.5. \u2022 About half of markers carrying no information at all fall below 0.5 by chance, so this is not evidence that the marker runs backwards. \u2022 It is consistent with a marker that simply does not discriminate. \u2022 If you expected it to run the other way, check the Direction setting and the outcome coding before drawing any conclusion."), predictor, round(auc_value, 3))
                                 )
                             }
                         } else if (auc_value < 0.7) {
                             private$.addNotice(
                                 type = "STRONG_WARNING",
                                 title = sprintf(.("Limited Diagnostic Performance: %s"), predictor),
-                                content = sprintf(.("Limited diagnostic performance for %s: AUC=%s. \u{2022} AUC below 0.7 indicates limited discriminative ability. \u{2022} Consider: (1) Adding predictor variables or interaction terms, (2) Verifying data quality and coding, (3) Using multivariate models to improve discrimination, (4) Checking if direction setting is appropriate for your biomarker."), predictor, round(auc_value, 3))
+                                content = sprintf(.("Limited diagnostic performance for %1$s: AUC=%2$s. \u2022 AUC below 0.7 indicates limited discriminative ability. \u2022 Consider: (1) Adding predictor variables or interaction terms, (2) Verifying data quality and coding, (3) Using multivariate models to improve discrimination, (4) Checking if direction setting is appropriate for your biomarker."), predictor, round(auc_value, 3))
                             )
                         }
 
@@ -1156,17 +1224,18 @@ enhancedROCClass <- R6::R6Class(
                         # one per predictor.
                         if ((prevalence < 0.05 || prevalence > 0.95) && !isTRUE(private$.prevalenceNoticeShown)) {
                             private$.prevalenceNoticeShown <- TRUE
-                            prev_direction <- if (prevalence < 0.05) "low" else "high"
+                            # Both clauses were untranslated English spliced through %s.
+                            prev_direction <- if (prevalence < 0.05) .("low") else .("high")
                             metric_concern <- if (prevalence < 0.05) {
-                                "Positive Predictive Value (PPV) will be unreliable even with high sensitivity/specificity"
+                                .("Positive Predictive Value (PPV) will be unreliable even with high sensitivity/specificity")
                             } else {
-                                "Negative Predictive Value (NPV) will be unreliable even with high sensitivity/specificity"
+                                .("Negative Predictive Value (NPV) will be unreliable even with high sensitivity/specificity")
                             }
 
                             private$.addNotice(
                                 type = "STRONG_WARNING",
                                 title = .("Extreme Prevalence"),
-                                content = sprintf(.("Extreme prevalence in the analysed sample: %s%% (%s). \u{2022} %s. \u{2022} ROC/AUC analysis may be misleading - consider Precision-Recall Curve (PRC) instead. \u{2022} Sensitivity and specificity remain valid, but predictive values (PPV/NPV) are heavily influenced by prevalence."), round(prevalence * 100, 1), prev_direction, metric_concern)
+                                content = sprintf(.("Extreme prevalence in the analysed sample: %1$s%% (%2$s). \u2022 %3$s. \u2022 ROC/AUC analysis may be misleading - consider Precision-Recall Curve (PRC) instead. \u2022 Sensitivity and specificity remain valid, but predictive values (PPV/NPV) are heavily influenced by prevalence."), round(prevalence * 100, 1), prev_direction, metric_concern)
                             )
                         }
                     },
@@ -1181,7 +1250,7 @@ enhancedROCClass <- R6::R6Class(
                         } else if (grepl("missing", e$message, ignore.case = TRUE)) {
                             sprintf(.("Missing values detected in predictor '%s' or outcome variable. Please check your data."), predictor)
                         } else {
-                            sprintf(.("ROC analysis failed for predictor '%s': %s. Please check your data quality and variable selection."), predictor, conditionMessage(e))
+                            sprintf(.("ROC analysis failed for predictor '%1$s': %2$s. Please check your data quality and variable selection."), predictor, conditionMessage(e))
                         }
 
                         if (exists("clinicopath_error_handler")) {
@@ -1263,7 +1332,7 @@ enhancedROCClass <- R6::R6Class(
                     private$.addNotice(
                         type = "WARNING",
                         title = .("Clinical Preset Overrode Your Settings"),
-                        content = sprintf(.("The '%s' preset replaced settings you can still see in the options panel: %s. Choose the Custom preset if you want the values you entered to be used."), self$options$clinicalPresets, paste(changed, collapse = "; "))
+                        content = sprintf(.("The '%1$s' preset replaced settings you can still see in the options panel: %2$s. Choose the Custom preset if you want the values you entered to be used."), self$options$clinicalPresets, paste(changed, collapse = "; "))
                     )
                 }
             }
@@ -1291,7 +1360,7 @@ enhancedROCClass <- R6::R6Class(
                     private$.addNotice(
                         type = "INFO",
                         title = sprintf(.("Tied Best Cutoff: %s"), predictor),
-                        content = sprintf(.("%s cutoffs for %s share the same best balance of sensitivity and specificity. The one closest to the top-left corner of the ROC curve is reported (cutoff %s); the others perform equally well by this criterion."), tie_n, predictor, signif(coords_result$threshold[1], 4))
+                        content = sprintf(.("%1$s cutoffs for %2$s share the same best balance of sensitivity and specificity. The one closest to the top-left corner of the ROC curve is reported (cutoff %3$s); the others perform equally well by this criterion."), tie_n, predictor, signif(coords_result$threshold[1], 4))
                     )
                 }
 
@@ -1365,7 +1434,7 @@ enhancedROCClass <- R6::R6Class(
                 private$.addNotice(
                     type = "WARNING",
                     title = sprintf(.("Cutoff Constrained by Your Thresholds: %s"), predictor),
-                    content = sprintf(.("The reported cutoff for %s is the best one meeting your minimum sensitivity (%s) and specificity (%s), not the overall Youden optimum. Reported: cutoff %s, sensitivity %s, specificity %s, Youden index %s. Unconstrained optimum: cutoff %s, sensitivity %s, specificity %s, Youden index %s. Set both minimums to 0 to search without constraints."), predictor, sens_threshold, spec_threshold, signif(coords_result$threshold[optimal_idx], 4), round(coords_result$sensitivity[optimal_idx], 3), round(coords_result$specificity[optimal_idx], 3), round(youden_indices[optimal_idx], 3), signif(coords_result$threshold[free_idx], 4), round(coords_result$sensitivity[free_idx], 3), round(coords_result$specificity[free_idx], 3), round(all_youden[free_idx], 3))
+                    content = sprintf(.("The reported cutoff for %1$s is the best one meeting your minimum sensitivity (%2$s) and specificity (%3$s), not the overall Youden optimum. Reported: cutoff %4$s, sensitivity %5$s, specificity %6$s, Youden index %7$s. Unconstrained optimum: cutoff %8$s, sensitivity %9$s, specificity %10$s, Youden index %11$s. Set both minimums to 0 to search without constraints."), predictor, sens_threshold, spec_threshold, signif(coords_result$threshold[optimal_idx], 4), round(coords_result$sensitivity[optimal_idx], 3), round(coords_result$specificity[optimal_idx], 3), round(youden_indices[optimal_idx], 3), signif(coords_result$threshold[free_idx], 4), round(coords_result$sensitivity[free_idx], 3), round(coords_result$specificity[free_idx], 3), round(all_youden[free_idx], 3))
                 )
             }
 
@@ -1464,7 +1533,7 @@ enhancedROCClass <- R6::R6Class(
                     return(custom_results)
                 },
                 error = function(e) {
-                    private$.addNotice(type = "WARNING", title = sprintf(.("Custom Cutoff Error: %s"), predictor), content = sprintf(.("Failed to evaluate custom cutoffs for %s: %s"), predictor, e$message))
+                    private$.addNotice(type = "WARNING", title = sprintf(.("Custom Cutoff Error: %s"), predictor), content = sprintf(.("Failed to evaluate custom cutoffs for %1$s: %2$s"), predictor, e$message))
                     return(NULL)
                 }
             )
@@ -1473,10 +1542,22 @@ enhancedROCClass <- R6::R6Class(
             aucTable <- self$results$results$aucSummary
             aucTable$deleteRows()   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
             private$.noteDirection(aucTable, private$.rocObjects)
-            aucTable$setNote("seed", if (isTRUE(self$options$useBootstrap)) jmvcore::format(.("Random seed: {seed}"), seed = self$options$seed))
+            aucTable$setNote("seed", if (isTRUE(self$options$useBootstrap)) .fmt(.("Random seed: {seed}"), seed = self$options$seed))
             aucTable$setNote(
                 "context_reference",
                 .("The last column restates each AUC as what it actually is: the probability that a randomly chosen case scores higher than a randomly chosen non-case. Where the selected clinical context has a conventionally quoted reference level (0.75 for screening, 0.80 for diagnosis) it also says which side of that level this AUC falls; those levels are reporting conventions, not thresholds for patient care, and the AUC Interpretation column is the same number placed in the same kind of conventional band. Both are in-sample estimates from these data; the AUC Lower CI and AUC Upper CI columns show how precisely this sample pins the AUC down.")
+            )
+
+            # Finding: ticking "Use bootstrap CI" blanks Std. Error across every row, because a
+            # DeLong variance does not describe a bootstrap interval. That is the right call, but
+            # nothing said so and a reader assumes the computation failed.
+            aucTable$setNote(
+                "std_error_blank",
+                if (isTRUE(self$options$useBootstrap)) {
+                    .("The Std. Error column is empty because the confidence limits are bootstrap limits. The standard error jamovi would otherwise show is DeLong's, which describes a DeLong interval and not this one; quoting it beside bootstrap limits would invite combining two different methods. Read the precision off the AUC Lower CI and AUC Upper CI columns instead.")
+                } else {
+                    NULL
+                }
             )
 
             for (predictor in names(private$.rocResults)) {
@@ -1857,12 +1938,23 @@ enhancedROCClass <- R6::R6Class(
             compTable <- self$results$results$rocComparisons
             compTable$deleteRows()   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
             # bootstrap and Venkatraman (permutation) tests resample; DeLong does not
-            compTable$setNote("seed", if (self$options$comparisonMethod != "delong") jmvcore::format(.("Random seed: {seed}"), seed = self$options$seed))
+            compTable$setNote("seed", if (self$options$comparisonMethod != "delong") .fmt(.("Random seed: {seed}"), seed = self$options$seed))
             compTable$setNote(
                 "no_equivalence",
                 .("\"Not significantly different\" means no difference was detected in this sample; it does not establish that the two predictors perform equally, because the test may lack power to detect a difference of the size that would matter here.")
             )
             predictors <- names(private$.rocResults)
+
+            # k predictors give k(k-1)/2 pairwise tests here, each row printing a categorical
+            # verdict, and nothing on the page said how many verdicts were generated. The verdict
+            # word carries more weight with a clinical reader than the p-value beside it.
+            n_tests <- length(predictors) * (length(predictors) - 1) / 2
+            if (n_tests > 1) {
+                compTable$setNote("multiplicity", .fmt(
+                    .("Every pair of predictors is tested separately, so with {k} predictors this table reports {m} tests. At the 5% level roughly one verdict in twenty is expected to read \u201csignificant\u201d by chance alone, so with several pairs on screen treat an isolated significant row as a hypothesis to confirm rather than as a finding. No multiplicity adjustment is applied to these p-values."),
+                    k = length(predictors), m = n_tests
+                ))
+            }
 
             for (i in 1:(length(predictors) - 1)) {
                 for (j in (i + 1):length(predictors)) {
@@ -1898,7 +1990,7 @@ enhancedROCClass <- R6::R6Class(
                         },
                         error = function(e) {
                             private$.addNotice(
-                                type = "WARNING", title = sprintf(.("Comparison Error: %s vs %s"), pred1, pred2),
+                                type = "WARNING", title = sprintf(.("Comparison Error: %1$s vs %2$s"), pred1, pred2),
                                 content = sprintf(.("ROC comparison failed: %s"), e$message)
                             )
                         }
@@ -1916,6 +2008,17 @@ enhancedROCClass <- R6::R6Class(
 
             # Get all predictor pairs
             predictors <- names(private$.rocResults)
+
+            # k predictors give k(k-1)/2 pairwise tests here, each row printing a categorical
+            # verdict, and nothing on the page said how many verdicts were generated. The verdict
+            # word carries more weight with a clinical reader than the p-value beside it.
+            n_tests <- 4 * length(predictors) * (length(predictors) - 1) / 2
+            if (n_tests > 1) {
+                detailTable$setNote("multiplicity", .fmt(
+                    .("Each metric is tested separately for every pair of predictors, so with {k} predictors this table reports up to {m} tests. At the 5% level roughly one verdict in twenty is expected to read \u201csignificant\u201d by chance alone, so with several pairs on screen treat an isolated significant row as a hypothesis to confirm rather than as a finding. No multiplicity adjustment is applied to these p-values."),
+                    k = length(predictors), m = n_tests
+                ))
+            }
 
             for (i in 1:(length(predictors) - 1)) {
                 for (j in (i + 1):length(predictors)) {
@@ -1968,7 +2071,11 @@ enhancedROCClass <- R6::R6Class(
                                         difference = diff,
                                         percent_change = percent_change,
                                         p_value = p_value,
-                                        effect_size = abs(diff),
+                                        # `effect_size` was abs(diff) - the same number as the
+                                        # Difference column, read by clinicians against the
+                                        # small/medium/large bands of a STANDARDISED effect
+                                        # size. No standardised effect size is computed here,
+                                        # so the column is gone rather than mislabelled.
                                         interpretation = interpretation
                                     )
 
@@ -1978,7 +2085,7 @@ enhancedROCClass <- R6::R6Class(
                         },
                         error = function(e) {
                             private$.addNotice(
-                                type = "WARNING", title = sprintf(.("Detailed Comparison Error: %s vs %s"), pred1, pred2),
+                                type = "WARNING", title = sprintf(.("Detailed Comparison Error: %1$s vs %2$s"), pred1, pred2),
                                 content = sprintf(.("Detailed comparison failed: %s"), e$message)
                             )
                         }
@@ -2001,7 +2108,7 @@ enhancedROCClass <- R6::R6Class(
 
             statSummaryTable <- self$results$results$statisticalSummary
             statSummaryTable$deleteRows()   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
-            statSummaryTable$setNote("seed", if (self$options$comparisonMethod != "delong") jmvcore::format(.("Random seed: {seed}"), seed = self$options$seed))
+            statSummaryTable$setNote("seed", if (self$options$comparisonMethod != "delong") .fmt(.("Random seed: {seed}"), seed = self$options$seed))
             statSummaryTable$setNote(
                 "no_equivalence",
                 .("\"No significant difference (p >= 0.05)\" means no difference between the two AUCs was detected in this sample; it does not establish that the two predictors perform equally, because the test may lack the power to detect a difference of the size that would matter here. The p-value is the probability of seeing a gap at least this large if the two AUCs were identical, not the probability that they are identical. The Effect Magnitude column reports only how far apart the two observed AUCs are, so a wide observed gap and a large p-value can appear on the same row when the sample is small.")
@@ -2009,6 +2116,17 @@ enhancedROCClass <- R6::R6Class(
 
             # Get all predictor pairs
             predictors <- names(private$.rocResults)
+
+            # k predictors give k(k-1)/2 pairwise tests here, each row printing a categorical
+            # verdict, and nothing on the page said how many verdicts were generated. The verdict
+            # word carries more weight with a clinical reader than the p-value beside it.
+            n_tests <- length(predictors) * (length(predictors) - 1) / 2
+            if (n_tests > 1) {
+                statSummaryTable$setNote("multiplicity", .fmt(
+                    .("Every pair of predictors is tested separately, so with {k} predictors this table reports {m} tests. At the 5% level roughly one verdict in twenty is expected to read \u201csignificant\u201d by chance alone, so with several pairs on screen treat an isolated significant row as a hypothesis to confirm rather than as a finding. No multiplicity adjustment is applied to these p-values."),
+                    k = length(predictors), m = n_tests
+                ))
+            }
 
             for (i in 1:(length(predictors) - 1)) {
                 for (j in (i + 1):length(predictors)) {
@@ -2080,7 +2198,7 @@ enhancedROCClass <- R6::R6Class(
                         },
                         error = function(e) {
                             private$.addNotice(
-                                type = "WARNING", title = sprintf(.("Statistical Summary Error: %s vs %s"), pred1, pred2),
+                                type = "WARNING", title = sprintf(.("Statistical Summary Error: %1$s vs %2$s"), pred1, pred2),
                                 content = sprintf(.("Statistical comparison failed: %s"), e$message)
                             )
                         }
@@ -2095,6 +2213,19 @@ enhancedROCClass <- R6::R6Class(
 
             paTable <- self$results$results$partialAucAnalysis
             paTable$deleteRows()   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
+            use_pa_boot <- isTRUE(self$options$bootstrapPartialAUC)
+            # The interval is seed-dependent, so the seed that produced it has to be on the table.
+            paTable$setNote("seed", if (use_pa_boot) .fmt(.("Random seed: {seed}"), seed = self$options$seed))
+            paTable$setNote(
+                "pauc_ci",
+                # "requested", not asserted: .bootstrapAucCi() silently downgrades BCa to
+                # percentile when resamples had to be dropped (:907-909), and this note is
+                # written BEFORE the bootstrap runs, so it cannot know which one produced the
+                # interval. Naming the requested type and the downgrade condition is true in
+                # both cases; the notice raised at that point says when it actually happened.
+                if (use_pa_boot) sprintf(
+                    .("The partial AUC confidence interval is a bootstrap interval of the requested type '%1$s' from %2$s resamples. If any resample contained a single outcome class it is dropped, and a BCa interval is then reported as a percentile interval instead \u2014 a notice appears when that happens. The interval is for the raw partial AUC over the chosen focus range, NOT for the McClish-normalised value in the next column."),
+                    self$options$bootstrapMethod, self$options$bootstrapSamples))
 
             # Parse partial range
             range_parts <- strsplit(self$options$partialRange, ",")[[1]]
@@ -2143,6 +2274,30 @@ enhancedROCClass <- R6::R6Class(
                             error = function(e) NA_real_
                         )
 
+                        # Bootstrap CI for the raw partial AUC. pROC::ci.auc(method = "bootstrap")
+                        # cannot do this: it always returns percentile limits and silently discards
+                        # the user's bootstrapMethod choice (see .bootstrapAucCi), so the shared
+                        # helper is reused with a partial-AUC statistic instead of the full AUC.
+                        pa_ci <- if (use_pa_boot) {
+                            tryCatch(
+                                private$.bootstrapAucCi(
+                                    roc_obj,
+                                    auc_fun = function(r) {
+                                        as.numeric(pROC::auc(r,
+                                            partial.auc = c(range_max, range_min),
+                                            partial.auc.focus = range_type_name
+                                        ))
+                                    },
+                                    # A partial AUC is bounded by the width of the focus range,
+                                    # not by 1.
+                                    clamp = c(0, range_max - range_min)
+                                ),
+                                error = function(e) NULL
+                            )
+                        } else {
+                            NULL
+                        }
+
                         clinical_relevance <- private$.assessPartialAUCRelevance(
                             pauc, range_min, range_max, self$options$clinicalContext, range_type_name
                         )
@@ -2153,6 +2308,10 @@ enhancedROCClass <- R6::R6Class(
                             range_min = range_min,
                             range_max = range_max,
                             partial_auc = as.numeric(pauc),
+                            # NULL, not a made-up number, when no resample yielded a usable pAUC:
+                            # jamovi renders an empty cell for a value it is not given.
+                            partial_auc_lower = if (is.null(pa_ci)) NULL else as.numeric(pa_ci[1]),
+                            partial_auc_upper = if (is.null(pa_ci)) NULL else as.numeric(pa_ci[3]),
                             normalized_pauc = as.numeric(normalized_pauc),
                             clinical_relevance = clinical_relevance
                         )
@@ -2160,7 +2319,7 @@ enhancedROCClass <- R6::R6Class(
                         paTable$addRow(rowKey = private$.escapeVar(predictor), values = row)
                     },
                     error = function(e) {
-                        private$.addNotice(type = "WARNING", title = sprintf(.("Partial AUC Error: %s"), predictor), content = sprintf(.("Partial AUC calculation failed for %s: %s. Check that the partial range is valid and data has sufficient variation."), predictor, e$message))
+                        private$.addNotice(type = "WARNING", title = sprintf(.("Partial AUC Error: %s"), predictor), content = sprintf(.("Partial AUC calculation failed for %1$s: %2$s. Check that the partial range is valid and data has sufficient variation."), predictor, e$message))
                     }
                 )
             }
@@ -2201,7 +2360,7 @@ enhancedROCClass <- R6::R6Class(
                         crocTable$addRow(rowKey = private$.escapeVar(predictor), values = row)
                     },
                     error = function(e) {
-                        private$.addNotice(type = "WARNING", title = sprintf(.("CROC Error: %s"), predictor), content = sprintf(.("CROC calculation failed for %s: %s"), predictor, e$message))
+                        private$.addNotice(type = "WARNING", title = sprintf(.("CROC Error: %s"), predictor), content = sprintf(.("CROC calculation failed for %1$s: %2$s"), predictor, e$message))
                     }
                 )
             }
@@ -2239,7 +2398,7 @@ enhancedROCClass <- R6::R6Class(
                         hullTable$addRow(rowKey = private$.escapeVar(predictor), values = row)
                     },
                     error = function(e) {
-                        private$.addNotice(type = "WARNING", title = sprintf(.("Convex Hull Error: %s"), predictor), content = sprintf(.("Convex hull calculation failed for %s: %s"), predictor, e$message))
+                        private$.addNotice(type = "WARNING", title = sprintf(.("Convex Hull Error: %s"), predictor), content = sprintf(.("Convex hull calculation failed for %1$s: %2$s"), predictor, e$message))
                     }
                 )
             }
@@ -2444,8 +2603,12 @@ enhancedROCClass <- R6::R6Class(
                 recommendation = recommendation
             ))
 
-            # Generate Notice if imbalanced (replaces HTML warning)
-            if (is_imbalanced && self$options$showImbalanceWarning) {
+            # Generate Notice if imbalanced (replaces HTML warning). DETECTION is never gated by
+            # a display option: `showImbalanceWarning` used to sit in this condition with
+            # `default: false`, so a 20:1 outcome produced an AUC, a confidence interval and an
+            # optimal cut-point with no caution anywhere on the page. That checkbox now decides
+            # only how much the warning EXPLAINS; the warning itself always fires.
+            if (is_imbalanced) {
                 # Determine notice type based on severity
                 notice_type <- if (ratio_value >= 10) {
                     "STRONG_WARNING"
@@ -2455,17 +2618,30 @@ enhancedROCClass <- R6::R6Class(
                     "WARNING"
                 }
 
-                # Build concise, single-line notice content
-                prc_recommendation <- if (self$options$recommendPRC) {
-                    " \u{2022} Consider using Precision-Recall Curve (PRC) analysis instead of ROC for more reliable performance assessment with imbalanced data."
+                # Both clauses were untranslated English spliced through %s, so a translated
+                # notice carried an English sentence mid-line. Translate the whole clause, and
+                # keep the leading separator OUTSIDE .() - a leading space in a msgid does not
+                # survive the catalog.
+                prc_recommendation <- paste0(" \u2022 ", if (self$options$recommendPRC) {
+                    .("Consider using Precision-Recall Curve (PRC) analysis instead of ROC for more reliable performance assessment with imbalanced data.")
                 } else {
-                    " \u{2022} Interpret ROC results cautiously given class imbalance."
+                    .("Interpret ROC results cautiously given class imbalance.")
+                })
+
+                # The explanatory bullets are what `showImbalanceWarning` now controls.
+                imbalance_detail <- if (isTRUE(self$options$showImbalanceWarning)) {
+                    paste0(" ", .("\u2022 ROC curves may be optimistic because specificity is dominated by the majority class. \u2022 A high AUC may mask poor minority-class performance."))
+                } else {
+                    ""
                 }
 
                 private$.addNotice(
                     type = notice_type,
                     title = .("Class Imbalance Detected"),
-                    content = sprintf(.("Class imbalance detected: %s ratio (%s positive, %s negative, prevalence %s%%). \u{2022} %s. \u{2022} ROC curves may be optimistic because specificity is dominated by majority class. \u{2022} High AUC may mask poor minority class performance.%s"), ratio_text, n_positive, n_negative, round(prevalence * 100, 1), severity, prc_recommendation)
+                    content = paste0(
+                        sprintf(.("Class imbalance detected: %1$s ratio (%2$s positive, %3$s negative, prevalence %4$s%%). \u2022 %5$s.%6$s"), ratio_text, n_positive, n_negative, round(prevalence * 100, 1), severity, prc_recommendation),
+                        imbalance_detail
+                    )
                 )
             }
         },
@@ -2631,23 +2807,25 @@ enhancedROCClass <- R6::R6Class(
             opt <- tryCatch(self$options$direction, error = function(e) "auto")
             pos <- tryCatch(private$.positiveClass, error = function(e) NULL)
             pos <- if (is.null(pos) || !nzchar(as.character(pos))) "the positive class" else jmvcore::htmlEscape(as.character(pos))
+            # Whole translatable sentences: "HIGHER"/"LOWER" used to be spliced through %s, which
+            # locks the word order to English and leaves the word itself untranslated.
             parts <- vapply(names(roc_objects), function(nm) {
                 d <- roc_objects[[nm]]$direction
-                sprintf("%s values of %s", if (identical(d, "<")) "HIGHER" else "LOWER", jmvcore::htmlEscape(nm))
+                if (identical(d, "<")) {
+                    sprintf(.("HIGHER values of %s"), jmvcore::htmlEscape(nm))
+                } else {
+                    sprintf(.("LOWER values of %s"), jmvcore::htmlEscape(nm))
+                }
             }, character(1))
             chosen <- if (identical(opt, "auto")) {
-                paste0("This was read from the data, not specified in advance \u{2014} set ",
-                       "Direction explicitly to pin it.")
+                .("This was read from the data, not specified in advance \u2014 set Direction explicitly to pin it.")
             } else {
-                sprintf("This is what you specified (Direction = \"%s\").", opt)
+                sprintf(.("This is what you specified (Direction = \"%s\")."), opt)
             }
             tryCatch(
                 table$setNote(
                     "direction_used",
-                    sprintf(paste0(
-                        "Reading of the test values: <b>%s were taken to indicate %s</b>. %s ",
-                        "If that is the wrong way round for a marker, its sensitivity, ",
-                        "specificity, cutpoint and AUC are all reversed."),
+                    sprintf(.("Reading of the test values: <b>%1$s were taken to indicate %2$s</b>. %3$s If that is the wrong way round for a marker, its sensitivity, specificity, cutpoint and AUC are all reversed."),
                         paste(parts, collapse = "; "), pos, chosen)),
                 error = function(e) NULL)
         },
@@ -2719,19 +2897,19 @@ enhancedROCClass <- R6::R6Class(
                     sprintf(.("Switch on 'Clinical metrics' to see the PPV at %s in the Clinical Application Metrics table."), prev_txt)
                 }
                 if (sens >= 0.90 && spec >= 0.70) {
-                    return(paste(sprintf(.("Sensitivity %.2f, specificity %.2f: at this cutpoint few cases were missed in this sample. What share of the positive results are true positives is not fixed by these two numbers; it also depends on prevalence."), sens, spec), ppv_hint))
+                    return(paste(sprintf(.("Sensitivity %1$.2f, specificity %2$.2f: at this cutpoint few cases were missed in this sample. What share of the positive results are true positives is not fixed by these two numbers; it also depends on prevalence."), sens, spec), ppv_hint))
                 } else if (sens >= 0.85) {
-                    return(paste(sprintf(.("Sensitivity %.2f, specificity %.2f: the false-positive burden depends on prevalence."), sens, spec), ppv_hint))
+                    return(paste(sprintf(.("Sensitivity %1$.2f, specificity %2$.2f: the false-positive burden depends on prevalence."), sens, spec), ppv_hint))
                 } else {
-                    return(sprintf(.("Sensitivity %.2f, specificity %.2f: false negatives were not rare in this sample."), sens, spec))
+                    return(sprintf(.("Sensitivity %1$.2f, specificity %2$.2f: false negatives were not rare in this sample."), sens, spec))
                 }
             } else if (context == "diagnosis") {
                 if (sens >= 0.80 && spec >= 0.80) {
-                    return(sprintf(.("Sensitivity %.2f and specificity %.2f, both at or above 0.80 at this cutpoint."), sens, spec))
+                    return(sprintf(.("Sensitivity %1$.2f and specificity %2$.2f, both at or above 0.80 at this cutpoint."), sens, spec))
                 } else if (spec >= 0.90) {
-                    return(sprintf(.("Specificity %.2f with sensitivity %.2f: few false positives in this sample."), spec, sens))
+                    return(sprintf(.("Specificity %1$.2f with sensitivity %2$.2f: few false positives in this sample."), spec, sens))
                 } else {
-                    return(sprintf(.("Sensitivity %.2f, specificity %.2f at this cutpoint."), sens, spec))
+                    return(sprintf(.("Sensitivity %1$.2f, specificity %2$.2f at this cutpoint."), sens, spec))
                 }
             } else {
                 youden <- optimal$youden_index
@@ -2768,7 +2946,7 @@ enhancedROCClass <- R6::R6Class(
                     sprintf("%.2f", lr_neg)
                 }
                 interpretation <- paste(interpretation, sprintf(
-                    .("- NPV %.2f at the prevalence used in this table; at low prevalence a high NPV is expected even for a weak test, so LR- (%s) is the prevalence-independent rule-out measure."),
+                    .("- NPV %1$.2f at the prevalence used in this table; at low prevalence a high NPV is expected even for a weak test, so LR- (%2$s) is the prevalence-independent rule-out measure."),
                     npv, lr_neg_txt
                 ))
             }
@@ -2811,8 +2989,14 @@ enhancedROCClass <- R6::R6Class(
             }
         },
         .calculateBinomialCI = function(successes, n) {
-            # Exact (Clopper-Pearson) confidence interval
-            bt <- suppressWarnings(binom.test(successes, n))
+            # Exact (Clopper-Pearson) confidence interval at the level the user asked for.
+            # binom.test()'s conf.level defaults to 0.95, so omitting it printed 95% limits for
+            # sensitivity and specificity in the same table as an AUC interval that DID honour
+            # the Confidence level option - a user who set 99% got a silently mixed table with
+            # no indication which column was which. The column titles carry the level too; see
+            # the getColumn()$setTitle() calls in .init().
+            conf <- (self$options$confidenceLevel %||% 95) / 100
+            bt <- suppressWarnings(binom.test(successes, n, conf.level = conf))
             return(bt$conf.int)
         },
         .computePRMetrics = function(scores, labels, positive_label, roc_direction = "<") {
@@ -2911,6 +3095,11 @@ enhancedROCClass <- R6::R6Class(
                 }
             }
         },
+        # Nine renderers used to start from ggplot2::theme_minimal() here and never added their
+        # `ggtheme` argument at all, so jamovi's own theme (including its dark mode) was thrown
+        # away for those plots. They now all read `ggtheme + private$.plotThemeFor() + theme(...)`,
+        # the order .plotROCCurve already used: ggtheme first because it REPLACES what precedes it.
+        #
         # Maps the plotTheme option onto a ggplot2 theme. Returned as an ADDITION to whatever the
         # renderer already set, never as a replacement: jamovi's `ggtheme` is a LIST of
         # [theme, ggPalette scales] (jmvcore::theme_default), so substituting a bare theme object
@@ -2918,9 +3107,24 @@ enhancedROCClass <- R6::R6Class(
         # background that jamovi's PNG rendering assumes. An empty theme() is a no-op merge, so
         # the default value "clinical" leaves every plot rendering exactly as it does today.
         .plotThemeFor = function() {
+            # theme_classic() and theme_light() are COMPLETE themes, so returning them here
+            # replaced `ggtheme` just as thoroughly as theme_minimal() used to - white panels
+            # and black text came straight back on jamovi's dark theme for any user who picked
+            # Classic or Modern, which is the very thing the ggtheme change set out to fix.
+            # Return only the incremental deltas that distinguish each look. An incomplete
+            # theme() MERGES into ggtheme, so jamovi's colours and panel background survive.
             switch(as.character(self$options$plotTheme),
-                classic = ggplot2::theme_classic(),
-                modern  = ggplot2::theme_light(),
+                classic = ggplot2::theme(
+                    panel.grid.major = ggplot2::element_blank(),
+                    panel.grid.minor = ggplot2::element_blank(),
+                    panel.border     = ggplot2::element_blank(),
+                    axis.line        = ggplot2::element_line(colour = NULL)
+                ),
+                modern = ggplot2::theme(
+                    panel.grid.minor = ggplot2::element_blank(),
+                    panel.border     = ggplot2::element_rect(fill = NA, colour = NULL),
+                    axis.line        = ggplot2::element_blank()
+                ),
                 ggplot2::theme()
             )
         },
@@ -3018,7 +3222,7 @@ enhancedROCClass <- R6::R6Class(
                 "<h4 style='margin-top: 0; color: inherit;'>", .("Analysis Summary"), "</h4>",
                 "<p><strong>", .("ROC Analysis Results:"), "</strong> ",
                 sprintf(
-                    .("This analysis evaluated %d predictor(s) using %d observations in a %s context."),
+                    .("This analysis evaluated %1$d predictor(s) using %2$d observations in a %3$s context."),
                     n_predictors, n_obs, private$.safeHtmlOutput(context)
                 ), " "
             )
@@ -3037,7 +3241,7 @@ enhancedROCClass <- R6::R6Class(
                 summary_text <- paste0(
                     summary_text,
                     sprintf(
-                        .("The best performing predictor was '%s' with an AUC of %.3f (%s performance).%s"),
+                        .("The best performing predictor was '%1$s' with an AUC of %2$.3f (%3$s performance).%4$s"),
                         private$.safeHtmlOutput(best_predictor), best_auc, private$.safeHtmlOutput(interpretation), utility_clause
                     ),
                     "</p>"
@@ -3080,7 +3284,7 @@ enhancedROCClass <- R6::R6Class(
                 private$.addNotice(
                     type = "WARNING",
                     title = .("No Valid ROC Results"),
-                    content = .("No valid ROC results available for report generation. \u{2022} ROC analysis may have failed for all predictors. \u{2022} Check that outcome variable is binary and predictors are numeric. \u{2022} Verify sufficient data for each predictor-outcome combination.")
+                    content = .("No valid ROC results available for report generation. \u2022 ROC analysis may have failed for all predictors. \u2022 Check that outcome variable is binary and predictors are numeric. \u2022 Verify sufficient data for each predictor-outcome combination.")
                 )
                 return()
             }
@@ -3098,14 +3302,12 @@ enhancedROCClass <- R6::R6Class(
                 !is.finite(best_cut_value) ||
                 !is.finite(best_youden) || best_youden <= 0
             if (isTRUE(report_unsafe)) {
+                # Same splicing defect: this clause is dropped into two translated sentences.
                 reason <- if (best_auc < 0.5) {
-                    paste0(
-                        "the best AUC is ", round(best_auc, 3),
-                        ", which is below chance - the marker points the wrong way, or the Direction ",
-                        "setting does not match the data"
-                    )
+                    .fmt(.("the best AUC is {auc}, which is below chance - the marker points the wrong way, or the Direction setting does not match the data"),
+                         auc = round(best_auc, 3))
                 } else {
-                    "no usable cut-point exists - every threshold gives a Youden index of zero or less"
+                    .("no usable cut-point exists - every threshold gives a Youden index of zero or less")
                 }
                 self$results$results$clinicalReport$setContent(paste0(
                     "<div style='background-color: rgba(216, 33, 50, 0.18); border: 1px solid #f5c6cb; ",
@@ -3137,7 +3339,7 @@ enhancedROCClass <- R6::R6Class(
             report_html <- paste0(report_html, "<h5>", .("Methods Section"), ":</h5>")
             report_html <- paste0(report_html, "<div style='background-color: rgba(127, 127, 127, 0.06); color: inherit; padding: 10px; border-left: 4px solid #0066cc; margin: 5px 0;'>")
             methods_text <- sprintf(
-                .("ROC analysis was performed to evaluate the diagnostic performance of %s in predicting %s using %d observations. The analysis was conducted using the pROC package in R, with AUC calculation and %s%% confidence intervals determined using %s methodology."),
+                .("ROC analysis was performed to evaluate the diagnostic performance of %1$s in predicting %2$s using %3$d observations. The analysis was conducted using the pROC package in R, with AUC calculation and %4$s%% confidence intervals determined using %5$s methodology."),
                 ifelse(n_predictors == 1, paste0("'", private$.safeHtmlOutput(best_predictor), "'"), paste(n_predictors, "predictors")),
                 private$.safeHtmlOutput(private$.outcome),
                 n_obs,
@@ -3151,7 +3353,7 @@ enhancedROCClass <- R6::R6Class(
             report_html <- paste0(report_html, "<div style='background-color: rgba(127, 127, 127, 0.06); color: inherit; padding: 10px; border-left: 4px solid #28a745; margin: 5px 0;'>")
 
             results_text <- sprintf(
-                .("The %s predictor demonstrated %s diagnostic performance with an AUC of %.3f (%s%% CI: %s--%s). At the optimal cutoff of %.3f, the test achieved %s sensitivity (%.1f%%) and %s specificity (%.1f%%), resulting in a Youden Index of %.3f."),
+                .("The %1$s predictor demonstrated %2$s diagnostic performance with an AUC of %3$.3f (%4$s%% CI: %5$s--%6$s). At the optimal cutoff of %7$.3f, the test achieved %8$s sensitivity (%9$.1f%%) and %10$s specificity (%11$.1f%%), resulting in a Youden Index of %12$.3f."),
                 private$.safeHtmlOutput(best_predictor),
                 private$.interpretAUC(best_auc),
                 best_auc,
@@ -3182,14 +3384,14 @@ enhancedROCClass <- R6::R6Class(
             report_html <- paste0(report_html, "<div style='background-color: rgba(127, 127, 127, 0.06); color: inherit; padding: 10px; border-left: 4px solid #ffc107; margin: 5px 0;'>")
 
             interpretation_text <- sprintf(
-                .("In this %s sample, %s showed %s: the AUC was %.3f (%s%% CI: %s--%s). AUC is the probability that a randomly chosen case scores above a randomly chosen non-case; it is computed over all cutpoints and does not depend on which cutpoint was selected. This is an in-sample estimate with no internal or external validation behind it%s. The sensitivity and specificity quoted at the selected cutpoint are a separate matter: those ARE optimistic, because that cutpoint was searched for on these same data."),
+                .("In this %1$s sample, %2$s showed %3$s: the AUC was %4$.3f (%5$s%% CI: %6$s--%7$s). AUC is the probability that a randomly chosen case scores above a randomly chosen non-case; it is computed over all cutpoints and does not depend on which cutpoint was selected. This is an in-sample estimate with no internal or external validation behind it%8$s. The sensitivity and specificity quoted at the selected cutpoint are a separate matter: those ARE optimistic, because that cutpoint was searched for on these same data."),
                 private$.safeHtmlOutput(context),
                 private$.safeHtmlOutput(best_predictor),
                 ifelse(best_auc >= 0.8, .("good to excellent discrimination"), ifelse(best_auc >= 0.7, .("fair to good discrimination"), .("limited discrimination"))),
                 best_auc,
                 format(self$options$confidenceLevel),
                 ci_lower, ci_upper,
-                if (n_predictors > 1) sprintf(.(", and it is additionally optimistic because this predictor was picked as the highest-scoring of %d"), n_predictors) else ""
+                if (n_predictors > 1) paste0(", ", sprintf(.("and it is additionally optimistic because this predictor was picked as the highest-scoring of %d"), n_predictors)) else ""
             )
 
             report_html <- paste0(report_html, interpretation_text, "</div>")
@@ -3200,7 +3402,7 @@ enhancedROCClass <- R6::R6Class(
                 report_html <- paste0(report_html, "<div style='background-color: rgba(127, 127, 127, 0.06); color: inherit; padding: 10px; border-left: 4px solid #dc3545; margin: 5px 0;'>")
                 if (isTRUE(self$options$pairwiseComparisons) && identical(self$options$analysisType, "comparative")) {
                     comparative_text <- sprintf(
-                        .("Among the %d predictors evaluated, %s had the highest observed AUC (%.3f). Pairwise comparisons using %s methodology are reported in the ROC Curve Comparisons table; a higher observed AUC is not a demonstrated difference unless the corresponding comparison is statistically significant, and a comparison that is not significant does not establish that two predictors perform equally."),
+                        .("Among the %1$d predictors evaluated, %2$s had the highest observed AUC (%3$.3f). Pairwise comparisons using %4$s methodology are reported in the ROC Curve Comparisons table; a higher observed AUC is not a demonstrated difference unless the corresponding comparison is statistically significant, and a comparison that is not significant does not establish that two predictors perform equally."),
                         n_predictors,
                         private$.safeHtmlOutput(best_predictor),
                         best_auc,
@@ -3208,7 +3410,7 @@ enhancedROCClass <- R6::R6Class(
                     )
                 } else {
                     comparative_text <- sprintf(
-                        .("Among the %d predictors evaluated, %s had the highest observed AUC (%.3f). No pairwise test was run, so this ranking describes this sample only; enable pairwise comparisons, with Analysis Type set to comparative, to test whether the AUC differences are statistically significant."),
+                        .("Among the %1$d predictors evaluated, %2$s had the highest observed AUC (%3$.3f). No pairwise test was run, so this ranking describes this sample only; enable pairwise comparisons, with Analysis Type set to comparative, to test whether the AUC differences are statistically significant."),
                         n_predictors,
                         private$.safeHtmlOutput(best_predictor),
                         best_auc
@@ -3219,7 +3421,7 @@ enhancedROCClass <- R6::R6Class(
 
             # the sentences above quote the AUC interval, which is a bootstrap one here
             if (isTRUE(self$options$useBootstrap))
-                report_html <- paste0(report_html, "<p><em>", jmvcore::htmlEscape(jmvcore::format(.("Random seed: {seed}"), seed = self$options$seed)), "</em></p>")
+                report_html <- paste0(report_html, "<p><em>", jmvcore::htmlEscape(.fmt(.("Random seed: {seed}"), seed = self$options$seed)), "</em></p>")
             report_html <- paste0(report_html, "</div>")
 
             html$setContent(report_html)
@@ -3234,7 +3436,7 @@ enhancedROCClass <- R6::R6Class(
                     warnings,
                     paste0(
                         "<p><strong>", .("Sample Size Warning"), ":</strong> ",
-                        sprintf(.("With only %d observations, results may be unstable. Consider %d+ observations for reliable ROC analysis."), n_obs, 50),
+                        sprintf(.("With only %1$d observations, results may be unstable. Consider %2$d+ observations for reliable ROC analysis."), n_obs, 50),
                         "</p>"
                     )
                 )
@@ -3251,7 +3453,7 @@ enhancedROCClass <- R6::R6Class(
                     paste0(
                         "<p><strong>", .("Outcome Balance Warning"), ":</strong> ",
                         sprintf(
-                            .("The smaller outcome group has only %.1f%% of observations (%d cases). This may affect ROC reliability."),
+                            .("The smaller outcome group has only %1$.1f%% of observations (%2$d cases). This may affect ROC reliability."),
                             min_group_pct, min_group_size
                         ), "</p>"
                     )
@@ -3364,13 +3566,29 @@ enhancedROCClass <- R6::R6Class(
                             c1 <- class1[mask]
                             c2 <- class2[mask]
 
-                            if (length(c1) >= 2) {
+                            # The guard used to be on total N. The asymptotic McNemar statistic
+                            # is (b - c)^2 / (b + c): it depends ONLY on the DISCORDANT pairs,
+                            # so `length(c1) >= 2` protected nothing that mattered - 3 discordant
+                            # pairs out of 206 patients still printed a normal-looking p-value.
+                            # Ten discordant pairs is the usual minimum for the uncorrected
+                            # normal approximation; below that leave the cell blank and let the
+                            # existing "Some Comparison P-Values Could Not Be Computed" notice
+                            # say why, rather than show a number that is not a valid test.
+                            n_discordant <- sum(c1 != c2, na.rm = TRUE)
+                            if (length(c1) >= 2 && n_discordant >= 10) {
                                 # McNemar's test: are the two predictors equally accurate on paired data?
                                 cont_table <- table(Pred1 = c1, Pred2 = c2)
                                 if (nrow(cont_table) == 2 && ncol(cont_table) == 2) {
                                     mcnemar_result <- stats::mcnemar.test(cont_table, correct = FALSE)
                                     return(mcnemar_result$p.value)
                                 }
+                            } else if (length(c1) >= 2) {
+                                private$.metricPValueFailures <- c(
+                                    private$.metricPValueFailures,
+                                    .fmt(.("{metric} ({a} vs {b}): only {n} patients were classified differently by the two markers, too few for McNemar\u2019s test"),
+                                         metric = metric, a = pred1, b = pred2, n = n_discordant)
+                                )
+                                return(NA)
                             }
                         }
                     }
@@ -3533,7 +3751,7 @@ enhancedROCClass <- R6::R6Class(
 
                     # Add confidence bands if requested
                     if (self$options$showConfidenceBands) {
-                        p <- p + ggplot2::labs(caption = jmvcore::format(.("Random seed: {seed}"), seed = self$options$seed))
+                        p <- p + ggplot2::labs(caption = .fmt(.("Random seed: {seed}"), seed = self$options$seed))
                         for (predictor in names(private$.rocResults)) {
                             roc_obj <- private$.rocResults[[predictor]]$roc
 
@@ -3617,6 +3835,13 @@ enhancedROCClass <- R6::R6Class(
                     TRUE
                 },
                 error = function(e) {
+                    # .checkpoint() signals a restart by stop()ping with a condition carrying
+                    # code == "restart" (jmvcore::createError("restarting", "restart")). It is
+                    # called inside the confidence-band loop above, and .checkpointCB is still
+                    # live while .createImage() runs, so this handler sees it -- and would turn
+                    # "the user changed an option, abandon this render" into a permanent
+                    # "ROC Curve Plot Error ... restarting" panel. Re-raise it untouched.
+                    if (identical(e$code, "restart")) stop(e)
                     # A renderer cannot raise a notice - see .plotMessage().
                     private$.plotMessage(
                         ggtheme,
@@ -3815,7 +4040,7 @@ enhancedROCClass <- R6::R6Class(
                             color = .("Metric")
                         ) +
                         ggplot2::ylim(0, 1) +
-                        ggplot2::theme_minimal() +
+                        ggtheme +
                         private$.plotThemeFor() +
                         ggplot2::theme(
                             plot.title = ggplot2::element_text(hjust = 0.5, size = 14, face = "bold"),
@@ -3880,7 +4105,7 @@ enhancedROCClass <- R6::R6Class(
                             title = .("Youden Index vs Threshold"),
                             color = .("Predictor")
                         ) +
-                        ggplot2::theme_minimal() +
+                        ggtheme +
                         private$.plotThemeFor() +
                         ggplot2::theme(
                             plot.title = ggplot2::element_text(hjust = 0.5, size = 14, face = "bold"),
@@ -3970,7 +4195,7 @@ enhancedROCClass <- R6::R6Class(
                         ) +
                         ggplot2::xlim(0, 1) +
                         ggplot2::ylim(0, 1) +
-                        ggplot2::theme_minimal() +
+                        ggtheme +
                         private$.plotThemeFor() +
                         ggplot2::theme(
                             plot.title = ggplot2::element_text(hjust = 0.5, size = 14, face = "bold"),
@@ -4076,14 +4301,14 @@ enhancedROCClass <- R6::R6Class(
                         ggplot2::geom_line(linewidth = 1.2) +
                         ggplot2::geom_hline(yintercept = baseline, linetype = "dashed", color = "gray50") +
                         ggplot2::labs(
-                            x = "Recall (Sensitivity)",
-                            y = "Precision (PPV)",
-                            title = "Precision-Recall Curve",
-                            subtitle = paste("Baseline (Prevalence) =", round(baseline, 3))
+                            x = .("Recall (Sensitivity)"),
+                            y = .("Precision (PPV)"),
+                            title = .("Precision-Recall Curve"),
+                            subtitle = .fmt(.("Baseline (Prevalence) = {b}"), b = round(baseline, 3))
                         ) +
                         ggplot2::xlim(0, 1) +
                         ggplot2::ylim(0, 1) +
-                        ggplot2::theme_minimal() +
+                        ggtheme +
                         private$.plotThemeFor() +
                         ggplot2::theme(
                             plot.title = ggplot2::element_text(hjust = 0.5, size = 14, face = "bold"),
@@ -4151,17 +4376,17 @@ enhancedROCClass <- R6::R6Class(
                         ggplot2::geom_line(linewidth = 1) +
                         ggplot2::geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "gray50") +
                         ggplot2::labs(
-                            x = paste0("Transformed FPR (CROC, \u03b1=", alpha, ")"),
-                            y = "True Positive Rate (Sensitivity)",
-                            title = "CROC (Concentrated ROC) Curve Analysis",
-                            subtitle = "Exponential magnifier emphasizes early retrieval performance",
-                            color = "Predictor",
-                            linetype = "Curve Type"
+                            x = .fmt(.("Transformed FPR (CROC, \u03b1={a})"), a = alpha),
+                            y = .("True Positive Rate (Sensitivity)"),
+                            title = .("CROC (Concentrated ROC) Curve Analysis"),
+                            subtitle = .("Exponential magnifier emphasizes early retrieval performance"),
+                            color = .("Predictor"),
+                            linetype = .("Curve Type")
                         ) +
                         ggplot2::xlim(0, 1) +
                         ggplot2::ylim(0, 1) +
                         ggplot2::coord_fixed() +
-                        ggplot2::theme_minimal() +
+                        ggtheme +
                         private$.plotThemeFor() +
                         ggplot2::theme(
                             plot.title = ggplot2::element_text(hjust = 0.5, size = 14, face = "bold"),
@@ -4253,7 +4478,7 @@ enhancedROCClass <- R6::R6Class(
                         ggplot2::xlim(0, 1) +
                         ggplot2::ylim(0, 1) +
                         ggplot2::coord_fixed() +
-                        ggplot2::theme_minimal() +
+                        ggtheme +
                         private$.plotThemeFor() +
                         ggplot2::theme(
                             plot.title = ggplot2::element_text(hjust = 0.5, size = 14, face = "bold"),
@@ -4311,6 +4536,9 @@ enhancedROCClass <- R6::R6Class(
 
             calTable <- self$results$results$calibrationSummary
             calTable$deleteRows()   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
+            calTable$setNote(
+                "eo",
+                if (isTRUE(self$options$eoRatio)) .("E/O is the sum of the predicted probabilities divided by the number of events actually observed; 1 means the marker predicts the right number of events overall, above 1 means it over-predicts them. It is reported only for a predictor supplied as a probability between 0 and 1. Where a logistic model had to be fitted here to obtain probabilities, that fit forces the predicted and observed event totals to be equal, so E/O would be exactly 1 for any data at all; the cell is left blank there rather than report a perfect calibration that is an algebraic identity. No confidence interval is given."))
             hlTable <- self$results$results$hosmerLemeshowTable
             hlTable$deleteRows()   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
 
@@ -4336,14 +4564,20 @@ enhancedROCClass <- R6::R6Class(
                             private$.addNotice(
                                 type = "INFO",
                                 title = sprintf(.("Calibration: %s"), predictor),
-                                content = sprintf(.("Every value of %s lies between 0 and 1, so they are treated as pre-calibrated probabilities%s. Calibration is assessed on those values as supplied."), predictor, if (identical(roc_dir, ">")) " (inverted, because lower values indicate the positive class)" else "")
+                                # Two complete sentences instead of splicing an untranslated
+                                # English clause through %s.
+                                content = if (identical(roc_dir, ">")) {
+                                    sprintf(.("Every value of %s lies between 0 and 1, so they are treated as pre-calibrated probabilities, inverted because lower values indicate the positive class. Calibration is assessed on those values as supplied."), predictor)
+                                } else {
+                                    sprintf(.("Every value of %s lies between 0 and 1, so they are treated as pre-calibrated probabilities. Calibration is assessed on those values as supplied."), predictor)
+                                }
                             )
                         } else {
                             private$.addNotice(
                                 type = "STRONG_WARNING",
                                 title = sprintf(.("Calibration: Non-Probability Predictor '%s'"), predictor),
                                 content = sprintf(
-                                    .("The predictor '%s' values are not in the 0 to 1 probability range (observed range: %s to %s). A logistic regression model was fitted to obtain predicted probabilities for calibration assessment. These calibration results reflect the fitted model's calibration, NOT the raw biomarker's calibration. For proper calibration assessment, provide predicted probabilities from your prediction model."),
+                                    .("The predictor '%1$s' values are not in the 0 to 1 probability range (observed range: %2$s to %3$s). A logistic regression model was fitted to obtain predicted probabilities for calibration assessment. These calibration results reflect the fitted model's calibration, NOT the raw biomarker's calibration. For proper calibration assessment, provide predicted probabilities from your prediction model."),
                                     predictor, round(pred_range[1], 2), round(pred_range[2], 2))
                             )
                         }
@@ -4374,15 +4608,26 @@ enhancedROCClass <- R6::R6Class(
                             # user their marker was perfectly calibrated, on no evidence at all.
                             # Report them only on the branch where the user supplied the risks.
                             if (!isTRUE(risk$assumed_probability)) {
-                                interpretation <- paste0(
-                                    "Not estimable - a model was fitted to these data, so the slope ",
-                                    "and intercept are 1 and 0 by construction"
-                                )
+                                # Was an untranslated English literal in a user-visible cell.
+                                interpretation <- .("Not estimable - a model was fitted to these data, so the slope and intercept are 1 and 0 by construction")
                             } else {
                                 logit_probs <- qlogis(probs)
                                 # Handle infinite logits if probs are 0 or 1
+                                n_clamped <- sum(probs == 0 | probs == 1, na.rm = TRUE)
                                 logit_probs[probs == 0] <- -10
                                 logit_probs[probs == 1] <- 10
+                                # +-10 is an arbitrary numerical convenience, and it is a very
+                                # high-leverage point: it moves the reported slope and intercept.
+                                # Exact 0.00 / 1.00 values are common when risks are rounded to
+                                # two decimals, so say when it happened instead of letting the
+                                # Interpretation cell grade an artefact of the clamp.
+                                if (n_clamped > 0) {
+                                    private$.addNotice(
+                                        type = "WARNING",
+                                        title = sprintf(.("Extreme Predicted Risks Clamped: %s"), predictor),
+                                        content = .fmt(.("{n} of the predicted risks for {pred} are exactly 0 or exactly 1, whose log-odds are infinite. They were set to log-odds of -10 and +10 so the calibration regression could run. Those are arbitrary values sitting far from the rest of the data, so they pull the calibration slope and intercept - and the Interpretation cell beside them - towards themselves. Check whether these values are genuine certainties or rounded-off probabilities."), n = n_clamped, pred = predictor)
+                                    )
+                                }
 
                                 cal_model <- glm(y_binary ~ logit_probs, family = binomial)
                                 intercept <- coef(cal_model)[1]
@@ -4392,12 +4637,14 @@ enhancedROCClass <- R6::R6Class(
                                 cal_large_model <- glm(y_binary ~ offset(logit_probs), family = binomial)
                                 cal_in_large <- coef(cal_large_model)[1]
 
+                                # These three are the only explanation of the slope anywhere in
+                                # the results pane and were shipping untranslated.
                                 if (slope > 1.1) {
-                                    interpretation <- "Under-fitting (slope > 1)"
+                                    interpretation <- .("Under-fitting (slope > 1)")
                                 } else if (slope < 0.9) {
-                                    interpretation <- "Over-fitting (slope < 1)"
+                                    interpretation <- .("Over-fitting (slope < 1)")
                                 } else {
-                                    interpretation <- "Good calibration slope"
+                                    interpretation <- .("Good calibration slope")
                                 }
                             }
                         }
@@ -4410,7 +4657,7 @@ enhancedROCClass <- R6::R6Class(
                                 private$.addNotice(
                                     type = "WARNING",
                                     title = sprintf(.("Spline calibration not estimable: %s"), predictor),
-                                    content = sprintf(.("The spline calibration curve for '%s' could not be fitted with %s knots: it needs at least %s events and %s non-events, more distinct predicted probabilities than knots, and a converging fit. Reduce the number of knots or check the predictor. ICI, E50, E90 and Emax are left blank."), predictor, self$options$splineKnots, self$options$splineKnots, self$options$splineKnots)
+                                    content = sprintf(.("The spline calibration curve for '%1$s' could not be fitted with %2$s knots: it needs at least %3$s events and %4$s non-events, more distinct predicted probabilities than knots, and a converging fit. Reduce the number of knots or check the predictor. ICI, E50, E90 and Emax are left blank."), predictor, self$options$splineKnots, self$options$splineKnots, self$options$splineKnots)
                                 )
                             } else {
                                 ici <- sp$ici; e50 <- sp$e50; e90 <- sp$e90; emax <- sp$emax
@@ -4424,6 +4671,23 @@ enhancedROCClass <- R6::R6Class(
                             }
                         }
 
+                        # Expected/Observed ratio. Gated on the same condition as the calibration
+                        # slope and intercept above, and for the same reason: when .riskProbabilities()
+                        # fitted glm(y ~ pred_vals) here, the binomial score equation for the intercept
+                        # forces sum(fitted) == sum(y), so E/O is identically 1.000 whatever the data.
+                        # Printing that would tell every pathologist their marker is perfectly
+                        # calibrated on no evidence. NA leaves the cell empty; the table note says why.
+                        eo <- NA_real_
+                        if (isTRUE(self$options$eoRatio) && isTRUE(risk$assumed_probability)) {
+                            # Sum over the SAME rows on both sides - dropping NAs independently
+                            # would divide an expected count by an observed count from a
+                            # different set of patients.
+                            ok <- is.finite(probs) & is.finite(y_binary)
+                            expected <- sum(probs[ok])
+                            observed <- sum(y_binary[ok])
+                            eo <- if (observed > 0) expected / observed else NA_real_
+                        }
+
                         # Populate Calibration Summary Table
                         row <- list(
                             predictor = predictor,
@@ -4433,6 +4697,7 @@ enhancedROCClass <- R6::R6Class(
                             calibration_intercept = intercept,
                             calibration_in_large = cal_in_large,
                             ici = ici, e50 = e50, e90 = e90, emax = emax,
+                            eo_ratio = eo,
                             interpretation = interpretation
                         )
                         calTable$addRow(rowKey = private$.escapeVar(predictor), values = row)
@@ -4465,10 +4730,29 @@ enhancedROCClass <- R6::R6Class(
                             denom <- exp * (1 - exp / n_cnt)
                             valid <- !is.na(denom) & abs(denom) > 1e-10
                             hl_stat <- if (any(valid)) sum((obs[valid] - exp[valid])^2 / denom[valid]) else NA
-                            df <- actual_groups - 2
+                            # g - 2 is the reference distribution only when the two parameters of
+                            # a logistic model were estimated on THESE data. When the user
+                            # supplied calibrated probabilities nothing is estimated here, and the
+                            # Hosmer-Lemeshow statistic is chi-square on g df (the external- /
+                            # independent-validation case). Using g - 2 there makes p too small,
+                            # because 1 - pchisq(x, df) increases with df: at chi-square 16 with
+                            # 10 groups, p = 0.042 on 8 df ("Significant lack of fit") against
+                            # p = 0.100 on 10 df ("Good fit") - opposite conclusions on the one
+                            # use case the calibration panel exists for.
+                            externally_supplied <- isTRUE(risk$assumed_probability)
+                            df <- if (externally_supplied) actual_groups else actual_groups - 2
                             p_val <- if (!is.na(hl_stat) && df > 0) 1 - pchisq(hl_stat, df = df) else NA
 
-                            conclusion <- if (!is.na(p_val) && p_val < 0.05) "Significant lack of fit" else if (!is.na(p_val)) "Good fit" else "Could not compute"
+                            hlTable$setNote(
+                                "hl_df",
+                                if (externally_supplied) {
+                                    .("Degrees of freedom are the number of groups, because the predicted probabilities were supplied rather than estimated from these data (no parameters were fitted here).")
+                                } else {
+                                    .("Degrees of freedom are the number of groups minus 2, because a logistic model with an intercept and a slope was fitted to these same data to obtain the predicted probabilities.")
+                                }
+                            )
+
+                            conclusion <- if (!is.na(p_val) && p_val < 0.05) .("Significant lack of fit") else if (!is.na(p_val)) .("Good fit") else .("Could not compute")
 
                             hl_row <- list(
                                 predictor = predictor,
@@ -4482,7 +4766,7 @@ enhancedROCClass <- R6::R6Class(
                         }
                     },
                     error = function(e) {
-                        private$.addNotice(type = "WARNING", title = sprintf(.("Calibration Error: %s"), predictor), content = sprintf(.("Calibration analysis failed for %s: %s"), predictor, e$message))
+                        private$.addNotice(type = "WARNING", title = sprintf(.("Calibration Error: %s"), predictor), content = sprintf(.("Calibration analysis failed for %1$s: %2$s"), predictor, e$message))
                     }
                 )
             }
@@ -4503,6 +4787,8 @@ enhancedROCClass <- R6::R6Class(
 
                     plot_data <- data.frame()
                     spline_data <- data.frame()
+                    # Raw predicted probabilities, for the optional marginal density overlay.
+                    dens_data <- data.frame()
                     spline_failed <- character(0)
                     n_groups <- self$options$hlGroups
 
@@ -4522,6 +4808,13 @@ enhancedROCClass <- R6::R6Class(
                         # the plotted curve and the tabulated Brier/slope describe the same numbers.
                         roc_dir <- if (!is.null(private$.rocObjects[[predictor]])) private$.rocObjects[[predictor]]$direction else "<"
                         probs <- private$.riskProbabilities(pred_vals, y_binary, roc_dir)$probs
+
+                        if (isTRUE(self$options$calibrationDensity)) {
+                            dens_data <- rbind(dens_data, data.frame(
+                                prob = probs[is.finite(probs)], Predictor = predictor,
+                                stringsAsFactors = FALSE
+                            ))
+                        }
 
                         # Bin on the same risk quantiles the Hosmer-Lemeshow test uses
                         # (.populateCalibrationAnalysis), so the plotted points and the reported
@@ -4580,9 +4873,9 @@ enhancedROCClass <- R6::R6Class(
                     # agree with the Groups column of the Hosmer-Lemeshow table above it.
                     drawn <- as.integer(table(plot_data$Predictor))
                     grp_label <- if (length(unique(drawn)) == 1) {
-                        paste0(drawn[1], " risk-quantile groups")
+                        .fmt(.("{n} risk-quantile groups"), n = drawn[1])
                     } else {
-                        paste0(min(drawn), "-", max(drawn), " risk-quantile groups")
+                        .fmt(.("{lo}-{hi} risk-quantile groups"), lo = min(drawn), hi = max(drawn))
                     }
 
                     use_spline <- isTRUE(self$options$splineCalibration) && nrow(spline_data) > 0
@@ -4596,15 +4889,43 @@ enhancedROCClass <- R6::R6Class(
                     } else {
                         p <- p + ggplot2::geom_line(linewidth = 1, alpha = 0.7)
                     }
+                    # Marginal density of the predicted probabilities, so a calibration point
+                    # backed by two patients is not read like one backed by two hundred. Scaled
+                    # into the bottom 15% of the 0-1 panel so it cannot be mistaken for the
+                    # calibration curve, and added BEFORE the theme calls below so it inherits
+                    # whichever theme wins. stats::density needs something to smooth, so skip it
+                    # rather than let it error inside a renderer.
+                    show_density <- isTRUE(self$options$calibrationDensity) && nrow(dens_data) >= 10
+                    if (show_density) {
+                        p <- p + ggplot2::geom_density(
+                            data = dens_data,
+                            mapping = ggplot2::aes(
+                                x = prob, y = ggplot2::after_stat(scaled) * 0.15,
+                                colour = Predictor, fill = Predictor
+                            ),
+                            inherit.aes = FALSE, alpha = 0.15, linewidth = 0.4
+                        )
+                    }
+
+                    # These four strings are the only explanation of what the plot shows and
+                    # were shipping untranslated alongside translated axis labels.
                     subtitle <- if (use_spline) {
-                        paste0("Points: observed proportion in ", grp_label, "; curve: natural cubic spline with ",
-                               self$options$splineKnots, " knots on the logit scale")
+                        .fmt(.("Points: observed proportion in {grp}; curve: natural cubic spline with {k} knots on the logit scale"),
+                             grp = grp_label, k = self$options$splineKnots)
                     } else {
-                        paste0("Observed vs Predicted Probabilities (", grp_label, ")")
+                        .fmt(.("Observed vs Predicted Probabilities ({grp})"), grp = grp_label)
+                    }
+                    # Explain the extra ink rather than leaving an unlabelled band at the foot.
+                    if (show_density) {
+                        # "; " is a separator, not translatable text - keep it OUTSIDE the
+                        # msgid. A translator cannot see a leading punctuation run, and a
+                        # catalog that trims it silently runs the clause into the subtitle.
+                        subtitle <- paste0(subtitle, "; ",
+                            .("shaded band at the foot: density of the predicted probabilities"))
                     }
                     caption <- if (length(spline_failed) > 0) {
-                        paste0("Spline curve not estimable for: ", paste(spline_failed, collapse = ", "),
-                               " (too few events or distinct probabilities for ", self$options$splineKnots, " knots)")
+                        .fmt(.("Spline curve not estimable for: {who} (too few events or distinct probabilities for {k} knots)"),
+                             who = paste(spline_failed, collapse = ", "), k = self$options$splineKnots)
                     } else NULL
                     p <- p +
                         ggplot2::labs(
@@ -4618,7 +4939,7 @@ enhancedROCClass <- R6::R6Class(
                         ggplot2::xlim(0, 1) +
                         ggplot2::ylim(0, 1) +
                         ggplot2::coord_fixed() +
-                        ggplot2::theme_minimal() +
+                        ggtheme +
                         private$.plotThemeFor() +
                         ggplot2::theme(
                             plot.title = ggplot2::element_text(hjust = 0.5, size = 14, face = "bold"),
@@ -4652,7 +4973,9 @@ enhancedROCClass <- R6::R6Class(
         # One-vs-rest ROCs share one reading of the marker. With direction "auto" chosen
         # per class, an ordinal outcome and a monotone marker force the middle class's AUC
         # to be >= 0.5 whichever way it points, inflating the macro average. Use the user's
-        # direction, or the direction that separates the extreme levels when it is "auto".
+        # direction, or, when it is "auto", the direction that separates the outcome's FIRST
+        # and LAST factor levels. Those are the extremes only for an ordered outcome; for a
+        # nominal one they are just the alphabetically first and last, so the pick is arbitrary.
         .ovrDirection = function(outcome, pred_vals) {
             opt <- self$options$direction %||% "auto"
             if (identical(opt, "higher")) return("<")
@@ -4666,6 +4989,53 @@ enhancedROCClass <- R6::R6Class(
                      error = function(e) "<")
         },
 
+        # One-vs-one AUCs: one AUC per class pair, every pair read in the SAME declared
+        # direction. Shared by both multi-class branches so the number quoted in the
+        # One-vs-Rest table is the same statistic the One-vs-One table prints. It used to be
+        # taken from pROC::multiclass.roc(), which orients each pair with "auto".
+        #
+        # This is deliberately NOT pROC's number, and it is deliberately no longer called
+        # Hand and Till's M anywhere the user can see. Hand and Till define M against a
+        # classifier's own per-class probabilities; with a bare marker that scoring rule has to
+        # be supplied from outside, and pROC's "auto" supplies it per pair by comparing the two
+        # groups' MEDIANS - literally `direction == "auto" && median(controls) <= median(cases)`
+        # in pROC:::roc.default. That orientation is fitted to the same data that then supply the
+        # AUC, so it is biased upward: the exact behaviour the binary path raises a STRONG notice
+        # about. It is NOT floored at 0.5, because a median split can disagree with the rank
+        # statistic (measured on lognormal noise, n = 60, 3 classes: per-pair auto AUCs
+        # 0.4750 / 0.4600 / 0.3950, multiclass.roc() = 0.4433; and on 3000 null binary samples at
+        # n = 20, auto still reported below 0.5 in 12 per cent of runs, min 0.35). Taking the
+        # orientation from the user's Direction instead makes the estimate honest rather than
+        # merely different, at the cost that it falls below 0.5 when the marker reads backwards.
+        # Because it can, it is labelled "one-vs-one pairwise AUC", not "Hand-Till".
+        #
+        # The price of one declared direction: a marker that orders the classes
+        # non-monotonically averages toward 0.5 even when single pairs separate strongly
+        # (measured: pairs 0.9500 / 0.4750 / 0.0025 -> mean 0.4758, which .interpretAUC() calls
+        # "Below chance", for a marker that tells B from A at 0.95 and B from C at 0.9975 read
+        # the other way). Both callers therefore print the RANGE of pair AUCs beside the mean,
+        # and the avgTable "ovo_definition" note explains it.
+        #
+        # Column order follows combn(levels(outcome), 2), which is what the One-vs-One row
+        # loop below also uses, so pair i here is pair i there.
+        # min()/max() without na.rm print "pairs range NA to NA" beside a finite mean the
+        # moment ONE pair fails; with na.rm an all-NA vector returns -Inf/Inf plus a warning.
+        # Report the range of the pairs that actually computed, or NA when none did.
+        .pairRange = function(x) {
+            x <- x[is.finite(x)]
+            if (!length(x)) c(NA_real_, NA_real_) else c(min(x), max(x))
+        },
+
+        .pairwiseAUCs = function(outcome, pred_vals, direction) {
+            pairs <- combn(levels(outcome), 2)
+            vapply(seq_len(ncol(pairs)), function(i) {
+                keep <- outcome %in% pairs[, i]
+                resp <- factor(outcome[keep], levels = pairs[, i])
+                as.numeric(pROC::roc(response = resp, predictor = pred_vals[keep],
+                                     direction = direction, quiet = TRUE)$auc)
+            }, numeric(1))
+        },
+
         .populateMultiClassROC = function() {
             if (!self$options$multiClassROC) {
                 return()
@@ -4673,11 +5043,19 @@ enhancedROCClass <- R6::R6Class(
 
             aucTable <- self$results$results$multiClassAUC
             # the one-vs-rest AUC limits are bootstrap intervals when useBootstrap is on
-            aucTable$setNote("seed", if (isTRUE(self$options$useBootstrap)) jmvcore::format(.("Random seed: {seed}"), seed = self$options$seed))
+            aucTable$setNote("seed", if (isTRUE(self$options$useBootstrap)) .fmt(.("Random seed: {seed}"), seed = self$options$seed))
             # This table still builds its rows in .run(): the row count is not knowable in
             # advance, so deleteRows() is required or every run would stack duplicates.
             aucTable$deleteRows()
             avgTable <- self$results$results$multiClassAverage
+            avgTable$setNote(
+                "weighted",
+                .("Weighted AUC averages the one-vs-rest AUCs in proportion to how many cases each class contains; Macro AUC weights every class equally. The One-vs-One strategy is defined as an unweighted average over class PAIRS, so no weighted value is given for it."))
+            # Says why this is not the figure pROC::multiclass.roc() prints, why it is not
+            # called Hand and Till's M, and what one declared direction costs: see .pairwiseAUCs().
+            avgTable$setNote(
+                "ovo_definition",
+                .("The one-vs-one pairwise AUC averages the AUC of every class pair, reading all pairs in ONE direction: the one set under Direction, or, when Direction is auto, the one that separates the outcome's first and last factor levels (the extremes only if the outcome is ordered \u2014 for an unordered outcome those are merely the alphabetically first and last levels, so the orientation is arbitrary and Direction should be set explicitly). A pair below 0.5 separates that pair in the opposite order to the one declared. Because the pairs are averaged unweighted, a marker that orders the classes non-monotonically averages toward 0.5 even when single pairs separate strongly, so read the range of pair AUCs printed beside the mean rather than the mean alone. This is not the figure pROC's multiclass.roc() prints: that function orients each pair by comparing the two groups' median values on these same data, which biases it upward but does not floor it at 0.5 either."))
             # Declared `rows: 1` in the .r.yaml, but this method loops over predictors. Writing
             # setRow(rowNo = 1) inside that loop meant each predictor overwrote the last, so the
             # panel silently showed whichever marker happened to sit last in the Predictor
@@ -4700,10 +5078,15 @@ enhancedROCClass <- R6::R6Class(
                 private$.addNotice(
                     type = "WARNING",
                     title = .("Multi-Class ROC Needs 3 or More Outcome Levels"),
-                    content = sprintf(.("Multi-class ROC analysis was requested, but the outcome variable has %s levels. \u{2022} The Multi-Class ROC Summary, Multi-Class Average AUC and Multi-Class ROC Curves panels are therefore empty. \u{2022} For a two-level outcome the standard ROC results above already give the complete analysis. \u{2022} Clear \"Multi-class ROC analysis\" to remove the empty panels, or choose an outcome with 3 or more levels."), nlevels(outcome))
+                    content = sprintf(.("Multi-class ROC analysis was requested, but the outcome variable has %s levels. \u2022 The Multi-Class ROC Summary, Multi-Class Average AUC and Multi-Class ROC Curves panels are therefore empty. \u2022 For a two-level outcome the standard ROC results above already give the complete analysis. \u2022 Clear \"Multi-class ROC analysis\" to remove the empty panels, or choose an outcome with 3 or more levels."), nlevels(outcome))
                 )
                 return()
             }
+
+            # The direction note used to be written with setNote() INSIDE this loop, so with
+            # two predictors the last one's direction silently overwrote the first's while the
+            # note still claimed it held for every marker. Collect them and write once, below.
+            dir_by_pred <- character(0)
 
             for (predictor in private$.predictors) {
                 tryCatch(
@@ -4712,27 +5095,11 @@ enhancedROCClass <- R6::R6Class(
                         data <- private$.analysisData
                         pred_vals <- data[[predictor]]
 
-                        # Run Multi-class ROC
-                        mc_roc <- .quietly(pROC::multiclass.roc(
-                            response = outcome,
-                            predictor = pred_vals,
-                            levels = levels(outcome)
-                        ))
-
-                        # Hand-Till pairwise AUC from pROC::multiclass.roc
-                        mc_auc_val <- as.numeric(mc_roc$auc)
-                        mc_interp <- private$.interpretAUC(mc_auc_val)
-
                         # If we want One-vs-Rest, compute OVR macro average separately
                         if (self$options$multiClassStrategy == "ovr") {
                             ovr_aucs <- numeric(nlevels(outcome))
                             ovr_dir <- private$.ovrDirection(outcome, pred_vals)
-                            tryCatch(aucTable$setNote(
-                                "ovr_direction",
-                                sprintf(.("One-vs-rest curves read %s values of each marker as indicating the class, the same way for every class (%s)."),
-                                        if (identical(ovr_dir, "<")) .("higher") else .("lower"),
-                                        if (identical(self$options$direction, "auto")) .("chosen from the two extreme outcome levels because Direction is set to auto") else .("as specified by Direction")),
-                                init = FALSE), error = function(e) NULL)
+                            dir_by_pred[[predictor]] <- ovr_dir
                             for (j in seq_along(levels(outcome))) {
                                 lvl <- levels(outcome)[j]
                                 # Create binary outcome: Class vs Rest
@@ -4762,7 +5129,7 @@ enhancedROCClass <- R6::R6Class(
                                     # one predictor the rows were indistinguishable - six rows
                                     # showing three class labels twice over. Name it here.
                                     class = if (length(private$.predictors) > 1) paste0(predictor, ": ", lvl) else lvl,
-                                    strategy = "One-vs-Rest",
+                                    strategy = .("One-vs-Rest"),
                                     auc = ovr_aucs[j],
                                     auc_lower = if (is.null(class_ci)) NA else as.numeric(class_ci[1]),
                                     auc_upper = if (is.null(class_ci)) NA else as.numeric(class_ci[3]),
@@ -4774,52 +5141,75 @@ enhancedROCClass <- R6::R6Class(
 
                             # OVR Macro Average
                             ovr_macro_auc <- mean(ovr_aucs, na.rm = TRUE)
+                            # Prevalence-weighted average of the SAME one-vs-rest AUCs: each class
+                            # weighted by how many cases it contains (sklearn's average="weighted").
+                            # ovr_aucs is indexed by j over levels(outcome), so the explicit
+                            # [levels(outcome)] reindex keeps the weights lined up element for
+                            # element even if table() ever reordered.
+                            class_n <- as.numeric(table(outcome)[levels(outcome)])
+                            ovr_weighted_auc <- stats::weighted.mean(ovr_aucs, w = class_n, na.rm = TRUE)
                             ovr_interp <- private$.interpretAUC(ovr_macro_auc)
+                            # Same computation as the One-vs-One branch below (same helper,
+                            # same direction), so the two panels can no longer print two
+                            # different numbers under one name.
+                            ovr_pair_aucs <- private$.pairwiseAUCs(outcome, pred_vals, ovr_dir)
+                            ht_quote <- mean(ovr_pair_aucs, na.rm = TRUE)
+                            ovr_pair_range <- private$.pairRange(ovr_pair_aucs)
                             avgTable$addRow(rowKey = private$.escapeVar(predictor), values = list(
-                                averaging_method = paste0(predictor, ": OVR Macro Average"),
+                                averaging_method = paste0(predictor, ": ", .("OVR Macro Average")),
                                 macro_auc = ovr_macro_auc,
-                                # Prevalence-weighted averaging is not implemented. This column
-                                # used to be filled with the Hand-Till PAIRWISE AUC, which is an
-                                # unweighted statistic over class pairs - printing it under a
-                                # "Weighted AUC" heading mislabelled it, and it did so at the
-                                # default setting where no warning fires. The value is still
-                                # reported, correctly named, in the interpretation cell.
-                                weighted_auc = NA,
-                                micro_auc = NA,
-                                interpretation = paste0(ovr_interp, " (Hand-Till pairwise: ", round(mc_auc_val, 3), ")")
+                                # This column used to be filled with the PAIRWISE AUC, which is
+                                # an unweighted statistic over class pairs - printing it under a
+                                # "Weighted AUC" heading mislabelled it. The pairwise value is
+                                # still reported, correctly named, in the interpretation cell;
+                                # this is now the actual prevalence-weighted average.
+                                weighted_auc = ovr_weighted_auc,
+                                # paste0() around a translated word left the parenthetical
+                                # untranslatable and unnamed; the msgid is now a literal and
+                                # says which statistic the number is. Not named "Hand-Till": it
+                                # is oriented by the declared Direction, see .pairwiseAUCs().
+                                # The range goes with the mean because this panel prints no
+                                # per-pair rows: without it, a non-monotone marker's collapse
+                                # toward 0.5 is invisible here.
+                                interpretation = sprintf(
+                                    .("%1$s (one-vs-one pairwise AUC, unweighted mean over class pairs: %2$.3f; pairs range %3$.3f to %4$.3f)"),
+                                    ovr_interp, ht_quote, ovr_pair_range[1], ovr_pair_range[2])
                             ))
                         } else {
-                            # One-vs-One (Pairwise) - Hand-Till method
-                            avgTable$addRow(rowKey = private$.escapeVar(predictor), values = list(
-                                averaging_method = paste0(predictor, ": Hand-Till Pairwise"),
-                                macro_auc = mc_auc_val,
-                                weighted_auc = NA,
-                                micro_auc = NA,
-                                interpretation = mc_interp
-                            ))
+                            # One-vs-One (Pairwise)
+                            # It is DEFINED as an unweighted average over class PAIRS, so
+                            # there is no prevalence weighting of it that is the same statistic.
+                            # The summary row is now written AFTER the pair loop and from the
+                            # pairwise AUCs actually shown, instead of from pROC's own
+                            # multiclass.roc value: the two agree exactly when the directions
+                            # agree (verified: 0.72679 both ways) but not once Direction is
+                            # honoured below, and a summary must be the same computation as the
+                            # rows it summarises.
 
                             # Per-pair AUC breakdown
+                            # direction = "auto" was hard-coded here, so the user's Direction
+                            # setting was silently discarded and every pairwise AUC was oriented
+                            # by pROC from the same data it is computed on (a median comparison,
+                            # not an AUC maximisation, so not floored at 0.5 either) - the exact
+                            # fitted-orientation bias the binary path raises a STRONG notice
+                            # about. Use the same resolution as the one-vs-rest branch:
+                            # one orientation for all pairs, honouring Direction, and for
+                            # "auto" derived once from the outcome's first and last factor
+                            # levels (arbitrary unless the outcome is ordered).
+                            pair_dir <- private$.ovrDirection(outcome, pred_vals)
+                            dir_by_pred[[predictor]] <- pair_dir
                             pairs <- combn(levels(outcome), 2)
+                            pair_aucs <- private$.pairwiseAUCs(outcome, pred_vals, pair_dir)
                             for (i in seq_len(ncol(pairs))) {
                                 class1 <- pairs[1, i]
                                 class2 <- pairs[2, i]
-
-                                # Subset data
-                                subset_idx <- outcome %in% c(class1, class2)
-                                subset_outcome <- factor(outcome[subset_idx], levels = c(class1, class2))
-                                subset_pred <- pred_vals[subset_idx]
-
-                                roc_obj <- pROC::roc(
-                                    response = subset_outcome, predictor = subset_pred,
-                                    direction = "auto", quiet = TRUE
-                                )
 
                                 row <- list(
                                     class = if (length(private$.predictors) > 1)
                                         paste0(predictor, ": ", class1, " vs ", class2)
                                     else paste(class1, "vs", class2),
-                                    strategy = "One-vs-One",
-                                    auc = as.numeric(roc_obj$auc),
+                                    strategy = .("One-vs-One"),
+                                    auc = pair_aucs[i],
                                     auc_lower = NA, # CI for pairwise might be overkill to compute for all
                                     auc_upper = NA,
                                     n_positive = sum(outcome == class2), # Assuming class2 is 'positive' in the pair
@@ -4827,12 +5217,54 @@ enhancedROCClass <- R6::R6Class(
                                 )
                                 aucTable$addRow(rowKey = paste0(private$.escapeVar(predictor), "_", private$.escapeVar(class1), "_", private$.escapeVar(class2)), values = row)
                             }
+
+                            ht_auc <- mean(pair_aucs, na.rm = TRUE)
+                            pair_range <- private$.pairRange(pair_aucs)
+                            avgTable$addRow(rowKey = private$.escapeVar(predictor), values = list(
+                                averaging_method = paste0(predictor, ": ", .("One-vs-One Pairwise")),
+                                macro_auc = ht_auc,
+                                weighted_auc = NA,
+                                # The bucket word describes the unweighted mean, which collapses
+                                # toward 0.5 for a non-monotone marker; the range is what tells
+                                # the reader whether that is what happened. See .pairwiseAUCs().
+                                interpretation = sprintf(
+                                    .("%1$s (pairs range %2$.3f to %3$.3f)"),
+                                    private$.interpretAUC(ht_auc), pair_range[1], pair_range[2])
+                            ))
                         }
                     },
                     error = function(e) {
-                        private$.addNotice(type = "WARNING", title = sprintf(.("Multi-Class ROC Error: %s"), predictor), content = sprintf(.("Multi-class ROC analysis failed for %s: %s"), predictor, e$message))
+                        private$.addNotice(type = "WARNING", title = sprintf(.("Multi-Class ROC Error: %s"), predictor), content = sprintf(.("Multi-class ROC analysis failed for %1$s: %2$s"), predictor, e$message))
                     }
                 )
+            }
+
+            # One note for the whole table, written after every predictor has resolved its
+            # direction. Two markers can resolve differently under Direction = auto, so the
+            # note names them when they disagree instead of quoting whichever ran last.
+            if (length(dir_by_pred)) {
+                word_higher <- .("higher")
+                word_lower <- .("lower")
+                dir_words <- ifelse(dir_by_pred == "<", word_higher, word_lower)
+                why <- if (identical(self$options$direction, "auto"))
+                    .("chosen from the outcome's first and last factor levels because Direction is set to auto; for an unordered outcome those are merely the alphabetically first and last levels, so the orientation is arbitrary")
+                else
+                    .("as specified by Direction")
+                same_dir <- length(unique(dir_words)) == 1L
+                per_marker <- paste(paste0(names(dir_by_pred), ": ", dir_words), collapse = "; ")
+                note_key <- if (identical(self$options$multiClassStrategy, "ovr")) "ovr_direction" else "ovo_direction"
+                note_txt <- if (identical(note_key, "ovr_direction")) {
+                    if (same_dir)
+                        sprintf(.("One-vs-rest curves read %1$s values of every marker as indicating the class, the same way for every class (%2$s)."), dir_words[[1]], why)
+                    else
+                        sprintf(.("One-vs-rest curves read each marker the same way for every class, but the markers do not all read the same way (%1$s). The orientation was %2$s."), per_marker, why)
+                } else {
+                    if (same_dir)
+                        sprintf(.("One-vs-one curves read %1$s values of every marker as indicating the later class of the pair, the same way for every pair (%2$s)."), dir_words[[1]], why)
+                    else
+                        sprintf(.("One-vs-one curves read each marker the same way for every pair, but the markers do not all read the same way (%1$s). The orientation was %2$s."), per_marker, why)
+                }
+                tryCatch(aucTable$setNote(note_key, note_txt, init = FALSE), error = function(e) NULL)
             }
         },
         .plotMultiClassROC = function(image, ggtheme, theme, ...) {
@@ -4873,7 +5305,7 @@ enhancedROCClass <- R6::R6Class(
 
                     if (self$options$multiClassStrategy == "ovo") {
                         # Do NOT simply advise switching to OVR: that changes the estimand, not
-                        # just the picture. OVO reports the Hand-Till pairwise AUC over class
+                        # just the picture. OVO reports the pairwise AUC over class
                         # pairs; OVR reports the macro average of one-vs-rest AUCs, which
                         # penalises an intermediate class. The two differ materially on the same
                         # data, so the trade-off has to be stated, not hidden behind "switch to".
@@ -4885,7 +5317,7 @@ enhancedROCClass <- R6::R6Class(
                                 "AUC values in the tables are unaffected. Switching to One-vs-Rest ",
                                 "would draw the curves, but it also changes the reported statistic: ",
                                 "OVR reports the macro average of one-vs-rest AUCs rather than the ",
-                                "Hand-Till pairwise AUC, and the two do not agree."
+                                "one-vs-one pairwise AUC, and the two do not agree."
                             )
                         ))
                     }
@@ -4934,7 +5366,7 @@ enhancedROCClass <- R6::R6Class(
                         ggplot2::xlim(0, 1) +
                         ggplot2::ylim(0, 1) +
                         ggplot2::coord_fixed() +
-                        ggplot2::theme_minimal() +
+                        ggtheme +
                         private$.plotThemeFor() +
                         ggplot2::theme(
                             plot.title = ggplot2::element_text(hjust = 0.5, size = 14, face = "bold"),
@@ -4982,7 +5414,7 @@ enhancedROCClass <- R6::R6Class(
             impactTable$setNote(
                 "threshold_source",
                 .fmt(
-                    .("Net benefit and number needed to treat are evaluated at a risk threshold of {thr}, taken from the disease prevalence {src}. A threshold of {thr} means accepting {ratio} unnecessary positive results for each additional case found. If that trade-off does not match your setting, untick \u{2018}Use observed prevalence\u{2019} and enter the threshold you want in the Disease Prevalence box."),
+                    .("Net benefit and number needed to treat are evaluated at a risk threshold of {thr}, taken from the disease prevalence {src}. A threshold of {thr} means accepting {ratio} unnecessary positive results for each additional case found. If that trade-off does not match your setting, untick \u2018Use observed prevalence\u2019 and enter the threshold you want in the Disease Prevalence box."),
                     thr = sprintf("%.3f", impact_threshold),
                     src = if (isTRUE(self$options$useObservedPrevalence)) .("observed in these data") else .("you entered"),
                     ratio = sprintf("%.1f", (1 - impact_threshold) / impact_threshold)
@@ -5008,7 +5440,26 @@ enhancedROCClass <- R6::R6Class(
                             private$.addNotice(
                                 type = "STRONG_WARNING",
                                 title = sprintf(.("Values Read as Risks: %s"), predictor),
-                                content = sprintf(.("Every value of %s falls between 0 and 1, so they are being used directly as predicted risks rather than modelled. Net benefit, NNT and the decision-impact rows below therefore assume this column already IS a calibrated probability of the outcome. If it is a measurement that merely happens to lie in that range, rescale it or these figures will not mean what they say."), predictor)
+                                # Two complete sentences per branch rather than an untranslated
+                                # English clause spliced through %s. The ">" branch must say the
+                                # values were INVERTED: the panel silently used 1 - x as the risk,
+                                # matching the wording already used by the calibration panel.
+                                content = if (identical(roc_dir, ">")) {
+                                    sprintf(.("Every value of %s falls between 0 and 1, so they are being used directly as predicted risks rather than modelled, inverted to 1 minus the value because lower values indicate the positive class. Net benefit, NNT and the decision-impact rows below therefore assume this column already IS a calibrated probability, read that way round. If it is a measurement that merely happens to lie in that range, rescale it or these figures will not mean what they say."), predictor)
+                                } else {
+                                    sprintf(.("Every value of %s falls between 0 and 1, so they are being used directly as predicted risks rather than modelled. Net benefit, NNT and the decision-impact rows below therefore assume this column already IS a calibrated probability of the outcome. If it is a measurement that merely happens to lie in that range, rescale it or these figures will not mean what they say."), predictor)
+                                }
+                            )
+                        } else {
+                            # The OPPOSITE branch - the common one for any raw marker - had no
+                            # warning at all in this panel, while the calibration panel one
+                            # screen up warns in bold about exactly the same situation. These
+                            # numbers come from a logistic model fitted to these same patients
+                            # and evaluated on them: apparent performance, not validated.
+                            private$.addNotice(
+                                type = "STRONG_WARNING",
+                                title = sprintf(.("Risks Were Modelled from These Same Data: %s"), predictor),
+                                content = .fmt(.("The values of {pred} are not probabilities, so a logistic regression was fitted to these same patients to turn them into predicted risks. Every figure in the Clinical Impact panel \u2014 NNT, NND, net benefit and the PPV and NPV at each threshold \u2014 is therefore apparent performance: the model was both fitted and evaluated on the same {n} observations, which overstates what the marker would achieve on new patients. \u2022 Treat these as an upper bound. \u2022 For an honest estimate, supply predicted risks from a model fitted elsewhere, or use the Internal Validation panel."), pred = predictor, n = n)
                             )
                         }
 
@@ -5070,6 +5521,9 @@ enhancedROCClass <- R6::R6Class(
                                 npv <- ifelse((tn_thr + fn_thr) > 0, tn_thr / (tn_thr + fn_thr), NA)
 
                                 decisionTable$addRow(rowKey = paste0(private$.escapeVar(predictor), "_", thr), values = list(
+                                    # Without this the four rows per marker were unlabelled -
+                                    # the same defect already fixed for multiClassAUC.
+                                    predictor = predictor,
                                     threshold = thr,
                                     n_high_risk = tp_thr + fp_thr,
                                     n_high_risk_with_event = tp_thr,
@@ -5081,10 +5535,104 @@ enhancedROCClass <- R6::R6Class(
                         }
                     },
                     error = function(e) {
-                        private$.addNotice(type = "WARNING", title = sprintf(.("Clinical Impact Error: %s"), predictor), content = sprintf(.("Clinical impact analysis failed for %s: %s"), predictor, e$message))
+                        private$.addNotice(type = "WARNING", title = sprintf(.("Clinical Impact Error: %s"), predictor), content = sprintf(.("Clinical impact analysis failed for %1$s: %2$s"), predictor, e$message))
                     }
                 )
             }
+        },
+        # Clinical impact curve (Kerr 2016; Vickers 2019): the same counts the
+        # decisionImpactSummary table reports at four fixed thresholds, drawn over a continuous
+        # threshold grid and expressed per 1000 tested so a clinician can read it as people.
+        .plotDecisionImpact = function(image, ggtheme, theme, ...) {
+            private$.restoreFromState(image)
+            if (!isTRUE(self$options$decisionImpactCurves)) {
+                return(FALSE)
+            }
+
+            tryCatch(
+                {
+                    thresholds <- seq(0.01, 0.99, by = 0.01)
+                    lab_high <- .("Called high risk")
+                    lab_event <- .("High risk and has the event")
+                    plot_data <- data.frame()
+
+                    for (predictor in names(private$.rocResults)) {
+                        data <- private$.analysisData
+                        outcome <- data[[private$.outcome]]
+                        pred_vals <- data[[predictor]]
+                        y_binary <- as.numeric(outcome == levels(outcome)[2])
+                        n <- length(y_binary)
+                        if (n == 0) next
+
+                        # Direction-aware risk; see .riskProbabilities().
+                        roc_dir <- if (!is.null(private$.rocObjects[[predictor]])) private$.rocObjects[[predictor]]$direction else "<"
+                        probs <- private$.riskProbabilities(pred_vals, y_binary, roc_dir)$probs
+
+                        n_high <- vapply(thresholds, function(th) sum(probs >= th, na.rm = TRUE) / n * 1000, numeric(1))
+                        n_tp <- vapply(thresholds, function(th) sum(probs >= th & y_binary == 1, na.rm = TRUE) / n * 1000, numeric(1))
+
+                        plot_data <- rbind(plot_data, data.frame(
+                            Threshold = rep(thresholds, 2L),
+                            Count = c(n_high, n_tp),
+                            Predictor = predictor,
+                            Group = rep(c(lab_high, lab_event), each = length(thresholds)),
+                            stringsAsFactors = FALSE
+                        ))
+                    }
+
+                    if (nrow(plot_data) == 0) {
+                        return(private$.plotMessage(
+                            ggtheme,
+                            .("Clinical Impact Curve Unavailable"),
+                            .("No predictor produced usable risk probabilities, so there is nothing to plot.")
+                        ))
+                    }
+
+                    p <- ggplot2::ggplot(plot_data, ggplot2::aes(
+                            x = Threshold, y = Count, colour = Predictor, linetype = Group
+                        )) +
+                        ggplot2::geom_line(linewidth = 1) +
+                        ggplot2::labs(
+                            x = .("Threshold Probability"),
+                            y = .("Number per 1000 tested"),
+                            title = .("Clinical Impact Curve"),
+                            subtitle = .("Where a marker is not already a probability, the risks come from a logistic model fitted to these same data, so the curve is apparent, not validated."),
+                            colour = .("Predictor"),
+                            linetype = .("Group")
+                        ) +
+                        # ggtheme REPLACES every theme()/scale_*() that precedes it, so it goes on
+                        # first and the tweaks that must survive go after it.
+                        ggtheme +
+                        private$.plotThemeFor() +
+                        ggplot2::theme(
+                            plot.title = ggplot2::element_text(hjust = 0.5, size = 14, face = "bold"),
+                            plot.subtitle = ggplot2::element_text(hjust = 0.5, size = 9),
+                            legend.position = "bottom",
+                            legend.box = "vertical"
+                        )
+
+                    # Follow jamovi's global palette so this plot agrees with the rest of the
+                    # document; after ggtheme, or ggtheme's own scale would win.
+                    cols <- tryCatch(
+                        jmvcore::colorPalette(length(unique(plot_data$Predictor)), theme$palette, "color"),
+                        error = function(e) NULL
+                    )
+                    if (!is.null(cols)) {
+                        p <- p + ggplot2::scale_colour_manual(values = cols)
+                    }
+
+                    print(p)
+                    TRUE
+                },
+                error = function(e) {
+                    # A renderer cannot raise a notice - see .plotMessage().
+                    private$.plotMessage(
+                        ggtheme,
+                        .("Clinical Impact Curve Error"),
+                        sprintf(.("Failed to create the clinical impact curve: %s"), conditionMessage(e))
+                    )
+                }
+            )
         },
         .plotClinicalUtility = function(image, ggtheme, theme, ...) {
             private$.restoreFromState(image)
@@ -5169,7 +5717,7 @@ enhancedROCClass <- R6::R6Class(
                             linetype = .("Type")
                         ) +
                         ggplot2::coord_cartesian(ylim = c(-0.05, prevalence + 0.05)) + # Zoom in on relevant range
-                        ggplot2::theme_minimal() +
+                        ggtheme +
                         private$.plotThemeFor() +
                         ggplot2::theme(
                             plot.title = ggplot2::element_text(hjust = 0.5, size = 14, face = "bold"),
@@ -5202,8 +5750,19 @@ enhancedROCClass <- R6::R6Class(
 
             val_method <- self$options$validationMethod
 
-            summary_text <- paste0("<h3>Internal Validation (", private$.safeHtmlOutput(val_method), ")</h3>",
-                                   "<p>", jmvcore::htmlEscape(jmvcore::format(.("Random seed: {seed}"), seed = self$options$seed)), "</p>")
+            # The optimism-correction resample count is capped at 200 for runtime. A user who
+            # set Bootstrap samples to 2000 for a publication silently got 200, and the panel
+            # printed the seed but not B - so the run was not reproducible from what is shown.
+            validation_B <- min(self$options$bootstrapSamples %||% 100, 200)
+            summary_text <- paste0("<h3>", jmvcore::htmlEscape(.("Internal Validation")), " (", private$.safeHtmlOutput(val_method), ")</h3>",
+                                   "<p>", jmvcore::htmlEscape(.fmt(.("Random seed: {seed}"), seed = self$options$seed)), "</p>")
+            if (val_method == "bootstrap" || val_method == "both") {
+                summary_text <- paste0(summary_text, "<p>",
+                    jmvcore::htmlEscape(.fmt(
+                        .("Optimism correction uses {b} bootstrap resamples (capped at 200 regardless of the Bootstrap samples setting, which is {req})."),
+                        b = validation_B, req = self$options$bootstrapSamples %||% 100)),
+                    "</p>")
+            }
 
             for (predictor in names(private$.rocResults)) {
                 result <- tryCatch(
@@ -5224,7 +5783,7 @@ enhancedROCClass <- R6::R6Class(
                             # 3. Test AUC = same model predictions on original sample
                             # 4. Optimism = apparent - test
                             # 5. Corrected AUC = original AUC - mean(optimism)
-                            B <- min(self$options$bootstrapSamples %||% 100, 200)
+                            B <- validation_B
                             optimism_vals <- numeric(B)
                             boot_aucs <- numeric(B)
 
@@ -5273,16 +5832,29 @@ enhancedROCClass <- R6::R6Class(
                             ci_lower <- if (length(orig_ci) == 3) orig_ci[1] - mean_optimism else NA_real_
                             ci_upper <- if (length(orig_ci) == 3) orig_ci[3] - mean_optimism else NA_real_
 
-                            pred_text <- paste0(
-                                pred_text,
-                                "<p><b>", private$.safeHtmlOutput(predictor), " (Bootstrap):</b> Original AUC = ", round(original_auc, 3),
-                                ", Optimism = ", round(mean_optimism, 4),
-                                " (SD across resamples ", round(sd_optimism, 4), ")",
-                                ", Corrected AUC = ", round(corrected_auc, 3),
-                                if (is.finite(ci_lower)) paste0(", ", self$options$confidenceLevel, "% interval [", round(ci_lower, 3), ", ", round(ci_upper, 3),
-                                    "] (the apparent AUC's interval shifted by the optimism estimate)") else "",
-                                "</p>"
+                            # Every label in this block was an untranslated English literal
+                            # interleaved with the numbers it describes. Build the sentence from
+                            # one msgid so a translator can reorder it, then escape it once.
+                            boot_line <- .fmt(
+                                .("{pred} (Bootstrap): Original AUC = {orig}, Optimism = {opt} (SD across resamples {sd}), Corrected AUC = {corr}"),
+                                pred = predictor, orig = round(original_auc, 3),
+                                opt = round(mean_optimism, 4), sd = round(sd_optimism, 4),
+                                corr = round(corrected_auc, 3)
                             )
+                            if (is.finite(ci_lower)) {
+                                # Separator OUTSIDE the msgid: a leading ", " inside one is
+                                # untranslatable punctuation a translator cannot move.
+                                boot_line <- paste0(boot_line, ", ", .fmt(
+                                    # No " [..]" inside a msgid: jmvcore's Translator splits
+                                    # on " \\[(.*)\\]" and, for any language with no catalog
+                                    # entry, drops everything from " [" onward - the interval
+                                    # bounds would disappear. Parentheses carry no such meaning.
+                                    .("{level}% interval ({lo} to {hi}), the apparent AUC\u2019s interval shifted by the optimism estimate"),
+                                    level = self$options$confidenceLevel,
+                                    lo = round(ci_lower, 3), hi = round(ci_upper, 3)
+                                ))
+                            }
+                            pred_text <- paste0(pred_text, "<p>", jmvcore::htmlEscape(boot_line), "</p>")
                         }
 
                         if (val_method == "cv" || val_method == "both") {
@@ -5326,17 +5898,20 @@ enhancedROCClass <- R6::R6Class(
                             mean_cv_auc <- mean(cv_aucs, na.rm = TRUE)
                             sd_cv_auc <- sd(cv_aucs, na.rm = TRUE)
 
-                            pred_text <- paste0(
-                                pred_text,
-                                "<p><b>", private$.safeHtmlOutput(predictor), " (", k, "-Fold CV):</b> Mean AUC = ", round(mean_cv_auc, 3),
-                                " (SD = ", round(sd_cv_auc, 3), ")</p>"
-                            )
+                            pred_text <- paste0(pred_text, "<p>", jmvcore::htmlEscape(.fmt(
+                                .("{pred} ({k}-Fold CV): Mean AUC = {mean} (SD = {sd})"),
+                                pred = predictor, k = k,
+                                mean = round(mean_cv_auc, 3), sd = round(sd_cv_auc, 3)
+                            )), "</p>")
                         }
 
                         pred_text # return the text for this predictor
                     },
                     error = function(e) {
-                        paste0("<p>Validation failed for ", private$.safeHtmlOutput(predictor), ": ", private$.safeHtmlOutput(e$message), "</p>")
+                        paste0("<p>", jmvcore::htmlEscape(.fmt(
+                            .("Validation failed for {pred}: {msg}"),
+                            pred = predictor, msg = conditionMessage(e)
+                        )), "</p>")
                     }
                 )
 

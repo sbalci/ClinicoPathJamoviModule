@@ -27,14 +27,17 @@ items:
       title: Clinical Interpretation
       type: Table
       rows: 0
-      visible: (clinicalMode:basic || clinicalMode:advanced || clinicalMode:comprehensive)
+      # Was `visible: (clinicalMode:basic || clinicalMode:advanced || clinicalMode:comprehensive)`,
+      # which lists every level the option has and so was a tautology dressed up as a gate.
+      # clinicalMode is dropped from clearWith too: nothing in this table's contents
+      # depends on it.
+      visible: true
       clearWith:
           - dependentVars
           - classVar
           - positiveClass
           - subGroup
           - direction
-          - clinicalMode
       columns:
         - name: variable
           title: Test
@@ -80,7 +83,6 @@ items:
           - name: cutpoint
             title: Cutpoint
             type: number
-            format: zto
           - name: sensitivity
             title: Sensitivity
             type: number
@@ -122,6 +124,7 @@ items:
         - method
         - allObserved
         - specifyCutScore
+        - direction
       template:
         type: Html
 
@@ -142,10 +145,14 @@ items:
         - usePriorPrev
         - priorPrev
       columns:
+        # Every marker's thresholds go into this one flat table; without this column the
+        # rows carried no marker identity at all (only the invisible rowKey).
+        - name: variable
+          title: Test Variable
+          type: text
         - name: threshold
           title: Cut-off
           type: number
-          format: zto
         - name: sensitivity
           title: Sensitivity
           type: number
@@ -169,11 +176,9 @@ items:
         - name: plr
           title: +LR
           type: number
-          format: zto
         - name: nlr
           title: -LR
           type: number
-          format: zto
         - name: youden
           title: "Youden's J"
           type: number
@@ -195,6 +200,7 @@ items:
         - fixedSensitivityValue
         - fixedSpecificityValue
         - fixedInterpolation
+        - direction
       columns:
         - name: variable
           title: Variable
@@ -209,7 +215,6 @@ items:
         - name: cutpoint
           title: Determined Cutpoint
           type: number
-          format: zto
         - name: achieved_sensitivity
           title: Achieved Sensitivity
           type: number
@@ -283,10 +288,15 @@ items:
       type: Table
       rows: 0
       visible: (delongTest)
+      # delongTest itself must be in clearWith: without it, unticking and re-ticking the
+      # option never clears the table, and addRow() (which has no duplicate-key check)
+      # appends a second copy of every pairwise comparison.
       clearWith:
         - dependentVars
         - classVar
         - positiveClass
+        - direction
+        - delongTest
       columns:
         - name: comparison
           title: Comparison
@@ -306,7 +316,6 @@ items:
         - name: z
           title: Z-statistic
           type: number
-          format: zto
         - name: p
           title: p-value
           type: number
@@ -320,6 +329,8 @@ items:
         - dependentVars
         - classVar
         - positiveClass
+        - direction
+        - delongTest
       refs:
         - DeLong1988
 
@@ -347,6 +358,16 @@ items:
           - showConfidenceBands
           - quantileCIs
           - combinePlots
+          # jmvcore never re-renders a FILLED image: Image$fromProtoBuf() restores filePath
+          # and returns unless an option in THIS item's own clearWith changed. These five are
+          # read by .plotROC() (legendPosition b.R:4212, rocSmoothingMethod :4263,
+          # displaySE :4311, directLabel :4404, quantiles :4484), so without them the curve
+          # kept its previous appearance while the tables beside it recomputed.
+          - legendPosition
+          - rocSmoothingMethod
+          - displaySE
+          - directLabel
+          - quantiles
 
     - name: interactivePlot
       title: Interactive ROC Plot
@@ -360,8 +381,11 @@ items:
         - classVar
         - positiveClass
         - subGroup
-      refs: 
-        - plotROC
+        - direction
+      # The plotROC package ref was removed: grep 'plotROC::' over the backend returns 0 -
+      # every figure here is built with ggplot2, so citing Sachs' package in an exported
+      # reference list is a citation error. (The ref key also collided with the option name
+      # of the same spelling.)
 
     - name: fixedSensSpecROC
       title: Fixed Sensitivity/Specificity ROC Curves
@@ -381,6 +405,7 @@ items:
           - fixedSensitivityValue
           - fixedSpecificityValue
           - fixedInterpolation
+          - direction
 
     # ==========================================
     # ADDITIONAL PLOTS
@@ -403,6 +428,7 @@ items:
           - method
           - metric
           - direction
+          - combinePlots
 
     - name: prevalencePlot
       title: Predictive Values vs. Prevalence
@@ -421,11 +447,15 @@ items:
           - subGroup
           - usePriorPrev
           - priorPrev
+          - combinePlots
 
     - name: dotPlot
       title: Test Values Distribution
+      # Dot plots are not drawn in combined mode. This was previously done with an
+      # imperative setVisible(FALSE) in .run() that had no matching setVisible(TRUE), so
+      # the plots never came back when the user left combined mode.
       type: Array
-      visible: (showDotPlot)
+      visible: (showDotPlot && !combinePlots)
       template:
         title: $key
         type: Image
@@ -438,6 +468,7 @@ items:
           - positiveClass
           - subGroup
           - direction
+          - combinePlots
 
     - name: dotPlotMessage
       title: Dot Plot Note
@@ -458,6 +489,8 @@ items:
           - classVar
           - positiveClass
           - subGroup
+          - direction
+          - combinePlots
 
     # ==========================================
     # ADVANCED ANALYSES - Model comparison
@@ -560,6 +593,7 @@ items:
         - dependentVars
         - classVar
         - positiveClass
+        - direction
       columns:
         - name: comparison
           title: Comparison
@@ -567,23 +601,18 @@ items:
         - name: d_first
           title: Cohen's d (first)
           type: number
-          format: zto
         - name: d_second
           title: Cohen's d (second)
           type: number
-          format: zto
         - name: cohens_d
           title: Δ Cohen's d
           type: number
-          format: zto
         - name: glass_delta
           title: Δ Glass' Δ
           type: number
-          format: zto
         - name: hedges_g
           title: Δ Hedges' g
           type: number
-          format: zto
         - name: effect_magnitude
           title: Size of difference
           type: text
@@ -606,6 +635,7 @@ items:
         - targetPower
         - expectedAUCDifference
         - significanceLevel
+        - direction
       columns:
         - name: variable
           title: Variable
@@ -620,16 +650,17 @@ items:
         - name: target_effect_size
           title: Target Effect Size
           type: number
-          format: zto
         - name: power_adequacy
           title: Power Adequacy
           type: text
         - name: recommendation
           title: Recommendation
           type: text
-      refs:
-        - Cohen1988
-        - Faul2007
+      # Cohen1988 and Faul2007 (G*Power) were removed: this table's power and required N
+      # come from the Hanley-McNeil AUC variance, not from Cohen's conventions or G*Power,
+      # and the table's own methodology note already names the right sources. No ref key
+      # exists for Hanley & McNeil (1982) or Obuchowski & McClish (1997) in 00refs.yaml, so
+      # none can be cited here yet.
 
     - name: bayesianROCTable
       title: Bootstrap ROC Analysis with Prior Weighting
@@ -642,6 +673,7 @@ items:
         - positiveClass
         - priorAUC
         - priorPrecision
+        - direction
       columns:
         - name: variable
           title: Variable
@@ -650,27 +682,30 @@ items:
           title: Weighted Bootstrap AUC
           type: number
           format: zto
+        # NOT "95% Bootstrap CI": these are the 2.5/97.5 percentiles of the PRIOR-WEIGHTED
+        # resampled AUCs, so they bracket the Weighted Bootstrap AUC beside them and are
+        # narrower than an interval for the AUC by the factor n / (n + prior precision).
         - name: credible_lower
-          title: 95% Bootstrap CI Lower
+          title: 95% Interval Lower (weighted AUC)
           type: number
           format: zto
         - name: credible_upper
-          title: 95% Bootstrap CI Upper
+          title: 95% Interval Upper (weighted AUC)
           type: number
           format: zto
         - name: bayes_factor
           title: Bootstrap Evidence Ratio
           type: number
-          format: zto
         - name: evidence_strength
           title: Evidence Strength
           type: text
         - name: prior_influence
           title: Prior Influence
           type: text
-      refs:
-        - Kruschke2014
-        - McElreath2020
+      # refs Kruschke2014 / McElreath2020 removed: nothing in this table is Bayesian.
+      # The "Bootstrap Evidence Ratio" is a bootstrap tail count, not a Bayes factor, and
+      # citing Bayesian texts beside it implied a marginal-likelihood calculation that
+      # never happens. (Both refs remain defined in 00refs.yaml for any genuine use.)
 
     - name: clinicalUtilityTable
       title: Clinical Utility Analysis
@@ -684,6 +719,7 @@ items:
         - treatmentThreshold
         - harmBenefitRatio
         - interventionCost
+        - direction
       columns:
         - name: variable
           title: Variable
@@ -734,6 +770,9 @@ items:
         - dependentVars
         - classVar
         - positiveClass
+        - direction
+        - metaAnalysisMethod
+        - heterogeneityTest
       columns:
         - name: model_type
           title: Model Type
@@ -757,11 +796,9 @@ items:
         - name: tau_squared
           title: τ² Between-Study Variance
           type: number
-          format: zto
         - name: cochran_q
           title: Cochran's Q
           type: number
-          format: zto
         - name: q_p_value
           title: Q p-value
           type: number
@@ -782,6 +819,7 @@ items:
         - treatmentThreshold
         - harmBenefitRatio
         - interventionCost
+        - direction
       columns:
         - name: variable
           title: Variable
@@ -818,6 +856,7 @@ items:
         - positiveClass
         - partialAUCfrom
         - partialAUCto
+        - direction
       columns:
         - name: variable
           title: Variable
@@ -854,6 +893,7 @@ items:
         - classVar
         - positiveClass
         - bootstrapReps
+        - direction
       columns:
         - name: variable
           title: Variable
@@ -883,6 +923,7 @@ items:
         - dependentVars
         - classVar
         - positiveClass
+        - direction
       columns:
         - name: variable
           title: Variable
@@ -920,6 +961,9 @@ items:
       type: Array
       visible: (effectSizeAnalysis)
       template:
+        # The single item holds ALL pairwise comparisons, so it must not be headed by an
+        # item key that names one marker.
+        title: All pairwise comparisons
         type: Image
         width: 600
         height: 400
@@ -992,6 +1036,9 @@ items:
           - dependentVars
           - classVar
           - positiveClass
+          - metaAnalysisMethod
+          - forestPlot
+          - direction
 
 # ==========================================
 # REFERENCES
@@ -1005,7 +1052,6 @@ refs:
     - ClinicoPathJamoviModule
     - cutpointr
     - pROC
-    - plotROC
     - MASS
     - tools
     # - Cohen1988

@@ -359,12 +359,36 @@ testthat::test_that("runtime dependencies are declared at the correct strength",
   used <- list()
   defined <- character(0)
 
-  walk <- function(expr, file, line) {
+  # plotmath keywords: the call heads in ?plotmath's syntax table (grDevices)
+  # that no always-attached package defines, plus vphantom, which the renderer
+  # takes but the table omits. Inside quote()/bquote()/expression()/
+  # substitute() they are drawn, never called: jjstatsplot's
+  # bquote(atop(...)) seed caption failed CI here (2026-09-30). They are exempt
+  # ONLY there, not in .dependency_guard_language_symbols(): bold and italic
+  # (crayon, flextable), %<-% and %->% (zeallot, future, igraph), ring, group,
+  # integral, %.% and %<=% are real functions elsewhere, so a bare call must
+  # still resolve. Every other name inside those calls is still checked -- an
+  # eval(bquote(.(d) %>% head())) template does run. Plain plotmath symbols
+  # (degree, infinity, cdots, ...) are never call heads and need no entry.
+  plotmath <- c(
+    "plain", "bold", "italic", "bolditalic", "symbol", "underline",
+    "tilde", "dot", "ring", "bar", "widehat", "widetilde",
+    "displaystyle", "textstyle", "scriptstyle", "scriptscriptstyle",
+    "phantom", "vphantom", "frac", "over", "atop", "group", "bgroup",
+    "integral", "lim", "inf", "sup",
+    "%+-%", "%.%", "%~~%", "%=~%", "%==%", "%prop%", "%~%",
+    "%subset%", "%subseteq%", "%notsubset%", "%supset%", "%supseteq%",
+    "%<->%", "%->%", "%<-%", "%up%", "%down%", "%<=>%", "%=>%", "%<=%",
+    "%dblup%", "%dbldown%"
+  )
+
+  walk <- function(expr, file, line, markup = FALSE) {
     if (!is.call(expr)) return(invisible(NULL))
     srcref <- attr(expr, "srcref")
     if (inherits(srcref, "srcref")) line <- as.integer(srcref)[1]
 
     head <- expr[[1]]
+    head_name <- if (is.symbol(head)) as.character(head) else ""
 
     if ((identical(head, as.name("<-")) || identical(head, as.name("=")) ||
          identical(head, as.name("<<-"))) && length(expr) >= 2) {
@@ -383,12 +407,12 @@ testthat::test_that("runtime dependencies are declared at the correct strength",
     if (identical(head, as.name("::")) || identical(head, as.name(":::")) ||
         identical(head, as.name("$")) || identical(head, as.name("@"))) {
       for (i in seq_along(expr)[-1]) {
-        if (is.call(expr[[i]])) walk(expr[[i]], file, line)
+        if (is.call(expr[[i]])) walk(expr[[i]], file, line, markup)
       }
       return(invisible(NULL))
     }
 
-    if (is.symbol(head)) {
+    if (is.symbol(head) && !(markup && head_name %in% plotmath)) {
       name <- as.character(head)
       previous <- used[[name]]
       if (is.null(previous)) {
@@ -399,9 +423,26 @@ testthat::test_that("runtime dependencies are declared at the correct strength",
       }
     }
 
+    # Markup is what a quoting call leaves unevaluated: every argument of
+    # expression(), and only the expr argument of quote()/bquote()/
+    # substitute(). bquote()'s where and splice, substitute()'s env, and
+    # bquote()'s .() and ..() escapes are evaluated, so they stay checked.
+    # Only these bare base heads count, so plotmath under base::bquote(),
+    # rlang::expr() or ggplot2::label_bquote() is still reported: extend
+    # this list then, never import a plotmath keyword.
+    markup <- markup && !head_name %in% c(".", "..")
+    quoted <- if (head_name == "expression") seq_along(expr)[-1] else integer(0)
+    if (head_name %in% c("quote", "bquote", "substitute")) {
+      # expr is the argument named expr, else the first unnamed one
+      arg_names <- names(expr)
+      if (is.null(arg_names)) arg_names <- character(length(expr))
+      quoted <- match("expr", arg_names)
+      if (is.na(quoted)) quoted <- match("", arg_names[-1]) + 1L
+    }
+
     for (i in seq_along(expr)) {
       if (i == 1 && is.symbol(head)) next
-      walk(expr[[i]], file, line)
+      walk(expr[[i]], file, line, markup || i %in% quoted)
     }
     invisible(NULL)
   }
@@ -491,6 +532,9 @@ testthat::test_that("runtime dependencies are declared at the correct strength",
   # cluster(), frailty(), tt(), pspline() and mgcv's s()/te()/ti(). Those ARE
   # resolved through the namespace when the model function evaluates the
   # formula, so a missing importFrom for them is a real break, not noise.
+  # Nor plotmath keywords (atop, italic, ...): tools/submodule_smoke.R shares
+  # this list, and they are exempt only inside quoting calls -- see
+  # .dependency_guard_symbol_use().
 }
 
 testthat::test_that("bare symbols used as functions resolve from the package namespace", {

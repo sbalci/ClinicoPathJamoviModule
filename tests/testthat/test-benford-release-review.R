@@ -337,7 +337,7 @@ test_that("the plot state carries no per-observation table", {
   expect_equal(nrow(st$bfd), 90L)         # the aggregated table the plot needs
 })
 
-test_that("every translated template is a jmvcore::format placeholder string", {
+test_that("every translated template is a .fmt placeholder string", {
   # sprintf()/glue() with a .() template crash .run() (sprintf) or EVAL the
   # brace contents (glue) if a translator drops, reorders or mistypes a
   # specifier. jmvcore::format does plain substitution and degrades to an
@@ -353,22 +353,21 @@ test_that("every translated template is a jmvcore::format placeholder string", {
     expect_false(any(grepl('^\\s*\\.\\("', code[opens + 1])))
 })
 
-test_that("no jmvcore::format placeholder can swallow its own template", {
-  # jmvcore::format(str, ..., context). `str` sits BEFORE `...`, so R partial
-  # matching binds an argument named s/st/str to the TEMPLATE slot: the real
-  # template slides into `...` and the call returns only that one value, with
-  # the whole sentence gone and no error raised. Underscored placeholders ship
-  # as literal braces. Both are silent, so they are asserted here rather than
-  # left to review.
+test_that("no .fmt placeholder can swallow its own template", {
+  # Retargeted from jmvcore::format to .fmt when the module-wide sweep converted
+  # every call site: matching the old name here would find nothing and this guard
+  # would pass while testing nothing.
+  # .fmt(.format_string, ...) delegates to jmvcore::format(str, ..., context), so
+  # an argument named `context` still binds to that real formal instead of
+  # substituting, and the value vanishes from the sentence. Underscored
+  # placeholders ship as literal braces. Both are silent, so they are asserted
+  # here rather than left to review.
   exprs <- parse("../../R/benford.b.R")
   problems <- character(0)
   walk <- function(e) {
     if (!is.call(e)) return(invisible())
     fn <- e[[1]]
-    if (is.call(fn) && length(fn) == 3 &&
-        identical(as.character(fn[[1]]), "::") &&
-        identical(as.character(fn[[3]]), "format") &&
-        identical(as.character(fn[[2]]), "jmvcore")) {
+    if (is.name(fn) && identical(as.character(fn), ".fmt")) {
       args <- as.list(e)[-1]
       tmpl <- args[[1]]
       lit <- if (is.call(tmpl) && identical(as.character(tmpl[[1]]), "."))
@@ -386,7 +385,7 @@ test_that("no jmvcore::format placeholder can swallow its own template", {
           problems <<- c(problems, paste("argument without placeholder:", tag))
         if (length(grep("_", ph)))
           problems <<- c(problems, paste("underscored placeholder:", tag))
-        if (length(intersect(supplied, c("s", "st", "str", "context"))))
+        if (length(intersect(supplied, "context")))
           problems <<- c(problems, paste("SWALLOWS TEMPLATE:", tag))
       }
     }

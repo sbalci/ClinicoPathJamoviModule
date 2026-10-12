@@ -1,7 +1,8 @@
-
-# Source the function files
-source("../../R/dendrogram.h.R")
-source("../../R/dendrogram.b.R")
+# Do not source() R/*.h.R / R/*.b.R here: a source() preamble detaches the package namespace,
+# jmvcore's .() helper leaves scope and any .() string dies with `could not find function "."`
+# (project reference test-source-preamble-breaks-dot-translate). The package provides these.
+dendrogramOptions <- getFromNamespace("dendrogramOptions", "ClinicoPath")
+dendrogramClass   <- getFromNamespace("dendrogramClass",   "ClinicoPath")
 
 test_that("dendrogram works with basic linear plot", {
   skip_if_not_installed('jmvReadWrite')

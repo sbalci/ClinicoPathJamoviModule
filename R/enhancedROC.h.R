@@ -10,7 +10,7 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             positiveClass = NULL,
             predictors = NULL,
             analysisType = "single",
-            direction = "auto",
+            direction = "higher",
             youdenOptimization = TRUE,
             customCutoffs = "",
             sensitivityThreshold = 0,
@@ -19,7 +19,6 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             bootstrapSamples = 1000,
             useBootstrap = FALSE,
             bootstrapMethod = "bca",
-            bootstrapCutoffCI = FALSE,
             bootstrapPartialAUC = FALSE,
             stratifiedBootstrap = FALSE,
             seed = 0,
@@ -65,9 +64,6 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             splineCalibration = FALSE,
             splineKnots = 4,
             eoRatio = FALSE,
-            namDagostino = FALSE,
-            greenwoodNam = FALSE,
-            calibrationBelt = FALSE,
             calibrationDensity = FALSE,
             multiClassROC = FALSE,
             multiClassStrategy = "ovr",
@@ -76,19 +72,9 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             nntCalculation = FALSE,
             clinicalUtilityCurve = FALSE,
             decisionImpactTable = FALSE,
-            harrellCIndex = FALSE,
-            unoCStatistic = FALSE,
-            incidentDynamic = FALSE,
-            cumulativeDynamic = FALSE,
-            competingRisksConcordance = FALSE,
             internalValidation = FALSE,
             validationMethod = "bootstrap",
-            optimismCorrection = FALSE,
-            externalValidation = FALSE,
-            decisionImpactCurves = FALSE,
-            netBenefitRegression = FALSE,
-            modelUpdating = FALSE,
-            transportability = FALSE, ...) {
+            decisionImpactCurves = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -131,7 +117,7 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "auto",
                     "higher",
                     "lower"),
-                default="auto")
+                default="higher")
             private$..youdenOptimization <- jmvcore::OptionBool$new(
                 "youdenOptimization",
                 youdenOptimization,
@@ -176,10 +162,6 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "bca",
                     "basic"),
                 default="bca")
-            private$..bootstrapCutoffCI <- jmvcore::OptionBool$new(
-                "bootstrapCutoffCI",
-                bootstrapCutoffCI,
-                default=FALSE)
             private$..bootstrapPartialAUC <- jmvcore::OptionBool$new(
                 "bootstrapPartialAUC",
                 bootstrapPartialAUC,
@@ -405,18 +387,6 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 "eoRatio",
                 eoRatio,
                 default=FALSE)
-            private$..namDagostino <- jmvcore::OptionBool$new(
-                "namDagostino",
-                namDagostino,
-                default=FALSE)
-            private$..greenwoodNam <- jmvcore::OptionBool$new(
-                "greenwoodNam",
-                greenwoodNam,
-                default=FALSE)
-            private$..calibrationBelt <- jmvcore::OptionBool$new(
-                "calibrationBelt",
-                calibrationBelt,
-                default=FALSE)
             private$..calibrationDensity <- jmvcore::OptionBool$new(
                 "calibrationDensity",
                 calibrationDensity,
@@ -455,26 +425,6 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 "decisionImpactTable",
                 decisionImpactTable,
                 default=FALSE)
-            private$..harrellCIndex <- jmvcore::OptionBool$new(
-                "harrellCIndex",
-                harrellCIndex,
-                default=FALSE)
-            private$..unoCStatistic <- jmvcore::OptionBool$new(
-                "unoCStatistic",
-                unoCStatistic,
-                default=FALSE)
-            private$..incidentDynamic <- jmvcore::OptionBool$new(
-                "incidentDynamic",
-                incidentDynamic,
-                default=FALSE)
-            private$..cumulativeDynamic <- jmvcore::OptionBool$new(
-                "cumulativeDynamic",
-                cumulativeDynamic,
-                default=FALSE)
-            private$..competingRisksConcordance <- jmvcore::OptionBool$new(
-                "competingRisksConcordance",
-                competingRisksConcordance,
-                default=FALSE)
             private$..internalValidation <- jmvcore::OptionBool$new(
                 "internalValidation",
                 internalValidation,
@@ -487,29 +437,9 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "cv",
                     "both"),
                 default="bootstrap")
-            private$..optimismCorrection <- jmvcore::OptionBool$new(
-                "optimismCorrection",
-                optimismCorrection,
-                default=FALSE)
-            private$..externalValidation <- jmvcore::OptionBool$new(
-                "externalValidation",
-                externalValidation,
-                default=FALSE)
             private$..decisionImpactCurves <- jmvcore::OptionBool$new(
                 "decisionImpactCurves",
                 decisionImpactCurves,
-                default=FALSE)
-            private$..netBenefitRegression <- jmvcore::OptionBool$new(
-                "netBenefitRegression",
-                netBenefitRegression,
-                default=FALSE)
-            private$..modelUpdating <- jmvcore::OptionBool$new(
-                "modelUpdating",
-                modelUpdating,
-                default=FALSE)
-            private$..transportability <- jmvcore::OptionBool$new(
-                "transportability",
-                transportability,
                 default=FALSE)
 
             self$.addOption(private$..outcome)
@@ -525,7 +455,6 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             self$.addOption(private$..bootstrapSamples)
             self$.addOption(private$..useBootstrap)
             self$.addOption(private$..bootstrapMethod)
-            self$.addOption(private$..bootstrapCutoffCI)
             self$.addOption(private$..bootstrapPartialAUC)
             self$.addOption(private$..stratifiedBootstrap)
             self$.addOption(private$..seed)
@@ -571,9 +500,6 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             self$.addOption(private$..splineCalibration)
             self$.addOption(private$..splineKnots)
             self$.addOption(private$..eoRatio)
-            self$.addOption(private$..namDagostino)
-            self$.addOption(private$..greenwoodNam)
-            self$.addOption(private$..calibrationBelt)
             self$.addOption(private$..calibrationDensity)
             self$.addOption(private$..multiClassROC)
             self$.addOption(private$..multiClassStrategy)
@@ -582,19 +508,9 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             self$.addOption(private$..nntCalculation)
             self$.addOption(private$..clinicalUtilityCurve)
             self$.addOption(private$..decisionImpactTable)
-            self$.addOption(private$..harrellCIndex)
-            self$.addOption(private$..unoCStatistic)
-            self$.addOption(private$..incidentDynamic)
-            self$.addOption(private$..cumulativeDynamic)
-            self$.addOption(private$..competingRisksConcordance)
             self$.addOption(private$..internalValidation)
             self$.addOption(private$..validationMethod)
-            self$.addOption(private$..optimismCorrection)
-            self$.addOption(private$..externalValidation)
             self$.addOption(private$..decisionImpactCurves)
-            self$.addOption(private$..netBenefitRegression)
-            self$.addOption(private$..modelUpdating)
-            self$.addOption(private$..transportability)
         }),
     active = list(
         outcome = function() private$..outcome$value,
@@ -610,7 +526,6 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         bootstrapSamples = function() private$..bootstrapSamples$value,
         useBootstrap = function() private$..useBootstrap$value,
         bootstrapMethod = function() private$..bootstrapMethod$value,
-        bootstrapCutoffCI = function() private$..bootstrapCutoffCI$value,
         bootstrapPartialAUC = function() private$..bootstrapPartialAUC$value,
         stratifiedBootstrap = function() private$..stratifiedBootstrap$value,
         seed = function() private$..seed$value,
@@ -656,9 +571,6 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         splineCalibration = function() private$..splineCalibration$value,
         splineKnots = function() private$..splineKnots$value,
         eoRatio = function() private$..eoRatio$value,
-        namDagostino = function() private$..namDagostino$value,
-        greenwoodNam = function() private$..greenwoodNam$value,
-        calibrationBelt = function() private$..calibrationBelt$value,
         calibrationDensity = function() private$..calibrationDensity$value,
         multiClassROC = function() private$..multiClassROC$value,
         multiClassStrategy = function() private$..multiClassStrategy$value,
@@ -667,19 +579,9 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         nntCalculation = function() private$..nntCalculation$value,
         clinicalUtilityCurve = function() private$..clinicalUtilityCurve$value,
         decisionImpactTable = function() private$..decisionImpactTable$value,
-        harrellCIndex = function() private$..harrellCIndex$value,
-        unoCStatistic = function() private$..unoCStatistic$value,
-        incidentDynamic = function() private$..incidentDynamic$value,
-        cumulativeDynamic = function() private$..cumulativeDynamic$value,
-        competingRisksConcordance = function() private$..competingRisksConcordance$value,
         internalValidation = function() private$..internalValidation$value,
         validationMethod = function() private$..validationMethod$value,
-        optimismCorrection = function() private$..optimismCorrection$value,
-        externalValidation = function() private$..externalValidation$value,
-        decisionImpactCurves = function() private$..decisionImpactCurves$value,
-        netBenefitRegression = function() private$..netBenefitRegression$value,
-        modelUpdating = function() private$..modelUpdating$value,
-        transportability = function() private$..transportability$value),
+        decisionImpactCurves = function() private$..decisionImpactCurves$value),
     private = list(
         ..outcome = NA,
         ..positiveClass = NA,
@@ -694,7 +596,6 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         ..bootstrapSamples = NA,
         ..useBootstrap = NA,
         ..bootstrapMethod = NA,
-        ..bootstrapCutoffCI = NA,
         ..bootstrapPartialAUC = NA,
         ..stratifiedBootstrap = NA,
         ..seed = NA,
@@ -740,9 +641,6 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         ..splineCalibration = NA,
         ..splineKnots = NA,
         ..eoRatio = NA,
-        ..namDagostino = NA,
-        ..greenwoodNam = NA,
-        ..calibrationBelt = NA,
         ..calibrationDensity = NA,
         ..multiClassROC = NA,
         ..multiClassStrategy = NA,
@@ -751,19 +649,9 @@ enhancedROCOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         ..nntCalculation = NA,
         ..clinicalUtilityCurve = NA,
         ..decisionImpactTable = NA,
-        ..harrellCIndex = NA,
-        ..unoCStatistic = NA,
-        ..incidentDynamic = NA,
-        ..cumulativeDynamic = NA,
-        ..competingRisksConcordance = NA,
         ..internalValidation = NA,
         ..validationMethod = NA,
-        ..optimismCorrection = NA,
-        ..externalValidation = NA,
-        ..decisionImpactCurves = NA,
-        ..netBenefitRegression = NA,
-        ..modelUpdating = NA,
-        ..transportability = NA)
+        ..decisionImpactCurves = NA)
 )
 
 enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -785,7 +673,10 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "AustinSteyerberg2019ICI",
                     "boot",
                     "caret",
-                    "splines"))
+                    "splines",
+                    "Kerr2016DCA",
+                    "Vickers2019DCA",
+                    "McClish1989"))
             self$add(R6::R6Class(
                 inherit = jmvcore::Group,
                 active = list(
@@ -825,7 +716,8 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     multiClassROCPlot = function() private$.items[["multiClassROCPlot"]],
                     clinicalImpactTable = function() private$.items[["clinicalImpactTable"]],
                     decisionImpactSummary = function() private$.items[["decisionImpactSummary"]],
-                    clinicalUtilityPlot = function() private$.items[["clinicalUtilityPlot"]]),
+                    clinicalUtilityPlot = function() private$.items[["clinicalUtilityPlot"]],
+                    decisionImpactPlot = function() private$.items[["decisionImpactPlot"]]),
                 private = list(),
                 public=list(
                     initialize=function(options) {
@@ -841,7 +733,10 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                 "outcome",
                                 "predictors",
                                 "detectImbalance",
-                                "analysisType")))
+                                "analysisType",
+                                "imbalanceThreshold",
+                                "recommendPRC",
+                                "showImbalanceWarning")))
                         self$add(jmvcore::Html$new(
                             options=options,
                             name="instructions",
@@ -849,7 +744,8 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             visible=TRUE,
                             clearWith=list(
                                 "outcome",
-                                "predictors")))
+                                "predictors",
+                                "clinicalContext")))
                         self$add(jmvcore::Table$new(
                             options=options,
                             name="imbalanceMetrics",
@@ -901,7 +797,8 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             clearWith=list(
                                 "outcome",
                                 "predictors",
-                                "positiveClass"),
+                                "positiveClass",
+                                "direction"),
                             rows=1,
                             columns=list(
                                 list(
@@ -944,7 +841,11 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                 "positiveClass",
                                 "internalValidation",
                                 "validationMethod",
-                                "bootstrapSamples")))
+                                "bootstrapSamples",
+                                "clinicalContext",
+                                "seed",
+                                "direction",
+                                "confidenceLevel")))
                         self$add(jmvcore::Html$new(
                             options=options,
                             name="clinicalReport",
@@ -953,7 +854,22 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             clearWith=list(
                                 "outcome",
                                 "predictors",
-                                "positiveClass")))
+                                "positiveClass",
+                                "clinicalContext",
+                                "direction",
+                                "confidenceLevel",
+                                "useBootstrap",
+                                "bootstrapMethod",
+                                "bootstrapSamples",
+                                "stratifiedBootstrap",
+                                "seed",
+                                "youdenOptimization",
+                                "sensitivityThreshold",
+                                "specificityThreshold",
+                                "clinicalPresets",
+                                "analysisType",
+                                "pairwiseComparisons",
+                                "comparisonMethod")))
                         self$add(jmvcore::Table$new(
                             options=options,
                             name="aucSummary",
@@ -969,7 +885,8 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                 "bootstrapMethod",
                                 "bootstrapSamples",
                                 "stratifiedBootstrap",
-                                "seed"),
+                                "seed",
+                                "clinicalContext"),
                             columns=list(
                                 list(
                                     `name`="predictor", 
@@ -1012,7 +929,11 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                 "outcome",
                                 "predictors",
                                 "positiveClass",
-                                "comparisonMethod"),
+                                "comparisonMethod",
+                                "clinicalContext",
+                                "bootstrapSamples",
+                                "seed",
+                                "direction"),
                             columns=list(
                                 list(
                                     `name`="predictor1", 
@@ -1030,8 +951,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                 list(
                                     `name`="test_statistic", 
                                     `title`="Test Statistic", 
-                                    `type`="number", 
-                                    `format`="zto"),
+                                    `type`="number"),
                                 list(
                                     `name`="p_value", 
                                     `title`="p-value", 
@@ -1053,7 +973,14 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             clearWith=list(
                                 "outcome",
                                 "predictors",
-                                "positiveClass"),
+                                "positiveClass",
+                                "direction",
+                                "comparisonMethod",
+                                "seed",
+                                "youdenOptimization",
+                                "sensitivityThreshold",
+                                "specificityThreshold",
+                                "clinicalPresets"),
                             columns=list(
                                 list(
                                     `name`="metric", 
@@ -1078,17 +1005,12 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                     `name`="percent_change", 
                                     `title`="% Change", 
                                     `type`="number", 
-                                    `format`="pc"),
+                                    `format`="dp:1"),
                                 list(
                                     `name`="p_value", 
                                     `title`="p-value", 
                                     `type`="number", 
                                     `format`="zto,pvalue"),
-                                list(
-                                    `name`="effect_size", 
-                                    `title`="Effect Size", 
-                                    `type`="number", 
-                                    `format`="zto"),
                                 list(
                                     `name`="interpretation", 
                                     `title`="Clinical Interpretation", 
@@ -1102,7 +1024,10 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                 "outcome",
                                 "predictors",
                                 "positiveClass",
-                                "comparisonMethod"),
+                                "comparisonMethod",
+                                "bootstrapSamples",
+                                "seed",
+                                "direction"),
                             columns=list(
                                 list(
                                     `name`="test_name", 
@@ -1111,8 +1036,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                 list(
                                     `name`="test_statistic", 
                                     `title`="Test Statistic", 
-                                    `type`="number", 
-                                    `format`="zto"),
+                                    `type`="number"),
                                 list(
                                     `name`="p_value", 
                                     `title`="p-value", 
@@ -1139,7 +1063,8 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                 "youdenOptimization",
                                 "sensitivityThreshold",
                                 "specificityThreshold",
-                                "clinicalPresets"),
+                                "clinicalPresets",
+                                "clinicalContext"),
                             columns=list(
                                 list(
                                     `name`="predictor", 
@@ -1148,8 +1073,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                 list(
                                     `name`="optimal_cutoff", 
                                     `title`="Optimal Cutoff", 
-                                    `type`="number", 
-                                    `format`="zto"),
+                                    `type`="number"),
                                 list(
                                     `name`="youden_index", 
                                     `title`="Youden Index", 
@@ -1197,8 +1121,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                 list(
                                     `name`="cutoff", 
                                     `title`="Cutoff", 
-                                    `type`="number", 
-                                    `format`="zto"),
+                                    `type`="number"),
                                 list(
                                     `name`="cutoff_type", 
                                     `title`="Cutoff Type", 
@@ -1252,7 +1175,8 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                 "youdenOptimization",
                                 "sensitivityThreshold",
                                 "specificityThreshold",
-                                "clinicalPresets"),
+                                "clinicalPresets",
+                                "confidenceLevel"),
                             columns=list(
                                 list(
                                     `name`="predictor", 
@@ -1261,8 +1185,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                 list(
                                     `name`="cutoff", 
                                     `title`="Cutoff", 
-                                    `type`="number", 
-                                    `format`="zto"),
+                                    `type`="number"),
                                 list(
                                     `name`="sensitivity", 
                                     `title`="Sensitivity", 
@@ -1270,7 +1193,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                     `format`="zto"),
                                 list(
                                     `name`="sensitivity_ci", 
-                                    `title`="Sensitivity 95% CI", 
+                                    `title`="Sensitivity CI", 
                                     `type`="text"),
                                 list(
                                     `name`="specificity", 
@@ -1279,7 +1202,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                     `format`="zto"),
                                 list(
                                     `name`="specificity_ci", 
-                                    `title`="Specificity 95% CI", 
+                                    `title`="Specificity CI", 
                                     `type`="text"),
                                 list(
                                     `name`="accuracy", 
@@ -1306,7 +1229,8 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                 "youdenOptimization",
                                 "sensitivityThreshold",
                                 "specificityThreshold",
-                                "clinicalPresets"),
+                                "clinicalPresets",
+                                "clinicalContext"),
                             columns=list(
                                 list(
                                     `name`="predictor", 
@@ -1330,18 +1254,15 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                 list(
                                     `name`="lr_positive", 
                                     `title`="LR+", 
-                                    `type`="number", 
-                                    `format`="zto"),
+                                    `type`="number"),
                                 list(
                                     `name`="lr_negative", 
                                     `title`="LR-", 
-                                    `type`="number", 
-                                    `format`="zto"),
+                                    `type`="number"),
                                 list(
                                     `name`="diagnostic_odds_ratio", 
                                     `title`="Diagnostic OR", 
-                                    `type`="number", 
-                                    `format`="zto"),
+                                    `type`="number"),
                                 list(
                                     `name`="clinical_interpretation", 
                                     `title`="Clinical Interpretation", 
@@ -1357,7 +1278,14 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                 "positiveClass",
                                 "direction",
                                 "partialRange",
-                                "partialAucType"),
+                                "partialAucType",
+                                "bootstrapPartialAUC",
+                                "bootstrapSamples",
+                                "bootstrapMethod",
+                                "stratifiedBootstrap",
+                                "confidenceLevel",
+                                "seed",
+                                "clinicalContext"),
                             columns=list(
                                 list(
                                     `name`="predictor", 
@@ -1383,6 +1311,18 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                     `type`="number", 
                                     `format`="zto"),
                                 list(
+                                    `name`="partial_auc_lower", 
+                                    `title`="pAUC Lower CI", 
+                                    `type`="number", 
+                                    `format`="zto", 
+                                    `visible`="(bootstrapPartialAUC)"),
+                                list(
+                                    `name`="partial_auc_upper", 
+                                    `title`="pAUC Upper CI", 
+                                    `type`="number", 
+                                    `format`="zto", 
+                                    `visible`="(bootstrapPartialAUC)"),
+                                list(
                                     `name`="normalized_pauc", 
                                     `title`="Normalized pAUC", 
                                     `type`="number", 
@@ -1400,7 +1340,8 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                 "outcome",
                                 "predictors",
                                 "positiveClass",
-                                "crocAlpha"),
+                                "crocAlpha",
+                                "direction"),
                             columns=list(
                                 list(
                                     `name`="predictor", 
@@ -1419,8 +1360,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                 list(
                                     `name`="alpha", 
                                     `title`="Alpha", 
-                                    `type`="number", 
-                                    `format`="zto"),
+                                    `type`="number"),
                                 list(
                                     `name`="early_retrieval_gain", 
                                     `title`="Early Retrieval Gain", 
@@ -1438,7 +1378,8 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             clearWith=list(
                                 "outcome",
                                 "predictors",
-                                "positiveClass"),
+                                "positiveClass",
+                                "direction"),
                             columns=list(
                                 list(
                                     `name`="predictor", 
@@ -1475,7 +1416,10 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             clearWith=list(
                                 "outcome",
                                 "predictors",
-                                "positiveClass"),
+                                "positiveClass",
+                                "clinicalContext",
+                                "direction",
+                                "analysisType"),
                             columns=list(
                                 list(
                                     `name`="measure", 
@@ -1501,7 +1445,8 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             clearWith=list(
                                 "outcome",
                                 "predictors",
-                                "positiveClass")))
+                                "positiveClass",
+                                "clinicalContext")))
                         self$add(jmvcore::Html$new(
                             options=options,
                             name="methodsExplanation",
@@ -1529,7 +1474,11 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                 "seed",
                                 "plotTheme",
                                 "plotWidth",
-                                "plotHeight"),
+                                "plotHeight",
+                                "youdenOptimization",
+                                "sensitivityThreshold",
+                                "specificityThreshold",
+                                "clinicalPresets"),
                             width=600,
                             height=600))
                         self$add(jmvcore::Image$new(
@@ -1539,6 +1488,9 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             visible="(detectImbalance)",
                             renderFun=".plotPRC",
                             clearWith=list(
+                                "direction",
+                                "plotTheme",
+                                "detectImbalance",
                                 "outcome",
                                 "predictors",
                                 "positiveClass",
@@ -1562,7 +1514,11 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                 "confidenceLevel",
                                 "plotTheme",
                                 "plotWidth",
-                                "plotHeight"),
+                                "plotHeight",
+                                "youdenOptimization",
+                                "sensitivityThreshold",
+                                "specificityThreshold",
+                                "clinicalPresets"),
                             width=600,
                             height=600))
                         self$add(jmvcore::Image$new(
@@ -1572,6 +1528,8 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             visible="(cutoffTable)",
                             renderFun=".plotCutoffAnalysis",
                             clearWith=list(
+                                "direction",
+                                "plotTheme",
                                 "outcome",
                                 "predictors",
                                 "positiveClass",
@@ -1586,6 +1544,8 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             visible="(youdenOptimization)",
                             renderFun=".plotYoudenIndex",
                             clearWith=list(
+                                "direction",
+                                "plotTheme",
                                 "outcome",
                                 "predictors",
                                 "positiveClass",
@@ -1604,11 +1564,19 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             visible="(clinicalMetrics)",
                             renderFun=".plotClinicalDecision",
                             clearWith=list(
+                                "direction",
+                                "plotTheme",
+                                "useObservedPrevalence",
+                                "prevalence",
                                 "outcome",
                                 "predictors",
                                 "positiveClass",
                                 "plotWidth",
-                                "plotHeight"),
+                                "plotHeight",
+                                "youdenOptimization",
+                                "sensitivityThreshold",
+                                "specificityThreshold",
+                                "clinicalPresets"),
                             width=600,
                             height=600))
                         self$add(jmvcore::Image$new(
@@ -1618,6 +1586,8 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             visible="(crocAnalysis)",
                             renderFun=".plotCROC",
                             clearWith=list(
+                                "direction",
+                                "plotTheme",
                                 "outcome",
                                 "predictors",
                                 "positiveClass",
@@ -1633,6 +1603,8 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             visible="(convexHull)",
                             renderFun=".plotConvexHull",
                             clearWith=list(
+                                "direction",
+                                "plotTheme",
                                 "outcome",
                                 "predictors",
                                 "positiveClass",
@@ -1653,7 +1625,9 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                 "splineCalibration",
                                 "splineKnots",
                                 "brierScore",
-                                "calibrationMetrics"),
+                                "calibrationMetrics",
+                                "eoRatio",
+                                "direction"),
                             columns=list(
                                 list(
                                     `name`="predictor", 
@@ -1673,19 +1647,16 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                     `name`="calibration_slope", 
                                     `title`="Calibration Slope", 
                                     `type`="number", 
-                                    `format`="zto", 
                                     `visible`="(calibrationMetrics)"),
                                 list(
                                     `name`="calibration_intercept", 
                                     `title`="Calibration Intercept", 
                                     `type`="number", 
-                                    `format`="zto", 
                                     `visible`="(calibrationMetrics)"),
                                 list(
                                     `name`="calibration_in_large", 
                                     `title`="Calibration-in-the-Large", 
                                     `type`="number", 
-                                    `format`="zto", 
                                     `visible`="(calibrationMetrics)"),
                                 list(
                                     `name`="ici", 
@@ -1712,6 +1683,12 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                     `format`="zto", 
                                     `visible`="(splineCalibration)"),
                                 list(
+                                    `name`="eo_ratio", 
+                                    `title`="E/O Ratio", 
+                                    `type`="number", 
+                                    `format`="dp:3", 
+                                    `visible`="(eoRatio)"),
+                                list(
                                     `name`="interpretation", 
                                     `title`="Interpretation", 
                                     `type`="text"))))
@@ -1724,7 +1701,8 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                 "outcome",
                                 "predictors",
                                 "positiveClass",
-                                "hlGroups"),
+                                "hlGroups",
+                                "direction"),
                             columns=list(
                                 list(
                                     `name`="predictor", 
@@ -1733,8 +1711,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                 list(
                                     `name`="chi_square", 
                                     `title`="Chi-Square", 
-                                    `type`="number", 
-                                    `format`="zto"),
+                                    `type`="number"),
                                 list(
                                     `name`="df", 
                                     `title`="df", 
@@ -1759,12 +1736,15 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             visible="(calibrationAnalysis && calibrationPlot)",
                             renderFun=".plotCalibration",
                             clearWith=list(
+                                "direction",
+                                "plotTheme",
                                 "outcome",
                                 "predictors",
                                 "positiveClass",
                                 "hlGroups",
                                 "splineCalibration",
                                 "splineKnots",
+                                "calibrationDensity",
                                 "plotWidth",
                                 "plotHeight"),
                             width=600,
@@ -1775,10 +1755,17 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             title="Multi-Class ROC Summary",
                             visible="(multiClassROC)",
                             clearWith=list(
+                                "direction",
                                 "outcome",
                                 "predictors",
                                 "positiveClass",
-                                "multiClassStrategy"),
+                                "multiClassStrategy",
+                                "useBootstrap",
+                                "bootstrapMethod",
+                                "bootstrapSamples",
+                                "stratifiedBootstrap",
+                                "confidenceLevel",
+                                "seed"),
                             columns=list(
                                 list(
                                     `name`="class", 
@@ -1817,6 +1804,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             title="Multi-Class Average AUC",
                             visible="(multiClassROC)",
                             clearWith=list(
+                                "direction",
                                 "outcome",
                                 "predictors",
                                 "positiveClass",
@@ -1839,11 +1827,6 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                     `type`="number", 
                                     `format`="zto"),
                                 list(
-                                    `name`="micro_auc", 
-                                    `title`="Micro AUC", 
-                                    `type`="number", 
-                                    `format`="zto"),
-                                list(
                                     `name`="interpretation", 
                                     `title`="Interpretation", 
                                     `type`="text"))))
@@ -1854,6 +1837,8 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             visible="(multiClassROC)",
                             renderFun=".plotMultiClassROC",
                             clearWith=list(
+                                "direction",
+                                "plotTheme",
                                 "outcome",
                                 "predictors",
                                 "positiveClass",
@@ -1872,7 +1857,8 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                 "predictors",
                                 "positiveClass",
                                 "useObservedPrevalence",
-                                "prevalence"),
+                                "prevalence",
+                                "direction"),
                             columns=list(
                                 list(
                                     `name`="predictor", 
@@ -1887,13 +1873,11 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                     `name`="nnt", 
                                     `title`="NNT", 
                                     `type`="number", 
-                                    `format`="zto", 
                                     `visible`="(nntCalculation)"),
                                 list(
                                     `name`="nnd", 
                                     `title`="NND", 
                                     `type`="number", 
-                                    `format`="zto", 
                                     `visible`="(nntCalculation)"),
                                 list(
                                     `name`="tested_positive", 
@@ -1913,8 +1897,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                 list(
                                     `name`="net_benefit_per_100", 
                                     `title`="Net Benefit per 100", 
-                                    `type`="number", 
-                                    `format`="zto"))))
+                                    `type`="number"))))
                         self$add(jmvcore::Table$new(
                             options=options,
                             name="decisionImpactSummary",
@@ -1925,8 +1908,13 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                 "predictors",
                                 "positiveClass",
                                 "useObservedPrevalence",
-                                "prevalence"),
+                                "prevalence",
+                                "direction"),
                             columns=list(
+                                list(
+                                    `name`="predictor", 
+                                    `title`="Predictor", 
+                                    `type`="text"),
                                 list(
                                     `name`="threshold", 
                                     `title`="Risk Threshold", 
@@ -1961,9 +1949,27 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             visible="(clinicalImpact && clinicalUtilityCurve)",
                             renderFun=".plotClinicalUtility",
                             clearWith=list(
+                                "direction",
+                                "plotTheme",
                                 "outcome",
                                 "predictors",
                                 "positiveClass",
+                                "plotWidth",
+                                "plotHeight"),
+                            width=600,
+                            height=600))
+                        self$add(jmvcore::Image$new(
+                            options=options,
+                            name="decisionImpactPlot",
+                            title="Clinical Impact Curve",
+                            visible="(decisionImpactCurves)",
+                            renderFun=".plotDecisionImpact",
+                            clearWith=list(
+                                "plotTheme",
+                                "outcome",
+                                "predictors",
+                                "positiveClass",
+                                "direction",
                                 "plotWidth",
                                 "plotHeight"),
                             width=600,
@@ -1977,7 +1983,7 @@ enhancedROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "enhancedROC",
-                version = c(1,0,81),
+                version = c(1,0,83),
                 options = options,
                 results = enhancedROCResults$new(options=options),
                 data = data,
@@ -1995,7 +2001,7 @@ enhancedROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' Clinical ROC analysis toolkit for comprehensive diagnostic performance 
 #' evaluation. Includes ROC curve analysis, Youden Index optimization, 
 #' sensitivity/specificity analysis, optimal cutoff determination, and 
-#' comparative ROC analysis. Essential for biomarker validation, diagnostic
+#' comparative ROC analysis. Essential for biomarker validation, diagnostic 
 #' test evaluation, and clinical decision support in medical research.
 #' 
 #' @param data The data as a data frame.
@@ -2004,7 +2010,19 @@ enhancedROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   (disease/condition present)
 #' @param predictors Numeric predictor variables for ROC analysis
 #' @param analysisType Type of ROC analysis to perform
-#' @param direction Direction of the predictor-outcome relationship
+#' @param direction Direction of the predictor-outcome relationship. The
+#'   default is "Higher values indicate positive outcome" because it is a stated
+#'   hypothesis rather than an estimate. "Auto" reads the orientation off the
+#'   same data that supply the AUC - pROC compares the two groups' median values
+#'   - so the direction is fitted rather than assumed, and every AUC is biased
+#'   upward (for n = 20 the AUC expected under no association is about 0.60, not
+#'   0.50, and exceeds 0.60 in roughly 45 of every 100 markers carrying no
+#'   information at all). It is not floored at 0.5 either: a median split can
+#'   disagree with the ranks, so about 12 of those 100 null markers are still
+#'   reported below 0.5. "Auto" can also silently invert a marker and report
+#'   0.825 where the un-inverted reading is 0.175. Use "Auto" only for
+#'   exploratory screening of markers whose direction is genuinely unknown, and
+#'   say so.
 #' @param youdenOptimization Find the optimal cutoff by maximising the Youden
 #'   index (sensitivity + specificity - 1), subject to the minimum
 #'   sensitivity/specificity below. When off, the cutoff closest to the top-left
@@ -2029,11 +2047,10 @@ enhancedROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param useBootstrap Use bootstrap methods for confidence intervals
 #' @param bootstrapMethod Method for calculating bootstrap confidence
 #'   intervals. BCa provides better coverage but requires more computation.
-#' @param bootstrapCutoffCI NOT YET IMPLEMENTED - selecting this produces no
-#'   output. Calculate bootstrap confidence intervals for sensitivity and
-#'   specificity at optimal cutoff
-#' @param bootstrapPartialAUC NOT YET IMPLEMENTED - selecting this produces no
-#'   output. Calculate bootstrap confidence intervals for partial AUC estimates
+#' @param bootstrapPartialAUC Bootstrap confidence interval for the partial
+#'   AUC, using the resample count, interval type (BCa/percentile/basic) and
+#'   stratification set above. The interval is for the raw partial AUC on the
+#'   chosen focus range, not for the McClish-normalised value.
 #' @param stratifiedBootstrap Maintain outcome class proportions in bootstrap
 #'   samples (recommended for imbalanced data)
 #' @param seed Random seed used for every resampling step - bootstrap
@@ -2069,8 +2086,9 @@ enhancedROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   PRC when appropriate
 #' @param imbalanceThreshold Ratio threshold for imbalance detection (e.g.,
 #'   3.0 means 3:1 or 1:3 ratio)
-#' @param showImbalanceWarning Display warning message when class imbalance is
-#'   detected
+#' @param showImbalanceWarning Add the explanatory detail to the
+#'   class-imbalance warning. The warning itself is always shown when imbalance
+#'   is detected; this only controls how much it explains.
 #' @param recommendPRC Recommend using Precision-Recall curves when imbalance
 #'   is detected
 #' @param prevalence Disease prevalence to assume when computing predictive
@@ -2117,25 +2135,22 @@ enhancedROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   spline has knots - 1 degrees of freedom; more knots follow the data more
 #'   closely but need more events per knot. Used only when splineCalibration is
 #'   on.
-#' @param eoRatio NOT YET IMPLEMENTED - selecting this produces no output.
-#'   Calculate Expected/Observed ratio for overall calibration assessment
-#' @param namDagostino NOT YET IMPLEMENTED - selecting this produces no
-#'   output. Perform Nam-D'Agostino calibration test (more powerful than H-L)
-#' @param greenwoodNam NOT YET IMPLEMENTED - selecting this produces no
-#'   output. Greenwood-Nam-D'Agostino test for survival model calibration
-#' @param calibrationBelt NOT YET IMPLEMENTED - selecting this produces no
-#'   output. Display calibration belt showing uncertainty around calibration
-#'   curve
-#' @param calibrationDensity NOT YET IMPLEMENTED - selecting this produces no
-#'   output. Show distribution of predicted probabilities as density overlay
+#' @param eoRatio Expected/Observed ratio for overall calibration. Reported
+#'   only when the predictor is supplied as a probability in 0 to 1; when a
+#'   logistic model has to be fitted here to get probabilities the ratio is 1 by
+#'   construction and the cell is left blank.
+#' @param calibrationDensity Overlay the distribution of predicted
+#'   probabilities along the bottom of the calibration plot, so a calibration
+#'   point backed by two patients is not read like one backed by two hundred.
+#'   Skipped when there are fewer than 10 usable probabilities to smooth.
 #' @param multiClassROC Enable multi-class ROC analysis for outcomes with >2
 #'   levels
 #' @param multiClassStrategy Strategy for multi-class ROC analysis
-#' @param multiClassAveraging Method for averaging AUC across classes. Only
-#'   the unweighted Macro Average is computed; Weighted Average (by prevalence)
-#'   is NOT YET IMPLEMENTED - selecting it changes nothing, and the value
-#'   reported stays the unweighted macro average of the One-vs-Rest AUCs (OVR
-#'   strategy) or the Hand-Till pairwise AUC (OVO strategy)
+#' @param multiClassAveraging Method for averaging AUC across classes. Both
+#'   averages are reported side by side for the One-vs-Rest strategy: Macro
+#'   weights every class equally, Weighted weights each class by how many cases
+#'   it contains. The One-vs-One strategy reports only its own unweighted
+#'   average over class pairs, which is what that statistic is defined as.
 #' @param clinicalImpact Calculate clinical impact metrics (NNT, NND, clinical
 #'   utility)
 #' @param nntCalculation Show the number needed to test (1 / net benefit) and
@@ -2144,34 +2159,12 @@ enhancedROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param clinicalUtilityCurve Display clinical utility curve showing test
 #'   consequences
 #' @param decisionImpactTable Show decision impact at various thresholds
-#' @param harrellCIndex NOT YET IMPLEMENTED - selecting this produces no
-#'   output. Calculate Harrell's concordance index for time-to-event outcomes
-#' @param unoCStatistic NOT YET IMPLEMENTED - selecting this produces no
-#'   output. Calculate Uno's C-statistic (more robust to censoring)
-#' @param incidentDynamic NOT YET IMPLEMENTED - selecting this produces no
-#'   output. Calculate incident/dynamic AUC (sensitivity for events at specific
-#'   time)
-#' @param cumulativeDynamic NOT YET IMPLEMENTED - selecting this produces no
-#'   output. Calculate cumulative/dynamic AUC (sensitivity for events by
-#'   specific time)
-#' @param competingRisksConcordance NOT YET IMPLEMENTED - selecting this
-#'   produces no output. Calculate cause-specific concordance for competing
-#'   risks
 #' @param internalValidation Perform internal validation using
 #'   cross-validation or bootstrap
 #' @param validationMethod Method for internal validation
-#' @param optimismCorrection NOT YET IMPLEMENTED - selecting this produces no
-#'   output. Apply optimism correction to performance metrics
-#' @param externalValidation NOT YET IMPLEMENTED - selecting this produces no
-#'   output. Enable external validation reporting framework
-#' @param decisionImpactCurves NOT YET IMPLEMENTED - selecting this produces
-#'   no output. Plot decision impact curves showing clinical consequences
-#' @param netBenefitRegression NOT YET IMPLEMENTED - selecting this produces
-#'   no output. Model net benefit as function of threshold probabilities
-#' @param modelUpdating NOT YET IMPLEMENTED - selecting this produces no
-#'   output. Analyze need for model recalibration or updating
-#' @param transportability NOT YET IMPLEMENTED - selecting this produces no
-#'   output. Assess model transportability across populations
+#' @param decisionImpactCurves Plot the clinical impact curve: how many of
+#'   1000 tested patients would be called high risk at each threshold
+#'   probability, and how many of those actually have the event.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$results$notices} \tab \tab \tab \tab \tab a html \cr
@@ -2211,6 +2204,7 @@ enhancedROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$results$clinicalImpactTable} \tab \tab \tab \tab \tab Number needed to test and clinical utility metrics \cr
 #'   \code{results$results$decisionImpactSummary} \tab \tab \tab \tab \tab Clinical consequences at various decision thresholds \cr
 #'   \code{results$results$clinicalUtilityPlot} \tab \tab \tab \tab \tab Clinical utility showing test consequences across thresholds \cr
+#'   \code{results$results$decisionImpactPlot} \tab \tab \tab \tab \tab Number of patients called high risk, and number of true events among them, per 1000 tested across thresholds \cr
 #' }
 #'
 #' @export
@@ -2220,7 +2214,7 @@ enhancedROC <- function(
     positiveClass,
     predictors,
     analysisType = "single",
-    direction = "auto",
+    direction = "higher",
     youdenOptimization = TRUE,
     customCutoffs = "",
     sensitivityThreshold = 0,
@@ -2229,7 +2223,6 @@ enhancedROC <- function(
     bootstrapSamples = 1000,
     useBootstrap = FALSE,
     bootstrapMethod = "bca",
-    bootstrapCutoffCI = FALSE,
     bootstrapPartialAUC = FALSE,
     stratifiedBootstrap = FALSE,
     seed = 0,
@@ -2275,9 +2268,6 @@ enhancedROC <- function(
     splineCalibration = FALSE,
     splineKnots = 4,
     eoRatio = FALSE,
-    namDagostino = FALSE,
-    greenwoodNam = FALSE,
-    calibrationBelt = FALSE,
     calibrationDensity = FALSE,
     multiClassROC = FALSE,
     multiClassStrategy = "ovr",
@@ -2286,19 +2276,9 @@ enhancedROC <- function(
     nntCalculation = FALSE,
     clinicalUtilityCurve = FALSE,
     decisionImpactTable = FALSE,
-    harrellCIndex = FALSE,
-    unoCStatistic = FALSE,
-    incidentDynamic = FALSE,
-    cumulativeDynamic = FALSE,
-    competingRisksConcordance = FALSE,
     internalValidation = FALSE,
     validationMethod = "bootstrap",
-    optimismCorrection = FALSE,
-    externalValidation = FALSE,
-    decisionImpactCurves = FALSE,
-    netBenefitRegression = FALSE,
-    modelUpdating = FALSE,
-    transportability = FALSE) {
+    decisionImpactCurves = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("enhancedROC requires jmvcore to be installed (restart may be required)")
@@ -2326,7 +2306,6 @@ enhancedROC <- function(
         bootstrapSamples = bootstrapSamples,
         useBootstrap = useBootstrap,
         bootstrapMethod = bootstrapMethod,
-        bootstrapCutoffCI = bootstrapCutoffCI,
         bootstrapPartialAUC = bootstrapPartialAUC,
         stratifiedBootstrap = stratifiedBootstrap,
         seed = seed,
@@ -2372,9 +2351,6 @@ enhancedROC <- function(
         splineCalibration = splineCalibration,
         splineKnots = splineKnots,
         eoRatio = eoRatio,
-        namDagostino = namDagostino,
-        greenwoodNam = greenwoodNam,
-        calibrationBelt = calibrationBelt,
         calibrationDensity = calibrationDensity,
         multiClassROC = multiClassROC,
         multiClassStrategy = multiClassStrategy,
@@ -2383,19 +2359,9 @@ enhancedROC <- function(
         nntCalculation = nntCalculation,
         clinicalUtilityCurve = clinicalUtilityCurve,
         decisionImpactTable = decisionImpactTable,
-        harrellCIndex = harrellCIndex,
-        unoCStatistic = unoCStatistic,
-        incidentDynamic = incidentDynamic,
-        cumulativeDynamic = cumulativeDynamic,
-        competingRisksConcordance = competingRisksConcordance,
         internalValidation = internalValidation,
         validationMethod = validationMethod,
-        optimismCorrection = optimismCorrection,
-        externalValidation = externalValidation,
-        decisionImpactCurves = decisionImpactCurves,
-        netBenefitRegression = netBenefitRegression,
-        modelUpdating = modelUpdating,
-        transportability = transportability)
+        decisionImpactCurves = decisionImpactCurves)
 
     analysis <- enhancedROCClass$new(
         options = options,

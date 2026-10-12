@@ -266,9 +266,10 @@ test_that("categorize audit follow-ups: notice gaps, blank cells, citations", {
   if (grepl("Severe bin imbalance", n)) expect_match(n, "Consider quantile-based binning")
 
   # every refs: key in the results schema resolves in 00refs.yaml with a year
-  root <- if (file.exists("../../jamovi/categorize.r.yaml")) "../.." else "."
-  keys <- yaml::read_yaml(file.path(root, "jamovi/categorize.r.yaml"))$refs
-  refs <- yaml::read_yaml(file.path(root, "jamovi/00refs.yaml"))$refs
+  jamovi_dir <- testthat::test_path("..", "..", "jamovi")
+  skip_if_not(dir.exists(jamovi_dir), "package source tree not available")
+  keys <- yaml::read_yaml(file.path(jamovi_dir, "categorize.r.yaml"))$refs
+  refs <- yaml::read_yaml(file.path(jamovi_dir, "00refs.yaml"))$refs
   expect_true(all(c("classInt", "dichotomizing") %in% keys))
   for (k in keys) {
     expect_true(k %in% names(refs), info = k)

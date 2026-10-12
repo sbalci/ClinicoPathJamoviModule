@@ -99,7 +99,7 @@ install.packages('jmvtools', repos = c('https://repo.jamovi.org', 'https://cran.
 
 - **Analysis Definitions**: `.a.yaml` files define parameters and
   options
-- **UI Definitions**: `.u.yaml` files define user interface layout\
+- **UI Definitions**: `.u.yaml` files define user interface layout  
 - **Results Definitions**: `.r.yaml` files define output tables and
   plots
 - **Backend Implementation**: `.b.R` files contain the R6 class analysis
@@ -130,7 +130,7 @@ Rscript _updateModules_enhanced.R
 ```
 
 **Key Features**: - ✅ **Automated testing** and validation - ✅
-**Backup and rollback** capabilities\
+**Backup and rollback** capabilities  
 - ✅ **Multi-module distribution** to specialized repos - ✅
 **Configuration management** via YAML - ✅ **Security validation** and
 integrity checks
@@ -4438,6 +4438,8 @@ DiagrammeR::mermaid(
   height = 200
 )
 ```
+
+
 
     Remotes:
 

@@ -391,7 +391,11 @@ test_that("the recommendation does not double-count the Serial/all-positive twin
     # an independent check of the disclosed count, not a restatement of it.
     stable <- ct[(ct$tp + ct$fn) >= 10 & (ct$fp + ct$tn) >= 10 &
                      is.finite(ct$youden) & ct$youden > 0, ]
-    n_distinct <- length(unique(paste(stable$tp, stable$fp, stable$fn, stable$tn)))
+    # Only Serial and the all-positive pattern are the same RULE. Two different rules that
+    # happen to share a 2x2 are still two candidates (VAL-decisioncombine-02): counting
+    # unique 2x2 tables here encoded the old, wrong rule and agreed only by coincidence.
+    n_distinct <- nrow(stable) -
+        sum(grepl("^\\+(/\\+)+$", stable$pattern) & "Serial (all pos)" %in% stable$pattern)
 
     expect_equal(n_claimed, n_distinct)
     # the twin must not surface as a tie
@@ -418,7 +422,7 @@ test_that("proportions and ratios are reported in separate tables", {
 })
 
 
-test_that("the forest plot renders with both tables and free x-scales", {
+test_that("the forest plot renders both tables (proportions linear, ratios on a log axis)", {
     d <- dcomb_fixture()
     opts <- ClinicoPath:::decisioncombineOptions$new(
         gold = "gold", goldPositive = "pos", test1 = "t1", test1Positive = "pos",
@@ -705,7 +709,7 @@ test_that("an explicit-NA factor level is treated as missing, not as negative", 
 test_that("an explicit-NA level does not blank an individual test's 2x2", {
     # Same root cause in .analyzeIndividualTest: complete.cases() kept the rows, the
     # ifelse() recode produced an all-NA column, and the 2x2 came back all zeros --
-    # which the "All Zero Counts" guard then reported as "no valid observations".
+    # which a since-removed "All Zero Counts" notice then reported as "no valid observations".
     d <- dcomb_fixture()
     d$t3[1:30] <- NA
     d$t3 <- addNA(factor(d$t3))
@@ -716,7 +720,8 @@ test_that("an explicit-NA level does not blank an individual test's 2x2", {
     expect_false(any(is.na(cont$total)))
     expect_gt(cont$total[cont$total == max(cont$total)][1], 0)
     expect_equal(max(cont$total), nrow(d) - 30)
-    expect_false(grepl("All Zero Counts", notices_of(res), fixed = TRUE))
+    stats <- as.data.frame(res$individualTest3$test3Stats$asDF)
+    expect_true(all(is.finite(stats$estimate[1:2])))   # sensitivity and specificity computed
 })
 
 

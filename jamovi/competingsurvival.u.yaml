@@ -45,28 +45,28 @@ children:
                 children:
                   - type: LevelSelector
                     name: dod
-                    label: (e.g., Death from Disease)
+                    label: e.g., Death from Disease
                     enable: (outcome)
               - type: Label
                 label: Competing Event
                 children:
                   - type: LevelSelector
                     name: dooc
-                    label: (e.g., Death from Other Causes)
+                    label: e.g., Death from Other Causes
                     enable: (outcome)
               - type: Label
                 label: Censored with Event
                 children:
                   - type: LevelSelector
                     name: awd
-                    label: (e.g., Alive with Disease)
+                    label: e.g., Alive with Disease
                     enable: (outcome)
               - type: Label
                 label: Censored without Event
                 children:
                   - type: LevelSelector
                     name: awod
-                    label: (e.g., Alive without Disease)
+                    label: e.g., Alive without Disease
                     enable: (outcome)
 
   - type: LayoutBox

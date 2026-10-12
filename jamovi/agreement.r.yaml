@@ -79,7 +79,7 @@ items:
           type: integer
         - name: peragree
           title: 'Agreement %'
-          type: integer
+          type: number
         - name: kappa
           title: 'Kappa'
           type: number
@@ -103,6 +103,15 @@ items:
           - wght
           - exct
           - confLevel
+          - kappaCIMethod
+      refs:
+          - Cohen1960
+          - Cohen1968
+          - Fleiss1971
+          - Conger1980
+          - Gwet2008
+          - irrCAC
+          - LandisKoch1977
 
 
     - name:  contingencyTableHeading
@@ -139,6 +148,183 @@ items:
       type: Html
       visible: (sft && showAbout)
 
+    # ---- Pathologist Grading Analysis (model-based ordinal agreement) ----
+
+    - name: gradingHeading
+      title: Pathologist Grading Analysis
+      type:  Preformatted
+      visible: (gradingDesign || perPathologist || severityModel || latentModel || showGradingGuide)
+      clearWith:
+          - gradingDesign
+          - perPathologist
+          - severityModel
+          - latentModel
+          - showGradingGuide
+
+    - name: designSummaryTable
+      title: "Study Design"
+      type: Table
+      visible: (gradingDesign)
+      rows: 0
+      columns:
+        - name: item
+          title: 'Design Feature'
+          type: text
+        - name: value
+          title: 'Value'
+          type: text
+      clearWith:
+          - vars
+          - clusterVariable
+
+    - name: categoryDistributionTable
+      title: "Category Distribution by Pathologist"
+      type: Table
+      visible: (gradingDesign)
+      rows: 0
+      columns:
+        - name: pathologist
+          title: 'Pathologist'
+          type: text
+        - name: n
+          title: 'Ratings'
+          type: integer
+      clearWith:
+          - vars
+
+    - name: pathologistTable
+      title: "Per-Pathologist Agreement and Grading Tendency"
+      type: Table
+      visible: (perPathologist || severityModel)
+      rows: 0
+      columns:
+        - name: pathologist
+          title: 'Pathologist'
+          type: text
+        - name: cases_read
+          title: 'Cases Read'
+          type: integer
+          visible: (perPathologist)
+        - name: pct_exact
+          title: 'Exact agreement with colleagues %'
+          type: number
+          visible: (perPathologist)
+        - name: mean_kappa
+          title: 'Mean pairwise kappa'
+          type: number
+          visible: (perPathologist)
+        - name: shift
+          title: 'Grading tendency'
+          type: number
+          visible: (severityModel)
+        - name: se
+          title: 'SE'
+          type: number
+          visible: (severityModel)
+        - name: ci_lower
+          title: '95% CI Lower'
+          type: number
+          visible: (severityModel)
+        - name: ci_upper
+          title: '95% CI Upper'
+          type: number
+          visible: (severityModel)
+        - name: p_holm
+          title: 'p (Holm)'
+          type: number
+          format: zto,pvalue
+          visible: (severityModel)
+        - name: tendency
+          title: 'Tendency'
+          type: text
+          visible: (severityModel)
+      clearWith:
+          - vars
+          - confLevel
+      refs:
+          - Nelson2015
+          - ordinal
+          - holm1979
+
+    - name: boundaryTable
+      title: "Boundary Excess over Colleagues"
+      type: Table
+      visible: (perPathologist)
+      rows: 0
+      columns:
+        - name: pathologist
+          title: 'Pathologist'
+          type: text
+          combineBelow: true
+        - name: boundary
+          title: 'Boundary'
+          type: text
+        - name: n
+          title: 'Shared Cases'
+          type: integer
+        - name: excess
+          title: 'Excess over colleagues'
+          type: number
+        - name: ci_lower
+          title: '95% CI Lower'
+          type: number
+        - name: ci_upper
+          title: '95% CI Upper'
+          type: number
+      clearWith:
+          - vars
+          - confLevel
+
+    - name: severityPlot
+      title: "Grading Tendency per Pathologist"
+      type: Image
+      width: 600
+      height: 400
+      renderFun: .severityPlot
+      requiresData: false
+      visible: (severityModel)
+      refs:
+          - Nelson2015
+          - ordinal
+
+    - name: latentModelTable
+      title: "Model-Based Agreement (Latent Probit Model)"
+      type: Table
+      visible: (latentModel)
+      rows: 0
+      columns:
+        - name: quantity
+          title: 'Quantity'
+          type: text
+        - name: estimate
+          title: 'Estimate'
+          type: number
+        - name: se
+          title: 'SE'
+          type: number
+        - name: ci_lower
+          title: '95% CI Lower'
+          type: number
+        - name: ci_upper
+          title: '95% CI Upper'
+          type: number
+      clearWith:
+          - vars
+          - clusterVariable
+          - confLevel
+      refs:
+          - Nelson2015
+          - ordinal
+
+    - name: gradingGuide
+      title: "About the Pathologist Grading Analysis"
+      type: Html
+      visible: (showGradingGuide)
+      clearWith:
+          - showGradingGuide
+      refs:
+          - Nelson2015
+
     - name: blandAltmanHeading
       title: Bland-Altman Method Comparison
       type:  Preformatted
@@ -161,6 +347,8 @@ items:
           # proportionalBias is on, so without this the plot kept the old image
           # when the option was toggled.
           - proportionalBias
+      refs:
+          - BlandAltman1986
 
     - name: agreementHeatmapPlot
       title: 'Agreement Heatmap (Confusion Matrix)'
@@ -209,7 +397,7 @@ items:
           title: 'Upper LoA'
           type: number
         - name: propBiasP
-          title: 'Proportional Bias (p)'
+          title: 'Difference-Mean Slope (p)'
           type: number
           format: zto,pvalue
           visible: (proportionalBias)
@@ -224,6 +412,9 @@ items:
           - vars
           - baConfidenceLevel
           - proportionalBias
+      refs:
+          - BlandAltman1986
+          - BlandAltman1999
 
 
 
@@ -286,6 +477,8 @@ items:
           - nBoot
           - confLevel
           - seed
+      refs:
+          - Krippendorff2004
 
     - name: krippExplanation
       title: "About Krippendorff's Alpha"
@@ -326,12 +519,12 @@ items:
         - name: kappa
           title: "Kappa"
           type: number
-        - name: p
-          title: 'p-value'
-          type: number
-          format: zto,pvalue
       clearWith:
+          - wght
           - vars
+      refs:
+          - LandisKoch1977
+          - Light1971
 
     - name: lightKappaExplanation
       title: "About Light's Kappa"
@@ -378,6 +571,9 @@ items:
           - vars
           - finnLevels
           - finnModel
+      refs:
+          - Finn1970
+          - Cicchetti1994
 
     - name: finnExplanation
       title: "About Finn Coefficient"
@@ -416,6 +612,8 @@ items:
           format: zto,pvalue
       clearWith:
           - vars
+      refs:
+          - Kendall1939
 
     - name: kendallWExplanation
       title: "About Kendall's W"
@@ -456,6 +654,8 @@ items:
           - nBoot
           - seed
           - confLevel
+      refs:
+          - Robinson1957
 
     - name: robinsonAExplanation
       title: "About Robinson's A"
@@ -493,6 +693,9 @@ items:
           type: text
       clearWith:
           - vars
+      refs:
+          - Spearman1904
+          - Mukaka2012
 
     - name: meanSpearmanExplanation
       title: "About Mean Spearman Rho"
@@ -502,7 +705,7 @@ items:
           - showMeanSpearmanGuide
 
     - name: raterBiasHeading
-      title: Marginal Homogeneity Tests
+      title: Directional Discordance and Marginal Homogeneity Tests
       type:  Preformatted
       visible: (raterBias || showRaterBiasGuide || bhapkar || showBhapkarGuide || stuartMaxwell || showStuartMaxwellGuide)
       clearWith:
@@ -514,7 +717,7 @@ items:
           - showStuartMaxwellGuide
 
     - name: raterBiasTable
-      title: "Rater Bias Test Results"
+      title: "Directional Discordance Test (ordinal, 2 raters)"
       type: Table
       visible: (raterBias)
       rows: 1
@@ -534,9 +737,11 @@ items:
           format: zto,pvalue
       clearWith:
           - vars
+      refs:
+          - agresti2013
 
     - name: raterBiasExplanation
-      title: "About Rater Bias Test"
+      title: "About Directional Discordance Test"
       type: Html
       visible: (showRaterBiasGuide)
       clearWith:
@@ -572,6 +777,8 @@ items:
           type: text
       clearWith:
           - vars
+      refs:
+          - agresti2013
 
     - name: bhapkarExplanation
       title: "About Bhapkar Test"
@@ -610,6 +817,8 @@ items:
           type: text
       clearWith:
           - vars
+      refs:
+          - agresti2013
 
     - name: stuartMaxwellExplanation
       title: "About Stuart-Maxwell Test"
@@ -648,6 +857,10 @@ items:
           - vars
           - referenceRater
           - rankRaters
+          - wght
+      refs:
+          - Cohen1960
+          - LandisKoch1977
 
     - name: pairwiseKappaExplanation
       title: "About Pairwise Kappa Analysis"
@@ -709,6 +922,10 @@ items:
           - allPairsCI
           - multipleTestCorrection
           - confLevel
+          - kappaCIMethod
+      refs:
+          - Cohen1960
+          - LandisKoch1977
 
     - name: allPairsKappaExplanation
       title: "About All-Pairs Kappa Analysis"
@@ -783,15 +1000,17 @@ items:
         - name: overall_kappa
           title: 'Overall Kappa'
           type: number
-        - name: ci_lower
-          title: '95% CI Lower'
-          type: number
-        - name: ci_upper
-          title: '95% CI Upper'
-          type: number
       clearWith:
           - vars
           - clusterVariable
+          - wght
+          - exct
+          - kappaCIMethod
+          - confLevel
+      refs:
+          - Shrout1979
+          - McGraw1996
+          - Barlow1991
 
     - name: clusterSpecificTable
       title: "Cluster-Specific Kappa Estimates"
@@ -817,10 +1036,6 @@ items:
         - name: ci_upper
           title: '95% CI Upper'
           type: number
-        - name: shrinkage_kappa
-          title: 'Shrinkage Kappa'
-          type: number
-          visible: (shrinkageEstimates)
         - name: rank
           title: 'Rank'
           type: integer
@@ -828,8 +1043,15 @@ items:
       clearWith:
           - vars
           - clusterVariable
-          - shrinkageEstimates
           - clusterRankings
+          - confLevel
+          - wght
+          - exct
+          - kappaCIMethod
+      refs:
+          - Shrout1979
+          - McGraw1996
+          - Barlow1991
 
     - name: varianceDecompositionTable
       title: "Variance Component Decomposition"
@@ -856,6 +1078,9 @@ items:
       clearWith:
           - vars
           - clusterVariable
+      refs:
+          - Shrout1979
+          - McGraw1996
 
     - name: hierarchicalICCTable
       title: "Hierarchical ICC Decomposition"
@@ -869,18 +1094,15 @@ items:
         - name: icc_value
           title: 'ICC'
           type: number
-        - name: ci_lower
-          title: '95% CI Lower'
-          type: number
-        - name: ci_upper
-          title: '95% CI Upper'
-          type: number
         - name: interpretation
           title: 'Interpretation'
           type: text
       clearWith:
           - vars
           - clusterVariable
+      refs:
+          - Shrout1979
+          - McGraw1996
 
     - name: homogeneityTestTable
       title: "Cluster Homogeneity Test Results"
@@ -907,6 +1129,10 @@ items:
       clearWith:
           - vars
           - clusterVariable
+      refs:
+          - Shrout1979
+          - McGraw1996
+          - Stram1994
 
     - name: hierarchicalExplanation
       title: "About Hierarchical/Multilevel Kappa"
@@ -963,7 +1189,12 @@ items:
       clearWith:
           - vars
           - conditionVariable
+          - caseIdVariable
           - multipleTestCorrection
+          - confLevel
+      refs:
+          - Shrout1979
+          - McGraw1996
 
     - name: mixedEffectsVarianceTable
       title: "Mixed-Effects Variance Components"
@@ -990,6 +1221,10 @@ items:
       clearWith:
           - vars
           - conditionVariable
+          - caseIdVariable
+      refs:
+          - Shrout1979
+          - McGraw1996
 
     - name: mixedEffectsExplanation
       title: "About Mixed-Effects Condition Comparison"
@@ -1030,7 +1265,7 @@ items:
           title: 'Class'
           type: text
         - name: 'n'
-          title: 'N'
+          title: 'Agreements (TP)'
           type: integer
         - name: precision
           title: 'Precision (PPV)'
@@ -1044,9 +1279,6 @@ items:
         - name: support
           title: 'Support'
           type: integer
-        - name: interpretation
-          title: 'Interpretation'
-          type: text
       clearWith:
           - vars
           - confusionNormalize
@@ -1074,10 +1306,10 @@ items:
           title: 'Boot SE'
           type: number
         - name: ci_lower
-          title: '95% CI Lower'
+          title: 'Lower'
           type: number
         - name: ci_upper
-          title: '95% CI Upper'
+          title: 'Upper'
           type: number
         - name: boot_bias
           title: 'Bias'
@@ -1086,11 +1318,14 @@ items:
           title: 'CI Method'
           type: text
       clearWith:
+          - exct
           - vars
           - nBoot
           - confLevel
           - seed
           - iccType
+          - wght
+          - krippMethod
 
     - name: bootstrapCIExplanation
       title: "About Bootstrap Confidence Intervals"
@@ -1120,6 +1355,7 @@ items:
       clearWith:
           - vars
           - predictionColumn
+          - tieBreaker
 
     - name: concordanceF1PerClassTable
       title: "Per-Class Concordance F1"
@@ -1146,6 +1382,7 @@ items:
       clearWith:
           - vars
           - predictionColumn
+          - tieBreaker
 
     - name: concordanceF1Explanation
       title: "About Multi-Annotator Concordance"
@@ -1199,6 +1436,9 @@ items:
           - vars
           - gwetWeights
           - confLevel
+      refs:
+          - Gwet2008
+          - LandisKoch1977
 
     - name: gwetExplanation
       title: "About Gwet's AC Coefficient"
@@ -1237,6 +1477,8 @@ items:
       clearWith:
           - vars
           - wght
+      refs:
+          - Byrt1993
 
     - name: pabakExplanation
       title: "About PABAK & Prevalence/Bias Indices"
@@ -1275,10 +1517,10 @@ items:
           title: 'ICC'
           type: number
         - name: ci_lower
-          title: '95% CI Lower'
+          title: 'Lower'
           type: number
         - name: ci_upper
-          title: '95% CI Upper'
+          title: 'Upper'
           type: number
         - name: f_value
           title: 'F'
@@ -1297,6 +1539,10 @@ items:
           - vars
           - iccType
           - confLevel
+      refs:
+          - Shrout1979
+          - McGraw1996
+          - Koo2016
 
     - name: iccExplanation
       title: "About Intraclass Correlation Coefficient (ICC)"
@@ -1334,6 +1580,9 @@ items:
           type: text
       clearWith:
           - vars
+      refs:
+          - Pearson1895
+          - Mukaka2012
 
     - name: meanPearsonExplanation
       title: "About Mean Pearson Correlation"
@@ -1358,10 +1607,10 @@ items:
           title: 'CCC'
           type: number
         - name: ci_lower
-          title: '95% CI Lower'
+          title: 'Lower'
           type: number
         - name: ci_upper
-          title: '95% CI Upper'
+          title: 'Upper'
           type: number
         - name: pearson_r
           title: 'Precision (r)'
@@ -1375,6 +1624,8 @@ items:
       clearWith:
           - vars
           - confLevel
+      refs:
+          - Lin1989
 
     - name: linCCCExplanation
       title: "About Lin's Concordance Correlation Coefficient"
@@ -1384,7 +1635,7 @@ items:
           - showLinCCCGuide
 
     - name: tdiTable
-      title: "Total Deviation Index (TDI) - Acceptable Agreement Limits"
+      title: "Empirical Total Deviation Index (TDI)"
       type: Table
       visible: (tdi)
       rows: 0
@@ -1406,7 +1657,7 @@ items:
           title: 'Acceptable Limit'
           type: number
         - name: meets_criteria
-          title: 'Acceptable?'
+          title: 'Observed Criterion?'
           type: text
         - name: ci_lower
           title: '95% CI Lower'
@@ -1424,6 +1675,8 @@ items:
           - confLevel
           - nBoot
           - seed
+      refs:
+          - Lin2000
 
     - name: tdiExplanation
       title: "About Total Deviation Index (TDI)"
@@ -1484,6 +1737,9 @@ items:
           type: text
       clearWith:
           - vars
+      refs:
+          - Shrout1979
+          - McGraw1996
 
     - name: maxwellREExplanation
       title: About the rater variance decomposition
@@ -1530,6 +1786,13 @@ items:
           - vars
           - interIntraSeparator
           - confLevel
+          - kappaCIMethod
+          - wght
+      refs:
+          - Shrout1979
+          - Koo2016
+          - Cohen1960
+          - LandisKoch1977
 
     - name: interIntraRaterInterTable
       title: "Inter-Rater Reliability (Between Raters)"
@@ -1569,6 +1832,12 @@ items:
           - vars
           - interIntraSeparator
           - confLevel
+          - kappaCIMethod
+      refs:
+          - Shrout1979
+          - Koo2016
+          - Cohen1960
+          - LandisKoch1977
 
     - name: interIntraRaterExplanation
       title: "About Inter/Intra-Rater Reliability"
@@ -1578,7 +1847,7 @@ items:
           - showInterIntraRaterGuide
 
     - name: iotaTable
-      title: "Iota Coefficient Results (Multivariate Agreement)"
+      title: "Iota Coefficient Results (Single Variable)"
       type: Table
       visible: (iota)
       rows: 1
@@ -1592,15 +1861,17 @@ items:
         - name: raters
           title: 'Raters'
           type: integer
-        - name: variables
-          title: 'Variables'
-          type: integer
         - name: iota_value
           title: 'Iota'
           type: number
         - name: interpretation
           title: 'Interpretation'
           type: text
+      refs:
+          - Janson2001
+          - Conger1980
+          - LandisKoch1977
+          - Koo2016
       clearWith:
           - vars
           - iotaStandardize
@@ -1701,8 +1972,20 @@ items:
       title: "Summary"
       type: Html
       visible: (showSummary)
+      # This panel prints n, raw agreement, kappa, its interval and a Landis & Koch
+      # verdict, all computed from the data, but it is only written inside the
+      # ">= 2 rater variables" branch of .run(). With clearWith: [showSummary] alone
+      # it survived a change of variables or weighting, so the welcome panel could
+      # say "select at least 2 rater variables" with last run's kappa underneath it.
       clearWith:
           - showSummary
+          - vars
+          - wght
+          - exct
+          - confLevel
+          - kappaCIMethod
+      refs:
+          - LandisKoch1977
 
     - name: about
       title: "About This Analysis"
@@ -1717,15 +2000,6 @@ items:
       visible: (showAbout)
       clearWith:
           - showAbout
-
-    - name: computedVariablesHeading
-      title: Computed Variables
-      type:  Preformatted
-      visible: (consensusVar || (loaVariable && loaOutput))
-      clearWith:
-          - consensusVar
-          - loaVariable
-          - loaOutput
 
     - name: consensusTable
       title: "Consensus Variable Summary"
@@ -1785,9 +2059,12 @@ items:
       visible: (loaVariable)
       rows: 0
       columns:
+        # Row identity from the data (rownames), not a position in this
+        # table, so a flagged case can be found in the spreadsheet with a
+        # filter active. Character, hence text rather than integer.
         - name: case_id
           title: 'Case'
-          type: integer
+          type: text
         - name: loa_category
           title: 'LoA Category'
           type: text
@@ -1808,6 +2085,7 @@ items:
           - loaThresholds
           - loaHighThreshold
           - loaLowThreshold
+          - tieBreaker
 
     - name: computedVariablesInfo
       title: "Computed Variables Added to Dataset"
@@ -1817,6 +2095,14 @@ items:
           - consensusVar
           - loaVariable
           - loaOutput
+          - consensusName
+          - consensusRule
+          - loaVariableName
+          - detailLevel
+          - simpleThreshold
+          - loaThresholds
+          - loaHighThreshold
+          - loaLowThreshold
 
     # Output Variables (Computed Columns Added to Dataset)
     - name: consensusVar
@@ -1904,7 +2190,12 @@ items:
           - vars
           - subgroupVariable
           - confLevel
+          - kappaCIMethod
           - subgroupMinCases
+          - wght
+      refs:
+          - LandisKoch1977
+          - Koo2016
 
     - name: subgroupForestPlotImage
       title: 'Forest Plot of Agreement by Subgroup'
@@ -1913,10 +2204,9 @@ items:
       height: 450
       renderFun: .subgroupForestPlot
       visible: (agreementBySubgroup && subgroupForestPlot)
-      clearWith:
-          - vars
-          - subgroupVariable
-          - subgroupMinCases
+      refs:
+          - LandisKoch1977
+          - Koo2016
 
     - name: subgroupExplanation
       title: "About Agreement by Subgroup"
@@ -1972,6 +2262,8 @@ items:
           - vars
           - clusterDistance
           - clusterLinkage
+          - nClusters
+          - clusterMethod
 
     - name: raterClusterHeatmap
       title: 'Rater Similarity Heatmap with Clusters'
@@ -2029,6 +2321,8 @@ items:
           - vars
           - caseClusterDistance
           - caseClusterLinkage
+          - nCaseClusters
+          - caseClusterMethod
 
     - name: caseClusterHeatmap
       title: 'Case Similarity Heatmap with Clusters'
@@ -2076,6 +2370,7 @@ items:
           - pairedBootN
           - confLevel
           - seed
+          - wght
       columns:
         - name: metric
           title: "Metric"
@@ -2107,6 +2402,9 @@ items:
         - name: interpretation
           title: "Interpretation"
           type: text
+      refs:
+          - Cohen1960
+          - agresti2013
 
     - name: pairedAgreementExplanation
       title: "About Paired Agreement Comparison"
@@ -2138,6 +2436,10 @@ items:
         - name: value
           title: "Value"
           type: text
+      refs:
+          - Walter1998
+          - donnerEliasziwKappaGOF
+          - rotondiDonnerKappaCI
 
     - name: agreementSampleSizeExplanation
       title: "About Agreement Sample Size"

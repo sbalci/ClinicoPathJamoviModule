@@ -3,7 +3,7 @@
 ## Feature-to-Code Mapping
 
 - **Analysis Function**: `agreement`
-- **Module**: `meddecideT`
+- **Module**: `meddecide`
 
 | Feature / Option | UI Binding | Backend Handler | Target Result Item |
 | :--- | :--- | :--- | :--- |
@@ -11,6 +11,7 @@
 | `vars` | UI Control `vars` | `self$options$vars` | Output item / Table |
 | `baConfidenceLevel` | UI Control `baConfidenceLevel` | `self$options$baConfidenceLevel` | Output item / Table |
 | `confLevel` | UI Control `confLevel` | `self$options$confLevel` | Output item / Table |
+| `kappaCIMethod` | UI Control `kappaCIMethod` | `self$options$kappaCIMethod` | Output item / Table |
 | `proportionalBias` | UI Control `proportionalBias` | `self$options$proportionalBias` | Output item / Table |
 | `showBlandAltmanGuide` | UI Control `showBlandAltmanGuide` | `self$options$showBlandAltmanGuide` | Output item / Table |
 | `blandAltmanPlot` | UI Control `blandAltmanPlot` | `self$options$blandAltmanPlot` | Output item / Table |
@@ -120,6 +121,7 @@
 | `loaLowThreshold` | UI Control `loaLowThreshold` | `self$options$loaLowThreshold` | Output item / Table |
 | `loaVariableName` | UI Control `loaVariableName` | `self$options$loaVariableName` | Output item / Table |
 | `showLoaTable` | UI Control `showLoaTable` | `self$options$showLoaTable` | Output item / Table |
+| `loaOutput` | UI Control `loaOutput` | `self$options$loaOutput` | Output item / Table |
 | `raterProfiles` | UI Control `raterProfiles` | `self$options$raterProfiles` | Output item / Table |
 | `raterProfileType` | UI Control `raterProfileType` | `self$options$raterProfileType` | Output item / Table |
 | `raterProfileShowPoints` | UI Control `raterProfileShowPoints` | `self$options$raterProfileShowPoints` | Output item / Table |

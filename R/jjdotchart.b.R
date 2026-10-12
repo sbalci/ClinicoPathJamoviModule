@@ -403,7 +403,7 @@ jjdotchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             t <- self$results$summary
             if (is.null(tab)) return()
             # the Lower/Upper columns are a bootstrap interval whatever the selected test
-            t$setNote("seed", jmvcore::format(.("Random seed: {seed}"), seed = self$options$seed))
+            t$setNote("seed", .fmt(.("Random seed: {seed}"), seed = self$options$seed))
             t$setNote("agg", sprintf(
                 "Each row is one plotted point. 'Summary' is the %s of that group's observations, which is the statistic the selected test uses, and Lower/Upper are the same %g%% interval drawn as that point's error bar on the chart. 'SD' is the standard deviation of the raw observations. 'vs Reference' is Summary minus the Reference Value (%s).",
                 private$.summaryLabelLower(), 100 * self$options$conflevel,

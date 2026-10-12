@@ -1,17 +1,28 @@
 ---
 name:  agreement
 title: Interrater Reliability
-menuGroup: meddecide
+menuGroup: meddecideT
 menuSubgroup: Agreement
-version: '1.0.81'
+version: '1.0.83'
 jas: '1.2'
 
 description:
-    main: Function for Interrater Reliability.
-    # R:
-    #     dontrun: true
-    #     usage: |
-    #         # example will be added
+    main: >
+        Agreement between two or more raters who scored the same cases. Cohen's
+        kappa for two raters (unweighted, or linear or quadratic weighted for ordinal
+        grades) with a confidence interval, and Fleiss' or Conger's exact kappa for
+        three or more; optional Krippendorff's alpha, Gwet's AC, PABAK, ICC, Lin's
+        concordance, Bland-Altman limits, marginal homogeneity tests, per-rater and
+        per-subgroup agreement, rater and case clustering, consensus and
+        agreement-level variables, and sample size for an agreement study.
+    R:
+        dontrun: true
+        usage: |
+            # Two raters scoring the same 250 cases as 0 or 1
+            agreement(
+                data = histopathology,
+                vars = c("Rater 1", "Rater 2"),
+                sft = TRUE)
 
 
 options:
@@ -19,7 +30,9 @@ options:
       type: Data
       description:
           R: >
-            The data as a data frame. The data should be in long format, where each row is a unique observation.
+            The data as a data frame in WIDE format: one row per case and one column per
+            rater or method, holding that rater's score for that case. (Not long format -
+            do not stack the raters into a single column.)
 
     - name: vars
       title: Raters
@@ -27,21 +40,24 @@ options:
       default: NULL
       description:
           R: >
-            A string naming the variable from `data` that contains the
-            diagnosis given by the observer. 
+            The variables in `data` holding the ratings, one per rater or method.
+            Each selected variable is one rater's column of scores across the cases.
 
 
 
     - name: baConfidenceLevel
-      title: 'Confidence Level for LoA'
+      title: 'Coverage for limits of agreement'
       type: Number
       default: 0.95
       min: 0.50
       max: 0.99
       description:
           R: >
-            Confidence level for Bland-Altman limits of agreement (LoA).
-            Typically 0.95 for 95 percent confidence intervals.
+            Proportion of differences the Bland-Altman limits of agreement are meant to
+            contain, conventionally 0.95, giving mean difference +/- 1.96 SD. This is a
+            coverage proportion for future differences, NOT a confidence level for the
+            limits: raising it moves the limits outward rather than widening an interval
+            around fixed limits.
 
     - name: confLevel
       title: 'Confidence level for CIs'
@@ -54,15 +70,47 @@ options:
             Confidence level for confidence intervals in ICC, CCC, bootstrap CIs,
             and other agreement statistics. Default is 0.95 (95 percent CI).
 
+    - name: kappaCIMethod
+      title: 'Kappa interval method'
+      type: List
+      options:
+        - title: Wald (symmetric, matches psych::cohen.kappa)
+          name: wald
+        - title: Fisher z (asymmetric, better small-sample coverage)
+          name: fisherz
+      default: wald
+      description:
+          R: >
+            Scale on which the confidence interval for Cohen's kappa is built.
+            Wald is kappa plus or minus z times the non-null asymptotic standard error,
+            clamped to the range minus one to one; it is symmetric and reproduces the
+            limits printed by psych::cohen.kappa. Fisher z applies the arc-tangent
+            transform, builds the interval on that scale with the delta-method standard
+            error, and transforms back; the limits are asymmetric and cannot fall outside
+            the range minus one to one. In simulation the Wald interval covered the true
+            kappa about 85 to 95 percent of the time between 20 and 100 cases, while the
+            Fisher z interval held close to its nominal level at every sample size when
+            kappa was moderate and the categories balanced, but under-covered when one
+            category was rare (about 88 percent at 20 to 30 cases with a 10 percent
+            positive rate) and when kappa was very high (88 to 93 percent up to 50
+            cases). The setting
+            applies to every table that builds a Cohen's kappa interval from the
+            asymptotic standard error: the main table with two raters, All-Pairs
+            Kappa, Agreement by Subgroup and the inter/intra-rater tables. Bootstrap
+            intervals are not affected.
+
     - name: proportionalBias
-      title: "Proportional bias test"
+      title: "Difference-mean trend (exploratory)"
       type: Bool
       default: false
       description:
           R: >
-            Test whether the difference between raters changes systematically
-            with the magnitude of measurement (proportional bias).
-            Uses linear regression of difference vs. mean.
+            Fit an exploratory ordinary least-squares trend of the paired difference
+            against the pair mean. The p-value tests whether that slope is zero; it is
+            not, by itself, a valid general test of proportional bias because unequal
+            method precision can create a slope even when neither method has
+            magnitude-dependent bias. Confirm an apparent trend with replicated
+            measurements or an errors-in-variables model before calling it proportional bias.
 
     - name: showBlandAltmanGuide
       title: "When to use Bland-Altman analysis"
@@ -79,8 +127,8 @@ options:
       description:
           R: >
             Generate Bland-Altman plot for continuous agreement analysis.
-            Displays mean difference and limits of agreement between the first two raters.
-            Only applicable when raters provide continuous measurements (e.g., tumor size in mm).
+            Displays the mean difference and limits of agreement between two raters; it needs exactly two
+            rater variables. Only applicable when raters provide continuous measurements (e.g., tumor size in mm).
 
     - name: agreementHeatmap
       title: "Agreement heatmap (confusion matrix)"
@@ -100,9 +148,9 @@ options:
       title: "Heatmap colour scheme"
       type: List
       options:
-        - title: 'Blue-Red Diverging (Agreement Focus)'
+        - title: 'Blue-White-Red'
           name: bluered
-        - title: 'Green-Yellow-Red (Traffic Light)'
+        - title: 'Red-Yellow-Green (Traffic Light)'
           name: traffic
         - title: 'Viridis (Colorblind-Friendly)'
           name: viridis
@@ -111,9 +159,12 @@ options:
       default: bluered
       description:
           R: >
-            Color palette for heatmap visualization. Blue-Red highlights diagonal agreement
-            with strong contrast. Traffic light uses intuitive color coding. Viridis is
-            perceptually uniform and colorblind-safe. Grayscale for black-and-white printing.
+            Colour palette for the heatmap. Every scheme shows the share of all cases in a cell on a
+            fixed 0 to 100 percent scale, so colour means frequency, on or off the diagonal, not
+            agreement. Blue-White-Red: blue for empty or rare cells, white at half of all cases, red
+            above half. Traffic light: red for few cases through green for many, so a crowded
+            off-diagonal cell is green too. Viridis is perceptually uniform and colorblind-safe (dark
+            purple few, yellow many). Grayscale for black-and-white printing (light few, dark many).
 
     - name: heatmapShowPercentages
       title: "Percentages in cells"
@@ -191,9 +242,10 @@ options:
       default: false
       description:
           R: >
-            Use exact p-value calculation instead of normal approximation.
-            Recommended for small sample sizes (< 30 cases) with 3 or more raters.
-            Note: Not applicable for 2-rater analysis (use Cohen's kappa).
+            Report Conger's (1980) exact kappa instead of Fleiss' kappa for 3 or more
+            raters. Its chance-agreement term uses each rater's own category
+            proportions, so the coefficient differs from Fleiss' kappa, and no z
+            statistic or p-value is available for it. Not applicable with 2 raters.
 
     - name: showLevelInfo
       title: "Level ordering information"
@@ -205,6 +257,61 @@ options:
             Essential for weighted kappa analysis to ensure ordinal levels are properly ordered
             (e.g., G1 → G2 → G3 for tumor grades).
 
+    # Pathologist Grading Analysis (model-based ordinal agreement)
+    - name: gradingDesign
+      title: "Study design and category distribution"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show the reading design (cases, pathologists, ratings per case and per
+            pathologist, whether every pathologist is linked through shared cases) and
+            the distribution of categories used by each pathologist. Every observed
+            rating is used; incomplete cases are not dropped.
+
+    - name: perPathologist
+      title: "Per-pathologist agreement"
+      type: Bool
+      default: false
+      description:
+          R: >
+            For each pathologist, the exact agreement with colleagues who read the same
+            cases, the mean pairwise Cohen kappa, and the boundary table showing how much
+            more often this pathologist calls a case at or above each grade than the
+            colleagues who read the same cases.
+
+    - name: severityModel
+      title: "Grading tendency per pathologist (mixed model)"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Cumulative-probit mixed model with a random case effect and one fixed effect
+            per pathologist (ordinal package). Each pathologist's grading tendency is
+            shown relative to the panel average, with a Holm-adjusted p-value and a plot.
+            Ordinal ratings only.
+
+    - name: latentModel
+      title: "Model-based agreement (latent ICC and model-based kappa)"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Cumulative-probit mixed model with crossed random effects for case and
+            pathologist (Nelson and Edwards 2015). Reports the case, pathologist and
+            (when a cluster variable is set) institution variances, the latent ICC(2,1)
+            and the Nelson-Edwards model-based kappa. Ordinal ratings only; the table
+            refuses designs too small for the estimates to be trusted.
+
+    - name: showGradingGuide
+      title: "Explanations for pathologist grading analysis"
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show a plain-language guide to the pathologist grading tables: what each
+            one answers, when to use which, and the design limits.
+
     - name: kripp
       title: "Krippendorff's alpha"
       type: Bool
@@ -215,7 +322,7 @@ options:
             Useful when raters didn't rate all cases or when comparing different measurement levels.
 
     - name: krippMethod
-      title: "Data Type for Krippendorff's Alpha" 
+      title: "Data type for Krippendorff's alpha"
       type: List
       options:
         - title: Nominal
@@ -392,26 +499,31 @@ options:
       default: false
       description:
           R: >
-            Total Deviation Index (TDI) quantifies the limits within which a specified proportion of differences
-            between two measurement methods will fall. Unlike Bland-Altman which assumes constant variability,
-            TDI accounts for heteroscedastic errors (variance increasing with magnitude). Provides a single index
-            for acceptable agreement based on predefined clinically acceptable limits. Essential for medical device
-            validation, laboratory method comparison, and biomarker assay validation where regulatory agencies
-            require demonstration that a specified percentage of measurements fall within acceptable limits.
-            Requires 2 raters/methods. Particularly useful when establishing equivalence between manual and
-            automated measurements or between different measurement platforms.
+            Total Deviation Index (TDI): the boundary within which the requested proportion of
+            absolute differences between two measurement methods fall. Computed here as the
+            empirical quantile of the absolute differences, with a distribution-free order-statistic
+            confidence interval; a finite upper limit needs at least 36 pairs at 90 percent coverage
+            and a 95 percent confidence level, and more at higher settings. It is a single number summarising how far apart the two methods get, and
+            it is useful alongside Bland-Altman when the differences are not normal. Note the
+            scope: this estimator is unconditional, so it does NOT model variability as a
+            function of magnitude and does not adjust for the case mix of the sample - a
+            different spread of values gives a different TDI for the same two methods. Use it as
+            a descriptive summary of the observed comparison, not on its own as a demonstration
+            of equivalence or of regulatory acceptability, which require a prespecified design
+            and acceptance criterion. Requires 2 raters/methods.
 
     - name: tdiCoverage
-      title: "Coverage Probability ( percent)"
+      title: "Empirical coverage target (percent)"
       type: Number
       default: 90
       min: 50
       max: 99
       description:
           R: >
-            The proportion of differences that should fall within TDI limits (default: 90 percent).
-            Common values: 90 percent for general agreement, 95 percent for stringent requirements.
-            This defines what percentage of future measurements must fall within acceptable limits.
+            Quantile of the observed absolute differences to report (default: 90 percent).
+            Common descriptive targets are 90 or 95 percent. This is an unconditional
+            empirical target for the sampled case mix, not a prediction guarantee for future
+            measurements.
 
     - name: tdiLimit
       title: "Acceptable limit"
@@ -423,7 +535,8 @@ options:
           R: >
             Maximum acceptable difference between methods in original units.
             Example: For tumor size, 5mm might be clinically acceptable.
-            TDI should be smaller than this limit for methods to be considered equivalent.
+            Compare the empirical TDI and the upper limit of its interval with this prespecified
+            descriptive limit. Passing it does not, by itself, establish method equivalence.
 
     - name: showTDIGuide
       title: "When to use TDI"
@@ -434,26 +547,29 @@ options:
             Show educational guide and clinical use cases for Total Deviation Index before running analysis.
 
     - name: iota
-      title: "Iota coefficient (multivariate agreement)"
+      title: "Iota coefficient (single variable)"
       type: Bool
       default: false
       description:
           R: >
-            Iota coefficient for multivariate interrater agreement. Measures agreement when raters assess
-            multiple variables simultaneously (e.g., tumor size + grade + mitotic count). Unlike ICC which
-            analyzes one variable at a time, Iota provides a single chance-corrected agreement index across
-            all variables. Supports both quantitative (continuous) and nominal (categorical) data. Reduces
-            to Fleiss' kappa for single categorical variable.
+            Iota coefficient (Janson & Olsson, 2001) for the selected rater columns, computed as ONE
+            variable rated by all of them. Supports quantitative (continuous) and nominal (categorical)
+            ratings. For nominal ratings it is numerically identical to Conger's exact kappa, which the
+            'Exact kappa (3+ raters)' option also reports. The multivariate form of iota - several
+            variables scored by the same raters, summarised in one coefficient - is NOT computed by this
+            analysis, because no option here can say which columns belong to which variable; enter the
+            rater columns of one variable at a time.
 
     - name: iotaStandardize
-      title: "Standardize variables (iota)"
+      title: "Standardize quantitative ratings (no effect on a single variable)"
       type: Bool
       default: true
       description:
           R: >
-            Z-standardize quantitative variables before computing Iota. Recommended when variables are on
-            different scales (e.g., tumor size in mm vs. Ki-67 percentage). Ensures each variable contributes
-            equally to the overall agreement measure.
+            Z-standardize the quantitative ratings before computing Iota. Standardization exists to
+            equalise the contribution of several variables to a multivariate iota. This analysis computes
+            iota for a single variable, where standardizing is an affine rescaling that leaves the
+            coefficient unchanged, so this setting has no effect on the reported value.
 
     - name: showIotaGuide
       title: "When to use iota coefficient"
@@ -461,7 +577,8 @@ options:
       default: false
       description:
           R: >
-            Show educational guide explaining the Iota coefficient for multivariate agreement assessment.
+            Show the educational guide explaining the Iota coefficient, what this analysis computes with
+            it, and when to prefer kappa or ICC instead.
 
     - name: finn
       title: "Finn coefficient (variance-based agreement)"
@@ -474,15 +591,20 @@ options:
             traditional kappa-based measures. Works with ordered categorical ratings.
 
     - name: finnLevels
-      title: "Number of Rating Categories (Finn)"
+      title: "Number of rating categories (Finn)"
       type: Integer
       min: 2
       max: 20
       default: 3
       description:
           R: >
-            The number of different rating categories for Finn coefficient calculation (e.g., 3 for low/medium/high,
-            5 for 5-point Likert scale). Must specify the total number of distinct categories in your rating scale.
+            The number of categories on the rating scale, used by the Finn coefficient as its
+            chance baseline (the variance of a uniform rating on an s-point scale), so it changes
+            the value and can change its sign. When the rater variables are nominal or ordinal
+            this is read from their declared levels instead and a note reports any disagreement;
+            this option is only consulted for numeric ratings, where the scale cannot be
+            recovered from the data. Count every category on the scale, including any that no
+            case happened to receive.
 
     - name: finnModel
       title: "Finn model type"
@@ -518,7 +640,7 @@ options:
             distributions or when assumptions of Fleiss' kappa are questionable.
 
     - name: showLightKappaGuide
-      title: "When to use light's kappa"
+      title: "When to use Light's kappa"
       type: Bool
       default: false
       description:
@@ -532,7 +654,7 @@ options:
       description:
           R: >
             Kendall's coefficient of concordance (W) measures agreement among raters when rating or
-            ranking ordinal data. W ranges from 0 (no agreement) to 1 (perfect agreement). Particularly
+            ranking ordinal data. W ranges from 0 to 1 (perfect agreement); raters who agree no better than chance score about 1/m. Particularly
             useful for ranked data, severity scores, and ordinal grading systems where you want to know
             if raters rank cases in similar order.
 
@@ -551,9 +673,10 @@ options:
       description:
           R: >
             Robinson's A (1957) is an agreement coefficient for ordinal or numeric ratings: 1 minus
-            the within-case variance divided by the total variance. It ranges from 0 to 1 (perfect agreement),
-            with 0 indicating agreement no better than chance. Alternative to weighted kappa that
-            directly measures the degree of ordinal association between raters. Particularly useful
+            the within-case variance divided by the total variance. It reaches 1 at perfect agreement;
+            raters who agree no better than chance score about 1/m (0.5 for two raters), so the label
+            is read from the chance-corrected value (mA - 1)/(m - 1). Alternative to weighted kappa
+            that penalises systematic offsets between raters, not only disagreement in order. Particularly useful
             when ordinal categories have meaningful rank order (e.g., disease severity stages, tumor
             grades). Less affected by marginal distribution imbalances than kappa-based measures.
 
@@ -589,23 +712,29 @@ options:
             Show educational guide and clinical use cases for Mean Spearman Rho before running analysis.
 
     - name: raterBias
-      title: "Rater bias test (systematic differences)"
+      title: "Directional discordance test (ordinal, 2 raters)"
       type: Bool
       default: false
       description:
           R: >
-            Tests whether raters have systematically different rating patterns (e.g., one rater is more
-            lenient/strict than others). Uses chi-square test to detect if marginal frequencies differ
-            significantly across raters. Essential quality control tool to identify raters who consistently
-            over-diagnose or under-diagnose compared to their peers.
+            Tests whether the disagreements between two raters run in one direction more often
+            than the other, i.e. whether one rater is consistently the higher scorer on the cases
+            where they differ. A single chi-square on 1 degree of freedom comparing the total
+            counts above and below the diagonal of the two-rater table (`irr::rater.bias`).
+            Requires exactly 2 raters and both variables must be declared Ordinal, because
+            "higher" is otherwise undefined. This is NOT a test of marginal homogeneity: opposing
+            shifts in different categories cancel out and it returns p = 1 even when the two
+            raters use the categories at quite different rates. Use `bhapkar` or `stuartMaxwell`
+            for that hypothesis.
 
     - name: showRaterBiasGuide
-      title: "When to use rater bias test"
+      title: "When to use directional discordance test"
       type: Bool
       default: false
       description:
           R: >
-            Show educational guide for detecting systematic rater bias in quality control.
+            Show an educational guide to the two-rater ordinal directional discordance test,
+            including its distinction from marginal homogeneity.
 
     - name: bhapkar
       title: "Bhapkar test (marginal homogeneity for 2 raters)"
@@ -669,7 +798,7 @@ options:
             Show the guide to the rater variance decomposition before running analysis.
 
     - name: interIntraRater
-      title: "Inter/Intra-rater reliability (test-retest)"
+      title: "Inter/intra-rater reliability (test-retest)"
       type: Bool
       default: false
       description:
@@ -692,7 +821,7 @@ options:
             as the same rater at two time points. Common patterns: underscore (_), dot (.), dash (-).
 
     - name: showInterIntraRaterGuide
-      title: "When to use inter/Intra-rater reliability"
+      title: "When to use inter/intra-rater reliability"
       type: Bool
       default: false
       description:
@@ -722,7 +851,7 @@ options:
             this reference using Cohen's kappa.
 
     - name: rankRaters
-      title: "Rank raters by performance"
+      title: "Rater performance ranking"
       type: Bool
       default: false
       description:
@@ -750,7 +879,8 @@ options:
       description:
           R: >
             For studies with 3+ raters, compute Cohen's kappa, observed agreement,
-            standard error, 95 percent CI, z, and p-value for every rater pair
+            standard error, a confidence interval at the chosen confidence level, z,
+            and p-value for every rater pair
             (C(k,2) rows). Reproduces the conventional pairwise agreement table
             reported in interobserver reliability studies. Honors the 'wght'
             (weights) and 'multipleTestCorrection' options.
@@ -761,8 +891,12 @@ options:
       default: true
       description:
           R: >
-            Compute Fisher-z 95 percent CI for each pairwise kappa using the
-            analytical standard error returned by irr::kappa2.
+            Show the confidence interval columns of the All-Pairs Kappa table. Each
+            interval is built at the chosen confidence level from the non-null
+            asymptotic standard error (vcd::Kappa), on the scale set by 'Kappa
+            interval method'. When vcd::Kappa cannot return a finite standard error
+            for a pair, that row falls back to the irr::kappa2 null-hypothesis
+            standard error and a footnote says so.
 
     - name: showAllPairsKappaGuide
       title: "When to use all-pairs kappa"
@@ -799,15 +933,19 @@ options:
 
     # Hierarchical/Multilevel Agreement Analysis
     - name: hierarchicalKappa
-      title: "Hierarchical/Multilevel kappa"
+      title: "Hierarchical/multilevel kappa"
       type: Bool
       default: false
       description:
           R: >
-            Enable hierarchical (multilevel) kappa analysis for nested data structures
-            (e.g., pathologists nested within institutions, readers nested within centers).
-            Accounts for clustering effects and provides institution/cluster-specific agreement
-            estimates. Essential for multi-center reliability studies.
+            Agreement for multi-centre designs in which every case belongs to one cluster
+            (institution, centre or scanner) and the same raters score the cases. Categorical
+            ratings get cluster-specific kappa and a stratified kappa (the cluster kappas
+            weighted by cluster size, Barlow, Lai and Azen 1991) shown beside the pooled kappa.
+            Continuous ratings get the within-cluster ICC(2,1) and ICC(2,k) from a linear mixed
+            model. For categorical ratings the case, pathologist and institution variances come
+            from the model-based agreement of the pathologist grading analysis (an ordinal
+            mixed model), not from this section.
 
     - name: clusterVariable
       title: "Cluster/institution variable"
@@ -817,8 +955,11 @@ options:
       default: NULL
       description:
           R: >
-            Variable defining clusters/institutions/centers. For example, hospital ID,
-            institution name, or scanner ID. Raters are nested within these clusters.
+            Variable giving the cluster (for example hospital, institution or scanner ID) that
+            each case belongs to. Each case must belong to exactly one cluster; the same raters
+            may score cases from every cluster. Used by the hierarchical kappa and, when set,
+            by the model-based agreement of the pathologist grading analysis, which then adds
+            an institution variance to the latent model.
 
     - name: iccHierarchical
       title: "Hierarchical ICC decomposition"
@@ -826,10 +967,11 @@ options:
       default: false
       description:
           R: >
-            Calculate intraclass correlation coefficients for hierarchical data.
-            ICC(1): between-cluster agreement, ICC(2): reliability of cluster means,
-            ICC(3): within-cluster agreement. Decomposes variance into cluster-level
-            and rater-level components.
+            Intraclass correlations for the hierarchical design, estimated within cluster:
+            ICC(2,1), the absolute-agreement reliability of a single rater, and ICC(2,k), that
+            of the mean of the raters, from a linear mixed model. Continuous ratings only; for
+            categorical ratings the latent ICC is reported by the model-based agreement of the
+            pathologist grading analysis.
 
     - name: clusterSpecificKappa
       title: "Cluster-specific kappa estimates"
@@ -837,8 +979,9 @@ options:
       default: true
       description:
           R: >
-            Calculate kappa separately for each cluster/institution to identify
-            sites with poor agreement. Useful for quality control in multi-center studies.
+            Agreement within each cluster separately, to see whether it is similar across
+            sites: Cohen's or Fleiss' kappa for categorical ratings, the ICC for continuous
+            ratings. Useful for quality control in multi-centre studies.
 
     - name: varianceDecomposition
       title: "Variance component decomposition"
@@ -846,19 +989,10 @@ options:
       default: true
       description:
           R: >
-            Decompose total variance into between-cluster and within-cluster components.
-            Large between-cluster variance indicates institutional heterogeneity.
-            Comparison informs whether issues are local or systematic.
-
-    - name: shrinkageEstimates
-      title: "Shrinkage (empirical bayes) estimates"
-      type: Bool
-      default: false
-      description:
-          R: >
-            Calculate shrinkage estimates for cluster-specific kappas. Shrinks extreme
-            estimates toward overall mean, providing more stable estimates for small clusters.
-            Recommended when cluster sizes vary substantially.
+            Share of the rating variance due to cases, raters, clusters and residual error,
+            from a linear mixed model. Continuous ratings only; for categorical ratings the
+            variances are estimated by the model-based agreement of the pathologist grading
+            analysis.
 
     - name: testClusterHomogeneity
       title: "Cluster homogeneity test"
@@ -866,9 +1000,13 @@ options:
       default: true
       description:
           R: >
-            Test whether agreement is homogeneous across clusters (null hypothesis:
-            all clusters have equal kappa). Significant result indicates heterogeneity
-            requiring investigation.
+            Likelihood ratio test for the institution (cluster) random effect: the linear
+            mixed model for continuous ratings fitted with and without an institution term.
+            It tests whether the cases' mean scores differ between institutions (case mix or
+            site-level scoring, which this design cannot separate), not whether agreement
+            (kappa or ICC) differs between them; read the cluster-specific estimates for
+            that. The p-value is boundary-corrected, half the usual chi-square value,
+            because a variance cannot be negative (Stram and Lee, 1994).
 
     - name: clusterRankings
       title: "Cluster performance rankings"
@@ -876,9 +1014,10 @@ options:
       default: false
       description:
           R: >
-            Rank clusters/institutions by agreement performance with confidence intervals.
-            Identifies best and worst performing sites. Use cautiously to avoid
-            unfair comparisons when cluster sizes differ substantially.
+            Rank clusters by their cluster-specific agreement. Read each rank beside that
+            cluster's confidence interval: with small clusters, neighbouring ranks are rarely
+            distinguishable, and ranking sites of very different size invites unfair
+            comparison.
 
     - name: showHierarchicalGuide
       title: "When to use hierarchical kappa"
@@ -899,8 +1038,22 @@ options:
           R: >
             Variable distinguishing measurement conditions (e.g., AI-assisted vs. conventional,
             pre-training vs. post-training). Enables mixed-effects comparison that accounts for
-            rater and case random effects. Each case-rater pair should have one observation
-            per condition level.
+            rater and case random effects. Each data row is treated as a separate case unless a
+            case ID variable is given.
+
+    - name: caseIdVariable
+      title: "Case ID variable"
+      type: Variable
+      suggested: [nominal, id]
+      permitted: [factor, numeric, id]
+      default: NULL
+      description:
+          R: >
+            Identifies the case on each row of the mixed-effects condition comparison. Give it
+            when the same case was measured under each condition on separate rows: rows sharing
+            an ID are then one case in the model (a random intercept per case), so the conditions
+            are compared within case. Without it every row is a separate case and the comparison
+            is between cases.
 
     - name: mixedEffectsComparison
       title: "Mixed-effects condition comparison"
@@ -911,8 +1064,8 @@ options:
             Fit a linear mixed model to compare measurement conditions while accounting
             for rater and case random effects. Model: score ~ condition + (1|rater) + (1|case).
             Provides condition effect estimate with CI, variance components, and ICC.
-            More powerful than paired t-tests or Wilcoxon tests when data has a crossed
-            rater x case x condition design (e.g., Dy et al. 2024 Ki-67 AI study).
+            Give a case ID variable when a case was measured under each condition on separate
+            rows; without it each row is one case and the comparison is between cases.
 
     - name: multipleTestCorrection
       title: "Multiple testing correction"
@@ -929,10 +1082,9 @@ options:
       default: none
       description:
           R: >
-            Correction method for multiple comparisons when testing agreement
-            across multiple strata or clusters. Applied to cluster-specific
-            p-values in the hierarchical analysis and to per-condition
-            comparisons when multiple conditions are present.
+            Correction for multiple comparisons, applied to the pairwise p-values of the
+            All-Pairs Kappa table and to the fixed-effect p-values of the Mixed-Effects
+            Condition Comparison.
 
     - name: showMixedEffectsGuide
       title: "When to use mixed-effects comparison"
@@ -995,7 +1147,7 @@ options:
             may be non-normal (e.g., skewed kappa distributions with few categories).
 
     - name: nBoot
-      title: "Number of Bootstrap Samples"
+      title: "Number of bootstrap samples"
       type: Integer
       default: 1000
       min: 100
@@ -1091,8 +1243,8 @@ options:
       default: true
       description:
           R: >
-            Calculate 95 percent confidence intervals for specific agreement indices using
-            Wilson score method. Recommended for publication and when sample sizes vary
+            Calculate confidence intervals at the chosen confidence level for specific
+            agreement indices, using the Wilson score method. Recommended for publication and when sample sizes vary
             across categories. Helps distinguish true differences in category-specific
             agreement from random variation.
 
@@ -1110,8 +1262,8 @@ options:
       default: false
       description:
           R: >
-            Display a natural-language interpretation of results with color-coded agreement levels
-            and clinical guidance. Recommended for reports and presentations.
+            Display a natural-language interpretation of results with the Landis and Koch
+            agreement level and clinical guidance. Recommended for reports and presentations.
 
     - name: showAbout
       title: "About this analysis"
@@ -1172,8 +1324,11 @@ options:
       default: exclude
       description:
           R: >
-            How to handle ties when no single category meets the consensus threshold
-            (e.g., 2-2 split with 4 raters). Exclude = set consensus to NA for tied cases.
+            How to break a tie between equally frequent categories (e.g., a 2-2 split with 4 raters) in
+            the modal rating of Case Agreement and in the reference label of the multi-annotator
+            concordance. Lowest and highest are read on the declared category order. It does not
+            change the consensus variable: a majority, a supermajority or unanimity cannot tie, so a
+            split case gets no consensus label under any setting. Exclude = leave tied cases without a label.
             First = use first category that appears. Lowest/Highest = use min/max of tied categories.
 
 
@@ -1206,7 +1361,7 @@ options:
             Simple mode replicates the former "Agreement Status" feature.
 
     - name: simpleThreshold
-      title: "Majority Threshold ( percent) - Simple Mode"
+      title: "Majority threshold (percent) - simple mode"
       type: Number
       default: 50
       min: 50
@@ -1233,7 +1388,7 @@ options:
             Custom = user-defined cutpoints. Quartiles/Tertiles = data-driven splits.
 
     - name: loaHighThreshold
-      title: "High Threshold ( percent) - Detailed Mode"
+      title: "High threshold (percent) - detailed mode"
       type: Number
       default: 75
       min: 50
@@ -1245,7 +1400,7 @@ options:
             Cases >= this threshold are "High Agreement".
 
     - name: loaLowThreshold
-      title: "Low Threshold ( percent) - Detailed Mode"
+      title: "Low threshold (percent) - detailed mode"
       type: Number
       default: 56
       min: 30
@@ -1257,7 +1412,7 @@ options:
             Below = "Poor", between Low and High = "Moderate".
 
     - name: loaVariableName
-      title: "Variable Name for LoA"
+      title: "Variable name for LoA"
       type: String
       default: 'agreement_level'
       description:
@@ -1339,6 +1494,11 @@ options:
       title: "When to use rater profile plots"
       type: Bool
       default: false
+      description:
+          R: >
+            Show the educational guide explaining what a rater profile plot shows,
+            how to read a systematic shift between raters, and when to prefer a
+            coefficient instead.
 
     # ---- Agreement by Subgroup ----
 
@@ -1382,7 +1542,7 @@ options:
             for each subgroup. Facilitates visual comparison of agreement across subgroups.
 
     - name: subgroupMinCases
-      title: "Minimum Cases per Subgroup"
+      title: "Minimum cases per subgroup"
       type: Integer
       default: 10
       min: 5
@@ -1397,6 +1557,12 @@ options:
       title: "When to use agreement by subgroup"
       type: Bool
       default: false
+      description:
+          R: >
+            Show the educational guide listing when stratified agreement is useful
+            (tumor type, stage or grade, case difficulty, anatomical site). The
+            table's own note explains that kappa depends on each subgroup's case mix
+            and that subgroups are not compared with each other.
 
     # ---- Rater Clustering ----
 
@@ -1407,8 +1573,9 @@ options:
       description:
           R: >
             Cluster raters based on their rating patterns to identify groups of raters with similar
-            rating behavior. For continuous data: clustering based on correlation or Euclidean distance
-            of ratings. For categorical data: clustering based on agreement patterns or confusion matrices.
+            rating behavior. For continuous data: clustering on the distance chosen under Distance
+            (1 minus Lin's CCC by default, or correlation, Euclidean or Manhattan). For categorical data:
+            clustering on the proportion of cases on which two raters disagree.
             Essential for identifying subgroups of raters who rate similarly, detecting outlier raters,
             understanding rater training backgrounds, and optimizing panel composition. Reveals whether
             raters form natural groups (e.g., experienced vs. novice, different training backgrounds)
@@ -1435,25 +1602,36 @@ options:
       title: "Distance metric"
       type: List
       options:
-        - title: 'Correlation (1 - r)'
+        - title: "Concordance (1 - Lin's CCC)"
+          name: ccc
+        - title: "Correlation (1 - r), pattern only"
           name: correlation
         - title: 'Euclidean Distance'
           name: euclidean
         - title: 'Manhattan Distance'
           name: manhattan
-        - title: 'Agreement-Based (Categorical)'
+        - title: 'Exact Agreement (categorical)'
           name: agreement
-      default: correlation
+      default: ccc
       description:
           R: >
-            For continuous data:
-            - Correlation: Groups raters with similar relative rating patterns (recommended for most cases)
-            - Euclidean: Groups raters with similar absolute rating values
-            - Manhattan: Like Euclidean but less sensitive to outliers
-            For categorical data:
-            - Agreement-based: Distance = 1 - pairwise agreement proportion
-            Correlation is recommended for most applications as it captures rating pattern similarity
-            regardless of systematic shifts (one rater consistently 10 percent higher).
+            Distance used to compare raters. Concordance (1 - Lin's CCC) is the default: Lin's
+            concordance correlation coefficient is the correlation multiplied by a bias factor,
+            so it falls both when two raters scatter around each other and when one reads
+            consistently higher or on a wider scale. Two raters are close only when their
+            numbers are interchangeable, which is what agreement means. The similarity column is
+            then the concordance coefficient itself, on -1 to 1. Correlation (1 - r), pattern
+            only: groups raters whose case-to-case ranking agrees. It removes systematic
+            offsets, so two raters can share a cluster while one reads consistently higher than
+            the other; it measures association, not absolute agreement. Choose it when the
+            question is about ranking rather than about interchangeable values. Euclidean and
+            Manhattan: raw distance between the two raters' readings. Both see a systematic
+            offset, but their size grows with the number of cases, so the similarity column is
+            rescaled by the largest distance in the analysis and ranks raters within this
+            dataset only. Manhattan is less affected by a single extreme case. Exact Agreement:
+            1 minus the proportion of cases scored identically. This is the distance used for
+            categorical ratings whatever is selected here; on continuous measurements it counts
+            exact equality only.
 
     - name: clusterLinkage
       title: "Linkage method (hierarchical)"
@@ -1477,16 +1655,18 @@ options:
             - Ward: Minimizes within-cluster variance (tends to create equal-sized clusters)
 
     - name: nClusters
-      title: "Number of Clusters (K-means)"
+      title: "Number of clusters"
       type: Integer
       default: 3
       min: 2
       max: 10
       description:
           R: >
-            Number of clusters to create for k-means clustering.
-            Consider: number of training cohorts, experience levels, or institutions.
-            For hierarchical clustering, this is ignored but dendrogram can be cut at any height.
+            Number of clusters to form. K-means partitions the raters into this many clusters;
+            hierarchical clustering cuts the dendrogram into this many branches.
+            Consider the number of training cohorts, experience levels or institutions.
+            A value larger than one less than the number of raters is reduced, and the table
+            says so.
 
     - name: showDendrogram
       title: "Dendrogram"
@@ -1506,12 +1686,17 @@ options:
           R: >
             Display heatmap of pairwise rater similarities with cluster memberships annotated.
             Helps visualize which raters are most similar and validates cluster assignments.
-            For continuous data: correlation matrix. For categorical data: agreement matrix.
+            For continuous data the similarity is the one the chosen distance implies (Lin's CCC by
+            default). For categorical data it is the proportion of cases two raters agree on.
 
     - name: showRaterClusterGuide
       title: "When to use rater clustering"
       type: Bool
       default: false
+      description:
+          R: >
+            Show the educational guide explaining how raters are grouped and how to
+            read the dendrogram and similarity heatmap.
 
     # ---- Case Clustering ----
 
@@ -1542,21 +1727,32 @@ options:
       title: "Distance metric"
       type: List
       options:
-        - title: 'Correlation (1 - r)'
-          name: correlation
         - title: 'Euclidean Distance'
           name: euclidean
         - title: 'Manhattan Distance'
           name: manhattan
-        - title: 'Agreement-Based (Categorical)'
+        - title: "Correlation (1 - r), profile shape only"
+          name: correlation
+        - title: 'Exact Agreement (categorical)'
           name: agreement
-      default: correlation
+      default: euclidean
       description:
           R: >
-            Correlation (1 - r): Based on correlation between rating vectors (continuous).
-            Euclidean: Straight-line distance in rating space.
-            Manhattan: City-block distance (sum of absolute differences).
-            Agreement-Based: Proportion of disagreeing raters (categorical).
+            Distance used to compare cases. Euclidean is the default: straight-line distance
+            between two cases' rating vectors, which sees the level of the ratings, so cases are
+            grouped when the raters gave them similar numbers. The similarity column is the
+            distance rescaled by the largest distance in the analysis and ranks cases within
+            this dataset only. Manhattan: the same, from absolute differences, and less affected
+            by one extreme rater. Correlation (1 - r), profile shape only: groups cases whose
+            rating profile across raters has the same shape. It ignores the level of the
+            ratings, so cases of very different magnitude are grouped together. A case's profile
+            has only as many points as there are raters, so this needs at least three raters;
+            with two, the correlation between any two cases is exactly +1 or -1 and the analysis
+            stops with a message. Exact Agreement: 1 minus the proportion of raters who gave two
+            cases the same value. This is the distance used for categorical ratings whatever is
+            selected here. Lin's concordance coefficient is deliberately not offered for cases:
+            it would be estimated from as many points as there are raters, typically three to
+            six, which is too few.
 
     - name: caseClusterLinkage
       title: "Linkage method (hierarchical)"
@@ -1579,13 +1775,17 @@ options:
             Ward: Minimizes within-cluster variance.
 
     - name: nCaseClusters
-      title: "Number of Clusters (K-means)"
+      title: "Number of clusters"
       type: Integer
       default: 3
       min: 2
       max: 20
       description:
-          R: Number of clusters to create for k-means clustering.
+          R: >
+            Number of clusters to form. K-means partitions the cases into this many clusters;
+            hierarchical clustering cuts the dendrogram into this many branches.
+            A value larger than one less than the number of cases is reduced, and the table
+            says so.
 
     - name: showCaseDendrogram
       title: "Dendrogram"
@@ -1613,7 +1813,7 @@ options:
     # ============================================================
 
     - name: pairedAgreementTest
-      title: Compare agreement between two conditions
+      title: "Paired agreement comparison"
       type: Bool
       default: false
       description:
@@ -1635,6 +1835,9 @@ options:
           R: >
             Rater columns for the second condition (e.g., AI-assisted).
             The main rater variables serve as Condition A.
+            Give Condition B the same number of rater columns as Condition A;
+            otherwise only percent agreement is comparable and no kappa row is
+            shown.
 
     - name: pairedBootN
       title: Bootstrap replications
@@ -1703,16 +1906,18 @@ options:
             This is the minimum clinically meaningful agreement.
 
     - name: ssNRaters
-      title: Number of Raters
+      title: "Number of raters"
       type: Integer
       min: 2
       max: 100
       default: 2
       description:
-          R: Planned number of raters in the study.
+          R: >
+            Planned number of raters in the study.
+            Kappa calculations support 2 to 6 raters; the ICC calculation has no upper limit.
 
     - name: ssNCategories
-      title: Number of Categories
+      title: "Number of categories"
       type: Integer
       min: 2
       max: 20
@@ -1752,8 +1957,9 @@ options:
       default: 42
       description:
           R: >
-            Random seed for the reproducible bootstrap resampling used in the
-            agreement analyses. Change this value to obtain a different bootstrap
+            Random seed for everything random in this analysis: the bootstrap resampling, the
+            k-means starting centres of rater and case clustering, and the random subsample the
+            case-cluster heatmap draws above 200 cases. Change this value to obtain a different
             draw; the default (42) reproduces the previous fixed behaviour.
 
 

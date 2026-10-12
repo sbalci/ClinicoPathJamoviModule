@@ -152,7 +152,7 @@ test_that("spider 'jamovi' scheme follows the document palette", {
 test_that("waterfall palette options declare no duplicate or colliding level", {
   ay <- testthat::test_path("..", "..", "jamovi", "waterfall.a.yaml")
   skip_if_not(file.exists(ay), "a.yaml not available in the installed test context")
-  opts <- yaml::read_yaml(ay)$options
+  opts <- yaml::read_yaml(ay, fileEncoding = "UTF-8")$options
   get <- function(n) Filter(function(o) identical(o$name, n), opts)[[1]]
 
   cs <- get("colorScheme")

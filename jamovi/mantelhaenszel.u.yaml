@@ -62,7 +62,7 @@ children:
       - type: TextBox
         name: alpha
         format: number
-        suffix: (significance level)
+        suffix: significance level
 
   - type: CollapseBox
     label: Documentation

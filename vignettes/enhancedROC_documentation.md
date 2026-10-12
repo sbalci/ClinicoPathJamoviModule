@@ -4,6 +4,9 @@
 
 - **Analysis Function**: `enhancedROC`
 - **Module**: `meddecide`
+- **Not implemented (2026-09-22)**: 14 options are commented out of `jamovi/enhancedROC.a.yaml`
+  / `.u.yaml` and are absent from this map. They are not wrapper arguments - passing one is an
+  "unused argument" error: `harrellCIndex`, `unoCStatistic`, `namDagostino`, `greenwoodNam`, `calibrationBelt`, `optimismCorrection`, `externalValidation`, `transportability`, `bootstrapCutoffCI`, `modelUpdating`, `netBenefitRegression`, `incidentDynamic`, `cumulativeDynamic`, `competingRisksConcordance`.
 
 | Feature / Option | UI Binding | Backend Handler | Target Result Item |
 | :--- | :--- | :--- | :--- |
@@ -21,7 +24,6 @@
 | `bootstrapSamples` | UI Control `bootstrapSamples` | `self$options$bootstrapSamples` | Output item / Table |
 | `useBootstrap` | UI Control `useBootstrap` | `self$options$useBootstrap` | Output item / Table |
 | `bootstrapMethod` | UI Control `bootstrapMethod` | `self$options$bootstrapMethod` | Output item / Table |
-| `bootstrapCutoffCI` | UI Control `bootstrapCutoffCI` | `self$options$bootstrapCutoffCI` | Output item / Table |
 | `bootstrapPartialAUC` | UI Control `bootstrapPartialAUC` | `self$options$bootstrapPartialAUC` | Output item / Table |
 | `stratifiedBootstrap` | UI Control `stratifiedBootstrap` | `self$options$stratifiedBootstrap` | Output item / Table |
 | `seed` | UI Control `seed` | `self$options$seed` | Output item / Table |
@@ -67,9 +69,6 @@
 | `splineCalibration` | UI Control `splineCalibration` | `self$options$splineCalibration` | Output item / Table |
 | `splineKnots` | UI Control `splineKnots` | `self$options$splineKnots` | Output item / Table |
 | `eoRatio` | UI Control `eoRatio` | `self$options$eoRatio` | Output item / Table |
-| `namDagostino` | UI Control `namDagostino` | `self$options$namDagostino` | Output item / Table |
-| `greenwoodNam` | UI Control `greenwoodNam` | `self$options$greenwoodNam` | Output item / Table |
-| `calibrationBelt` | UI Control `calibrationBelt` | `self$options$calibrationBelt` | Output item / Table |
 | `calibrationDensity` | UI Control `calibrationDensity` | `self$options$calibrationDensity` | Output item / Table |
 | `multiClassROC` | UI Control `multiClassROC` | `self$options$multiClassROC` | Output item / Table |
 | `multiClassStrategy` | UI Control `multiClassStrategy` | `self$options$multiClassStrategy` | Output item / Table |
@@ -78,19 +77,9 @@
 | `nntCalculation` | UI Control `nntCalculation` | `self$options$nntCalculation` | Output item / Table |
 | `clinicalUtilityCurve` | UI Control `clinicalUtilityCurve` | `self$options$clinicalUtilityCurve` | Output item / Table |
 | `decisionImpactTable` | UI Control `decisionImpactTable` | `self$options$decisionImpactTable` | Output item / Table |
-| `harrellCIndex` | UI Control `harrellCIndex` | `self$options$harrellCIndex` | Output item / Table |
-| `unoCStatistic` | UI Control `unoCStatistic` | `self$options$unoCStatistic` | Output item / Table |
-| `incidentDynamic` | UI Control `incidentDynamic` | `self$options$incidentDynamic` | Output item / Table |
-| `cumulativeDynamic` | UI Control `cumulativeDynamic` | `self$options$cumulativeDynamic` | Output item / Table |
-| `competingRisksConcordance` | UI Control `competingRisksConcordance` | `self$options$competingRisksConcordance` | Output item / Table |
 | `internalValidation` | UI Control `internalValidation` | `self$options$internalValidation` | Output item / Table |
 | `validationMethod` | UI Control `validationMethod` | `self$options$validationMethod` | Output item / Table |
-| `optimismCorrection` | UI Control `optimismCorrection` | `self$options$optimismCorrection` | Output item / Table |
-| `externalValidation` | UI Control `externalValidation` | `self$options$externalValidation` | Output item / Table |
 | `decisionImpactCurves` | UI Control `decisionImpactCurves` | `self$options$decisionImpactCurves` | Output item / Table |
-| `netBenefitRegression` | UI Control `netBenefitRegression` | `self$options$netBenefitRegression` | Output item / Table |
-| `modelUpdating` | UI Control `modelUpdating` | `self$options$modelUpdating` | Output item / Table |
-| `transportability` | UI Control `transportability` | `self$options$transportability` | Output item / Table |
 
 ## Verification Checklist
 

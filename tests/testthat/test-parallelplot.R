@@ -1,10 +1,6 @@
 # Test file for parallelplot function
 library(testthat)
 
-# Source the parallelplot function directly for testing
-source(file.path("R", "parallelplot.b.R"))
-source(file.path("R", "parallelplot.h.R"))
-
 # Create test data
 create_test_data <- function() {
     set.seed(123)
@@ -31,8 +27,7 @@ test_that("parallelplot handles basic input correctly", {
     result <- parallelplot(
         data = test_data,
         vars = c("var1", "var2", "var3"),
-        scaling = "std",
-        interactive = FALSE
+        scaling = "std"
     )
     
     expect_true(!is.null(result))
@@ -46,8 +41,7 @@ test_that("parallelplot handles grouping variable", {
         data = test_data,
         vars = c("var1", "var2", "var3"),
         group = "group",
-        scaling = "std",
-        interactive = FALSE
+        scaling = "std"
     )
     
     expect_true(!is.null(result))
@@ -62,8 +56,7 @@ test_that("parallelplot handles different scaling methods", {
         result <- parallelplot(
             data = test_data,
             vars = c("var1", "var2"),
-            scaling = method,
-            interactive = FALSE
+            scaling = method
         )
         
         expect_true(!is.null(result), info = paste("Failed for scaling method:", method))
@@ -79,8 +72,7 @@ test_that("parallelplot handles missing data options", {
     result1 <- parallelplot(
         data = test_data,
         vars = c("var1", "var2"),
-        showMissing = FALSE,
-        interactive = FALSE
+        showMissing = FALSE
     )
     
     expect_true(!is.null(result1))
@@ -89,8 +81,7 @@ test_that("parallelplot handles missing data options", {
     result2 <- parallelplot(
         data = test_data,
         vars = c("var1", "var2"),
-        showMissing = TRUE,
-        interactive = FALSE
+        showMissing = TRUE
     )
     
     expect_true(!is.null(result2))
@@ -103,8 +94,7 @@ test_that("parallelplot validates input correctly", {
     expect_error(
         parallelplot(
             data = test_data,
-            vars = c("non_numeric"),
-            interactive = FALSE
+            vars = c("non_numeric")
         ),
         "At least 2 numeric variables"
     )
@@ -113,8 +103,7 @@ test_that("parallelplot validates input correctly", {
     expect_error(
         parallelplot(
             data = test_data,
-            vars = c("var1"),
-            interactive = FALSE
+            vars = c("var1")
         ),
         "At least 2 numeric variables"
     )
@@ -130,8 +119,7 @@ test_that("parallelplot color palettes work", {
             data = test_data,
             vars = c("var1", "var2"),
             group = "group",
-            colorPalette = palette,
-            interactive = FALSE
+            colorPalette = palette
         )
         
         expect_true(!is.null(result), info = paste("Failed for palette:", palette))
@@ -147,8 +135,7 @@ test_that("parallelplot alpha parameter works", {
         result <- parallelplot(
             data = test_data,
             vars = c("var1", "var2"),
-            alpha = alpha,
-            interactive = FALSE
+            alpha = alpha
         )
         
         expect_true(!is.null(result), info = paste("Failed for alpha:", alpha))
@@ -160,8 +147,7 @@ test_that("parallelplot summary table is created correctly", {
     
     result <- parallelplot(
         data = test_data,
-        vars = c("var1", "var2", "var3"),
-        interactive = FALSE
+        vars = c("var1", "var2", "var3")
     )
     
     # Check that summary table exists and has correct structure
@@ -186,23 +172,29 @@ test_that("parallelplot handles empty data gracefully", {
     expect_error(
         parallelplot(
             data = empty_data,
-            vars = c("var1", "var2"),
-            interactive = FALSE
-        )
+            vars = c("var1", "var2")
+        ),
+        "No complete cases found"
     )
 })
 
 test_that("parallelplot instructions are shown when no variables selected", {
-    test_data <- create_test_data()
-    
+    # No data= here: with data and zero variables, jmvcore's init() select()s a
+    # 0-column frame and fails ("invalid 'row.names' length") before .run().
     result <- parallelplot(
-        data = test_data,
-        vars = c(),  # No variables
-        interactive = FALSE
+        vars = c()  # No variables
     )
     
     expect_true(!is.null(result))
-    # Instructions should be shown when no variables are selected
+    # Instructions should be shown when no variables are selected. The item
+    # is visible by default, so also check its text, and that selecting
+    # variables hides it.
     instructions <- result$instructions
-    expect_true(!is.null(instructions))
+    expect_true(instructions$visible)
+    expect_match(instructions$content, "Welcome to Parallel Coordinates Plot",
+                 fixed = TRUE)
+
+    selected <- parallelplot(data = create_test_data(),
+                             vars = c("var1", "var2"))
+    expect_false(selected$instructions$visible)
 })

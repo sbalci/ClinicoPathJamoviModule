@@ -418,13 +418,36 @@ test_that("every diagnostic plot renders", {
 })
 
 
-test_that("probability plot endpoints use pooled final classifications", {
+test_that("each probability path spans only the steps its own subjects receive", {
+    # Until 2026-09-21 both paths were drawn across all three x positions and the branch that
+    # LEAVES the pathway after test 1 was terminated on the pooled Combined_PPV / Combined_NPV.
+    # A pooled predictive value is a mixture over two subgroups with different posteriors, so it
+    # is not the continuation of either branch; drawing it moved a line at an x position labelled
+    # for a test those subjects never received. With sens = 0.60 and spec = 0.70 on both tests
+    # and prevalence = 0.20:
+    #   serial positive -- final negatives are {T1-}, P(D) = 12.50%, and {T1+,T2-}, P(D) = 22.22%.
+    #     The pooled 1 - NPV = 14.95% is neither, and the T1- line was drawn rising 12.50 -> 14.95.
+    #   serial negative -- final positives are {T1+}, P(D) = 33.33%, and {T1-,T2+}, P(D) = 22.22%.
+    #     The pooled PPV = 29.17% is neither, and the T1+ line was drawn falling 33.33 -> 29.17.
+    # Where a final class IS a single branch the two coincide exactly (serial positive: final
+    # positive == {T1+,T2+}; serial negative: final negative == {T1-,T2-}), and the endpoint must
+    # still equal the pooled value -- that identity is asserted below.
+    prev <- 0.20; s1 <- 0.60; p1 <- 0.70; s2 <- 0.60; p2 <- 0.70
+
+    # Independent oracle: P(D | pattern) straight from Bayes, not from the module's LR chaining.
+    pd <- function(lik_d, lik_h) (prev * lik_d) / (prev * lik_d + (1 - prev) * lik_h)
+    p_t1pos <- pd(s1, 1 - p1)                              # 0.3333333333
+    p_t1neg <- pd(1 - s1, p1)                              # 0.1250000000
+    p_pospos <- pd(s1 * s2, (1 - p1) * (1 - p2))           # 0.5000000000
+    p_negneg <- pd((1 - s1) * (1 - s2), p1 * p2)           # 0.0754716981
+    p_either <- pd(1 - (1 - s1) * (1 - s2), 1 - p1 * p2)   # 0.2916666667
+
     render_probability_data <- function(strategy) {
         h <- private_st(
             strategy = strategy,
-            test1_sens = 0.60, test1_spec = 0.70,
-            test2_sens = 0.60, test2_spec = 0.70,
-            prevalence = 0.20, show_plots = TRUE
+            test1_sens = s1, test1_spec = p1,
+            test2_sens = s2, test2_spec = p2,
+            prevalence = prev, show_plots = TRUE
         )
         h$p$.run()
         grDevices::pdf(NULL)
@@ -435,28 +458,91 @@ test_that("probability plot endpoints use pooled final classifications", {
         ))
         list(
             data = ggplot2::last_plot()$data,
+            caption = ggplot2::last_plot()$labels$caption,
             state = h$a$results$plot_probability$state
         )
     }
 
+    # An NA or NaN here would reach the rendered plot as a missing point.
+    check_no_na <- function(d) expect_false(anyNA(d$Probability))
+    # The caption is strwrap()ped for the plot, so match against a single-spaced copy.
+    flat_caption <- function(x) gsub("[[:space:]]+", " ", x)
+
     serial_positive <- render_probability_data("serial_positive")
+    check_no_na(serial_positive$data)
+    # positive path: pre -> after T1+ -> after T2+ ; negative path stops at test 1.
     expect_equal(
-        serial_positive$data$Probability[6],
-        100 * (1 - serial_positive$state$Combined_NPV),
+        serial_positive$data$Probability,
+        100 * c(prev, p_t1pos, p_pospos, prev, p_t1neg),
         tolerance = 1e-12
     )
+    expect_equal(serial_positive$data$x, c(1, 2, 3, 1, 2))
+    expect_equal(
+        serial_positive$data$Probability[3],
+        100 * serial_positive$state$Combined_PPV,
+        tolerance = 1e-12
+    )
+    expect_false(isTRUE(all.equal(
+        serial_positive$data$Probability[5],
+        100 * (1 - serial_positive$state$Combined_NPV))))
+    # ... and because it is NOT that pooled number, the plot has to say so. Until 2026-09-22 the
+    # pane shipped 12.5% on the line and 14.95% in the tables for "probability after a negative
+    # result" with nothing to tell them apart. The final-negative class is {T1-} (P(D) = 12.50%,
+    # weight 0.640/0.856 = 0.7477) plus {T1+,T2-} (P(D) = 22.22%, weight 0.216/0.856 = 0.2523,
+    # i.e. 21.6% of the cohort); 0.7477*0.125 + 0.2523*0.2222 = 0.1495, weights summing to 1.
+    sp_cap <- flat_caption(serial_positive$caption)
+    expect_true(length(sp_cap) == 1L && nzchar(sp_cap))
+    expect_match(sp_cap, "Negative Path ends at the first-test-negative subgroup", fixed = TRUE)
+    expect_match(sp_cap, "P(disease | Test 1 negative) = 12.5%", fixed = TRUE)
+    expect_match(sp_cap, "1 - combined NPV = 15.0%", fixed = TRUE)
+    expect_match(sp_cap, "Test 1 positive / Test 2 negative subgroup (P(disease) = 22.2%)", fixed = TRUE)
 
     serial_negative <- render_probability_data("serial_negative")
+    check_no_na(serial_negative$data)
+    # negative path: pre -> after T1- -> after T2- ; positive path stops at test 1.
     expect_equal(
-        serial_negative$data$Probability[3],
-        100 * serial_negative$state$Combined_PPV,
+        serial_negative$data$Probability,
+        100 * c(prev, p_t1pos, prev, p_t1neg, p_negneg),
         tolerance = 1e-12
     )
+    expect_equal(serial_negative$data$x, c(1, 2, 1, 2, 3))
     expect_equal(
-        serial_negative$data$Probability[6],
+        serial_negative$data$Probability[5],
         100 * (1 - serial_negative$state$Combined_NPV),
         tolerance = 1e-12
     )
+    expect_false(isTRUE(all.equal(
+        serial_negative$data$Probability[2],
+        100 * serial_negative$state$Combined_PPV)))
+    # Mirror image of the serial-positive case: final positives are {T1+} (P(D) = 33.33%, weight
+    # 0.360/0.576 = 0.625) plus {T1-,T2+} (P(D) = 22.22%, weight 0.216/0.576 = 0.375);
+    # 0.625*0.3333 + 0.375*0.2222 = 0.2917, weights summing to 1.
+    sn_cap <- flat_caption(serial_negative$caption)
+    expect_true(length(sn_cap) == 1L && nzchar(sn_cap))
+    expect_match(sn_cap, "Positive Path ends at the first-test-positive subgroup", fixed = TRUE)
+    expect_match(sn_cap, "P(disease | Test 1 positive) = 33.3%", fixed = TRUE)
+    expect_match(sn_cap, "combined PPV = 29.2%", fixed = TRUE)
+    expect_match(sn_cap, "Test 1 negative / Test 2 positive subgroup (P(disease) = 22.2%)", fixed = TRUE)
+
+    # Parallel applies both tests at once, so there is no intermediate step and neither branch
+    # is truncated: each endpoint is the POOLED value the tables report, which is why both
+    # identities below hold. Only the negative endpoint is also a single pattern, {T1-,T2-},
+    # P(D) = 7.55%. The positive endpoint 29.17% is a genuine three-way mixture of {T1+,T2+}
+    # (P(D) = 50.00%, weight 0.250), {T1+,T2-} (22.22%, 0.375) and {T1-,T2+} (22.22%, 0.375):
+    # 0.250*0.5 + 0.375*0.2222 + 0.375*0.2222 = 0.2917, weights summing to 1. The plot shows
+    # that mixture rather than one of its parts, so nothing here contradicts the tables.
+    parallel <- render_probability_data("parallel")
+    check_no_na(parallel$data)
+    expect_equal(
+        parallel$data$Probability,
+        100 * c(prev, p_either, prev, p_negneg),
+        tolerance = 1e-12
+    )
+    expect_equal(parallel$data$x, c(1, 2, 1, 2))
+    expect_equal(parallel$data$Probability[2], 100 * parallel$state$Combined_PPV, tolerance = 1e-12)
+    expect_equal(parallel$data$Probability[4], 100 * (1 - parallel$state$Combined_NPV), tolerance = 1e-12)
+    # Nothing is truncated here, so there is no discrepancy to caption.
+    expect_null(parallel$caption)
 })
 
 

@@ -40,28 +40,28 @@ children:
           - type: TextBox
             name: effect_size
             format: number
-            suffix: "(interpreted per Effect Size Type)"
+            suffix: "interpreted per Effect Size Type"
             label: "Effect size"
             enable: (!(effect_size_type:rmst_difference) && !(test_type:non_inferiority && analysis_type:effect_size))
           - type: TextBox
             name: alpha_level
             format: number
-            suffix: "(typically 0.05)"
+            suffix: "typically 0.05"
             label: "Significance level (alpha)"
           - type: TextBox
             name: power_level
             format: number
-            suffix: "(typically 0.80)"
+            suffix: "typically 0.80"
             label: "Target power (1-beta)"
             enable: (!(analysis_type:power))
           - type: TextBox
             name: allocation_ratio
             format: number
-            suffix: "(1 = equal groups)"
+            suffix: "1 = equal groups"
           - type: TextBox
             name: sample_size_input
             format: number
-            suffix: "(for power/effect/duration calculations)"
+            suffix: "for power/effect/duration calculations"
             enable: (!(analysis_type:sample_size))
 
   - type: CollapseBox
@@ -74,13 +74,13 @@ children:
           - type: TextBox
             name: control_median_survival
             format: number
-            suffix: "(months)"
+            suffix: "months"
           - type: ComboBox
             name: survival_distribution
           - type: TextBox
             name: weibull_shape
             format: number
-            suffix: "(1 = exponential)"
+            suffix: "1 = exponential"
             enable: (survival_distribution:weibull)
 
   - type: CollapseBox
@@ -93,17 +93,17 @@ children:
           - type: TextBox
             name: accrual_period
             format: number
-            suffix: "(months)"
+            suffix: "months"
           - type: TextBox
             name: follow_up_period
             format: number
-            suffix: "(months)"
+            suffix: "months"
           - type: ComboBox
             name: accrual_pattern
           - type: TextBox
             name: dropout_rate
             format: number
-            suffix: "(0-1, e.g., 0.05 = 5%)"
+            suffix: "0-1, e.g., 0.05 = 5%"
 
   - type: CollapseBox
     label: Specialized Methods

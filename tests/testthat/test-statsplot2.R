@@ -1,3 +1,7 @@
+# Do not source() R/*.h.R / R/*.b.R here: a source() preamble detaches the package namespace,
+# jmvcore's .() helper leaves scope and any .() string dies with `could not find function "."`
+# (project reference test-source-preamble-breaks-dot-translate). The package provides these.
+
 # Comprehensive Test Suite for statsplot2 Function
 # Addresses reviewer concern: "Complete lack of testing for complex dispatch logic"
 #
@@ -16,9 +20,6 @@ library(jmvcore)
 library(ggstatsplot)
 library(ggalluvial)
 
-# Source the files
-source("../../R/statsplot2.h.R")
-source("../../R/statsplot2.b.R")
 
 # Define . function if not exists
 if (!exists(".")) . <- function(x, ...) x

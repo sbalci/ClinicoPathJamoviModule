@@ -162,7 +162,7 @@
       return(num_levels >= 1)
     }
     jmvcore::reject(paste(
-      jmvcore::format(.("Outcome Factor Has Unsupported Levels: the outcome variable has non-numeric levels that cannot be interpreted as events: {levels}."),
+      .fmt(.("Outcome Factor Has Unsupported Levels: the outcome variable has non-numeric levels that cannot be interpreted as events: {levels}."),
                       # levels() is NULL for a character outcome, which printed "events: ."
                       levels = paste(if (is.factor(outcome_vec)) levels(outcome_vec)
                                      else sort(unique(stats::na.omit(as.character(outcome_vec)))),
@@ -177,7 +177,7 @@
 
   # IMPROVEMENT: Throw error for unsupported types instead of returning NA
   jmvcore::reject(paste(
-    jmvcore::format(.("Outcome Variable Type Not Supported: the outcome variable has type '{type}', which cannot be used for survival analysis."),
+    .fmt(.("Outcome Variable Type Not Supported: the outcome variable has type '{type}', which cannot be used for survival analysis."),
                     type = class(outcome_vec)[1]),
     .("Supported types: numeric 0 (censored) and 1 (event); logical FALSE (censored) and TRUE (event); or a factor with numeric levels ('0'/'1') or competing-risk levels ('Censored'/'Event'/'Competing')."),
     .("To fix: check that the correct outcome variable is selected, verify its type under Data > Setup, and convert a text variable to a numeric or factor outcome, for example with Transform > Compute."),
@@ -1698,7 +1698,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           if (!is.null(x) && length(unique(stats::na.omit(x))) < 2) {
             label <- labelled::var_label(x)
             jmvcore::reject(trimws(paste(
-              jmvcore::format(
+              .fmt(
                 .("The explanatory variable '{var}' has only one value in the analysed rows, so no effect can be estimated for it. Remove it, or check the data filter and missing values."),
                 var = if (is.null(label)) v else label),
               if (isTRUE(self$options$uselandmark))
@@ -1899,7 +1899,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           # some exports and "1 = event" in others. Say exactly how it was read.
           if (is.numeric(raw_outcome) && !isTRUE(self$options$multievent) &&
               nzchar(recode_html)) {
-            recode_html <- paste0(recode_html, "<p style='margin-top:8px'>", jmvcore::format(
+            recode_html <- paste0(recode_html, "<p style='margin-top:8px'>", .fmt(
               .("How this numeric outcome was read: the value {event} is the event and every other value ({censored}) is treated as censored. Values are matched exactly, not by size, so for a column coded 1/2 the Event Level decides which value is the event."),
               event = htmltools::htmlEscape(private$.eventRecode$event_label),
               censored = htmltools::htmlEscape(paste(private$.eventRecode$censored_labels, collapse = ", "))),
@@ -3639,7 +3639,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           return()
         }
 
-        tbl$setNote("seed", jmvcore::format(.("Random seed: {seed}"),
+        tbl$setNote("seed", .fmt(.("Random seed: {seed}"),
           seed = if (is.null(self$options$seed) || is.na(self$options$seed)) 1234L else self$options$seed))
         tbl$setRow(rowKey = "apparent", values = list(
           value = res$apparent,

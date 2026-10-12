@@ -53,18 +53,37 @@ def check_versions():
 
 
 def check_news():
-    """NEWS.md needs a section for the version DESCRIPTION declares - the one the reviewer reads
-    (2026-09-16 OncoPath [LOW]). _updateModules.R rewrites Version: on every regeneration and never
-    writes NEWS.md (release notes need a person), so a missing entry only surfaces here."""
+    """.github/workflows/release.yaml extracts the GitHub release body from the first NEWS.md
+    heading matching `(^|[^0-9.])<version>([^0-9.]|$)`, and falls back to the one-line placeholder
+    "Release <v>." on a miss - so `1.0.82.02` does not serve `1.0.83` (2026-09-22 OncoPath [LOW];
+    14 of the 16 workflow-era releases shipped with that placeholder).
+
+    Judge only versions the workflow would actually publish. Its cascade keys on DESCRIPTION
+    Version:: three components -> release; three with a multi-digit last part -> pre-release;
+    four or more -> no release at all. _updateModules.R rewrites Version: in DESCRIPTION,
+    CITATION.cff, 0000.yaml and every .a.yaml on every regeneration and never touches NEWS.md,
+    so most of the time the version on disk is a four-component dev build that publishes nothing.
+    Warning about those was the old bug here: it put all five modules permanently in the red and
+    the one module that was really about to ship a placeholder was invisible among them.
+
+    Write the heading BEFORE the version bump: the workflow skips any version whose tag already
+    exists, so a release cannot be re-cut once it has gone out with the placeholder."""
     if not os.path.exists('NEWS.md'):
         return
     dv = re.search(r'^Version:\s*(\S+)', open('DESCRIPTION', encoding='utf-8').read(), re.M).group(1)
-    heads = re.findall(r'^#{1,2} +(.*)$', open('NEWS.md', encoding='utf-8').read(), re.M)
-    covered = any(re.search(r'(?<![\w.])%s(?![\w.])' % re.escape(dv), h) for h in heads)
+    parts = dv.split('.')
+    if len(parts) != 3 or not all(x.isdigit() for x in parts):
+        print('  NEWS.md: %s is a %d-part dev build - the release workflow publishes nothing' % (dv, len(parts)))
+        return
+    heads = re.findall(r'^#+ +(.*)$', open('NEWS.md', encoding='utf-8').read(), re.M)
+    covered = any(re.search(r'(^|[^0-9.])%s([^0-9.]|$)' % re.escape(dv), h) for h in heads)
+    kind = 'pre-release' if len(parts[2]) > 1 else 'release'
     if not covered:
-        WARN.append('NEWS.md has no heading for DESCRIPTION version %s (newest heading: %s)'
-                    % (dv, next((h for h in heads if re.search(r'\d+\.\d+', h)), 'none')))
-    print('  NEWS.md: DESCRIPTION %s %s' % (dv, 'has a heading' if covered else 'has NO heading'))
+        WARN.append('NEWS.md has no heading the release workflow can match for %s, so the %s would be '
+                    'published with the placeholder body "Release %s." (newest heading: %s). Add the '
+                    'heading before the version bump - the tag guard makes a release un-retryable.'
+                    % (dv, kind, dv, next((h for h in heads if re.search(r'\d+\.\d+', h)), 'none')))
+    print('  NEWS.md: %s (%s) %s' % (dv, kind, 'has a heading' if covered else 'has NO heading'))
 
 
 def check_license():
@@ -886,6 +905,208 @@ def check_min_app():
     print('  jamovi 28.3 features: %d File/Text, %d vector images; minApp %s' % (len(need), len(vec), min_app))
 
 
+_TOPKEYS = ('title', 'menuTitle', 'menuSubtitle', 'description')
+
+
+def _scalar_newlines(path):
+    """Yield (line, key, n_newlines) for every .a.yaml scalar that reaches jamovi/0000.yaml and
+    resolves with an interior newline. yaml.compose keeps the node's line and style; safe_load
+    would lose both. rstrip('\\n') is mandatory - a `>` block always clip-chomps to one trailing
+    newline, and without the strip every folded description is a false positive."""
+    try:
+        root = yaml.compose(open(path, encoding='utf-8'))
+    except Exception:
+        return
+    if not isinstance(root, yaml.MappingNode):
+        return
+    for k, v in root.value:
+        if k.value not in _TOPKEYS:
+            continue
+        pairs = ([(k2, v2) for k2, v2 in v.value if k2.value == 'main']
+                 if k.value == 'description' and isinstance(v, yaml.MappingNode) else [(k, v)])
+        for kn, vn in pairs:
+            if not isinstance(vn, yaml.ScalarNode):
+                continue
+            body = vn.value.rstrip('\n')
+            if '\n' in body:
+                yield kn.start_mark.line + 1, kn.value, body.count('\n')
+
+
+def check_description_newlines():
+    """The jamovi library listing renders every newline left in an analysis `description: main:`
+    as a paragraph break, so a `|` literal block shatters the entry mid-sentence, and jmvtools
+    truncates it at the first blank line - silently dropping the rest (2026-09-22 OncoPath [LOW];
+    jjdotchart lost 25 of 28 lines, crosstable 11 of 12, sequentialtests 10 of 14). Use a single
+    `>` folded paragraph with no blank line. Tested on the RESOLVED value, not the block style:
+    a `>` block containing a blank line folds to a newline too, and a single-line `|` is harmless.
+    options[].description.R is deliberately out of scope - it reaches man/*.Rd, where newlines
+    do not matter."""
+    bad, debt = [], 0
+    for p in sorted(glob.glob('jamovi/*.a.yaml')):
+        name = os.path.basename(p)[:-7]
+        for line, key, n in _scalar_newlines(p):
+            if _shipped(name):
+                bad.append('%s:%d %s (%d newline%s)' % (os.path.basename(p), line, key, n, '' if n == 1 else 's'))
+            else:
+                debt += 1
+    UNSHIPPED['description_newlines'] = debt
+    if bad:
+        WARN.append('%d shipped analysis description(s) resolve with an interior newline, so the jamovi '
+                    'library listing breaks them into paragraphs and drops everything after the first '
+                    'blank line (use one `>` paragraph): %s' % (len(bad), ', '.join(cap(bad))))
+    print('  description newlines: %d shipped, %d debt' % (len(bad), debt))
+
+
+_ISSUE_URL = re.compile(r'https?://github\.com/([\w.-]+/[\w.-]+?)(?:\.git)?/issues', re.I)
+
+
+def check_issue_urls():
+    """Every file that tells a user where to report a bug must name the same repository. OncoPath
+    sent DESCRIPTION's readers to sbalci/OncoPath/issues and the jamovi library's readers (via
+    jamovi/0000.yaml) to sbalci/ClinicoPathJamoviModule/issues (2026-09-22 OncoPath [LOW]); four
+    of the six module trees disagree with themselves. Case is ignored - only the repository
+    identity matters."""
+    seen = {}
+    for p in ('DESCRIPTION', 'jamovi/0000.yaml', 'README.md', 'CITATION.cff'):
+        if not os.path.exists(p):
+            continue
+        for repo in _ISSUE_URL.findall(open(p, encoding='utf-8', errors='replace').read()):
+            seen.setdefault(repo.lower(), set()).add(p)
+    if len(seen) > 1:
+        WARN.append('%d different bug-report repositories across DESCRIPTION / 0000.yaml / README.md / '
+                    'CITATION.cff (a user is sent to whichever file they happened to read): %s'
+                    % (len(seen), '; '.join('%s in %s' % (r, ', '.join(sorted(f))) for r, f in sorted(seen.items()))))
+    print('  bug-report URL: %d distinct repositor%s' % (len(seen), 'y' if len(seen) == 1 else 'ies'))
+
+
+def check_dataset_descriptions():
+    """Two example datasets that describe themselves identically cannot be told apart in the
+    jamovi data picker, and an entry whose .omv is missing is a dead row (2026-09-22 OncoPath
+    [LOW]: waterfall_percentage_basic and waterfall_raw_longitudinal - the two input modes the
+    waterfall description itself distinguishes - both read 'Example analysis for Waterfall Plot.')."""
+    ds = (_safe_yaml('jamovi/0000.yaml') or {}).get('datasets') or []
+    descs, dup, missing = {}, [], []
+    for d in ds:
+        if not isinstance(d, dict):
+            continue
+        t = (d.get('description') or '').strip()
+        if t and t in descs:
+            dup.append('%s / %s: %r' % (descs[t], d.get('name'), t))
+        elif t:
+            descs[t] = d.get('name')
+        if d.get('path') and not os.path.exists(os.path.join('data', d['path'])):
+            missing.append('%s -> data/%s' % (d.get('name'), d['path']))
+    if dup:
+        WARN.append('%d example dataset pair(s) share one description, so the data picker cannot tell '
+                    'them apart: %s' % (len(dup), '; '.join(cap(dup))))
+    if missing:
+        FAIL.append('%d datasets: entr%s names a file that is not in data/: %s'
+                    % (len(missing), 'y' if len(missing) == 1 else 'ies', ', '.join(cap(missing))))
+    print('  datasets: %d listed, %d duplicate descriptions, %d missing files' % (len(ds), len(dup), len(missing)))
+
+
+_INSERT = re.compile(r'\$insert\s*\(\s*([0-9]+)\s*,')
+
+
+def check_sentinel_insert():
+    """`jmvcore::Group$insert(index, item)` has NO bounds check. For any index above
+    length(items) it slices `.items[index:length(.items)]`, and R's `:` counts DOWN, so the
+    results tree is padded with NULLs; the next traversal calls NULL$asProtoBuf() and the user
+    gets `attempt to apply non-function` from the serialization path. Measured 2026-09-22 on
+    jmvcore 2.7.38: 21 items, insert(999) -> 1978 items / 1955 NULLs, insert(22) -> 1 NULL, and
+    a jmvcore::Html fails identically - the element type is irrelevant. This is what the
+    2025-12 `survival` / `swimmerplot` crashes actually were; the conclusion drawn then
+    (\"Notice objects cannot be serialized\") was wrong and cost the project 80 hand-rolled HTML
+    notice helpers. There is no append index: use `$add(item)` for the bottom and `insert(1, item)`
+    for the top of a NON-EMPTY group. 999 is never a valid index in this codebase - the largest
+    results tree measured has 21 items - so any literal above the cutoff is the sentinel bug."""
+    hits, debt = [], 0
+    for p in sorted(glob.glob('R/*.R')):
+        if '.bak' in p:
+            continue
+        for i, line in enumerate(open(p, encoding='utf-8', errors='replace'), 1):
+            code = line.split('#', 1)[0]
+            for idx in _INSERT.findall(code):
+                if int(idx) < 100:
+                    continue
+                if _file_shipped(p):
+                    hits.append('%s:%d insert(%s,)' % (p, i, idx))
+                else:
+                    debt += 1
+    UNSHIPPED['sentinel_insert'] = debt
+    if hits:
+        FAIL.append('%d $insert() call(s) use a sentinel index far past the number of results items; '
+                    'jmvcore pads the tree with NULLs and serialization dies with "attempt to apply '
+                    'non-function" (use $add() to append): %s' % (len(hits), ', '.join(cap(hits))))
+    print('  sentinel $insert(): %d shipped, %d debt' % (len(hits), debt))
+
+
+def _tables(node, out):
+    if isinstance(node, dict):
+        if node.get('type') == 'Table' and node.get('name'):
+            out.append(node)
+        for k in ('items', 'template'):
+            if node.get(k):
+                _tables(node[k], out)
+    elif isinstance(node, list):
+        for x in node:
+            _tables(x, out)
+
+
+def check_init_row_structure():
+    """A table whose whole row set is known before the data is seen must be scaffolded in
+    .init() and filled with setRow(); built with addRow() in .run() it appears as an empty
+    header and then restructures - the visible jump (library review guide section 6). Raised
+    against meddecide three rounds running (2026-07-13 MEDIUM, 2026-08-17 MEDIUM,
+    2026-09-16 LOW) with a rule but no detector.
+
+    The unit is the TABLE, not the addRow call: a table that already has an .init() skeleton
+    and gains one extra conditional row in .run() does not blink, and flagging those buried the
+    real hits (6 of 8 in a call-level probe). Flagged only when the table declares no rows:,
+    nothing reachable from .init() names it, and EVERY addRow it gets uses a literal rowKey -
+    which is the proof that the row set was known at the time the code was written.
+
+    ponytail: blind to a loop index over a fixed-length result (`for (i in 1:nrow(res))
+    addRow(rowKey = i)`, the epiR shape in 2026-09-16 meddecide), so 0 here is not proof.
+    """
+    hits = []
+    for p in glob.glob('jamovi/*.r.yaml'):
+        name = os.path.basename(p)[:-7]
+        b = 'R/%s.b.R' % name
+        r = _safe_yaml(p)
+        if not os.path.exists(b) or not r:
+            continue
+        tl = []
+        _tables(r, tl)
+        src = re.sub(r'#[^\n]*', '', open(b, encoding='utf-8', errors='replace').read())
+        heads = list(_METHOD.finditer(src))
+        body = {h.group(1): src[h.end(): heads[i + 1].start() if i + 1 < len(heads) else len(src)]
+                for i, h in enumerate(heads)}
+        reach, todo = {'.init'}, ['.init']
+        while todo:
+            for c in _CALL.findall(body.get(todo.pop(), '')):
+                if c not in reach:
+                    reach.add(c)
+                    todo.append(c)
+        init_src = '\n'.join(body.get(m, '') for m in reach)
+        run_src = '\n'.join(v for k, v in body.items() if k not in reach)
+        for t in tl:
+            tn = t['name']
+            if t.get('rows') or re.search(r'\b%s\b' % re.escape(tn), init_src):
+                continue
+            keys = re.findall(r'%s\s*\$addRow\s*\(\s*rowKey\s*=\s*([^,\n]+)' % re.escape(tn), run_src)
+            for v in set(re.findall(r'(\w+)\s*<-\s*self\$results(?:\$\w+)*\$%s\b' % re.escape(tn), run_src)):
+                keys += re.findall(r'\b%s\s*\$addRow\s*\(\s*rowKey\s*=\s*([^,\n]+)' % re.escape(v), run_src)
+            if keys and all(re.match(r'\s*["\']', k) for k in keys):
+                hits.append((name, '%s::%s (%d rows)' % (name, tn, len(keys))))
+    ship = sorted(x for n, x in hits if _shipped(n))
+    UNSHIPPED['init_row_structure'] = len(hits) - len(ship)
+    if ship:
+        WARN.append('%d shipped table(s) with a fixed row set built by addRow() in .run() - the '
+                    'table appears empty and then restructures: %s' % (len(ship), ', '.join(cap(ship))))
+    print('  fixed rows built in .run(): %d tables (%d shipped)' % (len(hits), len(ship)))
+
+
 if __name__ == '__main__':
     print('RELEASE GATE  %s\n' % ROOT)
     for fn in (check_versions, check_news, check_license, check_refs, check_clearwith, check_renderfun,
@@ -893,7 +1114,9 @@ if __name__ == '__main__':
                check_requires_data, check_render_private_state, check_bare_set_seed, check_unused_imports, check_collapsebox_titlecase, check_i18n_padding,
                check_i18n_catalog_scope, check_i18n_bracket, check_i18n_braced_escape,
                check_i18n_po_formats, check_notice_title_colour, check_min_app,
-               check_column_formats, check_fabricated_stats, check_state_payload):
+               check_column_formats, check_fabricated_stats, check_state_payload,
+               check_description_newlines, check_issue_urls, check_dataset_descriptions,
+               check_sentinel_insert, check_init_row_structure):
         try:
             fn()
         except Exception as e:

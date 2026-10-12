@@ -330,7 +330,8 @@ test_that("negative conditional dependence is permitted", {
     # backend validation accepts it
     p <- private_of()
     expect_silent(p$.validateInputParameters(0.8, 0.9, 0.7, 0.95, 0.1, FALSE, -0.5, -0.5))
-    expect_error(p$.validateInputParameters(0.8, 0.9, 0.7, 0.95, 0.1, FALSE, -1.5, 0),
+    # out of range is rejected by the option schema itself, before .run() is reached
+    expect_error(ClinicoPath::cotest(indep = FALSE, cond_dep_pos = -1.5),
                  "between -1 and 1")
 
     # negative dependence yields a valid, more-informative-than-independent joint model

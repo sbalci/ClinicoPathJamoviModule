@@ -90,8 +90,9 @@ test_that("notice text shows the method title, never the option key", {
 })
 
 test_that("the notices item clears on every option it reports on", {
-  root <- if (file.exists("../../jamovi/categorize.r.yaml")) "../.." else "."
-  items <- yaml::read_yaml(file.path(root, "jamovi/categorize.r.yaml"))$items
+  jamovi_dir <- testthat::test_path("..", "..", "jamovi")
+  skip_if_not(dir.exists(jamovi_dir), "package source tree not available")
+  items <- yaml::read_yaml(file.path(jamovi_dir, "categorize.r.yaml"))$items
   notices <- Filter(function(i) i$name == "notices", items)[[1]]
   expect_true(all(c("newvarname", "addtodata", "ordered") %in% notices$clearWith))
 })
