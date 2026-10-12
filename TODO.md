@@ -1,3 +1,19 @@
+# lassologistic — `/release-review-function` (2026-10-12 evening, uncommitted)
+
+Acceptance: every lassologistic test file green with 0 skips; the new test red on HEAD's `.b.R`; an
+independent oracle (own FISTA solver, Mann-Whitney AUC, DeLong, Youden, scoring, Harrell loop) agrees
+with HEAD; the bootstrap cache survives a real protobuf save/load; gate with lassologistic as shipped
+unchanged; `msgfmt -c` clean.
+- [x] R-01 a predictor with one value among the complete cases aborted the run ("Design matrix error:
+      contrasts ...", a regression from today's `droplevels()`); now dropped, reported, rows recounted
+- [x] R-02 Patient ID accepts jamovi's ID measure type (`permitted: [factor, numeric, id]`) - needs
+      `jmvtools::prepare()` to reach `R/lassologistic.h.R`
+- [x] NEWS.md 1.0.84 entry: Max-scaled default, >2-level refusal and the rest of the 21:12 commit
+- [ ] User: `jmvtools::prepare()` + `devtools::document()` for R-02, then the in-jamovi checks below
+- Not fixed (minor, msgid churn): suitability row "p = N predictors" counts model terms; clinical
+  guidance "negative points for the reference class" means features favouring it; CV-plot subtitle
+  uses the codes lambda.min / lambda.1se.
+
 # lassologistic — fixes from `/check-function-full` (2026-10-12, done, uncommitted)
 
 Acceptance: each finding has a test that fails on HEAD's `.b.R`/`.h.R` and passes now; every lassologistic test

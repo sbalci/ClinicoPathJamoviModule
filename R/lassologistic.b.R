@@ -369,6 +369,16 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             paste(data$dropped_constant, collapse = ", "), data$n_vars)
                     )
                 }
+                # Not "the same value in every case": the spreadsheet shows these varying.
+                if (length(data$dropped_single) > 0) {
+                    private$.addNotice(
+                        "WARNING",
+                        .("Predictors constant among the analysed cases"),
+                        sprintf(
+                            .("Removed before fitting: %1$s. Each varies only in rows that were excluded for a missing value, so every analysed case has the same value, and a predictor that does not vary cannot be penalised or selected. %2$d variables remain and are shown as Variables analysed."),
+                            paste(data$dropped_single, collapse = ", "), data$n_vars)
+                    )
+                }
 
                 private$.checkpoint()
 
@@ -534,8 +544,22 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Complete-case filtering
                 complete <- complete.cases(status, predictors)
+                if (sum(complete) < 10) jmvcore::reject(.("Too few complete cases for analysis."))
+                # A predictor can vary overall yet take one value in every complete case (its other
+                # values occur only in rows excluded for a missing value). droplevels() below then
+                # left such a factor a single level and model.matrix() aborted the whole analysis;
+                # a numeric one was dropped as a degenerate column without a word. Drop it here,
+                # say so, and recount without it: adding rows back cannot make another predictor
+                # constant, so one recount is enough.
+                single <- vapply(predictors, function(x) length(unique(x[complete])) < 2, logical(1))
+                dropped_single <- names(predictors)[single]
+                if (any(single)) {
+                    predictors <- predictors[, !single, drop = FALSE]
+                    explanatory_vars <- names(predictors)
+                    if (ncol(predictors) < 2) jmvcore::reject(.("Fewer than 2 non-constant predictors remain."))
+                    complete <- complete.cases(status, predictors)
+                }
                 n_complete <- sum(complete)
-                if (n_complete < 10) jmvcore::reject(.("Too few complete cases for analysis."))
 
                 # Why each row went away: a partition of !complete (outcome is judged
                 # first, then predictors), so a missing outcome is never announced as a
@@ -657,6 +681,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     n_excl_pred = n_excl_pred,
                     n_dropped_constant = n_dropped_constant,
                     dropped_constant = dropped_constant,
+                    dropped_single = dropped_single,
                     # ncol(X) counts design-matrix COLUMNS (a 5-level factor is 4 of
                     # them), so it cannot stand in for "variables you selected".
                     n_vars = length(explanatory_vars),

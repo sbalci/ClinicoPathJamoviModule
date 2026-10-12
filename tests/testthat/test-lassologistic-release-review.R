@@ -274,3 +274,30 @@ test_that("A separated model reports no calibration slope instead of an arbitrar
   auc <- vt[gsub('^"|"$', "", rownames(vt)) == "auc", ]
   expect_true(is.finite(auc$corrected))
 })
+
+test_that("a predictor constant among the complete cases is dropped and reported, not a design-matrix error", {
+  # /release-review-function 2026-10-12: droplevels() on the complete cases left such a factor one
+  # level and model.matrix() aborted with "contrasts can be applied only to factors with 2 or more
+  # levels"; a numeric one was dropped as a degenerate column without a word, and its own missing
+  # values still excluded rows from a model it was not in.
+  skip_if_not_installed("glmnet")
+  d <- ClinicoPath::lassologistic_pannen
+  pv <- c("p53_aberrant", "rb1_loss", "sstr2a_3plus", "ki67_pct", "mitotic_count", "age_years")
+  ki_na <- is.na(d$ki67_pct)
+  d$coexist_carcinoma <- factor(ifelse(ki_na, "Yes", "No"), levels = c("No", "Yes"))  # varies only where Ki-67 is missing
+  d$marker <- ifelse(ki_na, 5, 1)
+  d$marker[which(complete.cases(d[pv]))[1:2]] <- NA   # and is itself missing in two analysable rows
+  run <- function(vars) suppressWarnings(do.call(ClinicoPath::lassologistic, list(
+    data = d, outcome = "diagnosis", outcomeLevel = "PanNEC", explanatory = vars)))
+  with_both <- run(c(pv, "coexist_carcinoma", "marker"))
+  without <- run(pv)
+  # the oracle: the same analysis as never having selected them (same rows, same fit)
+  expect_equal(with_both$coefficients$asDF, without$coefficients$asDF)
+  expect_equal(with_both$modelSummary$asDF, without$modelSummary$asDF)
+  txt <- with_both$notices$content
+  expect_match(txt, "Predictors constant among the analysed cases", fixed = TRUE)
+  expect_match(txt, "Removed before fitting: coexist_carcinoma, marker.", fixed = TRUE)
+  expect_false(grepl("same value in every case", txt, fixed = TRUE))
+  # fewer than two left is still a refusal, with the existing message
+  expect_error(run(c("ki67_pct", "coexist_carcinoma", "marker")), "Fewer than 2 non-constant predictors remain")
+})

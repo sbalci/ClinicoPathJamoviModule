@@ -129476,6 +129476,10 @@ msgid ""
 "remove these predictors."
 msgstr ""
 
+#: R/lassologistic.b.R
+msgid "Predictors constant among the analysed cases"
+msgstr ""
+
 #: R/multisurvival.b.R
 msgid "Predictors included:"
 msgstr ""
@@ -133270,6 +133274,14 @@ msgstr ""
 
 #: alluvial/options/curveType/quintic.title
 msgid "Quintic (very smooth)"
+msgstr ""
+
+#: R/lassologistic.b.R
+msgid ""
+"Removed before fitting: %1$s. Each varies only in rows that were excluded "
+"for a missing value, so every analysed case has the same value, and a "
+"predictor that does not vary cannot be penalised or selected. %2$d variables "
+"remain and are shown as Variables analysed."
 msgstr ""
 
 #: bayesiandiagnostic/results/convergenceDiagnostics.columns.title

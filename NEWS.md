@@ -41,6 +41,18 @@
   stale methodology clearing, generated event/lookup metadata, and coefficient plot
   scales are corrected. Saved ROC plots use curve coordinates and support older states.
   The analysis remains in `meddecideT` pending a separate release/promotion operation.
+  **Changed default:** the scoring method is now Max-scaled (also the primary in
+  "Compare All Methods"); Smallest-unit gave the bundled example a -23 to 120 point
+  scale. A scale giving one factor more than 20 points is flagged. **Breaking:** an
+  outcome with more than two observed levels is refused instead of being narrowed to
+  the event and an inferred reference level. Character and logical predictors are coded
+  as factors, unused factor levels are dropped before coding, and each factor's
+  reference level is named. A predictor that varies only in rows excluded for a missing
+  value is now removed and reported; it used to stop the analysis with a design-matrix
+  error. Data-derived score cuts print as the shortest number that awards the same
+  patients. Notices are ordered by severity, and the bootstrap summary is reused when
+  only display options change. The bundled `lassologistic_pannen` example was
+  regenerated with overlapping classes (apparent AUC 0.961, previously 1.000).
 
 - In module 1.0.81.01, `psychopdaROC` analysis 1.0.92 aligns its AUC-PR with
   `enhancedROC`: both integrate the curve interpolated in true- and false-positive

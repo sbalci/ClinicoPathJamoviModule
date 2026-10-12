@@ -335,8 +335,8 @@ options:
       title: Patient ID (optional duplicate check)
       type: Variable
       default: NULL
-      suggested: [ nominal ]
-      permitted: [ factor, numeric ]
+      suggested: [ nominal, id ]
+      permitted: [ factor, numeric, id ]
       description:
         R: >
           Optional identifier for independent patients. Repeated or missing IDs among

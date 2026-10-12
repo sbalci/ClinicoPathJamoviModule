@@ -5,6 +5,23 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-10-12 — lassologistic: droplevels() on the complete cases turned a dropped column into a crash
+
+- **Failure mode:** the `/review-function` fix ran `droplevels()` on the complete cases so an unused
+  first level could not leave the dummies collinear. A factor that varies overall but takes one value
+  in every complete case (its other level only where Ki-67 is missing) then reached `model.matrix()`
+  with one level, and the whole analysis stopped with "Design matrix error: contrasts can be applied
+  only to factors with 2 or more levels". Before, its all-zero dummy was dropped as degenerate.
+- **Detection:** `/release-review-function` read the diff of the newest commit and asked what each
+  new preprocessing step does at its boundary, rather than re-running the tests that commit added.
+- **Repair:** `.cleanData()` drops any predictor with one value among the complete cases, reports it
+  in its own notice, and recounts the complete cases without it. Oracle: the result equals a run
+  that never selected it. Test in `test-lassologistic-release-review.R`, red on the previous code.
+- **Rule:** a preprocessing step that shrinks a set (`droplevels`, `na.omit`, a filter) needs a
+  test at the size where it leaves too little: one level, zero rows, one column.
+
+---
+
 ## 2026-10-12 — lassologistic: a demo that only showed the guards, and a fingerprint that was not a hash
 
 - **Failure mode:** the bundled `lassologistic_pannen` separated the classes completely, so the default
