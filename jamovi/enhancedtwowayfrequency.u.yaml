@@ -79,7 +79,7 @@ children:
               - type: TextBox
                 name: minimumExpected
                 format: number
-                suffix: (minimum expected frequency)
+                suffix: minimum expected frequency
 
   - type: LayoutBox
     margin: large

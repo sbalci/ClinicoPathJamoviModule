@@ -327,3 +327,54 @@ test_that("every declared option is read by the backend", {
         grepl(paste0("options\\$", o, "\\b"), backend), logical(1))]
     expect_equal(unread, character(0))
 })
+
+
+test_that("expected counts never reach the reader in scientific notation", {
+    # signif() pasted into prose rendered the small tail as "1.4e-06" in a sentence aimed at
+    # pathologists. Pinned directly rather than only through a swept design, so the floor
+    # cannot drift: the same three assertions live in test-kappasizeci- and
+    # test-kappasizefixedn-, and the three .fmtCount implementations must stay identical.
+    # .fmtCount calls .() for its two literal returns, and jmvcore's .() looks up `self` in the
+    # calling frame -- lifted out of $private_methods it is unbound and throws "object 'self'
+    # not found". Bind it off an instance instead.
+    an  <- ClinicoPath:::kappaSizePowerClass$new(options = ClinicoPath:::kappaSizePowerOptions$new())
+    fmt <- an$.__enclos_env__$private$.fmtCount
+    expect_equal(fmt(8.9e-06), "below 0.0001")
+    expect_equal(fmt(0.0013),  "0.0013")
+    expect_equal(fmt(0.013),   "0.013")
+    expect_equal(fmt(4.9),     "4.9")
+    expect_equal(fmt(NA_real_), "unavailable")
+    # the six-rater 5%-finding design is the one the swept prose came from: 0.00034 must print
+    # as itself, not be swallowed by the floor
+    expect_equal(fmt(0.00034), "0.00034")
+})
+
+
+test_that("the marginal and the agreement-pattern warnings can both appear", {
+    # They describe different quantities -- how empty the chi-square's cells are, versus how
+    # few cases of the rare category the study will contain at all -- and the marginal block
+    # used to be gated on the pattern block NOT having fired, which silenced it on exactly the
+    # designs where both are true. Only the shared remedy sentence is dropped from the second.
+    an <- ClinicoPath:::kappaSizePowerClass$new(options = ClinicoPath:::kappaSizePowerOptions$new())
+    build <- an$.__enclos_env__$private$.buildNotices
+
+    both <- build(176, sparse = TRUE, outcome = 5L, raters = 2L, kappa0 = 0.80, kappa1 = 0.90,
+                  power = 0.80, sparse_min = 2.8, sparse_below5 = 1L, sparse_total = 6L,
+                  marg_min = 3.5, marg_sparse = TRUE)
+    expect_match(both, "Sparse categories", fixed = TRUE)
+    expect_match(both, "Rare outcome category", fixed = TRUE)
+    expect_equal(lengths(regmatches(both, gregexpr("collapsing rare categories", both)))[[1]], 1L)
+
+    # marginal alone (Cochran silent) still speaks, and carries the remedy itself
+    marg <- build(176, sparse = FALSE, outcome = 5L, raters = 2L, kappa0 = 0.80, kappa1 = 0.90,
+                  power = 0.80, marg_min = 3.5, marg_sparse = TRUE)
+    expect_false(grepl("Sparse categories", marg, fixed = TRUE))
+    expect_match(marg, "Rare outcome category", fixed = TRUE)
+    expect_match(marg, "collapsing rare categories", fixed = TRUE)
+
+    # below 10 subjects the "Very small sample size" block owns the explanation
+    expect_false(grepl("Rare outcome category",
+                       build(4, sparse = TRUE, outcome = 5L, raters = 2L, kappa0 = 0.80,
+                             kappa1 = 0.90, power = 0.80, marg_min = 0.1, marg_sparse = TRUE),
+                       fixed = TRUE))
+})

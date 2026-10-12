@@ -1,149 +1,1557 @@
+# agreement (meddecide) — deferred from the 2026-09-23 correctness pass
+
+Everything the independent audit found is fixed and verified (audit harness 29/29, suites 616 pass).
+These are the items deliberately NOT done, each with the reason and what it would take.
+
+**2026-09-25 `/fix-function agreement --apply` (second pass, afternoon) — DONE.**
+Scope: the defects the earlier passes deferred, plus the regeneration step they left to the user.
+menuGroup already `meddecideT`. Peer session (security audit) handed the files over.
+- [x] Baseline: 27 files, 1961 pass / 4 fail (stale zzz) / 1 err (FIX-18: no `LANG` in the Bash tool, κ in r.yaml) / 1 skip; release gate 0 agreement hits
+- [x] Bland-Altman exact fit (B = 2A): slope p printed 3e-283 with no note; now a relative residual-SD check
+- [x] Hierarchical ICC(2,k): k = harmonic mean of ratings per case, not the number of rater columns
+- [x] Lin's CCC fallback: full Lin (2000) asymptotic variance on n - 2; point estimate on n divisors (matched DescTools to 1e-10)
+- [x] B7 remainder: subgroup and inter/intra ICC labels say "(CI spans X to Y)" (`.iccBandWithCI`); the hierarchical ICC table has no CI, so nothing to span
+- [x] Heatmap colour keys (agreement, rater and case similarity) via `.drawHeatmapKey`; truncation caption moved to the top. Rendered and inspected
+- [x] Empty rater column named in the grading section (pathologist and design tables)
+- [x] PABAK guide: PI/BI marked 2x2 only (the q-category PABAK row was already right; example re-derived: 0.640 / 0.85 / 0.90)
+- [x] Continuous-data panel lists all 11 analyses the gate counts (6 were missing)
+- [x] Dead locals (codetools): 11 deleted; per-class F1 note corrected (F1 empty only when TP = FP = FN = 0)
+- [x] All-Pairs footnote strings (4) wrapped in `.()`
+- [x] Stale zzz assertions (4) rewritten to pin the plain-mean decision and `.orderedLevelsInfo`
+- [x] Verify (see Results)
+- **Results.** New `test-agreement-fixes-2026-09-25-pm.R`: 7 tests, 25 expectations; the 6 fix tests fail on a pre-fix copy (swapped in and restored), the noisy-slope control passes on both. `notes-and-labels` updated for the CI suffix. Full suite (27 files, `LANG=en_US.UTF-8`): 2008 pass / 0 fail / 0 err / 1 known skip. `prepare()`: only `agreement.h.R` (version back to 1.0.83 = `.a.yaml`) and `00jmv.R` (Light1971, Lin2000 refs). `document()`: `agreement.Rd` already current. Release gate: identical to baseline except one more orphaned msgid (advisory, i18n pass). Theme/state-guard/duplicate-name checks: no agreement hits.
+- **Codex review (CLI 0.155.1, gpt-6-astra) of this pass's hunks:** 5 of 7 clean. P3 fixed: the CCC fallback's u overflowed near 1e80 (now sqrt(sd_x sd_y (n-1)/n); test red on the previous form). P2 kept by decision: the exact-fit guard treats relative scatter below 1.5e-8 (all.equal's tolerance, same as the constant-difference check) as exact; the comment says so. Suite after: new file 8 tests / 26 expectations, green.
+- **For the user:** the header said `version = c(1,0,84)` but `jamovi/agreement.a.yaml` says `1.0.83` (as at HEAD); `prepare()` followed the yaml. If 1.0.84 was intended, bump `version:` in the `.a.yaml` and re-run `prepare()`.
+- Still open from the lists below: D10 i18n (`/prepare-translation agreement`), numeric-coded grades in the hierarchical section, sibling defects (`modalitycomparison`, `pathagreement`), Proportional Bland-Altman slope construction caveat stays as disclosed.
+
+**2026-09-25 `/release-review-function agreement` — DONE: ready after the regeneration step (see Results).** Four read-only verifiers
+settled the 178 unjudged leads of `development-ideas/agreement-check-function-release-2026-09-24.md`
+(about 80 confirmed, the rest already fixed or i18n). Plan:
+- [x] Baseline: 18 agreement files + 5 zzz contracts, 1559 pass / 0 fail / 1 known skip
+- [x] Oracle check of the headline estimators (vcd, psych, irrCAC, DescTools, kappaSize, hand)
+- [x] Root fix: `.run()` blanks every rows: 1 table and clears every table's notes (stale-output class)
+- [x] Critical: contingency `make.names` merge (L476); Krippendorff single category + bootstrap coding + irr complete-data bias (L482, R1, R5); tie-break scale order (L458/L437); LoA quantile bands (L349)
+- [x] Group plots/clustering/subgroup (L326, L395, L325, L329, L332, L331, L403, L402, L404, L406, L400, L399) - merged, 12 tests red on base; plus heatmapColorScheme wording, case self-correlation diagonal, case-cluster guide
+- [x] Group coefficients (L380, L320, L379, L377, L388, L385, L386, L410, L333, L411, L408/9, L337, L417, L419, L420, L422, L423, L427, L407, L373-5) - merged, 20 tests red on base; plus the ICC-table guard call
+- [x] Group panels (L436, L441, L443, L442, L444, L445, L447, L462, L463, L466, L467, L472, L471, L484/5, R8) - merged, 16 tests red on base; includes the CRITICAL caseIdVariable (1|case_id:condition) term (p 0.0084 -> 0.2072 = paired t) and the model note case count
+- [x] yaml descriptions/refs (L489, L491, L492, R7, TDI text, L493, L497 + Light1971/Lin2000 in 00refs); L459; L477; L439/L440
+- [x] Statistics review of the fix pass: #5 partial-full band, #6 Stuart-Maxwell generalized inverse, per-class order; #4 slice scale (All-Pairs, institutions done; subgroup after merge)
+- [x] Routed to fixer agents: Critical caseIdVariable case:condition term (panels); Fisher-z mean, Kendall negative band, TDI text (coef)
+- [x] Verify: red on pre-fix snapshot, green now; full agreement suite; gates
+- **Results.** 4 new test files, 72 blocks / 333 expectations: 69 blocks red on the pre-fix file, the other 3 are value-parity tests of behaviour that was already right (L500). Full suite: 22 agreement files + 5 zzz contracts, 1892 pass / 0 fail / 0 err / 1 known skip (baseline 1559). release_gate `--root .`: output identical before and after (3 pre-existing FAILs in other analyses, 0 agreement hits). lintr: 21 style lints, 0 bug-class. Static gates (state guards, duplicate names, theme, entities, warning/set.seed/insert, `.()` padding and brackets, underscored placeholders): clean.
+- **Needs the user:** `jmvtools::prepare()` then `devtools::document()` - `.a.yaml` (version 1.0.84, descriptions, colour-scheme titles), `.r.yaml` (refs) and `00refs.yaml` (Light1971, Lin2000) changed; `man/agreement.Rd` was already stale (no `caseIdVariable`). The analysis stays in `meddecideT` until you move it.
+- Deferred: i18n (D10) to `/prepare-translation agreement` (this pass added about 40 msgids and orphaned about 15)
+- Deferred (Minor, found by the fixers, not fixed) - ALL DONE in the afternoon `/fix-function` pass above: hierarchical ICC(2,k) uses k = ncol(ratings) when raters are missing per case; an exact proportional Bland-Altman relation (B = 2A) prints slope p = 0 with no exact-fit note; the PABAK guide gives 2x2-only prevalence/bias formulas (check what the table computes for q > 2); the continuous-data panel's Recommended Analyses list omits Kendall's W, Robinson's A, mean Spearman, hierarchical and mixed-effects; B7 (Koo & Li bands on the CI) reached only the main ICC table - subgroup, intra-rater and hierarchical ICC labels still band the point estimate; the heatmaps have no colour key (the guides now spell out the mapping).
+
+**2026-09-25 `/security-audit-function agreement` — done (0 HIGH, 0 MEDIUM; 5 LOW + 1 hygiene fixed).**
+No code-execution sink: no eval/parse/get/system/deserialization, and every model formula is a
+literal over internal column names. Tests: `test-agreement-security-2026-09-25.R` (7 tests, fail on
+the pre-fix file); full agreement suite 23 files, 0 fail / 1 known skip.
+- [x] `.noteSafe()` now HTML-escapes; the 45 callers that escaped first were unwrapped, 26 that did
+  not are now escaped (rater names, category labels, `specificPositiveCategory`, `interIntraSeparator`)
+- [x] Case clustering refuses more than 5000 cases (dense n x n matrix in an R double loop)
+- [x] Deleted the false "TODO (security, forward-looking)" in `.calculateSpecificAgreement`
+- [x] Found by the verification sweep, then approved: `jmvcore::htmlEscape(e$message)` went to sinks
+  that show plain text (jamovi's client renders `setError` with `textContent`), so a `<` or `&` printed
+  as `&lt;` / `&amp;`. Now passed unescaped: `agreementHeatmapPlot$setError` (L4724),
+  `raterProfilePlot$setError` (L5062), `homogeneityTestTable` cell `conclusion` (L12474).
+- ~~Open (i18n): the All-Pairs footnote strings at L9460, L9476, L9495, L9497 have no `.()`.~~ - done.
+- Open (forward-looking): L15228 clears jmvcore's private `.rowNames` through `.__enclos_env__`;
+  re-check it on each jmvcore upgrade.
+- Open (unverified): column titles set from rater names and labels (L15982, L15987, L16050) are not
+  escaped; check how jamovi renders column titles before changing them.
+- ~~Pre-existing, not caused by this pass: `test-zzz-meddecide-release-20260921.R` has 4 stale source~~ (done, afternoon fix pass)
+  assertions (expects `.orderedLevels = function` and two `tanh(mean(atanh(` lines; the source now has
+  `.orderedLevelsInfo` and plain `mean(pairwise_r)`). Same result on the pre-fix file.
+
+**2026-09-24 `/review-function` (read-only): NOT_READY. All seven blocking and most major findings fixed 2026-09-25 (below).** Seven blocking defects (irr Stuart-Maxwell
+drops equal-marginal categories; `kappa2` without `sort.levels`; intra-rater `union()` level order;
+subgroup/institution weighted kappa on the observed scale; paired comparison on continuous data;
+macro-F1 drops TP = 0 classes; Robinson's A banded like an ICC), plus 21 major findings, each with
+evidence and a one-line fix, in `development-ideas/agreement-review-function-2026-09-24.md`. It also
+settles about 40 of the 180 unverified leads below.
+
+**2026-09-25 `/fix-function agreement --apply`: done.** 31 regression tests in
+`test-agreement-fixes-2026-09-25.R`. Each fails on the pre-fix files (checked by swapping them
+back in) and passes now.
+- [x] S1 category order: A1 `sort.levels`, B1 intra-rater merge, C2 declared scale, A12 nominal weights, A15 note tokens, D7 (no `reject()`)
+- [x] S2 marginal homogeneity: A2/A3 Stuart-Maxwell and A4 Bhapkar on the square table (`.marginalHomogeneity`)
+- [x] S3 continuous routing: C1, A6, D2, D3, D4 (frequency tables, LoA, consensus, bootstrap proportion), B14
+- [x] S4 bands: B2 and B3 chance-corrected, B4 perfect pair, B5 negative mean, B7 CI span, B8
+- [x] S5 other majors: A5, A7, A8, A9, A10/A11, C3 (disclosed), C4, D1, D5, D6, B6 (order-statistic TDI bound)
+- [x] S6 minors: A17, A18, B9, B10, B12, B13, B15, C5, C6, C7, C8/D13, D8, D16, D17, D18, D19
+- [x] Verify: `prepare()` (only `agreement.h.R` changed), agreement suite plus zzz contracts
+  (21 files, 1471+ pass, 0 fail, 1 known skip), lintr (style only), release gate (0 agreement hits)
+
+**Codex review of this pass (2026-09-25, via `npx -y codex-mcp-server`): 4 P2 findings, all fixed**
+with tests CX1-CX4. (1) Consensus and level-of-agreement columns went stale when the ratings
+turned continuous. (2) Bland-Altman kept the previous limits and plot after the new
+under-3-pairs return. (3) The intra-rater table still weighted a nominal time point. (4) Kendall's
+W label used (mW - 1)/(m - 1), which is wrong with tied grades.
+
+**Codex review, round 2: 3 P2 findings on this pass's own code, all fixed** (CX5-CX7).
+(5) A constant rater made Kendall's mean correlation skip pairs. (6) Refusing nominal
+Krippendorff left the previous bootstrap interval and seed. (7) Numeric grade codes lost their
+weights in the test-retest table.
+
+**Codex review, round 3: 1 P2 finding, fixed (CX8).** The test-retest statistic was chosen
+after dropping incomplete pairs, so a measurement whose only fractional value sat in an
+incomplete row was read as category codes.
+
+**Codex review, round 4: 2 P2 findings, both fixed** (CX9, CX10). (9) The paired comparison
+dropped the weights for numeric grade codes; `private$.hasOrder()` is now shared with the
+intra-rater table. (10) A rerun on measurements kept the previous dataset's consensus and
+agreement-level notes.
+
+**Codex review, round 5: 2 P2 findings with one root cause, fixed** (CX11-CX13).
+`.orderedLevelsInfo()` merged each NUMERIC column's observed values as if they were declared
+scales, so {0,2,3} against {0,1,3} was "ambiguous" and the weights were dropped. That hit the
+headline interval, the paired bootstrap resamples, and the test-retest merge, which had the same
+flaw. Numeric columns now take the sorted union of their values and are never ambiguous.
+
+**Maintainer decisions (2026-09-25), all implemented, with tests in the Round 2 block and the
+NEWS.md entry. Breaking changes were accepted.**
+- [x] C3: new `caseIdVariable` option. Rows sharing an ID are one case in the mixed model; the note
+  says whether the comparison is within or between cases.
+- [x] B11: Lin's CCC is pairwise-complete, like TDI.
+- [x] A13/A14: Gwet's q is the declared scale; ratings are recoded to positions (no upper-case merge).
+- [x] C9: "ICC(2,1), within institution" and "Latent ICC(2,1), across institutions".
+- [x] A16: the "first" tie-break follows rater order; item-modal and per-class rows use declared order.
+- [x] D9: the heatmap and profile plots use declared order; NA is dropped; the heatmap state holds
+  the pair tables.
+- [x] D14: the categorical hierarchical route hides the three linear-model tables, and one note sits
+  on the overall table. `.run()` resets their visibility each run.
+
+**Still open:**
+- **D10: i18n.** 38 guide panels, the welcome, About and weighted-kappa panels, and the plot
+  labels have no `.()`. Use `/prepare-translation agreement`, which also refreshes
+  `catalog.pot`: 13 msgids replaced in this pass are orphaned (release_gate advisory).
+- ~~**Unused locals:** 6, found by codetools (listed in the review).~~ - done (11 deleted, afternoon fix pass).
+- **Sibling, `modalitycomparison.b.R:248` (menuGroup `meddecideExtraD`).** Calls
+  `irr::kappa2(weight = "equal")` on factors, so the linear weights sit on the alphabetical
+  order. Same defect and fix as A1.
+- **Sibling, `pathagreement.b.R:712`.** Numeric position codes are safe below 10 categories;
+  from 10, irr's character sort misorders them (1, 10, 2, ...).
+
+## 2026-09-24 `/check-function-full` pass — decisions taken and items deferred
+
+Fixed and verified in this pass: hierarchical ICC(2,1)/ICC(2,k) now condition on institution and
+the G-coefficient row and fabricated "Shrinkage Kappa" column are gone; a new categorical
+hierarchical route (per-cluster kappa, stratified kappa per Barlow, Lai & Azen 1991, and a probit
+GLMM latent-scale decomposition for binary ratings with 5+ raters); Krippendorff, Gwet AC2 and
+Robinson's A scale ordering; four missing `.checkpoint()`s and two handlers that swallowed the
+restart; bootstrap attrition disclosure; BCa acceleration rescaled for the subsampled jackknife;
+strict simple majority; per-class 0/0 as NA; zero-width item-modal CI; 3 factor-code sites; Finn
+two-sided scale disclosure; 12 `clearWith` gaps; 3 `enable:` drifts; sample-size calculator
+reachable with no raters; the sparse-table rule; positional rowKeys. 18 new regression tests in
+`test-agreement-fixes-2026-09-24.R`, each confirmed to FAIL on the unfixed code.
+
+### Decisions taken with the maintainer (2026-09-24)
+
+- **Wald stays the default kappa interval** (VAL-agreement-13 stays open, its test skipped). The
+  small-sample note now quotes the coverage of the method actually in use and names Fisher z as
+  the remedy. Revisit the default at the next breaking change: it changes every saved analysis
+  and the tests that pin `psych::cohen.kappa` limits.
+- **icc1 changed value**: sigma2_case / (case + rater + residual), within institution, replacing
+  sigma2_case / sigma2_total. Accepted because the analysis is parked (`meddecideT`).
+
+### Deferred
+
+- ~~Ordinal ratings get no hierarchical decomposition~~ - done: Model-based agreement in the
+  Pathologist Grading Analysis (`ordinal::clmm`, case/pathologist/institution variances).
+- ~~Binary latent-scale decomposition below 5 raters~~ - superseded: the binary glmer route is
+  withdrawn; binary latent models are never shown (see the grading-analysis list below).
+- **`multipleTestCorrection` sits in the Mixed-Effects box** but now also serves All-Pairs Kappa
+  (its `enable:` was fixed); the control is hard to find from the All-Pairs box.
+- ~~**Lin's CCC fallback variance** (used only if `DescTools::CCC()` errors) keeps only the first
+  term of Lin's asymptotic variance and divides by n, not n - 2.~~ - done (afternoon fix pass).
+- **Subgroup table, 3+ raters**: the interval uses the null-hypothesis SE (disclosed, too narrow at
+  high kappa).
+- **Test-retest uses the first two time points** and pooled inter-rater treats reads as raters -
+  both now disclosed; averaging over all timepoint pairs, or restricting to one read per rater,
+  would change the statistic.
+- **Plot palettes**: none of the 8 renderers offers jamovi's global palette
+  (`jmvcore::colorPalette`, review guide §23) - a module-wide design decision.
+- **Smoke-only suites remain**: `test-agreement-comprehensive.R`, `-integration.R`, `-basic.R`
+  and `test-agreement.R` assert only that the analysis ran (`test-agreement-edge-cases.R` now
+  checks kappa = 1, -1, ICC = 1 and an `irr` oracle).
+
+## 2026-09-24 Pathologist Grading Analysis — deferred
+
+Shipped in this pass, parked under `menuGroup: meddecideT`: the grading section, the all-ratings
+Fleiss/Conger headline and its bootstrap and hierarchical siblings. Simulation limits are in
+`AGREEMENT_LATENT_GATES` (`R/agreement-latent.R`).
+
+- **Skewed data get no latent model.** When one category holds 50% or more, κ_m and the latent
+  ICC are refused. The ICC is biased at 58% and at 70%; κ_m only at 70%, so 50% is a conservative
+  cutoff for κ_m. A skew-robust estimator (adaptive quadrature, or a Bayesian fit) would be needed.
+  The grid did not test shares between 58% and 70%.
+- **Binary calls get no latent model** (bias -0.028 to -0.053 in every tested design, which is the
+  Laplace approximation). The same estimator change would fix it.
+- **Interval coverage was simulated at 95% only and without an institution term.** Both cases are
+  disclosed in notes (`ci_level`, `ci_cluster`). Extend `validate_agreement_ordinal_grid.R` to
+  cover them.
+- **Numeric-coded grades in the hierarchical section** (1-5 stored as numbers) still go to the
+  linear mixed model, while the grading section reads them as ordinal codes. This predates the
+  pass. Route whole-number codes up to 10 the same way `.gradingScale()` does.
+- **Shipping `agreement_grading`**: uncomment `agreement_grading.rda` under meddecide
+  `data_files` in `_updateModules_config.yaml` when agreement leaves `meddecideT`. Make the `.omv`
+  example in the meddecide repo, not the umbrella.
+- **Grading-tendency runtime ceiling** (`AGREEMENT_SEVERITY_MAX_WORK` = 100,000 ratings x
+  pathologists; about a minute on the dev Mac). Warm starts, ucminf and quadrature did not speed
+  up `clmm` with one fixed effect per rater. An opt-in "fit anyway" option, or a faster
+  estimator validated against the grid, would lift it.
+- ~~**Empty rater column**: the headline says 5 raters while the grading section says 4
+  pathologists, and the empty rater's per-pathologist row is blank with no note.~~ - done: a note names it (afternoon fix pass).
+- **Cluster variable with some missing values**: the latent model drops the institution term
+  entirely (a note says so) instead of fitting it on the cases that have one.
+- **Severity non-convergence on ordinary data**: 2 of 25 simulated 120 x 4 datasets were refused
+  as "did not converge". `.agreement_convergence` is what keeps their near-zero SEs off screen,
+  so keep it as a hard gate.
+- **Severity at 4 pathologists on skewed data** failed narrowly (400-replicate rerun: borderline).
+  It stays at 6 because the failure is in the harmful direction (false flags). Revisit with more
+  replicates if 4-reader panels ask for it.
+
+## Feature decisions, not defects
+
+- **Multivariate iota.** The feature was rescoped to the single-variable coefficient because nothing
+  in the 153-option schema can name a second variable. Building it properly means a rater x variable
+  input (one `Variables` group per variable) and `ratings_list` with one element each — then
+  `irr::iota` reproduces Janson & Olsson (2001) Table 1 = 0.7550. Decide whether the feature is
+  wanted before building it; the coefficient the module computes today is legitimate and now
+  honestly labelled.
+- **`iotaStandardize` is a measured no-op** for a single variable (verified over 5 seeds; irr divides
+  each LIST ELEMENT by its own sd, which for one element is an affine rescale that iota is invariant
+  to). Kept, with the UI and a note saying so, because removing it would strand saved `.omv` files.
+  At the next breaking change: remove it, or keep it as the hook for the multivariate feature.
+- **`clusterDistance` default stays `correlation`.** Correlation distance is blind to systematic
+  offsets, which in an agreement module is arguably the wrong default — two readers 25 Ki-67 points
+  apart cluster together at similarity 0.98. Changing a default silently re-clusters every saved
+  analysis, so this pass added a computed disclosure naming the raters and the gap instead. The
+  alternative (default to a metric that sees offsets) is a product call.
+- **No Cochran Q for subgroup heterogeneity.** Specified but deliberately not shipped: a usable ASE
+  exists only on the two-rater `vcd` rows, so a Q would either drop rows silently or mislabel its
+  coverage; and because kappa is prevalence-dependent, a significant Q is fully producible by case
+  mix — the exact inference the new note exists to block. Full spec is in the round-1 design brief
+  if it is ever wanted, and it should be gated behind a simulation of its size at n = 20–50 per
+  subgroup first.
+
+## Known ceilings, recorded not fixed
+
+- **Clustered pathology data.** The whole analysis treats one row as one independent case. Multiple
+  blocks, cores, slides or lesions per patient are analysed as independent, so every kappa, ICC and
+  bootstrap interval is too narrow. No guard, no note. Module-wide, pre-existing.
+- **Bracketed values in notes.** Fixed inside `agreement` with a value-sanitising helper, but the
+  root cause is `jmvcore`: `Table$setNote()` re-translates the already-composed string and the
+  Translator's msgctxt regex is unanchored, so any bracket in an interpolated value truncates the
+  note. Other analyses in this module have the same exposure. Either sweep them or raise it upstream.
+- ~~**`$setError()` and `$addFootnote()`**~~ **SETTLED 2026-09-23 by measurement against jmvcore
+  2.7.38 — they do NOT truncate.** Only `Table$setNote()` calls `options$translate()`;
+  `ResultsElement$setError()`, `Cell$addFootnote()` and `Table$setRow()`/`Cell$setValue()` store the
+  string verbatim. Verified end to end with a bracketed payload on all four paths, with `setNote()`
+  as a positive control on the same live table (it truncated, they did not). No sanitiser is needed
+  there and adding one would mislead the next reader — the scope is now recorded in a comment above
+  the helper. What those sites DID have wrong was bare English outside `.()`; that is fixed.
+- ~~**`.run()`-level `influential_case` notes never cleared**~~ **FIXED 2026-09-23.** It was worse
+  than recorded: measured on one analysis object run twice with the data swapped (what the jamovi
+  engine does), the note survived onto clean data still quoting ratings of `99999, 99999`, and the
+  same pattern left the headline table asserting kappa was not computed for continuous measurements
+  over a printed kappa of 0.069. One clear block at the top of `.run()`, placed where nothing can
+  race a later write.
+- **Bootstrap resamples re-derive the weighted-kappa scale**, so a resample missing a category is
+  scored on a collapsed scale. Same in `irr::kappa2` itself; fixing it needs a scale argument on the
+  shared helper.
+- ~~**Label vocabulary split**~~ **FIXED 2026-09-23.** One `private$.kappaLabel()` authority now
+  feeds every displayed kappa label (headline, intra/inter-rater, paired, bootstrap, subgroup,
+  sample size). Note the trap that had to be handled: `subgroupAgreementTable`'s `stat_type` was
+  both displayed AND branched on to choose Koo & Li versus Landis & Koch bands, so the label had to
+  be decoupled from the branch key first — otherwise an ICC would be graded on the kappa scale in
+  every non-English locale.
+- **`clusterSpecificTable` / `mixedEffectsTable`** now honour `confLevel`; the rest of the
+  hierarchical / mixed-effects family is still owned by the open VAL-agreement-06/-07 findings in
+  `development-ideas/agreement-validation-2026-09-23.md`.
+
+- **Release gate: option-to-`clearWith` dependency check.** `kappaCIMethod` reached five tables
+  through `.pairKappaWithCI()` and sat in none of their `clearWith` lists (found by
+  `/check-function agreement --profile release`, 2026-09-23; fixed). testthat cannot see this
+  class at all. Add a `release_gate.py` check: for each `.r.yaml` item, the options read by the
+  method(s) that write it (following `private$` calls) minus the item's `clearWith` should be
+  empty, or the difference listed as a WARN. The unit must be the item that DISPLAYS the value,
+  not the caller of the helper: the adversarial review found the subgroup forest plot and the
+  summary panel drawing the same interval without calling `.pairKappaWithCI()` at all.
+- **Adversarial review of the release pass (2026-09-24): 180 findings still unverified.** Full
+  record, with the claim, evidence and proposed fix for each, in
+  `development-ideas/agreement-check-function-release-2026-09-24.md`. 35 were confirmed by
+  refutation votes before the account hit its weekly limit; the rest were never judged. The
+  confirmed ones in the release pass's own work are fixed; the parallel `/check-function-full`
+  session of the same morning took several others (consensus majority, per-class F1, item-modal
+  CI, shrinkage, Krippendorff bootstrap scale, clearWith lists). Triage the remainder with
+  `/validate-function agreement` before the next release; do not treat them as defects unread.
+- **Release profile: `defaults_false` deliberately not applied, `align_labelled_logic` not
+  applicable.** 15 Bool options stay `default: true`, and none computes anything on a fresh
+  analysis. Eleven sit behind a parent that defaults to false in their `visible:` rule
+  (`clusterSpecificKappa`, `varianceDecomposition`, `testClusterHomogeneity` behind
+  `hierarchicalKappa`; `showLoaTable` behind `loaVariable`; `subgroupForestPlot` behind
+  `agreementBySubgroup`; the four dendrogram and heatmap toggles behind the two clustering
+  options; `allPairsCI` only shows columns of the `allPairsKappa` table). The other four are read
+  only inside their parent's branch (`heatmapShowPercentages`, `heatmapShowCounts` under
+  `agreementHeatmap`; `specificAllCategories`, `specificConfidenceIntervals` under
+  `specificAgreement`), and `iotaStandardize` is a measured no-op. Flipping them would strip
+  output from saved analyses for no compute saved. Labelled parity with `oddsratio` does not
+  apply: `agreement` never cleans or renames variables, so there is no label map to restore.
+- **Release profile: `check_external` scope.** Compared against installed signatures, help pages
+  and CRAN NEWS or source (2026-09-23): `irr` 0.85, `irrCAC` 1.4 (and the 1.0 source), `vcd`
+  1.4-14, `DescTools` 0.99.60, `kappaSize` 1.2, `lme4` 2.0-6, `lmerTest` 3.2-1, `withr` 3.0.3.
+  Not compared: `psych` (every mention is a comment or a string), the plotting stack. Calls match
+  their signatures. What is still missing is a value-parity test for five displayed cells that
+  come straight from upstream: the `DescTools::CCC` interval, the `kappaSize::Power*` sample size,
+  the `irr::kappam.light` value, and the `irr::bhapkar` and `irr::stuart.maxwell.mh` statistics.
+  Add one test each.
+- **About panel and weighted-kappa guide are untranslated.** `.createAboutPanel()` and
+  `.createWeightedKappaGuide()` hold about sixty bare English sentences, headings and cells, and
+  none is in the catalog. Confirmed by the adversarial review; left for `/prepare-translation
+  agreement` because it is a mechanical i18n pass over two large HTML literals, not a check fix.
+
+## Module-wide, surfaced by this pass but not caused by it
+
+- ~~**29 `.b.R` files still call `jmvcore::format()` directly**~~ **SWEPT 2026-09-23.** 430 call
+  sites in 34 files converted to the guarded `.fmt()`; `tests/testthat/test-zzz-fmt-substitution-loop.R`
+  is green and its glob was widened from `R/*.b.R` to `R/*.R`, which had been blind to 13 live calls
+  in `R/stagemigration-part*.R`. Two live bugs were found inside the sweep: `survivalPower`'s
+  `do.call(jmvcore::format, ...)` would have ERRORED under a token swap, and `singlearm` was passing
+  `context =`, which is a real formal of `jmvcore::format`, so the value was consumed instead of
+  substituted. Byte-identity of every other changed line was proven against a pre-sweep snapshot.
+- **STILL OPEN, and deliberately not shipped: a module-wide `.fmt` AST guard.** Promoting the
+  benford-style AST walk (placeholder with no argument, argument with no placeholder) to run over
+  every file reports **20 pre-existing findings** in analyses outside that pass's remit, so shipping
+  it would land a permanently RED test. The check is written and was measured; it needs those 20
+  fixed first. Until then `test-benford-release-review.R` carries the retargeted single-file
+  version — note it was about to go green-but-empty, because its AST walk matched only
+  `jmvcore::format` and the sweep removed every one of them.
+
+## Pre-existing module failures, measured 2026-09-23 (NOT caused by the .fmt sweep)
+
+Established by swapping the pre-sweep sources back in and re-running the identical harness. All
+counts are identical before and after, so none of these is a regression from that work.
+
+- `test-multisurvival-render-without-data.R` — "adjusted curves redraw from state alone" (1 fail)
+- `test-outcomeorganizer-guidance-notices.R` — 2 fails, both "expected not to throw"
+- `test-singlearm-release-review.R` — "the Kaplan-Meier median path is untouched by the guard" (1)
+- `test-survivalcont-verification.R` — 2 fails (minimum-p exhaustiveness; small-sample cut-offs)
+- `test-waterfall-edge-cases.R` — 1 ERROR, "an all-missing cohort says why nothing was produced";
+  note `waterfall` was being edited by someone else throughout, so check with them first.
+- `test-pathagreement-wiring.R` — **not a failure: batch-order pollution.** 37 pass / 0 fail in
+  isolation and in a six-file harness, both pre- and post-sweep; fails only inside a 231-file
+  `test_dir` batch. Whatever it is, it is order-dependent, not source-dependent.
+
+FIXED in the same pass, and previously red: the two unsubstituted-`{placeholder}` leaks in
+`oddsratio` and `outcomeorganizer` (see the underscore note below).
+
+- **Underscored placeholders — swept exhaustively 2026-09-23.** `jmvcore::format()` (and therefore
+  `.fmt()`) silently leaves `{a_b}` unreplaced, so literal braces ship to the user. A 2026-08-22
+  sweep for this was explicitly recorded as incomplete. A parser-based sweep (not a grep — a brace
+  in a comment or a `glue()` call is not a bug) found **7 call sites in 5 files**: `dataquality`,
+  `oddsratio` (2), `outcomeorganizer`, `pathagreement`, `survivalcont` (2). All renamed to
+  underscore-free placeholders. The detector is
+  `development-scripts/`-adjacent and worth keeping: parse every `R/*.R`, walk for `.fmt` calls,
+  and flag any `{name_with_underscore}` in the template.
+
+## Documentation drift
+
+- **Iota multivariate claim - FULLY CLOSED 2026-09-23, both repos.** Umbrella: `docs/reference/
+  agreement.{html,md}`, `docs/reference/index.{html,md}`, `docs/search.json` and `docs/llms.txt`
+  regenerated with a TARGETED pkgdown build (`build_reference(topics="agreement")` +
+  `build_llm_docs()` + `build_search()`), deliberately NOT a full site rebuild, so `docs/index.html`
+  was not re-rendered from the in-flight `README.Rmd`. meddecide: regenerated with
+  `Rscript _updateModules.R meddecide` (naming the module keeps OncoPath/JamoviTest, where the
+  unfinished work lives, untouched), which fixed the SHIPPED module code - the claim was live there,
+  not just in a vignette. Its pkgdown artefacts got the same targeted treatment, and
+  `vignettes/clinicopath-descriptives-agreement-comprehensive.html` was re-knitted.
+  NOTE for whoever maintains that vignette: it cannot be knitted inside meddecide, because it reads
+  `../data-raw/non-rda/*.csv` (20 files, 216 KB) and does `devtools::load_all("../")` - both resolve
+  only from the UMBRELLA's `vignettes/`. It was knitted there and the HTML copied across. Either
+  vendor those CSVs into meddecide or keep knitting it from the umbrella; today it is silently
+  un-reproducible in the repo that ships it.
+
+- **`jamovi/i18n/tr.po`: 377 agreement msgids are untranslated.** Measured: 1,003 msgids reference
+  `R/agreement.b.R` / `agreement/options/*` / `agreement/results/*` / `agreement/ui*`, of which 377
+  have no translation (`msgattrib`/`msggrep` count; a raw parse of `tr.po` says 379, the 2 extra
+  being entries `msgattrib --no-obsolete` drops). 133 msgids are new in this pass and all 133 are
+  untranslated. The earlier "~80 new msgids" undercounted by roughly a factor of two - size the job
+  from these numbers.
+  Runtime falls back to English, which is correct behaviour, not a defect. No owner is documented for
+  Turkish: `vignettes/jamovi_i18n_guide.md` section 9 points at jamovi's community Weblate, and
+  `i18n-plans/agreement-tr-translation-plan.md` is a template whose "Suggested Turkish" column is
+  still the English identity string. Hand-off recipe - GNU gettext lives in `/opt/homebrew/bin` and
+  is NOT on the default PATH:
+
+  ```bash
+  export PATH=/opt/homebrew/bin:$PATH
+  msgattrib --untranslated --no-obsolete jamovi/i18n/tr.po \
+    | msggrep -N 'R/agreement.b.R' -N 'agreement/options/*' -N 'agreement/results/*' -N 'agreement/ui*' - \
+    > i18n-plans/agreement-tr-missing.po     # measured 2026-09-23: 377 entries, 2347 lines, ~77 KB
+  # after translation, merge back (measured: 34,145 entries preserved, 0 existing translations lost)
+  msgcat --use-first i18n-plans/agreement-tr-filled.po jamovi/i18n/tr.po -o /tmp/tr.merged.po \
+    && mv /tmp/tr.merged.po jamovi/i18n/tr.po
+  msgfmt -c -o /dev/null jamovi/i18n/tr.po
+  python3 tools/release_gate.py              # check_i18n_po_formats must stay PASS
+  ```
+
+  Then run `jmvtools::i18nUpdate()` to renormalise ordering and references.
+
 # ClinicoPathDescriptives
+
+```text
+/check-module ClinicoPathDescriptives
+/check-module ClinicoPathDescriptives --profile release
+/audit-module ClinicoPathDescriptives
+/library-audit learn '2026-09-16 ClinicoPathDescriptives.md'
+/library-audit implement '2026-09-16 ClinicoPathDescriptives.md'
+/library-audit status '2026-09-16 ClinicoPathDescriptives.md'
+```
 
 ## Descriptives
 
-- reportcat
-- summarydata
-- tableone
+### reportcat
+
+```text
+/fix-function reportcat --apply
+
+/validate-function reportcat depth=exhaustive
+/independent-reviewer reportcat
+/check-function reportcat --profile release
+/check-function-full reportcat
+/review-function reportcat
+/release-review-function reportcat
+/security-audit-function reportcat
+```
+
+### summarydata
+
+```text
+/fix-function summarydata --apply
+
+/validate-function summarydata depth=exhaustive
+/independent-reviewer summarydata
+/check-function summarydata --profile release
+/check-function-full summarydata
+/review-function summarydata
+/release-review-function summarydata
+/security-audit-function summarydata
+```
+
+### tableone
+
+```text
+/fix-function tableone --apply
+
+/validate-function tableone depth=exhaustive
+/independent-reviewer tableone
+/check-function tableone --profile release
+/check-function-full tableone
+/review-function tableone
+/release-review-function tableone
+/security-audit-function tableone
+```
 
 ## Data Quality
 
-- benford
-- checkdata
-- dataquality
-- outlierdetection
+### benford
+
+```text
+/fix-function benford --apply
+
+/validate-function benford depth=exhaustive
+/independent-reviewer benford
+/check-function benford --profile release
+/check-function-full benford
+/review-function benford
+/release-review-function benford
+/security-audit-function benford
+```
+
+### checkdata
+
+```text
+/fix-function checkdata --apply
+
+/validate-function checkdata depth=exhaustive
+/independent-reviewer checkdata
+/check-function checkdata --profile release
+/check-function-full checkdata
+/review-function checkdata
+/release-review-function checkdata
+/security-audit-function checkdata
+```
+
+### dataquality
+
+```text
+/fix-function dataquality --apply
+
+/validate-function dataquality depth=exhaustive
+/independent-reviewer dataquality
+/check-function dataquality --profile release
+/check-function-full dataquality
+/review-function dataquality
+/release-review-function dataquality
+/security-audit-function dataquality
+```
+
+### outlierdetection
+
+```text
+/fix-function outlierdetection --apply
+
+/validate-function outlierdetection depth=exhaustive
+/independent-reviewer outlierdetection
+/check-function outlierdetection --profile release
+/check-function-full outlierdetection
+/review-function outlierdetection
+/release-review-function outlierdetection
+/security-audit-function outlierdetection
+```
 
 ## Descriptive Plots
 
-- agepyramid
-- alluvial
-- vartree
-- venn
+### agepyramid
+
+```text
+/fix-function agepyramid --apply
+
+/validate-function agepyramid depth=exhaustive
+/independent-reviewer agepyramid
+/check-function agepyramid --profile release
+/check-function-full agepyramid
+/review-function agepyramid
+/release-review-function agepyramid
+/security-audit-function agepyramid
+```
+
+### alluvial
+
+```text
+/fix-function alluvial --apply
+
+/validate-function alluvial depth=exhaustive
+/independent-reviewer alluvial
+/check-function alluvial --profile release
+/check-function-full alluvial
+/review-function alluvial
+/release-review-function alluvial
+/security-audit-function alluvial
+```
+
+### vartree
+
+```text
+/fix-function vartree --apply
+
+/validate-function vartree depth=exhaustive
+/independent-reviewer vartree
+/check-function vartree --profile release
+/check-function-full vartree
+/review-function vartree
+/release-review-function vartree
+/security-audit-function vartree
+```
+
+### venn
+
+```text
+/fix-function venn --apply
+
+/validate-function venn depth=exhaustive
+/independent-reviewer venn
+/check-function venn --profile release
+/check-function-full venn
+/review-function venn
+/release-review-function venn
+/security-audit-function venn
+```
 
 ## Comparisons
 
-- chisqposttest
-- crosstable
+### chisqposttest
+
+```text
+/fix-function chisqposttest --apply
+
+/validate-function chisqposttest depth=exhaustive
+/independent-reviewer chisqposttest
+/check-function chisqposttest --profile release
+/check-function-full chisqposttest
+/review-function chisqposttest
+/release-review-function chisqposttest
+/security-audit-function chisqposttest
+```
+
+### crosstable
+
+```text
+/fix-function crosstable --apply
+
+/validate-function crosstable depth=exhaustive
+/independent-reviewer crosstable
+/check-function crosstable --profile release
+/check-function-full crosstable
+/review-function crosstable
+/release-review-function crosstable
+/security-audit-function crosstable
+```
 
 ## Data Preparation
 
-- categorize
+### categorize
+
+```text
+/fix-function categorize --apply
+
+/validate-function categorize depth=exhaustive
+/independent-reviewer categorize
+/check-function categorize --profile release
+/check-function-full categorize
+/review-function categorize
+/release-review-function categorize
+/security-audit-function categorize
+```
 
 # jjstatsplot
 
+```text
+/check-module jjstatsplot
+/check-module jjstatsplot --profile release
+/audit-module jjstatsplot
+/library-audit learn '2026-09-16 jjstatsplot.md'
+/library-audit implement '2026-09-16 jjstatsplot.md'
+/library-audit status '2026-09-16 jjstatsplot.md'
+```
+
 ## All-In-One
 
-- statsplot2
+### statsplot2
+
+```text
+/fix-function statsplot2 --apply
+
+/validate-function statsplot2 depth=exhaustive
+/independent-reviewer statsplot2
+/check-function statsplot2 --profile release
+/check-function-full statsplot2
+/review-function statsplot2
+/release-review-function statsplot2
+/security-audit-function statsplot2
+```
 
 ## Categorical × Categorical
 
-- jjbarstats
-- jjpiestats
-- jjsegmentedtotalbar
+### jjbarstats
+
+```text
+/fix-function jjbarstats --apply
+
+/validate-function jjbarstats depth=exhaustive
+/independent-reviewer jjbarstats
+/check-function jjbarstats --profile release
+/check-function-full jjbarstats
+/review-function jjbarstats
+/release-review-function jjbarstats
+/security-audit-function jjbarstats
+```
+
+### jjpiestats
+
+```text
+/fix-function jjpiestats --apply
+
+/validate-function jjpiestats depth=exhaustive
+/independent-reviewer jjpiestats
+/check-function jjpiestats --profile release
+/check-function-full jjpiestats
+/review-function jjpiestats
+/release-review-function jjpiestats
+/security-audit-function jjpiestats
+```
+
+### jjsegmentedtotalbar
+
+```text
+/fix-function jjsegmentedtotalbar --apply
+
+/validate-function jjsegmentedtotalbar depth=exhaustive
+/independent-reviewer jjsegmentedtotalbar
+/check-function jjsegmentedtotalbar --profile release
+/check-function-full jjsegmentedtotalbar
+/review-function jjsegmentedtotalbar
+/release-review-function jjsegmentedtotalbar
+/security-audit-function jjsegmentedtotalbar
+```
 
 ## Categorical × Continuous
 
-- advancedraincloud
-- jjbetweenstats
-- jjdotchart
-- jjdotplotstats
-- jjwithinstats
-- lollipop
-- raincloud
+### advancedraincloud
+
+```text
+/fix-function advancedraincloud --apply
+
+/validate-function advancedraincloud depth=exhaustive
+/independent-reviewer advancedraincloud
+/check-function advancedraincloud --profile release
+/check-function-full advancedraincloud
+/review-function advancedraincloud
+/release-review-function advancedraincloud
+/security-audit-function advancedraincloud
+```
+
+### jjbetweenstats
+
+```text
+/fix-function jjbetweenstats --apply
+
+/validate-function jjbetweenstats depth=exhaustive
+/independent-reviewer jjbetweenstats
+/check-function jjbetweenstats --profile release
+/check-function-full jjbetweenstats
+/review-function jjbetweenstats
+/release-review-function jjbetweenstats
+/security-audit-function jjbetweenstats
+```
+
+### jjdotchart
+
+```text
+/fix-function jjdotchart --apply
+
+/validate-function jjdotchart depth=exhaustive
+/independent-reviewer jjdotchart
+/check-function jjdotchart --profile release
+/check-function-full jjdotchart
+/review-function jjdotchart
+/release-review-function jjdotchart
+/security-audit-function jjdotchart
+```
+
+### jjdotplotstats
+
+```text
+/fix-function jjdotplotstats --apply
+
+/validate-function jjdotplotstats depth=exhaustive
+/independent-reviewer jjdotplotstats
+/check-function jjdotplotstats --profile release
+/check-function-full jjdotplotstats
+/review-function jjdotplotstats
+/release-review-function jjdotplotstats
+/security-audit-function jjdotplotstats
+```
+
+### jjwithinstats
+
+```text
+/fix-function jjwithinstats --apply
+
+/validate-function jjwithinstats depth=exhaustive
+/independent-reviewer jjwithinstats
+/check-function jjwithinstats --profile release
+/check-function-full jjwithinstats
+/review-function jjwithinstats
+/release-review-function jjwithinstats
+/security-audit-function jjwithinstats
+```
+
+### lollipop
+
+```text
+/fix-function lollipop --apply
+
+/validate-function lollipop depth=exhaustive
+/independent-reviewer lollipop
+/check-function lollipop --profile release
+/check-function-full lollipop
+/review-function lollipop
+/release-review-function lollipop
+/security-audit-function lollipop
+```
+
+### raincloud
+
+```text
+/fix-function raincloud --apply
+
+/validate-function raincloud depth=exhaustive
+/independent-reviewer raincloud
+/check-function raincloud --profile release
+/check-function-full raincloud
+/review-function raincloud
+/release-review-function raincloud
+/security-audit-function raincloud
+```
 
 ## Continuous × Continuous
 
-- hullplot
-- jjcorrmat
-- jjscatterstats
+### hullplot
+
+```text
+/fix-function hullplot --apply
+
+/validate-function hullplot depth=exhaustive
+/independent-reviewer hullplot
+/check-function hullplot --profile release
+/check-function-full hullplot
+/review-function hullplot
+/release-review-function hullplot
+/security-audit-function hullplot
+```
+
+### jjcorrmat
+
+```text
+/fix-function jjcorrmat --apply
+
+/validate-function jjcorrmat depth=exhaustive
+/independent-reviewer jjcorrmat
+/check-function jjcorrmat --profile release
+/check-function-full jjcorrmat
+/review-function jjcorrmat
+/release-review-function jjcorrmat
+/security-audit-function jjcorrmat
+```
+
+### jjscatterstats
+
+```text
+/fix-function jjscatterstats --apply
+
+/validate-function jjscatterstats depth=exhaustive
+/independent-reviewer jjscatterstats
+/check-function jjscatterstats --profile release
+/check-function-full jjscatterstats
+/review-function jjscatterstats
+/release-review-function jjscatterstats
+/security-audit-function jjscatterstats
+```
 
 ## Distribution
 
-- jjhistostats
-- jjridges
-- jwaffle
+### jjhistostats
+
+```text
+/fix-function jjhistostats --apply
+
+/validate-function jjhistostats depth=exhaustive
+/independent-reviewer jjhistostats
+/check-function jjhistostats --profile release
+/check-function-full jjhistostats
+/review-function jjhistostats
+/release-review-function jjhistostats
+/security-audit-function jjhistostats
+```
+
+### jjridges
+
+```text
+/fix-function jjridges --apply
+
+/validate-function jjridges depth=exhaustive
+/independent-reviewer jjridges
+/check-function jjridges --profile release
+/check-function-full jjridges
+/review-function jjridges
+/release-review-function jjridges
+/security-audit-function jjridges
+```
+
+### jwaffle
+
+```text
+/fix-function jwaffle --apply
+
+/validate-function jwaffle depth=exhaustive
+/independent-reviewer jwaffle
+/check-function jwaffle --profile release
+/check-function-full jwaffle
+/review-function jwaffle
+/release-review-function jwaffle
+/security-audit-function jwaffle
+```
 
 ## Lines / Network
 
-- linechart
-- jjarcdiagram
+### linechart
+
+```text
+/fix-function linechart --apply
+
+/validate-function linechart depth=exhaustive
+/independent-reviewer linechart
+/check-function linechart --profile release
+/check-function-full linechart
+/review-function linechart
+/release-review-function linechart
+/security-audit-function linechart
+```
+
+### jjarcdiagram
+
+```text
+/fix-function jjarcdiagram --apply
+
+/validate-function jjarcdiagram depth=exhaustive
+/independent-reviewer jjarcdiagram
+/check-function jjarcdiagram --profile release
+/check-function-full jjarcdiagram
+/review-function jjarcdiagram
+/release-review-function jjarcdiagram
+/security-audit-function jjarcdiagram
+```
 
 # jsurvival
 
+```text
+/check-module jsurvival
+/check-module jsurvival --profile release
+/audit-module jsurvival
+/library-audit learn '2026-09-15 jsurvival.md'
+/library-audit implement '2026-09-15 jsurvival.md'
+/library-audit status '2026-09-15 jsurvival.md'
+```
+
 ## ClinicoPath Survival
 
-- multisurvival
-- singlearm
-- survival
-- survivalcont
+### multisurvival
+
+```text
+/fix-function multisurvival --apply
+
+/validate-function multisurvival depth=exhaustive
+/independent-reviewer multisurvival
+/check-function multisurvival --profile release
+/check-function-full multisurvival
+/review-function multisurvival
+/release-review-function multisurvival
+/security-audit-function multisurvival
+```
+
+### singlearm
+
+```text
+/fix-function singlearm --apply
+
+/validate-function singlearm depth=exhaustive
+/independent-reviewer singlearm
+/check-function singlearm --profile release
+/check-function-full singlearm
+/review-function singlearm
+/release-review-function singlearm
+/security-audit-function singlearm
+```
+
+### survival
+
+```text
+/fix-function survival --apply
+
+/validate-function survival depth=exhaustive
+/independent-reviewer survival
+/check-function survival --profile release
+/check-function-full survival
+/review-function survival
+/release-review-function survival
+/security-audit-function survival
+```
+
+### survivalcont
+
+```text
+/fix-function survivalcont --apply
+
+/validate-function survivalcont depth=exhaustive
+/independent-reviewer survivalcont
+/check-function survivalcont --profile release
+/check-function-full survivalcont
+/review-function survivalcont
+/release-review-function survivalcont
+/security-audit-function survivalcont
+```
 
 ## Data Preparation
 
-- datetimeconverter
-- outcomeorganizer
-- timeinterval
+### datetimeconverter
+
+```text
+/fix-function datetimeconverter --apply
+
+/validate-function datetimeconverter depth=exhaustive
+/independent-reviewer datetimeconverter
+/check-function datetimeconverter --profile release
+/check-function-full datetimeconverter
+/review-function datetimeconverter
+/release-review-function datetimeconverter
+/security-audit-function datetimeconverter
+```
+
+### outcomeorganizer
+
+```text
+/fix-function outcomeorganizer --apply
+
+/validate-function outcomeorganizer depth=exhaustive
+/independent-reviewer outcomeorganizer
+/check-function outcomeorganizer --profile release
+/check-function-full outcomeorganizer
+/review-function outcomeorganizer
+/release-review-function outcomeorganizer
+/security-audit-function outcomeorganizer
+```
+
+### timeinterval
+
+```text
+/fix-function timeinterval --apply
+
+/validate-function timeinterval depth=exhaustive
+/independent-reviewer timeinterval
+/check-function timeinterval --profile release
+/check-function-full timeinterval
+/review-function timeinterval
+/release-review-function timeinterval
+/security-audit-function timeinterval
+```
 
 ## General Statistics
 
-- oddsratio
+### oddsratio
+
+```text
+/fix-function oddsratio --apply
+
+/validate-function oddsratio depth=exhaustive
+/independent-reviewer oddsratio
+/check-function oddsratio --profile release
+/check-function-full oddsratio
+/review-function oddsratio
+/release-review-function oddsratio
+/security-audit-function oddsratio
+```
 
 ## Penalized Cox-Regression
 
-- lassocox
+### lassocox
+
+```text
+/fix-function lassocox --apply
+
+/validate-function lassocox depth=exhaustive
+/independent-reviewer lassocox
+/check-function lassocox --profile release
+/check-function-full lassocox
+/review-function lassocox
+/release-review-function lassocox
+/security-audit-function lassocox
+```
 
 # meddecide
 
+```text
+/check-module meddecide
+/check-module meddecide --profile release
+/audit-module meddecide
+/library-audit learn '2026-09-16 meddecide.md'
+/library-audit implement '2026-09-16 meddecide.md'
+/library-audit status '2026-09-16 meddecide.md'
+```
+
 ## Agreement
 
-- agreement
+### agreement
+
+```text
+/fix-function agreement --apply
+
+/validate-function agreement depth=exhaustive
+/independent-reviewer agreement
+/check-function agreement --profile release
+/check-function-full agreement
+/review-function agreement
+/release-review-function agreement
+/security-audit-function agreement
+```
 
 ## Decision
 
-- decision
-- decisioncombine
-- decisioncompare
-- nogoldstandard
+### decision
+
+```text
+/fix-function decision --apply
+
+/validate-function decision depth=exhaustive
+/independent-reviewer decision
+/check-function decision --profile release
+/check-function-full decision
+/review-function decision
+/release-review-function decision
+/security-audit-function decision
+```
+
+- [x] (cleanup) `R/decision.b.R` L2766/L2773 and L2793/L2800: `falsePositiveTable` / `falseNegativeTable`
+  call `try(...$deleteRows(), silent = TRUE)` twice each (before and inside `if (n_fp > 0)` / `if (n_fn > 0)`);
+  the inner call is redundant. Filed from the 2026-09-27 security audit (meddecide carries no inline TODOs).
+  Done by `/fix-function decision --apply` (2026-09-27).
+
+**`/fix-function decision --apply` (2026-09-27) — results.** The gate with `decision` counted as shipped
+matched the normal run exactly (0 blocking), and the baseline suite was green (121 tests). Fixed:
+
+- `jamovi/decision.a.yaml` `version: '1.0.83'` → `'1.0.84'`. The release review's bump reached
+  `R/decision.h.R` and NEWS.md, but the yaml was rewritten 3 minutes after `prepare()` and lost it, so the next
+  `prepare()` would have rolled the header back. A one-analysis scratch module compiled with jamovi 28.3 gives
+  a header byte-identical to the committed one. A scan of all analyses finds no other yaml/header version drift.
+- The three `addRow` loops (rawCounts, FP, FN) call `private$.checkpoint(flush = FALSE)`. The default
+  `flush = TRUE` serialised the whole results tree on every row (up to 500 per table) just to poll for a restart.
+- The redundant inner `deleteRows()` is removed (item above).
+- New regression test in `test-decision-misclassified.R`: a restart at a table checkpoint escapes `.run()` and
+  raises no "Error in misclassified cases analysis" notice. It fails (2 failures) when the handler's re-raise is
+  removed. Before this there was no restart test for decision: a flushing checkpoint needs RProtoBuf, which
+  this dev library lacks.
+- Verify: all 10 `test-decision*.R` files green (122 tests, 0 fail/error/skip/warn);
+  `test-meddecide-library-audit.R` green (22 tests).
+
+- [ ] (follow-up, gate) `tools/release_gate.py` has no check that `jamovi/<fn>.a.yaml` `version:` equals
+  `version = c(...)` in `R/<fn>.h.R`. `decision` drifted (yaml 1.0.83, header 1.0.84) and the gate stayed green.
+  The check is a dozen lines (regex both files, compare integer tuples); 0 hits module-wide after this fix.
+- [ ] (cosmetic) `rawCounts` sorts rows alphabetically (`Neg` before `Pos`), while `rawContingency` lists the
+  positive level first. The 200-row cap there cannot trigger: the analysed data holds at most 4 level combinations.
+
+### decisioncombine
+
+```text
+/fix-function decisioncombine --apply
+
+/validate-function decisioncombine depth=exhaustive
+/independent-reviewer decisioncombine
+/check-function decisioncombine --profile release
+/check-function-full decisioncombine
+/review-function decisioncombine
+/release-review-function decisioncombine
+/security-audit-function decisioncombine
+```
+
+Independent review 2026-09-29 (`development-ideas/decisioncombine-independent-review-2026-09-29.md`;
+pre-fix evidence: `development-scripts/audit_decisioncombine.R`, 197 checks, 12 FAIL). Fixed the same day in the
+working tree (uncommitted; `menuGroup: meddecideT`, analysis 1.0.84); the script now verifies the fixes
+(`-postfix-matrix.csv`, 0 FAIL). A 22-agent adversarial review of the fixes found 18 more problems, all fixed.
+- [x] IR-03 (S3): sparse-cell notice now says the log-scale intervals are approximate and can fall below 95%.
+  Kept the Simel/Woolf intervals (module-wide convention); Koopman for LR is a separate, module-wide decision.
+- [x] IR-01 (S2): "Test k alone" rows (2-3 tests) and pairwise Serial/Parallel rows (3 tests) in the table and the
+  ranking; ties go to the rule with fewer tests; a sentence reports the J-optimal pattern union when it beats
+  every listed rule. About text no longer claims "every way". Youden's J was NOT added to the individual-test
+  tables: the "alone" rows show it with intervals, and the tables' `pc` column format would print J as a percent.
+- [x] IR-02 (S3): per-test guard graded by the Agresti-Caffo 95% CI of J (STRONG only when wholly below 0; INFO
+  "Test Performs at Chance Level" inside the CI). The first ungraded version false-alarmed on ~45% of useless tests.
+- [x] IR-04 (S3), IR-05 (S4), IR-06 (S4), IR-07 (S4).
+- [ ] Commit, then `Rscript _updateModules.R --dry-run` and sync to meddecide (shipped 1.0.83.05 is still the
+  pre-09-28 code); re-run `AUDIT_PKG=../meddecide AUDIT_SCOPE=headline` expecting 0 FAIL; move `menuGroup` back
+  from `meddecideT` when satisfied.
+- [x] (pre-existing drift, not this fix) `jamovi/decision.a.yaml` says version 1.0.83 while the committed
+  `R/decision.h.R` says 1.0.84: the next `jmvtools::prepare()` DOWNGRADES decision's header (seen 2026-09-29,
+  reverted). ~~Bump `decision.a.yaml` to 1.0.84.~~ A hand bump cannot hold: `_updateModules.R` stamps
+  `new_version`[1:3] (now 1.0.83) into the umbrella's own `.a.yaml` of every analysis it ships, T-parked ones
+  included. The user's 18:49 prepare left decision at yaml 1.0.83 = header 1.0.83. Raise `new_version` in
+  `_updateModules_config.yaml` if these analyses should ship as 1.0.84.
+
+**`/check-function decisioncombine --profile release` (2026-09-29) — results.**
+- Wiring: all 20 options read by the backend; every results item has a setter (4 images from `setState()`
+  state only, no `requiresData` needed); all 9 checkboxes default `false`; no File/Text/vector; `menuGroup`
+  was already `meddecideT`.
+- Added a `welcome` "Getting Started" panel (`style_welcome`). A new analysis showed three empty tables and
+  nothing else, and `.validateInputs()` said it returned quietly "to let the instructions panel speak" -- no
+  such panel existed. Same `visible: (length(gold) == 0 || ...)` form as `decision.r.yaml`; the static content
+  is set in `.init()` from 14 existing, translated msgids, so the i18n catalogs needed no change (IR-R2-8b).
+- Variable safety: new test -- punctuation, quotes and non-ASCII in column names and in a level label give the
+  plain-name table exactly, and the exported syntax parses and reproduces it (VAL-03 covered spaces only).
+  Labelled parity: N/A (the wrapper `as.factor()`s every variable; the backend never renames columns).
+- Version: the user's `_updateModules.R` run set `decisioncombine.a.yaml` back to 1.0.83 at 18:49 (see the
+  decision item above), leaving the header at 1.0.84. Header regenerated from a one-analysis scratch compile
+  (jamovi 28.3.0): the diff was the welcome item plus 84 -> 83. "analysis 1.0.84" above and in NEWS.md holds
+  only if `new_version` is raised.
+- Refs: `AgrestiCaffo2000` and `DescTools` added to the `.r.yaml` refs. The inversion-guard notices name the
+  Agresti-Caffo interval, which `DescTools::BinomDiffCI(method = "ac")` computes; both keys already existed.
+- Gates: `release_gate.py` 0 blocking, and byte-identical output with `decisioncombine` counted as shipped;
+  `check_state_guards.py` 0; `theme_safe_html.py` 0 for this file; library-review greps clean.
+- Verify: the 8 `test-decisioncombine*.R` files plus `test-zzz-results-rendering-contract.R`: 198 tests,
+  798 expectations, 0 failed / error / skip / warning. The final welcome test, run against the pre-change copy
+  in JamoviTest (synced 18:51, no `welcome` item), fails at its first expectation: "'welcome' does not exist in
+  this results element". Its first draft had called the wrapper with no variable at all and failed inside
+  `jmvcore::select()` instead, a path jamovi never takes.
+- [ ] (advisory, reviewer class) the option-determined rows of `combinationTable`, `combinationTableCI`,
+  `combinationTableCIRatios` and `crossTabTable` are built with `addRow()` in `.run()`, so they appear only after
+  the run. Moving them to `.init()` changes the "no rows on an early return" contract that 9 `rowCount == 0L`
+  assertions pin; `release_gate.py`'s `init_row_structure` detector does not flag this analysis.
+- [ ] (docs) `vignettes/decisioncombine-documentation.md`, `decisioncombine_documentation.md` and
+  `testing_decisioncombine.md` date from 2026-08-29 and miss the 09-27..29 changes (single-test and pairwise
+  rows, inversion guards, the ratio CI table, About panels, welcome). Refresh with `/document-function`.
+- [ ] (test data) `data-raw/decisioncombine_test_data.R` also writes CSV/XLSX/OMV, but only the 8 `.rda` are in
+  `data/`, and re-running it rewrites the `.rda` the tests read. Write CSVs from the `.rda` if jamovi example
+  data are wanted.
+- [ ] (out of scope, found by the i18n agent) 11 Turkish msgstr in `jamovi/i18n/tr.po` reorder `%d`/`%s` slots
+  without `%n$` markers: chisqposttest (5), crosstable (3), singlearm, venn, survivalcont. `sprintf()` then stops
+  with "invalid format '%d'; use format %s for character objects" -- in Turkish only. Example: msgid
+  "%d pairwise comparisons with %s adjustment, %d significant" -> "%s düzeltmesi ile %d ikili karşılaştırma,
+  %d anlamlı". Fix with `%2$s ... %1$d` positional markers; `tools/release_gate.py` check_i18n_po_formats WARNs,
+  and `test-zzz-meddecide-release-20260921.R` tolerates exactly 11.
+- [ ] (i18n, needs a project-wide decision) the shared msgid "Pattern" is "Örüntü" in tr.po (also used by
+  checkdata, missingdataexplorer, pathsampling, spatialanalysis), while decisioncombine's Turkish prose says
+  "patern"; numbers filled into notices always use "." while Turkish prose writes "0,5".
+- [ ] (optional, module-wide) LR+/LR- intervals: Koopman score interval (Fagerland 2015 §8.3) instead of the
+  0.5-adjusted log interval, which under-covers (0.888) for near-perfect tests in small series. Would change
+  numbers in decision, decisioncombine, decisioncompare together.
+
+**`/check-function-full decisioncombine` (2026-09-29) — results.** Report only; no source edited (`menuGroup`
+already `meddecideT`).
+- Evidence: all 19 options change the output when toggled (each `show*` only its own item; the two filters
+  change the bar chart, heatmap and forest plot, and by design not the decision-space plot). All 18 results
+  items are populated. Oracles agree: point estimates exact; Wilson intervals match `prop.test(correct = FALSE)`
+  (1e-16); LR/DOR intervals match `epiR::epi.tests` on the 16 zero-free rows (5e-12); Agresti-Caffo matches
+  the hand formula. `release_gate.py` output is byte-identical with `decisioncombine` counted as shipped;
+  `check_state_guards.py` 0; library-review greps clean.
+- [x] (UX/safety, High) `notices` is the LAST item in `jamovi/decisioncombine.r.yaml`, so every ERROR and
+  serious warning renders below the three combination tables. With 3 tests those hold 180 rows
+  (20 + 100 + 60). With the plots ticked, add the space the images reserve, up to about 5,850 px; the forest
+  plot alone is sized 4,050 px in `.init()`, even when an early return leaves it blank. That includes
+  "Positive Levels May Be Inverted", the only detector of a swapped level. `decision` and
+  `decisioncalculator` put `notices` at the top. Move it to just after `welcome`, and carry the
+  `&analysisInputs` anchor with it: an alias placed before its anchor is a YAML error, and `prepare()` exits 0
+  on YAML errors. Also reword the About sentence placing the missing-cases warning "at the end of the
+  results" (`R/decisioncombine.b.R:118`, a msgid) and the comment at `:972`.
+- [x] (severity, Medium) "Sparse Cell Counts" is a STRONG_WARNING (`R/decisioncombine.b.R:1377`) that fires
+  on all 8 bundled `decisioncombine_*` datasets (n 50-400). It names up to ~15 of 20 rows, including Parallel
+  and single-test rules that are sparse because they are good (the file's own comment at `:1965-1972`). Its
+  text says sensitivity, specificity and J stay sound. That leaves only the ratio intervals, which already
+  widen. A serious warning that always fires trains readers to skip the channel the inversion warning uses
+  (CHANGELOG 2026-09-29 rule: measure a warning's false-alarm rate before shipping it). Demote to WARNING.
+  Tests assert only the title, so add one that pins the severity.
+- [x] (docs, Low) the `filterStatistic` description in `jamovi/decisioncombine.a.yaml` (help panel and
+  `man/decisioncombine.Rd`) says the heatmap default "also includes ... Youden's J". The code leaves J out on
+  purpose (`:2663-2672`; the default draws Prevalence, Sensitivity, Specificity, PPV, NPV, Accuracy, Balanced
+  Accuracy). The `.r.yaml` heatmap description "all diagnostic metrics" is wrong too.
+- [x] (cleanup, Low) three translated notices can never fire, yet they still reach translators, against the
+  file's own rule at `:1403-1407`: "All Zero Counts" in `.analyzeSinglePattern` (`:1425`; validation
+  guarantees >= 4 complete cases), and "Invalid Counts" / "All Zero Counts" in `.analyzeIndividualTest`
+  (`:1073-1096`; `n_used == 0` returns first, and `table()` never yields NA or negative counts).
+- [x] (cleanup, Low) `.resultsItem()` (`:30`) and the `tryCatch()` around `self$options$showAbout` (`:78`)
+  were bridges for a stale `.h.R`. The header now defines both, so both are dead indirection.
+  `tests/testthat/helper-decisioncombine.R` defines two helpers that no test calls, for a transition that
+  has ended.
+- [x] (UX, Low) With one test and the ranking ticked, the table ranks "1 candidate rule(s)" and names Test 1
+  "Highest-Ranked Rule". In a one-class sample the decision-space plot is blank with no notice, while the
+  other three plots get one. The `.u.yaml` LevelSelector labels "Positive Level" are Title Case, and
+  `test2Positive` lacks the `enable: (test2)` that `test3Positive` has.
+- [x] (enhancement) Nothing flags weak discrimination in the best rule. For a binary rule, balanced accuracy
+  is the single-cut-point AUC, and the clinical profile asks for a caution below 0.7; calibrate its alarm
+  rate before adding it. The Agresti-Caffo CI for J is already computed for the inversion guard and could be
+  shown beside J.
+
+**Fix pass (2026-09-30) — results.** All seven items above done; `menuGroup` still `meddecideT`, analysis
+version untouched (the updater owns it). Plan cross-checked with Codex before coding; the change then went
+through a 45-agent adversarial workflow (statistics, jamovi integration, old-vs-new regression, Turkish,
+calibration; three skeptics per finding) and a Codex review.
+- Placement: `notices` is item 2 (after `welcome`), carrying the `&analysisInputs` anchor; the About text
+  and the "No Rule Performs Better Than Chance" text no longer say "at the end" / "tables above".
+- Youden's J: `youdenLower`/`youdenUpper` columns (Agresti-Caffo, `.youdenCI()`), a table note naming the
+  method, and a ranking-table note (`bound`) set only beside the "advantage is not established" sentence,
+  which keeps its conservative Wilson-sum bound. The inversion guards now read these columns: notice
+  text identical to the old recomputation in 30 of 30 inverted cases.
+- Discrimination notice (`.assessTopRuleDiscrimination()`), graded on the intervals of EVERY scored rule,
+  because its sentences speak for all of them (Codex and three review lenses found the first version,
+  graded on the top rule alone, contradicting another rule's interval): serious "Poor Discrimination" only
+  when every interval lies below 0.40; plain "Discrimination Not Established" when every interval includes 0
+  and one reaches 0.40; else plain "Discrimination May Be Poor". Separate one-test wording. Printed values
+  decide the bands. Hosmer-Lemeshow-Sturdivant is a notice-level reference (`setRefs()`, as in decision).
+  Calibration (harness, 150 reps per cell): serious warning on an acceptable test (true J 0.45) 0.000 /
+  0.000 / 0.007 at 15 / 30 / 60 per group, 0.000 with two tests; the first design was 0.26 at n 15.
+- Also: "Sparse Cell Counts" is a WARNING; unreachable notices and `.resultsItem()` removed; single-test
+  ranking note; blank decision-space notice; forest note for J; heatmap title and three help texts
+  (filterStatistic, showHeatmap, combinationTable description); "Positive level" labels, `enable: (test2)`;
+  `helper-decisioncombine.R` deleted; a dead test assertion replaced; `audit_decisioncombine.R` expectations
+  updated for the two reworded sentences.
+- Generated: `R/decisioncombine.h.R` from a one-analysis scratch `prepare()`; `man/decisioncombine.Rd` by
+  roxygen in a scratch package (`decisioncombineClass.Rd` reproduced byte-identical; `tools::checkRd` 0).
+  Catalogs by `jmvtools::i18nUpdate()`: every changed entry is decisioncombine's, 293/293 translated in
+  tr.po; the shared "Poor Discrimination" msgstr is now "Zayıf Ayırt Etme" (reviewer TR-1).
+- Verify: the 10 `test-decisioncombine*.R` files plus `test-zzz-results-rendering-contract.R` and
+  `test-meddecide-library-audit.R` (`load_all(export_all = FALSE)`, `NOT_CRAN=true`): 234 tests, 972
+  expectations, 0 failed / error / skip / warning. `development-scripts/audit_decisioncombine.R` with
+  `AUDIT_SIM_R=0` (matrix written to scratch, the recorded postfix matrices untouched): 233 checks, 232 PASS,
+  0 FAIL, 1 BLOCKED (the skipped simulation battery). `release_gate.py` with decisioncombine counted as
+  shipped: 0 blocking and identical to the pre-change run except the catalog size (34469 -> 34481 msgids,
+  0 unused); `check_state_guards.py` 0; library-review greps clean; `msgfmt -c` OK.
+- [x] (calibration, pre-existing) "No Rule Performs Better Than Chance" is an ungraded point-estimate STRONG
+  in a single-test analysis: it fires whenever the one test's J <= 0, e.g. 27% of samples of a test with
+  true J 0.15 at 15 per group (review calibration lens). Grade it by the Agresti-Caffo interval, as the
+  inversion guard is; the "Test Performs at Chance Level" suppression for eligible single tests would then
+  need revisiting (IR-02 tests pin it).
+  Done 2026-09-30: with one test, J <= 0 within sampling variation now gets the chance-level note (no longer
+  withheld above the 10-per-group gate) and `.assessTopRuleDiscrimination()` instead; a reversal beyond
+  sampling variation keeps "Positive Levels May Be Inverted". With two or three tests the warning is
+  unchanged (it needs every rule's J to be exactly 0; IR-02d, audit H4). Tests: IR-02b's single-test half
+  rewritten, IR-R2-4/-5 comments, CF-07, new CF-15; audit check H2d. Calibration (harness, 150 reps per
+  cell, one test): the old warning fires in 0 cells; a serious warning on an acceptable test (true J 0.45)
+  0.000 at 15 and 0.013 at 30 per group.
+- [ ] (docs) re-run `development-scripts/audit_decisioncombine.R` with its simulations (default
+  `AUDIT_SIM_R=2000`) to refresh the recorded `-postfix-matrix.csv` / `-postfix-sim-*.csv`; only the
+  deterministic checks were re-run (to scratch). `vignettes/decisioncombine-documentation.md` (item above)
+  also predates the J interval columns, the notices placement and the new notices.
+- [ ] (release decision) NEWS.md's decisioncombine header says "analysis 1.0.84"; the code is 1.0.83 until
+  `new_version` is raised (see the decision item under `### decision`).
+
+### decisioncompare
+
+```text
+/fix-function decisioncompare --apply
+
+/validate-function decisioncompare depth=exhaustive
+/independent-reviewer decisioncompare
+
+/check-function decisioncompare --profile release
+/check-function-full decisioncompare
+/review-function decisioncompare
+/release-review-function decisioncompare
+/security-audit-function decisioncompare
+```
+
+### nogoldstandard
+
+```text
+/fix-function nogoldstandard --apply
+
+/validate-function nogoldstandard depth=exhaustive
+/independent-reviewer nogoldstandard
+
+/check-function nogoldstandard --profile release
+/check-function-full nogoldstandard
+/review-function nogoldstandard
+/release-review-function nogoldstandard
+/security-audit-function nogoldstandard
+```
 
 ## Decision Calculators
 
-- cotest
-- decisioncalculator
-- sequentialtests
+### cotest
+
+```text
+/fix-function cotest --apply
+
+/validate-function cotest depth=exhaustive
+/independent-reviewer cotest
+/check-function cotest --profile release
+/check-function-full cotest
+/review-function cotest
+/release-review-function cotest
+/security-audit-function cotest
+```
+
+### decisioncalculator
+
+```text
+/fix-function decisioncalculator --apply
+
+/validate-function decisioncalculator depth=exhaustive
+/independent-reviewer decisioncalculator
+/check-function decisioncalculator --profile release
+/check-function-full decisioncalculator
+/review-function decisioncalculator
+/release-review-function decisioncalculator
+/security-audit-function decisioncalculator
+```
+
+### sequentialtests
+
+```text
+/fix-function sequentialtests --apply
+
+/validate-function sequentialtests depth=exhaustive
+/independent-reviewer sequentialtests
+/check-function sequentialtests --profile release
+/check-function-full sequentialtests
+/review-function sequentialtests
+/release-review-function sequentialtests
+/security-audit-function sequentialtests
+```
 
 ## ROC
 
-- enhancedROC
-- psychopdaROC
+### enhancedROC
+
+```text
+/fix-function enhancedROC --apply
+
+/validate-function enhancedROC depth=exhaustive
+/independent-reviewer enhancedROC
+/check-function enhancedROC --profile release
+/check-function-full enhancedROC
+/review-function enhancedROC
+/release-review-function enhancedROC
+/security-audit-function enhancedROC
+```
+
+### psychopdaROC
+
+```text
+/fix-function psychopdaROC --apply
+
+/validate-function psychopdaROC depth=exhaustive
+/independent-reviewer psychopdaROC
+/check-function psychopdaROC --profile release
+/check-function-full psychopdaROC
+/review-function psychopdaROC
+/release-review-function psychopdaROC
+/security-audit-function psychopdaROC
+```
 
 ## Prediction Models
 
-- lassologistic
+### lassologistic
+
+```text
+/fix-function lassologistic --apply
+
+/validate-function lassologistic depth=exhaustive
+/independent-reviewer lassologistic
+/check-function lassologistic --profile release
+/check-function-full lassologistic
+/review-function lassologistic
+/release-review-function lassologistic
+/security-audit-function lassologistic
+```
 
 ## Decision Curve Analysis
 
-- decisioncurve
+### decisioncurve
+
+```text
+/fix-function decisioncurve --apply
+
+/validate-function decisioncurve depth=exhaustive
+/independent-reviewer decisioncurve
+/check-function decisioncurve --profile release
+/check-function-full decisioncurve
+/review-function decisioncurve
+/release-review-function decisioncurve
+/security-audit-function decisioncurve
+```
 
 ## Power (menuGroup: Power)
 
-- kappaSizeCI
-- kappaSizeFixedN
-- kappaSizePower
+### kappaSizeCI
+
+```text
+/fix-function kappaSizeCI --apply
+
+/validate-function kappaSizeCI depth=exhaustive
+/independent-reviewer kappaSizeCI
+/check-function kappaSizeCI --profile release
+/check-function-full kappaSizeCI
+/review-function kappaSizeCI
+/release-review-function kappaSizeCI
+/security-audit-function kappaSizeCI
+```
+
+### kappaSizeFixedN
+
+```text
+/fix-function kappaSizeFixedN --apply
+
+/validate-function kappaSizeFixedN depth=exhaustive
+/independent-reviewer kappaSizeFixedN
+/check-function kappaSizeFixedN --profile release
+/check-function-full kappaSizeFixedN
+/review-function kappaSizeFixedN
+/release-review-function kappaSizeFixedN
+/security-audit-function kappaSizeFixedN
+```
+
+### kappaSizePower
+
+```text
+/fix-function kappaSizePower --apply
+
+/validate-function kappaSizePower depth=exhaustive
+/independent-reviewer kappaSizePower
+/check-function kappaSizePower --profile release
+/check-function-full kappaSizePower
+/review-function kappaSizePower
+/release-review-function kappaSizePower
+/security-audit-function kappaSizePower
+```
 
 # OncoPath
 
+```text
+/check-module OncoPath
+/check-module OncoPath --profile release
+/audit-module OncoPath
+/library-audit learn '2026-09-22 OncoPath.md'
+/library-audit implement '2026-09-22 OncoPath.md'
+/library-audit status '2026-09-22 OncoPath.md'
+```
+
 ## IHC Heterogeneity
 
-- ihcheterogeneity
+### ihcheterogeneity
+
+```text
+/validate-function ihcheterogeneity depth=exhaustive
+/independent-reviewer ihcheterogeneity
+/check-function ihcheterogeneity --profile release
+/check-function-full ihcheterogeneity
+/review-function ihcheterogeneity
+/release-review-function ihcheterogeneity
+/security-audit-function ihcheterogeneity
+/fix-function ihcheterogeneity --apply
+```
 
 ## Diagnostic Meta-Analysis
 
-- diagnosticmeta
+### diagnosticmeta
+
+```text
+/validate-function diagnosticmeta depth=exhaustive
+/independent-reviewer diagnosticmeta
+/check-function diagnosticmeta --profile release
+/check-function-full diagnosticmeta
+/review-function diagnosticmeta
+/release-review-function diagnosticmeta
+/security-audit-function diagnosticmeta
+/fix-function diagnosticmeta --apply
+```
 
 ## Visualization
 
-- swimmerplot
+### swimmerplot
 
-- waterfall
+```text
+/validate-function swimmerplot depth=exhaustive
+/independent-reviewer swimmerplot
+/check-function swimmerplot --profile release
+/check-function-full swimmerplot
+/review-function swimmerplot
+/release-review-function swimmerplot
+/security-audit-function swimmerplot
+/fix-function swimmerplot --apply
+```
+
+### waterfall
+
+```text
+/validate-function waterfall depth=exhaustive
+/independent-reviewer waterfall
+/check-function waterfall --profile release
+/check-function-full waterfall
+/review-function waterfall
+/release-review-function waterfall
+/security-audit-function waterfall
+/fix-function waterfall --apply
+```
+
 
 # check articles
 
@@ -2889,6 +4297,7 @@ no validation against established packages. Regression tests appended to `test-c
 ### /review-function 2026-09-05
 
 **Fixed**: hardcoded `set.seed(42)` in `.calculatePhiCI()` replaced by a `seed` Integer option (default 42, `.a.yaml`
+
 - `.u.yaml` TextBox enabled by `phiCI` + `posthocTable` clearWith); `is.null()` fallback keeps 42 until
 `jmvtools::prepare()` regenerates the header and wrapper. Unused `total_comparisons` assignment removed from
 `.robustPairwiseTestsChunked()`.
@@ -5098,7 +6507,6 @@ other nine were fixed here. Each carries a regression test in
 `tests/testthat/test-diagnosticmeta-audit-fixes.R`; six of the new blocks fail on the pre-fix backend.
 The three `USER:` items below are unchanged and still required.
 
-
 29 of the 40 findings from the 2026-09-18 OncoPath audit were fixed (see NEWS, and
 `tests/testthat/test-diagnosticmeta-release-fixes.R`). These eleven remain open; none is a wrong number, all
 are presentation or interpretation defects. Evidence for each is in
@@ -5443,8 +6851,8 @@ passes.
       binomial intervals (every field verified against Crossref), and item-level `refs:` on the five
       items that actually report a method - plot, summary, advancedMetrics, groupComparisonTest,
       copyReadyReport. The other 13 items stay ref-free deliberately.
-- [x] **F3** `STRONG_WARNING` printed as `WARNING: `, so the level had no effect in the output. Now
-      `STRONG WARNING: `, matching the two siblings that already distinguish it. `": "` is composed
+- [x] **F3** `STRONG_WARNING` printed as `WARNING:`, so the level had no effect in the output. Now
+      `STRONG WARNING:`, matching the two siblings that already distinguish it. `": "` is composed
       OUTSIDE `.()` because the bare words are existing msgids already translated (HATA / GÜÇLÜ UYARI /
       UYARI / NOT) - putting the colon inside would have minted new msgids shipping with empty msgstrs.
 - [x] **F4** `advancedMetrics` accumulated duplicate rows on repeated `.init()`. The `rowCount == 0`
@@ -5537,6 +6945,7 @@ every non-minor finding handed to a separate agent told to refute it: **23 findi
 now fixed. 180 blocks / 519 assertions pass; the 7 new blocks all fail against the pre-fix snapshot.
 
 **Correctness**
+
 - [x] **Mixed `Date` + `POSIXct` destroyed person-time.** `.asNumericTime()` returned each class's own
       raw epoch unit - DAYS for Date, SECONDS for POSIXct - and all six call sites compare a start
       against an end. Measured **104,106,728 months reported beside a correct Mean Duration of 2.5**;
@@ -5566,6 +6975,7 @@ now fixed. 180 blocks / 519 assertions pass; the 7 new blocks all fail against t
       claiming the order matched the plot.
 
 **Reconciliation and disclosure** - all verified cases where two numbers on one page disagreed
+
 - [x] Summary table: Mean Duration and Total Person-Time are on different definitions (9.33 x 3 = 28
       against a reported 22 on a gapped fixture) and the table carried no note at all unless a response
       variable was selected. It now always carries units and the definition difference.
@@ -5587,6 +6997,7 @@ now fixed. 180 blocks / 519 assertions pass; the 7 new blocks all fail against t
       also carries Clopper-Pearson intervals. Named, with the log-log difference called out.
 
 **Performance** - `n = 10 000` went from **91.6 s to 3.7 s**
+
 - [x] The data.table fast path split its own finished one-row-per-patient aggregate into n one-row
       tables purely so the shared `bind_rows()` could reassemble them - 70% of the whole run.
 - [x] `segment_duration` was computed for every row and read by nothing; removing it orphaned
@@ -5600,6 +7011,7 @@ now fixed. 180 blocks / 519 assertions pass; the 7 new blocks all fail against t
       handler now blanks what it may have written.
 
 **i18n**
+
 - [x] `R/utils-followup.R` has 72 string literals and zero `.()`, and its English `reason` was pasted
       onto a translated sentence. It cannot call `.()` (a file-level helper has no `self`), so it now
       returns a `reason_code` and the R6 caller picks the translated wording. `reason` is kept, so the
@@ -5614,6 +7026,7 @@ now fixed. 180 blocks / 519 assertions pass; the 7 new blocks all fail against t
       OYO and I will switch all of them instead.** Also `Odds Oranı (OO)` -> `(OR)`.
 
 **Not fixed, deliberately**
+
 - [ ] `private$.checkpoint()` is still absent. The review measured 43-116 s runs, but the data.table fix
       took `n = 10 000` to 3.7 s, so the case is much weaker - and every candidate site sits inside the
       catch-all `tryCatch`, which would swallow the restart (it is an error-class condition). Worth
@@ -5627,6 +7040,7 @@ now fixed. 180 blocks / 519 assertions pass; the 7 new blocks all fail against t
 ### swimmerplot — release review (2026-09-21): READY AFTER MINOR ACTIONS
 
 Gate results for promotion out of `OncoPathT`:
+
 - `tools/promotion_screen.py`: **swimmerplot debt = 0**, and it ranks **1st of 40** candidates
   (score 14.45, wired 1.00, 21 test files, 9 vignettes, 6 refs). Nothing it carries would fail the
   gate on promotion.
@@ -5801,3 +7215,325 @@ analysis scores lower as a candidate.
       Both unshipped. Use `jmvcore::Notice` or the notices→HTML helper.
 - [ ] 79 unused `Imports:` at the umbrella level; several heavy (`sf`, `spatstat`, `shiny`, `MCMCglmm`).
 - [ ] 59 dead citations and 16 missing `url:` in `jamovi/00refs.yaml`.
+
+## meddecide release check (2026-09-21: `/check-module meddecide --profile release`)
+
+Full report: `quality-reports/meddecide-check-module-20260921/REPORT.md`.
+All 15 production analyses. Fixes applied umbrella-side; regression guards in
+`tests/testthat/test-zzz-meddecide-release-20260921.R` (115 assertions, verified to fail
+against pre-fix source).
+
+**Fixed this pass**
+
+- [x] `lassologistic` / `agreement`: Output columns written positionally — a row filter saved every
+      prediction and every consensus/level-of-agreement label onto a different patient.
+      `setRowNums(rownames(...))` at lassologistic:166,354 and agreement:8253,8494.
+- [x] `psychopdaROC`: 5 pROC paths were not one-vs-rest — `setdiff(...)[1]` kept one other level and
+      pROC silently dropped the rest. Measured 60 of 90 rows used and AUC reported as 1.0000 vs 0.9728.
+      One `private$.ovrResponse()` helper now used at all five.
+- [x] `psychopdaROC`: `getCell()` returns a Cell object; the Fixed Sens/Spec ROC plot crashed on every draw.
+- [x] `agreement`: ICC sample size was a Wald form carrying Walter (1998)'s citation — n=9 where
+      Walter gives n=23. Replaced with the log transform + an ICC=1 guard.
+- [x] `psychopdaROC`: catch-all `tryCatch` swallowed 6 `jmvcore::reject()` calls, then ran the fallback
+      on the same invalid input while claiming pROC. Rejects tagged + re-raised; note names the real path.
+- [x] Fabricated statistics: bootstrap AUC 0.5 for single-class resamples; precision/recall/F1 `0` for
+      undefined. Both now NA with disclosure.
+- [x] `agreement`: mean r / mean rho now Fisher-z averaged (r=(.30,.95): .625 → .790).
+- [x] 51 `.()` msgids with braced `\u{XXXX}` escapes → `\uXXXX` (agreement 4, decision 1, decisioncurve 1,
+      enhancedROC 20, sequentialtests 25).
+- [x] 7 `tr.po` templates reordered conversions without `%n$` — the ROC narrative *errored* in Turkish.
+- [x] Notice panels theme-safe in all 6 files (opaque pastel fill + fixed title hue).
+- [x] 32 `format: zto` on unbounded columns (a glucose cutpoint rendered `126.0000000`).
+- [x] `clearWith` on 10 blinking items (sequentialtests 8, cotest 2); forest-plot + Bayesian-trace
+      `addItem` guarded; decisioncurve `ggtheme` ordering; 54 lines of dead YAML.
+- [x] `2026-09-16 meddecide.md` audit: 15 findings / 0 responses → 10 done, 2 partial, 3 deferred, 0 open.
+
+**USER — blocked on you**
+
+- [ ] `Rscript _updateModules.R meddecide` was **held**: the tree had unrelated in-flight edits
+      (`_build_site.R`, `.Rbuildignore`, `_updateModules_utils.R`, `new_version` 1.0.82.07→1.0.83).
+      Until it runs, the shipped module still fails the gate on 4 malformed `format: zto;pvalue`
+      tokens in `enhancedROC.r.yaml` and lacks the `psychopdaROC` `is.null(st)` guard.
+- [ ] After regeneration: `jmvtools::i18nUpdate()` (133 stale msgids) + a `NEWS.md` heading.
+- [ ] Run the 96 testthat files against an `R CMD INSTALL` of the working tree, not `load_all()`.
+
+**Decisions needed**
+
+- [ ] `enhancedROC` ships 20 live checkboxes that compute nothing (b.R:487-506), all confirmed tickable.
+      Removing them means removing the `.a.yaml` options too — `prepare()` re-adds any control whose
+      option survives — which breaks saved `.omv`.
+- [ ] `enhancedROC` `direction: auto` vs `psychopdaROC` `>=`: same data → AUC 0.825 vs 0.175. Fitting
+      direction to the data biases every AUC upward (null ≈0.593 at n=20). psychopdaROC's fixed
+      direction is defensible; the fix is one line at `enhancedROC.a.yaml:74` and changes saved results.
+- [ ] `agreement`: ~19 `error = function(e) NULL` handlers still blank a displayed value with no notice
+      (Shapiro-Wilk especially — blank reads as "normality fine"). The file's own TODO line list has drifted.
+- [ ] i18n coverage: `cotest` 0/193 and `kappaSizeCI` 0/119 `.()` wraps; `nogoldstandard` leaves its
+      non-convergence warning in English; `agreement` splices ~102 English phrases into translated sentences.
+
+### meddecide round 2 — "fix detected issues" (2026-09-21, same day)
+
+Report: `quality-reports/meddecide-check-module-20260921/REPORT.md` (Round 2 section).
+24 agents across two orchestrated runs + a hand-repair pass on what adversarial verify caught.
+
+- [x] **enhancedROC 20 dead options triaged.** 5 implemented (`eoRatio`, `calibrationDensity`,
+      `decisionImpactCurves`, `bootstrapPartialAUC`, `multiClassAveraging`); 14 commented out in
+      BOTH `.a.yaml` and `.u.yaml` with the reason inline. `eoRatio` returns NA when the predictor
+      is not already a probability — the fitted glm forces E/O ≡ 1.000, which would have told every
+      user their marker was perfectly calibrated on no evidence.
+      `harrellCIndex` (= the AUC on a binary outcome) and `optimismCorrection`
+      (= internalValidation + bootstrap) are duplicates: commented, not implemented, not deleted.
+      The `unimplemented` accumulator and its WARNING are gone — required, because
+      `self$options$<name>` RAISES for an option that no longer exists.
+- [x] **`direction` default `auto` → `higher`** (`enhancedROC.a.yaml:74`); `auto` still offered,
+      description now states the upward bias. enhancedROC and psychopdaROC agree by default.
+- [x] agreement: Kendall's W df (19 → the real 16), Fleiss CI provenance, consensus tie-break no
+      longer alphabetical, BCa order-independence, PABAK `q` from scale levels, computed
+      Bhapkar/Stuart-Maxwell df, nominal factors rejected, pairwise-complete pairwise stats,
+      NSA reachable, ~9 silent handlers disclosed.
+- [x] decisioncompare: catch-all tryCatch no longer downgrades `reject()`; restart leaves before
+      notices serialize; `.checkpoint()` added (there were zero in 2,945 lines); McNemar caveat on
+      the table.
+- [x] psychopdaROC: 5 renderers apply ggtheme; Wald → Wilson bands; evidence ratio de-Bayesified.
+- [x] i18n: cotest 0→130, kappaSizeCI 0→69, decisioncompare 39→312, agreement +183,
+      nogoldstandard +33, enhancedROC +23, psychopdaROC +23 `.()` wraps. 0 trap hits after.
+- [x] `.gofCells()` de-duplicated into `R/utils-kappasize.R`; updater resolves and ships it.
+- [x] **Adversarial verify caught 2 criticals the fixes INTRODUCED** — both "a CI belonging to a
+      different statistic than the estimate it decorates": the subgroup table (unweighted kappa2
+      estimate + weighted CI) and the inter-rater row (Scott's pi labelled Fleiss' κ with a Cohen's
+      kappa CI). Both repaired. Also: a Wilson band still captioned "normal-approximation"; a BCa
+      "fix" that was still order-dependent while its note claimed otherwise; a `theme` guard that
+      could only ever error; 13 untranslated red-banner strings.
+- [x] Round-1 omission of mine: the Fisher-z switch on mean r / mean ρ now carries a table note.
+
+**USER — still blocked on you (unchanged)**
+
+- [ ] `Rscript _updateModules.R meddecide` still HELD — the tree still carries unrelated in-flight
+      work (`_build_site.R`, `.Rbuildignore`, `_updateModules_utils.R`, `new_version`).
+      Nothing above reaches users until it runs; the shipped module still fails the gate.
+- [ ] After regeneration: `jmvtools::i18nUpdate()` (182 stale msgids now) + a `NEWS.md` heading.
+- [ ] Run the 96 testthat files against an `R CMD INSTALL` of the working tree.
+- [ ] Review the 5 newly implemented enhancedROC analyses on real data before release — they are
+      new user-visible statistics, not repairs.
+
+### meddecide — outstanding after the 2026-09-21 validation + fix pass
+
+Deliberately recorded here rather than as `# TODO` comments: the jamovi library reviewer counts
+TODO/FIXME markers in the shipped module as an audit finding (`[INFO] Three TODO markers`,
+2026-09-16). The 15 shipped meddecide backends still carry exactly those 3 and no more.
+
+**Needs `/update-refs` — method citations with no key in `jamovi/00refs.yaml`.**
+`agreement` gained 8 method refs this pass (LandisKoch1977, Krippendorff2004, Shrout1979,
+McGraw1996, Koo2016, BlandAltman1986, BlandAltman1999, agresti2013 — all verified to resolve).
+These have no key and were left uncited rather than invented, because a `refs:` key absent from
+`00refs.yaml` fails the compile:
+
+- [ ] Gwet (2008), Br J Math Stat Psychol 61:29–48 — for `gwetTable` (only the `irrCAC` *software*
+      key exists today, which is the very defect VAL-agreement-02 reports)
+- [ ] Lin (1989), Biometrics 45:255–268 — `linCCCTable`
+- [ ] Lin (2000) / McBride — the Total Deviation Index
+- [ ] Byrt, Bishop & Carlin (1993), J Clin Epidemiol 46:423–429 — PABAK
+- [ ] Kendall & Babington Smith (1939) — `kendallWTable`. The existing `Kendall` key is the R
+      *package*; citing it would repeat the software-instead-of-method defect
+- [ ] Robinson (1957), Finn (1970), Light (1971), Janson & Olsson's iota
+- [ ] Walter, Eliasziw & Donner (1998) — the ICC arm of `agreementSampleSizeTable`. `Bonett2002`
+      exists and is also ICC sample size, but it is a *different formula*; citing it would
+      attribute the displayed numbers to a method the code does not run
+
+**Disclosure gap (same family as the notes fixed this pass).**
+
+- [ ] `agreement`: the kappa Wald upper limit is clamped at 1 and the `ci_method` note does not
+      say so. At kappa = 0.70 on the validation fixture the unclamped upper is 1.0114 and the
+      table shows 1.000. Clamping is correct (kappa is bounded; `psych::cohen.kappa` clamps
+      identically) — it is the silence that is the gap.
+
+**Low, from the fix verifiers (each traced, none a wrong number).**
+
+- [ ] `agreement:6152`: the sibling guard for `interIntraRaterInterTable` uses
+      `!is.na(x) && !is.finite(x)`, and `is.na(NaN)` is TRUE, so a NaN kappa would skip blanking
+      there. Latent — `kappam.fleiss` returns Inf, not NaN, on degenerate data. Widen to
+      `is.nan(x) || (!is.na(x) && !is.finite(x))` for symmetry with the path fixed this pass.
+- [ ] `enhancedROC:5075`: the interpretation word grades the macro AUC while the number beside it
+      is now the Hand-Till pairwise mean — two quantities in one cell.
+- [ ] `lassologistic:1971`: the degenerate-score headline is keyed on `cutoff_collapsed`, so the
+      collapsed-AND-inverted case renders the collapsed wording.
+- [ ] `kappaSizePower:214`: the `outcome == 2L` remedy in the new rare-category block is
+      unreachable (swept 5 rater counts × 9 prevalences × 16 kappa pairs).
+- [ ] `test-kappasizeci-release-review.R:187`: the narrowed `src[start]` window assumes a msgid
+      stays on one source line; `R/kappaSizeCI.b.R:450` is >400 characters, so an ordinary re-wrap
+      would break the test.
+
+**Still blocked on regeneration** (unchanged): `../meddecide` carries none of this.
+
+---
+
+## 2026-09-22 — `agreement` independent-review repairs
+
+Seven S1 findings from `development-ideas/agreement-independent-review-2026-09-21.md` were
+repaired. `development-scripts/audit_agreement.R` now exits 0 (10/10 PASS, every check
+rewritten from a hardcoded verdict into a live assertion), and
+`tests/testthat/test-agreement-independent-review.R` adds 51 expectations across 8 blocks.
+The 11 direct `test-agreement*.R` suites pass 412/412 with no skips. Remediation detail is
+in §8 of the review report.
+
+**Design decisions, not defects — these need a call before anyone implements them.**
+
+- [ ] `agreement`: the proportional-bias test regresses D = X − Y on M = (X + Y)/2, whose
+      regressor is built from the same two measurements as the response. Under no proportional
+      bias with SD(e1) = 1 and SD(e2) = 4 it rejects in **50 of 50** simulated replicates
+      (n = 1000). The existing statistic is now explicitly labelled as an exploratory
+      difference-mean association, not a proportional-bias test. A Deming / errors-in-variables
+      regression would need a user-supplied variance ratio — a new option and assumption.
+- [x] `agreement`: weighted Fleiss kappa is not available. For 3+ raters a weighted request now
+      leaves the headline Fleiss estimate blank with an explicit note, while preserving valid
+      weighted all-pairs Cohen kappa and naming ordinal Krippendorff alpha / weighted Gwet AC2.
+- [ ] `agreement`: TDI's heteroscedasticity claim was removed from the description rather than
+      the estimator upgraded. A magnitude-conditional TDI (Lin's regression-based form) is a
+      real feature request, not a correction.
+
+**Citations still missing** (narrows the 2026-09-21 list — most are now defined *and* cited).
+
+- [ ] `/update-refs agreement`: **Walter1998** (ICC sample size), **Kendall1939** (Kendall's W),
+      **Finn1970**, **McBride2005** (TDI/CCC bands) are neither defined in `jamovi/00refs.yaml`
+      nor cited. `Gwet2008`, `Lin1989`, `Byrt1993`, `Krippendorff2004`, `Cohen1960/1968`,
+      `Fleiss1971`, `LandisKoch1977`, `Shrout1979`, `McGraw1996`, `Koo2016` and
+      `BlandAltman1986/1999` are done.
+
+**Audit findings not individually worked through.**
+
+- [ ] The independent review's **46 S2, 38 S3 and 6 S4** findings. The seven S1s and the S2/S3
+      items named in §8.2 (Finn default, proportional-bias confound, LoA coverage label, TDI
+      claims, the long-vs-wide data description) are closed; the rest are audit output left as
+      proposals.
+
+**i18n — a consequence of this pass.**
+
+- [ ] `jmvtools::i18nUpdate()` has not been run. Rewriting a `.()` msgid orphans its
+      translation, and several were rewritten here: both Landis & Koch summary sentences, the
+      three rater-bias interpretation strings, and the continuous-data note (which was a bare
+      English literal and is now wrapped). Turkish falls back to English for those until the
+      catalog is re-keyed.
+
+**Found while fixing, already repaired.**
+
+- Three tests in `test-agreement-arguments.R` (`kendallW`, `robinsonA`, `meanSpearman`) had been
+  failing on `master` since some earlier commit. They were not flaky and not caused by this
+  pass: all three rank the ratings, a later guard correctly refuses **unordered** factors with
+  an explanatory note, and the tests still asserted the pre-guard contract ("a value comes back
+  for any factor"). Rewritten to assert both arms — refusal plus note on a nominal factor, a
+  finite value on an ordered one. A committed guard contradicting a committed test is worth a
+  sweep: other analyses may carry the same shape.
+
+**Two more stale test references, found and fixed in the same pass.**
+
+- `test-meddecide-library-audit.R:145` asserted `config$modes$copy_i18n_files` is TRUE. That
+  key no longer exists in `_updateModules_config.yaml`, and `isTRUE(NULL)` is FALSE, so the
+  test failed. It was not a regression: the copy became **unconditional** in
+  `_updateModules_plan.R:382`, so the flag was redundant and removed. The assertion now checks
+  the guarantee (the plan loops over `m$i18n_files` with no gate) rather than the removed key.
+- `test-meddecide-library-audit.R:255` read `R/nomogrammer.r`, renamed to
+  `R/utils-nomogrammer.R` under the `utils-<topic>.R` helper convention. `readLines()` errored,
+  which **aborted the whole `test_that` block** — so the "do not request whole dependency
+  namespaces" sweep had stopped covering any file at all, silently. Path fixed; the file now
+  reports 101 pass / 0 fail, up from 98 pass / 1 fail / 1 error.
+
+Three stale-test failures in one pass, all the same shape: a test that outlived the code it
+described. Worth a sweep of the other `test-*-library-audit.R` and `test-zzz-*` files for
+hardcoded paths and config keys — an erroring block reports as one failure while silently
+testing nothing.
+
+**Still blocked on regeneration** (unchanged): `../meddecide` carries none of this.
+
+# 2026-09-30 PR review follow-through: merge approved PRs, fix review findings
+
+Acceptance criteria
+- The 5 submodule CI PRs (Descriptives#5, jjstatsplot#13, meddecide#18, jsurvival#17, OncoPath#2)
+  carry the review polish and are squash-merged.
+- #125/#126/#127 branches carry a fix for every confirmed review finding (plus the pre-existing
+  defects in the files they touch), executed in R, generated files regenerated (never hand-edited),
+  independently verified, follow-up review posted. Not merged (not requested).
+- Umbrella master fixes stay UNCOMMITTED in the working tree (maintainer commits); nothing is pushed
+  to any master; the maintainer's dirty in-flight files are not touched.
+
+Checklist
+- [x] Submodule CI PRs: check reporter, PR-only cancellation, drop no-op inputs, checkout@v5,
+      jsurvival file rename, meddecide badge -> push -> CI
+- [ ] Squash-merge the five: BLOCKED by the session's permission policy ("merge without review") - merge by hand
+- [x] #127: R_PROFILE_USER + Ncpus + cache: always + tests from the source tree -> push -> measure
+- [x] #125 fixes (tests, direct LF power formula, .h.R/.Rd, messages, ranges, gsDesign floor, labels,
+      dead power option, first test, reject() placement, n rounding, clearWith)
+- [x] #126 fixes (regenerated .h.R, asFormula, addRow, tests, pi^2/6, enable binding, LR, docs,
+      nits, pre-existing kept-option defects)
+- [x] Umbrella: `==`/`!=` enable bindings in 19 .u.yaml (mixedcox handled in #126)
+- [x] Umbrella: park-aware meddecide audit test + psychopdaROC case -> mirror to meddecide
+- [x] Umbrella: plotmath tokens in the dependency guard -> copy to the 5 siblings
+- [x] Umbrella: 4 tests that assume wd = package root (grafify, groupedforest, groupsummary, parallelplot)
+- [x] Siblings: OncoPath NEWS 1.0.83.05 + README RECIST/breadcrumb; meddecide irr import;
+      Descriptives dataquality mirror
+- [x] hullplot: concave hulls via ggforce >= 0.5.0 without concaveman/V8 (only if verified at runtime)
+- [x] Verify: harness tests, single-analysis prepare() diffs, guard/audit tests on sibling trees, CI
+- [x] Follow-up reviews; Results section below
+
+Working notes
+- Disk 17 GiB free, swap ~10/11 GB: sparse `git clone --shared` scratch clones, <= 3 R processes,
+  no load_all()/document()/check() on the umbrella.
+- Unpushed local commits: umbrella 6, meddecide 2 (+16 dirty), OncoPath 2 (+3 dirty) -> never pushed here.
+
+## Results (2026-10-01)
+
+Reviewed, fixed and independently verified. Every fix was executed in R or in jamovi 28.3's own client
+code, and each work item had a separate verifier. Git: PR branches only; nothing was pushed to any master.
+
+Merges were NOT performed: the session's permission policy blocked "merge without review". Merge by hand:
+`gh pr ready N -R sbalci/<repo> && gh pr merge N -R sbalci/<repo> --squash`.
+
+| PR | State |
+|---|---|
+| Descriptives#5, jsurvival#17 | polished; CI green; ready to squash-merge |
+| jjstatsplot#13, meddecide#18 | polished; red only until the regenerated test files below are committed in the sibling |
+| OncoPath#2 | polished; its last run merged into the old master; master + the OncoPath edits below pass the audit statically |
+| umbrella#127 | fixed; green in ~6 min (binary repo + cache + load check + changed-analysis tests); approve |
+| umbrella#125 | fixed in 3 rounds (exact LF power, working tests, arms, export-path plots); verified; follow-up review posted (approve) |
+| umbrella#126 | fixed in 3 rounds (header, fit, table, pi^2/6, strict date layouts, ordinal contrasts); verified; follow-up review posted (approve) |
+
+Uncommitted working-tree changes left for the maintainer to commit:
+- umbrella: 19 .u.yaml with ==/!= bindings rewritten to jamovi's grammar; 19 .u.yaml whose "(...)" suffix
+  and label text was read as a binding and never shown; jjhistostats dotted-option event removed and
+  events.js fixed; dependency-guard template (plotmath only inside quoting calls) and its regression tests;
+  park-aware audit tests (meddecide, OncoPath, jsurvival); hullplot on ggforce >= 0.5.0 without concaveman/V8
+  (R, a.yaml, h.R, Rd, DESCRIPTION, _updateModules_config.yaml prune_imports, tests); tests that assumed
+  wd = package root, and the defects that exposed (grafify, groupedforest, groupsummary, parallelplot,
+  categorize, patientsimilarity, pcacomponenttest, swimmerplot/waterfall validation).
+- siblings: guard test (all five); audit tests (meddecide, OncoPath, jsurvival); shipped .u.yaml
+  (jjstatsplot 4, meddecide 2, Descriptives 1); hullplot + DESCRIPTION (jjstatsplot); jjhistostats events.js
+  (jjstatsplot); dataquality placeholder fix (Descriptives); NEWS 1.0.83.05 + README breadcrumb (OncoPath);
+  irr kappa2 import in R/zzz_imports.R + NAMESPACE (meddecide, clears the R CMD check NOTE).
+
+## Follow-ups (logged, not fixed in this pass)
+
+- [ ] ~172 test files assert `inherits(model, "jmvcoreClass")`; jmvcore 2.7.38 has no such class, so every one
+      fails when run (generator-template defect; replace with expect_s3_class(x, "<name>Results")).
+- [ ] ~30 test files read ../../R or ../../jamovi via test_path() with no source-tree skip (ERROR under R CMD check);
+      the source-tree guards also pass in an --install-tests layout (check jamovi/0000.yaml instead of dir.exists).
+- [ ] test-clinicopath-descriptives-audit.R hard-codes 14 analyses without guards (same park-awareness fix).
+- [ ] simpleSurvivalPower (SurvivalD): interim-analysis table uses the Lan-DeMets spending formula under an
+      O'Brien-Fleming label and shows hard-coded statistics; interim_analyses is Number (fractional counts accepted).
+- [ ] classicalSurvivalPower: both renderers use theme_minimal() instead of jamovi's ggtheme; two-sided power uses
+      gsDesign's one-tail convention (alpha/2 at HR = 1); a vanishingly small non-zero gamma underflows.
+- [ ] mixedcox: user-visible strings not yet wrapped in .() (prepare-translation pass before promotion);
+      Time Elapsed could get enable: (!tint).
+- [ ] hullplot: hull_expand below ggforce's fixed 2.5 mm corner radius (~0.01) trims thin groups and, with labels on,
+      can fail the plot; pass radius = min(default, padding) in .plot().
+- [ ] Updater: prune_conflicts() cannot see a bare requireNamespace("pkg") probe (a prune entry could silently disable
+      a feature); _updateModules_plan.R:455 feeds binary data/*.rda (datadoc rows) to the scanner (459 warnings in the
+      jjstatsplot dry run, 4462 in meddecide's).
+- [ ] i18n: catalogs (umbrella and siblings) lack the new strings and keep removed msgids until the next
+      jmvtools::i18nUpdate(); generated build/js/*.src.js and pkgdown docs/reference refresh on the next prepare()/build.
+- [ ] patientsimilarity (umbrella test finding): negative survival times are accepted with no notice.
+- [ ] Pre-existing CI noise on umbrella PRs: claude-review fails every run (is_error, no model usage: credentials);
+      AppVeyor still attached although no appveyor.yml is tracked.
+- [ ] Date parsing across analyses: as.Date(text, format = ...) / strptime read only a PREFIX, so a wrong
+      day-month order, dd-mm-yyyy under %Y-%m-%d ('13-04-2016' -> year 13) or a 2-digit year 'parses' and gives
+      wrong times with no error. mixedcox (PR #126) now requires the whole value to match the layout; audit the
+      other .b.R files that parse user dates: surveysurvival (as.Date/strptime), and via lubridate/anytime/
+      as.POSIXct(format=) (check 2-digit years and day-month swaps): datetimeconverter, datevalidator, groupsummary, multisurvival, singlearm, summarydata2, survival, survivalcont, swimmerplot, timeinterval.
+- [ ] decisiongraph.b.R:2578 calls calculateMarkovTransitionMatrix, defined nowhere (parked, meddecideExtraD).

@@ -1554,10 +1554,10 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             ci <- private$.diagnosticCIs(tp = tp, fp = fp, fn = fn, tn = tn)
 
             # Create diagnostic information
-            diagnostic_info <- jmvcore::format(.("Positive outcome level: '{pos_outcome}' ({outcome_method})\nPositive predictor level: '{pos_pred}' ({pred_method})\nContingency table:\n  {pred1} \u2192 {out1}: {c11} | {out2}: {c12}\n  {pred2} \u2192 {out1}: {c21} | {out2}: {c22}\nTrue Positives: {tp}, False Positives: {fp}, False Negatives: {fn}, True Negatives: {tn}"), pos_outcome = positive_outcome_level,
-                    outcome_method = outcome_determination_method,
-                    pos_pred = positive_predictor_level,
-                    pred_method = predictor_determination_method,
+            diagnostic_info <- .fmt(.("Positive outcome level: '{posOutcome}' ({outcomeMethod})\nPositive predictor level: '{posPred}' ({predMethod})\nContingency table:\n  {pred1} \u2192 {out1}: {c11} | {out2}: {c12}\n  {pred2} \u2192 {out1}: {c21} | {out2}: {c22}\nTrue Positives: {tp}, False Positives: {fp}, False Negatives: {fn}, True Negatives: {tn}"), posOutcome = positive_outcome_level,
+                    outcomeMethod = outcome_determination_method,
+                    posPred = positive_predictor_level,
+                    predMethod = predictor_determination_method,
                     pred1 = predictor_levels[1], out1 = outcome_levels[1], c11 = cont_table[1,1],
                     out2 = outcome_levels[2], c12 = cont_table[1,2],
                     pred2 = predictor_levels[2], c21 = cont_table[2,1], c22 = cont_table[2,2],
@@ -2213,7 +2213,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
                 if (min_expected < 5) {
                     assumptions_ok <- FALSE
-                    warnings <- c(warnings, jmvcore::format(.("Small expected cell counts detected (minimum = {min}). Chi-square assumptions may be violated."), min = round(min_expected, 2)))
+                    warnings <- c(warnings, .fmt(.("Small expected cell counts detected (minimum = {min}). Chi-square assumptions may be violated."), min = round(min_expected, 2)))
                     
                     # c(x, list(<record>)) appends one record. append(x, list(...))
                     # flattens the record into four separate elements, which made
@@ -2229,7 +2229,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
                 # Check for very small total sample size
                 if (total_n < 20) {
-                    warnings <- c(warnings, jmvcore::format(.("Very small sample size (n = {n}). Results should be interpreted with extreme caution."), n = total_n))
+                    warnings <- c(warnings, .fmt(.("Very small sample size (n = {n}). Results should be interpreted with extreme caution."), n = total_n))
                 }
                 
                 # Check for zero cells
@@ -2542,7 +2542,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         axis.line.y  = ggplot2::element_blank())
 
                 ttl <- if (!is.null(outcome_label))
-                    grid::textGrob(jmvcore::format(.("{outcome}: OR (95% CI, p-value)"), outcome = outcome_label),
+                    grid::textGrob(.fmt(.("{outcome}: OR (95% CI, p-value)"), outcome = outcome_label),
                                    gp = grid::gpar(fontsize = 14)) else NULL
 
                 gridExtra::arrangeGrob(
@@ -2631,15 +2631,15 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             lr_df       <- unname(fit$df)
             lr_p        <- stats::pchisq(lr_stat, df = lr_df, lower.tail = FALSE)
             metrics <- list(
-                jmvcore::format(.("Observations: {n}"), n = nrow(.data)),
-                jmvcore::format(.("Firth penalized log-likelihood: {val}"), val = round(loglik_full, 2)),
+                .fmt(.("Observations: {n}"), n = nrow(.data)),
+                .fmt(.("Firth penalized log-likelihood: {val}"), val = round(loglik_full, 2)),
                 # Keep the value immediately after the "AIC" label: a parenthetical
                 # formula between the two makes the metrics line hard to read and
                 # makes the figure ambiguous to anything parsing it.
-                jmvcore::format(.("Penalized AIC: {aic} (-2 x penalized log-likelihood + 2 x {n_par} parameters)."),
-                                aic = sprintf("%.1f", -2 * loglik_full + 2 * n_par), n_par = n_par),
+                .fmt(.("Penalized AIC: {aic} (-2 x penalized log-likelihood + 2 x {nPar} parameters)."),
+                                aic = sprintf("%.1f", -2 * loglik_full + 2 * n_par), nPar = n_par),
                 .("This AIC is computed from the penalized (Firth) likelihood. Compare it only with other Firth models fitted to these same observations, not with the maximum-likelihood AIC of an unpenalized fit."),
-                jmvcore::format(.("Penalized likelihood-ratio test vs null model: chi-square = {stat} on {df} df, {p}."),
+                .fmt(.("Penalized likelihood-ratio test vs null model: chi-square = {stat} on {df} df, {p}."),
                                 stat = round(lr_stat, 3), df = lr_df, p = private$.fmtP(lr_p))
             )
 

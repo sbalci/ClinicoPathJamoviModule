@@ -89,6 +89,7 @@ models for proper statistical analysis.
 
 1.  **Binary Outcome (Diagnosis):**
 
+
         # Predicting diagnosis from fibrosis score and age
         geemodel(
           data = gee_liver_data,
@@ -102,6 +103,7 @@ models for proper statistical analysis.
 
 2.  **Count Outcome (Cell Count):**
 
+
         # Modeling inflammatory cell count
         geemodel(
           data = gee_liver_data,
@@ -114,6 +116,7 @@ models for proper statistical analysis.
         )
 
 3.  **Continuous Outcome (Fibrosis Score):**
+
 
         # Predicting fibrosis from age and sample method
         geemodel(

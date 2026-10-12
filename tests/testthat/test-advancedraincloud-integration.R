@@ -350,12 +350,14 @@ test_that("advancedraincloud preserves data integrity", {
 })
 
 test_that("advancedraincloud handles CSV imported data", {
-  skip_if_not(file.exists("data/advancedraincloud_test.csv"),
+  # the fixtures live in data-raw/non-rda/ (build-ignored: skips under R CMD check)
+  csv_path <- testthat::test_path("..", "..", "data-raw", "non-rda", "advancedraincloud_test.csv")
+  skip_if_not(file.exists(csv_path),
               "CSV test file not available")
 
 
   # Read from CSV (simulates user import)
-  csv_data <- read.csv("data/advancedraincloud_test.csv", stringsAsFactors = TRUE)
+  csv_data <- read.csv(csv_path, stringsAsFactors = TRUE)
 
   result <- advancedraincloud(
     data = csv_data,
@@ -367,14 +369,15 @@ test_that("advancedraincloud handles CSV imported data", {
 })
 
 test_that("advancedraincloud handles OMV imported data", {
-  skip_if_not(file.exists("data/advancedraincloud_test.omv"),
+  omv_path <- testthat::test_path("..", "..", "data-raw", "non-rda", "advancedraincloud_test.omv")
+  skip_if_not(file.exists(omv_path),
               "OMV test file not available")
   skip_if_not(requireNamespace("jmvReadWrite", quietly = TRUE),
               "jmvReadWrite package not available")
 
 
   # Read from OMV (simulates jamovi import)
-  omv_data <- jmvReadWrite::read_omv("data/advancedraincloud_test.omv")
+  omv_data <- jmvReadWrite::read_omv(omv_path)
 
   result <- advancedraincloud(
     data = omv_data,

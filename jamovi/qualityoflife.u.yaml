@@ -101,7 +101,7 @@ children:
           - type: TextBox
             name: missing_domain_threshold
             format: number
-            suffix: " (0.1-1.0)"
+            suffix: " 0.1-1.0"
           - type: ComboBox
             name: imputation_method
           - type: CheckBox
@@ -122,7 +122,7 @@ children:
           - type: TextBox
             name: mid_values
             format: string
-            suffix: " (comma-separated)"
+            suffix: " comma-separated"
           - type: CheckBox
             name: ceiling_floor_analysis
           - type: CheckBox

@@ -121,9 +121,11 @@ test_that("the notice panel is readable in both jamovi themes", {
   expect_true(all(entities %in% c("&lt;", "&gt;", "&amp;", "&quot;", "&apos;")))
 })
 
-test_that("hull_concavity is bounded to the range concaveman honours", {
+test_that("hull_concavity is bounded to the scale ggforce documents", {
   d <- hullplot_notice_data()
-  # below 1 concaveman clamps, so 0 and 0.5 drew byte-identical hulls
+  # ggforce documents concavity from 1 (very concave) upwards but does not
+  # clamp smaller values itself (0 and 0.5 can draw hulls that differ from
+  # 1), so the option's own min: 1 is what keeps the value on that scale
   expect_error(
     hullplot(data = d, x_var = "Biomarker", y_var = "Ki67",
                           group_var = "Grade", hull_concavity = 0.5),

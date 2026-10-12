@@ -16,6 +16,8 @@
 
 - **Date**: 2026-08-29
 - **Summary**: Comprehensive documentation suite created & verified against active schemas and backend implementation.
+- **Date**: 2026-09-26
+- **Summary**: Option and output titles re-synced with the schema after the 2026-09-25/26 review (`/check-function decision --profile release`).
 
 ## 2. Options Reference (`.a.yaml`)
 
@@ -36,7 +38,7 @@
 | `fagan` | `Bool` | `FALSE` | Fagan nomogram plot |
 | `showNaturalLanguage` | `Bool` | `FALSE` | Clinical summary |
 | `showClinicalInterpretation` | `Bool` | `FALSE` | Clinical interpretation guide |
-| `showReportTemplate` | `Bool` | `FALSE` | Copy-ready report |
+| `showReportTemplate` | `Bool` | `FALSE` | Copy-ready results paragraph |
 | `showAboutAnalysis` | `Bool` | `FALSE` | About this analysis |
 | `showMisclassified` | `Bool` | `FALSE` | Misclassified cases analysis |
 | `maxCasesShow` | `Integer` | `50` | Maximum cases to display |
@@ -48,18 +50,18 @@
 | :--- | :--- | :--- | :--- |
 | `welcome` | `Html` | `Getting Started` |  |
 | `notices` | `Html` | `Important Information` |  |
-| `rawContingency` | `Table` | `Raw Contingency Table` |  |
-| `rawCounts` | `Table` | `Raw Combination Counts` |  |
-| `cTable` | `Table` | `Recoded Data for Decision Test Statistics` |  |
+| `rawContingency` | `Table` | `Analysed Contingency Table` |  |
+| `rawCounts` | `Table` | `Analysed Combination Counts` |  |
+| `cTable` | `Table` | `2x2 Table` |  |
 | `nTable` | `Table` | `n` |  |
 | `ratioTable` | `Table` | `` |  |
 | `missingDataSummary` | `Html` | `Data Quality Summary` |  |
-| `epirTable_ratio` | `Table` | `EpiR Table Ratios` |  |
+| `epirTable_ratio` | `Table` | `Sensitivity, Specificity and Predictive Values with 95% CI` |  |
 | `epirTable_number` | `Table` | `` |  |
 | `plot1` | `Image` | `Fagan nomogram` |  |
 | `naturalLanguageSummary` | `Html` | `Clinical Summary` |  |
 | `clinicalInterpretation` | `Html` | `Clinical Interpretation Guide` |  |
-| `reportTemplate` | `Html` | `Copy-Ready Report` |  |
+| `reportTemplate` | `Html` | `Copy-Ready Results Paragraph` |  |
 | `aboutAnalysis` | `Html` | `About This Analysis` |  |
 | `misclassifiedHeading` | `Html` | `Misclassified Cases Analysis` |  |
 | `confusionMatrixSummary` | `Table` | `Confusion Matrix Summary` |  |

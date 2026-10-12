@@ -10,6 +10,7 @@ agreement(
   vars = NULL,
   baConfidenceLevel = 0.95,
   confLevel = 0.95,
+  kappaCIMethod = "wald",
   proportionalBias = FALSE,
   showBlandAltmanGuide = FALSE,
   blandAltmanPlot = FALSE,
@@ -129,7 +130,7 @@ agreement(
   showSubgroupGuide = FALSE,
   raterClustering = FALSE,
   clusterMethod = "hierarchical",
-  clusterDistance = "correlation",
+  clusterDistance = "ccc",
   clusterLinkage = "average",
   nClusters = 3,
   showDendrogram = TRUE,
@@ -137,7 +138,7 @@ agreement(
   showRaterClusterGuide = FALSE,
   caseClustering = FALSE,
   caseClusterMethod = "hierarchical",
-  caseClusterDistance = "correlation",
+  caseClusterDistance = "euclidean",
   caseClusterLinkage = "average",
   nCaseClusters = 3,
   showCaseDendrogram = TRUE,
@@ -164,29 +165,52 @@ agreement(
 
 - data:
 
-  The data as a data frame. The data should be in long format, where
-  each row is a unique observation.
+  The data as a data frame in WIDE format: one row per case and one
+  column per rater or method, holding that rater's score for that case.
+  (Not long format - do not stack the raters into a single column.)
 
 - vars:
 
-  A string naming the variable from `data` that contains the diagnosis
-  given by the observer.
+  The variables in `data` holding the ratings, one per rater or method.
+  Each selected variable is one rater's column of scores across the
+  cases.
 
 - baConfidenceLevel:
 
-  Confidence level for Bland-Altman limits of agreement (LoA). Typically
-  0.95 for 95 percent confidence intervals.
+  Proportion of differences the Bland-Altman limits of agreement are
+  meant to contain, conventionally 0.95, giving mean difference +/- 1.96
+  SD. This is a coverage proportion for future differences, NOT a
+  confidence level for the limits: raising it moves the limits outward
+  rather than widening an interval around fixed limits.
 
 - confLevel:
 
   Confidence level for confidence intervals in ICC, CCC, bootstrap CIs,
   and other agreement statistics. Default is 0.95 (95 percent CI).
 
+- kappaCIMethod:
+
+  Scale on which the confidence interval for Cohen's kappa is built.
+  Wald is kappa plus or minus z times the non-null asymptotic standard
+  error, clamped to the range minus one to one; it is symmetric and
+  reproduces the limits printed by psych::cohen.kappa. Fisher z applies
+  the arc-tangent transform, builds the interval on that scale with the
+  delta-method standard error, and transforms back; the limits are
+  asymmetric and cannot fall outside the range minus one to one. In
+  simulation the Wald interval covered the true kappa about 85 to 95
+  percent of the time between 20 and 100 cases, while the Fisher z
+  interval held close to its nominal level from about 30 cases upward,
+  except when kappa is very high and the sample is small.
+
 - proportionalBias:
 
-  Test whether the difference between raters changes systematically with
-  the magnitude of measurement (proportional bias). Uses linear
-  regression of difference vs. mean.
+  Fit an exploratory ordinary least-squares trend of the paired
+  difference against the pair mean. The p-value tests whether that slope
+  is zero; it is not, by itself, a valid general test of proportional
+  bias because unequal method precision can create a slope even when
+  neither method has magnitude-dependent bias. Confirm an apparent trend
+  with replicated measurements or an errors-in-variables model before
+  calling it proportional bias.
 
 - showBlandAltmanGuide:
 
@@ -377,32 +401,35 @@ agreement(
 
 - tdi:
 
-  Total Deviation Index (TDI) quantifies the limits within which a
-  specified proportion of differences between two measurement methods
-  will fall. Unlike Bland-Altman which assumes constant variability, TDI
-  accounts for heteroscedastic errors (variance increasing with
-  magnitude). Provides a single index for acceptable agreement based on
-  predefined clinically acceptable limits. Essential for medical device
-  validation, laboratory method comparison, and biomarker assay
-  validation where regulatory agencies require demonstration that a
-  specified percentage of measurements fall within acceptable limits.
-  Requires 2 raters/methods. Particularly useful when establishing
-  equivalence between manual and automated measurements or between
-  different measurement platforms.
+  Total Deviation Index (TDI): the boundary within which the requested
+  proportion of absolute differences between two measurement methods
+  fall. Computed here as the empirical quantile of the absolute
+  differences, with a case-resampling bootstrap interval. It is a single
+  number summarising how far apart the two methods get, and it is useful
+  alongside Bland-Altman when the differences are not normal. Note the
+  scope: this estimator is unconditional, so it does NOT model
+  variability as a function of magnitude and does not adjust for the
+  case mix of the sample - a different spread of values gives a
+  different TDI for the same two methods. Use it as a descriptive
+  summary of the observed comparison, not on its own as a demonstration
+  of equivalence or of regulatory acceptability, which require a
+  prespecified design and acceptance criterion. Requires 2
+  raters/methods.
 
 - tdiCoverage:
 
-  The proportion of differences that should fall within TDI limits
-  (default: 90 percent). Common values: 90 percent for general
-  agreement, 95 percent for stringent requirements. This defines what
-  percentage of future measurements must fall within acceptable limits.
+  Quantile of the observed absolute differences to report (default: 90
+  percent). Common descriptive targets are 90 or 95 percent. This is an
+  unconditional empirical target for the sampled case mix, not a
+  prediction guarantee for future measurements.
 
 - tdiLimit:
 
   Maximum acceptable difference between methods in original units.
-  Example: For tumor size, 5mm might be clinically acceptable. TDI
-  should be smaller than this limit for methods to be considered
-  equivalent.
+  Example: For tumor size, 5mm might be clinically acceptable. Compare
+  the empirical TDI and its bootstrap interval with this prespecified
+  descriptive limit. Passing it does not, by itself, establish method
+  equivalence.
 
 - showTDIGuide:
 
@@ -411,25 +438,29 @@ agreement(
 
 - iota:
 
-  Iota coefficient for multivariate interrater agreement. Measures
-  agreement when raters assess multiple variables simultaneously (e.g.,
-  tumor size + grade + mitotic count). Unlike ICC which analyzes one
-  variable at a time, Iota provides a single chance-corrected agreement
-  index across all variables. Supports both quantitative (continuous)
-  and nominal (categorical) data. Reduces to Fleiss' kappa for single
-  categorical variable.
+  Iota coefficient (Janson & Olsson, 2001) for the selected rater
+  columns, computed as ONE variable rated by all of them. Supports
+  quantitative (continuous) and nominal (categorical) ratings. For
+  nominal ratings it is numerically identical to Conger's exact kappa,
+  which the 'Exact kappa (3+ raters)' option also reports. The
+  multivariate form of iota - several variables scored by the same
+  raters, summarised in one coefficient - is NOT computed by this
+  analysis, because no option here can say which columns belong to which
+  variable; enter the rater columns of one variable at a time.
 
 - iotaStandardize:
 
-  Z-standardize quantitative variables before computing Iota.
-  Recommended when variables are on different scales (e.g., tumor size
-  in mm vs. Ki-67 percentage). Ensures each variable contributes equally
-  to the overall agreement measure.
+  Z-standardize the quantitative ratings before computing Iota.
+  Standardization exists to equalise the contribution of several
+  variables to a multivariate iota. This analysis computes iota for a
+  single variable, where standardizing is an affine rescaling that
+  leaves the coefficient unchanged, so this setting has no effect on the
+  reported value.
 
 - showIotaGuide:
 
-  Show educational guide explaining the Iota coefficient for
-  multivariate agreement assessment.
+  Show the educational guide explaining the Iota coefficient, what this
+  analysis computes with it, and when to prefer kappa or ICC instead.
 
 - finn:
 
@@ -441,10 +472,14 @@ agreement(
 
 - finnLevels:
 
-  The number of different rating categories for Finn coefficient
-  calculation (e.g., 3 for low/medium/high, 5 for 5-point Likert scale).
-  Must specify the total number of distinct categories in your rating
-  scale.
+  The number of categories on the rating scale, used by the Finn
+  coefficient as its chance baseline (the variance of a uniform rating
+  on an s-point scale), so it changes the value and can change its sign.
+  When the rater variables are nominal or ordinal this is read from
+  their declared levels instead and a note reports any disagreement;
+  this option is only consulted for numeric ratings, where the scale
+  cannot be recovered from the data. Count every category on the scale,
+  including any that no case happened to receive.
 
 - finnModel:
 
@@ -485,11 +520,11 @@ agreement(
 
 - robinsonA:
 
-  Robinson's A is an agreement coefficient for ordinal data based on the
-  proportion of concordant pairs. It ranges from -1 (complete
-  disagreement) to 1 (perfect agreement), with 0 indicating agreement no
-  better than chance. Alternative to weighted kappa that directly
-  measures the degree of ordinal association between raters.
+  Robinson's A (1957) is an agreement coefficient for ordinal or numeric
+  ratings: 1 minus the within-case variance divided by the total
+  variance. It ranges from 0 to 1 (perfect agreement), with 0 indicating
+  agreement no better than chance. Alternative to weighted kappa that
+  directly measures the degree of ordinal association between raters.
   Particularly useful when ordinal categories have meaningful rank order
   (e.g., disease severity stages, tumor grades). Less affected by
   marginal distribution imbalances than kappa-based measures.
@@ -519,16 +554,23 @@ agreement(
 
 - raterBias:
 
-  Tests whether raters have systematically different rating patterns
-  (e.g., one rater is more lenient/strict than others). Uses chi-square
-  test to detect if marginal frequencies differ significantly across
-  raters. Essential quality control tool to identify raters who
-  consistently over-diagnose or under-diagnose compared to their peers.
+  Tests whether the disagreements between two raters run in one
+  direction more often than the other, i.e. whether one rater is
+  consistently the higher scorer on the cases where they differ. A
+  single chi-square on 1 degree of freedom comparing the total counts
+  above and below the diagonal of the two-rater table
+  ([`irr::rater.bias`](https://rdrr.io/pkg/irr/man/rater.bias.html)).
+  Requires exactly 2 raters and both variables must be declared Ordinal,
+  because "higher" is otherwise undefined. This is NOT a test of
+  marginal homogeneity: opposing shifts in different categories cancel
+  out and it returns p = 1 even when the two raters use the categories
+  at quite different rates. Use `bhapkar` or `stuartMaxwell` for that
+  hypothesis.
 
 - showRaterBiasGuide:
 
-  Show educational guide for detecting systematic rater bias in quality
-  control.
+  Show an educational guide to the two-rater ordinal directional
+  discordance test, including its distinction from marginal homogeneity.
 
 - bhapkar:
 
@@ -560,9 +602,10 @@ agreement(
 
 - maxwellRE:
 
-  Maxwell's Random Error (RE) index decomposes total measurement
-  variance into systematic and random error components. RE represents
-  the proportion of total disagreement attributable to random
+  A two-way (case + rater) variance decomposition splits rater
+  disagreement into a systematic (rater offset) and a random (residual)
+  component; the between-case variance is reported separately. The
+  random share is the proportion of disagreement attributable to random
   measurement error rather than systematic differences between raters or
   methods. Values range from 0 (all error is systematic) to 1 (all error
   is random). Essential for understanding error sources in method
@@ -572,8 +615,8 @@ agreement(
 
 - showMaxwellREGuide:
 
-  Show educational guide and clinical use cases for Maxwell's RE before
-  running analysis.
+  Show the guide to the rater variance decomposition before running
+  analysis.
 
 - interIntraRater:
 
@@ -872,10 +915,11 @@ agreement(
 
 - loaVariable:
 
-  Calculate agreement level for each case and add as new computed
-  column. Choose between Simple (3 categories) or Detailed (5
-  categories) classification. Useful for identifying difficult cases and
-  quality control.
+  Calculate the agreement level for each case. Choose between Simple (3
+  categories) or Detailed (5 categories) classification. Useful for
+  identifying difficult cases and quality control. To also add the
+  result to the dataset as a new column, enable the separate output
+  variable 'Add case agreement categorization to data'.
 
 - detailLevel:
 
@@ -1010,14 +1054,26 @@ agreement(
 
 - clusterDistance:
 
-  For continuous data: - Correlation: Groups raters with similar
-  relative rating patterns (recommended for most cases) - Euclidean:
-  Groups raters with similar absolute rating values - Manhattan: Like
-  Euclidean but less sensitive to outliers For categorical data: -
-  Agreement-based: Distance = 1 - pairwise agreement proportion
-  Correlation is recommended for most applications as it captures rating
-  pattern similarity regardless of systematic shifts (one rater
-  consistently 10 percent higher).
+  Distance used to compare raters. Concordance (1 - Lin's CCC) is the
+  default: Lin's concordance correlation coefficient is the correlation
+  multiplied by a bias factor, so it falls both when two raters scatter
+  around each other and when one reads consistently higher or on a wider
+  scale. Two raters are close only when their numbers are
+  interchangeable, which is what agreement means. The similarity column
+  is then the concordance coefficient itself, on -1 to 1. Correlation
+  (1 - r), pattern only: groups raters whose case-to-case ranking
+  agrees. It removes systematic offsets, so two raters can share a
+  cluster while one reads consistently higher than the other; it
+  measures association, not absolute agreement. Choose it when the
+  question is about ranking rather than about interchangeable values.
+  Euclidean and Manhattan: raw distance between the two raters'
+  readings. Both see a systematic offset, but their size grows with the
+  number of cases, so the similarity column is rescaled by the largest
+  distance in the analysis and ranks raters within this dataset only.
+  Manhattan is less affected by a single extreme case. Exact Agreement:
+  1 minus the proportion of cases scored identically. This is the
+  distance used for categorical ratings whatever is selected here; on
+  continuous measurements it counts exact equality only.
 
 - clusterLinkage:
 
@@ -1030,10 +1086,11 @@ agreement(
 
 - nClusters:
 
-  Number of clusters to create for k-means clustering. Consider: number
-  of training cohorts, experience levels, or institutions. For
-  hierarchical clustering, this is ignored but dendrogram can be cut at
-  any height.
+  Number of clusters to form. K-means partitions the raters into this
+  many clusters; hierarchical clustering cuts the dendrogram into this
+  many branches. Consider the number of training cohorts, experience
+  levels or institutions. A value larger than one less than the number
+  of raters is reduced, and the table says so.
 
 - showDendrogram:
 
@@ -1066,10 +1123,24 @@ agreement(
 
 - caseClusterDistance:
 
-  Correlation (1 - r): Based on correlation between rating vectors
-  (continuous). Euclidean: Straight-line distance in rating space.
-  Manhattan: City-block distance (sum of absolute differences).
-  Agreement-Based: Proportion of disagreeing raters (categorical).
+  Distance used to compare cases. Euclidean is the default:
+  straight-line distance between two cases' rating vectors, which sees
+  the level of the ratings, so cases are grouped when the raters gave
+  them similar numbers. The similarity column is the distance rescaled
+  by the largest distance in the analysis and ranks cases within this
+  dataset only. Manhattan: the same, from absolute differences, and less
+  affected by one extreme rater. Correlation (1 - r), profile shape
+  only: groups cases whose rating profile across raters has the same
+  shape. It ignores the level of the ratings, so cases of very different
+  magnitude are grouped together. A case's profile has only as many
+  points as there are raters, so this needs at least three raters; with
+  two, the correlation between any two cases is exactly +1 or -1 and the
+  analysis stops with a message. Exact Agreement: 1 minus the proportion
+  of raters who gave two cases the same value. This is the distance used
+  for categorical ratings whatever is selected here. Lin's concordance
+  coefficient is deliberately not offered for cases: it would be
+  estimated from as many points as there are raters, typically three to
+  six, which is too few.
 
 - caseClusterLinkage:
 
@@ -1079,7 +1150,10 @@ agreement(
 
 - nCaseClusters:
 
-  Number of clusters to create for k-means clustering.
+  Number of clusters to form. K-means partitions the cases into this
+  many clusters; hierarchical clustering cuts the dendrogram into this
+  many branches. A value larger than one less than the number of cases
+  is reduced, and the table says so.
 
 - showCaseDendrogram:
 
@@ -1102,7 +1176,9 @@ agreement(
 - conditionBVars:
 
   Rater columns for the second condition (e.g., AI-assisted). The main
-  rater variables serve as Condition A.
+  rater variables serve as Condition A. Give Condition B the same number
+  of rater columns as Condition A; otherwise only percent agreement is
+  comparable and no kappa row is shown.
 
 - pairedBootN:
 
@@ -1133,7 +1209,8 @@ agreement(
 
 - ssNRaters:
 
-  Planned number of raters in the study.
+  Planned number of raters in the study. Kappa calculations support 2 to
+  6 raters; the ICC calculation has no upper limit.
 
 - ssNCategories:
 
@@ -1199,10 +1276,8 @@ A results object containing:
 | `results$stuartMaxwellExplanation`       |     |     |     |     | a html         |
 | `results$pairwiseKappaTable`             |     |     |     |     | a table        |
 | `results$pairwiseKappaExplanation`       |     |     |     |     | a html         |
-| `results$allPairsKappaHeading`           |     |     |     |     | a preformatted |
 | `results$allPairsKappaTable`             |     |     |     |     | a table        |
 | `results$allPairsKappaExplanation`       |     |     |     |     | a html         |
-| `results$itemModalAgreementHeading`      |     |     |     |     | a preformatted |
 | `results$itemModalAgreementTable`        |     |     |     |     | a table        |
 | `results$itemModalAgreementExplanation`  |     |     |     |     | a html         |
 | `results$hierarchicalHeading`            |     |     |     |     | a preformatted |
@@ -1254,7 +1329,6 @@ A results object containing:
 | `results$summary`                        |     |     |     |     | a html         |
 | `results$about`                          |     |     |     |     | a html         |
 | `results$clinicalUseCases`               |     |     |     |     | a html         |
-| `results$computedVariablesHeading`       |     |     |     |     | a preformatted |
 | `results$consensusTable`                 |     |     |     |     | a table        |
 | `results$loaTable`                       |     |     |     |     | a table        |
 | `results$loaDetailTable`                 |     |     |     |     | a table        |

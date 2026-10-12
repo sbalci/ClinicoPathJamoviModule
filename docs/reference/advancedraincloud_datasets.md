@@ -241,6 +241,7 @@ features:
 
 ## Usage Examples
 
+
     # Basic raincloud plot with clinical cutoff
     advancedraincloud(
       data = advancedraincloud_baseline,

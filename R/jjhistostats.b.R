@@ -278,7 +278,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                 # Check if selected variables exist in data
                 missing_vars <- self$options$dep[!self$options$dep %in% names(self$data)]
                 if (length(missing_vars) > 0) {
-                    return(list(valid = FALSE, message = jmvcore::format(
+                    return(list(valid = FALSE, message = .fmt(
                         .("These selected variables are not present in the data: {vars}."),
                         vars = paste(missing_vars, collapse = ", "))))
                 }
@@ -293,18 +293,18 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     n_ok <- sum(is.finite(jmvcore::toNumeric(self$data[[v]])))
                     if (n_ok < 3)
                         return(list(valid = FALSE, message = if (n_ok == 1)
-                            jmvcore::format(
+                            .fmt(
                                 .("Variable '{var}' has 1 finite numeric value. A histogram needs at least 3. Check the variable selection and any active row filters."),
                                 var = v)
                         else
-                            jmvcore::format(
+                            .fmt(
                                 .("Variable '{var}' has {n} finite numeric values. A histogram needs at least 3. Check the variable selection and any active row filters."),
                                 var = v, n = n_ok)))
                 }
 
                 # Check if grouping variable exists if specified
                 if (!is.null(self$options$grvar) && !self$options$grvar %in% names(self$data)) {
-                    return(list(valid = FALSE, message = jmvcore::format(
+                    return(list(valid = FALSE, message = .fmt(
                         .("The grouping variable '{var}' is not present in the data."),
                         var = self$options$grvar)))
                 }
@@ -313,7 +313,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                 # `permitted` is factor), so the histogram's own x aesthetic becomes discrete
                 # and stat_bin() dies with "requires a continuous x aesthetic".
                 if (!is.null(self$options$grvar) && self$options$grvar %in% self$options$dep) {
-                    return(list(valid = FALSE, message = jmvcore::format(
+                    return(list(valid = FALSE, message = .fmt(
                         .("'{var}' is used both as a histogram variable and as the Split by variable. Choose a different grouping variable."),
                         var = self$options$grvar)))
                 }
@@ -341,7 +341,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                         if (rng <= 0) next
                         n_bins <- rng / self$options$binwidth
                         if (n_bins > max_bins)
-                            return(list(valid = FALSE, message = jmvcore::format(
+                            return(list(valid = FALSE, message = .fmt(
                                 .("A bin width of {width} would split '{var}' into {bins} bins, so the histogram would be unreadable or blank. '{var}' ranges over {range}; a bin width of about {suggested} gives roughly 30 bins."),
                                 width = base::format(self$options$binwidth), var = v,
                                 bins = base::format(round(n_bins), big.mark = ","),
@@ -400,7 +400,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                                bayes         = .("one-sample Bayesian t-test"),
                                .("one-sample test"))
                         warnings <- c(warnings, paste0(
-                            jmvcore::format(
+                            .fmt(
                                 .("<strong>The statistical subtitle is testing against zero.</strong><br>The subtitle on the histogram is a <strong>{test}</strong> asking whether the centre of your data differs from <strong>0</strong>."),
                                 test = test_name),
                             if (chose_it) "" else
@@ -422,18 +422,18 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                 if (isTRUE(private$.option("resultssubtitle"))) {
                     stat_type <- private$.option("typestatistics")
                     if (identical(stat_type, "bayes") || isTRUE(self$options$bf.message)) {
-                        warnings <- c(warnings, jmvcore::format(
+                        warnings <- c(warnings, .fmt(
                             .("<strong>Bayes factor prior:</strong> the Bayes factor is computed under a Cauchy prior on effect size with scale r = {r}. A Bayes factor is only interpretable against the prior that produced it, so report this value alongside it, and vary the Bayes prior scale to check how sensitive your conclusion is to the choice."),
                             r = base::format(self$options$bfprior)))
                     }
                     if (identical(stat_type, "robust")) {
-                        warnings <- c(warnings, jmvcore::format(
+                        warnings <- c(warnings, .fmt(
                             .("<strong>Robust test trim level:</strong> the robust test uses a bootstrap-t on a trimmed mean, discarding the highest and lowest {pct}% of observations ({n} of {total} rows at each tail). If a genuine high- or low-value subgroup matters clinically, that subgroup is being trimmed away - lower the trim proportion or use the nonparametric test instead."),
                             pct = base::format(100 * self$options$trimlevel),
                             n = round(self$options$trimlevel * nrow(data)), total = nrow(data)))
                     }
                     if (!identical(self$options$alternative, "two.sided")) {
-                        warnings <- c(warnings, jmvcore::format(
+                        warnings <- c(warnings, .fmt(
                             .("<strong>One-sided test in use.</strong> The reported p-value tests only whether the centre is {direction} than the test value, not whether it differs in either direction. A one-sided test is only valid if the direction was chosen before seeing these data."),
                             direction = if (identical(self$options$alternative, "greater"))
                                 .("greater") else .("less")))
@@ -453,7 +453,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     # out blank -- and that warning goes to stderr, which jamovi does not show.
                     # So the user is left looking at an empty plot with no explanation.
                     if (length(var_data) == 0) {
-                        warnings <- c(warnings, jmvcore::format(
+                        warnings <- c(warnings, .fmt(
                             .("<strong>No data to plot for '{var}'.</strong> Every value in this variable is missing, so the histogram is empty. Check the variable selection, and any row filters that may be active."),
                             var = htmltools::htmlEscape(var)))
                         next
@@ -461,11 +461,11 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
 
                     if (length(var_data) < 3) {
                         warnings <- c(warnings, if (length(var_data) == 1)
-                            jmvcore::format(
+                            .fmt(
                                 .("<strong>Only 1 finite numeric value for '{var}'.</strong> A histogram needs a range of values to bin; the panel will be empty or near-empty, and any test statistic based on it is not interpretable."),
                                 var = htmltools::htmlEscape(var))
                         else
-                            jmvcore::format(
+                            .fmt(
                                 .("<strong>Only {n} finite numeric values for '{var}'.</strong> A histogram needs a range of values to bin; the panel will be empty or near-empty, and any test statistic based on it is not interpretable."),
                                 n = length(var_data), var = htmltools::htmlEscape(var)))
                     }
@@ -488,17 +488,17 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                                          error = function(e) NA_real_)
                         if (!is.na(sw_p) && sw_p <= 0.05) {
                             warnings <- c(warnings, paste0(
-                                jmvcore::format(
+                                .fmt(
                                     .("<strong>'{var}' is not normally distributed</strong> (Shapiro-Wilk p = {p}), but the subtitle is reporting a <strong>parametric one-sample t-test</strong>, which assumes approximate normality."),
                                     var = htmltools::htmlEscape(var),
                                     p = base::format.pval(sw_p, digits = 3, eps = 1e-16)),
                                 " ",
                                 if (length(var_data) >= 30)
-                                    jmvcore::format(
+                                    .fmt(
                                         .("At n = {n} the central limit theorem makes the t-test fairly robust to this, so treat it as a caution rather than an error."),
                                         n = length(var_data))
                                 else
-                                    jmvcore::format(
+                                    .fmt(
                                         .("At n = {n} the central limit theorem does not rescue the test, so the p-value and confidence interval may be misleading."),
                                         n = length(var_data)),
                                 " ", .("Switch Type of statistic to Nonparametric (Wilcoxon signed-rank) if you want a test that makes no normality assumption.")
@@ -508,7 +508,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
 
                     # Sample size warnings
                     if (length(var_data) < 30) {
-                        warnings <- c(warnings, jmvcore::format(
+                        warnings <- c(warnings, .fmt(
                             .("Small sample size (n = {n}) for '{var}'. Consider a nonparametric analysis, or interpret the results cautiously."),
                             n = length(var_data), var = htmltools::htmlEscape(var)))
                     }
@@ -521,11 +521,11 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                             outliers <- sum(abs(var_data - med) > 3 * mad_val)
                             if (outliers > 0) {
                                 warnings <- c(warnings, if (outliers == 1)
-                                    jmvcore::format(
+                                    .fmt(
                                         .("Detected 1 extreme outlier in '{var}' (more than 3 MAD from the median). Consider reviewing data quality, or using the robust method."),
                                         var = htmltools::htmlEscape(var))
                                 else
-                                    jmvcore::format(
+                                    .fmt(
                                         .("Detected {n} extreme outliers in '{var}' (more than 3 MAD from the median). Consider reviewing data quality, or using the robust method."),
                                         n = outliers, var = htmltools::htmlEscape(var)))
                             }
@@ -536,7 +536,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     # (stat_bin() cannot build breaks over a zero range and its error only
                     # reaches stderr), so say so rather than leaving the user to guess.
                     if (length(unique(var_data)) == 1) {
-                        warnings <- c(warnings, jmvcore::format(
+                        warnings <- c(warnings, .fmt(
                             .("<strong>Variable '{var}' has constant values</strong> (every row is {value}). There is no range to bin, so the histogram panel for this variable will be empty. Check the variable selection and any active row filters."),
                             var = htmltools::htmlEscape(var),
                             value = htmltools::htmlEscape(base::format(var_data[1]))))
@@ -547,7 +547,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     # BOTH, the second reading "has only 1 unique values".
                     if (length(unique(var_data)) > 1 &&
                         length(unique(var_data)) < 5 && length(var_data) > 10) {
-                        warnings <- c(warnings, jmvcore::format(
+                        warnings <- c(warnings, .fmt(
                             .("Variable '{var}' has only {n} unique values. Consider treating it as categorical or ordinal data."),
                             var = htmltools::htmlEscape(var), n = length(unique(var_data))))
                     }
@@ -561,11 +561,11 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     if (any(group_sizes < 10)) {
                         small_groups <- names(group_sizes[group_sizes < 10])
                         warnings <- c(warnings, if (length(small_groups) == 1)
-                            jmvcore::format(
+                            .fmt(
                                 .("Small group size detected: {groups} (n < 10). Results may be unreliable for this group."),
                                 groups = htmltools::htmlEscape(small_groups))
                         else
-                            jmvcore::format(
+                            .fmt(
                                 .("Small group sizes detected: {groups} (n < 10). Results may be unreliable for these groups."),
                                 groups = htmltools::htmlEscape(paste(small_groups, collapse = ", "))))
                     }
@@ -617,13 +617,13 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     n_total <- length(data[[var]])
                     n_used  <- sum(!is.na(data[[var]]))
                     if (n_used < n_total)
-                        dropped <- c(dropped, jmvcore::format(
+                        dropped <- c(dropped, .fmt(
                             .("{var}: n = {used} of {total} ({pct}% missing)"),
                             var = htmltools::htmlEscape(var), used = n_used, total = n_total,
                             pct = base::format(round(100 * (n_total - n_used) / n_total, 1))))
                 }
                 if (length(dropped) > 0)
-                    warnings <- c(warnings, jmvcore::format(
+                    warnings <- c(warnings, .fmt(
                         .("<strong>Rows with missing values were excluded.</strong> Every statistic and histogram below is computed on the remaining observations - {detail}."),
                         detail = paste(dropped, collapse = "; ")))
 
@@ -639,11 +639,11 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     n_rows <- nrow(data)
                     
                     if (n_rows > 1000) {
-                        warnings <- c(warnings, jmvcore::format(
+                        warnings <- c(warnings, .fmt(
                             .("<strong>Slow computation:</strong> a Bayesian analysis of {n} rows may take several minutes. Consider the parametric or nonparametric method for faster results."),
                             n = n_rows))
                     } else if (n_rows > 500) {
-                        warnings <- c(warnings, jmvcore::format(
+                        warnings <- c(warnings, .fmt(
                             .("<strong>Performance note:</strong> a Bayesian analysis of {n} rows may take 30 to 60 seconds. Wait for it, or switch to a faster method."),
                             n = n_rows))
                     } else {
@@ -658,7 +658,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                 
                 # Large dataset general warning
                 if (nrow(data) > 5000) {
-                    warnings <- c(warnings, jmvcore::format(
+                    warnings <- c(warnings, .fmt(
                         .("<strong>Large dataset:</strong> processing {n} rows may take extra time for plot generation and statistical calculation."),
                         n = nrow(data)))
                 }
@@ -756,13 +756,13 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                                if (is_normal)
                                    .("Parametric tests are reasonable; symmetry alone does not rule out bimodality or heavy tails, so check the histogram.")
                                else
-                                   jmvcore::format(
+                                   .fmt(
                                        .("But with n = {n} the normality check below could not be run, so symmetry here is not evidence of a normal distribution."),
                                        n = n))
                     }
 
                     normality_text <- if (!is.na(shapiro_p)) {
-                        paste0(jmvcore::format(
+                        paste0(.fmt(
                                    .("<li><strong>Normality (Shapiro-Wilk):</strong> p = {p}"),
                                    p = base::format.pval(shapiro_p, digits = 3, eps = 1e-16)),
                                " ",
@@ -771,7 +771,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     } else if (sd_val == 0) {
                         paste0("<li>", .("<strong>Normality:</strong> not assessable - every value is identical."), "</li>")
                     } else {
-                        paste0("<li>", jmvcore::format(
+                        paste0("<li>", .fmt(
                             .("<strong>Normality:</strong> Shapiro-Wilk is not available at n = {n}; the skewness rule-of-thumb was used instead."),
                             n = n), "</li>")
                     }
@@ -786,11 +786,11 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
 
                     var_interpretation <- paste0(
                         "<h4>", htmltools::htmlEscape(var), "</h4><ul>",
-                        "<li>", jmvcore::format(.("<strong>Sample size:</strong> {n} observations"), n = n), "</li>",
-                        "<li>", jmvcore::format(
+                        "<li>", .fmt(.("<strong>Sample size:</strong> {n} observations"), n = n), "</li>",
+                        "<li>", .fmt(
                             .("<strong>Central tendency:</strong> mean = {mean}, median = {median}"),
                             mean = round(mean_val, 2), median = round(median_val, 2)), "</li>",
-                        "<li>", jmvcore::format(.("<strong>Variability:</strong> SD = {sd}"),
+                        "<li>", .fmt(.("<strong>Variability:</strong> SD = {sd}"),
                                                 sd = round(sd_val, 2)), "</li>",
                         "<li><strong>", .("Distribution shape:"), "</strong> ", shape_text, "</li>",
                         normality_text,

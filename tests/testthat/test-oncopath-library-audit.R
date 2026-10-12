@@ -25,15 +25,61 @@ skip_if_no_oncopath_source <- function() {
   )
 }
 
+# The analyses this audit covers. The umbrella keeps all of them; a parked one (T/P/D menuGroup) is
+# deleted from the generated module, and a maintainer's checkout can be mid-removal. So each test
+# audits the ones present and ends with a skip that names the rest: an absent file only says "cannot
+# open the connection", and gating a whole test on one analysis hides the others. The helpers below
+# are the ones in test-meddecide-library-audit.R.
+audit_analyses <- c("diagnosticmeta", "ihcheterogeneity", "swimmerplot", "waterfall")
+
+# Which of `names` lack a file here; `files` are sprintf() templates relative to `root`. Matched
+# against list.files(), not file.exists(): macOS disks ignore case, so file.exists() finds a
+# misspelt name there and Linux CI does not.
+audit_absent <- function(root, names, files = "R/%s.b.R") {
+  on_disk <- function(path) basename(path) %in% list.files(file.path(root, dirname(path)))
+  Filter(function(name) !all(vapply(sprintf(files, name), on_disk, logical(1))), names)
+}
+
+# Runtime tests: which of `analyses` have their class loaded (the namespace under R CMD check,
+# load_all() in development).
+audit_loaded <- function(analyses) Filter(function(a) exists(paste0(a, "Class")), analyses)
+
+# Ends a test that could not reach `absent` with a skip naming them, and `note` if given. Given the
+# umbrella's `root` it errors instead: the umbrella keeps every analysis, parked or not, so a missing
+# name is a typo.
+audit_skip_absent <- function(absent, root = NULL, note = NULL) {
+  if (length(absent) == 0) return(invisible())
+  absent <- paste(absent, collapse = ", ")
+  if (!is.null(root) &&
+      identical(unname(read.dcf(file.path(root, "DESCRIPTION"))[1, "Package"]), "ClinicoPath"))
+    stop("the umbrella keeps every analysis, parked or not, yet lacks: ", absent, call. = FALSE)
+  testthat::skip(paste(c(paste0("not in this module (parked or not shipped): ", absent), note), collapse = "; "))
+}
+
+# Ends a runtime test with a skip naming each of `wanted` whose class is not loaded, and why: its files
+# are absent from this tree, or present while the package is not (the file was run on its own). R CMD
+# check has no source tree; there the loaded namespace is the module, so a missing class is absent.
+audit_skip_unloaded <- function(wanted) {
+  unloaded <- setdiff(wanted, audit_loaded(wanted))
+  if (length(unloaded) == 0) return(invisible())
+  root <- normalizePath(file.path(testthat::test_path(), "..", ".."), mustWork = FALSE)
+  if (!file.exists(file.path(root, "DESCRIPTION"))) audit_skip_absent(unloaded)
+  absent <- audit_absent(root, unloaded)
+  not_loaded <- paste0("class not loaded (package not loaded in this run): ",
+                       paste(setdiff(unloaded, absent), collapse = ", "))
+  audit_skip_absent(absent, root, if (length(absent) < length(unloaded)) not_loaded)
+  testthat::skip(not_loaded)
+}
+
 test_that("OncoPath analyses and manifest use library-ready versions", {
   skip_if_no_oncopath_source()
+  pkg_name <- unname(read.dcf(oncopath_file("DESCRIPTION"), fields = "Package")[[1]])
+  skip_if(pkg_name != "OncoPath", "analysis version verification belongs to OncoPath")
+  absent <- audit_absent(oncopath_root, audit_analyses, "jamovi/%s.a.yaml")
   analysis_files <- file.path(
     oncopath_root,
     "jamovi",
-    paste0(
-      c("diagnosticmeta", "ihcheterogeneity", "swimmerplot", "waterfall"),
-      ".a.yaml"
-    )
+    sprintf("%s.a.yaml", setdiff(audit_analyses, absent))
   )
 
   # The invariant is that every manifest agrees with DESCRIPTION -- not that the
@@ -48,20 +94,25 @@ test_that("OncoPath analyses and manifest use library-ready versions", {
   }
   expect_match(read_oncopath("jamovi", "0000.yaml"),
                paste0("version: ", pkg_version), fixed = TRUE)
+  audit_skip_absent(absent, oncopath_root)
 })
 
 test_that("disabled clinical presets and orphan stage migration files stay removed", {
   skip_if_no_oncopath_source()
-  swimmer_schema <- read_oncopath("jamovi", "swimmerplot.a.yaml")
-  swimmer_source <- read_oncopath("R", "swimmerplot.b.R")
-  waterfall_schema <- read_oncopath("jamovi", "waterfall.a.yaml")
-  waterfall_source <- read_oncopath("R", "waterfall.b.R")
-
-  expect_false(grepl("clinicalPreset", swimmer_schema, fixed = TRUE))
-  expect_false(grepl("clinicalPreset", swimmer_source, fixed = TRUE))
-  expect_false(grepl("clinicalPreset", waterfall_schema, fixed = TRUE))
-  expect_false(grepl("clinicalPreset", waterfall_source, fixed = TRUE))
-  expect_false(grepl("Clinical Presets", waterfall_source, fixed = TRUE))
+  absent <- audit_absent(oncopath_root, c("swimmerplot", "waterfall"), c("jamovi/%s.a.yaml", "R/%s.b.R"))
+  if (!"swimmerplot" %in% absent) {
+    swimmer_schema <- read_oncopath("jamovi", "swimmerplot.a.yaml")
+    swimmer_source <- read_oncopath("R", "swimmerplot.b.R")
+    expect_false(grepl("clinicalPreset", swimmer_schema, fixed = TRUE))
+    expect_false(grepl("clinicalPreset", swimmer_source, fixed = TRUE))
+  }
+  if (!"waterfall" %in% absent) {
+    waterfall_schema <- read_oncopath("jamovi", "waterfall.a.yaml")
+    waterfall_source <- read_oncopath("R", "waterfall.b.R")
+    expect_false(grepl("clinicalPreset", waterfall_schema, fixed = TRUE))
+    expect_false(grepl("clinicalPreset", waterfall_source, fixed = TRUE))
+    expect_false(grepl("Clinical Presets", waterfall_source, fixed = TRUE))
+  }
 
   orphan_names <- c(
     "stagemigration.a.yaml",
@@ -82,6 +133,7 @@ test_that("disabled clinical presets and orphan stage migration files stay remov
     expect_true(all(stage_schema_exists))
     expect_true(all(stage_source_exists))
   }
+  audit_skip_absent(absent, oncopath_root)
 })
 
 test_that("umbrella updater keeps the production OncoPath helper boundary minimal", {
@@ -98,21 +150,43 @@ test_that("umbrella updater keeps the production OncoPath helper boundary minima
   cfg <- yaml::read_yaml(config_path)
   routes <- planner$route_analyses(oncopath_root, cfg$modules, unlist(cfg$umbrella_only_suffixes))
   analyses <- routes$analysis[routes$module %in% "OncoPath"]
-  expect_setequal(analyses, c("diagnosticmeta", "ihcheterogeneity", "swimmerplot", "waterfall"))
+  # Nothing unexpected ships. An audited analysis routed elsewhere is parked (T/P/D) and takes its
+  # helpers with it, so the exact helper set holds for the full set only; the skip at the end names it.
+  expect_equal(setdiff(analyses, audit_analyses), character(0))
+  parked <- setdiff(audit_analyses, analyses)
+  # sprintf(), not paste0(): paste0(character(0), ".b.R") is ".b.R", a file that is never there
   helpers <- planner$resolve_helpers(planner$index_r_sources(oncopath_root),
-                                     paste0(analyses, ".b.R"), ignore = character())
+                                     sprintf("%s.b.R", analyses), ignore = character())
   expect_equal(helpers$errors, character(0))
   # swimmerplot needs only the follow-up estimator; the RECIST and IHC engines,
   # the survival formula and event-coding helpers must not leak into OncoPath.
-  expect_setequal(helpers$files, c("utils.R", "utils-followup.R", "swimmerplot-html.R"))
+  allowed <- c("utils.R", "utils-followup.R", "swimmerplot-html.R")
+  expect_equal(setdiff(helpers$files, allowed), character(0))
+  if (length(parked) == 0) expect_setequal(helpers$files, allowed)
 
   # zzz_imports.R is hand-maintained in OncoPath: never written or deleted.
   expect_true(grepl(planner$.PLAN_KEEP_R, "zzz_imports.R"))
-  expect_setequal(unlist(cfg$modules$OncoPath$prune_imports, use.names = FALSE), c("cluster", "tidyr"))
+
+  # The invariant is that nothing OncoPath ships still needs a pruned package -- not that the
+  # list is any particular literal. Pinning c("cluster", "tidyr") went stale the moment psych
+  # and stringr were added, the same way pinning "1.0.0" above broke on every release.
+  utils_path <- oncopath_file("_updateModules_utils.R")
+  skip_if_not(file.exists(utils_path), "updater utils unavailable")
+  sys.source(utils_path, envir = planner)
+  shipped <- file.path(oncopath_root, "R", c(sprintf("%s.b.R", analyses), helpers$files))
+  expect_equal(planner$prune_conflicts(cfg$modules$OncoPath$prune_imports, shipped), character(0))
+
+  # The one literal worth pinning. `%>%` is used bare in waterfall.b.R and swimmerplot.b.R,
+  # so no source scan can tie it to magrittr -- pruning it is what left `waterfall` unable to
+  # run in jamovi at all (2026-09-16, CRITICAL).
+  expect_false("magrittr" %in% unlist(cfg$modules$OncoPath$prune_imports, use.names = FALSE))
+  if (length(parked))
+    testthat::skip(paste0("not routed to OncoPath (parked): ", paste(parked, collapse = ", ")))
 })
 
 test_that("swimmer controls and errors follow jamovi UI and i18n conventions", {
   skip_if_no_oncopath_source()
+  audit_skip_absent(audit_absent(oncopath_root, "swimmerplot", c("jamovi/%s.a.yaml", "R/%s.b.R")), oncopath_root)
   schema <- read_oncopath("jamovi", "swimmerplot.a.yaml")
   source <- read_oncopath("R", "swimmerplot.b.R")
 
@@ -129,6 +203,8 @@ test_that("swimmer controls and errors follow jamovi UI and i18n conventions", {
 
 test_that("diagnostic SROC labels match the implemented mada model", {
   skip_if_no_oncopath_source()
+  audit_skip_absent(audit_absent(oncopath_root, "diagnosticmeta",
+                                 c("jamovi/%s.a.yaml", "jamovi/%s.r.yaml", "R/%s.b.R")), oncopath_root)
   analysis_schema <- read_oncopath("jamovi", "diagnosticmeta.a.yaml")
   result_schema <- read_oncopath("jamovi", "diagnosticmeta.r.yaml")
   source <- read_oncopath("R", "diagnosticmeta.b.R")
@@ -144,6 +220,7 @@ test_that("diagnostic SROC labels match the implemented mada model", {
 
 test_that("auxiliary meta-analysis honors options and guards infinite values", {
   skip_if_no_oncopath_source()
+  audit_skip_absent(audit_absent(oncopath_root, "diagnosticmeta"), oncopath_root)
   source <- read_oncopath("R", "diagnosticmeta.b.R")
 
   expect_match(source, ".metaforMethod = function", fixed = TRUE)
@@ -157,6 +234,7 @@ test_that("auxiliary meta-analysis honors options and guards infinite values", {
 
 test_that("diagnostic source remains ASCII-clean and renders real symbols", {
   skip_if_no_oncopath_source()
+  audit_skip_absent(audit_absent(oncopath_root, "diagnosticmeta"), oncopath_root)
   path <- oncopath_file("R", "diagnosticmeta.b.R")
   bytes <- readBin(path, what = "raw", n = file.info(path)$size)
 
@@ -179,6 +257,7 @@ test_that("diagnostic source remains ASCII-clean and renders real symbols", {
 
 test_that("ggswim is selectively imported from a reproducible revision", {
   skip_if_no_oncopath_source()
+  audit_skip_absent(audit_absent(oncopath_root, "swimmerplot"), oncopath_root)
   description <- read_oncopath("DESCRIPTION")
   swimmer_source <- read_oncopath("R", "swimmerplot.b.R")
 
@@ -197,6 +276,7 @@ test_that("the jmvcore .() translator is imported by the file set that uses it",
   # jmvcore puts nothing in scope, exactly like `%>%`. The umbrella hides it: some
   # other .b.R always carries the tag. OncoPath does not, since waterfall (which did
   # carry it) moved to JamoviTest and left swimmerplot alone in the module.
+  audit_skip_absent(audit_absent(oncopath_root, "swimmerplot", c("R/%s.b.R", "R/%s-html.R")), oncopath_root)
   sources <- c(read_oncopath("R", "swimmerplot.b.R"),
                read_oncopath("R", "swimmerplot-html.R"))
   expect_true(any(grepl("(^|[^A-Za-z0-9._$@])\\.\\(", sources)))
@@ -224,7 +304,7 @@ test_that("standalone OncoPath metadata is internally consistent", {
 })
 
 test_that("diagnostic models honor estimator choices and zero-cell guards", {
-  skip_if_not(exists("diagnosticmeta", mode = "function"))
+  audit_skip_unloaded("diagnosticmeta")
 
   data <- data.frame(
     study = paste0("S", seq_len(8)),
@@ -323,7 +403,13 @@ test_that("translation catalog references only this module's sources", {
   analyses <- sub("\\.a\\.yaml$", "", list.files(oncopath_file("jamovi"), "\\.a\\.yaml$"))
   known <- c(file.path("R", list.files(oncopath_file("R"))), analyses, "package")
   expect_gt(length(owners), 0)
-  expect_equal(setdiff(owners, known), character(0))
+  # A parked analysis keeps its strings until the next i18nUpdate(): a reference to an audited
+  # analysis absent here, or to an R file named for it, is that, not an inherited catalog.
+  unknown <- setdiff(owners, known)
+  parked <- unknown[sub("^R/([^.-]+).*$", "\\1", unknown) %in% audit_absent(oncopath_root, audit_analyses)]
+  expect_equal(setdiff(unknown, parked), character(0))
+  audit_skip_absent(unique(sub("^R/([^.-]+).*$", "\\1", parked)), oncopath_root,
+                    paste("the catalog still cites", paste(parked, collapse = ", ")))
 })
 
 # library-audit 2026-09-16 OncoPath [LOW] DONE: requiresData: true only where the renderer, or a
@@ -333,9 +419,10 @@ test_that("images declare requiresData exactly when their renderer reads self$da
   # jmvcore nulls the data once .run() returns and re-reads it for a redraw or export only
   # for an Image that asks. Missing flag: the plot errors on resize/.omv reopen/export.
   # Surplus flag: the whole dataset is re-read for a plot drawn from image$state.
+  absent <- audit_absent(oncopath_root, audit_analyses, c("R/%s.b.R", "jamovi/%s.r.yaml"))
   images <- 0
   mismatches <- character()
-  for (name in c("diagnosticmeta", "ihcheterogeneity", "swimmerplot", "waterfall")) {
+  for (name in setdiff(audit_analyses, absent)) {
     src <- sub("#.*$", "", readLines(oncopath_file("R", paste0(name, ".b.R")), warn = FALSE))
     heads <- grep("^\\s*\\.[A-Za-z_][A-Za-z0-9_.]*\\s*=\\s*function\\s*\\(", src)
     ends <- c(heads[-1] - 1, length(src))
@@ -369,8 +456,11 @@ test_that("images declare requiresData exactly when their renderer reads self$da
     }
     walk(yaml::read_yaml(oncopath_file("jamovi", paste0(name, ".r.yaml"))))
   }
-  expect_gt(images, 0)
+  # The floor proves the walk found the images, without which no mismatch could show. A parked
+  # analysis takes its images with it, so it holds for the full set; the skip names what is missing.
+  if (length(absent) == 0) expect_gt(images, 0)
   expect_equal(mismatches, character(0))
+  audit_skip_absent(absent, oncopath_root)
 })
 
 # library-audit 2026-09-16 OncoPath [LOW] PARTIAL: no .() padding anywhere, and the report-sentence builders
@@ -381,8 +471,9 @@ test_that("report sentences translate as whole sentences", {
   # Separators belong to the joining code: a translator cannot see a trailing space.
   lead <- "\\.\\(\\s*\"(?:[\\s,;:]|\\.(?!\\.\\.))"
   trail <- "\\.\\(\\s*\"[^\"\\n]*\\s\"\\s*[,)]"
+  absent <- audit_absent(oncopath_root, audit_analyses)
   padded <- character()
-  for (name in c("diagnosticmeta", "ihcheterogeneity", "swimmerplot", "waterfall")) {
+  for (name in setdiff(audit_analyses, absent)) {
     src <- readLines(oncopath_file("R", paste0(name, ".b.R")), warn = FALSE)
     hit <- !grepl("^\\s*#", src) & (grepl(lead, src, perl = TRUE) | grepl(trail, src, perl = TRUE))
     padded <- c(padded, sprintf("%s.b.R:%d", name, which(hit)))
@@ -392,7 +483,13 @@ test_that("report sentences translate as whole sentences", {
   # Pseudo-translate every .() string as \u00ab...\u00bb. A translated word spliced into a
   # translated sentence then nests, padding shows inside the marks, and logic that compares
   # a translated word with English breaks (LR+ not estimable printed "Inf" in Turkish).
-  skip_if_not(exists("diagnosticmetaClass") && exists("ihcheterogeneityClass"))
+  # Each analysis runs when its class is loaded, so one that is parked leaves the other covered.
+  wanted <- c("diagnosticmeta", "ihcheterogeneity")
+  loaded <- audit_loaded(setdiff(wanted, absent))
+  if (length(loaded) == 0) {
+    audit_skip_absent(absent, oncopath_root)
+    audit_skip_unloaded(wanted)
+  }
   literals <- character()
   collect <- function(e) {
     if (is.call(e) && identical(e[[1]], as.name(".")) && length(e) >= 2 && is.character(e[[2]]))
@@ -400,12 +497,12 @@ test_that("report sentences translate as whole sentences", {
     if (is.call(e) || is.expression(e) || is.pairlist(e) || is.list(e))
       for (i in seq_along(e)) if (!identical(e[[i]], quote(expr = ))) collect(e[[i]])
   }
-  for (name in c("diagnosticmeta", "ihcheterogeneity"))
+  for (name in setdiff(wanted, absent))
     collect(parse(oncopath_file("R", paste0(name, ".b.R")), keep.source = FALSE, encoding = "UTF-8"))
   messages <- lapply(unique(literals), function(s) list(paste0("\u00ab", s, "\u00bb")))
   names(messages) <- unique(literals)
 
-  pkg <- diagnosticmetaOptions$new()$.__enclos_env__$private$.package
+  pkg <- get(paste0(loaded[1], "Options"))$new()$.__enclos_env__$private$.package
   cache <- get(".i18n", envir = asNamespace("jmvcore"))
   old_pkg <- if (pkg %in% names(cache)) cache[[pkg]] else NULL
   cache[[pkg]] <- new.env()
@@ -417,56 +514,63 @@ test_that("report sentences translate as whole sentences", {
     if (is.null(old_pkg)) rm(list = pkg, envir = cache) else cache[[pkg]] <- old_pkg
   }, add = TRUE)
   # Options fix their language when constructed, so build the analyses after LANGUAGE is set.
-  dm <- diagnosticmetaClass$new(options = diagnosticmetaOptions$new(), data = data.frame())
-  ih <- ihcheterogeneityClass$new(options = ihcheterogeneityOptions$new(), data = data.frame())
-
-  dp <- dm$.__enclos_env__$private
-  outputs <- c(
-    dp$.getInterpretationText(95, 96, 24, 0.05, c(91, 97), c(80, 99)),
-    dp$.getInterpretationText(85, 92, 10.6, 0.16),
-    dp$.getInterpretationText(75, 70, 3, 0.4),
-    dp$.getInterpretationText(60, 100, Inf, 0.8),
-    dp$.getInterpretationText(96, 50, 1.9, NaN)
-  )
-  ip <- ih$.__enclos_env__$private
-  # A partial metrics list (as before) and full ones that reach the per-region,
-  # material-bias, equivalence and ICC branches of the copy-ready builder.
-  bias_row <- function(name, pooled, rel, material, equivalent, constant = FALSE)
-    list(name = name, pooled = pooled, mean_diff = rel / 2, rel = rel, ci = c(rel / 2 - 1, rel / 2 + 1),
-         rel_ci = c(rel - 2, rel + 2), rel_ci90 = c(rel - 1.5, rel + 1.5), loa = c(-8, 9), p_holm = 0.002,
-         adjusted = TRUE, material = material, equivalent = equivalent, constant = constant,
-         comparator = "reference")
-  # a difference shown to change with the level (proportional bias), material or not
-  level_row <- function(name, material)
-    modifyList(bias_row(name, FALSE, 1, material, FALSE),
-               list(prop_shown = TRUE, material_ok = TRUE, mean_material = FALSE, margin_abs = 2.5, ref_mean = 50,
-                    prop = list(fit = c(3, -4), ends = c(25, 75), slope = -0.14, p = 0.001),
-                    end_ci90 = rbind(c(1, 5), c(-6, -2))))
-  for (ref in c(TRUE, FALSE)) for (r in c(0.95, 0.82, 0.72, 0.4)) {
-    m <- list(has_reference = ref, overall_corr = r, within_cv = 12, bias_p = 0.2,
-              n_cases = 30, n_biopsies = 4)
-    outputs <- c(outputs, ip$.generateReportSentences(m, 20, 0.90))
-    for (rows in list(
-      list(bias_row("b1", FALSE, -12, TRUE, FALSE), bias_row("b2", FALSE, 9, TRUE, FALSE), bias_row(NA, TRUE, -1, FALSE, FALSE)),
-      list(bias_row(NA, TRUE, 7, TRUE, FALSE, constant = TRUE)),
-      list(bias_row("b1", FALSE, 1, FALSE, TRUE), bias_row("b2", FALSE, 2, FALSE, FALSE)),
-      list(level_row("b3", TRUE), bias_row("b1", FALSE, -12, TRUE, FALSE)),
-      list(level_row("b3", FALSE), bias_row("b1", FALSE, 1, FALSE, TRUE)))) {
-      full <- c(m, list(icc = 0.81, icc_lower = 0.7, icc_upper = 0.9, icc_method = "icc", icc_n = 28,
-                        icc_dropped = if (ref) "b4 (n = 3)" else character(0),
-                        overall_ci = c(r - 0.1, min(r + 0.03, 0.99)), verdict_corr = r - 0.05,
-                        ref_corr = if (ref) c(b1 = r, b2 = r - 0.05) else NULL, min_ref_name = "b2",
-                        bias_rows = if (ref) rows else list(),
-                        bias_material = ref && any(vapply(rows, function(x) x$material, TRUE)),
-                        bias_equivalent = FALSE, reference_constant = FALSE))
-      outputs <- c(outputs, ip$.generateReportSentences(full, 20, 0.90),
-                   ip$.generateRecommendations(full, 20))
+  outputs <- character()
+  if ("diagnosticmeta" %in% loaded) {
+    dm <- diagnosticmetaClass$new(options = diagnosticmetaOptions$new(), data = data.frame())
+    dp <- dm$.__enclos_env__$private
+    outputs <- c(
+      outputs,
+      dp$.getInterpretationText(95, 96, 24, 0.05, c(91, 97), c(80, 99)),
+      dp$.getInterpretationText(85, 92, 10.6, 0.16),
+      dp$.getInterpretationText(75, 70, 3, 0.4),
+      dp$.getInterpretationText(60, 100, Inf, 0.8),
+      dp$.getInterpretationText(96, 50, 1.9, NaN)
+    )
+  }
+  if ("ihcheterogeneity" %in% loaded) {
+    ih <- ihcheterogeneityClass$new(options = ihcheterogeneityOptions$new(), data = data.frame())
+    ip <- ih$.__enclos_env__$private
+    # A partial metrics list (as before) and full ones that reach the per-region,
+    # material-bias, equivalence and ICC branches of the copy-ready builder.
+    bias_row <- function(name, pooled, rel, material, equivalent, constant = FALSE)
+      list(name = name, pooled = pooled, mean_diff = rel / 2, rel = rel, ci = c(rel / 2 - 1, rel / 2 + 1),
+           rel_ci = c(rel - 2, rel + 2), rel_ci90 = c(rel - 1.5, rel + 1.5), loa = c(-8, 9), p_holm = 0.002,
+           adjusted = TRUE, material = material, equivalent = equivalent, constant = constant,
+           comparator = "reference")
+    # a difference shown to change with the level (proportional bias), material or not
+    level_row <- function(name, material)
+      modifyList(bias_row(name, FALSE, 1, material, FALSE),
+                 list(prop_shown = TRUE, material_ok = TRUE, mean_material = FALSE, margin_abs = 2.5, ref_mean = 50,
+                      prop = list(fit = c(3, -4), ends = c(25, 75), slope = -0.14, p = 0.001),
+                      end_ci90 = rbind(c(1, 5), c(-6, -2))))
+    for (ref in c(TRUE, FALSE)) for (r in c(0.95, 0.82, 0.72, 0.4)) {
+      m <- list(has_reference = ref, overall_corr = r, within_cv = 12, bias_p = 0.2,
+                n_cases = 30, n_biopsies = 4)
+      outputs <- c(outputs, ip$.generateReportSentences(m, 20, 0.90))
+      for (rows in list(
+        list(bias_row("b1", FALSE, -12, TRUE, FALSE), bias_row("b2", FALSE, 9, TRUE, FALSE), bias_row(NA, TRUE, -1, FALSE, FALSE)),
+        list(bias_row(NA, TRUE, 7, TRUE, FALSE, constant = TRUE)),
+        list(bias_row("b1", FALSE, 1, FALSE, TRUE), bias_row("b2", FALSE, 2, FALSE, FALSE)),
+        list(level_row("b3", TRUE), bias_row("b1", FALSE, -12, TRUE, FALSE)),
+        list(level_row("b3", FALSE), bias_row("b1", FALSE, 1, FALSE, TRUE)))) {
+        full <- c(m, list(icc = 0.81, icc_lower = 0.7, icc_upper = 0.9, icc_method = "icc", icc_n = 28,
+                          icc_dropped = if (ref) "b4 (n = 3)" else character(0),
+                          overall_ci = c(r - 0.1, min(r + 0.03, 0.99)), verdict_corr = r - 0.05,
+                          ref_corr = if (ref) c(b1 = r, b2 = r - 0.05) else NULL, min_ref_name = "b2",
+                          bias_rows = if (ref) rows else list(),
+                          bias_material = ref && any(vapply(rows, function(x) x$material, TRUE)),
+                          bias_equivalent = FALSE, reference_constant = FALSE))
+        outputs <- c(outputs, ip$.generateReportSentences(full, 20, 0.90),
+                     ip$.generateRecommendations(full, 20))
+      }
     }
   }
   expect_true(all(grepl("\u00ab", outputs)))                       # the pseudo-catalog was used
   expect_equal(grep("\u00ab[^\u00bb]*\u00ab", outputs, value = TRUE), character(0))   # nothing spliced
   expect_equal(grep("\\s\u00bb|\u00ab\\s", outputs, value = TRUE), character(0))     # no padding
   expect_equal(grep("\\b(Inf|NaN|NA)\\b", outputs, value = TRUE), character(0))
+  audit_skip_absent(absent, oncopath_root)
+  audit_skip_unloaded(wanted)
 })
 
 # library-audit 2026-09-16 OncoPath [LOW] DONE: NEWS.md has a section for the DESCRIPTION version;
@@ -487,10 +591,14 @@ test_that("NEWS.md has a section for the version DESCRIPTION declares", {
 #   translator intact when no catalog entry matches (" [..]" is read as a context and cut off)
 test_that("translatable strings survive the translator and no TODO comments remain", {
   skip_if_no_oncopath_source()
-  files <- file.path("R", c("diagnosticmeta.b.R", "ihcheterogeneity.b.R", "swimmerplot.b.R",
-                            "waterfall.b.R", "swimmerplot-html.R", "utils-followup.R", "utils.R"))
-  files <- files[file.exists(oncopath_file(files))]
-  expect_gt(length(files), 3)
+  absent <- audit_absent(oncopath_root, audit_analyses)
+  # helpers ship with the analyses that use them, so a parked analysis can take one along
+  helpers <- c("swimmerplot-html.R", "utils-followup.R", "utils.R")
+  files <- file.path("R", c(sprintf("%s.b.R", setdiff(audit_analyses, absent)),
+                            intersect(helpers, list.files(oncopath_file("R")))))
+  # the floors (here and on the literal count) are the full set's: a parked analysis takes its
+  # files and strings with it, and the skip at the end names it
+  if (length(absent) == 0) expect_gt(length(files), 3)
 
   todo <- character()
   literals <- character()
@@ -512,17 +620,19 @@ test_that("translatable strings survive the translator and no TODO comments rema
   options <- jmvcore::Options$new()
   literals <- unique(literals)
   cut_short <- literals[vapply(literals, function(s) !identical(options$translate(s), s), logical(1))]
-  expect_gt(length(literals), 1000)
+  if (length(absent) == 0) expect_gt(length(literals), 1000)
   expect_equal(unname(cut_short), character(0))
+  audit_skip_absent(absent, oncopath_root)
 })
 
 # library-audit 2026-09-16 OncoPath [INFO] REJECTED: native notice element (see .addNotice, guide section 13);
 #   what HTML can do here holds: notice titles inherit, an opaque background sets its own text colour
 test_that("HTML panels stay readable in jamovi's dark theme", {
   skip_if_no_oncopath_source()
-  files <- file.path("R", c("diagnosticmeta.b.R", "ihcheterogeneity.b.R", "swimmerplot.b.R",
-                            "waterfall.b.R", "swimmerplot-html.R", "utils-followup.R", "utils.R"))
-  files <- files[file.exists(oncopath_file(files))]
+  absent <- audit_absent(oncopath_root, audit_analyses)
+  helpers <- c("swimmerplot-html.R", "utils-followup.R", "utils.R")
+  files <- file.path("R", c(sprintf("%s.b.R", setdiff(audit_analyses, absent)),
+                            intersect(helpers, list.files(oncopath_file("R")))))
   opaque <- "background(-color)?:\\s*(#[0-9A-Fa-f]{3,8}|(?!rgba|transparent|inherit|none)[a-z]+)\\b"
   own_colour <- "(^|[;'\" ])color:\\s*(?!inherit)[#a-z]"
   unreadable <- character()
@@ -548,13 +658,14 @@ test_that("HTML panels stay readable in jamovi's dark theme", {
     }
   }
   expect_equal(unreadable, character(0))
+  audit_skip_absent(absent, oncopath_root)
 })
 
 # library-audit 2026-09-16 meddecide [LOW] DONE (same class here): the waterfall median CI seeds its bootstrap
 #   with withr::local_seed() from the "Random seed" option, so drawing the plot leaves the session's
 #   random-number stream as it found it (every analysis shares one R process)
 test_that("waterfall's bootstrap CI leaves the caller's RNG stream untouched", {
-  skip_if_not(exists("waterfallClass"))
+  audit_skip_unloaded("waterfall")
   quiet <- function(expr) suppressWarnings(suppressMessages(expr))
   set.seed(3)
   d <- data.frame(PatientID = sprintf("PT%02d", 1:20), Response = round(stats::runif(20, -80, 40), 1))
@@ -586,18 +697,325 @@ test_that("waterfall's bootstrap CI leaves the caller's RNG stream untouched", {
 #   their rows before .run(). (swimmerplot's summaryData is not converted: after its five fixed metrics it
 #   adds one pair of rows per response level present in the data.)
 test_that("fixed-row OncoPath tables are scaffolded before .run()", {
-  skip_if_not(exists("swimmerplotClass") && exists("diagnosticmetaClass"))
+  wanted <- c("swimmerplot", "diagnosticmeta")
+  loaded <- audit_loaded(wanted)
   after_init <- function(name, data, ...) {
     a <- get(paste0(name, "Class"))$new(options = get(paste0(name, "Options"))$new(...), data = data)
     suppressWarnings(suppressMessages(a$init()))
     function(table) unlist(a$results[[table]]$rowKeys)
   }
-  sw <- data.frame(id = sprintf("P%02d", 1:10), s = 0, e = seq(5, 50, 5), cens = rep(c(0, 1), 5))
-  swim <- after_init("swimmerplot", sw, patientID = "id", startTime = "s", endTime = "e", censorVar = "cens",
-                     personTimeAnalysis = TRUE)
-  expect_identical(swim("advancedMetrics"), c("median_followup", "iqr", "person_time", "followup_density"))
-  dm <- data.frame(study = paste("S", 1:10), tp = 20:29, fp = 5:14, fn = 3:12, tn = 40:49)
-  meta <- after_init("diagnosticmeta", dm, study = "study", true_positives = "tp", false_positives = "fp",
-                     false_negatives = "fn", true_negatives = "tn", bivariate_analysis = TRUE, publication_bias = TRUE)
-  expect_identical(meta("publicationbias"), "deeks_test")
+  if ("swimmerplot" %in% loaded) {
+    sw <- data.frame(id = sprintf("P%02d", 1:10), s = 0, e = seq(5, 50, 5), cens = rep(c(0, 1), 5))
+    swim <- after_init("swimmerplot", sw, patientID = "id", startTime = "s", endTime = "e", censorVar = "cens",
+                       personTimeAnalysis = TRUE)
+    expect_identical(swim("advancedMetrics"), c("median_followup", "iqr", "person_time", "followup_density"))
+  }
+  if ("diagnosticmeta" %in% loaded) {
+    dm <- data.frame(study = paste("S", 1:10), tp = 20:29, fp = 5:14, fn = 3:12, tn = 40:49)
+    meta <- after_init("diagnosticmeta", dm, study = "study", true_positives = "tp", false_positives = "fp",
+                       false_negatives = "fn", true_negatives = "tn", bivariate_analysis = TRUE, publication_bias = TRUE)
+    expect_identical(meta("publicationbias"), "deeks_test")
+  }
+  audit_skip_unloaded(wanted)
 })
+
+# library-audit 2026-09-22 OncoPath [MEDIUM] DONE: an analysis the user has just opened, or has half
+#   filled in, is not an error. Nothing assigned emits no notice at all; a partial selection gets an
+#   INFO naming the empty boxes. A red ERROR on that path tells the user they did something wrong
+#   when they have not (guide section 25).
+#   The guard is exercised by calling the validator directly, not through $run(): with NO variable
+#   assigned, jmvcore fails first with "invalid 'row.names' length" when an analysis is built outside
+#   the engine, so a $run() route would pass vacuously and prove nothing.
+test_that("an unconfigured or half-configured OncoPath analysis raises no ERROR", {
+  wanted <- c("waterfall", "diagnosticmeta")
+  loaded <- audit_loaded(wanted)
+  quiet <- function(expr) suppressWarnings(suppressMessages(try(expr, silent = TRUE)))
+  d <- data.frame(A = 1:8, B = letters[1:8], stringsAsFactors = FALSE)
+  sev <- function(analysis) {
+    lst <- analysis$.__enclos_env__$private$.noticeList
+    if (is.null(lst) || !length(lst)) character(0)
+    else vapply(lst, function(n) as.character(n$type), character(1))
+  }
+
+  if ("waterfall" %in% loaded) {
+    # waterfall, nothing assigned: the todo panel speaks for itself, no notice at all
+    wf0 <- waterfallClass$new(options = waterfallOptions$new(), data = d)
+    quiet(wf0$.__enclos_env__$private$.validateInputsAndData())
+    expect_identical(sev(wf0), character(0))
+
+    # waterfall, one of two assigned: guidance, not a red ERROR
+    wf1 <- waterfallClass$new(options = waterfallOptions$new(patientID = "B"), data = d)
+    quiet(wf1$.__enclos_env__$private$.validateInputsAndData())
+    expect_false("ERROR" %in% sev(wf1))
+    expect_true("INFO" %in% sev(wf1))
+  }
+
+  if ("diagnosticmeta" %in% loaded) {
+    # diagnosticmeta, two of five assigned: same rule, reached through $run()
+    dm <- diagnosticmetaClass$new(
+      options = diagnosticmetaOptions$new(study = "B", true_positives = "A"), data = d)
+    quiet(dm$init()); quiet(dm$run())
+    expect_false("ERROR" %in% sev(dm))
+    expect_true("INFO" %in% sev(dm))
+  }
+  audit_skip_unloaded(wanted)
+})
+
+# library-audit 2026-09-22 OncoPath [MEDIUM] DONE: a data-processing failure is fatal, so it uses
+#   jamovi's own presentation - jmvcore::reject() greys the results - instead of an ERROR banner
+#   above a pane that still looks like a normal, empty set of results (guide section 25).
+test_that("a fatal waterfall processing failure rejects rather than drawing a banner", {
+  # a source check: it needs the file, not the class (R CMD check has the class and no source tree)
+  skip_if_no_oncopath_source()
+  audit_skip_absent(audit_absent(oncopath_root, "waterfall"), oncopath_root)
+  src <- read_oncopath("R", "waterfall.b.R")
+
+  # the processing-failure branch in .processAndAnalyzeData()
+  branch <- regmatches(src, regexpr(
+    "if \\(!is\\.null\\(processed_data\\$error\\) && processed_data\\$error\\) \\{(?s).{0,600}?\\n        \\}",
+    src, perl = TRUE))
+  expect_length(branch, 1L)
+  expect_true(grepl("jmvcore::reject", branch, fixed = TRUE),
+              info = "the fatal branch still reports through .addNotice() instead of jmvcore::reject()")
+  expect_false(grepl('.addNotice("ERROR", .("DATA PROCESSING ERROR")', branch, fixed = TRUE))
+})
+
+# library-audit 2026-09-22 OncoPath [MEDIUM] DONE: reference and computed tables belong in Table
+#   results, not hand-built HTML (guide section 26). The Likelihood Ratio guide is a static Table
+#   populated in .init(); Predictive Values by Prevalence is a Table populated in .run() from the
+#   pooled sensitivity and specificity estimates.
+test_that("diagnosticmeta clinical interpretation tables are Table elements, not HTML", {
+  # 1 and 2 read the source, 3 runs the analysis (R CMD check has the class and no source tree)
+  skip_if_no_oncopath_source()
+  audit_skip_absent(audit_absent(oncopath_root, "diagnosticmeta", c("R/%s.b.R", "jamovi/%s.r.yaml")),
+                    oncopath_root)
+  # 1. Source level: no hand-built <table> markup in .populateInterpretation()
+  src <- read_oncopath("R", "diagnosticmeta.b.R")
+  interp_match <- regexpr(
+    "\\.populateInterpretation = function\\(\\) \\{(?s).{0,15000}?\\n        \\},",
+    src, perl = TRUE)
+  expect_true(interp_match > 0L, info = "could not find .populateInterpretation() in R/diagnosticmeta.b.R")
+  interp_body <- regmatches(src, interp_match)
+  expect_false(grepl("<table", interp_body, fixed = TRUE),
+               info = ".populateInterpretation() still contains hand-built HTML <table> tags")
+
+  # 2. Schema: likelihoodRatioGuide and predictiveValues declared as Table results
+  schema <- read_oncopath("jamovi", "diagnosticmeta.r.yaml")
+  expect_true(grepl("name: likelihoodRatioGuide", schema, fixed = TRUE),
+              info = "likelihoodRatioGuide Table is missing from diagnosticmeta.r.yaml")
+  expect_true(grepl("name: predictiveValues", schema, fixed = TRUE),
+              info = "predictiveValues Table is missing from diagnosticmeta.r.yaml")
+
+  # 3. Runtime: after init with show_interpretation = TRUE, likelihoodRatioGuide has 6 rows
+  audit_skip_unloaded("diagnosticmeta")
+  d <- data.frame(
+    study = paste("Study", 1:6),
+    tp = c(80, 75, 85, 90, 70, 88),
+    fp = c(10, 15, 12, 8, 20, 14),
+    fn = c(15, 20, 10, 8, 25, 12),
+    tn = c(95, 90, 93, 94, 85, 86)
+  )
+  dm <- diagnosticmetaClass$new(
+    options = diagnosticmetaOptions$new(
+      study = "study", true_positives = "tp", false_positives = "fp",
+      false_negatives = "fn", true_negatives = "tn",
+      show_interpretation = TRUE, bivariate_analysis = TRUE
+    ),
+    data = d
+  )
+  suppressWarnings(suppressMessages({
+    dm$init()
+    dm$run()
+  }))
+
+  # likelihoodRatioGuide table checks
+  expect_true(!is.null(dm$results$likelihoodRatioGuide),
+              info = "likelihoodRatioGuide result is NULL")
+  expect_equal(dm$results$likelihoodRatioGuide$rowCount, 6L)
+  expect_equal(as.character(dm$results$likelihoodRatioGuide$getCell(rowNo = 1, "range")$value), ">10")
+
+  # predictiveValues table checks
+  expect_true(!is.null(dm$results$predictiveValues),
+              info = "predictiveValues result is NULL")
+  expect_true(dm$results$predictiveValues$rowCount >= 3L)
+  p_val <- dm$results$predictiveValues$getCell(rowNo = 1, "ppv")$value
+  expect_true(!is.null(p_val) && is.finite(p_val) && p_val > 0 && p_val < 1)
+})
+
+# library-audit 2026-09-22 OncoPath [LOW] REJECTED: dynamic runtime jmvcore::Notice insertion
+#   in .run() accumulates across cycles (Group$remove() is broken in jmvcore) and Notice only
+#   supports unformatted single-line plain text. The old claims ('no native notice element' and
+#   'Notice serialization error') were incorrect generalizations of Group$insert() bounds bugs
+#   and have been retracted from code comments and breadcrumbs (guide section 13).
+test_that("stale notice serialization and native notice claims are retracted across OncoPath", {
+  skip_if_no_oncopath_source()
+  absent <- audit_absent(oncopath_root, audit_analyses)
+  for (f in sprintf("%s.b.R", setdiff(audit_analyses, absent))) {
+    src <- read_oncopath("R", f)
+    expect_false(grepl("no native notice element", src, fixed = TRUE),
+                 info = paste(f, "still claims 'no native notice element'"))
+    expect_false(grepl("serialization error", src, ignore.case = TRUE),
+                 info = paste(f, "still claims 'serialization error'"))
+    expect_true(grepl("library-audit 2026-09-22 OncoPath \\[LOW\\] REJECTED:", src),
+                info = paste(f, "missing updated 2026-09-22 REJECTED breadcrumb"))
+  }
+  audit_skip_absent(absent, oncopath_root)
+})
+
+# library-audit 2026-09-22 OncoPath [LOW] DONE: stringr removed from Imports and zzz_imports.R
+#   after ihcheterogeneity rework eliminated its last str_to_title call (guide section 10)
+test_that("stringr is pruned from OncoPath and no unused packages are held in zzz_imports.R", {
+  skip_if_no_oncopath_source()
+  package <- read.dcf(oncopath_file("DESCRIPTION"), fields = "Package")[[1]]
+  if (package == "OncoPath") {
+    desc <- readLines(oncopath_file("DESCRIPTION"), warn = FALSE)
+    zzz <- readLines(oncopath_file("R", "zzz_imports.R"), warn = FALSE)
+    ns <- readLines(oncopath_file("NAMESPACE"), warn = FALSE)
+
+    expect_false(any(grepl("^\\s*stringr\\b", desc)),
+                 info = "stringr is still declared in OncoPath DESCRIPTION")
+    expect_false(any(grepl("@importFrom\\s+stringr", zzz)),
+                 info = "stringr is still imported in OncoPath R/zzz_imports.R")
+    expect_false(any(grepl("importFrom\\(stringr", ns)),
+                 info = "stringr is still imported in OncoPath NAMESPACE")
+    expect_true(any(grepl("library-audit 2026-09-22 OncoPath \\[LOW\\] DONE: stringr", zzz)),
+                info = "OncoPath R/zzz_imports.R missing 2026-09-22 DONE breadcrumb")
+
+    # Invariant: Every package in Imports is actually used by R/ code (no dummy-held deps)
+    imports_field <- read.dcf(oncopath_file("DESCRIPTION"), fields = "Imports")[[1]]
+    declared_pkgs <- trimws(unlist(strsplit(gsub("\\s*\\([^)]*\\)", "", imports_field), ",")))
+    declared_pkgs <- declared_pkgs[nzchar(declared_pkgs)]
+    r_files <- list.files(oncopath_file("R"), pattern = "\\.[rR]$", full.names = TRUE)
+    r_files <- r_files[basename(r_files) != "00jmv.R"]
+    r_code <- paste(unlist(lapply(r_files, function(f) readLines(f, warn = FALSE))), collapse = "\n")
+    used <- vapply(declared_pkgs, function(pkg) {
+      grepl(paste0(pkg, ":::?"), r_code) ||
+        grepl(paste0("requireNamespace\\s*\\(\\s*['\"]", pkg, "['\"]"), r_code) ||
+        grepl(paste0("library\\s*\\(\\s*['\"]?", pkg, "['\"]?"), r_code) ||
+        (pkg == "magrittr" && grepl("%>%", r_code, fixed = TRUE))
+    }, logical(1))
+    # A parked analysis leaves its packages in Imports, where they read as unused: that is routing,
+    # not dead weight, so skip and never prune on it (a prune_imports entry is a standing delete
+    # order). The skip lists them, so a package no parked analysis explains is still in view.
+    if (!all(used))
+      audit_skip_absent(audit_absent(oncopath_root, audit_analyses), oncopath_root,
+                        paste("Imports unused here:", paste(declared_pkgs[!used], collapse = ", ")))
+    for (pkg in declared_pkgs) {
+      is_used <- used[[pkg]]
+      expect_true(is_used, info = paste("Declared package", pkg, "is never used in OncoPath R/ code"))
+    }
+  } else {
+    cfg_path <- oncopath_file("_updateModules_config.yaml")
+    skip_if_not(file.exists(cfg_path), "updater config unavailable")
+    cfg_text <- paste(readLines(cfg_path, warn = FALSE), collapse = "\n")
+    expect_true(grepl("stringr", cfg_text),
+                info = "stringr not mentioned in updater config")
+    cfg <- yaml::read_yaml(cfg_path)
+    expect_true("stringr" %in% unlist(cfg$modules$OncoPath$prune_imports, use.names = FALSE),
+                info = "stringr must be in OncoPath prune_imports")
+    expect_false(grepl("psych/rlang/stringr", cfg_text, fixed = TRUE),
+                 info = "stale stringr comment still in _updateModules_config.yaml")
+  }
+})
+
+# library-audit 2026-09-22 OncoPath [LOW] DONE: retitled 1.0.82.02 section to 1.0.83 (2026-09-21)
+#   so the GitHub release workflow extracts full release notes instead of placeholder (guide section 1)
+test_that("NEWS.md has a matching heading for released version 1.0.83", {
+  skip_if_no_oncopath_source()
+  package <- read.dcf(oncopath_file("DESCRIPTION"), fields = "Package")[[1]]
+  skip_if(package != "OncoPath", "OncoPath NEWS.md verification belongs to OncoPath")
+
+  news_path <- oncopath_file("NEWS.md")
+  skip_if_not(file.exists(news_path), "NEWS.md unavailable")
+  news <- readLines(news_path, warn = FALSE)
+
+  # 1. NEWS.md must contain a level-1 heading matching release version 1.0.83
+  headings <- grep("^#+[[:space:]]", news, value = TRUE)
+  matches_1083 <- grep("(^|[^0-9.])1[.]0[.]83([^0-9.]|$)", headings, value = TRUE)
+  expect_true(length(matches_1083) >= 1L,
+              info = "NEWS.md has no heading matching 1.0.83 (release workflow would publish placeholder)")
+
+  # 2. Release notes extraction logic from release.yaml must extract real content
+  idx <- grep("^#+[[:space:]].*(^|[^0-9.])1[.]0[.]83([^0-9.]|$)", news)
+  expect_true(length(idx) >= 1L)
+  start_line <- idx[1]
+  next_headings <- grep("^#[[:space:]]", news)
+  next_headings <- next_headings[next_headings > start_line]
+  end_line <- if (length(next_headings) > 0) next_headings[1] - 1 else length(news)
+  section_body <- paste(news[(start_line + 1):end_line], collapse = "\n")
+  expect_true(nchar(trimws(section_body)) > 100L,
+              info = "Release notes extracted for 1.0.83 are too short or empty")
+
+  # 3. 1.0.82.02 must no longer be an unreleased placeholder heading in NEWS.md
+  expect_false(any(grepl("^#+[[:space:]]+OncoPath 1\\.0\\.82\\.02", news)),
+               info = "NEWS.md still contains unreleased 4-part dev heading 1.0.82.02")
+
+  # 4. Breadcrumb
+  expect_true(any(grepl("library-audit 2026-09-22 OncoPath \\[LOW\\] DONE: retitled 1.0.82.02", news)),
+              info = "NEWS.md missing library-audit 2026-09-22 DONE breadcrumb")
+})
+
+# library-audit 2026-09-22 OncoPath [LOW] DONE: aligned RECIST claims across DESCRIPTION and README.md
+#   with 0000.yaml; standardized issue URLs, dataset descriptions and folded scalars (guide section 27)
+test_that("module prose and clinical capability claims agree across files", {
+  skip_if_no_oncopath_source()
+  package <- read.dcf(oncopath_file("DESCRIPTION"), fields = "Package")[[1]]
+  skip_if(package != "OncoPath", "OncoPath prose verification belongs to OncoPath")
+
+  desc_text <- paste(readLines(oncopath_file("DESCRIPTION"), warn = FALSE), collapse = "\n")
+  readme_path <- oncopath_file("README.md")
+  skip_if_not(file.exists(readme_path), "README.md unavailable")
+  readme_text <- paste(readLines(readme_path, warn = FALSE), collapse = "\n")
+  manifest_path <- oncopath_file("jamovi", "0000.yaml")
+  skip_if_not(file.exists(manifest_path), "0000.yaml unavailable")
+  manifest_text <- paste(readLines(manifest_path, warn = FALSE), collapse = "\n")
+
+  # 1. RECIST claims in DESCRIPTION and README.md must match 0000.yaml (adapted from RECIST v1.1 thresholds)
+  expect_false(grepl("Features RECIST \\(Response Evaluation Criteria in Solid Tumors\\) criteria analysis", desc_text),
+               info = "DESCRIPTION still claims full RECIST criteria analysis instead of adapted thresholds")
+  expect_true(grepl("response categories adapted from[[:space:]]+RECIST v1\\.1 thresholds", desc_text),
+              info = "DESCRIPTION missing qualified RECIST thresholds wording matching 0000.yaml")
+  expect_false(grepl("RECIST Criteria Support.*Built-in Response Evaluation Criteria In Solid Tumors", readme_text),
+               info = "README.md still promises built-in RECIST guidelines instead of adapted thresholds")
+  expect_true(grepl("Adapted RECIST (v1\\.1 )?Thresholds", readme_text),
+              info = "README.md missing qualified Adapted RECIST Thresholds section")
+
+  # 2. Issue URLs: every issue URL across DESCRIPTION, 0000.yaml, README.md, CITATION.cff must point to sbalci/OncoPath
+  issue_regex <- "https?://github\\.com/([\\w.-]+/[\\w.-]+?)(?:\\.git)?/issues"
+  for (f in c("DESCRIPTION", "README.md", file.path("jamovi", "0000.yaml"), "CITATION.cff")) {
+    p <- oncopath_file(f)
+    if (!file.exists(p)) next
+    txt <- paste(readLines(p, warn = FALSE), collapse = "\n")
+    matches <- regmatches(txt, gregexpr(issue_regex, txt, perl = TRUE))[[1]]
+    for (m in matches) {
+      expect_true(grepl("sbalci/OncoPath", m, ignore.case = TRUE),
+                  info = paste(f, "has mismatched issue URL:", m))
+    }
+  }
+
+  # 3. diagnosticmeta description must not have interior newlines in resolved text
+  absent <- audit_absent(oncopath_root, "diagnosticmeta", "jamovi/%s.a.yaml")
+  if (length(absent) == 0) {
+    diag_yaml <- yaml::read_yaml(oncopath_file("jamovi", "diagnosticmeta.a.yaml"))
+    main_desc <- diag_yaml$description$main
+    expect_false(grepl("\n", trimws(main_desc), fixed = TRUE),
+                 info = "diagnosticmeta.a.yaml description has interior newlines (breaks jamovi listing)")
+  }
+
+  # 4. Example dataset descriptions in 0000.yaml must be distinct
+  manifest_yaml <- yaml::read_yaml(manifest_path)
+  dataset_descs <- vapply(manifest_yaml$datasets, function(d) d$description, character(1))
+  expect_equal(length(dataset_descs), length(unique(dataset_descs)),
+               info = "0000.yaml has duplicate dataset descriptions")
+
+  # 5. Breadcrumb present in DESCRIPTION or README.md
+  expect_true(grepl("library-audit 2026-09-22 OncoPath \\[LOW\\] DONE:", readme_text) ||
+              grepl("library-audit 2026-09-22 OncoPath \\[LOW\\] DONE:", desc_text),
+              info = "Missing library-audit 2026-09-22 DONE breadcrumb for prose alignment")
+  audit_skip_absent(absent, oncopath_root)
+})
+
+
+
+
+

@@ -4,7 +4,7 @@ title: Advanced ROC Analysis
 menuGroup: meddecide
 menuSubgroup: ROC
 menuSubtitle: Advanced ROC analysis with statistical comparisons and effect sizes
-version: '1.0.81'
+version: '1.0.83'
 jas: '1.2'
 
 description:
@@ -35,22 +35,23 @@ options:
     # ==========================================
 
     - name: clinicalMode
-      title: Analysis Level
+      title: Guidance Level
       type: List
       options:
         - name: basic
-          title: Basic ROC Analysis (Recommended for Clinical Use)
+          title: Basic (recommended for clinical use)
         - name: advanced
-          title: Advanced Research Analysis
+          title: Advanced research
         - name: comprehensive
-          title: Comprehensive Statistical Analysis
+          title: Comprehensive
       default: basic
       description:
           R: >
-            Select the complexity level of analysis:
-            Basic - Essential ROC metrics for clinical decision making
-            Advanced - Additional statistical comparisons and metrics
-            Comprehensive - Full research-grade analysis with all options
+            Selects which guidance notes are shown in the Procedure Notes panel.
+            Basic explains the AUC bands and warns that a cutpoint searched on
+            these data is optimistic; Advanced and Comprehensive give a shorter
+            research framing. This option does not switch any analysis on or
+            off - every optional analysis has its own checkbox.
 
     # ==========================================
     # DATA INPUT SECTION

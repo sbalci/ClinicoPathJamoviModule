@@ -30,7 +30,7 @@ decision(
 \item{data}{The data as a data frame. The data frame should contain the
 variables specified in the 'variables' option.}
 
-\item{gold}{The gold standard reference variable representing true disease
+\item{gold}{The reference standard variable, used as each case's disease
 status.}
 
 \item{goldPositive}{The level indicating presence of disease in the gold
@@ -60,7 +60,10 @@ instead of study prevalence.}
 \item{pprob}{Population disease prevalence as a proportion between 0.001
 and 0.999.}
 
-\item{od}{Boolean selection whether to show original data frequency tables.}
+\item{od}{Boolean selection whether to show original data frequency tables.
+The raw data outputs (rawContingency, rawCounts and missingDataSummary) are
+filled only when this is TRUE, so R code that reads them must set od =
+TRUE.}
 
 \item{fnote}{Boolean selection whether to show detailed explanatory
 footnotes.}
@@ -77,7 +80,7 @@ language clinical summary.}
 clinical interpretation guide.}
 
 \item{showReportTemplate}{Boolean selection whether to show the copy-ready
-report template.}
+results paragraph.}
 
 \item{showAboutAnalysis}{Boolean selection whether to show the about
 analysis section.}

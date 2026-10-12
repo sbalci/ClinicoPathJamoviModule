@@ -167,15 +167,26 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                 if (prevalence >= 0.90) {
                     private$.addNotice('STRONG_WARNING', .('Prevalence Very High'), sprintf(.('Prevalence is very high (%.1f%%). Verify that this assumption matches the intended population; predictive values are prevalence-dependent.'), prevalence*100))
                 }
+                # The module's clinical threshold for an unstable PPV is 5%, not 1%: the whole
+                # 1%-5% band (where the shipped HIV teaching example sits, at 2%) used to pass
+                # with no notice at all. Two tiers, so the very-low wording is kept.
                 if (prevalence <= 0.01) {
                     private$.addNotice('STRONG_WARNING', .('Prevalence Very Low'), sprintf(.('Prevalence is very low (%.3f%%). Even with excellent tests, PPV may be extremely low. Verify the pre-test probability for the intended population.'), prevalence*100))
+                } else if (prevalence < 0.05) {
+                    private$.addNotice('STRONG_WARNING', .('Prevalence Low'), sprintf(.('Prevalence is low (%.2f%%). Below 5%% pre-test probability, PPV is dominated by specificity: a one-percentage-point change in specificity can move PPV by tens of points. Verify the specificity assumptions and the intended population.'), prevalence*100))
                 }
 
                 # Detect potential test correlation. fixed = TRUE compares the names literally
                 # (fuzzy string similarity), so a test name containing regex metacharacters
                 # (e.g. "CA-125 [serum]") can't throw a malformed-pattern error that aborts .run().
                 test_similarity <- agrepl(test1_name, test2_name, max.distance = 0.3, fixed = TRUE)
-                if (test_similarity && test1_name != "Screening Test" && test2_name != "Confirmatory Test") {
+                # The exemption is for the UNTOUCHED default pair only. With `&&` on each name
+                # separately the notice was suppressed whenever EITHER box still held its
+                # default, so naming both tests "Confirmatory Test" - the strongest possible
+                # conditional-dependence signal - posted nothing.
+                is_default_pair <- identical(test1_name, "Screening Test") &&
+                    identical(test2_name, "Confirmatory Test")
+                if (test_similarity && !is_default_pair) {
                     private$.addNotice('STRONG_WARNING', .('Test Correlation Risk'), sprintf(.('Test names are similar ("%s" vs "%s"). If tests measure similar biomarkers or use similar technology, they may be conditionally dependent. This can bias combined sensitivity and specificity in opposite directions.'), test1_name, test2_name))
                 }
 
@@ -400,13 +411,13 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                     }
 
                     nnt_text <- if (!is.na(nnt)) {
-                        sprintf(.(" You would need to screen approximately %d people to identify one true positive case."), nnt)
+                        paste0(" ", sprintf(.("You would need to screen approximately %d people to identify one true positive case."), nnt))
                     } else {
                         ""
                     }
 
                     summary <- sprintf(
-                        .("<div style='background-color: rgba(33, 149, 188, 0.1);padding:15px;border-left:4px solid #0077be;font-size:1.05em;line-height:1.6; color: inherit;'><strong>Illustrative Summary:</strong> Using a %s with %s followed by %s, the combined test achieves %.1f%% sensitivity (detects %.0f of every 100 diseased individuals) and %.1f%% specificity (correctly rules out %.0f of every 100 healthy individuals). At your specified disease prevalence of %.1f%%, a positive result indicates a %s chance the person truly has the disease (PPV), while a negative result indicates a %s chance the person is truly disease-free (NPV).%s %s <em>These combined figures assume the two tests are conditionally independent given disease status, and they treat the sensitivity, specificity and prevalence you entered as exact, so they carry no confidence interval. If the two tests measure related biology, %s.</em></div>"),
+                        .("<div style='background-color: rgba(33, 149, 188, 0.1);padding:15px;border-left:4px solid #0077be;font-size:1.05em;line-height:1.6; color: inherit;'><strong>Illustrative Summary:</strong> Using a %1$s with %2$s followed by %3$s, the combined test achieves %4$.1f%% sensitivity (detects %5$.0f of every 100 diseased individuals) and %6$.1f%% specificity (correctly rules out %7$.0f of every 100 healthy individuals). At your specified disease prevalence of %8$.1f%%, a positive result indicates a %9$s chance the person truly has the disease (PPV), while a negative result indicates a %10$s chance the person is truly disease-free (NPV).%11$s %12$s <em>These combined figures assume the two tests are conditionally independent given disease status, and they treat the sensitivity, specificity and prevalence you entered as exact, so they carry no confidence interval. If the two tests measure related biology, %13$s.</em></div>"),
                         strategy_desc,
                         private$.safeHtmlOutput(test1_name),
                         private$.safeHtmlOutput(test2_name),
@@ -468,6 +479,16 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                 pop_size <- self$options$population_size
                 diseased <- pop_size * prevalence
                 healthy <- pop_size - diseased
+
+                # population_size has min 100 and prevalence min 0.001, so the flow table can
+                # legitimately print "Disease Positive 0.100". Nothing told the user that the
+                # illustrative population is simply too small to illustrate anything.
+                if (diseased < 10) {
+                    private$.addNotice(
+                        'WARNING', .('Illustrative Population Too Small'),
+                        sprintf(.('An illustrative population of %1$.0f at %2$.2f%% prevalence contains only %3$.2f expected people with disease, so the population-flow counts are fractional. Increase the population size (for example to 10000) for readable whole-person counts.'),
+                                pop_size, prevalence * 100, diseased))
+                }
 
                 # Initial population
                 flowTable <- self$results$population_flow_table
@@ -561,8 +582,10 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
 
                 tp_rate <- if (diseased > 0) final_tp / diseased else NA_real_
                 tn_rate <- if (healthy > 0) final_tn / healthy else NA_real_
-                tp_rate_text <- if (is.na(tp_rate)) "not defined (no diseased subjects)" else format_percent(tp_rate)
-                tn_rate_text <- if (is.na(tn_rate)) "not defined (no disease-free subjects)" else format_percent(tn_rate)
+                # These are spliced into the translated Explanation HTML, so they must be
+                # translatable like the format_percent() fallbacks beside them.
+                tp_rate_text <- if (is.na(tp_rate)) .("not defined (no diseased subjects)") else format_percent(tp_rate)
+                tn_rate_text <- if (is.na(tn_rate)) .("not defined (no disease-free subjects)") else format_percent(tn_rate)
 
                 flowTable$setRow(
                     rowKey = "after_test2",
@@ -647,13 +670,21 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                 # confidence interval. That belongs beside the numbers, not only in the guides.
                 summaryTable$setNote(
                     key = "fixed_inputs",
-                    note = .("Sensitivity, specificity and prevalence are treated as exact. These combined figures therefore carry <i>no</i> confidence interval and do not reflect sampling uncertainty in the values entered \u{2014} published test performance and local prevalence both vary.")
+                    note = .("Sensitivity, specificity and prevalence are treated as exact. These combined figures therefore carry <i>no</i> confidence interval and do not reflect sampling uncertainty in the values entered \u2014 published test performance and local prevalence both vary.")
+                )
+
+                # "Number Needed to Screen" is 1 / (prevalence x combined sensitivity): it counts
+                # entries into the pathway. A serial strategy also consumes second tests, which
+                # this single figure does not convey.
+                summaryTable$setNote(
+                    key = "nns_scope",
+                    note = .("<i>Number Needed to Screen</i> counts entries into the pathway, that is first tests only. A serial strategy also performs a second test on part of that group; the Cost Analysis table shows the expected number of each test.")
                 )
 
                 summaryTable$setNote(
                     key = "independence_warning",
                     note = private$.formatTranslated(
-                        .("Combined figures assume the two tests are <i>conditionally independent</i> \u{2014} that, among people with the same disease status, one test's result says nothing about the other's. With positive conditional dependence, {direction}."),
+                        .("Combined figures assume the two tests are <i>conditionally independent</i> \u2014 that, among people with the same disease status, one test's result says nothing about the other's. With positive conditional dependence, {direction}."),
                         list(direction = dependence_caveat)
                     )
                 )
@@ -752,15 +783,15 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
 
                 # Populate strategy notes. Named test pairs are teaching examples only; they are
                 # not recommendations, validated pathways, or sources for the illustrative inputs.
-                guidance_html <- .("<div class='jmv-guidance' style='background-color: rgba(138, 155, 172, 0.06);padding:15px;border-radius:6px;margin-top:10px; color: inherit;'><h4>Strategy Notes and Teaching Examples</h4><p><strong>Teaching examples only \u{2014} not clinical guidance.</strong> The named pairs illustrate mathematical structure only. They are not recommendations, complete diagnostic algorithms, or validated pathways, and their sensitivity, specificity, prevalence, and cost values are not validated clinical parameters.</p><p><strong>How the strategies combine tests:</strong></p><ul><li><strong>Serial positive:</strong> Test 2 is applied to first-test positives; both tests must be positive. Specificity increases and sensitivity decreases under conditional independence.</li><li><strong>Serial negative:</strong> Test 2 is applied to first-test negatives; either positive makes the final result positive. Sensitivity increases and specificity decreases under conditional independence.</li><li><strong>Parallel:</strong> Both tests are applied to everyone; either positive makes the final result positive. Accuracy is algebraically identical to serial-negative testing, but utilization differs.</li></ul><p><strong>Why conditional dependence matters:</strong> Conditional dependence means that one test result remains informative about the other even after disease status is fixed, for example because the tests share biology, specimen characteristics, or technology. When positive conditional dependence is present in both disease-status groups, independence-based serial-positive calculations can make combined specificity too high and combined sensitivity too low. For serial-negative and parallel interpretation, they can make combined sensitivity too high and combined specificity too low. Gardner et al. (2000), <em>Conditional dependence between tests affects the diagnosis and surveillance of animal diseases</em>, describes these directional effects; see the reference below.</p><p>Test order is an input to explore, not a recommendation. Replace every example value with evidence appropriate to the intended setting.</p><p><strong>Illustrative pair labels:</strong></p><ul>")
+                guidance_html <- .("<div class='jmv-guidance' style='background-color: rgba(138, 155, 172, 0.06);padding:15px;border-radius:6px;margin-top:10px; color: inherit;'><h4>Strategy Notes and Teaching Examples</h4><p><strong>Teaching examples only \u2014 not clinical guidance.</strong> The named pairs illustrate mathematical structure only. They are not recommendations, complete diagnostic algorithms, or validated pathways, and their sensitivity, specificity, prevalence, and cost values are not validated clinical parameters.</p><p><strong>How the strategies combine tests:</strong></p><ul><li><strong>Serial positive:</strong> Test 2 is applied to first-test positives; both tests must be positive. Specificity increases and sensitivity decreases under conditional independence.</li><li><strong>Serial negative:</strong> Test 2 is applied to first-test negatives; either positive makes the final result positive. Sensitivity increases and specificity decreases under conditional independence.</li><li><strong>Parallel:</strong> Both tests are applied to everyone; either positive makes the final result positive. Accuracy is algebraically identical to serial-negative testing, but utilization differs.</li></ul><p><strong>Why conditional dependence matters:</strong> Conditional dependence means that one test result remains informative about the other even after disease status is fixed, for example because the tests share biology, specimen characteristics, or technology. When positive conditional dependence is present in both disease-status groups, independence-based serial-positive calculations can make combined specificity too high and combined sensitivity too low. For serial-negative and parallel interpretation, they can make combined sensitivity too high and combined specificity too low. Gardner et al. (2000), <em>Conditional dependence between tests affects the diagnosis and surveillance of animal diseases</em>, describes these directional effects; see the reference below.</p><p>Test order is an input to explore, not a recommendation. Replace every example value with evidence appropriate to the intended setting.</p><p><strong>Illustrative pair labels:</strong></p><ul>")
 
                 if (strategy == "serial_positive") {
                     guidance_html <- paste0(guidance_html,
-                        .("<li>HIV-style teaching pair (Ag/Ab assay \u{2192} differentiation assay); this is not a complete HIV diagnostic algorithm</li><li>Cancer-screening teaching pair (Imaging \u{2192} Tissue sampling)</li><li>Respiratory-infection teaching pair (Rapid antigen \u{2192} Molecular assay)</li>")
+                        .("<li>HIV-style teaching pair (Ag/Ab assay \u2192 differentiation assay); this is not a complete HIV diagnostic algorithm</li><li>Cancer-screening teaching pair (Imaging \u2192 Tissue sampling)</li><li>Respiratory-infection teaching pair (Rapid antigen \u2192 Molecular assay)</li>")
                     )
                 } else if (strategy == "serial_negative") {
                     guidance_html <- paste0(guidance_html,
-                        .("<li>Rule-out teaching pair (Initial assessment \u{2192} Biomarker)</li><li>Exclusion teaching pair (Clinical score \u{2192} Laboratory assay)</li>")
+                        .("<li>Rule-out teaching pair (Initial assessment \u2192 Biomarker)</li><li>Exclusion teaching pair (Clinical score \u2192 Laboratory assay)</li>")
                     )
                 } else if (strategy == "parallel") {
                     guidance_html <- paste0(guidance_html,
@@ -793,7 +824,7 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
 
                     formulas <- paste0(formulas, .("<ol>"))
                     formulas <- paste0(formulas, .("<li><strong>Convert pre-test probability to odds</strong>: Odds = P/(1-P)</li>"))
-                    formulas <- paste0(formulas, .("<li><strong>Multiply odds by likelihood ratio</strong>: Post-test odds = Pre-test odds \u{00D7} LR</li>"))
+                    formulas <- paste0(formulas, .("<li><strong>Multiply odds by likelihood ratio</strong>: Post-test odds = Pre-test odds \u00D7 LR</li>"))
                     formulas <- paste0(formulas, .("<li><strong>Convert post-test odds back to probability</strong>: Post-test P = Odds/(1+Odds)</li>"))
                     formulas <- paste0(formulas, .("</ol>"))
 
@@ -807,7 +838,7 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                         # Sensitivity calculation
                         formulas <- paste0(formulas, .("<h5>Combined Sensitivity</h5>"))
                         formulas <- paste0(formulas, .("<p>For a subject to test positive in this strategy, they must test positive on both tests:</p>"))
-                        formulas <- paste0(formulas, .("<p>Se<sub>combined</sub> = Se<sub>1</sub> \u{00D7} Se<sub>2</sub></p>"))
+                        formulas <- paste0(formulas, .("<p>Se<sub>combined</sub> = Se<sub>1</sub> \u00D7 Se<sub>2</sub></p>"))
                         formulas <- paste0(formulas, .("<p>Probability calculation:</p>"))
                         formulas <- paste0(formulas, .("<ul>"))
                         formulas <- paste0(formulas, private$.formatTranslated(
@@ -817,7 +848,7 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                             .("<li>Given a positive Test 1, probability of testing positive on Test 2: {value}</li>"),
                             list(value = base::format(test2_sens, digits = 4))))
                         formulas <- paste0(formulas, private$.formatTranslated(
-                            .("<li>Combined probability = {sens1} \u{00D7} {sens2} = {combined}</li>"),
+                            .("<li>Combined probability = {sens1} \u00D7 {sens2} = {combined}</li>"),
                             list(
                                 sens1 = base::format(test1_sens, digits = 4),
                                 sens2 = base::format(test2_sens, digits = 4),
@@ -831,14 +862,14 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                         formulas <- paste0(formulas, .("<li>Test negative on Test 1, OR</li>"))
                         formulas <- paste0(formulas, .("<li>Test positive on Test 1 but negative on Test 2</li>"))
                         formulas <- paste0(formulas, .("</ul>"))
-                        formulas <- paste0(formulas, .("<p>Sp<sub>combined</sub> = Sp<sub>1</sub> + (1-Sp<sub>1</sub>) \u{00D7} Sp<sub>2</sub></p>"))
+                        formulas <- paste0(formulas, .("<p>Sp<sub>combined</sub> = Sp<sub>1</sub> + (1-Sp<sub>1</sub>) \u00D7 Sp<sub>2</sub></p>"))
                         formulas <- paste0(formulas, .("<p>Probability calculation:</p>"))
                         formulas <- paste0(formulas, .("<ul>"))
                         formulas <- paste0(formulas, private$.formatTranslated(
                             .("<li>Probability of testing negative on Test 1: {value}</li>"),
                             list(value = base::format(test1_spec, digits = 4))))
                         formulas <- paste0(formulas, private$.formatTranslated(
-                            .("<li>Probability of positive Test 1 followed by negative Test 2: (1 - {spec1}) \u{00D7} {spec2} = {value}</li>"),
+                            .("<li>Probability of positive Test 1 followed by negative Test 2: (1 - {spec1}) \u00D7 {spec2} = {value}</li>"),
                             list(
                                 spec1 = base::format(test1_spec, digits = 4),
                                 spec2 = base::format(test2_spec, digits = 4),
@@ -864,14 +895,14 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                         formulas <- paste0(formulas, .("<li>Test positive on Test 1, OR</li>"))
                         formulas <- paste0(formulas, .("<li>Test negative on Test 1 but positive on Test 2</li>"))
                         formulas <- paste0(formulas, .("</ul>"))
-                        formulas <- paste0(formulas, .("<p>Se<sub>combined</sub> = Se<sub>1</sub> + (1-Se<sub>1</sub>) \u{00D7} Se<sub>2</sub></p>"))
+                        formulas <- paste0(formulas, .("<p>Se<sub>combined</sub> = Se<sub>1</sub> + (1-Se<sub>1</sub>) \u00D7 Se<sub>2</sub></p>"))
                         formulas <- paste0(formulas, .("<p>Probability calculation:</p>"))
                         formulas <- paste0(formulas, .("<ul>"))
                         formulas <- paste0(formulas, private$.formatTranslated(
                             .("<li>Probability of testing positive on Test 1: {value}</li>"),
                             list(value = base::format(test1_sens, digits = 4))))
                         formulas <- paste0(formulas, private$.formatTranslated(
-                            .("<li>Probability of negative Test 1 followed by positive Test 2: (1 - {sens1}) \u{00D7} {sens2} = {value}</li>"),
+                            .("<li>Probability of negative Test 1 followed by positive Test 2: (1 - {sens1}) \u00D7 {sens2} = {value}</li>"),
                             list(
                                 sens1 = base::format(test1_sens, digits = 4),
                                 sens2 = base::format(test2_sens, digits = 4),
@@ -887,7 +918,7 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                         # Specificity calculation
                         formulas <- paste0(formulas, .("<h5>Combined Specificity</h5>"))
                         formulas <- paste0(formulas, .("<p>For a subject to test negative in this strategy, they must test negative on both tests:</p>"))
-                        formulas <- paste0(formulas, .("<p>Sp<sub>combined</sub> = Sp<sub>1</sub> \u{00D7} Sp<sub>2</sub></p>"))
+                        formulas <- paste0(formulas, .("<p>Sp<sub>combined</sub> = Sp<sub>1</sub> \u00D7 Sp<sub>2</sub></p>"))
                         formulas <- paste0(formulas, .("<p>Probability calculation:</p>"))
                         formulas <- paste0(formulas, .("<ul>"))
                         formulas <- paste0(formulas, private$.formatTranslated(
@@ -897,7 +928,7 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                             .("<li>Given a negative Test 1, probability of testing negative on Test 2: {value}</li>"),
                             list(value = base::format(test2_spec, digits = 4))))
                         formulas <- paste0(formulas, private$.formatTranslated(
-                            .("<li>Combined probability = {spec1} \u{00D7} {spec2} = {combined}</li>"),
+                            .("<li>Combined probability = {spec1} \u00D7 {spec2} = {combined}</li>"),
                             list(
                                 spec1 = base::format(test1_spec, digits = 4),
                                 spec2 = base::format(test2_spec, digits = 4),
@@ -913,9 +944,9 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                         # Sensitivity calculation
                         formulas <- paste0(formulas, .("<h5>Combined Sensitivity</h5>"))
                         formulas <- paste0(formulas, .("<p>For a subject to test positive in this strategy, they must test positive on at least one test. This is calculated using the complement of the probability of testing negative on both tests:</p>"))
-                        formulas <- paste0(formulas, .("<p>Se<sub>combined</sub> = 1 - (1-Se<sub>1</sub>) \u{00D7} (1-Se<sub>2</sub>)</p>"))
+                        formulas <- paste0(formulas, .("<p>Se<sub>combined</sub> = 1 - (1-Se<sub>1</sub>) \u00D7 (1-Se<sub>2</sub>)</p>"))
                         formulas <- paste0(formulas, .("<p>This can be rewritten as:</p>"))
-                        formulas <- paste0(formulas, .("<p>Se<sub>combined</sub> = Se<sub>1</sub> + Se<sub>2</sub> - (Se<sub>1</sub> \u{00D7} Se<sub>2</sub>)</p>"))
+                        formulas <- paste0(formulas, .("<p>Se<sub>combined</sub> = Se<sub>1</sub> + Se<sub>2</sub> - (Se<sub>1</sub> \u00D7 Se<sub>2</sub>)</p>"))
                         formulas <- paste0(formulas, .("<p>Probability calculation:</p>"))
                         formulas <- paste0(formulas, .("<ul>"))
                         formulas <- paste0(formulas, private$.formatTranslated(
@@ -925,7 +956,7 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                             .("<li>Probability of testing positive on Test 2: {value}</li>"),
                             list(value = base::format(test2_sens, digits = 4))))
                         formulas <- paste0(formulas, private$.formatTranslated(
-                            .("<li>Probability of testing positive on both: {sens1} \u{00D7} {sens2} = {both}</li>"),
+                            .("<li>Probability of testing positive on both: {sens1} \u00D7 {sens2} = {both}</li>"),
                             list(
                                 sens1 = base::format(test1_sens, digits = 4),
                                 sens2 = base::format(test2_sens, digits = 4),
@@ -942,7 +973,7 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                         # Specificity calculation
                         formulas <- paste0(formulas, .("<h5>Combined Specificity</h5>"))
                         formulas <- paste0(formulas, .("<p>For a subject to test negative in this strategy, they must test negative on both tests:</p>"))
-                        formulas <- paste0(formulas, .("<p>Sp<sub>combined</sub> = Sp<sub>1</sub> \u{00D7} Sp<sub>2</sub></p>"))
+                        formulas <- paste0(formulas, .("<p>Sp<sub>combined</sub> = Sp<sub>1</sub> \u00D7 Sp<sub>2</sub></p>"))
                         formulas <- paste0(formulas, .("<p>Probability calculation:</p>"))
                         formulas <- paste0(formulas, .("<ul>"))
                         formulas <- paste0(formulas, private$.formatTranslated(
@@ -952,7 +983,7 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                             .("<li>Probability of testing negative on Test 2: {value}</li>"),
                             list(value = base::format(test2_spec, digits = 4))))
                         formulas <- paste0(formulas, private$.formatTranslated(
-                            .("<li>Combined probability = {spec1} \u{00D7} {spec2} = {combined}</li>"),
+                            .("<li>Combined probability = {spec1} \u00D7 {spec2} = {combined}</li>"),
                             list(
                                 spec1 = base::format(test1_spec, digits = 4),
                                 spec2 = base::format(test2_spec, digits = 4),
@@ -966,7 +997,7 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                     # Positive Predictive Value
                     formulas <- paste0(formulas, .("<h5>Positive Predictive Value (PPV)</h5>"))
                     formulas <- paste0(formulas, .("<p>The probability that a positive test result is a true positive:</p>"))
-                    formulas <- paste0(formulas, .("<p>PPV = (P \u{00D7} Se) / (P \u{00D7} Se + (1-P) \u{00D7} (1-Sp))</p>"))
+                    formulas <- paste0(formulas, .("<p>PPV = (P \u00D7 Se) / (P \u00D7 Se + (1-P) \u00D7 (1-Sp))</p>"))
 
                     # Calculate intermediate values for clarity
                     ppv_numerator = prevalence * combined_sens
@@ -984,13 +1015,13 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                         .("<li>Combined specificity (Sp) = {value}</li>"),
                         list(value = base::format(combined_spec, digits = 4))))
                     formulas <- paste0(formulas, private$.formatTranslated(
-                        .("<li>Numerator = P \u{00D7} Se = {p} \u{00D7} {se} = {numerator}</li>"),
+                        .("<li>Numerator = P \u00D7 Se = {p} \u00D7 {se} = {numerator}</li>"),
                         list(
                             p = base::format(prevalence, digits = 4),
                             se = base::format(combined_sens, digits = 4),
                             numerator = base::format(ppv_numerator, digits = 4))))
                     formulas <- paste0(formulas, private$.formatTranslated(
-                        .("<li>Denominator = P \u{00D7} Se + (1-P) \u{00D7} (1-Sp) = {numerator} + {oneMinusP} \u{00D7} {oneMinusSp} = {denominator}</li>"),
+                        .("<li>Denominator = P \u00D7 Se + (1-P) \u00D7 (1-Sp) = {numerator} + {oneMinusP} \u00D7 {oneMinusSp} = {denominator}</li>"),
                         list(
                             numerator = base::format(ppv_numerator, digits = 4),
                             oneMinusP = base::format(1 - prevalence, digits = 4),
@@ -1007,7 +1038,7 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                     # Negative Predictive Value
                     formulas <- paste0(formulas, .("<h5>Negative Predictive Value (NPV)</h5>"))
                     formulas <- paste0(formulas, .("<p>The probability that a negative test result is a true negative:</p>"))
-                    formulas <- paste0(formulas, .("<p>NPV = ((1-P) \u{00D7} Sp) / ((1-P) \u{00D7} Sp + P \u{00D7} (1-Se))</p>"))
+                    formulas <- paste0(formulas, .("<p>NPV = ((1-P) \u00D7 Sp) / ((1-P) \u00D7 Sp + P \u00D7 (1-Se))</p>"))
 
                     # Calculate intermediate values for clarity
                     npv_numerator = (1-prevalence) * combined_spec
@@ -1025,13 +1056,13 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                         .("<li>Combined specificity (Sp) = {value}</li>"),
                         list(value = base::format(combined_spec, digits = 4))))
                     formulas <- paste0(formulas, private$.formatTranslated(
-                        .("<li>Numerator = (1-P) \u{00D7} Sp = {oneMinusP} \u{00D7} {sp} = {numerator}</li>"),
+                        .("<li>Numerator = (1-P) \u00D7 Sp = {oneMinusP} \u00D7 {sp} = {numerator}</li>"),
                         list(
                             oneMinusP = base::format(1 - prevalence, digits = 4),
                             sp = base::format(combined_spec, digits = 4),
                             numerator = base::format(npv_numerator, digits = 4))))
                     formulas <- paste0(formulas, private$.formatTranslated(
-                        .("<li>Denominator = (1-P) \u{00D7} Sp + P \u{00D7} (1-Se) = {numerator} + {p} \u{00D7} {oneMinusSe} = {denominator}</li>"),
+                        .("<li>Denominator = (1-P) \u00D7 Sp + P \u00D7 (1-Se) = {numerator} + {p} \u00D7 {oneMinusSe} = {denominator}</li>"),
                         list(
                             numerator = base::format(npv_numerator, digits = 4),
                             p = base::format(prevalence, digits = 4),
@@ -1398,14 +1429,20 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                     ) +
                     ggplot2::theme_minimal() +
                     ggtheme +
+                    # vjust = 1 is required as well as hjust: jamovi's ggtheme drops vjust,
+                    # so rotated (and often long) test names ran into the axis title.
                     ggplot2::theme(legend.position = "bottom",
-                                 axis.text.x = ggplot2::element_text(angle = 45, hjust = 1)) +
+                                 axis.text.x = ggplot2::element_text(angle = 45, hjust = 1, vjust = 1)) +
                     ggplot2::scale_x_discrete(labels = test_labels) +
                     ggplot2::scale_fill_manual(
                         values = c("#66c2a5", "#fc8d62", "#8da0cb"),
                         labels = test_labels
                     ) +
-                    ggplot2::ylim(0, 105)
+                    # A positional ylim() applies ONE limit to every panel, which cancelled the
+                    # facet's scales = "free_y" and squashed the PPV panel at low prevalence.
+                    # Headroom for the value labels comes from the upper expansion instead.
+                    ggplot2::scale_y_continuous(
+                        expand = ggplot2::expansion(mult = c(0, 0.15)))
 
                 print(perf_plot)
                 return(TRUE)
@@ -1433,42 +1470,86 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                 post_test1_neg_prob <- post_test1_neg_odds / (1 + post_test1_neg_odds)
 
                 test2_nlr <- (1 - plotData$Test2_Sens) / plotData$Test2_Spec
+                test2_plr <- plotData$Test2_Sens / (1 - plotData$Test2_Spec)
                 post_test2_neg_odds <- post_test1_neg_odds * test2_nlr
                 post_test2_neg_prob <- post_test2_neg_odds / (1 + post_test2_neg_odds)
+                # The subgroup that is retested and then crosses over: T1+/T2- under
+                # serial_positive, T1-/T2+ under serial_negative. It shares the FINAL class with
+                # the branch that stopped at test 1, and it is the higher-risk half of it.
+                cross_pos_neg_odds <- post_test1_pos_odds * test2_nlr
+                cross_pos_neg_prob <- cross_pos_neg_odds / (1 + cross_pos_neg_odds)
+                cross_neg_pos_odds <- post_test1_neg_odds * test2_plr
+                cross_neg_pos_prob <- cross_neg_pos_odds / (1 + cross_neg_pos_odds)
                 positive_path <- .("Positive Path")
                 negative_path <- .("Negative Path")
 
-                # Create data for plotting based on strategy
+                # Create data for plotting based on strategy.
+                # A branch's line may only span the steps its own subjects go through. The
+                # combined PPV/NPV is a mixture over BOTH branches, so using it as the endpoint
+                # of the branch that LEAVES the pathway after test 1 drew a probability change
+                # for a test those subjects never received: on the defaults the negative path
+                # was drawn 10.0% -> 0.79% -> 2.61%, and on the serial-negative teaching example
+                # the positive path 15.0% -> 32.0% -> 29.9%. Each branch now stops where its
+                # subjects stop. `step_labels` replaces the hardcoded three-label x axis, which
+                # was per-plot wrong (it read "After Test 1" over the combined parallel PPV) and
+                # made the dropped `Step` column dead data.
+                #
+                # Stopping each branch where its subjects stop leaves a SECOND discrepancy that
+                # the caption below has to own: the truncated branch is only PART of its final
+                # class, so its endpoint is not the pooled figure the tables report. On the
+                # teaching example (prev 20%, both tests 60/70) serial_positive's final-negative
+                # class is {T1-} at P(D) = 12.50% with weight 0.7477 plus {T1+,T2-} at 22.22%
+                # with weight 0.2523, which mix to the tabled 1 - NPV = 14.95%; the retested
+                # crossover subgroup is 21.6% of the cohort and is drawn nowhere. serial_negative
+                # is the mirror image: {T1+} at 33.33% (weight 0.625) plus {T1-,T2+} at 22.22%
+                # (weight 0.375) mix to the tabled PPV = 29.17%. Shipping the plotted number and
+                # the tabled number in the same pane without saying they answer different
+                # questions is what made this a defect; the plotted values are correct for the
+                # subgroup they describe, so the caption names the subgroup rather than the plot
+                # being bent to match the table.
                 if (plotData$Strategy == "serial_positive") {
+                    # Only test-1 positives receive test 2; test-1 negatives stop at test 1.
                     prob_data <- data.frame(
-                        Step = c(.("Pre-test"), .("After Test 1 (+)"), .("After Test 2 (+)"),
-                                .("Pre-test"), .("After Test 1 (-)"), .("Final (-)")),
                         Probability = c(prevalence * 100, post_test1_pos_prob * 100, plotData$Combined_PPV * 100,
-                                      prevalence * 100, post_test1_neg_prob * 100,
-                                      (1 - plotData$Combined_NPV) * 100),
-                        Path = c(rep(positive_path, 3), rep(negative_path, 3)),
-                        x = c(1, 2, 3, 1, 2, 3)
+                                      prevalence * 100, post_test1_neg_prob * 100),
+                        Path = c(rep(positive_path, 3), rep(negative_path, 2)),
+                        x = c(1, 2, 3, 1, 2)
                     )
+                    step_labels <- c(.("Pre-test"), .("After Test 1"), .("After Test 2 (+)"))
+                    truncation_note <- sprintf(
+                        .("%1$s ends at the first-test-negative subgroup: P(disease | Test 1 negative) = %2$.1f%%. That is not the pooled final-negative figure in the tables, 1 - combined NPV = %3$.1f%%, which also averages in the Test 1 positive / Test 2 negative subgroup (P(disease) = %4$.1f%%). Those subjects are classified negative but are not drawn here."),
+                        negative_path, post_test1_neg_prob * 100,
+                        (1 - plotData$Combined_NPV) * 100, cross_pos_neg_prob * 100)
                 } else if (plotData$Strategy == "serial_negative") {
+                    # Only test-1 negatives receive test 2; test-1 positives stop at test 1.
                     prob_data <- data.frame(
-                        Step = c(.("Pre-test"), .("After Test 1 (+)"), .("Final (+)"),
-                                .("Pre-test"), .("After Test 1 (-)"), .("After Test 2 (-)")),
-                        Probability = c(prevalence * 100, post_test1_pos_prob * 100, plotData$Combined_PPV * 100,
+                        Probability = c(prevalence * 100, post_test1_pos_prob * 100,
                                       prevalence * 100, post_test1_neg_prob * 100, post_test2_neg_prob * 100),
-                        Path = c(rep(positive_path, 3), rep(negative_path, 3)),
-                        x = c(1, 2, 3, 1, 2, 3)
+                        Path = c(rep(positive_path, 2), rep(negative_path, 3)),
+                        x = c(1, 2, 1, 2, 3)
                     )
+                    step_labels <- c(.("Pre-test"), .("After Test 1"), .("After Test 2 (-)"))
+                    truncation_note <- sprintf(
+                        .("%1$s ends at the first-test-positive subgroup: P(disease | Test 1 positive) = %2$.1f%%. That is not the pooled final-positive figure in the tables, combined PPV = %3$.1f%%, which also averages in the Test 1 negative / Test 2 positive subgroup (P(disease) = %4$.1f%%). Those subjects are classified positive but are not drawn here."),
+                        positive_path, post_test1_pos_prob * 100,
+                        plotData$Combined_PPV * 100, cross_neg_pos_prob * 100)
                 } else {
-                    # Parallel testing
+                    # Parallel testing: both tests are applied at once, so there is no
+                    # intermediate step. The third point merely repeated the second.
                     prob_data <- data.frame(
-                        Step = c(.("Pre-test"), .("After Either Test (+)"), .("Final PPV"),
-                                .("Pre-test"), .("After Both Tests (-)"), .("Final NPV")),
-                        Probability = c(prevalence * 100, plotData$Combined_PPV * 100, plotData$Combined_PPV * 100,
-                                      prevalence * 100, (1 - plotData$Combined_NPV) * 100, (1 - plotData$Combined_NPV) * 100),
-                        Path = c(rep(positive_path, 3), rep(negative_path, 3)),
-                        x = c(1, 2, 3, 1, 2, 3)
+                        Probability = c(prevalence * 100, plotData$Combined_PPV * 100,
+                                      prevalence * 100, (1 - plotData$Combined_NPV) * 100),
+                        Path = c(rep(positive_path, 2), rep(negative_path, 2)),
+                        x = c(1, 2, 1, 2)
                     )
+                    step_labels <- c(.("Pre-test"), .("After Both Tests"))
+                    # Nothing is truncated: both endpoints ARE the pooled tabled values. (The
+                    # positive one is still a mixture of {T1+,T2+}, {T1+,T2-} and {T1-,T2+}, but
+                    # the plot shows the mixture, not one of its parts, so nothing contradicts.)
+                    truncation_note <- NULL
                 }
+                if (!is.null(truncation_note))
+                    truncation_note <- paste(strwrap(truncation_note, width = 95), collapse = "\n")
 
                 prob_plot <- ggplot2::ggplot(
                     prob_data,
@@ -1481,16 +1562,6 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                     ggplot2::geom_point(size = 4) +
                     ggplot2::geom_text(ggplot2::aes(label = sprintf("%.1f%%", Probability)),
                                       vjust = -1.5, hjust = 0.5, size = 3) +
-                    ggplot2::scale_x_continuous(
-                        breaks = 1:3,
-                        labels = c(.("Pre-test"), .("After Test 1"), .("Final"))
-                    ) +
-                    ggplot2::scale_color_manual(
-                        values = stats::setNames(
-                            c("#D55E00", "#0072B2"), c(positive_path, negative_path))) +
-                    ggplot2::scale_linetype_manual(
-                        values = stats::setNames(
-                            c("solid", "dashed"), c(positive_path, negative_path))) +
                     ggplot2::labs(
                         title = .("Probability Transformation Through Testing"),
                         subtitle = private$.formatTranslated(
@@ -1499,11 +1570,28 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                                 strategy = if (is.null(plotData$StrategyLabel)) plotData$Strategy else plotData$StrategyLabel,
                                 prevalence = sprintf("%.1f%%", plotData$Prevalence * 100))),
                         x = .("Testing Stage"), y = .("Disease Probability (%)"),
-                        color = "", linetype = ""
+                        color = "", linetype = "",
+                        caption = truncation_note
                     ) +
                     ggplot2::theme_minimal() +
                     ggtheme +
-                    ggplot2::theme(legend.position = "bottom") +
+                    # Scales go AFTER ggtheme: jamovi's global theme carries its own discrete
+                    # colour scale and silently replaced the colourblind-safe pair below when
+                    # they were added first.
+                    ggplot2::scale_x_continuous(
+                        breaks = seq_along(step_labels),
+                        labels = step_labels
+                    ) +
+                    ggplot2::scale_color_manual(
+                        values = stats::setNames(
+                            c("#D55E00", "#0072B2"), c(positive_path, negative_path))) +
+                    ggplot2::scale_linetype_manual(
+                        values = stats::setNames(
+                            c("solid", "dashed"), c(positive_path, negative_path))) +
+                    # Left-aligned and smaller: the caption is a sentence, not a credit line,
+                    # and ggplot's default right-aligns it at the body font size.
+                    ggplot2::theme(legend.position = "bottom",
+                                   plot.caption = ggplot2::element_text(hjust = 0, size = 8)) +
                     ggplot2::ylim(0, max(prob_data$Probability) * 1.2)
 
                 print(prob_plot)
@@ -1691,7 +1779,7 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                                      size = 3, hjust = ifelse(plotData$Prevalence > 0.5, 1.1, -0.1)) +
                     ggplot2::labs(
                         title = .("Sensitivity Analysis: How Prevalence Affects Predictive Values"),
-                        subtitle = sprintf(.("Combined Test Performance: Sensitivity=%.1f%%, Specificity=%.1f%%"),
+                        subtitle = sprintf(.("Combined Test Performance: Sensitivity=%1$.1f%%, Specificity=%2$.1f%%"),
                                           plotData$Combined_Sens * 100, plotData$Combined_Spec * 100),
                         x = .("Disease Prevalence"),
                         y = .("Probability"),
@@ -1701,12 +1789,14 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                     ggplot2::scale_y_continuous(labels = function(x) sprintf("%.0f%%", x * 100),
                                                limits = c(0, 1)) +
                     ggplot2::scale_x_continuous(labels = function(x) sprintf("%.0f%%", x * 100)) +
+                    ggplot2::theme_minimal() +
+                    ggtheme +
+                    # Scales AFTER ggtheme (see .plot_probability): the global theme's own
+                    # discrete colour scale otherwise replaces these.
                     ggplot2::scale_color_manual(values = stats::setNames(
                         c("#D55E00", "#0072B2"), c(ppv_label, npv_label))) +
                     ggplot2::scale_linetype_manual(values = stats::setNames(
                         c("solid", "dashed"), c(ppv_label, npv_label))) +
-                    ggplot2::theme_minimal() +
-                    ggtheme +
                     ggplot2::theme(
                         legend.position = "bottom",
                         legend.text = ggplot2::element_text(size = 10),
@@ -1718,10 +1808,13 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                 return(TRUE)
             },
 
-            # Notice collection helpers. A single Preformatted (plain-text) output item:
-            # avoids BOTH the jmvcore::Notice serialization error from
-            # self$results$insert(999, Notice) AND any HTML in notices (project convention:
-            # notice content must be plain text). ====
+            # Notice collection helpers. A single Preformatted (plain-text) output item, so the
+            # whole set renders with no HTML (project convention: notice content must be plain
+            # text). NOTE (corrected 2026-09-23): jmvcore::Notice itself serializes fine. The
+            # "attempt to apply non-function" crash once blamed on it came from
+            # self$results$insert(999, ...) -- Group$insert() has no bounds check, so it pads the
+            # results tree with NULLs and the next traversal calls NULL$asProtoBuf(). An Html
+            # element at the same index fails identically. Use $add(), never insert(999, ...). ====
             # Teaching examples. This table MUST match SEQUENTIAL_PRESET_CONFIGS in
             # jamovi/js/sequentialtests.events.js -- the JavaScript applies examples in the GUI,
             # this applies them for callers from R, and a regression test compares the two.
@@ -1782,11 +1875,15 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                 # Plain text only - notices avoid HTML by project convention; the Preformatted
                 # output item renders this literally (no markup, no injection surface).
                 blocks <- vapply(private$.noticeList, function(notice) {
-                    prefix <- switch(notice$type,
-                        ERROR          = .("ERROR: "),
-                        STRONG_WARNING = .("STRONG WARNING: "),
-                        WARNING        = .("WARNING: "),
+                    # The ": " separator lives here, not inside the msgid: a translator
+                    # cannot see trailing whitespace, and a catalog that drops it silently
+                    # runs the label into the title.
+                    label <- switch(notice$type,
+                        ERROR          = .("ERROR"),
+                        STRONG_WARNING = .("STRONG WARNING"),
+                        WARNING        = .("WARNING"),
                         "")
+                    prefix <- if (nzchar(label)) paste0(label, ": ") else ""
                     paste0(prefix, notice$title, "\n", notice$content)
                 }, character(1))
 

@@ -13,31 +13,29 @@ cotestClass <- if (requireNamespace("jmvcore"))
             NOMOGRAM_LABEL_SIZE = 14/5,
             NUMERICAL_TOLERANCE = 1e-10,
 
-            # Cache for expensive nomogram calculations
-            .nomogramCache = NULL,
-            .lastNomogramParams = NULL,
+            # No nomogram memo. nomogrammer() only assembles a ggplot object, which is
+            # microseconds, and the cache was keyed on the three numbers alone -- so a change of
+            # jamovi theme (or of the caption) re-used a plot built under the previous theme.
             .notices = NULL,
-            # Translation coverage of the long educational HTML remains incomplete; keep
-            # statistical formulas and notices covered by test-cotest-release-review.R while
-            # migrating prose as complete messages rather than sentence fragments.
             .init = function() {
                 # Add welcome instructions
-                instructions <- '
-<div style="max-width: 900px; font-family: sans-serif;">
+                # The leading newline is layout, not message: keeping it out of the msgid
+                # stops the catalog entry starting with whitespace.
+                instructions <- paste0("\n", .('<div style="max-width: 900px; font-family: sans-serif;">
 <h3>Welcome to Co-Testing Analysis</h3>
 <p><strong>Purpose:</strong> This analysis evaluates the combined diagnostic performance of two tests applied <strong>in parallel</strong>, accounting for possible dependence between them.</p>
 
-<p><strong>What "in parallel" means here:</strong> both tests are performed on the same subject at the same time, before either result is known, and the two results are then combined into a single conclusion. Neither test gates the other: Test 2 is run whether or not Test 1 came back positive. That is what separates parallel co-testing from <em>sequential</em> (serial) testing, where a second test is ordered only after a particular first result, and where the second test\'s operating characteristics apply to the selected subgroup rather than to everyone. If your tests are run one after the other with the second conditional on the first, this is the wrong analysis \u{2014} use <em>Sequential Test Analysis</em> instead.</p>
+<p><strong>What "in parallel" means here:</strong> both tests are performed on the same subject at the same time, before either result is known, and the two results are then combined into a single conclusion. Neither test gates the other: Test 2 is run whether or not Test 1 came back positive. That is what separates parallel co-testing from <em>sequential</em> (serial) testing, where a second test is ordered only after a particular first result, and where the second test\'s operating characteristics apply to the selected subgroup rather than to everyone. If your tests are run one after the other with the second conditional on the first, this is the wrong analysis \u2014 use <em>Sequential Test Analysis</em> instead.</p>
 
 <p><strong>Choosing between this and Sequential Test Analysis for parallel testing.</strong> Sequential Test Analysis also has a parallel strategy, and for <em>conditionally independent</em> tests the two agree. It computes its combined figures under that independence assumption and warns you in prose when dependence would matter. This analysis is the one that actually models the dependence: if the two tests share a specimen, a modality, an observer or a biological pathway, use this one and enter a dependence parameter.</p>
 
-<p>Because both tests are always performed, each subject falls into exactly one of four result combinations \u{2014} both positive, Test 1 only, Test 2 only, both negative \u{2014} and the table below gives the post-test probability of disease for each, plus the combined <em>either positive</em> arm used by the parallel decision rule.</p>
+<p>Because both tests are always performed, each subject falls into exactly one of four result combinations \u2014 both positive, Test 1 only, Test 2 only, both negative \u2014 and the table below gives the post-test probability of disease for each, plus the combined <em>either positive</em> arm used by the parallel decision rule.</p>
 
 <h4>Quick Start Guide</h4>
 <ol>
-<li><strong>Choose a worked example</strong> (optional): HPV+Pap, PSA+DRE, Troponin+ECG and the rest fill in every parameter for you so you can see the calculation end to end. <strong>They are illustrations, not clinical inputs</strong> \u{2014} see the warning below.</li>
+<li><strong>Choose a worked example</strong> (optional): HPV+Pap, PSA+DRE, Troponin+ECG and the rest fill in every parameter for you so you can see the calculation end to end. <strong>They are illustrations, not clinical inputs</strong> \u2014 see the warning below.</li>
 <li><strong>Enter your own test parameters</strong>: with <em>Custom values</em> selected, input sensitivity and specificity for each test. While a worked example is selected these boxes are locked, because the example supplies them.</li>
-<li><strong>Set disease prevalence</strong>: the pre-test probability of disease in the population you are actually testing \u{2014} not the figure quoted in the paper the test was validated in.</li>
+<li><strong>Set disease prevalence</strong>: the pre-test probability of disease in the population you are actually testing \u2014 not the figure quoted in the paper the test was validated in.</li>
 <li><strong>Configure test independence</strong>: state whether the two tests are conditionally independent or dependent (see "Understanding Test Dependence" below). This choice moves the answer more than any other.</li>
 <li><strong>Review Results</strong>: The analysis provides post-test probabilities for all test combination outcomes, including the critical <em>Either Test Positive (Parallel Rule)</em> used in clinical co-testing algorithms.</li>
 </ol>
@@ -61,32 +59,34 @@ cotestClass <- if (requireNamespace("jmvcore"))
 </ul>
 
 <div style="background-color: rgba(220, 53, 69, 0.12); border-left: 3px solid rgba(220, 53, 69, 0.85); border-radius: 3px; padding: 10px 14px; margin: 12px 0; color: inherit;">
-<p style="margin: 0;"><strong>The worked examples are for demonstration only.</strong> Every sensitivity, specificity, prevalence and dependence value in them is a round illustrative number picked to show how the calculation behaves \u{2014} how a sensitive test pairs with a specific one, how dependence pulls the answer back. They are <strong>not</strong> pooled estimates from the literature, they are <strong>not</strong> drawn from any guideline, and they have <strong>not</strong> been checked for clinical accuracy. Do not quote them, and do not make any clinical decision from a result computed with them. For real work select <em>Custom values</em> and enter sensitivity and specificity from a validation study in a population like yours, together with your own local prevalence.</p>
+<p style="margin: 0;"><strong>The worked examples are for demonstration only.</strong> Every sensitivity, specificity, prevalence and dependence value in them is a round illustrative number picked to show how the calculation behaves \u2014 how a sensitive test pairs with a specific one, how dependence pulls the answer back. They are <strong>not</strong> pooled estimates from the literature, they are <strong>not</strong> drawn from any guideline, and they have <strong>not</strong> been checked for clinical accuracy. Do not quote them, and do not make any clinical decision from a result computed with them. For real work select <em>Custom values</em> and enter sensitivity and specificity from a validation study in a population like yours, together with your own local prevalence.</p>
 </div>
 
-<p><strong>No uncertainty is propagated:</strong> sensitivity, specificity and prevalence are treated as exact. Every probability reported here is conditional on those numbers being right, and carries no confidence interval \u{2014} published test performance and local prevalence both vary considerably.</p>
+<p><strong>No uncertainty is propagated:</strong> sensitivity, specificity and prevalence are treated as exact. Every probability reported here is conditional on those numbers being right, and carries no confidence interval \u2014 published test performance and local prevalence both vary considerably.</p>
 
-<p><strong>Tip:</strong> Enable "Detailed footnotes" for explanations of each metric. Enable "Fagan nomogram" for a visual of the probability update \u{2014} note that the nomogram plots the <em>parallel rule</em> (positive if either test is positive, negative only if both are negative), so its positive arm corresponds to the "Either Test Positive" row of the results table, not to "Both Tests Positive".</p>
-</div>'
+<p><strong>Tip:</strong> Enable "Detailed footnotes" for explanations of each metric. Enable "Fagan nomogram" for a visual of the probability update \u2014 note that the nomogram plots the <em>parallel rule</em> (positive if either test is positive, negative only if both are negative), so its positive arm corresponds to the "Either Test Positive" row of the results table, not to "Both Tests Positive".</p>
+</div>'))
 
                 self$results$instructions$setContent(instructions)
 
                 # Initialize tables with row headers
                 testParamsTable <- self$results$testParamsTable
-                testParamsTable$addRow(rowKey = "test1", values = list(test = "Test 1"))
-                testParamsTable$addRow(rowKey = "test2", values = list(test = "Test 2"))
+                testParamsTable$addRow(rowKey = "test1", values = list(test = .("Test 1")))
+                testParamsTable$addRow(rowKey = "test2", values = list(test = .("Test 2")))
 
                 cotestResultsTable <- self$results$cotestResultsTable
                 cotestResultsTable$addRow(rowKey = "either_pos",
-                                          values = list(scenario = "Either Test Positive (Parallel Rule)"))
+                                          values = list(scenario = .("Either Test Positive (Parallel Rule)")))
+                # Same msgid as .updateCotestResultsTable() uses, so the scaffolded label and the
+                # finished one cannot be translated differently and visibly change wording.
                 cotestResultsTable$addRow(rowKey = "test1_pos",
-                                          values = list(scenario = "Test 1 Positive Only"))
+                                          values = list(scenario = sprintf(.("%s Positive Only"), .("Test 1"))))
                 cotestResultsTable$addRow(rowKey = "test2_pos",
-                                          values = list(scenario = "Test 2 Positive Only"))
+                                          values = list(scenario = sprintf(.("%s Positive Only"), .("Test 2"))))
                 cotestResultsTable$addRow(rowKey = "both_pos",
-                                          values = list(scenario = "Both Tests Positive"))
+                                          values = list(scenario = .("Both Tests Positive")))
                 cotestResultsTable$addRow(rowKey = "both_neg",
-                                          values = list(scenario = "Both Tests Negative"))
+                                          values = list(scenario = .("Both Tests Negative")))
             },
 
             .run = function() {
@@ -97,19 +97,26 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 # used to say only "Test 1" / "Test 2", so a manuscript sentence never said what
                 # was tested. Defaults are exactly the old strings, so nothing moves unless the
                 # user names them.
-                t1_name <- private$.testLabel(self$options$test1_name, "Test 1")
-                t2_name <- private$.testLabel(self$options$test2_name, "Test 2")
+                t1_name <- private$.testLabel(self$options$test1_name, .("Test 1"))
+                t2_name <- private$.testLabel(self$options$test2_name, .("Test 2"))
                 # A worked example names its own tests, unless the user typed something.
                 # (events.js writes the same names into the boxes, so the GUI agrees.)
                 if (self$options$preset != "custom") {
                     pv <- private$.getPresetValues(self$options$preset)
                     if (!is.null(pv)) {
                         if (!nzchar(trimws(self$options$test1_name)) && !is.null(pv$test1_name))
-                            t1_name <- private$.escapeHtml(pv$test1_name)
+                            t1_name <- pv$test1_name
                         if (!nzchar(trimws(self$options$test2_name)) && !is.null(pv$test2_name))
-                            t2_name <- private$.escapeHtml(pv$test2_name)
+                            t2_name <- pv$test2_name
                     }
                 }
+
+                # A jamovi `type: text` table cell is rendered as PLAIN TEXT: an entity is not
+                # decoded there, so a test named "Ki-67 <10%" read "Ki-67 &lt;10%" in both tables
+                # and in whatever manuscript table they were exported into. Keep the raw name for
+                # table cells and footnotes; escape only where this file builds HTML itself.
+                t1_html <- private$.escapeHtml(t1_name)
+                t2_html <- private$.escapeHtml(t2_name)
 
                 # Get parameters from user inputs
                 test1_sens <- self$options$test1_sens
@@ -141,12 +148,10 @@ cotestClass <- if (requireNamespace("jmvcore"))
                         # A worked example silently replacing whatever is in the boxes is exactly
                         # how a demonstration figure ends up quoted as if it were evidence. Say so
                         # every single time one is in use.
+                        # A msgid must be ONE string literal, so the paste0() fragments are
+                        # merged into a single .() literal. Rendered text is unchanged.
                         private$.addNotice(sprintf(
-                            paste0("Worked example in use: %s. %s These are round illustrative numbers ",
-                                   "chosen to demonstrate the calculation, not pooled estimates from the ",
-                                   "literature and not values to use for patient care \u{2014} select ",
-                                   "Custom values and enter sensitivity, specificity and prevalence ",
-                                   "from your own population before acting on any result below."),
+                            .("Worked example in use: %1$s. %2$s These are round illustrative numbers chosen to demonstrate the calculation, not pooled estimates from the literature and not values to use for patient care \u2014 select Custom values and enter sensitivity, specificity and prevalence from your own population before acting on any result below."),
                             preset_values$label, preset_values$note), "info")
 
                         # The .u.yaml `enable:` locks are a GUI affordance only; a script calling
@@ -167,12 +172,22 @@ cotestClass <- if (requireNamespace("jmvcore"))
                             o <- self$options$.__enclos_env__$private[[paste0("..", nm)]]
                             if (is.null(o)) {
                                 private$.addNotice(sprintf(
-                                    "Internal: could not read the default for '%s', so the analysis cannot report whether a worked example replaced a value you supplied. Please report this.",
+                                    .("Internal: could not read the default for '%s', so the analysis cannot report whether a worked example replaced a value you supplied. Please report this."),
                                     nm), "warning")
                                 return(NULL)
                             }
                             o$default
                         }
+                        # The user never sees "test1_sens"; they see the control's label. Use the
+                        # .a.yaml titles so the warning names something they can act on.
+                        opt_titles <- c(
+                            test1_sens   = .("Test 1 sensitivity"),
+                            test1_spec   = .("Test 1 specificity"),
+                            test2_sens   = .("Test 2 sensitivity"),
+                            test2_spec   = .("Test 2 specificity"),
+                            prevalence   = .("Disease prevalence"),
+                            cond_dep_pos = .("Dependence among subjects with disease"),
+                            cond_dep_neg = .("Dependence among subjects without disease"))
                         differing <- character(0)
                         for (nm in c("test1_sens", "test1_spec", "test2_sens", "test2_spec",
                                      "prevalence", "cond_dep_pos", "cond_dep_neg")) {
@@ -185,8 +200,8 @@ cotestClass <- if (requireNamespace("jmvcore"))
                                 next
                             if (isTRUE(all.equal(given, used)))   # already agrees with the example
                                 next
-                            differing <- c(differing, sprintf("%s (%s given, %s used)",
-                                                              nm, format(given), format(used)))
+                            differing <- c(differing, sprintf(.("%1$s (%2$s given, %3$s used)"),
+                                                              opt_titles[[nm]], format(given), format(used)))
                         }
 
                         # `indep` is handled WITHOUT the schema-default test. It is a Bool
@@ -197,13 +212,12 @@ cotestClass <- if (requireNamespace("jmvcore"))
                         # INDEPENDENT model and said nothing at all.
                         if (!identical(isTRUE(self$options$indep), isTRUE(indep)))
                             differing <- c(differing,
-                                           sprintf("indep (%s given, %s used \u{2014} this selects which model is fitted)",
+                                           sprintf(.("%1$s (%2$s given, %3$s used \u2014 this selects which model is fitted)"),
+                                                   .("Assume conditional independence"),
                                                    isTRUE(self$options$indep), isTRUE(indep)))
                         if (length(differing) > 0) {
                             private$.addNotice(sprintf(
-                                paste0("The worked example replaced values you supplied: %s. A worked ",
-                                       "example sets every parameter; to use your own numbers set the ",
-                                       "worked example to Custom values."),
+                                .("The worked example replaced values you supplied: %s. A worked example sets every parameter; to use your own numbers set the worked example to Custom values."),
                                 paste(differing, collapse = "; ")), "warning")
                         }
                     }
@@ -216,10 +230,10 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 pretest_odds <- prevalence / (1 - prevalence)
 
                 # Calculate likelihood ratios with numerical stability
-                test1_plr <- private$.calculateLikelihoodRatio(test1_sens, (1 - test1_spec), "Test 1 Positive LR")
-                test1_nlr <- private$.calculateLikelihoodRatio((1 - test1_sens), test1_spec, "Test 1 Negative LR")
-                test2_plr <- private$.calculateLikelihoodRatio(test2_sens, (1 - test2_spec), "Test 2 Positive LR")
-                test2_nlr <- private$.calculateLikelihoodRatio((1 - test2_sens), test2_spec, "Test 2 Negative LR")
+                test1_plr <- private$.calculateLikelihoodRatio(test1_sens, (1 - test1_spec), .("Test 1 Positive LR"))
+                test1_nlr <- private$.calculateLikelihoodRatio((1 - test1_sens), test1_spec, .("Test 1 Negative LR"))
+                test2_plr <- private$.calculateLikelihoodRatio(test2_sens, (1 - test2_spec), .("Test 2 Positive LR"))
+                test2_nlr <- private$.calculateLikelihoodRatio((1 - test2_sens), test2_spec, .("Test 2 Negative LR"))
 
                 # Update test parameters table using helper method
                 private$.updateTestParametersTable(test1_sens, test1_spec, test1_plr, test1_nlr,
@@ -257,7 +271,7 @@ cotestClass <- if (requireNamespace("jmvcore"))
                     p_either_pos_nD <- 1 - results$p_both_neg_nD
                 }
 
-                lr_either_pos <- private$.calculateLikelihoodRatio(p_either_pos_D, p_either_pos_nD, "Either Positive LR")
+                lr_either_pos <- private$.calculateLikelihoodRatio(p_either_pos_D, p_either_pos_nD, .("Either Positive LR"))
                 postest_odds_either <- pretest_odds * lr_either_pos
                 postest_prob_either <- private$.oddsToProbability(postest_odds_either)
                 rel_prob_either <- postest_prob_either / prevalence
@@ -289,30 +303,30 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 # Create enhanced explanation with clinical interpretation
                 plr_interpretation <- private$.interpretPLR(if(indep) test1_plr * test2_plr else results$lr_both_pos)
                 explanation <- sprintf(
-                    "<p><strong>Clinical Interpretation:</strong></p>
-                <p>Disease prevalence (pre-test probability): <strong>%s</strong></p>
-                <p><strong>Both tests positive:</strong> %s probability (%s) - %s</p>
-                <p><strong>Both tests negative:</strong> %s probability (%s) %s</p>
+                    .("<p><strong>Clinical Interpretation:</strong></p>
+                <p>Disease prevalence (pre-test probability): <strong>%1$s</strong></p>
+                <p><strong>Both tests positive:</strong> %2$s probability (%3$s) - %4$s</p>
+                <p><strong>Both tests negative:</strong> %5$s probability (%6$s) %7$s</p>
                 <p><strong>Single positive test:</strong></p>
                 <ul>
-                <li>%s positive only: <strong>%s</strong> %s</li>
-                <li>%s positive only: <strong>%s</strong> %s</li>
+                <li>%8$s positive only: <strong>%9$s</strong> %10$s</li>
+                <li>%11$s positive only: <strong>%12$s</strong> %13$s</li>
                 </ul>
                 <div style='background-color: rgba(33, 152, 255, 0.07); padding: 10px; border-radius: 5px; margin-top: 15px; color: inherit;'>
                 <p><strong>Copy-ready summary:</strong></p>
-                <p style='font-family: monospace; font-size: 12px;'>%s</p>
-                </div>",
+                <p style='font-family: monospace; font-size: 12px;'>%14$s</p>
+                </div>"),
                     private$.fmtPct(prevalence),
                     private$.fmtPct(postest_prob_both), private$.fmtChange(rel_prob_both), plr_interpretation,
                     private$.fmtPct(postest_prob_both_neg), private$.fmtChange(rel_prob_both_neg),
                     private$.getClinicalSignificance(postest_prob_both_neg, prevalence),
-                    t1_name, private$.fmtPct(postest_prob_t1), private$.getClinicalSignificance(postest_prob_t1, prevalence),
-                    t2_name, private$.fmtPct(postest_prob_t2), private$.getClinicalSignificance(postest_prob_t2, prevalence),
+                    t1_html, private$.fmtPct(postest_prob_t1), private$.getClinicalSignificance(postest_prob_t1, prevalence),
+                    t2_html, private$.fmtPct(postest_prob_t2), private$.getClinicalSignificance(postest_prob_t2, prevalence),
                     private$.generateReportSentence(test1_sens, test1_spec, test2_sens, test2_spec,
                                                    prevalence, postest_prob_both, rel_prob_both,
                                                    postest_prob_both_neg, rel_prob_both_neg,
                                                    preset, indep, phi_d_used, phi_n_used,
-                                                   cond_dep_pos, cond_dep_neg, t1_name, t2_name)
+                                                   cond_dep_pos, cond_dep_neg, t1_html, t2_html)
                 )
 
                 self$results$explanation$setContent(explanation)
@@ -332,80 +346,84 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 private$.displayNotices()
             },
 
-            .plot1 = function(image1, ggtheme, ...) {
+            # `ggtheme = NULL`, not a bare parameter: a guard on a missing promise forces it and
+            # errors when the renderer is called outside jamovi's engine.
+            .plot1 = function(image1, ggtheme = NULL, ...) {
                 plotData <- image1$state
 
                 # .prepareFaganPlotData() already explained the reason in a notice.
                 if (is.null(plotData) || !isTRUE(plotData$drawable))
                     return(FALSE)
 
-                # Check cache to avoid expensive recalculations
-                params_key <- paste(plotData$Prevalence, plotData$Plr_PositiveRule, plotData$Nlr_NegativeRule, sep="_")
+                p <- nomogrammer(
+                    Prevalence = plotData$Prevalence,
+                    Plr = plotData$Plr_PositiveRule,
+                    Nlr = plotData$Nlr_NegativeRule,
+                    Detail = TRUE,
+                    NullLine = TRUE,
+                    LabelSize = private$NOMOGRAM_LABEL_SIZE,
+                    # Verbose printed "Sensitivity = 94% / Specificity = 86%" to the console.
+                    # Those are the operating characteristics nomogrammer back-derives for the
+                    # COMBINED parallel rule; they belong to neither test, and in jamovi they
+                    # surfaced in Analysis Notes unlabelled.
+                    Verbose = FALSE,
+                    # jamovi's global theme, so the nomogram stops being a white rectangle in a
+                    # dark results pane. nomogrammer() layers its structural theme() (hidden x
+                    # axis, no grid, no legend) ON TOP of it, so the layout survives.
+                    Theme = ggtheme,
+                    # nomogrammer() is a file-level function: `.()` inside it throws "object
+                    # 'self' not found". The figure's own text is therefore translated HERE and
+                    # passed in, otherwise it is the one result item that bypasses translation
+                    # entirely -- and it travels into slide decks as a PNG.
+                    Title = .("Fagan Nomogram"),
+                    PriorLabel = .("Prior\nProb.\n(%)"),
+                    PosteriorLabel = .("Posterior\nProb.\n(%)")
+                )
 
-                if (is.null(private$.lastNomogramParams) || private$.lastNomogramParams != params_key) {
-                    private$.nomogramCache <- nomogrammer(
-                        Prevalence = plotData$Prevalence,
-                        Plr = plotData$Plr_PositiveRule,
-                        Nlr = plotData$Nlr_NegativeRule,
-                        Detail = TRUE,
-                        NullLine = TRUE,
-                        LabelSize = private$NOMOGRAM_LABEL_SIZE,
-                        # Verbose printed "Sensitivity = 94% / Specificity = 86%" to the console.
-                        # Those are the operating characteristics nomogrammer back-derives for the
-                        # COMBINED parallel rule; they belong to neither test, and in jamovi they
-                        # surfaced in Analysis Notes unlabelled.
-                        Verbose = FALSE
-                    )
-                    private$.lastNomogramParams <- params_key
-                }
-
-                p <- private$.nomogramCache
+                # After the theme, so it is not replaced by it. The colour is left to the theme:
+                # a pinned "grey30" was the lowest-contrast element on the figure at export
+                # resolution and unreadable on a dark background.
                 if (!is.null(plotData$Caption) && nzchar(plotData$Caption))
                     p <- p + ggplot2::labs(caption = plotData$Caption) +
                              ggplot2::theme(plot.caption = ggplot2::element_text(
-                                 hjust = 0, size = 8, colour = "grey30"))
+                                 hjust = 0, size = 8))
                 print(p)
                 TRUE
             },
 
             # Enhanced input validation with specific guidance
             .validateInputParameters = function(test1_sens, test1_spec, test2_sens, test2_spec, prevalence, indep, cond_dep_pos, cond_dep_neg) {
-                if (test1_sens <= 0 || test1_sens >= 1) {
-                    jmvcore::reject("Test 1 sensitivity must be between 0 and 1. Typical clinical values range from 0.60-0.95 for most diagnostic tests.")
-                }
-                if (test1_spec <= 0 || test1_spec >= 1) {
-                    jmvcore::reject("Test 1 specificity must be between 0 and 1. Typical clinical values range from 0.70-0.98 for most diagnostic tests.")
-                }
-                if (test2_sens <= 0 || test2_sens >= 1) {
-                    jmvcore::reject("Test 2 sensitivity must be between 0 and 1. Typical clinical values range from 0.60-0.95 for most diagnostic tests.")
-                }
-                if (test2_spec <= 0 || test2_spec >= 1) {
-                    jmvcore::reject("Test 2 specificity must be between 0 and 1. Typical clinical values range from 0.70-0.98 for most diagnostic tests.")
-                }
-                if (prevalence <= 0 || prevalence >= 1) {
-                    jmvcore::reject("Disease prevalence must be between 0 and 1. Consider realistic clinical prevalences: rare diseases (0.001-0.01), common conditions (0.05-0.20).")
-                }
-                if (!indep && (cond_dep_pos < -1 || cond_dep_pos > 1)) {
-                    jmvcore::reject("Conditional dependence for subjects with disease must be between -1 and 1. Typical positive values: 0.05 (weak), 0.15 (moderate), 0.30 (strong). Negative values describe tests that compensate for each other's errors.")
-                }
-                if (!indep && (cond_dep_neg < -1 || cond_dep_neg > 1)) {
-                    jmvcore::reject("Conditional dependence for subjects without disease must be between -1 and 1. Typical positive values: 0.05 (weak), 0.15 (moderate), 0.30 (strong). Negative values describe tests that compensate for each other's errors.")
-                }
-                
-                # Additional clinical validity checks
+                # No range guards here. Every one of these options is bounded in cotest.a.yaml
+                # (sens/spec 0.01-0.99, prevalence 0.001-0.999, dependence -1 to 1) and
+                # OptionNumber$check() REJECTS an out-of-range value -- it does not clamp -- before
+                # .run() is reached, so the six jmvcore::reject() calls that used to stand here
+                # could never fire and only put six dead msgids in the catalog. The calibration
+                # guidance they carried is now a note on the Test Parameters table, where it is
+                # actually read (see .updateTestParametersTable).
+
+                # The narrower, marginal-dependent Frechet range is deliberately NOT enforced
+                # either: a value inside -1 to 1 but unattainable with the entered sensitivities
+                # is truncated to its bound and reported (.calculateDependentTestProbabilities),
+                # so e.g. rho = -0.5 with Sens 0.80 / 0.70 (attainable range -0.33 to +0.76) is a
+                # legitimate request, not an error.
+
+                # Clinical validity checks
                 if (test1_sens + test1_spec < 1.1) {
-                    private$.addNotice("Test 1 has low discriminatory power (sensitivity plus specificity below 1.1, i.e. a Youden index below 0.1). Check its likelihood ratios in the results table: an operating point close to the chance diagonal can still give an informative LR+ or LR- when sensitivity and specificity are very unequal.", "warning")
+                    private$.addNotice(.("Test 1 has low discriminatory power (sensitivity plus specificity below 1.1, i.e. a Youden index below 0.1). Check its likelihood ratios in the results table: an operating point close to the chance diagonal can still give an informative LR+ or LR- when sensitivity and specificity are very unequal."), "warning")
                 }
                 if (test2_sens + test2_spec < 1.1) {
-                    private$.addNotice("Test 2 has low discriminatory power (sensitivity plus specificity below 1.1, i.e. a Youden index below 0.1). Check its likelihood ratios in the results table: an operating point close to the chance diagonal can still give an informative LR+ or LR- when sensitivity and specificity are very unequal.", "warning")
+                    private$.addNotice(.("Test 2 has low discriminatory power (sensitivity plus specificity below 1.1, i.e. a Youden index below 0.1). Check its likelihood ratios in the results table: an operating point close to the chance diagonal can still give an informative LR+ or LR- when sensitivity and specificity are very unequal."), "warning")
                 }
 
-                # Check for extreme prevalence that might cause numerical issues
-                if (prevalence < 0.001) {
-                    private$.addNotice("Very low prevalence (below 0.1%) may lead to unstable results; the computed post-test probabilities are highly sensitive to small changes in the entered prevalence.", "warning")
-                }
-                if (prevalence > 0.5) {
-                    private$.addNotice("High prevalence (above 50%) detected. Ensure this reflects your actual clinical population.", "info")
+                # Extreme prevalence. The old guard tested `< 0.001`, which is the option's own
+                # minimum, so it could never be TRUE and the most unstable reachable point (0.001)
+                # warned about nothing. Both tails now warn inside the reachable range.
+                if (prevalence < 0.05) {
+                    private$.addNotice(.("Low prevalence (below 5%): every post-test probability below is driven mainly by the prevalence you entered rather than by the tests, and changes steeply with it. Check that this is the pre-test probability in the population you are actually testing, and re-run with a plausible range around it before acting on the numbers."), "warning")
+                } else if (prevalence > 0.95) {
+                    private$.addNotice(.("Very high prevalence (above 95%): every post-test probability below is driven mainly by the prevalence you entered rather than by the tests, and even the 'both tests negative' row will stay high. Check that this is the pre-test probability in the population you are actually testing."), "warning")
+                } else if (prevalence > 0.5) {
+                    private$.addNotice(.("High prevalence (above 50%) detected. Ensure this reflects your actual clinical population."), "info")
                 }
             },
 
@@ -422,21 +440,21 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 # value is a structural consequence of the assumed model rather than an estimate.
                 if (num_zero && den_zero) {
                     private$.addNotice(sprintf(
-                        "%s is undefined: with the current parameters this combination of test results has probability zero in both the diseased and the non-diseased group, so it cannot occur at all and no post-test probability exists for it. That row is left blank.",
+                        .("%s is undefined: with the current parameters this combination of test results has probability zero in both the diseased and the non-diseased group, so it cannot occur at all and no post-test probability exists for it. That row is left blank."),
                         scenario_name), "warning")
                     return(NA_real_)
                 }
 
                 if (den_zero) {
                     private$.addNotice(sprintf(
-                        "%s is infinite: with the current parameters this combination of test results cannot occur in a subject without disease, so its post-test probability is 1 by construction rather than estimated. Lower the conditional dependence if that is not intended.",
+                        .("%s is infinite: with the current parameters this combination of test results cannot occur in a subject without disease, so its post-test probability is 1 by construction rather than estimated. Lower the conditional dependence if that is not intended."),
                         scenario_name), "warning")
                     return(Inf)
                 }
 
                 if (num_zero) {
                     private$.addNotice(sprintf(
-                        "%s is zero: with the current parameters this combination of test results cannot occur in a subject with disease, so its post-test probability is 0 by construction rather than estimated. Lower the conditional dependence if that is not intended.",
+                        .("%s is zero: with the current parameters this combination of test results cannot occur in a subject with disease, so its post-test probability is 0 by construction rather than estimated. Lower the conditional dependence if that is not intended."),
                         scenario_name), "warning")
                     return(0)
                 }
@@ -445,7 +463,8 @@ cotestClass <- if (requireNamespace("jmvcore"))
 
                 # Check for extreme values that might indicate issues
                 if (result > 1000) {
-                    private$.addNotice(paste("Very high", scenario_name, "ratio (", round(result, 1), ") - indicates highly informative test."), "info")
+                    private$.addNotice(sprintf(.("Very high %1$s ratio ( %2$s ) - indicates highly informative test."),
+                                               scenario_name, round(result, 1)), "info")
                 }
 
                 return(result)
@@ -464,7 +483,7 @@ cotestClass <- if (requireNamespace("jmvcore"))
             # Clamp probabilities to valid ranges while providing informative notices
             .clampProbability = function(value, lower, upper, context) {
                 if (is.nan(value) || is.infinite(value)) {
-                    jmvcore::reject("{ctx} resulted in a non-finite probability.",
+                    jmvcore::reject(.("{ctx} resulted in a non-finite probability."),
                                     code = NULL, ctx = context)
                 }
 
@@ -501,7 +520,7 @@ cotestClass <- if (requireNamespace("jmvcore"))
 
                 if (any(!is.finite(cells)) || any(cells < -1e-9) || any(cells > 1 + 1e-9)) {
                     private$.addNotice(sprintf(
-                        "The joint probabilities for %s are not all valid probabilities (%s). Review the dependence parameters.",
+                        .("The joint probabilities for %1$s are not all valid probabilities (%2$s). Review the dependence parameters."),
                         label, paste(sprintf("%.4f", cells), collapse = ", ")), "warning")
                     return(invisible(FALSE))
                 }
@@ -510,7 +529,7 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 # subtraction, which makes this true by construction today.
                 if (abs(sum(cells) - 1) > 1e-6) {
                     private$.addNotice(sprintf(
-                        "The joint probabilities for %s sum to %.6f rather than 1. Review the dependence parameters.",
+                        .("The joint probabilities for %1$s sum to %2$.6f rather than 1. Review the dependence parameters."),
                         label, sum(cells)), "warning")
                     return(invisible(FALSE))
                 }
@@ -519,7 +538,7 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 implied2 <- p_both + p_second_only
                 if (abs(implied1 - marginal1) > 1e-6 || abs(implied2 - marginal2) > 1e-6) {
                     private$.addNotice(sprintf(
-                        "The joint probabilities for %s do not add back up to the test parameters entered (they imply %.4f and %.4f, against %.4f and %.4f). Review the dependence parameters.",
+                        .("The joint probabilities for %1$s do not add back up to the test parameters entered (they imply %2$.4f and %3$.4f, against %4$.4f and %5$.4f). Review the dependence parameters."),
                         label, implied1, implied2, marginal1, marginal2), "warning")
                     return(invisible(FALSE))
                 }
@@ -543,14 +562,15 @@ cotestClass <- if (requireNamespace("jmvcore"))
                     )
                 )
 
+                # The orientation that used to sit in unreachable reject() messages. Most
+                # diagnostic tests land in these bands; a value far outside one is usually a
+                # transposed sensitivity/specificity pair rather than a remarkable test.
+                testParamsTable$setNote("typical_ranges", .("For orientation: most diagnostic tests fall between 0.60 and 0.95 for sensitivity and between 0.70 and 0.98 for specificity, and prevalence is the pre-test probability in the population you are testing (roughly 0.001-0.01 for rare disease, 0.05-0.20 for common conditions). Values far outside these bands are worth re-checking \u2014 most often sensitivity and specificity have been entered the wrong way round."))
+
                 # LR+ and LR- are the two headings most often misread, and their definitions
                 # used to sit behind the off-by-default "Detailed footnotes" checkbox, so the
                 # default run showed seven column headings with no definition of any of them.
-                testParamsTable$setNote("lr_defs", paste0(
-                    "LR+ is how many times more likely a positive result is in someone with the ",
-                    "disease than in someone without it; LR- is the same ratio for a negative ",
-                    "result. Above 10 (or below 0.1) a single result shifts the probability of ",
-                    "disease substantially; between 0.5 and 2 it barely moves it."))
+                testParamsTable$setNote("lr_defs", .("LR+ is how many times more likely a positive result is in someone with the disease than in someone without it; LR- is the same ratio for a negative result. Above 10 (or below 0.1) a single result shifts the probability of disease substantially; between 0.5 and 2 it barely moves it."))
 
                 testParamsTable$setRow(
                     rowKey = "test2",
@@ -590,17 +610,8 @@ cotestClass <- if (requireNamespace("jmvcore"))
                     postest_odds_both_neg <- pretest_odds * lr_both_neg
                     postest_prob_both_neg <- private$.oddsToProbability(postest_odds_both_neg)
 
-                    dependence_info <- paste0(
-                        "<p>The two tests are run in parallel on the same subject and are assumed to be ",
-                        "<strong>conditionally independent</strong>: within the diseased group, and again ",
-                        "within the non-diseased group, the result of one test carries no information ",
-                        "about the other. The joint probabilities below are therefore plain products of ",
-                        "the entered sensitivities and specificities.</p>",
-                        "<p>Independence is the optimistic assumption. If the two tests in fact tend to ",
-                        "err together \u{2014} same specimen, same operator, same biology \u{2014} it ",
-                        "overstates how much the pair adds over either test alone. Clear ",
-                        "<em>Assume the two tests are conditionally independent</em> and enter a ",
-                        "dependence parameter to see how far the conclusion moves.</p>")
+                    # One .() literal per message: a msgid cannot be assembled by paste0().
+                    dependence_info <- .("<p>The two tests are run in parallel on the same subject and are assumed to be <strong>conditionally independent</strong>: within the diseased group, and again within the non-diseased group, the result of one test carries no information about the other. The joint probabilities below are therefore plain products of the entered sensitivities and specificities.</p><p>Independence is the optimistic assumption. If the two tests in fact tend to err together \u2014 same specimen, same operator, same biology \u2014 it overstates how much the pair adds over either test alone. Clear <em>Assume the two tests are conditionally independent</em> and enter a dependence parameter to see how far the conclusion moves.</p>")
                 } else {
                     # Dependent tests scenario with numerical stability
                     dep_results <- private$.calculateDependentTestProbabilities(test1_sens, test1_spec, test2_sens, test2_spec,
@@ -674,7 +685,7 @@ cotestClass <- if (requireNamespace("jmvcore"))
                     # realized correlation of smaller magnitude, and lowering it further makes the
                     # truncation worse. The realized phi is reported in the Test Dependence panel.
                     private$.addNotice(sprintf(
-                        "The dependence parameter for the diseased group (%.2f) is not attainable with these sensitivities, so the joint positive probability was truncated from %.4f to its bound %.4f. The model actually fitted is therefore not the one you specified, and can force some test combinations to be impossible. Move the value toward 0 until this note disappears; the realized correlation is reported in the Test Dependence panel.",
+                        .("The dependence parameter for the diseased group (%1$.2f) is not attainable with these sensitivities, so the joint positive probability was truncated from %2$.4f to its bound %3$.4f. The model actually fitted is therefore not the one you specified, and can force some test combinations to be impossible. Move the value toward 0 until this note disappears; the realized correlation is reported in the Test Dependence panel."),
                         cond_dep_pos, p_both_pos_D_raw, p_both_pos_D), "warning")
                 }
 
@@ -694,7 +705,7 @@ cotestClass <- if (requireNamespace("jmvcore"))
                                                           "P(Test1+, Test2+ | Disease-)")
                 if (abs(p_both_pos_nD_raw - p_both_pos_nD) > private$NUMERICAL_TOLERANCE) {
                     private$.addNotice(sprintf(
-                        "The dependence parameter for the non-diseased group (%.2f) is not attainable with these specificities, so the joint false-positive probability was truncated from %.4f to its bound %.4f. The model actually fitted is therefore not the one you specified, and can force some test combinations to be impossible. Move the value toward 0 until this note disappears; the realized correlation is reported in the Test Dependence panel.",
+                        .("The dependence parameter for the non-diseased group (%1$.2f) is not attainable with these specificities, so the joint false-positive probability was truncated from %2$.4f to its bound %3$.4f. The model actually fitted is therefore not the one you specified, and can force some test combinations to be impossible. Move the value toward 0 until this note disappears; the realized correlation is reported in the Test Dependence panel."),
                         cond_dep_neg, p_both_pos_nD_raw, p_both_pos_nD), "warning")
                 }
 
@@ -707,18 +718,18 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 # Ensure each set is a valid distribution that still reproduces its marginals
                 private$.validateJointDistribution(
                     p_both_pos_D, p_t1_only_D, p_t2_only_D, p_both_neg_D,
-                    test1_sens, test2_sens, "subjects with disease"
+                    test1_sens, test2_sens, .("subjects with disease")
                 )
                 private$.validateJointDistribution(
                     p_both_pos_nD, p_t1_only_nD, p_t2_only_nD, p_both_neg_nD,
-                    fp_test1, fp_test2, "subjects without disease"
+                    fp_test1, fp_test2, .("subjects without disease")
                 )
 
                 # Calculate likelihood ratios with stability checks
-                lr_t1_only <- private$.calculateLikelihoodRatio(p_t1_only_D, p_t1_only_nD, "Test 1 Only LR")
-                lr_t2_only <- private$.calculateLikelihoodRatio(p_t2_only_D, p_t2_only_nD, "Test 2 Only LR")
-                lr_both_pos <- private$.calculateLikelihoodRatio(p_both_pos_D, p_both_pos_nD, "Both Positive LR")
-                lr_both_neg <- private$.calculateLikelihoodRatio(p_both_neg_D, p_both_neg_nD, "Both Negative LR")
+                lr_t1_only <- private$.calculateLikelihoodRatio(p_t1_only_D, p_t1_only_nD, .("Test 1 Only LR"))
+                lr_t2_only <- private$.calculateLikelihoodRatio(p_t2_only_D, p_t2_only_nD, .("Test 2 Only LR"))
+                lr_both_pos <- private$.calculateLikelihoodRatio(p_both_pos_D, p_both_pos_nD, .("Both Positive LR"))
+                lr_both_neg <- private$.calculateLikelihoodRatio(p_both_neg_D, p_both_neg_nD, .("Both Negative LR"))
 
                 # Calculate post-test odds and probabilities
                 postest_odds_t1 <- pretest_odds * lr_t1_only
@@ -743,24 +754,24 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 phi_n <- phi_calc(p_both_pos_nD, p_t1_only_nD, p_t2_only_nD, p_both_neg_nD)
 
                 dependence_info <- sprintf(
-                    "<p>Tests are modeled with conditional dependence:<br>
-                Dependence for subjects with disease: %.2f<br>
-                Dependence for subjects without disease: %.2f<br>
-                Realized phi (disease): %s<br>
-                Realized phi (no disease): %s<br>
+                    .("<p>Tests are modeled with conditional dependence:<br>
+                Dependence for subjects with disease: %1$.2f<br>
+                Dependence for subjects without disease: %2$.2f<br>
+                Realized phi (disease): %3$s<br>
+                Realized phi (no disease): %4$s<br>
                 <span style='font-size: 90%%;'>(Phi is the correlation between the two test results
-                actually achieved by the fitted model, on a \u{2212}1 to +1 scale, where 0 is
+                actually achieved by the fitted model, on a \u22121 to +1 scale, where 0 is
                 conditional independence. It differs from the value you entered when that value
                 was not attainable given the sensitivities and specificities supplied.)</span></p>
                 <p>Joint probabilities after accounting for dependence:<br>
-                P(Test1+,Test2+ | Disease+): %.4f<br>
-                P(Test1+,Test2- | Disease+): %.4f<br>
-                P(Test1-,Test2+ | Disease+): %.4f<br>
-                P(Test1-,Test2- | Disease+): %.4f<br>
-                P(Test1+,Test2+ | Disease-): %.4f<br>
-                P(Test1+,Test2- | Disease-): %.4f<br>
-                P(Test1-,Test2+ | Disease-): %.4f<br>
-                P(Test1-,Test2- | Disease-): %.4f</p>",
+                P(Test1+,Test2+ | Disease+): %5$.4f<br>
+                P(Test1+,Test2- | Disease+): %6$.4f<br>
+                P(Test1-,Test2+ | Disease+): %7$.4f<br>
+                P(Test1-,Test2- | Disease+): %8$.4f<br>
+                P(Test1+,Test2+ | Disease-): %9$.4f<br>
+                P(Test1+,Test2- | Disease-): %10$.4f<br>
+                P(Test1-,Test2+ | Disease-): %11$.4f<br>
+                P(Test1-,Test2- | Disease-): %12$.4f</p>"),
                     cond_dep_pos, cond_dep_neg,
                     ifelse(is.na(phi_d), "NA", sprintf("%.2f", phi_d)),
                     ifelse(is.na(phi_n), "NA", sprintf("%.2f", phi_n)),
@@ -799,40 +810,29 @@ cotestClass <- if (requireNamespace("jmvcore"))
 
                 # Define scenarios with their data (including clinical parallel rule)
                 scenarios <- list(
-                    list(key = "either_pos", scenario = "Either Test Positive (Parallel Rule)", postProb = postest_prob_either,
+                    list(key = "either_pos", scenario = .("Either Test Positive (Parallel Rule)"), postProb = postest_prob_either,
                          relativeProbability = rel_prob_either, orValue = postest_odds_either),
-                    list(key = "test1_pos", scenario = paste(t1_name, "Positive Only"), postProb = postest_prob_t1,
+                    list(key = "test1_pos", scenario = sprintf(.("%s Positive Only"), t1_name), postProb = postest_prob_t1,
                          relativeProbability = rel_prob_t1, orValue = postest_odds_t1),
-                    list(key = "test2_pos", scenario = paste(t2_name, "Positive Only"), postProb = postest_prob_t2,
+                    list(key = "test2_pos", scenario = sprintf(.("%s Positive Only"), t2_name), postProb = postest_prob_t2,
                          relativeProbability = rel_prob_t2, orValue = postest_odds_t2),
-                    list(key = "both_pos", scenario = "Both Tests Positive", postProb = postest_prob_both,
+                    list(key = "both_pos", scenario = .("Both Tests Positive"), postProb = postest_prob_both,
                          relativeProbability = rel_prob_both, orValue = postest_odds_both),
-                    list(key = "both_neg", scenario = "Both Tests Negative", postProb = postest_prob_both_neg,
+                    list(key = "both_neg", scenario = .("Both Tests Negative"), postProb = postest_prob_both_neg,
                          relativeProbability = rel_prob_both_neg, orValue = postest_odds_both_neg)
                 )
 
                 # Every input is a point estimate the user typed in, so every number in this table
                 # is conditional on those values being exact. That limitation belongs next to the
                 # numbers, not only in the welcome panel, which a user can collapse.
-                cotestResultsTable$setNote("fixed_inputs", paste0(
-                    "Sensitivity, specificity and prevalence are treated as exact. These post-test ",
-                    "probabilities therefore carry <i>no</i> confidence interval and do not reflect ",
-                    "sampling uncertainty in the values entered \u{2014} published test performance ",
-                    "estimates and local prevalence both vary."))
+                cotestResultsTable$setNote("fixed_inputs", .("Sensitivity, specificity and prevalence are treated as exact. These post-test probabilities therefore carry <i>no</i> confidence interval and do not reflect sampling uncertainty in the values entered \u2014 published test performance estimates and local prevalence both vary."))
 
                 # A worked example's numbers must not leave this table looking like estimates.
                 # Without this the table is byte-identical between preset = "custom" and a
                 # demonstration run, so an exported table carries no marking at all.
                 if (!identical(preset, "custom")) {
-                    cotestResultsTable$setNote("demo", paste0(
-                        "<b>Demonstration only.</b> These figures come from a built-in worked ",
-                        "example: round illustrative sensitivity, specificity, prevalence and ",
-                        "dependence values chosen to show how the calculation behaves. They are ",
-                        "not pooled literature estimates, are not taken from any guideline, and ",
-                        "must not be used for patient care."))
-                    self$results$testParamsTable$setNote("demo", paste0(
-                        "<b>Demonstration only.</b> Illustrative test performance from a built-in ",
-                        "worked example, not values for clinical use."))
+                    cotestResultsTable$setNote("demo", .("<b>Demonstration only.</b> These figures come from a built-in worked example: round illustrative sensitivity, specificity, prevalence and dependence values chosen to show how the calculation behaves. They are not pooled literature estimates, are not taken from any guideline, and must not be used for patient care."))
+                    self$results$testParamsTable$setNote("demo", .("<b>Demonstration only.</b> Illustrative test performance from a built-in worked example, not values for clinical use."))
                 }
 
                 # Under a dependent model the combined likelihood ratio is NOT the product of the
@@ -840,11 +840,7 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 # multiplies them to transport the result to another prevalence overstates the
                 # evidence roughly two-fold at the shipped hpv_pap example.
                 if (!isTRUE(indep)) {
-                    self$results$testParamsTable$setNote("marginal_only", paste0(
-                        "These likelihood ratios describe each test <i>on its own</i>. Because the ",
-                        "two tests are modelled as conditionally dependent, the combined likelihood ",
-                        "ratio is <b>not</b> their product \u{2014} use the Post-test Odds column of ",
-                        "the Co-Testing Results table instead."))
+                    self$results$testParamsTable$setNote("marginal_only", .("These likelihood ratios describe each test <i>on its own</i>. Because the two tests are modelled as conditionally dependent, the combined likelihood ratio is <b>not</b> their product \u2014 use the Post-test Odds column of the Co-Testing Results table instead."))
                 }
 
                 # Update all rows using loop to reduce duplication
@@ -869,12 +865,8 @@ cotestClass <- if (requireNamespace("jmvcore"))
                     if (length(odds) == 1L && !is.na(odds) && (is.infinite(odds) || odds == 0)) {
                         cotestResultsTable$addFootnote(
                             rowKey = scenario$key, col = "postProb",
-                            paste0("Not an estimate: with these parameters this result combination ",
-                                   "cannot occur in one of the two disease groups, so the probability ",
-                                   "is ", if (is.infinite(odds)) "1" else "0", " by construction. ",
-                                   "This follows from the conditional dependence being truncated to ",
-                                   "the largest value the entered sensitivities and specificities ",
-                                   "allow \u{2014} move it toward 0 to leave this regime."))
+                            sprintf(.("Not an estimate: with these parameters this result combination cannot occur in one of the two disease groups, so the probability is %s by construction. This follows from the conditional dependence being truncated to the largest value the entered sensitivities and specificities allow \u2014 move it toward 0 to leave this regime."),
+                                    if (is.infinite(odds)) "1" else "0"))
                     }
                 }
             },
@@ -887,35 +879,35 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 # Test parameters footnotes
                 testParamsTable$addFootnote(
                     rowKey = "test1", col = "sens",
-                    sprintf("Proportion of diseased patients correctly identified by %s", t1_name)
+                    sprintf(.("Proportion of diseased patients correctly identified by %s"), t1_name)
                 )
                 testParamsTable$addFootnote(
                     rowKey = "test1", col = "spec",
-                    sprintf("Proportion of non-diseased patients correctly identified by %s", t1_name)
+                    sprintf(.("Proportion of non-diseased patients correctly identified by %s"), t1_name)
                 )
                 testParamsTable$addFootnote(
                     rowKey = "test1", col = "plr",
-                    "Positive Likelihood Ratio: how much more likely a positive result is in diseased vs. non-diseased patients"
+                    .("Positive Likelihood Ratio: how much more likely a positive result is in diseased vs. non-diseased patients")
                 )
                 testParamsTable$addFootnote(
                     rowKey = "test1", col = "nlr",
-                    "Negative Likelihood Ratio: how much more likely a negative result is in diseased vs. non-diseased patients"
+                    .("Negative Likelihood Ratio: how much more likely a negative result is in diseased vs. non-diseased patients")
                 )
                 testParamsTable$addFootnote(
                     rowKey = "test2", col = "sens",
-                    sprintf("Proportion of diseased patients correctly identified by %s", t2_name)
+                    sprintf(.("Proportion of diseased patients correctly identified by %s"), t2_name)
                 )
                 testParamsTable$addFootnote(
                     rowKey = "test2", col = "spec",
-                    sprintf("Proportion of non-diseased patients correctly identified by %s", t2_name)
+                    sprintf(.("Proportion of non-diseased patients correctly identified by %s"), t2_name)
                 )
                 testParamsTable$addFootnote(
                     rowKey = "test2", col = "plr",
-                    "Positive Likelihood Ratio: how much more likely a positive result is in diseased vs. non-diseased patients"
+                    .("Positive Likelihood Ratio: how much more likely a positive result is in diseased vs. non-diseased patients")
                 )
                 testParamsTable$addFootnote(
                     rowKey = "test2", col = "nlr",
-                    "Negative Likelihood Ratio: how much more likely a negative result is in diseased vs. non-diseased patients"
+                    .("Negative Likelihood Ratio: how much more likely a negative result is in diseased vs. non-diseased patients")
                 )
 
                 # Results footnotes
@@ -924,16 +916,16 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 for (row_key in c("either_pos", "test1_pos", "test2_pos", "both_pos", "both_neg")) {
                     cotestResultsTable$addFootnote(
                         rowKey = row_key, col = "postProb",
-                        "Probability of disease after obtaining this test result combination"
+                        .("Probability of disease after obtaining this test result combination")
                     )
                     cotestResultsTable$addFootnote(
                         rowKey = row_key, col = "relativeProbability",
-                        "How many times more (or less) likely disease is after testing compared to before testing"
+                        .("How many times more (or less) likely disease is after testing compared to before testing")
                     )
                     # orValue had no explanation in ANY option state.
                     cotestResultsTable$addFootnote(
                         rowKey = row_key, col = "orValue",
-                        "Post-test odds: probability of disease divided by probability of no disease. Odds of 1 mean a 50% probability; odds of 9 mean 90%."
+                        .("Post-test odds: probability of disease divided by probability of no disease. Odds of 1 mean a 50% probability; odds of 9 mean 90%.")
                     )
                 }
             },
@@ -951,14 +943,11 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 finite1 <- function(x) length(x) == 1L && is.numeric(x) && is.finite(x)
                 reason <- NULL
                 if (!finite1(lr_positive_rule) || !finite1(lr_negative_rule)) {
-                    reason <- "one of the combined likelihood ratios is not a finite number with these parameters"
+                    reason <- .("The Fagan nomogram was not drawn because one of the combined likelihood ratios is not a finite number with these parameters. Check the sensitivity and specificity values you entered.")
                 } else if (lr_positive_rule < 1) {
-                    reason <- sprintf(paste0(
-                        "the positive-rule likelihood ratio is %.2f, which is below 1. A Fagan nomogram ",
-                        "assumes a positive result raises the probability of disease; here it lowers it, ",
-                        "which means the tests as specified perform worse than chance"), lr_positive_rule)
+                    reason <- sprintf(.("The Fagan nomogram was not drawn because the positive-rule likelihood ratio is %.2f, which is below 1. A Fagan nomogram assumes a positive result raises the probability of disease; here it lowers it, which means the tests as specified perform worse than chance. Check the sensitivity and specificity values you entered."), lr_positive_rule)
                 } else if (lr_negative_rule <= 0) {
-                    reason <- "the negative-rule likelihood ratio is zero, which cannot be placed on the nomogram's logarithmic axis"
+                    reason <- .("The Fagan nomogram was not drawn because the negative-rule likelihood ratio is zero, which cannot be placed on the nomogram's logarithmic axis. Check the sensitivity and specificity values you entered.")
                 } else if (abs(lr_positive_rule - lr_negative_rule) < .Machine$double.eps ||
                            isTRUE(all.equal(lr_positive_rule, lr_negative_rule))) {
                     # nomogrammer() stop()s on equal ratios ("PLR and NLR cannot be equal"). This
@@ -968,18 +957,12 @@ cotestClass <- if (requireNamespace("jmvcore"))
                     # written, and the renderer surfaced nomogrammer's raw internal error.
                     # all.equal() also catches the near-equal case (|LR+ - LR-| ~ 4e-16), which
                     # squeaked past the eps test and drew a nomogram for two worthless tests.
-                    reason <- sprintf(paste0(
-                        "the two tests together carry no information: the positive-rule and ",
-                        "negative-rule likelihood ratios are both %.2f, so neither a positive nor ",
-                        "a negative combined result changes the probability of disease. Each test ",
-                        "is sitting on the chance diagonal (sensitivity = 1 - specificity)"),
+                    reason <- sprintf(.("The Fagan nomogram was not drawn because the two tests together carry no information: the positive-rule and negative-rule likelihood ratios are both %.2f, so neither a positive nor a negative combined result changes the probability of disease. Each test is sitting on the chance diagonal (sensitivity = 1 - specificity). Check the sensitivity and specificity values you entered."),
                         lr_positive_rule)
                 }
 
                 if (!is.null(reason)) {
-                    private$.addNotice(sprintf(
-                        "The Fagan nomogram was not drawn because %s. Check the sensitivity and specificity values you entered.",
-                        reason), "warning")
+                    private$.addNotice(reason, "warning")
                 }
 
                 plotData <- list(
@@ -995,10 +978,10 @@ cotestClass <- if (requireNamespace("jmvcore"))
                     # marker and never said which decision rule it plots. A PNG dropped into a
                     # slide deck travels without any of the surrounding text.
                     "Caption" = paste0(
-                        "Parallel rule: positive if either test is positive, negative only if both are negative.",
+                        .("Parallel rule: positive if either test is positive, negative only if both are negative."),
                         if (!identical(preset, "custom") && !is.null(preset_label))
-                            paste0("  |  DEMONSTRATION ONLY \u{2014} ", preset_label,
-                                   ", illustrative values, not for clinical use")
+                            paste0("  |  ", sprintf(.("DEMONSTRATION ONLY \u2014 %s, illustrative values, not for clinical use"),
+                                                    preset_label))
                         else "")
                 )
 
@@ -1010,15 +993,16 @@ cotestClass <- if (requireNamespace("jmvcore"))
             # sprintf("%.1f%%", NA) renders the literal "NA%". A post-test probability is NA
             # whenever a result combination is impossible in BOTH disease groups -- correct, and
             # explained in a notice -- so the prose has to say that rather than print "NA%".
-            # A user-typed name reaches HTML panels and table cells, so escape it, and fall
-            # back to the positional label when it is blank.
+            # Returns the name AS TYPED (trimmed), or the positional label when blank. It is
+            # deliberately NOT escaped here: the same string feeds plain-text table cells and
+            # HTML panels, and escaping at the source corrupted the cells. The caller escapes.
             .testLabel = function(value, fallback) {
                 if (length(value) != 1L || is.na(value) || !nzchar(trimws(value))) return(fallback)
-                private$.escapeHtml(trimws(value))
+                trimws(value)
             },
 
-            .fmtPct = function(p) if (length(p) != 1L || is.na(p)) "not estimable" else sprintf("%.1f%%", p * 100),
-            .fmtRatio = function(r) if (length(r) != 1L || is.na(r)) "not estimable" else sprintf("%.2fx", r),
+            .fmtPct = function(p) if (length(p) != 1L || is.na(p)) .("not estimable") else sprintf("%.1f%%", p * 100),
+            .fmtRatio = function(r) if (length(r) != 1L || is.na(r)) .("not estimable") else sprintf("%.2fx", r),
 
             # Direction of effect, chosen from the ratio instead of asserted. The templates used
             # to hard-code "increase" and "reduced to"; neither ratio is constrained, so for any
@@ -1026,17 +1010,24 @@ cotestClass <- if (requireNamespace("jmvcore"))
             # sensitivity and specificity entered the wrong way round) both clauses stated the
             # opposite of the numbers printed beside them.
             .fmtChange = function(r) {
-                if (length(r) != 1L || is.na(r)) return("not estimable")
-                if (r >= 1) sprintf("%.1fx increase", r) else sprintf("%.2fx of prevalence, a decrease", r)
+                if (length(r) != 1L || is.na(r)) return(.("not estimable"))
+                if (r >= 1) sprintf(.("%.1fx increase"), r) else sprintf(.("%.2fx of prevalence, a decrease"), r)
             },
 
+            # Only LR = 1 carries no information. Returning "no diagnostic value" for every
+            # LR <= 1 contradicted the figures printed beside it: at a combined LR of 0.36 the
+            # same sentence already said the probability of disease FELL 2.6-fold, which is
+            # informative evidence pointing the other way -- and usually the one clue that a
+            # sensitivity and a specificity were entered the wrong way round. Same defect class
+            # as .fmtChange and dir_pos/dir_neg, which were repaired for exactly this reason.
             .interpretPLR = function(plr) {
-                if (length(plr) != 1L || is.na(plr)) return("not estimable")
-                if (plr > 10) return("strong evidence for disease")
-                if (plr > 5) return("moderate evidence for disease")
-                if (plr > 2) return("weak evidence for disease")
-                if (plr > 1) return("minimal evidence for disease")
-                return("no diagnostic value")
+                if (length(plr) != 1L || is.na(plr)) return(.("not estimable"))
+                if (plr > 10) return(.("strong evidence for disease"))
+                if (plr > 5) return(.("moderate evidence for disease"))
+                if (plr > 2) return(.("weak evidence for disease"))
+                if (plr > 1) return(.("minimal evidence for disease"))
+                if (isTRUE(all.equal(plr, 1))) return(.("no diagnostic value"))
+                return(.("evidence against disease: this result combination is more common in subjects without the disease, so it lowers the probability of disease. Check whether a sensitivity and a specificity have been entered the wrong way round."))
             },
 
             .getClinicalSignificance = function(post_prob, prevalence) {
@@ -1044,14 +1035,14 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 # in both groups, so there is no change from prevalence to describe.
                 if (length(post_prob) != 1L || is.na(post_prob) ||
                     length(prevalence) != 1L || is.na(prevalence) || prevalence <= 0)
-                    return("(not estimable)")
+                    return(.("(not estimable)"))
                 change_factor <- post_prob / prevalence
-                if (change_factor > 3) return("(major increase)")
-                if (change_factor > 1.5) return("(moderate increase)")
-                if (change_factor > 1.1) return("(slight increase)")
-                if (change_factor < 0.5) return("(major decrease)")
-                if (change_factor < 0.8) return("(moderate decrease)")
-                return("(minimal change)")
+                if (change_factor > 3) return(.("(major increase)"))
+                if (change_factor > 1.5) return(.("(moderate increase)"))
+                if (change_factor > 1.1) return(.("(slight increase)"))
+                if (change_factor < 0.5) return(.("(major decrease)"))
+                if (change_factor < 0.8) return(.("(moderate decrease)"))
+                return(.("(minimal change)"))
             },
 
             # The disclosure has to travel WITH the sentence. This block is monospaced and
@@ -1068,50 +1059,51 @@ cotestClass <- if (requireNamespace("jmvcore"))
                                                cond_dep_pos = NA, cond_dep_neg = NA,
                                                t1_name = "Test 1", t2_name = "Test 2") {
                 marker <- if (!identical(preset, "custom"))
-                    "[DEMONSTRATION ONLY \u{2014} illustrative values, not for clinical use] " else ""
+                    paste0("[", .("DEMONSTRATION ONLY \u2014 illustrative values, not for clinical use"), "] ") else ""
 
                 # REALIZED correlation, not the requested one. When the requested rho is outside
                 # the Frechet-feasible range the joint cell is clamped and the model actually
                 # fitted uses a different correlation -- which the Test Dependence panel already
                 # reports. Quoting the requested value here put a number in a pasteable methods
                 # sentence that described a model nobody ran (0.50 quoted against 0.35 fitted).
-                fmt2 <- function(x) if (length(x) != 1L || is.na(x)) "unavailable" else sprintf("%.2f", x)
+                fmt2 <- function(x) if (length(x) != 1L || is.na(x)) .("unavailable") else sprintf("%.2f", x)
                 model <- if (isTRUE(indep)) {
-                    " Both tests were applied in parallel and assumed conditionally independent."
+                    paste0(" ", .("Both tests were applied in parallel and assumed conditionally independent."))
                 } else {
-                    trunc_note <- ""
+                    # Collected, not if/else-if. When BOTH parameters were truncated the old form
+                    # named only the diseased one, so a manuscript sentence implied the
+                    # non-diseased correlation had been fitted as entered.
+                    trunc <- character(0)
                     if (!is.na(phi_d) && !is.na(cond_dep_pos) && abs(phi_d - cond_dep_pos) > 5e-3)
-                        trunc_note <- sprintf(" (requested %.2f among diseased, truncated to the largest value the entered sensitivities allow)",
-                                              cond_dep_pos)
-                    else if (!is.na(phi_n) && !is.na(cond_dep_neg) && abs(phi_n - cond_dep_neg) > 5e-3)
-                        trunc_note <- sprintf(" (requested %.2f among non-diseased, truncated to the largest value the entered specificities allow)",
-                                              cond_dep_neg)
-                    sprintf(paste0(" Both tests were applied in parallel, allowing conditional ",
-                                   "dependence (correlation %s among diseased and %s among ",
-                                   "non-diseased subjects)%s."),
-                            fmt2(phi_d), fmt2(phi_n), trunc_note)
+                        trunc <- c(trunc, sprintf(.("(requested %.2f among diseased, truncated to the largest value the entered sensitivities allow)"),
+                                                  cond_dep_pos))
+                    if (!is.na(phi_n) && !is.na(cond_dep_neg) && abs(phi_n - cond_dep_neg) > 5e-3)
+                        trunc <- c(trunc, sprintf(.("(requested %.2f among non-diseased, truncated to the largest value the entered specificities allow)"),
+                                                  cond_dep_neg))
+                    trunc_note <- if (length(trunc) > 0) paste0(" ", paste(trunc, collapse = " ")) else ""
+                    paste0(" ", sprintf(.("Both tests were applied in parallel, allowing conditional dependence (correlation %1$s among diseased and %2$s among non-diseased subjects)%3$s."),
+                                        fmt2(phi_d), fmt2(phi_n), trunc_note))
                 }
 
                 # Direction chosen from the ratio. Hard-coding "increase" and "reduced to" made
                 # this sentence assert the opposite of its own numbers for any test pair with
                 # sensitivity + specificity < 1.
-                dir_pos <- if (is.na(rel_prob_both)) "not estimable"
-                           else if (rel_prob_both >= 1) sprintf("%.1fx increase", rel_prob_both)
-                           else sprintf("%.2fx of prevalence, a decrease", rel_prob_both)
-                dir_neg <- if (is.na(rel_prob_both_neg)) "not estimable"
-                           else if (rel_prob_both_neg <= 1) sprintf("reduced to %.2fx of prevalence", rel_prob_both_neg)
-                           else sprintf("raised to %.2fx of prevalence", rel_prob_both_neg)
+                dir_pos <- if (is.na(rel_prob_both)) .("not estimable")
+                           else if (rel_prob_both >= 1) sprintf(.("%.1fx increase"), rel_prob_both)
+                           else sprintf(.("%.2fx of prevalence, a decrease"), rel_prob_both)
+                dir_neg <- if (is.na(rel_prob_both_neg)) .("not estimable")
+                           else if (rel_prob_both_neg <= 1) sprintf(.("reduced to %.2fx of prevalence"), rel_prob_both_neg)
+                           else sprintf(.("raised to %.2fx of prevalence"), rel_prob_both_neg)
 
                 paste0(marker, sprintf(
-                    "Co-testing with %s (sensitivity %.0f%%, specificity %.0f%%) and %s (sensitivity %.0f%%, specificity %.0f%%) in a population with %.1f%% disease prevalence showed: when both tests are positive, disease probability is %s (%s); when both are negative, disease probability is %s (%s).",
+                    .("Co-testing with %1$s (sensitivity %2$.0f%%, specificity %3$.0f%%) and %4$s (sensitivity %5$.0f%%, specificity %6$.0f%%) in a population with %7$.1f%% disease prevalence showed: when both tests are positive, disease probability is %8$s (%9$s); when both are negative, disease probability is %10$s (%11$s)."),
                     t1_name, test1_sens * 100, test1_spec * 100,
                     t2_name, test2_sens * 100, test2_spec * 100,
                     prevalence * 100,
                     private$.fmtPct(postest_prob_both), dir_pos,
                     private$.fmtPct(postest_prob_both_neg), dir_neg
                 ), model,
-                " Sensitivity, specificity and prevalence were treated as exact, so these",
-                " probabilities carry no confidence interval.")
+                " ", .("Sensitivity, specificity and prevalence were treated as exact, so these probabilities carry no confidence interval."))
             },
 
             # THE canonical preset table. jamovi/js/cotest.events.js writes the same numbers
@@ -1130,60 +1122,54 @@ cotestClass <- if (requireNamespace("jmvcore"))
                         test2_sens = 0.70, test2_spec = 0.95,
                         prevalence = 0.05, indep = FALSE,
                         cond_dep_pos = 0.15, cond_dep_neg = 0.10,
-                        test1_name = "HPV", test2_name = "Pap cytology",
-                        label = "HPV (Test 1) + Pap cytology (Test 2)",
-                        note = paste0("A sensitive test paired with a specific one, both read from the same ",
-                                      "cervical sample, so they are modelled as conditionally dependent.")
+                        test1_name = .("HPV"), test2_name = .("Pap cytology"),
+                        label = .("HPV (Test 1) + Pap cytology (Test 2)"),
+                        note = .("A sensitive test paired with a specific one, both read from the same cervical sample, so they are modelled as conditionally dependent.")
                     ),
                     psa_dre = list(
                         test1_sens = 0.80, test1_spec = 0.70,
                         test2_sens = 0.50, test2_spec = 0.85,
                         prevalence = 0.15, indep = TRUE,
                         cond_dep_pos = NULL, cond_dep_neg = NULL,
-                        test1_name = "PSA", test2_name = "Rectal examination",
-                        label = "PSA (Test 1) + digital rectal examination (Test 2)",
-                        note = paste0("The one worked example that assumes conditional independence: a ",
-                                      "biochemical measurement and a physical examination.")
+                        test1_name = .("PSA"), test2_name = .("Rectal examination"),
+                        label = .("PSA (Test 1) + digital rectal examination (Test 2)"),
+                        note = .("The one worked example that assumes conditional independence: a biochemical measurement and a physical examination.")
                     ),
                     troponin_ecg = list(
                         test1_sens = 0.90, test1_spec = 0.95,
                         test2_sens = 0.70, test2_spec = 0.90,
                         prevalence = 0.20, indep = FALSE,
                         cond_dep_pos = 0.20, cond_dep_neg = 0.05,
-                        test1_name = "Troponin", test2_name = "ECG",
-                        label = "Troponin (Test 1) + ECG (Test 2)",
-                        note = paste0("Both tests are driven by the extent of myocardial injury, so they are ",
-                                      "modelled as dependent among diseased subjects in particular.")
+                        test1_name = .("Troponin"), test2_name = .("ECG"),
+                        label = .("Troponin (Test 1) + ECG (Test 2)"),
+                        note = .("Both tests are driven by the extent of myocardial injury, so they are modelled as dependent among diseased subjects in particular.")
                     ),
                     mammogram_ultrasound = list(
                         test1_sens = 0.85, test1_spec = 0.90,
                         test2_sens = 0.80, test2_spec = 0.85,
                         prevalence = 0.08, indep = FALSE,
                         cond_dep_pos = 0.25, cond_dep_neg = 0.15,
-                        test1_name = "Mammography", test2_name = "Ultrasound",
-                        label = "Mammography (Test 1) + ultrasound (Test 2)",
-                        note = paste0("Two imaging modalities of the same tissue: the strongest dependence ",
-                                      "among the worked examples, which is what dense tissue would produce.")
+                        test1_name = .("Mammography"), test2_name = .("Ultrasound"),
+                        label = .("Mammography (Test 1) + ultrasound (Test 2)"),
+                        note = .("Two imaging modalities of the same tissue: the strongest dependence among the worked examples, which is what dense tissue would produce.")
                     ),
                     covid_antigen_pcr = list(
                         test1_sens = 0.70, test1_spec = 0.95,
                         test2_sens = 0.95, test2_spec = 0.99,
                         prevalence = 0.10, indep = FALSE,
                         cond_dep_pos = 0.30, cond_dep_neg = 0.10,
-                        test1_name = "Rapid antigen", test2_name = "PCR",
-                        label = "Rapid antigen (Test 1) + PCR (Test 2)",
-                        note = paste0("Two assays for the same organism on the same swab; both track viral ",
-                                      "load, so dependence among diseased subjects is set high.")
+                        test1_name = .("Rapid antigen"), test2_name = .("PCR"),
+                        label = .("Rapid antigen (Test 1) + PCR (Test 2)"),
+                        note = .("Two assays for the same organism on the same swab; both track viral load, so dependence among diseased subjects is set high.")
                     ),
                     tb_xray_sputum = list(
                         test1_sens = 0.75, test1_spec = 0.80,
                         test2_sens = 0.85, test2_spec = 0.98,
                         prevalence = 0.12, indep = FALSE,
                         cond_dep_pos = 0.20, cond_dep_neg = 0.08,
-                        test1_name = "Chest radiograph", test2_name = "Sputum microscopy",
-                        label = "Chest radiograph (Test 1) + sputum microscopy (Test 2)",
-                        note = paste0("A sensitive imaging test paired with a highly specific microbiological ",
-                                      "one; advanced disease makes both more likely to be positive.")
+                        test1_name = .("Chest radiograph"), test2_name = .("Sputum microscopy"),
+                        label = .("Chest radiograph (Test 1) + sputum microscopy (Test 2)"),
+                        note = .("A sensitive imaging test paired with a highly specific microbiological one; advanced disease makes both more likely to be positive.")
                     )
                 )
 
@@ -1231,13 +1217,13 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 # (tools/theme_safe_html.py only scans background declarations, so it read clean.)
                 styleFor <- function(level) {
                     switch(level,
-                        "error"   = list(label = "Error",
+                        "error"   = list(label = .("Error"),
                                          tint = "rgba(220, 53, 69, 0.14)",  rule = "rgba(220, 53, 69, 0.85)"),
-                        "warning" = list(label = "Warning",
+                        "warning" = list(label = .("Warning"),
                                          tint = "rgba(255, 193, 7, 0.16)",  rule = "rgba(217, 164, 6, 0.90)"),
-                        "info"    = list(label = "Note",
+                        "info"    = list(label = .("Note"),
                                          tint = "rgba(13, 202, 240, 0.12)", rule = "rgba(13, 140, 180, 0.85)"),
-                        list(label = "Note",
+                        list(label = .("Note"),
                              tint = "rgba(255, 193, 7, 0.16)", rule = "rgba(217, 164, 6, 0.90)")
                     )
                 }
@@ -1266,11 +1252,12 @@ cotestClass <- if (requireNamespace("jmvcore"))
 
             # Helper method to build dependence explanation content
             .buildDependenceExplanation = function() {
-                explanation <- '
-<div style="max-width: 800px;">
+                # One complete .() literal, exactly as the welcome panel above: a msgid must be a
+                # string literal, and a translator needs the whole passage rather than fragments.
+                explanation <- paste0("\n", .('<div style="max-width: 800px;">
 <h3>Understanding Test Dependence in Diagnostic Testing</h3>
 
-<p>This applies to two tests read <strong>in parallel</strong>: both are performed on the same subject at the same time, before either result is known, and the two results are then combined. For tests performed one after another, where the second is ordered only after a particular first result, use a sequential testing analysis instead \u{2014} the second test\'s sensitivity and specificity there apply to the selected subgroup, not to everyone.</p>
+<p>This applies to two tests read <strong>in parallel</strong>: both are performed on the same subject at the same time, before either result is known, and the two results are then combined. For tests performed one after another, where the second is ordered only after a particular first result, use a sequential testing analysis instead \u2014 the second test\'s sensitivity and specificity there apply to the selected subgroup, not to everyone.</p>
 
 <h4>What is conditional independence vs. dependence?</h4>
 <p>Two diagnostic tests are <strong>conditionally independent</strong> if the result of one test does not influence the result of the other test, <em>given the disease status</em>. In other words, within the diseased population, the probability of Test 1 being positive is not affected by knowing the result of Test 2, and vice versa. The same applies within the non-diseased population.</p>
@@ -1281,16 +1268,16 @@ cotestClass <- if (requireNamespace("jmvcore"))
 
 <p><strong>Independent Tests:</strong> When tests are independent, joint probabilities are simply the product of individual probabilities:</p>
 <ul>
-  <li>P(Test1+ and Test2+ | Disease+) = P(Test1+ | Disease+) \u{00D7} P(Test2+ | Disease+) = Sens\u{2081} \u{00D7} Sens\u{2082}</li>
-  <li>P(Test1+ and Test2+ | Disease\u{2212}) = P(Test1+ | Disease\u{2212}) \u{00D7} P(Test2+ | Disease\u{2212}) = (1\u{2212}Spec\u{2081}) \u{00D7} (1\u{2212}Spec\u{2082})</li>
-  <li>P(Test1\u{2212} and Test2\u{2212} | Disease+) = P(Test1\u{2212} | Disease+) \u{00D7} P(Test2\u{2212} | Disease+) = (1\u{2212}Sens\u{2081}) \u{00D7} (1\u{2212}Sens\u{2082})</li>
-  <li>P(Test1\u{2212} and Test2\u{2212} | Disease\u{2212}) = P(Test1\u{2212} | Disease\u{2212}) \u{00D7} P(Test2\u{2212} | Disease\u{2212}) = Spec\u{2081} \u{00D7} Spec\u{2082}</li>
+  <li>P(Test1+ and Test2+ | Disease+) = P(Test1+ | Disease+) \u00D7 P(Test2+ | Disease+) = Sens\u2081 \u00D7 Sens\u2082</li>
+  <li>P(Test1+ and Test2+ | Disease\u2212) = P(Test1+ | Disease\u2212) \u00D7 P(Test2+ | Disease\u2212) = (1\u2212Spec\u2081) \u00D7 (1\u2212Spec\u2082)</li>
+  <li>P(Test1\u2212 and Test2\u2212 | Disease+) = P(Test1\u2212 | Disease+) \u00D7 P(Test2\u2212 | Disease+) = (1\u2212Sens\u2081) \u00D7 (1\u2212Sens\u2082)</li>
+  <li>P(Test1\u2212 and Test2\u2212 | Disease\u2212) = P(Test1\u2212 | Disease\u2212) \u00D7 P(Test2\u2212 | Disease\u2212) = Spec\u2081 \u00D7 Spec\u2082</li>
 </ul>
 
-<p><strong>Dependent Tests:</strong> When tests are dependent, we adjust these probabilities using a correlation parameter (denoted as \u{03C1} or \u{03C8}) that runs from \u{2212}1 through 0 (independence) to +1. Positive values describe tests that tend to err together; negative values describe tests that compensate for each other\'s errors, so that one tends to be positive where the other is negative. Both are permitted here, though the attainable range is narrower than [\u{2212}1, +1] and depends on the sensitivities and specificities entered \u{2014} values outside it are truncated, and the analysis says so:</p>
+<p><strong>Dependent Tests:</strong> When tests are dependent, we adjust these probabilities using a correlation parameter (denoted as \u03C1 or \u03C8) that runs from \u22121 through 0 (independence) to +1. Positive values describe tests that tend to err together; negative values describe tests that compensate for each other\'s errors, so that one tends to be positive where the other is negative. Both are permitted here, though the attainable range is narrower than \u22121 to +1 and depends on the sensitivities and specificities entered \u2014 values outside it are truncated, and the analysis says so:</p>
 <ul>
-  <li>P(Test1+ and Test2+ | Disease+) = (Sens\u{2081} \u{00D7} Sens\u{2082}) + \u{03C1}\u{1D68}\u{2092}\u{209B} \u{00D7} \u{221A}(Sens\u{2081} \u{00D7} (1\u{2212}Sens\u{2081}) \u{00D7} Sens\u{2082} \u{00D7} (1\u{2212}Sens\u{2082}))</li>
-  <li>P(Test1+ and Test2+ | Disease\u{2212}) = ((1\u{2212}Spec\u{2081}) \u{00D7} (1\u{2212}Spec\u{2082})) + \u{03C1}\u{2099}\u{2091}\U{0001D454} \u{00D7} \u{221A}((1\u{2212}Spec\u{2081}) \u{00D7} Spec\u{2081} \u{00D7} (1\u{2212}Spec\u{2082}) \u{00D7} Spec\u{2082})</li>
+  <li>P(Test1+ and Test2+ | Disease+) = (Sens\u2081 \u00D7 Sens\u2082) + \u03C1<sub>pos</sub> \u00D7 \u221A(Sens\u2081 \u00D7 (1\u2212Sens\u2081) \u00D7 Sens\u2082 \u00D7 (1\u2212Sens\u2082))</li>
+  <li>P(Test1+ and Test2+ | Disease\u2212) = ((1\u2212Spec\u2081) \u00D7 (1\u2212Spec\u2082)) + \u03C1<sub>neg</sub> \u00D7 \u221A((1\u2212Spec\u2081) \u00D7 Spec\u2081 \u00D7 (1\u2212Spec\u2082) \u00D7 Spec\u2082)</li>
 </ul>
 
 <p>Extreme values are automatically truncated to stay within feasible joint bounds; the realized correlation after truncation is reported.</p>
@@ -1327,19 +1314,19 @@ cotestClass <- if (requireNamespace("jmvcore"))
 </ul>
 
 <h4>Estimating Dependency Parameters</h4>
-<p>The conditional dependence parameters (\u{03C1}\u{1D68}\u{2092}\u{209B} for diseased subjects and \u{03C1}\u{2099}\u{2091}\U{0001D454} for non-diseased subjects) ideally should be estimated from paired testing data with known disease status. Positive values between 0 and 0.5 are the common case in practice, with larger values indicating stronger dependence; negative values are unusual but legitimate where the two tests genuinely compensate for one another. When no data is available, sensitivity analyses using a range of plausible values (e.g., 0.05, 0.1, 0.2) can reveal how much dependence affects results.</p>
+<p>The conditional dependence parameters (\u03C1<sub>pos</sub> for diseased subjects and \u03C1<sub>neg</sub> for non-diseased subjects) ideally should be estimated from paired testing data with known disease status. Positive values between 0 and 0.5 are the common case in practice, with larger values indicating stronger dependence; negative values are unusual but legitimate where the two tests genuinely compensate for one another. When no data is available, sensitivity analyses using a range of plausible values (e.g., 0.05, 0.1, 0.2) can reveal how much dependence affects results.</p>
 
 <h4>Impact of Ignoring Dependence</h4>
 <p>Ignoring conditional dependence when it exists overstates how much the second test adds. The <em>direction</em> of the error differs by row, so it is worth being precise rather than saying post-test probabilities are simply "exaggerated":</p>
 <ul>
-  <li><strong>Both tests positive</strong> \u{2014} assuming independence makes the probability of disease <strong>too high</strong>. Two correlated positives are partly the same evidence counted twice. (Simulation across 400 ordinary clinical parameter sets: this held in 100% of them.)</li>
-  <li><strong>Both tests negative</strong> \u{2014} assuming independence makes the probability of disease <strong>too low</strong>, i.e. it overstates how safely the pair rules disease out. This is the error that matters most in screening. (100% of the same sets.)</li>
-  <li><strong>Either test positive (the parallel rule)</strong> \u{2014} here independence makes the probability of disease <strong>too low</strong> in the large majority of cases (85%), not too high, because dependence concentrates false positives into the double-positive cell. Do not assume the independent figure is the conservative one for this row.</li>
-  <li><strong>One test positive only</strong> \u{2014} the direction is not determined by dependence alone; across the same sets it went each way about half the time, depending on the two operating points.</li>
+  <li><strong>Both tests positive</strong> \u2014 assuming independence makes the probability of disease <strong>too high</strong>. Two correlated positives are partly the same evidence counted twice. (Simulation across 400 ordinary clinical parameter sets: this held in 100% of them.)</li>
+  <li><strong>Both tests negative</strong> \u2014 assuming independence makes the probability of disease <strong>too low</strong>, i.e. it overstates how safely the pair rules disease out. This is the error that matters most in screening. (100% of the same sets.)</li>
+  <li><strong>Either test positive (the parallel rule)</strong> \u2014 here independence makes the probability of disease <strong>too low</strong> in the large majority of cases (85%), not too high, because dependence concentrates false positives into the double-positive cell. Do not assume the independent figure is the conservative one for this row.</li>
+  <li><strong>One test positive only</strong> \u2014 the direction is not determined by dependence alone; across the same sets it went each way about half the time, depending on the two operating points.</li>
 </ul>
 <p>The common thread is an <strong>overly optimistic assessment of what the two tests achieve together</strong>, not a uniform inflation of every number. Note also that this analysis reports no confidence intervals at all: every figure is conditional on the sensitivity, specificity and prevalence you entered being exact.</p>
-</div>'
-                
+</div>'))
+
                 return(explanation)
             }
         )

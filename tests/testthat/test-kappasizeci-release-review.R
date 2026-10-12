@@ -175,14 +175,14 @@ test_that("the non-convergence branch is a backstop, and its advice is the oppos
     an  <- ClinicoPath:::kappaSizeCIClass$new(options = ClinicoPath:::kappaSizeCIOptions$new())
     src <- readLines("../../R/kappaSizeCI.b.R", warn = FALSE)
     # Reconstruct the sentence the user would see. Taking it by regex over the whole file does
-    # not work (R's sub() has no lazy quantifier, so ".*?" spans everything), and taking it by
-    # line does not either -- the message is split across paste0() string literals, so
-    # "Use fewer raters" never appears contiguously in the source. Strip the R string syntax
-    # from the block and collapse whitespace, then assert on the rendered prose.
+    # not work (R's sub() has no lazy quantifier, so ".*?" spans everything). The message used
+    # to be split across paste0() literals, so this read a (start - 2):(start + 8) block; it is
+    # now a single .() msgid, and that window ran on into the NEXT reject() -- the too-narrow-
+    # interval one, whose "use more raters" advice is correct there -- and failed on it. Window
+    # the msgid line alone, strip the R string syntax and collapse whitespace.
     start <- grep("extreme for the kappaSize engine", src, fixed = TRUE)
     expect_length(start, 1L)
-    block <- paste(src[(start - 2):(start + 8)], collapse = " ")
-    prose <- gsub("\\s+", " ", gsub('"', "", gsub('",\\s*"', "", block)))
+    prose <- gsub("\\s+", " ", gsub('"', "", src[start]))
     expect_match(prose, "Use fewer raters", fixed = TRUE)
     expect_false(grepl("use more raters", prose, fixed = TRUE))
     expect_true(is.function(an$.__enclos_env__$private$.predictedN))
@@ -225,7 +225,7 @@ test_that(".predictedN reproduces the engine exactly, so triage cannot refuse a 
     # -- so its brute-force search is solving a division. If this ever drifts from the engine,
     # the triage threshold starts refusing designs kappaSize would have sized (or vice versa).
     skip_if_not_installed("kappaSize")
-    # .predictedN calls private$.gofCells, so it must be bound off an instance rather than
+    # .predictedN calls private$.limitSlopes, so it must be bound off an instance rather than
     # lifted out of $private_methods the way the self-contained helpers can be.
     an   <- ClinicoPath:::kappaSizeCIClass$new(options = ClinicoPath:::kappaSizeCIOptions$new())
     pred <- an$.__enclos_env__$private$.predictedN
@@ -252,7 +252,7 @@ test_that("a degenerate slope falls through to the engine rather than returning 
     # A zero expected cell makes the engine's own chi-square infinite, which it maps to 0 and
     # then loops forever. .predictedN() must return NA there (so the setTimeLimit backstop still
     # runs) instead of a slope of Inf, which would silently collapse to the engine's n = 11 floor.
-    # .predictedN calls private$.gofCells, so it must be bound off an instance rather than
+    # .predictedN calls private$.limitSlopes, so it must be bound off an instance rather than
     # lifted out of $private_methods the way the self-contained helpers can be.
     an   <- ClinicoPath:::kappaSizeCIClass$new(options = ClinicoPath:::kappaSizeCIOptions$new())
     pred <- an$.__enclos_env__$private$.predictedN
@@ -401,7 +401,10 @@ test_that("the sparse notice quotes one coherent confidence limit, not a mix of 
     # assembled from BOTH limits and "k of m cells are below 5" became a union count that no
     # single chi-square ever has.
     skip_if_not_installed("kappaSize")
-    gof <- ClinicoPath:::kappaSizeCIClass$private_methods$.gofCells
+    # .gofCells was de-duplicated out of the three kappaSize backends into the top-level
+    # kappaSizeGofCells() in R/utils-kappasize.R; the private method no longer exists, so the
+    # old $private_methods lookup yielded NULL and calling it died with "non-function".
+    gof <- ClinicoPath:::kappaSizeGofCells   # (outcome, raters, props, rho)
 
     res <- ci_run(kappa0 = 0.60, kappaL = 0.30, kappaU = 0.80, props = "0.05, 0.95", raters = "2")
     n <- ci_n(res)
@@ -443,12 +446,18 @@ test_that("a confidence limit with a negative expected cell is skipped, never pr
 
 test_that("expected counts never reach the reader in scientific notation", {
     # signif() pasted into prose rendered the small tail as "8.9e-06" in a sentence aimed at
-    # pathologists; rounding to fixed decimals instead would print "0.000", so it says
-    # "below 0.01".
+    # pathologists. The floor was 0.01 and is now 0.0001, matching the two siblings: nothing
+    # here rounds to fixed decimals, so the old "0.000 would be worse" justification never
+    # applied, and 0.01 also swallowed the default design's own 0.013 neighbourhood. The
+    # same three assertions live in test-kappasizepower- and test-kappasizefixedn-.
     skip_if_not_installed("kappaSize")
-    fmt <- ClinicoPath:::kappaSizeCIClass$private_methods$.fmtCount
-    expect_equal(fmt(8.9e-06), "below 0.01")
-    expect_equal(fmt(0.0013),  "below 0.01")
+    # .fmtCount calls .() for its two literal returns, and jmvcore's .() looks up `self` in the
+    # calling frame -- lifted out of $private_methods it is unbound and throws "object 'self'
+    # not found". Bind it off an instance instead.
+    an  <- ClinicoPath:::kappaSizeCIClass$new(options = ClinicoPath:::kappaSizeCIOptions$new())
+    fmt <- an$.__enclos_env__$private$.fmtCount
+    expect_equal(fmt(8.9e-06), "below 0.0001")
+    expect_equal(fmt(0.0013),  "0.0013")
     expect_equal(fmt(0.013),   "0.013")
     expect_equal(fmt(4.9),     "4.9")
     expect_equal(fmt(NA_real_), "unavailable")

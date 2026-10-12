@@ -151,7 +151,7 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
 
             if (length(missing_packages) > 0) {
-                error_msg <- jmvcore::format(
+                error_msg <- .fmt(
                     .("The lollipop chart needs the following R packages, which are not installed: {packages}. Install them with install.packages() and re-run the analysis."),
                     packages = paste(missing_packages, collapse = ", "))
 
@@ -256,7 +256,7 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     private$.addNotice(
                         'INFO',
                         .("Conditional Coloring"),
-                        jmvcore::format(
+                        .fmt(
                             .("Values above {thr} are drawn in orange and the rest in blue, so colour encodes the threshold rather than the group."),
                             thr = base::format(self$options$colorThreshold, digits = 3))
                     )
@@ -365,7 +365,7 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 private$.addNotice(
                     'WARNING',
                     .("Non-finite Values Removed"),
-                    jmvcore::format(
+                    .fmt(
                         .("{n} row(s) held an infinite value for the dependent variable and were removed; an infinite value usually means a division by zero or an out-of-range entry."),
                         n = n_nonfinite)
                 )
@@ -394,7 +394,7 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 private$.addNotice(
                     'WARNING',
                     .("Many Group Levels"),
-                    jmvcore::format(
+                    .fmt(
                         .("The grouping variable has {n} levels, more than a single chart can label legibly; consider pooling categories or splitting the chart."),
                         n = n_groups)
                 )
@@ -419,7 +419,7 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 private$.addNotice(
                     'WARNING',
                     .("Missing Data Removed"),
-                    jmvcore::format(
+                    .fmt(
                         .("{n} rows ({pct}%) had a missing value in the selected variables and were removed before plotting."),
                         n = n_removed,
                         pct = pct_removed)
@@ -443,7 +443,7 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 private$.addNotice(
                     'WARNING',
                     .("Highlight Level Not Found"),
-                    jmvcore::format(
+                    .fmt(
                         .("The level {level} does not occur in the grouping variable, so nothing is highlighted; pick a level that is present in the data."),
                         level = highlight_level)
                 )
@@ -460,7 +460,7 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 private$.addNotice(
                     'STRONG_WARNING',
                     .("Duplicate Groups Detected"),
-                    jmvcore::format(
+                    .fmt(
                         .("Some groups hold several observations (up to {n}, for example {groups}), and with no aggregation every one of them is drawn on the same stem, so the chart over-plots and hides how many points each lollipop stands for; choose Mean, Median or Sum under Data aggregation."),
                         n = max_count,
                         groups = paste(utils::head(groups_with_dups, 5), collapse = ", "))
@@ -661,7 +661,7 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 private$.addNotice(
                     'WARNING',
                     .("Thinly Replicated Groups"),
-                    jmvcore::format(
+                    .fmt(
                         .("The {groups} groups hold {raw} observations between them, fewer than three per group on average, so each plotted point rests on very little data; consider pooling categories or reporting the individual observations."),
                         groups = summary_stats$n_groups,
                         raw = summary_stats$source_n)
@@ -686,7 +686,7 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     private$.addNotice(
                         'WARNING',
                         .("Extreme Values Present"),
-                        jmvcore::format(
+                        .fmt(
                             .("{n} plotted value(s) lie more than three interquartile ranges beyond the quartiles and will stretch the axis so the remaining lollipops look nearly equal; check these entries and consider a log scale."),
                             n = n_far_out)
                     )
@@ -703,7 +703,7 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 private$.addNotice(
                     'WARNING',
                     .("Unbalanced Group Sizes"),
-                    jmvcore::format(
+                    .fmt(
                         .("Group sizes range from {lo} to {hi} observations, so the lollipops are not estimated with equal precision; read the sparsely sampled groups with more caution."),
                         lo = min_count,
                         hi = max_count)
@@ -722,7 +722,7 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 private$.addNotice(
                     'STRONG_WARNING',
                     .("Mean Line Averages the Group Summaries"),
-                    jmvcore::format(
+                    .fmt(
                         .("The mean reference line is the unweighted mean of the {groups} plotted group summaries, not the mean of the {raw} underlying observations; because the groups differ greatly in size these two means differ, and the line does not mark the overall average."),
                         groups = summary_stats$n_groups,
                         raw = summary_stats$source_n)
@@ -740,7 +740,7 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 private$.addNotice(
                     'WARNING',
                     .("Aggregation Hides Within-Group Spread"),
-                    jmvcore::format(
+                    .fmt(
                         .("Observations within a single group vary by up to {sd} (one standard deviation), which is more than half the {span} spread between the plotted group summaries; each lollipop is a single point with no error bar, so the chart shows less disagreement than the data contains."),
                         sd = base::format(max_within_sd, digits = 3),
                         span = base::format(summary_stats$dep_range, digits = 3))
@@ -765,7 +765,7 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     private$.addNotice(
                         'WARNING',
                         .("Baseline Falls Inside the Data Range"),
-                        jmvcore::format(
+                        .fmt(
                             .("The baseline of {base} sits inside the range of the data, so {above} lollipop(s) point one way and {below} point the other; stem length now shows distance from the baseline rather than magnitude, which is easy to misread."),
                             base = base::format(baseline, digits = 3),
                             above = n_above,
@@ -783,7 +783,7 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         private$.addNotice(
                             'WARNING',
                             .("Baseline Far From the Data"),
-                            jmvcore::format(
+                            .fmt(
                                 .("Measured from the baseline of {base}, the differences between groups occupy only {pct}% of each stem, so the lollipops look almost equal; set the baseline near the lower end of the data to make the comparison visible."),
                                 base = base::format(baseline, digits = 3),
                                 pct = round(100 * summary_stats$dep_range / span, 1))
@@ -797,7 +797,7 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 private$.addNotice(
                     'WARNING',
                     .("Small Sample Size"),
-                    jmvcore::format(
+                    .fmt(
                         .("The chart rests on {n} observations in total, too few for the differences between groups to be stable; treat the ordering as provisional."),
                         n = summary_stats$source_n)
                 )
@@ -817,7 +817,7 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (!is.null(agg_method) && agg_method != "none") {
                 table$setNote(
                     "aggregation",
-                    jmvcore::format(
+                    .fmt(
                         .("Statistics describe the {n} plotted per-group {method} values aggregated from {raw} observations, not the raw observations themselves."),
                         n = summary_stats$n_observations,
                         method = agg_method,
@@ -1052,9 +1052,9 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 # so this is a mean of means and not the overall average. A bare
                 # "Mean =" invites the reader to take it for the grand mean.
                 mean_label <- if (identical(self$options$aggregation, "none")) {
-                    jmvcore::format(.("Mean = {val}"), val = round(mean_value, 2))
+                    .fmt(.("Mean = {val}"), val = round(mean_value, 2))
                 } else {
-                    jmvcore::format(.("Mean of group values = {val}"), val = round(mean_value, 2))
+                    .fmt(.("Mean of group values = {val}"), val = round(mean_value, 2))
                 }
                 if (orientation == "horizontal") {
                     p <- p + ggplot2::geom_vline(

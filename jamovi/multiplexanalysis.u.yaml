@@ -100,7 +100,7 @@ children:
               - type: TextBox
                 name: n_clusters
                 format: number
-                suffix: (0 = auto)
+                suffix: 0 = auto
                 enable: (perform_clustering)
 
       - type: CollapseBox
@@ -170,6 +170,6 @@ children:
               - type: TextBox
                 name: confidence_level
                 format: number
-                suffix: (0.80-0.99)
+                suffix: 0.80-0.99
 
 ...

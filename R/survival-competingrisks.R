@@ -18,6 +18,6 @@
                "cumulative incidence output instead, or set survival type to Overall or ",
                "Cause Specific.")
     } else {
-        jmvcore::format(.("{feature} is not available for competing-risks analysis. It assumes a single event type, and the competing-risk outcome is coded 0/1/2. Use the cumulative incidence output instead, or set survival type to Overall or Cause Specific."), feature = feature)
+        .fmt(.("{feature} is not available for competing-risks analysis. It assumes a single event type, and the competing-risk outcome is coded 0/1/2. Use the cumulative incidence output instead, or set survival type to Overall or Cause Specific."), feature = feature)
     }
 }

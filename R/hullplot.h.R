@@ -441,9 +441,11 @@ hullplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param hull_concavity Controls the concavity of hull polygons. A value of 1
 #'   gives the most concave hull, which follows the point cloud closely; the
 #'   hull approaches the convex hull as the value grows. The default of 2
-#'   matches ggforce. Values below 1 are clamped by concaveman and are not
-#'   permitted, and the upper bound of 20 is close enough to a convex hull for
-#'   practical purposes. Ignored when V8/concaveman are unavailable.
+#'   matches ggforce. ggforce documents the scale from 1 (very concave) upwards,
+#'   so values below 1 are not permitted, and the upper bound of 20 is close
+#'   enough to a convex hull for practical purposes. ggforce 0.5.0 and later
+#'   compute the hull with their own implementation of the concaveman algorithm,
+#'   so neither the concaveman package nor V8 is needed.
 #' @param hull_alpha Transparency level for hull polygons. 0 = completely
 #'   transparent, 1 = opaque.
 #' @param show_labels If TRUE, displays group labels inside hull regions.
@@ -456,8 +458,12 @@ hullplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param x_label Custom label for X-axis. If empty, uses variable name.
 #' @param y_label Custom label for Y-axis. If empty, uses variable name.
 #' @param hull_expand Padding added around each hull, as a fraction of the
-#'   plot area (0 = hull touches the outermost points, 1 = the whole panel).
-#'   Ignored when V8/concaveman are unavailable and convex hulls are drawn.
+#'   panel width (0 = no padding, 1 = one full panel width). ggforce also rounds
+#'   the hull corners with a fixed 2.5 mm radius; when the padding is smaller
+#'   than that radius (below about 0.01 at the default plot size, more on a
+#'   smaller plot) the rounding trims the hull, so points on its edge can fall
+#'   outside it and a thin group can lose most of its outline. The default of
+#'   0.05 is well clear of this at ordinary plot sizes.
 #' @param show_statistics If TRUE, displays summary statistics for each group
 #'   in the output.
 #' @param outlier_detection If TRUE, reports the number of potential outliers

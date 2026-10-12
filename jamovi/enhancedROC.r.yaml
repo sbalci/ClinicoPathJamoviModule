@@ -17,6 +17,9 @@ items:
                - predictors
                - detectImbalance
                - analysisType
+               - imbalanceThreshold
+               - recommendPRC
+               - showImbalanceWarning
 
           - name: instructions
             title: Instructions
@@ -25,6 +28,7 @@ items:
             clearWith:
                 - outcome
                 - predictors
+                - clinicalContext
 
           # Imbalance Metrics Table
           - name: imbalanceMetrics
@@ -73,6 +77,7 @@ items:
                 - outcome
                 - predictors
                 - positiveClass
+                - direction
             rows: 1
             columns:
                 - name: predictor
@@ -111,6 +116,10 @@ items:
                 - internalValidation
                 - validationMethod
                 - bootstrapSamples
+                - clinicalContext
+                - seed
+                - direction
+                - confidenceLevel
             description: Plain language summary of key findings
 
           # Clinical Report Sentences
@@ -122,6 +131,21 @@ items:
                 - outcome
                 - predictors
                 - positiveClass
+                - clinicalContext
+                - direction
+                - confidenceLevel
+                - useBootstrap
+                - bootstrapMethod
+                - bootstrapSamples
+                - stratifiedBootstrap
+                - seed
+                - youdenOptimization
+                - sensitivityThreshold
+                - specificityThreshold
+                - clinicalPresets
+                - analysisType
+                - pairwiseComparisons
+                - comparisonMethod
             description: Copy-ready clinical report sentences for publications and reports
 
           # AUC Summary Table
@@ -141,6 +165,7 @@ items:
                 - bootstrapSamples
                 - stratifiedBootstrap
                 - seed
+                - clinicalContext
 
             columns:
                 - name: predictor
@@ -180,6 +205,10 @@ items:
                 - predictors
                 - positiveClass
                 - comparisonMethod
+                - clinicalContext
+                - bootstrapSamples
+                - seed
+                - direction
 
             columns:
                 - name: predictor1
@@ -195,7 +224,6 @@ items:
                 - name: test_statistic
                   title: 'Test Statistic'
                   type: number
-                  format: zto
                 - name: p_value
                   title: 'p-value'
                   type: number
@@ -217,6 +245,13 @@ items:
                 - outcome
                 - predictors
                 - positiveClass
+                - direction
+                - comparisonMethod
+                - seed
+                - youdenOptimization
+                - sensitivityThreshold
+                - specificityThreshold
+                - clinicalPresets
 
             columns:
                 - name: metric
@@ -237,15 +272,15 @@ items:
                 - name: percent_change
                   title: '% Change'
                   type: number
-                  format: pc
+                  # .b.R computes (diff / val1) * 100 - the value is ALREADY a percentage.
+                  # `format: pc` multiplies by 100 again, so 12.5 % printed as '1250%'.
+                  # dp:1 is used rather than dropping the *100 because the Clinical
+                  # Interpretation cascade compares abs(percent_change) against 20 and 10.
+                  format: dp:1
                 - name: p_value
                   title: 'p-value'
                   type: number
                   format: zto,pvalue
-                - name: effect_size
-                  title: 'Effect Size'
-                  type: number
-                  format: zto
                 - name: interpretation
                   title: 'Clinical Interpretation'
                   type: text
@@ -261,6 +296,9 @@ items:
                 - predictors
                 - positiveClass
                 - comparisonMethod
+                - bootstrapSamples
+                - seed
+                - direction
 
             columns:
                 - name: test_name
@@ -269,7 +307,6 @@ items:
                 - name: test_statistic
                   title: 'Test Statistic'
                   type: number
-                  format: zto
                 - name: p_value
                   title: 'p-value'
                   type: number
@@ -296,6 +333,7 @@ items:
                 - sensitivityThreshold
                 - specificityThreshold
                 - clinicalPresets
+                - clinicalContext
 
             columns:
                 - name: predictor
@@ -304,7 +342,6 @@ items:
                 - name: optimal_cutoff
                   title: 'Optimal Cutoff'
                   type: number
-                  format: zto
                 - name: youden_index
                   title: 'Youden Index'
                   type: number
@@ -349,7 +386,6 @@ items:
                 - name: cutoff
                   title: 'Cutoff'
                   type: number
-                  format: zto
                 - name: cutoff_type
                   title: 'Cutoff Type'
                   type: text
@@ -397,6 +433,7 @@ items:
                 - sensitivityThreshold
                 - specificityThreshold
                 - clinicalPresets
+                - confidenceLevel
 
             columns:
                 - name: predictor
@@ -405,20 +442,19 @@ items:
                 - name: cutoff
                   title: 'Cutoff'
                   type: number
-                  format: zto
                 - name: sensitivity
                   title: 'Sensitivity'
                   type: number
                   format: zto
                 - name: sensitivity_ci
-                  title: 'Sensitivity 95% CI'
+                  title: 'Sensitivity CI'
                   type: text
                 - name: specificity
                   title: 'Specificity'
                   type: number
                   format: zto
                 - name: specificity_ci
-                  title: 'Specificity 95% CI'
+                  title: 'Specificity CI'
                   type: text
                 - name: accuracy
                   title: 'Accuracy'
@@ -446,6 +482,7 @@ items:
                 - sensitivityThreshold
                 - specificityThreshold
                 - clinicalPresets
+                - clinicalContext
 
             columns:
                 - name: predictor
@@ -466,15 +503,12 @@ items:
                 - name: lr_positive
                   title: 'LR+'
                   type: number
-                  format: zto
                 - name: lr_negative
                   title: 'LR-'
                   type: number
-                  format: zto
                 - name: diagnostic_odds_ratio
                   title: 'Diagnostic OR'
                   type: number
-                  format: zto
                 - name: clinical_interpretation
                   title: 'Clinical Interpretation'
                   type: text
@@ -492,6 +526,13 @@ items:
                 - direction
                 - partialRange
                 - partialAucType
+                - bootstrapPartialAUC
+                - bootstrapSamples
+                - bootstrapMethod
+                - stratifiedBootstrap
+                - confidenceLevel
+                - seed
+                - clinicalContext
 
             columns:
                 - name: predictor
@@ -512,6 +553,16 @@ items:
                   title: 'Partial AUC'
                   type: number
                   format: zto
+                - name: partial_auc_lower
+                  title: 'pAUC Lower CI'
+                  type: number
+                  format: zto
+                  visible: (bootstrapPartialAUC)
+                - name: partial_auc_upper
+                  title: 'pAUC Upper CI'
+                  type: number
+                  format: zto
+                  visible: (bootstrapPartialAUC)
                 - name: normalized_pauc
                   title: 'Normalized pAUC'
                   type: number
@@ -531,6 +582,7 @@ items:
                 - predictors
                 - positiveClass
                 - crocAlpha
+                - direction
 
             columns:
                 - name: predictor
@@ -547,7 +599,6 @@ items:
                 - name: alpha
                   title: 'Alpha'
                   type: number
-                  format: zto
                 - name: early_retrieval_gain
                   title: 'Early Retrieval Gain'
                   type: number
@@ -566,6 +617,7 @@ items:
                 - outcome
                 - predictors
                 - positiveClass
+                - direction
 
             columns:
                 - name: predictor
@@ -600,6 +652,9 @@ items:
                 - outcome
                 - predictors
                 - positiveClass
+                - clinicalContext
+                - direction
+                - analysisType
 
             columns:
                 - name: measure
@@ -624,6 +679,7 @@ items:
                 - outcome
                 - predictors
                 - positiveClass
+                - clinicalContext
 
           # Statistical Methods
           - name: methodsExplanation
@@ -655,6 +711,10 @@ items:
                 - plotTheme
                 - plotWidth
                 - plotHeight
+                - youdenOptimization
+                - sensitivityThreshold
+                - specificityThreshold
+                - clinicalPresets
             width: 600
             height: 600
 
@@ -666,6 +726,9 @@ items:
             visible: (detectImbalance)
             renderFun: .plotPRC
             clearWith:
+                - direction
+                - plotTheme
+                - detectImbalance
                 - outcome
                 - predictors
                 - positiveClass
@@ -692,6 +755,10 @@ items:
                 - plotTheme
                 - plotWidth
                 - plotHeight
+                - youdenOptimization
+                - sensitivityThreshold
+                - specificityThreshold
+                - clinicalPresets
             width: 600
             height: 600
 
@@ -703,6 +770,8 @@ items:
             visible: (cutoffTable)
             renderFun: .plotCutoffAnalysis
             clearWith:
+                - direction
+                - plotTheme
                 - outcome
                 - predictors
                 - positiveClass
@@ -719,6 +788,8 @@ items:
             visible: (youdenOptimization)
             renderFun: .plotYoudenIndex
             clearWith:
+                - direction
+                - plotTheme
                 - outcome
                 - predictors
                 - positiveClass
@@ -739,11 +810,19 @@ items:
             visible: (clinicalMetrics)
             renderFun: .plotClinicalDecision
             clearWith:
+                - direction
+                - plotTheme
+                - useObservedPrevalence
+                - prevalence
                 - outcome
                 - predictors
                 - positiveClass
                 - plotWidth
                 - plotHeight
+                - youdenOptimization
+                - sensitivityThreshold
+                - specificityThreshold
+                - clinicalPresets
             width: 600
             height: 600
 
@@ -755,6 +834,8 @@ items:
             visible: (crocAnalysis)
             renderFun: .plotCROC
             clearWith:
+                - direction
+                - plotTheme
                 - outcome
                 - predictors
                 - positiveClass
@@ -772,6 +853,8 @@ items:
             visible: (convexHull)
             renderFun: .plotConvexHull
             clearWith:
+                - direction
+                - plotTheme
                 - outcome
                 - predictors
                 - positiveClass
@@ -795,6 +878,8 @@ items:
                 - splineKnots
                 - brierScore
                 - calibrationMetrics
+                - eoRatio
+                - direction
             columns:
                 - name: predictor
                   title: 'Predictor'
@@ -810,17 +895,14 @@ items:
                 - name: calibration_slope
                   title: 'Calibration Slope'
                   type: number
-                  format: zto
                   visible: (calibrationMetrics)
                 - name: calibration_intercept
                   title: 'Calibration Intercept'
                   type: number
-                  format: zto
                   visible: (calibrationMetrics)
                 - name: calibration_in_large
                   title: 'Calibration-in-the-Large'
                   type: number
-                  format: zto
                   visible: (calibrationMetrics)
                 - name: ici
                   title: 'ICI'
@@ -842,6 +924,13 @@ items:
                   type: number
                   format: zto
                   visible: (splineCalibration)
+                # E/O is a ratio of counts, not a proportion - it is not bounded by 1, so
+                # `format: zto` would be wrong here.
+                - name: eo_ratio
+                  title: 'E/O Ratio'
+                  type: number
+                  format: dp:3
+                  visible: (eoRatio)
                 - name: interpretation
                   title: 'Interpretation'
                   type: text
@@ -856,6 +945,7 @@ items:
                 - predictors
                 - positiveClass
                 - hlGroups
+                - direction
             columns:
                 - name: predictor
                   title: 'Predictor'
@@ -863,7 +953,6 @@ items:
                 - name: chi_square
                   title: 'Chi-Square'
                   type: number
-                  format: zto
                 - name: df
                   title: 'df'
                   type: integer
@@ -885,12 +974,15 @@ items:
             visible: (calibrationAnalysis && calibrationPlot)
             renderFun: .plotCalibration
             clearWith:
+                - direction
+                - plotTheme
                 - outcome
                 - predictors
                 - positiveClass
                 - hlGroups
                 - splineCalibration
                 - splineKnots
+                - calibrationDensity
                 - plotWidth
                 - plotHeight
             width: 600
@@ -903,10 +995,17 @@ items:
             description: AUC values for each class in multi-class analysis
             visible: (multiClassROC)
             clearWith:
+                - direction
                 - outcome
                 - predictors
                 - positiveClass
                 - multiClassStrategy
+                - useBootstrap
+                - bootstrapMethod
+                - bootstrapSamples
+                - stratifiedBootstrap
+                - confidenceLevel
+                - seed
             columns:
                 - name: class
                   title: 'Class'
@@ -939,6 +1038,7 @@ items:
             description: Averaged AUC across all classes
             visible: (multiClassROC)
             clearWith:
+                - direction
                 - outcome
                 - predictors
                 - positiveClass
@@ -957,10 +1057,6 @@ items:
                   title: 'Weighted AUC'
                   type: number
                   format: zto
-                - name: micro_auc
-                  title: 'Micro AUC'
-                  type: number
-                  format: zto
                 - name: interpretation
                   title: 'Interpretation'
                   type: text
@@ -972,6 +1068,8 @@ items:
             visible: (multiClassROC)
             renderFun: .plotMultiClassROC
             clearWith:
+                - direction
+                - plotTheme
                 - outcome
                 - predictors
                 - positiveClass
@@ -993,6 +1091,7 @@ items:
                 - positiveClass
                 - useObservedPrevalence
                 - prevalence
+                - direction
             columns:
                 - name: predictor
                   title: 'Predictor'
@@ -1004,12 +1103,10 @@ items:
                 - name: nnt
                   title: 'NNT'
                   type: number
-                  format: zto
                   visible: (nntCalculation)
                 - name: nnd
                   title: 'NND'
                   type: number
-                  format: zto
                   visible: (nntCalculation)
                 - name: tested_positive
                   title: 'Tested Positive (%)'
@@ -1026,7 +1123,6 @@ items:
                 - name: net_benefit_per_100
                   title: 'Net Benefit per 100'
                   type: number
-                  format: zto
 
           - name: decisionImpactSummary
             title: Decision Impact at Key Thresholds
@@ -1039,7 +1135,11 @@ items:
                 - positiveClass
                 - useObservedPrevalence
                 - prevalence
+                - direction
             columns:
+                - name: predictor
+                  title: 'Predictor'
+                  type: text
                 - name: threshold
                   title: 'Risk Threshold'
                   type: number
@@ -1069,9 +1169,28 @@ items:
             visible: (clinicalImpact && clinicalUtilityCurve)
             renderFun: .plotClinicalUtility
             clearWith:
+                - direction
+                - plotTheme
                 - outcome
                 - predictors
                 - positiveClass
+                - plotWidth
+                - plotHeight
+            width: 600
+            height: 600
+
+          - name: decisionImpactPlot
+            title: Clinical Impact Curve
+            type: Image
+            description: Number of patients called high risk, and number of true events among them, per 1000 tested across thresholds
+            visible: (decisionImpactCurves)
+            renderFun: .plotDecisionImpact
+            clearWith:
+                - plotTheme
+                - outcome
+                - predictors
+                - positiveClass
+                - direction
                 - plotWidth
                 - plotHeight
             width: 600
@@ -1085,4 +1204,7 @@ refs:
     - boot
     - caret
     - splines
+    - Kerr2016DCA
+    - Vickers2019DCA
+    - McClish1989
 ...

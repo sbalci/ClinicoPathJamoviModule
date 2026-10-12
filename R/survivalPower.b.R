@@ -2436,7 +2436,10 @@ survivalPowerClass <- R6::R6Class(
             private$.format_text(template, alpha = trimws(private$.alpha_pct()))
         },
         .format_text = function(text, ...) {
-            do.call(jmvcore::format, c(list(str = text), lapply(list(...), as.character)))
+            # Template passed POSITIONALLY: .fmt's first formal is `.format_string`,
+            # so a `str =` name would land in `...` and .fmt would error with
+            # "argument .format_string is missing, with no default".
+            do.call(.fmt, c(list(text), lapply(list(...), as.character)))
         },
         .format_objective_phrase = function(hr) {
             value <- format(round(hr, 3), trim = TRUE)

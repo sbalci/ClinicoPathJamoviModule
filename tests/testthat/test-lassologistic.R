@@ -326,11 +326,15 @@ test_that("Invalid outcomeLevel is rejected with a clear message", {
     y = factor(rep(c("neg", "pos"), each = 50)),
     x1 = rnorm(100), x2 = rnorm(100)
   )
-  # Rejection is caught internally and surfaced via the To Do panel (no crash).
-  result <- ll(d, outcome = "y", explanatory = c("x1", "x2"),
-               outcomeLevel = "Nonexistent")
-  expect_match(result$todo$content, "not found")
-  expect_equal(nrow(result$coefficients$asDF), 0)
+  # R/lassologistic.b.R:453 calls jmvcore::reject(), which is the documented mechanism
+  # for a validation failure the user can fix by changing an option -- jamovi puts the
+  # analysis into its error state and shows the message. reject() is a plain simpleError,
+  # so it aborts the run: the earlier expectation here read result$todo$content, which can
+  # never be reached because no result object is returned at all.
+  expect_error(
+    ll(d, outcome = "y", explanatory = c("x1", "x2"), outcomeLevel = "Nonexistent"),
+    "not found in the outcome variable"
+  )
 })
 
 test_that("More than two outcome levels warns and models two classes", {

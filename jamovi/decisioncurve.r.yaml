@@ -131,26 +131,25 @@ items:
           title: 'Threshold'
           type: number
           format: pc
+        # No `format:` on the five projected counts below. They are headcounts projected to
+        # populationSize (default 1,000) or a ratio >= 1, not zero-to-one quantities, and
+        # `format: zto` printed them as '430.000' next to the identical '430' in Resource
+        # Utilization, which carries no format for exactly these quantities.
         - name: interventions_per_100
           title: 'Projected Interventions'
           type: number
-          format: zto
         - name: true_positives_per_100
           title: 'Projected True Positives'
           type: number
-          format: zto
         - name: false_positives_per_100
           title: 'Projected False Positives'
           type: number
-          format: zto
         - name: interventions_avoided
           title: 'Projected Net Interventions Avoided vs Treat All'
           type: number
-          format: zto
         - name: number_needed_to_screen
           title: 'Patients Screened per True Positive'
           type: number
-          format: zto
       clearWith:
         - outcome
         - outcomePositive
@@ -210,6 +209,13 @@ items:
         - thresholdMin
         - thresholdMax
         - thresholdStep
+        # Both comparison methods resample private$.analysisData, the complete-case subset
+        # over c(outcome, models, rule_var). Adding or changing the rule variable drops the
+        # rows where it is missing and so changes every bootstrap p-value here.
+        - clinicalDecisionRule
+        - decisionRuleVar
+        - decisionRulePositive
+        - decisionRuleLabel
 
     # Average net benefit over the threshold range (area under the decision curve,
     # normalised by range width). Unweighted despite the historical option name.
@@ -501,11 +507,16 @@ items:
         - thresholdMax
         - thresholdStep
         - multiModelComparison
-        - comparisonMethod
         - bootReps
         - ciLevel
         - seed
         - modelNames
+        # Same reason as comparisonTable above: the rule variable changes the
+        # complete-case cohort this table's bootstrap resamples.
+        - clinicalDecisionRule
+        - decisionRuleVar
+        - decisionRulePositive
+        - decisionRuleLabel
 
     - name: resourceUtilizationTable
       title: Resource Utilization

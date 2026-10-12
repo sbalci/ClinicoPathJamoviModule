@@ -339,12 +339,14 @@ test_that("jjbarstats works with subsetted data", {
 })
 
 test_that("jjbarstats works with CSV imported data", {
-  skip_if_not(file.exists("data/jjbarstats_test.csv"),
+  # the fixtures live in data-raw/non-rda/ (build-ignored: skips under R CMD check)
+  csv_path <- testthat::test_path("..", "..", "data-raw", "non-rda", "jjbarstats_test.csv")
+  skip_if_not(file.exists(csv_path),
               "CSV test file not available")
 
 
   # Read from CSV
-  csv_data <- read.csv("data/jjbarstats_test.csv", stringsAsFactors = TRUE)
+  csv_data <- read.csv(csv_path, stringsAsFactors = TRUE)
 
   result <- jjbarstats(
     data = csv_data,
@@ -356,14 +358,15 @@ test_that("jjbarstats works with CSV imported data", {
 })
 
 test_that("jjbarstats works with OMV imported data", {
-  skip_if_not(file.exists("data/jjbarstats_test.omv"),
+  omv_path <- testthat::test_path("..", "..", "data-raw", "non-rda", "jjbarstats_test.omv")
+  skip_if_not(file.exists(omv_path),
               "OMV test file not available")
   skip_if_not(requireNamespace("jmvReadWrite", quietly = TRUE),
               "jmvReadWrite package not available")
 
 
   # Read from OMV
-  omv_data <- jmvReadWrite::read_omv("data/jjbarstats_test.omv")
+  omv_data <- jmvReadWrite::read_omv(omv_path)
 
   result <- jjbarstats(
     data = omv_data,

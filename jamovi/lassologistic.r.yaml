@@ -68,14 +68,18 @@ items:
         - name: variable
           title: "Variable"
           type: text
+        # No `format: zto` on these two. zto pins FIXED decimal places at the
+        # user's digits setting AND disables scientific notation, but these are
+        # back-transformed to the predictor's ORIGINAL measurement scale, so a
+        # predictor measured in cells/mm3 or read counts renders as exactly
+        # 0.000 / 1.000 - a top-ranked marker that looks like it was dropped.
+        # The default number format prints 2.50e-4 instead.
         - name: coefficient
           title: "Coefficient"
           type: number
-          format: zto
         - name: oddsRatio
           title: "Odds Ratio"
           type: number
-          format: zto
         - name: importance
           title: "Importance"
           type: number
@@ -126,10 +130,10 @@ items:
         - name: variable
           title: "Predictive Factor"
           type: text
+        # Same reason as coefficients.oddsRatio: not a [0,1] quantity.
         - name: oddsRatio
           title: "Odds Ratio"
           type: number
-          format: zto
         - name: criterion
           title: "Award points when"
           type: text
@@ -210,10 +214,12 @@ items:
           title: "Accuracy"
           type: number
           format: zto
+        # A percentage (0-100), not a [0,1] proportion: zto forced it to three
+        # fixed decimals ("3.200") and disabled scientific notation.
+        # NOT `format: pc` either - the value is already multiplied by 100.
         - name: info_loss
           title: "Info Loss vs Full Model (%)"
           type: number
-          format: zto
         - name: reference
           title: "Reference"
           type: text
@@ -360,7 +366,7 @@ items:
           - random_seed
 
     - name: predictions
-      title: Add Predicted Probabilities
+      title: Predicted probabilities
       type: Output
       measureType: continuous
       varTitle: 'Predicted Probability from LASSO Logistic'
@@ -405,12 +411,22 @@ items:
       title: Methodology Notes
       type: Html
       visible: (showMethodologyNotes)
+      # penalty/outcome/explanatory/lambda: the panel branches on `penalty`
+      # (a Ridge-specific bullet vs a LASSO one) and interpolates
+      # .scoreCutLabel(), whose "fell back to the sample median" variant depends
+      # on which predictors were selected - i.e. on outcome, explanatory and
+      # lambda. Without them, a run that returns early after a penalty switch
+      # left the old LASSO bullet beside a Model Summary reading Ridge.
       clearWith:
           - showMethodologyNotes
           - standardize
           - scoreCutMethod
           - scoreCutPoints
           - scoringSystem
+          - penalty
+          - outcome
+          - explanatory
+          - lambda
 
     - name: clinicalGuidance
       title: Clinical Interpretation Guidance
@@ -467,10 +483,11 @@ items:
           title: "AUC"
           type: number
           format: zto
+        # An AIC is on the deviance scale (hundreds), not [0,1]: zto printed it
+        # as "245.300", three decimals of noise on a model-selection criterion.
         - name: aic
           title: "AIC"
           type: number
-          format: zto
         - name: brier
           title: "Brier Score"
           type: number

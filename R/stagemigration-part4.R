@@ -3474,7 +3474,7 @@ stagemigrationPart4 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         # Add note about method used
                         correction_method <- cutpoint_results$correction_method
                         if (!is.null(correction_method)) {
-                            table$setNote("correction", jmvcore::format(.("Multiple testing correction: {correctionMethod}"), correctionMethod = correction_method))
+                            table$setNote("correction", .fmt(.("Multiple testing correction: {correctionMethod}"), correctionMethod = correction_method))
                         }
 
                         # Populate validation results if available
@@ -3675,14 +3675,14 @@ stagemigrationPart4 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             "None"
                         }
 
-                        table$setNote("cutpoints", jmvcore::format(.("Cut-points used: {cutpointsText}"), cutpointsText = cutpoints_text))
-                        table$setNote("method", jmvcore::format(.("Method: {stagingMethod}"), stagingMethod = staging_results$staging_method))
+                        table$setNote("cutpoints", .fmt(.("Cut-points used: {cutpointsText}"), cutpointsText = cutpoints_text))
+                        table$setNote("method", .fmt(.("Method: {stagingMethod}"), stagingMethod = staging_results$staging_method))
 
                         # Add distribution note
                         distribution <- staging_results$stage_distribution
                         if (!is.null(distribution)) {
                             dist_text <- paste(names(distribution), ":", distribution, collapse = "; ")
-                            table$setNote("distribution", jmvcore::format(.("Stage distribution: {distText}"), distText = dist_text))
+                            table$setNote("distribution", .fmt(.("Stage distribution: {distText}"), distText = dist_text))
                         }
                     },
                     error = function(e) {
@@ -4528,7 +4528,7 @@ stagemigrationPart4 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         # Basic validation
                         if (nrow(data) < 50) {
                             private$.addNotice("STRONG_WARNING", .("Multi-state analysis not run"),
-                                jmvcore::format(.("Sample size ({n}) is below the minimum of 50 needed for a reliable multi-state model."), n = sprintf("%d", nrow(data))))
+                                .fmt(.("Sample size ({n}) is below the minimum of 50 needed for a reliable multi-state model."), n = sprintf("%d", nrow(data))))
                             return(NULL)
                         }
 
@@ -5141,7 +5141,7 @@ stagemigrationPart4 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         # Basic validation
                         if (nrow(data) < 50) {
                             private$.addNotice("STRONG_WARNING", .("Competing risks analysis not run"),
-                                jmvcore::format(.("Sample size ({n}) is below the minimum of 50 needed for a reliable competing risks analysis."), n = sprintf("%d", nrow(data))))
+                                .fmt(.("Sample size ({n}) is below the minimum of 50 needed for a reliable competing risks analysis."), n = sprintf("%d", nrow(data))))
                             return(NULL)
                         }
 
@@ -5306,7 +5306,7 @@ stagemigrationPart4 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     fg_fit <- tryCatch(
                         cmprsk::crr(ftime = frame$time, fstatus = frame$event_cr, cov1 = design, failcode = 1, cencode = 0),
                         error = function(e) {
-                            private$.addNotice("WARNING", .("Fine-Gray model not fitted"), jmvcore::format(.("The model for the {systemName} staging system could not be fitted: {error}"), systemName = tolower(system_name), error = conditionMessage(e)))
+                            private$.addNotice("WARNING", .("Fine-Gray model not fitted"), .fmt(.("The model for the {systemName} staging system could not be fitted: {error}"), systemName = tolower(system_name), error = conditionMessage(e)))
                             NULL
                         }
                     )
@@ -5783,7 +5783,7 @@ stagemigrationPart4 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         # Basic validation
                         if (nrow(data) < 100) {
                             private$.addNotice("STRONG_WARNING", .("Random forest analysis not run"),
-                                jmvcore::format(.("Sample size ({n}) is below the minimum of 100 needed for stable variable importance estimates."), n = sprintf("%d", nrow(data))))
+                                .fmt(.("Sample size ({n}) is below the minimum of 100 needed for stable variable importance estimates."), n = sprintf("%d", nrow(data))))
                             return(NULL)
                         }
 

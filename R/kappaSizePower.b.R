@@ -27,57 +27,69 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             list(raw = raw, values = suppressWarnings(as.numeric(trimws(toks))))
         },
 
-        # Expected probability of every goodness-of-fit cell under kappa0. kappaSize sizes the
-        # study with a chi-square over AGREEMENT PATTERNS, not over outcome categories: for a
-        # binary outcome and n raters the cells are "exactly j raters call the finding present"
-        # (j = 0..n); for 3-5 categories they are "all n raters choose category j" plus one
-        # "any disagreement" cell. These are the P0..Pn closures inside
-        # body(kappaSize::PowerBinary) / Power3Cats / Power4Cats / Power5Cats. The cells in the
-        # middle carry a (1 - kappa0) factor and p^j (1 - p)^(n - j), so they empty out long
-        # before any category marginal does -- with 6 raters and a 5% finding, N = 316 leaves
-        # three cells below 0.5 expected while the marginal check (0.05 * 316 = 16) sees nothing
-        # wrong. That multi-rater, rare-finding design is the typical pathology agreement study.
-        # The multi-category "all agree on j" cell is the Dirichlet-multinomial product
-        # prod_{i=0}^{n-1} (p_j (1 - kappa0) + i kappa0) / ((1 - kappa0) + i kappa0), which
-        # reproduces the engine's polynomials for K = 3..5 and n = 2..6 to 1e-15 and reduces
-        # to p_j^2 + kappa0 p_j (1 - p_j) for two raters.
-        .gofCells = function(outcome, raters, props, kappa0) {
-            if (outcome == 2L) {
-                p <- props[1]
-                j <- 0:raters
-                choose(raters, j) * p^j * (1 - p)^(raters - j) * (1 - kappa0) +
-                    kappa0 * ifelse(j == raters, p, ifelse(j == 0, 1 - p, 0))
-            } else {
-                i <- seq_len(raters) - 1
-                agree <- vapply(props, function(pj)
-                    prod((pj * (1 - kappa0) + i * kappa0) / ((1 - kappa0) + i * kappa0)),
-                    numeric(1))
-                c(1 - sum(agree), agree)
-            }
-        },
+        # The goodness-of-fit cell probabilities now live in R/utils-kappasize.R
+        # (kappaSizeGofCells) -- the identical closed form used to be copied into all
+        # three kappaSize backends. See that file for the derivation and for which
+        # agreement level each engine evaluates the cells at.
 
         # Preformatted panes do not wrap: a 300-character sentence runs off the right edge of
         # the results panel (the siblings hard-break theirs). Wrap at render time so the
         # translated text wraps too.
         .wrap = function(x, width = 78) paste(strwrap(x, width = width), collapse = "\n"),
 
+        # Expected counts run from ~3e-06 to a few dozen, and signif() pasted straight into a
+        # sentence rendered the small end as "1.4e-06" in prose aimed at pathologists (binary,
+        # 6 raters, 2% prevalence, kappa0 0.40 vs kappa1 0.90 reaches it). scientific = FALSE
+        # already prevents that, so the only job left for a floor is to stop the tail growing
+        # unreadably long. It used to be 0.01, which is far too high: the six-rater, 5%-finding
+        # design at N = 316 has a cell of 0.00034 -- a pattern that is effectively never
+        # observed -- and "below 0.01" hid exactly how empty it is behind a figure that also
+        # covers a comfortable 0.009. R/kappaSizeCI.b.R:.fmtCount and
+        # R/kappaSizeFixedN.b.R:.fmtCount are now identical to this one, floor and wording.
+        .fmtCount = function(x) {
+            if (!isTRUE(is.finite(x))) return(.("unavailable"))
+            if (x < 0.0001) return(.("below 0.0001"))
+            base::format(signif(x, 2), scientific = FALSE, trim = TRUE)
+        },
+
+        # A round sample size pastes as "1e+05" and a large one is unreadable without
+        # separators ("The design needs 76724 subjects"). Every place n reaches the user
+        # goes through here, as in R/kappaSizeCI.b.R:.fmtN.
+        .fmtN = function(n) {
+            if (!isTRUE(is.finite(n))) return("NA")
+            base::format(round(n), scientific = FALSE, big.mark = ",", trim = TRUE)
+        },
+
+        # Display form of a category proportion. .run() now renormalises the vector before it
+        # reaches the engine, so a typed "0.333, 0.333, 0.333" becomes 0.33333333333333331 and
+        # jmvcore::format renders a double at 15 significant digits -- the Study Explanation
+        # would read "the prevalences of the categories are 0.333333333333333 ...". Round for
+        # DISPLAY only; the engine keeps full precision. Element-wise, because base::format()
+        # on a VECTOR pads every element to a common number of decimals and would turn a typed
+        # 0.1 into "0.10" next to a 0.25.
+        .fmtProp = function(x) {
+            vapply(x, function(v) base::format(signif(v, 4), scientific = FALSE, trim = TRUE),
+                   character(1))
+        },
+
         # Build the study-explanation paragraph (plain text; generic across cardinalities).
         .buildExplanation = function(kappa0, kappa1, alpha, power, raters, props) {
+            props_txt <- private$.fmtProp(props)
             prev <- if (length(props) == 1) {
                 .fmt(
                     .("Further suppose that the prevalence of the trait is {p}."),
-                    p = props[1])
+                    p = props_txt[1])
             } else if (length(props) == 2) {
                 # The user never said which category is the "trait"; with "0.80, 0.20" the
                 # old sentence claimed the lesion was present in 80% of cases.
                 .fmt(
                     .("Further suppose that the two categories occur in {p1} and {p2} of subjects (the required sample size is the same whichever category is called positive)."),
-                    p1 = props[1], p2 = props[2])
+                    p1 = props_txt[1], p2 = props_txt[2])
             } else {
                 .fmt(
                     .("Further suppose that the prevalences of the categories are {head} and {last}."),
-                    head = paste0(props[-length(props)], collapse = ", "),
-                    last = props[length(props)])
+                    head = paste0(props_txt[-length(props_txt)], collapse = ", "),
+                    last = props_txt[length(props_txt)])
             }
 
             paste0(
@@ -101,7 +113,8 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
         .buildNotices = function(n_required, sparse, outcome, raters, kappa0, kappa1, power,
                                  sparse_min = NA_real_, sparse_below5 = NA_integer_,
-                                 sparse_total = NA_integer_) {
+                                 sparse_total = NA_integer_, marg_min = NA_real_,
+                                 marg_sparse = FALSE) {
             warn_div <- "<div style='margin:6px 0; padding:8px 10px; border-left:3px solid #ec971f; background-color: rgba(227, 144, 33, 0.07); color: inherit;'>"
             info_div <- "<div style='margin:6px 0; padding:8px 10px; border-left:3px solid #3c8dbc; background-color: rgba(72, 138, 188, 0.06); color: inherit;'>"
             block <- function(div, title, ...)
@@ -143,7 +156,7 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     .("Very large sample size."),
                     .fmt(
                         .("The design needs {n} subjects; few agreement studies can enrol this many. A rare finding (prevalence far from 0.5), a small difference between kappa0 and kappa1, and a high power target all inflate the sample size - revisit whichever of these is not a firm requirement."),
-                        n = n_required)))
+                        n = private$.fmtN(n_required))))
             }
 
             # The option ranges still admit designs the method cannot size: alpha just below
@@ -154,7 +167,7 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     .("Very small sample size."),
                     .fmt(
                         .("The required sample size is only {n} {subjects}. The large-sample approximation behind this method does not hold for such small studies; treat the figure as a lower bound, not a plan."),
-                        n = n_required, subjects = private$.subjects(n_required))))
+                        n = private$.fmtN(n_required), subjects = private$.subjects(n_required))))
             }
 
             if (is.finite(power) && power < 0.5) {
@@ -165,25 +178,55 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         power = power)))
             }
 
-            # Sparse goodness-of-fit cells (see .gofCells), judged by Cochran's rule: no expected
+            # Sparse goodness-of-fit cells (see kappaSizeGofCells), judged by Cochran's rule: no expected
             # count below 1 and at most one cell in five below 5. kappaSize prints its own
             # marginal version once per sparse CATEGORY inside the raw result text; it was
             # reaching the user only as repeated lines there, and it watches the wrong quantity.
             # Skipped when n is below 10: every cell is sparse then, the "Very small sample size"
             # block above already says so, and "enrich the case series" would point at the wrong
             # cause.
-            if (isTRUE(sparse) && !(has_n && n_required < 10)) {
-                remedy <- if (outcome == 2L) {
-                    .("Consider enriching the case series so the rare finding is more common (the calculation assumes the stated prevalence), or planning a larger study.")
-                } else {
-                    .("Consider collapsing rare categories or planning a larger study.")
-                }
+            too_small <- has_n && n_required < 10
+            pattern_shown <- isTRUE(sparse) && !too_small
+            # One remedy for both blocks below: the two conditions are different, but what the
+            # user can do about either is the same, and printing the identical sentence twice
+            # reads like a copy-paste slip. Whichever block comes first carries it.
+            remedy <- if (outcome == 2L) {
+                .("Consider enriching the case series so the rare finding is more common (the calculation assumes the stated prevalence), or planning a larger study.")
+            } else {
+                .("Consider collapsing rare categories or planning a larger study.")
+            }
+            if (pattern_shown) {
                 warn <- paste0(warn, block(warn_div,
                     .("Sparse categories."),
                     .fmt(
                         .("At the required sample size the agreement-pattern cells (for example, exactly k of the raters calling the finding present, or all raters agreeing on one category) are too sparse: the smallest expected count is {min} and {below} of {total} cells are below 5. The calculation rests on a large-sample chi-square approximation, so the sample size shown is less dependable here."),
-                        min = signif(sparse_min, 2), below = sparse_below5, total = sparse_total),
+                        min = private$.fmtCount(sparse_min), below = sparse_below5,
+                        total = sparse_total),
                     remedy))
+            }
+
+            # The engine's own (suppressed, untranslated) caveat watches the outcome MARGINALS,
+            # props[j] * N < 5, and the Cochran rule above does NOT cover it. An agreement-pattern
+            # probability is never larger than its category's marginal, so one rare category in a
+            # 4- or 5-category design puts exactly ONE of the 5-6 cells below 5 -- mean(e < 5) is
+            # then 1/6 = 0.17, under the 20% threshold, and the block above stays silent while the
+            # engine would have warned. Measured: 5 categories, props 0.02/0.245 x 4, 2 raters,
+            # kappa0 0.80 vs kappa1 0.90 -> N = 176, rarest marginal 3.5 (engine warns), smallest
+            # agreement cell 2.8 with 1 of 6 below 5 and none below 1 (Cochran silent).
+            #
+            # This used to be gated on !pattern_shown, which silenced it on every design where
+            # the Cochran block fired -- including the designs where BOTH are true, which is
+            # most sparse binary studies. The two describe different quantities (how empty the
+            # chi-square's cells are, versus how few cases of the rare category the study will
+            # even contain) and a reader needs both, so both are allowed to appear. Only the
+            # shared remedy is dropped from the second, since it is the same sentence.
+            if (isTRUE(marg_sparse) && !too_small) {
+                warn <- paste0(warn, block(warn_div,
+                    .("Rare outcome category."),
+                    .fmt(
+                        .("At the required sample size the rarest outcome category is expected in only {min} subjects. Fewer than five cases of a category makes the large-sample chi-square approximation behind this method unreliable, and it leaves the study with too few examples of that category for the raters to disagree about."),
+                        min = private$.fmtCount(marg_min)),
+                    if (!pattern_shown) remedy))
             }
 
             info <- block(info_div,
@@ -195,7 +238,8 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 if (has_n)
                     .fmt(
                         .("Required sample size: <b>{n}</b> {subjects}, each rated by all {raters} raters."),
-                        n = n_required, subjects = private$.subjects(n_required), raters = raters)
+                        n = private$.fmtN(n_required),
+                        subjects = private$.subjects(n_required), raters = raters)
                 else "")
 
             paste0(warn, info)
@@ -267,6 +311,20 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         sum = round(sum(props), 4)),
                     code = "props_sum")
 
+            # Renormalise. kappaSize accepts a sum within 0.001 of 1 and then uses the values
+            # VERBATIM, so a 4-decimal rounding artefact such as 0.0003/0.0003/0.9999 (sum
+            # 1.0005) drives the lumped goodness-of-fit cell P0 = 1 - sum(agree) negative, the
+            # chi-square denominator flips sign and the engine returns a NEGATIVE sample size:
+            # Power3Cats(kappa0 = 0.50, kappa1 = 0.40, props = c(0.0003, 0.0003, 0.9999),
+            # raters = 2) gave N = -380296.1 where the valid design needs 218,244, and
+            # ceiling() of a negative is finite so every pane printed it. Where the result
+            # stays positive the same defect mis-sizes silently (0.01/0.01/0.9805 at
+            # kappa0 = 0.90: 1,675 verbatim against 1,887 renormalised). This is bit-identical
+            # for any input that already sums to one, so it only touches inputs that were
+            # wrong. Same fix as R/kappaSizeCI.b.R:.validateProportions().
+            if (length(props) >= 2)
+                props <- props / sum(props)
+
             # --- Validate alpha against power ---------------------------------
             # kappaSize's root finder (kappaSize:::.hichi) never converges when alpha is ABOVE
             # the target power: its first loop keeps quartering the lower bracket towards zero
@@ -316,8 +374,14 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             # --- Populate outputs ---------------------------------------------
             # print() gives the headline sentence ("A minimum of N subjects ..."); summary()
             # repeats it and adds the study parameters. The engine prints its cell-count warning
-            # once per sparse category (five times for five levels); keep the first and lift the
-            # caveat into the Notes panel, where it is computed on the right cells.
+            # once per sparse category (five times for five levels), in untranslatable English,
+            # and computes it as props[i] * N on the outcome MARGINALS -- not the quantity that
+            # governs the chi-square. Keep the FIRST of those identical lines and drop the
+            # repeats, as R/kappaSizeFixedN.b.R does: deleting them all would silently edit the
+            # engine's own output, and a reader comparing the pane against a direct kappaSize
+            # call would find a warning missing. The Notes panel restates the caveat once,
+            # translated, from the agreement-pattern cells that matter PLUS a marginal check
+            # that covers the designs those cells miss (see .buildNotices).
             dedupe <- function(lines)
                 lines[!(duplicated(lines) & grepl("expected cell count", lines, fixed = TRUE))]
             result_text <- paste(dedupe(utils::capture.output(print(result))), collapse = "\n")
@@ -335,16 +399,26 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 if (is.finite(n_required))
                     paste0("\n", .fmt(
                         .("The required sample size is {n} {subjects}."),
-                        n = n_required, subjects = private$.subjects(n_required)))
+                        n = private$.fmtN(n_required),
+                        subjects = private$.subjects(n_required)))
                 else ""))
 
             # Cochran's rule on the expected counts at N: no cell below 1, at most 20% below 5.
-            e      <- private$.gofCells(outcome, raters, props, kappa0) * as.numeric(result$N)
+            e      <- kappaSizeGofCells(outcome, raters, props, kappa0) * as.numeric(result$N)
             sparse <- is.finite(n_required) && (any(e < 1) || mean(e < 5) > 0.2)
+
+            # Expected count of each OUTCOME category at N -- the quantity the engine's own
+            # discarded warning uses. A binary design may have been entered as a single
+            # prevalence, so restore the complement before taking the minimum.
+            marg     <- if (length(props) == 1) c(props, 1 - props) else props
+            marg     <- marg * as.numeric(result$N)
+            marg_min <- min(marg)
             self$results$notices$setContent(
                 private$.buildNotices(n_required, sparse = sparse, outcome = outcome,
                                       raters = raters, kappa0 = kappa0, kappa1 = kappa1,
                                       power = power, sparse_min = min(e),
-                                      sparse_below5 = sum(e < 5), sparse_total = length(e)))
+                                      sparse_below5 = sum(e < 5), sparse_total = length(e),
+                                      marg_min = marg_min,
+                                      marg_sparse = is.finite(n_required) && marg_min < 5))
         })
 )

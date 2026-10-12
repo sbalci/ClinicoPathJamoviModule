@@ -272,12 +272,14 @@ test_that("statsplot2 works with subsetted data", {
 })
 
 test_that("statsplot2 works with CSV imported data", {
-  skip_if_not(file.exists("data/statsplot2_test.csv"),
+  # the fixtures live in data-raw/non-rda/ (build-ignored: skips under R CMD check)
+  csv_path <- testthat::test_path("..", "..", "data-raw", "non-rda", "statsplot2_test.csv")
+  skip_if_not(file.exists(csv_path),
               "CSV test file not available")
 
 
   # Read from CSV
-  csv_data <- read.csv("data/statsplot2_test.csv", stringsAsFactors = TRUE)
+  csv_data <- read.csv(csv_path, stringsAsFactors = TRUE)
 
   result <- statsplot2(
     data = csv_data,
@@ -289,14 +291,15 @@ test_that("statsplot2 works with CSV imported data", {
 })
 
 test_that("statsplot2 works with OMV imported data", {
-  skip_if_not(file.exists("data/statsplot2_test.omv"),
+  omv_path <- testthat::test_path("..", "..", "data-raw", "non-rda", "statsplot2_test.omv")
+  skip_if_not(file.exists(omv_path),
               "OMV test file not available")
   skip_if_not(requireNamespace("jmvReadWrite", quietly = TRUE),
               "jmvReadWrite package not available")
 
 
   # Read from OMV
-  omv_data <- jmvReadWrite::read_omv("data/statsplot2_test.omv")
+  omv_data <- jmvReadWrite::read_omv(omv_path)
 
   result <- statsplot2(
     data = omv_data,

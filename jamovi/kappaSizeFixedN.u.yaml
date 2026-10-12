@@ -83,7 +83,7 @@ children:
         children:
           - type: TextBox
             name: props
-            label: ''
+            label: "Proportions (comma-separated, sum to 1)"
             format: string
             stretchFactor: 2
             fitToGrid: true

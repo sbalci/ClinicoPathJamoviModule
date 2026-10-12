@@ -22,11 +22,68 @@ Nothing here proves an analysis is correct. A high score means "worth a human
 looking at it"; a low score means "don't bother yet".
 """
 import os, re, subprocess, json, sys
+import yaml
 from collections import defaultdict
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 J = os.path.join(ROOT, 'jamovi')
 R = os.path.join(ROOT, 'R')
+
+# Strip R string literals and comments before looking for `pkg::`. A mention is not a use,
+# and the difference decides whether a package may be pruned from Imports.
+#
+# The string branch must span newlines, so this runs over the WHOLE file, not line by line.
+# Measured on R/agreement.b.R against R's own parser (SYMBOL_PACKAGE tokens), 2026-09-23:
+#
+#   package    raw   line-at-a-time   whole-file   R parser
+#   psych        7                1            0          0
+#   vcd         18                4            3          3
+#   DescTools    3                1            1          1
+#
+# A line-at-a-time masker reports psych=1 because agreement.b.R:7616
+# (`<code>psych::cohen.kappa()</code>`) sits inside a multi-line HTML string and its line
+# carries no quote character. That one false positive is the difference between "psych is
+# prunable" (true) and "psych is used" (false). The alternation is scanned left to right,
+# so a '#' inside a string is consumed by the string branch and a quote inside a comment by
+# the comment branch.
+_CODE_ONLY = re.compile(r'"(?:\\.|[^"\\])*"' r"|'(?:\\.|[^'\\])*'" r'|#[^\n]*', re.S)
+
+
+def code_only(src):
+    return _CODE_ONLY.sub(' ', src)
+
+
+def _prune_map():
+    """base menuGroup -> set(packages this module deletes from Imports).
+
+    `prune_imports` is a standing DELETE order, and it is derived from what the module
+    ships TODAY. A D/P/T analysis does not ship, so its packages look unused; promoting it
+    without first deleting the entry makes `prune_conflicts()` raise a plan error, and if
+    that guard were ever bypassed the analysis would install but not run (the 2026-09-16
+    OncoPath `magrittr` CRITICAL). Counting it here puts the cost on the promotion where it
+    belongs (guide section 24: promotion debt, not a live defect).
+    """
+    cfg = yaml.safe_load(read(os.path.join(ROOT, '_updateModules_config.yaml'))) or {}
+    out = {}
+    for mod, spec in (cfg.get('modules') or {}).items():
+        pr = set(spec.get('prune_imports') or [])
+        if not pr:
+            continue
+        for g in (spec.get('menu_groups') or []):
+            out[str(g).split('#')[0].strip()] = pr
+    return out
+
+
+_PRUNE = None
+
+
+def pruned_for(group):
+    """Packages deleted from Imports for the module this (parked) menuGroup belongs to."""
+    global _PRUNE
+    if _PRUNE is None:
+        _PRUNE = _prune_map()
+    m = re.match(r'^(.*?)(?:Extra)?[DPT]+$', group or '')
+    return _PRUNE.get(m.group(1), set()) if m else set()
 
 
 def read(p):
@@ -78,13 +135,39 @@ _HEAVY_STATE = re.compile(r'setState\s*\(\s*(?:list\s*\()?\s*[^)]{0,200}?'
                           r'(?<![\w.])(fit|model|zph|roc|survfit|coxph|cph)\s*[=)]')
 
 
+def _desc_newlines(name):
+    """description: main: that resolves with an interior newline - the jamovi library listing turns
+    each one into a paragraph break and drops everything after the first blank line (section 27).
+    Compose rather than safe_load so the node keeps its style; rstrip('\\n') because a `>` block
+    always clip-chomps to one trailing newline."""
+    try:
+        import yaml
+        root = yaml.compose(open(os.path.join(ROOT, 'jamovi', name + '.a.yaml'), encoding='utf-8'))
+    except Exception:
+        return 0
+    n = 0
+    for k, v in getattr(root, 'value', []):
+        if k.value in ('title', 'menuTitle', 'menuSubtitle', 'description'):
+            pairs = ([(k2, v2) for k2, v2 in v.value if k2.value == 'main']
+                     if k.value == 'description' and isinstance(v, yaml.MappingNode) else [(k, v)])
+            for _, vn in pairs:
+                if isinstance(vn, yaml.ScalarNode) and '\n' in vn.value.rstrip('\n'):
+                    n += 1
+    return n
+
+
 def conventions(name, src, a, r):
     """Count promotion blockers. Each is cheap, falsifiable, and mechanical - no judgement."""
     fmt = 0
     for m in re.finditer(r"^\s*format:\s*['\"]?([^'\"#\n]+?)['\"]?\s*$", r, re.M):
         if any(not _FMT_OK.match(t.strip()) for t in m.group(1).split(',')):
             fmt += 1
+    pruned = pruned_for(re.search(r'^menuGroup:\s*(.+?)\s*$', a, re.M).group(1)
+                        if re.search(r'^menuGroup:\s*(.+?)\s*$', a, re.M) else '')
+    code = code_only(src)
     return dict(
+        prune=sum(1 for pkg in pruned                   # section 24: blocks promotion
+                  if re.search(r'\b%s::' % re.escape(pkg), code)),
         fmt=fmt,                                        # section 21
         fake=len(_FAKE_SE.findall(src)),                # section 20
         rx=len(re.findall(r'(?:sub|gsub|grepl?)\s*\(\s*paste0?\s*\(\s*["\']\^?["\']\s*,', src)),  # section 22
@@ -92,6 +175,8 @@ def conventions(name, src, a, r):
         state=len(_HEAVY_STATE.findall(src)),           # section 17
         nockpt=len(re.findall(r'\bfor\s*\([^)]*\bin\b[^)]*\b(?:boot|perm|sim|fold)\w*', src, re.I))
                  - min(len(re.findall(r'private\$\.checkpoint\(', src)), 99) > 0,
+        desc=_desc_newlines(name),                      # section 27
+        sentinel=len(re.findall(r'\$insert\s*\(\s*(\d{3,})\s*,', src)),   # section 13
     )
 
 
@@ -124,7 +209,9 @@ def score_one(name, with_git=True):
     # weighted by how badly each reads in an audit report, not by how many there are
     conv_penalty = (min(conv['fmt'] / 10.0, 1.0) * 1.0 + min(conv['fake'], 3) * 1.5 +
                     min(conv['rx'], 3) * 0.5 + min(conv['verb'] / 15.0, 1.0) * 0.75 +
-                    min(conv['state'], 3) * 0.75 + (0.5 if conv['nockpt'] else 0.0))
+                    min(conv['state'], 3) * 0.75 + (0.5 if conv['nockpt'] else 0.0) +
+                    (0.5 if conv['desc'] else 0.0) + min(conv['sentinel'], 2) * 1.5 +
+                    min(conv['prune'], 2) * 1.5)   # promotion fails at plan time until the config entry goes
 
     # deliberately blunt: each signal contributes a small, comparable amount
     score = (
@@ -167,6 +254,20 @@ def main():
                r['tests'], r['vignettes'], r['refs'], r['debt']))
     print('\n%d dev/test-routed scored; full ranking in tools/promotion_scores.json' % len(dev))
     print('scaffolds (computes=False): %d' % sum(1 for r in dev if not r['computes']))
+
+    # Promotion debt that fails the BUILD rather than the review: prune_imports is derived
+    # from what a module ships today, so every parked analysis calling a pruned package
+    # turns into a plan error the moment someone removes its D/P/T suffix.
+    blocked = [r for r in dev if r['conv']['prune']]
+    if blocked:
+        print('\nprune_imports collisions (%d analyses): promoting these fails at plan time '
+              'until the entry is deleted from _updateModules_config.yaml' % len(blocked))
+        for r in sorted(blocked, key=lambda r: (r['group'], r['name'])):
+            hits = sorted(pkg for pkg in pruned_for(r['group'])
+                          if re.search(r'\b%s::' % re.escape(pkg), code_only(read(os.path.join(R, r['name'] + '.b.R')))))
+            print('  %-28s %-16s %s' % (r['name'], r['group'], ', '.join(hits)))
+    else:
+        print('\nprune_imports collisions: none')
 
 
 if __name__ == '__main__':

@@ -436,3 +436,30 @@ test_that("kappasizefixedn_power_cases quotes the bound this function actually r
             info = d$case_name[i])
     }
 })
+
+
+test_that("expected counts never reach the reader in scientific notation", {
+    # This file had no .fmtCount at all while both siblings did: signif(sparse_min, 2) went
+    # straight into the sentence, and 64 of 120 swept designs told a pathologist that "the
+    # smallest expected count is 2.4e-06". Pinned directly so the floor cannot drift -- the
+    # same three assertions live in test-kappasizeci- and test-kappasizepower-, and the three
+    # .fmtCount implementations must stay identical.
+    # .fmtCount calls .() for its two literal returns, and jmvcore's .() looks up `self` in the
+    # calling frame -- lifted out of $private_methods it is unbound and throws "object 'self'
+    # not found". Bind it off an instance instead.
+    an  <- ClinicoPath:::kappaSizeFixedNClass$new(
+        options = ClinicoPath:::kappaSizeFixedNOptions$new())
+    fmt <- an$.__enclos_env__$private$.fmtCount
+    expect_equal(fmt(8.9e-06), "below 0.0001")
+    expect_equal(fmt(0.0013),  "0.0013")
+    expect_equal(fmt(0.013),   "0.013")
+    expect_equal(fmt(4.9),     "4.9")
+    expect_equal(fmt(NA_real_), "unavailable")
+
+    # and the notice it feeds renders the same way
+    build <- an$.__enclos_env__$private$.buildNotices
+    sparse <- build(0.44, sparse_cells = TRUE, sparse_min = 2.4e-06, sparse_below5 = 6L,
+                    sparse_total = 7L)
+    expect_match(sparse, "smallest expected count is below 0.0001", fixed = TRUE)
+    expect_false(grepl("count is [0-9.]+e[-+]", sparse))
+})

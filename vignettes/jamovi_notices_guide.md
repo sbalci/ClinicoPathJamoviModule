@@ -309,7 +309,7 @@ dataValidationNotice$setContent(message)
 self$results$insert(1, dataValidationNotice)
 
 # Insert at bottom (use high position number)
-self$results$insert(999, dataValidationNotice)
+self$results$add(dataValidationNotice)   # append; insert(999, ...) corrupts the tree - see 13.1
 
 # Insert before specific table
 # (Use position just before that table)
@@ -588,7 +588,7 @@ Four renderers, four different rules. Pick by what the text is for:
 
 | Renderer | Where | Format honoured | Newlines | Escaping | Use for |
 |---|---|---|---|---|---|
-| `jmvcore::Notice` | `.b.R`, `notice$setContent()` | plain text; avoid HTML | not supported (project rule) | none; no HTML | severity messages (ERROR / WARNING / INFO); never `insert(999, notice)` ([13.1](#131-type-notice-does-not-compile-in-ryaml)) |
+| `jmvcore::Notice` | `.b.R`, `notice$setContent()` | plain text; avoid HTML | not supported (project rule) | none; no HTML | severity messages (ERROR / WARNING / INFO); append with `$add()`, never a sentinel index ([13.1](#131-the-native-notice-and-the-insert-trap)) |
 | `table$setNote()` | `.b.R`, on a table | HTML allow-list: `i`/`em`, `b`/`strong`, `sub`, `sup` | `\n\n` = paragraph; single `\n` collapsed | (unverified) HTML-escape user text | footnotes on a table |
 | `type: Html` | `.r.yaml` + `setContent()` | full HTML | HTML rules (`<p>`, `<br>`) | `htmltools::htmlEscape()`; only five named entities ([13.3](#133-only-five-named-html-entities-are-safe)) | severity-styled panels; must be theme-safe ([13.2](#132-html-output-must-be-theme-safe)) |
 | `type: Text` | `.r.yaml` + `setContent()` | Markdown subset: `**bold**`, `*italic*`, `~~strike~~`, `[link](url)`, `-` / `1.` lists, `<sub>`/`<sup>` | `\n\n` = paragraph; single `\n` does not break | markdown-escape user text ([`.mdEscape`](jamovi_b_R_guide.md#text-content-population-jamovi-283)); decodes only `&lt; &gt; &amp; &quot; &#39;`; write other characters as `\uXXXX` | narrative, summaries, interpretation |
@@ -968,7 +968,7 @@ Show different notices based on analysis progress:
         successNotice$setContent(
             sprintf('Analysis completed successfully using %d observations.', nrow(self$data))
         )
-        self$results$insert(999, successNotice)
+        self$results$add(successNotice)   # append; insert(999, ...) corrupts the tree - see 13.1
 
     }, error = function(e) {
         errorNotice <- jmvcore::Notice$new(
@@ -1360,7 +1360,7 @@ Position 999: Last item (bottom)
         )
     )
 
-    self$results$insert(999, summaryNotice)  # Bottom position
+    self$results$add(summaryNotice)   # bottom; insert(999, ...) corrupts the tree - see 13.1
 }
 ```
 
@@ -1941,7 +1941,7 @@ survivalAnalysisClass <- R6::R6Class(
                         sep = '\n'
                     )
                 )
-                self$results$insert(999, methodNotice)
+                self$results$add(methodNotice)   # append; insert(999, ...) corrupts the tree - see 13.1
 
             }, error = function(e) {
 
@@ -2174,7 +2174,7 @@ diagnosticTestClass <- R6::R6Class(
                                ifelse(metrics$auc > 0.7, 'acceptable', 'poor'))
                     )
                 )
-                self$results$insert(999, summaryNotice)
+                self$results$add(summaryNotice)   # append; insert(999, ...) corrupts the tree - see 13.1
 
             }, error = function(e) {
                 errorNotice <- jmvcore::Notice$new(
@@ -2501,7 +2501,7 @@ sampleSizeClass <- R6::R6Class(
                     )
                 }
 
-                self$results$insert(999, feasibilityNotice)
+                self$results$add(feasibilityNotice)   # append; insert(999, ...) corrupts the tree - see 13.1
 
             }, error = function(e) {
                 calcErrorNotice <- jmvcore::Notice$new(
@@ -2858,12 +2858,31 @@ Every rule in this section was raised by the jamovi library reviewer against a
 real file in this project. See `vignettes/jamovi_library_review_guide.md` for the
 full report digest.
 
-### 13.1 `type: Notice` does NOT compile in `.r.yaml`
+### 13.1 The native notice, and the `insert()` trap
 
-The ClinicoPathDescriptives audit suggests replacing hand-styled HTML panels with
-`type: Notice` result elements declared in `.r.yaml`, reasoning (correctly) that
-the serialization problem is specific to *constructing* Notice objects
-dynamically. **The reasoning is right, but the option is not available today.**
+Two separate facts. **`type: Notice` in `.r.yaml` does not compile** - jamovi's notices are not
+declared in the results definition at all. **`jmvcore::Notice` built in R and inserted at run
+time does work**, and jamovi's own `jmv` ships it (`conttables`, `linReg`, `descriptives`,
+`setAnalysisNotice`).
+
+> **Corrected 2026-09-22.** This guide, `CLAUDE.md` and this project's code comments used to say
+> Notice objects "contain function references that cannot be serialized". That is false and was
+> never measured. A `Notice` at a valid index survives `asProtoBuf(final = TRUE)` and a protobuf
+> round trip with `type` and `content` intact. The crash came from `jmvcore::Group$insert()`,
+> which has **no bounds check**: any index above `length(results$items)` slices
+> `.items[index:length(.items)]`, R's `:` counts down, the tree fills with `NULL`s, and the next
+> traversal calls `NULL$asProtoBuf()` - `attempt to apply non-function`. A `jmvcore::Html` at the
+> same index fails identically. Use `$add()` to append; there is no append index. `insert(1, ...)`
+> into an **empty** group is the same bug (`1:0` is `c(1, 0)`). Arrays have no `insert` - use
+> `setHeader()`. Call `$setContent()`: the constructor's `content=` leaves `.stale = TRUE` and
+> `results$isFilled()` goes FALSE. Full account and the experiment:
+> [review guide section 13](jamovi_library_review_guide.md#13-notices-the-native-element-and-the-insert-trap).
+
+The notice helpers in this project stay hand-rolled HTML for a different reason: notice content
+renders as escaped plain text and takes no newlines, and these panels are multi-line. That is a
+standing product decision, not a workaround for a bug.
+
+**`type: Notice` in `.r.yaml`, verified empirically, remains unavailable:**
 
 Verified empirically against **jamovi 28.1.0 / jmvtools 28.3 / jamovi-compiler 0.3.5**:
 
@@ -2875,7 +2894,7 @@ Unable to compile 'nt.r.yaml':
 ```
 
 **Re-checked for jmvtools 28.3.1 (schema read, `prepare()` not re-run):** the enum adds `Text`
-and `Svg`; still no `Notice`. Record: [library review guide §13](jamovi_library_review_guide.md#13-the-type-notice-trap);
+and `Svg`; still no `Notice`. Record: [library review guide §13](jamovi_library_review_guide.md#13-notices-the-native-element-and-the-insert-trap);
 toolchain: [Installing Current jmvtools and jmvcore](jamovi_module_patterns_guide.md#installing-current-jmvtools-and-jmvcore).
 
 The compiler's `schemas/resultsschema.yaml` enum has no `Notice`, even though
@@ -2910,11 +2929,12 @@ Until then:
 |---|---|
 | Fatal validation error | `jmvcore::reject(.("..."), code = "...")` |
 | Non-fatal warning shown inline | `type: Html` element, styled per 13.2 |
-| Dynamic notice | `jmvcore::Notice` — but **never** via `self$results$insert(999, notice)` |
+| Dynamic notice | `jmvcore::Notice` + `$setContent()` + `$add()` (bottom) or `insert(1, …)` (top of a non-empty group) — **never** a sentinel index |
 
-`insert()` with a `jmvcore::Notice` raises `attempt to apply non-function`: Notice
-objects hold function references that jamovi's protobuf layer cannot serialize.
-See `R/waterfall.b.R` (`.addNotice()` / `.renderNotices()`) for the conversion pattern.
+Note: `insert()` with an index past the results group length (such as `insert(999, ...)`)
+triggers `jmvcore::Group$insert()`'s bounds-check bug where the results tree is padded with
+`NULL`s, causing serialization failure. Always use `$add()` for append or valid 1-based
+indices. See section 13.1 above.
 
 Also note `jmvcore::NoticeType` is `ERROR = 0`, `STRONG_WARNING = 1`,
 `WARNING = 2`, `INFO = 3`. Hand-written `switch()` mappings in `.addNotice()`

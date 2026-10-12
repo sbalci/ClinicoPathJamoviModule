@@ -1,11 +1,21 @@
+# testthat runs this file from tests/testthat, not the package root: resolve
+# source-tree files from there, and skip (not fail) where there is no source
+# tree, e.g. an installed-package run such as R CMD check.
+src_path <- function(...) {
+  root <- testthat::test_path("..", "..")
+  skip_if_not(dir.exists(file.path(root, "R")) && dir.exists(file.path(root, "jamovi")),
+              "package source tree not available")
+  file.path(root, ...)
+}
+
 test_that("groupedforest module files exist", {
   
   # Test that required files exist
-  expect_true(file.exists("R/groupedforest.b.R"))
-  expect_true(file.exists("jamovi/groupedforest.a.yaml"))
-  expect_true(file.exists("jamovi/groupedforest.u.yaml"))
-  expect_true(file.exists("jamovi/groupedforest.r.yaml"))
-  expect_true(file.exists("R/groupedforest.h.R"))
+  expect_true(file.exists(src_path("R/groupedforest.b.R")))
+  expect_true(file.exists(src_path("jamovi/groupedforest.a.yaml")))
+  expect_true(file.exists(src_path("jamovi/groupedforest.u.yaml")))
+  expect_true(file.exists(src_path("jamovi/groupedforest.r.yaml")))
+  expect_true(file.exists(src_path("R/groupedforest.h.R")))
 })
 
 test_that("groupedforest class and function availability", {
@@ -25,7 +35,7 @@ test_that("groupedforest class and function availability", {
 test_that("groupedforest backend implementation structure", {
   
   # Read the backend file and check for key elements
-  backend_content <- readLines("R/groupedforest.b.R", warn = FALSE)
+  backend_content <- readLines(src_path("R/groupedforest.b.R"), warn = FALSE)
   backend_text <- paste(backend_content, collapse = "\n")
   
   # Check for essential methods
@@ -50,7 +60,7 @@ test_that("groupedforest YAML configurations are valid", {
   
   # Test analysis configuration
   if (requireNamespace("yaml", quietly = TRUE)) {
-    analysis_config <- yaml::read_yaml("jamovi/groupedforest.a.yaml")
+    analysis_config <- yaml::read_yaml(src_path("jamovi/groupedforest.a.yaml"))
     
     expect_equal(analysis_config$name, "groupedforest")
     expect_true("title" %in% names(analysis_config))
@@ -62,7 +72,7 @@ test_that("groupedforest YAML configurations are valid", {
     expect_true(all(expected_options %in% option_names))
     
     # Test results configuration
-    results_config <- yaml::read_yaml("jamovi/groupedforest.r.yaml")
+    results_config <- yaml::read_yaml(src_path("jamovi/groupedforest.r.yaml"))
     item_names <- sapply(results_config$items, function(x) x$name)
     expect_true("forest_plot" %in% item_names)
     expect_true("statistics_table" %in% item_names)
@@ -72,15 +82,15 @@ test_that("groupedforest YAML configurations are valid", {
 test_that("groupedforest test datasets exist and are properly structured", {
   
   # Test that datasets were created
-  expect_true(file.exists("data/groupedforest_comprehensive_data.rda"))
-  expect_true(file.exists("data/groupedforest_simple_data.rda"))
-  expect_true(file.exists("data/groupedforest_multi_subgroups.rda"))
-  expect_true(file.exists("data/groupedforest_precision_medicine.rda"))
-  expect_true(file.exists("data/groupedforest_biomarker_data.rda"))
-  expect_true(file.exists("data/groupedforest_interaction_data.rda"))
+  expect_true(file.exists(src_path("data/groupedforest_comprehensive_data.rda")))
+  expect_true(file.exists(src_path("data/groupedforest_simple_data.rda")))
+  expect_true(file.exists(src_path("data/groupedforest_multi_subgroups.rda")))
+  expect_true(file.exists(src_path("data/groupedforest_precision_medicine.rda")))
+  expect_true(file.exists(src_path("data/groupedforest_biomarker_data.rda")))
+  expect_true(file.exists(src_path("data/groupedforest_interaction_data.rda")))
   
   # Load and test the main dataset
-  load("data/groupedforest_comprehensive_data.rda")
+  load(src_path("data/groupedforest_comprehensive_data.rda"))
   
   expect_s3_class(groupedforest_comprehensive_data, "data.frame")
   expect_gt(nrow(groupedforest_comprehensive_data), 150)
@@ -100,7 +110,7 @@ test_that("groupedforest test datasets exist and are properly structured", {
 test_that("groupedforest handles basic survival data structure", {
   
   # Load basic survival data for testing
-  load("data/basic_survival_data.rda")
+  load(src_path("data/basic_survival_data.rda"))
   
   # Test that the basic survival data has required columns
   required_cols <- c("survival_months", "death_event", "treatment", "sex")
@@ -118,7 +128,7 @@ test_that("groupedforest parameter combinations work", {
   
   if (exists("groupedforest")) {
     # Load test data
-    load("data/basic_survival_data.rda")
+    load(src_path("data/basic_survival_data.rda"))
     
     # Test basic groupedforest instantiation
     expect_error({
@@ -139,7 +149,7 @@ test_that("groupedforest with comprehensive dataset", {
   
   if (exists("groupedforest")) {
     # Load comprehensive test data
-    load("data/groupedforest_comprehensive_data.rda")
+    load(src_path("data/groupedforest_comprehensive_data.rda"))
     
     # Test with biomarker grouping
     expect_error({
@@ -174,7 +184,7 @@ test_that("groupedforest multiple subgroups dataset", {
   
   if (exists("groupedforest")) {
     # Load multi-subgroups data
-    load("data/groupedforest_multi_subgroups.rda")
+    load(src_path("data/groupedforest_multi_subgroups.rda"))
     
     # Test with molecular subtype
     expect_error({
@@ -208,7 +218,7 @@ test_that("groupedforest precision medicine dataset", {
   
   if (exists("groupedforest")) {
     # Load precision medicine data
-    load("data/groupedforest_precision_medicine.rda")
+    load(src_path("data/groupedforest_precision_medicine.rda"))
     
     # Test with genomic variants
     expect_error({
@@ -241,7 +251,7 @@ test_that("groupedforest biomarker stratification", {
   
   if (exists("groupedforest")) {
     # Load biomarker data
-    load("data/groupedforest_biomarker_data.rda")
+    load(src_path("data/groupedforest_biomarker_data.rda"))
     
     # Test with biomarker levels
     expect_error({
@@ -275,7 +285,7 @@ test_that("groupedforest clinical trial interaction data", {
   
   if (exists("groupedforest")) {
     # Load interaction data
-    load("data/groupedforest_interaction_data.rda")
+    load(src_path("data/groupedforest_interaction_data.rda"))
     
     # Test with genetic profiles
     expect_error({
@@ -311,7 +321,7 @@ test_that("groupedforest plot theme options", {
   
   
   if (exists("groupedforest")) {
-    load("data/groupedforest_simple_data.rda")
+    load(src_path("data/groupedforest_simple_data.rda"))
     
     # Test different plot themes
     themes <- c("clinical", "minimal", "classic", "publication")
@@ -335,7 +345,7 @@ test_that("groupedforest hazard ratio range options", {
   
   
   if (exists("groupedforest")) {
-    load("data/groupedforest_simple_data.rda")
+    load(src_path("data/groupedforest_simple_data.rda"))
     
     # Test different HR range options
     hr_ranges <- c("auto", "wide", "narrow", "custom")
@@ -361,7 +371,7 @@ test_that("groupedforest confidence level options", {
   
   
   if (exists("groupedforest")) {
-    load("data/groupedforest_simple_data.rda")
+    load(src_path("data/groupedforest_simple_data.rda"))
     
     # Test different confidence levels
     conf_levels <- c(0.80, 0.90, 0.95, 0.99)
@@ -385,7 +395,7 @@ test_that("groupedforest display options combinations", {
   
   
   if (exists("groupedforest")) {
-    load("data/groupedforest_comprehensive_data.rda")
+    load(src_path("data/groupedforest_comprehensive_data.rda"))
     
     # Test comprehensive parameter combinations
     expect_error({
@@ -419,7 +429,7 @@ test_that("groupedforest dependency handling", {
     if (requireNamespace(pkg, quietly = TRUE)) {
       expect_error({
         if (exists("groupedforest")) {
-          load("data/basic_survival_data.rda")
+          load(src_path("data/basic_survival_data.rda"))
           result <- groupedforest(
             data = basic_survival_data,
             time_var = "survival_months",
@@ -440,7 +450,7 @@ test_that("groupedforest with missing data handling", {
   
   if (exists("groupedforest")) {
     # Create data with missing values
-    load("data/groupedforest_simple_data.rda")
+    load(src_path("data/groupedforest_simple_data.rda"))
     test_data <- groupedforest_simple_data
     
     # Introduce some missing values
@@ -463,15 +473,20 @@ test_that("groupedforest required methods exist", {
   
   
   if (exists("groupedforest")) {
-    load("data/basic_survival_data.rda")
+    load(src_path("data/basic_survival_data.rda"))
     
-    result <- groupedforest(
-      data = basic_survival_data,
-      time_var = "survival_months",
-      event_var = "death_event",
-      treatment_var = "treatment",
-      grouping_var = "sex"
+    # The groupedforest() wrapper returns analysis$results, which has no private
+    # methods: build the analysis itself, as the wrapper does.
+    result <- groupedforestClass$new(
+      options = groupedforestOptions$new(
+        time_var = "survival_months",
+        event_var = "death_event",
+        treatment_var = "treatment",
+        grouping_var = "sex"
+      ),
+      data = basic_survival_data
     )
+    result$run()
     
     # Check that required methods exist
     expect_true(exists(".plot_forest", envir = result$.__enclos_env__$private))
@@ -499,9 +514,10 @@ test_that("groupedforest interaction test uses a joint LR test (not min per-term
       reference_treatment = "Ctrl", interaction_test = TRUE,
       show_overall = TRUE, show_statistics = TRUE)
   })
-  expect_true(inherits(model, "jmvcoreClass"))
+  # the wrapper returns the results group itself (there is no "jmvcoreClass")
+  expect_s3_class(model, "groupedforestResults")
 
-  it <- model$results$interaction_test$content
+  it <- model$interaction_test$content
   # overall test reported as a single likelihood-ratio chi-square on df
   expect_true(grepl("likelihood-ratio", it, ignore.case = TRUE))
   expect_true(grepl("df", it))

@@ -1,12 +1,66 @@
+# A parked analysis (T/P/D menuGroup) is deleted from the generated module, and a maintainer's
+# checkout can be mid-removal. So each test audits the analyses present and ends with a skip that
+# names the rest: an absent file only says "cannot open the connection", and gating a whole test on
+# one analysis hides the others. The helpers below are the ones in test-meddecide-library-audit.R.
+
+# Which of `names` lack a file here; `files` are sprintf() templates relative to `root`. Matched
+# against list.files(), not file.exists(): macOS disks ignore case, so file.exists() finds a
+# misspelt name there and Linux CI does not.
+audit_absent <- function(root, names, files = "R/%s.b.R") {
+  on_disk <- function(path) basename(path) %in% list.files(file.path(root, dirname(path)))
+  Filter(function(name) !all(vapply(sprintf(files, name), on_disk, logical(1))), names)
+}
+
+# Runtime tests: which of `analyses` have their class loaded (the namespace under R CMD check,
+# load_all() in development).
+audit_loaded <- function(analyses) Filter(function(a) exists(paste0(a, "Class")), analyses)
+
+# Ends a test that could not reach `absent` with a skip naming them, and `note` if given. Given the
+# umbrella's `root` it errors instead: the umbrella keeps every analysis, parked or not, so a missing
+# name is a typo.
+audit_skip_absent <- function(absent, root = NULL, note = NULL) {
+  if (length(absent) == 0) return(invisible())
+  absent <- paste(absent, collapse = ", ")
+  if (!is.null(root) &&
+      identical(unname(read.dcf(file.path(root, "DESCRIPTION"))[1, "Package"]), "ClinicoPath"))
+    stop("the umbrella keeps every analysis, parked or not, yet lacks: ", absent, call. = FALSE)
+  testthat::skip(paste(c(paste0("not in this module (parked or not shipped): ", absent), note), collapse = "; "))
+}
+
+# Ends a runtime test with a skip naming each of `wanted` whose class is not loaded, and why: its files
+# are absent from this tree, or present while the package is not (the file was run on its own). R CMD
+# check has no source tree; there the loaded namespace is the module, so a missing class is absent.
+audit_skip_unloaded <- function(wanted) {
+  unloaded <- setdiff(wanted, audit_loaded(wanted))
+  if (length(unloaded) == 0) return(invisible())
+  root <- normalizePath(file.path(testthat::test_path(), "..", ".."), mustWork = FALSE)
+  if (!file.exists(file.path(root, "DESCRIPTION"))) audit_skip_absent(unloaded)
+  absent <- audit_absent(root, unloaded)
+  not_loaded <- paste0("class not loaded (package not loaded in this run): ",
+                       paste(setdiff(unloaded, absent), collapse = ", "))
+  audit_skip_absent(absent, root, if (length(absent) < length(unloaded)) not_loaded)
+  testthat::skip(not_loaded)
+}
+
 # Every analysis on the production Survival menu (the ones the updater ships to
-# jsurvival), read from the .a.yaml files so a routing change cannot leave this stale.
+# jsurvival), read from the .a.yaml files so a routing change cannot leave this stale,
+# and from jamovi/0000.yaml, which still lists one whose files a checkout mid-removal
+# has already deleted (the updater drops the entry together with the files).
 jsurvival_audit_analyses <- local({
-  files <- list.files(testthat::test_path("..", "..", "jamovi"), "\\.a\\.yaml$", full.names = TRUE)
+  jamovi <- testthat::test_path("..", "..", "jamovi")
+  files <- list.files(jamovi, "\\.a\\.yaml$", full.names = TRUE)
   group <- vapply(files, function(f) {
     g <- grep("^menuGroup:", readLines(f, warn = FALSE), value = TRUE)
     if (length(g)) trimws(sub("^menuGroup:", "", g[1])) else ""
   }, "")
-  sort(sub("\\.a\\.yaml$", "", basename(files[group == "Survival"])))
+  manifest <- file.path(jamovi, "0000.yaml")
+  listed <- if (file.exists(manifest)) {
+    Filter(function(a) identical(a$menuGroup, "Survival"), yaml::read_yaml(manifest)$analyses)
+  }
+  sort(unique(c(
+    sub("\\.a\\.yaml$", "", basename(files[group == "Survival"])),
+    vapply(listed, function(a) as.character(a$name), "")
+  )))
 })
 
 jsurvival_audit_root <- normalizePath(
@@ -18,6 +72,14 @@ jsurvival_audit_root <- normalizePath(
 jsurvival_source_available <- dir.exists(file.path(jsurvival_audit_root, "jamovi")) &&
   dir.exists(file.path(jsurvival_audit_root, "R")) &&
   file.exists(file.path(jsurvival_audit_root, "DESCRIPTION"))
+
+# The audited analyses this tree lacks a file for, and the ones it has.
+jsurvival_absent <- audit_absent(
+  jsurvival_audit_root,
+  jsurvival_audit_analyses,
+  c("jamovi/%s.a.yaml", "jamovi/%s.r.yaml", "jamovi/%s.u.yaml", "R/%s.b.R")
+)
+jsurvival_present <- setdiff(jsurvival_audit_analyses, jsurvival_absent)
 
 read_jsurvival_definition <- function(analysis, kind) {
   yaml::read_yaml(file.path(
@@ -71,7 +133,7 @@ read_jsurvival_source <- function(analysis) {
 test_that("jsurvival schema references remain internally consistent", {
   skip_if_not(jsurvival_source_available, "package source tree not available")
 
-  for (analysis in jsurvival_audit_analyses) {
+  for (analysis in jsurvival_present) {
     analysis_def <- read_jsurvival_definition(analysis, "a")
     result_def <- read_jsurvival_definition(analysis, "r")
     ui_def <- read_jsurvival_definition(analysis, "u")
@@ -117,6 +179,7 @@ test_that("jsurvival schema references remain internally consistent", {
       )
     }
   }
+  audit_skip_absent(jsurvival_absent, jsurvival_audit_root)
 })
 
 test_that("jsurvival release and citation versions are synchronized", {
@@ -136,9 +199,10 @@ test_that("jsurvival release and citation versions are synchronized", {
 test_that("jsurvival citation catalog contains exactly the required standalone keys", {
   skip_if_not(jsurvival_source_available, "package source tree not available")
 
-  referenced <- unique(unlist(lapply(jsurvival_audit_analyses, function(analysis) {
+  # as.character(): with every analysis absent unlist() gives NULL, which expect_setequal() rejects
+  referenced <- unique(as.character(unlist(lapply(jsurvival_present, function(analysis) {
     collect_jsurvival_values(read_jsurvival_definition(analysis, "r"), "refs")
-  })))
+  }))))
   defined <- names(yaml::read_yaml(
     file.path(jsurvival_audit_root, "jamovi", "00refs.yaml")
   )$refs)
@@ -149,6 +213,12 @@ test_that("jsurvival citation catalog contains exactly the required standalone k
 
   expect_setequal(intersect(referenced, defined), referenced)
   if (identical(package_name, "jsurvival")) {
+    # An absent analysis's citations stay until the updater rewrites 00refs.yaml: routing, not dead
+    # keys. The skip lists them, so a key no absent analysis explains is still in view.
+    extra <- setdiff(defined, referenced)
+    if (length(extra))
+      audit_skip_absent(jsurvival_absent, jsurvival_audit_root,
+                        paste("keys no present analysis cites:", paste(extra, collapse = ", ")))
     expect_setequal(defined, referenced)
   }
 })
@@ -164,6 +234,9 @@ test_that("oddsratio validation rejects cleanly on both audited error paths", {
     identical(package_name, "jsurvival"),
     "runtime error paths are exercised in the standalone distribution"
   )
+  # the class loaded here, not whatever jsurvival is installed: that may be older, or still hold a
+  # parked oddsratio
+  audit_skip_unloaded("oddsratio")
   oddsratio <- getExportedValue(package_name, "oddsratio")
 
   empty_data <- data.frame(
@@ -203,24 +276,27 @@ test_that("symbol entities and fragmented translation calls are absent", {
   skip_if_not(jsurvival_source_available, "package source tree not available")
 
   sources <- vapply(
-    jsurvival_audit_analyses,
+    jsurvival_present,
     read_jsurvival_source,
     character(1)
   )
   expect_false(any(grepl("&(mdash|times|ndash|beta|ge);", sources, perl = TRUE)))
 
-  translation_sources <- sources[c("survival", "singlearm")]
+  translated <- c("survival", "singlearm")
+  absent <- audit_absent(jsurvival_audit_root, translated)
+  translation_sources <- vapply(setdiff(translated, absent), read_jsurvival_source, character(1))
   active_lines <- unlist(lapply(strsplit(translation_sources, "\n", fixed = TRUE), function(lines) {
     lines[!grepl("^\\s*#", lines)]
   }))
   expect_false(any(grepl("paste0?\\(\\.\\(", active_lines, perl = TRUE)))
+  audit_skip_absent(union(jsurvival_absent, absent), jsurvival_audit_root)
 })
 
 test_that("audited backends use selective namespace imports", {
   skip_if_not(jsurvival_source_available, "package source tree not available")
 
   sources <- vapply(
-    jsurvival_audit_analyses,
+    jsurvival_present,
     read_jsurvival_source,
     character(1)
   )
@@ -248,6 +324,7 @@ test_that("audited backends use selective namespace imports", {
     )))
     expect_true(any(grepl('^importFrom\\(jmvcore,("[.]"|[.])\\)$', namespace)))
   }
+  audit_skip_absent(jsurvival_absent, jsurvival_audit_root)
 })
 
 test_that("checkbox labels use noun phrases", {
@@ -258,7 +335,7 @@ test_that("checkbox labels use noun phrases", {
     "Stratify|Add|Remove)( |$)"
   )
 
-  for (analysis in jsurvival_audit_analyses) {
+  for (analysis in jsurvival_present) {
     analysis_def <- read_jsurvival_definition(analysis, "a")
     ui_def <- read_jsurvival_definition(analysis, "u")
     option_titles <- setNames(
@@ -286,10 +363,15 @@ test_that("checkbox labels use noun phrases", {
       )
     }
   }
+  audit_skip_absent(jsurvival_absent, jsurvival_audit_root)
 })
 
 test_that("disabled survival-tree scaffolding is not exposed in the UI", {
   skip_if_not(jsurvival_source_available, "package source tree not available")
+  audit_skip_absent(
+    audit_absent(jsurvival_audit_root, "multisurvival", c("jamovi/%s.a.yaml", "jamovi/%s.u.yaml")),
+    jsurvival_audit_root
+  )
 
   analysis_def <- read_jsurvival_definition("multisurvival", "a")
   ui_def <- read_jsurvival_definition("multisurvival", "u")
@@ -333,7 +415,7 @@ test_that("audited backends contain no direct code-execution calls", {
   skip_if_not(jsurvival_source_available, "package source tree not available")
 
   forbidden <- c("eval", "parse", "system", "system2", "shell", "source")
-  for (analysis in jsurvival_audit_analyses) {
+  for (analysis in jsurvival_present) {
     parsed <- parse(
       file.path(jsurvival_audit_root, "R", paste0(analysis, ".b.R")),
       keep.source = TRUE
@@ -346,11 +428,13 @@ test_that("audited backends contain no direct code-execution calls", {
       info = paste(analysis, "contains a forbidden execution call")
     )
   }
+  audit_skip_absent(jsurvival_absent, jsurvival_audit_root)
 })
 
 # A result that changes with the random seed names that seed next to it (Random seed option).
 test_that("seed-dependent jsurvival results show the seed that drew them", {
-  skip_if_not(exists("survivalClass") && exists("multisurvivalClass") && exists("lassocoxClass"))
+  wanted <- c("survival", "multisurvival", "lassocox")
+  loaded <- audit_loaded(wanted)
   skip_if_not_installed("glmnet")
   quiet <- function(expr) suppressWarnings(suppressMessages(expr))
   shown <- "Random seed: 777"
@@ -369,25 +453,33 @@ test_that("seed-dependent jsurvival results show the seed that drew them", {
   d$status <- stats::rbinom(n, 1, 0.75)
   d$event <- factor(ifelse(d$status == 1, "Yes", "No"))
 
-  sv <- run("survival", d, elapsedtime = "time", outcome = "status", outcomeLevel = "1", explanatory = "trt",
-            bootstrapValidation = TRUE, bootstrapValN = 50, seed = 777)
-  expect_true(shown %in% notes(sv$results$bootstrapValidationTable))
+  if ("survival" %in% loaded) {
+    sv <- run("survival", d, elapsedtime = "time", outcome = "status", outcomeLevel = "1", explanatory = "trt",
+              bootstrapValidation = TRUE, bootstrapValN = 50, seed = 777)
+    expect_true(shown %in% notes(sv$results$bootstrapValidationTable))
+  }
 
-  ms <- run("multisurvival", d, elapsedtime = "time", outcome = "status", outcomeLevel = "1",
-            explanatory = "trt", contexpl = "age", ci_optimism = TRUE, ci_optimism_boot = 50, seed = 777)
-  expect_true(shown %in% notes(ms$results$cindexValidation))
+  if ("multisurvival" %in% loaded) {
+    ms <- run("multisurvival", d, elapsedtime = "time", outcome = "status", outcomeLevel = "1",
+              explanatory = "trt", contexpl = "age", ci_optimism = TRUE, ci_optimism_boot = 50, seed = 777)
+    expect_true(shown %in% notes(ms$results$cindexValidation))
+  }
 
-  lc <- run("lassocox", d, elapsedtime = "time", outcome = "event", outcomeLevel = "Yes", censorLevel = "No",
-            explanatory = c("x1", "x2", "x3", "x4", "age"), random_seed = 777,
-            cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE)
-  expect_true(shown %in% notes(lc$results$modelSummary))
+  if ("lassocox" %in% loaded) {
+    lc <- run("lassocox", d, elapsedtime = "time", outcome = "event", outcomeLevel = "Yes", censorLevel = "No",
+              explanatory = c("x1", "x2", "x3", "x4", "age"), random_seed = 777,
+              cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE)
+    expect_true(shown %in% notes(lc$results$modelSummary))
+  }
+  audit_skip_unloaded(wanted)
 })
 
 # library-audit 2026-09-16 meddecide [LOW] DONE (same class): tables whose row set is fixed by the code or by
 #   an option have their rows before .run(); a statistic that cannot be computed stays as a blank row
 #   rather than vanishing, so "not estimable" is distinguishable from "never tried"
 test_that("fixed-row jsurvival tables are scaffolded before .run()", {
-  skip_if_not(exists("survivalClass") && exists("singlearmClass") && exists("multisurvivalClass"))
+  wanted <- c("survival", "singlearm", "multisurvival")
+  loaded <- audit_loaded(wanted)
   after_init <- function(name, data, ...) {
     a <- get(paste0(name, "Class"))$new(options = get(paste0(name, "Options"))$new(...), data = data)
     suppressWarnings(suppressMessages(a$init()))
@@ -397,17 +489,24 @@ test_that("fixed-row jsurvival tables are scaffolded before .run()", {
   n <- 80
   d <- data.frame(time = round(stats::rexp(n, 0.025) + 1, 2), status = stats::rbinom(n, 1, 0.7),
                   trt = factor(sample(c("A", "B"), n, TRUE)), age = stats::rnorm(n, 60, 10))
-  sv <- after_init("survival", d, elapsedtime = "time", outcome = "status", outcomeLevel = "1", explanatory = "trt",
-                   calibration_curves = TRUE, use_parametric = TRUE, compare_distributions = TRUE)
-  expect_identical(sv("calibrationTable"), c("slope", "meancal", "mae", "cindex"))
-  expect_identical(sv("parametricModelComparison"),
-                   c("exp", "weibull", "lnorm", "llogis", "gamma", "gengamma", "gompertz"))
-  sa <- after_init("singlearm", d, elapsedtime = "time", outcome = "status", outcomeLevel = "1",
-                   advancedDiagnostics = TRUE)
-  expect_identical(sa("dataQualityTable"),
-                   c("n_total", "n_events", "event_rate", "followup_range", "median_followup", "memory",
-                     "time_complete", "outcome_complete"))
-  ms <- after_init("multisurvival", d, elapsedtime = "time", outcome = "status", outcomeLevel = "1",
-                   explanatory = "trt", contexpl = "age", ci_optimism = TRUE)
-  expect_identical(ms("cindexValidation"), c("apparent", "optimism", "corrected"))
+  if ("survival" %in% loaded) {
+    sv <- after_init("survival", d, elapsedtime = "time", outcome = "status", outcomeLevel = "1", explanatory = "trt",
+                     calibration_curves = TRUE, use_parametric = TRUE, compare_distributions = TRUE)
+    expect_identical(sv("calibrationTable"), c("slope", "meancal", "mae", "cindex"))
+    expect_identical(sv("parametricModelComparison"),
+                     c("exp", "weibull", "lnorm", "llogis", "gamma", "gengamma", "gompertz"))
+  }
+  if ("singlearm" %in% loaded) {
+    sa <- after_init("singlearm", d, elapsedtime = "time", outcome = "status", outcomeLevel = "1",
+                     advancedDiagnostics = TRUE)
+    expect_identical(sa("dataQualityTable"),
+                     c("n_total", "n_events", "event_rate", "followup_range", "median_followup", "memory",
+                       "time_complete", "outcome_complete"))
+  }
+  if ("multisurvival" %in% loaded) {
+    ms <- after_init("multisurvival", d, elapsedtime = "time", outcome = "status", outcomeLevel = "1",
+                     explanatory = "trt", contexpl = "age", ci_optimism = TRUE)
+    expect_identical(ms("cindexValidation"), c("apparent", "optimism", "corrected"))
+  }
+  audit_skip_unloaded(wanted)
 })

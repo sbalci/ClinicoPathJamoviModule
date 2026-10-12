@@ -18,6 +18,7 @@ refs:
         title: "Diagnostic tests 1: Sensitivity and specificity"
         publisher: BMJ
         volume: 308
+        issue: 6943
         pages: 1552
         doi: 10.1136/bmj.308.6943.1552
         url: "https://doi.org/10.1136/bmj.308.6943.1552"
@@ -56,6 +57,17 @@ refs:
         doi: 10.1002/sim.8281
         url: "https://doi.org/10.1002/sim.8281"
 
+    Barlow1991:
+        type: article
+        author: "Barlow, W., Lai, M. Y., & Azen, S. P."
+        year: 1991
+        title: A comparison of methods for calculating a stratified kappa
+        publisher: Statistics in Medicine
+        volume: 10
+        issue: 9
+        pages: 1465-1472
+        doi: 10.1002/sim.4780100913
+        url: "https://doi.org/10.1002/sim.4780100913"
     BART:
         type: software
         author: Robert McCulloch , Rodney Sparapani , Robert Gramacy , Matthew Pratola , Charles Spanbauer , Martyn Plummer , Nicky Best , Kate Cowles , Karen Vines
@@ -137,6 +149,18 @@ refs:
         doi: 10.1002/sim.1108
         url: "https://doi.org/10.1002/sim.1108"
 
+    Byrt1993:
+        type: article
+        author: "Byrt, T., Bishop, J., & Carlin, J. B."
+        year: 1993
+        title: "Bias, prevalence and kappa"
+        publisher: Journal of Clinical Epidemiology
+        volume: 46
+        issue: 5
+        pages: 423-429
+        doi: 10.1016/0895-4356(93)90018-V
+        url: "https://doi.org/10.1016/0895-4356(93)90018-V"
+
     BlueSky:
         type: software
         author: BlueSkyStatistics
@@ -207,9 +231,9 @@ refs:
 
     ClinicoPathJamoviModule:
         type: software
-        author: Serdar Balci
-        year: 2022
-        title: "ClinicoPath jamovi Module doi:10.5281/zenodo.3997188"
+        author: "Balci, S."
+        year: 2020
+        title: "ClinicoPath jamovi Module"
         publisher: "[R package]. Retrieved from https://github.com/sbalci/ClinicoPathJamoviModule"
         doi: 10.17605/OSF.IO/9SZUD
         url: "https://www.serdarbalci.com/ClinicoPathJamoviModule/"
@@ -234,6 +258,42 @@ refs:
         publisher: Cochrane
         doi: 10.1002/9781119756194
         url: "https://www.cochrane.org/authors/handbooks-and-manuals/handbook-systematic-reviews-diagnostic-test-accuracy"
+
+    Cicchetti1994:
+        type: article
+        author: "Cicchetti, D. V."
+        year: 1994
+        title: Guidelines, criteria, and rules of thumb for evaluating normed and standardized assessment instruments in psychology
+        publisher: Psychological Assessment
+        volume: 6
+        issue: 4
+        pages: 284-290
+        doi: 10.1037/1040-3590.6.4.284
+        url: "https://doi.org/10.1037/1040-3590.6.4.284"
+
+    Cohen1960:
+        type: article
+        author: "Cohen, J."
+        year: 1960
+        title: A coefficient of agreement for nominal scales
+        publisher: Educational and Psychological Measurement
+        volume: 20
+        issue: 1
+        pages: 37-46
+        doi: 10.1177/001316446002000104
+        url: "https://doi.org/10.1177/001316446002000104"
+
+    Cohen1968:
+        type: article
+        author: "Cohen, J."
+        year: 1968
+        title: "Weighted kappa: Nominal scale agreement provision for scaled disagreement or partial credit"
+        publisher: Psychological Bulletin
+        volume: 70
+        issue: 4
+        pages: 213-220
+        doi: 10.1037/h0026256
+        url: "https://doi.org/10.1037/h0026256"
 
     Cohen1988:
         type: book
@@ -275,6 +335,18 @@ refs:
         pages: 107-122
         doi: 10.1016/S0167-5877(00)00119-7
         url: "https://pubmed.ncbi.nlm.nih.gov/10802336/"
+
+    Conger1980:
+        type: article
+        author: "Conger, A. J."
+        year: 1980
+        title: Integration and generalization of kappas for multiple raters
+        publisher: Psychological Bulletin
+        volume: 88
+        issue: 2
+        pages: 322-328
+        doi: 10.1037/0033-2909.88.2.322
+        url: "https://doi.org/10.1037/0033-2909.88.2.322"
 
     DT:
         type: software
@@ -337,9 +409,10 @@ refs:
         type: article
         author: "Deeks, J. J., & Altman, D. G."
         year: 2004
-        title: "Diagnostic tests 4: Likelihood ratios"
+        title: "Diagnostic tests 4: likelihood ratios"
         publisher: BMJ
         volume: 329
+        issue: 7458
         pages: 168-169
         doi: 10.1136/bmj.329.7458.168
         url: "https://doi.org/10.1136/bmj.329.7458.168"
@@ -387,12 +460,15 @@ refs:
 
     DiagnosticTests:
         type: article
-        author: Stites EC, Wilen CB.
+        author: "Stites, E. C., & Wilen, C. B."
         year: 2020
         title: The Interpretation of SARS-CoV-2 Diagnostic Tests
-        publisher: Med (N Y).
+        publisher: Med
+        volume: 1
+        issue: 1
+        pages: 78-89
         doi: 10.1016/j.medj.2020.08.001
-        url: "https://www.cell.com/med/fulltext/S2666-6340(20)30016-7"
+        url: "https://doi.org/10.1016/j.medj.2020.08.001"
 
     DiagrammeR:
         type: software
@@ -498,8 +574,8 @@ refs:
 
     Fagan:
         type: software
-        author: Adam Chekroud
-        year: 2020
+        author: "Chekroud, A. M., & Schwartz, A."
+        year: 2016
         title: "nomogrammer: Fagan's nomograms with ggplot2"
         publisher: GitHub
         url: "https://github.com/achekroud/nomogrammer"
@@ -508,20 +584,13 @@ refs:
         type: article
         author: Fagan, T. J.
         year: 1975
-        title: Nomogram for Bayes theorem
+        title: "Nomogram for Bayes's theorem"
         publisher: New England Journal of Medicine
         volume: 293
+        issue: 5
         pages: 257
         doi: 10.1056/NEJM197507312930513
         url: "https://doi.org/10.1056/NEJM197507312930513"
-
-    Fagan2:
-        type: article
-        author: Simon, S.
-        year: 2020
-        title: "StATS: What is a Fagan nomogram?"
-        publisher: P.Mean Consulting
-        url: "http://www.pmean.com/definitions/fagan.htm"
 
     Faul2007:
         type: article
@@ -534,6 +603,18 @@ refs:
         pages: 175-191
         doi: 10.3758/BF03193146
         url: "https://doi.org/10.3758/BF03193146"
+
+    Fleiss1971:
+        type: article
+        author: "Fleiss, J. L."
+        year: 1971
+        title: Measuring nominal scale agreement among many raters
+        publisher: Psychological Bulletin
+        volume: 76
+        issue: 5
+        pages: 378-382
+        doi: 10.1037/h0031619
+        url: "https://doi.org/10.1037/h0031619"
 
     FreedmanAndSchoenfeld1982:
         type: article
@@ -578,6 +659,18 @@ refs:
         pages: 437-442
         doi: 10.1093/biomet/28.3-4.437
         url: "https://doi.org/10.1093/biomet/28.3-4.437"
+
+    Gwet2008:
+        type: article
+        author: "Gwet, K. L."
+        year: 2008
+        title: Computing inter-rater reliability and its variance in the presence of high agreement
+        publisher: British Journal of Mathematical and Statistical Psychology
+        volume: 61
+        issue: 1
+        pages: 29-48
+        doi: 10.1348/000711006X126600
+        url: "https://doi.org/10.1348/000711006X126600"
 
     Hedges1981:
         type: article
@@ -661,6 +754,18 @@ refs:
         title: "JMbayes2: R package"
         publisher: "[R package]. Retrieved from https://CRAN.R-project.org/package=JMbayes2"
         url: "https://CRAN.R-project.org/package=JMbayes2"
+
+    Janson2001:
+        type: article
+        author: "Janson, H., & Olsson, U."
+        year: 2001
+        title: A measure of agreement for interval or nominal multivariate observations
+        publisher: Educational and Psychological Measurement
+        volume: 61
+        issue: 2
+        pages: 277-289
+        doi: 10.1177/00131640121971239
+        url: "https://doi.org/10.1177/00131640121971239"
 
     KMunicate:
         type: software
@@ -755,6 +860,42 @@ refs:
         pages: 159-174
         doi: 10.2307/2529310
         url: "https://pubmed.ncbi.nlm.nih.gov/843571/"
+
+    Lin1989:
+        type: article
+        author: "Lin, L. I."
+        year: 1989
+        title: A concordance correlation coefficient to evaluate reproducibility
+        publisher: Biometrics
+        volume: 45
+        issue: 1
+        pages: 255-268
+        doi: 10.2307/2532051
+        url: "https://doi.org/10.2307/2532051"
+
+    Lin2000:
+        type: article
+        author: "Lin, L. I."
+        year: 2000
+        title: Total deviation index for measuring individual agreement with applications in laboratory performance and bioequivalence
+        publisher: Statistics in Medicine
+        volume: 19
+        issue: 2
+        pages: 255-270
+        doi: "10.1002/(SICI)1097-0258(20000130)19:2<255::AID-SIM293>3.0.CO;2-8"
+        url: "https://pubmed.ncbi.nlm.nih.gov/10641028/"
+
+    Light1971:
+        type: article
+        author: "Light, R. J."
+        year: 1971
+        title: "Measures of response agreement for qualitative data: Some generalizations and alternatives"
+        publisher: Psychological Bulletin
+        volume: 76
+        issue: 5
+        pages: 365-377
+        doi: 10.1037/h0031643
+        url: "https://doi.org/10.1037/h0031643"
 
     LachinAndFoulkes1986:
         type: article
@@ -859,6 +1000,29 @@ refs:
         title: "MendelianRandomization: Mendelian Randomization Package"
         publisher: "[R package version 0.10.0]. Retrieved from https://CRAN.R-project.org/package=MendelianRandomization"
         url: "https://CRAN.R-project.org/package=MendelianRandomization"
+
+    Mukaka2012:
+        type: article
+        author: "Mukaka, M. M."
+        year: 2012
+        title: "Statistics corner: A guide to appropriate use of correlation coefficient in medical research"
+        publisher: Malawi Medical Journal
+        volume: 24
+        issue: 3
+        pages: 69-71
+        url: "https://pubmed.ncbi.nlm.nih.gov/23638278/"
+
+    Nelson2015:
+        type: article
+        author: "Nelson, K. P., & Edwards, D."
+        year: 2015
+        title: Measures of agreement between many raters for ordinal classifications
+        publisher: Statistics in Medicine
+        volume: 34
+        issue: 23
+        pages: 3116-3132
+        doi: 10.1002/sim.6546
+        url: "https://doi.org/10.1002/sim.6546"
 
     NguyenPennello2024:
         type: article
@@ -1042,6 +1206,18 @@ refs:
         publisher: "[R package]. Retrieved from https://CRAN.R-project.org/package=ResourceSelection"
         url: "https://CRAN.R-project.org/package=ResourceSelection"
 
+    Reitsma2005:
+        type: article
+        author: "Reitsma, J. B., Glas, A. S., Rutjes, A. W., Scholten, R. J., Bossuyt, P. M., & Zwinderman, A. H."
+        year: 2005
+        title: Bivariate analysis of sensitivity and specificity produces informative summary measures in diagnostic reviews
+        publisher: Journal of Clinical Epidemiology
+        volume: 58
+        issue: 10
+        pages: 982-990
+        doi: 10.1016/j.jclinepi.2005.02.022
+        url: "https://doi.org/10.1016/j.jclinepi.2005.02.022"
+
     RileyHigginsDeeks2011:
         type: article
         author: "Riley, R. D., Higgins, J. P. T., & Deeks, J. J."
@@ -1174,6 +1350,7 @@ refs:
         issue: 2
         pages: 420-428
         doi: 10.1037/0033-2909.86.2.420
+        url: https://doi.org/10.1037/0033-2909.86.2.420
 
     Simon2011Coxnet:
         type: article
@@ -1211,6 +1388,16 @@ refs:
         doi: 10.1097/EDE.0b013e3181c30fb2
         url: "https://doi.org/10.1097/EDE.0b013e3181c30fb2"
 
+    Stram1994:
+        type: article
+        author: "Stram, D. O., & Lee, J. W."
+        year: 1994
+        title: Variance components testing in the longitudinal mixed effects model
+        publisher: Biometrics
+        volume: 50
+        issue: 4
+        pages: 1171-1177
+        url: "https://pubmed.ncbi.nlm.nih.gov/7786999/"
     Strobl2007:
         type: article
         author: "Strobl, C., Boulesteix, A.-L., Zeileis, A., & Hothorn, T."
@@ -1948,10 +2135,11 @@ refs:
 
     epiR:
         type: software
-        author: Mark Stevenson with contributions from Telmo Nunes, Cord Heuer, Jonathon Marshall, Javier Sanchez, Ron Thornton, Jeno Reiczigel, Jim Robison-Cox, Paola Sebastiani, Peter Solymos, Kazuki Yoshida, Geoff Jones, Sarah Pirikahu, Simon Firestone, Ryan Kyle, Johann Popp, Mathew Jay and Charles Reynard.
-        year: 2020
-        title: "epiR: Tools for the Analysis of Epidemiological Data."
+        author: "Stevenson, M., & Sergeant, E."
+        year: 2026
+        title: "epiR: Tools for the Analysis of Epidemiological Data"
         publisher: "[R package]. Retrieved from https://CRAN.R-project.org/package=epiR"
+        doi: 10.32614/CRAN.package.epiR
         url: "https://CRAN.R-project.org/package=epiR"
 
     epitools:
@@ -2056,10 +2244,11 @@ refs:
 
     forcats:
         type: software
-        author: Hadley Wickham and Posit Software, PBC
+        author: "Wickham, H."
         year: 2025
         title: "forcats: Tools for Working with Categorical Variables (Factors)"
         publisher: "[R package]. Retrieved from https://CRAN.R-project.org/package=forcats"
+        doi: 10.32614/CRAN.package.forcats
         url: "https://CRAN.R-project.org/package=forcats"
 
     foreach:
@@ -2682,7 +2871,7 @@ refs:
 
     jaeschke1994:
         type: article
-        author: Jaeschke, R., Guyatt, G. H., Sackett, D. L., et al.
+        author: "Jaeschke, R., Guyatt, G. H., & Sackett, D. L."
         year: 1994
         title: Users' guides to the medical literature. III. How to use an article about a diagnostic test. B. What are the results and will they help me in caring for my patients?
         publisher: JAMA
@@ -4487,5 +4676,275 @@ refs:
         pages: 32-35
         doi: "10.1002/1097-0142(1950)3:1<32::AID-CNCR2820030106>3.0.CO;2-3"
         url: "https://doi.org/10.1002/1097-0142%281950%293%3A1%3C32%3A%3AAID-CNCR2820030106%3E3.0.CO%3B2-3"
+
+    Finn1970:
+        type: article
+        author: Finn, R. H.
+        year: 1970
+        title: A note on estimating the reliability of categorical data
+        publisher: Educational and Psychological Measurement
+        volume: 30
+        issue: 1
+        pages: 71-76
+        doi: 10.1177/001316447003000106
+        url: "https://doi.org/10.1177/001316447003000106"
+
+    Kendall1939:
+        type: article
+        author: "Kendall, M. G., & Babington Smith, B."
+        year: 1939
+        title: The problem of m rankings
+        publisher: The Annals of Mathematical Statistics
+        volume: 10
+        issue: 3
+        pages: 275-287
+        doi: 10.1214/aoms/1177732186
+        url: "https://doi.org/10.1214/aoms/1177732186"
+
+    Pearson1895:
+        type: article
+        author: Pearson, K.
+        year: 1895
+        title: Note on regression and inheritance in the case of two parents
+        publisher: Proceedings of the Royal Society of London
+        volume: 58
+        pages: 240-242
+        doi: 10.1098/rspl.1895.0041
+        url: "https://doi.org/10.1098/rspl.1895.0041"
+
+    Robinson1957:
+        type: article
+        author: Robinson, W. S.
+        year: 1957
+        title: The statistical measurement of agreement
+        publisher: American Sociological Review
+        volume: 22
+        issue: 1
+        pages: 17
+        doi: 10.2307/2088760
+        url: "https://doi.org/10.2307/2088760"
+
+    Spearman1904:
+        type: article
+        author: Spearman, C.
+        year: 1904
+        title: The proof and measurement of association between two things
+        publisher: The American Journal of Psychology
+        volume: 15
+        issue: 1
+        pages: 72
+        doi: 10.2307/1412159
+        url: "https://doi.org/10.2307/1412159"
+
+    Walter1998:
+        type: article
+        author: "Walter, S. D., Eliasziw, M., & Donner, A."
+        year: 1998
+        title: Sample size and optimal designs for reliability studies
+        publisher: Statistics in Medicine
+        volume: 17
+        issue: 1
+        pages: 101-110
+        doi: "10.1002/(SICI)1097-0258(19980115)17:1<101::AID-SIM727>3.0.CO;2-E"
+        url: "https://pubmed.ncbi.nlm.nih.gov/9463853/"
+
+    AltmanBland1994b:
+        type: article
+        author: "Altman, D. G., & Bland, J. M."
+        year: 1994
+        title: "Diagnostic tests 2: Predictive values"
+        publisher: BMJ
+        volume: 309
+        issue: 6947
+        pages: 102
+        doi: 10.1136/bmj.309.6947.102
+        url: "https://doi.org/10.1136/bmj.309.6947.102"
+
+    Simel1991:
+        type: article
+        author: "Simel, D. L., Samsa, G. P., & Matchar, D. B."
+        year: 1991
+        title: "Likelihood ratios with confidence: sample size estimation for diagnostic test studies"
+        publisher: Journal of Clinical Epidemiology
+        volume: 44
+        issue: 8
+        pages: 763-770
+        doi: "10.1016/0895-4356(91)90128-v"
+        url: "https://doi.org/10.1016/0895-4356(91)90128-v"
+
+    Glas2003:
+        type: article
+        author: "Glas, A. S., Lijmer, J. G., Prins, M. H., Bonsel, G. J., & Bossuyt, P. M. M."
+        year: 2003
+        title: "The diagnostic odds ratio: a single indicator of test performance"
+        publisher: Journal of Clinical Epidemiology
+        volume: 56
+        issue: 11
+        pages: 1129-1135
+        doi: "10.1016/s0895-4356(03)00177-x"
+        url: "https://doi.org/10.1016/s0895-4356(03)00177-x"
+
+    LinnGrunau2006:
+        type: article
+        author: "Linn, S., & Grunau, P. D."
+        year: 2006
+        title: "New patient-oriented summary measure of net total gain in certainty for dichotomous diagnostic tests"
+        publisher: "Epidemiologic Perspectives & Innovations"
+        volume: 3
+        issue: 1
+        pages: 11
+        doi: 10.1186/1742-5573-3-11
+        url: "https://doi.org/10.1186/1742-5573-3-11"
+
+    anscombe1956:
+        type: article
+        author: "Anscombe, F. J."
+        year: 1956
+        title: "On estimating binomial response relations"
+        publisher: Biometrika
+        volume: 43
+        issue: "3-4"
+        pages: 461-464
+        doi: 10.1093/biomet/43.3-4.461
+        url: "https://doi.org/10.1093/biomet/43.3-4.461"
+
+    HosmerLemeshow2013:
+        type: book
+        author: "Hosmer, D. W., Lemeshow, S., & Sturdivant, R. X."
+        year: 2013
+        title: "Applied Logistic Regression (3rd ed.)"
+        publisher: Wiley
+        doi: 10.1002/9781118548387
+        url: "https://doi.org/10.1002/9781118548387"
+
+    Pewsner2004:
+        type: article
+        author: "Pewsner, D., Battaglia, M., Minder, C., et al."
+        year: 2004
+        title: 'Ruling a diagnosis in or out with "SpPIn" and "SnNOut": a note of caution'
+        publisher: BMJ
+        volume: 329
+        issue: 7459
+        pages: 209-213
+        doi: 10.1136/bmj.329.7459.209
+        url: "https://doi.org/10.1136/bmj.329.7459.209"
+
+    AgrestiCaffo2000:
+        type: article
+        author: "Agresti, A., & Caffo, B."
+        year: 2000
+        title: "Simple and effective confidence intervals for proportions and differences of proportions result from adding two successes and two failures"
+        publisher: The American Statistician
+        volume: 54
+        issue: 4
+        pages: 280-288
+        doi: 10.1080/00031305.2000.10474560
+        url: "https://doi.org/10.1080/00031305.2000.10474560"
+
+    UsherSmith2016:
+        type: article
+        author: "Usher-Smith, J. A., Sharp, S. J., & Griffin, S. J."
+        year: 2016
+        title: "The spectrum effect in tests for risk prediction, screening, and diagnosis"
+        publisher: BMJ
+        volume: 353
+        pages: i3139
+        doi: 10.1136/bmj.i3139
+        url: "https://doi.org/10.1136/bmj.i3139"
+
+    Ying2020:
+        type: article
+        author: "Ying, G.-S., Maguire, M. G., Glynn, R. J., & Rosner, B."
+        year: 2020
+        title: "Calculating sensitivity, specificity, and predictive values for correlated eye data"
+        publisher: Investigative Ophthalmology & Visual Science
+        volume: 61
+        issue: 11
+        pages: 29
+        doi: 10.1167/iovs.61.11.29
+        url: "https://doi.org/10.1167/iovs.61.11.29"
+
+    Alberg2004:
+        type: article
+        author: "Alberg, A. J., Park, J. W., Hager, B. W., et al."
+        year: 2004
+        title: 'The use of "overall accuracy" to evaluate the validity of screening or diagnostic tests'
+        publisher: Journal of General Internal Medicine
+        volume: 19
+        issue: "5 Pt 1"
+        pages: 460-465
+        doi: 10.1111/j.1525-1497.2004.30091.x
+        url: "https://doi.org/10.1111/j.1525-1497.2004.30091.x"
+
+    Valenstein1990:
+        type: article
+        author: "Valenstein, P. N."
+        year: 1990
+        title: "Evaluating diagnostic tests with imperfect standards"
+        publisher: American Journal of Clinical Pathology
+        volume: 93
+        issue: 2
+        pages: 252-258
+        doi: 10.1093/ajcp/93.2.252
+        url: "https://doi.org/10.1093/ajcp/93.2.252"
+
+    Schuetz2012:
+        type: article
+        author: "Schuetz, G. M., Schlattmann, P., & Dewey, M."
+        year: 2012
+        title: "Use of 3x2 tables with an intention to diagnose approach to assess clinical performance of diagnostic tests: meta-analytical evaluation of coronary CT angiography studies"
+        publisher: BMJ
+        volume: 345
+        pages: e6717
+        doi: 10.1136/bmj.e6717
+        url: "https://doi.org/10.1136/bmj.e6717"
+
+    woolf1955:
+        type: article
+        author: Woolf, B.
+        year: 1955
+        title: On estimating the relation between blood group and disease
+        publisher: Annals of Human Genetics
+        volume: 19
+        issue: 4
+        pages: 251-253
+        doi: 10.1111/j.1469-1809.1955.tb01348.x
+        url: "https://doi.org/10.1111/j.1469-1809.1955.tb01348.x"
+
+    Begg1983:
+        type: article
+        author: "Begg, C. B., & Greenes, R. A."
+        year: 1983
+        title: Assessment of diagnostic tests when disease verification is subject to selection bias
+        publisher: Biometrics
+        volume: 39
+        issue: 1
+        pages: 207-215
+        doi: 10.2307/2530820
+        url: "https://doi.org/10.2307/2530820"
+
+    Ransohoff1978:
+        type: article
+        author: "Ransohoff, D. F., & Feinstein, A. R."
+        year: 1978
+        title: Problems of spectrum and bias in evaluating the efficacy of diagnostic tests
+        publisher: New England Journal of Medicine
+        volume: 299
+        issue: 17
+        pages: 926-930
+        doi: 10.1056/NEJM197810262991705
+        url: "https://doi.org/10.1056/NEJM197810262991705"
+
+    Leisenring2000:
+        type: article
+        author: "Leisenring, W., Alonzo, T., & Pepe, M. S."
+        year: 2000
+        title: Comparisons of predictive values of binary medical diagnostic tests for paired designs
+        publisher: Biometrics
+        volume: 56
+        issue: 2
+        pages: 345-351
+        doi: 10.1111/j.0006-341x.2000.00345.x
+        url: "https://doi.org/10.1111/j.0006-341x.2000.00345.x"
 
 ...

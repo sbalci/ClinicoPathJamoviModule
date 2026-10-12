@@ -9,10 +9,13 @@
 decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
     R6::R6Class("decisioncalculatorClass",
         inherit = decisioncalculatorBase, private = list(
-            # Notice collection helpers. A single Preformatted (plain-text) output item:
-            # avoids BOTH the jmvcore::Notice serialization error from
-            # self$results$insert(999, Notice) AND any HTML in notices (project convention:
-            # notice content must be plain text). ====
+            # Notice collection helpers. A single Preformatted (plain-text) output item,
+            # so the whole set renders in severity order with no HTML (project convention:
+            # notice content must be plain text). NOTE (corrected 2026-09-22): jmvcore::Notice
+            # itself serializes fine; the "attempt to apply non-function" crash blamed on it
+            # was Group$insert() having no bounds check. Use $add(), never insert(999, ...).
+            # Invalid counts are reported HERE rather than by rejecting the option, which is
+            # why jamovi/decisioncalculator.a.yaml gives the counts no `min:`. ====
             .noticeList = list(),
             # A results item that may not exist in the compiled .h.R yet. jmvcore raises
             # rather than returning NULL, so a bare self$results$x would crash every run
@@ -131,7 +134,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     "<p style='margin: 0; font-size: 13px;'><strong>",
                     .("Illustrative example, not clinical guidance:"),
                     "</strong> ",
-                    .("If 200 participants include 100 reference-positive and 100 reference-negative observations, with TP=90 and TN=80, then FN=10 and FP=20."),
+                    .("If 220 participants include 110 reference-positive and 110 reference-negative observations, with TP=90 and TN=80, then FN=20 and FP=30."),
                     "</p></div></div></div>"
                 )
 
@@ -670,21 +673,48 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     for (key in private$.epirNumberStats())
                         epirTable_number$setRow(rowKey = key, values = blank)
 
-                    if (!fractional_counts) {
-                        if (!requireNamespace("epiR", quietly = TRUE)) {
-                            private$.addNotice(
-                                "ERROR",
-                                .("epiR package missing"),
-                                .("The epiR package is required for confidence intervals. Install it or disable confidence intervals.")
-                            )
-                            return()
-                        }
+                    # Confidence intervals are an OPTIONAL extra. A missing epiR, or an
+                    # error inside it, used to `return()` out of .run() -- which threw away
+                    # the summary/about/assumptions/glossary panels and left plot1 without a
+                    # state, so the Fagan nomogram came up blank with no explanation, even
+                    # though every table above had already been filled successfully. Both
+                    # now only skip the two interval tables.
+                    epir_ok <- !fractional_counts &&
+                        requireNamespace("epiR", quietly = TRUE)
 
-                        epirresult2 <- epiR::epi.tests(dat = table3) |>
-                            summary() |>
-                            as.data.frame() |>
-                            tibble::rownames_to_column(var = "statsabv")
+                    if (!fractional_counts && !epir_ok) {
+                        private$.addNotice(
+                            "ERROR",
+                            .("epiR package missing"),
+                            .("The epiR package is required for confidence intervals. Install it or disable confidence intervals. The two interval tables are left blank; every other result on this page is unaffected.")
+                        )
+                    }
 
+                    epirresult2 <- NULL
+                    if (epir_ok) {
+                        # Wrap ONLY the third-party call, so that a failure inside epiR
+                        # cannot discard the tables already populated above. Nothing here
+                        # raises jmvcore::reject() or a checkpoint restart.
+                        epirresult2 <- tryCatch(
+                            epiR::epi.tests(dat = table3) |>
+                                summary() |>
+                                as.data.frame() |>
+                                tibble::rownames_to_column(var = "statsabv"),
+                            error = function(e) {
+                                private$.addNotice(
+                                    "ERROR",
+                                    .("Confidence intervals could not be computed"),
+                                    .fmt(
+                                        .("epiR could not compute confidence intervals for this table: {error}. The two interval tables are left blank; the point estimates above are unaffected."),
+                                        error = conditionMessage(e)
+                                    )
+                                )
+                                NULL
+                            }
+                        )
+                    }
+
+                    if (!is.null(epirresult2)) {
                         stat_labels <- private$.epirStatLabels()
                         epirresult2$statsnames <- unname(stat_labels[epirresult2$statistic])
 
@@ -719,17 +749,48 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                         epirresult_ratio <- rbind(epirresult_ratio, extra_rows)
 
                         # as.character: epiR returns `statistic` as a factor, which does not match
-                        # a string rowKey.
+                        # a string rowKey. Returns the number of rows it managed to fill.
                         fill <- function(table, df, keys) {
                             stats <- as.character(df$statistic)
+                            filled <- 0L
                             for (i in seq_len(nrow(df)))
-                                if (stats[i] %in% keys)
+                                if (stats[i] %in% keys) {
+                                    # epiR reports a zero cell as est = Inf with lower = NaN
+                                    # (verified: TP=90 FP=0 TN=80 FN=10 gives lr.pos and
+                                    # diag.or = Inf, lower = NaN). NaN is a floating-point
+                                    # artifact, not a confidence bound, and Inf is not an
+                                    # estimate; blank both and explain in the note below.
+                                    v <- c(df$est[i], df$lower[i], df$upper[i])
+                                    v[!is.finite(v)] <- NA_real_
                                     table$setRow(rowKey = stats[i],
-                                        values = list(est = df$est[i], lower = df$lower[i],
-                                                      upper = df$upper[i]))
+                                        values = list(est = v[1], lower = v[2],
+                                                      upper = v[3]))
+                                    filled <- filled + 1L
+                                }
+                            filled
                         }
-                        fill(epirTable_ratio, epirresult_ratio, private$.epirRatioStats())
-                        fill(epirTable_number, epirresult_number, private$.epirNumberStats())
+                        n_filled <-
+                            fill(epirTable_ratio, epirresult_ratio, private$.epirRatioStats()) +
+                            fill(epirTable_number, epirresult_number, private$.epirNumberStats())
+
+                        if (n_filled == 0L) {
+                            # The join is by epiR's own `statistic` strings. A future epiR
+                            # that renames them (it has before) would leave every scaffolded
+                            # row blank with nothing on screen to say why.
+                            private$.addNotice(
+                                "ERROR",
+                                .("Confidence intervals could not be matched"),
+                                .("No confidence intervals could be matched to the reported statistics. The installed version of epiR labels its output differently from the version this analysis expects. The interval tables are left blank; the point estimates above are unaffected.")
+                            )
+                        } else if (zero_cell) {
+                            # The tables above show Haldane-Anscombe corrected likelihood
+                            # ratios and DOR; epi.tests() is fed the raw table3. Without this
+                            # the two panels contradict each other with nothing to reconcile
+                            # them, and the only text that mentioned it was gated on fnote.
+                            ci_note <- .("Estimates and intervals in this table are computed by epiR from the raw counts. The likelihood ratios and diagnostic odds ratio shown in the tables above use a Haldane-Anscombe 0.5 correction because a zero cell was present, so their point estimates differ from the ones here. Quantities that are not estimable from the raw table are left blank.")
+                            epirTable_ratio$setNote("rawcounts", ci_note)
+                            epirTable_number$setNote("rawcounts", ci_note)
+                        }
                     }
                 }
 
@@ -838,12 +899,28 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                         self$options$cutoff2
                     )
 
-                    # Skip table population if validation failed
+                    # The cut-off scenarios are an OPTIONAL extra. This used to `return()`
+                    # out of .run(), so one bad scenario frequency also blanked the
+                    # summary/about/assumptions/glossary panels and left plot1 without a
+                    # state (an empty Fagan nomogram) -- with nothing on screen to say why.
+                    # Skip only the comparison table; calculate_cutoff_metrics() has already
+                    # raised a notice naming the offending scenario and its frequencies.
                     if (is.null(cutoff1_metrics) || is.null(cutoff2_metrics)) {
-                        private$.addNotice("ERROR", .("Cut-off validation failed"), .("The cut-off comparison cannot be performed because at least one scenario has invalid frequencies."))
-                        return()
+                        bad <- c(self$options$cutoff1, self$options$cutoff2)[
+                            c(is.null(cutoff1_metrics), is.null(cutoff2_metrics))]
+                        private$.addNotice(
+                            "ERROR",
+                            .("Cut-off validation failed"),
+                            .fmt(
+                                .("The cut-off comparison is omitted because these scenarios have invalid frequencies: {scenarios}. The rest of the analysis is unaffected."),
+                                scenarios = paste(bad, collapse = ", ")
+                            )
+                        )
                     }
+                }
 
+                if (self$options$multiplecuts &&
+                    !is.null(cutoff1_metrics) && !is.null(cutoff2_metrics)) {
                     # Rows are created in .init(); only the computed cells are set here.
                     multipleCutoffTable$setRow(
                         rowKey = 1,
@@ -1093,8 +1170,19 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                             "</p></div>"))
                     } else {
                         pre <- PriorProb
-                        post_pos <- PostTestProbDisease
-                        post_neg <- 1 - PostTestProbHealthy
+                        # These sentences quote LRP/LRN, which are Haldane-Anscombe
+                        # corrected, and sit directly under a nomogram drawn from the same
+                        # corrected proportions. PostTestProbDisease is Bayes on the
+                        # UNcorrected Sens/Spec, so with a zero cell the panel printed a
+                        # post-test probability the quoted likelihood ratio cannot produce
+                        # (100.0% beside LR+ = 145.16, against the plot's 99.5%). Take the
+                        # estimate and its update factor from one computation. Without a
+                        # zero cell these are algebraically identical to the old values.
+                        # PriorProb is strictly inside (0, 1): DiseaseP == 0 and
+                        # DiseaseN == 0 both early-return above, and pprob is bounded.
+                        pre_odds <- pre / (1 - pre)
+                        post_pos <- (pre_odds * LRP) / (1 + pre_odds * LRP)
+                        post_neg <- (pre_odds * LRN) / (1 + pre_odds * LRN)
                         pretest_sentence <- if (isTRUE(self$options$pp)) {
                             .fmt(
                                 .("Pre-test probability is {prevalence}, using the population prevalence you supplied."),
@@ -1118,21 +1206,28 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                             prevalence = sprintf("%.1f%%", 100 * pre),
                             posttest = sprintf("%.1f%%", 100 * post_neg)
                         )
+                        # Disclose which table the probabilities above were read off.
+                        # They now follow the corrected likelihood ratios (and the plot);
+                        # the Measures table's PPV/NPV are raw-count Bayes, so with a zero
+                        # cell the two panels legitimately differ by a fraction of a point.
+                        correction_paragraph <- if (zero_cell) {
+                            paste0("<p style='font-size:90%;color:inherit;'>",
+                                .("A zero cell was present, so the likelihood ratios and the probabilities read from the nomogram use the Haldane-Anscombe 0.5 correction. The predictive values in the Measures table are computed from the raw counts and can differ slightly."),
+                                "</p>")
+                        } else {
+                            ""
+                        }
                         fagan_item$setContent(paste0(
                             "<div style='padding:12px;border-left:4px solid #1565c0;background-color: rgba(88, 155, 255, 0.06); color: inherit;'>",
                             "<p>", pretest_sentence, "</p>",
                             "<p>", positive_sentence, "</p>",
                             "<p>", negative_sentence, "</p>",
+                            correction_paragraph,
                             "<p style='font-size:90%;color:inherit;'>",
                             .("Read the nomogram by drawing a line from the pre-test probability on the left, through the likelihood ratio in the middle, to the post-test probability on the right. Sensitivity and specificity describe agreement with the reference standard; the pre-test probability depends on population context, so the same test can lead to a different endpoint in another population."),
                             "</p></div>"))
                     }
                 }
-
-                # plotData2 <- plotData1
-                #
-                # image2 <- self$results$plot2
-                # image2$setState(plotData2)
 
                 # Render collected notices once at the end of a successful run. This also
                 # clears the panel when no notice was raised this cycle (.noticeList was
@@ -1147,19 +1242,46 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 # notices are rendered before any plot function runs.
                 if (identical(plotData1$drawable, FALSE)) return(FALSE)
 
+                # Pass ONE input pair. nomogrammer treats both pairs as a conflict: it
+                # warns (invisible in jamovi), discards Plr/Nlr and recomputes them from
+                # Sens/Spec -- but the discarded pair still runs through its likelihood-ratio
+                # validator, which aborts with a raw R error when LR+ == LR- ("uninformative
+                # test"). That fires for any Youden's J == 0 table, e.g. 50/50/50/50, which
+                # fagan_ok lets through because LR+ == 1 satisfies LR+ >= 1. Sens/Spec here
+                # are the Haldane-Anscombe corrected proportions, so the ratios nomogrammer
+                # recomputes are exactly the LRP/LRN shown in the tables.
                 plot1 <- nomogrammer(
                     Prevalence = plotData1$Prevalence,
                     Sens = plotData1$Sens,
                     Spec = plotData1$Spec,
-                    Plr = plotData1$Plr,
-                    Nlr = plotData1$Nlr,
                     Detail = TRUE,
                     NullLine = TRUE,
                     LabelSize = (14 / 5),
-                    Verbose = TRUE
+                    # Verbose only cat()s a summary block to stdout, which jamovi never
+                    # shows; that reading is rendered as faganSummary instead.
+                    Verbose = FALSE
                 )
 
-                plot1 <- plot1 + ggtheme
+                # A ggtheme is a COMPLETE theme, so it replaced nomogrammer's theme_nomogram:
+                # the meaningless x axis (internal log-odds layout coordinates) came back and
+                # the "line: pos/neg" legend reappeared and squeezed the figure. jamovi's
+                # ggtheme is also a LIST carrying a colour scale, which replaced
+                # scale_color_manual and repainted the red positive / blue negative
+                # trajectories -- the only thing distinguishing the two lines. Apply the
+                # ggtheme first, then re-apply the scale and the blanking tweaks.
+                plot1 <- plot1 + ggtheme +
+                    ggplot2::scale_color_manual(values = c("pos" = "red", "neg" = "blue")) +
+                    ggplot2::theme(
+                        axis.text.x = ggplot2::element_blank(),
+                        axis.ticks.x = ggplot2::element_blank(),
+                        axis.title.x = ggplot2::element_blank(),
+                        axis.title.y = ggplot2::element_text(angle = 0, vjust = 0.5),
+                        axis.title.y.right = ggplot2::element_text(angle = 0, vjust = 0.5),
+                        axis.line = ggplot2::element_blank(),
+                        panel.grid = ggplot2::element_blank(),
+                        legend.position = "none",
+                        plot.title = ggplot2::element_text(hjust = 0.5, size = ggplot2::rel(1.2))
+                    )
 
                 print(plot1)
                 TRUE
@@ -1168,6 +1290,12 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
             # Private helper methods for summaries ----
 
             .createSummary = function(Sens, Spec, PPV, NPV, LRP, LRN, Youden, Accuracy, Prevalence) {
+                # PPV is NA when TP + FP == 0 and NPV when TN + FN == 0. Both are only
+                # WARNINGs, not early returns, so this panel is still built and
+                # sprintf("%.1f%%", NA) printed the literal "NA%" in 18px type while the
+                # matching ratioTable cell was correctly blank. Say the same thing twice.
+                na_label <- .("not estimable")
+                fmtPct <- function(x) if (is.finite(x)) sprintf("%.1f%%", x * 100) else na_label
                 descriptive_result <- .fmt(
                     .("Youden's index is {youden} and sample accuracy is {accuracy}. These values describe the entered study table; they are not clinical grades or decision thresholds."),
                     youden = sprintf("%.3f", Youden),
@@ -1205,11 +1333,11 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     .("True-negative rate"), "</span></td></tr><tr>",
                     "<td style='border: 1px solid #ccc; padding: 10px; background-color: rgba(155, 155, 155, 0.06); color: inherit;'><strong>",
                     .("PPV"), "</strong><br><span style='font-size: 18px;'>",
-                    sprintf("%.1f%%", PPV * 100), "</span><br><span style='font-size: 12px;'>",
+                    fmtPct(PPV), "</span><br><span style='font-size: 12px;'>",
                     prevalence_label, "</span></td>",
                     "<td style='border: 1px solid #ccc; padding: 10px; background-color: rgba(155, 155, 155, 0.06); color: inherit;'><strong>",
                     .("NPV"), "</strong><br><span style='font-size: 18px;'>",
-                    sprintf("%.1f%%", NPV * 100), "</span><br><span style='font-size: 12px;'>",
+                    fmtPct(NPV), "</span><br><span style='font-size: 12px;'>",
                     prevalence_label, "</span></td></tr></table>",
                     "<p style='margin: 10px 0;'><strong>", .("Likelihood-ratio update:"),
                     "</strong></p><ul style='margin: 10px 0; padding-left: 25px;'><li>",
@@ -1272,11 +1400,14 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     )
                 }
 
-                # Check for zero cells
-                if (FP == 0 || FN == 0) {
+                # Check for zero cells. All four are zero cells, all four trigger the
+                # Haldane-Anscombe correction in .run(); testing only FP and FN gave a
+                # TP == 0 or TN == 0 table the green "no sparse-cell warning" box directly
+                # under a notice saying a continuity correction had been applied.
+                if (TP == 0 || TN == 0 || FP == 0 || FN == 0) {
                     warnings <- c(
                         warnings,
-                        .("Zero cells were detected. An estimated sensitivity or specificity of 100% may reflect limited validation data.")
+                        .("A zero cell was detected. Estimates pinned at 0% or 100% may reflect limited validation data, and a Haldane-Anscombe correction was applied to the likelihood ratios and diagnostic odds ratio.")
                     )
                 }
 

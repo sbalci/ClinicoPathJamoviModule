@@ -21,6 +21,16 @@
 #' @param LabelSize Numeric. Controls the size of text labels on the plot.
 #'   Default is 14/5 ~= 2.8.
 #' @param Verbose Logical. If TRUE, prints diagnostic metrics to the console.
+#' @param Theme A ggplot2 theme object used as the base theme, for example jamovi's global
+#'   \code{ggtheme}. The nomogram's own structural theme (hidden x axis, no grid, no legend)
+#'   is layered on top of it, so the layout is preserved. Defaults to \code{theme_bw()}.
+#' @param Title Character. Plot title. Callers inside a jamovi analysis pass a translated
+#'   string; this function is file-level, so it cannot translate one itself.
+#' @param PriorLabel Character. Name of the left (prior probability) axis.
+#' @param PosteriorLabel Character. Name of the right (posterior probability) axis.
+#' @param DetailLabels Named character vector with the words used in the \code{Detail} text:
+#'   \code{prevalence}, \code{plr}, \code{nlr}, \code{post_pos}, \code{post_neg}. Callers inside a
+#'   jamovi analysis pass translated strings (this function cannot translate them itself).
 #'
 #' @details
 #' The Fagan nomogram visually represents Bayes' theorem for diagnostic testing:
@@ -94,7 +104,13 @@ nomogrammer <- function(Prevalence,
                         Detail = FALSE,
                         NullLine = FALSE,
                         LabelSize = (14/5),
-                        Verbose = FALSE) {
+                        Verbose = FALSE,
+                        Theme = NULL,
+                        Title = "Fagan Nomogram",
+                        PriorLabel = "Prior\nProb.\n(%)",
+                        PosteriorLabel = "Posterior\nProb.\n(%)",
+                        DetailLabels = c(prevalence = "Prevalence", plr = "PLR", nlr = "NLR",
+                                         post_pos = "Post(+)", post_neg = "Post(-)")) {
 
     ######################################
     ########## Helper Functions ##########
@@ -143,7 +159,14 @@ nomogrammer <- function(Prevalence,
         # Those two analyses are therefore affected, for the better; they are not "unchanged".
         if (length(p) != 1L || !is.finite(p) || p == 0)
             return(scales::percent(signif(p, digits = 3), accuracy = 1))
-        if (abs(p) >= 0.01)                       # >= 1%: byte-identical to the old output
+        # Upper tail, the mirror of the lower one below: at integer accuracy every
+        # probability from 99.5% up printed as "100%" - certainty - while the widened
+        # panel now draws the line visibly short of 100% (PPV 99.69% read "Post(+) = 100%").
+        if (p >= 0.995 && p < 1) {
+            if (1 - p < 1e-5) return(">99.999%")
+            return(scales::percent(p, accuracy = if (1 - p < 0.001) 1e-3 else 0.1))
+        }
+        if (abs(p) >= 0.01)                       # 1% to below 99.5%: byte-identical to the old output
             return(scales::percent(signif(p, digits = 3), accuracy = 1))
         if (abs(p) < 1e-5)                        # would still render as all zeros
             return(if (p > 0) "<0.001%" else ">-0.001%")
@@ -269,8 +292,24 @@ nomogrammer <- function(Prevalence,
     ########## Plotting Setup   ##########
     ######################################
 
-    # Set plotting theme
-    theme_nomogram <- theme_bw() +
+    # Set plotting theme. A caller may supply a base theme (jamovi's global ggtheme); the
+    # structural tweaks below are applied AFTER it, because a complete theme replaces whatever
+    # came before it and would otherwise bring back the x axis, the grid and the legend.
+    # jamovi hands a renderer `ggtheme`, which is NOT a theme object: jmvcore returns a
+    # LIST whose first element is the theme and whose remaining elements (when present) are
+    # discrete colour/fill scales. `inherits(Theme, "theme")` is therefore FALSE for every
+    # built-in jamovi theme, so the previous guard always fell through to theme_bw() and the
+    # nomogram stayed a white rectangle on the dark pane - the exact defect it claimed to fix.
+    # Take only the theme element: the palette scales would collide with this figure's own
+    # scale_colour_manual() for the positive/negative rules.
+    base_theme <- if (inherits(Theme, "theme")) {
+        Theme
+    } else if (is.list(Theme) && length(Theme) > 0 && inherits(Theme[[1]], "theme")) {
+        Theme[[1]]
+    } else {
+        theme_bw()
+    }
+    theme_nomogram <- base_theme +
         theme(
             axis.text.x = element_blank(),
             axis.ticks.x = element_blank(),
@@ -300,7 +339,6 @@ nomogrammer <- function(Prevalence,
     left <- 0
     right <- 1
     middle <- 0.5
-    midright <- 0.75
 
     # Create data frame with the four key points (start/end of pos/neg lines)
     df <- data.frame(
@@ -316,13 +354,54 @@ nomogrammer <- function(Prevalence,
     scale_factor <- abs(adj_min) - adj_diff / 2
 
     # Convert probabilities to log-odds for plotting
-    df$lo_y <- ifelse(df$x == left, 
-                      logodds(1 - df$y) - scale_factor, 
+    # Left (prior) points use the expression the left-axis breaks use, -(logodds(p) +
+    # scale_factor); logodds(1 - p) - scale_factor is the same number up to rounding, and
+    # that rounding put a prior at the panel edge a few ulp outside its own tick.
+    df$lo_y <- ifelse(df$x == left,
+                      -(logodds(df$y) + scale_factor),
                       logodds(df$y))
 
     # Calculate axis scaling
     rescale <- range(ticks_logodds) + abs(adj_min) - adj_diff / 2
     rescale_x_breaks <- ticks_logodds + abs(adj_min) - adj_diff / 2
+
+    # The panel used to be exactly `rescale` (+/- 2.498 log10-odds), passed as
+    # scale_y_continuous(limits =). A scale limit CENSORS out-of-range data to NA, so a
+    # posterior below 0.317% or above 99.68% - a strong rule-out test at 5% prevalence,
+    # or any prior at the 0.1% minimum - silently deleted that pathway's line while the
+    # Detail text still printed its value. Now the panel widens to contain every endpoint
+    # (and the right end of the dashed LR = 1 line, which sits at the prior), up to
+    # +/- 5 log10-odds (about 0.001% / 99.999%); beyond that coord_cartesian() CLIPS the
+    # line at the frame instead of deleting it. Unbounded widening crushed the 1-99% scale
+    # into a sliver and printed the tick labels on top of one another.
+    # `scale_factor` and the tick set above are untouched, so a nomogram whose endpoints
+    # already fitted keeps the same frame, lines and ticks.
+    y_cap <- 5
+    ends <- c(df$lo_y[is.finite(df$lo_y)], logodds(prior_prob))
+    ylim <- range(c(rescale, pmax(pmin(ends, y_cap), -y_cap)))
+    # A widened side gets a hair of slack so a tick sitting exactly on the new edge
+    # (the prior's own tick, say) is not dropped by rounding.
+    ylim <- ylim + c(-1, 1) * 1e-9 * (abs(ylim - rescale) > 1e-12)
+    # Extra labelled ticks, drawn only OUTSIDE the old frame: inside it they would add a
+    # "99.5" to every nomogram that never needed widening.
+    ticks_prob_axis <- c(0.001, 0.002, 0.005, 0.01, 0.02, 0.05,
+                         ticks_prob, 99.5, 99.8, 99.9, 99.95, 99.98, 99.99)
+    ticks_logodds_axis <- logodds(ticks_prob_axis / 100)
+    left_breaks <- -(ticks_logodds_axis + scale_factor)
+    outside <- function(y) y < rescale[1] - 1e-12 | y > rescale[2] + 1e-12
+    base_tick <- ticks_prob_axis %in% ticks_prob
+    keep_left <- base_tick | outside(left_breaks)
+    keep_right <- base_tick | outside(ticks_logodds_axis)
+
+    # Detail text (the numbers the figure encodes): a subtitle, not text inside the panel,
+    # where a strong rule-in line ran straight through it once the panel could widen.
+    detailed_annotation <- if (Detail) paste(
+        paste0(DetailLabels[["prevalence"]], " = ", p2percent(prior_prob)),
+        paste(DetailLabels[["plr"]], "=", signif(PLR, 3), ",", DetailLabels[["nlr"]], "=", signif(NLR, 3)),
+        paste(DetailLabels[["post_pos"]], "=", p2percent(post_prob_pos),
+              ",", DetailLabels[["post_neg"]], "=", p2percent(post_prob_neg)),
+        sep = "\n"
+    ) else NULL
 
     ######################################
     ########## Create Plot       ##########
@@ -347,20 +426,21 @@ nomogrammer <- function(Prevalence,
         scale_x_continuous(expand = c(0, 0)) +
         scale_y_continuous(
             expand = c(0, 0),
-            limits = rescale,
-            breaks = -rescale_x_breaks,
-            labels = ticks_prob,
-            name = "Prior\nProb.\n(%)",
+            breaks = left_breaks[keep_left],
+            labels = ticks_prob_axis[keep_left],
+            name = PriorLabel,
             sec.axis = sec_axis(
                 transform = ~ .,
-                name = "Posterior\nProb.\n(%)",
-                labels = ticks_prob,
-                breaks = ticks_logodds
+                name = PosteriorLabel,
+                labels = ticks_prob_axis[keep_right],
+                breaks = ticks_logodds_axis[keep_right]
             )
         ) +
+        ggplot2::coord_cartesian(ylim = ylim, expand = FALSE) +
         scale_color_manual(values = c("pos" = "red", "neg" = "blue")) +
-        ggtitle("Fagan Nomogram") +
-        theme_nomogram
+        ggtitle(Title, subtitle = detailed_annotation) +
+        theme_nomogram +
+        theme(plot.subtitle = element_text(hjust = 0.5, size = rel(0.85)))
 
     ######################################
     ########## Optional Features ##########
@@ -371,7 +451,7 @@ nomogrammer <- function(Prevalence,
         uninformative <- data.frame(
             x = c(left, right),
             lo_y = c(
-                logodds(1 - prior_prob) - scale_factor,
+                -(logodds(prior_prob) + scale_factor),
                 logodds(prior_prob)
             )
         )
@@ -385,26 +465,7 @@ nomogrammer <- function(Prevalence,
         )
     }
 
-    # Add detailed annotations if requested
-    if (Detail) {
-        detailed_annotation <- paste(
-            paste0("Prevalence = ", p2percent(prior_prob)),
-            paste("PLR =", signif(PLR, 3), ", NLR =", signif(NLR, 3)),
-            paste("Post(+) =", p2percent(post_prob_pos),
-                  ", Post(-) =", p2percent(post_prob_neg)),
-            sep = "\n"
-        )
-
-        p <- p + annotate(
-            geom = "text",
-            x = midright,
-            y = max(rescale) * 0.8,
-            label = detailed_annotation,
-            size = rel(LabelSize),
-            hjust = 0,
-            vjust = 1
-        )
-    }
+    # The Detail text is the plot subtitle (set above).
 
     # Print verbose output if requested
     if (Verbose) {

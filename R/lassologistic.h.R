@@ -385,13 +385,11 @@ lassologisticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     list(
                         `name`="coefficient", 
                         `title`="Coefficient", 
-                        `type`="number", 
-                        `format`="zto"),
+                        `type`="number"),
                     list(
                         `name`="oddsRatio", 
                         `title`="Odds Ratio", 
-                        `type`="number", 
-                        `format`="zto"),
+                        `type`="number"),
                     list(
                         `name`="importance", 
                         `title`="Importance", 
@@ -450,8 +448,7 @@ lassologisticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     list(
                         `name`="oddsRatio", 
                         `title`="Odds Ratio", 
-                        `type`="number", 
-                        `format`="zto"),
+                        `type`="number"),
                     list(
                         `name`="criterion", 
                         `title`="Award points when", 
@@ -546,8 +543,7 @@ lassologisticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     list(
                         `name`="info_loss", 
                         `title`="Info Loss vs Full Model (%)", 
-                        `type`="number", 
-                        `format`="zto"),
+                        `type`="number"),
                     list(
                         `name`="reference", 
                         `title`="Reference", 
@@ -705,7 +701,7 @@ lassologisticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$add(jmvcore::Output$new(
                 options=options,
                 name="predictions",
-                title="Add Predicted Probabilities",
+                title="Predicted probabilities",
                 measureType="continuous",
                 varTitle="Predicted Probability from LASSO Logistic",
                 varDescription="Predicted Probability Based on LASSO Logistic Model",
@@ -754,7 +750,11 @@ lassologisticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "standardize",
                     "scoreCutMethod",
                     "scoreCutPoints",
-                    "scoringSystem")))
+                    "scoringSystem",
+                    "penalty",
+                    "outcome",
+                    "explanatory",
+                    "lambda")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="clinicalGuidance",
@@ -821,8 +821,7 @@ lassologisticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     list(
                         `name`="aic", 
                         `title`="AIC", 
-                        `type`="number", 
-                        `format`="zto"),
+                        `type`="number"),
                     list(
                         `name`="brier", 
                         `title`="Brier Score", 
@@ -848,7 +847,7 @@ lassologisticBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "lassologistic",
-                version = c(1,0,81),
+                version = c(1,0,83),
                 options = options,
                 results = lassologisticResults$new(options=options),
                 data = data,
@@ -864,9 +863,9 @@ lassologisticBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' LASSO Logistic Regression
 #'
 #' Performs LASSO-penalized logistic regression for variable selection in 
-#' binary
-#' classification problems. Ideal for diagnostic pathology studies that build
-#' classifiers (e.g., tumor type A vs B) with automatic feature selection.
+#' binary classification problems. Ideal for diagnostic pathology studies that 
+#' build classifiers (e.g., tumor type A vs B) with automatic feature 
+#' selection.
 #' 
 #' @param data The data as a data frame.
 #' @param outcome Binary outcome variable to classify. Can be factor or

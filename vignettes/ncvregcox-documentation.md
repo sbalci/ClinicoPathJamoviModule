@@ -639,7 +639,7 @@ Overall verdict: any red = "Some issues require attention"; any yellow = "Data i
 
 4. **AIC approximation**: AIC is from an unpenalized Cox refit, not from the penalized likelihood. It is useful for relative comparison between lambda.min and lambda.1se models but is not a true penalized AIC.
 
-5. **Protobuf serialization of Notice objects**: The `.insertNotice()` helper is wrapped in `tryCatch` because `jmvcore::Notice` objects contain function references that can fail during jamovi's protobuf serialization. If serialization fails, the notice is silently skipped. The model interpretation HTML serves as a backup channel for warnings.
+5. **Protobuf serialization of Notice objects**: the `.insertNotice()` helper is wrapped in `tryCatch` on the belief that `jmvcore::Notice` objects hold unserializable function references. **That belief was wrong (corrected 2026-09-22)** — `Notice` round-trips fine. The real hazard is an insert index above `length(results$items)`, which corrupts the results tree for any element type; use `self$results$add()` to append. The `tryCatch` is therefore swallowing nothing useful and should be revisited. See `vignettes/jamovi_library_review_guide.md` §13.
 
 ### E. References
 

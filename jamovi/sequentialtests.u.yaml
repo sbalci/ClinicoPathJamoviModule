@@ -23,19 +23,19 @@ children:
             name: test1_name
             format: string
             width: largest
-            enable: (preset == 'custom')
+            enable: (preset:custom)
           - type: TextBox
             name: test1_sens
             format: number
             label: Sensitivity
-            enable: (preset == 'custom')
+            enable: (preset:custom)
             events:
               change: ./sequentialtests.events::onChange_test1_sens
           - type: TextBox
             name: test1_spec
             format: number
             label: Specificity
-            enable: (preset == 'custom')
+            enable: (preset:custom)
             events:
               change: ./sequentialtests.events::onChange_test1_spec
   - type: Label
@@ -48,19 +48,19 @@ children:
             name: test2_name
             format: string
             width: largest
-            enable: (preset == 'custom')
+            enable: (preset:custom)
           - type: TextBox
             name: test2_sens
             format: number
             label: Sensitivity
-            enable: (preset == 'custom')
+            enable: (preset:custom)
             events:
               change: ./sequentialtests.events::onChange_test2_sens
           - type: TextBox
             name: test2_spec
             format: number
             label: Specificity
-            enable: (preset == 'custom')
+            enable: (preset:custom)
             events:
               change: ./sequentialtests.events::onChange_test2_spec
   - type: Label
@@ -82,7 +82,7 @@ children:
     children:
       - type: ComboBox
         name: strategy
-        enable: (preset == 'custom')
+        enable: (preset:custom)
   - type: Label
     label: Disease Parameters
     children:
@@ -93,7 +93,7 @@ children:
             name: prevalence
             format: number
             label: Prevalence
-            enable: (preset == 'custom')
+            enable: (preset:custom)
             events:
               change: ./sequentialtests.events::onChange_prevalence
           - type: TextBox

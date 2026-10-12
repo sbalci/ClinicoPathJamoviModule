@@ -172,7 +172,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 x <- private$.numericColumn(data, variable)
                 valid <- private$.validCount(x) & x <= total
                 if (any(!valid)) private$.addNotice("WARNING", jmvcore::.("Invalid positive sample counts"),
-                    jmvcore::format(jmvcore::.("{v1} cases excluded from positive-sample summaries because counts are missing, invalid or greater than total samples."), v1 = sprintf("%d", sum(!valid))))
+                    .fmt(jmvcore::.("{v1} cases excluded from positive-sample summaries because counts are missing, invalid or greater than total samples."), v1 = sprintf("%d", sum(!valid))))
                 x[!valid] <- NA_real_
                 x
             },
@@ -214,7 +214,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     missing <- requirements[[option]][vapply(requirements[[option]],
                         function(x) is.null(self$options[[x]]), logical(1))]
                     if (length(missing)) private$.addNotice("INFO", jmvcore::.("Additional inputs needed"),
-                        jmvcore::format(jmvcore::.("Select {inputs} to calculate the requested optional analysis."), inputs = paste(labels[missing], collapse = ", ")))
+                        .fmt(jmvcore::.("Select {inputs} to calculate the requested optional analysis."), inputs = paste(labels[missing], collapse = ", ")))
                 }
             },
             .planSamples = function(estimate = NA_real_) {
@@ -244,7 +244,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 x <- private$.numericColumn(self$data, self$options$totalLymphNodes)
                 valid <- private$.validCount(x)
                 if (any(!valid)) private$.addNotice("WARNING", jmvcore::.("Invalid examined-node counts"),
-                    jmvcore::format(jmvcore::.("{v1} cases excluded from the adequacy summary because examined-node counts are missing or invalid."), v1 = sprintf("%d", sum(!valid))))
+                    .fmt(jmvcore::.("{v1} cases excluded from the adequacy summary because examined-node counts are missing or invalid."), v1 = sprintf("%d", sum(!valid))))
                 x <- x[valid]
                 text <- self$results$effectSizesText
                 text$setContent(jmvcore::.("<p>The descriptive proportion meeting the selected examined-node threshold has a 95% Wilson interval. No treatment or protocol effect is estimated. Choose a disease-appropriate threshold; counts alone do not establish adequate staging.</p>"))
@@ -259,7 +259,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 half <- z * sqrt(phat * (1 - phat) / n + z^2 / (4 * n^2)) / denominator
                 values <- list(
                     list(measure = jmvcore::.("Cases with valid examined-node counts"), value = as.character(n), interpretation = jmvcore::.("Descriptive denominator")),
-                    list(measure = jmvcore::format(jmvcore::.("Cases with at least {v1} examined nodes"), v1 = sprintf("%d", threshold)), value = sprintf("%d/%d (%.1f%%)", successes, n, 100 * phat), interpretation = jmvcore::.("User-selected count threshold")),
+                    list(measure = .fmt(jmvcore::.("Cases with at least {v1} examined nodes"), v1 = sprintf("%d", threshold)), value = sprintf("%d/%d (%.1f%%)", successes, n, 100 * phat), interpretation = jmvcore::.("User-selected count threshold")),
                     list(measure = jmvcore::.("95% Wilson confidence interval"), value = sprintf("%.1f%%-%.1f%%", 100 * max(0, center-half), 100 * min(1, center+half)), interpretation = jmvcore::.("Uncertainty in the observed proportion")),
                     list(measure = jmvcore::.("Median examined nodes"), value = format(stats::median(x)), interpretation = jmvcore::.("Observed count")))
                 for (i in seq_along(values)) private$.putRow(self$results$effectSizesTable, rowKey = i, values = values[[i]])
@@ -337,7 +337,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         (N_int <= 0) | (K_int < 0) | (K_int > N_int)
                     if (any(invalidHyper, na.rm = TRUE)) {
                         removed <- sum(invalidHyper, na.rm = TRUE)
-                        hyperNotes <- c(hyperNotes, jmvcore::format(jmvcore::.("{v1} cases removed (invalid population/success counts)"), v1 = sprintf("%d", removed)))
+                        hyperNotes <- c(hyperNotes, .fmt(jmvcore::.("{v1} cases removed (invalid population/success counts)"), v1 = sprintf("%d", removed)))
                         N_int <- N_int[!invalidHyper]
                         K_int <- K_int[!invalidHyper]
                     }
@@ -363,7 +363,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         private$.clearTable(hypergeometricTable)
                         hyperRecommendTable <- self$results$hyperRecommendTable
                         private$.clearTable(hyperRecommendTable)
-                        note <- jmvcore::format(jmvcore::.("<p>No cases had at least {v1} positive observations, so the hypergeometric model could not be estimated.</p>"), v1 = sprintf("%d", target))
+                        note <- .fmt(jmvcore::.("<p>No cases had at least {v1} positive observations, so the hypergeometric model could not be estimated.</p>"), v1 = sprintf("%d", target))
                         if (self$options$showHypergeometric) {
                             hypergeometricText$setContent(note)
                         }
@@ -375,7 +375,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     if (removedZeroPos > 0) {
                         hyperNotes <- c(
                             hyperNotes,
-                            jmvcore::format(jmvcore::.("{v1} cases excluded (no positive observations for conditional model)"), v1 = sprintf("%d", removedZeroPos))
+                            .fmt(jmvcore::.("{v1} cases excluded (no positive observations for conditional model)"), v1 = sprintf("%d", removedZeroPos))
                         )
                     }
                     N_int <- N_int[positiveCaseIdx]
@@ -387,12 +387,12 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                     hypergeometricText <- self$results$hypergeometricText
                     notesHtml <- if (length(hyperNotes) > 0) {
-                        jmvcore::format(jmvcore::.("<p><b>Data notes:</b> {v1}.</p>"), v1 = paste(hyperNotes, collapse = "; "))
+                        .fmt(jmvcore::.("<p><b>Data notes:</b> {v1}.</p>"), v1 = paste(hyperNotes, collapse = "; "))
                     } else {
                         ""
                     }
 
-                    html <- jmvcore::format(jmvcore::.("<p><b>Hypergeometric model</b></p><p>Sampling without replacement is evaluated in {v1} positive cases. Median population size = {v2}; median positive count = {v3}.</p>{v4}<p>The probability of at least {v5} positives is calculated for each case and averaged. Draws are capped at each case's population size; cases with fewer positives than the target contribute zero.</p>"), v1 = sprintf("%d", nHyperCases), v2 = sprintf("%.0f", medianN), v3 = sprintf("%.0f", medianK), v4 = notesHtml, v5 = sprintf("%d", target), v6 = sprintf("%d", target), v7 = sprintf("%d", max(target - 1, 0)))
+                    html <- .fmt(jmvcore::.("<p><b>Hypergeometric model</b></p><p>Sampling without replacement is evaluated in {v1} positive cases. Median population size = {v2}; median positive count = {v3}.</p>{v4}<p>The probability of at least {v5} positives is calculated for each case and averaged. Draws are capped at each case's population size; cases with fewer positives than the target contribute zero.</p>"), v1 = sprintf("%d", nHyperCases), v2 = sprintf("%.0f", medianN), v3 = sprintf("%.0f", medianK), v4 = notesHtml, v5 = sprintf("%d", target), v6 = sprintf("%d", target), v7 = sprintf("%d", max(target - 1, 0)))
                     if (self$options$showHypergeometric) {
                         hypergeometricText$setContent(html)
                     }
@@ -551,7 +551,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             (successStatesData > totalPopulationData)
                         if (any(invalidBeta, na.rm = TRUE)) {
                             removed <- sum(invalidBeta, na.rm = TRUE)
-                            betaBinomNotes <- c(betaBinomNotes, jmvcore::format(jmvcore::.("{v1} cases removed (invalid population/success counts)"), v1 = sprintf("%d", removed)))
+                            betaBinomNotes <- c(betaBinomNotes, .fmt(jmvcore::.("{v1} cases removed (invalid population/success counts)"), v1 = sprintf("%d", removed)))
                             totalPopulationData <- totalPopulationData[!invalidBeta]
                             successStatesData <- successStatesData[!invalidBeta]
                         }
@@ -666,7 +666,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                             if (alpha < 0.01 || beta < 0.01) {
                                                 betaBinomNotes <- c(
                                                     betaBinomNotes,
-                                                    jmvcore::format(jmvcore::.("CAUTION: Extreme parameter values (\u03b1={v1}, \u03b2={v2}) suggest poor model fit or extreme skew. Results should be interpreted with caution."), v1 = sprintf("%.4f", alpha), v2 = sprintf("%.4f", beta))
+                                                    .fmt(jmvcore::.("CAUTION: Extreme parameter values (\u03b1={v1}, \u03b2={v2}) suggest poor model fit or extreme skew. Results should be interpreted with caution."), v1 = sprintf("%.4f", alpha), v2 = sprintf("%.4f", beta))
                                                 )
                                             }
 
@@ -674,14 +674,14 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                             if (rho_fit < 0.001) {
                                                 betaBinomNotes <- c(
                                                     betaBinomNotes,
-                                                    jmvcore::format(jmvcore::.("Very low overdispersion (\u03c1={v1}): Cases have nearly identical detection rates. Simple binomial model may be more appropriate."), v1 = sprintf("%.4f", rho_fit))
+                                                    .fmt(jmvcore::.("Very low overdispersion (\u03c1={v1}): Cases have nearly identical detection rates. Simple binomial model may be more appropriate."), v1 = sprintf("%.4f", rho_fit))
                                                 )
                                             }
 
                                             # Add note about N-weighted estimation
                                             betaBinomNotes <- c(
                                                 betaBinomNotes,
-                                                jmvcore::format(jmvcore::.("Parameters estimated using N-weighted MLE via VGAM (\u03bc={v1}, \u03c1={v2}, \u03b1={v3}, \u03b2={v4})"), v1 = sprintf("%.3f", mu_fit), v2 = sprintf("%.4g", rho_fit), v3 = private$.fmtShape(alpha), v4 = private$.fmtShape(beta))
+                                                .fmt(jmvcore::.("Parameters estimated using N-weighted MLE via VGAM (\u03bc={v1}, \u03c1={v2}, \u03b1={v3}, \u03b2={v4})"), v1 = sprintf("%.3f", mu_fit), v2 = sprintf("%.4g", rho_fit), v3 = private$.fmtShape(alpha), v4 = private$.fmtShape(beta))
                                             )
                                         }
                                     },
@@ -691,7 +691,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                         # on to report beta-binomial results from a failed fit.
                                         betaBinomNotes <<- c(
                                             betaBinomNotes,
-                                            jmvcore::format(jmvcore::.("VGAM fitting failed: {v1}. Data may not fit beta-binomial distribution or may have convergence issues."), v1 = jmvcore::htmlEscape(conditionMessage(e)))
+                                            .fmt(jmvcore::.("VGAM fitting failed: {v1}. Data may not fit beta-binomial distribution or may have convergence issues."), v1 = jmvcore::htmlEscape(conditionMessage(e)))
                                         )
                                         modelRejected <<- TRUE
                                     }
@@ -707,7 +707,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             betaBinomialRecommendTable <- self$results$betaBinomialRecommendTable
                             private$.clearTable(betaBinomialRecommendTable)
 
-                            errorHtml <- jmvcore::format(jmvcore::.("<p><b>Beta-binomial predictions unavailable</b></p><p>{v7}</p><p>Review the fitting diagnostics and data before selecting another model. Resampling does not remove ascertainment bias.</p>"), v1 = private$.styleConstants$font, v2 = private$.styleConstants$bgLight, v3 = private$.styleConstants$borderWarning, v4 = private$.styleConstants$padding15, v5 = private$.styleConstants$fontSize15, v6 = private$.styleConstants$fontSize14, v7 = paste(betaBinomNotes, collapse = " "), v8 = private$.styleConstants$fontSize14, v9 = private$.styleConstants$fontSize14)
+                            errorHtml <- .fmt(jmvcore::.("<p><b>Beta-binomial predictions unavailable</b></p><p>{v7}</p><p>Review the fitting diagnostics and data before selecting another model. Resampling does not remove ascertainment bias.</p>"), v1 = private$.styleConstants$font, v2 = private$.styleConstants$bgLight, v3 = private$.styleConstants$borderWarning, v4 = private$.styleConstants$padding15, v5 = private$.styleConstants$fontSize15, v6 = private$.styleConstants$fontSize14, v7 = paste(betaBinomNotes, collapse = " "), v8 = private$.styleConstants$fontSize14, v9 = private$.styleConstants$fontSize14)
 
                             if (self$options$showBetaBinomial) {
                                 betaBinomialText$setContent(errorHtml)
@@ -721,7 +721,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         if (!modelRejected) {
                             betaBinomialText <- self$results$betaBinomialText
                             extraText <- if (length(betaBinomNotes) > 0) {
-                                jmvcore::format(jmvcore::.("<p><b>Estimation notes:</b> {v1}.</p>"), v1 = paste(betaBinomNotes, collapse = "; "))
+                                .fmt(jmvcore::.("<p><b>Estimation notes:</b> {v1}.</p>"), v1 = paste(betaBinomNotes, collapse = "; "))
                             } else {
                                 ""
                             }
@@ -731,7 +731,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             # 2026-09-09 -- it did not resolve in PubMed by citation lookup or
                             # title search. The beta-binomial method itself is standard and does
                             # not depend on it; re-add a source only once one is confirmed.
-                            html <- jmvcore::format(jmvcore::.("<p><b>Beta-binomial model</b></p><p>This model describes between-case variation in binomial sample positivity. It is not a finite-population correction or an interchangeable alternative to the hypergeometric estimand.</p><p>Estimated alpha = {v1}; beta = {v2}.</p>{v3}"), v1 = private$.fmtShape(alpha), v2 = private$.fmtShape(beta), v3 = extraText)
+                            html <- .fmt(jmvcore::.("<p><b>Beta-binomial model</b></p><p>This model describes between-case variation in binomial sample positivity. It is not a finite-population correction or an interchangeable alternative to the hypergeometric estimand.</p><p>Estimated alpha = {v1}; beta = {v2}.</p>{v3}"), v1 = private$.fmtShape(alpha), v2 = private$.fmtShape(beta), v3 = extraText)
                             if (self$options$showBetaBinomial) {
                                 betaBinomialText$setContent(html)
                             }
@@ -868,7 +868,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     keep <- private$.validCount(totalELN, positive = TRUE) &
                         private$.validCount(positiveLN) & positiveLN <= totalELN
                     if (any(!keep)) private$.addNotice("WARNING", jmvcore::.("Invalid lymph-node pairs"),
-                        jmvcore::format(jmvcore::.("{v1} cases excluded: counts must be complete nonnegative integers, total nodes must be positive, and positive nodes cannot exceed total nodes."), v1 = sprintf("%d", sum(!keep))))
+                        .fmt(jmvcore::.("{v1} cases excluded: counts must be complete nonnegative integers, total nodes must be positive, and positive nodes cannot exceed total nodes."), v1 = sprintf("%d", sum(!keep))))
                     totalELN <- totalELN[keep]
                     positiveLN <- positiveLN[keep]
                     nCases <- length(totalELN)
@@ -1067,7 +1067,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 if (self$options$showGuidedInstructions) {
                     guidedInstructions <- self$results$guidedInstructions
 
-                    guidedHtml <- jmvcore::format(jmvcore::.("<p><b>Quick start</b></p><ol><li>Select total samples and first-detection position. Use NA when no lesion was observed; this does not prove disease absence.</li><li>Choose a descriptive detection target, maximum sample count and bootstrap iterations.</li><li>Optional count, sample-type, finite-population and node analyses require their own inputs.</li><li>Check exclusions, denominators and assumptions before interpreting the results. Independent planning and node analyses can run without first-detection data.</li></ol>"), v1 = private$.styleConstants$font, v2 = private$.buildStyle(
+                    guidedHtml <- .fmt(jmvcore::.("<p><b>Quick start</b></p><ol><li>Select total samples and first-detection position. Use NA when no lesion was observed; this does not prove disease absence.</li><li>Choose a descriptive detection target, maximum sample count and bootstrap iterations.</li><li>Optional count, sample-type, finite-population and node analyses require their own inputs.</li><li>Check exclusions, denominators and assumptions before interpreting the results. Independent planning and node analyses can run without first-detection data.</li></ol>"), v1 = private$.styleConstants$font, v2 = private$.buildStyle(
                             private$.styleConstants$bgLight,
                             private$.styleConstants$borderLeft,
                             private$.styleConstants$padding15,
@@ -1124,7 +1124,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 if (self$options$showConciseInstructions) {
                     conciseInstructions <- self$results$conciseInstructions
 
-                    conciseHtml <- jmvcore::format(jmvcore::.("<p><b>About this analysis</b></p><p>This analysis describes first detections among eventually observed-positive cases. Select total samples and first-detection position, leaving the position missing when no lesion was observed. Model-based targets and resampling intervals do not establish clinical sampling adequacy.</p>"), v1 = private$.styleConstants$font, v2 = private$.styleConstants$colorPrimary, v3 = private$.styleConstants$fontSize16, v4 = private$.styleConstants$fontSize14, v5 = private$.styleConstants$colorPrimary, v6 = private$.styleConstants$fontSize14, v7 = private$.styleConstants$colorPrimary, v8 = private$.styleConstants$fontSize14, v9 = private$.styleConstants$colorPrimary, v10 = private$.styleConstants$fontSize14, v11 = private$.styleConstants$colorPrimary)
+                    conciseHtml <- .fmt(jmvcore::.("<p><b>About this analysis</b></p><p>This analysis describes first detections among eventually observed-positive cases. Select total samples and first-detection position, leaving the position missing when no lesion was observed. Model-based targets and resampling intervals do not establish clinical sampling adequacy.</p>"), v1 = private$.styleConstants$font, v2 = private$.styleConstants$colorPrimary, v3 = private$.styleConstants$fontSize16, v4 = private$.styleConstants$fontSize14, v5 = private$.styleConstants$colorPrimary, v6 = private$.styleConstants$fontSize14, v7 = private$.styleConstants$colorPrimary, v8 = private$.styleConstants$fontSize14, v9 = private$.styleConstants$colorPrimary, v10 = private$.styleConstants$fontSize14, v11 = private$.styleConstants$colorPrimary)
 
                     conciseInstructions$setContent(conciseHtml)
                 }
@@ -1237,12 +1237,12 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     if (!is.na(targetIdx)) {
                         minSamples <- targetIdx
                         achievedProb <- probVec[targetIdx]
-                        status <- jmvcore::format(jmvcore::.("Meets target at {v1} samples ({v2}%)"), v1 = sprintf("%d", minSamples), v2 = sprintf("%.1f", achievedProb * 100))
+                        status <- .fmt(jmvcore::.("Meets target at {v1} samples ({v2}%)"), v1 = sprintf("%d", minSamples), v2 = sprintf("%.1f", achievedProb * 100))
                     } else {
                         minSamples <- NA_integer_
                         achievedProb <- bestProb
                         status <- ifelse(length(validIdx) > 0,
-                            jmvcore::format(jmvcore::.("Target not reached; best {v1}% at {v2} samples"), v1 = sprintf("%.1f", bestProb * 100), v2 = sprintf("%d", bestIdx)),
+                            .fmt(jmvcore::.("Target not reached; best {v1}% at {v2} samples"), v1 = sprintf("%.1f", bestProb * 100), v2 = sprintf("%d", bestIdx)),
                             jmvcore::.("Target not reached")
                         )
                     }
@@ -1292,7 +1292,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     private$.addNotice(
                         "ERROR",
                         jmvcore::.("Invalid target confidence"),
-                        jmvcore::format(jmvcore::.("Target confidence must be strictly between 0 and 1; {v1} was supplied. Set it to a value such as 0.95 and re-run."), v1 = format(targetConf, trim = TRUE))
+                        .fmt(jmvcore::.("Target confidence must be strictly between 0 and 1; {v1} was supplied. Set it to a value such as 0.95 and re-run."), v1 = format(targetConf, trim = TRUE))
                     )
                     return()
                 }
@@ -1302,7 +1302,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     private$.addNotice(
                         "WARNING",
                         jmvcore::.("Extreme confidence level"),
-                        jmvcore::format(jmvcore::.("A target of {value}% may require an impractical number of samples. This is a descriptive target, not a clinical standard."), value = sprintf("%.1f", targetConf * 100))
+                        .fmt(jmvcore::.("A target of {value}% may require an impractical number of samples. This is a descriptive target, not a clinical standard."), value = sprintf("%.1f", targetConf * 100))
                     )
                 }
 
@@ -1311,7 +1311,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     private$.addNotice(
                         "WARNING",
                         jmvcore::.("Low bootstrap iterations"),
-                        jmvcore::format(jmvcore::.("Only {value} bootstrap iterations were requested. The percentile intervals may have noticeable Monte Carlo variation; increase iterations and assess stability."), value = nBoot)
+                        .fmt(jmvcore::.("Only {value} bootstrap iterations were requested. The percentile intervals may have noticeable Monte Carlo variation; increase iterations and assess stability."), value = nBoot)
                     )
                 }
 
@@ -1329,7 +1329,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     rawFirst > rawTotalSamplesData), na.rm = TRUE)
                 dataWarnings <- character()
                 if (any(!validRows)) {
-                    dataWarnings <- jmvcore::format(jmvcore::.("{v1} cases excluded because total samples or first-detection positions were missing or invalid."), v1 = sprintf("%d", sum(!validRows)))
+                    dataWarnings <- .fmt(jmvcore::.("{v1} cases excluded because total samples or first-detection positions were missing or invalid."), v1 = sprintf("%d", sum(!validRows)))
                     private$.addNotice("WARNING", jmvcore::.("Excluded invalid sampling data"), dataWarnings)
                 }
                 if (!is.null(sampleType)) data[[sampleType]] <- private$.groupColumn(data[[sampleType]])
@@ -1355,7 +1355,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         (!is.na(firstDetectionData) & positiveCountData < 1) |
                         (is.na(firstDetectionData) & positiveCountData > 0)
                     if (any(badCount)) private$.addNotice("WARNING", jmvcore::.("Positive count exclusions"),
-                        jmvcore::format(jmvcore::.("{v1} cases have missing, invalid or inconsistent positive counts and are excluded from count-based estimation; their first-detection data remain available."), v1 = sprintf("%d", sum(badCount))))
+                        .fmt(jmvcore::.("{v1} cases have missing, invalid or inconsistent positive counts and are excluded from count-based estimation; their first-detection data remain available."), v1 = sprintf("%d", sum(badCount))))
                     positiveCountData[badCount] <- NA_real_
                 }
                 if (!is.null(positiveSamplesListData)) {
@@ -1368,7 +1368,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                 length(x) != positiveCountData[i])
                     }, logical(1))
                     if (any(badList)) private$.addNotice("WARNING", jmvcore::.("Invalid positive sample lists"),
-                        jmvcore::format(jmvcore::.("{v1} lists excluded: use unique integer positions within the total count, consistent with first detection and the positive count when supplied."), v1 = sprintf("%d", sum(badList))))
+                        .fmt(jmvcore::.("{v1} lists excluded: use unique integer positions within the total count, consistent with first detection and the positive count when supplied."), v1 = sprintf("%d", sum(badList))))
                     positiveSamplesListData[badList] <- NA_character_
                 }
                 detectedCases <- !is.na(firstDetectionData)
@@ -1385,7 +1385,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     private$.addNotice(
                         "WARNING",
                         jmvcore::.("Small sample size"),
-                        jmvcore::format(jmvcore::.("Only {value} cases recorded a detected lesion. Estimates and bootstrap intervals may be unstable; assess the observation design and collect more cases before drawing conclusions."), value = nDetected)
+                        .fmt(jmvcore::.("Only {value} cases recorded a detected lesion. Estimates and bootstrap intervals may be unstable; assess the observation design and collect more cases before drawing conclusions."), value = nDetected)
                     )
                 }
 
@@ -1457,7 +1457,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 private$.putRow(dataInfo, rowKey = "total_analyzed", values = list(
                     measure = jmvcore::.("Total samples analyzed"),
-                    value = jmvcore::format(jmvcore::.("{v1} (up to first detection)"), v1 = format(totalExamined, trim = TRUE))
+                    value = .fmt(jmvcore::.("{v1} (up to first detection)"), v1 = format(totalExamined, trim = TRUE))
                 ))
 
                 private$.putRow(dataInfo, rowKey = "mean_samples", values = list(
@@ -1513,7 +1513,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     if (self$options$showBinomialModel) {
                         binomialText$setContent(paste0(
                             jmvcore::.("<p><b>Independent-trial approximation among eventually observed-positive cases</b></p>"),
-                            jmvcore::format(jmvcore::.("<p>Estimator: {v1}; q = {v2}; eligible cases = {v3}.</p>"), v1 = estimationMethod, v2 = if (is.finite(pEstimate)) sprintf("%.4f", pEstimate) else "NA", v3 = sprintf("%d", estimate$n)),
+                            .fmt(jmvcore::.("<p>Estimator: {v1}; q = {v2}; eligible cases = {v3}.</p>"), v1 = estimationMethod, v2 = if (is.finite(pEstimate)) sprintf("%.4f", pEstimate) else "NA", v3 = sprintf("%d", estimate$n)),
                             jmvcore::.("<p>Modelled probability at n samples is 1 - (1-q)^n. This assumes independent trials with constant probability and does not correct unequal observation windows, missed disease or spatial dependence.</p>"),
                             sprintf("<p>%s</p>", diagnostic)))
                     }
@@ -1605,7 +1605,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             ))
 
                             # Add explanatory text
-                            html <- jmvcore::format(jmvcore::.("<p><b>Group comparison:</b> {v2}</p><p>The likelihood-ratio test compares pooled and group-specific geometric working models among eventual detections. Unequal observation windows or sparse groups can undermine this approximation; the test does not establish clinical differences.</p>"), v1 = private$.styleConstants$font, v2 = het_results$interpretation)
+                            html <- .fmt(jmvcore::.("<p><b>Group comparison:</b> {v2}</p><p>The likelihood-ratio test compares pooled and group-specific geometric working models among eventual detections. Unequal observation windows or sparse groups can undermine this approximation; the test does not establish clinical differences.</p>"), v1 = private$.styleConstants$font, v2 = het_results$interpretation)
                             heterogeneityText$setContent(html)
                         } else {
                             heterogeneityText$setContent(het_results$interpretation)
@@ -1636,7 +1636,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             ))
 
                             # Add explanatory text
-                            html <- jmvcore::format(jmvcore::.("<p><b>Model fit:</b> {v2}</p><p>The approximate chi-square test assesses an untruncated geometric working model among eventual detections. A large p-value does not establish model validity, independent sampling or clinical sensitivity. No p-value is calculated for empirical-count q.</p>"), v1 = private$.styleConstants$font, v2 = fit_results$fitQuality)
+                            html <- .fmt(jmvcore::.("<p><b>Model fit:</b> {v2}</p><p>The approximate chi-square test assesses an untruncated geometric working model among eventual detections. A large p-value does not establish model validity, independent sampling or clinical sensitivity. No p-value is calculated for empirical-count q.</p>"), v1 = private$.styleConstants$font, v2 = fit_results$fitQuality)
                             modelFitText$setContent(html)
                         } else {
                             modelFitText$setContent(fit_results$fitQuality)
@@ -1699,12 +1699,12 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         ))
                     }
 
-                    html <- jmvcore::format(jmvcore::.("<p><b>Multiple positive samples</b></p><p>Probabilities use independent trials with q = {v2}. Several positive samples may come from the same focus; these probabilities do not count distinct anatomical lesions.</p>"), v1 = private$.styleConstants$font, v2 = sprintf("%.3f", q_val))
+                    html <- .fmt(jmvcore::.("<p><b>Multiple positive samples</b></p><p>Probabilities use independent trials with q = {v2}. Several positive samples may come from the same focus; these probabilities do not count distinct anatomical lesions.</p>"), v1 = private$.styleConstants$font, v2 = sprintf("%.3f", q_val))
                     multifocalText$setContent(if (is.finite(q_val)) html else jmvcore::.("Positive-sample predictions are unavailable because no applicable per-sample probability could be estimated."))
                 }
 
                 if (self$options$autoSelectModel) {
-                    self$results$modelSelectionText$setContent(jmvcore::format(jmvcore::.("<p><b>Model applicability guide</b></p><p>Empirical curves describe {v1} eventual detections; the independent-trial approximation is {v2}. Hypergeometric sampling requires known finite counts and no replacement. Beta-binomial models describe between-case variation, not finite-population correction. Different estimands are not automatically ranked.</p>"), v1 = sprintf("%d", nDetected), v2 = if (is.finite(pEstimate)) jmvcore::.("estimated; assess independence and ascertainment before use") else jmvcore::.("unavailable or withheld")))
+                    self$results$modelSelectionText$setContent(.fmt(jmvcore::.("<p><b>Model applicability guide</b></p><p>Empirical curves describe {v1} eventual detections; the independent-trial approximation is {v2}. Hypergeometric sampling requires known finite counts and no replacement. Beta-binomial models describe between-case variation, not finite-population correction. Different estimands are not automatically ranked.</p>"), v1 = sprintf("%d", nDetected), v2 = if (is.finite(pEstimate)) jmvcore::.("estimated; assess independence and ascertainment before use") else jmvcore::.("unavailable or withheld")))
                 }
 
                 # === Auto-Detect Heterogeneity (Warning Only) ===
@@ -1726,7 +1726,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 if (self$options$showProbabilityExplanation) {
                     observed <- vapply(c(3, 5, 10), function(n)
                         mean(firstDetectionData[detectedCases] <= n), numeric(1))
-                    self$results$probabilityExplanation$setContent(jmvcore::format(jmvcore::.("<p><b>Two descriptive quantities</b></p><p>Among {v1} eventually detected cases, {v2}% were detected by three samples, {v3}% by five and {v4}% by ten. Multiplying these fractions by the observed-positive fraction ({v5}/{v6}) gives the fraction of all recorded cases detected at that position.</p><p>Neither quantity establishes true disease prevalence or sensitivity. Geometric approximations and bootstrap intervals do not correct missed disease, truncation, censoring or dependence.</p>"), v1 = sprintf("%d", nDetected), v2 = sprintf("%.1f", 100 * observed[1]), v3 = sprintf("%.1f", 100 * observed[2]), v4 = sprintf("%.1f", 100 * observed[3]), v5 = sprintf("%d", nDetected), v6 = sprintf("%d", length(firstDetectionData))))
+                    self$results$probabilityExplanation$setContent(.fmt(jmvcore::.("<p><b>Two descriptive quantities</b></p><p>Among {v1} eventually detected cases, {v2}% were detected by three samples, {v3}% by five and {v4}% by ten. Multiplying these fractions by the observed-positive fraction ({v5}/{v6}) gives the fraction of all recorded cases detected at that position.</p><p>Neither quantity establishes true disease prevalence or sensitivity. Geometric approximations and bootstrap intervals do not correct missed disease, truncation, censoring or dependence.</p>"), v1 = sprintf("%d", nDetected), v2 = sprintf("%.1f", 100 * observed[1]), v3 = sprintf("%.1f", 100 * observed[2]), v4 = sprintf("%.1f", 100 * observed[3]), v5 = sprintf("%d", nDetected), v6 = sprintf("%d", length(firstDetectionData))))
                 }
 
                 # === Bootstrap Analysis ===
@@ -1734,11 +1734,11 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # Validation: Check if we have enough positive cases for bootstrap
                     if (nDetected < 3) {
                         bootstrapText <- self$results$bootstrapText
-                        errorHtml <- jmvcore::format(jmvcore::.("<p><b>Insufficient data for bootstrap</b></p><p>At least 3 eventually detected cases are required; {v7} are available. Collect more observations before interpreting resampling intervals.</p>"), v1 = private$.styleConstants$font, v2 = private$.styleConstants$bgLight, v3 = private$.styleConstants$borderWarning, v4 = private$.styleConstants$padding15, v5 = private$.styleConstants$fontSize14, v6 = private$.styleConstants$fontSize14, v7 = sprintf("%d", nDetected), v8 = if (nDetected == 1) "" else "s", v9 = private$.styleConstants$fontSize14)
+                        errorHtml <- .fmt(jmvcore::.("<p><b>Insufficient data for bootstrap</b></p><p>At least 3 eventually detected cases are required; {v7} are available. Collect more observations before interpreting resampling intervals.</p>"), v1 = private$.styleConstants$font, v2 = private$.styleConstants$bgLight, v3 = private$.styleConstants$borderWarning, v4 = private$.styleConstants$padding15, v5 = private$.styleConstants$fontSize14, v6 = private$.styleConstants$fontSize14, v7 = sprintf("%d", nDetected), v8 = if (nDetected == 1) "" else "s", v9 = private$.styleConstants$fontSize14)
                         bootstrapText$setContent(errorHtml)
                     } else {
                         bootstrapText <- self$results$bootstrapText
-                        html <- jmvcore::format(jmvcore::.("<p><b>Bootstrap resampling</b></p><p>{v6} case-resampling iterations estimate the observed-positive detection curve and 95% percentile intervals. Cases are resampled independently; missed disease and unequal sampling windows are not corrected.</p>"), v1 = private$.styleConstants$font, v2 = private$.buildStyle(
+                        html <- .fmt(jmvcore::.("<p><b>Bootstrap resampling</b></p><p>{v6} case-resampling iterations estimate the observed-positive detection curve and 95% percentile intervals. Cases are resampled independently; missed disease and unequal sampling windows are not corrected.</p>"), v1 = private$.styleConstants$font, v2 = private$.buildStyle(
                                 private$.styleConstants$bgLight,
                                 private$.styleConstants$borderLeft,
                                 private$.styleConstants$padding15,
@@ -1861,7 +1861,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     probVec = observedProbVec,
                     priority = 5,
                     description = jmvcore::.("Observed cumulative detection in dataset"),
-                    detail = jmvcore::format(jmvcore::.("Conditional probability among {v1} positive cases"), v1 = sprintf("%d", nPositiveCases))
+                    detail = .fmt(jmvcore::.("Conditional probability among {v1} positive cases"), v1 = sprintf("%d", nPositiveCases))
                 )
 
                 obsPercents <- observedProbVec * 100
@@ -1907,7 +1907,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # === Explanatory Text ===
                     tumorBurdenText <- self$results$tumorBurdenText
 
-                    html <- jmvcore::format(jmvcore::.("<p><b>Sample positivity ratio (SPR)</b></p><p>SPR is the proportion of examined samples containing tumor, calculated from valid count pairs among eventually detected cases. It describes sample positivity, not lesion volume, independent anatomical foci or detection completeness.</p>"), v1 = private$.buildStyle(private$.styleConstants$font), v2 = private$.buildStyle(private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary), v3 = private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary), v4 = private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary), v5 = private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary), v6 = private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorSecondary))
+                    html <- .fmt(jmvcore::.("<p><b>Sample positivity ratio (SPR)</b></p><p>SPR is the proportion of examined samples containing tumor, calculated from valid count pairs among eventually detected cases. It describes sample positivity, not lesion volume, independent anatomical foci or detection completeness.</p>"), v1 = private$.buildStyle(private$.styleConstants$font), v2 = private$.buildStyle(private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary), v3 = private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary), v4 = private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary), v5 = private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary), v6 = private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorSecondary))
 
                     if (self$options$showTumorBurden) {
                         tumorBurdenText$setContent(html)
@@ -2056,7 +2056,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # === Explanatory Text ===
                     stageMigrationText <- self$results$stageMigrationText
 
-                    html <- jmvcore::format(jmvcore::.("<p><b>Observed detection by sampling intensity</b></p><p>This cross-sectional comparison describes positivity in cases with different numbers of examined samples. It does not identify individual understaging, establish causality, or estimate the effect of examining more samples.</p>"), v1 = private$.buildStyle(private$.styleConstants$font), v2 = private$.buildStyle(private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary), v3 = private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary), v4 = private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary), v5 = private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorSecondary))
+                    html <- .fmt(jmvcore::.("<p><b>Observed detection by sampling intensity</b></p><p>This cross-sectional comparison describes positivity in cases with different numbers of examined samples. It does not identify individual understaging, establish causality, or estimate the effect of examining more samples.</p>"), v1 = private$.buildStyle(private$.styleConstants$font), v2 = private$.buildStyle(private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary), v3 = private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary), v4 = private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary), v5 = private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorSecondary))
 
                     if (self$options$showStageMigration) {
                         stageMigrationText$setContent(html)
@@ -2143,14 +2143,14 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                     if (is.null(corTest) || is.na(corTest$estimate) || is.na(corTest$p.value)) {
                         reason <- if (nCorPairs < 3) {
-                            jmvcore::format(jmvcore::.("only {v1} complete pairs are available (at least 3 are needed)"), v1 = sprintf("%d", nCorPairs))
+                            .fmt(jmvcore::.("only {v1} complete pairs are available (at least 3 are needed)"), v1 = sprintf("%d", nCorPairs))
                         } else {
                             jmvcore::.("one of the two variables takes the same value in every case, so there is no variation to correlate")
                         }
                         private$.addNotice(
                             "WARNING",
                             jmvcore::.("Correlation not computed"),
-                            jmvcore::format(jmvcore::.("The examined-versus-positive correlation could not be estimated because {v1}."), v1 = reason)
+                            .fmt(jmvcore::.("The examined-versus-positive correlation could not be estimated because {v1}."), v1 = reason)
                         )
                         private$.putRow(correlationStats, rowKey = "r_value", values = list(
                             statistic = "Spearman's rho", value = jmvcore::.("Not estimable")
@@ -2188,7 +2188,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         ((positiveCassettesData == 0 & maxPositiveSingleData == 0) |
                          (positiveCassettesData > 0 & maxPositiveSingleData > 0))
                     if (any(!keepFoci)) private$.addNotice("WARNING", jmvcore::.("Invalid foci counts"),
-                        jmvcore::format(jmvcore::.("{v1} cases excluded from foci classification: provide complete integer counts, with maximum foci per slide no greater than total foci and consistent zero counts."), v1 = sprintf("%d", sum(!keepFoci))))
+                        .fmt(jmvcore::.("{v1} cases excluded from foci classification: provide complete integer counts, with maximum foci per slide no greater than total foci and consistent zero counts."), v1 = sprintf("%d", sum(!keepFoci))))
                     positiveCassettesData <- positiveCassettesData[keepFoci]
                     maxPositiveSingleData <- maxPositiveSingleData[keepFoci]
                     nFociCases <- sum(keepFoci)
@@ -2197,7 +2197,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                     # Distribution Pattern Text
                     distributionPatternText <- self$results$distributionPatternText
-                    html <- jmvcore::format(jmvcore::.("<p><b>Single-slide versus summed foci</b></p><p>Cases are classified by whether the threshold of {v1} foci is met on one slide or {v2} foci is met only by summing slides. Counts must represent foci, not positive cassettes. This descriptive classification does not estimate prognosis.</p>"), v1 = sprintf("%d", threshold), v2 = sprintf("%d", threshold))
+                    html <- .fmt(jmvcore::.("<p><b>Single-slide versus summed foci</b></p><p>Cases are classified by whether the threshold of {v1} foci is met on one slide or {v2} foci is met only by summing slides. Counts must represent foci, not positive cassettes. This descriptive classification does not estimate prognosis.</p>"), v1 = sprintf("%d", threshold), v2 = sprintf("%d", threshold))
                     if (self$options$showDistributionPattern) {
                         distributionPatternText$setContent(html)
                     }
@@ -2225,12 +2225,12 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         percent = nFocal / ifelse(nFociCases > 0, nFociCases, NA_real_)
                     ))
                     private$.putRow(distributionPatternTable, rowKey = "summed_effect", values = list(
-                        pattern = jmvcore::format(jmvcore::.("Substantial on single slide (>={v1} on >=1 slide)"), v1 = sprintf("%d", threshold)),
+                        pattern = .fmt(jmvcore::.("Substantial on single slide (>={v1} on >=1 slide)"), v1 = sprintf("%d", threshold)),
                         count = nSubstantialSingle,
                         percent = nSubstantialSingle / ifelse(nFociCases > 0, nFociCases, NA_real_)
                     ))
                     private$.putRow(distributionPatternTable, rowKey = "diffuse", values = list(
-                        pattern = jmvcore::format(jmvcore::.("Substantial only when summed (>={v1} total, <{v2} max)"), v1 = sprintf("%d", threshold), v2 = sprintf("%d", threshold)),
+                        pattern = .fmt(jmvcore::.("Substantial only when summed (>={v1} total, <{v2} max)"), v1 = sprintf("%d", threshold), v2 = sprintf("%d", threshold)),
                         count = nSubstantialSummed,
                         percent = nSubstantialSummed / ifelse(nFociCases > 0, nFociCases, NA_real_)
                     ))
@@ -2248,7 +2248,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         pctSummedAmongSubstantial <- sum(substantialSummed, na.rm = TRUE) / nSubstantial * 100
 
                         private$.putRow(distributionComparisonTable, rowKey = "mean_single", values = list(
-                            measure = jmvcore::format(jmvcore::.("Cases with >={v1} foci (substantial)"), v1 = sprintf("%d", threshold)),
+                            measure = .fmt(jmvcore::.("Cases with >={v1} foci (substantial)"), v1 = sprintf("%d", threshold)),
                             value = sprintf("%d (%.1f%%)", nSubstantial, nSubstantial / ifelse(nFociCases > 0, nFociCases, NA_real_) * 100)
                         ))
                         private$.putRow(distributionComparisonTable, rowKey = "max_single", values = list(
@@ -2281,7 +2281,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     } else {
                         private$.putRow(distributionComparisonTable, rowKey = "mean_single", values = list(
                             measure = jmvcore::.("No substantial cases"),
-                            value = jmvcore::format(jmvcore::.("No cases with >={v1} foci"), v1 = sprintf("%d", threshold))
+                            value = .fmt(jmvcore::.("No cases with >={v1} foci"), v1 = sprintf("%d", threshold))
                         ))
                     }
 
@@ -2308,13 +2308,13 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                         contextNote <- ""
                         if (analysisContext == "tumor") {
-                            contextNote <- jmvcore::format(jmvcore::.("<p><b>Tumor sampling:</b> Spatial dependence can invalidate independent-trial predictions. Empirical curves describe the observed first detections; resampling does not correct missed disease or unequal observation windows.</p>"), v1 = private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorPrimary), v2 = private$.buildStyle(private$.styleConstants$fontSize12, private$.styleConstants$colorSecondary))
+                            contextNote <- .fmt(jmvcore::.("<p><b>Tumor sampling:</b> Spatial dependence can invalidate independent-trial predictions. Empirical curves describe the observed first detections; resampling does not correct missed disease or unequal observation windows.</p>"), v1 = private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorPrimary), v2 = private$.buildStyle(private$.styleConstants$fontSize12, private$.styleConstants$colorSecondary))
                         } else if (analysisContext == "margin") {
-                            contextNote <- jmvcore::format(jmvcore::.("<p><b>Margin sampling:</b> Nearby samples may be dependent. The observed detection curve does not validate margin clearance or a rule-out protocol.</p>"), v1 = private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorPrimary))
+                            contextNote <- .fmt(jmvcore::.("<p><b>Margin sampling:</b> Nearby samples may be dependent. The observed detection curve does not validate margin clearance or a rule-out protocol.</p>"), v1 = private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorPrimary))
                         }
 
                         # Populate text
-                        html <- jmvcore::format(jmvcore::.("<p><b>Empirical cumulative detection</b></p><p>The curve describes {v5} eventually detected cases, with first-detection positions from {v6} to {v7}. Bootstrap intervals quantify case-resampling variation without imposing a geometric distribution.</p>{v8}"), v1 = private$.buildStyle(private$.styleConstants$font), v2 = private$.buildStyle(private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary), v3 = private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary), v4 = private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary), v5 = sprintf("%d", nDetected), v6 = sprintf("%.0f", min(firstDetectionData, na.rm = TRUE)), v7 = sprintf("%.0f", max(firstDetectionData, na.rm = TRUE)), v8 = contextNote)
+                        html <- .fmt(jmvcore::.("<p><b>Empirical cumulative detection</b></p><p>The curve describes {v5} eventually detected cases, with first-detection positions from {v6} to {v7}. Bootstrap intervals quantify case-resampling variation without imposing a geometric distribution.</p>{v8}"), v1 = private$.buildStyle(private$.styleConstants$font), v2 = private$.buildStyle(private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary), v3 = private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary), v4 = private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary), v5 = sprintf("%d", nDetected), v6 = sprintf("%.0f", min(firstDetectionData, na.rm = TRUE)), v7 = sprintf("%.0f", max(firstDetectionData, na.rm = TRUE)), v8 = contextNote)
 
                         if (self$options$showEmpiricalCumulative) {
                             empiricalCumulativeText$setContent(html)
@@ -2376,7 +2376,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         }
                     }
 
-                    html <- jmvcore::format(jmvcore::.("<p><b>Incremental observed yield</b></p><p>The table shows the added fraction of eventual detections at each sample position. Bands are descriptive: higher (at least 10%), moderate (5% to below 10%), diminishing (2% to below 5%) and low (below 2%). These bands include no costs or utilities and do not define a clinical stopping rule.</p>"), v1 = private$.buildStyle(private$.styleConstants$font), v2 = private$.buildStyle(private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary), v3 = private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary), v4 = private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary))
+                    html <- .fmt(jmvcore::.("<p><b>Incremental observed yield</b></p><p>The table shows the added fraction of eventual detections at each sample position. Bands are descriptive: higher (at least 10%), moderate (5% to below 10%), diminishing (2% to below 5%) and low (below 2%). These bands include no costs or utilities and do not define a clinical stopping rule.</p>"), v1 = private$.buildStyle(private$.styleConstants$font), v2 = private$.buildStyle(private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary), v3 = private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary), v4 = private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary))
 
                     if (self$options$showIncrementalYield) {
                         incrementalYieldText$setContent(html)
@@ -2397,7 +2397,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     unique_types <- levels(droplevels(sampleTypeData))
 
                     if (length(unique_types) > 0) {
-                        html <- jmvcore::format(jmvcore::.("<p><b>Sample-type comparisons</b></p><p>Each group retains its recorded counts and observed-positive fraction. The selected estimator and the case-proportion screening rule are applied separately to each group. Groups without an eligible q retain their descriptive counts but receive no model predictions.</p>"), v1 = private$.buildStyle(private$.styleConstants$font), v2 = private$.buildStyle(private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary), v3 = private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary), v4 = private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary))
+                        html <- .fmt(jmvcore::.("<p><b>Sample-type comparisons</b></p><p>Each group retains its recorded counts and observed-positive fraction. The selected estimator and the case-proportion screening rule are applied separately to each group. Groups without an eligible q retain their descriptive counts but receive no model predictions.</p>"), v1 = private$.buildStyle(private$.styleConstants$font), v2 = private$.buildStyle(private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary), v3 = private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary), v4 = private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary))
 
                         if (self$options$showStratifiedAnalysis) {
                             stratifiedText$setContent(html)
@@ -2423,7 +2423,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                 qEstimate = q_type))
                             if (!is.finite(q_type)) {
                                 private$.addNotice("WARNING", jmvcore::.("Subgroup estimate unavailable"),
-                                    jmvcore::format(jmvcore::.("Sample type {v1}: q and model predictions are unavailable because no eligible detections/count pairs remain or the within-group case-proportion CV exceeds 0.5. Its observed case counts and positive fraction are retained."), v1 = type))
+                                    .fmt(jmvcore::.("Sample type {v1}: q and model predictions are unavailable because no eligible detections/count pairs remain or the within-group case-proportion CV exceeds 0.5. Its observed case counts and positive fraction are retained."), v1 = type))
                             } else {
                                 for (n in c(3, 5, 7, 10)) {
                                     if (n <= maxSamp) {
@@ -2452,7 +2452,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # Calculate overall prevalence
                     prevalence <- nDetected / length(firstDetectionData)
 
-                    html <- jmvcore::format(jmvcore::.("<p><b>Recorded-case and conditional detection</b></p><p>The observed-positive fraction is {v6}% ({v7}/{v8} cases). Conditional predictions refer to eventual observation, not independently known disease. Multiplying by the recorded positive fraction gives a modelled fraction of recorded cases, not validated population sensitivity.</p>"), v1 = private$.buildStyle(private$.styleConstants$font), v2 = private$.buildStyle(private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary), v3 = private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary), v4 = private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary), v5 = private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary), v6 = sprintf("%.1f", 100 * prevalence), v7 = sprintf("%d", nDetected), v8 = sprintf("%d", length(firstDetectionData)), v9 = private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorSecondary))
+                    html <- .fmt(jmvcore::.("<p><b>Recorded-case and conditional detection</b></p><p>The observed-positive fraction is {v6}% ({v7}/{v8} cases). Conditional predictions refer to eventual observation, not independently known disease. Multiplying by the recorded positive fraction gives a modelled fraction of recorded cases, not validated population sensitivity.</p>"), v1 = private$.buildStyle(private$.styleConstants$font), v2 = private$.buildStyle(private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary), v3 = private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary), v4 = private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary), v5 = private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary), v6 = sprintf("%.1f", 100 * prevalence), v7 = sprintf("%d", nDetected), v8 = sprintf("%d", length(firstDetectionData)), v9 = private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorSecondary))
 
                     if (self$options$showPopulationDetection) {
                         populationDetectionText$setContent(html)
@@ -2507,7 +2507,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     n_total <- sum(!is.na(clustering_indices))
 
                     if (n_total > 0) {
-                        html <- jmvcore::format(jmvcore::.("<p><b>Sample-position clustering</b></p><p>The index compares mean gaps with their expectation under uniform random placement. Labels below 0.7, from 0.7 to 1.3, and above 1.3 are descriptive bands, not hypothesis tests. Sampling order need not represent anatomical distance; these groups do not establish focality or a sampling protocol.</p>"), v1 = private$.buildStyle(private$.styleConstants$font), v2 = private$.buildStyle(private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary), v3 = private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary), v4 = private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary), v5 = private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorSecondary))
+                        html <- .fmt(jmvcore::.("<p><b>Sample-position clustering</b></p><p>The index compares mean gaps with their expectation under uniform random placement. Labels below 0.7, from 0.7 to 1.3, and above 1.3 are descriptive bands, not hypothesis tests. Sampling order need not represent anatomical distance; these groups do not establish focality or a sampling protocol.</p>"), v1 = private$.buildStyle(private$.styleConstants$font), v2 = private$.buildStyle(private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary), v3 = private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary), v4 = private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary), v5 = private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorSecondary))
 
                         if (self$options$showSpatialClustering) {
                             spatialClusteringText$setContent(html)
@@ -2566,7 +2566,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     n_total <- sum(!is.na(foci_counts))
 
                     if (n_total > 0) {
-                        html <- jmvcore::format(jmvcore::.("<p><b>Heuristic foci count</b></p><p>A gap exceeding the user-selected threshold starts a new sample-position group. These groups are a sampling-order heuristic, not independently established anatomical lesions; they do not determine stage or treatment.</p>"), v1 = private$.buildStyle(private$.styleConstants$font), v2 = private$.buildStyle(private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary), v3 = private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary), v4 = private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorSecondary))
+                        html <- .fmt(jmvcore::.("<p><b>Heuristic foci count</b></p><p>A gap exceeding the user-selected threshold starts a new sample-position group. These groups are a sampling-order heuristic, not independently established anatomical lesions; they do not determine stage or treatment.</p>"), v1 = private$.buildStyle(private$.styleConstants$font), v2 = private$.buildStyle(private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary), v3 = private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary), v4 = private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorSecondary))
 
                         if (self$options$showMultifocalAnalysis) {
                             multifocalText$setContent(html)
@@ -2665,12 +2665,12 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     )
 
                     contextExample <- switch(analysisContext,
-                        "tumor" = jmvcore::format(jmvcore::.("<p><b>Example interpretation:</b> The selected descriptive target is reached at {v1} samples under the model assumptions. This is not a validated tumor-sampling minimum.</p>"), v1 = sprintf("%d", rec$minSamples)),
-                        "lymphnode" = jmvcore::format(jmvcore::.("<p><b>Example interpretation:</b> The selected descriptive target is reached at {v1} nodes under the model assumptions. This does not establish adequate dissection for an individual patient.</p>"), v1 = sprintf("%d", rec$minSamples)),
+                        "tumor" = .fmt(jmvcore::.("<p><b>Example interpretation:</b> The selected descriptive target is reached at {v1} samples under the model assumptions. This is not a validated tumor-sampling minimum.</p>"), v1 = sprintf("%d", rec$minSamples)),
+                        "lymphnode" = .fmt(jmvcore::.("<p><b>Example interpretation:</b> The selected descriptive target is reached at {v1} nodes under the model assumptions. This does not establish adequate dissection for an individual patient.</p>"), v1 = sprintf("%d", rec$minSamples)),
                         "" # default: no example
                     )
 
-                    html <- jmvcore::format(jmvcore::.("<h4>{v1}</h4><p>The descriptive {v2}% target is reached at {v3} samples by the {v4} model{v5}, with an estimated observed-positive detection of {v6}% using {v7}.</p><p>This does not establish a patient-level sampling minimum.</p>{v8}"), v1 = contextHeader, v2 = sprintf("%.0f", targetConf * 100), v3 = sprintf("%d", rec$minSamples), v4 = rec$method, v5 = detailSuffix, v6 = sprintf("%.1f", rec$achievedProb * 100), v7 = rec$description, v8 = contextExample)
+                    html <- .fmt(jmvcore::.("<h4>{v1}</h4><p>The descriptive {v2}% target is reached at {v3} samples by the {v4} model{v5}, with an estimated observed-positive detection of {v6}% using {v7}.</p><p>This does not establish a patient-level sampling minimum.</p>{v8}"), v1 = contextHeader, v2 = sprintf("%.0f", targetConf * 100), v3 = sprintf("%d", rec$minSamples), v4 = rec$method, v5 = detailSuffix, v6 = sprintf("%.1f", rec$achievedProb * 100), v7 = rec$description, v8 = contextExample)
                     if (nzchar(obsListHtml)) {
                         html <- paste0(
                             html,
@@ -2684,7 +2684,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     detailSuffix <- if (!is.na(rec$detail) && nzchar(rec$detail)) sprintf(" (%s)", rec$detail) else ""
                     bestProb <- rec$bestProb * 100
                     bestSamples <- rec$bestN
-                    html <- jmvcore::format(jmvcore::.("<p><b>Descriptive target not reached</b></p><p>The {v1}% target was not reached in the evaluated range. The {v2} model{v3} reached {v4}% at {v5} samples. This does not establish clinical sampling adequacy.</p>"), v1 = sprintf("%.0f", targetConf * 100), v2 = rec$method, v3 = detailSuffix, v4 = sprintf("%.1f", bestProb), v5 = sprintf("%d", bestSamples))
+                    html <- .fmt(jmvcore::.("<p><b>Descriptive target not reached</b></p><p>The {v1}% target was not reached in the evaluated range. The {v2} model{v3} reached {v4}% at {v5} samples. This does not establish clinical sampling adequacy.</p>"), v1 = sprintf("%.0f", targetConf * 100), v2 = rec$method, v3 = detailSuffix, v4 = sprintf("%.1f", bestProb), v5 = sprintf("%d", bestSamples))
                     if (nzchar(obsListHtml)) {
                         html <- paste0(
                             html,
@@ -2703,18 +2703,18 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 keyResults <- self$results$keyResults
 
-                targetLine <- jmvcore::format(jmvcore::.("<p style='{v1} {v2}'><b>Target detection probability:</b> {v3}%</p>"), v1 = private$.styleConstants$fontSize14, v2 = private$.styleConstants$colorPrimary, v3 = sprintf("%.0f", targetConf * 100))
+                targetLine <- .fmt(jmvcore::.("<p style='{v1} {v2}'><b>Target detection probability:</b> {v3}%</p>"), v1 = private$.styleConstants$fontSize14, v2 = private$.styleConstants$colorPrimary, v3 = sprintf("%.0f", targetConf * 100))
 
                 if (!is.null(primaryRecommendation) && nrow(primaryRecommendation) == 1) {
                     rec <- primaryRecommendation
                     detailSuffix <- if (!is.na(rec$detail) && nzchar(rec$detail)) sprintf(" (%s)", rec$detail) else ""
-                    primaryLine <- jmvcore::format(jmvcore::.("<p><b>Descriptive target sample count:</b> {v3} ({v4}), with {v5}% observed-positive detection{v6}.</p>"), v1 = private$.styleConstants$fontSize15, v2 = private$.styleConstants$colorPrimary, v3 = sprintf("%d", rec$minSamples), v4 = rec$method, v5 = sprintf("%.1f", rec$achievedProb * 100), v6 = detailSuffix)
+                    primaryLine <- .fmt(jmvcore::.("<p><b>Descriptive target sample count:</b> {v3} ({v4}), with {v5}% observed-positive detection{v6}.</p>"), v1 = private$.styleConstants$fontSize15, v2 = private$.styleConstants$colorPrimary, v3 = sprintf("%d", rec$minSamples), v4 = rec$method, v5 = sprintf("%.1f", rec$achievedProb * 100), v6 = detailSuffix)
                 } else if (!is.null(fallbackRecommendation) && nrow(fallbackRecommendation) == 1) {
                     rec <- fallbackRecommendation
                     detailSuffix <- if (!is.na(rec$detail) && nzchar(rec$detail)) sprintf(" (%s)", rec$detail) else ""
-                    primaryLine <- jmvcore::format(jmvcore::.("<p><b>Target not reached:</b> Best modelled value is {v3}% at {v4} samples using {v5}{v6}.</p>"), v1 = private$.styleConstants$fontSize15, v2 = private$.styleConstants$colorPrimary, v3 = sprintf("%.1f", rec$bestProb * 100), v4 = sprintf("%d", rec$bestN), v5 = rec$method, v6 = detailSuffix)
+                    primaryLine <- .fmt(jmvcore::.("<p><b>Target not reached:</b> Best modelled value is {v3}% at {v4} samples using {v5}{v6}.</p>"), v1 = private$.styleConstants$fontSize15, v2 = private$.styleConstants$colorPrimary, v3 = sprintf("%.1f", rec$bestProb * 100), v4 = sprintf("%d", rec$bestN), v5 = rec$method, v6 = detailSuffix)
                 } else {
-                    primaryLine <- jmvcore::format(jmvcore::.("<p>No eligible model could estimate the descriptive sampling target.</p>"), v1 = private$.styleConstants$fontSize15, v2 = private$.styleConstants$colorPrimary)
+                    primaryLine <- .fmt(jmvcore::.("<p>No eligible model could estimate the descriptive sampling target.</p>"), v1 = private$.styleConstants$fontSize15, v2 = private$.styleConstants$colorPrimary)
                 }
 
                 methodListHtml <- ""
@@ -2729,7 +2729,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 }
 
                 comparisonSection <- if (nzchar(methodListHtml)) {
-                    jmvcore::format(jmvcore::.("<p><b>Model comparison</b></p><ul>{v5}</ul>"), v1 = private$.styleConstants$fontSize14, v2 = private$.styleConstants$colorPrimary, v3 = private$.styleConstants$fontSize14, v4 = private$.styleConstants$colorPrimary, v5 = methodListHtml)
+                    .fmt(jmvcore::.("<p><b>Model comparison</b></p><ul>{v5}</ul>"), v1 = private$.styleConstants$fontSize14, v2 = private$.styleConstants$colorPrimary, v3 = private$.styleConstants$fontSize14, v4 = private$.styleConstants$colorPrimary, v5 = methodListHtml)
                 } else {
                     ""
                 }
@@ -2741,9 +2741,9 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 }
 
                 if (self$options$showClinicalSummary) {
-                    summary <- jmvcore::format(jmvcore::.("<p>Of {v1} analyzed cases, {v2} recorded a lesion. The analysis describes the position at which these observed lesions were first detected.</p>"), v1 = sprintf("%d", nCases), v2 = sprintf("%d", nDetected))
+                    summary <- .fmt(jmvcore::.("<p>Of {v1} analyzed cases, {v2} recorded a lesion. The analysis describes the position at which these observed lesions were first detected.</p>"), v1 = sprintf("%d", nCases), v2 = sprintf("%d", nDetected))
                     if (!is.na(bootstrapTargetIdx)) {
-                        summary <- paste0(summary, jmvcore::format(jmvcore::.("<p>The observed-positive bootstrap mean reaches the {v1}% target at {v2} samples (95% percentile interval at that position: {v3}%-{v4}%).</p>"), v1 = sprintf("%.0f", 100 * targetConf), v2 = sprintf("%d", bootstrapTargetIdx), v3 = sprintf("%.1f", 100 * bootstrapCILowerVec[bootstrapTargetIdx]), v4 = sprintf("%.1f", 100 * bootstrapCIUpperVec[bootstrapTargetIdx])))
+                        summary <- paste0(summary, .fmt(jmvcore::.("<p>The observed-positive bootstrap mean reaches the {v1}% target at {v2} samples (95% percentile interval at that position: {v3}%-{v4}%).</p>"), v1 = sprintf("%.0f", 100 * targetConf), v2 = sprintf("%d", bootstrapTargetIdx), v3 = sprintf("%.1f", 100 * bootstrapCILowerVec[bootstrapTargetIdx]), v4 = sprintf("%.1f", 100 * bootstrapCIUpperVec[bootstrapTargetIdx])))
                     }
                     summary <- paste0(summary, jmvcore::.("<p>This is a descriptive sampling analysis, not a validated patient-level recommendation. Assess eventual-detection ascertainment, missed disease, unequal observation windows and dependence before applying results to a protocol. Independent probability models and node summaries have separate assumptions and denominators.</p>"))
                     self$results$clinicalSummary$setContent(summary)
@@ -2776,8 +2776,8 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 private$.addNotice(
                     "INFO",
                     jmvcore::.("Analysis complete"),
-                    jmvcore::format(jmvcore::.("Analysed {v1} of {v2} supplied cases; {v3} recorded a detected lesion. {v4}"), v1 = sprintf("%d", nCases), v2 = sprintf("%d", totalCasesInput), v3 = sprintf("%d", nDetected), v4 = if (identical(estimationMethod, jmvcore::.("Not calculated"))) ""
-                            else jmvcore::format(jmvcore::.("Per-sample detection probability estimated by {v1}."), v1 = estimationMethod))
+                    .fmt(jmvcore::.("Analysed {v1} of {v2} supplied cases; {v3} recorded a detected lesion. {v4}"), v1 = sprintf("%d", nCases), v2 = sprintf("%d", totalCasesInput), v3 = sprintf("%d", nDetected), v4 = if (identical(estimationMethod, jmvcore::.("Not calculated"))) ""
+                            else .fmt(jmvcore::.("Per-sample detection probability estimated by {v1}."), v1 = estimationMethod))
                 )
             },
             .detectionCurve = function(image, ggtheme, theme, ...) {
@@ -2830,7 +2830,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     ggplot2::scale_x_continuous(breaks = nSamples) +
                     ggplot2::labs(
                         title = jmvcore::.("Diagnostic Yield Curve"),
-                        subtitle = jmvcore::format(jmvcore::.("Target observed-positive detection: {v1}% (red line)"), v1 = sprintf("%.0f", targetConfidence * 100)),
+                        subtitle = .fmt(jmvcore::.("Target observed-positive detection: {v1}% (red line)"), v1 = sprintf("%.0f", targetConfidence * 100)),
                         x = jmvcore::.("Number of Samples"),
                         y = jmvcore::.("Cumulative Detection Probability"),
                         color = "Method",
@@ -2883,7 +2883,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     ggplot2::scale_x_continuous(breaks = nSamples) +
                     ggplot2::labs(
                         title = jmvcore::.("Bootstrap Observed-positive detection Estimates with 95% Confidence Intervals"),
-                        subtitle = jmvcore::format(jmvcore::.("Based on {v1} bootstrap iterations"), v1 = sprintf("%d", state$bootstrapIterations)),
+                        subtitle = .fmt(jmvcore::.("Based on {v1} bootstrap iterations"), v1 = sprintf("%d", state$bootstrapIterations)),
                         x = jmvcore::.("Number of Samples"),
                         y = jmvcore::.("Observed-positive detection (Detection Probability)")
                     ) +
@@ -2961,7 +2961,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     )) +
                     ggplot2::labs(
                         title = jmvcore::.("Empirical Cumulative Detection vs Binomial Model"),
-                        subtitle = jmvcore::format(jmvcore::.("Conditional probability (observed-positive detection) | {v1} positive cases | q = {v2}"), v1 = sprintf("%d", nPositiveCases), v2 = sprintf("%.3f", ifelse(is.na(pEstimate), 0, pEstimate))),
+                        subtitle = .fmt(jmvcore::.("Conditional probability (observed-positive detection) | {v1} positive cases | q = {v2}"), v1 = sprintf("%d", nPositiveCases), v2 = sprintf("%.3f", ifelse(is.na(pEstimate), 0, pEstimate))),
                         x = jmvcore::.("Number of Samples Examined"),
                         y = jmvcore::.("Cumulative Detection Probability"),
                         color = "Method",
@@ -3408,9 +3408,9 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # Create summary message
                 if (warning_flag) {
                     severity <- if (cv_q > 0.50) "HIGH" else "MODERATE"
-                    message <- jmvcore::format(jmvcore::.("{v1} heterogeneity detected (CV = {v2}). Detection probability varies substantially across groups. Consider stratified analysis."), v1 = severity, v2 = sprintf("%.2f", cv_q))
+                    message <- .fmt(jmvcore::.("{v1} heterogeneity detected (CV = {v2}). Detection probability varies substantially across groups. Consider stratified analysis."), v1 = severity, v2 = sprintf("%.2f", cv_q))
                 } else {
-                    message <- jmvcore::format(jmvcore::.("Low observed between-group variation (CV = {v1}); this does not establish independence or justify pooling."), v1 = sprintf("%.2f", cv_q))
+                    message <- .fmt(jmvcore::.("Low observed between-group variation (CV = {v1}); this does not establish independence or justify pooling."), v1 = sprintf("%.2f", cv_q))
                 }
 
                 list(

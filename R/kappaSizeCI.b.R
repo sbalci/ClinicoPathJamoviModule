@@ -31,18 +31,18 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # 0.5)" rather than "alpha must be between 0 and 1".
             if (!is_one_sided) {
                 if (self$options$kappaL >= self$options$kappaU) {
-                    errors <- c(errors, "kappaL must be less than kappaU")
+                    errors <- c(errors, .("kappaL must be less than kappaU"))
                 }
 
                 # kappaSize requires kappa0 to lie strictly inside the interval;
                 # kappa0 == kappaL or kappa0 == kappaU errors inside the engine.
                 if (self$options$kappa0 <= self$options$kappaL || self$options$kappa0 >= self$options$kappaU) {
-                    errors <- c(errors, "kappa0 must be strictly within the confidence interval (kappaL, kappaU)")
+                    errors <- c(errors, .("kappa0 must be strictly within the confidence interval (kappaL, kappaU)"))
                 }
             } else {
                 # One-sided: kappaSize requires kappa0 strictly greater than the lower limit.
                 if (self$options$kappa0 <= self$options$kappaL) {
-                    errors <- c(errors, "kappa0 must be greater than kappaL")
+                    errors <- c(errors, .("kappa0 must be greater than kappaL"))
                 }
             }
 
@@ -60,7 +60,7 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 # U+00A0 (non-breaking space, what Word/Excel paste) is not in [:space:].
                 props_str <- trimws(gsub("\u{00A0}", " ", self$options$props, fixed = TRUE))
                 if (props_str == "") {
-                    return(list(error = "Proportions cannot be empty"))
+                    return(list(error = .("Proportions cannot be empty")))
                 }
 
                 # Parse proportions with flexible delimiters. The old class "[,;|\\t]+" was the
@@ -69,18 +69,18 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 # "0.2, 0.3; 0.5" was accepted. [[:space:]] covers tab and space properly.
                 props_clean <- gsub("[,;|[:space:]]+", ",", props_str)
                 props_split <- strsplit(props_clean, ",")[[1]]
-                # suppressWarnings: the space-separated fallback below is the intended
-                # path when this comma parse yields NAs, so do not surface a coercion warning.
+                # suppressWarnings: a non-numeric token is reported as "must be valid
+                # numbers" below, so do not also surface a coercion warning.
                 props_numeric <- suppressWarnings(as.numeric(trimws(props_split)))
 
-                # Handle space-separated format
-                if (length(props_numeric) == 1 && grepl("\\s+", props_str)) {
-                    props_split <- trimws(strsplit(props_str, "\\s+")[[1]])
-                    props_numeric <- suppressWarnings(as.numeric(props_split))
-                }
+                # A space-separated fallback used to sit here. It was dead: the gsub above
+                # has already turned every whitespace run into a comma, so props_numeric can
+                # only have length 1 when the (already trimws-ed) input contains no separator
+                # at all -- and then grepl("\\s+", props_str) is FALSE. Removed rather than
+                # left implying a parsing path this regex does not already handle.
 
                 if (any(is.na(props_numeric))) {
-                    return(list(error = "All proportions must be valid numbers"))
+                    return(list(error = .("All proportions must be valid numbers")))
                 }
 
                 if (any(props_numeric <= 0) || any(props_numeric >= 1)) {
@@ -92,11 +92,9 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         gsub("([0-9]),([0-9])", "\\1.\\2", props_str), "[;|[:space:]]+")))))
                     as_decimal <- as_decimal[!is.na(as_decimal)]
                     if (length(as_decimal) > 0 && all(as_decimal > 0 & as_decimal < 1)) {
-                        return(list(error = paste0(
-                            "Proportions must use a decimal point, not a decimal comma: write ",
-                            "0.20, 0.80 rather than 0,20 0,80")))
+                        return(list(error = .("Proportions must use a decimal point, not a decimal comma: write 0.20, 0.80 rather than 0,20 0,80.")))
                     }
-                    return(list(error = "All proportions must be between 0 and 1"))
+                    return(list(error = .("All proportions must be between 0 and 1")))
                 }
 
                 expected_length <- as.numeric(self$options$outcome)
@@ -106,7 +104,11 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 }
 
                 if (length(props_numeric) != expected_length) {
-                    error_msg <- paste0("Expected ", expected_length, " proportions for ", expected_length, " outcome categories, got ", length(props_numeric))
+                    # One msgid with placeholders: the old paste0() spliced English word order
+                    # into the message, which no catalog can reorder.
+                    error_msg <- .fmt(
+                        .("Enter exactly {k} proportions for {k} outcome categories (received {got})."),
+                        k = expected_length, got = length(props_numeric))
                     return(list(error = error_msg))
                 }
 
@@ -114,7 +116,8 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 # Match kappaSize's strict tolerance: proportions must sum to 1
                 # within 0.001 (a looser 0.01 lets inputs pass here but reject in the engine).
                 if (abs(prop_sum - 1) > 0.001) {
-                    error_msg <- paste0("Proportions should sum to 1.0, current sum is ", round(prop_sum, 3))
+                    error_msg <- .fmt(.("Proportions should sum to 1.0, current sum is {sum}."),
+                                      sum = round(prop_sum, 3))
                     return(list(error = error_msg))
                 }
 
@@ -129,30 +132,15 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 return(list(props = props_numeric, error = NULL))
 
             }, error = function(e) {
-                return(list(error = paste("Error parsing proportions:", e$message)))
+                return(list(error = .fmt(.("Error parsing proportions: {error}"),
+                                         error = conditionMessage(e))))
             })
         },
 
-        # Expected probability of every goodness-of-fit cell at agreement rho. kappaSize's
-        # CI* engines grow n until the chi-square sum over AGREEMENT PATTERNS --
-        # (n P_j(kappa0) - n P_j(rho))^2 / (n P_j(rho)) -- exceeds the critical value at
-        # rho = kappaL and (two-sided) rho = kappaU. The expected counts in those denominators
-        # are where sparseness matters, NOT the outcome marginals that kappaSize's own
-        # print/summary check. Identical closed forms to R/kappaSizeFixedN.b.R:.gofCells and
-        # R/kappaSizePower.b.R:.gofCells, verified against every engine .CalcIT for raters 2-6.
-        .gofCells = function(outcome, raters, props, rho) {
-            if (outcome == 2) {
-                p <- props[1]
-                j <- 0:raters
-                choose(raters, j) * p^j * (1 - p)^(raters - j) * (1 - rho) +
-                    rho * ifelse(j == raters, p, ifelse(j == 0, 1 - p, 0))
-            } else {
-                i <- seq_len(raters) - 1
-                agree <- vapply(props, function(pj)
-                    prod((pj * (1 - rho) + i * rho) / ((1 - rho) + i * rho)), numeric(1))
-                c(1 - sum(agree), agree)
-            }
-        },
+        # The goodness-of-fit cell probabilities now live in R/utils-kappasize.R
+        # (kappaSizeGofCells) -- the identical closed form used to be copied into all
+        # three kappaSize backends. See that file for the derivation and for which
+        # agreement level each engine evaluates the cells at.
 
         # Cochran's rule applied to each confidence limit SEPARATELY, reporting the numbers
         # from the limit that is actually thinnest.
@@ -180,7 +168,7 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             per <- list()
             for (rho in rhos) {
-                e <- private$.gofCells(params$outcome, params$raters, params$props, rho) *
+                e <- kappaSizeGofCells(params$outcome, params$raters, params$props, rho) *
                      required_n
                 if (!all(is.finite(e)) || any(e < 0)) next   # degenerate here; not assessable
                 per[[length(per) + 1L]] <- list(
@@ -201,12 +189,32 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
 
         # Expected counts run from ~3e-06 to a few dozen, and signif() pasted straight into a
-        # sentence renders the small end as "8.9e-06" in prose aimed at pathologists. Rounding
-        # to fixed decimals instead would print "0.000", which is worse; say "below 0.01".
+        # sentence renders the small end as "8.9e-06" in prose aimed at pathologists.
+        # scientific = FALSE already prevents that, so the only job left for a floor is to stop
+        # the tail growing unreadably long. It used to be 0.01, justified as beating a rounded
+        # "0.000" -- but nothing here rounds to fixed decimals, so that justification never
+        # applied, and 0.01 is far too high: the default six-rater binary design's smallest cell
+        # is 0.013 (see .sparseVerdict below), i.e. right on the old floor, and anything under
+        # it -- a pattern effectively never observed -- read as "below 0.01", a figure that also
+        # covers a comfortable 0.009. Same floor and same wording as R/kappaSizePower.b.R and
+        # R/kappaSizeFixedN.b.R, so the three analyses word the same caveat the same way.
         .fmtCount = function(x) {
-            if (!isTRUE(is.finite(x))) return("unavailable")
-            if (x < 0.01) return("below 0.01")
+            if (!isTRUE(is.finite(x))) return(.("unavailable"))
+            if (x < 0.0001) return(.("below 0.0001"))
             base::format(signif(x, 2), scientific = FALSE, trim = TRUE)
+        },
+
+        # Display form of a category proportion. .validateProportions() renormalises the
+        # vector (kappaSize accepts a sum within 0.001 of 1 and then uses it verbatim, which
+        # can drive a goodness-of-fit cell negative), so a typed "0.333, 0.333, 0.333" becomes
+        # 0.33333333333333331 and jmvcore::format renders a double at 15 significant digits --
+        # the Study Explanation read "Expected category proportions of 0.333333333333333 ...".
+        # Round for DISPLAY only; params$props keeps full precision for the engine.
+        # Element-wise: base::format() on a VECTOR pads every element to a common number of
+        # decimals, which would turn a typed 0.1 into "0.10" next to a 0.25.
+        .fmtProp = function(x) {
+            vapply(x, function(v) base::format(signif(v, 4), scientific = FALSE, trim = TRUE),
+                   character(1))
         },
 
         # No memoisation here. Every option this analysis has is listed in each result's
@@ -248,7 +256,7 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # which is NOT always the limit geometrically nearer kappa0. Both .predictedN() and the
         # Study Explanation need this, so it lives in one place.
         .limitSlopes = function(params) {
-            at_kappa0 <- private$.gofCells(params$outcome, params$raters, params$props,
+            at_kappa0 <- kappaSizeGofCells(params$outcome, params$raters, params$props,
                                            params$kappa0)
             valid <- function(x) all(is.finite(x)) && all(x > 0)
             if (!valid(at_kappa0)) return(NULL)
@@ -258,7 +266,7 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (length(rhos) == 0) return(NULL)
 
             out <- vapply(rhos, function(rho) {
-                b <- private$.gofCells(params$outcome, params$raters, params$props, rho)
+                b <- kappaSizeGofCells(params$outcome, params$raters, params$props, rho)
                 if (!valid(b)) return(NA_real_)
                 # No na.rm: the engine drops NaN terms, but a NaN here means this estimate
                 # cannot be trusted, and dropping it would understate the slope and so
@@ -276,8 +284,11 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # to 1,212 -- the limit being named has no influence at all.
         .bindingLimit = function(params) {
             slopes <- private$.limitSlopes(params)
-            if (is.null(slopes) || !any(is.finite(slopes))) return(NULL)
-            slopes <- slopes[is.finite(slopes)]
+            # ALL slopes, not any: with one limit degenerate there is nothing to compare the
+            # survivor against, so naming it as "the limit that drives the sample size" states
+            # as a finding what was never established. .predictedN() already refuses the same
+            # case (returns NA); fall back to the geometric-distance wording instead.
+            if (is.null(slopes) || !all(is.finite(slopes))) return(NULL)
             rho <- as.numeric(names(slopes)[which.min(slopes)])
             list(rho = rho, distance = abs(params$kappa0 - rho))
         },
@@ -307,7 +318,7 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         .calculateSampleSize = function(params) {
             if (!requireNamespace('kappaSize', quietly = TRUE)) {
-                jmvcore::reject('The kappaSize package is required but not installed. Please install it using install.packages("kappaSize")')
+                jmvcore::reject(.('The kappaSize package is required but not installed. Please install it using install.packages("kappaSize")'))
             }
 
             kappa_function <- switch(
@@ -316,7 +327,7 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 "3" = kappaSize::CI3Cats,
                 "4" = kappaSize::CI4Cats,
                 "5" = kappaSize::CI5Cats,
-                stop("Unsupported number of outcome categories")
+                stop(.("Unsupported number of outcome categories"))
             )
 
             # kappaSize searches for n by brute force -- `n <- 10; while (...) n <- n + 1` in
@@ -364,21 +375,19 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 params$kappa0 - params$kappaL
 
             if (isTRUE(predicted > engine_n_limit)) {
-                cost_text <- if (isTRUE(is.finite(predicted)))
-                    paste0("it would need about ", private$.fmtN(predicted), " subjects")
+                # Two COMPLETE alternative sentences rather than one sentence with an English
+                # fragment spliced in: a catalog cannot reorder or inflect a spliced clause,
+                # and "it would need about N subjects" is not a phrase every language builds
+                # the same way.
+                msg <- if (isTRUE(is.finite(predicted)))
+                    .fmt(
+                        .("The requested confidence interval is too narrow to size in reasonable time: it would need about {n} subjects. The limit that governs the sample size is {dist} away from kappa0, and the required sample size grows roughly as one over the square of that distance. Widen the interval, use more raters, or accept a lower confidence level. As a guide, halving that distance multiplies the required sample size by about four."),
+                        n = private$.fmtN(predicted), dist = signif(half_width, 3))
                 else
-                    "no sample size can deliver it"
-                jmvcore::reject(
-                    paste0(
-                        "The requested confidence interval is too narrow to size in reasonable ",
-                        "time: ", cost_text, ". The ",
-                        "limit that governs the sample size is ", signif(half_width, 3),
-                        " away from kappa0, and ",
-                        "the required sample size grows roughly as one over the square of that ",
-                        "distance. Widen the interval, use more raters, or accept a lower ",
-                        "confidence level. As a guide, halving that distance multiplies the ",
-                        "required sample size by about four."),
-                    code = NULL)
+                    .fmt(
+                        .("The requested confidence interval is too narrow to size in reasonable time: no sample size can deliver it. The limit that governs the sample size is {dist} away from kappa0, and the required sample size grows roughly as one over the square of that distance. Widen the interval, use more raters, or accept a lower confidence level. As a guide, halving that distance multiplies the required sample size by about four."),
+                        dist = signif(half_width, 3))
+                jmvcore::reject(msg, code = NULL)
             }
 
             # Wall-clock backstop, sized to what the engine should cost rather than a flat 20
@@ -410,6 +419,12 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # grepl() for it silently fails under any non-English locale and the user gets the
             # raw translated error instead of the guidance below (verified: LANGUAGE=fr gives
             # "la limite de temps est atteinte"). This module ships a Turkish catalog.
+            # jmvcore cannot interrupt inside the vendor's interpreted while-loop, but this
+            # lets jamovi flush and mark the analysis as running before up to `time_budget`
+            # seconds of uninterruptible engine time. Outside the tryCatch below on purpose:
+            # .checkpoint() signals its restart as an ERROR and must not be caught here.
+            private$.checkpoint()
+
             t0 <- Sys.time()
             result <- tryCatch({
                 setTimeLimit(elapsed = time_budget, transient = TRUE)
@@ -434,30 +449,24 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     # "use more raters", the correct advice for a genuinely narrow interval,
                     # would send them further into the case that is failing.
                     if (isTRUE(predicted <= engine_n_limit)) {
+                        # \u2014, not \u{2014}: R resolves both at parse time, but the
+                        # catalog stores the msgid verbatim, so a brace form inside .() can
+                        # never be looked up and the string stays untranslated forever.
                         jmvcore::reject(
-                            paste0(
-                                "This combination of expected proportions and rater count is too ",
-                                "extreme for the kappaSize engine: with ", params$raters,
-                                " raters and a rarest category of ", signif(min(params$props), 3),
-                                ", some agreement patterns are so unlikely that the calculation ",
-                                "loses them to rounding and never converges. About ",
-                                private$.fmtN(predicted), " subjects would be needed. Use fewer ",
-                                "raters, or a less extreme expected prevalence \u{2014} the same ",
-                                "design usually computes with one rater fewer."),
+                            .fmt(
+                                .("This combination of expected proportions and rater count is too extreme for the kappaSize engine: with {raters} raters and a rarest category of {rarest}, some agreement patterns are so unlikely that the calculation loses them to rounding and never converges. About {n} subjects would be needed. Use fewer raters, or a less extreme expected prevalence \u2014 the same design usually computes with one rater fewer."),
+                                raters = params$raters,
+                                rarest = signif(min(params$props), 3),
+                                n = private$.fmtN(predicted)),
                             code = NULL)
                     }
                     jmvcore::reject(
-                        paste0(
-                            "The requested confidence interval is too narrow to size in reasonable ",
-                            "time. The limit that governs the sample size is ",
-                            signif(half_width, 3),
-                            " away from kappa0, and the required sample size grows roughly as one over ",
-                            "the square of that distance \u{2014} the search was still running after ",
-                            time_budget, " seconds. Widen the interval, use more raters, or accept ",
-                            "a lower confidence level."),
+                        .fmt(
+                            .("The requested confidence interval is too narrow to size in reasonable time. The limit that governs the sample size is {dist} away from kappa0, and the required sample size grows roughly as one over the square of that distance \u2014 the search was still running after {secs} seconds. Widen the interval, use more raters, or accept a lower confidence level."),
+                            dist = signif(half_width, 3), secs = time_budget),
                         code = NULL)
                 }
-                jmvcore::reject("Error in sample size calculation: {}", code = NULL, msg)
+                jmvcore::reject(.("Error in sample size calculation: {}"), code = NULL, msg)
             })
 
             setTimeLimit(elapsed = Inf, transient = TRUE)
@@ -465,23 +474,33 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
 
         .generateExplanation = function(params) {
+            # Only the VALUE list is built here; the words around it ("Expected category
+            # proportions of ...") are one translatable sentence further down. The old form
+            # pasted the English noun phrase in front of the list, and "and" is a word too, so
+            # the joiner is its own msgid, matching R/kappaSizeFixedN.b.R:.formatProps. (The old
+            # form also emitted a stray space before the final comma: "0.2, 0.3 , and 0.5".)
             props_text <- if (params$outcome == 2) {
-                paste("proportions of", paste(params$props, collapse = " and "))
+                .fmt(.("{a} and {b}"), a = private$.fmtProp(params$props[1]),
+                     b = private$.fmtProp(params$props[2]))
             } else {
-                prop_list <- paste(params$props[-length(params$props)], collapse = ", ")
-                paste("proportions of", prop_list, ", and", params$props[length(params$props)])
+                k <- length(params$props)
+                .fmt(.("{head} and {last}"),
+                     head = paste(private$.fmtProp(params$props[-k]), collapse = ", "),
+                     last = private$.fmtProp(params$props[k]))
             }
 
             is_one_sided <- (params$citype == "one_sided")
 
+            # Escapes inside a .() msgid are written \u03ba-style (four hex digits, no
+            # braces): R resolves both forms at parse time, but the catalog stores the msgid
+            # verbatim, so a brace form could never be looked up and would stay untranslated.
             if (is_one_sided) {
-                ci_text <- paste0("\u{2022} Lower confidence limit (\u{03BA}L): ", params$kappaL)
-                ci_type_text <- "One-sided (lower bound only)"
-                objective_text <- paste0(
-                    "Determine the required sample size to estimate \u03ba\u2080 = ", params$kappa0,
-                    " ensuring the lower confidence limit is at least ", params$kappaL,
-                    " in an interobserver agreement study."
-                )
+                ci_text <- .fmt(.("\u2022 Lower confidence limit (\u03baL): {kappaL}"),
+                                kappaL = params$kappaL)
+                ci_type_text <- .("One-sided (lower bound only)")
+                objective_text <- .fmt(
+                    .("Determine the required sample size to estimate \u03ba\u2080 = {kappa0} ensuring the lower confidence limit is at least {kappaL} in an interobserver agreement study."),
+                    kappa0 = params$kappa0, kappaL = params$kappaL)
             } else {
                 # Name the limit that GOVERNS n, not the one geometrically nearer kappa0.
                 # kappaSize stops when the chi-square clears the critical value at BOTH limits,
@@ -490,48 +509,51 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 # geometrically-nearer limit has no influence on n whatsoever.
                 binding <- private$.bindingLimit(params)
                 near_txt <- if (!is.null(binding))
-                    paste0(
-                        "\u{2022} The limit that drives the sample size is ", binding$rho,
-                        ", which is ", round(binding$distance, 3), " from \u03ba\u2080",
-                        " (it is this distance, not the full interval width, that sets n)")
+                    .fmt(
+                        .("\u2022 The limit that drives the sample size is {rho}, which is {dist} from \u03ba\u2080 (it is this distance, not the full interval width, that sets n)"),
+                        rho = binding$rho, dist = round(binding$distance, 3))
                 else
-                    paste0(
-                        "\u{2022} Distance from \u03ba\u2080 to the nearer limit: ",
-                        round(min(params$kappa0 - params$kappaL,
-                                  params$kappaU - params$kappa0), 3),
-                        " (this is what drives the sample size, not the full width)")
+                    .fmt(
+                        .("\u2022 Distance from \u03ba\u2080 to the nearer limit: {dist} (this is what drives the sample size, not the full width)"),
+                        dist = round(min(params$kappa0 - params$kappaL,
+                                         params$kappaU - params$kappa0), 3))
+                # The bracketed interval is passed in as a value: a literal " [" inside a .()
+                # msgid is read as a trailing msgctxt marker by jmvcore's translator, which
+                # strips it and everything after it from the displayed text.
+                limits_txt <- paste0("[", params$kappaL, ", ", params$kappaU, "]")
                 ci_text <- paste0(
-                    "\u{2022} Confidence interval: [", params$kappaL, ", ", params$kappaU, "]\n",
-                    near_txt
+                    .fmt(.("\u2022 Confidence interval: {limits}"), limits = limits_txt),
+                    "\n", near_txt
                 )
-                ci_type_text <- "Two-sided"
-                objective_text <- paste0(
-                    "Determine the required sample size to estimate \u03ba\u2080 = ", params$kappa0,
-                    " with confidence limits [", params$kappaL, ", ", params$kappaU,
-                    "] in an interobserver agreement study."
-                )
+                ci_type_text <- .("Two-sided")
+                objective_text <- .fmt(
+                    .("Determine the required sample size to estimate \u03ba\u2080 = {kappa0} with confidence limits {limits} in an interobserver agreement study."),
+                    kappa0 = params$kappa0, limits = limits_txt)
             }
 
             explanation <- paste0(
-                "Sample Size Calculation for Interobserver Agreement Study\n\n",
-                "This is a CONFIDENCE-INTERVAL calculation: it returns the number of subjects\n",
-                "needed for the interval around kappa to reach the requested width. It answers a\n",
-                "different question from the power approach (kappaSizePower), which sizes a study\n",
-                "to reject a null value, so the two will not agree on a sample size for the same\n",
-                "study - choose the one that matches how the result will be reported.\n\n",
-                "Study Design:\n",
-                "\u{2022} Number of outcome categories: ", params$outcome, "\n",
-                "\u{2022} Number of raters: ", params$raters, "\n",
-                "\u{2022} Confidence level: ",
-                base::format(100 * (1 - params$alpha), scientific = FALSE, trim = TRUE),
-                "% (\u03b1 = ", params$alpha, ")\n",
-                "\u{2022} CI type: ", ci_type_text, "\n\n",
-                "Kappa Parameters:\n",
-                "\u{2022} Anticipated kappa (\u03ba\u2080): ", params$kappa0, "\n",
+                .("Sample Size Calculation for Interobserver Agreement Study"), "\n\n",
+                # One paragraph, one msgid. The hard line breaks stay inside it because this
+                # pane is preformatted and does not wrap; splitting it at them would hand a
+                # translator five sentence fragments instead of a paragraph.
+                .("This is a CONFIDENCE-INTERVAL calculation: it returns the number of subjects\nneeded for the interval around kappa to reach the requested width. It answers a\ndifferent question from the power approach (kappaSizePower), which sizes a study\nto reject a null value, so the two will not agree on a sample size for the same\nstudy - choose the one that matches how the result will be reported."),
+                "\n\n",
+                .("Study Design:"), "\n",
+                .fmt(.("\u2022 Number of outcome categories: {k}"), k = params$outcome), "\n",
+                .fmt(.("\u2022 Number of raters: {raters}"), raters = params$raters), "\n",
+                .fmt(.("\u2022 Confidence level: {pct}% (\u03b1 = {alpha})"),
+                     pct = base::format(100 * (1 - params$alpha), scientific = FALSE,
+                                        trim = TRUE),
+                     alpha = params$alpha), "\n",
+                .fmt(.("\u2022 CI type: {type}"), type = ci_type_text), "\n\n",
+                .("Kappa Parameters:"), "\n",
+                .fmt(.("\u2022 Anticipated kappa (\u03ba\u2080): {kappa0}"),
+                     kappa0 = params$kappa0), "\n",
                 ci_text, "\n\n",
-                "Population Characteristics:\n",
-                "\u{2022} Expected category ", props_text, "\n\n",
-                "Objective:\n",
+                .("Population Characteristics:"), "\n",
+                .fmt(.("\u2022 Expected category proportions of {props}"), props = props_text),
+                "\n\n",
+                .("Objective:"), "\n",
                 objective_text
             )
 
@@ -540,12 +562,12 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         .formatSampleSizeOutput = function(result) {
             if (is.null(result) || length(result) == 0) {
-                return("Sample size calculation failed")
+                return(.("Sample size calculation failed"))
             }
 
             required_n <- private$.extractRequiredN(result)
             if (is.na(required_n)) {
-                return("Required sample size: unavailable")
+                return(.("Required sample size: unavailable"))
             }
 
             is_one_sided <- (self$options$citype == "one_sided")
@@ -571,7 +593,8 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 )
             }
 
-            return(paste0("Required sample size: ", private$.fmtN(required_n), "\n", sentence))
+            return(paste0(.fmt(.("Required sample size: {n}"), n = private$.fmtN(required_n)),
+                          "\n", sentence))
         },
 
         .extractRequiredN = function(result) {
@@ -615,12 +638,13 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         .buildExampleSentence = function(required_n, kappa0, kappaL, kappaU, one_sided = FALSE,
                                          raters = NA) {
             if (is.na(required_n)) {
-                return("The required sample size could not be determined from the provided inputs.")
+                return(.("The required sample size could not be determined from the provided inputs."))
             }
             n_txt <- private$.fmtN(required_n)
 
             if (is.na(kappa0) || is.na(kappaL)) {
-                return(paste0("At least ", n_txt, " subjects are needed for the requested confidence interval precision."))
+                return(.fmt(.("At least {n} subjects are needed for the requested confidence interval precision."),
+                            n = n_txt))
             }
 
             # "ensure" was an overclaim: the calculation carries no assurance probability. The
@@ -629,27 +653,38 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # default design (n = 118, kappa0 = 0.60, target [0.40, 0.80]) gives realised limits
             # of [0.400, 0.749] at khat = 0.60 but [0.348, 0.708] at khat = 0.55 -- only 0.54 SD
             # below kappa0, and already short of the promised 0.40 floor.
-            raters_txt <- if (is.null(raters) || is.na(raters)) ""
-                          else paste0(" rated by ", raters, " raters")
+            # Four COMPLETE sentences instead of one sentence with " rated by N raters"
+            # spliced into the middle of it: a spliced English clause cannot be reordered or
+            # inflected by a catalog, and the bracketed interval is passed in as a value
+            # because a literal " [" inside a msgid is taken for a trailing msgctxt marker.
+            has_raters <- !(is.null(raters) || is.na(raters))
 
             if (one_sided || is.na(kappaU)) {
-                return(paste0(
-                    "At least ", n_txt, " subjects", raters_txt, " are needed for the lower ",
-                    "confidence limit for \u03ba\u2080 = ", kappa0, " to reach ", kappaL,
-                    ", if the observed kappa comes in at ", kappa0, "."
-                ))
+                if (has_raters)
+                    return(.fmt(
+                        .("At least {n} subjects rated by {raters} raters are needed for the lower confidence limit for \u03ba\u2080 = {kappa0} to reach {kappaL}, if the observed kappa comes in at {kappa0}."),
+                        n = n_txt, raters = raters, kappa0 = kappa0, kappaL = kappaL))
+                return(.fmt(
+                    .("At least {n} subjects are needed for the lower confidence limit for \u03ba\u2080 = {kappa0} to reach {kappaL}, if the observed kappa comes in at {kappa0}."),
+                    n = n_txt, kappa0 = kappa0, kappaL = kappaL))
             }
 
-            return(paste0(
-                "At least ", n_txt, " subjects", raters_txt, " are needed for the confidence ",
-                "limits to fall within [", kappaL, ", ", kappaU, "], if the observed kappa comes ",
-                "in at ", kappa0, "."
-            ))
+            limits_txt <- paste0("[", kappaL, ", ", kappaU, "]")
+            if (has_raters)
+                return(.fmt(
+                    .("At least {n} subjects rated by {raters} raters are needed for the confidence limits to fall within {limits}, if the observed kappa comes in at {kappa0}."),
+                    n = n_txt, raters = raters, limits = limits_txt, kappa0 = kappa0))
+            return(.fmt(
+                .("At least {n} subjects are needed for the confidence limits to fall within {limits}, if the observed kappa comes in at {kappa0}."),
+                n = n_txt, limits = limits_txt, kappa0 = kappa0))
         },
 
         # Build methodology (INFO) and large-sample (WARNING) notices as HTML.
-        # Rendered via a dedicated Html output rather than jmvcore::Notice objects
-        # to avoid the notice serialization / no-newline limitations in jamovi.
+        # Rendered via a dedicated Html output rather than jmvcore::Notice objects because
+        # Notice content renders as escaped plain text and accepts no newlines, and these
+        # panels are multi-line. NOTE (corrected 2026-09-23): Notice serializes fine -- the
+        # "attempt to apply non-function" crash once blamed on it was Group$insert() having no
+        # bounds check. Use $add(), never insert(999, ...).
         .buildNotices = function(required_n, sparse_cells = FALSE,
                                  sparse_min = NA_real_, sparse_below5 = NA_integer_,
                                  sparse_total = NA_integer_,
@@ -660,19 +695,22 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # 100(1 - alpha)%: two-sided uses qchisq(1 - alpha, 1) = z(1 - alpha/2)^2 and
             # one-sided uses qchisq(1 - 2 alpha, 1) = z(1 - alpha)^2.
             conf_pct <- if (isTRUE(is.finite(alpha)))
-                base::format(100 * (1 - alpha), scientific = FALSE, trim = TRUE) else "100(1 - alpha)"
-            ci_side_text <- if (isTRUE(one_sided)) "one-sided lower bound" else "two-sided"
+                base::format(100 * (1 - alpha), scientific = FALSE, trim = TRUE)
+            else
+                .("100(1 - alpha)")
+            ci_side_text <- if (isTRUE(one_sided)) .("one-sided lower bound") else .("two-sided")
 
+            # HTML tags stay OUTSIDE the msgids: a translator should never have to carry markup,
+            # and "Donner and Eliasziw" is spelled out rather than "&amp;" so the msgid has no
+            # entity in it (the sibling kappaSizeFixedN words it the same way).
             info <- paste0(
                 "<div style='margin:6px 0; padding:8px 10px; border-left:3px solid #3c8dbc; background-color: rgba(72, 138, 188, 0.06); color: inherit;'>",
-                "<b>Methodology.</b> The required sample size is computed with the confidence-interval ",
-                "width approach of the kappaSize package (Donner &amp; Eliasziw; Rotondi &amp; Donner). ",
-                "It returns the minimum number of subjects so that the ", conf_pct, "% confidence ",
-                "interval (", ci_side_text, ") for the intraclass (Fleiss-type) \u{03BA} of the ",
-                "common-correlation model attains the requested precision, given the expected ",
-                "category proportions and the number of raters. For two raters with equal marginal ",
-                "frequencies this coincides with Cohen's \u{03BA}; with more raters, or unequal ",
-                "marginals, it does not. ",
+                "<b>", .("Methodology."), "</b> ",
+                .("The required sample size is computed with the confidence-interval width approach of the kappaSize package (Donner and Eliasziw; Rotondi and Donner)."), " ",
+                .fmt(
+                    .("It returns the minimum number of subjects so that the {pct}% confidence interval ({side}) for the intraclass (Fleiss-type) \u03ba of the common-correlation model attains the requested precision, given the expected category proportions and the number of raters."),
+                    pct = conf_pct, side = ci_side_text), " ",
+                .("For two raters with equal marginal frequencies this coincides with Cohen's \u03ba; with more raters, or unequal marginals, it does not."), " ",
                 # The engine's own Summary pane says n subjects "ensure" the limits are met.
                 # There is no assurance probability anywhere in this design: the limits are the
                 # ones obtained IF the observed kappa lands exactly on kappa0, and P(khat < kappa0)
@@ -681,20 +719,16 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 # khat = 0.60 but [0.348, 0.708] at khat = 0.55 -- only 0.54 SD below kappa0 and
                 # already short of the 0.40 floor. The module's own text1 is worded
                 # conditionally; this sentence covers the vendor pane, which cannot be.
-                "<b>This is a planning expectation, not a guarantee.</b> The sample size delivers ",
-                "the stated limits only if the study observes the anticipated kappa. Roughly half ",
-                "of such studies observe less and finish with a lower limit short of the target, ",
-                "so plan on a conservative anticipated kappa or enrol above the figure shown. ",
-                "(The Summary panel below reproduces the kappaSize package's own wording, which ",
-                "says the sample size will \u{201C}ensure\u{201D} the limits \u{2014} read it with ",
-                "this caveat in mind.)",
+                "<b>", .("This is a planning expectation, not a guarantee."), "</b> ",
+                .("The sample size delivers the stated limits only if the study observes the anticipated kappa. Roughly half of such studies observe less and finish with a lower limit short of the target, so plan on a conservative anticipated kappa or enrol above the figure shown."), " ",
+                .("(The Summary panel below reproduces the kappaSize package's own wording, which says the sample size will \u201censure\u201d the limits \u2014 read it with this caveat in mind.)"),
                 "</div>"
             )
 
             warn <- ""
 
             # Sparse goodness-of-fit cells, judged by Cochran's rule on the cells the engine
-            # actually divides by (see .gofCells / .sparseVerdict): no expected count below 1
+            # actually divides by (see kappaSizeGofCells / .sparseVerdict): no expected count below 1
             # and at most one cell in five below 5. This replaces a grep for kappaSize's own
             # "expected cell count is less than five" line, which tests the outcome MARGINALS
             # and for a binary outcome only props[1]. That rule missed 7 of 10 realistic
@@ -703,20 +737,22 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # "6 of 7" is the count the ABANDONED element-wise-minimum rule produced; the
             # per-limit rule now in use reports 5 of 7, which is what the notice prints.)
             if (isTRUE(sparse_cells)) {
+                # A binary outcome has nothing to collapse -- offering it as a remedy sends
+                # the reader looking for an option that cannot exist. Two complete sentences,
+                # not one sentence with a clause spliced in: English word order is not a
+                # property a catalog can preserve across languages.
+                remedy <- if (isTRUE(outcome > 2))
+                    .("Consider collapsing rare categories, using fewer raters, or recruiting more subjects than the figure shown.")
+                else
+                    .("Consider using fewer raters, or recruiting more subjects than the figure shown.")
                 warn <- paste0(warn,
                     "<div style='margin:6px 0; padding:8px 10px; border-left:3px solid #ec971f; background-color: rgba(227, 144, 33, 0.07); color: inherit;'>",
-                    "<b>Sparse categories.</b> At the computed sample size the agreement-pattern ",
-                    "cells (for example, exactly k of the raters calling the finding present, or all ",
-                    "raters agreeing on one category) are too sparse at the confidence limit where ",
-                    "they are thinnest: the smallest expected count is ",
-                    private$.fmtCount(sparse_min), " and ",
-                    sparse_below5, " of ", sparse_total, " cells are below 5. The calculation rests ",
-                    "on a large-sample chi-square approximation, so the required n is less ",
-                    "dependable here. Consider ",
-                    # A binary outcome has nothing to collapse -- offering it as a remedy sends
-                    # the reader looking for an option that cannot exist.
-                    if (isTRUE(outcome > 2)) "collapsing rare categories, " else "",
-                    "using fewer raters, or recruiting more subjects than the figure shown.",
+                    "<b>", .("Sparse categories."), "</b> ",
+                    .fmt(
+                        .("At the computed sample size the agreement-pattern cells (for example, exactly k of the raters calling the finding present, or all raters agreeing on one category) are too sparse at the confidence limit where they are thinnest: the smallest expected count is {min} and {below} of {total} cells are below 5. The calculation rests on a large-sample chi-square approximation, so the required n is less dependable here."),
+                        min = private$.fmtCount(sparse_min),
+                        below = sparse_below5, total = sparse_total), " ",
+                    remedy,
                     "</div>"
                 )
             }
@@ -724,22 +760,22 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # NB: paste0(warn, ...), not paste0(...). Writing over `warn` here silently deleted
             # the sparse-cell block whenever both conditions held.
             if (!is.na(required_n) && required_n > 1000) {
+                # Adding raters lowers n, but it is also what makes the agreement-pattern
+                # cells sparse. Recommending it directly under a Sparse-categories box that
+                # has just said "use fewer raters" left the two panels contradicting each
+                # other with no way to tell which applied. Two complete sentences rather than
+                # one with a trailing clause glued on, so each is translatable on its own.
+                advice <- if (isTRUE(sparse_cells))
+                    .("Consider a wider confidence interval (lower precision) or revisiting the expected category proportions. More raters would lower this figure, but that is what makes the cells sparse above \u2014 the two cannot both be improved by the rater count, so change the interval or the proportions instead.")
+                else
+                    .("Consider a wider confidence interval (lower precision), revisiting the expected category proportions, or increasing the number of raters.")
                 warn <- paste0(warn,
                     "<div style='margin:6px 0; padding:8px 10px; border-left:3px solid #d9534f; background-color: rgba(222, 55, 55, 0.06); color: inherit;'>",
-                    "<b>Warning.</b> The computed sample size (", private$.fmtN(required_n), ") is very large and may be ",
-                    "impractical for a typical interobserver-agreement study. Consider a wider confidence ",
-                    "interval (lower precision) or revisiting the expected category proportions",
-                    # Adding raters lowers n, but it is also what makes the agreement-pattern
-                    # cells sparse. Recommending it directly under a Sparse-categories box that
-                    # has just said "use fewer raters" left the two panels contradicting each
-                    # other with no way to tell which applied.
-                    if (isTRUE(sparse_cells))
-                        paste0(". More raters would lower this figure, but that is what makes ",
-                               "the cells sparse above \u{2014} the two cannot both be improved ",
-                               "by the rater count, so change the interval or the proportions ",
-                               "instead.")
-                    else
-                        ", or increasing the number of raters.",
+                    "<b>", .("Warning."), "</b> ",
+                    .fmt(
+                        .("The computed sample size ({n}) is very large and may be impractical for a typical interobserver-agreement study."),
+                        n = private$.fmtN(required_n)), " ",
+                    advice,
                     "</div>"
                 )
             }
@@ -751,7 +787,8 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Input validation
             validation_errors <- private$.validateInputs()
             if (!is.null(validation_errors)) {
-                error_msg <- paste("Input validation failed:", paste(validation_errors, collapse = "; "))
+                error_msg <- .fmt(.("Input validation failed: {errors}"),
+                                  errors = paste(validation_errors, collapse = "; "))
                 jmvcore::reject(error_msg, code='validation_failed')
             }
 
@@ -779,10 +816,30 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 summary_lines <- summary_lines[
                     !(duplicated(summary_lines) &
                       grepl("expected cell count", summary_lines, fixed = TRUE))]
-                if (isTRUE(params$citype == "one_sided"))
-                    summary_lines <- sub("^KappaU:\\s*NA\\s*$",
-                                         "KappaU: not applicable (one-sided interval)",
-                                         summary_lines)
+                # Assigned by index, not through sub(): sub() parses its REPLACEMENT for
+                # backslash escapes (\1 is a backreference), and the replacement here is a
+                # translated string, so a catalog entry containing a backslash would error or
+                # silently mangle the line. The PATTERN stays the untranslated engine output.
+                if (isTRUE(params$citype == "one_sided")) {
+                    ku <- grepl("^KappaU:\\s*NA\\s*$", summary_lines)
+                    if (any(ku))
+                        summary_lines[ku] <- .("KappaU: not applicable (one-sided interval)")
+                }
+
+                # kappaSize's binary engine keeps only props[1] and summary() prints THAT as
+                # "Event Proportion:". .calculateSampleSize() hands it the SORTED pair (the
+                # order decides whether the vendor polynomials converge), so a user who typed
+                # a prevalence above 0.5 read the complement of their own design assumption
+                # here while the Study Explanation pane showed it correctly -- two panels of
+                # one analysis stating opposite prevalences. n is identical either way
+                # (agreement is symmetric under relabelling the two categories), so only the
+                # printed line is wrong. Restore the entered value.
+                if (params$outcome == 2) {
+                    ep <- grepl("^Event Proportion:", summary_lines)
+                    if (any(ep))
+                        summary_lines[ep] <- .fmt(.("Event Proportion: {p}"),
+                                                  p = private$.fmtProp(params$props[1]))
+                }
                 summary_text <- paste(summary_lines, collapse = "\n")
 
                 # Generate explanation
@@ -790,7 +847,7 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                 # Methodology / large-sample notices. Sparseness is judged on the
                 # agreement-pattern cells at the requested confidence limits (Cochran's rule),
-                # not on kappaSize's own marginal check -- see .gofCells. The engine's own
+                # not on kappaSize's own marginal check -- see kappaSizeGofCells. The engine's own
                 # marginal line is left untouched in the Summary pane.
                 required_n <- private$.extractRequiredN(raw_result)
                 verdict <- private$.sparseVerdict(params, required_n)
@@ -822,8 +879,8 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 self$results$text2$setContent("")
                 self$results$notices$setContent("")
                 jmvcore::reject(
-                    paste0("The sample size was computed but could not be formatted for display: ",
-                           conditionMessage(e)),
+                    .fmt(.("The sample size was computed but could not be formatted for display: {error}"),
+                         error = conditionMessage(e)),
                     code = NULL)
             })
         }

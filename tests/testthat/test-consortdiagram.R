@@ -1,6 +1,8 @@
+# Do not source() R/*.h.R / R/*.b.R here: a source() preamble detaches the package namespace,
+# jmvcore's .() helper leaves scope and any .() string dies with `could not find function "."`
+# (project reference test-source-preamble-breaks-dot-translate). The package provides these.
+
 # Tests for consortdiagram function
-source("../../R/consortdiagram.h.R")
-source("../../R/consortdiagram.b.R")
 
 test_that("consortdiagram works with basic single-arm inputs", {
   skip_if_not_installed('jmvReadWrite')

@@ -53,6 +53,9 @@ items:
       title: Bivariate Meta-Analysis Results
       type: Table
       visible: (bivariate_analysis)
+      refs:
+        - Reitsma2005
+        - mada
       clearWith:
           - study
           - true_positives
@@ -88,6 +91,9 @@ items:
       title: Proportional-Hazards SROC Model Results
       type: Table
       visible: (hsroc_analysis)
+      refs:
+        - HollingBoehningBoehning2012
+        - mada
       clearWith:
           - study
           - true_positives
@@ -147,11 +153,11 @@ items:
           type: number
           format: zto,pvalue
         - name: i_squared
-          title: I² (%)
+          title: "I\u00B2 (%)"
           type: number
           format: zto
         - name: tau_squared
-          title: τ²
+          title: "\u03C4\u00B2"
           type: number
           format: zto
 
@@ -207,6 +213,8 @@ items:
       title: Publication Bias Assessment
       type: Table
       visible: (publication_bias)
+      refs:
+        - DeeksMacaskillIrwig2005
       clearWith:
           - study
           - true_positives
@@ -345,6 +353,52 @@ items:
       type: Html
       visible: (show_interpretation)
 
+    # library-audit 2026-09-22 OncoPath [MEDIUM] DONE: reference tables belong in Table results, not hand-built HTML (guide section 26)
+    - name: likelihoodRatioGuide
+      title: Likelihood Ratios for Clinical Decision-Making
+      type: Table
+      visible: (show_interpretation)
+      rows: 6
+      columns:
+        - name: lr_type
+          title: Likelihood Ratio
+          type: text
+        - name: range
+          title: Value Range
+          type: text
+        - name: interpretation
+          title: Clinical Interpretation
+          type: text
+
+    # library-audit 2026-09-22 OncoPath [MEDIUM] DONE: computed clinical tables belong in Table results, derived from pooled estimates (guide section 26)
+    - name: predictiveValues
+      title: Predictive Values by Prevalence
+      type: Table
+      visible: (show_interpretation)
+      rows: 0
+      columns:
+        - name: prevalence
+          title: Prevalence
+          type: number
+          format: pc
+        - name: ppv
+          title: PPV
+          type: number
+          format: pc
+        - name: npv
+          title: NPV
+          type: number
+          format: pc
+      clearWith:
+        - study
+        - true_positives
+        - false_positives
+        - false_negatives
+        - true_negatives
+        - method
+        - zero_cell_correction
+        - confidence_level
+
     # The three explanation panels are static interpretation guides populated
     # once in .init(); they carry no clearWith so a data change can never leave
     # a visible-but-empty titled panel.
@@ -367,6 +421,7 @@ refs:
     - ClinicoPathJamoviModule
     - mada
     - metafor
+    - Reitsma2005
     - CochraneDTAHandbook2023
     - DeeksMacaskillIrwig2005
     - ZwindermanBossuyt2008

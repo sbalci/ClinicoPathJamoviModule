@@ -57,15 +57,24 @@ children:
                 name: thresholdStep
                 format: number
                 label: Step Size
+      # decisionRuleVar is a target VariablesListBox, and a target box takes its source
+      # list from the nearest ancestor VariableSupplier. It used to sit under a plain
+      # Label/LayoutBox with no supplier anywhere above it, so nothing could be dragged
+      # into it and the whole clinical-rule backend was unreachable from jamovi. Wrapped
+      # in its own VariableSupplier/TargetLayoutBox, as the Outcome/Models block above.
       - type: LayoutBox
         margin: large
         children:
-          - type: Label
-            label: Clinical Decision Rule
+          - type: CheckBox
+            name: clinicalDecisionRule
+            label: Clinical decision rule
+      - type: VariableSupplier
+        persistentItems: false
+        stretchFactor: 1
+        children:
+          - type: TargetLayoutBox
+            label: Clinical Decision Rule (binary)
             children:
-              - type: CheckBox
-                name: clinicalDecisionRule
-                label: Clinical decision rule
               - type: VariablesListBox
                 name: decisionRuleVar
                 isTarget: true
@@ -75,11 +84,14 @@ children:
                 name: decisionRulePositive
                 label: Positive rule level
                 enable: (clinicalDecisionRule && decisionRuleVar)
-              - type: TextBox
-                name: decisionRuleLabel
-                format: string
-                label: Decision rule label
-                enable: (clinicalDecisionRule)
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: decisionRuleLabel
+            format: string
+            label: Decision rule label
+            enable: (clinicalDecisionRule)
   - type: CollapseBox
     label: Tables & Outputs
     margin: normal
@@ -146,8 +158,12 @@ children:
           - type: CheckBox
             name: showStandardizedNetBenefit
             label: Standardized net benefit plot
+  # Renamed from "Cost-Benefit Analysis": the option, the table, the table note and the
+  # .a.yaml description were all deliberately renamed to "Exploratory Monetary Payoff"
+  # and explicitly disclaim being an ICER / cost-effectiveness analysis. The heading is
+  # the largest text the user reads, so it must not promise health economics.
   - type: CollapseBox
-    label: Cost-Benefit Analysis
+    label: Exploratory Monetary Payoff
     margin: normal
     collapsed: true
     children:
@@ -191,10 +207,6 @@ children:
           - type: CheckBox
             name: multiModelComparison
             label: Enhanced pairwise comparison
-          - type: ComboBox
-            name: comparisonMethod
-            label: Test method (bootstrap only)
-            enable: (compareModels || multiModelComparison)
           - type: CheckBox
             name: weightedAUC
             label: Average net benefit table

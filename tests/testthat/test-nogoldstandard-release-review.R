@@ -408,6 +408,11 @@ test_that("removing configured tests restores instructions and hides stale summa
     expect_false(analysis$results$instructions$visible)
     expect_true(analysis$results$clinical_summary$visible)
 
+    # A complete selection must leave real content behind, not just visible headings.
+    expect_gt(analysis$results$agreement_stats$rowCount, 0)
+    expect_gt(analysis$results$crosstab$rowCount, 0)
+    expect_true(nzchar(analysis$results$clinical_summary$content))
+
     for (name in c("test2", "test2Positive", "test3", "test3Positive")) {
         option <- options$option(name)
         option$value <- NULL
@@ -415,8 +420,14 @@ test_that("removing configured tests restores instructions and hides stale summa
     analysis$run()
 
     expect_true(analysis$results$instructions$visible)
-    expect_false(analysis$results$clinical_summary$visible)
+    # clinical_summary's visibility is owned by the .r.yaml `visible: (showSummary)`
+    # binding, which is still TRUE here -- emptying the content is what removes the stale
+    # summary, so that is what is asserted.
     expect_identical(analysis$results$clinical_summary$content, "")
+    # .run() empties .noticeList and renders on exit, so the previous run's "Important
+    # Information" text cannot survive an early return. This guards the R results object;
+    # in the jamovi client the item's own clearWith would also clear it.
+    expect_identical(analysis$results$notices$content, "")
 })
 
 

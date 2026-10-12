@@ -1,8 +1,8 @@
-
-
-# Source the function files
-source("../../R/ihccluster.h.R")
-source("../../R/ihccluster.b.R")
+# Do not source() R/*.h.R / R/*.b.R here: a source() preamble detaches the package namespace,
+# jmvcore's .() helper leaves scope and any .() string dies with `could not find function "."`
+# (project reference test-source-preamble-breaks-dot-translate). The package provides these.
+ihcclusterOptions <- getFromNamespace("ihcclusterOptions", "ClinicoPath")
+ihcclusterClass   <- getFromNamespace("ihcclusterClass",   "ClinicoPath")
 
 test_that("ihccluster works with basic PAM clustering", {
   skip_if_not_installed('jmvReadWrite')

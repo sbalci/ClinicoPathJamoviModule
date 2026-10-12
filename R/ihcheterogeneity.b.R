@@ -38,8 +38,8 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
         .ss_done = FALSE,
         .noticeList = list(),
 
-        # library-audit 2026-09-16 OncoPath [INFO] REJECTED: no native notice element - type: Notice fails the
-        #   .r.yaml schema, type: Notification builds no results object (guide section 13)
+        # library-audit 2026-09-22 OncoPath [LOW] REJECTED: Notice renders single-line plain text and dynamic
+        #   insert() in .run() accumulates across runs (Group$remove cannot drop items) (guide section 13)
         .addNotice = function(type, title, content) {
             private$.noticeList[[length(private$.noticeList) + 1]] <- list(
                 type = type, title = title, content = content)
@@ -50,6 +50,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
         .renderNotices = function() {
             if (length(private$.noticeList) == 0) {
                 self$results$notices$setContent("")
+                self$results$notices$setVisible(FALSE)
                 return()
             }
             # library-audit 2026-09-16 OncoPath [INFO] DONE: titles inherit the pane colour - fixed hues fell to
@@ -72,6 +73,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                     "<span style='color: inherit;'>", htmltools::htmlEscape(notice$content), "</span></div>")
             }
             self$results$notices$setContent(paste0(html, "</div>"))
+            self$results$notices$setVisible(TRUE)
         },
 
         # Sampling-strategy note, merged into the final interpretation (Html
@@ -569,6 +571,8 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             # Until a regional measurement is selected only the welcome panel
             # shows (empty tables and plot frames used to sit beneath it).
             analysis_type <- self$options$analysis_type
+            self$results$notices$setVisible(FALSE)
+            self$results$interpretation$setVisible(has_regional)
             self$results$reproducibilitytable$setVisible(has_regional)
             self$results$samplingbiastable$setVisible(has_regional)
             show_plots <- has_regional && (self$options$show_variability_plots ||
@@ -623,6 +627,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             private$.ss_done <- FALSE
 
             if (!has_regional_measurement) {
+                self$results$interpretation$setVisible(FALSE)
                 return()
             }
 
@@ -2319,6 +2324,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             }
 
             self$results$interpretation$setContent(interpretation)
+            self$results$interpretation$setVisible(TRUE)
             self$results$report_sentences$setContent(report_sentences)
             self$results$assumptions$setContent(
                 if (isTRUE(self$options$showAssumptions)) private$.generateAssumptionsContent(metrics) else "")

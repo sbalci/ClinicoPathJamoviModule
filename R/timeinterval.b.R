@@ -737,11 +737,11 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
             
             if (quality_metrics$negative_intervals > 0) {
-                warnings <- c(warnings, jmvcore::format(.("{n} negative time intervals detected (end date before start date)"), n = quality_metrics$negative_intervals))
+                warnings <- c(warnings, .fmt(.("{n} negative time intervals detected (end date before start date)"), n = quality_metrics$negative_intervals))
             }
             
             if (quality_metrics$missing_values > 0) {
-                warnings <- c(warnings, jmvcore::format(.("{n} missing time intervals due to missing dates"), n = quality_metrics$missing_values))
+                warnings <- c(warnings, .fmt(.("{n} missing time intervals due to missing dates"), n = quality_metrics$missing_values))
             }
             
             if (quality_metrics$future_dates > 0) {
@@ -1316,8 +1316,8 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 lm_unit_1 <- sub("s$", "", lm_unit)                                          # "months" -> "month"
                 lm_amount <- paste(lm_val, if (isTRUE(lm_val == 1)) lm_unit_1 else lm_unit)  # "6 months"
                 lm_adj    <- paste0(lm_val, "-", lm_unit_1)                                  # "6-month"
-                lm_hdr_suffix <- paste0(", ", jmvcore::format(.("measured from the {adj} landmark"), adj = lm_adj))
-                lm_pt_label   <- jmvcore::format(.("Total post-landmark person-time (from {amount} onward)"), amount = lm_amount)
+                lm_hdr_suffix <- paste0(", ", .fmt(.("measured from the {adj} landmark"), adj = lm_adj))
+                lm_pt_label   <- .fmt(.("Total post-landmark person-time (from {amount} onward)"), amount = lm_amount)
                 lm_mean_label <- .("Mean post-landmark time")
                 lm_fu_phrase  <- .("mean post-landmark follow-up")
                 lm_pt_phrase  <- .("The total post-landmark person-time")

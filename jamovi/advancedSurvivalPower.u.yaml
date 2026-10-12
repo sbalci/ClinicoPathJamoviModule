@@ -23,13 +23,13 @@ children:
             format: number
             label: 'Hazard Ratio:'
             suffix: ""
-            enable: (calc_type != "hazard_ratio")
+            enable: (!calc_type:hazard_ratio)
           - type: TextBox
             name: power
             format: number
             label: 'Power (1-β):'
             suffix: ""
-            enable: (calc_type != "power")
+            enable: (!calc_type:power)
           - type: TextBox
             name: alpha
             format: number
@@ -40,7 +40,7 @@ children:
             format: number
             label: 'Total Sample Size:'
             suffix: ""
-            enable: (calc_type != "sample_size")
+            enable: (!calc_type:sample_size)
           - type: TextBox
             name: allocation_ratio
             format: number

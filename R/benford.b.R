@@ -156,7 +156,7 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             var_data[!is.finite(var_data)] <- NA
             if (n_nonfinite > 0)
                 private$.addNotice("WARNING", .("Non-finite values excluded"),
-                    jmvcore::format(.("{n} value(s) in the selected variable are infinite or not a number (Inf, -Inf or NaN). A leading digit is undefined for these, so they were excluded from the analysis and from every count reported below. Values like these arise routinely from computed variables, for example a ratio with a zero denominator; check how the variable was derived."),
+                    .fmt(.("{n} value(s) in the selected variable are infinite or not a number (Inf, -Inf or NaN). A leading digit is undefined for these, so they were excluded from the analysis and from every count reported below. Values like these arise routinely from computed variables, for example a ratio with a zero denominator; check how the variable was derived."),
                             n = n_nonfinite))
 
             valid_count <- sum(!is.na(var_data))
@@ -169,9 +169,9 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # Markup stays outside the .() literal: the threshold is
                     # passed in already bolded, so the translator sees one
                     # plain sentence with a {n} field.
-                    "<p>", jmvcore::format(.("Benford's Law analysis requires at least {n} valid observations for meaningful results."),
+                    "<p>", .fmt(.("Benford's Law analysis requires at least {n} valid observations for meaningful results."),
                                            n = "<strong>30</strong>"), "</p>",
-                    "<p><strong>", jmvcore::format(.("Current data: {n} valid observations"),
+                    "<p><strong>", .fmt(.("Current data: {n} valid observations"),
                                                    n = valid_count), "</strong></p>",
                     "<hr style='border-color: #dc3545;'>",
                     "<p><strong>", .("Recommendations:"), "</strong></p>",
@@ -186,7 +186,7 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 self$results$dataWarning$setContent(html)
                 self$results$dataWarning$setVisible(TRUE)
                 private$.addNotice("ERROR", .("Analysis stopped: too few valid observations"),
-                    jmvcore::format(.("Only {n} valid observations are available; a leading-digit distribution needs at least 30 (and 100 or more before the tests carry useful power), so nothing below was computed. Select a variable with more recorded values, or pool comparable measurements before running this analysis."),
+                    .fmt(.("Only {n} valid observations are available; a leading-digit distribution needs at least 30 (and 100 or more before the tests carry useful power), so nothing below was computed. Select a variable with more recorded values, or pool comparable measurements before running this analysis."),
                             n = valid_count))
                 return(FALSE)
             }
@@ -203,8 +203,8 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "<p><strong>", .("Benford's Law only applies to positive numbers."), "</strong></p>",
                     "<p>", .("Your data contains:"), "</p>",
                     "<ul style='margin-left: 20px;'>",
-                    if (zero_count > 0) paste0("<li>", jmvcore::format(.("{n} zero values"), n = zero_count), "</li>") else "",
-                    if (negative_count > 0) paste0("<li>", jmvcore::format(.("{n} negative values"), n = negative_count), "</li>") else "",
+                    if (zero_count > 0) paste0("<li>", .fmt(.("{n} zero values"), n = zero_count), "</li>") else "",
+                    if (negative_count > 0) paste0("<li>", .fmt(.("{n} negative values"), n = negative_count), "</li>") else "",
                     "</ul>",
                     "<hr style='border-color: #dc3545;'>",
                     "<p><strong>", .("Solutions:"), "</strong></p>",
@@ -219,7 +219,7 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 self$results$dataWarning$setContent(html)
                 self$results$dataWarning$setVisible(TRUE)
                 private$.addNotice("ERROR", .("Analysis stopped: non-positive values present"),
-                    jmvcore::format(.("The selected variable contains {zeros} zero and {negatives} negative values. A leading digit is undefined for these, so nothing below was computed. Filter them out, analyse increases and decreases separately if the variable is a change score, or choose a naturally positive measurement."),
+                    .fmt(.("The selected variable contains {zeros} zero and {negatives} negative values. A leading digit is undefined for these, so nothing below was computed. Filter them out, analyse increases and decreases separately if the variable is a change score, or choose a naturally positive measurement."),
                             zeros = zero_count, negatives = negative_count))
                 return(FALSE)
             }
@@ -256,7 +256,7 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # "1 orders of magnitude". %.2f also matches the wording the
                     # Assessment row already uses for the same quantity.
                     "<p><strong>",
-                    jmvcore::format(.("Your data range: {min} to {max} ({decades} orders of magnitude)"),
+                    .fmt(.("Your data range: {min} to {max} ({decades} orders of magnitude)"),
                                     min = base::format(round(min_val, 2)),
                                     max = base::format(round(max_val, 2)),
                                     decades = sprintf("%.2f", magnitude_range)),
@@ -280,7 +280,7 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 self$results$dataWarning$setContent(html)
                 self$results$dataWarning$setVisible(TRUE)
                 private$.addNotice("WARNING", .("Data span less than two orders of magnitude"),
-                    jmvcore::format(.("Values run from {min} to {max}, a range of {decades} orders of magnitude. Benford's Law describes data spanning several orders of magnitude; between one and two decades the leading-digit frequencies are dominated by where the range starts and stops rather than by Benford's Law, so the tests below are not calibrated and can report a large departure for data that were recorded perfectly (on simulated conforming data spanning 1.3 decades the chi-square test rejected in 38 percent of runs at a nominal 5 percent). The statistics are shown for completeness, but the leading-digit finding is reported as {finding} for this variable rather than being interpreted."),
+                    .fmt(.("Values run from {min} to {max}, a range of {decades} orders of magnitude. Benford's Law describes data spanning several orders of magnitude; between one and two decades the leading-digit frequencies are dominated by where the range starts and stops rather than by Benford's Law, so the tests below are not calibrated and can report a large departure for data that were recorded perfectly (on simulated conforming data spanning 1.3 decades the chi-square test rejected in 38 percent of runs at a nominal 5 percent). The statistics are shown for completeness, but the leading-digit finding is reported as {finding} for this variable rather than being interpreted."),
                             min = base::format(round(min_val, 2)),
                             max = base::format(round(max_val, 2)),
                             decades = sprintf("%.2f", magnitude_range),
@@ -432,7 +432,7 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             min_expected <- if (length(expected_counts) > 0) min(expected_counts) else NA_real_
             if (is.finite(min_expected) && min_expected < 1)
                 private$.addNotice("WARNING", .("Chi-square p-value is approximate at this sample size"),
-                    jmvcore::format(.("The {digits}-digit analysis spreads {n} observations over {bins} digit bins. The smallest expected count is {minexp} and {sparse} percent of the bins have an expected count below 5, so the chi-square approximation is only approximate here and rejects more often than its nominal rate: on simulated conforming data the rejection rate in this regime ran between 6 and 14 percent against a nominal 5 percent, worst at the 3-digit setting. Read the p-value as indicative rather than exact. A 1-digit analysis uses 9 bins and puts far more observations in each."),
+                    .fmt(.("The {digits}-digit analysis spreads {n} observations over {bins} digit bins. The smallest expected count is {minexp} and {sparse} percent of the bins have an expected count below 5, so the chi-square approximation is only approximate here and rejects more often than its nominal rate: on simulated conforming data the rejection rate in this regime ran between 6 and 14 percent against a nominal 5 percent, worst at the 3-digit setting. Read the p-value as indicative rather than exact. A 1-digit analysis uses 9 bins and puts far more observations in each."),
                             digits = n_digits, n = n_used,
                             bins = length(expected_counts),
                             minexp = sprintf("%.2f", min_expected),
@@ -440,7 +440,7 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (!range_ok) {
                 finding <- .("Not assessable")
-                clinical_interpretation <- jmvcore::format(
+                clinical_interpretation <- .fmt(
                     .("The values span {decades} orders of magnitude. Benford's Law describes data spanning several orders of magnitude, so below two decades the leading-digit frequencies are determined by where the range starts and stops rather than by how the values were recorded. The measured MAD of {mad} and chi-square p of {p} are reported above, but for this variable they carry no information about recording quality and are not interpreted here."),
                     decades = sprintf("%.2f", magnitude_range),
                     mad = sprintf("%.4f", mad_value), p = private$.fmtP(chisq_pvalue))
@@ -448,9 +448,9 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             } else if (n_total < 100) {
                 private$.addNotice("WARNING", .("Sample small: only a very large departure would be detected"),
-                    jmvcore::format(.("Only {n} observations were analysed. The digit-frequency tests below are computed, but at this size they resolve only very large departures, and the MAD conformity label is biased upward by sampling noise. Neither a departure nor its absence is established at this sample size."),
+                    .fmt(.("Only {n} observations were analysed. The digit-frequency tests below are computed, but at this size they resolve only very large departures, and the MAD conformity label is biased upward by sampling noise. Neither a departure nor its absence is established at this sample size."),
                             n = n_total))
-                clinical_interpretation <- jmvcore::format(
+                clinical_interpretation <- .fmt(
                     .("Only {n} observations were analysed. At this size the digit-frequency tests detect only very large departures, so neither a departure nor its absence is established here. The statistics above are reported for completeness."),
                     n = n_total)
                 considerations <- .("A larger sample, typically several hundred observations or more, is needed before a leading-digit result carries much weight either way.")
@@ -458,7 +458,7 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             } else if (!is.na(mad_conformity) && !mad_label_reliable) {
                 private$.addNotice("INFO", .("MAD conformity label not usable at this sample size"),
-                    jmvcore::format(.("Nigrini's MAD cut-off for {digits}-digit analysis is {cutoff}, but sampling noise alone produces a MAD of about {floor} at N={n}, so the label '{label}' cannot separate a real departure from noise. It needs N above {needed}. The assessment below is taken instead from the chi-square goodness-of-fit test, together with the size of the MAD relative to that noise level."),
+                    .fmt(.("Nigrini's MAD cut-off for {digits}-digit analysis is {cutoff}, but sampling noise alone produces a MAD of about {floor} at N={n}, so the label '{label}' cannot separate a real departure from noise. It needs N above {needed}. The assessment below is taken instead from the chi-square goodness-of-fit test, together with the size of the MAD relative to that noise level."),
                             digits = n_digits,
                             cutoff = base::format(private$.madNonconformityCutoff(n_digits)),
                             floor = base::format(signif(mad_floor, 3)),
@@ -480,7 +480,7 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # what sampling explains, and that ratio is reported so the
                     # basis for the verdict is visible rather than implied.
                     mad_ratio <- mad_value / mad_floor
-                    clinical_interpretation <- jmvcore::format(
+                    clinical_interpretation <- .fmt(
                         .("Chi-square goodness-of-fit test indicates a departure from Benford's Law (p={p}). MAD = {mad}, which is {ratio} times the deviation expected from sampling noise alone at N={n} with {digits}-digit analysis ({floor}). The '{label}' label is not informative at this sample size, so this conclusion rests on the chi-square test and the size of the deviation relative to that noise level."),
                         p = private$.fmtP(chisq_pvalue),
                         mad = sprintf("%.4f", mad_value),
@@ -492,19 +492,19 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     if (mad_ratio >= 2) {
                         considerations <- .("The deviation is larger than sampling noise accounts for. Leading-digit departures arise from systematic rounding, preferred or repeated values, a subset of records entered differently, and other recording patterns; this test does not distinguish among them. The leading-digit bin listing below shows which digit combinations carry the deviation.")
                     } else {
-                        considerations <- jmvcore::format(
+                        considerations <- .fmt(
                             .("The deviation is detectable but modest relative to sampling noise. The leading-digit bin listing below shows which digit combinations carry it. Collecting at least {needed} observations would additionally make the MAD conformity classification usable."),
                             needed = ceiling(private$.minNForMadLabel(n_digits)))
                     }
                 } else {
-                    clinical_interpretation <- jmvcore::format(
+                    clinical_interpretation <- .fmt(
                         .("No evidence of departure from Benford's Law (chi-square p={p}). MAD = {mad}, which is within the range expected from sampling noise alone at N={n} with {digits}-digit analysis (about {floor}), so the '{label}' label is not informative at this sample size."),
                         p = private$.fmtP(chisq_pvalue),
                         mad = sprintf("%.4f", mad_value), n = n_total,
                         digits = n_digits, floor = sprintf("%.4f", mad_floor),
                         label = mad_conformity
                     )
-                    considerations <- jmvcore::format(
+                    considerations <- .fmt(
                         .("No departure was detected. That is not evidence the data are free of errors: this test examines only leading-digit frequencies. To additionally use the MAD conformity classification, {needed} observations are needed for {digits}-digit analysis, or switch to 1-digit analysis, which needs far fewer."),
                         needed = ceiling(private$.minNForMadLabel(n_digits)),
                         digits = n_digits)
@@ -516,7 +516,7 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # number.of.digits > 3. digits is capped at 3 in benford.a.yaml,
                 # but guard defensively so an NA conformity reports MAD
                 # numerically instead of crashing on if(NA || NA).
-                clinical_interpretation <- jmvcore::format(
+                clinical_interpretation <- .fmt(
                     .("MAD = {mad}. A conformity classification is not available for this digit setting; interpret the MAD and chi-square test (p={p}) directly. Larger MAD values indicate greater deviation from Benford's Law."),
                     mad = sprintf("%.4f", mad_value), p = private$.fmtP(chisq_pvalue)
                 )
@@ -552,7 +552,7 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # "Close conformity", chi-square p = 4e-10).
                     if (!is.na(chisq_pvalue) && chisq_pvalue < 0.05) {
                         mad_ratio <- mad_value / mad_floor
-                        clinical_interpretation <- jmvcore::format(
+                        clinical_interpretation <- .fmt(
                             .("MAD = {mad} falls in the '{label}' band, but the chi-square goodness-of-fit test detects a departure from Benford's Law (p={p}). The MAD is {ratio} times the deviation expected from sampling noise alone at N={n} with {digits}-digit analysis ({floor}), so the departure is statistically detectable but small in magnitude. The two measures disagree because the MAD cut-offs are fixed while the chi-square test gains power as N grows."),
                             mad = sprintf("%.4f", mad_value), label = mad_conformity,
                             p = private$.fmtP(chisq_pvalue),
@@ -562,7 +562,7 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         considerations <- .("A departure this small relative to the MAD cut-offs, yet detectable by the chi-square test, is the pattern a localized cause produces: systematic rounding, preferred values, or a subset of records entered differently. The leading-digit bin listing below shows which digit combinations carry it.")
                         finding <- .("Departure detected")
                     } else {
-                        clinical_interpretation <- jmvcore::format(
+                        clinical_interpretation <- .fmt(
                             .("Leading-digit distribution is consistent with Benford's Law (MAD={mad}, {label}; chi-square p={p}). Neither measure detected a departure. Absence of a detected departure is not evidence that the data contain no errors - this analysis examines only leading-digit frequencies."),
                             mad = sprintf("%.4f", mad_value), label = mad_conformity,
                             p = private$.fmtP(chisq_pvalue)
@@ -572,7 +572,7 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     }
 
                 } else if (mad_conformity == "Marginally acceptable conformity") {
-                    clinical_interpretation <- jmvcore::format(
+                    clinical_interpretation <- .fmt(
                         .("Data shows marginally acceptable conformity to Benford's Law (MAD={mad}). Chi-square test: p={p}. Consider reviewing data collection procedures."),
                         mad = sprintf("%.4f", mad_value), p = private$.fmtP(chisq_pvalue)
                     )
@@ -580,7 +580,7 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     finding <- .("Departure detected")
 
                 } else {  # "Nonconformity"
-                    clinical_interpretation <- jmvcore::format(
+                    clinical_interpretation <- .fmt(
                         .("The leading-digit distribution departs from Benford's Law (MAD={mad}, {label}; chi-square p={p}). The deviation exceeds Nigrini's nonconformity cut-off for this digit setting. Benford's Law describes how leading digits are distributed in data spanning several orders of magnitude; a departure indicates the values do not follow that pattern and does not by itself identify a cause."),
                         mad = sprintf("%.4f", mad_value), label = mad_conformity,
                         p = private$.fmtP(chisq_pvalue)
@@ -641,7 +641,7 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # translated once (the same .() strings .interpretResults() writes
             # into the table), and the curly quotes stay out of the msgid, where
             # they would otherwise be stored as the literal "\u{201C}" escape.
-            action_text = jmvcore::format(
+            action_text = .fmt(
                 .("The Assessment row reports what the tests found, not how concerned to be - that judgement depends on how the variable was collected and belongs to you. {nodeparture} means the leading-digit frequencies are consistent with Benford's Law; it does not establish that the data are free of errors, because this test looks only at leading digits. {departure} means the frequencies differ from Benford's Law by more than sampling noise explains; systematic rounding, preferred or repeated values, truncation at a detection limit, and a subset of records entered differently all produce this, as does a variable that simply does not follow Benford's Law, and the test does not distinguish among them. {notassessable} means the data span less than two orders of magnitude, where the method does not apply. {limited} means the sample is too small for the tests to resolve anything but a very large departure."),
                 nodeparture   = paste0("\u{201C}", .("No departure detected"), "\u{201D}"),
                 departure     = paste0("\u{201C}", .("Departure detected"), "\u{201D}"),
@@ -669,12 +669,12 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # reads it as an opening tag and swallows everything up to the
                 # next ">", which silently ate this entire sentence after
                 # "observations (N". Same trap as .fmtP's "< 0.0001" below.
-                summary_text <- jmvcore::format(
+                summary_text <- .fmt(
                     .("Benford's Law analysis of {n} observations, fewer than the 100 this analysis treats as a working minimum. At this size the digit-frequency tests detect only very large departures, so this run does not establish either a departure or its absence."),
                     n = interpretation_results$total_observations
                 )
             } else {
-                summary_text <- jmvcore::format(
+                summary_text <- .fmt(
                     .("Benford's Law analysis of {n} observations using {d}-digit analysis: MAD = {mad} ({conformity}), chi-square p = {pval}. Finding: {level}."),
                     n = interpretation_results$total_observations,
                     d = digits,
@@ -841,7 +841,7 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 guideline1 = .("Ensure data represents naturally occurring numbers (not artificial ranges)"),
                 guideline2 = .("Minimum 100-1000 observations recommended for reliable results"),
                 guideline3 = .("1-digit analysis has only 9 bins, so its MAD conformity label becomes usable at about 1000 observations against about 5200 for 2 digits; 2-digit analysis is more sensitive but needs the larger sample"),
-                more_info = jmvcore::format(.("For technical details, see {link}"), link = doclink)
+                more_info = .fmt(.("For technical details, see {link}"), link = doclink)
             )
 
             self$results$todo$setContent(guidelines)
@@ -964,10 +964,10 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # so on the row that shows it.
                 mad_note <- if (isTRUE(interpretation$mad_label_reliable) ||
                                 is.na(interpretation$mad_conformity)) {
-                    jmvcore::format(.("Conformity: {label}"),
+                    .fmt(.("Conformity: {label}"),
                                     label = interpretation$mad_conformity)
                 } else {
-                    jmvcore::format(
+                    .fmt(
                         .("Conformity: {label} - not reliable at N={n} for {digits}-digit analysis (sampling noise alone gives MAD ~ {floor}; needs N > {needed})"),
                         label = interpretation$mad_conformity,
                         n = interpretation$total_observations,
@@ -985,11 +985,11 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # "df" is prose and translatable; the X-squared symbol is
                     # non-ASCII and is passed in rather than written into the
                     # msgid, where it would be catalogued as a literal escape.
-                    value=jmvcore::format(.("{chi} = {stat}, df = {df}"),
+                    value=.fmt(.("{chi} = {stat}, df = {df}"),
                                           chi = "X\u{00B2}",
                                           stat = sprintf("%.2f", interpretation$chisq_statistic),
                                           df = interpretation$chisq_df),
-                    interpretation=jmvcore::format(.("p-value = {p}. This is the test the Assessment row is based on."),
+                    interpretation=.fmt(.("p-value = {p}. This is the test the Assessment row is based on."),
                                                    p = private$.fmtP(interpretation$chisq_pvalue))
                 ))
 
@@ -1019,11 +1019,11 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # 3-digit, n=300, exactly-Benford -> "2nL2 = 9.68, df = 2,
                 # p-value = 0.0079" directly above "No departure detected".
                 self$results$summary$setRow(rowKey=4L, values=list(
-                    value=jmvcore::format(.("{stat2nl} = {stat}, df = {df}"),
+                    value=.fmt(.("{stat2nl} = {stat}, df = {df}"),
                                           stat2nl = "2nL\u{00B2}",
                                           stat = sprintf("%.2f", 2 * interpretation$n_used * interpretation$mat_statistic),
                                           df = interpretation$mat_df),
-                    interpretation=jmvcore::format(.("p-value = {p}. Supplementary: this test examines the mantissa distribution rather than the leading digits, and the Assessment row is not based on it. On data that follow Benford's Law it reaches p below 0.05 about once in twenty runs, like any other test, so a small p-value here alongside a chi-square p-value that is not small is an ordinary result rather than a contradiction."),
+                    interpretation=.fmt(.("p-value = {p}. Supplementary: this test examines the mantissa distribution rather than the leading digits, and the Assessment row is not based on it. On data that follow Benford's Law it reaches p below 0.05 about once in twenty runs, like any other test, so a small p-value here alongside a chi-square p-value that is not small is an ordinary result rather than a contradiction."),
                                                    p = private$.fmtP(interpretation$mat_pvalue))
                 ))
 
@@ -1081,7 +1081,7 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # code. This is also the one template whose VALUE is derived
                     # from the data (an upstream error message), so the safest
                     # substitution primitive is the right one to use here.
-                    error_msg <- jmvcore::format(
+                    error_msg <- .fmt(
                         .("Analysis error: {msg}. Please check your data and try again."),
                         msg = e$message)
                 }
@@ -1126,7 +1126,7 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             dist_table <- paste0(
                 "\n",
                 paste(rep("=", 50), collapse = ""), "\n",
-                jmvcore::format(.("DIGIT DISTRIBUTION ANALYSIS ({digits}-digit)"),
+                .fmt(.("DIGIT DISTRIBUTION ANALYSIS ({digits}-digit)"),
                                 digits = digits), "\n",
                 paste(rep("=", 50), collapse = ""), "\n"
             )
@@ -1154,9 +1154,9 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # empty at the DEFAULT setting. Show the bins that actually drive
                 # the deviation instead.
                 dist_table <- paste0(dist_table,
-                    jmvcore::format(.("Mean Absolute Deviation (MAD): {mad}"),
+                    .fmt(.("Mean Absolute Deviation (MAD): {mad}"),
                                     mad = sprintf("%.6f", benford_obj$MAD)), "\n",
-                    jmvcore::format(.("Number of combinations analyzed: {bins}"),
+                    .fmt(.("Number of combinations analyzed: {bins}"),
                                     bins = length(observed_props)), "\n",
                     "\n", .("Most-deviating digit combinations:"), "\n",
                     sprintf("%-8s | %-10s | %-10s | %-10s\n", .("Digits"), .("Expected %"), .("Observed %"), .("Deviation")),
@@ -1180,28 +1180,28 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Add key statistics
             enhanced_text <- paste0(
                 "\n", .("DATA SUMMARY:"), "\n",
-                "  ", jmvcore::format(.("Total observations: {n}"),
+                "  ", .fmt(.("Total observations: {n}"),
                               n = base::format(length(cleaned_data), big.mark = ",")), "\n",
-                "  ", jmvcore::format(.("Data range: {min} to {max}"),
+                "  ", .fmt(.("Data range: {min} to {max}"),
                               min = base::format(min(cleaned_data), big.mark = ","),
                               max = base::format(max(cleaned_data), big.mark = ",")), "\n",
-                "  ", jmvcore::format(.("Range ratio: {ratio}x"),
+                "  ", .fmt(.("Range ratio: {ratio}x"),
                               ratio = base::format(round(max(cleaned_data)/min(cleaned_data), 2), big.mark = ",")), "\n",
                 dist_table,
                 "\n",
                 .("STATISTICAL TESTS:"), "\n",
                 # MAD.conformity is benford.analysis's own English label, and is
                 # interpolated here as DATA, not as a translatable literal.
-                "  ", jmvcore::format(.("Chi-square: {stat} (p = {p})"),
+                "  ", .fmt(.("Chi-square: {stat} (p = {p})"),
                               stat = round(benford_obj$stats$chisq$statistic, 4),
                               p = format.pval(benford_obj$stats$chisq$p.value, digits = 4, eps = 0.0001)), "\n",
-                "  ", jmvcore::format(.("MAD: {mad} ({label})"),
+                "  ", .fmt(.("MAD: {mad} ({label})"),
                               mad = round(benford_obj$MAD, 6),
                               label = benford_obj$MAD.conformity), "\n",
                 # L-squared symbol passed in, not written into the msgid (it
                 # was catalogued as the literal "\u{00B2}" escape and never
                 # matched at run time).
-                "  ", jmvcore::format(.("Mantissa Arc Test: {l2} = {stat} (p = {p})"),
+                "  ", .fmt(.("Mantissa Arc Test: {l2} = {stat} (p = {p})"),
                               l2 = "L\u{00B2}",
                               stat = round(benford_obj$stats$mantissa.arc.test$statistic, 4),
                               p = format.pval(benford_obj$stats$mantissa.arc.test$p.value, digits = 4, eps = 0.0001)), "\n"
@@ -1266,7 +1266,7 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                   collapse = "\n")
             if (n_suspects > max_listed)
                 listing_text <- paste0(listing_text, "\n",
-                    jmvcore::format(.("... and {more} more (showing the first {shown} of {total})"),
+                    .fmt(.("... and {more} more (showing the first {shown} of {total})"),
                             more = n_suspects - max_listed, shown = max_listed,
                             total = n_suspects))
 
@@ -1284,11 +1284,11 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 .("WHAT THIS LIST IS:"), "\n",
                 private$.wrapText(.("The 2 leading-digit bins whose observed frequency deviates most from Benford's Law were selected, and every observation falling in them is listed below. An observation appears here because of its leading digits, not because it is individually unusual.")), "\n\n",
                 if (nzchar(bins_text)) paste0("  ",
-                    jmvcore::format(.("Bins selected: {bins}"), bins = bins_text), "\n") else "",
-                "  ", jmvcore::format(.("Observations in those bins: {n} / {total} ({pct}%)"),
+                    .fmt(.("Bins selected: {bins}"), bins = bins_text), "\n") else "",
+                "  ", .fmt(.("Observations in those bins: {n} / {total} ({pct}%)"),
                                       n = n_suspects, total = total_count,
                                       pct = suspect_rate), "\n",
-                "  ", jmvcore::format(.("Share expected in those same bins under Benford's Law: {pct}"),
+                "  ", .fmt(.("Share expected in those same bins under Benford's Law: {pct}"),
                                       pct = expected_text), "\n\n",
                 private$.wrapText(.("A percentage close to the expected share is what conforming data looks like. Whether the data depart from Benford's Law is answered by the MAD and chi-square results in the summary table, not by this count.")), "\n\n",
                 .("OBSERVATIONS IN THOSE BINS:"), "\n",

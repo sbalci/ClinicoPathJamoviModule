@@ -4,7 +4,7 @@ title: Decision Curve Analysis
 menuGroup: meddecide
 menuSubgroup: Decision Curve Analysis
 menuSubtitle: Clinical Utility, Net Benefit, Threshold Analysis
-version: '1.0.81'
+version: '1.0.83'
 jas: '1.2'
 
 description:
@@ -449,22 +449,12 @@ options:
             Perform exploratory pairwise bootstrap comparisons between all models. Inference is
             approximate and conditional on the selected threshold range.
 
-    - name: comparisonMethod
-      # Kept as a declared option so saved .omv files still load, but there is exactly one
-      # choice, so the title says so rather than inviting the user to look for others.
-      title: Comparison Statistical Test (bootstrap only)
-      type: List
-      options:
-        - name: bootstrap
-          title: Bootstrap Test
-      default: bootstrap
-      description:
-          R: >
-            Statistical method for comparing decision curves between models. Only the
-            case-resampling bootstrap is implemented. Permutation and integral-difference
-            options were previously offered here but had no code behind them: selecting
-            either produced an empty p-value and the literal text "Bootstrap required" in
-            the results table.
+    # `comparisonMethod` used to sit here: a List that no backend code ever read. It once
+    # offered permutation and integral-difference tests with nothing behind them, was cut
+    # down to a single "bootstrap" choice, and is now removed outright -- the comparison is
+    # always the case-resampling bootstrap. An .omv saved with the old option still loads:
+    # jmvcore's Options$fromProtoBuf() keeps a saved name it does not recognise instead of
+    # failing on it.
 
     - name: showDecisionConsequences
       title: Decision Consequences Table

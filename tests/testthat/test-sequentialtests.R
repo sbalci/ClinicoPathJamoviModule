@@ -2,12 +2,6 @@
 # Testing mathematical accuracy, edge cases, and clinical scenarios
 
 
-# Source the implementation files
-if (file.exists("../../R/sequentialtests.h.R")) {
-  source("../../R/sequentialtests.h.R")
-  source("../../R/sequentialtests.b.R")
-}
-
 # Helper functions to calculate expected values manually
 calculate_serial_positive_sens <- function(sens1, sens2) {
   sens1 * sens2

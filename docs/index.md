@@ -702,7 +702,7 @@ a coffee](https://www.buymeacoffee.com/bS0teIs)
 ------------------------------------------------------------------------
 
 ![Buy Me A
-Coffee](https://cdn.buymeacoffee.com/buttons/arial-orange.png)\
+Coffee](https://cdn.buymeacoffee.com/buttons/arial-orange.png)  
 ![Twitter
 Follow](https://img.shields.io/twitter/follow/serdarbalci?style=social)![GitHub
 followers](https://img.shields.io/github/followers/sbalci?style=social)[![Say
@@ -710,7 +710,7 @@ Thanks!](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg)](https://saytha
 
 ## Development Status
 
-**Code**\
+**Code**  
 [![Launch Rstudio
 Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/sbalci/ClinicoPathJamoviModule/master?urlpath=rstudio)
 [![Gitpod
@@ -718,10 +718,10 @@ Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-blue?logo=git
 [![Download
 ClinicoPathJamoviModule](https://img.shields.io/sourceforge/dt/clinicopathjamovimodule.svg)](https://sourceforge.net/projects/clinicopathjamovimodule/files/latest/download)
 
-**Status**\
+**Status**  
 [![Project Status: Active – The project has reached a stable, usable
 state and is being actively
-developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)\
+developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)  
 [![lifecycle](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://www.tidyverse.org/lifecycle/)
 [![stability-unstable](https://img.shields.io/badge/stability-unstable-yellow.svg)](https://github.com/joethorley/stability-badges#unstable)
 [![GitHub
@@ -729,7 +729,7 @@ issues](https://img.shields.io/github/issues/sbalci/clinicopathjamovimodule.svg)
 ![GitHub
 issues](https://img.shields.io/github/issues/sbalci/clinicopathjamovimodule)
 
-**Check, CI**\
+**Check, CI**  
 ![R-CMD-check](https://github.com/sbalci/ClinicoPathJamoviModule/workflows/R-CMD-check/badge.svg)
 
 [![Codacy
@@ -749,7 +749,7 @@ badge](https://badges.guardrails.io/sbalci/ClinicoPathJamoviModule.svg?token=940
 [![Test
 Coverage](https://api.codeclimate.com/v1/badges/692e4af79330f43dac48/test_coverage)](https://codeclimate.com/github/sbalci/ClinicoPathJamoviModule/test_coverage)
 
-**Recency, Updates**\
+**Recency, Updates**  
 ![GitHub](https://img.shields.io/github/license/sbalci/clinicopathjamovimodule.svg)[![GitHub
 last
 commit](https://img.shields.io/github/last-commit/sbalci/clinicopathjamovimodule)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
@@ -759,12 +759,12 @@ Date](https://img.shields.io/github/release-date/sbalci/clinicopathjamovimodule)
 commit
 activity](https://img.shields.io/github/commit-activity/m/sbalci/clinicopathjamovimodule)
 
-**Webpage, Links, Size, Download**\
+**Webpage, Links, Size, Download**  
 [![Website](https://img.shields.io/badge/website-ClinicoPathJamoviModule-orange.svg?colorB=E91E63)](https://www.serdarbalci.com/ClinicoPathJamoviModule/)
 [![GitHub code size in
 bytes](https://img.shields.io/github/languages/code-size/sbalci/clinicopathjamovimodule.svg)](https://github.com/sbalci/ClinicoPathJamoviModule)
 
-**Dependencies**\
+**Dependencies**  
 [![minimal R
 version](https://img.shields.io/badge/R%3E%3D-3.6.3-6666ff.svg)](https://cran.r-project.org/)
 [![Libraries.io dependency status for GitHub
@@ -772,7 +772,7 @@ repo](https://img.shields.io/librariesio/github/sbalci/clinicopathjamovimodule.s
 [![Requirements
 Status](https://requires.io/github/sbalci/ClinicoPathJamoviModule/requirements.svg?branch=gh-pages)](https://requires.io/github/sbalci/ClinicoPathJamoviModule/requirements/?branch=gh-pages)
 
-**Interaction, Shares**\
+**Interaction, Shares**  
 [![GitHub
 forks](https://img.shields.io/github/forks/sbalci/clinicopathjamovimodule.svg)](https://github.com/sbalci/clinicopathjamovimodule/network)
 ![GitHub

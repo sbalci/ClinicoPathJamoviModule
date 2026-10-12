@@ -84,7 +84,7 @@ children:
           - type: TextBox
             name: train_proportion
             format: number
-            suffix: " (0.5-0.9)"
+            suffix: " 0.5-0.9"
           - type: ComboBox
             name: validation_method
           - type: CheckBox

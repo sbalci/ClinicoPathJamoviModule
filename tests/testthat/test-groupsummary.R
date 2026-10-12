@@ -1,11 +1,21 @@
+# testthat runs this file from tests/testthat, not the package root: resolve
+# source-tree files from there, and skip (not fail) where there is no source
+# tree, e.g. an installed-package run such as R CMD check.
+src_path <- function(...) {
+  root <- testthat::test_path("..", "..")
+  skip_if_not(dir.exists(file.path(root, "R")) && dir.exists(file.path(root, "jamovi")),
+              "package source tree not available")
+  file.path(root, ...)
+}
+
 test_that("groupsummary module files exist", {
   
   # Test that required files exist
-  expect_true(file.exists("R/groupsummary.b.R"))
-  expect_true(file.exists("jamovi/groupsummary.a.yaml"))
-  expect_true(file.exists("jamovi/groupsummary.u.yaml"))
-  expect_true(file.exists("jamovi/groupsummary.r.yaml"))
-  expect_true(file.exists("R/groupsummary.h.R"))
+  expect_true(file.exists(src_path("R/groupsummary.b.R")))
+  expect_true(file.exists(src_path("jamovi/groupsummary.a.yaml")))
+  expect_true(file.exists(src_path("jamovi/groupsummary.u.yaml")))
+  expect_true(file.exists(src_path("jamovi/groupsummary.r.yaml")))
+  expect_true(file.exists(src_path("R/groupsummary.h.R")))
 })
 
 test_that("groupsummary class and function availability", {
@@ -25,7 +35,7 @@ test_that("groupsummary class and function availability", {
 test_that("groupsummary backend implementation structure", {
   
   # Read the backend file and check for key elements
-  backend_content <- readLines("R/groupsummary.b.R", warn = FALSE)
+  backend_content <- readLines(src_path("R/groupsummary.b.R"), warn = FALSE)
   backend_text <- paste(backend_content, collapse = "\n")
   
   # Check for essential methods
@@ -52,7 +62,7 @@ test_that("groupsummary YAML configurations are valid", {
   
   # Test analysis configuration
   if (requireNamespace("yaml", quietly = TRUE)) {
-    analysis_config <- yaml::read_yaml("jamovi/groupsummary.a.yaml")
+    analysis_config <- yaml::read_yaml(src_path("jamovi/groupsummary.a.yaml"))
     
     expect_equal(analysis_config$name, "groupsummary")
     expect_true("title" %in% names(analysis_config))
@@ -64,7 +74,7 @@ test_that("groupsummary YAML configurations are valid", {
     expect_true(all(expected_options %in% option_names))
     
     # Test results configuration
-    results_config <- yaml::read_yaml("jamovi/groupsummary.r.yaml")
+    results_config <- yaml::read_yaml(src_path("jamovi/groupsummary.r.yaml"))
     item_names <- sapply(results_config$items, function(x) x$name)
     expect_true("summaryTable" %in% item_names)
     expect_true("plot" %in% item_names)
@@ -74,17 +84,17 @@ test_that("groupsummary YAML configurations are valid", {
 test_that("groupsummary test datasets exist and are properly structured", {
   
   # Test that datasets were created
-  expect_true(file.exists("data/groupsummary_simple.rda"))
-  expect_true(file.exists("data/groupsummary_sales_data.rda"))
-  expect_true(file.exists("data/groupsummary_survey_data.rda"))
-  expect_true(file.exists("data/groupsummary_financial_data.rda"))
-  expect_true(file.exists("data/groupsummary_manufacturing_data.rda"))
-  expect_true(file.exists("data/groupsummary_web_analytics.rda"))
-  expect_true(file.exists("data/medical_research_data.rda"))
-  expect_true(file.exists("data/hospital_admission_hourly.rda"))
+  expect_true(file.exists(src_path("data/groupsummary_simple.rda")))
+  expect_true(file.exists(src_path("data/groupsummary_sales_data.rda")))
+  expect_true(file.exists(src_path("data/groupsummary_survey_data.rda")))
+  expect_true(file.exists(src_path("data/groupsummary_financial_data.rda")))
+  expect_true(file.exists(src_path("data/groupsummary_manufacturing_data.rda")))
+  expect_true(file.exists(src_path("data/groupsummary_web_analytics.rda")))
+  expect_true(file.exists(src_path("data/medical_research_data.rda")))
+  expect_true(file.exists(src_path("data/hospital_admission_hourly.rda")))
   
   # Load and test the simple dataset
-  load("data/groupsummary_simple.rda")
+  load(src_path("data/groupsummary_simple.rda"))
   
   expect_s3_class(groupsummary_simple, "data.frame")
   expect_gt(nrow(groupsummary_simple), 50)
@@ -107,7 +117,7 @@ test_that("groupsummary handles basic categorical grouping", {
   
   if (exists("groupsummary")) {
     # Load simple test data
-    load("data/groupsummary_simple.rda")
+    load(src_path("data/groupsummary_simple.rda"))
     
     # Test basic groupsummary instantiation
     expect_error({
@@ -126,7 +136,7 @@ test_that("groupsummary with multiple grouping variables", {
   
   if (exists("groupsummary")) {
     # Load sales data
-    load("data/groupsummary_sales_data.rda")
+    load(src_path("data/groupsummary_sales_data.rda"))
     
     # Test multiple grouping variables
     expect_error({
@@ -146,7 +156,7 @@ test_that("groupsummary with date aggregation", {
   
   if (exists("groupsummary")) {
     # Load sales data with dates
-    load("data/groupsummary_sales_data.rda")
+    load(src_path("data/groupsummary_sales_data.rda"))
     
     # Test date aggregation by month
     expect_error({
@@ -181,7 +191,7 @@ test_that("groupsummary with timestamp data", {
   
   if (exists("groupsummary")) {
     # Load financial data with timestamps
-    load("data/groupsummary_financial_data.rda")
+    load(src_path("data/groupsummary_financial_data.rda"))
     
     # Test hourly aggregation
     expect_error({
@@ -215,7 +225,7 @@ test_that("groupsummary statistics options", {
   
   
   if (exists("groupsummary")) {
-    load("data/groupsummary_simple.rda")
+    load(src_path("data/groupsummary_simple.rda"))
     
     # Test individual statistics
     statistics_options <- list(
@@ -246,7 +256,7 @@ test_that("groupsummary with survey data", {
   
   if (exists("groupsummary")) {
     # Load survey data
-    load("data/groupsummary_survey_data.rda")
+    load(src_path("data/groupsummary_survey_data.rda"))
     
     # Test demographic analysis
     expect_error({
@@ -277,7 +287,7 @@ test_that("groupsummary with manufacturing data", {
   
   if (exists("groupsummary")) {
     # Load manufacturing data
-    load("data/groupsummary_manufacturing_data.rda")
+    load(src_path("data/groupsummary_manufacturing_data.rda"))
     
     # Test shift and quality analysis
     expect_error({
@@ -309,7 +319,7 @@ test_that("groupsummary with web analytics data", {
   
   if (exists("groupsummary")) {
     # Load web analytics data
-    load("data/groupsummary_web_analytics.rda")
+    load(src_path("data/groupsummary_web_analytics.rda"))
     
     # Test traffic source analysis
     expect_error({
@@ -342,7 +352,7 @@ test_that("groupsummary with medical research data", {
   
   if (exists("groupsummary")) {
     # Load medical data
-    load("data/medical_research_data.rda")
+    load(src_path("data/medical_research_data.rda"))
     
     # Test multi-center treatment analysis
     expect_error({
@@ -375,7 +385,7 @@ test_that("groupsummary with hospital hourly data", {
   
   if (exists("groupsummary")) {
     # Load hourly hospital data
-    load("data/hospital_admission_hourly.rda")
+    load(src_path("data/hospital_admission_hourly.rda"))
     
     # Test hourly vital signs monitoring
     expect_error({
@@ -396,7 +406,7 @@ test_that("groupsummary display options", {
   
   
   if (exists("groupsummary")) {
-    load("data/groupsummary_simple.rda")
+    load(src_path("data/groupsummary_simple.rda"))
     
     # Test different sorting options
     sort_options <- c("groups", "first_desc", "first_asc")
@@ -442,7 +452,7 @@ test_that("groupsummary with missing data", {
   
   if (exists("groupsummary")) {
     # Create data with missing values
-    load("data/groupsummary_simple.rda")
+    load(src_path("data/groupsummary_simple.rda"))
     test_data <- groupsummary_simple
     
     # Introduce some missing values
@@ -504,7 +514,7 @@ test_that("groupsummary time aggregation options", {
   
   
   if (exists("groupsummary")) {
-    load("data/groupsummary_sales_data.rda")
+    load(src_path("data/groupsummary_sales_data.rda"))
     
     # Test different time aggregations
     time_aggregations <- c("day", "week", "month", "year")
@@ -534,7 +544,7 @@ test_that("groupsummary dependency handling", {
     if (requireNamespace(pkg, quietly = TRUE)) {
       expect_error({
         if (exists("groupsummary")) {
-          load("data/groupsummary_simple.rda")
+          load(src_path("data/groupsummary_simple.rda"))
           result <- groupsummary(
             data = groupsummary_simple,
             groupVars = "category",
@@ -553,14 +563,19 @@ test_that("groupsummary required methods exist", {
   
   
   if (exists("groupsummary")) {
-    load("data/groupsummary_simple.rda")
+    load(src_path("data/groupsummary_simple.rda"))
     
-    result <- groupsummary(
-      data = groupsummary_simple,
-      groupVars = "category",
-      sumVars = "value1",
-      statistics = c("sum", "mean")
+    # The groupsummary() wrapper returns analysis$results, which has no private
+    # methods: build the analysis itself, as the wrapper does.
+    result <- groupsummaryClass$new(
+      options = groupsummaryOptions$new(
+        groupVars = "category",
+        sumVars = "value1",
+        statistics = c("sum", "mean")
+      ),
+      data = groupsummary_simple
     )
+    result$run()
     
     # Check that required methods exist
     expect_true(exists(".plot", envir = result$.__enclos_env__$private))
@@ -572,7 +587,7 @@ test_that("groupsummary parameter validation", {
   
   
   if (exists("groupsummary")) {
-    load("data/groupsummary_simple.rda")
+    load(src_path("data/groupsummary_simple.rda"))
     
     # Test with empty groupVars (should show welcome message)
     expect_error({
@@ -598,7 +613,7 @@ test_that("groupsummary comprehensive parameter combinations", {
   
   
   if (exists("groupsummary")) {
-    load("data/groupsummary_sales_data.rda")
+    load(src_path("data/groupsummary_sales_data.rda"))
     
     # Test comprehensive parameter combination
     expect_error({

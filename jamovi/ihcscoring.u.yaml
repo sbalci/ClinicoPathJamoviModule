@@ -152,7 +152,7 @@ children:
               - type: TextBox
                 name: confidence_level
                 format: number
-                suffix: (0.80-0.99)
+                suffix: 0.80-0.99
               - type: TextBox
                 name: bootstrap_n
                 format: number
@@ -175,7 +175,7 @@ children:
           - type: TextBox
             name: dab_thresholds
             format: string
-            suffix: (comma-separated OD values)
+            suffix: comma-separated OD values
             enable: (color_deconvolution)
           - type: TextBox
             name: minimum_nuclear_area
@@ -203,7 +203,7 @@ children:
           - type: TextBox
             name: cutoff_values
             format: string
-            suffix: (comma-separated %)
+            suffix: comma-separated %
             enable: (multiple_cutoffs)
           - type: CheckBox
             name: cutoff_comparison
@@ -249,7 +249,7 @@ children:
           - type: TextBox
             name: classification_cutoffs
             format: string
-            suffix: (comma-separated %)
+            suffix: comma-separated %
       - type: VariableSupplier
         persistentItems: false
         stretchFactor: 1
@@ -291,7 +291,7 @@ children:
           - type: TextBox
             name: checkpoint_cutoffs
             format: string
-            suffix: (comma-separated %)
+            suffix: comma-separated %
           - type: CheckBox
             name: subtype_statistics
           - type: CheckBox

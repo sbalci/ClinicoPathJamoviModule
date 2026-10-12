@@ -76,7 +76,7 @@ test_that("decisioncombine reports expected metrics for a two-test pattern", {
       # `rowType` distinguishes the observed test patterns from the named strategy rows
       # (Serial/AND, Parallel/OR), added in 1.0.4 so the serial rule is findable.
       "pattern", "rowType", "tp", "fp", "fn", "tn", "prevalence", "sens", "spec", "ppv", "npv",
-      "acc", "balancedAccuracy", "youden", "lrPos", "lrNeg", "dor"
+      "acc", "balancedAccuracy", "youden", "youdenLower", "youdenUpper", "lrPos", "lrNeg", "dor"
     ),
     names(tbl)
   )

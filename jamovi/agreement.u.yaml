@@ -15,7 +15,7 @@ children:
             name: vars
             isTarget: true
   - type: CollapseBox
-    label: Display Options
+    label: General Options
     collapsed: false
     children:
       - type: LayoutBox
@@ -30,8 +30,11 @@ children:
           - type: TextBox
             name: confLevel
             format: number
-            events:
-              change: ./agreement.events::onChange_confLevel
+          - type: ComboBox
+            name: kappaCIMethod
+          - type: TextBox
+            name: seed
+            format: number
   - type: CollapseBox
     label: Weighted Kappa (Ordinal)
     collapsed: false
@@ -45,6 +48,23 @@ children:
             name: exct
           - type: CheckBox
             name: showLevelInfo
+  - type: CollapseBox
+    label: Pathologist Grading Analysis [Ordinal/Categorical]
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: gradingDesign
+          - type: CheckBox
+            name: perPathologist
+          - type: CheckBox
+            name: severityModel
+          - type: CheckBox
+            name: latentModel
+          - type: CheckBox
+            name: showGradingGuide
   - type: CollapseBox
     label: Krippendorff's Alpha (Any Data Type)
     collapsed: true
@@ -162,7 +182,7 @@ children:
             name: showICCGuide
           - type: ComboBox
             name: iccType
-            enable: (icc)
+            enable: (icc || bootstrapCI)
   - type: CollapseBox
     label: Mean Pearson Correlation [Continuous] (Linear Association)
     collapsed: true
@@ -186,7 +206,7 @@ children:
           - type: CheckBox
             name: showLinCCCGuide
   - type: CollapseBox
-    label: Total Deviation Index (TDI) [Continuous] (Acceptable Limits)
+    label: Empirical TDI [Continuous] (Prespecified Difference Limit)
     collapsed: true
     children:
       - type: LayoutBox
@@ -205,7 +225,7 @@ children:
           - type: CheckBox
             name: showTDIGuide
   - type: CollapseBox
-    label: Iota Coefficient [Continuous or Categorical] (Multivariate)
+    label: Iota Coefficient [Continuous or Categorical] (Single Variable)
     collapsed: true
     children:
       - type: LayoutBox
@@ -293,7 +313,7 @@ children:
                     name: clusterVariable
                     maxItemCount: 1
                     isTarget: true
-                    enable: (hierarchicalKappa)
+                    enable: (hierarchicalKappa || latentModel)
       - type: LayoutBox
         margin: large
         children:
@@ -308,9 +328,6 @@ children:
             enable: (hierarchicalKappa)
           - type: CheckBox
             name: testClusterHomogeneity
-            enable: (hierarchicalKappa)
-          - type: CheckBox
-            name: shrinkageEstimates
             enable: (hierarchicalKappa)
           - type: CheckBox
             name: clusterRankings
@@ -340,12 +357,20 @@ children:
                     maxItemCount: 1
                     isTarget: true
                     enable: (mixedEffectsComparison)
+              - type: TargetLayoutBox
+                label: Case ID (same case on several rows)
+                children:
+                  - type: VariablesListBox
+                    name: caseIdVariable
+                    maxItemCount: 1
+                    isTarget: true
+                    enable: (mixedEffectsComparison)
       - type: LayoutBox
         margin: large
         children:
           - type: ComboBox
             name: multipleTestCorrection
-            enable: (mixedEffectsComparison || hierarchicalKappa)
+            enable: (mixedEffectsComparison || allPairsKappa)
           - type: CheckBox
             name: showMixedEffectsGuide
   - type: CollapseBox
@@ -374,7 +399,7 @@ children:
           - type: TextBox
             name: nBoot
             format: number
-            enable: (bootstrapCI)
+            enable: (bootstrapCI || bootstrap || robinsonA || tdi)
           - type: CheckBox
             name: showBootstrapCIGuide
   - type: CollapseBox
@@ -422,6 +447,7 @@ children:
             name: allPairsKappa
           - type: CheckBox
             name: allPairsCI
+            enable: (allPairsKappa)
           - type: CheckBox
             name: showAllPairsKappaGuide
           - type: CheckBox
@@ -429,7 +455,7 @@ children:
           - type: CheckBox
             name: showItemModalGuide
   - type: CollapseBox
-    label: Rater Bias Test [Categorical] (Quality Control)
+    label: Directional Discordance [Ordinal] (2 Raters)
     collapsed: true
     children:
       - type: LayoutBox
@@ -619,7 +645,7 @@ children:
           - type: TextBox
             name: nClusters
             format: number
-            enable: (raterClustering && clusterMethod:kmeans)
+            enable: (raterClustering)
           - type: CheckBox
             name: showDendrogram
             enable: (raterClustering && clusterMethod:hierarchical)
@@ -649,7 +675,7 @@ children:
           - type: TextBox
             name: nCaseClusters
             format: number
-            enable: (caseClustering && caseClusterMethod:kmeans)
+            enable: (caseClustering)
           - type: CheckBox
             name: showCaseDendrogram
             enable: (caseClustering && caseClusterMethod:hierarchical)
@@ -722,7 +748,3 @@ children:
             enable: (agreementSampleSize)
           - type: CheckBox
             name: showSampleSizeGuide
-          - type: TextBox
-            name: seed
-            format: number
-            label: Random Seed
