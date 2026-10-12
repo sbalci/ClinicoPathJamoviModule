@@ -110,3 +110,39 @@ test_that("L9 a calibration-slope correction resting on a subset of replicates s
   expect_lt(k, 50)
   expect_true(is.finite(res$validationTable$asDF$corrected[3]))
 })
+
+# /fix-function 2026-10-12: refusals caused by listwise deletion now give the cause and the counts,
+# and glmnet's per-call small-fold warnings become one notice each instead of raw Analysis Notes.
+ff_preds <- c("p53_aberrant", "rb1_loss", "sstr2a_3plus", "ki67_pct", "daxx_atrx_loss", "organoid_pattern",
+              "mitotic_count", "age_years", "tumor_size_cm", "institution")
+# do.call: the wrapper reads a bare `explanatory = ff_preds` as a column NAMED ff_preds.
+ff_run <- function(...) do.call(ClinicoPath::lassologistic, list(...))
+
+test_that("FF-1 a refusal caused by missing predictors says how many cases were excluded", {
+  skip_if_not_installed("glmnet")
+  d <- ClinicoPath::lassologistic_pannen
+  d$ki67_pct[d$diagnosis == "PanNET_G3"] <- NA       # the marker recorded in one group only
+  expect_error(ff_run(data = d, outcome = "diagnosis", outcomeLevel = "PanNEC",
+                                          explanatory = ff_preds),
+               "Only cases with outcome 'PanNEC' remain\\. \\d+ of 200 cases have the outcome and every predictor recorded; \\d+ were excluded because a predictor was missing\\.")
+  set.seed(21)
+  small <- data.frame(y = factor(rep(c("e", "r"), c(4, 20))), x1 = rnorm(24), x2 = rnorm(24))
+  expect_error(ff_run(data = small, outcome = "y", outcomeLevel = "e",
+                                          explanatory = c("x1", "x2")),
+               "The complete cases include 4 events and 20 non-events.", fixed = TRUE)
+})
+
+test_that("FF-2 small folds raise one notice, not a warning per cv.glmnet call", {
+  skip_if_not_installed("glmnet")
+  d <- withr::with_seed(5, ClinicoPath::lassologistic_pannen[sample(200, 30), ])   # 27 complete cases
+  expect_no_warning(res <- ff_run(data = d, outcome = "diagnosis",
+    outcomeLevel = "PanNEC", explanatory = ff_preds, bootstrapValidation = TRUE, bootstrapN = 50))
+  expect_match(res$notices$content, "Cross-validation error computed per case", fixed = TRUE)
+  pn <- ClinicoPath::lassologistic_pannen
+  few <- rbind(pn[pn$diagnosis == "PanNEC", ][1:6, ], pn[pn$diagnosis == "PanNET_G3", ][1:60, ])
+  few <- few[complete.cases(few[c("diagnosis", ff_preds)]), ]
+  expect_no_warning(res <- ff_run(data = few, outcome = "diagnosis",
+    outcomeLevel = "PanNEC", explanatory = ff_preds))
+  n_hits <- lengths(gregexpr("Few cases of one class per fold", res$notices$content, fixed = TRUE))
+  expect_equal(n_hits, 1L)
+})

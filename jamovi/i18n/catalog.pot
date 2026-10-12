@@ -2716,6 +2716,12 @@ msgid ""
 "Agreement %% uses only the %5$d complete cases."
 msgstr ""
 
+#: R/lassologistic.b.R
+msgid ""
+"%1$d of %2$d cases have the outcome and every predictor recorded; %3$d were "
+"excluded because a predictor was missing."
+msgstr ""
+
 #: R/agreement.b.R
 msgid ""
 "%1$d of %2$d cases were dropped because at least one rater was missing: "
@@ -21452,6 +21458,14 @@ msgid ""
 "At least one BCa stability interval could not be estimated from the "
 "leave-one-case-out values, so a percentile interval was reported for that "
 "statistic."
+msgstr ""
+
+#: R/lassologistic.b.R
+msgid ""
+"At least one cross-validation training set held fewer than 8 cases of one "
+"outcome class (%1$d events and %2$d non-events across %3$d folds). glmnet "
+"warns that fits this sparse are unstable: the chosen lambda depends on how "
+"these few cases fall into folds, which the random seed decides."
 msgstr ""
 
 #: R/nogoldstandard.b.R
@@ -48662,6 +48676,10 @@ msgstr ""
 msgid "Cross-Validation Error"
 msgstr ""
 
+#: R/lassologistic.b.R
+msgid "Cross-validation error computed per case"
+msgstr ""
+
 #: R/stagemigration-part4.R
 msgid "Cross-validation failed"
 msgstr ""
@@ -69678,6 +69696,10 @@ msgstr ""
 
 #: R/decision.b.R
 msgid "Few cases in one arm: {dpos} disease-present and {dneg} disease-free"
+msgstr ""
+
+#: R/lassologistic.b.R
+msgid "Few cases of one class per fold"
 msgstr ""
 
 #: R/jjpiestats.b.R
@@ -114155,6 +114177,10 @@ msgid ""
 "by one."
 msgstr ""
 
+#: R/lassologistic.b.R
+msgid "Only cases with outcome '%s' remain."
+msgstr ""
+
 #: R/waterfall.b.R
 msgid ""
 "Only n=%d evaluable patients: a single patient changes each rate by %.0f "
@@ -129464,6 +129490,10 @@ msgstr ""
 msgid "Predictors"
 msgstr ""
 
+#: R/lassologistic.b.R
+msgid "Predictors constant among the analysed cases"
+msgstr ""
+
 #: R/lassocox.b.R
 msgid ""
 "Predictors contain infinite values: {vars}. Correct these values before "
@@ -129474,10 +129504,6 @@ msgstr ""
 msgid ""
 "Predictors contain only missing values: {vars}. Supply data or explicitly "
 "remove these predictors."
-msgstr ""
-
-#: R/lassologistic.b.R
-msgid "Predictors constant among the analysed cases"
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -133274,14 +133300,6 @@ msgstr ""
 
 #: alluvial/options/curveType/quintic.title
 msgid "Quintic (very smooth)"
-msgstr ""
-
-#: R/lassologistic.b.R
-msgid ""
-"Removed before fitting: %1$s. Each varies only in rows that were excluded "
-"for a missing value, so every analysed case has the same value, and a "
-"predictor that does not vary cannot be penalised or selected. %2$d variables "
-"remain and are shown as Variables analysed."
 msgstr ""
 
 #: bayesiandiagnostic/results/convergenceDiagnostics.columns.title
@@ -137633,6 +137651,14 @@ msgstr ""
 
 #: R/decision.b.R
 msgid "Removed {n} row(s) with missing diagnostic data"
+msgstr ""
+
+#: R/lassologistic.b.R
+msgid ""
+"Removed before fitting: %1$s. Each varies only in rows that were excluded "
+"for a missing value, so every analysed case has the same value, and a "
+"predictor that does not vary cannot be penalised or selected. %2$d variables "
+"remain and are shown as Variables analysed."
 msgstr ""
 
 #: R/lassocox.b.R
@@ -164929,6 +164955,10 @@ msgid ""
 "intervals, and counts at selected times."
 msgstr ""
 
+#: R/lassologistic.b.R
+msgid "The complete cases include %1$d events and %2$d non-events."
+msgstr ""
+
 #: R/kappaSizeCI.b.R
 msgid ""
 "The computed sample size ({n}) is very large and may be impractical for a "
@@ -170475,6 +170505,13 @@ msgstr ""
 
 #: R/decisioncurve.b.R
 msgid "These look like percentages: enter {values} instead."
+msgstr ""
+
+#: R/lassologistic.b.R
+msgid ""
+"These manual cut point entries were not used: %s. Each must be "
+"'variable=value' using an explanatory variable's name as written; a name "
+"containing a comma, semicolon or '=' cannot be given a manual cut."
 msgstr ""
 
 #: R/psychopdaROC.b.R
@@ -187350,6 +187387,13 @@ msgstr ""
 msgid ""
 "With %.1f%% specificity, up to %.0f out of 100 healthy individuals may test "
 "positive."
+msgstr ""
+
+#: R/lassologistic.b.R
+msgid ""
+"With %1$d folds and %2$d cases some folds hold fewer than 3 cases, so glmnet "
+"computed the cross-validated deviance and its standard error per case rather "
+"than per fold. The 1SE rule uses that standard error."
 msgstr ""
 
 #: R/enhancedROC.b.R

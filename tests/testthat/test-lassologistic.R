@@ -636,8 +636,9 @@ test_that("manual cut-point strings are parsed safely", {
 
   expect_equal(parse("ki67=20, age=65"), c(ki67 = 20, age = 65))
   expect_equal(parse("ki67=20; age=65"), c(ki67 = 20, age = 65))
-  # malformed entries are dropped, not guessed
-  expect_equal(parse("ki67=20, bogus, x=abc"), c(ki67 = 20))
+  # malformed entries are dropped, not guessed - and kept for the "not used" note
+  expect_equal(parse("ki67=20, bogus, x=abc"), c(ki67 = 20), ignore_attr = "malformed")
+  expect_equal(attr(parse("ki67=20, bogus, x=abc"), "malformed"), c("bogus", "x=abc"))
   expect_length(parse(""), 0)
   expect_length(parse(NULL), 0)
 })

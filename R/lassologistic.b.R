@@ -500,12 +500,15 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # stopped with a pending panel when no level was chosen otherwise. The
                 # coder also treats an explicit NA level and "" as missing.
                 coding <- .rocOutcomeCoding(data[[outcome_var]], self$options$outcomeLevel)
+                # reject() runs its message through jmvcore::format(), which turns any {name}
+                # into "..." - so a level called "{grade}" would vanish from the refusal.
+                no_braces <- function(x) chartr("{}", "()", x)
                 if (identical(coding$status, "single"))
                     jmvcore::reject(.("Outcome variable must have at least 2 observed values."))
                 if (identical(coding$status, "invalid"))
                     jmvcore::reject(sprintf(
                         .("Specified event level '%1$s' not found in the outcome variable. Observed levels: %2$s."),
-                        coding$positive, paste(coding$levels, collapse = ", ")))
+                        no_braces(coding$positive), no_braces(paste(coding$levels, collapse = ", "))))
                 if (identical(coding$status, "unset"))
                     jmvcore::reject(.("Choose the 'Event level' of the outcome."))
                 observed_levels <- coding$levels
@@ -514,7 +517,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 if (length(observed_levels) > 2)
                     jmvcore::reject(sprintf(
                         .("The outcome has %1$d observed levels (%2$s), but this analysis compares exactly two. Filter the data to the two levels to compare, or recode the outcome into two groups."),
-                        length(observed_levels), paste(observed_levels, collapse = ", ")))
+                        length(observed_levels), no_braces(paste(observed_levels, collapse = ", "))))
                 event_level <- coding$positive
                 ref_level <- setdiff(observed_levels, event_level)
                 outcome_chr <- as.character(coding$values)
@@ -544,7 +547,14 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Complete-case filtering
                 complete <- complete.cases(status, predictors)
-                if (sum(complete) < 10) jmvcore::reject(.("Too few complete cases for analysis."))
+                # Listwise deletion is the usual cause of the three refusals below, and the exclusion
+                # notice that names it is only raised once cleaning succeeds: a sparse marker recorded
+                # in one diagnostic group left a single outcome class with no count or cause on screen.
+                why <- function(cc) sprintf(
+                    .("%1$d of %2$d cases have the outcome and every predictor recorded; %3$d were excluded because a predictor was missing."),
+                    sum(cc), length(cc), sum(!is.na(status) & !complete.cases(predictors)))
+                if (sum(complete) < 10)
+                    jmvcore::reject(paste(.("Too few complete cases for analysis."), why(complete)))
                 # A predictor can vary overall yet take one value in every complete case (its other
                 # values occur only in rows excluded for a missing value). droplevels() below then
                 # left such a factor a single level and model.matrix() aborted the whole analysis;
@@ -590,13 +600,17 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     else
                         .("Patient IDs are unique among the analyzed rows. Fitting, cross-validation, and bootstrap validation assume that these observations are independent; unique IDs alone cannot establish independence."))
                 if (!(length(unique(status_cc)) == 2 && all(unique(status_cc) %in% c(0, 1)))) {
-                    jmvcore::reject(.("Outcome is not binary after filtering."))
+                    left <- if (all(status_cc == 1)) event_level else ref_level
+                    jmvcore::reject(paste(.("Outcome is not binary after filtering."),
+                        sprintf(.("Only cases with outcome '%s' remain."), no_braces(left)), why(complete)))
                 }
 
                 n_events <- sum(status_cc == 1)
                 n_nonevents <- sum(status_cc == 0)
                 if (n_events < 5 || n_nonevents < 5) {
-                    jmvcore::reject(.("Need at least 5 cases in each outcome class."))
+                    jmvcore::reject(paste(.("Need at least 5 cases in each outcome class."),
+                        sprintf(.("The complete cases include %1$d events and %2$d non-events."), n_events, n_nonevents),
+                        why(complete)))
                 }
 
                 # Build design matrix
@@ -890,7 +904,23 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 gradient <- colMeans(sweep(centered, 2, sd_pop, "/") * (y - mean(y)))
                 null_path <- all(abs(gradient) <= 32 * .Machine$double.eps)
                 if (null_path) args$lambda <- exp(seq(log(1), log(1e-6), length.out = 100))
-                ans <- .quietly(do.call(glmnet::cv.glmnet, args))
+                # glmnet warns on EVERY call when a fold is small (per-case CV error under 3 cases a
+                # fold; "dangerous ground" under 8 of a class in a training set): 44 raw English lines
+                # in jamovi's Analysis Notes with the bootstrap on at n = 27. Muffled here and recorded;
+                # the main fit turns each into one notice.
+                known <- c(ungrouped = "grouped=FALSE enforced", small_class = "dangerous ground")
+                warned <- character(0)
+                ans <- withCallingHandlers(
+                    .quietly(do.call(glmnet::cv.glmnet, args)),
+                    warning = function(w) {
+                        hit <- names(known)[vapply(known, grepl, logical(1),
+                                                   x = conditionMessage(w), fixed = TRUE)]
+                        if (length(hit)) {
+                            warned <<- union(warned, hit)
+                            invokeRestart("muffleWarning")
+                        }
+                    })
+                attr(ans, "glmnet_warned") <- warned
                 attr(ans, "null_path") <- null_path
                 attr(ans$glmnet.fit, "null_path") <- null_path
                 if (null_path) {
@@ -934,6 +964,15 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 foldid <- private$.stratifiedFolds(data$y, nfolds)
 
                 cv_fit <- private$.cvFit(data$X, data$y, alpha_val, foldid)
+                warned <- attr(cv_fit, "glmnet_warned")
+                if ("ungrouped" %in% warned)
+                    private$.addNotice("INFO", .("Cross-validation error computed per case"),
+                        sprintf(.("With %1$d folds and %2$d cases some folds hold fewer than 3 cases, so glmnet computed the cross-validated deviance and its standard error per case rather than per fold. The 1SE rule uses that standard error."),
+                            nfolds, data$n))
+                if ("small_class" %in% warned)
+                    private$.addNotice("WARNING", .("Few cases of one class per fold"),
+                        sprintf(.("At least one cross-validation training set held fewer than 8 cases of one outcome class (%1$d events and %2$d non-events across %3$d folds). glmnet warns that fits this sparse are unstable: the chosen lambda depends on how these few cases fall into folds, which the random seed decides."),
+                            data$n_events, data$n_nonevents, nfolds))
                 if (isTRUE(attr(cv_fit, "null_path")))
                     private$.addNotice("INFO", .("Intercept-only optimum"),
                         .("All predictor gradients are zero at the intercept-only fit. A fixed positive lambda grid (1 to 0.000001) was used because the automatic path degenerates at zero. The fitted model assigns the overall event rate to every observation and has no discrimination."))
@@ -1058,8 +1097,9 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                              sprintf("%d of %d (%.1f%%)", data$n_excluded, data$n_total,
                                      100 * data$n_excluded / data$n_total)
                          else .("None")),
-                    list(.("Event class (positive)"), paste0(data$event_level, " (n=", data$n_events, ")")),
-                    list(.("Reference class"), paste0(data$ref_level, " (n=", data$n_nonevents, ")")),
+                    # .rocLabel: text cells are parsed as HTML, so a level "<LOD" rendered blank.
+                    list(.("Event class (positive)"), paste0(.rocLabel(data$event_level, note = FALSE), " (n=", data$n_events, ")")),
+                    list(.("Reference class"), paste0(.rocLabel(data$ref_level, note = FALSE), " (n=", data$n_nonevents, ")")),
                     # Name what it counts. data$p is ncol(X) - a 5-level factor is 4
                     # of them - so labelling it "Candidate predictors" contradicted
                     # the constant-predictor notice, which counts VARIABLES (3 vs 6
@@ -1168,7 +1208,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     importance <- if (max_abs > 0) unname(per_sd[i]) / max_abs else NA
 
                     table$addRow(rowKey = i, values = list(
-                        variable = fit$selected[i],
+                        variable = .rocLabel(fit$selected[i], note = FALSE),
                         coefficient = coef_val,
                         oddsRatio = or_val,
                         importance = importance
@@ -1724,7 +1764,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                  data$column_source[[nm]])
                 }, character(1))
                 sprintf(.("Model-term names overlap, so unique labels are used: %s. Manual cut points use the original predictor names."),
-                        paste(mapping, collapse = "; "))
+                        .rocLabel(paste(mapping, collapse = "; ")))
             },
 
             .scoreCuts = function(data, variables) {
@@ -1813,6 +1853,11 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 attr(out, "fellback") <- fellback
                 attr(out, "adjusted") <- adjusted
                 attr(out, "rounded") <- rounded
+                # Typed entries that cut nothing: malformed, or naming no explanatory variable
+                # (a name containing ',' or ';' is split by the parser and lands here).
+                if (identical(method, "manual"))
+                    attr(out, "manual_ignored") <- c(attr(manual, "malformed"),
+                        setdiff(names(manual), self$options$explanatory))
                 out
             },
 
@@ -1836,21 +1881,23 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             },
 
             # Parse "ki67=20, age=65" (also accepts ';' and newlines) into a named
-            # numeric vector. Unparseable entries are dropped rather than guessed.
+            # numeric vector. Unparseable entries are dropped rather than guessed, and
+            # listed in attr "malformed" so the table can say they were not used.
             .parseCutPoints = function(txt) {
                 if (is.null(txt) || !nzchar(trimws(txt))) return(stats::setNames(numeric(0), character(0)))
                 parts <- unlist(strsplit(txt, "[,;\n]+"))
                 parts <- trimws(parts[nzchar(trimws(parts))])
-                nm <- character(0); vals <- numeric(0)
+                nm <- character(0); vals <- numeric(0); bad <- character(0)
                 for (pt in parts) {
                     kv <- strsplit(pt, "=", fixed = TRUE)[[1]]
-                    if (length(kv) != 2) next
                     key <- trimws(kv[1])
-                    val <- suppressWarnings(as.numeric(trimws(kv[2])))
-                    if (!nzchar(key) || !is.finite(val)) next
+                    val <- if (length(kv) == 2) suppressWarnings(as.numeric(trimws(kv[2]))) else NA_real_
+                    if (!nzchar(key) || !is.finite(val)) { bad <- c(bad, pt); next }
                     nm <- c(nm, key); vals <- c(vals, val)
                 }
-                stats::setNames(vals, nm)
+                out <- stats::setNames(vals, nm)
+                if (length(bad)) attr(out, "malformed") <- bad
+                out
             },
 
             # ── Human-readable scoring criterion, on the ORIGINAL scale ─────
@@ -2048,7 +2095,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 for (i in seq_len(nrow(score_data))) {
                     table$addRow(rowKey = i, values = list(
-                        variable = score_data$variable[i],
+                        variable = .rocLabel(score_data$variable[i], note = FALSE),
                         oddsRatio = score_data$oddsRatio[i],
                         criterion = score_data$criterion[i],
                         direction = score_data$direction[i],
@@ -2090,6 +2137,12 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         .("No manual cut point was supplied for: %s. These fell back to the sample median. Enter them as 'variable=value' pairs (for example 'ki67=20, age=65') to use established clinical thresholds."),
                         .rocLabel(paste(fellback, collapse = ", "))))
                 }
+                # Without this a typed cut that was not used vanished, and the fallback note
+                # above then said none was supplied for that predictor.
+                ignored <- attr(cuts, "manual_ignored")
+                table$setNote("manual_ignored", if (length(ignored)) sprintf(
+                    .("These manual cut point entries were not used: %s. Each must be 'variable=value' using an explanatory variable's name as written; a name containing a comma, semicolon or '=' cannot be given a manual cut."),
+                    .rocLabel(paste(ignored, collapse = "; "))) else NULL)
                 adj <- attr(cuts, "adjusted")
                 table$setNote("cut_adjusted", if (length(adj)) sprintf(
                     .("The cut point for %s left no case on one side (nobody above it, or everybody), so it could separate no one and its points would rest on no contrast. It was moved to the sample median, or to just below the highest value when ties make the median the maximum. The criterion column shows the cut actually applied."),
@@ -2596,7 +2649,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 n_show <- min(nrow(imp_df), 20)
                 for (i in seq_len(n_show)) {
                     table$addRow(rowKey = i, values = list(
-                        variable = imp_df$variable[i],
+                        variable = .rocLabel(imp_df$variable[i], note = FALSE),
                         importance_score = imp_df$importance_score[i],
                         selection_frequency = imp_df$selection_frequency[i],
                         stability_rank = imp_df$stability_rank[i]

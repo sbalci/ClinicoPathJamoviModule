@@ -3177,6 +3177,14 @@ msgstr ""
 "katkıda bulunur, ancak gözlenen uyuma katkıda bulunmaz. Uyum %% yalnızca "
 "%5$d eksiksiz olguyu kullanır."
 
+#: R/lassologistic.b.R
+msgid ""
+"%1$d of %2$d cases have the outcome and every predictor recorded; %3$d were "
+"excluded because a predictor was missing."
+msgstr ""
+"%2$d olgudan %1$d tanesinde sonlanım ve tüm tahmin ediciler kayıtlı; %3$d "
+"olgu bir tahmin edici eksik olduğu için hariç tutuldu."
+
 #: R/agreement.b.R
 msgid ""
 "%1$d of %2$d cases were dropped because at least one rater was missing: "
@@ -24262,6 +24270,19 @@ msgstr ""
 "En az bir BCa kararlılık aralığı, bir olguyu dışarıda bırakma değerlerinden "
 "tahmin edilemedi; bu nedenle ilgili istatistik için yüzdelik aralık "
 "raporlandı."
+
+#: R/lassologistic.b.R
+msgid ""
+"At least one cross-validation training set held fewer than 8 cases of one "
+"outcome class (%1$d events and %2$d non-events across %3$d folds). glmnet "
+"warns that fits this sparse are unstable: the chosen lambda depends on how "
+"these few cases fall into folds, which the random seed decides."
+msgstr ""
+"En az bir çapraz doğrulama eğitim kümesinde bir sonlanım sınıfından 8'den az "
+"olgu vardı (%3$d kata dağılmış %1$d olay ve %2$d olay olmayan). glmnet bu "
+"kadar seyrek uyarlamaların kararsız olduğu konusunda uyarır: seçilen lambda, "
+"bu az sayıdaki olgunun katlara nasıl dağıldığına bağlıdır ve bunu rastgele "
+"tohum belirler."
 
 #: R/nogoldstandard.b.R
 msgid ""
@@ -52669,6 +52690,10 @@ msgstr ""
 msgid "Cross-Validation Error"
 msgstr ""
 
+#: R/lassologistic.b.R
+msgid "Cross-validation error computed per case"
+msgstr "Çapraz doğrulama hatası olgu bazında hesaplandı"
+
 #: R/stagemigration-part4.R
 msgid "Cross-validation failed"
 msgstr ""
@@ -74767,6 +74792,10 @@ msgstr "Kadın düzeyi:"
 #: R/decision.b.R
 msgid "Few cases in one arm: {dpos} disease-present and {dneg} disease-free"
 msgstr "Gruplardan birinde az olgu: {dpos} hastalıklı ve {dneg} hastalıksız olgu"
+
+#: R/lassologistic.b.R
+msgid "Few cases of one class per fold"
+msgstr "Katlarda bir sınıftan az olgu"
 
 #: R/jjpiestats.b.R
 msgid "Few discordant pairs"
@@ -121987,6 +122016,10 @@ msgstr ""
 "Yalnızca en az iki patolog tarafından okunan olgular sayılır; burada %d olgu "
 "tek bir patolog tarafından okundu."
 
+#: R/lassologistic.b.R
+msgid "Only cases with outcome '%s' remain."
+msgstr "Yalnızca sonlanımı '%s' olan olgular kaldı."
+
 #: R/waterfall.b.R
 msgid ""
 "Only n=%d evaluable patients: a single patient changes each rate by %.0f "
@@ -138111,6 +138144,10 @@ msgstr "En yüksek EAA değerine sahip öngörücü"
 msgid "Predictors"
 msgstr "Öngörücüler"
 
+#: R/lassologistic.b.R
+msgid "Predictors constant among the analysed cases"
+msgstr "Analiz edilen olgularda sabit kalan tahmin ediciler"
+
 #: R/lassocox.b.R
 msgid ""
 "Predictors contain infinite values: {vars}. Correct these values before "
@@ -138126,10 +138163,6 @@ msgid ""
 msgstr ""
 "Yordayıcılar yalnızca eksik değerler içeriyor: {vars}. Veri sağlayınız veya "
 "bu yordayıcıları açıkça çıkarınız."
-
-#: R/lassologistic.b.R
-msgid "Predictors constant among the analysed cases"
-msgstr "Analiz edilen olgularda sabit kalan tahmin ediciler"
 
 #: R/multisurvival.b.R
 msgid "Predictors included:"
@@ -142099,19 +142132,6 @@ msgstr ""
 #: alluvial/options/curveType/quintic.title
 msgid "Quintic (very smooth)"
 msgstr "Beşinci derece (çok yumuşak)"
-
-#: R/lassologistic.b.R
-msgid ""
-"Removed before fitting: %1$s. Each varies only in rows that were excluded "
-"for a missing value, so every analysed case has the same value, and a "
-"predictor that does not vary cannot be penalised or selected. %2$d variables "
-"remain and are shown as Variables analysed."
-msgstr ""
-"Uyarlamadan önce çıkarıldı: %1$s. Her biri yalnızca eksik bir değer "
-"nedeniyle dışlanan satırlarda farklılık gösterir; bu yüzden analiz edilen "
-"her olguda aynı değere sahiptir ve değişkenlik göstermeyen bir tahmin edici "
-"cezalandırılamaz ve seçilemez. %2$d değişken kalmıştır ve Analiz edilen "
-"değişkenler olarak gösterilir."
 
 #: bayesiandiagnostic/results/convergenceDiagnostics.columns.title
 #: bayesiannetworkma/results/convergenceDiagnostics.columns.title
@@ -146648,6 +146668,19 @@ msgstr "Eksik değerlere sahip {n} olgu kaldırıldı"
 #: R/decision.b.R
 msgid "Removed {n} row(s) with missing diagnostic data"
 msgstr "Eksik tanısal veriye sahip {n} satır kaldırıldı"
+
+#: R/lassologistic.b.R
+msgid ""
+"Removed before fitting: %1$s. Each varies only in rows that were excluded "
+"for a missing value, so every analysed case has the same value, and a "
+"predictor that does not vary cannot be penalised or selected. %2$d variables "
+"remain and are shown as Variables analysed."
+msgstr ""
+"Uyarlamadan önce çıkarıldı: %1$s. Her biri yalnızca eksik bir değer "
+"nedeniyle dışlanan satırlarda farklılık gösterir; bu yüzden analiz edilen "
+"her olguda aynı değere sahiptir ve değişkenlik göstermeyen bir tahmin edici "
+"cezalandırılamaz ve seçilemez. %2$d değişken kalmıştır ve Analiz edilen "
+"değişkenler olarak gösterilir."
 
 #: R/lassocox.b.R
 msgid "Removed constant candidate predictors: {vars}."
@@ -175572,6 +175605,10 @@ msgstr ""
 "insidans tablosu seçilen zamanlardaki tahminler, güven aralıkları ve "
 "sayımlar için kullanılabilir olmaya devam eder."
 
+#: R/lassologistic.b.R
+msgid "The complete cases include %1$d events and %2$d non-events."
+msgstr "Tam olgular %1$d olay ve %2$d olay olmayan içeriyor."
+
 #: R/kappaSizeCI.b.R
 msgid ""
 "The computed sample size ({n}) is very large and may be impractical for a "
@@ -182924,6 +182961,17 @@ msgstr ""
 #: R/decisioncurve.b.R
 msgid "These look like percentages: enter {values} instead."
 msgstr "Bunlar yüzde gibi görünüyor: bunun yerine {values} girin."
+
+#: R/lassologistic.b.R
+msgid ""
+"These manual cut point entries were not used: %s. Each must be "
+"'variable=value' using an explanatory variable's name as written; a name "
+"containing a comma, semicolon or '=' cannot be given a manual cut."
+msgstr ""
+"Şu manuel kesim noktası girdileri kullanılmadı: %s. Her biri, açıklayıcı "
+"değişkenin adı yazıldığı gibi kullanılarak 'değişken=değer' biçiminde "
+"olmalıdır; virgül, noktalı virgül veya '=' içeren bir ada manuel kesim "
+"verilemez."
 
 #: R/psychopdaROC.b.R
 msgid ""
@@ -201080,6 +201128,16 @@ msgid ""
 msgstr ""
 "%%%.1f özgüllük ile, sağlıklı 100 bireyden %.0f kadarı pozitif test sonucu "
 "verebilir."
+
+#: R/lassologistic.b.R
+msgid ""
+"With %1$d folds and %2$d cases some folds hold fewer than 3 cases, so glmnet "
+"computed the cross-validated deviance and its standard error per case rather "
+"than per fold. The 1SE rule uses that standard error."
+msgstr ""
+"%1$d kat ve %2$d olgu ile bazı katlarda 3'ten az olgu bulunduğundan glmnet "
+"çapraz doğrulanmış sapmayı ve standart hatasını kat bazında değil olgu "
+"bazında hesapladı. 1SE kuralı bu standart hatayı kullanır."
 
 #: R/enhancedROC.b.R
 msgid ""
