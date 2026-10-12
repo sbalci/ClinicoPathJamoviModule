@@ -2,6 +2,14 @@
 
 ## Unreleased — rare-disease AI validation and workload
 
+- Add `agreementintro` 0.0.1 under meddecideT → Agreement → Method Guide.
+  The guide combines a study-design questionnaire, optional wide/long data checks,
+  and educational explanations. It recommends agreement-family analyses with explicit
+  settings and development status, preserves IDs and ordinal levels, and identifies
+  unknown, conflicting and unsupported designs. English/Turkish strings and Mermaid
+  decision documentation are included. Existing statistical backends and production
+  routing are unchanged.
+
 - In module 1.0.81.01, `psychopdaROC` analysis 1.0.92 aligns its AUC-PR with
   `enhancedROC`: both integrate the curve interpolated in true- and false-positive
   counts. The former trapezoidal calculation overstated tied-score performance

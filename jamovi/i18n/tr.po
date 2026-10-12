@@ -635,6 +635,10 @@ msgstr ""
 msgid "(Expected)"
 msgstr "(Beklenen)"
 
+#: R/agreementintro.b.R
+msgid "(first 30 declared levels shown)"
+msgstr "(tanımlı ilk 30 düzey gösteriliyor)"
+
 #: R/agepyramid.b.R
 msgid "(ggcharts received {nRows} rows covering {nGroups} age group(s).)"
 msgstr "(ggcharts, {nGroups} yaş grubunu kapsayan {nRows} satır aldı.)"
@@ -13476,6 +13480,22 @@ msgstr ""
 "Sıfır veya altında bir sınır, bu sayıda olgunun şansa bağlı uyumdan daha "
 "iyisini dışlayamayacağı anlamına gelir."
 
+#: R/agreementintro.b.R
+msgid ""
+"A case has conflicting reference values. Resolve the reference definition "
+"before using reader accuracy."
+msgstr ""
+"Bir olguda çelişen referans değerleri var. Değerlendirici doğruluğunu "
+"kullanmadan önce referans tanımını düzeltin."
+
+#: R/agreementintro.b.R
+msgid ""
+"A case ID maps to more than one patient ID. Resolve the case-to-patient "
+"mapping."
+msgstr ""
+"Bir olgu kimliği birden fazla hasta kimliğiyle eşleşiyor. Olgu-hasta "
+"eşlemesini düzeltin."
+
 #: R/agreement.b.R
 msgid ""
 "A case ID variable was given, but no case appears under more than one "
@@ -13925,6 +13945,10 @@ msgstr ""
 "Renkle gösterilecek değişkeni seçen dolgu seçeneği. Varsayılan "
 "'first_variable'."
 
+#: agreementintro/options/planningGoal/fixed.title
+msgid "A lower confidence bound with fixed sample size"
+msgstr "Sabit örneklem büyüklüğünde alt güven sınırı"
+
 #: R/multisurvival.b.R
 msgid "a lower fitted hazard"
 msgstr "daha düşük bir model tehlikesi"
@@ -13972,6 +13996,10 @@ msgid ""
 "A measure that converts health benefits into monetary terms and subtracts "
 "costs, allowing direct comparison of interventions."
 msgstr ""
+
+#: R/agreementintro.b.R
+msgid "A method configuration matches the declared study design."
+msgstr "Bildirilen çalışma tasarımına uygun bir yöntem yapılandırması bulundu."
 
 #: R/decisioncurve.b.R
 msgid "A model is useful only where its curve sits above BOTH reference lines."
@@ -14104,6 +14132,16 @@ msgstr ""
 "Elle yapılan alt grup uydurmalarıyla karşılaştırırken örneklem büyüklüğü "
 "hakkında not:"
 
+#: R/agreementintro.b.R
+msgid ""
+"A one-way ICC requires different exchangeable random raters across cases and "
+"equal numbers of ratings. A fixed-panel or consistency-specific "
+"interpretation is not supported by this one-way route."
+msgstr ""
+"Tek yönlü ICC, olgular arasında farklı, değişebilir rastgele "
+"değerlendiriciler ve eşit sayıda değerlendirme gerektirir. Bu yol sabit "
+"panel veya tutarlılığa özel yorumlamayı desteklemez."
+
 #: R/raincloud.b.R
 msgid ""
 "A p-value adjustment was requested, but only one comparison is being made, "
@@ -14138,6 +14176,14 @@ msgstr ""
 #: R/enhancedROC.b.R
 msgid "A partition audit requires patient identifiers."
 msgstr "Bölümleme denetimi hasta tanımlayıcıları gerektirir."
+
+#: R/agreementintro.b.R
+msgid ""
+"A patient contributes more than one distinct case. These cases are "
+"clustered, even when case IDs are unique."
+msgstr ""
+"Bir hasta birden fazla farklı olgu sağlıyor. Olgu kimlikleri benzersiz olsa "
+"bile bu olgular kümelenmiştir."
 
 #: R/psychopdaROC.b.R
 msgid ""
@@ -14243,6 +14289,10 @@ msgid ""
 "A point in the decision tree where uncertain events occur. Represented by "
 "circles in decision trees."
 msgstr ""
+
+#: agreementintro/options/raterSelection/random.title
+msgid "A population of comparable raters (random)"
+msgstr "Benzer değerlendiricilerden oluşan popülasyon (rastgele)"
 
 #: R/decision.b.R
 msgid ""
@@ -14407,6 +14457,20 @@ msgstr ""
 "tekilleştirilmez. Frekans ağırlıkları kullanıldığında bunlar doğrulanmış "
 "benzersiz hastaları veya karmaşık bir örnekleme tasarımını değil, "
 "çoğaltılmış satırları temsil eder."
+
+#: R/agreementintro.b.R
+msgid ""
+"A selected column is no longer available. Update the optional data "
+"selections."
+msgstr "Seçili bir sütun artık yok. İsteğe bağlı veri seçimlerini güncelleyin."
+
+#: R/agreementintro.b.R
+msgid ""
+"A selected identifier contains missing or blank values. Complete the "
+"identifiers before checking matched designs."
+msgstr ""
+"Seçili bir kimlik sütununda eksik veya boş değer var. Eşleştirilmiş tasarımı "
+"kontrol etmeden önce kimlikleri tamamlayın."
 
 #: R/cotest.b.R
 msgid ""
@@ -14734,6 +14798,10 @@ msgstr ""
 #: contTables/results/chiSq.description
 msgid "a table of χ² test results"
 msgstr ""
+
+#: agreementintro/options/planningGoal/precision.title
+msgid "A target confidence interval"
+msgstr "Hedef güven aralığı"
 
 #: R/pathsampling.b.R
 msgid ""
@@ -15313,6 +15381,10 @@ msgstr ""
 msgid "Above reference gap (index > 1.3)"
 msgstr "Referans boşluğun üzerinde (indeks > 1,3)"
 
+#: agreementintro/options/cutoffDirection/gt.title
+msgid "Above the cutoff"
+msgstr "Eşiğin üstünde"
+
 #: bbcplots/options/value_position/above.title
 msgid "Above/End"
 msgstr ""
@@ -15340,6 +15412,10 @@ msgstr ""
 #: icccoeff/options/agreement_type/agreement.title
 msgid "Absolute Agreement (ICC(A))"
 msgstr ""
+
+#: agreementintro/options/iccDefinition/absolute.title
+msgid "Absolute agreement: the same values"
+msgstr "Mutlak uyum: aynı değerler"
 
 #: clinicaltrialdesign/options/margin_type/absolute.title
 msgid "Absolute Difference"
@@ -15413,6 +15489,14 @@ msgstr ""
 #: stagemigration/options/absorptionStates.title
 msgid "Absorption States"
 msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"AC2 is a complementary weighted agreement coefficient with a different "
+"chance-agreement model."
+msgstr ""
+"AC2, farklı bir şansa bağlı uyum modeli kullanan tamamlayıcı ağırlıklı uyum "
+"katsayısıdır."
 
 #: raftgee/results/coefficients.columns.title
 msgid "Accel. Factor"
@@ -19118,6 +19202,8 @@ msgstr "Referansla Uyuşan"
 #: pathagreement/options.menuSubgroup
 #: pathologyagreement/options.menuSubgroup
 #: survivalPower/results/simulation_validation_table.columns.title
+#: package/analyses/agreementintro.menuSubgroup
+#: agreementintro/options.menuSubgroup
 msgid "Agreement"
 msgstr "Uyum"
 
@@ -19156,6 +19242,10 @@ msgstr ""
 msgid "Agreement Across Sequential Case Groups"
 msgstr ""
 
+#: agreementintro/results/catalogue.title
+msgid "Agreement Analysis Catalogue"
+msgstr "Uyum Analizi Kataloğu"
+
 #: R/pathagreement.b.R
 msgid "Agreement analysis requires at least 2 cases (observations)."
 msgstr ""
@@ -19183,6 +19273,10 @@ msgid ""
 "across {cases} cases. This is one of several rater pairs ({raters} raters in "
 "total); report the pairwise results rather than this pair alone."
 msgstr ""
+
+#: agreementintro/options/purpose/measurement.title
+msgid "Agreement between two measurement methods"
+msgstr "İki ölçüm yöntemi arasındaki uyum"
 
 #: package/analyses/agreement.description
 #: agreement/options.description.main
@@ -19338,6 +19432,15 @@ msgstr ""
 msgid "Agreement Level:"
 msgstr "Uyum Düzeyi:"
 
+#: package.title
+#: package/analyses/agreementintro.title
+#: agreementintro/options.title
+#: agreementintro/ui.title
+#: agreementintro/results.title
+#: agreementintro/results/overview.title
+msgid "Agreement Method Guide"
+msgstr "Uyum Yöntemi Rehberi"
+
 #: R/agreement.b.R
 #: pathologyagreement/results/agreementtable.columns.title
 msgid "Agreement Metric"
@@ -19351,6 +19454,10 @@ msgstr "Uyum metriği"
 #: pathagreement/options.menuSubtitle
 msgid "Agreement on Categorical and Ordinal Data"
 msgstr ""
+
+#: agreementintro/options/purpose/categorical.title
+msgid "Agreement on categories or grades"
+msgstr "Kategori veya derecelerde uyum"
 
 #: package/analyses/pathologyagreement.menuSubtitle
 #: pathologyagreement/options.menuSubtitle
@@ -19455,6 +19562,16 @@ msgstr ""
 msgid "Agreement with comparator"
 msgstr "Karşılaştırıcı ile uyum"
 
+#: R/agreementintro.b.R
+msgid ""
+"Agreement with expert consensus or another method is not disease sensitivity "
+"or specificity. Keep the comparator description and classification agreement "
+"labels in the report."
+msgstr ""
+"Uzman uzlaşısı veya başka bir yöntemle uyum, hastalık duyarlılığı veya "
+"özgüllüğü değildir. Raporda karşılaştırıcının tanımını ve sınıflandırma "
+"uyumu etiketlerini koruyun."
+
 #: R/pathagreement.b.R
 msgid ""
 "Agreement with the comparator does not establish disease status. PPA/NPA "
@@ -19484,6 +19601,16 @@ msgstr ""
 #: agreement/options/loaVariableName.default
 msgid "agreement_level"
 msgstr "uyum_duzeyi"
+
+#: R/agreementintro.b.R
+msgid ""
+"Agreement, reliability, correlation, and diagnostic accuracy are different "
+"questions. A large correlation, a non-significant marginal test, or a verbal "
+"kappa band does not establish clinical interchangeability."
+msgstr ""
+"Uyum, güvenirlik, korelasyon ve tanısal doğruluk farklı sorulardır. Yüksek "
+"korelasyon, anlamlı olmayan marjinal test veya sözel kappa sınıfı klinik "
+"olarak birbirinin yerine kullanılabilirliği göstermez."
 
 #: cohenskappa/results/categoryStats.columns.title
 msgid "Agreements"
@@ -19834,6 +19961,10 @@ msgid ""
 "ratio is heterogeneous, so a non-significant result does not establish that "
 "publication bias is absent."
 msgstr ""
+
+#: agreementintro/options/showCatalogue.title
+msgid "All available analysis routes"
+msgstr "Kullanılabilir tüm analiz yolları"
 
 #: mageeequation/options/equations/all.title
 msgid "All Available Equations"
@@ -20569,6 +20700,16 @@ msgstr ""
 msgid "Alpha and Power"
 msgstr "Alfa ve Güç"
 
+#: R/agreementintro.b.R
+msgid ""
+"Alpha can use incomplete rating panels. Cases with fewer than two observed "
+"ratings provide no pairwise agreement information; missingness can still "
+"bias the study."
+msgstr ""
+"Alfa eksik değerlendirme panellerini kullanabilir. İkiden az gözlenen "
+"değerlendirmesi olan olgular ikili uyum bilgisi sağlamaz; eksiklik yine de "
+"çalışmada yanlılık oluşturabilir."
+
 #: nogoldstandard/options/alpha.title
 msgid "Alpha for Confidence Intervals"
 msgstr "Güven Aralıkları İçin Alfa"
@@ -20637,6 +20778,10 @@ msgstr ""
 #: tinytable/options/style_alternating.title
 msgid "Alternating Row Colors"
 msgstr ""
+
+#: R/agreementintro.b.R
+msgid "Alternative"
+msgstr "Alternatif"
 
 #: pathagreement/ui[9][0][0].label
 msgid "Alternative agreement coefficients"
@@ -20860,6 +21005,14 @@ msgstr ""
 "Tam model AIC değerinin ({aic}) altındaki bir <b>çıkarılırsa AIC</b>, "
 "kovaryatın uyumu bozmadan çıkarılabileceğini gösterir."
 
+#: R/agreementintro.b.R
+msgid ""
+"An alternative interface is available for this method. Its development "
+"status and assumptions need separate review."
+msgstr ""
+"Bu yöntem için alternatif bir arayüz vardır. Geliştirme durumu ve "
+"varsayımları ayrıca değerlendirilmelidir."
+
 #: R/decisiongraph.b.R
 msgid ""
 "An analysis that tests how sensitive the results are to changes in key "
@@ -20890,6 +21043,21 @@ msgstr ""
 "Tam ayrım katsayıların kendisini de kararsız hale getirir. İyimserlik "
 "düzeltmeli bir tahmin için bootstrap doğrulamasını etkinleştirin ve herhangi "
 "bir klinik kullanımdan önce harici doğrulamayı zorunlu olarak ele alın."
+
+#: package/analyses/agreementintro.description
+#: agreementintro/options.description.main
+msgid ""
+"An educational decision guide across the agreement analysis family. Uses "
+"user-confirmed study design and optional wide or long data inspection to "
+"suggest methods, exact settings, preparation steps and current development "
+"routes. Does not calculate agreement statistics or run another analysis. "
+"Questionnaire guidance works with an empty dataset."
+msgstr ""
+"Uyum analizi ailesi için eğitici karar rehberi. Kullanıcının doğruladığı "
+"çalışma tasarımını ve isteğe bağlı geniş veya uzun veri incelemesini "
+"kullanarak yöntemleri, kesin ayarları, hazırlık adımlarını ve mevcut "
+"geliştirme yollarını önerir. Uyum istatistiği hesaplamaz ve başka bir analiz "
+"çalıştırmaz. Anket yönlendirmesi boş veri kümesiyle çalışır."
 
 #: R/agreement.b.R
 msgid ""
@@ -21017,6 +21185,10 @@ msgstr ""
 "Kusursuz olmayan bir referans standart tahmin edilen her ölçütü yanlı hale "
 "getirebilir; kısıtlılıklarını belgeleyin ve uygun olduğunda örtük sınıf veya "
 "uyumsuzluk çözme yöntemlerini düşünün."
+
+#: agreementintro/options/panel/incomplete.title
+msgid "An incomplete or varying rater panel"
+msgstr "Eksik veya değişen değerlendirici paneli"
 
 #: package/analyses/lassointro.description
 #: lassointro/options.description.main
@@ -21196,8 +21368,11 @@ msgstr "%d olgu analiz ediliyor"
 #: timevarycox/results/todo.title
 #: treatmentmeta/results/trim_fill_results.columns.title
 #: weightedlogrank/results/todo.title
+#: agreementintro/results/recommendations.columns.title
+#: agreementintro/results/settings.columns.title
+#: agreementintro/results/catalogue.columns.title
 msgid "Analysis"
-msgstr ""
+msgstr "Analiz"
 
 #: R/jjpiestats.b.R
 msgid "analysis"
@@ -22140,6 +22315,17 @@ msgstr ""
 msgid "Analysis unit"
 msgstr "Analiz birimi"
 
+#: R/agreementintro.b.R
+msgid ""
+"Analysis unit: the independent entity relevant to the question. A patient "
+"may contribute several dependent specimens. A reference standard, expert "
+"consensus, and comparison method have different interpretations and must be "
+"labelled explicitly."
+msgstr ""
+"Analiz birimi: araştırma sorusuyla ilgili bağımsız varlık. Bir hasta birden "
+"fazla bağımlı örnek sağlayabilir. Referans standardı, uzman uzlaşısı ve "
+"karşılaştırma yöntemi farklı yorumlara sahiptir ve açıkça etiketlenmelidir."
+
 #: R/advancedraincloud.b.R
 msgid ""
 "Analysis uses each subject’s last available level after baseline, according "
@@ -22545,6 +22731,10 @@ msgstr ""
 #: decisiongraph/results/markovTable.columns.title
 msgid "Annual Utility"
 msgstr ""
+
+#: agreementintro/options/referenceType/method.title
+msgid "Another comparison method"
+msgstr "Başka bir karşılaştırma yöntemi"
 
 #: advancedbarplot/options/stat_method/anova.title
 #: bbcplots/options/stat_method/anova.title
@@ -23020,6 +23210,11 @@ msgstr "Arktanjant"
 msgid "Arctangent (gradual curves)"
 msgstr ""
 
+#: agreementintro/options/missingRatings.title
+#: agreementintro/ui[0][4].label
+msgid "Are any ratings missing?"
+msgstr "Eksik değerlendirme var mı?"
+
 #: R/multisurvival.b.R
 msgid "are created by dividing patients into quantiles (tertiles, quartiles, etc.)"
 msgstr "hastaların kantillere (tersil, çeyrek vb.) bölünmesiyle oluşturulur"
@@ -23416,6 +23611,34 @@ msgstr ""
 msgid "Assessment time"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"Assign modality1_var and modality2_var and optionally case_id. Use one "
+"matched pair per independent case. This custom-category recipe reports "
+"overall agreement and unweighted kappa on complete pairs. Directional, "
+"weighted, discordance, contingency, plot and confidence-interval outputs are "
+"disabled because their custom-category behavior is not verified. The target "
+"remains a draft."
+msgstr ""
+"modality1_var ve modality2_var değişkenlerini, isteğe bağlı olarak case_id "
+"değişkenini atayın. Her bağımsız vaka için bir eşleştirilmiş çift kullanın. "
+"Bu özel kategori ayarları tam çiftlerde genel uyumu ve ağırlıksız kappayı "
+"raporlar. Özel kategorilerdeki davranışları doğrulanmadığından yön, ağırlık, "
+"uyumsuzluk, çapraz tablo, grafik ve güven aralığı çıktıları kapalıdır. Hedef "
+"analiz taslak durumundadır."
+
+#: R/agreementintro.b.R
+msgid ""
+"Assign Patient / cluster ID to readerCluster in pathagreement and retain "
+"paired readings within each resampled cluster. These bootstrap intervals are "
+"exploratory; the analysis unit is the case or specimen, with clustered "
+"uncertainty."
+msgstr ""
+"pathagreement içinde Hasta / küme kimliğini readerCluster seçeneğine atayın "
+"ve yeniden örneklenen her kümedeki eşleştirilmiş okumaları birlikte tutun. "
+"Bu bootstrap aralıkları keşifseldir; analiz birimi olgu veya örnektir, "
+"belirsizlik kümeleri dikkate alır."
+
 #: ihccluster/results/outlierCases.columns.title
 #: ihcpredict/results/predictionEvidence.columns.title
 msgid "Assigned Cluster"
@@ -23651,6 +23874,14 @@ msgstr ""
 #: jjdotplotstats/results/explanation.title
 msgid "Assumptions and Interpretation"
 msgstr ""
+
+#: agreementintro/options/showPitfalls.title
+msgid "Assumptions and pitfalls"
+msgstr "Varsayımlar ve sık yapılan hatalar"
+
+#: agreementintro/results/pitfalls.title
+msgid "Assumptions and Pitfalls"
+msgstr "Varsayımlar ve Sık Yapılan Hatalar"
 
 #: chisqposttest/options/showAssumptionsCheck.title
 msgid "Assumptions check"
@@ -24005,6 +24236,16 @@ msgstr ""
 "gözlemler tutulabilir ancak tamamı sıfır olan bir zaman değişkeni sağkalım "
 "tahminini destekleyemez."
 
+#: R/agreementintro.b.R
+msgid ""
+"At least one selected column has fewer than two observed distinct values. A "
+"chance-corrected coefficient may be undefined; constant ratings do not "
+"establish reliability."
+msgstr ""
+"En az bir seçili sütunda ikiden az farklı gözlenen değer var. Şansa göre "
+"düzeltilmiş katsayı tanımsız olabilir; sabit değerlendirmeler güvenirliği "
+"göstermez."
+
 #: R/riverplot.b.R
 msgid "At least one strata variable is required"
 msgstr ""
@@ -24108,9 +24349,17 @@ msgstr "En uygun eşik = %1$s (duyarlılık %2$s%%, özgüllük %3$s%%)"
 msgid "At or above cutoff"
 msgstr ""
 
+#: agreementintro/options/cutoffDirection/ge.title
+msgid "At or above the cutoff"
+msgstr "Eşiğe eşit veya üstünde"
+
 #: pathagreement/options/positiveRule/le.title
 msgid "At or below cutoff"
 msgstr ""
+
+#: agreementintro/options/cutoffDirection/le.title
+msgid "At or below the cutoff"
+msgstr "Eşiğe eşit veya altında"
 
 #: R/crosstable.b.R
 msgid "At p < 0.05, %d of %d variables differed between the groups: %s."
@@ -24770,6 +25019,19 @@ msgstr ""
 "alanı olduğundan büyük gösterir. Hiçbir bilgi taşımayan bir belirteç "
 "yaklaşık prevalans kadar skor alır. Ortalama kesinlik basamaklı tahmindir: "
 "Duyarlılık-Duyarlık grafiğindeki basamak eğrisinin altındaki alan."
+
+#: R/psychopdaROC.b.R
+msgid ""
+"AUC-PR uses interpolation linear in true- and false-positive counts (Davis & "
+"Goadrich 2006; Keilwagen et al. 2014), matching Clinical ROC Analysis. Tied "
+"scores enter together. The precision-recall step plot instead shows average "
+"precision. A constant marker has both areas equal to the sample prevalence."
+msgstr ""
+"AUC-PR, Klinik ROC Analizi ile uyumlu olarak doğru ve yanlış pozitif "
+"sayılarında doğrusal enterpolasyon kullanır (Davis ve Goadrich 2006; "
+"Keilwagen ve ark. 2014). Eşit puanlar birlikte değerlendirilir. "
+"Kesinlik-duyarlılık basamak grafiği ise ortalama kesinliği gösterir. Sabit "
+"bir belirteç için her iki alan da örneklem prevalansına eşittir."
 
 #: biomarkerdiscovery/results/signature_performance.columns.title
 #: biomarkerdiscovery/results/cross_validation_results.columns.title
@@ -25454,6 +25716,10 @@ msgstr "Ortalama kesinlik"
 #: precisionrecall/options/aucMethod/average_precision.title
 msgid "Average precision (step area)"
 msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid "Average precision = %.3f"
+msgstr "Ortalama kesinlik = %.3f"
 
 #: vusanalysis/options/handle_ties/average.title
 msgid "Average Ranks"
@@ -27479,6 +27745,10 @@ msgstr "Referans boşluğun altında (indeks < 0,7)"
 msgid "Below the conventional 0.667 minimum for tentative conclusions"
 msgstr "Geçici sonuçlar için geleneksel 0.667 alt sınırının altında"
 
+#: agreementintro/options/cutoffDirection/lt.title
+msgid "Below the cutoff"
+msgstr "Eşiğin altında"
+
 #: R/ihcheterogeneity.b.R
 msgid "Below the threshold as a point estimate only: %s."
 msgstr "Yalnızca nokta tahmini olarak eşiğin altında: %s."
@@ -28461,6 +28731,15 @@ msgstr ""
 msgid "Binary Outcomes"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"Binary ratings were declared, but the selected rating columns together "
+"contain more than two observed values. Confirm a common binary coding."
+msgstr ""
+"İkili değerlendirmeler bildirildi; ancak seçili değerlendirme sütunları "
+"birlikte ikiden fazla gözlenen değer içeriyor. Ortak ikili kodlamayı "
+"doğrulayın."
+
 #: pathagreement/options/readerWorkflow/binary.title
 msgid "Binary reader diagnostics"
 msgstr ""
@@ -29135,6 +29414,10 @@ msgid ""
 msgstr ""
 "Bland-Altman analizi tam olarak 2 değerlendirici gerektirir. Lütfen yalnızca "
 "2 değişken seçin."
+
+#: R/agreementintro.b.R
+msgid "Bland-Altman limits and Lin's CCC"
+msgstr "Bland-Altman sınırları ve Lin CCC"
 
 #: pathologyagreement/options/ba_method.title
 #: pathologyagreement/ui[1][3][0].label
@@ -33369,6 +33652,8 @@ msgstr ""
 #: pathagreement/results/consensusTable.columns.title
 #: pathagreement/results/caseDifficultyTable.columns.title
 #: pathagreement/results/discordantCasesCluster.columns.title
+#: agreementintro/options/caseID.title
+#: agreementintro/ui[2][2][2].label
 msgid "Case ID"
 msgstr "Olgu Kimliği"
 
@@ -33617,6 +33902,7 @@ msgstr ""
 #: pathsampling/results/lnrClassification.columns.title
 #: pathsampling/results/ajccNStage.columns.title
 #: pathsampling/results/adequacyByELN.columns.title
+#: R/agreementintro.b.R
 msgid "Cases"
 msgstr "Olgu"
 
@@ -33814,6 +34100,14 @@ msgstr ""
 msgid "Cassettes Examined"
 msgstr ""
 
+#: agreementintro/results/catalogueNotes.title
+msgid "Catalogue Menu Locations"
+msgstr "Katalog Menü Konumları"
+
+#: agreementintro/results/catalogue.columns.title
+msgid "Catalogue version"
+msgstr "Katalog sürümü"
+
 #: R/tableone.b.R
 #: package/analyses/jjtreemap.menuSubgroup
 #: jjtreemap/options.menuSubgroup
@@ -33900,6 +34194,14 @@ msgstr ""
 #: advancedimputation/options/categorical_method.title
 msgid "Categorical Imputation Method"
 msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Categorical kappa needs categories or grades. Use measurement agreement or "
+"reliability for continuous measurements."
+msgstr ""
+"Kategorik kappa, kategori veya derece gerektirir. Sürekli ölçümler için "
+"ölçüm uyumu veya güvenirlik kullanın."
 
 #: multisurvival/ui[6][0][0][1][0][0].label
 msgid "Categorical Model Variable"
@@ -34061,6 +34363,7 @@ msgstr ""
 #: jjsegmentedtotalbar/results/summary.columns.title
 #: modalitycomparison/results/overviewTable.columns.title
 #: pathagreement/results/overviewTable.columns.title
+#: agreementintro/results/columnSummary.columns.title
 msgid "Categories"
 msgstr "Kategoriler"
 
@@ -36011,6 +36314,29 @@ msgstr ""
 msgid "Choose a unique rule label."
 msgstr "Benzersiz bir kural etiketi seçin."
 
+#: R/agreementintro.b.R
+msgid ""
+"Choose absolute agreement or consistency; consistency permits systematic "
+"shifts between raters."
+msgstr ""
+"Mutlak uyum veya tutarlılığı seçin; tutarlılık, değerlendiriciler arasındaki "
+"sistematik kaymalara izin verir."
+
+#: package/analyses/agreementintro.menuSubtitle
+#: agreementintro/options.menuSubtitle
+msgid "Choose an agreement analysis for your study design"
+msgstr "Çalışma tasarımınız için uyum analizi seçin"
+
+#: R/agreementintro.b.R
+msgid ""
+"Choose an agreement method from the question you want to answer, the meaning "
+"of the scores, and the study design. This guide describes analyses; it does "
+"not calculate agreement statistics or open another analysis."
+msgstr ""
+"Uyum yöntemini araştırma sorunuza, puanların anlamına ve çalışma tasarımına "
+"göre seçin. Bu rehber analizleri açıklar; uyum istatistiği hesaplamaz ve "
+"başka bir analiz açmaz."
+
 #: R/nogoldstandard.b.R
 msgid "Choose Analysis Method:"
 msgstr "Analiz Yöntemini Seçin:"
@@ -36199,6 +36525,14 @@ msgstr ""
 msgid "Choose Input Type"
 msgstr "Giriş Türünü Seçin"
 
+#: R/agreementintro.b.R
+msgid ""
+"Choose interval precision, hypothesis-test power, or a lower bound with "
+"fixed sample size."
+msgstr ""
+"Güven aralığı hassasiyeti, hipotez testi gücü veya sabit örneklem "
+"büyüklüğünde alt sınırı seçin."
+
 #: jjsegmentedtotalbar/options/flerlage_label_color.description.jamovi
 msgid "Choose label color for Flerlage plot type."
 msgstr ""
@@ -36308,6 +36642,14 @@ msgstr ""
 #: bbcplots/options/chart_type.description.ui
 msgid "Choose the chart type that best represents your data."
 msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Choose the clinical cutoff before inspecting performance, then confirm that "
+"it was prespecified."
+msgstr ""
+"Performansı incelemeden önce klinik eşiği seçin, ardından önceden "
+"belirlendiğini doğrulayın."
 
 #: clinicalheatmap/options/colorPalette.description.jamovi
 msgid "Choose the color scheme for the heatmap."
@@ -36535,6 +36877,14 @@ msgstr ""
 #: jiwillsurvive/options/followup_units.description.jamovi
 msgid "Choose time units for follow-up calculation."
 msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Choose unweighted, linear, or quadratic disagreement weights for ordered "
+"categories."
+msgstr ""
+"Sıralı kategoriler için ağırlıksız, doğrusal veya karesel uyuşmazlık "
+"ağırlıklarını seçin."
 
 #: datevalidator/ui[1][0].label
 msgid "Choose validation method and date/datetime format"
@@ -38101,8 +38451,13 @@ msgid ""
 msgstr ""
 
 #: R/jjhistostats.b.R
+#: agreementintro/options/showExamples.title
 msgid "Clinical examples"
-msgstr ""
+msgstr "Klinik örnekler"
+
+#: agreementintro/results/examples.title
+msgid "Clinical Examples"
+msgstr "Klinik Örnekler"
 
 #: jjbarstats/options/showexplanations.title
 #: jjpiestats/options/showexplanations.title
@@ -41091,8 +41446,9 @@ msgid "Cohen's Kappa"
 msgstr "Cohen Kappa"
 
 #: R/pathagreement.b.R
+#: R/agreementintro.b.R
 msgid "Cohen's kappa"
-msgstr ""
+msgstr "Cohen kappa"
 
 #: agreement/options/ssMetric/kappa.title
 msgid "Cohen's Kappa (2 raters)"
@@ -41801,8 +42157,9 @@ msgstr ""
 #: esquisseauto/options/manualGeom/col.title
 #: jggheatmap/options/scaling/column.title
 #: jggheatmap/results/matrixtab.columns.title
+#: agreementintro/results/columnSummary.columns.title
 msgid "Column"
-msgstr ""
+msgstr "Sütun"
 
 #: R/timeinterval.b.R
 msgid ""
@@ -42947,6 +43304,10 @@ msgstr ""
 msgid "Compare to Unadjusted ROC"
 msgstr ""
 
+#: agreementintro/options/purpose/paired.title
+msgid "Compare two conditions or modalities"
+msgstr "İki koşulu veya modaliteyi karşılaştırma"
+
 #: package/analyses/groomecompare.description
 #: groomecompare/options.description.main
 msgid ""
@@ -43783,6 +44144,10 @@ msgid ""
 "Complete case analysis performed. Observations with missing values in any "
 "required variable were excluded."
 msgstr ""
+
+#: R/agreementintro.b.R
+msgid "Complete case-condition-occasion groups"
+msgstr "Eksiksiz olgu-koşul-zaman grupları"
 
 #: R/checkdata.b.R
 #: partialcorrelation/results/diagnostics.columns.title
@@ -45608,6 +45973,10 @@ msgstr ""
 msgid "Concordance Methods"
 msgstr ""
 
+#: agreementintro/options/purpose/ranking.title
+msgid "Concordance of rankings"
+msgstr "Sıralamaların uyumu"
+
 #: mageeequation/results/concordancePlot.title
 #: multifocalconcordance/options/showPlot.title
 msgid "Concordance Plot"
@@ -45664,6 +46033,14 @@ msgstr ""
 msgid "Concordant"
 msgstr "Uyumlu"
 
+#: R/agreementintro.b.R
+msgid ""
+"Concordant biomarker calls alone do not establish tumour clonality. The "
+"candidate settings leave the case-level clonality summary disabled."
+msgstr ""
+"Uyumlu biyobelirteç kararları tek başına tümör klonalitesini göstermez. "
+"Önerilen ayarlar olgu düzeyinde klonalite özetini kapalı tutar."
+
 #: decisioncalculator/results/nTable.columns.title
 msgid "Concordant Results"
 msgstr "Uyumlu Sonuçlar"
@@ -45707,9 +46084,18 @@ msgstr ""
 msgid "Condition"
 msgstr ""
 
+#: agreementintro/options/condition.title
+#: agreementintro/ui[2][2][6].label
+msgid "Condition / modality (optional)"
+msgstr "Koşul / modalite (isteğe bağlı)"
+
 #: agreement/results/pairedAgreementTable.columns.title
 msgid "Condition A"
 msgstr "Koşul A"
+
+#: R/agreementintro.b.R
+msgid "Condition A and B must contain the same number of matched rater columns."
+msgstr "A ve B koşulları aynı sayıda eşleşmiş değerlendirici sütunu içermelidir."
 
 #: R/agreement.b.R
 msgid ""
@@ -45726,6 +46112,11 @@ msgstr ""
 #: agreement/results/pairedAgreementTable.columns.title
 msgid "Condition B"
 msgstr "Koşul B"
+
+#: agreementintro/options/conditionBRatings.title
+#: agreementintro/ui[2][2][1].label
+msgid "Condition B rater columns (paired comparison)"
+msgstr "B koşulu değerlendirici sütunları (eşleştirilmiş karşılaştırma)"
 
 #: agreement/options/conditionBVars.title
 msgid "Condition B raters"
@@ -46960,6 +47351,14 @@ msgstr ""
 msgid "Confirm variables have adequate variation (≥2 categories)"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"Confirm whether the ratings are binary, nominal, ordinal, continuous, or "
+"ranks."
+msgstr ""
+"Değerlendirmelerin ikili, nominal, sıralı, sürekli veya sıra derecesi "
+"olduğunu doğrulayın."
+
 #: R/waterfall.b.R
 msgid "Confirmation"
 msgstr "Doğrulama"
@@ -47186,6 +47585,10 @@ msgstr ""
 #: deeplearningprediction/results/confusionMatrixPlot.title
 msgid "Confusion Matrix Visualization"
 msgstr ""
+
+#: R/agreementintro.b.R
+msgid "Conger's exact kappa"
+msgstr "Conger kesin kappa"
 
 #: pathagreement/options/exct.title
 msgid "Conger's exact kappa (3 or more raters)"
@@ -47633,6 +48036,10 @@ msgstr ""
 msgid "Consistency Score"
 msgstr ""
 
+#: agreementintro/options/iccDefinition/consistency.title
+msgid "Consistency: allow systematic rater shifts"
+msgstr "Tutarlılık: sistematik değerlendirici kaymalarına izin ver"
+
 #: R/agreement.b.R
 msgid "consistent agreement"
 msgstr "tutarlı uyum"
@@ -47949,6 +48356,18 @@ msgstr ""
 msgid "Continuous IHC Markers (H-scores, % positivity)"
 msgstr ""
 
+#: agreementintro/options/scale/continuous.title
+msgid "Continuous measurements"
+msgstr "Sürekli ölçümler"
+
+#: R/agreementintro.b.R
+msgid ""
+"Continuous measurements were declared, but at least one selected rating "
+"column is categorical or text. Confirm and prepare the scale explicitly."
+msgstr ""
+"Sürekli ölçümler bildirildi; ancak seçili değerlendirme sütunlarından en az "
+"biri kategorik veya metin türünde. Ölçeği açıkça doğrulayıp hazırlayın."
+
 #: netreclassification/options/nri_type/numeric.title
 #: netreclassification/results/sensitivityTable.columns.title
 msgid "Continuous NRI"
@@ -47985,6 +48404,10 @@ msgstr ""
 #: R/crosstable.b.R
 msgid "Continuous p-values are rank-based in the gtsummary style"
 msgstr "gtsummary stilinde sürekli p-değerleri sıra temellidir"
+
+#: R/agreementintro.b.R
+msgid "Continuous platform comparison"
+msgstr "Sürekli platform karşılaştırması"
 
 #: R/multisurvival.b.R
 msgid "Continuous predictor with few distinct values"
@@ -54558,6 +54981,10 @@ msgstr ""
 msgid "Data Aspect"
 msgstr ""
 
+#: agreementintro/results/inspectionNotes.title
+msgid "Data Check Notes"
+msgstr "Veri Kontrolü Notları"
+
 #: eurostatmap/ui[3][0].label
 msgid "Data Classification"
 msgstr ""
@@ -56042,6 +56469,7 @@ msgstr ""
 #: nogoldstandard/options.menuSubgroup
 #: screeningcalculator/options.menuSubgroup
 #: stagemigration/results/nestedModelTests.columns.title
+#: agreementintro/results/status.title
 msgid "Decision"
 msgstr "Karar"
 
@@ -56362,6 +56790,10 @@ msgstr ""
 msgid "Decision Panel Optimization"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid "Decision path:"
+msgstr "Karar yolu:"
+
 #: roc2d/options/decision_rule.title
 msgid "Decision Rule"
 msgstr ""
@@ -56540,6 +56972,10 @@ msgstr ""
 "ayar) olarak yazdırılır. Varsayılan, dokunulmamış bir raporun bir örnekleme "
 "tasarımı öne sürmemesi için Diğer / bilinmiyor olarak ayarlanmıştır; PÖD ve "
 "NÖD değerlerinin nasıl okunacağı buna bağlıdır."
+
+#: R/agreementintro.b.R
+msgid "Declared category order"
+msgstr "Tanımlı kategori sırası"
 
 #: R/pathagreement.b.R
 msgid "Declining agreement"
@@ -57860,6 +58296,10 @@ msgstr ""
 msgid "Design could not be computed"
 msgstr ""
 
+#: agreementintro/ui[1].label
+msgid "Design Details"
+msgstr "Tasarım Ayrıntıları"
+
 #: surveysurvival/results/designEffectsSummary.title
 msgid "Design Effects Summary"
 msgstr ""
@@ -58428,6 +58868,17 @@ msgstr "Geliştirme / doğrulama bölümü tanımlayıcısı"
 msgid "Development data only; optimism not corrected"
 msgstr "Yalnızca geliştirme verisi; iyimserlik düzeltilmedi"
 
+#: R/agreementintro.b.R
+msgid ""
+"Development menu labels describe implementation routing, not statistical or "
+"clinical validation. Prespecify cutoffs, disagreement weights and acceptable "
+"differences, and report uncertainty and the analysed population."
+msgstr ""
+"Geliştirme menüsü etiketleri istatistiksel veya klinik doğrulamayı değil "
+"uygulamanın yerini tanımlar. Eşikleri, uyuşmazlık ağırlıklarını ve kabul "
+"edilebilir farkları önceden belirleyin; belirsizliği ve analiz edilen "
+"popülasyonu raporlayın."
+
 #: brierscore/options/development_period.title
 msgid "Development Period End Date"
 msgstr ""
@@ -58439,6 +58890,10 @@ msgstr "Geliştirme risk skoru"
 #: lassocox/options/survival_plot.title
 msgid "Development risk-group curves"
 msgstr "Geliştirme risk grubu eğrileri"
+
+#: agreementintro/results/catalogue.columns.title
+msgid "Development status"
+msgstr "Geliştirme durumu"
 
 #: bayesianma/results/selectedModel.columns.title
 #: bayesianma/results/crossValidation.columns.title
@@ -59530,6 +59985,10 @@ msgstr "Farklı diller/kodlamalar manuel belirleme gerektirebilir"
 msgid "Different Shapes for Node Types"
 msgstr ""
 
+#: agreementintro/options/panel/different.title
+msgid "Different, exchangeable raters with equal numbers per case"
+msgstr "Her olguda eşit sayıda farklı, değişebilir değerlendirici"
+
 #: R/misclassificationbias.b.R
 msgid "differential"
 msgstr ""
@@ -60441,8 +60900,9 @@ msgstr "Hastalık referansı"
 
 #: diagnosticsamplesize/options/referenceType/disease.title
 #: pathagreement/options/referenceType/disease.title
+#: agreementintro/options/referenceType/disease.title
 msgid "Disease reference standard"
-msgstr ""
+msgstr "Hastalık referans standardı"
 
 #: clinicalvalidation/options/clinical_context/screening.title
 #: clinicalvalidationinteractive/options/clinical_context/screening.title
@@ -61792,6 +62252,15 @@ msgid ""
 "where ROC curves may be misleading (Saito & Rehmsmeier, 2015)."
 msgstr ""
 
+#: R/psychopdaROC.b.R
+msgid ""
+"Display precision-recall step curves with average precision. The classifier "
+"comparison table reports the separate interpolated AUC-PR estimate."
+msgstr ""
+"Ortalama kesinlik ile kesinlik-duyarlılık basamak eğrilerini gösterir. "
+"Sınıflandırıcı karşılaştırma tablosu, ayrı bir ölçü olan enterpolasyonlu "
+"AUC-PR tahminini raporlar."
+
 #: directbinomial/options/predictions.description
 #: flexcomprisk/options/showPredictions.description
 msgid "Display predicted cumulative incidence at specified time points"
@@ -62506,6 +62975,10 @@ msgstr ""
 msgid "Distinct diagnostic style"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid "Distinct reader / focus IDs in long input"
+msgstr "Uzun verideki farklı değerlendirici / odak kimlikleri"
+
 #: package/analyses/jjhistostats.menuSubgroup
 #: package/analyses/jwaffle.menuSubgroup
 #: package/analyses/jjridges.menuSubgroup
@@ -62899,6 +63372,16 @@ msgstr ""
 msgid "dmy"
 msgstr "gaa"
 
+#: R/agreementintro.b.R
+msgid ""
+"Do not pool repeated readings as independent raters. Select the "
+"paired-condition workflow when appropriate, or obtain a design-specific "
+"repeatability analysis."
+msgstr ""
+"Tekrarlı değerlendirmeleri bağımsız değerlendiriciler gibi birleştirmeyin. "
+"Uygunsa eşleştirilmiş koşul iş akışını seçin veya tasarıma özel "
+"tekrarlanabilirlik analizi kullanın."
+
 #: R/decisioncurve.b.R
 msgid ""
 "Do not select a model solely from its average net benefit: curve crossings "
@@ -62907,6 +63390,17 @@ msgid ""
 msgstr ""
 "Bir modeli yalnızca ortalama net faydasına göre seçmeyin: eğri kesişimleri "
 "ve her eşiğin makullüğü klinik olarak anlamlı karşılaştırmayı belirler."
+
+#: R/agreementintro.b.R
+msgid ""
+"Do not use numerical category codes as continuous measurements without "
+"justification. Weighted methods need a common ordinal scale; repeated "
+"readings and clustered specimens need an appropriate analysis unit and "
+"uncertainty method."
+msgstr ""
+"Gerekçe olmadan sayısal kategori kodlarını sürekli ölçüm olarak kullanmayın. "
+"Ağırlıklı yöntemler ortak sıralı ölçek gerektirir; tekrarlı okumalar ve "
+"kümelenmiş örnekler uygun analiz birimi ve belirsizlik yöntemi gerektirir."
 
 #: R/lassocox.b.R
 msgid ""
@@ -62949,6 +63443,11 @@ msgid "Does not remove bias from unmeasured confounding or model misspecificatio
 msgstr ""
 "Ölçülmemiş karıştırıcılardan veya model hatalı belirtiminden kaynaklanan "
 "yanlılığı gidermez"
+
+#: agreementintro/options/repeatedReadings.title
+#: agreementintro/ui[0][5].label
+msgid "Does the same rater read a case more than once?"
+msgstr "Aynı değerlendirici bir olguyu birden fazla kez okuyor mu?"
 
 #: retracted/results/summary.columns.title
 msgid "DOI"
@@ -63325,6 +63824,10 @@ msgstr ""
 msgid "DR 95% CI Upper"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid "Draft"
+msgstr "Taslak"
+
 #: summarydata/options/report_sentences.title
 msgid "Draft report sentences"
 msgstr "Taslak rapor cümleleri"
@@ -63333,6 +63836,10 @@ msgstr "Taslak rapor cümleleri"
 #: summarydata/results/reportSentences.title
 msgid "Draft Statistical Summary"
 msgstr "Taslak İstatistiksel Özet"
+
+#: R/agreementintro.b.R
+msgid "Draft; not a production release"
+msgstr "Taslak; üretim sürümü değil"
 
 #: package/analyses/competingsurvival.menuSubgroup
 #: package/analyses/oneSurvival.menuSubgroup
@@ -63523,6 +64030,20 @@ msgstr ""
 #: R/decisioncurve.b.R
 msgid "Duplicate Model Names"
 msgstr "Yinelenen Model Adları"
+
+#: R/agreementintro.b.R
+msgid "Duplicate reading keys"
+msgstr "Yinelenen okuma anahtarları"
+
+#: R/agreementintro.b.R
+msgid ""
+"Duplicate reading keys were found. Wide keys are case-condition-occasion; "
+"long keys additionally include reader. Identify distinct specimens or "
+"occasions rather than silently averaging duplicate readings."
+msgstr ""
+"Yinelenen okuma anahtarları bulundu. Geniş veride anahtar olgu-koşul-zaman, "
+"uzun veride bunlara ek olarak değerlendiricidir. Yinelenen okumaları "
+"sessizce ortalamak yerine farklı örnekleri veya zamanları tanımlayın."
 
 #: R/dataquality.b.R
 msgid "Duplicate Row Analysis"
@@ -63931,6 +64452,10 @@ msgid ""
 msgstr ""
 "Her fark, ilk adı geçen testten ikincisinin çıkarılmasıyla elde edilir: 'A "
 "ile B' için pozitif bir değer A'nın, negatif bir değer B'nin lehinedir."
+
+#: agreementintro/options/comparisonGoal/readerModality.title
+msgid "Each fixed reader uses two modalities"
+msgstr "Her sabit değerlendirici iki modalite kullanıyor"
 
 #: R/jjdotplotstats.b.R
 msgid ""
@@ -66798,6 +67323,12 @@ msgstr ""
 msgid "Enter at least one fixed score cutoff."
 msgstr "En az bir sabit skor kesme noktası girin."
 
+#: R/agreementintro.b.R
+msgid "Enter at least two raters, methods, or foci. Zero means not specified."
+msgstr ""
+"En az iki değerlendirici, yöntem veya odak girin. Sıfır, belirtilmemiş "
+"anlamına gelir."
+
 #: economistplots/options/caption_text.description.jamovi
 msgid "Enter caption text (data source, notes, etc.)."
 msgstr ""
@@ -66848,6 +67379,16 @@ msgstr ""
 msgid "Enter custom y-axis break points (comma-separated)."
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid "Enter distinct, exact positive and negative labels for the reader calls."
+msgstr ""
+"Değerlendirici kararları için birbirinden farklı, tam pozitif ve negatif "
+"etiketleri girin."
+
+#: R/agreementintro.b.R
+msgid "Enter distinct, exact positive and negative reference labels."
+msgstr "Referans için birbirinden farklı, tam pozitif ve negatif etiketleri girin."
+
 #: R/kappaSizeCI.b.R
 msgid "Enter exactly {k} proportions for {k} outcome categories (received {got})."
 msgstr ""
@@ -66892,6 +67433,14 @@ msgstr "Tanı testi değerlendirmenizden dört temel sayıyı girin:"
 #: bbcplots/options/title_text.description.ui
 msgid "Enter the main title for your chart."
 msgstr ""
+
+#: R/agreementintro.b.R
+msgid "Enter the number of categories for study planning."
+msgstr "Çalışma planlaması için kategori sayısını girin."
+
+#: R/agreementintro.b.R
+msgid "Enter the prespecified numeric cutoff or ordinal boundary category."
+msgstr "Önceden belirlenmiş sayısal eşiği veya sıralı sınır kategorisini girin."
 
 #: jiwillsurvive/options/time_points.description.jamovi
 msgid "Enter time points for survival estimates (e.g., 12,24,36)."
@@ -67981,6 +68530,14 @@ msgstr ""
 #: decisionpanel/results/incrementalValue.columns.title
 msgid "Essential?"
 msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Establish one complete category order, including unused categories, and "
+"declare it identically for every rater before using ordinal methods."
+msgstr ""
+"Kullanılmayan kategoriler dahil tam bir kategori sırası belirleyin ve sıralı "
+"yöntemleri kullanmadan önce her değerlendirici için aynı şekilde tanımlayın."
 
 #: ihcscoring/results/biomarkerspecific/clinicalcutpoints.description
 msgid "Established clinical thresholds and their performance"
@@ -70097,6 +70654,10 @@ msgstr "Birebir Uyum (kategorik)"
 msgid "Exact agreement %"
 msgstr ""
 
+#: agreementintro/options/weights/unweighted.title
+msgid "Exact agreement only (unweighted)"
+msgstr "Yalnızca tam uyum (ağırlıksız)"
+
 #: R/agreement.b.R
 msgid ""
 "Exact agreement pools every pair of readings this pathologist shares with a "
@@ -71420,8 +71981,9 @@ msgid "Expert consensus (agreement)"
 msgstr ""
 
 #: pathagreement/options/referenceType/consensus.title
+#: agreementintro/options/referenceType/consensus.title
 msgid "Expert consensus comparator"
-msgstr ""
+msgstr "Uzman uzlaşısı karşılaştırıcısı"
 
 #: greyzoneroc/options/grey_zone_action/expert.title
 msgid "Expert Review Required"
@@ -73737,8 +74299,9 @@ msgstr ""
 #: superpc/results/component_loadings.columns.title
 #: survivalfeaturerank/results/rankingTable.columns.title
 #: treeadvanced/results/featurecontributions.columns.title
+#: agreementintro/results/dataSummary.columns.title
 msgid "Feature"
-msgstr ""
+msgstr "Özellik"
 
 #: explainableai/results/shapanalysis/shapinteractiontable.columns.title
 #: featurequality/results/correlation_analysis.columns.title
@@ -75421,6 +75984,18 @@ msgstr ""
 msgid "Fixed-prior point estimation; not a full Bayesian posterior analysis"
 msgstr "Sabit öncüllü nokta tahmini; tam bir Bayesyen sonsal analizi değildir"
 
+#: R/agreementintro.b.R
+msgid ""
+"Fixed-rater absolute agreement and random-rater consistency are valid ICC "
+"designs, but the current target labels do not unambiguously express these "
+"combinations. No exact configuration is recommended until that interface is "
+"verified."
+msgstr ""
+"Sabit değerlendiricilerde mutlak uyum ve rastgele değerlendiricilerde "
+"tutarlılık geçerli ICC tasarımlarıdır; ancak mevcut hedef etiketleri bu "
+"birleşimleri açıkça ifade etmiyor. Arayüz doğrulanana kadar kesin bir "
+"yapılandırma önerilmez."
+
 #: finegray/results/influenceTable.columns.title
 msgid "Flag"
 msgstr ""
@@ -75516,8 +76091,9 @@ msgid "Fleiss' Kappa"
 msgstr ""
 
 #: R/pathagreement.b.R
+#: R/agreementintro.b.R
 msgid "Fleiss' kappa"
-msgstr ""
+msgstr "Fleiss kappa"
 
 #: pathagreement/ui[5][0]/multiraterMethod/fleiss.title
 msgid "Fleiss' Kappa (3 or more raters)"
@@ -76372,6 +76948,18 @@ msgstr "otomatik yaş gruplaması için"
 msgid "For binary classification, specify which class is considered positive"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"For binary or imbalanced categories, inspect category frequencies and "
+"consider category-specific agreement and Gwet's AC as complementary "
+"summaries. They answer different questions and do not automatically replace "
+"kappa."
+msgstr ""
+"İkili veya dengesiz kategorilerde kategori sıklıklarını inceleyin; "
+"kategoriye özgü uyumu ve Gwet AC katsayısını tamamlayıcı özetler olarak "
+"değerlendirin. Bunlar farklı soruları yanıtlar ve otomatik olarak kappanın "
+"yerini almaz."
+
 #: R/jjpiestats.b.R
 msgid ""
 "For biomarker analysis: Examine distribution patterns across patient groups. "
@@ -76712,6 +77300,16 @@ msgstr ""
 "Üç veya daha fazla değerlendirici için her kurumun kappası, ana tablodaki "
 "gibi gözlenen her değerlendirmeyi kullanır; standart hata ve t aralığı da "
 "aynıdır (Gwet 2014)."
+
+#: R/agreementintro.b.R
+msgid ""
+"For three or more raters, the current paired tool compares unweighted Fleiss "
+"coefficients even for a fixed panel. It cannot carry the recommended Conger "
+"or weighted ordinal estimand through the comparison."
+msgstr ""
+"Üç veya daha fazla değerlendiricide mevcut eşleştirilmiş araç, sabit panelde "
+"bile ağırlıksız Fleiss katsayılarını karşılaştırır. Önerilen Conger veya "
+"ağırlıklı sıralı hedefi karşılaştırmaya taşıyamaz."
 
 #: adaptivetrialdesign/options/time_variable.description
 msgid "For time-to-event endpoints"
@@ -79703,8 +80301,10 @@ msgstr ""
 #: lassointro/results/glossary.title
 #: patientfollowupintro/options/showGlossary.title
 #: patientfollowupintro/results/glossary.title
+#: agreementintro/options/showGlossary.title
+#: agreementintro/results/glossary.title
 msgid "Glossary"
-msgstr ""
+msgstr "Terimler Sözlüğü"
 
 #: pathagreement/ui[6][1]/showStatisticalGlossary.label
 msgid "Glossary of statistical terms"
@@ -81422,6 +82022,10 @@ msgid ""
 "dominance."
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid "Groups with at least two observed ratings"
+msgstr "En az iki gözlenen değerlendirmesi olan gruplar"
+
 #: R/jjridges.b.R
 msgid ""
 "Groups with fewer than {min} observations may show unreliable density "
@@ -81614,6 +82218,10 @@ msgstr ""
 #: agreement/results/gwetTable.title
 msgid "Gwet's AC1/AC2 Results"
 msgstr "Gwet'in AC1/AC2 Sonuçları"
+
+#: R/agreementintro.b.R
+msgid "Gwet's AC2"
+msgstr "Gwet AC2"
 
 #: R/pathagreement.b.R
 msgid "Gwet's AC2 (ordinal weights)"
@@ -84431,6 +85039,11 @@ msgstr ""
 msgid "How Sequential Testing Works"
 msgstr ""
 
+#: agreementintro/options/weights.title
+#: agreementintro/ui[1][1].label
+msgid "How should ordinal disagreements be weighted?"
+msgstr "Sıralı uyuşmazlıklar nasıl ağırlıklandırılmalı?"
+
 #: chisqposttest/options/residualsCriterion.description
 msgid ""
 "How the critical value for flagging a cell residual is chosen. "
@@ -85158,6 +85771,19 @@ msgstr ""
 msgid "ICC, CCC, and correlation measures"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"ICC: reliability of continuous measurements for a stated rater design and "
+"reporting unit. Absolute agreement includes systematic rater shifts; "
+"consistency permits them. CCC summarizes agreement between continuous "
+"measurements; Bland-Altman limits describe differences in their original "
+"units."
+msgstr ""
+"ICC: belirli değerlendirici tasarımı ve raporlama birimi için sürekli "
+"ölçümlerin güvenirliği. Mutlak uyum sistematik değerlendirici kaymalarını "
+"içerir; tutarlılık bunlara izin verir. CCC sürekli ölçümler arasındaki uyumu "
+"özetler; Bland-Altman sınırları farkları özgün birimlerinde tanımlar."
+
 #: icccoeff/options/icc_type/icc1_1.title
 msgid "ICC(1,1) - One-way random, single measures"
 msgstr ""
@@ -85525,6 +86151,15 @@ msgstr ""
 #: spatialanalysis/options/perform_hotspot.description.ui
 msgid "Identify spatial hotspots using kernel density estimation"
 msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Identify the reference as a disease standard, expert consensus, or "
+"comparison method. Agreement-only cutoff studies may select no reference."
+msgstr ""
+"Referansı hastalık standardı, uzman uzlaşısı veya karşılaştırma yöntemi "
+"olarak tanımlayın. Yalnızca eşik uyumunu inceleyen çalışmalar referans "
+"kullanmayabilir."
 
 #: advancedbarplot/options/bar_position/identity.title
 #: flexrstpm2/options/link_function/identity.title
@@ -87010,6 +87645,20 @@ msgstr ""
 msgid "In Legend"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"In pathagreement assign vars for categorical calls or readerScores for "
+"numeric cutoffs, caseID for case identity, and referenceStandard when used. "
+"Select exact labels and a prespecified cutoff, keep shared-case populations, "
+"and supply readerCluster for clustered specimens. For an ordinal boundary, "
+"calls at or above the ordered category are positive."
+msgstr ""
+"pathagreement içinde kategorik kararlar için vars, sayısal eşikler için "
+"readerScores, olgu kimliği için caseID ve kullanılıyorsa referenceStandard "
+"atayın. Tam etiketleri ve önceden belirlenmiş eşiği seçin, ortak olgu "
+"popülasyonlarını koruyun ve kümeli örneklerde readerCluster sağlayın. Sıralı "
+"sınırda, sınır kategorisi ve üzerindeki kararlar pozitiftir."
+
 #: ihcpredict/results/validationResults.columns.title
 msgid "In Query Set"
 msgstr ""
@@ -88167,9 +88816,21 @@ msgstr ""
 msgid "Independent (Zero Correlation)"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"Independent cases were declared, but a patient contributes multiple cases in "
+"the selected data."
+msgstr ""
+"Bağımsız olgular bildirildi; ancak seçili veride bir hasta birden fazla olgu "
+"sağlıyor."
+
 #: R/decisioncompare.b.R
 msgid "Independent cases; repeated reads require a reader/cluster analysis"
 msgstr "Bağımsız olgular; tekrarlanan okumalar okuyucu/küme analizi gerektirir"
+
+#: agreementintro/options/analysisUnit/independent.title
+msgid "Independent cases: one case per patient"
+msgstr "Bağımsız olgular: hasta başına bir olgu"
 
 #: R/multisurvival.b.R
 msgid "Independent Censoring:"
@@ -88984,6 +89645,7 @@ msgid "Input Mode"
 msgstr ""
 
 #: R/enhancedROC.b.R
+#: R/agreementintro.b.R
 msgid "Input rows"
 msgstr "Girdi satırları"
 
@@ -89040,6 +89702,10 @@ msgstr ""
 #: decision/ui[6][0].label
 msgid "Inspect discordant calls under the selected reference interpretation"
 msgstr ""
+
+#: agreementintro/options/inspectData.title
+msgid "Inspect selected data"
+msgstr "Seçili veriyi incele"
 
 #: R/decisioncurve.b.R
 msgid ""
@@ -91217,6 +91883,10 @@ msgstr ""
 msgid "Intraclass Correlation Coefficient"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid "Intraclass correlation coefficient"
+msgstr "Sınıf içi korelasyon katsayısı"
+
 #: pathagreement/ui[9][0]/icc.label
 msgid "Intraclass correlation coefficient (ICC)"
 msgstr ""
@@ -91769,6 +92439,11 @@ msgstr ""
 #: qualityoflife/options/scoring_algorithm/irt_scoring.title
 msgid "IRT-Based Scoring"
 msgstr ""
+
+#: agreementintro/options/categoryOrder.title
+#: agreementintro/ui[1][0].label
+msgid "Is one common category order established?"
+msgstr "Ortak bir kategori sırası belirlendi mi?"
 
 #: R/multisurvival.b.R
 msgid ""
@@ -92969,9 +93644,17 @@ msgstr ""
 "kullanır; bu nedenle Değerlendiriciler Arası Güvenilirlik tablosuyla "
 "karşılaştırılabilir."
 
+#: R/agreementintro.b.R
+msgid "Kappa hypothesis-test power planning"
+msgstr "Kappa hipotez testi güç planlaması"
+
 #: agreement/options/kappaCIMethod.title
 msgid "Kappa interval method"
 msgstr "Kappa aralık yöntemi"
+
+#: R/agreementintro.b.R
+msgid "Kappa interval precision planning"
+msgstr "Kappa aralığı hassasiyet planlaması"
 
 #: R/agreement.b.R
 msgid ""
@@ -93053,6 +93736,10 @@ msgstr ""
 #: kappaSizePower/ui[1].label
 msgid "Kappa Levels"
 msgstr "Kappa Düzeyleri"
+
+#: R/agreementintro.b.R
+msgid "Kappa lower bound at fixed sample size"
+msgstr "Sabit örneklem büyüklüğünde kappa alt sınırı"
 
 #: cohenskappa/options/kappa_type.title
 msgid "Kappa Method"
@@ -93233,6 +93920,10 @@ msgstr ""
 msgid "Kendall's Tau-B"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid "Kendall's W"
+msgstr "Kendall W"
+
 #: R/agreement.b.R
 msgid "Kendall's W (coefficient of concordance)"
 msgstr "Kendall'ın W katsayısı (uyum katsayısı)"
@@ -93249,6 +93940,14 @@ msgstr ""
 msgid "Kendall's W [Ordinal] (Concordance for Rankings)"
 msgstr "Kendall'ın W Katsayısı [Sıralı] (Sıralamalar İçin Uyum)"
 
+#: R/agreementintro.b.R
+msgid ""
+"Kendall's W here requires complete comparable rankings or ordered ratings of "
+"the same cases."
+msgstr ""
+"Buradaki Kendall W, aynı olguların eksiksiz ve karşılaştırılabilir "
+"sıralamalarını veya sıralı değerlendirmelerini gerektirir."
+
 #: R/agreement.b.R
 msgid ""
 "Kendall's W ranks the ratings, so it needs a continuous variable or an "
@@ -93263,6 +93962,14 @@ msgstr ""
 "değişkendir: kategoriler gerçekten sıralıysa ölçüm türünü Continuous veya "
 "Ordinal olarak değiştirin; aksi halde nominal uyum için Fleiss kappasını "
 "veya Krippendorff alfasını kullanın."
+
+#: R/agreementintro.b.R
+msgid ""
+"Kendall's W summarizes similarity of rankings, not equality of measurement "
+"values."
+msgstr ""
+"Kendall W, ölçüm değerlerinin eşitliğini değil sıralamaların benzerliğini "
+"özetler."
 
 #: parametricfrailty/results/frailty_summary.columns.title
 msgid "Kendall's τ"
@@ -93668,6 +94375,7 @@ msgid "Krippendorff's Alpha"
 msgstr "Krippendorff Alfasu"
 
 #: agreement/options/kripp.title
+#: R/agreementintro.b.R
 msgid "Krippendorff's alpha"
 msgstr "Krippendorff alfasu"
 
@@ -96108,6 +96816,14 @@ msgstr ""
 "Sürekli açıklayıcı değişkende değişkenlik sınırlı. Kategorik olarak ele "
 "almayı değerlendirin."
 
+#: R/agreementintro.b.R
+msgid ""
+"Limits of agreement describe differences in measurement units; CCC "
+"summarizes concordance. Correlation alone does not demonstrate agreement."
+msgstr ""
+"Uyum sınırları farkları ölçüm biriminde tanımlar; CCC uyumu özetler. "
+"Korelasyon tek başına uyumu göstermez."
+
 #: methodcomparison/options/limits_method.title
 msgid "Limits of Agreement Method"
 msgstr ""
@@ -96470,6 +97186,10 @@ msgstr "Doğrusal Ağırlıklar (sıralı)"
 #: R/agreement.b.R
 msgid "Linear-weighted κ"
 msgstr "Doğrusal ağırlıklı κ"
+
+#: agreementintro/options/weights/linear.title
+msgid "Linear: equal cost for each extra category step"
+msgstr "Doğrusal: her ek kategori adımı için eşit maliyet"
 
 #: R/pathagreement.b.R
 msgid "Linear/equal weighting"
@@ -97458,6 +98178,18 @@ msgstr ""
 msgid "Long format requires exactly one strata variable"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"Long-data coverage is counted within case-condition-occasion groups. General "
+"agreement analyses require a case-by-rater matrix; reshape a copy without "
+"combining duplicate readings. Reader modality workflows can use long data "
+"directly."
+msgstr ""
+"Uzun veride kapsama olgu-koşul-zaman grupları içinde sayılır. Genel uyum "
+"analizleri olgu-değerlendirici matrisi gerektirir; yinelenen okumaları "
+"birleştirmeden bir kopyayı yeniden biçimlendirin. Değerlendirici modalite iş "
+"akışları uzun veriyi doğrudan kullanabilir."
+
 #: pathagreement/options/rating.title
 msgid "Long-format rating"
 msgstr ""
@@ -97469,6 +98201,10 @@ msgstr ""
 #: pathagreement/options/readerFormat/long.title
 msgid "Long: case, reader and modality"
 msgstr ""
+
+#: agreementintro/options/dataLayout/long.title
+msgid "Long: one row per reading"
+msgstr "Uzun: değerlendirme başına bir satır"
 
 #: waterfallrecist/options/diameter.description.jamovi
 msgid ""
@@ -99402,6 +100138,14 @@ msgstr ""
 #: jjscatterstats/options/marginal.title
 msgid "Marginal histograms"
 msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Marginal homogeneity asks whether raters use categories with the same "
+"distribution; it is not an agreement coefficient."
+msgstr ""
+"Marjinal homojenlik, değerlendiricilerin kategorileri aynı dağılımla "
+"kullanıp kullanmadığını sorar; bir uyum katsayısı değildir."
 
 #: cohenskappa/results/marginalTest.title
 msgid "Marginal Homogeneity Test"
@@ -102010,6 +102754,8 @@ msgstr ""
 #: nogoldstandard/options.menuGroup
 #: psychopdaROC/options.menuGroup
 #: sequentialtests/options.menuGroup
+#: package/analyses/agreementintro.menuGroup
+#: agreementintro/options.menuGroup
 msgid "meddecideT"
 msgstr "meddecideT"
 
@@ -102947,6 +103693,16 @@ msgstr ""
 msgid "Mental Health Items"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"Menu paths and versions describe this source catalogue, not modules "
+"installed on another computer. Draft and pending analyses may be absent from "
+"distributed modules. No analysis is launched automatically."
+msgstr ""
+"Menü yolları ve sürümler bu kaynak kataloğunu tanımlar; başka bir "
+"bilgisayardaki kurulu modülleri göstermez. Taslak ve beklemedeki analizler "
+"dağıtılan modüllerde bulunmayabilir. Hiçbir analiz otomatik başlatılmaz."
+
 #: jjsyndromicplot/results/warnings.title
 #: jjwithinstats/results/warnings.title
 #: jwaffle/results/warnings.title
@@ -103232,6 +103988,7 @@ msgstr ""
 #: treatmentswitching/results/treatmentEffectTable.columns.title
 #: treatmentswitching/results/methodComparisonTable.columns.title
 #: treatmentswitching/results/bootstrapTable.columns.title
+#: agreementintro/results/recommendations.columns.title
 msgid "Method"
 msgstr "Yöntem"
 
@@ -103729,6 +104486,8 @@ msgstr ""
 #: package/analyses/lassointro.menuTitle
 #: lassointro/options.menuTitle
 #: nogoldstandard/options/showMethodGuide.title
+#: package/analyses/agreementintro.menuTitle
+#: agreementintro/options.menuTitle
 msgid "Method Guide"
 msgstr "Yöntem Kılavuzu"
 
@@ -103773,6 +104532,10 @@ msgstr "Momentler Yöntemi"
 #: lassointro/results/overview.title
 msgid "Method Overview"
 msgstr ""
+
+#: agreementintro/options/showOverview.title
+msgid "Method overview"
+msgstr "Yönteme genel bakış"
 
 #: patientsimilarity/ui[3].label
 msgid "Method Parameters"
@@ -105579,6 +106342,7 @@ msgstr ""
 #: parallelplot/results/summary.columns.title
 #: pathagreement/results/readerDataSummary.columns.title
 #: toolssummary/results/summary.columns.title
+#: agreementintro/results/columnSummary.columns.title
 msgid "Missing"
 msgstr "Eksik"
 
@@ -105913,6 +106677,15 @@ msgstr ""
 "için kaldırılır. Boşluk veya özel karakter içeren değişken adları otomatik "
 "olarak işlenir ve çıktıda geri yüklenir."
 
+#: R/agreementintro.b.R
+msgid ""
+"Missing or blank ratings were observed. Review each recommended method's "
+"usable-case population; missingness is not automatically ignorable."
+msgstr ""
+"Eksik veya boş değerlendirmeler gözlendi. Önerilen her yöntemin "
+"kullanılabilir olgu popülasyonunu inceleyin; eksiklik otomatik olarak göz "
+"ardı edilemez."
+
 #: R/outcomeorganizer.b.R
 msgid "Missing outcome data: {pct}% ({missing} out of {total} rows)."
 msgstr "Eksik sonuç verisi: %{pct} ({total} satırdan {missing} tanesi)."
@@ -105946,6 +106719,10 @@ msgstr "Pozitif Düzey Eksik"
 #: R/decisioncompare.b.R
 msgid "Missing Positive Levels"
 msgstr "Pozitif Düzeyler Eksik"
+
+#: R/agreementintro.b.R
+msgid "Missing rating cells"
+msgstr "Eksik değerlendirme hücreleri"
 
 #: R/enhancedROC.b.R
 msgid "Missing reference"
@@ -108719,6 +109496,10 @@ msgstr ""
 msgid "More cases would narrow the interval."
 msgstr "Daha fazla vaka aralığı daraltır."
 
+#: R/agreementintro.b.R
+msgid "More information is needed before recommending a configuration."
+msgstr "Bir yapılandırma önermeden önce ek bilgi gerekiyor."
+
 #: R/oddsratio.b.R
 msgid "More reliable for small cell counts"
 msgstr "Küçük hücre sayıları için daha güvenilirdir"
@@ -109390,6 +110171,14 @@ msgstr ""
 msgid "Multifocal / Primary-Metastasis Concordance"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid "Multifocal categorical concordance"
+msgstr "Çok odaklı kategorik uyum"
+
+#: agreementintro/options/purpose/multifocal.title
+msgid "Multifocal or primary-metastasis concordance"
+msgstr "Çok odaklı veya primer-metastaz uyumu"
+
 #: advancedimputation/options/multilevel_imputation.title
 #: advancedimputation/ui[5][0].label
 msgid "Multilevel Imputation"
@@ -109653,9 +110442,23 @@ msgstr ""
 msgid "Multiple predictor variables (for predictors analysis)"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"Multiple reading occasions within a condition require an explicit selection "
+"or a repeated-measures model. The recommended paired workflow accepts one "
+"reading per case, reader and condition."
+msgstr ""
+"Bir koşul içindeki birden fazla değerlendirme zamanı, açık bir seçim veya "
+"tekrarlı ölçüm modeli gerektirir. Önerilen eşleştirilmiş iş akışı olgu, "
+"değerlendirici ve koşul başına tek okuma kabul eder."
+
 #: enhancedROC/results/results/comparativeROCPlot.description
 msgid "Multiple ROC curves for comparison"
 msgstr "Karşılaştırma için birden fazla ROC eğrisi"
+
+#: agreementintro/options/analysisUnit/clustered.title
+msgid "Multiple specimens or visits per patient"
+msgstr "Hasta başına birden fazla örnek veya ziyaret"
 
 #: R/riverplot.b.R
 msgid "Multiple strata as columns"
@@ -112107,6 +112910,8 @@ msgstr ""
 #: R/lassocox.b.R
 #: enhancedcrosstable/options/showNA/no.title
 #: gtsummary/options/includeMissing/no.title
+#: agreementintro/options/missingRatings/no.title
+#: agreementintro/options/repeatedReadings/no.title
 msgid "No"
 msgstr "Hayır"
 
@@ -112129,6 +112934,14 @@ msgstr "Hayır (%d ayrı grup)"
 #: R/agreement.b.R
 msgid "No (criterion not met)"
 msgstr "Hayır (ölçüt karşılanmadı)"
+
+#: agreementintro/options/cutoffPrespecified/no.title
+msgid "No / not yet"
+msgstr "Hayır / henüz değil"
+
+#: agreementintro/options/categoryOrder/uncertain.title
+msgid "No / unsure"
+msgstr "Hayır / emin değilim"
 
 #: R/venn.b.R
 msgid ""
@@ -112290,6 +113103,10 @@ msgstr ""
 #: R/ihcheterogeneity.b.R
 msgid "No case has a CV above your %s%% threshold."
 msgstr "Hiçbir vakanın CV'si %%%s eşiğinizin üzerinde değil."
+
+#: R/agreementintro.b.R
+msgid "No case has at least two observed ratings in the same condition and occasion."
+msgstr "Aynı koşul ve zamanda en az iki gözlenen değerlendirmesi olan olgu yok."
 
 #: R/nogoldstandard.b.R
 msgid ""
@@ -113872,6 +114689,10 @@ msgstr "Referans negatif denek yok"
 msgid "No reference-positive subjects"
 msgstr "Referans pozitif denek yok"
 
+#: agreementintro/options/referenceType/none.title
+msgid "No reference: agreement only"
+msgstr "Referans yok: yalnızca uyum"
+
 #: R/decision.b.R
 msgid ""
 "No reliable direction: this likelihood ratio rests on a zero count, and the "
@@ -113901,6 +114722,14 @@ msgid ""
 "No repeated observations found in complete data. Change analysis requires "
 "subjects with multiple measurements."
 msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"No repeated readings were declared, but multiple occasions are present. "
+"Confirm how occasions enter the study design."
+msgstr ""
+"Tekrarlı değerlendirme olmadığı bildirildi; ancak birden fazla zaman var. "
+"Zamanların çalışma tasarımındaki yerini doğrulayın."
 
 #: R/enhancedROC.b.R
 msgid "No report sentences were written, because %s."
@@ -113939,6 +114768,14 @@ msgstr ""
 #: R/benford.b.R
 msgid "No results below were produced for this variable."
 msgstr "Bu değişken için aşağıda hiçbir sonuç üretilmedi."
+
+#: R/agreementintro.b.R
+msgid ""
+"No rows are available for inspection. Select data or turn off inspection to "
+"use the questionnaire alone."
+msgstr ""
+"İncelenecek satır yok. Veri seçin veya yalnızca anketi kullanmak için "
+"incelemeyi kapatın."
 
 #: R/decisioncombine.b.R
 msgid "No Rows Match the Pattern Filter"
@@ -114252,6 +115089,10 @@ msgstr ""
 #: R/pathsampling.b.R
 msgid "No substantial cases"
 msgstr "Yaygın odaklı olgu yok"
+
+#: R/agreementintro.b.R
+msgid "No supported configuration matches this combination of answers."
+msgstr "Bu yanıt birleşimine uyan desteklenen bir yapılandırma yok."
 
 #: R/survivalcont.b.R
 msgid ""
@@ -114831,6 +115672,10 @@ msgstr ""
 "Nominal ve sıralı faktörler referans kategoriye dayalı gösterge kodlaması "
 "kullanır. İlk gözlenen faktör düzeyi referanstır; göstergeler grup olarak "
 "değil ayrı ayrı seçilir."
+
+#: R/agreementintro.b.R
+msgid "Nominal factor"
+msgstr "Nominal faktör"
 
 #: gsdesign/results/boundaryTable.columns.title
 msgid "Nominal p"
@@ -116482,6 +117327,22 @@ msgstr "Anlamlı derecede farklı değil"
 #: decisioncompare/options/referenceType/legacy.title
 #: ihcheterogeneity/options/sampling_strategy/unknown.title
 #: pathagreement/options/referenceType/legacy.title
+#: agreementintro/options/purpose/unspecified.title
+#: agreementintro/options/scale/unspecified.title
+#: agreementintro/options/panel/unspecified.title
+#: agreementintro/options/missingRatings/unspecified.title
+#: agreementintro/options/repeatedReadings/unspecified.title
+#: agreementintro/options/analysisUnit/unspecified.title
+#: agreementintro/options/categoryOrder/unspecified.title
+#: agreementintro/options/weights/unspecified.title
+#: agreementintro/options/raterSelection/unspecified.title
+#: agreementintro/options/iccDefinition/unspecified.title
+#: agreementintro/options/reportingUnit/unspecified.title
+#: agreementintro/options/referenceType/unspecified.title
+#: agreementintro/options/comparisonGoal/unspecified.title
+#: agreementintro/options/planningGoal/unspecified.title
+#: agreementintro/options/cutoffDirection/unspecified.title
+#: agreementintro/options/cutoffPrespecified/unspecified.title
 msgid "Not specified"
 msgstr "Belirtilmedi"
 
@@ -117521,6 +118382,11 @@ msgstr "Kategori sayısı"
 msgid "Number of Categories"
 msgstr "Kategori Sayısı"
 
+#: agreementintro/options/nCategories.title
+#: agreementintro/ui[1][8].label
+msgid "Number of categories for planning (0 = unspecified)"
+msgstr "Planlama için kategori sayısı (0 = belirtilmemiş)"
+
 #: categorize/options/nbins.description.jamovi
 msgid "Number of categories to create (2-20)."
 msgstr "Oluşturulacak kategori sayısı (2-20)."
@@ -118230,6 +119096,11 @@ msgstr "Değerlendirici Sayısı"
 msgid "Number of raters"
 msgstr "Değerlendirici sayısı"
 
+#: agreementintro/options/nRaters.title
+#: agreementintro/ui[0][2].label
+msgid "Number of raters / methods / foci (0 = unspecified)"
+msgstr "Değerlendirici / yöntem / odak sayısı (0 = belirtilmemiş)"
+
 #: kappaSizeCI/options/raters.description.ui
 #: kappaSizeFixedN/options/raters.description.ui
 #: kappaSizePower/options/raters.description.ui
@@ -118619,6 +119490,7 @@ msgstr ""
 
 #: R/tableone.b.R
 #: jjcoefstats/options/pValueDisplay/numeric.title
+#: R/agreementintro.b.R
 msgid "Numeric"
 msgstr "Sayısal"
 
@@ -118721,6 +119593,14 @@ msgstr ""
 #: pathagreement/ui[2][0].label
 msgid "Numeric reader scores"
 msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Numeric storage does not establish a continuous measurement: values may be "
+"category codes. Confirm the measurement scale yourself."
+msgstr ""
+"Sayısal saklama, sürekli ölçüm olduğunu göstermez: değerler kategori kodları "
+"olabilir. Ölçüm ölçeğini kendiniz doğrulayın."
 
 #: R/swimmerplot-html.R
 msgid "numeric values"
@@ -119035,6 +119915,7 @@ msgstr "Gözlem sayısı: {n}"
 #: standardizedratio/results/overallTable.columns.title
 #: standardizedratio/results/stratumTable.columns.title
 #: survivalbart/results/posteriorPredictive.columns.title
+#: agreementintro/results/columnSummary.columns.title
 msgid "Observed"
 msgstr "Gözlenen"
 
@@ -119073,6 +119954,16 @@ msgstr ""
 #: agreement/results/pabakTable.columns.title
 msgid "Observed Agreement"
 msgstr "Gözlenen Uyum"
+
+#: R/agreementintro.b.R
+msgid ""
+"Observed agreement: the fraction of matching calls. Kappa and alpha: "
+"agreement coefficients with different definitions of chance disagreement. "
+"Gwet's AC uses another chance model, so its value need not match kappa."
+msgstr ""
+"Gözlenen uyum: eşleşen kararların oranı. Kappa ve alfa: şansa bağlı "
+"uyuşmazlığı farklı tanımlayan uyum katsayıları. Gwet AC başka bir şans "
+"modeli kullanır; bu nedenle değeri kappayla aynı olmak zorunda değildir."
 
 #: decisioncalculator/options/showWorkload.title
 #: decisioncalculator/results/screeningWorkload.title
@@ -119113,6 +120004,10 @@ msgid "Observed complete-case proportions projected to a population of {n} patie
 msgstr ""
 "Gözlemlenen eksiksiz olgu oranları {n} kişilik bir hasta popülasyonuna "
 "yansıtılmıştır."
+
+#: R/agreementintro.b.R
+msgid "Observed conditions"
+msgstr "Gözlenen koşullar"
 
 #: R/pathsampling.b.R
 msgid "Observed count"
@@ -119197,6 +120092,10 @@ msgstr "Gözlenen Ölçüt?"
 #: R/pathsampling.b.R
 msgid "Observed cumulative detection in dataset"
 msgstr "Veri setinde gözlenen kümülatif saptama"
+
+#: agreementintro/results/dataSummary.title
+msgid "Observed Data Structure"
+msgstr "Gözlenen Veri Yapısı"
 
 #: epidemiosurvival/results/excess_mortality_table.columns.title
 #: survival/results/ageStandardizationTable.columns.title
@@ -119323,9 +120222,27 @@ msgstr "Gözlemlenen Oran"
 msgid "Observed Rating Mapping"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"Observed reader calls include values outside the declared positive and "
+"negative labels. Correct the labels or explicitly handle nondiagnostic calls "
+"in the target workflow."
+msgstr ""
+"Gözlenen değerlendirici kararlarında bildirilen pozitif ve negatif "
+"etiketlerin dışında değerler var. Etiketleri düzeltin veya tanısal olmayan "
+"kararları hedef iş akışında açıkça ele alın."
+
 #: multisurvival/results/adjustedMedianTable.columns.title
 msgid "Observed Records"
 msgstr "Gözlenen Kayıtlar"
+
+#: R/agreementintro.b.R
+msgid ""
+"Observed reference values include labels outside the declared positive and "
+"negative reference classes. Confirm the comparator coding."
+msgstr ""
+"Gözlenen referans değerlerinde bildirilen pozitif ve negatif sınıfların "
+"dışında etiketler var. Karşılaştırıcı kodlamasını doğrulayın."
 
 #: survivalvalidation/results/calibrationTable.columns.title
 msgid "Observed Risk"
@@ -119380,6 +120297,10 @@ msgstr ""
 #: sigmametrics/results/methodValidation.columns.title
 msgid "Observed Value"
 msgstr ""
+
+#: agreementintro/results/dataSummary.columns.title
+msgid "Observed value"
+msgstr "Gözlenen değer"
 
 #: missingdata/results/density_plot.title
 msgid "Observed vs Imputed Distributions"
@@ -119455,6 +120376,11 @@ msgstr ""
 #: bayesianma/options/occam_ratio.title
 msgid "Occam's Window Ratio"
 msgstr ""
+
+#: agreementintro/options/occasion.title
+#: agreementintro/ui[2][2][7].label
+msgid "Occasion / time point (optional)"
+msgstr "Değerlendirme zamanı (isteğe bağlı)"
 
 #: stagemigration/results/stateOccupancy.columns.title
 msgid "Occupancy Prob (%)"
@@ -120074,6 +121000,10 @@ msgstr ""
 msgid "One Proportion Test (Single Group Rate)"
 msgstr ""
 
+#: agreementintro/options/reportingUnit/single.title
+msgid "One rater / measurement"
+msgstr "Tek değerlendirici / ölçüm"
+
 #: R/multisurvival.b.R
 msgid "One row per crossed term."
 msgstr "Her çaprazlanmış terim için bir satır."
@@ -120309,6 +121239,16 @@ msgstr ""
 #: R/crosstable.b.R
 msgid "one-way ANOVA, which for two groups is the pooled-variance t-test"
 msgstr "tek yönlü ANOVA (iki grup için havuzlanmış varyanslı t-testidir)"
+
+#: R/agreementintro.b.R
+msgid ""
+"One-way ICC does not separate rater effects. The software uses its one-way "
+"calculation even though the API type value is consistency; report one-way "
+"random absolute agreement and the single or average measurement unit."
+msgstr ""
+"Tek yönlü ICC, değerlendirici etkilerini ayırmaz. API tür değeri consistency "
+"olsa da yazılım tek yönlü hesaplamasını kullanır; tek yönlü rastgele mutlak "
+"uyumu ve tek ölçüm veya ortalama ölçüm birimini raporlayın."
 
 #: decisiongraph/ui[4][1]/sensitivityAnalysis.label
 msgid "One-Way Sensitivity Analysis"
@@ -120980,6 +121920,10 @@ msgid ""
 "posterior samples, which this model does not draw."
 msgstr ""
 
+#: agreementintro/options/raterSelection/fixed.title
+msgid "Only these selected raters (fixed)"
+msgstr "Yalnızca seçilen değerlendiriciler (sabit)"
+
 #: outbreakanalysis/options/date_onset.title
 #: outbreakanalysis/ui[0][2].label
 msgid "Onset Date Variable"
@@ -121589,6 +122533,10 @@ msgstr "Yüksek özgüllükle doğrulayıcı test için optimize edilmiş"
 msgid "Optimizer"
 msgstr ""
 
+#: agreementintro/results/settings.columns.title
+msgid "Option"
+msgstr "Seçenek"
+
 #: eurostatmap/ui[0][0][0].label
 msgid "Option 1: Use sample data (keep 'Use Local Data' unchecked)"
 msgstr ""
@@ -121626,6 +122574,10 @@ msgid ""
 "Optional clinical variables to display as annotations (e.g., age, stage, "
 "treatment response)."
 msgstr ""
+
+#: agreementintro/ui[2].label
+msgid "Optional Data Check"
+msgstr "İsteğe Bağlı Veri Kontrolü"
 
 #: classicalSurvivalPower/options/data.description.jamovi
 msgid "Optional dataset for survival power analysis."
@@ -122059,6 +123011,10 @@ msgstr ""
 msgid "Order Groups By"
 msgstr ""
 
+#: agreementintro/options/scale/ordinal.title
+msgid "Ordered categories or grades"
+msgstr "Sıralı kategoriler veya dereceler"
+
 #: R/agreement.b.R
 msgid "Ordered categories, but the rater variables do not declare one common order"
 msgstr ""
@@ -122081,6 +123037,7 @@ msgid ""
 msgstr ""
 
 #: categorize/options/ordered.title
+#: R/agreementintro.b.R
 msgid "Ordered factor"
 msgstr "Sıralı faktör"
 
@@ -122171,6 +123128,15 @@ msgstr ""
 msgid "Ordinal (whole-number codes)"
 msgstr "Sıralı (tam sayı kodları)"
 
+#: R/agreementintro.b.R
+msgid ""
+"Ordinal alpha respects the ordered scale across several raters. It is not a "
+"weighted version of the displayed unweighted Fleiss or Conger coefficient."
+msgstr ""
+"Sıralı alfa, birden fazla değerlendiricide sıralı ölçeği dikkate alır. "
+"Gösterilen ağırlıksız Fleiss veya Conger katsayısının ağırlıklı sürümü "
+"değildir."
+
 #: package/analyses/door.menuSubtitle
 #: door/options.menuSubtitle
 msgid "Ordinal Benefit-Risk Comparison of Two Groups"
@@ -122211,6 +123177,16 @@ msgstr ""
 #: ordinalroc/ui[0][1].label
 msgid "Ordinal Outcome Variable"
 msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Ordinal ratings were confirmed, but the selected columns do not all declare "
+"ordered levels. Prepare a copy with one explicit full ordered scale before "
+"applying ordinal settings; the guide does not recode your data."
+msgstr ""
+"Sıralı değerlendirmeler doğrulandı; ancak seçili sütunların tümünde sıralı "
+"düzeyler tanımlanmamış. Sıralı ayarları uygulamadan önce ortak tam sıralı "
+"ölçek içeren bir kopya hazırlayın; rehber verinizi yeniden kodlamaz."
 
 #: clinicalscore/options/modelType/ordinal.title
 msgid "Ordinal Regression (ordered categories)"
@@ -122284,6 +123260,18 @@ msgstr "Ordinal değişkenler doğal sıralamalarını korumalıdır"
 msgctxt "Ordinal/Categorical"
 msgid "Pathologist Grading Analysis"
 msgstr "Patolog Derecelendirme Analizi"
+
+#: R/agreementintro.b.R
+msgid ""
+"Ordinary kappa, ICC, and Bland-Altman settings do not adjust uncertainty for "
+"multiple specimens or visits per patient. Use a supported reader cluster "
+"workflow or obtain a design-specific analysis; do not treat rows as "
+"independent patients."
+msgstr ""
+"Olağan kappa, ICC ve Bland-Altman ayarları, hasta başına birden fazla örnek "
+"veya ziyaret için belirsizliği düzeltmez. Desteklenen kümeli değerlendirici "
+"iş akışını veya tasarıma özel analizi kullanın; satırları bağımsız hastalar "
+"olarak ele almayın."
 
 #: pseudosurvival/options/regression_method/ols.title
 msgid "Ordinary Least Squares"
@@ -124012,6 +125000,10 @@ msgstr ""
 "F1'in yayımlanmış yorum aralıkları yoktur ve kesinlik ile duyarlılık yanında "
 "verilmiştir."
 
+#: agreementintro/options/comparisonGoal/agreement.title
+msgid "Overall agreement of the same panel"
+msgstr "Aynı panelin genel uyumu"
+
 #: advancedtrials/results/trial_design_summary.columns.title
 msgid "Overall Alpha"
 msgstr ""
@@ -125536,6 +126528,7 @@ msgid "Paired Agreement Comparison"
 msgstr "Eşleştirilmiş Uyum Karşılaştırması"
 
 #: agreement/options/pairedAgreementTest.title
+#: R/agreementintro.b.R
 msgid "Paired agreement comparison"
 msgstr "Eşleştirilmiş uyum karşılaştırması"
 
@@ -127252,6 +128245,11 @@ msgstr ""
 msgid "patient"
 msgstr "hasta"
 
+#: agreementintro/options/patientID.title
+#: agreementintro/ui[2][2][3].label
+msgid "Patient / cluster ID (optional)"
+msgstr "Hasta / küme kimliği (isteğe bağlı)"
+
 #: qualityoflife/ui[0][3].label
 msgid "Patient & Study Variables"
 msgstr ""
@@ -127263,6 +128261,17 @@ msgstr ""
 #: competingRisksPower/options/accrualTime.description
 msgid "Patient accrual/recruitment period"
 msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Patient and focus identifiers define within-patient biomarker concordance. "
+"This draft recipe uses descriptive concordance. Kappa and gain/loss "
+"interpretations need consistent focus roles across cases, which the "
+"questionnaire has not established."
+msgstr ""
+"Hasta ve odak kimlikleri, hasta içi biyobelirteç uyumunu tanımlar. Bu taslak "
+"ayarlar betimsel uyumu kullanır. Kappa ve kazanım/kayıp yorumları, vakalar "
+"arasında tutarlı odak rolleri gerektirir; anket bu rolleri belirlememiştir."
 
 #: treatmentoptim/options/patientVars.title
 msgid "Patient Characteristics"
@@ -127716,6 +128725,10 @@ msgstr "Hastalar"
 #: progressionsurvival/results/pfs_summary.columns.title
 msgid "Patients (N)"
 msgstr ""
+
+#: R/agreementintro.b.R
+msgid "Patients / clusters"
+msgstr "Hastalar / kümeler"
 
 #: R/outcomeorganizer.b.R
 msgid ""
@@ -128534,6 +129547,14 @@ msgstr "Ceza Tipi"
 #: R/lassologistic.b.R
 msgid "Penalty type"
 msgstr "Ceza türü"
+
+#: R/agreementintro.b.R
+msgid "Pending"
+msgstr "Beklemede"
+
+#: R/agreementintro.b.R
+msgid "Pending implementation; not a production release"
+msgstr "Uygulaması beklemede; üretim sürümü değil"
 
 #: R/swimmerplot.b.R
 msgid "per 100 %s"
@@ -131219,6 +132240,10 @@ msgstr ""
 msgid "Plain-language summary with clinical context"
 msgstr ""
 
+#: agreementintro/options/purpose/planning.title
+msgid "Plan an agreement study"
+msgstr "Uyum çalışması planlama"
+
 #: diagnosticsamplesize/options/zeroMissPlanning.title
 msgid "Plan independent positives assuming zero misses"
 msgstr ""
@@ -133712,6 +134737,11 @@ msgstr "Pozitif ve negatif kuralları"
 msgid "Positive call / negative reference"
 msgstr "Pozitif sonuç / negatif referans"
 
+#: agreementintro/options/cutoffDirection.title
+#: agreementintro/ui[1][15].label
+msgid "Positive call for a numeric score"
+msgstr "Sayısal puanda pozitif karar"
+
 #: pathagreement/options/positiveRule.title
 msgid "Positive call when score is"
 msgstr ""
@@ -134979,6 +136009,10 @@ msgstr ""
 #: adaptivetrialdesign/options/alpha_spending_function/power_family.title
 msgid "Power Family"
 msgstr ""
+
+#: agreementintro/options/planningGoal/power.title
+msgid "Power for a specified kappa hypothesis test"
+msgstr "Belirli kappa hipotez testi için güç"
 
 #: classicalSurvivalPower/options/calculation_type/power.title
 msgid "Power from Sample Size"
@@ -136961,6 +137995,10 @@ msgstr ""
 msgid "Prentice weights"
 msgstr ""
 
+#: agreementintro/results/preparation.title
+msgid "Preparation and Interpretation"
+msgstr "Hazırlık ve Yorumlama"
+
 #: R/summarydata.b.R
 msgid "Preparation for statistical modeling"
 msgstr "İstatistiksel modellemeye hazırlık"
@@ -137033,6 +138071,11 @@ msgstr ""
 #: conditionalsurvival/options/method/pkm.title
 msgid "Presmoothed Kaplan-Meier"
 msgstr ""
+
+#: agreementintro/options/cutoff.title
+#: agreementintro/ui[1][14].label
+msgid "Prespecified cutoff value / ordinal boundary"
+msgstr "Önceden belirlenmiş eşik / sıralı sınır"
 
 #: R/enhancedROC.b.R
 #: enhancedROC/options/thresholdSource/prespecified.title
@@ -137280,6 +138323,10 @@ msgstr ""
 #: labinterpret/results/deltaChecksTable.columns.title
 msgid "Previous Value"
 msgstr ""
+
+#: R/agreementintro.b.R
+msgid "Primary"
+msgstr "Birincil"
 
 #: pathagreement/ui[5][0]/multiraterMethod.label
 msgid "Primary analysis method"
@@ -137801,8 +138848,9 @@ msgstr ""
 #: labcontrolcharts/results/correctiveActions.columns.title
 #: patientdashboard/results/activeAlertsTable.columns.title
 #: sigmametrics/results/improvementRecommendations.columns.title
+#: agreementintro/results/recommendations.columns.title
 msgid "Priority"
-msgstr ""
+msgstr "Öncelik"
 
 #: outcomeorganizer/options/eventPriority.title
 msgid "Priority Event Type"
@@ -138318,6 +139366,14 @@ msgstr "PÖD ve NÖD çarpımı"
 #: psychopdaROC/options/metric/prod_sens_spec.title
 msgid "Product of sensitivity and specificity"
 msgstr "Duyarlılık ve özgüllük çarpımı"
+
+#: R/agreementintro.b.R
+msgid "Production menu"
+msgstr "Üretim menüsü"
+
+#: R/agreementintro.b.R
+msgid "Production menu route; this guide does not certify release status"
+msgstr "Üretim menüsünde; bu rehber yayımlanma durumunu onaylamaz"
 
 #: jwaffle/options/color_palette/professional.title
 msgid "Professional"
@@ -140203,6 +141259,10 @@ msgstr "Karesel Ağırlıklar (sıralı)"
 msgid "Quadratic-weighted κ"
 msgstr "Karesel ağırlıklı κ"
 
+#: agreementintro/options/weights/quadratic.title
+msgid "Quadratic: larger disagreements receive more weight"
+msgstr "Karesel: büyük uyuşmazlıklara daha fazla ağırlık"
+
 #: R/pathagreement.b.R
 msgid "Quadratic/squared weighting"
 msgstr ""
@@ -141876,6 +142936,10 @@ msgstr "Sıralama İçin En Az İki Test Gerekir"
 msgid "Ranking Options"
 msgstr ""
 
+#: agreementintro/options/scale/rankings.title
+msgid "Ranks"
+msgstr "Sıralamalar"
+
 #: R/cotest.b.R
 msgid "Rapid antigen"
 msgstr "Hızlı antijen"
@@ -142082,6 +143146,11 @@ msgid ""
 "variation may be unreliable."
 msgstr ""
 
+#: agreementintro/options/ratings.title
+#: agreementintro/ui[2][2][0].label
+msgid "Rater / method columns"
+msgstr "Değerlendirici / yöntem sütunları"
+
 #: agreement/results/raterClusterHeading.title
 msgid "Rater & Case Clustering"
 msgstr "Değerlendirici ve Olgu Kümeleme"
@@ -142259,6 +143328,10 @@ msgstr "Değerlendiriciler"
 msgid "raters"
 msgstr "değerlendiriciler"
 
+#: R/agreementintro.b.R
+msgid "Raters / columns / maximum foci"
+msgstr "Değerlendiriciler / sütunlar / en fazla odak"
+
 #: pathagreement/results/consensusTable.columns.title
 msgid "Raters Agreeing"
 msgstr ""
@@ -142279,9 +143352,22 @@ msgid ""
 "This is what lets the test and the rate above it be read together."
 msgstr ""
 
+#: agreementintro/options/rating.title
+#: agreementintro/ui[2][2][5].label
+msgid "Rating (long data)"
+msgstr "Değerlendirme (uzun veri)"
+
 #: pathagreement/ui[1][4][2].label
 msgid "Rating (long input)"
 msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Rating columns and identifier/reference roles must be distinct. Case ID and "
+"patient ID may intentionally be the same column."
+msgstr ""
+"Değerlendirme sütunları ile kimlik/referans rolleri farklı olmalıdır. Olgu "
+"ve hasta kimliği bilinçli olarak aynı sütun olabilir."
 
 #: agreement/results/ratingCombinationsTable.title
 msgid "Rating Combinations (3+ Raters)"
@@ -142644,6 +143730,15 @@ msgstr "Okunabilir yaş grubu etiketleri"
 msgid "Reader"
 msgstr ""
 
+#: agreementintro/options/readerID.title
+#: agreementintro/ui[2][2][4].label
+msgid "Reader / focus ID (long data)"
+msgstr "Değerlendirici / odak kimliği (uzun veri)"
+
+#: agreementintro/options/purpose/readerAccuracy.title
+msgid "Reader accuracy against a reference"
+msgstr "Referansa göre değerlendirici doğruluğu"
+
 #: pathagreement/options/referenceAccuracy.title
 msgid "Reader accuracy against reference"
 msgstr ""
@@ -142651,6 +143746,10 @@ msgstr ""
 #: pathagreement/ui[4].label
 msgid "Reader Accuracy and Cutoff Agreement"
 msgstr ""
+
+#: R/agreementintro.b.R
+msgid "Reader accuracy and cutoff disagreement"
+msgstr "Değerlendirici doğruluğu ve eşik uyuşmazlığı"
 
 #: pathagreement/results/cutoffAgreementTable.title
 msgid "Reader Agreement at the Clinical Cutoff"
@@ -142680,6 +143779,10 @@ msgstr ""
 msgid "Reader data: {message}"
 msgstr ""
 
+#: agreementintro/options/purpose/cutoff.title
+msgid "Reader disagreement at a clinical cutoff"
+msgstr "Klinik eşikte değerlendirici uyuşmazlığı"
+
 #: pathagreement/options/readerID.title
 msgid "Reader ID"
 msgstr ""
@@ -142693,20 +143796,32 @@ msgid "Reader input format"
 msgstr ""
 
 #: pathagreement/options/readerNegative.title
+#: agreementintro/options/negativeLabel.title
+#: agreementintro/ui[1][10].label
 msgid "Reader negative label"
-msgstr ""
+msgstr "Değerlendirici negatif etiketi"
 
 #: pathagreement/options/readerPairs.title
 msgid "Reader pairs"
 msgstr ""
 
 #: pathagreement/options/readerPositive.title
+#: agreementintro/options/positiveLabel.title
+#: agreementintro/ui[1][9].label
 msgid "Reader positive label"
-msgstr ""
+msgstr "Değerlendirici pozitif etiketi"
 
 #: pathagreement/options/readerWorkflow.title
 msgid "Reader workflow"
 msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Reader workflows here support binary calls, an ordered boundary, or a "
+"prespecified numeric cutoff."
+msgstr ""
+"Buradaki değerlendirici iş akışları ikili kararları, sıralı bir sınırı veya "
+"önceden belirlenmiş sayısal eşiği destekler."
 
 #: pathagreement/results/readerModalitySummary.columns.title
 #: pathagreement/results/readerModalityContrast.columns.title
@@ -143124,8 +144239,13 @@ msgstr ""
 #: treatmentoptim/results/treatmentComparison.columns.title
 #: treatmentswitching/results/methodComparisonTable.columns.title
 #: treecompare/results/ranking_table.columns.title
+#: agreementintro/ui[3].label
 msgid "Recommendation"
 msgstr "Öneri"
+
+#: agreementintro/options/showRecommendation.title
+msgid "Recommendation and setup"
+msgstr "Öneri ve kurulum"
 
 #: modelperformance/options/recommendBy.title
 msgid "Recommendation Criterion"
@@ -143217,6 +144337,10 @@ msgstr ""
 #: sigmametrics/results/controlPlanning.columns.title
 msgid "Recommended QC Rules"
 msgstr ""
+
+#: agreementintro/results/settings.title
+msgid "Recommended Settings"
+msgstr "Önerilen Ayarlar"
 
 #: R/venn.b.R
 msgid "Recommended Solution:"
@@ -143587,6 +144711,11 @@ msgstr ""
 msgid "Reference class"
 msgstr "Referans sınıf"
 
+#: agreementintro/options/reference.title
+#: agreementintro/ui[2][2][8].label
+msgid "Reference column (optional)"
+msgstr "Referans sütunu (isteğe bağlı)"
+
 #: pathagreement/results/diagnosticAccuracyTable.title
 msgid "Reference Comparison by Rater (Macro-Averaged Across Categories)"
 msgstr ""
@@ -143794,8 +144923,10 @@ msgid "Reference negative given negative call"
 msgstr "Negatif sonuçta referansın negatif olması"
 
 #: pathagreement/options/referenceNegative.title
+#: agreementintro/options/referenceNegative.title
+#: agreementintro/ui[1][12].label
 msgid "Reference negative label"
-msgstr ""
+msgstr "Referans negatif etiketi"
 
 #: decision/options/goldNegative.title
 #: decisioncompare/options/goldNegative.title
@@ -143858,8 +144989,10 @@ msgstr ""
 "oranıdır."
 
 #: pathagreement/options/referencePositive.title
+#: agreementintro/options/referencePositive.title
+#: agreementintro/ui[1][11].label
 msgid "Reference positive label"
-msgstr ""
+msgstr "Referans pozitif etiketi"
 
 #: decision/options/goldPositive.title
 #: decisioncompare/options/goldPositive.title
@@ -145029,6 +146162,10 @@ msgstr ""
 msgid "Reliability Measure"
 msgstr ""
 
+#: agreementintro/options/purpose/reliability.title
+msgid "Reliability of continuous measurements (ICC)"
+msgstr "Sürekli ölçümlerin güvenirliği (ICC)"
+
 #: R/ihcheterogeneity.b.R
 msgid "Reliability:"
 msgstr "Güvenilirlik:"
@@ -145342,6 +146479,16 @@ msgstr ""
 "medyanı gerektirir. Bağımsız satır çıkarımı, tekrarlanan hastaları ayrı "
 "gözlemler olarak değerlendiremez."
 
+#: R/agreementintro.b.R
+msgid ""
+"Repeated reads within the same reader and condition must not be treated as "
+"independent cases. Select one prespecified occasion or use an explicitly "
+"matched modality design."
+msgstr ""
+"Aynı değerlendirici ve koşul içindeki tekrarlı okumalar bağımsız olgular "
+"olarak ele alınmamalıdır. Önceden belirlenmiş tek bir zamanı seçin veya "
+"açıkça eşleştirilmiş bir modalite tasarımı kullanın."
+
 #: R/waterfall.b.R
 msgid "REPEATED VISIT TIMES"
 msgstr "YİNELENEN VİZİT ZAMANLARI"
@@ -145514,6 +146661,18 @@ msgid ""
 "Report the event-free probability and cumulative incidence of the target and "
 "competing events within observed follow-up."
 msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Report the ICC model, absolute-agreement or consistency definition, single "
+"or average measurement unit, confidence interval, and intended rater "
+"population. A fixed-rater consistency estimate must not be described as "
+"absolute agreement."
+msgstr ""
+"ICC modelini, mutlak uyum veya tutarlılık tanımını, tek veya ortalama ölçüm "
+"birimini, güven aralığını ve hedef değerlendirici popülasyonunu raporlayın. "
+"Sabit değerlendiricili tutarlılık tahmini mutlak uyum olarak "
+"tanımlanmamalıdır."
 
 #: R/singlearm.b.R
 msgid ""
@@ -146201,6 +147360,14 @@ msgstr ""
 #: jforester/options/dpi.description
 msgid "Resolution for exported plot"
 msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Resolve the data check or the conflicting design answers before using a "
+"recommendation."
+msgstr ""
+"Öneriyi kullanmadan önce veri kontrolündeki sorunları veya çelişen tasarım "
+"yanıtlarını düzeltin."
 
 #: populationhealth/results/geographicAnalysisTable.columns.title
 msgid "Resource Availability"
@@ -152281,6 +153448,18 @@ msgstr ""
 "Kategorik bir değişken seçin ya da değerleri önce Veri > Dönüştür ile "
 "gruplayın."
 
+#: R/agreementintro.b.R
+msgid ""
+"Select a complete numeric case-by-measurement matrix. The same columns "
+"identify the same raters for a two-way design; for a one-way design they "
+"identify exchangeable rating slots. Interpret the interval in the intended "
+"population, not only a verbal quality band."
+msgstr ""
+"Eksiksiz sayısal olgu-ölçüm matrisi seçin. İki yönlü tasarımda aynı sütunlar "
+"aynı değerlendiricileri, tek yönlü tasarımda değişebilir değerlendirme "
+"yuvalarını gösterir. Aralığı yalnızca sözel kalite sınıfına göre değil, "
+"hedef popülasyonda yorumlayın."
+
 #: R/jjdotplotstats.b.R
 msgid ""
 "Select a continuous dependent variable and a categorical grouping variable "
@@ -152608,6 +153787,21 @@ msgstr "Grafik Seçimi panelinde bir veya daha fazla grafik motoru seçin"
 #: R/waterfall.b.R
 msgid "Select Patient ID variable"
 msgstr "Hasta Kimliği değişkenini seçin"
+
+#: R/agreementintro.b.R
+msgid ""
+"Select rater columns in agreement, set the recommended alpha type, and "
+"preserve missing ratings. Report alpha separately from the default table: "
+"two-rater kappa uses complete pairs; multirater kappa uses all observed "
+"ratings, including singleton cases in its chance term, while exact agreement "
+"uses complete cases. Alpha requires at least two ratings per usable case."
+msgstr ""
+"agreement içinde değerlendirici sütunlarını seçin, önerilen alfa türünü "
+"ayarlayın ve eksik değerlendirmeleri koruyun. Alfayı varsayılan tablodan "
+"ayrı raporlayın: iki değerlendiricili kappa eksiksiz çiftleri; çok "
+"değerlendiricili kappa, şans teriminde tek değerlendirmeli olgular dahil tüm "
+"gözlenen puanları kullanır. Tam uyum eksiksiz olguları kullanır. Alfa için "
+"kullanılabilir olguda en az iki değerlendirme gerekir."
 
 #: R/decisioncompare.b.R
 msgid ""
@@ -152981,6 +154175,18 @@ msgstr ""
 "tutulmuştur ancak bu sürekli kesim noktası fonksiyonu tarafından analiz "
 "edilmez; yarışan risk analizine rehberlik almak için bunu seçin."
 
+#: R/agreementintro.b.R
+msgid ""
+"Select the two numeric measurements in the same units on matched independent "
+"cases. Prespecify clinically acceptable differences; inspect the difference "
+"distribution and changing variability before interpreting ordinary limits of "
+"agreement. Missing pairs are excluded."
+msgstr ""
+"Eşleştirilmiş bağımsız olgularda aynı birimle ölçülmüş iki sayısal ölçümü "
+"seçin. Klinik olarak kabul edilebilir farkları önceden belirleyin; olağan "
+"uyum sınırlarını yorumlamadan önce fark dağılımını ve değişken varyansı "
+"inceleyin. Eksik çiftler dışlanır."
+
 #: decisiongraph/ui[0][0].label
 msgid "Select the type of decision analysis to perform"
 msgstr ""
@@ -153074,6 +154280,14 @@ msgstr ""
 msgid "Select which results to display"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"Select which side of the numeric cutoff is a positive call, including "
+"whether equality is positive."
+msgstr ""
+"Eşiğe eşitliğin pozitif sayılıp sayılmadığı dahil, sayısal eşiğin hangi "
+"tarafının pozitif olduğunu seçin."
+
 #: spatialanalysis/ui[1][0][1].label
 msgid "Select which spatial analyses to perform:"
 msgstr ""
@@ -153087,6 +154301,10 @@ msgstr ""
 #: R/agepyramid.b.R
 msgid "Select your Age and Gender variables to begin."
 msgstr "Başlamak için Yaş ve Cinsiyet değişkenlerinizi seçin."
+
+#: R/agreementintro.b.R
+msgid "Select your study question."
+msgstr "Çalışma sorunuzu seçin."
 
 #: R/linechart.b.R
 msgid "Select your X-axis variable (time points, visits, or sequence)"
@@ -153140,6 +154358,10 @@ msgstr ""
 msgid "Selected cutpoint"
 msgstr "Seçilen kesim noktası"
 
+#: agreementintro/options/dataLayout.title
+msgid "Selected data layout"
+msgstr "Seçili veri düzeni"
+
 #: R/lassocox.b.R
 msgid "Selected event level ('{level}') is not present in observed outcome data."
 msgstr "Seçilen olay düzeyi ('{level}') gözlenen sonlanım verisinde yoktur."
@@ -153187,6 +154409,16 @@ msgstr ""
 msgid "Selected Model Details"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"Selected ordered columns do not declare exactly the same full category "
+"order. Harmonize the declared scale, including unused levels, before an "
+"ordinal analysis."
+msgstr ""
+"Seçili sıralı sütunlar tam olarak aynı kategori sırasını tanımlamıyor. "
+"Sıralı analizden önce kullanılmayan düzeyler dahil tanımlı ölçeği uyumlu "
+"hale getirin."
+
 #: R/lassocox.b.R
 msgid "Selected Original Predictors"
 msgstr "Seçilen özgün yordayıcılar"
@@ -153210,6 +154442,10 @@ msgstr ""
 #: R/lassocox.b.R
 msgid "Selected Predictor Columns"
 msgstr "Seçilen yordayıcı sütunları"
+
+#: agreementintro/results/columnSummary.title
+msgid "Selected Rating Columns"
+msgstr "Seçili Değerlendirme Sütunları"
 
 #: R/decisioncompare.b.R
 msgid "Selected row"
@@ -154610,6 +155846,15 @@ msgstr "Kurulum durumu"
 msgid "Seventh variable for 7+ set analysis."
 msgstr "7+ küme analizi için yedinci değişken."
 
+#: R/agreementintro.b.R
+msgid ""
+"Several conditions are present. Select one condition for a single-panel "
+"analysis or choose a matched paired-condition workflow; do not pool "
+"conditions as independent cases."
+msgstr ""
+"Birden fazla koşul var. Tek panel analizi için bir koşul seçin veya eşleşmiş "
+"koşul iş akışını kullanın; koşulları bağımsız olgular gibi birleştirmeyin."
+
 #: R/psychopdaROC.b.R
 msgid ""
 "Several cut-points tie for the best %1$s (%2$s): %3$s. The cut-point shown, "
@@ -154620,6 +155865,19 @@ msgstr ""
 "Gösterilen kesim noktası %4$s, bunlardan hesaplanmıştır ve bunlardan biri "
 "değildir; %1$s değeri %5$s olur. Her birini listelemek için Eşitlikleri "
 "Çözme Yönteminde 'Tüm eşit kesim noktaları' seçeneğini seçin."
+
+#: R/agreementintro.b.R
+msgid ""
+"Several readers score multiple slides per patient with and without AI "
+"assistance: choose a fixed-reader modality workflow, identify patient "
+"clusters, state the comparator, and keep paired case-reader observations "
+"together. An expert consensus comparator is not automatically disease truth."
+msgstr ""
+"Birden fazla değerlendirici hasta başına birden fazla lamı yapay zekâ "
+"yardımıyla ve yardımsız puanlıyor: sabit değerlendiricili modalite iş "
+"akışını seçin, hasta kümelerini ve karşılaştırıcıyı tanımlayın, "
+"eşleştirilmiş olgu-değerlendirici gözlemlerini birlikte tutun. Uzman "
+"uzlaşısı otomatik olarak hastalık gerçeği değildir."
 
 #: R/waterfall.b.R
 msgid "SEVERAL ROWS PER PATIENT"
@@ -161792,6 +163050,18 @@ msgstr ""
 msgid "Special Options"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid "Specialist categorical modality comparison"
+msgstr "Kategorik modaliteye özel karşılaştırma"
+
+#: R/agreementintro.b.R
+msgid "Specialist Cohen's kappa interface"
+msgstr "Cohen kappaya özel arayüz"
+
+#: R/agreementintro.b.R
+msgid "Specialist ICC interface"
+msgstr "ICC'ye özel arayüz"
+
 #: modalitycomparison/ui[3].label
 msgid "Specialized Analysis"
 msgstr ""
@@ -162218,9 +163488,31 @@ msgstr ""
 msgid "Specify custom colors for your visualization."
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid "Specify independent cases or multiple specimens or visits per patient."
+msgstr ""
+"Bağımsız olgular mı yoksa hasta başına birden fazla örnek veya ziyaret mi "
+"olduğunu belirtin."
+
 #: factoranalysis/options/nFactorsMethod/manual.title
 msgid "Specify Number"
 msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Specify overall panel agreement, fixed-reader modality comparison, or the "
+"specialist two-modality workflow."
+msgstr ""
+"Genel panel uyumunu, sabit değerlendiricili modalite karşılaştırmasını veya "
+"iki modaliteye özel iş akışını belirtin."
+
+#: R/agreementintro.b.R
+msgid ""
+"Specify reliability of one measurement or of the average of the selected "
+"measurements."
+msgstr ""
+"Tek bir ölçümün mü yoksa seçili ölçümlerin ortalamasının mı güvenirliğini "
+"istediğinizi belirtin."
 
 #: classicalSurvivalPower/options/power_plot_range.description.jamovi
 msgid "Specify sample size range for power curves (e.g., '50,500' or 'auto')."
@@ -162379,6 +163671,33 @@ msgstr ""
 #: bbcplots/options/legend_position.description.jamovi
 msgid "Specify where to place the chart legend."
 msgstr ""
+
+#: R/agreementintro.b.R
+msgid "Specify whether any ratings are missing."
+msgstr "Eksik değerlendirme bulunup bulunmadığını belirtin."
+
+#: R/agreementintro.b.R
+msgid ""
+"Specify whether reliability should generalize to comparable raters or only "
+"to this fixed panel."
+msgstr ""
+"Güvenirliğin benzer değerlendiricilere mi yoksa yalnızca bu sabit panele mi "
+"genellenmesini istediğinizi belirtin."
+
+#: R/agreementintro.b.R
+msgid ""
+"Specify whether the same identified raters rate every case, raters are "
+"exchangeable, or the panel is incomplete."
+msgstr ""
+"Her olguyu aynı tanımlı değerlendiricilerin mi değerlendirdiğini, "
+"değerlendiricilerin değişebilir mi olduğunu veya panelin eksik mi olduğunu "
+"belirtin."
+
+#: R/agreementintro.b.R
+msgid "Specify whether the same rater reads the same case more than once."
+msgstr ""
+"Aynı değerlendiricinin aynı olguyu birden fazla kez değerlendirip "
+"değerlendirmediğini belirtin."
 
 #: oddsratio/options/predictorLevel.description.main
 msgid ""
@@ -163877,6 +165196,18 @@ msgid ""
 msgstr ""
 "Varsa yüzde verileriyle başlayın veya otomatik hesaplama için uygun zaman "
 "değişkenleriyle ham ölçümleri kullanın."
+
+#: R/agreementintro.b.R
+msgid ""
+"Start with Study Question, complete the relevant Design Details, and "
+"optionally inspect selected columns. Read the recommendation together with "
+"its preparation steps and development status. No dataset is needed for "
+"questionnaire-only guidance."
+msgstr ""
+"Çalışma Sorusu ile başlayın, ilgili Tasarım Ayrıntılarını tamamlayın ve "
+"isterseniz seçili sütunları inceleyin. Öneriyi hazırlık adımları ve "
+"geliştirme durumu ile birlikte okuyun. Yalnızca anketle yönlendirme için "
+"veri gerekmez."
 
 #: singlearm/options/ybegin_plot.title
 #: survivalcont/options/ybegin_plot.title
@@ -166529,6 +167860,10 @@ msgstr ""
 msgid "Structured validation report"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid "Stuart-Maxwell marginal homogeneity"
+msgstr "Stuart-Maxwell marjinal homojenlik"
+
 #: agreement/options/stuartMaxwell.title
 msgid "Stuart-Maxwell test (marginal homogeneity for 2 raters)"
 msgstr "Stuart-Maxwell testi (2 değerlendirici için marjinal homojenlik)"
@@ -166832,6 +168167,10 @@ msgstr ""
 #: treatmentmeta/options/quality_score.title
 msgid "Study Quality Score (Optional)"
 msgstr ""
+
+#: agreementintro/ui[0].label
+msgid "Study Question"
+msgstr "Çalışma Sorusu"
 
 #: hierarchicalbayes/results/shrinkagePlots.title
 msgid "Study Shrinkage Plot"
@@ -167505,9 +168844,42 @@ msgstr ""
 msgid "Suggested Action"
 msgstr ""
 
+#: agreementintro/results/recommendations.title
+msgid "Suggested Analyses"
+msgstr "Önerilen Analizler"
+
+#: R/agreementintro.b.R
+msgid ""
+"Suggested analysis unit: multiple specimens or visits per patient. Confirm "
+"patient identities and the intended unit of inference."
+msgstr ""
+"Önerilen analiz birimi: hasta başına birden fazla örnek veya ziyaret. Hasta "
+"kimliklerini ve amaçlanan çıkarım birimini doğrulayın."
+
+#: R/agreementintro.b.R
+msgid ""
+"Suggested answer for missing ratings: yes. At least one selected rating is "
+"missing or long-format coverage is incomplete. Confirm how this arose in the "
+"study."
+msgstr ""
+"Eksik değerlendirmeler için önerilen yanıt: evet. En az bir seçili "
+"değerlendirme eksik veya uzun veride kapsama eksik. Bunun çalışmada nasıl "
+"oluştuğunu doğrulayın."
+
 #: multiplexanalysis/results/clusteringtable.columns.title
 msgid "Suggested Phenotype"
 msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Suggested rater count from the selected columns or distinct reader IDs: {n}. "
+"Confirm that this represents the intended study panel; exchangeable rating "
+"slots may require a different count."
+msgstr ""
+"Seçili sütunlardan veya farklı değerlendirici kimliklerinden önerilen "
+"değerlendirici sayısı: {n}. Bunun amaçlanan paneli temsil ettiğini "
+"doğrulayın; değişebilir değerlendirme yuvaları farklı bir sayı "
+"gerektirebilir."
 
 #: R/linechart.b.R
 #: R/psychopdaROC.b.R
@@ -168178,6 +169550,17 @@ msgstr ""
 msgid "Supervised Principal Components Results"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"Supply a complete equal-width case-by-rating-slot matrix with exchangeable "
+"slots. Slot columns are not fixed rater identities. Do not encode absent "
+"ratings as a category or use Cohen's kappa for exchangeable slots."
+msgstr ""
+"Değişebilir değerlendirme yuvaları içeren, eksiksiz ve eşit genişlikte "
+"olgu-değerlendirme matrisi sağlayın. Yuvalar sabit değerlendirici kimlikleri "
+"değildir. Eksik değerlendirmeleri kategori olarak kodlamayın ve değişebilir "
+"yuvalar için Cohen kappa kullanmayın."
+
 #: R/pathsampling.b.R
 msgid ""
 "Supply at least one positive integer total sample count and a valid "
@@ -168185,6 +169568,18 @@ msgid ""
 msgstr ""
 "En az bir pozitif tam sayı toplam örnek sayısı ve geçerli ilk saptama konumu "
 "girin; lezyon saptanmadıysa konumu eksik bırakın."
+
+#: R/agreementintro.b.R
+msgid ""
+"Supply defensible anticipated kappa and category proportions in the selected "
+"calculator. Precision, power and fixed-sample lower-bound calculations are "
+"different objectives. These settings concern unweighted kappa and "
+"independent subjects, not weighted ordinal kappa or ICC."
+msgstr ""
+"Seçilen hesaplayıcıda gerekçelendirilmiş beklenen kappa ve kategori "
+"oranlarını sağlayın. Hassasiyet, güç ve sabit örneklemde alt sınır "
+"hesaplamaları farklı amaçlardır. Bu ayarlar ağırlıklı sıralı kappa veya ICC "
+"için değil, bağımsız bireylerde ağırlıksız kappa içindir."
 
 #: agreement/results/perClassMetricsTable.columns.title
 #: deeplearningprediction/results/performanceAnalysis/classificationReport.columns.title
@@ -169882,6 +171277,10 @@ msgstr ""
 "fark dışlandı (iki tek yönlü test), karşılaştırma sayısına göre düzeltilmiş "
 "bir GA (Bonferroni) tamamen marjın ötesinde kaldığında ise fark önemli kabul "
 "edildi."
+
+#: agreementintro/options/purpose/bias.title
+msgid "Systematic differences in category use"
+msgstr "Kategori kullanımında sistematik farklar"
 
 #: R/ihcheterogeneity.b.R
 msgid ""
@@ -172270,8 +173669,9 @@ msgstr "Test Pozitif (%)"
 
 #: classification/options/testing.title
 #: classification/ui[1][0][0].label
+#: R/agreementintro.b.R
 msgid "Testing"
-msgstr ""
+msgstr "Test aşamasında"
 
 #: R/decisiongraph.b.R
 msgid "Testing how changes in uncertain parameters affect the results"
@@ -172280,6 +173680,10 @@ msgstr ""
 #: classification/options/testSize.title
 msgid "Testing perc."
 msgstr ""
+
+#: R/agreementintro.b.R
+msgid "Testing route; not a production release"
+msgstr "Test aşamasında; üretim sürümü değil"
 
 #: R/sequentialtests.b.R
 #: sequentialtests/results/population_flow_table.columns.title
@@ -172416,8 +173820,9 @@ msgid "Tetrachoric (binary-binary)"
 msgstr ""
 
 #: jjtreemap/ui[2][0].label
+#: R/agreementintro.b.R
 msgid "Text"
-msgstr ""
+msgstr "Metin"
 
 #: venn/options/labelGeometry/text.title
 msgid "Text (no background)"
@@ -173027,6 +174432,14 @@ msgid ""
 "designs."
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"The answer says no ratings are missing, but the selected data have missing "
+"readings or incomplete long-format coverage."
+msgstr ""
+"Yanıt eksik değerlendirme olmadığını söylüyor; ancak seçili veride eksik "
+"okumalar veya uzun veri kapsamında eksiklik var."
+
 #: R/multisurvival.b.R
 msgid ""
 "The apparent C-index is <b>{cindex}</b>. It measures rank discrimination in "
@@ -173164,6 +174577,10 @@ msgstr "%1$s için AUC %2$.3f idi (%3$s%% GA: %4$s--%5$s)."
 #: R/enhancedROC.b.R
 msgid "The AUC of %1$s was %2$.3f (interval not estimable)."
 msgstr "%1$s için AUC %2$.3f idi (aralık tahmin edilemedi)."
+
+#: agreementintro/options/reportingUnit/average.title
+msgid "The average of these raters / measurements"
+msgstr "Bu değerlendiricilerin / ölçümlerin ortalaması"
 
 #: R/decisiongraph.b.R
 msgid ""
@@ -173393,6 +174810,18 @@ msgstr ""
 #: R/stagemigration-part1.R
 msgid "The calculation returned no result."
 msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"The calculators assume an intraclass, common-correlation kappa model with "
+"common category probabilities. Their sample sizes are not automatically "
+"valid for unrestricted Cohen or fixed-panel Conger designs; confirm the "
+"model and anticipated margins in the selected calculator."
+msgstr ""
+"Hesaplayıcılar, ortak kategori olasılıkları olan sınıf içi ortak korelasyon "
+"kappa modelini varsayar. Örneklem büyüklükleri, kısıtlanmamış Cohen veya "
+"sabit panelli Conger tasarımları için otomatik olarak geçerli değildir; "
+"seçilen hesaplayıcıda modeli ve beklenen marjinleri doğrulayın."
 
 #: R/enhancedROC.b.R
 msgid ""
@@ -174122,6 +175551,17 @@ msgstr "Kümülatif insidans grafiği tahmin edilemedi"
 msgid "The current outcome \"{var}\" has {n} levels: {levels}."
 msgstr "Geçerli sonuç \"{var}\" {n} düzeye sahiptir: {levels}."
 
+#: R/agreementintro.b.R
+msgid ""
+"The current paired agreement tool compares categorical kappa and exact "
+"matches. It does not compare continuous ICC or CCC estimates. A paired "
+"continuous agreement comparison needs a separate verified workflow."
+msgstr ""
+"Mevcut eşleştirilmiş uyum aracı kategorik kappayı ve tam eşleşmeleri "
+"karşılaştırır. Sürekli ICC veya CCC tahminlerini karşılaştırmaz. "
+"Eşleştirilmiş sürekli uyum karşılaştırması ayrı, doğrulanmış bir iş akışı "
+"gerektirir."
+
 #: R/decisioncalculator.b.R
 msgid ""
 "The current row and the two scenarios have {current}, {scenario1} and "
@@ -174626,6 +176066,23 @@ msgstr ""
 "standart sonucuna sahiptir, bu nedenle ikisinden biri tahmin edilemez. "
 "Referans standarda ilişkin bildirim hangisi olduğunu belirtir."
 
+#: R/agreementintro.b.R
+msgid ""
+"The declared number of raters differs from the selected columns or observed "
+"reader IDs. Confirm that you selected the intended panel."
+msgstr ""
+"Bildirilen değerlendirici sayısı seçili sütunlardan veya gözlenen "
+"değerlendirici kimliklerinden farklı. Amaçlanan paneli seçtiğinizi "
+"doğrulayın."
+
+#: R/agreementintro.b.R
+msgid ""
+"The declared rater design, agreement definition, and measurement unit match "
+"this ICC configuration."
+msgstr ""
+"Bildirilen değerlendirici tasarımı, uyum tanımı ve ölçüm birimi bu ICC "
+"yapılandırmasına uygundur."
+
 #: R/cotest.b.R
 msgid ""
 "The dependence parameter for the diseased group (%1$.2f) is not attainable "
@@ -174679,6 +176136,16 @@ msgstr ""
 "Tasarım, gerçek hazard oranının {hr} olduğu varsayımıyla, {n} kişide "
 "%{power} güç ve %{alpha} anlamlılık düzeyinde (tek yönlü), {margin} veya "
 "daha kötü bir hazard oranını dışlamayı amaçlar."
+
+#: R/agreementintro.b.R
+msgid ""
+"The design has equal numbers of exchangeable ratings per case. Fleiss' "
+"coefficient uses pooled category frequencies rather than fixed "
+"rater-specific margins."
+msgstr ""
+"Tasarımda olgu başına eşit sayıda değişebilir değerlendirme vardır. Fleiss "
+"katsayısı sabit değerlendiriciye özgü marjinler yerine birleştirilmiş "
+"kategori sıklıklarını kullanır."
 
 #: R/kappaSizePower.b.R
 msgid ""
@@ -175681,6 +177148,18 @@ msgid ""
 "categories."
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"The guide preserves these original IDs, but the target would merge distinct "
+"numeric IDs when formatting them as text. Prepare lossless text identifiers "
+"from the source before proceeding; ordinary numeric-to-text conversion is "
+"not sufficient."
+msgstr ""
+"Rehber özgün kimlikleri korur; ancak hedef analiz bunları metin olarak "
+"biçimlendirirken farklı sayısal kimlikleri birleştirebilir. Devam etmeden "
+"önce kaynaktan kayıpsız metin kimlikleri hazırlayın; sıradan sayıdan metne "
+"dönüşüm yeterli değildir."
+
 #: R/multisurvival.b.R
 msgid ""
 "The hazard ratio is the effect per one-unit increase, assuming a constant "
@@ -176075,6 +177554,18 @@ msgid ""
 "The kappaSize package is required but not installed. Please install it using "
 "install.packages(\"kappaSize\")"
 msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"The kappaSize routes cover unweighted categorical kappa with 2 to 5 "
+"categories and 2 to 6 raters on independent cases without repeated readings. "
+"Binary planning requires exactly two categories. Weighted-kappa, ICC, "
+"clustered, and repeated-reading planning need a separate design."
+msgstr ""
+"kappaSize yolları, tekrarlı değerlendirme içermeyen bağımsız olgularda 2–5 "
+"kategori ve 2–6 değerlendirici için ağırlıksız kategorik kappayı kapsar. "
+"İkili planlama tam iki kategori gerektirir. Ağırlıklı kappa, ICC, kümelenmiş "
+"veya tekrarlı değerlendirme planlaması ayrı bir tasarım gerektirir."
 
 #: R/decisioncombine.b.R
 msgid "The kinds of row"
@@ -176533,6 +178024,14 @@ msgstr ""
 "Sınır, geçmiş kanıtlara ve klinik öneme dayanan, hastalığa özgü bir gerekçe "
 "gerektirir."
 
+#: R/agreementintro.b.R
+msgid ""
+"The marginal-homogeneity route requires two categorical raters on the same "
+"cases."
+msgstr ""
+"Marjinal homojenlik yolu, aynı olguları değerlendiren iki kategorik "
+"değerlendirici gerektirir."
+
 #: R/psychopdaROC.b.R
 msgid "The marker could not be scaled to finite values."
 msgstr "Belirteç sonlu değerlere ölçeklenemedi."
@@ -176916,6 +178415,18 @@ msgstr ""
 "Kategorik değerlendirmeler için bunun yerine koşulları eşleştirilmiş uyum "
 "testi veya alt grup analiziyle karşılaştırın."
 
+#: R/agreementintro.b.R
+msgid ""
+"The modalitycomparison draft sorts custom categories alphabetically and has "
+"no explicit order setting. Its ordinal direction and weighted outputs are "
+"not a verified route. Use the categorical agreement route with a confirmed "
+"order, or review a supported specialist preset separately."
+msgstr ""
+"modalitycomparison taslağı özel kategorileri alfabetik sıralar ve açık bir "
+"sıra ayarı içermez. Ordinal yön ve ağırlıklı çıktıları doğrulanmış bir yol "
+"değildir. Doğrulanmış bir sıra ile kategorik uyum yolunu kullanın veya "
+"desteklenen özel bir ön ayarı ayrıca inceleyin."
+
 #: R/agreement.b.R
 msgid ""
 "The model also contains a case-by-condition variance of %1$.4g (%2$.1f%% of "
@@ -177060,6 +178571,14 @@ msgstr ""
 #: R/decisiongraph.b.R
 msgid "The monetary value of health benefits minus the costs"
 msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"The multifocal route requires categorical biomarker or mutation calls and "
+"explicit patient and focus identities."
+msgstr ""
+"Çok odaklı yol, kategorik biyobelirteç veya mutasyon kararları ile açık "
+"hasta ve odak kimlikleri gerektirir."
 
 #: R/outcomeorganizer.b.R
 msgid ""
@@ -177242,6 +178761,14 @@ msgstr ""
 "Tanı için gereken sayı gösterilmiyor: Youden indeksi ve güven aralığının "
 "tamamı 0 veya altındadır."
 
+#: R/agreementintro.b.R
+msgid ""
+"The number of independent cases is fixed; this route describes the "
+"attainable lower confidence bound."
+msgstr ""
+"Bağımsız olgu sayısı sabittir; bu yol ulaşılabilir alt güven sınırını "
+"tanımlar."
+
 #: R/chisqposttest.b.R
 msgid ""
 "The number of observations expected in each cell if the variables were "
@@ -177263,6 +178790,10 @@ msgid ""
 "groups ({nGroups}), so default labels were used."
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid "The numeric cutoff must be one finite number."
+msgstr "Sayısal eşik tek bir sonlu sayı olmalıdır."
+
 #: R/survivalcont.b.R
 msgid ""
 "The numeric date columns hold values too small to be Unix epoch seconds (the "
@@ -177272,6 +178803,22 @@ msgid ""
 "corrected_datetime_numeric output, or supply the dates as text (e.g. "
 "\"2024-01-15\") and set the matching input time type."
 msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"The objective is an interval around anticipated kappa with a specified "
+"precision, not hypothesis-test power."
+msgstr ""
+"Amaç hipotez testi gücü değil, beklenen kappa çevresinde belirli "
+"hassasiyette bir aralıktır."
+
+#: R/agreementintro.b.R
+msgid ""
+"The objective is power to reject a specified null kappa in favour of an "
+"anticipated alternative."
+msgstr ""
+"Amaç, belirli bir sıfır hipotezi kappasını beklenen alternatif lehine "
+"reddetme gücüdür."
 
 #: R/swimmerplot.b.R
 msgid ""
@@ -177418,6 +178965,15 @@ msgid ""
 msgstr ""
 "İsteğe bağlı tanımlayıcı kohort özeti oluşturulamadı. Yukarıdaki sayısal "
 "tablolar yetkili sonuçlar olmaya devam eder."
+
+#: R/agreementintro.b.R
+msgid ""
+"The ordinal boundary does not occur in every selected column's declared "
+"category order. Confirm the complete scale and boundary before recommending "
+"a cutoff."
+msgstr ""
+"Sıralı sınır, seçili sütunların her birinin tanımlı kategori sırasında "
+"bulunmuyor. Eşik önermeden önce tam ölçeği ve sınırı doğrulayın."
 
 #: R/waterfall.b.R
 msgid ""
@@ -177617,6 +179173,16 @@ msgstr ""
 "gelir. Uyumsuz çift yoksa p geleneksel olarak 1'dir. Çoklu karşılaştırma "
 "için düzeltilmemiştir. Genel doğruluk Test Doğruluğunun İstatistiksel "
 "Karşılaştırması tablosunda test edilir, bu nedenle buradaki p hücresi boştur."
+
+#: R/agreementintro.b.R
+msgid ""
+"The paired agreement configuration requires the same panel and complete "
+"matched cases in both conditions, with a confirmed common ordinal scale when "
+"applicable."
+msgstr ""
+"Eşleştirilmiş uyum yapılandırması, her iki koşulda aynı paneli ve eksiksiz "
+"eşleştirilmiş olguları; uygulanabildiğinde doğrulanmış ortak sıralı ölçeği "
+"gerektirir."
 
 #: R/decisioncompare.b.R
 msgid ""
@@ -178325,6 +179891,16 @@ msgstr ""
 "İstenen özgüllük aralığı için ham kısmi AUC kestirilemedi; hücresi boş "
 "bırakıldı."
 
+#: R/agreementintro.b.R
+msgid ""
+"The recommended ICC implementations use complete rectangular ratings. "
+"Incomplete panels need an appropriate model; simply deleting missing cases "
+"may change the target population."
+msgstr ""
+"Önerilen ICC uygulamaları eksiksiz dikdörtgen değerlendirme matrisi "
+"kullanır. Eksik paneller uygun bir model gerektirir; eksik olguları silmek "
+"hedef popülasyonu değiştirebilir."
+
 #: R/ihcheterogeneity.b.R
 msgid ""
 "The reference (whole section, hotspot or overall score) is treated as the "
@@ -178791,9 +180367,31 @@ msgstr ""
 "yorumlamadan önce referans standart ve her test için pozitif olarak seçilen "
 "düzeyi kontrol edin."
 
+#: R/agreementintro.b.R
+msgid ""
+"The same cases and matched raters are observed in both conditions; the "
+"paired resampling compares their agreement coefficients."
+msgstr ""
+"Aynı olgular ve eşleşmiş değerlendiriciler her iki koşulda gözlenir; "
+"eşleştirilmiş yeniden örnekleme uyum katsayılarını karşılaştırır."
+
+#: R/agreementintro.b.R
+msgid ""
+"The same complete panel was declared, but long-format reader coverage "
+"differs between cases. Confirm an incomplete panel or prepare the intended "
+"matched population."
+msgstr ""
+"Aynı eksiksiz panel bildirildi; ancak uzun veride değerlendirici kapsamı "
+"olgular arasında farklı. Eksik paneli doğrulayın veya amaçlanan eşleşmiş "
+"popülasyonu hazırlayın."
+
 #: R/survival.b.R
 msgid "the same hazard"
 msgstr "aynı hazard"
+
+#: agreementintro/options/panel/same.title
+msgid "The same identified raters"
+msgstr "Aynı tanımlı değerlendiriciler"
 
 #: R/ihcheterogeneity.b.R
 msgid ""
@@ -178802,6 +180400,14 @@ msgid ""
 msgstr ""
 "Sistematik sapmalar çıkarılmış aynı oran; bir sapmanın görülebilmesi için "
 "mutlak uyum biçiminin yanında gösterilir."
+
+#: R/agreementintro.b.R
+msgid ""
+"The same three or more identified raters assess every case; Conger's exact "
+"formulation retains rater-specific marginal distributions."
+msgstr ""
+"Aynı üç veya daha fazla tanımlı değerlendirici her olguyu değerlendirir; "
+"Conger'in kesin formülü değerlendiriciye özgü marjinal dağılımları korur."
 
 #: R/timeinterval.b.R
 msgid ""
@@ -179231,6 +180837,18 @@ msgstr ""
 "Ayrı katsayı yolu grafiği katsayıları log lambdaya karşı gösterir; üst "
 "eksende tam modeldeki sıfır olmayan sütun sayıları yer alır."
 
+#: R/agreementintro.b.R
+msgid ""
+"The settings table contains option names and values for the named analysis. "
+"Assign the required data columns in that analysis as described below. "
+"Unlisted options retain their defaults; inspect its notices and denominators "
+"before interpreting results."
+msgstr ""
+"Ayar tablosu, belirtilen analizin seçenek adlarını ve değerlerini içerir. "
+"Gerekli veri sütunlarını aşağıda açıklandığı gibi o analizde atayın. "
+"Listelenmeyen seçenekler varsayılan değerlerini korur; sonuçları "
+"yorumlamadan önce uyarıları ve paydaları inceleyin."
+
 #: R/linechart.b.R
 msgid ""
 "The shaded band is the 95% confidence interval of a LOESS fit, not the "
@@ -179514,6 +181132,12 @@ msgstr ""
 "Bölgesel ve referans ölçümler arasındaki Spearman korelasyonu %s idi; bu "
 "değer, bu analiz için belirlenen %s eşiğini karşılamaktadır."
 
+#: R/agreementintro.b.R
+msgid ""
+"The specialist modality route requires exactly two categorical or ordinal "
+"modalities."
+msgstr "Modaliteye özel yol, tam iki kategorik veya sıralı modalite gerektirir."
+
 #: R/diagnosticmeta.b.R
 msgid "The specificity heterogeneity model failed: %s"
 msgstr ""
@@ -179661,6 +181285,14 @@ msgid ""
 msgstr ""
 "Alt grup değişkeninin gözlenen düzeyi yoktur. Bu değişkeni kaldırın veya "
 "eksik olmayan alt grup değerleri sağlayın."
+
+#: R/agreementintro.b.R
+msgid ""
+"The suggestion is conditional on your confirmed answers. It is not evidence "
+"that your study or the suggested software has been clinically validated."
+msgstr ""
+"Öneri, doğruladığınız yanıtlara bağlıdır. Çalışmanızın veya önerilen "
+"yazılımın klinik olarak doğrulandığı anlamına gelmez."
 
 #: R/diagnosticmeta.b.R
 msgid ""
@@ -180643,6 +182275,17 @@ msgstr ""
 "Bunlar modele dayalı öngörülerdir. Cox modelinin doğru belirlenmiş olmasına "
 "ve orantılı tehlikelerin sağlanmasına dayanırlar; yalnızca modeldeki "
 "değişkenlere göre düzeltme yaparlar, ölçülmemiş hiçbir şeye göre değil."
+
+#: R/agreementintro.b.R
+msgid ""
+"These are observed data features, not confirmed study-design answers. The "
+"guide never recodes columns, changes your answers, or infers a disease "
+"reference. Counts respect the data and filters supplied by jamovi."
+msgstr ""
+"Bunlar doğrulanmış çalışma tasarımı yanıtları değil, gözlenen veri "
+"özellikleridir. Rehber sütunları yeniden kodlamaz, yanıtlarınızı değiştirmez "
+"ve hastalık referansı çıkarımı yapmaz. Sayımlar jamovi'nin sağladığı veri ve "
+"filtreleri kullanır."
 
 #: R/diagnosticmeta.b.R
 msgid ""
@@ -181741,6 +183384,14 @@ msgstr ""
 msgid "This design cannot support a reliability claim."
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"This design needs a workflow that this guide cannot currently recommend with "
+"verified settings."
+msgstr ""
+"Bu tasarım, rehberin şu anda doğrulanmış ayarlarla öneremediği bir iş akışı "
+"gerektiriyor."
+
 #: R/multisurvival.b.R
 msgid ""
 "This does not establish that no association exists; the analysis may lack "
@@ -181860,6 +183511,14 @@ msgstr ""
 #: R/singlearm.b.R
 msgid "This hazard plot"
 msgstr "Bu tehlike grafiği"
+
+#: R/agreementintro.b.R
+msgid ""
+"This ICC route is for continuous measurements. Numerical category codes "
+"alone do not establish a continuous measurement scale."
+msgstr ""
+"Bu ICC yolu sürekli ölçümler içindir. Sayısal kategori kodları tek başına "
+"sürekli ölçüm ölçeği oluşturmaz."
 
 #: R/waterfallrecist.b.R
 msgid ""
@@ -182123,6 +183782,14 @@ msgstr ""
 #: R/psychopdaROC.b.R
 msgid "this marker"
 msgstr "bu belirteç"
+
+#: R/agreementintro.b.R
+msgid ""
+"This measurement-agreement route requires exactly two continuous methods "
+"measured on the same cases."
+msgstr ""
+"Bu ölçüm uyumu yolu, aynı olgularda ölçülen tam iki sürekli yöntem "
+"gerektirir."
 
 #: R/multisurvival.b.R
 msgid ""
@@ -182407,6 +184074,16 @@ msgid ""
 "correlation."
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"This reader workflow conditions on identified readers. Different "
+"exchangeable readers across cases need a design-specific analysis rather "
+"than fixed-reader shared-case comparisons."
+msgstr ""
+"Bu değerlendirici iş akışı tanımlı değerlendiricilere koşulludur. Olgular "
+"arasında değişen değerlendiriciler, sabit değerlendiricili ortak olgu "
+"karşılaştırmaları yerine tasarıma özel analiz gerektirir."
+
 #: R/ihcheterogeneity.b.R
 msgid ""
 "This relaxed band (correlation threshold minus 0.2, CV threshold times 1.5) "
@@ -182550,6 +184227,14 @@ msgstr "Bu basitleştirilmiş arayüz temel tanısal performans ölçütlerini g
 #: R/singlearm.b.R
 msgid "This single-arm survival analysis"
 msgstr "Bu tek kollu sağkalım analizi"
+
+#: R/agreementintro.b.R
+msgid ""
+"This specialist interface describes categorical modality discordance. Its "
+"draft status requires separate verification before use."
+msgstr ""
+"Bu özel arayüz kategorik modalite uyuşmazlığını tanımlar. Taslak durumda "
+"olduğundan kullanımdan önce ayrıca doğrulanmalıdır."
 
 #: R/sequentialtests.b.R
 msgid ""
@@ -182816,6 +184501,14 @@ msgid ""
 "standalone 'Win Ratio' analysis (SurvivalD [Draft] > Specialized Survival "
 "Methods)."
 msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"This workflow separates reproducibility from reference-based accuracy and "
+"makes class labels, cutoffs, case populations, and clustering explicit."
+msgstr ""
+"Bu iş akışı tekrarlanabilirliği referansa dayalı doğruluktan ayırır; sınıf "
+"etiketlerini, eşikleri, olgu popülasyonlarını ve kümelenmeyi açıklar."
 
 #: screeningcalculator/results/repeatTest3Table.title
 msgid "Three Consecutive Tests"
@@ -185616,6 +187309,11 @@ msgstr ""
 #: R/pathsampling.b.R
 msgid "To test for heterogeneity, please specify a 'Sample Type' variable."
 msgstr "Heterojenlik testi için bir örnek türü değişkeni belirtin."
+
+#: agreementintro/options/raterSelection.title
+#: agreementintro/ui[1][2].label
+msgid "To which raters should reliability generalize?"
+msgstr "Güvenirlik hangi değerlendiricilere genellenmeli?"
 
 #: conditionalinference/results/todo.title
 #: extratrees/results/todo.title
@@ -188447,9 +190145,17 @@ msgstr ""
 "izler, bu nedenle hastalığı olan deneklerdeki bağımlılık yüksek "
 "ayarlanmıştır."
 
+#: agreementintro/options/comparisonGoal/specialized.title
+msgid "Two categorical modalities (specialist workflow)"
+msgstr "İki kategorik modalite (özel iş akışı)"
+
 #: circos/options/inputMode/crosstab.title
 msgid "Two categorical variables (cross-tabulated)"
 msgstr ""
+
+#: agreementintro/options/scale/binary.title
+msgid "Two categories (binary)"
+msgstr "İki kategori (ikili)"
 
 #: pathsampling/options/fociGapThreshold.description
 msgid ""
@@ -188489,6 +190195,15 @@ msgstr ""
 msgid "Two Groups"
 msgstr "İki Grup"
 
+#: R/agreementintro.b.R
+msgid ""
+"Two identified raters score the same independent cases. Ordinal weighting "
+"requires a common ordered scale and a prespecified disagreement cost."
+msgstr ""
+"İki tanımlı değerlendirici aynı bağımsız olguları puanlar. Sıralı "
+"ağırlıklandırma ortak bir sıralı ölçek ve önceden belirlenmiş uyuşmazlık "
+"maliyeti gerektirir."
+
 #: R/cotest.b.R
 msgid ""
 "Two imaging modalities of the same tissue, so dependence is set relatively "
@@ -188525,6 +190240,28 @@ msgstr ""
 "işaretleyebilir - burada tamamen temiz bir durumdan ziyade tespit edilebilir "
 "ancak küçük bir sapma olarak bildirilir. İşaretlenen gözlem sayısı aralık "
 "üyeliğidir, aykırı değer sayımı değildir ve yalnızca tanımlayıcıdır."
+
+#: R/agreementintro.b.R
+msgid ""
+"Two pathologists classify independent biopsies as benign or malignant: "
+"choose categorical agreement, binary scores, two fixed raters, and describe "
+"missingness. Start with Cohen's kappa and observed/category-specific "
+"agreement."
+msgstr ""
+"İki patolog bağımsız biyopsileri benign veya malign olarak sınıflandırıyor: "
+"kategorik uyumu, ikili puanları ve iki sabit değerlendiriciyi seçin; "
+"eksikliği açıklayın. Cohen kappa ile gözlenen ve kategoriye özgü uyumdan "
+"başlayın."
+
+#: R/agreementintro.b.R
+msgid ""
+"Two platforms measure Ki67 percentages: choose continuous measurement "
+"agreement. Inspect differences and limits in percentage points and specify "
+"acceptable differences before interpreting concordance."
+msgstr ""
+"İki platform Ki67 yüzdelerini ölçüyor: sürekli ölçüm uyumunu seçin. Farkları "
+"ve sınırları yüzde puanı olarak inceleyin; uyumu yorumlamadan önce kabul "
+"edilebilir farkları belirleyin."
 
 #: clinicaltrialdesign/options/test_type/two_proportions.title
 msgid "Two Proportions Test (Binary Outcomes)"
@@ -188802,6 +190539,7 @@ msgstr "Uyuşmazlığın iki yönlü varyans ayrıştırması"
 #: survivalfeaturerank/results/rankingTable.columns.title
 #: toolssummary/results/summary.columns.title
 #: waterfallrecist/results/lesionTable.columns.title
+#: agreementintro/results/columnSummary.columns.title
 msgid "Type"
 msgstr "Tür"
 
@@ -190488,6 +192226,10 @@ msgstr ""
 "hesaplanmaz; tasarım, dağılım, patolog başına ve kategori tabloları ise yine "
 "hesaplanır."
 
+#: agreementintro/options/scale/nominal.title
+msgid "Unordered categories"
+msgstr "Sırasız kategoriler"
+
 #: R/lassocox.b.R
 msgid "Unpenalized refit after LASSO selection"
 msgstr "LASSO seçimi sonrası cezasız yeniden kurulum"
@@ -191435,6 +193177,31 @@ msgstr ""
 msgid "Use Logarithmic Scale"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"Use long data with caseID, readerID, modality and rating. Choose "
+"baselineModality and comparisonModality explicitly; each "
+"case-reader-modality combination must be unique. This comparison conditions "
+"on the selected readers and does not generalize to a population of readers."
+msgstr ""
+"caseID, readerID, modality ve rating içeren uzun veri kullanın. "
+"baselineModality ve comparisonModality değerlerini açıkça seçin; her "
+"olgu-değerlendirici-modalite birleşimi benzersiz olmalıdır. Bu karşılaştırma "
+"seçilen değerlendiricilere koşulludur ve değerlendirici popülasyonuna "
+"genellenmez."
+
+#: R/agreementintro.b.R
+msgid ""
+"Use long data: assign caseId to patient identity, focusId to sample "
+"identity, and markers to categorical biomarker columns. Preserve all foci "
+"within a patient. This draft provides descriptive concordance and does not "
+"certify clinical interchangeability."
+msgstr ""
+"Uzun veri kullanın: hasta kimliğini caseId, örnek kimliğini focusId, "
+"kategorik biyobelirteç sütunlarını markers seçeneğine atayın. Hastanın tüm "
+"odaklarını koruyun. Bu taslak betimsel uyum sağlar; klinik olarak birbirinin "
+"yerine kullanılabilirliği onaylamaz."
+
 #: agreement/options/tieBreaker/lowest.title
 msgid "Use lowest category"
 msgstr "En düşük kategoriyi kullan"
@@ -191483,6 +193250,27 @@ msgstr ""
 #: R/nonparametric.b.R
 msgid "Use non-parametric methods"
 msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Use one column per rater ranking the same cases. Preserve ties and a common "
+"direction. Kendall's W does not quantify absolute measurement agreement."
+msgstr ""
+"Aynı olguları sıralayan her değerlendirici için bir sütun kullanın. Bağlı "
+"sıraları ve ortak yönü koruyun. Kendall W, mutlak ölçüm uyumunu "
+"nicelleştirmez."
+
+#: R/agreementintro.b.R
+msgid ""
+"Use one row per independent case and one column per identified rater. For "
+"ordinal methods, declare the same full ordered category scale on every "
+"column. Report observed agreement, category frequencies, the named "
+"chance-corrected coefficient and its interval."
+msgstr ""
+"Her bağımsız olgu için bir satır, her tanımlı değerlendirici için bir sütun "
+"kullanın. Sıralı yöntemlerde tüm sütunlarda aynı tam sıralı kategori "
+"ölçeğini tanımlayın. Gözlenen uyumu, kategori sıklıklarını, adı belirtilmiş "
+"şansa göre düzeltilmiş katsayıyı ve güven aralığını raporlayın."
 
 #: agepyramid/options/originaltheme.description.jamovi
 msgid "Use original custom theme instead of jamovi's default theme."
@@ -191852,6 +193640,18 @@ msgstr ""
 "Çalışma örnekleminiz hedef popülasyon prevalansını temsil etmediğinde "
 "kullanın. Bayes teoremiyle yapılan PPV/NPV hesaplamalarını etkiler. Oran "
 "olarak girin (ör. %5 için 0.05, %15 için 0.15)."
+
+#: R/agreementintro.b.R
+msgid ""
+"Use wide data: assign condition A columns to vars and matched condition B "
+"columns to conditionBVars in the same rater order. Match cases by identity, "
+"retain independent cases, and report the two coefficients and their paired "
+"difference."
+msgstr ""
+"Geniş veri kullanın: A koşulu sütunlarını vars, eşleşmiş B koşulu "
+"sütunlarını aynı değerlendirici sırasıyla conditionBVars seçeneğine atayın. "
+"Olguları kimlikleriyle eşleştirin, bağımsız olguları koruyun; iki katsayıyı "
+"ve eşleştirilmiş farklarını raporlayın."
 
 #: R/benford.b.R
 msgid ""
@@ -192809,6 +194609,7 @@ msgstr ""
 #: waterfall/results/responseDurationTable.columns.title
 #: waterfallrecist/results/recistSummary/orrConfirmed.columns.title
 #: waterfallrecist/results/recistSummary/dcrConfirmed.columns.title
+#: agreementintro/results/settings.columns.title
 msgid "Value"
 msgstr "Değer"
 
@@ -196501,6 +198302,11 @@ msgstr ""
 msgid "Warnings:"
 msgstr "Uyarılar:"
 
+#: agreementintro/options/cutoffPrespecified.title
+#: agreementintro/ui[1][13].label
+msgid "Was the cutoff chosen before inspecting performance?"
+msgstr "Eşik, performans incelenmeden önce seçildi mi?"
+
 #: package/analyses/waterfall.menuSubtitle
 #: waterfall/options.menuSubtitle
 msgid "Waterfall and SpiderPlot: One burden value per patient or visit"
@@ -196986,6 +198792,10 @@ msgstr "Bire-Karşı-Bir Stratejisiyle Ağırlıklı Ortalama Kullanılamaz"
 #: psychopdaROC/results/bayesianROCTable.columns.title
 msgid "Weighted Bootstrap AUC"
 msgstr "Ağırlıklı Bootstrap EAA"
+
+#: R/agreementintro.b.R
+msgid "Weighted Cohen's kappa"
+msgstr "Ağırlıklı Cohen kappa"
 
 #: stagemigration/options/concordanceProbabilityMethods/weighted_concordance.title
 msgid "Weighted Concordance"
@@ -197474,6 +199284,21 @@ msgstr ""
 msgid "What are standardized residuals?"
 msgstr "Standartlaştırılmış artıklar nelerdir?"
 
+#: agreementintro/options/comparisonGoal.title
+#: agreementintro/ui[1][6].label
+msgid "What changes between the paired conditions?"
+msgstr "Eşleştirilmiş koşullar arasında ne değişiyor?"
+
+#: agreementintro/options/scale.title
+#: agreementintro/ui[0][1].label
+msgid "What do the ratings represent?"
+msgstr "Değerlendirmeler neyi temsil ediyor?"
+
+#: agreementintro/options/referenceType.title
+#: agreementintro/ui[1][5].label
+msgid "What does the reference represent?"
+msgstr "Referans neyi temsil ediyor?"
+
 #: R/decisioncalculator.b.R
 msgid "What does this analysis do?"
 msgstr "Bu analiz ne yapar?"
@@ -197500,6 +199325,21 @@ msgstr "Yüzücü Grafiği Nedir?"
 msgid "What is being computed"
 msgstr "Ne hesaplanıyor"
 
+#: agreementintro/options/analysisUnit.title
+#: agreementintro/ui[0][6].label
+msgid "What is the analysis unit?"
+msgstr "Analiz birimi nedir?"
+
+#: agreementintro/options/planningGoal.title
+#: agreementintro/ui[1][7].label
+msgid "What is the planning objective?"
+msgstr "Planlamanın amacı nedir?"
+
+#: agreementintro/options/purpose.title
+#: agreementintro/ui[0][0].label
+msgid "What is your study question?"
+msgstr "Çalışma sorunuz nedir?"
+
 #: R/benford.b.R
 msgid "What it does:"
 msgstr "Ne yapar:"
@@ -197511,6 +199351,16 @@ msgstr "Ne Yapar:"
 #: R/vartree.b.R
 msgid "What it reports:"
 msgstr "Ne bildirir:"
+
+#: agreementintro/options/iccDefinition.title
+#: agreementintro/ui[1][3].label
+msgid "What kind of reliability matters?"
+msgstr "Hangi güvenirlik türü önemli?"
+
+#: agreementintro/options/reportingUnit.title
+#: agreementintro/ui[1][4].label
+msgid "What measurement will be used?"
+msgstr "Hangi ölçüm kullanılacak?"
 
 #: enhancedROC/options/analysisUnit.description
 msgid ""
@@ -198234,6 +200084,11 @@ msgstr "DSÖ kısaltılmış"
 msgid "WHO abridged (<1, 1-4, 5-9, ... 85+)"
 msgstr "DSÖ kısaltılmış (<1, 1-4, 5-9, ... 85+)"
 
+#: agreementintro/options/panel.title
+#: agreementintro/ui[0][3].label
+msgid "Who rates each case?"
+msgstr "Her olguyu kim değerlendiriyor?"
+
 #: R/agepyramid.b.R
 msgid "WHO/UN standard"
 msgstr "DSÖ/BM standart"
@@ -198348,6 +200203,15 @@ msgstr ""
 msgid "Wide format requires at least two strata variables"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"Wide inspection needs rater columns. Long inspection needs case ID, reader "
+"ID and rating columns."
+msgstr ""
+"Geniş veri incelemesi değerlendirici sütunlarını gerektirir. Uzun veri "
+"incelemesi olgu kimliği, değerlendirici kimliği ve değerlendirme sütunlarını "
+"gerektirir."
+
 #: R/jjridges.b.R
 msgid "Wide ridges = high variability; narrow ridges = consistent values"
 msgstr ""
@@ -198359,6 +200223,10 @@ msgstr "Geniş Eşik Aralığı"
 #: R/riverplot.b.R
 msgid "Wide:"
 msgstr ""
+
+#: agreementintro/options/dataLayout/wide.title
+msgid "Wide: one column per rater"
+msgstr "Geniş: değerlendirici başına bir sütun"
 
 #: pathagreement/options/readerFormat/wide.title
 msgid "Wide: one column per reader"
@@ -200057,12 +201925,19 @@ msgstr ""
 #: R/decisioncompare.b.R
 #: R/jjarcdiagram.b.R
 #: R/lassocox.b.R
+#: agreementintro/options/missingRatings/yes.title
+#: agreementintro/options/repeatedReadings/yes.title
+#: agreementintro/options/cutoffPrespecified/yes.title
 msgid "Yes"
 msgstr "Evet"
 
 #: R/agreement.b.R
 msgid "Yes (criterion met)"
 msgstr "Evet (ölçüt karşılandı)"
+
+#: agreementintro/options/categoryOrder/confirmed.title
+msgid "Yes, the full order is specified for every rater"
+msgstr "Evet, her değerlendirici için tam sıra tanımlandı"
 
 #: singlearm/options/timetypedata/ymd.title
 #: survival/options/timetypedata/ymd.title
@@ -200926,15 +202801,3 @@ msgstr ""
 #: contTables/results/chiSq.title
 msgid "χ² Tests"
 msgstr ""
-
-#: R/psychopdaROC.b.R
-msgid "Average precision = %.3f"
-msgstr "Ortalama kesinlik = %.3f"
-
-#: R/psychopdaROC.b.R
-msgid "AUC-PR uses interpolation linear in true- and false-positive counts (Davis & Goadrich 2006; Keilwagen et al. 2014), matching Clinical ROC Analysis. Tied scores enter together. The precision-recall step plot instead shows average precision. A constant marker has both areas equal to the sample prevalence."
-msgstr "AUC-PR, Klinik ROC Analizi ile uyumlu olarak doğru ve yanlış pozitif sayılarında doğrusal enterpolasyon kullanır (Davis ve Goadrich 2006; Keilwagen ve ark. 2014). Eşit puanlar birlikte değerlendirilir. Kesinlik-duyarlılık basamak grafiği ise ortalama kesinliği gösterir. Sabit bir belirteç için her iki alan da örneklem prevalansına eşittir."
-
-#: R/psychopdaROC.b.R
-msgid "Display precision-recall step curves with average precision. The classifier comparison table reports the separate interpolated AUC-PR estimate."
-msgstr "Ortalama kesinlik ile kesinlik-duyarlılık basamak eğrilerini gösterir. Sınıflandırıcı karşılaştırma tablosu, ayrı bir ölçü olan enterpolasyonlu AUC-PR tahminini raporlar."

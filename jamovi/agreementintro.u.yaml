@@ -1,0 +1,296 @@
+---
+name: agreementintro
+title: Agreement Method Guide
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+- type: Label
+  label: Study Question
+  children:
+  - type: Label
+    label: What is your study question?
+    heading: false
+    children:
+    - type: ComboBox
+      name: purpose
+      label: ''
+  - type: Label
+    label: What do the ratings represent?
+    heading: false
+    children:
+    - type: ComboBox
+      name: scale
+      label: ''
+  - type: Label
+    label: Number of raters / methods / foci (0 = unspecified)
+    heading: false
+    children:
+    - type: TextBox
+      name: nRaters
+      format: number
+      label: ''
+  - type: Label
+    label: Who rates each case?
+    heading: false
+    children:
+    - type: ComboBox
+      name: panel
+      label: ''
+  - type: Label
+    label: Are any ratings missing?
+    heading: false
+    children:
+    - type: ComboBox
+      name: missingRatings
+      label: ''
+  - type: Label
+    label: Does the same rater read a case more than once?
+    heading: false
+    children:
+    - type: ComboBox
+      name: repeatedReadings
+      label: ''
+  - type: Label
+    label: What is the analysis unit?
+    heading: false
+    children:
+    - type: ComboBox
+      name: analysisUnit
+      label: ''
+- type: CollapseBox
+  label: Design Details
+  collapsed: true
+  children:
+  - type: Label
+    label: Is one common category order established?
+    heading: false
+    children:
+    - type: ComboBox
+      name: categoryOrder
+      enable: (scale:ordinal || scale:rankings)
+      label: ''
+  - type: Label
+    label: How should ordinal disagreements be weighted?
+    heading: false
+    children:
+    - type: ComboBox
+      name: weights
+      enable: (scale:ordinal)
+      label: ''
+  - type: Label
+    label: To which raters should reliability generalize?
+    heading: false
+    children:
+    - type: ComboBox
+      name: raterSelection
+      enable: (purpose:reliability)
+      label: ''
+  - type: Label
+    label: What kind of reliability matters?
+    heading: false
+    children:
+    - type: ComboBox
+      name: iccDefinition
+      enable: (purpose:reliability)
+      label: ''
+  - type: Label
+    label: What measurement will be used?
+    heading: false
+    children:
+    - type: ComboBox
+      name: reportingUnit
+      enable: (purpose:reliability)
+      label: ''
+  - type: Label
+    label: What does the reference represent?
+    heading: false
+    children:
+    - type: ComboBox
+      name: referenceType
+      enable: (purpose:readerAccuracy || purpose:cutoff || purpose:paired)
+      label: ''
+  - type: Label
+    label: What changes between the paired conditions?
+    heading: false
+    children:
+    - type: ComboBox
+      name: comparisonGoal
+      enable: (purpose:paired)
+      label: ''
+  - type: Label
+    label: What is the planning objective?
+    heading: false
+    children:
+    - type: ComboBox
+      name: planningGoal
+      enable: (purpose:planning)
+      label: ''
+  - type: Label
+    label: Number of categories for planning (0 = unspecified)
+    heading: false
+    children:
+    - type: TextBox
+      name: nCategories
+      format: number
+      enable: (purpose:planning)
+      label: ''
+  - type: Label
+    label: Reader positive label
+    heading: false
+    children:
+    - type: TextBox
+      name: positiveLabel
+      format: string
+      enable: (scale:binary)
+      label: ''
+  - type: Label
+    label: Reader negative label
+    heading: false
+    children:
+    - type: TextBox
+      name: negativeLabel
+      format: string
+      enable: (scale:binary)
+      label: ''
+  - type: Label
+    label: Reference positive label
+    heading: false
+    children:
+    - type: TextBox
+      name: referencePositive
+      format: string
+      enable: (referenceType:disease || referenceType:consensus || referenceType:method)
+      label: ''
+  - type: Label
+    label: Reference negative label
+    heading: false
+    children:
+    - type: TextBox
+      name: referenceNegative
+      format: string
+      enable: (referenceType:disease || referenceType:consensus || referenceType:method)
+      label: ''
+  - type: Label
+    label: Was the cutoff chosen before inspecting performance?
+    heading: false
+    children:
+    - type: ComboBox
+      name: cutoffPrespecified
+      enable: (purpose:cutoff || purpose:readerAccuracy || purpose:paired)
+      label: ''
+  - type: Label
+    label: Prespecified cutoff value / ordinal boundary
+    heading: false
+    children:
+    - type: TextBox
+      name: cutoff
+      format: string
+      enable: (scale:ordinal || scale:continuous)
+      label: ''
+  - type: Label
+    label: Positive call for a numeric score
+    heading: false
+    children:
+    - type: ComboBox
+      name: cutoffDirection
+      enable: (scale:continuous)
+      label: ''
+- type: CollapseBox
+  label: Optional Data Check
+  collapsed: true
+  children:
+  - type: CheckBox
+    name: inspectData
+  - type: ComboBox
+    name: dataLayout
+    enable: (inspectData)
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+    - type: TargetLayoutBox
+      label: Rater / method columns
+      children:
+      - type: VariablesListBox
+        name: ratings
+        isTarget: true
+        enable: (inspectData && dataLayout:wide)
+    - type: TargetLayoutBox
+      label: Condition B rater columns (paired comparison)
+      children:
+      - type: VariablesListBox
+        name: conditionBRatings
+        isTarget: true
+        enable: (inspectData && dataLayout:wide)
+    - type: TargetLayoutBox
+      label: Case ID
+      children:
+      - type: VariablesListBox
+        name: caseID
+        isTarget: true
+        enable: (inspectData)
+        maxItemCount: 1
+    - type: TargetLayoutBox
+      label: Patient / cluster ID (optional)
+      children:
+      - type: VariablesListBox
+        name: patientID
+        isTarget: true
+        enable: (inspectData)
+        maxItemCount: 1
+    - type: TargetLayoutBox
+      label: Reader / focus ID (long data)
+      children:
+      - type: VariablesListBox
+        name: readerID
+        isTarget: true
+        enable: (inspectData && dataLayout:long)
+        maxItemCount: 1
+    - type: TargetLayoutBox
+      label: Rating (long data)
+      children:
+      - type: VariablesListBox
+        name: rating
+        isTarget: true
+        enable: (inspectData && dataLayout:long)
+        maxItemCount: 1
+    - type: TargetLayoutBox
+      label: Condition / modality (optional)
+      children:
+      - type: VariablesListBox
+        name: condition
+        isTarget: true
+        enable: (inspectData)
+        maxItemCount: 1
+    - type: TargetLayoutBox
+      label: Occasion / time point (optional)
+      children:
+      - type: VariablesListBox
+        name: occasion
+        isTarget: true
+        enable: (inspectData)
+        maxItemCount: 1
+    - type: TargetLayoutBox
+      label: Reference column (optional)
+      children:
+      - type: VariablesListBox
+        name: reference
+        isTarget: true
+        enable: (inspectData)
+        maxItemCount: 1
+- type: Label
+  label: Recommendation
+  children:
+  - type: CheckBox
+    name: showRecommendation
+  - type: CheckBox
+    name: showOverview
+  - type: CheckBox
+    name: showExamples
+  - type: CheckBox
+    name: showPitfalls
+  - type: CheckBox
+    name: showGlossary
+  - type: CheckBox
+    name: showCatalogue

@@ -752,6 +752,17 @@
         `pages`="155-163", 
         `doi`="10.1016/j.jcm.2016.02.012", 
         `url`="https://doi.org/10.1016/j.jcm.2016.02.012"), 
+    `Koo2017Erratum`=list(
+        `type`="article", 
+        `author`="Journal of Chiropractic Medicine", 
+        `year`=2017, 
+        `title`="Erratum to A Guideline of Selecting and Reporting Intraclass Correlation Coefficients for Reliability Research", 
+        `publisher`="Journal of Chiropractic Medicine", 
+        `volume`=16, 
+        `issue`=4, 
+        `pages`="346", 
+        `doi`="10.1016/j.jcm.2017.10.001", 
+        `url`="https://pmc.ncbi.nlm.nih.gov/articles/PMC5731844/"), 
     `Kruschke2014`=list(
         `type`="book", 
         `author`="Kruschke, J. K.", 

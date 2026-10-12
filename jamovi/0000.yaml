@@ -5882,6 +5882,20 @@ analyses:
       Cleveland dot chart: one summary point per group, ordered by value, with
       a confidence interval and a reference line. Wraps
       ggstatsplot::ggdotplotstats and ggstatsplot::grouped_ggdotplotstats.
+  - title: Agreement Method Guide
+    name: agreementintro
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: meddecideT
+    menuSubgroup: Agreement
+    menuTitle: Method Guide
+    menuSubtitle: Choose an agreement analysis for your study design
+    description: >-
+      An educational decision guide across the agreement analysis family. Uses
+      user-confirmed study design and optional wide or long data inspection to
+      suggest methods, exact settings, preparation steps and current development
+      routes. Does not calculate agreement statistics or run another analysis.
+      Questionnaire guidance works with an empty dataset.
 usesNative: true
 minApp: 2.7.27
 

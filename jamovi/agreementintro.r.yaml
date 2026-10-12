@@ -1,0 +1,128 @@
+---
+name: agreementintro
+title: Agreement Method Guide
+jrs: '1.1'
+items:
+- name: overview
+  title: Agreement Method Guide
+  type: Html
+  visible: (showOverview)
+- name: status
+  title: Decision
+  type: Html
+  visible: (showRecommendation)
+- name: recommendations
+  title: Suggested Analyses
+  type: Table
+  rows: 0
+  visible: (showRecommendation)
+  columns:
+  - name: priority
+    title: Priority
+    type: text
+  - name: analysis
+    title: Analysis
+    type: text
+  - name: method
+    title: Method
+    type: text
+- name: settings
+  title: Recommended Settings
+  type: Table
+  rows: 0
+  visible: (showRecommendation)
+  columns:
+  - name: analysis
+    title: Analysis
+    type: text
+  - name: option
+    title: Option
+    type: text
+  - name: value
+    title: Value
+    type: text
+- name: preparation
+  title: Preparation and Interpretation
+  type: Html
+  visible: (showRecommendation)
+- name: dataSummary
+  title: Observed Data Structure
+  type: Table
+  rows: 0
+  visible: (inspectData)
+  columns:
+  - name: feature
+    title: Feature
+    type: text
+  - name: value
+    title: Observed value
+    type: text
+- name: columnSummary
+  title: Selected Rating Columns
+  type: Table
+  rows: 0
+  visible: (inspectData)
+  columns:
+  - name: variable
+    title: Column
+    type: text
+  - name: type
+    title: Type
+    type: text
+  - name: observed
+    title: Observed
+    type: integer
+  - name: missing
+    title: Missing
+    type: integer
+  - name: categories
+    title: Categories
+    type: integer
+- name: inspectionNotes
+  title: Data Check Notes
+  type: Html
+  visible: (inspectData)
+- name: examples
+  title: Clinical Examples
+  type: Html
+  visible: (showExamples)
+- name: pitfalls
+  title: Assumptions and Pitfalls
+  type: Html
+  visible: (showPitfalls)
+- name: glossary
+  title: Glossary
+  type: Html
+  visible: (showGlossary)
+- name: catalogue
+  title: Agreement Analysis Catalogue
+  type: Table
+  rows: 0
+  visible: (showCatalogue)
+  columns:
+  - name: analysis
+    title: Analysis
+    type: text
+  - name: version
+    title: Catalogue version
+    type: text
+  - name: development
+    title: Development status
+    type: text
+- name: catalogueNotes
+  title: Catalogue Menu Locations
+  type: Html
+  visible: (showCatalogue)
+refs:
+- ClinicoPathJamoviModule
+- Cohen1960
+- Fleiss1971
+- Conger1980
+- Krippendorff2004
+- Gwet2008
+- Koo2016
+- Koo2017Erratum
+- BlandAltman1986
+- Kendall1939
+- rotondiDonnerKappaCI
+...

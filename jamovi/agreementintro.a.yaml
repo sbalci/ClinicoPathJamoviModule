@@ -1,0 +1,418 @@
+---
+name: agreementintro
+title: Agreement Method Guide
+menuGroup: meddecideT
+menuSubgroup: Agreement
+menuTitle: Method Guide
+menuSubtitle: Choose an agreement analysis for your study design
+version: 0.0.1
+jas: '1.2'
+description:
+  main: An educational decision guide across the agreement analysis family. Uses user-confirmed study
+    design and optional wide or long data inspection to suggest methods, exact settings, preparation
+    steps and current development routes. Does not calculate agreement statistics or run another analysis.
+    Questionnaire guidance works with an empty dataset.
+  R:
+    dontrun: false
+    usage: "agreementintro(data = data.frame(), purpose = \"categorical\",\n    scale = \"nominal\"\
+      , nRaters = 2, panel = \"same\",\n    missingRatings = \"no\", repeatedReadings = \"no\",\n\
+      \    analysisUnit = \"independent\")"
+options:
+- name: data
+  type: Data
+  description:
+    R: The data as a data frame. Use data.frame() for questionnaire-only guidance.
+- name: purpose
+  title: What is your study question?
+  type: List
+  options:
+  - name: unspecified
+    title: Not specified
+  - name: categorical
+    title: Agreement on categories or grades
+  - name: measurement
+    title: Agreement between two measurement methods
+  - name: reliability
+    title: Reliability of continuous measurements (ICC)
+  - name: readerAccuracy
+    title: Reader accuracy against a reference
+  - name: cutoff
+    title: Reader disagreement at a clinical cutoff
+  - name: paired
+    title: Compare two conditions or modalities
+  - name: ranking
+    title: Concordance of rankings
+  - name: bias
+    title: Systematic differences in category use
+  - name: multifocal
+    title: Multifocal or primary-metastasis concordance
+  - name: planning
+    title: Plan an agreement study
+  default: unspecified
+- name: scale
+  title: What do the ratings represent?
+  type: List
+  options:
+  - name: unspecified
+    title: Not specified
+  - name: binary
+    title: Two categories (binary)
+  - name: nominal
+    title: Unordered categories
+  - name: ordinal
+    title: Ordered categories or grades
+  - name: continuous
+    title: Continuous measurements
+  - name: rankings
+    title: Ranks
+  default: unspecified
+- name: nRaters
+  title: Number of raters / methods / foci (0 = unspecified)
+  type: Integer
+  default: 0
+  min: 0
+  description:
+    R: Zero means not specified.
+- name: panel
+  title: Who rates each case?
+  type: List
+  options:
+  - name: unspecified
+    title: Not specified
+  - name: same
+    title: The same identified raters
+  - name: different
+    title: Different, exchangeable raters with equal numbers per case
+  - name: incomplete
+    title: An incomplete or varying rater panel
+  default: unspecified
+- name: missingRatings
+  title: Are any ratings missing?
+  type: List
+  options:
+  - name: unspecified
+    title: Not specified
+  - name: 'no'
+    title: 'No'
+  - name: 'yes'
+    title: 'Yes'
+  default: unspecified
+- name: repeatedReadings
+  title: Does the same rater read a case more than once?
+  type: List
+  options:
+  - name: unspecified
+    title: Not specified
+  - name: 'no'
+    title: 'No'
+  - name: 'yes'
+    title: 'Yes'
+  default: unspecified
+- name: analysisUnit
+  title: What is the analysis unit?
+  type: List
+  options:
+  - name: unspecified
+    title: Not specified
+  - name: independent
+    title: 'Independent cases: one case per patient'
+  - name: clustered
+    title: Multiple specimens or visits per patient
+  default: unspecified
+- name: categoryOrder
+  title: Is one common category order established?
+  type: List
+  options:
+  - name: unspecified
+    title: Not specified
+  - name: confirmed
+    title: Yes, the full order is specified for every rater
+  - name: uncertain
+    title: No / unsure
+  default: unspecified
+- name: weights
+  title: How should ordinal disagreements be weighted?
+  type: List
+  options:
+  - name: unspecified
+    title: Not specified
+  - name: unweighted
+    title: Exact agreement only (unweighted)
+  - name: linear
+    title: 'Linear: equal cost for each extra category step'
+  - name: quadratic
+    title: 'Quadratic: larger disagreements receive more weight'
+  default: unspecified
+- name: raterSelection
+  title: To which raters should reliability generalize?
+  type: List
+  options:
+  - name: unspecified
+    title: Not specified
+  - name: random
+    title: A population of comparable raters (random)
+  - name: fixed
+    title: Only these selected raters (fixed)
+  default: unspecified
+- name: iccDefinition
+  title: What kind of reliability matters?
+  type: List
+  options:
+  - name: unspecified
+    title: Not specified
+  - name: absolute
+    title: 'Absolute agreement: the same values'
+  - name: consistency
+    title: 'Consistency: allow systematic rater shifts'
+  default: unspecified
+- name: reportingUnit
+  title: What measurement will be used?
+  type: List
+  options:
+  - name: unspecified
+    title: Not specified
+  - name: single
+    title: One rater / measurement
+  - name: average
+    title: The average of these raters / measurements
+  default: unspecified
+- name: referenceType
+  title: What does the reference represent?
+  type: List
+  options:
+  - name: unspecified
+    title: Not specified
+  - name: none
+    title: 'No reference: agreement only'
+  - name: disease
+    title: Disease reference standard
+  - name: consensus
+    title: Expert consensus comparator
+  - name: method
+    title: Another comparison method
+  default: unspecified
+- name: comparisonGoal
+  title: What changes between the paired conditions?
+  type: List
+  options:
+  - name: unspecified
+    title: Not specified
+  - name: agreement
+    title: Overall agreement of the same panel
+  - name: readerModality
+    title: Each fixed reader uses two modalities
+  - name: specialized
+    title: Two categorical modalities (specialist workflow)
+  default: unspecified
+- name: planningGoal
+  title: What is the planning objective?
+  type: List
+  options:
+  - name: unspecified
+    title: Not specified
+  - name: precision
+    title: A target confidence interval
+  - name: power
+    title: Power for a specified kappa hypothesis test
+  - name: fixed
+    title: A lower confidence bound with fixed sample size
+  default: unspecified
+- name: nCategories
+  title: Number of categories for planning (0 = unspecified)
+  type: Integer
+  default: 0
+  min: 0
+  description:
+    R: Zero means not specified.
+- name: positiveLabel
+  title: Reader positive label
+  type: String
+  default: ''
+- name: negativeLabel
+  title: Reader negative label
+  type: String
+  default: ''
+- name: referencePositive
+  title: Reference positive label
+  type: String
+  default: ''
+- name: referenceNegative
+  title: Reference negative label
+  type: String
+  default: ''
+- name: cutoff
+  title: Prespecified cutoff value / ordinal boundary
+  type: String
+  default: ''
+- name: cutoffDirection
+  title: Positive call for a numeric score
+  type: List
+  options:
+  - name: unspecified
+    title: Not specified
+  - name: ge
+    title: At or above the cutoff
+  - name: gt
+    title: Above the cutoff
+  - name: le
+    title: At or below the cutoff
+  - name: lt
+    title: Below the cutoff
+  default: unspecified
+- name: cutoffPrespecified
+  title: Was the cutoff chosen before inspecting performance?
+  type: List
+  options:
+  - name: unspecified
+    title: Not specified
+  - name: 'yes'
+    title: 'Yes'
+  - name: 'no'
+    title: No / not yet
+  default: unspecified
+- name: inspectData
+  title: Inspect selected data
+  type: Bool
+  default: false
+- name: dataLayout
+  title: Selected data layout
+  type: List
+  options:
+  - name: wide
+    title: 'Wide: one column per rater'
+  - name: long
+    title: 'Long: one row per reading'
+  default: wide
+- name: ratings
+  title: Rater / method columns
+  type: Variables
+  default: null
+  suggested:
+  - continuous
+  - ordinal
+  - nominal
+  permitted:
+  - numeric
+  - factor
+  - id
+- name: conditionBRatings
+  title: Condition B rater columns (paired comparison)
+  type: Variables
+  default: null
+  suggested:
+  - continuous
+  - ordinal
+  - nominal
+  permitted:
+  - numeric
+  - factor
+  - id
+- name: caseID
+  title: Case ID
+  type: Variable
+  default: null
+  suggested:
+  - continuous
+  - ordinal
+  - nominal
+  permitted:
+  - numeric
+  - factor
+  - id
+- name: patientID
+  title: Patient / cluster ID (optional)
+  type: Variable
+  default: null
+  suggested:
+  - continuous
+  - ordinal
+  - nominal
+  permitted:
+  - numeric
+  - factor
+  - id
+- name: readerID
+  title: Reader / focus ID (long data)
+  type: Variable
+  default: null
+  suggested:
+  - continuous
+  - ordinal
+  - nominal
+  permitted:
+  - numeric
+  - factor
+  - id
+- name: rating
+  title: Rating (long data)
+  type: Variable
+  default: null
+  suggested:
+  - continuous
+  - ordinal
+  - nominal
+  permitted:
+  - numeric
+  - factor
+  - id
+- name: condition
+  title: Condition / modality (optional)
+  type: Variable
+  default: null
+  suggested:
+  - continuous
+  - ordinal
+  - nominal
+  permitted:
+  - numeric
+  - factor
+  - id
+- name: occasion
+  title: Occasion / time point (optional)
+  type: Variable
+  default: null
+  suggested:
+  - continuous
+  - ordinal
+  - nominal
+  permitted:
+  - numeric
+  - factor
+  - id
+- name: reference
+  title: Reference column (optional)
+  type: Variable
+  default: null
+  suggested:
+  - continuous
+  - ordinal
+  - nominal
+  permitted:
+  - numeric
+  - factor
+  - id
+- name: showOverview
+  title: Method overview
+  type: Bool
+  default: true
+- name: showRecommendation
+  title: Recommendation and setup
+  type: Bool
+  default: true
+- name: showExamples
+  title: Clinical examples
+  type: Bool
+  default: false
+- name: showPitfalls
+  title: Assumptions and pitfalls
+  type: Bool
+  default: false
+- name: showGlossary
+  title: Glossary
+  type: Bool
+  default: false
+- name: showCatalogue
+  title: All available analysis routes
+  type: Bool
+  default: false
+...

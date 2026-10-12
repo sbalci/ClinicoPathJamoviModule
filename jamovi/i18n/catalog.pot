@@ -546,6 +546,10 @@ msgstr ""
 msgid "(Expected)"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid "(first 30 declared levels shown)"
+msgstr ""
+
 #: R/agepyramid.b.R
 msgid "(ggcharts received {nRows} rows covering {nGroups} age group(s).)"
 msgstr ""
@@ -11566,6 +11570,18 @@ msgid ""
 "no better than chance."
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"A case has conflicting reference values. Resolve the reference definition "
+"before using reader accuracy."
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"A case ID maps to more than one patient ID. Resolve the case-to-patient "
+"mapping."
+msgstr ""
+
 #: R/agreement.b.R
 msgid ""
 "A case ID variable was given, but no case appears under more than one "
@@ -11910,6 +11926,10 @@ msgid ""
 "color. Default is 'first_variable'."
 msgstr ""
 
+#: agreementintro/options/planningGoal/fixed.title
+msgid "A lower confidence bound with fixed sample size"
+msgstr ""
+
 #: R/multisurvival.b.R
 msgid "a lower fitted hazard"
 msgstr ""
@@ -11950,6 +11970,10 @@ msgstr ""
 msgid ""
 "A measure that converts health benefits into monetary terms and subtracts "
 "costs, allowing direct comparison of interventions."
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid "A method configuration matches the declared study design."
 msgstr ""
 
 #: R/decisioncurve.b.R
@@ -12053,6 +12077,13 @@ msgstr ""
 msgid "A note on sample size when comparing to a manual per-subgroup fit:"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"A one-way ICC requires different exchangeable random raters across cases and "
+"equal numbers of ratings. A fixed-panel or consistency-specific "
+"interpretation is not supported by this one-way route."
+msgstr ""
+
 #: R/raincloud.b.R
 msgid ""
 "A p-value adjustment was requested, but only one comparison is being made, "
@@ -12079,6 +12110,12 @@ msgstr ""
 
 #: R/enhancedROC.b.R
 msgid "A partition audit requires patient identifiers."
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"A patient contributes more than one distinct case. These cases are "
+"clustered, even when case IDs are unique."
 msgstr ""
 
 #: R/psychopdaROC.b.R
@@ -12156,6 +12193,10 @@ msgstr ""
 msgid ""
 "A point in the decision tree where uncertain events occur. Represented by "
 "circles in decision trees."
+msgstr ""
+
+#: agreementintro/options/raterSelection/random.title
+msgid "A population of comparable raters (random)"
 msgstr ""
 
 #: R/decision.b.R
@@ -12280,6 +12321,18 @@ msgid ""
 "A row is treated as one case. Repeated records are not deduplicated. "
 "Frequency weights, when supplied, represent replicated rows, not verified "
 "unique patients or a complex survey design."
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"A selected column is no longer available. Update the optional data "
+"selections."
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"A selected identifier contains missing or blank values. Complete the "
+"identifiers before checking matched designs."
 msgstr ""
 
 #: R/cotest.b.R
@@ -12529,6 +12582,10 @@ msgstr ""
 
 #: contTables/results/chiSq.description
 msgid "a table of χ² test results"
+msgstr ""
+
+#: agreementintro/options/planningGoal/precision.title
+msgid "A target confidence interval"
 msgstr ""
 
 #: R/pathsampling.b.R
@@ -13044,6 +13101,10 @@ msgstr ""
 msgid "Above reference gap (index > 1.3)"
 msgstr "Above reference gap (index > 1.3)"
 
+#: agreementintro/options/cutoffDirection/gt.title
+msgid "Above the cutoff"
+msgstr ""
+
 #: bbcplots/options/value_position/above.title
 msgid "Above/End"
 msgstr ""
@@ -13070,6 +13131,10 @@ msgstr ""
 
 #: icccoeff/options/agreement_type/agreement.title
 msgid "Absolute Agreement (ICC(A))"
+msgstr ""
+
+#: agreementintro/options/iccDefinition/absolute.title
+msgid "Absolute agreement: the same values"
 msgstr ""
 
 #: clinicaltrialdesign/options/margin_type/absolute.title
@@ -13140,6 +13205,12 @@ msgstr ""
 
 #: stagemigration/options/absorptionStates.title
 msgid "Absorption States"
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"AC2 is a complementary weighted agreement coefficient with a different "
+"chance-agreement model."
 msgstr ""
 
 #: raftgee/results/coefficients.columns.title
@@ -16690,6 +16761,8 @@ msgstr ""
 #: pathagreement/options.menuSubgroup
 #: pathologyagreement/options.menuSubgroup
 #: survivalPower/results/simulation_validation_table.columns.title
+#: package/analyses/agreementintro.menuSubgroup
+#: agreementintro/options.menuSubgroup
 msgid "Agreement"
 msgstr ""
 
@@ -16721,6 +16794,10 @@ msgstr ""
 msgid "Agreement Across Sequential Case Groups"
 msgstr ""
 
+#: agreementintro/results/catalogue.title
+msgid "Agreement Analysis Catalogue"
+msgstr ""
+
 #: R/pathagreement.b.R
 msgid "Agreement analysis requires at least 2 cases (observations)."
 msgstr ""
@@ -16747,6 +16824,10 @@ msgid ""
 "Agreement between {pair} was {interpretation} ({symbol} = {estimate}{ci}{p}) "
 "across {cases} cases. This is one of several rater pairs ({raters} raters in "
 "total); report the pairwise results rather than this pair alone."
+msgstr ""
+
+#: agreementintro/options/purpose/measurement.title
+msgid "Agreement between two measurement methods"
 msgstr ""
 
 #: package/analyses/agreement.description
@@ -16882,6 +16963,15 @@ msgstr ""
 msgid "Agreement Level:"
 msgstr ""
 
+#: package.title
+#: package/analyses/agreementintro.title
+#: agreementintro/options.title
+#: agreementintro/ui.title
+#: agreementintro/results.title
+#: agreementintro/results/overview.title
+msgid "Agreement Method Guide"
+msgstr ""
+
 #: R/agreement.b.R
 #: pathologyagreement/results/agreementtable.columns.title
 msgid "Agreement Metric"
@@ -16894,6 +16984,10 @@ msgstr ""
 #: package/analyses/pathagreement.menuSubtitle
 #: pathagreement/options.menuSubtitle
 msgid "Agreement on Categorical and Ordinal Data"
+msgstr ""
+
+#: agreementintro/options/purpose/categorical.title
+msgid "Agreement on categories or grades"
 msgstr ""
 
 #: package/analyses/pathologyagreement.menuSubtitle
@@ -16995,6 +17089,13 @@ msgstr ""
 msgid "Agreement with comparator"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"Agreement with expert consensus or another method is not disease sensitivity "
+"or specificity. Keep the comparator description and classification agreement "
+"labels in the report."
+msgstr ""
+
 #: R/pathagreement.b.R
 msgid ""
 "Agreement with the comparator does not establish disease status. PPA/NPA "
@@ -17019,6 +17120,13 @@ msgstr ""
 
 #: agreement/options/loaVariableName.default
 msgid "agreement_level"
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Agreement, reliability, correlation, and diagnostic accuracy are different "
+"questions. A large correlation, a non-significant marginal test, or a verbal "
+"kappa band does not establish clinical interchangeability."
 msgstr ""
 
 #: cohenskappa/results/categoryStats.columns.title
@@ -17359,6 +17467,10 @@ msgid ""
 "All asymmetry tests have low power, particularly when the diagnostic odds "
 "ratio is heterogeneous, so a non-significant result does not establish that "
 "publication bias is absent."
+msgstr ""
+
+#: agreementintro/options/showCatalogue.title
+msgid "All available analysis routes"
 msgstr ""
 
 #: mageeequation/options/equations/all.title
@@ -18041,6 +18153,13 @@ msgstr ""
 msgid "Alpha and Power"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"Alpha can use incomplete rating panels. Cases with fewer than two observed "
+"ratings provide no pairwise agreement information; missingness can still "
+"bias the study."
+msgstr ""
+
 #: nogoldstandard/options/alpha.title
 msgid "Alpha for Confidence Intervals"
 msgstr ""
@@ -18108,6 +18227,10 @@ msgstr ""
 
 #: tinytable/options/style_alternating.title
 msgid "Alternating Row Colors"
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid "Alternative"
 msgstr ""
 
 #: pathagreement/ui[9][0][0].label
@@ -18289,6 +18412,12 @@ msgid ""
 "covariate could be removed without penalising fit."
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"An alternative interface is available for this method. Its development "
+"status and assumptions need separate review."
+msgstr ""
+
 #: R/decisiongraph.b.R
 msgid ""
 "An analysis that tests how sensitive the results are to changes in key "
@@ -18311,6 +18440,16 @@ msgid ""
 "coefficients themselves unstable. Enable bootstrap validation for an "
 "optimism-corrected estimate, and treat external validation as mandatory "
 "before any clinical use."
+msgstr ""
+
+#: package/analyses/agreementintro.description
+#: agreementintro/options.description.main
+msgid ""
+"An educational decision guide across the agreement analysis family. Uses "
+"user-confirmed study design and optional wide or long data inspection to "
+"suggest methods, exact settings, preparation steps and current development "
+"routes. Does not calculate agreement statistics or run another analysis. "
+"Questionnaire guidance works with an empty dataset."
 msgstr ""
 
 #: R/agreement.b.R
@@ -18399,6 +18538,10 @@ msgid ""
 "An imperfect reference standard can bias every estimated measure; document "
 "its limitations and consider latent-class or discrepant-resolution methods "
 "where appropriate."
+msgstr ""
+
+#: agreementintro/options/panel/incomplete.title
+msgid "An incomplete or varying rater panel"
 msgstr ""
 
 #: package/analyses/lassointro.description
@@ -18557,6 +18700,9 @@ msgstr ""
 #: timevarycox/results/todo.title
 #: treatmentmeta/results/trim_fill_results.columns.title
 #: weightedlogrank/results/todo.title
+#: agreementintro/results/recommendations.columns.title
+#: agreementintro/results/settings.columns.title
+#: agreementintro/results/catalogue.columns.title
 msgid "Analysis"
 msgstr ""
 
@@ -19481,6 +19627,14 @@ msgstr ""
 msgid "Analysis unit"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"Analysis unit: the independent entity relevant to the question. A patient "
+"may contribute several dependent specimens. A reference standard, expert "
+"consensus, and comparison method have different interpretations and must be "
+"labelled explicitly."
+msgstr ""
+
 #: R/advancedraincloud.b.R
 msgid ""
 "Analysis uses each subject’s last available level after baseline, according "
@@ -19883,6 +20037,10 @@ msgstr ""
 
 #: decisiongraph/results/markovTable.columns.title
 msgid "Annual Utility"
+msgstr ""
+
+#: agreementintro/options/referenceType/method.title
+msgid "Another comparison method"
 msgstr ""
 
 #: advancedbarplot/options/stat_method/anova.title
@@ -20352,6 +20510,11 @@ msgstr ""
 msgid "Arctangent (gradual curves)"
 msgstr ""
 
+#: agreementintro/options/missingRatings.title
+#: agreementintro/ui[0][4].label
+msgid "Are any ratings missing?"
+msgstr ""
+
 #: R/multisurvival.b.R
 msgid "are created by dividing patients into quantiles (tertiles, quartiles, etc.)"
 msgstr ""
@@ -20726,6 +20889,24 @@ msgstr ""
 msgid "Assessment time"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"Assign modality1_var and modality2_var and optionally case_id. Use one "
+"matched pair per independent case. This custom-category recipe reports "
+"overall agreement and unweighted kappa on complete pairs. Directional, "
+"weighted, discordance, contingency, plot and confidence-interval outputs are "
+"disabled because their custom-category behavior is not verified. The target "
+"remains a draft."
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Assign Patient / cluster ID to readerCluster in pathagreement and retain "
+"paired readings within each resampled cluster. These bootstrap intervals are "
+"exploratory; the analysis unit is the case or specimen, with clustered "
+"uncertainty."
+msgstr ""
+
 #: ihccluster/results/outlierCases.columns.title
 #: ihcpredict/results/predictionEvidence.columns.title
 msgid "Assigned Cluster"
@@ -20960,6 +21141,14 @@ msgstr ""
 
 #: jjdotplotstats/results/explanation.title
 msgid "Assumptions and Interpretation"
+msgstr ""
+
+#: agreementintro/options/showPitfalls.title
+msgid "Assumptions and pitfalls"
+msgstr ""
+
+#: agreementintro/results/pitfalls.title
+msgid "Assumptions and Pitfalls"
 msgstr ""
 
 #: chisqposttest/options/showAssumptionsCheck.title
@@ -21261,6 +21450,13 @@ msgid ""
 "survival estimation."
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"At least one selected column has fewer than two observed distinct values. A "
+"chance-corrected coefficient may be undefined; constant ratings do not "
+"establish reliability."
+msgstr ""
+
 #: R/riverplot.b.R
 msgid "At least one strata variable is required"
 msgstr ""
@@ -21350,8 +21546,16 @@ msgstr ""
 msgid "At or above cutoff"
 msgstr ""
 
+#: agreementintro/options/cutoffDirection/ge.title
+msgid "At or above the cutoff"
+msgstr ""
+
 #: pathagreement/options/positiveRule/le.title
 msgid "At or below cutoff"
+msgstr ""
+
+#: agreementintro/options/cutoffDirection/le.title
+msgid "At or below the cutoff"
 msgstr ""
 
 #: R/crosstable.b.R
@@ -21930,6 +22134,14 @@ msgid ""
 "with no information scores about the prevalence. Average precision is the "
 "step-wise estimate: the area under the step curve in the Precision-Recall "
 "plot."
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"AUC-PR uses interpolation linear in true- and false-positive counts (Davis & "
+"Goadrich 2006; Keilwagen et al. 2014), matching Clinical ROC Analysis. Tied "
+"scores enter together. The precision-recall step plot instead shows average "
+"precision. A constant marker has both areas equal to the sample prevalence."
 msgstr ""
 
 #: biomarkerdiscovery/results/signature_performance.columns.title
@@ -22596,6 +22808,10 @@ msgstr ""
 
 #: precisionrecall/options/aucMethod/average_precision.title
 msgid "Average precision (step area)"
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid "Average precision = %.3f"
 msgstr ""
 
 #: vusanalysis/options/handle_ties/average.title
@@ -24546,6 +24762,10 @@ msgstr "Below reference gap (index < 0.7)"
 msgid "Below the conventional 0.667 minimum for tentative conclusions"
 msgstr ""
 
+#: agreementintro/options/cutoffDirection/lt.title
+msgid "Below the cutoff"
+msgstr ""
+
 #: R/ihcheterogeneity.b.R
 msgid "Below the threshold as a point estimate only: %s."
 msgstr ""
@@ -25492,6 +25712,12 @@ msgstr ""
 msgid "Binary Outcomes"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"Binary ratings were declared, but the selected rating columns together "
+"contain more than two observed values. Confirm a common binary coding."
+msgstr ""
+
 #: pathagreement/options/readerWorkflow/binary.title
 msgid "Binary reader diagnostics"
 msgstr ""
@@ -26157,6 +26383,10 @@ msgstr ""
 msgid ""
 "Bland-Altman analysis requires exactly 2 raters. Please select only 2 "
 "variables."
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid "Bland-Altman limits and Lin's CCC"
 msgstr ""
 
 #: pathologyagreement/options/ba_method.title
@@ -30237,6 +30467,8 @@ msgstr ""
 #: pathagreement/results/consensusTable.columns.title
 #: pathagreement/results/caseDifficultyTable.columns.title
 #: pathagreement/results/discordantCasesCluster.columns.title
+#: agreementintro/options/caseID.title
+#: agreementintro/ui[2][2][2].label
 msgid "Case ID"
 msgstr ""
 
@@ -30465,6 +30697,7 @@ msgstr ""
 #: pathsampling/results/lnrClassification.columns.title
 #: pathsampling/results/ajccNStage.columns.title
 #: pathsampling/results/adequacyByELN.columns.title
+#: R/agreementintro.b.R
 msgid "Cases"
 msgstr ""
 
@@ -30651,6 +30884,14 @@ msgstr ""
 msgid "Cassettes Examined"
 msgstr ""
 
+#: agreementintro/results/catalogueNotes.title
+msgid "Catalogue Menu Locations"
+msgstr ""
+
+#: agreementintro/results/catalogue.columns.title
+msgid "Catalogue version"
+msgstr ""
+
 #: R/tableone.b.R
 #: package/analyses/jjtreemap.menuSubgroup
 #: jjtreemap/options.menuSubgroup
@@ -30736,6 +30977,12 @@ msgstr ""
 
 #: advancedimputation/options/categorical_method.title
 msgid "Categorical Imputation Method"
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Categorical kappa needs categories or grades. Use measurement agreement or "
+"reliability for continuous measurements."
 msgstr ""
 
 #: multisurvival/ui[6][0][0][1][0][0].label
@@ -30889,6 +31136,7 @@ msgstr ""
 #: jjsegmentedtotalbar/results/summary.columns.title
 #: modalitycomparison/results/overviewTable.columns.title
 #: pathagreement/results/overviewTable.columns.title
+#: agreementintro/results/columnSummary.columns.title
 msgid "Categories"
 msgstr ""
 
@@ -32773,6 +33021,24 @@ msgstr ""
 msgid "Choose a unique rule label."
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"Choose absolute agreement or consistency; consistency permits systematic "
+"shifts between raters."
+msgstr ""
+
+#: package/analyses/agreementintro.menuSubtitle
+#: agreementintro/options.menuSubtitle
+msgid "Choose an agreement analysis for your study design"
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Choose an agreement method from the question you want to answer, the meaning "
+"of the scores, and the study design. This guide describes analyses; it does "
+"not calculate agreement statistics or open another analysis."
+msgstr ""
+
 #: R/nogoldstandard.b.R
 msgid "Choose Analysis Method:"
 msgstr ""
@@ -32952,6 +33218,12 @@ msgstr ""
 msgid "Choose Input Type"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"Choose interval precision, hypothesis-test power, or a lower bound with "
+"fixed sample size."
+msgstr ""
+
 #: jjsegmentedtotalbar/options/flerlage_label_color.description.jamovi
 msgid "Choose label color for Flerlage plot type."
 msgstr ""
@@ -33053,6 +33325,12 @@ msgstr ""
 
 #: bbcplots/options/chart_type.description.ui
 msgid "Choose the chart type that best represents your data."
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Choose the clinical cutoff before inspecting performance, then confirm that "
+"it was prespecified."
 msgstr ""
 
 #: clinicalheatmap/options/colorPalette.description.jamovi
@@ -33248,6 +33526,12 @@ msgstr ""
 
 #: jiwillsurvive/options/followup_units.description.jamovi
 msgid "Choose time units for follow-up calculation."
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Choose unweighted, linear, or quadratic disagreement weights for ordered "
+"categories."
 msgstr ""
 
 #: datevalidator/ui[1][0].label
@@ -34782,7 +35066,12 @@ msgid ""
 msgstr ""
 
 #: R/jjhistostats.b.R
+#: agreementintro/options/showExamples.title
 msgid "Clinical examples"
+msgstr ""
+
+#: agreementintro/results/examples.title
+msgid "Clinical Examples"
 msgstr ""
 
 #: jjbarstats/options/showexplanations.title
@@ -37698,6 +37987,7 @@ msgid "Cohen's Kappa"
 msgstr ""
 
 #: R/pathagreement.b.R
+#: R/agreementintro.b.R
 msgid "Cohen's kappa"
 msgstr ""
 
@@ -38389,6 +38679,7 @@ msgstr ""
 #: esquisseauto/options/manualGeom/col.title
 #: jggheatmap/options/scaling/column.title
 #: jggheatmap/results/matrixtab.columns.title
+#: agreementintro/results/columnSummary.columns.title
 msgid "Column"
 msgstr ""
 
@@ -39491,6 +39782,10 @@ msgstr ""
 msgid "Compare to Unadjusted ROC"
 msgstr ""
 
+#: agreementintro/options/purpose/paired.title
+msgid "Compare two conditions or modalities"
+msgstr ""
+
 #: package/analyses/groomecompare.description
 #: groomecompare/options.description.main
 msgid ""
@@ -40284,6 +40579,10 @@ msgstr ""
 msgid ""
 "Complete case analysis performed. Observations with missing values in any "
 "required variable were excluded."
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid "Complete case-condition-occasion groups"
 msgstr ""
 
 #: R/checkdata.b.R
@@ -42075,6 +42374,10 @@ msgstr ""
 msgid "Concordance Methods"
 msgstr ""
 
+#: agreementintro/options/purpose/ranking.title
+msgid "Concordance of rankings"
+msgstr ""
+
 #: mageeequation/results/concordancePlot.title
 #: multifocalconcordance/options/showPlot.title
 msgid "Concordance Plot"
@@ -42131,6 +42434,12 @@ msgstr ""
 msgid "Concordant"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"Concordant biomarker calls alone do not establish tumour clonality. The "
+"candidate settings leave the case-level clonality summary disabled."
+msgstr ""
+
 #: decisioncalculator/results/nTable.columns.title
 msgid "Concordant Results"
 msgstr ""
@@ -42170,8 +42479,17 @@ msgstr ""
 msgid "Condition"
 msgstr ""
 
+#: agreementintro/options/condition.title
+#: agreementintro/ui[2][2][6].label
+msgid "Condition / modality (optional)"
+msgstr ""
+
 #: agreement/results/pairedAgreementTable.columns.title
 msgid "Condition A"
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid "Condition A and B must contain the same number of matched rater columns."
 msgstr ""
 
 #: R/agreement.b.R
@@ -42184,6 +42502,11 @@ msgstr ""
 
 #: agreement/results/pairedAgreementTable.columns.title
 msgid "Condition B"
+msgstr ""
+
+#: agreementintro/options/conditionBRatings.title
+#: agreementintro/ui[2][2][1].label
+msgid "Condition B rater columns (paired comparison)"
 msgstr ""
 
 #: agreement/options/conditionBVars.title
@@ -43348,6 +43671,12 @@ msgstr ""
 msgid "Confirm variables have adequate variation (≥2 categories)"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"Confirm whether the ratings are binary, nominal, ordinal, continuous, or "
+"ranks."
+msgstr ""
+
 #: R/waterfall.b.R
 msgid "Confirmation"
 msgstr ""
@@ -43566,6 +43895,10 @@ msgstr ""
 
 #: deeplearningprediction/results/confusionMatrixPlot.title
 msgid "Confusion Matrix Visualization"
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid "Conger's exact kappa"
 msgstr ""
 
 #: pathagreement/options/exct.title
@@ -43991,6 +44324,10 @@ msgstr ""
 msgid "Consistency Score"
 msgstr ""
 
+#: agreementintro/options/iccDefinition/consistency.title
+msgid "Consistency: allow systematic rater shifts"
+msgstr ""
+
 #: R/agreement.b.R
 msgid "consistent agreement"
 msgstr ""
@@ -44304,6 +44641,16 @@ msgstr ""
 msgid "Continuous IHC Markers (H-scores, % positivity)"
 msgstr ""
 
+#: agreementintro/options/scale/continuous.title
+msgid "Continuous measurements"
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Continuous measurements were declared, but at least one selected rating "
+"column is categorical or text. Confirm and prepare the scale explicitly."
+msgstr ""
+
 #: netreclassification/options/nri_type/numeric.title
 #: netreclassification/results/sensitivityTable.columns.title
 msgid "Continuous NRI"
@@ -44339,6 +44686,10 @@ msgstr ""
 
 #: R/crosstable.b.R
 msgid "Continuous p-values are rank-based in the gtsummary style"
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid "Continuous platform comparison"
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -50635,6 +50986,10 @@ msgstr ""
 msgid "Data Aspect"
 msgstr ""
 
+#: agreementintro/results/inspectionNotes.title
+msgid "Data Check Notes"
+msgstr ""
+
 #: eurostatmap/ui[3][0].label
 msgid "Data Classification"
 msgstr ""
@@ -52070,6 +52425,7 @@ msgstr ""
 #: nogoldstandard/options.menuSubgroup
 #: screeningcalculator/options.menuSubgroup
 #: stagemigration/results/nestedModelTests.columns.title
+#: agreementintro/results/status.title
 msgid "Decision"
 msgstr ""
 
@@ -52365,6 +52721,10 @@ msgstr ""
 msgid "Decision Panel Optimization"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid "Decision path:"
+msgstr ""
+
 #: roc2d/options/decision_rule.title
 msgid "Decision Rule"
 msgstr ""
@@ -52529,6 +52889,10 @@ msgid ""
 "not check it. A value left at its default is printed as (default setting). "
 "The default is Other / unknown so that an untouched report does not assert a "
 "sampling design; how PPV and NPV should be read depends on it."
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid "Declared category order"
 msgstr ""
 
 #: R/pathagreement.b.R
@@ -53793,6 +54157,10 @@ msgstr ""
 msgid "Design could not be computed"
 msgstr ""
 
+#: agreementintro/ui[1].label
+msgid "Design Details"
+msgstr ""
+
 #: surveysurvival/results/designEffectsSummary.title
 msgid "Design Effects Summary"
 msgstr ""
@@ -54360,6 +54728,13 @@ msgstr ""
 msgid "Development data only; optimism not corrected"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"Development menu labels describe implementation routing, not statistical or "
+"clinical validation. Prespecify cutoffs, disagreement weights and acceptable "
+"differences, and report uncertainty and the analysed population."
+msgstr ""
+
 #: brierscore/options/development_period.title
 msgid "Development Period End Date"
 msgstr ""
@@ -54370,6 +54745,10 @@ msgstr ""
 
 #: lassocox/options/survival_plot.title
 msgid "Development risk-group curves"
+msgstr ""
+
+#: agreementintro/results/catalogue.columns.title
+msgid "Development status"
 msgstr ""
 
 #: bayesianma/results/selectedModel.columns.title
@@ -55408,6 +55787,10 @@ msgstr ""
 msgid "Different Shapes for Node Types"
 msgstr ""
 
+#: agreementintro/options/panel/different.title
+msgid "Different, exchangeable raters with equal numbers per case"
+msgstr ""
+
 #: R/misclassificationbias.b.R
 msgid "differential"
 msgstr ""
@@ -56270,6 +56653,7 @@ msgstr ""
 
 #: diagnosticsamplesize/options/referenceType/disease.title
 #: pathagreement/options/referenceType/disease.title
+#: agreementintro/options/referenceType/disease.title
 msgid "Disease reference standard"
 msgstr ""
 
@@ -57564,6 +57948,12 @@ msgid ""
 "where ROC curves may be misleading (Saito & Rehmsmeier, 2015)."
 msgstr ""
 
+#: R/psychopdaROC.b.R
+msgid ""
+"Display precision-recall step curves with average precision. The classifier "
+"comparison table reports the separate interpolated AUC-PR estimate."
+msgstr ""
+
 #: directbinomial/options/predictions.description
 #: flexcomprisk/options/showPredictions.description
 msgid "Display predicted cumulative incidence at specified time points"
@@ -58252,6 +58642,10 @@ msgstr ""
 msgid "Distinct diagnostic style"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid "Distinct reader / focus IDs in long input"
+msgstr ""
+
 #: package/analyses/jjhistostats.menuSubgroup
 #: package/analyses/jwaffle.menuSubgroup
 #: package/analyses/jjridges.menuSubgroup
@@ -58639,11 +59033,26 @@ msgstr ""
 msgid "dmy"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"Do not pool repeated readings as independent raters. Select the "
+"paired-condition workflow when appropriate, or obtain a design-specific "
+"repeatability analysis."
+msgstr ""
+
 #: R/decisioncurve.b.R
 msgid ""
 "Do not select a model solely from its average net benefit: curve crossings "
 "and the plausibility of each threshold determine the clinically relevant "
 "comparison."
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Do not use numerical category codes as continuous measurements without "
+"justification. Weighted methods need a common ordinal scale; repeated "
+"readings and clustered specimens need an appropriate analysis unit and "
+"uncertainty method."
 msgstr ""
 
 #: R/lassocox.b.R
@@ -58681,6 +59090,11 @@ msgstr ""
 
 #: R/multisurvival.b.R
 msgid "Does not remove bias from unmeasured confounding or model misspecification"
+msgstr ""
+
+#: agreementintro/options/repeatedReadings.title
+#: agreementintro/ui[0][5].label
+msgid "Does the same rater read a case more than once?"
 msgstr ""
 
 #: retracted/results/summary.columns.title
@@ -59054,6 +59468,10 @@ msgstr ""
 msgid "DR 95% CI Upper"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid "Draft"
+msgstr ""
+
 #: summarydata/options/report_sentences.title
 msgid "Draft report sentences"
 msgstr ""
@@ -59061,6 +59479,10 @@ msgstr ""
 #: R/summarydata.b.R
 #: summarydata/results/reportSentences.title
 msgid "Draft Statistical Summary"
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid "Draft; not a production release"
 msgstr ""
 
 #: package/analyses/competingsurvival.menuSubgroup
@@ -59239,6 +59661,17 @@ msgstr ""
 
 #: R/decisioncurve.b.R
 msgid "Duplicate Model Names"
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid "Duplicate reading keys"
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Duplicate reading keys were found. Wide keys are case-condition-occasion; "
+"long keys additionally include reader. Identify distinct specimens or "
+"occasions rather than silently averaging duplicate readings."
 msgstr ""
 
 #: R/dataquality.b.R
@@ -59611,6 +60044,10 @@ msgstr ""
 msgid ""
 "Each difference is the first-named test minus the second: for 'A vs B', a "
 "positive value favours A and a negative value favours B."
+msgstr ""
+
+#: agreementintro/options/comparisonGoal/readerModality.title
+msgid "Each fixed reader uses two modalities"
 msgstr ""
 
 #: R/jjdotplotstats.b.R
@@ -62264,6 +62701,10 @@ msgstr ""
 msgid "Enter at least one fixed score cutoff."
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid "Enter at least two raters, methods, or foci. Zero means not specified."
+msgstr ""
+
 #: economistplots/options/caption_text.description.jamovi
 msgid "Enter caption text (data source, notes, etc.)."
 msgstr ""
@@ -62314,6 +62755,14 @@ msgstr ""
 msgid "Enter custom y-axis break points (comma-separated)."
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid "Enter distinct, exact positive and negative labels for the reader calls."
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid "Enter distinct, exact positive and negative reference labels."
+msgstr ""
+
 #: R/kappaSizeCI.b.R
 msgid "Enter exactly {k} proportions for {k} outcome categories (received {got})."
 msgstr ""
@@ -62355,6 +62804,14 @@ msgstr ""
 
 #: bbcplots/options/title_text.description.ui
 msgid "Enter the main title for your chart."
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid "Enter the number of categories for study planning."
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid "Enter the prespecified numeric cutoff or ordinal boundary category."
 msgstr ""
 
 #: jiwillsurvive/options/time_points.description.jamovi
@@ -63406,6 +63863,12 @@ msgstr ""
 
 #: decisionpanel/results/incrementalValue.columns.title
 msgid "Essential?"
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Establish one complete category order, including unused categories, and "
+"declare it identically for every rater before using ordinal methods."
 msgstr ""
 
 #: ihcscoring/results/biomarkerspecific/clinicalcutpoints.description
@@ -65343,6 +65806,10 @@ msgstr ""
 msgid "Exact agreement %"
 msgstr ""
 
+#: agreementintro/options/weights/unweighted.title
+msgid "Exact agreement only (unweighted)"
+msgstr ""
+
 #: R/agreement.b.R
 msgid ""
 "Exact agreement pools every pair of readings this pathologist shares with a "
@@ -66596,6 +67063,7 @@ msgid "Expert consensus (agreement)"
 msgstr ""
 
 #: pathagreement/options/referenceType/consensus.title
+#: agreementintro/options/referenceType/consensus.title
 msgid "Expert consensus comparator"
 msgstr ""
 
@@ -68827,6 +69295,7 @@ msgstr ""
 #: superpc/results/component_loadings.columns.title
 #: survivalfeaturerank/results/rankingTable.columns.title
 #: treeadvanced/results/featurecontributions.columns.title
+#: agreementintro/results/dataSummary.columns.title
 msgid "Feature"
 msgstr ""
 
@@ -70408,6 +70877,14 @@ msgstr ""
 msgid "Fixed-prior point estimation; not a full Bayesian posterior analysis"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"Fixed-rater absolute agreement and random-rater consistency are valid ICC "
+"designs, but the current target labels do not unambiguously express these "
+"combinations. No exact configuration is recommended until that interface is "
+"verified."
+msgstr ""
+
 #: finegray/results/influenceTable.columns.title
 msgid "Flag"
 msgstr ""
@@ -70503,6 +70980,7 @@ msgid "Fleiss' Kappa"
 msgstr ""
 
 #: R/pathagreement.b.R
+#: R/agreementintro.b.R
 msgid "Fleiss' kappa"
 msgstr ""
 
@@ -71294,6 +71772,14 @@ msgstr ""
 msgid "For binary classification, specify which class is considered positive"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"For binary or imbalanced categories, inspect category frequencies and "
+"consider category-specific agreement and Gwet's AC as complementary "
+"summaries. They answer different questions and do not automatically replace "
+"kappa."
+msgstr ""
+
 #: R/jjpiestats.b.R
 msgid ""
 "For biomarker analysis: Examine distribution patterns across patient groups. "
@@ -71568,6 +72054,13 @@ msgid ""
 "For three or more raters each institution's kappa uses every observed "
 "rating, as in the headline table, with the same standard error and t "
 "interval (Gwet 2014)."
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"For three or more raters, the current paired tool compares unweighted Fleiss "
+"coefficients even for a fixed panel. It cannot carry the recommended Conger "
+"or weighted ordinal estimand through the comparison."
 msgstr ""
 
 #: adaptivetrialdesign/options/time_variable.description
@@ -74454,6 +74947,8 @@ msgstr ""
 #: lassointro/results/glossary.title
 #: patientfollowupintro/options/showGlossary.title
 #: patientfollowupintro/results/glossary.title
+#: agreementintro/options/showGlossary.title
+#: agreementintro/results/glossary.title
 msgid "Glossary"
 msgstr ""
 
@@ -76146,6 +76641,10 @@ msgid ""
 "dominance."
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid "Groups with at least two observed ratings"
+msgstr ""
+
 #: R/jjridges.b.R
 msgid ""
 "Groups with fewer than {min} observations may show unreliable density "
@@ -76320,6 +76819,10 @@ msgstr ""
 
 #: agreement/results/gwetTable.title
 msgid "Gwet's AC1/AC2 Results"
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid "Gwet's AC2"
 msgstr ""
 
 #: R/pathagreement.b.R
@@ -79034,6 +79537,11 @@ msgstr ""
 msgid "How Sequential Testing Works"
 msgstr ""
 
+#: agreementintro/options/weights.title
+#: agreementintro/ui[1][1].label
+msgid "How should ordinal disagreements be weighted?"
+msgstr ""
+
 #: chisqposttest/options/residualsCriterion.description
 msgid ""
 "How the critical value for flagging a cell residual is chosen. "
@@ -79750,6 +80258,15 @@ msgstr ""
 msgid "ICC, CCC, and correlation measures"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"ICC: reliability of continuous measurements for a stated rater design and "
+"reporting unit. Absolute agreement includes systematic rater shifts; "
+"consistency permits them. CCC summarizes agreement between continuous "
+"measurements; Bland-Altman limits describe differences in their original "
+"units."
+msgstr ""
+
 #: icccoeff/options/icc_type/icc1_1.title
 msgid "ICC(1,1) - One-way random, single measures"
 msgstr ""
@@ -80102,6 +80619,12 @@ msgstr ""
 
 #: spatialanalysis/options/perform_hotspot.description.ui
 msgid "Identify spatial hotspots using kernel density estimation"
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Identify the reference as a disease standard, expert consensus, or "
+"comparison method. Agreement-only cutoff studies may select no reference."
 msgstr ""
 
 #: advancedbarplot/options/bar_position/identity.title
@@ -81467,6 +81990,15 @@ msgstr ""
 msgid "In Legend"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"In pathagreement assign vars for categorical calls or readerScores for "
+"numeric cutoffs, caseID for case identity, and referenceStandard when used. "
+"Select exact labels and a prespecified cutoff, keep shared-case populations, "
+"and supply readerCluster for clustered specimens. For an ordinal boundary, "
+"calls at or above the ordered category are positive."
+msgstr ""
+
 #: ihcpredict/results/validationResults.columns.title
 msgid "In Query Set"
 msgstr ""
@@ -82572,8 +83104,18 @@ msgstr ""
 msgid "Independent (Zero Correlation)"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"Independent cases were declared, but a patient contributes multiple cases in "
+"the selected data."
+msgstr ""
+
 #: R/decisioncompare.b.R
 msgid "Independent cases; repeated reads require a reader/cluster analysis"
+msgstr ""
+
+#: agreementintro/options/analysisUnit/independent.title
+msgid "Independent cases: one case per patient"
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -83367,6 +83909,7 @@ msgid "Input Mode"
 msgstr ""
 
 #: R/enhancedROC.b.R
+#: R/agreementintro.b.R
 msgid "Input rows"
 msgstr ""
 
@@ -83420,6 +83963,10 @@ msgstr ""
 
 #: decision/ui[6][0].label
 msgid "Inspect discordant calls under the selected reference interpretation"
+msgstr ""
+
+#: agreementintro/options/inspectData.title
+msgid "Inspect selected data"
 msgstr ""
 
 #: R/decisioncurve.b.R
@@ -85463,6 +86010,10 @@ msgstr ""
 msgid "Intraclass Correlation Coefficient"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid "Intraclass correlation coefficient"
+msgstr ""
+
 #: pathagreement/ui[9][0]/icc.label
 msgid "Intraclass correlation coefficient (ICC)"
 msgstr ""
@@ -85987,6 +86538,11 @@ msgstr ""
 
 #: qualityoflife/options/scoring_algorithm/irt_scoring.title
 msgid "IRT-Based Scoring"
+msgstr ""
+
+#: agreementintro/options/categoryOrder.title
+#: agreementintro/ui[1][0].label
+msgid "Is one common category order established?"
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -87073,8 +87629,16 @@ msgid ""
 "is comparable with the Interrater Reliability table."
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid "Kappa hypothesis-test power planning"
+msgstr ""
+
 #: agreement/options/kappaCIMethod.title
 msgid "Kappa interval method"
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid "Kappa interval precision planning"
 msgstr ""
 
 #: R/agreement.b.R
@@ -87128,6 +87692,10 @@ msgstr ""
 #: kappaSizeCI/ui[2].label
 #: kappaSizePower/ui[1].label
 msgid "Kappa Levels"
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid "Kappa lower bound at fixed sample size"
 msgstr ""
 
 #: cohenskappa/options/kappa_type.title
@@ -87300,6 +87868,10 @@ msgstr ""
 msgid "Kendall's Tau-B"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid "Kendall's W"
+msgstr ""
+
 #: R/agreement.b.R
 msgid "Kendall's W (coefficient of concordance)"
 msgstr ""
@@ -87316,6 +87888,12 @@ msgstr ""
 msgid "Kendall's W [Ordinal] (Concordance for Rankings)"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"Kendall's W here requires complete comparable rankings or ordered ratings of "
+"the same cases."
+msgstr ""
+
 #: R/agreement.b.R
 msgid ""
 "Kendall's W ranks the ratings, so it needs a continuous variable or an "
@@ -87323,6 +87901,12 @@ msgid ""
 "a nominal (unordered) variable: change its measure type to Continuous or "
 "Ordinal if the categories really are ordered, otherwise use Fleiss' kappa or "
 "Krippendorff's alpha for nominal agreement."
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Kendall's W summarizes similarity of rankings, not equality of measurement "
+"values."
 msgstr ""
 
 #: parametricfrailty/results/frailty_summary.columns.title
@@ -87721,6 +88305,7 @@ msgid "Krippendorff's Alpha"
 msgstr ""
 
 #: agreement/options/kripp.title
+#: R/agreementintro.b.R
 msgid "Krippendorff's alpha"
 msgstr ""
 
@@ -90009,6 +90594,12 @@ msgid ""
 "categorical."
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"Limits of agreement describe differences in measurement units; CCC "
+"summarizes concordance. Correlation alone does not demonstrate agreement."
+msgstr ""
+
 #: methodcomparison/options/limits_method.title
 msgid "Limits of Agreement Method"
 msgstr ""
@@ -90362,6 +90953,10 @@ msgstr ""
 
 #: R/agreement.b.R
 msgid "Linear-weighted κ"
+msgstr ""
+
+#: agreementintro/options/weights/linear.title
+msgid "Linear: equal cost for each extra category step"
 msgstr ""
 
 #: R/pathagreement.b.R
@@ -91333,6 +91928,14 @@ msgstr ""
 msgid "Long format requires exactly one strata variable"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"Long-data coverage is counted within case-condition-occasion groups. General "
+"agreement analyses require a case-by-rater matrix; reshape a copy without "
+"combining duplicate readings. Reader modality workflows can use long data "
+"directly."
+msgstr ""
+
 #: pathagreement/options/rating.title
 msgid "Long-format rating"
 msgstr ""
@@ -91343,6 +91946,10 @@ msgstr ""
 
 #: pathagreement/options/readerFormat/long.title
 msgid "Long: case, reader and modality"
+msgstr ""
+
+#: agreementintro/options/dataLayout/long.title
+msgid "Long: one row per reading"
 msgstr ""
 
 #: waterfallrecist/options/diameter.description.jamovi
@@ -93185,6 +93792,12 @@ msgstr ""
 
 #: jjscatterstats/options/marginal.title
 msgid "Marginal histograms"
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Marginal homogeneity asks whether raters use categories with the same "
+"distribution; it is not an agreement coefficient."
 msgstr ""
 
 #: cohenskappa/results/marginalTest.title
@@ -95739,6 +96352,8 @@ msgstr ""
 #: nogoldstandard/options.menuGroup
 #: psychopdaROC/options.menuGroup
 #: sequentialtests/options.menuGroup
+#: package/analyses/agreementintro.menuGroup
+#: agreementintro/options.menuGroup
 msgid "meddecideT"
 msgstr ""
 
@@ -96654,6 +97269,13 @@ msgstr ""
 msgid "Mental Health Items"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"Menu paths and versions describe this source catalogue, not modules "
+"installed on another computer. Draft and pending analyses may be absent from "
+"distributed modules. No analysis is launched automatically."
+msgstr ""
+
 #: jjsyndromicplot/results/warnings.title
 #: jjwithinstats/results/warnings.title
 #: jwaffle/results/warnings.title
@@ -96930,6 +97552,7 @@ msgstr ""
 #: treatmentswitching/results/treatmentEffectTable.columns.title
 #: treatmentswitching/results/methodComparisonTable.columns.title
 #: treatmentswitching/results/bootstrapTable.columns.title
+#: agreementintro/results/recommendations.columns.title
 msgid "Method"
 msgstr ""
 
@@ -97388,6 +98011,8 @@ msgstr ""
 #: package/analyses/lassointro.menuTitle
 #: lassointro/options.menuTitle
 #: nogoldstandard/options/showMethodGuide.title
+#: package/analyses/agreementintro.menuTitle
+#: agreementintro/options.menuTitle
 msgid "Method Guide"
 msgstr ""
 
@@ -97425,6 +98050,10 @@ msgstr ""
 #: lassointro/options/showOverview.title
 #: lassointro/results/overview.title
 msgid "Method Overview"
+msgstr ""
+
+#: agreementintro/options/showOverview.title
+msgid "Method overview"
 msgstr ""
 
 #: patientsimilarity/ui[3].label
@@ -99187,6 +99816,7 @@ msgstr ""
 #: parallelplot/results/summary.columns.title
 #: pathagreement/results/readerDataSummary.columns.title
 #: toolssummary/results/summary.columns.title
+#: agreementintro/results/columnSummary.columns.title
 msgid "Missing"
 msgstr ""
 
@@ -99516,6 +100146,12 @@ msgid ""
 "automatically and restored in the output."
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"Missing or blank ratings were observed. Review each recommended method's "
+"usable-case population; missingness is not automatically ignorable."
+msgstr ""
+
 #: R/outcomeorganizer.b.R
 msgid "Missing outcome data: {pct}% ({missing} out of {total} rows)."
 msgstr ""
@@ -99548,6 +100184,10 @@ msgstr ""
 
 #: R/decisioncompare.b.R
 msgid "Missing Positive Levels"
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid "Missing rating cells"
 msgstr ""
 
 #: R/enhancedROC.b.R
@@ -102227,6 +102867,10 @@ msgstr ""
 msgid "More cases would narrow the interval."
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid "More information is needed before recommending a configuration."
+msgstr ""
+
 #: R/oddsratio.b.R
 msgid "More reliable for small cell counts"
 msgstr ""
@@ -102885,6 +103529,14 @@ msgstr ""
 msgid "Multifocal / Primary-Metastasis Concordance"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid "Multifocal categorical concordance"
+msgstr ""
+
+#: agreementintro/options/purpose/multifocal.title
+msgid "Multifocal or primary-metastasis concordance"
+msgstr ""
+
 #: advancedimputation/options/multilevel_imputation.title
 #: advancedimputation/ui[5][0].label
 msgid "Multilevel Imputation"
@@ -103143,8 +103795,19 @@ msgstr ""
 msgid "Multiple predictor variables (for predictors analysis)"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"Multiple reading occasions within a condition require an explicit selection "
+"or a repeated-measures model. The recommended paired workflow accepts one "
+"reading per case, reader and condition."
+msgstr ""
+
 #: enhancedROC/results/results/comparativeROCPlot.description
 msgid "Multiple ROC curves for comparison"
+msgstr ""
+
+#: agreementintro/options/analysisUnit/clustered.title
+msgid "Multiple specimens or visits per patient"
 msgstr ""
 
 #: R/riverplot.b.R
@@ -105494,6 +106157,8 @@ msgstr ""
 #: R/lassocox.b.R
 #: enhancedcrosstable/options/showNA/no.title
 #: gtsummary/options/includeMissing/no.title
+#: agreementintro/options/missingRatings/no.title
+#: agreementintro/options/repeatedReadings/no.title
 msgid "No"
 msgstr ""
 
@@ -105513,6 +106178,14 @@ msgstr ""
 
 #: R/agreement.b.R
 msgid "No (criterion not met)"
+msgstr ""
+
+#: agreementintro/options/cutoffPrespecified/no.title
+msgid "No / not yet"
+msgstr ""
+
+#: agreementintro/options/categoryOrder/uncertain.title
+msgid "No / unsure"
 msgstr ""
 
 #: R/venn.b.R
@@ -105646,6 +106319,10 @@ msgstr ""
 
 #: R/ihcheterogeneity.b.R
 msgid "No case has a CV above your %s%% threshold."
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid "No case has at least two observed ratings in the same condition and occasion."
 msgstr ""
 
 #: R/nogoldstandard.b.R
@@ -106968,6 +107645,10 @@ msgstr ""
 msgid "No reference-positive subjects"
 msgstr ""
 
+#: agreementintro/options/referenceType/none.title
+msgid "No reference: agreement only"
+msgstr ""
+
 #: R/decision.b.R
 msgid ""
 "No reliable direction: this likelihood ratio rests on a zero count, and the "
@@ -106990,6 +107671,12 @@ msgstr ""
 msgid ""
 "No repeated observations found in complete data. Change analysis requires "
 "subjects with multiple measurements."
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"No repeated readings were declared, but multiple occasions are present. "
+"Confirm how occasions enter the study design."
 msgstr ""
 
 #: R/enhancedROC.b.R
@@ -107021,6 +107708,12 @@ msgstr ""
 
 #: R/benford.b.R
 msgid "No results below were produced for this variable."
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"No rows are available for inspection. Select data or turn off inspection to "
+"use the questionnaire alone."
 msgstr ""
 
 #: R/decisioncombine.b.R
@@ -107271,6 +107964,10 @@ msgstr ""
 #: R/pathsampling.b.R
 msgid "No substantial cases"
 msgstr "No substantial cases"
+
+#: R/agreementintro.b.R
+msgid "No supported configuration matches this combination of answers."
+msgstr ""
 
 #: R/survivalcont.b.R
 msgid ""
@@ -107773,6 +108470,10 @@ msgid ""
 "Nominal and ordered factors use treatment indicators. The first observed "
 "factor level is the reference, and indicators are selected separately rather "
 "than as a group."
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid "Nominal factor"
 msgstr ""
 
 #: gsdesign/results/boundaryTable.columns.title
@@ -109306,6 +110007,22 @@ msgstr ""
 #: decisioncompare/options/referenceType/legacy.title
 #: ihcheterogeneity/options/sampling_strategy/unknown.title
 #: pathagreement/options/referenceType/legacy.title
+#: agreementintro/options/purpose/unspecified.title
+#: agreementintro/options/scale/unspecified.title
+#: agreementintro/options/panel/unspecified.title
+#: agreementintro/options/missingRatings/unspecified.title
+#: agreementintro/options/repeatedReadings/unspecified.title
+#: agreementintro/options/analysisUnit/unspecified.title
+#: agreementintro/options/categoryOrder/unspecified.title
+#: agreementintro/options/weights/unspecified.title
+#: agreementintro/options/raterSelection/unspecified.title
+#: agreementintro/options/iccDefinition/unspecified.title
+#: agreementintro/options/reportingUnit/unspecified.title
+#: agreementintro/options/referenceType/unspecified.title
+#: agreementintro/options/comparisonGoal/unspecified.title
+#: agreementintro/options/planningGoal/unspecified.title
+#: agreementintro/options/cutoffDirection/unspecified.title
+#: agreementintro/options/cutoffPrespecified/unspecified.title
 msgid "Not specified"
 msgstr ""
 
@@ -110281,6 +110998,11 @@ msgstr ""
 msgid "Number of Categories"
 msgstr ""
 
+#: agreementintro/options/nCategories.title
+#: agreementintro/ui[1][8].label
+msgid "Number of categories for planning (0 = unspecified)"
+msgstr ""
+
 #: categorize/options/nbins.description.jamovi
 msgid "Number of categories to create (2-20)."
 msgstr ""
@@ -110972,6 +111694,11 @@ msgstr ""
 msgid "Number of raters"
 msgstr ""
 
+#: agreementintro/options/nRaters.title
+#: agreementintro/ui[0][2].label
+msgid "Number of raters / methods / foci (0 = unspecified)"
+msgstr ""
+
 #: kappaSizeCI/options/raters.description.ui
 #: kappaSizeFixedN/options/raters.description.ui
 #: kappaSizePower/options/raters.description.ui
@@ -111334,6 +112061,7 @@ msgstr ""
 
 #: R/tableone.b.R
 #: jjcoefstats/options/pValueDisplay/numeric.title
+#: R/agreementintro.b.R
 msgid "Numeric"
 msgstr ""
 
@@ -111425,6 +112153,12 @@ msgstr ""
 #: pathagreement/options/readerScores.title
 #: pathagreement/ui[2][0].label
 msgid "Numeric reader scores"
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Numeric storage does not establish a continuous measurement: values may be "
+"category codes. Confirm the measurement scale yourself."
 msgstr ""
 
 #: R/swimmerplot-html.R
@@ -111722,6 +112456,7 @@ msgstr ""
 #: standardizedratio/results/overallTable.columns.title
 #: standardizedratio/results/stratumTable.columns.title
 #: survivalbart/results/posteriorPredictive.columns.title
+#: agreementintro/results/columnSummary.columns.title
 msgid "Observed"
 msgstr ""
 
@@ -111755,6 +112490,13 @@ msgstr ""
 
 #: agreement/results/pabakTable.columns.title
 msgid "Observed Agreement"
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Observed agreement: the fraction of matching calls. Kappa and alpha: "
+"agreement coefficients with different definitions of chance disagreement. "
+"Gwet's AC uses another chance model, so its value need not match kappa."
 msgstr ""
 
 #: decisioncalculator/options/showWorkload.title
@@ -111791,6 +112533,10 @@ msgstr ""
 
 #: R/decisioncurve.b.R
 msgid "Observed complete-case proportions projected to a population of {n} patients."
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid "Observed conditions"
 msgstr ""
 
 #: R/pathsampling.b.R
@@ -111864,6 +112610,10 @@ msgstr ""
 #: R/pathsampling.b.R
 msgid "Observed cumulative detection in dataset"
 msgstr "Observed cumulative detection in dataset"
+
+#: agreementintro/results/dataSummary.title
+msgid "Observed Data Structure"
+msgstr ""
 
 #: epidemiosurvival/results/excess_mortality_table.columns.title
 #: survival/results/ageStandardizationTable.columns.title
@@ -111986,8 +112736,21 @@ msgstr ""
 msgid "Observed Rating Mapping"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"Observed reader calls include values outside the declared positive and "
+"negative labels. Correct the labels or explicitly handle nondiagnostic calls "
+"in the target workflow."
+msgstr ""
+
 #: multisurvival/results/adjustedMedianTable.columns.title
 msgid "Observed Records"
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Observed reference values include labels outside the declared positive and "
+"negative reference classes. Confirm the comparator coding."
 msgstr ""
 
 #: survivalvalidation/results/calibrationTable.columns.title
@@ -112042,6 +112805,10 @@ msgstr ""
 #: screeningevaluation/results/quality_indicators.columns.title
 #: sigmametrics/results/methodValidation.columns.title
 msgid "Observed Value"
+msgstr ""
+
+#: agreementintro/results/dataSummary.columns.title
+msgid "Observed value"
 msgstr ""
 
 #: missingdata/results/density_plot.title
@@ -112117,6 +112884,11 @@ msgstr ""
 
 #: bayesianma/options/occam_ratio.title
 msgid "Occam's Window Ratio"
+msgstr ""
+
+#: agreementintro/options/occasion.title
+#: agreementintro/ui[2][2][7].label
+msgid "Occasion / time point (optional)"
 msgstr ""
 
 #: stagemigration/results/stateOccupancy.columns.title
@@ -112664,6 +113436,10 @@ msgstr ""
 msgid "One Proportion Test (Single Group Rate)"
 msgstr ""
 
+#: agreementintro/options/reportingUnit/single.title
+msgid "One rater / measurement"
+msgstr ""
+
 #: R/multisurvival.b.R
 msgid "One row per crossed term."
 msgstr ""
@@ -112876,6 +113652,13 @@ msgstr ""
 
 #: R/crosstable.b.R
 msgid "one-way ANOVA, which for two groups is the pooled-variance t-test"
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"One-way ICC does not separate rater effects. The software uses its one-way "
+"calculation even though the API type value is consistency; report one-way "
+"random absolute agreement and the single or average measurement unit."
 msgstr ""
 
 #: decisiongraph/ui[4][1]/sensitivityAnalysis.label
@@ -113372,6 +114155,10 @@ msgid ""
 "specificity is shown. The posterior standard deviation, the credible "
 "interval and the probability that the correlation is positive require "
 "posterior samples, which this model does not draw."
+msgstr ""
+
+#: agreementintro/options/raterSelection/fixed.title
+msgid "Only these selected raters (fixed)"
 msgstr ""
 
 #: outbreakanalysis/options/date_onset.title
@@ -113968,6 +114755,10 @@ msgstr ""
 msgid "Optimizer"
 msgstr ""
 
+#: agreementintro/results/settings.columns.title
+msgid "Option"
+msgstr ""
+
 #: eurostatmap/ui[0][0][0].label
 msgid "Option 1: Use sample data (keep 'Use Local Data' unchecked)"
 msgstr ""
@@ -114004,6 +114795,10 @@ msgstr ""
 msgid ""
 "Optional clinical variables to display as annotations (e.g., age, stage, "
 "treatment response)."
+msgstr ""
+
+#: agreementintro/ui[2].label
+msgid "Optional Data Check"
 msgstr ""
 
 #: classicalSurvivalPower/options/data.description.jamovi
@@ -114400,6 +115195,10 @@ msgstr ""
 msgid "Order Groups By"
 msgstr ""
 
+#: agreementintro/options/scale/ordinal.title
+msgid "Ordered categories or grades"
+msgstr ""
+
 #: R/agreement.b.R
 msgid "Ordered categories, but the rater variables do not declare one common order"
 msgstr ""
@@ -114420,6 +115219,7 @@ msgid ""
 msgstr ""
 
 #: categorize/options/ordered.title
+#: R/agreementintro.b.R
 msgid "Ordered factor"
 msgstr ""
 
@@ -114501,6 +115301,12 @@ msgstr ""
 msgid "Ordinal (whole-number codes)"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"Ordinal alpha respects the ordered scale across several raters. It is not a "
+"weighted version of the displayed unweighted Fleiss or Conger coefficient."
+msgstr ""
+
 #: package/analyses/door.menuSubtitle
 #: door/options.menuSubtitle
 msgid "Ordinal Benefit-Risk Comparison of Two Groups"
@@ -114540,6 +115346,13 @@ msgstr ""
 #: ordinalroc/options/ordinal_outcome.title
 #: ordinalroc/ui[0][1].label
 msgid "Ordinal Outcome Variable"
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Ordinal ratings were confirmed, but the selected columns do not all declare "
+"ordered levels. Prepare a copy with one explicit full ordered scale before "
+"applying ordinal settings; the guide does not recode your data."
 msgstr ""
 
 #: clinicalscore/options/modelType/ordinal.title
@@ -114613,6 +115426,14 @@ msgstr ""
 #: agreement/ui[3].label
 msgctxt "Ordinal/Categorical"
 msgid "Pathologist Grading Analysis"
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Ordinary kappa, ICC, and Bland-Altman settings do not adjust uncertainty for "
+"multiple specimens or visits per patient. Use a supported reader cluster "
+"workflow or obtain a design-specific analysis; do not treat rows as "
+"independent patients."
 msgstr ""
 
 #: pseudosurvival/options/regression_method/ols.title
@@ -116235,6 +117056,10 @@ msgid ""
 "interpretive bands, and precision and recall are printed beside it."
 msgstr ""
 
+#: agreementintro/options/comparisonGoal/agreement.title
+msgid "Overall agreement of the same panel"
+msgstr ""
+
 #: advancedtrials/results/trial_design_summary.columns.title
 msgid "Overall Alpha"
 msgstr ""
@@ -117700,6 +118525,7 @@ msgid "Paired Agreement Comparison"
 msgstr ""
 
 #: agreement/options/pairedAgreementTest.title
+#: R/agreementintro.b.R
 msgid "Paired agreement comparison"
 msgstr ""
 
@@ -119361,6 +120187,11 @@ msgstr ""
 msgid "patient"
 msgstr ""
 
+#: agreementintro/options/patientID.title
+#: agreementintro/ui[2][2][3].label
+msgid "Patient / cluster ID (optional)"
+msgstr ""
+
 #: qualityoflife/ui[0][3].label
 msgid "Patient & Study Variables"
 msgstr ""
@@ -119371,6 +120202,14 @@ msgstr ""
 
 #: competingRisksPower/options/accrualTime.description
 msgid "Patient accrual/recruitment period"
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Patient and focus identifiers define within-patient biomarker concordance. "
+"This draft recipe uses descriptive concordance. Kappa and gain/loss "
+"interpretations need consistent focus roles across cases, which the "
+"questionnaire has not established."
 msgstr ""
 
 #: treatmentoptim/options/patientVars.title
@@ -119801,6 +120640,10 @@ msgstr ""
 
 #: progressionsurvival/results/pfs_summary.columns.title
 msgid "Patients (N)"
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid "Patients / clusters"
 msgstr ""
 
 #: R/outcomeorganizer.b.R
@@ -120588,6 +121431,14 @@ msgstr ""
 
 #: R/lassologistic.b.R
 msgid "Penalty type"
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid "Pending"
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid "Pending implementation; not a production release"
 msgstr ""
 
 #: R/swimmerplot.b.R
@@ -123112,6 +123963,10 @@ msgstr ""
 msgid "Plain-language summary with clinical context"
 msgstr ""
 
+#: agreementintro/options/purpose/planning.title
+msgid "Plan an agreement study"
+msgstr ""
+
 #: diagnosticsamplesize/options/zeroMissPlanning.title
 msgid "Plan independent positives assuming zero misses"
 msgstr ""
@@ -125535,6 +126390,11 @@ msgstr ""
 msgid "Positive call / negative reference"
 msgstr ""
 
+#: agreementintro/options/cutoffDirection.title
+#: agreementintro/ui[1][15].label
+msgid "Positive call for a numeric score"
+msgstr ""
+
 #: pathagreement/options/positiveRule.title
 msgid "Positive call when score is"
 msgstr ""
@@ -126736,6 +127596,10 @@ msgstr ""
 
 #: adaptivetrialdesign/options/alpha_spending_function/power_family.title
 msgid "Power Family"
+msgstr ""
+
+#: agreementintro/options/planningGoal/power.title
+msgid "Power for a specified kappa hypothesis test"
 msgstr ""
 
 #: classicalSurvivalPower/options/calculation_type/power.title
@@ -128586,6 +129450,10 @@ msgstr ""
 msgid "Prentice weights"
 msgstr ""
 
+#: agreementintro/results/preparation.title
+msgid "Preparation and Interpretation"
+msgstr ""
+
 #: R/summarydata.b.R
 msgid "Preparation for statistical modeling"
 msgstr ""
@@ -128654,6 +129522,11 @@ msgstr ""
 
 #: conditionalsurvival/options/method/pkm.title
 msgid "Presmoothed Kaplan-Meier"
+msgstr ""
+
+#: agreementintro/options/cutoff.title
+#: agreementintro/ui[1][14].label
+msgid "Prespecified cutoff value / ordinal boundary"
 msgstr ""
 
 #: R/enhancedROC.b.R
@@ -128866,6 +129739,10 @@ msgstr ""
 
 #: labinterpret/results/deltaChecksTable.columns.title
 msgid "Previous Value"
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid "Primary"
 msgstr ""
 
 #: pathagreement/ui[5][0]/multiraterMethod.label
@@ -129377,6 +130254,7 @@ msgstr ""
 #: labcontrolcharts/results/correctiveActions.columns.title
 #: patientdashboard/results/activeAlertsTable.columns.title
 #: sigmametrics/results/improvementRecommendations.columns.title
+#: agreementintro/results/recommendations.columns.title
 msgid "Priority"
 msgstr ""
 
@@ -129862,6 +130740,14 @@ msgstr ""
 
 #: psychopdaROC/options/metric/prod_sens_spec.title
 msgid "Product of sensitivity and specificity"
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid "Production menu"
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid "Production menu route; this guide does not certify release status"
 msgstr ""
 
 #: jwaffle/options/color_palette/professional.title
@@ -131693,6 +132579,10 @@ msgstr ""
 msgid "Quadratic-weighted κ"
 msgstr ""
 
+#: agreementintro/options/weights/quadratic.title
+msgid "Quadratic: larger disagreements receive more weight"
+msgstr ""
+
 #: R/pathagreement.b.R
 msgid "Quadratic/squared weighting"
 msgstr ""
@@ -133310,6 +134200,10 @@ msgstr ""
 msgid "Ranking Options"
 msgstr ""
 
+#: agreementintro/options/scale/rankings.title
+msgid "Ranks"
+msgstr ""
+
 #: R/cotest.b.R
 msgid "Rapid antigen"
 msgstr ""
@@ -133510,6 +134404,11 @@ msgid ""
 "variation may be unreliable."
 msgstr ""
 
+#: agreementintro/options/ratings.title
+#: agreementintro/ui[2][2][0].label
+msgid "Rater / method columns"
+msgstr ""
+
 #: agreement/results/raterClusterHeading.title
 msgid "Rater & Case Clustering"
 msgstr ""
@@ -133685,6 +134584,10 @@ msgstr ""
 msgid "raters"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid "Raters / columns / maximum foci"
+msgstr ""
+
 #: pathagreement/results/consensusTable.columns.title
 msgid "Raters Agreeing"
 msgstr ""
@@ -133705,8 +134608,19 @@ msgid ""
 "This is what lets the test and the rate above it be read together."
 msgstr ""
 
+#: agreementintro/options/rating.title
+#: agreementintro/ui[2][2][5].label
+msgid "Rating (long data)"
+msgstr ""
+
 #: pathagreement/ui[1][4][2].label
 msgid "Rating (long input)"
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Rating columns and identifier/reference roles must be distinct. Case ID and "
+"patient ID may intentionally be the same column."
 msgstr ""
 
 #: agreement/results/ratingCombinationsTable.title
@@ -134039,12 +134953,25 @@ msgstr ""
 msgid "Reader"
 msgstr ""
 
+#: agreementintro/options/readerID.title
+#: agreementintro/ui[2][2][4].label
+msgid "Reader / focus ID (long data)"
+msgstr ""
+
+#: agreementintro/options/purpose/readerAccuracy.title
+msgid "Reader accuracy against a reference"
+msgstr ""
+
 #: pathagreement/options/referenceAccuracy.title
 msgid "Reader accuracy against reference"
 msgstr ""
 
 #: pathagreement/ui[4].label
 msgid "Reader Accuracy and Cutoff Agreement"
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid "Reader accuracy and cutoff disagreement"
 msgstr ""
 
 #: pathagreement/results/cutoffAgreementTable.title
@@ -134075,6 +135002,10 @@ msgstr ""
 msgid "Reader data: {message}"
 msgstr ""
 
+#: agreementintro/options/purpose/cutoff.title
+msgid "Reader disagreement at a clinical cutoff"
+msgstr ""
+
 #: pathagreement/options/readerID.title
 msgid "Reader ID"
 msgstr ""
@@ -134088,6 +135019,8 @@ msgid "Reader input format"
 msgstr ""
 
 #: pathagreement/options/readerNegative.title
+#: agreementintro/options/negativeLabel.title
+#: agreementintro/ui[1][10].label
 msgid "Reader negative label"
 msgstr ""
 
@@ -134096,11 +135029,19 @@ msgid "Reader pairs"
 msgstr ""
 
 #: pathagreement/options/readerPositive.title
+#: agreementintro/options/positiveLabel.title
+#: agreementintro/ui[1][9].label
 msgid "Reader positive label"
 msgstr ""
 
 #: pathagreement/options/readerWorkflow.title
 msgid "Reader workflow"
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Reader workflows here support binary calls, an ordered boundary, or a "
+"prespecified numeric cutoff."
 msgstr ""
 
 #: pathagreement/results/readerModalitySummary.columns.title
@@ -134499,7 +135440,12 @@ msgstr ""
 #: treatmentoptim/results/treatmentComparison.columns.title
 #: treatmentswitching/results/methodComparisonTable.columns.title
 #: treecompare/results/ranking_table.columns.title
+#: agreementintro/ui[3].label
 msgid "Recommendation"
+msgstr ""
+
+#: agreementintro/options/showRecommendation.title
+msgid "Recommendation and setup"
 msgstr ""
 
 #: modelperformance/options/recommendBy.title
@@ -134589,6 +135535,10 @@ msgstr ""
 
 #: sigmametrics/results/controlPlanning.columns.title
 msgid "Recommended QC Rules"
+msgstr ""
+
+#: agreementintro/results/settings.title
+msgid "Recommended Settings"
 msgstr ""
 
 #: R/venn.b.R
@@ -134947,6 +135897,11 @@ msgstr ""
 msgid "Reference class"
 msgstr ""
 
+#: agreementintro/options/reference.title
+#: agreementintro/ui[2][2][8].label
+msgid "Reference column (optional)"
+msgstr ""
+
 #: pathagreement/results/diagnosticAccuracyTable.title
 msgid "Reference Comparison by Rater (Macro-Averaged Across Categories)"
 msgstr ""
@@ -135151,6 +136106,8 @@ msgid "Reference negative given negative call"
 msgstr ""
 
 #: pathagreement/options/referenceNegative.title
+#: agreementintro/options/referenceNegative.title
+#: agreementintro/ui[1][12].label
 msgid "Reference negative label"
 msgstr ""
 
@@ -135211,6 +136168,8 @@ msgid ""
 msgstr ""
 
 #: pathagreement/options/referencePositive.title
+#: agreementintro/options/referencePositive.title
+#: agreementintro/ui[1][11].label
 msgid "Reference positive label"
 msgstr ""
 
@@ -136325,6 +137284,10 @@ msgstr ""
 msgid "Reliability Measure"
 msgstr ""
 
+#: agreementintro/options/purpose/reliability.title
+msgid "Reliability of continuous measurements (ICC)"
+msgstr ""
+
 #: R/ihcheterogeneity.b.R
 msgid "Reliability:"
 msgstr ""
@@ -136618,6 +137581,13 @@ msgid ""
 "observations."
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"Repeated reads within the same reader and condition must not be treated as "
+"independent cases. Select one prespecified occasion or use an explicitly "
+"matched modality design."
+msgstr ""
+
 #: R/waterfall.b.R
 msgid "REPEATED VISIT TIMES"
 msgstr ""
@@ -136776,6 +137746,14 @@ msgstr ""
 msgid ""
 "Report the event-free probability and cumulative incidence of the target and "
 "competing events within observed follow-up."
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Report the ICC model, absolute-agreement or consistency definition, single "
+"or average measurement unit, confidence interval, and intended rater "
+"population. A fixed-rater consistency estimate must not be described as "
+"absolute agreement."
 msgstr ""
 
 #: R/singlearm.b.R
@@ -137423,6 +138401,12 @@ msgstr ""
 
 #: jforester/options/dpi.description
 msgid "Resolution for exported plot"
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Resolve the data check or the conflicting design answers before using a "
+"recommendation."
 msgstr ""
 
 #: populationhealth/results/geographicAnalysisTable.columns.title
@@ -143222,6 +144206,14 @@ msgid ""
 "first."
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"Select a complete numeric case-by-measurement matrix. The same columns "
+"identify the same raters for a two-way design; for a one-way design they "
+"identify exchangeable rating slots. Interpret the interval in the intended "
+"population, not only a verbal quality band."
+msgstr ""
+
 #: R/jjdotplotstats.b.R
 msgid ""
 "Select a continuous dependent variable and a categorical grouping variable "
@@ -143503,6 +144495,15 @@ msgstr ""
 
 #: R/waterfall.b.R
 msgid "Select Patient ID variable"
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Select rater columns in agreement, set the recommended alpha type, and "
+"preserve missing ratings. Report alpha separately from the default table: "
+"two-rater kappa uses complete pairs; multirater kappa uses all observed "
+"ratings, including singleton cases in its chance term, while exact agreement "
+"uses complete cases. Alpha requires at least two ratings per usable case."
 msgstr ""
 
 #: R/decisioncompare.b.R
@@ -143810,6 +144811,14 @@ msgid ""
 "guidance to a competing-risk analysis."
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"Select the two numeric measurements in the same units on matched independent "
+"cases. Prespecify clinically acceptable differences; inspect the difference "
+"distribution and changing variability before interpreting ordinary limits of "
+"agreement. Missing pairs are excluded."
+msgstr ""
+
 #: decisiongraph/ui[0][0].label
 msgid "Select the type of decision analysis to perform"
 msgstr ""
@@ -143903,6 +144912,12 @@ msgstr ""
 msgid "Select which results to display"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"Select which side of the numeric cutoff is a positive call, including "
+"whether equality is positive."
+msgstr ""
+
 #: spatialanalysis/ui[1][0][1].label
 msgid "Select which spatial analyses to perform:"
 msgstr ""
@@ -143915,6 +144930,10 @@ msgstr ""
 
 #: R/agepyramid.b.R
 msgid "Select your Age and Gender variables to begin."
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid "Select your study question."
 msgstr ""
 
 #: R/linechart.b.R
@@ -143969,6 +144988,10 @@ msgstr ""
 msgid "Selected cutpoint"
 msgstr ""
 
+#: agreementintro/options/dataLayout.title
+msgid "Selected data layout"
+msgstr ""
+
 #: R/lassocox.b.R
 msgid "Selected event level ('{level}') is not present in observed outcome data."
 msgstr ""
@@ -144016,6 +145039,13 @@ msgstr ""
 msgid "Selected Model Details"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"Selected ordered columns do not declare exactly the same full category "
+"order. Harmonize the declared scale, including unused levels, before an "
+"ordinal analysis."
+msgstr ""
+
 #: R/lassocox.b.R
 msgid "Selected Original Predictors"
 msgstr ""
@@ -144034,6 +145064,10 @@ msgstr ""
 
 #: R/lassocox.b.R
 msgid "Selected Predictor Columns"
+msgstr ""
+
+#: agreementintro/results/columnSummary.title
+msgid "Selected Rating Columns"
 msgstr ""
 
 #: R/decisioncompare.b.R
@@ -145330,11 +146364,26 @@ msgstr ""
 msgid "Seventh variable for 7+ set analysis."
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"Several conditions are present. Select one condition for a single-panel "
+"analysis or choose a matched paired-condition workflow; do not pool "
+"conditions as independent cases."
+msgstr ""
+
 #: R/psychopdaROC.b.R
 msgid ""
 "Several cut-points tie for the best %1$s (%2$s): %3$s. The cut-point shown, "
 "%4$s, is computed from them and is not one of them; its %1$s is %5$s. Choose "
 "'All tied cutpoints' in Tie Breaking Method to list each one."
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Several readers score multiple slides per patient with and without AI "
+"assistance: choose a fixed-reader modality workflow, identify patient "
+"clusters, state the comparator, and keep paired case-reader observations "
+"together. An expert consensus comparator is not automatically disease truth."
 msgstr ""
 
 #: R/waterfall.b.R
@@ -152238,6 +153287,18 @@ msgstr ""
 msgid "Special Options"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid "Specialist categorical modality comparison"
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid "Specialist Cohen's kappa interface"
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid "Specialist ICC interface"
+msgstr ""
+
 #: modalitycomparison/ui[3].label
 msgid "Specialized Analysis"
 msgstr ""
@@ -152648,8 +153709,24 @@ msgstr ""
 msgid "Specify custom colors for your visualization."
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid "Specify independent cases or multiple specimens or visits per patient."
+msgstr ""
+
 #: factoranalysis/options/nFactorsMethod/manual.title
 msgid "Specify Number"
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Specify overall panel agreement, fixed-reader modality comparison, or the "
+"specialist two-modality workflow."
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Specify reliability of one measurement or of the average of the selected "
+"measurements."
 msgstr ""
 
 #: classicalSurvivalPower/options/power_plot_range.description.jamovi
@@ -152768,6 +153845,26 @@ msgstr ""
 
 #: bbcplots/options/legend_position.description.jamovi
 msgid "Specify where to place the chart legend."
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid "Specify whether any ratings are missing."
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Specify whether reliability should generalize to comparable raters or only "
+"to this fixed panel."
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Specify whether the same identified raters rate every case, raters are "
+"exchangeable, or the panel is incomplete."
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid "Specify whether the same rater reads the same case more than once."
 msgstr ""
 
 #: oddsratio/options/predictorLevel.description.main
@@ -154227,6 +155324,14 @@ msgstr ""
 msgid ""
 "Start with percentage data if available, or use raw measurements with proper "
 "time variables for automatic calculation."
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Start with Study Question, complete the relevant Design Details, and "
+"optionally inspect selected columns. Read the recommendation together with "
+"its preparation steps and development status. No dataset is needed for "
+"questionnaire-only guidance."
 msgstr ""
 
 #: singlearm/options/ybegin_plot.title
@@ -156793,6 +157898,10 @@ msgstr ""
 msgid "Structured validation report"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid "Stuart-Maxwell marginal homogeneity"
+msgstr ""
+
 #: agreement/options/stuartMaxwell.title
 msgid "Stuart-Maxwell test (marginal homogeneity for 2 raters)"
 msgstr ""
@@ -157079,6 +158188,10 @@ msgstr ""
 
 #: treatmentmeta/options/quality_score.title
 msgid "Study Quality Score (Optional)"
+msgstr ""
+
+#: agreementintro/ui[0].label
+msgid "Study Question"
 msgstr ""
 
 #: hierarchicalbayes/results/shrinkagePlots.title
@@ -157736,8 +158849,32 @@ msgstr ""
 msgid "Suggested Action"
 msgstr ""
 
+#: agreementintro/results/recommendations.title
+msgid "Suggested Analyses"
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Suggested analysis unit: multiple specimens or visits per patient. Confirm "
+"patient identities and the intended unit of inference."
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Suggested answer for missing ratings: yes. At least one selected rating is "
+"missing or long-format coverage is incomplete. Confirm how this arose in the "
+"study."
+msgstr ""
+
 #: multiplexanalysis/results/clusteringtable.columns.title
 msgid "Suggested Phenotype"
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Suggested rater count from the selected columns or distinct reader IDs: {n}. "
+"Confirm that this represents the intended study panel; exchangeable rating "
+"slots may require a different count."
 msgstr ""
 
 #: R/linechart.b.R
@@ -158395,6 +159532,13 @@ msgstr ""
 msgid "Supervised Principal Components Results"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"Supply a complete equal-width case-by-rating-slot matrix with exchangeable "
+"slots. Slot columns are not fixed rater identities. Do not encode absent "
+"ratings as a category or use Cohen's kappa for exchangeable slots."
+msgstr ""
+
 #: R/pathsampling.b.R
 msgid ""
 "Supply at least one positive integer total sample count and a valid "
@@ -158402,6 +159546,14 @@ msgid ""
 msgstr ""
 "Supply at least one positive integer total sample count and a valid "
 "first-detection position, or a missing position if no lesion was detected."
+
+#: R/agreementintro.b.R
+msgid ""
+"Supply defensible anticipated kappa and category proportions in the selected "
+"calculator. Precision, power and fixed-sample lower-bound calculations are "
+"different objectives. These settings concern unweighted kappa and "
+"independent subjects, not weighted ordinal kappa or ICC."
+msgstr ""
 
 #: agreement/results/perClassMetricsTable.columns.title
 #: deeplearningprediction/results/performanceAnalysis/classificationReport.columns.title
@@ -160037,6 +161189,10 @@ msgid ""
 "90%% CI lay within the margin (two one-sided tests) and considered material "
 "when a CI adjusted for the number of comparisons (Bonferroni) lay entirely "
 "beyond it."
+msgstr ""
+
+#: agreementintro/options/purpose/bias.title
+msgid "Systematic differences in category use"
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
@@ -162342,6 +163498,7 @@ msgstr ""
 
 #: classification/options/testing.title
 #: classification/ui[1][0][0].label
+#: R/agreementintro.b.R
 msgid "Testing"
 msgstr ""
 
@@ -162351,6 +163508,10 @@ msgstr ""
 
 #: classification/options/testSize.title
 msgid "Testing perc."
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid "Testing route; not a production release"
 msgstr ""
 
 #: R/sequentialtests.b.R
@@ -162477,6 +163638,7 @@ msgid "Tetrachoric (binary-binary)"
 msgstr ""
 
 #: jjtreemap/ui[2][0].label
+#: R/agreementintro.b.R
 msgid "Text"
 msgstr ""
 
@@ -162953,6 +164115,12 @@ msgid ""
 "designs."
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"The answer says no ratings are missing, but the selected data have missing "
+"readings or incomplete long-format coverage."
+msgstr ""
+
 #: R/multisurvival.b.R
 msgid ""
 "The apparent C-index is <b>{cindex}</b>. It measures rank discrimination in "
@@ -163064,6 +164232,10 @@ msgstr ""
 
 #: R/enhancedROC.b.R
 msgid "The AUC of %1$s was %2$.3f (interval not estimable)."
+msgstr ""
+
+#: agreementintro/options/reportingUnit/average.title
+msgid "The average of these raters / measurements"
 msgstr ""
 
 #: R/decisiongraph.b.R
@@ -163241,6 +164413,14 @@ msgstr ""
 
 #: R/stagemigration-part1.R
 msgid "The calculation returned no result."
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"The calculators assume an intraclass, common-correlation kappa model with "
+"common category probabilities. Their sample sizes are not automatically "
+"valid for unrestricted Cohen or fixed-panel Conger designs; confirm the "
+"model and anticipated margins in the selected calculator."
 msgstr ""
 
 #: R/enhancedROC.b.R
@@ -163808,6 +164988,13 @@ msgstr ""
 msgid "The current outcome \"{var}\" has {n} levels: {levels}."
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"The current paired agreement tool compares categorical kappa and exact "
+"matches. It does not compare continuous ICC or CCC estimates. A paired "
+"continuous agreement comparison needs a separate verified workflow."
+msgstr ""
+
 #: R/decisioncalculator.b.R
 msgid ""
 "The current row and the two scenarios have {current}, {scenario1} and "
@@ -164204,6 +165391,18 @@ msgid ""
 "reference standard says which."
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"The declared number of raters differs from the selected columns or observed "
+"reader IDs. Confirm that you selected the intended panel."
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"The declared rater design, agreement definition, and measurement unit match "
+"this ICC configuration."
+msgstr ""
+
 #: R/cotest.b.R
 msgid ""
 "The dependence parameter for the diseased group (%1$.2f) is not attainable "
@@ -164237,6 +165436,13 @@ msgid ""
 "The design aims to rule out a hazard ratio of {margin} or worse, assuming a "
 "true hazard ratio of {hr}, with {n} subjects and {power}% power at a "
 "{alpha}% significance level (one-sided)."
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"The design has equal numbers of exchangeable ratings per case. Fleiss' "
+"coefficient uses pooled category frequencies rather than fixed "
+"rater-specific margins."
 msgstr ""
 
 #: R/kappaSizePower.b.R
@@ -165004,6 +166210,14 @@ msgid ""
 "categories."
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"The guide preserves these original IDs, but the target would merge distinct "
+"numeric IDs when formatting them as text. Prepare lossless text identifiers "
+"from the source before proceeding; ordinary numeric-to-text conversion is "
+"not sufficient."
+msgstr ""
+
 #: R/multisurvival.b.R
 msgid ""
 "The hazard ratio is the effect per one-unit increase, assuming a constant "
@@ -165284,6 +166498,14 @@ msgstr ""
 msgid ""
 "The kappaSize package is required but not installed. Please install it using "
 "install.packages(\"kappaSize\")"
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"The kappaSize routes cover unweighted categorical kappa with 2 to 5 "
+"categories and 2 to 6 raters on independent cases without repeated readings. "
+"Binary planning requires exactly two categories. Weighted-kappa, ICC, "
+"clustered, and repeated-reading planning need a separate design."
 msgstr ""
 
 #: R/decisioncombine.b.R
@@ -165629,6 +166851,12 @@ msgid ""
 "and clinical relevance."
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"The marginal-homogeneity route requires two categorical raters on the same "
+"cases."
+msgstr ""
+
 #: R/psychopdaROC.b.R
 msgid "The marker could not be scaled to finite values."
 msgstr ""
@@ -165927,6 +167155,14 @@ msgid ""
 "the subgroup analysis instead."
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"The modalitycomparison draft sorts custom categories alphabetically and has "
+"no explicit order setting. Its ordinal direction and weighted outputs are "
+"not a verified route. Use the categorical agreement route with a confirmed "
+"order, or review a supported specialist preset separately."
+msgstr ""
+
 #: R/agreement.b.R
 msgid ""
 "The model also contains a case-by-condition variance of %1$.4g (%2$.1f%% of "
@@ -166026,6 +167262,12 @@ msgstr ""
 
 #: R/decisiongraph.b.R
 msgid "The monetary value of health benefits minus the costs"
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"The multifocal route requires categorical biomarker or mutation calls and "
+"explicit patient and focus identities."
 msgstr ""
 
 #: R/outcomeorganizer.b.R
@@ -166163,6 +167405,12 @@ msgid ""
 "confidence interval are at or below 0."
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"The number of independent cases is fixed; this route describes the "
+"attainable lower confidence bound."
+msgstr ""
+
 #: R/chisqposttest.b.R
 msgid ""
 "The number of observations expected in each cell if the variables were "
@@ -166182,6 +167430,10 @@ msgid ""
 "groups ({nGroups}), so default labels were used."
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid "The numeric cutoff must be one finite number."
+msgstr ""
+
 #: R/survivalcont.b.R
 msgid ""
 "The numeric date columns hold values too small to be Unix epoch seconds (the "
@@ -166190,6 +167442,18 @@ msgid ""
 "seconds since 1970-01-01 -- use the DateTime Converter's "
 "corrected_datetime_numeric output, or supply the dates as text (e.g. "
 "\"2024-01-15\") and set the matching input time type."
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"The objective is an interval around anticipated kappa with a specified "
+"precision, not hypothesis-test power."
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"The objective is power to reject a specified null kappa in favour of an "
+"anticipated alternative."
 msgstr ""
 
 #: R/swimmerplot.b.R
@@ -166287,6 +167551,13 @@ msgstr ""
 msgid ""
 "The optional descriptive cohort summary could not be generated. The "
 "numerical tables above remain the authoritative results."
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"The ordinal boundary does not occur in every selected column's declared "
+"category order. Confirm the complete scale and boundary before recommending "
+"a cutoff."
 msgstr ""
 
 #: R/waterfall.b.R
@@ -166451,6 +167722,13 @@ msgid ""
 "cases respectively. Without discordant pairs p is 1 by convention. They are "
 "not adjusted for multiplicity. Overall accuracy is tested in the Statistical "
 "Comparison of Test Accuracy table, so its p cell here is empty."
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"The paired agreement configuration requires the same panel and complete "
+"matched cases in both conditions, with a confirmed common ordinal scale when "
+"applicable."
 msgstr ""
 
 #: R/decisioncompare.b.R
@@ -166996,6 +168274,13 @@ msgid ""
 "range; its cell is blank."
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"The recommended ICC implementations use complete rectangular ratings. "
+"Incomplete panels need an appropriate model; simply deleting missing cases "
+"may change the target population."
+msgstr ""
+
 #: R/ihcheterogeneity.b.R
 msgid ""
 "The reference (whole section, hotspot or overall score) is treated as the "
@@ -167341,14 +168626,37 @@ msgid ""
 "interpreting any of these results."
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"The same cases and matched raters are observed in both conditions; the "
+"paired resampling compares their agreement coefficients."
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"The same complete panel was declared, but long-format reader coverage "
+"differs between cases. Confirm an incomplete panel or prepare the intended "
+"matched population."
+msgstr ""
+
 #: R/survival.b.R
 msgid "the same hazard"
+msgstr ""
+
+#: agreementintro/options/panel/same.title
+msgid "The same identified raters"
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
 msgid ""
 "The same ratio with systematic offsets removed; it is shown beside the "
 "absolute-agreement form so an offset can be seen."
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"The same three or more identified raters assess every case; Conger's exact "
+"formulation retains rater-specific marginal distributions."
 msgstr ""
 
 #: R/timeinterval.b.R
@@ -167681,6 +168989,14 @@ msgid ""
 "with full-model nonzero counts on its upper axis."
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"The settings table contains option names and values for the named analysis. "
+"Assign the required data columns in that analysis as described below. "
+"Unlisted options retain their defaults; inspect its notices and denominators "
+"before interpreting results."
+msgstr ""
+
 #: R/linechart.b.R
 msgid ""
 "The shaded band is the 95% confidence interval of a LOESS fit, not the "
@@ -167880,6 +169196,12 @@ msgid ""
 "%s, which meets the %s threshold set for this analysis."
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"The specialist modality route requires exactly two categorical or ordinal "
+"modalities."
+msgstr ""
+
 #: R/diagnosticmeta.b.R
 msgid "The specificity heterogeneity model failed: %s"
 msgstr ""
@@ -167992,6 +169314,12 @@ msgstr ""
 msgid ""
 "The subgroup variable has no observed levels. Remove it or provide "
 "nonmissing subgroup values."
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"The suggestion is conditional on your confirmed answers. It is not evidence "
+"that your study or the suggested software has been clinically validated."
 msgstr ""
 
 #: R/diagnosticmeta.b.R
@@ -168758,6 +170086,13 @@ msgid ""
 "These are model-based predictions. They rely on the Cox model being "
 "correctly specified and on proportional hazards holding, and they adjust "
 "only for variables in the model - not for anything unmeasured."
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"These are observed data features, not confirmed study-design answers. The "
+"guide never recodes columns, changes your answers, or infers a disease "
+"reference. Counts respect the data and filters supplied by jamovi."
 msgstr ""
 
 #: R/diagnosticmeta.b.R
@@ -169582,6 +170917,12 @@ msgstr ""
 msgid "This design cannot support a reliability claim."
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"This design needs a workflow that this guide cannot currently recommend with "
+"verified settings."
+msgstr ""
+
 #: R/multisurvival.b.R
 msgid ""
 "This does not establish that no association exists; the analysis may lack "
@@ -169674,6 +171015,12 @@ msgstr ""
 
 #: R/singlearm.b.R
 msgid "This hazard plot"
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"This ICC route is for continuous measurements. Numerical category codes "
+"alone do not establish a continuous measurement scale."
 msgstr ""
 
 #: R/waterfallrecist.b.R
@@ -169877,6 +171224,12 @@ msgstr ""
 
 #: R/psychopdaROC.b.R
 msgid "this marker"
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"This measurement-agreement route requires exactly two continuous methods "
+"measured on the same cases."
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -170084,6 +171437,13 @@ msgid ""
 "correlation."
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"This reader workflow conditions on identified readers. Different "
+"exchangeable readers across cases need a design-specific analysis rather "
+"than fixed-reader shared-case comparisons."
+msgstr ""
+
 #: R/ihcheterogeneity.b.R
 msgid ""
 "This relaxed band (correlation threshold minus 0.2, CV threshold times 1.5) "
@@ -170186,6 +171546,12 @@ msgstr ""
 
 #: R/singlearm.b.R
 msgid "This single-arm survival analysis"
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"This specialist interface describes categorical modality discordance. Its "
+"draft status requires separate verification before use."
 msgstr ""
 
 #: R/sequentialtests.b.R
@@ -170387,6 +171753,12 @@ msgid ""
 "a general hierarchical composite win ratio between any two groups, see the "
 "standalone 'Win Ratio' analysis (SurvivalD [Draft] > Specialized Survival "
 "Methods)."
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"This workflow separates reproducibility from reference-based accuracy and "
+"makes class labels, cutoffs, case populations, and clustering explicit."
 msgstr ""
 
 #: screeningcalculator/results/repeatTest3Table.title
@@ -173077,6 +174449,11 @@ msgstr ""
 #: R/pathsampling.b.R
 msgid "To test for heterogeneity, please specify a 'Sample Type' variable."
 msgstr "To test for heterogeneity, please specify a 'Sample Type' variable."
+
+#: agreementintro/options/raterSelection.title
+#: agreementintro/ui[1][2].label
+msgid "To which raters should reliability generalize?"
+msgstr ""
 
 #: conditionalinference/results/todo.title
 #: extratrees/results/todo.title
@@ -175879,8 +177256,16 @@ msgid ""
 "dependence among diseased subjects is set high."
 msgstr ""
 
+#: agreementintro/options/comparisonGoal/specialized.title
+msgid "Two categorical modalities (specialist workflow)"
+msgstr ""
+
 #: circos/options/inputMode/crosstab.title
 msgid "Two categorical variables (cross-tabulated)"
+msgstr ""
+
+#: agreementintro/options/scale/binary.title
+msgid "Two categories (binary)"
 msgstr ""
 
 #: pathsampling/options/fociGapThreshold.description
@@ -175923,6 +177308,12 @@ msgstr ""
 msgid "Two Groups"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"Two identified raters score the same independent cases. Ordinal weighting "
+"requires a common ordered scale and a prespecified disagreement cost."
+msgstr ""
+
 #: R/cotest.b.R
 msgid ""
 "Two imaging modalities of the same tissue, so dependence is set relatively "
@@ -175943,6 +177334,21 @@ msgid ""
 "a detectable but small departure rather than as an all-clear. The "
 "flagged-observation count is bin membership, not an outlier count, and is "
 "descriptive only."
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Two pathologists classify independent biopsies as benign or malignant: "
+"choose categorical agreement, binary scores, two fixed raters, and describe "
+"missingness. Start with Cohen's kappa and observed/category-specific "
+"agreement."
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Two platforms measure Ki67 percentages: choose continuous measurement "
+"agreement. Inspect differences and limits in percentage points and specify "
+"acceptable differences before interpreting concordance."
 msgstr ""
 
 #: clinicaltrialdesign/options/test_type/two_proportions.title
@@ -176186,6 +177592,7 @@ msgstr ""
 #: survivalfeaturerank/results/rankingTable.columns.title
 #: toolssummary/results/summary.columns.title
 #: waterfallrecist/results/lesionTable.columns.title
+#: agreementintro/results/columnSummary.columns.title
 msgid "Type"
 msgstr ""
 
@@ -177814,6 +179221,10 @@ msgid ""
 "design, distribution, per-pathologist and category tables still are."
 msgstr ""
 
+#: agreementintro/options/scale/nominal.title
+msgid "Unordered categories"
+msgstr ""
+
 #: R/lassocox.b.R
 msgid "Unpenalized refit after LASSO selection"
 msgstr ""
@@ -178728,6 +180139,22 @@ msgstr ""
 msgid "Use Logarithmic Scale"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"Use long data with caseID, readerID, modality and rating. Choose "
+"baselineModality and comparisonModality explicitly; each "
+"case-reader-modality combination must be unique. This comparison conditions "
+"on the selected readers and does not generalize to a population of readers."
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Use long data: assign caseId to patient identity, focusId to sample "
+"identity, and markers to categorical biomarker columns. Preserve all foci "
+"within a patient. This draft provides descriptive concordance and does not "
+"certify clinical interchangeability."
+msgstr ""
+
 #: agreement/options/tieBreaker/lowest.title
 msgid "Use lowest category"
 msgstr ""
@@ -178772,6 +180199,20 @@ msgstr ""
 
 #: R/nonparametric.b.R
 msgid "Use non-parametric methods"
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Use one column per rater ranking the same cases. Preserve ties and a common "
+"direction. Kendall's W does not quantify absolute measurement agreement."
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Use one row per independent case and one column per identified rater. For "
+"ordinal methods, declare the same full ordered category scale on every "
+"column. Report observed agreement, category frequencies, the named "
+"chance-corrected coefficient and its interval."
 msgstr ""
 
 #: agepyramid/options/originaltheme.description.jamovi
@@ -179103,6 +180544,14 @@ msgid ""
 "Use when your study sample doesn't represent the target population "
 "prevalence. Affects PPV/NPV calculations using Bayes' theorem. Enter as "
 "proportion (e.g., 0.05 for 5%, 0.15 for 15%)."
+msgstr ""
+
+#: R/agreementintro.b.R
+msgid ""
+"Use wide data: assign condition A columns to vars and matched condition B "
+"columns to conditionBVars in the same rater order. Match cases by identity, "
+"retain independent cases, and report the two coefficients and their paired "
+"difference."
 msgstr ""
 
 #: R/benford.b.R
@@ -180026,6 +181475,7 @@ msgstr ""
 #: waterfall/results/responseDurationTable.columns.title
 #: waterfallrecist/results/recistSummary/orrConfirmed.columns.title
 #: waterfallrecist/results/recistSummary/dcrConfirmed.columns.title
+#: agreementintro/results/settings.columns.title
 msgid "Value"
 msgstr ""
 
@@ -183541,6 +184991,11 @@ msgstr ""
 msgid "Warnings:"
 msgstr ""
 
+#: agreementintro/options/cutoffPrespecified.title
+#: agreementintro/ui[1][13].label
+msgid "Was the cutoff chosen before inspecting performance?"
+msgstr ""
+
 #: package/analyses/waterfall.menuSubtitle
 #: waterfall/options.menuSubtitle
 msgid "Waterfall and SpiderPlot: One burden value per patient or visit"
@@ -184006,6 +185461,10 @@ msgstr ""
 msgid "Weighted Bootstrap AUC"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid "Weighted Cohen's kappa"
+msgstr ""
+
 #: stagemigration/options/concordanceProbabilityMethods/weighted_concordance.title
 msgid "Weighted Concordance"
 msgstr ""
@@ -184443,6 +185902,21 @@ msgstr ""
 msgid "What are standardized residuals?"
 msgstr ""
 
+#: agreementintro/options/comparisonGoal.title
+#: agreementintro/ui[1][6].label
+msgid "What changes between the paired conditions?"
+msgstr ""
+
+#: agreementintro/options/scale.title
+#: agreementintro/ui[0][1].label
+msgid "What do the ratings represent?"
+msgstr ""
+
+#: agreementintro/options/referenceType.title
+#: agreementintro/ui[1][5].label
+msgid "What does the reference represent?"
+msgstr ""
+
 #: R/decisioncalculator.b.R
 msgid "What does this analysis do?"
 msgstr ""
@@ -184469,6 +185943,21 @@ msgstr ""
 msgid "What is being computed"
 msgstr ""
 
+#: agreementintro/options/analysisUnit.title
+#: agreementintro/ui[0][6].label
+msgid "What is the analysis unit?"
+msgstr ""
+
+#: agreementintro/options/planningGoal.title
+#: agreementintro/ui[1][7].label
+msgid "What is the planning objective?"
+msgstr ""
+
+#: agreementintro/options/purpose.title
+#: agreementintro/ui[0][0].label
+msgid "What is your study question?"
+msgstr ""
+
 #: R/benford.b.R
 msgid "What it does:"
 msgstr ""
@@ -184479,6 +185968,16 @@ msgstr ""
 
 #: R/vartree.b.R
 msgid "What it reports:"
+msgstr ""
+
+#: agreementintro/options/iccDefinition.title
+#: agreementintro/ui[1][3].label
+msgid "What kind of reliability matters?"
+msgstr ""
+
+#: agreementintro/options/reportingUnit.title
+#: agreementintro/ui[1][4].label
+msgid "What measurement will be used?"
 msgstr ""
 
 #: enhancedROC/options/analysisUnit.description
@@ -185095,6 +186594,11 @@ msgstr ""
 msgid "WHO abridged (<1, 1-4, 5-9, ... 85+)"
 msgstr ""
 
+#: agreementintro/options/panel.title
+#: agreementintro/ui[0][3].label
+msgid "Who rates each case?"
+msgstr ""
+
 #: R/agepyramid.b.R
 msgid "WHO/UN standard"
 msgstr ""
@@ -185194,6 +186698,12 @@ msgstr ""
 msgid "Wide format requires at least two strata variables"
 msgstr ""
 
+#: R/agreementintro.b.R
+msgid ""
+"Wide inspection needs rater columns. Long inspection needs case ID, reader "
+"ID and rating columns."
+msgstr ""
+
 #: R/jjridges.b.R
 msgid "Wide ridges = high variability; narrow ridges = consistent values"
 msgstr ""
@@ -185204,6 +186714,10 @@ msgstr ""
 
 #: R/riverplot.b.R
 msgid "Wide:"
+msgstr ""
+
+#: agreementintro/options/dataLayout/wide.title
+msgid "Wide: one column per rater"
 msgstr ""
 
 #: pathagreement/options/readerFormat/wide.title
@@ -186758,11 +188272,18 @@ msgstr ""
 #: R/decisioncompare.b.R
 #: R/jjarcdiagram.b.R
 #: R/lassocox.b.R
+#: agreementintro/options/missingRatings/yes.title
+#: agreementintro/options/repeatedReadings/yes.title
+#: agreementintro/options/cutoffPrespecified/yes.title
 msgid "Yes"
 msgstr ""
 
 #: R/agreement.b.R
 msgid "Yes (criterion met)"
+msgstr ""
+
+#: agreementintro/options/categoryOrder/confirmed.title
+msgid "Yes, the full order is specified for every rater"
 msgstr ""
 
 #: singlearm/options/timetypedata/ymd.title
@@ -187520,16 +189041,4 @@ msgstr ""
 
 #: contTables/results/chiSq.title
 msgid "χ² Tests"
-msgstr ""
-
-#: R/psychopdaROC.b.R
-msgid "Average precision = %.3f"
-msgstr ""
-
-#: R/psychopdaROC.b.R
-msgid "AUC-PR uses interpolation linear in true- and false-positive counts (Davis & Goadrich 2006; Keilwagen et al. 2014), matching Clinical ROC Analysis. Tied scores enter together. The precision-recall step plot instead shows average precision. A constant marker has both areas equal to the sample prevalence."
-msgstr ""
-
-#: R/psychopdaROC.b.R
-msgid "Display precision-recall step curves with average precision. The classifier comparison table reports the separate interpolated AUC-PR estimate."
 msgstr ""
