@@ -39,13 +39,13 @@ ll_reference <- function(d, seed = 123456, k = 10) {
   fid <- integer(length(y))
   fid[pos] <- sample(rep(1:k, length.out = length(pos)))
   fid[neg] <- sample(rep(1:k, length.out = length(neg)))
-  cv <- glmnet::cv.glmnet(Xs, y, family = "binomial", alpha = 1, standardize = FALSE,
+  cv <- glmnet::cv.glmnet(X, y, family = "binomial", alpha = 1, standardize = TRUE,
                           type.measure = "deviance", foldid = fid)
   lam <- cv$lambda.1se
-  cf <- as.numeric(stats::coef(cv, s = lam)); b_z <- cf[-1]; names(b_z) <- colnames(X)
+  cf <- as.numeric(stats::coef(cv, s = lam)); b_z <- cf[-1] * sds; names(b_z) <- colnames(X)
   sel <- names(b_z)[abs(b_z) > 1e-10]
-  p <- as.numeric(stats::predict(cv, Xs, s = lam, type = "response"))
-  list(lambda = lam, b0_z = cf[1], b_z = b_z, sel = sel, sds = sds, ctr = ctr, X = X, y = y, p = p,
+  p <- as.numeric(stats::predict(cv, X, s = lam, type = "response"))
+  list(lambda = lam, b0_z = cf[1] + sum(cf[-1] * ctr), b_z = b_z, sel = sel, sds = sds, ctr = ctr, X = X, y = y, p = p,
        auc = as.numeric(pROC::auc(pROC::roc(y, p, direction = "<", levels = c(0, 1), quiet = TRUE))))
 }
 
@@ -141,4 +141,98 @@ test_that("bootstrap validation runs with the stratified fold rule and reports o
   auc_row <- vt[grepl("AUC", vt$metric), ]
   expect_true(is.finite(auc_row$corrected))
   expect_lte(auc_row$corrected, auc_row$apparent + 1e-8)
+})
+
+# ═══════════════════════════════════════════════════════════
+# Independent review 2026-10-12 (IR-lassologistic-01 .. -10)
+# development-ideas/lassologistic-independent-review-2026-10-12.md
+# ═══════════════════════════════════════════════════════════
+
+ll_notes <- function(tbl) vapply(tbl$notes, function(n) n$note, "")
+ll_noise <- function() {   # seed chosen so that the 1SE model selects nothing
+  set.seed(3)
+  d <- data.frame(a = stats::rnorm(60), b = stats::rnorm(60), c = stats::rnorm(60))
+  d$dx <- factor(sample(c("NET", "NEC"), 60, TRUE), levels = c("NET", "NEC"))
+  d
+}
+
+test_that("IR-01 outcomeLevel offers None, so jamovi does not fill in the first level", {
+  # jamovi 28.3 LevelSelector without allowNone calls setValue(levels[0]); the R side of
+  # jmvcore ignores the flag, so the generated Options class is the only place to see it.
+  init <- paste(deparse(ClinicoPath:::lassologisticOptions$public_methods$initialize), collapse = "\n")
+  expect_match(init, "allowNone = TRUE", fixed = TRUE)
+})
+
+test_that("IR-01 a factor outcome with no event level is pending, not fitted on an inferred level", {
+  d <- ll_fixture()
+  res <- ClinicoPath::lassologistic(data = d, outcome = "dx", outcomeLevel = NULL,
+                                    explanatory = c("p53", "Rb1", "ki67", "age"))
+  expect_equal(nrow(res$coefficients$asDF), 0)
+  expect_match(res$todo$content, "NET \\(n=[0-9]+\\), NEC \\(n=[0-9]+\\)")
+})
+
+test_that("IR-03 a manual cut above every value is moved inside the data, never scored on a 1-SD contrast", {
+  d <- ll_fixture()
+  res <- ll_run(d, scoringSystem = TRUE, scoreCutMethod = "manual", scoreCutPoints = "ki67=1000")
+  st <- res$scoringTable$asDF
+  expect_true("ki67" %in% st$variable)
+  expect_equal(st$criterion[st$variable == "ki67"],
+               paste0("> ", sprintf("%.17g", stats::median(d$ki67))))
+  notes <- ll_notes(res$scoringTable)
+  expect_true(any(grepl("ki67", notes, fixed = TRUE) & grepl("left no case on one side", notes, fixed = TRUE)))
+})
+
+test_that("IR-03 ties at the top that make the median the maximum still split the cases", {
+  d <- ll_fixture()
+  d$ki67 <- ifelse(d$ki67 > 25, 90, round(d$ki67))
+  res <- ll_run(d, scoringSystem = TRUE)
+  st <- res$scoringTable$asDF
+  expect_true("ki67" %in% st$variable)
+  second <- sort(unique(d$ki67), decreasing = TRUE)[2]
+  expect_equal(st$criterion[st$variable == "ki67"], paste0("> ", base::format(second, trim = TRUE)))
+  expect_true(any(grepl("left no case on one side", ll_notes(res$scoringTable), fixed = TRUE)))
+})
+
+test_that("IR-05 Importance is the per-SD magnitude with or without standardization", {
+  d <- ll_fixture()
+  X <- stats::model.matrix(~ ., d[c("p53", "Rb1", "ki67", "age")])[, -1]
+  for (std in c(TRUE, FALSE)) {
+    cf <- ll_run(d, standardize = std)$coefficients$asDF
+    cf <- cf[cf$variable != "(Intercept)", ]
+    per_sd <- abs(cf$coefficient) * apply(X[, cf$variable, drop = FALSE], 2, stats::sd)
+    expect_equal(cf$importance, unname(per_sd / max(per_sd)), tolerance = 1e-8, label = paste("standardize", std))
+  }
+})
+
+test_that("IR-02 the calibration note explains a corrected slope above 1; probabilities carry a shrinkage note", {
+  d <- ll_fixture()
+  res <- ll_run(d, bootstrapValidation = TRUE, bootstrapN = 50)
+  expect_true(any(grepl("corrected slope above 1 means they are too moderate", ll_notes(res$validationTable), fixed = TRUE)))
+  expect_true(any(grepl("pulls them toward the overall event rate", ll_notes(res$performance), fixed = TRUE)))
+})
+
+test_that("IR-08/IR-09 a model that selects nothing shows no zero-width interval and no orphan slope optimism", {
+  res <- ClinicoPath::lassologistic(data = ll_noise(), outcome = "dx", outcomeLevel = "NEC",
+                                    explanatory = c("a", "b", "c"), bootstrapValidation = TRUE, bootstrapN = 50)
+  expect_equal(nrow(res$coefficients$asDF[res$coefficients$asDF$variable == "No variables selected", ]), 1)
+  auc <- res$performance$asDF[gsub('^"|"$', "", rownames(res$performance$asDF)) == "auc", ]
+  expect_equal(auc$value, "0.500 (CI not estimable)")
+  expect_equal(auc$interpretation, "No discrimination")
+  expect_false(grepl("Poor Discrimination", res$notices$content, fixed = TRUE))
+  slope <- res$validationTable$asDF[gsub('^"|"$', "", rownames(res$validationTable$asDF)) == "slope", ]
+  expect_true(is.na(slope$apparent) && is.na(slope$optimism) && is.na(slope$corrected))
+  expect_true(any(grepl("calibration slope is not estimable", ll_notes(res$validationTable), fixed = TRUE)))
+})
+
+test_that("IR-04 the lookup column says observed event rate, which is what it holds", {
+  d <- ll_fixture()
+  res <- ll_run(d, scoringSystem = TRUE)
+  expect_equal(res$lookupTable$getColumn("probability")$title, "Observed Event Rate")
+})
+
+test_that("IR-07/IR-10 guidance and suitability text do not overclaim", {
+  d <- ll_fixture()
+  res <- ll_run(d, includeClinicalGuidance = TRUE)
+  expect_false(grepl("most useful", res$clinicalGuidance$content, fixed = TRUE))
+  expect_false(grepl("adequate", res$suitabilityReport$content, fixed = TRUE))
 })

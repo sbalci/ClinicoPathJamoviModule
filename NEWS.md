@@ -10,6 +10,38 @@
   decision documentation are included. Existing statistical backends and production
   routing are unchanged.
 
+- `lassologistic` (LASSO Logistic) resolves its validation and independent review of
+  2026-10-12. **Breaking:** the Event Level is never inferred any more. jamovi used to
+  fill in the outcome's FIRST level while R used the SECOND, so the same data gave
+  inverted odds ratios in the two. A nominal or ordinal outcome now waits, listing its
+  levels, until the event is chosen; a numeric 0/1 outcome still reads 1 as the event.
+  **Breaking:** the scoring method key `schneeweiss` is now `smallest` (result column
+  `points_smallest`), because dividing by the smallest contribution is a Sullivan-type
+  scale, not Schneeweiss's method. Ordinal predictors are coded one indicator per level
+  instead of polynomial contrasts, which had produced scoring rules such as
+  "grade.L > 0". A manual or tied cut point with no patient on one side is moved inside
+  the data and named in a note, instead of being scored on an invented one-SD contrast.
+  Importance is per standard deviation whether or not predictors are standardized. The
+  lookup column is now "Observed Event Rate", which is what it always held. New notes
+  say that the penalized probabilities are pulled toward the event rate (most strongly
+  under the 1SE rule) and explain a corrected calibration slope above 1. A model that
+  selects nothing shows "CI not estimable" and "No discrimination" instead of a
+  zero-width interval graded "Poor". Independent implementations check coefficients,
+  AUC, DeLong intervals, threshold metrics, and lambda selection.
+
+- `lassologistic` analysis **1.0.84** addresses the subsequent independent re-audit.
+  **Numerical change:** standardization now uses glmnet's population SD separately
+  within each CV training fold and bootstrap fit; lambda, coefficients, and validation
+  estimates can therefore change. Bootstrap copies of one observation stay together
+  during CV. Published scoring cutoffs retain full numeric precision, and design-column
+  aliases preserve their original predictor identity for manual cuts. Each row is
+  explicitly an independent observation; an optional patient ID rejects repeated or
+  missing IDs among analyzed rows. Exact null models return the event rate without
+  spurious score points, and F1 uses its count-based definition. Ridge/elastic-net labels,
+  stale methodology clearing, generated event/lookup metadata, and coefficient plot
+  scales are corrected. Saved ROC plots use curve coordinates and support older states.
+  The analysis remains in `meddecideT` pending a separate release/promotion operation.
+
 - In module 1.0.81.01, `psychopdaROC` analysis 1.0.92 aligns its AUC-PR with
   `enhancedROC`: both integrate the curve interpolated in true- and false-positive
   counts. The former trapezoidal calculation overstated tied-score performance

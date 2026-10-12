@@ -24,6 +24,13 @@ children:
           - type: VariablesListBox
             name: explanatory
             isTarget: true
+      - type: TargetLayoutBox
+        label: Patient ID (Optional Duplicate Check)
+        children:
+          - type: VariablesListBox
+            name: patientID
+            maxItemCount: 1
+            isTarget: true
   - type: CollapseBox
     label: Data Suitability
     collapsed: false

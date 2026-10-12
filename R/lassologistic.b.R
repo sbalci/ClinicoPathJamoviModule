@@ -187,6 +187,13 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # survival.b.R.
                 private$.noticeList <- list()
                 private$.cutFellback <- character(0)
+                # A saved result can be restored before an incomplete selection is run.
+                # Clear dependent content before every early-return path.
+                for (nm in c("notices", "suitabilityReport", "summaryText", "lassoExplanation",
+                             "methodologyNotes", "clinicalGuidance"))
+                    self$results[[nm]]$setContent("")
+                for (nm in c("cv_plot", "coef_plot", "roc_plot"))
+                    self$results[[nm]]$setState(NULL)
 
                 # Every table is rebuilt with addRow() below and jmvcore never checks for
                 # duplicate row keys, so an option toggle that is not in a table's
@@ -224,6 +231,14 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         )
                         private$.renderNotices()
                     }
+                    return()
+                }
+
+                # No event level chosen and none that may be assumed: an unconfigured
+                # analysis, not an error. Show the levels to choose from and stop.
+                coding <- .rocOutcomeCoding(self$data[[self$options$outcome]], self$options$outcomeLevel)
+                if (identical(coding$status, "unset")) {
+                    private$.showEventLevelPending(coding)
                     return()
                 }
 
@@ -284,7 +299,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     ))
                     private$.addNotice(
                         "ERROR", .("Model Fitting Error"),
-                        sprintf(.("LASSO model fitting failed: %s"), e$message)
+                        sprintf(.("Penalized model fitting failed: %s"), e$message)
                     )
                     private$.renderNotices()
                     stop(e)
@@ -301,7 +316,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         .("You are already using the least conservative lambda (Minimum CV Error), so the penalty is not the limiting factor: none of these predictors carries enough signal at this sample size. Add more informative predictors or collect more cases.")
                     private$.addNotice(
                         "STRONG_WARNING", .("No Variables Selected"),
-                        sprintf(.("LASSO selected zero variables at the chosen lambda. %s"), remedy)
+                        sprintf(.("The penalized model retained no informative terms at the chosen lambda. %s"), remedy)
                     )
                 }
 
@@ -415,6 +430,22 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 private$.renderNotices()
             },
 
+            # Pending state: the outcome is chosen but its event level is not, and it is
+            # not a 0/1 numeric whose 1 may be assumed. jamovi greys a continuous
+            # column's LevelSelector, so a numeric 1/2 outcome needs its measure type
+            # changed before a level can be picked; say so.
+            .showEventLevelPending = function(coding) {
+                found <- paste(sprintf("%s (n=%d)", jmvcore::htmlEscape(coding$levels), coding$counts),
+                               collapse = ", ")
+                how <- if (isTRUE(coding$numeric))
+                    .("This numeric outcome is not coded 0/1, so neither value can be assumed to be the event. Set the outcome's measure type to Nominal, then choose the Event Level.")
+                else
+                    .("Choose the Event Level: the outcome level that means the condition is present (for example Malignant). It is never taken from the order of the levels.")
+                self$results$todo$setContent(paste0(
+                    "<div class='alert alert-info'><h4>", .("Choose the event level"), "</h4>",
+                    "<p>", how, "</p><p>", .("Levels found:"), " ", found, "</p></div>"))
+            },
+
             # ══════════════════════════════════════════════════════════════════
             # Data cleaning (adapted from lassocox)
             # ══════════════════════════════════════════════════════════════════
@@ -433,90 +464,44 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # levels = levels(x) keeps unused levels (a bare factor() drops them).
                 drop_na_level <- function(x)
                     if (is.factor(x) && anyNA(levels(x))) factor(x, levels = levels(x), exclude = NA) else x
-                outcome_raw <- drop_na_level(data[[outcome_var]])
                 predictors <- data[explanatory_vars]
                 predictors[] <- lapply(predictors, drop_na_level)
                 # jamovi delivers an Ordinal column as an ORDERED factor. Recorded here
                 # so the coefficient table can say how it was coded (see model.matrix).
                 ordinal_vars <- names(predictors)[vapply(predictors, is.ordered, logical(1))]
 
-                # Determine event coding
-                if (is.factor(outcome_raw) || is.character(outcome_raw)) {
-                    outcome_chr <- as.character(outcome_raw)
-                    # Preserve the variable's declared level ordering for factors
-                    # (mirrors oddsratio) so the default "second level" event class
-                    # matches levels(), not alphabetical order. Character outcomes
-                    # fall back to sorted unique values.
-                    if (is.factor(outcome_raw)) {
-                        observed_levels <- intersect(levels(outcome_raw), unique(outcome_chr[!is.na(outcome_chr)]))
-                    } else {
-                        observed_levels <- sort(unique(outcome_chr[!is.na(outcome_chr)]))
-                    }
-                    if (length(observed_levels) < 2) {
-                        jmvcore::reject(.("Outcome variable must have at least 2 observed values."))
-                    }
-                    outcome_level_opt <- self$options$outcomeLevel
-                    if (is.null(outcome_level_opt) || !nzchar(as.character(outcome_level_opt))) {
-                        event_level <- observed_levels[2]
-                    } else {
-                        event_level <- as.character(outcome_level_opt)
-                        if (!event_level %in% observed_levels) {
-                            jmvcore::reject(sprintf(
-                                .("Specified event level '%1$s' not found in the outcome variable. Observed levels: %2$s."),
-                                event_level, paste(observed_levels, collapse = ", ")
-                            ))
-                        }
-                    }
-                    if (length(observed_levels) > 2) {
-                        private$.addNotice(
-                            "WARNING", .("Non-Binary Outcome"),
-                            sprintf(
-                                .("Outcome has %1$d observed levels; only '%2$s' (event) vs '%3$s' (reference) are modeled. Cases in other levels are excluded."),
-                                length(observed_levels), event_level, setdiff(observed_levels, event_level)[1]
-                            )
+                # Event coding through the shared coder in R/utils.R (as enhancedROC and
+                # psychopdaROC do). The event is never inferred from level order or size:
+                # it used to be the SECOND level in R while jamovi's LevelSelector filled
+                # in the FIRST, so the same data gave inverted odds ratios in the two.
+                # Only a numeric 0/1 outcome defaults (1 = event); .run() has already
+                # stopped with a pending panel when no level was chosen otherwise. The
+                # coder also treats an explicit NA level and "" as missing.
+                coding <- .rocOutcomeCoding(data[[outcome_var]], self$options$outcomeLevel)
+                if (identical(coding$status, "single"))
+                    jmvcore::reject(.("Outcome variable must have at least 2 observed values."))
+                if (identical(coding$status, "invalid"))
+                    jmvcore::reject(sprintf(
+                        .("Specified event level '%1$s' not found in the outcome variable. Observed levels: %2$s."),
+                        coding$positive, paste(coding$levels, collapse = ", ")))
+                if (identical(coding$status, "unset"))
+                    jmvcore::reject(.("Choose the Event Level of the outcome."))
+                observed_levels <- coding$levels
+                event_level <- coding$positive
+                ref_level <- setdiff(observed_levels, event_level)[1]
+                if (length(observed_levels) > 2) {
+                    private$.addNotice(
+                        "WARNING", .("Non-Binary Outcome"),
+                        sprintf(
+                            .("Outcome has %1$d observed levels; only '%2$s' (event) vs '%3$s' (reference) are modeled. Cases in other levels are excluded."),
+                            length(observed_levels), event_level, ref_level
                         )
-                    }
-                    ref_level <- setdiff(observed_levels, event_level)[1]
-                    status <- rep(NA_real_, length(outcome_chr))
-                    status[outcome_chr == event_level] <- 1
-                    status[outcome_chr == ref_level] <- 0
-                } else {
-                    outcome_num <- jmvcore::toNumeric(outcome_raw)
-                    observed_levels <- sort(unique(outcome_num[!is.na(outcome_num)]))
-                    if (length(observed_levels) < 2) {
-                        jmvcore::reject(.("Numeric outcome must have at least 2 observed values."))
-                    }
-                    outcome_level_opt <- self$options$outcomeLevel
-                    if (!is.null(outcome_level_opt) && nzchar(as.character(outcome_level_opt))) {
-                        event_level_num <- suppressWarnings(as.numeric(outcome_level_opt))
-                        if (is.na(event_level_num) || !event_level_num %in% observed_levels) {
-                            jmvcore::reject(sprintf(
-                                .("Specified event level '%1$s' not found in the outcome variable. Observed values: %2$s."),
-                                as.character(outcome_level_opt), paste(observed_levels, collapse = ", ")
-                            ))
-                        }
-                    } else if (all(observed_levels %in% c(0, 1))) {
-                        event_level_num <- 1
-                    } else {
-                        event_level_num <- max(observed_levels)
-                    }
-                    if (length(observed_levels) > 2) {
-                        private$.addNotice(
-                            "WARNING", .("Non-Binary Outcome"),
-                            sprintf(
-                                .("Outcome has %1$d distinct numeric values; only %2$s (event) vs %3$s (reference) are modeled. Other cases are excluded."),
-                                length(observed_levels), as.character(event_level_num),
-                                as.character(setdiff(observed_levels, event_level_num)[1])
-                            )
-                        )
-                    }
-                    ref_level_num <- setdiff(observed_levels, event_level_num)[1]
-                    event_level <- as.character(event_level_num)
-                    ref_level <- as.character(ref_level_num)
-                    status <- rep(NA_real_, length(outcome_num))
-                    status[outcome_num == event_level_num] <- 1
-                    status[outcome_num == ref_level_num] <- 0
+                    )
                 }
+                outcome_chr <- as.character(coding$values)
+                status <- rep(NA_real_, length(outcome_chr))
+                status[outcome_chr == event_level] <- 1
+                status[outcome_chr == ref_level] <- 0
 
                 # Remove constant variables
                 constant_vars <- sapply(predictors, function(x) {
@@ -550,12 +535,32 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # were announced as "excluded because at least one selected variable
                 # was missing", sending the reader off to hunt a sparsely-measured
                 # predictor that does not exist.
-                outcome_na <- is.na(outcome_raw)
+                outcome_na <- is.na(coding$values)
                 n_excl_outcome_na <- sum(outcome_na)
                 n_excl_outcome_lvl <- sum(!outcome_na & is.na(status))
                 n_excl_pred <- sum(!is.na(status) & !complete.cases(predictors))
 
                 status_cc <- status[complete]
+                id_var <- self$options$patientID
+                if (!is.null(id_var)) {
+                    if (id_var %in% c(outcome_var, explanatory_vars))
+                        jmvcore::reject(.("The patient ID must be a separate identifier, not an outcome or predictor."))
+                    ids <- data[[id_var]][complete]
+                    # Test native values: formatting large numeric IDs as text can
+                    # collapse distinct, exactly representable identifiers.
+                    missing_id <- is.na(ids)
+                    if (is.factor(ids) || is.character(ids))
+                        missing_id <- missing_id | trimws(as.character(ids)) == ""
+                    if (any(missing_id))
+                        jmvcore::reject(.("Patient IDs are missing among the complete analysis rows. Supply an ID for every analyzed observation."))
+                    if (anyDuplicated(ids))
+                        jmvcore::reject(.("Repeated patient IDs were found among the analysis rows. This analysis requires independent observations and does not support repeated lesions, visits, or readings. Create a justified patient-level summary or use a model and validation method that account for clustering."))
+                }
+                private$.addNotice("INFO", .("Analysis unit: independent observations"),
+                    if (is.null(id_var))
+                        .("Each analyzed row is treated as one independent observation. Repeated lesions, visits, or readings from the same patient violate this assumption. Supply the optional patient ID to check for repeated patients; this analysis does not model clustering.")
+                    else
+                        .("Patient IDs are unique among the analyzed rows. Fitting, cross-validation, and bootstrap validation assume that these observations are independent; unique IDs alone cannot establish independence."))
                 if (!(length(unique(status_cc)) == 2 && all(unique(status_cc) %in% c(0, 1)))) {
                     jmvcore::reject(.("Outcome is not binary after filtering."))
                 }
@@ -578,6 +583,16 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         mm <- withr::with_options(
                             list(contrasts = c(unordered = "contr.treatment", ordered = "contr.treatment")),
                             model.matrix(~., data = pred_cc))
+                        # Keep provenance before presentation names are made unique.
+                        source_index <- attr(mm, "assign")[-1]
+                        source_names <- names(pred_cc)[source_index]
+                        column_source <- stats::setNames(source_names, colnames(mm)[-1])
+                        column_factor <- vapply(pred_cc[source_names], is.factor, logical(1))
+                        column_level <- vapply(seq_along(source_names), function(i) {
+                            src <- source_names[i]
+                            if (!is.factor(pred_cc[[src]])) return(NA_character_)
+                            levels(pred_cc[[src]])[1 + sum(source_names[seq_len(i)] == src)]
+                        }, character(1))
                         mm[, -1, drop = FALSE] # remove intercept
                     },
                     error = function(e) {
@@ -596,39 +611,34 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # silently falling back to the sample median. Shared with the eight
                 # other analyses that build a design matrix the same way; see
                 # .stripBackticks in R/utils.R for the full rationale.
+                has_aliases <- anyDuplicated(gsub("`", "", colnames(X), fixed = TRUE)) > 0
                 X <- .stripBackticks(X)
+                names(column_source) <- names(column_factor) <- names(column_level) <- colnames(X)
 
                 # Remove degenerate columns
                 col_vars <- apply(X, 2, var, na.rm = TRUE)
                 good_cols <- !is.na(col_vars) & col_vars > 0
                 if (sum(good_cols) < 2) jmvcore::reject(.("Too few non-degenerate predictor columns."))
                 X <- X[, good_cols, drop = FALSE]
+                column_source <- column_source[good_cols]
+                column_factor <- column_factor[good_cols]
+                column_level <- column_level[good_cols]
 
-                # Optional standardization.
-                #
-                # Keep the centre/scale so downstream output can be expressed on the
-                # ORIGINAL measurement scale. This code scales the matrix itself (sample
-                # SD, n - 1) and passes standardize=FALSE, so glmnet returns z-scale
-                # coefficients and beta_original = beta_z / sd recovers the per-unit
-                # coefficient. It is close to, not identical with, glmnet's own
-                # standardize=TRUE, which scales by the 1/n SD inside each CV fold.
+                # Keep raw measurements. glmnet learns its 1/n scaling separately
+                # in every CV training fold and bootstrap fit, and returns raw-unit
+                # coefficients. These identity transforms retain the helper contract.
                 X_center <- rep(0, ncol(X))
                 X_sd <- rep(1, ncol(X))
                 names(X_center) <- names(X_sd) <- colnames(X)
-                if (self$options$standardize) {
-                    X <- scale(X)
-                    ctr <- attr(X, "scaled:center")
-                    scl <- attr(X, "scaled:scale")
-                    if (!is.null(ctr)) X_center[names(ctr)] <- ctr
-                    if (!is.null(scl)) X_sd[names(scl)] <- scl
-                    # a zero sd would make the back-transform infinite
-                    X_sd[!is.finite(X_sd) | X_sd == 0] <- 1
-                }
 
                 list(
                     X = X,
                     X_center = X_center,
                     X_sd = X_sd,
+                    column_source = column_source,
+                    column_factor = column_factor,
+                    column_level = column_level,
+                    has_aliases = has_aliases,
                     y = status_cc,
                     n = n_complete,
                     n_total = nrow(self$data),
@@ -663,7 +673,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 if (epv >= 10) {
                     checks$epv <- list(
                         status = "green", label = .("Events per variable"),
-                        detail = sprintf(.("EPV = %.1f (>=10: adequate)"), epv)
+                        detail = sprintf(.("EPV = %.1f (meets the EPV >= 10 convention)"), epv)
                     )
                 } else if (epv >= 5) {
                     checks$epv <- list(
@@ -681,7 +691,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 if (data$n >= 100) {
                     checks$n <- list(
                         status = "green", label = .("Sample size"),
-                        detail = sprintf(.("N = %d (>=100: adequate)"), data$n)
+                        detail = sprintf(.("N = %d (meets the N >= 100 convention)"), data$n)
                     )
                 } else if (data$n >= 50) {
                     checks$n <- list(
@@ -762,7 +772,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 } else if (n_yellow > 0) {
                     overall <- paste0("<span style='color:#cc8800;font-weight:bold;'>", .("Acceptable with caveats"), "</span>")
                 } else {
-                    overall <- paste0("<span style='color:green;font-weight:bold;'>", .("Data suitable for LASSO logistic"), "</span>")
+                    overall <- paste0("<span style='color:green;font-weight:bold;'>", .("No concerns flagged by these checks"), "</span>")
                 }
 
                 rows <- sapply(checks, function(x) {
@@ -815,16 +825,43 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             # Stratified fold ids: events and non-events are each dealt round the folds, so
             # every fold holds events. Shared by the main fit and the bootstrap replicates so
             # the model-selection process being validated is the one actually validated.
-            # NULL on failure lets cv.glmnet fall back to its own random folds.
-            .stratifiedFolds = function(y, nfolds) {
-                tryCatch({
-                    pos_idx <- which(y == 1)
-                    neg_idx <- which(y == 0)
-                    foldid <- integer(length(y))
-                    foldid[pos_idx] <- sample(rep(seq_len(nfolds), length.out = length(pos_idx)))
-                    foldid[neg_idx] <- sample(rep(seq_len(nfolds), length.out = length(neg_idx)))
-                    foldid
-                }, error = function(e) NULL)
+            # Bootstrap copies of an observation stay together: the same source
+            # case must never appear in a training and held-out fold simultaneously.
+            .stratifiedFolds = function(y, nfolds, groups = seq_along(y)) {
+                first <- !duplicated(groups)
+                group_y <- y[first]
+                if (nfolds < 3 || min(sum(group_y == 1), sum(group_y == 0)) < nfolds)
+                    stop("Too few independent cases per class for stratified cross-validation.")
+                group_fold <- integer(length(group_y))
+                for (cls in c(1, 0)) {
+                    ii <- which(group_y == cls)
+                    group_fold[ii] <- sample(rep(seq_len(nfolds), length.out = length(ii)))
+                }
+                group_fold[match(groups, groups[first])]
+            },
+
+            .cvFit = function(X, y, alpha, foldid) {
+                args <- list(x = X, y = y, family = "binomial", alpha = alpha,
+                             standardize = isTRUE(self$options$standardize),
+                             type.measure = "deviance", foldid = foldid)
+                # At an exact null optimum the automatic lambda maximum is zero,
+                # and glmnet's path interpolation fails. All full-data slopes are
+                # zero for every positive penalty; a finite grid permits CV and the
+                # ordinary intercept-only fit without inventing a coefficient.
+                centered <- sweep(X, 2, colMeans(X))
+                sd_pop <- sqrt(colMeans(centered^2))
+                sd_pop[sd_pop == 0] <- 1
+                gradient <- colMeans(sweep(centered, 2, sd_pop, "/") * (y - mean(y)))
+                null_path <- all(abs(gradient) <= 32 * .Machine$double.eps)
+                if (null_path) args$lambda <- exp(seq(log(1), log(1e-6), length.out = 100))
+                ans <- .quietly(do.call(glmnet::cv.glmnet, args))
+                attr(ans, "null_path") <- null_path
+                attr(ans$glmnet.fit, "null_path") <- null_path
+                if (null_path) {
+                    attr(ans, "null_intercept") <- stats::qlogis(mean(y))
+                    attr(ans$glmnet.fit, "null_intercept") <- stats::qlogis(mean(y))
+                }
+                ans
             },
 
             .fitLasso = function(data) {
@@ -860,22 +897,10 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # Stratified CV folds for balanced sampling
                 foldid <- private$.stratifiedFolds(data$y, nfolds)
 
-                # Fit CV model
-                cv_args <- list(
-                    x = data$X,
-                    y = data$y,
-                    family = "binomial",
-                    alpha = alpha_val,
-                    standardize = FALSE, # already standardized if requested
-                    type.measure = "deviance"
-                )
-                if (!is.null(foldid)) {
-                    cv_args$foldid <- foldid
-                } else {
-                    cv_args$nfolds <- nfolds
-                }
-
-                cv_fit <- .quietly(do.call(glmnet::cv.glmnet, cv_args))
+                cv_fit <- private$.cvFit(data$X, data$y, alpha_val, foldid)
+                if (isTRUE(attr(cv_fit, "null_path")))
+                    private$.addNotice("INFO", .("Intercept-only optimum"),
+                        .("All predictor gradients are zero at the intercept-only fit. A fixed positive lambda grid (1 to 0.000001) was used because the automatic path degenerates at zero. The fitted model assigns the overall event rate to every observation and has no discrimination."))
 
                 # Select lambda
                 lambda_optimal <- switch(self$options$lambda,
@@ -892,6 +917,10 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Extract coefficients
                 coefs <- as.matrix(coef(final_model, s = lambda_optimal))
+                if (isTRUE(attr(final_model, "null_path"))) {
+                    coefs[-1, 1] <- 0
+                    coefs[1, 1] <- attr(final_model, "null_intercept")
+                }
                 intercept <- coefs[1, 1]
                 beta <- coefs[-1, 1]
                 # glmnet does not always store an exact zero: coordinate descent can
@@ -907,8 +936,6 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # cutoff would erase it. |beta| * sd(column) is the per-standard-
                 # deviation effect, which is 1e-16 for a denormal and O(0.1) for any
                 # real term regardless of the units the predictor was recorded in.
-                # (Under standardize = TRUE the columns already have sd 1, so this
-                # reduces to |beta|.)
                 #
                 # RIDGE IS EXEMPT. The tolerance exists to recognise the zero that
                 # L1 soft-thresholding meant to write; ridge (alpha = 0) never sets
@@ -1051,16 +1078,16 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             },
             .populateCoefficients = function(fit, data = NULL) {
                 table <- self$results$coefficients
-                # Intercept on the ORIGINAL scale. glmnet fitted logit = b0 + sum(beta_z * z)
-                # with z = (x - centre) / sd, so b0_original = b0 - sum(beta_z * centre / sd).
-                # Only the selected (non-zeroed) terms enter, matching the coefficients shown.
+                table$setNote("source_names", private$.sourceNameNote(data))
+                # glmnet returns raw-unit coefficients; identity transforms are retained
+                # for the shared coefficient/scoring helper contract.
                 ctr <- if (!is.null(data) && !is.null(data$X_center)) data$X_center else NULL
                 sdv <- if (!is.null(data) && !is.null(data$X_sd)) data$X_sd else NULL
                 b0 <- fit$intercept
                 ord <- if (!is.null(data)) data$ordinal_vars else character(0)
                 table$setNote("ordinal_note", if (length(ord) > 0) sprintf(
                     .("Ordinal predictor(s) %s are coded with one indicator per level, each compared with that predictor's lowest level; they are not modelled as a linear trend."),
-                    jmvcore::htmlEscape(paste(ord, collapse = ", "))) else NULL)
+                    .rocLabel(paste(ord, collapse = ", "))) else NULL)
                 if (length(fit$selected) > 0 && !is.null(ctr) && !is.null(sdv)) {
                     sel <- fit$selected
                     b0 <- b0 - sum(fit$selected_coefs * ctr[sel] / sdv[sel])
@@ -1082,20 +1109,15 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     return()
                 }
 
-                # Report on the ORIGINAL measurement scale.
-                #
-                # The design matrix was standardised here and glmnet was called with
-                # standardize=FALSE, so selected_coefs are per 1 SD. Dividing by the
-                # column SD recovers exactly what glmnet(standardize=TRUE) returns -
-                # the per-unit coefficient. This matters most for a 0/1 dummy from a
-                # factor: with a balanced marker sd is about 0.5, so the per-SD odds
-                # ratio is roughly the SQUARE ROOT of the model's actual
-                # present-vs-absent odds ratio (1.81 printed where the model implies
-                # 3.25). "Per 1 SD of p53 status" is not a quantity a pathologist can
-                # act on. Importance keeps the per-SD magnitude, which is the
-                # comparable-across-predictors quantity.
+                # Raw-unit coefficients and odds ratios; importance is per sample SD.
                 sds <- if (!is.null(data) && !is.null(data$X_sd)) data$X_sd else NULL
-                max_abs <- max(abs(fit$selected_coefs))
+                # Importance is the per-SD magnitude whatever `standardize` says: |beta| x
+                # SD of the FITTED column (1 when standardized). Without standardization it
+                # used to be |per-unit beta| / max, which ranked a 0/1 marker above a Ki-67
+                # (%) with four times its per-SD effect purely because of the units.
+                fit_sd <- if (!is.null(data)) private$.fitColSDs(data$X)[fit$selected] else 1
+                per_sd <- abs(fit$selected_coefs) * fit_sd
+                max_abs <- max(per_sd)
                 for (i in seq_along(fit$selected)) {
                     coef_sd <- fit$selected_coefs[i]
                     sd_i <- if (!is.null(sds) && fit$selected[i] %in% names(sds))
@@ -1103,7 +1125,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     if (!is.finite(sd_i) || sd_i == 0) sd_i <- 1
                     coef_val <- coef_sd / sd_i
                     or_val <- exp(coef_val)
-                    importance <- abs(coef_sd) / max_abs
+                    importance <- if (max_abs > 0) unname(per_sd[i]) / max_abs else NA
 
                     table$addRow(rowKey = i, values = list(
                         variable = fit$selected[i],
@@ -1125,9 +1147,10 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # Brier only, no estimates.
                 table$setNote("ci_note",
                     .("LASSO coefficients are penalized (shrunken) and have no valid standard confidence intervals; they are omitted rather than shown as blanks. Bootstrap validation estimates optimism-corrected performance (AUC, Brier score, calibration slope), not coefficient uncertainty."))
-                if (isTRUE(self$options$standardize)) {
-                    table$setNote("scale_note", .("Predictors were standardized before fitting so that the penalty treats them comparably, but the Coefficient and Odds Ratio columns are reported on the ORIGINAL measurement scale (per 1 unit of a continuous predictor, or present vs absent for a binary one). The Importance column is the per-standard-deviation magnitude, which is what can be compared across predictors with different units. Odds ratios remain penalized (shrunk toward 1)."))
-                }
+                table$setNote("scale_note", if (isTRUE(self$options$standardize))
+                    .("Predictors were standardized before fitting so that the penalty treats them comparably, but the Coefficient and Odds Ratio columns are reported on the ORIGINAL measurement scale (per 1 unit of a continuous predictor, or present vs absent for a binary one). The Importance column is the per-standard-deviation magnitude, which is what can be compared across predictors with different units. Odds ratios remain penalized (shrunk toward 1).")
+                else
+                    .("Predictors were NOT standardized, so the penalty acts on each coefficient in that predictor's own units and a predictor recorded on a large scale is penalized less. Coefficient and Odds Ratio are per 1 unit; the Importance column is the per-standard-deviation magnitude, so it can still be compared across predictors. Odds ratios remain penalized (shrunk toward 1)."))
             },
             .populatePerformance = function(data, fit) {
                 table <- self$results$performance
@@ -1181,9 +1204,13 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     },
                     error = function(e) {}
                 )
-                # A constant predicted probability is also degenerate even when
-                # pROC happens to return a finite "best" threshold.
-                if (length(unique(round(fit$probabilities, 12))) < 2) degenerate <- TRUE
+                # Every case has the same predicted probability (nothing selected). That
+                # is degenerate even when pROC returns a finite "best" threshold, and
+                # DeLong's variance is then exactly 0: the interval printed as "0.500
+                # (0.500-0.500)", a zero-width interval around a model that does not
+                # discriminate, while the AUC = 1 end already said "CI not estimable".
+                constant_score <- length(unique(round(fit$probabilities, 12))) < 2
+                if (constant_score) degenerate <- TRUE
 
                 # The other degenerate end. An apparent AUC of 1.000 means the
                 # predictors separate the two classes completely ON THESE ROWS; it
@@ -1220,8 +1247,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # No positive predictions: precision is undefined, not a perfect 0.
                 precision <- if (tp + fp > 0) tp / (tp + fp) else NA_real_
                 recall <- sensitivity
-                f1 <- if (!is.na(precision) && precision + recall > 0)
-                    2 * precision * recall / (precision + recall) else NA_real_
+                f1 <- if (2 * tp + fp + fn > 0) 2 * tp / (2 * tp + fp + fn) else NA_real_
 
                 # Keyed by the rows .init() laid down (see .fixedRowTables()).
                 rows <- list(
@@ -1230,7 +1256,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         # 1.000. Printing that reads as an extraordinarily precise
                         # estimate when it is really the interval collapsing.
                         if (is.na(auc_val)) .("Not available")
-                        else if (perfect) sprintf(.("%.3f (CI not estimable)"), auc_val)
+                        else if (perfect || constant_score) sprintf(.("%.3f (CI not estimable)"), auc_val)
                         else sprintf("%.3f (%.3f-%.3f)", auc_val, auc_ci_lower, auc_ci_upper),
                         if (is.na(auc_val)) .("AUC could not be computed")
                         else if (perfect) .("Perfect in-sample separation - see note")
@@ -1240,7 +1266,9 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         # "Poor" graded 0.68 and 0.41 identically. An AUC below 0.5
                         # is not merely weak: the model ranks cases the wrong way
                         # round, and the reader must be told which of the two it is.
-                        else if (auc_shown >= 0.5) .("Poor")
+                        # 0.500 itself is the book's "no discrimination", not "poor".
+                        else if (auc_shown > 0.5) .("Poor")
+                        else if (auc_shown == 0.5) .("No discrimination")
                         else .("Worse than chance - ranking is inverted")
                     ),
                     # .fmtNum, not sprintf: precision and f1 are NA_real_ when the
@@ -1289,15 +1317,24 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # rows: in simulation (n = 100) the interval covered the model's
                 # out-of-sample AUC in 83% of datasets, and with no signal at all it
                 # excluded 0.5 in 8.5% of them. Shown only when there is an interval to
-                # qualify (a constant score's 0.5-0.5 is exact; AUC 1 has none).
-                constant_score <- length(unique(round(fit$probabilities, 12))) < 2
+                # qualify (a constant score and AUC 1 have none; both say so in the cell).
                 table$setNote("auc_ci_note",
                     if (!is.na(auc_val) && !perfect && !constant_score && !is.na(auc_ci_lower))
                         .("The interval beside the apparent AUC is DeLong's 95% CI computed on these fitted probabilities as if they were a fixed, pre-specified marker. It does not account for fitting the coefficients or for selecting the variables and lambda on the same patients, so it is centred on an optimistic estimate and can under-cover the model's discrimination in new patients. Enable Bootstrap Internal Validation for an optimism-corrected AUC.")
                     else NULL)
 
                 table$setNote("auc_band_note", if (!is.na(auc_val) && !perfect)
-                    .("AUC bands follow the convention of Hosmer, Lemeshow and Sturdivant (2013): below 0.7 poor, 0.7 to 0.8 acceptable, 0.8 to 0.9 excellent, 0.9 and above outstanding. They are graded on the AUC as displayed.")
+                    .("AUC bands follow the convention of Hosmer, Lemeshow and Sturdivant (2013, p. 177): 0.5 no discrimination, above 0.5 and below 0.7 poor, 0.7 to 0.8 acceptable, 0.8 to 0.9 excellent, 0.9 and above outstanding. They are graded on the AUC as displayed.")
+                    else NULL)
+
+                # The probabilities themselves are penalized. Shrinkage pulls every
+                # prediction toward the overall event rate; in simulation (n = 150, 3 of 8
+                # real predictors) the 1SE model's external calibration slope was 2.2 -
+                # a 70% risk reads as about 35% - against 1.2 for Minimum CV Error. They
+                # rank patients correctly but are not absolute risks until the
+                # calibration slope says so, and the saved column carries no caveat.
+                table$setNote("prob_note", if (!constant_score)
+                    .("Predicted probabilities, including the saved Predicted Probability column, come from the penalized model: the penalty pulls them toward the overall event rate, most strongly with the 1SE rule, so high risks tend to be under-stated and low risks over-stated. They rank patients by the model, but check the corrected calibration slope (Bootstrap Internal Validation) before reading them as absolute risks.")
                     else NULL)
 
                 table$setNote(
@@ -1312,8 +1349,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # Assert constancy only when it is true: pROC can return a non-finite
                 # "best" threshold for a heavily tied but genuinely discriminating
                 # score, and the note claims every case got the same probability.
-                constant_probs <- length(unique(round(fit$probabilities, 12))) < 2
-                if (degenerate && constant_probs) {
+                if (degenerate && constant_score) {
                     table$setNote(
                         "degenerate_note",
                         .("This model assigns every case the same predicted probability, so it does not discriminate at all and no meaningful threshold exists. A default of 0.500 was used, which classifies every case into one group: the resulting sensitivity of 1.000 (or specificity of 1.000, depending on which side of 0.500 that constant probability falls) and the F1 score are artefacts of that, not evidence of a sensitive or specific test. Only the AUC of 0.500 is informative here.")
@@ -1370,7 +1406,8 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             auc_val
                         )
                     )
-                } else if (!is.na(auc_val) && auc_shown < 0.7) {
+                } else if (!is.na(auc_val) && !constant_score && auc_shown < 0.7) {
+                    # A constant score already carries "Model Does Not Discriminate".
                     private$.addNotice(
                         "STRONG_WARNING", .("Poor Discrimination"),
                         sprintf(
@@ -1380,13 +1417,13 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     )
                 }
 
-                # Precision and F1 are NA (blank cells above), not zero, when the
+                # Precision is NA (a blank cell), not zero, when the
                 # model makes no positive predictions. Say so once rather than
                 # leaving two unexplained empty cells.
                 if (is.na(precision)) {
                     table$setNote(
                         "precision_undefined",
-                        .("Precision (PPV) and the F1 score are left blank because this model predicts no positive cases at the chosen threshold, which makes both quantities undefined rather than zero.")
+                        .("Precision (PPV) is left blank because this model predicts no positive cases at the chosen threshold. F1 is computed as 2TP/(2TP+FP+FN), which is zero when events are present but none are predicted.")
                     )
                 }
             },
@@ -1418,16 +1455,21 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 out <- numeric(length(variables))
                 for (i in seq_along(variables)) {
                     var_col <- variables[i]
-                    if (!(var_col %in% colnames(data$X))) { out[i] <- coefs[i]; next }
+                    # Never reached (selected terms are columns of X); no contrast, no contribution.
+                    if (!(var_col %in% colnames(data$X))) { out[i] <- 0; next }
                     v <- data$X[, var_col]; v <- v[!is.na(v)]
                     ci <- cuts[[i]]
                     delta <- if (isTRUE(ci$binary)) {
                         uv <- unique(v); max(uv) - min(uv)
                     } else {
                         hi <- mean(v[v > ci$cut]); lo <- mean(v[v <= ci$cut])
-                        if (is.finite(hi) && is.finite(lo)) hi - lo else 1
+                        hi - lo
                     }
-                    if (!is.finite(delta) || delta == 0) delta <- 1
+                    # .scoreCuts() guarantees cases on both sides of every cut, so this is
+                    # never reached. It used to fall back to a contrast of 1 (one SD): a
+                    # manual cut above every value then printed points and an odds ratio
+                    # for a criterion nobody meets. No contrast means no contribution.
+                    if (!is.finite(delta)) delta <- 0
                     out[i] <- coefs[i] * delta
                 }
                 out
@@ -1520,24 +1562,15 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             # ── Format a metric into a `type: text` cell ────────────────────
             # sprintf("%.3f", NA_real_) returns the literal string "NA", which in a
             # text column reads as a computation failure rather than the blank cell
-            # jamovi renders for a genuinely undefined quantity. Precision and F1 are
-            # deliberately NA when the model makes no positive predictions, so every
+            # jamovi renders for a genuinely undefined quantity. Precision is
+            # undefined when the model makes no positive predictions, so every
             # metric goes through this.
             .fmtNum = function(x, digits = 3) {
                 if (length(x) != 1 || !is.finite(x)) return("")
                 sprintf(paste0("%.", digits, "f"), x)
             },
 
-            # ── The scale factor of the per-SD zero rule, in ONE place ─────
-            #
-            # |beta| * sd(column of the FITTED matrix) is the per-standard-
-            # deviation effect (see ZERO_TOL in .fitLasso). It must come from the
-            # matrix the model was fitted on, never from data$X_sd: X_sd holds the
-            # ORIGINAL SDs, and under standardize = TRUE data$X is already scaled,
-            # so the two are INVERSES of each other and the relationship flips
-            # with the option. .populateVariableImportance used X_sd and so could
-            # call a term non-zero that the coefficient table called zero, and
-            # vice versa. Both sites route through here so they cannot drift again.
+            # Per-sample-SD magnitudes make the zero rule invariant to measurement units.
             .fitColSDs = function(fit_X) {
                 sds <- apply(fit_X, 2, stats::sd)
                 sds[!is.finite(sds) | sds == 0] <- 1
@@ -1559,9 +1592,13 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             # again, so the threshold cannot differ between the two scorings.
             .probsFrom = function(fit_obj, lambda_s, fit_X, alpha_val, zero_tol = 1e-10) {
                 cf <- as.matrix(stats::coef(fit_obj, s = lambda_s))
+                if (isTRUE(attr(fit_obj, "null_path"))) {
+                    cf[-1, 1] <- 0
+                    cf[1, 1] <- attr(fit_obj, "null_intercept")
+                }
                 b <- cf[-1, 1]
                 keep <- is.finite(b)
-                if (alpha_val > 0) {
+                if (alpha_val > 0 || isTRUE(attr(fit_obj, "null_path"))) {
                     # Threshold against the matrix the model was FITTED on. Deriving
                     # it from the matrix being SCORED made the two bootstrap passes
                     # zero different coefficients of the SAME model (column SDs
@@ -1641,10 +1678,24 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             # Returns a named list: cut (on the z-scale of data$X), binary flag, and
             # the cut expressed on the original measurement scale for display.
             # Manual cuts are entered on the ORIGINAL scale and converted here.
+            .sourceNameNote = function(data) {
+                if (is.null(data) || !isTRUE(data$has_aliases)) return(NULL)
+                mapping <- vapply(names(data$column_source), function(nm) {
+                    if (isTRUE(data$column_factor[[nm]]))
+                        sprintf(.("%1$s denotes %2$s = %3$s"), nm,
+                                data$column_source[[nm]], data$column_level[[nm]])
+                    else sprintf(.("%1$s denotes numeric predictor %2$s"), nm,
+                                 data$column_source[[nm]])
+                }, character(1))
+                sprintf(.("Model-term names overlap, so unique labels are used: %s. Manual cut points use the original predictor names."),
+                        paste(mapping, collapse = "; "))
+            },
+
             .scoreCuts = function(data, variables) {
                 method <- private$.opt("scoreCutMethod", "median")
                 manual <- private$.parseCutPoints(private$.opt("scoreCutPoints", ""))
                 fellback <- character(0)
+                adjusted <- character(0)
 
                 out <- lapply(variables, function(var_col) {
                     if (!(var_col %in% colnames(data$X)))
@@ -1668,16 +1719,17 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         # threshold to apply to a new patient, which is exactly what
                         # .scoreCriteria exists to prevent. Carry the scoring value on
                         # the ORIGINAL scale so the criterion can state it.
-                        dummy <- !(var_col %in% data$explanatory_vars)
+                        dummy <- isTRUE(data$column_factor[[var_col]])
                         present_raw <- max(v) * sdv + ctr
                         return(list(binary = TRUE, dummy = dummy, cut = NA_real_,
                                     cut_raw = present_raw))
                     }
 
                     cut_z <- NA_real_
-                    if (identical(method, "manual") && var_col %in% names(manual)) {
+                    source_name <- data$column_source[[var_col]]
+                    if (identical(method, "manual") && source_name %in% names(manual)) {
                         # entered on the original scale -> convert to the z-scale
-                        cut_z <- (manual[[var_col]] - ctr) / sdv
+                        cut_z <- (manual[[source_name]] - ctr) / sdv
                     } else {
                         if (identical(method, "manual")) fellback <<- c(fellback, var_col)
                         cut_z <- switch(
@@ -1689,10 +1741,28 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         )
                     }
                     if (!is.finite(cut_z)) cut_z <- stats::median(v)
+                    # A cut with no case on one side separates nobody: a manual cut
+                    # outside the observed range, or a median/quartile that equals the
+                    # maximum because of ties at the top. Points derived from it rest
+                    # on no contrast. Move it inside the data - the median, or just
+                    # below the highest value when ties make the median the maximum
+                    # (>= 3 distinct values here, so that always splits) - and record it.
+                    splits <- function(cz) any(v > cz) && any(v <= cz)
+                    if (!splits(cut_z)) {
+                        # name the cut that failed, so a unit slip (200 for 20%) is visible
+                        adjusted <<- c(adjusted, sprintf("%s at %s", var_col,
+                            base::format(signif(cut_z * sdv + ctr, 6), trim = TRUE)))
+                        cut_z <- stats::median(v)
+                        if (!splits(cut_z)) {
+                            u <- sort(unique(v))
+                            cut_z <- u[length(u) - 1L]
+                        }
+                    }
                     list(binary = FALSE, cut = cut_z, cut_raw = cut_z * sdv + ctr)
                 })
                 names(out) <- variables
                 attr(out, "fellback") <- fellback
+                attr(out, "adjusted") <- adjusted
                 out
             },
 
@@ -1733,9 +1803,9 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         # NUMERIC needs the value that earns the points printed,
                         # because that is the rule .computeTotalScores applies.
                         if (isTRUE(ci$dummy) || !is.finite(ci$cut_raw)) return(.("present"))
-                        return(sprintf(.("= %s"), base::format(round(ci$cut_raw, 3), trim = TRUE)))
+                        return(sprintf(.("= %s"), sprintf("%.17g", ci$cut_raw)))
                     }
-                    sprintf(.("> %s"), base::format(round(ci$cut_raw, 3), trim = TRUE))
+                    sprintf(.("> %s"), sprintf("%.17g", ci$cut_raw))
                 }, character(1), USE.NAMES = FALSE)
             },
 
@@ -1793,8 +1863,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # table while the identical row of the Classification Performance
                 # table directly above it was blank for the same condition.
                 prec <- if (tp + fp > 0) tp / (tp + fp) else NA_real_
-                f1 <- if (!is.na(prec) && prec + sens > 0)
-                    2 * prec * sens / (prec + sens) else NA_real_
+                f1 <- if (2 * tp + fp + fn > 0) 2 * tp / (2 * tp + fp + fn) else NA_real_
 
                 auc_val <- NA
                 tryCatch(
@@ -1820,6 +1889,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             # ── Main scoring system population ──────────────────────────────
             .populateScoringSystem = function(data, fit) {
                 table <- self$results$scoringTable
+                table$setNote("source_names", private$.sourceNameNote(data))
                 perf_table <- self$results$scoringPerformance
 
                 # Nothing to score. Returning silently left up to four VISIBLE and
@@ -1926,20 +1996,25 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 }))
                 table$setNote("promoted", if (length(promo)) sprintf(
                     .("Raised from 0 to 1 point (of the predictor's sign) so that every selected predictor counts: %s. Their weight is overstated relative to the other predictors."),
-                    jmvcore::htmlEscape(paste(promo, collapse = "; "))) else NULL)
+                    .rocLabel(paste(promo, collapse = "; "))) else NULL)
                 fellback <- attr(cuts, "fellback")
                 if (identical(private$.opt("scoreCutMethod", "median"), "manual") &&
                     !is.null(fellback) && length(fellback) > 0) {
-                    # htmlEscape: setNote honours a small HTML allow-list, so a column
+                    # .rocLabel: setNote honours a small HTML allow-list, so a column
                     # literally named "<b>Ki-67" turned the rest of the footnote bold
                     # and dropped its own name out of it - from the one note whose
-                    # whole job is to say WHICH predictor fell back.
+                    # whole job is to say WHICH predictor fell back. (htmlEscape is no
+                    # remedy: the client shows its entities literally, so "A&B" would read as its entity.)
                     table$setNote("manual_fallback", sprintf(
                         .("No manual cut point was supplied for: %s. These fell back to the sample median. Enter them as 'variable=value' pairs (for example 'ki67=20, age=65') to use established clinical thresholds."),
-                        jmvcore::htmlEscape(paste(fellback, collapse = ", "))))
+                        .rocLabel(paste(fellback, collapse = ", "))))
                 }
+                adj <- attr(cuts, "adjusted")
+                table$setNote("cut_adjusted", if (length(adj)) sprintf(
+                    .("The cut point for %s left no case on one side (nobody above it, or everybody), so it could separate no one and its points would rest on no contrast. It was moved to the sample median, or to just below the highest value when ties make the median the maximum. The criterion column shows the cut actually applied."),
+                    .rocLabel(paste(adj, collapse = ", "))) else NULL)
                 cut_label <- private$.scoreCutLabel()
-                table$setNote("criterion_note", sprintf(.("Award a factor's points when the patient meets its criterion. Continuous predictors are cut at %s. The Odds Ratio column is the penalized odds ratio for MEETING that criterion (present vs absent, or above vs below the cut), which is the contrast the points represent - so points and odds ratios are on the same footing here. A cut derived from this dataset (median, mean, tertile or quartile) is not an externally established clinical threshold and will differ in another cohort; supplying manual cut points from the literature is what makes a score portable. The score has not been validated outside these data."), cut_label))
+                table$setNote("criterion_note", sprintf(.("Award a factor's points when the patient meets its criterion. Continuous predictors are cut at %s. The Odds Ratio column is the penalized odds ratio for MEETING that criterion (present vs absent, or above vs below the cut), which is the contrast the points represent - so points and odds ratios are on the same footing here. A cut derived from this dataset (median, mean, tertile or quartile) is not an externally established clinical threshold and will differ in another cohort; manual cut points fix the scoring thresholds but do not establish transportability. The score has not been validated outside these data."), cut_label))
 
                 # A points system is only useful if a clinician can add it up at the
                 # bedside. Smallest-unit divides by the SMALLEST contribution, so one
@@ -1994,7 +2069,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 perf_table$setNote(
                     "dichotomization",
-                    sprintf(.("Continuous predictors are scored by dichotomizing at %s: the full point block is awarded above the cut and nothing below it. The performance shown here reflects this simplified integer point system and may differ from the continuous LASSO model in the Classification Performance table."), cut_label)
+                    sprintf(.("Continuous predictors are scored by dichotomizing at %s: the full point block is awarded above the cut and nothing below it. The performance shown here reflects this simplified integer point system and may differ from the continuous penalized model in the Classification Performance table."), cut_label)
                 )
                 # The model's own table is labelled "AUC (apparent)" and carries an
                 # optimism caveat; the SCORE's table said only "Score AUC" while
@@ -2140,7 +2215,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 }
                 lookup_table$setNote(
                     "smallcell_note",
-                    .("Predicted probabilities are in-sample empirical event rates; scores based on few cases (small N) are unstable and can read as 0% or 100%. Validate the score-to-probability mapping on an independent cohort before clinical use.")
+                    .("Observed Event Rate is the share of cases with each total score that had the event, in this dataset (events / N): an in-sample proportion, not a model prediction, so it need not rise with the score, and scores based on few cases are unstable and can read as 0% or 100%. Validate the score-to-risk mapping on an independent cohort before clinical use.")
                 )
             },
 
@@ -2196,19 +2271,11 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                             # Fit on bootstrap with the SAME fold rule as the main fit:
                             # stratified, capped at the resample's minority class.
-                            nfolds_boot <- min(fit$nfolds, length(unique(idx)) - 1,
-                                               sum(y_boot == 1), sum(y_boot == 0))
-                            nfolds_boot <- max(nfolds_boot, 3)
-                            foldid_boot <- private$.stratifiedFolds(y_boot, nfolds_boot)
-
-                            cv_boot_args <- list(
-                                x = X_boot, y = y_boot,
-                                family = "binomial", alpha = alpha_val,
-                                standardize = FALSE, type.measure = "deviance"
-                            )
-                            if (!is.null(foldid_boot)) cv_boot_args$foldid <- foldid_boot
-                            else cv_boot_args$nfolds <- nfolds_boot
-                            cv_boot <- .quietly(do.call(glmnet::cv.glmnet, cv_boot_args))
+                            nfolds_boot <- min(fit$nfolds,
+                                length(unique(idx[y_boot == 1])), length(unique(idx[y_boot == 0])))
+                            if (nfolds_boot < 3) next
+                            foldid_boot <- private$.stratifiedFolds(y_boot, nfolds_boot, groups = idx)
+                            cv_boot <- private$.cvFit(X_boot, y_boot, alpha_val, foldid_boot)
                             lambda_boot <- switch(self$options$lambda,
                                 "lambda.min" = cv_boot$lambda.min,
                                 "lambda.1se" = cv_boot$lambda.1se,
@@ -2250,6 +2317,15 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 mean_optimism_auc <- safe_mean(optimism_auc)
                 mean_optimism_brier <- safe_mean(optimism_brier)
                 mean_optimism_slope <- safe_mean(optimism_slope)
+                # A constant final model has no linear predictor, so no apparent slope.
+                # Its replicates that did select terms still produced an optimism, which
+                # sat in the row beside two blank cells with nothing to correct.
+                if (is.na(apparent_slope)) mean_optimism_slope <- NA_real_
+                table$setNote("slope_na", if (is.na(apparent_slope))
+                    .("The calibration slope is not estimable: every case received the same predicted probability, so there is no linear predictor to calibrate.")
+                    else if (is.na(mean_optimism_slope))
+                    .("No bootstrap replicate produced a calibration slope (each replicate model gave every case the same probability), so the apparent slope could not be corrected.")
+                    else NULL)
                 corrected_auc <- apparent_auc - mean_optimism_auc
                 corrected_brier <- apparent_brier - mean_optimism_brier
                 corrected_slope <- apparent_slope - mean_optimism_slope
@@ -2312,9 +2388,13 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     )
                 }
 
+                # Both directions. The note used to explain only a slope below 1, and its
+                # "above 1 is expected for penalized models" read as reassurance for a
+                # CORRECTED slope near 2 - which is what the 1SE rule typically produces:
+                # in simulation the corrected slope (2.07) tracked the external one (2.22).
                 table$setNote(
                     "calibration_note",
-                    .("Calibration slope: 1.0 = ideal. A corrected slope below 1 means predicted probabilities are too extreme (overfitted) and would benefit from shrinkage; an apparent slope above 1 is expected for penalized models on their training data.")
+                    .("Calibration slope: 1.0 = ideal. A corrected slope below 1 means the predicted probabilities are too extreme (overfitted). A corrected slope above 1 means they are too moderate: the penalty pulled them too far toward the overall event rate, so high risks are under-stated and low risks over-stated. This is common with the 1SE rule, and the Minimum CV Error lambda shrinks less. The apparent slope is above 1 for any penalized model and is not itself a calibration check.")
                 )
             },
 
@@ -2331,7 +2411,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # an exact `!= 0` counted coordinate-descent residues of 1e-16 as inclusions.
                 # Scale factor and ridge exemption both come from the shared rule, so this
                 # panel and the coefficient table agree on which terms are non-zero.
-                if (isTRUE(fit$alpha > 0)) {
+                if (isTRUE(fit$alpha > 0) || isTRUE(attr(fit$cv_fit, "null_path"))) {
                     sds <- private$.fitColSDs(data$X)[rownames(all_coefs)]
                     # .fitColSDs already sanitises its own values; this second pass
                     # catches the NA a rowname that is not a column of data$X would
@@ -2342,7 +2422,11 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # Ridge never writes a zero, so every finite coefficient counts.
                     inclusion_prop <- rowMeans(is.finite(all_coefs))
                 }
-                max_abs <- apply(abs(all_coefs), 1, max)
+                # Per-SD magnitude, as in the Selected Variables table: without
+                # standardization a raw per-unit maximum ranks predictors by their units.
+                path_sd <- private$.fitColSDs(data$X)[rownames(all_coefs)]
+                path_sd[!is.finite(path_sd)] <- 1
+                max_abs <- apply(abs(all_coefs) * path_sd, 1, max)
 
                 imp_df <- data.frame(
                     variable = rownames(all_coefs),
@@ -2370,7 +2454,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 table$setNote(
                     "apparent_note",
-                    .("Path Inclusion Proportion is the fraction of the single cross-validated lambda path on which each predictor has a non-zero coefficient (apparent), NOT a bootstrap/resampling stability-selection frequency. Importance Rank orders predictors by their maximum absolute coefficient along that path. Because Ridge (L1 weight = 0) never shrinks coefficients to zero, every predictor is retained at all lambdas and the proportion is trivially 1.0.")
+                    .("Path Inclusion Proportion is the fraction of the single cross-validated lambda path on which each predictor has a non-zero coefficient (apparent), NOT a bootstrap/resampling stability-selection frequency. Importance Score is the largest per-standard-deviation coefficient magnitude along that path, and Importance Rank orders predictors by it. Because Ridge (L1 weight = 0) never shrinks coefficients to zero, every predictor is retained at all lambdas and the proportion is trivially 1.0.")
                 )
             },
 
@@ -2392,7 +2476,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         auc_lasso <- fit$apparent_auc
                         brier_lasso <- mean((fit$probabilities - data$y)^2)
                         table$addRow(rowKey = 1, values = list(
-                            model_type = .("LASSO (penalized)"),
+                            model_type = sprintf(.("%s (penalized)"), private$.penaltyLabel()),
                             n_variables = length(fit$selected),
                             auc = auc_lasso,
                             aic = NA,
@@ -2422,7 +2506,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             }
                             brier_sel <- mean((prob_sel - data$y)^2)
                             table$addRow(rowKey = 2, values = list(
-                                model_type = .("Logistic (LASSO-selected vars)"),
+                                model_type = .("Logistic (retained terms)"),
                                 n_variables = length(fit$selected),
                                 auc = auc_sel,
                                 aic = AIC(glm_sel),
@@ -2431,8 +2515,8 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         },
                         error = function(e) {
                             table$setNote("refit_failed_sel", sprintf(
-                                .("The unpenalized refit on the LASSO-selected variables could not be fitted (%s), so its row is omitted."),
-                                jmvcore::htmlEscape(conditionMessage(e))))
+                                .("The unpenalized refit on the retained terms could not be fitted (%s), so its row is omitted."),
+                                .rocLabel(conditionMessage(e))))
                         }
                     )
                 }
@@ -2463,7 +2547,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     error = function(e) {
                         table$setNote("refit_failed_all", sprintf(
                             .("The unpenalized refit on all candidate variables could not be fitted (%s), so its row is omitted."),
-                            jmvcore::htmlEscape(conditionMessage(e))))
+                            .rocLabel(conditionMessage(e))))
                     }
                 )
 
@@ -2472,7 +2556,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # saying "rows 2-3" pointed at a row that was not on screen.
                 table$setNote(
                     "refit_note",
-                    .("The 'Logistic' rows are unpenalized refits (shown for AIC comparability); their apparent AUC is typically higher than the penalized LASSO row because refitting removes LASSO shrinkage. All metrics are apparent (in-sample) - use Bootstrap Internal Validation for optimism-corrected discrimination.")
+                    .("The 'Logistic' rows are unpenalized refits (shown for AIC comparability); their apparent AUC is typically higher than the penalized row because refitting removes shrinkage. All metrics are apparent (in-sample) - use Bootstrap Internal Validation for optimism-corrected discrimination.")
                 )
 
                 if (separation_detected) {
@@ -2482,7 +2566,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     )
                     private$.addNotice(
                         "WARNING", .("Separation in Unpenalized Refit"),
-                        .("An unpenalized logistic refit in the Model Comparison table showed complete/quasi-complete separation (non-convergence or fitted probabilities at 0/1). Its AUC/AIC are unreliable; prefer the penalized LASSO row.")
+                        .("An unpenalized logistic refit in the Model Comparison table showed complete/quasi-complete separation (non-convergence or fitted probabilities at 0/1). Its AUC/AIC are unreliable; prefer the penalized row.")
                     )
                 }
             },
@@ -2501,7 +2585,8 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         cvlo       = as.numeric(fit$cv_fit$cvlo),
                         lambda_min = as.numeric(fit$cv_fit$lambda.min),
                         lambda_1se = as.numeric(fit$cv_fit$lambda.1se),
-                        nzero      = as.integer(fit$cv_fit$nzero)
+                        nzero      = as.integer(fit$cv_fit$nzero),
+                        penalty    = private$.penaltyLabel()
                     )
                     self$results$cv_plot$setState(cv_state)
                 }
@@ -2517,25 +2602,36 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # unit) with nothing on screen to explain it. Carry the flag so the
                 # renderer can name the scale it is actually drawing.
                 if (self$options$coef_plot && length(fit$selected) > 0) {
-                    ord <- order(abs(fit$selected_coefs))
+                    values <- fit$selected_coefs
+                    if (isTRUE(self$options$standardize))
+                        values <- values * private$.fitColSDs(data$X)[fit$selected]
+                    ord <- order(abs(values))
                     coef_state <- list(
                         var_names    = as.character(fit$selected[ord]),
-                        coef_values  = as.numeric(fit$selected_coefs[ord]),
-                        standardized = isTRUE(self$options$standardize)
+                        coef_values  = as.numeric(values[ord]),
+                        standardized = isTRUE(self$options$standardize),
+                        penalty      = private$.penaltyLabel()
                     )
                     self$results$coef_plot$setState(coef_state)
                 } else if (self$options$coef_plot) {
                     self$results$coef_plot$setState(NULL)
                 }
 
-                # ROC plot: save response and probabilities
+                # Store drawing coordinates only, not row-level outcomes or predictions.
                 if (self$options$roc_plot) {
-                    roc_state <- as.data.frame(list(
-                        y             = as.integer(data$y),
-                        probabilities = as.numeric(fit$probabilities)
-                    ))
-                    self$results$roc_plot$setState(roc_state)
+                    self$results$roc_plot$setState(private$.rocState(data$y, fit$probabilities))
                 }
+            },
+
+            .rocState = function(y, probabilities) {
+                roc <- pROC::roc(y, probabilities, quiet = TRUE, direction = "<", levels = c(0, 1))
+                ci <- tryCatch(suppressWarnings(as.numeric(pROC::ci.auc(roc, method = "delong"))),
+                               error = function(e) numeric(0))
+                if (length(ci) != 3 || any(!is.finite(ci)) || ci[1] >= 1 || ci[3] <= ci[1])
+                    ci <- numeric(0)
+                list(schema = 2L, specificity = as.numeric(roc$specificities),
+                     sensitivity = as.numeric(roc$sensitivities),
+                     auc = as.numeric(pROC::auc(roc)), ci = ci)
             },
 
             # ══════════════════════════════════════════════════════════════════
@@ -2561,10 +2657,11 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # naming the colours was the only key. Blue and orange separate for
                 # every common form of colour deficiency, and the different dash
                 # patterns carry the distinction even in greyscale.
-                col_min  <- "#0072B2"  # blue
-                col_1se  <- "#D55E00"  # vermillion
+                palette <- jmvcore::colorPalette(3, theme$palette)
+                col_min <- palette[1]
+                col_1se <- palette[2]
                 p <- ggplot2::ggplot(cv_data, ggplot2::aes(x = log(lambda), y = cvm)) +
-                    ggplot2::geom_point(color = "#CC79A7", size = 0.8) +
+                    ggplot2::geom_point(color = palette[3], size = 0.8) +
                     ggplot2::geom_errorbar(ggplot2::aes(ymin = cvlo, ymax = cvup),
                         color = "darkgrey", width = 0.02
                     ) +
@@ -2577,10 +2674,11 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         linetype = "dotted", color = col_1se
                     ) +
                     ggplot2::labs(
-                        title = .("Cross-Validation for LASSO Logistic Regression"),
+                        title = sprintf(.("Cross-Validation for %s Logistic Regression"),
+                            if (is.null(state$penalty)) .("Penalized") else state$penalty),
                         # The subtitle is the plot's only key, so it must name what
                         # is actually drawn - it still said "Green: lambda.1se".
-                        subtitle = .("Blue dashed: lambda.min; orange dotted: lambda.1se"),
+                        subtitle = .("Dashed: lambda.min; dotted: lambda.1se"),
                         x = .("Log Lambda"),
                         y = .("Binomial Deviance")
                     ) +
@@ -2621,7 +2719,8 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     ggplot2::geom_col() +
                     ggplot2::coord_flip() +
                     ggplot2::labs(
-                        title = .("LASSO Logistic Regression Coefficients"),
+                        title = sprintf(.("%s Logistic Regression Coefficients"),
+                            if (is.null(state$penalty)) .("Penalized") else state$penalty),
                         subtitle = sub_lab,
                         x = "", y = y_lab, fill = .("Direction")
                     ) +
@@ -2634,7 +2733,8 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # cue for direction - losing this scale left the legend saying
                     # Positive/Negative beside arbitrary palette colours.
                     ggplot2::scale_fill_manual(
-                        values = stats::setNames(c("#D55E00", "#0072B2"), c(lbl_pos, lbl_neg)))
+                        values = stats::setNames(jmvcore::colorPalette(2, theme$palette),
+                                                 c(lbl_pos, lbl_neg)))
                 print(p)
                 TRUE
             },
@@ -2643,20 +2743,14 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 if (is.null(state)) {
                     return(FALSE)
                 }
-                if (!requireNamespace("pROC", quietly = TRUE)) {
-                    return(FALSE)
-                }
-
-                roc_obj <- pROC::roc(state$y, state$probabilities, quiet = TRUE, direction = "<", levels = c(0, 1))
-                auc_val <- sprintf("%.3f", as.numeric(pROC::auc(roc_obj)))
-                # suppressWarnings for the same reason as .populatePerformance: pROC
-                # warns when AUC == 1, and an error-only tryCatch let that text escape
-                # into jamovi's Analysis Notes on EVERY render (resize, .omv reopen).
-                ci_obj <- tryCatch(suppressWarnings(pROC::ci.auc(roc_obj, method = "delong")),
-                                   error = function(e) NULL)
-                # DeLong collapses to exactly 1-1 at AUC == 1; drawing that beside a
-                # table that just said "CI not estimable" contradicts it.
-                if (!is.null(ci_obj) && is.finite(ci_obj[1]) && ci_obj[1] >= 1) ci_obj <- NULL
+                # Reopen pre-1.0.84 files without requiring the original dataset.
+                if (is.null(state$schema) && !is.null(state$y) && !is.null(state$probabilities))
+                    state <- private$.rocState(state$y, state$probabilities)
+                if (!identical(as.integer(state$schema), 2L) ||
+                    length(state$specificity) < 2 ||
+                    length(state$specificity) != length(state$sensitivity)) return(FALSE)
+                auc_val <- sprintf("%.3f", state$auc)
+                ci_obj <- if (length(state$ci) == 3) state$ci else NULL
 
                 # This is a BASE-graphics renderer, so `ggtheme` cannot reach it and
                 # the theme has to be applied through par(). Without this the axes,
@@ -2669,16 +2763,17 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 if (is.null(fg) || length(fg) != 1 || is.na(fg) || !nzchar(fg))
                     fg <- par("fg")
                 op <- par(fg = fg, col = fg, col.axis = fg, col.lab = fg,
-                          col.main = fg, col.sub = fg)
+                          col.main = fg, col.sub = fg, pty = "s")
                 on.exit(par(op), add = TRUE)
 
-                # pROC::plot.roc explicitly: in the umbrella package spatstat.explore also
-                # registers a plot.roc S3 method and wins the dispatch, so a bare plot() on a
-                # pROC object died with "Argument 'x' is not of class 'fv'".
-                pROC::plot.roc(roc_obj,
+                curve_color <- jmvcore::colorPalette(1, theme$palette)[1]
+                plot(state$specificity, state$sensitivity, type = "l",
+                    xlim = c(1, 0), ylim = c(0, 1), asp = 1, xaxs = "i", yaxs = "i",
+                    xlab = .("Specificity"), ylab = .("Sensitivity"),
                     main = sprintf(.("ROC Curve (AUC = %s)"), auc_val),
-                    col = "#0072B2", lwd = 2, print.auc = FALSE
+                    col = curve_color, lwd = 2
                 )
+                abline(a = 1, b = -1, col = fg, lty = 2)
                 # The caveat rides in the legend because an exported plot travels
                 # without the table's footnote. Positional %n$ markers so a translator
                 # can reorder the three conversions.
@@ -2687,12 +2782,9 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     legend = c(if (has_ci) sprintf(.("AUC = %1$s (in-sample DeLong 95%% CI: %2$.3f-%3$.3f)"),
                                                    auc_val, ci_obj[1], ci_obj[3]),
                                .("Apparent (in-sample): does not account for model fitting or selection")),
-                    col = c(if (has_ci) "#0072B2", NA), lwd = c(if (has_ci) 2, NA),
+                    col = c(if (has_ci) curve_color, NA), lwd = c(if (has_ci) 2, NA),
                     bty = "n", text.col = fg, cex = 0.8, inset = 0.02
                 )
-                # No extra diagonal: pROC already draws the chance line (identity = TRUE)
-                # on its specificity axis, where abline(0, 1) drew sensitivity =
-                # specificity instead - a second, wrong reference line.
                 TRUE
             },
 
@@ -2711,7 +2803,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Copy-ready report sentence (complete phrase; placeholders filled from results)
                 report <- sprintf(
-                    .("%1$s logistic regression with %2$s lambda selection and %3$d-fold cross-validation was applied to %4$d candidate variables (%5$d model terms after dummy coding) in %6$d patients (%7$d events, %8$d non-events)."),
+                    .("%1$s logistic regression with %2$s lambda selection and %3$d-fold cross-validation was applied to %4$d candidate variables (%5$d model terms after dummy coding) in %6$d independent observations (%7$d events, %8$d non-events)."),
                     penalty_name, private$.lambdaLabel(), fit$nfolds, data$n_vars, data$p, data$n,
                     data$n_events, data$n_nonevents
                 )
@@ -2779,14 +2871,14 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # .populateCoefficients divides by the column SD to put the
                 # Coefficient and Odds Ratio columns back on the original scale.
                 standardize_note <- if (isTRUE(self$options$standardize)) {
-                    .("<li><strong>Standardization (default on):</strong> predictors are centered and scaled before fitting, so the penalty treats variables with different units comparably. The Coefficient and Odds Ratio columns of the Selected Variables table are then back-transformed to the <strong>original measurement scale</strong> (per 1 unit of a continuous predictor, or present vs absent for a binary one). The Importance column and the Coefficient Plot stay on the per-standard-deviation scale, which is the quantity that is comparable across predictors with different units.</li>")
+                    .("<li><strong>Standardization (default on):</strong> glmnet learns centering and scaling within each training fold and each bootstrap fit, so held-out observations do not determine those transforms. It uses the population (1/n) standard deviation. The Coefficient and Odds Ratio columns of the Selected Variables table are returned on the <strong>original measurement scale</strong> (per 1 unit of a continuous predictor, or present vs absent for a binary one). The Importance column and the Coefficient Plot use the sample-standard-deviation scale, which is the quantity that is comparable across predictors with different units.</li>")
                 } else {
-                    .("<li>Predictors were <strong>not</strong> standardized; coefficients, odds ratios, importance, and the Coefficient Plot are all on the original measurement scale of each variable.</li>")
+                    .("<li>Predictors were <strong>not</strong> standardized, so the penalty acts on each coefficient in its own units. Coefficients, odds ratios and the Coefficient Plot are on the original measurement scale; the Importance columns are per standard deviation, so they remain comparable across predictors.</li>")
                 }
                 self$results$methodologyNotes$setContent(paste0(
                     "<h4>", .("Technical Notes"), "</h4>",
                     "<ul>",
-                    .("<li>LASSO coefficients do not have standard errors or p-values, and this analysis provides no coefficient inference. Bootstrap validation estimates optimism-corrected performance (AUC, Brier score, calibration slope), not coefficient uncertainty.</li>"),
+                    .("<li>Penalized coefficients do not have standard errors or p-values, and this analysis provides no coefficient inference. Bootstrap validation estimates optimism-corrected performance (AUC, Brier score, calibration slope), not coefficient uncertainty.</li>"),
                     standardize_note,
                     if (identical(self$options$penalty, "ridge"))
                         .("<li>With correlated predictors, Ridge shares the coefficient among them rather than picking one, which is one reason to prefer it when predictors are collinear.</li>")
@@ -2794,8 +2886,8 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         .("<li>With correlated predictors, LASSO arbitrarily selects one from a group. Consider elastic net (alpha 0.5).</li>"),
                     .("<li>An events-per-variable (EPV) of 10 is a rule of thumb (Peduzzi et al. 1996), not a guarantee. Sample-size criteria for prediction models (Riley et al. 2019, 2020) are preferred, and penalization does not make a small sample reliable (Riley et al. 2021).</li>"),
                     .("<li>The scoring system rounds coefficients to integers, which loses precision but gains clinical usability.</li>"),
-                    sprintf(.("<li>Continuous predictors in the scoring system are dichotomized at %s (set by 'Cut Point for Continuous Predictors'); the score-based performance therefore reflects a simplified point model and may differ from the continuous LASSO model's AUC.</li>"), private$.scoreCutLabel()),
-                    .("<li>Bootstrap optimism correction estimates how much the apparent AUC overestimates true performance.</li>"),
+                    sprintf(.("<li>Continuous predictors in the scoring system are dichotomized at %s (set by 'Cut Point for Continuous Predictors'); the score-based performance therefore reflects a simplified point model and may differ from the continuous penalized model's AUC.</li>"), private$.scoreCutLabel()),
+                    .("<li>Bootstrap optimism correction repeats scaling and lambda selection in every resample. Copies of the same observation stay in one cross-validation fold. It estimates optimism in model performance; it does not validate the simplified score or replace external validation.</li>"),
                     "</ul>"
                 ))
             },
@@ -2803,10 +2895,10 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 self$results$clinicalGuidance$setContent(paste0(
                     "<h4>", .("Clinical Interpretation"), "</h4>",
                     "<ul>",
-                    .("<li>Selected variables are the features most useful for distinguishing the two groups.</li>"),
+                    .("<li>Selected variables are those the model retained at the chosen lambda. LASSO selection is unstable: with a different sample it can retain different variables, including ones that carry no signal, so a selected variable is not thereby shown to be a marker of the event.</li>"),
                     .("<li>Variables NOT selected are not necessarily unimportant - they may be redundant with selected features.</li>"),
                     .("<li>The scoring system assigns positive points for features favoring the event class and negative points for the reference class.</li>"),
-                    .("<li>Higher total scores indicate higher probability of the event (positive class).</li>"),
+                    .("<li>Higher total scores indicate a higher event rate only when the score discriminates in the right direction (score AUC above 0.5 in the Scoring System Performance table); a warning is shown when it does not.</li>"),
                     .("<li>Always validate the scoring system on an independent cohort before clinical adoption.</li>"),
                     .("<li>Inter-observer agreement should be assessed for any morphologic scoring components.</li>"),
                     "</ul>"

@@ -32,7 +32,8 @@ lassologisticOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             showMethodologyNotes = FALSE,
             includeClinicalGuidance = FALSE,
             showVariableImportance = FALSE,
-            showModelComparison = FALSE, ...) {
+            showModelComparison = FALSE,
+            patientID = NULL, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -52,7 +53,8 @@ lassologisticOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..outcomeLevel <- jmvcore::OptionLevel$new(
                 "outcomeLevel",
                 outcomeLevel,
-                variable="(outcome)")
+                variable="(outcome)",
+                allowNone=TRUE)
             private$..explanatory <- jmvcore::OptionVariables$new(
                 "explanatory",
                 explanatory,
@@ -188,6 +190,15 @@ lassologisticOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "showModelComparison",
                 showModelComparison,
                 default=FALSE)
+            private$..patientID <- jmvcore::OptionVariable$new(
+                "patientID",
+                patientID,
+                default=NULL,
+                suggested=list(
+                    "nominal"),
+                permitted=list(
+                    "factor",
+                    "numeric"))
 
             self$.addOption(private$..outcome)
             self$.addOption(private$..outcomeLevel)
@@ -217,6 +228,7 @@ lassologisticOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..includeClinicalGuidance)
             self$.addOption(private$..showVariableImportance)
             self$.addOption(private$..showModelComparison)
+            self$.addOption(private$..patientID)
         }),
     active = list(
         outcome = function() private$..outcome$value,
@@ -246,7 +258,8 @@ lassologisticOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         showMethodologyNotes = function() private$..showMethodologyNotes$value,
         includeClinicalGuidance = function() private$..includeClinicalGuidance$value,
         showVariableImportance = function() private$..showVariableImportance$value,
-        showModelComparison = function() private$..showModelComparison$value),
+        showModelComparison = function() private$..showModelComparison$value,
+        patientID = function() private$..patientID$value),
     private = list(
         ..outcome = NA,
         ..outcomeLevel = NA,
@@ -275,7 +288,8 @@ lassologisticOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..showMethodologyNotes = NA,
         ..includeClinicalGuidance = NA,
         ..showVariableImportance = NA,
-        ..showModelComparison = NA)
+        ..showModelComparison = NA,
+        ..patientID = NA)
 )
 
 lassologisticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -332,6 +346,7 @@ lassologisticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 title="To Do",
                 clearWith=list(
                     "outcome",
+                    "patientID",
                     "outcomeLevel",
                     "explanatory")))
             self$add(jmvcore::Html$new(
@@ -340,6 +355,7 @@ lassologisticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 title="Important Information",
                 clearWith=list(
                     "outcome",
+                    "patientID",
                     "outcomeLevel",
                     "explanatory",
                     "lambda",
@@ -357,6 +373,7 @@ lassologisticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 visible="(suitabilityCheck)",
                 clearWith=list(
                     "outcome",
+                    "patientID",
                     "outcomeLevel",
                     "explanatory",
                     "suitabilityCheck")))
@@ -376,6 +393,7 @@ lassologisticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `type`="text")),
                 clearWith=list(
                     "outcome",
+                    "patientID",
                     "outcomeLevel",
                     "explanatory",
                     "lambda",
@@ -409,6 +427,7 @@ lassologisticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `format`="zto")),
                 clearWith=list(
                     "outcome",
+                    "patientID",
                     "outcomeLevel",
                     "explanatory",
                     "lambda",
@@ -438,6 +457,7 @@ lassologisticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `type`="text")),
                 clearWith=list(
                     "outcome",
+                    "patientID",
                     "outcomeLevel",
                     "explanatory",
                     "lambda",
@@ -490,6 +510,7 @@ lassologisticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `type`="integer")),
                 clearWith=list(
                     "outcome",
+                    "patientID",
                     "outcomeLevel",
                     "explanatory",
                     "lambda",
@@ -519,6 +540,7 @@ lassologisticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `type`="text")),
                 clearWith=list(
                     "outcome",
+                    "patientID",
                     "outcomeLevel",
                     "explanatory",
                     "lambda",
@@ -562,6 +584,7 @@ lassologisticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `type`="text")),
                 clearWith=list(
                     "outcome",
+                    "patientID",
                     "outcomeLevel",
                     "explanatory",
                     "lambda",
@@ -577,7 +600,7 @@ lassologisticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$add(jmvcore::Table$new(
                 options=options,
                 name="lookupTable",
-                title="Score-to-Probability Lookup",
+                title="Score Lookup (Observed Event Rates)",
                 visible="(scoringSystem && scoreLookupTable)",
                 rows=0,
                 columns=list(
@@ -595,7 +618,7 @@ lassologisticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `type`="integer"),
                     list(
                         `name`="probability", 
-                        `title`="Predicted Probability", 
+                        `title`="Observed Event Rate", 
                         `type`="number", 
                         `format`="zto"),
                     list(
@@ -604,6 +627,7 @@ lassologisticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `type`="text")),
                 clearWith=list(
                     "outcome",
+                    "patientID",
                     "outcomeLevel",
                     "explanatory",
                     "lambda",
@@ -644,6 +668,7 @@ lassologisticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `format`="zto")),
                 clearWith=list(
                     "outcome",
+                    "patientID",
                     "outcomeLevel",
                     "explanatory",
                     "lambda",
@@ -664,6 +689,7 @@ lassologisticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 refs="glmnet",
                 clearWith=list(
                     "outcome",
+                    "patientID",
                     "outcomeLevel",
                     "explanatory",
                     "lambda",
@@ -683,6 +709,7 @@ lassologisticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 refs="glmnet",
                 clearWith=list(
                     "outcome",
+                    "patientID",
                     "outcomeLevel",
                     "explanatory",
                     "lambda",
@@ -702,6 +729,7 @@ lassologisticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 refs="pROC",
                 clearWith=list(
                     "outcome",
+                    "patientID",
                     "outcomeLevel",
                     "explanatory",
                     "lambda",
@@ -715,10 +743,11 @@ lassologisticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="predictions",
                 title="Predicted probabilities",
                 measureType="continuous",
-                varTitle="Predicted Probability from LASSO Logistic",
-                varDescription="Predicted Probability Based on LASSO Logistic Model",
+                varTitle="Predicted Probability from Penalized Logistic",
+                varDescription="Predicted Probability Based on Penalized Logistic Model",
                 clearWith=list(
                     "outcome",
+                    "patientID",
                     "outcomeLevel",
                     "explanatory",
                     "lambda",
@@ -735,6 +764,7 @@ lassologisticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 clearWith=list(
                     "showSummary",
                     "outcome",
+                    "patientID",
                     "outcomeLevel",
                     "explanatory",
                     "penalty",
@@ -765,8 +795,13 @@ lassologisticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "scoringSystem",
                     "penalty",
                     "outcome",
+                    "patientID",
                     "explanatory",
-                    "lambda")))
+                    "lambda",
+                    "outcomeLevel",
+                    "alpha",
+                    "nfolds",
+                    "random_seed")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="clinicalGuidance",
@@ -802,6 +837,7 @@ lassologisticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 clearWith=list(
                     "showVariableImportance",
                     "outcome",
+                    "patientID",
                     "outcomeLevel",
                     "explanatory",
                     "lambda",
@@ -813,7 +849,7 @@ lassologisticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$add(jmvcore::Table$new(
                 options=options,
                 name="modelComparison",
-                title="LASSO vs Unpenalized Logistic",
+                title="Penalized vs Unpenalized Logistic",
                 visible="(showModelComparison)",
                 rows=0,
                 columns=list(
@@ -842,6 +878,7 @@ lassologisticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 clearWith=list(
                     "showModelComparison",
                     "outcome",
+                    "patientID",
                     "outcomeLevel",
                     "explanatory",
                     "lambda",
@@ -859,7 +896,7 @@ lassologisticBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "lassologistic",
-                version = c(1,0,83),
+                version = c(1,0,84),
                 options = options,
                 results = lassologisticResults$new(options=options),
                 data = data,
@@ -879,14 +916,17 @@ lassologisticBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' build classifiers (e.g., tumor type A vs B) with automatic feature 
 #' selection.
 #' 
-#' @param data The data as a data frame.
+#' @param data The data as a data frame, with one independent observation per
+#'   row.
 #' @param outcome Binary outcome variable to classify. Can be factor or
 #'   numeric with exactly two observed values.
-#' @param outcomeLevel Level of outcome considered as the positive class
-#'   (event). In jamovi this may be left unset, in which case the second level
-#'   of a factor (or the larger of two numeric values) is treated as the event.
-#'   When calling from R the argument has no default and must be supplied; pass
-#'   NULL to get the same automatic choice.
+#' @param outcomeLevel Level of the outcome that is the event (positive
+#'   class), for example Malignant. Required for a nominal or ordinal outcome:
+#'   it is never taken from the order of the levels, and until it is chosen the
+#'   analysis shows the levels found and fits nothing. A numeric outcome coded
+#'   0/1 is read as 1 = event without a choice; for any other numeric coding,
+#'   set the outcome's measure type to Nominal and choose the level. From R the
+#'   argument has no default: pass the level, or NULL for a 0/1 outcome.
 #' @param explanatory Variables to be considered for selection. At least 2
 #'   required. Constant variables are removed automatically.
 #' @param penalty Type of regularization penalty. LASSO (L1) produces sparse
@@ -901,13 +941,15 @@ lassologisticBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   when sample size is limited.
 #' @param random_seed Random seed for reproducible cross-validation fold
 #'   assignment.
-#' @param standardize Whether to standardize predictor variables before
-#'   fitting.
+#' @param standardize Whether glmnet standardizes predictors within each
+#'   training fold and bootstrap fit, using its population (1/n) standard
+#'   deviation. Reported coefficients remain on the original measurement scale.
 #' @param suitabilityCheck Check sample size, events-per-variable ratio,
 #'   multicollinearity, and whether regularization is needed.
 #' @param bootstrapValidation Perform bootstrap optimism-corrected validation
 #'   (Harrell method). Reports corrected AUC, calibration slope, and Brier
-#'   score.
+#'   score. Scaling and lambda selection are repeated within every resample.
+#'   Copies of an observation in a bootstrap sample remain in the same CV fold.
 #' @param bootstrapN Number of bootstrap iterations for internal validation.
 #' @param cv_plot Show cross-validation deviance vs lambda plot.
 #' @param coef_plot Show bar plot of selected variable coefficients.
@@ -939,14 +981,16 @@ lassologisticBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   awarding points. A predictor earns its points when the patient's value
 #'   exceeds this cut. 'median' (the default) splits at the sample median, which
 #'   is data-derived and will differ in another cohort. 'manual' lets you enter
-#'   established clinical thresholds, which is what makes a score portable.
+#'   established clinical thresholds. Fixed cutoffs alone do not establish
+#'   transportability; the score still requires external validation.
 #' @param scoreCutPoints Cut points on the ORIGINAL measurement scale, as
 #'   'variable=value' pairs separated by commas or semicolons, e.g. 'ki67=20,
 #'   age=65'. Used when Cut Point method is 'manual'. Any continuous predictor
 #'   not listed falls back to the sample median, and that fallback is reported.
 #'   Binary predictors ignore this - they score when present.
-#' @param scoreLookupTable Generate a lookup table mapping each possible total
-#'   score to predicted probability of the positive class.
+#' @param scoreLookupTable Generate a table listing each observed total score
+#'   with its number of cases, events and observed (in-sample) event rate. These
+#'   are proportions in this dataset, not model predictions.
 #' @param showSummary Display a natural-language summary of the main results.
 #' @param showExplanations Display explanations of LASSO logistic regression
 #'   methodology.
@@ -956,8 +1000,12 @@ lassologisticBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   of results.
 #' @param showVariableImportance Display variable importance rankings across
 #'   lambda values.
-#' @param showModelComparison Compare LASSO vs standard logistic using
-#'   selected variables.
+#' @param showModelComparison Compare the selected penalized model with
+#'   unpenalized logistic refits.
+#' @param patientID Optional identifier for independent patients. Repeated or
+#'   missing IDs among analyzed rows are rejected. Each row is otherwise assumed
+#'   independent; repeated lesions, visits, or readings require a patient-level
+#'   summary or a method that accounts for clustering.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -1018,18 +1066,21 @@ lassologistic <- function(
     showMethodologyNotes = FALSE,
     includeClinicalGuidance = FALSE,
     showVariableImportance = FALSE,
-    showModelComparison = FALSE) {
+    showModelComparison = FALSE,
+    patientID = NULL) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("lassologistic requires jmvcore to be installed (restart may be required)")
 
     if ( ! missing(outcome)) outcome <- jmvcore::resolveQuo(jmvcore::enquo(outcome))
     if ( ! missing(explanatory)) explanatory <- jmvcore::resolveQuo(jmvcore::enquo(explanatory))
+    if ( ! missing(patientID)) patientID <- jmvcore::resolveQuo(jmvcore::enquo(patientID))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(outcome), outcome, NULL),
-            `if`( ! missing(explanatory), explanatory, NULL))
+            `if`( ! missing(explanatory), explanatory, NULL),
+            `if`( ! missing(patientID), patientID, NULL))
 
 
     options <- lassologisticOptions$new(
@@ -1059,7 +1110,8 @@ lassologistic <- function(
         showMethodologyNotes = showMethodologyNotes,
         includeClinicalGuidance = includeClinicalGuidance,
         showVariableImportance = showVariableImportance,
-        showModelComparison = showModelComparison)
+        showModelComparison = showModelComparison,
+        patientID = patientID)
 
     analysis <- lassologisticClass$new(
         options = options,

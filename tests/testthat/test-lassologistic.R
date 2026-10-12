@@ -20,6 +20,15 @@ ll <- function(data, ...) {
     showVariableImportance = FALSE, showModelComparison = FALSE
   )
   args <- modifyList(defaults, list(...))
+  # The analysis no longer infers the event level (independent review IR-01): only a
+  # numeric 0/1 outcome defaults. These tests were written against the old default
+  # (second factor level, larger numeric value), so the helper now ASKS for that level.
+  if (is.null(args$outcomeLevel) && !is.null(args$outcome)) {
+    o <- data[[args$outcome]]
+    o <- o[!is.na(o)]
+    if (!is.numeric(o)) args["outcomeLevel"] <- list(levels(droplevels(factor(o)))[2])
+    else if (!all(o %in% c(0, 1))) args["outcomeLevel"] <- list(as.character(max(o)))
+  }
   do.call(lassologistic, args)
 }
 
@@ -301,8 +310,9 @@ test_that("scoringMaxPoints scales Max-scaled but not Beta10", {
 # 9. Outcome level / labelled-factor handling
 # ═══════════════════════════════════════════════════════════════════════════════
 
-test_that("Default event class respects factor level order, not alphabetical", {
-  # levels()[2] is "Alpha"; a sort(unique()) default would wrongly pick "Zeta".
+test_that("A factor outcome with no event level fits nothing and lists its levels (IR-01)", {
+  # The event used to default to levels()[2] in R while jamovi's LevelSelector filled in
+  # levels[0]: the same data gave inverted odds ratios in the two. It is never inferred now.
   set.seed(3)
   n <- 120
   x1 <- rnorm(n)
@@ -310,14 +320,29 @@ test_that("Default event class respects factor level order, not alphabetical", {
               levels = c("Zeta", "Alpha"))
   d <- data.frame(y = y, x1 = x1, x2 = rnorm(n), x3 = rnorm(n))
 
-  # Omit outcomeLevel entirely (the helper keeps its NULL default; passing NULL
-  # explicitly would drop the required Level arg via modifyList).
-  result <- ll(d, outcome = "y", explanatory = c("x1", "x2", "x3"),
-               lambda = "lambda.min")
+  pending <- lassologistic(data = d, outcome = "y", outcomeLevel = NULL,
+                           explanatory = c("x1", "x2", "x3"))
+  expect_equal(nrow(pending$coefficients$asDF), 0)
+  expect_match(pending$todo$content, "Choose the event level")
+  expect_match(pending$todo$content, "Zeta \\(n=[0-9]+\\), Alpha \\(n=[0-9]+\\)")
 
-  ms <- result$modelSummary$asDF
-  event_row <- ms$value[ms$statistic == "Event class (positive)"]
-  expect_match(event_row, "^Alpha")
+  chosen <- ll(d, outcome = "y", outcomeLevel = "Alpha", explanatory = c("x1", "x2", "x3"),
+               lambda = "lambda.min")
+  ms <- chosen$modelSummary$asDF
+  expect_match(ms$value[ms$statistic == "Event class (positive)"], "^Alpha")
+})
+
+test_that("Numeric outcomes: 0/1 defaults to 1, any other coding must be chosen (IR-06)", {
+  set.seed(4)
+  d <- data.frame(x1 = rnorm(80), x2 = rnorm(80), x3 = rnorm(80))
+  d$y01 <- rbinom(80, 1, plogis(d$x1))
+  d$y12 <- d$y01 + 1
+  r01 <- lassologistic(data = d, outcome = "y01", outcomeLevel = NULL, explanatory = c("x1", "x2", "x3"))
+  ms <- r01$modelSummary$asDF
+  expect_match(ms$value[ms$statistic == "Event class (positive)"], "^1 ")
+  r12 <- lassologistic(data = d, outcome = "y12", outcomeLevel = NULL, explanatory = c("x1", "x2", "x3"))
+  expect_equal(nrow(r12$coefficients$asDF), 0)
+  expect_match(r12$todo$content, "not coded 0/1")
 })
 
 test_that("Invalid outcomeLevel is rejected with a clear message", {
@@ -385,7 +410,7 @@ test_that("Model comparison separates penalized LASSO from unpenalized refits", 
   expect_match(mc$model_type[1], "penalized")
   expect_true(is.na(mc$aic[1]))
   # The unpenalized refits are labelled honestly (not as "LASSO").
-  expect_true(any(grepl("LASSO-selected", mc$model_type)))
+  expect_true(any(grepl("retained terms", mc$model_type)))
   expect_true(any(grepl("all vars", mc$model_type)))
   # Unpenalized rows carry an AIC.
   expect_true(all(!is.na(mc$aic[grepl("Logistic", mc$model_type)])))

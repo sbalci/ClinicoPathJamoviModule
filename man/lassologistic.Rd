@@ -32,20 +32,24 @@ lassologistic(
   showMethodologyNotes = FALSE,
   includeClinicalGuidance = FALSE,
   showVariableImportance = FALSE,
-  showModelComparison = FALSE
+  showModelComparison = FALSE,
+  patientID = NULL
 )
 }
 \arguments{
-\item{data}{The data as a data frame.}
+\item{data}{The data as a data frame, with one independent observation per
+row.}
 
 \item{outcome}{Binary outcome variable to classify. Can be factor or
 numeric with exactly two observed values.}
 
-\item{outcomeLevel}{Level of outcome considered as the positive class
-(event). In jamovi this may be left unset, in which case the second level
-of a factor (or the larger of two numeric values) is treated as the event.
-When calling from R the argument has no default and must be supplied; pass
-NULL to get the same automatic choice.}
+\item{outcomeLevel}{Level of the outcome that is the event (positive
+class), for example Malignant. Required for a nominal or ordinal outcome:
+it is never taken from the order of the levels, and until it is chosen the
+analysis shows the levels found and fits nothing. A numeric outcome coded
+0/1 is read as 1 = event without a choice; for any other numeric coding,
+set the outcome's measure type to Nominal and choose the level. From R the
+argument has no default: pass the level, or NULL for a 0/1 outcome.}
 
 \item{explanatory}{Variables to be considered for selection. At least 2
 required. Constant variables are removed automatically.}
@@ -67,15 +71,17 @@ when sample size is limited.}
 \item{random_seed}{Random seed for reproducible cross-validation fold
 assignment.}
 
-\item{standardize}{Whether to standardize predictor variables before
-fitting.}
+\item{standardize}{Whether glmnet standardizes predictors within each
+training fold and bootstrap fit, using its population (1/n) standard
+deviation. Reported coefficients remain on the original measurement scale.}
 
 \item{suitabilityCheck}{Check sample size, events-per-variable ratio,
 multicollinearity, and whether regularization is needed.}
 
 \item{bootstrapValidation}{Perform bootstrap optimism-corrected validation
 (Harrell method). Reports corrected AUC, calibration slope, and Brier
-score.}
+score. Scaling and lambda selection are repeated within every resample.
+Copies of an observation in a bootstrap sample remain in the same CV fold.}
 
 \item{bootstrapN}{Number of bootstrap iterations for internal validation.}
 
@@ -115,7 +121,8 @@ contribution and also ignores it.}
 awarding points. A predictor earns its points when the patient's value
 exceeds this cut. 'median' (the default) splits at the sample median, which
 is data-derived and will differ in another cohort. 'manual' lets you enter
-established clinical thresholds, which is what makes a score portable.}
+established clinical thresholds. Fixed cutoffs alone do not establish
+transportability; the score still requires external validation.}
 
 \item{scoreCutPoints}{Cut points on the ORIGINAL measurement scale, as
 'variable=value' pairs separated by commas or semicolons, e.g. 'ki67=20,
@@ -123,8 +130,9 @@ age=65'. Used when Cut Point method is 'manual'. Any continuous predictor
 not listed falls back to the sample median, and that fallback is reported.
 Binary predictors ignore this - they score when present.}
 
-\item{scoreLookupTable}{Generate a lookup table mapping each possible total
-score to predicted probability of the positive class.}
+\item{scoreLookupTable}{Generate a table listing each observed total score
+with its number of cases, events and observed (in-sample) event rate. These
+are proportions in this dataset, not model predictions.}
 
 \item{showSummary}{Display a natural-language summary of the main results.}
 
@@ -140,8 +148,13 @@ of results.}
 \item{showVariableImportance}{Display variable importance rankings across
 lambda values.}
 
-\item{showModelComparison}{Compare LASSO vs standard logistic using
-selected variables.}
+\item{showModelComparison}{Compare the selected penalized model with
+unpenalized logistic refits.}
+
+\item{patientID}{Optional identifier for independent patients. Repeated or
+missing IDs among analyzed rows are rejected. Each row is otherwise assumed
+independent; repeated lesions, visits, or readings require a patient-level
+summary or a method that accounts for clustering.}
 }
 \value{
 A results object containing:

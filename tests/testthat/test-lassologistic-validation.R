@@ -67,7 +67,7 @@ val_enet <- function(Z, y, lambda, alpha, active, signs) {
        kkt = if (alpha > 0 && length(ina)) max(abs(colMeans(Z[, ina, drop = FALSE] * (y - p)))) / (lambda * alpha) else 0)
 }
 val_coef_oracle <- function(res, X, y, alpha = 1, lam = "lambda_1se") {
-  ct <- val_coef(res); ctr <- colMeans(X); sdv <- apply(X, 2, stats::sd)
+  ct <- val_coef(res); ctr <- colMeans(X); sdv <- sqrt(colMeans(sweep(X, 2, ctr)^2))
   Z <- sweep(sweep(X, 2, ctr), 2, sdv, "/")
   o <- val_enet(Z, y, res$cv_plot$state[[lam]], alpha, ct$terms, sign(ct$coef[ct$terms]))
   list(b_mod = unname(ct$coef[ct$terms] * sdv[ct$terms]), b0_mod = ct$b0 + sum(ct$coef[ct$terms] * ctr[ct$terms]),
@@ -136,7 +136,7 @@ test_that("C14 MASS::birthwt coefficients solve the penalized objective", {
 test_that("C19/C20 apparent AUC and its DeLong interval match hand computation", {
   # oracle: Mann-Whitney pair count; DeLong 1988 structural-component variance
   d <- val_fixture(); res <- val_run(d, showModelComparison = TRUE)
-  rs <- res$roc_plot$state
+  rs <- list(y = as.integer(d$dx == "NEC"), probabilities = res$predictions$.__enclos_env__$private$.values[[1]])
   expect_equal(val_key(res$modelComparison$asDF, "1")$auc, val_auc(rs$y, rs$probabilities), tolerance = 1e-12)
   expect_equal(val_key(res$performance$asDF, "auc")$value, val_delong(rs$y, rs$probabilities))
 })
@@ -157,7 +157,7 @@ test_that("C21 AUC bands (Hosmer-Lemeshow 2013) land correctly at exact AUC 0.7 
 test_that("C22-C28 threshold, 2x2 metrics and Brier follow from the saved probabilities", {
   # oracle: exhaustive Youden search in integer arithmetic; counts by hand
   d <- val_fixture(); res <- val_run(d)
-  y <- res$roc_plot$state$y; p <- res$roc_plot$state$probabilities
+  y <- as.integer(d$dx == "NEC"); p <- res$predictions$.__enclos_env__$private$.values[[1]]
   t <- val_youden(y, p); pred <- p > t
   tp <- sum(pred & y == 1); fp <- sum(pred & y == 0); fn <- sum(!pred & y == 1); tn <- sum(!pred & y == 0)
   pf <- res$performance$asDF; f <- function(k) val_key(pf, k)$value
@@ -199,7 +199,7 @@ test_that("C46/C47 bootstrap table: corrected = apparent - optimism; apparent sl
   vt <- res$validationTable$asDF
   for (k in c("auc", "brier", "slope"))
     expect_equal(val_key(vt, k)$corrected, val_key(vt, k)$apparent - val_key(vt, k)$optimism, tolerance = 1e-12)
-  p <- res$roc_plot$state$probabilities; y <- res$roc_plot$state$y
+  p <- res$predictions$.__enclos_env__$private$.values[[1]]; y <- as.integer(d$dx == "NEC")
   expect_equal(val_key(vt, "slope")$apparent, val_logit(matrix(stats::qlogis(p)), y)$b[2], tolerance = 1e-6)
   expect_equal(val_key(vt, "brier")$apparent, mean((p - y)^2), tolerance = 1e-12)
 })
@@ -220,7 +220,7 @@ test_that("C31-C37 points, criteria and odds ratios follow the documented rules 
   expect_equal(as.numeric(st$points), unname(as.numeric(pts)))
   if ("Ki-67 (%)" %in% ct$terms)
     expect_equal(st$criterion[st$variable == "Ki-67 (%)"],
-                 sprintf("> %s", base::format(round(stats::median(d[["Ki-67 (%)"]]), 3), trim = TRUE)))
+                 sprintf("> %s", sprintf("%.17g", stats::median(d[["Ki-67 (%)"]]))))
 })
 
 # ── RNG hygiene ──────────────────────────────────────────────────────────────
@@ -377,7 +377,8 @@ test_that("VAL-lassologistic-11 the ROC plot draws no second, wrong diagonal", {
   # abline(0, 1) on pROC's specificity axis drew sensitivity = specificity (the
   # anti-diagonal) beside pROC's own chance line; found when the plot was inspected
   body_txt <- paste(deparse(body(ClinicoPath:::lassologisticClass$private_methods$.rocPlot)), collapse = "\n")
-  expect_false(grepl("abline", body_txt, fixed = TRUE))
+  expect_match(body_txt, "abline(a = 1, b = -1", fixed = TRUE)
+  expect_false(grepl("pROC::plot.roc", body_txt, fixed = TRUE))
   res <- val_run(val_fixture())
   f <- tempfile(fileext = ".png"); res$roc_plot$saveAs(f)
   expect_gt(file.size(f), 1000)

@@ -5,7 +5,7 @@ menuGroup: meddecideT
 menuSubgroup: Prediction Models
 menuTitle: LASSO Logistic
 menuSubtitle: Penalized feature selection for binary classification
-version: '1.0.83'
+version: '1.0.84'
 jas: '1.2'
 
 description:
@@ -23,7 +23,7 @@ options:
     - name: data
       type: Data
       description:
-          R: The data as a data frame.
+          R: The data as a data frame, with one independent observation per row.
 
     - name: outcome
       title: 'Binary Outcome'
@@ -35,17 +35,22 @@ options:
           Binary outcome variable to classify. Can be factor or
           numeric with exactly two observed values.
 
+    # allowNone: without it the jamovi client pre-selects levels[0] - usually the
+    # reference level - and every odds ratio comes out inverted. Never inferred.
     - name: outcomeLevel
       title: Event Level
       type: Level
       variable: (outcome)
+      allowNone: true
       description:
         R: >
-          Level of outcome considered as the positive class (event). In jamovi this
-          may be left unset, in which case the second level of a factor (or the
-          larger of two numeric values) is treated as the event. When calling from
-          R the argument has no default and must be supplied; pass NULL to get the
-          same automatic choice.
+          Level of the outcome that is the event (positive class), for example
+          Malignant. Required for a nominal or ordinal outcome: it is never taken
+          from the order of the levels, and until it is chosen the analysis shows
+          the levels found and fits nothing. A numeric outcome coded 0/1 is read as
+          1 = event without a choice; for any other numeric coding, set the
+          outcome's measure type to Nominal and choose the level. From R the
+          argument has no default: pass the level, or NULL for a 0/1 outcome.
 
     - name: explanatory
       title: Explanatory Variables
@@ -122,7 +127,10 @@ options:
       type: Bool
       default: true
       description:
-        R: Whether to standardize predictor variables before fitting.
+        R: >
+          Whether glmnet standardizes predictors within each training fold and
+          bootstrap fit, using its population (1/n) standard deviation. Reported
+          coefficients remain on the original measurement scale.
 
     - name: suitabilityCheck
       title: Data suitability assessment
@@ -140,7 +148,9 @@ options:
       description:
         R: >
           Perform bootstrap optimism-corrected validation (Harrell method).
-          Reports corrected AUC, calibration slope, and Brier score.
+          Reports corrected AUC, calibration slope, and Brier score. Scaling and
+          lambda selection are repeated within every resample. Copies of an
+          observation in a bootstrap sample remain in the same CV fold.
 
     - name: bootstrapN
       title: Bootstrap Iterations
@@ -246,7 +256,8 @@ options:
           predictor earns its points when the patient's value exceeds this cut.
           'median' (the default) splits at the sample median, which is
           data-derived and will differ in another cohort. 'manual' lets you enter
-          established clinical thresholds, which is what makes a score portable.
+          established clinical thresholds. Fixed cutoffs alone do not establish
+          transportability; the score still requires external validation.
 
     - name: scoreCutPoints
       title: Manual Cut Points
@@ -262,13 +273,14 @@ options:
           when present.
 
     - name: scoreLookupTable
-      title: Score-to-probability lookup table
+      title: Score lookup table (observed event rates)
       type: Bool
       default: true
       description:
         R: >
-          Generate a lookup table mapping each possible total score to
-          predicted probability of the positive class.
+          Generate a table listing each observed total score with its number of
+          cases, events and observed (in-sample) event rate. These are proportions
+          in this dataset, not model predictions.
 
     - name: predictions
       title: Predicted probabilities
@@ -316,6 +328,19 @@ options:
       type: Bool
       default: false
       description:
-        R: Compare LASSO vs standard logistic using selected variables.
+        R: Compare the selected penalized model with unpenalized logistic refits.
+
+    - name: patientID
+      title: Patient ID (optional duplicate check)
+      type: Variable
+      default: NULL
+      suggested: [ nominal ]
+      permitted: [ factor, numeric ]
+      description:
+        R: >
+          Optional identifier for independent patients. Repeated or missing IDs among
+          analyzed rows are rejected. Each row is otherwise assumed independent;
+          repeated lesions, visits, or readings require a patient-level summary or
+          a method that accounts for clustering.
 
 ...

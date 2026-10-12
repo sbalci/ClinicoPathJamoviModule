@@ -9,6 +9,7 @@ items:
       type: Html
       clearWith:
           - outcome
+          - patientID
           - outcomeLevel
           - explanatory
 
@@ -17,6 +18,7 @@ items:
       type: Html
       clearWith:
           - outcome
+          - patientID
           - outcomeLevel
           - explanatory
           - lambda
@@ -34,6 +36,7 @@ items:
       visible: (suitabilityCheck)
       clearWith:
           - outcome
+          - patientID
           - outcomeLevel
           - explanatory
           - suitabilityCheck
@@ -51,6 +54,7 @@ items:
           type: text
       clearWith:
           - outcome
+          - patientID
           - outcomeLevel
           - explanatory
           - lambda
@@ -86,6 +90,7 @@ items:
           format: zto
       clearWith:
           - outcome
+          - patientID
           - outcomeLevel
           - explanatory
           - lambda
@@ -112,6 +117,7 @@ items:
           type: text
       clearWith:
           - outcome
+          - patientID
           - outcomeLevel
           - explanatory
           - lambda
@@ -157,6 +163,7 @@ items:
           type: integer
       clearWith:
           - outcome
+          - patientID
           - outcomeLevel
           - explanatory
           - lambda
@@ -184,6 +191,7 @@ items:
           type: text
       clearWith:
           - outcome
+          - patientID
           - outcomeLevel
           - explanatory
           - lambda
@@ -225,6 +233,7 @@ items:
           type: text
       clearWith:
           - outcome
+          - patientID
           - outcomeLevel
           - explanatory
           - lambda
@@ -239,7 +248,7 @@ items:
           - scoreCutPoints
 
     - name: lookupTable
-      title: Score-to-Probability Lookup
+      title: Score Lookup (Observed Event Rates)
       type: Table
       visible: (scoringSystem && scoreLookupTable)
       rows: 0
@@ -253,8 +262,10 @@ items:
         - name: n_events
           title: "Events"
           type: integer
+        # Observed in-sample event rate per score stratum (events / N), not a model
+        # prediction: it need not rise with the score. The name stays for saved files.
         - name: probability
-          title: "Predicted Probability"
+          title: "Observed Event Rate"
           type: number
           format: zto
         - name: risk_group
@@ -262,6 +273,7 @@ items:
           type: text
       clearWith:
           - outcome
+          - patientID
           - outcomeLevel
           - explanatory
           - lambda
@@ -298,6 +310,7 @@ items:
           format: zto
       clearWith:
           - outcome
+          - patientID
           - outcomeLevel
           - explanatory
           - lambda
@@ -318,6 +331,7 @@ items:
       refs: glmnet
       clearWith:
           - outcome
+          - patientID
           - outcomeLevel
           - explanatory
           - lambda
@@ -337,6 +351,7 @@ items:
       refs: glmnet
       clearWith:
           - outcome
+          - patientID
           - outcomeLevel
           - explanatory
           - lambda
@@ -356,6 +371,7 @@ items:
       refs: pROC
       clearWith:
           - outcome
+          - patientID
           - outcomeLevel
           - explanatory
           - lambda
@@ -369,10 +385,11 @@ items:
       title: Predicted probabilities
       type: Output
       measureType: continuous
-      varTitle: 'Predicted Probability from LASSO Logistic'
-      varDescription: Predicted Probability Based on LASSO Logistic Model
+      varTitle: 'Predicted Probability from Penalized Logistic'
+      varDescription: Predicted Probability Based on Penalized Logistic Model
       clearWith:
           - outcome
+          - patientID
           - outcomeLevel
           - explanatory
           - lambda
@@ -389,6 +406,7 @@ items:
       clearWith:
           - showSummary
           - outcome
+          - patientID
           - outcomeLevel
           - explanatory
           - penalty
@@ -425,8 +443,14 @@ items:
           - scoringSystem
           - penalty
           - outcome
+          - patientID
           - explanatory
           - lambda
+
+          - outcomeLevel
+          - alpha
+          - nfolds
+          - random_seed
 
     - name: clinicalGuidance
       title: Clinical Interpretation Guidance
@@ -458,6 +482,7 @@ items:
       clearWith:
           - showVariableImportance
           - outcome
+          - patientID
           - outcomeLevel
           - explanatory
           - lambda
@@ -468,7 +493,7 @@ items:
           - random_seed
 
     - name: modelComparison
-      title: LASSO vs Unpenalized Logistic
+      title: Penalized vs Unpenalized Logistic
       type: Table
       visible: (showModelComparison)
       rows: 0
@@ -495,6 +520,7 @@ items:
       clearWith:
           - showModelComparison
           - outcome
+          - patientID
           - outcomeLevel
           - explanatory
           - lambda
