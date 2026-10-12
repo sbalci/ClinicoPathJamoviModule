@@ -5498,7 +5498,7 @@ analyses:
     name: lassologistic
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecide
+    menuGroup: meddecideT
     menuSubgroup: Prediction Models
     menuTitle: LASSO Logistic
     menuSubtitle: Penalized feature selection for binary classification

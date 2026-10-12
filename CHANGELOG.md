@@ -5,6 +5,29 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-10-12 — lassologistic: ordinal predictors, scoring eponyms, an unseen plot line
+
+- **Failure mode:** an Ordinal (ordered-factor) predictor went through `model.matrix`
+  with R's default `contr.poly`, so the tables showed `grade.L`/`grade.Q`, and the score
+  printed "grade.Q: present" while awarding that point to grades 1 and 3. Separately,
+  "Schneeweiss" divided by the smallest coefficient (Schneeweiss 2003 adds a point per
+  0.3 ln OR), Beta10 was cited to a paper that rounds beta with no x10, and the ROC plot
+  drew `abline(0, 1)` on pROC's specificity axis: the anti-diagonal, beside pROC's own
+  chance line.
+- **Detection:** `/validate-function` with an ordered-factor fixture and module internals
+  for which rows earn a point; citations read in the primary text or open-access papers
+  that cite them. The plot line was missed by that validation (the renderer ran, the PNG
+  was never looked at) and found only when the fixed plot was opened.
+- **Repair:** pin `contr.treatment` for every factor locally (`withr::with_options`),
+  rename the method key to `smallest` and re-cite, remove the extra diagonal; regression
+  tests `VAL-lassologistic-01..11` in `tests/testthat/test-lassologistic-validation.R`.
+- **Rule:** never let a design matrix inherit `options("contrasts")`; jamovi delivers
+  Ordinal as `ordered`. An eponymous method is verified against the eponym's own paper,
+  not against a secondary source that names it. A plot audit means opening the image,
+  not only proving it renders. `clinicalscore` carries the same Schneeweiss label.
+
+---
+
 ## 2026-10-11 — dual ROC comparison: PR estimators diverged after a sibling repair
 
 - **Failure mode:** `enhancedROC` used count-interpolated PR area while

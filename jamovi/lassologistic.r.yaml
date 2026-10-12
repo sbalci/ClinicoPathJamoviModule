@@ -144,10 +144,10 @@ items:
           title: "Beta10"
           type: integer
           visible: (scoringMethod == 'beta10' || scoringMethod == 'compare')
-        - name: points_schneeweiss
-          title: "Schneeweiss"
+        - name: points_smallest
+          title: "Smallest-unit"
           type: integer
-          visible: (scoringMethod == 'schneeweiss' || scoringMethod == 'compare')
+          visible: (scoringMethod == 'smallest' || scoringMethod == 'compare')
         - name: points_maxscaled
           title: "Max-scaled"
           type: integer
@@ -508,4 +508,16 @@ refs:
     - ClinicoPathJamoviModule
     - glmnet
     - pROC
+    - Tibshirani1996
+    - Friedman2010
+    - DeLong1988
+    - Robin2011
+    - Harrell1996
+    - HosmerLemeshow2013
+    - Mehta2016
+    - Sullivan2004
+    - Peduzzi1996
+    - Riley2019
+    - Riley2020
+    - Riley2021
 ...

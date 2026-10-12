@@ -13,7 +13,7 @@ ll <- function(data, ...) {
     suitabilityCheck = FALSE,
     bootstrapValidation = FALSE, bootstrapN = 50,
     cv_plot = FALSE, coef_plot = FALSE, roc_plot = FALSE,
-    scoringSystem = FALSE, scoringMethod = "schneeweiss",
+    scoringSystem = FALSE, scoringMethod = "smallest",
     scoringMaxPoints = 10, scoreLookupTable = FALSE,
     showSummary = FALSE, showExplanations = FALSE,
     showMethodologyNotes = FALSE, includeClinicalGuidance = FALSE,
@@ -105,7 +105,7 @@ test_that("Scoring system generates points and lookup table", {
   result <- ll(d, outcome = "y", outcomeLevel = "pos",
                explanatory = c("x1", "x2"),
                scoringSystem = TRUE, scoreLookupTable = TRUE,
-               scoringMethod = "schneeweiss")
+               scoringMethod = "smallest")
 
   score_df <- result$scoringTable$asDF
   expect_true(nrow(score_df) >= 1)
@@ -130,7 +130,7 @@ test_that("Method comparison produces 4 rows (3 methods + full model)", {
                scoringSystem = TRUE, scoringMethod = "compare")
 
   comp_df <- result$methodComparison$asDF
-  expect_equal(nrow(comp_df), 4)  # Beta10, Schneeweiss, Max-scaled, Full model
+  expect_equal(nrow(comp_df), 4)  # Beta10, Smallest-unit, Max-scaled, Full model
 })
 
 test_that("Majority-present binary predictor contributes to the score (standardized)", {
@@ -1065,7 +1065,7 @@ test_that("stripping backticks cannot collide two columns onto one name", {
 
 test_that("a degenerate point scale is flagged, not silently emitted", {
   skip_if_not_installed("glmnet")
-  # Schneeweiss divides by the SMALLEST contribution. Ridge is exempt from the
+  # Smallest-unit divides by the SMALLEST contribution. Ridge is exempt from the
   # selection tolerance, so a ~1e-14 coefficient can become the denominator:
   # the ratio then exceeded .Machine$integer.max and as.integer() returned NA,
   # blanking the two REAL predictors while the noise one kept the only point.
@@ -1079,7 +1079,7 @@ test_that("a degenerate point scale is flagged, not silently emitted", {
   res <- ll(d, outcome = "dx", outcomeLevel = "case",
             explanatory = c("big", "small", "age", "z"),
             penalty = "ridge", standardize = FALSE,
-            scoringSystem = TRUE, scoringMethod = "schneeweiss")
+            scoringSystem = TRUE, scoringMethod = "smallest")
 
   st <- res$scoringTable$asDF
   expect_gt(nrow(st), 0)

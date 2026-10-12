@@ -22,7 +22,7 @@ lassologisticOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             coef_plot = TRUE,
             roc_plot = TRUE,
             scoringSystem = FALSE,
-            scoringMethod = "schneeweiss",
+            scoringMethod = "smallest",
             scoringMaxPoints = 10,
             scoreCutMethod = "median",
             scoreCutPoints = "",
@@ -134,10 +134,10 @@ lassologisticOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 scoringMethod,
                 options=list(
                     "beta10",
-                    "schneeweiss",
+                    "smallest",
                     "maxscaled",
                     "compare"),
-                default="schneeweiss")
+                default="smallest")
             private$..scoringMaxPoints <- jmvcore::OptionInteger$new(
                 "scoringMaxPoints",
                 scoringMaxPoints,
@@ -313,7 +313,19 @@ lassologisticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 refs=list(
                     "ClinicoPathJamoviModule",
                     "glmnet",
-                    "pROC"))
+                    "pROC",
+                    "Tibshirani1996",
+                    "Friedman2010",
+                    "DeLong1988",
+                    "Robin2011",
+                    "Harrell1996",
+                    "HosmerLemeshow2013",
+                    "Mehta2016",
+                    "Sullivan2004",
+                    "Peduzzi1996",
+                    "Riley2019",
+                    "Riley2020",
+                    "Riley2021"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -463,10 +475,10 @@ lassologisticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `type`="integer", 
                         `visible`="(scoringMethod == 'beta10' || scoringMethod == 'compare')"),
                     list(
-                        `name`="points_schneeweiss", 
-                        `title`="Schneeweiss", 
+                        `name`="points_smallest", 
+                        `title`="Smallest-unit", 
                         `type`="integer", 
-                        `visible`="(scoringMethod == 'schneeweiss' || scoringMethod == 'compare')"),
+                        `visible`="(scoringMethod == 'smallest' || scoringMethod == 'compare')"),
                     list(
                         `name`="points_maxscaled", 
                         `title`="Max-scaled", 
@@ -902,19 +914,27 @@ lassologisticBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param roc_plot Show ROC curve with AUC and confidence interval.
 #' @param scoringSystem Convert model coefficients to an integer-point scoring
 #'   system. Multiple methods available following published standards.
-#' @param scoringMethod Method for converting regression coefficients to
-#'   integer points. Beta10: multiply by 10, round (Zhang et al. 2017).
-#'   Schneeweiss: divide by smallest absolute coefficient (Mehta et al. 2016).
-#'   Max-scaled: divide by the largest absolute coefficient and multiply by
-#'   scoringMaxPoints, so the strongest predictor scores exactly the maximum.
-#'   This option was previously labelled "Sullivan/D'Agostino"; it is not the
-#'   Sullivan 2004 Framingham procedure, which awards points per category of
-#'   each factor relative to a reference factor's per-category distance.
-#'   Compare: generate all three and show performance comparison.
+#' @param scoringMethod Method for converting each predictor's log-odds
+#'   contribution (the coefficient times the contrast its criterion applies) to
+#'   integer points. Beta10: multiply by 10 and round (the Beta10/integer method
+#'   of Mehta et al. 2016). Smallest: divide by the smallest contribution and
+#'   round, a Sullivan-type scale with one point per smallest contribution
+#'   (Sullivan et al. 2004); contributions below 1e-8 of the largest are not
+#'   used as the divisor. This option was previously labelled "Schneeweiss";
+#'   Schneeweiss et al. 2003 instead add one point per 0.3 increase in the log
+#'   odds ratio. Max-scaled: divide by the largest absolute coefficient and
+#'   multiply by scoringMaxPoints, so the strongest predictor scores exactly the
+#'   maximum. This option was previously labelled "Sullivan/D'Agostino"; it is
+#'   not the Sullivan 2004 Framingham procedure, which awards points per
+#'   category of each factor relative to a reference factor's per-category
+#'   distance. Compare: generate all three and show performance comparison.
+#'   Every method gives a selected predictor at least one point (of its sign)
+#'   when its points would round to zero, and caps a single predictor at 1000
+#'   points.
 #' @param scoringMaxPoints Points assigned to the strongest predictor in the
 #'   Max-scaled method. The Beta10 method uses a fixed x10 coefficient scaling
-#'   and ignores this value; the Schneeweiss method scales by the smallest
-#'   coefficient and also ignores it.
+#'   and ignores this value; the Smallest method scales by the smallest
+#'   contribution and also ignores it.
 #' @param scoreCutMethod How continuous predictors are dichotomized when
 #'   awarding points. A predictor earns its points when the patient's value
 #'   exceeds this cut. 'median' (the default) splits at the sample median, which
@@ -988,7 +1008,7 @@ lassologistic <- function(
     coef_plot = TRUE,
     roc_plot = TRUE,
     scoringSystem = FALSE,
-    scoringMethod = "schneeweiss",
+    scoringMethod = "smallest",
     scoringMaxPoints = 10,
     scoreCutMethod = "median",
     scoreCutPoints = "",

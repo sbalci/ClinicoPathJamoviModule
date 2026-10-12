@@ -16,10 +16,11 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
         private = list(
             # ══════════════════════════════════════════════════════════════════
             # Notice collection (HTML-based)
-            # jmvcore::Notice objects inserted via self$results$insert() carry
-            # function references that break jamovi's protobuf serialization
-            # ("attempt to apply non-function"). Collect notices here and render
-            # them into a single Html output item instead. See waterfall.b.R.
+            # Notices are collected here and rendered into one Html item because
+            # jmvcore::Notice content renders as escaped single-line text and these
+            # panels need richer text. (jmvcore::Notice itself serializes fine; the
+            # old "attempt to apply non-function" came from Group$insert() past the
+            # end of the results list - see CLAUDE.md, corrected 2026-09-22.)
             # ══════════════════════════════════════════════════════════════════
             .noticeList = list(),
             .addNotice = function(type, title, content) {
@@ -77,7 +78,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     performance = list(
                         label = "metric", fill = c("value", "interpretation"),
                         rows = c(
-                            auc = .("AUC (apparent)"),
+                            auc = .("AUC (apparent; DeLong 95% CI)"),
                             threshold = .("Optimal threshold"),
                             accuracy = .("Accuracy"),
                             sensitivity = .("Sensitivity (Recall)"),
@@ -109,12 +110,12 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         label = "method", fill = c("auc", "accuracy", "info_loss"),
                         rows = c(
                             beta10 = "Beta10",
-                            schneeweiss = "Schneeweiss",
+                            smallest = .("Smallest-unit"),
                             maxscaled = .("Max-scaled"),
                             full = .("Full LASSO model (continuous)")),
                         static = list(reference = c(
-                            beta10 = "Zhang et al. 2017",
-                            schneeweiss = "Mehta et al. 2016",
+                            beta10 = "Mehta et al. 2016",
+                            smallest = .("Sullivan-type (Sullivan et al. 2004), B = smallest contribution"),
                             maxscaled = .("beta / max|beta| x maximum points"),
                             full = .("Reference (no rounding)"))))
                 )
@@ -426,8 +427,18 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     jmvcore::reject(.("At least 2 explanatory variables are required for LASSO regression."))
                 }
 
-                outcome_raw <- data[[outcome_var]]
+                # An explicit NA level (addNA(), R API only) is a missing value, not a
+                # category: it passed complete.cases() and became a model term, and a
+                # missing outcome was reported as "outcome level not modelled".
+                # levels = levels(x) keeps unused levels (a bare factor() drops them).
+                drop_na_level <- function(x)
+                    if (is.factor(x) && anyNA(levels(x))) factor(x, levels = levels(x), exclude = NA) else x
+                outcome_raw <- drop_na_level(data[[outcome_var]])
                 predictors <- data[explanatory_vars]
+                predictors[] <- lapply(predictors, drop_na_level)
+                # jamovi delivers an Ordinal column as an ORDERED factor. Recorded here
+                # so the coefficient table can say how it was coded (see model.matrix).
+                ordinal_vars <- names(predictors)[vapply(predictors, is.ordered, logical(1))]
 
                 # Determine event coding
                 if (is.factor(outcome_raw) || is.character(outcome_raw)) {
@@ -557,9 +568,16 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Build design matrix
                 pred_cc <- predictors[complete, , drop = FALSE]
+                # Treatment contrasts for EVERY factor, ordered ones included. R's default
+                # codes an ordered factor with orthogonal polynomials (grade.L, grade.Q):
+                # odds ratios per unit of a polynomial contrast, and a scoring rule that
+                # gave the grade.Q points to grades 1 AND 3 while printing "present".
+                # Pinned locally so a session-wide options(contrasts) cannot change it.
                 X <- tryCatch(
                     {
-                        mm <- model.matrix(~., data = pred_cc)
+                        mm <- withr::with_options(
+                            list(contrasts = c(unordered = "contr.treatment", ordered = "contr.treatment")),
+                            model.matrix(~., data = pred_cc))
                         mm[, -1, drop = FALSE] # remove intercept
                     },
                     error = function(e) {
@@ -589,12 +607,11 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # Optional standardization.
                 #
                 # Keep the centre/scale so downstream output can be expressed on the
-                # ORIGINAL measurement scale. glmnet's own standardize=TRUE returns
-                # coefficients back-transformed to the original scale; because this
-                # code scales the matrix itself and then passes standardize=FALSE,
-                # no back-transformation happens and every coefficient stays on the
-                # z-scale. beta_original = beta_z / sd reproduces exactly what
-                # glmnet(standardize=TRUE) would have returned.
+                # ORIGINAL measurement scale. This code scales the matrix itself (sample
+                # SD, n - 1) and passes standardize=FALSE, so glmnet returns z-scale
+                # coefficients and beta_original = beta_z / sd recovers the per-unit
+                # coefficient. It is close to, not identical with, glmnet's own
+                # standardize=TRUE, which scales by the 1/n SD inside each CV fold.
                 X_center <- rep(0, ncol(X))
                 X_sd <- rep(1, ncol(X))
                 names(X_center) <- names(X_sd) <- colnames(X)
@@ -628,6 +645,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     n_nonevents = n_nonevents,
                     p = ncol(X),
                     complete_idx = which(complete),
+                    ordinal_vars = intersect(ordinal_vars, explanatory_vars),
                     event_level = event_level,
                     ref_level = ref_level,
                     explanatory_vars = explanatory_vars
@@ -760,7 +778,8 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     "<table class='table table-condensed'><thead>",
                     "<tr><th></th><th>", .("Check"), "</th><th>", .("Result"), "</th></tr></thead><tbody>",
                     paste(rows, collapse = ""),
-                    "</tbody></table>"
+                    "</tbody></table>",
+                    "<p>", .("The EPV threshold of 10 comes from Peduzzi et al. (1996); the other bands are conventions. Rules of thumb like these should give way to sample-size criteria for prediction models (Riley et al. 2019, 2020), and penalization does not make a small sample reliable (Riley et al. 2021)."), "</p>"
                 )
                 # Only the PANEL is optional; the notices below always fire.
                 if (isTRUE(self$options$suitabilityCheck))
@@ -1038,6 +1057,10 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 ctr <- if (!is.null(data) && !is.null(data$X_center)) data$X_center else NULL
                 sdv <- if (!is.null(data) && !is.null(data$X_sd)) data$X_sd else NULL
                 b0 <- fit$intercept
+                ord <- if (!is.null(data)) data$ordinal_vars else character(0)
+                table$setNote("ordinal_note", if (length(ord) > 0) sprintf(
+                    .("Ordinal predictor(s) %s are coded with one indicator per level, each compared with that predictor's lowest level; they are not modelled as a linear trend."),
+                    jmvcore::htmlEscape(paste(ord, collapse = ", "))) else NULL)
                 if (length(fit$selected) > 0 && !is.null(ctr) && !is.null(sdv)) {
                     sel <- fit$selected
                     b0 <- b0 - sum(fit$selected_coefs * ctr[sel] / sdv[sel])
@@ -1093,20 +1116,15 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # LASSO penalization yields biased, shrunken coefficients without a
                 # valid closed-form sampling distribution, so standard confidence
                 # intervals are not reported here (naive post-selection CIs have
-                # incorrect coverage). Enable bootstrap validation for optimism-
-                # corrected performance, or refit an unpenalized model on the
-                # selected variables (Model Comparison) for classical inference.
-                # Point at the Model Comparison table only when the user can
-                # actually see it - it is hidden behind showModelComparison, which
-                # is off by default, so the old wording named an output that was
-                # not on screen and gave no way to get to it.
-                unpen_hint <- if (isTRUE(self$options$showModelComparison))
-                    .("or the Model Comparison table for unpenalized estimates on the selected variables.")
-                else
-                    .("or tick 'Model comparison analysis' under Explanatory Output to see unpenalized estimates on the selected variables.")
-                table$setNote("ci_note", paste(
-                    .("LASSO coefficients are penalized (shrunken) and have no valid standard confidence intervals; they are omitted rather than shown as blanks. Use bootstrap validation for performance inference,"),
-                    unpen_hint))
+                # incorrect coverage). Bootstrap validation gives optimism-corrected
+                # PERFORMANCE, not coefficient inference; the unpenalized refit
+                # (Model Comparison) is a descriptive comparison, not valid
+                # post-selection inference either.
+                # The old tail pointed to the Model Comparison table "for unpenalized
+                # estimates on the selected variables"; that table reports AUC, AIC and
+                # Brier only, no estimates.
+                table$setNote("ci_note",
+                    .("LASSO coefficients are penalized (shrunken) and have no valid standard confidence intervals; they are omitted rather than shown as blanks. Bootstrap validation estimates optimism-corrected performance (AUC, Brier score, calibration slope), not coefficient uncertainty."))
                 if (isTRUE(self$options$standardize)) {
                     table$setNote("scale_note", .("Predictors were standardized before fitting so that the penalty treats them comparably, but the Coefficient and Odds Ratio columns are reported on the ORIGINAL measurement scale (per 1 unit of a continuous predictor, or present vs absent for a binary one). The Importance column is the per-standard-deviation magnitude, which is what can be compared across predictors with different units. Odds ratios remain penalized (shrunk toward 1)."))
                 }
@@ -1182,6 +1200,10 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # perfectly separating.
                 perfect <- !is.na(auc_val) &&
                     (auc_val >= 1 || (!is.na(auc_ci_lower) && auc_ci_lower >= 1))
+                # Grade on the AUC as DISPLAYED (3 decimals). A raw 0.79965 printed as
+                # 0.800 was graded "Acceptable" while the cell beside it said 0.800.
+                # Separation detection above keeps the raw value.
+                auc_shown <- if (is.na(auc_val)) NA_real_ else round(auc_val, 3)
 
                 predicted_class <- ifelse(fit$probabilities >= optimal_threshold, 1, 0)
                 accuracy <- mean(predicted_class == data$y)
@@ -1212,12 +1234,13 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         else sprintf("%.3f (%.3f-%.3f)", auc_val, auc_ci_lower, auc_ci_upper),
                         if (is.na(auc_val)) .("AUC could not be computed")
                         else if (perfect) .("Perfect in-sample separation - see note")
-                        else if (auc_val >= 0.9) .("Excellent") else if (auc_val >= 0.8) .("Good")
-                        else if (auc_val >= 0.7) .("Acceptable")
+                        # Hosmer, Lemeshow & Sturdivant (2013) tiers; footnoted as a convention.
+                        else if (auc_shown >= 0.9) .("Outstanding") else if (auc_shown >= 0.8) .("Excellent")
+                        else if (auc_shown >= 0.7) .("Acceptable")
                         # "Poor" graded 0.68 and 0.41 identically. An AUC below 0.5
                         # is not merely weak: the model ranks cases the wrong way
                         # round, and the reader must be told which of the two it is.
-                        else if (auc_val >= 0.5) .("Poor")
+                        else if (auc_shown >= 0.5) .("Poor")
                         else .("Worse than chance - ranking is inverted")
                     ),
                     # .fmtNum, not sprintf: precision and f1 are NA_real_ when the
@@ -1243,9 +1266,12 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             if (!is.finite(null_brier) || null_brier <= 0) {
                                 .("Not interpretable")
                             } else {
-                                bss <- 1 - brier / null_brier   # Brier skill score
-                                if (bss >= 0.25) sprintf(.("Good (%.0f%% better than predicting the base rate)"), 100 * bss)
-                                else if (bss > 0) sprintf(.("Marginal (%.0f%% better than base rate)"), 100 * bss)
+                                # Brier skill score, graded at the precision it is printed.
+                                # `bss > 0` on the raw value let a model predicting exactly
+                                # the base rate (skill +1e-16) read "Marginal (0% better)".
+                                # No grade word: the old Good (>= 25%)/Marginal cut had no source.
+                                bss_pct <- round(100 * (1 - brier / null_brier))
+                                if (bss_pct > 0) sprintf(.("%.0f%% better than predicting the base rate (Brier skill score)"), bss_pct)
                                 else .("No better than predicting the base rate")
                             }
                         }
@@ -1257,6 +1283,22 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         value = rows[[key]][[1]], interpretation = rows[[key]][[2]]
                     ))
                 }
+
+                # DeLong's interval treats these fitted probabilities as a fixed marker.
+                # They were fitted, and their variables and lambda selected, on the same
+                # rows: in simulation (n = 100) the interval covered the model's
+                # out-of-sample AUC in 83% of datasets, and with no signal at all it
+                # excluded 0.5 in 8.5% of them. Shown only when there is an interval to
+                # qualify (a constant score's 0.5-0.5 is exact; AUC 1 has none).
+                constant_score <- length(unique(round(fit$probabilities, 12))) < 2
+                table$setNote("auc_ci_note",
+                    if (!is.na(auc_val) && !perfect && !constant_score && !is.na(auc_ci_lower))
+                        .("The interval beside the apparent AUC is DeLong's 95% CI computed on these fitted probabilities as if they were a fixed, pre-specified marker. It does not account for fitting the coefficients or for selecting the variables and lambda on the same patients, so it is centred on an optimistic estimate and can under-cover the model's discrimination in new patients. Enable Bootstrap Internal Validation for an optimism-corrected AUC.")
+                    else NULL)
+
+                table$setNote("auc_band_note", if (!is.na(auc_val) && !perfect)
+                    .("AUC bands follow the convention of Hosmer, Lemeshow and Sturdivant (2013): below 0.7 poor, 0.7 to 0.8 acceptable, 0.8 to 0.9 excellent, 0.9 and above outstanding. They are graded on the AUC as displayed.")
+                    else NULL)
 
                 table$setNote(
                     "threshold_note",
@@ -1302,7 +1344,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     )
                 }
 
-                if (!is.na(auc_val) && !perfect && auc_val > 0.95 && data$n < 100) {
+                if (!is.na(auc_val) && !perfect && auc_shown > 0.95 && data$n < 100) {
                     table$setNote(
                         "overfit_warning",
                         .("Warning: Very high apparent AUC with small sample size suggests possible overfitting. Enable bootstrap validation to assess optimism.")
@@ -1320,7 +1362,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # STRONG_WARNING, not a plain WARNING, and an AUC below chance is an
                 # ERROR: a 0.41 model used to carry exactly the same yellow weight as
                 # a merely weak 0.68 one, with nothing saying the ranking is inverted.
-                if (!is.na(auc_val) && auc_val < 0.5) {
+                if (!is.na(auc_val) && auc_shown < 0.5) {
                     private$.addNotice(
                         "ERROR", .("Discrimination Worse Than Chance"),
                         sprintf(
@@ -1328,11 +1370,11 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             auc_val
                         )
                     )
-                } else if (!is.na(auc_val) && auc_val < 0.7) {
+                } else if (!is.na(auc_val) && auc_shown < 0.7) {
                     private$.addNotice(
                         "STRONG_WARNING", .("Poor Discrimination"),
                         sprintf(
-                            .("AUC = %.3f indicates poor discrimination and is below the level generally regarded as clinically usable. Consider adding more informative predictors or using a different model."),
+                            .("AUC = %.3f is in the poor band (below 0.7) of the Hosmer-Lemeshow convention. Consider adding more informative predictors or using a different model."),
                             auc_val
                         )
                     )
@@ -1398,7 +1440,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # Guard the reference denominator against a numerically negligible
                 # contribution. Ridge is deliberately exempt from the selection
                 # tolerance (it selects nothing), so a coefficient of ~1e-14 can
-                # reach here; Schneeweiss then divides by it, the ratio exceeds
+                # reach here; Smallest-unit then divides by it, the ratio exceeds
                 # .Machine$integer.max, and as.integer() returns NA -- the two REAL
                 # predictors came out blank while the noise one kept the only point.
                 # Anything below this fraction of the largest contribution carries
@@ -1414,9 +1456,12 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     as.integer(pmax(pmin(round(pts), MAX_ABS_POINTS), -MAX_ABS_POINTS))
                 }
 
+                # Points that round to 0 are raised to +/-1 so every selected predictor
+                # counts. Recorded (attr "promoted") so the table can disclose it.
+                promoted <- rep(FALSE, length(coefs))
                 if (method == "beta10") {
-                    # Zhang et al. 2017 ("Beta10"): multiply each coefficient by a
-                    # FIXED factor of 10 and round. This preserves absolute
+                    # Beta10 (the "Beta10/integer" method of Mehta et al. 2016): multiply
+                    # each coefficient by a FIXED factor of 10 and round. This preserves absolute
                     # coefficient magnitude and is deliberately distinct from the
                     # max-scaled method below. (A previous version
                     # renormalized the largest |coef| to max_points, which made Beta10
@@ -1424,14 +1469,19 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # Methods".) max_points is intentionally NOT used here.
                     pts <- clamp(coefs * 10)
                     # Ensure every selected (non-zero) predictor contributes >= 1 point
-                    pts[pts == 0 & coefs != 0] <- signs[pts == 0 & coefs != 0]
-                } else if (method == "schneeweiss") {
-                    # Mehta et al. 2016: divide by smallest absolute coefficient
-                    # (smallest MEANINGFUL one - see NEGLIGIBLE above)
+                    promoted <- pts == 0 & coefs != 0
+                    pts[promoted] <- signs[promoted]
+                } else if (method == "smallest") {
+                    # One point per smallest MEANINGFUL contribution (see NEGLIGIBLE
+                    # above): a Sullivan-type scale with constant B = that contribution
+                    # (Sullivan et al. 2004). Labelled "Schneeweiss" until 2026-10-12,
+                    # which it is not: Schneeweiss et al. 2003 add one point per 0.3
+                    # increase in ln(OR).
                     min_abs <- if (any(usable)) min(abs_coefs[usable]) else scale_ref
                     if (!is.finite(min_abs) || min_abs <= 0) min_abs <- 1
                     pts <- clamp(coefs / min_abs)
-                    pts[pts == 0 & coefs != 0] <- signs[pts == 0 & coefs != 0]
+                    promoted <- pts == 0 & coefs != 0
+                    pts[promoted] <- signs[promoted]
                 } else if (method == "maxscaled") {
                     # Max-scaled: Points = beta_i / max|beta| * max_points, so the strongest
                     # predictor scores exactly max_points and the others keep their ratios.
@@ -1443,14 +1493,17 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         return(rep(0L, length(coefs)))
                     }
                     pts <- clamp((coefs / W) * max_points)
-                    pts[pts == 0 & coefs != 0] <- signs[pts == 0 & coefs != 0]
+                    promoted <- pts == 0 & coefs != 0
+                    pts[promoted] <- signs[promoted]
                 } else {
                     W <- max(abs_coefs)
                     if (!is.finite(W) || W == 0) return(rep(0L, length(coefs)))
                     pts <- clamp(coefs * max_points / W)
                 }
 
-                as.integer(pts)
+                out <- as.integer(pts)
+                attr(out, "promoted") <- promoted
+                out
             },
 
             # ── Safe read of an option the compiled .h.R may not carry yet ──
@@ -1792,7 +1845,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 }
 
                 method <- self$options$scoringMethod
-                if (is.null(method)) method <- "schneeweiss"
+                if (is.null(method)) method <- "smallest"
                 max_points <- self$options$scoringMaxPoints
 
                 vars <- fit$selected
@@ -1813,16 +1866,16 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Compute points by all three methods
                 pts_beta10 <- private$.computePoints(coefs, "beta10", max_points)
-                pts_schneeweiss <- private$.computePoints(coefs, "schneeweiss", max_points)
+                pts_smallest <- private$.computePoints(coefs, "smallest", max_points)
                 pts_maxscaled <- private$.computePoints(coefs, "maxscaled", max_points)
 
                 # Select primary method's points
                 pts_primary <- switch(method,
                     "beta10" = pts_beta10,
-                    "schneeweiss" = pts_schneeweiss,
+                    "smallest" = pts_smallest,
                     "maxscaled" = pts_maxscaled,
-                    "compare" = pts_schneeweiss, # default to Schneeweiss for primary
-                    pts_schneeweiss
+                    "compare" = pts_smallest, # Smallest-unit is the primary in compare mode
+                    pts_smallest
                 )
 
                 # Build score data
@@ -1833,7 +1886,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     criterion = private$.scoreCriteria(data, vars, cuts),
                     direction = ifelse(coefs > 0, .("Positive (+)"), .("Negative (-)")),
                     points_beta10 = pts_beta10,
-                    points_schneeweiss = pts_schneeweiss,
+                    points_smallest = pts_smallest,
                     points_maxscaled = pts_maxscaled,
                     points = pts_primary,
                     stringsAsFactors = FALSE
@@ -1849,7 +1902,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         criterion = score_data$criterion[i],
                         direction = score_data$direction[i],
                         points_beta10 = score_data$points_beta10[i],
-                        points_schneeweiss = score_data$points_schneeweiss[i],
+                        points_smallest = score_data$points_smallest[i],
                         points_maxscaled = score_data$points_maxscaled[i],
                         points = score_data$points[i]
                     ))
@@ -1857,12 +1910,23 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Add method reference note
                 method_refs <- list(
-                    beta10 = .("Beta10 method (Zhang et al. Ann Transl Med 2017)"),
-                    schneeweiss = .("Schneeweiss method (Mehta et al. J Clin Epidemiol 2016)"),
+                    beta10 = .("Beta10 method: each contribution x 10, rounded (Mehta et al. J Clin Epidemiol 2016)"),
+                    smallest = .("Smallest-unit method: each contribution divided by the smallest, rounded; a Sullivan-type scale with one point per smallest contribution (Sullivan et al. Stat Med 2004)"),
                     maxscaled = .("Max-scaled method (strongest predictor = maximum points)"),
                     compare = .("All three methods shown for comparison")
                 )
                 table$setNote("method", method_refs[[method]])
+                # Which predictors were raised from 0 to +/-1 point, for every method shown.
+                shown <- if (method == "compare") c("beta10", "smallest", "maxscaled") else method
+                pts_by <- list(beta10 = pts_beta10, smallest = pts_smallest, maxscaled = pts_maxscaled)
+                lbl_by <- c(beta10 = "Beta10", smallest = .("Smallest-unit"), maxscaled = .("Max-scaled"))
+                promo <- unlist(lapply(shown, function(m) {
+                    v <- vars[attr(pts_by[[m]], "promoted")]
+                    if (length(v)) sprintf("%s (%s)", paste(v, collapse = ", "), lbl_by[[m]])
+                }))
+                table$setNote("promoted", if (length(promo)) sprintf(
+                    .("Raised from 0 to 1 point (of the predictor's sign) so that every selected predictor counts: %s. Their weight is overstated relative to the other predictors."),
+                    jmvcore::htmlEscape(paste(promo, collapse = "; "))) else NULL)
                 fellback <- attr(cuts, "fellback")
                 if (identical(private$.opt("scoreCutMethod", "median"), "manual") &&
                     !is.null(fellback) && length(fellback) > 0) {
@@ -1878,7 +1942,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 table$setNote("criterion_note", sprintf(.("Award a factor's points when the patient meets its criterion. Continuous predictors are cut at %s. The Odds Ratio column is the penalized odds ratio for MEETING that criterion (present vs absent, or above vs below the cut), which is the contrast the points represent - so points and odds ratios are on the same footing here. A cut derived from this dataset (median, mean, tertile or quartile) is not an externally established clinical threshold and will differ in another cohort; supplying manual cut points from the literature is what makes a score portable. The score has not been validated outside these data."), cut_label))
 
                 # A points system is only useful if a clinician can add it up at the
-                # bedside. Schneeweiss divides by the SMALLEST contribution, so one
+                # bedside. Smallest-unit divides by the SMALLEST contribution, so one
                 # near-zero predictor inflates every other weight - the guard in
                 # .computePoints stops that overflowing to NA, but a 1000-point scale
                 # is not a usable score and must not be presented as one.
@@ -1904,9 +1968,9 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # returns NULL and the Scoring method row is left blank.
                     method = switch(method,
                         "beta10" = "Beta10",
-                        "schneeweiss" = "Schneeweiss",
+                        "smallest" = .("Smallest-unit"),
                         "maxscaled" = .("Max-scaled"),
-                        "compare" = .("Schneeweiss (primary)"),
+                        "compare" = .("Smallest-unit (primary)"),
                         as.character(method)
                     ),
                     # .fmtNum, not sprintf: an NA metric (AUC when pROC is missing,
@@ -1957,7 +2021,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # discriminating cut point always beats it; best_cutoff == min means
                 # nothing did. (A constant score lands here too, which is correct.)
                 cutoff_collapsed <- is.finite(score_min) && isTRUE(perf$cutoff <= score_min)
-                score_inverted <- !is.na(perf$auc) && perf$auc < 0.5
+                score_inverted <- !is.na(perf$auc) && round(perf$auc, 3) < 0.5  # as displayed
                 if (cutoff_collapsed || score_inverted) {
                     # The note has to describe the rule the code ACTUALLY applied,
                     # in BOTH branches. The old fixed tail asserted "sensitivity
@@ -2018,7 +2082,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # references (see .fixedRowTables()); only the numbers are filled here.
                     methods_list <- list(
                         beta10 = pts_beta10,
-                        schneeweiss = pts_schneeweiss,
+                        smallest = pts_smallest,
                         maxscaled = pts_maxscaled
                     )
 
@@ -2239,7 +2303,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # variables, so the optimism is genuinely positive and subtracting
                 # it takes the estimate below chance. Left uncorrected on the
                 # screen it just looks broken, so say what it means.
-                if (!is.na(corrected_auc) && corrected_auc < 0.5) {
+                if (!is.na(corrected_auc) && round(corrected_auc, 3) < 0.5) {  # as displayed
                     table$setNote(
                         "below_chance",
                         sprintf(
@@ -2615,17 +2679,20 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     main = sprintf(.("ROC Curve (AUC = %s)"), auc_val),
                     col = "#0072B2", lwd = 2, print.auc = FALSE
                 )
-                if (!is.null(ci_obj)) {
-                    legend("bottomright",
-                        # Was the one unwrapped string in an otherwise translated
-                        # renderer. Positional %n$ markers because a translator must
-                        # be able to reorder three conversions.
-                        legend = sprintf(.("AUC = %1$s (95%% CI: %2$.3f-%3$.3f)"),
-                                         auc_val, ci_obj[1], ci_obj[3]),
-                        col = "#0072B2", lwd = 2, bty = "n", text.col = fg
-                    )
-                }
-                abline(a = 0, b = 1, lty = 2, col = "gray50")
+                # The caveat rides in the legend because an exported plot travels
+                # without the table's footnote. Positional %n$ markers so a translator
+                # can reorder the three conversions.
+                has_ci <- !is.null(ci_obj)
+                legend("bottomright",
+                    legend = c(if (has_ci) sprintf(.("AUC = %1$s (in-sample DeLong 95%% CI: %2$.3f-%3$.3f)"),
+                                                   auc_val, ci_obj[1], ci_obj[3]),
+                               .("Apparent (in-sample): does not account for model fitting or selection")),
+                    col = c(if (has_ci) "#0072B2", NA), lwd = c(if (has_ci) 2, NA),
+                    bty = "n", text.col = fg, cex = 0.8, inset = 0.02
+                )
+                # No extra diagonal: pROC already draws the chance line (identity = TRUE)
+                # on its specificity axis, where abline(0, 1) drew sensitivity =
+                # specificity instead - a second, wrong reference line.
                 TRUE
             },
 
@@ -2642,18 +2709,28 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # (reuse single-source apparent AUC from .fitLasso).
                 auc_val <- fit$apparent_auc
 
-                top_vars <- if (n_sel > 0) {
-                    paste(fit$selected[seq_len(min(5, n_sel))], collapse = ", ")
-                } else {
-                    .("none")
-                }
-
                 # Copy-ready report sentence (complete phrase; placeholders filled from results)
                 report <- sprintf(
-                    .("%1$s logistic regression with %2$s lambda selection and %3$d-fold cross-validation was applied to %4$d candidate variables (%5$d model terms after dummy coding) in %6$d patients (%7$d events, %8$d non-events). %9$d term(s) were retained: %10$s."),
+                    .("%1$s logistic regression with %2$s lambda selection and %3$d-fold cross-validation was applied to %4$d candidate variables (%5$d model terms after dummy coding) in %6$d patients (%7$d events, %8$d non-events)."),
                     penalty_name, private$.lambdaLabel(), fit$nfolds, data$n_vars, data$p, data$n,
-                    data$n_events, data$n_nonevents, n_sel, top_vars
+                    data$n_events, data$n_nonevents
                 )
+                # Retained terms by per-SD magnitude (|beta| x SD of the fitted column, so
+                # the order holds with or without standardization). This listed the first
+                # five in COLUMN order under "8 term(s) were retained:", silently dropping
+                # the second-strongest predictor of birthwt.
+                if (n_sel > 0) {
+                    mag <- abs(fit$selected_coefs) * private$.fitColSDs(data$X)[fit$selected]
+                    sel_sorted <- fit$selected[order(-mag)]
+                }
+                retained <- if (n_sel == 0) .("No term was retained.")
+                    else if (n_sel <= 5) sprintf(
+                        .("%1$d term(s) were retained (largest absolute standardized coefficient first): %2$s."),
+                        n_sel, paste(sel_sorted, collapse = ", "))
+                    else sprintf(
+                        .("%1$d terms were retained, including the five with the largest absolute standardized coefficients: %2$s (all are listed in the Selected Variables table)."),
+                        n_sel, paste(sel_sorted[1:5], collapse = ", "))
+                report <- paste(report, retained)
                 if (!is.na(auc_val)) {
                     report <- paste0(report, " ", sprintf(
                         .("Apparent (in-sample) discrimination was AUC = %.3f; enable Bootstrap Internal Validation for an optimism-corrected estimate."),
@@ -2709,13 +2786,13 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 self$results$methodologyNotes$setContent(paste0(
                     "<h4>", .("Technical Notes"), "</h4>",
                     "<ul>",
-                    .("<li>LASSO coefficients do not have standard errors or p-values. Use bootstrap validation for inference.</li>"),
+                    .("<li>LASSO coefficients do not have standard errors or p-values, and this analysis provides no coefficient inference. Bootstrap validation estimates optimism-corrected performance (AUC, Brier score, calibration slope), not coefficient uncertainty.</li>"),
                     standardize_note,
                     if (identical(self$options$penalty, "ridge"))
                         .("<li>With correlated predictors, Ridge shares the coefficient among them rather than picking one, which is one reason to prefer it when predictors are collinear.</li>")
                     else
                         .("<li>With correlated predictors, LASSO arbitrarily selects one from a group. Consider elastic net (alpha 0.5).</li>"),
-                    .("<li>Events-per-variable (EPV) should be >=10. Below 5, results are unreliable regardless of regularization.</li>"),
+                    .("<li>An events-per-variable (EPV) of 10 is a rule of thumb (Peduzzi et al. 1996), not a guarantee. Sample-size criteria for prediction models (Riley et al. 2019, 2020) are preferred, and penalization does not make a small sample reliable (Riley et al. 2021).</li>"),
                     .("<li>The scoring system rounds coefficients to integers, which loses precision but gains clinical usability.</li>"),
                     sprintf(.("<li>Continuous predictors in the scoring system are dichotomized at %s (set by 'Cut Point for Continuous Predictors'); the score-based performance therefore reflects a simplified point model and may differ from the continuous LASSO model's AUC.</li>"), private$.scoreCutLabel()),
                     .("<li>Bootstrap optimism correction estimates how much the apparent AUC overestimates true performance.</li>"),

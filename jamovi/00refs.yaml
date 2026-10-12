@@ -2616,7 +2616,7 @@ refs:
         author: Jerome Friedman, Trevor Hastie, Rob Tibshirani, Balasubramanian Narasimhan, Kenneth Tay, Noah Simon, James Yang, Jonathan Taylor
         year: 2026
         title: "glmnet: Lasso and Elastic-Net Regularized Generalized Linear Models"
-        publisher: "[R package version 5.0]. Retrieved from https://CRAN.R-project.org/package=glmnet"
+        publisher: "[R package version 5.1]. Retrieved from https://CRAN.R-project.org/package=glmnet"
         url: "https://CRAN.R-project.org/package=glmnet"
 
     glue:
@@ -5196,5 +5196,110 @@ refs:
         doi: 10.1002/sim.9148
         pmid: 34302372
         url: "https://doi.org/10.1002/sim.9148"
+
+    Tibshirani1996:
+        type: article
+        author: "Tibshirani, R."
+        year: 1996
+        title: "Regression shrinkage and selection via the lasso"
+        publisher: "Journal of the Royal Statistical Society: Series B (Methodological)"
+        volume: 58
+        issue: 1
+        pages: 267-288
+        doi: 10.1111/j.2517-6161.1996.tb02080.x
+        url: "https://doi.org/10.1111/j.2517-6161.1996.tb02080.x"
+
+    Friedman2010:
+        type: article
+        author: "Friedman, J., Hastie, T., & Tibshirani, R."
+        year: 2010
+        title: "Regularization paths for generalized linear models via coordinate descent"
+        publisher: Journal of Statistical Software
+        volume: 33
+        issue: 1
+        pages: 1-22
+        doi: 10.18637/jss.v033.i01
+        url: "https://doi.org/10.18637/jss.v033.i01"
+
+    Harrell1996:
+        type: article
+        author: "Harrell, F. E., Lee, K. L., & Mark, D. B."
+        year: 1996
+        title: "Multivariable prognostic models: issues in developing models, evaluating assumptions and adequacy, and measuring and reducing errors"
+        publisher: Statistics in Medicine
+        volume: 15
+        issue: 4
+        pages: 361-387
+        doi: "10.1002/(SICI)1097-0258(19960229)15:4<361::AID-SIM168>3.0.CO;2-4"
+        url: "https://pubmed.ncbi.nlm.nih.gov/8668867/"
+
+    Sullivan2004:
+        type: article
+        author: "Sullivan, L. M., Massaro, J. M., & D'Agostino, R. B."
+        year: 2004
+        title: "Presentation of multivariate data for clinical use: The Framingham Study risk score functions"
+        publisher: Statistics in Medicine
+        volume: 23
+        issue: 10
+        pages: 1631-1660
+        doi: 10.1002/sim.1742
+        url: "https://doi.org/10.1002/sim.1742"
+
+    Mehta2016:
+        type: article
+        author: "Mehta, H. B., Mehta, V., Girman, C. J., Adhikari, D., & Johnson, M. L."
+        year: 2016
+        title: "Regression coefficient-based scoring system should be used to assign weights to the risk index"
+        publisher: Journal of Clinical Epidemiology
+        volume: 79
+        pages: 22-28
+        doi: 10.1016/j.jclinepi.2016.03.031
+        url: "https://doi.org/10.1016/j.jclinepi.2016.03.031"
+
+    Peduzzi1996:
+        type: article
+        author: "Peduzzi, P., Concato, J., Kemper, E., Holford, T. R., & Feinstein, A. R."
+        year: 1996
+        title: "A simulation study of the number of events per variable in logistic regression analysis"
+        publisher: Journal of Clinical Epidemiology
+        volume: 49
+        issue: 12
+        pages: 1373-1379
+        doi: 10.1016/s0895-4356(96)00236-3
+        url: "https://doi.org/10.1016/s0895-4356(96)00236-3"
+
+    Riley2019:
+        type: article
+        author: "Riley, R. D., Snell, K. I. E., Ensor, J., Burke, D. L., Harrell, F. E., Moons, K. G. M., & Collins, G. S."
+        year: 2019
+        title: "Minimum sample size for developing a multivariable prediction model: PART II - binary and time-to-event outcomes"
+        publisher: Statistics in Medicine
+        volume: 38
+        issue: 7
+        pages: 1276-1296
+        doi: 10.1002/sim.7992
+        url: "https://doi.org/10.1002/sim.7992"
+
+    Riley2020:
+        type: article
+        author: "Riley, R. D., Ensor, J., Snell, K. I. E., Harrell, F. E., Martin, G. P., Reitsma, J. B., Moons, K. G. M., Collins, G., & van Smeden, M."
+        year: 2020
+        title: "Calculating the sample size required for developing a clinical prediction model"
+        publisher: BMJ
+        volume: 368
+        pages: m441
+        doi: 10.1136/bmj.m441
+        url: "https://doi.org/10.1136/bmj.m441"
+
+    Riley2021:
+        type: article
+        author: "Riley, R. D., Snell, K. I. E., Martin, G. P., Whittle, R., Archer, L., Sperrin, M., & Collins, G. S."
+        year: 2021
+        title: "Penalization and shrinkage methods produced unreliable clinical prediction models especially when sample size was small"
+        publisher: Journal of Clinical Epidemiology
+        volume: 132
+        pages: 88-96
+        doi: 10.1016/j.jclinepi.2020.12.005
+        url: "https://doi.org/10.1016/j.jclinepi.2020.12.005"
 
 ...
