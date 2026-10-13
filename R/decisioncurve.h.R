@@ -447,7 +447,7 @@ decisioncurveResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "Vickers2019DCA",
                     "Kerr2016DCA",
                     "Vickers2023DCAInference",
-                    "MandelBetensky2008"))
+                    "MontielOleaPlagborgMoller2019"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",
@@ -949,17 +949,17 @@ decisioncurveResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `type`="text"),
                     list(
                         `name`="nb_difference_mean", 
-                        `title`="Mean NB Difference", 
+                        `title`="Mean NB Difference (grid points)", 
                         `type`="number", 
                         `format`="zto"),
                     list(
                         `name`="nb_difference_median", 
-                        `title`="Median NB Difference", 
+                        `title`="Median NB Difference (grid points)", 
                         `type`="number", 
                         `format`="zto"),
                     list(
                         `name`="p_value", 
-                        `title`="p (Holm, mean NB difference)", 
+                        `title`="p (Holm, grid-point mean difference)", 
                         `type`="number", 
                         `format`="zto,pvalue"),
                     list(
@@ -1165,10 +1165,12 @@ decisioncurveBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param ciLevel Confidence level for bootstrap confidence intervals.
 #' @param ciBand Which bootstrap interval the decision curve plot draws.
 #'   'pointwise' gives a percentile interval at each threshold; read jointly
-#'   across thresholds these overstate confidence. 'simultaneous' gives a sup-t
-#'   band (Mandel & Betensky 2008) from the same replicates that covers the
-#'   entire curve with the stated probability. Both are computed; this only
-#'   selects which is drawn.
+#'   across thresholds these overstate confidence. 'simultaneous' gives a
+#'   studentized sup-t band (Montiel Olea and Plagborg-Moller 2019) from the
+#'   same replicates that covers the entire curve with approximately the stated
+#'   probability; coverage falls below nominal in small samples and where few
+#'   patients are classified positive. Both are computed; this only selects
+#'   which is drawn.
 #' @param showBenefitRange Report, for each model, the range of threshold
 #'   probabilities over which its net benefit exceeds both treat-all and
 #'   treat-none. The range is descriptive and may contain separated stretches.
@@ -1225,8 +1227,9 @@ decisioncurveBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   expresses net benefit relative to the maximum achievable value; it is not
 #'   net benefit per 100 patients.
 #' @param multiModelComparison Perform exploratory pairwise bootstrap
-#'   comparisons between all models. Inference is approximate and conditional on
-#'   the selected threshold range.
+#'   comparisons between all models of the unweighted mean (and median)
+#'   net-benefit difference over the threshold grid points. Inference is
+#'   approximate and conditional on the selected threshold range.
 #' @param showDecisionConsequences Show detailed table of decision
 #'   consequences (TP, FP, TN, FN) at selected thresholds.
 #' @param resourceUtilization Project tests, treatments, unnecessary
@@ -1249,7 +1252,7 @@ decisioncurveBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$summaryText} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$costBenefitTable} \tab \tab \tab \tab \tab Simple monetary payoff projection under explicit assumptions; not an ICER, QALY or formal health-economic analysis \cr
 #'   \code{results$decisionConsequencesTable} \tab \tab \tab \tab \tab Detailed consequences at selected thresholds \cr
-#'   \code{results$modelComparisonEnhanced} \tab \tab \tab \tab \tab Exploratory case-resampling comparison of average net benefit over the selected range \cr
+#'   \code{results$modelComparisonEnhanced} \tab \tab \tab \tab \tab Exploratory case-resampling comparison of the unweighted mean net-benefit difference over the threshold grid points \cr
 #'   \code{results$resourceUtilizationTable} \tab \tab \tab \tab \tab Resource utilization projected to the selected population size \cr
 #'   \code{results$relativeUtilityPlot} \tab \tab \tab \tab \tab Relative utility compared to default strategies \cr
 #'   \code{results$standardizedNetBenefitPlot} \tab \tab \tab \tab \tab Dimensionless net benefit divided by outcome prevalence; not net benefit per 100 patients \cr

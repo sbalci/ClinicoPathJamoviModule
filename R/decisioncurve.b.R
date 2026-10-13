@@ -446,6 +446,18 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 thresholds <- seq(range_lo, range_hi, by = step)
             }
 
+            # seq() accumulates roundoff, so a grid point LABELLED 15% is 0.15000000000000002
+            # (likewise 6%, 12%, 21%, 22% on the default grid). Predictions are compared with
+            # `>=`, so every patient whose risk is stored as exactly 0.15 dropped out of the curve
+            # at 15% while the table row at 0.15 counted them: on a lookup-table score the curve
+            # put the model below treat-all at 12% where the table had it above. Snap a point to
+            # its 10-decimal value only when the gap is roundoff-sized, so a user-entered bound
+            # with more than 10 decimals is never moved (VAL-decisioncurve-01, 2026-10-12).
+            rounded <- round(thresholds, 10)
+            snap <- abs(thresholds - rounded) <= 8 * .Machine$double.eps
+            thresholds[snap] <- rounded[snap]
+            thresholds <- unique(thresholds)
+
             # A range narrower than the step yields a single point. Nothing downstream guarded
             # against that: the analysis reported success, the weighted-AUC table printed
             # "20% - 20%" with a blank average net benefit, and every statistic in the model
@@ -546,6 +558,23 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             invisible(NULL)
         },
 
+        # The false-positive penalty, and the whole treat-all line, rest on the patients WITHOUT
+        # the outcome, so they bound precision exactly as the events do. A 90%-prevalence cohort of
+        # 200 has 20 of them and used to pass with no notice at all (VAL-decisioncurve-03).
+        .warnOnLowNonEventCount = function(outcomes, positive) {
+            n_nonevents <- sum(as.character(outcomes) != as.character(positive), na.rm = TRUE)
+            if (!is.finite(n_nonevents) || n_nonevents >= 25) return(invisible(NULL))
+            private$.addNotice(
+                type = if (n_nonevents < 10) "STRONG_WARNING" else "WARNING",
+                title = .("Few Patients Without the Outcome"),
+                content = paste(
+                    .fmt(.('Only {n} of the analysed cases do not have the outcome.'), n = n_nonevents),
+                    .('The false-positive penalty in net benefit and the treat-all reference rest on these patients, so the curves and any confidence intervals are imprecise.'),
+                    .('Interpret differences between models with caution and do not choose a threshold from this curve alone.'))
+            )
+            invisible(NULL)
+        },
+
         # Validate threshold ranges with clinical context and guidance
         .validateThresholdRange = function(min_thresh, max_thresh) {
             # Basic validation
@@ -604,7 +633,9 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             range_size <- max_thresh - min_thresh
             span_txt <- .fmt(.('The selected threshold range spans {span} percentage points.'),
                              span = sprintf("%.1f", range_size * 100))
-            if (range_size > 0.7) {
+            # 1e-9 margins: 0.80 - 0.10 is 0.7000000000000001 and 0.25 - 0.20 is
+            # 0.04999999999999999, so a range of exactly 70 or 5 points tripped the strict test.
+            if (range_size > 0.7 + 1e-9) {
                 private$.addNotice(
                     type = "WARNING",
                     title = .("Wide Threshold Range"),
@@ -613,7 +644,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 )
             }
 
-            if (range_size < 0.05) {
+            if (range_size < 0.05 - 1e-9) {
                 private$.addNotice(
                     type = "WARNING",
                     title = .("Narrow Range"),
@@ -838,15 +869,17 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     quantile(x, probs = 1 - (1 - self$options$ciLevel) / 2, na.rm = TRUE)
                 })
 
-                # Simultaneous sup-t band from the SAME replicates (Mandel & Betensky 2008):
-                # standardise each replicate's deviation from the observed curve by the
-                # bootstrap SE at that threshold, take the largest deviation across the
-                # whole curve per replicate, and use its (1 - alpha) quantile as a common
-                # multiplier. The band then covers the entire curve with probability
-                # 1 - alpha, whereas the pointwise intervals cover each threshold separately
-                # and reading them jointly overstates confidence. Where the SE is zero (no
-                # one is classified positive, so net benefit is identically 0) the band
-                # collapses onto the curve, which is exact.
+                # Simultaneous sup-t band from the SAME replicates: the critical-value-based
+                # bootstrap band, Montiel Olea & Plagborg-Moller (2019) supplement Appendix A.2,
+                # Algorithm 3 (it was attributed to Mandel & Betensky 2008, whose band is built
+                # from bootstrap ranks instead). Standardise each replicate's deviation from the
+                # observed curve by the bootstrap SE at that threshold, take the largest
+                # deviation across the whole curve per replicate, and use its (1 - alpha)
+                # quantile as a common multiplier. Coverage of the whole curve is approximate:
+                # 93% at n = 200 but 80% at n = 80 with ~10 events in the 2026-10-12 simulation.
+                # Where the SE is zero (no one in the sample is classified positive) the band
+                # collapses onto NB = 0; that is a property of the sample, not certainty about
+                # the population, which is why sparse thresholds are flagged in .run().
                 nb_hat <- private$.calculateNetBenefitsVectorized(
                     predictions, outcomes, thresholds, positive_outcome
                 )
@@ -1282,7 +1315,8 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             # six true positives. Deliberately placed AFTER the insufficient-cases guard above:
             # raised before it, this fired on runs that were being refused anyway and told a
             # user whose analysis had already stopped that it also had too few events.
-            private$.warnOnLowEventCount(data, outcome_var, complete_cases)
+            # (Called after the positive level is validated below, so a run refused for a
+            # non-binary outcome is not also told about its class counts.)
 
             n_excluded <- sum(!complete_cases)
             if (n_excluded > 0) {
@@ -1353,6 +1387,8 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             # Persist the validated level so every downstream table and plot uses the same
             # definition of the event.
             private$.outcomePositive <- outcome_positive
+            private$.warnOnLowEventCount(data, outcome_var, complete_cases)
+            private$.warnOnLowNonEventCount(outcomes, outcome_positive)
 
             # Clinical Profile Notices: Extreme Prevalence
             n_diseased <- sum(outcomes == outcome_positive)
@@ -1493,8 +1529,9 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     return()
                 }
 
-                # Warn if probabilities are suspiciously concentrated
-                if (pred_max - pred_min < 0.05) {
+                # Warn if probabilities are suspiciously concentrated. The margin keeps a range of
+                # exactly 5% (0.35 - 0.30 = 0.04999999999999999) on the documented side.
+                if (pred_max - pred_min < 0.05 - 1e-9) {
                     private$.addNotice(
                         type = "STRONG_WARNING",
                         title = .fmt(.('Narrow Probability Range: {model}'), model = model_name),
@@ -1624,6 +1661,30 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 }
 
                 plot_data <- dplyr::bind_rows(plot_data, rule_plot_data)
+            }
+
+            # Bootstrap intervals collapse where few patients are classified positive: in the
+            # 2026-10-12 simulation (n = 80, ~10 events) 95% intervals covered 82% at 35% and 66%
+            # at 40%, and a threshold no one reaches gives a zero-width interval at NB = 0. The
+            # positive count only falls as the threshold rises, so the sparse thresholds are the
+            # top of the range; name where they start (VAL-decisioncurve-06). 10 is a heuristic.
+            if (self$options$confidenceIntervals || self$options$showNetBenefitCI) {
+                for (nm in names(dca_results)) {
+                    z <- dca_results[[nm]]
+                    n_pos <- vapply(z$thresholds, function(t) sum(z$predictions >= t), numeric(1))
+                    sparse <- which(n_pos < 10)
+                    if (length(sparse) == 0) next
+                    private$.addNotice(
+                        type = "WARNING",
+                        title = .fmt(.('Few Positive Classifications: {model}'), model = nm),
+                        content = paste(
+                            .fmt(.('From the {lo}% threshold upwards, fewer than 10 patients are classified positive by {model} ({k} of the {total} thresholds analysed).'),
+                                 lo = sprintf("%.1f", min(z$thresholds[sparse]) * 100), model = nm,
+                                 k = length(sparse), total = length(z$thresholds)),
+                            .('Bootstrap intervals there under-cover and can collapse to a single value; a narrow interval at those thresholds does not mean precision.')
+                        )
+                    )
+                }
             }
 
             # Store results for plotting
@@ -2118,7 +2179,8 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                          reps = self$options$bootReps,
                          k = length(rows),
                          seed = private$.seedValue()),
-                    .("This is not a confirmatory test and depends on giving every threshold equal weight.")
+                    .("Every evaluated threshold, including both ends of the range, gets equal weight, so this differs slightly from the Difference in Average Net Benefit in the Exploratory Model Comparison table, which is the area under the curve divided by the range width."),
+                    .("This is not a confirmatory test.")
                 )
             )
         },
@@ -2445,18 +2507,16 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             # Identify the highest descriptive average over the selected range. This is not a
             # global model ranking: curves can cross, and the average gives every threshold
             # equal weight regardless of how plausible it is clinically.
-            best_wauc <- -Inf
-            best_model <- NULL
-
-            for (model_name in model_names) {
-                wauc <- private$.calculateWeightedAUC(
-                    private$.dcaResults[[model_name]]$net_benefits,
-                    private$.dcaResults[[model_name]]$thresholds
-                )
-                if (!is.na(wauc) && wauc > best_wauc) {
-                    best_wauc <- wauc
-                    best_model <- model_name
-                }
+            # Every model within 1e-10 of the top average is named: a strict `>` kept only the
+            # first of two tied models, and tied averages can still hide different curves, so
+            # each tied model gets its own range sentence (VAL-decisioncurve-07).
+            averages <- vapply(model_names, function(m) private$.calculateWeightedAUC(
+                private$.dcaResults[[m]]$net_benefits,
+                private$.dcaResults[[m]]$thresholds), numeric(1))
+            best_models <- character(0)
+            if (any(is.finite(averages))) {
+                top <- max(averages[is.finite(averages)])
+                best_models <- model_names[is.finite(averages) & abs(averages - top) <= 1e-10]
             }
 
             # Generate interpretation text
@@ -2465,17 +2525,20 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 "<h4>", .("Clinical Interpretation"), "</h4>"
             )
 
-            if (!is.null(best_model)) {
+            if (length(best_models) > 0) {
                 interpretation <- paste0(
                     interpretation,
                     "<p><strong>", .("Highest Average Net Benefit Over the Selected Range:"), "</strong> ",
-                    private$.safeHtmlOutput(best_model), " (",
+                    paste(private$.safeHtmlOutput(best_models), collapse = ", "),
+                    if (length(best_models) > 1) paste0(" ", .("(tied)")) else "", " (",
                     .("This only ranks the models against each other; it does not mean the model is useful."), " ",
                     .("Whether it beats treating everyone or no one is the Range of Benefit below."), " ",
                     .("Inspect the curves at prespecified clinical thresholds because curves may cross."),
                     ")</p>"
                 )
+            }
 
+            for (best_model in best_models) {
                 # Range over which the leading model beats both reference strategies.
                 best_results <- private$.dcaResults[[best_model]]
                 range_info <- private$.findBenefitRange(
@@ -2483,11 +2546,15 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     best_results$thresholds,
                     private$.treatAllNB
                 )
+                range_label <- if (length(best_models) > 1)
+                    .fmt(.('Range of Benefit ({model}):'), model = private$.safeHtmlOutput(best_model))
+                else
+                    .("Range of Benefit:")
 
                 if (!is.na(range_info$range_start)) {
                     interpretation <- paste0(
                         interpretation,
-                        "<p><strong>", .("Range of Benefit:"), "</strong> ",
+                        "<p><strong>", range_label, "</strong> ",
                         .fmt(.('{lo}% to {hi}% threshold probability - the range over which this model beats both treating everyone and treating no one.'),
                              lo = round(range_info$range_start * 100, 1), hi = round(range_info$range_end * 100, 1)),
                         if (isFALSE(range_info$contiguous))
@@ -2498,7 +2565,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 } else {
                     interpretation <- paste0(
                         interpretation,
-                        "<p><strong>", .("Range of Benefit:"), "</strong> ",
+                        "<p><strong>", range_label, "</strong> ",
                         .("none."), " ",
                         .("Across every threshold examined, treating everyone or treating no one does at least as well as this model."),
                         "</p>"
@@ -2542,14 +2609,15 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 footnotes <- paste0(footnotes,
                     if (private$.ciBand() == "simultaneous")
                         item(.("Confidence Band"), paste(
-                            .fmt(.('Simultaneous sup-t bootstrap band from {reps} replications at the {level}% level (Mandel and Betensky 2008).'),
+                            .fmt(.('Simultaneous sup-t bootstrap band from {reps} replications at the nominal {level}% level (Montiel Olea and Plagborg-Moller 2019, supplementary Appendix A.2, Algorithm 3).'),
                                  reps = reps, level = level),
-                            .("The whole curve, including any clinical rule, lies within the band with this probability.")))
+                            .("It is computed separately for each model and any clinical rule and covers that whole curve only approximately; coverage falls below nominal in small samples and where few patients are classified positive.")))
                     else
                         item(.("Confidence Intervals"), paste(
                             .fmt(.('Pointwise percentile-bootstrap intervals from {reps} replications at the {level}% level, drawn for every model and any clinical rule.'),
                                  reps = reps, level = level),
-                            .("They cover each threshold separately and are not a simultaneous band; choose the simultaneous band to read the whole curve at once."))))
+                            .("They cover each threshold separately and are not a simultaneous band; choose the simultaneous band to read the whole curve at once."),
+                            .("Coverage is approximate and falls below nominal where few patients are classified positive."))))
             }
 
             if (self$options$calculateClinicalImpact) {
@@ -3000,6 +3068,12 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             } else {
                 NULL
             }
+            # Say what is plotted. Above the prevalence D = 0 and RU equals the standardized net
+            # benefit (Kerr 2016 calls NB/prevalence "relative utility"); below it the two curves
+            # differ, and the plot did not say which definition it used (VAL-decisioncurve-08).
+            plot_caption <- paste(c(
+                .("RU = (NB - D) / (prevalence - D), where D is the better of treat-all and treat-none; it equals the standardized net benefit at thresholds above the prevalence."),
+                plot_caption), collapse = "\n")
 
             plot <- ggplot2::ggplot(plot_data,
                         ggplot2::aes(x = threshold, y = relative_utility, color = model)) +

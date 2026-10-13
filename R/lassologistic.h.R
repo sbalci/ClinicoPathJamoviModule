@@ -195,10 +195,12 @@ lassologisticOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 patientID,
                 default=NULL,
                 suggested=list(
-                    "nominal"),
+                    "nominal",
+                    "id"),
                 permitted=list(
                     "factor",
-                    "numeric"))
+                    "numeric",
+                    "id"))
 
             self$.addOption(private$..outcome)
             self$.addOption(private$..outcomeLevel)

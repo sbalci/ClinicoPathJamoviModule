@@ -474,7 +474,7 @@ items:
     - name: modelComparisonEnhanced
       title: Exploratory Pairwise Model Comparison
       type: Table
-      description: Exploratory case-resampling comparison of average net benefit over the selected range
+      description: Exploratory case-resampling comparison of the unweighted mean net-benefit difference over the threshold grid points
       visible: (multiModelComparison)
       columns:
         - name: model1
@@ -484,15 +484,15 @@ items:
           title: 'Model 2'
           type: text
         - name: nb_difference_mean
-          title: 'Mean NB Difference'
+          title: 'Mean NB Difference (grid points)'
           type: number
           format: zto
         - name: nb_difference_median
-          title: 'Median NB Difference'
+          title: 'Median NB Difference (grid points)'
           type: number
           format: zto
         - name: p_value
-          title: 'p (Holm, mean NB difference)'
+          title: 'p (Holm, grid-point mean difference)'
           type: number
           format: zto,pvalue
         - name: conclusion
@@ -618,4 +618,4 @@ refs:
     - Vickers2019DCA
     - Kerr2016DCA
     - Vickers2023DCAInference
-    - MandelBetensky2008
+    - MontielOleaPlagborgMoller2019

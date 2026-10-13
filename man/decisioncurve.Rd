@@ -131,10 +131,12 @@ p-value on every run.}
 
 \item{ciBand}{Which bootstrap interval the decision curve plot draws.
 'pointwise' gives a percentile interval at each threshold; read jointly
-across thresholds these overstate confidence. 'simultaneous' gives a sup-t
-band (Mandel & Betensky 2008) from the same replicates that covers the
-entire curve with the stated probability. Both are computed; this only
-selects which is drawn.}
+across thresholds these overstate confidence. 'simultaneous' gives a
+studentized sup-t band (Montiel Olea and Plagborg-Moller 2019) from the
+same replicates that covers the entire curve with approximately the stated
+probability; coverage falls below nominal in small samples and where few
+patients are classified positive. Both are computed; this only selects
+which is drawn.}
 
 \item{showBenefitRange}{Report, for each model, the range of threshold
 probabilities over which its net benefit exceeds both treat-all and
@@ -207,8 +209,9 @@ expresses net benefit relative to the maximum achievable value; it is not
 net benefit per 100 patients.}
 
 \item{multiModelComparison}{Perform exploratory pairwise bootstrap
-comparisons between all models. Inference is approximate and conditional on
-the selected threshold range.}
+comparisons between all models of the unweighted mean (and median)
+net-benefit difference over the threshold grid points. Inference is
+approximate and conditional on the selected threshold range.}
 
 \item{showDecisionConsequences}{Show detailed table of decision
 consequences (TP, FP, TN, FN) at selected thresholds.}
@@ -236,7 +239,7 @@ A results object containing:
 \code{results$summaryText} \tab \tab \tab \tab \tab a html \cr
 \code{results$costBenefitTable} \tab \tab \tab \tab \tab Simple monetary payoff projection under explicit assumptions; not an ICER, QALY or formal health-economic analysis \cr
 \code{results$decisionConsequencesTable} \tab \tab \tab \tab \tab Detailed consequences at selected thresholds \cr
-\code{results$modelComparisonEnhanced} \tab \tab \tab \tab \tab Exploratory case-resampling comparison of average net benefit over the selected range \cr
+\code{results$modelComparisonEnhanced} \tab \tab \tab \tab \tab Exploratory case-resampling comparison of the unweighted mean net-benefit difference over the threshold grid points \cr
 \code{results$resourceUtilizationTable} \tab \tab \tab \tab \tab Resource utilization projected to the selected population size \cr
 \code{results$relativeUtilityPlot} \tab \tab \tab \tab \tab Relative utility compared to default strategies \cr
 \code{results$standardizedNetBenefitPlot} \tab \tab \tab \tab \tab Dimensionless net benefit divided by outcome prevalence; not net benefit per 100 patients \cr

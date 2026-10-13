@@ -855,6 +855,17 @@
         `pages`="305-325", 
         `doi`="10.1016/0304-4076(85)90158-7", 
         `url`="https://doi.org/10.1016/0304-4076(85)90158-7"), 
+    `MontielOleaPlagborgMoller2019`=list(
+        `type`="article", 
+        `author`="Montiel Olea, J. L., & Plagborg-M\u00F8ller, M.", 
+        `year`=2019, 
+        `title`="Simultaneous confidence bands: Theory, implementation, and an application to SVARs", 
+        `publisher`="Journal of Applied Econometrics", 
+        `volume`=34, 
+        `issue`=1, 
+        `pages`="1-17", 
+        `doi`="10.1002/jae.2656", 
+        `url`="https://doi.org/10.1002/jae.2656"), 
     `MandelBetensky2008`=list(
         `type`="article", 
         `author`="Mandel, M., & Betensky, R. A.", 

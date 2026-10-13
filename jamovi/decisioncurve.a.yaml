@@ -1,7 +1,7 @@
 ---
 name: decisioncurve
 title: Decision Curve Analysis
-menuGroup: meddecide
+menuGroup: meddecideT
 menuSubgroup: Decision Curve Analysis
 menuSubtitle: Clinical Utility, Net Benefit, Threshold Analysis
 version: '1.0.83'
@@ -277,9 +277,11 @@ options:
           R: >
             Which bootstrap interval the decision curve plot draws. 'pointwise' gives a
             percentile interval at each threshold; read jointly across thresholds these
-            overstate confidence. 'simultaneous' gives a sup-t band (Mandel & Betensky 2008)
-            from the same replicates that covers the entire curve with the stated probability.
-            Both are computed; this only selects which is drawn.
+            overstate confidence. 'simultaneous' gives a studentized sup-t band (Montiel Olea
+            and Plagborg-Moller 2019) from the same replicates that covers the entire curve with
+            approximately the stated probability; coverage falls below nominal in small samples
+            and where few patients are classified positive. Both are computed; this only
+            selects which is drawn.
 
     - name: showBenefitRange
       title: Range of Benefit
@@ -446,8 +448,9 @@ options:
       default: false
       description:
           R: >
-            Perform exploratory pairwise bootstrap comparisons between all models. Inference is
-            approximate and conditional on the selected threshold range.
+            Perform exploratory pairwise bootstrap comparisons between all models of the
+            unweighted mean (and median) net-benefit difference over the threshold grid points.
+            Inference is approximate and conditional on the selected threshold range.
 
     # `comparisonMethod` used to sit here: a List that no backend code ever read. It once
     # offered permutation and integral-difference tests with nothing behind them, was cut

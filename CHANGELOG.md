@@ -5,6 +5,30 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-10-13 — decisioncurve: the curve point labelled 15% was computed at 0.15000000000000002
+
+- **Failure mode:** the threshold grid came from `seq(0.05, 0.50, by = 0.01)`, and 5 of its 46
+  points sit just above their decimal label (6%, 12%, 15%, 21%, 22%). Predictions are compared with
+  `>=`, so a patient whose risk is stored as exactly 0.15 was "not treated" on the curve at 15%. The
+  table row at 15% did treat them. On a lookup-table score the table had the model above treat-all at
+  12% and the curve had it below. Everything read off the curve inherited the error: range of
+  benefit, average net benefit (one model's gain flipped sign), both comparison tables and three
+  plots. All 69 existing tests passed because their predictions were continuous, so no prediction
+  ever equalled a threshold.
+- **Detection:** `/validate-function decisioncurve depth=exhaustive`. A 12-row fixture had ties on
+  every threshold and its expected values came from a blinded exact-fraction oracle. Comparing the
+  bundled 3-decimal data with dcurves at the labelled decimals located the points. The adjudicating
+  check, dcurves at the module's own float grid, agreed, which pinned the fault on the grid, not
+  the formula.
+- **Repair:** after `seq()`, a point within 8 machine epsilons of its 10-decimal rounding is snapped
+  to it (`.generateThresholds()`). A user-entered bound with more digits is never moved. Tests in
+  `test-decisioncurve-validation.R` (VAL-decisioncurve-01).
+- **Rule:** a threshold the user reads as a decimal must be that decimal before `>=`/`<=` compares
+  data to it. Fixtures for any threshold rule need data exactly ON the threshold, and the grid
+  should be checked with `sum(g != round(g, 10)) == 0`.
+
+---
+
 ## 2026-10-12 — lassologistic: droplevels() on the complete cases turned a dropped column into a crash
 
 - **Failure mode:** the `/review-function` fix ran `droplevels()` on the complete cases so an unused
