@@ -23,7 +23,6 @@ items:
       - accrual_duration
       - alpha
       - beta
-      - power
       - allocation_ratio
       - sample_size_input
       - events_input
@@ -50,7 +49,6 @@ items:
       - hazard_ratio
       - alpha
       - beta
-      - power
 
   - name: power_plot
     title: "Power Curve Analysis"
@@ -67,10 +65,17 @@ items:
       - hazard_control
       - hazard_treatment
       - hazard_ratio
+      - study_duration
+      - accrual_duration
+      - dropout_rate
       - alpha
       - beta
-      - power
+      - sided
       - allocation_ratio
+      - entry_type
+      - gamma
+      - sample_size_input
+      - events_input
       - power_plot_range
 
   - name: timeline_plot

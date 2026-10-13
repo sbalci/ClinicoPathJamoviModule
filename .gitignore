@@ -117,3 +117,6 @@ references/
 books/
 i18n-plans/
 
+# Generated default R graphics-device output
+/Rplots.pdf
+/tests/testthat/Rplots.pdf

@@ -142,24 +142,14 @@ options:
         jamovi: Probability of false positive (usually 0.025 for one-sided).
 
     - name: beta
-      title: "Type II Error Rate (β)"
+      title: "Type II Error Rate (β = 1 - power)"
       type: Number
       min: 0.01
       max: 0.5
       default: 0.1
       description:
-        R: Type II error rate (1 - power).
-        jamovi: Probability of false negative (0.1 = 90 percent power).
-
-    - name: power
-      title: "Statistical Power"
-      type: Number
-      min: 0.5
-      max: 0.99
-      default: 0.9
-      description:
-        R: Statistical power (1 - beta).
-        jamovi: Desired statistical power (probability of detecting true effect).
+        R: Type II error rate; the target power is 1 - beta (0.1 gives 90 percent power).
+        jamovi: Probability of missing a true effect; target power = 1 - β (0.1 = 90 percent power, 0.2 = 80 percent power).
 
     - name: sided
       title: "Test Type"
@@ -194,8 +184,8 @@ options:
       max: 5
       default: 0
       description:
-        R: Rate parameter for exponential entry (0 if uniform entry).
-        jamovi: Shape parameter for exponential entry (positive = convex, negative = concave).
+        R: Rate parameter for exponential entry; must be non-zero when entry_type is 'expo' (ignored for uniform entry).
+        jamovi: Exponential entry rate, non-zero (positive = faster recruitment early in accrual, negative = faster late).
 
     - name: sample_size_input
       title: "Sample Size (for Power Calculation)"
@@ -247,7 +237,7 @@ options:
       default: false
       description:
         R: Whether to display power curve visualization.
-        jamovi: Show interactive power curves and sample size relationships.
+        jamovi: Plot power against sample size for Lachin-Foulkes or number of events for Schoenfeld.
 
     - name: show_timeline_plot
       title: "Show Study Timeline Plot"
@@ -258,12 +248,12 @@ options:
         jamovi: Show study design timeline with accrual and follow-up periods.
 
     - name: power_plot_range
-      title: "Power Plot Sample Size Range"
+      title: "Power Plot Range (Sample Size or Events)"
       type: String
       default: "auto"
       description:
-        R: Sample size range for power plots (format 'min,max' or 'auto').
-        jamovi: Specify sample size range for power curves (e.g., '50,500' or 'auto').
+        R: Sample size range for Lachin-Foulkes or event-count range for Schoenfeld (format 'min,max' or 'auto').
+        jamovi: Specify subjects for Lachin-Foulkes or events for Schoenfeld (e.g., '50,500' or 'auto').
 
     - name: export_results
       title: "Summarise Results for Reporting"

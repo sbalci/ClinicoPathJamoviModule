@@ -51,6 +51,7 @@
 ^ClinicoPathJamoviModule\.code-workspace$
 ^DESCRIPTION-old\.txt$
 ^Rplots\.pdf$
+^tests/testthat/Rplots\.pdf$
 ^doc/
 ^Meta/
 ^temp$
