@@ -71,12 +71,6 @@ children:
   - type: LayoutBox
     margin: large
     children:
-      - type: TextBox
-        name: power
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
       - type: ComboBox
         name: sided
   - type: LayoutBox
@@ -90,6 +84,7 @@ children:
       - type: TextBox
         name: gamma
         format: number
+        enable: (entry_type:expo)
   - type: LayoutBox
     margin: large
     children:
