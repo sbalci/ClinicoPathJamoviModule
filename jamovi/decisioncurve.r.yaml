@@ -209,9 +209,10 @@ items:
         - thresholdMin
         - thresholdMax
         - thresholdStep
-        # Both comparison methods resample private$.analysisData, the complete-case subset
-        # over c(outcome, models, rule_var). Adding or changing the rule variable drops the
-        # rows where it is missing and so changes every bootstrap p-value here.
+        # Both comparison methods resample the complete-case cohort over
+        # c(outcome, models, rule_var), and the clinical rule is itself compared like a model.
+        # Adding or changing the rule variable drops the rows where it is missing, adds or
+        # changes the rule's rows, and so changes every bootstrap p-value here.
         - clinicalDecisionRule
         - decisionRuleVar
         - decisionRulePositive
@@ -260,7 +261,7 @@ items:
       width: 700
       height: 500
       renderFun: .plotDCA
-      visible: (showPlot || confidenceIntervals || showNetBenefitCI)
+      visible: (showPlot)
       description: Net-benefit curves with optional bootstrap ribbons, pointwise or a simultaneous sup-t band, for every model and any clinical rule
       clearWith:
         - outcome
@@ -274,7 +275,6 @@ items:
         - showReferenceLinesLabels
         - highlightRange
         - confidenceIntervals
-        - showNetBenefitCI
         - bootReps
         - ciLevel
         - ciBand
@@ -335,10 +335,12 @@ items:
         - decisionRuleLabel
 
     # Summary text
+    # Opt-in, like every explanatory panel; the always-visible procedureNotes above carries the
+    # data-requirement caveats (cohort prevalence, one row per patient, calibration, censoring).
     - name: summaryText
       title: Clinical Interpretation
       type: Html
-      visible: true
+      visible: (showInterpretation)
       clearWith:
         - outcome
         - outcomePositive
@@ -353,7 +355,7 @@ items:
         - decisionRulePositive
         - decisionRuleLabel
         - confidenceIntervals
-        - showNetBenefitCI
+        - showPlot
         - bootReps
         - ciLevel
         - ciBand
@@ -495,9 +497,6 @@ items:
           title: 'p (Holm, grid-point mean difference)'
           type: number
           format: zto,pvalue
-        - name: conclusion
-          title: 'Conclusion'
-          type: text
       clearWith:
         - outcome
         - outcomePositive
@@ -508,11 +507,11 @@ items:
         - thresholdStep
         - multiModelComparison
         - bootReps
-        - ciLevel
+        # No ciLevel: this table shows only a Holm p, which does not depend on it.
         - seed
         - modelNames
-        # Same reason as comparisonTable above: the rule variable changes the
-        # complete-case cohort this table's bootstrap resamples.
+        # Same reason as comparisonTable above: the rule is compared like a model, and its
+        # variable changes the complete-case cohort this table's bootstrap resamples.
         - clinicalDecisionRule
         - decisionRuleVar
         - decisionRulePositive
@@ -531,9 +530,6 @@ items:
           title: 'Threshold'
           type: number
           format: pc
-        - name: tests_per_1000
-          title: 'Projected Tests'
-          type: number
         - name: treatments_per_1000
           title: 'Projected Treatments'
           type: number
@@ -611,11 +607,16 @@ items:
         - decisionRuleLabel
 
 refs:
-    # Primary DCA method, clinical interpretation, standardized net benefit, and
-    # pointwise bootstrap inference.
+    # Primary DCA method, clinical interpretation and standardized net benefit; relative
+    # utility (Baker 2009); the simultaneous band (Montiel Olea & Plagborg-Moller 2019).
+    # Vickers2023DCAInference is cited as the CAUTION against deciding by significance tests of
+    # net benefit, which both comparison tables repeat - not as support for them.
+    # DeLong1988: the AUC confidence interval printed in the "Possible Inversion" notice.
     - ClinicoPathJamoviModule
     - Vickers2006
     - Vickers2019DCA
     - Kerr2016DCA
+    - Baker2009RelativeUtility
     - Vickers2023DCAInference
     - MontielOleaPlagborgMoller2019
+    - DeLong1988

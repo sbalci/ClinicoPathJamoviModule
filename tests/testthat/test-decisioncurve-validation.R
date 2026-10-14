@@ -92,8 +92,9 @@ test_that("C31-C34 monetary payoff and resource utilisation", {
                c(5100000/11, 29500000/11, 24400000/11, -5900000/11, -7000000/11, -100000), tolerance = 1e-10)
   ru <- res$resourceUtilizationTable$asDF
   r <- val_one(ru, ru$model == "a" & abs(ru$threshold - .30) < 1e-9)
-  expect_equal(c(r$tests_per_1000, r$treatments_per_1000, r$unnecessary_treatments, r$missed_cases,
-                 r$reduction_vs_treat_all), c(1000, 4000/11, 1000/11, 1000/11, 7/11), tolerance = 1e-10)
+  # "Projected Tests" was dropped: it always equalled populationSize (CF-decisioncurve-10).
+  expect_equal(c(r$treatments_per_1000, r$unnecessary_treatments, r$missed_cases,
+                 r$reduction_vs_treat_all), c(4000/11, 1000/11, 1000/11, 7/11), tolerance = 1e-10)
 })
 
 test_that("C05/C35/C37 curves, net interventions avoided and standardized NB match dcurves", {
@@ -166,7 +167,7 @@ test_that("C10/C11 a superior set with a gap is disclosed in the interpretation"
   pr <- c(rep(.03, 20), rep(.22, 11), rep(.62, 40))
   y <- factor(c(rep("no", 20), rep("yes", 10), "no", rep("yes", 30), rep("no", 10)), levels = c("no", "yes"))
   res <- val_dc(data.frame(y = y, p = pr), "y", "yes", "p", thresholdRange = "custom", thresholdMin = .05,
-                thresholdMax = .55, thresholdStep = .05, showBenefitRange = TRUE)
+                thresholdMax = .55, thresholdStep = .05, showBenefitRange = TRUE, showInterpretation = TRUE)
   br <- res$benefitRangeTable$asDF
   expect_equal(c(br$range_start, br$range_end), c(.05, .55), tolerance = 1e-10)
   expect_match(res$summaryText$content, "contains a gap", fixed = TRUE)
@@ -176,7 +177,8 @@ test_that("C46/C47/C49 guards fire at their stated thresholds", {
   mk <- function(n, events) { set.seed(1); data.frame(
     y = factor(c(rep("yes", events), rep("no", n - events)), levels = c("no", "yes")),
     p = round(runif(n, .02, .98), 4)) }
-  expect_match(val_dc(mk(9, 4), "y", "yes", "p")$notices$content, "Insufficient complete cases", fixed = TRUE)
+  # A fatal input problem is jamovi's error state (jmvcore::reject), not a banner (guide §25).
+  expect_error(val_dc(mk(9, 4), "y", "yes", "p"), "Insufficient complete cases", fixed = TRUE)
   expect_gt(nrow(val_dc(mk(10, 4), "y", "yes", "p")$resultsTable$asDF), 0)
   expect_match(val_dc(mk(200, 24), "y", "yes", "p")$notices$content, "Few Outcome Events", fixed = TRUE)
   expect_no_match(val_dc(mk(200, 25), "y", "yes", "p")$notices$content, "Few Outcome Events", fixed = TRUE)
@@ -249,7 +251,8 @@ test_that("VAL-decisioncurve-05 the simultaneous band is not attributed to a dif
   skip_if_not_installed("dcurves")
   d0 <- as.data.frame(dcurves::df_binary)
   d <- data.frame(y = factor(ifelse(d0$cancer, "yes", "no"), levels = c("no", "yes")), m = d0$cancerpredmarker)
-  res <- val_dc(d, "y", "yes", "m", confidenceIntervals = TRUE, ciBand = "simultaneous", bootReps = 100)
+  res <- val_dc(d, "y", "yes", "m", confidenceIntervals = TRUE, ciBand = "simultaneous", bootReps = 100,
+                showInterpretation = TRUE)
   expect_no_match(res$summaryText$content, "Mandel", fixed = TRUE)
   expect_match(res$summaryText$content, "Montiel Olea and Plagborg-Moller 2019", fixed = TRUE)
 })
@@ -270,7 +273,7 @@ test_that("VAL-decisioncurve-06 sparse thresholds are flagged when intervals are
 
 test_that("VAL-decisioncurve-07 exactly tied models are both named, each with its own range", {
   set.seed(4); p <- runif(200); y <- factor(ifelse(runif(200) < p, "yes", "no"), levels = c("no", "yes"))
-  st <- val_dc(data.frame(y = y, a = p, b = p), "y", "yes", c("a", "b"))$summaryText$content
+  st <- val_dc(data.frame(y = y, a = p, b = p), "y", "yes", c("a", "b"), showInterpretation = TRUE)$summaryText$content
   expect_match(st, "Selected Range:</strong> a, b (tied)", fixed = TRUE)
   expect_match(st, "Range of Benefit (a):", fixed = TRUE)
   expect_match(st, "Range of Benefit (b):", fixed = TRUE)

@@ -344,3 +344,33 @@ test_that("nogoldstandard builds its option-determined rows in .init() and fills
   expect_equal(comp$conditional_dependence$rowCount, 0L)
   expect_equal(comp$test_metrics$rowCount, 3L)
 })
+
+
+test_that("decisioncurve fills its .init() rows without a rowKey error", {
+  skip_if_not(analysis_available("decisioncurve"), "package not loaded")
+
+  # Column names that are not syntactic: the row keys must not depend on them.
+  set.seed(1); n <- 120
+  d <- data.frame(`Outcome (y/n)` = factor(sample(c("no", "yes"), n, TRUE)),
+                  `Risk A+B` = runif(n), `Risk 2/3` = runif(n), check.names = FALSE)
+  run <- function(data) decisioncurve(
+    data = data, outcome = "Outcome (y/n)", outcomePositive = "yes",
+    models = c("Risk A+B", "Risk 2/3"), decisionRulePositive = NULL,
+    showBenefitRange = TRUE, weightedAUC = TRUE, compareModels = TRUE,
+    multiModelComparison = TRUE, bootReps = 100, calculateClinicalImpact = TRUE,
+    costBenefitAnalysis = TRUE, showDecisionConsequences = TRUE, resourceUtilization = TRUE)
+  res <- run(d)
+  expect_equal(res$resultsTable$rowCount, 6L)            # default "Thresholds for table"
+  expect_equal(res$benefitRangeTable$rowCount, 2L)
+  expect_equal(res$weightedAUCTable$rowCount, 2L)
+  expect_equal(res$comparisonTable$rowCount, 1L)
+  expect_equal(res$modelComparisonEnhanced$rowCount, 1L)
+  for (t in c("clinicalImpactTable", "costBenefitTable", "decisionConsequencesTable",
+              "resourceUtilizationTable"))
+    expect_equal(res[[t]]$rowCount, 12L, label = t)
+
+  # A one-level outcome stops with its own message (jmvcore::reject since the 2026-10-14
+  # release review, guide §25) - never with a rowKey error from the pre-built rows.
+  d1 <- d; d1$`Outcome (y/n)` <- factor(rep("yes", n))
+  expect_error(run(d1), "Outcome Not Binary", fixed = TRUE)
+})

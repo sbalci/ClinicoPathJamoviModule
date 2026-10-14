@@ -54,6 +54,17 @@
         `pages`="4051-4065", 
         `doi`="10.1002/sim.8281", 
         `url`="https://doi.org/10.1002/sim.8281"), 
+    `Baker2009RelativeUtility`=list(
+        `type`="article", 
+        `author`="Baker, S. G., Cook, N. R., Vickers, A., & Kramer, B. S.", 
+        `year`=2009, 
+        `title`="Using relative utility curves to evaluate risk prediction", 
+        `publisher`="Journal of the Royal Statistical Society: Series A (Statistics in Society)", 
+        `volume`=172, 
+        `issue`=4, 
+        `pages`="729-748", 
+        `doi`="10.1111/j.1467-985X.2009.00592.x", 
+        `url`="https://doi.org/10.1111/j.1467-985X.2009.00592.x"), 
     `Barlow1991`=list(
         `type`="article", 
         `author`="Barlow, W., Lai, M. Y., & Azen, S. P.", 

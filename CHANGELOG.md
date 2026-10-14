@@ -5,6 +5,146 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-10-14 — decisioncurve: five review passes missed a GUI-only reversed event level
+
+- **Failure mode:** `outcomePositive` and `decisionRulePositive` were `type: Level` with no
+  `allowNone`.
+  - The jamovi client then pre-selects `levels[0]`, which is usually the non-event ("No", "0").
+  - Every new GUI analysis computed its decision curves for the wrong event, and its clinical rule
+    with the recommendation reversed.
+  - Independent review, release review, check-function, check-function-full and fix-function all
+    passed it on 2026-10-12/13.
+  - The class had already been fixed in enhancedROC, psychopdaROC and lassologistic on 2026-10-09,
+    but decisioncurve was not swept.
+- **Why nothing caught it:**
+  - Every test, oracle and differential run passes the level explicitly from R, so none of them
+    exercised the client's auto-fill.
+  - The "Possible Inversion" guard fires only for a discriminating model with a DeLong upper bound
+    below 0.5, so it covers part of the failure, not all of it.
+- **Detection:** reading the memory note on LevelSelector auto-fill while deciding whether a
+  missing level should be an ERROR or a pending INFO (review guide §25).
+- **Repair:**
+  - `allowNone: true` on both Level options.
+  - An INFO pending state that lists the outcome levels with their counts.
+  - The rule is left out with an INFO while its level is unset.
+  - Tests RR-01 (two blocks), red on the pre-review backend.
+- **Rule:**
+  - A Level that names an event, a positive class or a recommendation carries `allowNone: true`,
+    and the backend treats NULL as "not chosen".
+  - Search for this class by the option's ROLE (`grep -B1 -A4 "type: Level" jamovi/*.a.yaml`), not
+    by symptom. R-API tests cannot see it.
+  - 116 of 168 Level options in this module still lack `allowNone` (TODO.md).
+
+---
+
+## 2026-10-14 — decisioncurve: an inflated speed-up, and a phantom row key from `paste0()`
+
+- **Failure mode 1:** `/review-function` first reported the vectorized bootstrap as 6x faster
+  (3.63 s -> 0.60 s), and a TODO comment carried that number.
+  - The 3.63 s came from a loop I wrote to imitate the method, not from the method itself.
+  - That loop re-subset the data inside the threshold loop, which the module never did.
+  - Timed on the module's own `.calculateBootstrapCI()`, the method took 2.23 s, so the true
+    speed-up was 2.4x. The comment was corrected before the report went out.
+- **Failure mode 2:** with rows moved to `.init()`, a lone model with "Statistical comparison"
+  ticked aborted the run with `subscript out of bounds`.
+  - `paste0("pair_", seq_len(0))` is `"pair_"`, not `character(0)`: `paste0()` drops zero-length
+    arguments.
+  - That produced one row key with no label behind it.
+- **Detection:**
+  - Failure 1: re-timing the real method before writing the report.
+  - Failure 2: the existing CF-decisioncurve-01 test, whose last call is exactly that lone-model case.
+- **Repair:** row keys are built with `sprintf()`, which returns `character(0)` for empty input.
+  RF-decisioncurve-08c asserts zero comparison rows for a lone model.
+- **Rule:**
+  - Benchmark the code that ships, called the way it ships, and time the replacement against that
+    baseline. Never time a re-implementation of the baseline.
+  - Build keys or labels from a possibly empty sequence with `sprintf()` or
+    `paste0(..., recycle0 = TRUE)`, and test the zero-count case.
+
+---
+
+## 2026-10-13 — decisioncurve: a skip justified by a false claim, and a "no message" test that could not fail
+
+- **Failure mode 1:** both comparison tables skipped every pair involving the clinical decision
+  rule, with a notice saying the rule "has no values to resample".
+  - The rule's 0/1 vector was stored in `.dcaResults[[rule]]$predictions` a few hundred lines
+    above.
+  - Three validation and review passes read the notice and accepted it.
+  - Rule versus model, the comparison clinicians most often want, was never offered.
+- **Failure mode 2:** the first regression test for the ggplot2 message "Scale for fill is already
+  present" rendered through `image$saveAs()`.
+  - That path uses a theme with no fill scale, so the conflict never arises, and the test passed
+    on the unfixed code.
+  - Separately, the first fix wrapped `scale_fill_manual()` in `suppressMessages()`. The message is
+    emitted by the `+` that adds the scale, so that wrapper silenced nothing.
+- **Detection:**
+  - `/check-function-full decisioncurve` asked what the rule's predictions actually were.
+  - Codex's plan critique predicted the vacuous test, and running the new tests against a snapshot
+    of the pre-fix code confirmed it.
+- **Repair:**
+  - Both tables resample `.dcaResults[[m]]$predictions`. The skip and its notice are gone, and
+    the comparison runs whenever there are two strategies, a lone model plus a rule included.
+  - The oracle test enters the same rule as a numeric 0/1 model column and requires identical
+    bootstrap statistics.
+  - The message test now calls the renderer with `jmvcore:::getGlobalTheme("default", "jmv")`.
+    It is red before the fix and green after.
+- **Rule:**
+  - A skip or "cannot compute" message must name the missing input, checked against what the code
+    holds at that point.
+  - A test of theme-dependent behaviour (scales, palettes, messages from `+ ggtheme`) must render
+    with the jamovi global ggtheme, not `saveAs()` or `theme_bw()`.
+  - Every new regression test is run once against the pre-fix code.
+
+---
+
+## 2026-10-13 — decisioncurve: undefined table cells reached jamovi as "NaN" and "."
+
+- **Failure mode:** cells with no defined value were written as raw `NA`:
+  - the range of benefit of a model that never beats both references (`NA_real_`);
+  - PPV with nobody classified positive, NPV with nobody classified negative, and patients
+    screened per true positive with no true positive (logical `NA`).
+
+  jmvcore's `Cell$asProtoBuf()` sends a numeric NA as a double, which jamovi prints as "NaN", and a
+  logical NA as missing, printed ".". On the shipped `decisioncurve_test_data`, 8 of 21 NPV cells,
+  2 PPV cells and 2 screened-per-TP cells showed "." with no reason. Two validation passes and an
+  independent review missed it, because `$asDF` and `as.data.frame()` read both forms back as `NA`.
+  That made every existing assertion pass.
+- **Detection:** `/check-function --profile release` read cells through `getCell()$value` instead of
+  `asDF`, then printed what the client would draw.
+- **Repair:** a private `.footnoteNA()` (the decisioncalculator pattern) writes `""` and footnotes the
+  reason. The benefit-range cells take no footnote, because the table's "none" note already names the
+  model. Regression block in `test-decisioncurve-independent-review.R`; it was red (15 failures)
+  before the fix.
+- **Rule:** a test of what the user sees reads `getCell(col, rowNo)$value`, never `asDF`, whenever
+  a cell can be undefined. `asDF` reports a blank cell, a "." cell and a "NaN" cell all as `NA`.
+
+---
+
+## 2026-10-13 — decisioncurve: two inversion-guard gates were anti-conservative in sparse or tied data
+
+- **Failure mode:** the new "Possible Inversion" warning was first gated on the 95% DeLong (Wald)
+  interval lying below 0.5. Codex's exact enumeration showed 11% false alarms at 2 events / 8
+  non-events. The replacement gate added `wilcox.test(alternative = "less")` at p < 0.025. With ties,
+  or a group above 49, that switches to the normal approximation. With 2 events among 20 tied zeros
+  and 80 tied ones it gave p = 0.0024; the exact probability is choose(20, 2) / choose(100, 2) = 0.038.
+  Both gates looked calibrated in my own simulation, whose continuous data had no ties and
+  moderate classes.
+- **Detection:** two read-only Codex passes (`codex exec -m gpt-6-astra -s read-only`): a plan
+  critique, then an adversarial review of the diff. Each produced a concrete counterexample.
+- **Repair:** the guard fires only when the DeLong upper bound is below 0.5 AND a seeded Monte Carlo
+  permutation test of the event rank sum gives (b + 1) / (B + 1) < 0.025 (B = 2000, own seed
+  substream). Re-simulated through the public wrapper:
+  - false alarms 2.2-2.7% on continuous nulls, 0% on the tied configuration, 1.3% for a binary rule;
+  - detection 80% at 15/35 and 99.8% at 60/140.
+
+  Regression tests are in `test-decisioncurve-independent-review.R`.
+- **Rule:** a significance gate on a rank statistic must be valid under ties and in sparse classes.
+  Use an exact or permutation p, not a Wald interval or a normal approximation, whenever the data
+  can be discrete (a 0/1 rule, rounded scores) or one class can be small. Null simulations for a
+  guard must include tied and sparse-class configurations, not only continuous moderate-n data.
+
+---
+
 ## 2026-10-13 — decisioncurve: the curve point labelled 15% was computed at 0.15000000000000002
 
 - **Failure mode:** the threshold grid came from `seq(0.05, 0.50, by = 0.01)`, and 5 of its 46

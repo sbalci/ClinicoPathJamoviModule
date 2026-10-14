@@ -38,7 +38,6 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             decisionRulePositive = NULL,
             decisionRuleLabel = "Clinical Rule",
             showClinicalImpactPlot = FALSE,
-            showNetBenefitCI = FALSE,
             costBenefitAnalysis = FALSE,
             testCost = 100,
             treatmentCost = 1000,
@@ -47,6 +46,7 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             showStandardizedNetBenefit = FALSE,
             multiModelComparison = FALSE,
             showDecisionConsequences = FALSE,
+            showInterpretation = FALSE,
             resourceUtilization = FALSE,
             showRelativeUtility = FALSE, ...) {
 
@@ -225,10 +225,6 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "showClinicalImpactPlot",
                 showClinicalImpactPlot,
                 default=FALSE)
-            private$..showNetBenefitCI <- jmvcore::OptionBool$new(
-                "showNetBenefitCI",
-                showNetBenefitCI,
-                default=FALSE)
             private$..costBenefitAnalysis <- jmvcore::OptionBool$new(
                 "costBenefitAnalysis",
                 costBenefitAnalysis,
@@ -268,6 +264,10 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..showDecisionConsequences <- jmvcore::OptionBool$new(
                 "showDecisionConsequences",
                 showDecisionConsequences,
+                default=FALSE)
+            private$..showInterpretation <- jmvcore::OptionBool$new(
+                "showInterpretation",
+                showInterpretation,
                 default=FALSE)
             private$..resourceUtilization <- jmvcore::OptionBool$new(
                 "resourceUtilization",
@@ -310,7 +310,6 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..decisionRulePositive)
             self$.addOption(private$..decisionRuleLabel)
             self$.addOption(private$..showClinicalImpactPlot)
-            self$.addOption(private$..showNetBenefitCI)
             self$.addOption(private$..costBenefitAnalysis)
             self$.addOption(private$..testCost)
             self$.addOption(private$..treatmentCost)
@@ -319,6 +318,7 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..showStandardizedNetBenefit)
             self$.addOption(private$..multiModelComparison)
             self$.addOption(private$..showDecisionConsequences)
+            self$.addOption(private$..showInterpretation)
             self$.addOption(private$..resourceUtilization)
             self$.addOption(private$..showRelativeUtility)
         }),
@@ -355,7 +355,6 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         decisionRulePositive = function() private$..decisionRulePositive$value,
         decisionRuleLabel = function() private$..decisionRuleLabel$value,
         showClinicalImpactPlot = function() private$..showClinicalImpactPlot$value,
-        showNetBenefitCI = function() private$..showNetBenefitCI$value,
         costBenefitAnalysis = function() private$..costBenefitAnalysis$value,
         testCost = function() private$..testCost$value,
         treatmentCost = function() private$..treatmentCost$value,
@@ -364,6 +363,7 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         showStandardizedNetBenefit = function() private$..showStandardizedNetBenefit$value,
         multiModelComparison = function() private$..multiModelComparison$value,
         showDecisionConsequences = function() private$..showDecisionConsequences$value,
+        showInterpretation = function() private$..showInterpretation$value,
         resourceUtilization = function() private$..resourceUtilization$value,
         showRelativeUtility = function() private$..showRelativeUtility$value),
     private = list(
@@ -399,7 +399,6 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..decisionRulePositive = NA,
         ..decisionRuleLabel = NA,
         ..showClinicalImpactPlot = NA,
-        ..showNetBenefitCI = NA,
         ..costBenefitAnalysis = NA,
         ..testCost = NA,
         ..treatmentCost = NA,
@@ -408,6 +407,7 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..showStandardizedNetBenefit = NA,
         ..multiModelComparison = NA,
         ..showDecisionConsequences = NA,
+        ..showInterpretation = NA,
         ..resourceUtilization = NA,
         ..showRelativeUtility = NA)
 )
@@ -446,8 +446,10 @@ decisioncurveResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "Vickers2006",
                     "Vickers2019DCA",
                     "Kerr2016DCA",
+                    "Baker2009RelativeUtility",
                     "Vickers2023DCAInference",
-                    "MontielOleaPlagborgMoller2019"))
+                    "MontielOleaPlagborgMoller2019",
+                    "DeLong1988"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",
@@ -713,7 +715,7 @@ decisioncurveResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 width=700,
                 height=500,
                 renderFun=".plotDCA",
-                visible="(showPlot || confidenceIntervals || showNetBenefitCI)",
+                visible="(showPlot)",
                 clearWith=list(
                     "outcome",
                     "outcomePositive",
@@ -726,7 +728,6 @@ decisioncurveResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "showReferenceLinesLabels",
                     "highlightRange",
                     "confidenceIntervals",
-                    "showNetBenefitCI",
                     "bootReps",
                     "ciLevel",
                     "ciBand",
@@ -786,7 +787,7 @@ decisioncurveResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="summaryText",
                 title="Clinical Interpretation",
-                visible=TRUE,
+                visible="(showInterpretation)",
                 clearWith=list(
                     "outcome",
                     "outcomePositive",
@@ -801,7 +802,7 @@ decisioncurveResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "decisionRulePositive",
                     "decisionRuleLabel",
                     "confidenceIntervals",
-                    "showNetBenefitCI",
+                    "showPlot",
                     "bootReps",
                     "ciLevel",
                     "ciBand",
@@ -961,11 +962,7 @@ decisioncurveResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `name`="p_value", 
                         `title`="p (Holm, grid-point mean difference)", 
                         `type`="number", 
-                        `format`="zto,pvalue"),
-                    list(
-                        `name`="conclusion", 
-                        `title`="Conclusion", 
-                        `type`="text")),
+                        `format`="zto,pvalue")),
                 clearWith=list(
                     "outcome",
                     "outcomePositive",
@@ -976,7 +973,6 @@ decisioncurveResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "thresholdStep",
                     "multiModelComparison",
                     "bootReps",
-                    "ciLevel",
                     "seed",
                     "modelNames",
                     "clinicalDecisionRule",
@@ -998,10 +994,6 @@ decisioncurveResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `title`="Threshold", 
                         `type`="number", 
                         `format`="pc"),
-                    list(
-                        `name`="tests_per_1000", 
-                        `title`="Projected Tests", 
-                        `type`="number"),
                     list(
                         `name`="treatments_per_1000", 
                         `title`="Projected Treatments", 
@@ -1110,6 +1102,20 @@ decisioncurveBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' binary outcome and prediction horizon; calibration must be assessed 
 #' separately, and this analysis does not handle censoring.
 #' 
+#'
+#' @examples
+#' \donttest{
+#' # outcomePositive and decisionRulePositive are Level options: jamovi forbids a
+#' # default on them, so both are REQUIRED arguments. Pass NULL for the rule level
+#' # when no clinical decision rule is used.
+#' decisioncurve(
+#'     data = dca_test_data,
+#'     outcome = "cardiac_event",
+#'     outcomePositive = "Yes",
+#'     models = c("basic_model", "enhanced_model"),
+#'     decisionRulePositive = NULL
+#' )
+#'}
 #' @param data The data as a data frame.
 #' @param outcome Binary outcome variable (0/1 or FALSE/TRUE). This represents
 #'   the condition or event you want to predict.
@@ -1177,18 +1183,18 @@ decisioncurveBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   Threshold probability should be elicited from the clinical trade-off, not
 #'   optimized on the same data.
 #' @param compareModels Provide exploratory pairwise bootstrap comparisons of
-#'   average net benefit across the selected range. The p-values are approximate
-#'   and should not replace comparison at prespecified clinically relevant
-#'   thresholds or independent validation.
+#'   average net benefit across the selected range, between every pair of
+#'   strategies: the models and, if one is supplied, the clinical decision rule.
+#'   The p-values are approximate and should not replace comparison at
+#'   prespecified clinically relevant thresholds or independent validation.
 #' @param weightedAUC Summarise each decision curve by the area under it,
 #'   normalised by the width of the threshold range - that is, the model's
 #'   average net benefit over that range. The option is named weightedAUC for
 #'   historical reasons but the average is UNWEIGHTED: every threshold in the
 #'   range counts equally. The value therefore depends entirely on the threshold
-#'   range chosen above (on one example dataset it moved from 0.309 to 0.163 as
-#'   the range widened from 5-20 percent to 1-99 percent), so always report the
-#'   range alongside it. Curves may cross, so this descriptive average does not
-#'   identify a universally best model.
+#'   range chosen above, so always report the range alongside it. Curves may
+#'   cross, so this descriptive average does not identify a universally best
+#'   model.
 #' @param clinicalDecisionRule Add clinical decision rule analysis and
 #'   comparison with models.
 #' @param decisionRuleVar Binary variable indicating whether the clinical rule
@@ -1204,11 +1210,6 @@ decisioncurveBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param showClinicalImpactPlot Display projected true positives and false
 #'   positives for the selected population size at the selected threshold
 #'   probabilities.
-#' @param showNetBenefitCI Display bootstrap confidence ribbons around the net
-#'   benefit curves (pointwise or simultaneous, see ciBand). Identical in effect
-#'   to 'confidenceIntervals': both switch on the same case-resampling bootstrap
-#'   and produce byte-identical output, and either one enables the
-#'   replication-count and confidence-level controls.
 #' @param costBenefitAnalysis Project a simple exploratory monetary payoff
 #'   using user-assigned values in one common currency. This is not an ICER,
 #'   QALY, cost-effectiveness or formal net-monetary-benefit analysis.
@@ -1227,11 +1228,16 @@ decisioncurveBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   expresses net benefit relative to the maximum achievable value; it is not
 #'   net benefit per 100 patients.
 #' @param multiModelComparison Perform exploratory pairwise bootstrap
-#'   comparisons between all models of the unweighted mean (and median)
-#'   net-benefit difference over the threshold grid points. Inference is
-#'   approximate and conditional on the selected threshold range.
+#'   comparisons between all models, and any clinical decision rule, of the
+#'   unweighted mean (and median) net-benefit difference over the threshold grid
+#'   points. Inference is approximate and conditional on the selected threshold
+#'   range.
 #' @param showDecisionConsequences Show detailed table of decision
 #'   consequences (TP, FP, TN, FN) at selected thresholds.
+#' @param showInterpretation Show a plain-language interpretation of the
+#'   decision curves (the model with the highest average net benefit over the
+#'   range, its range of benefit, reading guidelines and methodological notes).
+#'   The Analysis Summary, which states the data requirements, is always shown.
 #' @param resourceUtilization Project tests, treatments, unnecessary
 #'   treatments and missed cases to the selected population size.
 #' @param showRelativeUtility Display relative utility curve comparing each
@@ -1299,7 +1305,6 @@ decisioncurve <- function(
     decisionRulePositive,
     decisionRuleLabel = "Clinical Rule",
     showClinicalImpactPlot = FALSE,
-    showNetBenefitCI = FALSE,
     costBenefitAnalysis = FALSE,
     testCost = 100,
     treatmentCost = 1000,
@@ -1308,6 +1313,7 @@ decisioncurve <- function(
     showStandardizedNetBenefit = FALSE,
     multiModelComparison = FALSE,
     showDecisionConsequences = FALSE,
+    showInterpretation = FALSE,
     resourceUtilization = FALSE,
     showRelativeUtility = FALSE) {
 
@@ -1360,7 +1366,6 @@ decisioncurve <- function(
         decisionRulePositive = decisionRulePositive,
         decisionRuleLabel = decisionRuleLabel,
         showClinicalImpactPlot = showClinicalImpactPlot,
-        showNetBenefitCI = showNetBenefitCI,
         costBenefitAnalysis = costBenefitAnalysis,
         testCost = testCost,
         treatmentCost = treatmentCost,
@@ -1369,6 +1374,7 @@ decisioncurve <- function(
         showStandardizedNetBenefit = showStandardizedNetBenefit,
         multiModelComparison = multiModelComparison,
         showDecisionConsequences = showDecisionConsequences,
+        showInterpretation = showInterpretation,
         resourceUtilization = resourceUtilization,
         showRelativeUtility = showRelativeUtility)
 

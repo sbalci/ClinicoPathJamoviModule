@@ -359,7 +359,6 @@ test_that("Resource Utilization Table is Populated", {
     expect_gt(length(analysis$results$resourceUtilizationTable$rows), 0)
     
     row1 <- analysis$results$resourceUtilizationTable$rows[[1]]$values
-    expect_true(!is.null(row1$tests_per_1000))
     expect_true(!is.null(row1$treatments_per_1000))
 })
 

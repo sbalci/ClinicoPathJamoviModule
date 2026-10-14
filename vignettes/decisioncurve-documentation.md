@@ -41,10 +41,11 @@
 | `calculateClinicalImpact` | `Bool` | `FALSE` | Calculate Clinical Impact |
 | `populationSize` | `Number` | `1000` | Population Size for Projections |
 | `showInterventionAvoided` | `Bool` | `FALSE` | Net Interventions Avoided |
-| `confidenceIntervals` | `Bool` | `FALSE` | Bootstrap Confidence Intervals |
+| `confidenceIntervals` | `Bool` | `FALSE` | Bootstrap Confidence Intervals (drawn on the decision curve plot only; ignored while `showPlot` is off) |
 | `bootReps` | `Integer` | `1000` | Bootstrap Replications |
 | `seed` | `Integer` | `42` | Random Seed |
 | `ciLevel` | `Number` | `0.95` | Confidence Level |
+| `ciBand` | `List` | `pointwise` | Interval Type (pointwise intervals or simultaneous sup-t band) |
 | `showBenefitRange` | `Bool` | `FALSE` | Range of Benefit |
 | `compareModels` | `Bool` | `FALSE` | Model Comparison Statistics |
 | `weightedAUC` | `Bool` | `FALSE` | Average Net Benefit Over the Threshold Range |
@@ -53,7 +54,6 @@
 | `decisionRulePositive` | `Level` | `NULL` | Decision Rule Positive Level |
 | `decisionRuleLabel` | `String` | `Clinical Rule` | Decision Rule Label |
 | `showClinicalImpactPlot` | `Bool` | `FALSE` | Clinical Impact Plot |
-| `showNetBenefitCI` | `Bool` | `FALSE` | Show Net Benefit Confidence Intervals |
 | `costBenefitAnalysis` | `Bool` | `FALSE` | Exploratory Monetary Payoff |
 | `testCost` | `Number` | `100` | Monetary Cost per Test/Screening |
 | `treatmentCost` | `Number` | `1000` | Monetary Cost per Treatment |
@@ -61,10 +61,16 @@
 | `harmFalseTreatment` | `Number` | `500` | Monetary Harm Assigned to a False Positive |
 | `showStandardizedNetBenefit` | `Bool` | `FALSE` | Standardized Net Benefit |
 | `multiModelComparison` | `Bool` | `FALSE` | Enhanced Multi-Model Comparison |
-| `comparisonMethod` | `List` | `bootstrap` | Comparison Statistical Test (bootstrap only) |
 | `showDecisionConsequences` | `Bool` | `FALSE` | Decision Consequences Table |
+| `showInterpretation` | `Bool` | `FALSE` | Clinical Interpretation (opt-in narrative panel) |
 | `resourceUtilization` | `Bool` | `FALSE` | Resource Utilization Analysis |
 | `showRelativeUtility` | `Bool` | `FALSE` | Relative Utility Curve |
+
+`outcomePositive` and `decisionRulePositive` carry `allowNone: true` (2026-10-14). Both start empty
+and are never filled in from the order of the levels. Until the outcome level is chosen, the analysis
+lists the levels and their counts in an INFO notice and computes nothing. Until the rule level is
+chosen, the rule is left out of every table and plot. A fatal input problem (a non-binary outcome,
+values outside 0 to 1, duplicate names) stops the run through `jmvcore::reject()`.
 
 ## 3. Results Definition (`.r.yaml`)
 
@@ -78,10 +84,10 @@
 | `clinicalImpactTable` | `Table` | `Clinical Impact Analysis` |  |
 | `comparisonTable` | `Table` | `Exploratory Model Comparison` |  |
 | `weightedAUCTable` | `Table` | `Descriptive Average Net Benefit Over Threshold Range` |  |
-| `dcaPlot` | `Image` | `Decision Curve Analysis` | Net-benefit curves with optional pointwise bootstrap intervals; ribbons are not simultaneous confidence bands |
+| `dcaPlot` | `Image` | `Decision Curve Analysis` | Shown when `showPlot` is on; net-benefit curves with optional bootstrap ribbons, pointwise or a simultaneous sup-t band (`ciBand`) |
 | `clinicalImpactPlot` | `Image` | `Clinical Impact Plot` | Projected true and false positives for the selected population size |
 | `interventionsAvoidedPlot` | `Image` | `Net Interventions Avoided vs Treat All` |  |
-| `summaryText` | `Html` | `Clinical Interpretation` |  |
+| `summaryText` | `Html` | `Clinical Interpretation` | Shown when `showInterpretation` is on; the always-visible `procedureNotes` carries the data-requirement caveats |
 | `costBenefitTable` | `Table` | `Exploratory Monetary Payoff (Not Cost-Effectiveness)` | Simple monetary payoff projection under explicit assumptions; not an ICER, QALY or formal health-economic analysis |
 | `decisionConsequencesTable` | `Table` | `Decision Consequences` | Detailed consequences at selected thresholds |
 | `modelComparisonEnhanced` | `Table` | `Exploratory Pairwise Model Comparison` | Exploratory case-resampling comparison of average net benefit over the selected range |

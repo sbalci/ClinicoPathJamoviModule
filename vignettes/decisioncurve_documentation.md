@@ -31,6 +31,7 @@
 | `bootReps` | UI Control `bootReps` | `self$options$bootReps` | Output item / Table |
 | `seed` | UI Control `seed` | `self$options$seed` | Output item / Table |
 | `ciLevel` | UI Control `ciLevel` | `self$options$ciLevel` | Output item / Table |
+| `ciBand` | UI Control `ciBand` | `self$options$ciBand` | Output item / Table |
 | `showBenefitRange` | UI Control `showBenefitRange` | `self$options$showBenefitRange` | Output item / Table |
 | `compareModels` | UI Control `compareModels` | `self$options$compareModels` | Output item / Table |
 | `weightedAUC` | UI Control `weightedAUC` | `self$options$weightedAUC` | Output item / Table |
@@ -39,7 +40,6 @@
 | `decisionRulePositive` | UI Control `decisionRulePositive` | `self$options$decisionRulePositive` | Output item / Table |
 | `decisionRuleLabel` | UI Control `decisionRuleLabel` | `self$options$decisionRuleLabel` | Output item / Table |
 | `showClinicalImpactPlot` | UI Control `showClinicalImpactPlot` | `self$options$showClinicalImpactPlot` | Output item / Table |
-| `showNetBenefitCI` | UI Control `showNetBenefitCI` | `self$options$showNetBenefitCI` | Output item / Table |
 | `costBenefitAnalysis` | UI Control `costBenefitAnalysis` | `self$options$costBenefitAnalysis` | Output item / Table |
 | `testCost` | UI Control `testCost` | `self$options$testCost` | Output item / Table |
 | `treatmentCost` | UI Control `treatmentCost` | `self$options$treatmentCost` | Output item / Table |
@@ -47,8 +47,8 @@
 | `harmFalseTreatment` | UI Control `harmFalseTreatment` | `self$options$harmFalseTreatment` | Output item / Table |
 | `showStandardizedNetBenefit` | UI Control `showStandardizedNetBenefit` | `self$options$showStandardizedNetBenefit` | Output item / Table |
 | `multiModelComparison` | UI Control `multiModelComparison` | `self$options$multiModelComparison` | Output item / Table |
-| `comparisonMethod` | UI Control `comparisonMethod` | `self$options$comparisonMethod` | Output item / Table |
 | `showDecisionConsequences` | UI Control `showDecisionConsequences` | `self$options$showDecisionConsequences` | Output item / Table |
+| `showInterpretation` | UI Control `showInterpretation` | `self$options$showInterpretation` | `summaryText` visibility and generation |
 | `resourceUtilization` | UI Control `resourceUtilization` | `self$options$resourceUtilization` | Output item / Table |
 | `showRelativeUtility` | UI Control `showRelativeUtility` | `self$options$showRelativeUtility` | Output item / Table |
 

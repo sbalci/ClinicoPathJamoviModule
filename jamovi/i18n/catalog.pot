@@ -440,10 +440,6 @@ msgid ""
 msgstr ""
 
 #: R/decisioncurve.b.R
-msgid "\"Clinical decision rule\" is enabled but no rule variable has been selected."
-msgstr ""
-
-#: R/decisioncurve.b.R
 msgid ""
 "\"Enhanced pairwise comparison\" is enabled but only one prediction model is "
 "selected, so the Exploratory Pairwise Model Comparison table stays empty."
@@ -742,6 +738,12 @@ msgstr ""
 #: R/decisioncurve.b.R
 #: R/nogoldstandard.b.R
 msgid "{a} vs {b}"
+msgstr ""
+
+#: R/classicalSurvivalPower.b.R
+msgid ""
+"{added} patient(s) were added beyond the arms' rounded shares: rounding each "
+"arm up shifted the allocation enough to cost power in this small design."
 msgstr ""
 
 #: R/survivalPower.b.R
@@ -1153,6 +1155,23 @@ msgstr ""
 
 #: R/decisioncurve.b.R
 msgid ""
+"{model} recommended intervention less often for patients with \"{level}\" "
+"than for patients without it (AUC {auc}, 95% CI {lo} to {hi}; one-sided "
+"permutation p = {p}, seed {seed})."
+msgstr ""
+
+#: R/decisioncurve.b.R
+msgid "{models} (tied)"
+msgstr ""
+
+#: R/decisioncurve.b.R
+msgid ""
+"{models} falls below -100 per 100 patients at some thresholds and is cut off "
+"there."
+msgstr ""
+
+#: R/decisioncurve.b.R
+msgid ""
 "{models} falls below the visible range at some thresholds: relative utility "
 "there is worse than shown."
 msgstr ""
@@ -1501,12 +1520,6 @@ msgstr ""
 
 #: enhancedcrosstable/options/percent_pattern/percent_only.title
 msgid "{p_col} only"
-msgstr ""
-
-#: R/decisioncurve.b.R
-msgid ""
-"{pairs} could not be bootstrap-tested because at least one side is a derived "
-"strategy rather than a predictor column, so it has no values to resample."
 msgstr ""
 
 #: R/dataquality.b.R
@@ -11023,6 +11036,10 @@ msgstr ""
 msgid "95% CI (Confidence Interval):"
 msgstr ""
 
+#: mixedcox/results/fixedEffectsTable.columns.superTitle
+msgid "95% CI (HR)"
+msgstr ""
+
 #: R/pathagreement.b.R
 msgid "95% CI for kappa {kappa}: {lower} to {upper}; category proportions {props}"
 msgstr ""
@@ -11102,7 +11119,6 @@ msgstr ""
 #: likelihoodratio/results/likelihoodRatios.columns.title
 #: likelihoodratio/results/diagnosticOddsRatio.columns.title
 #: methodcomparison/results/calibrationTable.columns.title
-#: mixedcox/results/bootstrapTable.columns.title
 #: multisurvival/results/adjustedSurvTable.columns.title
 #: ordinalroc/results/cumulativeAUC.columns.title
 #: ordinalroc/results/predictorComparison.columns.title
@@ -11274,7 +11290,6 @@ msgstr ""
 #: likelihoodratio/results/likelihoodRatios.columns.title
 #: likelihoodratio/results/diagnosticOddsRatio.columns.title
 #: methodcomparison/results/calibrationTable.columns.title
-#: mixedcox/results/bootstrapTable.columns.title
 #: multisurvival/results/adjustedSurvTable.columns.title
 #: ordinalroc/results/cumulativeAUC.columns.title
 #: ordinalroc/results/predictorComparison.columns.title
@@ -11893,6 +11908,12 @@ msgid ""
 "A hazard ratio above 1 means a higher instantaneous event rate and below 1 a "
 "lower one. It is a rate ratio, not a ratio of cumulative risks and not a "
 "difference in survival time."
+msgstr ""
+
+#: R/classicalSurvivalPower.b.R
+msgid ""
+"A hazard ratio of 1 means the groups do not differ, so no number of events "
+"reaches the target power. Enter the hazard ratio you expect to detect."
 msgstr ""
 
 #: R/agreement.b.R
@@ -13644,12 +13665,6 @@ msgstr ""
 msgid "across"
 msgstr ""
 
-#: R/decisioncurve.b.R
-msgid ""
-"Across every threshold examined, treating everyone or treating no one does "
-"at least as well as this model."
-msgstr ""
-
 #: ihcadvanced/results/markerOptimization.columns.title
 #: stagemigration/results/stepwiseResults.columns.title
 msgid "Action"
@@ -13829,10 +13844,6 @@ msgstr ""
 msgid "Adaptive Enrichment"
 msgstr ""
 
-#: mixedcox/options/optimization_method/agq.title
-msgid "Adaptive Gaussian Quadrature"
-msgstr ""
-
 #: grouplasso/options/penalty_type/adaptive_group.title
 msgid "Adaptive Group LASSO"
 msgstr ""
@@ -13967,7 +13978,7 @@ msgid ""
 msgstr ""
 
 #: R/decisioncurve.b.R
-msgid "Add a second model to compare."
+msgid "Add a second model, or a clinical decision rule, to compare."
 msgstr ""
 
 #: coxdiagnostics/options/add_smooth.description.jamovi
@@ -16005,10 +16016,6 @@ msgstr ""
 #: package/analyses/advancedSurvivalPower.menuSubtitle
 #: advancedSurvivalPower/options.menuSubtitle
 msgid "Advanced options - Multiple design types"
-msgstr ""
-
-#: mixedcox/ui[7][1].label
-msgid "Advanced Output"
 msgstr ""
 
 #: jjbarstats/ui[2][2].label
@@ -19511,7 +19518,6 @@ msgstr ""
 #: marginalrecurrent/results/todo.title
 #: mediansurvival/results/analysisSummary.title
 #: methodcomparison/results/summary.title
-#: mixedcox/results/analysisSummary.title
 #: mixedeffectscox/results/summaryTable.title
 #: multiclassdiagnostics/results/text.title
 #: multistatesurvival/results/summary.title
@@ -20519,7 +20525,6 @@ msgstr ""
 
 #: bayesiannetworkma/options/correlation_structure/ar1.title
 #: conditionalgee/options/correlation_structure/ar1.title
-#: mixedcox/options/correlation_structure/ar1.title
 #: mixedeffectscox/options/correlation_structure/ar1.title
 #: mixedeffectscox/ui[2][0]/correlation_structure_ar1.label
 #: raftgee/options/correlation_structure/ar1.title
@@ -24866,10 +24871,6 @@ msgstr ""
 msgid "Beneficial"
 msgstr ""
 
-#: decisioncurve/ui[4][0]/benefitCorrectTreatment.label
-msgid "Benefit of correct treatment"
-msgstr ""
-
 #: treatmentoptim/results/treatmentSelection.columns.title
 msgid "Benefit Score"
 msgstr ""
@@ -25400,7 +25401,6 @@ msgstr ""
 #: flexrstpm2/results/bootstrapValidation.columns.title
 #: generalpseudo/results/methodComparison.columns.title
 #: ihcscoring/results/digitalvalidation/algorithmcomparison.columns.title
-#: mixedcox/results/bootstrapTable.columns.title
 #: rmstregression/results/bootstrapResults.columns.title
 #: robustcorrelation/results/bootstrap_table.columns.title
 #: simonmakuch/results/bootstrapValidation.columns.title
@@ -26813,6 +26813,10 @@ msgstr ""
 msgid "Bootstrap analysis"
 msgstr "Bootstrap analysis"
 
+#: decisioncurve/ui[7].label
+msgid "Bootstrap and Resampling"
+msgstr ""
+
 #: nonparametric/ui[5].label
 msgid "Bootstrap and Resampling Methods"
 msgstr ""
@@ -26920,7 +26924,6 @@ msgstr ""
 #: curemodels/options/bootstrap_ci.title
 #: curemodels/ui[4].label
 #: decisioncurve/options/confidenceIntervals.title
-#: decisioncurve/ui[7].label
 #: decisionpanel/options/bootstrap.title
 #: decisionpanel/ui[5][0]/bootstrap.label
 #: decisionpanel/results/bootstrapResults.title
@@ -27093,6 +27096,12 @@ msgstr ""
 
 #: R/nogoldstandard.b.R
 msgid "Bootstrap intervals not estimated"
+msgstr ""
+
+#: R/decisioncurve.b.R
+msgid ""
+"Bootstrap intervals there under-cover and can collapse to a single value; a "
+"narrow interval at those thresholds does not mean precision."
 msgstr ""
 
 #: R/psychopdaROC.b.R
@@ -27339,7 +27348,6 @@ msgstr ""
 #: marginalrecurrent/options/bootstrap_samples.title
 #: mendelianrandomization/options/bootstrap_samples.title
 #: methodcomparison/options/bootstrap_samples.title
-#: mixedcox/options/bootstrap_samples.title
 #: mixedeffectscox/options/bootstrap_samples.title
 #: mixedeffectscox/ui[6][0]/bootstrap_samples.label
 #: multiclassroc/options/bootstrap_samples.title
@@ -27434,7 +27442,6 @@ msgstr ""
 
 #: effectsize/results/results/bootstrapResults.columns.title
 #: flexrstpm2/results/bootstrapValidation.columns.title
-#: mixedcox/results/bootstrapTable.columns.title
 #: pathagreement/results/stabilityTable.columns.title
 #: rmstregression/results/bootstrapResults.columns.title
 #: simonmakuch/results/bootstrapValidation.columns.title
@@ -27553,7 +27560,6 @@ msgstr ""
 
 #: clinicalvalidation/results/bootstrapresults.title
 #: flexrstpm2/results/bootstrapValidation.title
-#: mixedcox/results/bootstrapTable.title
 #: plscox/results/bootstrapResults.title
 #: simonmakuch/results/bootstrapValidation.title
 #: stagemigration/results/bootstrapResults.title
@@ -27562,10 +27568,6 @@ msgstr ""
 
 #: R/survival.b.R
 msgid "Bootstrap validation suppressed: fewer than 10 events."
-msgstr ""
-
-#: mixedcox/options/bootstrap_variance.title
-msgid "Bootstrap Variance Estimation"
 msgstr ""
 
 #: R/psychopdaROC.b.R
@@ -29167,10 +29169,6 @@ msgid ""
 "and APA-style formatting for clinical research applications."
 msgstr ""
 
-#: mixedcox/options/icc_calculation.title
-msgid "Calculate Intracluster Correlation"
-msgstr ""
-
 #: entropyanalysis/options/calculate_kl_divergence.title
 msgid "Calculate KL Divergence"
 msgstr ""
@@ -29653,7 +29651,6 @@ msgstr ""
 msgid "Calculated Time Preview"
 msgstr ""
 
-#: mixedcox/ui[3][1].label
 #: multisurvival/ui[1][2].label
 #: singlearm/ui[2][2].label
 #: surveysurvival/ui[2][1].label
@@ -32669,6 +32666,12 @@ msgstr ""
 msgid "Check Proportional Hazards"
 msgstr ""
 
+#: R/decisioncurve.b.R
+msgid ""
+"Check that \"Positive Outcome Level\" is the level the model predicts and "
+"that the column is not one minus the risk."
+msgstr ""
+
 #: R/linechart.b.R
 msgid "Check that all selected variables exist in your dataset."
 msgstr ""
@@ -35041,10 +35044,6 @@ msgstr ""
 msgid "Clinical Decision Rule Integration"
 msgstr ""
 
-#: R/decisioncurve.b.R
-msgid "Clinical Decision Rule Variable Required"
-msgstr ""
-
 #: greyzoneroc/ui/clinicalDecisions.label
 msgid "Clinical Decision Rules"
 msgstr ""
@@ -35428,6 +35427,7 @@ msgstr ""
 #: consortdiagram/results/interpretation.title
 #: continuousmarkov/results/clinicalInterpretation.title
 #: curemodels/results/interpretation.title
+#: decisioncurve/options/showInterpretation.title
 #: decisioncurve/results/summaryText.title
 #: decisionpanel/results/clinicalInterpretation.title
 #: diagnosticmeta/results/likelihoodRatioGuide.columns.title
@@ -35540,6 +35540,7 @@ msgstr ""
 msgid "Clinical Interpretation"
 msgstr ""
 
+#: decisioncurve/ui[2][0]/showInterpretation.label
 #: diagnosticmeta/options/show_interpretation.title
 #: diagnosticmeta/ui[1][3][0]/show_interpretation.label
 #: enhancedROC/options/clinical_interpretation.title
@@ -37185,8 +37186,6 @@ msgstr ""
 #: ihccluster/results/distr.columns.title
 #: ihcdiagnostic/results/differentialResults.columns.title
 #: jggheatmap/results/clustertab.columns.title
-#: mixedcox/results/clusterSummaryTable.columns.title
-#: mixedcox/results/randomEffectsPredTable.columns.title
 #: patientsimilarity/results/clusterSummary.columns.title
 #: patientsimilarity/results/clusterOutcomes.columns.title
 #: patientsimilarity/results/survivalTable.columns.title
@@ -37319,10 +37318,6 @@ msgstr ""
 msgid "Cluster Jackknife"
 msgstr ""
 
-#: mixedcox/results/iccTable.columns.title
-msgid "Cluster Level"
-msgstr ""
-
 #: ihccluster/results/medoidInfo.title
 msgid "Cluster Medoids (Representative Cases)"
 msgstr ""
@@ -37421,10 +37416,6 @@ msgstr ""
 msgid "Cluster Summary"
 msgstr ""
 
-#: mixedcox/results/clusterSummaryTable.title
-msgid "Cluster Summary Statistics"
-msgstr ""
-
 #: spatialautocorrelation/results/localIndicators.columns.title
 #: spatialautocorrelation/results/spatialClusters.columns.title
 msgid "Cluster Type"
@@ -37512,8 +37503,6 @@ msgstr ""
 
 #: frailtysurvival/options/survival_curves.title
 #: frailtysurvival/results/survival_curves_plot.title
-#: mixedcox/options/cluster_survival_plot.title
-#: mixedcox/results/clusterSurvivalPlot.title
 msgid "Cluster-Specific Survival Curves"
 msgstr ""
 
@@ -40275,10 +40264,6 @@ msgstr ""
 msgid "Comparison-Specific"
 msgstr ""
 
-#: R/decisioncurve.b.R
-msgid "Comparisons not tested"
-msgstr ""
-
 #: R/decisioncompare.b.R
 msgid ""
 "Comparisons without discordant pairs are left out of the Holm-Bonferroni "
@@ -41009,7 +40994,6 @@ msgstr ""
 #: idi/results/decomposition.columns.title
 #: ihcadvanced/results/pcaResults.columns.title
 #: ihccluster/results/pcaContributions.columns.title
-#: mixedcox/results/varianceTable.columns.title
 #: mixedeffectscox/results/randomEffects.columns.title
 #: mixedeffectscox/results/varianceComponents.columns.title
 #: multiplexanalysis/results/pcatable.columns.title
@@ -41184,7 +41168,6 @@ msgstr ""
 
 #: bayesiannetworkma/options/correlation_structure/compound_symmetry.title
 #: jointmodeling/options/error_structure/compound.title
-#: mixedcox/options/correlation_structure/compound_symmetry.title
 msgid "Compound Symmetry"
 msgstr ""
 
@@ -42317,7 +42300,6 @@ msgstr "Concise instructions (brief overview)"
 #: brierscore/results/pairwiseComparisons.columns.title
 #: cochranq/results/cochranQTest.columns.title
 #: concordanceindex/results/pairwiseTests.columns.title
-#: decisioncurve/results/modelComparisonEnhanced.columns.title
 #: enhancedROC/results/results/hosmerLemeshowTable.columns.title
 #: flexrstpm2/results/goodnessOfFitTests.columns.title
 #: friedmantest/results/friedmanTest.columns.title
@@ -43041,7 +43023,6 @@ msgstr ""
 #: enhancedcorrelation/ui[1][1].label
 #: exacttests/ui[1][1].label
 #: firthregression/ui[3].label
-#: mixedcox/options/confidence_intervals.title
 #: ordinalmixedmodel/options/confInt.title
 #: plscox/options/confidence_intervals.title
 #: prauc/options/confidence_intervals.title
@@ -46194,8 +46175,6 @@ msgstr ""
 #: conditionalgee/results/modelfit.columns.title
 #: conditionalgee/results/correlationPlot.title
 #: geemodel/ui[1][1].label
-#: mixedcox/options/correlation_structure.title
-#: mixedcox/ui[2][0].label
 #: mixedeffectscox/options/correlation_structure.title
 #: mixedeffectscox/ui[2][0].label
 #: raftgee/options/correlation_structure.title
@@ -47332,6 +47311,12 @@ msgstr ""
 
 #: agreement/options/baConfidenceLevel.title
 msgid "Coverage for limits of agreement"
+msgstr ""
+
+#: R/decisioncurve.b.R
+msgid ""
+"Coverage is approximate and falls below nominal where few patients are "
+"classified positive."
 msgstr ""
 
 #: bayesianci/results/hpdIntervals.columns.title
@@ -52221,7 +52206,6 @@ msgstr ""
 #: R/outcomeorganizer.b.R
 #: R/swimmerplot.b.R
 #: R/waterfall.b.R
-#: mixedcox/options/timetypeoutput/days.title
 #: multisurvival/options/timetypeoutput/days.title
 #: singlearm/options/timetypeoutput/days.title
 #: surveysurvival/options/timetypeoutput/days.title
@@ -52691,6 +52675,13 @@ msgid ""
 "categorical column cannot express a predicted risk."
 msgstr ""
 
+#: R/decisioncurve.b.R
+msgid ""
+"Decision curve analysis needs the predicted probability of the selected "
+"positive level; if these values describe the other level, the curves answer "
+"a different question."
+msgstr ""
+
 #: R/clinicalscore.b.R
 msgid "Decision curve analysis performed"
 msgstr ""
@@ -52761,6 +52752,12 @@ msgstr ""
 msgid ""
 "Decision curves may be less interpretable with very low or very high event "
 "rates, and net benefit is sensitive to prevalence extremes."
+msgstr ""
+
+#: R/decisioncurve.b.R
+msgid ""
+"Decision curves need a cohort or consecutive series from the target "
+"population."
 msgstr ""
 
 #: lassointro/results/decisionGuide.title
@@ -54359,10 +54356,6 @@ msgstr ""
 msgid "Desired statistical power (for sample size calculations)"
 msgstr ""
 
-#: classicalSurvivalPower/options/power.description.jamovi
-msgid "Desired statistical power (probability of detecting true effect)."
-msgstr ""
-
 #: assayoptimization/options/power_level.description.ui
 msgid "Desired statistical power for the experiment"
 msgstr ""
@@ -54918,7 +54911,6 @@ msgstr ""
 #: markovmultistate/results/modelFitStatistics.columns.title
 #: mendelianrandomization/results/heterogeneityTable.columns.title
 #: missingdataexplorer/results/mcar_test_results.columns.title
-#: mixedcox/results/likelihoodRatioTable.columns.title
 #: mixedeffectscox/results/varianceComponents.columns.title
 #: mixedmodelanova/results/fixed_effects.columns.title
 #: mixedmodelanova/results/posthoc.columns.title
@@ -55078,7 +55070,6 @@ msgstr ""
 #: adaptivelasso/results/modelDiagnostics.columns.title
 #: enhancedtwowayfrequency/results/diagnostics.columns.title
 #: jforestmodel/results/model_diagnostics.columns.title
-#: mixedcox/results/diagnosticsTable.columns.title
 #: stagemigration/results/enhancedModelDiagnostics.columns.title
 #: treatmenteffects/results/model_diagnostics.columns.title
 #: treatmentswitching/results/diagnosticsTable.columns.title
@@ -55308,10 +55299,6 @@ msgid ""
 "one 2x2 table it equals LR+ / LR- (Glas et al. 2003); here it and only one "
 "of the likelihood ratios come from the zero-cell corrected table, so the "
 "displayed values need not satisfy that identity."
-msgstr ""
-
-#: mixedcox/ui[5][0].label
-msgid "Diagnostic Options"
 msgstr ""
 
 #: decisioncombine/options/filterStatistic/dor.title
@@ -57372,12 +57359,6 @@ msgid ""
 "the statistical methods and results."
 msgstr ""
 
-#: mixedcox/options/showExplanations.description
-msgid ""
-"Display detailed explanations of mixed-effects Cox regression methods and "
-"interpretation guidelines."
-msgstr ""
-
 #: surveysurvival/options/showExplanations.description
 msgid ""
 "Display detailed explanations of survey-weighted survival methods and "
@@ -57812,12 +57793,6 @@ msgid ""
 "style)."
 msgstr ""
 
-#: mixedcox/options/showSummaries.description
-msgid ""
-"Display natural language summaries alongside tables and plots for "
-"interpretation of mixed-effects Cox regression results."
-msgstr ""
-
 #: surveysurvival/options/showSummaries.description
 msgid ""
 "Display natural language summaries alongside tables and plots for "
@@ -57906,7 +57881,6 @@ msgstr ""
 #: jjwithinstats/ui[5][2].label
 #: mantelhaenszel/ui[2].label
 #: markovmultistate/ui[4].label
-#: mixedcox/ui[7][0].label
 #: mixedeffectscox/ui[7][0].label
 #: mixedmodelanova/ui[2].label
 #: outcomeorganizer/ui[5].label
@@ -59649,12 +59623,6 @@ msgid ""
 "values as the strata."
 msgstr ""
 
-#: R/decisioncurve.b.R
-msgid ""
-"Drop a binary variable into \"Clinical Decision Rule (binary)\" and choose "
-"its positive level, or switch the option off."
-msgstr ""
-
 #: R/jjscatterstats.b.R
 msgid ""
 "Drop a continuous variable into <strong>x-axis</strong> (e.g. biomarker "
@@ -60360,6 +60328,13 @@ msgid ""
 "do not need to coincide with the plotting grid."
 msgstr ""
 
+#: R/decisioncurve.b.R
+msgid ""
+"Each row is treated as an independent patient, so the data must have one row "
+"per patient; several specimens, blocks or lesions from one patient make the "
+"bootstrap intervals and p-values too narrow."
+msgstr ""
+
 #: R/enhancedROC.b.R
 msgid ""
 "Each row must be a different patient: several slides, cores or lesions from "
@@ -60716,7 +60691,6 @@ msgstr ""
 
 #: jjbarstats/ui[5][0].label
 #: jjpiestats/ui[4][0].label
-#: mixedcox/ui[7][2].label
 #: multisurvival/ui[11][0].label
 #: simonmakuch/ui[9][0][0].label
 #: surveysurvival/ui[5][0].label
@@ -60870,10 +60844,6 @@ msgstr ""
 
 #: costeffectiveness/options/evppi_focus/effects.title
 msgid "Effect Parameters Only"
-msgstr ""
-
-#: mixedcox/ui[6][0].label
-msgid "Effect Plots"
 msgstr ""
 
 #: transformationmodels/results/coefficients.columns.title
@@ -62954,6 +62924,14 @@ msgid ""
 "data setup."
 msgstr ""
 
+#: R/classicalSurvivalPower.b.R
+msgid "Entered Events"
+msgstr ""
+
+#: R/classicalSurvivalPower.b.R
+msgid "Entered Sample Size"
+msgstr ""
+
 #: bayesianclinical/options/prior_type/enthusiastic.title
 #: bayesiandiagnostic/options/prior_type/enthusiastic.title
 msgid "Enthusiastic Priors"
@@ -63237,6 +63215,10 @@ msgstr ""
 #: R/categorize.b.R
 #: categorize/options/method/equal.title
 msgid "Equal intervals"
+msgstr ""
+
+#: R/decisioncurve.b.R
+msgid "Equal Numbers of Events and Non-Events"
 msgstr ""
 
 #: stratifiedparametric/options/knot_placement/quantiles.title
@@ -64197,10 +64179,6 @@ msgstr ""
 msgid "Estimate Survival Probabilities"
 msgstr ""
 
-#: mixedcox/options/variance_components.title
-msgid "Estimate Variance Components"
-msgstr ""
-
 #: nogoldstandard/results/prevalence.title
 msgid "Estimated Class or Rule Proportion"
 msgstr ""
@@ -64970,7 +64948,6 @@ msgstr ""
 #: coxphw/results/rareEventAnalysis.columns.title
 #: fragilityindex/results/countsTable.columns.title
 #: idi/results/subgroupAnalysis.columns.title
-#: mixedcox/results/clusterSummaryTable.columns.title
 #: predmodel/results/riskStratification.columns.title
 #: simpleSurvivalPower/results/competing_risks_table.columns.title
 #: surveysurvival/results/subpopulationAnalysis.columns.title
@@ -65548,6 +65525,14 @@ msgid ""
 "assessment requires both diseased and non-diseased cases. Individual-test "
 "tables use their own pairwise-complete cases and may still contain both "
 "outcomes."
+msgstr ""
+
+#: R/decisioncurve.b.R
+msgid ""
+"Every evaluated threshold, including both ends of the range, gets equal "
+"weight, so this differs slightly from the Difference in Average Net Benefit "
+"in the Exploratory Model Comparison table, which is the area under the curve "
+"divided by the range width."
 msgstr ""
 
 #: R/agreement.b.R
@@ -66847,6 +66832,7 @@ msgstr ""
 msgid "Expected Event Rate"
 msgstr ""
 
+#: R/classicalSurvivalPower.b.R
 #: competingRisksPower/results/sampleSizeBreakdown.columns.title
 #: standardizedratio/options/expected.title
 msgid "Expected Events"
@@ -67575,14 +67561,6 @@ msgstr ""
 msgid "ExplorationExtraD"
 msgstr ""
 
-#: R/decisioncurve.b.R
-msgid "Exploratory adjusted p < 0.05"
-msgstr ""
-
-#: R/decisioncurve.b.R
-msgid "Exploratory adjusted p >= 0.05"
-msgstr ""
-
 #: R/summarydata.b.R
 msgid "Exploratory assessment of distributional features"
 msgstr ""
@@ -67595,8 +67573,8 @@ msgstr ""
 
 #: decisioncurve/results/modelComparisonEnhanced.description
 msgid ""
-"Exploratory case-resampling comparison of average net benefit over the "
-"selected range"
+"Exploratory case-resampling comparison of the unweighted mean net-benefit "
+"difference over the threshold grid points"
 msgstr ""
 
 #: lassocox/options/showModelComparison.title
@@ -67775,8 +67753,21 @@ msgstr ""
 msgid "Exponential Entry"
 msgstr ""
 
+#: R/classicalSurvivalPower.b.R
+msgid ""
+"Exponential entry needs a non-zero gamma: a positive value means faster "
+"recruitment early in accrual, a negative value faster recruitment late. For "
+"evenly spread recruitment choose 'Uniform Entry'."
+msgstr ""
+
 #: classicalSurvivalPower/options/gamma.title
 msgid "Exponential Entry Parameter"
+msgstr ""
+
+#: classicalSurvivalPower/options/gamma.description.jamovi
+msgid ""
+"Exponential entry rate, non-zero (positive = faster recruitment early in "
+"accrual, negative = faster late)."
 msgstr ""
 
 #: tumorgrowth/options/growthModel/exponential.title
@@ -69729,6 +69720,14 @@ msgstr ""
 msgid "Few Outcome Events"
 msgstr ""
 
+#: R/decisioncurve.b.R
+msgid "Few Patients Without the Outcome"
+msgstr ""
+
+#: R/decisioncurve.b.R
+msgid "Few Positive Classifications: {model}"
+msgstr ""
+
 #: R/enhancedROC.b.R
 msgid "Fewer Cross-Validation Folds"
 msgstr ""
@@ -69794,6 +69793,12 @@ msgstr ""
 
 #: R/agreement.b.R
 msgid "Fewer than 5 valid cases for concordance analysis."
+msgstr ""
+
+#: R/decisioncurve.b.R
+msgid ""
+"Fewer than 50 bootstrap resamples gave a usable difference, so no p-value is "
+"reported."
 msgstr ""
 
 #: R/agreement.b.R
@@ -70828,11 +70833,6 @@ msgstr ""
 msgid "Fixed Effects Coefficients"
 msgstr ""
 
-#: mixedcox/options/fixed_effects_plot.title
-#: mixedcox/results/fixedEffectsPlot.title
-msgid "Fixed Effects Forest Plot"
-msgstr ""
-
 #: psychopdaROC/options/metaAnalysisMethod/fixed.title
 msgid "Fixed Effects Model"
 msgstr ""
@@ -71834,8 +71834,8 @@ msgstr ""
 
 #: R/decisioncurve.b.R
 msgid ""
-"For a defensible clinical claim, supply predictions from an external dataset "
-"or from cross-validation, and report which was used."
+"For a case-control or otherwise enriched sample the curves do not apply to "
+"the source population; this analysis does not accept an external prevalence."
 msgstr ""
 
 #: R/diagnosticmeta.b.R
@@ -73029,6 +73029,12 @@ msgstr ""
 msgid "From State Variable"
 msgstr ""
 
+#: R/decisioncurve.b.R
+msgid ""
+"From the {lo}% threshold upwards, fewer than 10 patients are classified "
+"positive by {model} ({k} of the {total} thresholds analysed)."
+msgstr ""
+
 #: R/enhancedROC.b.R
 msgid ""
 "Frozen evaluation requires a model version and an independently selected "
@@ -73379,10 +73385,10 @@ msgstr ""
 
 #: R/decisioncurve.b.R
 msgid ""
-"Gain vs Default is the difference against the better of treating everyone "
-"and treating no one at each threshold, on the net-benefit scale: 0.01 means "
-"one extra true positive per 100 patients at no extra cost in unnecessary "
-"treatment."
+"Gain vs Best Default is the difference against the better of treating "
+"everyone and treating no one at each threshold, on the net-benefit scale: "
+"0.01 means one extra true positive per 100 patients at no extra cost in "
+"unnecessary treatment."
 msgstr ""
 
 #: decisioncombine/results/pairedComparisonTable.columns.title
@@ -73448,6 +73454,13 @@ msgstr ""
 #: tidydensity/options/distribution_type/gamma.title
 #: treatmenteffects/results/sensitivity_analysis.columns.title
 msgid "Gamma"
+msgstr ""
+
+#: R/classicalSurvivalPower.b.R
+msgid ""
+"Gamma ({gamma}) equals a hazard rate plus the dropout rate, where the "
+"exponential-entry formula is undefined (0/0). Change gamma slightly, for "
+"example by 0.001."
 msgstr ""
 
 #: costeffectiveness/options/cost_distribution/gamma.title
@@ -77123,10 +77136,6 @@ msgstr ""
 msgid "Haralick Texture Features"
 msgstr ""
 
-#: decisioncurve/ui[4][0]/harmFalseTreatment.label
-msgid "Harm of false treatment"
-msgstr ""
-
 #: psychopdaROC/ui[13][0]/harmBenefitRatio.label
 msgid "Harm-benefit ratio"
 msgstr ""
@@ -79039,6 +79048,10 @@ msgstr ""
 msgid "Highlight Range Minimum"
 msgstr ""
 
+#: R/decisioncurve.b.R
+msgid "Highlight Range Not Drawn"
+msgstr ""
+
 #: enhancedtables/options/highlight_significant.title
 msgid "Highlight Significant Results"
 msgstr ""
@@ -79907,8 +79920,20 @@ msgstr ""
 msgid "HR < 1 favors treatment"
 msgstr ""
 
+#: R/classicalSurvivalPower.b.R
+msgid "HR = {hr} represents a {pct}% increase in hazard"
+msgstr ""
+
+#: R/classicalSurvivalPower.b.R
+msgid "HR = {hr} represents a {pct}% reduction in hazard"
+msgstr ""
+
 #: R/multisurvival.b.R
 msgid "HR = 1 means no modification."
+msgstr ""
+
+#: R/classicalSurvivalPower.b.R
+msgid "HR = 1 represents no difference in hazard"
 msgstr ""
 
 #: R/survivalcont.b.R
@@ -80243,7 +80268,6 @@ msgstr ""
 #: agreement/results/iccTable.columns.title
 #: icccoeff/results/icc_results.columns.title
 #: ihcscoring/results/agreementtable.columns.title
-#: mixedcox/results/iccTable.columns.title
 #: mixedeffectscox/results/randomEffects.columns.title
 #: mixedeffectscox/results/iccAnalysis.columns.title
 #: mixedmodelanova/results/icc_table.columns.title
@@ -80909,6 +80933,14 @@ msgstr ""
 msgid "If any"
 msgstr ""
 
+#: R/decisioncurve.b.R
+msgid ""
+"If cases and controls were sampled separately, the 50% prevalence is a "
+"design choice rather than the outcome rate of the target population, and the "
+"net benefit, the treat-all line and every projection here do not apply to "
+"that population."
+msgstr ""
+
 #: singlearm/options/calculatedtime.description
 msgid ""
 "If enabled, the interval between the two dates is added to your data as a "
@@ -81023,10 +81055,9 @@ msgstr ""
 
 #: R/decisioncurve.b.R
 msgid ""
-"If those risks came from a model fitted on this dataset - including a "
-"cutpoint, a score, or a regression developed here - the net benefit is "
-"optimistically biased and the model can appear to beat treat-all when it "
-"does not."
+"If they were - including a cutpoint, a score, or a regression developed here "
+"- the net benefit is apparent and optimistically biased, and the model can "
+"appear to beat treat-all when it does not."
 msgstr ""
 
 #: R/decisiongraph.b.R
@@ -82088,6 +82119,12 @@ msgstr ""
 msgid ""
 "In %d of the Split By panels the expected cell counts are too small for the "
 "chi-square shown on that panel. Fisher's exact test gives:"
+msgstr ""
+
+#: R/decisioncurve.b.R
+msgid ""
+"In a case-control or otherwise enriched sample the curves do not describe "
+"the source population."
 msgstr ""
 
 #: deeplearningprediction/results/predictionResults/cumulativeLogitResults.columns.title
@@ -83797,7 +83834,6 @@ msgstr ""
 #: adaptivelasso/options/influence_diagnostics.title
 #: betabinomialdiagnostic/options/influence_diagnostics.title
 #: coxrobust/results/influenceMeasures.title
-#: mixedcox/options/influence_diagnostics.title
 #: nonparametricregression/options/influence_diagnostics.title
 #: nonparametricregression/results/influenceDiagnostics.title
 #: treatmentmeta/options/influence_diagnostics.title
@@ -85449,8 +85485,6 @@ msgstr ""
 #: methodcomparison/results/calibrationTable.columns.title
 #: misclassificationbias/results/interpretation.title
 #: missingdataexplorer/results/mcar_test_results.columns.title
-#: mixedcox/results/iccTable.columns.title
-#: mixedcox/results/diagnosticsTable.columns.title
 #: mixedeffectscox/results/diagnostics.columns.title
 #: mixedeffectscox/results/iccAnalysis.columns.title
 #: mixedmodelanova/results/icc_table.columns.title
@@ -86147,7 +86181,6 @@ msgstr ""
 msgid "Intracluster Correlation"
 msgstr ""
 
-#: mixedcox/results/iccTable.title
 #: simpleSurvivalPower/options/icc.title
 msgid "Intracluster Correlation Coefficient"
 msgstr ""
@@ -86767,6 +86800,13 @@ msgstr ""
 
 #: R/decisioncurve.b.R
 msgid ""
+"It is computed separately for each model and any clinical rule and covers "
+"that whole curve only approximately; coverage falls below nominal in small "
+"samples and where few patients are classified positive."
+msgstr ""
+
+#: R/decisioncurve.b.R
+msgid ""
 "It is not an ICER, QALY, cost-effectiveness or net-monetary-benefit analysis "
 "and does not model time horizon, discounting, false-negative consequences or "
 "uncertainty in costs and values."
@@ -86951,10 +86991,6 @@ msgid ""
 "and specificity) falls at or below the point estimate of the best rule with "
 "a different 2-by-2 table ({runnerUp}), so the ranking may reflect sampling "
 "variation rather than a real difference."
-msgstr ""
-
-#: R/decisioncurve.b.R
-msgid "Its curve is still shown in the plot."
 msgstr ""
 
 #: irecist/results/pseudoprogressionTable.columns.title
@@ -89271,7 +89307,6 @@ msgid "Lane width"
 msgstr ""
 
 #: frailtysurvival/options/estimation_method/laplace_approximation.title
-#: mixedcox/options/optimization_method/laplace.title
 #: mixedeffectscox/options/estimation_method/laplace.title
 #: parametricfrailty/options/estimation_method/laplace.title
 msgid "Laplace Approximation"
@@ -90452,16 +90487,11 @@ msgid "Likelihood ratio of a positive test"
 msgstr ""
 
 #: R/pathsampling.b.R
-#: mixedcox/options/likelihood_ratio_test.title
 msgid "Likelihood Ratio Test"
 msgstr ""
 
 #: R/multisurvival.b.R
 msgid "Likelihood ratio test = {stat}, df = {df}, p = {p}"
-msgstr ""
-
-#: mixedcox/results/likelihoodRatioTable.title
-msgid "Likelihood Ratio Test for Random Effects"
 msgstr ""
 
 #: R/agreement.b.R
@@ -91668,7 +91698,6 @@ msgstr ""
 
 #: distributionfit/results/modelComparison.columns.title
 #: markovmultistate/results/modelSummary.columns.title
-#: mixedcox/results/likelihoodRatioTable.columns.title
 #: semimarkov/results/modelSummary.columns.title
 #: splinehazard/results/modelSummary.columns.title
 #: stratifiedparametric/results/modelComparisonTable.columns.title
@@ -92534,6 +92563,7 @@ msgstr ""
 #: linechart/results/correlation.columns.title
 #: mendelianrandomization/results/mrResults.columns.title
 #: misclassificationbias/results/biasAnalysis.columns.title
+#: mixedcox/results/fixedEffectsTable.columns.title
 #: multisurvival/results/interactionTest.columns.title
 #: multisurvival/results/subgroupHR.columns.title
 #: multisurvival/results/survMetricsTable.columns.title
@@ -95751,7 +95781,7 @@ msgid "Mean max foci per slide (summed group)"
 msgstr "Mean max foci per slide (summed group)"
 
 #: decisioncurve/results/modelComparisonEnhanced.columns.title
-msgid "Mean NB Difference"
+msgid "Mean NB Difference (grid points)"
 msgstr ""
 
 #: ihcimmune/results/spatialMetrics.columns.title
@@ -96287,11 +96317,9 @@ msgstr ""
 msgid "Mechanism Testing"
 msgstr ""
 
-#: package/analyses/decisioncurve.menuGroup
 #: package/analyses/betabinomialdiagnostic.menuSubgroup
 #: package/analyses/hierarchicalbayes.menuSubgroup
 #: betabinomialdiagnostic/options.menuSubgroup
-#: decisioncurve/options.menuGroup
 #: hierarchicalbayes/options.menuSubgroup
 msgid "meddecide"
 msgstr ""
@@ -96432,6 +96460,7 @@ msgstr ""
 #: package/analyses/decisioncombine.menuGroup
 #: package/analyses/cotest.menuGroup
 #: package/analyses/sequentialtests.menuGroup
+#: package/analyses/decisioncurve.menuGroup
 #: package/analyses/enhancedROC.menuGroup
 #: package/analyses/lassologistic.menuGroup
 #: package/analyses/agreementintro.menuGroup
@@ -96442,6 +96471,7 @@ msgstr ""
 #: decisioncalculator/options.menuGroup
 #: decisioncombine/options.menuGroup
 #: decisioncompare/options.menuGroup
+#: decisioncurve/options.menuGroup
 #: enhancedROC/options.menuGroup
 #: lassologistic/options.menuGroup
 #: nogoldstandard/options.menuGroup
@@ -96728,7 +96758,7 @@ msgid "Median Lines"
 msgstr ""
 
 #: decisioncurve/results/modelComparisonEnhanced.columns.title
-msgid "Median NB Difference"
+msgid "Median NB Difference (grid points)"
 msgstr ""
 
 #: R/waterfall.b.R
@@ -96982,7 +97012,6 @@ msgstr ""
 #: causespecifichazards/results/cause_summary.columns.title
 #: illnessdeath/results/transitionSummary.columns.title
 #: markovmultistate/results/meanSojournTimes.columns.title
-#: mixedcox/results/clusterSummaryTable.columns.title
 #: multistatesurvival/results/sojournTable.columns.title
 #: residualcancerburden/results/survivalTable.columns.title
 #: semimarkov/results/sojournDistribution.columns.title
@@ -100629,10 +100658,6 @@ msgstr ""
 msgid "Mixed-Effects Cox Regression"
 msgstr ""
 
-#: mixedcox/results/methodExplanation.title
-msgid "Mixed-Effects Cox Regression Methods"
-msgstr ""
-
 #: R/agreement.b.R
 msgid "Mixed-Effects ICC (hierarchical agreement proxy)"
 msgstr ""
@@ -100878,7 +100903,6 @@ msgstr ""
 #: landmarkanalysis/results/modelComparison.columns.title
 #: metaanalysis/results/overallResults.columns.title
 #: metaanalysis/results/modelFitStatistics.columns.title
-#: mixedcox/results/likelihoodRatioTable.columns.title
 #: mixedeffectscox/results/modelComparison.columns.title
 #: modelbuilder/results/modelComparisonTable.columns.title
 #: modelbuilder/results/validationResults.columns.title
@@ -100923,10 +100947,6 @@ msgstr ""
 
 #: R/decisioncurve.b.R
 msgid "Model \"{model}\" is a {class} column."
-msgstr ""
-
-#: R/decisioncurve.b.R
-msgid "Model \"{model}\" is entirely missing after complete-case filtering."
 msgstr ""
 
 #: enhancedROC/results/results/frozenMetrics.columns.title
@@ -101389,8 +101409,6 @@ msgstr ""
 #: jforestmodel/results/model_diagnostics.title
 #: jointmodeling/results/diagnostics.title
 #: markovmultistate/results/diagnosticsPlot.title
-#: mixedcox/ui[5].label
-#: mixedcox/results/diagnosticsTable.title
 #: mixedeffectscox/ui[7][0]/show_diagnostics.label
 #: mixedeffectscox/results/diagnostics.title
 #: pseudosurvival/options/model_diagnostics.title
@@ -102106,7 +102124,6 @@ msgstr ""
 #: package/analyses/survivalcalibration.menuSubgroup
 #: flexrstpm2/ui[3][3].label
 #: jointmodeling/results/validation.title
-#: mixedcox/ui[4][1].label
 #: modelbuilder/ui[6].label
 #: survival/ui[4][2].label
 #: survivalcalibration/options.menuSubgroup
@@ -102738,8 +102755,16 @@ msgstr ""
 msgid "Monetary Harm Assigned to a False Positive"
 msgstr ""
 
+#: decisioncurve/ui[4][0]/harmFalseTreatment.label
+msgid "Monetary harm per false positive"
+msgstr ""
+
 #: decisioncurve/options/benefitCorrectTreatment.title
 msgid "Monetary Value Assigned to a True Positive"
+msgstr ""
+
+#: decisioncurve/ui[4][0]/benefitCorrectTreatment.label
+msgid "Monetary value per true positive"
 msgstr ""
 
 #: R/riverplot.b.R
@@ -102924,7 +102949,6 @@ msgstr ""
 
 #: R/swimmerplot.b.R
 #: R/waterfall.b.R
-#: mixedcox/options/timetypeoutput/months.title
 #: multisurvival/options/timetypeoutput/months.title
 #: simpleSurvivalPower/ui[2][0]/control_median_survival.suffix
 #: simpleSurvivalPower/ui[3][0]/accrual_period.suffix
@@ -104385,7 +104409,6 @@ msgstr ""
 #: jiwillsurvive/results/survivalTable.columns.title
 #: jiwillsurvive/results/kmTable.columns.title
 #: landmarkanalysis/results/landmarkResults.columns.title
-#: mixedcox/results/clusterSummaryTable.columns.title
 #: pcacox/results/riskScore.columns.title
 #: plscox/results/riskStratification.columns.title
 #: progressionsurvival/results/subgroup_analysis_table.columns.title
@@ -104507,7 +104530,6 @@ msgstr ""
 
 #: generalpseudo/results/functionalSummary.columns.title
 #: hierarchicalpathology/results/descriptives.columns.title
-#: mixedcox/results/clusterSummaryTable.columns.title
 msgid "N Obs"
 msgstr ""
 
@@ -105610,6 +105632,20 @@ msgstr ""
 
 #: R/decisioncurve.b.R
 msgid ""
+"Net benefit and the treat-all line use the outcome prevalence of the "
+"analysed sample, so they describe the target population only when the sample "
+"is a cohort or consecutive series from it."
+msgstr ""
+
+#: R/decisioncurve.b.R
+msgid ""
+"Net benefit and the treat-all line use this sample prevalence, so they are "
+"valid only when the analysed rows have the outcome rate of the target "
+"population (a cohort or consecutive series)."
+msgstr ""
+
+#: R/decisioncurve.b.R
+msgid ""
 "Net benefit at every threshold is driven by these events, so the curves and "
 "any confidence intervals are imprecise and may be unstable."
 msgstr ""
@@ -105626,14 +105662,6 @@ msgstr ""
 
 #: timedependentdca/results/netBenefitTable.title
 msgid "Net Benefit at Selected Time Points"
-msgstr ""
-
-#: decisioncurve/ui[3][0]/showNetBenefitCI.label
-msgid "Net benefit confidence intervals"
-msgstr ""
-
-#: decisioncurve/options/showNetBenefitCI.title
-msgid "Net Benefit Confidence Intervals"
 msgstr ""
 
 #: stagemigration/results/clinicalUtilityNetBenefit.columns.title
@@ -105670,6 +105698,10 @@ msgid "Net Benefit Formula"
 msgstr ""
 
 #: R/decisioncurve.b.R
+msgid "Net Benefit Is Not Optimism-Corrected"
+msgstr ""
+
+#: R/decisioncurve.b.R
 msgid ""
 "Net benefit is on the scale of true positives per patient; multiply by 100 "
 "to read it as true positives per 100 patients, at no additional cost in "
@@ -105690,10 +105722,6 @@ msgstr ""
 
 #: bayesdca/results/netBenefitTable.title
 msgid "Net Benefit Results"
-msgstr ""
-
-#: R/decisioncurve.b.R
-msgid "Net benefit shown here is apparent, not validated"
 msgstr ""
 
 #: modelval/results/netBenefitSummary.title
@@ -107566,6 +107594,14 @@ msgstr ""
 msgid "no pairwise sub-comparisons for this table shape"
 msgstr ""
 
+#: R/decisioncurve.b.R
+msgid "No patient is classified negative at this threshold, so NPV is undefined."
+msgstr ""
+
+#: R/decisioncurve.b.R
+msgid "No patient is classified positive at this threshold, so PPV is undefined."
+msgstr ""
+
 #: R/enhancedROC.b.R
 msgid "No patient overlap in supplied partition labels"
 msgstr ""
@@ -107635,6 +107671,10 @@ msgstr ""
 
 #: R/alluvial.b.R
 msgid "No Positive Weights"
+msgstr ""
+
+#: R/classicalSurvivalPower.b.R
+msgid "No power curve could be computed for these settings."
 msgstr ""
 
 #: R/diagnosticmeta.b.R
@@ -108246,10 +108286,6 @@ msgstr ""
 msgid ""
 "No usable threshold probabilities were found in the list, so the default 5%, "
 "10%, 15%, 20%, 25% and 30% are used."
-msgstr ""
-
-#: R/decisioncurve.b.R
-msgid "No usable values: {model}"
 msgstr ""
 
 #: R/jjpiestats.b.R
@@ -109285,7 +109321,9 @@ msgid "None Specified"
 msgstr ""
 
 #: R/decisioncurve.b.R
-msgid "none."
+msgid ""
+"None: across every threshold examined, treating everyone or treating no one "
+"does at least as well as this model."
 msgstr ""
 
 #: tumorgrowth/options/modelApproach/nls.title
@@ -110171,10 +110209,6 @@ msgstr ""
 msgid "Not tabulated"
 msgstr ""
 
-#: R/decisioncurve.b.R
-msgid "Not testable"
-msgstr ""
-
 #: R/raincloud.b.R
 msgid ""
 "not testable - the spread used by this method is zero (too many identical "
@@ -110526,6 +110560,72 @@ msgstr ""
 
 #: R/decisioncurve.b.R
 msgid "Nothing about the clinical rule is shown until then."
+msgstr ""
+
+#: R/decisioncurve.b.R
+msgid "Clinical Decision Rule Not Included Yet"
+msgstr ""
+
+#: R/decisioncurve.b.R
+msgid ""
+"\"Clinical decision rule\" is enabled but no rule variable has been "
+"selected: drop a binary variable into \"Clinical Decision Rule (binary)\"."
+msgstr ""
+
+#: R/decisioncurve.b.R
+msgid ""
+"\"Clinical decision rule\" is enabled but its positive level has not been "
+"chosen: select the level that means the rule recommends intervention."
+msgstr ""
+
+#: R/decisioncurve.b.R
+msgid "Choose the Positive Outcome Level"
+msgstr ""
+
+#: R/decisioncurve.b.R
+msgid ""
+"Select the level of {var} that is the event the models predict, under "
+"\"Positive Outcome\"."
+msgstr ""
+
+#: R/decisioncurve.b.R
+msgid "Levels found: {levels}."
+msgstr ""
+
+#: R/decisioncurve.b.R
+msgid "The positive level is never taken from the order of the levels."
+msgstr ""
+
+#: R/decisioncurve.b.R
+msgid "Clinical Rule Is Constant"
+msgstr ""
+
+#: R/decisioncurve.b.R
+msgid ""
+"In the analysed rows the clinical rule recommends intervention for every "
+"patient, so its curve is the treat-all line."
+msgstr ""
+
+#: R/decisioncurve.b.R
+msgid ""
+"In the analysed rows the clinical rule recommends intervention for no "
+"patient, so its curve is the treat-none line at zero."
+msgstr ""
+
+#: R/decisioncurve.b.R
+msgid "Threshold Range Shortened"
+msgstr ""
+
+#: R/decisioncurve.b.R
+msgid ""
+"With a step of {step}%, the threshold grid starting at {lo}% stops at "
+"{last}%, so thresholds above it, up to the requested maximum of {hi}%, are "
+"not analysed."
+msgstr ""
+
+#: R/decisioncurve.b.R
+msgid ""
+"Choose a step size that divides the threshold range to analyse all of it."
 msgstr ""
 
 #: R/crosstable.b.R
@@ -111170,10 +111270,6 @@ msgstr ""
 
 #: dendrogram/options/nClusters.title
 msgid "Number of clusters to highlight"
-msgstr ""
-
-#: mixedcox/options/n_clusters_plot.title
-msgid "Number of Clusters to Plot"
 msgstr ""
 
 #: patientsimilarity/ui[4][2].label
@@ -112344,6 +112440,16 @@ msgstr ""
 
 #: continuousmarkov/options/optimization_method.description.ui
 msgid "Numerical optimization algorithm"
+msgstr ""
+
+#: R/classicalSurvivalPower.b.R
+msgid ""
+"Numerical overflow with exponential entry: gsDesign evaluates exp((hazard "
+"rate + dropout rate - gamma) x accrual duration), which is exp({value}) "
+"here, and anything above about exp(709) is infinite in double precision, so "
+"no sample size or power can be computed. This is a limit of the formula, not "
+"of the design. Shorten the accrual duration or bring gamma closer to 0, and "
+"check that the hazard rates, gamma and durations use the same time unit."
 msgstr ""
 
 #: R/agreement.b.R
@@ -113895,6 +114001,10 @@ msgid ""
 "nor its absence is established at this sample size."
 msgstr ""
 
+#: R/decisioncurve.b.R
+msgid "Only {n} of the analysed cases do not have the outcome."
+msgstr ""
+
 #: R/benford.b.R
 msgid ""
 "Only {n} valid observations are available; a leading-digit distribution "
@@ -114792,7 +114902,6 @@ msgstr ""
 #: continuousmarkov/options/optimization_method.title
 #: hiddenmarkov/options/method.title
 #: ihcthreshold/options/optimizationMethod.title
-#: mixedcox/options/optimization_method.title
 msgid "Optimization Method"
 msgstr ""
 
@@ -114828,10 +114937,6 @@ msgstr ""
 
 #: assayoptimization/results/optimization_results.title
 msgid "Optimization Results"
-msgstr ""
-
-#: mixedcox/ui[2][1].label
-msgid "Optimization Settings"
 msgstr ""
 
 #: ihcthreshold/results/optimalThreshold.columns.title
@@ -115597,7 +115702,6 @@ msgstr ""
 #: flexrstpm2/results/bootstrapValidation.columns.title
 #: jrecode/results/comparison.columns.title
 #: mageeequation/results/individualTable.columns.title
-#: mixedcox/results/bootstrapTable.columns.title
 #: rmstregression/results/bootstrapResults.columns.title
 #: simonmakuch/results/bootstrapValidation.columns.title
 msgid "Original"
@@ -116943,7 +117047,7 @@ msgstr ""
 #: mageeequation/ui[3].label
 #: mediansurvival/ui[3].label
 #: methodvalidation/ui[1][4].label
-#: mixedcox/ui[7].label
+#: mixedcox/ui[5].label
 #: modalitycomparison/ui[4].label
 #: modelbuilder/ui[8].label
 #: multifocalconcordance/ui[1].label
@@ -117629,7 +117733,7 @@ msgid "p (Holm, average NB difference)"
 msgstr ""
 
 #: decisioncurve/results/modelComparisonEnhanced.columns.title
-msgid "p (Holm, mean NB difference)"
+msgid "p (Holm, grid-point mean difference)"
 msgstr ""
 
 #: agreement/results/pathologistTable.columns.title
@@ -118044,7 +118148,6 @@ msgstr ""
 #: mendelianrandomization/results/mrResults.columns.title
 #: mendelianrandomization/results/pleiotropyTable.columns.title
 #: mixedcox/results/fixedEffectsTable.columns.title
-#: mixedcox/results/likelihoodRatioTable.columns.title
 #: modelbuilder/results/nriTable.columns.title
 #: modelbuilder/results/idiTable.columns.title
 #: multiplexanalysis/results/correlationtable.columns.title
@@ -119401,7 +119504,6 @@ msgstr ""
 #: metaanalysis/results/diagnosticAccuracyResults.columns.title
 #: methodcomparison/results/passingBablokResults.columns.title
 #: methodcomparison/results/demingResults.columns.title
-#: mixedcox/results/bootstrapTable.columns.title
 #: nonparametricregression/results/modelSummary.columns.title
 #: ordinalroc/results/modelCoefficients.columns.title
 #: parametricfrailty/results/coefficients.columns.title
@@ -120875,6 +120977,13 @@ msgid ""
 "removed)."
 msgstr ""
 
+#: R/decisioncurve.b.R
+msgid ""
+"Patients with \"{level}\" have lower values of {model} than patients without "
+"it (AUC {auc}, 95% CI {lo} to {hi}; one-sided permutation p = {p}, seed "
+"{seed})."
+msgstr ""
+
 #: R/riverplot.b.R
 msgid "patients/subjects"
 msgstr ""
@@ -121489,7 +121598,6 @@ msgstr ""
 
 #: frailtysurvival/options/estimation_method/penalized_likelihood.title
 #: illnessdeath/options/estimation_method/penalized.title
-#: mixedcox/options/optimization_method/penalized.title
 #: mixedeffectscox/options/estimation_method/penalized.title
 #: parametricfrailty/options/estimation_method/penalized_likelihood.title
 msgid "Penalized Likelihood"
@@ -125030,6 +125138,12 @@ msgstr ""
 msgid "Plot posterior distributions"
 msgstr ""
 
+#: classicalSurvivalPower/options/show_power_plot.description.jamovi
+msgid ""
+"Plot power against sample size for Lachin-Foulkes or number of events for "
+"Schoenfeld."
+msgstr ""
+
 #: competingRisksPower/options/plotPowerCurve.title
 msgid "Plot Power Curve"
 msgstr ""
@@ -125513,7 +125627,6 @@ msgstr ""
 #: lassocox/ui[3].label
 #: lassologistic/ui[5].label
 #: mediansurvival/ui[2].label
-#: mixedcox/ui[6].label
 #: mixedeffectscox/ui[8][0].label
 #: mlpathology/ui[1][3].label
 #: multisurvival/ui[3].label
@@ -127056,6 +127169,10 @@ msgid ""
 "scaling and statistical summaries."
 msgstr ""
 
+#: R/decisioncurve.b.R
+msgid "Possible Inversion: {model}"
+msgstr ""
+
 #: R/clinicalscore.b.R
 #: R/lassologistic.b.R
 msgid "Possible Overfitting"
@@ -127770,7 +127887,7 @@ msgid "Power Law"
 msgstr ""
 
 #: classicalSurvivalPower/options/power_plot_range.title
-msgid "Power Plot Sample Size Range"
+msgid "Power Plot Range (Sample Size or Events)"
 msgstr ""
 
 #: R/psychopdaROC.b.R
@@ -127787,6 +127904,14 @@ msgstr ""
 
 #: mixedeffectscox/options/variance_structure/power_variance.title
 msgid "Power Variance Function"
+msgstr ""
+
+#: R/classicalSurvivalPower.b.R
+msgid "Power with {n} events"
+msgstr ""
+
+#: R/classicalSurvivalPower.b.R
+msgid "Power with {n} patients"
 msgstr ""
 
 #: R/kappaSizePower.b.R
@@ -128470,10 +128595,6 @@ msgstr ""
 msgid "Predict Effect at Time"
 msgstr ""
 
-#: mixedcox/options/random_effects_prediction.title
-msgid "Predict Random Effects"
-msgstr ""
-
 #: agreement/results/confusionMatrixTable.columns.title
 #: dynamiccoeff/results/stateEvolution.columns.title
 #: ihcdiagnostic/results/differentialResults.columns.title
@@ -128623,10 +128744,6 @@ msgstr ""
 #: modelval/options/predicted.title
 #: modelval/ui/variablesupplier[1].label
 msgid "Predicted Probability"
-msgstr ""
-
-#: mixedcox/results/randomEffectsPredTable.title
-msgid "Predicted Random Effects (BLUPs)"
 msgstr ""
 
 #: ihcimmune/results/checkpointAnalysis.columns.title
@@ -129108,6 +129225,12 @@ msgstr ""
 
 #: R/agreement.b.R
 msgid "Prediction: rater %d"
+msgstr ""
+
+#: R/decisioncurve.b.R
+msgid ""
+"Predictions from an external dataset or from cross-validation avoid this; "
+"report which was used."
 msgstr ""
 
 #: stagemigration/options/frailtyPredictiveAccuracy.title
@@ -130722,16 +130845,18 @@ msgid ""
 "sensitivity and specificity."
 msgstr ""
 
-#: classicalSurvivalPower/options/beta.description.jamovi
-msgid "Probability of false negative (0.1 = 90 percent power)."
-msgstr ""
-
 #: classicalSurvivalPower/options/alpha.description.jamovi
 msgid "Probability of false positive (usually 0.025 for one-sided)."
 msgstr ""
 
 #: qtwist/options/toxicity_probability.title
 msgid "Probability of Grade 3-4 Toxicity"
+msgstr ""
+
+#: classicalSurvivalPower/options/beta.description.jamovi
+msgid ""
+"Probability of missing a true effect; target power = 1 - β (0.1 = 90 percent "
+"power, 0.2 = 80 percent power)."
 msgstr ""
 
 #: pathsampling/results/multifocalProbTable.title
@@ -131237,10 +131362,6 @@ msgid ""
 msgstr ""
 
 #: decisioncurve/results/resourceUtilizationTable.columns.title
-msgid "Projected Tests"
-msgstr ""
-
-#: decisioncurve/results/resourceUtilizationTable.columns.title
 msgid "Projected Treatments"
 msgstr ""
 
@@ -131329,7 +131450,6 @@ msgstr ""
 #: agreement/results/confusionMatrixTable.columns.title
 #: causespecifichazards/results/cause_summary.columns.title
 #: groupedbar/options/statistic/proportion.title
-#: mixedcox/results/varianceTable.columns.title
 msgid "Proportion"
 msgstr ""
 
@@ -133555,10 +133675,6 @@ msgstr ""
 msgid "Random Effects and Variance Components"
 msgstr ""
 
-#: mixedcox/results/randomEffectsPlot.title
-msgid "Random Effects Distribution"
-msgstr ""
-
 #: mixedeffectscox/ui[8][0]/show_random_effects_plots.label
 #: mixedeffectscox/results/randomEffectsPlots.title
 msgid "Random Effects Distribution Plots"
@@ -133583,10 +133699,6 @@ msgstr ""
 
 #: mixedeffectscox/ui[5][0].label
 msgid "Random Effects Options"
-msgstr ""
-
-#: mixedcox/options/random_effects_plot.title
-msgid "Random Effects Plot"
 msgstr ""
 
 #: mixedeffectscox/options/random_effects_prediction.title
@@ -133715,7 +133827,6 @@ msgstr ""
 msgid "Random forests"
 msgstr ""
 
-#: mixedcox/results/randomEffectsPredTable.columns.title
 #: mixedeffectscox/options/random_structure/random_intercept.title
 #: mixedeffectscox/ui[1][0]/random_structure_random_intercept.label
 msgid "Random Intercept"
@@ -133952,7 +134063,6 @@ msgstr ""
 msgid "Random share"
 msgstr ""
 
-#: mixedcox/results/randomEffectsPredTable.columns.title
 #: mixedeffectscox/options/random_structure/random_slope.title
 #: mixedeffectscox/ui[1][0]/random_structure_random_slope.label
 msgid "Random Slope"
@@ -134104,6 +134214,10 @@ msgstr ""
 #: decisioncurve/options/showBenefitRange.title
 #: decisioncurve/results/benefitRangeTable.title
 msgid "Range of Benefit"
+msgstr ""
+
+#: R/decisioncurve.b.R
+msgid "Range of Benefit ({model}):"
 msgstr ""
 
 #: decisioncurve/ui[2][0]/showBenefitRange.label
@@ -137377,6 +137491,10 @@ msgstr ""
 msgid "Relative Utility (vs best default strategy)"
 msgstr ""
 
+#: R/decisioncurve.b.R
+msgid "Relative utility as defined by Baker et al. (2009)."
+msgstr ""
+
 #: decisioncurve/results/relativeUtilityPlot.description
 msgid "Relative utility compared to default strategies"
 msgstr ""
@@ -138137,6 +138255,7 @@ msgid ""
 "at least 4 cases must remain after exclusions."
 msgstr ""
 
+#: R/classicalSurvivalPower.b.R
 #: simpleSurvivalPower/results/competing_risks_table.columns.title
 msgid "Required Events"
 msgstr ""
@@ -138222,6 +138341,7 @@ msgstr ""
 msgid "Required Response Time"
 msgstr ""
 
+#: R/classicalSurvivalPower.b.R
 #: clinicaltrialdesign/options/calculation_type/sample_size.title
 #: simpleSurvivalPower/results/snp_analysis_table.columns.title
 msgid "Required Sample Size"
@@ -138416,8 +138536,6 @@ msgstr ""
 #: intervalsurvival/results/residual_summary.title
 #: jointfrailty/results/residualAnalysis.title
 #: methodcomparison/results/residualPlots.title
-#: mixedcox/options/residual_analysis.title
-#: mixedcox/results/residualPlot.title
 #: smoothtimevary/options/residual_analysis.title
 #: smoothtimevary/ui[4][0]/residual_analysis.label
 #: smoothtimevary/results/residualPlots.title
@@ -141560,6 +141678,13 @@ msgstr ""
 msgid "Rows are not thresholds of one marker"
 msgstr ""
 
+#: R/decisioncurve.b.R
+msgid ""
+"Rows are resampled as independent patients, so the data must have one row "
+"per patient; several specimens, blocks or lesions from the same patient make "
+"these intervals and any comparison p-values too narrow."
+msgstr ""
+
 #: R/riverplot.b.R
 msgid "rows before error"
 msgstr ""
@@ -141726,6 +141851,13 @@ msgstr ""
 
 #: enhancedtables/options/export_format/rtf.title
 msgid "RTF"
+msgstr ""
+
+#: R/decisioncurve.b.R
+msgid ""
+"RU = (NB - D) / (prevalence - D), where D is the better of treat-all and "
+"treat-none; it equals the standardized net benefit at thresholds above the "
+"prevalence."
 msgstr ""
 
 #: tidyplots/options/distributionType/rug.title
@@ -142578,6 +142710,10 @@ msgstr ""
 #: decisioncompare/options/samplingDesign.title
 #: enhancedROC/options/samplingDesign.title
 msgid "Sampling design"
+msgstr ""
+
+#: R/decisioncurve.b.R
+msgid "Sampling Design"
 msgstr ""
 
 #: effectsize/results/results/effectDistributionPlot.description
@@ -143975,16 +144111,8 @@ msgstr ""
 msgid "SE (Exposure)"
 msgstr ""
 
-#: mixedcox/results/randomEffectsPredTable.columns.title
-msgid "SE (Intercept)"
-msgstr ""
-
 #: mendelianrandomization/results/selectedSNPs.columns.title
 msgid "SE (Outcome)"
-msgstr ""
-
-#: mixedcox/results/randomEffectsPredTable.columns.title
-msgid "SE (Slope)"
 msgstr ""
 
 #: advancedanova/results/gameshowell.columns.title
@@ -146418,6 +146546,10 @@ msgstr ""
 msgid "Set the number of categories"
 msgstr ""
 
+#: R/decisioncurve.b.R
+msgid "Set the range minimum below the range maximum under Plots."
+msgstr ""
+
 #: jrecode/options/else_level/other.title
 msgid "Set to \"Other\""
 msgstr ""
@@ -146887,12 +147019,6 @@ msgstr ""
 msgid "Shape Parameter (Group 2)"
 msgstr ""
 
-#: classicalSurvivalPower/options/gamma.description.jamovi
-msgid ""
-"Shape parameter for exponential entry (positive = convex, negative = "
-"concave)."
-msgstr ""
-
 #: competingRisksPower/options/shape1.description
 msgid "Shape parameter for Weibull distribution (Group 1)"
 msgstr ""
@@ -147179,7 +147305,6 @@ msgid ""
 "report."
 msgstr ""
 
-#: mixedcox/options/showExplanations.title
 #: surveysurvival/options/showExplanations.title
 msgid "Show Analysis Explanations"
 msgstr ""
@@ -147206,6 +147331,10 @@ msgstr ""
 
 #: icccoeff/options/show_apa_format.title
 msgid "Show APA Format"
+msgstr ""
+
+#: mixedcox/options/icc_calculation.title
+msgid "Show Approximate Latent-Scale Variance Fraction"
 msgstr ""
 
 #: nonparametric/options/show_assumptions.title
@@ -147455,10 +147584,6 @@ msgstr ""
 
 #: patientsimilarity/options/showClusterStats.title
 msgid "Show Cluster Statistics"
-msgstr ""
-
-#: mixedcox/options/show_cluster_summary.title
-msgid "Show Cluster Summary"
 msgstr ""
 
 #: ihccluster/options/showHeatmap.description
@@ -148523,10 +148648,6 @@ msgstr ""
 msgid "Show Inline Statistical Comments"
 msgstr ""
 
-#: classicalSurvivalPower/options/show_power_plot.description.jamovi
-msgid "Show interactive power curves and sample size relationships."
-msgstr ""
-
 #: jggstats/options/show_intercept.title
 msgid "Show Intercept"
 msgstr ""
@@ -148944,7 +149065,6 @@ msgstr ""
 msgid "Show N in Header"
 msgstr ""
 
-#: mixedcox/options/showSummaries.title
 #: surveysurvival/options/showSummaries.title
 msgid "Show Natural Language Summaries"
 msgstr ""
@@ -151296,8 +151416,9 @@ msgstr ""
 
 #: R/decisioncurve.b.R
 msgid ""
-"Simultaneous sup-t bootstrap band from {reps} replications at the {level}% "
-"level (Mandel and Betensky 2008)."
+"Simultaneous sup-t bootstrap band from {reps} replications at the nominal "
+"{level}% level (Montiel Olea and Plagborg-Moller 2019, supplementary "
+"Appendix A.2, Algorithm 3)."
 msgstr ""
 
 #: riverplot/options/edgeStyle/sin.title
@@ -153923,12 +154044,14 @@ msgid ""
 "measurements."
 msgstr ""
 
-#: classicalSurvivalPower/options/power_plot_range.description.jamovi
-msgid "Specify sample size range for power curves (e.g., '50,500' or 'auto')."
-msgstr ""
-
 #: continuousmarkov/options/initial_values.description.ui
 msgid "Specify starting values for optimization"
+msgstr ""
+
+#: classicalSurvivalPower/options/power_plot_range.description.jamovi
+msgid ""
+"Specify subjects for Lachin-Foulkes or events for Schoenfeld (e.g., '50,500' "
+"or 'auto')."
 msgstr ""
 
 #: survivalcont/options/endplot.description
@@ -156349,7 +156472,6 @@ msgstr ""
 msgid "Statistical plots using sjPlot package"
 msgstr ""
 
-#: classicalSurvivalPower/options/power.title
 #: clinicaltrialdesign/options/calculation_type/power.title
 #: outbreakanalysis/results/power_analysis_results.columns.title
 msgid "Statistical Power"
@@ -156679,7 +156801,6 @@ msgstr ""
 #: jjridges/results/tests.title
 #: jjsegmentedtotalbar/ui[7].label
 #: jjsegmentedtotalbar/results/statistical_tests.title
-#: mixedcox/ui[4][0].label
 #: outbreakanalysis/options/statistical_tests.title
 #: simonmakuch/ui[5][0][0].label
 #: stagemigration/ui[4][1].label
@@ -157011,7 +157132,6 @@ msgid "Std. Dev"
 msgstr ""
 
 #: jointfrailty/results/residualAnalysis.columns.title
-#: mixedcox/results/varianceTable.columns.title
 msgid "Std. Dev."
 msgstr ""
 
@@ -160501,7 +160621,6 @@ msgstr ""
 msgid "Survival Plot Display"
 msgstr ""
 
-#: mixedcox/ui[6][1].label
 #: multisurvival/results/survivalPlotsHeading.title
 #: simonmakuch/ui[6][0][0].label
 #: stagemigration/options/intervalCensoringPlots.title
@@ -163344,10 +163463,6 @@ msgstr ""
 msgid "Test Proportional Odds Assumption"
 msgstr ""
 
-#: mixedcox/options/random_effects_significance.title
-msgid "Test Random Effects Significance"
-msgstr ""
-
 #: decisionpanel/results/testRedundancy.title
 msgid "Test Redundancy Analysis"
 msgstr ""
@@ -164235,6 +164350,12 @@ msgid ""
 "required sample size is not the same either way."
 msgstr ""
 
+#: R/decisioncurve.b.R
+msgid ""
+"The analysed cases contain exactly as many patients with the outcome as "
+"without it ({n} each), as a 1:1 case-control design would."
+msgstr ""
+
 #: R/chisqposttest.b.R
 msgid "The analysis cannot proceed"
 msgstr ""
@@ -165076,6 +165197,13 @@ msgstr ""
 
 #: R/survivalcont.b.R
 msgid "the continuous variable '%s' was not found in the analysis data"
+msgstr ""
+
+#: R/classicalSurvivalPower.b.R
+msgid ""
+"The control and treatment hazard rates are equal (hazard ratio 1), so there "
+"is no difference to detect and no sample size reaches the target power. "
+"Enter different hazard rates for the two groups."
 msgstr ""
 
 #: R/datetimeconverter.b.R
@@ -166091,6 +166219,12 @@ msgid ""
 "values you entered."
 msgstr ""
 
+#: R/decisioncurve.b.R
+msgid ""
+"The false-positive penalty in net benefit and the treat-all reference rest "
+"on these patients, so the curves and any confidence intervals are imprecise."
+msgstr ""
+
 #: R/lassocox.b.R
 msgid ""
 "The first observed level in the supplied factor order is the reference; "
@@ -166557,6 +166691,12 @@ msgid ""
 "discrimination is not ruled out either. The intervals are not adjusted for "
 "choosing among the rules. Check the levels chosen as positive, and whether "
 "the sample gives the precision you need."
+msgstr ""
+
+#: R/decisioncurve.b.R
+msgid ""
+"The highlight range minimum ({min}%) is not below its maximum ({max}%), so "
+"no range is highlighted on the decision curve plot."
 msgstr ""
 
 #: R/lassocox.b.R
@@ -168259,6 +168399,18 @@ msgid ""
 "planning."
 msgstr ""
 
+#: R/classicalSurvivalPower.b.R
+msgid ""
+"The power plot range must be two numbers separated by a comma, such as "
+"50,500; the automatic range is shown instead."
+msgstr ""
+
+#: R/classicalSurvivalPower.b.R
+msgid ""
+"The power plot range was changed to {low} to {high}: it must run from low to "
+"high, start above 0 and include the current design point."
+msgstr ""
+
 #: ppv/options/percTrue.description
 msgid ""
 "The pre-study probability that the tested relationships are true. In "
@@ -169856,6 +170008,13 @@ msgstr ""
 msgid "The total post-landmark person-time"
 msgstr ""
 
+#: R/classicalSurvivalPower.b.R
+msgid ""
+"The total study duration ({duration}) is shorter than the accrual duration "
+"({accrual}). Recruitment must end within the study, so lengthen the study or "
+"shorten accrual."
+msgstr ""
+
 #: R/ihcheterogeneity.b.R
 msgid ""
 "The total variance split into between-case, between-method and residual "
@@ -170125,12 +170284,6 @@ msgstr ""
 msgid "The weight variable must contain at least one positive value."
 msgstr ""
 
-#: R/decisioncurve.b.R
-msgid ""
-"The whole curve, including any clinical rule, lies within the band with this "
-"probability."
-msgstr ""
-
 #: R/ihcheterogeneity.b.R
 msgid ""
 "The widest 95%% limits of agreement are %s to %s (region '%s'): an "
@@ -170308,6 +170461,12 @@ msgstr ""
 msgid "There is no loading above cutoff for {pc}"
 msgstr ""
 
+#: R/decisioncurve.b.R
+msgid ""
+"There is no true positive at this threshold, so patients screened per true "
+"positive is undefined."
+msgstr ""
+
 #: R/jjscatterstats.b.R
 msgid "there is only one complete pair of values"
 msgstr ""
@@ -170431,10 +170590,6 @@ msgid ""
 "side (skewness coefficient above 1): %s. Mean (SD) can misrepresent such "
 "distributions; consider switching the statistic to Median (Q1, Q3) in "
 "Options."
-msgstr ""
-
-#: R/decisioncurve.b.R
-msgid "These curves are computed on the same rows that supplied the predicted risks."
 msgstr ""
 
 #: R/lassocox.b.R
@@ -170851,6 +171006,12 @@ msgid ""
 "This analysis adjusts for multiple variables simultaneously, providing "
 "<b>conditional associations</b> for each term given the others in the fitted "
 "model."
+msgstr ""
+
+#: R/decisioncurve.b.R
+msgid ""
+"This analysis cannot tell whether the predicted risks, or a clinical rule, "
+"were developed on these same rows, and it applies no optimism correction."
 msgstr ""
 
 #: R/lollipop.b.R
@@ -171420,9 +171581,7 @@ msgid ""
 msgstr ""
 
 #: R/decisioncurve.b.R
-msgid ""
-"This is not a confirmatory test and depends on giving every threshold equal "
-"weight."
+msgid "This is not a confirmatory test."
 msgstr ""
 
 #: R/checkdata.b.R
@@ -173482,7 +173641,6 @@ msgstr ""
 msgid "Time Type in Data (e.g., YYYY-MM-DD)"
 msgstr ""
 
-#: mixedcox/options/timetypeoutput.title
 #: multisurvival/options/timetypeoutput.title
 #: surveysurvival/options/timetypeoutput.title
 #: survival/options/timetypeoutput.title
@@ -177940,7 +178098,7 @@ msgid ""
 msgstr ""
 
 #: classicalSurvivalPower/options/beta.title
-msgid "Type II Error Rate (β)"
+msgid "Type II Error Rate (β = 1 - power)"
 msgstr ""
 
 #: mixedmodelanova/results/anova_table.title
@@ -178787,10 +178945,6 @@ msgstr ""
 msgid "Understanding Clinical Interpretation Guide"
 msgstr ""
 
-#: mixedcox/results/clusteringExplanation.title
-msgid "Understanding Clustering in Survival Analysis"
-msgstr ""
-
 #: R/lassocox.b.R
 msgid "Understanding coefficients and paths"
 msgstr ""
@@ -178872,10 +179026,6 @@ msgstr ""
 msgid "Understanding Integrated Discrimination Improvement (IDI)"
 msgstr ""
 
-#: mixedcox/results/iccExplanation.title
-msgid "Understanding Intracluster Correlation"
-msgstr ""
-
 #: simonmakuch/results/landmarkAnalysisExplanation.title
 msgid "Understanding Landmark Analysis"
 msgstr ""
@@ -178906,10 +179056,6 @@ msgstr ""
 
 #: R/decision.b.R
 msgid "Understanding Misclassifications"
-msgstr ""
-
-#: mixedcox/results/modelSelectionExplanation.title
-msgid "Understanding Mixed vs Standard Cox Models"
 msgstr ""
 
 #: stagemigration/results/multifactorialResultsExplanation.title
@@ -178989,10 +179135,6 @@ msgstr ""
 
 #: dataquality/results/explanations.title
 msgid "Understanding Quality Metrics"
-msgstr ""
-
-#: mixedcox/results/randomEffectsExplanation.title
-msgid "Understanding Random Effects"
 msgstr ""
 
 #: survival/results/rmstExplanation.title
@@ -179331,6 +179473,10 @@ msgstr ""
 msgid "Unit for landmark time"
 msgstr ""
 
+#: R/decisioncurve.b.R
+msgid "Unit of Analysis"
+msgstr ""
+
 #: R/decisioncompare.b.R
 #: R/enhancedROC.b.R
 #: decision/options/analysisUnit.title
@@ -179338,6 +179484,10 @@ msgstr ""
 #: decisioncompare/options/analysisUnit.title
 #: enhancedROC/options/analysisUnit.title
 msgid "Unit of observation"
+msgstr ""
+
+#: R/decisioncurve.b.R
+msgid "Unit of Resampling"
 msgstr ""
 
 #: plscox/options/scaling_method/unit_variance.title
@@ -179549,7 +179699,6 @@ msgstr ""
 #: bayesiannetworkma/options/correlation_structure/unstructured.title
 #: conditionalgee/options/correlation_structure/unstructured.title
 #: jointmodeling/options/error_structure/unstructured.title
-#: mixedcox/options/correlation_structure/unstructured.title
 #: mixedeffectscox/options/correlation_structure/unstructured.title
 #: mixedeffectscox/ui[2][0]/correlation_structure_unstructured.label
 #: raftgee/options/correlation_structure/unstructured.title
@@ -179703,6 +179852,7 @@ msgstr ""
 #: linechart/results/correlation.columns.title
 #: mendelianrandomization/results/mrResults.columns.title
 #: misclassificationbias/results/biasAnalysis.columns.title
+#: mixedcox/results/fixedEffectsTable.columns.title
 #: multisurvival/results/interactionTest.columns.title
 #: multisurvival/results/subgroupHR.columns.title
 #: multisurvival/results/survMetricsTable.columns.title
@@ -181632,7 +181782,6 @@ msgstr ""
 #: methodcomparison/results/blandAltmanStats.columns.title
 #: methodcomparison/results/calibrationTable.columns.title
 #: methodvalidation/results/summary.columns.title
-#: mixedcox/results/diagnosticsTable.columns.title
 #: mixedeffectscox/results/modelSummary.columns.title
 #: mixedeffectscox/results/diagnostics.columns.title
 #: mixedeffectscox/results/convergenceInfo.columns.title
@@ -183596,7 +183745,6 @@ msgstr ""
 #: hierarchicalpathology/results/variancecomponents.columns.title
 #: ihcheterogeneity/results/variancetable.columns.title
 #: illnessdeath/results/sojournAnalysis.columns.title
-#: mixedcox/results/varianceTable.columns.title
 #: mixedeffectscox/results/randomEffects.columns.title
 #: mixedmodelanova/results/random_effects.columns.title
 #: ordinalmixedmodel/results/randomEffects.columns.title
@@ -183675,10 +183823,6 @@ msgstr ""
 #: frailtysurvival/options/variance_components.title
 #: stagemigration/options/frailtyVarianceComponents.title
 msgid "Variance Components Analysis"
-msgstr ""
-
-#: mixedcox/results/varianceTable.title
-msgid "Variance Components Details"
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
@@ -184337,6 +184481,15 @@ msgstr ""
 
 #: grafify/options/color_palette/vibrant.title
 msgid "Vibrant"
+msgstr ""
+
+#: R/decisioncurve.b.R
+msgid ""
+"Vickers et al. (2023) caution that significance tests and confidence "
+"intervals for net benefit are of questionable value for a treatment "
+"decision: the strategy with the highest net benefit at the prespecified "
+"threshold is preferred whatever the p-value, so read these p-values only as "
+"a description of sampling variability."
 msgstr ""
 
 #: batcheffect/results/redundancy.columns.title
@@ -185460,7 +185613,6 @@ msgstr ""
 #: R/waterfall.b.R
 #: irecist/ui[1][1][0]/confirmationWindow.suffix
 #: irecist/ui[1][1][0]/confirmationWindowMax.suffix
-#: mixedcox/options/timetypeoutput/weeks.title
 #: multisurvival/options/timetypeoutput/weeks.title
 #: recist/ui[2][0][0]/confirmationWindow.suffix
 #: recist/ui[2][1][0]/sdMinDuration.suffix
@@ -188554,7 +188706,6 @@ msgstr ""
 #: R/waterfall.b.R
 #: competingRisksPower/ui[2][0]/followUpTime.suffix
 #: competingRisksPower/ui[2][0]/accrualTime.suffix
-#: mixedcox/options/timetypeoutput/years.title
 #: multisurvival/options/timetypeoutput/years.title
 #: singlearm/options/timetypeoutput/years.title
 #: surveysurvival/options/timetypeoutput/years.title

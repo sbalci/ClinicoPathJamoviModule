@@ -1,5 +1,128 @@
 # ClinicoPath News
 
+## Unreleased — `decisioncurve` (Decision Curve Analysis): validation and independent-review fixes (module 1.0.81.01, analysis 1.0.83)
+
+- **The positive outcome level is no longer pre-selected (release review 2026-10-14).** jamovi
+  used to fill "Positive Outcome" with the first level of the outcome. That is usually the
+  non-event ("No", "0", "Absent"), so a new analysis computed every curve for the wrong event.
+  "Positive rule level" had the same problem, which reversed the clinical rule.
+  - Both now start empty.
+  - Until the outcome level is chosen, the analysis lists the levels with their counts in an INFO
+    notice and computes nothing.
+  - Until the rule level is chosen, the rule is left out with an INFO notice instead of stopping
+    the run.
+  - **Saved analyses:** an `.omv` saved earlier keeps whatever level it had. Check "Positive
+    Outcome" when reopening one.
+- **Fatal input errors use jamovi's error state.** A non-binary outcome, a positive level absent
+  from the data, values outside 0 to 1, a non-numeric model, duplicate or reserved names, and a
+  non-binary rule now stop the run with jamovi's own error message. Before, they showed a red
+  banner above empty tables. From R these conditions now raise an error.
+- **A step that does not divide the threshold range is reported.** With a 10% step, a 10% to 29%
+  range analyses 10% to 20%. A "Threshold Range Shortened" warning now names where the grid
+  stops; the grid itself is unchanged.
+- **Smaller fixes.**
+  - A clinical rule that recommends the same action for every analysed patient is analysed as the
+    treat-all (or treat-none) strategy, with a warning. It used to stop the analysis as "not
+    binary".
+  - A strategy that classifies nobody positive anywhere in the range gets a zero-width
+    simultaneous band instead of none.
+  - Relative utility is no longer blanked when the prevalence is close to 1.
+- **Corrected curve points.** The plotted curve is now computed at exactly the threshold its axis
+  shows. `seq()` round-off had placed the points labelled 6, 12, 15, 21 and 22% a hair above those
+  values. Patients whose risk equalled the threshold (common with lookup-table scores) were
+  therefore counted as untreated on the curve but treated in the results table. The range of
+  benefit, the average net benefit, both comparison tables and the interventions-avoided,
+  relative-utility and standardized-net-benefit plots inherited the error. The per-threshold tables
+  were always correct.
+- **Scope stated.** The analysis summary and the methodological notes now say two things.
+  - Net benefit and the treat-all line use the sample's outcome prevalence. The curves therefore
+    describe the target population only for a cohort or consecutive series, not for a case-control
+    or enriched sample.
+  - Each row must be one patient, because the bootstrap resamples rows.
+
+  An exact 1:1 split of events and non-events raises a warning that a case-control design produces
+  exactly this.
+- **New warnings.**
+  - "Possible Inversion" fires when a model's or a clinical rule's values run opposite to the
+    selected positive level, for example risks of the event scored against the non-event. It fires
+    only when the 95% DeLong interval for the AUC lies below 0.5 and a one-sided permutation test
+    gives p < 0.025. In simulation that meant at most about 2.5% false alarms on uninformative data,
+    including sparse classes and tied scores.
+  - "Few Patients Without the Outcome" fires below 25 non-events.
+  - "Few Positive Classifications" names the thresholds where fewer than 10 patients are classified
+    positive and the intervals under-cover.
+- **Plots and text.**
+  - The y-axis zoom no longer cuts off confidence ribbons. The caption puts the band description
+    and the seed on separate lines.
+  - Both comparison tables quote Vickers et al. (2023): significance tests of net benefit are of
+    questionable value for a treatment decision.
+  - Relative utility is attributed to Baker et al. (2009). The simultaneous band is attributed to
+    Montiel Olea and Plagborg-Møller (2019); it was previously misattributed.
+  - Tied best models are all named.
+  - The footnote names a clinical rule by the label the table uses.
+  - A population of 100000 is no longer printed as "1e+05".
+  - Malformed table thresholds are reported when only the clinical impact plot uses them.
+- **Undefined cells are blank and explained.** Some cells have no defined value: PPV when nobody is
+  classified positive, NPV when nobody is classified negative, and patients screened per true
+  positive when there is no true positive. These cells used to show a bare "."; they are now blank,
+  with a footnote giving the reason. A model with no range of benefit showed "NaN" in From, To and
+  Width; those cells are now blank too, and the existing table note says why.
+- Apart from the corrected curve points, no net-benefit value changes.
+- **Follow-up fixes from a full function audit:**
+  - The clinical decision rule now takes part in both model-comparison tables. It used to be
+    skipped as having "no values to resample". It is resampled exactly like a 0/1 predictor
+    column. One model plus a rule is now enough to run a comparison. With several models, the
+    added rule pairs change the Holm-adjusted p-values.
+  - Notices are listed by severity, most serious first.
+  - A highlight range whose minimum is not below its maximum is no longer drawn, and a warning
+    says why.
+  - The notice about apparent net benefit is now a warning rather than a strong warning, because
+    it appears on every run. It is retitled "Net Benefit Is Not Optimism-Corrected": the old title
+    claimed the predictions were "not validated", which is false for external-validation risks.
+  - The constant "Projected Tests" column, always equal to the population size, is removed from
+    Resource Utilization.
+  - The confidence-level box is no longer enabled for the enhanced pairwise comparison, which
+    shows only a Holm p-value that does not depend on it.
+  - The DeLong (1988) reference is cited for the AUC interval in the inversion warning.
+  - Hidden plots no longer store data in the .omv file.
+  - The help page has a runnable example.
+- **Breaking:** the "Net benefit confidence intervals" checkbox (`showNetBenefitCI`) is removed.
+  It was a second switch for "Bootstrap confidence intervals" (`confidenceIntervals`) and produced
+  identical output.
+  - A saved analysis that ticked only the removed box reopens without its confidence ribbons. If
+    "Decision curve plot" was also off, the plot itself is hidden. Tick "Decision curve plot" and
+    "Bootstrap confidence intervals" to restore them.
+  - R calls passing `showNetBenefitCI =` must switch to `confidenceIntervals =`.
+- **Fixes from a code review:**
+  - Bootstrap confidence intervals are about 17 times faster: 0.13 s instead of 2.23 s per strategy
+    at 1,000 patients, 1,000 replications and 46 thresholds. The intervals are identical, draw for
+    draw.
+  - The clinical impact bars are now blue and vermillion. The old dark green and dark red looked
+    the same to readers with red-green colour blindness.
+  - The net-interventions-avoided plot no longer lets one curve flatten the others. With the
+    automatic range, a missed case costs 99 interventions at the 1% threshold, and one curve fell
+    to -781 per 100. The view now stops at -100, and the caption names any curve cut off there.
+  - Optional plots no longer store patient-level vectors in the .omv file. The plot state stays the
+    same size at any sample size. Files saved with the previous version still redraw.
+  - The monetary payoff inputs are labelled "Monetary value per true positive" and "Monetary harm
+    per false positive", so a QALY or utility value is not entered by mistake. The bootstrap box is
+    renamed "Bootstrap and Resampling", because its replications and seed also drive the comparison
+    tables.
+  - Tables show their rows while the analysis runs, instead of appearing empty and then
+    restructuring.
+  - Every decisioncurve message, label and note now has a Turkish translation.
+- **Breaking (code review):**
+  - The "Conclusion" column ("Exploratory adjusted p < 0.05") is removed from the Exploratory
+    Pairwise Model Comparison. It read as a verdict next to the note that warns against deciding by
+    these p-values. The p column is unchanged. When a pair cannot be tested, the p cell is blank and
+    a footnote says why.
+  - "Decision curve plot" now hides the plot even while "Bootstrap confidence intervals" is ticked.
+    The intervals are drawn only on that plot, so the interval options are disabled and not
+    computed while the plot is off.
+  - The Clinical Interpretation panel is now opt-in, under Tables & Outputs → "Clinical
+    interpretation". The Analysis Summary, which states the data requirements, is still always
+    shown. R calls: `showInterpretation = TRUE`.
+
 ## Unreleased — rare-disease AI validation and workload
 
 - Add `agreementintro` 0.0.1 under meddecideT → Agreement → Method Guide.

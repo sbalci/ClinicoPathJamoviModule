@@ -20,8 +20,11 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         .treatAllNB = NULL,
         .plotThinning = NULL,
         .plotData = NULL,
-        # .clinicalImpactData removed: declared and reset but never assigned or read.
-        .analysisData = NULL,
+        # Outcome prevalence of the analysis cohort, and the clinical impact plot's per-100
+        # TP/FP rates at the selected thresholds: what the optional plots draw from (see
+        # .plotStateSpec). .analysisData removed: assigned, never read.
+        .prevalence = NULL,
+        .impactData = NULL,
         .analysisOutcomes = NULL,
         .outcomePositive = NULL,
         # Per-run memo of the pairwise bootstrap comparison, shared by the two comparison
@@ -38,38 +41,30 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         # error, nothing to tell the user why. Publishing the fields as image state and
         # rehydrating from it on render fixes that without touching a line of plotting code.
         #
-        # Only the six fields the renderers actually use are carried; .analysisData (the whole
-        # analysis frame) is deliberately NOT among them, so the state stays small in the .omv.
-        # What each renderer actually reads. Publishing the whole blob to all five images cost
-        # ~517 KB x 5 = 2.6 MB in the .omv on a 5,000-row, four-model analysis, because
-        # .dcaResults carries a prediction vector per model. .plotDCA -- the only plot on by
-        # default -- needs none of that, so slicing takes the common case from 517 KB to ~8 KB.
+        # What each renderer actually reads, and nothing per patient. The slices used to carry
+        # .dcaResults (a prediction vector per model) and the outcome vector: ~517 KB x 5 in
+        # the .omv on a 5,000-row, four-model analysis before slicing, and still 33 KB per
+        # optional plot at n = 1000 after it, although relative utility and standardized net
+        # benefit used them only to compute ONE number, the prevalence (/review-function
+        # 2026-10-13). Every curve, Treat All included, is already in plotData, and the
+        # clinical impact plot gets its rates precomputed in .run(). Only visible images get
+        # state (.publishPlotStates): jmvcore saves hidden images' state too.
         # i18n: every user-facing string is wrapped in .() with {placeholder} values via .fmt();
         # the "Treat All"/"Treat None" labels are strategy KEYS compared in code and stay literal.
-
         .plotStateSpec = function() {
             list(
-                dcaPlot                    = c("plotData", "plotThinning"),
-                # ...plus analysisOutcomes/outcomePositive, which .calculateModelAtThreshold
-                # reads transitively -- omitting them made this the one plot that still came
-                # back blank from state.
-                clinicalImpactPlot         = c("dcaResults", "analysisOutcomes",
-                                               "outcomePositive"),
-                interventionsAvoidedPlot   = c("dcaResults", "treatAllNB"),
-                relativeUtilityPlot        = c("dcaResults", "plotData", "analysisOutcomes",
-                                               "outcomePositive"),
-                standardizedNetBenefitPlot = c("dcaResults", "plotData", "analysisOutcomes",
-                                               "outcomePositive")
+                dcaPlot                    = "plotData",
+                clinicalImpactPlot         = "impactData",
+                interventionsAvoidedPlot   = "plotData",
+                relativeUtilityPlot        = c("plotData", "prevalence"),
+                standardizedNetBenefitPlot = c("plotData", "prevalence")
             )
         },
 
         .plotStateFields = function() {
-            list(dcaResults       = private$.dcaResults,
-                 plotData         = private$.plotData,
-                 plotThinning     = private$.plotThinning,
-                 treatAllNB       = private$.treatAllNB,
-                 analysisOutcomes = private$.analysisOutcomes,
-                 outcomePositive  = private$.outcomePositive)
+            list(plotData   = private$.plotData,
+                 prevalence = private$.prevalence,
+                 impactData = private$.impactData)
         },
 
         # .modelColourScale() removed: it hardcoded ColorBrewer "Set1" (with a viridis
@@ -89,7 +84,11 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             spec <- private$.plotStateSpec()
             for (nm in private$.plotImageNames()) {
                 img <- self$results[[nm]]
-                if (is.null(img)) next
+                # Hidden images keep the NULL state .clearPlotStates() gave them: jmvcore saves
+                # every non-NULL state into the .omv whether or not the image is visible. Each
+                # image's visibility is option-driven, and any option change re-runs .run(),
+                # which publishes the state once it is shown.
+                if (is.null(img) || !isTRUE(img$visible)) next
                 img$setState(st[spec[[nm]]])
             }
         },
@@ -119,13 +118,55 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             take <- function(field, value) {
                 if (is.null(private[[field]]) && !is.null(value)) private[[field]] <- value
             }
-            take(".dcaResults",       st$dcaResults)
-            take(".plotData",         st$plotData)
-            take(".plotThinning",     st$plotThinning)
-            take(".treatAllNB",       st$treatAllNB)
-            take(".analysisOutcomes", st$analysisOutcomes)
-            take(".outcomePositive",  st$outcomePositive)
+            take(".plotData",   st$plotData)
+            take(".prevalence", st$prevalence)
+            take(".impactData", st$impactData)
+
+            # ponytail: migration for state saved by the meddecide build of 2026-10-08, whose
+            # slices carried per-patient vectors instead of the fields above. Without it a
+            # resize or export of such an .omv draws a blank optional plot until an option is
+            # changed. Delete once those files no longer matter.
+            if (!is.null(st$analysisOutcomes) && !is.null(st$outcomePositive)) {
+                take(".prevalence", mean(st$analysisOutcomes == st$outcomePositive))
+                if (!is.null(st$dcaResults))
+                    take(".impactData", private$.buildImpactData(
+                        st$dcaResults, st$analysisOutcomes, st$outcomePositive,
+                        private$.parseSelectedThresholdsQuietly()))
+            }
+            if (!is.null(st$dcaResults) && !is.null(st$treatAllNB)) {
+                th <- st$dcaResults[[1]]$thresholds
+                take(".plotData", do.call(rbind, c(
+                    lapply(names(st$dcaResults), function(m) data.frame(
+                        threshold = th, net_benefit = st$dcaResults[[m]]$net_benefits,
+                        model = m, stringsAsFactors = FALSE)),
+                    list(data.frame(threshold = th, net_benefit = st$treatAllNB,
+                                    model = "Treat All", stringsAsFactors = FALSE)))))
+            }
             invisible(NULL)
+        },
+
+        # Per-100 true- and false-positive rates for every strategy at each table threshold,
+        # computed at the EXACT threshold (not the nearest grid point), in strategy order.
+        # The clinical impact plot draws these; it scales them by populationSize itself.
+        .buildImpactData = function(dca_results, outcomes, positive, thresholds) {
+            rows <- list()
+            for (m in names(dca_results)) for (t in thresholds) {
+                r <- private$.calculateNetBenefit(dca_results[[m]]$predictions, outcomes, t, positive)
+                rows[[length(rows) + 1]] <- data.frame(
+                    threshold = t, model = m,
+                    true_positives_per_100 = r$true_positives_per_100,
+                    false_positives_per_100 = r$false_positives_per_100,
+                    stringsAsFactors = FALSE)
+            }
+            do.call(rbind, rows)
+        },
+
+        # .parseSelectedThresholds() for a caller with nowhere to show its notices (a renderer,
+        # which runs on every resize without .renderNotices()): keep the notice list as it was.
+        .parseSelectedThresholdsQuietly = function() {
+            saved <- private$.noticeList
+            on.exit(private$.noticeList <- saved)
+            private$.parseSelectedThresholds()
         },
 
         # The results table's model columns depend only on which variables the user picked, so
@@ -161,6 +202,67 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 tbl$addColumn(name = unname(cols[i]), title = models[i],
                               type = "number", format = "zto")
             }
+
+            # The ROWS are option-determined too: one per table threshold, strategy, or pair of
+            # strategies. Built here with their labels; .run() fills them with setRow(). Added
+            # in .run() they made every table appear empty and then restructure on each run.
+            # No rows while the positive level is unset either: .run() then stops at the pending
+            # notice, and rows laid out here would sit under it with every value cell blank.
+            if (is.null(self$options$outcome) ||
+                private$.levelUnset(self$options$outcomePositive)) return(invisible(NULL))
+            thr <- private$.parseSelectedThresholdsQuietly()
+            pairs <- if (length(models) >= 2) utils::combn(models, 2, simplify = FALSE) else list()
+            per_strategy_threshold <- lapply(seq_len(length(models) * length(thr)), function(k) {
+                m <- (k - 1) %/% length(thr) + 1
+                list(model = models[m], threshold = thr[(k - 1) %% length(thr) + 1])
+            })
+            labels <- list(
+                resultsTable              = lapply(thr, function(t) list(threshold = t)),
+                benefitRangeTable         = lapply(models, function(m) list(model = m)),
+                weightedAUCTable          = lapply(models, function(m) list(model = m)),
+                comparisonTable           = lapply(pairs, function(p)
+                    list(comparison = .fmt(.('{a} vs {b}'), a = p[1], b = p[2]))),
+                modelComparisonEnhanced   = lapply(pairs, function(p) list(model1 = p[1], model2 = p[2])),
+                clinicalImpactTable       = per_strategy_threshold,
+                costBenefitTable          = per_strategy_threshold,
+                decisionConsequencesTable = per_strategy_threshold,
+                resourceUtilizationTable  = per_strategy_threshold
+            )
+            for (nm in names(labels)) {
+                table <- self$results[[nm]]
+                if (!isTRUE(table$visible)) next
+                keys <- private$.tableRowKeys(nm, length(models), length(thr))
+                for (k in seq_along(keys)) table$addRow(rowKey = keys[k], values = labels[[nm]][[k]])
+            }
+            invisible(NULL)
+        },
+
+        # Row keys of each table, shared by .init() (which builds the rows) and .run() (which
+        # fills them); strategy-by-threshold tables run strategy-major, as their populators do.
+        # sprintf(), not paste0(): paste0("pair_", integer(0)) is "pair_", one phantom key for a
+        # lone model with a comparison ticked; sprintf() returns character(0).
+        .tableRowKeys = function(table_name, n_strategies, n_thresholds) {
+            switch(table_name,
+                resultsTable = sprintf("thresh_%d", seq_len(n_thresholds)),
+                benefitRangeTable = ,
+                weightedAUCTable = sprintf("model_%d", seq_len(n_strategies)),
+                comparisonTable = ,
+                modelComparisonEnhanced = sprintf("pair_%d", seq_len(choose(n_strategies, 2))),
+                sprintf("model_%d_%d", rep(seq_len(n_strategies), each = n_thresholds),
+                        rep(seq_len(n_thresholds), times = n_strategies)))
+        },
+
+        # Make `table` hold exactly the rows `keys`, in order, before .run() setRow()s them.
+        # .init() normally built them already, so this does nothing; a direct .run() without
+        # .init(), or a reused object whose row set changed, is rebuilt instead of setRow()
+        # rejecting a key it cannot find.
+        .syncRows = function(table, keys) {
+            have <- vapply(table$rowKeys, function(k)
+                if (is.character(k) && length(k) == 1) k else NA_character_, character(1))
+            if (!identical(have, keys)) {
+                .deleteTableRows(table)
+                for (k in keys) table$addRow(rowKey = k)
+            }
             invisible(NULL)
         },
 
@@ -168,13 +270,15 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         # table columns and in .dcaResults. Returns NULL when there is no rule to label.
         # Both .init() (which scaffolds the columns) and .run() (which keys them off
         # names(.dcaResults)) call this, so the two can never resolve a different label.
+        # NULL too while the rule's positive level is still empty (allowNone): the rule is then
+        # left out of the run, so .init() must not scaffold a column for it.
         .ruleStrategyLabel = function() {
             if (!isTRUE(self$options$clinicalDecisionRule)) return(NULL)
             if (is.null(self$options$decisionRuleVar)) return(NULL)
+            rp <- self$options$decisionRulePositive
+            if (private$.levelUnset(rp)) return(NULL)
             lbl <- self$options$decisionRuleLabel
             if (!is.null(lbl) && nzchar(trimws(lbl))) return(trimws(lbl))
-            rp <- self$options$decisionRulePositive
-            if (is.null(rp) || length(rp) != 1 || is.na(rp)) return(NULL)
             .fmt(.('Clinical Rule ({level})'), level = rp)
         },
 
@@ -183,6 +287,15 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         .ciBand = function() {
             band <- tryCatch(self$options$ciBand, error = function(e) NULL)
             if (is.null(band) || !band %in% c("pointwise", "simultaneous")) "pointwise" else band
+        },
+
+        # Bootstrap intervals are drawn only on the decision curve plot, so they exist only while
+        # that plot is on. The plot used to be visible on (showPlot || confidenceIntervals), so
+        # unticking "Decision curve plot" did nothing while the intervals were ticked. A disabled
+        # jamovi control keeps its value, so the .u.yaml enable alone would still have run
+        # bootReps resamples per strategy, and described them in the footnotes, for no plot.
+        .ciDrawn = function() {
+            isTRUE(self$options$confidenceIntervals) && isTRUE(self$options$showPlot)
         },
 
         .positiveLevel = function() {
@@ -196,9 +309,16 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             else self$options$outcomePositive
         },
 
-        # Helper method to escape variable names for notice IDs
-        .escapeVar = function(varName) {
-            gsub("[^A-Za-z0-9]", "_", varName)
+        # An NA cell is never blank in jamovi: jmvcore sends a numeric NA as a double, printed
+        # "NaN", and a logical NA as missing, printed "." (Cell$asProtoBuf). "" is the only blank
+        # cell, and $asDF still reads it back as NA. Call after setRow(); the same pattern as
+        # .footnoteNA in decisioncalculator.b.R. `note` NULL when a table note already says why.
+        .footnoteNA = function(table, rowKey, values, note = NULL) {
+            for (col in names(values))
+                if (isTRUE(is.na(values[[col]]))) {
+                    table$setCell(col = col, value = "", rowKey = rowKey)
+                    if (!is.null(note)) table$addFootnote(col = col, note = note, rowKey = rowKey)
+                }
         },
 
         # HTML sanitization for security
@@ -239,6 +359,19 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
           invisible(NULL)
         },
 
+        # A fatal input problem: jamovi's own error state, not an ERROR banner beside the tables
+        # .init() has already laid out, which read as an empty but otherwise normal analysis
+        # (review guide §25). "{}" + msg: the text carries variable, model and level names, and
+        # reject() would otherwise read a brace in one as a placeholder.
+        .fatal = function(title, content) {
+            jmvcore::reject("{}", msg = paste0(title, ": ", content))
+        },
+
+        # A Level option left empty. allowNone gives NULL; "" and NA are treated the same.
+        .levelUnset = function(x) {
+            is.null(x) || length(x) != 1 || is.na(x) || !nzchar(as.character(x))
+        },
+
         # Render collected notices as HTML
         .renderNotices = function() {
           if (length(private$.noticeList) == 0) {
@@ -255,7 +388,11 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
           html <- "<div style='margin: 10px 0;'>"
 
-          for (notice in private$.noticeList) {
+          # Most severe first, insertion order within a severity (order() is stable). Insertion
+          # order alone put e.g. the Complete-Case WARNING above the small-sample STRONG_WARNING.
+          severity <- match(vapply(private$.noticeList, function(n) n$type, character(1)),
+                            c("ERROR", "STRONG_WARNING", "WARNING", "INFO"))
+          for (notice in private$.noticeList[order(severity)]) {
             style <- typeStyles[[notice$type]] %||% typeStyles$INFO
 
             html <- paste0(html,
@@ -277,9 +414,6 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         # Constants for default values and thresholds
         DECISIONCURVE_DEFAULTS = list(
             selected_thresholds = c(0.05, 0.10, 0.15, 0.20, 0.25, 0.30),
-            bootstrap_progress_threshold = 5000,
-            performance_threshold_count = 1000,  # Threshold count for performance optimization
-            bootstrap_chunk_size = 10000,       # Memory-efficient chunking threshold
             max_models_full_plot = 10           # Plot optimization threshold
         ),
 
@@ -358,6 +492,45 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             (model_nb - treat_all_nb) / threshold_odds * population
         },
 
+        # AUC of `pred` for the event and its DeLong (1988) standard error, from mid-rank
+        # placement values (Sun & Xu 2014), so it is O(n log n) and handles ties - a binary
+        # clinical rule is all ties. V10[i] is the share of non-events below event i (ties
+        # half), V01[j] the share of events above non-event j. Matches
+        # pROC::var(roc, method = "delong"). NULL with fewer than two of either class.
+        .aucDeLong = function(pred, is_event) {
+            ok <- !is.na(pred) & !is.na(is_event)
+            x <- pred[ok & is_event]
+            y <- pred[ok & !is_event]
+            n1 <- length(x)
+            n0 <- length(y)
+            if (n1 < 2 || n0 < 2) return(NULL)
+            r_all <- rank(c(x, y))
+            v10 <- (r_all[seq_len(n1)] - rank(x)) / n0
+            v01 <- 1 - (r_all[n1 + seq_len(n0)] - rank(y)) / n1
+            auc <- mean(v10)
+            se <- sqrt(stats::var(v10) / n1 + stats::var(v01) / n0)
+            z <- stats::qnorm(0.975)
+            list(auc = auc, se = se, lower = auc - z * se, upper = auc + z * se)
+        },
+
+        # One-sided permutation p-value for AUC < 0.5: the share of random relabellings whose
+        # event rank sum is at most the observed one, (b + 1) / (B + 1) so it is a valid test at
+        # every n and under any ties. wilcox.test() was not enough: it switches to the normal
+        # approximation with ties or a group above 49, and 2 events among 20 tied zeros and 80
+        # tied ones gave p = 0.0024 where the exact probability is 0.038 (Codex review,
+        # 2026-10-13). Called only after the DeLong bound has already flagged a strategy, and
+        # inside its own seed substream, so it costs nothing on ordinary runs and repeats exactly.
+        .aucLessPermutationP = function(pred, is_event, n_perm = 2000L) {
+            ok <- !is.na(pred) & !is.na(is_event)
+            r <- rank(pred[ok])
+            ev <- is_event[ok]
+            n1 <- sum(ev)
+            observed <- sum(r[ev])
+            perm <- vapply(seq_len(n_perm),
+                           function(i) sum(r[sample.int(length(r), n1)]), numeric(1))
+            (sum(perm <= observed + 1e-9) + 1) / (n_perm + 1)
+        },
+
         # Calculate all model metrics at the exact requested threshold. Storing predictions
         # in .dcaResults also lets this work for a binary clinical rule, which has no source
         # model column. This prevents a row labelled with one threshold from silently using
@@ -389,31 +562,19 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             )
         },
         
-        # Vectorized net benefit calculation for performance optimization
+        # Net benefit at every threshold from ONE sort of the predictions, instead of one pass
+        # over all patients per threshold: O(n log n + T log n), not O(n T). Both bootstraps call
+        # this once per replicate. findInterval(left.open = TRUE) counts the predictions strictly
+        # below each threshold, so a prediction equal to the threshold is still positive (`>=`,
+        # as .calculateNetBenefit and dcurves). Callers pass complete-case vectors (no NA).
         .calculateNetBenefitsVectorized = function(predictions, outcomes, thresholds, positive_outcome) {
-            # Convert outcomes to binary once
-            binary_outcomes <- as.numeric(outcomes == positive_outcome)
             n <- length(outcomes)
-            
-            # Pre-allocate result vector
-            net_benefits <- numeric(length(thresholds))
-            
-            # Calculate for each threshold (still a loop but optimized inner calculations)
-            for (j in seq_along(thresholds)) {
-                thresh <- thresholds[j]
-                
-                # Vectorized threshold comparison
-                predicted_positive <- predictions >= thresh
-                
-                # Vectorized confusion matrix calculation
-                tp <- sum(predicted_positive & binary_outcomes == 1)
-                fp <- sum(predicted_positive & binary_outcomes == 0)
-                
-                # Net benefit formula
-                net_benefits[j] <- (tp / n) - (fp / n) * (thresh / (1 - thresh))
-            }
-            
-            return(net_benefits)
+            ord <- order(predictions)
+            event_sorted <- (outcomes == positive_outcome)[ord]
+            n_below <- findInterval(thresholds, predictions[ord], left.open = TRUE)
+            tp <- sum(event_sorted) - c(0L, cumsum(event_sorted))[n_below + 1L]
+            fp <- (n - n_below) - tp
+            (tp / n) - (fp / n) * (thresholds / (1 - thresholds))
         },
 
         # Generate threshold sequence with enhanced validation
@@ -463,8 +624,8 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             # "20% - 20%" with a blank average net benefit, and every statistic in the model
             # comparison came back empty -- while the notice affirmed the threshold range. One
             # threshold cannot describe a curve, so refuse it and say what to change.
+            pct <- function(x) sprintf("%.1f", x * 100)
             if (length(thresholds) < 2) {
-                pct <- function(x) sprintf("%.1f", x * 100)
                 narrow_msg <- paste(
                     .fmt(.('The threshold range you entered, {lo}% to {hi}%, is narrower than the step size of {step}%, so it produces only one threshold ({one}%) and no decision curve can be drawn.'),
                          lo = pct(range_lo), hi = pct(range_hi), step = pct(step), one = pct(thresholds[1])),
@@ -484,6 +645,22 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 # simpleError/error/condition, same message, conditionCall NULL in both,
                 # same field names). The bare stop() already carried this message verbatim.
                 jmvcore::reject(narrow_msg)
+            }
+
+            # seq() stops at the last whole step, so a step that does not divide the range quietly
+            # shortened it: 10% to 29% by 10% analysed 10% to 20%, and the range of benefit, the
+            # average net benefit and both comparisons answered that shorter range (Codex review
+            # 2026-10-14). The grid is kept - Stata's dca steps the same way - and the cut named.
+            if (range_hi - max(thresholds) > 1e-9) {
+                private$.addNotice(
+                    type = "WARNING",
+                    title = .("Threshold Range Shortened"),
+                    content = paste(
+                        .fmt(.('With a step of {step}%, the threshold grid starting at {lo}% stops at {last}%, so thresholds above it, up to the requested maximum of {hi}%, are not analysed.'),
+                             step = pct(step), lo = pct(range_lo), last = pct(max(thresholds)), hi = pct(range_hi)),
+                        .('Choose a step size that divides the threshold range to analyse all of it.')
+                    )
+                )
             }
 
             return(thresholds)
@@ -759,7 +936,8 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         # while the table note promised that the same seed reproduces the numbers exactly.
         #
         # stream: a fixed id per consumer (1 model CIs, 2 clinical-rule CI, 3 pairwise
-        # comparisons). index: position within the consumer (model number, pair number), so
+        # comparisons, 4 inversion-guard permutations). index: position within the consumer
+        # (model number, pair number, strategy number), so
         # adding a model cannot shift an earlier model's draws either. Streams sit 100000
         # apart and the seed option maxes out at 999999, so no two (stream, index) pairs
         # collide within a run.
@@ -818,11 +996,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     )
                 )
             }
-            
-            # Progress reporting for large bootstrap runs
-            if (n_boot >= private$DECISIONCURVE_DEFAULTS$bootstrap_progress_threshold) {
-            }
-            
+
             n <- length(outcomes)
             boot_results <- array(NA, dim = c(n_boot, length(thresholds)))
             
@@ -848,14 +1022,13 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     # B = 4000: 5.05% of draws discarded and the lower limit shifted up by as
                     # much as 0.026, with the upper limit unchanged. Keep every resample.
 
-                    # Calculate net benefits for this bootstrap sample
-                    for (j in seq_along(thresholds)) {
-                        thresh <- thresholds[j]
-                        nb_result <- private$.calculateNetBenefit(
-                            boot_pred, boot_out, thresh, positive_outcome
-                        )
-                        boot_results[i, j] <- nb_result$net_benefit
-                    }
+                    # The whole curve in one sorted sweep. A per-threshold loop over
+                    # .calculateNetBenefit() took 2.23 s at n = 1000, B = 1000, 46 thresholds;
+                    # this takes ~0.1 s with identical draws, so bootReps = 10000 on a fine step
+                    # no longer runs for tens of minutes (/review-function 2026-10-13).
+                    boot_results[i, ] <- private$.calculateNetBenefitsVectorized(
+                        boot_pred, boot_out, thresholds, positive_outcome
+                    )
                 }
 
                 # Pointwise percentile intervals, one per threshold.
@@ -885,7 +1058,11 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 )
                 se_boot <- apply(boot_results, 2, stats::sd, na.rm = TRUE)
                 usable <- is.finite(se_boot) & se_boot > 0
-                sim_lower <- sim_upper <- rep(NA_real_, length(thresholds))
+                # Zero-SE thresholds collapse onto the estimate, as the percentile interval does. With
+                # NO usable threshold (a strategy that classifies nobody positive anywhere in the
+                # range) the band used to stay all NA and silently vanished from the plot, beside a
+                # footnote saying it was drawn for every strategy (Codex review 2026-10-14).
+                sim_lower <- sim_upper <- nb_hat
                 if (any(usable)) {
                     dev <- abs(sweep(boot_results[, usable, drop = FALSE], 2, nb_hat[usable], "-"))
                     dev <- sweep(dev, 2, se_boot[usable], "/")
@@ -893,10 +1070,11 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     max_dev <- max_dev[is.finite(max_dev)]
                     if (length(max_dev) >= 10) {
                         q_sim <- unname(quantile(max_dev, probs = self$options$ciLevel))
-                        sim_lower <- nb_hat - q_sim * se_boot
-                        sim_upper <- nb_hat + q_sim * se_boot
-                        sim_lower[!usable] <- nb_hat[!usable]
-                        sim_upper[!usable] <- nb_hat[!usable]
+                        sim_lower[usable] <- nb_hat[usable] - q_sim * se_boot[usable]
+                        sim_upper[usable] <- nb_hat[usable] + q_sim * se_boot[usable]
+                    } else {
+                        sim_lower[] <- NA_real_
+                        sim_upper[] <- NA_real_
                     }
                 }
 
@@ -1126,7 +1304,8 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             private$.dcaResults <- NULL
             private$.plotData <- NULL
             private$.treatAllNB <- NULL
-            private$.analysisData <- NULL
+            private$.prevalence <- NULL
+            private$.impactData <- NULL
             private$.analysisOutcomes <- NULL
             # Never serve a pairwise bootstrap from a previous data set or option set.
             private$.bootCompCache <- list()
@@ -1163,17 +1342,14 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             }
 
             if (length(missing_packages) > 0) {
-                private$.addNotice(
-                    type = "ERROR",
-                    title = .("Missing Packages"),
-                    content = paste(
+                private$.fatal(
+                    .("Missing Packages"),
+                    paste(
                         .fmt(.('Required packages missing: {pkgs}.'), pkgs = paste(missing_packages, collapse = ", ")),
                         .fmt(.('Install with install.packages(c({quoted})).'),
                              quoted = paste0('"', paste(missing_packages, collapse = '", "'), '"'))
                     )
                 )
-                private$.renderNotices()
-                return()
             }
 
             # Show instructions if needed
@@ -1206,6 +1382,26 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             # outcome variable was left with a blank pane and no guidance.
             self$results$instructions$setVisible(FALSE)
 
+            # No positive level chosen yet. allowNone stops jamovi pre-selecting the first level,
+            # which is usually the non-event ("No", "0"), so this is the state every new analysis
+            # starts in: unconfigured, not an error (review guide §25). List the levels and stop.
+            if (private$.levelUnset(self$options$outcomePositive)) {
+                lv <- table(self$data[[self$options$outcome]])
+                private$.addNotice(
+                    type = "INFO",
+                    title = .("Choose the Positive Outcome Level"),
+                    content = paste(
+                        .fmt(.('Select the level of {var} that is the event the models predict, under "Positive Outcome".'),
+                             var = self$options$outcome),
+                        .fmt(.('Levels found: {levels}.'),
+                             levels = paste(sprintf("%s (n = %d)", names(lv), as.integer(lv)), collapse = ", ")),
+                        .('The positive level is never taken from the order of the levels.')
+                    )
+                )
+                private$.renderNotices()
+                return()
+            }
+
             # Get data and variables
             data <- self$data
             outcome_var <- self$options$outcome
@@ -1231,55 +1427,48 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
             if (anyDuplicated(model_names)) {
                 duplicate_names <- unique(model_names[duplicated(model_names)])
-                private$.addNotice(
-                    type = "ERROR",
-                    title = .("Duplicate Model Names"),
-                    content = paste(
+                private$.fatal(
+                    .("Duplicate Model Names"),
+                    paste(
                         .('Each model needs a unique name.'),
                         .fmt(.('Rename the duplicated label(s): {names}.'), names = paste(duplicate_names, collapse = ", "))
                     )
                 )
-                private$.renderNotices()
-                return()
             }
 
             reserved_names <- c("treat all", "treat none")
             if (any(tolower(model_names) %in% reserved_names)) {
-                private$.addNotice(
-                    type = "ERROR",
-                    title = .("Reserved Model Name"),
-                    content = paste(
+                private$.fatal(
+                    .("Reserved Model Name"),
+                    paste(
                         .("Model names cannot be 'Treat All' or 'Treat None' because those labels identify the reference strategies."),
                         .("Choose distinct model names.")
                     )
                 )
-                private$.renderNotices()
-                return()
             }
 
             # Clinical decision rule variable (optional)
             rule_var <- NULL
             rule_positive <- NULL
             rule_label <- NULL
-            if (self$options$clinicalDecisionRule && !is.null(self$options$decisionRuleVar)) {
+            if (isTRUE(self$options$clinicalDecisionRule) && !is.null(private$.ruleStrategyLabel())) {
                 rule_var <- self$options$decisionRuleVar
                 rule_positive <- self$options$decisionRulePositive
-            } else if (self$options$clinicalDecisionRule) {
-                # The feature was switched on with no variable to apply it to. Without this
-                # the rule branch is simply skipped and the run ends with the green
-                # "Analysis Complete" notice, so the clinician believes the rule is in the
-                # comparison when there is no rule curve, no rule band and no rule row.
+            } else if (isTRUE(self$options$clinicalDecisionRule)) {
+                # Ticked, but the variable or its positive level is still empty: a half-configured
+                # rule, not an error (review guide §25), so the models still run. Say so, or the
+                # green "Analysis Complete" reads as if the rule were in the comparison.
                 private$.addNotice(
-                    type = "ERROR",
-                    title = .("Clinical Decision Rule Variable Required"),
+                    type = "INFO",
+                    title = .("Clinical Decision Rule Not Included Yet"),
                     content = paste(
-                        .('"Clinical decision rule" is enabled but no rule variable has been selected.'),
-                        .('Drop a binary variable into "Clinical Decision Rule (binary)" and choose its positive level, or switch the option off.'),
+                        if (is.null(self$options$decisionRuleVar))
+                            .('"Clinical decision rule" is enabled but no rule variable has been selected: drop a binary variable into "Clinical Decision Rule (binary)".')
+                        else
+                            .('"Clinical decision rule" is enabled but its positive level has not been chosen: select the level that means the rule recommends intervention.'),
                         .('Nothing about the clinical rule is shown until then.')
                     )
                 )
-                private$.renderNotices()
-                return()
             }
 
             # Get complete cases
@@ -1290,23 +1479,19 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             complete_cases <- complete.cases(data[complete_vars])
 
             if (sum(complete_cases) < 10) {
-                private$.addNotice(
-                    type = "ERROR",
-                    title = .("Insufficient Cases"),
-                    content = paste(
+                private$.fatal(
+                    .("Insufficient Cases"),
+                    paste(
                         .fmt(.('Insufficient complete cases for analysis ({n} cases available; this implementation requires at least 10 to run).'), n = sum(complete_cases)),
                         .('This computational safeguard does not imply that 10 observations are statistically adequate.'),
                         .('Net-benefit precision depends on event counts, prevalence and thresholds; use an adequately sized validation sample.')
                     )
                 )
-                private$.renderNotices()
-                return()
             }
 
             # Filter data to complete cases
             analysis_data <- data[complete_cases, ]
             outcomes <- analysis_data[[outcome_var]]
-            private$.analysisData <- analysis_data
             private$.analysisOutcomes <- outcomes
 
             # Event count, not just row count: the guards key on n and on prevalence, so a
@@ -1353,10 +1538,9 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             # Check outcome is binary
             unique_outcomes <- unique(outcomes)
             if (length(unique_outcomes) != 2) {
-                private$.addNotice(
-                    type = "ERROR",
-                    title = .("Outcome Not Binary"),
-                    content = paste(
+                private$.fatal(
+                    .("Outcome Not Binary"),
+                    paste(
                         .('The outcome variable must be binary (exactly 2 levels).'),
                         .fmt(.('The current outcome "{var}" has {n} levels: {levels}.'),
                              var = outcome_var, n = length(unique_outcomes),
@@ -1364,24 +1548,18 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                         .('Decision curve analysis requires a binary outcome (diseased vs healthy, event vs no event); recode to binary or select a different outcome variable.')
                     )
                 )
-                private$.renderNotices()
-                return()
             }
 
-            # Validate positive outcome level
-            if (is.null(outcome_positive) || length(outcome_positive) != 1 ||
-                is.na(outcome_positive) || !(outcome_positive %in% unique_outcomes)) {
-                private$.addNotice(
-                    type = "ERROR",
-                    title = .("Positive Outcome Level Required"),
-                    content = paste(
+            # A chosen level absent from the analysed rows (an unset one stopped above).
+            if (!(outcome_positive %in% unique_outcomes)) {
+                private$.fatal(
+                    .("Positive Outcome Level Required"),
+                    paste(
                         .('Select exactly one positive outcome level that is present in the analysis data.'),
                         .fmt(.('Available levels: {levels}.'), levels = paste(unique_outcomes, collapse = ", ")),
                         .('The analysis was stopped to avoid reversing event and non-event status.')
                     )
                 )
-                private$.renderNotices()
-                return()
             }
 
             # Persist the validated level so every downstream table and plot uses the same
@@ -1407,38 +1585,67 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 )
             }
 
+            # An exact 1:1 split is what a 1:1 case-control design produces, and its 50% prevalence
+            # passes the extreme-prevalence check above. On a case-control sample net benefit and
+            # treat-all are not the source population's: in the independent review a calibrated
+            # score read NB 0.260 at 20% against a cohort value of 0.037, and treat-all at 30% read
+            # +0.286 against -0.224 (IR-decisioncurve-01). Worded conditionally: a cohort can
+            # also split evenly by chance - in 25% of 10-patient cohorts at a true 50% prevalence
+            # (Codex review) - so it waits for 20 per class, below which the small-sample and
+            # few-events notices already speak.
+            if (n_diseased == n_total - n_diseased && n_diseased >= 20) {
+                private$.addNotice(
+                    type = "WARNING",
+                    title = .("Equal Numbers of Events and Non-Events"),
+                    content = paste(
+                        .fmt(.('The analysed cases contain exactly as many patients with the outcome as without it ({n} each), as a 1:1 case-control design would.'),
+                             n = n_diseased),
+                        .('If cases and controls were sampled separately, the 50% prevalence is a design choice rather than the outcome rate of the target population, and the net benefit, the treat-all line and every projection here do not apply to that population.'),
+                        .('Decision curves need a cohort or consecutive series from the target population.')
+                    )
+                )
+            }
+
             # Validate clinical decision rule variable if provided
             rule_data <- NULL
             if (!is.null(rule_var)) {
                 rule_data <- analysis_data[[rule_var]]
                 rule_levels <- unique(rule_data)
-                if (length(rule_levels) != 2) {
-                    private$.addNotice(
-                        type = "ERROR",
-                        title = .("Rule Not Binary"),
-                        content = paste(
+                # The values a rule can take: its two declared levels when it has them, so a rule
+                # that recommends the same action for every analysed patient - after filtering,
+                # say - is still a strategy (treat-all or treat-none) rather than a refused run.
+                rule_domain <- if (is.factor(rule_data) && nlevels(rule_data) == 2)
+                    levels(rule_data) else as.character(rule_levels)
+                if (length(rule_levels) > 2 || length(rule_domain) != 2) {
+                    private$.fatal(
+                        .("Rule Not Binary"),
+                        paste(
                             .('The clinical decision rule variable must be binary (exactly 2 levels).'),
                             .fmt(.('The current rule variable "{var}" has {n} levels: {levels}.'),
                                  var = rule_var, n = length(rule_levels), levels = paste(rule_levels, collapse = ", ")),
                             .('Select a binary rule variable or disable "Clinical Decision Rule Integration".')
                         )
                     )
-                    private$.renderNotices()
-                    return()
                 }
-                if (is.null(rule_positive) || length(rule_positive) != 1 ||
-                    is.na(rule_positive) || !(rule_positive %in% rule_levels)) {
-                    private$.addNotice(
-                        type = "ERROR",
-                        title = .("Rule Positive Level Required"),
-                        content = paste(
+                if (!(as.character(rule_positive) %in% rule_domain)) {
+                    private$.fatal(
+                        .("Rule Positive Level Required"),
+                        paste(
                             .('Select exactly one positive rule level that is present in the analysis data.'),
-                            .fmt(.('Available levels: {levels}.'), levels = paste(rule_levels, collapse = ", ")),
+                            .fmt(.('Available levels: {levels}.'), levels = paste(rule_domain, collapse = ", ")),
                             .('The analysis was stopped to avoid reversing intervention recommendations.')
                         )
                     )
-                    private$.renderNotices()
-                    return()
+                }
+                if (length(rule_levels) == 1) {
+                    private$.addNotice(
+                        type = "WARNING",
+                        title = .("Clinical Rule Is Constant"),
+                        content = if (as.character(rule_levels) == as.character(rule_positive))
+                            .('In the analysed rows the clinical rule recommends intervention for every patient, so its curve is the treat-all line.')
+                        else
+                            .('In the analysed rows the clinical rule recommends intervention for no patient, so its curve is the treat-none line at zero.')
+                    )
                 }
 
                 # Same resolution as .init() uses to scaffold the table columns, by
@@ -1446,26 +1653,18 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 rule_label <- private$.ruleStrategyLabel()
 
                 if (tolower(rule_label) %in% tolower(c(model_names, "Treat All", "Treat None"))) {
-                    private$.addNotice(
-                        type = "ERROR",
-                        title = .("Duplicate Strategy Name"),
-                        content = paste(
+                    private$.fatal(
+                        .("Duplicate Strategy Name"),
+                        paste(
                             .fmt(.('The clinical decision rule label "{label}" duplicates a model or reference-strategy name.'), label = rule_label),
                             .('Choose a unique rule label.')
                         )
                     )
-                    private$.renderNotices()
-                    return()
                 }
             }
 
             # Generate threshold sequence
             thresholds <- private$.generateThresholds()
-
-            # Performance monitoring for large analyses
-            n_calculations <- length(model_vars) * length(thresholds)
-            if (n_calculations >= private$DECISIONCURVE_DEFAULTS$performance_threshold_count) {
-            }
 
             # Initialize results storage
             dca_results <- list()
@@ -1477,36 +1676,22 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 model_name <- model_names[i]
                 predictions <- analysis_data[[model_var]]
 
-                # Progress reporting for multiple models
-                if (length(model_vars) > 3) {
-                }
-
                 # The GUI restricts this box to numeric columns, but a programmatic caller
                 # can still pass a factor or a character column. min() on a factor raises a
                 # bare R error before any notice can be shown, so reject it explicitly.
                 if (!is.numeric(predictions)) {
-                    private$.addNotice(
-                        type = "ERROR",
-                        title = .fmt(.('Not a numeric column: {model}'), model = model_name),
-                        content = paste(
+                    private$.fatal(
+                        .fmt(.('Not a numeric column: {model}'), model = model_name),
+                        paste(
                             .fmt(.('Model "{model}" is a {class} column.'), model = model_name,
                                  class = paste(class(predictions), collapse = "/")),
                             .('Decision curve analysis needs predicted probabilities between 0 and 1 as a numeric column; convert it before running the analysis, because a categorical column cannot express a predicted risk.')
                         )
                     )
-                    private$.renderNotices()
-                    return()
                 }
 
-                if (all(is.na(predictions))) {
-                    private$.addNotice(
-                        type = "ERROR",
-                        title = .fmt(.('No usable values: {model}'), model = model_name),
-                        content = .fmt(.('Model "{model}" is entirely missing after complete-case filtering.'), model = model_name)
-                    )
-                    private$.renderNotices()
-                    return()
-                }
+                # (An "entirely missing" check used to sit here. It could not fire: every row of
+                # analysis_data is complete in every model column.)
 
                 # Validate that predictions are probabilities between 0 and 1. This range
                 # check cannot establish calibration; it only prevents raw score scales from
@@ -1515,18 +1700,15 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 pred_max <- max(predictions, na.rm = TRUE)
 
                 if (pred_min < 0 || pred_max > 1) {
-                    private$.addNotice(
-                        type = "ERROR",
-                        title = .fmt(.('Invalid Probabilities: {model}'), model = model_name),
-                        content = paste(
+                    private$.fatal(
+                        .fmt(.('Invalid Probabilities: {model}'), model = model_name),
+                        paste(
                             .fmt(.('Model "{model}" contains values outside 0 to 1 (min = {min}, max = {max}).'),
                                  model = model_name, min = sprintf("%.3f", pred_min), max = sprintf("%.3f", pred_max)),
                             .('Decision curve analysis requires predicted probabilities for the clinical outcome and prediction horizon being evaluated, not raw scores, logits or linear predictors.'),
                             .('Use model-based probabilities and assess their calibration separately in the target population; min-max scaling does not create calibrated risks.')
                         )
                     )
-                    private$.renderNotices()
-                    return()
                 }
 
                 # Warn if probabilities are suspiciously concentrated. The margin keeps a range of
@@ -1570,7 +1752,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 )
 
                 # Add confidence intervals if requested
-                if (self$options$confidenceIntervals || self$options$showNetBenefitCI) {
+                if (private$.ciDrawn()) {
                     # Own substream per model (see .bootSeed): this model's interval does not
                     # depend on how many models precede it, nor the p-values below on whether
                     # this box is ticked at all.
@@ -1646,7 +1828,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
                 # The rule is a strategy like any model and its curve carries the same
                 # sampling uncertainty; it used to be the only curve drawn without a band.
-                if (self$options$confidenceIntervals || self$options$showNetBenefitCI) {
+                if (private$.ciDrawn()) {
                     rule_ci <- withr::with_seed(
                         private$.bootSeed(2L),
                         private$.calculateBootstrapCI(
@@ -1663,12 +1845,55 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 plot_data <- dplyr::bind_rows(plot_data, rule_plot_data)
             }
 
+            # A column of risks for the OTHER level is a valid input that answers the wrong
+            # question: scored against "none", a model with AUC 0.74 for the event read "Range of
+            # Benefit: none" with no notice (IR-decisioncurve-03). Net benefit needs the
+            # probability OF the selected level, so flag a strategy whose patients with that
+            # level rank LOWER - as a possibility, never as a verdict on the coding.
+            # Gate: the displayed 95% DeLong interval wholly below 0.5 (so the interval shown
+            # always agrees with the alarm) AND a one-sided permutation test of AUC < 0.5 at
+            # 2.5%, which holds its level at any n and under ties. A DeLong-only gate is
+            # anti-conservative in sparse classes (11% false alarms at 2 events / 8 non-events by
+            # exact enumeration, Codex review 2026-10-13); a point-estimate gate fires on about
+            # half of uninformative models.
+            is_event <- as.character(outcomes) == as.character(outcome_positive)
+            for (k in seq_along(dca_results)) {
+                nm <- names(dca_results)[k]
+                pred <- dca_results[[nm]]$predictions
+                a <- private$.aucDeLong(pred, is_event)
+                if (is.null(a) || !is.finite(a$upper) || a$upper >= 0.5) next
+                # Own substream (stream 4, one per strategy): see .bootSeed.
+                p_less <- withr::with_seed(private$.bootSeed(4L, k),
+                                           private$.aucLessPermutationP(pred, is_event))
+                if (!is.finite(p_less) || p_less >= 0.025) next
+                stats_txt <- list(level = outcome_positive, model = nm,
+                                  auc = sprintf("%.2f", a$auc),
+                                  lo = sprintf("%.2f", max(0, a$lower)),
+                                  hi = sprintf("%.2f", a$upper),
+                                  p = sprintf("%.4f", p_less),
+                                  seed = private$.seedValue())
+                # The clinical rule is a treat/do-not-treat recommendation, not a risk.
+                first <- if (!is.null(rule_label) && identical(nm, rule_label))
+                    do.call(.fmt, c(list(.('{model} recommended intervention less often for patients with "{level}" than for patients without it (AUC {auc}, 95% CI {lo} to {hi}; one-sided permutation p = {p}, seed {seed}).')), stats_txt))
+                else
+                    do.call(.fmt, c(list(.('Patients with "{level}" have lower values of {model} than patients without it (AUC {auc}, 95% CI {lo} to {hi}; one-sided permutation p = {p}, seed {seed}).')), stats_txt))
+                private$.addNotice(
+                    type = "STRONG_WARNING",
+                    title = .fmt(.('Possible Inversion: {model}'), model = nm),
+                    content = paste(
+                        first,
+                        .('Decision curve analysis needs the predicted probability of the selected positive level; if these values describe the other level, the curves answer a different question.'),
+                        .('Check that "Positive Outcome Level" is the level the model predicts and that the column is not one minus the risk.')
+                    )
+                )
+            }
+
             # Bootstrap intervals collapse where few patients are classified positive: in the
             # 2026-10-12 simulation (n = 80, ~10 events) 95% intervals covered 82% at 35% and 66%
             # at 40%, and a threshold no one reaches gives a zero-width interval at NB = 0. The
             # positive count only falls as the threshold rises, so the sparse thresholds are the
             # top of the range; name where they start (VAL-decisioncurve-06). 10 is a heuristic.
-            if (self$options$confidenceIntervals || self$options$showNetBenefitCI) {
+            if (private$.ciDrawn()) {
                 for (nm in names(dca_results)) {
                     z <- dca_results[[nm]]
                     n_pos <- vapply(z$thresholds, function(t) sum(z$predictions >= t), numeric(1))
@@ -1691,6 +1916,14 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             private$.dcaResults <- dca_results
             private$.plotData <- plot_data
             private$.treatAllNB <- treat_all_nb
+            private$.prevalence <- prevalence
+            # The clinical impact plot is visible with either option on. Building its rates
+            # here also parses "Thresholds for table" in .run(), where the parser's notices are
+            # shown, so plot-only mode reports an unusable entry instead of silently drawing the
+            # default thresholds (Codex review, 2026-10-13).
+            if (self$options$calculateClinicalImpact || self$options$showClinicalImpactPlot)
+                private$.impactData <- private$.buildImpactData(
+                    dca_results, outcomes, outcome_positive, private$.parseSelectedThresholds())
             # ... and publish them as image state so the renderers survive a render-only
             # invocation (see .publishPlotStates).
             private$.publishPlotStates()
@@ -1707,7 +1940,15 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 li(.("Sample Size"),
                    .fmt(.('{kept} complete cases; {excluded} of {total} rows excluded for missing required values'),
                         kept = sum(complete_cases), excluded = n_excluded, total = length(complete_cases))),
-                li(.("Prevalence"), paste0(round(mean(outcomes == outcome_positive) * 100, 1), "%")),
+                # The prevalence is not just reported: treat-all and every net benefit are built on
+                # it. Say so beside the number, where a case-control 50% is most likely to be
+                # noticed (IR-decisioncurve-01).
+                li(.("Prevalence"), paste(
+                   paste0(round(mean(outcomes == outcome_positive) * 100, 1), "%"),
+                   .("Net benefit and the treat-all line use this sample prevalence, so they are valid only when the analysed rows have the outcome rate of the target population (a cohort or consecutive series)."),
+                   .("In a case-control or otherwise enriched sample the curves do not describe the source population."))),
+                li(.("Unit of Analysis"),
+                   .("Each row is treated as an independent patient, so the data must have one row per patient; several specimens, blocks or lesions from one patient make the bootstrap intervals and p-values too narrow.")),
                 li(.("Threshold Range"),
                    .fmt(.('{lo}% to {hi}%'), lo = round(min(thresholds) * 100, 1), hi = round(max(thresholds) * 100, 1))),
                 li(.("Prediction Requirement"), paste(
@@ -1718,6 +1959,21 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             )
 
             self$results$procedureNotes$setContent(procedure_notes)
+
+            # .plotDCA draws the highlight only when min < max; say why it is missing otherwise.
+            if (self$options$highlightRange && isTRUE(self$results$dcaPlot$visible) &&
+                self$options$highlightMin >= self$options$highlightMax) {
+                private$.addNotice(
+                    type = "WARNING",
+                    title = .("Highlight Range Not Drawn"),
+                    content = paste(
+                        .fmt(.('The highlight range minimum ({min}%) is not below its maximum ({max}%), so no range is highlighted on the decision curve plot.'),
+                             min = sprintf("%.1f", self$options$highlightMin * 100),
+                             max = sprintf("%.1f", self$options$highlightMax * 100)),
+                        .('Set the range minimum below the range maximum under Plots.')
+                    )
+                )
+            }
 
             # Warn once per run about "Thresholds for table" rows outside the analysed
             # range. This used to be called only from .populateResultsTable(), so with the
@@ -1730,6 +1986,8 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 self$options$calculateClinicalImpact) {
                 private$.warnOnThresholdsOutsideRange(private$.parseSelectedThresholds())
             }
+            # (Plot-only mode, showClinicalImpactPlot alone, is parsed with the impact data
+            # above; the out-of-range explanation talks about table rows, so it stays off there.)
 
             # Populate results table
             if (self$options$showTable) {
@@ -1751,12 +2009,13 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 private$.populateWeightedAUCTable()
             }
 
-            # Model comparison if requested.
+            # Model comparison if requested. Strategies, not model columns: one model plus a
+            # clinical rule is a comparable pair.
             # The .r.yaml gates visibility on the checkbox alone, so with a single model the
             # table is on screen but never populated. An empty jamovi table reads as "the
             # computation failed", so say what is actually missing.
             if (self$options$compareModels) {
-                if (length(model_vars) > 1) {
+                if (length(private$.dcaResults) > 1) {
                     private$.performModelComparison()
                 } else {
                     private$.addNotice(
@@ -1764,7 +2023,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                         title = .("Model comparison needs two models"),
                         content = paste(
                             .('"Statistical comparison" is enabled but only one prediction model is selected, so the Exploratory Model Comparison table stays empty.'),
-                            .('Add a second model to compare.')
+                            .('Add a second model, or a clinical decision rule, to compare.')
                         )
                     )
                 }
@@ -1789,7 +2048,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             
             # Enhanced Model Comparison. Same visibility mismatch as compareModels above.
             if (self$options$multiModelComparison) {
-                if (length(model_vars) > 1) {
+                if (length(private$.dcaResults) > 1) {
                     private$.performEnhancedModelComparison()
                 } else {
                     private$.addNotice(
@@ -1797,26 +2056,34 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                         title = .("Pairwise comparison needs two models"),
                         content = paste(
                             .('"Enhanced pairwise comparison" is enabled but only one prediction model is selected, so the Exploratory Pairwise Model Comparison table stays empty.'),
-                            .('Add a second model to compare.')
+                            .('Add a second model, or a clinical decision rule, to compare.')
                         )
                     )
                 }
             }
 
-            # Generate clinical interpretation
-            private$.generateClinicalInterpretation()
+            # Clinical interpretation: opt-in, and never written to the hidden panel (the reset at
+            # the top of .run() still empties it, so re-enabling it never shows a stale run).
+            if (isTRUE(self$options$showInterpretation))
+                private$.generateClinicalInterpretation()
 
             # Apparent net benefit is not validated net benefit. The analysis is handed a
             # column of predicted risks and has no way to know whether they were fitted on
             # these same rows; for the common case of a marker developed on this dataset
             # every curve here is optimistically biased in the model's favour.
+            # WARNING, not STRONG_WARNING: it fires on every run whatever the data, and a
+            # data-independent alarm at the top severity trains users to skip that band.
+            # Worded as unknown provenance: the old title "apparent, not validated" was false
+            # for a user who supplies external-validation predictions (Codex review).
+            # The clinical rule's p-values in the comparison tables carry the same caveat: a rule
+            # derived on these outcomes is resampled as frozen decisions.
             private$.addNotice(
-                type = "STRONG_WARNING",
-                title = .("Net benefit shown here is apparent, not validated"),
+                type = "WARNING",
+                title = .("Net Benefit Is Not Optimism-Corrected"),
                 content = paste(
-                    .("These curves are computed on the same rows that supplied the predicted risks."),
-                    .("If those risks came from a model fitted on this dataset - including a cutpoint, a score, or a regression developed here - the net benefit is optimistically biased and the model can appear to beat treat-all when it does not."),
-                    .("For a defensible clinical claim, supply predictions from an external dataset or from cross-validation, and report which was used.")
+                    .("This analysis cannot tell whether the predicted risks, or a clinical rule, were developed on these same rows, and it applies no optimism correction."),
+                    .("If they were - including a cutpoint, a score, or a regression developed here - the net benefit is apparent and optimistically biased, and the model can appear to beat treat-all when it does not."),
+                    .("Predictions from an external dataset or from cross-validation avoid this; report which was used.")
                 )
             )
 
@@ -1850,12 +2117,12 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             # .warnOnThresholdsOutsideRange() moved to .run(); see the call there.
             results_table <- self$results$resultsTable
 
-            # Clear existing rows
-            .deleteTableRows(results_table)
-
             # Add columns for each model dynamically
             model_names <- names(private$.dcaResults)
             model_columns <- private$.modelColumnNames(model_names)
+            row_keys <- private$.tableRowKeys("resultsTable", length(model_names),
+                                              length(selected_thresholds))
+            private$.syncRows(results_table, row_keys)
 
             # .init() has normally created these already; only add what is genuinely missing
             # (a model name that changed shape between init and run).
@@ -1896,7 +2163,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     }
                 }
                 
-                results_table$addRow(rowKey = paste0("thresh_", i), values = row_values)
+                results_table$setRow(rowKey = row_keys[i], values = row_values)
             }
 
             results_table$setNote(
@@ -1907,11 +2174,12 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
         .populateCostBenefitTable = function() {
             table <- self$results$costBenefitTable
-            # Without this the rows appended below accumulate on every run cycle:
-            # a three-model comparison becomes six rows, then nine.
-            .deleteTableRows(table)
             selected_thresholds <- private$.parseSelectedThresholds()
             model_names <- names(private$.dcaResults)
+            # Rows were built by .init() (see .syncRows); appending them here used to grow a
+            # three-model table to six rows, then nine, on every run cycle.
+            private$.syncRows(table, private$.tableRowKeys(
+                "costBenefitTable", length(model_names), length(selected_thresholds)))
             
             # Costs and benefits
             test_cost <- self$options$testCost
@@ -1955,7 +2223,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     inc_cost <- total_cost - cost_all
                     inc_benefit <- total_benefit - benefit_all
 
-                    table$addRow(rowKey = paste0("model_", model_index, "_", i), values = list(
+                    table$setRow(rowKey = paste0("model_", model_index, "_", i), values = list(
                         model = model_name,
                         threshold = thresh,
                         total_cost = total_cost,
@@ -1982,11 +2250,12 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
         .populateDecisionConsequencesTable = function() {
             table <- self$results$decisionConsequencesTable
-            # Without this the rows appended below accumulate on every run cycle:
-            # a three-model comparison becomes six rows, then nine.
-            .deleteTableRows(table)
             selected_thresholds <- private$.parseSelectedThresholds()
             model_names <- names(private$.dcaResults)
+            # Rows were built by .init() (see .syncRows); appending them here used to grow a
+            # three-model table to six rows, then nine, on every run cycle.
+            private$.syncRows(table, private$.tableRowKeys(
+                "decisionConsequencesTable", length(model_names), length(selected_thresholds)))
             
             for (model_index in seq_along(model_names)) {
                 model_name <- model_names[model_index]
@@ -1999,7 +2268,8 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     ppv <- if ((res$tp + res$fp) > 0) res$tp / (res$tp + res$fp) else NA
                     npv <- if ((res$tn + res$fn) > 0) res$tn / (res$tn + res$fn) else NA
                     
-                    table$addRow(rowKey = paste0("model_", model_index, "_", i), values = list(
+                    key <- paste0("model_", model_index, "_", i)
+                    table$setRow(rowKey = key, values = list(
                         model = model_name,
                         threshold = thresh,
                         true_positive = res$tp,
@@ -2011,17 +2281,22 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                         ppv = ppv,
                         npv = npv
                     ))
+                    private$.footnoteNA(table, key, list(ppv = ppv),
+                        .("No patient is classified positive at this threshold, so PPV is undefined."))
+                    private$.footnoteNA(table, key, list(npv = npv),
+                        .("No patient is classified negative at this threshold, so NPV is undefined."))
                 }
             }
         },
 
         .populateResourceUtilizationTable = function() {
             table <- self$results$resourceUtilizationTable
-            # Without this the rows appended below accumulate on every run cycle:
-            # a three-model comparison becomes six rows, then nine.
-            .deleteTableRows(table)
             selected_thresholds <- private$.parseSelectedThresholds()
             model_names <- names(private$.dcaResults)
+            # Rows were built by .init() (see .syncRows); appending them here used to grow a
+            # three-model table to six rows, then nine, on every run cycle.
+            private$.syncRows(table, private$.tableRowKeys(
+                "resourceUtilizationTable", length(model_names), length(selected_thresholds)))
             pop_size <- self$options$populationSize
             
             for (model_index in seq_along(model_names)) {
@@ -2034,7 +2309,6 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     n_total <- res$tp + res$fp + res$tn + res$fn
                     scale_factor <- pop_size / n_total
 
-                    tests_per_1000 <- n_total * scale_factor
                     treatments_per_1000 <- (res$tp + res$fp) * scale_factor
                     unnecessary_treatments <- res$fp * scale_factor
                     missed_cases <- res$fn * scale_factor
@@ -2044,10 +2318,9 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     treatments_all <- n_total * scale_factor
                     reduction <- (treatments_all - treatments_per_1000) / treatments_all
                     
-                    table$addRow(rowKey = paste0("model_", model_index, "_", i), values = list(
+                    table$setRow(rowKey = paste0("model_", model_index, "_", i), values = list(
                         model = model_name,
                         threshold = thresh,
-                        tests_per_1000 = tests_per_1000,
                         treatments_per_1000 = treatments_per_1000,
                         unnecessary_treatments = unnecessary_treatments,
                         missed_cases = missed_cases,
@@ -2065,16 +2338,13 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         
         .performEnhancedModelComparison = function() {
             table <- self$results$modelComparisonEnhanced
-            # Without this the rows appended below accumulate on every run cycle:
-            # a three-model comparison becomes six rows, then nine.
-            .deleteTableRows(table)
             model_names <- names(private$.dcaResults)
-            analysis_data <- private$.analysisData
             outcomes <- private$.analysisOutcomes
             thresholds <- private$.dcaResults[[1]]$thresholds
-            model_vars_map <- private$.parseModelNames()
-            
+
             if (length(model_names) < 2) return()
+            private$.syncRows(table, private$.tableRowKeys(
+                "modelComparisonEnhanced", length(model_names), length(thresholds)))
             
             # Pairwise comparisons. Rows are collected first so the family of pairwise
             # tests can be Holm-adjusted before any "Significant Difference" verdict is
@@ -2085,28 +2355,18 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             # and both can seed the same substream for it (see .bootSeed).
             pairs <- combn(model_names, 2, simplify = FALSE)
             rows <- list()
-            skipped <- character(0)
 
             for (p in seq_along(pairs)) {
                 pair <- pairs[[p]]
                 m1 <- pair[1]
                 m2 <- pair[2]
 
-                idx1 <- which(model_vars_map == m1)
-                idx2 <- which(model_vars_map == m2)
-
-                # Derived strategies (the clinical decision rule) have no input column to
-                # resample. .performModelComparison() already records this omission; this
-                # table used to drop the pair silently, so the two panels on the same screen
-                # disagreed about which comparisons had been run.
-                if (length(idx1) == 0 || length(idx2) == 0) {
-                    skipped <- c(skipped, .fmt(.('{a} vs {b}'), a = m1, b = m2))
-                    next
-                }
-                var1 <- self$options$models[idx1]
-                var2 <- self$options$models[idx2]
-                pred1 <- analysis_data[[var1]]
-                pred2 <- analysis_data[[var2]]
+                # Each strategy's per-patient values on the analysis cohort: a model's
+                # complete-case column, or the clinical rule's 0/1 recommendation. The rule
+                # used to be skipped as having "no values to resample", but it is resampled
+                # exactly like a 0/1 predictor column (same pair index, same substream).
+                pred1 <- private$.dcaResults[[m1]]$predictions
+                pred2 <- private$.dcaResults[[m2]]$predictions
 
                 nb1 <- private$.dcaResults[[m1]]$net_benefits
                 nb2 <- private$.dcaResults[[m2]]$net_benefits
@@ -2136,40 +2396,25 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 )
             }
 
-            if (length(skipped) > 0) {
-                private$.addNotice(
-                    type = "INFO",
-                    title = .("Comparisons not tested"),
-                    content = paste(
-                        .fmt(.('{pairs} could not be bootstrap-tested because at least one side is a derived strategy rather than a predictor column, so it has no values to resample.'),
-                             pairs = paste(skipped, collapse = "; ")),
-                        .("Its curve is still shown in the plot.")
-                    )
-                )
-            }
-
-            if (length(rows) == 0) return()
-
             raw_p <- vapply(rows, function(r) as.numeric(r$p_value %||% NA_real_), numeric(1))
             adj_p <- stats::p.adjust(raw_p, method = "holm")
 
+            # No "Conclusion" column. It printed "Exploratory adjusted p < 0.05" as a verdict on
+            # each pair, beside the note that tells the reader not to decide by these p-values
+            # (Vickers et al. 2023), and it said nothing the p column does not (/review-function
+            # 2026-10-13). An untestable pair now shows a blank p with a footnote.
             for (k in seq_along(rows)) {
                 r <- rows[[k]]
-                conclusion <- if (is.na(adj_p[k])) {
-                    .("Not testable")
-                } else if (adj_p[k] < 0.05) {
-                    .("Exploratory adjusted p < 0.05")
-                } else {
-                    .("Exploratory adjusted p >= 0.05")
-                }
-                table$addRow(rowKey = r$key, values = list(
+                values <- list(
                     model1 = r$model1,
                     model2 = r$model2,
                     nb_difference_mean = r$nb_difference_mean,
                     nb_difference_median = r$nb_difference_median,
-                    p_value = adj_p[k],
-                    conclusion = conclusion
-                ))
+                    p_value = adj_p[k]
+                )
+                table$setRow(rowKey = r$key, values = values)
+                private$.footnoteNA(table, r$key, values["p_value"],
+                    .("Fewer than 50 bootstrap resamples gave a usable difference, so no p-value is reported."))
             }
 
             table$setNote(
@@ -2183,13 +2428,22 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     .("This is not a confirmatory test.")
                 )
             )
+            table$setNote("caution", private$.netBenefitInferenceCaution())
+        },
+
+        # The paper cited for net-benefit inference argues AGAINST deciding by it: "Application
+        # of inference for net benefit would generally be harmful" (Vickers, Van Calster, Wynants
+        # & Steyerberg 2023, Diagn Progn Res 7:11, abstract). Both comparison tables show p-values,
+        # so both carry this sentence; one msgid for the two (IR-decisioncurve-06).
+        .netBenefitInferenceCaution = function() {
+            .("Vickers et al. (2023) caution that significance tests and confidence intervals for net benefit are of questionable value for a treatment decision: the strategy with the highest net benefit at the prespecified threshold is preferred whatever the p-value, so read these p-values only as a description of sampling variability.")
         },
 
         .populateBenefitRangeTable = function() {
             range_table <- self$results$benefitRangeTable
-            .deleteTableRows(range_table)
-
             model_names <- names(private$.dcaResults)
+            row_keys <- private$.tableRowKeys("benefitRangeTable", length(model_names), 0)
+            private$.syncRows(range_table, row_keys)
             has_gap <- character(0)
             none_beneficial <- character(0)
 
@@ -2209,12 +2463,15 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     has_gap <- c(has_gap, model_name)
                 }
 
-                range_table$addRow(rowKey = i, values = list(
+                row_values <- list(
                     model = model_name,
                     range_start = info$range_start,
                     range_end = info$range_end,
                     range_width = info$width
-                ))
+                )
+                range_table$setRow(rowKey = row_keys[i], values = row_values)
+                # No footnote: the "none" table note below names these models and says why.
+                private$.footnoteNA(range_table, row_keys[i], row_values)
             }
 
 
@@ -2248,17 +2505,19 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
         .calculateClinicalImpactMetrics = function(outcomes, outcome_positive) {
             clinical_impact_table <- self$results$clinicalImpactTable
-            .deleteTableRows(clinical_impact_table)
-
             selected_thresholds <- private$.parseSelectedThresholds()
             model_names <- names(private$.dcaResults)
+            private$.syncRows(clinical_impact_table, private$.tableRowKeys(
+                "clinicalImpactTable", length(model_names), length(selected_thresholds)))
             pop_size <- self$options$populationSize
             per_100_to_population <- pop_size / 100
 
             # Calculate for each model at each selected threshold
-            row_counter <- 1
-            for (model_name in model_names) {
-                for (thresh in selected_thresholds) {
+            for (model_index in seq_along(model_names)) {
+                model_name <- model_names[model_index]
+                for (i in seq_along(selected_thresholds)) {
+                    thresh <- selected_thresholds[i]
+                    row_key <- paste0("model_", model_index, "_", i)
                     detailed_result <- private$.calculateModelAtThreshold(model_name, thresh)
                     if (is.null(detailed_result)) next
 
@@ -2273,23 +2532,21 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     )
 
                     # Reciprocal of the observed true-positive yield among all screened.
-                    if (detailed_result$true_positives_per_100 > 0) {
-                        nns <- 100 / detailed_result$true_positives_per_100
-                    } else {
-                        nns <- Inf
-                    }
+                    nns <- if (detailed_result$true_positives_per_100 > 0)
+                        100 / detailed_result$true_positives_per_100 else NA
 
-                    clinical_impact_table$addRow(rowKey = row_counter, values = list(
+                    clinical_impact_table$setRow(rowKey = row_key, values = list(
                         model = model_name,
                         threshold = thresh,
                         interventions_per_100 = detailed_result$interventions_per_100 * per_100_to_population,
                         true_positives_per_100 = detailed_result$true_positives_per_100 * per_100_to_population,
                         false_positives_per_100 = detailed_result$false_positives_per_100 * per_100_to_population,
                         interventions_avoided = interventions_avoided_per_100 * per_100_to_population,
-                        number_needed_to_screen = if(is.finite(nns)) nns else NA
+                        number_needed_to_screen = nns
                     ))
-
-                    row_counter <- row_counter + 1
+                    private$.footnoteNA(clinical_impact_table, row_key,
+                        list(number_needed_to_screen = nns),
+                        .("There is no true positive at this threshold, so patients screened per true positive is undefined."))
                 }
             }
 
@@ -2306,10 +2563,10 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
         .populateWeightedAUCTable = function() {
             weighted_auc_table <- self$results$weightedAUCTable
-            .deleteTableRows(weighted_auc_table)
-
             model_names <- names(private$.dcaResults)
             thresholds <- private$.dcaResults[[1]]$thresholds
+            row_keys <- private$.tableRowKeys("weightedAUCTable", length(model_names), 0)
+            private$.syncRows(weighted_auc_table, row_keys)
 
             # Reuse the treat-all curve computed in .run() on the analysis cohort. This
             # method used to rebuild its own complete-case set from self$data using only
@@ -2354,7 +2611,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     benefit_gain <- NA
                 }
 
-                weighted_auc_table$addRow(rowKey = i, values = list(
+                weighted_auc_table$setRow(rowKey = row_keys[i], values = list(
                     model = model_name,
                     weighted_auc = wauc,
                     auc_range = paste0(round(min(thresholds) * 100, 1), "% - ",
@@ -2369,7 +2626,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     .fmt(.('Average net benefit over the {lo}% to {hi}% threshold range: the area under the decision curve divided by the width of that range.'),
                          lo = sprintf("%.1f", min(thresholds) * 100), hi = sprintf("%.1f", max(thresholds) * 100)),
                     .("Every threshold in the range counts equally, so the value depends on the range you chose - report the range with it."),
-                    .("Gain vs Default is the difference against the better of treating everyone and treating no one at each threshold, on the net-benefit scale: 0.01 means one extra true positive per 100 patients at no extra cost in unnecessary treatment."),
+                    .("Gain vs Best Default is the difference against the better of treating everyone and treating no one at each threshold, on the net-benefit scale: 0.01 means one extra true positive per 100 patients at no extra cost in unnecessary treatment."),
                     .("A gain at or below zero means a default strategy serves these patients at least as well as the model.")
                 )
             )
@@ -2377,24 +2634,19 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
         .performModelComparison = function() {
             comparison_table <- self$results$comparisonTable
-            .deleteTableRows(comparison_table)
-
             model_names <- names(private$.dcaResults)
-            analysis_data <- private$.analysisData
             outcomes <- private$.analysisOutcomes
             thresholds <- private$.dcaResults[[1]]$thresholds
-            
-            # Map model names to variable names
-            model_vars_map <- private$.parseModelNames()
+            row_keys <- private$.tableRowKeys("comparisonTable", length(model_names), length(thresholds))
+            private$.syncRows(comparison_table, row_keys)
 
-            # Compare each pair of models.
+            # Compare each pair of strategies (models and any clinical rule).
             # Rows are collected first so that the family of k(k-1)/2 pairwise tests can be
             # Holm-adjusted together before anything is displayed. Reporting only nominal
             # p-values here invites reading a five-model screen as if it were one test.
             rows <- list()
-            skipped <- character(0)
 
-            # Counts every pair, skipped ones included, in the same order as the combn() in
+            # Counts every pair in the same order as the combn() in
             # .performEnhancedModelComparison(); it is the substream index, so both tables
             # resample a given pair identically (see .bootSeed).
             pair_no <- 0L
@@ -2405,23 +2657,10 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     model2_name <- model_names[j]
                     pair_no <- pair_no + 1L
 
-                    # Find corresponding variables
-                    idx1 <- which(model_vars_map == model1_name)
-                    idx2 <- which(model_vars_map == model2_name)
-
-                    # Derived strategies (the clinical decision rule, treat-all/treat-none)
-                    # have no input column to resample, so they cannot enter the bootstrap
-                    # comparison. Record the omission rather than dropping it silently.
-                    if (length(idx1) == 0 || length(idx2) == 0) {
-                        skipped <- c(skipped, .fmt(.('{a} vs {b}'), a = model1_name, b = model2_name))
-                        next
-                    }
-
-                    var1 <- self$options$models[idx1]
-                    var2 <- self$options$models[idx2]
-
-                    pred1 <- analysis_data[[var1]]
-                    pred2 <- analysis_data[[var2]]
+                    # Per-patient values on the analysis cohort, the rule's 0/1 included
+                    # (see .performEnhancedModelComparison).
+                    pred1 <- private$.dcaResults[[model1_name]]$predictions
+                    pred2 <- private$.dcaResults[[model2_name]]$predictions
 
                     # Calculate weighted AUC difference (observed)
                     wauc1 <- private$.calculateWeightedAUC(
@@ -2463,7 +2702,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             for (k in seq_along(rows)) {
                 r <- rows[[k]]
                 r$p_value_adj <- adj_p[k]
-                comparison_table$addRow(rowKey = k, values = r)
+                comparison_table$setRow(rowKey = row_keys[k], values = r)
             }
 
             comparison_table$setNote(
@@ -2477,6 +2716,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     .("Re-running with the same seed reproduces these numbers exactly.")
                 )
             )
+            comparison_table$setNote("caution", private$.netBenefitInferenceCaution())
 
             if (length(rows) > 1) {
                 comparison_table$setNote(
@@ -2484,18 +2724,6 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     paste(
                         .fmt(.('p (Holm) controls the family-wise error rate across all {k} pairwise comparisons.'), k = length(rows)),
                         .("Interpret the unadjusted p only for a single comparison specified before the data were seen.")
-                    )
-                )
-            }
-
-            if (length(skipped) > 0) {
-                private$.addNotice(
-                    type = "INFO",
-                    title = .("Comparisons not tested"),
-                    content = paste(
-                        .fmt(.('{pairs} could not be bootstrap-tested because at least one side is a derived strategy rather than a predictor column, so it has no values to resample.'),
-                             pairs = paste(skipped, collapse = "; ")),
-                        .("Its curve is still shown in the plot.")
                     )
                 )
             }
@@ -2525,12 +2753,16 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 "<h4>", .("Clinical Interpretation"), "</h4>"
             )
 
+            # Whole translatable units: "(tied)" and "none." used to be .() fragments glued on with
+            # paste0(), which a translator cannot place in a Turkish word order.
             if (length(best_models) > 0) {
+                best_txt <- paste(private$.safeHtmlOutput(best_models), collapse = ", ")
+                if (length(best_models) > 1)
+                    best_txt <- .fmt(.('{models} (tied)'), models = best_txt)
                 interpretation <- paste0(
                     interpretation,
                     "<p><strong>", .("Highest Average Net Benefit Over the Selected Range:"), "</strong> ",
-                    paste(private$.safeHtmlOutput(best_models), collapse = ", "),
-                    if (length(best_models) > 1) paste0(" ", .("(tied)")) else "", " (",
+                    best_txt, " (",
                     .("This only ranks the models against each other; it does not mean the model is useful."), " ",
                     .("Whether it beats treating everyone or no one is the Range of Benefit below."), " ",
                     .("Inspect the curves at prespecified clinical thresholds because curves may cross."),
@@ -2566,8 +2798,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     interpretation <- paste0(
                         interpretation,
                         "<p><strong>", range_label, "</strong> ",
-                        .("none."), " ",
-                        .("Across every threshold examined, treating everyone or treating no one does at least as well as this model."),
+                        .("None: across every threshold examined, treating everyone or treating no one does at least as well as this model."),
                         "</p>"
                     )
                 }
@@ -2603,7 +2834,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             footnotes <- paste0(footnotes, item(.("Threshold Probability"),
                 .("The minimum probability at which a patient would choose the intervention over no intervention.")))
 
-            if (self$options$confidenceIntervals || self$options$showNetBenefitCI) {
+            if (private$.ciDrawn()) {
                 reps  <- self$options$bootReps
                 level <- self$options$ciLevel * 100
                 footnotes <- paste0(footnotes,
@@ -2618,19 +2849,35 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                                  reps = reps, level = level),
                             .("They cover each threshold separately and are not a simultaneous band; choose the simultaneous band to read the whole curve at once."),
                             .("Coverage is approximate and falls below nominal where few patients are classified positive."))))
+                # The bootstrap resamples ROWS, so it is only right when each row is a patient.
+                # Duplicating every row narrows the interval by 1/sqrt(2) and nothing else in the
+                # output says so (IR-decisioncurve-04).
+                footnotes <- paste0(footnotes, item(.("Unit of Resampling"),
+                    .("Rows are resampled as independent patients, so the data must have one row per patient; several specimens, blocks or lesions from the same patient make these intervals and any comparison p-values too narrow.")))
             }
 
             if (self$options$calculateClinicalImpact) {
+                # base::format: .fmt() prints a round double such as 100000 as "1e+05", and a
+                # Number option is always a double (IR-decisioncurve-08). Same as the table note.
                 footnotes <- paste0(footnotes, item(.("Clinical Impact"),
                     .fmt(.('Observed complete-case proportions projected to a population of {n} patients.'),
-                         n = self$options$populationSize)))
+                         n = base::format(self$options$populationSize, scientific = FALSE, trim = TRUE))))
             }
 
-            if (self$options$clinicalDecisionRule && !is.null(self$options$decisionRuleVar)) {
+            if (!is.null(private$.ruleStrategyLabel())) {
+                # The label the rule carries in the tables and plots, not the raw option: with the
+                # label box left blank the strategy is "Clinical Rule (<level>)", and the raw option
+                # printed "()" here (IR-decisioncurve-07).
                 footnotes <- paste0(footnotes, item(.("Clinical Decision Rule"),
                     .fmt(.('Applied as provided in the data ({label}).'),
-                         label = private$.safeHtmlOutput(self$options$decisionRuleLabel))))
+                         label = private$.safeHtmlOutput(private$.ruleStrategyLabel()))))
             }
+
+            # Net benefit and treat-all take the outcome prevalence from these rows. That is only
+            # the population's prevalence for a cohort or consecutive series (IR-decisioncurve-01).
+            footnotes <- paste0(footnotes, item(.("Sampling Design"), paste(
+                .("Net benefit and the treat-all line use the outcome prevalence of the analysed sample, so they describe the target population only when the sample is a cohort or consecutive series from it."),
+                .("For a case-control or otherwise enriched sample the curves do not apply to the source population; this analysis does not accept an external prevalence."))))
 
             footnotes <- paste0(footnotes, item(.("Prediction Scale"), paste(
                 .("Values between 0 and 1 are accepted as probabilities, but this analysis does not verify calibration."),
@@ -2719,8 +2966,11 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 ggplot2::scale_x_continuous(labels = function(x) paste0(round(x * 100), "%")) +
                 ggtheme
 
+            # Limits of whatever interval is actually drawn; the y-zoom below must contain them.
+            band_limits <- numeric(0)
+
             # Add confidence intervals if calculated and display requested
-            if ((self$options$confidenceIntervals || self$options$showNetBenefitCI) &&
+            if (private$.ciDrawn() &&
                 "ci_lower" %in% names(plot_data)) {
                 band <- private$.ciBand()
                 lo_col <- if (band == "simultaneous") "sim_lower" else "ci_lower"
@@ -2750,16 +3000,19 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                         alpha = 0.2, color = NA
                     ) +
                     ggplot2::guides(fill = "none") +
-                    # the bands are bootstrap intervals: name the seed that drew them
+                    # the bands are bootstrap intervals: name the seed that drew them. One part
+                    # per line: joined with a space it read "Shaded: 95% pointwise CI Random seed: 42".
                     ggplot2::labs(caption = paste(c(caption, band_text,
                         .fmt(.("Random seed: {seed}"),
                             seed = private$.seedValue())),
-                        collapse = " "))
+                        collapse = "\n"))
+                    band_limits <- c(model_data[[lo_col]], model_data[[hi_col]])
                 }
             }
 
-            # Highlight clinical range if requested
-            if (self$options$highlightRange) {
+            # Highlight clinical range if requested. A reversed range is not drawn; .run() says so.
+            if (self$options$highlightRange &&
+                self$options$highlightMin < self$options$highlightMax) {
                 p <- p + ggplot2::annotate(
                     "rect",
                     xmin = self$options$highlightMin,
@@ -2835,7 +3088,12 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             # becomes an unreadable flat band. .plotRelativeUtility already solved this; use
             # coord_cartesian (a zoom) and NOT ylim (a scale limit, which DROPS rows and would
             # silently truncate the reference lines).
-            model_nb <- plot_data$net_benefit[!plot_data$model %in% c("Treat All", "Treat None")]
+            # The drawn band counts too. Zoomed on the curves alone, coord_cartesian() cut the
+            # ribbon off at the panel edge: on n = 80 the upper limit at low thresholds read as
+            # the top of the plot, 0.170 where it was 0.221, and the intervals are shown nowhere
+            # else (IR-decisioncurve-05). Treat-all is still left out on purpose (see above).
+            model_nb <- c(plot_data$net_benefit[!plot_data$model %in% c("Treat All", "Treat None")],
+                          band_limits)
             model_nb <- model_nb[is.finite(model_nb)]
             if (length(model_nb) > 0) {
                 # Pad OUTWARDS. `max * 1.1` moves the ceiling DOWN when the maximum is
@@ -2857,43 +3115,13 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
         .plotClinicalImpact = function(image, ggtheme, theme, ...) {
             private$.restoreFromState(image)
-            if (is.null(private$.dcaResults) || (!self$options$calculateClinicalImpact && !self$options$showClinicalImpactPlot)) {
-                return(FALSE)
-            }
+            impact_data <- private$.impactData
+            if (is.null(impact_data) || nrow(impact_data) == 0) return(FALSE)
 
-            # Get selected thresholds and models.
-            # .parseSelectedThresholds() calls .addNotice() on a malformed entry, and renderers
-            # run on every window resize without ever calling .renderNotices() -- so those
-            # notices piled up in private$.noticeList, invisible, growing one per resize. Keep
-            # the list exactly as .run() left it.
-            saved_notices <- private$.noticeList
-            selected_thresholds <- private$.parseSelectedThresholds()
-            private$.noticeList <- saved_notices
-            model_names <- names(private$.dcaResults)
+            # Rates per 100 from .run() (see .buildImpactData), projected to the population here.
             pop_size <- self$options$populationSize
-
-            # Prepare data for clinical impact plot
-            impact_data <- data.frame()
-
-            for (model_name in model_names) {
-                for (thresh in selected_thresholds) {
-                    detailed_result <- private$.calculateModelAtThreshold(model_name, thresh)
-                    if (is.null(detailed_result)) next
-                    scale_factor <- pop_size / 100
-
-                    # Add to plot data
-                    impact_data <- rbind(impact_data, data.frame(
-                        threshold = thresh,
-                        model = model_name,
-                        interventions_per_100 = detailed_result$interventions_per_100 * scale_factor,
-                        true_positives_per_100 = detailed_result$true_positives_per_100 * scale_factor,
-                        false_positives_per_100 = detailed_result$false_positives_per_100 * scale_factor,
-                        stringsAsFactors = FALSE
-                    ))
-                }
-            }
-
-            if (nrow(impact_data) == 0) return(FALSE)
+            rate_cols <- c("true_positives_per_100", "false_positives_per_100")
+            impact_data[rate_cols] <- impact_data[rate_cols] * (pop_size / 100)
 
             # Reshape data for stacked bar chart (tidyr::gather namespaced below)
             # No magrittr pipe: %>% is not imported by this package's NAMESPACE on its own
@@ -2909,7 +3137,10 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                                       levels = c("true_positives_per_100", "false_positives_per_100"),
                                       labels = c(tp_label, fp_label))
             )
-            fill_values <- stats::setNames(c("darkgreen", "darkred"), c(tp_label, fp_label))
+            # Okabe-Ito blue / vermillion. The old darkgreen/darkred collapsed under deuteranopia
+            # to #5D5311 vs #574C00 (L* 35 vs 32, colorspace::deutan): one olive bar, the
+            # benefit/harm split invisible (/review-function 2026-10-13).
+            fill_values <- stats::setNames(c("#0072B2", "#D55E00"), c(tp_label, fp_label))
 
             # Create stacked bar chart showing clinical impact
             p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = factor(threshold), y = count, fill = outcome_type)) +
@@ -2929,12 +3160,14 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 # AFTER ggtheme: a jamovi ggtheme is a COMPLETE theme and replaces every
                 # earlier theme() call, so this rotation was silently dropped and the
                 # percentage x-labels overlapped. Same ordering as .plotNetBenefit above.
-                ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1)) +
-                # Also after ggtheme, and for the same reason: green/red here is not
-                # decoration but the meaning of the two bar segments (benefit vs harm), so it
-                # is a deliberate override of the global palette. Before ggtheme it was dead,
-                # and the legend was titled with the raw column name "outcome_type".
-                ggplot2::scale_fill_manual(values = fill_values)
+                ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
+            # Also after ggtheme, and for the same reason: blue/vermillion here is not
+            # decoration but the meaning of the two bar segments (benefit vs harm), so it
+            # is a deliberate override of the global palette. Before ggtheme it was dead,
+            # and the legend was titled with the raw column name "outcome_type".
+            # ggplot2 says "Scale for fill is already present" when the `+` replaces the
+            # ggtheme fill scale; the replacement is the point, so silence that one message.
+            p <- suppressMessages(p + ggplot2::scale_fill_manual(values = fill_values))
 
             print(p)
             return(TRUE)
@@ -2945,40 +3178,38 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             # nothing can ever read it back -- a dead write that only bloated the .omv. State is
             # published from .run() now; this restores from it.
             private$.restoreFromState(image)
+            plot_data <- private$.plotData
+            if (is.null(plot_data) || nrow(plot_data) == 0) return(FALSE)
 
-            if (is.null(private$.dcaResults)) {
-                return(FALSE)
+            # Every strategy's curve, Treat All included, is in plotData; match treat-all by
+            # threshold value rather than by position.
+            treat_all <- plot_data[plot_data$model == "Treat All", , drop = FALSE]
+            avoided_data <- plot_data[!plot_data$model %in% c("Treat All", "Treat None"),
+                                      c("threshold", "net_benefit", "model"), drop = FALSE]
+            if (nrow(avoided_data) == 0 || nrow(treat_all) == 0) return(FALSE)
+            avoided_data$interventions_avoided <- mapply(
+                private$.calculateNetInterventionsAvoided,
+                avoided_data$net_benefit,
+                treat_all$net_benefit[match(avoided_data$threshold, treat_all$threshold)],
+                avoided_data$threshold,
+                MoreArgs = list(population = 100))
+
+            # A missed case costs 1/odds interventions here: 99 at the 1% threshold the automatic
+            # range starts from, so one curve could dive to several hundred below zero and flatten
+            # the others. Zoom (coord_cartesian keeps every point) no lower than -100 per 100 and
+            # name the strategies that leave the panel. -100 is a display floor, not a bound.
+            caption <- .("Positive values favour the model; negative values favour treating everyone.")
+            y_floor <- -100
+            y_vals <- avoided_data$interventions_avoided[is.finite(avoided_data$interventions_avoided)]
+            zoom <- length(y_vals) > 0 && min(y_vals) < y_floor
+            if (zoom) {
+                cut_off <- unique(avoided_data$model[
+                    is.finite(avoided_data$interventions_avoided) &
+                        avoided_data$interventions_avoided < y_floor])
+                caption <- paste(caption, .fmt(
+                    .('{models} falls below -100 per 100 patients at some thresholds and is cut off there.'),
+                    models = paste(cut_off, collapse = ", ")), sep = "\n")
             }
-
-            # Calculate interventions avoided compared to "treat all" strategy
-            thresholds <- private$.dcaResults[[1]]$thresholds
-            model_names <- names(private$.dcaResults)
-
-            # Prepare data
-            avoided_data <- data.frame()
-
-            for (model_name in model_names) {
-                model_results <- private$.dcaResults[[model_name]]
-                interventions_avoided <- numeric(length(thresholds))
-
-                for (j in seq_along(thresholds)) {
-                    interventions_avoided[j] <- private$.calculateNetInterventionsAvoided(
-                        model_results$net_benefits[j],
-                        private$.treatAllNB[j],
-                        thresholds[j],
-                        population = 100
-                    )
-                }
-
-                avoided_data <- rbind(avoided_data, data.frame(
-                    threshold = thresholds,
-                    interventions_avoided = interventions_avoided,
-                    model = model_name,
-                    stringsAsFactors = FALSE
-                ))
-            }
-
-            if (nrow(avoided_data) == 0) return(FALSE)
 
             # Create line plot showing interventions avoided
             p <- ggplot2::ggplot(avoided_data, ggplot2::aes(x = threshold, y = interventions_avoided, color = model)) +
@@ -2990,10 +3221,12 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     x = .("Threshold Probability"),
                     y = .("Net Interventions Avoided per 100 Patients"),
                     color = .("Model"),
-                    caption = .("Positive values favour the model; negative values favour treating everyone.")
+                    caption = caption
                 ) +
                 ggplot2::scale_x_continuous(labels = function(x) paste0(round(x * 100), "%")) +
                 ggtheme
+            if (zoom)
+                p <- p + ggplot2::coord_cartesian(ylim = c(y_floor, max(c(y_vals, 0))))
 
             print(p)
             return(TRUE)
@@ -3004,15 +3237,13 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             # used to sit here ran during render, where nothing could read it back.
             private$.restoreFromState(image)
 
-            if (is.null(private$.dcaResults)) return(FALSE)
-
             plot_data <- private$.plotData
+            prevalence <- private$.prevalence
+            if (is.null(plot_data) || is.null(prevalence)) return(FALSE)
 
             # Calculate Relative Utility
             # RU = (NB_model - NB_all) / (NB_perfect - NB_all)
-            
-            prevalence <- mean(private$.analysisOutcomes == private$.positiveLevel(), na.rm=TRUE)
-            
+
             plot_data$relative_utility <- NA
             
             for (i in seq_len(nrow(plot_data))) {
@@ -3031,13 +3262,12 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 nb_all <- prevalence - (1 - prevalence) * (thresh / (1 - thresh))
                 nb_baseline <- max(nb_all, 0)
 
-                denom <- nb_perfect - nb_baseline
-
-                if (abs(denom) > 1e-6) {
-                    ru <- (nb - nb_baseline) / denom
-                } else {
-                    ru <- NA_real_
-                }
+                # nb_perfect - nb_baseline, written out: (1 - prevalence) x odds below the
+                # prevalence, the prevalence above it. It is positive for every threshold in
+                # (0, 1); the old abs(denom) > 1e-6 cut-off blanked valid values once the
+                # prevalence neared 1 (Codex review 2026-10-14).
+                denom <- if (nb_all > 0) (1 - prevalence) * thresh / (1 - thresh) else nb_perfect
+                ru <- if (is.finite(denom) && denom > 0) (nb - nb_baseline) / denom else NA_real_
                 
                 plot_data$relative_utility[i] <- ru
             }
@@ -3071,8 +3301,11 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             # Say what is plotted. Above the prevalence D = 0 and RU equals the standardized net
             # benefit (Kerr 2016 calls NB/prevalence "relative utility"); below it the two curves
             # differ, and the plot did not say which definition it used (VAL-decisioncurve-08).
+            # Attributed on its own line, so the formula sentence above keeps its translation:
+            # Baker, Cook, Vickers & Kramer 2009, JRSS-A 172:729-748, section 9 (IR-decisioncurve-10).
             plot_caption <- paste(c(
                 .("RU = (NB - D) / (prevalence - D), where D is the better of treat-all and treat-none; it equals the standardized net benefit at thresholds above the prevalence."),
+                .("Relative utility as defined by Baker et al. (2009)."),
                 plot_caption), collapse = "\n")
 
             plot <- ggplot2::ggplot(plot_data,
@@ -3097,13 +3330,11 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             # used to sit here ran during render, where nothing could read it back.
             private$.restoreFromState(image)
 
-            if (is.null(private$.dcaResults)) return(FALSE)
-
             plot_data <- private$.plotData
+            prevalence <- private$.prevalence
+            if (is.null(plot_data) || is.null(prevalence)) return(FALSE)
 
             # Standardized Net Benefit (sNB) = NB / Prevalence
-            prevalence <- mean(private$.analysisOutcomes == private$.positiveLevel(), na.rm=TRUE)
-            
             plot_data$snb <- plot_data$net_benefit / prevalence
             
             plot <- ggplot2::ggplot(plot_data,

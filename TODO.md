@@ -1,3 +1,190 @@
+# decisioncurve — `/release-review-function` (2026-10-14 morning, uncommitted)
+
+Acceptance:
+- every fix has a regression test that fails on the pre-fix `.b.R` (`scratchpad/backup_pre_rr/`);
+- all decisioncurve test files are green with 0 skips;
+- the independent oracle (dcurves 0.5.1, pROC, hand formulas; 92 checks) stays all-PASS;
+- the release gate adds no FAIL;
+- `tr.po` has a Turkish msgstr for every new msgid.
+
+Baseline before any edit: 110 test blocks green with 0 skips. The oracle matched every displayed
+quantity to within 5e-10.
+
+- [x] F1 Critical: `outcomePositive` / `decisionRulePositive` had no `allowNone`, so the jamovi client
+      pre-selected levels[0] (usually the NON-event / "do not treat"). Fix: `allowNone: true`. An unset
+      outcome level gives an INFO pending state that lists the levels. A rule that is ticked but has
+      no variable or level gives an INFO and is left out of the run.
+- [x] F2 Moderate (§25): fatal input problems use `jmvcore::reject()` (`.fatal()`), not an ERROR
+      banner + return
+- [x] F3 Moderate (Codex 2): a step that does not divide the range gives a WARNING naming where the
+      grid stops
+- [x] F4 Minor (Codex 5): a rule that is constant in the analysed rows is a valid strategy, with a WARNING
+- [x] F5 Minor (Codex 4): a zero-SE strategy's simultaneous band collapses onto the estimate (was NA)
+- [x] F6 Minor (Codex 3): RU denominator computed analytically, `> 0` instead of `> 1e-6`
+- [x] Not fixed, Codex 1: trapezoid vs exact integral is 3e-5 at the default step and is the area
+      under the drawn curve; recorded as a limitation
+- [x] Verify:
+      - parse, tests and the oracle;
+      - release gate and rendering contract;
+      - tr.po entries;
+      - NEWS.md and CHANGELOG.md.
+- [ ] USER: `prepare()` + `document()`. `allowNone` reaches `decisioncurve.h.R` (OptionLevel) only
+      then, and the GUI needs the regenerated module.
+- [ ] Out of scope, same class as F1: 116 of 168 `type: Level` options in 67 analyses lack
+      `allowNone`.
+      - Sweep the ones that name an event, a positive class or a recommendation. Reference levels
+        and display choices may keep the auto-fill.
+      - List them with `grep -B1 -A4 "type: Level" jamovi/*.a.yaml`.
+- Results:
+  - Changed files:
+    - `R/decisioncurve.b.R`, `jamovi/decisioncurve.a.yaml`;
+    - `jamovi/i18n/{catalog.pot,en.po,tr.po}`: +13 msgids with Turkish, -5 retired;
+    - `test-decisioncurve-release-review.R` (RR-01..06, 7 blocks), one assertion each in
+      `test-decisioncurve-validation.R` and `test-zzz-init-row-structure-runtime.R` (banner -> reject);
+    - `vignettes/decisioncurve-documentation.md`, NEWS.md and CHANGELOG.md.
+  - Verification:
+    - 134 blocks green with 0 skips across the 6 decisioncurve files, the runtime-rows test and the
+      rendering contract.
+    - All 7 RR blocks are red on `backup_pre_rr/decisioncurve.b.R`.
+    - Oracle 75/75 PASS: dcurves NB, treat-all and net interventions avoided; pROC DeLong; hand
+      formulas for every table, both bootstraps, the sup-t band, RU and sNB.
+    - Gate 0 blocking / 10 advisory (unchanged), 0 unused msgids; `msgfmt -c` OK; 274/274 .()
+      literals have Turkish.
+    - meddecide audit: only the known lassologistic line-964 failure.
+
+# decisioncurve — `/fix-function --apply` of the `/review-function` findings (2026-10-13 night, uncommitted)
+
+Acceptance:
+- each behaviour change has a test that fails on the pre-fix snapshot
+  (`scratchpad/backup_pre_fix/`) and passes now;
+- all decisioncurve test files are green with 0 skips;
+- the dcurves oracle tests are unchanged and green;
+- `prepare()` changes only `decisioncurve.h.R`;
+- `tr.po` has no empty msgstr for a decisioncurve msgid and passes `msgfmt -c`;
+- the release gate adds no FAIL.
+
+- [x] R1 perf: `.calculateNetBenefitsVectorized` as sort + findInterval + cumsum; CI bootstrap calls it
+- [x] R3 a11y: clinical impact fill darkgreen/darkred -> Okabe-Ito #0072B2 / #D55E00
+- [x] R4 state: publish `prevalence` + `impactData`; no prediction/outcome vectors in any image state
+      (+ `.restoreFromState` migration for the 2026-10-08 meddecide slices; Codex plan critique)
+- [x] R2 drop the `conclusion` column (p < 0.05 verdict beside the Vickers caution); footnote an NA p
+- [x] R5 dcaPlot visible `(showPlot)`; CIs computed/drawn/footnoted only when the plot is on (backend
+      gate too: a disabled control keeps its value); u.yaml enables
+- [x] R7 payoff labels say "monetary"; CollapseBox "Bootstrap and Resampling"
+- [x] R8a `showInterpretation` (default false) gates `summaryText`; procedureNotes stays (caveats)
+- [x] R8b interventions-avoided plot: zoom floor -100 per 100 + caption naming cut-off models
+- [x] R8c option-determined rows in `.init()`, `setRow()` in `.run()` + runtime rowCount test
+- [x] R6 i18n: whole sentences for "(tied)"/"none."; `i18nUpdate()`; Turkish for every new msgid
+- [x] Verify: parse; `prepare()` (unset ELECTRON_RUN_AS_NODE); `document()`; tests; gate; rendering
+      contract; remove the four review TODO comments; NEWS.md; CHANGELOG.md (benchmark lesson)
+- Results:
+  - Changed files:
+    - `R/decisioncurve.b.R`, the three decisioncurve yaml files;
+    - the regenerated `decisioncurve.h.R`/`.Rd` (prepare/document changed no other generated file);
+    - `jamovi/i18n/{catalog.pot,en.po,tr.po}`. These are module-wide, so the diff also carries
+      other analyses' strings since 2026-10-12;
+    - both decisioncurve docs, NEWS.md and CHANGELOG.md;
+    - four test files: independent-review (+10 RF blocks), critical-fixes, validation,
+      release-review, plus a decisioncurve block in `test-zzz-init-row-structure-runtime.R`.
+  - Verification:
+    - 110 decisioncurve test blocks + 13 runtime-row blocks green, 0 skips; the dcurves oracles
+      are unchanged.
+    - 7 RF blocks red on the pre-fix backend. RF-01 and the RF-03 migration block are
+      no-change guards, and the static RF-06/07 checks fail against the snapshot files.
+    - The bootstrap sweep is bit-identical (ties at thresholds, 0/1 rule, unsorted thresholds):
+      2.23 s -> 0.13 s.
+    - Release gate 0 blocking (advisories 11 -> 10); rendering contract green; lintr style-only.
+    - `tr.po`: 419 decisioncurve entries, 0 empty, `msgfmt -c` OK.
+  - Bug found during the pass: `paste0("pair_", seq_len(0))` is `"pair_"`, a phantom row key;
+    switched to `sprintf()` (CHANGELOG 2026-10-14).
+
+# decisioncurve — `/release-review-function` after the independent review (2026-10-13, uncommitted)
+
+Source: `development-ideas/decisioncurve-independent-review-2026-10-13.md` (IR-decisioncurve-01..10).
+Acceptance: each fixed finding has a test that fails on HEAD's `.b.R` and passes now; all five
+decisioncurve test files green; the inverse-discrimination guard's false-alarm rate on correctly coded
+uninformative data is at most about 2.5% (one-sided) and it fires on a reversed informative model; its
+DeLong AUC/SE equal `pROC` to 1e-10; the audit script's finding rows turn PASS except the two M1
+numeric rows (the case-control limitation is disclosed, not removed); scratch-compiled header differs
+from HEAD only in refs/roxygen; release gate adds no FAIL.
+- [x] IR-01 disclose the sample-prevalence assumption (procedure notes + footnote); warn on an exact
+      1:1 event/non-event split with >= 20 per class. Target-prevalence option deferred (below)
+- [x] IR-03 "Possible Inversion" guard: DeLong upper bound < 0.5 AND seeded permutation p < 0.025
+      (Wald-only and wilcox.test gates were anti-conservative in sparse/tied data - Codex); rule wording
+- [x] IR-04 one-row-per-patient disclosure (procedure notes + interval footnote)
+- [x] IR-05 y-zoom includes the drawn band
+- [x] IR-06 comparison-table note on Vickers 2023; reword the r.yaml refs comment
+- [x] IR-07 footnote uses `.ruleStrategyLabel()`; IR-08 population printed without scientific notation
+- [x] IR-09 drop the unreproducible example numbers from the weightedAUC description (.a.yaml)
+- [x] IR-10 cite Baker 2009 for relative utility (00refs.yaml + r.yaml refs + RU caption)
+- [x] caption parts on separate lines; Codex-07 threshold parse notices in plot-only mode (no table text)
+- [x] Verify: parse; scratch compile (refs + roxygen only); 89 decisioncurve tests green, 0 skips; new
+      tests red on HEAD; guard null simulation; audit post-fix; release gate unchanged; NEWS.md, CHANGELOG.md
+- [x] `/check-function decisioncurve --profile release` (2026-10-13 evening):
+      - wiring: 43 options and 18 results all reach the backend; the 4 options with no backend read
+        are image `visible:` toggles;
+      - fix: undefined cells were "NaN" or "." (PPV, NPV, screened per TP, range of benefit), now
+        `""` plus a footnote, regression block red before the fix;
+      - removed the dead `.escapeVar`, 3 empty `if` stubs and 3 constants;
+      - docs: `comparisonMethod` row out and `ciBand` row in, in both decisioncurve docs;
+      - external oracle against dcurves 0.5.1: NB within 2e-16, net interventions avoided within 5e-14;
+      - `prepare()` clean; it changed only `decisioncurve.h.R` (refs and roxygen).
+- [ ] Out of scope, found by the same run: `test-meddecide-library-audit.R:964` expects lassologistic's
+      `methodComparison` row key `"schneeweiss"`, but the committed backend (5c4dfd582/5b8ade7da) renamed it
+      `"smallest"` on purpose (an eponym correction), so the expectation is stale. Fails on HEAD; unrelated
+      to decisioncurve.
+- [ ] User: revert `menuGroup: meddecideT` -> `meddecide`, then `_updateModules.R` for meddecide
+      (IR-02: the shipped copy predates every fix). The `i18nUpdate()` + Turkish part of this
+      item was done on 2026-10-14 (`/fix-function` pass above).
+- Deferred: optional target-population prevalence (dcurves `prevalence=`) applied to NB, treat-all,
+  projections, PPV/NPV, sNB/RU, with case/control-stratified bootstrap; optional patient-ID cluster
+  bootstrap (IR-04).
+- [x] `/check-function-full decisioncurve` (2026-10-13 late, report only, no source edits):
+      - all 43 options change output in a differential run;
+      - 18/18 results populated;
+      - 300 decisioncurve tests and the rendering contract green;
+      - gate clean with the analysis counted as shipped;
+      - NB/treat-all = dcurves 0.5.1 to 2e-16, net interventions avoided to 5e-13.
+      Follow-ups, fixed the same evening (user: "fix detected issues and implement recommendations"; Codex plan critique first):
+      Acceptance:
+      - each behaviour change has a test that fails on the pre-fix `.b.R`;
+      - all decisioncurve test files are green with 0 skips;
+      - parse passes, and `prepare()` changes only `decisioncurve.h.R` plus resyncs that were already stale;
+      - the release gate adds no FAIL;
+      - the dcurves oracle is unchanged.
+  - [x] Rule-vs-model pairs are skipped as "no values to resample", but the rule's 0/1 vector sits in
+        `.dcaResults[[rule]]$predictions`: resample that instead of `analysis_data[[var]]` (b.R ~2221, ~2547)
+  - [x] `.renderNotices()` prints in insertion order (WARNING above STRONG_WARNING at n = 40): sort by severity
+  - [x] `ciLevel` is enabled for, and in the clearWith of, `multiModelComparison`, which has no interval column
+  - [x] `confidenceIntervals` and `showNetBenefitCI` are byte-identical (measured): fold into one option
+  - [x] add `DeLong1988` to r.yaml `refs` (the inversion notice prints a DeLong CI)
+  - [x] `.publishPlotStates()` also writes the hidden images (~34 KB each at n = 5000); skip `!img$visible`
+  - [x] "apparent, not validated" STRONG_WARNING -> WARNING (fires on every run, data-independent)
+  - [x] `highlightMin >= highlightMax`: WARNING notice; the plot skips the rect
+  - [x] "Gain vs Default" (note) -> "Gain vs Best Default" (column title)
+  - [x] drop the "Projected Tests" column (always equals populationSize)
+  - [x] silence ggplot2's "Scale for fill is already present" in the clinical impact plot
+  - [x] runnable `usage:` example on `dca_test_data` (it ships with meddecide; `decisioncurve_test_data` does not) -> `\examples` in the .Rd
+  - [x] Verify:
+        - parse;
+        - `prepare()` (snapshot generated files first);
+        - `document()`;
+        - decisioncurve tests plus new regressions, red on the pre-fix code;
+        - release gate;
+        - dcurves oracle;
+        - NEWS.md and CHANGELOG.md
+  - Results:
+    - Changed files: `R/decisioncurve.b.R`, the three decisioncurve yaml files, the regenerated
+      `.h.R`/`.Rd` (`prepare()` and `document()` changed nothing else), both decisioncurve vignettes,
+      `test-decisioncurve-independent-review.R` (CF-decisioncurve-01..11),
+      `test-decisioncurve-validation.R`, three local development scripts, NEWS.md and CHANGELOG.md.
+    - The CF tests fail on the pre-fix snapshot (all except the ciLevel invariance guard) and pass
+      after the fix.
+    - The dcurves oracle is unchanged, and hidden plots now store 0 bytes of state.
+    - The gate adds no FAIL; it now lists 12 more unused catalog msgids (the retired strings),
+      which `i18nUpdate()` will clear.
+    - **Breaking:** `showNetBenefitCI` is removed (see NEWS).
+
 # lassologistic — `/release-review-function` (2026-10-12 evening, uncommitted)
 
 Acceptance: every lassologistic test file green with 0 skips; the new test red on HEAD's `.b.R`; an

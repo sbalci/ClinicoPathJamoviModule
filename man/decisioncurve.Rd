@@ -38,7 +38,6 @@ decisioncurve(
   decisionRulePositive,
   decisionRuleLabel = "Clinical Rule",
   showClinicalImpactPlot = FALSE,
-  showNetBenefitCI = FALSE,
   costBenefitAnalysis = FALSE,
   testCost = 100,
   treatmentCost = 1000,
@@ -47,6 +46,7 @@ decisioncurve(
   showStandardizedNetBenefit = FALSE,
   multiModelComparison = FALSE,
   showDecisionConsequences = FALSE,
+  showInterpretation = FALSE,
   resourceUtilization = FALSE,
   showRelativeUtility = FALSE
 )
@@ -145,19 +145,19 @@ Threshold probability should be elicited from the clinical trade-off, not
 optimized on the same data.}
 
 \item{compareModels}{Provide exploratory pairwise bootstrap comparisons of
-average net benefit across the selected range. The p-values are approximate
-and should not replace comparison at prespecified clinically relevant
-thresholds or independent validation.}
+average net benefit across the selected range, between every pair of
+strategies: the models and, if one is supplied, the clinical decision rule.
+The p-values are approximate and should not replace comparison at
+prespecified clinically relevant thresholds or independent validation.}
 
 \item{weightedAUC}{Summarise each decision curve by the area under it,
 normalised by the width of the threshold range - that is, the model's
 average net benefit over that range. The option is named weightedAUC for
 historical reasons but the average is UNWEIGHTED: every threshold in the
 range counts equally. The value therefore depends entirely on the threshold
-range chosen above (on one example dataset it moved from 0.309 to 0.163 as
-the range widened from 5-20 percent to 1-99 percent), so always report the
-range alongside it. Curves may cross, so this descriptive average does not
-identify a universally best model.}
+range chosen above, so always report the range alongside it. Curves may
+cross, so this descriptive average does not identify a universally best
+model.}
 
 \item{clinicalDecisionRule}{Add clinical decision rule analysis and
 comparison with models.}
@@ -178,12 +178,6 @@ tables.}
 \item{showClinicalImpactPlot}{Display projected true positives and false
 positives for the selected population size at the selected threshold
 probabilities.}
-
-\item{showNetBenefitCI}{Display bootstrap confidence ribbons around the net
-benefit curves (pointwise or simultaneous, see ciBand). Identical in effect
-to 'confidenceIntervals': both switch on the same case-resampling bootstrap
-and produce byte-identical output, and either one enables the
-replication-count and confidence-level controls.}
 
 \item{costBenefitAnalysis}{Project a simple exploratory monetary payoff
 using user-assigned values in one common currency. This is not an ICER,
@@ -209,12 +203,18 @@ expresses net benefit relative to the maximum achievable value; it is not
 net benefit per 100 patients.}
 
 \item{multiModelComparison}{Perform exploratory pairwise bootstrap
-comparisons between all models of the unweighted mean (and median)
-net-benefit difference over the threshold grid points. Inference is
-approximate and conditional on the selected threshold range.}
+comparisons between all models, and any clinical decision rule, of the
+unweighted mean (and median) net-benefit difference over the threshold grid
+points. Inference is approximate and conditional on the selected threshold
+range.}
 
 \item{showDecisionConsequences}{Show detailed table of decision
 consequences (TP, FP, TN, FN) at selected thresholds.}
+
+\item{showInterpretation}{Show a plain-language interpretation of the
+decision curves (the model with the highest average net benefit over the
+range, its range of benefit, reading guidelines and methodological notes).
+The Analysis Summary, which states the data requirements, is always shown.}
 
 \item{resourceUtilization}{Project tests, treatments, unnecessary
 treatments and missed cases to the selected population size.}
@@ -258,4 +258,18 @@ probabilities to determine if using a model provides more benefit than
 default strategies. Inputs must be probabilities for a clearly defined
 binary outcome and prediction horizon; calibration must be assessed
 separately, and this analysis does not handle censoring.
+}
+\examples{
+\donttest{
+# outcomePositive and decisionRulePositive are Level options: jamovi forbids a
+# default on them, so both are REQUIRED arguments. Pass NULL for the rule level
+# when no clinical decision rule is used.
+decisioncurve(
+    data = dca_test_data,
+    outcome = "cardiac_event",
+    outcomePositive = "Yes",
+    models = c("basic_model", "enhanced_model"),
+    decisionRulePositive = NULL
+)
+}
 }

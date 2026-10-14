@@ -113,6 +113,9 @@ children:
           - type: CheckBox
             name: showDecisionConsequences
             label: Decision consequences table
+          - type: CheckBox
+            name: showInterpretation
+            label: Clinical interpretation
   - type: CollapseBox
     label: Plots
     margin: normal
@@ -127,31 +130,28 @@ children:
           - type: ComboBox
             name: plotStyle
             label: Plot style
-            enable: (showPlot || confidenceIntervals || showNetBenefitCI)
+            enable: (showPlot)
           - type: CheckBox
             name: showReferenceLinesLabels
             label: Reference line labels
-            enable: (showPlot || confidenceIntervals || showNetBenefitCI)
+            enable: (showPlot)
           - type: CheckBox
             name: highlightRange
             label: Clinical range highlight
-            enable: (showPlot || confidenceIntervals || showNetBenefitCI)
+            enable: (showPlot)
           - type: TextBox
             name: highlightMin
             format: number
             label: Range minimum
-            enable: (highlightRange && (showPlot || confidenceIntervals || showNetBenefitCI))
+            enable: (highlightRange && showPlot)
           - type: TextBox
             name: highlightMax
             format: number
             label: Range maximum
-            enable: (highlightRange && (showPlot || confidenceIntervals || showNetBenefitCI))
+            enable: (highlightRange && showPlot)
           - type: CheckBox
             name: showClinicalImpactPlot
             label: Clinical impact plot
-          - type: CheckBox
-            name: showNetBenefitCI
-            label: Net benefit confidence intervals
           - type: CheckBox
             name: showRelativeUtility
             label: Relative utility plot
@@ -183,15 +183,17 @@ children:
             format: number
             label: Cost per treatment
             enable: (costBenefitAnalysis)
+          # "Monetary": the payoff is in one currency, and a QALY or utility entered here is
+          # silently treated as money (the option descriptions forbid it; the labels did not).
           - type: TextBox
             name: benefitCorrectTreatment
             format: number
-            label: Benefit of correct treatment
+            label: Monetary value per true positive
             enable: (costBenefitAnalysis)
           - type: TextBox
             name: harmFalseTreatment
             format: number
-            label: Harm of false treatment
+            label: Monetary harm per false positive
             enable: (costBenefitAnalysis)
   - type: CollapseBox
     label: Model Comparison
@@ -231,31 +233,35 @@ children:
           - type: CheckBox
             name: resourceUtilization
             label: Resource utilization
+  # Not "Bootstrap Confidence Intervals": the replications and the seed here also drive both
+  # model-comparison tables, whose checkboxes sit in another box.
   - type: CollapseBox
-    label: Bootstrap Confidence Intervals
+    label: Bootstrap and Resampling
     margin: normal
     collapsed: true
     children:
       - type: LayoutBox
         margin: large
         children:
+          # The intervals are drawn only on the decision curve plot.
           - type: CheckBox
             name: confidenceIntervals
             label: Bootstrap confidence intervals
+            enable: (showPlot)
           - type: TextBox
             name: bootReps
             format: number
             label: Bootstrap replications
-            enable: (confidenceIntervals || showNetBenefitCI || compareModels || multiModelComparison)
+            enable: ((confidenceIntervals && showPlot) || compareModels || multiModelComparison)
           - type: TextBox
             name: ciLevel
             format: number
             label: Confidence level
-            enable: (confidenceIntervals || showNetBenefitCI || compareModels || multiModelComparison)
+            enable: ((confidenceIntervals && showPlot) || compareModels)
           - type: ComboBox
             name: ciBand
             label: Interval type
-            enable: (confidenceIntervals || showNetBenefitCI)
+            enable: (confidenceIntervals && showPlot)
           - type: TextBox
             name: seed
             format: number

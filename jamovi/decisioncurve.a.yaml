@@ -14,10 +14,19 @@ description:
         determine if using a model provides more benefit than default strategies. Inputs must
         be probabilities for a clearly defined binary outcome and prediction horizon;
         calibration must be assessed separately, and this analysis does not handle censoring.
-    # R:
-    #     dontrun: true
-    #     usage: |
-    #         # example will be added
+    R:
+        dontrun: true
+        usage: |
+            # outcomePositive and decisionRulePositive are Level options: jamovi forbids a
+            # default on them, so both are REQUIRED arguments. Pass NULL for the rule level
+            # when no clinical decision rule is used.
+            decisioncurve(
+                data = dca_test_data,
+                outcome = "cardiac_event",
+                outcomePositive = "Yes",
+                models = c("basic_model", "enhanced_model"),
+                decisionRulePositive = NULL
+            )
 
 options:
     - name: data
@@ -36,14 +45,19 @@ options:
             Binary outcome variable (0/1 or FALSE/TRUE). This represents the
             condition or event you want to predict.
 
+    # allowNone: without it the jamovi client pre-selects levels[0] - usually the NON-event
+    # ("No", "0", "Absent") - and every curve answers the wrong question. Never inferred.
     - name: outcomePositive
       title: Positive Outcome Level
       type: Level
       variable: (outcome)
+      allowNone: true
       description:
           R: >
             Which level of the outcome variable represents the positive case
-            (presence of condition/event).
+            (presence of condition/event). It is never taken from the order of the
+            levels: until it is chosen the analysis lists the levels found and computes
+            nothing. From R the argument has no default; pass the level.
 
     - name: models
       title: Prediction Variables/Models
@@ -301,7 +315,8 @@ options:
       description:
           R: >
             Provide exploratory pairwise bootstrap comparisons of average net benefit across
-            the selected range. The p-values are approximate and should not replace comparison
+            the selected range, between every pair of strategies: the models and, if one is
+            supplied, the clinical decision rule. The p-values are approximate and should not replace comparison
             at prespecified clinically relevant thresholds or independent validation.
 
     - name: weightedAUC
@@ -314,10 +329,9 @@ options:
             the threshold range - that is, the model's average net benefit over that range.
             The option is named weightedAUC for historical reasons but the average is
             UNWEIGHTED: every threshold in the range counts equally. The value therefore
-            depends entirely on the threshold range chosen above (on one example dataset it
-            moved from 0.309 to 0.163 as the range widened from 5-20 percent to 1-99 percent), so always
-            report the range alongside it. Curves may cross, so this descriptive average does
-            not identify a universally best model.
+            depends entirely on the threshold range chosen above, so always report the range
+            alongside it. Curves may cross, so this descriptive average does not identify a
+            universally best model.
 
     - name: clinicalDecisionRule
       title: Clinical Decision Rule Integration
@@ -337,14 +351,17 @@ options:
           R: >
             Binary variable indicating whether the clinical rule recommends intervention (1/0 or yes/no).
 
+    # allowNone: as outcomePositive. levels[0] is usually "No", which would reverse the rule.
     - name: decisionRulePositive
       title: Decision Rule Positive Level
       type: Level
       variable: (decisionRuleVar)
+      allowNone: true
       description:
           R: >
             Which level of the rule variable indicates a positive recommendation
-            (treat/intervene). jamovi does not permit a default on a Level option, so this
+            (treat/intervene). Never taken from the order of the levels: until it is chosen
+            the rule is left out of the analysis. jamovi does not permit a default on a Level option, so this
             is always a required argument of the R function even when clinicalDecisionRule
             is FALSE. Programmatic callers that are not using a clinical decision rule must
             pass decisionRulePositive = NULL explicitly.
@@ -367,16 +384,9 @@ options:
             Display projected true positives and false positives for the selected population
             size at the selected threshold probabilities.
 
-    - name: showNetBenefitCI
-      title: Net Benefit Confidence Intervals
-      type: Bool
-      default: false
-      description:
-          R: >
-            Display bootstrap confidence ribbons around the net benefit curves (pointwise or
-            simultaneous, see ciBand). Identical in effect to 'confidenceIntervals': both
-            switch on the same case-resampling bootstrap and produce byte-identical output,
-            and either one enables the replication-count and confidence-level controls.
+    # `showNetBenefitCI` used to sit here: a second checkbox for the same switch as
+    # confidenceIntervals (byte-identical output). Removed 2026-10-13; an .omv saved with it
+    # still loads, but its ribbons now need "Bootstrap confidence intervals" ticked.
 
     - name: costBenefitAnalysis
       title: Exploratory Monetary Payoff
@@ -448,8 +458,9 @@ options:
       default: false
       description:
           R: >
-            Perform exploratory pairwise bootstrap comparisons between all models of the
-            unweighted mean (and median) net-benefit difference over the threshold grid points.
+            Perform exploratory pairwise bootstrap comparisons between all models, and any
+            clinical decision rule, of the unweighted mean (and median) net-benefit difference
+            over the threshold grid points.
             Inference is approximate and conditional on the selected threshold range.
 
     # `comparisonMethod` used to sit here: a List that no backend code ever read. It once
@@ -466,6 +477,17 @@ options:
       description:
           R: >
             Show detailed table of decision consequences (TP, FP, TN, FN) at selected thresholds.
+
+    - name: showInterpretation
+      title: Clinical Interpretation
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show a plain-language interpretation of the decision curves (the model with the
+            highest average net benefit over the range, its range of benefit, reading guidelines
+            and methodological notes). The Analysis Summary, which states the data requirements,
+            is always shown.
 
     - name: resourceUtilization
       title: Resource Utilization Analysis

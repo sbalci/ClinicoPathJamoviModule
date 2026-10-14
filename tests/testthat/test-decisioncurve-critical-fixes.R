@@ -467,11 +467,12 @@ test_that("Range of Benefit does not report floating-point noise as clinical sup
     res <- ClinicoPath::decisioncurve(
         data = d, outcome = "outcome", outcomePositive = "1", models = "p1",
         decisionRuleVar = NULL, decisionRulePositive = NULL,
-        thresholdRange = "custom", thresholdMin = 0.05, thresholdMax = 0.44, thresholdStep = 0.01)
+        thresholdRange = "custom", thresholdMin = 0.05, thresholdMax = 0.44, thresholdStep = 0.01,
+        showInterpretation = TRUE)
     # collapse whitespace: stripping the HTML tags leaves runs of spaces
     txt <- gsub("[[:space:]]+", " ", gsub("<[^>]*>", " ", res$summaryText$content))
     expect_false(grepl("Range of Benefit: 5% to 19%", txt, fixed = TRUE))
-    expect_match(txt, "Range of Benefit: none", fixed = TRUE)
+    expect_match(txt, "Range of Benefit: None", fixed = TRUE)
 })
 
 
