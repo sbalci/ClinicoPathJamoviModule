@@ -5,6 +5,28 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-10-14 — decisioncurve: the `allowNone` repair shipped without its header
+
+- **Failure mode:** the entry below added `allowNone: true` to both Level options in
+  `decisioncurve.a.yaml`. It was committed (9c112088e) with a `decisioncurve.h.R` from before
+  that edit, so the compiled `OptionLevel$new()` calls had no `allowNone`, and the help text was
+  also out of date.
+  - The test suite stayed green: jmvcore's R-side `OptionLevel` keeps no `allowNone` field, and
+    every test passes the level explicitly.
+- **Detection:** `/fix-function` noticed the header's mtime was older than its `.a.yaml`, then
+  grepped the header for `allowNone=TRUE` (0 hits; `competingsurvival.h.R` has 4).
+- **Repair:**
+  - `jmvtools::prepare()`; `git diff --name-only` showed `decisioncurve.h.R` as the only change.
+  - Guard RR-07 deparses `decisioncurveOptions$initialize`; it is red on the committed header and
+    green after.
+  - `man/decisioncurve.Rd` still needs `devtools::document()`.
+- **Rule:**
+  - After any `.a.yaml`/`.r.yaml` edit, run `prepare()` and see `R/<fn>.h.R` in `git diff` before
+    calling the change done.
+  - A header older than its yaml is a finding even when every test passes.
+
+---
+
 ## 2026-10-14 — decisioncurve: five review passes missed a GUI-only reversed event level
 
 - **Failure mode:** `outcomePositive` and `decisionRulePositive` were `type: Level` with no

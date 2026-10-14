@@ -302,3 +302,14 @@ test_that("RR-06 relative utility is not blanked when the prevalence is near 1",
   pl <- ggplot2::last_plot()$data
   expect_equal(pl$relative_utility[pl$model == "m"], rep(1, 9), tolerance = 1e-9)
 })
+
+test_that("RR-07 the compiled header carries allowNone on both positive-level options", {
+  # The .a.yaml gained allowNone (the client otherwise pre-selects levels[0], usually the
+  # NON-event) but the committed .h.R was not regenerated, so it compiled without it
+  # (/fix-function 2026-10-14). jmvcore's R-side OptionLevel keeps no allowNone field, so
+  # the constructor source is the only place a stale header shows.
+  init <- paste(deparse(ClinicoPath:::decisioncurveOptions$public_methods$initialize), collapse = "\n")
+  for (opt in c("outcomePositive", "decisionRulePositive"))
+    # [^$]: stop at the next option's `$new(` instead of reading across into it
+    expect_match(init, sprintf('"%s",[^$]*allowNone = TRUE', opt))
+})

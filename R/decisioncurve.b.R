@@ -278,8 +278,9 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             rp <- self$options$decisionRulePositive
             if (private$.levelUnset(rp)) return(NULL)
             lbl <- self$options$decisionRuleLabel
-            if (!is.null(lbl) && nzchar(trimws(lbl))) return(trimws(lbl))
-            .fmt(.('Clinical Rule ({level})'), level = rp)
+            # .rocLabel(note = FALSE): a display label only (see .parseModelNames).
+            .rocLabel(if (!is.null(lbl) && nzchar(trimws(lbl))) trimws(lbl)
+                      else .fmt(.('Clinical Rule ({level})'), level = rp), note = FALSE)
         },
 
         # Which interval the plot draws. NULL-safe: the option is absent from the compiled
@@ -887,7 +888,11 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             return(sort(unique(thresholds)))
         },
 
-        # Parse model names
+        # Parse model names. These are DISPLAY labels only -- data columns are read through
+        # self$options$models -- so they pass through .rocLabel(note = FALSE) once here: table
+        # cells and column titles are parsed as HTML by the jamovi client, which swallowed a
+        # "<" before a letter ("Risk<High>" showed as "Risk"; security audit 2026-10-14).
+        # Every consumer gets the same label, so keys and comparisons stay consistent.
         .parseModelNames = function() {
             model_names_str <- self$options$modelNames
             model_vars <- self$options$models
@@ -895,7 +900,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             # is.null FIRST: `NULL == ""` is logical(0), and `logical(0) || x` is an error
             # in R >= 4.3 rather than a usable FALSE.
             if (is.null(model_names_str) || !nzchar(model_names_str)) {
-                return(model_vars)
+                return(.rocLabel(model_vars, note = FALSE))
             }
 
             # Parse comma-separated names
@@ -904,10 +909,10 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             # If the number of names does not match, or any label is empty, use the source
             # variable names. .run() reports this substitution to the user.
             if (length(parsed_names) != length(model_vars) || any(!nzchar(parsed_names))) {
-                return(model_vars)
+                return(.rocLabel(model_vars, note = FALSE))
             }
 
-            return(parsed_names)
+            return(.rocLabel(parsed_names, note = FALSE))
         },
         
         # NOTE: a .calculateBootstrapCIChunked() path used to live here and has been removed.
@@ -2483,11 +2488,14 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 )
             )
 
+            # .rocLabel(): setNote() re-translates the composed note and cuts it at " [", so a
+            # model named "Model [v2]" left the note reading just "Model" (security audit
+            # 2026-10-14); it also breaks a "<" that the note renderer would read as a tag.
             if (length(none_beneficial) > 0) {
                 range_table$setNote(
                     "none",
                     .fmt(.('{models} never exceeds both reference strategies anywhere in the threshold range examined, so no range is shown.'),
-                         models = paste(none_beneficial, collapse = ", "))
+                         models = .rocLabel(paste(none_beneficial, collapse = ", ")))
                 )
             }
 
@@ -2496,7 +2504,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     "gap",
                     paste(
                         .fmt(.('{models} is superior over more than one separate stretch of thresholds.'),
-                             models = paste(has_gap, collapse = ", ")),
+                             models = .rocLabel(paste(has_gap, collapse = ", "))),
                         .("The start and end shown span a gap where the model is not superior - read the curve rather than the endpoints.")
                     )
                 )
