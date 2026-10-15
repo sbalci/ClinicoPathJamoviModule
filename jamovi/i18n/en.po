@@ -441,6 +441,18 @@ msgstr ""
 
 #: R/decisioncurve.b.R
 msgid ""
+"\"Clinical decision rule\" is enabled but its positive level has not been "
+"chosen: select the level that means the rule recommends intervention."
+msgstr ""
+
+#: R/decisioncurve.b.R
+msgid ""
+"\"Clinical decision rule\" is enabled but no rule variable has been "
+"selected: drop a binary variable into \"Clinical Decision Rule (binary)\"."
+msgstr ""
+
+#: R/decisioncurve.b.R
+msgid ""
 "\"Enhanced pairwise comparison\" is enabled but only one prediction model is "
 "selected, so the Exploratory Pairwise Model Comparison table stays empty."
 msgstr ""
@@ -12461,6 +12473,13 @@ msgstr ""
 msgid ""
 "A significant Q or a large I-squared here contradicts the fixed-effect "
 "assumption: switch to REML."
+msgstr ""
+
+#: R/kappaSizePower.b.R
+msgid ""
+"A simulation of the recommended goodness-of-fit test gives a power of about "
+"{sim} at this sample size, short of the stated {power}; about {needed} "
+"subjects reach about {simN} (random seed {seed})."
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
@@ -24780,6 +24799,13 @@ msgid ""
 "reported as evidence that one test outperforms the others."
 msgstr ""
 
+#: R/kappaSizePower.b.R
+msgid ""
+"Because the goodness-of-fit test has to estimate the expected proportions "
+"from the ratings, this sample size can fall well short of power {power}; "
+"confirm it by simulating the intended analysis."
+msgstr ""
+
 #: R/enhancedROC.b.R
 msgid ""
 "Because the probabilities for '%s' were derived here by a linear logistic "
@@ -33162,6 +33188,10 @@ msgid ""
 "clinical context."
 msgstr ""
 
+#: R/decisioncurve.b.R
+msgid "Choose a step size that divides the threshold range to analyse all of it."
+msgstr ""
+
 #: R/tableone.b.R
 msgid "Choose a table style for the output format."
 msgstr ""
@@ -33629,6 +33659,10 @@ msgstr ""
 msgid ""
 "Choose the positive level for {tests}. A test enters the analysis only after "
 "its positive level is chosen, so no results are shown yet."
+msgstr ""
+
+#: R/decisioncurve.b.R
+msgid "Choose the Positive Outcome Level"
 msgstr ""
 
 #: R/decision.b.R
@@ -35125,6 +35159,10 @@ msgstr ""
 msgid "Clinical Decision Rule Integration"
 msgstr ""
 
+#: R/decisioncurve.b.R
+msgid "Clinical Decision Rule Not Included Yet"
+msgstr ""
+
 #: greyzoneroc/ui/clinicalDecisions.label
 msgid "Clinical Decision Rules"
 msgstr ""
@@ -36262,6 +36300,10 @@ msgstr ""
 
 #: R/decisioncurve.b.R
 msgid "Clinical Rule ({level})"
+msgstr ""
+
+#: R/decisioncurve.b.R
+msgid "Clinical Rule Is Constant"
 msgstr ""
 
 #: R/decisiongraph.b.R
@@ -64294,6 +64336,14 @@ msgstr ""
 msgid "Estimate Survival Probabilities"
 msgstr ""
 
+#: R/kappaSizePower.b.R
+msgid ""
+"Estimate the prevalence for that test by maximum likelihood from the same "
+"pooled cells, with kappa held at kappa0: the published procedure plugs in "
+"the overall proportion of positive ratings, which makes the test reject a "
+"true kappa0 too often with four or more raters and a rare finding."
+msgstr ""
+
 #: nogoldstandard/results/prevalence.title
 msgid "Estimated Class or Rule Proportion"
 msgstr ""
@@ -67089,6 +67139,10 @@ msgstr ""
 
 #: R/jjpiestats.b.R
 msgid "Expected proportions ignored"
+msgstr ""
+
+#: R/kappaSizePower.b.R
+msgid "Expected proportions treated as known."
 msgstr ""
 
 #: functionalsampling/results/randomness_test.columns.title
@@ -82304,6 +82358,18 @@ msgid ""
 "(95% CI {lower} to {upper})."
 msgstr ""
 
+#: R/decisioncurve.b.R
+msgid ""
+"In the analysed rows the clinical rule recommends intervention for every "
+"patient, so its curve is the treat-all line."
+msgstr ""
+
+#: R/decisioncurve.b.R
+msgid ""
+"In the analysed rows the clinical rule recommends intervention for no "
+"patient, so its curve is the treat-none line at zero."
+msgstr ""
+
 #: R/enhancedROC.b.R
 msgid ""
 "In the simulations of Fluss et al. (2005) this empirical estimator, the most "
@@ -90456,6 +90522,10 @@ msgstr ""
 msgid "Levels found:"
 msgstr ""
 
+#: R/decisioncurve.b.R
+msgid "Levels found: {levels}."
+msgstr ""
+
 #: grafify/options/comparison_method/levelwise.title
 msgid "Levelwise Comparisons"
 msgstr ""
@@ -90567,6 +90637,19 @@ msgstr ""
 
 #: agreement/results/lightKappaTable.title
 msgid "Light's Kappa Results"
+msgstr ""
+
+#: R/kappaSizePower.b.R
+msgid ""
+"Like the published formulas, it treats the expected proportions as known and "
+"rests on a large-sample approximation, so the power actually achieved can "
+"differ from the stated power in either direction: by several percentage "
+"points in many designs, and by much more with several raters and a rare "
+"finding, where estimating the proportions costs power. For a binary outcome "
+"the analysis therefore simulates the recommended test at the sample size "
+"shown and, when the simulated power falls more than 0.03 short, gives a "
+"simulated sample size; with three to five categories a note flags designs "
+"where the loss is likely to be large (both from 10 subjects upwards)."
 msgstr ""
 
 #: differentialdiagnosis/results/bayesianAnalysis.columns.title
@@ -110724,72 +110807,6 @@ msgstr ""
 
 #: R/decisioncurve.b.R
 msgid "Nothing about the clinical rule is shown until then."
-msgstr ""
-
-#: R/decisioncurve.b.R
-msgid "Clinical Decision Rule Not Included Yet"
-msgstr ""
-
-#: R/decisioncurve.b.R
-msgid ""
-"\"Clinical decision rule\" is enabled but no rule variable has been "
-"selected: drop a binary variable into \"Clinical Decision Rule (binary)\"."
-msgstr ""
-
-#: R/decisioncurve.b.R
-msgid ""
-"\"Clinical decision rule\" is enabled but its positive level has not been "
-"chosen: select the level that means the rule recommends intervention."
-msgstr ""
-
-#: R/decisioncurve.b.R
-msgid "Choose the Positive Outcome Level"
-msgstr ""
-
-#: R/decisioncurve.b.R
-msgid ""
-"Select the level of {var} that is the event the models predict, under "
-"\"Positive Outcome\"."
-msgstr ""
-
-#: R/decisioncurve.b.R
-msgid "Levels found: {levels}."
-msgstr ""
-
-#: R/decisioncurve.b.R
-msgid "The positive level is never taken from the order of the levels."
-msgstr ""
-
-#: R/decisioncurve.b.R
-msgid "Clinical Rule Is Constant"
-msgstr ""
-
-#: R/decisioncurve.b.R
-msgid ""
-"In the analysed rows the clinical rule recommends intervention for every "
-"patient, so its curve is the treat-all line."
-msgstr ""
-
-#: R/decisioncurve.b.R
-msgid ""
-"In the analysed rows the clinical rule recommends intervention for no "
-"patient, so its curve is the treat-none line at zero."
-msgstr ""
-
-#: R/decisioncurve.b.R
-msgid "Threshold Range Shortened"
-msgstr ""
-
-#: R/decisioncurve.b.R
-msgid ""
-"With a step of {step}%, the threshold grid starting at {lo}% stops at "
-"{last}%, so thresholds above it, up to the requested maximum of {hi}%, are "
-"not analysed."
-msgstr ""
-
-#: R/decisioncurve.b.R
-msgid ""
-"Choose a step size that divides the threshold range to analyse all of it."
 msgstr ""
 
 #: R/crosstable.b.R
@@ -145145,6 +145162,12 @@ msgid ""
 "\"malignant\")."
 msgstr ""
 
+#: R/decisioncurve.b.R
+msgid ""
+"Select the level of {var} that is the event the models predict, under "
+"\"Positive Outcome\"."
+msgstr ""
+
 #: singlearm/options/awd.description
 msgid ""
 "Select the level of the outcome variable that represents being alive with "
@@ -151590,6 +151613,10 @@ msgstr ""
 
 #: survivalPower/results/simulation_validation_table.columns.title
 msgid "Simulated"
+msgstr ""
+
+#: R/kappaSizePower.b.R
+msgid "Simulated power below the stated power."
 msgstr ""
 
 #: competingRisksPower/results/simulationDiagnostics.title
@@ -166091,11 +166118,12 @@ msgstr ""
 
 #: R/kappaSizePower.b.R
 msgid ""
-"The design needs {n} subjects; few agreement studies can enrol this many. A "
-"small difference between kappa0 and kappa1 and a high power target always "
-"inflate the sample size, and a rare finding usually does too (for a binary "
-"outcome, a prevalence far from 0.5; with more categories, very unequal "
-"category proportions) - revisit whichever of these is not a firm requirement."
+"The design needs {n} subjects; few agreement studies can enrol this many. "
+"Moving kappa1 closer to kappa0 from the same side, or raising the power "
+"target, always inflates the sample size, and a rare finding usually does too "
+"(for a binary outcome, a prevalence far from 0.5; with more categories, very "
+"unequal category proportions) - revisit whichever of these is not a firm "
+"requirement."
 msgstr ""
 
 #: R/survivalPower.b.R
@@ -166766,6 +166794,14 @@ msgstr ""
 msgid ""
 "The gold-standard variable cannot also occupy a test slot. Select a "
 "different variable for each test."
+msgstr ""
+
+#: R/kappaSizePower.b.R
+msgid ""
+"The goodness-of-fit test also tests that model: if the raters follow another "
+"model with the same kappa, it can reject a true kappa0 far more often than "
+"the stated significance level, whereas Fleiss' kappa with a jackknife or "
+"bootstrap interval that resamples subjects is not tied to the model."
 msgstr ""
 
 #: R/agreement.b.R
@@ -168652,6 +168688,10 @@ msgstr ""
 msgid "The positive level \"%1$s\" is not available. Available levels: %2$s."
 msgstr ""
 
+#: R/decisioncurve.b.R
+msgid "The positive level is never taken from the order of the levels."
+msgstr ""
+
 #: R/decisioncalculator.b.R
 msgid ""
 "The positive likelihood ratio is {lr}, so a positive result lowers the "
@@ -168910,6 +168950,26 @@ msgid ""
 "is set independently of 'Statistical Test Type'. Both coefficients are "
 "correct for this data, but they are different statistics - set the two to "
 "match unless you intend to show both."
+msgstr ""
+
+#: R/kappaSizePower.b.R
+msgid ""
+"The published formula behind this sample size is a large-sample "
+"approximation that treats the expected proportions as known. In {R} "
+"simulated studies of {n} subjects analysed with the recommended "
+"goodness-of-fit test (prevalence estimated by maximum likelihood with kappa "
+"held at kappa0), the power to reject kappa0 when kappa equals kappa1 was "
+"about {sim}, short of the stated {power}. About {needed} subjects gave a "
+"simulated power of about {simN} (random seed {seed})."
+msgstr ""
+
+#: R/kappaSizePower.b.R
+msgid ""
+"The published formula behind this sample size treats the expected "
+"proportions as known. The goodness-of-fit test has to estimate them from the "
+"ratings, and in this design that can leave it well short of the stated power "
+"of {power} at {n} subjects. How far short cannot be computed reliably here, "
+"so confirm the sample size by simulating the intended analysis."
 msgstr ""
 
 #: R/agepyramid.b.R
@@ -172803,6 +172863,10 @@ msgstr ""
 
 #: modelval/options/thresholdRange.title
 msgid "Threshold Range for DCA"
+msgstr ""
+
+#: R/decisioncurve.b.R
+msgid "Threshold Range Shortened"
 msgstr ""
 
 #: R/decisioncurve.b.R
@@ -187953,6 +188017,13 @@ msgid ""
 "inconclusive. The p-value tests against zero."
 msgstr ""
 
+#: R/decisioncurve.b.R
+msgid ""
+"With a step of {step}%, the threshold grid starting at {lo}% stops at "
+"{last}%, so thresholds above it, up to the requested maximum of {hi}%, are "
+"not analysed."
+msgstr ""
+
 #: R/enhancedROC.b.R
 msgid ""
 "with Direction set to auto a marker carrying no information lands here about "
@@ -188133,6 +188204,16 @@ msgid ""
 "With two categories the latent model needs a median of at least %1$s ratings "
 "per case, because its approximation is biased with fewer ratings per case "
 "whatever the number of cases; this study has %2$s."
+msgstr ""
+
+#: R/kappaSizePower.b.R
+msgid ""
+"With two raters, estimate the prevalence for the test by maximum likelihood "
+"with kappa held at kappa0 rather than plugging in the overall proportion of "
+"positive ratings, as the published procedure does: in simulations of a rare "
+"finding (1 to 5 cases in 100) at a 0.05 level, the plug-in test rejected a "
+"true kappa0 at a rate of 0.057-0.066 and the maximum-likelihood version at "
+"0.043-0.051."
 msgstr ""
 
 #: R/nogoldstandard.b.R

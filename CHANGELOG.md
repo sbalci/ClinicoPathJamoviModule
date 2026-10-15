@@ -5,6 +5,42 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-10-15 — kappaSizePower: a power "correction" was validated on the designs that produced it
+
+- **Failure mode:** the 2026-10-14 fix for VAL-09 displayed a local (Mitra) projection as a point figure ("power
+  of about 0.76 ... about 688 subjects give the stated power"). It fired whenever the projected loss exceeded 0.02.
+  - It was checked against simulation on 5 designs and accepted as "pessimistic, so it never understates".
+  - On other designs it was wrong in both directions: false alarms in 5 of 12 two-rater designs (true power
+    0.81-0.83), and an understatement at kappa 0.2 -> 0.4 and whenever kappa1 < kappa0.
+  - A fixed cut on projected power also depends on alpha and power, so "never fires at two raters" held only at
+    alpha 0.05.
+- **Detection:** `/independent-reviewer` simulated the test the Notes describe on designs the fix had not seen
+  (`development-ideas/kappaSizePower-independent-review-2026-10-15.md`). Codex's plan review caught the
+  alpha-dependence of the proposed 0.05 cut.
+- **Repair, second attempt (the first failed its own held-out check):**
+  - First attempt: keep the projection, trigger on its noncentrality ratio (< 0.85), and call its N "a rough guide".
+    Pre-registered held-out designs rejected it: published-N power 0.28 with a guide reaching only 0.66
+    (kappa1 < kappa0), and 0.917 at a 0.90 target where it claimed a shortfall. The guide was worse than the
+    published N in 6 of 16 designs (`-projection-*.csv`).
+  - Final: for a binary outcome the module simulates the recommended test (pooled cells, prevalence by ML at
+    kappa0; vectorised, R = 4000, seed shown, global RNG restored; 0.02-0.13 s per run, 1.2 s on the first call) and reports a simulated N when
+    power is more than 0.03 short. 3-5 categories get a qualitative note.
+  - Pre-registered check against an independent `optimize()` simulation (block W): agreement 40/40, firing
+    40/40; the reported N reached the target within -0.009 to +0.031 in 20/20.
+- **Rule:**
+  - A number produced by an approximation and shown to users needs simulation on HELD-OUT designs. They must span
+    alpha, power, effect direction and the structural factor (raters, categories) before release.
+  - The designs that suggested a fix cannot validate it.
+  - Never state a direction ("conservative") from a handful of designs.
+  - Trigger warnings on quantities that do not move with incidental options.
+  - When a local approximation's own error is as large as the effect it corrects, stop correcting it. Simulate the
+    actual test instead, if that is cheap; here it was a 1-parameter, vectorisable fit.
+- **Auditor's own miss, same day:** my asymptotic derivation for the two-rater plug-in test (`AUD-H15`)
+  overstated simulated power by 0.025-0.067 at rare prevalence. Derive, then simulate, before a derivation
+  carries a finding.
+
+---
+
 ## 2026-10-14 — decisioncurve: the `allowNone` repair shipped without its header
 
 - **Failure mode:** the entry below added `allowNone: true` to both Level options in

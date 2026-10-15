@@ -22,6 +22,15 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
         #   papers' pooled-cell goodness-of-fit test, the intraclass/no-rater-bias estimand and the
         #   Altaye-Donner-Klar binary model; the 3+-rater warning is split by outcome type; the
         #   binary 3+-rater sparse check uses the pooled cells of that test.
+        # Resolved 2026-10-14 (validation third pass, development-ideas/kappaSizePower-validation-2026-10-14.md):
+        #   the N for estimated proportions is disclosed when the published N falls short of the stated
+        #   power (VAL-09); binary 3+ raters: ML prevalence and the GOF test's model dependence stated
+        #   (VAL-10); counts just under 5 no longer print as "5" (VAL-11); gap monotonicity qualified (VAL-12).
+        # Resolved 2026-10-15 (independent review, development-ideas/kappaSizePower-independent-review-2026-10-15.md):
+        #   binary outcome: the recommended test is simulated at the shown N and a simulated N replaces the local
+        #   projection's figures, which missed held-out simulation by up to 0.14 either way; 3-5 categories: a
+        #   qualitative note (KSP-IR-01). The Methodology states the approximation in both directions; two raters
+        #   get the ML-prevalence sentence (KSP-IR-02).
 
         # Split the proportions string into numbers. Same format as the siblings
         # (R/kappaSizeFixedN.b.R:.parsePropTokens): commas, semicolons, pipes or whitespace
@@ -53,11 +62,108 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
         # design at N = 316 has a cell of 0.00034 -- a pattern that is effectively never
         # observed -- and "below 0.01" hid exactly how empty it is behind a figure that also
         # covers a comfortable 0.009. R/kappaSizeCI.b.R:.fmtCount and
-        # R/kappaSizeFixedN.b.R:.fmtCount are now identical to this one, floor and wording.
+        # R/kappaSizeFixedN.b.R:.fmtCount share the floor and wording, not the guard below.
+        # Two significant digits round 4.97 up to "5", printed beside "... are below 5" and
+        # "Fewer than five cases" (VAL-11), so a count just under 5 keeps two decimals.
         .fmtCount = function(x) {
             if (!isTRUE(is.finite(x))) return(.("unavailable"))
             if (x < 0.0001) return(.("below 0.0001"))
-            base::format(signif(x, 2), scientific = FALSE, trim = TRUE)
+            s <- signif(x, 2)
+            if (x < 5 && s >= 5) {
+                s <- signif(x, 3)                        # 4.97 -> "4.97"
+                if (s >= 5) s <- floor(x * 100) / 100    # 4.9996 -> "4.99"
+            }
+            base::format(s, scientific = FALSE, trim = TRUE)
+        },
+
+        # Noncentrality left once the expected proportions are ESTIMATED, as a fraction of the one
+        # N is computed from (VAL-09), for 3-5 categories. The published formula evaluates the cells at
+        # the typed proportions, as if they were known; the papers' test estimates them, which removes
+        # the part of d = P(kappa1) - P(kappa0) that a shift in the proportions could also explain
+        # (Mitra 1958): ratio = (d'Wd - d'WG (G'WG)^-1 G'Wd) / d'Wd, W = 1/P0, G = dP0 / d(free props).
+        # It is a LOCAL approximation and is used only to decide whether to warn: at the kappa gaps users
+        # type, the power it implied missed simulation by -0.14 to +0.13 in both directions, and N / ratio
+        # was worse than the published N in 6 of 16 held-out binary designs (independent review
+        # 2026-10-15, KSP-IR-01). A binary outcome is simulated instead (.simPowerBinary).
+        .estimatedPropsRatio = function(raters, props, kappa0, kappa1) {
+            P0 <- kappaSizeGofCells(length(props), raters, props, kappa0)
+            d  <- kappaSizeGofCells(length(props), raters, props, kappa1) - P0
+            # cells are (disagree, agree_1..agree_K); free proportions pi_1..pi_(K-1).
+            # d agree_j / d pi_j by the product rule, with no division by pi_j (no overflow as pi_j -> 0).
+            i  <- seq_len(raters) - 1
+            K  <- length(props)
+            fp <- vapply(props, function(pj) {
+                a <- (pj * (1 - kappa0) + i * kappa0) / ((1 - kappa0) + i * kappa0)
+                sum(vapply(seq_along(i), function(m)
+                    (1 - kappa0) / ((1 - kappa0) + i[m] * kappa0) * prod(a[-m]), numeric(1)))
+            }, numeric(1))
+            G <- rbind(-(fp[-K] - fp[K]), diag(fp[-K], nrow = K - 1), rep(-fp[K], K - 1))
+            # Weighted projection by QR rather than normal equations: (G'WG) is near-singular for a
+            # proportion of 1e-20 while the projection itself is well defined.
+            w    <- sqrt(1 / P0)
+            full <- sum((w * d)^2)
+            q    <- qr(w * G)
+            proj <- sum(qr.qty(q, w * d)[seq_len(q$rank)]^2)
+            (full - proj) / full
+        },
+
+        # KSP-IR-01: power of the test the Notes recommend for a binary outcome - the goodness-of-fit
+        # chi-square on the pooled cells (all negative / any disagreement / all positive; for two raters
+        # these are Donner & Eliasziw's three cells), prevalence estimated by maximum likelihood with
+        # kappa held at kappa0, 1 df - in R studies of N subjects generated under kappa1 (Altaye-Donner-
+        # Klar mixture). The ML step is a bisection on the score, vectorised over the R studies; the
+        # pooled-cell likelihood has one free parameter. Checked against an independent optimize()-based
+        # simulation in development-scripts/audit_kappaSizePower.R (block W).
+        .simPowerBinary = function(raters, p, kappa0, kappa1, alpha, N, R) {
+            cells <- function(q, rho) {
+                a0 <- (1 - rho) * (1 - q)^raters + rho * (1 - q)
+                an <- (1 - rho) * q^raters + rho * q
+                cbind(a0, 1 - a0 - an, an)
+            }
+            O <- t(stats::rmultinom(R, N, cells(p, kappa1)[1, ]))
+            score <- function(q) {
+                P  <- cells(q, kappa0)
+                d0 <- -(1 - kappa0) * raters * (1 - q)^(raters - 1) - kappa0
+                dn <-  (1 - kappa0) * raters * q^(raters - 1) + kappa0
+                O[, 1] * d0 / P[, 1] - O[, 2] * (d0 + dn) / P[, 2] + O[, 3] * dn / P[, 3]
+            }
+            lo <- rep(1e-12, R); hi <- rep(1 - 1e-12, R)
+            for (it in seq_len(60)) {
+                mid <- (lo + hi) / 2
+                up  <- score(mid) > 0
+                up[is.na(up)] <- FALSE
+                lo[up] <- mid[up]; hi[!up] <- mid[!up]
+            }
+            E  <- N * cells((lo + hi) / 2, kappa0)
+            x2 <- rowSums(ifelse(E > 0, (O - E)^2 / E, ifelse(O > 0, Inf, 0)))
+            mean(x2 > stats::qchisq(1 - alpha, 1))
+        },
+
+        # N whose simulated power reaches the target, starting from a short n0 with simulated power p0. The
+        # 1-df noncentrality grows about linearly in N, so each step rescales N by lambda(aim) /
+        # lambda(simulated power) and simulates again (new seed per step). It aims 0.01 above the target and
+        # stops within 0.015 of the aim (about 2.4 Monte Carlo SE at R = 4000), so the N it returns reaches the
+        # stated power to within Monte Carlo error rather than landing just below it; at most 5 steps.
+        .simulatedN = function(raters, p, kappa0, kappa1, alpha, power, n0, p0, R, seed) {
+            z   <- stats::qnorm(1 - alpha / 2)
+            lam <- function(x) {
+                x <- min(x, 1 - 1e-6)
+                if (x <= alpha) return(0)
+                stats::uniroot(function(l) stats::pnorm(sqrt(l) - z) + stats::pnorm(-sqrt(l) - z) - x,
+                               c(0, 1e4), tol = 1e-10)$root
+            }
+            aim    <- min(power + 0.01, 0.999)
+            target <- lam(aim)
+            n <- n0; pw <- p0
+            for (step in seq_len(5)) {
+                l <- lam(pw)
+                n <- if (l > 0) ceiling(n * target / l) else n * 4
+                if (n > 1e9) return(NULL)
+                pw <- withr::with_seed(seed + step,
+                    private$.simPowerBinary(raters, p, kappa0, kappa1, alpha, n, R))
+                if (abs(pw - aim) <= 0.015) break
+            }
+            list(n = n, power = pw)
         },
 
         # A round sample size pastes as "1e+05" and a large one is unreadable without
@@ -67,6 +173,9 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             if (!isTRUE(is.finite(n))) return("NA")
             base::format(round(n), scientific = FALSE, big.mark = ",", trim = TRUE)
         },
+
+        # A power or probability for prose: two decimals, never "0.8" beside "0.75".
+        .fmtPower = function(x) base::format(round(x, 2), nsmall = 2),
 
         # Display form of a category proportion. .run() now renormalises the vector before it
         # reaches the engine, so a typed "0.333, 0.333, 0.333" becomes 0.33333333333333331 and
@@ -122,7 +231,7 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
         .buildNotices = function(n_required, sparse, outcome, raters, kappa0, kappa1, power,
                                  sparse_min = NA_real_, sparse_below5 = NA_integer_,
                                  sparse_total = NA_integer_, marg_min = NA_real_,
-                                 marg_sparse = FALSE) {
+                                 marg_sparse = FALSE, est = NULL) {
             warn_div <- "<div style='margin:6px 0; padding:8px 10px; border-left:3px solid #ec971f; background-color: rgba(227, 144, 33, 0.07); color: inherit;'>"
             info_div <- "<div style='margin:6px 0; padding:8px 10px; border-left:3px solid #3c8dbc; background-color: rgba(72, 138, 188, 0.06); color: inherit;'>"
             block <- function(div, title, ...)
@@ -168,7 +277,7 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 warn <- paste0(warn, block(warn_div,
                     .("Very large sample size."),
                     .fmt(
-                        .("The design needs {n} subjects; few agreement studies can enrol this many. A small difference between kappa0 and kappa1 and a high power target always inflate the sample size, and a rare finding usually does too (for a binary outcome, a prevalence far from 0.5; with more categories, very unequal category proportions) - revisit whichever of these is not a firm requirement."),
+                        .("The design needs {n} subjects; few agreement studies can enrol this many. Moving kappa1 closer to kappa0 from the same side, or raising the power target, always inflates the sample size, and a rare finding usually does too (for a binary outcome, a prevalence far from 0.5; with more categories, very unequal category proportions) - revisit whichever of these is not a firm requirement."),
                         n = private$.fmtN(n_required))))
             }
 
@@ -184,6 +293,26 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     .fmt(
                         .("The required sample size is only {n} {subjects}. The large-sample approximation behind this method does not hold for such small studies, so the figure is only approximate; treat it as a rough guide, not a plan."),
                         n = private$.fmtN(n_required), subjects = private$.subjects(n_required))))
+            }
+
+            # VAL-09 / KSP-IR-01: .run() fills est only from 10 subjects up. Binary: the simulated power fell
+            # more than 0.03 short; 3-5 categories: the projection flags a large loss it cannot size reliably.
+            if (isTRUE(est$type == "sim")) {
+                warn <- paste0(warn, block(warn_div,
+                    .("Simulated power below the stated power."),
+                    .fmt(
+                        .("The published formula behind this sample size is a large-sample approximation that treats the expected proportions as known. In {R} simulated studies of {n} subjects analysed with the recommended goodness-of-fit test (prevalence estimated by maximum likelihood with kappa held at kappa0), the power to reject kappa0 when kappa equals kappa1 was about {sim}, short of the stated {power}. About {needed} subjects gave a simulated power of about {simN} (random seed {seed})."),
+                        R = private$.fmtN(est$R), n = private$.fmtN(n_required),
+                        sim = private$.fmtPower(est$power), power = power,
+                        needed = private$.fmtN(est$n), simN = private$.fmtPower(est$power_n),
+                        seed = est$seed)))
+            }
+            if (isTRUE(est$type == "cat")) {
+                warn <- paste0(warn, block(warn_div,
+                    .("Expected proportions treated as known."),
+                    .fmt(
+                        .("The published formula behind this sample size treats the expected proportions as known. The goodness-of-fit test has to estimate them from the ratings, and in this design that can leave it well short of the stated power of {power} at {n} subjects. How far short cannot be computed reliably here, so confirm the sample size by simulating the intended analysis."),
+                        n = private$.fmtN(n_required), power = power)))
             }
 
             if (is.finite(power) && power < 0.5) {
@@ -267,12 +396,30 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 .("Power-based sample size for a two-sided test of H0: kappa = kappa0 against H1: kappa = kappa1, using the goodness-of-fit (non-central chi-square) approach of Donner and Eliasziw (two raters, binary outcome), Altaye, Donner and Klar (binary outcome, more raters) and Altaye, Donner and Eliasziw (three to five categories), as implemented in the kappaSize package (Rotondi and Donner)."),
                 .("Kappa here is the unweighted intraclass kappa for nominal categories (Scott's pi for two raters, Fleiss' kappa for more), which assumes that all raters share the same category prevalences; when raters differ systematically (rater bias), other methods are more appropriate."),
                 .("The sample size is for the papers' goodness-of-fit chi-square test on one degree of freedom, computed over the cells in which all raters agree on a category plus one pooled cell for any disagreement; a likelihood-ratio test of kappa is an approximate alternative."),
+                # KSP-IR-01: simulated power at the published N was 0.74-0.83 with two raters and as low as 0.28
+                # with several raters and a rare finding, for a stated 0.80 (independent review 2026-10-15).
+                .("Like the published formulas, it treats the expected proportions as known and rests on a large-sample approximation, so the power actually achieved can differ from the stated power in either direction: by several percentage points in many designs, and by much more with several raters and a rare finding, where estimating the proportions costs power. For a binary outcome the analysis therefore simulates the recommended test at the sample size shown and, when the simulated power falls more than 0.03 short, gives a simulated sample size; with three to five categories a note flags designs where the loss is likely to be large (both from 10 subjects upwards)."),
                 if (isTRUE(outcome == 2L && raters >= 3))
                     .("With three or more raters, do not compute the chi-square over every count of raters calling the finding present (none, one, ..., all): that statistic has more than one degree of freedom and, read on one, rejects a true kappa0 much more often than the stated significance level."),
+                # VAL-10: DE 1992 p.1513 and ADK 2001 p.585 plug in the overall proportion of positive
+                # ratings; simulated size 0.096-0.164 at a nominal 0.05 with 4-6 raters and a 1-10%
+                # finding, 0.046-0.050 with the ML estimate (validation 2026-10-14, N5).
+                if (isTRUE(outcome == 2L && raters >= 3))
+                    .("Estimate the prevalence for that test by maximum likelihood from the same pooled cells, with kappa held at kappa0: the published procedure plugs in the overall proportion of positive ratings, which makes the test reject a true kappa0 too often with four or more raters and a rare finding."),
+                # KSP-IR-02: DE 1992 p.1513 plugs in the overall proportion of positive ratings. Simulated (R = 20000,
+                # p .01-.05, kappa0 .2-.6, nominal 0.05): size 0.057-0.066, ML at kappa0 0.043-0.051 at equal power.
+                # Rates, not percentages: a literal "%" in a msgid can be read as a C format directive.
+                if (isTRUE(outcome == 2L && raters == 2L))
+                    .("With two raters, estimate the prevalence for the test by maximum likelihood with kappa held at kappa0 rather than plugging in the overall proportion of positive ratings, as the published procedure does: in simulations of a rare finding (1 to 5 cases in 100) at a 0.05 level, the plug-in test rejected a true kappa0 at a rate of 0.057-0.066 and the maximum-likelihood version at 0.043-0.051."),
                 if (isTRUE(outcome >= 3L && raters >= 3))
                     .("With three or more raters, estimate the category prevalences by maximum likelihood with kappa held at kappa0, as Altaye, Donner and Eliasziw do; plugging in the overall proportions of ratings makes the test reject a true kappa0 too often."),
                 if (isTRUE(outcome == 2L && raters >= 3))
                     .("For a binary outcome with three or more raters the calculation uses the rater-dependence model of Altaye, Donner and Klar: with probability kappa all raters give one shared call, otherwise each rater calls independently. Other models with the same kappa, such as the beta-binomial (the two-category case of the model of Altaye, Donner and Eliasziw), can need a markedly different number of subjects."),
+                # Beta-binomial ratings at the same pairwise kappa: the mixture-model GOF test rejected a
+                # true kappa0 in 9-81% of simulated studies, Fleiss' kappa with a jackknife Wald test in
+                # 6-7% (validation 2026-10-14, N6).
+                if (isTRUE(outcome == 2L && raters >= 3))
+                    .("The goodness-of-fit test also tests that model: if the raters follow another model with the same kappa, it can reject a true kappa0 far more often than the stated significance level, whereas Fleiss' kappa with a jackknife or bootstrap interval that resamples subjects is not tied to the model."),
                 .("It does not apply to weighted kappa for ordered grades; for an ordinal grading study either treat the grades as nominal categories or use a dedicated weighted-kappa method."),
                 .("It answers 'how many subjects do I need to reject kappa0 in favour of kappa1?' - not how precisely kappa will be estimated; to plan the expected confidence limits around an anticipated kappa, use kappaSizeCI instead."),
                 .("Note that kappa0 here is the null hypothesis value, whereas in kappaSizeCI and kappaSizeFixedN it is the agreement you anticipate observing."),
@@ -464,13 +611,53 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             # Put the computed answer in the explanation too, so the sentence a user copies into
             # a protocol carries the number it is explaining.
             n_required <- suppressWarnings(ceiling(as.numeric(result$N)))
+
+            # VAL-09 / KSP-IR-01: the published N is a large-sample approximation that treats the proportions as
+            # known. Binary outcome: simulate the recommended test at the shown N and, when it falls more than 0.03
+            # short (about 4.7 Monte Carlo SE at R = 4000), find the N that reaches the target by simulation.
+            # 3-5 categories (the note then always comes with the Sparse notice): a qualitative warning when the
+            # local projection removes more than 15% of the noncentrality. Two-rater ratios never go below 0.889.
+            # Not computed below 10 subjects (the "Very small sample size" note already says approximate) or above
+            # 1e9 (rmultinom's integer size; the "Very large sample size" note covers those).
+            est <- NULL
+            if (isTRUE(n_required >= 10 && n_required <= 1e9)) {
+                if (outcome == 2L) {
+                    sim_R <- 4000L; sim_seed <- 20261015L
+                    sim_p <- withr::with_seed(sim_seed, private$.simPowerBinary(
+                        raters, props[1], kappa0, kappa1, alpha, n_required, sim_R))
+                    if (sim_p < power - 0.03) {
+                        found <- private$.simulatedN(raters, props[1], kappa0, kappa1, alpha, power,
+                                                     n_required, sim_p, sim_R, sim_seed)
+                        if (!is.null(found))
+                            est <- list(type = "sim", power = sim_p, n = found$n, power_n = found$power,
+                                        R = sim_R, seed = sim_seed)
+                    }
+                } else {
+                    ratio <- private$.estimatedPropsRatio(raters, props, kappa0, kappa1)
+                    if (isTRUE(is.finite(ratio) && ratio > 0 && ratio < 0.85))
+                        est <- list(type = "cat")
+                }
+            }
+
             self$results$text2$setContent(paste0(
                 private$.buildExplanation(kappa0, kappa1, alpha, power, raters, props),
                 if (is.finite(n_required))
-                    paste0("\n", .fmt(
-                        .("The required sample size is {n} {subjects}."),
-                        n = private$.fmtN(n_required),
-                        subjects = private$.subjects(n_required)))
+                    paste0("\n", private$.wrap(paste(c(
+                        .fmt(
+                            .("The required sample size is {n} {subjects}."),
+                            n = private$.fmtN(n_required),
+                            subjects = private$.subjects(n_required)),
+                        if (isTRUE(est$type == "sim"))
+                            .fmt(
+                                .("A simulation of the recommended goodness-of-fit test gives a power of about {sim} at this sample size, short of the stated {power}; about {needed} subjects reach about {simN} (random seed {seed})."),
+                                sim = private$.fmtPower(est$power), power = power,
+                                needed = private$.fmtN(est$n), simN = private$.fmtPower(est$power_n),
+                                seed = est$seed),
+                        if (isTRUE(est$type == "cat"))
+                            .fmt(
+                                .("Because the goodness-of-fit test has to estimate the expected proportions from the ratings, this sample size can fall well short of power {power}; confirm it by simulating the intended analysis."),
+                                power = power)),
+                        collapse = " ")))
                 else ""))
 
             # Cochran's rule on the expected counts at N: no cell below 1, at most 20% below 5,
@@ -497,6 +684,7 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                                       power = power, sparse_min = min(e),
                                       sparse_below5 = sum(e < 5), sparse_total = length(e),
                                       marg_min = marg_min,
-                                      marg_sparse = is.finite(n_required) && marg_min < 5))
+                                      marg_sparse = is.finite(n_required) && marg_min < 5,
+                                      est = est))
         })
 )

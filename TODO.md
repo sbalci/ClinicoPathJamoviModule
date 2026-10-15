@@ -1,3 +1,28 @@
+# kappaSizePower — fixes from the independent review (2026-10-15, uncommitted)
+
+Report: `development-ideas/kappaSizePower-independent-review-2026-10-15.md` (KSP-IR-01 S3, KSP-IR-02 S4; addendum).
+
+Acceptance (met):
+- the published N is unchanged (A/B blocks of `development-scripts/audit_kappaSizePower.R` all-PASS);
+- no projected power figure anywhere; binary outcome: the recommended test is simulated in-app and the note fires
+  only when it is more than 0.03 short, with a simulated N that reaches the target (pre-registered block W against an
+  independent simulation: 40/40, 40/40, 20/20); 3-5 categories: qualitative note;
+- the Methodology states the approximation in both directions; two raters get the ML-estimator sentence;
+- new regression tests fail on the pre-fix `.b.R` (26 expectations) and pass now; all kappaSize suites green, 0 skips;
+- `tr.po` carries Turkish for all 7 new msgids; `msgfmt -c` clean; rendered in Turkish with no English left.
+
+- [x] KSP-IR-01: first attempt (ratio < 0.85 + "rough guide") rejected by its own held-out check (`-projection-*.csv`)
+- [x] KSP-IR-01: in-app simulation for a binary outcome (`.simPowerBinary`, `.simulatedN`), qualitative 3-5 category note
+- [x] KSP-IR-01: Methodology sentence (approximation in both directions; what is simulated)
+- [x] KSP-IR-02: two-rater binary ML sentence (rates 0.057-0.066 vs 0.043-0.051, no "%" in msgids)
+- [x] Tests: `test-kappaSizePower-validation.R` VAL C36 block rewritten, 3 KSP-IR blocks added
+- [x] i18n: i18nUpdate, Turkish filled, placeholder check, `msgfmt -c`, normalising second update
+- [x] Verify: audit post-fix runs (identical twice), kappaSize suites, release gate unchanged (0 blocking)
+- [ ] User: commit; sync JamoviTest (`Rscript _updateModules.R --dry-run` first - its copy predates 2026-10-11);
+      open in jamovi: binary 6 raters p .05 (note + seed shown), change an option, reopen the .omv, Turkish panel
+- [ ] Unrelated, seen in passing: `test-meddecide-library-audit.R` "fixed-row tables" expects a `methodComparison`
+      row key `schneeweiss`, the code now has `smallest` (another analysis; not touched)
+
 # decisioncurve — `/release-review-function` (2026-10-14 morning, uncommitted)
 
 Acceptance:
@@ -2733,6 +2758,13 @@ missing (below the missingness screen's floor) still gets only the generic "Remo
 
 ### kappaSizeCI
 
+Follow-ups from the kappaSizePower release review (2026-10-14, `development-ideas/kappaSizePower-validation-2026-10-14.md`):
+
+- [ ] `.fmtCount()` (`R/kappaSizeCI.b.R:204`) uses `signif(x, 2)` beside "k of m cells are below 5": an expected
+  count of 4.95-4.99 prints as "5". kappaSizePower's guard (`R/kappaSizePower.b.R` `.fmtCount`) is the fix (VAL-11).
+- [ ] The CI-width N evaluates the cells at the typed proportions. Check whether the achieved interval width
+  assumes the proportions known, as the power N did (kappaSizePower VAL-09).
+
 ```text
 /fix-function kappaSizeCI --apply
 
@@ -2746,6 +2778,12 @@ missing (below the missingness screen's floor) still gets only the generic "Remo
 ```
 
 ### kappaSizeFixedN
+
+Follow-ups from the kappaSizePower release review (2026-10-14):
+
+- [ ] `.fmtCount()` (`R/kappaSizeFixedN.b.R:56`) has the same `signif(x, 2)` / "below 5" contradiction (kappaSizePower VAL-11).
+- [ ] The lower confidence bound treats the proportions as known; check against a simulation with them estimated
+  (kappaSizePower VAL-09).
 
 ```text
 /fix-function kappaSizeFixedN --apply
