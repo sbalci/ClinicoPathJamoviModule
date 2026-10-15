@@ -58,7 +58,9 @@ decisioncurve(
 the condition or event you want to predict.}
 
 \item{outcomePositive}{Which level of the outcome variable represents the
-positive case (presence of condition/event).}
+positive case (presence of condition/event). It is never taken from the
+order of the levels: until it is chosen the analysis lists the levels found
+and computes nothing. From R the argument has no default; pass the level.}
 
 \item{models}{Variables holding predicted probabilities between 0 and 1
 (inclusive), one column per model. They must refer to the outcome and
@@ -166,11 +168,12 @@ comparison with models.}
 recommends intervention (1/0 or yes/no).}
 
 \item{decisionRulePositive}{Which level of the rule variable indicates a
-positive recommendation (treat/intervene). jamovi does not permit a default
-on a Level option, so this is always a required argument of the R function
-even when clinicalDecisionRule is FALSE. Programmatic callers that are not
-using a clinical decision rule must pass decisionRulePositive = NULL
-explicitly.}
+positive recommendation (treat/intervene). Never taken from the order of
+the levels: until it is chosen the rule is left out of the analysis. jamovi
+does not permit a default on a Level option, so this is always a required
+argument of the R function even when clinicalDecisionRule is FALSE.
+Programmatic callers that are not using a clinical decision rule must pass
+decisionRulePositive = NULL explicitly.}
 
 \item{decisionRuleLabel}{Label for the clinical decision rule in plots and
 tables.}
