@@ -1,5 +1,40 @@
 # ClinicoPath News
 
+## Unreleased — `kappaSizeCI` (Confidence Interval Approach for the Number of Subjects Required): validation and independent-review fixes (module 1.0.81.01, analysis 1.0.83)
+
+- **Sample sizes change for most designs with 3 or more raters or 3-5 categories (independent review
+  2026-10-15).** The published calculation (Rotondi & Donner 2012, and the kappaSize package) holds
+  the category proportions at their anticipated values. The interval a study should then report
+  re-estimates them at each value of kappa (Altaye, Donner & Eliasziw 2001). The interval that
+  plugs in the observed proportions instead covered kappa only about 91-93% of the time, not 95%.
+  At the old n, the recommended interval missed the requested limits.
+  - The reported n is now the larger of the two calculations, so the requested limits are reached
+    whichever way the study is analysed.
+  - Rotondi & Donner's own example (3 raters, prevalences 0.11/0.70/0.19, target [0.34, 0.54]) now
+    needs 190 subjects, not 171. With 6 raters it needs 147, not 110. With roughly equal category
+    frequencies nothing changes.
+  - A binary outcome with **two raters** keeps the published figure: Donner & Eliasziw's interval is
+    calibrated there.
+  - The Study Explanation shows both numbers whenever they differ. The Summary pane says why
+    kappaSize's own figure is smaller.
+- **The reported n is the defined minimum (validation 2026-10-15).** kappaSize's own search starts at
+  11 subjects and stops 0.001 past the critical value. The figure shown is now the smallest n that
+  reaches the requested limits, with the arithmetic shown, e.g. ⌈3.84146 / 0.032634⌉ = 118.
+- **The "Sparse categories" box judges the cells the test uses.** For a binary outcome with 3 or more
+  raters, the disagreement cells are pooled as in the published 1-df test. 19 of 40 designs had been
+  flagged spuriously.
+- **New and corrected notes.**
+  - Binary outcome with 3 or more raters: the sample size also depends on how agreement among more
+    than two raters is modelled. The 3-5 category model usually needs fewer subjects.
+  - Below 25 subjects, the "Small sample" box now states its sources' conditions: a binary outcome
+    whose rarer category makes up at least about a fifth of the ratings.
+  - The one-sided objective no longer says the limit is "ensured".
+  - The Methodology note names the model each design rests on.
+- **Interface (release check 2026-10-15).** The two drop-downs are labelled (Outcome levels, Raters), and the
+  significance level is labelled Alpha: the old label said "0-1", but the option accepts 0.001-0.20. Labels now
+  match kappaSizePower and kappaSizeFixedN.
+- **Saved analyses:** an `.omv` saved earlier shows the old n until it is re-run.
+
 ## Unreleased — `decisioncurve` (Decision Curve Analysis): validation and independent-review fixes (module 1.0.81.01, analysis 1.0.83)
 
 - **The positive outcome level is no longer pre-selected (release review 2026-10-14).** jamovi

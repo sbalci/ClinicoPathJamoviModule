@@ -1,8 +1,14 @@
 # Regression tests from the `kappaSizeCI` release review.
 #
-# Sample sizes are checked against the kappaSize package directly. The module reproduced kappaSize
-# exactly across 2,560 swept comparisons including the one-sided path, so what needed fixing was
-# everything around the engine call.
+# Since the validation fix of 2026-10-15 (development-ideas/kappaSizeCI-validation-2026-10-15.md) the
+# analysis REPORTS the closed-form minimum n = ceiling(crit / min slope). kappaSize's own search can
+# return 1-2 more (it stops at X^2 >= crit + 0.001) and never fewer than 11, so the sample sizes below
+# that differ from kappaSize were re-derived with the independent oracle of
+# test-kappaSizeCI-validation.R, and the engine comparisons assert the documented relationship.
+# Since the independent review of 2026-10-15 (IR-kappaSizeCI-01), for every design except a binary
+# outcome with two raters, the reported n is the larger of that fixed-proportion minimum and the
+# restricted-ML one (proportions re-estimated at each kappa). Values below that moved were re-derived with the restricted-ML oracle
+# of development-scripts/audit_kappaSizeCI.R, not read back from the module.
 
 ci_run <- function(...) {
     args <- utils::modifyList(
@@ -19,7 +25,9 @@ ci_n <- function(res) {
 }
 
 
-test_that("the sample size matches kappaSize exactly, two-sided and one-sided", {
+test_that("the sample size is kappaSize's, less at most its stopping margin, two-sided and one-sided", {
+    # kappaSize stops at X^2 >= crit + 0.001 and starts at 11; the reported minimum is never above
+    # it and at most two below. These three designs land where the two agree exactly.
     skip_if_not_installed("kappaSize")
     expect_equal(ci_n(ci_run()),
                  as.integer(ceiling(kappaSize::CIBinary(kappa0 = 0.60, kappaL = 0.40,
@@ -31,6 +39,10 @@ test_that("the sample size matches kappaSize exactly, two-sided and one-sided", 
     expect_equal(ci_n(ci_run(citype = "one_sided")),
                  as.integer(ceiling(kappaSize::CIBinary(kappa0 = 0.60, kappaL = 0.40,
                      kappaU = NA, props = c(0.20, 0.80), raters = 2, alpha = 0.05)$n)))
+    # where they differ, by the margin only: [0.55, 0.65] is 1624 (N* = 1623.82), kappaSize 1625
+    eng <- kappaSize::CIBinary(kappa0 = 0.60, kappaL = 0.55, kappaU = 0.65, props = c(0.20, 0.80),
+                               raters = 2, alpha = 0.05)$n
+    expect_equal(c(ci_n(ci_run(kappaL = 0.55, kappaU = 0.65)), eng), c(1624, 1625))
     # and one-sided genuinely differs from two-sided
     expect_lt(ci_n(ci_run(citype = "one_sided")), ci_n(ci_run()))
 })
@@ -59,7 +71,8 @@ test_that("an unsizeably narrow interval is refused instead of freezing", {
     # the message must tell the user what to change AND what the design would cost
     msg <- tryCatch(ci_run(kappaL = 0.5995, kappaU = 0.6005), error = conditionMessage)
     expect_match(msg, "Widen the interval")
-    expect_match(msg, "15,037,011 subjects", fixed = TRUE)
+    # the closed-form minimum (kappaSize's own rule would give 15,037,011)
+    expect_match(msg, "15,033,097 subjects", fixed = TRUE)
 })
 
 
@@ -88,12 +101,19 @@ test_that("proportions are renormalised, so a sum inside the tolerance cannot co
     # lumped goodness-of-fit cell negative and returned 215,974 where the valid design needs
     # 93,636 -- a 2.3-fold error with no warning.
     skip_if_not_installed("kappaSize")
-    n <- ci_n(ci_run(outcome = "3", kappa0 = 0.90, kappaL = 0.50, kappaU = 0.95,
-                     props = "0.9997, 0.0002, 0.0002"))
     p <- c(0.9997, 0.0002, 0.0002)
-    expect_equal(n, as.integer(ceiling(kappaSize::CI3Cats(kappa0 = 0.90, kappaL = 0.50,
-        kappaU = 0.95, props = p / sum(p), raters = 2, alpha = 0.05)$n)))
-    expect_lt(n, 215974L)
+    # For the renormalised vector the fixed-proportion minimum is 93,611 (kappaSize's own search,
+    # with its 0.001 stopping margin of ceiling(0.001 x 93611 / 3.841459) = 25 subjects: 93,636).
+    # With 3 categories the proportions are also re-estimated (IR-kappaSizeCI-01), which needs
+    # 100,389 (restricted-ML oracle) -- past the 100,000 ceiling, so the design is refused. The
+    # refusal quotes the VALID figure: the unnormalised vector's corrupted 215,974 never appears.
+    msg <- tryCatch(ci_run(outcome = "3", kappa0 = 0.90, kappaL = 0.50, kappaU = 0.95,
+                           props = "0.9997, 0.0002, 0.0002"), error = conditionMessage)
+    expect_match(msg, "about 100,389 subjects", fixed = TRUE)
+    expect_false(grepl("215,974", msg, fixed = TRUE))
+    eng <- as.integer(ceiling(kappaSize::CI3Cats(kappa0 = 0.90, kappaL = 0.50,
+        kappaU = 0.95, props = p / sum(p), raters = 2, alpha = 0.05)$n))
+    expect_equal(eng, 93636L)
 
     # and renormalising is bit-identical for anything that already sums to one
     expect_equal(ci_n(ci_run()), 118L)
@@ -106,12 +126,25 @@ test_that("the proportion ORDER cannot decide whether the analysis converges", {
     # while 0.0001/0.9999 -- the same study -- returned in 1.9 s. Agreement is symmetric under
     # relabelling, so the module hands the engine the smaller proportion first.
     skip_if_not_installed("kappaSize")
+    # The original design ([0.40, 0.80]) now needs about 119,848 subjects once the proportions are
+    # re-estimated (IR-kappaSizeCI-01) and is refused before the engine runs, which would no longer
+    # exercise the engine's ordering. [0.25, 0.90] keeps the same extreme prevalence and 5 raters
+    # inside the ceiling: fixed-proportion minimum 29,399 (what kappaSize searches to), reported
+    # 30,574 = ceiling(3.841459 / 1.256463e-4), the restricted-ML slope at kappaL agreeing to 1e-6
+    # across golden-section, logit-scale golden-section and score-root fits. (An oracle evaluated with
+    # 0.9999 first gave 30,578: George-Bowman's alternating sum loses precision near p = 1 and returned
+    # a negative cell; the model is symmetric, so the oracle is evaluated at the smaller proportion.)
     t0 <- Sys.time()
-    big   <- ci_n(ci_run(props = "0.9999, 0.0001", raters = "5"))
-    small <- ci_n(ci_run(props = "0.0001, 0.9999", raters = "5"))
+    big   <- ci_n(ci_run(props = "0.9999, 0.0001", raters = "5", kappaL = 0.25, kappaU = 0.90))
+    small <- ci_n(ci_run(props = "0.0001, 0.9999", raters = "5", kappaL = 0.25, kappaU = 0.90))
     expect_lt(as.numeric(difftime(Sys.time(), t0, units = "secs")), 15)
     expect_equal(big, small)
-    expect_equal(big, 88673L)
+    expect_equal(big, 30574L)
+    # and the original design is refused identically in both orders, quoting the same number
+    m1 <- tryCatch(ci_run(props = "0.9999, 0.0001", raters = "5"), error = conditionMessage)
+    m2 <- tryCatch(ci_run(props = "0.0001, 0.9999", raters = "5"), error = conditionMessage)
+    expect_identical(m1, m2)
+    expect_match(m1, "about 119,8", fixed = TRUE)
 })
 
 
@@ -119,8 +152,10 @@ test_that("the notices panel never gives opposite rater advice in one run", {
     # "use fewer raters" (sparse) and "increase the number of raters" (large n) used to render
     # in adjacent boxes with no trade-off statement.
     skip_if_not_installed("kappaSize")
-    txt <- ci_run(props = "0.05, 0.95", raters = "4",
-                  kappa0 = 0.60, kappaL = 0.55, kappaU = 0.65)$notices$content
+    # Needs a design that is sparse on the POOLED cells and above 1,000. No binary design is (its
+    # pooled cells hold about rho * p * n subjects), so a rare category of three: n = 1494.
+    txt <- ci_run(outcome = "3", props = "0.01, 0.01, 0.98", raters = "4",
+                  kappa0 = 0.60, kappaL = 0.50, kappaU = 0.70)$notices$content
     expect_match(txt, "Sparse categories")
     expect_match(txt, "very large and may be")
     expect_match(txt, "using fewer raters", fixed = TRUE)
@@ -151,8 +186,11 @@ test_that("the design that used to hang now sizes, and agrees with the closed fo
     n <- ci_n(ci_run(outcome = "2", raters = "6", props = "0.999, 0.001",
                      kappa0 = 0.70, kappaL = 0.60, kappaU = 0.80))
     expect_lt(as.numeric(difftime(Sys.time(), t0, units = "secs")), 10)
-    expect_equal(n, 23073L)
+    # fixed-proportion minimum 23,067; with six raters the reported n also covers re-estimating the
+    # proportions, 38,375 (restricted-ML oracle, IR-kappaSizeCI-01)
+    expect_equal(n, 38375L)
 
+    # .predictedN is kappaSize's own stopping rule (time budget): 23073, what the engine returns
     an   <- ClinicoPath:::kappaSizeCIClass$new(options = ClinicoPath:::kappaSizeCIOptions$new())
     pred <- an$.__enclos_env__$private$.predictedN
     expect_equal(pred(list(outcome = 2, raters = 6, props = c(0.001, 0.999), kappa0 = 0.70,
@@ -268,9 +306,10 @@ test_that("a degenerate slope falls through to the engine rather than returning 
 
 test_that("the guard does not block intervals that are merely demanding", {
     # Over-blocking would be worse than the freeze: these are legitimate designs.
-    expect_equal(ci_n(ci_run(kappaL = 0.55, kappaU = 0.65)), 1625L)
-    expect_equal(ci_n(ci_run(kappaL = 0.58, kappaU = 0.62)), 9707L)
-    expect_equal(ci_n(ci_run(kappaL = 0.59, kappaU = 0.61)), 38203L)
+    # closed-form minima (kappaSize's own search: 1625 / 9707 / 38203)
+    expect_equal(ci_n(ci_run(kappaL = 0.55, kappaU = 0.65)), 1624L)
+    expect_equal(ci_n(ci_run(kappaL = 0.58, kappaU = 0.62)), 9705L)
+    expect_equal(ci_n(ci_run(kappaL = 0.59, kappaU = 0.61)), 38193L)
 })
 
 
@@ -307,11 +346,11 @@ test_that("kappaSize's sparse-cell caveat reaches the notices panel", {
 
 
 test_that("the explanation does not claim the interval width drives the sample size", {
-    # kappaSize sizes on whichever limit is NEARER kappa0: with kappaL = 0.55 the answer is 1625
-    # for every kappaU from 0.65 to 0.99, so "Precision width" was the wrong quantity to show.
+    # kappaSize sizes on the limit that BINDS: with kappaL = 0.55 the answer is 1624 for every kappaU
+    # from 0.65 to 0.99, so "Precision width" was the wrong quantity to show.
     skip_if_not_installed("kappaSize")
     for (ku in c(0.65, 0.80, 0.99))
-        expect_equal(ci_n(ci_run(kappaL = 0.55, kappaU = ku)), 1625L, label = paste("kappaU", ku))
+        expect_equal(ci_n(ci_run(kappaL = 0.55, kappaU = ku)), 1624L, label = paste("kappaU", ku))
 
     txt <- ci_run()$text2$content
     # The explanation now names the limit that GOVERNS n rather than the geometrically nearer
@@ -335,26 +374,31 @@ test_that("every declared option is read by the backend", {
 
 # --- /check-function pass (2026-08-23) ------------------------------------------------------
 
-test_that("sparseness is judged on the agreement-pattern cells, not the outcome marginals", {
+test_that("sparseness is judged on the test's goodness-of-fit cells, not the outcome marginals", {
     # kappaSize's own check is `props[i] * n < 5`, and for a binary outcome the engine has
     # already reduced props to props[1] -- so it never looks at (1 - p) at all. The chi-square
     # the engine actually runs is over agreement patterns, whose expected counts go sparse far
     # earlier. Measured over 10 realistic designs, the marginal rule missed 7 of them.
     skip_if_not_installed("kappaSize")
 
-    # six raters on the DEFAULT prevalence: 6 of 7 pattern cells below 5, minimum 0.013,
-    # and kappaSize prints nothing
+    # six raters on the DEFAULT prevalence: the pooled cells of the published 1-df test (all
+    # negative / any disagreement / all positive; ADK 2001 p.586) have 1 of 3 below 5, and
+    # kappaSize prints nothing. (Before VAL-kappaSizeCI-02 the notice judged the 7 unpooled cells.)
     res <- ci_run(raters = "6")
     expect_false(grepl("less than five", res$text_summary$content))   # engine stays silent
     expect_match(res$notices$content, "Sparse categories")
-    expect_match(res$notices$content, "agreement-pattern")
-    expect_match(res$notices$content, "of 7 cells are below 5")
+    expect_match(res$notices$content, "goodness-of-fit cells")
+    expect_match(res$notices$content, "1 of 3 cells are below 5")
 
-    for (design in list(list(props = "0.05, 0.95", raters = "4"),
-                        list(props = "0.10, 0.90", raters = "6"),
+    for (design in list(list(props = "0.10, 0.90", raters = "6"),
                         list(outcome = "3", props = "0.20, 0.60, 0.20", raters = "3")))
         expect_match(do.call(ci_run, design)$notices$content, "Sparse categories",
                      info = paste(unlist(design), collapse = "/"))
+    # p = .05 with 4 raters was sparse at the fixed-proportion n (211). At the reported n, which
+    # now also covers re-estimating the proportions (251, IR-kappaSizeCI-01), its pooled cells hold
+    # 218 / 28 / 5.0 and 232 / 9.3 / 10.0 at the two limits: Cochran's rule is met, so it is quiet.
+    expect_false(grepl("Sparse categories",
+                       ci_run(props = "0.05, 0.95", raters = "4")$notices$content, fixed = TRUE))
 
     # well-populated designs stay quiet
     expect_false(grepl("Sparse categories", ci_run()$notices$content))
@@ -462,10 +506,13 @@ test_that("expected counts never reach the reader in scientific notation", {
     expect_equal(fmt(4.9),     "4.9")
     expect_equal(fmt(NA_real_), "unavailable")
 
+    # Rare categories of three: since the binary 3+-rater cells are pooled, binary designs rarely
+    # reach the sparse notice at all.
     fired <- 0L; sci <- 0L
-    for (pr in c("0.02, 0.98", "0.05, 0.95", "0.20, 0.80"))
+    for (pr in c("0.02, 0.98", "0.01, 0.01, 0.98", "0.002, 0.008, 0.99"))
         for (ra in c("2", "4", "6")) {
-            r <- ci_run(props = pr, raters = ra, kappaL = 0.45)
+            r <- ci_run(outcome = if (lengths(strsplit(pr, ",")) == 3) "3" else "2",
+                        props = pr, raters = ra, kappaL = 0.45)
             if (grepl("Sparse categories", r$notices$content)) {
                 fired <- fired + 1L
                 if (grepl("count is [0-9.]+e[-+]", r$notices$content)) sci <- sci + 1L

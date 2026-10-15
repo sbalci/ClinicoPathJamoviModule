@@ -59,8 +59,13 @@ items:
 refs:
     - ClinicoPathJamoviModule
     - kappaSize
+    # The Methodology note names each model the sample size rests on: Donner & Eliasziw (two
+    # raters, binary), Altaye, Donner & Klar (binary, more raters; eq. 4 is the engine's model)
+    # and Altaye, Donner & Eliasziw (3-5 categories), via Rotondi & Donner's CI approach.
     - rotondiDonnerKappaCI
     - donnerEliasziwKappaGOF
+    - altayeDonnerKlarKappaRaters
+    - altayeDonnerEliasziwKappaGOF
 
 
 ...

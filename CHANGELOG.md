@@ -5,6 +5,68 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-10-15 — kappaSizeCI: the n was planned for one analysis while the Notes recommended another
+
+- **Failure mode:** the sample size held the category proportions at their anticipated values
+  (RD2012 p.780; kappaSize). For 3+ raters the Notes then told users to re-estimate them by ML at each
+  kappa, because the plug-in interval under-covers.
+  - At the reported n, that recommended interval missed the requested limits. RD2012's own example
+    needed 190, not 171; with 6 raters, 147, not 110.
+  - Both statements were individually sourced. The contradiction lived between two panels, and the
+    same-day validation (VALIDATED) tested each claim on its own.
+- **Detection:** `/independent-reviewer kappaSizeCI`. It computed the expected limits, the planning
+  quantity RD2012 itself defines, under the analysis the module recommends, not only under the one
+  the n was built for. A simulation at the reported n then confirmed the gap.
+- **Repair:**
+  - n = max(fixed-proportion n, restricted-ML n) for every design except a binary outcome with two
+    raters (`.governingSlopes`, `.rmlSlopes`).
+  - Model disclosure for binary 3+-rater designs.
+  - The small-sample citation now keeps its qualifiers.
+  - The one-sided "ensuring" is gone.
+- **Rule:** when an output recommends how the study should be analysed, the planning quantity must be
+  computed for THAT analysis. Test the recommendation and the planned number together.
+- **Auditor's own misses, same pass:**
+  - The first fix applied re-estimation at 3+ raters only. The audit's simulation then showed the
+    plug-in also under-covers with 3 categories and two raters (0.928-0.932). The source paper (ADE
+    2001) re-estimates for any number of raters there. **Rule:** read the condition off the source
+    paper, not off where the first example happened to fail.
+  - An oracle mismatch (30,574 vs 30,578) was the ORACLE's error: George-Bowman's alternating sum
+    loses precision near p = 1 and returned a negative cell. **Rule:** adjudicate with a third method
+    before editing either side, and evaluate symmetric binary models at the smaller proportion.
+  - The displayed `⌈crit / slope⌉` at a fixed 6 significant digits ceiled to the wrong n when the
+    quotient sat within 0.004 of a whole number. The digits are now adaptive. **Rule:** a displayed
+    reproduction of a rounded-up quantity needs enough digits to round the same way.
+
+---
+
+## 2026-10-15 — kappaSizeCI: "the minimum n" was a vendor search result, and the sparse box judged the wrong cells
+
+- **Failure mode:** the analysis printed kappaSize's own `n` under "It returns the minimum number of subjects".
+  kappaSize's loop starts at 11 and stops at X² ≥ crit + 0.001, so the n was above the defined minimum in 23
+  of Rotondi & Donner's 265 published cells, and 11 when 5 suffice.
+  - Earlier reviews compared the module only with kappaSize (2,560 "exact" matches). That proves plumbing,
+    not the number.
+  - Separately, for a binary outcome with 3+ raters, the sparse notice judged the unpooled
+    "exactly k of n" cells, which the published 1-df test pools. 19 of 40 designs were flagged spuriously,
+    including a 976-subject study told to "use fewer raters".
+- **Detection:** `/validate-function kappaSizeCI depth=exhaustive` compared the module with the paper's printed
+  tables. Its oracle cells were typed from ADK 2001 eq. (4) and RD2012 p.779, not from the module. The same
+  oracle with the paper's rounded 3.84 reproduced all 265 printed values, which pinned it.
+- **Repair:** n is now `ceiling(crit / min slope)` (`.minimumN`). The Study Explanation shows that arithmetic,
+  and the Summary pane explains kappaSize's different figure beside it. Sparse cells are pooled as in
+  kappaSizePower.
+- **Rule:**
+  - Validate a wrapped engine against the method's PUBLISHED numbers, and against an oracle typed from the
+    paper, never only against the engine.
+  - When a sibling analysis fixes a shared statistical decision (here: which cells the 1-df test uses), grep
+    the other siblings for the same decision the same day. kappaSizeFixedN still judges unpooled cells.
+- **Auditor's own miss, same day:** the validation report called the vendor excess "1-2 subjects".
+  - The excess is ⌈0.001/slope⌉ ≈ n × 0.001/crit, i.e. 0.026% of n, so it is 25 subjects at n = 93,611.
+  - A test asserting it exposed the error.
+  - State an error that scales with n as a proportion, not as the count seen on the designs in hand.
+
+---
+
 ## 2026-10-15 — kappaSizePower: a power "correction" was validated on the designs that produced it
 
 - **Failure mode:** the 2026-10-14 fix for VAL-09 displayed a local (Mitra) projection as a point figure ("power

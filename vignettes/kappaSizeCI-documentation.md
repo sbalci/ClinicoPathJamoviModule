@@ -21,7 +21,7 @@
 
 | Option | Type | Default | Description |
 | :--- | :--- | :--- | :--- |
-| `outcome` | `List` | `2` | Number of outcome level |
+| `outcome` | `List` | `2` | Number of outcome levels |
 | `citype` | `List` | `two_sided` | Confidence Interval Type |
 | `kappa0` | `Number` | `0.6` | kappa0 |
 | `kappaL` | `Number` | `0.4` | kappaL |

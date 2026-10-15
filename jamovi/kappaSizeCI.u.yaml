@@ -22,7 +22,7 @@ children:
                 children:
                   - type: ComboBox
                     name: outcome
-                    label: ''
+                    label: Outcome levels
                     events:
                       change: ./kappaSizeCI.events::onChange_outcome
       - type: LayoutBox
@@ -39,7 +39,7 @@ children:
                 children:
                   - type: ComboBox
                     name: raters
-                    label: ''
+                    label: Raters
 
 
   - type: Label
@@ -91,7 +91,7 @@ children:
 
 
   - type: Label
-    label: "Proportions of Each Outcome Level"
+    label: "Expected Proportion of Cases in Each Category"
     children:
       - type: LayoutBox
         margin: large
@@ -117,5 +117,5 @@ children:
               children:
                 - type: TextBox
                   name: alpha
-                  label: "Alpha (0-1)"
+                  label: 'Alpha'
                   format: number
