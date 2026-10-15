@@ -219,8 +219,8 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 "\n\n",
                 private$.wrap(.fmt(
                     .("Researchers would like to determine the required sample size to test the null hypothesis kappa = {kappa0} against the alternative kappa = {kappa1} at a two-sided significance level of {alpha} with power {power}, in a study of interobserver agreement with {raters} raters."),
-                    kappa0 = kappa0, kappa1 = kappa1, alpha = alpha, power = power,
-                    raters = raters)),
+                    kappa0 = kappa0, kappa1 = kappa1, alpha = alpha,
+                    power = base::format(power, nsmall = 2), raters = raters)),
                 "\n",
                 private$.wrap(prev))
         },
@@ -324,7 +324,7 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     .("Expected proportions treated as known."),
                     .fmt(
                         .("The published formula behind this sample size treats the expected proportions as known. The goodness-of-fit test has to estimate them from the ratings, and in this design that can leave it well short of the stated power of {power} at {n} subjects. How far short cannot be computed reliably here, so confirm the sample size by simulating the intended analysis."),
-                        n = private$.fmtN(n_required), power = power)))
+                        n = private$.fmtN(n_required), power = base::format(power, nsmall = 2))))
             }
 
             if (is.finite(power) && power < 0.5) {
@@ -332,7 +332,7 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     .("Low power."),
                     .fmt(
                         .("The requested power is {power}. A study powered below 50% is more likely to miss the alternative kappa than to detect it; conventional values are 0.80 or 0.90."),
-                        power = power)))
+                        power = base::format(power, nsmall = 2))))
             }
 
             # Sparse goodness-of-fit cells (see kappaSizeGofCells), judged by Cochran's rule: no expected
@@ -420,9 +420,11 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     .("Estimate the prevalence for that test by maximum likelihood from the same pooled cells, with kappa held at kappa0: the published procedure plugs in the overall proportion of positive ratings, which makes the test reject a true kappa0 too often with four or more raters and a rare finding."),
                 # KSP-IR-02: DE 1992 p.1513 plugs in the overall proportion of positive ratings. Simulated (R = 20000,
                 # p .01-.05, kappa0 .2-.6, nominal 0.05): size 0.057-0.066, ML at kappa0 0.043-0.051 at equal power.
+                # A second run (release review 2026-10-15, R = 20000, the 9 designs p x kappa0 at the published N
+                # for kappa1 = kappa0 + 0.2) gave plug-in 0.055-0.066 and ML 0.046-0.052; the sentence states the union.
                 # Rates, not percentages: a literal "%" in a msgid can be read as a C format directive.
                 if (isTRUE(outcome == 2L && raters == 2L))
-                    .("With two raters, estimate the prevalence for the test by maximum likelihood with kappa held at kappa0 rather than plugging in the overall proportion of positive ratings, as the published procedure does: in simulations of a rare finding (1 to 5 cases in 100) at a 0.05 level, the plug-in test rejected a true kappa0 at a rate of 0.057-0.066 and the maximum-likelihood version at 0.043-0.051."),
+                    .("With two raters, estimate the prevalence for the test by maximum likelihood with kappa held at kappa0 rather than plugging in the overall proportion of positive ratings, as the published procedure does: in simulations of a rare finding (1 to 5 cases in 100) at a 0.05 level, the plug-in test rejected a true kappa0 at a rate of 0.055-0.066 and the maximum-likelihood version at 0.043-0.052."),
                 if (isTRUE(outcome >= 3L && raters >= 3))
                     .("With three or more raters, estimate the category prevalences by maximum likelihood with kappa held at kappa0, as Altaye, Donner and Eliasziw do; plugging in the overall proportions of ratings makes the test reject a true kappa0 too often."),
                 if (isTRUE(outcome == 2L && raters >= 3))
@@ -434,22 +436,24 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     .("The goodness-of-fit test also tests that model: if the raters follow another model with the same kappa, it can reject a true kappa0 far more often than the stated significance level, whereas Fleiss' kappa with a jackknife or bootstrap interval that resamples subjects is not tied to the model."),
                 .("It does not apply to weighted kappa for ordered grades; for an ordinal grading study either treat the grades as nominal categories or use a dedicated weighted-kappa method."),
                 .("It answers 'how many subjects do I need to reject kappa0 in favour of kappa1?' - not how precisely kappa will be estimated; to plan the expected confidence limits around an anticipated kappa, use kappaSizeCI instead."),
-                .("Note that kappa0 here is the null hypothesis value, whereas in kappaSizeCI and kappaSizeFixedN it is the agreement you anticipate observing."),
-                # The bold figure is what gets copied into a protocol, so when the simulation found the published N
-                # short it carries the simulated N too, not the published one alone.
-                if (has_n && isTRUE(est$type == "sim") && !is.null(est$n))
-                    .fmt(
-                        .("Required sample size: <b>{n}</b> {subjects} by the published formula and about <b>{needed}</b> by simulating the recommended test, each rated by all {raters} raters."),
-                        n = private$.fmtN(n_required), subjects = private$.subjects(n_required),
-                        needed = private$.fmtN(est$n), raters = raters)
-                else if (has_n)
-                    .fmt(
-                        .("Required sample size: <b>{n}</b> {subjects}, each rated by all {raters} raters."),
-                        n = private$.fmtN(n_required),
-                        subjects = private$.subjects(n_required), raters = raters)
-                else "")
+                .("Note that kappa0 here is the null hypothesis value, whereas in kappaSizeCI and kappaSizeFixedN it is the agreement you anticipate observing."))
 
-            paste0(warn, info)
+            # The bold figure is what gets copied into a protocol, so when the simulation found the published N
+            # short it carries the simulated N too, not the published one alone. Its own block, between the
+            # warnings and the Methodology: it used to be the last of up to 15 sentences of the method statement.
+            answer <- if (has_n && isTRUE(est$type == "sim") && !is.null(est$n))
+                .fmt(
+                    .("Required sample size: <b>{n}</b> {subjects} by the published formula and about <b>{needed}</b> by simulating the recommended test, each rated by all {raters} raters."),
+                    n = private$.fmtN(n_required), subjects = private$.subjects(n_required),
+                    needed = private$.fmtN(est$n), raters = raters)
+            else if (has_n)
+                .fmt(
+                    .("Required sample size: <b>{n}</b> {subjects}, each rated by all {raters} raters."),
+                    n = private$.fmtN(n_required),
+                    subjects = private$.subjects(n_required), raters = raters)
+            if (!is.null(answer)) answer <- paste0(info_div, answer, "</div>")
+
+            paste0(warn, answer, info)
         },
 
         .run = function() {
@@ -680,7 +684,7 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         if (isTRUE(est$type == "cat"))
                             .fmt(
                                 .("Because the goodness-of-fit test has to estimate the expected proportions from the ratings, this sample size can fall well short of power {power}; confirm it by simulating the intended analysis."),
-                                power = power)),
+                                power = base::format(power, nsmall = 2))),
                         collapse = " ")))
                 else ""))
 

@@ -16,8 +16,11 @@ items:
           - alpha
           - power
 
+    # Both engine panes print kappaSize's own sentence, "A minimum of N subjects are required", which is
+    # the published-formula N. For a binary outcome the Notes can give a larger simulated N beside it, so
+    # the titles say which figure these panes hold.
     - name:  text1
-      title: Analysis result
+      title: Result by the published formula (kappaSize)
       type:  Preformatted
       clearWith:
           - outcome
@@ -29,7 +32,7 @@ items:
           - power
 
     - name:  text_summary
-      title: Summary
+      title: Summary by the published formula (kappaSize)
       type:  Preformatted
       clearWith:
           - outcome

@@ -504,9 +504,10 @@ test_that("KSP-IR-01: the Methodology states the approximation in both direction
 test_that("KSP-IR-02: two raters, binary - the Notes recommend ML for the prevalence (independent review 2026-10-15)", {
     # Simulated, R = 20000, p .01-.05, kappa0 .2-.6, nominal 0.05: the published plug-in (overall proportion of
     # positive ratings, DE 1992 p.1513) rejected a true kappa0 at 0.057-0.066, ML with kappa at kappa0 at 0.043-0.051.
+    # The release review's second run (R = 20000, kappa1 = kappa0 + 0.2) gave 0.055-0.066 and 0.046-0.052: the union.
     notes <- vkp_run(props = "0.05")$notices$content
     expect_match(notes, "With two raters, estimate the prevalence for the test by maximum likelihood with kappa held at kappa0", fixed = TRUE)
-    expect_match(notes, "0.057-0.066", fixed = TRUE)
+    expect_match(notes, "rate of 0.055-0.066 and the maximum-likelihood version at 0.043-0.052.", fixed = TRUE)
     expect_false(grepl("from the same pooled cells", notes, fixed = TRUE))
     for (r in list(vkp_run(props = "0.05", raters = "3"), vkp_run(outcome = "3", props = "0.2, 0.3, 0.5")))
         expect_false(grepl("With two raters, estimate the prevalence", r$notices$content, fixed = TRUE))

@@ -55,7 +55,7 @@ children:
           children:
             - type: TextBox
               name: kappa0
-              label: 'Null hypothesis'
+              label: 'Null kappa (kappa0)'
               format: number
         - type: LayoutBox
           margin: large
@@ -65,7 +65,7 @@ children:
           children:
             - type: TextBox
               name: kappa1
-              label: 'Alternative hypothesis'
+              label: 'Alternative kappa (kappa1)'
               format: number
 
   - type: Label

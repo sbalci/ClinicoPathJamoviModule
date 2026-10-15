@@ -1,3 +1,29 @@
+# kappaSizePower — `/release-review-function` (2026-10-15, after 93a7f036a; all findings fixed, uncommitted)
+
+Verdict: ready after minor actions (below). Independent oracle (hand-written DE / ADK-mixture / lgamma
+Dirichlet-multinomial cells, raw kappaSize engine, app panes): N agrees 11/11 designs, K 2-5, raters 2-6. Subject-level
+`optimize()` simulation: app's simulated power 0.59/0.68/0.64 vs 0.589/0.686/0.641; simulated N reaches 0.808-0.817;
+size at it 0.045-0.049. 2-rater size, R = 20000, 9 designs: ML 0.046-0.052, plug-in 0.055-0.066. Sweep of 420 binary
+designs: 0 errors, 252 notes all with a simulated N, its power never below target (+0.00 to +0.02), 0.05 s median.
+Gate with kappaSizePower counted as shipped: identical to the normal run. Suites: 60 blocks, 496 expectations, 0 fail/skip.
+
+- [x] UX: the bold "Required sample size" closed a 250-400 word "Methodology." paragraph (15 sentences at 6 raters).
+      Now its own block between the warnings and the Methodology (same msgids; regression test in
+      `test-kappasizepower-release-review.R`, 6 FAIL on HEAD, pass now). No yaml touched, no `prepare()`.
+- [x] UX: `.u.yaml` kappa labels now "Null kappa (kappa0)" / "Alternative kappa (kappa1)" (siblings: "Anticipated
+      kappa (kappa0)"); closes the optional `/check-function` entry below.
+- [x] `.r.yaml`: `text1` / `text_summary` retitled "Result/Summary by the published formula (kappaSize)" - both print
+      kappaSize's "A minimum of N subjects", which the Notes can put beside a larger simulated N.
+- [x] Cosmetic: stated power printed `nsmall = 2` in the 3-5 category note, "Low power" and the Study Explanation.
+- [x] Methodology ranges now the union of both R = 20000 runs: plug-in 0.055-0.066, ML 0.043-0.052.
+- [x] i18n: `i18nUpdate()` x3 (3rd idempotent): +5 msgids all in Turkish, -2 obsolete, 0 other msgstr changed,
+      `msgfmt -c` clean. Tests: +3 blocks; scratch-compiled header gives 63 blocks / 506 expectations green; HEAD's
+      `.b.R` fails 11 of them. Gate as shipped: identical bar the msgid count.
+- [ ] User: `jmvtools::prepare()` + `devtools::document()` for the `.r.yaml` titles (the title test is red until
+      then; the scratch header differs from `R/kappaSizePower.h.R` in those two titles only).
+- [ ] Before promotion: `Rscript _updateModules.R --dry-run` (JamoviTest copy is stale), then open it in jamovi —
+      binary 6 raters p .05 (Notes order, seed shown), change an option, reopen the .omv, Turkish panel.
+
 # kappaSizePower — `/review-function` (2026-10-15; all three findings fixed same day, uncommitted)
 
 Result: statistically CORRECT, no code defects. 39 test blocks green; release gate 0 blocking, no kappaSizePower hit;
@@ -50,7 +76,7 @@ as shipped; scratch `prepare()` header byte-identical; kappaSize 1.2 = CRAN. App
       Regenerate with `/document-function kappaSizePower`.
 - [ ] Out of scope (cleanup): `jamovi/js/kappaSizeFixedN.events.js:25` also cites `.validateProportions()`, which
       `R/kappaSizeFixedN.b.R` does not define (its parser is `.parseProps`).
-- [ ] Optional (UX, needs approval + Turkish): `.u.yaml` labels kappa0/kappa1 "Null hypothesis" / "Alternative
+- [x] Optional (UX, needs approval + Turkish): `.u.yaml` labels kappa0/kappa1 "Null hypothesis" / "Alternative
       hypothesis" while every output says kappa0/kappa1; siblings use "Anticipated kappa (kappa0)". Candidate:
       "Null kappa (kappa0)" / "Alternative kappa (kappa1)".
 

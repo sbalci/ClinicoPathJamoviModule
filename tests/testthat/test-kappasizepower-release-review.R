@@ -382,3 +382,67 @@ test_that("the marginal and the agreement-pattern warnings can both appear", {
                              kappa1 = 0.90, power = 0.80, marg_min = 0.1, marg_sparse = TRUE),
                        fixed = TRUE))
 })
+
+
+test_that("the required sample size is its own Notes block, not the last sentence of the Methodology", {
+    # The bold figure is what gets copied into a protocol. It used to close a 250-400 word
+    # "Methodology." paragraph (six raters: 15 sentences), so a reader had to finish the method
+    # statement to find the answer. Its own block sits after the warnings and before the
+    # Methodology; the siblings keep their N out of the Methodology too.
+    blocks <- function(res) strsplit(res$notices$content, "</div>", fixed = TRUE)[[1]]
+    for (res in list(run_kp(),                                            # plain
+                     run_kp(props = "0.05", raters = "6"))) {             # simulated N shown
+        b   <- blocks(res)
+        req <- grep("Required sample size:", b, fixed = TRUE)
+        met <- grep("Methodology.", b, fixed = TRUE)
+        expect_length(req, 1L)
+        expect_length(met, 1L)
+        expect_false(grepl("Methodology.", b[req], fixed = TRUE))
+        expect_false(grepl("Required sample size:", b[met], fixed = TRUE))
+        expect_lt(req, met)
+        # the warnings still come first
+        if (grepl("Simulated power below", res$notices$content, fixed = TRUE))
+            expect_lt(grep("Simulated power below", b, fixed = TRUE), req)
+    }
+    # no N, no block
+    an <- ClinicoPath:::kappaSizePowerClass$new(options = ClinicoPath:::kappaSizePowerOptions$new())
+    none <- an$.__enclos_env__$private$.buildNotices(NA_real_, sparse = FALSE, outcome = 2L,
+                                                     raters = 2L, kappa0 = 0.4, kappa1 = 0.6, power = 0.8)
+    expect_false(grepl("Required sample size", none, fixed = TRUE))
+    expect_length(strsplit(none, "</div>", fixed = TRUE)[[1]], 1L)
+})
+
+
+test_that("the stated power prints with two decimals in every sentence", {
+    # The simulation sentences printed "0.80" while the 3-5 category note, the "Low power" note and the
+    # Study Explanation printed the same option as "0.8". A typed 0.825 keeps its third decimal.
+    expect_match(flat(run_kp()$text2$content), "with power 0.80, in a study", fixed = TRUE)
+    expect_match(run_kp(power = 0.30)$notices$content, "The requested power is 0.30.", fixed = TRUE)
+    cat3 <- run_kp(outcome = "3", props = "0.05, 0.05, 0.9", raters = "4")
+    expect_match(cat3$notices$content, "the stated power of 0.80 at", fixed = TRUE)
+    expect_match(flat(cat3$text2$content), "fall well short of power 0.80;", fixed = TRUE)
+    expect_match(flat(run_kp(power = 0.825)$text2$content), "with power 0.825, in a study", fixed = TRUE)
+})
+
+
+test_that("the kappa inputs carry the kappa0 / kappa1 names the output uses", {
+    # Every note says kappa0 / kappa1 ("check that kappa0 is the agreement you want to rule OUT", "swap the two
+    # values"); the controls were labelled "Null hypothesis" / "Alternative hypothesis" alone. The siblings
+    # label theirs "Anticipated kappa (kappa0)".
+    f <- file.path("../../jamovi", "kappaSizePower.u.yaml")
+    skip_if_not(file.exists(f), "jamovi/kappaSizePower.u.yaml not found from the test directory")
+    labels <- unlist(lapply(yaml::read_yaml(f)$children, function(x) rapply(x, function(v) v, how = "unlist")))
+    expect_true("Null kappa (kappa0)" %in% labels)
+    expect_true("Alternative kappa (kappa1)" %in% labels)
+})
+
+
+test_that("the two kappaSize panes say they hold the published-formula N", {
+    # Both print kappaSize's "A minimum of N subjects are required", which is the published formula. When the
+    # Notes give a larger simulated N (binary, 6 raters, 5% finding: 316 vs about 572), a pane titled
+    # "Analysis result" read as the answer. Needs jmvtools::prepare() to reach R/kappaSizePower.h.R.
+    res <- run_kp(props = "0.05", raters = "6")
+    expect_equal(res$text1$title, "Result by the published formula (kappaSize)")
+    expect_equal(res$text_summary$title, "Summary by the published formula (kappaSize)")
+    expect_match(res$text1$content, "A minimum of 316 subjects", fixed = TRUE)
+})

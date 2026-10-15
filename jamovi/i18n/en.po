@@ -18392,8 +18392,11 @@ msgstr ""
 #: exacttests/options/alternative.title
 #: exacttests/ui[1][0]/alternative.label
 #: jcorrelation/options/alternative.title
-#: kappaSizePower/ui[1][1]/kappa1.label
 msgid "Alternative hypothesis"
+msgstr ""
+
+#: kappaSizePower/ui[1][1]/kappa1.label
+msgid "Alternative kappa (kappa1)"
 msgstr ""
 
 #: curemodels/options/sensitivity_alternatives.title
@@ -19424,7 +19427,6 @@ msgstr ""
 
 #: kappaSizeCI/results/text1.title
 #: kappaSizeFixedN/results/text1.title
-#: kappaSizePower/results/text1.title
 msgid "Analysis result"
 msgstr ""
 
@@ -111094,10 +111096,6 @@ msgstr ""
 msgid "Null Effect Line"
 msgstr ""
 
-#: kappaSizePower/ui[1][0]/kappa0.label
-msgid "Null hypothesis"
-msgstr ""
-
 #: R/survival.b.R
 msgid ""
 "Null hypothesis: linear effect of {var}. Natural splines with {df} degrees "
@@ -111106,6 +111104,10 @@ msgstr ""
 
 #: agreement/options/ssKappaNull.title
 msgid "Null kappa (H0)"
+msgstr ""
+
+#: kappaSizePower/ui[1][0]/kappa0.label
+msgid "Null kappa (kappa0)"
 msgstr ""
 
 #: brierscore/results/brierSummary.columns.title
@@ -139485,6 +139487,10 @@ msgstr ""
 msgid "Result Availability by Reference State"
 msgstr ""
 
+#: kappaSizePower/results/text1.title
+msgid "Result by the published formula (kappaSize)"
+msgstr ""
+
 #: comprehensiveSurvivalPower/results/sensitivityTable.columns.title
 msgid "Result Change"
 msgstr ""
@@ -159605,7 +159611,6 @@ msgstr ""
 #: jjdotchart/results/summary.columns.title
 #: kappaSizeCI/results/text_summary.title
 #: kappaSizeFixedN/results/text_summary.title
-#: kappaSizePower/results/text_summary.title
 #: linechart/results/naturalSummary.title
 #: lymphnoderatio/results/summary.title
 #: multifocalconcordance/results/summary.title
@@ -159634,6 +159639,10 @@ msgstr ""
 
 #: reclassmetrics/results/summary.title
 msgid "Summary & Interpretation"
+msgstr ""
+
+#: kappaSizePower/results/text_summary.title
+msgid "Summary by the published formula (kappaSize)"
 msgstr ""
 
 #: R/jjarcdiagram.b.R
@@ -188237,8 +188246,8 @@ msgid ""
 "with kappa held at kappa0 rather than plugging in the overall proportion of "
 "positive ratings, as the published procedure does: in simulations of a rare "
 "finding (1 to 5 cases in 100) at a 0.05 level, the plug-in test rejected a "
-"true kappa0 at a rate of 0.057-0.066 and the maximum-likelihood version at "
-"0.043-0.051."
+"true kappa0 at a rate of 0.055-0.066 and the maximum-likelihood version at "
+"0.043-0.052."
 msgstr ""
 
 #: R/nogoldstandard.b.R
