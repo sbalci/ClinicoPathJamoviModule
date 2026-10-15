@@ -3,29 +3,27 @@ name: Claude Code Review
 on:
   pull_request:
     types: [opened, synchronize]
-    # Optional: Only run on specific file changes
-    # paths:
-    #   - "src/**/*.ts"
-    #   - "src/**/*.tsx"
-    #   - "src/**/*.js"
-    #   - "src/**/*.jsx"
 
 jobs:
   claude-review:
-    # Optional: Filter by PR author
-    # if: |
-    #   github.event.pull_request.user.login == 'external-contributor' ||
-    #   github.event.pull_request.user.login == 'new-developer' ||
-    #   github.event.pull_request.author_association == 'FIRST_TIME_CONTRIBUTOR'
-    
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: read
       pull-requests: read
       issues: read
       id-token: write
-    
+
     steps:
+      - name: Check Claude credential availability
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: |
+          if [ -z "$CLAUDE_CODE_OAUTH_TOKEN" ]; then
+            echo "::error::CLAUDE_CODE_OAUTH_TOKEN is unavailable. Check Actions secret access; fork and Dependabot pull requests do not receive this secret."
+            exit 1
+          fi
+
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
@@ -36,13 +34,10 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-
-          # Optional: pass extra Claude Code CLI flags via claude_args
-          # (e.g. --model claude-opus-4-20250514)
-          # claude_args: |
-          #   --model claude-opus-4-20250514
-
-          # Direct prompt for automated review (no @claude mention needed)
+          # Keep action-created user settings and shared project settings, but do
+          # not inherit the tracked macOS PATH/permissions in settings.local.json.
+          claude_args: --setting-sources user,project
+          show_full_output: false
           prompt: |
             Please review this pull request and provide feedback on:
             - Code quality and best practices
@@ -50,31 +45,73 @@ jobs:
             - Performance considerations
             - Security concerns
             - Test coverage
-            
+
             Be constructive and helpful in your feedback.
 
-          # Optional: Use sticky comments to make Claude reuse the same comment on subsequent pushes to the same PR
-          # use_sticky_comment: true
-          
-          # Optional: Customize review based on file types
-          # prompt: |
-          #   Review this PR focusing on:
-          #   - For TypeScript files: Type safety and proper interface usage
-          #   - For API endpoints: Security, input validation, and error handling
-          #   - For React components: Performance, accessibility, and best practices
-          #   - For tests: Coverage, edge cases, and test quality
-          
-          # Optional: Different prompts for different authors
-          # prompt: |
-          #   ${{ github.event.pull_request.author_association == 'FIRST_TIME_CONTRIBUTOR' && 
-          #   'Welcome! Please review this PR from a first-time contributor. Be encouraging and provide detailed explanations for any suggestions.' ||
-          #   'Please provide a thorough code review focusing on our coding standards and best practices.' }}
-          
-          # Optional: Add specific tools for running tests or linting
-          # allowed_tools: "Bash(npm run test),Bash(npm run lint),Bash(npm run typecheck)"
-          
-          # Optional: Skip review for certain conditions
-          # if: |
-          #   !contains(github.event.pull_request.title, '[skip-review]') &&
-          #   !contains(github.event.pull_request.title, '[WIP]')
+      - name: Verify execution and summarize safe diagnostics
+        if: ${{ always() && steps.claude-review.outcome != 'skipped' }}
+        env:
+          REVIEW_OUTCOME: ${{ steps.claude-review.outcome }}
+          EXECUTION_FILE: ${{ steps.claude-review.outputs.execution_file }}
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import re
+          from pathlib import Path
 
+          # The action writes this file before throwing, even if its output is
+          # unavailable. Never print/upload the transcript, result text or env.
+          path = Path(os.environ.get("EXECUTION_FILE") or
+                      str(Path(os.environ["RUNNER_TEMP"]) / "claude-execution-output.json"))
+          try:
+              messages = json.loads(path.read_text())
+              if not isinstance(messages, list):
+                  raise ValueError("Unexpected execution shape")
+              messages = [m for m in messages if isinstance(m, dict)]
+          except (OSError, ValueError):
+              messages = []
+
+          results = [m for m in messages if m.get("type") == "result"]
+          result = results[-1] if results else {}
+          initialized = any(m.get("type") == "system" and
+                            m.get("subtype") == "init" for m in messages)
+          completed = (os.environ.get("REVIEW_OUTCOME") == "success" and
+                       result.get("subtype") == "success" and
+                       result.get("is_error") is False)
+          # Inspect error content only in memory. Emit fixed labels, never text
+          # from the model, tools, API or repository (including workflow commands).
+          error_text = json.dumps([
+              m for m in messages if m.get("type") in ("assistant", "result")
+          ]).lower() if not completed else ""
+          patterns = {
+              "authentication": r"authentication_error|invalid.?token|token.{0,40}expired|unauthorized|\b401\b",
+              "access_or_policy": r"permission_error|access.denied|forbidden|\b403\b",
+              "model_or_resource": r"not_found_error|model.{0,40}(not.found|not.available)|\b404\b",
+              "quota_or_billing": r"rate_limit|billing|credit.balance|usage.limit|\b429\b",
+              "service_or_transport": r"overloaded|api_connection_error|timed.out|\b(500|502|503|504)\b",
+          }
+          hints = [label for label, pattern in patterns.items()
+                   if re.search(pattern, error_text)]
+          if completed:
+              status = "Claude execution completed successfully. This does not certify the statistical code or confirm feedback delivery."
+          elif initialized and result.get("is_error") is True and not result.get("modelUsage"):
+              status = "Claude initialized but failed without recorded model usage; no completed review."
+          elif not results:
+              status = "No readable terminal Claude result; inspect installation, authentication and SDK steps."
+          else:
+              status = "Claude review execution did not complete successfully."
+          lines = ["### Claude review execution", status]
+          if hints:
+              lines.append("Error-content hints (not confirmed causes): " + ", ".join(hints))
+          if not completed:
+              lines.append("Check .github/claude-review-troubleshooting.md. Raw execution content is intentionally not published.")
+          summary = "\n\n".join(lines) + "\n"
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as stream:
+              stream.write(summary)
+          print(status)
+          if hints:
+              print("Error-content hints (not confirmed causes): " + ", ".join(hints))
+          raise SystemExit(0 if completed else 1)
+          PY
