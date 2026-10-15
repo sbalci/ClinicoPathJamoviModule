@@ -14656,6 +14656,17 @@ msgstr ""
 "{sim} güç verir ve bu, belirtilen {power} değerinin altındadır; yaklaşık "
 "{needed} olgu ile yaklaşık {simN} güce ulaşılır (rastgelelik tohumu {seed})."
 
+#: R/kappaSizePower.b.R
+msgid ""
+"A simulation of the recommended goodness-of-fit test gives a power of about "
+"{sim} at this sample size, short of the stated {power}; the sample size that "
+"reaches it is too large to simulate (random seed {seed})."
+msgstr ""
+"Önerilen uyum iyiliği testinin simülasyonu bu örneklem büyüklüğünde yaklaşık "
+"{sim} güç verir ve bu, belirtilen {power} değerinin altındadır; bu güce "
+"ulaşan örneklem büyüklüğü simüle edilemeyecek kadar büyüktür (rastgelelik "
+"tohumu {seed})."
+
 #: R/ihcheterogeneity.b.R
 msgid ""
 "A single region differs from the reference by about %s%% (root-mean-square "
@@ -15209,6 +15220,14 @@ msgstr ""
 #: jjcorrmat/results/about.title
 msgid "About"
 msgstr ""
+
+#: R/kappaSizePower.b.R
+msgid ""
+"About {needed} subjects gave a simulated power of about {simN} (random seed "
+"{seed})."
+msgstr ""
+"Yaklaşık {needed} olgu, yaklaşık {simN} simüle güç verdi (rastgelelik tohumu "
+"{seed})."
 
 #: R/decisioncombine.b.R
 msgid ""
@@ -147541,6 +147560,16 @@ msgstr ""
 
 #: R/kappaSizePower.b.R
 msgid ""
+"Required sample size: <b>{n}</b> {subjects} by the published formula and "
+"about <b>{needed}</b> by simulating the recommended test, each rated by all "
+"{raters} raters."
+msgstr ""
+"Gerekli örneklem büyüklüğü: her biri {raters} değerlendiricinin tümü "
+"tarafından değerlendirilen, yayımlanmış formüle göre <b>{n}</b> {subjects}, "
+"önerilen testin simülasyonuna göre yaklaşık <b>{needed}</b> olgu."
+
+#: R/kappaSizePower.b.R
+msgid ""
 "Required sample size: <b>{n}</b> {subjects}, each rated by all {raters} "
 "raters."
 msgstr ""
@@ -180550,16 +180579,14 @@ msgid ""
 "simulated studies of {n} subjects analysed with the recommended "
 "goodness-of-fit test (prevalence estimated by maximum likelihood with kappa "
 "held at kappa0), the power to reject kappa0 when kappa equals kappa1 was "
-"about {sim}, short of the stated {power}. About {needed} subjects gave a "
-"simulated power of about {simN} (random seed {seed})."
+"about {sim}, short of the stated {power}."
 msgstr ""
 "Bu örneklem büyüklüğünün dayandığı yayımlanmış formül, beklenen oranları "
 "biliniyor kabul eden bir büyük örneklem yaklaşımıdır. Önerilen uyum iyiliği "
 "testiyle (prevalans, kappa kappa0'da sabit tutularak en çok olabilirlik "
 "yöntemiyle kestirilerek) çözümlenen {n} olguluk {R} simüle edilmiş "
 "çalışmada, kappa kappa1'e eşitken kappa0'ı reddetme gücü yaklaşık {sim} oldu "
-"ve belirtilen {power} değerinin altında kaldı. Yaklaşık {needed} olgu, "
-"yaklaşık {simN} simüle güç verdi (rastgelelik tohumu {seed})."
+"ve belirtilen {power} değerinin altında kaldı."
 
 #: R/kappaSizePower.b.R
 msgid ""
@@ -181272,6 +181299,14 @@ msgstr ""
 "ki-kare testi içindir; test, tüm değerlendiricilerin bir kategoride uyuştuğu "
 "hücreler ile her türlü uyuşmazlığı toplayan tek bir hücre üzerinden "
 "hesaplanır. Kappa için olabilirlik oranı testi yaklaşık bir alternatiftir."
+
+#: R/kappaSizePower.b.R
+msgid ""
+"The sample size that reaches the stated power is too large to simulate "
+"(random seed {seed})."
+msgstr ""
+"Belirtilen güce ulaşan örneklem büyüklüğü simüle edilemeyecek kadar büyüktür "
+"(rastgelelik tohumu {seed})."
 
 #: R/kappaSizeCI.b.R
 msgid "The sample size was computed but could not be formatted for display: {error}"

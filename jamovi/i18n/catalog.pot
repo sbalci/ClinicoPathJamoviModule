@@ -12454,6 +12454,13 @@ msgid ""
 "subjects reach about {simN} (random seed {seed})."
 msgstr ""
 
+#: R/kappaSizePower.b.R
+msgid ""
+"A simulation of the recommended goodness-of-fit test gives a power of about "
+"{sim} at this sample size, short of the stated {power}; the sample size that "
+"reaches it is too large to simulate (random seed {seed})."
+msgstr ""
+
 #: R/ihcheterogeneity.b.R
 msgid ""
 "A single region differs from the reference by about %s%% (root-mean-square "
@@ -12884,6 +12891,12 @@ msgstr ""
 #: jjcoefstats/results/about.title
 #: jjcorrmat/results/about.title
 msgid "About"
+msgstr ""
+
+#: R/kappaSizePower.b.R
+msgid ""
+"About {needed} subjects gave a simulated power of about {simN} (random seed "
+"{seed})."
 msgstr ""
 
 #: R/decisioncombine.b.R
@@ -138374,6 +138387,13 @@ msgstr ""
 
 #: R/kappaSizePower.b.R
 msgid ""
+"Required sample size: <b>{n}</b> {subjects} by the published formula and "
+"about <b>{needed}</b> by simulating the recommended test, each rated by all "
+"{raters} raters."
+msgstr ""
+
+#: R/kappaSizePower.b.R
+msgid ""
 "Required sample size: <b>{n}</b> {subjects}, each rated by all {raters} "
 "raters."
 msgstr ""
@@ -168660,8 +168680,7 @@ msgid ""
 "simulated studies of {n} subjects analysed with the recommended "
 "goodness-of-fit test (prevalence estimated by maximum likelihood with kappa "
 "held at kappa0), the power to reject kappa0 when kappa equals kappa1 was "
-"about {sim}, short of the stated {power}. About {needed} subjects gave a "
-"simulated power of about {simN} (random seed {seed})."
+"about {sim}, short of the stated {power}."
 msgstr ""
 
 #: R/kappaSizePower.b.R
@@ -169192,6 +169211,12 @@ msgid ""
 "degree of freedom, computed over the cells in which all raters agree on a "
 "category plus one pooled cell for any disagreement; a likelihood-ratio test "
 "of kappa is an approximate alternative."
+msgstr ""
+
+#: R/kappaSizePower.b.R
+msgid ""
+"The sample size that reaches the stated power is too large to simulate "
+"(random seed {seed})."
 msgstr ""
 
 #: R/kappaSizeCI.b.R

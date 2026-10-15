@@ -1,3 +1,29 @@
+# kappaSizePower — `/review-function` (2026-10-15; all three findings fixed same day, uncommitted)
+
+Result: statistically CORRECT, no code defects. 39 test blocks green; release gate 0 blocking, no kappaSizePower hit;
+scoped lintr style-only. N matches `kappaSize` (191/106/241). Independent subject-level oracle (`optimize()` ML, R =
+20000) agrees with the in-app simulated power at 8 designs within MC error (e.g. 0.59 vs 0.598, 0.80 vs 0.810); size
+under H0 0.046-0.050. Runtime <= 0.14 s including the simulated-N search.
+
+Fix results: `.b.R` (seed reused per step; the note split at its sentence boundary so the usual English is
+byte-identical; the bold line carries both figures; NULL simulated N keeps the note); 1 new test block (10
+expectations, 6 FAIL on HEAD's `.b.R`, all pass now); all 3 kappaSizePower suites green (59 blocks, 483 expectations,
+0 skip); i18nUpdate x2: tr.po +5 translated / -1 obsolete / 0 other msgstr changed, `msgfmt -c` clean, rendered in
+Turkish with no English left; release gate identical bar +4 msgids; oracle at the new simulated N 572: 0.813 (module
+0.81). No yaml touched, so no `prepare()`.
+
+- [x] UX (clinical): when the simulated power falls short, the bold Methodology line still reads "Required sample
+      size: **316** subjects" (`R/kappaSizePower.b.R:428-432`) beside a simulation saying 316 gives power 0.59 and
+      ~561 reach 0.80 (binary, 6 raters, p 0.05, kappa 0.4 vs 0.6). Someone copying the bold figure gets an
+      underpowered study. Candidate: when `est$type == "sim"`, the bold line names both ("316 by the published
+      formula; about 561 by simulation of the recommended test"). New msgid -> Turkish.
+- [x] Reproducibility (wording): the notes say "random seed 20261015", but the simulated-N figure comes from seeds
+      20261016-20261020 (`seed + step`, `:162`), so rerunning with the stated seed reproduces the 0.59, not the "561 ->
+      0.80". Say "seeds 20261015 onwards", or reuse one seed per step.
+- [x] Edge (low): `.simulatedN()` returns NULL above 1e9 subjects (`:161`), and `:633` then drops the shortfall note
+      although `sim_p < power - 0.03` was measured. Only reachable when the published N is already in the hundreds of
+      millions ("Very large sample size" fires); keep a note without the simulated N.
+
 # kappaSizePower — `/check-function-full` (2026-10-15, report only)
 
 Result: FUNCTIONAL, 7/7 options effective, 4/4 outputs populated, 347 expectations green, release gate identical with

@@ -31,6 +31,8 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
         #   projection's figures, which missed held-out simulation by up to 0.14 either way; 3-5 categories: a
         #   qualitative note (KSP-IR-01). The Methodology states the approximation in both directions; two raters
         #   get the ML-prevalence sentence (KSP-IR-02).
+        # Resolved 2026-10-15 (review-function): the bold sample size names the simulated N beside the published one;
+        #   every simulated figure comes from the one seed shown; a shortfall whose simulated N exceeds 1e9 is still reported.
 
         # Split the proportions string into numbers. Same format as the siblings
         # (R/kappaSizeFixedN.b.R:.parsePropTokens): commas, semicolons, pipes or whitespace
@@ -141,7 +143,8 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
         # N whose simulated power reaches the target, starting from a short n0 with simulated power p0. The
         # 1-df noncentrality grows about linearly in N, so each step rescales N by lambda(aim) /
-        # lambda(simulated power) and simulates again (new seed per step). It aims 0.01 above the target and
+        # lambda(simulated power) and simulates again. Every step uses the one seed the notes show, so each figure
+        # they report is reproducible from it (seed + step made "random seed X" true only of the first). It aims 0.01 above the target and
         # stops within 0.015 of the aim (about 2.4 Monte Carlo SE at R = 4000), so the N it returns reaches the
         # stated power to within Monte Carlo error rather than landing just below it; at most 5 steps.
         .simulatedN = function(raters, p, kappa0, kappa1, alpha, power, n0, p0, R, seed) {
@@ -159,7 +162,7 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 l <- lam(pw)
                 n <- if (l > 0) ceiling(n * target / l) else n * 4
                 if (n > 1e9) return(NULL)
-                pw <- withr::with_seed(seed + step,
+                pw <- withr::with_seed(seed,
                     private$.simPowerBinary(raters, p, kappa0, kappa1, alpha, n, R))
                 if (abs(pw - aim) <= 0.015) break
             }
@@ -298,16 +301,23 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
             # VAL-09 / KSP-IR-01: .run() fills est only from 10 subjects up. Binary: the simulated power fell
             # more than 0.03 short; 3-5 categories: the projection flags a large loss it cannot size reliably.
+            # est$n is NULL when the N that reaches the target is above 1e9 (rmultinom's integer size): the shortfall
+            # was still measured, so it is still reported, without a simulated N.
             if (isTRUE(est$type == "sim")) {
                 warn <- paste0(warn, block(warn_div,
                     .("Simulated power below the stated power."),
                     .fmt(
-                        .("The published formula behind this sample size is a large-sample approximation that treats the expected proportions as known. In {R} simulated studies of {n} subjects analysed with the recommended goodness-of-fit test (prevalence estimated by maximum likelihood with kappa held at kappa0), the power to reject kappa0 when kappa equals kappa1 was about {sim}, short of the stated {power}. About {needed} subjects gave a simulated power of about {simN} (random seed {seed})."),
+                        .("The published formula behind this sample size is a large-sample approximation that treats the expected proportions as known. In {R} simulated studies of {n} subjects analysed with the recommended goodness-of-fit test (prevalence estimated by maximum likelihood with kappa held at kappa0), the power to reject kappa0 when kappa equals kappa1 was about {sim}, short of the stated {power}."),
                         R = private$.fmtN(est$R), n = private$.fmtN(n_required),
                         # nsmall, not .fmtPower(): "0.80" beside "0.75", but a typed 0.825 stays 0.825
-                        sim = private$.fmtPower(est$power), power = base::format(power, nsmall = 2),
-                        needed = private$.fmtN(est$n), simN = private$.fmtPower(est$power_n),
-                        seed = est$seed)))
+                        sim = private$.fmtPower(est$power), power = base::format(power, nsmall = 2)),
+                    if (is.null(est$n))
+                        .fmt(.("The sample size that reaches the stated power is too large to simulate (random seed {seed})."),
+                             seed = est$seed)
+                    else
+                        .fmt(.("About {needed} subjects gave a simulated power of about {simN} (random seed {seed})."),
+                             needed = private$.fmtN(est$n), simN = private$.fmtPower(est$power_n),
+                             seed = est$seed)))
             }
             if (isTRUE(est$type == "cat")) {
                 warn <- paste0(warn, block(warn_div,
@@ -425,7 +435,14 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 .("It does not apply to weighted kappa for ordered grades; for an ordinal grading study either treat the grades as nominal categories or use a dedicated weighted-kappa method."),
                 .("It answers 'how many subjects do I need to reject kappa0 in favour of kappa1?' - not how precisely kappa will be estimated; to plan the expected confidence limits around an anticipated kappa, use kappaSizeCI instead."),
                 .("Note that kappa0 here is the null hypothesis value, whereas in kappaSizeCI and kappaSizeFixedN it is the agreement you anticipate observing."),
-                if (has_n)
+                # The bold figure is what gets copied into a protocol, so when the simulation found the published N
+                # short it carries the simulated N too, not the published one alone.
+                if (has_n && isTRUE(est$type == "sim") && !is.null(est$n))
+                    .fmt(
+                        .("Required sample size: <b>{n}</b> {subjects} by the published formula and about <b>{needed}</b> by simulating the recommended test, each rated by all {raters} raters."),
+                        n = private$.fmtN(n_required), subjects = private$.subjects(n_required),
+                        needed = private$.fmtN(est$n), raters = raters)
+                else if (has_n)
                     .fmt(
                         .("Required sample size: <b>{n}</b> {subjects}, each rated by all {raters} raters."),
                         n = private$.fmtN(n_required),
@@ -630,9 +647,9 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     if (sim_p < power - 0.03) {
                         found <- private$.simulatedN(raters, props[1], kappa0, kappa1, alpha, power,
                                                      n_required, sim_p, sim_R, sim_seed)
-                        if (!is.null(found))
-                            est <- list(type = "sim", power = sim_p, n = found$n, power_n = found$power,
-                                        R = sim_R, seed = sim_seed)
+                        # found is NULL above 1e9 subjects; est$n and est$power_n are then NULL
+                        est <- list(type = "sim", power = sim_p, n = found$n, power_n = found$power,
+                                    R = sim_R, seed = sim_seed)
                     }
                 } else {
                     ratio <- private$.estimatedPropsRatio(raters, props, kappa0, kappa1)
@@ -649,7 +666,12 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                             .("The required sample size is {n} {subjects}."),
                             n = private$.fmtN(n_required),
                             subjects = private$.subjects(n_required)),
-                        if (isTRUE(est$type == "sim"))
+                        if (isTRUE(est$type == "sim") && is.null(est$n))
+                            .fmt(
+                                .("A simulation of the recommended goodness-of-fit test gives a power of about {sim} at this sample size, short of the stated {power}; the sample size that reaches it is too large to simulate (random seed {seed})."),
+                                sim = private$.fmtPower(est$power), power = base::format(power, nsmall = 2),
+                                seed = est$seed)
+                        else if (isTRUE(est$type == "sim"))
                             .fmt(
                                 .("A simulation of the recommended goodness-of-fit test gives a power of about {sim} at this sample size, short of the stated {power}; about {needed} subjects reach about {simN} (random seed {seed})."),
                                 sim = private$.fmtPower(est$power), power = base::format(power, nsmall = 2),

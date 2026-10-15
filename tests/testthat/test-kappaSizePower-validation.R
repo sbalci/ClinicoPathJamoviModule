@@ -583,3 +583,30 @@ test_that("VAL C23: non-finite, negative or unreadable inputs are refused, never
     expect_equal(vkp_n(vkp_run(props = "0.3\t0.7")), 191)
     expect_equal(vkp_n(vkp_run(props = "1e-1, 9e-1")), ceiling(vkp_N(2, 2, 0.1, 0.4, 0.6)))
 })
+
+
+test_that("review 2026-10-15: the bold sample size, the stated seed and the >1e9 shortfall follow the simulation", {
+    # 6 raters, p .05, kappa .4 -> .6: the published 316 simulates to ~0.59. The bold line is what gets copied into a
+    # protocol, so it must carry the simulated N too, not 316 alone.
+    res  <- vkp_run(props = "0.05", raters = "6")
+    sim  <- vkp_sim(res)
+    bold <- regmatches(res$notices$content, regexpr("Required sample size: .*?raters\\.", res$notices$content))
+    expect_match(bold, "<b>316</b> subjects by the published formula and about <b>", fixed = TRUE)
+    expect_equal(vkp_num(bold, "about <b>([0-9,]+)</b> by simulating"), sim$n)
+    # "random seed 20261015" must reproduce every simulated figure the notes report, the simulated N's power
+    # included (the N search used to step the seed to 20261016-20, so it did not).
+    priv <- kappaSizePowerClass$new(options = kappaSizePowerOptions$new(), data = data.frame())$.__enclos_env__$private
+    again <- withr::with_seed(20261015L, priv$.simPowerBinary(6L, 0.05, 0.4, 0.6, 0.05, sim$n, 4000L))
+    expect_equal(round(again, 2), sim$power_n)
+    # The N that reaches the target exceeds rmultinom's 1e9 here (published 685,287,131); the shortfall was measured,
+    # so it is still reported, with its seed and without a simulated N. It used to vanish.
+    big <- vkp_run(props = "0.005", raters = "6", kappa0 = 0.7, kappa1 = 0.6996, alpha = 0.01)
+    expect_equal(vkp_n(big), 685287131)
+    expect_true(vkp_has(big, "Simulated power below the stated power."))
+    expect_match(big$notices$content, "too large to simulate (random seed 20261015)", fixed = TRUE)
+    expect_false(grepl("subjects gave a simulated power", big$notices$content, fixed = TRUE))
+    expect_match(big$notices$content, "Required sample size: <b>685,287,131</b> subjects, each rated by all 6 raters.", fixed = TRUE)
+    expect_match(gsub("\\s+", " ", big$text2$content), "the sample size that reaches it is too large to simulate", fixed = TRUE)
+    # no simulation, no change: the default design keeps the plain line
+    expect_match(vkp_run()$notices$content, "Required sample size: <b>241</b> subjects, each rated by all 2 raters.", fixed = TRUE)
+})
