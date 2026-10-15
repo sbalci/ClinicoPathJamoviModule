@@ -37,10 +37,22 @@ There is no evidence supporting a model change or broader GitHub permissions.
   This verifies execution, not review quality or comment delivery.
 - Limit the job to 30 minutes; retain existing GitHub App authentication and permissions.
 
+## Live validation of this change
+
+[Run 38734392859](https://github.com/sbalci/ClinicoPathJamoviModule/actions/runs/38734392859)
+passed the credential-availability preflight. The Claude GitHub App then skipped
+execution because the modified workflow did not match the default-branch copy.
+The action step reported success for that skip, but the new verification step
+correctly failed because no terminal review result existed. This verifies the
+missing-result guard on GitHub; it does not test Claude OAuth or model access.
+Do not bypass the App's workflow-validation protection.
+
 ## Maintainer recovery and validation
 
-1. Start a **new** PR synchronize run after this workflow is on the PR branch.
-   Rerunning an old run uses its old workflow, so it will not test these diagnostics.
+1. After this workflow change is reviewed and merged to the default branch,
+   start a **new** PR synchronize run with an identical workflow copy on the PR
+   branch. The Claude GitHub App will skip execution on the workflow-changing PR
+   before merge. Rerunning an old run uses its old workflow.
 2. Use the new step summary's categories as hints only. Do not publish raw JSON,
    debug logs, environment dumps, tokens or account-identifying error text.
 3. If authentication is indicated, or the credential's origin/validity is unknown:
