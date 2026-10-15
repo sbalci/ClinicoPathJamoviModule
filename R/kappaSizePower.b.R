@@ -224,7 +224,8 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
         # Notes panel, same shape as kappaSizeCI / kappaSizeFixedN: warnings first, then the
         # method statement. Rendered via a dedicated Html output rather than jmvcore::Notice
-        # objects (those cannot be serialised when inserted dynamically).
+        # objects: Notice content is escaped plain text with no line breaks, and these blocks
+        # need bold titles and several paragraphs (CLAUDE.md, "Notices: the insert() index").
         # "1 subjects" reads as a bug in a protocol sentence.
         .subjects = function(n) if (isTRUE(n == 1)) .("subject") else .("subjects"),
 
@@ -303,7 +304,8 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     .fmt(
                         .("The published formula behind this sample size is a large-sample approximation that treats the expected proportions as known. In {R} simulated studies of {n} subjects analysed with the recommended goodness-of-fit test (prevalence estimated by maximum likelihood with kappa held at kappa0), the power to reject kappa0 when kappa equals kappa1 was about {sim}, short of the stated {power}. About {needed} subjects gave a simulated power of about {simN} (random seed {seed})."),
                         R = private$.fmtN(est$R), n = private$.fmtN(n_required),
-                        sim = private$.fmtPower(est$power), power = power,
+                        # nsmall, not .fmtPower(): "0.80" beside "0.75", but a typed 0.825 stays 0.825
+                        sim = private$.fmtPower(est$power), power = base::format(power, nsmall = 2),
                         needed = private$.fmtN(est$n), simN = private$.fmtPower(est$power_n),
                         seed = est$seed)))
             }
@@ -650,7 +652,7 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         if (isTRUE(est$type == "sim"))
                             .fmt(
                                 .("A simulation of the recommended goodness-of-fit test gives a power of about {sim} at this sample size, short of the stated {power}; about {needed} subjects reach about {simN} (random seed {seed})."),
-                                sim = private$.fmtPower(est$power), power = power,
+                                sim = private$.fmtPower(est$power), power = base::format(power, nsmall = 2),
                                 needed = private$.fmtN(est$n), simN = private$.fmtPower(est$power_n),
                                 seed = est$seed),
                         if (isTRUE(est$type == "cat"))
@@ -667,16 +669,18 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             # eq. (4) model pooling leaves N unchanged. Judging the unpooled cells flagged designs
             # whose pooled cells are comfortable (6 raters, 5% finding: smallest pooled count 6.3,
             # smallest unpooled 0.0003). Two raters and 3-5 categories already use pooled cells.
+            # Counts are at the N shown, not the unrounded one: the notes say "at the required sample size",
+            # and 0.1 x 25.09 printed as 2.5 beside "26 subjects".
             gof    <- if (outcome == 2L && raters >= 3)
                           c(P0[1], sum(P0[2:raters]), P0[raters + 1]) else P0
-            e      <- gof * as.numeric(result$N)
+            e      <- gof * n_required
             sparse <- is.finite(n_required) && (any(e < 1) || mean(e < 5) > 0.2)
 
             # Expected count of each OUTCOME category at N -- the quantity the engine's own
             # discarded warning uses. A binary design may have been entered as a single
             # prevalence, so restore the complement before taking the minimum.
             marg     <- if (length(props) == 1) c(props, 1 - props) else props
-            marg     <- marg * as.numeric(result$N)
+            marg     <- marg * n_required
             marg_min <- min(marg)
             self$results$notices$setContent(
                 private$.buildNotices(n_required, sparse = sparse, outcome = outcome,

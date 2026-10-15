@@ -1,4 +1,34 @@
-# kappaSizePower — fixes from the independent review (2026-10-15, uncommitted)
+# kappaSizePower — `/check-function-full` (2026-10-15, report only)
+
+Result: FUNCTIONAL, 7/7 options effective, 4/4 outputs populated, 347 expectations green, release gate identical with
+kappaSizePower counted as shipped. Two cosmetic follow-ups, both fixed on request (same day): tests C15/C43 moved to
+the displayed N, new C44 pins both; 354 expectations green.
+
+- [x] Cosmetic (text): the Sparse / Rare-category counts are computed at the fractional N (`R/kappaSizePower.b.R:673`,
+      `:680`, `as.numeric(result$N)`) but the sentence says "At the required sample size", which is the displayed
+      ceiling. 4 categories 0.1/0.2/0.3/0.4, 6 raters, kappa 0.3 vs 0.5: N shown 26, note says 0.1 x N = "2.5" (2.6 at
+      26). Use `n_required`; grep the tests for the old figures first.
+- [x] Cosmetic (text): the stated power goes into the simulated-power sentences raw (`:305-309`, `:653-656`), so they
+      read "about 0.75, short of the stated 0.8", the mix `.fmtPower()`'s own comment rules out. Use
+      `base::format(power, nsmall = 2)`, not `.fmtPower()`, which would round a typed 0.825 to "0.82".
+
+# kappaSizePower — `/check-function --profile release` (2026-10-15)
+
+Result: no code defects. 57 test blocks green (0 fail/skip/error); release gate unchanged with kappaSizePower counted
+as shipped; scratch `prepare()` header byte-identical; kappaSize 1.2 = CRAN. Applied: two comment fixes only
+(`.b.R` Notice-serialisation rationale per CLAUDE.md 2026-09-22; `events.js` named a nonexistent `.validateProportions()`).
+
+- [ ] Out of scope (UX/docs): `vignettes/kappaSizePower-documentation.md`, `kappaSizePower_documentation.md` and
+      `testing_kappaSizePower.md` are the generic generator output — they describe datasets, missing values, tables and
+      plots (TC-02..TC-05 cannot apply to a no-data calculator) and point only at the 5-block `test-kappaSizePower.R`.
+      Regenerate with `/document-function kappaSizePower`.
+- [ ] Out of scope (cleanup): `jamovi/js/kappaSizeFixedN.events.js:25` also cites `.validateProportions()`, which
+      `R/kappaSizeFixedN.b.R` does not define (its parser is `.parseProps`).
+- [ ] Optional (UX, needs approval + Turkish): `.u.yaml` labels kappa0/kappa1 "Null hypothesis" / "Alternative
+      hypothesis" while every output says kappa0/kappa1; siblings use "Anticipated kappa (kappa0)". Candidate:
+      "Null kappa (kappa0)" / "Alternative kappa (kappa1)".
+
+# kappaSizePower — fixes from the independent review (2026-10-15, committed in 3d672a03a)
 
 Report: `development-ideas/kappaSizePower-independent-review-2026-10-15.md` (KSP-IR-01 S3, KSP-IR-02 S4; addendum).
 

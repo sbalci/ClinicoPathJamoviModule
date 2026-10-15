@@ -168,12 +168,13 @@ test_that("VAL C15: sparse-cell notice reports the oracle's expected counts on t
     Np <- vkp_lambda(0.05, 0.80) / sum((pooled(6, 0.05, 0.5) - pooled(6, 0.05, 0.2))^2 / pooled(6, 0.05, 0.2))
     expect_equal(Np, vkp_N(2, 6, 0.05, 0.2, 0.5), tolerance = 1e-10)
     res <- vkp_run(props = "0.05", raters = "6", kappa0 = 0.2, kappa1 = 0.5)
-    e <- pooled(6, 0.05, 0.2) * vkp_N(2, 6, 0.05, 0.2, 0.5)
+    # counts at the N shown (ceiling), as the notice says "at the required sample size"
+    e <- pooled(6, 0.05, 0.2) * ceiling(vkp_N(2, 6, 0.05, 0.2, 0.5))
     expect_true(vkp_has(res, "Sparse categories."))
     expect_match(res$notices$content, sprintf("smallest expected count is %s and %d of %d cells",
                  base::format(signif(min(e), 2), scientific = FALSE), sum(e < 5), length(e)), fixed = TRUE)
     # 6 raters, 5% finding, kappa 0.4 -> 0.6: unpooled cells reach 0.0003, pooled cells are all >= 5
-    e6 <- pooled(6, 0.05, 0.4) * vkp_N(2, 6, 0.05, 0.4, 0.6)
+    e6 <- pooled(6, 0.05, 0.4) * ceiling(vkp_N(2, 6, 0.05, 0.4, 0.6))
     expect_gte(min(e6), 5)
     expect_false(vkp_has(vkp_run(props = "0.05", raters = "6"), "Sparse categories."))
 })
@@ -529,13 +530,32 @@ test_that("VAL C36: binary 3+ raters - the Notes say how to estimate the prevale
 
 
 test_that("VAL C43 C16: a count printed in the Notes agrees with its own 'below 5' threshold (fixed: VAL-kappaSizePower-11)", {
-    # smallest pooled cell x N = 4.97 (binary, 2 raters, kappa .3 -> .8); rarest marginal x N = 4.97 (kappa .2 -> .9)
-    pe <- uniroot(function(p) min(vkp_cells_bin(2, p, 0.3) * vkp_N(2, 2, p, 0.3, 0.8)) - 4.97, c(0.3, 0.4), tol = 1e-13)$root
+    # smallest pooled cell x N = 4.97 (binary, 2 raters, kappa .3 -> .8); rarest marginal x N = 4.97 (kappa .2 -> .9).
+    # N is the one shown, ceiling(N), a step function of p: solve with it held, then check it did not move.
+    Ne <- 33
+    pe <- uniroot(function(p) min(vkp_cells_bin(2, p, 0.3)) * Ne - 4.97, c(0.28, 0.32), tol = 1e-13)$root
+    expect_equal(ceiling(vkp_N(2, 2, pe, 0.3, 0.8)), Ne)
     notes <- vkp_run(props = sprintf("%.12f", pe), kappa0 = 0.3, kappa1 = 0.8)$notices$content
     expect_equal(vkp_num(notes, "the smallest expected count is ([0-9.]+) and"), 4.97)
-    pm <- uniroot(function(p) p * vkp_N(2, 2, p, 0.2, 0.9) - 4.97, c(0.2, 0.3), tol = 1e-13)$root
+    Nm <- 18
+    pm <- 4.97 / Nm
+    expect_equal(ceiling(vkp_N(2, 2, pm, 0.2, 0.9)), Nm)
     notes <- vkp_run(props = sprintf("%.12f", pm), kappa0 = 0.2, kappa1 = 0.9)$notices$content
     expect_equal(vkp_num(notes, "rarest outcome category is expected in only ([0-9.]+) subjects"), 4.97)
+})
+
+
+test_that("VAL C44: the Notes count at the N shown and print the stated power to the simulated one's decimals", {
+    # 4 categories, 6 raters: N = 25.09 unrounded, 26 shown; the rarest category is 0.1 x 26 = 2.6, not 2.5
+    res <- vkp_run(outcome = "4", props = "0.1, 0.2, 0.3, 0.4", raters = "6", kappa0 = 0.3, kappa1 = 0.5)
+    expect_equal(vkp_n(res), 26)
+    expect_equal(vkp_num(res$notices$content, "rarest outcome category is expected in only ([0-9.]+) subjects"), 2.6)
+    # "about 0.59, short of the stated 0.80", never "0.8" beside two decimals; a typed 0.825 is not rounded
+    res <- vkp_run(props = "0.05", raters = "6")
+    for (txt in c(res$notices$content, res$text2$content))
+        expect_match(gsub("\\s+", " ", txt), "short of the stated 0.80", fixed = TRUE)
+    expect_match(vkp_run(props = "0.05", raters = "6", power = 0.825)$notices$content,
+                 "short of the stated 0.825", fixed = TRUE)
 })
 
 
