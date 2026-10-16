@@ -185,7 +185,8 @@ test_that("each analysis states which question it is sizing for", {
     expect_match(flat(p$text2$content), "kappaSizeCI")
 
     ci <- ClinicoPath::kappaSizeCI(outcome = "2", kappa0 = 0.6, kappaL = 0.4, kappaU = 0.8,
-                                   props = "0.30, 0.70", raters = "2", alpha = 0.05)
+                                   props = "0.30, 0.70", raters = "2", alpha = 0.05,
+                                   showExplanations = TRUE)
     expect_match(ci$text2$content, "CONFIDENCE-INTERVAL calculation")
     expect_match(ci$text2$content, "kappaSizePower")
     # and it no longer calls its anticipated kappa a null hypothesis value

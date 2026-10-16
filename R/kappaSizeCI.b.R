@@ -218,10 +218,17 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # it -- a pattern effectively never observed -- read as "below 0.01", a figure that also
         # covers a comfortable 0.009. Same floor and same wording as R/kappaSizePower.b.R and
         # R/kappaSizeFixedN.b.R, so the three analyses word the same caveat the same way.
+        # signif(x, 2) alone printed 4.95-4.99 as "5" beside "the number of cells below 5 is 1 of 3"
+        # (ten binary designs, e.g. 3 raters, p .24, 0.50 [0.30, 0.70]); same guard as kappaSizePower.
         .fmtCount = function(x) {
             if (!isTRUE(is.finite(x))) return(.("unavailable"))
             if (x < 0.0001) return(.("below 0.0001"))
-            base::format(signif(x, 2), scientific = FALSE, trim = TRUE)
+            s <- signif(x, 2)
+            if (x < 5 && s >= 5) {
+                s <- signif(x, 3)                        # 4.97 -> "4.97"
+                if (s >= 5) s <- floor(x * 100) / 100    # 4.9996 -> "4.99"
+            }
+            base::format(s, scientific = FALSE, trim = TRUE)
         },
 
         # Display form of a category proportion. .validateProportions() renormalises the
@@ -242,9 +249,9 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                    character(1))
         },
 
-        # No memoisation here. Every option this analysis has is listed in each result's
-        # clearWith, so jamovi only re-enters .run() when one of them has actually changed --
-        # a parameter-hash cache could never register a hit.
+        # No memoisation here. Every option a result's content depends on is in its clearWith,
+        # so jamovi only re-enters .run() when one of them has actually changed -- a
+        # parameter-hash cache could never register a hit.
         .prepareParameters = function() {
             props_result <- private$.validateProportions()
             if (!is.null(props_result$error)) {
@@ -532,17 +539,17 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
 
             # Wall-clock backstop, sized to what the engine should cost rather than a flat 20
-            # seconds. It is NOT unreachable: kappaSize evaluates its cell probabilities as
-            # expanded polynomials, and at an extreme prevalence with several raters those
-            # cancel to exactly 0 while the true value is merely tiny. It then divides by that
-            # zero, maps the resulting Inf to 0, and its while-loop can never exit. Measured:
-            # kappa0 = 0.70 on [0.60, 0.80] with props 0.999/0.001 and SIX raters never returns,
-            # while the same design with five raters is sized in 0.55 s. (At the module defaults,
-            # kappa0 = 0.60 on [0.40, 0.80], that same props converges in 0.2 s -- the kappa
-            # values are part of the trigger, so quote the whole design.) There is no magnitude
-            # threshold that separates the two
-            # -- props 0.9998 with six raters has a far smaller cell (7.7e-19 against 2.4e-15)
-            # and sizes without complaint -- so the only reliable detector is the clock.
+            # seconds. kappaSize evaluates its cell probabilities as expanded polynomials, and at an
+            # extreme prevalence with several raters those can cancel to exactly 0 while the true
+            # value is merely tiny; it then divides by that zero, maps the Inf to 0, and its
+            # while-loop never exits. Historically kappa0 = 0.70 on [0.60, 0.80] with props
+            # 0.999/0.001 and six raters never returned. Since the binary props are passed
+            # smaller-first (above) that design sizes in 0.8 s (n = 38,375), and a 2026-10-16
+            # search of 166 extreme designs (p down to 1e-4, 3-6 raters, 2-5 categories) found no
+            # engine failure: each either converged or was refused by the closed-form ceiling first.
+            # No current trigger is known. The guard stays because no magnitude threshold predicts
+            # the cancellation (props 0.9998 with six raters has a far smaller cell, 7.7e-19 against
+            # 2.4e-15, and sized without complaint), so the clock is the only reliable detector.
             #
             # Budget twice the worst-case cost (1e-4 s an iteration, the five-category
             # six-rater engine) rather than a flat twenty seconds, with a five-second floor so a
@@ -857,7 +864,8 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                                  sparse_total = NA_integer_,
                                  alpha = NA_real_, one_sided = FALSE,
                                  outcome = NA_integer_, raters = NA_integer_,
-                                 rml_checked = TRUE, props = NULL) {
+                                 rml_checked = TRUE, props = NULL,
+                                 show_details = FALSE, show_summary = FALSE) {
             # The confidence level was previously only ever shown symbolically as
             # "100(1 - alpha)%", so a clinician never saw the number. Both citype values deliver
             # 100(1 - alpha)%: two-sided uses qchisq(1 - alpha, 1) = z(1 - alpha/2)^2 and
@@ -888,14 +896,43 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             #   (3 raters, 3 categories, RD2012's own example); with the prevalences re-estimated by
             #   restricted maximum likelihood at each kappa, 0.958 and 0.950. Two raters: 0.945.
             info_div <- "<div style='margin:6px 0; padding:8px 10px; border-left:3px solid #3c8dbc; background-color: rgba(72, 138, 188, 0.06); color: inherit;'>"
-            info <- paste0(
+
+            # Always shown: what the number does and does not promise, and which kappa it is about.
+            # The method detail below is ~300 more words, so it waits for showExplanations
+            # (/review-function 2026-10-16: the Notes ran to ~480 words on every run).
+            caveats <- paste0(
+                info_div,
+                # The engine's own Summary pane says n subjects "ensure" the limits are met.
+                # There is no assurance probability anywhere in this design: the limits are the
+                # ones obtained IF the observed kappa lands exactly on kappa0, and P(khat < kappa0)
+                # is about 0.5. Inverting the engine's chi-square at the default design
+                # (n = 118, kappa0 = 0.60, target [0.40, 0.80]) gives [0.400, 0.749] at
+                # khat = 0.60 but [0.348, 0.708] at khat = 0.55 -- only 0.54 SD below kappa0 and
+                # already short of the 0.40 floor.
+                "<b>", .("This is a planning expectation, not a guarantee."), "</b> ",
+                .("The sample size delivers the stated limits only if the study observes the anticipated kappa. Roughly half of such studies observe less and finish with a lower limit short of the target, so plan on a conservative anticipated kappa or enrol above the figure shown."), " ",
+                # Agreement software rarely computes the goodness-of-fit interval: ClinicoPath's own
+                # agreement analysis gives Cohen's kappa a Wald or Fisher-z interval and pooled Fleiss'
+                # kappa none (R/agreement.b.R, 2026-10-16). At the default design a simulated Wald
+                # interval at n = 118 averaged [0.412, 0.776] against the planned [0.40, 0.80]
+                # (R = 4000, coverage 0.941): close for two raters, not the same interval.
+                .("This sample size is planned for the model-based goodness-of-fit interval; it does not establish the requested precision for the Wald, Fisher-z or bootstrap intervals that agreement software usually reports for Cohen's or Fleiss' κ. Report the goodness-of-fit interval, or size the study for the interval that will be reported."), " ",
+                if (!isTRUE(rml_checked))
+                    paste0(.("For this design the proportions could not be re-estimated, so the sample size holds them at their anticipated values only."), " "),
+                .("For any pair of raters this κ equals Cohen's κ when the raters share the same category frequencies (no rater bias); when their frequencies differ, it does not."),
+                # Beside the pane it qualifies, so only when that pane is shown.
+                if (isTRUE(show_summary))
+                    paste0(" ", .("(The Summary panel below reproduces the kappaSize package's own wording, which says the sample size will “ensure” the limits — read it with this caveat in mind.)")),
+                "</div>")
+
+            info <- if (isTRUE(show_details)) paste0(
                 info_div,
                 "<b>", .("Methodology."), "</b> ",
                 .("The required sample size follows the confidence-interval approach of Rotondi and Donner, on the goodness-of-fit models of Donner and Eliasziw (two raters, binary outcome), Altaye, Donner and Klar (binary outcome, more raters) and Altaye, Donner and Eliasziw (three to five categories), as implemented in the kappaSize package."), " ",
                 # IR-kappaSizeCI-01: the n now reaches the limits under BOTH ways of analysing the
-                # study, so the sentence says so; for a binary outcome with two raters it is the
-                # published fixed-proportion n (see .governingSlopes) and the sentence is unchanged.
-                if (private$.reestimationApplies(outcome, raters))
+                # study, so the sentence says so -- but only when the restricted fit ran; otherwise the
+                # caveats above say the proportions were held fixed, and claiming both would contradict it.
+                if (private$.reestimationApplies(outcome, raters) && isTRUE(rml_checked))
                     .fmt(
                         .("It is the smallest number of subjects for which the expected limits of the {level} confidence interval ({side}) for the intraclass (Fleiss-type) \u03ba of the common-correlation model reach the requested limits, given the expected category proportions and the number of raters, whether the analysis holds those proportions at their anticipated values (the published calculation, and kappaSize's) or re-estimates them by maximum likelihood at each value of \u03ba (the interval that keeps its stated coverage)."),
                         level = conf_lvl, side = ci_side_text)
@@ -905,9 +942,6 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         level = conf_lvl, side = ci_side_text),
                 " ",
                 .("Because the expected goodness-of-fit chi-square grows in proportion to the number of subjects, that number is computed directly: the chi-square critical value divided by the chi-square each subject contributes at the limit that drives the sample size, rounded up (the Study Explanation shows the numbers)."), " ",
-                if (!isTRUE(rml_checked))
-                    paste0(.("For this design the proportions could not be re-estimated, so the sample size holds them at their anticipated values only."), " "),
-                .("For any pair of raters this \u03ba equals Cohen's \u03ba when the raters share the same category frequencies (no rater bias); when their frequencies differ, it does not."), " ",
                 # IR-kappaSizeCI-02: a binary outcome uses ADK eq. (4); the 3-5 category engine is the
                 # Dirichlet-multinomial, which for two categories is the beta-binomial (ADE 2001
                 # p.2483). Same pairwise kappa, different higher-order agreement, different n: over
@@ -919,25 +953,8 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 # in the independent review; 0.929, 0.915 in the validation).
                 if (private$.reestimationApplies(outcome, raters))
                     paste0(.("When the study is analysed, estimate the category prevalences by maximum likelihood at each candidate value of \u03ba: with three or more raters, or three or more categories, plugging in the overall proportions of ratings gives an interval that covers \u03ba less often than stated (about 0.91 to 0.93 instead of 0.95 in the designs simulated for this analysis)."), " "),
-                # Agreement software rarely computes the goodness-of-fit interval: ClinicoPath's own
-                # agreement analysis gives Cohen's kappa a Wald or Fisher-z interval and pooled Fleiss'
-                # kappa none (R/agreement.b.R, 2026-10-16). At the default design a simulated Wald
-                # interval at n = 118 averaged [0.412, 0.776] against the planned [0.40, 0.80]
-                # (R = 4000, coverage 0.941): close for two raters, not the same interval.
-                .("This sample size is planned for the model-based goodness-of-fit interval; it does not establish the requested precision for the Wald, Fisher-z or bootstrap intervals that agreement software usually reports for Cohen's or Fleiss' \u03ba. Report the goodness-of-fit interval, or size the study for the interval that will be reported."), " ",
-                # The engine's own Summary pane says n subjects "ensure" the limits are met.
-                # There is no assurance probability anywhere in this design: the limits are the
-                # ones obtained IF the observed kappa lands exactly on kappa0, and P(khat < kappa0)
-                # is about 0.5. Inverting the engine's chi-square at the default design
-                # (n = 118, kappa0 = 0.60, target [0.40, 0.80]) gives [0.400, 0.749] at
-                # khat = 0.60 but [0.348, 0.708] at khat = 0.55 -- only 0.54 SD below kappa0 and
-                # already short of the 0.40 floor. The module's own text1 is worded
-                # conditionally; this sentence covers the vendor pane, which cannot be.
-                "<b>", .("This is a planning expectation, not a guarantee."), "</b> ",
-                .("The sample size delivers the stated limits only if the study observes the anticipated kappa. Roughly half of such studies observe less and finish with a lower limit short of the target, so plan on a conservative anticipated kappa or enrol above the figure shown."), " ",
-                .("(The Summary panel below reproduces the kappaSize package's own wording, which says the sample size will \u201censure\u201d the limits \u2014 read it with this caveat in mind.)"),
-                "</div>"
-            )
+                "</div>")
+            else ""
 
             warn <- ""
 
@@ -1041,7 +1058,7 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                        "</div>")
             else ""
 
-            return(paste0(warn, answer, info))
+            return(paste0(warn, answer, caveats, info))
         },
 
         .subjects = function(n) if (isTRUE(n == 1)) .("subject") else .("subjects"),
@@ -1070,64 +1087,68 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             required_n <- private$.minimumN(params)
             if (!isTRUE(is.finite(required_n))) required_n <- engine_n
 
+            # text2 and text_summary are visible only when their checkbox is on (r.yaml), and nothing
+            # is built for or written to a hidden pane.
+            show_details <- isTRUE(self$options$showExplanations)
+            show_summary <- isTRUE(self$options$showSummary)
+
             # Build outputs defensively; only unexpected formatting/summary errors
             # are caught here (the reject-throwing steps already ran above).
             tryCatch({
                 # Format the result
                 formatted_result <- private$.formatSampleSizeOutput(raw_result, required_n)
 
-                # Capture summary output from kappaSize
-                # The engine prints its marginal cell-count warning once per rare category (five
-                # times for five levels) and, in one-sided mode, echoes the deliberate
-                # `kappaU = NA` sentinel as a bare "KappaU: NA" that reads to a clinician like a
-                # failed calculation. Both siblings already strip the repeats; this file never
-                # got the fix.
-                summary_lines <- utils::capture.output(summary(raw_result))
-                summary_lines <- summary_lines[
-                    !(duplicated(summary_lines) &
-                      grepl("expected cell count", summary_lines, fixed = TRUE))]
-                # Assigned by index, not through sub(): sub() parses its REPLACEMENT for
-                # backslash escapes (\1 is a backreference), and the replacement here is a
-                # translated string, so a catalog entry containing a backslash would error or
-                # silently mangle the line. The PATTERN stays the untranslated engine output.
-                if (isTRUE(params$citype == "one_sided")) {
-                    ku <- grepl("^KappaU:\\s*NA\\s*$", summary_lines)
-                    if (any(ku))
-                        summary_lines[ku] <- .("KappaU: not applicable (one-sided interval)")
-                }
+                if (show_summary) {
+                    # Capture summary output from kappaSize
+                    # The engine prints its marginal cell-count warning once per rare category (five
+                    # times for five levels) and, in one-sided mode, echoes the deliberate
+                    # `kappaU = NA` sentinel as a bare "KappaU: NA" that reads to a clinician like a
+                    # failed calculation. Both siblings already strip the repeats; this file never
+                    # got the fix.
+                    summary_lines <- utils::capture.output(summary(raw_result))
+                    summary_lines <- summary_lines[
+                        !(duplicated(summary_lines) &
+                          grepl("expected cell count", summary_lines, fixed = TRUE))]
+                    # Assigned by index, not through sub(): sub() parses its REPLACEMENT for
+                    # backslash escapes (\1 is a backreference), and the replacement here is a
+                    # translated string, so a catalog entry containing a backslash would error or
+                    # silently mangle the line. The PATTERN stays the untranslated engine output.
+                    if (isTRUE(params$citype == "one_sided")) {
+                        ku <- grepl("^KappaU:\\s*NA\\s*$", summary_lines)
+                        if (any(ku))
+                            summary_lines[ku] <- .("KappaU: not applicable (one-sided interval)")
+                    }
 
-                # kappaSize's binary engine keeps only props[1] and summary() prints THAT as
-                # "Event Proportion:". .calculateSampleSize() hands it the SORTED pair (the
-                # order decides whether the vendor polynomials converge), so a user who typed
-                # a prevalence above 0.5 read the complement of their own design assumption
-                # here while the Study Explanation pane showed it correctly -- two panels of
-                # one analysis stating opposite prevalences. n is identical either way
-                # (agreement is symmetric under relabelling the two categories), so only the
-                # printed line is wrong. Restore the entered value.
-                if (params$outcome == 2) {
-                    ep <- grepl("^Event Proportion:", summary_lines)
-                    if (any(ep))
-                        summary_lines[ep] <- .fmt(.("Event Proportion: {p}"),
-                                                  p = private$.fmtNum(params$props[1]))
+                    # kappaSize's binary engine keeps only props[1] and summary() prints THAT as
+                    # "Event Proportion:". .calculateSampleSize() hands it the SORTED pair (the
+                    # order decides whether the vendor polynomials converge), so a user who typed
+                    # a prevalence above 0.5 read the complement of their own design assumption
+                    # here while the Study Explanation pane showed it correctly -- two panels of
+                    # one analysis stating opposite prevalences. n is identical either way
+                    # (agreement is symmetric under relabelling the two categories), so only the
+                    # printed line is wrong. Restore the entered value.
+                    if (params$outcome == 2) {
+                        ep <- grepl("^Event Proportion:", summary_lines)
+                        if (any(ep))
+                            summary_lines[ep] <- .fmt(.("Event Proportion: {p}"),
+                                                      p = private$.fmtNum(params$props[1]))
+                    }
+                    # The pane prints kappaSize's own "A minimum of N subjects", which can differ from
+                    # the reported n. Say why beside the number, rather than leave two panes stating two
+                    # sample sizes. Two reasons, checked in this order: re-estimating the proportions
+                    # needs more subjects than kappaSize plans for (IR-kappaSizeCI-01), or kappaSize's
+                    # search floor and stopping margin put it slightly above the minimum.
+                    n_fixed <- private$.minimumN(params, "fixed")
+                    if (isTRUE(is.finite(engine_n) && is.finite(n_fixed) && required_n > n_fixed))
+                        summary_lines <- c(summary_lines, "", .fmt(
+                            .("kappaSize's own search, above, reports {engine} subjects, holding the\ncategory proportions at their anticipated values as the published tables do.\nThe required sample size is {n}: it also reaches the requested limits when\nthe proportions are re-estimated at each value of kappa, as the analysis of\nthe study should do."),
+                            engine = private$.fmtN(engine_n), n = private$.fmtN(required_n)))
+                    else if (isTRUE(is.finite(engine_n) && engine_n != required_n))
+                        summary_lines <- c(summary_lines, "", .fmt(
+                            .("kappaSize's own search, above, reports {engine} subjects; the required\nsample size is {n}. kappaSize starts its search at 11 subjects and stops only\nonce the chi-square exceeds its critical value by 0.001, so it can report\nslightly more subjects than the smallest number that reaches the requested limits."),
+                            engine = private$.fmtN(engine_n), n = private$.fmtN(required_n)))
+                    summary_text <- paste(summary_lines, collapse = "\n")
                 }
-                # The pane prints kappaSize's own "A minimum of N subjects", which can differ from
-                # the reported n. Say why beside the number, rather than leave two panes stating two
-                # sample sizes. Two reasons, checked in this order: re-estimating the proportions
-                # needs more subjects than kappaSize plans for (IR-kappaSizeCI-01), or kappaSize's
-                # search floor and stopping margin put it slightly above the minimum.
-                n_fixed <- private$.minimumN(params, "fixed")
-                if (isTRUE(is.finite(engine_n) && is.finite(n_fixed) && required_n > n_fixed))
-                    summary_lines <- c(summary_lines, "", .fmt(
-                        .("kappaSize's own search, above, reports {engine} subjects, holding the\ncategory proportions at their anticipated values as the published tables do.\nThe required sample size is {n}: it also reaches the requested limits when\nthe proportions are re-estimated at each value of kappa, as the analysis of\nthe study should do."),
-                        engine = private$.fmtN(engine_n), n = private$.fmtN(required_n)))
-                else if (isTRUE(is.finite(engine_n) && engine_n != required_n))
-                    summary_lines <- c(summary_lines, "", .fmt(
-                        .("kappaSize's own search, above, reports {engine} subjects; the required\nsample size is {n}. kappaSize starts its search at 11 subjects and stops only\nonce the chi-square exceeds its critical value by 0.001, so it can report\nslightly more subjects than the smallest number that reaches the requested limits."),
-                        engine = private$.fmtN(engine_n), n = private$.fmtN(required_n)))
-                summary_text <- paste(summary_lines, collapse = "\n")
-
-                # Generate explanation
-                explanation <- private$.generateExplanation(params)
 
                 # Methodology / large-sample notices. Sparseness is judged on the
                 # agreement-pattern cells at the requested confidence limits (Cochran's rule),
@@ -1145,12 +1166,14 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     sparse_min    = verdict$min,
                     sparse_below5 = verdict$below5,
                     sparse_total  = verdict$total,
-                    props         = params$props)
+                    props         = params$props,
+                    show_details  = show_details,
+                    show_summary  = show_summary)
 
                 # Set results
                 self$results$text1$setContent(formatted_result)
-                self$results$text_summary$setContent(summary_text)
-                self$results$text2$setContent(explanation)
+                if (show_summary) self$results$text_summary$setContent(summary_text)
+                if (show_details) self$results$text2$setContent(private$.generateExplanation(params))
                 self$results$notices$setContent(notices_html)
 
             }, error = function(e) {

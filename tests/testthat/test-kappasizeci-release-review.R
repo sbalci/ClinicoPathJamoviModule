@@ -13,7 +13,8 @@
 ci_run <- function(...) {
     args <- utils::modifyList(
         list(outcome = "2", citype = "two_sided", kappa0 = 0.60, kappaL = 0.40,
-             kappaU = 0.80, props = "0.20, 0.80", raters = "2", alpha = 0.05),
+             kappaU = 0.80, props = "0.20, 0.80", raters = "2", alpha = 0.05,
+             showExplanations = TRUE, showSummary = TRUE),
         list(...))
     do.call(ClinicoPath::kappaSizeCI, args)
 }
@@ -660,4 +661,104 @@ test_that("every kappaSizeCI msgid has a Turkish translation with the same place
         expect_true(nzchar(e$msgstr), info = e$msgid)
         expect_identical(ph(e$msgstr), ph(e$msgid), info = e$msgid)
     }
+})
+
+
+test_that("a smallest expected count just under 5 is not printed as 5 (review-function 2026-10-16)", {
+    # signif(x, 2) turned 4.95-4.99 into "5", so ten binary designs read "the smallest expected count is 5,
+    # and the number of cells below 5 is 1 of 3". Same guard as R/kappaSizePower.b.R .fmtCount (VAL-11).
+    res <- ci_run(raters = "3", props = "0.24, 0.76", kappa0 = 0.50, kappaL = 0.30, kappaU = 0.70)
+    txt <- res$notices$content
+    expect_match(txt, "number of cells below 5 is 1 of 3", fixed = TRUE)
+    m <- regmatches(txt, regexpr("smallest expected count is [0-9.]+", txt))
+    expect_length(m, 1L)
+    shown <- as.numeric(sub("smallest expected count is ", "", m))
+    expect_lt(shown, 5)
+    expect_gt(shown, 4.9)
+})
+
+
+test_that(".fmtCount never rounds a count below 5 up to 5 (review-function 2026-10-16)", {
+    an  <- ClinicoPath:::kappaSizeCIClass$new(options = ClinicoPath:::kappaSizeCIOptions$new())
+    fmt <- an$.__enclos_env__$private$.fmtCount
+    expect_identical(fmt(4.94), "4.9")
+    expect_identical(fmt(4.95), "4.95")
+    expect_identical(fmt(4.99), "4.99")
+    expect_identical(fmt(4.9996), "4.99")
+    expect_identical(fmt(5), "5")
+    expect_identical(fmt(0.013), "0.013")
+})
+
+
+test_that("method detail and the kappaSize summary are off by default; the caveats are not (review-function 2026-10-16)", {
+    # The Notes ran to ~480 words on every run. The answer, the warnings and the caveats that qualify
+    # the number stay; the methodology, Study Explanation and kappaSize's printout wait for a checkbox.
+    base <- list(outcome = "2", citype = "two_sided", kappa0 = 0.60, kappaL = 0.40, kappaU = 0.80,
+                 props = "0.20, 0.80", raters = "4", alpha = 0.05)
+    run <- function(...) do.call(ClinicoPath::kappaSizeCI, utils::modifyList(base, list(...)))
+    off <- run()
+    expect_false(off$text2$visible)
+    expect_false(off$text_summary$visible)
+    filled <- function(x) !is.null(x) && nzchar(x)
+    expect_false(filled(off$text2$content))
+    expect_false(filled(off$text_summary$content))
+    notes <- off$notices$content
+    expect_match(notes, "Required sample size: <b>62</b>", fixed = TRUE)
+    expect_match(notes, "This is a planning expectation, not a guarantee.", fixed = TRUE)
+    expect_match(notes, "model-based goodness-of-fit interval", fixed = TRUE)
+    expect_match(notes, "Cohen's", fixed = TRUE)
+    expect_false(grepl("Methodology.", notes, fixed = TRUE))
+    expect_false(grepl("reproduces the kappaSize package", notes, fixed = TRUE))
+    words <- length(strsplit(trimws(gsub("<[^>]+>", " ", notes)), "\\s+")[[1]])
+    expect_lt(words, 200L)
+
+    det <- run(showExplanations = TRUE)
+    expect_true(det$text2$visible)
+    expect_match(det$text2$content, "Required n = ", fixed = TRUE)
+    expect_match(det$notices$content, "Methodology.", fixed = TRUE)
+    expect_false(det$text_summary$visible)
+    expect_false(grepl("reproduces the kappaSize package", det$notices$content, fixed = TRUE))
+
+    sm <- run(showSummary = TRUE)
+    expect_true(sm$text_summary$visible)
+    expect_match(sm$text_summary$content, "kappaSize's own search, above, reports 56", fixed = TRUE)
+    expect_match(sm$notices$content, "reproduces the kappaSize package", fixed = TRUE)
+    expect_false(grepl("Methodology.", sm$notices$content, fixed = TRUE))
+
+    # the checkboxes change what is shown, never the number
+    both <- run(showExplanations = TRUE, showSummary = TRUE)
+    for (r in list(off, det, sm, both))
+        expect_identical(strsplit(r$text1$content, "\n")[[1]][1], "Required sample size: 62")
+})
+
+
+test_that("the Methodology does not claim re-estimation when the restricted fit failed (review-function 2026-10-16)", {
+    an    <- ClinicoPath:::kappaSizeCIClass$new(options = ClinicoPath:::kappaSizeCIOptions$new())
+    build <- an$.__enclos_env__$private$.buildNotices
+    failed <- build(190, alpha = 0.05, outcome = 3, raters = 3, rml_checked = FALSE,
+                    props = c(0.11, 0.70, 0.19), show_details = TRUE)
+    expect_match(failed, "could not be re-estimated", fixed = TRUE)
+    expect_false(grepl("or re-estimates them by maximum likelihood", failed, fixed = TRUE))
+    ok <- build(190, alpha = 0.05, outcome = 3, raters = 3, rml_checked = TRUE,
+                props = c(0.11, 0.70, 0.19), show_details = TRUE)
+    expect_match(ok, "or re-estimates them by maximum likelihood", fixed = TRUE)
+    expect_false(grepl("could not be re-estimated", ok, fixed = TRUE))
+})
+
+
+test_that("every option named in a validation message is named on screen; kappaL help is not 'nearer limit' (review-function 2026-10-16)", {
+    ui <- testthat::test_path("..", "..", "jamovi", "kappaSizeCI.u.yaml")
+    ay <- testthat::test_path("..", "..", "jamovi", "kappaSizeCI.a.yaml")
+    skip_if_not(file.exists(ui) && file.exists(ay))
+    labels <- unlist(lapply(yaml::read_yaml(ui)$children, function(x) {
+        walk <- function(n) c(n$label, unlist(lapply(n$children, walk)))
+        walk(x)
+    }))
+    for (id in c("kappa0", "kappaL", "kappaU"))
+        expect_true(any(grepl(paste0("(", id, ")"), labels, fixed = TRUE)), info = id)
+    # kappa0 .75 on [.60, .85] needs 167 whatever the nearer kappaU is: the help may not say otherwise
+    opt <- Filter(function(o) identical(o$name, "kappaL"), yaml::read_yaml(ay)$options)[[1]]
+    for (d in c(opt$description$ui, opt$description$R)) expect_match(d, "not always", fixed = TRUE)
+    expect_identical(ci_n(ci_run(kappa0 = 0.75, kappaL = 0.60, kappaU = 0.85)),
+                     ci_n(ci_run(kappa0 = 0.75, kappaL = 0.60, kappaU = 0.95)))
 })

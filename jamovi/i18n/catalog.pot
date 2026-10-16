@@ -14769,6 +14769,7 @@ msgstr ""
 msgid "Additional Options"
 msgstr ""
 
+#: kappaSizeCI/ui[5].label
 #: mixedeffectscox/ui[9][0].label
 msgid "Additional Output"
 msgstr ""
@@ -14984,6 +14985,19 @@ msgid ""
 "Adds percentile confidence intervals to the frozen-model metrics, resampling "
 "whole patients when a patient identifier is given (jointly across models, "
 "within sites). Without it the report shows point estimates only."
+msgstr ""
+
+#: kappaSizeCI/options/showSummary.description.ui
+msgid ""
+"Adds the kappaSize package's own printed summary, with a note on why its "
+"sample size can differ from the one reported here."
+msgstr ""
+
+#: kappaSizeCI/options/showExplanations.description.ui
+msgid ""
+"Adds the methodology (models, how the sample size is computed, analysis "
+"advice) and the step-by-step Study Explanation. The sample size, the "
+"warnings and the main caveats are always shown."
 msgstr ""
 
 #: pathsampling/results/adequacyByELN.title
@@ -88047,6 +88061,10 @@ msgstr ""
 msgid "kappaSize package is required for validated kappa sample size calculations."
 msgstr ""
 
+#: kappaSizeCI/options/showSummary.title
+msgid "kappaSize package summary"
+msgstr ""
+
 #: R/kappaSizeFixedN.b.R
 msgid ""
 "kappaSize searches downward in steps of 0.001 and reports the first value "
@@ -92956,19 +92974,20 @@ msgstr ""
 msgid "Lower confidence interval bounds."
 msgstr ""
 
-#: kappaSizeCI/ui[2][1]/kappaL.label
-msgid "Lower confidence limit"
-msgstr ""
-
 #: evalue/options/ci_lower.title
 msgid "Lower Confidence Limit"
+msgstr ""
+
+#: kappaSizeCI/ui[2][1]/kappaL.label
+msgid "Lower confidence limit (kappaL)"
 msgstr ""
 
 #: kappaSizeCI/options/kappaL.description.ui
 msgid ""
 "Lower confidence limit you want the study to achieve for kappa. It must be "
-"below kappa0; the sample size is driven by how close it sits to kappa0, not "
-"by the full interval width."
+"below kappa0. The sample size is set by the limit that is harder to reach - "
+"usually, but not always, the one nearer kappa0 - not by the full interval "
+"width."
 msgstr ""
 
 #: labcontrolcharts/results/controlLimits.columns.title
@@ -98518,6 +98537,10 @@ msgstr ""
 #: samplingerror/results/methodology.title
 #: stereology/results/methodology.title
 msgid "Methodology & Interpretation"
+msgstr ""
+
+#: kappaSizeCI/options/showExplanations.title
+msgid "Methodology and study explanation"
 msgstr ""
 
 #: directregression/results/methodologyExplanation.title
@@ -180273,12 +180296,12 @@ msgstr ""
 msgid "Upper confidence interval bounds."
 msgstr ""
 
-#: kappaSizeCI/ui[2][2]/kappaU.label
-msgid "Upper confidence limit"
-msgstr ""
-
 #: evalue/options/ci_upper.title
 msgid "Upper Confidence Limit"
+msgstr ""
+
+#: kappaSizeCI/ui[2][2]/kappaU.label
+msgid "Upper confidence limit (kappaU)"
 msgstr ""
 
 #: kappaSizeCI/options/kappaU.description.ui

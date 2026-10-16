@@ -89,12 +89,13 @@ options:
       description:
           ui: >
               Lower confidence limit you want the study to achieve for kappa. It must be
-              below kappa0; the sample size is driven by how close it sits to kappa0, not
-              by the full interval width.
+              below kappa0. The sample size is set by the limit that is harder to reach -
+              usually, but not always, the one nearer kappa0 - not by the full interval width.
           R: >
               Lower confidence limit you want the study to achieve for kappa. Must be
               strictly below kappa0. The required sample size grows roughly as one over the
-              square of the distance from kappa0 to the nearer limit.
+              square of the distance from kappa0 to the limit that governs it - usually, but
+              not always, the nearer one.
 
     - name: kappaU
       title: kappaU
@@ -158,5 +159,28 @@ options:
               Significance level of the confidence interval - 0.05 gives a 95 percent interval
               (capped at 0.20). Two-sided intervals use qchisq(1 - alpha, 1); a one-sided
               lower bound uses qchisq(1 - 2*alpha, 1).
+
+    - name: showExplanations
+      title: Methodology and study explanation
+      type: Bool
+      default: false
+      description:
+          ui: >
+              Adds the methodology (models, how the sample size is computed, analysis advice)
+              and the step-by-step Study Explanation. The sample size, the warnings and the main
+              caveats are always shown.
+          R: >
+              If TRUE, adds the Methodology panel to the Notes and shows the Study Explanation.
+
+    - name: showSummary
+      title: kappaSize package summary
+      type: Bool
+      default: false
+      description:
+          ui: >
+              Adds the kappaSize package's own printed summary, with a note on why its sample
+              size can differ from the one reported here.
+          R: >
+              If TRUE, shows the kappaSize package's own summary output.
 
 ...

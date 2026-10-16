@@ -2875,10 +2875,46 @@ missing (below the missingness screen's floor) still gets only the generic "Remo
 
 Follow-ups from the kappaSizePower release review (2026-10-14, `development-ideas/kappaSizePower-validation-2026-10-14.md`):
 
-- [ ] `.fmtCount()` (`R/kappaSizeCI.b.R:204`) uses `signif(x, 2)` beside "k of m cells are below 5": an expected
+- [x] `.fmtCount()` (`R/kappaSizeCI.b.R:204`) uses `signif(x, 2)` beside "k of m cells are below 5": an expected
   count of 4.95-4.99 prints as "5". kappaSizePower's guard (`R/kappaSizePower.b.R` `.fmtCount`) is the fix (VAL-11).
-- [ ] The CI-width N evaluates the cells at the typed proportions. Check whether the achieved interval width
+  Still open 2026-10-16 (now `:221-225`): 10 binary designs print "the smallest expected count is 5, and the number
+  of cells below 5 is 1 of 3", e.g. 3 raters, p .24, kappa0 .50 [.30, .70].
+  Fixed 2026-10-16: kappaSizePower's guard ported; tests (end-to-end design + 4.94/4.95/4.99/4.9996/5).
+- [x] The CI-width N evaluates the cells at the typed proportions. Check whether the achieved interval width
   assumes the proportions known, as the power N did (kappaSizePower VAL-09).
+  Resolved by IR-kappaSizeCI-01 (`.rmlSlopes` / `.governingSlopes`). `/review-function` 2026-10-16: an independent
+  oracle (lgamma cells, nlminb/optimize, uniroot on the expected-data limits) gives the same n in 10/10 designs,
+  with limits inside the target under both fixed and re-estimated proportions at n, and not at n - 1.
+
+Follow-ups from `/review-function` (2026-10-16, after 04ba8033d; tests 668/668, oracle 10/10, lintr 0 real):
+
+- [x] Docs: the `kappaL` `R:` description (`jamovi/kappaSizeCI.a.yaml:97`, so also `man/kappaSizeCI.Rd:31` and
+  `.h.R`) says n is set by "the distance from kappa0 to the nearer limit". Wrong when the other limit binds:
+  kappa0 .75 [.60, .85] needs 167; moving the nearer kappaU to .95 leaves 167, moving kappaL to .70 gives 1,211.
+  Reword as "the limit that governs n (usually, not always, the nearer one)"; then `prepare()` + `document()`.
+  Fixed 2026-10-16 in both `ui:` and `R:` (the `ui:` text said the same), Turkish adapted; test guards it.
+- [x] UX: the validation messages say "kappaL" / "kappaU" (`R/kappaSizeCI.b.R:34,40,45`), but the UI labels are
+  "Lower confidence limit" / "Upper confidence limit", so those names appear nowhere on screen. Add "(kappaL)" /
+  "(kappaU)" to the `.u.yaml` labels as "Anticipated kappa (kappa0)" already does, or reword the messages.
+  Either way the msgids change, so re-translate them in tr.po.
+  Fixed 2026-10-16: labels now "... (kappaL)" / "... (kappaU)", Turkish filled; test checks every id in a message is on a label.
+- [x] UX: the Notes Html is about 480 words on every run (default binary design, 4 raters), and the Study
+  Explanation and the kappaSize Summary pane are always visible too. Keep the two safety caveats visible (planning
+  expectation, not a guarantee; goodness-of-fit interval, not Wald). Move the method detail behind an
+  off-by-default checkbox (models, closed-form n, ADK vs beta-binomial, Cohen equivalence, coverage advice).
+  Fixed 2026-10-16: `showExplanations` (Methodology + Study Explanation) and `showSummary` (kappaSize output + its
+  "ensure" caveat), both off, in an "Additional Output" CollapseBox. Always shown: warnings, answer, planning-expectation,
+  goodness-of-fit-not-Wald, Cohen/rater-bias, and the re-estimation-failed sentence. Also fixed (found by Codex): with
+  the restricted fit failed, the Methodology claimed re-estimation while the next sentence said it was not done.
+- [x] Cleanup: the time-out comment (`R/kappaSizeCI.b.R:535-546`) cites 0.999/0.001, six raters, 0.70 [0.60, 0.80]
+  as never returning. Since the smaller-proportion-first sort (`:500`) that design sizes in 0.8 s (n = 38,375).
+  0.9999/0.0001 and the 3- and 5-category extremes I tried are refused by the closed-form ceiling before the
+  engine runs. Keep the backstop, but correct the example.
+  Fixed 2026-10-16: comment now calls the example historical; a 166-design search found no current trigger.
+- [x] Unrelated, found via `test-meddecide-library-audit.R`: it fails at `:964` because `lassologistic`'s
+  `methodComparison` row keys are now `beta10, smallest, maxscaled, full`, while the test still expects
+  `schneeweiss`.
+  Fixed 2026-10-16: the expectation now reads `smallest` (the rename was deliberate, 2026-10-12); 107/107.
 
 ```text
 /fix-function kappaSizeCI --apply

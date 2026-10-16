@@ -17183,9 +17183,10 @@ msgstr ""
 msgid "Additional Options"
 msgstr ""
 
+#: kappaSizeCI/ui[5].label
 #: mixedeffectscox/ui[9][0].label
 msgid "Additional Output"
-msgstr ""
+msgstr "Ek Çıktı"
 
 #: pathagreement/ui[13][0][0].label
 msgid "Additional output"
@@ -17408,6 +17409,25 @@ msgstr ""
 "tanımlayıcısı verildiğinde hastaları bütün olarak yeniden örnekler (modeller "
 "arasında birlikte, merkezlerin içinde). Bu seçenek olmadan rapor yalnızca "
 "nokta tahminlerini gösterir."
+
+#: kappaSizeCI/options/showSummary.description.ui
+msgid ""
+"Adds the kappaSize package's own printed summary, with a note on why its "
+"sample size can differ from the one reported here."
+msgstr ""
+"kappaSize paketinin kendi yazdırdığı özeti, o paketin örneklem büyüklüğünün "
+"burada bildirilenden neden farklı olabileceğine ilişkin bir notla birlikte "
+"ekler."
+
+#: kappaSizeCI/options/showExplanations.description.ui
+msgid ""
+"Adds the methodology (models, how the sample size is computed, analysis "
+"advice) and the step-by-step Study Explanation. The sample size, the "
+"warnings and the main caveats are always shown."
+msgstr ""
+"Yöntemi (modeller, örneklem büyüklüğünün nasıl hesaplandığı, analiz "
+"önerileri) ve adım adım Çalışma Açıklamasını ekler. Örneklem büyüklüğü, "
+"uyarılar ve temel çekinceler her zaman gösterilir."
 
 #: pathsampling/results/adequacyByELN.title
 msgid "Adequacy Assessment by ELN Thresholds"
@@ -94320,6 +94340,10 @@ msgstr ""
 "Doğrulanmış kappa örneklem büyüklüğü hesaplamaları için kappaSize paketi "
 "gereklidir."
 
+#: kappaSizeCI/options/showSummary.title
+msgid "kappaSize package summary"
+msgstr "kappaSize paket özeti"
+
 #: R/kappaSizeFixedN.b.R
 msgid ""
 "kappaSize searches downward in steps of 0.001 and reports the first value "
@@ -99487,23 +99511,25 @@ msgstr ""
 msgid "Lower confidence interval bounds."
 msgstr ""
 
-#: kappaSizeCI/ui[2][1]/kappaL.label
-msgid "Lower confidence limit"
-msgstr "Alt güven sınırı"
-
 #: evalue/options/ci_lower.title
 msgid "Lower Confidence Limit"
 msgstr ""
 
+#: kappaSizeCI/ui[2][1]/kappaL.label
+msgid "Lower confidence limit (kappaL)"
+msgstr "Alt güven sınırı (kappaL)"
+
 #: kappaSizeCI/options/kappaL.description.ui
 msgid ""
 "Lower confidence limit you want the study to achieve for kappa. It must be "
-"below kappa0; the sample size is driven by how close it sits to kappa0, not "
-"by the full interval width."
+"below kappa0. The sample size is set by the limit that is harder to reach - "
+"usually, but not always, the one nearer kappa0 - not by the full interval "
+"width."
 msgstr ""
 "Çalışmanın kappa için ulaşmasını istediğiniz alt güven sınırı. kappa0 "
-"değerinin altında olmalıdır; örneklem büyüklüğü, tam aralık genişliğine göre "
-"değil, kappa0 değerine ne kadar yakın olduğuna göre belirlenir."
+"değerinin altında olmalıdır. Örneklem büyüklüğünü tam aralık genişliği "
+"değil, ulaşılması daha zor olan sınır belirler; bu genellikle, ancak her "
+"zaman değil, kappa0 değerine daha yakın olan sınırdır."
 
 #: labcontrolcharts/results/controlLimits.columns.title
 msgid "Lower Control Limit (LCL)"
@@ -105246,6 +105272,10 @@ msgstr ""
 #: stereology/results/methodology.title
 msgid "Methodology & Interpretation"
 msgstr ""
+
+#: kappaSizeCI/options/showExplanations.title
+msgid "Methodology and study explanation"
+msgstr "Yöntem ve çalışma açıklaması"
 
 #: directregression/results/methodologyExplanation.title
 #: dynamicprediction/results/methodologyExplanation.title
@@ -193779,13 +193809,13 @@ msgstr ""
 msgid "Upper confidence interval bounds."
 msgstr ""
 
-#: kappaSizeCI/ui[2][2]/kappaU.label
-msgid "Upper confidence limit"
-msgstr "Üst güven sınırı"
-
 #: evalue/options/ci_upper.title
 msgid "Upper Confidence Limit"
 msgstr ""
+
+#: kappaSizeCI/ui[2][2]/kappaU.label
+msgid "Upper confidence limit (kappaU)"
+msgstr "Üst güven sınırı (kappaU)"
 
 #: kappaSizeCI/options/kappaU.description.ui
 msgid ""

@@ -961,7 +961,9 @@ test_that("fixed-row tables across meddecide are scaffolded before .run()", {
                      c("method", "auc", "cutoff", "accuracy", "sensitivity", "specificity", "precision", "f1",
                        "mean_pos", "mean_neg", "range"))
     expect_identical(ll("validationTable"), c("auc", "brier", "slope"))
-    expect_identical(ll("methodComparison"), c("beta10", "schneeweiss", "maxscaled", "full"))
+    # "smallest", not "schneeweiss": divide-by-smallest is a Sullivan-type scale; Schneeweiss 2003 is
+    # +1 point per 0.3 ln(OR) (lassologistic key renamed 2026-10-12).
+    expect_identical(ll("methodComparison"), c("beta10", "smallest", "maxscaled", "full"))
   }
 
   if ("psychopdaROC" %in% loaded) {

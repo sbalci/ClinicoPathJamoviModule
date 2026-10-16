@@ -8,7 +8,9 @@ test_that("kappaSizeCI works for binary outcomes (2 categories)", {
     kappaU = 0.80,
     props = "0.30, 0.70",
     raters = "2",
-    alpha = 0.05
+    alpha = 0.05,
+    showExplanations = TRUE,
+    showSummary = TRUE
   )
 
   expect_true(!is.null(results$text1$content))
@@ -38,7 +40,9 @@ test_that("kappaSizeCI works for 3 categories", {
     kappaU = 0.70,
     props = "0.20, 0.30, 0.50",
     raters = "3",
-    alpha = 0.05
+    alpha = 0.05,
+    showExplanations = TRUE,
+    showSummary = TRUE
   )
 
   expect_match(results$text1$content, "Required sample size")
@@ -85,7 +89,9 @@ test_that("kappaSizeCI one-sided CI requires fewer subjects", {
     kappaU = 0.80,
     props = "0.30, 0.70",
     raters = "2",
-    alpha = 0.05
+    alpha = 0.05,
+    showExplanations = TRUE,
+    showSummary = TRUE
   )
 
   one_sided <- kappaSizeCI(
@@ -96,7 +102,9 @@ test_that("kappaSizeCI one-sided CI requires fewer subjects", {
     kappaU = 0.80,
     props = "0.30, 0.70",
     raters = "2",
-    alpha = 0.05
+    alpha = 0.05,
+    showExplanations = TRUE,
+    showSummary = TRUE
   )
 
   # One-sided should require fewer subjects
@@ -117,7 +125,9 @@ test_that("kappaSizeCI one-sided CI works for multi-category outcomes", {
     kappaU = 0.70,
     props = "0.20, 0.30, 0.50",
     raters = "2",
-    alpha = 0.05
+    alpha = 0.05,
+    showExplanations = TRUE,
+    showSummary = TRUE
   )
 
   expect_match(results$text1$content, "Required sample size: \\d+")

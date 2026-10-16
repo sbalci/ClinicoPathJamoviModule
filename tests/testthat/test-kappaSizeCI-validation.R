@@ -26,7 +26,8 @@ skip_if_not_installed("kappaSize")
 vci_run <- function(...) {
     args <- utils::modifyList(
         list(outcome = "2", citype = "two_sided", kappa0 = 0.60, kappaL = 0.40, kappaU = 0.80,
-             props = "0.20, 0.80", raters = "2", alpha = 0.05),
+             props = "0.20, 0.80", raters = "2", alpha = 0.05,
+             showExplanations = TRUE, showSummary = TRUE),
         list(...))
     suppressWarnings(do.call(ClinicoPath::kappaSizeCI, args))
 }

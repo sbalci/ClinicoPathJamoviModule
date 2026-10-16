@@ -74,7 +74,7 @@ children:
           children:
             - type: TextBox
               name: kappaL
-              label: 'Lower confidence limit'
+              label: 'Lower confidence limit (kappaL)'
               format: number
         - type: LayoutBox
           margin: large
@@ -84,7 +84,7 @@ children:
           children:
             - type: TextBox
               name: kappaU
-              label: 'Upper confidence limit'
+              label: 'Upper confidence limit (kappaU)'
               format: number
               enable: (citype:two_sided)
 
@@ -119,3 +119,13 @@ children:
                   name: alpha
                   label: 'Alpha'
                   format: number
+
+
+  - type: CollapseBox
+    label: Additional Output
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: showExplanations
+      - type: CheckBox
+        name: showSummary

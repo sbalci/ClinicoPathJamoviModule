@@ -12,7 +12,9 @@ kappaSizeCI(
   kappaU = 0.8,
   props = "0.20, 0.80",
   raters = "2",
-  alpha = 0.05
+  alpha = 0.05,
+  showExplanations = FALSE,
+  showSummary = FALSE
 )
 }
 \arguments{
@@ -28,8 +30,8 @@ the null being tested.}
 
 \item{kappaL}{Lower confidence limit you want the study to achieve for
 kappa. Must be strictly below kappa0. The required sample size grows
-roughly as one over the square of the distance from kappa0 to the nearer
-limit.}
+roughly as one over the square of the distance from kappa0 to the limit
+that governs it - usually, but not always, the nearer one.}
 
 \item{kappaU}{Upper confidence limit you want the study to achieve for
 kappa. Must be strictly above kappa0. Ignored when citype is 'one_sided'
@@ -47,6 +49,12 @@ otherwise.}
 \item{alpha}{Significance level of the confidence interval - 0.05 gives a
 95 percent interval (capped at 0.20). Two-sided intervals use qchisq(1 -
 alpha, 1); a one-sided lower bound uses qchisq(1 - 2*alpha, 1).}
+
+\item{showExplanations}{If TRUE, adds the Methodology panel to the Notes
+and shows the Study Explanation.}
+
+\item{showSummary}{If TRUE, shows the kappaSize package's own summary
+output.}
 }
 \value{
 A results object containing:
