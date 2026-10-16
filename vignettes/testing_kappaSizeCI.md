@@ -1,27 +1,32 @@
 # Testing Checklist: Confidence Interval Approach for the Number of Subjects Required (`kappaSizeCI`)
 
+`kappaSizeCI` is a planning calculator: it reads no dataset, so there are no missing-value,
+variable-name or plot scenarios.
+
 ## 1. Test Scenarios Matrix
 
-| Scenario ID | Test Description | Input Data Conditions | Expected Outcome |
+| Scenario ID | Test Description | Inputs | Expected Outcome |
 | :--- | :--- | :--- | :--- |
-| **TC-01** | Default options execution | Standard valid dataset | Clean table and plot outputs populated |
-| **TC-02** | Missing values handling | Dataset with 5-15% NAs | Proper omission/imputation notice and valid calculations |
-| **TC-03** | Single-level factor / edge case | Factor with 1 observed level | Graceful advisory notice, no fatal crash |
-| **TC-04** | Empty dataset / zero rows | Dataset with 0 rows | Error notice shown, results hidden gracefully |
-| **TC-05** | Special characters in variable names | Column names with spaces, hyphens, parentheses | Correctly escaped, executed without parsing errors |
-| **TC-06** | Full option permutations | All non-default options enabled | All child tables and visual layers rendered accurately |
+| **TC-01** | Defaults | binary, 2 raters, 0.60 in [0.40, 0.80], props 0.20/0.80 | n = 118; answer shown before the Methodology |
+| **TC-02** | Published example (Rotondi & Donner 2012) | 3 categories, 3 raters, .11/.70/.19, 0.44 in [0.34, 0.54] | n = 190 (kappaSize: 171, explained in Summary) |
+| **TC-03** | One-sided | `citype = one_sided` | n = 83; kappaU ignored; Summary says "not applicable" |
+| **TC-04** | Invalid kappa ordering | kappa0 = kappaL, or kappaL > kappaU | jamovi error naming the rule |
+| **TC-05** | Proportion input | `0,20 0,80`; `20, 80`; `20%, 80%`; `; 0.2 0.8`; sum 1.1; 3 values for binary | decimal-comma / percentage / count / sum messages; leading separator accepted |
+| **TC-06** | Too narrow to size | kappaL = 0.5999 | refused, quoting the n needed and "0.0001 away" (no scientific notation) |
+| **TC-07** | Rare category | props 0.02 | n = 855; "Rare category" panel |
+| **TC-08** | Sparse cells / small n | kappaL 0.10, kappaU 0.95 | n = 19; Sparse categories and Small sample panels |
+| **TC-09** | Turkish | jamovi language set to Turkish | every Notes, explanation and error sentence in Turkish |
 
 ## 2. Automated Test Execution
 
-Run the dedicated test suite for `kappaSizeCI`:
-
 ```r
 testthat::test_file("tests/testthat/test-kappaSizeCI.R")
+testthat::test_file("tests/testthat/test-kappaSizeCI-validation.R")
+testthat::test_file("tests/testthat/test-kappasizeci-release-review.R")
 ```
 
-## 3. QA Sign-Off Criteria
+## 3. Still to check in the jamovi app
 
-- [x] 0 Failures, 0 Warnings on R CMD check / testthat.
-- [x] UI labels match clinical guidance standards.
-- [x] Internationalization tags and translation plans completed.
-
+- [ ] Valid, invalid, valid input sequence: results clear and refill.
+- [ ] Reopening a saved `.omv`.
+- [ ] Turkish rendering (TC-09).

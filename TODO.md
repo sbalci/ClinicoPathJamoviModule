@@ -1,3 +1,36 @@
+# kappaSizeCI — `/check-function-full` + fixes (2026-10-16, after a72d024ba; uncommitted)
+
+Audit: arguments 8/8 effective, outputs 4/4 populated, independent oracle (lgamma Dirichlet-multinomial cells,
+Nelder-Mead) agrees: RD2012 171/190, 4 cat x 4 raters 19, 5 cat x 6 raters 12. Fixes below; each new test block
+fails on HEAD's backend (5 blocks + 2 reworded assertions) and passes now. `prepare()` changed only
+`R/kappaSizeCI.h.R` (refs). i18nUpdate x3 (3rd idempotent): +21 msgids, -10 obsolete, 0 other msgstr changed,
+`msgfmt -c` clean; 78 msgids filled in Turkish (the analysis had ~60 never translated).
+
+- [x] UX: answer ("Required sample size: <b>n</b> subjects ...", kappaSizePower's msgid) between the warnings and
+      the Methodology; the n sat below up to ~410 words.
+- [x] Clinical: "Rare category" panel when a category is below 5% (Byrt 1993 added to refs). p = 0.02 / 2 raters
+      (n = 855, ~17 per rater) used to show only the Methodology.
+- [x] Methodology: n is for the goodness-of-fit interval, not Wald / Fisher-z / bootstrap.
+- [x] Display: `.fmtProp` -> `.fmtNum(x, digits)`; refusal said "1e-04 away", Study Explanation printed slopes
+      below 1e-04 as "3.84146e-05" (any n above ~38,000).
+- [x] Input: percentages ("20, 80", "20%, 80%") get their own message; a leading separator parses.
+- [x] Grammar: "the number of cells below 5 is k of m" (was "1 of 4 cells are").
+- [x] Time-out handler: the "too narrow ... use more raters" branch was reachable only when n was NA
+      (degenerate cells); deleted, that case now reports the engine error.
+- [x] `.u.yaml`: group label "Alpha" -> "Significance Level" (the text box is still "Alpha").
+- [x] Docs: the three `vignettes/*kappaSizeCI*` files were generator boilerplate (datasets, plots, ggstatsplot).
+- [ ] User: `menuGroup: PowerT` -> `Power`, then `Rscript _updateModules.R --dry-run` and the real run. Running the
+      updater while it is `PowerT` deletes kappaSizeCI from meddecide. meddecide today ships the 2026-09-23
+      backend: 171 for RD2012 (umbrella 190), 56 for binary/4 raters (umbrella 62).
+- [ ] User: open it in jamovi - Turkish panel, a rare-category design, `.omv` reopen.
+- [ ] Out of scope (agreement): no goodness-of-fit kappa interval anywhere in ClinicoPath, and pooled Fleiss'
+      kappa has no interval at all, so the Notes' "report the goodness-of-fit interval" has no tool here.
+- [ ] Out of scope (kappaSizePower, kappaSizeFixedN): same "Alpha" group label around an "Alpha" box; same
+      possible rare-category / percentage-input gaps - not checked.
+- [ ] Skipped: `.validateProportions()` runs twice per run (harmless; removing it loses the combined message).
+      The engine-extreme message says "never converges" on a time-out (Codex review: time alone cannot prove it);
+      kept, since the measured trigger did hang.
+
 # kappaSizePower — `/release-review-function` (2026-10-15, after 93a7f036a; all findings fixed, uncommitted)
 
 Verdict: ready after minor actions (below). Independent oracle (hand-written DE / ADK-mixture / lgamma

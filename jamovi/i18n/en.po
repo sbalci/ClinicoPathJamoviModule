@@ -4443,6 +4443,14 @@ msgstr ""
 msgid "• H-score scale: 0-300 (intensity x percentage)"
 msgstr ""
 
+#: R/kappaSizeCI.b.R
+msgid ""
+"• Holding the category proportions at their anticipated values (the "
+"published calculation, and kappaSize's) would need {fixed}; re-estimating "
+"them at each value of κ, as the analysis of the study should, needs {n}, and "
+"that is the figure reported"
+msgstr ""
+
 #: ihcscoring/ui[2][1][0][3].label
 msgid "• Intensity scale: 0-3 (or 0-4 extended)"
 msgstr ""
@@ -4487,6 +4495,13 @@ msgstr ""
 msgid ""
 "• PPV (Positive Predictive Value): Probability that a positive test "
 "indicates disease"
+msgstr ""
+
+#: R/kappaSizeCI.b.R
+msgid ""
+"• Required n = ⌈{crit} / {slope}⌉ = {n}: the chi-square critical value "
+"divided by the expected chi-square that each subject contributes at the "
+"limit that drives the sample size, rounded up"
 msgstr ""
 
 #: decisionpanel/ui[7][0][0].label
@@ -18250,7 +18265,7 @@ msgstr ""
 #: R/lassologistic.b.R
 #: agreement/results/krippTable.columns.title
 #: enhancedROC/results/results/crocAnalysisTable.columns.title
-#: kappaSizeCI/ui[4].label
+#: kappaSizeCI/ui[4][0][0]/alpha.label
 #: kappaSizeFixedN/ui[3].label
 #: kappaSizeFixedN/ui[3][0][0]/alpha.label
 #: kappaSizePower/ui[3][0][0]/alpha.label
@@ -18263,10 +18278,6 @@ msgstr ""
 #: kappaSizeFixedN/options/alpha.title
 #: kappaSizePower/options/alpha.title
 msgid "alpha"
-msgstr ""
-
-#: kappaSizeCI/ui[4][0][0]/alpha.label
-msgid "Alpha (0-1)"
 msgstr ""
 
 #: gsdesign/options/alpha.title
@@ -21782,12 +21793,12 @@ msgstr ""
 
 #: R/kappaSizeCI.b.R
 msgid ""
-"At the computed sample size the agreement-pattern cells (for example, "
-"exactly k of the raters calling the finding present, or all raters agreeing "
-"on one category) are too sparse at the confidence limit where they are "
-"thinnest: the smallest expected count is {min} and {below} of {total} cells "
-"are below 5. The calculation rests on a large-sample chi-square "
-"approximation, so the required n is less dependable here."
+"At the computed sample size the goodness-of-fit cells (all raters agreeing "
+"on one category, or the single pooled cell for any disagreement) are too "
+"sparse at the confidence limit where they are thinnest: the smallest "
+"expected count is {min}, and the number of cells below 5 is {below} of "
+"{total}. The calculation rests on a large-sample chi-square approximation, "
+"so the required n is less dependable here."
 msgstr ""
 
 #: R/enhancedROC.b.R
@@ -24812,6 +24823,15 @@ msgid ""
 "Because the differences in overall accuracy were not statistically "
 "significant, this ranking reflects the observed sample and should not be "
 "reported as evidence that one test outperforms the others."
+msgstr ""
+
+#: R/kappaSizeCI.b.R
+msgid ""
+"Because the expected goodness-of-fit chi-square grows in proportion to the "
+"number of subjects, that number is computed directly: the chi-square "
+"critical value divided by the chi-square each subject contributes at the "
+"limit that drives the sample size, rounded up (the Study Explanation shows "
+"the numbers)."
 msgstr ""
 
 #: R/kappaSizePower.b.R
@@ -54915,9 +54935,9 @@ msgstr ""
 
 #: R/kappaSizeCI.b.R
 msgid ""
-"Determine the required sample size to estimate κ₀ = {kappa0} ensuring the "
-"lower confidence limit is at least {kappaL} in an interobserver agreement "
-"study."
+"Determine the required sample size to estimate κ₀ = {kappa0} so that the "
+"expected lower confidence limit reaches {kappaL} in an interobserver "
+"agreement study."
 msgstr ""
 
 #: R/kappaSizeCI.b.R
@@ -67137,6 +67157,7 @@ msgstr ""
 msgid "Expected proportion of cases in each category"
 msgstr ""
 
+#: kappaSizeCI/ui[3].label
 #: kappaSizeFixedN/ui[2].label
 #: kappaSizePower/ui[2].label
 msgid "Expected Proportion of Cases in Each Category"
@@ -72050,6 +72071,13 @@ msgid ""
 "and kappaSizeCI to size it for a target interval width."
 msgstr ""
 
+#: R/kappaSizeCI.b.R
+msgid ""
+"For any pair of raters this κ equals Cohen's κ when the raters share the "
+"same category frequencies (no rater bias); when their frequencies differ, it "
+"does not."
+msgstr ""
+
 #: R/chisqposttest.b.R
 msgid ""
 "For at least one comparison the exact computation could not be completed, "
@@ -72354,6 +72382,12 @@ msgid ""
 "says how precisely these cases pin it down."
 msgstr ""
 
+#: R/kappaSizeCI.b.R
+msgid ""
+"For this design the proportions could not be re-estimated, so the sample "
+"size holds them at their anticipated values only."
+msgstr ""
+
 #: R/agreement.b.R
 msgid ""
 "For three or more raters each institution's kappa uses every observed "
@@ -72390,12 +72424,6 @@ msgid ""
 "property of the statistic; on the count scale the same contrast is an "
 "absolute risk difference of 20 percentage points, i.e. a number needed to "
 "treat of 1/0.20 = 5."
-msgstr ""
-
-#: R/kappaSizeCI.b.R
-msgid ""
-"For two raters with equal marginal frequencies this coincides with Cohen's "
-"κ; with more raters, or unequal marginals, it does not."
 msgstr ""
 
 #: R/agreement.b.R
@@ -87042,9 +87070,20 @@ msgstr ""
 
 #: R/kappaSizeCI.b.R
 msgid ""
-"It returns the minimum number of subjects so that the {pct}% confidence "
-"interval ({side}) for the intraclass (Fleiss-type) κ of the "
-"common-correlation model attains the requested precision, given the expected "
+"It is the smallest number of subjects for which the expected limits of the "
+"{level} confidence interval ({side}) for the intraclass (Fleiss-type) κ of "
+"the common-correlation model reach the requested limits, given the expected "
+"category proportions and the number of raters, whether the analysis holds "
+"those proportions at their anticipated values (the published calculation, "
+"and kappaSize's) or re-estimates them by maximum likelihood at each value of "
+"κ (the interval that keeps its stated coverage)."
+msgstr ""
+
+#: R/kappaSizeCI.b.R
+msgid ""
+"It is the smallest number of subjects for which the expected limits of the "
+"{level} confidence interval ({side}) for the intraclass (Fleiss-type) κ of "
+"the common-correlation model reach the requested limits, given the expected "
 "category proportions and the number of raters."
 msgstr ""
 
@@ -88153,6 +88192,25 @@ msgid ""
 "kappaSize searches downward in steps of 0.001 and reports the first value "
 "rejected, so the bound is conservative by at most 0.001 and its third "
 "decimal is the search resolution, not estimation precision."
+msgstr ""
+
+#: R/kappaSizeCI.b.R
+msgid ""
+"kappaSize's own search, above, reports {engine} subjects, holding the\n"
+"category proportions at their anticipated values as the published tables do.\n"
+"The required sample size is {n}: it also reaches the requested limits when\n"
+"the proportions are re-estimated at each value of kappa, as the analysis of\n"
+"the study should do."
+msgstr ""
+
+#: R/kappaSizeCI.b.R
+msgid ""
+"kappaSize's own search, above, reports {engine} subjects; the required\n"
+"sample size is {n}. kappaSize starts its search at 11 subjects and stops "
+"only\n"
+"once the chi-square exceeds its critical value by 0.001, so it can report\n"
+"slightly more subjects than the smallest number that reaches the requested "
+"limits."
 msgstr ""
 
 #: kappaSizeCI/options/kappaU.title
@@ -111938,9 +111996,6 @@ msgid "Number of observations analyzed"
 msgstr ""
 
 #: kappaSizeCI/options/outcome.title
-msgid "Number of outcome level"
-msgstr ""
-
 #: kappaSizeFixedN/options/outcome.title
 #: kappaSizePower/options/outcome.title
 msgid "Number of outcome levels"
@@ -116459,6 +116514,7 @@ msgid ""
 msgstr ""
 
 #: R/clinicalscore.b.R
+#: kappaSizeCI/ui[0][0][0][0]/outcome.label
 #: kappaSizeFixedN/ui[0][0][0][0]/outcome.label
 #: kappaSizePower/ui[0][0][0][0]/outcome.label
 msgid "Outcome levels"
@@ -127849,13 +127905,11 @@ msgid "Potentially Informative"
 msgstr ""
 
 #: R/gsdesign.b.R
-#: package/analyses/kappaSizeCI.menuGroup
 #: package/analyses/kappaSizeFixedN.menuGroup
 #: adaptivetrialdesign/results/operatingCharacteristics.columns.title
 #: advancedSurvivalPower/options/calc_type/power.title
 #: competingRisksPower/results/powerCurveTable.columns.title
 #: comprehensiveSurvivalPower/results/methodComparison.columns.title
-#: kappaSizeCI/options.menuGroup
 #: kappaSizeFixedN/options.menuGroup
 #: kappaSizePower/ui[3][1][0]/power.label
 msgid "Power"
@@ -128155,7 +128209,9 @@ msgstr ""
 msgid "PowerP"
 msgstr ""
 
+#: package/analyses/kappaSizeCI.menuGroup
 #: package/analyses/kappaSizePower.menuGroup
+#: kappaSizeCI/options.menuGroup
 #: kappaSizePower/options.menuGroup
 msgid "PowerT"
 msgstr ""
@@ -132118,6 +132174,12 @@ msgstr ""
 msgid "Proportions cannot be empty"
 msgstr ""
 
+#: R/kappaSizeCI.b.R
+msgid ""
+"Proportions must be fractions, not percentages: write 0.20, 0.80 rather than "
+"20, 80."
+msgstr ""
+
 #: R/kappaSizeFixedN.b.R
 #: R/kappaSizePower.b.R
 msgid ""
@@ -132142,10 +132204,6 @@ msgstr ""
 msgid ""
 "Proportions must use a decimal point, not a decimal comma: write 0.30, 0.70 "
 "rather than 0,30 0,70."
-msgstr ""
-
-#: kappaSizeCI/ui[3].label
-msgid "Proportions of Each Outcome Level"
 msgstr ""
 
 #: kappaSizeCI/options/props.title
@@ -134749,6 +134807,10 @@ msgstr ""
 msgid "Rare category threshold (%)"
 msgstr ""
 
+#: R/kappaSizeCI.b.R
+msgid "Rare category."
+msgstr ""
+
 #: adaptivetrialdesign/options/clinical_context/rare_disease.title
 msgid "Rare Disease Trial"
 msgstr ""
@@ -135078,6 +135140,7 @@ msgstr ""
 #: agreement/results/iccTable.columns.title
 #: agreement/results/meanPearsonTable.columns.title
 #: agreement/results/iotaTable.columns.title
+#: kappaSizeCI/ui[0][1][0][0]/raters.label
 #: kappaSizeFixedN/ui[0][1][0][0]/raters.label
 #: kappaSizePower/ui[0][1][0][0]/raters.label
 #: pathagreement/results/overviewTable.columns.title
@@ -138595,6 +138658,7 @@ msgid ""
 "{raters} raters."
 msgstr ""
 
+#: R/kappaSizeCI.b.R
 #: R/kappaSizePower.b.R
 msgid ""
 "Required sample size: <b>{n}</b> {subjects}, each rated by all {raters} "
@@ -151163,6 +151227,7 @@ msgstr ""
 #: functionalsampling/options/significance_level.title
 #: idi/options/alpha_level.title
 #: jjcorrmat/options/siglevel.title
+#: kappaSizeCI/ui[4].label
 #: mantelhaenszel/options/alpha.title
 #: netreclassification/options/alpha_level.title
 #: pagetrendtest/options/alpha.title
@@ -152469,6 +152534,10 @@ msgstr ""
 
 #: R/decisioncombine.b.R
 msgid "Small sample: n = {n} complete cases"
+msgstr ""
+
+#: R/kappaSizeCI.b.R
+msgid "Small sample."
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
@@ -159148,6 +159217,7 @@ msgstr ""
 msgid "Subject"
 msgstr ""
 
+#: R/kappaSizeCI.b.R
 #: R/kappaSizePower.b.R
 msgid "subject"
 msgstr ""
@@ -159235,6 +159305,7 @@ msgstr ""
 msgid "Subject/Group"
 msgstr ""
 
+#: R/kappaSizeCI.b.R
 #: R/kappaSizePower.b.R
 #: R/singlearm.b.R
 msgid "subjects"
@@ -169039,6 +169110,18 @@ msgstr ""
 msgid "The ranking"
 msgstr ""
 
+#: R/kappaSizeCI.b.R
+msgid ""
+"The rarest category is expected in {share} of ratings, so each rater is "
+"expected to place only about {k} of the {n} subjects in it. Kappa depends "
+"strongly on prevalence (Byrt, Bishop and Carlin): when a category is this "
+"rare, high raw agreement can coexist with a low kappa, the estimate rests on "
+"those few subjects, and a kappa measured here cannot be assumed to "
+"generalize to a setting where the category is more common. Report the "
+"prevalence and the category-specific agreement (the proportion of that "
+"category's ratings that another rater matched) beside kappa."
+msgstr ""
+
 #: R/decisiongraph.b.R
 msgid "The rate used to convert future costs and benefits to present values"
 msgstr ""
@@ -169271,15 +169354,6 @@ msgid ""
 "multiplies the required sample size by about four."
 msgstr ""
 
-#: R/kappaSizeCI.b.R
-msgid ""
-"The requested confidence interval is too narrow to size in reasonable time. "
-"The limit that governs the sample size is {dist} away from kappa0, and the "
-"required sample size grows roughly as one over the square of that distance — "
-"the search was still running after {secs} seconds. Widen the interval, use "
-"more raters, or accept a lower confidence level."
-msgstr ""
-
 #: R/survivalcont.b.R
 msgid "The requested multiple cut-offs could not be estimated from these data"
 msgstr ""
@@ -169321,14 +169395,28 @@ msgstr ""
 msgid "The required sample size could not be determined from the provided inputs."
 msgstr ""
 
+#: R/kappaSizeCI.b.R
+msgid ""
+"The required sample size follows the confidence-interval approach of Rotondi "
+"and Donner, on the goodness-of-fit models of Donner and Eliasziw (two "
+"raters, binary outcome), Altaye, Donner and Klar (binary outcome, more "
+"raters) and Altaye, Donner and Eliasziw (three to five categories), as "
+"implemented in the kappaSize package."
+msgstr ""
+
 #: R/kappaSizePower.b.R
 msgid "The required sample size is {n} {subjects}."
 msgstr ""
 
 #: R/kappaSizeCI.b.R
 msgid ""
-"The required sample size is computed with the confidence-interval width "
-"approach of the kappaSize package (Donner and Eliasziw; Rotondi and Donner)."
+"The required sample size is below 25. For a binary outcome, the "
+"goodness-of-fit interval this calculation assumes was found close to its "
+"stated coverage from about 25 subjects when the rarer category makes up at "
+"least about a fifth of the ratings (Donner and Eliasziw; Altaye, Donner and "
+"Klar); for three to five categories no such figure was given, and the "
+"expected cell counts are the guide (Rotondi and Donner). Below 25 subjects "
+"it has not been shown to hold, so consider enrolling at least 25 subjects."
 msgstr ""
 
 #: R/kappaSizePower.b.R
@@ -171912,13 +172000,13 @@ msgstr ""
 #: R/kappaSizeCI.b.R
 msgid ""
 "This is a CONFIDENCE-INTERVAL calculation: it returns the number of subjects\n"
-"needed for the interval around kappa to reach the requested width. It "
-"answers a\n"
-"different question from the power approach (kappaSizePower), which sizes a "
-"study\n"
-"to reject a null value, so the two will not agree on a sample size for the "
-"same\n"
-"study - choose the one that matches how the result will be reported."
+"needed for the expected confidence limits around kappa to reach the "
+"requested\n"
+"limits. It answers a different question from the power approach\n"
+"(kappaSizePower), which sizes a study to reject a null value, so the two\n"
+"generally give different sample sizes for the same study - choose the one "
+"that\n"
+"matches how the result will be reported."
 msgstr ""
 
 #: R/decisioncombine.b.R
@@ -172372,6 +172460,15 @@ msgid ""
 "weighted kappa for ordered grades, so if the Weighted kappa option is set to "
 "linear or squared weights, either analyse the study unweighted as well or "
 "size it with a dedicated weighted-kappa method."
+msgstr ""
+
+#: R/kappaSizeCI.b.R
+msgid ""
+"This sample size is planned for the model-based goodness-of-fit interval; it "
+"does not establish the requested precision for the Wald, Fisher-z or "
+"bootstrap intervals that agreement software usually reports for Cohen's or "
+"Fleiss' κ. Report the goodness-of-fit interval, or size the study for the "
+"interval that will be reported."
 msgstr ""
 
 #: R/decisioncombine.b.R
@@ -187084,6 +187181,15 @@ msgstr ""
 msgid "When sorting by magnitude or alphabetically, use decreasing order."
 msgstr ""
 
+#: R/kappaSizeCI.b.R
+msgid ""
+"When the study is analysed, estimate the category prevalences by maximum "
+"likelihood at each candidate value of κ: with three or more raters, or three "
+"or more categories, plugging in the overall proportions of ratings gives an "
+"interval that covers κ less often than stated (about 0.91 to 0.93 instead of "
+"0.95 in the designs simulated for this analysis)."
+msgstr ""
+
 #: R/enhancedROC.b.R
 msgid ""
 "When the test is negative, the probability that the patient does not have "
@@ -188192,6 +188298,17 @@ msgid ""
 "likelihood with kappa held at kappa0, as Altaye, Donner and Eliasziw do; "
 "plugging in the overall proportions of ratings makes the test reject a true "
 "kappa0 too often."
+msgstr ""
+
+#: R/kappaSizeCI.b.R
+msgid ""
+"With three or more raters, the sample size for a binary finding also depends "
+"on how agreement among more than two raters is modelled. This analysis uses "
+"the model of Altaye, Donner and Klar; the Dirichlet-multinomial model used "
+"for three to five categories, which for two categories is the beta-binomial, "
+"describes the same κ but usually needs fewer subjects (in the designs "
+"checked, as few as about half when the finding is rare), so the figure shown "
+"is generally the more cautious of the two."
 msgstr ""
 
 #: R/nogoldstandard.b.R

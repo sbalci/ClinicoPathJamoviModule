@@ -5,16 +5,16 @@
 - **Analysis Function**: `kappaSizeCI`
 - **Module**: `PowerT`
 
-| Feature / Option | UI Binding | Backend Handler | Target Result Item |
+| Feature / Option | UI Binding | Backend Handler | Results affected (notices, text1, text_summary, text2) |
 | :--- | :--- | :--- | :--- |
-| `outcome` | UI Control `outcome` | `self$options$outcome` | Output item / Table |
-| `citype` | UI Control `citype` | `self$options$citype` | Output item / Table |
-| `kappa0` | UI Control `kappa0` | `self$options$kappa0` | Output item / Table |
-| `kappaL` | UI Control `kappaL` | `self$options$kappaL` | Output item / Table |
-| `kappaU` | UI Control `kappaU` | `self$options$kappaU` | Output item / Table |
-| `props` | UI Control `props` | `self$options$props` | Output item / Table |
-| `raters` | UI Control `raters` | `self$options$raters` | Output item / Table |
-| `alpha` | UI Control `alpha` | `self$options$alpha` | Output item / Table |
+| `outcome` | UI Control `outcome` | `self$options$outcome` | all panes; engine choice |
+| `citype` | UI Control `citype` | `self$options$citype` | all panes; critical value |
+| `kappa0` | UI Control `kappa0` | `self$options$kappa0` | all panes |
+| `kappaL` | UI Control `kappaL` | `self$options$kappaL` | all panes |
+| `kappaU` | UI Control `kappaU` | `self$options$kappaU` | all panes (two-sided only) |
+| `props` | UI Control `props` | `self$options$props` | all panes; Rare category panel |
+| `raters` | UI Control `raters` | `self$options$raters` | all panes |
+| `alpha` | UI Control `alpha` | `self$options$alpha` | all panes; confidence level |
 
 ## Verification Checklist
 

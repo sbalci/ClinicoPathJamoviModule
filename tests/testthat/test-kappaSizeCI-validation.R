@@ -274,7 +274,7 @@ test_that("C09 the sparse notice's numbers match the oracle where its cells are 
     fired <- Filter(function(e) any(e < 1) || mean(e < 5) > 0.2, per)
     worst <- fired[[which.min(vapply(fired, min, 0))]]
     expect_match(r$notices$content,
-                 sprintf("smallest expected count is %s and %d of %d cells are below 5",
+                 sprintf("smallest expected count is %s, and the number of cells below 5 is %d of %d",
                          base::format(signif(min(worst), 2), scientific = FALSE, trim = TRUE),
                          sum(worst < 5), length(worst)), fixed = TRUE)
     # binary, 6 raters, default prevalence: the POOLED cells are sparse too (1 of 3 below 5)

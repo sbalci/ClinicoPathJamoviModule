@@ -126,7 +126,8 @@ kappaSizeCIResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "rotondiDonnerKappaCI",
                     "donnerEliasziwKappaGOF",
                     "altayeDonnerKlarKappaRaters",
-                    "altayeDonnerEliasziwKappaGOF"))
+                    "altayeDonnerEliasziwKappaGOF",
+                    "Byrt1993"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="notices",

@@ -388,7 +388,7 @@ test_that("sparseness is judged on the test's goodness-of-fit cells, not the out
     expect_false(grepl("less than five", res$text_summary$content))   # engine stays silent
     expect_match(res$notices$content, "Sparse categories")
     expect_match(res$notices$content, "goodness-of-fit cells")
-    expect_match(res$notices$content, "1 of 3 cells are below 5")
+    expect_match(res$notices$content, "the number of cells below 5 is 1 of 3", fixed = TRUE)
 
     for (design in list(list(props = "0.10, 0.90", raters = "6"),
                         list(outcome = "3", props = "0.20, 0.60, 0.20", raters = "3")))
@@ -460,8 +460,8 @@ test_that("the sparse notice quotes one coherent confidence limit, not a mix of 
     })
     # each limit alone has exactly one cell below 5 -- so must the notice
     expect_equal(vapply(per, function(x) x$below5, integer(1)), c(1L, 1L))
-    expect_match(res$notices$content, "1 of 3 cells are below 5", fixed = TRUE)
-    expect_false(grepl("2 of 3 cells are below 5", res$notices$content, fixed = TRUE))
+    expect_match(res$notices$content, "the number of cells below 5 is 1 of 3", fixed = TRUE)
+    expect_false(grepl("the number of cells below 5 is 2 of 3", res$notices$content, fixed = TRUE))
 
     # and the count quoted is the smallest across the limits, from that same limit
     expect_match(res$notices$content,
@@ -560,5 +560,104 @@ test_that("the CI-approach paper this analysis implements is in its refs", {
         expect_true(!is.null(refs[[k]]), info = k)
         for (fld in c("title", "author", "url"))
             expect_true(nzchar(as.character(refs[[k]][[fld]])), info = paste(k, fld))
+    }
+})
+
+
+test_that("the Notes state the answer before the Methodology (check-function-full 2026-10-16)", {
+    # `notices` is the first result item, so the n sat below ~410 words of method text.
+    skip_if_not_installed("kappaSize")
+    res <- ci_run(kappaL = 0.10, kappaU = 0.95)   # n = 19: sparse and small-sample panels fire
+    nt <- res$notices$content
+    expect_match(nt, "Required sample size: <b>19</b> subjects, each rated by all 2 raters.", fixed = TRUE)
+    pos <- vapply(c("Sparse categories.", "Required sample size: <b>", "Methodology."),
+                  function(s) regexpr(s, nt, fixed = TRUE)[[1]], numeric(1))
+    expect_true(all(pos > 0))
+    expect_true(pos[1] < pos[2] && pos[2] < pos[3])
+    expect_match(ci_run()$notices$content, "Required sample size: <b>118</b> subjects", fixed = TRUE)
+})
+
+
+test_that("an extreme prevalence gets its own warning (check-function-full 2026-10-16)", {
+    # p = 0.02, two raters: n = 855 with healthy cells, and no panel said anything about kappa's
+    # dependence on prevalence. 855 x 0.02 = 17.1 subjects per rater in the rare category.
+    skip_if_not_installed("kappaSize")
+    res <- ci_run(props = "0.02")
+    expect_equal(ci_n(res), 855L)
+    expect_match(res$notices$content, "Rare category.", fixed = TRUE)
+    expect_match(res$notices$content, "expected in 2% of ratings", fixed = TRUE)
+    expect_match(res$notices$content, "about 17 of the 855 subjects", fixed = TRUE)
+    # the same design written from the common side, and a rare category among five
+    expect_match(ci_run(props = "0.98")$notices$content, "Rare category.", fixed = TRUE)
+    expect_match(ci_run(outcome = "5", props = "0.01, 0.29, 0.30, 0.20, 0.20",
+                        kappaL = 0.5, kappaU = 0.7)$notices$content, "Rare category.", fixed = TRUE)
+    # at and above the 5% cut-off it stays quiet
+    expect_false(grepl("Rare category.", ci_run()$notices$content, fixed = TRUE))
+    expect_false(grepl("Rare category.", ci_run(props = "0.05")$notices$content, fixed = TRUE))
+    expect_true("Byrt1993" %in% yaml::yaml.load_file("../../jamovi/kappaSizeCI.r.yaml")$refs)
+})
+
+
+test_that("the Methodology says which interval the n is planned for (check-function-full 2026-10-16)", {
+    skip_if_not_installed("kappaSize")
+    expect_match(ci_run()$notices$content,
+                 "does not establish the requested precision for the Wald, Fisher-z or bootstrap intervals",
+                 fixed = TRUE)
+})
+
+
+test_that("percentages and a leading separator are read correctly (check-function-full 2026-10-16)", {
+    skip_if_not_installed("kappaSize")
+    expect_error(ci_run(props = "20, 80"), "not percentages", fixed = TRUE)
+    expect_error(ci_run(props = "20%, 80%"), "not percentages", fixed = TRUE)
+    expect_error(ci_run(outcome = "3", props = "20, 60, 20"), "not percentages", fixed = TRUE)
+    # a genuinely out-of-range vector keeps the range message
+    expect_error(ci_run(props = "1.2, -0.2"), "between 0 and 1", fixed = TRUE)
+    # "; 0.2 0.8" left an empty first token that was reported as "must be valid numbers"
+    expect_equal(ci_n(ci_run(props = "; 0.20 0.80")), 118L)
+    expect_equal(ci_n(ci_run(props = "0.20, 0.80,")), 118L)
+})
+
+
+test_that("no number reaches the prose in scientific notation (check-function-full 2026-10-16)", {
+    skip_if_not_installed("kappaSize")
+    # the refusal read "The limit that governs the sample size is 1e-04 away from kappa0"
+    msg <- tryCatch(ci_run(kappaL = 0.5999), error = conditionMessage)
+    expect_match(msg, "is 0.0001 away from kappa0", fixed = TRUE)
+    expect_false(grepl("[0-9]e-[0-9]", msg))
+    # n above about 38,000 makes the per-subject slope < 1e-04, which the Study Explanation printed
+    # as "3.84146 / 8.1...e-05"
+    res <- ci_run(kappaL = 0.591)
+    expect_gt(ci_n(res), 38415L)
+    expect_false(grepl("[0-9]e-[0-9]", res$text2$content))
+    expect_match(res$text2$content, "Required n = ⌈", fixed = TRUE)
+})
+
+
+test_that("every kappaSizeCI msgid has a Turkish translation with the same placeholders (2026-10-16)", {
+    # The analysis shipped with ~60 msgids that had never been translated, and every rewording
+    # since added more: Turkish users read the whole analysis in English.
+    po <- testthat::test_path("..", "..", "jamovi", "i18n", "tr.po")
+    skip_if_not(file.exists(po))
+    lines <- readLines(po, encoding = "UTF-8", warn = FALSE)
+    unq <- function(s) gsub('\\\\"', '"', sub('^"', "", sub('"$', "", s)))
+    entries <- list(); cur <- NULL; field <- NULL; refs <- character(0)
+    flush <- function() if (!is.null(cur)) entries[[length(entries) + 1L]] <<- cur
+    for (ln in lines) {
+        if (startsWith(ln, "#:")) refs <- c(refs, trimws(sub("^#:", "", ln)))
+        else if (startsWith(ln, "msgid ")) {
+            flush(); cur <- list(msgid = unq(sub("^msgid ", "", ln)), msgstr = "", refs = refs)
+            field <- "msgid"; refs <- character(0)
+        } else if (startsWith(ln, "msgstr ")) { cur$msgstr <- unq(sub("^msgstr ", "", ln)); field <- "msgstr" }
+        else if (startsWith(ln, "\"") && !is.null(field)) cur[[field]] <- paste0(cur[[field]], unq(ln))
+        else if (!nzchar(ln)) field <- NULL
+    }
+    flush()
+    mine <- Filter(function(e) "R/kappaSizeCI.b.R" %in% e$refs && nzchar(e$msgid), entries)
+    expect_gt(length(mine), 70L)
+    ph <- function(s) sort(regmatches(s, gregexpr("\\{[^{}]*\\}", s))[[1]])
+    for (e in mine) {
+        expect_true(nzchar(e$msgstr), info = e$msgid)
+        expect_identical(ph(e$msgstr), ph(e$msgid), info = e$msgid)
     }
 })

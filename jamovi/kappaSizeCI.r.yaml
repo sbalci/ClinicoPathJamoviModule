@@ -66,6 +66,8 @@ refs:
     - donnerEliasziwKappaGOF
     - altayeDonnerKlarKappaRaters
     - altayeDonnerEliasziwKappaGOF
+    # The Rare category note cites it for kappa's dependence on prevalence.
+    - Byrt1993
 
 
 ...

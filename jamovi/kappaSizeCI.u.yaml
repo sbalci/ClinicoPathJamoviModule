@@ -107,7 +107,7 @@ children:
 
 
   - type: Label
-    label: "Alpha"
+    label: "Significance Level"
     children:
         - type: LayoutBox
           margin: large
