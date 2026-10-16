@@ -570,7 +570,7 @@ test_that("the Notes state the answer before the Methodology (check-function-ful
     skip_if_not_installed("kappaSize")
     res <- ci_run(kappaL = 0.10, kappaU = 0.95)   # n = 19: sparse and small-sample panels fire
     nt <- res$notices$content
-    expect_match(nt, "Required sample size: <b>19</b> subjects, each rated by all 2 raters.", fixed = TRUE)
+    expect_match(nt, "Required sample size: <b>19</b> subjects, each rated by both raters.", fixed = TRUE)
     pos <- vapply(c("Sparse categories.", "Required sample size: <b>", "Methodology."),
                   function(s) regexpr(s, nt, fixed = TRUE)[[1]], numeric(1))
     expect_true(all(pos > 0))
@@ -761,4 +761,84 @@ test_that("every option named in a validation message is named on screen; kappaL
     for (d in c(opt$description$ui, opt$description$R)) expect_match(d, "not always", fixed = TRUE)
     expect_identical(ci_n(ci_run(kappa0 = 0.75, kappaL = 0.60, kappaU = 0.85)),
                      ci_n(ci_run(kappa0 = 0.75, kappaL = 0.60, kappaU = 0.95)))
+})
+
+
+test_that("code strings are ASCII (R CMD check portability); the rendered caveats are unchanged (release review 2026-10-16)", {
+    # 77e3905 typed kappa, curly quotes and an em dash straight into three .() msgids. R CMD check
+    # WARNs on non-ASCII outside comments; \uXXXX gives the identical string, so the catalog still
+    # matches. Parse tokens, not lines: comments may carry UTF-8.
+    path <- testthat::test_path("..", "..", "R", "kappaSizeCI.b.R")
+    skip_if_not(file.exists(path), "needs the source tree")
+    pd   <- utils::getParseData(parse(path, keep.source = TRUE, encoding = "UTF-8"))
+    toks <- pd$text[pd$terminal & pd$token != "COMMENT"]
+    expect_identical(toks[vapply(toks, function(s) any(utf8ToInt(s) > 127L), logical(1))],
+                     character(0))
+    notes <- ci_run(showSummary = TRUE)$notices$content
+    for (s in c("Cohen's or Fleiss' κ.", "this κ equals Cohen's κ",
+                "will “ensure” the limits — read it"))
+        expect_match(notes, s, fixed = TRUE)
+})
+
+
+test_that("the syntax pane escapes props: a crafted value cannot inject an argument (security audit 2026-10-16)", {
+    # jmvcore quotes a String without escaping it: this value exported a call with an extra
+    # `alpha = {...}` argument that ran its code when pasted into R. Parse only, never evaluate.
+    src_of <- function(props) ClinicoPath:::kappaSizeCIClass$new(
+        options = ClinicoPath:::kappaSizeCIOptions$new(props = props))$asSource()
+    for (bad in c('0.2", alpha = {stop("INJECTED"); 0.05}, citype = "two_sided',
+                  '0.2\\", 0.8\\', '0.2"\nstop("x")\n"')) {
+        ex <- parse(text = src_of(bad))[[1]]
+        expect_identical(ex$props, bad)
+        expect_identical(names(ex)[-1], "props")
+    }
+    expect_match(src_of("0.30, 0.70"), 'props = "0.30, 0.70"', fixed = TRUE)
+    expect_false(grepl("props", src_of("0.20, 0.80"), fixed = TRUE))   # default still omitted
+})
+
+
+test_that("decimal-comma advice only when the comma reading parses in full (security audit 2026-10-16)", {
+    # "1.2," became NA, was dropped, and 0.8 alone made the typo look like a decimal comma.
+    for (p in c("1.2, 0.8", "2, 0.8", "0x1A, 0.8"))
+        expect_error(ci_run(props = p), "between 0 and 1", fixed = TRUE, info = p)
+    for (p in c("0,20 0,80", "0,2, 0,8", "; 0,20 0,80"))
+        expect_error(ci_run(props = p), "decimal point, not a decimal comma", fixed = TRUE, info = p)
+})
+
+
+test_that("two raters read 'both raters'; three or more keep 'all N raters' (2026-10-16)", {
+    expect_match(ci_run()$notices$content, "each rated by both raters.", fixed = TRUE)
+    expect_match(ci_run(raters = "3")$notices$content, "each rated by all 3 raters.", fixed = TRUE)
+})
+
+
+test_that("with the Summary pane off the kappaSize engine does not run, and text1 is unchanged (2026-10-16)", {
+    # The reported n is closed-form (.minimumN), yet kappaSize's brute-force search ran on every run and was
+    # discarded unless showSummary was on: 10 s for n = 90,407 (5 categories, 6 raters, [0.5975, 0.6025]).
+    # An engine that fails proves it is not called: with the pane off nothing may reach it.
+    two_sided <- ci_run(showSummary = TRUE)$text1$content
+    one_sided <- ci_run(citype = "one_sided", showSummary = TRUE)$text1$content
+    local_mocked_bindings(CIBinary = function(...) stop("engine ran"), .package = "kappaSize")
+    expect_identical(ci_run(showSummary = FALSE)$text1$content, two_sided)
+    expect_identical(ci_run(citype = "one_sided", showSummary = FALSE)$text1$content, one_sided)
+    expect_error(ci_run(showSummary = TRUE), "engine ran")          # the pane still runs it
+    # the ceiling refusal does not depend on the pane
+    expect_error(ci_run(kappaL = 0.5995, kappaU = 0.6005, showSummary = FALSE), "too narrow to size")
+})
+
+
+test_that("props from the R wrapper as NULL, NA or a vector gets a real message or is read (2026-10-16)", {
+    # These reached the user as "argument is of length zero" / "the condition has length > 1".
+    expect_error(ClinicoPath::kappaSizeCI(props = NULL), "Proportions cannot be empty", fixed = TRUE)
+    expect_error(ClinicoPath::kappaSizeCI(props = NA_character_), "Proportions cannot be empty", fixed = TRUE)
+    expect_equal(ci_n(ClinicoPath::kappaSizeCI(props = c(0.2, 0.8))), 118L)
+    expect_equal(ci_n(ClinicoPath::kappaSizeCI(props = c("0.2", "0.8"))), 118L)
+})
+
+
+test_that("a narrow no-break space (U+202F) separates proportions, as in kappaSizeFixedN (2026-10-16)", {
+    # French typography puts U+202F before ";"; it is not in [:space:], so the token "0.20<U+202F>" was
+    # "not a valid number".
+    expect_equal(ci_n(ci_run(props = "0.20\u202f; 0.80")), 118L)
+    expect_equal(ci_n(ci_run(props = "0.20\u202f0.80")), 118L)
 })

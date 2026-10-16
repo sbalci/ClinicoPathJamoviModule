@@ -1,3 +1,86 @@
+# kappaSizeCI — `/fix-function --apply` (2026-10-16, after the trio pass below; uncommitted)
+
+Acceptance: each fix has a test that fails on the pre-fix sources; all kappaSize suites + zzz guards as before;
+gate (kappaSizeCI counted as shipped) unchanged; no non-ASCII code.
+
+- [x] PERFORMANCE: kappaSize's brute-force engine ran on every run although the reported n is the closed-form
+      `.minimumN()` and the engine only feeds the Summary pane (default off). Measured 10.06 s for n = 90,407
+      (5 categories, 6 raters, [0.5975, 0.6025]), discarded. Now `.calculateSampleSize(params, run_engine)` runs it
+      only for that pane or when the closed form is NA; the 100,000 ceiling refusal applies either way. 0.16 s now.
+      `.formatSampleSizeOutput()` reads the design from `params` (the engine echoed it; text1 byte-identical).
+      Supersedes the trio pass's "Not fixing: engine runs with the Summary pane off" (measured only up to n = 17,115).
+- [x] ERROR HANDLING (R API): `props = NULL` / `NA` / a vector reached the user as "argument is of length zero" /
+      "the condition has length > 1". NULL/NA -> "Proportions cannot be empty"; a vector is read (`c(0.2, 0.8)`).
+- [x] INPUT: U+202F (narrow no-break space; French typography before ";") made "0.20 ; 0.80" "not a valid number"
+      in kappaSizeCI and kappaSizePower; kappaSizeFixedN already stripped it. Same class in all three now.
+- [x] i18n: the removed fallback's msgid "Sample size calculation failed" dropped from catalog.pot/en.po/tr.po.
+- [x] Verify: 4 new blocks error on the pre-fix sources and pass now; 16 files (8 kappaSize + 8 zzz) 228 blocks /
+      1785 expectations, only failure the pre-existing one below; gate identical to before (msgid count -1);
+      `tools:::.check_package_ASCII_code(".")` 0 files; `msgfmt -c` clean. No yaml changed, so no `prepare()`.
+- [ ] Residual (Codex note): with the Summary pane ON an engine failure still rejects the analysis, though the n
+      does not depend on it. No design is known to trigger one (166 extreme designs searched today).
+- [ ] Out of scope (pre-existing): `tests/testthat/test-zzz-fmt-substitution-loop.R:72` fails on
+      `R/agreementintro.b.R:104`, a direct `jmvcore::format()` call (file untouched since 22a96aff5).
+- [ ] User: kappaSizePower is `PowerT`, kappaSizeCI `PowerT`; move both back to `Power` after testing.
+
+# kappaSize trio + leftovers — "fix detected issues, and in the siblings" (2026-10-16; done, uncommitted)
+
+Acceptance: every confirmed issue below fixed once at its root; each fix has a test that fails on HEAD; all kappaSize
+suites + zzz guards green; gate (trio counted as shipped) unchanged; `parse()` of edited files identical in meaning.
+
+- [x] Shared helpers in `R/utils-kappasize.R`: `kappaSizePropsLookDecimalComma(raw)` (every token must parse under the
+      comma-as-decimal reading) and `kappaSizeSourcifyOption(option)` (`encodeString` for a non-default String option).
+- [x] kappaSizeCI: inline decimal-comma check and `.sourcifyOption` body -> the helpers (behaviour unchanged).
+- [x] kappaSizePower, kappaSizeFixedN: decimal-comma check -> helper; add `.sourcifyOption` override (syntax pane).
+- [x] "each rated by all 2 raters": a "both raters" sentence when raters == 2 (CI, Power x2); catalog.pot/en.po/tr.po.
+- [x] kappaSizeFixedN `.u.yaml`: group label "Alpha" around the "Alpha" box -> "Significance Level" (as kappaSizeCI).
+- [x] Non-ASCII code (R CMD check WARNING): 5 en dashes in curemodels.b.R, illnessdeath.b.R, utils-observed-cif.R ->
+      `\u2013`; module-wide guard test `tests/testthat/test-zzz-ascii-code.R` (R's own scanner).
+- [x] Audit skill: codegen pattern G1 -> round-trip every free-text option through `asSource()` + `parse()`.
+- [x] Verify: 8 kappaSize test files + zzz guards + new tests (fail on HEAD), gate, parse, ASCII scanner.
+- Not fixing: engine runs with the Summary pane off (measured 0.16-0.48 s; restructuring changes error paths).
+
+Results: Codex (gpt-6-astra, read-only) reviewed the plan first; adopted: props-only helper scope, NULL = delegate
+to jmvcore, require a real digit-comma-digit replacement, keep each parser's normalisation, guard the ASCII test.
+Every new block fails on HEAD's sources (CI 3, Power 3, FixedN 3; the 3 updated wording assertions too) and passes
+now. 14 suites 241 blocks / 1857 expectations, 0 fail/skip/error; gate (trio counted as shipped) identical to the
+session baseline; `tools:::.check_package_ASCII_code(".")` 4 files -> 0; `msgfmt -c` clean on en.po and tr.po.
+- [ ] User: kappaSizeFixedN is shipped (`Power`): these changes reach meddecide on the next `_updateModules.R` run
+      (dry-run first). The `.u.yaml` label shows after the module is rebuilt/installed; no `prepare()` needed.
+- [ ] User: Turkish for the two new "both raters" sentences was written by hand; a native read is welcome.
+- Changed message: `0,2,0.8` now gets the decimal-comma advice (was the range message); `0,20 0,80,1.2` gets the
+  range message (true; was the decimal-comma one). Both accepted (Codex risk note 7).
+
+
+# kappaSizeCI — `/security-audit-function` (2026-10-16; both findings fixed, uncommitted)
+
+- [x] MEDIUM (codegen): crafted `props` exported a syntax-pane call that ran code when pasted into R; `.sourcifyOption`
+      override with `encodeString()`. Test fails on HEAD (injected `alpha`/`citype`; backslash value unparseable).
+- [x] LOW (validation): "use a decimal point" shown to `1.2, 0.8` / `2, 0.8`; the comma reading must now parse in full.
+- [x] Verify: 5 suites 80 blocks / 749 expectations, 0 fail/skip/error; gate (kappaSizeCI as shipped) unchanged.
+- [ ] Out of scope (security): kappaSizePower and kappaSizeFixedN export the same injected arguments (`props`, no
+      override). Same 7-line fix. Upstream: jmvcore `sourcify()` should `encodeString()` strings (219 `.a.yaml`
+      declare a `type: String`; most rely on the default syntax generation).
+
+# kappaSizeCI — `/release-review-function` (2026-10-16, after 77e3905bd; uncommitted)
+
+Verdict: statistically correct; ready after the user actions below. Independent oracle (dbinom / lgamma
+Dirichlet-multinomial cells, stick-breaking + nlminb restricted ML, uniroot expected limits; shares no code with
+the module or `development-scripts/audit_kappaSizeCI.R`): n agrees 10/10 designs (K 2-5, raters 2-6, one- and
+two-sided, 5 RML-governed); at n the expected limits reach the request under both analyses, at n - 1 one misses;
+RD2012 row 306/171/135/119/110 reproduced. Gate with kappaSizeCI counted as shipped: identical to the normal run.
+
+- [x] Portability: three `.()` msgids (`R/kappaSizeCI.b.R:919,922,925`, from 77e3905bd) carried raw kappa, curly
+      quotes and an em dash; `tools:::.check_package_ASCII_code()` flagged the file (R CMD check WARNING). Now
+      `\uXXXX`; runtime strings and catalog msgids byte-identical. Test: token-level ASCII scan + rendered caveats
+      (fails on HEAD, passes now).
+- [x] Verify: 5 suites 78 blocks / 737 expectations, 0 fail/skip/error; release gate 0 blocking, unchanged.
+- [ ] Out of scope (portability): `tools:::.check_package_ASCII_code(".")` also flags `R/curemodels.b.R`,
+      `R/illnessdeath.b.R`, `R/utils-observed-cif.R`. `release_gate.py` has no non-ASCII check.
+- [ ] Minor (not fixed): the kappaSize engine runs even with the Summary pane off; it only feeds that pane
+      (measured 0.16-0.48 s at n 3,367-17,115, so not worth the restructuring).
+- [ ] Minor (wording, shared msgid with kappaSizePower): "each rated by all 2 raters" reads oddly for two.
+
 # kappaSizeCI — `/check-function-full` + fixes (2026-10-16, after a72d024ba; uncommitted)
 
 Audit: arguments 8/8 effective, outputs 4/4 populated, independent oracle (lgamma Dirichlet-multinomial cells,

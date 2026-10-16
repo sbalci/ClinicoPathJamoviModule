@@ -147743,6 +147743,16 @@ msgstr ""
 "tarafından değerlendirilen, yayımlanmış formüle göre <b>{n}</b> {subjects}, "
 "önerilen testin simülasyonuna göre yaklaşık <b>{needed}</b> olgu."
 
+#: R/kappaSizePower.b.R
+msgid ""
+"Required sample size: <b>{n}</b> {subjects} by the published formula and "
+"about <b>{needed}</b> by simulating the recommended test, each rated by both "
+"raters."
+msgstr ""
+"Gerekli örneklem büyüklüğü: her biri her iki değerlendirici tarafından "
+"değerlendirilen, yayımlanmış formüle göre <b>{n}</b> {subjects}, önerilen "
+"testin simülasyonuna göre yaklaşık <b>{needed}</b> olgu."
+
 #: R/kappaSizeCI.b.R
 #: R/kappaSizePower.b.R
 msgid ""
@@ -147751,6 +147761,14 @@ msgid ""
 msgstr ""
 "Gerekli örneklem büyüklüğü: her biri {raters} değerlendiricinin tümü "
 "tarafından değerlendirilen <b>{n}</b> {subjects}."
+
+#: R/kappaSizeCI.b.R
+#: R/kappaSizePower.b.R
+msgid ""
+"Required sample size: <b>{n}</b> {subjects}, each rated by both raters."
+msgstr ""
+"Gerekli örneklem büyüklüğü: her biri her iki değerlendirici tarafından "
+"değerlendirilen <b>{n}</b> {subjects}."
 
 #: R/kappaSizeCI.b.R
 msgid "Required sample size: unavailable"
@@ -151914,10 +151932,6 @@ msgstr ""
 #: competingRisksPower/options/analysisType/samplesize.title
 msgid "Sample Size Calculation"
 msgstr ""
-
-#: R/kappaSizeCI.b.R
-msgid "Sample size calculation failed"
-msgstr "Örneklem büyüklüğü hesaplaması başarısız oldu"
 
 #: R/kappaSizePower.b.R
 msgid "Sample size calculation failed: {error}"

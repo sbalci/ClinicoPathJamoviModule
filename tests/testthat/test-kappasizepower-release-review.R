@@ -311,7 +311,7 @@ test_that("degenerate designs inside the option ranges are flagged, not answered
     expect_false(grepl("Very small|Low power|Very large|Small kappa", ok))
     # the estimand of all four method papers: intraclass kappa, no rater bias (2026-10-11)
     expect_match(ok, "unweighted intraclass kappa for nominal categories", fixed = TRUE)
-    expect_match(ok, "each rated by all 2 raters")
+    expect_match(ok, "each rated by both raters")
 })
 
 
@@ -446,4 +446,42 @@ test_that("the two kappaSize panes say they hold the published-formula N", {
     expect_equal(res$text1$title, "Result by the published formula (kappaSize)")
     expect_equal(res$text_summary$title, "Summary by the published formula (kappaSize)")
     expect_match(res$text1$content, "A minimum of 316 subjects", fixed = TRUE)
+})
+
+
+test_that("the syntax pane escapes props: a crafted value cannot inject an argument (security audit 2026-10-16)", {
+    # jmvcore quotes a String without escaping it, so a props value carried in a shared .omv exported a call
+    # with extra arguments that ran their code when pasted into R. Parse only, never evaluate.
+    src_of <- function(props) ClinicoPath:::kappaSizePowerClass$new(
+        options = ClinicoPath:::kappaSizePowerOptions$new(props = props))$asSource()
+    for (bad in c('0.2", alpha = {stop("INJECTED"); 0.05}, outcome = "2',
+                  '0.2\\", 0.8\\', '0.2"\nstop("x")\n"')) {
+        ex <- parse(text = src_of(bad))[[1]]
+        expect_identical(ex$props, bad)
+        expect_identical(names(ex)[-1], "props")
+    }
+    expect_match(src_of("0.30, 0.70"), 'props = "0.30, 0.70"', fixed = TRUE)
+    expect_false(grepl("props", src_of("0.20, 0.80"), fixed = TRUE))   # default still omitted
+})
+
+
+test_that("decimal-comma advice only when the comma reading parses in full (2026-10-16)", {
+    # The check dropped tokens it could not read, so "1.2, 0.8" ("1.2," unreadable, 0.8 fine) was told to use
+    # the decimal point it already used. Shared rule: R/utils-kappasize.R kappaSizePropsLookDecimalComma().
+    for (p in c("1.2, 0.8", "2, 0.8"))
+        expect_error(run_kp(props = p), "strictly between 0 and 1", fixed = TRUE, info = p)
+    for (p in c("0,30 0,70", "0,3, 0,7", "0,3|0,7"))
+        expect_error(run_kp(props = p), "decimal point, not a decimal comma", fixed = TRUE, info = p)
+})
+
+
+test_that("two raters read 'both raters'; three or more keep 'all N raters' (2026-10-16)", {
+    expect_match(run_kp()$notices$content, "each rated by both raters.", fixed = TRUE)
+    expect_match(run_kp(raters = "3")$notices$content, "each rated by all 3 raters.", fixed = TRUE)
+})
+
+
+test_that("a narrow no-break space (U+202F) separates proportions, as in kappaSizeFixedN (2026-10-16)", {
+    expect_equal(n_from(run_kp(props = "0.30\u202f; 0.70")), n_from(run_kp()))
+    expect_equal(n_from(run_kp(props = "0.30\u202f0.70")), n_from(run_kp()))
 })

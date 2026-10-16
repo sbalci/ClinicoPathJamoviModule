@@ -463,3 +463,38 @@ test_that("expected counts never reach the reader in scientific notation", {
     expect_match(sparse, "smallest expected count is below 0.0001", fixed = TRUE)
     expect_false(grepl("count is [0-9.]+e[-+]", sparse))
 })
+
+
+test_that("the syntax pane escapes props: a crafted value cannot inject an argument (security audit 2026-10-16)", {
+    # jmvcore quotes a String without escaping it, so a props value carried in a shared .omv exported a call
+    # with extra arguments that ran their code when pasted into R. Parse only, never evaluate.
+    src_of <- function(props) ClinicoPath:::kappaSizeFixedNClass$new(
+        options = ClinicoPath:::kappaSizeFixedNOptions$new(props = props))$asSource()
+    for (bad in c('0.2", alpha = {stop("INJECTED"); 0.05}, outcome = "2',
+                  '0.2\\", 0.8\\', '0.2"\nstop("x")\n"')) {
+        ex <- parse(text = src_of(bad))[[1]]
+        expect_identical(ex$props, bad)
+        expect_identical(names(ex)[-1], "props")
+    }
+    expect_match(src_of("0.30, 0.70"), 'props = "0.30, 0.70"', fixed = TRUE)
+    expect_false(grepl("props", src_of("0.20, 0.80"), fixed = TRUE))   # default still omitted
+})
+
+
+test_that("decimal-comma advice only when the comma reading parses in full (2026-10-16)", {
+    # The check dropped tokens it could not read, so "1.2, 0.8" ("1.2," unreadable, 0.8 fine) was told to use
+    # the decimal point it already used. Shared rule: R/utils-kappasize.R kappaSizePropsLookDecimalComma().
+    for (p in c("1.2, 0.8", "2, 0.8"))
+        expect_error(fn_run(props = p), "strictly between 0 and 1", fixed = TRUE, info = p)
+    for (p in c("0,30 0,70", "0,3, 0,7", "0,3|0,7"))
+        expect_error(fn_run(props = p), "decimal point, not a decimal comma", fixed = TRUE, info = p)
+})
+
+
+test_that("the significance level is grouped under 'Significance Level', not 'Alpha' twice (2026-10-16)", {
+    ui <- testthat::test_path("..", "..", "jamovi", "kappaSizeFixedN.u.yaml")
+    skip_if_not(file.exists(ui))
+    groups <- vapply(yaml::read_yaml(ui)$children, function(x) if (is.null(x$label)) "" else x$label, "")
+    expect_true("Significance Level" %in% groups)
+    expect_false("Alpha" %in% groups)
+})

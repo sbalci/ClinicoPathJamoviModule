@@ -138480,11 +138480,24 @@ msgid ""
 "{raters} raters."
 msgstr ""
 
+#: R/kappaSizePower.b.R
+msgid ""
+"Required sample size: <b>{n}</b> {subjects} by the published formula and "
+"about <b>{needed}</b> by simulating the recommended test, each rated by both "
+"raters."
+msgstr ""
+
 #: R/kappaSizeCI.b.R
 #: R/kappaSizePower.b.R
 msgid ""
 "Required sample size: <b>{n}</b> {subjects}, each rated by all {raters} "
 "raters."
+msgstr ""
+
+#: R/kappaSizeCI.b.R
+#: R/kappaSizePower.b.R
+msgid ""
+"Required sample size: <b>{n}</b> {subjects}, each rated by both raters."
 msgstr ""
 
 #: R/kappaSizeCI.b.R
@@ -142430,10 +142443,6 @@ msgstr ""
 
 #: competingRisksPower/options/analysisType/samplesize.title
 msgid "Sample Size Calculation"
-msgstr ""
-
-#: R/kappaSizeCI.b.R
-msgid "Sample size calculation failed"
 msgstr ""
 
 #: R/kappaSizePower.b.R

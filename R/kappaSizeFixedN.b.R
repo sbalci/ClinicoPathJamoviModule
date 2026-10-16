@@ -191,13 +191,11 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
 
             # "0,30 0,70" splits into 0, 30, 0, 70 and would be reported as the wrong COUNT of
             # proportions, which sends the user looking in the wrong place. Diagnose the decimal
-            # separator first, as the two siblings do.
+            # separator first, as the two siblings do. Every token must parse
+            # (R/utils-kappasize.R): dropping the unreadable ones told the typo "1.2, 0.8" to use
+            # the decimal point it already used.
             if (any(props4 >= 1, na.rm = TRUE)) {
-                as_decimal <- suppressWarnings(as.numeric(trimws(unlist(strsplit(
-                    gsub("([0-9]),([0-9])", "\\1.\\2", parsed$raw),
-                    "[;|[:space:]]+")))))
-                as_decimal <- as_decimal[!is.na(as_decimal)]
-                if (length(as_decimal) > 0 && all(as_decimal > 0 & as_decimal < 1))
+                if (kappaSizePropsLookDecimalComma(parsed$raw))
                     jmvcore::reject(
                         .("Proportions must use a decimal point, not a decimal comma: write 0.30, 0.70 rather than 0,30 0,70."),
                         code = NULL)
@@ -251,6 +249,12 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                     .("Significance level (alpha) must be between 0.001 and 0.20."), code = NULL)
 
             invisible(TRUE)
+        },
+
+        # Syntax pane: props escaped (see kappaSizeSourcifyOption in R/utils-kappasize.R).
+        .sourcifyOption = function(option) {
+            src <- kappaSizeSourcifyOption(option)
+            if (is.null(src)) super$.sourcifyOption(option) else src
         },
 
         .run = function() {

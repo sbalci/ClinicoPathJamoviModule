@@ -26,7 +26,7 @@ illnessdeathClass <- R6::R6Class("illnessdeathClass", inherit = illnessdeathBase
           length(o$stratification_variable) || nzchar(trimws(o$interaction_terms)))
         stop("Frailty, additional time-varying effects, interactions, and stratification are not implemented in this exact-time model.")
       if (o$baseline_hazard != "nonparametric" || o$estimation_method != "partial")
-        stop("This implementation uses transition-specific Cox partial likelihood and Aalen–Johansen probabilities.")
+        stop("This implementation uses transition-specific Cox partial likelihood and Aalen\u2013Johansen probabilities.")
       h <- .multistateHistory(self$data, o$time_entry, o$time_exit, o$state_from,
         o$state_to, o$subject_id, o$covariates, o$model_structure)
       d <- h$data
@@ -44,7 +44,7 @@ illnessdeathClass <- R6::R6Class("illnessdeathClass", inherit = illnessdeathBase
           prob_dead_ci = ci_text(aj$lower[i, 3], aj$upper[i, 3])))
       }
       self$results$stateProbabilities$setNote("estimand", paste(
-        "Unadjusted Aalen–Johansen state occupation probabilities for the observed cohort,",
+        "Unadjusted Aalen\u2013Johansen state occupation probabilities for the observed cohort,",
         paste0("with pointwise ", 100 * o$confidence_level, "% confidence intervals."),
         "These are not arbitrary-initial-state transition matrices.",
         "Times outside observed support are omitted. Competing-risk state 1 is an absorbing competing event."

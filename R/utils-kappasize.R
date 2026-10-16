@@ -56,3 +56,30 @@ kappaSizeGofCells <- function(outcome, raters, props, rho) {
         c(1 - sum(agree), agree)
     }
 }
+
+# TRUE when `raw` (the proportions text, already space-normalised by the caller) is valid
+# proportions once every comma between two digits is read as a decimal point -- i.e. the
+# user's real mistake is the decimal separator. EVERY token must parse: the three backends
+# used to drop the tokens that did not, so the typo "1.2, 0.8" ("1.2," unreadable, 0.8 valid)
+# was told to use the decimal point it already used. A string with no digit-comma-digit is
+# never a decimal-comma problem.
+kappaSizePropsLookDecimalComma <- function(raw) {
+    if (!grepl("[0-9],[0-9]", raw)) return(FALSE)
+    tok <- strsplit(gsub("([0-9]),([0-9])", "\\1.\\2", raw), "[,;|[:space:]]+")[[1]]
+    v <- suppressWarnings(as.numeric(tok[nzchar(tok)]))
+    length(v) > 0 && all(is.finite(v)) && all(v > 0 & v < 1)
+}
+
+# Syntax pane for the free-text `props` option. jmvcore's sourcify() wraps a String in quotes
+# without escaping it, so a value carried in a shared .omv such as
+# `0.2", alpha = {<code>; 0.05}, citype = "two_sided` exported a call that parsed and ran
+# <code> when pasted into R. Returns the escaped argument for a non-default scalar value, or
+# NULL to mean "let jmvcore's .sourcifyOption() handle it" (defaults stay omitted). Each
+# backend's .sourcifyOption() calls this first.
+kappaSizeSourcifyOption <- function(option) {
+    value <- option$value
+    if (!identical(option$name, "props") || !is.character(value) || length(value) != 1L ||
+        is.na(value) || identical(value, option$default))
+        return(NULL)
+    paste0("props = ", encodeString(value, quote = '"'))
+}

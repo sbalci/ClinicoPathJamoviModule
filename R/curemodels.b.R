@@ -47,10 +47,10 @@ curemodelsClass <- R6::R6Class(
         "At risk means still under observation just before the assessment time;",
         "late events include all terminal events at or after it.",
         "No late events, especially with an empty or small risk set, do not establish cure.",
-        "Follow-up is estimated by reverse Kaplan–Meier; no threshold classifies patients as cured."
+        "Follow-up is estimated by reverse Kaplan\u2013Meier; no threshold classifies patients as cured."
       ))
       if (!isTRUE(mfu$reverse)) self$results$followupSupport$setNote("median",
-        "The reverse-Kaplan–Meier median follow-up is not estimable and is left blank.")
+        "The reverse-Kaplan\u2013Meier median follow-up is not estimable and is left blank.")
       horizons <- suppressWarnings(as.numeric(trimws(strsplit(o$analysis_horizons, ",",
                                                                 fixed = TRUE)[[1]])))
       valid <- is.finite(horizons) & horizons > 0 & horizons <= max(time)

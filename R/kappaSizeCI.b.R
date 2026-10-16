@@ -57,8 +57,14 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         .validateProportions = function() {
             tryCatch({
-                # U+00A0 (non-breaking space, what Word/Excel paste) is not in [:space:].
-                props_str <- trimws(gsub("\u{00A0}", " ", self$options$props, fixed = TRUE))
+                # jamovi always sends one string, but the R wrapper can pass NULL, NA or a vector
+                # (c(0.2, 0.8)), which reached the user as "argument is of length zero" / "the
+                # condition has length > 1". The siblings' .parseProps() already take a vector.
+                raw <- self$options$props
+                raw <- if (length(raw) == 0 || all(is.na(raw))) "" else paste(raw, collapse = ", ")
+                # U+00A0 and U+202F (no-break spaces: Word/Excel paste, and French typography puts
+                # U+202F before ";") are not in [:space:]. Same class as kappaSizeFixedN's .parseProps.
+                props_str <- trimws(gsub("[\u{00A0}\u{202F}]", " ", raw))
                 if (props_str == "") {
                     return(list(error = .("Proportions cannot be empty")))
                 }
@@ -96,11 +102,10 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     # "0,20 0,80" splits into 0, 20, 0, 80 and lands here, telling the user the
                     # proportions are out of range when the real problem is the decimal
                     # separator. Re-read it with the comma as a decimal point; if that yields
-                    # valid proportions, say so instead.
-                    as_decimal <- suppressWarnings(as.numeric(trimws(unlist(strsplit(
-                        gsub("([0-9]),([0-9])", "\\1.\\2", props_str), "[;|[:space:]]+")))))
-                    as_decimal <- as_decimal[!is.na(as_decimal)]
-                    if (length(as_decimal) > 0 && all(as_decimal > 0 & as_decimal < 1)) {
+                    # valid proportions, say so instead (kappaSizePropsLookDecimalComma, shared
+                    # with the two siblings: every token must parse, so "1.2, 0.8" is not told to
+                    # use the decimal point it already used).
+                    if (kappaSizePropsLookDecimalComma(props_str)) {
                         return(list(error = .("Proportions must use a decimal point, not a decimal comma: write 0.20, 0.80 rather than 0,20 0,80.")))
                     }
                     if (all(props_numeric > 0) && abs(sum(props_numeric) - 100) <= 0.1) {
@@ -461,7 +466,9 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             max(11, ceiling((chi_crit + 0.001) / worst))
         },
 
-        .calculateSampleSize = function(params) {
+        # run_engine = FALSE applies the ceiling refusal below and returns NULL without running
+        # kappaSize: its result only feeds the Summary pane (see .run).
+        .calculateSampleSize = function(params, run_engine = TRUE) {
             if (!requireNamespace('kappaSize', quietly = TRUE)) {
                 jmvcore::reject(.('The kappaSize package is required but not installed. Please install it using install.packages("kappaSize")'))
             }
@@ -537,6 +544,8 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         dist = private$.fmtNum(half_width, 3))
                 jmvcore::reject(msg, code = NULL)
             }
+
+            if (!run_engine) return(NULL)
 
             # Wall-clock backstop, sized to what the engine should cost rather than a flat 20
             # seconds. kappaSize evaluates its cell probabilities as expanded polynomials, and at an
@@ -734,38 +743,22 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             return(explanation)
         },
 
-        # `required_n` is the reported minimum (.minimumN), not kappaSize's own n.
-        .formatSampleSizeOutput = function(result, required_n) {
-            if (is.null(result) || length(result) == 0) {
-                return(.("Sample size calculation failed"))
-            }
-
+        # `required_n` is the reported minimum (.minimumN), not kappaSize's own n. The design comes
+        # from params: the engine only echoed kappa0/kappaL/kappaU/raters, and it now runs only for
+        # the Summary pane.
+        .formatSampleSizeOutput = function(params, required_n) {
             if (is.na(required_n)) {
                 return(.("Required sample size: unavailable"))
             }
 
-            is_one_sided <- (self$options$citype == "one_sided")
-
-            if (is.list(result)) {
-                sentence <- private$.buildExampleSentence(
-                    required_n = required_n,
-                    kappa0 = result$kappa0,
-                    kappaL = result$kappaL,
-                    kappaU = result$kappaU,
-                    one_sided = is_one_sided,
-                    raters = result$raters
-                )
-            } else {
-                # Defensive fallback: current kappaSize versions always return a
-                # classed list, so this non-list branch is not reached in practice.
-                sentence <- private$.buildExampleSentence(
-                    required_n = required_n,
-                    kappa0 = NA,
-                    kappaL = NA,
-                    kappaU = NA,
-                    one_sided = is_one_sided
-                )
-            }
+            sentence <- private$.buildExampleSentence(
+                required_n = required_n,
+                kappa0 = params$kappa0,
+                kappaL = params$kappaL,
+                kappaU = params$kappaU,
+                one_sided = isTRUE(params$citype == "one_sided"),
+                raters = params$raters
+            )
 
             return(paste0(.fmt(.("Required sample size: {n}"), n = private$.fmtN(required_n)),
                           "\n", sentence))
@@ -916,13 +909,13 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 # kappa none (R/agreement.b.R, 2026-10-16). At the default design a simulated Wald
                 # interval at n = 118 averaged [0.412, 0.776] against the planned [0.40, 0.80]
                 # (R = 4000, coverage 0.941): close for two raters, not the same interval.
-                .("This sample size is planned for the model-based goodness-of-fit interval; it does not establish the requested precision for the Wald, Fisher-z or bootstrap intervals that agreement software usually reports for Cohen's or Fleiss' κ. Report the goodness-of-fit interval, or size the study for the interval that will be reported."), " ",
+                .("This sample size is planned for the model-based goodness-of-fit interval; it does not establish the requested precision for the Wald, Fisher-z or bootstrap intervals that agreement software usually reports for Cohen's or Fleiss' \u03ba. Report the goodness-of-fit interval, or size the study for the interval that will be reported."), " ",
                 if (!isTRUE(rml_checked))
                     paste0(.("For this design the proportions could not be re-estimated, so the sample size holds them at their anticipated values only."), " "),
-                .("For any pair of raters this κ equals Cohen's κ when the raters share the same category frequencies (no rater bias); when their frequencies differ, it does not."),
+                .("For any pair of raters this \u03ba equals Cohen's \u03ba when the raters share the same category frequencies (no rater bias); when their frequencies differ, it does not."),
                 # Beside the pane it qualifies, so only when that pane is shown.
                 if (isTRUE(show_summary))
-                    paste0(" ", .("(The Summary panel below reproduces the kappaSize package's own wording, which says the sample size will “ensure” the limits — read it with this caveat in mind.)")),
+                    paste0(" ", .("(The Summary panel below reproduces the kappaSize package's own wording, which says the sample size will \u201censure\u201d the limits \u2014 read it with this caveat in mind.)")),
                 "</div>")
 
             info <- if (isTRUE(show_details)) paste0(
@@ -1052,7 +1045,8 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # R/kappaSizePower.b.R (whose Turkish already exists), hence the <b> inside it.
             answer <- if (isTRUE(is.finite(required_n)) && isTRUE(is.finite(raters)))
                 paste0(info_div,
-                       .fmt(.("Required sample size: <b>{n}</b> {subjects}, each rated by all {raters} raters."),
+                       .fmt(if (isTRUE(raters == 2)) .("Required sample size: <b>{n}</b> {subjects}, each rated by both raters.")
+                            else .("Required sample size: <b>{n}</b> {subjects}, each rated by all {raters} raters."),
                             n = private$.fmtN(required_n), subjects = private$.subjects(required_n),
                             raters = raters),
                        "</div>")
@@ -1062,6 +1056,12 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
 
         .subjects = function(n) if (isTRUE(n == 1)) .("subject") else .("subjects"),
+
+        # Syntax pane: props escaped (see kappaSizeSourcifyOption in R/utils-kappasize.R).
+        .sourcifyOption = function(option) {
+            src <- kappaSizeSourcifyOption(option)
+            if (is.null(src)) super$.sourcifyOption(option) else src
+        },
 
         .run = function() {
             # Input validation
@@ -1078,25 +1078,29 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # conditions propagate makes jamovi render them as real error notices
             # instead of swallowing them into the result body text.
             params <- private$.prepareParameters()
-            raw_result <- private$.calculateSampleSize(params)
-
-            # The reported n is the closed-form minimum (.minimumN); kappaSize's own n is kept for
-            # the Summary pane, which is the package's own output. Fall back to the engine only if
-            # the closed form could not judge the design (a degenerate cell vector).
-            engine_n   <- private$.extractRequiredN(raw_result)
-            required_n <- private$.minimumN(params)
-            if (!isTRUE(is.finite(required_n))) required_n <- engine_n
 
             # text2 and text_summary are visible only when their checkbox is on (r.yaml), and nothing
             # is built for or written to a hidden pane.
             show_details <- isTRUE(self$options$showExplanations)
             show_summary <- isTRUE(self$options$showSummary)
 
+            # The reported n is the closed-form minimum (.minimumN); kappaSize's own n is kept for
+            # the Summary pane, which is the package's own output. Its brute-force search ran on
+            # every run and was discarded unless that pane was on: 10 s for n = 90,407 (5 categories,
+            # 6 raters, [0.5975, 0.6025]). So it runs for that pane, or to stand in when the closed
+            # form cannot judge the design (a degenerate cell vector). The ceiling refusal applies
+            # either way, so the checkbox never decides whether a design is refused.
+            required_n <- private$.minimumN(params)
+            raw_result <- private$.calculateSampleSize(
+                params, run_engine = show_summary || !isTRUE(is.finite(required_n)))
+            engine_n   <- private$.extractRequiredN(raw_result)
+            if (!isTRUE(is.finite(required_n))) required_n <- engine_n
+
             # Build outputs defensively; only unexpected formatting/summary errors
             # are caught here (the reject-throwing steps already ran above).
             tryCatch({
                 # Format the result
-                formatted_result <- private$.formatSampleSizeOutput(raw_result, required_n)
+                formatted_result <- private$.formatSampleSizeOutput(params, required_n)
 
                 if (show_summary) {
                     # Capture summary output from kappaSize

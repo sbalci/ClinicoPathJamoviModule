@@ -57,7 +57,7 @@
     table$addRow(rowKey = i, values = as.list(result$table[i, ]))
   }
   table$setNote("estimand", paste(
-    "Aalen–Johansen estimates within each group's observed follow-up.",
+    "Aalen\u2013Johansen estimates within each group's observed follow-up.",
     "Event-free probability and both cumulative incidences sum to one.",
     "Competing events are pooled according to the selected outcome mapping.",
     "Risk counts are just before the stated time; event and censoring counts are cumulative",

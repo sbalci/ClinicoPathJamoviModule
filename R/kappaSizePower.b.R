@@ -40,7 +40,7 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
         # (non-breaking space) in place of a space, which [:space:] does NOT match, so it is
         # normalised first; otherwise "0.30<nbsp>0.70" fails as one unreadable token.
         .parseProps = function(raw) {
-            raw  <- gsub("\u{00A0}", " ", raw, fixed = TRUE)
+            raw  <- gsub("[\u{00A0}\u{202F}]", " ", raw)   # as kappaSizeFixedN: U+202F too
             toks <- unlist(strsplit(raw, "[,;|[:space:]]+"), use.names = FALSE)
             toks <- toks[nzchar(trimws(toks))]
             list(raw = raw, values = suppressWarnings(as.numeric(trimws(toks))))
@@ -441,19 +441,29 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             # The bold figure is what gets copied into a protocol, so when the simulation found the published N
             # short it carries the simulated N too, not the published one alone. Its own block, between the
             # warnings and the Methodology: it used to be the last of up to 15 sentences of the method statement.
+            # "each rated by all 2 raters" read oddly: two raters get their own whole sentence.
+            both <- isTRUE(raters == 2)
             answer <- if (has_n && isTRUE(est$type == "sim") && !is.null(est$n))
                 .fmt(
-                    .("Required sample size: <b>{n}</b> {subjects} by the published formula and about <b>{needed}</b> by simulating the recommended test, each rated by all {raters} raters."),
+                    if (both) .("Required sample size: <b>{n}</b> {subjects} by the published formula and about <b>{needed}</b> by simulating the recommended test, each rated by both raters.")
+                    else .("Required sample size: <b>{n}</b> {subjects} by the published formula and about <b>{needed}</b> by simulating the recommended test, each rated by all {raters} raters."),
                     n = private$.fmtN(n_required), subjects = private$.subjects(n_required),
                     needed = private$.fmtN(est$n), raters = raters)
             else if (has_n)
                 .fmt(
-                    .("Required sample size: <b>{n}</b> {subjects}, each rated by all {raters} raters."),
+                    if (both) .("Required sample size: <b>{n}</b> {subjects}, each rated by both raters.")
+                    else .("Required sample size: <b>{n}</b> {subjects}, each rated by all {raters} raters."),
                     n = private$.fmtN(n_required),
                     subjects = private$.subjects(n_required), raters = raters)
             if (!is.null(answer)) answer <- paste0(info_div, answer, "</div>")
 
             paste0(warn, answer, info)
+        },
+
+        # Syntax pane: props escaped (see kappaSizeSourcifyOption in R/utils-kappasize.R).
+        .sourcifyOption = function(option) {
+            src <- kappaSizeSourcifyOption(option)
+            if (is.null(src)) super$.sourcifyOption(option) else src
         },
 
         .run = function() {
@@ -485,12 +495,10 @@ kappaSizePowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 # tells a user with a European keyboard that their proportions are out of range
                 # rather than that the decimal separator is wrong. Detect that case by re-reading
                 # the string with the comma as a decimal point and seeing whether it becomes
-                # valid; only then is it really a decimal-separator problem.
-                as_decimal <- suppressWarnings(as.numeric(trimws(unlist(
-                    strsplit(gsub("([0-9]),([0-9])", "\\1.\\2", parsed$raw),
-                             "[;|[:space:]]+"), use.names = FALSE))))
-                as_decimal <- as_decimal[!is.na(as_decimal)]
-                if (length(as_decimal) > 0 && all(as_decimal > 0 & as_decimal < 1))
+                # valid; only then is it really a decimal-separator problem. Every token must
+                # parse (R/utils-kappasize.R): dropping the unreadable ones told the typo
+                # "1.2, 0.8" to use the decimal point it already used.
+                if (kappaSizePropsLookDecimalComma(parsed$raw))
                     jmvcore::reject(
                         .("Proportions must use a decimal point, not a decimal comma: write 0.30, 0.70 rather than 0,30 0,70."),
                         code = "props_decimal_comma")

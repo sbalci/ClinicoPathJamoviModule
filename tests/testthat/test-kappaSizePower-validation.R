@@ -609,5 +609,5 @@ test_that("review 2026-10-15: the bold sample size, the stated seed and the >1e9
     expect_match(big$notices$content, "Required sample size: <b>685,287,131</b> subjects, each rated by all 6 raters.", fixed = TRUE)
     expect_match(gsub("\\s+", " ", big$text2$content), "the sample size that reaches it is too large to simulate", fixed = TRUE)
     # no simulation, no change: the default design keeps the plain line
-    expect_match(vkp_run()$notices$content, "Required sample size: <b>241</b> subjects, each rated by all 2 raters.", fixed = TRUE)
+    expect_match(vkp_run()$notices$content, "Required sample size: <b>241</b> subjects, each rated by both raters.", fixed = TRUE)
 })

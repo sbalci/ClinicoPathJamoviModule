@@ -5,6 +5,63 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-10-16 — kappaSizeCI: a performance finding measured at typical inputs, not at the ceiling
+
+- **Failure mode:** the trio pass logged "engine runs with the Summary pane off" as not worth fixing on a measured
+  0.16-0.48 s, taken at n up to 17,115. The engine's cost is linear in n and the code admits n up to 100,000 on its
+  slowest engine: 10 s per run there, for a number the analysis then discarded.
+- **Detection:** `/fix-function kappaSizeCI --apply` timed designs near the 100,000 ceiling with the Summary pane off.
+- **Repair:** run kappaSize only for the Summary pane or when the closed form is NA; test mocks the engine to fail.
+- **Rule:** a "too cheap to fix" verdict is measured at the worst input the code permits (here the ceiling it
+  enforces), not at a typical one. Also: a Bash heredoc decodes `\uXXXX` exactly as the Edit tool does; after
+  writing any escape through either, `LC_ALL=C grep -n '[^ -~<TAB>]' <file>` and re-escape in Python.
+
+---
+
+## 2026-10-16 — kappaSize trio: one heuristic, three copies, one bug; fixed in one file first
+
+- **Failure mode:** the decimal-comma diagnosis was copied into all three kappaSize parsers. Each re-split only on
+  `;`/`|`/space and dropped the tokens it could not read, so the typo `1.2, 0.8` was told to "use a decimal point".
+  The security audit fixed kappaSizeCI alone (one function per pass), which broke the 2026-10-15 rule "grep the
+  siblings the same day" until the user asked for the siblings.
+- **Detection:** adversarial `props` inputs in `/security-audit-function kappaSizeCI`; reproduced in both siblings.
+- **Repair:** `kappaSizePropsLookDecimalComma()` and `kappaSizeSourcifyOption()` in `R/utils-kappasize.R`, called by
+  all three backends; regression tests in each release-review file.
+- **Rule:** a fix to a block that exists in a sibling goes into a shared helper in the same pass, even when the
+  pass is scoped to one function; the scope rule limits what is reviewed, not where a confirmed copy is fixed.
+
+---
+
+## 2026-10-16 — kappaSize trio: a free-text option exported executable syntax, and an audit called it clean
+
+- **Failure mode:** jmvcore's default syntax generation wraps a String option in quotes without escaping it. A
+  `props` value such as `0.2", alpha = {<code>; 0.05}, citype = "two_sided` made the syntax pane show a call that
+  parses, and pasting it into R runs `<code>`. The 2026-10-15 security audit of kappaSizePower recorded "no
+  findings": the codegen category is rated "shown, not evaluated", so nobody evaluated the pasted snippet.
+- **Detection:** `/security-audit-function kappaSizeCI` parsed `asSource()` for a crafted value, then evaluated it
+  with a canary (`file.create`); the file was created.
+- **Repair:** `props`-scoped `.sourcifyOption` with `encodeString()` in kappaSizeCI; siblings logged.
+- **Rule:** for every free-text option, round-trip a quote-breaking value through `asSource()` and `parse()`: the
+  value must come back identical and no other argument may appear. "Shown, not evaluated" is not a severity
+  argument when a user is expected to copy the code into R.
+
+---
+
+## 2026-10-16 — kappaSizeCI: a review commit typed raw non-ASCII into three msgids
+
+- **Failure mode:** 77e3905bd added three `.()` sentences with a literal kappa, curly quotes and an em dash.
+  The same file escapes every other glyph (`\u03ba`), and `release_gate.py` has no non-ASCII check, so the
+  commit passed every gate while `R CMD check` would WARN on the file. Likely cause: the Edit tool decodes
+  `\uXXXX` typed into old/new strings (it did so again in this pass, making the edit a no-op).
+- **Detection:** `/release-review-function kappaSizeCI`, a byte scan of the code (not comments) of the scope
+  files, confirmed with `tools:::.check_package_ASCII_code(".")`.
+- **Repair:** Python replace to `\uXXXX` (runtime string and catalog msgid unchanged); a token-level test in
+  `test-kappasizeci-release-review.R` fails on any non-ASCII outside comments.
+- **Rule:** after any edit that adds a user-visible string with a symbol in it, run
+  `Rscript -e 'tools:::.check_package_ASCII_code(".")'`; never trust the Edit tool with an escape.
+
+---
+
 ## 2026-10-15 — kappaSizeCI: the n was planned for one analysis while the Notes recommended another
 
 - **Failure mode:** the sample size held the category proportions at their anticipated values
