@@ -112075,6 +112075,10 @@ msgstr ""
 msgid "Number of raters / methods / foci (0 = unspecified)"
 msgstr ""
 
+#: R/kappaSizeFixedN.b.R
+msgid "Number of raters must be 2, 3, 4, 5, or 6."
+msgstr ""
+
 #: kappaSizeCI/options/raters.description.ui
 #: kappaSizeFixedN/options/raters.description.ui
 #: kappaSizePower/options/raters.description.ui
@@ -166305,10 +166309,10 @@ msgstr "The examined-versus-positive correlation could not be estimated because 
 
 #: R/kappaSizeFixedN.b.R
 msgid ""
-"The expected lower bound could not be computed for this design: the "
-"goodness-of-fit chi-square does not reach its critical value inside the "
-"range of agreement the model allows for these proportions. Increase N, use a "
-"less extreme prevalence, or raise the significance level."
+"The expected lower bound could not be computed for this design: it lies too "
+"close to the lowest agreement the model allows for these proportions to be "
+"resolved numerically, as happens when a category is extremely rare. Use a "
+"less extreme prevalence, increase N, or raise the significance level."
 msgstr ""
 
 #: R/kappaSizeFixedN.b.R
@@ -171968,9 +171972,10 @@ msgstr ""
 #: R/kappaSizeFixedN.b.R
 msgid ""
 "This is the bound the study reaches if the agreement it observes lands "
-"exactly on kappa0. Roughly half of such studies will observe less agreement "
-"than anticipated and end with a lower bound below the figure shown, so read "
-"it as a planning expectation rather than a guarantee."
+"exactly on kappa0 and its category proportions match the anticipated ones. "
+"Roughly half of such studies will observe less agreement than anticipated "
+"and end with a lower bound below the figure shown, so read it as a planning "
+"expectation rather than a guarantee."
 msgstr ""
 
 #: R/jjhistostats.b.R

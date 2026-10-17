@@ -351,6 +351,9 @@ test_that("the Notes panel says the bound is a best case, not a guarantee", {
     # as a floor the study is guaranteed to clear.
     notes <- fn_run()$methodology$content
     expect_match(notes, "lands exactly on kappa0", fixed = TRUE)
+    # and only if the proportions are the anticipated ones: observed kappa exactly 0.6, n 250, two raters gives
+    # 0.510 at prevalence .5 and 0.489 at .2 (/fix-function 2026-10-17)
+    expect_match(notes, "and its category proportions match the anticipated ones", fixed = TRUE)
     expect_match(notes, "planning expectation rather than a guarantee", fixed = TRUE)
 })
 
@@ -720,7 +723,9 @@ test_that("F2 Study Explanation, method detail and kappaSize's summary are off b
     expect_match(dm, "Methodology.", fixed = TRUE)
     expect_match(dm, "lower root of the goodness-of-fit chi-square equation", fixed = TRUE)
     expect_false(grepl("reproduced in the Summary panel", dm, fixed = TRUE))   # that pane is off
-    expect_match(fn_run(raters = "3")$methodology$content, "reproduced in the Summary panel", fixed = TRUE)
+    # With the pane on but the (mocked) engine failing there is nothing reproduced to describe; the sentence waits
+    # for a valid figure (positive case: "the Methodology quotes kappaSize's 0.001 search only when ..." below).
+    expect_false(grepl("reproduced in the Summary panel", fn_run(raters = "3")$methodology$content, fixed = TRUE))
 })
 
 test_that("F2 the toggles are declared as in kappaSizeCI", {
@@ -796,8 +801,11 @@ test_that("IR-kappaSizeCI-02 carried over: the beta-binomial bound is never belo
 # An analysis opened from an .omv/.omt reaches the backend with its saved options unchecked: jamovi
 # copies them through as they are, and jmvcore's options$read() assigns any value to any option and
 # adds an option for any unknown name. These build that state the same way. Parse only, never evaluate.
+# `data =` is needed for run(): without it jmvcore's run() calls self$readDataset(), which only jamovi's
+# engine sets, and fails with "attempt to apply non-function" before .run() is reached.
 crafted_fn <- function(set = list(), extra = NULL) {
-    an <- ClinicoPath:::kappaSizeFixedNClass$new(options = ClinicoPath:::kappaSizeFixedNOptions$new())
+    an <- ClinicoPath:::kappaSizeFixedNClass$new(options = ClinicoPath:::kappaSizeFixedNOptions$new(),
+                                                 data = data.frame())
     for (nm in names(set)) { o <- an$options$option(nm); o$value <- set[[nm]] }
     if (!is.null(extra)) an$options$.addOption(jmvcore:::Option$new(extra, 0.05))
     an
@@ -857,4 +865,67 @@ test_that("kappaSize's own search is cut off instead of running for a day on a r
     fn_run()
     t1 <- Sys.time()
     expect_no_error(while (difftime(Sys.time(), t1, units = "secs") < 6) NULL)
+})
+
+
+# ---- /fix-function follow-ups (2026-10-17) -----------------------------------------------------------
+
+test_that("a fractional n the Integer check rejected is refused, not printed rounded", {
+    # 82.5 was computed as given and printed as "82 subjects" beside the bound for 82.5 (0.399; 82 gives 0.398),
+    # although the backstop's own message says "whole number".
+    an <- crafted_fn(list(n = 82.5))
+    an$init(noThrow = TRUE)
+    expect_error(an$run(), "must be a whole number of at least 11", fixed = TRUE)
+    an <- crafted_fn(list(n = 82))
+    an$init(noThrow = TRUE)
+    expect_no_error(an$run())
+})
+
+test_that("the Methodology quotes kappaSize's 0.001 search only when its figure is valid", {
+    skip_if_not_installed("kappaSize")
+    # kappaSize's walk ends at -23.78 here, past the model floor, against a bound of -0.020, and the Methodology
+    # still said "it can report a value up to about 0.001 lower".
+    past <- fn_run(props = "0.02", kappa0 = 0.01, n = 11, alpha = 0.001)
+    expect_match(past$text_summary$content, "stepped past the lowest agreement", fixed = TRUE)
+    expect_false(grepl("up to about 0.001 lower", flat(past$methodology$content), fixed = TRUE))
+    expect_match(flat(fn_run()$methodology$content), "up to about 0.001 lower", fixed = TRUE)
+})
+
+test_that("a bound too close to the model floor to resolve is not called nonexistent", {
+    # Prevalence 1e-10: the root is 1.15e-14 above the floor, inside both bracket offsets of .fixedBound(), and the
+    # refusal said the chi-square "does not reach its critical value" there.
+    msg <- tryCatch(fn_run(props = "1e-10", kappa0 = 0.01, n = 11, alpha = 0.001, showSummary = FALSE),
+                    error = conditionMessage)
+    expect_match(msg, "too close to the lowest agreement the model allows", fixed = TRUE)
+    expect_false(grepl("does not reach its critical value", msg, fixed = TRUE))
+    # a decade up the offsets still bracket it (1.15e-13 above the floor) and the bound is reported
+    expect_match(fn_line(fn_run(props = "1e-9", kappa0 = 0.01, n = 11, alpha = 0.001, showSummary = FALSE)),
+                 "lower limit for kappa of", fixed = TRUE)
+})
+
+test_that("every .() string of the backend is in tr.po, translated, with the same placeholders", {
+    # Checking the catalog's own entries cannot see a msgid that was never extracted: "Number of raters must be
+    # 2, 3, 4, 5, or 6." (security audit 2026-10-17) was in no catalog.
+    src <- readLines(testthat::test_path("..", "..", "R", "kappaSizeFixedN.b.R"), warn = FALSE)
+    src <- paste(src[!grepl("^\\s*#", src)], collapse = "\n")
+    ids <- regmatches(src, gregexpr('\\.\\(\\s*"((?:[^"\\\\]|\\\\.)*)"', src, perl = TRUE))[[1]]
+    ids <- unique(gsub('\\\\"', '"', sub('"$', "", sub('^\\.\\(\\s*"', "", ids))))
+    expect_gt(length(ids), 60L)
+
+    po <- readLines(testthat::test_path("..", "..", "jamovi", "i18n", "tr.po"), encoding = "UTF-8", warn = FALSE)
+    unq <- function(s) gsub('\\\\"', '"', sub('^"', "", sub('"$', "", s)))
+    tr <- character(0); field <- NULL
+    for (ln in c(po, "")) {
+        if (startsWith(ln, "msgid ")) { id <- unq(sub("^msgid ", "", ln)); field <- "id" }
+        else if (startsWith(ln, "msgstr ")) { str <- unq(sub("^msgstr ", "", ln)); field <- "str" }
+        else if (startsWith(ln, "\"") && identical(field, "id")) id <- paste0(id, unq(ln))
+        else if (startsWith(ln, "\"") && identical(field, "str")) str <- paste0(str, unq(ln))
+        else if (!nzchar(ln) && identical(field, "str")) { tr[id] <- str; field <- NULL }
+    }
+    expect_identical(setdiff(ids, names(tr)), character(0))
+    ph <- function(s) sort(regmatches(s, gregexpr("\\{[^{}]*\\}", s))[[1]])
+    for (i in intersect(ids, names(tr))) {
+        expect_true(nzchar(tr[[i]]), info = i)
+        expect_identical(ph(tr[[i]]), ph(i), info = i)
+    }
 })

@@ -5,6 +5,27 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-10-17 — kappaSizeFixedN: two regression tests that could not fail
+
+- **Failure mode:** the security audit's raters test built its analysis without `data =`, so jmvcore's `run()`
+  called `self$readDataset()` (set only by jamovi's engine) and stopped with "attempt to apply non-function" before
+  `.run()`. It was red from the commit, and it could not have gone green with or without the guard. Validation C23
+  read the Study Explanation after that pane became default-off: both sides were `""`, so `identical("", "")` passed
+  without comparing a bound. The same pass found four smaller defects: the audit's new msgid in no catalog; a
+  Methodology sentence ("can report a value up to about 0.001 lower") still shown when kappaSize's walk ended 23.8
+  below the bound, or never ran; a planning caveat conditioned on kappa0 alone; and a numerical bracketing failure
+  (prevalence <= 1e-10) worded as the chi-square never reaching its critical value.
+- **Detection:** a baseline run before any edit (1 error), then Codex's static review, every claim re-run in R.
+- **Repair:** `data = data.frame()`; C23 turns the pane on and asserts a finite bound first; `i18nUpdate()` run on a
+  scratch copy first (0 churn), Turkish added, and a test of every backend `.()` literal against tr.po; the `n`
+  backstop checks whole numbers; an `engine_ok` gate; the caveat and the refusal reworded.
+- **Rule:** run a new regression test red first against the code without its fix, and read why it is red. An error
+  raised inside the framework is not the guard firing. When a default turns a pane off, grep the tests that read
+  that pane: an extractor over `""` returns `""`, and two empty strings compare equal. Test i18n completeness from
+  the source's literals, not from the catalog's entries, which cannot show a msgid that was never extracted.
+
+---
+
 ## 2026-10-17 — kappaSizeFixedN: a verdict gate the model's parameter space made unreachable
 
 - **Failure mode:** the red "cannot demonstrate agreement" verdict fired only on `bound <= 0`. The bound cannot fall

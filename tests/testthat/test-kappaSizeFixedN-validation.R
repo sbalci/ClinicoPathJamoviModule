@@ -288,14 +288,19 @@ test_that("C20 the engine's own marginal warning (Summary pane) reads the first 
 })
 
 test_that("C23 the exported syntax reproduces the bound", {
+    # showExplanations = TRUE: the Study Explanation this reads is off by default, and with it off both
+    # sides were "" and the comparison passed without comparing a bound.
     opts <- ClinicoPath:::kappaSizeFixedNOptions$new(outcome = "3", kappa0 = 0.5, props = "0.2, 0.3, 0.5",
-                                                     raters = "3", alpha = 0.05, n = 150L)
+                                                     raters = "3", alpha = 0.05, n = 150L,
+                                                     showExplanations = TRUE)
     an <- ClinicoPath:::kappaSizeFixedNClass$new(options = opts, data = data.frame())
     an$init(); suppressWarnings(an$run())
     # eval() of the analysis's OWN generated call with fixed, test-defined inputs: that the syntax
     # pane's code runs and reproduces the bound is the claim under test.
     res2 <- suppressWarnings(eval(parse(text = an$asSource())))
+    expect_true(is.finite(vfn_bound(an$results)))
     expect_identical(vfn_bound_str(res2), vfn_bound_str(an$results))
+    expect_identical(res2$text1$content, an$results$text1$content)
 })
 
 test_that("C07 'roughly half' of studies observing the planned design end below the bound (simulation)", {

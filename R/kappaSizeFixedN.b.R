@@ -139,8 +139,9 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
         # searched. kappaSize walks down in steps of 0.001 and stops at X2 >= crit + 0.001, which put
         # its figure up to 0.00115 below this root and let it step past the floor altogether
         # (prevalence 0.02, 3 raters, kappa0 0.01, n 100, alpha 0.2: -0.841 against a root of
-        # -0.0004). NA only if no bracket can be formed, which no design reachable from the
-        # interface has produced.
+        # -0.0004). NA when neither offset brackets the root. The root always exists, but for an
+        # extremely rare category it lies closer to the floor than either offset (prevalence 1e-10,
+        # 2 raters, kappa0 0.01, n 11, alpha 0.001: 1.15e-14 above it; /fix-function 2026-10-17).
         .fixedBound = function(outcome, raters, props, kappa0, n, crit) {
             q <- private$.pooledCells(outcome, raters, props, kappa0)
             f <- function(r) {
@@ -442,12 +443,14 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
 
         # Methodology panel, at the foot of the results. `rml` is the status from .rmlBound() ("rml",
         # "fixed", "failed"), or "na" when re-estimation does not apply; `engine_sparse` is TRUE when
-        # kappaSize's own summary printed its expected-cell-count line. As in R/kappaSizeCI.b.R, the
+        # kappaSize's own summary printed its expected-cell-count line, and `engine_ok` when its search
+        # returned a figure inside the model. As in R/kappaSizeCI.b.R, the
         # caveats are always shown and the method detail waits for showExplanations (F2); a sentence
         # about the Summary panel appears only while that panel is shown. The builder defaults show
         # everything; .run() passes the two options.
         .buildMethodology = function(outcome, raters, alpha, rml = "na", sparse_cells = FALSE,
-                                     engine_sparse = FALSE, show_details = TRUE, show_summary = TRUE) {
+                                     engine_sparse = FALSE, show_details = TRUE, show_summary = TRUE,
+                                     engine_ok = TRUE) {
             conf_pct <- if (isTRUE(is.finite(alpha)))
                 paste0(base::format(100 * (1 - alpha), scientific = FALSE, trim = TRUE), "%")
             else
@@ -456,7 +459,9 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
 
             caveats <- private$.block("info",
                 .("This is a planning expectation, not a guarantee."),
-                .("This is the bound the study reaches if the agreement it observes lands exactly on kappa0. Roughly half of such studies will observe less agreement than anticipated and end with a lower bound below the figure shown, so read it as a planning expectation rather than a guarantee."),
+                # The bound conditions on the proportions too: two raters, n 250, observed kappa exactly
+                # 0.6 give 0.510 at prevalence .5 and 0.489 at .2 (/fix-function 2026-10-17).
+                .("This is the bound the study reaches if the agreement it observes lands exactly on kappa0 and its category proportions match the anticipated ones. Roughly half of such studies will observe less agreement than anticipated and end with a lower bound below the figure shown, so read it as a planning expectation rather than a guarantee."),
                 # As kappaSizeCI: ClinicoPath's own agreement analysis gives Cohen's kappa a Wald or
                 # Fisher-z interval, not this one (R/agreement.b.R, 2026-10-16).
                 .("This bound is for the model-based goodness-of-fit interval; the Wald, Fisher-z or bootstrap intervals that agreement software usually reports for Cohen's or Fleiss' kappa can give a different lower limit for the same data. Report the goodness-of-fit interval, or plan for the interval that will be reported."),
@@ -486,9 +491,10 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 .("It answers 'given the subjects I have, how little agreement am I still unable to rule out?' - the mirror image of the sample-size question; every kappa below the bound is excluded."),
                 if (reest && !identical(rml, "failed"))
                     .("The bound shown is the lower of two: the one obtained holding the category proportions at their anticipated values (the published calculation, and kappaSize's) and the one obtained re-estimating them by maximum likelihood at each value of kappa (the interval that keeps its stated coverage)."),
-                # VAL-04: kappaSize's own search (Summary panel) is up to 0.00115 below the root.
+                # VAL-04: kappaSize's own search (Summary panel) is up to 0.00115 below the root - while it
+                # stays inside the model; past the floor it can be any distance (-23.78 against -0.020).
                 .("The bound is the lower root of the goodness-of-fit chi-square equation, solved directly; a positive bound is shown rounded down (to three decimals, or to two significant digits below 0.001), so the figure shown never overstates it."),
-                if (isTRUE(show_summary))
+                if (isTRUE(show_summary) && isTRUE(engine_ok))
                     .("The kappaSize package's own search, reproduced in the Summary panel, moves down in steps of 0.001 and stops once the chi-square exceeds its critical value by 0.001, so it can report a value up to about 0.001 lower."),
                 # IR-kappaSizeCI-02 carried over: a binary outcome uses ADK eq. (4); the 3-5 category cells are
                 # the Dirichlet-multinomial, which for two categories is the beta-binomial (ADE 2001 p.2483).
@@ -583,16 +589,18 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                         sum = round(sum(props4), 4)),
                     code = NULL)
 
-            # Backstop: every kappaSize FixedN* engine stops on n <= 10, and an Inf used to
-            # hang its search loop (the test statistic becomes NaN).
-            if (!is.finite(n) || n < 11)
+            # Backstop: every kappaSize FixedN* engine stops on n <= 10, an Inf used to hang its
+            # search loop (the test statistic becomes NaN), and a fractional n was computed as given
+            # but printed rounded (82.5: "82 subjects" beside the bound for 82.5).
+            if (!isTRUE(is.finite(n) && n >= 11 && n == round(n)))
                 jmvcore::reject(
                     .fmt(
                         .("Sample size (N) must be a whole number of at least 11. The kappaSize method is a large-sample approximation and its engine refuses any study of 10 or fewer subjects (received {n})."),
                         n = n),
                     code = NULL)
 
-            # Backstops for the compiled (0.01, 0.99) and (0.001, 0.20) bounds.
+            # Backstops: kappa0 in (0, 1), the range the model needs (the compiled 0.01-0.99 is the
+            # interface's); alpha in its compiled (0.001, 0.20).
             if (!is.finite(kappa0) || kappa0 <= 0 || kappa0 >= 1)
                 jmvcore::reject(.("kappa0 must be strictly between 0 and 1."), code = NULL)
 
@@ -652,7 +660,7 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             fixed <- private$.fixedBound(outcome, raters, props_used, kappa0, n, crit)
             if (!isTRUE(is.finite(fixed)))
                 jmvcore::reject(
-                    .("The expected lower bound could not be computed for this design: the goodness-of-fit chi-square does not reach its critical value inside the range of agreement the model allows for these proportions. Increase N, use a less extreme prevalence, or raise the significance level."),
+                    .("The expected lower bound could not be computed for this design: it lies too close to the lowest agreement the model allows for these proportions to be resolved numerically, as happens when a category is extremely rare. Use a less extreme prevalence, increase N, or raise the significance level."),
                     code = NULL)
 
             rml <- if (private$.reestimationApplies(outcome, raters))
@@ -673,6 +681,7 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 bound = private$.fmtBound(bound)))
 
             engine_sparse <- FALSE
+            engine_ok <- FALSE
             if (show_summary) {
                 # kappaSize's own search, for the Summary pane only: the reported bound no longer depends
                 # on it. n goes in as an integer: the engine cat()s the value it was given, and a double
@@ -709,8 +718,9 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                     lines <- utils::capture.output(summary(engine))
                     lines <- lines[!(duplicated(lines) & grepl("expected cell count", lines, fixed = TRUE))]
                     engine_sparse <- any(grepl("expected cell count", lines, fixed = TRUE))
-                    note <- if (!(length(eng_val) == 1 && is.finite(eng_val)) ||
-                                !private$.inModel(outcome, raters, props_used, round(eng_val, 10)))
+                    engine_ok <- length(eng_val) == 1 && is.finite(eng_val) &&
+                        private$.inModel(outcome, raters, props_used, round(eng_val, 10))
+                    note <- if (!engine_ok)
                         .fmt(.("kappaSize's own search, above, stepped past the lowest agreement the model allows for these proportions, so its figure is not a valid limit. The expected lower bound, solved directly, is {bound}."),
                              bound = private$.fmtBound(bound))
                     else if (show_rml)
@@ -788,6 +798,6 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             self$results$methodology$setContent(private$.buildMethodology(
                 outcome, raters, alpha, rml = rml$status, sparse_cells = sparse,
                 engine_sparse = engine_sparse, show_details = show_details,
-                show_summary = show_summary))
+                show_summary = show_summary, engine_ok = engine_ok))
         })
 )

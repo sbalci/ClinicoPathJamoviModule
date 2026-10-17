@@ -38,7 +38,8 @@
 #     kappaL <= 0           -> the study cannot even rule out chance agreement
 #
 #   One caveat runs through every example below: kappaL is what the study
-#   reaches IF the observed agreement lands exactly on kappa0. Roughly half of
+#   reaches IF the observed agreement lands exactly on kappa0 and the category
+#   proportions match the anticipated ones. Roughly half of
 #   such studies observe less and end with a lower bound below the figure
 #   shown. Treat it as a planning expectation, not a guarantee.
 #

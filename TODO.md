@@ -1,3 +1,38 @@
+# kappaSizeFixedN — `/fix-function --apply` (2026-10-17, after the release review and security audit; in progress)
+
+Baseline (HEAD 080825f91): suites 19 + 324 + 206 pass, 1 error (release-review "a raters value the option check
+rejected..."); gate identical with kappaSizeFixedN counted as shipped; 600 random + 240 extreme designs, 0 errors,
+slowest 0.40 s. Codex (static: its sandbox could not start R) confirmed A and B and raised five more; each re-run in R.
+Acceptance: each fix has a test that fails without it; suites green; zzz/agreementintro failures as baseline only.
+
+- [ ] F1 (test): `crafted_fn()` builds without `data`, so jmvcore's `run()` calls `readDataset()` (set only by jamovi's
+      engine) and dies with "attempt to apply non-function" before `.run()`: the raters backstop was never exercised.
+- [ ] F2 (test): validation C23 compares two empty strings - `showExplanations` is off by default, so both
+      Study Explanations are "". Turn it on and assert a number before comparing.
+- [ ] F3 (i18n): "Number of raters must be 2, 3, 4, 5, or 6." is in no catalog (`i18nUpdate()` on a scratch copy
+      adds exactly this entry, 0 other churn). Turkish; a test of every backend `.()` msgid against tr.po.
+- [ ] F4 (backstop): the n check accepts 82.5 on the R-caller path - prints "82 subjects" beside the bound for 82.5
+      (0.399; 82 gives 0.398) although its own message says "whole number".
+- [ ] F5 (wording): with the Summary on, Methodology says kappaSize "can report a value up to about 0.001 lower" when
+      its walk stepped past the model floor (props .02, 2 raters, kappa0 .01, n 11, alpha .001: -23.78 vs -0.020) or
+      could not run at all. Say it only when kappaSize returned a valid figure.
+- [ ] F6 (wording): the planning caveat conditions on kappa0 alone; the bound also assumes the anticipated proportions
+      (Codex: two observed tables with kappa 0.6, n 250 give 0.511 at prevalence .5 and 0.489 at .2).
+- [ ] F7 (message): a prevalence <= 1e-10 is rejected with "the chi-square does not reach its critical value inside
+      the range the model allows" - false (the root exists; the bracket offsets cannot resolve it), and the comment
+      called it unreachable from the interface.
+- [ ] Verify: suites, zzz + agreementintro vs baseline, `i18nUpdate()` churn + `msgfmt -c`, sweeps re-run.
+- [x] Not changed: on the same R-caller path kappa0 outside 0.01-0.99 (but inside (0, 1)) and n above 1e6 compute
+      valid numbers, so only the comment that called them backstops of the compiled bounds was corrected.
+- [ ] OOS (kappaSizeCI, R-caller path only): no raters backstop. `raters = "7"` set on the option object, then
+      `init(noThrow = TRUE)` + `run(noThrow = TRUE)`, ends `complete` with a sample size for 7 raters; "1000" reaches
+      kappaSize's "Sorry, this function is designed for between 2 to 6 raters." kappaSizePower shows that vendor
+      string for both. jamovi's engine never runs after a failed init, so this is defense in depth; the clause and
+      msgid are kappaSizeFixedN's `.validateInputs()` ones (build the test analysis with `data = data.frame()`).
+- [ ] OOS (kappaSizeCI): its caveat "The sample size delivers the stated limits only if the study observes the
+      anticipated kappa." also assumes the anticipated proportions (F6 above).
+- [ ] User: kappaSizeFixedN is still `PowerT`; move it back to `Power`, then `prepare()` and `_updateModules.R`.
+
 # kappaSizeFixedN — `/release-review-function` (2026-10-17; verdict: ready after the user's steps, no code changed)
 
 - [x] Tests 528/528 (19 + 206 + 303), 0 skip; rendering contract 6/6; file naming 7/7; release gate 0 blocking;
