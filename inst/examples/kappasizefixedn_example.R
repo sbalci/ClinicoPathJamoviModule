@@ -130,7 +130,9 @@ kappaSizeFixedN(
   n       = 50
 )
 
-# Result: kappaL = 0.318
+# Result: kappaL = 0.316
+# - With three raters the bound allows for re-estimating the prevalence when the
+#   study is analysed (kappaSize alone, holding it fixed, gives 0.318).
 # - The third rater is what rescues this design: with 2 raters and otherwise
 #   identical inputs the bound would be materially lower. Extra raters buy
 #   information per subject, which is often cheaper than extra subjects.
@@ -338,7 +340,7 @@ kappaSizeFixedN(
   n       = 1000
 )
 
-# Result: kappaL = 0.66
+# Result: kappaL = 0.660
 # - The smallest gap in this file (0.040): large n AND balanced categories.
 # - Verdict: certifies substantial agreement with the bound alone.
 
@@ -410,7 +412,7 @@ result_n300 <- kappaSizeFixedN(
 #
 #    Number of raters - large gains, especially from 2 to 3:
 #      kappa0 = 0.60, p = 0.30, n = 60, alpha = 0.05
-#      2 -> 0.389 | 3 -> 0.445 | 4 -> 0.464 | 6 -> 0.480
+#      2 -> 0.389 | 3 -> 0.443 | 4 -> 0.459 | 6 -> 0.474
 #
 #    Balance of the categories - a rare finding is expensive:
 #      kappa0 = 0.60, 2 raters, n = 100, alpha = 0.05

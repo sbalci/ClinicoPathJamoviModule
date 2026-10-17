@@ -42,15 +42,18 @@ A results object containing:
 \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$text_summary} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$methodology} \tab \tab \tab \tab \tab a html \cr
 }
 }
 \description{
 For an interobserver agreement study whose number of subjects is already
 fixed, the lowest kappa the study would still be unable to rule out - the
 lower bound of the one-sided confidence interval around the anticipated
-kappa (kappa0); every value below it is excluded. Computed with the
-kappaSize package. Use kappaSizePower to size a study for a hypothesis test
-and kappaSizeCI to size it for a target interval width.
+kappa (kappa0); every value below it is excluded. Solved from the
+goodness-of-fit models of the kappaSize package; with three or more raters
+or categories it also allows for re-estimating the category proportions
+when the study is analysed. Use kappaSizePower to size a study for a
+hypothesis test and kappaSizeCI to size it for target confidence limits.
 }
 \examples{
 \donttest{

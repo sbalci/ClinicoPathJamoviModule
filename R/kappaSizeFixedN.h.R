@@ -91,7 +91,8 @@ kappaSizeFixedNResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         notices = function() private$.items[["notices"]],
         text1 = function() private$.items[["text1"]],
         text_summary = function() private$.items[["text_summary"]],
-        text2 = function() private$.items[["text2"]]),
+        text2 = function() private$.items[["text2"]],
+        methodology = function() private$.items[["methodology"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -103,7 +104,10 @@ kappaSizeFixedNResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "ClinicoPathJamoviModule",
                     "kappaSize",
                     "donnerEliasziwKappaGOF",
-                    "rotondiDonnerKappaCI"))
+                    "rotondiDonnerKappaCI",
+                    "altayeDonnerKlarKappaRaters",
+                    "altayeDonnerEliasziwKappaGOF",
+                    "LandisKoch1977"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="notices",
@@ -147,6 +151,17 @@ kappaSizeFixedNResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "props",
                     "raters",
                     "alpha",
+                    "n")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="methodology",
+                title="Methodology",
+                clearWith=list(
+                    "outcome",
+                    "kappa0",
+                    "props",
+                    "raters",
+                    "alpha",
                     "n")))}))
 
 kappaSizeFixedNBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -175,9 +190,11 @@ kappaSizeFixedNBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' For an interobserver agreement study whose number of subjects is already 
 #' fixed, the lowest kappa the study would still be unable to rule out - the 
 #' lower bound of the one-sided confidence interval around the anticipated 
-#' kappa (kappa0); every value below it is excluded. Computed with the 
-#' kappaSize package. Use kappaSizePower to size a study for a hypothesis test 
-#' and kappaSizeCI to size it for a target interval width.
+#' kappa (kappa0); every value below it is excluded. Solved from the 
+#' goodness-of-fit models of the kappaSize package; with three or more raters 
+#' or categories it also allows for re-estimating the category proportions 
+#' when the study is analysed. Use kappaSizePower to size a study for a 
+#' hypothesis test and kappaSizeCI to size it for target confidence limits.
 #' 
 #'
 #' @examples
@@ -213,6 +230,7 @@ kappaSizeFixedNBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'   \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text_summary} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$methodology} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' @export

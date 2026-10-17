@@ -1371,7 +1371,7 @@ analyses:
   - title: Interrater Reliability
     name: agreement
     ns: ClinicoPath
-    menuGroup: meddecideT
+    menuGroup: meddecide
     menuSubgroup: Agreement
     menuTitle: Interrater Reliability
     description: >
@@ -1387,7 +1387,7 @@ analyses:
   - title: Medical Decision
     name: decision
     ns: ClinicoPath
-    menuGroup: meddecideT
+    menuGroup: meddecide
     menuSubgroup: Decision
     menuTitle: Medical Decision
     menuSubtitle: Sensitivity, Specificity, PPV, NPV
@@ -1399,7 +1399,7 @@ analyses:
   - title: Medical Decision Calculator
     name: decisioncalculator
     ns: ClinicoPath
-    menuGroup: meddecideT
+    menuGroup: meddecide
     menuSubgroup: Decision Calculators
     menuTitle: Medical Decision Calculator
     menuSubtitle: Sensitivity, Specificity, PPV, NPV, ...
@@ -1417,7 +1417,7 @@ analyses:
   - title: Analysis Without Gold Standard
     name: nogoldstandard
     ns: ClinicoPath
-    menuGroup: meddecideT
+    menuGroup: meddecide
     menuSubgroup: Decision
     menuTitle: Analysis Without Gold Standard
     menuSubtitle: Multiple Test Analysis Without Gold Standard
@@ -1433,7 +1433,7 @@ analyses:
   - title: Compare Medical Decision Tests
     name: decisioncompare
     ns: ClinicoPath
-    menuGroup: meddecideT
+    menuGroup: meddecide
     menuTitle: Compare Medical Decision Tests
     menuSubgroup: Decision
     menuSubtitle: Compare sensitivity, specificity, PPV, NPV, ...
@@ -1453,7 +1453,7 @@ analyses:
   - title: Confidence Interval Approach for the Number of Subjects Required
     name: kappaSizeCI
     ns: ClinicoPath
-    menuGroup: PowerT
+    menuGroup: Power
     menuSubgroup: Power Analysis by meddecide
     menuTitle: Confidence Interval Approach for the Number of Subjects Required
     menuSubtitle: Find sample size based on Kappa confidence
@@ -1469,7 +1469,7 @@ analyses:
   - title: Lowest Expected Value for a fixed sample size
     name: kappaSizeFixedN
     ns: ClinicoPath
-    menuGroup: Power
+    menuGroup: PowerT
     menuSubgroup: Power Analysis by meddecide
     menuTitle: Lowest Expected Value for a fixed sample size
     menuSubtitle: Find lower Kappa based on sample size
@@ -1477,15 +1477,17 @@ analyses:
       For an interobserver agreement study whose number of subjects is already
       fixed, the lowest kappa the study would still be unable to rule out - the
       lower bound of the one-sided confidence interval around the anticipated
-      kappa (kappa0); every value below it is excluded. Computed with the
-      kappaSize package. Use kappaSizePower to size a study for a hypothesis
-      test and kappaSizeCI to size it for a target interval width.
+      kappa (kappa0); every value below it is excluded. Solved from the
+      goodness-of-fit models of the kappaSize package; with three or more raters
+      or categories it also allows for re-estimating the category proportions
+      when the study is analysed. Use kappaSizePower to size a study for a
+      hypothesis test and kappaSizeCI to size it for target confidence limits.
     ribbon: analyses
     category: analyses
   - title: Power Approach for the Number of Subjects Required
     name: kappaSizePower
     ns: ClinicoPath
-    menuGroup: PowerT
+    menuGroup: Power
     menuSubgroup: Power Analysis by meddecide
     menuTitle: Power Approach for the Number of Subjects Required
     menuSubtitle: Find sample size based on power
@@ -1501,7 +1503,7 @@ analyses:
     name: psychopdaROC
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT
+    menuGroup: meddecide
     menuSubgroup: ROC
     menuTitle: Advanced ROC Analysis
     menuSubtitle: Advanced ROC analysis with statistical comparisons and effect sizes
@@ -1516,7 +1518,7 @@ analyses:
   - title: Combine Medical Decision Tests
     name: decisioncombine
     ns: ClinicoPath
-    menuGroup: meddecideT
+    menuGroup: meddecide
     menuSubgroup: Decision
     menuTitle: Combine Medical Decision Tests
     menuSubtitle: Combine and evaluate test patterns
@@ -1551,7 +1553,7 @@ analyses:
   - title: Co-Testing Analysis
     name: cotest
     ns: ClinicoPath
-    menuGroup: meddecideT
+    menuGroup: meddecide
     menuTitle: Co-Testing Analysis
     menuSubgroup: Decision Calculators
     menuSubtitle: Two tests run in parallel
@@ -1572,7 +1574,7 @@ analyses:
   - title: Sequential Testing Analysis
     name: sequentialtests
     ns: ClinicoPath
-    menuGroup: meddecideT
+    menuGroup: meddecide
     menuTitle: Sequential Testing Analysis
     menuSubgroup: Decision Calculators
     menuSubtitle: Sequential Test Analysis
@@ -1594,7 +1596,7 @@ analyses:
   - title: Decision Curve Analysis
     name: decisioncurve
     ns: ClinicoPath
-    menuGroup: meddecideT
+    menuGroup: meddecide
     menuTitle: Decision Curve Analysis
     menuSubgroup: Decision Curve Analysis
     menuSubtitle: Clinical Utility, Net Benefit, Threshold Analysis
@@ -4608,7 +4610,7 @@ analyses:
     name: enhancedROC
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT
+    menuGroup: meddecide
     menuSubgroup: ROC
     menuTitle: Clinical ROC Analysis
     menuSubtitle: Clinical ROC analysis with diagnostic metrics and optimal cutoffs
@@ -5498,7 +5500,7 @@ analyses:
     name: lassologistic
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT
+    menuGroup: meddecide
     menuSubgroup: Prediction Models
     menuTitle: LASSO Logistic
     menuSubtitle: Penalized feature selection for binary classification

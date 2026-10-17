@@ -22,7 +22,7 @@ const events = {
         // unconditionally destroys hand-entered proportions every time this runs -- including
         // whenever jamovi fires `change` while binding options, which would silently reset a
         // saved .omv back to the template. A binary outcome accepts one value or two, matching
-        // .validateProportions() in the backend.
+        // .validateInputs() in the backend.
         const current = String(ui.props.value() || '');
         const count = current.split(/[,;|\s]+/).filter(s => s.length > 0).length;
         const needed = outcome === '2' ? [1, 2] : [Number(outcome)];

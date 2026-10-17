@@ -1,3 +1,112 @@
+# kappaSizeFixedN — `/check-function-full` + `/fix-function --apply` (2026-10-17; applied, uncommitted)
+
+Audit: 6/6 options effective, 4/4 outputs populated, 0 grep-gate hits; binary two-rater bound = independent
+Donner-Eliasziw oracle in 72/72 designs. Fixes below; results at the end of the list.
+
+- [x] i18n: all 51 `.()` msgids of `R/kappaSizeFixedN.b.R` are now in `catalog.pot`/`tr.po` with Turkish (24 filled:
+      19 new + 5 that were empty, among them the shared "Methodology" title). `i18nUpdate()` run twice; vs the session
+      snapshot 0 entries lost and 0 existing translations changed module-wide; `msgfmt -c` clean. `PowerT` (menuGroup)
+      left untranslated on purpose.
+- [x] IR-03: `.rmlFitter()` (shared by `.rmlBound()` and `.liftable()`): fit over the proportions the model allows at
+      rho (p = t + (1 - K t) softmax), `nlminb` with restarts instead of BFGS, two cold starts instead of a warm start
+      (the warm start made the statistic depend on evaluation order, so uniroot saw no sign change), and the step loop
+      halves on a step with no fit. Extreme sweep (160): 18/18 former failures resolved, 0 "could not be re-estimated",
+      every changed row agrees with an independent multi-start oracle, all changed rows carry the Sparse block; random
+      grid (120): 120/120 unchanged; slowest run 0.34 s (was 4.7 s).
+- [x] IR-04: `.liftable()` decides the amber remedy: tests 0.40 against the REPORTED bound (fixed and re-estimated) for
+      the current rater count up to 6 at n 1e6, alpha 0.20 (limits pinned to `.a.yaml` by a test). New msgid when out of
+      reach for kappa0 > 0.40; kappa0 <= 0.40 keeps its own sentence.
+- [x] UX: Methodology is its own Html item (`methodology`) at the foot; `notices` carries the red/amber blocks only.
+      `notices` gets `<div></div>` when empty: the jamovi client renders an Html element only when content != "",
+      so "" leaves the previous run's warnings on screen.
+- [x] UX: the Summary-panel cross-reference is shown only when kappaSize printed its cell-count line (reworded msgid).
+- [x] Cleanup: `.buildNotices()` takes `kappa0`/`liftable` as arguments; `.buildMethodology()` uses
+      `.reestimationApplies()`; one `.block()` helper for the three panel styles.
+- [x] Not changed: the props label "Proportions (comma-separated, sum to 1)" is shared by all three kappaSize
+      analyses with its Turkish; it is not wrong for anyone who follows it, and the help text gives the full grammar.
+- [x] Stale entries ticked below: the events.js `.validateProportions()` comment, the `.fmtCount()` "below 5"
+      contradiction, kappaSizePower VAL-09 for this analysis (the restricted-ML bound, VAL-03).
+- [x] Tests: 7 new blocks in `test-kappasizefixedn-release-review.R` (each fails on the pre-session backend except the
+      static `.liftable()` limit pin); methodology assertions moved from `notices` to `methodology`; C16's floor
+      invariant now uses the equal-proportion floor once proportions are re-estimated (oracle -0.03670 / -0.06190).
+      62 tests / 460 expectations pass, 0 skip, against the sourced working tree. `prepare()` clean (only this
+      `.h.R`), `document()` wrote only this `.Rd`, NAMESPACE unchanged.
+- [ ] Follow-up (all analyses): any warnings-only Html set to `""` after a run keeps showing the previous run's
+      content in the jamovi client (`resultsview-*.js` Html `render()`: `e.content!==""&&(...)`). Grep for
+      `setContent("")` outside the start-of-run blanking.
+- [ ] Follow-up (kappaSizeCI, kappaSizePower): move their Methodology out of the top Notes panel the same way.
+- [ ] User: kappaSizeFixedN is `PowerT`; move it back to `Power` after testing, then `prepare()` and `_updateModules.R`.
+
+# kappaSizeFixedN — `/independent-reviewer` follow-ups (2026-10-16; audit only, nothing applied)
+
+Report: `development-ideas/kappaSizeFixedN-independent-review-2026-10-16.md`
+(script `development-scripts/audit_kappaSizeFixedN.R`). No S1/S2.
+
+- [ ] IR-01 (S3): the shared Notes msgid "with three or more raters, or three or more categories, plugging in ...
+      covers κ less often than stated" is true only with a rare category. Simulated coverage of the plug-in: 0.949
+      at 3 raters, p .3, and 0.942 at 3 balanced categories, both in band. Qualify it in kappaSizeFixedN,
+      kappaSizeCI (identical msgid) and kappaSizePower (the parallel test sentence); update tr.po.
+      **kappaSizeFixedN done** (own msgid, qualified to a category under about a fifth; test IR-kappaSizeFixedN-01).
+      Still open: kappaSizeCI (old msgid, which keeps its catalog entry), kappaSizePower, and tr.po for the new msgid.
+- [x] IR-02 (S4): `.fmtBound` rounds 0 < bound < 0.001 to nearest at 2 s.f., which contradicts "never
+      overstates" (e.g. κ0 .22, n 56 shows 0.0002 for 0.000197). Now rounded down ("0.00019"); the Methodology sentence
+      names the 2 s.f. case; the validation contract `vfn_shown_ok` follows; test IR-kappaSizeFixedN-02.
+- [x] IR-03 (S4): `.rmlBound` gives up when the warm start is outside the model one 0.01 step down. 18 of 160
+      extreme designs (κ0 ≤ 0.2, a category ≤ 0.02) are affected, and a root exists in all 18. Restart from equal
+      proportions, and bisect on NA. Fold into the `.rmlBound`/`.rmlSlopes` consolidation below.
+- [x] IR-04 (S4): κ0 in (0.40, ~0.4005) shows "Enrol more ..." although 0.40 is unreachable at n 1e6.
+- [ ] O3 (kappaSizeCI): it reports n as low as 3 ("Required sample size: 9"), while kappaSizeFixedN refuses
+      n ≤ 10. Align them, or explain the floor.
+- [ ] O2 (release): meddecide still runs the pre-fix kappaSizeFixedN (VAL-01/02 reproduce there). The umbrella
+      menuGroup is `Power` again since 21:23, so it needs `prepare()` and then `_updateModules.R`.
+      (`/check-function --profile release` set it to `PowerT` again at ~23:01; move it back first.)
+
+# kappaSizeFixedN — `/check-function --profile release` (2026-10-16; applied, uncommitted)
+
+- [x] menuGroup `Power` -> `PowerT` (JamoviTest routing). User: move it back to `Power` after testing.
+- [x] IR-02 fixed; IR-01 fixed for this analysis (above). JS comment named a non-existent `.validateProportions()`.
+- [x] N/A: escape vars / labelled logic (no Variable option), defaults_false (no Bool), welcome block (a
+      calculator that always has inputs), regroup_ui (six controls, already grouped).
+- [x] Verify: `prepare()` 0 errors (its 0000.yaml diff is derived from the `.a.yaml` files only: siblings' T
+      suffixes the user had already removed, plus this one's `PowerT`); `document()` exit 0; suites 19 / 198 / 204
+      pass, 0 fail; gate 0 blocking, and identical when kappaSizeFixedN is counted as shipped; CRAN kappaSize is
+      still 1.2 (2018-11-26), as installed.
+- [ ] OOS: `test-zzz-fmt-substitution-loop.R` "no R/ source calls jmvcore::format directly" FAILS on
+      `R/agreementintro.b.R:104` (committed 22a96aff5, 2026-10-12; not this change). Route it through `.fmt()`.
+
+# kappaSizeFixedN — `/fix-function --apply` of validation VAL-01..07 (2026-10-16; done, uncommitted)
+
+Source: `development-ideas/kappaSizeFixedN-validation-2026-10-16.md`. VAL-03 mirrors kappaSizeCI (IR-kappaSizeCI-01).
+Acceptance: the seven skip-guarded VAL tests go live and pass; every kappaSize suite + zzz guards as before; gate
+unchanged; evidence script re-run on the post-fix contract (twice, identical); no non-ASCII code; `prepare()` diff
+limited to this analysis's header + 0000.yaml.
+
+- [x] Bound computed directly: minimal admissible root of N X2(rho) = qchisq(1 - 2a, 1) (VAL-01, VAL-04); kappaSize's
+      own search kept in the Summary pane with a line explaining any difference (as kappaSizeCI).
+- [x] VAL-03: except binary/2 raters, also the restricted-ML bound (prevalences re-estimated at each rho, pooled
+      cells, ADE 2001 eqs 8-9); report the lower; Notes recommend ML estimation (sibling msgid, has Turkish).
+- [x] Display: positive bounds rounded DOWN to 3 dp (threshold-consistent), |bound| < 0.001 at 2 s.f., negatives to
+      3 dp; red iff bound <= 0, amber iff < 0.40 on the unrounded value; remedy branch stays kappa0 <= 0.40 (Codex).
+- [x] VAL-02: sparse rule on pooled cells (binary 3+ raters), at the reported bound, fitted proportions when RML
+      governs; port kappaSizeCI's `.fmtCount` 4.95-4.99 guard (the "identical" claim in the comment is false).
+- [x] VAL-05 small-sample box (< 25); VAL-07 drop "relaxing the significance level"; VAL-06 refs + Methodology names.
+- [x] Out-of-model: the engine's walk past the floor no longer decides anything; the in-model root is reported.
+- [x] Migrate tests encoding the old contract (release-review: engine parity, refusals, 7-cell wording, pane
+      identity; validation C01/C16); example file / dataset quoted bounds if they move.
+- [x] menuGroup Power -> PowerT (CLAUDE.md JamoviTest routing); `jmvtools::prepare()` with a generated-file snapshot.
+- [x] Verify: suites, gate, ASCII check, evidence script post-fix x2.
+- [x] Found by the post-fix evidence run: a restricted-ML fit stopped on its iteration cap near the root (rare category,
+      5 raters) and the bound fell back to fixed proportions; maxit 5000 / reltol 1e-12 / warm start; 5.4 s -> 0.46 s.
+- [x] i18n: 9 msgids orphaned by this change dropped from catalog.pot/en.po/tr.po (msgfmt -c clean); the new msgids are
+      untranslated except the reused kappaSizeCI ML sentence. `jmvtools::i18nUpdate()` not run (module-wide).
+- [ ] Follow-up: kappaSizeCI `.rmlSlopes()` and this `.rmlBound()` are two copies of one restricted fit; consolidate in
+      `R/utils-kappasize.R` (two users) - and give the CI copy the same maxit / warm start.
+      2026-10-17: FixedN's copy is now `.rmlFitter()` (in-model reparametrisation, nlminb, cold starts). The CI copy
+      did NOT reproduce the defect: 912 rare-category fits (kappa0 .4-.8, limits +-.1/.2, a 1-10% category, 2-6
+      raters) never failed and matched `.rmlFitter()` to 1e-5 relative, so it was left alone.
+- [ ] Follow-up: binary 3+ raters model-dependence sentence (IR-kappaSizeCI-02) not carried over to this analysis.
+- [ ] User: kappaSizeFixedN is now `PowerT` (with the two siblings); move all three back to `Power` after testing.
+
 # kappaSizeCI — `/fix-function --apply` (2026-10-16, after the trio pass below; uncommitted)
 
 Acceptance: each fix has a test that fails on the pre-fix sources; all kappaSize suites + zzz guards as before;
@@ -190,7 +299,7 @@ as shipped; scratch `prepare()` header byte-identical; kappaSize 1.2 = CRAN. App
       `testing_kappaSizePower.md` are the generic generator output — they describe datasets, missing values, tables and
       plots (TC-02..TC-05 cannot apply to a no-data calculator) and point only at the 5-block `test-kappaSizePower.R`.
       Regenerate with `/document-function kappaSizePower`.
-- [ ] Out of scope (cleanup): `jamovi/js/kappaSizeFixedN.events.js:25` also cites `.validateProportions()`, which
+- [x] Out of scope (cleanup): `jamovi/js/kappaSizeFixedN.events.js:25` also cites `.validateProportions()`, which
       `R/kappaSizeFixedN.b.R` does not define (its parser is `.parseProps`).
 - [x] Optional (UX, needs approval + Turkish): `.u.yaml` labels kappa0/kappa1 "Null hypothesis" / "Alternative
       hypothesis" while every output says kappa0/kappa1; siblings use "Anticipated kappa (kappa0)". Candidate:
@@ -3015,8 +3124,8 @@ Follow-ups from `/review-function` (2026-10-16, after 04ba8033d; tests 668/668, 
 
 Follow-ups from the kappaSizePower release review (2026-10-14):
 
-- [ ] `.fmtCount()` (`R/kappaSizeFixedN.b.R:56`) has the same `signif(x, 2)` / "below 5" contradiction (kappaSizePower VAL-11).
-- [ ] The lower confidence bound treats the proportions as known; check against a simulation with them estimated
+- [x] `.fmtCount()` (`R/kappaSizeFixedN.b.R:56`) has the same `signif(x, 2)` / "below 5" contradiction (kappaSizePower VAL-11).
+- [x] The lower confidence bound treats the proportions as known; check against a simulation with them estimated
   (kappaSizePower VAL-09).
 
 ```text

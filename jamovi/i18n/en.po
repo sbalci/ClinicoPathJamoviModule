@@ -12762,6 +12762,12 @@ msgid ""
 "response."
 msgstr ""
 
+#: R/kappaSizeFixedN.b.R
+msgid ""
+"A total of {n} subjects can produce an expected lower limit for kappa of "
+"{bound}."
+msgstr ""
+
 #: R/chisqposttest.b.R
 msgid "A total sample size of at least n=%d is recommended to achieve 80%% power."
 msgstr ""
@@ -18280,7 +18286,6 @@ msgstr ""
 #: agreement/results/krippTable.columns.title
 #: enhancedROC/results/results/crocAnalysisTable.columns.title
 #: kappaSizeCI/ui[4][0][0]/alpha.label
-#: kappaSizeFixedN/ui[3].label
 #: kappaSizeFixedN/ui[3][0][0]/alpha.label
 #: kappaSizePower/ui[3][0][0]/alpha.label
 #: nogoldstandard/ui[2][0]/alpha.label
@@ -21890,12 +21895,12 @@ msgstr ""
 
 #: R/kappaSizeFixedN.b.R
 msgid ""
-"At this sample size the agreement-pattern cells (for example, exactly k of "
-"the raters calling the finding present, or all raters agreeing on one "
-"category) are too sparse at the reported lower bound: the smallest expected "
-"count is {min} and {below} of {total} cells are below 5. The calculation "
-"rests on a large-sample chi-square approximation, so the bound shown is less "
-"dependable here."
+"At this sample size the goodness-of-fit cells (all raters agreeing on one "
+"category, or the single pooled cell for any disagreement) are too sparse at "
+"the reported lower bound: the smallest expected count is {min}, and the "
+"number of cells below 5 is {below} of {total}. The calculation rests on a "
+"large-sample chi-square approximation, so the bound shown is less dependable "
+"here."
 msgstr ""
 
 #: R/timeinterval.b.R
@@ -44429,8 +44434,7 @@ msgstr ""
 #: R/kappaSizeFixedN.b.R
 msgid ""
 "Consider enriching the case series so the rare finding is more common (the "
-"calculation assumes the stated prevalence), adding subjects, or relaxing the "
-"significance level."
+"calculation assumes the stated prevalence), or enrolling more subjects."
 msgstr ""
 
 #: R/kappaSizePower.b.R
@@ -72080,9 +72084,11 @@ msgid ""
 "For an interobserver agreement study whose number of subjects is already "
 "fixed, the lowest kappa the study would still be unable to rule out - the "
 "lower bound of the one-sided confidence interval around the anticipated "
-"kappa (kappa0); every value below it is excluded. Computed with the "
-"kappaSize package. Use kappaSizePower to size a study for a hypothesis test "
-"and kappaSizeCI to size it for a target interval width."
+"kappa (kappa0); every value below it is excluded. Solved from the "
+"goodness-of-fit models of the kappaSize package; with three or more raters "
+"or categories it also allows for re-estimating the category proportions when "
+"the study is analysed. Use kappaSizePower to size a study for a hypothesis "
+"test and kappaSizeCI to size it for target confidence limits."
 msgstr ""
 
 #: R/kappaSizeCI.b.R
@@ -72394,6 +72400,12 @@ msgid ""
 "A small p-value only rules out zero agreement; it does not say how large the "
 "agreement is. The size of kappa answers that, and the interval around kappa "
 "says how precisely these cases pin it down."
+msgstr ""
+
+#: R/kappaSizeFixedN.b.R
+msgid ""
+"For this design the proportions could not be re-estimated, so the bound "
+"holds them at their anticipated values only."
 msgstr ""
 
 #: R/kappaSizeCI.b.R
@@ -79513,6 +79525,14 @@ msgstr ""
 msgid "Hold-Out Validation (75/25 split)"
 msgstr ""
 
+#: R/kappaSizeFixedN.b.R
+msgid ""
+"Holding the category proportions at their anticipated values (the published "
+"calculation, and kappaSize's) the bound would be {fixed}; re-estimating them "
+"at each value of kappa, as the analysis of the study should, gives {bound}, "
+"and that is the figure reported."
+msgstr ""
+
 #: classification/options/validateMethod/holdout.title
 msgid "Holdout"
 msgstr ""
@@ -81238,16 +81258,6 @@ msgid ""
 "%s the level that means the condition is present? Only if it is, change "
 "Direction: the AUC becomes 1 minus the value shown, and the cutpoint, "
 "sensitivity and specificity are re-estimated."
-msgstr ""
-
-#: R/kappaSizeFixedN.b.R
-msgid ""
-"If the Analysis result panel also prints 'At least one expected cell count "
-"is less than five', that is a separate and looser check: kappaSize applies "
-"it to the outcome category prevalences you entered (for a binary outcome, to "
-"the prevalence of the finding alone), not to the agreement-pattern cells the "
-"chi-square actually divides by, and those empty out long before any category "
-"prevalence does. Seeing one warning without the other is expected."
 msgstr ""
 
 #: R/chisqposttest.b.R
@@ -88193,10 +88203,6 @@ msgstr ""
 msgid "kappaL must be less than kappaU"
 msgstr ""
 
-#: R/kappaSizeFixedN.b.R
-msgid "kappaSize could not compute the expected lower bound: {error}"
-msgstr ""
-
 #: R/agreement.b.R
 msgid "kappaSize package is required for validated kappa sample size calculations."
 msgstr ""
@@ -88206,10 +88212,7 @@ msgid "kappaSize package summary"
 msgstr ""
 
 #: R/kappaSizeFixedN.b.R
-msgid ""
-"kappaSize searches downward in steps of 0.001 and reports the first value "
-"rejected, so the bound is conservative by at most 0.001 and its third "
-"decimal is the search resolution, not estimation precision."
+msgid "kappaSize's own search could not be run for comparison: {error}"
 msgstr ""
 
 #: R/kappaSizeCI.b.R
@@ -88229,6 +88232,29 @@ msgid ""
 "once the chi-square exceeds its critical value by 0.001, so it can report\n"
 "slightly more subjects than the smallest number that reaches the requested "
 "limits."
+msgstr ""
+
+#: R/kappaSizeFixedN.b.R
+msgid ""
+"kappaSize's own search, above, reports {engine}, holding the category "
+"proportions at their anticipated values as the published tables do. The "
+"expected lower bound is {bound}: the lower limit when the proportions are "
+"re-estimated at each value of kappa, as the analysis of the study should do."
+msgstr ""
+
+#: R/kappaSizeFixedN.b.R
+msgid ""
+"kappaSize's own search, above, reports {engine}; the expected lower bound is "
+"{bound}. kappaSize moves down in steps of 0.001 and stops only once the "
+"chi-square exceeds its critical value by 0.001, so it can report a value "
+"slightly lower than the bound."
+msgstr ""
+
+#: R/kappaSizeFixedN.b.R
+msgid ""
+"kappaSize's own search, above, stepped past the lowest agreement the model "
+"allows for these proportions, so its figure is not a valid limit. The "
+"expected lower bound, solved directly, is {bound}."
 msgstr ""
 
 #: kappaSizeCI/options/kappaU.title
@@ -96644,10 +96670,34 @@ msgstr ""
 msgid "Mechanism Testing"
 msgstr ""
 
+#: package/analyses/agreement.menuGroup
+#: package/analyses/decision.menuGroup
+#: package/analyses/decisioncalculator.menuGroup
+#: package/analyses/nogoldstandard.menuGroup
+#: package/analyses/decisioncompare.menuGroup
+#: package/analyses/psychopdaROC.menuGroup
+#: package/analyses/decisioncombine.menuGroup
+#: package/analyses/cotest.menuGroup
+#: package/analyses/sequentialtests.menuGroup
+#: package/analyses/decisioncurve.menuGroup
 #: package/analyses/betabinomialdiagnostic.menuSubgroup
 #: package/analyses/hierarchicalbayes.menuSubgroup
+#: package/analyses/enhancedROC.menuGroup
+#: package/analyses/lassologistic.menuGroup
+#: agreement/options.menuGroup
 #: betabinomialdiagnostic/options.menuSubgroup
+#: cotest/options.menuGroup
+#: decision/options.menuGroup
+#: decisioncalculator/options.menuGroup
+#: decisioncombine/options.menuGroup
+#: decisioncompare/options.menuGroup
+#: decisioncurve/options.menuGroup
+#: enhancedROC/options.menuGroup
 #: hierarchicalbayes/options.menuSubgroup
+#: lassologistic/options.menuGroup
+#: nogoldstandard/options.menuGroup
+#: psychopdaROC/options.menuGroup
+#: sequentialtests/options.menuGroup
 msgid "meddecide"
 msgstr ""
 
@@ -96778,32 +96828,8 @@ msgstr ""
 msgid "meddecideP"
 msgstr ""
 
-#: package/analyses/agreement.menuGroup
-#: package/analyses/decision.menuGroup
-#: package/analyses/decisioncalculator.menuGroup
-#: package/analyses/nogoldstandard.menuGroup
-#: package/analyses/decisioncompare.menuGroup
-#: package/analyses/psychopdaROC.menuGroup
-#: package/analyses/decisioncombine.menuGroup
-#: package/analyses/cotest.menuGroup
-#: package/analyses/sequentialtests.menuGroup
-#: package/analyses/decisioncurve.menuGroup
-#: package/analyses/enhancedROC.menuGroup
-#: package/analyses/lassologistic.menuGroup
 #: package/analyses/agreementintro.menuGroup
-#: agreement/options.menuGroup
 #: agreementintro/options.menuGroup
-#: cotest/options.menuGroup
-#: decision/options.menuGroup
-#: decisioncalculator/options.menuGroup
-#: decisioncombine/options.menuGroup
-#: decisioncompare/options.menuGroup
-#: decisioncurve/options.menuGroup
-#: enhancedROC/options.menuGroup
-#: lassologistic/options.menuGroup
-#: nogoldstandard/options.menuGroup
-#: psychopdaROC/options.menuGroup
-#: sequentialtests/options.menuGroup
 msgid "meddecideT"
 msgstr "meddecideT"
 
@@ -98650,6 +98676,7 @@ msgstr ""
 #: interruptedtimeseries/results/explanation.title
 #: joinpoint/results/explanation.title
 #: jwaffle/results/methodExplanation.title
+#: kappaSizeFixedN/results/methodology.title
 #: lymphnoderatio/results/explanation.title
 #: mantelhaenszel/results/methodology.title
 #: mediansurvival/results/methodExplanation.title
@@ -127928,12 +127955,14 @@ msgid "Potentially Informative"
 msgstr ""
 
 #: R/gsdesign.b.R
-#: package/analyses/kappaSizeFixedN.menuGroup
+#: package/analyses/kappaSizeCI.menuGroup
+#: package/analyses/kappaSizePower.menuGroup
 #: adaptivetrialdesign/results/operatingCharacteristics.columns.title
 #: advancedSurvivalPower/options/calc_type/power.title
 #: competingRisksPower/results/powerCurveTable.columns.title
 #: comprehensiveSurvivalPower/results/methodComparison.columns.title
-#: kappaSizeFixedN/options.menuGroup
+#: kappaSizeCI/options.menuGroup
+#: kappaSizePower/options.menuGroup
 #: kappaSizePower/ui[3][1][0]/power.label
 msgid "Power"
 msgstr ""
@@ -128232,10 +128261,8 @@ msgstr ""
 msgid "PowerP"
 msgstr ""
 
-#: package/analyses/kappaSizeCI.menuGroup
-#: package/analyses/kappaSizePower.menuGroup
-#: kappaSizeCI/options.menuGroup
-#: kappaSizePower/options.menuGroup
+#: package/analyses/kappaSizeFixedN.menuGroup
+#: kappaSizeFixedN/options.menuGroup
 msgid "PowerT"
 msgstr ""
 
@@ -138697,8 +138724,7 @@ msgstr ""
 
 #: R/kappaSizeCI.b.R
 #: R/kappaSizePower.b.R
-msgid ""
-"Required sample size: <b>{n}</b> {subjects}, each rated by both raters."
+msgid "Required sample size: <b>{n}</b> {subjects}, each rated by both raters."
 msgstr ""
 
 #: R/kappaSizeCI.b.R
@@ -151260,6 +151286,7 @@ msgstr ""
 #: idi/options/alpha_level.title
 #: jjcorrmat/options/siglevel.title
 #: kappaSizeCI/ui[4].label
+#: kappaSizeFixedN/ui[3].label
 #: mantelhaenszel/options/alpha.title
 #: netreclassification/options/alpha_level.title
 #: pagetrendtest/options/alpha.title
@@ -152569,6 +152596,7 @@ msgid "Small sample: n = {n} complete cases"
 msgstr ""
 
 #: R/kappaSizeCI.b.R
+#: R/kappaSizeFixedN.b.R
 msgid "Small sample."
 msgstr ""
 
@@ -165117,6 +165145,25 @@ msgid ""
 "subjects, is what binds here."
 msgstr ""
 
+#: R/kappaSizeFixedN.b.R
+msgid ""
+"The bound is the lower root of the goodness-of-fit chi-square equation, "
+"solved directly; a positive bound is shown rounded down (to three decimals, "
+"or to two significant digits below 0.001), so the figure shown never "
+"overstates it. The kappaSize package's own search, reproduced in the Summary "
+"panel, moves down in steps of 0.001 and stops once the chi-square exceeds "
+"its critical value by 0.001, so it can report a value up to about 0.001 "
+"lower."
+msgstr ""
+
+#: R/kappaSizeFixedN.b.R
+msgid ""
+"The bound shown is the lower of two: the one obtained holding the category "
+"proportions at their anticipated values (the published calculation, and "
+"kappaSize's) and the one obtained re-estimating them by maximum likelihood "
+"at each value of kappa (the interval that keeps its stated coverage)."
+msgstr ""
+
 #: R/enhancedROC.b.R
 msgid ""
 "The Brier score is the mean squared difference between the predicted risk "
@@ -165134,16 +165181,6 @@ msgstr ""
 msgid ""
 "The calculation assumes both tests are performed in parallel and are "
 "conditionally independent."
-msgstr ""
-
-#: R/kappaSizeFixedN.b.R
-msgid ""
-"The calculation did not converge to a usable answer: the search returned "
-"{bound}, which is below the lowest agreement the model allows for these "
-"prevalences (every agreement pattern must keep a non-negative probability). "
-"With this combination of sample size, anticipated kappa and category "
-"prevalences the large-sample approximation breaks down. Increase N, use a "
-"less extreme prevalence, or raise the significance level."
 msgstr ""
 
 #: R/stagemigration-part1.R
@@ -166515,6 +166552,14 @@ msgstr ""
 #: R/pathsampling.b.R
 msgid "The examined-versus-positive correlation could not be estimated because {v1}."
 msgstr "The examined-versus-positive correlation could not be estimated because {v1}."
+
+#: R/kappaSizeFixedN.b.R
+msgid ""
+"The expected lower bound could not be computed for this design: the "
+"goodness-of-fit chi-square does not reach its critical value inside the "
+"range of agreement the model allows for these proportions. Increase N, use a "
+"less extreme prevalence, or raise the significance level."
+msgstr ""
 
 #: R/kappaSizeFixedN.b.R
 msgid "The expected lower bound for kappa is {bound}."
@@ -168274,6 +168319,17 @@ msgid ""
 "The number of observations expected in each cell if the variables were "
 "independent. Chi-square test requires most cells to have expected counts "
 "\\u{2265} 5."
+msgstr ""
+
+#: R/kappaSizeFixedN.b.R
+msgid ""
+"The number of subjects is below 25. For a binary outcome, the "
+"goodness-of-fit interval this calculation assumes was found close to its "
+"stated coverage from about 25 subjects when the rarer category makes up at "
+"least about a fifth of the ratings (Donner and Eliasziw; Altaye, Donner and "
+"Klar); for three to five categories no such figure was given, and the "
+"expected cell counts are the guide (Rotondi and Donner). Below 25 subjects "
+"it has not been shown to hold, so read the bound with caution."
 msgstr ""
 
 #: R/advancedraincloud.b.R
@@ -170124,6 +170180,12 @@ msgid ""
 "zero or a negative value is rejected rather than drawn."
 msgstr ""
 
+#: R/kappaSizeFixedN.b.R
+msgid ""
+"The Sparse categories warning above is the check that matters for the bound, "
+"because it is the one computed on the goodness-of-fit cells."
+msgstr ""
+
 #: R/ihcheterogeneity.b.R
 msgid ""
 "The Spearman correlation between the regional and reference measurements was "
@@ -170284,6 +170346,16 @@ msgid ""
 msgstr ""
 "The suggestion is conditional on your confirmed answers. It is not evidence "
 "that your study or the suggested software has been clinically validated."
+
+#: R/kappaSizeFixedN.b.R
+msgid ""
+"The Summary panel's line 'At least one expected cell count is less than "
+"five' comes from a separate and looser check: kappaSize applies it to the "
+"category proportions you entered (for a binary outcome, to the first "
+"proportion only), not to the goodness-of-fit cells the chi-square divides "
+"by, and those empty out long before any category proportion does. Seeing one "
+"warning without the other is expected."
+msgstr ""
 
 #: R/diagnosticmeta.b.R
 msgid ""
@@ -170789,12 +170861,6 @@ msgstr ""
 msgid ""
 "The visual distribution summary could not be produced; counts only are shown "
 "below."
-msgstr ""
-
-#: R/kappaSizeFixedN.b.R
-msgid ""
-"The warning above is the check that matters for the bound, because it is the "
-"one computed on those agreement-pattern cells."
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
@@ -187222,6 +187288,17 @@ msgid ""
 "0.95 in the designs simulated for this analysis)."
 msgstr ""
 
+#: R/kappaSizeFixedN.b.R
+msgid ""
+"When the study is analysed, estimate the category prevalences by maximum "
+"likelihood at each candidate value of κ. With three or more raters or "
+"categories, plugging in the overall proportions of ratings instead can give "
+"an interval that covers κ less often than stated when a category makes up "
+"less than about a fifth of the ratings (about 0.90 to 0.94 instead of 0.95 "
+"in the designs of that kind simulated for this analysis); without such a "
+"category it stayed close to 0.95."
+msgstr ""
+
 #: R/enhancedROC.b.R
 msgid ""
 "When the test is negative, the probability that the patient does not have "
@@ -188196,6 +188273,15 @@ msgid ""
 "not analysed."
 msgstr ""
 
+#: R/kappaSizeFixedN.b.R
+msgid ""
+"With an anticipated kappa of {kappa0} and these proportions, even 1,000,000 "
+"subjects, up to six raters and a significance level of 0.20 (the largest "
+"this analysis allows) leave the expected lower bound below 0.40, so changing "
+"the sample size, the raters or the significance level cannot support a claim "
+"of moderate or better reliability here."
+msgstr ""
+
 #: R/enhancedROC.b.R
 msgid ""
 "with Direction set to auto a marker carrying no information lands here about "
@@ -188308,12 +188394,14 @@ msgstr ""
 
 #: R/kappaSizeFixedN.b.R
 msgid ""
-"With the sample size already fixed, this reports the lower bound of the "
-"one-sided 100(1 - alpha)% confidence interval that the study can expect to "
-"achieve for the intraclass (Fleiss-type) kappa of the common-correlation "
-"model used by the kappaSize package (Donner and Eliasziw; Rotondi and "
-"Donner); for two raters with equal marginal frequencies this coincides with "
-"Cohen's kappa."
+"With the sample size already fixed, this reports the expected lower bound of "
+"the one-sided {level} goodness-of-fit confidence interval for the intraclass "
+"(Fleiss-type) kappa of the common-correlation model, on the models of Donner "
+"and Eliasziw (two raters, binary outcome), Altaye, Donner and Klar (binary "
+"outcome, more raters) and Altaye, Donner and Eliasziw (three to five "
+"categories), in the confidence-interval approach of Rotondi and Donner "
+"implemented in the kappaSize package; for two raters with equal marginal "
+"frequencies this kappa coincides with Cohen's kappa."
 msgstr ""
 
 #: R/kappaSizePower.b.R

@@ -48,11 +48,25 @@ items:
           - alpha
           - 'n'
 
+    - name:  methodology
+      title: Methodology
+      type:  Html
+      clearWith:
+          - outcome
+          - kappa0
+          - props
+          - raters
+          - alpha
+          - 'n'
+
 refs:
     - ClinicoPathJamoviModule
     - kappaSize
     - donnerEliasziwKappaGOF
     - rotondiDonnerKappaCI
+    - altayeDonnerKlarKappaRaters
+    - altayeDonnerEliasziwKappaGOF
+    - LandisKoch1977
 
 
 

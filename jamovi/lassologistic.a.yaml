@@ -1,7 +1,7 @@
 ---
 name: lassologistic
 title: LASSO Logistic Regression
-menuGroup: meddecideT
+menuGroup: meddecide
 menuSubgroup: Prediction Models
 menuTitle: LASSO Logistic
 menuSubtitle: Penalized feature selection for binary classification

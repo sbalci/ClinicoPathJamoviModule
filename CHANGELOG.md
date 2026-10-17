@@ -5,6 +5,27 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-10-17 — kappaSizeFixedN: an optimiser inside a root finder, and a test that pinned a failure as an invariant
+
+- **Failure mode:** the restricted-ML bound fitted the proportions with BFGS over the plain simplex, a flat 1e10
+  outside the model, and a warm start from the previous fit. Near a rare category's floor BFGS stopped short
+  (finite-difference probes crossed the wall) or ran onto its iteration cap, and the warm start made the statistic
+  depend on the order of evaluation (one rho: -2.54 fitted first, +3.83 after a fit 0.01 lower), so `uniroot` saw no
+  change of sign. 18 of 160 extreme designs reported "could not be re-estimated" although a root existed. Separately,
+  validation test C16 asserted "the bound never falls below the anticipated proportions' model floor"; that held only
+  BECAUSE the re-estimation failed there - a re-estimated bound may legitimately fall below it.
+- **Detection:** `/check-function-full` reproduced IR-03; an extreme-design sweep against an independent multi-start
+  oracle, then `uniroot` instrumented to print every evaluation. C16 failed the moment the fit started working.
+- **Repair:** `.rmlFitter()` - p = t + (1 - K t) softmax(theta) keeps every theta inside the model, `nlminb` with
+  restarts, two cold starts. C16 now checks the equal-proportion floor once proportions are re-estimated, and pins
+  the oracle roots. Also found: the jamovi client renders an Html element only when its content is non-empty, so a
+  warnings-only panel set to `""` keeps the previous run's text; the panel now gets `<div></div>`.
+- **Rule:** an optimiser called inside a root finder must be a function of its argument alone (fixed starts, no state
+  carried between calls). Constrain a fit by parametrisation, not by a flat penalty. Before calling a test invariant
+  broken by a fix, ask whether it only ever held because the code path it guards was failing.
+
+---
+
 ## 2026-10-16 — kappaSizeCI: a performance finding measured at typical inputs, not at the ceiling
 
 - **Failure mode:** the trio pass logged "engine runs with the Summary pane off" as not worth fixing on a measured
