@@ -5,6 +5,37 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-10-17 — meddecide 1.0.9 R CMD check: a two-week-old copy of the audit test
+
+- **Failure mode:** five failures in the sibling's `test-meddecide-library-audit.R`, all from its 2026-10-01 copy.
+  The umbrella's copy had followed each behaviour change since (psychopdaROC's required `negativeClass`, its Run gate
+  and its refusal of a single-cohort meta-analysis; decisioncompare's explicit negative levels; lassologistic's
+  `schneeweiss` -> `smallest`), and audit tests never sync. The shipped `R/` and yaml were byte-identical, so only a
+  diff of the test explained it. Behind the two NOTEs: a bare `combn` and four aes() columns in top-level helpers (R6
+  bodies are invisible to the check, top-level functions are not), and `MASS` with no call - a true detection: its
+  one use, `MASS::ginv` in the DeLong code, left on 2026-10-10. MASS is still needed, though: psychopdaROC's
+  `fitdistr` smoother reaches it through pROC, which only Suggests it, and fails silently without it. Behind those, a
+  failure only the source tree shows: the unused-Imports guard listed `MASS` and `tibble`, hidden on CI because the
+  last pushed commit had two analyses removed, which turns that guard into a skip.
+- **Detection:** `diff` of the audit test across the two repos; the suite run in both contexts (the check's copy of
+  `tests/` and the sibling's source tree) against the package the check installed; a `git archive` of HEAD to show
+  the guard's failure predated the edits; a review panel (four refuting agents, Codex) that moved two first fixes.
+- **Repair:** mirrored the umbrella test; `utils::combn`; `.data$` in the three aes() calls with a file-local
+  `@importFrom rlang .data` - the first fix, `globalVariables()` entries, would have hidden `result` and `test`
+  package-wide in seven codebases. `MASS` is declared where it is used: `@importFrom MASS fitdistr` on
+  psychopdaROC.b.R and a `requireNamespace("MASS")` on the `fitdistr` path, so R CMD check, the audit guard, the
+  release gate and `prune_conflicts()` all see it, and it leaves with the analysis if that is parked (the first fix,
+  a `zzz_imports.R` tag plus a name exemption in the guard, could do neither). The parked clinicalscore's
+  `MASS::polr` is a second reason to keep it. A test now runs the `fitdistr` smoother. `tibble`, called by no
+  meddecide analysis (parked ones included), left Imports with its stale tag.
+- **Rule:** mirror `test-<module>-library-audit.R` in the same pass that edits it. A package a module needs only
+  through another package's Suggests is a real Import that no code scan can see: declare it at the point of use
+  (`requireNamespace()` plus the analysis's own `@importFrom`), never by exempting it in a guard, and never prune on
+  the scan. Give a top-level helper's aes() columns `.data$`, not `globalVariables()`. Before trusting a green
+  sibling CI, check whether that run had an audited analysis absent - the park-aware guards skip then.
+
+---
+
 ## 2026-10-17 — kappaSizeFixedN: two regression tests that could not fail
 
 - **Failure mode:** the security audit's raters test built its analysis without `data =`, so jmvcore's `run()`

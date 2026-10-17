@@ -509,6 +509,11 @@ test_that("psychopdaROC overlays survive a redraw without .run()", {
 
   expect_true(is.finite(live) && live > 1)
   expect_identical(exported, live)
+
+  # "Distribution fitting" is pROC's MASS::fitdistr smoother, which fails silently (try) when MASS is
+  # missing; meddecide imports MASS for it (R CMD check 2026-10-17).
+  fitted <- analysis$.__enclos_env__$private$.createSmoothedROC(d$marker1, d$status, "Disease", "fitdistr")
+  expect_true(is.finite(as.numeric(fitted$auc)))
 })
 
 # library-audit 2026-09-16 meddecide [LOW] DONE: requiresData: true only where the renderer, or a

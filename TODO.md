@@ -1,3 +1,47 @@
+# meddecide 1.0.9 — R CMD check: 1 ERROR (5 audit-test failures), 2 NOTEs (2026-10-17; fixed, uncommitted)
+
+Cause: the sibling's `test-meddecide-library-audit.R` was the 2026-10-01 copy (audit tests never sync); a bare
+`combn` and four aes() columns in top-level helpers; `MASS` declared with no call. Acceptance: R CMD check 0/0/0 on
+the sibling, and the suite green in the installed AND the source-tree context (the sibling's CI runs the latter).
+
+- [x] Mirror the umbrella audit test (`tools/mirror_to_submodule.R --module meddecide ...`): 5 failures -> 0.
+- [x] `R/nogoldstandard-mixture.R`: `utils::combn`.
+- [x] `R/utils-diagnostic-comparator.R`: `.data$` in the three aes() calls and a file-local `@importFrom rlang .data`
+      (not `globalVariables()`, which is package-wide and ships with `R/utils.R` to every module).
+- [x] `MASS` declared where it is used: `@importFrom MASS fitdistr` and a `requireNamespace("MASS")` on the
+      `fitdistr` path in `R/psychopdaROC.b.R`; one test runs that smoother. Its old use, `MASS::ginv`, left on
+      2026-10-10; the parked clinicalscore's `MASS::polr` is a second reason to keep it.
+- [x] Pre-existing, source tree only (hidden on CI while two analyses were absent): `tibble` left the sibling's
+      Imports with its stale `rownames_to_column` tag.
+- [x] Verify: R CMD check 0 errors / 0 warnings / 0 notes; installed suite 27 tests, FAIL 0, 86 passed, 15 named
+      skips; source-tree suite 27 tests, FAIL 0, 118 passed; release gate `Imports: 30 checked, 0 unused`, 0
+      blocking; comparator plots build identical to HEAD (heatmap, radar, bar); `fitdistr` reaches
+      `MASS::fitdistr` (traced) and the new assertion fails on NULL.
+- [ ] User: commit both repos. Umbrella: NAMESPACE, R/psychopdaROC.b.R, R/nogoldstandard-mixture.R,
+      R/utils-diagnostic-comparator.R, the audit test, CHANGELOG.md, TODO.md. Sibling: DESCRIPTION, NAMESPACE,
+      R/zzz_imports.R, the same three R files, the audit test. A later `_updateModules.R` run reproduces the
+      sibling's R files and NAMESPACE from the umbrella.
+- [ ] User, before pushing meddecide: `48e04a0` deleted `inst/i18n/en.json` and `tr.json` (prepare() empties that
+      folder; `560a661` had refreshed them). R-side installs then lose Turkish silently (jmvcore falls back to
+      English); jamovi's .jmo build regenerates them. Restore: `git -C ../meddecide restore --source=48e04a0~1 --
+      inst/i18n/en.json inst/i18n/tr.json`, or `Rscript --vanilla tools/i18n_rebuild_json.R ../meddecide`.
+- [ ] User, before releasing 1.0.9: the sibling NEWS.md has no 1.0.9 heading (newest 1.0.83.03), so the release body
+      would be the placeholder (release gate WARN). And `1.0.9` sorts below the published pre-releases v1.0.81 and
+      v1.0.52 (R and jamovi compare 9 < 81); it is above v1.0.6, the Latest release.
+- [x] Known, not changed: the "empty test" skip is the sibling's `test-decision.R`, disabled on purpose
+      (`if (FALSE)`); its file-level `context()` is what testthat counts. The test WARN is pROC built under R 4.6.1
+      (session R 4.6.0).
+- [ ] Follow-up (psychopdaROC, from the review): every smoothing failure is swallowed silently (`try(silent = TRUE)`,
+      no notice; enhancedROC shows one); the binormal/density tests in `test-psychopdaROC-advanced.R` omit
+      `run = TRUE`, so they stop at the Run gate and never smooth; smoothing runs with `plotROC` off, though the plot
+      is its only consumer; `- MASS` is an analysis-level ref printed on every output for a non-default plot option
+      (an item ref on `plotROC` fits); the meta-analysis forest generator/renderer (b.R ~6617/~6669) has no caller.
+- [ ] Follow-up (tooling): nothing syncs `test-<module>-library-audit.R`; a `--dry-run` line when the umbrella copy
+      differs from a sibling's would have flagged each divergence since early October.
+- [ ] Follow-up (low): the audit test's printf-conversion scan dropped the space flag (2026-10-16), so a real `% .2f`
+      in a msgid would pass; none exists today. Five bare `combn()` calls in meddecide R6 bodies resolve through
+      the attached utils; `utils::` would harden them.
+
 # kappaSizeFixedN — `/fix-function --apply` (2026-10-17, after the release review and security audit; in progress)
 
 Baseline (HEAD 080825f91): suites 19 + 324 + 206 pass, 1 error (release-review "a raters value the option check
@@ -447,8 +491,9 @@ Acceptance (met):
 - [x] Verify: audit post-fix runs (identical twice), kappaSize suites, release gate unchanged (0 blocking)
 - [ ] User: commit; sync JamoviTest (`Rscript _updateModules.R --dry-run` first - its copy predates 2026-10-11);
       open in jamovi: binary 6 raters p .05 (note + seed shown), change an option, reopen the .omv, Turkish panel
-- [ ] Unrelated, seen in passing: `test-meddecide-library-audit.R` "fixed-row tables" expects a `methodComparison`
-      row key `schneeweiss`, the code now has `smallest` (another analysis; not touched)
+- [x] Unrelated, seen in passing: `test-meddecide-library-audit.R` "fixed-row tables" expects a `methodComparison`
+      row key `schneeweiss`, the code now has `smallest` (another analysis; not touched). Done: the umbrella test
+      expects `smallest`, and the sibling's copy was mirrored on 2026-10-17 (meddecide R CMD check, top of file).
 
 # decisioncurve — `/release-review-function` (2026-10-14 morning, uncommitted)
 
@@ -581,10 +626,10 @@ from HEAD only in refs/roxygen; release gate adds no FAIL.
       - docs: `comparisonMethod` row out and `ciBand` row in, in both decisioncurve docs;
       - external oracle against dcurves 0.5.1: NB within 2e-16, net interventions avoided within 5e-14;
       - `prepare()` clean; it changed only `decisioncurve.h.R` (refs and roxygen).
-- [ ] Out of scope, found by the same run: `test-meddecide-library-audit.R:964` expects lassologistic's
+- [x] Out of scope, found by the same run: `test-meddecide-library-audit.R:964` expects lassologistic's
       `methodComparison` row key `"schneeweiss"`, but the committed backend (5c4dfd582/5b8ade7da) renamed it
       `"smallest"` on purpose (an eponym correction), so the expectation is stale. Fails on HEAD; unrelated
-      to decisioncurve.
+      to decisioncurve. Done: both copies expect `smallest` (sibling mirrored 2026-10-17).
 - [ ] User: revert `menuGroup: meddecideT` -> `meddecide`, then `_updateModules.R` for meddecide
       (IR-02: the shipped copy predates every fix). The `i18nUpdate()` + Turkish part of this
       item was done on 2026-10-14 (`/fix-function` pass above).
@@ -8258,6 +8303,10 @@ Verdict: **ready after the specified actions**. Statistics independently verifie
 - [ ] Module-wide, not this analysis: `compilerMode: tame` is absent from `jamovi/0000.yaml`, and 222 of 390
       `.b.R` files use bare `ggplot2::aes()` column names that are not in `utils::globalVariables()`
       (diagnosticmeta contributes 9). Both are package-level CRAN/library-review items.
+      Note 2026-10-17 (meddecide R CMD check): R CMD check never walks R6 method bodies, so aes() names in a
+      `.b.R` raise no NOTE and need no `globalVariables()` entry - the list is package-wide, `R/utils.R` ships to
+      every module, and each name hides that name's free use everywhere. Only top-level helpers are checked, and
+      those should use `.data$` (`R/utils-diagnostic-comparator.R` does now).
 
 ## diagnosticmeta deep audit — what the fix pass left (2026-09-20)
 

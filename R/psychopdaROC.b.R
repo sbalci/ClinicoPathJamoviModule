@@ -266,6 +266,7 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @importFrom cutpointr cutpointr
+#' @importFrom MASS fitdistr
 # ============================================================================
 # MAIN ANALYSIS CLASS
 # ============================================================================
@@ -1113,6 +1114,11 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
       .createSmoothedROC = function(x, class, positiveClass, method) {
         # Check package dependencies
         if (!private$.checkPackageDependencies("pROC", "ROC curve smoothing")) {
+          return(NULL)
+        }
+        # "fitdistr" is pROC's MASS::fitdistr smoother and pROC only Suggests MASS, so MASS is a
+        # meddecide Import that no MASS:: call shows; this line is what the dependency scans see.
+        if (identical(method, "fitdistr") && !requireNamespace("MASS", quietly = TRUE)) {
           return(NULL)
         }
 

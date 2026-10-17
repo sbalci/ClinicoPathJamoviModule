@@ -156,7 +156,7 @@ nogoldstandard_identification <- function(tab, par) {
   empirical <- tab$counts / tab$n
   marginal <- colSums(tab$patterns * empirical)
   factorized <- FALSE
-  for (pair in combn(tab$k, 2, simplify = FALSE)) {
+  for (pair in utils::combn(tab$k, 2, simplify = FALSE)) {
     code <- 1L + tab$patterns[, pair[1]] + 2L * tab$patterns[, pair[2]]
     pair_prob <- vapply(1:4, function(i) sum(empirical[code == i]), numeric(1))
     implied <- pair_prob[code]

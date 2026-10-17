@@ -181,10 +181,14 @@
   TRUE
 }
 
+# The plot's aes() columns use the .data pronoun; the import travels with this file.
+#' @importFrom rlang .data
+NULL
+
 # Builds the comparator plot from its saved state (kept separate so tests can inspect it).
 .diagComparatorPlotObject <- function(d, kind = "bar", text = .diagText) {
   if (kind == "heatmap") {
-    p <- ggplot2::ggplot(d, ggplot2::aes(x = test, y = row, fill = result)) +
+    p <- ggplot2::ggplot(d, ggplot2::aes(x = .data$test, y = .data$row, fill = .data$result)) +
       ggplot2::geom_tile() +
       ggplot2::labs(x = text$plot_test, y = text$plot_row, fill = text$plot_call)
   } else {
@@ -199,7 +203,8 @@
       wrap <- d[d$x == 1L, ]
       wrap$x <- 4L
       ring <- rbind(d, wrap)
-      p <- ggplot2::ggplot(ring, ggplot2::aes(x = x, y = estimate, group = test, colour = test)) +
+      p <- ggplot2::ggplot(ring, ggplot2::aes(x = .data$x, y = .data$estimate, group = .data$test,
+                                              colour = .data$test)) +
         ggplot2::geom_path(na.rm = TRUE) +
         ggplot2::geom_point(data = d, na.rm = TRUE) +
         ggplot2::scale_x_continuous(limits = c(1, 4), breaks = 1:3, labels = metrics) +
@@ -207,7 +212,7 @@
         ggplot2::scale_y_continuous(limits = c(0, 1), labels = function(x) paste0(100 * x, "%")) +
         ggplot2::labs(x = NULL, y = text$plot_agreement, colour = text$plot_test)
     } else {
-      p <- ggplot2::ggplot(d, ggplot2::aes(x = metric, y = estimate, fill = test)) +
+      p <- ggplot2::ggplot(d, ggplot2::aes(x = .data$metric, y = .data$estimate, fill = .data$test)) +
         ggplot2::geom_col(position = ggplot2::position_dodge(preserve = "single"), na.rm = TRUE) +
         ggplot2::scale_x_discrete(drop = FALSE) +
         ggplot2::scale_y_continuous(limits = c(0, 1), labels = function(x) paste0(100 * x, "%")) +
