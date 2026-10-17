@@ -1469,7 +1469,7 @@ analyses:
   - title: Lowest Expected Kappa for a Fixed Sample Size
     name: kappaSizeFixedN
     ns: ClinicoPath
-    menuGroup: PowerT
+    menuGroup: Power
     menuSubgroup: Power Analysis by meddecide
     menuTitle: Lowest Expected Kappa for a Fixed Sample Size
     menuSubtitle: Find lower Kappa based on sample size
