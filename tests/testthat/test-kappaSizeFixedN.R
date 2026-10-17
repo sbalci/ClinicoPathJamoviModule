@@ -6,6 +6,8 @@ test_that("kappaSizeFixedN works for binary outcomes (2 categories)", {
     props = "0.30, 0.70",
     raters = "2",
     alpha = 0.05,
+    showExplanations = TRUE,
+    showSummary = TRUE,
     n = 100
   )
 
@@ -33,6 +35,8 @@ test_that("kappaSizeFixedN works for 3 categories", {
     props = "0.20, 0.30, 0.50",
     raters = "3",
     alpha = 0.05,
+    showExplanations = TRUE,
+    showSummary = TRUE,
     n = 150
   )
 
@@ -49,6 +53,8 @@ test_that("kappaSizeFixedN works for 4 categories", {
     props = "0.10, 0.20, 0.30, 0.40",
     raters = "2",
     alpha = 0.05,
+    showExplanations = TRUE,
+    showSummary = TRUE,
     n = 200
   )
 
@@ -63,6 +69,8 @@ test_that("kappaSizeFixedN works for 5 categories", {
     props = "0.10, 0.20, 0.20, 0.25, 0.25",
     raters = "2",
     alpha = 0.05,
+    showExplanations = TRUE,
+    showSummary = TRUE,
     n = 200
   )
 
@@ -77,6 +85,8 @@ test_that("kappaSizeFixedN integration with kappaSize package calculations", {
     props = "0.5, 0.5",
     raters = "2",
     alpha = 0.05,
+    showExplanations = TRUE,
+    showSummary = TRUE,
     n = 100
   )
 

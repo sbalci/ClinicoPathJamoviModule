@@ -15034,11 +15034,11 @@ msgstr ""
 
 #: R/kappaSizeFixedN.b.R
 msgid ""
-"A total of {n} subjects can produce an expected lower limit for kappa of "
-"{bound}."
+"A total of {n} subjects can produce an expected one-sided {conf} lower limit "
+"for kappa of {bound}."
 msgstr ""
-"Toplam {n} olgu, kappa için {bound} değerinde beklenen bir alt sınır "
-"sağlayabilir."
+"Toplam {n} olgu, kappa için {bound} değerinde, tek yönlü {conf} beklenen bir "
+"alt güven sınırı sağlayabilir."
 
 #: R/chisqposttest.b.R
 msgid "A total sample size of at least n=%d is recommended to achieve 80%% power."
@@ -17192,6 +17192,7 @@ msgid "Additional Options"
 msgstr ""
 
 #: kappaSizeCI/ui[5].label
+#: kappaSizeFixedN/ui[4].label
 #: mixedeffectscox/ui[9][0].label
 msgid "Additional Output"
 msgstr "Ek Çıktı"
@@ -17418,6 +17419,14 @@ msgstr ""
 "arasında birlikte, merkezlerin içinde). Bu seçenek olmadan rapor yalnızca "
 "nokta tahminlerini gösterir."
 
+#: kappaSizeFixedN/options/showSummary.description.ui
+msgid ""
+"Adds the kappaSize package's own printed summary, with a note on why its "
+"bound can differ from the one reported here."
+msgstr ""
+"kappaSize paketinin kendi yazdırdığı özeti, o paketin sınırının burada "
+"bildirilenden neden farklı olabileceğine ilişkin bir notla birlikte ekler."
+
 #: kappaSizeCI/options/showSummary.description.ui
 msgid ""
 "Adds the kappaSize package's own printed summary, with a note on why its "
@@ -17426,6 +17435,16 @@ msgstr ""
 "kappaSize paketinin kendi yazdırdığı özeti, o paketin örneklem büyüklüğünün "
 "burada bildirilenden neden farklı olabileceğine ilişkin bir notla birlikte "
 "ekler."
+
+#: kappaSizeFixedN/options/showExplanations.description.ui
+msgid ""
+"Adds the methodology (models, how the bound is computed, analysis advice) "
+"and the step-by-step Study Explanation. The bound, the warnings and the main "
+"caveats are always shown."
+msgstr ""
+"Yöntemi (modeller, sınırın nasıl hesaplandığı, analiz önerileri) ve adım "
+"adım Çalışma Açıklamasını ekler. Sınır, uyarılar ve temel çekinceler her "
+"zaman gösterilir."
 
 #: kappaSizeCI/options/showExplanations.description.ui
 msgid ""
@@ -77348,6 +77367,16 @@ msgstr ""
 "testine göre çalışma büyüklüğü belirlemek için kappaSizePower'ı, hedef güven "
 "sınırlarına göre belirlemek için kappaSizeCI'ı kullanın."
 
+#: R/kappaSizeFixedN.b.R
+msgid ""
+"For any pair of raters this kappa equals Cohen's kappa when the raters share "
+"the same category frequencies (no rater bias); when their frequencies "
+"differ, it does not."
+msgstr ""
+"Herhangi bir değerlendirici çifti için bu kappa, değerlendiriciler aynı "
+"kategori sıklıklarını paylaştığında (değerlendirici yanlılığı yokken) "
+"Cohen'in kappa değerine eşittir; sıklıkları farklı olduğunda eşit değildir."
+
 #: R/kappaSizeCI.b.R
 msgid ""
 "For any pair of raters this κ equals Cohen's κ when the raters share the "
@@ -94359,6 +94388,7 @@ msgstr ""
 "gereklidir."
 
 #: kappaSizeCI/options/showSummary.title
+#: kappaSizeFixedN/options/showSummary.title
 msgid "kappaSize package summary"
 msgstr "kappaSize paket özeti"
 
@@ -99706,8 +99736,8 @@ msgstr ""
 #: kappaSizeFixedN/options.title
 #: kappaSizeFixedN/ui.title
 #: kappaSizeFixedN/results.title
-msgid "Lowest Expected Value for a fixed sample size"
-msgstr "Sabit Örneklem Büyüklüğü için En Düşük Beklenen Değer"
+msgid "Lowest Expected Kappa for a Fixed Sample Size"
+msgstr "Sabit Örneklem Büyüklüğü için En Düşük Beklenen Kappa"
 
 #: R/lollipop.b.R
 msgid "Lowest Value Group"
@@ -105321,6 +105351,7 @@ msgid "Methodology & Interpretation"
 msgstr ""
 
 #: kappaSizeCI/options/showExplanations.title
+#: kappaSizeFixedN/options/showExplanations.title
 msgid "Methodology and study explanation"
 msgstr "Yöntem ve çalışma açıklaması"
 
@@ -143734,6 +143765,7 @@ msgid "Rare category threshold (%)"
 msgstr "Nadir kategori eşiği (%)"
 
 #: R/kappaSizeCI.b.R
+#: R/kappaSizeFixedN.b.R
 msgid "Rare category."
 msgstr "Nadir kategori."
 
@@ -169869,7 +169901,6 @@ msgstr ""
 #: jiwillsurvive/options/followup_plot_type/summary.title
 #: jjdotchart/results/summary.columns.title
 #: kappaSizeCI/results/text_summary.title
-#: kappaSizeFixedN/results/text_summary.title
 #: linechart/results/naturalSummary.title
 #: lymphnoderatio/results/summary.title
 #: multifocalconcordance/results/summary.title
@@ -169900,6 +169931,7 @@ msgstr "Özet (Sade Dilde)"
 msgid "Summary & Interpretation"
 msgstr ""
 
+#: kappaSizeFixedN/results/text_summary.title
 #: kappaSizePower/results/text_summary.title
 msgid "Summary by the published formula (kappaSize)"
 msgstr "Yayımlanmış formüle göre özet (kappaSize)"
@@ -175649,18 +175681,12 @@ msgid ""
 "The bound is the lower root of the goodness-of-fit chi-square equation, "
 "solved directly; a positive bound is shown rounded down (to three decimals, "
 "or to two significant digits below 0.001), so the figure shown never "
-"overstates it. The kappaSize package's own search, reproduced in the Summary "
-"panel, moves down in steps of 0.001 and stops once the chi-square exceeds "
-"its critical value by 0.001, so it can report a value up to about 0.001 "
-"lower."
+"overstates it."
 msgstr ""
 "Sınır, uyum iyiliği ki-kare denkleminin doğrudan çözülen alt köküdür; "
 "pozitif bir sınır aşağı yuvarlanarak gösterilir (üç ondalık basamağa ya da "
 "0.001'in altında iki anlamlı basamağa), bu nedenle gösterilen değer sınırı "
-"hiçbir zaman olduğundan yüksek göstermez. Özet panelinde yeniden üretilen "
-"kappaSize paketinin kendi araması 0.001'lik adımlarla aşağı iner ve ki-kare "
-"kritik değerini 0.001 aştığında durur; bu nedenle yaklaşık 0.001'e kadar "
-"daha düşük bir değer bildirebilir."
+"hiçbir zaman olduğundan yüksek göstermez."
 
 #: R/kappaSizeFixedN.b.R
 msgid ""
@@ -177514,6 +177540,22 @@ msgstr ""
 
 #: R/kappaSizeFixedN.b.R
 msgid ""
+"The expected lower bound is {bound}, which on the Landis and Koch scale is "
+"no better than fair agreement, so these subjects cannot establish moderate "
+"or better reliability even if the raters perform exactly as anticipated. The "
+"goodness-of-fit cells are too sparse at this sample size (see Sparse "
+"categories) for the bound to be relied on, so it does not show that "
+"agreement exceeds chance either."
+msgstr ""
+"Beklenen alt sınır {bound}; bu, Landis ve Koch ölçeğinde en fazla makul "
+"uyuma karşılık gelir, bu nedenle bu olgular değerlendiriciler tam olarak "
+"beklendiği gibi performans gösterse bile orta veya daha iyi düzeyde "
+"güvenilirlik ortaya koyamaz. Bu örneklem büyüklüğünde uyum iyiliği hücreleri "
+"sınıra güvenilemeyecek kadar seyrektir (bkz. Seyrek kategoriler), bu nedenle "
+"sınır uyumun şansı aştığını da göstermez."
+
+#: R/kappaSizeFixedN.b.R
+msgid ""
 "The expected lower bound is {bound}. The study excludes agreement below that "
 "value but leaves everything above it open, and on the Landis and Koch scale "
 "a bound under 0.40 is no better than fair agreement. These subjects can "
@@ -178612,6 +178654,16 @@ msgid ""
 msgstr ""
 "kappaSize paketi gereklidir ancak yüklü değil. Lütfen "
 "install.packages(\"kappaSize\") ile yükleyin"
+
+#: R/kappaSizeFixedN.b.R
+msgid ""
+"The kappaSize package's own search, reproduced in the Summary panel, moves "
+"down in steps of 0.001 and stops once the chi-square exceeds its critical "
+"value by 0.001, so it can report a value up to about 0.001 lower."
+msgstr ""
+"Özet panelinde yeniden üretilen kappaSize paketinin kendi araması 0.001'lik "
+"adımlarla aşağı iner ve ki-kare kritik değerini 0.001 aştığında durur; bu "
+"nedenle yaklaşık 0.001'e kadar daha düşük bir değer bildirebilir."
 
 #: R/agreementintro.b.R
 msgid ""
@@ -180967,7 +181019,29 @@ msgstr ""
 msgid "The ranking"
 msgstr "Sıralama"
 
+#: R/kappaSizeFixedN.b.R
+msgid ""
+"The rarest category is expected in {share} of ratings, so each rater is "
+"expected to place only about {k} of the {n} subjects in it, fewer than one. "
+"The goodness-of-fit approximation behind the expected lower bound of {bound} "
+"does not hold with so few, and with a category this rare the model allows "
+"little or no agreement below zero, so the bound stays near or above zero "
+"however few the subjects are: it cannot support a dependable conclusion. "
+"Enrol more subjects, or enrich the case series so that the rare category is "
+"more common."
+msgstr ""
+"En nadir kategorinin değerlendirmelerin {share} kadarında görülmesi "
+"beklenir; bu nedenle her değerlendiricinin {n} olgudan yalnızca yaklaşık {k} "
+"tanesini, yani birden azını, bu kategoriye koyması beklenir. {bound} "
+"değerindeki beklenen alt sınırın dayandığı uyum iyiliği yaklaşımı bu kadar "
+"az olguyla geçerli değildir ve kategori bu kadar nadir olduğunda model "
+"sıfırın altında çok az uyuma izin verir ya da hiç izin vermez; bu nedenle "
+"olgu sayısı ne kadar az olursa olsun sınır sıfıra yakın ya da sıfırın "
+"üzerinde kalır: güvenilir bir sonucu destekleyemez. Daha fazla olgu alın "
+"veya nadir kategorinin daha sık görülmesi için olgu serisini zenginleştirin."
+
 #: R/kappaSizeCI.b.R
+#: R/kappaSizeFixedN.b.R
 msgid ""
 "The rarest category is expected in {share} of ratings, so each rater is "
 "expected to place only about {k} of the {n} subjects in it. Kappa depends "
@@ -184476,6 +184550,20 @@ msgstr ""
 msgid "This binary analysis does not account for censoring."
 msgstr "Bu ikili analiz sansürlemeyi hesaba katmaz."
 
+#: R/kappaSizeFixedN.b.R
+msgid ""
+"This bound is for the model-based goodness-of-fit interval; the Wald, "
+"Fisher-z or bootstrap intervals that agreement software usually reports for "
+"Cohen's or Fleiss' kappa can give a different lower limit for the same data. "
+"Report the goodness-of-fit interval, or plan for the interval that will be "
+"reported."
+msgstr ""
+"Bu sınır model tabanlı uyum iyiliği aralığı içindir; uyum yazılımlarının "
+"Cohen'in veya Fleiss'in kappa değeri için genellikle bildirdiği Wald, "
+"Fisher-z veya bootstrap aralıkları aynı veriler için farklı bir alt sınır "
+"verebilir. Uyum iyiliği aralığını bildirin veya çalışmayı bildirilecek "
+"aralığa göre planlayın."
+
 #: R/lassocox.b.R
 msgid ""
 "This C-index is apparent (training) performance from the same patients used "
@@ -184852,6 +184940,7 @@ msgstr ""
 "kılavuz veya doğrulanmış öneri değildir."
 
 #: R/kappaSizeCI.b.R
+#: R/kappaSizeFixedN.b.R
 msgid "This is a planning expectation, not a guarantee."
 msgstr "Bu bir planlama beklentisidir, garanti değildir."
 
@@ -188678,6 +188767,10 @@ msgstr ""
 #: R/jjpiestats.b.R
 msgid "Too few discordant pairs to reach p < 0.05"
 msgstr ""
+
+#: R/kappaSizeFixedN.b.R
+msgid "Too few expected subjects in the rarest category."
+msgstr "En nadir kategoride beklenen olgu sayısı çok az."
 
 #: R/enhancedROC.b.R
 msgid "Too few independent clusters per site"
@@ -200921,6 +201014,25 @@ msgstr ""
 msgid "When sorting by magnitude or alphabetically, use decreasing order."
 msgstr ""
 
+#: R/kappaSizeFixedN.b.R
+msgid ""
+"When the study is analysed, estimate the category prevalences by maximum "
+"likelihood at each candidate value of kappa. With three or more raters or "
+"categories, plugging in the overall proportions of ratings instead can give "
+"an interval that covers kappa less often than stated when a category makes "
+"up less than about a fifth of the ratings (about 0.90 to 0.94 instead of "
+"0.95 in the designs of that kind simulated for this analysis); without such "
+"a category it stayed close to 0.95."
+msgstr ""
+"Çalışma analiz edilirken kategori yaygınlıklarını her aday kappa değerinde "
+"en çok olabilirlik ile kestirin. Üç veya daha fazla değerlendirici ya da "
+"kategori olduğunda, bunun yerine değerlendirmelerin genel oranlarını yerine "
+"koymak, bir kategori değerlendirmelerin yaklaşık beşte birinden azını "
+"oluşturduğunda kappayı belirtilenden daha seyrek kapsayan bir aralık "
+"verebilir (bu analiz için simüle edilen bu türden tasarımlarda 0.95 yerine "
+"yaklaşık 0.90 ila 0.94); böyle bir kategori olmadığında kapsama 0.95'e yakın "
+"kaldı."
+
 #: R/kappaSizeCI.b.R
 msgid ""
 "When the study is analysed, estimate the category prevalences by maximum "
@@ -200934,24 +201046,6 @@ msgstr ""
 "daha fazla kategoriyle, değerlendirmelerin genel oranlarını yerine koymak κ "
 "değerini belirtilenden daha seyrek kapsayan bir aralık verir (bu analiz için "
 "simüle edilen tasarımlarda 0.95 yerine yaklaşık 0.91 ila 0.93)."
-
-#: R/kappaSizeFixedN.b.R
-msgid ""
-"When the study is analysed, estimate the category prevalences by maximum "
-"likelihood at each candidate value of κ. With three or more raters or "
-"categories, plugging in the overall proportions of ratings instead can give "
-"an interval that covers κ less often than stated when a category makes up "
-"less than about a fifth of the ratings (about 0.90 to 0.94 instead of 0.95 "
-"in the designs of that kind simulated for this analysis); without such a "
-"category it stayed close to 0.95."
-msgstr ""
-"Çalışma analiz edilirken kategori yaygınlıklarını her aday κ değerinde en "
-"çok olabilirlik ile kestirin. Üç veya daha fazla değerlendirici ya da "
-"kategori olduğunda, bunun yerine değerlendirmelerin genel oranlarını yerine "
-"koymak, bir kategori değerlendirmelerin yaklaşık beşte birinden azını "
-"oluşturduğunda κ'yı belirtilenden daha seyrek kapsayan bir aralık verebilir "
-"(bu analiz için simüle edilen bu türden tasarımlarda 0.95 yerine yaklaşık "
-"0.90 ila 0.94); böyle bir kategori olmadığında kapsama 0.95'e yakın kaldı."
 
 #: R/enhancedROC.b.R
 msgid ""
@@ -202246,6 +202340,27 @@ msgstr ""
 "en çok olabilirlik yöntemiyle kestirin; tüm değerlendirmelerin genel "
 "oranlarını doğrudan kullanmak testin doğru bir kappa0'ı çok sık reddetmesine "
 "yol açar."
+
+#: R/kappaSizeFixedN.b.R
+msgid ""
+"With three or more raters, the lower bound for a binary finding also depends "
+"on how agreement among more than two raters is modelled. This analysis uses "
+"the model of Altaye, Donner and Klar; the Dirichlet-multinomial model used "
+"for three to five categories, which for two categories is the beta-binomial, "
+"describes the same kappa, and with the proportions held at their anticipated "
+"values it never gave a lower bound than the one shown in the designs checked "
+"and usually gave a higher one (by up to about 0.10 when the finding is rare "
+"and the study small), so the figure shown is the more cautious of the two."
+msgstr ""
+"Üç veya daha fazla değerlendiriciyle, ikili bir bulgu için alt sınır ikiden "
+"fazla değerlendirici arasındaki uyumun nasıl modellendiğine de bağlıdır. Bu "
+"analiz Altaye, Donner ve Klar modelini kullanır; üç ila beş kategori için "
+"kullanılan ve iki kategoride beta-binom modele indirgenen Dirichlet-multinom "
+"model aynı kappa değerini tanımlar ve oranlar beklenen değerlerinde "
+"tutulduğunda incelenen tasarımlarda hiçbir zaman gösterilenden daha düşük "
+"bir sınır vermemiş, genellikle daha yüksek bir sınır vermiştir (bulgu nadir "
+"ve çalışma küçük olduğunda yaklaşık 0.10'a kadar); bu nedenle gösterilen "
+"değer ikisinden daha temkinli olanıdır."
 
 #: R/kappaSizeCI.b.R
 msgid ""

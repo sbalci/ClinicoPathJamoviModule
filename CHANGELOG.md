@@ -5,6 +5,26 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-10-17 — kappaSizeFixedN: a verdict gate the model's parameter space made unreachable
+
+- **Failure mode:** the red "cannot demonstrate agreement" verdict fired only on `bound <= 0`. The bound cannot fall
+  below the common-correlation model's floor, -p^(R-1)/(1-p^(R-1)) for a binary outcome, which for a rare finding
+  with 3+ raters is next to zero (p .02, 6 raters: -3.2e-9). So however few the subjects, the bound stayed positive
+  and the amber block said "these subjects can therefore show that agreement exceeds chance": 117 of 180 binary
+  designs with fewer than 2 expected positive subjects (n p 0.22-1.5) printed it; red fired in 3, all two-rater.
+  Every one also showed "Sparse categories", so the panel contradicted itself rather than staying silent.
+- **Detection:** `/review-function` extreme-design sweep (n 11, p .01, 6 raters gave +0.0000011 under the amber
+  claim), then a sweep of realistic rare-finding designs counting the claim against n * p.
+- **Repair:** no exclusion claim under the sparse rule; a red block when n * min(p) < 1 for any outcome; kappaSizeCI's
+  "Rare category." block ported. The sweep's count went 117 -> 0.
+- **Rule:** before trusting a threshold verdict on an estimate, check that the estimate can reach the threshold
+  for every input the analysis admits - a bound clipped by a parameter-space floor can make a gate unreachable.
+  Also from the same pass: R's stdout to a file is block-buffered, so a progress line that appears late is not a
+  slow loop (an apparent 6 s per design was 0.4 s); and a PO entry whose first line is `msgstr ""` may be the
+  start of a multi-line translation, not an empty one - parse the entry before calling it untranslated.
+
+---
+
 ## 2026-10-17 — kappaSizeFixedN: an optimiser inside a root finder, and a test that pinned a failure as an invariant
 
 - **Failure mode:** the restricted-ML bound fitted the proportions with BFGS over the plain simplex, a flat 1e10

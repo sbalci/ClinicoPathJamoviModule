@@ -12764,8 +12764,8 @@ msgstr ""
 
 #: R/kappaSizeFixedN.b.R
 msgid ""
-"A total of {n} subjects can produce an expected lower limit for kappa of "
-"{bound}."
+"A total of {n} subjects can produce an expected one-sided {conf} lower limit "
+"for kappa of {bound}."
 msgstr ""
 
 #: R/chisqposttest.b.R
@@ -14806,6 +14806,7 @@ msgid "Additional Options"
 msgstr ""
 
 #: kappaSizeCI/ui[5].label
+#: kappaSizeFixedN/ui[4].label
 #: mixedeffectscox/ui[9][0].label
 msgid "Additional Output"
 msgstr ""
@@ -15023,10 +15024,23 @@ msgid ""
 "within sites). Without it the report shows point estimates only."
 msgstr ""
 
+#: kappaSizeFixedN/options/showSummary.description.ui
+msgid ""
+"Adds the kappaSize package's own printed summary, with a note on why its "
+"bound can differ from the one reported here."
+msgstr ""
+
 #: kappaSizeCI/options/showSummary.description.ui
 msgid ""
 "Adds the kappaSize package's own printed summary, with a note on why its "
 "sample size can differ from the one reported here."
+msgstr ""
+
+#: kappaSizeFixedN/options/showExplanations.description.ui
+msgid ""
+"Adds the methodology (models, how the bound is computed, analysis advice) "
+"and the step-by-step Study Explanation. The bound, the warnings and the main "
+"caveats are always shown."
 msgstr ""
 
 #: kappaSizeCI/options/showExplanations.description.ui
@@ -72091,6 +72105,13 @@ msgid ""
 "test and kappaSizeCI to size it for target confidence limits."
 msgstr ""
 
+#: R/kappaSizeFixedN.b.R
+msgid ""
+"For any pair of raters this kappa equals Cohen's kappa when the raters share "
+"the same category frequencies (no rater bias); when their frequencies "
+"differ, it does not."
+msgstr ""
+
 #: R/kappaSizeCI.b.R
 msgid ""
 "For any pair of raters this κ equals Cohen's κ when the raters share the "
@@ -88208,6 +88229,7 @@ msgid "kappaSize package is required for validated kappa sample size calculation
 msgstr ""
 
 #: kappaSizeCI/options/showSummary.title
+#: kappaSizeFixedN/options/showSummary.title
 msgid "kappaSize package summary"
 msgstr ""
 
@@ -93290,7 +93312,7 @@ msgstr ""
 #: kappaSizeFixedN/options.title
 #: kappaSizeFixedN/ui.title
 #: kappaSizeFixedN/results.title
-msgid "Lowest Expected Value for a fixed sample size"
+msgid "Lowest Expected Kappa for a Fixed Sample Size"
 msgstr ""
 
 #: R/lollipop.b.R
@@ -98722,6 +98744,7 @@ msgid "Methodology & Interpretation"
 msgstr ""
 
 #: kappaSizeCI/options/showExplanations.title
+#: kappaSizeFixedN/options/showExplanations.title
 msgid "Methodology and study explanation"
 msgstr ""
 
@@ -134858,6 +134881,7 @@ msgid "Rare category threshold (%)"
 msgstr ""
 
 #: R/kappaSizeCI.b.R
+#: R/kappaSizeFixedN.b.R
 msgid "Rare category."
 msgstr ""
 
@@ -159741,7 +159765,6 @@ msgstr ""
 #: jiwillsurvive/options/followup_plot_type/summary.title
 #: jjdotchart/results/summary.columns.title
 #: kappaSizeCI/results/text_summary.title
-#: kappaSizeFixedN/results/text_summary.title
 #: linechart/results/naturalSummary.title
 #: lymphnoderatio/results/summary.title
 #: multifocalconcordance/results/summary.title
@@ -159772,6 +159795,7 @@ msgstr ""
 msgid "Summary & Interpretation"
 msgstr ""
 
+#: kappaSizeFixedN/results/text_summary.title
 #: kappaSizePower/results/text_summary.title
 msgid "Summary by the published formula (kappaSize)"
 msgstr ""
@@ -165150,10 +165174,7 @@ msgid ""
 "The bound is the lower root of the goodness-of-fit chi-square equation, "
 "solved directly; a positive bound is shown rounded down (to three decimals, "
 "or to two significant digits below 0.001), so the figure shown never "
-"overstates it. The kappaSize package's own search, reproduced in the Summary "
-"panel, moves down in steps of 0.001 and stops once the chi-square exceeds "
-"its critical value by 0.001, so it can report a value up to about 0.001 "
-"lower."
+"overstates it."
 msgstr ""
 
 #: R/kappaSizeFixedN.b.R
@@ -166575,6 +166596,16 @@ msgstr ""
 
 #: R/kappaSizeFixedN.b.R
 msgid ""
+"The expected lower bound is {bound}, which on the Landis and Koch scale is "
+"no better than fair agreement, so these subjects cannot establish moderate "
+"or better reliability even if the raters perform exactly as anticipated. The "
+"goodness-of-fit cells are too sparse at this sample size (see Sparse "
+"categories) for the bound to be relied on, so it does not show that "
+"agreement exceeds chance either."
+msgstr ""
+
+#: R/kappaSizeFixedN.b.R
+msgid ""
 "The expected lower bound is {bound}. The study excludes agreement below that "
 "value but leaves everything above it open, and on the Landis and Koch scale "
 "a bound under 0.40 is no better than fair agreement. These subjects can "
@@ -167387,6 +167418,13 @@ msgstr ""
 msgid ""
 "The kappaSize package is required but not installed. Please install it using "
 "install.packages(\"kappaSize\")"
+msgstr ""
+
+#: R/kappaSizeFixedN.b.R
+msgid ""
+"The kappaSize package's own search, reproduced in the Summary panel, moves "
+"down in steps of 0.001 and stops once the chi-square exceeds its critical "
+"value by 0.001, so it can report a value up to about 0.001 lower."
 msgstr ""
 
 #: R/agreementintro.b.R
@@ -169198,7 +169236,20 @@ msgstr ""
 msgid "The ranking"
 msgstr ""
 
+#: R/kappaSizeFixedN.b.R
+msgid ""
+"The rarest category is expected in {share} of ratings, so each rater is "
+"expected to place only about {k} of the {n} subjects in it, fewer than one. "
+"The goodness-of-fit approximation behind the expected lower bound of {bound} "
+"does not hold with so few, and with a category this rare the model allows "
+"little or no agreement below zero, so the bound stays near or above zero "
+"however few the subjects are: it cannot support a dependable conclusion. "
+"Enrol more subjects, or enrich the case series so that the rare category is "
+"more common."
+msgstr ""
+
 #: R/kappaSizeCI.b.R
+#: R/kappaSizeFixedN.b.R
 msgid ""
 "The rarest category is expected in {share} of ratings, so each rater is "
 "expected to place only about {k} of the {n} subjects in it. Kappa depends "
@@ -171847,6 +171898,15 @@ msgstr ""
 msgid "This binary analysis does not account for censoring."
 msgstr ""
 
+#: R/kappaSizeFixedN.b.R
+msgid ""
+"This bound is for the model-based goodness-of-fit interval; the Wald, "
+"Fisher-z or bootstrap intervals that agreement software usually reports for "
+"Cohen's or Fleiss' kappa can give a different lower limit for the same data. "
+"Report the goodness-of-fit interval, or plan for the interval that will be "
+"reported."
+msgstr ""
+
 #: R/lassocox.b.R
 msgid ""
 "This C-index is apparent (training) performance from the same patients used "
@@ -172122,6 +172182,7 @@ msgid ""
 msgstr ""
 
 #: R/kappaSizeCI.b.R
+#: R/kappaSizeFixedN.b.R
 msgid "This is a planning expectation, not a guarantee."
 msgstr ""
 
@@ -175591,6 +175652,10 @@ msgstr ""
 
 #: R/jjpiestats.b.R
 msgid "Too few discordant pairs to reach p < 0.05"
+msgstr ""
+
+#: R/kappaSizeFixedN.b.R
+msgid "Too few expected subjects in the rarest category."
 msgstr ""
 
 #: R/enhancedROC.b.R
@@ -187279,6 +187344,17 @@ msgstr ""
 msgid "When sorting by magnitude or alphabetically, use decreasing order."
 msgstr ""
 
+#: R/kappaSizeFixedN.b.R
+msgid ""
+"When the study is analysed, estimate the category prevalences by maximum "
+"likelihood at each candidate value of kappa. With three or more raters or "
+"categories, plugging in the overall proportions of ratings instead can give "
+"an interval that covers kappa less often than stated when a category makes "
+"up less than about a fifth of the ratings (about 0.90 to 0.94 instead of "
+"0.95 in the designs of that kind simulated for this analysis); without such "
+"a category it stayed close to 0.95."
+msgstr ""
+
 #: R/kappaSizeCI.b.R
 msgid ""
 "When the study is analysed, estimate the category prevalences by maximum "
@@ -187286,17 +187362,6 @@ msgid ""
 "or more categories, plugging in the overall proportions of ratings gives an "
 "interval that covers κ less often than stated (about 0.91 to 0.93 instead of "
 "0.95 in the designs simulated for this analysis)."
-msgstr ""
-
-#: R/kappaSizeFixedN.b.R
-msgid ""
-"When the study is analysed, estimate the category prevalences by maximum "
-"likelihood at each candidate value of κ. With three or more raters or "
-"categories, plugging in the overall proportions of ratings instead can give "
-"an interval that covers κ less often than stated when a category makes up "
-"less than about a fifth of the ratings (about 0.90 to 0.94 instead of 0.95 "
-"in the designs of that kind simulated for this analysis); without such a "
-"category it stayed close to 0.95."
 msgstr ""
 
 #: R/enhancedROC.b.R
@@ -188418,6 +188483,18 @@ msgid ""
 "likelihood with kappa held at kappa0, as Altaye, Donner and Eliasziw do; "
 "plugging in the overall proportions of ratings makes the test reject a true "
 "kappa0 too often."
+msgstr ""
+
+#: R/kappaSizeFixedN.b.R
+msgid ""
+"With three or more raters, the lower bound for a binary finding also depends "
+"on how agreement among more than two raters is modelled. This analysis uses "
+"the model of Altaye, Donner and Klar; the Dirichlet-multinomial model used "
+"for three to five categories, which for two categories is the beta-binomial, "
+"describes the same kappa, and with the proportions held at their anticipated "
+"values it never gave a lower bound than the one shown in the designs checked "
+"and usually gave a higher one (by up to about 0.10 when the finding is rare "
+"and the study small), so the figure shown is the more cautious of the two."
 msgstr ""
 
 #: R/kappaSizeCI.b.R

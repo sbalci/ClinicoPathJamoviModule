@@ -8,7 +8,8 @@
 fn_run <- function(...) {
     args <- utils::modifyList(
         list(outcome = "2", kappa0 = 0.60, props = "0.30, 0.70",
-             raters = "2", alpha = 0.05, n = 100),
+             raters = "2", alpha = 0.05, n = 100,
+             showExplanations = TRUE, showSummary = TRUE),   # both panels are off by default (F2)
         list(...))
     do.call(ClinicoPath::kappaSizeFixedN, args)
 }
@@ -241,7 +242,8 @@ test_that("sparse agreement-pattern cells at the lower bound are flagged, not ju
     skip_if_not_installed("kappaSize")
     run <- function(...) {
         args <- utils::modifyList(list(outcome = "2", kappa0 = 0.4, props = "0.30, 0.70",
-                                       raters = "2", alpha = 0.05, n = 100), list(...))
+                                       raters = "2", alpha = 0.05, n = 100,
+                                       showExplanations = TRUE, showSummary = TRUE), list(...))
         do.call(ClinicoPath::kappaSizeFixedN, args)
     }
     # kappaSize's own warning checks props[i] * n, which is exactly 5 here and stays silent
@@ -265,8 +267,8 @@ test_that("sparse agreement-pattern cells at the lower bound are flagged, not ju
                                                   n = 1000)$notices$content))
     expect_match(run(kappa0 = 0.4, props = "0.20, 0.80", raters = "5")$notices$content,
                  "Sparse categories")
-    # n >= 1e5 is printed as a number, not 1e+05
-    expect_match(run(n = 100000)$text1$content, "100000 subjects", fixed = TRUE)
+    # n >= 1e5 is printed as a number, not 1e+05 (grouped by thousands since F4)
+    expect_match(run(n = 100000)$text1$content, "100,000 subjects", fixed = TRUE)
     # multi-category with several raters: all-agree cells from the Dirichlet-multinomial product
     four <- run(outcome = "4", raters = "5", kappa0 = 0.3, props = "0.40, 0.30, 0.06, 0.24",
                 n = 120)
@@ -307,8 +309,11 @@ test_that("the notices item is declared in .r.yaml with the same clearWith as th
     expect_true("notices" %in% names(items))
     expect_equal(items$notices$type, "Html")
     opts <- c("outcome", "kappa0", "props", "raters", "alpha", "n")
+    # plus the toggle that decides what each optional pane holds (F2, as kappaSizeCI)
+    extra <- list(text_summary = "showSummary", text2 = "showExplanations",
+                  methodology = c("showExplanations", "showSummary"))
     for (nm in names(items))
-        expect_setequal(items[[nm]]$clearWith, opts)
+        expect_setequal(items[[nm]]$clearWith, c(opts, extra[[nm]]))
 })
 
 
@@ -530,7 +535,7 @@ test_that("IR-03 the proportions are re-estimated where the warm start used to l
                   alpha = 0.05, n = 11)
     expect_false(grepl("could not be re-estimated", res$methodology$content, fixed = TRUE))
     expect_match(res$methodology$content, "The bound shown is the lower of two", fixed = TRUE)
-    expect_identical(fn_line(res), "A total of 11 subjects can produce an expected lower limit for kappa of -0.101.")
+    expect_identical(fn_line(res), "A total of 11 subjects can produce an expected one-sided 95% lower limit for kappa of -0.101.")
 })
 
 test_that("IR-03 the re-estimated statistic does not depend on what was fitted before", {
@@ -618,4 +623,238 @@ test_that("the notice builder follows its arguments, not self$options", {
     expect_false(grepl("lower of two", meth(outcome = 2, raters = 2, alpha = 0.05), fixed = TRUE))
     expect_match(meth(outcome = 2, raters = 3, alpha = 0.05), "lower of two", fixed = TRUE)
     expect_match(meth(outcome = 3, raters = 2, alpha = 0.05, rml = "failed"), "could not be re-estimated", fixed = TRUE)
+})
+
+
+# --- /review-function action items (2026-10-17) -----------------------------------------------
+# Each block below fails on the backend as it was before these items were applied.
+
+fn_bound <- function(res) as.numeric(sub(".*kappa of (\\S+?)\\.$", "\\1", fn_line(res)))
+
+test_that("F1 a sparse design no longer claims that agreement exceeds chance", {
+    skip_if_not_installed("kappaSize")
+    # review repro: a 5% finding, 3 raters, 30 subjects = 1.5 expected positives per rater
+    res <- fn_run(props = "0.05", raters = "3", n = 30)
+    expect_gt(fn_bound(res), 0)
+    notes <- res$notices$content
+    expect_match(notes, "This design cannot support a reliability claim.", fixed = TRUE)
+    expect_match(notes, "Sparse categories.", fixed = TRUE)
+    expect_false(grepl("can therefore show that agreement exceeds chance", notes, fixed = TRUE))
+    expect_false(grepl("The study excludes agreement below", notes, fixed = TRUE))
+    expect_match(notes, "does not show that agreement exceeds chance either", fixed = TRUE)
+    # 5% is not "under 5%" (kappaSizeCI's strict rule), so no Rare category block here
+    expect_false(grepl("Rare category", notes, fixed = TRUE))
+    # F1c: a category under 5% gets kappaSizeCI's block, with the counts of THIS design
+    rare <- flat(fn_run(props = "0.04", raters = "3", n = 30)$notices$content)
+    expect_match(rare, "Rare category.", fixed = TRUE)
+    expect_match(rare, "expected in 4% of ratings, so each rater is expected to place only about 1.2 of the 30 subjects",
+                 fixed = TRUE)
+    # a design with healthy cells keeps the claim and gets no Rare category block
+    ok <- fn_run(kappa0 = 0.45, props = "0.30, 0.70", raters = "2", n = 100)$notices$content
+    expect_match(ok, "can therefore show that agreement exceeds chance", fixed = TRUE)
+    expect_false(grepl("Sparse categories", ok, fixed = TRUE))
+    expect_false(grepl("Rare category", ok, fixed = TRUE))
+})
+
+test_that("F1 fewer than one expected subject per rater in the rarest category is red at any bound", {
+    skip_if_not_installed("kappaSize")
+    # binary, 2%, 3 raters, 11 subjects: n p = 0.22; the bound is positive (the model floor is -0.0004)
+    res <- fn_run(props = "0.02", raters = "3", n = 11)
+    expect_gt(fn_bound(res), 0)
+    notes <- flat(res$notices$content)
+    expect_match(notes, "Too few expected subjects in the rarest category.", fixed = TRUE)
+    expect_match(notes, "only about 0.22 of the 11 subjects in it, fewer than one", fixed = TRUE)
+    expect_match(notes, "cannot support a dependable conclusion", fixed = TRUE)
+    expect_false(grepl("cannot support a reliability claim", notes, fixed = TRUE))    # no amber on top
+    expect_false(grepl("can therefore show", notes, fixed = TRUE))
+    expect_false(grepl("Rare category.", notes, fixed = TRUE))                        # not said twice
+    # 3-5 categories too, with the same wording
+    m <- flat(fn_run(outcome = "3", props = "0.05, 0.45, 0.50", raters = "3", n = 15)$notices$content)
+    expect_match(m, "about 0.75 of the 15 subjects in it, fewer than one", fixed = TRUE)
+    # exactly one expected subject is not "fewer than one": the Rare category block speaks instead
+    one <- flat(fn_run(props = "0.04", raters = "3", n = 25)$notices$content)
+    expect_false(grepl("Too few expected subjects", one, fixed = TRUE))
+    expect_match(one, "only about 1 of the 25 subjects in it.", fixed = TRUE)
+    # the builder is unchanged when no proportion is passed (direct callers, older tests)
+    an <- ClinicoPath:::kappaSizeFixedNClass$new(options = ClinicoPath:::kappaSizeFixedNOptions$new(),
+                                                 data = data.frame())
+    expect_false(grepl("Too few", an$.__enclos_env__$private$.buildNotices(0.30, n = 11, kappa0 = 0.6),
+                       fixed = TRUE))
+})
+
+test_that("F2 Study Explanation, method detail and kappaSize's summary are off by default", {
+    skip_if_not_installed("kappaSize")
+    # the engine must not even run while its pane is off
+    testthat::local_mocked_bindings(FixedNBinary = function(...) stop("engine was called"),
+                                    .package = "kappaSize")
+    res <- ClinicoPath::kappaSizeFixedN(outcome = "2", kappa0 = 0.6, props = "0.30, 0.70",
+                                        raters = "3", alpha = 0.05, n = 100)
+    expect_false(res$text2$visible)
+    expect_false(res$text_summary$visible)
+    expect_identical(res$text2$content, "")
+    expect_identical(res$text_summary$content, "")
+    expect_match(res$text1$content, "lower limit for kappa of", fixed = TRUE)
+    m <- flat(res$methodology$content)
+    # always shown: what the number promises, which interval and which kappa it is about
+    expect_match(m, "This is a planning expectation, not a guarantee.", fixed = TRUE)
+    expect_match(m, "Roughly half of such studies", fixed = TRUE)
+    expect_match(m, "Wald, Fisher-z or bootstrap", fixed = TRUE)
+    expect_match(m, "equals Cohen's kappa when the raters share the same category frequencies", fixed = TRUE)
+    expect_match(m, "not a null hypothesis value", fixed = TRUE)
+    # waits for showExplanations / showSummary
+    expect_false(grepl("Methodology.", m, fixed = TRUE))
+    expect_false(grepl("lower root of the goodness-of-fit", m, fixed = TRUE))
+    expect_false(grepl("Summary panel", m, fixed = TRUE))
+
+    # the mocked engine proves the Summary toggle is what runs it
+    s <- ClinicoPath::kappaSizeFixedN(outcome = "2", kappa0 = 0.6, props = "0.30, 0.70",
+                                      raters = "3", alpha = 0.05, n = 100, showSummary = TRUE)
+    expect_true(s$text_summary$visible)
+    expect_match(s$text_summary$content, "could not be run for comparison: engine was called", fixed = TRUE)
+
+    d <- ClinicoPath::kappaSizeFixedN(outcome = "2", kappa0 = 0.6, props = "0.30, 0.70",
+                                      raters = "3", alpha = 0.05, n = 100, showExplanations = TRUE)
+    dm <- flat(d$methodology$content)
+    expect_true(d$text2$visible)
+    expect_match(d$text2$content, "expected lower bound for kappa", fixed = TRUE)
+    expect_match(dm, "Methodology.", fixed = TRUE)
+    expect_match(dm, "lower root of the goodness-of-fit chi-square equation", fixed = TRUE)
+    expect_false(grepl("reproduced in the Summary panel", dm, fixed = TRUE))   # that pane is off
+    expect_match(fn_run(raters = "3")$methodology$content, "reproduced in the Summary panel", fixed = TRUE)
+})
+
+test_that("F2 the toggles are declared as in kappaSizeCI", {
+    a <- yaml::read_yaml("../../jamovi/kappaSizeFixedN.a.yaml")
+    o <- setNames(a$options, vapply(a$options, function(x) x$name, ""))
+    for (nm in c("showExplanations", "showSummary")) {
+        expect_identical(o[[nm]]$type, "Bool")
+        expect_false(o[[nm]]$default)
+    }
+    r <- yaml::read_yaml("../../jamovi/kappaSizeFixedN.r.yaml",
+                         handlers = list("bool#yes" = function(x) x, "bool#no" = function(x) x))
+    it <- setNames(r$items, vapply(r$items, function(x) x$name, ""))
+    expect_identical(it$text2$visible, "(showExplanations)")
+    expect_identical(it$text_summary$visible, "(showSummary)")
+    expect_null(it$methodology$visible)          # caveats are always shown
+    u <- paste(readLines("../../jamovi/kappaSizeFixedN.u.yaml"), collapse = "\n")
+    expect_match(u, "label: Additional Output\n    collapsed: true", fixed = TRUE)
+})
+
+test_that("F3 titles: the analysis names kappa, and the Summary pane names its source", {
+    ttl <- "Lowest Expected Kappa for a Fixed Sample Size"
+    for (f in c("a", "r", "u"))
+        expect_identical(yaml::read_yaml(sprintf("../../jamovi/kappaSizeFixedN.%s.yaml", f))$title, ttl)
+    r <- yaml::read_yaml("../../jamovi/kappaSizeFixedN.r.yaml",
+                         handlers = list("bool#yes" = function(x) x, "bool#no" = function(x) x))
+    it <- setNames(r$items, vapply(r$items, function(x) x$name, ""))
+    expect_identical(it$text_summary$title, "Summary by the published formula (kappaSize)")
+})
+
+test_that("F4 the main result states its confidence level, and the analysis says kappa throughout", {
+    skip_if_not_installed("kappaSize")
+    expect_match(fn_line(fn_run(alpha = 0.025)), "expected one-sided 97.5% lower limit for kappa of", fixed = TRUE)
+    expect_match(fn_line(fn_run(n = 123456)), "A total of 123,456 subjects", fixed = TRUE)
+    src <- paste(readLines("../../R/kappaSizeFixedN.b.R"), collapse = "\n")
+    expect_false(grepl("\\u03ba", src, fixed = TRUE))
+    expect_false(grepl("κ", fn_run(outcome = "3", props = "0.2, 0.3, 0.5", raters = "3")$methodology$content,
+                       fixed = TRUE))
+})
+
+test_that("IR-kappaSizeCI-02 carried over: the beta-binomial bound is never below the one shown", {
+    skip_if_not_installed("kappaSize")
+    # Independent oracle: Dirichlet-multinomial with two categories (the beta-binomial), pooled cells
+    # all-negative / any disagreement / all-positive, proportions held fixed; the minimal root of
+    # N X^2 = qchisq(1 - 2 alpha, 1) (Rotondi & Donner 2012 p.780).
+    bb_cells <- function(R, p, rho) {
+        a <- vapply(c(p, 1 - p), function(pj) prod((pj * (1 - rho) + (0:(R - 1)) * rho) /
+                                                   ((1 - rho) + (0:(R - 1)) * rho)), 0)
+        c(1 - sum(a), a)
+    }
+    bb_bound <- function(R, p, k0, n, alpha) {
+        q <- bb_cells(R, p, k0); crit <- stats::qchisq(1 - 2 * alpha, 1)
+        f <- function(r) { b <- bb_cells(R, p, r); n * sum((q - b)^2 / b) - crit }
+        lo <- max(-min(p, 1 - p) / (R - 1 - min(p, 1 - p)), -1 / (R - 2)) + 1e-9
+        stats::uniroot(f, c(lo, k0 - 1e-9), tol = 1e-12)$root
+    }
+    for (d in list(c(R = 3, p = 0.05, k0 = 0.6, n = 30), c(R = 6, p = 0.05, k0 = 0.6, n = 30),
+                   c(R = 4, p = 0.2, k0 = 0.8, n = 100), c(R = 5, p = 0.5, k0 = 0.4, n = 300))) {
+        shown <- fn_bound(fn_run(props = as.character(d[["p"]]), raters = as.character(d[["R"]]),
+                                 kappa0 = d[["k0"]], n = d[["n"]]))
+        expect_gte(bb_bound(d[["R"]], d[["p"]], d[["k0"]], d[["n"]], 0.05), shown)
+    }
+    # the sentence: binary with 3+ raters only, and only with the method detail
+    has <- function(...) grepl("beta-binomial", fn_run(...)$methodology$content, fixed = TRUE)
+    expect_true(has(raters = "3"))
+    expect_false(has(raters = "2"))
+    expect_false(has(outcome = "3", props = "0.2, 0.3, 0.5", raters = "3"))
+    expect_false(has(raters = "3", showExplanations = FALSE))
+})
+
+
+# ---- /security-audit-function follow-ups (2026-10-17) ---------------------------------------------
+
+# An analysis opened from an .omv/.omt reaches the backend with its saved options unchecked: jamovi
+# copies them through as they are, and jmvcore's options$read() assigns any value to any option and
+# adds an option for any unknown name. These build that state the same way. Parse only, never evaluate.
+crafted_fn <- function(set = list(), extra = NULL) {
+    an <- ClinicoPath:::kappaSizeFixedNClass$new(options = ClinicoPath:::kappaSizeFixedNOptions$new())
+    for (nm in names(set)) { o <- an$options$option(nm); o$value <- set[[nm]] }
+    if (!is.null(extra)) an$options$.addOption(jmvcore:::Option$new(extra, 0.05))
+    an
+}
+syntax_args <- function(an) as.list(parse(text = an$asSource())[[1]])[-1]
+
+test_that("the syntax pane escapes every option, not only props", {
+    q <- '"'
+    bad <- paste0("2", q, ", kappa0 = {stop(", q, "INJECTED", q, "); 0.6}, props = ", q, "0.5")
+    for (nm in c("outcome", "raters", "kappa0", "alpha", "n", "showExplanations", "showSummary")) {
+        a <- syntax_args(crafted_fn(setNames(list(bad), nm)))
+        expect_identical(names(a), nm, info = nm)
+        expect_identical(a[[nm]], bad, info = nm)
+    }
+    # ordinary values are written as before
+    expect_identical(
+        syntax_args(crafted_fn(list(outcome = "3", kappa0 = 0.7, props = "0.2, 0.3, 0.5", raters = "4", n = 250L))),
+        list(outcome = "3", kappa0 = 0.7, props = "0.2, 0.3, 0.5", raters = "4", n = 250))
+})
+
+test_that("the syntax pane drops option names the analysis does not define, and list values", {
+    q <- '"'
+    # a name spelling the wrapper's own arguments would bind, and run the code when pasted
+    extra <- paste0("outcome = ", q, "2", q, ", kappa0 = {stop(", q, "INJECTED", q, "); 0.6}, alpha")
+    expect_length(syntax_args(crafted_fn(extra = extra)), 0)
+    # a list (the protobuf's list type): deparse() would leave the backtick in this name unescaped
+    lst <- setNames(list("2"), paste0("a` = {stop(", q, "INJECTED", q, ")}, `b"))
+    expect_length(syntax_args(crafted_fn(list(outcome = lst))), 0)
+})
+
+test_that("a raters value the option check rejected cannot reach the calculation", {
+    # jmvcore's run() still enters .run() after init() recorded the failed check (jamovi's engine does
+    # not call run() then; an R caller can), and the analysis used to report a bound for 7, 60 or 1000
+    # raters.
+    for (bad in c("7", "60", "1000", "abc")) {
+        an <- crafted_fn(list(raters = bad))
+        an$init(noThrow = TRUE)
+        expect_error(suppressWarnings(an$run()), "Number of raters must be 2, 3, 4, 5, or 6.",
+                     fixed = TRUE, info = bad)
+    }
+})
+
+test_that("kappaSize's own search is cut off instead of running for a day on a rare finding", {
+    skip_if_not_installed("kappaSize")
+    skip_on_cran()
+    # prevalence 1e-8, 2 raters, kappa0 0.01, n 11: the engine's 0.001-step walk needs some 1e10 steps
+    t0 <- Sys.time()
+    res <- fn_run(props = "1e-8", kappa0 = 0.01, n = 11, alpha = 0.001)
+    expect_lt(as.numeric(difftime(Sys.time(), t0, units = "secs")), 30)
+    expect_match(res$text_summary$content, "could not be run for comparison", fixed = TRUE)
+    # the bound shown does not depend on the engine
+    expect_identical(fn_line(res),
+                     fn_line(fn_run(props = "1e-8", kappa0 = 0.01, n = 11, alpha = 0.001, showSummary = FALSE)))
+    # The limit is lifted after a normal run too. R clears it when it fires, but one left behind after the
+    # engine returned in time would end whatever this computation does next (a busy loop trips it;
+    # Sys.sleep() does not).
+    fn_run()
+    t1 <- Sys.time()
+    expect_no_error(while (difftime(Sys.time(), t1, units = "secs") < 6) NULL)
 })

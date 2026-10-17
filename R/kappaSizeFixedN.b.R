@@ -1,4 +1,4 @@
-#' @title Lowest Expected Value for a fixed sample size
+#' @title Lowest Expected Kappa for a Fixed Sample Size
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @return An \code{R6} class generator object for the \code{kappaSizeFixedNClass} backend; used internally by the jamovi analysis wrapper and not called directly.
@@ -76,6 +76,12 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 if (s >= 5) s <- floor(x * 100) / 100    # 4.9996 -> "4.99"
             }
             base::format(s, scientific = FALSE, trim = TRUE)
+        },
+
+        # Number of subjects, grouped by thousands. Identical to R/kappaSizeCI.b.R:.fmtN.
+        .fmtN = function(n) {
+            if (!isTRUE(is.finite(n))) return("NA")
+            base::format(round(n), scientific = FALSE, big.mark = ",", trim = TRUE)
         },
 
         # Every design except a binary outcome rated by two raters: there Donner & Eliasziw's
@@ -278,11 +284,24 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
         .buildNotices = function(kappaL_val, sparse_cells = FALSE, outcome = 2,
                                  sparse_min = NA_real_, sparse_below5 = NA_integer_,
                                  sparse_total = NA_integer_, n = NA_real_, kappa0 = NA_real_,
-                                 liftable = NA) {
+                                 liftable = NA, min_prop = NA_real_) {
             block <- private$.block
 
             warn <- ""
             has_bound <- length(kappaL_val) == 1 && is.finite(kappaL_val)
+
+            # Fewer than one subject per rater expected in the rarest category (/review-function F1,
+            # 2026-10-17). The bound cannot fall far below the model floor, and for a rare category that
+            # floor is next to zero (binary, p .02, 6 raters: -3.2e-9), so the `<= 0` test below could not
+            # fire however few the subjects: 117 of 180 binary designs with under 2 expected positives
+            # (n p 0.22-1.5) showed a positive bound and "agreement exceeds chance". Not worded as
+            # impossibility: for 3-5 categories the common categories can still show agreement.
+            rare_k <- n * min_prop
+            too_few <- has_bound && isTRUE(rare_k < 1)
+            rare_args <- if (isTRUE(is.finite(rare_k))) list(
+                share = paste0(base::format(signif(100 * min_prop, 3), scientific = FALSE, trim = TRUE), "%"),
+                k = base::format(signif(rare_k, 2), scientific = FALSE, trim = TRUE),
+                n = private$.fmtN(n))
 
             # A bound at or below zero is the clinically decisive case: the study cannot exclude
             # agreement no better than chance, whatever the point estimate turns out to be.
@@ -301,7 +320,7 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                     .fmt(
                         .("The expected lower bound is {bound}, at or below zero, so even if the study observes the anticipated kappa it will not be able to rule out agreement no better than chance. Enrol more subjects, add raters, or relax the significance level."),
                         bound = private$.fmtBound(kappaL_val))))
-            } else if (has_bound && kappaL_val < 0.40) {
+            } else if (has_bound && kappaL_val < 0.40 && !too_few) {
                 # A positive bound is not automatically a usable one. Below 0.40 the study
                 # excludes only chance-level agreement and everything the module elsewhere
                 # labels slight or fair (Landis and Koch 1977 cut-points 0.20/0.40/0.60/0.80,
@@ -323,12 +342,24 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                          kappa0 = kappa0)
                 else
                     .("Enrol more subjects, add raters, or relax the significance level.")
+                # With sparse cells the chi-square the bound inverts is not dependable, so neither the
+                # exclusion of agreement below the bound nor "exceeds chance" is claimed (F1).
+                body <- if (isTRUE(sparse_cells))
+                    .("The expected lower bound is {bound}, which on the Landis and Koch scale is no better than fair agreement, so these subjects cannot establish moderate or better reliability even if the raters perform exactly as anticipated. The goodness-of-fit cells are too sparse at this sample size (see Sparse categories) for the bound to be relied on, so it does not show that agreement exceeds chance either.")
+                else
+                    .("The expected lower bound is {bound}. The study excludes agreement below that value but leaves everything above it open, and on the Landis and Koch scale a bound under 0.40 is no better than fair agreement. These subjects can therefore show that agreement exceeds chance, but cannot establish moderate or better reliability even if the raters perform exactly as anticipated.")
                 warn <- paste0(warn, block("amber",
                     .("This design cannot support a reliability claim."),
-                    .fmt(
-                        .("The expected lower bound is {bound}. The study excludes agreement below that value but leaves everything above it open, and on the Landis and Koch scale a bound under 0.40 is no better than fair agreement. These subjects can therefore show that agreement exceeds chance, but cannot establish moderate or better reliability even if the raters perform exactly as anticipated."),
-                        bound = private$.fmtBound(kappaL_val)),
+                    .fmt(body, bound = private$.fmtBound(kappaL_val)),
                     remedy))
+            }
+
+            if (too_few) {
+                warn <- paste0(warn, block("red",
+                    .("Too few expected subjects in the rarest category."),
+                    do.call(.fmt, c(list(
+                        .("The rarest category is expected in {share} of ratings, so each rater is expected to place only about {k} of the {n} subjects in it, fewer than one. The goodness-of-fit approximation behind the expected lower bound of {bound} does not hold with so few, and with a category this rare the model allows little or no agreement below zero, so the bound stays near or above zero however few the subjects are: it cannot support a dependable conclusion. Enrol more subjects, or enrich the case series so that the rare category is more common.")),
+                        rare_args, list(bound = private$.fmtBound(kappaL_val))))))
             }
 
             # Sparse goodness-of-fit cells (the cells of the test the bound inverts, see .pooledCells),
@@ -347,6 +378,17 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                         min = private$.fmtCount(sparse_min), below = sparse_below5,
                         total = sparse_total),
                     remedy))
+            }
+
+            # A category under 5% (a warning heuristic, not a statistical boundary): the msgid of
+            # R/kappaSizeCI.b.R's "Rare category." block, so both analyses say it alike (F1). Not repeated
+            # under the red block above, which already gives the count.
+            if (isTRUE(min_prop < 0.05) && !too_few && !is.null(rare_args)) {
+                warn <- paste0(warn, block("amber",
+                    .("Rare category."),
+                    do.call(.fmt, c(list(
+                        .("The rarest category is expected in {share} of ratings, so each rater is expected to place only about {k} of the {n} subjects in it. Kappa depends strongly on prevalence (Byrt, Bishop and Carlin): when a category is this rare, high raw agreement can coexist with a low kappa, the estimate rests on those few subjects, and a kappa measured here cannot be assumed to generalize to a setting where the category is more common. Report the prevalence and the category-specific agreement (the proportion of that category's ratings that another rater matched) beside kappa.")),
+                        rare_args))))
             }
 
             # Donner & Eliasziw 1992 p.1518 and Rotondi & Donner 2012 p.782 document the
@@ -400,47 +442,71 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
 
         # Methodology panel, at the foot of the results. `rml` is the status from .rmlBound() ("rml",
         # "fixed", "failed"), or "na" when re-estimation does not apply; `engine_sparse` is TRUE when
-        # kappaSize's own summary printed its expected-cell-count line.
+        # kappaSize's own summary printed its expected-cell-count line. As in R/kappaSizeCI.b.R, the
+        # caveats are always shown and the method detail waits for showExplanations (F2); a sentence
+        # about the Summary panel appears only while that panel is shown. The builder defaults show
+        # everything; .run() passes the two options.
         .buildMethodology = function(outcome, raters, alpha, rml = "na", sparse_cells = FALSE,
-                                     engine_sparse = FALSE) {
+                                     engine_sparse = FALSE, show_details = TRUE, show_summary = TRUE) {
             conf_pct <- if (isTRUE(is.finite(alpha)))
                 paste0(base::format(100 * (1 - alpha), scientific = FALSE, trim = TRUE), "%")
             else
                 "100(1 - alpha)%"
             reest <- private$.reestimationApplies(outcome, raters)
 
-            private$.block("info",
+            caveats <- private$.block("info",
+                .("This is a planning expectation, not a guarantee."),
+                .("This is the bound the study reaches if the agreement it observes lands exactly on kappa0. Roughly half of such studies will observe less agreement than anticipated and end with a lower bound below the figure shown, so read it as a planning expectation rather than a guarantee."),
+                # As kappaSizeCI: ClinicoPath's own agreement analysis gives Cohen's kappa a Wald or
+                # Fisher-z interval, not this one (R/agreement.b.R, 2026-10-16).
+                .("This bound is for the model-based goodness-of-fit interval; the Wald, Fisher-z or bootstrap intervals that agreement software usually reports for Cohen's or Fleiss' kappa can give a different lower limit for the same data. Report the goodness-of-fit interval, or plan for the interval that will be reported."),
+                # VAL-03, as kappaSizeCI sizes n (IR-kappaSizeCI-01): the bound holds whichever way the
+                # study is analysed, but only when the restricted fit ran.
+                if (reest && identical(rml, "failed"))
+                    .("For this design the proportions could not be re-estimated, so the bound holds them at their anticipated values only."),
+                .("For any pair of raters this kappa equals Cohen's kappa when the raters share the same category frequencies (no rater bias); when their frequencies differ, it does not."),
+                .("Note that kappa0 here is the agreement you anticipate observing, not a null hypothesis value as it is in kappaSizePower."),
+                # The engine prints its own "expected cell count is less than five" line into the
+                # Summary pane from a DIFFERENT and looser check - kappaSize inspects the category
+                # proportions typed (for a binary design only props[1]), not the goodness-of-fit
+                # cells. Both cross-references are conditional: unconditional, they pointed at nothing
+                # in every panel without that line or without the Sparse block.
+                if (isTRUE(show_summary) && isTRUE(engine_sparse))
+                    .("The Summary panel's line 'At least one expected cell count is less than five' comes from a separate and looser check: kappaSize applies it to the category proportions you entered (for a binary outcome, to the first proportion only), not to the goodness-of-fit cells the chi-square divides by, and those empty out long before any category proportion does. Seeing one warning without the other is expected."),
+                if (isTRUE(show_summary) && isTRUE(sparse_cells))
+                    .("The Sparse categories warning above is the check that matters for the bound, because it is the one computed on the goodness-of-fit cells."))
+
+            if (!isTRUE(show_details)) return(caveats)
+
+            details <- private$.block("info",
                 .("Methodology."),
                 .fmt(
                     .("With the sample size already fixed, this reports the expected lower bound of the one-sided {level} goodness-of-fit confidence interval for the intraclass (Fleiss-type) kappa of the common-correlation model, on the models of Donner and Eliasziw (two raters, binary outcome), Altaye, Donner and Klar (binary outcome, more raters) and Altaye, Donner and Eliasziw (three to five categories), in the confidence-interval approach of Rotondi and Donner implemented in the kappaSize package; for two raters with equal marginal frequencies this kappa coincides with Cohen's kappa."),
                     level = conf_pct),
                 .("It answers 'given the subjects I have, how little agreement am I still unable to rule out?' - the mirror image of the sample-size question; every kappa below the bound is excluded."),
-                # VAL-03, as kappaSizeCI sizes n (IR-kappaSizeCI-01): the bound holds whichever way the
-                # study is analysed, but only when the restricted fit ran.
-                if (reest && identical(rml, "failed"))
-                    .("For this design the proportions could not be re-estimated, so the bound holds them at their anticipated values only.")
-                else if (reest)
+                if (reest && !identical(rml, "failed"))
                     .("The bound shown is the lower of two: the one obtained holding the category proportions at their anticipated values (the published calculation, and kappaSize's) and the one obtained re-estimating them by maximum likelihood at each value of kappa (the interval that keeps its stated coverage)."),
                 # VAL-04: kappaSize's own search (Summary panel) is up to 0.00115 below the root.
-                .("The bound is the lower root of the goodness-of-fit chi-square equation, solved directly; a positive bound is shown rounded down (to three decimals, or to two significant digits below 0.001), so the figure shown never overstates it. The kappaSize package's own search, reproduced in the Summary panel, moves down in steps of 0.001 and stops once the chi-square exceeds its critical value by 0.001, so it can report a value up to about 0.001 lower."),
-                .("This is the bound the study reaches if the agreement it observes lands exactly on kappa0. Roughly half of such studies will observe less agreement than anticipated and end with a lower bound below the figure shown, so read it as a planning expectation rather than a guarantee."),
-                .("Note that kappa0 here is the agreement you anticipate observing, not a null hypothesis value as it is in kappaSizePower."),
+                .("The bound is the lower root of the goodness-of-fit chi-square equation, solved directly; a positive bound is shown rounded down (to three decimals, or to two significant digits below 0.001), so the figure shown never overstates it."),
+                if (isTRUE(show_summary))
+                    .("The kappaSize package's own search, reproduced in the Summary panel, moves down in steps of 0.001 and stops once the chi-square exceeds its critical value by 0.001, so it can report a value up to about 0.001 lower."),
+                # IR-kappaSizeCI-02 carried over: a binary outcome uses ADK eq. (4); the 3-5 category cells are
+                # the Dirichlet-multinomial, which for two categories is the beta-binomial (ADE 2001 p.2483).
+                # Fixed-proportion beta-binomial bound vs the bound shown, 180 binary designs (3-6 raters,
+                # p .05-.5, kappa0 .4/.6/.8, n 30/100/300, alpha .05; /review-function 2026-10-17): higher in
+                # 171, equal in the 9 at p .5 with 3 raters (where the two cell sets coincide), never lower;
+                # up to +0.103 (p .05, 6 raters, n 30), median +0.015.
+                if (isTRUE(outcome == 2 && raters >= 3))
+                    .("With three or more raters, the lower bound for a binary finding also depends on how agreement among more than two raters is modelled. This analysis uses the model of Altaye, Donner and Klar; the Dirichlet-multinomial model used for three to five categories, which for two categories is the beta-binomial, describes the same kappa, and with the proportions held at their anticipated values it never gave a lower bound than the one shown in the designs checked and usually gave a higher one (by up to about 0.10 when the finding is rare and the study small), so the figure shown is the more cautious of the two."),
                 # IR-01: the under-coverage is a rare-category effect, not a "three or more raters" one.
                 # This analysis's simulations (one-sided 95%, R = 2000): plug-in 0.901-0.9375 with a
                 # category near 0.1 (4 and 6 raters p .1; 3 categories .11/.70/.19), but 0.949 at 3 raters
                 # p .3 and 0.942 with 3 balanced categories; ADK 2001 p.587 "provided pi >= 0.2". The
                 # sibling kappaSizeCI still carries the older, unqualified msgid (TODO IR-01).
                 if (reest)
-                    .("When the study is analysed, estimate the category prevalences by maximum likelihood at each candidate value of \u03ba. With three or more raters or categories, plugging in the overall proportions of ratings instead can give an interval that covers \u03ba less often than stated when a category makes up less than about a fifth of the ratings (about 0.90 to 0.94 instead of 0.95 in the designs of that kind simulated for this analysis); without such a category it stayed close to 0.95."),
-                # The engine prints its own "expected cell count is less than five" line into the
-                # Summary pane from a DIFFERENT and looser check - kappaSize inspects the category
-                # proportions typed (for a binary design only props[1]), not the goodness-of-fit
-                # cells. Both cross-references are conditional: unconditional, they pointed at nothing
-                # in every panel without that line or without the Sparse block.
-                if (isTRUE(engine_sparse))
-                    .("The Summary panel's line 'At least one expected cell count is less than five' comes from a separate and looser check: kappaSize applies it to the category proportions you entered (for a binary outcome, to the first proportion only), not to the goodness-of-fit cells the chi-square divides by, and those empty out long before any category proportion does. Seeing one warning without the other is expected."),
-                if (isTRUE(sparse_cells))
-                    .("The Sparse categories warning above is the check that matters for the bound, because it is the one computed on the goodness-of-fit cells."))
+                    .("When the study is analysed, estimate the category prevalences by maximum likelihood at each candidate value of kappa. With three or more raters or categories, plugging in the overall proportions of ratings instead can give an interval that covers kappa less often than stated when a category makes up less than about a fifth of the ratings (about 0.90 to 0.94 instead of 0.95 in the designs of that kind simulated for this analysis); without such a category it stayed close to 0.95."))
+
+            paste0(caveats, details)
         },
 
         # Human-readable list: "0.20 and 0.80" or "0.20, 0.30 and 0.50"
@@ -455,15 +521,20 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
 
         # Validate all inputs; reject with an actionable message on failure. Kept outside any
         # tryCatch so jmvcore::reject surfaces as a proper jamovi error.
-        # The generated option classes already enforce the List levels, the Integer type and
-        # the Number ranges before .run() is entered, so the range clauses here are BACKSTOPS
-        # for an R caller whose option bounds may one day be relaxed - they are not reached
-        # from the jamovi GUI.
-        .validateInputs = function(outcome, kappa0, parsed, alpha, n) {
+        # The generated option classes check the List levels, the Integer type and the Number
+        # ranges in init(), and jamovi's engine stops when init() fails (engine/enginer.cpp checks
+        # `errored` before it calls run()), so the range clauses here are BACKSTOPS. They matter
+        # for an R caller: jmvcore's run(noThrow = TRUE) still enters .run() after init() recorded
+        # the failed check, and raters "7", "60" or "1000" then completed and reported a bound
+        # (security audit 2026-10-17). Every option the calculation reads is checked here.
+        .validateInputs = function(outcome, kappa0, parsed, alpha, n, raters) {
             props4 <- parsed$values
 
             if (!outcome %in% c(2, 3, 4, 5))
                 jmvcore::reject(.("Number of outcome levels must be 2, 3, 4, or 5."), code = NULL)
+
+            if (!isTRUE(raters %in% 2:6))
+                jmvcore::reject(.("Number of raters must be 2, 3, 4, 5, or 6."), code = NULL)
 
             if (length(props4) == 0 || any(is.na(props4)))
                 jmvcore::reject(
@@ -532,8 +603,12 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             invisible(TRUE)
         },
 
-        # Syntax pane: props escaped (see kappaSizeSourcifyOption in R/utils-kappasize.R).
+        # Syntax pane: only this analysis's own arguments, string values escaped (see
+        # kappaSizeSourcifyOption in R/utils-kappasize.R). jmvcore adds every option name a saved
+        # file carries and pastes it into the call raw, so a name spelling
+        # `outcome = "2", kappa0 = {<code>; 0.6}, alpha` exported a call that ran <code>.
         .sourcifyOption = function(option) {
+            if (!option$name %in% names(formals(kappaSizeFixedN))) return("")
             src <- kappaSizeSourcifyOption(option)
             if (is.null(src)) super$.sourcifyOption(option) else src
         },
@@ -553,11 +628,15 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             raters  <- as.numeric(self$options$raters)
             alpha   <- self$options$alpha
             n       <- self$options$n
+            # Study Explanation, method detail and the kappaSize printout are optional (F2, as
+            # kappaSizeCI); nothing is built for a hidden pane, and the engine runs only for its own.
+            show_details <- isTRUE(self$options$showExplanations)
+            show_summary <- isTRUE(self$options$showSummary)
 
             parsed <- private$.parseProps(self$options$props)
             props4 <- parsed$values
 
-            private$.validateInputs(outcome, kappa0, parsed, alpha, n)
+            private$.validateInputs(outcome, kappa0, parsed, alpha, n, raters)
 
             # The proportions the calculation uses: a single binary prevalence expanded to its pair,
             # and every vector renormalised. kappaSize accepts a sum within 0.001 of 1 and uses it
@@ -586,92 +665,105 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             # gives 0.559" told the reader nothing).
             show_rml <- rml_governs && !identical(private$.fmtBound(fixed), private$.fmtBound(bound))
 
-            # kappaSize's own search, for the Summary pane only: the reported bound no longer depends
-            # on it. n goes in as an integer: the engine cat()s the value it was given, and a double
-            # of 100000 prints as "1e+05".
-            kappa_fn <- switch(
-                as.character(outcome),
-                "2" = kappaSize::FixedNBinary,
-                "3" = kappaSize::FixedN3Cats,
-                "4" = kappaSize::FixedN4Cats,
-                "5" = kappaSize::FixedN5Cats
-            )
-            engine <- tryCatch(
-                kappa_fn(kappa0 = kappa0, n = as.integer(n), props = props4, alpha = alpha,
-                         raters = raters),
-                error = function(e) e)
-
             # --- Populate outputs ---------------------------------------------
-            n_txt <- base::format(n, scientific = FALSE)
+            n_txt <- private$.fmtN(n)
             self$results$text1$setContent(.fmt(
-                .("A total of {n} subjects can produce an expected lower limit for kappa of {bound}."),
-                n = n_txt, bound = private$.fmtBound(bound)))
+                .("A total of {n} subjects can produce an expected one-sided {conf} lower limit for kappa of {bound}."),
+                n = n_txt, conf = paste0(base::format(100 * (1 - alpha), scientific = FALSE, trim = TRUE), "%"),
+                bound = private$.fmtBound(bound)))
 
             engine_sparse <- FALSE
-            if (inherits(engine, "error")) {
-                summary_txt <- private$.wrap(.fmt(
-                    .("kappaSize's own search could not be run for comparison: {error}"),
-                    error = conditionMessage(engine)))
-            } else {
-                eng_val <- suppressWarnings(as.numeric(engine$kappaL))
-                if (length(eng_val) == 1 && is.finite(eng_val)) engine$kappaL <- round(eng_val, 10)
-                # The engine prints its marginal cell-count warning once per rare category (five
-                # times for five levels); keep the first, the Notes panel carries the real check.
-                lines <- utils::capture.output(summary(engine))
-                lines <- lines[!(duplicated(lines) & grepl("expected cell count", lines, fixed = TRUE))]
-                engine_sparse <- any(grepl("expected cell count", lines, fixed = TRUE))
-                note <- if (!(length(eng_val) == 1 && is.finite(eng_val)) ||
-                            !private$.inModel(outcome, raters, props_used, round(eng_val, 10)))
-                    .fmt(.("kappaSize's own search, above, stepped past the lowest agreement the model allows for these proportions, so its figure is not a valid limit. The expected lower bound, solved directly, is {bound}."),
-                         bound = private$.fmtBound(bound))
-                else if (show_rml)
-                    .fmt(.("kappaSize's own search, above, reports {engine}, holding the category proportions at their anticipated values as the published tables do. The expected lower bound is {bound}: the lower limit when the proportions are re-estimated at each value of kappa, as the analysis of the study should do."),
-                         engine = private$.fmtEngine(eng_val), bound = private$.fmtBound(bound))
-                else if (!identical(private$.fmtBound(round(eng_val, 10)), private$.fmtBound(bound)))
-                    .fmt(.("kappaSize's own search, above, reports {engine}; the expected lower bound is {bound}. kappaSize moves down in steps of 0.001 and stops only once the chi-square exceeds its critical value by 0.001, so it can report a value slightly lower than the bound."),
-                         engine = private$.fmtEngine(eng_val), bound = private$.fmtBound(bound))
-                else NULL
-                summary_txt <- paste(c(lines, if (!is.null(note)) c("", private$.wrap(note))),
-                                     collapse = "\n")
-            }
-            self$results$text_summary$setContent(summary_txt)
+            if (show_summary) {
+                # kappaSize's own search, for the Summary pane only: the reported bound no longer depends
+                # on it. n goes in as an integer: the engine cat()s the value it was given, and a double
+                # of 100000 prints as "1e+05".
+                kappa_fn <- switch(
+                    as.character(outcome),
+                    "2" = kappaSize::FixedNBinary,
+                    "3" = kappaSize::FixedN3Cats,
+                    "4" = kappaSize::FixedN4Cats,
+                    "5" = kappaSize::FixedN5Cats
+                )
+                # kappaSize walks down from kappa0 in steps of 0.001 with no floor and no cap, and for a
+                # rare finding its statistic barely moves: prevalence 1e-4 (2 raters, kappa0 0.01,
+                # n 11) takes about two million steps, and 1e-8 (some 1e10 steps, over a day) held
+                # the analysis and a jamovi engine (security audit 2026-10-17). A normal walk takes
+                # well under a second, so five seconds is ample; the time-out arrives as an error and
+                # lands in the branch below. Same guard as R/kappaSizeCI.b.R.
+                engine <- tryCatch({
+                    setTimeLimit(elapsed = 5, transient = TRUE)
+                    kappa_fn(kappa0 = kappa0, n = as.integer(n), props = props4, alpha = alpha,
+                             raters = raters)
+                }, error = function(e) e)
+                setTimeLimit(elapsed = Inf, transient = TRUE)
 
-            prev_txt <- if (outcome == 2 && length(parsed$tokens) == 1) {
-                .fmt(.("Further suppose that the prevalence of the trait is {p}."),
-                                p = parsed$tokens[1])
-            } else {
-                .fmt(
-                    .("Further suppose that the proportions of the outcome categories are {props}."),
-                    props = private$.formatProps(parsed$tokens))
+                if (inherits(engine, "error")) {
+                    summary_txt <- private$.wrap(.fmt(
+                        .("kappaSize's own search could not be run for comparison: {error}"),
+                        error = conditionMessage(engine)))
+                } else {
+                    eng_val <- suppressWarnings(as.numeric(engine$kappaL))
+                    if (length(eng_val) == 1 && is.finite(eng_val)) engine$kappaL <- round(eng_val, 10)
+                    # The engine prints its marginal cell-count warning once per rare category (five
+                    # times for five levels); keep the first, the Notes panel carries the real check.
+                    lines <- utils::capture.output(summary(engine))
+                    lines <- lines[!(duplicated(lines) & grepl("expected cell count", lines, fixed = TRUE))]
+                    engine_sparse <- any(grepl("expected cell count", lines, fixed = TRUE))
+                    note <- if (!(length(eng_val) == 1 && is.finite(eng_val)) ||
+                                !private$.inModel(outcome, raters, props_used, round(eng_val, 10)))
+                        .fmt(.("kappaSize's own search, above, stepped past the lowest agreement the model allows for these proportions, so its figure is not a valid limit. The expected lower bound, solved directly, is {bound}."),
+                             bound = private$.fmtBound(bound))
+                    else if (show_rml)
+                        .fmt(.("kappaSize's own search, above, reports {engine}, holding the category proportions at their anticipated values as the published tables do. The expected lower bound is {bound}: the lower limit when the proportions are re-estimated at each value of kappa, as the analysis of the study should do."),
+                             engine = private$.fmtEngine(eng_val), bound = private$.fmtBound(bound))
+                    else if (!identical(private$.fmtBound(round(eng_val, 10)), private$.fmtBound(bound)))
+                        .fmt(.("kappaSize's own search, above, reports {engine}; the expected lower bound is {bound}. kappaSize moves down in steps of 0.001 and stops only once the chi-square exceeds its critical value by 0.001, so it can report a value slightly lower than the bound."),
+                             engine = private$.fmtEngine(eng_val), bound = private$.fmtBound(bound))
+                    else NULL
+                    summary_txt <- paste(c(lines, if (!is.null(note)) c("", private$.wrap(note))),
+                                         collapse = "\n")
+                }
+                self$results$text_summary$setContent(summary_txt)
             }
 
-            # A lower confidence bound is the smallest kappa still compatible with the
-            # anticipated result; everything BELOW it is ruled out. The old sentence ("the lowest
-            # value of kappa that the study can expect to rule out") said the opposite.
-            text2 <- paste0(
-                private$.wrap(paste(
+            if (show_details) {
+                prev_txt <- if (outcome == 2 && length(parsed$tokens) == 1) {
+                    .fmt(.("Further suppose that the prevalence of the trait is {p}."),
+                                    p = parsed$tokens[1])
+                } else {
                     .fmt(
-                        .("Researchers anticipate an agreement of kappa = {kappa0} and have access to {n} subjects, each rated by {raters} raters."),
-                        kappa0 = kappa0, n = n_txt, raters = raters),
-                    prev_txt)),
-                "\n",
-                private$.wrap(.fmt(
-                    .("They would like to know how low the one-sided {conf}% lower confidence bound for kappa can be expected to fall - the smallest agreement the study would still be unable to rule out; every value below it is excluded."),
-                    conf = base::format(100 * (1 - alpha), scientific = FALSE))),
-                "\n",
-                private$.wrap(.fmt(
-                    .("The expected lower bound for kappa is {bound}."),
-                    bound = private$.fmtBound(bound))),
-                if (show_rml)
-                    paste0("\n", private$.wrap(.fmt(
-                        .("Holding the category proportions at their anticipated values (the published calculation, and kappaSize's) the bound would be {fixed}; re-estimating them at each value of kappa, as the analysis of the study should, gives {bound}, and that is the figure reported."),
-                        fixed = private$.fmtBound(fixed), bound = private$.fmtBound(bound))))
-                else "",
-                if (bound <= 0)
-                    paste0("\n", private$.wrap(
-                        .("A bound at or below zero means this many subjects cannot rule out agreement no better than chance.")))
-                else "")
-            self$results$text2$setContent(text2)
+                        .("Further suppose that the proportions of the outcome categories are {props}."),
+                        props = private$.formatProps(parsed$tokens))
+                }
+
+                # A lower confidence bound is the smallest kappa still compatible with the
+                # anticipated result; everything BELOW it is ruled out. The old sentence ("the lowest
+                # value of kappa that the study can expect to rule out") said the opposite.
+                text2 <- paste0(
+                    private$.wrap(paste(
+                        .fmt(
+                            .("Researchers anticipate an agreement of kappa = {kappa0} and have access to {n} subjects, each rated by {raters} raters."),
+                            kappa0 = kappa0, n = n_txt, raters = raters),
+                        prev_txt)),
+                    "\n",
+                    private$.wrap(.fmt(
+                        .("They would like to know how low the one-sided {conf}% lower confidence bound for kappa can be expected to fall - the smallest agreement the study would still be unable to rule out; every value below it is excluded."),
+                        conf = base::format(100 * (1 - alpha), scientific = FALSE))),
+                    "\n",
+                    private$.wrap(.fmt(
+                        .("The expected lower bound for kappa is {bound}."),
+                        bound = private$.fmtBound(bound))),
+                    if (show_rml)
+                        paste0("\n", private$.wrap(.fmt(
+                            .("Holding the category proportions at their anticipated values (the published calculation, and kappaSize's) the bound would be {fixed}; re-estimating them at each value of kappa, as the analysis of the study should, gives {bound}, and that is the figure reported."),
+                            fixed = private$.fmtBound(fixed), bound = private$.fmtBound(bound))))
+                    else "",
+                    if (bound <= 0)
+                        paste0("\n", private$.wrap(
+                            .("A bound at or below zero means this many subjects cannot rule out agreement no better than chance.")))
+                    else "")
+                self$results$text2$setContent(text2)
+            }
 
             # Cochran's rule on the expected counts of the test's cells at the reported bound, with
             # the proportions that bound was computed with (see .buildNotices).
@@ -688,12 +780,14 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 sparse_total  = length(e),
                 n             = n,
                 kappa0        = kappa0,
-                liftable      = liftable)
+                liftable      = liftable,
+                min_prop      = min(props_used))
             # Never "" after a run: the jamovi client renders an Html element only when its content is
             # non-empty, so "" would leave the previous run's warnings on screen.
             self$results$notices$setContent(if (nzchar(warn)) warn else "<div></div>")
             self$results$methodology$setContent(private$.buildMethodology(
                 outcome, raters, alpha, rml = rml$status, sparse_cells = sparse,
-                engine_sparse = engine_sparse))
+                engine_sparse = engine_sparse, show_details = show_details,
+                show_summary = show_summary))
         })
 )

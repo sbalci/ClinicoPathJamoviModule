@@ -1,4 +1,4 @@
-# Testing Checklist: Lowest Expected Value for a fixed sample size (`kappaSizeFixedN`)
+# Testing Checklist: Lowest Expected Kappa for a Fixed Sample Size (`kappaSizeFixedN`)
 
 ## 1. Test Scenarios Matrix
 

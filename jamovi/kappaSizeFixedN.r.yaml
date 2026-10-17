@@ -1,6 +1,6 @@
 ---
 name:  kappaSizeFixedN
-title: Lowest Expected Value for a fixed sample size
+title: Lowest Expected Kappa for a Fixed Sample Size
 jrs:   '1.1'
 
 items:
@@ -27,8 +27,9 @@ items:
           - 'n'
 
     - name:  text_summary
-      title: Summary
+      title: Summary by the published formula (kappaSize)
       type:  Preformatted
+      visible: (showSummary)
       clearWith:
           - outcome
           - kappa0
@@ -36,10 +37,12 @@ items:
           - raters
           - alpha
           - 'n'
+          - showSummary
 
     - name:  text2
       title: Study Explanation
       type:  Preformatted
+      visible: (showExplanations)
       clearWith:
           - outcome
           - kappa0
@@ -47,6 +50,7 @@ items:
           - raters
           - alpha
           - 'n'
+          - showExplanations
 
     - name:  methodology
       title: Methodology
@@ -58,6 +62,8 @@ items:
           - raters
           - alpha
           - 'n'
+          - showExplanations
+          - showSummary
 
 refs:
     - ClinicoPathJamoviModule
@@ -67,6 +73,7 @@ refs:
     - altayeDonnerKlarKappaRaters
     - altayeDonnerEliasziwKappaGOF
     - LandisKoch1977
+    - Byrt1993
 
 
 

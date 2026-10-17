@@ -70,16 +70,20 @@ kappaSizePropsLookDecimalComma <- function(raw) {
     length(v) > 0 && all(is.finite(v)) && all(v > 0 & v < 1)
 }
 
-# Syntax pane for the free-text `props` option. jmvcore's sourcify() wraps a String in quotes
-# without escaping it, so a value carried in a shared .omv such as
-# `0.2", alpha = {<code>; 0.05}, citype = "two_sided` exported a call that parsed and ran
-# <code> when pasted into R. Returns the escaped argument for a non-default scalar value, or
-# NULL to mean "let jmvcore's .sourcifyOption() handle it" (defaults stay omitted). Each
-# backend's .sourcifyOption() calls this first.
+# Syntax pane. jmvcore's sourcify() wraps a string in quotes without escaping it, and the options
+# of an analysis opened from an .omv/.omt reach it unchecked: jamovi copies the saved options
+# through as they are, so ANY option, not only the free-text props, can hold a string or a list.
+# A value such as `0.2", alpha = {<code>; 0.05}, citype = "two_sided` therefore exported a call
+# that parsed and ran <code> when pasted into R (props: security audit 2026-10-16; the List,
+# Number, Integer and Bool options: 2026-10-17). Returns "" for a list, which no option here
+# takes (deparse() would leave a backtick in a list name unescaped, so it is dropped, not
+# rendered), the escaped argument for a non-default string, or NULL to mean "let jmvcore's
+# .sourcifyOption() handle it" (numbers, logicals, defaults). Each backend's .sourcifyOption()
+# drops the option names its analysis does not define, then calls this.
 kappaSizeSourcifyOption <- function(option) {
     value <- option$value
-    if (!identical(option$name, "props") || !is.character(value) || length(value) != 1L ||
-        is.na(value) || identical(value, option$default))
+    if (is.list(value)) return("")
+    if (!is.character(value) || length(value) != 1L || is.na(value) || identical(value, option$default))
         return(NULL)
-    paste0("props = ", encodeString(value, quote = '"'))
+    paste0(option$name, " = ", encodeString(value, quote = '"'))
 }

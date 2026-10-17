@@ -1,4 +1,4 @@
-# Lowest Expected Value for a fixed sample size - Feature Mapping Specification
+# Lowest Expected Kappa for a Fixed Sample Size - Feature Mapping Specification
 
 ## Feature-to-Code Mapping
 

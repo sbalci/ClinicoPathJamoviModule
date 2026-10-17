@@ -11,7 +11,9 @@ kappaSizeFixedNOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             props = "0.20, 0.80",
             raters = "2",
             alpha = 0.05,
-            n = 100, ...) {
+            n = 100,
+            showExplanations = FALSE,
+            showSummary = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -60,6 +62,14 @@ kappaSizeFixedNOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 default=100,
                 min=11,
                 max=1000000)
+            private$..showExplanations <- jmvcore::OptionBool$new(
+                "showExplanations",
+                showExplanations,
+                default=FALSE)
+            private$..showSummary <- jmvcore::OptionBool$new(
+                "showSummary",
+                showSummary,
+                default=FALSE)
 
             self$.addOption(private$..outcome)
             self$.addOption(private$..kappa0)
@@ -67,6 +77,8 @@ kappaSizeFixedNOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$.addOption(private$..raters)
             self$.addOption(private$..alpha)
             self$.addOption(private$..n)
+            self$.addOption(private$..showExplanations)
+            self$.addOption(private$..showSummary)
         }),
     active = list(
         outcome = function() private$..outcome$value,
@@ -74,14 +86,18 @@ kappaSizeFixedNOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         props = function() private$..props$value,
         raters = function() private$..raters$value,
         alpha = function() private$..alpha$value,
-        n = function() private$..n$value),
+        n = function() private$..n$value,
+        showExplanations = function() private$..showExplanations$value,
+        showSummary = function() private$..showSummary$value),
     private = list(
         ..outcome = NA,
         ..kappa0 = NA,
         ..props = NA,
         ..raters = NA,
         ..alpha = NA,
-        ..n = NA)
+        ..n = NA,
+        ..showExplanations = NA,
+        ..showSummary = NA)
 )
 
 kappaSizeFixedNResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -99,7 +115,7 @@ kappaSizeFixedNResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             super$initialize(
                 options=options,
                 name="",
-                title="Lowest Expected Value for a fixed sample size",
+                title="Lowest Expected Kappa for a Fixed Sample Size",
                 refs=list(
                     "ClinicoPathJamoviModule",
                     "kappaSize",
@@ -107,7 +123,8 @@ kappaSizeFixedNResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "rotondiDonnerKappaCI",
                     "altayeDonnerKlarKappaRaters",
                     "altayeDonnerEliasziwKappaGOF",
-                    "LandisKoch1977"))
+                    "LandisKoch1977",
+                    "Byrt1993"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="notices",
@@ -133,25 +150,29 @@ kappaSizeFixedNResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text_summary",
-                title="Summary",
+                title="Summary by the published formula (kappaSize)",
+                visible="(showSummary)",
                 clearWith=list(
                     "outcome",
                     "kappa0",
                     "props",
                     "raters",
                     "alpha",
-                    "n")))
+                    "n",
+                    "showSummary")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text2",
                 title="Study Explanation",
+                visible="(showExplanations)",
                 clearWith=list(
                     "outcome",
                     "kappa0",
                     "props",
                     "raters",
                     "alpha",
-                    "n")))
+                    "n",
+                    "showExplanations")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="methodology",
@@ -162,7 +183,9 @@ kappaSizeFixedNResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "props",
                     "raters",
                     "alpha",
-                    "n")))}))
+                    "n",
+                    "showExplanations",
+                    "showSummary")))}))
 
 kappaSizeFixedNBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "kappaSizeFixedNBase",
@@ -185,7 +208,7 @@ kappaSizeFixedNBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 weightsSupport = 'na')
         }))
 
-#' Lowest Expected Value for a fixed sample size
+#' Lowest Expected Kappa for a Fixed Sample Size
 #'
 #' For an interobserver agreement study whose number of subjects is already 
 #' fixed, the lowest kappa the study would still be unable to rule out - the 
@@ -224,6 +247,10 @@ kappaSizeFixedNBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'   (capped at 0.20).
 #' @param n Number of subjects available, each rated by all raters (at least
 #'   11; the kappaSize engine refuses 10 or fewer).
+#' @param showExplanations If TRUE, adds the methodology to the caveats panel
+#'   and shows the Study Explanation.
+#' @param showSummary If TRUE, shows the kappaSize package's own summary
+#'   output.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$notices} \tab \tab \tab \tab \tab a html \cr
@@ -240,7 +267,9 @@ kappaSizeFixedN <- function(
     props = "0.20, 0.80",
     raters = "2",
     alpha = 0.05,
-    n = 100) {
+    n = 100,
+    showExplanations = FALSE,
+    showSummary = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("kappaSizeFixedN requires jmvcore to be installed (restart may be required)")
@@ -252,7 +281,9 @@ kappaSizeFixedN <- function(
         props = props,
         raters = raters,
         alpha = alpha,
-        n = n)
+        n = n,
+        showExplanations = showExplanations,
+        showSummary = showSummary)
 
     analysis <- kappaSizeFixedNClass$new(
         options = options,

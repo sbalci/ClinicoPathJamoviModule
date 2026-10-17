@@ -24,7 +24,8 @@ skip_if_not_installed("kappaSize")
 
 vfn_run <- function(...) {
     args <- utils::modifyList(
-        list(outcome = "2", kappa0 = 0.60, props = "0.20, 0.80", raters = "2", alpha = 0.05, n = 100L),
+        list(outcome = "2", kappa0 = 0.60, props = "0.20, 0.80", raters = "2", alpha = 0.05, n = 100L,
+             showExplanations = TRUE, showSummary = TRUE),
         list(...))
     suppressWarnings(do.call(ClinicoPath::kappaSizeFixedN, args))
 }
@@ -268,7 +269,8 @@ test_that("C02/C03/C04/C19 the panes agree and echo the inputs", {
     expect_match(t2, "the one-sided 95% lower confidence bound", fixed = TRUE)
     conf <- function(a) sub(".*the one-sided (\\S+)% lower.*", "\\1", vfn_flat(vfn_run(alpha = a)$text2$content))
     expect_identical(vapply(c(0.025, 0.001, 0.2, 0.07), conf, ""), c("97.5", "99.9", "80", "93"))
-    expect_match(vfn_run(n = 100000L)$text1$content, "A total of 100000 subjects", fixed = TRUE)
+    # grouped by thousands as in kappaSizeCI (F4), and never "1e+05"
+    expect_match(vfn_run(n = 100000L)$text1$content, "A total of 100,000 subjects", fixed = TRUE)
 })
 
 test_that("C09 two raters, equal marginals: the model's kappa is Cohen's kappa", {

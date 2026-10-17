@@ -39,7 +39,7 @@
       "Power", "Power Analysis by meddecide", "1.0.83", "production"),
     kappaSizePower = entry("Power Approach for the Number of Subjects Required",
       "PowerT", "Power Analysis by meddecide", "1.0.83", "testing"),
-    kappaSizeFixedN = entry("Lowest Expected Value for a fixed sample size", "Power",
+    kappaSizeFixedN = entry("Lowest Expected Kappa for a Fixed Sample Size", "Power",
       "Power Analysis by meddecide", "1.0.83", "production")
   )
 }

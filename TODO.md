@@ -1,3 +1,88 @@
+# kappaSizeFixedN — `/release-review-function` (2026-10-17; verdict: ready after the user's steps, no code changed)
+
+- [x] Tests 528/528 (19 + 206 + 303), 0 skip; rendering contract 6/6; file naming 7/7; release gate 0 blocking;
+      state guards, duplicate u.yaml names, theme-safe HTML, entities, setVisible/warning/set.seed, padded `.()`,
+      format tokens: 0 hits; `msgfmt -c tr.po` clean; `.h.R` carries showExplanations/showSummary and the new title.
+- [x] Independent oracle (scratchpad, model definitions: ADK mixture for binary, Dirichlet-multinomial via lgamma
+      for 3-5 categories; own profile-likelihood restricted ML): 120 random designs (K 2-5, R 2-6, n 11-5000,
+      alpha .01-.20), 120/120 shown bound within the display contract of min(fixed, RML); text1 == Study
+      Explanation 120/120; RML governed in 77 (up to 0.018 lower); kappaSize's walk 0.000024-0.000994 below the
+      fixed root; "exceeds chance" with n*min(p) < 2: 0.
+- [ ] User: `PowerT` -> `Power`, `prepare()`, then `_updateModules.R` - while parked the updater DELETES the
+      meddecide copy (which still carries the old title and none of today's fixes).
+- [ ] Not verified: jamovi app (Html blocks, Additional Output CollapseBox, toggles off/on/off, `.omv` reopen);
+      `render_ui.sh` is blind here (events.js).
+- [ ] The `.fmtN` Turkish grouping follow-up below now applies to kappaSizeFixedN too (F4 copied it).
+
+# kappaSizeFixedN — apply the `/review-function` action items (2026-10-17; done, uncommitted)
+
+Scope: F1, F2, F3, F4 and the IR-kappaSizeCI-02 carry-over below. Not in scope: F5 (consolidation), shipping to
+meddecide, moving `PowerT` back to `Power` (the user's). Plan cross-checked with Codex before coding; adopted its
+three refinements (drop the whole exclusion statement under sparsity, "cannot support a dependable conclusion"
+rather than impossibility and for 3-5 categories too, Wald and Cohen caveats always visible).
+
+- [x] F1a: under the sparse rule the amber block no longer claims exclusion or "exceeds chance" (new msgid).
+- [x] F1b: red "Too few expected subjects in the rarest category." when n * min(p) < 1, any outcome, any bound;
+      the amber block and the Rare category block are not repeated under it.
+- [x] F1c: kappaSizeCI's "Rare category." block (same msgid, already translated) for a category under 5%; Byrt1993
+      in refs.
+- [x] F2: `showExplanations` / `showSummary` (Bool, default false, "Additional Output" CollapseBox). Methodology
+      Html stays visible: planning expectation, GOF-vs-Wald, re-estimation failure, Cohen equivalence, kappa0 meaning
+      always; method detail with showExplanations; Summary-panel cross-references with showSummary. The engine runs
+      only with showSummary (proved with a mocked `kappaSize::FixedNBinary`). Builder defaults show everything.
+- [x] F3: title "Lowest Expected Kappa for a Fixed Sample Size" (a/r/u yaml, roxygen, 0000.yaml via prepare,
+      `R/agreementintro-rules.R`, 4 vignettes); text_summary "Summary by the published formula (kappaSize)".
+- [x] F4: text1 "...expected one-sided 95% lower limit..."; N via `.fmtN` (as kappaSizeCI); no Greek kappa left in
+      `R/kappaSizeFixedN.b.R`. The old combined rounding / kappaSize-search msgid split in two (second part only with
+      the Summary).
+- [x] IR-kappaSizeCI-02 sentence, binary 3+ raters, with the method detail (beta-binomial bound >= shown in 180/180).
+- [x] Turkish: 13 new msgids filled; `i18nUpdate()` x2; vs HEAD 4 superseded msgids gone, 0 translations changed;
+      `msgfmt -c` clean.
+
+Results / verification:
+- Tests: test-kappaSizeFixedN 19/19, -validation 206/206, -release-review 303/303 (7 new blocks), kappasizepower
+  159/159, kappasizeci 558/558. Each new block fails against HEAD on its own assertions (run in an extracted HEAD
+  tree with the toggles removed from the helper; the IR-02 block fails only on the sentence, its oracle passes on
+  HEAD as expected). test-agreementintro: 3 failures, the menuGroup mismatches from the T-routing (agreement,
+  kappaSizePower, kappaSizeFixedN); HEAD fails 4 there (the same 3 plus one more), none added.
+- Rare-finding sweep (180 binary designs): designs under 2 expected positives that claim chance is excluded,
+  117 -> 0.
+- `prepare()` exit 0, only this `.h.R` and its 0000.yaml entry changed; `document()` exit 0, only the two Rd files;
+  NAMESPACE unchanged. Release gate 0 blocking, output identical except the msgid count. lintr 0 bug-linter hits;
+  no non-ASCII, no padded or split `.()`.
+- Not run: the jamovi app (Html rendering of the new blocks, the CollapseBox, toggle on/off/on).
+- [ ] User: `PowerT` -> `Power`, then `prepare()` and `_updateModules.R` (meddecide).
+- [ ] Follow-up (F5, trio): `.fmtN` is now a 2nd copy; fold the shared formatters into `R/utils-kappasize.R`.
+- [ ] Follow-up (kappaSizeCI): `.fmtN` groups with "," in every locale; in Turkish "1,000" reads as 1.0.
+
+# kappaSizeFixedN — `/review-function` (2026-10-17; review only, nothing applied)
+
+- [ ] F1 (clinical): the amber sentence "These subjects can therefore show that agreement exceeds chance"
+      (0 < bound < 0.40) is printed in 117 of 180 binary rare-finding designs (p .02/.05/.10, 2-6 raters,
+      kappa0 .4/.6/.8, n 11/20/30/50, alpha .05) in which the study expects fewer than 2 positive subjects
+      (n*p 0.22-1.5). The red "cannot demonstrate agreement" fired in 3 of them, all with two raters. Cause: the
+      binary model floor -p^(R-1)/(1-p^(R-1)) is ~0 for a rare finding with 3+ raters (p .02, 6 raters: -3.2e-9),
+      so the bound cannot fall meaningfully below 0 at any n and the `bound <= 0` gate cannot be reached. Every affected
+      design also shows Sparse categories (and Small sample when n < 25), so the panel contradicts itself rather than
+      staying silent. Fix: drop or qualify the chance-exclusion clause when the sparse rule fires, and port kappaSizeCI's
+      "Rare category" block (min prop < 0.05, expected subjects per rater); consider red when n*min(p) < 1.
+      Repro: p 0.05, 3 raters, kappa0 0.6, n 30 (1.5 expected positives) -> bound 0.165, amber
+      "can therefore show that agreement exceeds chance" beside Sparse categories.
+- [ ] F2 (UX, sibling parity): Summary (the kappaSize printout), Study Explanation and Methodology are always shown.
+      kappaSizeCI gates them with `showExplanations` / `showSummary` (default false, "Additional Output" CollapseBox),
+      and skips the engine when the Summary is off. Do the same here (yaml change: needs the user's approval).
+- [ ] F3 (UX): `text_summary` is titled "Summary" but holds kappaSize's raw printout (kappaSizePower: "Summary by the
+      published formula (kappaSize)"). The analysis title "Lowest Expected Value for a fixed sample size" does not
+      name kappa and mixes casing; "Lowest Expected Kappa for a Fixed Sample Size"? (rename shows in the menu: user's call)
+- [ ] F4 (UX, minor): text1 omits the confidence level ("one-sided 95%"); N is printed without thousands separators
+      ("1000000"); "kappa" everywhere except one Methodology sentence that uses the kappa symbol.
+- [ ] F5 (maintainability): `.fmtCount` (3 copies), `.parseProps` / `.wrap` / `.reestimationApplies` (2 each) across
+      the trio; fold into `R/utils-kappasize.R` with the `.rmlBound` / `.rmlSlopes` consolidation listed below.
+- [x] Verified, no change: 3 test files 460/460 expectations, 0 skip; scoped lintr 0 bug-linter hits (15 style);
+      hygiene greps clean; release gate output identical with kappaSizeFixedN counted as shipped; tr.po holds all 51
+      msgids with matching placeholders; `.h.R` in sync; kappaSize's 0.001 walk always terminates for n >= 11 (its
+      statistic tends to -n, beyond every critical value <= 9.55); full run <= 0.5 s over 53 typical/extreme designs.
+
 # kappaSizeFixedN — `/check-function-full` + `/fix-function --apply` (2026-10-17; applied, uncommitted)
 
 Audit: 6/6 options effective, 4/4 outputs populated, 0 grep-gate hits; binary two-rater bound = independent

@@ -2,7 +2,7 @@
 % Please edit documentation in R/kappaSizeFixedN.h.R
 \name{kappaSizeFixedN}
 \alias{kappaSizeFixedN}
-\title{Lowest Expected Value for a fixed sample size}
+\title{Lowest Expected Kappa for a Fixed Sample Size}
 \usage{
 kappaSizeFixedN(
   outcome = "2",
@@ -10,7 +10,9 @@ kappaSizeFixedN(
   props = "0.20, 0.80",
   raters = "2",
   alpha = 0.05,
-  n = 100
+  n = 100,
+  showExplanations = FALSE,
+  showSummary = FALSE
 )
 }
 \arguments{
@@ -34,6 +36,12 @@ Enter exactly one value per outcome level otherwise.}
 
 \item{n}{Number of subjects available, each rated by all raters (at least
 11; the kappaSize engine refuses 10 or fewer).}
+
+\item{showExplanations}{If TRUE, adds the methodology to the caveats panel
+and shows the Study Explanation.}
+
+\item{showSummary}{If TRUE, shows the kappaSize package's own summary
+output.}
 }
 \value{
 A results object containing:

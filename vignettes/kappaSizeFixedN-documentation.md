@@ -1,9 +1,9 @@
-# Lowest Expected Value for a fixed sample size - Developer Documentation
+# Lowest Expected Kappa for a Fixed Sample Size - Developer Documentation
 
 ## 1. Overview
 
 - **Function**: `kappaSizeFixedN`
-- **Title**: Lowest Expected Value for a fixed sample size
+- **Title**: Lowest Expected Kappa for a Fixed Sample Size
 - **Module**: `PowerT`
 - **Files**:
   - `jamovi/kappaSizeFixedN.u.yaml` - User Interface Definition
@@ -26,7 +26,9 @@
 | `props` | `String` | `0.20, 0.80` | Expected proportion of cases in each category |
 | `raters` | `List` | `2` | raters |
 | `alpha` | `Number` | `0.05` | alpha |
-| `n` | `Integer` | `100` | FALSE |
+| `n` | `Integer` | `100` | N |
+| `showExplanations` | `Bool` | `false` | Methodology and study explanation |
+| `showSummary` | `Bool` | `false` | kappaSize package summary |
 
 ## 3. Results Definition (`.r.yaml`)
 
@@ -34,8 +36,9 @@
 | :--- | :--- | :--- | :--- |
 | `notices` | `Html` | `Notes` |  |
 | `text1` | `Preformatted` | `Analysis result` |  |
-| `text_summary` | `Preformatted` | `Summary` |  |
-| `text2` | `Preformatted` | `Study Explanation` |  |
+| `text_summary` | `Preformatted` | `Summary by the published formula (kappaSize)` | visible with `showSummary` |
+| `text2` | `Preformatted` | `Study Explanation` | visible with `showExplanations` |
+| `methodology` | `Html` | `Methodology` | caveats always; method detail with `showExplanations` |
 
 ## 4. Architecture & Data Flow Diagram
 

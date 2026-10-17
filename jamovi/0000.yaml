@@ -1466,12 +1466,12 @@ analyses:
       when the number of subjects is already fixed.
     ribbon: analyses
     category: analyses
-  - title: Lowest Expected Value for a fixed sample size
+  - title: Lowest Expected Kappa for a Fixed Sample Size
     name: kappaSizeFixedN
     ns: ClinicoPath
     menuGroup: PowerT
     menuSubgroup: Power Analysis by meddecide
-    menuTitle: Lowest Expected Value for a fixed sample size
+    menuTitle: Lowest Expected Kappa for a Fixed Sample Size
     menuSubtitle: Find lower Kappa based on sample size
     description: >
       For an interobserver agreement study whose number of subjects is already

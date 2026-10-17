@@ -2,12 +2,12 @@
 % Please edit documentation in R/kappaSizeFixedN.b.R
 \name{kappaSizeFixedNClass}
 \alias{kappaSizeFixedNClass}
-\title{Lowest Expected Value for a fixed sample size}
+\title{Lowest Expected Kappa for a Fixed Sample Size}
 \value{
 An \code{R6} class generator object for the \code{kappaSizeFixedNClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 }
 \description{
-Lowest Expected Value for a fixed sample size
+Lowest Expected Kappa for a Fixed Sample Size
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{kappaSizeFixedNBase} -> \code{kappaSizeFixedNClass}

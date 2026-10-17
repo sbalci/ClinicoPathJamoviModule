@@ -1,6 +1,6 @@
 ---
 name:  kappaSizeFixedN
-title: Lowest Expected Value for a fixed sample size
+title: Lowest Expected Kappa for a Fixed Sample Size
 menuGroup: PowerT #meddecide
 menuSubgroup:  Power Analysis by meddecide
 menuSubtitle: Find lower Kappa based on sample size
@@ -120,5 +120,29 @@ options:
           R: >
               Number of subjects available, each rated by all raters (at least 11; the
               kappaSize engine refuses 10 or fewer).
+
+    - name: showExplanations
+      title: Methodology and study explanation
+      type: Bool
+      default: false
+      description:
+          ui: >
+              Adds the methodology (models, how the bound is computed, analysis advice) and
+              the step-by-step Study Explanation. The bound, the warnings and the main caveats
+              are always shown.
+          R: >
+              If TRUE, adds the methodology to the caveats panel and shows the Study
+              Explanation.
+
+    - name: showSummary
+      title: kappaSize package summary
+      type: Bool
+      default: false
+      description:
+          ui: >
+              Adds the kappaSize package's own printed summary, with a note on why its bound
+              can differ from the one reported here.
+          R: >
+              If TRUE, shows the kappaSize package's own summary output.
 
 ...

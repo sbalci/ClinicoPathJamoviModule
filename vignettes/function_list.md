@@ -396,7 +396,7 @@ This list is automatically generated. Functions marked as **Draft** or **Templat
 | `decisioncompare` | Compare Medical Decision Tests | **Coded** | meddecide |
 | `enhancedROC` | Clinical ROC Analysis | **Coded** | meddecide |
 | `kappaSizeCI` | Confidence Interval Approach for the Number of Subjects Required | **Coded** | meddecide |
-| `kappaSizeFixedN` | Lowest Expected Value for a fixed sample size | **Coded** | meddecide |
+| `kappaSizeFixedN` | Lowest Expected Kappa for a Fixed Sample Size | **Coded** | meddecide |
 | `kappaSizePower` | Power Approach for the Number of Subjects Required | **Coded** | meddecide |
 | `nogoldstandard` | Analysis Without Gold Standard | **Coded** | meddecide |
 | `psychopdaROC` | Advanced ROC Analysis | **Coded** | meddecide |
