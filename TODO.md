@@ -3365,6 +3365,22 @@ Follow-ups from the kappaSizePower release review (2026-10-14):
 /library-audit status '2026-09-22 OncoPath.md'
 ```
 
+## Missing-value cells and zero-row notices — `/fix-function` waterfall, swimmerplot, diagnosticmeta (2026-10-18)
+
+Source: `quality-reports/ONCOPATH_CHECK_MODULE_2026-10-18-evening.md` findings 1-3, widened by a Codex sweep.
+Acceptance: no visible numeric cell holds a double NA/NaN in the sweep scenarios; zero rows with variables assigned
+show a notice and stay idle (the policy `test-waterfall-basic.R` encodes); unconfigured state unchanged; no new
+msgid without a Turkish msgstr; all existing suites of the three analyses green.
+
+- [x] Reproduce: baseline NaN-cell sweep, 27 cells in 9 of 19 scenarios (`quality-reports/fix-oncopath-cells-2026-10-18/`)
+- [ ] Route the three analyses to `menuGroup: OncoPathT`; timestamped backups
+- [ ] `.tableValues()` boundary helper (the ihcheterogeneity 1.1.0 idiom) in all three classes; every table write goes through it
+- [ ] Zero rows: WARNING notice after the variable check (diagnosticmeta, waterfall); delete waterfall's unreachable branch
+- [ ] Regression tests, red against the old code first
+- [ ] Verify: parse + AST diff, `prepare()`, QA install (sweep 0, sibling suite, probes), umbrella suites of the three analyses, release gate, smoke
+- [ ] Verify in the jamovi GUI with a separately named QA module
+- [ ] NEWS + CHANGELOG; hand-off: move menuGroups back, regenerate OncoPath, mirror the tests
+
 ## IHC Heterogeneity
 
 ### ihcheterogeneity

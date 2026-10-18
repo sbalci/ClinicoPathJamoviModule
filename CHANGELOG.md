@@ -5,6 +5,29 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-10-18 — "Empty" table cells that rendered as NaN: waterfall, swimmerplot, diagnosticmeta
+
+- **Failure mode:** code meant to leave a cell empty wrote `NA_real_` or `NaN` into it; several sites
+  carried comments saying "leaves empty cells". jmvcore serializes a double NA as NaN, and jamovi prints
+  "NaN". The baseline sweep found 27 such cells in 9 of 19 scenarios; one was the bundled longitudinal
+  waterfall example, with only Response duration ticked. A second defect: waterfall's zero-row
+  message sat behind an earlier `nrow(self$data) == 0` return and could never run; diagnosticmeta had
+  no message at all.
+- **Detection:** a runtime sweep of every visible numeric cell during `/check-module OncoPath`
+  (`is.double(v) && is.na(v)` on `getCell()$value`). No schema check or release-gate check can see
+  this: a NaN cell is a value. A read-only Codex review widened the list of sites.
+- **Repair:** the ihcheterogeneity 1.1.0 `.tableValues()` boundary helper in all three classes. A
+  script routed every one of the 74 `setRow`/`addRow` value lists through it, and the result was checked
+  byte for byte against the original with the wrappers removed. The zero-row checks moved after the
+  variable check and now add a WARNING built from two existing, translated msgids. The analysis stays
+  idle, which is the policy `test-waterfall-basic.R` encodes. Nine red-first tests failed 35
+  expectations on the old code. The sweep went from 27 cells to 0.
+- **Rule:** never write a literal NA into a numeric cell to mean "empty". Route table writes through
+  `.tableValues()` (NULL is jamovi's missing cell), and sweep the cells at run time after any change to
+  a table writer.
+
+---
+
 ## 2026-10-18 — "wait for selection": venn, agepyramid, oddsratio predictor level
 
 - **Failure mode:** three analyses guessed a defining level. venn had no `allowNone` on its true levels, so

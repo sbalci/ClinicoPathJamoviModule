@@ -1,5 +1,25 @@
 # ClinicoPath News
 
+## Unreleased — OncoPath: unavailable values are empty cells, and zero-row data says why
+
+- **No more "NaN" in Waterfall, Swimmer Plot and Diagnostic Test Meta-Analysis tables.** A number
+  that cannot be computed is now an empty cell; the reason stays where it was (a table note, the
+  detail column or a notice). Estimates shown before are unchanged. The cases found:
+  - Waterfall: the Response Duration table when the Kaplan-Meier median duration of response is not
+    reached (the bundled longitudinal example), when no patient responds, or when there is no Time
+    Variable; the percentage of the "Unknown / not evaluable" row.
+  - Swimmer Plot: the Summary and Advanced Metrics rows of a run that stops on a data error; the
+    follow-up density when person-time is zero; ORR and DCR when no response label is a RECIST
+    category.
+  - Diagnostic Test Meta-Analysis: the Deeks test row when every study has the same effective
+    sample size.
+- **Zero rows are explained.** With the variables selected but no rows in the data (for example, a
+  filter that excludes every row), Waterfall and Diagnostic Test Meta-Analysis keep the start panel
+  and add a warning: "The dataset contains no rows. Add data (or clear the active filter) and
+  re-run." Before, they showed only the start panel, as if nothing had been selected. In guided mode
+  the Waterfall steps show the analysis as stopped.
+- Modified analyses are routed to `OncoPathT` for validation; production promotion is separate.
+
 ## Unreleased — OncoPath patient identity, ICC planning and input validation
 
 - Swimmer plots preserve distinct numeric patient IDs, including large exactly representable

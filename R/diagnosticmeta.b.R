@@ -13,6 +13,15 @@ diagnosticmetaClass <- R6::R6Class(
     "diagnosticmetaClass",
     inherit = diagnosticmetaBase,
     private = list(
+        # Numeric NA is serialized as NaN by this jmvcore build. At the table
+        # boundary, preserve named entries but encode unavailable cells as NULL.
+        .tableValues = function(values) {
+            lapply(values, function(value) {
+                if (is.numeric(value) && length(value) == 1L && is.na(value))
+                    NULL else value
+            })
+        },
+
         # Cache variables for performance optimization
         .continuity_correction = FALSE,
         .correction_method_used = "none",
@@ -267,7 +276,7 @@ diagnosticmetaClass <- R6::R6Class(
             for (prev in prevalences) {
                 self$results$predictiveValues$addRow(
                     rowKey = paste0("p_", as.integer(prev * 100)),
-                    values = list(prevalence = prev, ppv = NA_real_, npv = NA_real_)
+                    values = private$.tableValues(list(prevalence = prev, ppv = NA_real_, npv = NA_real_))
                 )
             }
 
@@ -297,7 +306,7 @@ diagnosticmetaClass <- R6::R6Class(
             for (biv_key in names(biv_parameters))
                 self$results$bivariateresults$addRow(
                     rowKey = biv_key,
-                    values = list(parameter = biv_parameters[[biv_key]]))
+                    values = private$.tableValues(list(parameter = biv_parameters[[biv_key]])))
 
             # library-audit 2026-09-16 meddecide [LOW] DONE (same class): publicationbias has a fixed row set, so .init()
             # scaffolds the rows and .run() fills them with setRow()
@@ -306,7 +315,7 @@ diagnosticmetaClass <- R6::R6Class(
             if (isTRUE(self$options$publication_bias))
                 self$results$publicationbias$addRow(
                     rowKey = "deeks_test",
-                    values = list(test = .("Deeks' Funnel Plot Asymmetry Test")))
+                    values = private$.tableValues(list(test = .("Deeks' Funnel Plot Asymmetry Test"))))
 
             # Same class of fix for the other two fixed row sets. Building these
             # in .run() with deleteRows() + addRow() made the tables appear
@@ -317,7 +326,7 @@ diagnosticmetaClass <- R6::R6Class(
                 for (het_key in names(het_rows))
                     self$results$heterogeneity$addRow(
                         rowKey = het_key,
-                        values = list(measure = het_rows[[het_key]]))
+                        values = private$.tableValues(list(measure = het_rows[[het_key]])))
             }
 
             # mada::phm always returns theta and taus_sq; the AUC row is derived
@@ -331,7 +340,7 @@ diagnosticmetaClass <- R6::R6Class(
                 for (phm_key in names(phm_rows))
                     self$results$hsrocresults$addRow(
                         rowKey = phm_key,
-                        values = list(parameter = phm_rows[[phm_key]]))
+                        values = private$.tableValues(list(parameter = phm_rows[[phm_key]])))
             }
 
         },
@@ -362,7 +371,7 @@ diagnosticmetaClass <- R6::R6Class(
             private$.heterogeneity_substantial <- FALSE
 
             # Check if data is ready
-            if (is.null(self$data) || nrow(self$data) == 0) {
+            if (is.null(self$data)) {
                 # Show instructions when no data
                 self$results$instructions$setVisible(TRUE)
                 return()
@@ -409,6 +418,16 @@ diagnosticmetaClass <- R6::R6Class(
                                 .("Fill them in and the meta-analysis will appear.")),
                               collapse = " "))
                 }
+                return()
+            }
+
+            # Variables assigned but no rows (an empty dataset, or a filter that
+            # excludes every row): stay idle, as for an incomplete selection, but
+            # say why nothing appears.
+            if (nrow(self$data) == 0) {
+                self$results$instructions$setVisible(TRUE)
+                private$.addNotice("WARNING", .("Data contains no rows"),
+                    .("The dataset contains no rows. Add data (or clear the active filter) and re-run."))
                 return()
             }
 
@@ -1156,19 +1175,19 @@ diagnosticmetaClass <- R6::R6Class(
                         .("The fixed-effect method assumes a single common sensitivity and specificity across studies. It produces no prediction interval, no SROC prediction region and no heterogeneity warning, and its confidence intervals are narrower than the random-effects equivalents whatever the studies actually show. Use it only when the Heterogeneity Assessment table gives no sign of heterogeneity; REML (the default) is the appropriate choice otherwise."))
             }
 
-            bivariate_table$setRow(rowKey = "sensitivity", values = list(
+            bivariate_table$setRow(rowKey = "sensitivity", values = private$.tableValues(list(
                 estimate = pooled_sens * 100,  # Convert to percentage
                 ci_lower = sens_ci[1] * 100,   # Convert to percentage
                 ci_upper = sens_ci[2] * 100,   # Convert to percentage
                 p_value = sens_logit_row[1, "Pr(>|z|)"]
-            ))
+            )))
 
-            bivariate_table$setRow(rowKey = "specificity", values = list(
+            bivariate_table$setRow(rowKey = "specificity", values = private$.tableValues(list(
                 estimate = pooled_spec * 100,  # Convert to percentage
                 ci_lower = spec_ci[1] * 100,   # Convert to percentage
                 ci_upper = spec_ci[2] * 100,   # Convert to percentage
                 p_value = fpr_logit_row[1, "Pr(>|z|)"]
-            ))
+            )))
 
             pooled_plr <- safe_lr(pooled_sens, 1 - pooled_spec)
             pooled_nlr <- safe_lr(1 - pooled_sens, pooled_spec)
@@ -1225,26 +1244,26 @@ diagnosticmetaClass <- R6::R6Class(
                 }
             }
 
-            bivariate_table$setRow(rowKey = "plr", values = list(
+            bivariate_table$setRow(rowKey = "plr", values = private$.tableValues(list(
                 estimate = pooled_plr,
                 ci_lower = lr_ci$plr[1],
                 ci_upper = lr_ci$plr[2],
                 p_value = NULL
-            ))
+            )))
 
-            bivariate_table$setRow(rowKey = "nlr", values = list(
+            bivariate_table$setRow(rowKey = "nlr", values = private$.tableValues(list(
                 estimate = pooled_nlr,
                 ci_lower = lr_ci$nlr[1],
                 ci_upper = lr_ci$nlr[2],
                 p_value = NULL
-            ))
+            )))
 
-            bivariate_table$setRow(rowKey = "dor", values = list(
+            bivariate_table$setRow(rowKey = "dor", values = private$.tableValues(list(
                 estimate = pooled_dor,
                 ci_lower = lr_ci$dor[1],
                 ci_upper = lr_ci$dor[2],
                 p_value = NULL
-            ))
+            )))
 
             bivariate_table$setNote("method", sprintf(.("Reitsma bivariate model, %s estimation."),
                 private$.methodTitle(method_used)))
@@ -1261,9 +1280,9 @@ diagnosticmetaClass <- R6::R6Class(
             hsroc_table <- self$results$hsrocresults
                 # Blank the rows scaffolded in .init() rather than deleting them.
                 for (blank_key in c("theta", "taus_sq", "auc"))
-                    hsroc_table$setRow(rowKey = blank_key, values = list(
+                    hsroc_table$setRow(rowKey = blank_key, values = private$.tableValues(list(
                         estimate = NULL, std_error = NULL,
-                        z_value = NULL, p_value = NULL))
+                        z_value = NULL, p_value = NULL)))
 
                 # Validate input data
                 if (is.null(meta_data) || nrow(meta_data) == 0) {
@@ -1502,13 +1521,13 @@ diagnosticmetaClass <- R6::R6Class(
                         # ever returns a coefficient we did not anticipate.
                         phm_set <- if (param_name %in% c("theta", "taus_sq"))
                             hsroc_table$setRow else hsroc_table$addRow
-                        phm_set(rowKey = param_name, values = list(
+                        phm_set(rowKey = param_name, values = private$.tableValues(list(
                             parameter = display_name,
                             estimate = estimate,
                             std_error = if (is.finite(std_error)) std_error else NULL,
                             z_value = if (is.finite(z_value)) z_value else NULL,
                             p_value = if (is.finite(p_value)) p_value else NULL
-                        ))
+                        )))
                     }
 
                     # The AUC of the PHM SROC curve is 1/(1 + theta) (Holling,
@@ -1518,13 +1537,13 @@ diagnosticmetaClass <- R6::R6Class(
                     theta_val <- if ("theta" %in% names(coefficients)) unname(coefficients["theta"]) else NA_real_
                     if (is.finite(theta_val) && theta_val > 0) {
                         auc_val <- 1 / (1 + theta_val)
-                        hsroc_table$setRow(rowKey = "auc", values = list(
+                        hsroc_table$setRow(rowKey = "auc", values = private$.tableValues(list(
                             parameter = .("Area under the SROC curve (AUC = 1/(1 + theta))"),
                             estimate = auc_val,
                             std_error = if (is.finite(theta_se)) theta_se / (1 + theta_val)^2 else NULL,
                             z_value = NULL,
                             p_value = NULL
-                        ))
+                        )))
                         if (auc_val < 0.5) {
                             # theta > 1 puts the Lehmann-family curve below the
                             # diagonal. That is this model failing to describe
@@ -1583,9 +1602,9 @@ diagnosticmetaClass <- R6::R6Class(
                 # run that cannot fit a margin leaves empty cells rather than the
                 # previous run's numbers (same idiom as the Deeks row).
                 for (blank_key in c("sensitivity", "specificity"))
-                    het_table$setRow(rowKey = blank_key, values = list(
+                    het_table$setRow(rowKey = blank_key, values = private$.tableValues(list(
                         q_statistic = NA_real_, df = NA_integer_, p_value = NA_real_,
-                        i_squared = NA_real_, tau_squared = NA_real_))
+                        i_squared = NA_real_, tau_squared = NA_real_)))
 
                 sens_valid <- is.finite(analysis_data$logit_sens) &
                     is.finite(analysis_data$var_logit_sens) &
@@ -1674,14 +1693,14 @@ diagnosticmetaClass <- R6::R6Class(
                     } else {
                         0
                     }
-                    het_table$setRow(rowKey = row_key, values = list(
+                    het_table$setRow(rowKey = row_key, values = private$.tableValues(list(
                         measure = measure,
                         q_statistic = model$QE,
                         df = model$k - 1,
                         p_value = model$QEp,
                         i_squared = i_squared,
                         tau_squared = model$tau2
-                    ))
+                    )))
 
                     # Name the estimator. Each row is a SEPARATE univariate
                     # random-effects model on logit sensitivity or logit
@@ -1987,7 +2006,7 @@ diagnosticmetaClass <- R6::R6Class(
                     }
                     metareg_table$addRow(
                         rowKey = paste0(key_prefix, "_intercept"),
-                        values = list(
+                        values = private$.tableValues(list(
                             measure = measure,
                             parameter = .("Intercept"),
                             estimate = model$beta[1],
@@ -2000,7 +2019,7 @@ diagnosticmetaClass <- R6::R6Class(
                             ci_upper = model$ci.ub[1],
                             z_value = model$zval[1],
                             p_value = model$pval[1]
-                        )
+                        ))
                     )
 
                     n_coef <- length(model$beta)
@@ -2026,7 +2045,7 @@ diagnosticmetaClass <- R6::R6Class(
                         coef_label <- trimws(coef_label)
                         metareg_table$addRow(
                             rowKey = paste0(key_prefix, "_covariate_", j),
-                            values = list(
+                            values = private$.tableValues(list(
                                 measure = measure,
                                 parameter = coef_label,
                                 estimate = model$beta[j],
@@ -2035,7 +2054,7 @@ diagnosticmetaClass <- R6::R6Class(
                                 ci_upper = model$ci.ub[j],
                                 z_value = model$zval[j],
                                 p_value = model$pval[j]
-                            )
+                            ))
                         )
                     }
                 }
@@ -2115,8 +2134,8 @@ diagnosticmetaClass <- R6::R6Class(
             # Blank first, before any early return. The Deeks row is scaffolded in
             # .init(), so deleteRows() would remove it; a run that cannot assess
             # bias leaves empty cells, not the previous run's result.
-            self$results$publicationbias$setRow(rowKey = "deeks_test", values = list(
-                statistic = NA_real_, p_value = NA_real_, interpretation = NA_character_))
+            self$results$publicationbias$setRow(rowKey = "deeks_test", values = private$.tableValues(list(
+                statistic = NA_real_, p_value = NA_real_, interpretation = NA_character_)))
 
             if (!requireNamespace("metafor", quietly = TRUE)) {
                 self$results$publicationbias$setNote("package_error",
@@ -2160,10 +2179,10 @@ diagnosticmetaClass <- R6::R6Class(
                 bias_table <- self$results$publicationbias
 
                 if (nrow(fit_data) < 3) {
-                    bias_table$setRow(rowKey = "deeks_test", values = list(
+                    bias_table$setRow(rowKey = "deeks_test", values = private$.tableValues(list(
                         statistic = NA_real_, p_value = NA_real_,
                         interpretation = .("Not estimable: at least 3 studies with finite odds ratios are required")
-                    ))
+                    )))
                 } else {
                     deeks_fit <- stats::lm(log_dor ~ inv_root_ess,
                                            data = fit_data, weights = fit_data$ess)
@@ -2174,9 +2193,9 @@ diagnosticmetaClass <- R6::R6Class(
                         # the predictor is constant, the slope is aliased and the
                         # fit returns an intercept row only. cf[2, 3] then threw
                         # "subscript out of bounds" into the notes as a raw error.
-                        bias_table$setRow(rowKey = "deeks_test", values = list(
+                        bias_table$setRow(rowKey = "deeks_test", values = private$.tableValues(list(
                             statistic = NA_real_, p_value = NA_real_,
-                            interpretation = .("Not estimable: all studies have the same effective sample size")))
+                            interpretation = .("Not estimable: all studies have the same effective sample size"))))
                         bias_table$setNote("deeks_method",
                             .("Deeks' test regresses the log diagnostic odds ratio on 1/sqrt(effective sample size). Every study here has the same effective sample size, so there is no variation in study size to relate accuracy to and funnel-plot asymmetry cannot be assessed. This is expected when the studies are different tests or readers applied to one common sample."))
                         return()
@@ -2189,7 +2208,7 @@ diagnosticmetaClass <- R6::R6Class(
                     zero_share <- n_zero / nrow(analysis_data)
                     too_many_zeros <- zero_share > 0.25
 
-                    bias_table$setRow(rowKey = "deeks_test", values = list(
+                    bias_table$setRow(rowKey = "deeks_test", values = private$.tableValues(list(
                         statistic = deeks_t,
                         p_value = deeks_p,
                         interpretation = if (too_many_zeros)
@@ -2198,7 +2217,7 @@ diagnosticmetaClass <- R6::R6Class(
                             .("Asymmetry detected (p < 0.05)")
                         else
                             .("No asymmetry detected (p >= 0.05)")
-                    ))
+                    )))
 
                     note <- sprintf(
                         .("Deeks' test: log diagnostic odds ratio regressed on 1/sqrt(effective sample size), weighted by effective sample size; slope referred to t on %d df (Deeks, Macaskill & Irwig 2005). The verdict uses alpha = 0.05; some implementations use 0.10 for asymmetry tests, so a p-value between the two is borderline either way. Asymmetry is not by itself evidence of publication bias - it can also arise from between-study heterogeneity, a threshold effect, or a genuine relation between study size and accuracy (Cochrane DTA Handbook, chapter 10)."), deeks_df)
@@ -3043,7 +3062,7 @@ diagnosticmetaClass <- R6::R6Class(
                                              meta_data$tp[i] + meta_data$fn[i], z_crit)
                 spec_ci <- private$.wilsonCI(meta_data$tn[i],
                                              meta_data$tn[i] + meta_data$fp[i], z_crit)
-                table$addRow(rowKey = i, values = list(
+                table$addRow(rowKey = i, values = private$.tableValues(list(
                     study = as.character(meta_data$study[i]),
                     # Percent, matching the pooled table. These were proportions
                     # (0.82) while the bivariate table held percentages (81.59),
@@ -3059,7 +3078,7 @@ diagnosticmetaClass <- R6::R6Class(
                     fn = as.integer(meta_data$fn[i]),
                     tn = as.integer(meta_data$tn[i]),
                     sample_size = as.integer(meta_data$sample_size[i])
-                ))
+                )))
             }
 
             if (isTRUE(private$.continuity_correction)) {
@@ -3223,11 +3242,11 @@ diagnosticmetaClass <- R6::R6Class(
                 list(type = .("Negative LR"), range = "0.2-0.5", interp = .("Weak evidence against disease"))
             )
             for (i in seq_along(lr_guide)) {
-                table$setRow(rowNo = i, values = list(
+                table$setRow(rowNo = i, values = private$.tableValues(list(
                     lr_type = lr_guide[[i]]$type,
                     range = lr_guide[[i]]$range,
                     interpretation = lr_guide[[i]]$interp
-                ))
+                )))
             }
         },
 
@@ -3254,11 +3273,11 @@ diagnosticmetaClass <- R6::R6Class(
                     ppv <- NA_real_
                     npv <- NA_real_
                 }
-                table$setRow(rowKey = paste0("p_", as.integer(prev * 100)), values = list(
+                table$setRow(rowKey = paste0("p_", as.integer(prev * 100)), values = private$.tableValues(list(
                     prevalence = prev,
                     ppv = ppv,
                     npv = npv
-                ))
+                )))
             }
 
             if (has_estimates) {

@@ -11,6 +11,15 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = waterfallBase,
     private = list(
 
+        # Numeric NA is serialized as NaN by this jmvcore build. At the table
+        # boundary, preserve named entries but encode unavailable cells as NULL.
+        .tableValues = function(values) {
+            lapply(values, function(value) {
+                if (is.numeric(value) && length(value) == 1L && is.na(value))
+                    NULL else value
+            })
+        },
+
         # RECIST v1.1 Constants ----
         RECIST_CR_THRESHOLD = -100,  # Complete Response threshold (\u2264-100%)
         RECIST_PR_THRESHOLD = -30,   # Partial Response threshold (\u2264-30%)
@@ -1572,7 +1581,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         }
 
         # Check if data is loaded
-        if (is.null(self$data) || nrow(self$data) == 0) {
+        if (is.null(self$data)) {
           if (!isTRUE(self$options$enableGuidedMode)) {
             self$results$todo$setContent(todo)
           }
@@ -1606,13 +1615,14 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         }
 
         ## Validate data availability ----
+        # Variables assigned but no rows (an empty dataset, or a filter that
+        # excludes every row): stay idle, as for an incomplete selection, but say
+        # why nothing appears.
         if (nrow(self$data) == 0) {
-          if (!isTRUE(self$options$enableGuidedMode)) {
-            todo <- paste0(todo,
-                           paste0("<br><br>",
-                           .("Data contains no complete rows. Check the data.")))
-            self$results$todo$setContent(todo)
-          }
+          no_rows <- .("The dataset contains no rows. Add data (or clear the active filter) and re-run.")
+          private$.addNotice("WARNING", .("Data contains no rows"), no_rows)
+          if (isTRUE(self$options$enableGuidedMode))
+            private$.generateGuidedAnalysis(problem = no_rows)
           return(FALSE)
         }
 
@@ -1971,9 +1981,9 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             percent = percent_display
           )
           if (row_key %in% self$results$summaryTable$rowKeys)
-            self$results$summaryTable$setRow(rowKey = row_key, values = values)
+            self$results$summaryTable$setRow(rowKey = row_key, values = private$.tableValues(values))
           else
-            self$results$summaryTable$addRow(rowKey = row_key, values = values)
+            self$results$summaryTable$addRow(rowKey = row_key, values = private$.tableValues(values))
         }
 
         # Patients in the waterfall but not evaluable (all-missing responses,
@@ -1988,9 +1998,9 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           # This row is not part of the .init() skeleton; addRow() on a re-run
           # would append a second copy.
           if ("recist_Unknown" %in% self$results$summaryTable$rowKeys)
-            self$results$summaryTable$setRow(rowKey = "recist_Unknown", values = unknown_values)
+            self$results$summaryTable$setRow(rowKey = "recist_Unknown", values = private$.tableValues(unknown_values))
           else
-            self$results$summaryTable$addRow(rowKey = "recist_Unknown", values = unknown_values)
+            self$results$summaryTable$addRow(rowKey = "recist_Unknown", values = private$.tableValues(unknown_values))
           self$results$summaryTable$setNote("unknown",
             .("Percentages and the response rates below are computed over evaluable patients only (CR/PR/SD/PD); patients with an unknown category are excluded from every denominator. See the Important Information panel for who was excluded and why."))
         }
@@ -2028,7 +2038,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         idx_env$metric_row_index <- 1
         add_metric_row <- function(values) {
           row_key <- sprintf("metric_%02d", idx_env$metric_row_index)
-          self$results$clinicalMetrics$addRow(rowKey = row_key, values = values)
+          self$results$clinicalMetrics$addRow(rowKey = row_key, values = private$.tableValues(values))
           idx_env$metric_row_index <- idx_env$metric_row_index + 1
         }
 
@@ -2151,31 +2161,31 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
               rdt$setNote("none", .("No patient reached a response (PR or better, <= -30%) after baseline, so time to response and duration of response are not estimable."))
               rdt$setNote("dor", NULL)
               rdt$setNote("needs_time", NULL)
-              rdt$setRow(rowKey = "ttr", values = list(
+              rdt$setRow(rowKey = "ttr", values = private$.tableValues(list(
                 metric = .("Median time to first response (TTR)"),
                 value = NaN,
-                detail = ""))
-              rdt$setRow(rowKey = "dor_naive", values = list(
+                detail = "")))
+              rdt$setRow(rowKey = "dor_naive", values = private$.tableValues(list(
                 metric = .("Median duration of response (naive)"),
                 value = NaN,
-                detail = ""))
-              rdt$setRow(rowKey = "dor_km", values = list(
+                detail = "")))
+              rdt$setRow(rowKey = "dor_km", values = private$.tableValues(list(
                 metric = .("Median duration of response (Kaplan-Meier)"),
                 value = NaN,
-                detail = ""))
+                detail = "")))
             } else {
               rdt$setNote("none", NULL)
               rdt$setNote("needs_time", NULL)
-              rdt$setRow(rowKey = "ttr", values = list(
+              rdt$setRow(rowKey = "ttr", values = private$.tableValues(list(
                 metric = .("Median time to first response (TTR)"),
                 value = s$median_time_to_response,
-                detail = sprintf(.("RECIST PR or better; n=%d responders"), s$n_responders)))
-              rdt$setRow(rowKey = "dor_naive", values = list(
+                detail = sprintf(.("RECIST PR or better; n=%d responders"), s$n_responders))))
+              rdt$setRow(rowKey = "dor_naive", values = private$.tableValues(list(
                 metric = .("Median duration of response (naive)"),
                 value = s$median_duration_of_response,
                 detail = sprintf(.("Ignores censoring; n=%d with duration data"),
-                                 s$n_with_duration_data)))
-              rdt$setRow(rowKey = "dor_km", values = list(
+                                 s$n_with_duration_data))))
+              rdt$setRow(rowKey = "dor_km", values = private$.tableValues(list(
                 metric = .("Median duration of response (Kaplan-Meier)"),
                 value = s$km_median_duration_of_response,
                 detail = if (s$n_responders < 2)
@@ -2187,7 +2197,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                           s$n_duration_events, s$n_responders, ci_text)
                 else
                   sprintf(.("Censoring-aware; %d progression events; %s"),
-                          s$n_duration_events, ci_text)))
+                          s$n_duration_events, ci_text))))
               rdt$setNote("dor",
                 .("DoR is measured from first response to progression over the nadir (reappearance after a complete response counts as progression); responders still in response are censored at their last measured assessment. The Kaplan-Meier median accounts for this censoring and is the preferred summary."))
             }
@@ -2206,9 +2216,9 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           rdt$setNote("none", NULL)
           rdt$setNote("dor", NULL)
           rdt$setNote("override", NULL)
-          rdt$setRow(rowKey = "ttr", values = list(value = NaN, detail = ""))
-          rdt$setRow(rowKey = "dor_naive", values = list(value = NaN, detail = ""))
-          rdt$setRow(rowKey = "dor_km", values = list(value = NaN, detail = ""))
+          rdt$setRow(rowKey = "ttr", values = private$.tableValues(list(value = NaN, detail = "")))
+          rdt$setRow(rowKey = "dor_naive", values = private$.tableValues(list(value = NaN, detail = "")))
+          rdt$setRow(rowKey = "dor_km", values = private$.tableValues(list(value = NaN, detail = "")))
         }
 
         # Person-time ----
@@ -2252,7 +2262,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
               # "Median time to best response" and the DoR are meaningless for
               # SD/PD rows; leave those blank.
               is_responder_cat <- cat_i %in% c("CR", "PR")
-              pt$addRow(rowKey = i, values = list(
+              pt$addRow(rowKey = i, values = private$.tableValues(list(
                 category = cat_i,
                 patients = by_cat$patients[i],
                 patient_pct = sprintf("%.1f%%", by_cat$pct_patients[i]),
@@ -2265,9 +2275,9 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                   else if (is.na(by_cat$median_duration[i])) .("not reached")
                   else sprintf("%.1f", by_cat$median_duration[i])
                 } else ""
-              ))
+              )))
             }
-            pt$addRow(rowKey = nrow(by_cat) + 1, values = list(
+            pt$addRow(rowKey = nrow(by_cat) + 1, values = private$.tableValues(list(
               category = .("Total"),
               patients = person_time_metrics$summary$total_patients,
               patient_pct = "100.0%",
@@ -2275,7 +2285,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
               time_pct = "100.0%",
               median_time = "",
               median_duration = ""
-            ))
+            )))
             pt$setNote("dor",
               .("Categories are the final response categories (same as the Response Categories table). Person-time is follow-up to the last measured assessment. The DoR column is the Kaplan-Meier median duration of response within the category."))
             if (person_time_metrics$summary$n_excluded > 0) {
@@ -2652,22 +2662,22 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           for (cat in c("CR", "PR", "SD", "PD"))
             self$results$summaryTable$addRow(
               rowKey = sprintf("recist_%s", cat),
-              values = list(category = cat))
+              values = private$.tableValues(list(category = cat)))
         }
         if (self$results$enhancedClinicalMetrics$rowCount == 0) {
-          self$results$enhancedClinicalMetrics$addRow(rowKey = 1, values = list())
-          self$results$enhancedClinicalMetrics$addRow(rowKey = 2, values = list())
+          self$results$enhancedClinicalMetrics$addRow(rowKey = 1, values = private$.tableValues(list()))
+          self$results$enhancedClinicalMetrics$addRow(rowKey = 2, values = private$.tableValues(list()))
         }
         if (self$results$responseDurationTable$rowCount == 0) {
           self$results$responseDurationTable$addRow(
             rowKey = "ttr",
-            values = list(metric = .("Median time to first response (TTR)")))
+            values = private$.tableValues(list(metric = .("Median time to first response (TTR)"))))
           self$results$responseDurationTable$addRow(
             rowKey = "dor_naive",
-            values = list(metric = .("Median duration of response (naive)")))
+            values = private$.tableValues(list(metric = .("Median duration of response (naive)"))))
           self$results$responseDurationTable$addRow(
             rowKey = "dor_km",
-            values = list(metric = .("Median duration of response (Kaplan-Meier)")))
+            values = private$.tableValues(list(metric = .("Median duration of response (Kaplan-Meier)"))))
         }
       },
 
@@ -3526,10 +3536,10 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           ci_upper = round(dcr_ci[2] * 100, 1),
           interpretation = private$.interpretDCR(metrics$DCR, n_dcr, n_total)
         )
-        if (1 %in% ecm$rowKeys) ecm$setRow(rowKey = 1, values = orr_values)
-        else ecm$addRow(rowKey = 1, values = orr_values)
-        if (2 %in% ecm$rowKeys) ecm$setRow(rowKey = 2, values = dcr_values)
-        else ecm$addRow(rowKey = 2, values = dcr_values)
+        if (1 %in% ecm$rowKeys) ecm$setRow(rowKey = 1, values = private$.tableValues(orr_values))
+        else ecm$addRow(rowKey = 1, values = private$.tableValues(orr_values))
+        if (2 %in% ecm$rowKeys) ecm$setRow(rowKey = 2, values = private$.tableValues(dcr_values))
+        else ecm$addRow(rowKey = 2, values = private$.tableValues(dcr_values))
 
         # SAFETY CHECK: Warn if confidence intervals are extremely wide (>40 percentage points)
         # This indicates severe statistical uncertainty that makes results unreliable
@@ -3706,14 +3716,14 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # Populate group comparison table
         for (i in seq_len(nrow(group_stats))) {
-          self$results$groupComparisonTable$addRow(rowKey = i, values = list(
+          self$results$groupComparisonTable$addRow(rowKey = i, values = private$.tableValues(list(
             group = as.character(group_stats$patient_group[i]),
             n_patients = group_stats$n_patients[i],
             orr = round(group_stats$orr[i], 1),
             orr_ci = group_stats$orr_ci[i],
             dcr = round(group_stats$dcr[i], 1),
             dcr_ci = group_stats$dcr_ci[i]
-          ))
+          )))
         }
         self$results$groupComparisonTable$setNote("denom",
           .("N and all rates count evaluable patients only (CR/PR/SD/PD), the same denominator as the overall ORR/DCR; patients with an unknown category are excluded."))
@@ -3767,14 +3777,14 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
               .("No statistically significant difference in response rates was detected; this does not establish that the rates are equal")
             }
 
-            self$results$groupComparisonTest$addRow(rowKey = row_count, values = list(
+            self$results$groupComparisonTest$addRow(rowKey = row_count, values = private$.tableValues(list(
               comparison = .("Objective Response Rate (ORR)"),
               # fisher.test() returns an odds ratio only for a 2x2 table; with
               # 3+ groups this printed "OR = NA".
               test_statistic = or_label(orr_test),
               p_value = orr_test$p.value,
               interpretation = orr_interpretation
-            ))
+            )))
             row_count <- row_count + 1
           }
 
@@ -3785,12 +3795,12 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
               .("No statistically significant difference in disease control rates was detected; this does not establish that the rates are equal")
             }
 
-            self$results$groupComparisonTest$addRow(rowKey = row_count, values = list(
+            self$results$groupComparisonTest$addRow(rowKey = row_count, values = private$.tableValues(list(
               comparison = .("Disease Control Rate (DCR)"),
               test_statistic = or_label(dcr_test),
               p_value = dcr_test$p.value,
               interpretation = dcr_interpretation
-            ))
+            )))
           }
 
           if (self$results$groupComparisonTest$rowCount > 1) {

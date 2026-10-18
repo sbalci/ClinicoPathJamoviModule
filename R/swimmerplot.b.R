@@ -27,6 +27,15 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
     "swimmerplotClass",
     inherit = swimmerplotBase,
     private = list(
+        # Numeric NA is serialized as NaN by this jmvcore build. At the table
+        # boundary, preserve named entries but encode unavailable cells as NULL.
+        .tableValues = function(values) {
+            lapply(values, function(value) {
+                if (is.numeric(value) && length(value) == 1L && is.na(value))
+                    NULL else value
+            })
+        },
+
         # Notice collection helpers. A single Preformatted (plain-text) output item.
         # library-audit 2026-09-22 OncoPath [LOW] REJECTED: Notice renders single-line plain text;
         #   Preformatted avoids HTML and accumulates safely across run cycles (guide section 13)
@@ -2240,7 +2249,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             labs <- private$.summaryMetricLabels()
             .deleteTableRows(tbl)
             for (i in seq_along(labs))
-                tbl$addRow(rowKey = i, values = list(metric = labs[i], value = NA_real_))
+                tbl$addRow(rowKey = i, values = private$.tableValues(list(metric = labs[i], value = NA_real_)))
         },
 
         .init = function() {
@@ -2256,7 +2265,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             if (self$results$summary$rowCount == 0)
                 for (i in seq_along(summary_metrics))
                     self$results$summary$addRow(
-                        rowKey = i, values = list(metric = summary_metrics[i]))
+                        rowKey = i, values = private$.tableValues(list(metric = summary_metrics[i])))
 
             # Unlike the summary block above, this row set is NOT fixed:
             # .advancedMetricLabels() returns 0, 2, 4 or 6 keys depending on
@@ -2280,7 +2289,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 .deleteTableRows(self$results$advancedMetrics)
                 for (key in want)
                     self$results$advancedMetrics$addRow(rowKey = key,
-                        values = list(metric_name = advanced_labels[[key]]))
+                        values = private$.tableValues(list(metric_name = advanced_labels[[key]])))
             }
         },
 
@@ -2323,10 +2332,10 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             scaffolded <- as.character(unlist(self$results$advancedMetrics$rowKeys))
             for (key in names(advanced_labels))
                 if (key %in% scaffolded)
-                    self$results$advancedMetrics$setRow(rowKey = key, values = list(
+                    self$results$advancedMetrics$setRow(rowKey = key, values = private$.tableValues(list(
                         metric_name = advanced_labels[[key]], metric_value = NA_real_,
                         confidence_interval = NA_character_, metric_unit = NA_character_,
-                        clinical_interpretation = NA_character_))
+                        clinical_interpretation = NA_character_)))
 
             # Static educational panels: populate whenever requested, BEFORE any
             # early return - previously an incomplete selection or a validation
@@ -2648,11 +2657,11 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             # the values are computed here. deleteRows() would take those rows
             # with it, and a subsequent setRow() on a missing key aborts the
             # analysis, so the response rows below are cleared selectively.
-            summary_table$setRow(rowKey = 1L, values = list(value = stats$n_patients))
-            summary_table$setRow(rowKey = 2L, values = list(value = stats$n_observations))
-            summary_table$setRow(rowKey = 3L, values = list(value = round(stats$median_duration, 2)))
-            summary_table$setRow(rowKey = 4L, values = list(value = round(stats$mean_duration, 2)))
-            summary_table$setRow(rowKey = 5L, values = list(value = round(stats$total_person_time, 2)))
+            summary_table$setRow(rowKey = 1L, values = private$.tableValues(list(value = stats$n_patients)))
+            summary_table$setRow(rowKey = 2L, values = private$.tableValues(list(value = stats$n_observations)))
+            summary_table$setRow(rowKey = 3L, values = private$.tableValues(list(value = round(stats$median_duration, 2))))
+            summary_table$setRow(rowKey = 4L, values = private$.tableValues(list(value = round(stats$mean_duration, 2))))
+            summary_table$setRow(rowKey = 5L, values = private$.tableValues(list(value = round(stats$total_person_time, 2))))
 
             # This table has one Value column carrying counts, durations and
             # percentages, and it used to have no note at all unless a response
@@ -2686,9 +2695,9 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                         value = round(stats$response_percentages[[response]], 1)
                     )
                     if (any(vapply(summary_table$rowKeys, identical, logical(1), row_key)))
-                        summary_table$setRow(rowKey = row_key, values = row_values)
+                        summary_table$setRow(rowKey = row_key, values = private$.tableValues(row_values))
                     else
-                        summary_table$addRow(rowKey = row_key, values = row_values)
+                        summary_table$addRow(rowKey = row_key, values = private$.tableValues(row_values))
                 }
 
                 # Every rate above divides by all patients, so the patients with
@@ -2705,9 +2714,9 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     # "missing" produces exactly that key, and this row then
                     # overwrote the category's own row.
                     if (any(vapply(summary_table$rowKeys, identical, logical(1), "no_recorded_response")))
-                        summary_table$setRow(rowKey = "no_recorded_response", values = miss_values)
+                        summary_table$setRow(rowKey = "no_recorded_response", values = private$.tableValues(miss_values))
                     else
-                        summary_table$addRow(rowKey = "no_recorded_response", values = miss_values)
+                        summary_table$addRow(rowKey = "no_recorded_response", values = private$.tableValues(miss_values))
                 }
 
                 # Name the denominator once, beside the rows that use it.
@@ -2760,13 +2769,13 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 )
 
             for (i in seq_len(nrow(person_time_data))) {
-                self$results$personTimeTable$addRow(rowKey = i, values = list(
+                self$results$personTimeTable$addRow(rowKey = i, values = private$.tableValues(list(
                     response_type = jmvcore::htmlEscape(as.character(person_time_data$response[i])),
                     n_patients = person_time_data$n_patients[i],
                     total_time = round(person_time_data$total_time[i], 2),
                     mean_time = round(person_time_data$mean_time[i], 2),
                     incidence_rate = round(person_time_data$followup_density[i], 3)
-                ))
+                )))
             }
             # The rows sum to less than Total Person-Time whenever a patient has no
             # recorded response, and nothing said so: a 6-patient fixture summed
@@ -2839,12 +2848,12 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             
             # Populate the table
             for (i in seq_len(nrow(milestone_stats))) {
-                self$results$milestoneTable$addRow(rowKey = i, values = list(
+                self$results$milestoneTable$addRow(rowKey = i, values = private$.tableValues(list(
                     milestone_name = jmvcore::htmlEscape(as.character(milestone_stats$label[i])),
                     n_events = milestone_stats$n_events[i],
                     median_time = round(milestone_stats$median_time[i], 2),
                     time_range = milestone_stats$time_range[i]
-                ))
+                )))
             }
         },
         
@@ -2893,12 +2902,12 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             
             # Populate the table
             for (i in seq_len(nrow(event_stats))) {
-                self$results$eventMarkerTable$addRow(rowKey = i, values = list(
+                self$results$eventMarkerTable$addRow(rowKey = i, values = private$.tableValues(list(
                     event_type = jmvcore::htmlEscape(as.character(event_stats$label[i])),
                     n_events = event_stats$n_events[i],
                     percent = event_stats$percent[i],
                     median_time = round(event_stats$median_time[i], 2)
-                ))
+                )))
             }
 
             # The percentage divides by event RECORDS, not patients, so one
@@ -3055,13 +3064,13 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             labels[["median_followup"]] <- private$.medianFollowUpLabel(stats$median_followup_method)
             for (metric in metrics) {
                 if (!metric$key %in% names(labels)) next
-                self$results$advancedMetrics$setRow(rowKey = metric$key, values = list(
+                self$results$advancedMetrics$setRow(rowKey = metric$key, values = private$.tableValues(list(
                     metric_name = labels[[metric$key]],
                     metric_value = metric$value,
                     confidence_interval = metric$ci,
                     metric_unit = metric$unit,
                     clinical_interpretation = metric$interpretation
-                ))
+                )))
             }
         },
 
@@ -3268,14 +3277,14 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                         .("No statistically significant difference in response rates was detected; this does not establish that the rates are equal, as the test may lack power")
                     }
 
-                    self$results$groupComparisonTest$addRow(rowKey = 1, values = list(
+                    self$results$groupComparisonTest$addRow(rowKey = 1, values = private$.tableValues(list(
                         comparison = .("Objective Response Rate (ORR)"),
                         # fisher.test() returns an odds ratio only for a 2x2 table;
                         # with 3+ groups this printed "OR = NA".
                         test_statistic = private$.groupTestStatistic(orr_contingency, orr_test),
                         p_value = orr_test$p.value,
                         interpretation = orr_interpretation
-                    ))
+                    )))
                     orr_ran <- TRUE
                 }
             }
@@ -3298,12 +3307,12 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                         .("No statistically significant difference in disease control rates was detected; this does not establish that the rates are equal, as the test may lack power")
                     }
 
-                    self$results$groupComparisonTest$addRow(rowKey = 2, values = list(
+                    self$results$groupComparisonTest$addRow(rowKey = 2, values = private$.tableValues(list(
                         comparison = .("Disease Control Rate (DCR)"),
                         test_statistic = private$.groupTestStatistic(dcr_contingency, dcr_test),
                         p_value = dcr_test$p.value,
                         interpretation = dcr_interpretation
-                    ))
+                    )))
                     dcr_ran <- TRUE
                 }
             }
@@ -3404,14 +3413,14 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     export_cap <- 500L
                     n_export <- min(nrow(per_patient), export_cap)
                     for (i in seq_len(n_export)) {
-                        tbl$addRow(rowKey = i, values = list(
+                        tbl$addRow(rowKey = i, values = private$.tableValues(list(
                             patient_id = as.character(per_patient$patient_id[i]),
                             start_time = st_exp[i],
                             end_time   = en_exp[i],
                             duration   = per_patient$follow_up[i],
                             response   = if (has_response)
                                 as.character(per_patient$response[i]) else ""
-                        ))
+                        )))
                     }
                     if (nrow(per_patient) > export_cap)
                         tbl$setNote("capped", sprintf(
@@ -3451,10 +3460,10 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 tbl <- self$results$summaryData
                 .deleteTableRows(tbl)
                 for (i in seq_len(nrow(summary_export))) {
-                    tbl$addRow(rowKey = i, values = list(
+                    tbl$addRow(rowKey = i, values = private$.tableValues(list(
                         metric = as.character(summary_export$metric[i]),
                         value  = suppressWarnings(as.numeric(summary_export$value[i]))
-                    ))
+                    )))
                 }
             }
             
