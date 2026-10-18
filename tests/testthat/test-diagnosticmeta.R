@@ -181,3 +181,48 @@ testthat::test_that("diagnosticmeta respects optional analysis flags", {
   testthat::expect_true(enabled_results$publicationbias$rowCount >= 1)
   testthat::expect_false(is.null(enabled_results$srocplot$state))
 })
+
+testthat::test_that("diagnosticmeta preserves factor reference level in meta-regression note and rounds predictive values note", {
+  testthat::skip_if_not_installed("mada")
+  testthat::skip_if_not_installed("metafor")
+
+  candidates <- c(
+    testthat::test_path("..", "..", "data-raw", "non-rda", "diagnostic_meta_test.csv"),
+    file.path("..", "..", "data-raw", "non-rda", "diagnostic_meta_test.csv"),
+    file.path("data-raw", "non-rda", "diagnostic_meta_test.csv")
+  )
+  data_path <- candidates[file.exists(candidates)][1]
+  testthat::skip_if(is.na(data_path), "diagnostic_meta_test.csv fixture not found")
+  diag_data <- utils::read.csv(data_path, stringsAsFactors = FALSE)
+
+  # Factor whose first level ("Manual") is not alphabetically first ("Automated")
+  diag_data$method_group <- factor(
+    rep(c("Manual", "Automated"), length.out = nrow(diag_data)),
+    levels = c("Manual", "Automated")
+  )
+
+  res <- diagnosticmeta(
+    data = diag_data,
+    study = study_name,
+    true_positives = true_positives,
+    false_positives = false_positives,
+    false_negatives = false_negatives,
+    true_negatives = true_negatives,
+    covariate = method_group,
+    bivariate_analysis = TRUE,
+    meta_regression = TRUE,
+    show_interpretation = TRUE,
+    forest_plot = FALSE,
+    sroc_plot = FALSE,
+    funnel_plot = FALSE
+  )
+
+  mr_df <- res$metaregression$asDF
+  testthat::expect_true(any(grepl("method_group Automated", mr_df$parameter, fixed = TRUE)))
+  scale_note <- res$metaregression$notes$scale$note
+  testthat::expect_match(scale_note, "reference level 'Manual'", fixed = TRUE)
+
+  pv_note <- res$predictiveValues$notes$explanation$note
+  testthat::expect_match(pv_note, "\\([0-9]+\\.[0-9]%\\)")
+})
+

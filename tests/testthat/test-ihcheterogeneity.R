@@ -134,3 +134,23 @@ test_that("ihcheterogeneity glossary works", {
     expect_true(results$glossary$visible)
 })
 
+test_that("ihcheterogeneity omits opposite-direction calibration wording without a reference", {
+    set.seed(42)
+    n <- 30
+    base <- rnorm(n, 20, 4)
+    df_inter <- data.frame(
+        core1 = base + 35 + rnorm(n, 0, 1),
+        core2 = base + rnorm(n, 0, 1),
+        core3 = base + rnorm(n, 0, 1)
+    )
+    res <- ClinicoPath::ihcheterogeneity(
+        data = df_inter,
+        biopsy1 = "core1",
+        biopsy2 = "core2",
+        biopsy3 = "core3"
+    )
+    interp_html <- res$interpretation$content
+    expect_false(grepl("offset in opposite directions", interp_html, fixed = TRUE))
+})
+
+

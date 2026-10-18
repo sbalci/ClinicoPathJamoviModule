@@ -104,7 +104,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # Calculate statistical power for response rates
         .progressionTimes = function(times, values, after_time) {
-          ok <- !is.na(times) & !is.na(values)
+          ok <- !is.na(times) & !is.na(values) & times >= 0
           times <- times[ok]
           values <- values[ok]
           if (length(times) == 0) return(numeric(0))
@@ -134,7 +134,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # a progression precludes a later CR, PR or SD, so assessments after this
         # time do not count towards the best response.
         .firstProgression = function(times, values) {
-          ok <- !is.na(times) & !is.na(values)
+          ok <- !is.na(times) & !is.na(values) & times >= 0
           t <- times[ok]; v <- values[ok]
           if (!any(t == 0)) { t <- c(0, t); v <- c(0, v) }
           pt <- private$.progressionTimes(t, v, 0)
@@ -435,7 +435,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           n <- nrow(df)
           # Confirmation: a point at each bar tip, shape mapped by level
           if (!is.null(plotData$options$confirmationVar) && "confirm_status" %in% names(df)) {
-            keep <- !is.na(df$confirm_status)
+            keep <- !is.na(df$confirm_status) & !is.na(df$response)
             if (any(keep)) {
               marker_df <- data.frame(
                 xpos = which(keep),
@@ -468,7 +468,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           }
           # Ongoing: an arrow drawn outward from each ongoing bar tip
           if (!is.null(plotData$options$ongoingVar) && "ongoing_flag" %in% names(df)) {
-            on_idx <- which(private$.isTrueVec(df$ongoing_flag))
+            on_idx <- which(private$.isTrueVec(df$ongoing_flag) & !is.na(df$response))
             if (length(on_idx) > 0) {
               on_df <- data.frame(
                 xpos = on_idx,
@@ -521,6 +521,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     bad <- !is.na(vals) & vals < 0
                     if (any(bad)) {
                         bad_ids <- unique(as.character(source_df[[patientID]][bad]))
+                        attr(waterfall_data, "bad_raw_ids") <- bad_ids
                         idx <- which(as.character(waterfall_data[[patientID]]) %in% bad_ids)
                         if (length(idx) > 0) {
                             waterfall_data$response[idx] <- NA_real_
@@ -593,7 +594,9 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .accountForUnevaluablePatients = function(waterfall_data, source_df,
                                                   patientID, timeVar,
                                                   responseVar = NULL,
-                                                  inputType = "percentage") {
+                                                  inputType = "percentage",
+                                                  analysis_data = NULL,
+                                                  categoryVar = NULL) {
           if (is.null(waterfall_data) || !is.data.frame(waterfall_data) ||
               is.null(patientID) || is.null(source_df) ||
               !patientID %in% names(source_df)) {
@@ -627,6 +630,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           # Patients with no post-baseline ASSESSMENT: a later row counts only when
           # its measurement is present. Counting rows by time alone let a scheduled
           # visit with a missing measurement pass, and the patient became SD at 0%.
+          no_post_idx <- integer(0)
           if (!is.null(timeVar) && timeVar %in% names(source_df)) {
             tv <- jmvcore::toNumeric(source_df[[timeVar]])
             measured <- if (!is.null(responseVar) && responseVar %in% names(source_df))
@@ -635,22 +639,48 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
               list(n_post = !is.na(tv) & tv > 0 & measured),
               by = list(pid = source_df[[patientID]]), FUN = sum)
             no_post <- post$pid[post$n_post == 0]
-            idx <- which(waterfall_data[[patientID]] %in% no_post)
-            if (length(idx) > 0) {
-              waterfall_data$response[idx] <- NA_real_
+            no_post_idx <- which(waterfall_data[[patientID]] %in% no_post)
+            if (length(no_post_idx) > 0) {
+              waterfall_data$response[no_post_idx] <- NA_real_
               waterfall_data$recist_category <- private$.categorizeRECIST(
                 waterfall_data$response)
+            }
+          }
+
+          # Apply user-supplied RECIST category override before emitting
+          # unevaluable notices, so patients with a baseline scan only who are
+          # explicitly coded as PD (e.g. clinical progression, new lesions, or
+          # death before first follow-up scan) are counted as evaluable PD
+          # rather than announced as "Unknown" and then overridden.
+          bad_raw_ids <- attr(waterfall_data, "bad_raw_ids")
+          if (!is.null(categoryVar) && !is.null(analysis_data)) {
+            waterfall_data <- private$.applyCategoryOverride(
+              waterfall_data, analysis_data, patientID, categoryVar, timeVar)
+            if (length(bad_raw_ids) > 0) {
+              bad_idx <- which(as.character(waterfall_data[[patientID]]) %in% bad_raw_ids)
+              if (length(bad_idx) > 0) {
+                waterfall_data$recist_category[bad_idx] <- "Unknown"
+              }
+            }
+          }
+
+          if (length(no_post_idx) > 0) {
+            uneval_idx <- no_post_idx[as.character(waterfall_data$recist_category[no_post_idx]) == "Unknown"]
+            if (length(uneval_idx) > 0) {
               private$.addNotice(
                 type = "WARNING",
                 title = .("NOT RESPONSE-EVALUABLE"),
                 content = sprintf(
                   .("%d patient(s) have a baseline but no post-baseline measurement (no later row, or the later measurements are missing) and are therefore not response-evaluable: %s. They are reported as \"Unknown\" rather than as stable disease, so they do not inflate the disease control rate."),
-                  length(idx),
-                  paste(utils::head(as.character(waterfall_data[[patientID]][idx]), 10),
+                  length(uneval_idx),
+                  paste(utils::head(as.character(waterfall_data[[patientID]][uneval_idx]), 10),
                         collapse = ", "))
               )
             }
           }
+
+          n_evaluable <- sum(waterfall_data$recist_category %in% c("CR", "PR", "SD", "PD"),
+                             na.rm = TRUE)
 
           # Reported after the demotions so the stated denominator is the one the
           # rates use (patients shown as Unknown are not in it).
@@ -668,13 +698,13 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
               content = sprintf(template,
                 length(dropped), length(all_ids),
                 paste(utils::head(as.character(dropped), 10), collapse = ", "),
-                sum(!is.na(waterfall_data$response)))
+                n_evaluable)
             )
           }
 
           # Checked after the demotions: a cohort can have rows for every patient
           # and still leave nobody evaluable.
-          if (all(is.na(waterfall_data$response))) {
+          if (n_evaluable == 0) {
             no_evaluable_notice()
           }
 
@@ -1727,18 +1757,20 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             processed_data$waterfall, validated_data, safe_patientID,
             safe_responseVar, self$options$inputType)
 
+          bad_raw_ids <- attr(processed_data$waterfall, "bad_raw_ids")
+          if (length(bad_raw_ids) > 0 && !is.null(processed_data$spider) &&
+              safe_patientID %in% names(processed_data$spider)) {
+            s_idx <- which(as.character(processed_data$spider[[safe_patientID]]) %in% bad_raw_ids)
+            if (length(s_idx) > 0) {
+              processed_data$spider <- processed_data$spider[-s_idx, , drop = FALSE]
+            }
+          }
+
           processed_data$waterfall <- private$.accountForUnevaluablePatients(
             processed_data$waterfall, validated_data, safe_patientID, safe_timeVar,
-            safe_responseVar, self$options$inputType)
-        }
-
-        # Optional: override the computed RECIST category with a user-supplied one
-        # (e.g., new-lesion PD despite target-lesion shrinkage). Applied before
-        # metrics and plots so ORR/DCR and bar coloring all reflect it.
-        if (!is.null(processed_data) && !is.null(processed_data$waterfall)) {
-          processed_data$waterfall <- private$.applyCategoryOverride(
-            processed_data$waterfall, analysis_data, safe_patientID,
-            self$options$responseCategoryVar, safe_timeVar)
+            safe_responseVar, self$options$inputType,
+            analysis_data = analysis_data,
+            categoryVar = self$options$responseCategoryVar)
         }
 
         # A processing error ends the run here, before the method disclaimers (they
@@ -1825,10 +1857,10 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # Check for small sample size (if processed_data is available)
         if (!is.null(processed_data) && !is.null(processed_data$waterfall)) {
-          # Count EVALUABLE patients (non-missing response after the demotions
-          # above), matching the ORR/DCR denominator - nrow() also counts
-          # Unknown patients and so understated how small the usable cohort is.
-          n_patients <- sum(!is.na(processed_data$waterfall$response))
+          # Count EVALUABLE patients (CR/PR/SD/PD after demotions and category
+          # overrides), matching the ORR/DCR denominator in .calculateMetrics().
+          n_patients <- sum(processed_data$waterfall$recist_category %in% c("CR", "PR", "SD", "PD"),
+                            na.rm = TRUE)
 
           # Warning #6: Small Sample Size
           if (n_patients > 0 && n_patients < 10) {
@@ -1913,6 +1945,11 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         ## Update results tables ----
         private$.checkpoint()  # Checkpoint before summary table population
+        if ((is.null(metrics$n_unknown) || metrics$n_unknown == 0) &&
+            "recist_Unknown" %in% self$results$summaryTable$rowKeys) {
+          self$results$summaryTable$deleteRows()
+          self$results$summaryTable$setNote("unknown", NULL)
+        }
         # The four category rows are created in .init() (fixed row set); fill
         # them with setRow so the table does not restructure on every run. The
         # rowKeys fallback covers a run without a prior init cycle.

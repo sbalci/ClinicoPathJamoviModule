@@ -1834,6 +1834,10 @@ diagnosticmetaClass <- R6::R6Class(
                         return(NULL)
                     }
 
+                    if (is.factor(data$covariate)) {
+                        data$covariate <- droplevels(data$covariate)
+                    }
+
                     # Per-margin degrees of freedom: a categorical covariate
                     # contributes (levels - 1) parameters, and both the level
                     # count and the study count are those of THIS margin after
@@ -2020,7 +2024,11 @@ diagnosticmetaClass <- R6::R6Class(
                 # a row labelled "grade MRI  -0.037" had no stated comparator.
                 cov_levels_note <- if (is.factor(analysis_data$covariate) ||
                                        is.character(analysis_data$covariate)) {
-                    lv <- sort(unique(stats::na.omit(as.character(analysis_data$covariate))))
+                    lv <- if (is.factor(analysis_data$covariate)) {
+                        levels(droplevels(analysis_data$covariate))
+                    } else {
+                        sort(unique(stats::na.omit(as.character(analysis_data$covariate))))
+                    }
                     sprintf(.("Each coefficient contrasts that level of %s against the reference level '%s'."),
                             covariate_var, lv[1])
                 } else {
@@ -3259,8 +3267,8 @@ diagnosticmetaClass <- R6::R6Class(
             if (has_estimates) {
                 table$setNote("explanation", sprintf(
                     .("Sensitivity and specificity are test characteristics; predictive values depend on disease prevalence. Values calculated from pooled sensitivity (%s%%) and specificity (%s%%)."),
-                    .fmt(sens * 100, digits = 1),
-                    .fmt(spec * 100, digits = 1)
+                    sprintf("%.1f", sens * 100),
+                    sprintf("%.1f", spec * 100)
                 ))
             } else {
                 table$setNote("explanation",

@@ -2062,7 +2062,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                         sprintf(.("Calibrate region(s) %s against the reference before substituting them."), info$regions)
                     else
                         .("Calibrate the mean of all regions against the reference before using it in its place.")),
-                    if (info$opposite) paste0(" ", .("The regions are offset in opposite directions, so each needs its own calibration.")) else "",
+                    if (metrics$has_reference && info$opposite) paste0(" ", .("The regions are offset in opposite directions, so each needs its own calibration.")) else "",
                     "</li>") else "",
                 if (n_cv > 0) paste0(
                     "<li><strong>", .("Quality Control:"), "</strong> ",

@@ -421,3 +421,71 @@ test_that("Integration tests work correctly", {
   expect_true(!is.null(result_full_raw$waterfallplot))
   expect_true(!is.null(result_full_raw$spiderplot))
 })
+
+test_that("Pre-baseline (time < 0) scans do not poison on-study nadir or best response", {
+  df_pre <- data.frame(
+    id = c("P1", "P1", "P1", "P1", "P2", "P2", "P2"),
+    time = c(-1, 0, 2, 4, 0, 2, 4),
+    meas = c(25, 50, 35, 30, 50, 35, 30),
+    stringsAsFactors = FALSE
+  )
+
+  res <- waterfall(
+    data = df_pre,
+    patientID = "id",
+    responseVar = "meas",
+    timeVar = "time",
+    inputType = "raw",
+    showResponseDuration = TRUE
+  )
+
+  wf_df <- res$waterfallplot$state$data$waterfall
+  expect_equal(wf_df$response[wf_df$id == "P1"], -40)
+  expect_equal(wf_df$response[wf_df$id == "P2"], -40)
+})
+
+test_that("Negative raw measurements are excluded from spider plot data", {
+  df_neg <- data.frame(
+    id = c("P1", "P1", "P1", "P2", "P2", "P2", "P3", "P3", "P3"),
+    time = c(0, 2, 4, 0, 2, 4, 0, 2, 4),
+    meas = c(-50, -30, -10, 50, -10, 20, 50, 30, 25),
+    stringsAsFactors = FALSE
+  )
+
+  res <- waterfall(
+    data = df_neg,
+    patientID = "id",
+    responseVar = "meas",
+    timeVar = "time",
+    inputType = "raw",
+    showSpiderPlot = TRUE
+  )
+
+  sp_df <- res$spiderplot$state$data$spider
+  expect_false(any(sp_df$id %in% c("P1", "P2")))
+  expect_true(all(sp_df$id == "P3"))
+})
+
+test_that("responseCategoryVar override on baseline-only patient reconciles with notices and sample size", {
+  df_ov <- data.frame(
+    id = c("P1", "P1", "P2", "P2", "P3"),
+    time = c(0, 2, 0, 2, 0),
+    meas = c(50, 25, 50, 45, 50),
+    cat = c("PR", "PR", "SD", "SD", "PD"),
+    stringsAsFactors = FALSE
+  )
+
+  res <- waterfall(
+    data = df_ov,
+    patientID = "id",
+    responseVar = "meas",
+    timeVar = "time",
+    inputType = "raw",
+    responseCategoryVar = "cat"
+  )
+
+  notices_html <- res$notices$content
+  expect_false(grepl("NOT RESPONSE-EVALUABLE", notices_html, fixed = TRUE))
+  expect_match(notices_html, "Only n=3 evaluable patients", fixed = TRUE)
+})
+
