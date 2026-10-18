@@ -26,6 +26,9 @@
 		},
 		{
 			"path": "../Pj"
+		},
+		{
+			"path": "../ClinicoPathPj"
 		}
 	],
 	"settings": {}
