@@ -68,7 +68,8 @@ decisionOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..goldPositive <- jmvcore::OptionLevel$new(
                 "goldPositive",
                 goldPositive,
-                variable="(gold)")
+                variable="(gold)",
+                allowNone=TRUE)
             private$..newtest <- jmvcore::OptionVariable$new(
                 "newtest",
                 newtest,
@@ -80,7 +81,8 @@ decisionOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..testPositive <- jmvcore::OptionLevel$new(
                 "testPositive",
                 testPositive,
-                variable="(newtest)")
+                variable="(newtest)",
+                allowNone=TRUE)
             private$..goldNegative <- jmvcore::OptionLevel$new(
                 "goldNegative",
                 goldNegative,
@@ -1209,11 +1211,15 @@ decisionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param gold The reference standard variable, used as each case's disease
 #'   status.
 #' @param goldPositive The positive reference level; disease interpretation
-#'   requires a disease standard.
+#'   requires a disease standard. It is never taken from the order of the
+#'   levels: NULL leaves the analysis pending, listing the levels found. The
+#'   argument has no default; pass the level.
 #' @param newtest The diagnostic test variable being evaluated for
 #'   performance.
 #' @param testPositive The level representing a positive result for the test
-#'   under evaluation.
+#'   under evaluation. It is never taken from the order of the levels: NULL
+#'   leaves the analysis pending, listing the levels found. The argument has no
+#'   default; pass the level.
 #' @param goldNegative The level indicating absence of disease in the gold
 #'   standard variable. The compiler forbids a default on a Level option, so R
 #'   callers must pass it explicitly; pass NULL only for a two-level variable,

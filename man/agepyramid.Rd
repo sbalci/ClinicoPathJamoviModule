@@ -40,16 +40,20 @@ continuous values used for the report}
 the categorical values used for the report}
 
 \item{female}{a string naming the level of \code{gender} that identifies
-female subjects. This argument has no default (jamovi does not allow one on
-a level option), so a call from R must always supply it; pass NULL to let
-the analysis read the level names itself, which it reports in a note above
-the results.}
+female subjects. It must be chosen: it is never read from the level names
+or their order. The argument has no default (jamovi does not allow one on a
+level option), so a call from R must supply it. NULL leaves the analysis
+waiting, with the levels found and their counts listed and nothing drawn,
+unless \code{male} is set and \code{gender} has no other observed level:
+that single-gender cohort is drawn on the male side only.}
 
 \item{male}{a string naming the level of \code{gender} that identifies male
-subjects. This argument has no default (jamovi does not allow one on a
-level option), so a call from R must always supply it; pass NULL to let the
-analysis read the level names itself, which it reports in a note above the
-results.}
+subjects. It must be chosen: it is never read from the level names or their
+order. The argument has no default (jamovi does not allow one on a level
+option), so a call from R must supply it. NULL leaves the analysis waiting,
+with the levels found and their counts listed and nothing drawn, unless
+\code{female} is set and \code{gender} has no other observed level: that
+single-gender cohort is drawn on the female side only.}
 
 \item{age_groups}{Predefined age group categories. Choose 'custom' to use
 bin_width, or select a preset. 'who' gives the WHO/UN standard five-year
@@ -155,8 +159,9 @@ Generates an age pyramid from an age variable and a gender variable.
 \examples{
 \donttest{
 # `female` and `male` are Level options: jamovi forbids a default on
-# them, so they are REQUIRED arguments of this function. Pass NULL to
-# have the levels read from their names.
+# them, so they are REQUIRED arguments of this function. They are
+# never read from the level names or order: NULL leaves the analysis
+# waiting (except for a single-gender cohort, see `female`).
 agepyramid(
     data = histopathology,
     age = "Age",

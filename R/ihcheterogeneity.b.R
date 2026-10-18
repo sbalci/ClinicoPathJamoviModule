@@ -657,6 +657,20 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             }
             biopsy_data <- private$.extractRegionalData(data)
             has_reference <- !is.null(whole_section)
+            measurements <- as.matrix(biopsy_data)
+            if (has_reference) {
+                measurements <- cbind(whole_section, measurements)
+                colnames(measurements)[1] <- self$options$wholesection
+            }
+            infinite <- is.infinite(measurements)
+            if (any(infinite)) {
+                bad_vars <- colnames(measurements)[colSums(infinite) > 0]
+                bad_rows <- which(rowSums(infinite) > 0)
+                jmvcore::reject("{}", code = "nonfinite_measurements", msg = sprintf(
+                    .("Infinite biomarker measurements in variable(s) %s, analysis row(s) %s. Enter finite measurements or mark unavailable values as missing."),
+                    paste(bad_vars, collapse = ", "),
+                    paste(utils::head(bad_rows, 10), collapse = ", ")))
+            }
             # A variable selected twice is analysed once, which can leave an
             # inter-regional design with a single region.
             if (!has_reference && ncol(biopsy_data) < 2) {
@@ -1405,15 +1419,46 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             ))
         },
 
-        # Cases needed to estimate the ICC with a chosen precision (Bonett 2002):
-        #     n = 8 z^2 (1 - rho)^2 (1 + (k - 1) rho)^2 / (k (k - 1) w^2) + 1
-        # for a 95% CI of full width w with k measurements per case.
-        #
-        # This replaced a power table for H0: correlation = 0 at Cohen's r = 0.1,
-        # 0.3 and 0.5. No agreement study needs to show that a biopsy correlates
-        # with its own whole section better than chance, and on data with a
-        # tightly estimated ICC the old table printed "Substantial sample
-        # increase recommended" with a required n of 830.
+        # Under the balanced normal consistency model, MS_case / MS_error is
+        # theta * F(n - 1, (n - 1)(k - 1)). Average the width of the same exact
+        # F interval used by .iccFromMatrix over that sampling distribution.
+        # Bonett's large-sample width can be too small at high ICC with k = 2.
+        .iccExpectedWidth = function(n, k, rho) {
+            if (n < 2 || k < 2) return(NA_real_)
+            df1 <- n - 1
+            df2 <- df1 * (k - 1)
+            q_upper <- stats::qf(0.975, df1, df2)
+            q_reverse <- stats::qf(0.975, df2, df1)
+            theta <- (1 + (k - 1) * rho) / (1 - rho)
+            stats::integrate(function(p) {
+                f <- theta * stats::qf(p, df1, df2)
+                lower_f <- f / q_upper
+                upper_f <- f * q_reverse
+                # Equivalent to upper ICC - lower ICC, without subtracting
+                # two numbers very close to 1 when the planning ICC is high.
+                k * (1 / (lower_f + k - 1) - 1 / (upper_f + k - 1))
+            }, 0, 1, rel.tol = 1e-7, subdivisions = 200L)$value
+        },
+
+        .iccPrecisionN = function(k, rho, width) {
+            lower <- private$.CLINICAL_CONSTANTS$MIN_CASES_ANALYSIS
+            if (private$.iccExpectedWidth(lower, k, rho) <= width)
+                return(as.integer(lower))
+            # Bonett (2002) supplies a starting bracket, not the final answer.
+            q <- 8 * stats::qnorm(0.975)^2 * (1 - rho)^2 *
+                (1 + (k - 1) * rho)^2 / (k * (k - 1))
+            upper <- max(lower + 1, ceiling(q / width^2 + 1))
+            while (private$.iccExpectedWidth(upper, k, rho) > width)
+                upper <- 2 * upper
+            while (upper - lower > 1) {
+                middle <- floor((upper + lower) / 2)
+                if (private$.iccExpectedWidth(middle, k, rho) <= width)
+                    upper <- middle
+                else lower <- middle
+            }
+            as.integer(upper)
+        },
+
         .performSampleSizePlanning = function() {
             table <- self$results$samplesizetable
             .deleteTableRows(table)
@@ -1425,33 +1470,25 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 table$setNote("bonett", .("Sample-size planning needs at least two measurements per case."))
                 return()
             }
-            z <- stats::qnorm(0.975)
             plans <- list(
                 list(rho = 0.75, label = .("Planning ICC 0.75 (lower limit of good reliability)")),
                 list(rho = 0.90, label = .("Planning ICC 0.90 (lower limit of excellent reliability)")))
-            # Bonett's formula gives the expected width of the EXACT F-based
-            # interval, which exists for the consistency ICC. The observed row
-            # therefore uses ICC(3,1): fed the absolute-agreement ICC it promised a
-            # width of 0.04 beside an actual ICC(2,1) interval of 0.15 when a
-            # systematic offset was present.
+            # This model plans consistency precision, so the observed planning
+            # value is ICC(3,1), not the absolute-agreement ICC(2,1).
             observed <- if (!is.null(info$result)) info$result$consistency$value else NA_real_
             if (is.finite(observed) && observed > 0 && observed < 1)
                 plans[[3]] <- list(rho = observed, label = .("Observed ICC(3,1), consistency"))
-            # Never below the minimum this analysis itself requires: at high ICCs
-            # the approximation returns 2 or 3 cases.
-            min_cases <- private$.CLINICAL_CONSTANTS$MIN_CASES_ANALYSIS
             for (i in seq_along(plans)) {
                 rho <- plans[[i]]$rho
-                q <- 8 * z^2 * (1 - rho)^2 * (1 + (k - 1) * rho)^2 / (k * (k - 1))
                 table$addRow(rowKey = i, values = list(
                     scenario = plans[[i]]$label,
                     planning_icc = rho,
-                    width_current = if (n > 1) sqrt(q / (n - 1)) else NA_real_,
-                    n_w20 = as.integer(max(ceiling(q / 0.20^2 + 1), min_cases)),
-                    n_w10 = as.integer(max(ceiling(q / 0.10^2 + 1), min_cases))))
+                    width_current = private$.iccExpectedWidth(n, k, rho),
+                    n_w20 = private$.iccPrecisionN(k, rho, 0.20),
+                    n_w10 = private$.iccPrecisionN(k, rho, 0.10)))
             }
             note <- sprintf(
-                .("Bonett (2002) planning for the consistency ICC, ICC(3,1), with k = %d measurements per case and a 95%% confidence interval; this analysis has %d complete cases. The widths are expected values, so about half of the studies of that size obtain a wider interval. A systematic offset between the measurements widens the interval of the absolute-agreement ICC(2,1), which then needs more cases. The number of cases is never shown below the 5 this analysis requires. This is precision planning, not a hypothesis test."),
+                .("Planning for the consistency ICC, ICC(3,1), with k = %d measurements per case and a 95%% confidence interval; this analysis has %d complete cases. Bonett (2002) provides the starting approximation, refined here by numerical integration of the exact F-interval width under a balanced normal ANOVA model. The required size is the smallest number of cases, at least 5, whose expected interval width meets the target. Some studies will obtain wider intervals: this is expected-width planning, not an assurance calculation or a hypothesis test. Systematic offsets affect the absolute-agreement ICC(2,1), whose precision needs separate planning."),
                 k, n)
             if (n < 2)
                 note <- paste(note, .("The expected width at the current size is blank because fewer than 2 cases have every measurement."))

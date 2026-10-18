@@ -55,8 +55,9 @@ test_that("partial multievent selections identify which fields are missing", {
     stringsAsFactors = FALSE
   )
 
-  # Test with only some selections provided
-  expect_no_error({
+  # Test with only some selections provided. Unassigned levels would be dropped from
+  # the analysis, so it stops and names them (deliberate since 2026-09-16).
+  expect_error({
     results <- ClinicoPath::outcomeorganizer(
       data = test_data,
       outcome = "Outcome",
@@ -71,7 +72,7 @@ test_that("partial multievent selections identify which fields are missing", {
       awd = NULL,
       awod = NULL
     )
-  })
+  }, "not assigned to any category: AWD, AWOD", fixed = TRUE)
 })
 
 # =============================================================================
@@ -261,8 +262,8 @@ test_that("identifies when only one selection is missing", {
     stringsAsFactors = FALSE
   )
 
-  # Test with only awod missing
-  expect_no_error({
+  # Test with only awod missing: the analysis stops and names the unassigned level.
+  expect_error({
     results <- ClinicoPath::outcomeorganizer(
       data = test_data,
       outcome = "Outcome",
@@ -277,7 +278,7 @@ test_that("identifies when only one selection is missing", {
       recurrenceLevel = NULL,
       awod = NULL
     )
-  })
+  }, "not assigned to any state: AWOD", fixed = TRUE)
 })
 
 # =============================================================================

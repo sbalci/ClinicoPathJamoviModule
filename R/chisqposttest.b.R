@@ -1170,28 +1170,31 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # true an effect is, so "highly significant" / "very significant" was
             # dropped: the magnitude claim belongs to Cramer's V, which is reported
             # in the same sentence.
-            significance_text <- if (chiSqTest$p.value < alpha) {
+            significance_text <- if (chiSqTest$omnibus_p < alpha) {
                 sprintf(.("statistically significant at \u{3B1} = %g"), alpha)
             } else {
                 sprintf(.("not statistically significant at \u{3B1} = %g"), alpha)
             }
             
-            summary_text <- sprintf(
-                .("The association between %s was %s (\u{3C7}\u{B2}(%d) = %.2f, p %s, n = %s). The effect size was %s (Cram\u{E9}r's V = %.3f)."),
-                var_names,
-                significance_text,
-                chiSqTest$parameter,
-                chiSqTest$statistic,
-                if (chiSqTest$p.value < 0.001) "< 0.001" else sprintf("= %.3f", chiSqTest$p.value),
-                private$.fmtCount(n),
-                effect_interpretation,
-                cramers_v
-            )
+            # The sentence names the test whose p-value it prints: a Fisher p-value after
+            # a chi-square statistic would attribute it to the wrong test.
+            p_text <- if (chiSqTest$omnibus_p < 0.001) "< 0.001" else sprintf("= %.3f", chiSqTest$omnibus_p)
+            summary_text <- switch(chiSqTest$omnibus_method,
+                fisher = sprintf(
+                    .("The association between %s was %s (Fisher's exact test, p %s, n = %s). The effect size was %s (Cram\u00E9r's V = %.3f)."),
+                    var_names, significance_text, p_text, private$.fmtCount(n), effect_interpretation, cramers_v),
+                fisher_mc = sprintf(
+                    .("The association between %s was %s (Fisher's exact test, Monte Carlo p %s from 2,000 simulated tables, n = %s). The effect size was %s (Cram\u00E9r's V = %.3f)."),
+                    var_names, significance_text, p_text, private$.fmtCount(n), effect_interpretation, cramers_v),
+                sprintf(
+                    .("The association between %s was %s (\u{3C7}\u{B2}(%d) = %.2f, p %s, n = %s). The effect size was %s (Cram\u{E9}r's V = %.3f)."),
+                    var_names, significance_text, chiSqTest$parameter, chiSqTest$statistic, p_text,
+                    private$.fmtCount(n), effect_interpretation, cramers_v))
             
             # Add post-hoc information if applicable
             if (self$options$posthoc == "none") {
                 summary_text <- paste(summary_text, .("Pairwise post-hoc comparisons were not performed because the post-hoc method is set to 'None'."))
-            } else if (chiSqTest$p.value < alpha && !is.null(pairwise_results) && length(pairwise_results) > 0) {
+            } else if (chiSqTest$omnibus_p < alpha && !is.null(pairwise_results) && length(pairwise_results) > 0) {
                 posthoc_text <- sprintf(
                     .("Post-hoc analysis revealed %d significant pairwise difference(s) out of %d comparisons after %s correction."),
                     n_significant_pairs,
@@ -1208,7 +1211,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 effect_size = cramers_v,
                 effect_interpretation = effect_interpretation,
                 n_significant_pairs = n_significant_pairs,
-                significant = chiSqTest$p.value < alpha
+                significant = chiSqTest$omnibus_p < alpha
             ))
         },
 
@@ -1225,10 +1228,17 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # One complete sentence per table shape rather than a "two" / "two
             # binary" fragment spliced into a template: a translator cannot
             # inflect a spliced word.
-            methods_core <- if (nrow(contTable) == 2 && ncol(contTable) == 2)
-                .("A chi-square test of independence, without continuity correction, was performed to examine the relationship between two binary categorical variables.")
-            else
-                .("A chi-square test of independence, without continuity correction, was performed to examine the relationship between two categorical variables.")
+            is_2x2 <- nrow(contTable) == 2 && ncol(contTable) == 2
+            methods_core <- switch(chiSqTest$omnibus_method,
+                fisher = if (is_2x2)
+                    .("Fisher's exact test was performed to examine the relationship between two binary categorical variables.")
+                else
+                    .("Fisher's exact test was performed to examine the relationship between two categorical variables."),
+                fisher_mc = .("Fisher's exact test, with its p-value estimated from 2,000 Monte Carlo simulated tables, was performed to examine the relationship between two categorical variables."),
+                if (is_2x2)
+                    .("A chi-square test of independence, without continuity correction, was performed to examine the relationship between two binary categorical variables.")
+                else
+                    .("A chi-square test of independence, without continuity correction, was performed to examine the relationship between two categorical variables."))
             sentences$methods <- if (assumptions$low_expected_5 > 0)
                 paste(methods_core,
                       .fmt(.("{k} of the {m} cells had an expected count below 5."),
@@ -1250,7 +1260,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # sig = 0.01 and p = 0.03 the old code took the p < 0.05 branch and then
             # printed "rejected at the alpha = 0.01 level", a false statement in a
             # panel whose whole purpose is to be pasted into a manuscript.
-            sentences$conclusion <- if (chiSqTest$p.value < self$options$sig) {
+            sentences$conclusion <- if (chiSqTest$omnibus_p < self$options$sig) {
                 sprintf(
                     .("The null hypothesis of independence was rejected at the \u{3B1} = %g significance level."),
                     self$options$sig
@@ -1677,6 +1687,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             )
 
             self$results$chisqTable$setNote("seed", NULL)
+            fisher_omnibus <- NULL
             if (identical(self$options$testSelection, "fisher")) {
                 fisher_omnibus <- private$.fisherOmnibusPvalue(contTable)
                 if (identical(fisher_omnibus$method, "fisher_mc"))
@@ -1695,10 +1706,19 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             self$results$chisqTable$setRow(rowNo = 1, values = omnibus_values)
 
+            # The p-value in this row is the one every gate and sentence downstream must
+            # read: the post-hoc gate, the summaries, the export and the notices use
+            # chiSqTest$omnibus_p, never chiSqTest$p.value. With 'Always Fisher's exact'
+            # they read the Pearson p-value, so when the two fell on opposite sides of
+            # alpha the table said one thing and the panels below said the other.
+            # Residuals, expected counts and Cramer's V stay on the Pearson object.
+            chiSqTest$omnibus_p <- omnibus_values$p
+            chiSqTest$omnibus_method <- if (is.null(fisher_omnibus)) "chisq" else fisher_omnibus$method
+
             # Disclose the correction choice: jamovi's own Contingency Tables applies
             # Yates' continuity correction to a 2x2 by default, so the same 2x2 table
             # gives a different statistic there and the reader needs to know why.
-            if (nrow(contTable) == 2 && ncol(contTable) == 2)
+            if (identical(chiSqTest$omnibus_method, "chisq") && nrow(contTable) == 2 && ncol(contTable) == 2)
                 self$results$chisqTable$setNote(
                     "continuity",
                     .("Computed without Yates' continuity correction."))
@@ -1892,13 +1912,16 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # CRITICAL FIX: Enforce omnibus significance prerequisite
             # Only run post-hoc if overall chi-square is significant
-            overall_significant <- chiSqTest$p.value < self$options$sig
+            overall_significant <- chiSqTest$omnibus_p < self$options$sig
 
             if (!overall_significant) {
                 # Use HTML message only (no Notice object to avoid serialization errors)
                 message_text <- sprintf(
-                    .("The overall chi-square test is not significant (p = %s \u{2265} %g). Post-hoc pairwise comparisons are only valid when the overall test is significant: running them after a non-significant omnibus test inflates the Type I error rate and constitutes data dredging."),
-                    format.pval(chiSqTest$p.value, digits = 3), self$options$sig)
+                    if (identical(chiSqTest$omnibus_method, "chisq"))
+                        .("The overall chi-square test is not significant (p = %s \u{2265} %g). Post-hoc pairwise comparisons are only valid when the overall test is significant: running them after a non-significant omnibus test inflates the Type I error rate and constitutes data dredging.")
+                    else
+                        .("The overall Fisher's exact test is not significant (p = %s \u2265 %g). Post-hoc pairwise comparisons are only valid when the overall test is significant: running them after a non-significant omnibus test inflates the Type I error rate and constitutes data dredging."),
+                    format.pval(chiSqTest$omnibus_p, digits = 3), self$options$sig)
                 self$results$multipleTestingInfo$setContent(
                     paste0("<div style='padding: 15px; background-color: rgba(255, 202, 33, 0.23); border: 1px solid #ffc107; color: inherit;'>",
                           "<strong>", .("Post-hoc Testing Not Performed:"), "</strong> ",
@@ -2048,6 +2071,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # these rows carry the same p-values and interval as the tables above
             mc_used <- length(pairwise_results) > 0 &&
                 any(vapply(pairwise_results, function(x) identical(x$test_used, "fisher_mc"), logical(1)))
+            mc_used <- mc_used || identical(chiSqTest$omnibus_method, "fisher_mc")
             self$results$exportTable$setNote("seed", if (self$options$phiCI || mc_used) .fmt(.("Random seed: {seed}"), seed = self$options$seed))
 
             export_data <- list()
@@ -2072,12 +2096,15 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             export_data[[row_index]] <- list(
                 category = .("Overall Test"),
-                measure = .("P-value"),
-                value = format.pval(chiSqTest$p.value, digits = 4),
+                measure = switch(chiSqTest$omnibus_method,
+                    fisher = .("P-value (Fisher's exact test)"),
+                    fisher_mc = .("P-value (Fisher's exact test, Monte Carlo)"),
+                    .("P-value")),
+                value = format.pval(chiSqTest$omnibus_p, digits = 4),
                 # A non-significant p-value is absence of evidence, not evidence that
                 # the variables are independent - "No significant association" as a
                 # bare verdict invites exactly that misreading.
-                interpretation = if (chiSqTest$p.value < self$options$sig)
+                interpretation = if (chiSqTest$omnibus_p < self$options$sig)
                     sprintf(.("Statistically significant association at \u{3B1} = %g"), self$options$sig)
                 else
                     sprintf(.("No statistically significant association detected at \u{3B1} = %g; absence of evidence is not evidence of absence, so read the effect size and its precision alongside this"), self$options$sig)
@@ -2145,7 +2172,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     interpretation = .("No pairwise comparisons were performed. Select Bonferroni, Holm or FDR to obtain them.")
                 )
                 row_index <- row_index + 1
-            } else if (chiSqTest$p.value < self$options$sig) {
+            } else if (chiSqTest$omnibus_p < self$options$sig) {
                 # Reuse the pairwise results computed in .run(); recompute only if absent.
                 if (is.null(pairwise_results))
                     pairwise_results <- private$.robustPairwiseTests(contTable, self$options$posthoc, self$options$testSelection)
@@ -2257,6 +2284,10 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Perform main chi-square test
             chiSqTest <- private$.performChiSquareTest(contTable, rows, cols)
+            # With a forced Fisher omnibus the chi-square approximation warnings below
+            # would call the p-value in the table unreliable and tell the user to select
+            # the test that is already in use.
+            pearson_omnibus <- identical(chiSqTest$omnibus_method, "chisq")
 
             # Compute pairwise post-hoc comparisons once and reuse across the
             # post-hoc table, clinical summary, and export table. This avoids
@@ -2270,7 +2301,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # the uncorrected multiple testing the option exists to prevent.
             pairwise_results <- NULL
             need_pairwise <- self$options$posthoc != "none"
-            if (need_pairwise && chiSqTest$p.value < self$options$sig)
+            if (need_pairwise && chiSqTest$omnibus_p < self$options$sig)
                 pairwise_results <- private$.robustPairwiseTests(contTable, self$options$posthoc, self$options$testSelection)
 
             # Validate assumptions and show warnings
@@ -2283,7 +2314,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             warning_messages <- c()
 
             # Small sample size warning
-            if (assumptions$total_n < 20) {
+            if (pearson_omnibus && assumptions$total_n < 20) {
                 warning_msg <- sprintf(.("Very small sample size (n = %s). The chi-square approximation may be unreliable. Consider using Fisher's exact test and interpreting results with caution."), private$.fmtCount(assumptions$total_n))
                 warning_messages <- c(warning_messages, warning_msg)
                 # Also as a notice: this condition invalidates the test that is
@@ -2312,7 +2343,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # Low expected counts warning
-            if (assumptions$prop_low_5 > 0.2) {
+            if (pearson_omnibus && assumptions$prop_low_5 > 0.2) {
                 warning_msg <- sprintf(.("%.0f%% of cells have expected counts below 5, so the chi-square test assumptions are violated. Use Fisher's exact test for more reliable results."), assumptions$prop_low_5 * 100)
                 warning_messages <- c(warning_messages, warning_msg)
                 private$.addNotice(
@@ -2327,7 +2358,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # approximation on its own, even when fewer than 20% of cells are below 5
             # (a large table with one sparse category). The block above does not fire
             # then, and the Assumptions check panel that does report it is opt-in.
-            if (assumptions$low_expected_1 > 0 && assumptions$prop_low_5 <= 0.2) {
+            if (pearson_omnibus && assumptions$low_expected_1 > 0 && assumptions$prop_low_5 <= 0.2) {
                 warning_msg <- sprintf(.("%d cell(s) have an expected count below 1. Use Fisher's exact test or merge the sparse category."), assumptions$low_expected_1)
                 warning_messages <- c(warning_messages, warning_msg)
                 private$.addNotice(
@@ -2344,7 +2375,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # omnibus p-value carried no default-visible caveat at all. The severity
             # ladder in .validateAssumptions() is untouched: this is a plain WARNING
             # and never fires when either STRONG_WARNING above has.
-            if (assumptions$low_expected_5 > 0 && assumptions$prop_low_5 <= 0.2 &&
+            if (pearson_omnibus && assumptions$low_expected_5 > 0 && assumptions$prop_low_5 <= 0.2 &&
                 assumptions$low_expected_1 == 0)
                 private$.addNotice(
                     "WARNING",
@@ -2352,6 +2383,15 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     .fmt(.("{k} of {m} cells ({pct}%) have an expected count below 5. That is within the usual 20% limit and no cell is below 1, so the chi-square approximation is generally acceptable, but the overall p-value above is less precise than it would be with larger expected counts. Turn on the Assumptions check panel for the per-cell detail, or use Fisher's exact test if the sparse cells matter to the conclusion."),
                          k = assumptions$low_expected_5, m = length(chiSqTest$expected),
                          pct = sprintf("%.0f", assumptions$prop_low_5 * 100)))
+
+            # Fisher replaces the omnibus p-value only; the residuals and Cramer's V are
+            # still chi-square quantities, so sparse cells still qualify them.
+            if (!pearson_omnibus && assumptions$low_expected_5 > 0)
+                private$.addNotice(
+                    "INFO",
+                    .("The overall p-value is from Fisher's exact test"),
+                    .fmt(.("{k} of {m} cells have an expected count below 5. The overall p-value is from Fisher's exact test, so the large-sample limits of the chi-square approximation do not apply to it. The standardized residuals and Cram\u00E9r's V still come from the chi-square statistic and are approximate for a table this sparse."),
+                         k = assumptions$low_expected_5, m = length(chiSqTest$expected)))
 
             # Display combined warnings in todo element if any exist
             if (length(warning_messages) > 0) {
@@ -2416,7 +2456,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             n_pairs <- length(pairwise_results)
             pairwise_text <- if (self$options$posthoc == "none")
                 .("no pairwise comparisons (post-hoc method set to None)")
-            else if (chiSqTest$p.value >= self$options$sig)
+            else if (chiSqTest$omnibus_p >= self$options$sig)
                 .("no pairwise comparisons (overall test not significant)")
             else if (n_pairs == 0)
                 .("no pairwise sub-comparisons for this table shape")
@@ -2428,9 +2468,12 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$.addNotice(
                 "INFO",
                 .("Analysis summary"),
-                sprintf(.("%g observations in a %d x %d table; Pearson chi-square without continuity correction, p %s at alpha = %g; %s."),
+                sprintf(switch(chiSqTest$omnibus_method,
+                            fisher = .("%g observations in a %d x %d table; Fisher's exact test, p %s at alpha = %g; %s."),
+                            fisher_mc = .("%g observations in a %d x %d table; Fisher's exact test (Monte Carlo, B = 2000), p %s at alpha = %g; %s."),
+                            .("%g observations in a %d x %d table; Pearson chi-square without continuity correction, p %s at alpha = %g; %s.")),
                         sum(contTable), nrow(contTable), ncol(contTable),
-                        if (chiSqTest$p.value < 0.001) "< 0.001" else sprintf("= %.3f", chiSqTest$p.value),
+                        if (chiSqTest$omnibus_p < 0.001) "< 0.001" else sprintf("= %.3f", chiSqTest$omnibus_p),
                         self$options$sig, pairwise_text))
         },
         

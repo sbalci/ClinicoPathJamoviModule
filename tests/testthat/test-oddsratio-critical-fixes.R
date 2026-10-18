@@ -321,70 +321,16 @@ test_that("Diagnostic metrics: Poor test (60% sensitivity, 60% specificity)", {
 
 
 # Test Category 3: Predictor Level Detection ----
-# These tests verify that automatic predictor level detection works as expected
+# The two tests that stood here re-implemented the keyword match ("Positive",
+# "Yes", "High", ...) and the second-level fallback of .detectPositiveLevels().
+# That guess was removed on 2026-10-18: the positive predictor level is never
+# inferred, and an empty predictorLevel leaves the diagnostic metrics waiting
+# (behaviour: test-oddsratio-pending-predictor-level.R). Pin the removal here.
 
-test_that("Predictor level detection: Standard positive keywords", {
-  # Test data with clear positive indicators
-  test_cases <- list(
-    list(levels = c("Negative", "Positive"), expected = "Positive"),
-    list(levels = c("No", "Yes"), expected = "Yes"),
-    list(levels = c("Absent", "Present"), expected = "Present"),
-    list(levels = c("Unexposed", "Exposed"), expected = "Exposed"),
-    list(levels = c("Low", "High"), expected = "High"),
-    list(levels = c("Normal", "Abnormal"), expected = "Abnormal"),
-    list(levels = c("Alive", "Dead"), expected = "Dead"),
-    list(levels = c("No Event", "Event"), expected = "Event")
-  )
-
-  # We can't directly test the private function, but we can verify the logic
-  for (test_case in test_cases) {
-    levels_vec <- test_case$levels
-    expected_positive <- test_case$expected
-
-    # Keyword matching logic (simplified from actual function)
-    indicators <- c("Positive", "Yes", "Present", "Exposed", "High", "Abnormal", "Dead", "Event")
-    positive_matches <- levels_vec[levels_vec %in% indicators]
-
-    if (length(positive_matches) >= 1) {
-      detected <- positive_matches[1]
-    } else {
-      detected <- levels_vec[min(2, length(levels_vec))]
-    }
-
-    expect_equal(detected, expected_positive,
-                 info = paste("For levels", paste(levels_vec, collapse = ", "),
-                             "expected", expected_positive, "got", detected))
-  }
-})
-
-test_that("Predictor level detection: Ambiguous cases (no keyword match)", {
-  # Test cases where keyword matching fails and should fall back to second level
-  test_cases <- list(
-    list(levels = c("Control", "Treatment"), expected = "Treatment"),  # Alphabetically second
-    list(levels = c("A", "B"), expected = "B"),
-    list(levels = c("Group1", "Group2"), expected = "Group2"),
-    list(levels = c("Baseline", "Follow-up"), expected = "Follow-up")
-  )
-
-  for (test_case in test_cases) {
-    levels_vec <- test_case$levels
-    expected_positive <- test_case$expected
-
-    # Keyword matching logic
-    indicators <- c("Positive", "Yes", "Present", "Exposed", "High", "Abnormal", "Dead", "Event")
-    positive_matches <- levels_vec[levels_vec %in% indicators]
-
-    # Should fall back to second level
-    if (length(positive_matches) == 0) {
-      detected <- levels_vec[2]
-    } else {
-      detected <- positive_matches[1]
-    }
-
-    expect_equal(detected, expected_positive,
-                 info = paste("For ambiguous levels", paste(levels_vec, collapse = ", "),
-                             "should default to second level:", expected_positive))
-  }
+test_that("Predictor level detection: no automatic detection remains", {
+  gen <- get0("oddsratioClass", envir = asNamespace("ClinicoPath"), inherits = FALSE)
+  skip_if(is.null(gen), "oddsratioClass not reachable")
+  expect_null(gen$private_methods$.detectPositiveLevels)
 })
 
 
@@ -541,9 +487,9 @@ test_that("Consistency: Selecting opposite outcome gives reciprocal OR", {
 # This test file covers:
 # 1. Outcome releveling with different factor level orders (5 tests)
 # 2. Diagnostic metrics with known 2x2 tables (3 tests)
-# 3. Predictor level detection logic (2 tests)
+# 3. Predictor level is never auto-detected (1 test)
 # 4. Edge cases (3 tests)
 # 5. Consistency checks (2 tests)
-# TOTAL: 15 comprehensive numerical tests
+# TOTAL: 14 comprehensive numerical tests
 
 # All tests verify actual numerical results, not just that code runs without error

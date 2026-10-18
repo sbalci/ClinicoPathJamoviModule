@@ -39,7 +39,9 @@ important for correct interpretation of likelihood ratios and diagnostic metrics
 When showNomogram is enabled, the function generates:
 \itemize{
 \item Prediction nomogram based on the fitted logistic model
-\item Diagnostic metrics (sensitivity, specificity, likelihood ratios)
+\item Diagnostic metrics (sensitivity, specificity, likelihood ratios) for the
+chosen \code{predictorLevel}; with \code{predictorLevel = NULL} they wait for
+that choice and the model and nomogram still run
 \item Contingency table analysis
 \item User guidance for interpretation
 }

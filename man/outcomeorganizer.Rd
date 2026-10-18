@@ -39,13 +39,18 @@ outcomeorganizer(
 analysis (e.g., vital status).}
 
 \item{outcomeLevel}{The level of the outcome variable that represents the
-event of interest (e.g., "Death", "Relapse").}
+event of interest (e.g., "Death", "Relapse"). Required for a factor
+outcome, and never taken from the order of the levels: without it the
+analysis stops and lists the levels. A numeric 0/1 outcome is read as 1 =
+event.}
 
 \item{recurrence}{Variable indicating disease recurrence or progression
 (for RFS/PFS/DFS analyses).}
 
 \item{recurrenceLevel}{The level indicating recurrence or progression has
-occurred.}
+occurred. Required when a recurrence/progression variable is used, and
+never taken from the order of the levels: without it the analysis stops and
+asks for it.}
 
 \item{patientID}{Patient identifier for handling multiple records or
 applying event hierarchies.}

@@ -399,7 +399,7 @@ children:
           - type: TextBox
             name: nBoot
             format: number
-            enable: (bootstrapCI || bootstrap || robinsonA || tdi || specificAgreement && specificConfidenceIntervals && specificCIMethod:bootstrap)
+            enable: (bootstrapCI || bootstrap || robinsonA || tdi || (specificAgreement && specificConfidenceIntervals && specificCIMethod:bootstrap))
           - type: CheckBox
             name: showBootstrapCIGuide
   - type: CollapseBox

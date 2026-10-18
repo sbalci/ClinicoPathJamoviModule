@@ -58,10 +58,13 @@ options:
           A numeric 0/1 column is read as 0 = censored and 1 = event; for any other
           coding, such as numeric 1/2 or a factor, `outcomeLevel` must name the event value.
 
+    # allowNone: without it the jamovi client pre-fills levels[0], so the first level - not
+    # the one the user means - becomes the event. Empty is handled below, never inferred.
     - name: outcomeLevel
       title: Event level
       type: Level
       variable: (outcome)
+      allowNone: true
       description:
         ui: >
           The outcome value that means the event happened (for example Dead, or 2 in a column coded 1/2). Required unless the outcome is numeric 0/1. Values are matched exactly; the event is never taken from level order or numeric size.
@@ -75,6 +78,7 @@ options:
       title: Censored level
       type: Level
       variable: (outcome)
+      allowNone: true
       description:
         ui: >
           The outcome value for patients without the event. If left empty, the other of the two observed values is used.

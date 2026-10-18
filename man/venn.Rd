@@ -63,43 +63,57 @@ analysis.}
 diagram.}
 
 \item{var1true}{The level in \code{var1} that represents the positive
-condition.}
+condition. It must be chosen whenever \code{var1} is selected and is never
+taken from the order of the levels; until it is set the analysis waits and
+draws nothing.}
 
 \item{var2}{A string naming the secondary variable from \code{data} used in
 the diagram.}
 
 \item{var2true}{The level in \code{var2} that represents the positive
-condition.}
+condition. It must be chosen whenever \code{var2} is selected and is never
+taken from the order of the levels; until it is set the analysis waits and
+draws nothing.}
 
 \item{var3}{An optional variable from \code{data} to include in the
 diagram.}
 
 \item{var3true}{The level in \code{var3} that represents the positive
-condition.}
+condition. It must be chosen whenever \code{var3} is selected and is never
+taken from the order of the levels; until it is set the analysis waits and
+draws nothing.}
 
 \item{var4}{An optional variable from \code{data} for additional overlap
 analysis.}
 
 \item{var4true}{The level in \code{var4} that represents the positive
-condition.}
+condition. It must be chosen whenever \code{var4} is selected and is never
+taken from the order of the levels; until it is set the analysis waits and
+draws nothing.}
 
 \item{var5}{Fifth variable for 5-set Venn diagrams (automatically switches
 to advanced engine).}
 
 \item{var5true}{The level in \code{var5} that represents the positive
-condition.}
+condition. It must be chosen whenever \code{var5} is selected and is never
+taken from the order of the levels; until it is set the analysis waits and
+draws nothing.}
 
 \item{var6}{Sixth variable for 6-set Venn diagrams (uses advanced engine
 automatically).}
 
 \item{var6true}{The level in \code{var6} that represents the positive
-condition.}
+condition. It must be chosen whenever \code{var6} is selected and is never
+taken from the order of the levels; until it is set the analysis waits and
+draws nothing.}
 
 \item{var7}{Seventh variable for 7-set Venn diagrams (uses advanced engine
 automatically).}
 
 \item{var7true}{The level in \code{var7} that represents the positive
-condition.}
+condition. It must be chosen whenever \code{var7} is selected and is never
+taken from the order of the levels; until it is set the analysis waits and
+draws nothing.}
 
 \item{show_upsetR}{Show the UpSetR matrix-style intersection plot. Suited
 to 4 or more sets, where a Venn diagram becomes unreadable.}

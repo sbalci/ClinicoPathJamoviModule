@@ -57,11 +57,13 @@ lassocoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..outcomeLevel <- jmvcore::OptionLevel$new(
                 "outcomeLevel",
                 outcomeLevel,
-                variable="(outcome)")
+                variable="(outcome)",
+                allowNone=TRUE)
             private$..censorLevel <- jmvcore::OptionLevel$new(
                 "censorLevel",
                 censorLevel,
-                variable="(outcome)")
+                variable="(outcome)",
+                allowNone=TRUE)
             private$..explanatory <- jmvcore::OptionVariables$new(
                 "explanatory",
                 explanatory,

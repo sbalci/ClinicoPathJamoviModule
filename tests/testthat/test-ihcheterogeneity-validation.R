@@ -47,7 +47,7 @@ test_that("C16, C17, C18, C19: Closed-form two-way ANOVA variance components dec
   expect_equal(sum(vt$percentage[1:3]), 100, tolerance = 1e-8)
 })
 
-test_that("C20: Bonett (2002) sample size planning exact formula", {
+test_that("C20: ICC planning refines the expected exact-interval width", {
   d <- data.frame(
     ws = c(50, 60, 70, 80, 90, 100),
     b1 = c(52, 59, 73, 78, 95, 102),
@@ -57,11 +57,10 @@ test_that("C20: Bonett (2002) sample size planning exact formula", {
                         sample_size_planning = TRUE)
   st <- r$samplesizetable$asDF
 
-  # At ICC ~ 0.9873, k = 3, alpha = 0.05:
-  # width 0.20 requires n = 52
-  # width 0.10 requires n = 202
-  expect_equal(st$n_w20[1], 52)
-  expect_equal(st$n_w10[1], 202)
+  # Planning ICC 0.75, k = 3; independent expected-F-width integration.
+  # The unrefined large-sample approximation gave 52 and 202.
+  expect_equal(st$n_w20[1], 53)
+  expect_equal(st$n_w10[1], 203)
 })
 
 test_that("C03, C04: Parity for ICC(2,1) and ICC(3,1) with psych and irr packages", {

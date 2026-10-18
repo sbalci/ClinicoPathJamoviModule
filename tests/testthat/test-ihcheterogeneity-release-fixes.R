@@ -210,7 +210,6 @@ test_that("sample-size planning is ICC precision (Bonett 2002), for both designs
     repro <- ihc(d, wholesection = "whole", biopsy1 = "b1", biopsy2 = "b2", analysis_type = "reproducibility")
     expect_false(repro$samplesizetable$visible)
 
-    bonett_n <- function(rho, k, w) ceiling(8 * qnorm(0.975)^2 * (1 - rho)^2 * (1 + (k - 1) * rho)^2 / (k * (k - 1) * w^2) + 1)
     for (with_ref in c(TRUE, FALSE)) {
         res <- if (with_ref) ihc(d, wholesection = "whole", biopsy1 = "b1", biopsy2 = "b2", sample_size_planning = TRUE)
                else ihc(d, biopsy1 = "b1", biopsy2 = "b2", sample_size_planning = TRUE)
@@ -219,12 +218,11 @@ test_that("sample-size planning is ICC precision (Bonett 2002), for both designs
         expect_true(res$samplesizetable$visible)
         row <- pt[abs(pt$planning_icc - 0.75) < 1e-12, ]
         expect_equal(nrow(row), 1)
-        expect_equal(row$n_w20, bonett_n(0.75, k, 0.20))
-        expect_equal(row$n_w10, bonett_n(0.75, k, 0.10))
+        # Independent expected-width calculation, not the starting approximation.
+        expect_equal(row$n_w20, if (k == 3) 53L else 79L)
+        expect_equal(row$n_w10, if (k == 3) 203L else 300L)
         expect_false(any(grepl("sample increase", unlist(pt), ignore.case = TRUE)))
     }
-    # Bonett's worked example (Stat Med 2002;21:1331): rho = 0.8, k = 2, w = 0.2 needs 51 subjects
-    expect_equal(bonett_n(0.8, 2, 0.2), 51)
 })
 
 # ── F. One grading rule (I10, I29) ────────────────────────────────────────────

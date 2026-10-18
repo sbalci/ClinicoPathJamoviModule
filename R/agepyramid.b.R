@@ -61,11 +61,24 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
         # A rejected run shows jamovi's error banner; any INFO/WARNING raised
         # before the abort would otherwise stay in the notices panel beside it
-        # (e.g. "levels were read from the level names" next to "no valid rows").
+        # (e.g. "Some ages could not be used" next to "no valid rows").
         .rejectClean = function(message) {
             private$.noticeList <- list()
             private$.renderNotices()
             jmvcore::reject(message)
+        },
+
+        # A run that draws nothing (waiting for a gender level, a configuration
+        # error) must not leave the previous run's numbers on screen. In jamovi
+        # clearWith already resets these items when female/male/bin_width change;
+        # an analysis object re-run in place gets no clearWith. "<div></div>", not
+        # "": the jamovi client skips an empty Html update and keeps the old text.
+        .clearResults = function() {
+            .deleteTableRows(self$results$pyramidTable)
+            self$results$pyramidTable$setNote("pct", NULL)
+            self$results$dataInfo$setContent("<div></div>")
+            self$results$plot$setState(NULL)
+            self$results$plotGGCharts$setState(NULL)
         },
 
         .run = function() {
@@ -128,6 +141,84 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             age <- self$options$age
             gender <- self$options$gender
 
+            # The gender levels are the user's to state ----
+            # Never read from the level NAMES or ORDER: an order fallback reversed
+            # the whole pyramid (sides, legend, Female/Male columns) for every
+            # c("M", "F") coding. allowNone keeps jamovi from pre-filling both
+            # selectors with levels[0]; until they are chosen the levels found are
+            # listed and nothing is computed. "" and NA (R callers) count as unset.
+            # A vector (R callers) is not one level: it would be recycled in the comparisons.
+            unset <- function(x) is.null(x) || length(x) != 1 || is.na(x) || !nzchar(x)
+            female_level <- if (unset(self$options$female)) NULL else self$options$female
+            male_level <- if (unset(self$options$male)) NULL else self$options$male
+            # Observed levels only: an unused factor level is not a gender present.
+            level_counts <- table(factor(mydata[[gender]], exclude = c(NA, "")))
+            level_counts <- level_counts[level_counts > 0]
+            list_levels <- function(counts) {
+                if (length(counts) == 0) return(.("none"))
+                shown <- sprintf("%s (n = %d)", names(counts), as.integer(counts))
+                if (length(shown) > 10) shown <- c(shown[1:10], "...")
+                paste(shown, collapse = ", ")
+            }
+            # A chosen level the variable does not have (a stale selection after the
+            # variable changed, or a typo) is an error, never a reason to wait or to
+            # draw one side empty. Declared-but-unused factor levels are allowed, so a
+            # male-only cohort stored with levels F/M can still name both.
+            gender_col <- mydata[[gender]]
+            declared <- if (is.factor(gender_col)) levels(gender_col) else
+                unique(as.character(gender_col[!is.na(gender_col)]))
+            for (side in c("female", "male")) {
+                chosen <- if (side == "female") female_level else male_level
+                if (!is.null(chosen) && !(as.character(chosen) %in% declared)) {
+                    private$.clearResults()
+                    private$.addNotice(
+                        "ERROR",
+                        .("Gender level not found"),
+                        .fmt(.("The level '{level}' chosen under '{control}' is not a level of '{gender}'. Levels available: {levels}."),
+                             level = chosen,
+                             control = if (side == "female") .("Female level") else .("Male level"),
+                             gender = gender, levels = list_levels(level_counts)))
+                    return()
+                }
+            }
+            if (is.null(female_level) && is.null(male_level)) {
+                private$.clearResults()
+                private$.addNotice(
+                    "INFO",
+                    .("Choose the Female and Male levels"),
+                    paste(c(
+                        .fmt(.("Select the level of '{gender}' that identifies female subjects under 'Female level', and the one that identifies male subjects under 'Male level'. They are never read from the level names or their order."), gender = gender),
+                        .fmt(.("Levels found: {levels}."), levels = list_levels(level_counts)),
+                        if (length(level_counts) == 1) c(
+                            .("For a single-gender cohort, choosing that one level under its own selector is enough."),
+                            .("Nothing is drawn until it is chosen."))
+                        else .("Nothing is drawn until they are chosen.")), collapse = " "))
+                return()
+            }
+            if (is.null(female_level) || is.null(male_level)) {
+                chosen <- if (is.null(female_level)) male_level else female_level
+                others <- level_counts[names(level_counts) != chosen]
+                # No other observed level: a single-gender cohort, drawn one-sided below.
+                if (length(others) > 0) {
+                    private$.clearResults()
+                    # One whole sentence per side, so each translates with its own grammar.
+                    if (is.null(male_level)) {
+                        title <- .("Choose the Male level")
+                        ask <- .("'{level}' is set as the female level. Select the level of '{gender}' that identifies male subjects under 'Male level'; it is never filled in from the remaining levels.")
+                    } else {
+                        title <- .("Choose the Female level")
+                        ask <- .("'{level}' is set as the male level. Select the level of '{gender}' that identifies female subjects under 'Female level'; it is never filled in from the remaining levels.")
+                    }
+                    private$.addNotice(
+                        "INFO", title,
+                        paste(
+                            .fmt(ask, level = chosen, gender = gender),
+                            .fmt(.("Other levels found: {levels}."), levels = list_levels(others)),
+                            .("Nothing is drawn until it is chosen.")))
+                    return()
+                }
+            }
+
             # Select and clean the required columns
             mydata <- jmvcore::select(mydata, c(age, gender))
             mydata <- jmvcore::naOmit(mydata)
@@ -161,59 +252,7 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
             }
 
-            # Determine gender levels with smart defaults ----
             n_initial <- nrow(self$data)  # Track for data summary
-            female_level <- self$options$female
-            male_level <- self$options$male
-            gender_levels <- levels(mydata[["Gender"]])
-
-            # Apply smart defaults if levels not selected.
-            #
-            # Assigning by factor level ORDER alone is silently wrong for every
-            # coding whose first level is the male one - c("M", "F"),
-            # c("Male", "Female"), c("E", "K") - and the inversion runs all the
-            # way through: the sides of the pyramid, the legend and the
-            # "Female (n)" / "Male (n)" columns are all reversed with no visible
-            # sign. So read the level LABELS first, and disclose the outcome as a
-            # notice either way (see the assign_mode block below).
-            assign_mode <- "user"
-            auto_side <- NULL
-            auto_level <- NULL
-            if (is.null(female_level) && is.null(male_level)) {
-                guess <- private$.guess_gender_levels(gender_levels)
-                if (!is.null(guess)) {
-                    female_level <- guess$female
-                    male_level <- guess$male
-                    assign_mode <- "label"
-                } else if (length(gender_levels) >= 2) {
-                    female_level <- gender_levels[1]
-                    male_level <- gender_levels[2]
-                    assign_mode <- "order"
-                } else if (length(gender_levels) == 1) {
-                    # Single level: put it on the side its own label names, so a
-                    # male-only cohort is not reported in the Female column.
-                    if (identical(private$.gender_side(gender_levels[1]), "male")) {
-                        male_level <- gender_levels[1]
-                    } else {
-                        female_level <- gender_levels[1]
-                    }
-                    assign_mode <- "single"
-                }
-            } else if (is.null(female_level)) {
-                # Only male selected - fill the female side from the remaining levels
-                remaining <- gender_levels[gender_levels != male_level]
-                female_level <- private$.pick_level(remaining, "female")
-                assign_mode <- "partial"
-                auto_side <- "female"
-                auto_level <- female_level
-            } else if (is.null(male_level)) {
-                # Only female selected - fill the male side from the remaining levels
-                remaining <- gender_levels[gender_levels != female_level]
-                male_level <- private$.pick_level(remaining, "male")
-                assign_mode <- "partial"
-                auto_side <- "male"
-                auto_level <- male_level
-            }
 
             # Validate that female and male levels are different. This is a
             # configuration error, so it belongs in the notices panel at the top of
@@ -223,48 +262,17 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "ERROR",
                     .("Female and Male levels must be different"),
                     .fmt(
-                        .("The level '{level}' is selected for BOTH the female and the male side, so there is nothing to compare and no pyramid was drawn. Choose two different levels of '{gender}', or clear one or both selectors to let the analysis read the levels from their names."),
+                        .("The level '{level}' is selected for BOTH the female and the male side, so there is nothing to compare and no pyramid was drawn. Choose two different levels of '{gender}'."),
                         level = female_level, gender = gender)
                 )
-                self$results$dataInfo$setContent("")
+                private$.clearResults()
                 return()
             }
 
-            # Detect single-gender cohort
+            # Single-gender cohort: one level chosen and no other level observed
+            # (any other observed level made the run wait above).
             is_single_gender <- is.null(male_level) || is.null(female_level)
             single_gender_label <- if(!is.null(female_level)) female_level else male_level
-
-            # State the assignment where it is read, not only as a table row.
-            if (assign_mode == "label") {
-                private$.addNotice(
-                    "INFO",
-                    .("Gender levels were read from the level names"),
-                    .fmt(
-                        .("You did not set the gender levels, so they were matched on the level names of '{gender}': '{female}' was taken as female and '{male}' as male. The sides of the pyramid, the legend and the 'Female (n)' / 'Male (n)' table columns all follow that assignment. Use the 'Female level' and 'Male level' selectors to set it explicitly."),
-                        gender = gender, female = female_level, male = male_level)
-                )
-            } else if (assign_mode == "order") {
-                private$.addNotice(
-                    "STRONG_WARNING",
-                    .("Gender levels were assigned by level order, not by name"),
-                    .fmt(
-                        .("The levels of '{gender}' were not recognised as gender labels, so the first level ('{female}') was treated as FEMALE and the second ('{male}') as MALE. If your data are coded the other way round, the whole analysis is reversed with them: the left and right sides of the pyramid, the legend, and the 'Female (n)' and 'Male (n)' table columns. Set the 'Female level' and 'Male level' selectors to state the coding explicitly."),
-                        gender = gender, female = female_level, male = male_level)
-                )
-            } else if (assign_mode == "partial" && !is.null(auto_level)) {
-                # Two complete sentences rather than one with the side spliced
-                # in, so each can be translated with its own grammar.
-                template <- if (identical(auto_side, "female")) {
-                    .("Only one of the two gender selectors was set, so the level '{level}' was used as the female group. Check that this matches your coding; if it does not, the female side of the pyramid and the 'Female (n)' column describe the wrong patients. Set both the 'Female level' and 'Male level' selectors to remove the guess.")
-                } else {
-                    .("Only one of the two gender selectors was set, so the level '{level}' was used as the male group. Check that this matches your coding; if it does not, the male side of the pyramid and the 'Male (n)' column describe the wrong patients. Set both the 'Female level' and 'Male level' selectors to remove the guess.")
-                }
-                private$.addNotice(
-                    "STRONG_WARNING",
-                    .("One gender level was filled in automatically"),
-                    .fmt(template, level = auto_level)
-                )
-            }
 
             # Create standardized gender variable
             is_female <- if (!is.null(female_level)) {
@@ -480,7 +488,7 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         .("The current settings produce {n} age bands over an age range ending at {maxAge} years. No table or figure was drawn: that many bands need one table row and two bars each, which takes a long time to render and cannot be read. Increase the bin width, type fewer custom breaks, or choose one of the age group presets - about 25 bands or fewer is readable at the size this plot is drawn."),
                         n = n_bands, maxAge = round(max_age, 2))
                 )
-                self$results$dataInfo$setContent("")
+                private$.clearResults()
                 return()
             }
             # (The "many narrow bands" warning is raised after cut(), where the
@@ -1056,48 +1064,6 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 grDevices::col2rgb(x)
                 TRUE
             }, error = function(e) FALSE)
-        },
-
-        # Map a gender level label onto a side, or NA when it is not recognised.
-        # Deliberately narrow: an unrecognised label falls back to level order and
-        # is disclosed in a notice, which is safer than a loose guess.
-        .gender_side = function(label) {
-            key <- gsub("[^a-z]", "", tolower(trimws(as.character(label))))
-            if (length(key) != 1 || is.na(key) || !nzchar(key))
-                return(NA_character_)
-            # "kadn" is "kadin"/"kad\u{131}n" after the non-letter strip
-            if (key %in% c("f", "fem", "female", "females", "w", "woman", "women",
-                           "k", "kadin", "kadn"))
-                return("female")
-            if (key %in% c("m", "male", "males", "man", "men", "e", "erkek"))
-                return("male")
-            NA_character_
-        },
-
-        # Both sides read from the level names, or NULL if that is not unambiguous.
-        .guess_gender_levels = function(gender_levels) {
-            if (length(gender_levels) < 2)
-                return(NULL)
-            sides <- vapply(gender_levels, private$.gender_side, character(1),
-                            USE.NAMES = FALSE)
-            female <- gender_levels[!is.na(sides) & sides == "female"]
-            male <- gender_levels[!is.na(sides) & sides == "male"]
-            if (length(female) == 1 && length(male) == 1)
-                return(list(female = female, male = male))
-            NULL
-        },
-
-        # Fill one side from the levels the user left over: prefer a level whose
-        # own name says which side it is, otherwise take the first remaining one.
-        .pick_level = function(candidates, side) {
-            if (length(candidates) == 0)
-                return(NULL)
-            sides <- vapply(candidates, private$.gender_side, character(1),
-                            USE.NAMES = FALSE)
-            named <- candidates[!is.na(sides) & sides == side]
-            if (length(named) == 1)
-                return(named)
-            candidates[1]
         },
 
         .bin_width_breaks = function(max_age) {

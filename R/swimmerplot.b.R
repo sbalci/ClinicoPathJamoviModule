@@ -108,7 +108,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
         .patientAnchorIndex = function(patient_id, start_vals) {
             v <- as.numeric(start_vals)
             stats::ave(
-                seq_along(v), as.character(patient_id),
+                seq_along(v), match(patient_id, unique(patient_id)),
                 FUN = function(ix) {
                     vals <- v[ix]
                     if (all(is.na(vals))) ix[1] else ix[which.min(vals)]
@@ -341,7 +341,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             # (50.0%)" on the same page where the summary classified all six and
             # showed none missing. A patient's follow-up is likewise their whole
             # span, not one episode.
-            pid <- as.character(patient_data$patient_id)
+            pid <- .patientIDLabels(patient_data$patient_id)
             by_patient <- function(f) vapply(split(seq_along(pid), pid), f, 0)
             n_patients <- length(unique(pid))
             spans <- by_patient(function(ix) {
@@ -443,7 +443,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             # Extract and process core variables
             patient_data <- tryCatch({
                 data.frame(
-                    patient_id = as.character(df[[self$options$patientID]]),
+                    patient_id = .patientIDLabels(df[[self$options$patientID]]),
                     start_time = df[[self$options$startTime]],
                     end_time = df[[self$options$endTime]],
                     stringsAsFactors = FALSE
@@ -761,7 +761,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             # and emerged negative. Multi-episode input is explicitly supported -
             # the module detects it and says so - so it has to be handled here.
             patient_data <- patient_data[
-                !duplicated(as.character(patient_data$patient_id)), , drop = FALSE]
+                !duplicated(.patientIDLabels(patient_data$patient_id)), , drop = FALSE]
             
             # Resolve one label per slot BEFORE the loop, and say what is being
             # ignored. Three ways to lose an assigned milestone without a word:
@@ -837,11 +837,11 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     # row was silently lost from the plot and the summary table.
                     if (!is.null(self$options$patientID) &&
                         self$options$patientID %in% names(self$data)) {
-                        src_ids <- as.character(self$data[[self$options$patientID]])
+                        src_ids <- .patientIDLabels(self$data[[self$options$patientID]])
                         nn <- which(!is.na(milestone_dates))
                         first_nn <- nn[!duplicated(src_ids[nn])]
                         lookup <- stats::setNames(first_nn, src_ids[first_nn])
-                        align <- unname(lookup[as.character(patient_data$patient_id)])
+                        align <- unname(lookup[.patientIDLabels(patient_data$patient_id)])
                         milestone_dates <- milestone_dates[align]
                     }
 
@@ -956,14 +956,14 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             # its median. The markers are kept - a progression recorded after the
             # last follow-up line is real - but the reader is told.
             if (nrow(milestone_data) > 0 && nrow(patient_data) > 0) {
-                pid_chr <- as.character(patient_data$patient_id)
+                pid_chr <- .patientIDLabels(patient_data$patient_id)
                 win_lo <- tapply(private$.asNumericTime(patient_data$start_time),
                                  pid_chr, min, na.rm = TRUE)
                 win_hi <- tapply(private$.asNumericTime(patient_data$end_time),
                                  pid_chr, max, na.rm = TRUE)
                 ms_t  <- private$.asNumericTime(milestone_data$time)
-                ms_lo <- win_lo[as.character(milestone_data$patient_id)]
-                ms_hi <- win_hi[as.character(milestone_data$patient_id)]
+                ms_lo <- win_lo[.patientIDLabels(milestone_data$patient_id)]
+                ms_hi <- win_hi[.patientIDLabels(milestone_data$patient_id)]
                 outside <- !is.na(ms_t) & !is.na(ms_lo) & !is.na(ms_hi) &
                            (ms_t < ms_lo | ms_t > ms_hi)
                 if (any(outside)) {
@@ -997,7 +997,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 # end. The old per-row logic drew arrows mid-lane at the end of
                 # whichever episode row happened to be coded censored, and could
                 # disagree with the estimator for multi-episode patients.
-                pid <- as.character(patient_data$patient_id)
+                pid <- .patientIDLabels(patient_data$patient_id)
                 status <- private$.classifyCensoring(patient_data$censor_status)
 
                 # State the convention that was inferred. Reading a censoring
@@ -1072,7 +1072,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 if (!is.null(event_var)) {
                     event_data <- tryCatch({
                         # Ensure all variables exist and get their lengths
-                        patient_ids <- as.character(self$data[[self$options$patientID]])
+                        patient_ids <- .patientIDLabels(self$data[[self$options$patientID]])
                         event_times <- self$data[[event_time_var]]
                         event_labels <- as.character(self$data[[event_var]])
 
@@ -1178,8 +1178,8 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                             self$options$timeDisplay == "relative" &&
                             "original_start" %in% names(patient_data) &&
                             is.numeric(event_data$time)) {
-                            pidx <- match(as.character(event_data$patient_id),
-                                          as.character(patient_data$patient_id))
+                            pidx <- match(.patientIDLabels(event_data$patient_id),
+                                          .patientIDLabels(patient_data$patient_id))
                             shift <- private$.asNumericTime(private$.shiftBasis(patient_data))[pidx]
                             shift[is.na(shift)] <- 0
                             event_data$time <- event_data$time - shift
@@ -1191,14 +1191,14 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                         # episode's end and dropping valid events in later
                         # episodes - and the old per-episode date merge duplicated
                         # any event falling inside overlapping episode windows.
-                        pid_chr <- as.character(patient_data$patient_id)
+                        pid_chr <- .patientIDLabels(patient_data$patient_id)
                         win_lo <- tapply(private$.asNumericTime(patient_data$start_time),
                                          pid_chr, min, na.rm = TRUE)
                         win_hi <- tapply(private$.asNumericTime(patient_data$end_time),
                                          pid_chr, max, na.rm = TRUE)
                         ev_t <- private$.asNumericTime(event_data$time)
-                        ev_lo <- win_lo[as.character(event_data$patient_id)]
-                        ev_hi <- win_hi[as.character(event_data$patient_id)]
+                        ev_lo <- win_lo[.patientIDLabels(event_data$patient_id)]
+                        ev_hi <- win_hi[.patientIDLabels(event_data$patient_id)]
                         keep <- !is.na(ev_t) & !is.na(event_data$label) &
                                 !is.na(ev_lo) & !is.na(ev_hi) &
                                 ev_t >= ev_lo & ev_t <= ev_hi
@@ -1262,12 +1262,12 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
         # SMALLEST, not the first row - match() re-based a patient's episode-1
         # milestone on whichever episode the file happened to list first.
         .convertTimesToNumeric = function(times, patient_ids, patient_data, unit = self$options$timeUnit) {
-            ids_chr <- as.character(patient_ids)
+            ids_chr <- .patientIDLabels(patient_ids)
             anchor_idx <- private$.patientAnchorIndex(
                 patient_data$patient_id, patient_data$start_time)
-            first_of <- !duplicated(as.character(patient_data$patient_id))
+            first_of <- !duplicated(.patientIDLabels(patient_data$patient_id))
             anchors <- patient_data$start_time[anchor_idx][first_of]
-            names(anchors) <- as.character(patient_data$patient_id)[first_of]
+            names(anchors) <- .patientIDLabels(patient_data$patient_id)[first_of]
             start_vals <- anchors[ids_chr]
 
             if (inherits(times, c("Date", "POSIXct", "POSIXlt"))) {
@@ -2882,7 +2882,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             self$results$eventMarkerTable$setNote("denominator", .fmt(
                 .("Percentages are over the {n} event markers shown, not over the {p} patients who have one or the {N} patients in the analysis - a patient with several markers counts several times. Median Time is measured from each patient's own start, in {unit}."),
                 n = total_events, p = n_pat_ev,
-                N = if (!is.null(patient_data)) length(unique(as.character(patient_data$patient_id))) else n_pat_ev,
+                N = if (!is.null(patient_data)) length(unique(.patientIDLabels(patient_data$patient_id))) else n_pat_ev,
                 unit = private$.timeUnitWord()))
         },
         
@@ -3831,7 +3831,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             # end), constant across a patient's rows - sorting by per-row episode
             # duration scattered multi-episode patients by whichever episode
             # happened to come first.
-            pid_chr <- as.character(patient_data$patient_id)
+            pid_chr <- .patientIDLabels(patient_data$patient_id)
             startn <- private$.asNumericTime(patient_data$start_time)
             endn <- private$.asNumericTime(patient_data$end_time)
             sort_durations <-
@@ -3843,13 +3843,13 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 sv <- self$options$sortVariable
                 df <- self$data
                 tmp <- data.frame(
-                    patient_id = as.character(df[[self$options$patientID]]),
+                    patient_id = .patientIDLabels(df[[self$options$patientID]]),
                     sort_val = df[[sv]],
                     stringsAsFactors = FALSE
                 )
                 tmp <- tmp[!is.na(tmp$patient_id) & !duplicated(tmp$patient_id), ]
                 map <- stats::setNames(tmp$sort_val, tmp$patient_id)
-                key <- unname(map[as.character(patient_data$patient_id)])
+                key <- unname(map[.patientIDLabels(patient_data$patient_id)])
                 ord <- order(key, na.last = TRUE, method = "auto")
 
                 # A Sort Variable wins over Sort Order, which is reasonable but
@@ -3866,7 +3866,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             } else if (self$options$sortOrder == "patient_id") {
                 # Numeric-looking IDs sort numerically. Plain order() is
                 # lexicographic, so 1, 2, 3, 10, 20 came out "1 10 2 20 3".
-                ids <- as.character(patient_data$patient_id)
+                ids <- .patientIDLabels(patient_data$patient_id)
                 num <- suppressWarnings(as.numeric(ids))
                 ord <- if (!any(is.na(num) & !is.na(ids)))
                     order(num, method = "auto") else order(ids, method = "auto")
@@ -3894,8 +3894,8 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             # longest-first from the TOP, which is how every reader scans a
             # swimmer plot. Before this, all four sort orders were shown upside
             # down.
-            ordered_ids <- as.character(patient_data$patient_id[ord])
-            patient_data$patient_id <- factor(as.character(patient_data$patient_id),
+            ordered_ids <- .patientIDLabels(patient_data$patient_id[ord])
+            patient_data$patient_id <- factor(.patientIDLabels(patient_data$patient_id),
                                               levels = rev(unique(ordered_ids)))
             patient_data
         },

@@ -29,20 +29,56 @@ decisionClass <- if (requireNamespace("jmvcore"))
             # Constants for maintainability
             NOMOGRAM_LABEL_SIZE = 14/5,
 
+            # Blank every disease-accuracy output (comparator mode, and while a positive level is
+            # unset). Rows scaffolded in .init() are blanked, not deleted: .run() fills them by
+            # setRow() on their keys, so a deleted scaffold breaks the next run on this object.
+            # Notes are dropped with the values they explained; the welcome panel is left alone.
             .clearDiseaseOutputs = function() {
                 self$results$plot1$setState(NULL)
-                for (nm in c("welcome", "naturalLanguageSummary", "clinicalInterpretation",
-                             "reportTemplate", "aboutAnalysis", "misclassificationInterpretation",
-                             "misclassifiedHeading")) self$results[[nm]]$setContent("")
-                for (nm in c("cTable", "nTable", "ratioTable", "epirTable_ratio", "epirTable_number")) {
+                for (nm in c("naturalLanguageSummary", "clinicalInterpretation", "reportTemplate",
+                             "aboutAnalysis", "misclassificationInterpretation", "misclassifiedHeading",
+                             "missingDataSummary")) self$results[[nm]]$setContent("")
+                for (nm in c("cTable", "nTable", "ratioTable", "epirTable_ratio", "epirTable_number",
+                             "rawContingency", "confusionMatrixSummary")) {
                     table <- self$results[[nm]]
+                    for (key in names(table$notes)) table$setNote(key, NULL)
                     for (column in table$columns) if (column$type %in% c("number", "integer")) {
                         for (i in seq_len(table$rowCount))
                             table$setCell(col = column$name, rowNo = i, value = NA_real_)
                     }
                 }
-                for (nm in c("rawCounts", "rawContingency", "confusionMatrixSummary",
-                             "falsePositiveTable", "falseNegativeTable")) .deleteTableRows(self$results[[nm]])
+                raw_labels <- private$.rawContingencyLabels()
+                for (key in intersect(names(raw_labels), self$results$rawContingency$rowKeys))
+                    self$results$rawContingency$setRow(rowKey = key,
+                        values = list(test_level = unname(raw_labels[[key]])))
+                for (nm in c("rawCounts", "falsePositiveTable", "falseNegativeTable")) {
+                    table <- self$results[[nm]]
+                    .deleteTableRows(table)
+                    for (key in names(table$notes)) table$setNote(key, NULL)
+                }
+                # The saved TP/FP/FN/TN column must not keep labels from a previous level choice.
+                if (isTRUE(self$options$saveClassifications) && !is.null(self$data)) {
+                    self$results$saveClassifications$setRowNums(rownames(self$data))
+                    self$results$saveClassifications$setValues(rep(NA_character_, nrow(self$data)))
+                }
+                private$.n_complete_cases <- NA_integer_
+                private$.n_level_excluded <- 0L
+                private$.youdenDirection <- NULL
+            },
+
+            # A Level option left empty. allowNone gives NULL; "" and NA are treated the same.
+            .levelUnset = function(x) {
+                is.null(x) || length(x) != 1 || is.na(x) || !nzchar(as.character(x))
+            },
+
+            # "level (n = k)" for each non-missing level present in a column, in level order.
+            # Unused factor levels, an explicit NA level and "" are left out.
+            .observedLevels = function(var) {
+                counts <- table(factor(self$data[[var]], exclude = c(NA, "")))
+                if (length(counts) == 0) return(.("none"))
+                shown <- sprintf("%s (n = %d)", names(counts), as.integer(counts))
+                if (length(shown) > 10) shown <- c(shown[1:10], "...")
+                paste(shown, collapse = ", ")
             },
 
             .runComparator = function(mydata, testVariable, goldVariable) {
@@ -443,10 +479,9 @@ decisionClass <- if (requireNamespace("jmvcore"))
             # Enhanced input validation for categorical diagnostic data
             .validateCategoricalInputs = function() {
                 # No "variable not selected" branches here: .run() returns before
-                # calling this method unless gold, newtest, goldPositive and
-                # testPositive are all set (each is a scalar option, so its length
-                # check summing to 4 means all four are present). The unselected
-                # state is handled by the `welcome` panel instead.
+                # calling this method unless gold and newtest are selected and both
+                # positive levels are set (an unset one is a pending INFO, raised
+                # there). The unselected state is handled by the `welcome` panel.
 
                 # Check data availability
                 if (is.null(self$data) || nrow(self$data) == 0) {
@@ -1670,10 +1705,32 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 # inside the confusion-matrix handler reach the user too.
                 on.exit(private$.renderNotices(), add = TRUE)
 
-                # Early return if variables not selected
-                if (length(self$options$testPositive) + length(self$options$newtest) +
-                    length(self$options$goldPositive) + length(self$options$gold) < 4)
+                # Nothing is computed until both variables and both positive levels are chosen.
+                # allowNone stops jamovi pre-selecting each variable's FIRST level, usually the
+                # negative one ("No", "0", "Benign"), so an unset positive level is the state every
+                # new analysis starts in: pending, not an error. A selected variable without its
+                # positive level gets an INFO listing its levels; the welcome panel covers the
+                # rest. The positive level is never taken from the order of the levels.
+                pending <- length(self$options$gold) == 0 || length(self$options$newtest) == 0
+                for (slot in list(
+                    list(var = self$options$gold, level = self$options$goldPositive,
+                         title = .("Choose the Reference Positive Level"),
+                         ask = .('Select the level of {var} that counts as positive, under "Reference positive level".')),
+                    list(var = self$options$newtest, level = self$options$testPositive,
+                         title = .("Choose the Test Positive Level"),
+                         ask = .('Select the level of {var} that is a positive test result, under "Test positive level".')))) {
+                    if (length(slot$var) == 0 || !private$.levelUnset(slot$level)) next
+                    pending <- TRUE
+                    private$.addNotice(type = "INFO", title = slot$title, content = paste(
+                        .fmt(slot$ask, var = slot$var),
+                        .fmt(.("Levels found: {levels}."), levels = private$.observedLevels(slot$var)),
+                        .("Nothing is computed until it is chosen.")))
+                }
+                if (pending) {
+                    # A previous run's numbers must not sit beside the notice.
+                    private$.clearDiseaseOutputs()
                     return()
+                }
 
                 # Consolidated input validation
                 if (!private$.validateCategoricalInputs()) {

@@ -22,13 +22,13 @@
     list(title = title, group = group, subgroup = subgroup, version = version, state = state)
   }
   list(
-    agreement = entry("Interrater Reliability", "meddecideT", "Agreement", "1.0.83", "testing"),
+    agreement = entry("Interrater Reliability", "meddecide", "Agreement", "1.0.9", "production"),
     cohenskappa = entry("Cohen's Kappa Agreement", "meddecideExtraD", "Diagnostic Statistics",
       "1.0.83", "draft"),
     icccoeff = entry("Intraclass Correlation Coefficient", "meddecideExtraD", "Agreement",
       "0.0.31", "draft"),
     pathagreement = entry("Pathology Interrater Reliability", "OncoPathT", "Agreement",
-      "1.0.83", "testing"),
+      "1.0.9", "testing"),
     pathologyagreement = entry("Pathology Agreement Analysis", "OncoPathP", "Agreement",
       "1.0.0", "pending"),
     modalitycomparison = entry("Modality Comparison Analysis", "meddecideExtraD", "Agreement",
@@ -36,11 +36,11 @@
     multifocalconcordance = entry("Multifocal / Primary-Metastasis Concordance", "OncoPathD",
       "ClinicoPath Biomarker Analysis", "0.0.1", "draft"),
     kappaSizeCI = entry("Confidence Interval Approach for the Number of Subjects Required",
-      "Power", "Power Analysis by meddecide", "1.0.83", "production"),
+      "Power", "Power Analysis by meddecide", "1.0.9", "production"),
     kappaSizePower = entry("Power Approach for the Number of Subjects Required",
-      "PowerT", "Power Analysis by meddecide", "1.0.83", "testing"),
+      "Power", "Power Analysis by meddecide", "1.0.9", "production"),
     kappaSizeFixedN = entry("Lowest Expected Kappa for a Fixed Sample Size", "Power",
-      "Power Analysis by meddecide", "1.0.83", "production")
+      "Power Analysis by meddecide", "1.0.9", "production")
   )
 }
 

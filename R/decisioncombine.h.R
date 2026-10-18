@@ -47,7 +47,8 @@ decisioncombineOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             private$..goldPositive <- jmvcore::OptionLevel$new(
                 "goldPositive",
                 goldPositive,
-                variable="(gold)")
+                variable="(gold)",
+                allowNone=TRUE)
             private$..test1 <- jmvcore::OptionVariable$new(
                 "test1",
                 test1,
@@ -59,7 +60,8 @@ decisioncombineOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             private$..test1Positive <- jmvcore::OptionLevel$new(
                 "test1Positive",
                 test1Positive,
-                variable="(test1)")
+                variable="(test1)",
+                allowNone=TRUE)
             private$..test2 <- jmvcore::OptionVariable$new(
                 "test2",
                 test2,
@@ -1066,14 +1068,23 @@ decisioncombineBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' @param gold The gold standard reference variable representing true disease
 #'   status.
 #' @param goldPositive The level indicating presence of disease in the gold
-#'   standard.
+#'   standard. It is never taken from the order of the levels: NULL leaves the
+#'   analysis pending, listing the levels found. The argument has no default;
+#'   pass the level.
 #' @param test1 The first diagnostic test variable.
 #' @param test1Positive The level representing a positive result for Test 1.
+#'   It is never taken from the order of the levels: NULL leaves the analysis
+#'   pending, listing the levels found. The argument has no default; pass the
+#'   level.
 #' @param test2 The second diagnostic test variable for combination analysis.
 #' @param test2Positive The level representing a positive result for Test 2.
+#'   Pass NULL when Test 2 is not selected; with Test 2 selected, NULL leaves
+#'   the analysis pending.
 #' @param test3 The third diagnostic test variable for 3-way combination
 #'   analysis.
 #' @param test3Positive The level representing a positive result for Test 3.
+#'   Pass NULL when Test 3 is not selected; with Test 3 selected, NULL leaves
+#'   the analysis pending.
 #' @param showIndividual Boolean to show individual test performance tables.
 #' @param showFrequency Boolean to show frequency tables.
 #' @param showCITables Boolean to show the confidence-interval tables for the

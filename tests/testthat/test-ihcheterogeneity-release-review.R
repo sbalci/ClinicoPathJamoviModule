@@ -169,9 +169,8 @@ test_that("sample-size planning uses the number of complete cases", {
     # complete cases, not the 40 rows.
     pt <- run_ihc(d, sample_size_planning = TRUE)$samplesizetable$asDF
     row <- pt[abs(pt$planning_icc - 0.75) < 1e-12, ]
-    k <- 3; rho <- 0.75
-    q <- 8 * qnorm(0.975)^2 * (1 - rho)^2 * (1 + (k - 1) * rho)^2 / (k * (k - 1))
-    expect_equal(row$width_current, sqrt(q / (20 - 1)), tolerance = 1e-10)
+    # Independent integration over the Beta density at n = 20, k = 3, rho = .75.
+    expect_equal(row$width_current, 0.3338848, tolerance = 1e-7)
     expect_false(any(grepl("power", pt$scenario, ignore.case = TRUE)))
 })
 

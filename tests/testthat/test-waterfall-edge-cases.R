@@ -50,16 +50,17 @@ test_that("an all-missing cohort says why nothing was produced", {
   all_na_data <- waterfall_test
   all_na_data$best_response <- NA_real_
 
-  result <- waterfall(
-    data = all_na_data,
-    patientID = "patientID",
-    responseVar = "best_response"
+  # A processing failure is fatal, so it uses jamovi's error state (jmvcore::reject(),
+  # library audit 2026-09-22) rather than an ERROR notice above empty tables. From R
+  # that is an error carrying the same explanation.
+  expect_error(
+    waterfall(
+      data = all_na_data,
+      patientID = "patientID",
+      responseVar = "best_response"
+    ),
+    "No patients with valid response data"
   )
-  # The 4-row table skeleton from .init() stays, but no values are filled.
-  expect_true(all(is.na(result$summaryTable$asDF$n)))
-  # The run stops and explains itself once, in the always-visible notices panel
-  # (it was also copied into todo2, so the message appeared twice).
-  expect_match(wf_text(result, "notices"), "No patients with valid response data")
 })
 
 test_that("waterfall handles missing patientID values", {

@@ -198,7 +198,10 @@ test_that("Regression: minimum-p search is exhaustive when the candidate space i
     groups <- cut(marker, breaks = c(-Inf, cuts, Inf))
     if (any(as.integer(table(groups)) < min_n)) return(Inf)
     fit <- survival::survdiff(survival::Surv(time, status) ~ groups, data = df)
-    1 - stats::pchisq(fit$chisq, df = length(fit$n) - 1L)
+    # Upper tail, not 1 - pchisq(): the latter rounds to exactly 0 for 27 of these
+    # candidates, so which.min() returned the first tie (2, 4; chi-square 92.9) rather
+    # than the true minimum (6, 9; chi-square 198, p = 1e-43) the analysis finds.
+    stats::pchisq(fit$chisq, df = length(fit$n) - 1L, lower.tail = FALSE)
   }, numeric(1))
   expected <- candidates[[which.min(scores)]]
 
@@ -821,6 +824,7 @@ test_that("Edge cases: small sample size and single/multiple cut-offs handled sa
   })
   # Fewer than 10 events: cut-off determination must stay suppressed and said so.
   expect_equal(res$rescutTable$rowCount, 0L)
-  expect_match(strip_survivalcont_html(res$warnings$content),
+  # a strong warning, so it is written to the strongWarnings panel
+  expect_match(strip_survivalcont_html(res$strongWarnings$content),
                "Cut-off determination is suppressed", fixed = TRUE)
 })

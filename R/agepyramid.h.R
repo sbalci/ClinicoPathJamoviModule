@@ -56,11 +56,13 @@ agepyramidOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..female <- jmvcore::OptionLevel$new(
                 "female",
                 female,
-                variable="(gender)")
+                variable="(gender)",
+                allowNone=TRUE)
             private$..male <- jmvcore::OptionLevel$new(
                 "male",
                 male,
-                variable="(gender)")
+                variable="(gender)",
+                allowNone=TRUE)
             private$..age_groups <- jmvcore::OptionList$new(
                 "age_groups",
                 age_groups,
@@ -406,8 +408,9 @@ agepyramidBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @examples
 #' \donttest{
 #' # `female` and `male` are Level options: jamovi forbids a default on
-#' # them, so they are REQUIRED arguments of this function. Pass NULL to
-#' # have the levels read from their names.
+#' # them, so they are REQUIRED arguments of this function. They are
+#' # never read from the level names or order: NULL leaves the analysis
+#' # waiting (except for a single-gender cohort, see `female`).
 #' agepyramid(
 #'     data = histopathology,
 #'     age = "Age",
@@ -423,15 +426,19 @@ agepyramidBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param gender a string naming the variable from \code{data} that contains
 #'   the categorical values used for the report
 #' @param female a string naming the level of \code{gender} that identifies
-#'   female subjects. This argument has no default (jamovi does not allow one on
-#'   a level option), so a call from R must always supply it; pass NULL to let
-#'   the analysis read the level names itself, which it reports in a note above
-#'   the results.
+#'   female subjects. It must be chosen: it is never read from the level names
+#'   or their order. The argument has no default (jamovi does not allow one on a
+#'   level option), so a call from R must supply it. NULL leaves the analysis
+#'   waiting, with the levels found and their counts listed and nothing drawn,
+#'   unless \code{male} is set and \code{gender} has no other observed level:
+#'   that single-gender cohort is drawn on the male side only.
 #' @param male a string naming the level of \code{gender} that identifies male
-#'   subjects. This argument has no default (jamovi does not allow one on a
-#'   level option), so a call from R must always supply it; pass NULL to let the
-#'   analysis read the level names itself, which it reports in a note above the
-#'   results.
+#'   subjects. It must be chosen: it is never read from the level names or their
+#'   order. The argument has no default (jamovi does not allow one on a level
+#'   option), so a call from R must supply it. NULL leaves the analysis waiting,
+#'   with the levels found and their counts listed and nothing drawn, unless
+#'   \code{female} is set and \code{gender} has no other observed level: that
+#'   single-gender cohort is drawn on the female side only.
 #' @param age_groups Predefined age group categories. Choose 'custom' to use
 #'   bin_width, or select a preset. 'who' gives the WHO/UN standard five-year
 #'   groups (0-4, 5-9, ... 85+) used by the WHO World Standard Population and UN

@@ -115,9 +115,12 @@ Variance and Comprehensive focuses (Comprehensive is the default), so this
 option adds it under the Reproducibility focus.}
 
 \item{sample_size_planning}{Number of cases needed to estimate the ICC with
-a 95 percent CI of width 0.20 or 0.10 (Bonett 2002), at planning ICCs of
-0.75 and 0.90 and at the observed ICC, for the number of measurements per
-case in this analysis. Always shown under the Comprehensive focus.}
+a 95 percent CI of width 0.20 or 0.10 at planning ICCs of 0.75 and 0.90 and
+at the observed consistency ICC, for the number of measurements per case in
+this analysis. Refines the Bonett (2002) approximation by integrating the
+exact F-interval width under a balanced normal ANOVA model. Controls
+expected width, not assurance that every interval meets the target. Always
+shown under the Comprehensive focus.}
 
 \item{generate_recommendations}{Recommendations on regions per case,
 calibration of systematic differences and quality control, derived from the

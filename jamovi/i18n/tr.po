@@ -25650,14 +25650,6 @@ msgstr ""
 msgid "Automatic by Variable Type"
 msgstr ""
 
-#: R/oddsratio.b.R
-msgid "Automatic detection - first match ({language})"
-msgstr "Otomatik algılama - ilk eşleşme ({language})"
-
-#: R/oddsratio.b.R
-msgid "Automatic detection ({language})"
-msgstr "Otomatik algılama ({language})"
-
 #: datevalidator/options/correction_method/datefixr.title
 msgid "Automatic Detection (datefixR)"
 msgstr ""
@@ -25711,10 +25703,6 @@ msgstr ""
 #: esquisseauto/options.menuSubtitle
 msgid "Automatic plot selection using esquisse"
 msgstr ""
-
-#: R/oddsratio.b.R
-msgid "Automatic Predictor Level Detection"
-msgstr "Otomatik Belirteç Düzeyi Algılama"
 
 #: treeadvanced/options/auto_prune.title
 msgid "Automatic Pruning"
@@ -57537,10 +57525,6 @@ msgstr ""
 msgid "Default (Right)"
 msgstr ""
 
-#: R/oddsratio.b.R
-msgid "Default (second factor level)"
-msgstr "Varsayılan (ikinci faktör düzeyi)"
-
 #: hullplot/options/plot_theme/minimal.title
 msgid "Default (theme_minimal)"
 msgstr ""
@@ -79364,14 +79348,6 @@ msgid "Gender level selection"
 msgstr "Cinsiyet düzeyi seçimi"
 
 #: R/agepyramid.b.R
-msgid "Gender levels were assigned by level order, not by name"
-msgstr "Cinsiyet düzeyleri ada göre değil, düzey sırasına göre atandı"
-
-#: R/agepyramid.b.R
-msgid "Gender levels were read from the level names"
-msgstr "Cinsiyet düzeyleri düzey adlarından okundu"
-
-#: R/agepyramid.b.R
 msgid "gender values matching neither the female nor the male level"
 msgstr "ne kadın ne erkek düzeyiyle eşleşen cinsiyet değerleri"
 
@@ -88039,10 +88015,6 @@ msgstr "Önemli uyarı"
 #: venn/results/validationWarnings.title
 msgid "Important Warnings"
 msgstr "Önemli Uyarılar"
-
-#: R/oddsratio.b.R
-msgid "Important:"
-msgstr "Önemli:"
 
 #: R/oddsratio.b.R
 msgid "Important: Please Verify These Interpretations"
@@ -105254,10 +105226,6 @@ msgstr ""
 msgid "Method:"
 msgstr "Yöntem:"
 
-#: R/oddsratio.b.R
-msgid "Method: {method}"
-msgstr "Yöntem: {method}"
-
 #: R/stagemigration-part4.R
 msgid "Method: {stagingMethod}"
 msgstr ""
@@ -114707,10 +114675,6 @@ msgid "No Futility Boundary"
 msgstr ""
 
 #: R/decisioncombine.b.R
-msgid "No Gold Positive Level"
-msgstr "Altın Pozitif Düzeyi Yok"
-
-#: R/decisioncombine.b.R
 #: R/decisioncompare.b.R
 msgid "No Gold Standard"
 msgstr "Altın Standart Yok"
@@ -115812,18 +115776,6 @@ msgstr "Nihai olay gözlemlenmedi; nokta tahmini 0 kalır"
 #: R/decisioncombine.b.R
 msgid "No Test 1"
 msgstr "Test 1 Yok"
-
-#: R/decisioncombine.b.R
-msgid "No Test 1 Positive Level"
-msgstr "Test 1 Pozitif Düzeyi Yok"
-
-#: R/decisioncombine.b.R
-msgid "No Test 2 Positive Level"
-msgstr "Test 2 Pozitif Düzeyi Yok"
-
-#: R/decisioncombine.b.R
-msgid "No Test 3 Positive Level"
-msgstr "Test 3 Pozitif Düzeyi Yok"
 
 #: R/decisioncompare.b.R
 msgid ""
@@ -121055,7 +121007,7 @@ msgstr ""
 
 #: singlearm/ui[0].label
 #: survival/ui[0].label
-msgid "Observed-time competing risks"
+msgid "Observed-Time Competing Risks"
 msgstr ""
 
 #: singlearm/results/cifTable.title
@@ -121640,10 +121592,6 @@ msgstr ""
 "Her hasta kendi gözlenen kovaryat değerlerinde olacak şekilde tüm kohort "
 "için tek bir eğri üretilir. <i>%s</i> <b>değiştirilmez</b>; dolayısıyla bu "
 "çıktı düzeylerini karşılaştır<b>maz</b>."
-
-#: R/agepyramid.b.R
-msgid "One gender level was filled in automatically"
-msgstr "Bir cinsiyet düzeyi otomatik olarak dolduruldu"
 
 #: R/pathagreement.b.R
 msgid "one minus signed Spearman correlation distance"
@@ -122534,34 +122482,6 @@ msgstr ""
 "tahmin edilemez, bu nedenle standart sapma ve güven aralığı NA olarak "
 "bildirilir ve ortalama, medyan ve aralık bu tek değerden ibarettir. Bu, "
 "herhangi bir istatistiksel ifade için temel oluşturmaz."
-
-#: R/agepyramid.b.R
-msgid ""
-"Only one of the two gender selectors was set, so the level '{level}' was "
-"used as the female group. Check that this matches your coding; if it does "
-"not, the female side of the pyramid and the 'Female (n)' column describe the "
-"wrong patients. Set both the 'Female level' and 'Male level' selectors to "
-"remove the guess."
-msgstr ""
-"İki cinsiyet seçicisinden yalnızca biri ayarlandığı için '{level}' düzeyi "
-"kadın grubu olarak kullanıldı. Bunun kodlamanızla uyuştuğunu kontrol edin; "
-"uyuşmuyorsa piramidin kadın tarafı ve 'Kadın (n)' sütunu yanlış hastaları "
-"anlatır. Tahmini kaldırmak için hem 'Kadın düzeyi' hem 'Erkek düzeyi' "
-"seçicilerini ayarlayın."
-
-#: R/agepyramid.b.R
-msgid ""
-"Only one of the two gender selectors was set, so the level '{level}' was "
-"used as the male group. Check that this matches your coding; if it does not, "
-"the male side of the pyramid and the 'Male (n)' column describe the wrong "
-"patients. Set both the 'Female level' and 'Male level' selectors to remove "
-"the guess."
-msgstr ""
-"İki cinsiyet seçicisinden yalnızca biri ayarlandığı için '{level}' düzeyi "
-"erkek grubu olarak kullanıldı. Bunun kodlamanızla uyuştuğunu kontrol edin; "
-"uyuşmuyorsa piramidin erkek tarafı ve 'Erkek (n)' sütunu yanlış hastaları "
-"anlatır. Tahmini kaldırmak için hem 'Kadın düzeyi' hem 'Erkek düzeyi' "
-"seçicilerini ayarlayın."
 
 #: R/decisioncompare.b.R
 msgid ""
@@ -133318,14 +133238,6 @@ msgstr ""
 "Lütfen şu alanlar için pozitif düzeyleri belirtin: {slots}. Hangi düzeyin "
 "pozitif test sonucunu temsil ettiğini seçmek için değişken panelindeki düzey "
 "seçiciyi kullanın."
-
-#: R/oddsratio.b.R
-msgid ""
-"Please verify that '{level}' is the correct positive level. If this is "
-"wrong, diagnostic metrics will be inverted."
-msgstr ""
-"Lütfen '{level}' düzeyinin doğru pozitif düzey olduğunu doğrulayın. Bu "
-"yanlışsa, tanısal metrikler tersine dönecektir."
 
 #: R/linechart.b.R
 msgid "Please verify your data and variable selections."
@@ -154755,10 +154667,6 @@ msgstr "Kategorilere dönüştürmek istediğiniz sürekli değişkeni seçin."
 msgid "Select the depth and focus of spatial analysis"
 msgstr ""
 
-#: R/decisioncombine.b.R
-msgid "Select the disease-present level for the gold standard."
-msgstr "Altın standart için hastalık var düzeyini seçin."
-
 #: autoeda/options/eda_engine.description.jamovi
 msgid "Select the EDA analysis engine."
 msgstr ""
@@ -154792,14 +154700,6 @@ msgstr ""
 #: R/mageeequation.b.R
 msgid "Select the HER2 Positive level to identify HER2-positive cases."
 msgstr ""
-
-#: decisioncombine/options/goldPositive.description.ui
-msgid ""
-"Select the level indicating disease presence (e.g., \"1\", \"positive\", "
-"\"malignant\")."
-msgstr ""
-"Hastalık varlığını gösteren düzeyi seçin (ör. \"1\", \"pozitif\", "
-"\"malign\")."
 
 #: R/decisioncurve.b.R
 msgid ""
@@ -154855,10 +154755,6 @@ msgstr ""
 "sonuç değişkeni \"Alive\" ve \"Dead\" düzeylerine sahip \"death_status\" "
 "ise, olay düzeyi olarak \"Dead\" seçeneğini belirleyin."
 
-#: decisioncombine/options/test1Positive.description.ui
-msgid "Select the level representing a positive result for Test 1."
-msgstr "Test 1 için pozitif bir sonucu temsil eden düzeyi seçin."
-
 #: decision/options/goldNegative.description.ui
 msgid ""
 "Select the level that indicates disease is absent in your gold standard "
@@ -154901,14 +154797,6 @@ msgstr "Test 2 için POZİTİF bir sonucu temsil eden düzeyi seçin."
 #: decisioncompare/options/test3Positive.description.ui
 msgid "Select the level that represents a POSITIVE result for Test 3."
 msgstr "Test 3 için POZİTİF bir sonucu temsil eden düzeyi seçin."
-
-#: decision/options/testPositive.description.ui
-msgid ""
-"Select the level that represents a positive test result. This should "
-"correspond to the level indicating suspected disease presence."
-msgstr ""
-"Pozitif bir test sonucunu temsil eden düzeyi seçin. Bu, şüphelenilen "
-"hastalık varlığını gösteren düzeye karşılık gelmelidir."
 
 #: survivalcont/options/awod.description
 msgid ""
@@ -154965,18 +154853,6 @@ msgstr ""
 msgid "Select the outcome, for example disease status or malignant versus benign."
 msgstr "Sonlanımı seçin; örneğin hastalık durumu veya malign ile benign."
 
-#: R/decisioncombine.b.R
-msgid "Select the positive level for Test 1."
-msgstr "Test 1 için pozitif düzeyi seçin."
-
-#: R/decisioncombine.b.R
-msgid "Select the positive level for Test 2."
-msgstr "Test 2 için pozitif düzeyi seçin."
-
-#: R/decisioncombine.b.R
-msgid "Select the positive level for Test 3."
-msgstr "Test 3 için pozitif düzeyi seçin."
-
 #: decisioncompare/options/goldPositive.description.ui
 msgid ""
 "Select the positive reference level (e.g., \"positive\", \"malignant\", "
@@ -154984,12 +154860,6 @@ msgid ""
 msgstr ""
 "Pozitif referans düzeyini seçin (ör. \"pozitif\", \"malign\", \"1\"). Bu, "
 "tespit etmek istediğiniz durumu temsil eder."
-
-#: decision/options/goldPositive.description.ui
-msgid ""
-"Select the positive reference level. This represents the condition you want "
-"to detect or diagnose."
-msgstr ""
 
 #: bbcplots/options/y_var.description.ui
 msgid "Select the primary variable to visualize (values, measurements, counts)."
@@ -164600,16 +164470,6 @@ msgstr ""
 "Aynı değerlendiricinin aynı olguyu birden fazla kez değerlendirip "
 "değerlendirmediğini belirtin."
 
-#: oddsratio/options/predictorLevel.description.main
-msgid ""
-"Specify which level of the diagnostic predictor represents the positive case "
-"(e.g., \"Present\", \"Test+\", \"Yes\"). If omitted, the module attempts "
-"automatic detection and displays the selected level for verification."
-msgstr ""
-"Tanısal belirtecin hangi düzeyinin pozitif durumu temsil ettiğini belirtin "
-"(ör. \"Var\", \"Test+\", \"Evet\"). Atlanırsa, modül otomatik algılama dener "
-"ve doğrulama için seçilen düzeyi görüntüler."
-
 #: R/nogoldstandard.b.R
 msgid "Specify which level represents a positive test result for each test"
 msgstr ""
@@ -171803,13 +171663,6 @@ msgstr ""
 msgid "SurvivalP"
 msgstr ""
 
-#: package/analyses/singlearm.menuGroup
-#: package/analyses/survival.menuGroup
-#: singlearm/options.menuGroup
-#: survival/options.menuGroup
-msgid "SurvivalT"
-msgstr ""
-
 #: multisurvival/options/sty/t3.title
 msgid "survminer forestplot"
 msgstr "survminer orman grafiği"
@@ -178877,18 +178730,6 @@ msgstr ""
 "Düğümlerde referans düzey yüzdesi çizilmedi. Görüntülemek için bu düzeyi "
 "'+', '-', '/' veya '=' içermeyen bir adla yeniden kodlayın."
 
-#: R/agepyramid.b.R
-msgid ""
-"The level '{level}' is selected for BOTH the female and the male side, so "
-"there is nothing to compare and no pyramid was drawn. Choose two different "
-"levels of '{gender}', or clear one or both selectors to let the analysis "
-"read the levels from their names."
-msgstr ""
-"'{level}' düzeyi HEM kadın HEM erkek tarafı için seçildi; karşılaştırılacak "
-"bir şey olmadığından piramit çizilmedi. '{gender}' değişkeninden iki farklı "
-"düzey seçin ya da seçicilerden birini veya ikisini boş bırakarak düzeylerin "
-"adlarından okunmasına izin verin."
-
 #: R/oddsratio.b.R
 msgid "The level '{level}' is used as the positive/exposure category as specified."
 msgstr ""
@@ -178900,34 +178741,6 @@ msgid ""
 "The level {level} does not occur in the grouping variable, so nothing is "
 "highlighted; pick a level that is present in the data."
 msgstr ""
-
-#: venn/options/var1true.description.jamovi
-msgid "The level in `var1` that represents the true condition."
-msgstr "`var1` içinde doğru durumu temsil eden düzey."
-
-#: venn/options/var2true.description.jamovi
-msgid "The level in `var2` that represents the true condition."
-msgstr "`var2` içinde doğru durumu temsil eden düzey."
-
-#: venn/options/var3true.description.jamovi
-msgid "The level in `var3` that represents the true condition."
-msgstr "`var3` içinde doğru durumu temsil eden düzey."
-
-#: venn/options/var4true.description.jamovi
-msgid "The level in `var4` that represents the true condition."
-msgstr "`var4` içinde doğru durumu temsil eden düzey."
-
-#: venn/options/var5true.description.jamovi
-msgid "The level in `var5` that represents the true condition."
-msgstr "`var5` içinde doğru durumu temsil eden düzey."
-
-#: venn/options/var6true.description.jamovi
-msgid "The level in `var6` that represents the true condition."
-msgstr "`var6` içinde doğru durumu temsil eden düzey."
-
-#: venn/options/var7true.description.jamovi
-msgid "The level in `var7` that represents the true condition."
-msgstr "`var7` içinde doğru durumu temsil eden düzey."
 
 #: qtwist/options/event_os_level.description
 msgid ""
@@ -178944,51 +178757,15 @@ msgstr ""
 msgid "The level indicating progression or death when using factor variables."
 msgstr ""
 
-#: agepyramid/options/female.description.jamovi
-msgid ""
-"The level of the gender variable that identifies female subjects. Leave both "
-"level selectors empty to have them read from the level names; the assignment "
-"used is then stated above the results."
-msgstr ""
-"Kadın özneleri tanımlayan cinsiyet değişkeni düzeyi. Düzey adlarından "
-"okunması için her iki düzey seçicisini de boş bırakın; kullanılan atama "
-"sonuçların üzerinde belirtilir."
-
-#: agepyramid/options/male.description.jamovi
-msgid ""
-"The level of the gender variable that identifies male subjects. Leave both "
-"level selectors empty to have them read from the level names; the assignment "
-"used is then stated above the results."
-msgstr ""
-"Erkek özneleri tanımlayan cinsiyet değişkeni düzeyi. Düzey adlarından "
-"okunması için her iki düzey seçicisini de boş bırakın; kullanılan atama "
-"sonuçların üzerinde belirtilir."
-
 #: survivalcont/options/outcomeLevel.description
-msgid "The level of the outcome variable that represents the event of interest."
-msgstr "Sonuç değişkeninin ilgilenilen olayı temsil eden düzeyi."
+msgid "The level of the outcome variable that represents the event of interest. Required for a factor outcome, and never taken from the order of the levels: without it the analysis stops and lists the levels. A numeric 0/1 outcome is read as 1 = event."
+msgstr "Sonuç değişkeninin ilgilenilen olayı temsil eden düzeyi. Faktör türünde bir sonuç için zorunludur ve asla düzeylerin sırasından alınmaz: seçilmezse analiz durur ve düzeyleri listeler. Sayısal 0/1 bir sonuç 1 = olay olarak okunur."
 
 #: simonmakuch/options/exposedLevel.description
 msgid ""
 "The level that represents the \"exposed\" or \"active\" status of the "
 "time-dependent variable."
 msgstr ""
-
-#: R/agepyramid.b.R
-msgid ""
-"The levels of '{gender}' were not recognised as gender labels, so the first "
-"level ('{female}') was treated as FEMALE and the second ('{male}') as MALE. "
-"If your data are coded the other way round, the whole analysis is reversed "
-"with them: the left and right sides of the pyramid, the legend, and the "
-"'Female (n)' and 'Male (n)' table columns. Set the 'Female level' and 'Male "
-"level' selectors to state the coding explicitly."
-msgstr ""
-"'{gender}' değişkeninin düzeyleri cinsiyet etiketi olarak tanınmadı; bu "
-"yüzden ilk düzey ('{female}') KADIN, ikinci düzey ('{male}') ERKEK olarak "
-"alındı. Veriniz tersine kodlanmışsa analizin tamamı tersine döner: piramidin "
-"sol ve sağ tarafları, gösterge ve 'Kadın (n)' ile 'Erkek (n)' tablo "
-"sütunları. Kodlamayı açıkça belirtmek için 'Kadın düzeyi' ve 'Erkek düzeyi' "
-"seçicilerini ayarlayın."
 
 #: R/decisioncompare.b.R
 msgid ""
@@ -180636,10 +180413,6 @@ msgid ""
 msgstr ""
 "Pozitif olabilirlik oranı tahmin edilemez: test bu tabloda hiç pozitif sonuç "
 "vermedi."
-
-#: R/oddsratio.b.R
-msgid "The positive predictor level was automatically detected as: '{level}'"
-msgstr "Pozitif belirteç düzeyi otomatik olarak şu şekilde algılandı: '{level}'"
 
 #: R/nogoldstandard.b.R
 msgid ""
@@ -194845,12 +194618,6 @@ msgstr ""
 msgid "Use Surrogate Splits"
 msgstr ""
 
-#: R/oddsratio.b.R
-msgid "Use the 'Predictor Positive Level' option to set this manually."
-msgstr ""
-"Bunu manuel olarak ayarlamak için 'Belirteç Pozitif Düzeyi' seçeneğini "
-"kullanın."
-
 #: R/multisurvival.b.R
 msgid ""
 "Use the adjusted cumulative-incidence or risk-group cumulative-incidence "
@@ -203505,20 +203272,6 @@ msgstr ""
 "Zaten en az muhafazakar lambdayı kullanıyorsunuz, bu nedenle daha "
 "bilgilendirici tahmin ediciler ekleyin veya daha fazla olgu toplayın."
 
-#: R/agepyramid.b.R
-msgid ""
-"You did not set the gender levels, so they were matched on the level names "
-"of '{gender}': '{female}' was taken as female and '{male}' as male. The "
-"sides of the pyramid, the legend and the 'Female (n)' / 'Male (n)' table "
-"columns all follow that assignment. Use the 'Female level' and 'Male level' "
-"selectors to set it explicitly."
-msgstr ""
-"Cinsiyet düzeylerini belirlemediğiniz için '{gender}' değişkeninin düzey "
-"adlarıyla eşleştirildi: '{female}' kadın, '{male}' erkek olarak alındı. "
-"Piramidin tarafları, gösterge ve 'Kadın (n)' / 'Erkek (n)' tablo sütunları "
-"bu atamayı izler. Açıkça belirlemek için 'Kadın düzeyi' ve 'Erkek düzeyi' "
-"seçicilerini kullanın."
-
 #: R/venn.b.R
 msgid "You have selected %d variables."
 msgstr "%d değişken seçtiniz."
@@ -204335,3 +204088,212 @@ msgstr ""
 #: contTables/results/chiSq.title
 msgid "χ² Tests"
 msgstr ""
+
+#: R/decision.b.R
+msgid "Choose the Reference Positive Level"
+msgstr "Referans pozitif düzeyini seçin"
+
+#: R/decision.b.R
+msgid "Select the level of {var} that counts as positive, under \"Reference positive level\"."
+msgstr "\"Referans pozitif düzeyi\" altında {var} değişkeninin pozitif sayılan düzeyini seçin."
+
+#: R/decision.b.R
+msgid "Choose the Test Positive Level"
+msgstr "Test pozitif düzeyini seçin"
+
+#: R/decision.b.R
+msgid "Select the level of {var} that is a positive test result, under \"Test positive level\"."
+msgstr "\"Test pozitif düzeyi\" altında {var} değişkeninin pozitif test sonucu olan düzeyini seçin."
+
+#: R/decision.b.R
+#: R/decisioncombine.b.R
+msgid "Nothing is computed until it is chosen."
+msgstr "Seçilene kadar hiçbir şey hesaplanmaz."
+
+#: R/decisioncombine.b.R
+msgid "Choose the Disease Present Level"
+msgstr "Hastalık var düzeyini seçin"
+
+#: R/decisioncombine.b.R
+msgid "Select the level of {var} that means disease is present, under \"Disease present level\"."
+msgstr "\"Hastalık var düzeyi\" altında {var} değişkeninin hastalığın varlığını gösteren düzeyini seçin."
+
+#: R/decisioncombine.b.R
+msgid "Choose the Positive Level for {test}"
+msgstr "{test} için pozitif düzeyi seçin"
+
+#: R/decisioncombine.b.R
+msgid "Select the level of {var} that is a positive result for {test}, under \"Positive level\"."
+msgstr "\"Pozitif düzey\" altında {var} değişkeninin {test} için pozitif sonuç olan düzeyini seçin."
+
+#: R/chisqposttest.b.R
+msgid "The association between %s was %s (Fisher's exact test, p %s, n = %s). The effect size was %s (Cramér's V = %.3f)."
+msgstr "%s arasındaki ilişki %s bulundu (Fisher kesin testi, p %s, n = %s). Etki büyüklüğü %s düzeydeydi (Cramér V = %.3f)."
+
+#: R/chisqposttest.b.R
+msgid "The association between %s was %s (Fisher's exact test, Monte Carlo p %s from 2,000 simulated tables, n = %s). The effect size was %s (Cramér's V = %.3f)."
+msgstr "%s arasındaki ilişki %s bulundu (Fisher kesin testi, 2.000 benzetim tablosundan Monte Carlo p %s, n = %s). Etki büyüklüğü %s düzeydeydi (Cramér V = %.3f)."
+
+#: R/chisqposttest.b.R
+msgid "Fisher's exact test was performed to examine the relationship between two binary categorical variables."
+msgstr "İki ikili kategorik değişken arasındaki ilişkiyi incelemek için Fisher kesin testi uygulandı."
+
+#: R/chisqposttest.b.R
+msgid "Fisher's exact test was performed to examine the relationship between two categorical variables."
+msgstr "İki kategorik değişken arasındaki ilişkiyi incelemek için Fisher kesin testi uygulandı."
+
+#: R/chisqposttest.b.R
+msgid "Fisher's exact test, with its p-value estimated from 2,000 Monte Carlo simulated tables, was performed to examine the relationship between two categorical variables."
+msgstr "İki kategorik değişken arasındaki ilişkiyi incelemek için, p-değeri 2.000 Monte Carlo benzetim tablosundan kestirilen Fisher kesin testi uygulandı."
+
+#: R/chisqposttest.b.R
+msgid "The overall Fisher's exact test is not significant (p = %s ≥ %g). Post-hoc pairwise comparisons are only valid when the overall test is significant: running them after a non-significant omnibus test inflates the Type I error rate and constitutes data dredging."
+msgstr "Genel Fisher kesin testi anlamlı değil (p = %s ≥ %g). İkili post-hoc karşılaştırmalar yalnızca genel test anlamlı olduğunda geçerlidir: anlamlı olmayan bir genel testten sonra yapılmaları I. tip hata oranını şişirir ve veri taraması anlamına gelir."
+
+#: R/chisqposttest.b.R
+msgid "P-value (Fisher's exact test)"
+msgstr "p-değeri (Fisher kesin testi)"
+
+#: R/chisqposttest.b.R
+msgid "P-value (Fisher's exact test, Monte Carlo)"
+msgstr "p-değeri (Fisher kesin testi, Monte Carlo)"
+
+#: R/chisqposttest.b.R
+msgid "%g observations in a %d x %d table; Fisher's exact test, p %s at alpha = %g; %s."
+msgstr "%g gözlem, %d x %d tablo; Fisher kesin testi, p %s (alfa = %g); %s."
+
+#: R/chisqposttest.b.R
+msgid "%g observations in a %d x %d table; Fisher's exact test (Monte Carlo, B = 2000), p %s at alpha = %g; %s."
+msgstr "%g gözlem, %d x %d tablo; Fisher kesin testi (Monte Carlo, B = 2000), p %s (alfa = %g); %s."
+
+#: R/chisqposttest.b.R
+msgid "The overall p-value is from Fisher's exact test"
+msgstr "Genel p-değeri Fisher kesin testinden alınmıştır"
+
+#: R/chisqposttest.b.R
+msgid "{k} of {m} cells have an expected count below 5. The overall p-value is from Fisher's exact test, so the large-sample limits of the chi-square approximation do not apply to it. The standardized residuals and Cramér's V still come from the chi-square statistic and are approximate for a table this sparse."
+msgstr "{m} hücrenin {k} tanesinde beklenen sayı 5'in altında. Genel p-değeri Fisher kesin testinden alındığı için ki-kare yaklaşımının büyük örneklem sınırları ona uygulanmaz. Standartlaştırılmış artıklar ve Cramér V hâlâ ki-kare istatistiğinden hesaplanır ve bu kadar seyrek bir tabloda yaklaşıktır."
+
+#: decision/options/goldPositive.description
+msgid "Select the positive reference level. This represents the condition you want to detect or diagnose. It must be chosen: it is never taken from the order of the levels, and until it is chosen the analysis lists the levels found and computes nothing."
+msgstr "Pozitif referans düzeyini seçin. Bu, saptamak ya da tanılamak istediğiniz durumu temsil eder. Seçilmesi zorunludur: düzeylerin sırasından asla alınmaz ve seçilene kadar analiz bulunan düzeyleri listeler, hiçbir şey hesaplamaz."
+
+#: decision/options/testPositive.description
+msgid "Select the level that represents a positive test result. This should correspond to the level indicating suspected disease presence. It must be chosen: it is never taken from the order of the levels, and until it is chosen the analysis lists the levels found and computes nothing."
+msgstr "Pozitif test sonucunu temsil eden düzeyi seçin. Bu, hastalık şüphesini gösteren düzeye karşılık gelmelidir. Seçilmesi zorunludur: düzeylerin sırasından asla alınmaz ve seçilene kadar analiz bulunan düzeyleri listeler, hiçbir şey hesaplamaz."
+
+#: decisioncombine/options/goldPositive.description
+msgid "Select the level indicating disease presence (e.g., \"1\", \"positive\", \"malignant\"). It must be chosen: it is never taken from the order of the levels, and until it is chosen the analysis lists the levels found and computes nothing."
+msgstr "Hastalığın varlığını gösteren düzeyi seçin (ör. \"1\", \"pozitif\", \"malign\"). Seçilmesi zorunludur: düzeylerin sırasından asla alınmaz ve seçilene kadar analiz bulunan düzeyleri listeler, hiçbir şey hesaplamaz."
+
+#: decisioncombine/options/test1Positive.description
+msgid "Select the level representing a positive result for Test 1. It must be chosen: it is never taken from the order of the levels, and until it is chosen the analysis lists the levels found and computes nothing."
+msgstr "Test 1 için pozitif sonucu temsil eden düzeyi seçin. Seçilmesi zorunludur: düzeylerin sırasından asla alınmaz ve seçilene kadar analiz bulunan düzeyleri listeler, hiçbir şey hesaplamaz."
+
+#: R/oddsratio.b.R
+msgid "Diagnostic metrics are waiting for the Predictor Positive Level. Choose which level of '{variable}' is the positive test result. Observed levels: {levels}. The logistic model, odds ratios, forest plot and nomogram are not affected."
+msgstr "Tanısal ölçütler Belirteç Pozitif Düzeyi'ni bekliyor. '{variable}' değişkeninin hangi düzeyinin pozitif test sonucu olduğunu seçin. Gözlenen düzeyler: {levels}. Lojistik model, olasılık oranları, orman grafiği ve nomogram bundan etkilenmez."
+
+#: R/oddsratio.b.R
+msgid "To choose a level, first put '{variable}' in the Diagnostic Predictor box."
+msgstr "Bir düzey seçmek için önce '{variable}' değişkenini Tanısal Belirteç kutusuna yerleştirin."
+
+#: R/venn.b.R
+msgid "Waiting for a True Level"
+msgstr "Doğru düzey bekleniyor"
+
+#: R/venn.b.R
+msgid "Choose the true level for '{var}'; it is never taken from the order of the levels. Observed levels: {levels}. Nothing is drawn or counted until the level is chosen."
+msgstr "'{var}' için doğru düzeyi seçin; düzeylerin sırasından asla alınmaz. Gözlenen düzeyler: {levels}. Düzey seçilene kadar hiçbir şey çizilmez ya da sayılmaz."
+
+#: R/agepyramid.b.R
+msgid "Choose the Female and Male levels"
+msgstr "Kadın ve Erkek düzeylerini seçin"
+
+#: R/agepyramid.b.R
+msgid "Select the level of '{gender}' that identifies female subjects under 'Female level', and the one that identifies male subjects under 'Male level'. They are never read from the level names or their order."
+msgstr "'Kadın düzeyi' altında '{gender}' değişkeninin kadın katılımcıları tanımlayan düzeyini, 'Erkek düzeyi' altında da erkek katılımcıları tanımlayan düzeyini seçin. Bunlar asla düzey adlarından ya da sıralarından okunmaz."
+
+#: R/agepyramid.b.R
+msgid "For a single-gender cohort, choosing that one level under its own selector is enough."
+msgstr "Tek cinsiyetli bir kohort için o tek düzeyi kendi seçicisinde seçmek yeterlidir."
+
+#: R/agepyramid.b.R
+msgid "Nothing is drawn until it is chosen."
+msgstr "Seçilene kadar hiçbir şey çizilmez."
+
+#: R/agepyramid.b.R
+msgid "Nothing is drawn until they are chosen."
+msgstr "Bunlar seçilene kadar hiçbir şey çizilmez."
+
+#: R/agepyramid.b.R
+msgid "Choose the Male level"
+msgstr "Erkek düzeyini seçin"
+
+#: R/agepyramid.b.R
+msgid "Choose the Female level"
+msgstr "Kadın düzeyini seçin"
+
+#: R/agepyramid.b.R
+msgid "'{level}' is set as the female level. Select the level of '{gender}' that identifies male subjects under 'Male level'; it is never filled in from the remaining levels."
+msgstr "'{level}' kadın düzeyi olarak ayarlandı. 'Erkek düzeyi' altında '{gender}' değişkeninin erkek katılımcıları tanımlayan düzeyini seçin; bu düzey kalan düzeylerden asla doldurulmaz."
+
+#: R/agepyramid.b.R
+msgid "'{level}' is set as the male level. Select the level of '{gender}' that identifies female subjects under 'Female level'; it is never filled in from the remaining levels."
+msgstr "'{level}' erkek düzeyi olarak ayarlandı. 'Kadın düzeyi' altında '{gender}' değişkeninin kadın katılımcıları tanımlayan düzeyini seçin; bu düzey kalan düzeylerden asla doldurulmaz."
+
+#: R/agepyramid.b.R
+msgid "Other levels found: {levels}."
+msgstr "Bulunan diğer düzeyler: {levels}."
+
+#: R/agepyramid.b.R
+msgid "The level '{level}' is selected for BOTH the female and the male side, so there is nothing to compare and no pyramid was drawn. Choose two different levels of '{gender}'."
+msgstr "'{level}' düzeyi hem kadın hem erkek tarafı için seçildi; karşılaştırılacak bir şey olmadığından piramit çizilmedi. '{gender}' değişkeninin iki farklı düzeyini seçin."
+
+#: oddsratio/options/predictorLevel.description
+msgid "Choose which level of the diagnostic predictor is the positive test result (e.g., \"Present\", \"Test+\", \"Yes\"). The diagnostic metrics (sensitivity, specificity, likelihood ratios) need this choice; it is never taken from the level names or their order. While it is empty the diagnostic metrics wait for it and list the observed levels, and the logistic model, odds ratios, forest plot and nomogram still run."
+msgstr "Tanısal belirtecin hangi düzeyinin pozitif test sonucu olduğunu seçin (ör. \"Present\", \"Test+\", \"Yes\"). Tanısal ölçütler (duyarlılık, özgüllük, olabilirlik oranları) bu seçimi gerektirir; düzey adlarından ya da sıralarından asla alınmaz. Boş kaldığı sürece tanısal ölçütler bu seçimi bekler ve gözlenen düzeyleri listeler; lojistik model, olasılık oranları, orman grafiği ve nomogram yine çalışır."
+
+#: venn/options/var1true.description
+msgid "The level in `var1` that represents the true condition. It must be chosen whenever `var1` is selected and is never taken from the order of the levels."
+msgstr "`var1` içinde doğru durumu temsil eden düzey. `var1` seçildiğinde mutlaka seçilmelidir ve düzeylerin sırasından asla alınmaz."
+
+#: venn/options/var2true.description
+msgid "The level in `var2` that represents the true condition. It must be chosen whenever `var2` is selected and is never taken from the order of the levels."
+msgstr "`var2` içinde doğru durumu temsil eden düzey. `var2` seçildiğinde mutlaka seçilmelidir ve düzeylerin sırasından asla alınmaz."
+
+#: venn/options/var3true.description
+msgid "The level in `var3` that represents the true condition. It must be chosen whenever `var3` is selected and is never taken from the order of the levels."
+msgstr "`var3` içinde doğru durumu temsil eden düzey. `var3` seçildiğinde mutlaka seçilmelidir ve düzeylerin sırasından asla alınmaz."
+
+#: venn/options/var4true.description
+msgid "The level in `var4` that represents the true condition. It must be chosen whenever `var4` is selected and is never taken from the order of the levels."
+msgstr "`var4` içinde doğru durumu temsil eden düzey. `var4` seçildiğinde mutlaka seçilmelidir ve düzeylerin sırasından asla alınmaz."
+
+#: venn/options/var5true.description
+msgid "The level in `var5` that represents the true condition. It must be chosen whenever `var5` is selected and is never taken from the order of the levels."
+msgstr "`var5` içinde doğru durumu temsil eden düzey. `var5` seçildiğinde mutlaka seçilmelidir ve düzeylerin sırasından asla alınmaz."
+
+#: venn/options/var6true.description
+msgid "The level in `var6` that represents the true condition. It must be chosen whenever `var6` is selected and is never taken from the order of the levels."
+msgstr "`var6` içinde doğru durumu temsil eden düzey. `var6` seçildiğinde mutlaka seçilmelidir ve düzeylerin sırasından asla alınmaz."
+
+#: venn/options/var7true.description
+msgid "The level in `var7` that represents the true condition. It must be chosen whenever `var7` is selected and is never taken from the order of the levels."
+msgstr "`var7` içinde doğru durumu temsil eden düzey. `var7` seçildiğinde mutlaka seçilmelidir ve düzeylerin sırasından asla alınmaz."
+
+#: agepyramid/options/female.description
+msgid "The level of the gender variable that identifies female subjects. It must be chosen: it is never read from the level names or their order. While it is empty the levels found are listed and nothing is drawn, unless Male level is set and the data hold no other level, in which case the male-only cohort is drawn."
+msgstr "Cinsiyet değişkeninin kadın katılımcıları tanımlayan düzeyi. Seçilmesi zorunludur: düzey adlarından ya da sıralarından asla okunmaz. Boş kaldığı sürece bulunan düzeyler listelenir ve hiçbir şey çizilmez; Erkek düzeyi ayarlıysa ve verilerde başka düzey yoksa yalnızca erkeklerden oluşan kohort çizilir."
+
+#: agepyramid/options/male.description
+msgid "The level of the gender variable that identifies male subjects. It must be chosen: it is never read from the level names or their order. While it is empty the levels found are listed and nothing is drawn, unless Female level is set and the data hold no other level, in which case the female-only cohort is drawn."
+msgstr "Cinsiyet değişkeninin erkek katılımcıları tanımlayan düzeyi. Seçilmesi zorunludur: düzey adlarından ya da sıralarından asla okunmaz. Boş kaldığı sürece bulunan düzeyler listelenir ve hiçbir şey çizilmez; Kadın düzeyi ayarlıysa ve verilerde başka düzey yoksa yalnızca kadınlardan oluşan kohort çizilir."
+
+#: R/agepyramid.b.R
+msgid "Gender level not found"
+msgstr "Cinsiyet düzeyi bulunamadı"
+
+#: R/agepyramid.b.R
+msgid "The level '{level}' chosen under '{control}' is not a level of '{gender}'. Levels available: {levels}."
+msgstr "'{control}' altında seçilen '{level}' düzeyi '{gender}' değişkeninin bir düzeyi değil. Kullanılabilir düzeyler: {levels}."

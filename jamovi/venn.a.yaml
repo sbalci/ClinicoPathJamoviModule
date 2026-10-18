@@ -33,11 +33,21 @@ options:
       title: 'True level'
       type: Level
       variable: (var1)
+      # allowNone: without it the jamovi client pre-fills the variable's FIRST
+      # level (levels[0]), so a marker coded Absent/Present silently became the
+      # set "Absent". No default (a Level cannot carry one): while unset, the
+      # analysis waits with a notice listing the observed levels.
+      allowNone: true
       description:
           R: >
-            The level in `var1` that represents the positive condition.
+            The level in `var1` that represents the positive condition. It must
+            be chosen whenever `var1` is selected and is never taken from the
+            order of the levels; until it is set the analysis waits and draws
+            nothing.
           jamovi: >
-            The level in `var1` that represents the true condition.
+            The level in `var1` that represents the true condition. It must be
+            chosen whenever `var1` is selected and is never taken from the order
+            of the levels.
 
     - name: var2
       title: 'Variable 2 (required)'
@@ -55,11 +65,17 @@ options:
       title: 'True level'
       type: Level
       variable: (var2)
+      allowNone: true
       description:
           R: >
-            The level in `var2` that represents the positive condition.
+            The level in `var2` that represents the positive condition. It must
+            be chosen whenever `var2` is selected and is never taken from the
+            order of the levels; until it is set the analysis waits and draws
+            nothing.
           jamovi: >
-            The level in `var2` that represents the true condition.
+            The level in `var2` that represents the true condition. It must be
+            chosen whenever `var2` is selected and is never taken from the order
+            of the levels.
 
     - name: var3
       title: 'Variable 3 (optional)'
@@ -77,11 +93,17 @@ options:
       title: 'True level'
       type: Level
       variable: (var3)
+      allowNone: true
       description:
           R: >
-            The level in `var3` that represents the positive condition.
+            The level in `var3` that represents the positive condition. It must
+            be chosen whenever `var3` is selected and is never taken from the
+            order of the levels; until it is set the analysis waits and draws
+            nothing.
           jamovi: >
-            The level in `var3` that represents the true condition.
+            The level in `var3` that represents the true condition. It must be
+            chosen whenever `var3` is selected and is never taken from the order
+            of the levels.
 
     - name: var4
       title: 'Variable 4 (optional)'
@@ -99,11 +121,17 @@ options:
       title: 'True level'
       type: Level
       variable: (var4)
+      allowNone: true
       description:
           R: >
-            The level in `var4` that represents the positive condition.
+            The level in `var4` that represents the positive condition. It must
+            be chosen whenever `var4` is selected and is never taken from the
+            order of the levels; until it is set the analysis waits and draws
+            nothing.
           jamovi: >
-            The level in `var4` that represents the true condition.
+            The level in `var4` that represents the true condition. It must be
+            chosen whenever `var4` is selected and is never taken from the order
+            of the levels.
 
 
     - name: var5
@@ -122,11 +150,17 @@ options:
       title: 'True level'
       type: Level
       variable: (var5)
+      allowNone: true
       description:
           R: >
-            The level in `var5` that represents the positive condition.
+            The level in `var5` that represents the positive condition. It must
+            be chosen whenever `var5` is selected and is never taken from the
+            order of the levels; until it is set the analysis waits and draws
+            nothing.
           jamovi: >
-            The level in `var5` that represents the true condition.
+            The level in `var5` that represents the true condition. It must be
+            chosen whenever `var5` is selected and is never taken from the order
+            of the levels.
 
     - name: var6
       title: 'Variable 6 (optional)'
@@ -144,11 +178,17 @@ options:
       title: 'True level'
       type: Level
       variable: (var6)
+      allowNone: true
       description:
           R: >
-            The level in `var6` that represents the positive condition.
+            The level in `var6` that represents the positive condition. It must
+            be chosen whenever `var6` is selected and is never taken from the
+            order of the levels; until it is set the analysis waits and draws
+            nothing.
           jamovi: >
-            The level in `var6` that represents the true condition.
+            The level in `var6` that represents the true condition. It must be
+            chosen whenever `var6` is selected and is never taken from the order
+            of the levels.
 
     - name: var7
       title: 'Variable 7 (optional)'
@@ -166,11 +206,17 @@ options:
       title: 'True level'
       type: Level
       variable: (var7)
+      allowNone: true
       description:
           R: >
-            The level in `var7` that represents the positive condition.
+            The level in `var7` that represents the positive condition. It must
+            be chosen whenever `var7` is selected and is never taken from the
+            order of the levels; until it is set the analysis waits and draws
+            nothing.
           jamovi: >
-            The level in `var7` that represents the true condition.
+            The level in `var7` that represents the true condition. It must be
+            chosen whenever `var7` is selected and is never taken from the order
+            of the levels.
 
     - name: show_upsetR
       title: "UpSetR plot"

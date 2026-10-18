@@ -65,16 +65,23 @@ options:
             The reference standard variable, used as each case's disease status.
 
 
+    # allowNone: without it the jamovi client pre-selects levels[0] - usually the NEGATIVE
+    # level ("No", "0", "Benign") - and every estimate is computed for the wrong event.
     - name: goldPositive
       title: Reference positive level
       type: Level
       variable: (gold)
+      allowNone: true
       description:
           ui: >
             Select the positive reference level.
-            This represents the condition you want to detect or diagnose.
+            This represents the condition you want to detect or diagnose. It must be chosen:
+            it is never taken from the order of the levels, and until it is chosen the
+            analysis lists the levels found and computes nothing.
           R: >
             The positive reference level; disease interpretation requires a disease standard.
+            It is never taken from the order of the levels: NULL leaves the analysis pending,
+            listing the levels found. The argument has no default; pass the level.
 
     - name: newtest
       title: Test Under Evaluation
@@ -89,16 +96,22 @@ options:
           R: >
             The diagnostic test variable being evaluated for performance.
 
+    # allowNone: as goldPositive. levels[0] is usually the negative result.
     - name: testPositive
       title: Test positive level
       type: Level
       variable: (newtest)
+      allowNone: true
       description:
           ui: >
             Select the level that represents a positive test result.
-            This should correspond to the level indicating suspected disease presence.
+            This should correspond to the level indicating suspected disease presence. It must
+            be chosen: it is never taken from the order of the levels, and until it is chosen
+            the analysis lists the levels found and computes nothing.
           R: >
             The level representing a positive result for the test under evaluation.
+            It is never taken from the order of the levels: NULL leaves the analysis pending,
+            listing the levels found. The argument has no default; pass the level.
 
     - name: goldNegative
       title: Reference negative level

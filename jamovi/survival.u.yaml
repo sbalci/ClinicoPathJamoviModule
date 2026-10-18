@@ -5,7 +5,7 @@ stage: 0
 compilerMode: tame
 children:
   - type: CollapseBox
-    label: Observed-time competing risks
+    label: Observed-Time Competing Risks
     collapsed: true
     children:
       - type: CheckBox

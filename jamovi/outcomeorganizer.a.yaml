@@ -73,13 +73,18 @@ options:
           R: >
             The primary outcome variable to be recoded for survival analysis (e.g., vital status).
 
+    # allowNone: without it the jamovi client pre-fills levels[0], so the first level - not
+    # the one the user means - becomes the event. Empty is handled below, never inferred.
     - name: outcomeLevel
       title: Event Level
       type: Level
       variable: (outcome)
+      allowNone: true
       description:
           R: >
             The level of the outcome variable that represents the event of interest (e.g., "Death", "Relapse").
+            Required for a factor outcome, and never taken from the order of the levels: without it the
+            analysis stops and lists the levels. A numeric 0/1 outcome is read as 1 = event.
 
     - name: recurrence
       title: 'Recurrence/Progression Variable'
@@ -95,9 +100,12 @@ options:
       title: Event Level
       type: Level
       variable: (recurrence)
+      allowNone: true
       description:
           R: >
-            The level indicating recurrence or progression has occurred.
+            The level indicating recurrence or progression has occurred. Required when a
+            recurrence/progression variable is used, and never taken from the order of the levels:
+            without it the analysis stops and asks for it.
 
     - name: patientID
       title: 'Patient ID'

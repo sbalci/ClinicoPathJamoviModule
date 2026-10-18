@@ -5,6 +5,85 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-10-18 — "wait for selection": venn, agepyramid, oddsratio predictor level
+
+- **Failure mode:** three analyses guessed a defining level. venn had no `allowNone` on its true levels, so
+  Absent/Present became the set "Absent", and an empty level gave a validation error. agepyramid read the
+  sides from the level names, else from their order, and filled in a missing side. oddsratio matched keywords,
+  else took the second level, for the positive predictor. The first implementations also missed two edge
+  cases, which the Codex review found. A chosen level that is not a level of the variable waited or emptied
+  a side, instead of erroring. A vector level was recycled in comparisons.
+- **Detection:** the shipped-Level `allowNone` survey, the user's decision, and a read-only Codex review of
+  the three diffs; 2 of its 7 points were real.
+- **Repair:** `allowNone`, INFO waiting states with level counts, and outputs cleared while waiting. The
+  guessing helpers were removed. A non-level selection is an error; declared-but-unused levels still count, so
+  a male-only cohort can name both sides. Three red-first tests: venn 84 fails, agepyramid 62, oddsratio 23
+  and one crash.
+- **Rule:** a waiting gate checks three things before it waits. Is the value one scalar? Is it a level of the
+  variable (declared, not only observed)? Does the next ready run on the same object still work? The last
+  matters most when a table's rows are built in `.init()`: blank them, do not delete them.
+
+---
+
+## 2026-10-18 — jsurvival event levels: a schema-only fix, and a test oracle that rounded to zero
+
+- **Failure mode:** seven shipped Level options (lassocox, oddsratio, outcomeorganizer, survivalcont) naming the
+  event, censored or positive level had no `allowNone`, so jamovi made the first level the event. Every backend
+  already handled NULL correctly; the GUI could not send it. Separately, two pre-existing survivalcont test
+  failures were oracle defects. One minimum-p oracle used `1 - pchisq()`: it rounded 27 candidate splits to
+  exactly 0, and `which.min()` returned the first tie, (2, 4). The analysis's upper tail found the true minimum,
+  (6, 9; chi-square 198 vs 92.9). The other test read the wrong panel. Two outcomeorganizer tests still expected
+  no error after unassigned levels became a deliberate stop.
+- **Detection:** the `allowNone` survey of shipped schemas; re-running each failure on the committed code before
+  touching it, then recomputing the oracle both ways.
+- **Repair:** `allowNone` plus descriptions; `test-jsurvival-level-allownone.R` (7 schema failures red first);
+  oracle and panel corrected, pins updated to the deliberate behaviour.
+- **Rule:** before adding `allowNone`, read the NULL path. It is often already there, so the fix is the schema.
+  In any p-value oracle, use `lower.tail = FALSE` (or `log.p`); `1 - pchisq()` ties every strong effect at 0, and
+  a minimiser then reports the first candidate, not the best.
+
+---
+
+## 2026-10-18 — chisqposttest: an option replaced the shown p-value, and every consumer kept the old one
+
+- **Failure mode:** "Always Fisher's exact" substituted Fisher's p-value into the omnibus row only. The function
+  returned the untouched Pearson `htest`, and a dozen downstream reads of `chiSqTest$p.value` made the
+  decisions: the post-hoc gate, clinical summary, conclusion, export and analysis summary. Four sparse-table
+  warnings also kept calling the shown p-value unreliable, and told the user to select the option already
+  selected. On a 3 x 2 table (Pearson 0.038, Fisher 0.076),
+  the table read "not significant" while two pairwise tests ran under it.
+- **Detection:** found while writing release notes (the NEWS agent read the gate against the row). Codex mapped
+  every consumer; two fixed-margin fixtures put the two p-values on opposite sides of 0.05.
+- **Repair:** the resolved value travels with the object (`chiSqTest$omnibus_p`, `$omnibus_method`), and every
+  gate and sentence reads it. Residuals, expected counts and Cramer's V stay on the Pearson fields. Sentences name
+  the test that produced the p-value. The new test was run red first: 10+ failures on the old code.
+- **Rule:** when an option swaps the value a table displays, attach the resolved value to the object the rest of
+  the analysis receives, then grep every read of the original field. A substitution confined to `setRow()` is a
+  display fix, not a statistical one.
+
+---
+
+## 2026-10-18 — release-day sweep: four checks that existed and were not run
+
+- **Failure mode:** each defect had a guard or a written rule, and the guard never ran on the commit that
+  broke it:
+  - a fix commit added a direct `$deleteRows()` the guard test forbids (`waterfall`), and two more sat in
+    `agreementintro` and `mixedcox`;
+  - `survival` and `singlearm` stayed in `SurvivalT` for two weeks after development parking, so the next
+    jsurvival regeneration would have deleted both;
+  - the version bump left `agreementintro`'s pinned catalogue and a pre-reject waterfall test stale;
+  - one `.u.yaml` rule mixed `||` and `&&` unbracketed (`agreement` nBoot), which jamovi folds left to right.
+- **Detection:** running the guard tests and the release gate while writing NEWS; comparing umbrella menuGroups
+  with each sibling's.
+- **Repair:** helper calls; menuGroup restored after `release_gate.py` showed no new shipped hit (one Title-Case
+  WARN fixed); catalogue and test updated to the deliberate behaviour; inner group bracketed. A
+  `_updateModules.R --dry-run jsurvival` now plans 0 deletes.
+- **Rule:** before a version bump or regeneration, run `test-utils-delete-table-rows.R`, the analysis's own
+  tests, and `grep '^menuGroup' jamovi/<a>.a.yaml` against the sibling for every analysis the sibling ships. A
+  `T`/`P`/`D` suffix found there is a deletion order, not a label.
+
+---
+
 ## 2026-10-17 — meddecide 1.0.9 R CMD check: a two-week-old copy of the audit test
 
 - **Failure mode:** five failures in the sibling's `test-meddecide-library-audit.R`, all from its 2026-10-01 copy.

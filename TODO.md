@@ -1,3 +1,37 @@
+# NEWS update and the issues it surfaced (2026-10-18; done, uncommitted)
+
+Acceptance: every NEWS.md current (umbrella + five siblings; meddecide/OncoPath 1.0.9 headings pass the gate);
+each surfaced defect fixed with a red-first regression test; prepare() clean; touched suites green.
+
+- [x] NEWS.md: meddecide 1.0.9 + 1.0.81 backfill; OncoPath 1.0.9; ClinicoPathDescriptives, jjstatsplot,
+      jsurvival 1.0.82.03 + 1.0.81; umbrella gap sections; `**Bold.**Text` rendering fixed in all six files.
+- [x] `chisqposttest`: "Always Fisher's exact" drives every gate and sentence (`chiSqTest$omnibus_p`); new
+      `test-chisqposttest-fisher-omnibus-consistency.R` (red first, 10+ failures on the old code).
+- [x] `decision`, `decisioncombine`: `allowNone` on the four positive Levels, INFO pending state with counts;
+      new `test-decision-pending-positive-level.R` (91/245 red before, 245/245 after); Turkish for 9 new msgids.
+- [x] `survival`, `singlearm`: `SurvivalT` -> `Survival` (gate: no new shipped hit; Title-Case WARN fixed;
+      `--dry-run jsurvival` plans 0 deletes).
+- [x] Direct `$deleteRows()` -> `.deleteTableRows()` in waterfall, mixedcox, agreementintro (guard test green).
+- [x] `agreement.u.yaml` nBoot enable rule bracketed; jjbarstats/jjpiestats seed help corrected.
+- [x] Stale pins: agreementintro catalogue (groups/versions), waterfall all-missing test now expects the reject.
+- [x] Same GUI-only defect class (shipped jsurvival): `allowNone` on lassocox `outcomeLevel`/`censorLevel`,
+      oddsratio `outcomeLevel`/`predictorLevel`, outcomeorganizer `outcomeLevel`/`recurrenceLevel`, survivalcont
+      `outcomeLevel`. Every backend already handled NULL (shared coder asks for the level; lassocox censored =
+      other value; oddsratio waits / flags auto-detection), so only the schema changed. New
+      `test-jsurvival-level-allownone.R` (7 schema failures red first).
+- [x] User decision: wait for selection. `venn` var1true..var7true and `agepyramid` female/male got `allowNone`
+      plus a waiting state (agepyramid's label/order/partial guessing removed; single-gender cohort still runs);
+      oddsratio's empty Predictor Positive Level makes the diagnostic metrics wait (auto-detection removed).
+      Tests: test-venn-pending-true-level.R, test-agepyramid-pending-gender-levels.R,
+      test-oddsratio-pending-predictor-level.R (each red first). Remaining shipped Levels without `allowNone`
+      are cosmetic (lollipop highlight, vartree percvarLevel) or negatives whose collision with the positive is
+      already an error (decision goldNegative/testNegative).
+- [x] `swimmerplot` was `OncoPathT` in the working tree during another session's work; 3ae261013 committed it
+      back as `OncoPath`. That commit postdates OncoPath 1.0.9, so the sibling needs a regeneration to carry it.
+- [ ] User: regenerate meddecide (decision, decisioncombine), OncoPath (waterfall) and the other siblings to carry
+      these fixes; meddecide/OncoPath 1.0.9 NEWS then need a line each. Edit the v1.0.81 GitHub release bodies
+      if wanted (they still read "Release 1.0.81.").
+
 # meddecide 1.0.9 — R CMD check: 1 ERROR (5 audit-test failures), 2 NOTEs (2026-10-17; fixed, uncommitted)
 
 Cause: the sibling's `test-meddecide-library-audit.R` was the 2026-10-01 copy (audit tests never sync); a bare
@@ -25,8 +59,9 @@ the sibling, and the suite green in the installed AND the source-tree context (t
       folder; `560a661` had refreshed them). R-side installs then lose Turkish silently (jmvcore falls back to
       English); jamovi's .jmo build regenerates them. Restore: `git -C ../meddecide restore --source=48e04a0~1 --
       inst/i18n/en.json inst/i18n/tr.json`, or `Rscript --vanilla tools/i18n_rebuild_json.R ../meddecide`.
-- [ ] User, before releasing 1.0.9: the sibling NEWS.md has no 1.0.9 heading (newest 1.0.83.03), so the release body
-      would be the placeholder (release gate WARN). And `1.0.9` sorts below the published pre-releases v1.0.81 and
+- [x] User, before releasing 1.0.9: the sibling NEWS.md has no 1.0.9 heading (newest 1.0.83.03), so the release body
+      would be the placeholder (release gate WARN). DONE 2026-10-18: `# meddecide 1.0.9 (2026-10-17)` written (gate
+      NEWS check passes); OncoPath 1.0.9 likewise. And `1.0.9` sorts below the published pre-releases v1.0.81 and
       v1.0.52 (R and jamovi compare 9 < 81); it is above v1.0.6, the Latest release.
 - [x] Known, not changed: the "empty test" skip is the sibling's `test-decision.R`, disabled on purpose
       (`if (FALSE)`); its file-level `context()` is what testthat counts. The test WARN is pROC built under R 4.6.1

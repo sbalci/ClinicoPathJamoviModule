@@ -274,8 +274,19 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 df
             },
 
+            # Also the unset test for a Level option: allowNone gives NULL; "" and NA count too.
             .optionSelected = function(value) {
-                !is.null(value) && length(value) == 1L && nzchar(value)
+                !is.null(value) && length(value) == 1L && !is.na(value) && nzchar(value)
+            },
+
+            # "level (n = k)" for each non-missing level present in a column, in level order.
+            # Unused factor levels, an explicit NA level and "" are left out.
+            .observedLevels = function(var) {
+                counts <- table(factor(self$data[[var]], exclude = c(NA, "")))
+                if (length(counts) == 0) return(.("none"))
+                shown <- sprintf("%s (n = %d)", names(counts), as.integer(counts))
+                if (length(shown) > 10) shown <- c(shown[1:10], "...")
+                paste(shown, collapse = ", ")
             },
 
             # Forest plot height from the options alone, so .init() can set it. The rows are
@@ -597,7 +608,8 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 # it is a 0-column frame whose nrow() is 0 -- the "No Data" branch would
                 # then greet every freshly opened analysis with "Load data before running
                 # the analysis" while the data were loaded and only the controls empty.
-                # None of the four checks below touches self$data.
+                # Nothing below up to the "No Data" check needs rows (an empty level list in a
+                # pending notice reads "none").
                 #
                 # Empty state: nothing chosen at all. A freshly opened analysis must not
                 # greet the user with a red ERROR before they have configured anything, so
@@ -612,6 +624,34 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     return(FALSE)
                 }
 
+                # A selected variable whose positive level is unset leaves the analysis pending:
+                # an INFO, not an ERROR. allowNone stops jamovi pre-selecting each variable's
+                # FIRST level, usually the negative one ("No", "0", "Benign"), so this is the
+                # state every new analysis starts in. Test 2 and Test 3 are checked only when
+                # selected, and a selected one is never silently dropped. The structural errors
+                # below are still reported beside it; nothing is computed until all are chosen.
+                pending <- FALSE
+                # The three tests share one title and one sentence, with {test} filled in.
+                for (slot in list(
+                    list(var = "gold", level = "goldPositive", test = "",
+                         title = .("Choose the Disease Present Level"),
+                         ask = .('Select the level of {var} that means disease is present, under "Disease present level".')),
+                    list(var = "test1", level = "test1Positive", test = .("Test 1")),
+                    list(var = "test2", level = "test2Positive", test = .("Test 2")),
+                    list(var = "test3", level = "test3Positive", test = .("Test 3")))) {
+                    variable <- self$options[[slot$var]]
+                    if (!private$.optionSelected(variable) ||
+                        private$.optionSelected(self$options[[slot$level]])) next
+                    pending <- TRUE
+                    private$.addNotice("INFO",
+                        slot$title %||% .fmt(.("Choose the Positive Level for {test}"), test = slot$test),
+                        paste(
+                            .fmt(slot$ask %||% .('Select the level of {var} that is a positive result for {test}, under "Positive level".'),
+                                 var = variable, test = slot$test),
+                            .fmt(.("Levels found: {levels}."), levels = private$.observedLevels(variable)),
+                            .("Nothing is computed until it is chosen.")))
+                }
+
                 if (length(self$options$gold) == 0 || self$options$gold == "") {
                     private$.addNotice(
                         "ERROR",
@@ -621,29 +661,11 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     return(FALSE)
                 }
 
-                if (is.null(self$options$goldPositive) || self$options$goldPositive == "") {
-                    private$.addNotice(
-                        "ERROR",
-                        .("No Gold Positive Level"),
-                        .("Select the disease-present level for the gold standard.")
-                    )
-                    return(FALSE)
-                }
-
                 if (length(self$options$test1) == 0 || self$options$test1 == "") {
                     private$.addNotice(
                         "ERROR",
                         .("No Test 1"),
                         .("Test 1 is required. Select at least one test variable.")
-                    )
-                    return(FALSE)
-                }
-
-                if (is.null(self$options$test1Positive) || self$options$test1Positive == "") {
-                    private$.addNotice(
-                        "ERROR",
-                        .("No Test 1 Positive Level"),
-                        .("Select the positive level for Test 1.")
                     )
                     return(FALSE)
                 }
@@ -660,17 +682,6 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 # Check if we have at least 2 tests for combination analysis
                 has_test2 <- private$.optionSelected(self$options$test2)
 
-                if (has_test2) {
-                    if (is.null(self$options$test2Positive) || self$options$test2Positive == "") {
-                        private$.addNotice(
-                            "ERROR",
-                            .("No Test 2 Positive Level"),
-                            .("Select the positive level for Test 2.")
-                        )
-                        return(FALSE)
-                    }
-                }
-
                 # Check test3 only if provided
                 has_test3 <- private$.optionSelected(self$options$test3)
                 if (has_test3 && !has_test2) {
@@ -680,16 +691,6 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                         .("Test 3 cannot be combined without Test 2. Select Test 2 and its positive level, or remove Test 3.")
                     )
                     return(FALSE)
-                }
-                if (has_test3) {
-                    if (is.null(self$options$test3Positive) || self$options$test3Positive == "") {
-                        private$.addNotice(
-                            "ERROR",
-                            .("No Test 3 Positive Level"),
-                            .("Select the positive level for Test 3.")
-                        )
-                        return(FALSE)
-                    }
                 }
 
                 selected_vars <- c(
@@ -708,6 +709,11 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                             variables = paste(duplicated_vars, collapse = ", ")
                         )
                     )
+                    return(FALSE)
+                }
+
+                # Pending (see above): stop before anything reads a positive level.
+                if (pending) {
                     return(FALSE)
                 }
 

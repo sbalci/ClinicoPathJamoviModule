@@ -85,7 +85,9 @@ analysis.}
 \item{outcome}{The outcome variable to be used in the analysis.}
 
 \item{outcomeLevel}{The level of the outcome variable that represents the
-event of interest.}
+event of interest. Required for a factor outcome, and never taken from the
+order of the levels: without it the analysis stops and lists the levels. A
+numeric 0/1 outcome is read as 1 = event.}
 
 \item{dod}{.}
 

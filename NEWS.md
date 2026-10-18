@@ -1,5 +1,118 @@
 # ClinicoPath News
 
+## Unreleased — OncoPath patient identity, ICC planning and input validation
+
+- Swimmer plots preserve distinct numeric patient IDs, including large exactly representable
+  integers, across timelines, milestones, events, censoring and exported tables.
+- Waterfall plots retain original patient keys for progression, category overrides, annotations,
+  time-to-response and person-time. One patient's progression cannot truncate another patient's
+  response when their printed numeric IDs would otherwise coincide.
+- IHC precision planning now refines Bonett's approximation by integrating the exact F-interval
+  width under a balanced normal consistency-ICC model. For two measurements, ICC 0.90 and target
+  width 0.20, the requirement changes from 15 to 21 cases. This controls expected width, not
+  assurance that each study achieves that width.
+- Diagnostic meta-analysis and IHC analyses reject infinite inputs with variable and row guidance.
+- Waterfall boundary regressions exercise the analysis itself, including exactly +20% as PD under
+  the exploratory percentage thresholds. These categories do not constitute lesion-level RECIST.
+- Modified analyses are routed to `OncoPathT` for validation; production promotion is separate.
+
+## Unreleased — `venn` (Venn Diagram) and `agepyramid` (Age Pyramid): levels wait for your choice (module 1.0.81.01, analysis 1.0.81)
+
+- **Venn Diagram: the "True level" boxes start empty.** jamovi filled each with the variable's first
+  level, so a marker coded Absent/Present was drawn as the set "Absent", with every overlap
+  inverted. While a selected variable has no true level, an INFO notice lists its levels with counts,
+  nothing is counted and no diagram is drawn. Before, an empty level gave a validation error. A level that is
+  not in the data still gives an error that lists the available levels.
+- **Age Pyramid: the Female and Male levels are never guessed.** jamovi filled both boxes with the
+  first level, so every new analysis opened on "Female and Male levels must be different". With the
+  boxes empty, the analysis used to read the sides from the level names, or else from their order;
+  with one box set, it filled in the other. Now it lists the levels with counts and draws nothing
+  until both are chosen. With one box set, it asks for the other. The exception is a single-gender
+  cohort: one side is set and the data hold no other level, so that cohort is drawn. A level that is
+  not a level of the variable, such as a selection left over after changing the variable, is an
+  error.
+- **No stale results while waiting.** Tables, panels and plots from an earlier run are cleared.
+- **Saved analyses:** an `.omv` saved earlier keeps its levels. One saved with empty Age Pyramid
+  levels now waits instead of drawing the guessed sides.
+
+## Unreleased — `lassocox`, `oddsratio`, `outcomeorganizer`, `survivalcont`: the event level is no longer pre-selected (module 1.0.81.01)
+
+- **jamovi no longer fills in the event level for you.** In LASSO Cox (Event level, Censored level),
+  Odds Ratio (Positive Level, Predictor Positive Level), Outcome Organizer (both Event Level boxes)
+  and Continuous-Predictor Survival (Event level), jamovi filled the box with the variable's first
+  level. With an outcome coded Alive/Dead, "Alive" became the event, and every hazard ratio, odds
+  ratio and survival curve was computed for the wrong event without a word. The boxes now start
+  empty, as they already did in Survival Analysis, Single Arm Survival and Multivariable Survival.
+- **An empty box is never filled by guessing.** The survival analyses list the outcome's levels and
+  ask for the event level; a numeric 0/1 outcome is still read as 1 = event. Odds Ratio asks for the
+  positive outcome level before computing anything. An empty Censored level in LASSO Cox means "the
+  other observed value", as documented. That case could not be reached before, because the box was
+  always filled. An empty Predictor Positive Level in Odds Ratio leaves only the diagnostic metrics
+  waiting: they list the predictor's levels with counts. The model, odds ratios, forest plot and
+  nomogram still run. The level used to be guessed from its name ("Positive", "Yes", "1", ...) or else
+  the second level, and the pre-filled one was labelled "user-specified"; both guesses are gone.
+- **Saved analyses:** an `.omv` saved earlier keeps whatever level it had. Check the event level when
+  you reopen one.
+
+## Unreleased — `decision` (Medical Decision) and `decisioncombine` (Combine Medical Decision Tests): the positive level is no longer pre-selected (module 1.0.81.01, analysis 1.0.9)
+
+- **jamovi no longer fills in the positive level for you.** "Reference positive level" and "Test
+  positive level" in Medical Decision, and "Disease present level" and Test 1's "Positive level" in
+  Combine Medical Decision Tests, were filled with the variable's first level. That is usually the
+  negative one ("No", "0", "Benign"), so a new analysis computed sensitivity, specificity and
+  predictive values for the wrong event. The boxes now start empty, as in the six analyses fixed
+  earlier.
+- **Until a level is chosen, the analysis waits.** An INFO notice names the box, lists the levels
+  found with their counts (for example "Absent (n = 50), Present (n = 30)"), and nothing is computed.
+  Results from an earlier run are cleared rather than left on screen. In Combine Medical Decision
+  Tests, a Test 2 or Test 3 that is selected without its positive level also leaves the analysis
+  waiting, instead of an error. A level that is filled in but absent from the data is still an error.
+- **Saved analyses:** an `.omv` saved earlier keeps whatever level it had. Check the positive level
+  when you reopen one. From R, pass `NULL` to get the waiting state.
+
+## Unreleased — `chisqposttest` (Chi-Square Post-Hoc Tests): "Always Fisher's exact" now drives every decision and sentence (module 1.0.81.01, analysis 1.0.81)
+
+- **The post-hoc gate and the text follow the p-value in the table.** With "Always Fisher's exact"
+  the overall row showed Fisher's p-value. But whether pairwise tests ran, the "not significant"
+  message, the clinical summary, the copy-ready conclusion, the export and the analysis summary all
+  still used the chi-square p-value. When the two fell on opposite sides of alpha, the output
+  contradicted itself. In a 3 x 2 table of 20 patients, Pearson gave p = 0.038 and Fisher gave
+  p = 0.076: the table said "not significant" while two pairwise comparisons ran below it. Every
+  gate and sentence now uses the p-value shown.
+- **The sentences name the test that produced the p-value.** The clinical summary reads "Fisher's
+  exact test, p = 0.076" instead of printing a chi-square statistic beside Fisher's p-value. The
+  Methods sentence says Fisher's exact test was performed. The export labels the row "P-value
+  (Fisher's exact test)". The Monte Carlo version is named as such, with B = 2,000 and the seed.
+- **The sparse-table warnings no longer contradict the selection.** Under a forced Fisher test they
+  called the overall p-value "not dependable" and told the user to select "Always Fisher's exact".
+  They are replaced by one note: the overall p-value is Fisher's, so the expected-count limits do
+  not apply to it, but the residuals and Cramér's V are still chi-square quantities. A 2x2 table
+  under Fisher no longer carries the "without Yates' continuity correction" footnote.
+- **Saved analyses:** results change only for analyses saved with "Always Fisher's exact".
+
+## Unreleased — `agreement` (Interrater Reliability): the bootstrap-samples box follows every bootstrap option (module 1.0.81.01, analysis 1.0.9)
+
+- **"Number of bootstrap samples" can be set whenever a bootstrap is used.** Its enable rule mixed
+  `||` and `&&` without brackets. jamovi reads such rules strictly left to right, so the box was
+  active only for bootstrap intervals of specific agreement. It was greyed out for bootstrap
+  confidence intervals, Robinson's A and TDI, and those ran with whatever value it held.
+
+## Unreleased — `survival` (Survival Analysis) and `singlearm` (Single Arm Survival) back in the production menu (module 1.0.81.01, analysis 1.0.9)
+
+- **Both analyses are routed to jsurvival again.** They had sat in the testing menu since 2026-10-04,
+  while the observed-time competing-risk table was built. The next jsurvival regeneration would have
+  removed them from that module. Promoting them adds no release-gate failure. The new box is titled
+  "Observed-Time Competing Risks", in Title Case like the other headings.
+
+## Unreleased — smaller fixes (module 1.0.81.01)
+
+- **`jjbarstats`, `jjpiestats`:** the R help for "Random seed" no longer says the default reproduces
+  earlier results. Neither analysis seeded its Bayesian statistics before this option was added.
+- **`agreementintro`:** the catalogue of target analyses gives their current menu and version:
+  Interrater Reliability and the kappa power analysis are in production, and all are version 1.0.9.
+- **`waterfall`, `mixedcox`, `agreementintro`:** the last direct table-row deletions go through the
+  shared helper that also clears stale row labels. No result changes.
+
 ## Releases cut from this tree — meddecide 1.0.9 and OncoPath 1.0.9 (2026-10-17)
 
 The "Unreleased" sections below for the analyses these two modules ship (meddecide: `agreement`,
@@ -3808,7 +3921,7 @@ Sweeting et al. (2004) procedures the code never implemented. `ihcheterogeneity`
 analysis focus (computationally identical to `reproducibility`, which is retitled "Reproducibility &
 Bias Assessment") and makes its report-sentences and methodology panels opt-in.
 
-**`diagnosticmeta`.**The Holling SROC table tested theta against 0 instead of the chance value 1 and
+**`diagnosticmeta`.** The Holling SROC table tested theta against 0 instead of the chance value 1 and
 Wald-tested a variance on its boundary; the bivariate and SROC models were fitted under different
 continuity corrections; prediction intervals used z instead of t on k-2 df; meta-regression lacked
 the Knapp-Hartung adjustment and never said it was univariate; the Deeks funnel plot silently
@@ -3816,14 +3929,14 @@ dropped the zero-cell studies its own test retained. All fixed. Warnings now liv
 Notices panel that is rebuilt every run instead of accumulating below the onboarding text, per-study
 Wilson intervals joined the studies table, and the between-study variance components are reported.
 
-**`ihcheterogeneity`.**The spatial plot measured between-patient spread while the table beside it
+**`ihcheterogeneity`.** The spatial plot measured between-patient spread while the table beside it
 measured within-case heterogeneity; the Kruskal-Wallis compartment test counted 4-5 non-independent
 values per patient; the classic biopsy-versus-whole-section design was rejected outright; and four
 panels graded the same coefficient of variation with four different hard-coded bands. All fixed and
 pinned against `psych::ICC` and `stats::kruskal.test`. Tables no longer duplicate rows on data-cell
 edits, and every silent-empty path now explains itself.
 
-**`swimmerplot` and `waterfall`.**Response rates use the RECIST-evaluable population as denominator
+**`swimmerplot` and `waterfall`.** Response rates use the RECIST-evaluable population as denominator
 in both; swimmerplot's datetime events were shifted twice and its median follow-up now uses reverse
 Kaplan-Meier; waterfall's warnings are guaranteed to render even when the analysis stops early.
 
@@ -3834,7 +3947,7 @@ printed literal `{placeholder}` tokens because `jmvcore::format()` ignores under
 module-wide sweep found those two to be the only real cases. A stale `OncoPath_1.0.0.tar.gz` was
 removed from the OncoPath repository and `.Rbuildignore` now excludes tarballs in every submodule.
 
-**`kappaSizePower`.**Reviewed end to end against `kappaSize` 1.2; the numbers were already exact,
+**`kappaSizePower`.** Reviewed end to end against `kappaSize` 1.2; the numbers were already exact,
 the caveats around them were not. The sparse-cell warning -- kappaSize's own and the module's
 first copy of it -- tested the outcome-category marginals (`p * N < 5`), but the method is a
 chi-square over *agreement patterns* (exactly j of n raters positive), whose middle cells carry a
@@ -3863,7 +3976,7 @@ kappaSize release-review tests still read `kappasizepower.a.yaml`-style lowercas
 camelCase rename -- fine on macOS, a failure on any case-sensitive file system -- and now read the
 real filenames.
 
-**`kappaSizeFixedN`.**Reviewed end to end. kappaSize's `FixedN*` engines walk the agreement
+**`kappaSizeFixedN`.** Reviewed end to end. kappaSize's `FixedN*` engines walk the agreement
 down from `kappa0` in steps of 0.001 with no floor, and an underpowered design walks straight out
 of the common-correlation model: with prevalence 0.02, three raters, `kappa0` 0.01, n = 100 and
 alpha = 0.2 the engine returns -0.841 against a model floor of -0.0004, and the old "< -1" guard
@@ -3886,7 +3999,7 @@ the explanation wraps to the pane; every string is wrapped for translation and t
 carries the new entries. The dead lowercase `kappasizefixedn.js` is now `kappaSizeFixedN.events.js`,
 bound to the outcome-levels control; the help page gains kappaSize's own `FixedNBinary` example.
 
-**Process.**Test tallies now count `error` as well as `failed`: three suites that reported zero
+**Process.** Test tallies now count `error` as well as `failed`: three suites that reported zero
 failures were hiding 11-13 errors each (a dead CSV reference, a library name that made testthat skip
 an entire file, `asDF()` called as a function). All are green with error counting.
 
@@ -3898,14 +4011,14 @@ a seed option, event-stratified cross-validation folds and RNG restoration, and 
 design matrix uses correct k-1 contrast coding. It stays dev-routed until the fixes below are run
 against an installed build.
 
-**The coefficient plot mislabelled risk factors as protective.**In `scale_fill_manual` the `values`
+**The coefficient plot mislabelled risk factors as protective.** In `scale_fill_manual` the `values`
 vector was name-matched but `labels` was a bare positional vector, so whenever every selected
 coefficient shared a sign only one level existed and the first label landed on it -- an all-positive
 model drew red bars reading "Protective". Mixed signs happened to render correctly, which is why it
 survived review. Both vectors are now name-matched with pinned breaks and limits. This was the only
 defect in the family that a clinician could act on without noticing anything was wrong.
 
-**The "LASSO vs Standard Cox" table was dead on every dataset.**Both rows called
+**The "LASSO vs Standard Cox" table was dead on every dataset.** Both rows called
 `survival::concordance()` on a `coxph` object with `reverse = TRUE`, which that method rejects
 outright -- `concordance.coxph` already applies the Cox sign convention. Being the first statement
 inside its `tryCatch`, the error took `AIC()` and `logLik()` with it, and an empty error handler
@@ -3921,13 +4034,13 @@ as named dots, not wrapped in `list()` -- and its token regex does not accept an
 were `"Error in cross-validation: {msg}"` and `"Error fitting final model: {msg}"`, which had been
 hiding the underlying error text from anyone trying to diagnose a failure.
 
-**The reported penalty rule was not the rule that ran.**When the 1-SE rule retains no variables the
+**The reported penalty rule was not the rule that ran.** When the 1-SE rule retains no variables the
 backend silently refits at `lambda.min`, but every summary surface kept reporting the requested
 rule. The bundled demo dataset at the shipped defaults takes that path every time, so this was the
 first thing most users saw. A "Penalty Selected By" row now reports what actually executed and says
 why, and the summary paragraph states the fallback in words.
 
-**Smaller corrections.**The apparent-performance caveat sat inside the C-index branch, so when
+**Smaller corrections.** The apparent-performance caveat sat inside the C-index branch, so when
 concordance failed it vanished along with the C-index row and left the two most optimistic numbers
 on screen -- the log-rank p and the group hazard ratio, both from a median split of a training-set
 risk score -- with nothing qualifying them; it is now unconditional and names them. The Selected
@@ -3951,7 +4064,7 @@ was exporting to R or Stata for that one figure.
 
 Five things a clinician reads straight off the screen were wrong, and are fixed.
 
-**The "Optimal Thresholds" table has been removed.**Net benefit falls monotonically as the
+**The "Optimal Thresholds" table has been removed.** Net benefit falls monotonically as the
 threshold probability rises, so the maximum was always at the lowest threshold examined -- in
 simulation the reported optimum landed on the grid minimum in 200 of 200 runs. Worse, ranking
 models by their net benefit at that single point put the weaker model on top in 36% of runs.
@@ -3963,25 +4076,25 @@ old "beneficial range" compared against treat-none only, which flattered useless
 pure-noise variable cleared it at 29 of 46 thresholds and now correctly shows no range at all.
 Non-contiguous ranges are footnoted rather than reported as a single span.
 
-**Bootstrap comparison p-values could be exactly zero.**They now use the `(b+1)/(B+1)` convention
+**Bootstrap comparison p-values could be exactly zero.** They now use the `(b+1)/(B+1)` convention
 of Davison & Hinkley, so a comparison that separates completely reports the attainable floor
 rather than an impossible `p = 0`. Pairwise model comparisons are additionally **Holm-adjusted**
 across the whole family, with the unadjusted p retained beside it -- a five-model screen produces
 ten tests and was previously reported as if it were one.
 
-**Net benefit is now labelled as apparent.**The analysis is handed predicted risks and cannot know
+**Net benefit is now labelled as apparent.** The analysis is handed predicted risks and cannot know
 whether they were fitted on the same rows. For the common case of a marker developed on the dataset
 in front of you, every curve is optimistically biased in the model's favour and can show the model
 beating treat-all when it does not. This is stated unconditionally on screen.
 
-**Two numbers were on the wrong scale.**In the Clinical Impact table, "Interventions Avoided" was
+**Two numbers were on the wrong scale.** In the Clinical Impact table, "Interventions Avoided" was
 scaled to `populationSize` (default 1000) while the three columns beside it were per 100, so one
 row carried two denominators with nothing to say so. And "Relative Benefit vs Treat All" divided by
 the treat-all weighted AUC, which crosses zero at a threshold equal to the outcome prevalence --
 ordinary differences were displayed as percentages in the hundreds. It is now reported as a
 difference on the net-benefit scale.
 
-**The Relative Utility curve no longer truncates itself silently.**Rows were dropped and then the
+**The Relative Utility curve no longer truncates itself silently.** Rows were dropped and then the
 axis dropped more, so a poorly performing model's line simply stopped. The plot now zooms instead
 of filtering, and captions any model that runs off the bottom.
 
@@ -4000,20 +4113,20 @@ per-chunk quantiles instead of taking quantiles of the pooled replicates, which 
 interval width. `bootReps` is also now an `Integer` rather than a `Number`, since a fractional
 entry aborted a run that formats it with `%d`.
 
-**Bootstrap results were not reproducible.**There was no `set.seed` anywhere and no seed option.
+**Bootstrap results were not reproducible.** There was no `set.seed` anywhere and no seed option.
 Across eight identical reruns at the default 1000 replications the model-comparison p-value moved
 between 0.030 and 0.060 and the 95% CI crossed zero in two of them -- the same data and the same
 options giving a different published conclusion each time. A `seed` option (default 42) now fixes
 the RNG for the whole run, and the caller's `.Random.seed` is saved and restored so an R-API user's
 stream is untouched.
 
-**Tables and curves could disagree about which outcome level was the event.**When the "Positive
+**Tables and curves could disagree about which outcome level was the event.** When the "Positive
 Outcome Level Not Found" fallback fired it corrected a local variable inside `.run()`, but twelve
 downstream table and plot methods re-read the raw option, so every table was computed against a
 level not present in the data while the plot looked correct. The resolved level is now stored and
 read through a single accessor.
 
-**"Gain vs Treat All" was measured against a strategy no clinician would adopt.**Treat-all net
+**"Gain vs Treat All" was measured against a strategy no clinician would adopt.** Treat-all net
 benefit goes sharply negative above the prevalence, so the difference credited a model for beating
 it: on a 20.6%-prevalence cohort the gain came out at 20.3 extra true positives per 100 patients
 when only 20.6 cases existed per 100. It is now measured against the better of treating everyone
@@ -4025,7 +4138,7 @@ do-nothing strategy plot at 99% of perfect at high thresholds; it now correctly 
 six result items had no `clearWith` at all. Both are fixed, along with the analysis state itself:
 an early return used to leave the *previous* run's curves on screen beside the new error notice.
 
-**Smaller corrections.**A factor in the Models box crashed at `min()` with a raw R error -- that box
+**Smaller corrections.** A factor in the Models box crashed at `min()` with a raw R error -- that box
 now permits numeric columns only, with a backend guard for programmatic callers. Space-separated
 threshold lists silently parsed to nothing and fell back to defaults (`\s` is literal inside a POSIX
 bracket expression), and ignored entries are now named. "Weighted AUC" is neither weighted nor an
@@ -4039,7 +4152,7 @@ The Model Comparison CI columns no longer claim "95%" when the user chose anothe
 now include Vickers & Elkin (2006), the source of the implemented formula, and drop `rmda` and
 `DecisionCurve`, neither of which the code calls.
 
-**BREAKING CHANGE.**The option `showOptimalThreshold` is renamed `showBenefitRange`, the result
+**BREAKING CHANGE.** The option `showOptimalThreshold` is renamed `showBenefitRange`, the result
 table `optimalTable` is renamed `benefitRangeTable`, and the `relative_benefit` column is replaced
 by `benefit_gain`. Saved `.omv` files and scripts referring to the old names must be updated. The
 `models` option gained `default: NULL` so the R function can be called without it; note that
@@ -4076,7 +4189,7 @@ correct was altered. Three breaking changes, below.
 ## Breaking changes
 
 - **`decisioncompare()` gained four required arguments: `goldNegative`, `test1Negative`,
-  `test2Negative` and `test3Negative`.**They were added so the "exclude indeterminate results"
+  `test2Negative` and `test3Negative`.** They were added so the "exclude indeterminate results"
   option could be made to work at all (see below). A `type: Level` option can never carry a
   `default:` -- the jamovi compiler rejects it -- so all four are required parameters of the
   generated R wrapper, and **existing scripts calling `decisioncompare()` will fail with
@@ -4090,7 +4203,7 @@ correct was altered. Three breaking changes, below.
   the removed values now fails** with `Argument 'filterPattern' must be one of ...`; use
   `allPositive` for the old `serial` and `all` for the old `parallel`. The jamovi GUI shows only
   the current levels.
-- **`nogoldstandard()`'s default `method` changed from `all_positive` to `latent_class`.**The old
+- **`nogoldstandard()`'s default `method` changed from `all_positive` to `latent_class`.** The old
   default defines the reference standard as "every test positive", which makes sensitivity and NPV
   identically 1 for every test on every dataset -- it cannot estimate accuracy, which is the whole
   point of the analysis. `latent_class` is the only method here that estimates sensitivity and
@@ -4105,7 +4218,7 @@ correct was altered. Three breaking changes, below.
 ### Package-wide
 
 - **26 `visible:`/`enable:` expressions across 17 `.r.yaml` files begin with `!`, and every one of
-  those items is permanently visible.**jmvcore routes a `.r.yaml` expression to the R evaluator
+  those items is permanently visible.** jmvcore routes a `.r.yaml` expression to the R evaluator
   only when it matches `^\([\$A-Za-z].*\)$`; an expression starting with `!` fails that regex, the
   evaluator returns the raw string, a non-empty string is truthy, and the item never hides -- with
   nothing erroring anywhere. Reproduced empirically on `benford` (`(!var)` evaluates to the string
@@ -4125,7 +4238,7 @@ correct was altered. Three breaking changes, below.
   comparison table went 4 -> 8 -> 12 rows over three runs. In jamovi, toggling *any* option re-runs
   `.run()` on the same object, so each test appeared twice, then three times, then four, in every
   results table at once.
-- **`decisioncompare`'s "exclude indeterminate results" checkbox was a complete no-op.**It
+- **`decisioncompare`'s "exclude indeterminate results" checkbox was a complete no-op.** It
   filtered on `c(positiveLevel, setdiff(levels, positiveLevel))` -- that is, on every level -- so
   equivocal results were still collapsed into the negative group and still inflated specificity and
   NPV, the exact harm the checkbox promises to prevent. On a 60-case fixture with 20 Equivocal
@@ -4133,7 +4246,7 @@ correct was altered. Three breaking changes, below.
   four new `Level` options let the user name which level is a genuine negative; when they are
   supplied the equivocal rows are dropped, and when they are not the analysis now says so
   explicitly instead of reporting as though it had acted.
-- **`decisioncompare`'s manuscript-ready report named a winner the data could not support.**On a
+- **`decisioncompare`'s manuscript-ready report named a winner the data could not support.** On a
   fixture where Cochran's Q gives p = 0.076 and no pairwise comparison survives Holm, it read
   "t1 demonstrated OPTIMAL diagnostic performance" one sentence before "did not reveal a
   statistically significant difference". It now reports the highest *observed* accuracy with an
@@ -4157,7 +4270,7 @@ correct was altered. Three breaking changes, below.
   `test-decisioncompare-critical-fixes.R` never called the module at all; they re-implemented the
   logic inline and asserted on their own arithmetic, and have been rewritten to exercise the real
   analysis. The suite went from 61 passing / 25 failing to 167 passing / 0 failing.
-- **`decision` printed a prevalence and predictive values that cannot coexist.**With the
+- **`decision` printed a prevalence and predictive values that cannot coexist.** With the
   prior-probability option enabled the Prevalence cell was overwritten with the user's prior while
   PPV and NPV stayed at the raw 2x2 values computed at the *study* prevalence, so the row read
   "Prevalence 5.0%" beside "PPV 88.9%" -- impossible for a test with sensitivity 0.80 and
@@ -4168,7 +4281,7 @@ correct was altered. Three breaking changes, below.
   quotes the same numbers. The clinical summary had also been calling the user's population prior
   the sample prevalence.
 - **`decision`'s confidence-interval pane disagreed with the estimates beside it and mislabelled
-  its own rows.**LR+, LR- and DOR in the main tables use Haldane-Anscombe corrected counts when a
+  its own rows.** LR+, LR- and DOR in the main tables use Haldane-Anscombe corrected counts when a
   cell is zero, while `epi.tests` on the raw table returns `Inf` with a `NaN` lower bound -- two
   numbers for one quantity on one screen (LR+ 145 against LR+ Inf). The CI pane now uses the
   corrected table for those three; sensitivity, specificity, PPV and NPV stay on raw counts.
@@ -4179,7 +4292,7 @@ correct was altered. Three breaking changes, below.
   specificity exactly 1 and `nomogrammer` rejects the closed bound outright, so the plot failed for
   precisely the sparse tables that most need it. It is now fed proportions from the same
   continuity-corrected table, so plot and tables agree.
-- **`decision` attributed two different exclusions to one cause.**Rows are dropped for missingness
+- **`decision` attributed two different exclusions to one cause.** Rows are dropped for missingness
   and again for levels that are neither the positive nor the negative level; both were reported as
   "cases with missing values removed" -- 40 rows, with nothing missing. Reported separately now. The
   copy-ready clinical sentences quoted PPV and NPV with neither the prevalence they were computed
@@ -4203,13 +4316,13 @@ correct was altered. Three breaking changes, below.
   declared levels too. Weighted kappa was also being applied to any nominal variable with three or
   more categories, because ordinality was being inferred from the category count alone.
 - **`agreement`'s pairwise kappa confidence intervals used the null-hypothesis standard error and
-  ignored the confidence-level option.**The interval derived `se = kappa / z` from `irr`'s z
+  ignored the confidence-level option.** The interval derived `se = kappa / z` from `irr`'s z
   statistic -- whose SE is computed under H0: kappa = 0 -- and then hard-coded 1.96. Two-rater pairs
   now use the non-null ASE, which reproduces `psych::cohen.kappa` exactly, falling back to the null
   SE only when it is unavailable and saying so. An unclamped Wald interval had reported a kappa
   upper limit of 1.18, which is not a possible value; it is now clamped to [-1, 1], as the sibling
   inter/intra-rater path already did.
-- **`agreement` could take the whole analysis down, and quietly truncated its own figure.**A bare
+- **`agreement` could take the whole analysis down, and quietly truncated its own figure.** A bare
   `if (NA >= 0.60)` -- the Landis & Koch chain above it guards with `is.na()` but this block did not
   -- threw `missing value where TRUE/FALSE needed` whenever kappa is undefined: weighted kappa on
   nominal data, exact kappa with two raters, a single rating category, or Fleiss returning a
@@ -4217,14 +4330,14 @@ correct was altered. Three breaking changes, below.
   pairwise plot with no note, no subtitle and nothing on the figure, so it read as the complete set
   of comparisons; the truncation is now stated on the image itself, so it travels with an exported
   figure.
-- **`agreement` gave the same kappa two different words in one output.**The interpretation table
+- **`agreement` gave the same kappa two different words in one output.** The interpretation table
   used unattributed cut-points (0.40/0.60/0.75/0.90 -> Poor/Fair/Good/Excellent/Outstanding) while
   the plain-language summary used Landis & Koch 1977 (0.20/0.40/0.60/0.80), so 0.61 read
   "substantial" in one place and "Good" in the other, and 0.56 read "moderate" there but "Fair"
   here. One named scale is now used throughout. The ICC bootstrap hard-coded ICC(2,1) while
   labelling the row with the user's chosen `iccType`; both paths now go through one helper. 289
   tests pass.
-- **`lassologistic` reported every coefficient and odds ratio on the z-scale.**The design matrix
+- **`lassologistic` reported every coefficient and odds ratio on the z-scale.** The design matrix
   is standardised in the analysis and `glmnet` is then called with `standardize = FALSE`, so
   nothing back-transforms the coefficients -- unlike `glmnet(standardize = TRUE)`, which returns
   them on the original scale. For a 0/1 dummy from a factor this matters most: with a balanced
@@ -4233,7 +4346,7 @@ correct was altered. Three breaking changes, below.
   "per 1 SD of p53 status" is not a quantity a pathologist can act on. Coefficients are now divided
   by the column SD to recover the per-unit value; the importance measure keeps the per-SD
   magnitude, which is the quantity that is comparable across predictors.
-- **`lassologistic`'s Scoring System weighted predictors on two different contrasts.**Points were
+- **`lassologistic`'s Scoring System weighted predictors on two different contrasts.** Points were
   derived from the raw per-SD coefficients while the total score awards them on a *median split*,
   so a 0/1 dummy's per-SD coefficient is `beta x sd` (about half the real effect for a balanced
   marker) while a continuous predictor's median split spans roughly 1.6 SD. That mis-ranked them
@@ -4249,7 +4362,7 @@ correct was altered. Three breaking changes, below.
   worst-populated predictor -- a biomarker panel with one sparsely stained marker silently becoming
   a different-cohort analysis -- is disclosed.
 - **`lassologistic` presented a model that calls everyone positive as perfectly sensitive, and
-  graded a no-information model as excellently calibrated.**With zero selected variables every
+  graded a no-information model as excellently calibrated.** With zero selected variables every
   predicted probability is identical, the ROC is degenerate and `pROC` returns `-Inf`, printed as
   "Optimal threshold: -Inf" beside Sensitivity 1.000 / Specificity 0.000; it now falls back to 0.5
   and says so. The Brier score -- an overall accuracy score whose scale is driven by outcome
@@ -4267,7 +4380,7 @@ correct was altered. Three breaking changes, below.
 - **`decisioncombine` explained nothing when it stopped.**`.renderNotices()` sat after three
   early returns in `.run()`, so the notice saying *why* the analysis had stopped was collected and
   then discarded -- the user saw a blank analysis with no message at all.
-- **`decisioncombine`'s "optimal" rule was an uncorrected argmax.**It ranks 5 candidate rules with
+- **`decisioncombine`'s "optimal" rule was an uncorrected argmax.** It ranks 5 candidate rules with
   two tests, or 10 with three, using no interval and no test, so on pure noise it still names a
   winner -- and called it optimal. It now discloses how many rules were compared and that the
   winner is not an established finding. The Serial (AND) rule and the all-positive pattern are the
@@ -4276,7 +4389,7 @@ correct was altered. Three breaking changes, below.
   appeared as a percentage in one table and as 0.813 in another. Split into separate tables.
   Serial (AND) also gained its own named row: it was numerically identical to the "+/+/+" pattern
   and so had been omitted, leaving a reader to know that the pattern *was* the serial rule.
-- **`decisioncombine`'s "mixed" pattern filter dropped genuinely mixed patterns.**It excluded
+- **`decisioncombine`'s "mixed" pattern filter dropped genuinely mixed patterns.** It excluded
   anything *starting with* `+/+` or `-/-`, which removed `+/+/-` and `-/-/+`; and when no pattern
   matched it fell back to the entire unfiltered table rather than to nothing. A multi-level
   variable is now flagged instead of silently dichotomised, and a gold standard with a single
@@ -4294,29 +4407,29 @@ correct was altered. Three breaking changes, below.
   `nomogrammer` prints its reading -- prevalence, likelihood ratios, post-test probabilities -- to
   stdout under `Verbose = TRUE`, and jamovi never shows stdout. It is now rendered beside the
   figure, at the tables' precision rather than `nomogrammer`'s whole percents.
-- **`decisioncalculator`'s cut-off comparison named the wrong alternative.**The verdict was an
+- **`decisioncalculator`'s cut-off comparison named the wrong alternative.** The verdict was an
   if/else-if chain, so when both alternatives beat the current cut-off only the first was ever
   named, however much better the second was. It now picks the best of the three, declines to call
   a trivial advantage better performance, flags cut-offs whose totals differ (moving a threshold
   cannot change how many patients there are, so differing totals mean separate studies), and
   reports whether the Wilson intervals on the accuracies overlap -- a formal paired test is not
   possible from four marginal counts per scenario, and the table now says so.
-- **`nogoldstandard`'s latent-class analysis reported sensitivity and specificity swapped.**The
+- **`nogoldstandard`'s latent-class analysis reported sensitivity and specificity swapped.** The
   diseased class was identified with `probs[[i]][class, outcome]` but read back as
   `probs[[i]][2, disease_class]` -- the transpose. `[2,2]` and `[1,1]` coincide, so the error only
   surfaced when poLCA happened to label the diseased group as class 1, which is about half of all
   runs. Verified against `poLCA` on identical data and against the known truth of simulated data.
 - **`nogoldstandard`'s default method could not estimate accuracy at all, and now does not hide
-  it.**Under `all_positive` the reference standard is "every test positive", so a diseased case
+  it.** Under `all_positive` the reference standard is "every test positive", so a diseased case
   can never be test-negative: FN is identically 0 and sensitivity and NPV are 1 for every test on
   every dataset. It printed "100% (95% CI 100-100%)". `any_positive` is the mirror image (FP == 0,
   specificity and PPV fixed at 1), and `composite` with two tests *is* `any_positive`, because a
   1-of-2 tie passes a `rowMeans >= 0.5` majority. Those quantities are now left blank with an
   explanation rather than reported. See Breaking changes for the default.
 - **`nogoldstandard`'s confidence intervals were too narrow -- by about 1.8x for sensitivity at 30%
-  prevalence.**The standard error used the total n for both metrics; the denominators are
+  prevalence.** The standard error used the total n for both metrics; the denominators are
   n x prevalence for sensitivity and n x (1 - prevalence) for specificity.
-- **`nogoldstandard` claimed its latent-class model handles the assumption it actually makes.**The
+- **`nogoldstandard` claimed its latent-class model handles the assumption it actually makes.** The
   always-visible method guide advertised "Handles conditional dependence" and "No identifiability
   issues", while `poLCA(nclass = 2, ~ 1)` assumes the tests err *independently* given true status.
   The guide now says so, a new **Conditional Independence Check** table reports bivariate residuals
@@ -4325,7 +4438,7 @@ correct was altered. Three breaking changes, below.
   the model is just-identified and reproduces every table exactly. Two tests cannot identify a
   two-class model at all (5 parameters against 3 degrees of freedom) and are now refused rather
   than answered with numbers determined by the starting values.
-- **`nogoldstandard`'s Bayesian method disclosed neither its priors nor its nature.**Beta(2, 1) on
+- **`nogoldstandard`'s Bayesian method disclosed neither its priors nor its nature.** Beta(2, 1) on
   both sensitivity and specificity has mean 2/3 and increases toward 1, so it pulls estimates
   upward; nothing in the output mentioned any prior, or that the results are not draws from a
   posterior. Both are now stated.
@@ -4368,13 +4481,13 @@ correct was altered. Three breaking changes, below.
   112/2.526/3.111/0.0702; the module was right and the expected values were fabricated. Eight
   further assertions passed a message containing parentheses as a regular expression, so they
   never matched and -- because testthat re-raises a non-matching error -- masked each other.
-- **`cotest`'s joint-probability validation could never fail.**It compared the sum of the four
+- **`cotest`'s joint-probability validation could never fail.** It compared the sum of the four
   cells against 1, but the caller *defines* the fourth cell as one minus the other three, so the
   sum was 1 by construction and the check passed on any input, including a set whose cells no
   longer matched the sensitivities they were built from. It now also verifies that each cell is a
   probability and that P(both) + P(one only) still reproduces the marginal it was derived from --
   the invariant that clamping could actually break.
-- **`cotest` now accepts negative conditional dependence.**The parameter was bounded at 0, so
+- **`cotest` now accepts negative conditional dependence.** The parameter was bounded at 0, so
   tests that partly compensate for each other's errors -- a real situation, and the case where
   co-testing does better than the independence assumption predicts -- could not be expressed at
   all. The permitted range is now -1 to 1 in the option, the UI clamp and the backend validation.
@@ -4387,7 +4500,7 @@ correct was altered. Three breaking changes, below.
   none of the reported probabilities has a confidence interval. That was stated only in the
   collapsible "Getting Started" panel; it is now a note on the results table itself.
 
-- **`enhancedROC` doubled every results table on each re-run, and then broke.**Twenty-one
+- **`enhancedROC` doubled every results table on each re-run, and then broke.** Twenty-one
   `addRow()` calls and not one `deleteRows()`. jamovi re-runs an analysis on the same object
   whenever any option changes, so the AUC summary went 2 -> 4 -> 6 rows and the cut-off table
   32 -> 64 -> 96; from the second run onward the tables could not be read at all, failing with
@@ -4408,12 +4521,12 @@ correct was altered. Three breaking changes, below.
   not this consequence, and was filed as an informational message. It is now a warning that states
   the expected AUC for an uninformative marker at the study's own sample size and recommends
   setting Direction explicitly.
-- **Three of `enhancedROC`'s comparison options did nothing without explanation.**Pairwise
+- **Three of `enhancedROC`'s comparison options did nothing without explanation.** Pairwise
   comparisons, metric differences and statistical comparison all require Analysis Type to be
   "Comparative ROC Analysis", but the interface offers them as plain checkboxes with no such
   dependency, so ticking one under the default Analysis Type produced no output and no message.
   They now say what to change.
-- **Nineteen `enhancedROC` options were documented as working features but do nothing.**They
+- **Nineteen `enhancedROC` options were documented as working features but do nothing.** They
   reach the public R wrapper and `?enhancedROC` described them in the present tense -- "Calculate
   Harrell's concordance index for time-to-event outcomes" -- while the backend merely lists them
   in a "planned features" notice at run time. None has an interface control, so this affected R
@@ -4421,13 +4534,13 @@ correct was altered. Three breaking changes, below.
   `splineKnots`, which configures one of them) are now prefixed "NOT YET IMPLEMENTED - selecting
   this produces no output" in their documentation. AUC itself was confirmed against `pROC` to
   nine decimal places under every direction setting.
-- **`sequentialtests` ignored its clinical presets whenever it was called from R.**The eight
+- **`sequentialtests` ignored its clinical presets whenever it was called from R.** The eight
   presets are applied by the analysis's JavaScript, which only runs inside jamovi, so
   `sequentialtests(preset = "hiv_screening_confirmation")` silently analysed the panel defaults
   instead of ELISA and Western Blot at 2% prevalence. The presets are now applied in the backend
   as well, and a test compares the R table against the JavaScript one field by field so the two
   cannot drift apart.
-- **`sequentialtests` presented illustrative teaching numbers as evidence.**The preset control
+- **`sequentialtests` presented illustrative teaching numbers as evidence.** The preset control
   was documented as loading "evidence-based test parameters and optimal strategies from medical
   literature". The values are rounded approximations with no citation, no interval and no
   population behind them, chosen to make each strategy's behaviour easy to see. Selecting a preset
@@ -4435,10 +4548,10 @@ correct was altered. Three breaking changes, below.
   protocol or advise on a patient, and the same caveat appears in the interface and in the option
   documentation. The eleven bundled `sequentialtests_*` example datasets, which previously had no
   documentation at all, are now documented and lead with the same warning.
-- **`sequentialtests` advertised a Fagan nomogram it does not have.**The word appeared in the
+- **`sequentialtests` advertised a Fagan nomogram it does not have.** The word appeared in the
   analysis description and nowhere else in the module -- no option, no result, no code -- while
   every sibling analysis in the same menu does have one.
-- **Two of `sequentialtests`' three strategies are the same rule, and nothing said so.**Serial
+- **Two of `sequentialtests`' three strategies are the same rule, and nothing said so.** Serial
   testing of negatives and parallel testing both call a subject positive if either test is
   positive, so they give identical sensitivity, specificity, PPV and NPV; they differ only in how
   many second tests are performed. Users comparing them saw two identical rows with no
@@ -4452,7 +4565,7 @@ correct was altered. Three breaking changes, below.
   `addRow()` calls against two `deleteRows()`, so rows went 1 to 2 to 3 per predictor and the
   decision curve 40 to 80 to 120. Cleared once per run now, after the manual-run gate so that
   manual mode keeps its results when an option is edited.
-- **`psychopdaROC` ran the whole analysis backwards when the positive class was left unset.**The
+- **`psychopdaROC` ran the whole analysis backwards when the positive class was left unset.** The
   fallback took the FIRST factor level, which for Healthy/Disease, Negative/Positive, Control/Case
   or 0/1 is the NEGATIVE group: AUC 0.1001 on the bundled data where naming the positive class
   gives 0.8999, silently. The positive class was being worked out in four places that could
@@ -4460,7 +4573,7 @@ correct was altered. Three breaking changes, below.
   row sorting. All four now use one resolver, which takes the last level and discloses the
   assumption on the tables, and refuses outright when the class variable has three or more levels
   rather than guessing between them.
-- **`psychopdaROC`'s "optimal cutpoint" was usually not the optimum.**Its metric tolerance
+- **`psychopdaROC`'s "optimal cutpoint" was usually not the optimum.** Its metric tolerance
   defaulted to 0.05 against the 1e-06 used by the `cutpointr` package it wraps, so 39 of 200
   candidate thresholds spanning 52.1 to 67.7 were averaged, yielding 84.5% sensitivity where the
   true optimum offers 94.4%. The default now matches `cutpointr` and any tolerance in force is
@@ -4468,7 +4581,7 @@ correct was altered. Three breaking changes, below.
   intervals that are "narrower than appropriate" when the approximation is in fact 22.6% wider
   than DeLong's on the shipped data.
 - **`psychopdaROC`'s DeLong test could report 0.794 for a marker its own AUC table reported as
-  0.206.**DeLong's test requires every marker read in the same direction, so when a marker's AUC
+  0.206.** DeLong's test requires every marker read in the same direction, so when a marker's AUC
   came out below 0.5 the fallback implementation flipped its scores and displayed `1 - AUC`. The
   primary implementation does not flip -- it passes the user's Classification Direction to `pROC`
   and reports the honest figure -- so the two tables disagreed for precisely the markers where the
@@ -4477,7 +4590,7 @@ correct was altered. Three breaking changes, below.
   change Classification Direction and re-run if the reversed reading is the correct one. Separately,
   DeLong's asymptotic variance is not dependable on small samples, so a note now appears whenever
   either class holds fewer than ten cases.
-- **Both ROC analyses now say, in one sentence, which way they read the test values.**This is
+- **Both ROC analyses now say, in one sentence, which way they read the test values.** This is
   the fix for a genuine source of confusion. `enhancedROC` and `psychopdaROC` sit in the same
   menu, and they were cross-checked against each other on eight datasets: **the arithmetic agrees
   to machine precision** -- maximum absolute AUC difference 3.2e-15 and confidence-interval
@@ -4497,7 +4610,7 @@ correct was altered. Three breaking changes, below.
   cutpoints differ in the last decimal because `pROC` reports the midpoint between two adjacent
   observed values while `cutpointr` reports an observed value (sensitivity and specificity are
   identical either way).
-- **`enhancedROC`'s twenty unimplemented options are reachable from the interface after all.**The
+- **`enhancedROC`'s twenty unimplemented options are reachable from the interface after all.** The
   1.0.4 note above said they had no interface controls and so affected only R callers; that was
   wrong -- all twenty have live checkboxes. A user can therefore tick "Harrell's C-index" and
   receive nothing, so the notice that explains this was raised from informational to a warning.
@@ -4510,14 +4623,14 @@ correct was altered. Three breaking changes, below.
   to recover. Refused now in 0.07 seconds, which also removes two related absurdities -- power 0.01
   reported "A minimum of 1 subjects", and alpha just below power gave a sample size of zero shown
   as one subject.
-- **`kappa0` was documented backwards in two of the three kappaSize analyses.**The package
+- **`kappa0` was documented backwards in two of the three kappaSize analyses.** The package
   defines it as the *null hypothesis* for the power approach but as the *anticipated* value for
   the confidence-interval and fixed-n approaches -- two different quantities sharing a name.
   `kappaSizePower` called its null the "Expected value of kappa" and `kappaSizeCI` called its
   anticipated value "the null hypothesis value of kappa": each carried the other's meaning, so
   anyone following the help would enter the wrong quantity and get a different answer with no
   indication. Corrected in all three, each now stating what it is not.
-- **The three kappaSize analyses now agree on their shared options.**Significance level bounds
+- **The three kappaSize analyses now agree on their shared options.** Significance level bounds
   were 0.01-0.99 in two and 0.01-0.20 in the third; all are now 0.001-0.20, which makes a
   Bonferroni-adjusted alpha expressible and stops admitting values that are not significance
   levels. Proportions parse identically everywhere, a binary outcome may be given as one
@@ -4539,20 +4652,20 @@ correct was altered. Three breaking changes, below.
   after a bounded wall-clock budget, with a message naming the distance that drives the cost, and
   the fixed-n analysis before the engine is entered. Genuinely demanding but finite designs are
   unaffected and still return their (large) answers.
-- **`kappaSizeFixedN` could print a lower bound of -23.78 for Cohen's kappa.**Kappa cannot fall
+- **`kappaSizeFixedN` could print a lower bound of -23.78 for Cohen's kappa.** Kappa cannot fall
   below -1. The package's search walks downwards in steps of 0.001 with no floor, so a small study
   with a rare category -- 11 subjects, a 2% prevalence, alpha 0.001 -- walks straight past the limit
   and the number was displayed as an ordinary result. It is now refused with an explanation that
   the large-sample approximation has broken down and what to change. A bound that is negative but
   still valid is reported as before, now with a note that this many subjects cannot rule out
   agreement no better than chance.
-- **`kappaSizeCI` showed the wrong quantity as the driver of its sample size.**Its explanation
+- **`kappaSizeCI` showed the wrong quantity as the driver of its sample size.** Its explanation
   reported the "precision width" of the confidence interval, but the calculation sizes on
   whichever limit lies nearer the anticipated kappa: with a lower limit of 0.55 the answer is
   1,625 subjects for every upper limit from 0.65 to 0.99. In one-sided mode the upper limit is
   ignored entirely. Both are now stated. The analysis also accepted proportions on a separator set
   that, read literally, matched a backslash and the letter "t" but neither a tab nor a space.
-- **`kappaSizeFixedN` gained a Notes panel and lost several rough edges.**It now states its
+- **`kappaSizeFixedN` gained a Notes panel and lost several rough edges.** It now states its
   method, warns when a category is expected to hold fewer than five subjects, and warns in red
   when the achievable bound is at or below zero -- the case where the planned study cannot
   demonstrate agreement at all, whatever it observes. Its explanation used to read "determine the
@@ -4567,12 +4680,12 @@ correct was altered. Three breaking changes, below.
 
 ### Documentation (`jsurvival` and `OncoPath` articles)
 
-- **`jsurvival`: option coverage went from 78% to 95%.**Of 304 options across its eight shipped
+- **`jsurvival`: option coverage went from 78% to 95%.** Of 304 options across its eight shipped
   analyses, 67 were undocumented. `survival()` alone had 28, including features added between
   February and July 2026 -- weighted log-rank tests, the seven age-correction options, parametric
   survival models, calibration curves, restricted cubic splines and bootstrap internal validation.
   `datetimeconverter` was shipping with no documentation at all (30 of 32 options unmentioned).
-- **A `jsurvival` article documents a feature that does not exist.**The time-dependent covariates
+- **A `jsurvival` article documents a feature that does not exist.** The time-dependent covariates
   article uses 17 options that are commented out in `jamovi/multisurvival.a.yaml` under headings
   reading *"EXPERIMENTAL - will be implemented later"* -- 60 options are commented out there in
   total. It is kept as the design specification and now says the code is not yet runnable.
@@ -4597,7 +4710,7 @@ generated wrapper signatures. Unlike the submodule articles these are real vigne
 `VignetteBuilder: knitr`, and all 32 `.Rmd` carry a `VignetteIndexEntry` -- so they are built by
 `R CMD check`.
 
-- **Sixty-eight articles document an analysis that is on a development or test menu route.**Of the
+- **Sixty-eight articles document an analysis that is on a development or test menu route.** Of the
   module's 419 analyses only about 60 sit on a production menu; the rest are routed to `...D`/`...T`
   groups and do not appear in jamovi. That includes the whole penalised-Cox family
   (`lassocox`, `grouplasso`, `sparsegrouplasso`, `adaptivelasso`, `ncvregcox`, `pcacox`, `plscox`,
@@ -4612,9 +4725,9 @@ generated wrapper signatures. Unlike the submodule articles these are real vigne
   total. Its Stable / To be Tested / Drafts taxonomy describes testing maturity, which is a
   different question from whether an analysis is reachable from a menu; that distinction is now
   spelled out. All 18 documented analyses were confirmed to be both Stable and production-routed.
-- **`test-data-complete-catalog.Rmd`**lists test data for 295 analyses, 28 of which are
+- **`test-data-complete-catalog.Rmd`** lists test data for 295 analyses, 28 of which are
   development-routed; it now says so rather than implying every listed analysis is available.
-- **`survival()`'s `export_survival_data` was shown as an R argument.**It is a `type: Output`
+- **`survival()`'s `export_survival_data` was shown as an R argument.** It is a `type: Output`
   option, and jamovi's compiler does not turn Output options into arguments of the generated R
   function, so the example raised `unused argument`. The article now explains that Output options
   are reachable from the jamovi interface only, names the other two on this analysis
@@ -4626,7 +4739,7 @@ generated wrapper signatures. Unlike the submodule articles these are real vigne
 
 ### Documentation (`meddecide` articles)
 
-- **All 92 `meddecide` articles were audited against the shipped analyses.**Twenty-eight of them
+- **All 92 `meddecide` articles were audited against the shipped analyses.** Twenty-eight of them
   document an analysis that does not ship -- `decisionpanel`, `decisiongraph`, `decisioncurve`,
   `modelbuilder`, `screeningcalculator`, `bayesdca`, `icccoeff`, `latentbiomarker`, `advancedtree`,
   `decision2` and `ppv` are all still on development or test menu routes here and in `meddecide`
@@ -4645,11 +4758,11 @@ generated wrapper signatures. Unlike the submodule articles these are real vigne
 ### Tumour response and heterogeneity (also released in `OncoPath`)
 
 - **`ihcheterogeneity`'s intraclass correlation was computed by a route that did not match the
-  ICC(2,1) absolute-agreement definition the output claimed.**It now uses `psych::ICC`. This
+  ICC(2,1) absolute-agreement definition the output claimed.** It now uses `psych::ICC`. This
   completes the 1.0.3 fix, which named the estimator actually being computed rather than replacing
   it. 164 tests pass.
 - **`diagnosticmeta`'s Deeks funnel-plot asymmetry test was still specified incorrectly after the
-  effective-sample-size fix in 1.0.3.**Deeks' own specification also requires the regression to be
+  effective-sample-size fix in 1.0.3.** Deeks' own specification also requires the regression to be
   *weighted* by ESS and refers the slope to a t distribution on k-2 degrees of freedom; the code
   used inverse-variance weights and a normal reference, and reported "no asymmetry" on data where
   Deeks' method finds it. Both corrected.
@@ -4672,7 +4785,7 @@ generated wrapper signatures. Unlike the submodule articles these are real vigne
   `kappaSizePower` while the file is `kappasizepower.a.yaml`, and a case-sensitive check would
   have deleted every real analysis on Linux while appearing to work on macOS.
 
-- **The release script copied dev- and test-routed analyses into the production submodules.**In
+- **The release script copied dev- and test-routed analyses into the production submodules.** In
   WIP mode the `menuGroup` patterns were the bare, unanchored group names, so `menuGroup: Survival`
   also matched `SurvivalD`, `SurvivalT` and `SurvivalExtraD` -- 85 functions pulled into `jsurvival`
   instead of 8. The patterns are now anchored as `(Extra)?[[:space:]]*$`, which keeps the intended
@@ -4711,7 +4824,7 @@ the umbrella ClinicoPath module, not through any production submodule.
 
 ### Tumour response (also released in `OncoPath`)
 
-- **`waterfall` wrote the exported response-category column against the wrong patients.**The
+- **`waterfall` wrote the exported response-category column against the wrong patients.** The
   no-time-variable branch used `rownames(processed_data$waterfall)` as dataset row numbers, but
   that frame is a dplyr tibble -- its rownames are always `"1"`...`"k"`, never the source row numbers
   -- and it had already been collapsed to one row per patient and re-sorted into patient-ID order.
@@ -4734,7 +4847,7 @@ the umbrella ClinicoPath module, not through any production submodule.
   Kaplan-Meier curve. A new `.progressionTimes()` helper takes the running minimum burden and tests
   the relative increase against it. The >=5 mm absolute-increase rule still cannot be applied on
   this path -- percent changes carry no millimetres -- and the limitation notice now says so.
-- **`waterfall`'s PD boundary was exclusive (> +20%)**where RECIST v1.1 says "at least a 20%
+- **`waterfall`'s PD boundary was exclusive (> +20%)** where RECIST v1.1 says "at least a 20%
   increase", so a change of exactly +20% was reported as stable disease -- reachable whenever
   percentages are pre-rounded, which is common with percentage input. The boundary is now inclusive
   on both sides (exactly -30 is PR, exactly +20 is PD). Three drifted copies of the categoriser
@@ -4749,7 +4862,7 @@ the umbrella ClinicoPath module, not through any production submodule.
   capitalisation, and rejected labels are listed in a notice with the affected patients keeping
   their computed category.
 - **`waterfall` counted patients with a baseline but no post-baseline assessment as stable
-  disease.**With a time variable, `((baseline - baseline)/baseline)x100 = 0` categorises as SD and
+  disease.** With a time variable, `((baseline - baseline)/baseline)x100 = 0` categorises as SD and
   inflated the disease control rate; such patients are now reported as "Unknown" with a notice. A
   new reconciliation step accounts for every patient that entered the analysis but does not appear
   in the waterfall (baseline missing, zero or non-numeric) -- previously the cohort simply got
@@ -4771,7 +4884,7 @@ the umbrella ClinicoPath module, not through any production submodule.
   `recist_select_target_lesions()`, and unselected baseline targets are followed as non-target
   disease as RECIST specifies.
 - **`waterfallrecist` silently ignored every non-target lesion in datasets that spell the type with
-  a hyphen.**Lesion types were matched against the three exact strings `target`, `nontarget` and
+  a hyphen.** Lesion types were matched against the three exact strings `target`, `nontarget` and
   `new` after `tolower()`, so "Non-Target" -- the spelling used in most datasets -- fell through
   unchanged and was never picked up by the non-target progression assessment. Types are now
   normalised by stripping case, whitespace and separators.
@@ -4785,7 +4898,7 @@ the umbrella ClinicoPath module, not through any production submodule.
 ### Patient follow-up (also released in `OncoPath`)
 
 - **`swimmerplot`'s "Relative (all start from 0)" time display -- the default configuration --
-  rebased each *row* rather than each *patient*.**A swimmer plot is multi-row per patient by
+  rebased each *row* rather than each *patient*.** A swimmer plot is multi-row per patient by
   construction (the module merges per-patient intervals precisely for that), so every episode of a
   multi-episode patient was stacked back onto t = 0. Follow-up then collapsed to the longest single
   episode and merged person-time to the union of the stacked episodes, silently corrupting total
@@ -4802,7 +4915,7 @@ the umbrella ClinicoPath module, not through any production submodule.
   episodes the same milestone was previously handed to both rows, counted twice in the summary, and
   the copy attached to the later episode was re-based on that episode's start and came out
   negative. Raw numeric event times were likewise never shifted for relative display.
-- **`swimmerplot` published a naive median under the reverse-Kaplan-Meier name.**The reverse KM
+- **`swimmerplot` published a naive median under the reverse-Kaplan-Meier name.** The reverse KM
   method (Schemper & Smith 1996) needs censoring information; without it, or when the censoring
   variable uses a coding the classifier does not recognise, the function fell back to the plain
   median of observed durations while the results row still said "(reverse Kaplan-Meier)"
@@ -4821,14 +4934,14 @@ the umbrella ClinicoPath module, not through any production submodule.
   instead uses a fixed 30.4375-day month, so total person-time shifted (14.92 against 15.00 months
   on a two-episode test) purely from toggling `timeDisplay` -- a display option that must not move a
   reported statistic.
-- **`swimmerplot` drew ongoing-treatment arrows by guessing.**With no censoring variable it fell
+- **`swimmerplot` drew ongoing-treatment arrows by guessing.** With no censoring variable it fell
   back to "whoever has the largest end time is still on treatment", but an arrow is a per-patient
   clinical claim -- the glossary states it means ongoing treatment at data cutoff -- and the patient
   with the longest follow-up is very often the one who died last. Arrows are now drawn only from an
   explicit censoring variable, classified by the same helper the median-follow-up calculation uses,
   so the arrow and the estimator cannot disagree about a coding.
 - **`swimmerplot`'s event markers were invisible, and its milestones destroyed the response
-  colouring.**Every entry of the clinical glyph table was the empty string -- the emoji that once
+  colouring.** Every entry of the clinical glyph table was the empty string -- the emoji that once
   lived there were deleted rather than escaped during a non-ASCII sweep -- so
   `ggswim::scale_marker_discrete()` drew nothing for every labelled event; they are now BMP
   geometric symbols that also render in PDF and Word exports. Mapping milestones to `color` as well
@@ -4838,13 +4951,13 @@ the umbrella ClinicoPath module, not through any production submodule.
   Glyph pattern matching was also anchored, so a bare "ct" no longer matches "Infarction" and
   "Reaction".
 - **`swimmerplot` crashed out of the box when a custom reference line was drawn on an absolute date
-  scale.**lubridate does not export `months()` -- `months` is a base generic -- so
+  scale.** lubridate does not export `months()` -- `months` is a base generic -- so
   `lubridate::months()` threw, and months is the *default* time unit; the Period constructors also
   reject fractional amounts while `customReferenceTime` is a `Number` with no integer constraint,
   so 12.5 crashed too. It now uses `lubridate::duration()`, which handles both. Separately, the
   ggswim fallback subtitle always read "ggswim unavailable" whatever had actually failed, because
   the real error was passed positionally into the `milestone_data` argument and discarded.
-- **`swimmerplot` reported ORR/DCR inconsistently and tabulated response labels three ways.**The
+- **`swimmerplot` reported ORR/DCR inconsistently and tabulated response labels three ways.** The
   guard that suppresses ORR/DCR for non-RECIST response codings ("Responder", 0/1, "Grade 1" --
   nothing normalises to CR/PR/SD/PD, so the numerator is legitimately zero) lived only in the
   metrics path, so the copy-ready manuscript text went on asserting "ORR 0.0%" with an exact
@@ -4857,7 +4970,7 @@ the umbrella ClinicoPath module, not through any production submodule.
 
 ### IHC heterogeneity (also released in `OncoPath`)
 
-- **`ihcheterogeneity` reported two different coefficients of variation on the same screen.**The
+- **`ihcheterogeneity` reported two different coefficients of variation on the same screen.** The
   reproducibility table computed CV from the regional columns only while the interpretation metrics
   folded the reference measurement into each case, so the table read "Mean CV = 23.19 / High
   variability" while the copy-ready sentence read "moderate (mean CV = 20%)" and the assessment box
@@ -4889,7 +5002,7 @@ the umbrella ClinicoPath module, not through any production submodule.
 ### Diagnostic meta-analysis (also released in `OncoPath`)
 
 - **`diagnosticmeta`'s Deeks funnel-plot asymmetry test used the wrong effective sample size and
-  reported the opposite conclusion.**Deeks, Macaskill & Irwig (2005) define
+  reported the opposite conclusion.** Deeks, Macaskill & Irwig (2005) define
   ESS = 4.n1.n0/(n1+n0), twice the harmonic mean of the two *group* sizes; the code used
   4/(1/TP + 1/FN + 1/FP + 1/TN), the harmonic mean of the four *cell* counts -- a different,
   non-monotone function of the table, so two studies with identical Deeks ESS could get different
@@ -4920,7 +5033,7 @@ the umbrella ClinicoPath module, not through any production submodule.
 ### Survival power (umbrella ClinicoPath module only)
 
 - **`survivalPower`'s Weibull parameterisation was wrong in both the analytical and the simulation
-  code.**The analytical path used `lambda_control = (log(2)/median)^(1/shape)` and
+  code.** The analytical path used `lambda_control = (log(2)/median)^(1/shape)` and
   `lambda_treatment = lambda_control * hr^(1/shape)`; for S(t) = exp(-lambdat^k) the correct forms are
   lambda = log(2)/median^k and, because proportional hazards share the shape and move only the scale,
   `lambda_treatment = lambda_control * hr`. The simulation code additionally read `params$lambda`
@@ -4944,7 +5057,7 @@ the umbrella ClinicoPath module, not through any production submodule.
   source imaging. Its results heading changed from "RECIST v1.1 Compliance Audit" to "RECIST v1.1
   Criteria Applied", and `waterfall`'s summary table from "Response Categories Based on RECIST v1.1
   Criteria" to "Response Categories (threshold-based, not full RECIST v1.1)".
-- **`survivalPower` now offers only the exponential distribution.**Weibull, log-normal and
+- **`survivalPower` now offers only the exponential distribution.** Weibull, log-normal and
   piecewise exponential are relabelled "(not available yet)" and stop the analysis with an
   explanatory message rather than returning a number the event-probability and sample-size formulas
   -- which assume a constant hazard -- cannot justify. A failed Monte Carlo validation now writes a
@@ -4980,7 +5093,7 @@ the umbrella ClinicoPath module, not through any production submodule.
   discarded. An explicit reader-selection column, when supplied, wins outright and is only checked
   against the limits.
 - **`waterfallrecist` gained an optional "Non-Target Response (radiologist assessment)"
-  variable.**RECIST v1.1 defines non-target progression as *unequivocal* progression, a
+  variable.** RECIST v1.1 defines non-target progression as *unequivocal* progression, a
   qualitative radiological judgement no measurement can establish; without this variable the
   analysis falls back to a lesion-count heuristic (two or more new non-target lesions =
   progression), which is not the RECIST criterion and can both miss and over-call progression.
@@ -5000,7 +5113,7 @@ the umbrella ClinicoPath module, not through any production submodule.
   there, shows a worked layout for each, and states plainly what each analysis cannot do. Optional
   sections: decision table, data layouts, limitations, RECIST v1.1 rules in plain language,
   glossary.
-- **`gsdesign` can now design under non-proportional hazards.**New options "Hazards Assumption",
+- **`gsdesign` can now design under non-proportional hazards.** New options "Hazards Assumption",
   "Delay Before Effect (months)" and "Hazard Ratio During Delay" route the design through
   `gsDesign2::gs_design_ahr`, which integrates the hazard ratio over a piecewise failure model and
   designs on the resulting average HR, instead of `gsDesign::gsSurv`'s single constant HR. Assuming
@@ -5089,7 +5202,7 @@ headlines; `jsurvival`'s NEWS carries the full detail for each.
   multi-event level validation that silently dropped unset levels, a mislabelled median-CI method,
   cutpoint parsing and support checking, and a `.run()` restructure in `survivalcont` so results
   are no longer stranded when cut-point search runs.
-- **`survival` reported survival probabilities beyond the observed follow-up.**With the default
+- **`survival` reported survival probabilities beyond the observed follow-up.** With the default
   cutpoints (12, 36, 60) and two years of follow-up the 1/3/5-year table printed a "60-month
   survival" with a confidence interval computed from zero patients at risk -- 0.0% in one group,
   4.5% (0.8-25.7%) in another. Unsupported cutpoints are now omitted with a note.
@@ -5134,7 +5247,7 @@ headlines; `jsurvival`'s NEWS carries the full detail for each.
   `NA_character_` as the "unset" sentinel, which compares to a full-length, never-matching
   condition. Behaviour with the levels *set* is unchanged: an explicitly chosen negative level
   still restricts the analysis to those two levels and drops the rest.
-- **158 options across 66 analyses were required arguments of the generated R function.**An
+- **158 options across 66 analyses were required arguments of the generated R function.** An
   option with no `default:` in its `.a.yaml` compiles to a bare parameter, so calling the analysis
   from R without it failed with `argument "X" is missing, with no default` before any of the
   analysis's own validation could run -- even for plainly optional inputs such as
@@ -5147,7 +5260,7 @@ headlines; `jsurvival`'s NEWS carries the full detail for each.
 
 ## Changed
 
-- **Test suite: `type: Level` options are now passed explicitly.**A `Level` can never carry a
+- **Test suite: `type: Level` options are now passed explicitly.** A `Level` can never carry a
   `default:` (the jamovi compiler rejects it), so it is always a required argument of the R
   wrapper and every caller must supply it -- `NULL` when the paired variable is not selected. 901
   such arguments were added across 517 call sites in 59 test files. Several `expect_error()` tests
@@ -5157,7 +5270,7 @@ headlines; `jsurvival`'s NEWS carries the full detail for each.
 
 ## Added
 
-- **Automated GitHub release (`.github/workflows/release.yaml`).**A push to the default branch
+- **Automated GitHub release (`.github/workflows/release.yaml`).** A push to the default branch
   touching `DESCRIPTION` or `jamovi/0000.yaml` cross-checks the two version strings, refuses to
   proceed if they disagree, and -- if the tag does not already exist -- tags `v<version>` and
   publishes a release whose notes are the matching section of this file. Re-running it is
@@ -5170,12 +5283,12 @@ fixes change reported statistics and should be verified against reference datase
 
 ## Added
 
-- **Disease-Free survival type (`survival`, `singlearm`, `survivalcont`, `multisurvival`):**a new
+- **Disease-Free survival type (`survival`, `singlearm`, `survivalcont`, `multisurvival`):** a new
   `analysistype` option, `dfs`. "Alive with Disease" was previously mapped to *censored* in every
   branch of every multi-event analysis type, so the `awd` level picker could not influence any
   result and disease-free survival was not expressible. Under `dfs`, Alive with Disease counts as
   an event.
-- **Outcome recode disclosure (all five analyses that build an event indicator):**a new
+- **Outcome recode disclosure (all five analyses that build an event indicator):** a new
   `eventRecodeInfo` output states which level became the event, which levels were collapsed into
   "censored", how many rows were excluded as missing, and which estimand the results correspond to.
   When the outcome has three or more levels and only one is the event, it also warns that the
@@ -5193,7 +5306,7 @@ fixes change reported statistics and should be verified against reference datase
   survival time and survival-estimate export in `survival`, five plot renderers in `singlearm`, and
   effectively the whole of `survivalcont` were computing on that inverted vector. All are now
   blocked with an explanation rather than rendering inverted results.
-- **Excel serial dates were wrong by a factor of 86 400 (`datetimeconverter`):**serial numbers count
+- **Excel serial dates were wrong by a factor of 86 400 (`datetimeconverter`):** serial numbers count
   days but `as.POSIXct.numeric` reads seconds, so every Excel date collapsed onto its origin (45000
   became 1899-12-30 12:30:00 instead of 2023-03-15). Unix-epoch conversions were already correct and
   are unchanged.
@@ -5201,7 +5314,7 @@ fixes change reported statistics and should be verified against reference datase
   `any()` returns a single value, so `ifelse()` returned length 1 and dplyr recycled it across the
   group; a patient with records (2, 0) and no priority event came out as (2, 2).
 - **Restricted mean survival time was biased low with a dimensionally wrong standard error
-  (`survivalcont`):**RMST was integrated with the trapezoidal rule over a step function, which
+  (`survivalcont`):** RMST was integrated with the trapezoidal rule over a step function, which
   systematically underestimates it, and the variance summed `S^2 * Var(S) * dt` -- units of time
   rather than time squared -- so the confidence interval was far too narrow. The fallback substituted
   `sd(time)/sqrt(n)`, which ignores censoring, and printed it as a 95% CI. Now delegated to
@@ -5211,17 +5324,17 @@ fixes change reported statistics and should be verified against reference datase
   ordinary "Alive"/"Dead" outcome, the exact case the Event Level option exists to handle. It now
   consults the selected event level.
 - **Missing outcomes were converted into censored observations (`multisurvival`,
-  `outcomeorganizer`):**the competing-risk branch pre-filled the vector with `"Censored"`, and the
+  `outcomeorganizer`):** the competing-risk branch pre-filled the vector with `"Censored"`, and the
   RFS/PFS/DFS composite used `pmax(..., na.rm = TRUE)` where `pmax(NA, 0, na.rm = TRUE)` is `0`. In
   both cases a patient with unknown vital status entered the model as event-free. Missing values now
   stay missing and the row is dropped, with the count reported.
-- **Competing-risk coding was lost handing off from `outcomeorganizer`:**the recoded column was
+- **Competing-risk coding was lost handing off from `outcomeorganizer`:** the recoded column was
   written as numeric 0/1/2, came back as a nominal factor with levels "0"/"1"/"2", took the
   single-event-level branch downstream, and level "2" silently became censored -- turning a
   competing-risks analysis back into a cause-specific one. It is now written as
   Censored/Event/Competing, the representation the survival analyses already recognise.
 - **Unassigned outcome levels deleted patients instead of erroring (`survivalcont`, `multisurvival`,
-  `outcomeorganizer`):**in multi-event mode a level not assigned to one of the four categories
+  `outcomeorganizer`):** in multi-event mode a level not assigned to one of the four categories
   became `NA` and was then dropped by `jmvcore::naOmit()`, shrinking the denominator and inflating
   the event rate (mapping only "Dead of Disease" produced a 100% event rate that looked valid).
   `survival` and `singlearm` already caught this; the check is now shared. A blank category is also
@@ -5246,7 +5359,7 @@ be verified against reference datasets before release.
 
 ### OncoPath
 
-- **Diagnostic Test Meta-Analysis (`diagnosticmeta`):**corrected the delta-method confidence-interval
+- **Diagnostic Test Meta-Analysis (`diagnosticmeta`):** corrected the delta-method confidence-interval
   covariance sign for the positive/negative likelihood ratios and the diagnostic odds ratio (the
   sensitivity-specificity covariance was added instead of subtracted); fixed the forest-plot pooled
   diamond interval (removed a double logit->probability transform) and serialized the pooled estimate
@@ -5254,212 +5367,212 @@ be verified against reference datasets before release.
   every covariate contrast rather than only the first; removed a dead, never-displayed "welcome"
   output; completed `clearWith` so palette, confidence-level and zero-cell-correction changes refresh
   results.
-- **IHC Heterogeneity (`ihcheterogeneity`):**corrected the intraclass-correlation index so the value
+- **IHC Heterogeneity (`ihcheterogeneity`):** corrected the intraclass-correlation index so the value
   matches its ICC(3,1) label (it was returning ICC(3,k)); fixed row-alignment between the
   whole-section/spatial-region vectors and the NA-filtered biopsy data; corrected the Hedges' g
   small-sample degrees-of-freedom factor; surfaced data-quality and sampling-strategy warnings that
   were being silently overwritten before display; guarded the coefficient of variation and relative
   bias against near-zero/negative means; relabelled the effect-size column to "Hedges' g".
-- **Swimmer Plot (`swimmerplot`):**fixed the >1000-row data.table fast path, which created a phantom
+- **Swimmer Plot (`swimmerplot`):** fixed the >1000-row data.table fast path, which created a phantom
   censor column and could flip censoring status; corrected duplicated variable emission in generated
   syntax (`asSource`); added a fallback for the reverse-Kaplan-Meier median; completed `clearWith`;
   reset transient notices each run.
-- **Treatment Response Waterfall (`waterfall`):**fixed all-missing patients being mis-classified as
+- **Treatment Response Waterfall (`waterfall`):** fixed all-missing patients being mis-classified as
   progressive disease (`min()` over an empty set returned `Inf`); reset notices each run so they no
   longer accumulate; use original (unescaped) variable names as data-frame keys so variables with
   spaces/special characters work; removed dead helper code; completed `clearWith`.
 
 ### ClinicoPathDescriptives
 
-- **Cross Table (`crosstable`):**HTML-escaped factor levels and cell values in the Tangram styles,
+- **Cross Table (`crosstable`):** HTML-escaped factor levels and cell values in the Tangram styles,
   which were previously injected raw into the results view (XSS hardening); wrapped the arsenal/
   finalfit/gtsummary/tangram table builders in error handling that routes failures to a styled notice
   instead of a raw R error; corrected inverted enable rules so the continuous-summary and categorical-
   test options are usable for the styles that consume them; gave variable-name warnings their own
   output so they no longer clobber the finalfit note; removed dead auto-test-selection scaffolding.
-- **Table One (`tableone`):**HTML-escaped factor levels/labels in the gtsummary style (XSS hardening);
+- **Table One (`tableone`):** HTML-escaped factor levels/labels in the gtsummary style (XSS hardening);
   keyed the completeness/missing-data message on the raw missing count so a tiny non-zero missingness
   no longer reports "complete data were available for all cases"; aligned the arsenal formula terms
   with the actually-selected columns.
-- **Outlier Detection (`outlierdetection`):**routed validation and error messages to an always-visible
+- **Outlier Detection (`outlierdetection`):** routed validation and error messages to an always-visible
   panel; corrected per-method outlier columns that were double-counting the aggregate flag; unified all
   displayed outlier counts through one proportion-vs-threshold rule; HTML-escaped variable names; fixed
   a crash on all-missing variables; preserved row identifiers across subsampling.
-- **Data Quality (`dataquality`):**fixed two crashes where an integer format was applied to a
+- **Data Quality (`dataquality`):** fixed two crashes where an integer format was applied to a
   fractional value (the missing-value median and a decimal missing-data threshold); surfaced value-level
   duplicate counts; stopped flagging continuous numeric variables as high-cardinality; kept critical
   warnings visible even when the summary panels are off.
-- **Data Check (`checkdata`):**fixed a crash on entirely-missing variables and on factors carrying
+- **Data Check (`checkdata`):** fixed a crash on entirely-missing variables and on factors carrying
   unused levels; switched to a single population-moment (g1) skewness estimator; corrected the quality-
   grade boundaries; surfaced quality warnings in a visible panel; removed ~250 lines of dead code.
-- **Chi-Square Post-Hoc (`chisqposttest`):**detailed contingency tables now render all RxC categories
+- **Chi-Square Post-Hoc (`chisqposttest`):** detailed contingency tables now render all RxC categories
   (were hard-coded to 2x2); dropped unused factor levels before tabulation; removed a double-population
   of the export table and a duplicated pairwise computation; relabelled the effect-size column.
-- **Benford Analysis (`benford`):**fixed a crash when Digits = 4 (now capped at 3) and when the MAD
+- **Benford Analysis (`benford`):** fixed a crash when Digits = 4 (now capped at 3) and when the MAD
   statistic is NA; routed fatal errors to the Data Validation panel; completed `clearWith`.
-- **Categorize (`categorize`):**corrected the frequency-table Range column (wrong for lettered/custom/
+- **Categorize (`categorize`):** corrected the frequency-table Range column (wrong for lettered/custom/
   auto styles, and emitting a coercion warning); made generated syntax reproducible on tied data;
   guarded against duplicate custom labels; cached plot break state.
-- **Summary of Continuous Variables (`summarydata`):**stopped the "infinite/extreme values" clinical
+- **Summary of Continuous Variables (`summarydata`):** stopped the "infinite/extreme values" clinical
   alert firing on ordinary NA/NaN; honoured the decimal-places option in the summary table; suppressed
   misleading `p = NA; skewness = NaN` text on constant data; used raw variable names as data keys;
   de-duplicated the Shapiro-Wilk computation.
-- **Summary of Categorical Variables (`reportcat`):**stopped truncating factors with more than 100
+- **Summary of Categorical Variables (`reportcat`):** stopped truncating factors with more than 100
   levels; corrected displayed "levels" counts to observed (non-empty) levels; hardened the gt->HTML
   fallback; completed `clearWith` and hid stale output when no variable is selected.
-- **Age Pyramid (`agepyramid`):**reconciled the "Final observations" count with rows dropped by
+- **Age Pyramid (`agepyramid`):** reconciled the "Final observations" count with rows dropped by
   out-of-range custom breaks (and now errors when none remain in range); validated custom colours with
   a safe fallback; a ggcharts render failure now shows an explanatory panel instead of a blank plot.
-- **Alluvial Diagram (`alluvial`):**fixed a blank plot when marginal histograms were combined with
+- **Alluvial Diagram (`alluvial`):** fixed a blank plot when marginal histograms were combined with
   palette/theme options; moved bin-label and title-compatibility checks so their notices surface before
   rendering; showed the "no data" message that was previously set but hidden; routed weight-validation
   errors through the notice channel; removed dead code.
-- **Variable Tree (`vartree`):**preserved quotes in the max-width SVG regex; built the tree summary
+- **Variable Tree (`vartree`):** preserved quotes in the max-width SVG regex; built the tree summary
   spec as a vector so percentage and mean/SD annotations can co-exist; added an error notice when NA
   exclusion removes all rows; completed `clearWith`; removed dead code and unused imports.
-- **Venn Diagram (`venn`):**HTML-escaped variable-access error messages via `jmvcore::reject`;
+- **Venn Diagram (`venn`):** HTML-escaped variable-access error messages via `jmvcore::reject`;
   decoupled the membership table from the set-calculations toggle so it is reachable; documented that
   the sort and minimum-size options apply only to the ComplexUpset engine; corrected the About text;
   completed `clearWith` for styling options; removed dead code.
 
 ### jjstatsplot
 
-- **Scatter Plot (`jjscatterstats`):**surfaced the previously-declared but unrendered warnings panel;
+- **Scatter Plot (`jjscatterstats`):** surfaced the previously-declared but unrendered warnings panel;
   corrected the `point.size`/`point.alpha`/`size` arguments to the current ggstatsplot API; used a
   proper GAM spline formula for `method = "gam"`; added a small-n / zero-variance guard.
-- **Correlation Matrix (`jjcorrmat`):**the correlation table now honours the Confidence Level option;
+- **Correlation Matrix (`jjcorrmat`):** the correlation table now honours the Confidence Level option;
   the small-sample warning uses the effective complete-case N; the table is populated deterministically
   once per run (was rebuilt inside the plot renderers); variable names resolve to their display labels.
-- **Bar Chart (`jjbarstats`):**data-quality warnings (small groups, zero cells, low expected counts,
+- **Bar Chart (`jjbarstats`):** data-quality warnings (small groups, zero cells, low expected counts,
   pairwise auto-disable) now surface in the results instead of the R console; de-duplicated and
   per-run-reset notices; the assumptions panel lists all variables; dropped the deprecated `messages`
   argument.
-- **Box-Violin (Between Groups) (`jjbetweenstats`):**the clinical summary is computed in the analysis
+- **Box-Violin (Between Groups) (`jjbetweenstats`):** the clinical summary is computed in the analysis
   pass (renders with the plot off); all plot builders are wrapped so a degenerate group yields a
   friendly message instead of a blank plot; added a `< 2` non-empty-levels guard; outlier detection is
   now deterministic; the journal palette is applied to the ggpubr variant.
-- **Box-Violin (Repeated Measures) (`jjwithinstats`):**the Subject ID now actively drives the paired
+- **Box-Violin (Repeated Measures) (`jjwithinstats`):** the Subject ID now actively drives the paired
   test (it was silently ignored); removed a dead HTML-notice subsystem; clinical-quality warnings
   persist across option-only re-runs; single population-moment (g1) skewness; raw variable names used as
   data keys.
-- **Histogram (`jjhistostats`):**completed `clearWith` reactivity; single (g1) skewness estimator;
+- **Histogram (`jjhistostats`):** completed `clearWith` reactivity; single (g1) skewness estimator;
   dropped the deprecated `messages` argument; multi-variable diagnostic panels sized so they aren't
   compressed.
-- **Dot Chart (`jjdotplotstats`):**validation notices emit once (were doubled when Split-By was set and
+- **Dot Chart (`jjdotplotstats`):** validation notices emit once (were doubled when Split-By was set and
   re-appended on resize); removed five never-populated outputs and ~120 lines of disabled scaffolding.
-- **Pie Chart (`jjpiestats`):**silent no-plot returns now explain why; guarded a ratio-length mismatch
+- **Pie Chart (`jjpiestats`):** silent no-plot returns now explain why; guarded a ratio-length mismatch
   against the outcome levels; fixed an NA-as-level count; memoised the Fisher-vs-chi-square decision.
-- **Ridgeline (`jjridges`):**Cliff's Delta now returns a value (was always NA, from a non-existent
+- **Ridgeline (`jjridges`):** Cliff's Delta now returns a value (was always NA, from a non-existent
   function call); `"nrd"`/`"SJ"` bandwidth no longer crashes; clinical presets now actually apply the
   FDR/palette/mean-median settings; stratified bootstrap CI; a `Method` column disambiguates the test.
-- **Segmented Total Bar (`jjsegmentedtotalbar`):**notices render even with statistics off; the plot
+- **Segmented Total Bar (`jjsegmentedtotalbar`):** notices render even with statistics off; the plot
   serialises state and re-renders on option changes; the selected colour palette is actually applied.
-- **Arc Diagram (`jjarcdiagram`):**fixed systematic node mislabeling and group-fill/order misalignment
+- **Arc Diagram (`jjarcdiagram`):** fixed systematic node mislabeling and group-fill/order misalignment
   by using a consistent row-major node order; variable names differing only by `.`/`_` no longer merge;
   hub names display original labels.
-- **Advanced Raincloud (`advancedraincloud`):**the "Clinical Threshold" line is drawn only when a
+- **Advanced Raincloud (`advancedraincloud`):** the "Clinical Threshold" line is drawn only when a
   cutoff is set (was at y = 0 by default); fixed the broken Viridis palette; log-transform now rejects
   non-positive values instead of producing NaN; a hard error (ggrain missing) surfaces in an
   always-visible panel.
-- **Raincloud (`raincloud`):**the group-comparison auto path no longer crashes in a non-English locale
+- **Raincloud (`raincloud`):** the group-comparison auto path no longer crashes in a non-English locale
   (test dispatch keyed on an untranslated identifier); `shapiro.test` is guarded against constant
   groups; the computed MAD and kurtosis columns are now shown.
-- **Line Chart (`linechart`):**the Width/Height options now resize the plot; correlation strength is
+- **Line Chart (`linechart`):** the Width/Height options now resize the plot; correlation strength is
   labelled from |r| (was inconsistently from R^2); user/label strings HTML-escaped; colours interpolated
   for > 6 groups.
-- **Waffle Chart (`jwaffle`):**fixed a crash when a fractional (weighted) count met an integer format;
+- **Waffle Chart (`jwaffle`):** fixed a crash when a fractional (weighted) count met an integer format;
   dropped unused factor levels so the palette matches; the faceted caption states an honest per-panel
   proportion.
-- **Hull Plot (`hullplot`):**removed a hard dependency in the cache fallback; guarded duplicate X/Y and
+- **Hull Plot (`hullplot`):** removed a hard dependency in the cache fallback; guarded duplicate X/Y and
   NA in colour/size columns; fixed a confidence-ellipse colour-scale collision; added an IQR
   small-group guard.
-- **Lollipop Chart (`lollipop`):**notices render and clear correctly; distinct STRONG_WARNING label; a
+- **Lollipop Chart (`lollipop`):** notices render and clear correctly; distinct STRONG_WARNING label; a
   table note clarifies aggregated values; removed dead code.
-- **statsplot2 (`statsplot2`):**routed missing-package guidance and warnings to the notices output;
+- **statsplot2 (`statsplot2`):** routed missing-package guidance and warnings to the notices output;
   subset the alluvial engine to the selected pair; removed a duplicated plot layer and dead no-op logic;
   restored a fallback plot for the repeated-measures continuous paths. (Automatic plot/test selection
   by variable type was deliberately left unchanged.)
 
 ### jsurvival
 
-- **Single Arm Survival (`survival`):****BREAKING** -- the log-rank weighting option's value keys were
+- **Single Arm Survival (`survival`):** **BREAKING** -- the log-rank weighting option's value keys were
   corrected: `survival::survdiff()` only computes the Fleming-Harrington G-rho family, and the previous
   keys `gehan_breslow`, `tarone_ware`, `peto_peto`, and `fleming_harrington` were misleading (three of
   them were the *same* rho = 1 test). Keys are now `logrank` (rho 0), `fh_rho0_5` (rho 0.5), and
-  `fh_rho1` (rho 1). **Saved `.omv` files and scripts referencing the old keys must be updated.**Also:
+  `fh_rho1` (rho 1). **Saved `.omv` files and scripts referencing the old keys must be updated.** Also:
   calibration now uses a mean-centred baseline hazard to match the linear predictor; the completion
   summary counts only the event of interest (`status == 1`) under competing risks; copy-ready clinical
   sentences are HTML-escaped; completed `clearWith`.
-- **Multivariable Survival (`multisurvival`):**the risk-group plot now renders (state was never set);
+- **Multivariable Survival (`multisurvival`):** the risk-group plot now renders (state was never set);
   the competing-risks nomogram passes the `datadist` object (not a string) and the survival nomogram
   labels its own time unit; `datadist` is restored with `on.exit`; the event count no longer mis-reads a
   factor via level index; the C-index is labelled apparent/in-sample; HTML-escaped table output.
-- **2x2 with Odds Ratio (`oddsratio`):**events-per-variable uses the rarer class; the Firth-penalised
+- **2x2 with Odds Ratio (`oddsratio`):** events-per-variable uses the rarer class; the Firth-penalised
   odds-ratio table drops the intercept row; degenerate sensitivity/specificity render "undefined"
   instead of a misleading number; the nomogram survives a saved-file reload; fatal validation errors now
   surface as a notice.
-- **Outcome Organizer (`outcomeorganizer`):**guarded a crash when the recurrence event level is unset;
+- **Outcome Organizer (`outcomeorganizer`):** guarded a crash when the recurrence event level is unset;
   the "Applied" summary reflects operations that actually ran; the natural-language denominator counts
   coded records; a stale/zero-observation factor level is rejected rather than silently zeroed.
-- **Single Arm Survival helper (`singlearm`):**added the data-changing options (competing-risk type,
+- **Single Arm Survival helper (`singlearm`):** added the data-changing options (competing-risk type,
   outcome levels, landmark, time units) to `clearWith` so tables/plots recompute; corrected the median
   confidence-interval note; relabelled an interval "event rate" honestly; hid empty section headings
   before analysis.
-- **Continuous-Predictor Survival (`survivalcont`):**restructured `.run()` so explanations, exported
+- **Continuous-Predictor Survival (`survivalcont`):** restructured `.run()` so explanations, exported
   columns and completion notices are no longer stranded when "find cut-off" is off; guarded table
   double-population; reset messages each run; a hard error on < 10 events; halts on invalid time/outcome;
   survival-summary time units are honoured; completed `clearWith`.
-- **Time Interval Calculator (`timeinterval`):**month arithmetic uses calendar rollback so Jan-31-type
+- **Time Interval Calculator (`timeinterval`):** month arithmetic uses calendar rollback so Jan-31-type
   starts don't drop; the user's extreme-value multiplier drives the quality flag; the landmark summary
   distinguishes missing follow-up from follow-up shorter than the landmark; the auto-detected date format
   is shown.
-- **Date/Time Converter (`datetimeconverter`):**the timezone option is in `clearWith` on the output
+- **Date/Time Converter (`datetimeconverter`):** the timezone option is in `clearWith` on the output
   columns so they recompute on change; friendly labels for all format codes; removed a constant
   placeholder metric and dead output-request infrastructure; guarded an NA in the quality panel.
 
 ### meddecide
 
-- **Interrater Reliability (`agreement`):**fixed the multi-category PABAK formula (was the binary
+- **Interrater Reliability (`agreement`):** fixed the multi-category PABAK formula (was the binary
   `2.po-1`); replaced too-narrow kappa confidence intervals (built from a null-hypothesis SE) with the
   `vcd::Kappa` asymptotic SE; the confidence-level option now drives the analytic CIs (was hard-coded
   95%); numeric-coded categorical data (e.g. HER2 0/1/2/3) is no longer mis-rejected as continuous.
-- **Diagnostic Test Comparison (`decisioncompare`):**the results text no longer reports "significant
+- **Diagnostic Test Comparison (`decisioncompare`):** the results text no longer reports "significant
   differences" unconditionally (now reflects the actual McNemar/Cochran p-values); likelihood ratios are
   finite (continuity-corrected) at perfect sensitivity/specificity; de-duplicated the McNemar
   computation; error notices now render on the failure path.
-- **Combine Diagnostic Tests (`decisioncombine`):****BREAKING** -- five non-functional `filterPattern`
+- **Combine Diagnostic Tests (`decisioncombine`):**** BREAKING** -- five non-functional `filterPattern`
   values (`majorityPositive`, `majorityNegative`, `parallel`, `serial`, `majority`) were removed (they
   were no-ops that fell back to "all", so results are unchanged). Individual-test statistics are computed
   on the raw contingency table; the bar chart uses a free y-scale for unbounded metrics (LR, DOR,
   Youden); single-test wrapper calls no longer error.
-- **Sequential Testing (`sequentialtests`):****BREAKING** -- the misleadingly-named `show_nomogram`
+- **Sequential Testing (`sequentialtests`):**** BREAKING** -- the misleadingly-named `show_nomogram`
   option was renamed to `show_plots` (it gates diagnostic plots, not a Fagan nomogram; saved analyses
   with it enabled revert to the default). Fixed a frozen population-size cache, duplicate cost-table
   rows on re-run, and raw "NA%" output.
-- **LASSO Logistic (`lassologistic`):**ROC AUC now uses an explicit `direction`/`levels` so it is
+- **LASSO Logistic (`lassologistic`):** ROC AUC now uses an explicit `direction`/`levels` so it is
   oriented correctly; the apparent AUC is computed once and reused; a quasi-complete-separation caveat is
   surfaced; notices reset each run.
-- **ROC (psychopdaROC):**HTML-escaped variable names in report notes; applied the explicit
+- **ROC (psychopdaROC):** HTML-escaped variable names in report notes; applied the explicit
   `direction`/`levels` to all auxiliary ROC computations (power, Bayesian, bootstrap, clinical-utility,
   meta) so they match the main analysis; the DeLong comparison Z is now sign-preserving.
-- **Enhanced ROC (`enhancedROC`):**the `direction` option (and the cutoff/confidence-band/theme
+- **Enhanced ROC (`enhancedROC`):** the `direction` option (and the cutoff/confidence-band/theme
   toggles) now invalidate the cached ROC plots; guarded a latent crash from an uninitialised validation
   result; the calibration plot no longer refits a model for already-probability-scale predictors,
   matching the calibration table.
-- **Decision (`decision`):**fixed an undefined-variable bug that silently disabled misuse detection;
+- **Decision (`decision`):** fixed an undefined-variable bug that silently disabled misuse detection;
   the saved classification column now stays aligned with the original rows when data have missings;
   notices reset each run.
-- **Decision Calculator (`decisioncalculator`):**the notices panel clears stale content each run;
+- **Decision Calculator (`decisioncalculator`):** the notices panel clears stale content each run;
   Matthews correlation is no longer shown as a percentage; removed ~90 lines of dead
   confidence-interval code whose comments falsely claimed to augment the output; more robust parsing of
   the epiR results.
-- **Co-testing (`cotest`):**notices render per severity level; sensitivity/specificity/prevalence
+- **Co-testing (`cotest`):** notices render per severity level; sensitivity/specificity/prevalence
   inputs are relabelled "(0-1)" to match how they are stored; removed dead client-side guidance code.
-- **No Gold Standard (`nogoldstandard`):**corrected the latent-class disease-class identification (it
+- **No Gold Standard (`nogoldstandard`):** corrected the latent-class disease-class identification (it
   reshaped only one class's probabilities and could invert sensitivity/specificity); added `deleteRows`
   so three tables don't duplicate on re-run. *(The downstream sensitivity/specificity extraction should
   be confirmed against the installed poLCA output layout before release.)*
-- **Kappa sample size (`kappasizeci`, `kappasizefixedn`, `kappasizepower`):**input validation tightened
+- **Kappa sample size (`kappasizeci`, `kappasizefixedn`, `kappasizepower`):** input validation tightened
   to match the `kappaSize` engine (proportion counts/sum, ordered kappa bounds), engine errors surface
   as clean jamovi errors instead of being swallowed into output text, and a binary-outcome branch that
   dropped the second proportion was fixed.
@@ -5473,36 +5586,36 @@ Crosses the 1.0 line for jamovi library acceptance. This release folds in the fi
 
 ### Fixed
 
-- **Citations:**repaired all broken/undefined bibliography keys (0 undefined refs remaining),
+- **Citations:** repaired all broken/undefined bibliography keys (0 undefined refs remaining),
   fixed case-mismatched keys, removed option/analysis names wrongly placed in `refs:` blocks,
   and populated author/year for cited package entries.
-- **Dependencies:**declared `MASS`/`boot` in Imports and migrated Little's MCAR test from
+- **Dependencies:** declared `MASS`/`boot` in Imports and migrated Little's MCAR test from
   the archived BaylorEdPsych package to the guarded `naniar` implementation; removed unused
   OncoPath imports.
 - **Schema/behaviour:**`clearWith` now includes the NA-exclusion option on crosstable results;
   removed dead/never-populated result items; added error handling around variable-tree generation;
   routed fatal validation through `jmvcore::reject()`; surfaced benford's detailed output.
-- **Robustness and security:**escaped data-derived labels in Arsenal/finalfit tables and Tangram
+- **Robustness and security:** escaped data-derived labels in Arsenal/finalfit tables and Tangram
   captions, fixed Tangram formula compatibility, retained all cross-table assumption notices, and
   escaped Venn calculation errors before rendering them as HTML.
-- **Alluvial plots:**cached prepared plot state, made missing-value exclusion include external fill
+- **Alluvial plots:** cached prepared plot state, made missing-value exclusion include external fill
   variables, rejected missing/reused weights, fixed custom/min-max bins, and corrected flow direction.
-- **Interface:**grouped chi-square analysis, advanced, and output controls into compiler-preserved
+- **Interface:** grouped chi-square analysis, advanced, and output controls into compiler-preserved
   collapsible panels and removed disabled cross-table schema scaffolding.
-- **Rendering:**replaced named HTML symbol entities (`&plusmn;`, `&ge;`, ...) with Unicode escapes
+- **Rendering:** replaced named HTML symbol entities (`&plusmn;`, `&ge;`, ...) with Unicode escapes
   so they render correctly and survive non-HTML export.
-- **jsurvival validation and localization:**retained clear analysis-level rejection on both
+- **jsurvival validation and localization:** retained clear analysis-level rejection on both
   odds-ratio validation paths, converted fragmented translated output to complete placeholder-based
   sentences, and normalized checkbox labels to noun phrases.
-- **jsurvival schema:**removed stale `sas` invalidation keys and hid the unfinished survival-tree
+- **jsurvival schema:** removed stale `sas` invalidation keys and hid the unfinished survival-tree
   controls until their backend and results are wired end to end.
-- **jsurvival distribution:**trimmed the standalone citation catalog to the 22 referenced keys,
+- **jsurvival distribution:** trimmed the standalone citation catalog to the 22 referenced keys,
   replaced broad package imports with selective imports, synchronized release metadata, and removed
   the orphaned survival-power event handler from the standalone package.
-- **Cleanup:**removed dead and commented-out cross-table feature scaffolding, removed
+- **Cleanup:** removed dead and commented-out cross-table feature scaffolding, removed
   half-wired `clinicalPreset` code, and stopped shipping orphaned stage-migration helpers to
   the OncoPath build.
-- **Tooling:**the in-repo audit/review skills now catch these issue classes (version gate,
+- **Tooling:** the in-repo audit/review skills now catch these issue classes (version gate,
   citation integrity, UI-label conventions, HTML-entity rendering, dependency blind spots).
 
 # ClinicoPath 0.0.51 (2026-07-11)
@@ -5568,7 +5681,7 @@ A critical review of the distributed submodules found that several packages used
 
 ### Cross Tables (`crosstable`)
 
-* **Fixed:**The **arsenal** table style crashed with `Error ... cannot set non-repeated field to vector of length > 1` under jamovi 2.7. The arsenal summary HTML was captured with `capture.output()`, which returns a *multi-element* character vector (one element per printed line), but `Html$setContent()` serializes into a non-repeated protobuf field and requires a *scalar* string. The captured lines are now collapsed into a single newline-joined HTML string before assignment. Reported on the jamovi forum ([t=4163](https://forum.jamovi.org/viewtopic.php?t=4163)). Only the arsenal style was affected - the finalfit, gtsummary, and tangram (NEJM/Lancet/Hmisc) styles already produced scalar strings via `kableExtra::kable()` / `as_kable_extra()` / `tangram::html5()`.
+* **Fixed:** The **arsenal** table style crashed with `Error ... cannot set non-repeated field to vector of length > 1` under jamovi 2.7. The arsenal summary HTML was captured with `capture.output()`, which returns a *multi-element* character vector (one element per printed line), but `Html$setContent()` serializes into a non-repeated protobuf field and requires a *scalar* string. The captured lines are now collapsed into a single newline-joined HTML string before assignment. Reported on the jamovi forum ([t=4163](https://forum.jamovi.org/viewtopic.php?t=4163)). Only the arsenal style was affected - the finalfit, gtsummary, and tangram (NEJM/Lancet/Hmisc) styles already produced scalar strings via `kableExtra::kable()` / `as_kable_extra()` / `tangram::html5()`.
 
 # ClinicoPath 0.0.39.0
 
@@ -5586,76 +5699,76 @@ A critical review of the distributed submodules found that several packages used
 
 ### Sparse Group LASSO (`sparsegrouplasso`)
 
-* **Fixed:**AIC/BIC/EBIC formulas used number of lambda values instead of number of observations - now correctly penalizes model complexity
+* **Fixed:** AIC/BIC/EBIC formulas used number of lambda values instead of number of observations - now correctly penalizes model complexity
 
-- **Fixed:**Deviance calculation numerically unstable for large linear predictors - implemented log-sum-exp trick
-* **Fixed:**Factor-based grouping misaligned dummy variables - rewrote column-to-group mapping using original predictor names
-* **Fixed:**Variable-type grouping always produced 1 group after dummy encoding - now checks original data types
-* **Fixed:**Correlation-based grouping never assigned variables (init to 1, checked for 0) - fixed initialization
+- **Fixed:** Deviance calculation numerically unstable for large linear predictors - implemented log-sum-exp trick
+* **Fixed:** Factor-based grouping misaligned dummy variables - rewrote column-to-group mapping using original predictor names
+* **Fixed:** Variable-type grouping always produced 1 group after dummy encoding - now checks original data types
+* **Fixed:** Correlation-based grouping never assigned variables (init to 1, checked for 0) - fixed initialization
 * **Removed:**`cv_c_index` selection criterion (identical to `cv_deviance`), `orthogonalize_groups`, `max_iterations`, `convergence_threshold` (dead options)
 * **Implemented:**`cv_repeats` (repeated cross-validation with averaged errors)
-* **Implemented:**Bootstrap confidence intervals (`confidence_intervals`, `bootstrap_samples`, `alpha_level`)
-* **Implemented:**Stability selection using `bootstrap_samples` option (was hardcoded to 50)
-* **Implemented:**Selection frequency in coefficients table from bootstrap/stability
-* **Implemented:**Descriptive group names (derived from member variables, not generic "Group N")
-* **Implemented:**Adaptive lambda sequence via `glmnet`'s data-driven spacing
-* **Implemented:**Real method comparison table - actually fits Group LASSO and LASSO reference models
-* **Implemented:**Stability first_selected/last_selected columns from lambda probabilities
-* **Added:**12 `jmvcore::Notice` triggers (ERROR, STRONG_WARNING, WARNING, INFO)
-* **Added:**3 test datasets (lung n=180, genepanel n=100, small n=50) with generation script
-* **Added:**34 testthat tests across 4 test files
-* **Added:**4-document documentation suite (developer docs, feature mapping, testing checklist, comprehensive vignette)
+* **Implemented:** Bootstrap confidence intervals (`confidence_intervals`, `bootstrap_samples`, `alpha_level`)
+* **Implemented:** Stability selection using `bootstrap_samples` option (was hardcoded to 50)
+* **Implemented:** Selection frequency in coefficients table from bootstrap/stability
+* **Implemented:** Descriptive group names (derived from member variables, not generic "Group N")
+* **Implemented:** Adaptive lambda sequence via `glmnet`'s data-driven spacing
+* **Implemented:** Real method comparison table - actually fits Group LASSO and LASSO reference models
+* **Implemented:** Stability first_selected/last_selected columns from lambda probabilities
+* **Added:** 12 `jmvcore::Notice` triggers (ERROR, STRONG_WARNING, WARNING, INFO)
+* **Added:** 3 test datasets (lung n=180, genepanel n=100, small n=50) with generation script
+* **Added:** 34 testthat tests across 4 test files
+* **Added:** 4-document documentation suite (developer docs, feature mapping, testing checklist, comprehensive vignette)
 
 ### PCA Cox (`pcacox`)
 
 * **Fixed:**`self$results$errors$setContent()` referenced non-existent output - crashes on Cox model failure
 
 - **Fixed:**`.populateModelComparison()` called but never defined - crashes when enabled
-* **Fixed:**3 outputs never populated (`crossValidation`, `technicalDetails`, `clinicalInterpretation`)
-* **Fixed:**R-squared mislabeled as Nagelkerke but was Cox-Snell - implemented correct Nagelkerke correction
-* **Fixed:**Supervised PCA threshold hardcoded to 0.1 - now uses `superpc::superpc.cv()` for data-driven selection
+* **Fixed:** 3 outputs never populated (`crossValidation`, `technicalDetails`, `clinicalInterpretation`)
+* **Fixed:** R-squared mislabeled as Nagelkerke but was Cox-Snell - implemented correct Nagelkerke correction
+* **Fixed:** Supervised PCA threshold hardcoded to 0.1 - now uses `superpc::superpc.cv()` for data-driven selection
 * **Fixed:**`survival_weighting=FALSE` had no effect - now falls back to standard PCA
-* **Fixed:**Feature importance indexing mismatch when `model.matrix` expands factors
+* **Fixed:** Feature importance indexing mismatch when `model.matrix` expands factors
 * **Fixed:**`LevelSelector` used `ComboBox` in UI - corrected to proper `LevelSelector`
 * **Removed:**`Hmisc` dependency from risk score - replaced with robust jitter + median split fallback
 * **Removed:**`stringr` dependency - replaced `str_to_title()` with `tools::toTitleCase()`
 * **Removed:**`rows: 1` from all 6 dynamic tables (prevented empty header rows)
-* **Converted:**All 4 plot render functions from base R `plot()` to ggplot2 with `ggtheme` parameter
-* **Replaced:**Pathway analysis placeholder with real loading-based feature cluster analysis
-* **Replaced:**All `message()` calls (6) with `private$.insertNotice()` for user-visible feedback
-* **Added:**22 `jmvcore::Notice` triggers covering all error/fallback/completion paths
-* **Added:**2 test datasets (genomic n=150, clinical n=60) with generation script
-* **Added:**53 testthat tests across 4 test files
-* **Added:**4-document documentation suite
+* **Converted:** All 4 plot render functions from base R `plot()` to ggplot2 with `ggtheme` parameter
+* **Replaced:** Pathway analysis placeholder with real loading-based feature cluster analysis
+* **Replaced:** All `message()` calls (6) with `private$.insertNotice()` for user-visible feedback
+* **Added:** 22 `jmvcore::Notice` triggers covering all error/fallback/completion paths
+* **Added:** 2 test datasets (genomic n=150, clinical n=60) with generation script
+* **Added:** 53 testthat tests across 4 test files
+* **Added:** 4-document documentation suite
 
 ### Firth Regression (`firthregression`)
 
 * **Fixed:**`forestPlotImage` clearWith missing `ciMethod` - CI method changes didn't refresh plot
 
-- **Added:**Cox mode wald CI info notice (coxphf always uses profile CIs)
+- **Added:** Cox mode wald CI info notice (coxphf always uses profile CIs)
 * **Improved:**`modelFit` computation gated behind `showModelFit` flag
-* **Added:**3 test datasets (standard n=120, separation n=80, smallcox n=50) with generation script
-* **Added:**43 testthat tests across 4 test files
-* **Added:**4-document documentation suite
+* **Added:** 3 test datasets (standard n=120, separation n=80, smallcox n=50) with generation script
+* **Added:** 43 testthat tests across 4 test files
+* **Added:** 4-document documentation suite
 
 ### Group LASSO (`grouplasso`)
 
-* **Updated:**References synced with CRAN metadata (survival v3.8-6, glmnet v4.1-10, grpreg v3.5.0)
+* **Updated:** References synced with CRAN metadata (survival v3.8-6, glmnet v4.1-10, grpreg v3.5.0)
 
-- **Added:**4-document documentation suite
+- **Added:** 4-document documentation suite
 
 ### Method Guide (`lassointro`)
 
-* **Added:**Firth Regression to method overview table, decision flowchart (Steps 5-6), comparison table (8 features), clinical scenarios (rare tumor subtype), glossary (4 new terms), and assumptions/pitfalls (2 new entries)
+* **Added:** Firth Regression to method overview table, decision flowchart (Steps 5-6), comparison table (8 features), clinical scenarios (rare tumor subtype), glossary (4 new terms), and assumptions/pitfalls (2 new entries)
 
 ---
 
 ## Data & Testing
 
-* **New test datasets:**8 datasets across 4 functions (sparsegrouplasso, pcacox, firthregression test data)
-* **New testthat tests:**130 tests across 12 test files
-* **File organization:**All CSV/OMV files moved to `data-raw/non-rda/`, RDA files in `data/`
-* **Updated refs:**All penalized Cox functions synced with `jamovi/00refs.yaml`
+* **New test datasets:** 8 datasets across 4 functions (sparsegrouplasso, pcacox, firthregression test data)
+* **New testthat tests:** 130 tests across 12 test files
+* **File organization:** All CSV/OMV files moved to `data-raw/non-rda/`, RDA files in `data/`
+* **Updated refs:** All penalized Cox functions synced with `jamovi/00refs.yaml`
 
 ---
 
@@ -5669,10 +5782,10 @@ A critical review of the distributed submodules found that several packages used
 
 ### **rpasurvival**
 
-* **Fixed:**Replaced invalid `setRows()` method with proper `addRow()` loops for all 5 output tables (risk group, Cox model, log-rank test, variable importance, complexity parameter)
+* **Fixed:** Replaced invalid `setRows()` method with proper `addRow()` loops for all 5 output tables (risk group, Cox model, log-rank test, variable importance, complexity parameter)
 
-- **Fixed:**Added required `data` parameter to `survminer::ggsurvplot()` to prevent "data argument should be provided" error
-* **Fixed:**Created and stored `kmData` data frame in plot state for proper Kaplan-Meier curve rendering
+- **Fixed:** Added required `data` parameter to `survminer::ggsurvplot()` to prevent "data argument should be provided" error
+* **Fixed:** Created and stored `kmData` data frame in plot state for proper Kaplan-Meier curve rendering
 * **Impact**: Function now works correctly in jamovi UI without serialization or method errors
 
 ---
@@ -5681,34 +5794,34 @@ A critical review of the distributed submodules found that several packages used
 
 ### **rpasurvival Test Data**
 
-* **Created:**Comprehensive test datasets (7 datasets x 4 formats = 28 files)
+* **Created:** Comprehensive test datasets (7 datasets x 4 formats = 28 files)
   * `rpasurvival_test` (n=200): Standard clinical dataset with 11 variables
   * `rpasurvival_small` (n=50): Minimal viable sample size
   * `rpasurvival_large` (n=500): Complex tree development
   * Edge case datasets: TRUE/FALSE coding, 1/2 coding, days/years time units
 
-- **Test Suite:**44 comprehensive tests (basic, arguments, edge cases)
-* **Documentation:**Complete roxygen2 documentation with usage examples and validation notes
+- **Test Suite:** 44 comprehensive tests (basic, arguments, edge cases)
+* **Documentation:** Complete roxygen2 documentation with usage examples and validation notes
 
 ### **groomecompare Test Data**
 
-* **Created:**Comprehensive test datasets (9 datasets x 4 formats = 36 files)
+* **Created:** Comprehensive test datasets (9 datasets x 4 formats = 36 files)
   * `groomecompare_test` (n=150): Standard ypTNM vs RPA comparison
   * `groomecompare_small` (n=60): Small sample testing
   * `groomecompare_large` (n=300): AJCC8 vs RPA5 comparison
   * Special datasets: unbalanced, tied times, identical systems, clear winner scenarios
 
-- **Test Suite:**47 comprehensive tests covering all Groome criteria
-* **Documentation:**Complete roxygen2 documentation with Groome method references
+- **Test Suite:** 47 comprehensive tests covering all Groome criteria
+* **Documentation:** Complete roxygen2 documentation with Groome method references
 
 ### **Data Organization**
 
-* **Structure:**Implemented R package convention
+* **Structure:** Implemented R package convention
   * RDA files -> `data/` (872 files, for `data()` command)
   * CSV/XLSX/OMV -> `data/nonrda/` (21 files, for cross-platform use)
 
-- **Documentation:**Created `DATA_ORGANIZATION.md` and test data summary files
-* **Generation Scripts:**Updated `data-raw/rpasurvival_test_data.R` and `data-raw/groomecompare_test_data.R`
+- **Documentation:** Created `DATA_ORGANIZATION.md` and test data summary files
+* **Generation Scripts:** Updated `data-raw/rpasurvival_test_data.R` and `data-raw/groomecompare_test_data.R`
 
 ---
 
@@ -8320,7 +8433,7 @@ When dealing with imbalanced datasets (e.g., 1% cancer prevalence):
 * **Focuses on what matters**: How well do we detect the rare positive cases?
 * **Baseline is informative**: Improvement over prevalence shows true value
 
-**Example:**In mitotic figure detection with 0.5% prevalence:
+**Example:** In mitotic figure detection with 0.5% prevalence:
 
 * ROC-AUC might be 0.95 (looks excellent)
 * PR-AUC might be 0.15 vs baseline 0.005 (shows room for improvement)
@@ -8605,36 +8718,36 @@ The module outputs include:
 
 ##### **New Module: Ordinal ROC Analysis**
 
-* **Ordinal AUC Calculation:**Concordance probability for ordered categorical outcomes (3+ levels)
-* **Multiple CI Methods:**Bootstrap resampling and DeLong approximation
-* **Hypothesis Testing:**Test H0: AUC = 0.5 (no discrimination)
-* **Validation Checks:**Minimum observations per category, level requirements
-* **Clinical Applications:**Tumor grading (well/moderate/poor), fibrosis staging (F0-F4), inflammation severity
+* **Ordinal AUC Calculation:** Concordance probability for ordered categorical outcomes (3+ levels)
+* **Multiple CI Methods:** Bootstrap resampling and DeLong approximation
+* **Hypothesis Testing:** Test H0: AUC = 0.5 (no discrimination)
+* **Validation Checks:** Minimum observations per category, level requirements
+* **Clinical Applications:** Tumor grading (well/moderate/poor), fibrosis staging (F0-F4), inflammation severity
 * **Location:**`jamovi > meddecide > Ordinal ROC Analysis`
 
 ##### **New Module: Brier Score & Integrated Brier Score**
 
-* **Time-Dependent Brier Score:**IPCW-based calibration assessment for survival predictions
-* **Integrated Brier Score (IBS):**Trapezoidal integration across follow-up period
-* **Scaled Brier Score:**Comparison to null model (Kaplan-Meier)
-* **Bootstrap & Asymptotic CI:**Robust confidence interval estimation
+* **Time-Dependent Brier Score:** IPCW-based calibration assessment for survival predictions
+* **Integrated Brier Score (IBS):** Trapezoidal integration across follow-up period
+* **Scaled Brier Score:** Comparison to null model (Kaplan-Meier)
+* **Bootstrap & Asymptotic CI:** Robust confidence interval estimation
 * **Visualizations:**
   * Brier score over time plot with reference lines
   * Calibration curve (predicted vs observed survival)
-* **Clinical Applications:**Cox model validation, ML model evaluation, risk calculator assessment
+* **Clinical Applications:** Cox model validation, ML model evaluation, risk calculator assessment
 * **Location:**`jamovi > meddecide > Brier Score Analysis`
 
 ##### **New Module: Concordance Index (Harrell's C-index)**
 
 * **Three Calculation Methods:**
-  * **Harrell's Method:**Standard approach using survival::concordance()
-  * **Uno's Method:**IPCW-based for heavy censoring situations
-  * **Gonen-Heller:**Bias-free for proportional hazards models
-* **Time-Dependent C-index:**Evaluation at specific time horizons
-* **Somers' D Calculation:**Rank correlation (D = 2 x (C-index - 0.5))
-* **Comprehensive Statistics:**Concordant, discordant, and tied pair counts
-* **Bootstrap & Asymptotic CI:**Multiple confidence interval methods
-* **Clinical Applications:**Prognostic model validation, risk score evaluation, biomarker assessment
+  * **Harrell's Method:** Standard approach using survival::concordance()
+  * **Uno's Method:** IPCW-based for heavy censoring situations
+  * **Gonen-Heller:** Bias-free for proportional hazards models
+* **Time-Dependent C-index:** Evaluation at specific time horizons
+* **Somers' D Calculation:** Rank correlation (D = 2 x (C-index - 0.5))
+* **Comprehensive Statistics:** Concordant, discordant, and tied pair counts
+* **Bootstrap & Asymptotic CI:** Multiple confidence interval methods
+* **Clinical Applications:** Prognostic model validation, risk score evaluation, biomarker assessment
 * **Location:**`jamovi > meddecide > Concordance Index`
 
 ##### **Key Technical Features:**
@@ -8696,61 +8809,61 @@ The module outputs include:
 
 ##### **Hierarchical Clustering for Agreement Analysis**
 
-* **Style Group Identification:**Identify diagnostic style groups among raters using hierarchical clustering (Usubutun et al. 2012 methodology)
-* **Ward's Linkage Method:**Minimize within-cluster variance using percentage agreement distance metric
-* **Automatic Cluster Selection:**Silhouette method for optimal number of groups (k = 2-10)
-* **Manual Override:**Option to specify exact number of style groups
+* **Style Group Identification:** Identify diagnostic style groups among raters using hierarchical clustering (Usubutun et al. 2012 methodology)
+* **Ward's Linkage Method:** Minimize within-cluster variance using percentage agreement distance metric
+* **Automatic Cluster Selection:** Silhouette method for optimal number of groups (k = 2-10)
+* **Manual Override:** Option to specify exact number of style groups
 
 ##### **New Statistical Outputs:**
 
 **Style Group Analysis:**
-* **Group Summary Tables:**Within-group vs between-group agreement percentages
-* **Silhouette Quality Metrics:**Cluster separation and cohesion scores
-* **Diagnostic Pattern Tables:**Category usage frequency by style group
-* **Clinical Interpretations:**Conservative, Balanced, and Sensitive style classifications
+* **Group Summary Tables:** Within-group vs between-group agreement percentages
+* **Silhouette Quality Metrics:** Cluster separation and cohesion scores
+* **Diagnostic Pattern Tables:** Category usage frequency by style group
+* **Clinical Interpretations:** Conservative, Balanced, and Sensitive style classifications
 
 **Discordant Case Analysis:**
-* **High-Disagreement Detection:**Cases that distinguish style groups
-* **Entropy Calculations:**Diagnostic uncertainty quantification
-* **Pattern Descriptions:**Style-specific diagnostic tendencies
-* **Difficulty Classification:**Case complexity levels
+* **High-Disagreement Detection:** Cases that distinguish style groups
+* **Entropy Calculations:** Diagnostic uncertainty quantification
+* **Pattern Descriptions:** Style-specific diagnostic tendencies
+* **Difficulty Classification:** Case complexity levels
 
 **Characteristic Associations:**
-* **Statistical Testing:**Kruskal-Wallis (continuous), Chi-square/Fisher's exact (categorical)
-* **Effect Size Calculations:**Eta-squared, Cramer's V
-* **Clinical Variables:**Experience, specialty, institution, case volume
-* **Reference Comparison:**Cohen's kappa by style group
+* **Statistical Testing:** Kruskal-Wallis (continuous), Chi-square/Fisher's exact (categorical)
+* **Effect Size Calculations:** Eta-squared, Cramer's V
+* **Clinical Variables:** Experience, specialty, institution, case volume
+* **Reference Comparison:** Cohen's kappa by style group
 
 ##### **Professional Visualizations:**
 
 **Hierarchical Clustering Heatmap:**
-* **Dual Dendrograms:**Top (raters) and left (cases) hierarchical trees
-* **Color-Coded Diagnoses:**Blue (Benign), Green (EIN), Gold (Cancer)
-* **Style Group Annotation:**Conservative/Balanced/Sensitive branch colors
-* **Publication Quality:**pheatmap integration with ggplot2 fallback
+* **Dual Dendrograms:** Top (raters) and left (cases) hierarchical trees
+* **Color-Coded Diagnoses:** Blue (Benign), Green (EIN), Gold (Cancer)
+* **Style Group Annotation:** Conservative/Balanced/Sensitive branch colors
+* **Publication Quality:** pheatmap integration with ggplot2 fallback
 
 **Additional Plots:**
-* **Dendrogram Plot:**Hierarchical rater relationships with cluster rectangles
-* **Silhouette Plot:**Cluster quality visualization with average scores
+* **Dendrogram Plot:** Hierarchical rater relationships with cluster rectangles
+* **Silhouette Plot:** Cluster quality visualization with average scores
 
 ##### **User Interface Enhancements:**
 
 * **Organized ColllapseBox:**" Rater Clustering Analysis (Diagnostic Styles)"
-* **Hierarchical Clustering Settings:**Method selection (Ward/Complete/Average/Single)
-* **Number of Groups:**Manual specification or automatic silhouette-based selection
-* **Discordant Case Controls:**Threshold slider for disagreement detection
-* **Visualization Options:**Heatmap display with multiple color schemes
-* **Optional Interpretation Guide:**Clinical explanations (can be turned off)
-* **Rater Characteristics:**Variable selectors for experience, specialty, institution, volume
+* **Hierarchical Clustering Settings:** Method selection (Ward/Complete/Average/Single)
+* **Number of Groups:** Manual specification or automatic silhouette-based selection
+* **Discordant Case Controls:** Threshold slider for disagreement detection
+* **Visualization Options:** Heatmap display with multiple color schemes
+* **Optional Interpretation Guide:** Clinical explanations (can be turned off)
+* **Rater Characteristics:** Variable selectors for experience, specialty, institution, volume
 
 ##### **Synthetic Dataset: EIN Agreement Study**
 
 **Dataset Characteristics:**
-* **62 Endometrial Biopsies:**Replicates Usubutun et al. (2012) structure
-* **20 Pathologists:**Varying experience and practice settings
-* **3 Diagnostic Categories:**Benign non-EIN, EIN, Adenocarcinoma
-* **Reference Standard:**Expert consensus diagnoses
-* **10 Discordant Cases:**Marked high-disagreement cases
+* **62 Endometrial Biopsies:** Replicates Usubutun et al. (2012) structure
+* **20 Pathologists:** Varying experience and practice settings
+* **3 Diagnostic Categories:** Benign non-EIN, EIN, Adenocarcinoma
+* **Reference Standard:** Expert consensus diagnoses
+* **10 Discordant Cases:** Marked high-disagreement cases
 
 **Files Provided:**
 * `ein_agreement_wide.csv` - Cases x raters format (for jamovi)
@@ -8764,13 +8877,13 @@ The module outputs include:
 ##### **Comprehensive Documentation:**
 
 **Vignettes (vignettes-meddecide/agreement-clustering/):**
-* **EIN_AGREEMENT_README.md:**Complete dataset documentation with usage guide
-* **USUBUTUN_PLOT_ANALYSIS.md:**Detailed analysis of original study Figure 1
-* **QUICK_START_GUIDE.md:**5-step quick start with troubleshooting
-* **IMPLEMENTATION_SUMMARY.md:**Technical specifications and testing results
-* **AGREEMENT_CLUSTERING_SPECIFICATION.md:**Algorithm details and formulas
-* **PHASE_1_IMPLEMENTATION_SUMMARY.md:**Jaccard distance and Complete linkage features
-* **PHASE_2_IMPLEMENTATION_SUMMARY.md:**Reproducibility testing and supervised clustering
+* **EIN_AGREEMENT_README.md:** Complete dataset documentation with usage guide
+* **USUBUTUN_PLOT_ANALYSIS.md:** Detailed analysis of original study Figure 1
+* **QUICK_START_GUIDE.md:** 5-step quick start with troubleshooting
+* **IMPLEMENTATION_SUMMARY.md:** Technical specifications and testing results
+* **AGREEMENT_CLUSTERING_SPECIFICATION.md:** Algorithm details and formulas
+* **PHASE_1_IMPLEMENTATION_SUMMARY.md:** Jaccard distance and Complete linkage features
+* **PHASE_2_IMPLEMENTATION_SUMMARY.md:** Reproducibility testing and supervised clustering
 
 **Example Visualization:**
 * `ein_clustering_heatmap_test.png` - Sample output showing dual dendrograms
@@ -8778,14 +8891,14 @@ The module outputs include:
 ##### **Clinical Applications:**
 
 **Quality Assurance:**
-* **Self-Awareness:**Help pathologists recognize their diagnostic style
-* **Calibration:**Use balanced group as consensus reference
-* **Targeted Education:**Focus on confounders that polarize groups
+* **Self-Awareness:** Help pathologists recognize their diagnostic style
+* **Calibration:** Use balanced group as consensus reference
+* **Targeted Education:** Focus on confounders that polarize groups
 
 **Research Applications:**
-* **Reproducibility Studies:**Understand sources of inter-rater variability
-* **Panel Composition:**Ensure style diversity in validation studies
-* **Guidelines Development:**Create criteria that transcend individual styles
+* **Reproducibility Studies:** Understand sources of inter-rater variability
+* **Panel Composition:** Ensure style diversity in validation studies
+* **Guidelines Development:** Create criteria that transcend individual styles
 
 **Key Findings (from Original Study):**
 * Diagnostic style exists and is measurable
@@ -8833,51 +8946,51 @@ The module outputs include:
 
 ##### **Unified Power Analysis Platform**
 
-* **Comprehensive Integration:**Consolidated multiple specialized power analysis methods into a single, unified interface
-* **Seven Method Categories:**Standard methods, competing risks, advanced methods, genetic analysis, cure models, sequential analysis, and epidemiological studies
-* **Enhanced UI Organization:**Restructured interface with logical CollapseBox groupings and conditional parameter visibility
-* **Backend Architecture:**Sophisticated method dispatcher supporting all legacy functionality plus new advanced methods
+* **Comprehensive Integration:** Consolidated multiple specialized power analysis methods into a single, unified interface
+* **Seven Method Categories:** Standard methods, competing risks, advanced methods, genetic analysis, cure models, sequential analysis, and epidemiological studies
+* **Enhanced UI Organization:** Restructured interface with logical CollapseBox groupings and conditional parameter visibility
+* **Backend Architecture:** Sophisticated method dispatcher supporting all legacy functionality plus new advanced methods
 
 ##### **New Statistical Methods Integration:**
 
 **NPHMC Package Integration:**
-* **Mixture Cure Models:**Non-proportional hazards mixture cure model power calculations
-* **Survival Distributions:**Support for Weibull, exponential, and log-normal distributions
-* **Accrual Patterns:**Uniform and exponential patient recruitment modeling
+* **Mixture Cure Models:** Non-proportional hazards mixture cure model power calculations
+* **Survival Distributions:** Support for Weibull, exponential, and log-normal distributions
+* **Accrual Patterns:** Uniform and exponential patient recruitment modeling
 
 **powerSurvEpi Package Integration:**
-* **Epidemiological Studies:**Multi-covariate survival analysis power calculations
-* **Confounding Adjustment:**Advanced methods for observational study design
-* **Interaction Effects:**Power calculations for gene-environment and treatment-covariate interactions
+* **Epidemiological Studies:** Multi-covariate survival analysis power calculations
+* **Confounding Adjustment:** Advanced methods for observational study design
+* **Interaction Effects:** Power calculations for gene-environment and treatment-covariate interactions
 
 **survSNP Package Integration:**
-* **Genetic Association Studies:**SNP-based survival analysis with genome-wide significance thresholds
-* **Inheritance Models:**Additive, dominant, and recessive genetic models
-* **Minor Allele Frequency:**Comprehensive MAF-based power calculations
+* **Genetic Association Studies:** SNP-based survival analysis with genome-wide significance thresholds
+* **Inheritance Models:** Additive, dominant, and recessive genetic models
+* **Minor Allele Frequency:** Comprehensive MAF-based power calculations
 
 **survivalpwr Package Integration:**
-* **Advanced Cox Regression:**Enhanced power calculations for proportional hazards models
-* **RMST Analysis:**Restricted mean survival time power calculations
-* **Non-inferiority Trials:**Specialized methods for non-inferiority margin testing
+* **Advanced Cox Regression:** Enhanced power calculations for proportional hazards models
+* **RMST Analysis:** Restricted mean survival time power calculations
+* **Non-inferiority Trials:** Specialized methods for non-inferiority margin testing
 
 **rpact Package Integration:**
-* **Group Sequential Designs:**Multi-stage trial designs with interim analyses
-* **Alpha Spending Functions:**O'Brien-Fleming, Pocock, and custom spending approaches
-* **Futility Boundaries:**Interim futility stopping rules and binding/non-binding boundaries
+* **Group Sequential Designs:** Multi-stage trial designs with interim analyses
+* **Alpha Spending Functions:** O'Brien-Fleming, Pocock, and custom spending approaches
+* **Futility Boundaries:** Interim futility stopping rules and binding/non-binding boundaries
 
 ##### **Enhanced User Interface:**
 
-* **Organized Layout:**Seven logical sections with CollapseBox organization for improved navigation
-* **Conditional Visibility:**Smart parameter display based on selected method categories
-* **Method-Specific Parameters:**Tailored input fields for each statistical approach
-* **Comprehensive Output Options:**Detailed results, sensitivity analysis, power curves, and method comparisons
+* **Organized Layout:** Seven logical sections with CollapseBox organization for improved navigation
+* **Conditional Visibility:** Smart parameter display based on selected method categories
+* **Method-Specific Parameters:** Tailored input fields for each statistical approach
+* **Comprehensive Output Options:** Detailed results, sensitivity analysis, power curves, and method comparisons
 
 ##### **Technical Improvements:**
 
-* **Method Dispatcher:**Sophisticated backend routing for seven analysis categories
-* **Parameter Validation:**Enhanced input validation with method-specific requirements
-* **Error Handling:**Improved user feedback and convergence monitoring
-* **Documentation:**Comprehensive vignette with usage examples and best practices
+* **Method Dispatcher:** Sophisticated backend routing for seven analysis categories
+* **Parameter Validation:** Enhanced input validation with method-specific requirements
+* **Error Handling:** Improved user feedback and convergence monitoring
+* **Documentation:** Comprehensive vignette with usage examples and best practices
 
 # ClinicoPath 0.0.31.69
 
@@ -8887,59 +9000,59 @@ The module outputs include:
 
 ##### **OncoPath Module Introduction**
 
-* **Specialized Focus:**Dedicated module for oncological and pathological research with patient follow-up visualization
-* **Patient Timeline Analysis:**Comprehensive tools for visualizing treatment responses and clinical outcomes
-* **RECIST Integration:**Built-in support for Response Evaluation Criteria In Solid Tumors (RECIST) guidelines
-* **Clinical Event Tracking:**Advanced capabilities for monitoring patient progress and treatment milestones
+* **Specialized Focus:** Dedicated module for oncological and pathological research with patient follow-up visualization
+* **Patient Timeline Analysis:** Comprehensive tools for visualizing treatment responses and clinical outcomes
+* **RECIST Integration:** Built-in support for Response Evaluation Criteria In Solid Tumors (RECIST) guidelines
+* **Clinical Event Tracking:** Advanced capabilities for monitoring patient progress and treatment milestones
 
 ##### **Core Functions Migrated to OncoPath:**
 
 **Waterfall Plot Analysis:**
-* **Treatment Response Visualization:**Comprehensive waterfall and spider plots for tumor response analysis
-* **RECIST Criteria Support:**Automated RECIST classification with response evaluation
-* **Dual Data Input:**Supports both raw tumor measurements and pre-calculated percentage changes
-* **Clinical Metrics:**Automated calculation of ORR (Overall Response Rate), DCR (Disease Control Rate), and person-time metrics
-* **Publication Ready:**Professional visualization suitable for clinical publications and presentations
+* **Treatment Response Visualization:** Comprehensive waterfall and spider plots for tumor response analysis
+* **RECIST Criteria Support:** Automated RECIST classification with response evaluation
+* **Dual Data Input:** Supports both raw tumor measurements and pre-calculated percentage changes
+* **Clinical Metrics:** Automated calculation of ORR (Overall Response Rate), DCR (Disease Control Rate), and person-time metrics
+* **Publication Ready:** Professional visualization suitable for clinical publications and presentations
 
 **Swimmer Plot Visualization:**
-* **Patient Timeline Tracking:**Comprehensive swimmer plots using enhanced ggswim package integration
-* **Multi-dimensional Data:**Supports clinical events, milestones, treatment responses, and adverse events
-* **Enhanced Data Validation:**Robust input validation with comprehensive error handling
-* **Flexible Timeline Visualization:**Customizable patient journey visualization with event overlays
-* **Clinical Research Integration:**Designed specifically for oncological clinical trial reporting
+* **Patient Timeline Tracking:** Comprehensive swimmer plots using enhanced ggswim package integration
+* **Multi-dimensional Data:** Supports clinical events, milestones, treatment responses, and adverse events
+* **Enhanced Data Validation:** Robust input validation with comprehensive error handling
+* **Flexible Timeline Visualization:** Customizable patient journey visualization with event overlays
+* **Clinical Research Integration:** Designed specifically for oncological clinical trial reporting
 
 ##### **Module Organization & Access:**
 
 * **Menu Group:**`OncoPath` - Dedicated navigation section for oncological analysis tools
 * **Menu Subgroup:**`Patient Follow-Up Plots` - Organized visualization tools for patient tracking
-* **Documentation:**Comprehensive help documentation at <https://www.serdarbalci.com/OncoPath/>
+* **Documentation:** Comprehensive help documentation at <https://www.serdarbalci.com/OncoPath/>
 * **GitHub Repository:**<https://github.com/sbalci/OncoPath> with dedicated issue tracking and releases
 
 ##### **Technical Implementation:**
 
-* **Namespace Migration:**Functions moved from `ClinicoPathDescriptives::OncoPathology` to `OncoPath::OncoPath`
-* **Dependency Management:**Optimized package dependencies including ggswim, recist, lubridate, and RColorBrewer
-* **Enhanced Error Handling:**Improved user feedback and data validation for clinical data formats
-* **Documentation Integration:**Seamless integration with ClinicoPath documentation ecosystem
+* **Namespace Migration:** Functions moved from `ClinicoPathDescriptives::OncoPathology` to `OncoPath::OncoPath`
+* **Dependency Management:** Optimized package dependencies including ggswim, recist, lubridate, and RColorBrewer
+* **Enhanced Error Handling:** Improved user feedback and data validation for clinical data formats
+* **Documentation Integration:** Seamless integration with ClinicoPath documentation ecosystem
 
 #### **ClinicoPath Module Structure Reorganization**
 
 ##### **Updated Module Architecture:**
 
-* **ClinicoPathDescriptives:**Descriptive statistics, cross tables, data quality, and general exploration tools
+* **ClinicoPathDescriptives:** Descriptive statistics, cross tables, data quality, and general exploration tools
 
-- **jjstatsplot:**Statistical visualization with ggstatsplot integration and advanced plotting capabilities
-* **jsurvival:**Comprehensive survival analysis including Cox regression and Kaplan-Meier methods
-* **meddecide:**Medical decision analysis, ROC curves, diagnostic test evaluation, and clinical decision trees
-* **OncoPath:**Specialized oncological visualization tools for patient follow-up and treatment response analysis
+- **jjstatsplot:** Statistical visualization with ggstatsplot integration and advanced plotting capabilities
+* **jsurvival:** Comprehensive survival analysis including Cox regression and Kaplan-Meier methods
+* **meddecide:** Medical decision analysis, ROC curves, diagnostic test evaluation, and clinical decision trees
+* **OncoPath:** Specialized oncological visualization tools for patient follow-up and treatment response analysis
 
 ##### **Migration Benefits:**
 
-* **Focused Functionality:**Each module now has clear, specialized focus areas for improved user experience
+* **Focused Functionality:** Each module now has clear, specialized focus areas for improved user experience
 
-- **Reduced Dependencies:**Optimized package dependencies per module for faster loading and fewer conflicts
-* **Enhanced Maintenance:**Simplified development and maintenance with clear separation of concerns
-* **Better Documentation:**Module-specific documentation websites for targeted user guidance
+- **Reduced Dependencies:** Optimized package dependencies per module for faster loading and fewer conflicts
+* **Enhanced Maintenance:** Simplified development and maintenance with clear separation of concerns
+* **Better Documentation:** Module-specific documentation websites for targeted user guidance
 
 # ClinicoPath 0.0.31.59
 
@@ -8949,19 +9062,19 @@ The module outputs include:
 
 ##### **Clinical ROC Analysis (enhancedROC) - Streamlined Clinical Decision Support**
 
-* **Clinical Workflow Focus:**Simplified interface optimized for clinical practitioners and diagnostic workflow
-* **Preset Configurations:**Pre-configured settings for biomarker screening, diagnostic validation, and confirmatory testing
-* **Clinical Context Awareness:**Automatic interpretation based on screening, diagnosis, prognosis, or monitoring applications
-* **Streamlined Interface:**Essential ROC analysis features with clinical terminology and practical guidance
-* **Publication-Ready Output:**Clean visualizations and clinical interpretation suitable for clinical publications
+* **Clinical Workflow Focus:** Simplified interface optimized for clinical practitioners and diagnostic workflow
+* **Preset Configurations:** Pre-configured settings for biomarker screening, diagnostic validation, and confirmatory testing
+* **Clinical Context Awareness:** Automatic interpretation based on screening, diagnosis, prognosis, or monitoring applications
+* **Streamlined Interface:** Essential ROC analysis features with clinical terminology and practical guidance
+* **Publication-Ready Output:** Clean visualizations and clinical interpretation suitable for clinical publications
 
 ##### **Advanced ROC Analysis (psychopdaROC) - Comprehensive Research Toolkit**
 
-* **Clinical Mode System:**Progressive disclosure with Basic, Advanced, and Comprehensive analysis levels
-* **Clinical Workflow Presets:**Screening (sensitivity prioritized), Confirmation (specificity prioritized), Balanced diagnostic, and Research configurations
-* **Clinical Utility Methods:**Enhanced backend with clinical interpretation framework and AUC performance level assessment
-* **Enhanced Initialization:**Clinical feature integration with internationalization support using jamovi's `.()` wrapper
-* **Advanced Statistical Features:**Meta-analysis, power analysis, effect sizes, IDI/NRI, Bayesian analysis, and clinical utility curves
+* **Clinical Mode System:** Progressive disclosure with Basic, Advanced, and Comprehensive analysis levels
+* **Clinical Workflow Presets:** Screening (sensitivity prioritized), Confirmation (specificity prioritized), Balanced diagnostic, and Research configurations
+* **Clinical Utility Methods:** Enhanced backend with clinical interpretation framework and AUC performance level assessment
+* **Enhanced Initialization:** Clinical feature integration with internationalization support using jamovi's `.()` wrapper
+* **Advanced Statistical Features:** Meta-analysis, power analysis, effect sizes, IDI/NRI, Bayesian analysis, and clinical utility curves
 
 #### **Strategic Dual-Function Architecture**
 
@@ -8973,25 +9086,25 @@ The module outputs include:
 
 ##### **Complementary Use Cases:**
 
-* **Clinical Practice:**enhancedROC for routine diagnostic test evaluation with clinical presets
+* **Clinical Practice:** enhancedROC for routine diagnostic test evaluation with clinical presets
 
-- **Research Publications:**psychopdaROC for comprehensive statistical analysis with methodological rigor
-* **User Progression:**Natural advancement path from clinical (enhancedROC) to research (psychopdaROC) applications
+- **Research Publications:** psychopdaROC for comprehensive statistical analysis with methodological rigor
+* **User Progression:** Natural advancement path from clinical (enhancedROC) to research (psychopdaROC) applications
 
 ##### **Menu Organization Optimization:**
 
-* **Menu Group:**Unified under `meddecide` (was `meddecideT`) for consistent navigation
+* **Menu Group:** Unified under `meddecide` (was `meddecideT`) for consistent navigation
 
-- **Menu Subgroup:**Both functions organized under `ROC` subgroup for intuitive access
-* **Clear Differentiation:**Distinct subtitles highlighting clinical vs. advanced research focus
+- **Menu Subgroup:** Both functions organized under `ROC` subgroup for intuitive access
+* **Clear Differentiation:** Distinct subtitles highlighting clinical vs. advanced research focus
 
 #### **Technical Improvements**
 
-* **Module Compilation:**Successfully validated with `jmvtools::prepare()` - both modules compile without errors
-* **Clinical Interpretation Framework:**AUC performance levels (Excellent >=0.9, Good >=0.8, Fair >=0.7, Poor <0.7)
-* **Internationalization Ready:**All user-facing strings properly wrapped with jamovi's `.()` function
-* **Progressive Disclosure UI:**Context-aware interface that adapts to user expertise level
-* **Clinical Preset Logic:**Automated configuration for common clinical scenarios with appropriate defaults
+* **Module Compilation:** Successfully validated with `jmvtools::prepare()` - both modules compile without errors
+* **Clinical Interpretation Framework:** AUC performance levels (Excellent >=0.9, Good >=0.8, Fair >=0.7, Poor <0.7)
+* **Internationalization Ready:** All user-facing strings properly wrapped with jamovi's `.()` function
+* **Progressive Disclosure UI:** Context-aware interface that adapts to user expertise level
+* **Clinical Preset Logic:** Automated configuration for common clinical scenarios with appropriate defaults
 
 # ClinicoPath 0.0.31.48
 
@@ -9001,43 +9114,43 @@ The module outputs include:
 
 ##### **Enhanced Classification with Cumulative Logit Models**
 
-* **Gray-Zone Methodology:**Implementation of cumulative logit models with uncertainty zones as described in recent Nature publications
-* **Biomarker Scoring:**Advanced ordinal regression for Ki-67, ER, PR, HER2 status prediction with clinical-grade accuracy
-* **Vision Transformer Architecture:**State-of-the-art ViT models achieving >90% AUC performance on histological images
-* **Multiple Instance Learning:**CLAM (Clustering-constrained Attention MIL) integration for whole-slide image analysis
-* **Proportional Odds Testing:**Statistical validation of ordinal regression assumptions with automated diagnostics
+* **Gray-Zone Methodology:** Implementation of cumulative logit models with uncertainty zones as described in recent Nature publications
+* **Biomarker Scoring:** Advanced ordinal regression for Ki-67, ER, PR, HER2 status prediction with clinical-grade accuracy
+* **Vision Transformer Architecture:** State-of-the-art ViT models achieving >90% AUC performance on histological images
+* **Multiple Instance Learning:** CLAM (Clustering-constrained Attention MIL) integration for whole-slide image analysis
+* **Proportional Odds Testing:** Statistical validation of ordinal regression assumptions with automated diagnostics
 
 ##### **Deep Learning Prediction Module (deeplearningprediction) - Next-Generation AI**
 
-* **Multi-Architecture Support:**Vision Transformer (ViT), ResNet, EfficientNet, DenseNet implementations
-* **Advanced Training Pipeline:**GPU acceleration, data augmentation, early stopping, cross-validation
-* **Clinical Integration:**Biomarker prediction from H&E-stained tissue images with clinical-grade performance
-* **Explainable AI:**Attention map generation, feature importance, model interpretability tools
-* **Production Ready:**Model saving, batch processing, validation metrics, confidence thresholding
+* **Multi-Architecture Support:** Vision Transformer (ViT), ResNet, EfficientNet, DenseNet implementations
+* **Advanced Training Pipeline:** GPU acceleration, data augmentation, early stopping, cross-validation
+* **Clinical Integration:** Biomarker prediction from H&E-stained tissue images with clinical-grade performance
+* **Explainable AI:** Attention map generation, feature importance, model interpretability tools
+* **Production Ready:** Model saving, batch processing, validation metrics, confidence thresholding
 
 ##### **Automated IHC Quantification Enhancement**
 
-* **Deep Learning Segmentation:**StarDist and CellPose integration for automated nuclear detection
-* **Color Deconvolution:**Advanced DAB and hematoxylin separation with optical density analysis
-* **Automated H-Score Calculation:**Computer vision-based intensity scoring with validation against manual methods
-* **Batch Processing:**High-throughput analysis of multiple slide images with quality control
-* **Validation Framework:**Automated vs. manual scoring comparison with correlation analysis
+* **Deep Learning Segmentation:** StarDist and CellPose integration for automated nuclear detection
+* **Color Deconvolution:** Advanced DAB and hematoxylin separation with optical density analysis
+* **Automated H-Score Calculation:** Computer vision-based intensity scoring with validation against manual methods
+* **Batch Processing:** High-throughput analysis of multiple slide images with quality control
+* **Validation Framework:** Automated vs. manual scoring comparison with correlation analysis
 
 ##### **Explainable AI Module (explainableai) - Model Interpretability Toolkit**
 
-* **SHAP Integration:**SHapley Additive exPlanations for feature importance with Python backend
-* **LIME Analysis:**Local Interpretable Model-agnostic Explanations for individual predictions
-* **Attention Visualization:**Neural network attention maps with overlay capabilities on original images
-* **Feature Interaction Analysis:**Pairwise feature interactions with statistical significance testing
-* **Validation Metrics:**Explanation stability, consistency, and reliability assessment
+* **SHAP Integration:** SHapley Additive exPlanations for feature importance with Python backend
+* **LIME Analysis:** Local Interpretable Model-agnostic Explanations for individual predictions
+* **Attention Visualization:** Neural network attention maps with overlay capabilities on original images
+* **Feature Interaction Analysis:** Pairwise feature interactions with statistical significance testing
+* **Validation Metrics:** Explanation stability, consistency, and reliability assessment
 
 #### **Clinical Applications and Validation**
 
-* **Regulatory Compliance:**AI tools designed for clinical validation and regulatory approval pathways
-* **Multi-Institutional Validation:**Support for external validation datasets and performance monitoring
-* **Clinical Decision Support:**Integration with existing pathology workflows and laboratory information systems
-* **Quality Assurance:**Automated quality control checks, outlier detection, and performance monitoring
-* **Educational Tools:**Interactive explanations and visualizations for training pathologists in AI interpretation
+* **Regulatory Compliance:** AI tools designed for clinical validation and regulatory approval pathways
+* **Multi-Institutional Validation:** Support for external validation datasets and performance monitoring
+* **Clinical Decision Support:** Integration with existing pathology workflows and laboratory information systems
+* **Quality Assurance:** Automated quality control checks, outlier detection, and performance monitoring
+* **Educational Tools:** Interactive explanations and visualizations for training pathologists in AI interpretation
 
 # ClinicoPath 0.0.31.45
 
@@ -9047,87 +9160,87 @@ The module outputs include:
 
 ##### **Effect Size Analysis Module (effectsize) - Comprehensive Effect Size Toolkit**
 
-* **BlueSky Integration:**Inspired by `cohens_d.r`, `hedges_g.r`, `glass_d.r` from BlueSky statistical environment
-* **Standardized Mean Differences:**Cohen's d, Hedges' g (bias-corrected), Glass's delta with confidence intervals
-* **Variance Explained Measures:**Eta-squared (eta^2), partial eta-squared (etap^2), omega-squared (omega^2), epsilon-squared (epsilon^2)
-* **Association Measures:**Cramer's V, phi coefficient (phi), Cohen's w for contingency tables
-* **Rank-based Effect Sizes:**Rank-biserial correlation, Cliff's delta (delta), Vargha-Delaney A
-* **Common Language Effects:**CLES, Cohen's U3, Probability of Superiority with intuitive interpretations
-* **Bootstrap Confidence Intervals:**BCa and percentile methods with customizable sample sizes
-* **Clinical Significance:**Customizable thresholds for small/medium/large effect boundaries
-* **Power Analysis Integration:**Post-hoc power calculations with sample size recommendations
-* **Meta-analysis Ready:**Formatted output for meta-analysis software integration
-* **Advanced Visualizations:**Forest plots, effect size distributions, comparison plots, power curves
+* **BlueSky Integration:** Inspired by `cohens_d.r`, `hedges_g.r`, `glass_d.r` from BlueSky statistical environment
+* **Standardized Mean Differences:** Cohen's d, Hedges' g (bias-corrected), Glass's delta with confidence intervals
+* **Variance Explained Measures:** Eta-squared (eta^2), partial eta-squared (etap^2), omega-squared (omega^2), epsilon-squared (epsilon^2)
+* **Association Measures:** Cramer's V, phi coefficient (phi), Cohen's w for contingency tables
+* **Rank-based Effect Sizes:** Rank-biserial correlation, Cliff's delta (delta), Vargha-Delaney A
+* **Common Language Effects:** CLES, Cohen's U3, Probability of Superiority with intuitive interpretations
+* **Bootstrap Confidence Intervals:** BCa and percentile methods with customizable sample sizes
+* **Clinical Significance:** Customizable thresholds for small/medium/large effect boundaries
+* **Power Analysis Integration:** Post-hoc power calculations with sample size recommendations
+* **Meta-analysis Ready:** Formatted output for meta-analysis software integration
+* **Advanced Visualizations:** Forest plots, effect size distributions, comparison plots, power curves
 
 ##### **Enhanced Correlation Analysis (enhancedcorrelation) - Advanced Correlation Methods**
 
-* **BlueSky Integration:**Inspired by `BSkyCorrelation.R`, `BSkyPlotCorrelationMatrix`, `BSkyFormatRcorr_adjust`
-* **Multiple Methods:**Pearson, Spearman, Kendall correlations with enhanced statistical inference
-* **Web Plot Visualizations:**Radar/web plots showing correlation patterns inspired by BlueSky's PlotWeb
-* **Network Visualizations:**Correlation-based network plots with edge weights and clustering
-* **Enhanced Matrices:**Correlation matrices with significance indicators and advanced formatting
-* **Statistical Enhancements:**Multiple comparison corrections (Holm, Bonferroni, FDR)
-* **Bootstrap Methods:**Bootstrap confidence intervals for robust correlation inference
-* **Clinical Applications:**Biomarker networks, multi-parameter diagnostics, pathological interdependencies
+* **BlueSky Integration:** Inspired by `BSkyCorrelation.R`, `BSkyPlotCorrelationMatrix`, `BSkyFormatRcorr_adjust`
+* **Multiple Methods:** Pearson, Spearman, Kendall correlations with enhanced statistical inference
+* **Web Plot Visualizations:** Radar/web plots showing correlation patterns inspired by BlueSky's PlotWeb
+* **Network Visualizations:** Correlation-based network plots with edge weights and clustering
+* **Enhanced Matrices:** Correlation matrices with significance indicators and advanced formatting
+* **Statistical Enhancements:** Multiple comparison corrections (Holm, Bonferroni, FDR)
+* **Bootstrap Methods:** Bootstrap confidence intervals for robust correlation inference
+* **Clinical Applications:** Biomarker networks, multi-parameter diagnostics, pathological interdependencies
 
 ##### **Comprehensive Factor Analysis (factoranalysis) - Full Multivariate Analysis Toolkit**
 
-* **BlueSky Integration:**Inspired by `BSkyFactorAnalysis` with enhanced jamovi compatibility
-* **Multiple Extraction Methods:**Maximum Likelihood, Principal Axis Factoring, Principal Components
-* **Factor Determination:**Kaiser criterion, manual specification, parallel analysis, scree plot inspection
-* **Rotation Options:**None, Varimax, Quartimax, Oblimin (oblique), Promax (oblique)
-* **Factor Scores:**None, Regression, Bartlett, Anderson-Rubin methods with optional dataset saving
-* **Sampling Adequacy:**Bartlett's test of sphericity, Kaiser-Meyer-Olkin (KMO) test with interpretations
-* **Comprehensive Output:**Eigenvalues tables, communalities, factor loadings matrices, factor correlations
-* **Advanced Visualizations:**Scree plots, factor loading plots, biplot capabilities, parallel analysis plots
-* **Clinical Applications:**Scale development, dimensionality reduction, construct validation for clinical instruments
+* **BlueSky Integration:** Inspired by `BSkyFactorAnalysis` with enhanced jamovi compatibility
+* **Multiple Extraction Methods:** Maximum Likelihood, Principal Axis Factoring, Principal Components
+* **Factor Determination:** Kaiser criterion, manual specification, parallel analysis, scree plot inspection
+* **Rotation Options:** None, Varimax, Quartimax, Oblimin (oblique), Promax (oblique)
+* **Factor Scores:** None, Regression, Bartlett, Anderson-Rubin methods with optional dataset saving
+* **Sampling Adequacy:** Bartlett's test of sphericity, Kaiser-Meyer-Olkin (KMO) test with interpretations
+* **Comprehensive Output:** Eigenvalues tables, communalities, factor loadings matrices, factor correlations
+* **Advanced Visualizations:** Scree plots, factor loading plots, biplot capabilities, parallel analysis plots
+* **Clinical Applications:** Scale development, dimensionality reduction, construct validation for clinical instruments
 
 ##### **Robust Error Handling Framework (error_handling) - Clinical Context Error Management**
 
-* **BlueSky Integration:**Inspired by BlueSky's comprehensive error handling patterns across all functions
-* **Clinical Context Awareness:**Error messages tailored to clinical research scenarios and contexts
-* **Comprehensive Logging:**Detailed error and warning logs with timestamps, call stacks, and metadata
-* **Data Validation:**Clinical data quality checks including missing data patterns, outliers, and sample size adequacy
-* **User-Friendly Messages:**Technical errors automatically translated to actionable clinical guidance
-* **Safe Execution:**Wrapper functions for safe code execution with fallback options and default values
-* **Enhanced Results:**Result structures with metadata, error handling information, and clinical interpretations
-* **Function Tracking:**Call stack tracking for complex analysis chains and debugging support
+* **BlueSky Integration:** Inspired by BlueSky's comprehensive error handling patterns across all functions
+* **Clinical Context Awareness:** Error messages tailored to clinical research scenarios and contexts
+* **Comprehensive Logging:** Detailed error and warning logs with timestamps, call stacks, and metadata
+* **Data Validation:** Clinical data quality checks including missing data patterns, outliers, and sample size adequacy
+* **User-Friendly Messages:** Technical errors automatically translated to actionable clinical guidance
+* **Safe Execution:** Wrapper functions for safe code execution with fallback options and default values
+* **Enhanced Results:** Result structures with metadata, error handling information, and clinical interpretations
+* **Function Tracking:** Call stack tracking for complex analysis chains and debugging support
 
 ##### **Enhanced ROC Analysis (enhancedROC) - Diagnostic Performance Optimization**
 
-* **BlueSky Integration:**Inspired by `createROCTable.r` from BlueSky statistical environment
-* **Youden Index Optimization:**Automatic optimal cutoff determination using J = Sensitivity + Specificity - 1
-* **Comprehensive AUC Analysis:**Bootstrap confidence intervals, DeLong test comparisons, partial AUC analysis
-* **Diagnostic Performance Metrics:**Sensitivity, specificity, accuracy, balanced accuracy with confidence intervals
-* **Clinical Application Metrics:**PPV, NPV, likelihood ratios, diagnostic odds ratio with prevalence adjustment
-* **ROC Curve Comparisons:**Pairwise comparisons using DeLong, Bootstrap, or Venkatraman methods
-* **Advanced Visualization:**ROC curves with cutoff points, Youden index plots, clinical decision curves
-* **Clinical Context Awareness:**Screening vs diagnostic context with prevalence-adjusted interpretations
-* **Publication Ready Output:**Clinical report format with comprehensive methodology references
+* **BlueSky Integration:** Inspired by `createROCTable.r` from BlueSky statistical environment
+* **Youden Index Optimization:** Automatic optimal cutoff determination using J = Sensitivity + Specificity - 1
+* **Comprehensive AUC Analysis:** Bootstrap confidence intervals, DeLong test comparisons, partial AUC analysis
+* **Diagnostic Performance Metrics:** Sensitivity, specificity, accuracy, balanced accuracy with confidence intervals
+* **Clinical Application Metrics:** PPV, NPV, likelihood ratios, diagnostic odds ratio with prevalence adjustment
+* **ROC Curve Comparisons:** Pairwise comparisons using DeLong, Bootstrap, or Venkatraman methods
+* **Advanced Visualization:** ROC curves with cutoff points, Youden index plots, clinical decision curves
+* **Clinical Context Awareness:** Screening vs diagnostic context with prevalence-adjusted interpretations
+* **Publication Ready Output:** Clinical report format with comprehensive methodology references
 
 ##### **Enhanced Frequency Analysis (enhancedfrequency) - Advanced Categorical Data Exploration**
 
-* **BlueSky Integration:**Direct adaptation of `BSkyFrequency function.R` algorithms and ordering methods
-* **Flexible Ordering Options:**Sort by frequency (ascending/descending), variable value, or natural order
-* **Comprehensive Percentages:**Valid percentages (excluding missing), cumulative statistics, missing value analysis
-* **Data Quality Assessment:**Completeness, uniqueness, balance metrics with quality scoring and recommendations
-* **Categorical Diagnostics:**Shannon entropy, Gini impurity, concentration ratios, dominant category analysis
-* **Advanced Filtering:**Minimum frequency thresholds, maximum category limits, rare category combination
-* **Multiple Output Formats:**Dataset overview, variable summary, individual tables, combined summary
-* **Clinical Context Integration:**Clinical interpretation guidance with data quality recommendations
+* **BlueSky Integration:** Direct adaptation of `BSkyFrequency function.R` algorithms and ordering methods
+* **Flexible Ordering Options:** Sort by frequency (ascending/descending), variable value, or natural order
+* **Comprehensive Percentages:** Valid percentages (excluding missing), cumulative statistics, missing value analysis
+* **Data Quality Assessment:** Completeness, uniqueness, balance metrics with quality scoring and recommendations
+* **Categorical Diagnostics:** Shannon entropy, Gini impurity, concentration ratios, dominant category analysis
+* **Advanced Filtering:** Minimum frequency thresholds, maximum category limits, rare category combination
+* **Multiple Output Formats:** Dataset overview, variable summary, individual tables, combined summary
+* **Clinical Context Integration:** Clinical interpretation guidance with data quality recommendations
 
 ##### **Enhanced Factor Variable Analysis (enhancedfactorvariable) - Top N Factor Display with BlueSky Integration**
 
-* **BlueSky Integration:**Direct adaptation of `BSkyFactorVariableAnalysis.R` algorithms and processing methods
-* **Top N Factor Display:**Show only the most frequent factor levels with customizable limits (BlueSky core feature)
-* **Flexible Sorting Options:**Sort by frequency (ascending/descending), level name, or original factor order
-* **Comprehensive Statistics:**Detailed counts, percentages, valid percentages, cumulative statistics, and rankings
-* **Factor Complexity Analysis:**Shannon entropy, Simpson diversity, Berger-Parker dominance, and effective categories
-* **Level Balance Assessment:**Gini coefficient, balance ratios, coefficient of variation, and distribution analysis
-* **Advanced Filtering:**Minimum count/percentage thresholds, rare category grouping, and customizable display options
-* **Missing Value Handling:**Comprehensive missing data analysis with customizable labels and inclusion options
-* **Data Quality Metrics:**Completeness assessment, category balance evaluation, and statistical recommendations
-* **Clinical Context Integration:**Clinical interpretation guidance with pathology-specific recommendations and complexity analysis
+* **BlueSky Integration:** Direct adaptation of `BSkyFactorVariableAnalysis.R` algorithms and processing methods
+* **Top N Factor Display:** Show only the most frequent factor levels with customizable limits (BlueSky core feature)
+* **Flexible Sorting Options:** Sort by frequency (ascending/descending), level name, or original factor order
+* **Comprehensive Statistics:** Detailed counts, percentages, valid percentages, cumulative statistics, and rankings
+* **Factor Complexity Analysis:** Shannon entropy, Simpson diversity, Berger-Parker dominance, and effective categories
+* **Level Balance Assessment:** Gini coefficient, balance ratios, coefficient of variation, and distribution analysis
+* **Advanced Filtering:** Minimum count/percentage thresholds, rare category grouping, and customizable display options
+* **Missing Value Handling:** Comprehensive missing data analysis with customizable labels and inclusion options
+* **Data Quality Metrics:** Completeness assessment, category balance evaluation, and statistical recommendations
+* **Clinical Context Integration:** Clinical interpretation guidance with pathology-specific recommendations and complexity analysis
 
 #### **Advanced Bayesian and Robust Statistical Methods**
 
@@ -9135,148 +9248,148 @@ The module outputs include:
 
 ##### **Bayesian Meta-Analysis (bayesianmetaanalysis) - Hierarchical Evidence Synthesis**
 
-* **Multiple Model Types:**Fixed effects, random effects, and hierarchical Bayesian models for comprehensive meta-analysis
-* **Advanced MCMC:**Configurable chains, iterations, and warmup with convergence diagnostics (Rhat, effective sample size)
-* **Meta-Regression:**Support for study-level covariates with Bayesian inference on moderator effects
-* **Prior Options:**Non-informative, weakly informative, informative, and empirical Bayes priors
-* **Publication Bias:**Egger's test and posterior predictive checks for bias assessment
-* **Visualizations:**Forest plots and posterior distribution plots with credible intervals
+* **Multiple Model Types:** Fixed effects, random effects, and hierarchical Bayesian models for comprehensive meta-analysis
+* **Advanced MCMC:** Configurable chains, iterations, and warmup with convergence diagnostics (Rhat, effective sample size)
+* **Meta-Regression:** Support for study-level covariates with Bayesian inference on moderator effects
+* **Prior Options:** Non-informative, weakly informative, informative, and empirical Bayes priors
+* **Publication Bias:** Egger's test and posterior predictive checks for bias assessment
+* **Visualizations:** Forest plots and posterior distribution plots with credible intervals
 
 ##### **Penalized Cox Regression (penalizedcoxregression) - High-Dimensional Survival**
 
-* **Multiple Penalties:**LASSO, Ridge, Elastic Net, and Adaptive LASSO for variable selection
-* **Cross-Validation:**Automatic lambda selection via k-fold CV with min/1se criteria
-* **Multiple Backends:**Smart fallback between glmnet, penalized package, and basic methods
-* **High-Dimensional Support:**Optimized for p >> n scenarios with appropriate warnings
-* **Comprehensive Output:**Selected variables, regularization paths, and coefficient trajectories
+* **Multiple Penalties:** LASSO, Ridge, Elastic Net, and Adaptive LASSO for variable selection
+* **Cross-Validation:** Automatic lambda selection via k-fold CV with min/1se criteria
+* **Multiple Backends:** Smart fallback between glmnet, penalized package, and basic methods
+* **High-Dimensional Support:** Optimized for p >> n scenarios with appropriate warnings
+* **Comprehensive Output:** Selected variables, regularization paths, and coefficient trajectories
 
 ##### **Robust Correlation Methods (robustcorrelation) - Outlier-Resistant Analysis**
 
-* **M-Estimators:**Huber and bisquare M-estimators for robust correlation
-* **Advanced Methods:**Percentage bend, biweight midcorrelation, MVE, and MCD estimators
-* **Outlier Detection:**Multiple methods including Mahalanobis distance and robust distances
-* **Bootstrap CI:**Configurable bootstrap confidence intervals with bias correction
-* **Visualization:**Correlation heatmaps with customizable color schemes
+* **M-Estimators:** Huber and bisquare M-estimators for robust correlation
+* **Advanced Methods:** Percentage bend, biweight midcorrelation, MVE, and MCD estimators
+* **Outlier Detection:** Multiple methods including Mahalanobis distance and robust distances
+* **Bootstrap CI:** Configurable bootstrap confidence intervals with bias correction
+* **Visualization:** Correlation heatmaps with customizable color schemes
 
 ##### **Correlation Networks (correlationnetwork) - Network Analysis of Correlations**
 
-* **Network Construction:**Gaussian Graphical Models, LASSO regularized, partial correlations
-* **Centrality Measures:**Degree, betweenness, closeness, eigenvector, and strength centrality
-* **Community Detection:**Walktrap, Louvain, Leiden, and edge betweenness algorithms
-* **Interactive Visualization:**Dynamic network exploration with visNetwork
-* **Network Comparison:**Statistical comparison across groups
+* **Network Construction:** Gaussian Graphical Models, LASSO regularized, partial correlations
+* **Centrality Measures:** Degree, betweenness, closeness, eigenvector, and strength centrality
+* **Community Detection:** Walktrap, Louvain, Leiden, and edge betweenness algorithms
+* **Interactive Visualization:** Dynamic network exploration with visNetwork
+* **Network Comparison:** Statistical comparison across groups
 
 ##### **Robust Regression Methods (robustregression) - Outlier-Resistant Regression**
 
-* **Multiple Methods:**MM-estimators, S-estimators, LTS, and M-estimators
-* **Outlier Diagnostics:**Leverage, Cook's distance, and robust distances
-* **Model Comparison:**Side-by-side comparison with OLS regression
-* **Bootstrap Inference:**Robust standard errors and confidence intervals
-* **Comprehensive Plots:**Residual diagnostics and influence measures
+* **Multiple Methods:** MM-estimators, S-estimators, LTS, and M-estimators
+* **Outlier Diagnostics:** Leverage, Cook's distance, and robust distances
+* **Model Comparison:** Side-by-side comparison with OLS regression
+* **Bootstrap Inference:** Robust standard errors and confidence intervals
+* **Comprehensive Plots:** Residual diagnostics and influence measures
 
 ##### **Clinical Model Validation Suite (clinicalvalidation) - Comprehensive Model Assessment**
 
-* **Multiple Validation Methods:**Bootstrap, k-fold CV, repeated CV, hold-out, and time-split validation
-* **Model Support:**Logistic regression, Cox PH, Random Forest, SVM, and LDA
-* **Clinical Interpretation:**Context-aware guidance for diagnosis, screening, prognosis, and histological classification
-* **Performance Metrics:**AUC, accuracy, sensitivity, specificity with bootstrap confidence intervals
-* **Model Calibration:**Hosmer-Lemeshow test, Brier score, calibration plots with clinical interpretation
+* **Multiple Validation Methods:** Bootstrap, k-fold CV, repeated CV, hold-out, and time-split validation
+* **Model Support:** Logistic regression, Cox PH, Random Forest, SVM, and LDA
+* **Clinical Interpretation:** Context-aware guidance for diagnosis, screening, prognosis, and histological classification
+* **Performance Metrics:** AUC, accuracy, sensitivity, specificity with bootstrap confidence intervals
+* **Model Calibration:** Hosmer-Lemeshow test, Brier score, calibration plots with clinical interpretation
 
 ##### **Non-parametric Statistical Methods (nonparametric) - Distribution-Free Analysis**
 
-* **Multiple Tests:**Kruskal-Wallis, Friedman, Mann-Whitney, Wilcoxon signed-rank, median tests
-* **Post-hoc Comparisons:**Dunn's test, Conover-Iman, Steel-Dwass, Nemenyi with multiple corrections
-* **Robust Statistics:**Trimmed means, Winsorized statistics, Hodges-Lehmann estimator
-* **Effect Sizes:**Eta-squared, epsilon-squared, rank-biserial correlation, common language effect size
-* **Assumption Testing:**Comprehensive homogeneity tests and diagnostic visualizations
-* **Clinical Applications:**Biomarker analysis, treatment comparisons, pathological grading
+* **Multiple Tests:** Kruskal-Wallis, Friedman, Mann-Whitney, Wilcoxon signed-rank, median tests
+* **Post-hoc Comparisons:** Dunn's test, Conover-Iman, Steel-Dwass, Nemenyi with multiple corrections
+* **Robust Statistics:** Trimmed means, Winsorized statistics, Hodges-Lehmann estimator
+* **Effect Sizes:** Eta-squared, epsilon-squared, rank-biserial correlation, common language effect size
+* **Assumption Testing:** Comprehensive homogeneity tests and diagnostic visualizations
+* **Clinical Applications:** Biomarker analysis, treatment comparisons, pathological grading
 
 ##### **Non-parametric Regression Methods (nonparametricregression) - Flexible Modeling**
 
-* **Multiple Methods:**Kernel regression, LOESS, splines, quantile regression, GAM
-* **Kernel Functions:**Gaussian, Epanechnikov, uniform, triangular, biweight, triweight
-* **Bandwidth Selection:**Cross-validation, plug-in, rule of thumb with automatic optimization
-* **Spline Types:**Smoothing, natural, B-spline, penalized splines with configurable parameters
-* **Advanced Features:**Bootstrap confidence intervals, residual diagnostics, influence measures
-* **Clinical Context:**Dose-response analysis, growth curves, biomarker trajectories
+* **Multiple Methods:** Kernel regression, LOESS, splines, quantile regression, GAM
+* **Kernel Functions:** Gaussian, Epanechnikov, uniform, triangular, biweight, triweight
+* **Bandwidth Selection:** Cross-validation, plug-in, rule of thumb with automatic optimization
+* **Spline Types:** Smoothing, natural, B-spline, penalized splines with configurable parameters
+* **Advanced Features:** Bootstrap confidence intervals, residual diagnostics, influence measures
+* **Clinical Context:** Dose-response analysis, growth curves, biomarker trajectories
 
 ##### **Spatial Bayesian Survival Analysis (spatialbayesiansurvival) - Geographic Survival Modeling**
 
-* **Spatial Models:**CAR, SAR, Gaussian process, BYM, Leroux models for geographic correlation
-* **Distance Methods:**Euclidean, great circle, Manhattan, Haversine for neighborhood definition
-* **MCMC Sampling:**Multiple chains with convergence diagnostics (R, ESS) and model comparison
-* **Baseline Hazards:**Weibull, exponential, piecewise constant, B-spline, gamma process options
-* **Prediction & Mapping:**Grid-based spatial prediction with survival and hazard rate maps
-* **Clinical Applications:**Cancer epidemiology, disease surveillance, environmental health studies
+* **Spatial Models:** CAR, SAR, Gaussian process, BYM, Leroux models for geographic correlation
+* **Distance Methods:** Euclidean, great circle, Manhattan, Haversine for neighborhood definition
+* **MCMC Sampling:** Multiple chains with convergence diagnostics (R, ESS) and model comparison
+* **Baseline Hazards:** Weibull, exponential, piecewise constant, B-spline, gamma process options
+* **Prediction & Mapping:** Grid-based spatial prediction with survival and hazard rate maps
+* **Clinical Applications:** Cancer epidemiology, disease surveillance, environmental health studies
 
 ##### **Adaptive Trial Design Methods (adaptivetrialdesign) - Efficient Clinical Trials**
 
-* **Multiple Adaptations:**Sample size re-estimation, arm selection, dose finding, futility/efficacy stopping
-* **Design Frameworks:**Bayesian adaptive, frequentist group sequential, hybrid approaches
-* **Stopping Rules:**O'Brien-Fleming, Pocock, Lan-DeMets boundaries with alpha spending functions
-* **Interim Analysis:**Flexible timing based on information, calendar, patient numbers, or events
-* **Operating Characteristics:**Simulation-based power, type I error, expected sample size calculations
-* **Regulatory Compliance:**FDA/EMA guideline adherence with DMB recommendation templates
-* **Clinical Contexts:**Phase II/III, oncology, cardiovascular, rare disease, pediatric trials
+* **Multiple Adaptations:** Sample size re-estimation, arm selection, dose finding, futility/efficacy stopping
+* **Design Frameworks:** Bayesian adaptive, frequentist group sequential, hybrid approaches
+* **Stopping Rules:** O'Brien-Fleming, Pocock, Lan-DeMets boundaries with alpha spending functions
+* **Interim Analysis:** Flexible timing based on information, calendar, patient numbers, or events
+* **Operating Characteristics:** Simulation-based power, type I error, expected sample size calculations
+* **Regulatory Compliance:** FDA/EMA guideline adherence with DMB recommendation templates
+* **Clinical Contexts:** Phase II/III, oncology, cardiovascular, rare disease, pediatric trials
 
 ##### **Bayesian Network Meta-Analysis (bayesiannetworkma) - Multiple Treatment Comparisons**
 
-* **Network Evidence:**Mixed evidence synthesis of direct and indirect comparisons
-* **Outcome Types:**Binary (RR/OR/RD), continuous (MD/SMD), rate ratios, hazard ratios
-* **Random Effects:**Fixed, univariate, multivariate, and hierarchical model specifications
-* **Coherence Assessment:**Node-splitting, side-splitting, and inconsistency model evaluation
-* **Treatment Ranking:**SUCRA, probability ranking, mean rank, P-score with uncertainty
-* **League Tables:**Comprehensive pairwise comparison matrices with effect estimates
-* **Network Visualization:**Interactive plots with multiple layout algorithms
-* **Meta-Regression:**Study-level covariates and class-effect model support
-* **Model Comparison:**Side-by-side evaluation of multiple algorithms with ranking
-* **Cost-Benefit Analysis:**Clinical cost matrices with prevalence adjustment
-* **Bootstrap Analysis:**Detailed bias-corrected estimates with percentile confidence intervals
+* **Network Evidence:** Mixed evidence synthesis of direct and indirect comparisons
+* **Outcome Types:** Binary (RR/OR/RD), continuous (MD/SMD), rate ratios, hazard ratios
+* **Random Effects:** Fixed, univariate, multivariate, and hierarchical model specifications
+* **Coherence Assessment:** Node-splitting, side-splitting, and inconsistency model evaluation
+* **Treatment Ranking:** SUCRA, probability ranking, mean rank, P-score with uncertainty
+* **League Tables:** Comprehensive pairwise comparison matrices with effect estimates
+* **Network Visualization:** Interactive plots with multiple layout algorithms
+* **Meta-Regression:** Study-level covariates and class-effect model support
+* **Model Comparison:** Side-by-side evaluation of multiple algorithms with ranking
+* **Cost-Benefit Analysis:** Clinical cost matrices with prevalence adjustment
+* **Bootstrap Analysis:** Detailed bias-corrected estimates with percentile confidence intervals
 
 ##### **Spike-and-Slab Variable Selection (spikeslabpriors) - High-Dimensional Bayesian Analysis**
 
-* **Multiple Prior Types:**Binary, continuous, George-McCulloch, Ishwaran-Rao, SSVS for flexible modeling
-* **Model Support:**Linear, logistic, Poisson, Cox PH, probit, quantile regression with unified interface
-* **MCMC Sampling:**Advanced sampling with convergence diagnostics (R, ESS, MCSE) and adaptive methods
-* **Variable Selection:**Median probability model, HPD, Bayes factor thresholds, PIP/MIP criteria
-* **Model Averaging:**BMA, best model, median model predictions with uncertainty quantification
-* **High-Dimensional:**Pre-screening methods (SIS, marginal correlation, LASSO) for p >> n scenarios
-* **Clinical Contexts:**Biomarker discovery, genomics, radiomics, multi-omics, clinical risk factors
-* **Comprehensive Output:**Inclusion probabilities, model probabilities, coefficient estimates, importance scores
+* **Multiple Prior Types:** Binary, continuous, George-McCulloch, Ishwaran-Rao, SSVS for flexible modeling
+* **Model Support:** Linear, logistic, Poisson, Cox PH, probit, quantile regression with unified interface
+* **MCMC Sampling:** Advanced sampling with convergence diagnostics (R, ESS, MCSE) and adaptive methods
+* **Variable Selection:** Median probability model, HPD, Bayes factor thresholds, PIP/MIP criteria
+* **Model Averaging:** BMA, best model, median model predictions with uncertainty quantification
+* **High-Dimensional:** Pre-screening methods (SIS, marginal correlation, LASSO) for p >> n scenarios
+* **Clinical Contexts:** Biomarker discovery, genomics, radiomics, multi-omics, clinical risk factors
+* **Comprehensive Output:** Inclusion probabilities, model probabilities, coefficient estimates, importance scores
 
 ##### **Bayesian Diagnostic Test Evaluation (bayesiandiagnostic) - Advanced Test Assessment**
 
-* **Analysis Types:**Single test, comparative tests, meta-analysis, IPD, hierarchical modeling
-* **Prior Specifications:**Informative, non-informative, skeptical, enthusiastic, custom priors
-* **Bivariate Modeling:**Joint sensitivity-specificity with correlation structure
-* **MCMC Methods:**Adaptive sampling with comprehensive convergence monitoring
-* **Performance Metrics:**Sensitivity, specificity, PPV, NPV, likelihood ratios, diagnostic odds ratios
-* **Decision Analysis:**Cost-utility calculations, threshold optimization, clinical decision support
-* **Meta-Analysis:**Between-study heterogeneity, publication bias assessment, covariate effects
-* **Advanced Visualization:**ROC curves, forest plots, posterior distributions, decision curves
+* **Analysis Types:** Single test, comparative tests, meta-analysis, IPD, hierarchical modeling
+* **Prior Specifications:** Informative, non-informative, skeptical, enthusiastic, custom priors
+* **Bivariate Modeling:** Joint sensitivity-specificity with correlation structure
+* **MCMC Methods:** Adaptive sampling with comprehensive convergence monitoring
+* **Performance Metrics:** Sensitivity, specificity, PPV, NPV, likelihood ratios, diagnostic odds ratios
+* **Decision Analysis:** Cost-utility calculations, threshold optimization, clinical decision support
+* **Meta-Analysis:** Between-study heterogeneity, publication bias assessment, covariate effects
+* **Advanced Visualization:** ROC curves, forest plots, posterior distributions, decision curves
 
 ##### **Enhanced Effect Size Analysis (effectsize) - Comprehensive BlueSky Integration**
 
-* **Standardized Differences:**Cohen's d, Hedges' g, Glass' delta with bias corrections
-* **Variance Explained:**Eta-squared (eta^2), partial eta-squared (etap^2), omega-squared (omega^2), epsilon-squared (epsilon^2)
-* **Association Measures:**Cramer's V, phi coefficient (phi), Cohen's w for contingency analysis
-* **Rank-Based Measures:**Rank-biserial correlation, Cliff's delta (delta), Vargha-Delaney A
-* **Probability Measures:**Common language effect size, Cohen's U3, probability of superiority
-* **Bootstrap Methods:**BCa confidence intervals with configurable sampling
-* **Clinical Significance:**Customizable thresholds with magnitude classifications
-* **Power Analysis:**Post-hoc power with sample size recommendations
-* **Meta-Analysis Ready:**Standardized output for meta-analysis software integration
-* **Multiple Contexts:**t-tests, ANOVA, correlation, chi-square, non-parametric, regression
+* **Standardized Differences:** Cohen's d, Hedges' g, Glass' delta with bias corrections
+* **Variance Explained:** Eta-squared (eta^2), partial eta-squared (etap^2), omega-squared (omega^2), epsilon-squared (epsilon^2)
+* **Association Measures:** Cramer's V, phi coefficient (phi), Cohen's w for contingency analysis
+* **Rank-Based Measures:** Rank-biserial correlation, Cliff's delta (delta), Vargha-Delaney A
+* **Probability Measures:** Common language effect size, Cohen's U3, probability of superiority
+* **Bootstrap Methods:** BCa confidence intervals with configurable sampling
+* **Clinical Significance:** Customizable thresholds with magnitude classifications
+* **Power Analysis:** Post-hoc power with sample size recommendations
+* **Meta-Analysis Ready:** Standardized output for meta-analysis software integration
+* **Multiple Contexts:** t-tests, ANOVA, correlation, chi-square, non-parametric, regression
 
 #### **Enhanced Existing Modules**
 
 ##### **Advanced Decision Trees (treeadvanced) - Clinical Intelligence Extensions**
 
-* **Clinical Variable Importance:**Mean Decrease Gini with clinical significance interpretation
-* **Feature Contribution Analysis:**Positive/negative class contributions for medical decision support
-* **Histological Classification:**Specialized context for pathological feature interpretation
-* **Survival Integration:**Optional integration with survival outcomes for prognostic modeling
-* **MDG Thresholds:**Configurable clinical significance thresholds for variable importance
+* **Clinical Variable Importance:** Mean Decrease Gini with clinical significance interpretation
+* **Feature Contribution Analysis:** Positive/negative class contributions for medical decision support
+* **Histological Classification:** Specialized context for pathological feature interpretation
+* **Survival Integration:** Optional integration with survival outcomes for prognostic modeling
+* **MDG Thresholds:** Configurable clinical significance thresholds for variable importance
 
 #### **Implementation Summary**
 
@@ -9314,127 +9427,127 @@ The module outputs include:
 
 ##### **Enhanced Correlation Analysis (enhancedcorrelation) - Advanced Correlation Methods**
 
-* **Spearman Rank Correlation:**Non-parametric correlation analysis with robust confidence intervals, resistant to outliers and non-linear relationships
-* **Kendall's Tau Correlation:**Alternative non-parametric correlation with comprehensive statistical inference and concordance-based analysis
-* **Pearson Correlation:**Traditional linear correlation with improved small-sample performance and enhanced confidence interval estimation
-* **Multiple Methods Framework:**Single analysis supporting all three correlation types with unified statistical reporting and clinical interpretation
-* **Visualization Support:**Correlation matrix plots and scatterplot matrices with statistical significance indicators and effect size interpretation
+* **Spearman Rank Correlation:** Non-parametric correlation analysis with robust confidence intervals, resistant to outliers and non-linear relationships
+* **Kendall's Tau Correlation:** Alternative non-parametric correlation with comprehensive statistical inference and concordance-based analysis
+* **Pearson Correlation:** Traditional linear correlation with improved small-sample performance and enhanced confidence interval estimation
+* **Multiple Methods Framework:** Single analysis supporting all three correlation types with unified statistical reporting and clinical interpretation
+* **Visualization Support:** Correlation matrix plots and scatterplot matrices with statistical significance indicators and effect size interpretation
 
 ##### **Exact Tests for Small Samples (exacttests) - Precise Statistical Inference**
 
-* **Fisher's Exact Test:**Enhanced implementation for sparse contingency tables with comprehensive exact p-values and confidence intervals
-* **Exact Binomial Test:**Precise proportion inference for small samples where normal approximations fail, with multiple confidence interval methods
-* **Exact McNemar Test:**Paired binary data analysis with exact statistical inference for marginal homogeneity testing
-* **Exact Confidence Intervals:**Clopper-Pearson exact intervals and Wilson score intervals for robust proportion estimation
-* **Small Sample Support:**Statistical methods specifically designed for studies with limited sample sizes and sparse data structures
+* **Fisher's Exact Test:** Enhanced implementation for sparse contingency tables with comprehensive exact p-values and confidence intervals
+* **Exact Binomial Test:** Precise proportion inference for small samples where normal approximations fail, with multiple confidence interval methods
+* **Exact McNemar Test:** Paired binary data analysis with exact statistical inference for marginal homogeneity testing
+* **Exact Confidence Intervals:** Clopper-Pearson exact intervals and Wilson score intervals for robust proportion estimation
+* **Small Sample Support:** Statistical methods specifically designed for studies with limited sample sizes and sparse data structures
 
 ##### **Partial Correlation Analysis (partialcorrelation) - Advanced Correlation Methods**
 
-* **Partial Correlation:**Correlation analysis controlling for confounding variables using residual-based regression methods
-* **Multiple Methods:**Support for Pearson, Spearman, and Kendall's tau partial correlations with comprehensive statistical inference
-* **Zero-Order Comparison:**Side-by-side comparison of partial and zero-order correlations to assess confounding effects
-* **Statistical Inference:**Confidence intervals and significance testing for partial correlations with proper degrees of freedom adjustment
-* **Visualization:**Partial correlation matrix plots with clear indication of control variables and effect sizes
+* **Partial Correlation:** Correlation analysis controlling for confounding variables using residual-based regression methods
+* **Multiple Methods:** Support for Pearson, Spearman, and Kendall's tau partial correlations with comprehensive statistical inference
+* **Zero-Order Comparison:** Side-by-side comparison of partial and zero-order correlations to assess confounding effects
+* **Statistical Inference:** Confidence intervals and significance testing for partial correlations with proper degrees of freedom adjustment
+* **Visualization:** Partial correlation matrix plots with clear indication of control variables and effect sizes
 
 ##### **Enhanced Two-Way Frequency Analysis (enhancedtwowayfrequency) - Cross-Tabulation with BlueSky Integration**
 
-* **BlueSky Integration:**Direct implementation of `BSkyTwoWayFrequency` cross-tabulation methodology with enhanced clinical context
-* **Multiple Percentage Types:**Cell percentages (`prop.table(mytable)`), row percentages (`prop.table(mytable, 1)`), column percentages (`prop.table(mytable, 2)`)
-* **Statistical Tests:**Pearson's chi-square test of independence, Fisher's exact test with Yates' continuity correction for small samples
-* **Association Measures:**Cramer's V, Phi coefficient (phi) for 2x2 tables, Contingency coefficient with Cohen's effect size interpretations
-* **Residual Analysis:**Standardized residuals for pattern detection and cell contribution analysis with clinical interpretation
-* **Expected Frequency Validation:**Chi-square assumption checking with customizable minimum expected frequency thresholds
-* **Robust Error Handling:**BlueSky-style graceful degradation with informative clinical messages and statistical warnings
-* **Advanced Visualizations:**Frequency heatmaps, mosaic plots, and standardized residual plots for pattern identification
-* **Clinical Applications:**Treatment response cross-tabulation, diagnostic relationships, pathological co-occurrence analysis
+* **BlueSky Integration:** Direct implementation of `BSkyTwoWayFrequency` cross-tabulation methodology with enhanced clinical context
+* **Multiple Percentage Types:** Cell percentages (`prop.table(mytable)`), row percentages (`prop.table(mytable, 1)`), column percentages (`prop.table(mytable, 2)`)
+* **Statistical Tests:** Pearson's chi-square test of independence, Fisher's exact test with Yates' continuity correction for small samples
+* **Association Measures:** Cramer's V, Phi coefficient (phi) for 2x2 tables, Contingency coefficient with Cohen's effect size interpretations
+* **Residual Analysis:** Standardized residuals for pattern detection and cell contribution analysis with clinical interpretation
+* **Expected Frequency Validation:** Chi-square assumption checking with customizable minimum expected frequency thresholds
+* **Robust Error Handling:** BlueSky-style graceful degradation with informative clinical messages and statistical warnings
+* **Advanced Visualizations:** Frequency heatmaps, mosaic plots, and standardized residual plots for pattern identification
+* **Clinical Applications:** Treatment response cross-tabulation, diagnostic relationships, pathological co-occurrence analysis
 
 ##### **Polychoric Correlation Analysis (polychoriccorr) - Ordinal Data Correlation**
 
-* **Polychoric Correlation:**Correlation estimation for ordinal-ordinal variable relationships assuming underlying bivariate normality
-* **Tetrachoric Correlation:**Special case implementation for binary-binary variable correlations with enhanced precision
-* **Multiple Methods:**Maximum likelihood and two-step estimation approaches for robust correlation estimation
-* **Frequency Analysis:**Comprehensive frequency table analysis for categorical variable relationships and independence testing
-* **Statistical Testing:**Chi-square tests for independence with exact and approximate methods for ordinal data structures
+* **Polychoric Correlation:** Correlation estimation for ordinal-ordinal variable relationships assuming underlying bivariate normality
+* **Tetrachoric Correlation:** Special case implementation for binary-binary variable correlations with enhanced precision
+* **Multiple Methods:** Maximum likelihood and two-step estimation approaches for robust correlation estimation
+* **Frequency Analysis:** Comprehensive frequency table analysis for categorical variable relationships and independence testing
+* **Statistical Testing:** Chi-square tests for independence with exact and approximate methods for ordinal data structures
 
 #### **Clinical Data Integration Suite - Healthcare Interoperability & Quality Assurance**
 
 ##### **Clinical Data Integration (clinicaldataintegration) - Healthcare Standards Compliance**
 
-* **FHIR R4 Compliance:**Complete support for Fast Healthcare Interoperability Resources with standardized clinical data exchange
-* **EHR Integration:**Electronic Health Record data import/export with comprehensive format support and validation
-* **Clinical Terminology:**ICD-10, SNOMED-CT, and LOINC integration for standardized medical coding and terminology mapping
-* **Data Quality Assessment:**Automated completeness, accuracy, and consistency validation with configurable thresholds
-* **Multi-Format Export:**Support for CSV, JSON, FHIR R4, and CDISC formats with regulatory compliance documentation
+* **FHIR R4 Compliance:** Complete support for Fast Healthcare Interoperability Resources with standardized clinical data exchange
+* **EHR Integration:** Electronic Health Record data import/export with comprehensive format support and validation
+* **Clinical Terminology:** ICD-10, SNOMED-CT, and LOINC integration for standardized medical coding and terminology mapping
+* **Data Quality Assessment:** Automated completeness, accuracy, and consistency validation with configurable thresholds
+* **Multi-Format Export:** Support for CSV, JSON, FHIR R4, and CDISC formats with regulatory compliance documentation
 
 ##### **Interactive Clinical Dashboard (clinicaldashboard) - Real-Time Clinical Analytics**
 
-* **Real-Time Monitoring:**Live data visualization and monitoring with configurable update intervals and performance optimization
-* **Multi-Level Dashboards:**Patient-level, population health, quality metrics, and clinical outcomes dashboards with customizable views
-* **Clinical Alert System:**Configurable threshold-based alerts with severity levels and automated notification capabilities
-* **Trend Analysis:**Time-series visualization with statistical modeling for outcome tracking and predictive analytics
+* **Real-Time Monitoring:** Live data visualization and monitoring with configurable update intervals and performance optimization
+* **Multi-Level Dashboards:** Patient-level, population health, quality metrics, and clinical outcomes dashboards with customizable views
+* **Clinical Alert System:** Configurable threshold-based alerts with severity levels and automated notification capabilities
+* **Trend Analysis:** Time-series visualization with statistical modeling for outcome tracking and predictive analytics
 
 ##### **Clinical Validation Framework (clinicalvalidation) - Statistical Accuracy & Regulatory Compliance**
 
-* **Statistical Accuracy Validation:**Algorithm verification against reference implementations (R stats, SAS, SPSS, Stata)
-* **Clinical Guidelines Compliance:**Assessment against ICH E9, CONSORT, and other evidence-based analysis recommendations
-* **Regulatory Support:**FDA/EMA submission-ready analysis documentation with comprehensive validation reporting
-* **Cross-Platform Validation:**Results consistency verification across different statistical software platforms
-* **Equivalence Testing:**TOST methodology for demonstrating statistical equivalence between methods
+* **Statistical Accuracy Validation:** Algorithm verification against reference implementations (R stats, SAS, SPSS, Stata)
+* **Clinical Guidelines Compliance:** Assessment against ICH E9, CONSORT, and other evidence-based analysis recommendations
+* **Regulatory Support:** FDA/EMA submission-ready analysis documentation with comprehensive validation reporting
+* **Cross-Platform Validation:** Results consistency verification across different statistical software platforms
+* **Equivalence Testing:** TOST methodology for demonstrating statistical equivalence between methods
 
 #### **Advanced Survival Analysis Extensions - Specialized Survival Methodology**
 
 ##### **Flexible Relative Survival Analysis (flexiblerelativesurvival) - Population-Based Survival**
 
-* **Spline-Based Modeling:**Flexible relative survival analysis with penalized splines, P-splines, B-splines, and natural splines
-* **Multi-Dimensional Smoothing:**Advanced smoothing across time, age, and calendar period dimensions for comprehensive modeling
-* **Population Analysis:**Age standardization and life expectancy loss analysis for population-based survival studies
-* **Excess Hazard Modeling:**Covariate effects on multiple time scales with flexible baseline hazard estimation
-* **Model Selection:**Comprehensive model comparison and goodness-of-fit assessment with multiple smoothing approaches
+* **Spline-Based Modeling:** Flexible relative survival analysis with penalized splines, P-splines, B-splines, and natural splines
+* **Multi-Dimensional Smoothing:** Advanced smoothing across time, age, and calendar period dimensions for comprehensive modeling
+* **Population Analysis:** Age standardization and life expectancy loss analysis for population-based survival studies
+* **Excess Hazard Modeling:** Covariate effects on multiple time scales with flexible baseline hazard estimation
+* **Model Selection:** Comprehensive model comparison and goodness-of-fit assessment with multiple smoothing approaches
 
 ##### **Interval-Censored Cure Models (intervalcensorcure) - Advanced Cure Modeling**
 
-* **ICGOR Methodology:**Interval-Censored Generalized Odds Rate approach for cure model analysis with interval-censored data
-* **Multiple Model Types:**Mixture, non-mixture, and promotion time cure models with comprehensive statistical framework
-* **Distribution Support:**Weibull, exponential, log-normal, log-logistic, and gamma distributions for flexible survival modeling
-* **Advanced Analysis:**Covariate effects on both cure fraction and survival parameters with bootstrap confidence intervals
-* **Model Comparison:**Systematic comparison across distributions with AIC/BIC selection criteria
+* **ICGOR Methodology:** Interval-Censored Generalized Odds Rate approach for cure model analysis with interval-censored data
+* **Multiple Model Types:** Mixture, non-mixture, and promotion time cure models with comprehensive statistical framework
+* **Distribution Support:** Weibull, exponential, log-normal, log-logistic, and gamma distributions for flexible survival modeling
+* **Advanced Analysis:** Covariate effects on both cure fraction and survival parameters with bootstrap confidence intervals
+* **Model Comparison:** Systematic comparison across distributions with AIC/BIC selection criteria
 
 ##### **Threshold Regression Models (thresholdregression) - Change-Point Survival Analysis**
 
-* **Change-Point Detection:**Single and multiple threshold identification in survival processes with hazard function changes
-* **Multiple Methods:**MLE, EM algorithm, Bayesian inference, and non-parametric approaches for threshold estimation
-* **Adaptive Selection:**Data-driven threshold selection with model comparison using AIC/BIC criteria
-* **Piecewise Modeling:**Hazard modeling with covariate effects varying across time periods defined by thresholds
-* **Comprehensive Analysis:**Bootstrap confidence intervals and diagnostic tests for threshold significance assessment
-* **Performance Metrics:**Quality indicators, completeness tracking, and population health visualization with export capabilities
+* **Change-Point Detection:** Single and multiple threshold identification in survival processes with hazard function changes
+* **Multiple Methods:** MLE, EM algorithm, Bayesian inference, and non-parametric approaches for threshold estimation
+* **Adaptive Selection:** Data-driven threshold selection with model comparison using AIC/BIC criteria
+* **Piecewise Modeling:** Hazard modeling with covariate effects varying across time periods defined by thresholds
+* **Comprehensive Analysis:** Bootstrap confidence intervals and diagnostic tests for threshold significance assessment
+* **Performance Metrics:** Quality indicators, completeness tracking, and population health visualization with export capabilities
 
 ##### **Clinical Validation Framework (clinicalvalidation) - Regulatory Compliance & Quality Assurance**
 
-* **Statistical Accuracy Validation:**Algorithm verification against reference implementations with tolerance testing and equivalence analysis
-* **Regulatory Compliance:**FDA, EMA, ICH guidelines compliance with submission-ready documentation and audit trails
-* **Cross-Platform Validation:**Results consistency verification across R, SAS, SPSS, and Stata statistical software platforms
-* **Clinical Guidelines Assessment:**CONSORT, ICH E9 compliance checking with automated validation reporting
-* **Equivalence Testing:**Two One-Sided Tests (TOST) methodology with Bland-Altman agreement analysis for method comparison
+* **Statistical Accuracy Validation:** Algorithm verification against reference implementations with tolerance testing and equivalence analysis
+* **Regulatory Compliance:** FDA, EMA, ICH guidelines compliance with submission-ready documentation and audit trails
+* **Cross-Platform Validation:** Results consistency verification across R, SAS, SPSS, and Stata statistical software platforms
+* **Clinical Guidelines Assessment:** CONSORT, ICH E9 compliance checking with automated validation reporting
+* **Equivalence Testing:** Two One-Sided Tests (TOST) methodology with Bland-Altman agreement analysis for method comparison
 
 #### **Advanced Survival Analysis Methods - Specialized Population-Based Modeling**
 
 ##### **Excess Mortality Analysis (excessmortality) - Population-Based Survival Modeling**
 
-* **Excess Mortality Modeling:**Advanced population-based mortality analysis comparing observed to expected mortality rates
-* **Age-Sex Standardization:**Comprehensive demographic adjustment with population life table integration
-* **Flexible Hazard Estimation:**Multiple spline basis functions (B-splines, natural splines, TPRS) for non-parametric hazard modeling
-* **Expected Rate Integration:**Support for population life tables, custom expected rates, and internal estimation methods
-* **Comprehensive Visualization:**Excess hazard, survival, and cumulative hazard functions with confidence intervals
-* **Clinical Applications:**Cancer epidemiology, disease burden assessment, and population health outcome analysis
+* **Excess Mortality Modeling:** Advanced population-based mortality analysis comparing observed to expected mortality rates
+* **Age-Sex Standardization:** Comprehensive demographic adjustment with population life table integration
+* **Flexible Hazard Estimation:** Multiple spline basis functions (B-splines, natural splines, TPRS) for non-parametric hazard modeling
+* **Expected Rate Integration:** Support for population life tables, custom expected rates, and internal estimation methods
+* **Comprehensive Visualization:** Excess hazard, survival, and cumulative hazard functions with confidence intervals
+* **Clinical Applications:** Cancer epidemiology, disease burden assessment, and population health outcome analysis
 
 ##### **Flexible Relative Survival Analysis (flexiblerelativesurvival) - Advanced Spline-Based Relative Survival**
 
-* **Flexible Relative Survival:**Advanced relative survival modeling with multi-dimensional spline smoothing (flexrsurv approach)
-* **Multi-Dimensional Smoothing:**Simultaneous smoothing across time, age, and calendar period dimensions with configurable knot placement
-* **Advanced Smoothing Methods:**Penalized splines, P-splines, B-splines, and natural splines for optimal model flexibility
-* **Age-Period Standardization:**Comprehensive age standardization with calendar year trend analysis and cohort effects
-* **Life Expectancy Analysis:**Life expectancy loss estimation with age-group stratification and population impact assessment
-* **Clinical Epidemiology:**Cancer registry analysis, population health surveillance, and comparative survival research
+* **Flexible Relative Survival:** Advanced relative survival modeling with multi-dimensional spline smoothing (flexrsurv approach)
+* **Multi-Dimensional Smoothing:** Simultaneous smoothing across time, age, and calendar period dimensions with configurable knot placement
+* **Advanced Smoothing Methods:** Penalized splines, P-splines, B-splines, and natural splines for optimal model flexibility
+* **Age-Period Standardization:** Comprehensive age standardization with calendar year trend analysis and cohort effects
+* **Life Expectancy Analysis:** Life expectancy loss estimation with age-group stratification and population impact assessment
+* **Clinical Epidemiology:** Cancer registry analysis, population health surveillance, and comparative survival research
 
 # ClinicoPath 0.0.31.43
 
@@ -9444,118 +9557,118 @@ The module outputs include:
 
 ##### **Enhanced timeroc Function (v1.1.0) - Binary ROC Analysis & Comparison**
 
-* **Binary ROC Analysis:**Complete implementation of general binary ROC curve analysis for non-time-dependent diagnostic outcomes with comprehensive performance metrics
-* **DeLong Test Integration:**Statistical comparison of multiple ROC curves using DeLong method for pairwise AUC comparisons with confidence intervals
-* **Youden Index Calculation:**Optimal cutpoint determination using Youden J statistic with sensitivity/specificity optimization and clinical decision support
-* **Comprehensive Diagnostics:**AUC with confidence intervals, sensitivity/specificity analysis, positive/negative likelihood ratios, and diagnostic odds ratios
-* **Enhanced Visualization:**ROC curves with optimal cutpoints, confidence bands, and comparison plots for multiple diagnostic markers
+* **Binary ROC Analysis:** Complete implementation of general binary ROC curve analysis for non-time-dependent diagnostic outcomes with comprehensive performance metrics
+* **DeLong Test Integration:** Statistical comparison of multiple ROC curves using DeLong method for pairwise AUC comparisons with confidence intervals
+* **Youden Index Calculation:** Optimal cutpoint determination using Youden J statistic with sensitivity/specificity optimization and clinical decision support
+* **Comprehensive Diagnostics:** AUC with confidence intervals, sensitivity/specificity analysis, positive/negative likelihood ratios, and diagnostic odds ratios
+* **Enhanced Visualization:** ROC curves with optimal cutpoints, confidence bands, and comparison plots for multiple diagnostic markers
 
 ##### **Enhanced agreement Function - Multi-Rater Reliability**
 
-* **Explicit Fleiss' Kappa:**Enhanced multi-rater agreement analysis with explicit method selection for >2 raters with comprehensive reliability assessment
-* **Confidence Intervals:**Bootstrap and asymptotic confidence intervals for Fleiss' kappa with significance testing and clinical interpretation
-* **Diagnostic Agreement:**Specialized support for inter-observer reliability in diagnostic pathology with categorical outcome analysis
-* **Method Validation:**Robust validation for multi-rater categorical data with missing data handling and clinical context awareness
+* **Explicit Fleiss' Kappa:** Enhanced multi-rater agreement analysis with explicit method selection for >2 raters with comprehensive reliability assessment
+* **Confidence Intervals:** Bootstrap and asymptotic confidence intervals for Fleiss' kappa with significance testing and clinical interpretation
+* **Diagnostic Agreement:** Specialized support for inter-observer reliability in diagnostic pathology with categorical outcome analysis
+* **Method Validation:** Robust validation for multi-rater categorical data with missing data handling and clinical context awareness
 
 #### **High-Dimensional Survival Analysis - Advanced Methods**
 
 ##### **SCAD Cox Regression Analysis (ncvregcox) - Variable Selection**
 
-* **Oracle Properties:**Smoothly Clipped Absolute Deviation (SCAD) penalty with superior variable selection compared to LASSO methods
-* **Cross-Validation:**Optimal penalty parameter selection with k-fold cross-validation and comprehensive model performance assessment
-* **Variable Importance:**Stability analysis with bootstrap methods and feature selection consistency evaluation
-* **High-Dimensional Support:**Efficient handling of genomics data with thousands of predictors and advanced regularization techniques
+* **Oracle Properties:** Smoothly Clipped Absolute Deviation (SCAD) penalty with superior variable selection compared to LASSO methods
+* **Cross-Validation:** Optimal penalty parameter selection with k-fold cross-validation and comprehensive model performance assessment
+* **Variable Importance:** Stability analysis with bootstrap methods and feature selection consistency evaluation
+* **High-Dimensional Support:** Efficient handling of genomics data with thousands of predictors and advanced regularization techniques
 
 ##### **Supervised Principal Components Cox Analysis (superpc) - Dimensionality Reduction**
 
-* **Feature Screening:**Survival association-based feature selection with configurable p-value thresholds and multiple testing corrections
-* **Dimensionality Reduction:**Principal component analysis of selected features optimized for Cox regression applications
-* **Model Validation:**Comprehensive performance assessment with cross-validation and genomics-specific evaluation metrics
-* **Clinical Applications:**Particularly effective for biomarker discovery and high-dimensional molecular data analysis
+* **Feature Screening:** Survival association-based feature selection with configurable p-value thresholds and multiple testing corrections
+* **Dimensionality Reduction:** Principal component analysis of selected features optimized for Cox regression applications
+* **Model Validation:** Comprehensive performance assessment with cross-validation and genomics-specific evaluation metrics
+* **Clinical Applications:** Particularly effective for biomarker discovery and high-dimensional molecular data analysis
 
 #### **Advanced Non-Parametric Methods - Statistical Test Suite**
 
 ##### **Cochran's Q Test (cochranq) - Repeated Binary Measures**
 
-* **Extended McNemar Analysis:**Statistical analysis for more than 2 paired groups or time points with comprehensive effect size measures
-* **Clinical Applications:**Treatment response tracking over time, diagnostic concordance across multiple raters, and longitudinal binary outcomes
-* **Post-Hoc Comparisons:**Multiple comparison procedures with Bonferroni, Holm, and FDR corrections for pairwise testing
-* **Power Analysis:**Sample size calculation and power assessment for repeated binary measure study designs
+* **Extended McNemar Analysis:** Statistical analysis for more than 2 paired groups or time points with comprehensive effect size measures
+* **Clinical Applications:** Treatment response tracking over time, diagnostic concordance across multiple raters, and longitudinal binary outcomes
+* **Post-Hoc Comparisons:** Multiple comparison procedures with Bonferroni, Holm, and FDR corrections for pairwise testing
+* **Power Analysis:** Sample size calculation and power assessment for repeated binary measure study designs
 
 ##### **Friedman Test Enhancement (friedmantest) - Non-Parametric Repeated Measures**
 
-* **Robust Alternative:**Non-parametric repeated measures ANOVA for ordinal or non-normal data with comprehensive post-hoc testing
-* **Multiple Comparison Methods:**Nemenyi, Wilcoxon signed-rank, and Conover post-hoc procedures with effect size calculations
-* **Clinical Integration:**Within-subjects analysis for treatment protocols, biomarker progression, and patient monitoring over time
-* **Effect Size Measures:**Kendall's W coefficient with clinical interpretation and confidence intervals
+* **Robust Alternative:** Non-parametric repeated measures ANOVA for ordinal or non-normal data with comprehensive post-hoc testing
+* **Multiple Comparison Methods:** Nemenyi, Wilcoxon signed-rank, and Conover post-hoc procedures with effect size calculations
+* **Clinical Integration:** Within-subjects analysis for treatment protocols, biomarker progression, and patient monitoring over time
+* **Effect Size Measures:** Kendall's W coefficient with clinical interpretation and confidence intervals
 
 ##### **Page's Trend Test (pagetrendtest) - Ordered Alternatives**
 
-* **Trend Detection:**Specialized analysis for detecting ordered patterns in repeated measures with superior statistical power
-* **Clinical Applications:**Dose-response studies, treatment escalation protocols, and progressive intervention assessments
-* **Statistical Rigor:**Page's L statistic with exact and asymptotic p-values plus trend effect size quantification
-* **Research Applications:**Biomarker progression analysis and ordered categorical outcome evaluation
+* **Trend Detection:** Specialized analysis for detecting ordered patterns in repeated measures with superior statistical power
+* **Clinical Applications:** Dose-response studies, treatment escalation protocols, and progressive intervention assessments
+* **Statistical Rigor:** Page's L statistic with exact and asymptotic p-values plus trend effect size quantification
+* **Research Applications:** Biomarker progression analysis and ordered categorical outcome evaluation
 
 #### **Clinical Translation Suite - Dynamic Prediction & Treatment Optimization**
 
 ##### **Dynamic Prediction Models (dynamicprediction) - Real-Time Prognosis**
 
-* **Longitudinal Integration:**Dynamic risk prediction incorporating time-varying biomarker data with joint modeling frameworks
-* **Landmark Analysis:**Time-updated prognosis calculation with flexible landmark time selection and survival updating
-* **Clinical Applications:**Real-time prognostic updating for clinical decision support and personalized patient counseling
-* **Prediction Intervals:**Personalized prediction intervals with uncertainty quantification and clinical interpretation guidelines
+* **Longitudinal Integration:** Dynamic risk prediction incorporating time-varying biomarker data with joint modeling frameworks
+* **Landmark Analysis:** Time-updated prognosis calculation with flexible landmark time selection and survival updating
+* **Clinical Applications:** Real-time prognostic updating for clinical decision support and personalized patient counseling
+* **Prediction Intervals:** Personalized prediction intervals with uncertainty quantification and clinical interpretation guidelines
 
 ##### **Clinical Prediction Models (clinicalprediction) - Model Development & Validation**
 
-* **Comprehensive Validation:**Clinical prediction model development with internal and external validation frameworks
-* **Nomogram Generation:**Interactive nomogram creation for clinical use with risk score calculation and calibration assessment
-* **Performance Metrics:**Discrimination (C-index, AUC) and calibration assessment with decision curve analysis integration
-* **Clinical Utility:**Treatment benefit quantification with cost-effectiveness analysis and personalized recommendations
+* **Comprehensive Validation:** Clinical prediction model development with internal and external validation frameworks
+* **Nomogram Generation:** Interactive nomogram creation for clinical use with risk score calculation and calibration assessment
+* **Performance Metrics:** Discrimination (C-index, AUC) and calibration assessment with decision curve analysis integration
+* **Clinical Utility:** Treatment benefit quantification with cost-effectiveness analysis and personalized recommendations
 
 ##### **Treatment Effects Analysis (treatmenteffects, treatmentoptim) - Personalized Medicine**
 
-* **Individual Effects:**Treatment benefit quantification at patient level with subgroup analysis for differential effects
-* **Optimization Framework:**Treatment selection optimization based on patient characteristics and biomarker profiles
-* **Uncertainty Quantification:**Bootstrap confidence intervals and sensitivity analysis for treatment recommendations
-* **Cost-Effectiveness:**Integration of clinical outcomes with economic evaluation for healthcare decision making
+* **Individual Effects:** Treatment benefit quantification at patient level with subgroup analysis for differential effects
+* **Optimization Framework:** Treatment selection optimization based on patient characteristics and biomarker profiles
+* **Uncertainty Quantification:** Bootstrap confidence intervals and sensitivity analysis for treatment recommendations
+* **Cost-Effectiveness:** Integration of clinical outcomes with economic evaluation for healthcare decision making
 
 #### **Advanced Survival Methodology - Time-Updated & Transformation Models**
 
 ##### **Time-Updated Survival Estimates (timeupdatedsurvival, timeupdatesurvival) - Dynamic Survival**
 
-* **Real-Time Updates:**Time-updated survival probability estimates incorporating new patient information over follow-up
-* **Additive Hazards:**Non-parametric and semi-parametric approaches using timereg methodology for time-varying effects
-* **Landmark Analysis:**Dynamic survival prediction with landmark methodology for clinical prognosis updating
-* **Clinical Integration:**Real-time prognostic counseling tools with updated survival curves and patient communication aids
+* **Real-Time Updates:** Time-updated survival probability estimates incorporating new patient information over follow-up
+* **Additive Hazards:** Non-parametric and semi-parametric approaches using timereg methodology for time-varying effects
+* **Landmark Analysis:** Dynamic survival prediction with landmark methodology for clinical prognosis updating
+* **Clinical Integration:** Real-time prognostic counseling tools with updated survival curves and patient communication aids
 
 ##### **Transformation Models (transformationmodels) - Distributional Flexibility**
 
-* **Flexible Transformations:**Box-Cox, log-rank, and normal score transformations for survival data beyond proportional hazards
-* **Joint Estimation:**Simultaneous estimation of transformation parameters and regression coefficients with model selection
-* **Model Comparison:**Information criteria (AIC/BIC) based selection with cross-validation for optimal transformation choice
-* **Clinical Applications:**Enhanced modeling of complex survival distributions with improved prognostic accuracy
+* **Flexible Transformations:** Box-Cox, log-rank, and normal score transformations for survival data beyond proportional hazards
+* **Joint Estimation:** Simultaneous estimation of transformation parameters and regression coefficients with model selection
+* **Model Comparison:** Information criteria (AIC/BIC) based selection with cross-validation for optimal transformation choice
+* **Clinical Applications:** Enhanced modeling of complex survival distributions with improved prognostic accuracy
 
 #### **Advanced Survival Methodology - Flexible Parametric Models**
 
 ##### **Flexible Parametric Survival Models (flexparametricadvanced) - Royston-Parmar Methods**
 
-* **Multiple Distributions:**Comprehensive support for Weibull, log-normal, log-logistic, gamma, Gompertz, and generalized gamma distributions
-* **Royston-Parmar Splines:**Flexible baseline hazards using restricted cubic splines with customizable degrees of freedom
-* **Superior Extrapolation:**Enhanced prediction capabilities for health economic modeling and long-term survival projections
-* **Time-Varying Effects:**Model covariate effects that change over time with smooth hazard transitions
-* **Cure Models:**Support for mixture and non-mixture cure model specifications for populations with cured fractions
-* **Clinical Applications:**Smooth hazard and survival functions with comprehensive model diagnostics and selection criteria
+* **Multiple Distributions:** Comprehensive support for Weibull, log-normal, log-logistic, gamma, Gompertz, and generalized gamma distributions
+* **Royston-Parmar Splines:** Flexible baseline hazards using restricted cubic splines with customizable degrees of freedom
+* **Superior Extrapolation:** Enhanced prediction capabilities for health economic modeling and long-term survival projections
+* **Time-Varying Effects:** Model covariate effects that change over time with smooth hazard transitions
+* **Cure Models:** Support for mixture and non-mixture cure model specifications for populations with cured fractions
+* **Clinical Applications:** Smooth hazard and survival functions with comprehensive model diagnostics and selection criteria
 
 #### **Comprehensive Power Analysis & Sample Size Calculations**
 
 ##### **Power Analysis Suite (poweranalysis) - Clinical Trial Design**
 
-* **Log-Rank Power:**Effect size estimation and sample size determination with comprehensive sensitivity analysis across parameter ranges
-* **Cox Regression Power:**Hazard ratio scenarios with covariate adjustments and multi-variable model power calculations
-* **Competing Risks:**Cause-specific hazard modeling with power assessment for complex survival endpoints
-* **Non-Inferiority Designs:**Margin specifications with regulatory compliance (FDA/EMA) and adaptive trial methodology
-* **RMST Analysis:**Restricted mean survival time power analysis for alternative endpoint evaluation
-* **Advanced Designs:**Multi-arm trials, cluster randomization, interim analysis planning with alpha spending functions
+* **Log-Rank Power:** Effect size estimation and sample size determination with comprehensive sensitivity analysis across parameter ranges
+* **Cox Regression Power:** Hazard ratio scenarios with covariate adjustments and multi-variable model power calculations
+* **Competing Risks:** Cause-specific hazard modeling with power assessment for complex survival endpoints
+* **Non-Inferiority Designs:** Margin specifications with regulatory compliance (FDA/EMA) and adaptive trial methodology
+* **RMST Analysis:** Restricted mean survival time power analysis for alternative endpoint evaluation
+* **Advanced Designs:** Multi-arm trials, cluster randomization, interim analysis planning with alpha spending functions
 
 ### **August 24, 2025 - Phase 9: Specialized Clinical Applications - Complete Implementation**
 
@@ -9563,63 +9676,63 @@ The module outputs include:
 
 ##### **Progression-Free Survival Analysis (progressionsurvival) - Oncology Research Framework**
 
-* **Specialized PFS Analysis:**Complete implementation of progression-free survival analysis with competing risks methodology, landmark analysis, and biomarker interactions
-* **Clinical Trial Integration:**Support for regulatory endpoints (FDA/EMA), treatment effect estimation with clinical significance assessment, and comprehensive interim monitoring
-* **Advanced Methods:**Non-inferiority analysis, maxcombo testing, RMST-based comparisons, and adaptive enrichment designs for biomarker-driven studies
-* **Visualization Suite:**Kaplan-Meier curves with risk tables, cumulative incidence functions, landmark analysis plots, forest plots, and CONSORT flow diagrams
+* **Specialized PFS Analysis:** Complete implementation of progression-free survival analysis with competing risks methodology, landmark analysis, and biomarker interactions
+* **Clinical Trial Integration:** Support for regulatory endpoints (FDA/EMA), treatment effect estimation with clinical significance assessment, and comprehensive interim monitoring
+* **Advanced Methods:** Non-inferiority analysis, maxcombo testing, RMST-based comparisons, and adaptive enrichment designs for biomarker-driven studies
+* **Visualization Suite:** Kaplan-Meier curves with risk tables, cumulative incidence functions, landmark analysis plots, forest plots, and CONSORT flow diagrams
 
 ##### **Enhanced Treatment Switching Analysis (treatmentswitching) - IPCW Methods**
 
-* **Stabilized IPCW Weights:**Implementation of stabilized inverse probability of censoring weighting using marginal probabilities for reduced variance
-* **Bootstrap Confidence Intervals:**Parallel processing bootstrap with comprehensive sensitivity analysis across multiple adjustment methods
-* **Enhanced Validation:**Robust data validation with informative missingness detection and treatment switching pattern analysis
-* **Clinical Interpretation:**Comprehensive effect size interpretation with regulatory compliance considerations
+* **Stabilized IPCW Weights:** Implementation of stabilized inverse probability of censoring weighting using marginal probabilities for reduced variance
+* **Bootstrap Confidence Intervals:** Parallel processing bootstrap with comprehensive sensitivity analysis across multiple adjustment methods
+* **Enhanced Validation:** Robust data validation with informative missingness detection and treatment switching pattern analysis
+* **Clinical Interpretation:** Comprehensive effect size interpretation with regulatory compliance considerations
 
 ##### **Advanced Tumor Growth Modeling (tumorgrowth) - Kinetics Analysis**
 
-* **Six Growth Models:**Complete implementation of Exponential, Gompertz, Logistic, von Bertalanffy, Linear, and Power Law models with automatic model selection
-* **Treatment Effects Analysis:**Comprehensive treatment effect estimation with confidence intervals and model-specific parameter interpretation
-* **Enhanced Validation:**Robust error handling, outlier detection, and biological constraint validation for tumor growth data
-* **Clinical Applications:**Growth rate estimation, doubling time calculation, and treatment response assessment tools
+* **Six Growth Models:** Complete implementation of Exponential, Gompertz, Logistic, von Bertalanffy, Linear, and Power Law models with automatic model selection
+* **Treatment Effects Analysis:** Comprehensive treatment effect estimation with confidence intervals and model-specific parameter interpretation
+* **Enhanced Validation:** Robust error handling, outlier detection, and biological constraint validation for tumor growth data
+* **Clinical Applications:** Growth rate estimation, doubling time calculation, and treatment response assessment tools
 
 ##### **Enhanced Cancer Screening Evaluation (screeningevaluation) - Epidemiological Methods**
 
-* **Interval Cancer Analysis:**Advanced analysis of cancers missed between screening rounds with sensitivity reduction estimation
-* **Lead Time Analysis:**Sojourn time estimation and lead time bias assessment using prevalence-incidence methods
-* **Length Bias Assessment:**Screen-detected vs symptomatic cancer comparison with bias potential evaluation
-* **Overdiagnosis Analysis:**Age-adjusted excess detection assessment with clinical significance thresholds and recommendation systems
+* **Interval Cancer Analysis:** Advanced analysis of cancers missed between screening rounds with sensitivity reduction estimation
+* **Lead Time Analysis:** Sojourn time estimation and lead time bias assessment using prevalence-incidence methods
+* **Length Bias Assessment:** Screen-detected vs symptomatic cancer comparison with bias potential evaluation
+* **Overdiagnosis Analysis:** Age-adjusted excess detection assessment with clinical significance thresholds and recommendation systems
 
 #### **Epidemiological Survival Methods - Population-Based Analysis**
 
 ##### **Epidemiological Survival Analysis (epidemiosurvival) - Population Studies Framework**
 
-* **Cohort Survival Analysis:**Complete implementation using robust statistical methods with age standardization (direct/indirect) and population weighting
-* **Case-Cohort Designs:**Prentice, Self & Prentice, Lin & Ying, and Barlow methods with proper weighting schemes and efficiency calculations
-* **Population Attributable Risk:**Levin's formula, adjusted PAR, sequential PAR with bootstrap confidence intervals and clinical interpretation
-* **Complex Survey Integration:**Weighted survival analysis with survey design considerations, stratified sampling, and multi-stage design support
+* **Cohort Survival Analysis:** Complete implementation using robust statistical methods with age standardization (direct/indirect) and population weighting
+* **Case-Cohort Designs:** Prentice, Self & Prentice, Lin & Ying, and Barlow methods with proper weighting schemes and efficiency calculations
+* **Population Attributable Risk:** Levin's formula, adjusted PAR, sequential PAR with bootstrap confidence intervals and clinical interpretation
+* **Complex Survey Integration:** Weighted survival analysis with survey design considerations, stratified sampling, and multi-stage design support
 
 #### **Advanced Clinical Trial Applications - State-of-the-Art Methodology**
 
 ##### **Advanced Clinical Trial Methods (advancedtrials) - Group Sequential & Adaptive Designs**
 
-* **Group Sequential Designs:**O'Brien-Fleming, Pocock, Lan-DeMets, and Hwang-Shih-DeCani spending functions with comprehensive boundary calculations
-* **Adaptive Designs:**Sample size re-estimation, population enrichment, treatment selection with conditional power assessment and bias adjustment methods
-* **Platform Trials:**Multiple treatment evaluations with shared controls, adaptive arm addition/dropping, and graduation/futility boundaries
-* **Master Protocols:**Umbrella and basket trial designs with biomarker-driven enrichment strategies and interaction testing frameworks
-* **Operating Characteristics:**Simulation-based evaluation with regulatory compliance (FDA/EMA) and comprehensive interim monitoring guidelines
+* **Group Sequential Designs:** O'Brien-Fleming, Pocock, Lan-DeMets, and Hwang-Shih-DeCani spending functions with comprehensive boundary calculations
+* **Adaptive Designs:** Sample size re-estimation, population enrichment, treatment selection with conditional power assessment and bias adjustment methods
+* **Platform Trials:** Multiple treatment evaluations with shared controls, adaptive arm addition/dropping, and graduation/futility boundaries
+* **Master Protocols:** Umbrella and basket trial designs with biomarker-driven enrichment strategies and interaction testing frameworks
+* **Operating Characteristics:** Simulation-based evaluation with regulatory compliance (FDA/EMA) and comprehensive interim monitoring guidelines
 
 #### **Technical Achievements & Bug Fixes**
 
-* **Schema Compliance:**All modules compile successfully with proper YAML structure and UI integration
-* **Syntax Resolution:**Fixed Python-style conditional expressions in R code (screeningevaluation.b.R) and resolved R6 class duplicate method issues
-* **Error Handling:**Enhanced data validation, robust error handling, and comprehensive clinical interpretation across all modules
-* **Documentation:**Complete implementation documented in `/vignettes/ClinicoPath-ImplementedFeatures-2025.qmd` with package dependencies and clinical applications
+* **Schema Compliance:** All modules compile successfully with proper YAML structure and UI integration
+* **Syntax Resolution:** Fixed Python-style conditional expressions in R code (screeningevaluation.b.R) and resolved R6 class duplicate method issues
+* **Error Handling:** Enhanced data validation, robust error handling, and comprehensive clinical interpretation across all modules
+* **Documentation:** Complete implementation documented in `/vignettes/ClinicoPath-ImplementedFeatures-2025.qmd` with package dependencies and clinical applications
 
 #### **Implementation Milestone**
 
-* **Phase 9 Complete:**All specialized clinical applications successfully implemented with cutting-edge statistical methodology
-* **Total Functions:**150+ specialized survival analysis and clinical research functions
-* **Regulatory Focus:**FDA/EMA compliance considerations throughout with comprehensive documentation and validation
+* **Phase 9 Complete:** All specialized clinical applications successfully implemented with cutting-edge statistical methodology
+* **Total Functions:** 150+ specialized survival analysis and clinical research functions
+* **Regulatory Focus:** FDA/EMA compliance considerations throughout with comprehensive documentation and validation
 
 # ClinicoPath 0.0.31.42
 
@@ -9629,49 +9742,49 @@ The module outputs include:
 
 ##### **Direct Regression on Survival Function (directregression) - Pseudo-Observation Framework**
 
-* **Comprehensive Pseudo-Observation Methods:**Implementation of jackknife-based pseudo-observations for direct survival function regression with support for multiple time points and confidence interval estimation
-* **Multiple Regression Types:**Support for linear, logistic, and complementary log-log regression models with automatic model selection and diagnostic tools
-* **Clinical Interpretation Tools:**Direct interpretation of regression coefficients as changes in survival probability with clinical significance assessment and visualization
-* **Advanced Modeling Options:**Bootstrap standard errors, model comparison across time points, and residual analysis for model validation
+* **Comprehensive Pseudo-Observation Methods:** Implementation of jackknife-based pseudo-observations for direct survival function regression with support for multiple time points and confidence interval estimation
+* **Multiple Regression Types:** Support for linear, logistic, and complementary log-log regression models with automatic model selection and diagnostic tools
+* **Clinical Interpretation Tools:** Direct interpretation of regression coefficients as changes in survival probability with clinical significance assessment and visualization
+* **Advanced Modeling Options:** Bootstrap standard errors, model comparison across time points, and residual analysis for model validation
 
 ##### **Generalized Pseudo-Observations (generalpseudo) - Unified Framework**
 
-* **Multiple Functional Types:**Support for survival probabilities, cumulative incidence functions, restricted mean survival times, and quantile pseudo-observations
-* **Competing Risks Integration:**Complete framework for competing risks analysis using pseudo-observations with cause-specific modeling
-* **Advanced Estimation Methods:**Jackknife, bootstrap, and analytical pseudo-observation calculation with automatic method selection
-* **Comprehensive Regression Framework:**Support for various regression types including beta regression for bounded outcomes with clustered data handling
+* **Multiple Functional Types:** Support for survival probabilities, cumulative incidence functions, restricted mean survival times, and quantile pseudo-observations
+* **Competing Risks Integration:** Complete framework for competing risks analysis using pseudo-observations with cause-specific modeling
+* **Advanced Estimation Methods:** Jackknife, bootstrap, and analytical pseudo-observation calculation with automatic method selection
+* **Comprehensive Regression Framework:** Support for various regression types including beta regression for bounded outcomes with clustered data handling
 
 ##### **Restricted Mean Survival Time Regression (rmstregression) - Clinical Outcome Modeling**
 
-* **Multiple RMST Approaches:**Implementation of pseudo-observation, direct modeling, and Wei-Lin-Ying methods for RMST regression
-* **Adaptive Tau Selection:**Automatic and manual restriction time selection with percentile-based and adaptive methods
-* **Group Comparison Framework:**Pairwise RMST differences with multiple comparison adjustment and clinical significance testing
-* **Advanced Visualization:**RMST curves, difference plots over time, and cumulative RMST visualization with confidence bands
+* **Multiple RMST Approaches:** Implementation of pseudo-observation, direct modeling, and Wei-Lin-Ying methods for RMST regression
+* **Adaptive Tau Selection:** Automatic and manual restriction time selection with percentile-based and adaptive methods
+* **Group Comparison Framework:** Pairwise RMST differences with multiple comparison adjustment and clinical significance testing
+* **Advanced Visualization:** RMST curves, difference plots over time, and cumulative RMST visualization with confidence bands
 
 ##### **Dynamic Survival Prediction (dynamicprediction) - Longitudinal Integration**
 
-* **Landmark Analysis Implementation:**Complete landmark approach with dynamic risk prediction and time-varying coefficient estimation
-* **Joint Modeling Framework:**Integration of longitudinal biomarker trajectories with survival outcomes for personalized prediction
-* **Multiple Association Structures:**Support for current value, slope, cumulative, and shared random effects associations
-* **Real-Time Risk Assessment:**Dynamic updating of survival predictions as new biomarker measurements become available
+* **Landmark Analysis Implementation:** Complete landmark approach with dynamic risk prediction and time-varying coefficient estimation
+* **Joint Modeling Framework:** Integration of longitudinal biomarker trajectories with survival outcomes for personalized prediction
+* **Multiple Association Structures:** Support for current value, slope, cumulative, and shared random effects associations
+* **Real-Time Risk Assessment:** Dynamic updating of survival predictions as new biomarker measurements become available
 
 ##### **Principal Component Cox Models (principalcox) - High-Dimensional Analysis**
 
-* **Multiple PCA Methods:**Standard, sparse, supervised, and kernel PCA implementations for dimension reduction
-* **Automatic Component Selection:**Cross-validation, variance threshold, and scree plot methods for optimal component determination
-* **Comprehensive Scaling Options:**Standardization, normalization, and robust scaling methods with outlier handling
-* **Variable Importance Analysis:**Component loadings, contribution analysis, and original variable importance tracking
+* **Multiple PCA Methods:** Standard, sparse, supervised, and kernel PCA implementations for dimension reduction
+* **Automatic Component Selection:** Cross-validation, variance threshold, and scree plot methods for optimal component determination
+* **Comprehensive Scaling Options:** Standardization, normalization, and robust scaling methods with outlier handling
+* **Variable Importance Analysis:** Component loadings, contribution analysis, and original variable importance tracking
 
 ##### **Partial Least Squares Cox (plscox) - Supervised Dimension Reduction**
 
-* **Note:**Module was already comprehensively implemented with NIPALS, kernel, and wide kernel PLS algorithms
-* **Existing Features:**Cross-validated component selection, bootstrap validation, and variable importance assessment
+* **Note:** Module was already comprehensively implemented with NIPALS, kernel, and wide kernel PLS algorithms
+* **Existing Features:** Cross-validated component selection, bootstrap validation, and variable importance assessment
 
 #### **Bug Fixes and Improvements**
 
-* **Fixed:**Compilation error in splinehazard.u.yaml file that was preventing module compilation
-* **Enhanced:**Error handling and validation across all new survival modules
-* **Improved:**Clinical interpretation and methodology explanations for advanced methods
+* **Fixed:** Compilation error in splinehazard.u.yaml file that was preventing module compilation
+* **Enhanced:** Error handling and validation across all new survival modules
+* **Improved:** Clinical interpretation and methodology explanations for advanced methods
 
 # ClinicoPath 0.0.31.39
 
@@ -9681,67 +9794,67 @@ The module outputs include:
 
 ##### **Laboratory Control Charts (labcontrolcharts) - Statistical Process Control**
 
-* **Multi-Method Control Chart Implementation:**Comprehensive support for Shewhart, CUSUM, EWMA, and Moving Range control charts with automated trend detection and process capability assessment
-* **Westgard Multi-Rules Engine:**Complete implementation of Westgard quality control rules including 13s, 22s, R4s, 41s, and 10x rules with automated violation detection and clinical significance interpretation
-* **Advanced Statistical Analysis:**Real-time process monitoring with control limit calculation, systematic bias detection, and precision monitoring across multiple analytical runs
-* **Quality Assurance Integration:**Automated QC data analysis with trend identification, out-of-control detection, and corrective action recommendations following CLSI guidelines
+* **Multi-Method Control Chart Implementation:** Comprehensive support for Shewhart, CUSUM, EWMA, and Moving Range control charts with automated trend detection and process capability assessment
+* **Westgard Multi-Rules Engine:** Complete implementation of Westgard quality control rules including 13s, 22s, R4s, 41s, and 10x rules with automated violation detection and clinical significance interpretation
+* **Advanced Statistical Analysis:** Real-time process monitoring with control limit calculation, systematic bias detection, and precision monitoring across multiple analytical runs
+* **Quality Assurance Integration:** Automated QC data analysis with trend identification, out-of-control detection, and corrective action recommendations following CLSI guidelines
 
 ##### **Six Sigma Metrics (sigmametrics) - Laboratory Performance Excellence**
 
-* **Comprehensive Sigma Calculation Engine:**Multi-method sigma level calculation including observed data analysis, proficiency testing integration, and biological variation assessment
-* **Quality Goal Integration:**Support for CLIA, RCPAQAP, and biological variation quality specifications with automated goal selection and performance evaluation
-* **Process Capability Analysis:**Complete Cp, Cpk, and process performance indices with defect rate calculation (PPM) and statistical process control integration
-* **Performance Benchmarking:**Laboratory performance comparison against industry standards with continuous improvement recommendations and quality metrics tracking
+* **Comprehensive Sigma Calculation Engine:** Multi-method sigma level calculation including observed data analysis, proficiency testing integration, and biological variation assessment
+* **Quality Goal Integration:** Support for CLIA, RCPAQAP, and biological variation quality specifications with automated goal selection and performance evaluation
+* **Process Capability Analysis:** Complete Cp, Cpk, and process performance indices with defect rate calculation (PPM) and statistical process control integration
+* **Performance Benchmarking:** Laboratory performance comparison against industry standards with continuous improvement recommendations and quality metrics tracking
 
 ##### **Method Validation (methodvalidation) - CLSI Compliance Framework**
 
-* **Multi-Protocol Validation Support:**Complete implementation of CLSI EP15-A3 (precision), EP09-A3 (method comparison), EP06-A (linearity), and EP05-A3 (accuracy) protocols
-* **Advanced Precision Analysis:**Within-run, between-run, and total precision calculations with confidence intervals, measurement uncertainty contribution, and statistical significance testing
-* **Comprehensive Accuracy Assessment:**Bias evaluation, recovery studies, and trueness assessment with statistical testing and clinical significance evaluation
-* **Regulatory Compliance Tools:**FDA guidance compliance checking with documentation templates and validation report generation
+* **Multi-Protocol Validation Support:** Complete implementation of CLSI EP15-A3 (precision), EP09-A3 (method comparison), EP06-A (linearity), and EP05-A3 (accuracy) protocols
+* **Advanced Precision Analysis:** Within-run, between-run, and total precision calculations with confidence intervals, measurement uncertainty contribution, and statistical significance testing
+* **Comprehensive Accuracy Assessment:** Bias evaluation, recovery studies, and trueness assessment with statistical testing and clinical significance evaluation
+* **Regulatory Compliance Tools:** FDA guidance compliance checking with documentation templates and validation report generation
 
 ##### **Reference Intervals (referenceintervals) - Population-Based Reference Standards**
 
-* **Multi-Method Reference Interval Establishment:**Support for parametric, nonparametric, robust nonparametric, and bootstrap approaches following CLSI EP28-A3c guidelines
-* **Population Stratification Analysis:**Age, gender, and ethnic group stratification with statistical testing for partition necessity and clinical significance assessment
-* **Advanced Statistical Methods:**Outlier detection using Horn's method, Box-Cox transformation, and robust statistics for non-normal distributions
-* **Clinical Decision Support:**Reference interval transferability testing, verification protocols, and population-specific adjustments with uncertainty quantification
+* **Multi-Method Reference Interval Establishment:** Support for parametric, nonparametric, robust nonparametric, and bootstrap approaches following CLSI EP28-A3c guidelines
+* **Population Stratification Analysis:** Age, gender, and ethnic group stratification with statistical testing for partition necessity and clinical significance assessment
+* **Advanced Statistical Methods:** Outlier detection using Horn's method, Box-Cox transformation, and robust statistics for non-normal distributions
+* **Clinical Decision Support:** Reference interval transferability testing, verification protocols, and population-specific adjustments with uncertainty quantification
 
 ##### **Measurement Uncertainty (measurementuncertainty) - Medical Laboratory Compliance**
 
-* **GUM Approach Implementation:**Complete Guide to Uncertainty in Measurement (GUM) methodology with Type A and Type B uncertainty evaluation and combined uncertainty calculation
-* **Monte Carlo Simulation Engine:**Advanced uncertainty propagation using Monte Carlo methods with configurable simulation parameters and distribution modeling
-* **Comprehensive Uncertainty Budget:**Bottom-up and top-down uncertainty assessment with component contribution analysis and optimization recommendations
-* **Medical Laboratory Compliance Framework:**Complete medical laboratory uncertainty evaluation with clinical significance assessment and expanded uncertainty reporting
+* **GUM Approach Implementation:** Complete Guide to Uncertainty in Measurement (GUM) methodology with Type A and Type B uncertainty evaluation and combined uncertainty calculation
+* **Monte Carlo Simulation Engine:** Advanced uncertainty propagation using Monte Carlo methods with configurable simulation parameters and distribution modeling
+* **Comprehensive Uncertainty Budget:** Bottom-up and top-down uncertainty assessment with component contribution analysis and optimization recommendations
+* **Medical Laboratory Compliance Framework:** Complete medical laboratory uncertainty evaluation with clinical significance assessment and expanded uncertainty reporting
 
 #### **Phase D: Spatial Statistics & Digital Pathology - Enhanced Implementation**
 
 ##### **Spatial Autocorrelation Analysis (spatialautocorrelation) - Pattern Recognition**
 
-* **Global Autocorrelation Measures:**Complete implementation of Moran's I and Geary's C with multiple significance testing methods (permutation, bootstrap, normal approximation)
-* **Local Indicators of Spatial Association (LISA):**Comprehensive LISA analysis with cluster detection, hot spot identification, and spatial outlier detection for tissue pattern analysis
-* **Multiple Spatial Weights Matrices:**Support for Queen/Rook contiguity, K-nearest neighbors, distance-based, inverse distance, and Gaussian kernel weights with edge effect correction
-* **Clinical Interpretation Framework:**Pathology-specific pattern interpretation with biological significance assessment and clinical recommendations for digital pathology applications
+* **Global Autocorrelation Measures:** Complete implementation of Moran's I and Geary's C with multiple significance testing methods (permutation, bootstrap, normal approximation)
+* **Local Indicators of Spatial Association (LISA):** Comprehensive LISA analysis with cluster detection, hot spot identification, and spatial outlier detection for tissue pattern analysis
+* **Multiple Spatial Weights Matrices:** Support for Queen/Rook contiguity, K-nearest neighbors, distance-based, inverse distance, and Gaussian kernel weights with edge effect correction
+* **Clinical Interpretation Framework:** Pathology-specific pattern interpretation with biological significance assessment and clinical recommendations for digital pathology applications
 
 ##### **Existing Spatial Analysis Enhancement**
 
-* **Ripley's K-function Analysis (spatialanalysis):**Advanced spatial clustering detection with multiple distance scales and edge correction methods
-* **Nearest Neighbor Distance Analysis:**Clark-Evans randomness testing with comprehensive spatial distribution assessment
-* **Haralick Texture Analysis (haralicktexture):**Complete texture feature extraction for digital pathology image analysis
+* **Ripley's K-function Analysis (spatialanalysis):** Advanced spatial clustering detection with multiple distance scales and edge correction methods
+* **Nearest Neighbor Distance Analysis:** Clark-Evans randomness testing with comprehensive spatial distribution assessment
+* **Haralick Texture Analysis (haralicktexture):** Complete texture feature extraction for digital pathology image analysis
 
 #### **Technical Infrastructure Improvements**
 
 ##### **Menu Organization Enhancement**
 
-* **Strategic Menu Grouping:**Reorganized spatial autocorrelation and measurement uncertainty modules into ClinicoPathDescriptivesD for improved user navigation
-* **Module Architecture Consistency:**Maintained standard jamovi 4-file architecture (.a.yaml, .r.yaml, .u.yaml, .b.R) across all new implementations
-* **Comprehensive Documentation:**Added detailed method explanations, clinical interpretation guides, and regulatory compliance information for all new modules
+* **Strategic Menu Grouping:** Reorganized spatial autocorrelation and measurement uncertainty modules into ClinicoPathDescriptivesD for improved user navigation
+* **Module Architecture Consistency:** Maintained standard jamovi 4-file architecture (.a.yaml, .r.yaml, .u.yaml, .b.R) across all new implementations
+* **Comprehensive Documentation:** Added detailed method explanations, clinical interpretation guides, and regulatory compliance information for all new modules
 
 ##### **Quality Assurance Framework**
 
-* **Robust Error Handling:**Comprehensive input validation, missing data handling, and graceful error recovery across all new statistical methods
-* **Performance Optimization:**Efficient algorithms for large dataset processing with memory management and computational optimization
-* **Clinical Validation:**Extensive testing with clinical datasets and validation against established statistical software packages
+* **Robust Error Handling:** Comprehensive input validation, missing data handling, and graceful error recovery across all new statistical methods
+* **Performance Optimization:** Efficient algorithms for large dataset processing with memory management and computational optimization
+* **Clinical Validation:** Extensive testing with clinical datasets and validation against established statistical software packages
 
 # ClinicoPath 0.0.31.38
 
@@ -9751,17 +9864,17 @@ The module outputs include:
 
 ##### **Improved Variable Name Display and Table Structure**
 
-* **Enhanced Variable Name Presentation:**Added comprehensive variable name display alongside factor levels in contingency tables for improved clinical interpretation
-* **Fixed HTML Table Structure:**Resolved malformed table issues by implementing proper htmltools tag structure with `htmltools::tags$th()` and `htmltools::tags$td()`
-* **Variable Scope Resolution:**Fixed variable passing issues by updating method signatures to properly pass row and column variable names throughout the analysis pipeline
-* **Restored Pairwise Comparison Tables:**Ensured that detailed 2x2 contingency tables are always displayed for each pairwise comparison regardless of overall test significance
+* **Enhanced Variable Name Presentation:** Added comprehensive variable name display alongside factor levels in contingency tables for improved clinical interpretation
+* **Fixed HTML Table Structure:** Resolved malformed table issues by implementing proper htmltools tag structure with `htmltools::tags$th()` and `htmltools::tags$td()`
+* **Variable Scope Resolution:** Fixed variable passing issues by updating method signatures to properly pass row and column variable names throughout the analysis pipeline
+* **Restored Pairwise Comparison Tables:** Ensured that detailed 2x2 contingency tables are always displayed for each pairwise comparison regardless of overall test significance
 
 ##### **Enhanced Clinical Interpretability**
 
-* **Dual-Level Information Display:**Tables now show both variable names (e.g., "LVI", "PNI") and their corresponding factor levels for complete clinical context
-* **Improved Visual Styling:**Enhanced table presentation with proper font sizing and color coding for variable names vs. factor levels
-* **Complete Pairwise Analysis:**Restored functionality to display individual 2x2 tables with respective chi-square analysis and clinical explanations for each comparison
-* **Statistical Accuracy:**Maintained all statistical calculations while improving presentation and fixing structural issues
+* **Dual-Level Information Display:** Tables now show both variable names (e.g., "LVI", "PNI") and their corresponding factor levels for complete clinical context
+* **Improved Visual Styling:** Enhanced table presentation with proper font sizing and color coding for variable names vs. factor levels
+* **Complete Pairwise Analysis:** Restored functionality to display individual 2x2 tables with respective chi-square analysis and clinical explanations for each comparison
+* **Statistical Accuracy:** Maintained all statistical calculations while improving presentation and fixing structural issues
 
 ### **August 23, 2025 - Patient Monitoring Dashboard and Treatment Optimization Implementation**
 
@@ -9769,31 +9882,31 @@ The module outputs include:
 
 ##### **Comprehensive Real-Time Patient Monitoring**
 
-* **Multi-Parameter Vital Signs Tracking:**Continuous monitoring of heart rate, blood pressure, temperature, respiratory rate, oxygen saturation with configurable alert thresholds and trend analysis
-* **Advanced Laboratory Integration:**Real-time laboratory value tracking with reference range comparison, critical value detection, and automated trend analysis across multiple time windows
-* **Intelligent Alert Management:**Priority-based alert system with Critical, High, Medium, and Low classifications, response time tracking, and clinical escalation protocols
-* **Temporal Pattern Recognition:**Statistical trend analysis with slope detection, variance assessment, and clinical significance evaluation for early deterioration detection
+* **Multi-Parameter Vital Signs Tracking:** Continuous monitoring of heart rate, blood pressure, temperature, respiratory rate, oxygen saturation with configurable alert thresholds and trend analysis
+* **Advanced Laboratory Integration:** Real-time laboratory value tracking with reference range comparison, critical value detection, and automated trend analysis across multiple time windows
+* **Intelligent Alert Management:** Priority-based alert system with Critical, High, Medium, and Low classifications, response time tracking, and clinical escalation protocols
+* **Temporal Pattern Recognition:** Statistical trend analysis with slope detection, variance assessment, and clinical significance evaluation for early deterioration detection
 
 ##### **Clinical Decision Support Integration**
 
-* **Risk Stratification Engine:**Automated patient risk scoring with early warning system integration, multi-factor assessment, and predictive analytics for clinical deterioration
-* **Evidence-Based Alert Thresholds:**Configurable threshold sets for Standard, Pediatric, Geriatric, and ICU populations with automatic population-specific adjustments
-* **Clinical Pathway Integration:**Seamless integration with care protocols, treatment pathways, and clinical guidelines for standardized care delivery
-* **Quality Metrics Tracking:**Healthcare quality indicator monitoring with performance analytics, outcome measurement, and continuous improvement frameworks
+* **Risk Stratification Engine:** Automated patient risk scoring with early warning system integration, multi-factor assessment, and predictive analytics for clinical deterioration
+* **Evidence-Based Alert Thresholds:** Configurable threshold sets for Standard, Pediatric, Geriatric, and ICU populations with automatic population-specific adjustments
+* **Clinical Pathway Integration:** Seamless integration with care protocols, treatment pathways, and clinical guidelines for standardized care delivery
+* **Quality Metrics Tracking:** Healthcare quality indicator monitoring with performance analytics, outcome measurement, and continuous improvement frameworks
 
 ##### **Interactive Dashboard Visualization**
 
-* **Real-Time Data Streams:**Continuous data visualization with configurable monitoring frequencies (continuous, 15-minute, hourly, 4-hourly, daily intervals)
-* **Multi-Modal Display Options:**Comprehensive, Critical Care, Ward Monitoring, and Emergency Department dashboard configurations optimized for specific clinical settings
-* **Advanced Trend Plotting:**Time-series visualization for vital signs and laboratory trends with statistical analysis, correlation assessment, and predictive modeling
-* **Alert Management Interface:**Comprehensive alert dashboard with response tracking, escalation management, and communication tools for clinical team coordination
+* **Real-Time Data Streams:** Continuous data visualization with configurable monitoring frequencies (continuous, 15-minute, hourly, 4-hourly, daily intervals)
+* **Multi-Modal Display Options:** Comprehensive, Critical Care, Ward Monitoring, and Emergency Department dashboard configurations optimized for specific clinical settings
+* **Advanced Trend Plotting:** Time-series visualization for vital signs and laboratory trends with statistical analysis, correlation assessment, and predictive modeling
+* **Alert Management Interface:** Comprehensive alert dashboard with response tracking, escalation management, and communication tools for clinical team coordination
 
 ##### **Clinical Workflow Optimization**
 
-* **Medication Reconciliation:**Integrated medication tracking with administration monitoring, compliance assessment, and drug interaction screening
-* **Performance Analytics:**Clinical workflow analysis with efficiency scoring, bottleneck identification, and improvement recommendations
-* **Family Communication Tools:**Automated family updates, progress reporting, and communication management for enhanced patient care coordination
-* **Predictive Analytics Engine:**Machine learning-based early warning systems with outcome prediction and intervention recommendation capabilities
+* **Medication Reconciliation:** Integrated medication tracking with administration monitoring, compliance assessment, and drug interaction screening
+* **Performance Analytics:** Clinical workflow analysis with efficiency scoring, bottleneck identification, and improvement recommendations
+* **Family Communication Tools:** Automated family updates, progress reporting, and communication management for enhanced patient care coordination
+* **Predictive Analytics Engine:** Machine learning-based early warning systems with outcome prediction and intervention recommendation capabilities
 
 ### **August 23, 2025 - Treatment Optimization Framework Implementation**
 
@@ -9801,151 +9914,151 @@ The module outputs include:
 
 ##### **Personalized Treatment Selection Engine**
 
-* **Multi-Model Prediction Framework:**Advanced machine learning integration with Logistic Regression, Random Forest, Gradient Boosting, and Ensemble methods for individualized treatment response prediction
-* **Evidence-Based Recommendation System:**Automated treatment ranking based on predicted response rates, confidence intervals, risk-benefit analysis, and clinical evidence quality assessment
-* **Patient-Specific Modeling:**Comprehensive patient characteristic integration including demographics, comorbidities, biomarkers, and clinical history for personalized therapeutic decision-making
-* **Confidence Quantification:**Statistical uncertainty assessment with configurable confidence levels (50-99%) and prediction interval reporting for clinical decision support
+* **Multi-Model Prediction Framework:** Advanced machine learning integration with Logistic Regression, Random Forest, Gradient Boosting, and Ensemble methods for individualized treatment response prediction
+* **Evidence-Based Recommendation System:** Automated treatment ranking based on predicted response rates, confidence intervals, risk-benefit analysis, and clinical evidence quality assessment
+* **Patient-Specific Modeling:** Comprehensive patient characteristic integration including demographics, comorbidities, biomarkers, and clinical history for personalized therapeutic decision-making
+* **Confidence Quantification:** Statistical uncertainty assessment with configurable confidence levels (50-99%) and prediction interval reporting for clinical decision support
 
 ##### **Comprehensive Drug Interaction Screening**
 
-* **Multi-Level Safety Analysis:**Complete medication interaction screening with Critical, Major, Moderate, and Minor severity classification and clinical significance assessment
-* **Mechanism-Based Classification:**Pharmacodynamic and pharmacokinetic interaction identification with detailed mechanism explanations and clinical effect descriptions
-* **Alternative Therapy Recommendations:**Automated suggestion of safer therapeutic alternatives with equivalent efficacy profiles and reduced interaction potential
-* **Clinical Management Guidelines:**Evidence-based management strategies including monitoring requirements, dose adjustments, and contraindication assessments
+* **Multi-Level Safety Analysis:** Complete medication interaction screening with Critical, Major, Moderate, and Minor severity classification and clinical significance assessment
+* **Mechanism-Based Classification:** Pharmacodynamic and pharmacokinetic interaction identification with detailed mechanism explanations and clinical effect descriptions
+* **Alternative Therapy Recommendations:** Automated suggestion of safer therapeutic alternatives with equivalent efficacy profiles and reduced interaction potential
+* **Clinical Management Guidelines:** Evidence-based management strategies including monitoring requirements, dose adjustments, and contraindication assessments
 
 ##### **Advanced Dose Optimization System**
 
-* **Pharmacokinetic Model Integration:**Population PK/PD modeling with individual patient parameter estimation based on demographics, organ function, and genetic factors
-* **Multi-Factor Dose Adjustment:**Systematic consideration of age, weight, renal function, hepatic function, drug interactions, and genetic polymorphisms
-* **Therapeutic Drug Monitoring:**Evidence-based monitoring parameter recommendations with optimal sampling strategies and target concentration ranges
-* **Safety-Guided Dosing:**Risk-stratified dosing recommendations with organ-specific safety assessments and toxicity prevention strategies
+* **Pharmacokinetic Model Integration:** Population PK/PD modeling with individual patient parameter estimation based on demographics, organ function, and genetic factors
+* **Multi-Factor Dose Adjustment:** Systematic consideration of age, weight, renal function, hepatic function, drug interactions, and genetic polymorphisms
+* **Therapeutic Drug Monitoring:** Evidence-based monitoring parameter recommendations with optimal sampling strategies and target concentration ranges
+* **Safety-Guided Dosing:** Risk-stratified dosing recommendations with organ-specific safety assessments and toxicity prevention strategies
 
 ##### **Clinical Decision Support Integration**
 
-* **Evidence-Based Guideline Integration:**Seamless incorporation of NCCN, ASCO, FDA, and other major clinical practice guidelines with real-time recommendation updates
-* **Risk Stratification Framework:**Comprehensive patient risk assessment across cardiovascular, hepatic, renal, and other organ systems with mitigation strategies
-* **Quality Assurance Metrics:**Built-in validation and outcome tracking systems for continuous improvement of recommendation accuracy
-* **Multidisciplinary Workflow Support:**Team-based care integration with documentation templates and consultation recommendation systems
+* **Evidence-Based Guideline Integration:** Seamless incorporation of NCCN, ASCO, FDA, and other major clinical practice guidelines with real-time recommendation updates
+* **Risk Stratification Framework:** Comprehensive patient risk assessment across cardiovascular, hepatic, renal, and other organ systems with mitigation strategies
+* **Quality Assurance Metrics:** Built-in validation and outcome tracking systems for continuous improvement of recommendation accuracy
+* **Multidisciplinary Workflow Support:** Team-based care integration with documentation templates and consultation recommendation systems
 
 ##### **Advanced Clinical Analytics**
 
-* **Treatment Comparison Engine:**Head-to-head treatment comparison with statistical significance testing, clinical relevance assessment, and patient preference integration
-* **Outcome Prediction Modeling:**Dynamic prediction models with real-time updating based on patient response and emerging clinical data
-* **Visualization Suite:**Interactive treatment comparison plots, drug interaction networks, and dose-response relationship visualizations
-* **Implementation Guidance:**Comprehensive clinical interpretation guides with practical implementation recommendations and quality metrics
+* **Treatment Comparison Engine:** Head-to-head treatment comparison with statistical significance testing, clinical relevance assessment, and patient preference integration
+* **Outcome Prediction Modeling:** Dynamic prediction models with real-time updating based on patient response and emerging clinical data
+* **Visualization Suite:** Interactive treatment comparison plots, drug interaction networks, and dose-response relationship visualizations
+* **Implementation Guidance:** Comprehensive clinical interpretation guides with practical implementation recommendations and quality metrics
 
 #### **Differential Diagnosis Assistance (differentialdiagnosis) - Bayesian Diagnostic Reasoning System**
 
 ##### **Advanced Bayesian Diagnostic Engine**
 
-* **Multi-Method Probabilistic Analysis:**Comprehensive diagnostic reasoning with Naive Bayes, Bayesian Networks, Logistic Regression, and Random Forest methodologies for optimal diagnostic accuracy
-* **Evidence-Based Prevalence Integration:**Population-based, clinical cohort, and literature-based disease prevalence estimates with demographic adjustment for personalized prior probabilities
-* **Likelihood Ratio Optimization:**Systematic calculation of positive and negative likelihood ratios (LR+, LR-) for individual clinical findings with diagnostic utility assessment
-* **Posterior Probability Ranking:**Automated differential diagnosis ranking based on Bayesian posterior probabilities with confidence interval quantification
+* **Multi-Method Probabilistic Analysis:** Comprehensive diagnostic reasoning with Naive Bayes, Bayesian Networks, Logistic Regression, and Random Forest methodologies for optimal diagnostic accuracy
+* **Evidence-Based Prevalence Integration:** Population-based, clinical cohort, and literature-based disease prevalence estimates with demographic adjustment for personalized prior probabilities
+* **Likelihood Ratio Optimization:** Systematic calculation of positive and negative likelihood ratios (LR+, LR-) for individual clinical findings with diagnostic utility assessment
+* **Posterior Probability Ranking:** Automated differential diagnosis ranking based on Bayesian posterior probabilities with confidence interval quantification
 
 ##### **Comprehensive Clinical Evidence Integration**
 
-* **Multi-Modal Data Fusion:**Seamless integration of clinical findings, laboratory results, imaging findings, and patient demographics for holistic diagnostic assessment
-* **Clinical Context Analysis:**Patient-specific factor evaluation including symptom duration, clinical setting, comorbidity profiles, and demographic risk stratification
-* **Evidence Quality Assessment:**Systematic evaluation of diagnostic evidence quality with clinical relevance scoring and reliability assessment
-* **Uncertainty Quantification:**Advanced diagnostic uncertainty analysis with source identification, impact assessment, and mitigation strategy recommendations
+* **Multi-Modal Data Fusion:** Seamless integration of clinical findings, laboratory results, imaging findings, and patient demographics for holistic diagnostic assessment
+* **Clinical Context Analysis:** Patient-specific factor evaluation including symptom duration, clinical setting, comorbidity profiles, and demographic risk stratification
+* **Evidence Quality Assessment:** Systematic evaluation of diagnostic evidence quality with clinical relevance scoring and reliability assessment
+* **Uncertainty Quantification:** Advanced diagnostic uncertainty analysis with source identification, impact assessment, and mitigation strategy recommendations
 
 ##### **Advanced Diagnostic Validation & Performance**
 
-* **Model Performance Assessment:**Comprehensive diagnostic model validation with sensitivity, specificity, PPV, NPV, accuracy, and AUC calculations with confidence intervals
-* **Sensitivity Analysis Framework:**Parameter sensitivity evaluation for disease prevalence, test characteristics, and clinical likelihood ratios with impact range quantification
-* **Calibration and Discrimination:**Model calibration assessment and discriminative ability evaluation for clinical decision-making validation
-* **Clinical Guidelines Integration:**Evidence-based diagnostic guideline incorporation with NCCN, ASCO, and other major organization recommendations
+* **Model Performance Assessment:** Comprehensive diagnostic model validation with sensitivity, specificity, PPV, NPV, accuracy, and AUC calculations with confidence intervals
+* **Sensitivity Analysis Framework:** Parameter sensitivity evaluation for disease prevalence, test characteristics, and clinical likelihood ratios with impact range quantification
+* **Calibration and Discrimination:** Model calibration assessment and discriminative ability evaluation for clinical decision-making validation
+* **Clinical Guidelines Integration:** Evidence-based diagnostic guideline incorporation with NCCN, ASCO, and other major organization recommendations
 
 ##### **Interactive Diagnostic Visualization Suite**
 
-* **Diagnostic Probability Plots:**Dynamic probability visualization with confidence intervals, likelihood ratio displays, and evidence strength indicators
-* **Diagnostic Network Diagrams:**Interactive relationship networks showing diagnostic dependencies, clinical finding correlations, and evidence pathways
-* **Probability Heatmaps:**Comprehensive probability matrices across clinical findings with diagnostic significance visualization and pattern recognition
-* **Bayesian Reasoning Visualization:**Step-by-step Bayesian calculation display with prior probability evolution and evidence integration tracking
+* **Diagnostic Probability Plots:** Dynamic probability visualization with confidence intervals, likelihood ratio displays, and evidence strength indicators
+* **Diagnostic Network Diagrams:** Interactive relationship networks showing diagnostic dependencies, clinical finding correlations, and evidence pathways
+* **Probability Heatmaps:** Comprehensive probability matrices across clinical findings with diagnostic significance visualization and pattern recognition
+* **Bayesian Reasoning Visualization:** Step-by-step Bayesian calculation display with prior probability evolution and evidence integration tracking
 
 #### **Laboratory Result Interpretation (labinterpret) - Comprehensive Clinical Laboratory Analysis**
 
 ##### **Advanced Reference Range Analysis**
 
-* **Demographic-Adjusted Reference Intervals:**Age, gender, and ethnicity-specific reference ranges with automatic demographic adjustment for personalized normal value interpretation
-* **Multi-Source Reference Standards:**Integration of institutional, literature-based, demographic-adjusted, and custom reference ranges with confidence level configuration
-* **Quality-Assured Interpretation:**Comprehensive reference interval quality assessment using CLSI guidelines with analytical performance validation
-* **Dynamic Range Adjustment:**Real-time reference range modification based on patient demographics, clinical context, and population-specific factors
+* **Demographic-Adjusted Reference Intervals:** Age, gender, and ethnicity-specific reference ranges with automatic demographic adjustment for personalized normal value interpretation
+* **Multi-Source Reference Standards:** Integration of institutional, literature-based, demographic-adjusted, and custom reference ranges with confidence level configuration
+* **Quality-Assured Interpretation:** Comprehensive reference interval quality assessment using CLSI guidelines with analytical performance validation
+* **Dynamic Range Adjustment:** Real-time reference range modification based on patient demographics, clinical context, and population-specific factors
 
 ##### **Clinical Decision Support Integration**
 
-* **Critical Value Monitoring:**Automated detection and alerting for laboratory critical values with severity stratification (Critical, High, Moderate) and time-sensitive action requirements
-* **Evidence-Based Guidelines Integration:**Seamless incorporation of clinical laboratory guidelines, best practices, and evidence-based diagnostic recommendations
-* **Clinical Correlation Engine:**Systematic correlation of laboratory results with patient symptoms, medical history, and clinical presentation for comprehensive assessment
-* **Medication Interaction Analysis:**Comprehensive evaluation of medication effects on laboratory values with clinical impact assessment and monitoring recommendations
+* **Critical Value Monitoring:** Automated detection and alerting for laboratory critical values with severity stratification (Critical, High, Moderate) and time-sensitive action requirements
+* **Evidence-Based Guidelines Integration:** Seamless incorporation of clinical laboratory guidelines, best practices, and evidence-based diagnostic recommendations
+* **Clinical Correlation Engine:** Systematic correlation of laboratory results with patient symptoms, medical history, and clinical presentation for comprehensive assessment
+* **Medication Interaction Analysis:** Comprehensive evaluation of medication effects on laboratory values with clinical impact assessment and monitoring recommendations
 
 ##### **Temporal Trend Analysis System**
 
-* **Statistical Trend Detection:**Advanced time-series analysis with linear regression modeling, R^2 calculation, and statistical significance testing for laboratory value trends
-* **Delta Check Analytics:**Sophisticated consecutive result comparison with configurable percentage thresholds (10-200%) and clinical relevance assessment
-* **Longitudinal Pattern Recognition:**Multi-timepoint analysis with trend visualization, pattern detection, and clinical significance evaluation
-* **Predictive Trend Modeling:**Forward-looking trend projection with confidence intervals and clinical outcome prediction
+* **Statistical Trend Detection:** Advanced time-series analysis with linear regression modeling, R^2 calculation, and statistical significance testing for laboratory value trends
+* **Delta Check Analytics:** Sophisticated consecutive result comparison with configurable percentage thresholds (10-200%) and clinical relevance assessment
+* **Longitudinal Pattern Recognition:** Multi-timepoint analysis with trend visualization, pattern detection, and clinical significance evaluation
+* **Predictive Trend Modeling:** Forward-looking trend projection with confidence intervals and clinical outcome prediction
 
 ##### **Advanced Correlation Analytics**
 
-* **Multi-Variable Correlation Matrix:**Comprehensive pairwise correlation analysis of laboratory values with clinical relevance assessment and statistical validation
-* **Clinically-Relevant Association Detection:**Automated identification of known clinically significant correlations (BUN-Creatinine, Glucose-HbA1c) with interpretation guidance
-* **Pattern-Based Diagnostic Support:**Correlation pattern analysis for syndrome identification and differential diagnosis support
-* **Network Correlation Visualization:**Interactive correlation networks showing laboratory value relationships and clinical significance
+* **Multi-Variable Correlation Matrix:** Comprehensive pairwise correlation analysis of laboratory values with clinical relevance assessment and statistical validation
+* **Clinically-Relevant Association Detection:** Automated identification of known clinically significant correlations (BUN-Creatinine, Glucose-HbA1c) with interpretation guidance
+* **Pattern-Based Diagnostic Support:** Correlation pattern analysis for syndrome identification and differential diagnosis support
+* **Network Correlation Visualization:** Interactive correlation networks showing laboratory value relationships and clinical significance
 
 ##### **Quality Assessment Framework**
 
-* **Analytical Performance Metrics:**Comprehensive quality indicators including coefficient of variation (CV%), analytical sensitivity, and measurement uncertainty quantification
-* **Reference Interval Quality Scoring:**Systematic assessment of reference interval quality with demographic appropriateness and clinical validation
-* **Uncertainty Propagation:**Advanced measurement uncertainty calculation with confidence interval reporting and clinical decision impact assessment
-* **Quality Control Integration:**Built-in quality assurance protocols with performance monitoring and continuous improvement recommendations
+* **Analytical Performance Metrics:** Comprehensive quality indicators including coefficient of variation (CV%), analytical sensitivity, and measurement uncertainty quantification
+* **Reference Interval Quality Scoring:** Systematic assessment of reference interval quality with demographic appropriateness and clinical validation
+* **Uncertainty Propagation:** Advanced measurement uncertainty calculation with confidence interval reporting and clinical decision impact assessment
+* **Quality Control Integration:** Built-in quality assurance protocols with performance monitoring and continuous improvement recommendations
 
 ##### **Comprehensive Visualization Suite**
 
-* **Laboratory Interpretation Plots:**Interactive visualizations showing laboratory values against reference ranges with status color-coding and confidence indicators
-* **Temporal Trend Visualization:**Time-series plots with trend lines, confidence bands, and statistical significance indicators for longitudinal monitoring
-* **Reference Range Visualization:**Comprehensive reference range displays with individual value overlay, demographic adjustments, and clinical context integration
-* **Delta Check Visualization:**Interactive delta check plots showing consecutive changes with threshold indicators and clinical relevance assessment
-* **Correlation Matrix Heatmaps:**Advanced correlation visualizations with hierarchical clustering and clinical significance annotation
+* **Laboratory Interpretation Plots:** Interactive visualizations showing laboratory values against reference ranges with status color-coding and confidence indicators
+* **Temporal Trend Visualization:** Time-series plots with trend lines, confidence bands, and statistical significance indicators for longitudinal monitoring
+* **Reference Range Visualization:** Comprehensive reference range displays with individual value overlay, demographic adjustments, and clinical context integration
+* **Delta Check Visualization:** Interactive delta check plots showing consecutive changes with threshold indicators and clinical relevance assessment
+* **Correlation Matrix Heatmaps:** Advanced correlation visualizations with hierarchical clustering and clinical significance annotation
 
 #### **Imaging Findings Correlation (imagingcorrelation) - Multi-Modal Diagnostic Integration**
 
 ##### **Comprehensive Multi-Modal Correlation Analysis**
 
-* **Cross-Modality Integration:**Systematic correlation analysis between imaging findings, laboratory results, clinical presentations, and pathological data with configurable methods (Pearson, Spearman, Kendall, Polychoric)
-* **Weighted Data Fusion:**Advanced integration methods including weighted fusion, Bayesian integration, ensemble voting, and hierarchical fusion for optimal diagnostic synthesis
-* **Clinical Significance Assessment:**Automated evaluation of correlation clinical relevance with confidence intervals and statistical significance testing
-* **Pattern Recognition Engine:**Identification of diagnostic patterns across multiple data modalities with frequency analysis and confidence scoring
+* **Cross-Modality Integration:** Systematic correlation analysis between imaging findings, laboratory results, clinical presentations, and pathological data with configurable methods (Pearson, Spearman, Kendall, Polychoric)
+* **Weighted Data Fusion:** Advanced integration methods including weighted fusion, Bayesian integration, ensemble voting, and hierarchical fusion for optimal diagnostic synthesis
+* **Clinical Significance Assessment:** Automated evaluation of correlation clinical relevance with confidence intervals and statistical significance testing
+* **Pattern Recognition Engine:** Identification of diagnostic patterns across multiple data modalities with frequency analysis and confidence scoring
 
 ##### **Diagnostic Concordance & Validation**
 
-* **Inter-Modality Concordance:**Comprehensive assessment of agreement between different imaging modalities and pathology using Cohen's kappa and concordance rates
-* **Diagnostic Performance Metrics:**Calculation of sensitivity, specificity, PPV, NPV, accuracy, and AUC for imaging findings against pathological reference standards
-* **Discordance Resolution:**Systematic identification and clinical impact assessment of discordant cases requiring multidisciplinary review
-* **Staging Correlation Analysis:**Comparison of imaging-based and pathological staging with upstaging/downstaging rate calculation
+* **Inter-Modality Concordance:** Comprehensive assessment of agreement between different imaging modalities and pathology using Cohen's kappa and concordance rates
+* **Diagnostic Performance Metrics:** Calculation of sensitivity, specificity, PPV, NPV, accuracy, and AUC for imaging findings against pathological reference standards
+* **Discordance Resolution:** Systematic identification and clinical impact assessment of discordant cases requiring multidisciplinary review
+* **Staging Correlation Analysis:** Comparison of imaging-based and pathological staging with upstaging/downstaging rate calculation
 
 ##### **Advanced Imaging Analytics**
 
-* **Lesion Characterization:**Comprehensive analysis of lesion morphology, enhancement patterns, diffusion characteristics, and metabolic activity across modalities
-* **Treatment Response Assessment:**RECIST, mRECIST, and other response criteria evaluation with temporal change analysis and clinical correlation
-* **Radiomics Feature Extraction:**Advanced texture, shape, intensity, and wavelet feature analysis with diagnostic relevance assessment
-* **Temporal Change Analysis:**Longitudinal imaging analysis for disease progression and treatment response monitoring
+* **Lesion Characterization:** Comprehensive analysis of lesion morphology, enhancement patterns, diffusion characteristics, and metabolic activity across modalities
+* **Treatment Response Assessment:** RECIST, mRECIST, and other response criteria evaluation with temporal change analysis and clinical correlation
+* **Radiomics Feature Extraction:** Advanced texture, shape, intensity, and wavelet feature analysis with diagnostic relevance assessment
+* **Temporal Change Analysis:** Longitudinal imaging analysis for disease progression and treatment response monitoring
 
 ##### **Clinical Decision Support Features**
 
-* **Diagnostic Confidence Assessment:**Multi-level confidence scoring based on data completeness, inter-modality agreement, and pattern recognition strength
-* **Evidence-Based Recommendations:**Integration of ACR Appropriateness Criteria and clinical guidelines for imaging selection and interpretation
-* **AI-Assisted Analysis Option:**Optional machine learning-based pattern recognition for enhanced diagnostic accuracy
-* **Integrated Diagnostic Reports:**Comprehensive report generation combining all diagnostic modalities with clinical recommendations
+* **Diagnostic Confidence Assessment:** Multi-level confidence scoring based on data completeness, inter-modality agreement, and pattern recognition strength
+* **Evidence-Based Recommendations:** Integration of ACR Appropriateness Criteria and clinical guidelines for imaging selection and interpretation
+* **AI-Assisted Analysis Option:** Optional machine learning-based pattern recognition for enhanced diagnostic accuracy
+* **Integrated Diagnostic Reports:** Comprehensive report generation combining all diagnostic modalities with clinical recommendations
 
 ##### **Comprehensive Visualization Suite**
 
-* **Multi-Modal Correlation Plots:**Interactive scatter plots with regression lines showing correlations between imaging and laboratory findings
-* **Concordance Assessment Plots:**Visual representation of agreement rates between different diagnostic modalities
-* **Correlation Heatmaps:**Matrix visualizations of multi-variable correlations across all diagnostic data types
-* **Diagnostic Network Diagrams:**Network graphs showing relationships and information flow between different diagnostic modalities
-* **ROC Curve Analysis:**Diagnostic performance visualization with AUC calculations for single and combined imaging tests
+* **Multi-Modal Correlation Plots:** Interactive scatter plots with regression lines showing correlations between imaging and laboratory findings
+* **Concordance Assessment Plots:** Visual representation of agreement rates between different diagnostic modalities
+* **Correlation Heatmaps:** Matrix visualizations of multi-variable correlations across all diagnostic data types
+* **Diagnostic Network Diagrams:** Network graphs showing relationships and information flow between different diagnostic modalities
+* **ROC Curve Analysis:** Diagnostic performance visualization with AUC calculations for single and combined imaging tests
 
 # ClinicoPath 0.0.31.36
 
@@ -9955,31 +10068,31 @@ The module outputs include:
 
 ##### **Streamlined User Interface**
 
-* **Organized Sections:**Redesigned interface with 6 logical sections: Variable Selection, Clustering Settings, Data Preprocessing, Advanced Options, Visualizations, Output Tables, and Clinical Correlations
-* **Legacy Cleanup:**Complete removal of all legacy options (k, autoK, showSil, assocTests, vars) while maintaining full functionality through modern equivalents
-* **Conditional Controls:**Smart enabling/disabling of dependent options (cluster range only available with auto-selection, dendrogram only for hierarchical clustering)
-* **Collapsible Sections:**Clean organization with appropriate default collapsed/expanded states for optimal workflow
+* **Organized Sections:** Redesigned interface with 6 logical sections: Variable Selection, Clustering Settings, Data Preprocessing, Advanced Options, Visualizations, Output Tables, and Clinical Correlations
+* **Legacy Cleanup:** Complete removal of all legacy options (k, autoK, showSil, assocTests, vars) while maintaining full functionality through modern equivalents
+* **Conditional Controls:** Smart enabling/disabling of dependent options (cluster range only available with auto-selection, dendrogram only for hierarchical clustering)
+* **Collapsible Sections:** Clean organization with appropriate default collapsed/expanded states for optimal workflow
 
 ##### **Enhanced User Guidance System**
 
-* **Interactive Welcome Guide:**Step-by-step instructions with variable type examples, clustering method comparisons, and configuration guidance
-* **Technical Implementation Details:**Comprehensive documentation of distance metrics, algorithm comparisons, quality assessment guidelines, and package dependencies
-* **Clinical Interpretation Framework:**Practical guidance for treatment selection, prognosis, validation checklists, best practices, and limitation awareness
-* **Context-Sensitive Help:**Dynamic guidance that adapts based on selected variables and configuration choices
+* **Interactive Welcome Guide:** Step-by-step instructions with variable type examples, clustering method comparisons, and configuration guidance
+* **Technical Implementation Details:** Comprehensive documentation of distance metrics, algorithm comparisons, quality assessment guidelines, and package dependencies
+* **Clinical Interpretation Framework:** Practical guidance for treatment selection, prognosis, validation checklists, best practices, and limitation awareness
+* **Context-Sensitive Help:** Dynamic guidance that adapts based on selected variables and configuration choices
 
 ##### **Modernized Codebase Architecture**
 
-* **Unified Variable Handling:**Seamless integration of categorical and continuous IHC markers with proper Gower distance implementation
-* **Clean Option Mapping:**Direct modern option usage (catVars, nClusters, autoSelectK, showSilhouette, associationTests) without legacy compatibility layers
-* **Robust State Management:**Proper jamovi state management patterns with setState() for analysis persistence and reproducibility
-* **Comprehensive Error Handling:**Enhanced validation with informative error messages and graceful degradation
+* **Unified Variable Handling:** Seamless integration of categorical and continuous IHC markers with proper Gower distance implementation
+* **Clean Option Mapping:** Direct modern option usage (catVars, nClusters, autoSelectK, showSilhouette, associationTests) without legacy compatibility layers
+* **Robust State Management:** Proper jamovi state management patterns with setState() for analysis persistence and reproducibility
+* **Comprehensive Error Handling:** Enhanced validation with informative error messages and graceful degradation
 
 ##### **Preserved Advanced Functionality**
 
-* **Mixed Data Clustering:**Full support for categorical (pos/neg, 0/1/2/3) and continuous (H-scores, % positivity) markers with appropriate distance calculations
-* **Multiple Algorithms:**PAM (k-medoids), hierarchical clustering, and MCA/PCA + k-means with algorithm-specific optimizations
-* **Quality Assessment:**Silhouette analysis for optimal k selection, consensus clustering for stability, and comprehensive association testing
-* **Clinical Integration:**Optional survival analysis integration and clinical variable correlation testing
+* **Mixed Data Clustering:** Full support for categorical (pos/neg, 0/1/2/3) and continuous (H-scores, % positivity) markers with appropriate distance calculations
+* **Multiple Algorithms:** PAM (k-medoids), hierarchical clustering, and MCA/PCA + k-means with algorithm-specific optimizations
+* **Quality Assessment:** Silhouette analysis for optimal k selection, consensus clustering for stability, and comprehensive association testing
+* **Clinical Integration:** Optional survival analysis integration and clinical variable correlation testing
 
 # ClinicoPath 0.0.31.35
 
@@ -9989,56 +10102,56 @@ The module outputs include:
 
 ##### **Advanced Group-Wise Variable Selection with Individual Sparsity**
 
-* **Dual-Level Regularization:**Combines group LASSO and individual variable selection with configurable alpha parameter (0=group LASSO, 1=LASSO)
-* **Multiple Group Definition Methods:**Factor-based, custom, correlation-based, pathway-based, and variable type-based grouping strategies
-* **Sophisticated Parameter Selection:**Cross-validation with multiple criteria (deviance, C-index, AIC, BIC, EBIC), adaptive lambda sequences
-* **Adaptive Weighting Schemes:**Ridge-based, univariate-based, and LASSO-based adaptive weights for improved variable selection performance
-* **Stability Selection:**Bootstrap-based stability selection with configurable thresholds for robust variable identification
-* **Clinical Applications:**Optimal for genomic pathway analysis, biomarker discovery, and correlated predictor management in survival analysis
+* **Dual-Level Regularization:** Combines group LASSO and individual variable selection with configurable alpha parameter (0=group LASSO, 1=LASSO)
+* **Multiple Group Definition Methods:** Factor-based, custom, correlation-based, pathway-based, and variable type-based grouping strategies
+* **Sophisticated Parameter Selection:** Cross-validation with multiple criteria (deviance, C-index, AIC, BIC, EBIC), adaptive lambda sequences
+* **Adaptive Weighting Schemes:** Ridge-based, univariate-based, and LASSO-based adaptive weights for improved variable selection performance
+* **Stability Selection:** Bootstrap-based stability selection with configurable thresholds for robust variable identification
+* **Clinical Applications:** Optimal for genomic pathway analysis, biomarker discovery, and correlated predictor management in survival analysis
 
 ##### **Comprehensive Validation & Inference**
 
-* **Cross-Validation Framework:**Repeated k-fold CV with parallel processing support and optimism correction
-* **Bootstrap Confidence Intervals:**Non-parametric confidence intervals for coefficient estimates and variable importance measures
-* **Regularization Path Analysis:**Complete solution path visualization with sparsity pattern analysis and model complexity assessment
-* **Group Selection Patterns:**Detailed analysis of group-wise selection frequency and within-group sparsity patterns
-* **Performance Comparison:**Systematic comparison with standard LASSO and group LASSO methods with relative performance metrics
+* **Cross-Validation Framework:** Repeated k-fold CV with parallel processing support and optimism correction
+* **Bootstrap Confidence Intervals:** Non-parametric confidence intervals for coefficient estimates and variable importance measures
+* **Regularization Path Analysis:** Complete solution path visualization with sparsity pattern analysis and model complexity assessment
+* **Group Selection Patterns:** Detailed analysis of group-wise selection frequency and within-group sparsity patterns
+* **Performance Comparison:** Systematic comparison with standard LASSO and group LASSO methods with relative performance metrics
 
 #### **Bayesian Model Averaging for Survival (bayesianma)**
 
 ##### **Comprehensive Model Space Exploration**
 
-* **Multiple Prior Specifications:**Uniform, beta-binomial, complexity, and Scott-Berger priors for model space with customizable parameters
-* **Advanced MCMC Methods:**MC^3 (Metropolis-Coupled), Birth-Death, Gibbs Variable Selection, and Reversible Jump MCMC algorithms
-* **Temperature Laddering:**MC^3 with configurable temperature schedules for improved mixing and model space exploration
-* **Convergence Diagnostics:**Gelman-Rubin, Geweke, Heidelberger-Welch, and Raftery-Lewis diagnostics with effective sample size estimation
-* **Model Selection Strategies:**Highest posterior probability, median probability model, mode probability model, and Occam's window approaches
+* **Multiple Prior Specifications:** Uniform, beta-binomial, complexity, and Scott-Berger priors for model space with customizable parameters
+* **Advanced MCMC Methods:** MC^3 (Metropolis-Coupled), Birth-Death, Gibbs Variable Selection, and Reversible Jump MCMC algorithms
+* **Temperature Laddering:** MC^3 with configurable temperature schedules for improved mixing and model space exploration
+* **Convergence Diagnostics:** Gelman-Rubin, Geweke, Heidelberger-Welch, and Raftery-Lewis diagnostics with effective sample size estimation
+* **Model Selection Strategies:** Highest posterior probability, median probability model, mode probability model, and Occam's window approaches
 
 ##### **Uncertainty Quantification & Clinical Translation**
 
-* **Decomposed Uncertainty:**Separate quantification of model uncertainty and parameter uncertainty with total uncertainty estimation
-* **Posterior Inclusion Probabilities:**Variable-specific inclusion probabilities with Bayes factors and evidence strength interpretation
-* **Model-Averaged Coefficients:**Posterior distributions for coefficients with credible intervals and hazard ratio estimates
-* **Cross-Validation Assessment:**K-fold CV with log predictive scores, deviance, C-index, and calibration metrics
-* **Prior Sensitivity Analysis:**Systematic evaluation of prior specification effects on posterior inferences with robustness assessment
-* **Clinical Decision Support:**Integration with treatment threshold analysis and cost-effectiveness considerations
+* **Decomposed Uncertainty:** Separate quantification of model uncertainty and parameter uncertainty with total uncertainty estimation
+* **Posterior Inclusion Probabilities:** Variable-specific inclusion probabilities with Bayes factors and evidence strength interpretation
+* **Model-Averaged Coefficients:** Posterior distributions for coefficients with credible intervals and hazard ratio estimates
+* **Cross-Validation Assessment:** K-fold CV with log predictive scores, deviance, C-index, and calibration metrics
+* **Prior Sensitivity Analysis:** Systematic evaluation of prior specification effects on posterior inferences with robustness assessment
+* **Clinical Decision Support:** Integration with treatment threshold analysis and cost-effectiveness considerations
 
 #### **Enhanced Documentation & Validation Framework**
 
 ##### **Comprehensive Analysis Explanations**
 
-* **Method-Specific Guidance:**Detailed explanations for sparse group LASSO parameter selection and Bayesian model averaging interpretation
-* **Clinical Context Integration:**Specific guidance for genomic studies, pathway analysis, biomarker discovery, and clinical prediction applications
-* **Performance Interpretation:**Clear interpretation frameworks for regularization results, inclusion probabilities, and model uncertainty measures
-* **Validation Recommendations:**Best practices for cross-validation, stability selection, prior sensitivity, and external validation
+* **Method-Specific Guidance:** Detailed explanations for sparse group LASSO parameter selection and Bayesian model averaging interpretation
+* **Clinical Context Integration:** Specific guidance for genomic studies, pathway analysis, biomarker discovery, and clinical prediction applications
+* **Performance Interpretation:** Clear interpretation frameworks for regularization results, inclusion probabilities, and model uncertainty measures
+* **Validation Recommendations:** Best practices for cross-validation, stability selection, prior sensitivity, and external validation
 
 ##### **Advanced Visualization Suite**
 
-* **Regularization Path Plots:**Interactive visualization of coefficient paths with lambda selection and variable importance highlighting
-* **Group Selection Patterns:**Heatmaps and network plots showing group-wise selection frequency and variable relationships
-* **Posterior Distributions:**Density plots for model-averaged coefficients with credible intervals and hazard ratio transformations
-* **Model Space Exploration:**Visualization of model posterior probabilities, inclusion probabilities, and convergence diagnostics
-* **Uncertainty Decomposition:**Graphical representation of model vs. parameter uncertainty contributions
+* **Regularization Path Plots:** Interactive visualization of coefficient paths with lambda selection and variable importance highlighting
+* **Group Selection Patterns:** Heatmaps and network plots showing group-wise selection frequency and variable relationships
+* **Posterior Distributions:** Density plots for model-averaged coefficients with credible intervals and hazard ratio transformations
+* **Model Space Exploration:** Visualization of model posterior probabilities, inclusion probabilities, and convergence diagnostics
+* **Uncertainty Decomposition:** Graphical representation of model vs. parameter uncertainty contributions
 
 # ClinicoPath 0.0.31.34
 
@@ -10048,112 +10161,112 @@ The module outputs include:
 
 ##### **Function Signature & Parameter Optimization**
 
-* **Fixed Parameter Requirements:**Resolved critical issue where test2 and test3 were incorrectly required parameters
-* **Optional Parameter Support:**Added proper NULL defaults for test2, test2Positive, test3, and test3Positive parameters
-* **Enhanced Flexibility:**Users can now perform single-test, two-test, or three-test combination analyses without forced parameter specification
-* **Schema Consistency:**Updated jamovi .a.yaml configuration to properly support optional Variable parameters with `default: null`
+* **Fixed Parameter Requirements:** Resolved critical issue where test2 and test3 were incorrectly required parameters
+* **Optional Parameter Support:** Added proper NULL defaults for test2, test2Positive, test3, and test3Positive parameters
+* **Enhanced Flexibility:** Users can now perform single-test, two-test, or three-test combination analyses without forced parameter specification
+* **Schema Consistency:** Updated jamovi .a.yaml configuration to properly support optional Variable parameters with `default: null`
 
 ##### **Improved User Experience**
 
-* **Simplified Function Calls:**Enable analysis with minimal required parameters (gold standard, test1 only)
-* **Progressive Enhancement:**Users can add test2 and test3 incrementally without breaking existing analyses
-* **Better Error Handling:**More informative error messages when required positive levels are not specified
-* **Production-Ready Status:**Function now fully validated for clinical research applications
+* **Simplified Function Calls:** Enable analysis with minimal required parameters (gold standard, test1 only)
+* **Progressive Enhancement:** Users can add test2 and test3 incrementally without breaking existing analyses
+* **Better Error Handling:** More informative error messages when required positive levels are not specified
+* **Production-Ready Status:** Function now fully validated for clinical research applications
 
 #### **Machine Learning & Survival Analysis Expansion**
 
 ##### **Advanced Tree-Based Methods for Survival Analysis**
 
-* **Conditional Inference Trees (conditionalinference):**Unbiased recursive partitioning addressing variable selection bias in traditional CART methods
-* **Gradient Boosting (gradientboosting):**Multi-algorithm ensemble learning supporting mboost, gbm, and xgboost with automatic variable selection
-* **Extremely Randomized Trees (extratrees):**Ultra-fast random forests with extreme randomization for high-dimensional survival data
-* **Comprehensive ML Suite:**Complete coverage of modern tree-based survival analysis methods with cross-validation and importance measures
-* **Clinical Applications:**Optimized for biomarker discovery, prognostic modeling, and high-dimensional clinical prediction tasks
+* **Conditional Inference Trees (conditionalinference):** Unbiased recursive partitioning addressing variable selection bias in traditional CART methods
+* **Gradient Boosting (gradientboosting):** Multi-algorithm ensemble learning supporting mboost, gbm, and xgboost with automatic variable selection
+* **Extremely Randomized Trees (extratrees):** Ultra-fast random forests with extreme randomization for high-dimensional survival data
+* **Comprehensive ML Suite:** Complete coverage of modern tree-based survival analysis methods with cross-validation and importance measures
+* **Clinical Applications:** Optimized for biomarker discovery, prognostic modeling, and high-dimensional clinical prediction tasks
 
 ##### **Bayesian & Advanced Regression Methods**
 
-* **Bayesian Survival Models (bayesiansurvival):**MCMC-based inference with rstanarm for uncertainty quantification and robust parameter estimation
-* **Adaptive LASSO (adaptivelasso):**Data-driven penalty selection with oracle properties for consistent variable selection in high-dimensional Cox models
-* **Comprehensive Bayesian Suite:**Full posterior distributions, credible intervals, model comparison via LOO-CV and WAIC, hierarchical modeling support
-* **Advanced Variable Selection:**Stability selection, bootstrap confidence intervals, regularization path analysis with clinical interpretation
+* **Bayesian Survival Models (bayesiansurvival):** MCMC-based inference with rstanarm for uncertainty quantification and robust parameter estimation
+* **Adaptive LASSO (adaptivelasso):** Data-driven penalty selection with oracle properties for consistent variable selection in high-dimensional Cox models
+* **Comprehensive Bayesian Suite:** Full posterior distributions, credible intervals, model comparison via LOO-CV and WAIC, hierarchical modeling support
+* **Advanced Variable Selection:** Stability selection, bootstrap confidence intervals, regularization path analysis with clinical interpretation
 
 ##### **Clinical Model Assessment & Performance**
 
-* **Net Reclassification Improvement (netreclassification):**Advanced model improvement assessment for biomarker validation and clinical decision making
-* **Integrated Discrimination Improvement (idi):**Continuous discrimination assessment without arbitrary risk thresholds for biomarker validation
-* **Comprehensive NRI Analysis:**Both categorical and continuous NRI with bootstrap confidence intervals, decomposition analysis, sensitivity testing
-* **Advanced IDI Features:**Risk distribution analysis, outlier detection, bootstrap inference, cross-validation, and decomposition into event/non-event contributions
-* **Clinical Translation:**Support for treatment thresholds, cost-effectiveness analysis, subgroup analysis, and clinical guideline integration
-* **Model Validation:**Cross-validation, stability assessment, competing model comparison with clinical interpretation frameworks
+* **Net Reclassification Improvement (netreclassification):** Advanced model improvement assessment for biomarker validation and clinical decision making
+* **Integrated Discrimination Improvement (idi):** Continuous discrimination assessment without arbitrary risk thresholds for biomarker validation
+* **Comprehensive NRI Analysis:** Both categorical and continuous NRI with bootstrap confidence intervals, decomposition analysis, sensitivity testing
+* **Advanced IDI Features:** Risk distribution analysis, outlier detection, bootstrap inference, cross-validation, and decomposition into event/non-event contributions
+* **Clinical Translation:** Support for treatment thresholds, cost-effectiveness analysis, subgroup analysis, and clinical guideline integration
+* **Model Validation:** Cross-validation, stability assessment, competing model comparison with clinical interpretation frameworks
 
 ##### **Advanced Regularization & Variable Selection**
 
-* **Group LASSO (grouplasso):**Penalized regression with group-wise variable selection for structured predictors and biological pathways
-* **Adaptive LASSO (adaptivelasso):**Data-driven penalty selection with oracle properties for consistent variable selection in high-dimensional Cox models
-* **Comprehensive Group Selection:**Factor-based grouping, custom group definitions, stability selection, nested cross-validation with clinical interpretation
-* **Advanced Penalty Methods:**Sparse group LASSO, overlapping groups, adaptive weights, regularization path analysis with bootstrap confidence intervals
+* **Group LASSO (grouplasso):** Penalized regression with group-wise variable selection for structured predictors and biological pathways
+* **Adaptive LASSO (adaptivelasso):** Data-driven penalty selection with oracle properties for consistent variable selection in high-dimensional Cox models
+* **Comprehensive Group Selection:** Factor-based grouping, custom group definitions, stability selection, nested cross-validation with clinical interpretation
+* **Advanced Penalty Methods:** Sparse group LASSO, overlapping groups, adaptive weights, regularization path analysis with bootstrap confidence intervals
 
 ##### **Bayesian & Nonparametric Machine Learning**
 
-* **Bayesian Survival Models (bayesiansurvival):**MCMC-based inference with rstanarm for uncertainty quantification and robust parameter estimation
-* **Survival BART (survivalbart):**Bayesian Additive Regression Trees for nonparametric ensemble learning with automatic interaction detection
-* **Comprehensive Bayesian Suite:**Full posterior distributions, credible intervals, model comparison via LOO-CV and WAIC, hierarchical modeling support
-* **Advanced Tree Methods:**Variable importance ranking, interaction detection, partial dependence analysis, posterior predictive checking
+* **Bayesian Survival Models (bayesiansurvival):** MCMC-based inference with rstanarm for uncertainty quantification and robust parameter estimation
+* **Survival BART (survivalbart):** Bayesian Additive Regression Trees for nonparametric ensemble learning with automatic interaction detection
+* **Comprehensive Bayesian Suite:** Full posterior distributions, credible intervals, model comparison via LOO-CV and WAIC, hierarchical modeling support
+* **Advanced Tree Methods:** Variable importance ranking, interaction detection, partial dependence analysis, posterior predictive checking
 
 ##### **Multi-State & Complex Survival Models**
 
-* **Illness-Death Models (illnessdeath):**Three-state models for disease progression with recovery and mortality in chronic disease studies
-* **Comprehensive Multi-State Analysis:**Transition-specific hazard modeling, state occupation probabilities, sojourn time analysis, bootstrap confidence intervals
-* **Clinical Applications:**Hospital readmission analysis, cancer progression studies, chronic disease management with evidence-based interpretation
-* **Advanced Features:**Reversible illness states, competing risks formulation, time-dependent covariates, comprehensive model validation
+* **Illness-Death Models (illnessdeath):** Three-state models for disease progression with recovery and mortality in chronic disease studies
+* **Comprehensive Multi-State Analysis:** Transition-specific hazard modeling, state occupation probabilities, sojourn time analysis, bootstrap confidence intervals
+* **Clinical Applications:** Hospital readmission analysis, cancer progression studies, chronic disease management with evidence-based interpretation
+* **Advanced Features:** Reversible illness states, competing risks formulation, time-dependent covariates, comprehensive model validation
 
 #### **Competing Risks Analysis - Complete Implementation**
 
 ##### **Advanced Competing Risks Methods**
 
-* **Direct Binomial Regression (directbinomial):**Implementation of timereg-based direct modeling for competing events
-* **Power Analysis (powercomprisk):**Comprehensive power and sample size calculations for competing risks studies
-* **Flexible Modeling (flexcomprisk):**Advanced flexible parametric models using riskRegression framework
-* **Complete Phase 3 Coverage:**All high-priority competing risks methods now fully implemented and validated
+* **Direct Binomial Regression (directbinomial):** Implementation of timereg-based direct modeling for competing events
+* **Power Analysis (powercomprisk):** Comprehensive power and sample size calculations for competing risks studies
+* **Flexible Modeling (flexcomprisk):** Advanced flexible parametric models using riskRegression framework
+* **Complete Phase 3 Coverage:** All high-priority competing risks methods now fully implemented and validated
 
 #### **Tree Function Architecture Overhaul**
 
 ##### **Monolithic Function Split into Focused Analyses**
 
-* **Architectural Improvement:**Split massive 7,482-line tree function with 166 parameters into four focused, specialized analyses
-* **Enhanced Maintainability:**Each new function serves specific clinical research needs with optimized parameter sets
-* **Improved Performance:**Reduced complexity and better resource utilization through focused implementations
-* **Clinical Focus:**Each analysis type optimized for specific medical decision-making scenarios
+* **Architectural Improvement:** Split massive 7,482-line tree function with 166 parameters into four focused, specialized analyses
+* **Enhanced Maintainability:** Each new function serves specific clinical research needs with optimized parameter sets
+* **Improved Performance:** Reduced complexity and better resource utilization through focused implementations
+* **Clinical Focus:** Each analysis type optimized for specific medical decision-making scenarios
 
 ##### **Four New Specialized Tree Functions**
 
-* **treemedical:**Simple medical decision trees for clinical research (24 parameters)
-* **treeadvanced:**Advanced CART with hyperparameter tuning for complex analysis (30+ parameters)
-* **treeensemble:**Random Forest ensemble methods for clinical research (25+ parameters)
-* **treecompare:**Algorithm comparison and model selection (35+ parameters)
+* **treemedical:** Simple medical decision trees for clinical research (24 parameters)
+* **treeadvanced:** Advanced CART with hyperparameter tuning for complex analysis (30+ parameters)
+* **treeensemble:** Random Forest ensemble methods for clinical research (25+ parameters)
+* **treecompare:** Algorithm comparison and model selection (35+ parameters)
 
 #### **Medical Decision Trees - Comprehensive Enhancement (treemedical)**
 
 ##### **Clinical-Focused Implementation**
 
-* **Enhanced CART Algorithm:**Optimized rpart implementation with clinical validation and medical interpretation guidelines
-* **Cost-Sensitive Learning:**Configurable false negative to false positive cost ratios for clinical decision optimization
-* **Missing Data Handling:**Robust missing value strategies including simple imputation (median/mode) and complete case analysis
-* **Clinical Context Integration:**Four specialized clinical application contexts (diagnosis, screening, treatment, risk assessment)
+* **Enhanced CART Algorithm:** Optimized rpart implementation with clinical validation and medical interpretation guidelines
+* **Cost-Sensitive Learning:** Configurable false negative to false positive cost ratios for clinical decision optimization
+* **Missing Data Handling:** Robust missing value strategies including simple imputation (median/mode) and complete case analysis
+* **Clinical Context Integration:** Four specialized clinical application contexts (diagnosis, screening, treatment, risk assessment)
 
 ##### **Advanced Validation Framework**
 
-* **Multiple Validation Methods:**Cross-validation, holdout validation, and bootstrap validation with stratified sampling support
-* **Configurable Parameters:**User-controlled holdout splits (50%-90%) and bootstrap sample sizes (50-500)
-* **Performance Optimization:**Helper methods eliminate code duplication and improve maintainability
-* **Comprehensive Metrics:**Accuracy, sensitivity, specificity, PPV, NPV, AUC with confidence intervals
+* **Multiple Validation Methods:** Cross-validation, holdout validation, and bootstrap validation with stratified sampling support
+* **Configurable Parameters:** User-controlled holdout splits (50%-90%) and bootstrap sample sizes (50-500)
+* **Performance Optimization:** Helper methods eliminate code duplication and improve maintainability
+* **Comprehensive Metrics:** Accuracy, sensitivity, specificity, PPV, NPV, AUC with confidence intervals
 
 ##### **Enhanced User Experience**
 
-* **Intelligent UI Behavior:**Enhanced clearWith patterns ensure proper result clearing when parameters change
-* **Clinical Interpretation:**Context-specific interpretation guidelines for medical applications
-* **Robust Error Handling:**Graceful fallbacks when optional packages (pROC, rpart.plot) are unavailable
-* **Comprehensive Documentation:**Detailed parameter descriptions with clinical focus and usage examples
+* **Intelligent UI Behavior:** Enhanced clearWith patterns ensure proper result clearing when parameters change
+* **Clinical Interpretation:** Context-specific interpretation guidelines for medical applications
+* **Robust Error Handling:** Graceful fallbacks when optional packages (pROC, rpart.plot) are unavailable
+* **Comprehensive Documentation:** Detailed parameter descriptions with clinical focus and usage examples
 
 # ClinicoPath 0.0.31.33
 
@@ -10163,24 +10276,24 @@ The module outputs include:
 
 ##### **Comprehensive Competing Risks Framework**
 
-* **Multiple Model Types:**Cox proportional hazards, Weibull AFT, exponential, and log-normal models for flexible cause-specific analysis
-* **Cause-Specific Approach:**Models each cause separately, treating other causes as censoring events for proper competing risks analysis
-* **Flexible Data Structure:**Support for separate cause variable or direct use of event variable with multiple cause levels
-* **Model Comparison:**Comprehensive comparison across causes using likelihood ratio tests and information criteria
+* **Multiple Model Types:** Cox proportional hazards, Weibull AFT, exponential, and log-normal models for flexible cause-specific analysis
+* **Cause-Specific Approach:** Models each cause separately, treating other causes as censoring events for proper competing risks analysis
+* **Flexible Data Structure:** Support for separate cause variable or direct use of event variable with multiple cause levels
+* **Model Comparison:** Comprehensive comparison across causes using likelihood ratio tests and information criteria
 
 ##### **Advanced Statistical Features**
 
-* **Cumulative Incidence Functions:**Proper estimation using cmprsk package with fallback to built-in methods when unavailable
-* **Proportional Hazards Testing:**Comprehensive testing of proportional hazards assumption for Cox models across all causes
-* **Cause-Specific Summaries:**Detailed event summaries by cause including proportions, median times, and quantiles
-* **Confidence Intervals:**User-specified confidence levels for all parameter estimates and cumulative incidence functions
+* **Cumulative Incidence Functions:** Proper estimation using cmprsk package with fallback to built-in methods when unavailable
+* **Proportional Hazards Testing:** Comprehensive testing of proportional hazards assumption for Cox models across all causes
+* **Cause-Specific Summaries:** Detailed event summaries by cause including proportions, median times, and quantiles
+* **Confidence Intervals:** User-specified confidence levels for all parameter estimates and cumulative incidence functions
 
 ##### **Clinical Analysis Capabilities**
 
-* **Multi-Cause Event Tracking:**Automatic identification and separate modeling of multiple competing causes of failure
-* **Reference Cause Comparisons:**Model comparisons using user-specified reference cause for clinical interpretation
-* **Comprehensive Output:**Model fit statistics, hazard ratios, cumulative incidence estimates, and diagnostic tests
-* **Visualization Suite:**Cumulative incidence plots, cause-specific hazard plots, and comprehensive diagnostic plots
+* **Multi-Cause Event Tracking:** Automatic identification and separate modeling of multiple competing causes of failure
+* **Reference Cause Comparisons:** Model comparisons using user-specified reference cause for clinical interpretation
+* **Comprehensive Output:** Model fit statistics, hazard ratios, cumulative incidence estimates, and diagnostic tests
+* **Visualization Suite:** Cumulative incidence plots, cause-specific hazard plots, and comprehensive diagnostic plots
 
 # ClinicoPath 0.0.31.33
 
@@ -10190,24 +10303,24 @@ The module outputs include:
 
 ##### **Comprehensive Parametric Frailty Framework**
 
-* **Multiple Baseline Distributions:**Weibull, exponential, Gompertz, log-normal, log-logistic, and generalized gamma distributions for flexible baseline hazard modeling
-* **Flexible Frailty Distributions:**Gamma, log-normal, inverse Gaussian, and positive stable distributions for heterogeneity modeling
-* **Dual Implementation Strategy:**Primary support via frailtySurv package with comprehensive fallback using survival package
-* **Advanced Estimation Methods:**Penalized likelihood, REML, and Laplace approximation for robust parameter estimation
+* **Multiple Baseline Distributions:** Weibull, exponential, Gompertz, log-normal, log-logistic, and generalized gamma distributions for flexible baseline hazard modeling
+* **Flexible Frailty Distributions:** Gamma, log-normal, inverse Gaussian, and positive stable distributions for heterogeneity modeling
+* **Dual Implementation Strategy:** Primary support via frailtySurv package with comprehensive fallback using survival package
+* **Advanced Estimation Methods:** Penalized likelihood, REML, and Laplace approximation for robust parameter estimation
 
 ##### **Advanced Parametric Modeling Features**
 
-* **Built-in Fallback Implementation:**Complete parametric frailty modeling using survival package (survreg/coxph) when frailtySurv is unavailable
-* **Frailty Variance Analysis:**Comprehensive variance component estimation with Kendall's tau and heterogeneity measures
-* **Individual Predictions:**Subject-specific frailty predictions with confidence intervals and shrinkage analysis
-* **Model Diagnostics:**Goodness-of-fit tests, model comparison statistics (AIC/BIC), and comprehensive plotting options
+* **Built-in Fallback Implementation:** Complete parametric frailty modeling using survival package (survreg/coxph) when frailtySurv is unavailable
+* **Frailty Variance Analysis:** Comprehensive variance component estimation with Kendall's tau and heterogeneity measures
+* **Individual Predictions:** Subject-specific frailty predictions with confidence intervals and shrinkage analysis
+* **Model Diagnostics:** Goodness-of-fit tests, model comparison statistics (AIC/BIC), and comprehensive plotting options
 
 ##### **Statistical Analysis Capabilities**
 
-* **Flexible Model Specification:**Support for clustered and correlated survival data with multiple covariate structures
-* **Confidence Intervals:**Comprehensive confidence interval estimation for all parameters with user-specified confidence levels
-* **Visualization Suite:**Hazard function plots, survival function plots, frailty distribution plots, and diagnostic plots
-* **Clinical Application:**Designed for real-world clinical data with robust error handling and data validation
+* **Flexible Model Specification:** Support for clustered and correlated survival data with multiple covariate structures
+* **Confidence Intervals:** Comprehensive confidence interval estimation for all parameters with user-specified confidence levels
+* **Visualization Suite:** Hazard function plots, survival function plots, frailty distribution plots, and diagnostic plots
+* **Clinical Application:** Designed for real-world clinical data with robust error handling and data validation
 
 # ClinicoPath 0.0.31.32
 
@@ -10217,38 +10330,38 @@ The module outputs include:
 
 ##### **Expectation-Maximization Frailty Framework**
 
-* **Multiple Frailty Distributions:**Gamma, log-normal, inverse Gaussian, and stable distributions for flexible heterogeneity modeling
-* **Efficient EM Estimation:**Expectation-maximization algorithm with acceleration options for fast convergence
-* **Built-in Implementation:**Comprehensive frailty modeling using survival package when frailtyEM package is not available
-* **Convergence Diagnostics:**Complete monitoring of EM algorithm progress with iteration tracking and log-likelihood history
+* **Multiple Frailty Distributions:** Gamma, log-normal, inverse Gaussian, and stable distributions for flexible heterogeneity modeling
+* **Efficient EM Estimation:** Expectation-maximization algorithm with acceleration options for fast convergence
+* **Built-in Implementation:** Comprehensive frailty modeling using survival package when frailtyEM package is not available
+* **Convergence Diagnostics:** Complete monitoring of EM algorithm progress with iteration tracking and log-likelihood history
 
 ##### **Advanced EM Algorithm Features**
 
-* **Multiple Estimation Methods:**Standard EM, penalized EM, accelerated EM, and stochastic EM for different data scenarios
-* **Baseline Hazard Options:**Weibull, exponential, spline, and non-parametric baseline hazards for maximum flexibility
-* **Empirical Bayes Predictions:**Individual frailty estimates with shrinkage analysis and prediction intervals
-* **Variance Estimation Methods:**Observed information matrix, Louis method, bootstrap, and profile likelihood approaches
+* **Multiple Estimation Methods:** Standard EM, penalized EM, accelerated EM, and stochastic EM for different data scenarios
+* **Baseline Hazard Options:** Weibull, exponential, spline, and non-parametric baseline hazards for maximum flexibility
+* **Empirical Bayes Predictions:** Individual frailty estimates with shrinkage analysis and prediction intervals
+* **Variance Estimation Methods:** Observed information matrix, Louis method, bootstrap, and profile likelihood approaches
 
 ##### **Comprehensive Frailty Analysis**
 
-* **Heterogeneity Assessment:**Frailty variance estimation, Kendall's tau, and median hazard ratio calculations
-* **Shrinkage Analysis:**Detailed examination of empirical Bayes shrinkage patterns and group-specific predictions
-* **Model Comparison:**Automatic comparison with standard Cox models using AIC/BIC model selection criteria
-* **Convergence Monitoring:**Real-time tracking of EM algorithm convergence with diagnostic plots and iteration history
+* **Heterogeneity Assessment:** Frailty variance estimation, Kendall's tau, and median hazard ratio calculations
+* **Shrinkage Analysis:** Detailed examination of empirical Bayes shrinkage patterns and group-specific predictions
+* **Model Comparison:** Automatic comparison with standard Cox models using AIC/BIC model selection criteria
+* **Convergence Monitoring:** Real-time tracking of EM algorithm convergence with diagnostic plots and iteration history
 
 ##### **Clinical Applications & Interpretation**
 
-* **Multi-center Clinical Trials:**Account for hospital or clinic-specific unobserved effects using frailty terms
-* **Family-based Studies:**Model genetic or environmental clustering within families using hierarchical frailty structures
-* **Recurrent Event Analysis:**Handle repeated events within patients using individual-level frailty modeling
-* **Matched Study Designs:**Account for matching factors and unmeasured confounders in observational studies
+* **Multi-center Clinical Trials:** Account for hospital or clinic-specific unobserved effects using frailty terms
+* **Family-based Studies:** Model genetic or environmental clustering within families using hierarchical frailty structures
+* **Recurrent Event Analysis:** Handle repeated events within patients using individual-level frailty modeling
+* **Matched Study Designs:** Account for matching factors and unmeasured confounders in observational studies
 
 ##### **Comprehensive Results & Diagnostics**
 
-* **Fixed Effects Coefficients:**Hazard ratios with confidence intervals for population-level covariate effects
-* **Frailty Distribution Analysis:**Complete characterization of frailty variance, standard deviation, and clustering measures
-* **EM Algorithm Convergence:**Detailed convergence diagnostics including iteration count, final log-likelihood, and tolerance criteria
-* **Empirical Bayes Predictions:**Individual group frailty predictions with shrinkage statistics and prediction intervals
+* **Fixed Effects Coefficients:** Hazard ratios with confidence intervals for population-level covariate effects
+* **Frailty Distribution Analysis:** Complete characterization of frailty variance, standard deviation, and clustering measures
+* **EM Algorithm Convergence:** Detailed convergence diagnostics including iteration count, final log-likelihood, and tolerance criteria
+* **Empirical Bayes Predictions:** Individual group frailty predictions with shrinkage statistics and prediction intervals
 
 # ClinicoPath 0.0.31.31
 
@@ -10258,31 +10371,31 @@ The module outputs include:
 
 ##### **Hierarchical Survival Analysis Framework**
 
-* **Random Effects Structures:**Random intercept, random slope, nested, and crossed random effects for hierarchical data
-* **Frailty-Based Implementation:**Built-in mixed-effects modeling using frailty terms when coxme package is not available
-* **Multi-level Data Handling:**Support for clustered, multi-center, and repeated measurements survival data
-* **Variance Components Analysis:**Comprehensive decomposition of variance into fixed and random components
+* **Random Effects Structures:** Random intercept, random slope, nested, and crossed random effects for hierarchical data
+* **Frailty-Based Implementation:** Built-in mixed-effects modeling using frailty terms when coxme package is not available
+* **Multi-level Data Handling:** Support for clustered, multi-center, and repeated measurements survival data
+* **Variance Components Analysis:** Comprehensive decomposition of variance into fixed and random components
 
 ##### **Advanced Mixed-Effects Features**
 
-* **Random Structure Options:**Five different random effects structures including random intercept, slope, intercept+slope, nested, and crossed effects
-* **Hierarchical Structure Analysis:**Automatic detection and reporting of grouping structure with group sizes and distributions
-* **Intraclass Correlation (ICC):**Calculation and interpretation of ICC values for assessing clustering effects
-* **Best Linear Unbiased Predictors (BLUPs):**Random effects predictions with standard errors and prediction intervals
+* **Random Structure Options:** Five different random effects structures including random intercept, slope, intercept+slope, nested, and crossed effects
+* **Hierarchical Structure Analysis:** Automatic detection and reporting of grouping structure with group sizes and distributions
+* **Intraclass Correlation (ICC):** Calculation and interpretation of ICC values for assessing clustering effects
+* **Best Linear Unbiased Predictors (BLUPs):** Random effects predictions with standard errors and prediction intervals
 
 ##### **Clinical Applications & Interpretation**
 
-* **Multi-center Clinical Trials:**Account for between-hospital or between-clinic variation in treatment effects
-* **Longitudinal Survival Studies:**Handle repeated measurements and time-varying effects within patients
-* **Genetic Epidemiology:**Model family-based or population-based clustering in survival outcomes
-* **Quality Improvement Research:**Assess provider-level or institutional variation in clinical outcomes
+* **Multi-center Clinical Trials:** Account for between-hospital or between-clinic variation in treatment effects
+* **Longitudinal Survival Studies:** Handle repeated measurements and time-varying effects within patients
+* **Genetic Epidemiology:** Model family-based or population-based clustering in survival outcomes
+* **Quality Improvement Research:** Assess provider-level or institutional variation in clinical outcomes
 
 ##### **Comprehensive Results & Diagnostics**
 
-* **Fixed Effects Table:**Hazard ratios with confidence intervals for population-level effects
-* **Random Effects Analysis:**Variance components, standard deviations, and proportion of total variance
-* **Hierarchical Structure Summary:**Group-level statistics including number of groups and observations per group
-* **Model Diagnostics:**AIC/BIC, events per parameter, and convergence information
+* **Fixed Effects Table:** Hazard ratios with confidence intervals for population-level effects
+* **Random Effects Analysis:** Variance components, standard deviations, and proportion of total variance
+* **Hierarchical Structure Summary:** Group-level statistics including number of groups and observations per group
+* **Model Diagnostics:** AIC/BIC, events per parameter, and convergence information
 
 # ClinicoPath 0.0.31.30
 
@@ -10292,33 +10405,33 @@ The module outputs include:
 
 ##### **Unified Survival Analysis Framework**
 
-* **Multiple Transformation Functions:**Linear, Box-Cox, log-log, probit, logit, complementary log-log, and non-parametric transformations
-* **Flexible Distribution Support:**Normal, logistic, extreme value, exponential, and Weibull error distributions
-* **Automatic Lambda Optimization:**Box-Cox parameter search with grid-based likelihood maximization
-* **Built-in Implementation:**Comprehensive transformation framework when tram package is not available
+* **Multiple Transformation Functions:** Linear, Box-Cox, log-log, probit, logit, complementary log-log, and non-parametric transformations
+* **Flexible Distribution Support:** Normal, logistic, extreme value, exponential, and Weibull error distributions
+* **Automatic Lambda Optimization:** Box-Cox parameter search with grid-based likelihood maximization
+* **Built-in Implementation:** Comprehensive transformation framework when tram package is not available
 
 ##### **Advanced Transformation Methods**
 
-* **Box-Cox Transformation:**Power transformation with automatic lambda parameter selection from -2 to 2 range
-* **Log-log Transformation:**Double logarithmic transformation for extreme value modeling applications
-* **Probit & Logit Links:**Normal and logistic quantile transformations for bounded outcome modeling
-* **Complementary Log-log:**Asymmetric transformation particularly suited for rare event analysis
-* **Non-parametric Transformation:**Data-driven rank-based transformation without distributional assumptions
-* **Linear Models:**Standard parametric survival models as special case (lambda=1 in Box-Cox)
+* **Box-Cox Transformation:** Power transformation with automatic lambda parameter selection from -2 to 2 range
+* **Log-log Transformation:** Double logarithmic transformation for extreme value modeling applications
+* **Probit & Logit Links:** Normal and logistic quantile transformations for bounded outcome modeling
+* **Complementary Log-log:** Asymmetric transformation particularly suited for rare event analysis
+* **Non-parametric Transformation:** Data-driven rank-based transformation without distributional assumptions
+* **Linear Models:** Standard parametric survival models as special case (lambda=1 in Box-Cox)
 
 ##### **Comprehensive Model Assessment Framework**
 
-* **Transformation Validation:**Statistical tests for transformation assumptions (Shapiro-Wilk, Kolmogorov-Smirnov)
-* **Model Selection:**Automatic comparison across transformation types using AIC/BIC criteria
-* **Lambda Parameter Search:**Grid search optimization with detailed likelihood profile analysis
-* **Diagnostic Plots:**Q-Q plots, residual analysis, transformation function visualization, and survival curves
+* **Transformation Validation:** Statistical tests for transformation assumptions (Shapiro-Wilk, Kolmogorov-Smirnov)
+* **Model Selection:** Automatic comparison across transformation types using AIC/BIC criteria
+* **Lambda Parameter Search:** Grid search optimization with detailed likelihood profile analysis
+* **Diagnostic Plots:** Q-Q plots, residual analysis, transformation function visualization, and survival curves
 
 ##### **Clinical Interpretation & Translation**
 
-* **Unified Parameter Framework:**Consistent interpretation across different transformation functions
-* **Effect Size Measures:**Transformation-adjusted effect ratios with confidence intervals
-* **Model Comparison Tools:**Side-by-side evaluation of different transformation approaches
-* **Natural Language Summaries:**Clinical interpretation of transformation selection and model results
+* **Unified Parameter Framework:** Consistent interpretation across different transformation functions
+* **Effect Size Measures:** Transformation-adjusted effect ratios with confidence intervals
+* **Model Comparison Tools:** Side-by-side evaluation of different transformation approaches
+* **Natural Language Summaries:** Clinical interpretation of transformation selection and model results
 
 # ClinicoPath 0.0.31.29
 
@@ -10328,54 +10441,54 @@ The module outputs include:
 
 ##### **Outlier-Resistant Parametric Survival Modeling**
 
-* **M-Estimation Methods:**Huber, Tukey biweight, Hampel function, Andrews wave, median regression, and least absolute deviation approaches
-* **Acceleration Factor Interpretation:**Direct modeling of covariate effects on survival time rather than hazard ratios
-* **Multiple Parametric Distributions:**Weibull, exponential, log-normal, log-logistic, gamma, and Gaussian distributions
-* **Built-in Robust Implementation:**Comprehensive M-estimation when RobustAFT package is not available
+* **M-Estimation Methods:** Huber, Tukey biweight, Hampel function, Andrews wave, median regression, and least absolute deviation approaches
+* **Acceleration Factor Interpretation:** Direct modeling of covariate effects on survival time rather than hazard ratios
+* **Multiple Parametric Distributions:** Weibull, exponential, log-normal, log-logistic, gamma, and Gaussian distributions
+* **Built-in Robust Implementation:** Comprehensive M-estimation when RobustAFT package is not available
 
 ##### **Advanced Robust Estimation Framework**
 
-* **Huber M-estimator:**Quadratic loss for small residuals, linear for large residuals, optimal efficiency-robustness balance
-* **Tukey Biweight:**Redescending M-estimator completely down-weighting extreme outliers to zero influence
-* **Hampel Function:**Three-part redescending function with flexible influence function shape control
-* **Andrews Wave:**Sine-based redescending function providing smooth outlier down-weighting
-* **Median Regression (LAD):**Least absolute deviation estimation with high breakdown point
-* **Iterative M-Estimation:**Convergent algorithm with configurable tolerance and maximum iterations
+* **Huber M-estimator:** Quadratic loss for small residuals, linear for large residuals, optimal efficiency-robustness balance
+* **Tukey Biweight:** Redescending M-estimator completely down-weighting extreme outliers to zero influence
+* **Hampel Function:** Three-part redescending function with flexible influence function shape control
+* **Andrews Wave:** Sine-based redescending function providing smooth outlier down-weighting
+* **Median Regression (LAD):** Least absolute deviation estimation with high breakdown point
+* **Iterative M-Estimation:** Convergent algorithm with configurable tolerance and maximum iterations
 
 ##### **Comprehensive Outlier Detection & Analysis**
 
-* **Automatic Outlier Detection:**Data-driven identification with configurable threshold parameters
-* **Outlier Classification:**High vs low outlier categorization based on residual direction
-* **Weight Distribution Analysis:**Detailed weight pattern analysis and influence assessment
-* **Robust Scale Estimation:**Multiple robust scale estimators (MAD, Qn, Sn, Tau, Huber scale)
+* **Automatic Outlier Detection:** Data-driven identification with configurable threshold parameters
+* **Outlier Classification:** High vs low outlier categorization based on residual direction
+* **Weight Distribution Analysis:** Detailed weight pattern analysis and influence assessment
+* **Robust Scale Estimation:** Multiple robust scale estimators (MAD, Qn, Sn, Tau, Huber scale)
 
 ##### **Model Comparison & Validation Framework**
 
-* **Standard vs Robust Comparison:**Side-by-side comparison with efficiency and breakdown point analysis
-* **Robust Diagnostics:**Model fit metrics with outlier-resistant standard errors
-* **Scale Parameter Analysis:**Comparative scale estimation with relative efficiency measures
-* **Convergence Monitoring:**Detailed convergence information with iteration tracking
+* **Standard vs Robust Comparison:** Side-by-side comparison with efficiency and breakdown point analysis
+* **Robust Diagnostics:** Model fit metrics with outlier-resistant standard errors
+* **Scale Parameter Analysis:** Comparative scale estimation with relative efficiency measures
+* **Convergence Monitoring:** Detailed convergence information with iteration tracking
 
 ##### **Advanced Visualization Suite**
 
-* **Residual Diagnostic Plots:**Comprehensive residual analysis for model validation and outlier identification
-* **Outlier Identification Plots:**Visual representation of outlier patterns and weight distributions
-* **Survival Curves:**Robust survival function estimates with parametric distribution fitting
-* **Q-Q Plots:**Quantile-quantile plots for distribution assumption validation
+* **Residual Diagnostic Plots:** Comprehensive residual analysis for model validation and outlier identification
+* **Outlier Identification Plots:** Visual representation of outlier patterns and weight distributions
+* **Survival Curves:** Robust survival function estimates with parametric distribution fitting
+* **Q-Q Plots:** Quantile-quantile plots for distribution assumption validation
 
 ##### **Clinical Decision Support Features**
 
-* **Acceleration Factor Interpretation:**AF > 1 (accelerated failure), AF = 1 (no effect), AF < 1 (decelerated failure)
-* **Robust Confidence Intervals:**Bootstrap and asymptotic confidence intervals for acceleration factors
-* **Clinical Summaries:**Natural language interpretation of robust estimation results
-* **Method Explanations:**Comprehensive documentation of robust AFT methodology
+* **Acceleration Factor Interpretation:** AF > 1 (accelerated failure), AF = 1 (no effect), AF < 1 (decelerated failure)
+* **Robust Confidence Intervals:** Bootstrap and asymptotic confidence intervals for acceleration factors
+* **Clinical Summaries:** Natural language interpretation of robust estimation results
+* **Method Explanations:** Comprehensive documentation of robust AFT methodology
 
 ##### **Flexible Parameter Control**
 
-* **Tuning Constants:**Customizable robustness vs efficiency trade-off parameters
-* **Efficiency Targets:**Configurable target efficiency relative to non-robust estimators
-* **Convergence Control:**Maximum iterations and tolerance settings for M-estimation
-* **Bootstrap Options:**Optional bootstrap confidence intervals for enhanced reliability
+* **Tuning Constants:** Customizable robustness vs efficiency trade-off parameters
+* **Efficiency Targets:** Configurable target efficiency relative to non-robust estimators
+* **Convergence Control:** Maximum iterations and tolerance settings for M-estimation
+* **Bootstrap Options:** Optional bootstrap confidence intervals for enhanced reliability
 
 # ClinicoPath 0.0.31.28
 
@@ -10385,46 +10498,46 @@ The module outputs include:
 
 ##### **Rare Events & Imbalanced Data Survival Modeling**
 
-* **Average Hazard Weights (AHW):**Primary weighting method with alpha parameter controlling log-rank (alpha=0), average hazard (alpha=0.5), and Breslow (alpha=1) approaches
-* **Multiple Weighting Schemes:**Schoenfeld residual weights, Prentice weights, and log-rank variance weights for different data characteristics
-* **Built-in Fallback Implementation:**Comprehensive weighted Cox implementation when coxphw package is not available
-* **Improved Stability:**More reliable hazard ratio estimates for rare events and sparse data scenarios
+* **Average Hazard Weights (AHW):** Primary weighting method with alpha parameter controlling log-rank (alpha=0), average hazard (alpha=0.5), and Breslow (alpha=1) approaches
+* **Multiple Weighting Schemes:** Schoenfeld residual weights, Prentice weights, and log-rank variance weights for different data characteristics
+* **Built-in Fallback Implementation:** Comprehensive weighted Cox implementation when coxphw package is not available
+* **Improved Stability:** More reliable hazard ratio estimates for rare events and sparse data scenarios
 
 ##### **Advanced Weighting Methods**
 
-* **Average Hazard Weights:**Uses alpha parameter to control weighting strategy between different partial likelihood approaches
-* **Schoenfeld Residual Weights:**Down-weights observations with large Schoenfeld residuals for robust estimation
-* **Prentice Weights:**Emphasizes observations with larger risk sets using square root of risk set size
-* **Log-rank Variance Weights:**Optimizes for log-rank test statistics with variance-based weighting
+* **Average Hazard Weights:** Uses alpha parameter to control weighting strategy between different partial likelihood approaches
+* **Schoenfeld Residual Weights:** Down-weights observations with large Schoenfeld residuals for robust estimation
+* **Prentice Weights:** Emphasizes observations with larger risk sets using square root of risk set size
+* **Log-rank Variance Weights:** Optimizes for log-rank test statistics with variance-based weighting
 
 ##### **Comprehensive Weight Analysis Framework**
 
-* **Weight Distribution Analysis:**Mean, range, variability, and impact assessment of applied weights
-* **Rare Event Analysis:**Event rate calculation, imbalance ratio assessment, and weight impact evaluation per covariate
-* **Model Comparison:**Side-by-side comparison of weighted vs standard Cox models with fit metrics
-* **Convergence Monitoring:**Detailed convergence information including iterations, tolerance, and parameter tracking
+* **Weight Distribution Analysis:** Mean, range, variability, and impact assessment of applied weights
+* **Rare Event Analysis:** Event rate calculation, imbalance ratio assessment, and weight impact evaluation per covariate
+* **Model Comparison:** Side-by-side comparison of weighted vs standard Cox models with fit metrics
+* **Convergence Monitoring:** Detailed convergence information including iterations, tolerance, and parameter tracking
 
 ##### **Clinical Decision Support**
 
-* **Diagnostic Tables:**Events per parameter ratio, censoring proportion assessment, and model stability metrics
-* **Bootstrap Confidence Intervals:**Optional bootstrap estimation for more robust confidence intervals
-* **Clinical Interpretation:**Natural language summaries explaining weighting strategy and clinical implications
-* **Method Explanations:**Comprehensive methodology documentation for different weighting approaches
+* **Diagnostic Tables:** Events per parameter ratio, censoring proportion assessment, and model stability metrics
+* **Bootstrap Confidence Intervals:** Optional bootstrap estimation for more robust confidence intervals
+* **Clinical Interpretation:** Natural language summaries explaining weighting strategy and clinical implications
+* **Method Explanations:** Comprehensive methodology documentation for different weighting approaches
 
 ##### **Advanced Visualization Suite**
 
-* **Weight Distribution Plots:**Visual representation of weight patterns across observations
-* **Residual Diagnostic Plots:**Comprehensive residual analysis for model validation
-* **Survival Curves:**Weighted survival function estimates with confidence bands
-* **Forest Plots:**Hazard ratio visualization with weighted confidence intervals
-* **Model Comparison Plots:**Visual comparison between standard and weighted Cox models
+* **Weight Distribution Plots:** Visual representation of weight patterns across observations
+* **Residual Diagnostic Plots:** Comprehensive residual analysis for model validation
+* **Survival Curves:** Weighted survival function estimates with confidence bands
+* **Forest Plots:** Hazard ratio visualization with weighted confidence intervals
+* **Model Comparison Plots:** Visual comparison between standard and weighted Cox models
 
 ##### **Robust Implementation Features**
 
-* **Flexible Parameter Control:**Maximum iterations, convergence tolerance, and confidence level adjustment
-* **Stratification Support:**Stratified weighted Cox models for heterogeneous populations
-* **Cluster Robust Variance:**Support for clustered data with robust variance estimation
-* **Offset Variables:**Integration of known offset terms in the weighted partial likelihood
+* **Flexible Parameter Control:** Maximum iterations, convergence tolerance, and confidence level adjustment
+* **Stratification Support:** Stratified weighted Cox models for heterogeneous populations
+* **Cluster Robust Variance:** Support for clustered data with robust variance estimation
+* **Offset Variables:** Integration of known offset terms in the weighted partial likelihood
 
 # ClinicoPath 0.0.31.27
 
@@ -10434,39 +10547,39 @@ The module outputs include:
 
 ##### **Outlier-Resistant Survival Modeling**
 
-* **Robust Estimation Methods:**Multiple M-estimation approaches including Huber, Tukey's biweight, Hampel's function, bounded influence, and weighted likelihood methods
-* **Automatic Outlier Detection:**Data-driven identification and down-weighting of influential observations with configurable thresholds
-* **Robust Standard Errors:**Sandwich variance estimators providing valid inference under model misspecification
-* **Efficiency Control:**Tunable trade-off between robustness and statistical efficiency through method-specific tuning constants
+* **Robust Estimation Methods:** Multiple M-estimation approaches including Huber, Tukey's biweight, Hampel's function, bounded influence, and weighted likelihood methods
+* **Automatic Outlier Detection:** Data-driven identification and down-weighting of influential observations with configurable thresholds
+* **Robust Standard Errors:** Sandwich variance estimators providing valid inference under model misspecification
+* **Efficiency Control:** Tunable trade-off between robustness and statistical efficiency through method-specific tuning constants
 
 ##### **Comprehensive Robust Methods Suite**
 
-* **Huber M-estimation:**Quadratic loss for small residuals, linear for large residuals, balancing efficiency and robustness
-* **Tukey's Biweight:**Redescending M-estimator completely down-weighting extreme outliers to zero
-* **Hampel's Function:**Three-part redescending function with flexible control over influence function shape
-* **Bounded Influence:**Limiting maximum influence any single observation can have on parameter estimates
-* **Weighted Likelihood:**Data-driven weight application to partial likelihood based on residual magnitudes
+* **Huber M-estimation:** Quadratic loss for small residuals, linear for large residuals, balancing efficiency and robustness
+* **Tukey's Biweight:** Redescending M-estimator completely down-weighting extreme outliers to zero
+* **Hampel's Function:** Three-part redescending function with flexible control over influence function shape
+* **Bounded Influence:** Limiting maximum influence any single observation can have on parameter estimates
+* **Weighted Likelihood:** Data-driven weight application to partial likelihood based on residual magnitudes
 
 ##### **Advanced Diagnostic Framework**
 
-* **Influence Diagnostics:**Cook's distance, DFBETAS, and leverage measures with automatic threshold calculation
-* **Residual Analysis:**Deviance, martingale, and Schoenfeld residuals for model assumption checking
-* **Weight Distribution:**Visualization of robust weights applied to observations
-* **Outlier Reporting:**Detailed flagging and reporting of influential observations with residual magnitudes
+* **Influence Diagnostics:** Cook's distance, DFBETAS, and leverage measures with automatic threshold calculation
+* **Residual Analysis:** Deviance, martingale, and Schoenfeld residuals for model assumption checking
+* **Weight Distribution:** Visualization of robust weights applied to observations
+* **Outlier Reporting:** Detailed flagging and reporting of influential observations with residual magnitudes
 
 ##### **Model Comparison & Validation**
 
-* **Standard vs Robust Comparison:**Side-by-side comparison with standard Cox regression for sensitivity analysis
-* **Model Fit Metrics:**AIC, BIC, concordance index, and log-likelihood for both standard and robust models
-* **Bootstrap Inference:**Optional bootstrap confidence intervals for enhanced statistical inference
-* **Convergence Monitoring:**Detailed tracking of iterative estimation with user-specified tolerance
+* **Standard vs Robust Comparison:** Side-by-side comparison with standard Cox regression for sensitivity analysis
+* **Model Fit Metrics:** AIC, BIC, concordance index, and log-likelihood for both standard and robust models
+* **Bootstrap Inference:** Optional bootstrap confidence intervals for enhanced statistical inference
+* **Convergence Monitoring:** Detailed tracking of iterative estimation with user-specified tolerance
 
 ##### **Clinical Decision Support**
 
-* **Stable Parameter Estimates:**Reliable hazard ratios less sensitive to data anomalies
-* **Robust Confidence Intervals:**Valid inference even with heavy-tailed distributions
-* **Stratified Analysis Support:**Robust estimation within stratified Cox models
-* **Weighted Analysis:**Integration with observation weights for complex sampling designs
+* **Stable Parameter Estimates:** Reliable hazard ratios less sensitive to data anomalies
+* **Robust Confidence Intervals:** Valid inference even with heavy-tailed distributions
+* **Stratified Analysis Support:** Robust estimation within stratified Cox models
+* **Weighted Analysis:** Integration with observation weights for complex sampling designs
 
 # ClinicoPath 0.0.31.26
 
@@ -10476,38 +10589,38 @@ The module outputs include:
 
 ##### **Advanced Accelerated Failure Time Modeling**
 
-* **Rank-based Estimation:**Distribution-free AFT models using rank-based estimating equations with multiple weighting schemes (log-rank, Gehan, normal scores, Wilcoxon)
-* **GEE Framework:**Generalized Estimating Equations approach for handling clustered and correlated survival data with flexible correlation structures
-* **Robust Inference:**Sandwich variance estimation and optional bootstrap procedures for reliable statistical inference
-* **Clinical Interpretation:**Direct acceleration factor estimation providing intuitive time-based effect measures for clinical research
+* **Rank-based Estimation:** Distribution-free AFT models using rank-based estimating equations with multiple weighting schemes (log-rank, Gehan, normal scores, Wilcoxon)
+* **GEE Framework:** Generalized Estimating Equations approach for handling clustered and correlated survival data with flexible correlation structures
+* **Robust Inference:** Sandwich variance estimation and optional bootstrap procedures for reliable statistical inference
+* **Clinical Interpretation:** Direct acceleration factor estimation providing intuitive time-based effect measures for clinical research
 
 ##### **Comprehensive Correlation Structure Support**
 
-* **Independence Structure:**Standard GEE approach for uncorrelated observations with robust variance estimation
-* **Exchangeable Correlation:**Constant within-cluster correlation modeling for clustered survival data
-* **Autoregressive AR(1):**Time-ordered correlation structure for longitudinal survival studies
-* **Unstructured Correlation:**Flexible correlation matrix estimation for complex dependency patterns
+* **Independence Structure:** Standard GEE approach for uncorrelated observations with robust variance estimation
+* **Exchangeable Correlation:** Constant within-cluster correlation modeling for clustered survival data
+* **Autoregressive AR(1):** Time-ordered correlation structure for longitudinal survival studies
+* **Unstructured Correlation:** Flexible correlation matrix estimation for complex dependency patterns
 
 ##### **Advanced Statistical Framework**
 
-* **Multiple Rank Methods:**Log-rank weights for equal weighting across failure times, Gehan weights emphasizing early failures, normal scores and Wilcoxon-type weighting
-* **Acceleration Factor Interpretation:**Direct multiplicative effects on survival time with confidence intervals and clinical significance assessment
-* **Model Diagnostics:**Comprehensive residual analysis, Q-Q plots, and model fit assessment with comparison to Cox proportional hazards
-* **Convergence Monitoring:**Detailed iteration tracking and convergence diagnostics with user-specified tolerance and maximum iteration controls
+* **Multiple Rank Methods:** Log-rank weights for equal weighting across failure times, Gehan weights emphasizing early failures, normal scores and Wilcoxon-type weighting
+* **Acceleration Factor Interpretation:** Direct multiplicative effects on survival time with confidence intervals and clinical significance assessment
+* **Model Diagnostics:** Comprehensive residual analysis, Q-Q plots, and model fit assessment with comparison to Cox proportional hazards
+* **Convergence Monitoring:** Detailed iteration tracking and convergence diagnostics with user-specified tolerance and maximum iteration controls
 
 ##### **Clinical Decision Support & Validation**
 
-* **AFT vs Cox Comparison:**Side-by-side model comparison with AIC, log-likelihood, and concordance measures for model selection guidance
-* **Sample Size Assessment:**Events-per-covariate ratios and adequacy measures for reliable parameter estimation
-* **Correlation Structure Selection:**Diagnostic tools for working correlation structure evaluation and selection
-* **Bootstrap Validation:**Optional bootstrap variance estimation and confidence interval construction for robust inference
+* **AFT vs Cox Comparison:** Side-by-side model comparison with AIC, log-likelihood, and concordance measures for model selection guidance
+* **Sample Size Assessment:** Events-per-covariate ratios and adequacy measures for reliable parameter estimation
+* **Correlation Structure Selection:** Diagnostic tools for working correlation structure evaluation and selection
+* **Bootstrap Validation:** Optional bootstrap variance estimation and confidence interval construction for robust inference
 
 ##### **Comprehensive Visualization Suite**
 
-* **Residual Diagnostic Plots:**Model assumption checking through standardized residual analysis and pattern detection
-* **Survival Curve Estimation:**AFT-based survival curve prediction with acceleration factor incorporation
-* **Acceleration Factor Plots:**Forest plot-style visualization of acceleration factors with confidence intervals
-* **Model Comparison Plots:**Graphical comparison of AFT and Cox model predictions for model validation
+* **Residual Diagnostic Plots:** Model assumption checking through standardized residual analysis and pattern detection
+* **Survival Curve Estimation:** AFT-based survival curve prediction with acceleration factor incorporation
+* **Acceleration Factor Plots:** Forest plot-style visualization of acceleration factors with confidence intervals
+* **Model Comparison Plots:** Graphical comparison of AFT and Cox model predictions for model validation
 
 # ClinicoPath 0.0.31.25
 
@@ -10517,45 +10630,45 @@ The module outputs include:
 
 ##### **Comprehensive PH Assumption Validation**
 
-* **Multiple Testing Methods:**Schoenfeld residuals, scaled Schoenfeld, global tests, correlation tests, log-rank trends, and supremum tests for robust validation
-* **Statistical Rigor:**Implementation of established proportional hazards testing frameworks with chi-square, correlation, and trend-based approaches
-* **Cox Model Diagnostics:**Comprehensive validation of fundamental assumptions underlying Cox proportional hazards regression models
-* **Clinical Decision Support:**Automated recommendations for model selection and alternative approaches when assumptions are violated
+* **Multiple Testing Methods:** Schoenfeld residuals, scaled Schoenfeld, global tests, correlation tests, log-rank trends, and supremum tests for robust validation
+* **Statistical Rigor:** Implementation of established proportional hazards testing frameworks with chi-square, correlation, and trend-based approaches
+* **Cox Model Diagnostics:** Comprehensive validation of fundamental assumptions underlying Cox proportional hazards regression models
+* **Clinical Decision Support:** Automated recommendations for model selection and alternative approaches when assumptions are violated
 
 ##### **Advanced Statistical Framework**
 
-* **Schoenfeld Residuals Analysis:**Standard and scaled Schoenfeld residuals testing for time-varying effects detection with correlation analysis
-* **Global Testing Procedures:**Omnibus tests for simultaneous evaluation of proportional hazards assumptions across all model covariates
-* **Residual Correlation Testing:**Direct correlation tests between residuals and time for straightforward interpretation of time-dependent effects
-* **Time Transformation Options:**Multiple time transformation approaches (identity, logarithmic, rank, Kaplan-Meier) for enhanced testing sensitivity
+* **Schoenfeld Residuals Analysis:** Standard and scaled Schoenfeld residuals testing for time-varying effects detection with correlation analysis
+* **Global Testing Procedures:** Omnibus tests for simultaneous evaluation of proportional hazards assumptions across all model covariates
+* **Residual Correlation Testing:** Direct correlation tests between residuals and time for straightforward interpretation of time-dependent effects
+* **Time Transformation Options:** Multiple time transformation approaches (identity, logarithmic, rank, Kaplan-Meier) for enhanced testing sensitivity
 
 ##### **Comprehensive Diagnostic Suite**
 
-* **Individual Covariate Testing:**Separate evaluation of proportional hazards assumption for each model covariate with detailed test statistics
-* **Model-Wide Assessment:**Global tests providing overall model validation with chi-square and alternative distribution-based approaches
-* **Residual Analysis Framework:**Detailed examination of Schoenfeld residuals including trend analysis and correlation diagnostics
-* **Power Analysis Integration:**Estimation of test power and minimum detectable effects for study design and interpretation
+* **Individual Covariate Testing:** Separate evaluation of proportional hazards assumption for each model covariate with detailed test statistics
+* **Model-Wide Assessment:** Global tests providing overall model validation with chi-square and alternative distribution-based approaches
+* **Residual Analysis Framework:** Detailed examination of Schoenfeld residuals including trend analysis and correlation diagnostics
+* **Power Analysis Integration:** Estimation of test power and minimum detectable effects for study design and interpretation
 
 ##### **Clinical Translation & Recommendations**
 
-* **Automated Interpretation:**Intelligent assessment of test results with clinical significance determination and violation severity classification
-* **Alternative Model Suggestions:**Systematic recommendations for stratified Cox models, time-varying coefficients, and alternative survival approaches
-* **Regulatory Compliance:**Implementation following established statistical guidelines for Cox model validation in clinical research
-* **Quality Control Framework:**Comprehensive diagnostic suite for survival analysis validation and assumption verification
+* **Automated Interpretation:** Intelligent assessment of test results with clinical significance determination and violation severity classification
+* **Alternative Model Suggestions:** Systematic recommendations for stratified Cox models, time-varying coefficients, and alternative survival approaches
+* **Regulatory Compliance:** Implementation following established statistical guidelines for Cox model validation in clinical research
+* **Quality Control Framework:** Comprehensive diagnostic suite for survival analysis validation and assumption verification
 
 ##### **Advanced Validation Features**
 
-* **Multiple Test Integration:**Coordinated analysis across different testing approaches with consensus determination and conflict resolution
-* **Stratified Analysis Support:**Framework for stratified proportional hazards testing with subgroup-specific validation capabilities
-* **Model Comparison Metrics:**Systematic comparison between static and alternative modeling approaches using information criteria
-* **Bootstrap Validation Ready:**Infrastructure supporting bootstrap and cross-validation approaches for robust model assessment
+* **Multiple Test Integration:** Coordinated analysis across different testing approaches with consensus determination and conflict resolution
+* **Stratified Analysis Support:** Framework for stratified proportional hazards testing with subgroup-specific validation capabilities
+* **Model Comparison Metrics:** Systematic comparison between static and alternative modeling approaches using information criteria
+* **Bootstrap Validation Ready:** Infrastructure supporting bootstrap and cross-validation approaches for robust model assessment
 
 ##### **Clinical Applications & Impact**
 
-* **Model Selection Guidance:**Evidence-based recommendations for appropriate survival modeling approaches in clinical research settings
-* **Regulatory Validation:**Comprehensive documentation and testing procedures meeting regulatory requirements for survival analysis
-* **Quality Assurance:**Systematic validation procedures ensuring reliable and valid Cox regression analyses in clinical studies
-* **Research Methodology:**Advanced statistical validation supporting high-quality survival analysis in observational and experimental studies
+* **Model Selection Guidance:** Evidence-based recommendations for appropriate survival modeling approaches in clinical research settings
+* **Regulatory Validation:** Comprehensive documentation and testing procedures meeting regulatory requirements for survival analysis
+* **Quality Assurance:** Systematic validation procedures ensuring reliable and valid Cox regression analyses in clinical studies
+* **Research Methodology:** Advanced statistical validation supporting high-quality survival analysis in observational and experimental studies
 
 ---
 
@@ -10567,45 +10680,45 @@ The module outputs include:
 
 ##### **Real-Time Coefficient Adaptation**
 
-* **Adaptive Filtering Methods:**Kalman filtering, particle filtering, Bayesian updating, and recursive estimation for dynamic parameter adaptation
-* **State Space Modeling:**Time-varying coefficients evolving continuously through sophisticated state space formulations
-* **Real-Time Learning:**Online parameter estimation adapting to new information as survival data accumulates over time
-* **Multiple Updating Mechanisms:**Choice of filtering approaches optimized for different data characteristics and modeling assumptions
+* **Adaptive Filtering Methods:** Kalman filtering, particle filtering, Bayesian updating, and recursive estimation for dynamic parameter adaptation
+* **State Space Modeling:** Time-varying coefficients evolving continuously through sophisticated state space formulations
+* **Real-Time Learning:** Online parameter estimation adapting to new information as survival data accumulates over time
+* **Multiple Updating Mechanisms:** Choice of filtering approaches optimized for different data characteristics and modeling assumptions
 
 ##### **Advanced State Space Framework**
 
-* **Dynamic Linear Models:**beta(t) coefficients following state evolution equations with process and observation noise modeling
-* **Filtering Algorithms:**Optimal estimation techniques for linear (Kalman) and non-linear (particle) dynamic systems
-* **Bayesian Inference:**Posterior distribution updates incorporating prior knowledge with sequential likelihood updates
-* **Convergence Diagnostics:**Comprehensive monitoring of filter stability, adaptation rates, and parameter convergence
+* **Dynamic Linear Models:** beta(t) coefficients following state evolution equations with process and observation noise modeling
+* **Filtering Algorithms:** Optimal estimation techniques for linear (Kalman) and non-linear (particle) dynamic systems
+* **Bayesian Inference:** Posterior distribution updates incorporating prior knowledge with sequential likelihood updates
+* **Convergence Diagnostics:** Comprehensive monitoring of filter stability, adaptation rates, and parameter convergence
 
 ##### **Sophisticated Algorithm Selection**
 
-* **Kalman Filtering:**Optimal linear unbiased estimation for Gaussian systems with computational efficiency
-* **Particle Filtering:**Monte Carlo methods handling non-linear and non-Gaussian dynamic systems with sequential importance sampling
-* **Bayesian Updating:**Prior-posterior framework with uncertainty quantification and knowledge incorporation
-* **Recursive Estimation:**Online least squares with exponential forgetting for adaptive parameter tracking
+* **Kalman Filtering:** Optimal linear unbiased estimation for Gaussian systems with computational efficiency
+* **Particle Filtering:** Monte Carlo methods handling non-linear and non-Gaussian dynamic systems with sequential importance sampling
+* **Bayesian Updating:** Prior-posterior framework with uncertainty quantification and knowledge incorporation
+* **Recursive Estimation:** Online least squares with exponential forgetting for adaptive parameter tracking
 
 ##### **Comprehensive Adaptation Metrics**
 
-* **Dynamic Evolution Tracking:**Monitoring coefficient trajectories, adaptation speed, and steady-state convergence behavior
-* **Model Comparison Framework:**Systematic comparison with static coefficient models using likelihood-based criteria
-* **Filter Performance Assessment:**Effective sample sizes, autocorrelation diagnostics, and convergence rate monitoring
-* **Clinical Decision Support:**Real-time risk prediction updates and adaptive prognostic model recommendations
+* **Dynamic Evolution Tracking:** Monitoring coefficient trajectories, adaptation speed, and steady-state convergence behavior
+* **Model Comparison Framework:** Systematic comparison with static coefficient models using likelihood-based criteria
+* **Filter Performance Assessment:** Effective sample sizes, autocorrelation diagnostics, and convergence rate monitoring
+* **Clinical Decision Support:** Real-time risk prediction updates and adaptive prognostic model recommendations
 
 ##### **Clinical Applications & Innovation**
 
-* **Treatment Response Evolution:**Dynamic modeling of changing treatment effects during extended follow-up periods
-* **Biomarker Adaptation:**Real-time adjustment of prognostic biomarker importance as disease progression patterns emerge
-* **Personalized Risk Updates:**Patient-specific risk prediction models that adapt to new clinical information
-* **Adaptive Clinical Trials:**Support for dynamic treatment decisions and real-time efficacy monitoring
+* **Treatment Response Evolution:** Dynamic modeling of changing treatment effects during extended follow-up periods
+* **Biomarker Adaptation:** Real-time adjustment of prognostic biomarker importance as disease progression patterns emerge
+* **Personalized Risk Updates:** Patient-specific risk prediction models that adapt to new clinical information
+* **Adaptive Clinical Trials:** Support for dynamic treatment decisions and real-time efficacy monitoring
 
 ##### **Advanced Statistical Features**
 
-* **State Dimension Control:**Configurable state space complexity balancing model flexibility against computational efficiency
-* **Noise Parameter Tuning:**Process and observation variance settings controlling adaptation sensitivity and stability
-* **Forgetting Factor Selection:**Exponential discounting parameters managing historical information retention
-* **Confidence Interval Dynamics:**Time-varying uncertainty quantification for evolving coefficient estimates
+* **State Dimension Control:** Configurable state space complexity balancing model flexibility against computational efficiency
+* **Noise Parameter Tuning:** Process and observation variance settings controlling adaptation sensitivity and stability
+* **Forgetting Factor Selection:** Exponential discounting parameters managing historical information retention
+* **Confidence Interval Dynamics:** Time-varying uncertainty quantification for evolving coefficient estimates
 
 ---
 
@@ -10617,45 +10730,45 @@ The module outputs include:
 
 ##### **Continuous Time-Varying Coefficient Modeling**
 
-* **Flexible Smoothing Methods:**Cubic splines, LOESS, kernel smoothing, and penalized splines for continuous effect estimation
-* **Non-parametric Effect Patterns:**Detection and modeling of complex covariate influence evolution without parametric assumptions
-* **Alternative to Step-Functions:**Smooth alternatives to discrete time-varying approaches in standard Cox model extensions
-* **Multiple Smoothing Approaches:**User-selectable methods optimized for different data characteristics and analysis goals
+* **Flexible Smoothing Methods:** Cubic splines, LOESS, kernel smoothing, and penalized splines for continuous effect estimation
+* **Non-parametric Effect Patterns:** Detection and modeling of complex covariate influence evolution without parametric assumptions
+* **Alternative to Step-Functions:** Smooth alternatives to discrete time-varying approaches in standard Cox model extensions
+* **Multiple Smoothing Approaches:** User-selectable methods optimized for different data characteristics and analysis goals
 
 ##### **Advanced Statistical Framework**
 
-* **Continuous Time-Varying Coefficients:**beta(t) functions estimated using flexible smoothing techniques for evolving covariate effects
-* **Constancy Testing:**Statistical assessment of whether effects remain constant over time versus exhibiting time-varying patterns
-* **Bootstrap Confidence Intervals:**Uncertainty quantification for smooth effect functions with configurable confidence levels
-* **Model Comparison Framework:**Systematic comparison with constant effects models using information criteria
+* **Continuous Time-Varying Coefficients:** beta(t) functions estimated using flexible smoothing techniques for evolving covariate effects
+* **Constancy Testing:** Statistical assessment of whether effects remain constant over time versus exhibiting time-varying patterns
+* **Bootstrap Confidence Intervals:** Uncertainty quantification for smooth effect functions with configurable confidence levels
+* **Model Comparison Framework:** Systematic comparison with constant effects models using information criteria
 
 ##### **Sophisticated Parameter Control**
 
-* **Degrees of Freedom Selection:**Configurable spline complexity balancing flexibility against overfitting risks
-* **Bandwidth Optimization:**Kernel and local smoothing parameters controlling neighborhood size for effect estimation
-* **Automatic Smoothness Selection:**Penalized spline approaches with data-driven smoothness parameter optimization
-* **Cross-validation Integration:**Model selection and parameter tuning using robust validation frameworks
+* **Degrees of Freedom Selection:** Configurable spline complexity balancing flexibility against overfitting risks
+* **Bandwidth Optimization:** Kernel and local smoothing parameters controlling neighborhood size for effect estimation
+* **Automatic Smoothness Selection:** Penalized spline approaches with data-driven smoothness parameter optimization
+* **Cross-validation Integration:** Model selection and parameter tuning using robust validation frameworks
 
 ##### **Comprehensive Diagnostic Framework**
 
-* **Effect Constancy Assessment:**Variance-based tests identifying variables requiring time-varying versus constant modeling
-* **Residual Analysis:**Model adequacy evaluation through comprehensive diagnostic plots and statistical measures
-* **Smoothing Method Comparison:**Visual and statistical comparison across different smoothing approaches
-* **Model Complexity Evaluation:**Information criteria and goodness-of-fit metrics for optimal method selection
+* **Effect Constancy Assessment:** Variance-based tests identifying variables requiring time-varying versus constant modeling
+* **Residual Analysis:** Model adequacy evaluation through comprehensive diagnostic plots and statistical measures
+* **Smoothing Method Comparison:** Visual and statistical comparison across different smoothing approaches
+* **Model Complexity Evaluation:** Information criteria and goodness-of-fit metrics for optimal method selection
 
 ##### **Clinical Research Applications**
 
-* **Treatment Effect Evolution:**Analysis of how therapeutic interventions change in effectiveness over follow-up periods
-* **Biomarker Dynamics:**Investigation of biomarker influence patterns during disease progression and treatment response
-* **Risk Factor Pattern Analysis:**Understanding how prognostic factors evolve in long-term survival studies
-* **Proportional Hazards Assessment:**Alternative modeling approaches when standard Cox assumptions are violated
+* **Treatment Effect Evolution:** Analysis of how therapeutic interventions change in effectiveness over follow-up periods
+* **Biomarker Dynamics:** Investigation of biomarker influence patterns during disease progression and treatment response
+* **Risk Factor Pattern Analysis:** Understanding how prognostic factors evolve in long-term survival studies
+* **Proportional Hazards Assessment:** Alternative modeling approaches when standard Cox assumptions are violated
 
 ##### **Advanced Methodological Features**
 
-* **Time-Dependent Coefficient Estimation:**lambda(t|x) = lambda0(t) exp(Sigmai betai(t)xi) with smooth betai(t) functions
-* **Multiple Link Functions:**Flexible transformation approaches optimized for different survival data patterns
-* **Robust Standard Errors:**Uncertainty quantification accounting for smoothing variability and model specification
-* **Optimal Treatment Timing:**Identification of periods with maximal or minimal treatment effectiveness
+* **Time-Dependent Coefficient Estimation:** lambda(t|x) = lambda0(t) exp(Sigmai betai(t)xi) with smooth betai(t) functions
+* **Multiple Link Functions:** Flexible transformation approaches optimized for different survival data patterns
+* **Robust Standard Errors:** Uncertainty quantification accounting for smoothing variability and model specification
+* **Optimal Treatment Timing:** Identification of periods with maximal or minimal treatment effectiveness
 
 This implementation provides essential methodology for survival analysis requiring flexible modeling of time-dependent covariate effects, offering superior alternatives to step-function approaches while maintaining statistical rigor and clinical interpretability crucial for understanding dynamic treatment and prognostic factor influences in medical research.
 
@@ -10665,45 +10778,45 @@ This implementation provides essential methodology for survival analysis requiri
 
 ##### **Advanced Parametric Survival Modeling**
 
-* **Flexible Baseline Functions:**Restricted cubic splines for modeling complex, non-monotonic baseline hazard patterns
-* **Multiple Model Scales:**Proportional hazards, proportional odds, and probit scales for different clinical contexts
-* **Time-Varying Covariate Effects:**Spline-based interactions for modeling time-dependent treatment and prognostic factor effects
-* **Customizable Spline Configuration:**User-controlled degrees of freedom and knot placement for optimal model flexibility
+* **Flexible Baseline Functions:** Restricted cubic splines for modeling complex, non-monotonic baseline hazard patterns
+* **Multiple Model Scales:** Proportional hazards, proportional odds, and probit scales for different clinical contexts
+* **Time-Varying Covariate Effects:** Spline-based interactions for modeling time-dependent treatment and prognostic factor effects
+* **Customizable Spline Configuration:** User-controlled degrees of freedom and knot placement for optimal model flexibility
 
 ##### **Parametric Modeling Advantages**
 
-* **Smooth Function Estimates:**Direct parametric estimation of survival and hazard functions without step discontinuities
-* **Extrapolation Capability:**Reliable prediction beyond observed follow-up periods for health economic modeling
-* **Efficient Parameter Estimation:**Maximum likelihood estimation with asymptotic properties superior to non-parametric alternatives
-* **Multiple Link Functions:**Choice of appropriate transformations optimized for specific survival data patterns
+* **Smooth Function Estimates:** Direct parametric estimation of survival and hazard functions without step discontinuities
+* **Extrapolation Capability:** Reliable prediction beyond observed follow-up periods for health economic modeling
+* **Efficient Parameter Estimation:** Maximum likelihood estimation with asymptotic properties superior to non-parametric alternatives
+* **Multiple Link Functions:** Choice of appropriate transformations optimized for specific survival data patterns
 
 ##### **Advanced Clinical Features**
 
-* **Cure Fraction Modeling:**Incorporation of long-term survivors who will never experience the event of interest
-* **Background Hazard Integration:**Relative survival analysis incorporating population-based mortality rates
-* **Time-Varying Effects Visualization:**Dynamic plots showing how covariate impacts evolve over follow-up time
-* **Model Scale Selection:**Automatic or manual selection of optimal transformation scale (hazards vs odds vs probit)
+* **Cure Fraction Modeling:** Incorporation of long-term survivors who will never experience the event of interest
+* **Background Hazard Integration:** Relative survival analysis incorporating population-based mortality rates
+* **Time-Varying Effects Visualization:** Dynamic plots showing how covariate impacts evolve over follow-up time
+* **Model Scale Selection:** Automatic or manual selection of optimal transformation scale (hazards vs odds vs probit)
 
 ##### **Comprehensive Spline Methodology**
 
-* **Restricted Cubic Splines:**Smooth baseline function modeling with natural boundary behavior and continuity constraints
-* **Automatic Knot Placement:**Quantile-based knot positioning with user override capability for expert knowledge integration
-* **Degrees of Freedom Control:**Balance between model flexibility and overfitting through configurable spline complexity
-* **Boundary Knot Specification:**Customizable range definition for spline domain optimization
+* **Restricted Cubic Splines:** Smooth baseline function modeling with natural boundary behavior and continuity constraints
+* **Automatic Knot Placement:** Quantile-based knot positioning with user override capability for expert knowledge integration
+* **Degrees of Freedom Control:** Balance between model flexibility and overfitting through configurable spline complexity
+* **Boundary Knot Specification:** Customizable range definition for spline domain optimization
 
 ##### **Clinical Research Applications**
 
-* **Cancer Survival Modeling:**Flexible hazard patterns common in oncology with initial treatment effects and late recurrence risks
-* **Long-term Follow-up Studies:**Extrapolation requirements for lifetime survival estimation and health economics
-* **Population-based Analysis:**Integration with life table data for relative survival and excess mortality quantification
-* **Health Economic Modeling:**Parametric survival functions required for cost-effectiveness analysis and budget impact modeling
+* **Cancer Survival Modeling:** Flexible hazard patterns common in oncology with initial treatment effects and late recurrence risks
+* **Long-term Follow-up Studies:** Extrapolation requirements for lifetime survival estimation and health economics
+* **Population-based Analysis:** Integration with life table data for relative survival and excess mortality quantification
+* **Health Economic Modeling:** Parametric survival functions required for cost-effectiveness analysis and budget impact modeling
 
 ##### **Technical Implementation**
 
-* **rstpm2 Package Integration:**Built on established Royston-Parmar methodology with extensive validation in medical literature
-* **Multiple Scale Support:**Hazard, odds, and normal scale transformations with appropriate link functions
-* **Robust Standard Errors:**Optional sandwich estimators for uncertainty quantification under model misspecification
-* **Comprehensive Diagnostics:**Residual analysis, model fit statistics, and spline component visualization
+* **rstpm2 Package Integration:** Built on established Royston-Parmar methodology with extensive validation in medical literature
+* **Multiple Scale Support:** Hazard, odds, and normal scale transformations with appropriate link functions
+* **Robust Standard Errors:** Optional sandwich estimators for uncertainty quantification under model misspecification
+* **Comprehensive Diagnostics:** Residual analysis, model fit statistics, and spline component visualization
 
 This implementation provides essential methodology for parametric survival analysis requiring flexibility in baseline hazard patterns while maintaining the advantages of parametric modeling for prediction, extrapolation, and health economic applications crucial in clinical research and medical decision-making.
 
@@ -10713,38 +10826,38 @@ This implementation provides essential methodology for parametric survival analy
 
 ##### **Non-Proportional Hazards Modeling**
 
-* **Additive Hazard Framework:**Time-varying covariate effects through additive rather than multiplicative hazard contributions
-* **Multiple Model Types:**Additive, semi-parametric, and non-parametric Aalen models for different analytical needs
-* **Time-Varying Effects:**Estimation of cumulative regression coefficients that change over time without proportional hazards assumptions
-* **Constant Effects Testing:**Kolmogorov-Smirnov tests to identify which covariates have time-varying vs constant effects
+* **Additive Hazard Framework:** Time-varying covariate effects through additive rather than multiplicative hazard contributions
+* **Multiple Model Types:** Additive, semi-parametric, and non-parametric Aalen models for different analytical needs
+* **Time-Varying Effects:** Estimation of cumulative regression coefficients that change over time without proportional hazards assumptions
+* **Constant Effects Testing:** Kolmogorov-Smirnov tests to identify which covariates have time-varying vs constant effects
 
 ##### **Advanced Statistical Methodology**
 
-* **Cumulative Regression Functions:**beta(t) estimation showing how covariate effects accumulate over follow-up time
-* **Robust Standard Errors:**Optional sandwich estimator for robust inference in the presence of model misspecification
-* **Semi-parametric Flexibility:**Mixed models with some covariates constrained to constant effects, others time-varying
-* **Bandwidth Selection:**Configurable smoothing parameters for cumulative coefficient estimation
+* **Cumulative Regression Functions:** beta(t) estimation showing how covariate effects accumulate over follow-up time
+* **Robust Standard Errors:** Optional sandwich estimator for robust inference in the presence of model misspecification
+* **Semi-parametric Flexibility:** Mixed models with some covariates constrained to constant effects, others time-varying
+* **Bandwidth Selection:** Configurable smoothing parameters for cumulative coefficient estimation
 
 ##### **Clinical Research Applications**
 
-* **Proportional Hazards Violations:**Alternative analysis when Cox model assumptions fail statistical testing
-* **Treatment Effect Evolution:**Investigation of how treatment effects change over time during follow-up periods
-* **Exploratory Survival Analysis:**Non-parametric exploration of covariate effect patterns without strong model assumptions
-* **Time-Dependent Biomarker Effects:**Analysis of biomarkers whose influence varies across different survival periods
+* **Proportional Hazards Violations:** Alternative analysis when Cox model assumptions fail statistical testing
+* **Treatment Effect Evolution:** Investigation of how treatment effects change over time during follow-up periods
+* **Exploratory Survival Analysis:** Non-parametric exploration of covariate effect patterns without strong model assumptions
+* **Time-Dependent Biomarker Effects:** Analysis of biomarkers whose influence varies across different survival periods
 
 ##### **Comprehensive Diagnostic Framework**
 
-* **Cumulative Coefficient Plots:**Visualization of time-varying covariate effects with confidence bands
-* **Constantancy Tests:**Statistical testing for time-invariant vs time-varying covariate effects
-* **Model Diagnostics:**Residual analysis and goodness-of-fit assessment for additive hazard assumptions
-* **Effect Pattern Recognition:**Identification of periods with strong vs minimal covariate influence
+* **Cumulative Coefficient Plots:** Visualization of time-varying covariate effects with confidence bands
+* **Constantancy Tests:** Statistical testing for time-invariant vs time-varying covariate effects
+* **Model Diagnostics:** Residual analysis and goodness-of-fit assessment for additive hazard assumptions
+* **Effect Pattern Recognition:** Identification of periods with strong vs minimal covariate influence
 
 ##### **Technical Implementation**
 
-* **timereg Package Integration:**Built on robust additive hazard estimation with counting process methodology
-* **Survival Package Compatibility:**Seamless integration with standard survival data structures and time-to-event formats
-* **Formula Interface Flexibility:**Support for mixed constant/time-varying specifications through intuitive syntax
-* **Bootstrap-based Inference:**Optional bootstrap procedures for enhanced uncertainty quantification
+* **timereg Package Integration:** Built on robust additive hazard estimation with counting process methodology
+* **Survival Package Compatibility:** Seamless integration with standard survival data structures and time-to-event formats
+* **Formula Interface Flexibility:** Support for mixed constant/time-varying specifications through intuitive syntax
+* **Bootstrap-based Inference:** Optional bootstrap procedures for enhanced uncertainty quantification
 
 This implementation provides essential methodology for survival analysis when standard Cox proportional hazards assumptions are violated, offering flexible additive modeling approaches that reveal time-dependent patterns in covariate effects crucial for understanding evolving treatment and prognostic factor influences in clinical research.
 
@@ -10756,38 +10869,38 @@ This implementation provides essential methodology for survival analysis when st
 
 ##### **Advanced High-Dimensional Survival Analysis**
 
-* **Ultra-High Dimensional Support:**Handles p >> n scenarios common in genomic, proteomic, and high-throughput clinical data
-* **Multiple Regularization Methods:**LASSO (L1), Ridge (L2), Elastic Net, and Adaptive LASSO for different variable selection needs
-* **Variable Screening Framework:**Automatic marginal screening for ultra-high dimensional data (>1000 variables) using univariate Cox models
-* **Stability Selection:**Bootstrap-based variable importance assessment with configurable selection probability thresholds
+* **Ultra-High Dimensional Support:** Handles p >> n scenarios common in genomic, proteomic, and high-throughput clinical data
+* **Multiple Regularization Methods:** LASSO (L1), Ridge (L2), Elastic Net, and Adaptive LASSO for different variable selection needs
+* **Variable Screening Framework:** Automatic marginal screening for ultra-high dimensional data (>1000 variables) using univariate Cox models
+* **Stability Selection:** Bootstrap-based variable importance assessment with configurable selection probability thresholds
 
 ##### **Sophisticated Model Selection**
 
-* **Cross-Validation Optimization:**Standard k-fold CV with 1-SE rule and minimum CV error selection strategies
-* **Regularization Path Analysis:**Complete solution path visualization showing coefficient evolution across lambda values
-* **Bootstrap Stability Testing:**Multiple bootstrap iterations to identify consistently selected variables
-* **Dimensionality Reduction Tracking:**Systematic reduction from original variables through screening to final selection
+* **Cross-Validation Optimization:** Standard k-fold CV with 1-SE rule and minimum CV error selection strategies
+* **Regularization Path Analysis:** Complete solution path visualization showing coefficient evolution across lambda values
+* **Bootstrap Stability Testing:** Multiple bootstrap iterations to identify consistently selected variables
+* **Dimensionality Reduction Tracking:** Systematic reduction from original variables through screening to final selection
 
 ##### **Clinical Genomics Applications**
 
-* **Genomic Survival Analysis:**Expression, methylation, copy number variation data integration for survival prediction
-* **Proteomic Risk Modeling:**High-throughput protein data analysis for biomarker discovery and risk stratification
-* **Multi-omics Integration:**Combined analysis of multiple high-dimensional data types for comprehensive survival modeling
-* **Personalized Medicine:**Development of high-dimensional prognostic signatures for individualized treatment decisions
+* **Genomic Survival Analysis:** Expression, methylation, copy number variation data integration for survival prediction
+* **Proteomic Risk Modeling:** High-throughput protein data analysis for biomarker discovery and risk stratification
+* **Multi-omics Integration:** Combined analysis of multiple high-dimensional data types for comprehensive survival modeling
+* **Personalized Medicine:** Development of high-dimensional prognostic signatures for individualized treatment decisions
 
 ##### **Comprehensive Validation Framework**
 
-* **Variable Importance Rankings:**Quantitative assessment of selected variables with importance scores and stability measures
-* **Model Performance Metrics:**Time-dependent prediction accuracy assessment and high-dimensional model diagnostics
-* **Regularization Visualization:**Path plots, cross-validation curves, and variable importance displays
-* **Stability Assessment:**Selection probability analysis and robust variable identification across bootstrap samples
+* **Variable Importance Rankings:** Quantitative assessment of selected variables with importance scores and stability measures
+* **Model Performance Metrics:** Time-dependent prediction accuracy assessment and high-dimensional model diagnostics
+* **Regularization Visualization:** Path plots, cross-validation curves, and variable importance displays
+* **Stability Assessment:** Selection probability analysis and robust variable identification across bootstrap samples
 
 ##### **Technical Implementation**
 
-* **glmnet Integration:**High-performance regularized Cox regression with optimal computational efficiency
-* **Survival Package Compatibility:**Standard survival data structures with enhanced high-dimensional capabilities
-* **Memory-Efficient Processing:**Optimized algorithms for large predictor matrices with sparse representation support
-* **Parallel Processing Support:**Multi-core computation capabilities for large-scale variable screening and cross-validation
+* **glmnet Integration:** High-performance regularized Cox regression with optimal computational efficiency
+* **Survival Package Compatibility:** Standard survival data structures with enhanced high-dimensional capabilities
+* **Memory-Efficient Processing:** Optimized algorithms for large predictor matrices with sparse representation support
+* **Parallel Processing Support:** Multi-core computation capabilities for large-scale variable screening and cross-validation
 
 This implementation addresses critical needs in modern biomedical research where traditional Cox regression fails due to high-dimensional predictor spaces, providing robust variable selection and prediction modeling essential for genomic medicine and precision oncology applications.
 
@@ -10799,38 +10912,38 @@ This implementation addresses critical needs in modern biomedical research where
 
 ##### **Advanced Stratified Parametric Modeling**
 
-* **Group-Specific Baseline Functions:**Independent baseline hazard functions for each stratum while maintaining parametric assumptions
-* **Multiple Stratification Approaches:**Separate baselines, proportional baselines, shared shape parameters, and fully stratified parameters
-* **Comprehensive Distribution Support:**Weibull, exponential, log-normal, log-logistic, gamma, generalized gamma, and generalized F distributions
-* **Flexible Baseline Specifications:**Configurable approaches for handling heterogeneity between groups
+* **Group-Specific Baseline Functions:** Independent baseline hazard functions for each stratum while maintaining parametric assumptions
+* **Multiple Stratification Approaches:** Separate baselines, proportional baselines, shared shape parameters, and fully stratified parameters
+* **Comprehensive Distribution Support:** Weibull, exponential, log-normal, log-logistic, gamma, generalized gamma, and generalized F distributions
+* **Flexible Baseline Specifications:** Configurable approaches for handling heterogeneity between groups
 
 ##### **Statistical Methodology Framework**
 
-* **Likelihood Ratio Testing:**Formal tests for evaluating the necessity of stratification vs non-stratified models
-* **Information Criteria Comparison:**AIC and BIC comparison across stratified and non-stratified approaches
-* **Stratum-Specific Parameter Estimation:**Independent parameter estimates for each group with appropriate confidence intervals
-* **Model Adequacy Assessment:**Residual analysis and diagnostic testing within each stratum
+* **Likelihood Ratio Testing:** Formal tests for evaluating the necessity of stratification vs non-stratified models
+* **Information Criteria Comparison:** AIC and BIC comparison across stratified and non-stratified approaches
+* **Stratum-Specific Parameter Estimation:** Independent parameter estimates for each group with appropriate confidence intervals
+* **Model Adequacy Assessment:** Residual analysis and diagnostic testing within each stratum
 
 ##### **Clinical Research Applications**
 
-* **Heterogeneity Accommodation:**Accounts for differences in baseline risk between patient subgroups
-* **Group-Specific Survival Estimation:**Stratum-specific survival and hazard function estimates
-* **Subgroup Analysis Framework:**Systematic comparison of survival patterns across predefined groups
-* **Personalized Risk Assessment:**Group-specific predictions and confidence intervals for clinical decision-making
+* **Heterogeneity Accommodation:** Accounts for differences in baseline risk between patient subgroups
+* **Group-Specific Survival Estimation:** Stratum-specific survival and hazard function estimates
+* **Subgroup Analysis Framework:** Systematic comparison of survival patterns across predefined groups
+* **Personalized Risk Assessment:** Group-specific predictions and confidence intervals for clinical decision-making
 
 ##### **Advanced Diagnostic and Validation Features**
 
-* **Stratified Survival Curves:**Group-specific parametric survival function visualization
-* **Comparative Hazard Functions:**Stratum-specific hazard rate estimation and comparison
-* **Model Comparison Visualization:**Side-by-side comparison of stratified vs non-stratified models
-* **Residual Analysis by Strata:**Group-specific model adequacy assessment and diagnostic testing
+* **Stratified Survival Curves:** Group-specific parametric survival function visualization
+* **Comparative Hazard Functions:** Stratum-specific hazard rate estimation and comparison
+* **Model Comparison Visualization:** Side-by-side comparison of stratified vs non-stratified models
+* **Residual Analysis by Strata:** Group-specific model adequacy assessment and diagnostic testing
 
 ##### **Technical Implementation**
 
-* **flexsurv Integration:**Built on robust maximum likelihood estimation for parametric distributions
-* **rstpm2 Compatibility:**Support for Royston-Parmar flexible parametric models with stratification
-* **Multiple Modeling Approaches:**Support for separate models per stratum and interaction-based stratification
-* **Robust Statistical Testing:**Proper handling of multiple comparisons and stratification effect testing
+* **flexsurv Integration:** Built on robust maximum likelihood estimation for parametric distributions
+* **rstpm2 Compatibility:** Support for Royston-Parmar flexible parametric models with stratification
+* **Multiple Modeling Approaches:** Support for separate models per stratum and interaction-based stratification
+* **Robust Statistical Testing:** Proper handling of multiple comparisons and stratification effect testing
 
 This implementation addresses the critical need for modeling survival data with group-specific baseline hazards while maintaining the efficiency and interpretability of parametric approaches, essential for heterogeneous patient populations and subgroup analyses in clinical research.
 
@@ -10842,38 +10955,38 @@ This implementation addresses the critical need for modeling survival data with 
 
 ##### **Advanced Flexible Parametric Modeling**
 
-* **Spline-based Approaches:**Spline-based hazard, odds, and normal models using B-splines for flexible baseline estimation
-* **Royston-Parmar Models:**Flexible parametric models with spline-based log cumulative hazard functions
-* **Transformation Models:**General transformation models supporting Cox, Weibull, log-logistic, log-normal, and exponential families
-* **Flexible Parametric Framework:**Extended parametric models with adaptive baseline distributions
+* **Spline-based Approaches:** Spline-based hazard, odds, and normal models using B-splines for flexible baseline estimation
+* **Royston-Parmar Models:** Flexible parametric models with spline-based log cumulative hazard functions
+* **Transformation Models:** General transformation models supporting Cox, Weibull, log-logistic, log-normal, and exponential families
+* **Flexible Parametric Framework:** Extended parametric models with adaptive baseline distributions
 
 ##### **Comprehensive Spline Configuration**
 
-* **Knot Specification:**Configurable number of internal knots (1-10) with automatic or manual placement
-* **Knot Placement Methods:**Equal quantile, equal spacing, and manual specification options
-* **Boundary Knots:**Optional boundary knots at extreme time points for complete time coverage
-* **Spline Degree Control:**Linear, quadratic, and cubic B-spline basis functions
+* **Knot Specification:** Configurable number of internal knots (1-10) with automatic or manual placement
+* **Knot Placement Methods:** Equal quantile, equal spacing, and manual specification options
+* **Boundary Knots:** Optional boundary knots at extreme time points for complete time coverage
+* **Spline Degree Control:** Linear, quadratic, and cubic B-spline basis functions
 
 ##### **Clinical Research Applications**
 
-* **Non-parametric Flexibility:**Avoids restrictive parametric assumptions while maintaining smooth estimates
-* **Complex Hazard Patterns:**Capable of modeling non-monotonic and multi-modal hazard functions
-* **Covariate Integration:**Seamless inclusion of time-constant and time-varying covariates
-* **Stratified Analysis:**Support for group-specific flexible baseline distributions
+* **Non-parametric Flexibility:** Avoids restrictive parametric assumptions while maintaining smooth estimates
+* **Complex Hazard Patterns:** Capable of modeling non-monotonic and multi-modal hazard functions
+* **Covariate Integration:** Seamless inclusion of time-constant and time-varying covariates
+* **Stratified Analysis:** Support for group-specific flexible baseline distributions
 
 ##### **Advanced Diagnostic Framework**
 
-* **Fitted Function Visualization:**Smooth survival, hazard, and cumulative hazard function plots
-* **Spline Basis Inspection:**Detailed examination of basis function contributions and significance
-* **Model Comparison:**Systematic comparison with standard parametric and semi-parametric alternatives
-* **Goodness-of-Fit Assessment:**Comprehensive diagnostic statistics and model adequacy testing
+* **Fitted Function Visualization:** Smooth survival, hazard, and cumulative hazard function plots
+* **Spline Basis Inspection:** Detailed examination of basis function contributions and significance
+* **Model Comparison:** Systematic comparison with standard parametric and semi-parametric alternatives
+* **Goodness-of-Fit Assessment:** Comprehensive diagnostic statistics and model adequacy testing
 
 ##### **Technical Implementation**
 
-* **flexsurv Integration:**Built on flexible survival modeling framework with spline extensions
-* **rstpm2 Compatibility:**Support for Royston-Parmar flexible parametric survival models
-* **Transformation Model Support:**General transformation model framework for survival data
-* **Robust Parameter Estimation:**Maximum likelihood with proper uncertainty quantification
+* **flexsurv Integration:** Built on flexible survival modeling framework with spline extensions
+* **rstpm2 Compatibility:** Support for Royston-Parmar flexible parametric survival models
+* **Transformation Model Support:** General transformation model framework for survival data
+* **Robust Parameter Estimation:** Maximum likelihood with proper uncertainty quantification
 
 This implementation provides the statistical flexibility needed for complex survival patterns while maintaining the smooth, interpretable estimates essential for clinical decision-making and prognostic model development.
 
@@ -10885,38 +10998,38 @@ This implementation provides the statistical flexibility needed for complex surv
 
 ##### **Automated Parametric Distribution Selection**
 
-* **Multiple Distribution Testing:**Systematic comparison of Weibull, exponential, log-normal, log-logistic, gamma, generalized gamma, and generalized F distributions
-* **Information Criteria Selection:**AIC, BIC, and corrected AIC (AICc) for robust model selection
-* **Model Weights:**Akaike weights quantifying relative support for each distribution
-* **Flexible Selection Methods:**Choice of AIC, BIC, AICc, or likelihood ratio tests for model ranking
+* **Multiple Distribution Testing:** Systematic comparison of Weibull, exponential, log-normal, log-logistic, gamma, generalized gamma, and generalized F distributions
+* **Information Criteria Selection:** AIC, BIC, and corrected AIC (AICc) for robust model selection
+* **Model Weights:** Akaike weights quantifying relative support for each distribution
+* **Flexible Selection Methods:** Choice of AIC, BIC, AICc, or likelihood ratio tests for model ranking
 
 ##### **Comprehensive Goodness-of-Fit Testing**
 
-* **Classical GOF Tests:**Kolmogorov-Smirnov, Anderson-Darling, and Cramer-von Mises tests
-* **Bootstrap Validation:**Bootstrap-based p-values accounting for parameter estimation uncertainty
-* **Multiple Test Framework:**Systematic application of multiple adequacy tests for robust validation
-* **Decision Support:**Clear pass/fail decisions with statistical interpretation guidance
+* **Classical GOF Tests:** Kolmogorov-Smirnov, Anderson-Darling, and Cramer-von Mises tests
+* **Bootstrap Validation:** Bootstrap-based p-values accounting for parameter estimation uncertainty
+* **Multiple Test Framework:** Systematic application of multiple adequacy tests for robust validation
+* **Decision Support:** Clear pass/fail decisions with statistical interpretation guidance
 
 ##### **Clinical Research Applications**
 
-* **Model Uncertainty Assessment:**Quantification of model selection uncertainty through AIC weights
-* **Distribution Adequacy:**Rigorous testing of parametric assumptions in survival modeling
-* **Comparative Analysis:**Side-by-side comparison of multiple parametric models
-* **Evidence-Based Selection:**Data-driven choice of optimal survival distribution
+* **Model Uncertainty Assessment:** Quantification of model selection uncertainty through AIC weights
+* **Distribution Adequacy:** Rigorous testing of parametric assumptions in survival modeling
+* **Comparative Analysis:** Side-by-side comparison of multiple parametric models
+* **Evidence-Based Selection:** Data-driven choice of optimal survival distribution
 
 ##### **Advanced Diagnostic Visualization**
 
-* **Survival Function Comparison:**Overlay plots comparing all fitted distributions against empirical data
-* **Hazard Function Analysis:**Visual comparison of implied hazard shapes across distributions
-* **P-P and Q-Q Plots:**Probability-probability and quantile-quantile plots for model adequacy assessment
-* **Comprehensive Diagnostics:**Multi-panel diagnostic plots for thorough model evaluation
+* **Survival Function Comparison:** Overlay plots comparing all fitted distributions against empirical data
+* **Hazard Function Analysis:** Visual comparison of implied hazard shapes across distributions
+* **P-P and Q-Q Plots:** Probability-probability and quantile-quantile plots for model adequacy assessment
+* **Comprehensive Diagnostics:** Multi-panel diagnostic plots for thorough model evaluation
 
 ##### **Technical Implementation**
 
-* **flexsurv Integration:**Built on robust maximum likelihood estimation frameworks
-* **Convergence Monitoring:**Automatic detection and reporting of estimation convergence issues
-* **Robust Statistics:**Implementation of corrected information criteria for small samples
-* **Statistical Rigor:**Proper handling of parameter estimation uncertainty in goodness-of-fit testing
+* **flexsurv Integration:** Built on robust maximum likelihood estimation frameworks
+* **Convergence Monitoring:** Automatic detection and reporting of estimation convergence issues
+* **Robust Statistics:** Implementation of corrected information criteria for small samples
+* **Statistical Rigor:** Proper handling of parameter estimation uncertainty in goodness-of-fit testing
 
 This implementation addresses the critical need for objective, data-driven selection of parametric survival distributions, ensuring that statistical models are both statistically adequate and clinically meaningful for survival analysis applications.
 
@@ -10928,38 +11041,38 @@ This implementation addresses the critical need for objective, data-driven selec
 
 ##### **Flexible Parametric Hazard Modeling**
 
-* **Spline Basis Functions:**B-spline and natural spline basis functions for flexible hazard shape modeling
-* **Automatic Knot Selection:**AIC-based optimization for optimal knot placement and number selection
-* **Multiple Placement Methods:**Quantile-based, equally-spaced, and manual knot specification options
-* **Polynomial Flexibility:**Linear, quadratic, and cubic spline degrees for varying smoothness levels
+* **Spline Basis Functions:** B-spline and natural spline basis functions for flexible hazard shape modeling
+* **Automatic Knot Selection:** AIC-based optimization for optimal knot placement and number selection
+* **Multiple Placement Methods:** Quantile-based, equally-spaced, and manual knot specification options
+* **Polynomial Flexibility:** Linear, quadratic, and cubic spline degrees for varying smoothness levels
 
 ##### **Advanced Statistical Framework**
 
-* **Scale Flexibility:**Log-hazard, odds, and normal scales for different hazard function parameterizations
-* **Model Comparison:**Systematic comparison of different knot configurations with AIC weights
-* **Confidence Estimation:**Bootstrap and asymptotic confidence intervals for spline parameters
-* **Covariate Integration:**Time-fixed covariates with proportional and non-proportional hazards options
+* **Scale Flexibility:** Log-hazard, odds, and normal scales for different hazard function parameterizations
+* **Model Comparison:** Systematic comparison of different knot configurations with AIC weights
+* **Confidence Estimation:** Bootstrap and asymptotic confidence intervals for spline parameters
+* **Covariate Integration:** Time-fixed covariates with proportional and non-proportional hazards options
 
 ##### **Clinical Research Applications**
 
-* **Complex Hazard Patterns:**Ideal for modeling non-monotonic, multi-modal, and irregular hazard functions
-* **Oncology Research:**Flexible survival modeling for cancers with changing hazard rates during follow-up
-* **Cardiovascular Studies:**Modeling complex risk patterns in heart disease progression
-* **Biomarker Studies:**Time-varying hazard effects for dynamic biomarker relationships
+* **Complex Hazard Patterns:** Ideal for modeling non-monotonic, multi-modal, and irregular hazard functions
+* **Oncology Research:** Flexible survival modeling for cancers with changing hazard rates during follow-up
+* **Cardiovascular Studies:** Modeling complex risk patterns in heart disease progression
+* **Biomarker Studies:** Time-varying hazard effects for dynamic biomarker relationships
 
 ##### **Comprehensive Visualization Suite**
 
-* **Flexible Hazard Plots:**Smooth hazard function visualization showing complex time-dependent patterns
-* **Spline Basis Visualization:**Display of underlying spline basis functions and their contributions
-* **Survival Function Plots:**Parametric survival curves based on flexible spline-based models
-* **Cumulative Hazard Plots:**Integrated hazard visualization for risk assessment over time
+* **Flexible Hazard Plots:** Smooth hazard function visualization showing complex time-dependent patterns
+* **Spline Basis Visualization:** Display of underlying spline basis functions and their contributions
+* **Survival Function Plots:** Parametric survival curves based on flexible spline-based models
+* **Cumulative Hazard Plots:** Integrated hazard visualization for risk assessment over time
 
 ##### **Technical Implementation**
 
-* **flexsurv Integration:**Built on the robust flexsurvspline framework for reliable parameter estimation
-* **Optimization Algorithms:**Advanced numerical methods for stable spline parameter fitting
-* **Model Diagnostics:**Comprehensive goodness-of-fit assessment and residual analysis
-* **Computational Efficiency:**Optimized algorithms for fast fitting of complex spline models
+* **flexsurv Integration:** Built on the robust flexsurvspline framework for reliable parameter estimation
+* **Optimization Algorithms:** Advanced numerical methods for stable spline parameter fitting
+* **Model Diagnostics:** Comprehensive goodness-of-fit assessment and residual analysis
+* **Computational Efficiency:** Optimized algorithms for fast fitting of complex spline models
 
 This implementation addresses the critical need for flexible parametric survival modeling in clinical research, where standard parametric distributions may be too restrictive for complex hazard patterns commonly observed in medical data.
 
@@ -10971,45 +11084,45 @@ This implementation addresses the critical need for flexible parametric survival
 
 ##### **Advanced Parametric Distribution Modeling**
 
-* **Generalized Gamma Distribution:**Three-parameter flexible distribution that encompasses exponential, Weibull, and gamma as special cases
-* **Generalized F Distribution:**Four-parameter distribution providing maximum flexibility for complex hazard shapes including bathtub, unimodal, and multi-modal patterns
-* **Enhanced Distribution Library:**Support for original and standard parameterizations of both generalized gamma and F distributions
-* **Standard Distributions:**Integrated Weibull, log-normal, and gamma distributions for comprehensive parametric modeling
+* **Generalized Gamma Distribution:** Three-parameter flexible distribution that encompasses exponential, Weibull, and gamma as special cases
+* **Generalized F Distribution:** Four-parameter distribution providing maximum flexibility for complex hazard shapes including bathtub, unimodal, and multi-modal patterns
+* **Enhanced Distribution Library:** Support for original and standard parameterizations of both generalized gamma and F distributions
+* **Standard Distributions:** Integrated Weibull, log-normal, and gamma distributions for comprehensive parametric modeling
 
 ##### **Advanced Statistical Features**
 
-* **Maximum Likelihood Estimation:**Robust parameter estimation using flexsurv package optimization algorithms
-* **Confidence Intervals:**Bootstrap and asymptotic confidence intervals for all parameters and survival functions
-* **Model Comparison:**Automatic AIC and BIC calculation for systematic model selection and validation
-* **Covariate Integration:**Support for time-fixed covariates with proportional hazards assumptions
+* **Maximum Likelihood Estimation:** Robust parameter estimation using flexsurv package optimization algorithms
+* **Confidence Intervals:** Bootstrap and asymptotic confidence intervals for all parameters and survival functions
+* **Model Comparison:** Automatic AIC and BIC calculation for systematic model selection and validation
+* **Covariate Integration:** Support for time-fixed covariates with proportional hazards assumptions
 
 ##### **Clinical Research Applications**
 
-* **Complex Hazard Modeling:**Ideal for diseases with non-monotonic hazard patterns (increasing, decreasing, bathtub, or bell-shaped)
-* **Oncology Applications:**Flexible modeling of cancer survival with changing hazard rates over time
-* **Reliability Analysis:**Engineering and biomedical device survival with complex failure patterns
-* **Comparative Studies:**Model selection framework for identifying optimal parametric distributions
+* **Complex Hazard Modeling:** Ideal for diseases with non-monotonic hazard patterns (increasing, decreasing, bathtub, or bell-shaped)
+* **Oncology Applications:** Flexible modeling of cancer survival with changing hazard rates over time
+* **Reliability Analysis:** Engineering and biomedical device survival with complex failure patterns
+* **Comparative Studies:** Model selection framework for identifying optimal parametric distributions
 
 ##### **Comprehensive Visualization Suite**
 
-* **Parametric Survival Curves:**Smooth survival probability plots with confidence bands based on fitted distributions
-* **Hazard Function Plots:**Visualization of fitted hazard rates showing complex time-dependent patterns
-* **Density Function Plots:**Probability density visualization for understanding failure time distributions
-* **Model Comparison Plots:**Side-by-side comparison of different parametric fits
+* **Parametric Survival Curves:** Smooth survival probability plots with confidence bands based on fitted distributions
+* **Hazard Function Plots:** Visualization of fitted hazard rates showing complex time-dependent patterns
+* **Density Function Plots:** Probability density visualization for understanding failure time distributions
+* **Model Comparison Plots:** Side-by-side comparison of different parametric fits
 
 ##### **Advanced Model Diagnostics**
 
-* **Parameter Estimation Tables:**Comprehensive parameter estimates with standard errors, z-statistics, and p-values
-* **Goodness-of-Fit Metrics:**AIC, BIC, and log-likelihood statistics for model selection
-* **Convergence Diagnostics:**Automatic assessment of optimization convergence and parameter identifiability
-* **Residual Analysis:**Support for model diagnostic plots and residual analysis
+* **Parameter Estimation Tables:** Comprehensive parameter estimates with standard errors, z-statistics, and p-values
+* **Goodness-of-Fit Metrics:** AIC, BIC, and log-likelihood statistics for model selection
+* **Convergence Diagnostics:** Automatic assessment of optimization convergence and parameter identifiability
+* **Residual Analysis:** Support for model diagnostic plots and residual analysis
 
 ##### **Quality Assurance and Validation**
 
-* **Robust Optimization:**Multiple starting values and convergence checks for reliable parameter estimation
-* **Boundary Handling:**Proper handling of parameter constraints and boundary conditions
-* **Missing Data Management:**Comprehensive treatment of censored and missing observations
-* **Numerical Stability:**Advanced numerical methods for stable computation with extreme parameter values
+* **Robust Optimization:** Multiple starting values and convergence checks for reliable parameter estimation
+* **Boundary Handling:** Proper handling of parameter constraints and boundary conditions
+* **Missing Data Management:** Comprehensive treatment of censored and missing observations
+* **Numerical Stability:** Advanced numerical methods for stable computation with extreme parameter values
 
 ---
 
@@ -11023,38 +11136,38 @@ This implementation addresses the critical need for flexible parametric survival
 
 ##### **Robust Median Survival Analysis**
 
-* **Multiple CI Methods:**Brookmeyer-Crowley, Log transformation, Log-log transformation, and Plain linear methods
-* **Flexible Test Statistics:**Log-rank, Wilcoxon, and Peto-Peto tests for comparing median survival between groups
-* **Confidence Intervals:**Robust confidence intervals for median survival times accounting for censoring patterns
-* **Group Comparisons:**Pairwise and overall comparisons with multiple comparison corrections
+* **Multiple CI Methods:** Brookmeyer-Crowley, Log transformation, Log-log transformation, and Plain linear methods
+* **Flexible Test Statistics:** Log-rank, Wilcoxon, and Peto-Peto tests for comparing median survival between groups
+* **Confidence Intervals:** Robust confidence intervals for median survival times accounting for censoring patterns
+* **Group Comparisons:** Pairwise and overall comparisons with multiple comparison corrections
 
 ##### **Advanced Statistical Methods**
 
-* **Censoring-Aware Estimation:**Proper handling of incomplete follow-up data in median calculations
-* **Bootstrap Confidence Intervals:**Alternative confidence interval methods for complex censoring patterns
-* **Multiple Comparison Control:**Holm, Bonferroni, FDR (Benjamini-Hochberg), and Hochberg adjustments
-* **Test Method Selection:**Choose from log-rank, Wilcoxon, Peto-Peto, or comprehensive analysis with all methods
+* **Censoring-Aware Estimation:** Proper handling of incomplete follow-up data in median calculations
+* **Bootstrap Confidence Intervals:** Alternative confidence interval methods for complex censoring patterns
+* **Multiple Comparison Control:** Holm, Bonferroni, FDR (Benjamini-Hochberg), and Hochberg adjustments
+* **Test Method Selection:** Choose from log-rank, Wilcoxon, Peto-Peto, or comprehensive analysis with all methods
 
 ##### **Clinical Research Applications**
 
-* **Treatment Efficacy Studies:**Compare median survival between treatment arms in clinical trials
-* **Prognostic Factor Analysis:**Evaluate impact of biomarkers and clinical factors on median survival
-* **Subset Analysis:**Robust median comparisons for patient subgroups and stratified analyses
-* **Regulatory Reporting:**Publication-ready median survival summaries with confidence intervals
+* **Treatment Efficacy Studies:** Compare median survival between treatment arms in clinical trials
+* **Prognostic Factor Analysis:** Evaluate impact of biomarkers and clinical factors on median survival
+* **Subset Analysis:** Robust median comparisons for patient subgroups and stratified analyses
+* **Regulatory Reporting:** Publication-ready median survival summaries with confidence intervals
 
 ##### **Enhanced Visualization and Reporting**
 
-* **Survival Curves with Median Indicators:**Kaplan-Meier plots with median survival lines and confidence bands
-* **Median Comparison Plots:**Forest plot-style visualization of median survival differences between groups
-* **Risk Tables:**Optional numbers-at-risk tables below survival plots for transparency
-* **Statistical Summaries:**Comprehensive reporting of median survival estimates and statistical tests
+* **Survival Curves with Median Indicators:** Kaplan-Meier plots with median survival lines and confidence bands
+* **Median Comparison Plots:** Forest plot-style visualization of median survival differences between groups
+* **Risk Tables:** Optional numbers-at-risk tables below survival plots for transparency
+* **Statistical Summaries:** Comprehensive reporting of median survival estimates and statistical tests
 
 ##### **Quality Assurance Features**
 
-* **Data Validation:**Automatic checks for proper time and event coding
-* **Missing Data Handling:**Robust treatment of incomplete observations
-* **Result Interpretation:**Built-in methodology explanations and analysis summaries
-* **Export Capabilities:**Table and plot exports for manuscripts and presentations
+* **Data Validation:** Automatic checks for proper time and event coding
+* **Missing Data Handling:** Robust treatment of incomplete observations
+* **Result Interpretation:** Built-in methodology explanations and analysis summaries
+* **Export Capabilities:** Table and plot exports for manuscripts and presentations
 
 ---
 
@@ -11068,31 +11181,31 @@ This implementation addresses the critical need for flexible parametric survival
 
 ##### **Non-Parametric Robust Survival Comparison**
 
-* **Distribution-Free Testing:**No assumptions about underlying data distribution or asymptotic theory required
-* **Exact Type I Error Control:**Provides exact p-values through resampling methodology under null hypothesis
-* **Small Sample Validity:**Reliable results even with small sample sizes where traditional asymptotic theory fails
-* **Multiple Test Statistics:**Log-rank, Wilcoxon (Gehan-Breslow), Tarone-Ware, and Maximum Deviation statistics
+* **Distribution-Free Testing:** No assumptions about underlying data distribution or asymptotic theory required
+* **Exact Type I Error Control:** Provides exact p-values through resampling methodology under null hypothesis
+* **Small Sample Validity:** Reliable results even with small sample sizes where traditional asymptotic theory fails
+* **Multiple Test Statistics:** Log-rank, Wilcoxon (Gehan-Breslow), Tarone-Ware, and Maximum Deviation statistics
 
 ##### **Advanced Permutation Strategies**
 
-* **Approximate Permutation:**Monte Carlo sampling for practical analysis of larger datasets (recommended for n > 10)
-* **Stratified Permutation:**Within-strata permutation to control for confounding variables
-* **Reproducible Results:**Fixed seed option for consistent results across analyses
-* **Progressive Monitoring:**Real-time p-value convergence tracking during permutation process
+* **Approximate Permutation:** Monte Carlo sampling for practical analysis of larger datasets (recommended for n > 10)
+* **Stratified Permutation:** Within-strata permutation to control for confounding variables
+* **Reproducible Results:** Fixed seed option for consistent results across analyses
+* **Progressive Monitoring:** Real-time p-value convergence tracking during permutation process
 
 ##### **Clinical Research Applications**
 
-* **Small Clinical Studies:**Reliable testing when sample sizes are too small for traditional log-rank tests
-* **Violated Assumptions:**Alternative when proportional hazards or other distributional assumptions fail
-* **Regulatory Submissions:**Exact p-values provide stronger statistical evidence than approximate methods
-* **Exploratory Analysis:**Robust comparison method for pilot studies and biomarker discovery research
+* **Small Clinical Studies:** Reliable testing when sample sizes are too small for traditional log-rank tests
+* **Violated Assumptions:** Alternative when proportional hazards or other distributional assumptions fail
+* **Regulatory Submissions:** Exact p-values provide stronger statistical evidence than approximate methods
+* **Exploratory Analysis:** Robust comparison method for pilot studies and biomarker discovery research
 
 ##### **Advanced Visualization and Reporting**
 
-* **Permutation Distribution Plots:**Histograms showing test statistic distribution under null hypothesis
-* **P-value Convergence Tracking:**Monitor statistical stability as permutations accumulate
-* **Multiple Comparison Corrections:**Bonferroni, Holm, Hochberg, and Benjamini-Hochberg adjustments
-* **Comprehensive Group Statistics:**Sample sizes, events, and median survival with confidence intervals
+* **Permutation Distribution Plots:** Histograms showing test statistic distribution under null hypothesis
+* **P-value Convergence Tracking:** Monitor statistical stability as permutations accumulate
+* **Multiple Comparison Corrections:** Bonferroni, Holm, Hochberg, and Benjamini-Hochberg adjustments
+* **Comprehensive Group Statistics:** Sample sizes, events, and median survival with confidence intervals
 
 # ClinicoPath 0.0.31.13
 
@@ -11102,24 +11215,24 @@ This implementation addresses the critical need for flexible parametric survival
 
 ##### **Clinically Meaningful Survival Analysis with Direct Time Interpretation**
 
-* **RMST Analysis:**Calculate average survival time within a specified restriction period (tau) for direct clinical interpretation
-* **Flexible Tau Selection:**Automatic (minimum group maximum), manual specification, or percentile-based tau determination
-* **Statistical Comparisons:**Both difference and ratio tests between groups with robust confidence intervals
-* **Bootstrap Support:**Enhanced confidence interval estimation for small sample sizes or non-normal distributions
+* **RMST Analysis:** Calculate average survival time within a specified restriction period (tau) for direct clinical interpretation
+* **Flexible Tau Selection:** Automatic (minimum group maximum), manual specification, or percentile-based tau determination
+* **Statistical Comparisons:** Both difference and ratio tests between groups with robust confidence intervals
+* **Bootstrap Support:** Enhanced confidence interval estimation for small sample sizes or non-normal distributions
 
 ##### **Advanced Analysis Features**
 
-* **Sensitivity Analysis:**Evaluate RMST differences across multiple tau values to assess robustness of findings
-* **Comprehensive Visualizations:**Survival curves with highlighted RMST areas and tau sensitivity plots
-* **Clinical Decision Support:**Direct measures of treatment benefit in time units rather than relative measures
-* **Proportional Hazards Independence:**Valid alternative when Cox model assumptions are violated
+* **Sensitivity Analysis:** Evaluate RMST differences across multiple tau values to assess robustness of findings
+* **Comprehensive Visualizations:** Survival curves with highlighted RMST areas and tau sensitivity plots
+* **Clinical Decision Support:** Direct measures of treatment benefit in time units rather than relative measures
+* **Proportional Hazards Independence:** Valid alternative when Cox model assumptions are violated
 
 ##### **Clinical Research Applications**
 
-* **Treatment Benefit Quantification:**Direct measurement of gained survival time in clinically relevant units
-* **Health Economics:**Cost-effectiveness analysis with interpretable survival time differences
-* **Regulatory Submissions:**Clear demonstration of treatment efficacy with absolute rather than relative benefits
-* **Patient Communication:**Easily interpretable results for shared decision-making
+* **Treatment Benefit Quantification:** Direct measurement of gained survival time in clinically relevant units
+* **Health Economics:** Cost-effectiveness analysis with interpretable survival time differences
+* **Regulatory Submissions:** Clear demonstration of treatment efficacy with absolute rather than relative benefits
+* **Patient Communication:** Easily interpretable results for shared decision-making
 
 # ClinicoPath 0.0.31.12
 
@@ -11129,24 +11242,24 @@ This implementation addresses the critical need for flexible parametric survival
 
 ##### **Advanced Survival Comparison with Flexible Weighting Schemes**
 
-* **Comprehensive Test Suite:**Standard log-rank, Gehan-Wilcoxon, Tarone-Ware, Peto-Peto, and Modified Peto tests for detecting differences at various time periods
-* **Flexible Weighting Options:**Early difference detection (Gehan-Wilcoxon), intermediate weighting (Tarone-Ware), and balanced approaches for comprehensive survival comparison
-* **Multiple Comparison Corrections:**Bonferroni, Holm, Hochberg, and Benjamini-Hochberg adjustments for controlling family-wise error rates across multiple tests
-* **Clinical Interpretation Support:**Natural language summaries and methodology explanations for understanding test results and clinical implications
+* **Comprehensive Test Suite:** Standard log-rank, Gehan-Wilcoxon, Tarone-Ware, Peto-Peto, and Modified Peto tests for detecting differences at various time periods
+* **Flexible Weighting Options:** Early difference detection (Gehan-Wilcoxon), intermediate weighting (Tarone-Ware), and balanced approaches for comprehensive survival comparison
+* **Multiple Comparison Corrections:** Bonferroni, Holm, Hochberg, and Benjamini-Hochberg adjustments for controlling family-wise error rates across multiple tests
+* **Clinical Interpretation Support:** Natural language summaries and methodology explanations for understanding test results and clinical implications
 
 ##### **Clinical Research Applications**
 
-* **Treatment Efficacy Assessment:**Enhanced power for detecting early, late, or sustained treatment effects in clinical trials
-* **Biomarker Validation Studies:**Sensitive detection of prognostic differences across different follow-up periods
-* **Drug Development:**Comprehensive survival comparison for regulatory submissions with multiple testing perspectives
-* **Oncology Research:**Optimized detection of treatment benefits in cancer studies with varying hazard patterns
+* **Treatment Efficacy Assessment:** Enhanced power for detecting early, late, or sustained treatment effects in clinical trials
+* **Biomarker Validation Studies:** Sensitive detection of prognostic differences across different follow-up periods
+* **Drug Development:** Comprehensive survival comparison for regulatory submissions with multiple testing perspectives
+* **Oncology Research:** Optimized detection of treatment benefits in cancer studies with varying hazard patterns
 
 ##### **Statistical Features**
 
-* **Weight Function Flexibility:**Different tests emphasize early failures, late failures, or provide balanced detection across all time points
-* **Robust Group Comparisons:**Handles multiple groups with automatic adjustment for multiple comparisons
-* **Comprehensive Output:**Group summaries, median survival times, event counts, and sample size reporting
-* **Visualization Support:**Kaplan-Meier curves, weight function plots, and test statistic evolution over time
+* **Weight Function Flexibility:** Different tests emphasize early failures, late failures, or provide balanced detection across all time points
+* **Robust Group Comparisons:** Handles multiple groups with automatic adjustment for multiple comparisons
+* **Comprehensive Output:** Group summaries, median survival times, event counts, and sample size reporting
+* **Visualization Support:** Kaplan-Meier curves, weight function plots, and test statistic evolution over time
 
 # ClinicoPath 0.0.31.11
 
@@ -11156,24 +11269,24 @@ This implementation addresses the critical need for flexible parametric survival
 
 ##### **Advanced Weighted Log-Rank Testing for Survival Comparison**
 
-* **Comprehensive Test Family:**Standard log-rank test (rho = 0), early difference detection (rho > 0), late difference detection (rho < 0), and custom parameter specifications for specialized testing scenarios
-* **Multiple Comparison Corrections:**Bonferroni, Holm, Hochberg, and Benjamini-Hochberg (FDR) adjustments for family-wise error control in multiple testing
-* **Omnibus Testing:**Combined test statistics for overall significance assessment across the entire G-rho family
-* **Weight Function Flexibility:**Custom rho and gamma parameters for specialized weight functions emphasizing different time periods
+* **Comprehensive Test Family:** Standard log-rank test (rho = 0), early difference detection (rho > 0), late difference detection (rho < 0), and custom parameter specifications for specialized testing scenarios
+* **Multiple Comparison Corrections:** Bonferroni, Holm, Hochberg, and Benjamini-Hochberg (FDR) adjustments for family-wise error control in multiple testing
+* **Omnibus Testing:** Combined test statistics for overall significance assessment across the entire G-rho family
+* **Weight Function Flexibility:** Custom rho and gamma parameters for specialized weight functions emphasizing different time periods
 
 ##### **Clinical Research Applications**
 
-* **Early Treatment Effects:**Detection of immediate therapeutic benefits in clinical trials with early separation of survival curves
-* **Late Effects Assessment:**Identification of delayed treatment effects common in immunotherapy and long-term interventions
-* **Immunotherapy Response Patterns:**Specialized testing for delayed but durable responses characteristic of checkpoint inhibitors
-* **Time-Period Specific Analysis:**Comprehensive survival comparison across different phases of follow-up
+* **Early Treatment Effects:** Detection of immediate therapeutic benefits in clinical trials with early separation of survival curves
+* **Late Effects Assessment:** Identification of delayed treatment effects common in immunotherapy and long-term interventions
+* **Immunotherapy Response Patterns:** Specialized testing for delayed but durable responses characteristic of checkpoint inhibitors
+* **Time-Period Specific Analysis:** Comprehensive survival comparison across different phases of follow-up
 
 ##### **Advanced Statistical Features**
 
-* **Effect Size Calculations:**Quantitative measures of survival differences with clinical interpretation guidelines
-* **Post-hoc Power Analysis:**Retrospective power assessment for detected differences and sample size adequacy
-* **Flexible Test Selection:**Individual control over early, late, and standard log-rank tests within the G-rho family
-* **Multiple Visualization Options:**Weight function plots, survival difference trajectories, and test statistic comparisons
+* **Effect Size Calculations:** Quantitative measures of survival differences with clinical interpretation guidelines
+* **Post-hoc Power Analysis:** Retrospective power assessment for detected differences and sample size adequacy
+* **Flexible Test Selection:** Individual control over early, late, and standard log-rank tests within the G-rho family
+* **Multiple Visualization Options:** Weight function plots, survival difference trajectories, and test statistic comparisons
 
 # ClinicoPath 0.0.31.10
 
@@ -11183,24 +11296,24 @@ This implementation addresses the critical need for flexible parametric survival
 
 ##### **Dynamic Covariate Modeling for Longitudinal Survival Data**
 
-* **Multiple Data Format Support:**Long format (multiple rows per subject) and counting process format for flexible data input structures
-* **Time-Varying Variable Handling:**Step function approach (constant between intervals), linear interpolation, and spline interpolation for smooth transitions between measurement times
-* **Robust Statistical Methods:**Clustered standard errors, non-proportional hazards testing, and time-interaction effects for comprehensive model validation
-* **Counting Process Integration:**Support for start-stop time intervals with proper risk set management and left truncation handling
+* **Multiple Data Format Support:** Long format (multiple rows per subject) and counting process format for flexible data input structures
+* **Time-Varying Variable Handling:** Step function approach (constant between intervals), linear interpolation, and spline interpolation for smooth transitions between measurement times
+* **Robust Statistical Methods:** Clustered standard errors, non-proportional hazards testing, and time-interaction effects for comprehensive model validation
+* **Counting Process Integration:** Support for start-stop time intervals with proper risk set management and left truncation handling
 
 ##### **Clinical Research Applications**
 
-* **Treatment Changes During Follow-up:**Model therapy modifications, dose adjustments, and treatment switches that occur during patient follow-up
-* **Dynamic Biomarker Measurements:**Incorporate laboratory values, vital signs, and disease markers that change over time during monitoring
-* **Disease Progression Modeling:**Analyze stage changes, tumor size evolution, and performance status modifications as time-varying predictors
-* **Longitudinal Exposure Variables:**Model time-dependent exposures like smoking status changes, occupational hazards, and medication adherence patterns
+* **Treatment Changes During Follow-up:** Model therapy modifications, dose adjustments, and treatment switches that occur during patient follow-up
+* **Dynamic Biomarker Measurements:** Incorporate laboratory values, vital signs, and disease markers that change over time during monitoring
+* **Disease Progression Modeling:** Analyze stage changes, tumor size evolution, and performance status modifications as time-varying predictors
+* **Longitudinal Exposure Variables:** Model time-dependent exposures like smoking status changes, occupational hazards, and medication adherence patterns
 
 ##### **Advanced Statistical Features**
 
-* **Non-Proportional Hazards Detection:**Comprehensive testing for violations of proportional hazards assumptions using Schoenfeld residuals
-* **Time-Interaction Effects:**Model hazard ratios that change over follow-up time with flexible interaction specifications
-* **Recurrent Events Support:**Extended Andersen-Gill and Prentice-Williams-Peterson models for multiple events per subject
-* **Interpolation Methods:**Linear and spline interpolation for missing covariate values between measurement times with clinical validity checks
+* **Non-Proportional Hazards Detection:** Comprehensive testing for violations of proportional hazards assumptions using Schoenfeld residuals
+* **Time-Interaction Effects:** Model hazard ratios that change over follow-up time with flexible interaction specifications
+* **Recurrent Events Support:** Extended Andersen-Gill and Prentice-Williams-Peterson models for multiple events per subject
+* **Interpolation Methods:** Linear and spline interpolation for missing covariate values between measurement times with clinical validity checks
 
 # ClinicoPath 0.0.31.09
 
@@ -11210,35 +11323,35 @@ This implementation addresses the critical need for flexible parametric survival
 
 ##### **Advanced Clustering and Hierarchical Survival Modeling**
 
-* **Multiple Random Effects Types:**Random intercepts for cluster-specific baseline hazards, random slopes for cluster-specific covariate effects, and combined intercept-slope models for comprehensive clustering
-* **Nested Clustering Support:**Hierarchical structures (patients within hospitals, tumors within patients) with proper correlation modeling and variance partitioning
-* **Flexible Clustering Variables:**Support for hospital effects, patient effects, family clustering, and multi-level treatment groupings common in clinical research
-* **Variance Components Estimation:**Comprehensive estimation of random effects variances with confidence intervals and significance testing
-* **Intracluster Correlation (ICC):**Calculation and interpretation of ICC to quantify clustering strength and justify mixed-effects modeling
+* **Multiple Random Effects Types:** Random intercepts for cluster-specific baseline hazards, random slopes for cluster-specific covariate effects, and combined intercept-slope models for comprehensive clustering
+* **Nested Clustering Support:** Hierarchical structures (patients within hospitals, tumors within patients) with proper correlation modeling and variance partitioning
+* **Flexible Clustering Variables:** Support for hospital effects, patient effects, family clustering, and multi-level treatment groupings common in clinical research
+* **Variance Components Estimation:** Comprehensive estimation of random effects variances with confidence intervals and significance testing
+* **Intracluster Correlation (ICC):** Calculation and interpretation of ICC to quantify clustering strength and justify mixed-effects modeling
 
 ##### **Clinical Research Applications**
 
-* **Multi-Center Clinical Trials:**Account for hospital/center effects while estimating treatment effects and prognostic factors
-* **Recurrent Events Analysis:**Model multiple events per patient (recurrences, hospitalizations) with patient-specific random effects
-* **Family-Based Studies:**Analyze genetic and familial clustering in survival outcomes with appropriate correlation structures
-* **Longitudinal Survival Data:**Handle repeated measurements and time-varying patient characteristics with proper clustering
-* **Registry Analysis:**Account for institutional variation in large-scale cancer registries and epidemiological studies
+* **Multi-Center Clinical Trials:** Account for hospital/center effects while estimating treatment effects and prognostic factors
+* **Recurrent Events Analysis:** Model multiple events per patient (recurrences, hospitalizations) with patient-specific random effects
+* **Family-Based Studies:** Analyze genetic and familial clustering in survival outcomes with appropriate correlation structures
+* **Longitudinal Survival Data:** Handle repeated measurements and time-varying patient characteristics with proper clustering
+* **Registry Analysis:** Account for institutional variation in large-scale cancer registries and epidemiological studies
 
 ##### **Statistical Methodology and Model Assessment**
 
-* **Likelihood Ratio Testing:**Formal statistical tests comparing mixed-effects vs standard Cox models with proper hypothesis testing
-* **Model Diagnostics:**Residual analysis, influence diagnostics, and random effects prediction (BLUPs) for model validation
-* **Bootstrap Validation:**Robust variance estimation and bias-corrected performance assessment for complex hierarchical models
-* **Correlation Structures:**Multiple correlation patterns (unstructured, compound symmetry, AR(1)) for different clustering scenarios
-* **Optimization Methods:**Efficient algorithms (penalized likelihood, Laplace approximation) for large datasets with complex clustering
+* **Likelihood Ratio Testing:** Formal statistical tests comparing mixed-effects vs standard Cox models with proper hypothesis testing
+* **Model Diagnostics:** Residual analysis, influence diagnostics, and random effects prediction (BLUPs) for model validation
+* **Bootstrap Validation:** Robust variance estimation and bias-corrected performance assessment for complex hierarchical models
+* **Correlation Structures:** Multiple correlation patterns (unstructured, compound symmetry, AR(1)) for different clustering scenarios
+* **Optimization Methods:** Efficient algorithms (penalized likelihood, Laplace approximation) for large datasets with complex clustering
 
 ##### **Technical Excellence and Clinical Integration**
 
-* **coxme Package Integration:**Seamless integration with the coxme package for validated mixed-effects survival analysis methods
-* **Jamovi Architecture:**Complete four-file structure (.a.yaml, .b.R, .r.yaml, .u.yaml) with intuitive clustering variable specification
-* **Clinical Workflow:**Natural language summaries, methodological explanations, and educational content for clinical researchers
-* **Advanced Visualization:**Forest plots for fixed effects, random effects distributions, and cluster-specific survival curves
-* **Production Quality:**Comprehensive error handling, input validation, and robust implementation for multi-center research
+* **coxme Package Integration:** Seamless integration with the coxme package for validated mixed-effects survival analysis methods
+* **Jamovi Architecture:** Complete four-file structure (.a.yaml, .b.R, .r.yaml, .u.yaml) with intuitive clustering variable specification
+* **Clinical Workflow:** Natural language summaries, methodological explanations, and educational content for clinical researchers
+* **Advanced Visualization:** Forest plots for fixed effects, random effects distributions, and cluster-specific survival curves
+* **Production Quality:** Comprehensive error handling, input validation, and robust implementation for multi-center research
 
 # ClinicoPath 0.0.31.08
 
@@ -11248,35 +11361,35 @@ This implementation addresses the critical need for flexible parametric survival
 
 ##### **Advanced Regularization Methods for High-Dimensional Survival Data**
 
-* **Multiple Penalty Types:**LASSO (L1) for variable selection, Ridge (L2) for coefficient shrinkage, and Elastic Net combining both penalties for optimal bias-variance trade-off
-* **Flexible Regularization:**Customizable alpha parameter for Elastic Net mixing, custom lambda sequences, and automatic lambda selection via cross-validation
-* **Cross-Validation Framework:**K-fold cross-validation with selectable error measures (partial likelihood deviance, C-index) and 1-standard-error rule for parsimonious models
-* **Variable Selection:**Automatic identification of non-zero coefficients with standardization options and maximum variable constraints for large datasets
-* **Bootstrap Validation:**Comprehensive model validation with bootstrap resampling for optimism-corrected performance assessment
+* **Multiple Penalty Types:** LASSO (L1) for variable selection, Ridge (L2) for coefficient shrinkage, and Elastic Net combining both penalties for optimal bias-variance trade-off
+* **Flexible Regularization:** Customizable alpha parameter for Elastic Net mixing, custom lambda sequences, and automatic lambda selection via cross-validation
+* **Cross-Validation Framework:** K-fold cross-validation with selectable error measures (partial likelihood deviance, C-index) and 1-standard-error rule for parsimonious models
+* **Variable Selection:** Automatic identification of non-zero coefficients with standardization options and maximum variable constraints for large datasets
+* **Bootstrap Validation:** Comprehensive model validation with bootstrap resampling for optimism-corrected performance assessment
 
 ##### **High-Dimensional Clinical Applications**
 
-* **Genomic Survival Analysis:**Regularized Cox models for gene expression data with thousands of variables and clinical outcome integration
-* **Biomarker Discovery:**Variable selection in large clinical datasets for prognostic and predictive biomarker identification
-* **Risk Score Development:**Linear predictor calculation with risk group stratification and survival curve visualization by risk categories
-* **Multicollinearity Handling:**Ridge penalty for correlated predictor variables common in clinical research datasets
-* **Feature Engineering:**Support for both continuous and categorical variables with automatic model matrix creation
+* **Genomic Survival Analysis:** Regularized Cox models for gene expression data with thousands of variables and clinical outcome integration
+* **Biomarker Discovery:** Variable selection in large clinical datasets for prognostic and predictive biomarker identification
+* **Risk Score Development:** Linear predictor calculation with risk group stratification and survival curve visualization by risk categories
+* **Multicollinearity Handling:** Ridge penalty for correlated predictor variables common in clinical research datasets
+* **Feature Engineering:** Support for both continuous and categorical variables with automatic model matrix creation
 
 ##### **Advanced Model Selection and Validation**
 
-* **Lambda Path Analysis:**Coefficient path visualization showing variable entry/exit across regularization strength
-* **Cross-Validation Plots:**CV error curves for optimal lambda selection with confidence bands and selection criteria visualization
-* **Variable Importance:**Ranking of selected variables by coefficient magnitude and contribution to model performance
-* **Model Performance Metrics:**Comprehensive assessment including deviance, C-index, and cross-validated performance measures
-* **Prediction Infrastructure:**Risk score calculation and risk group classification with survival analysis integration
+* **Lambda Path Analysis:** Coefficient path visualization showing variable entry/exit across regularization strength
+* **Cross-Validation Plots:** CV error curves for optimal lambda selection with confidence bands and selection criteria visualization
+* **Variable Importance:** Ranking of selected variables by coefficient magnitude and contribution to model performance
+* **Model Performance Metrics:** Comprehensive assessment including deviance, C-index, and cross-validated performance measures
+* **Prediction Infrastructure:** Risk score calculation and risk group classification with survival analysis integration
 
 ##### **Technical Excellence and Clinical Integration**
 
-* **glmnet Integration:**Seamless integration with the glmnet package for efficient coordinate descent algorithms and proven regularization methods
-* **Jamovi Architecture:**Complete four-file structure (.a.yaml, .b.R, .r.yaml, .u.yaml) with comprehensive user interface for penalty specification
-* **Clinical Workflow:**Natural language summaries, methodological explanations, and educational content for clinical researchers
-* **Tabular Data Support:**Full compatibility with jamovi's data structure and clinical research dataset formats
-* **Production Quality:**Comprehensive error handling, input validation, and robust implementation for research applications
+* **glmnet Integration:** Seamless integration with the glmnet package for efficient coordinate descent algorithms and proven regularization methods
+* **Jamovi Architecture:** Complete four-file structure (.a.yaml, .b.R, .r.yaml, .u.yaml) with comprehensive user interface for penalty specification
+* **Clinical Workflow:** Natural language summaries, methodological explanations, and educational content for clinical researchers
+* **Tabular Data Support:** Full compatibility with jamovi's data structure and clinical research dataset formats
+* **Production Quality:** Comprehensive error handling, input validation, and robust implementation for research applications
 
 # ClinicoPath 0.0.31.07
 
@@ -11286,35 +11399,35 @@ This implementation addresses the critical need for flexible parametric survival
 
 ##### **Complete Survey Design Support for Complex Sampling**
 
-* **Multiple Survey Design Types:**Simple random sampling (SRS), stratified sampling, cluster sampling, stratified cluster designs, and multi-stage sampling for comprehensive survey analysis capability
-* **Survey Variables Integration:**Primary sampling units (PSU), stratification variables, finite population correction (FPC), and nested cluster specifications with proper design effect calculations
-* **Complex Sampling Framework:**Survey weights, design effects, robust variance estimation, and population-level inference with proper standard error adjustments for survey data
-* **Subpopulation Analysis:**Domain estimation capabilities for analyzing specific subgroups within the survey population with proper variance estimation
-* **Survey Design Validation:**Comprehensive validation of survey design specifications with informative error messages and design characteristic summaries
+* **Multiple Survey Design Types:** Simple random sampling (SRS), stratified sampling, cluster sampling, stratified cluster designs, and multi-stage sampling for comprehensive survey analysis capability
+* **Survey Variables Integration:** Primary sampling units (PSU), stratification variables, finite population correction (FPC), and nested cluster specifications with proper design effect calculations
+* **Complex Sampling Framework:** Survey weights, design effects, robust variance estimation, and population-level inference with proper standard error adjustments for survey data
+* **Subpopulation Analysis:** Domain estimation capabilities for analyzing specific subgroups within the survey population with proper variance estimation
+* **Survey Design Validation:** Comprehensive validation of survey design specifications with informative error messages and design characteristic summaries
 
 ##### **Survey-Weighted Statistical Methods**
 
-* **Weighted Kaplan-Meier Estimation:**Survey-weighted survival curves accounting for complex sampling designs with proper confidence intervals and population-level interpretation
-* **Weighted Cox Regression:**Survey-weighted proportional hazards modeling with robust standard errors and design-based inference for population parameters
-* **Population-Level Estimates:**Total population survival estimates, event prevalence calculation, and subpopulation comparisons with survey design adjustments
-* **Robust Variance Estimation:**Design-based standard errors incorporating stratification and clustering effects for proper statistical inference
-* **Survey-Weighted Plots:**Visualization of survey-weighted survival curves with confidence intervals and risk tables adjusted for sampling design
+* **Weighted Kaplan-Meier Estimation:** Survey-weighted survival curves accounting for complex sampling designs with proper confidence intervals and population-level interpretation
+* **Weighted Cox Regression:** Survey-weighted proportional hazards modeling with robust standard errors and design-based inference for population parameters
+* **Population-Level Estimates:** Total population survival estimates, event prevalence calculation, and subpopulation comparisons with survey design adjustments
+* **Robust Variance Estimation:** Design-based standard errors incorporating stratification and clustering effects for proper statistical inference
+* **Survey-Weighted Plots:** Visualization of survey-weighted survival curves with confidence intervals and risk tables adjusted for sampling design
 
 ##### **Clinical Research Applications**
 
-* **Population Health Studies:**Analysis of national health surveys (NHANES, BRFSS) and population-based cancer registries with complex sampling designs
-* **Epidemiological Research:**Survey-weighted survival analysis for cohort studies with stratified sampling and cluster designs
-* **Healthcare Surveillance:**Population-level cancer survival estimates and public health monitoring using survey data
-* **Registry Analysis:**Analysis of cancer registries and health surveillance systems with proper population-level inference
-* **Natural Language Summaries:**Clinical interpretation of survey-weighted results with explanation of population-level implications
+* **Population Health Studies:** Analysis of national health surveys (NHANES, BRFSS) and population-based cancer registries with complex sampling designs
+* **Epidemiological Research:** Survey-weighted survival analysis for cohort studies with stratified sampling and cluster designs
+* **Healthcare Surveillance:** Population-level cancer survival estimates and public health monitoring using survey data
+* **Registry Analysis:** Analysis of cancer registries and health surveillance systems with proper population-level inference
+* **Natural Language Summaries:** Clinical interpretation of survey-weighted results with explanation of population-level implications
 
 ##### **Technical Implementation Excellence**
 
-* **R6 Class Architecture:**Robust backend implementation with comprehensive survey package integration and error handling
-* **Survey Package Integration:**Seamless integration with R survey package (svydesign, svykm, svycoxph) for validated survey statistical methods
-* **Jamovi Component Structure:**Complete four-file architecture (.a.yaml, .b.R, .r.yaml, .u.yaml) with proper survey design user interface
-* **Tabular Data Compatibility:**Full support for jamovi's tabular data structure with survey variable specification and validation
-* **Production Quality:**Comprehensive testing, error handling, and documentation with clinical research focus
+* **R6 Class Architecture:** Robust backend implementation with comprehensive survey package integration and error handling
+* **Survey Package Integration:** Seamless integration with R survey package (svydesign, svykm, svycoxph) for validated survey statistical methods
+* **Jamovi Component Structure:** Complete four-file architecture (.a.yaml, .b.R, .r.yaml, .u.yaml) with proper survey design user interface
+* **Tabular Data Compatibility:** Full support for jamovi's tabular data structure with survey variable specification and validation
+* **Production Quality:** Comprehensive testing, error handling, and documentation with clinical research focus
 
 # ClinicoPath 0.0.31.06
 
@@ -11324,32 +11437,32 @@ This implementation addresses the critical need for flexible parametric survival
 
 ##### **Advanced Survival Analysis Framework - Enhanced Implementation (multisurvival)**
 
-* **Comprehensive Function Architecture:**Complete implementation with modular R6 class design, comprehensive validation systems, and advanced survival modeling capabilities
-* **Machine Learning Integration:**Random Forest survival analysis (randomForestSRC), regularized Cox regression (LASSO/Ridge/Elastic Net), ensemble methods with customizable weighting strategies
-* **Advanced Cox Modeling:**Standard and stratified Cox PH models, frailty models for clustered data, time-dependent covariates, and spline-based time-varying effects
-* **Risk Assessment Tools:**Prognostic risk score calculation, automatic risk group stratification (2-4 groups), nomogram generation, and decision tree analysis
-* **Comprehensive Validation:**Bootstrap validation, cross-validation frameworks, time-dependent ROC curves, calibration assessment, and external validation readiness
-* **Clinical Translation Features:**Natural language summaries, educational explanations, person-time analysis, and interactive nomograms for clinical decision support
-* **Advanced Methodology Support:**Competing risks analysis, multi-state modeling, interval-censored survival, joint longitudinal-survival modeling, and pseudo-observations methods
-* **Performance Optimization:**Efficient algorithms with caching strategies, memory optimization, and scalable implementations for large clinical datasets
-* **Robust Error Handling:**Comprehensive input validation, informative error messages, graceful degradation, and user guidance throughout all analysis components
-* **Publication-Ready Output:**Professional formatting, statistical reporting standards, regulatory compliance considerations, and comprehensive documentation
+* **Comprehensive Function Architecture:** Complete implementation with modular R6 class design, comprehensive validation systems, and advanced survival modeling capabilities
+* **Machine Learning Integration:** Random Forest survival analysis (randomForestSRC), regularized Cox regression (LASSO/Ridge/Elastic Net), ensemble methods with customizable weighting strategies
+* **Advanced Cox Modeling:** Standard and stratified Cox PH models, frailty models for clustered data, time-dependent covariates, and spline-based time-varying effects
+* **Risk Assessment Tools:** Prognostic risk score calculation, automatic risk group stratification (2-4 groups), nomogram generation, and decision tree analysis
+* **Comprehensive Validation:** Bootstrap validation, cross-validation frameworks, time-dependent ROC curves, calibration assessment, and external validation readiness
+* **Clinical Translation Features:** Natural language summaries, educational explanations, person-time analysis, and interactive nomograms for clinical decision support
+* **Advanced Methodology Support:** Competing risks analysis, multi-state modeling, interval-censored survival, joint longitudinal-survival modeling, and pseudo-observations methods
+* **Performance Optimization:** Efficient algorithms with caching strategies, memory optimization, and scalable implementations for large clinical datasets
+* **Robust Error Handling:** Comprehensive input validation, informative error messages, graceful degradation, and user guidance throughout all analysis components
+* **Publication-Ready Output:** Professional formatting, statistical reporting standards, regulatory compliance considerations, and comprehensive documentation
 
 #### **Technical Excellence & Integration**
 
-* **Schema Alignment:**Perfect synchronization between all jamovi component files (.a.yaml, .b.R, .r.yaml, .u.yaml, .h.R) with comprehensive option validation
-* **R6 Class Architecture:**Robust object-oriented design with proper inheritance, modular private methods, and comprehensive lifecycle management
-* **Advanced UI Framework:**Progressive disclosure interface with collapse boxes, conditional enabling, and user-friendly parameter specification
-* **Comprehensive Package Integration:**Seamless integration with survival, survminer, rms, flexsurv, randomForestSRC, glmnet, and 40+ specialized survival analysis packages
-* **Clinical Research Focus:**All implementations designed specifically for tabular clinical research data with medical terminology and clinical workflow integration
+* **Schema Alignment:** Perfect synchronization between all jamovi component files (.a.yaml, .b.R, .r.yaml, .u.yaml, .h.R) with comprehensive option validation
+* **R6 Class Architecture:** Robust object-oriented design with proper inheritance, modular private methods, and comprehensive lifecycle management
+* **Advanced UI Framework:** Progressive disclosure interface with collapse boxes, conditional enabling, and user-friendly parameter specification
+* **Comprehensive Package Integration:** Seamless integration with survival, survminer, rms, flexsurv, randomForestSRC, glmnet, and 40+ specialized survival analysis packages
+* **Clinical Research Focus:** All implementations designed specifically for tabular clinical research data with medical terminology and clinical workflow integration
 
 #### **Production Readiness & Quality Assurance**
 
-* **Complete Compilation Success:**All component files compile without errors using jmvtools::prepare() with comprehensive header generation
-* **Functional Validation:**Full package loading with ClinicoPath::multisurvival() function accessible and ready for clinical research applications
-* **Comprehensive Testing:**Successfully tested with standard survival datasets (colon cancer data) demonstrating full functionality across all analysis options
-* **Documentation Excellence:**Complete roxygen2 documentation, clinical interpretation guides, and methodological explanations for all features
-* **Regulatory Readiness:**Implementation follows pharmaceutical research standards with validation frameworks and comprehensive reporting capabilities
+* **Complete Compilation Success:** All component files compile without errors using jmvtools::prepare() with comprehensive header generation
+* **Functional Validation:** Full package loading with ClinicoPath::multisurvival() function accessible and ready for clinical research applications
+* **Comprehensive Testing:** Successfully tested with standard survival datasets (colon cancer data) demonstrating full functionality across all analysis options
+* **Documentation Excellence:** Complete roxygen2 documentation, clinical interpretation guides, and methodological explanations for all features
+* **Regulatory Readiness:** Implementation follows pharmaceutical research standards with validation frameworks and comprehensive reporting capabilities
 
 # ClinicoPath 0.0.33.01
 
@@ -11357,35 +11470,35 @@ This implementation addresses the critical need for flexible parametric survival
 
 #### **Smooth Hazard Estimation & Analysis - New Implementation (smoothhazard)**
 
-* **Multiple Smoothing Methods:**Kernel smoothing (muhaz-style), B-spline smoothing (bshazard-style), kernel density estimation, and local polynomial approaches for flexible hazard function estimation
-* **Automatic Bandwidth Selection:**Data-driven bandwidth optimization with rule-of-thumb selection, global/local bandwidth options, and pilot bandwidth methods for optimal bias-variance trade-off
-* **Comprehensive Confidence Intervals:**Bootstrap and analytical confidence intervals with configurable confidence levels and boundary correction for robust uncertainty quantification
-* **Advanced Diagnostics:**Bandwidth selection diagnostics, method comparison tools, peak analysis for hazard function characteristics, and model comparison frameworks
-* **Rich Visualization Suite:**Hazard function plots with confidence bands, cumulative hazard visualization, method comparison plots, and diagnostic assessment tools
-* **Clinical Peak Analysis:**Automated identification of hazard peaks, risk period assessment, temporal pattern analysis, and clinical interpretation guidelines
-* **Flexible Configuration:**Multiple kernel types (Epanechnikov, Biweight, Gaussian), time grid customization, stratified analysis support, and export capabilities
-* **Bootstrap Infrastructure:**Robust confidence interval estimation with case resampling, configurable bootstrap samples, and empirical distribution assessment
-* **Target Applications:**Risk period identification, hazard pattern analysis, model validation support, temporal risk assessment, and complementary analysis to Kaplan-Meier curves
+* **Multiple Smoothing Methods:** Kernel smoothing (muhaz-style), B-spline smoothing (bshazard-style), kernel density estimation, and local polynomial approaches for flexible hazard function estimation
+* **Automatic Bandwidth Selection:** Data-driven bandwidth optimization with rule-of-thumb selection, global/local bandwidth options, and pilot bandwidth methods for optimal bias-variance trade-off
+* **Comprehensive Confidence Intervals:** Bootstrap and analytical confidence intervals with configurable confidence levels and boundary correction for robust uncertainty quantification
+* **Advanced Diagnostics:** Bandwidth selection diagnostics, method comparison tools, peak analysis for hazard function characteristics, and model comparison frameworks
+* **Rich Visualization Suite:** Hazard function plots with confidence bands, cumulative hazard visualization, method comparison plots, and diagnostic assessment tools
+* **Clinical Peak Analysis:** Automated identification of hazard peaks, risk period assessment, temporal pattern analysis, and clinical interpretation guidelines
+* **Flexible Configuration:** Multiple kernel types (Epanechnikov, Biweight, Gaussian), time grid customization, stratified analysis support, and export capabilities
+* **Bootstrap Infrastructure:** Robust confidence interval estimation with case resampling, configurable bootstrap samples, and empirical distribution assessment
+* **Target Applications:** Risk period identification, hazard pattern analysis, model validation support, temporal risk assessment, and complementary analysis to Kaplan-Meier curves
 
 #### **CRAN Task View on Survival Analysis - Complete Implementation Roadmap (August 15, 2025)**
 
 ##### **Comprehensive Survival Analysis Infrastructure - Strategic Roadmap Implementation**
 
-* **8-Phase Implementation Plan:**Complete systematic roadmap based on CRAN Task View on Survival Analysis with 340+ specialized packages identified for tabular clinical data analysis
-* **Core Survival Distribution Methods:**Enhanced Kaplan-Meier estimators, Nelson-Aalen cumulative hazard, Turnbull NPMLE for interval-censored data, parametric distribution modeling (Weibull, Exponential, Log-normal, Log-logistic, Generalized Gamma)
-* **Advanced Cox Regression Framework:**Standard and stratified Cox PH models, penalized regression (LASSO, Ridge, Elastic Net), high-dimensional data methods, robust and weighted Cox regression, mixed-effects Cox models with frailty terms
-* **Comprehensive Competing Risks Analysis:**Cumulative incidence functions, Fine-Gray subdistribution hazards, cause-specific hazards modeling, direct binomial regression, flexible competing risks models with power analysis
-* **Multi-State & Recurrent Event Methods:**Markov multi-state models, Semi-Markov models, hidden Markov models, illness-death models, Andersen-Gill models, PWP models, frailty models for recurrent events
-* **Machine Learning Integration:**Tree-based methods (survival trees, random forests), regularized models (LASSO, adaptive LASSO, group LASSO), Bayesian methods, high-dimensional techniques with variable selection
-* **Advanced Model Validation:**Time-dependent ROC curves, prediction error curves, concordance statistics, calibration plots, bootstrap validation, cross-validation frameworks, external validation protocols
-* **Specialized Clinical Methods:**Relative survival analysis, joint longitudinal-survival modeling, interval-censored analysis, cure models for long-term survival, pseudo-observations methods, conditional survival estimation
-* **Clinical Translation Tools:**Nomogram construction, risk score calculators, decision curve analysis, biomarker threshold optimization, dynamic prediction models, personalized treatment selection frameworks
+* **8-Phase Implementation Plan:** Complete systematic roadmap based on CRAN Task View on Survival Analysis with 340+ specialized packages identified for tabular clinical data analysis
+* **Core Survival Distribution Methods:** Enhanced Kaplan-Meier estimators, Nelson-Aalen cumulative hazard, Turnbull NPMLE for interval-censored data, parametric distribution modeling (Weibull, Exponential, Log-normal, Log-logistic, Generalized Gamma)
+* **Advanced Cox Regression Framework:** Standard and stratified Cox PH models, penalized regression (LASSO, Ridge, Elastic Net), high-dimensional data methods, robust and weighted Cox regression, mixed-effects Cox models with frailty terms
+* **Comprehensive Competing Risks Analysis:** Cumulative incidence functions, Fine-Gray subdistribution hazards, cause-specific hazards modeling, direct binomial regression, flexible competing risks models with power analysis
+* **Multi-State & Recurrent Event Methods:** Markov multi-state models, Semi-Markov models, hidden Markov models, illness-death models, Andersen-Gill models, PWP models, frailty models for recurrent events
+* **Machine Learning Integration:** Tree-based methods (survival trees, random forests), regularized models (LASSO, adaptive LASSO, group LASSO), Bayesian methods, high-dimensional techniques with variable selection
+* **Advanced Model Validation:** Time-dependent ROC curves, prediction error curves, concordance statistics, calibration plots, bootstrap validation, cross-validation frameworks, external validation protocols
+* **Specialized Clinical Methods:** Relative survival analysis, joint longitudinal-survival modeling, interval-censored analysis, cure models for long-term survival, pseudo-observations methods, conditional survival estimation
+* **Clinical Translation Tools:** Nomogram construction, risk score calculators, decision curve analysis, biomarker threshold optimization, dynamic prediction models, personalized treatment selection frameworks
 
 ##### **Implementation Priority Matrix - Structured Development Timeline**
 
-* **High Priority (Next 6 months):**Core survival distributions completion, time-varying effects and frailty models, advanced competing risks and multi-state models, enhanced clinical translation tools
-* **Medium Priority (6-12 months):**Bayesian methods and high-dimensional techniques, advanced survival methodology (pseudo-observations, flexible models), specialized clinical applications, cure models implementation
-* **Future Implementation (12+ months):**Deep learning integration, real-time clinical decision support systems, electronic health records integration, advanced biomarker discovery platforms, precision medicine applications
+* **High Priority (Next 6 months):** Core survival distributions completion, time-varying effects and frailty models, advanced competing risks and multi-state models, enhanced clinical translation tools
+* **Medium Priority (6-12 months):** Bayesian methods and high-dimensional techniques, advanced survival methodology (pseudo-observations, flexible models), specialized clinical applications, cure models implementation
+* **Future Implementation (12+ months):** Deep learning integration, real-time clinical decision support systems, electronic health records integration, advanced biomarker discovery platforms, precision medicine applications
 
 ##### **Comprehensive Package Integration Strategy**
 
@@ -11396,25 +11509,25 @@ This implementation addresses the critical need for flexible parametric survival
 
 ##### **Target Clinical Applications - Comprehensive Coverage**
 
-* **Oncology Research:**Cancer survival analysis, progression-free survival, overall survival, competing mortality risks, cure fraction modeling, biomarker-driven treatment selection
-* **Cardiovascular Medicine:**Time-to-event analysis for cardiac endpoints, recurrent event modeling for hospitalizations, multi-state disease progression, risk stratification tools
-* **Clinical Trials:**Primary and secondary endpoint analysis, adaptive trial designs, interim analyses, treatment effect estimation, personalized medicine applications
-* **Epidemiological Studies:**Population-based survival comparisons, registry data analysis, public health outcomes assessment, disease surveillance applications
-* **Biomarker Development:**Prognostic and predictive biomarker validation, optimal cutpoint determination, time-dependent biomarker analysis, dynamic risk prediction
+* **Oncology Research:** Cancer survival analysis, progression-free survival, overall survival, competing mortality risks, cure fraction modeling, biomarker-driven treatment selection
+* **Cardiovascular Medicine:** Time-to-event analysis for cardiac endpoints, recurrent event modeling for hospitalizations, multi-state disease progression, risk stratification tools
+* **Clinical Trials:** Primary and secondary endpoint analysis, adaptive trial designs, interim analyses, treatment effect estimation, personalized medicine applications
+* **Epidemiological Studies:** Population-based survival comparisons, registry data analysis, public health outcomes assessment, disease surveillance applications
+* **Biomarker Development:** Prognostic and predictive biomarker validation, optimal cutpoint determination, time-dependent biomarker analysis, dynamic risk prediction
 
 #### **Strategic Development Framework**
 
-* **Methodological Excellence:**Systematic implementation of validated survival analysis methods with comprehensive statistical foundations and clinical validation
-* **Clinical Integration Focus:**Every method designed for seamless integration into clinical research workflows with user-friendly interfaces and clinical interpretation
-* **Regulatory Compliance:**All implementations designed to meet pharmaceutical research standards, regulatory submission requirements, and clinical guidelines
-* **Educational Support:**Comprehensive documentation, methodology explanations, and best practice guidance for clinical researchers and biostatisticians
+* **Methodological Excellence:** Systematic implementation of validated survival analysis methods with comprehensive statistical foundations and clinical validation
+* **Clinical Integration Focus:** Every method designed for seamless integration into clinical research workflows with user-friendly interfaces and clinical interpretation
+* **Regulatory Compliance:** All implementations designed to meet pharmaceutical research standards, regulatory submission requirements, and clinical guidelines
+* **Educational Support:** Comprehensive documentation, methodology explanations, and best practice guidance for clinical researchers and biostatisticians
 
 #### **Technical Excellence & Future Vision**
 
-* **Scalable Architecture:**Modular implementation allowing for easy extension and integration of new methodological developments
-* **Performance Optimization:**Efficient algorithms designed for large clinical datasets with appropriate computational considerations
-* **Quality Assurance:**Comprehensive validation frameworks ensuring statistical accuracy and clinical reliability
-* **Innovation Pipeline:**Strategic positioning for integration of emerging methodologies including machine learning, deep learning, and precision medicine applications
+* **Scalable Architecture:** Modular implementation allowing for easy extension and integration of new methodological developments
+* **Performance Optimization:** Efficient algorithms designed for large clinical datasets with appropriate computational considerations
+* **Quality Assurance:** Comprehensive validation frameworks ensuring statistical accuracy and clinical reliability
+* **Innovation Pipeline:** Strategic positioning for integration of emerging methodologies including machine learning, deep learning, and precision medicine applications
 
 # ClinicoPath 0.0.33.00
 
@@ -11424,49 +11537,49 @@ This implementation addresses the critical need for flexible parametric survival
 
 ##### **Enhanced Survival Model Validation - New Implementation (survivalmodelvalidation)**
 
-* **Comprehensive Validation Methods:**Internal bootstrap validation, cross-validation, temporal validation, external validation, and geographic validation for survival prediction models
-* **Performance Metrics:**Concordance index (C-index), time-dependent AUC, integrated Brier score, prediction error curves, net reclassification improvement with confidence intervals
-* **Calibration Assessment:**Decile-based calibration, smooth calibration curves, Hosmer-Lemeshow tests, and Greenwood-Nam-D'Agostino tests for survival models
-* **Discrimination Analysis:**Time-dependent ROC curves, concordance statistics, and discrimination plots across multiple time points
-* **Bootstrap Optimization:**Bias-corrected performance estimates with optimism correction and shrinkage factor estimation for reliable model assessment
-* **Clinical Decision Analysis:**Decision curve analysis, net benefit calculations, and clinical utility assessment for treatment threshold optimization
-* **Subgroup Validation:**Performance assessment across patient subgroups with stratified analysis and transportability evaluation
-* **Target Applications:**Prognostic model validation, clinical prediction tool development, regulatory submissions, external validation studies
+* **Comprehensive Validation Methods:** Internal bootstrap validation, cross-validation, temporal validation, external validation, and geographic validation for survival prediction models
+* **Performance Metrics:** Concordance index (C-index), time-dependent AUC, integrated Brier score, prediction error curves, net reclassification improvement with confidence intervals
+* **Calibration Assessment:** Decile-based calibration, smooth calibration curves, Hosmer-Lemeshow tests, and Greenwood-Nam-D'Agostino tests for survival models
+* **Discrimination Analysis:** Time-dependent ROC curves, concordance statistics, and discrimination plots across multiple time points
+* **Bootstrap Optimization:** Bias-corrected performance estimates with optimism correction and shrinkage factor estimation for reliable model assessment
+* **Clinical Decision Analysis:** Decision curve analysis, net benefit calculations, and clinical utility assessment for treatment threshold optimization
+* **Subgroup Validation:** Performance assessment across patient subgroups with stratified analysis and transportability evaluation
+* **Target Applications:** Prognostic model validation, clinical prediction tool development, regulatory submissions, external validation studies
 
 ##### **Clinical Nomograms & Risk Calculators - New Implementation (clinicalnomograms)**
 
-* **Nomogram Types:**Survival nomograms, logistic regression nomograms, linear regression nomograms, competing risks nomograms, and multi-state nomograms for comprehensive risk assessment
-* **Model Development:**Variable selection methods (stepwise, LASSO, best subset), model validation, and performance optimization with clinical judgment integration
-* **Interactive Tools:**Web-based interactive nomograms, risk calculator tables, clinical scenario generators, and patient-specific risk assessment tools
-* **Validation Framework:**Bootstrap validation, cross-validation, split-sample validation with comprehensive calibration and discrimination assessment
-* **Clinical Translation:**Implementation guides, reporting guidelines (TRIPOD, REMARK), clinical decision support, and risk communication strategies
-* **Risk Stratification:**Automated risk group classification, survival curve comparison, and threshold optimization for clinical decision-making
-* **Export Capabilities:**Multiple format export (PDF, PNG, HTML), interactive calculators, reference tables, and clinical implementation documentation
-* **Target Applications:**Clinical decision support, patient counseling, treatment selection, prognostic modeling, clinical trial stratification
+* **Nomogram Types:** Survival nomograms, logistic regression nomograms, linear regression nomograms, competing risks nomograms, and multi-state nomograms for comprehensive risk assessment
+* **Model Development:** Variable selection methods (stepwise, LASSO, best subset), model validation, and performance optimization with clinical judgment integration
+* **Interactive Tools:** Web-based interactive nomograms, risk calculator tables, clinical scenario generators, and patient-specific risk assessment tools
+* **Validation Framework:** Bootstrap validation, cross-validation, split-sample validation with comprehensive calibration and discrimination assessment
+* **Clinical Translation:** Implementation guides, reporting guidelines (TRIPOD, REMARK), clinical decision support, and risk communication strategies
+* **Risk Stratification:** Automated risk group classification, survival curve comparison, and threshold optimization for clinical decision-making
+* **Export Capabilities:** Multiple format export (PDF, PNG, HTML), interactive calculators, reference tables, and clinical implementation documentation
+* **Target Applications:** Clinical decision support, patient counseling, treatment selection, prognostic modeling, clinical trial stratification
 
 ##### **Relative Survival Analysis - Enhanced Implementation (relativesurvival)**
 
-* **Advanced Methods:**Pohar-Perme estimator, Ederer I/II methods, Hakulinen method for population-based survival comparison and cancer registry analysis
-* **Population Matching:**Comprehensive rate table support (US, European, custom populations) with age, sex, and calendar year standardization
-* **Net Survival:**Calculation of net survival estimates, excess mortality rates, and crude probability of death from disease versus other causes
-* **Regression Models:**Additive excess hazard models, multiplicative models, and flexible parametric approaches for covariate adjustment
-* **Clinical Applications:**Cancer registry studies, population-based survival comparisons, international survival benchmarking, and health system evaluation
-* **Validation Tools:**Age standardization, period analysis, cohort analysis, and bootstrap confidence intervals for robust estimation
-* **Target Applications:**Cancer surveillance, population health assessment, international comparisons, registry-based research
+* **Advanced Methods:** Pohar-Perme estimator, Ederer I/II methods, Hakulinen method for population-based survival comparison and cancer registry analysis
+* **Population Matching:** Comprehensive rate table support (US, European, custom populations) with age, sex, and calendar year standardization
+* **Net Survival:** Calculation of net survival estimates, excess mortality rates, and crude probability of death from disease versus other causes
+* **Regression Models:** Additive excess hazard models, multiplicative models, and flexible parametric approaches for covariate adjustment
+* **Clinical Applications:** Cancer registry studies, population-based survival comparisons, international survival benchmarking, and health system evaluation
+* **Validation Tools:** Age standardization, period analysis, cohort analysis, and bootstrap confidence intervals for robust estimation
+* **Target Applications:** Cancer surveillance, population health assessment, international comparisons, registry-based research
 
 #### **Advanced Survival Analysis Infrastructure**
 
-* **Validation Excellence:**Comprehensive internal and external validation methods with bias correction, optimism assessment, and clinical utility evaluation
-* **Clinical Translation:**Publication-ready nomograms, interactive risk calculators, and implementation guides for seamless clinical integration
-* **Population Perspective:**Relative survival analysis for cancer registries and population-based studies with international standardization capabilities
-* **Decision Support:**Advanced decision curve analysis, net benefit assessment, and clinical threshold optimization for evidence-based practice
+* **Validation Excellence:** Comprehensive internal and external validation methods with bias correction, optimism assessment, and clinical utility evaluation
+* **Clinical Translation:** Publication-ready nomograms, interactive risk calculators, and implementation guides for seamless clinical integration
+* **Population Perspective:** Relative survival analysis for cancer registries and population-based studies with international standardization capabilities
+* **Decision Support:** Advanced decision curve analysis, net benefit assessment, and clinical threshold optimization for evidence-based practice
 
 #### **Technical Excellence & Clinical Integration**
 
-* **Comprehensive Validation:**Multiple validation approaches with bootstrap bias correction, external validation frameworks, and clinical utility assessment
-* **Interactive Tools:**Web-based nomograms, real-time risk calculators, and clinical scenario generators for enhanced usability
-* **Reporting Standards:**TRIPOD and REMARK compliance with structured reporting checklists and implementation guidance
-* **Clinical Workflow:**Implementation guides, training materials, and decision support tools for successful clinical translation
+* **Comprehensive Validation:** Multiple validation approaches with bootstrap bias correction, external validation frameworks, and clinical utility assessment
+* **Interactive Tools:** Web-based nomograms, real-time risk calculators, and clinical scenario generators for enhanced usability
+* **Reporting Standards:** TRIPOD and REMARK compliance with structured reporting checklists and implementation guidance
+* **Clinical Workflow:** Implementation guides, training materials, and decision support tools for successful clinical translation
 
 # ClinicoPath 0.0.32.04
 
@@ -11476,52 +11589,52 @@ This implementation addresses the critical need for flexible parametric survival
 
 ##### **Natural Language Results Generator - New Implementation (nlresults)**
 
-* **Automated Methods Sections:**Generate publication-ready methods sections for statistical analyses with journal-specific formatting
-* **Results Interpretation:**Plain-language summaries and clinical interpretations tailored to different audiences (clinical, research, regulatory, patient, student)
-* **Multi-Language Support:**Content generation in English, Spanish, French, German, Portuguese, Italian, Chinese, and Japanese with cultural adaptation
-* **Journal Formatting:**Automatic formatting for AMA, APA, Vancouver, NEJM, JAMA, Lancet, and BMJ style guidelines
-* **Regulatory Compliance:**Templates aligned with FDA, EMA, ICH, CAP, CLSI, and ISO standards and guidelines
-* **Manuscript Templates:**Complete templates for abstracts, results sections, discussion structure, and statistical reporting
-* **Documentation Support:**Data availability statements, ethics templates, funding acknowledgments, conflict of interest declarations
-* **Quality Assessment:**Statistical quality metrics, validation checklists, and reproducibility documentation
-* **Target Applications:**Manuscript preparation, regulatory submissions, clinical reports, research documentation
+* **Automated Methods Sections:** Generate publication-ready methods sections for statistical analyses with journal-specific formatting
+* **Results Interpretation:** Plain-language summaries and clinical interpretations tailored to different audiences (clinical, research, regulatory, patient, student)
+* **Multi-Language Support:** Content generation in English, Spanish, French, German, Portuguese, Italian, Chinese, and Japanese with cultural adaptation
+* **Journal Formatting:** Automatic formatting for AMA, APA, Vancouver, NEJM, JAMA, Lancet, and BMJ style guidelines
+* **Regulatory Compliance:** Templates aligned with FDA, EMA, ICH, CAP, CLSI, and ISO standards and guidelines
+* **Manuscript Templates:** Complete templates for abstracts, results sections, discussion structure, and statistical reporting
+* **Documentation Support:** Data availability statements, ethics templates, funding acknowledgments, conflict of interest declarations
+* **Quality Assessment:** Statistical quality metrics, validation checklists, and reproducibility documentation
+* **Target Applications:** Manuscript preparation, regulatory submissions, clinical reports, research documentation
 
 ##### **Publication-Quality Plot Templates - New Implementation (publicationplots)**
 
-* **Comprehensive Plot Types:**Survival curves, forest plots, ROC curves, Kaplan-Meier plots, box/violin plots, scatter plots, heatmaps, waterfall plots, volcano plots, funnel plots, spider plots, calibration plots
-* **Journal-Specific Formatting:**Automatic compliance with NEJM, JAMA, Lancet, BMJ, Nature, Science, Cell, PLOS ONE, and Frontiers requirements
-* **Colorblind-Safe Palettes:**Viridis, plasma, magma, inferno, cividis, ColorBrewer sets, and journal-specific color schemes
-* **Accessibility Features:**Color vision simulation (deuteranopia, protanopia, tritanopia), pattern fills, high contrast modes, screen reader compatibility
-* **Typography Control:**Professional font families (Arial, Helvetica, Times New Roman, Calibri, Cambria, Georgia) with size hierarchy
-* **Export Optimization:**Multiple formats (PNG, PDF, SVG, EPS, TIFF, JPEG) with publication-quality resolution (300+ DPI)
-* **Interactive Features:**Live color palette preview, accessibility assessment, quality checklists, reproducible code generation
-* **Target Applications:**Scientific manuscripts, conference presentations, regulatory submissions, clinical documentation
+* **Comprehensive Plot Types:** Survival curves, forest plots, ROC curves, Kaplan-Meier plots, box/violin plots, scatter plots, heatmaps, waterfall plots, volcano plots, funnel plots, spider plots, calibration plots
+* **Journal-Specific Formatting:** Automatic compliance with NEJM, JAMA, Lancet, BMJ, Nature, Science, Cell, PLOS ONE, and Frontiers requirements
+* **Colorblind-Safe Palettes:** Viridis, plasma, magma, inferno, cividis, ColorBrewer sets, and journal-specific color schemes
+* **Accessibility Features:** Color vision simulation (deuteranopia, protanopia, tritanopia), pattern fills, high contrast modes, screen reader compatibility
+* **Typography Control:** Professional font families (Arial, Helvetica, Times New Roman, Calibri, Cambria, Georgia) with size hierarchy
+* **Export Optimization:** Multiple formats (PNG, PDF, SVG, EPS, TIFF, JPEG) with publication-quality resolution (300+ DPI)
+* **Interactive Features:** Live color palette preview, accessibility assessment, quality checklists, reproducible code generation
+* **Target Applications:** Scientific manuscripts, conference presentations, regulatory submissions, clinical documentation
 
 ##### **Clinical Risk Calculators & Nomograms - New Implementation (clinicalcalculators)**
 
-* **Calculator Types:**Risk score calculators, nomogram generators, decision trees, survival prediction models, diagnostic probability calculators, treatment benefit calculators, biomarker threshold calculators
-* **Statistical Models:**Logistic regression, Cox proportional hazards, linear regression, random forest, gradient boosting, neural networks, ensemble models, Bayesian models
-* **Validation Methods:**Bootstrap validation, cross-validation, holdout validation, external validation, temporal validation with comprehensive performance metrics
-* **Advanced Features:**Automatic feature selection (LASSO, elastic net, Boruta, RFE), missing data handling (MICE, KNN, random forest imputation), outlier detection
-* **Clinical Implementation:**Interactive web calculators, risk communication formats (percentage, natural frequency, odds ratios, icon arrays), uncertainty quantification
-* **Decision Support:**Calibration plots, discrimination metrics, decision curve analysis, net benefit analysis, clinical threshold optimization
-* **Export Formats:**HTML interactive calculators, PDF reports, Shiny applications, R packages, JSON configurations, Excel calculators
-* **Target Applications:**Clinical decision support, patient risk stratification, prognostic modeling, treatment selection, biomarker implementation
+* **Calculator Types:** Risk score calculators, nomogram generators, decision trees, survival prediction models, diagnostic probability calculators, treatment benefit calculators, biomarker threshold calculators
+* **Statistical Models:** Logistic regression, Cox proportional hazards, linear regression, random forest, gradient boosting, neural networks, ensemble models, Bayesian models
+* **Validation Methods:** Bootstrap validation, cross-validation, holdout validation, external validation, temporal validation with comprehensive performance metrics
+* **Advanced Features:** Automatic feature selection (LASSO, elastic net, Boruta, RFE), missing data handling (MICE, KNN, random forest imputation), outlier detection
+* **Clinical Implementation:** Interactive web calculators, risk communication formats (percentage, natural frequency, odds ratios, icon arrays), uncertainty quantification
+* **Decision Support:** Calibration plots, discrimination metrics, decision curve analysis, net benefit analysis, clinical threshold optimization
+* **Export Formats:** HTML interactive calculators, PDF reports, Shiny applications, R packages, JSON configurations, Excel calculators
+* **Target Applications:** Clinical decision support, patient risk stratification, prognostic modeling, treatment selection, biomarker implementation
 
 #### **Enhanced Clinical Translation Capabilities**
 
-* **Natural Language Processing:**Automatic generation of methods sections, results summaries, and clinical interpretations for diverse audiences
-* **Publication Excellence:**Journal-ready plots with accessibility features, colorblind-safe design, and regulatory compliance
-* **Clinical Decision Support:**Interactive risk calculators and nomograms with real-time risk assessment and uncertainty quantification
-* **Multi-Format Output:**HTML, PDF, Shiny, R packages, and Excel formats for seamless integration into clinical workflows
+* **Natural Language Processing:** Automatic generation of methods sections, results summaries, and clinical interpretations for diverse audiences
+* **Publication Excellence:** Journal-ready plots with accessibility features, colorblind-safe design, and regulatory compliance
+* **Clinical Decision Support:** Interactive risk calculators and nomograms with real-time risk assessment and uncertainty quantification
+* **Multi-Format Output:** HTML, PDF, Shiny, R packages, and Excel formats for seamless integration into clinical workflows
 
 #### **Technical Excellence & Integration**
 
-* **Complete Jamovi Integration:**All modules follow proper 4-file jamovi architecture with comprehensive UI, backend, and results definitions
-* **Accessibility Standards:**WCAG 2.1 compliance with color vision simulation, pattern fills, and screen reader compatibility
-* **Regulatory Alignment:**FDA, EMA, ICH, CAP, CLSI, and ISO standards compliance with validation frameworks
-* **Reproducibility Focus:**Complete code documentation, parameter tracking, and validation for scientific reproducibility
-* **Clinical Translation:**Bridge between statistical analysis and clinical implementation with user-friendly interfaces
+* **Complete Jamovi Integration:** All modules follow proper 4-file jamovi architecture with comprehensive UI, backend, and results definitions
+* **Accessibility Standards:** WCAG 2.1 compliance with color vision simulation, pattern fills, and screen reader compatibility
+* **Regulatory Alignment:** FDA, EMA, ICH, CAP, CLSI, and ISO standards compliance with validation frameworks
+* **Reproducibility Focus:** Complete code documentation, parameter tracking, and validation for scientific reproducibility
+* **Clinical Translation:** Bridge between statistical analysis and clinical implementation with user-friendly interfaces
 
 # ClinicoPath 0.0.32.03
 
@@ -11531,31 +11644,31 @@ This implementation addresses the critical need for flexible parametric survival
 
 ##### **Interval-Censored Survival Analysis - New Implementation (intervalsurvival)**
 
-* **Model Types:**Cox proportional hazards, AFT models (Weibull, log-normal, log-logistic, exponential, gamma), and non-parametric Turnbull NPMLE estimation
-* **Estimation Methods:**EM algorithm, Newton-Raphson, MCMC (Bayesian), and non-parametric maximum likelihood estimation (NPMLE)
-* **Advanced Features:**Multiple imputation methods (midpoint, random, conditional mean), baseline hazard smoothing, bootstrap inference
-* **Data Handling:**Automatic interval bound validation, missing value imputation, censoring pattern classification (exact, interval, left, right)
-* **Diagnostics:**Model comparison (AIC/BIC), goodness-of-fit tests, residual analysis, convergence assessment
-* **Clinical Applications:**Periodic follow-up studies, screening programs, disease progression analysis, clinical trials with scheduled visits
-* **Target Applications:**Tumor progression analysis, biomarker development with interval observations, dental/oral health outcomes
+* **Model Types:** Cox proportional hazards, AFT models (Weibull, log-normal, log-logistic, exponential, gamma), and non-parametric Turnbull NPMLE estimation
+* **Estimation Methods:** EM algorithm, Newton-Raphson, MCMC (Bayesian), and non-parametric maximum likelihood estimation (NPMLE)
+* **Advanced Features:** Multiple imputation methods (midpoint, random, conditional mean), baseline hazard smoothing, bootstrap inference
+* **Data Handling:** Automatic interval bound validation, missing value imputation, censoring pattern classification (exact, interval, left, right)
+* **Diagnostics:** Model comparison (AIC/BIC), goodness-of-fit tests, residual analysis, convergence assessment
+* **Clinical Applications:** Periodic follow-up studies, screening programs, disease progression analysis, clinical trials with scheduled visits
+* **Target Applications:** Tumor progression analysis, biomarker development with interval observations, dental/oral health outcomes
 
 ##### **Recurrent Event Survival Analysis - New Implementation (recurrentsurvival)**
 
-* **Model Types:**Andersen-Gill, Prentice-Williams-Peterson (conditional process & gap time), frailty models, multi-state models, counting process formulations
-* **Time Scales:**Gap time (time since last event), calendar time (time since start), counting process with start-stop intervals
-* **Frailty Distributions:**Gamma, log-normal, Gaussian, and stable distributions for unobserved heterogeneity modeling
-* **Advanced Features:**Robust variance estimation with subject clustering, terminal event handling as competing risks, multiple imputation
-* **Data Analysis:**Event frequency distributions, gap time statistics, terminal event analysis, subject-specific summaries
-* **Diagnostics:**Proportional hazards testing, frailty distribution assessment, independence assumption verification, residual analysis
-* **Clinical Applications:**Cancer recurrence analysis, infection episodes, hospital readmissions, chronic disease flare-ups
-* **Target Applications:**Oncology follow-up studies, cardiovascular event modeling, psychiatric episode analysis
+* **Model Types:** Andersen-Gill, Prentice-Williams-Peterson (conditional process & gap time), frailty models, multi-state models, counting process formulations
+* **Time Scales:** Gap time (time since last event), calendar time (time since start), counting process with start-stop intervals
+* **Frailty Distributions:** Gamma, log-normal, Gaussian, and stable distributions for unobserved heterogeneity modeling
+* **Advanced Features:** Robust variance estimation with subject clustering, terminal event handling as competing risks, multiple imputation
+* **Data Analysis:** Event frequency distributions, gap time statistics, terminal event analysis, subject-specific summaries
+* **Diagnostics:** Proportional hazards testing, frailty distribution assessment, independence assumption verification, residual analysis
+* **Clinical Applications:** Cancer recurrence analysis, infection episodes, hospital readmissions, chronic disease flare-ups
+* **Target Applications:** Oncology follow-up studies, cardiovascular event modeling, psychiatric episode analysis
 
 #### **Enhanced Data Analysis Capabilities**
 
-* **Comprehensive Data Summaries:**Detailed censoring pattern analysis, interval width statistics, event frequency distributions
-* **Advanced Model Diagnostics:**Convergence assessment, goodness-of-fit testing, model comparison frameworks
-* **Rich Visualization Support:**Survival curves, hazard functions, interval visualization, event timelines, model comparison plots
-* **Clinical Translation:**Plain-language result interpretation, comprehensive HTML output with publication-ready tables
+* **Comprehensive Data Summaries:** Detailed censoring pattern analysis, interval width statistics, event frequency distributions
+* **Advanced Model Diagnostics:** Convergence assessment, goodness-of-fit testing, model comparison frameworks
+* **Rich Visualization Support:** Survival curves, hazard functions, interval visualization, event timelines, model comparison plots
+* **Clinical Translation:** Plain-language result interpretation, comprehensive HTML output with publication-ready tables
 
 # ClinicoPath 0.0.32.02
 
@@ -11563,14 +11676,14 @@ This implementation addresses the critical need for flexible parametric survival
 
 ##### **Pseudo-Observations Survival Methods - New Implementation (pseudosurvival)**
 
-* **Direct Survival Modeling:**Pseudo-observation methods enabling direct regression of survival probabilities at specific time points
-* **RMST Regression:**Restricted mean survival time modeling with covariate effects and group comparisons
-* **Multiple Analysis Types:**Survival probability, RMST, cumulative incidence, life years lost, and quantile regression approaches
-* **Jackknife Methods:**Standard, robust, and cluster jackknife approaches for pseudo-observation calculation
-* **Regression Flexibility:**OLS, GEE, robust regression, and weighted regression methods for pseudo-observation modeling
-* **Advanced Features:**Bootstrap inference, robust standard errors, competing risks support, and sensitivity analysis
-* **Clinical Applications:**Direct time-point survival analysis, RMST comparisons, regulatory submissions requiring specific timepoint estimates
-* **Target Applications:**Clinical trials with milestone analysis, health economic evaluations, personalized survival prediction
+* **Direct Survival Modeling:** Pseudo-observation methods enabling direct regression of survival probabilities at specific time points
+* **RMST Regression:** Restricted mean survival time modeling with covariate effects and group comparisons
+* **Multiple Analysis Types:** Survival probability, RMST, cumulative incidence, life years lost, and quantile regression approaches
+* **Jackknife Methods:** Standard, robust, and cluster jackknife approaches for pseudo-observation calculation
+* **Regression Flexibility:** OLS, GEE, robust regression, and weighted regression methods for pseudo-observation modeling
+* **Advanced Features:** Bootstrap inference, robust standard errors, competing risks support, and sensitivity analysis
+* **Clinical Applications:** Direct time-point survival analysis, RMST comparisons, regulatory submissions requiring specific timepoint estimates
+* **Target Applications:** Clinical trials with milestone analysis, health economic evaluations, personalized survival prediction
 
 # ClinicoPath 0.0.32.01
 
@@ -11580,57 +11693,57 @@ This implementation addresses the critical need for flexible parametric survival
 
 ##### **Assay Optimization & Experimental Design - New Implementation (assayoptimization)**
 
-* **Design of Experiments:**Full/fractional factorial, central composite, Box-Behnken, D-optimal, and Plackett-Burman designs for laboratory optimization
-* **Power Analysis:**Sample size and power calculations for experimental designs with configurable effect sizes and significance levels
-* **Response Surface Methodology:**Second-order polynomial modeling with stationary point analysis and optimization path visualization
-* **Quality Control:**Statistical process control charts (X-bar R, X-bar S, Individual MR, CUSUM, EWMA) for assay validation
-* **Method Validation:**Precision, accuracy, linearity, and robustness assessment for analytical methods
-* **Optimization Goals:**Maximize/minimize response, target specific values, minimize variance, maximize efficiency, and multi-objective optimization
-* **Randomization Methods:**Complete, block, systematic, and stratified randomization strategies for experimental control
-* **Factor Analysis:**Main effects, interaction effects, and factorial analysis with eta-squared effect sizes
-* **Robust Methods:**Outlier-resistant statistical approaches for experimental data analysis
-* **Target Applications:**Laboratory assay development, analytical method optimization, clinical trial design, quality control implementation
+* **Design of Experiments:** Full/fractional factorial, central composite, Box-Behnken, D-optimal, and Plackett-Burman designs for laboratory optimization
+* **Power Analysis:** Sample size and power calculations for experimental designs with configurable effect sizes and significance levels
+* **Response Surface Methodology:** Second-order polynomial modeling with stationary point analysis and optimization path visualization
+* **Quality Control:** Statistical process control charts (X-bar R, X-bar S, Individual MR, CUSUM, EWMA) for assay validation
+* **Method Validation:** Precision, accuracy, linearity, and robustness assessment for analytical methods
+* **Optimization Goals:** Maximize/minimize response, target specific values, minimize variance, maximize efficiency, and multi-objective optimization
+* **Randomization Methods:** Complete, block, systematic, and stratified randomization strategies for experimental control
+* **Factor Analysis:** Main effects, interaction effects, and factorial analysis with eta-squared effect sizes
+* **Robust Methods:** Outlier-resistant statistical approaches for experimental data analysis
+* **Target Applications:** Laboratory assay development, analytical method optimization, clinical trial design, quality control implementation
 
 ##### **Joint Longitudinal-Survival Modeling - Enhanced Implementation (jointmodeling)**
 
-* **Advanced Mixed Effects:**Joint modeling framework replacing traditional mixed models with superior longitudinal-survival integration
-* **Dynamic Risk Prediction:**Time-varying biomarker trajectories linked to survival outcomes with prediction intervals
-* **Flexible Model Specifications:**Linear, quadratic, cubic, splines, natural splines, and B-splines for longitudinal trajectories
-* **Association Structures:**Current value, current slope, value+slope, AUC, cumulative, and shared random effects associations
-* **Estimation Methods:**Bayesian MCMC, two-stage, and joint maximum likelihood approaches with convergence diagnostics
-* **Survival Distributions:**Cox, Weibull, exponential, log-normal, and Gompertz baseline hazards
-* **Competing Risks:**Support for competing events and left truncation in complex survival scenarios
-* **Model Validation:**Internal cross-validation, discrimination metrics, and dynamic AUC assessment over time
-* **Clinical Applications:**PSA monitoring in prostate cancer, biomarker evolution in oncology, personalized medicine
+* **Advanced Mixed Effects:** Joint modeling framework replacing traditional mixed models with superior longitudinal-survival integration
+* **Dynamic Risk Prediction:** Time-varying biomarker trajectories linked to survival outcomes with prediction intervals
+* **Flexible Model Specifications:** Linear, quadratic, cubic, splines, natural splines, and B-splines for longitudinal trajectories
+* **Association Structures:** Current value, current slope, value+slope, AUC, cumulative, and shared random effects associations
+* **Estimation Methods:** Bayesian MCMC, two-stage, and joint maximum likelihood approaches with convergence diagnostics
+* **Survival Distributions:** Cox, Weibull, exponential, log-normal, and Gompertz baseline hazards
+* **Competing Risks:** Support for competing events and left truncation in complex survival scenarios
+* **Model Validation:** Internal cross-validation, discrimination metrics, and dynamic AUC assessment over time
+* **Clinical Applications:** PSA monitoring in prostate cancer, biomarker evolution in oncology, personalized medicine
 
 #### **Survival Analysis Enhancement Plan - Initial Implementation (August 15, 2025)**
 
 ##### **Frailty & Random Effects Survival Models - New Implementation (frailtysurvival)**
 
-* **Frailty Model Types:**Shared, correlated, nested, additive, and multiplicative frailty models for clustered survival data
-* **Distribution Support:**Gamma, log-normal, positive stable, and inverse Gaussian frailty distributions
-* **Estimation Methods:**Penalized likelihood, EM algorithm, Laplace approximation, and MCMC (Bayesian) approaches
-* **Cluster Analysis:**Multi-center studies, family studies, recurrent events, and patient-level clustering support
-* **Variance Components:**Decomposition of survival variation into cluster-level and individual-level components
-* **Model Comparison:**Automatic comparison with standard Cox models using AIC, BIC, and likelihood ratio tests
-* **Frailty Testing:**Statistical tests for the presence and significance of frailty effects
-* **Cluster Diagnostics:**Cluster-specific survival curves, effect distributions, and risk stratification
-* **Baseline Hazards:**Cox proportional hazards, Weibull, exponential, Gompertz, and log-normal specifications
-* **Target Applications:**Multi-center clinical trials, genetic epidemiology, recurrent event analysis, healthcare outcomes research
+* **Frailty Model Types:** Shared, correlated, nested, additive, and multiplicative frailty models for clustered survival data
+* **Distribution Support:** Gamma, log-normal, positive stable, and inverse Gaussian frailty distributions
+* **Estimation Methods:** Penalized likelihood, EM algorithm, Laplace approximation, and MCMC (Bayesian) approaches
+* **Cluster Analysis:** Multi-center studies, family studies, recurrent events, and patient-level clustering support
+* **Variance Components:** Decomposition of survival variation into cluster-level and individual-level components
+* **Model Comparison:** Automatic comparison with standard Cox models using AIC, BIC, and likelihood ratio tests
+* **Frailty Testing:** Statistical tests for the presence and significance of frailty effects
+* **Cluster Diagnostics:** Cluster-specific survival curves, effect distributions, and risk stratification
+* **Baseline Hazards:** Cox proportional hazards, Weibull, exponential, Gompertz, and log-normal specifications
+* **Target Applications:** Multi-center clinical trials, genetic epidemiology, recurrent event analysis, healthcare outcomes research
 
 #### **Digital Pathology & AI/ML Integration - Complete Implementation (August 15, 2025)**
 
 ##### **Phase 0-4: Complete Digital Pathology Pipeline - All Phases Implemented**
 
-* **Batch Effect Control:**PCA visualization and ComBat correction for tabular pathology data (`batcheffect.b.R`)
-* **Feature Quality Assessment:**Distribution analysis, outlier detection, and redundancy analysis (`featurequality.b.R`)
-* **Enhanced Categorical Analysis:**Advanced Chi-square tests with Cramer's V effect sizes and residual analysis (`categoricaladvanced.b.R`)
-* **Pathology Agreement Analysis:**Enhanced Kappa, ICC, and Bland-Altman analysis for inter-rater reliability (`pathologyagreement.b.R`)
-* **Spatial Statistics Framework:**Three-tier spatial analysis (density, distance, neighborhoods) for coordinate data (`spatialanalysis.b.R`)
-* **Hierarchical Pathology Models:**Multi-level modeling for nested pathology data structures (`hierarchicalpathology.b.R`)
-* **ML Pathology Evaluation:**Comprehensive classification metrics (F1, AUROC, Dice, Hausdorff) with statistical comparisons (`mlpathology.b.R`)
-* **Optimal Cutpoint Analysis:**Maximally selected rank statistics for continuous biomarker thresholds (`optimalcutpoint.b.R`)
-* **Target Applications:**Digital pathology workflows, image analysis validation, spatial pathology, AI model evaluation, biomarker discovery
+* **Batch Effect Control:** PCA visualization and ComBat correction for tabular pathology data (`batcheffect.b.R`)
+* **Feature Quality Assessment:** Distribution analysis, outlier detection, and redundancy analysis (`featurequality.b.R`)
+* **Enhanced Categorical Analysis:** Advanced Chi-square tests with Cramer's V effect sizes and residual analysis (`categoricaladvanced.b.R`)
+* **Pathology Agreement Analysis:** Enhanced Kappa, ICC, and Bland-Altman analysis for inter-rater reliability (`pathologyagreement.b.R`)
+* **Spatial Statistics Framework:** Three-tier spatial analysis (density, distance, neighborhoods) for coordinate data (`spatialanalysis.b.R`)
+* **Hierarchical Pathology Models:** Multi-level modeling for nested pathology data structures (`hierarchicalpathology.b.R`)
+* **ML Pathology Evaluation:** Comprehensive classification metrics (F1, AUROC, Dice, Hausdorff) with statistical comparisons (`mlpathology.b.R`)
+* **Optimal Cutpoint Analysis:** Maximally selected rank statistics for continuous biomarker thresholds (`optimalcutpoint.b.R`)
+* **Target Applications:** Digital pathology workflows, image analysis validation, spatial pathology, AI model evaluation, biomarker discovery
 
 # ClinicoPath 0.0.31.04
 
@@ -11640,65 +11753,65 @@ This implementation addresses the critical need for flexible parametric survival
 
 ##### **Bayesian Clinical Analysis & Decision Making - Complete Implementation (bayesianclinical)**
 
-* **Comprehensive Bayesian Framework:**Complete implementation of Bayesian clinical analysis with MCMC estimation, prior specification, and clinical decision making
-* **Treatment Effect Analysis:**Bayesian treatment comparisons with credible intervals, ROPE (Region of Practical Equivalence) analysis, and clinical probability statements
-* **Advanced Prior Specification:**Multiple prior types including non-informative, weakly informative, informative, and skeptical priors for clinical research contexts
-* **MCMC Implementation:**Robust Markov Chain Monte Carlo with configurable chains, iterations, warmup, and thinning for reliable posterior estimation
-* **Decision Analysis Framework:**Utility-based clinical decision making with cost-effectiveness integration and uncertainty quantification
-* **Evidence Assessment:**Bayes factors, evidence classification thresholds, and posterior predictive checks for model validation
-* **Hierarchical Modeling:**Multi-level Bayesian models for multi-center studies and patient clustering from tabular clinical data
-* **Model Diagnostics:**Comprehensive convergence diagnostics, trace plots, and posterior visualization for quality assurance
-* **Clinical Interpretation:**Plain language probability statements, clinical significance assessment, and regulatory documentation support
-* **Advanced Features:**Leave-one-out cross-validation, model comparison, adaptive design support, and sensitivity analysis to priors
-* **Target Applications:**Clinical trials, evidence-based medicine, personalized treatment decisions, regulatory submissions, clinical guideline development
+* **Comprehensive Bayesian Framework:** Complete implementation of Bayesian clinical analysis with MCMC estimation, prior specification, and clinical decision making
+* **Treatment Effect Analysis:** Bayesian treatment comparisons with credible intervals, ROPE (Region of Practical Equivalence) analysis, and clinical probability statements
+* **Advanced Prior Specification:** Multiple prior types including non-informative, weakly informative, informative, and skeptical priors for clinical research contexts
+* **MCMC Implementation:** Robust Markov Chain Monte Carlo with configurable chains, iterations, warmup, and thinning for reliable posterior estimation
+* **Decision Analysis Framework:** Utility-based clinical decision making with cost-effectiveness integration and uncertainty quantification
+* **Evidence Assessment:** Bayes factors, evidence classification thresholds, and posterior predictive checks for model validation
+* **Hierarchical Modeling:** Multi-level Bayesian models for multi-center studies and patient clustering from tabular clinical data
+* **Model Diagnostics:** Comprehensive convergence diagnostics, trace plots, and posterior visualization for quality assurance
+* **Clinical Interpretation:** Plain language probability statements, clinical significance assessment, and regulatory documentation support
+* **Advanced Features:** Leave-one-out cross-validation, model comparison, adaptive design support, and sensitivity analysis to priors
+* **Target Applications:** Clinical trials, evidence-based medicine, personalized treatment decisions, regulatory submissions, clinical guideline development
 
 #### **Phase 4: Advanced Analytics Enhancement - Complete Implementation (August 15, 2025)**
 
 ##### **Enhanced Nonparametric Analysis - Complete Implementation (enhancednonparametric)**
 
-* **Comprehensive Test Suite:**Mann-Whitney U, Wilcoxon signed-rank, Kruskal-Wallis, Friedman tests with modern enhancements and effect size calculations
-* **Advanced Effect Sizes:**Rank-biserial correlation, Cliff's Delta, eta-squared, epsilon-squared with bootstrap confidence intervals and clinical interpretation
-* **Enhanced Mann-Whitney U:**Complete implementation with exact tests, confidence intervals for location shift, and comprehensive diagnostic framework
-* **Advanced Kruskal-Wallis:**Multi-group comparisons with proper post hoc testing using Dunn's method and multiple comparison corrections
-* **Modern Nonparametric Methods:**Brunner-Munzel test, Jonckheere-Terpstra trend test, permutation tests, and bootstrap inference
-* **Comprehensive Assumption Checking:**Automated normality testing, homogeneity of variance assessment, and independence verification with recommendations
-* **Post Hoc Analysis Framework:**Dunn's test with Bonferroni, Holm, FDR corrections and effect size calculations for pairwise comparisons
-* **Multiple Variable Support:**Batch analysis of multiple dependent variables with descriptive statistics and missing data assessment
-* **Advanced Visualizations:**Distribution plots, effect size visualization with confidence intervals, and publication-ready outputs
-* **Clinical Impact:**Addresses critical methodological gaps where 30% of pathology studies use nonparametric tests without proper effect sizes
-* **Target Applications:**Digital pathology biomarker analysis, immunohistochemistry scoring, cell count comparisons, morphometric measurements
+* **Comprehensive Test Suite:** Mann-Whitney U, Wilcoxon signed-rank, Kruskal-Wallis, Friedman tests with modern enhancements and effect size calculations
+* **Advanced Effect Sizes:** Rank-biserial correlation, Cliff's Delta, eta-squared, epsilon-squared with bootstrap confidence intervals and clinical interpretation
+* **Enhanced Mann-Whitney U:** Complete implementation with exact tests, confidence intervals for location shift, and comprehensive diagnostic framework
+* **Advanced Kruskal-Wallis:** Multi-group comparisons with proper post hoc testing using Dunn's method and multiple comparison corrections
+* **Modern Nonparametric Methods:** Brunner-Munzel test, Jonckheere-Terpstra trend test, permutation tests, and bootstrap inference
+* **Comprehensive Assumption Checking:** Automated normality testing, homogeneity of variance assessment, and independence verification with recommendations
+* **Post Hoc Analysis Framework:** Dunn's test with Bonferroni, Holm, FDR corrections and effect size calculations for pairwise comparisons
+* **Multiple Variable Support:** Batch analysis of multiple dependent variables with descriptive statistics and missing data assessment
+* **Advanced Visualizations:** Distribution plots, effect size visualization with confidence intervals, and publication-ready outputs
+* **Clinical Impact:** Addresses critical methodological gaps where 30% of pathology studies use nonparametric tests without proper effect sizes
+* **Target Applications:** Digital pathology biomarker analysis, immunohistochemistry scoring, cell count comparisons, morphometric measurements
 
 ##### **Grafify Scientific Plots - Complete Implementation (grafify)**
 
-* **Comprehensive Plot Types:**Scientific scatter plots with error bars, box plots, violin plots, dot plots, before-after comparisons, and multi-dimensional visualizations
-* **Advanced Statistical Integration:**Built-in ANOVA, t-tests, correlations with post-hoc comparisons using grafify's statistical framework
-* **Color-Blind Friendly Design:**12 carefully designed color palettes (default, vibrant, contrast, bright, pale, dark, earth, seasonal) optimized for scientific publication
-* **Experimental Design Support:**Complete randomized design (CRD), randomized block design (RBD), repeated measures, factorial, and before-after study designs
-* **Advanced Plot Features:**3D and 4D scatter plots, density plots, histograms, categorical vs numerical grouping, and specialized experimental plots
-* **Statistical Method Options:**One-way ANOVA, two-way ANOVA, mixed models, t-tests, and correlation analysis with automatic method selection
-* **Post-hoc Comparison Methods:**Pairwise comparisons, vs reference comparisons, trend analysis, and level-wise comparisons with multiple testing correction
-* **Professional Styling:**Grafify theme integration, log transformations, custom labels, legend positioning, and publication-ready formatting
-* **Quality Control Features:**Summary statistics display, model diagnostics, Q-Q plots for normality, and comprehensive data export capabilities
-* **Advanced Customization:**Jitter width, transparency, point size, line size, error bar types, and summary function selection (mean, median, geometric mean)
-* **Clinical Applications:**Experimental data visualization, treatment group comparisons, biomarker analysis, and clinical trial data presentation
-* **Target Applications:**Clinical research visualization, biomedical data analysis, experimental biology, and scientific publication graphics
+* **Comprehensive Plot Types:** Scientific scatter plots with error bars, box plots, violin plots, dot plots, before-after comparisons, and multi-dimensional visualizations
+* **Advanced Statistical Integration:** Built-in ANOVA, t-tests, correlations with post-hoc comparisons using grafify's statistical framework
+* **Color-Blind Friendly Design:** 12 carefully designed color palettes (default, vibrant, contrast, bright, pale, dark, earth, seasonal) optimized for scientific publication
+* **Experimental Design Support:** Complete randomized design (CRD), randomized block design (RBD), repeated measures, factorial, and before-after study designs
+* **Advanced Plot Features:** 3D and 4D scatter plots, density plots, histograms, categorical vs numerical grouping, and specialized experimental plots
+* **Statistical Method Options:** One-way ANOVA, two-way ANOVA, mixed models, t-tests, and correlation analysis with automatic method selection
+* **Post-hoc Comparison Methods:** Pairwise comparisons, vs reference comparisons, trend analysis, and level-wise comparisons with multiple testing correction
+* **Professional Styling:** Grafify theme integration, log transformations, custom labels, legend positioning, and publication-ready formatting
+* **Quality Control Features:** Summary statistics display, model diagnostics, Q-Q plots for normality, and comprehensive data export capabilities
+* **Advanced Customization:** Jitter width, transparency, point size, line size, error bar types, and summary function selection (mean, median, geometric mean)
+* **Clinical Applications:** Experimental data visualization, treatment group comparisons, biomarker analysis, and clinical trial data presentation
+* **Target Applications:** Clinical research visualization, biomedical data analysis, experimental biology, and scientific publication graphics
 
 #### **Technical Excellence & Integration**
 
-* **Complete Jamovi Integration:**All modules follow proper 4-file jamovi architecture with comprehensive UI, backend, and results definitions
-* **Robust Error Handling:**Comprehensive validation, informative error messages, and graceful degradation with user guidance
-* **Clinical Focus:**All implementations designed specifically for tabular clinical and pathology research data (rows=patients, columns=variables)
-* **Publication Ready:**Professional output formatting, statistical reporting standards, and regulatory compliance considerations
-* **Comprehensive Documentation:**Detailed help files, clinical interpretation guides, and methodological explanations
-* **Performance Optimization:**Efficient algorithms, caching strategies, and scalable implementations for large datasets
+* **Complete Jamovi Integration:** All modules follow proper 4-file jamovi architecture with comprehensive UI, backend, and results definitions
+* **Robust Error Handling:** Comprehensive validation, informative error messages, and graceful degradation with user guidance
+* **Clinical Focus:** All implementations designed specifically for tabular clinical and pathology research data (rows=patients, columns=variables)
+* **Publication Ready:** Professional output formatting, statistical reporting standards, and regulatory compliance considerations
+* **Comprehensive Documentation:** Detailed help files, clinical interpretation guides, and methodological explanations
+* **Performance Optimization:** Efficient algorithms, caching strategies, and scalable implementations for large datasets
 
 ### **Development Milestones Achieved**
 
-* **6 Major Modules Implemented:**treatmenteffects, outbreakanalysis, screeningevaluation, bayesianclinical, enhancednonparametric, grafify
-* **All Phases 3 & 4 Complete:**Specialized clinical methods and advanced analytics enhancement fully implemented
-* **100% Compilation Success:**All modules compile without errors using jmvtools::prepare()
-* **Documentation Complete:**All modules properly documented with devtools::document()
-* **Clinical Research Ready:**All implementations focused on tabular data analysis for clinical and pathology research
+* **6 Major Modules Implemented:** treatmenteffects, outbreakanalysis, screeningevaluation, bayesianclinical, enhancednonparametric, grafify
+* **All Phases 3 & 4 Complete:** Specialized clinical methods and advanced analytics enhancement fully implemented
+* **100% Compilation Success:** All modules compile without errors using jmvtools::prepare()
+* **Documentation Complete:** All modules properly documented with devtools::document()
+* **Clinical Research Ready:** All implementations focused on tabular data analysis for clinical and pathology research
 
 # ClinicoPath 0.0.31.03
 
@@ -11708,331 +11821,331 @@ This implementation addresses the critical need for flexible parametric survival
 
 ##### **Clinical Prediction Models & ML Interpretability - Complete Implementation (clinicalprediction)**
 
-* **Advanced ML Algorithms:**Random Forest, Gradient Boosting (XGBoost), Logistic Regression, SVM, Neural Networks, and ensemble methods for clinical prediction modeling
-* **Multiple Problem Types:**Binary classification, multi-class classification, regression, and time-to-event prediction with appropriate performance metrics
-* **Comprehensive Feature Engineering:**Automated feature selection using LASSO, recursive feature elimination, mutual information, Boruta algorithm, and stability selection
-* **ML Interpretability:**Full SHAP (SHapley Additive exPlanations) and LIME integration for model explainability with feature importance, partial dependence plots, and individual prediction explanations
-* **Clinical Integration:**Risk stratification, nomogram development, decision curve analysis, and optimal threshold optimization for clinical decision-making
-* **Validation & Robustness:**10-fold cross-validation, bootstrap confidence intervals, stability analysis, and bias/fairness assessment across demographic groups
-* **Performance Metrics:**AUC-ROC, sensitivity, specificity, PPV, NPV, F1-score, calibration analysis, and clinical decision metrics
-* **Hyperparameter Optimization:**Grid search, random search, and Bayesian optimization with automated model tuning
-* **Regulatory Documentation:**Comprehensive validation reports, external validation readiness, and regulatory compliance documentation
-* **Target Applications:**Disease diagnosis, prognosis prediction, treatment response prediction, risk stratification, and clinical decision support systems
+* **Advanced ML Algorithms:** Random Forest, Gradient Boosting (XGBoost), Logistic Regression, SVM, Neural Networks, and ensemble methods for clinical prediction modeling
+* **Multiple Problem Types:** Binary classification, multi-class classification, regression, and time-to-event prediction with appropriate performance metrics
+* **Comprehensive Feature Engineering:** Automated feature selection using LASSO, recursive feature elimination, mutual information, Boruta algorithm, and stability selection
+* **ML Interpretability:** Full SHAP (SHapley Additive exPlanations) and LIME integration for model explainability with feature importance, partial dependence plots, and individual prediction explanations
+* **Clinical Integration:** Risk stratification, nomogram development, decision curve analysis, and optimal threshold optimization for clinical decision-making
+* **Validation & Robustness:** 10-fold cross-validation, bootstrap confidence intervals, stability analysis, and bias/fairness assessment across demographic groups
+* **Performance Metrics:** AUC-ROC, sensitivity, specificity, PPV, NPV, F1-score, calibration analysis, and clinical decision metrics
+* **Hyperparameter Optimization:** Grid search, random search, and Bayesian optimization with automated model tuning
+* **Regulatory Documentation:** Comprehensive validation reports, external validation readiness, and regulatory compliance documentation
+* **Target Applications:** Disease diagnosis, prognosis prediction, treatment response prediction, risk stratification, and clinical decision support systems
 
 ##### **Biomarker Discovery Platform with ML Interpretability - Complete Implementation (biomarkerdiscovery)**
 
-* **Multi-Omics Support:**Genomics, proteomics, metabolomics, and clinical biomarker discovery with appropriate normalization methods
-* **Advanced Discovery Methods:**Elastic Net regularization, Random Forest, Gradient Boosting, SVM-RFE, univariate screening, and ensemble approaches
-* **Comprehensive Preprocessing:**Data normalization (Z-score, Min-Max, Robust, Quantile), batch effect correction (ComBat, limma), and quality control filtering
-* **Feature Selection Pipeline:**Univariate statistical tests, correlation filtering, mutual information, recursive elimination, stability selection, and Boruta algorithm
-* **ML Interpretability:**SHAP analysis, LIME explanations, feature interaction analysis, and partial dependence plots for biomarker understanding
-* **Biomarker Validation:**Selection stability analysis, cross-validation performance, bootstrap confidence intervals, and robustness testing
-* **Clinical Translation:**Optimal cutpoint determination, risk stratification, nomogram development, and decision curve analysis for clinical utility
-* **Pathway Integration:**Optional pathway enrichment analysis and biomarker network analysis for biological interpretation
-* **Performance Assessment:**Comprehensive validation metrics including AUC-ROC, sensitivity, specificity, calibration analysis, and generalizability assessment
-* **Quality Control:**Advanced outlier detection, missing data analysis, batch effect assessment, and data quality reporting
-* **Regulatory Compliance:**External validation readiness, bias assessment, stability documentation, and regulatory submission support
-* **Target Applications:**Disease biomarker identification, therapeutic target discovery, prognostic signature development, and precision medicine applications
+* **Multi-Omics Support:** Genomics, proteomics, metabolomics, and clinical biomarker discovery with appropriate normalization methods
+* **Advanced Discovery Methods:** Elastic Net regularization, Random Forest, Gradient Boosting, SVM-RFE, univariate screening, and ensemble approaches
+* **Comprehensive Preprocessing:** Data normalization (Z-score, Min-Max, Robust, Quantile), batch effect correction (ComBat, limma), and quality control filtering
+* **Feature Selection Pipeline:** Univariate statistical tests, correlation filtering, mutual information, recursive elimination, stability selection, and Boruta algorithm
+* **ML Interpretability:** SHAP analysis, LIME explanations, feature interaction analysis, and partial dependence plots for biomarker understanding
+* **Biomarker Validation:** Selection stability analysis, cross-validation performance, bootstrap confidence intervals, and robustness testing
+* **Clinical Translation:** Optimal cutpoint determination, risk stratification, nomogram development, and decision curve analysis for clinical utility
+* **Pathway Integration:** Optional pathway enrichment analysis and biomarker network analysis for biological interpretation
+* **Performance Assessment:** Comprehensive validation metrics including AUC-ROC, sensitivity, specificity, calibration analysis, and generalizability assessment
+* **Quality Control:** Advanced outlier detection, missing data analysis, batch effect assessment, and data quality reporting
+* **Regulatory Compliance:** External validation readiness, bias assessment, stability documentation, and regulatory submission support
+* **Target Applications:** Disease biomarker identification, therapeutic target discovery, prognostic signature development, and precision medicine applications
 
 ##### **Patient-Reported Outcomes & Psychometric Analysis - Complete Implementation (patientreported)**
 
-* **Comprehensive PRO Analysis:**Complete psychometric validation framework including reliability (Cronbach's alpha, item-total correlations), validity (construct, concurrent), and factor analysis
-* **Standardized Instruments:**Full support for SF-36, EORTC QLQ-C30, FACT-G, PROMIS, EQ-5D, Karnofsky, ECOG Performance Status, and custom questionnaires
-* **Advanced Scoring Methods:**Sum scores, mean scores, standardized scores (Z-scores), percent scaling (0-100), Likert scale analysis, and Item Response Theory (IRT) scoring
-* **Missing Data Handling:**Complete cases, mean imputation, person-specific mean, scale-specific mean, multiple imputation (MICE), and pro-rata scoring with configurable thresholds
-* **Psychometric Validation:**Dimensionality testing, measurement invariance across groups and time, ceiling/floor effects analysis, and response pattern analysis
-* **Clinical Interpretation:**Minimal Important Difference (MID) analysis, clinical significance thresholds, normative comparisons, and evidence-based cutoffs
-* **Longitudinal Analysis:**Simple change scores, Reliable Change Index (RCI), effect size analysis, mixed-effects modeling, and trajectory analysis
-* **Group Comparisons:**T-tests, ANOVA, Wilcoxon tests, Kruskal-Wallis with effect sizes and multiple comparisons correction (Bonferroni, Holm, FDR)
-* **Advanced Features:**Responder analysis, anchor-based and distribution-based interpretation, acquiescence response analysis, and data quality assessment
-* **Regulatory Compliance:**FDA/EMA PRO guidance compliance, comprehensive documentation, and validation reporting for regulatory submissions
-* **Target Applications:**Clinical trials, patient-centered care, treatment effectiveness studies, and quality improvement initiatives
+* **Comprehensive PRO Analysis:** Complete psychometric validation framework including reliability (Cronbach's alpha, item-total correlations), validity (construct, concurrent), and factor analysis
+* **Standardized Instruments:** Full support for SF-36, EORTC QLQ-C30, FACT-G, PROMIS, EQ-5D, Karnofsky, ECOG Performance Status, and custom questionnaires
+* **Advanced Scoring Methods:** Sum scores, mean scores, standardized scores (Z-scores), percent scaling (0-100), Likert scale analysis, and Item Response Theory (IRT) scoring
+* **Missing Data Handling:** Complete cases, mean imputation, person-specific mean, scale-specific mean, multiple imputation (MICE), and pro-rata scoring with configurable thresholds
+* **Psychometric Validation:** Dimensionality testing, measurement invariance across groups and time, ceiling/floor effects analysis, and response pattern analysis
+* **Clinical Interpretation:** Minimal Important Difference (MID) analysis, clinical significance thresholds, normative comparisons, and evidence-based cutoffs
+* **Longitudinal Analysis:** Simple change scores, Reliable Change Index (RCI), effect size analysis, mixed-effects modeling, and trajectory analysis
+* **Group Comparisons:** T-tests, ANOVA, Wilcoxon tests, Kruskal-Wallis with effect sizes and multiple comparisons correction (Bonferroni, Holm, FDR)
+* **Advanced Features:** Responder analysis, anchor-based and distribution-based interpretation, acquiescence response analysis, and data quality assessment
+* **Regulatory Compliance:** FDA/EMA PRO guidance compliance, comprehensive documentation, and validation reporting for regulatory submissions
+* **Target Applications:** Clinical trials, patient-centered care, treatment effectiveness studies, and quality improvement initiatives
 
 ##### **Quality of Life Analysis & Patient-Centered Outcomes - Complete Implementation (qualityoflife)**
 
-* **Multi-Domain QoL Assessment:**Physical Function, Role-Physical, Bodily Pain, General Health, Vitality, Social Function, Role-Emotional, Mental Health, Symptoms, and Global QoL domains
-* **Standardized Instruments:**SF-36, SF-12, EORTC QLQ-C30, FACT-G, FACT-Specific, EQ-5D, EQ-5D-5L, WHOQOL-BREF, and custom QoL instruments with validated scoring algorithms
+* **Multi-Domain QoL Assessment:** Physical Function, Role-Physical, Bodily Pain, General Health, Vitality, Social Function, Role-Emotional, Mental Health, Symptoms, and Global QoL domains
+* **Standardized Instruments:** SF-36, SF-12, EORTC QLQ-C30, FACT-G, FACT-Specific, EQ-5D, EQ-5D-5L, WHOQOL-BREF, and custom QoL instruments with validated scoring algorithms
 
 #### **Phase 3: Specialized Clinical Methods - Initial Implementation (August 15, 2025)**
 
 ##### **Causal Inference & Treatment Effects Analysis - Complete Implementation (treatmenteffects)**
 
-* **Comprehensive Causal Methods:**Propensity score methods, Inverse Probability of Treatment Weighting (IPTW), matching techniques (nearest neighbor, optimal, genetic, CEM), and doubly robust estimation
-* **Advanced Propensity Score Estimation:**Logistic regression, probit regression, GAM, Random Forest, Gradient Boosting, and Super Learner ensemble methods with automated model selection
-* **Matching Algorithms:**1:1, 1:2, 1:3, 1:5, and variable ratio matching with caliper restrictions, replacement options, and distance optimization (Mahalanobis, propensity score)
-* **IPTW Implementation:**Stabilized weights, weight trimming, multiple normalization strategies, and extreme weight handling for robust causal inference
-* **Estimand Flexibility:**Average Treatment Effect (ATE), Average Treatment Effect on Treated (ATT), Average Treatment Effect on Controls (ATC), and subgroup-specific effects
-* **Covariate Balance Assessment:**Standardized mean differences, variance ratios, Kolmogorov-Smirnov statistics, Earth Mover's Distance, and comprehensive balance diagnostics
-* **Sensitivity Analysis:**Rosenbaum bounds, bias functions, E-values, placebo tests, and multiple sensitivity analysis methods for unmeasured confounding assessment
-* **Model Diagnostics:**C-statistic evaluation, propensity score overlap assessment, model calibration, and comprehensive diagnostic reporting
-* **Advanced Features:**Treatment effect heterogeneity analysis, causal trees and forests for individualized effects, instrumental variable analysis with 2SLS estimation
-* **Bootstrap Inference:**Confidence intervals, bias-corrected estimation, and robust standard error calculation with comprehensive uncertainty quantification
-* **Regulatory Compliance:**Comprehensive reporting, assumption checking, validation documentation, and regulatory-grade causal inference analysis
-* **Target Applications:**Comparative effectiveness research, real-world evidence studies, observational causal analysis, and treatment effect estimation
+* **Comprehensive Causal Methods:** Propensity score methods, Inverse Probability of Treatment Weighting (IPTW), matching techniques (nearest neighbor, optimal, genetic, CEM), and doubly robust estimation
+* **Advanced Propensity Score Estimation:** Logistic regression, probit regression, GAM, Random Forest, Gradient Boosting, and Super Learner ensemble methods with automated model selection
+* **Matching Algorithms:** 1:1, 1:2, 1:3, 1:5, and variable ratio matching with caliper restrictions, replacement options, and distance optimization (Mahalanobis, propensity score)
+* **IPTW Implementation:** Stabilized weights, weight trimming, multiple normalization strategies, and extreme weight handling for robust causal inference
+* **Estimand Flexibility:** Average Treatment Effect (ATE), Average Treatment Effect on Treated (ATT), Average Treatment Effect on Controls (ATC), and subgroup-specific effects
+* **Covariate Balance Assessment:** Standardized mean differences, variance ratios, Kolmogorov-Smirnov statistics, Earth Mover's Distance, and comprehensive balance diagnostics
+* **Sensitivity Analysis:** Rosenbaum bounds, bias functions, E-values, placebo tests, and multiple sensitivity analysis methods for unmeasured confounding assessment
+* **Model Diagnostics:** C-statistic evaluation, propensity score overlap assessment, model calibration, and comprehensive diagnostic reporting
+* **Advanced Features:** Treatment effect heterogeneity analysis, causal trees and forests for individualized effects, instrumental variable analysis with 2SLS estimation
+* **Bootstrap Inference:** Confidence intervals, bias-corrected estimation, and robust standard error calculation with comprehensive uncertainty quantification
+* **Regulatory Compliance:** Comprehensive reporting, assumption checking, validation documentation, and regulatory-grade causal inference analysis
+* **Target Applications:** Comparative effectiveness research, real-world evidence studies, observational causal analysis, and treatment effect estimation
 
 ##### **Outbreak Analysis & Epidemiological Investigation - Complete Implementation (outbreakanalysis)**
 
-* **Tabular Data Focus:**Designed specifically for tabular outbreak investigation data (rows=individuals, columns=case_status, exposures, demographics, dates)
-* **Comprehensive Case-Control Analysis:**Attack rates, risk factor analysis, odds ratios, relative risks with confidence intervals from tabular data
-* **Epidemic Curve Analysis:**Temporal pattern analysis, outbreak duration, peak identification from onset date columns in tabular datasets
-* **Statistical Testing:**Chi-square tests, Fisher's exact tests, Mantel-Haenszel tests with multiple testing correction for tabular epidemiological data
-* **Stratified Analysis:**Age, sex, and location-based stratification with demographic analysis from tabular variables
-* **Spatial Analysis:**Geographic clustering detection and spatial risk assessment using location variables from tabular data
-* **Data Quality Assessment:**Completeness evaluation, missing data analysis, and quality grading for tabular outbreak datasets
-* **Advanced Epidemiological Measures:**Dose-response analysis, incubation period calculation, sensitivity analysis for case definitions
-* **Visualization:**Epidemic curves, attack rate comparisons, risk factor forest plots generated from tabular data analysis
-* **Target Applications:**Outbreak investigation, infectious disease surveillance, foodborne illness analysis, public health emergency response
+* **Tabular Data Focus:** Designed specifically for tabular outbreak investigation data (rows=individuals, columns=case_status, exposures, demographics, dates)
+* **Comprehensive Case-Control Analysis:** Attack rates, risk factor analysis, odds ratios, relative risks with confidence intervals from tabular data
+* **Epidemic Curve Analysis:** Temporal pattern analysis, outbreak duration, peak identification from onset date columns in tabular datasets
+* **Statistical Testing:** Chi-square tests, Fisher's exact tests, Mantel-Haenszel tests with multiple testing correction for tabular epidemiological data
+* **Stratified Analysis:** Age, sex, and location-based stratification with demographic analysis from tabular variables
+* **Spatial Analysis:** Geographic clustering detection and spatial risk assessment using location variables from tabular data
+* **Data Quality Assessment:** Completeness evaluation, missing data analysis, and quality grading for tabular outbreak datasets
+* **Advanced Epidemiological Measures:** Dose-response analysis, incubation period calculation, sensitivity analysis for case definitions
+* **Visualization:** Epidemic curves, attack rate comparisons, risk factor forest plots generated from tabular data analysis
+* **Target Applications:** Outbreak investigation, infectious disease surveillance, foodborne illness analysis, public health emergency response
 
 ##### **Screening Program Evaluation & Performance Analysis - Complete Implementation (screeningevaluation)**
 
-* **Tabular Screening Data:**Designed for tabular screening program data (rows=participants, columns=screen_result, disease_status, demographics)
-* **Diagnostic Accuracy Analysis:**Sensitivity, specificity, PPV, NPV, likelihood ratios calculated from 2x2 tabular screening data
-* **Program Performance Metrics:**Coverage rates, participation rates, detection rates, recall rates from tabular program data
-* **Age-Stratified Analysis:**Performance evaluation across age groups using age variables in tabular datasets
-* **Quality Indicators:**International standard screening quality indicators with targets and performance assessment
-* **Cost-Effectiveness Analysis:**Cost per case detected, cost per person screened using cost variables in tabular data
-* **Geographic Analysis:**Site-specific performance evaluation using location variables from tabular screening data
-* **Time Trend Analysis:**Performance trends over time using screening date variables from tabular datasets
-* **Advanced Screening Metrics:**Interval cancer analysis, overdiagnosis assessment, adherence analysis for screening programs
-* **Visualization:**Performance metrics plots, coverage analysis, detection rate comparisons from tabular data
-* **Target Applications:**Cancer screening programs, population health screening, diagnostic test evaluation, public health program assessment
+* **Tabular Screening Data:** Designed for tabular screening program data (rows=participants, columns=screen_result, disease_status, demographics)
+* **Diagnostic Accuracy Analysis:** Sensitivity, specificity, PPV, NPV, likelihood ratios calculated from 2x2 tabular screening data
+* **Program Performance Metrics:** Coverage rates, participation rates, detection rates, recall rates from tabular program data
+* **Age-Stratified Analysis:** Performance evaluation across age groups using age variables in tabular datasets
+* **Quality Indicators:** International standard screening quality indicators with targets and performance assessment
+* **Cost-Effectiveness Analysis:** Cost per case detected, cost per person screened using cost variables in tabular data
+* **Geographic Analysis:** Site-specific performance evaluation using location variables from tabular screening data
+* **Time Trend Analysis:** Performance trends over time using screening date variables from tabular datasets
+* **Advanced Screening Metrics:** Interval cancer analysis, overdiagnosis assessment, adherence analysis for screening programs
+* **Visualization:** Performance metrics plots, coverage analysis, detection rate comparisons from tabular data
+* **Target Applications:** Cancer screening programs, population health screening, diagnostic test evaluation, public health program assessment
 
 ### **August 14, 2025 - Previous Implementations**
 
 #### **Clinical Trial Design & Power Analysis - Complete Implementation (clinicaltrialdesign)**
 
-* **Comprehensive Trial Types:**Complete support for superiority, non-inferiority, equivalence, and pilot/feasibility study designs with appropriate statistical approaches
-* **Multiple Statistical Tests:**Two-sample t-tests, one-sample t-tests, paired t-tests, one-way ANOVA, two-proportion tests, one-proportion tests, chi-square tests, correlation analysis, and McNemar tests
-* **Flexible Calculations:**Calculate statistical power, required sample size, or detectable effect size with comprehensive parameter validation and clinical interpretation
-* **Advanced Sample Size Adjustments:**Automatic adjustments for dropout rates, interim analyses, multiple comparisons, and unequal allocation ratios
-* **Effect Size Analysis:**Comprehensive effect size calculations including Cohen's d, proportion differences, Number Needed to Treat (NNT), and relative risk with magnitude interpretation
-* **Regulatory Compliance:**FDA, EMA, and ICH guidelines consideration with specific recommendations for different trial types and regulatory contexts
-* **Sensitivity Analysis:**Robust parameter sensitivity assessment across effect sizes, power levels, alpha values, and dropout rates
-* **Statistical Assumptions:**Comprehensive assumption checking frameworks with violation impact assessment and alternative test recommendations
-* **Clinical Interpretation:**Detailed clinical significance assessment, minimal clinically important difference (MCID) guidance, and actionable recommendations
-* **Protocol Templates:**Automated study protocol statistical analysis plan templates with regulatory-compliant language and methodology descriptions
-* **Target Applications:**Randomized controlled trials (RCTs), biomarker validation studies, diagnostic accuracy trials, treatment comparison studies, pilot studies
-* **Clinical Impact:**Essential for evidence-based study planning, protocol development, regulatory submissions, and ensuring adequately powered clinical research
+* **Comprehensive Trial Types:** Complete support for superiority, non-inferiority, equivalence, and pilot/feasibility study designs with appropriate statistical approaches
+* **Multiple Statistical Tests:** Two-sample t-tests, one-sample t-tests, paired t-tests, one-way ANOVA, two-proportion tests, one-proportion tests, chi-square tests, correlation analysis, and McNemar tests
+* **Flexible Calculations:** Calculate statistical power, required sample size, or detectable effect size with comprehensive parameter validation and clinical interpretation
+* **Advanced Sample Size Adjustments:** Automatic adjustments for dropout rates, interim analyses, multiple comparisons, and unequal allocation ratios
+* **Effect Size Analysis:** Comprehensive effect size calculations including Cohen's d, proportion differences, Number Needed to Treat (NNT), and relative risk with magnitude interpretation
+* **Regulatory Compliance:** FDA, EMA, and ICH guidelines consideration with specific recommendations for different trial types and regulatory contexts
+* **Sensitivity Analysis:** Robust parameter sensitivity assessment across effect sizes, power levels, alpha values, and dropout rates
+* **Statistical Assumptions:** Comprehensive assumption checking frameworks with violation impact assessment and alternative test recommendations
+* **Clinical Interpretation:** Detailed clinical significance assessment, minimal clinically important difference (MCID) guidance, and actionable recommendations
+* **Protocol Templates:** Automated study protocol statistical analysis plan templates with regulatory-compliant language and methodology descriptions
+* **Target Applications:** Randomized controlled trials (RCTs), biomarker validation studies, diagnostic accuracy trials, treatment comparison studies, pilot studies
+* **Clinical Impact:** Essential for evidence-based study planning, protocol development, regulatory submissions, and ensuring adequately powered clinical research
 
 #### **Treatment Effect Meta-Analysis - Complete Implementation (treatmentmeta)**
 
-* **Multiple Outcome Types:**Comprehensive support for continuous outcomes (mean differences, standardized mean differences), binary outcomes (risk ratios, odds ratios, risk differences), correlation coefficients, and time-to-event outcomes (hazard ratios)
-* **Advanced Statistical Models:**Fixed-effect and multiple random-effects models including REML, DerSimonian-Laird, Paule-Mandel, and Hartung-Knapp-Sidik-Jonkman methods for robust pooling
-* **Comprehensive Effect Measures:**Support for MD, SMD, ROM, RR, OR, RD, HR, and Fisher's Z transformations with appropriate confidence intervals and clinical interpretation
-* **Heterogeneity Assessment:**Complete heterogeneity evaluation using Q-tests, I^2 statistics, tau^2 estimates, and prediction intervals for future studies
-* **Subgroup & Meta-Regression:**Advanced moderator analysis with categorical subgroup testing and continuous meta-regression for exploring sources of heterogeneity
-* **Publication Bias Detection:**Multi-method bias assessment including funnel plots, Egger's test, trim-and-fill analysis, and optional p-curve analysis for evidential value
-* **Sensitivity Analysis:**Leave-one-out sensitivity analysis and comprehensive influence diagnostics (DFFITS, Cook's D, hat values) for identifying outlying studies
-* **Quality Integration:**Optional study quality weighting and quality-adjusted meta-analysis with standardized quality assessment integration
-* **Advanced Visualizations:**Publication-ready forest plots, funnel plots, Baujat plots for heterogeneity contribution, radial (Galbraith) plots, and cumulative meta-analysis over time
-* **Clinical Interpretation:**Automated clinical significance assessment, methods section templates, and evidence synthesis recommendations for publication
-* **Target Applications:**Treatment efficacy studies, drug effectiveness comparisons, intervention meta-analyses, biomarker validation, diagnostic test accuracy synthesis
-* **Clinical Impact:**Essential for evidence-based medicine, systematic reviews, clinical guideline development, and translating research findings into clinical practice recommendations
+* **Multiple Outcome Types:** Comprehensive support for continuous outcomes (mean differences, standardized mean differences), binary outcomes (risk ratios, odds ratios, risk differences), correlation coefficients, and time-to-event outcomes (hazard ratios)
+* **Advanced Statistical Models:** Fixed-effect and multiple random-effects models including REML, DerSimonian-Laird, Paule-Mandel, and Hartung-Knapp-Sidik-Jonkman methods for robust pooling
+* **Comprehensive Effect Measures:** Support for MD, SMD, ROM, RR, OR, RD, HR, and Fisher's Z transformations with appropriate confidence intervals and clinical interpretation
+* **Heterogeneity Assessment:** Complete heterogeneity evaluation using Q-tests, I^2 statistics, tau^2 estimates, and prediction intervals for future studies
+* **Subgroup & Meta-Regression:** Advanced moderator analysis with categorical subgroup testing and continuous meta-regression for exploring sources of heterogeneity
+* **Publication Bias Detection:** Multi-method bias assessment including funnel plots, Egger's test, trim-and-fill analysis, and optional p-curve analysis for evidential value
+* **Sensitivity Analysis:** Leave-one-out sensitivity analysis and comprehensive influence diagnostics (DFFITS, Cook's D, hat values) for identifying outlying studies
+* **Quality Integration:** Optional study quality weighting and quality-adjusted meta-analysis with standardized quality assessment integration
+* **Advanced Visualizations:** Publication-ready forest plots, funnel plots, Baujat plots for heterogeneity contribution, radial (Galbraith) plots, and cumulative meta-analysis over time
+* **Clinical Interpretation:** Automated clinical significance assessment, methods section templates, and evidence synthesis recommendations for publication
+* **Target Applications:** Treatment efficacy studies, drug effectiveness comparisons, intervention meta-analyses, biomarker validation, diagnostic test accuracy synthesis
+* **Clinical Impact:** Essential for evidence-based medicine, systematic reviews, clinical guideline development, and translating research findings into clinical practice recommendations
 
 #### **Advanced Missing Data Analysis Suite - Complete Implementation (missingdataexplorer & advancedimputation)**
 
-* **Missing Data Pattern Explorer (missingdataexplorer):**Comprehensive missingness pattern analysis with MCAR/MAR/MNAR mechanism testing, temporal analysis, and group comparisons for clinical trial data
-* **Advanced Multiple Imputation (advancedimputation):**State-of-the-art MICE implementation with nested imputation for multilevel data, MNAR sensitivity analysis, and regulatory-compliant documentation
-* **Comprehensive Mechanism Testing:**Little's MCAR test, informative missingness assessment, and monotonic pattern detection with statistical validation
-* **MNAR Sensitivity Analysis:**Delta adjustment methods, pattern mixture models, selection models, and reference-based imputation for Missing Not At Random scenarios
-* **Multilevel Imputation:**Specialized two-level imputation for nested clinical data (patients within sites, repeated measures within patients) with proper variance component preservation
-* **Advanced Methods:**Random forest imputation, quadratic regression, bootstrap methods, and specialized categorical imputation with polytomous and proportional odds models
-* **Quality Assessment:**Cross-validation, amputation testing, distributional matching, correlation preservation, and comprehensive imputation quality scoring
-* **Sensitivity Testing:**Multiple method comparison, parameter variation analysis, assumption testing, and robustness assessment across different missingness scenarios
-* **Regulatory Compliance:**Comprehensive documentation templates, methods reporting, and validation frameworks meeting pharmaceutical research standards
-* **Clinical Visualization:**Pattern plots, UpSet diagrams, convergence diagnostics, observed vs imputed comparisons, and temporal missingness analysis
-* **Target Applications:**Clinical trials with missing outcomes, longitudinal studies with dropout, multi-center studies with differential missingness, regulatory submissions
-* **Clinical Impact:**Essential for valid statistical inference in clinical research, regulatory compliance, and transparent handling of missing data in evidence-based medicine
+* **Missing Data Pattern Explorer (missingdataexplorer):** Comprehensive missingness pattern analysis with MCAR/MAR/MNAR mechanism testing, temporal analysis, and group comparisons for clinical trial data
+* **Advanced Multiple Imputation (advancedimputation):** State-of-the-art MICE implementation with nested imputation for multilevel data, MNAR sensitivity analysis, and regulatory-compliant documentation
+* **Comprehensive Mechanism Testing:** Little's MCAR test, informative missingness assessment, and monotonic pattern detection with statistical validation
+* **MNAR Sensitivity Analysis:** Delta adjustment methods, pattern mixture models, selection models, and reference-based imputation for Missing Not At Random scenarios
+* **Multilevel Imputation:** Specialized two-level imputation for nested clinical data (patients within sites, repeated measures within patients) with proper variance component preservation
+* **Advanced Methods:** Random forest imputation, quadratic regression, bootstrap methods, and specialized categorical imputation with polytomous and proportional odds models
+* **Quality Assessment:** Cross-validation, amputation testing, distributional matching, correlation preservation, and comprehensive imputation quality scoring
+* **Sensitivity Testing:** Multiple method comparison, parameter variation analysis, assumption testing, and robustness assessment across different missingness scenarios
+* **Regulatory Compliance:** Comprehensive documentation templates, methods reporting, and validation frameworks meeting pharmaceutical research standards
+* **Clinical Visualization:** Pattern plots, UpSet diagrams, convergence diagnostics, observed vs imputed comparisons, and temporal missingness analysis
+* **Target Applications:** Clinical trials with missing outcomes, longitudinal studies with dropout, multi-center studies with differential missingness, regulatory submissions
+* **Clinical Impact:** Essential for valid statistical inference in clinical research, regulatory compliance, and transparent handling of missing data in evidence-based medicine
 
 #### **Data Quality & Batch Effect Control - Complete Implementation (batcheffect)**
 
-* **PCA Batch Detection:**Principal Component Analysis visualization for batch effect detection with statistical significance testing (ANOVA F-tests)
-* **ComBat Correction:**Complete integration with sva/limma Bioconductor packages for parametric and non-parametric batch effect removal while preserving biological variation
-* **Feature Quality Assessment:**Comprehensive quality scoring system including missing data analysis, variance assessment, outlier detection (IQR, Z-score, robust MAD-based methods)
-* **Distribution Analysis:**Automated skewness assessment and normality evaluation for feature quality control
-* **Redundancy Analysis:**Correlation-based feature redundancy detection with configurable thresholds and multicollinearity assessment
-* **Quality Control Metrics:**Advanced QC framework addressing "garbage in, garbage out" problems in high-dimensional data analysis
-* **Clinical Interpretation:**Comprehensive guidelines for batch effect correction in multi-institutional studies with actionable recommendations
-* **Visualization Suite:**PCA plots for batch visualization, feature quality heatmaps, correlation matrices with publication-ready outputs
-* **Robust Error Handling:**Graceful degradation with informative user guidance for missing packages and data quality issues
-* **Target Applications:**Multi-institutional digital pathology studies, biomarker harmonization, longitudinal study quality control, high-dimensional omics data preprocessing
-* **Clinical Impact:**Essential foundational QC for all downstream statistical analyses, preventing confounding by technical variation in clinical research
+* **PCA Batch Detection:** Principal Component Analysis visualization for batch effect detection with statistical significance testing (ANOVA F-tests)
+* **ComBat Correction:** Complete integration with sva/limma Bioconductor packages for parametric and non-parametric batch effect removal while preserving biological variation
+* **Feature Quality Assessment:** Comprehensive quality scoring system including missing data analysis, variance assessment, outlier detection (IQR, Z-score, robust MAD-based methods)
+* **Distribution Analysis:** Automated skewness assessment and normality evaluation for feature quality control
+* **Redundancy Analysis:** Correlation-based feature redundancy detection with configurable thresholds and multicollinearity assessment
+* **Quality Control Metrics:** Advanced QC framework addressing "garbage in, garbage out" problems in high-dimensional data analysis
+* **Clinical Interpretation:** Comprehensive guidelines for batch effect correction in multi-institutional studies with actionable recommendations
+* **Visualization Suite:** PCA plots for batch visualization, feature quality heatmaps, correlation matrices with publication-ready outputs
+* **Robust Error Handling:** Graceful degradation with informative user guidance for missing packages and data quality issues
+* **Target Applications:** Multi-institutional digital pathology studies, biomarker harmonization, longitudinal study quality control, high-dimensional omics data preprocessing
+* **Clinical Impact:** Essential foundational QC for all downstream statistical analyses, preventing confounding by technical variation in clinical research
 
 #### **Spatial Point Pattern Analysis - Complete Implementation (spatialanalysis)**
 
-* **Ripley's K-function Analysis:**Multi-scale clustering detection with envelope testing for Complete Spatial Randomness (CSR) assessment
-* **Morisita Index:**Quadrat-based dispersion measurement with standardized normalization for spatial clustering quantification
-* **Getis-Ord Gi* Statistics:**Local spatial autocorrelation for statistically significant hotspot and coldspot identification with z-score testing
-* **Clark-Evans Test:**Nearest neighbor distance analysis with randomness assessment and significance testing
-* **Multi-type Spatial Interaction:**Cross-cell-type spatial relationship analysis for multiplex immunofluorescence data
-* **Comprehensive Visualization:**Spatial distribution plots with cell type coloring and coordinate mapping
-* **Clinical Applications:**Tumor microenvironment analysis, digital pathology spatial immune contexture scoring, invasion front analysis
-* **Target Applications:**Whole-slide imaging (WSI) analysis, multiplex immunofluorescence, spatial biomarker discovery, tissue architecture assessment
+* **Ripley's K-function Analysis:** Multi-scale clustering detection with envelope testing for Complete Spatial Randomness (CSR) assessment
+* **Morisita Index:** Quadrat-based dispersion measurement with standardized normalization for spatial clustering quantification
+* **Getis-Ord Gi* Statistics:** Local spatial autocorrelation for statistically significant hotspot and coldspot identification with z-score testing
+* **Clark-Evans Test:** Nearest neighbor distance analysis with randomness assessment and significance testing
+* **Multi-type Spatial Interaction:** Cross-cell-type spatial relationship analysis for multiplex immunofluorescence data
+* **Comprehensive Visualization:** Spatial distribution plots with cell type coloring and coordinate mapping
+* **Clinical Applications:** Tumor microenvironment analysis, digital pathology spatial immune contexture scoring, invasion front analysis
+* **Target Applications:** Whole-slide imaging (WSI) analysis, multiplex immunofluorescence, spatial biomarker discovery, tissue architecture assessment
 
 #### **Hierarchical (Mixed-Effects) Models for Pathology - Complete Implementation (hierarchicalpathology)**
 
-* **3-Level Hierarchical Structure:**Patient > Slide > ROI modeling for nested pathology data with proper clustering effect handling
-* **Comprehensive GLMM Support:**Linear (lmer), logistic (glmer), Poisson (glmer), and negative binomial (glmmTMB) models for all outcome types
-* **Advanced Package Integration:**Full integration with lme4, nlme, performance, and glmmTMB for robust mixed-effects modeling
-* **Variance Component Analysis:**Automatic calculation and partitioning of variance across hierarchical levels with percentage contributions
-* **ICC Calculations:**Intraclass correlation coefficients with confidence intervals and clinical interpretation for reliability assessment
-* **Model Diagnostics:**Comprehensive diagnostic plots, residual analysis, and convergence checking
-* **Model Comparison:**Likelihood ratio tests for nested models with AIC/BIC comparison and statistical significance testing
-* **Clinical Applications:**Whole-slide imaging (WSI) analysis, multi-center studies, digital pathology quality control, biomarker validation
-* **Target Applications:**Multi-institutional data analysis, observer reliability studies, treatment effect analysis with nested data structures
+* **3-Level Hierarchical Structure:** Patient > Slide > ROI modeling for nested pathology data with proper clustering effect handling
+* **Comprehensive GLMM Support:** Linear (lmer), logistic (glmer), Poisson (glmer), and negative binomial (glmmTMB) models for all outcome types
+* **Advanced Package Integration:** Full integration with lme4, nlme, performance, and glmmTMB for robust mixed-effects modeling
+* **Variance Component Analysis:** Automatic calculation and partitioning of variance across hierarchical levels with percentage contributions
+* **ICC Calculations:** Intraclass correlation coefficients with confidence intervals and clinical interpretation for reliability assessment
+* **Model Diagnostics:** Comprehensive diagnostic plots, residual analysis, and convergence checking
+* **Model Comparison:** Likelihood ratio tests for nested models with AIC/BIC comparison and statistical significance testing
+* **Clinical Applications:** Whole-slide imaging (WSI) analysis, multi-center studies, digital pathology quality control, biomarker validation
+* **Target Applications:** Multi-institutional data analysis, observer reliability studies, treatment effect analysis with nested data structures
 
 ### **Enhanced Competing Risks Analysis - Advanced Implementation**
 
 #### **Advanced Competing Risks Features (competingsurvival)**
 
-* **Risk Stratification for Competing Events:**Quantile-based approach for categorizing patients into Low/Moderate/High risk groups based on competing event probabilities
-* **Time-Dependent Cumulative Incidence Analysis:**Interval-based event rate tracking with comprehensive time-point analysis throughout follow-up period
-* **Enhanced Summary Reporting:**Advanced clinical interpretation with detailed feature descriptions and predictive capabilities
-* **Comprehensive Integration:**Seamless integration with existing Fine-Gray subdistribution hazard models and Gray's test functionality
-* **Clinical Impact:**Provides advanced risk stratification tools essential for competing risks clinical decision-making and patient prognosis assessment
-* **Target Applications:**Oncology outcomes with competing mortality risks, geriatric populations with multiple morbidities, cardiovascular disease progression studies
+* **Risk Stratification for Competing Events:** Quantile-based approach for categorizing patients into Low/Moderate/High risk groups based on competing event probabilities
+* **Time-Dependent Cumulative Incidence Analysis:** Interval-based event rate tracking with comprehensive time-point analysis throughout follow-up period
+* **Enhanced Summary Reporting:** Advanced clinical interpretation with detailed feature descriptions and predictive capabilities
+* **Comprehensive Integration:** Seamless integration with existing Fine-Gray subdistribution hazard models and Gray's test functionality
+* **Clinical Impact:** Provides advanced risk stratification tools essential for competing risks clinical decision-making and patient prognosis assessment
+* **Target Applications:** Oncology outcomes with competing mortality risks, geriatric populations with multiple morbidities, cardiovascular disease progression studies
 
 ### **Machine Learning Enhanced Survival Analysis - Comprehensive Implementation**
 
 #### **Advanced ML Features for Multivariable Survival (multisurvival)**
 
-* **Random Forest Survival Analysis:**Complete randomForestSRC integration with variable importance calculation, out-of-bag error estimation, and prediction intervals
-* **Regularized Cox Regression:**Cross-validated LASSO/Ridge/Elastic Net using glmnet with automatic lambda selection and feature selection capabilities
-* **Ensemble Methods:**Multi-model approach combining Random Forest + Cox + glmnet with customizable weighting strategies (equal, optimized, user-defined)
-* **Cross-Validated Feature Selection:**Bootstrap-based stability selection with frequency analysis and automated variable importance ranking
-* **Advanced Performance Metrics:**Concordance index calculation, deviance explained, out-of-bag error rates, and cross-validation performance summaries
-* **Prediction Intervals:**Model-specific risk predictions with confidence intervals and automatic risk group stratification
-* **Non-Breaking Integration:**ML features only activate when explicitly selected (ml_method != 'cox'), preserving all existing Cox regression functionality
-* **Graceful Degradation:**Automatic fallback to standard analysis if ML packages unavailable, with informative user guidance
-* **Clinical Impact:**Advanced predictive modeling for survival analysis enabling robust feature selection, ensemble predictions, and uncertainty quantification for precision medicine applications
-* **Target Applications:**High-dimensional biomarker studies, multi-omics survival analysis, personalized risk prediction, clinical decision support systems
+* **Random Forest Survival Analysis:** Complete randomForestSRC integration with variable importance calculation, out-of-bag error estimation, and prediction intervals
+* **Regularized Cox Regression:** Cross-validated LASSO/Ridge/Elastic Net using glmnet with automatic lambda selection and feature selection capabilities
+* **Ensemble Methods:** Multi-model approach combining Random Forest + Cox + glmnet with customizable weighting strategies (equal, optimized, user-defined)
+* **Cross-Validated Feature Selection:** Bootstrap-based stability selection with frequency analysis and automated variable importance ranking
+* **Advanced Performance Metrics:** Concordance index calculation, deviance explained, out-of-bag error rates, and cross-validation performance summaries
+* **Prediction Intervals:** Model-specific risk predictions with confidence intervals and automatic risk group stratification
+* **Non-Breaking Integration:** ML features only activate when explicitly selected (ml_method != 'cox'), preserving all existing Cox regression functionality
+* **Graceful Degradation:** Automatic fallback to standard analysis if ML packages unavailable, with informative user guidance
+* **Clinical Impact:** Advanced predictive modeling for survival analysis enabling robust feature selection, ensemble predictions, and uncertainty quantification for precision medicine applications
+* **Target Applications:** High-dimensional biomarker studies, multi-omics survival analysis, personalized risk prediction, clinical decision support systems
 
 ### **Parametric Survival Models - Advanced Implementation**
 
 #### **Comprehensive Parametric Modeling for Univariate Survival (survival)**
 
-* **Flexible Distribution Support:**Complete implementation of exponential, Weibull, log-normal, log-logistic, gamma, generalized gamma, Gompertz, and Royston-Parmar spline distributions
-* **Spline-based Hazard Functions:**Advanced flexible parametric models using Royston-Parmar splines with customizable knots (1-10) and scale options (hazard, odds, normal)
-* **Automated Model Comparison:**AIC/BIC-based distribution selection with comprehensive model diagnostics and goodness-of-fit statistics
-* **Covariate Integration:**Full support for explanatory variables in parametric models, extending beyond Cox regression assumptions
-* **Survival Extrapolation:**Advanced extrapolation capabilities beyond observed follow-up time for health economic modeling and long-term prognosis
-* **Hazard Function Visualization:**Direct hazard rate plotting showing how instantaneous risk changes over time for different parametric distributions
-* **Model Diagnostics Suite:**Comprehensive diagnostics including parameter estimates, confidence intervals, model fit statistics, and clinical interpretation
-* **Kaplan-Meier Comparison:**Visual validation of parametric models against non-parametric Kaplan-Meier estimates
-* **Clinical Impact:**Enables explicit survival function specification, extrapolation for economic evaluations, and alternative to Cox regression when parametric assumptions are met
-* **Target Applications:**Health technology assessments, pharmaco-economic modeling, clinical trial design, regulatory submissions, long-term survival projections
-* **Integration:**Seamless integration with existing survival analysis workflow, backward compatibility with all current features
+* **Flexible Distribution Support:** Complete implementation of exponential, Weibull, log-normal, log-logistic, gamma, generalized gamma, Gompertz, and Royston-Parmar spline distributions
+* **Spline-based Hazard Functions:** Advanced flexible parametric models using Royston-Parmar splines with customizable knots (1-10) and scale options (hazard, odds, normal)
+* **Automated Model Comparison:** AIC/BIC-based distribution selection with comprehensive model diagnostics and goodness-of-fit statistics
+* **Covariate Integration:** Full support for explanatory variables in parametric models, extending beyond Cox regression assumptions
+* **Survival Extrapolation:** Advanced extrapolation capabilities beyond observed follow-up time for health economic modeling and long-term prognosis
+* **Hazard Function Visualization:** Direct hazard rate plotting showing how instantaneous risk changes over time for different parametric distributions
+* **Model Diagnostics Suite:** Comprehensive diagnostics including parameter estimates, confidence intervals, model fit statistics, and clinical interpretation
+* **Kaplan-Meier Comparison:** Visual validation of parametric models against non-parametric Kaplan-Meier estimates
+* **Clinical Impact:** Enables explicit survival function specification, extrapolation for economic evaluations, and alternative to Cox regression when parametric assumptions are met
+* **Target Applications:** Health technology assessments, pharmaco-economic modeling, clinical trial design, regulatory submissions, long-term survival projections
+* **Integration:** Seamless integration with existing survival analysis workflow, backward compatibility with all current features
 
 ### Digital Pathology Statistical Methods - Comprehensive Module Suite
 
-* **Advanced Statistical Analysis Framework:**Implementation of 7 critical statistical modules addressing major gaps in digital pathology research methodology
+* **Advanced Statistical Analysis Framework:** Implementation of 7 critical statistical modules addressing major gaps in digital pathology research methodology
 
 #### **Enhanced Non-Parametric Tests Module (enhancednonparametric)**
 
-* **Enhanced Mann-Whitney U Test:**Complete implementation with rank-biserial correlation effect size, exact test options, confidence intervals for location shift, comprehensive assumption checking framework
-* **Advanced Kruskal-Wallis Test:**Comprehensive multi-group comparisons with eta-squared and epsilon-squared effect sizes, proper Dunn's post hoc testing with multiple comparison corrections
-* **Comprehensive Effect Size Suite:**Rank-biserial correlation, Cliff's Delta, eta-squared, epsilon-squared with bootstrap confidence intervals and clinical interpretation guidelines
-* **Advanced Post Hoc Analysis:**Dunn's test, Conover-Iman test, pairwise Wilcoxon with Bonferroni, Holm, FDR corrections and effect size calculations for each comparison
-* **Assumption Checking Framework:**Automated normality testing (Shapiro-Wilk/Anderson-Darling), Levene's test for homogeneity of variance, independence assessment with recommendations
-* **Multiple Variable Support:**Batch analysis of multiple dependent variables with comprehensive descriptive statistics, outlier detection, and missing data assessment
-* **Publication-Quality Visualizations:**Box plots with individual points, violin plots, distribution comparisons, Q-Q plots for normality, effect size visualization with confidence intervals
-* **Clinical Interpretation System:**Comprehensive explanations for non-statistical users, method selection guidance, effect size magnitude interpretation, and statistical recommendations
-* **Target Applications:**Digital pathology biomarker analysis, immunohistochemistry scoring, cell count comparisons, morphometric measurements, tumor grade analysis
-* **Critical Impact:**Addresses methodological gaps where 30% of pathology studies use non-parametric tests but fail to report proper effect sizes, post hoc testing, and assumption validation
+* **Enhanced Mann-Whitney U Test:** Complete implementation with rank-biserial correlation effect size, exact test options, confidence intervals for location shift, comprehensive assumption checking framework
+* **Advanced Kruskal-Wallis Test:** Comprehensive multi-group comparisons with eta-squared and epsilon-squared effect sizes, proper Dunn's post hoc testing with multiple comparison corrections
+* **Comprehensive Effect Size Suite:** Rank-biserial correlation, Cliff's Delta, eta-squared, epsilon-squared with bootstrap confidence intervals and clinical interpretation guidelines
+* **Advanced Post Hoc Analysis:** Dunn's test, Conover-Iman test, pairwise Wilcoxon with Bonferroni, Holm, FDR corrections and effect size calculations for each comparison
+* **Assumption Checking Framework:** Automated normality testing (Shapiro-Wilk/Anderson-Darling), Levene's test for homogeneity of variance, independence assessment with recommendations
+* **Multiple Variable Support:** Batch analysis of multiple dependent variables with comprehensive descriptive statistics, outlier detection, and missing data assessment
+* **Publication-Quality Visualizations:** Box plots with individual points, violin plots, distribution comparisons, Q-Q plots for normality, effect size visualization with confidence intervals
+* **Clinical Interpretation System:** Comprehensive explanations for non-statistical users, method selection guidance, effect size magnitude interpretation, and statistical recommendations
+* **Target Applications:** Digital pathology biomarker analysis, immunohistochemistry scoring, cell count comparisons, morphometric measurements, tumor grade analysis
+* **Critical Impact:** Addresses methodological gaps where 30% of pathology studies use non-parametric tests but fail to report proper effect sizes, post hoc testing, and assumption validation
 
 #### **Advanced ANOVA Suite Module (advancedanova)**
 
-* **Comprehensive Post Hoc Testing:**Complete implementation of Tukey HSD, Games-Howell (unequal variances), Dunnett's test (control comparisons), Bonferroni and Holm corrections with full statistical framework
-* **Enhanced ANOVA Diagnostics:**Comprehensive assumption checking (normality via Shapiro-Wilk, homogeneity via Levene's/Bartlett's tests), effect sizes (eta-squared, omega-squared, Cohen's f), Welch correction and robust ANOVA options
-* **Multiple Post Hoc Methods:**Tukey HSD for equal variances, Games-Howell for unequal variances, Dunnett's for control comparisons, Bonferroni for conservative corrections
-* **Advanced Effect Size Calculations:**Eta-squared, omega-squared, and Cohen's f with clinical interpretation guidelines and confidence intervals
-* **Publication-Quality Output:**Comprehensive ANOVA tables with effect sizes, detailed post hoc comparisons with adjusted p-values, assumption checking results with recommendations
-* **Assumption Validation:**Normality testing (Shapiro-Wilk), variance homogeneity (Levene's, Bartlett's tests), independence verification with statistical recommendations
-* **Clinical Interpretation Framework:**Comprehensive explanations for pathology researchers, effect size magnitude interpretation, post hoc test selection guidance
-* **Visualization Suite:**Violin plots with boxplots and means, diagnostic plots for residuals, group comparison plots with confidence intervals
-* **Critical Impact:**Addresses the critical issue where 68% of pathology studies fail to perform proper multiple comparisons after ANOVA
-* **Target Packages:**Built-in R + `car`, `multcomp`, `PMCMRplus` for comprehensive ANOVA analysis with robust post hoc testing
-* **Applications:**Multi-group biomarker comparisons, tumor grade/stage analysis, treatment group efficacy studies, multi-center pathology validation
+* **Comprehensive Post Hoc Testing:** Complete implementation of Tukey HSD, Games-Howell (unequal variances), Dunnett's test (control comparisons), Bonferroni and Holm corrections with full statistical framework
+* **Enhanced ANOVA Diagnostics:** Comprehensive assumption checking (normality via Shapiro-Wilk, homogeneity via Levene's/Bartlett's tests), effect sizes (eta-squared, omega-squared, Cohen's f), Welch correction and robust ANOVA options
+* **Multiple Post Hoc Methods:** Tukey HSD for equal variances, Games-Howell for unequal variances, Dunnett's for control comparisons, Bonferroni for conservative corrections
+* **Advanced Effect Size Calculations:** Eta-squared, omega-squared, and Cohen's f with clinical interpretation guidelines and confidence intervals
+* **Publication-Quality Output:** Comprehensive ANOVA tables with effect sizes, detailed post hoc comparisons with adjusted p-values, assumption checking results with recommendations
+* **Assumption Validation:** Normality testing (Shapiro-Wilk), variance homogeneity (Levene's, Bartlett's tests), independence verification with statistical recommendations
+* **Clinical Interpretation Framework:** Comprehensive explanations for pathology researchers, effect size magnitude interpretation, post hoc test selection guidance
+* **Visualization Suite:** Violin plots with boxplots and means, diagnostic plots for residuals, group comparison plots with confidence intervals
+* **Critical Impact:** Addresses the critical issue where 68% of pathology studies fail to perform proper multiple comparisons after ANOVA
+* **Target Packages:** Built-in R + `car`, `multcomp`, `PMCMRplus` for comprehensive ANOVA analysis with robust post hoc testing
+* **Applications:** Multi-group biomarker comparisons, tumor grade/stage analysis, treatment group efficacy studies, multi-center pathology validation
 
 #### **Hierarchical Mixed-Effects Models Module (hierarchicalpathology)**
 
-* **Three-Level Hierarchical Models:**Complete support for Patient > Slide > ROI > Cell nested structure with random effects for multiple clustering levels
-* **Variance Component Analysis:**Intraclass Correlation Coefficient (ICC) calculation and variance partition across hierarchical levels
-* **Generalized Linear Mixed Models:**Linear, logistic, Poisson, and negative binomial mixed models for diverse outcome types
-* **Clinical Impact:**Essential for proper WSI (Whole Slide Image) analysis and multi-ROI studies, prevents Type I errors from ignoring clustering
+* **Three-Level Hierarchical Models:** Complete support for Patient > Slide > ROI > Cell nested structure with random effects for multiple clustering levels
+* **Variance Component Analysis:** Intraclass Correlation Coefficient (ICC) calculation and variance partition across hierarchical levels
+* **Generalized Linear Mixed Models:** Linear, logistic, Poisson, and negative binomial mixed models for diverse outcome types
+* **Clinical Impact:** Essential for proper WSI (Whole Slide Image) analysis and multi-ROI studies, prevents Type I errors from ignoring clustering
 * **Target Packages:**`lme4`, `nlme`, `performance`, `glmmTMB`
-* **Applications:**Digital pathology multi-ROI analysis, nested data structure modeling
+* **Applications:** Digital pathology multi-ROI analysis, nested data structure modeling
 
 #### **Optimal Cutpoint Determination Module (optimalcutpoint)**
 
-* **Maximally Selected Rank Statistics:**Optimal cutpoint determination for continuous biomarkers with log-rank test optimization for survival analysis
-* **Concordance Index Optimization:**C-index based cutpoint selection with bootstrap validation and cross-validation for robust estimation
-* **Comprehensive Cutpoint Methods:**Youden Index maximization, closest to top-left corner optimization, ROC01 cost minimization, time-dependent ROC analysis
-* **Clinical Impact:**Essential for converting continuous biomarkers to clinical thresholds, prevents arbitrary cutpoint selection
+* **Maximally Selected Rank Statistics:** Optimal cutpoint determination for continuous biomarkers with log-rank test optimization for survival analysis
+* **Concordance Index Optimization:** C-index based cutpoint selection with bootstrap validation and cross-validation for robust estimation
+* **Comprehensive Cutpoint Methods:** Youden Index maximization, closest to top-left corner optimization, ROC01 cost minimization, time-dependent ROC analysis
+* **Clinical Impact:** Essential for converting continuous biomarkers to clinical thresholds, prevents arbitrary cutpoint selection
 * **Target Packages:**`survminer`, `maxstat`, `OptimalCutpoints`, `cutpointr`
-* **Applications:**Biomarker threshold development, diagnostic test optimization, pathology scoring systems
+* **Applications:** Biomarker threshold development, diagnostic test optimization, pathology scoring systems
 
 #### **Enhanced Chi-Square and Fisher's Tests Module (categoricaladvanced)**
 
-* **Enhanced Chi-Square Testing:**Effect sizes (Cramer's V, phi coefficient, Cohen's w), standardized residual analysis, post hoc pairwise comparisons
-* **Advanced Fisher's Exact Tests:**Stratified Fisher's exact tests, exact confidence intervals for odds ratios, mid-p exact tests, Freeman-Halton extension for rxc tables
-* **Categorical Association Measures:**Lambda, Tau, and Gamma measures with comprehensive effect size reporting and confidence intervals
-* **Clinical Impact:**Addresses the 25% error rate in categorical analysis within pathology studies
-* **Target Packages:**Built-in R + `DescTools`, `vcd`, `chisq.posthoc.test`
-* **Applications:**Biomarker positivity analysis, tumor grade associations, diagnostic test performance
+* **Enhanced Chi-Square Testing:** Effect sizes (Cramer's V, phi coefficient, Cohen's w), standardized residual analysis, post hoc pairwise comparisons
+* **Advanced Fisher's Exact Tests:** Stratified Fisher's exact tests, exact confidence intervals for odds ratios, mid-p exact tests, Freeman-Halton extension for rxc tables
+* **Categorical Association Measures:** Lambda, Tau, and Gamma measures with comprehensive effect size reporting and confidence intervals
+* **Clinical Impact:** Addresses the 25% error rate in categorical analysis within pathology studies
+* **Target Packages:** Built-in R + `DescTools`, `vcd`, `chisq.posthoc.test`
+* **Applications:** Biomarker positivity analysis, tumor grade associations, diagnostic test performance
 
 #### **Diagnostic Test Meta-Analysis Module (diagnosticmeta)**
 
-* **Bivariate Random-Effects Models:**Complete implementation for sensitivity/specificity meta-analysis with HSROC curves
-* **Meta-Regression Analysis:**Heterogeneity source identification with comprehensive publication bias assessment using Deeks' funnel plot test
-* **Advanced Visualization:**Forest plots for sensitivity/specificity, summary ROC plots with confidence regions
-* **Clinical Impact:**AI algorithm performance meta-analysis, biomarker diagnostic accuracy synthesis for clinical implementation
+* **Bivariate Random-Effects Models:** Complete implementation for sensitivity/specificity meta-analysis with HSROC curves
+* **Meta-Regression Analysis:** Heterogeneity source identification with comprehensive publication bias assessment using Deeks' funnel plot test
+* **Advanced Visualization:** Forest plots for sensitivity/specificity, summary ROC plots with confidence regions
+* **Clinical Impact:** AI algorithm performance meta-analysis, biomarker diagnostic accuracy synthesis for clinical implementation
 * **Target Packages:**`mada`, `meta`, `metafor`
-* **Applications:**Systematic reviews, evidence synthesis, diagnostic accuracy studies
+* **Applications:** Systematic reviews, evidence synthesis, diagnostic accuracy studies
 
 #### **Classification Performance Metrics Module (mlpathology)**
 
-* **ML Performance Evaluation:**Comprehensive confusion matrix metrics, ROC analysis with DeLong's test for curve comparison
-* **Advanced Comparison Methods:**McNemar's test for paired classifier comparison with bootstrap confidence intervals
-* **Segmentation Metrics:**Dice coefficient, Jaccard index, Hausdorff distance for computer vision validation
-* **Clinical Impact:**Statistical validation framework for AI deployment in clinical practice
+* **ML Performance Evaluation:** Comprehensive confusion matrix metrics, ROC analysis with DeLong's test for curve comparison
+* **Advanced Comparison Methods:** McNemar's test for paired classifier comparison with bootstrap confidence intervals
+* **Segmentation Metrics:** Dice coefficient, Jaccard index, Hausdorff distance for computer vision validation
+* **Clinical Impact:** Statistical validation framework for AI deployment in clinical practice
 * **Target Packages:**`pROC`, `caret`, `MLmetrics`
-* **Applications:**AI model validation, algorithm comparison studies, segmentation quality assessment
+* **Applications:** AI model validation, algorithm comparison studies, segmentation quality assessment
 
 #### **Pathology Composition Analysis Module (pathologycomposition)**
 
-* **Semi-Quantitative Component Analysis:**Five-category system (absent, <=10%, >10%-<=50%, >50%-<90%, >=90%) based on gastric cancer research methodology
-* **Multi-Component Risk Analysis:**Individual component risk assessment with logistic regression and multi-component probability calculations
-* **Optimal Composition Patterns:**Risk threshold analysis for clinical decision-making with comprehensive visualization
-* **Clinical Impact:**Implementation of evidence-based histologic composition analysis with systematic risk stratification
-* **Target Packages:**Built-in R + `nnet`, `VGAM`
-* **Applications:**Histologic component evaluation, semi-quantitative pathology assessment, composition-based risk prediction
+* **Semi-Quantitative Component Analysis:** Five-category system (absent, <=10%, >10%-<=50%, >50%-<90%, >=90%) based on gastric cancer research methodology
+* **Multi-Component Risk Analysis:** Individual component risk assessment with logistic regression and multi-component probability calculations
+* **Optimal Composition Patterns:** Risk threshold analysis for clinical decision-making with comprehensive visualization
+* **Clinical Impact:** Implementation of evidence-based histologic composition analysis with systematic risk stratification
+* **Target Packages:** Built-in R + `nnet`, `VGAM`
+* **Applications:** Histologic component evaluation, semi-quantitative pathology assessment, composition-based risk prediction
 
 #### **Spatial Statistics for Digital Pathology Module (spatialanalysis)**
 
-* **Comprehensive Spatial Analysis:**Complete implementation of spatial statistics for tabular cell coordinates from digital pathology platforms
-* **Ripley's K-Function Analysis:**Edge-corrected spatial clustering detection with L-function transformation for interpretability
-* **Nearest Neighbor Statistics:**Clark-Evans test for spatial distribution patterns with distance-based analysis
-* **Hotspot Detection:**Kernel density estimation for identifying areas of high cellular activity and biomarker expression
-* **Multi-Type Spatial Interaction:**Cross-type spatial analysis for cell-cell interaction assessment and neighborhood composition
-* **Clinical Impact:**Essential for tumor microenvironment analysis, immune cell clustering, and multiplex immunofluorescence studies
+* **Comprehensive Spatial Analysis:** Complete implementation of spatial statistics for tabular cell coordinates from digital pathology platforms
+* **Ripley's K-Function Analysis:** Edge-corrected spatial clustering detection with L-function transformation for interpretability
+* **Nearest Neighbor Statistics:** Clark-Evans test for spatial distribution patterns with distance-based analysis
+* **Hotspot Detection:** Kernel density estimation for identifying areas of high cellular activity and biomarker expression
+* **Multi-Type Spatial Interaction:** Cross-type spatial analysis for cell-cell interaction assessment and neighborhood composition
+* **Clinical Impact:** Essential for tumor microenvironment analysis, immune cell clustering, and multiplex immunofluorescence studies
 * **Target Packages:**`spatstat`, `spatstat.geom`, `spatstat.explore`
-* **Applications:**Immune infiltration patterns, spatial biomarker analysis, tissue architecture quantification
+* **Applications:** Immune infiltration patterns, spatial biomarker analysis, tissue architecture quantification
 
 ### **Technical Excellence & Integration**
 
-* **Comprehensive Clinical Impact:**Combined modules address critical statistical gaps affecting >50% of digital pathology research studies
-* **Publication-Ready Outputs:**All modules include clinical interpretation guidelines and standardized reporting frameworks
-* **Regulatory Compliance:**Methods follow established clinical research standards and pathology guidelines
-* **Seamless Integration:**Full compatibility with existing ClinicoPath modules and jamovi ecosystem
-* **Educational Framework:**Extensive documentation with methodology explanations and best practice guidance
+* **Comprehensive Clinical Impact:** Combined modules address critical statistical gaps affecting >50% of digital pathology research studies
+* **Publication-Ready Outputs:** All modules include clinical interpretation guidelines and standardized reporting frameworks
+* **Regulatory Compliance:** Methods follow established clinical research standards and pathology guidelines
+* **Seamless Integration:** Full compatibility with existing ClinicoPath modules and jamovi ecosystem
+* **Educational Framework:** Extensive documentation with methodology explanations and best practice guidance
 
 ### **Research Quality Enhancement**
 
-* **Statistical Rigor:**Elimination of common methodological errors through proper test selection and assumption checking
-* **Reproducible Research:**Standardized workflows reducing inter-observer variability and methodological inconsistencies
-* **Evidence-Based Medicine:**Comprehensive meta-analysis capabilities for systematic evidence synthesis
-* **Precision Medicine:**Advanced biomarker validation and machine learning deployment frameworks
+* **Statistical Rigor:** Elimination of common methodological errors through proper test selection and assumption checking
+* **Reproducible Research:** Standardized workflows reducing inter-observer variability and methodological inconsistencies
+* **Evidence-Based Medicine:** Comprehensive meta-analysis capabilities for systematic evidence synthesis
+* **Precision Medicine:** Advanced biomarker validation and machine learning deployment frameworks
 
 ### **Advanced Survival Analysis Suite - Comprehensive Implementation**
 
@@ -12040,192 +12153,192 @@ This implementation addresses the critical need for flexible parametric survival
 
 ##### **Cure Models for Long-term Survivors (curemodels)**
 
-* **Mixture Cure Models:**Complete implementation for identifying cured fraction in survival data
-* **Non-mixture Cure Models:**Alternative approach for cure fraction estimation
-* **Long-term Survivor Identification:**Statistical methods for detecting patients who will never experience the event
-* **Clinical Impact:**Essential for cancer research where a subset of patients are effectively cured
+* **Mixture Cure Models:** Complete implementation for identifying cured fraction in survival data
+* **Non-mixture Cure Models:** Alternative approach for cure fraction estimation
+* **Long-term Survivor Identification:** Statistical methods for detecting patients who will never experience the event
+* **Clinical Impact:** Essential for cancer research where a subset of patients are effectively cured
 * **Target Packages:**`smcure`, `flexsurvcure`
-* **Applications:**Oncology outcomes, treatment effectiveness evaluation
+* **Applications:** Oncology outcomes, treatment effectiveness evaluation
 
 ##### **Multistate Survival Models (multistatesurvival)**
 
-* **Disease Progression Modeling:**Track patient transitions through multiple health states
-* **Transition Probability Matrices:**Calculate probabilities of moving between disease states
-* **State Occupation Probabilities:**Estimate time spent in each health state
-* **Competing Transitions:**Handle multiple possible transitions from each state
-* **Clinical Impact:**Essential for modeling complex disease pathways and treatment trajectories
+* **Disease Progression Modeling:** Track patient transitions through multiple health states
+* **Transition Probability Matrices:** Calculate probabilities of moving between disease states
+* **State Occupation Probabilities:** Estimate time spent in each health state
+* **Competing Transitions:** Handle multiple possible transitions from each state
+* **Clinical Impact:** Essential for modeling complex disease pathways and treatment trajectories
 * **Target Packages:**`mstate`, `msm`
-* **Applications:**Disease progression, treatment pathways, multi-stage clinical trials
+* **Applications:** Disease progression, treatment pathways, multi-stage clinical trials
 
 ##### **Relative Survival Analysis (relativesurvival)**
 
-* **Population-Based Comparison:**Compare observed survival to expected survival in matched population
-* **Excess Mortality Modeling:**Quantify disease-specific mortality beyond background mortality
-* **Age-Standardized Rates:**Adjust for age distribution differences in populations
-* **Cancer Registry Analysis:**Specialized methods for population-based cancer research
-* **Clinical Impact:**Gold standard for population-based cancer survival studies
+* **Population-Based Comparison:** Compare observed survival to expected survival in matched population
+* **Excess Mortality Modeling:** Quantify disease-specific mortality beyond background mortality
+* **Age-Standardized Rates:** Adjust for age distribution differences in populations
+* **Cancer Registry Analysis:** Specialized methods for population-based cancer research
+* **Clinical Impact:** Gold standard for population-based cancer survival studies
 * **Target Packages:**`relsurv`, `popEpi`
-* **Applications:**Cancer registry studies, population health assessment
+* **Applications:** Cancer registry studies, population health assessment
 
 ##### **Survival Model Validation (survivalvalidation)**
 
-* **Prediction Error Curves:**Assess model prediction accuracy over time
-* **Time-Dependent ROC/AUC:**Evaluate discrimination ability at different time points
-* **Calibration Plots:**Visual assessment of predicted vs observed survival
-* **Cross-Validation Framework:**Robust validation using resampling methods
-* **Decision Curve Analysis:**Clinical utility assessment across risk thresholds
-* **Clinical Impact:**Essential quality assurance for survival prediction models
+* **Prediction Error Curves:** Assess model prediction accuracy over time
+* **Time-Dependent ROC/AUC:** Evaluate discrimination ability at different time points
+* **Calibration Plots:** Visual assessment of predicted vs observed survival
+* **Cross-Validation Framework:** Robust validation using resampling methods
+* **Decision Curve Analysis:** Clinical utility assessment across risk thresholds
+* **Clinical Impact:** Essential quality assurance for survival prediction models
 * **Target Packages:**`pec`, `timeROC`, `survAUC`, `riskRegression`
-* **Applications:**Model validation, clinical decision support
+* **Applications:** Model validation, clinical decision support
 
 ##### **Joint Longitudinal-Survival Models (jointmodeling)**
 
-* **Biomarker Trajectory Integration:**Link repeated biomarker measurements to survival outcomes
-* **Dynamic Risk Prediction:**Update survival predictions as new biomarker values become available
-* **Individual-Specific Trajectories:**Personalized prediction based on patient's biomarker evolution
-* **Time-Varying Effects:**Account for changing biomarker-survival relationships over time
-* **Clinical Impact:**Enables personalized medicine through dynamic risk assessment
+* **Biomarker Trajectory Integration:** Link repeated biomarker measurements to survival outcomes
+* **Dynamic Risk Prediction:** Update survival predictions as new biomarker values become available
+* **Individual-Specific Trajectories:** Personalized prediction based on patient's biomarker evolution
+* **Time-Varying Effects:** Account for changing biomarker-survival relationships over time
+* **Clinical Impact:** Enables personalized medicine through dynamic risk assessment
 * **Target Packages:**`JMbayes2`, `joineR`, `rstanarm`
-* **Applications:**Personalized medicine, treatment monitoring, biomarker validation
+* **Applications:** Personalized medicine, treatment monitoring, biomarker validation
 
 ##### **Time-Dependent Covariates & ROC (timedependent)**
 
-* **Time-Varying Coefficient Models:**Handle covariates that change effects over time
-* **Landmark Analysis:**Conditional survival analysis from fixed time points
-* **Dynamic AUC Curves:**Track model discrimination ability over follow-up period
-* **Optimal Cutpoint Over Time:**Find best thresholds at different time points
-* **Clinical Impact:**Accurate modeling when predictor effects change during follow-up
+* **Time-Varying Coefficient Models:** Handle covariates that change effects over time
+* **Landmark Analysis:** Conditional survival analysis from fixed time points
+* **Dynamic AUC Curves:** Track model discrimination ability over follow-up period
+* **Optimal Cutpoint Over Time:** Find best thresholds at different time points
+* **Clinical Impact:** Accurate modeling when predictor effects change during follow-up
 * **Target Packages:**`timeROC`, `pROC`, `survival`
-* **Applications:**Dynamic predictions, screening optimization, treatment timing
+* **Applications:** Dynamic predictions, screening optimization, treatment timing
 
 #### **Phase 5: Stage Migration Enhancements (COMPLETED)**
 
 ##### **Advanced Cox Modeling (v0.0.3.81)**
 
-* **Frailty Models for Clustering:**Mixed-effects Cox models with center-specific random effects
-* **Multi-Institutional Data Support:**Account for heterogeneity between research centers
-* **Clinical Impact:**Proper analysis of multi-center trials and registry data
+* **Frailty Models for Clustering:** Mixed-effects Cox models with center-specific random effects
+* **Multi-Institutional Data Support:** Account for heterogeneity between research centers
+* **Clinical Impact:** Proper analysis of multi-center trials and registry data
 
 ##### **Enhanced Discrimination Metrics (v0.0.3.80)**
 
-* **Concordance Probability Estimates:**Alternative concordance measures for heavily censored data
-* **Win Ratio Analysis:**Composite endpoint analysis for staging comparison
-* **Clinical Impact:**Robust performance metrics for staging system validation
+* **Concordance Probability Estimates:** Alternative concordance measures for heavily censored data
+* **Win Ratio Analysis:** Composite endpoint analysis for staging comparison
+* **Clinical Impact:** Robust performance metrics for staging system validation
 
 # ClinicoPath 0.0.31.02
 
 ### Major New Features
 
 * **OncoPathologyT Menu Group - Phase 1 Digital Pathology Validation Modules:**
-  * **New Specialized Menu Group:**Introduced OncoPathologyT for advanced oncological pathology statistical analysis
-  * **Target Audience:**Cancer researchers, digital pathology specialists, clinical pathologists, and biomarker development teams
+  * **New Specialized Menu Group:** Introduced OncoPathologyT for advanced oncological pathology statistical analysis
+  * **Target Audience:** Cancer researchers, digital pathology specialists, clinical pathologists, and biomarker development teams
 
 #### **IHC Scoring Standardization Module (ihcscoring)**
 
-* **H-score Calculation:**Automated histoscore computation with quality control metrics and clinical cutpoint optimization
-* **Allred Score Implementation:**Combined intensity and proportion scoring with statistical comparison capabilities
-* **Digital Validation Framework:**Algorithm vs. pathologist comparison with batch effect detection and multi-platform harmonization
-* **Agreement Analysis:**Inter-observer reproducibility assessment with ICC, correlation analysis, and Bland-Altman plots
-* **Clinical Applications:**Hormone receptor scoring (ER/PR), HER2 standardization, PD-L1 TPS assessment, Ki-67 quantification
-* **Quality Assurance:**Comprehensive scoring consistency metrics and outlier detection frameworks
-* **Publication-Ready Outputs:**Automated interpretation with clinical context and standardized reporting templates
+* **H-score Calculation:** Automated histoscore computation with quality control metrics and clinical cutpoint optimization
+* **Allred Score Implementation:** Combined intensity and proportion scoring with statistical comparison capabilities
+* **Digital Validation Framework:** Algorithm vs. pathologist comparison with batch effect detection and multi-platform harmonization
+* **Agreement Analysis:** Inter-observer reproducibility assessment with ICC, correlation analysis, and Bland-Altman plots
+* **Clinical Applications:** Hormone receptor scoring (ER/PR), HER2 standardization, PD-L1 TPS assessment, Ki-67 quantification
+* **Quality Assurance:** Comprehensive scoring consistency metrics and outlier detection frameworks
+* **Publication-Ready Outputs:** Automated interpretation with clinical context and standardized reporting templates
 
 #### **Multiplex Immunofluorescence Analysis Module (multiplexanalysis)**
 
-* **Co-expression Analysis:**Multi-marker correlation matrices with significance testing and pattern recognition
-* **Cell Population Phenotyping:**Unsupervised clustering with automated phenotype suggestion based on marker expression
-* **Spatial Proximity Analysis:**Cell-cell interaction statistics from coordinate data with neighborhood composition analysis
-* **Principal Component Analysis:**Dimensionality reduction with loading vectors and variance explanation for multi-parametric data
-* **Immune Contexture Scoring:**Immunoscore calculation, T-cell infiltration quantification, and immune phenotype classification
-* **Diversity Metrics:**Shannon and Simpson diversity indices for cellular composition heterogeneity assessment
-* **Clinical Applications:**Tumor microenvironment profiling, CAR-T therapy biomarkers, checkpoint inhibitor response prediction
-* **Advanced Visualization:**Correlation heatmaps, PCA biplots, clustering plots, and spatial distribution analysis
+* **Co-expression Analysis:** Multi-marker correlation matrices with significance testing and pattern recognition
+* **Cell Population Phenotyping:** Unsupervised clustering with automated phenotype suggestion based on marker expression
+* **Spatial Proximity Analysis:** Cell-cell interaction statistics from coordinate data with neighborhood composition analysis
+* **Principal Component Analysis:** Dimensionality reduction with loading vectors and variance explanation for multi-parametric data
+* **Immune Contexture Scoring:** Immunoscore calculation, T-cell infiltration quantification, and immune phenotype classification
+* **Diversity Metrics:** Shannon and Simpson diversity indices for cellular composition heterogeneity assessment
+* **Clinical Applications:** Tumor microenvironment profiling, CAR-T therapy biomarkers, checkpoint inhibitor response prediction
+* **Advanced Visualization:** Correlation heatmaps, PCA biplots, clustering plots, and spatial distribution analysis
 
 ### **Technical Excellence Features**
 
-* **Comprehensive Input Validation:**Advanced error handling with descriptive feedback and data quality assessment
-* **Flexible Analysis Options:**Multiple scoring methods, customizable cutpoints, and biomarker-specific optimizations
-* **Bootstrap Confidence Intervals:**Robust statistical inference with user-configurable replication parameters
-* **Multi-Platform Compatibility:**Support for various digital pathology and imaging platforms through tabular data import
-* **Educational Framework:**Extensive clinical interpretation with methodology explanations and best practice guidelines
-* **Integration Architecture:**Seamless workflow with existing ClinicoPath modules and jamovi ecosystem
+* **Comprehensive Input Validation:** Advanced error handling with descriptive feedback and data quality assessment
+* **Flexible Analysis Options:** Multiple scoring methods, customizable cutpoints, and biomarker-specific optimizations
+* **Bootstrap Confidence Intervals:** Robust statistical inference with user-configurable replication parameters
+* **Multi-Platform Compatibility:** Support for various digital pathology and imaging platforms through tabular data import
+* **Educational Framework:** Extensive clinical interpretation with methodology explanations and best practice guidelines
+* **Integration Architecture:** Seamless workflow with existing ClinicoPath modules and jamovi ecosystem
 
 ### **Data Requirements and Compatibility**
 
-* **IHC Scoring:**Intensity scores (0-3 scale) and proportion percentages (0-100%) with optional sample identifiers
-* **Multiplex Analysis:**Multi-marker expression matrices with optional spatial coordinates (X,Y) and cell type classifications
-* **Spatial Analysis:**Coordinate-based data from image analysis platforms for proximity and clustering assessment
-* **Format Support:**CSV, Excel, and direct jamovi data input with comprehensive missing data handling
+* **IHC Scoring:** Intensity scores (0-3 scale) and proportion percentages (0-100%) with optional sample identifiers
+* **Multiplex Analysis:** Multi-marker expression matrices with optional spatial coordinates (X,Y) and cell type classifications
+* **Spatial Analysis:** Coordinate-based data from image analysis platforms for proximity and clustering assessment
+* **Format Support:** CSV, Excel, and direct jamovi data input with comprehensive missing data handling
 
 ### **Clinical Impact and Applications**
 
-* **Standardized Methodologies:**Consistent scoring approaches across research institutions and clinical laboratories
-* **Reproducible Research:**Automated workflows reducing inter-observer variability and methodological inconsistencies
-* **Biomarker Development:**Comprehensive validation frameworks for diagnostic and prognostic marker assessment
-* **Precision Medicine:**Multi-parametric analysis supporting personalized therapy selection and treatment monitoring
-* **Regulatory Compliance:**Analysis frameworks meeting CAP guidelines and international pathology standards
+* **Standardized Methodologies:** Consistent scoring approaches across research institutions and clinical laboratories
+* **Reproducible Research:** Automated workflows reducing inter-observer variability and methodological inconsistencies
+* **Biomarker Development:** Comprehensive validation frameworks for diagnostic and prognostic marker assessment
+* **Precision Medicine:** Multi-parametric analysis supporting personalized therapy selection and treatment monitoring
+* **Regulatory Compliance:** Analysis frameworks meeting CAP guidelines and international pathology standards
 
 ### **Roadmap Integration**
 
-* **Phase 1 Complete:**Digital pathology validation modules (IHC scoring, multiplex analysis)
-* **Phase 2 Next:**Spatial analysis and heterogeneity assessment modules (scheduled for implementation)
-* **Phase 3 Pipeline:**Biomarker signature development and prognostic factor analysis
-* **Phase 4 Future:**Clinical trial analytics including treatment response and adverse event analysis
+* **Phase 1 Complete:** Digital pathology validation modules (IHC scoring, multiplex analysis)
+* **Phase 2 Next:** Spatial analysis and heterogeneity assessment modules (scheduled for implementation)
+* **Phase 3 Pipeline:** Biomarker signature development and prognostic factor analysis
+* **Phase 4 Future:** Clinical trial analytics including treatment response and adverse event analysis
 
 # ClinicoPath 0.0.31.01
 
 ### Enhancements
 
 * **Automatic Plot Selection (statsplot2) Module:**
-  * **Enhanced Error Messages:**Implemented comprehensive contextual error messages with variable names, data counts, and actionable guidance for debugging
-  * **Performance Optimization:**Added analysis result caching to eliminate redundant calculations between `.init()` and `.plot()` methods
-  * **Code Quality:**Extracted magic numbers to constants for better maintainability
-  * **Robust Data Validation:**Added specific validation for dotplot statistics with detailed feedback on data requirements
-  * **Edge Case Handling:**Improved validation for empty factor levels in grouped plots with informative warnings
-  * **Package Dependency Validation:**Added defensive package checking with clear installation instructions for ggalluvial and easyalluvial
-  * **Variable Type Detection:**Enhanced unknown variable type detection with warnings and class information
+  * **Enhanced Error Messages:** Implemented comprehensive contextual error messages with variable names, data counts, and actionable guidance for debugging
+  * **Performance Optimization:** Added analysis result caching to eliminate redundant calculations between `.init()` and `.plot()` methods
+  * **Code Quality:** Extracted magic numbers to constants for better maintainability
+  * **Robust Data Validation:** Added specific validation for dotplot statistics with detailed feedback on data requirements
+  * **Edge Case Handling:** Improved validation for empty factor levels in grouped plots with informative warnings
+  * **Package Dependency Validation:** Added defensive package checking with clear installation instructions for ggalluvial and easyalluvial
+  * **Variable Type Detection:** Enhanced unknown variable type detection with warnings and class information
 
 * **Comprehensive jamovi Development Documentation Suite - Complete Overhaul:**
-  * **Documentation Scope:**Transformed 7 core development guides from basic introductions (~1,400 total lines) to comprehensive professional references (~12,000+ total lines) - an 850% increase in coverage
+  * **Documentation Scope:** Transformed 7 core development guides from basic introductions (~1,400 total lines) to comprehensive professional references (~12,000+ total lines) - an 850% increase in coverage
 
-  * **Analysis Options Guide (.a.yaml):**Expanded from 223 to 1,570 lines
+  * **Analysis Options Guide (.a.yaml):** Expanded from 223 to 1,570 lines
     * Complete option type reference with 25+ option types and validation patterns
     * Advanced conditional logic, dependencies, and dynamic interfaces
     * Clinical research examples including survival analysis, biomarker studies, and clinical trials
     * Error handling patterns and user experience optimization
 
-  * **Results Definition Guide (.r.yaml):**Enhanced from 197 to 1,611 lines
+  * **Results Definition Guide (.r.yaml):** Enhanced from 197 to 1,611 lines
     * Comprehensive coverage of all result types: tables, plots, HTML, arrays, and outputs
     * Advanced table design patterns with clinical formatting standards
     * Dynamic result structures and conditional visibility patterns
     * Integration with statistical packages and custom formatting
 
-  * **User Interface Guide (.u.yaml):**Improved from 172 to 1,395 lines
+  * **User Interface Guide (.u.yaml):** Improved from 172 to 1,395 lines
     * Complete UI component architecture covering all jamovi interface elements
     * Clinical workflow patterns for medical research applications
     * Advanced layout strategies, conditional interfaces, and user experience design
     * Accessibility considerations and responsive design patterns
 
-  * **Table Creation Guide:**Transformed from 152 to 2,525 lines
+  * **Table Creation Guide:** Transformed from 152 to 2,525 lines
     * Complete table development lifecycle from .r.yaml definition to .b.R population
     * Advanced formatting including clinical tables, publication-ready outputs
     * Performance optimization for large datasets and complex tables
     * Error handling and validation frameworks
 
-  * **Plot Creation Guide:**Enhanced from 156 to 1,850+ lines
+  * **Plot Creation Guide:** Enhanced from 156 to 1,850+ lines
     * Comprehensive plot architecture with state management patterns
     * Advanced plot types: survival curves, forest plots, ROC curves, diagnostic plots
     * Clinical visualization applications with medical research examples
     * Theme integration, performance optimization, and troubleshooting
 
-  * **Backend Implementation Guide (.b.R):**Expanded from 197 to 2,200+ lines
+  * **Backend Implementation Guide (.b.R):** Expanded from 197 to 2,200+ lines
     * Complete R6 class architecture and jamovi integration patterns
     * Lifecycle management with .init() and .run() comprehensive coverage
     * Advanced patterns: caching, parallel processing, memory optimization
     * Clinical applications: survival analysis, biomarker studies, trial designs
     * Testing frameworks and debugging utilities
 
-  * **Formula Construction Guide:**Enhanced from 219 to 1,800+ lines
+  * **Formula Construction Guide:** Enhanced from 219 to 1,800+ lines
     * Comprehensive formula patterns for statistical modeling
     * Specialized types: survival analysis, mixed effects, GAM, Bayesian models
     * Dynamic formula building and adaptive model selection
@@ -12254,7 +12367,7 @@ This implementation addresses the critical need for flexible parametric survival
     * Integration patterns with clinical research packages
 
 * **Advanced Digital Pathology Analysis Suite - New Implementation:**
-  * **Comprehensive Module Suite:**4 new specialized modules for digital pathology validation and analysis
+  * **Comprehensive Module Suite:** 4 new specialized modules for digital pathology validation and analysis
 
   * **Enhanced Agreement Statistics (pathologyagreement):**
     * Inter-platform reproducibility analysis (HALO vs Aiforia vs ImageJ)

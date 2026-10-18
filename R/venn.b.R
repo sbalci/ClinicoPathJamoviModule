@@ -168,6 +168,52 @@ vennClass <- if (requireNamespace('jmvcore'))
                 vars
             },
 
+            # A true level is unset unless it is one non-empty string: jamovi sends NULL
+            # for None (allowNone), and an R caller may pass NULL, NA or "".
+            .levelUnset = function(x) {
+                length(x) != 1L || is.na(x) || !nzchar(as.character(x))
+            },
+
+            # var1true..var7true carry allowNone because jamovi otherwise pre-fills the
+            # FIRST level, which for a marker coded Absent/Present silently made "Absent"
+            # the set. Until every selected variable has its true level nothing is counted
+            # or drawn: one INFO notice per waiting variable lists its observed levels.
+            # Returns TRUE when the run must stop here.
+            .waitForTrueLevels = function() {
+                waiting <- Filter(function(slot)
+                    !is.null(self$options[[slot]]) &&
+                        private$.levelUnset(self$options[[paste0(slot, "true")]]),
+                    paste0("var", 1:7))
+                if (length(waiting) == 0L)
+                    return(FALSE)
+
+                for (slot in waiting) {
+                    var <- self$options[[slot]]
+                    counts <- table(self$data[[var]])
+                    counts <- counts[!is.na(names(counts)) & nzchar(names(counts)) & counts > 0]
+                    private$.addNotice(
+                        "INFO",
+                        .("Waiting for a True Level"),
+                        .fmt(.("Choose the true level for '{var}'; it is never taken from the order of the levels. Observed levels: {levels}. Nothing is drawn or counted until the level is chosen."),
+                             var = var,
+                             levels = paste(sprintf("%s (n = %d)", names(counts), as.integer(counts)),
+                                            collapse = ", ")))
+                }
+
+                # The summary counts are already blanked at the top of .run(). jamovi's
+                # top-level clearWith empties everything else when a true level changes;
+                # this covers a re-run of the same analysis object. Html gets non-empty
+                # blank markup: the jamovi client skips an update whose content is "".
+                for (img in c("plotGgvenn", "plotGgVennDiagram", "plotUpsetR", "plotComplexUpset"))
+                    self$results[[img]]$setState(NULL)
+                for (nm in c("clinicalSummary", "reportSentences", "setCalculations"))
+                    self$results[[nm]]$setContent("<div></div>")
+                self$results$summary$setNote("levels", NULL)
+                .deleteTableRows(self$results$membershipTable)
+                self$results$membershipTable$setNote("truncated", NULL)
+                TRUE
+            },
+
             .init = function() {
                 # Count number of selected variables for dynamic sizing
                 num_vars <- 0
@@ -380,6 +426,11 @@ vennClass <- if (requireNamespace('jmvcore'))
                     # Onboarding guidance is shown in the richer 'welcome' panel above.
                     return()
                 } else {
+                    # Before any data processing: a selected variable without its true
+                    # level waits (INFO notice), it is never an error.
+                    if (private$.waitForTrueLevels())
+                        return()
+
                     # The ggvenn fallback goes through the notices channel like every
                     # other message. It used to have a results item of its own titled
                     # "To Do" - developer-speak shown to the user as a heading - which
@@ -936,72 +987,27 @@ vennClass <- if (requireNamespace('jmvcore'))
                     return(FALSE)
                 }
 
-                # Validate var1 (required)
-                if (!is.null(self$options$var1)) {
-                    if (is.null(self$options$var1true)) {
-                        private$.errors <- c(private$.errors,
-                            'Variable 1 selected but "true" level not specified. Please select which level represents the positive/true condition for Variable 1.')
-                        return(FALSE)
-                    }
-                    var1_data <- self$data[[self$options$var1]]
-                    if (all(is.na(var1_data))) {
-                        private$.errors <- c(private$.errors,
-                            sprintf("Variable '%s' contains only missing values. Please select a different variable with valid data.", self$options$var1))
-                        return(FALSE)
-                    }
-                    if (!self$options$var1true %in% levels(as.factor(var1_data))) {
-                        available_levels <- paste(levels(as.factor(var1_data)), collapse=", ")
-                        private$.errors <- c(private$.errors,
-                            sprintf("Selected 'true' level '%s' not found in Variable '%s'. Available levels: %s", self$options$var1true, self$options$var1, available_levels))
-                        return(FALSE)
-                    }
-                }
-
-                # Validate var2 (required)
-                if (!is.null(self$options$var2)) {
-                    if (is.null(self$options$var2true)) {
-                        private$.errors <- c(private$.errors,
-                            'Variable 2 selected but "true" level not specified. Please select which level represents the positive/true condition for Variable 2.')
-                        return(FALSE)
-                    }
-                    var2_data <- self$data[[self$options$var2]]
-                    if (all(is.na(var2_data))) {
-                        private$.errors <- c(private$.errors,
-                            sprintf("Variable '%s' contains only missing values. Please select a different variable with valid data.", self$options$var2))
-                        return(FALSE)
-                    }
-                    if (!self$options$var2true %in% levels(as.factor(var2_data))) {
-                        available_levels <- paste(levels(as.factor(var2_data)), collapse=", ")
-                        private$.errors <- c(private$.errors,
-                            sprintf("Selected 'true' level '%s' not found in Variable '%s'. Available levels: %s", self$options$var2true, self$options$var2, available_levels))
-                        return(FALSE)
-                    }
-                }
-
-                # Validate optional variables (var3-7)
-                for (i in 3:7) {
+                # Validate every selected variable (var1, var2 required; var3-7 optional).
+                # An UNSET true level is not an error: .run() waits for it with an INFO
+                # notice (.waitForTrueLevels) once var1 and var2 are both selected.
+                for (i in 1:7) {
                     var_name <- paste0("var", i)
                     var_true_name <- paste0("var", i, "true")
                     var_value <- self$options[[var_name]]
                     var_true_value <- self$options[[var_true_name]]
 
                     if (!is.null(var_value)) {
-                        if (is.null(var_true_value)) {
-                            private$.errors <- c(private$.errors,
-                                sprintf('Variable %d selected but "true" level not specified. Please select which level represents the positive/true condition.', i))
-                            return(FALSE)
-                        }
                         var_data <- self$data[[var_value]]
-                        # Same check var1/var2 already get. Without it an all-missing
-                        # optional variable fell through to the level test below and
-                        # reported "Available levels: " with an empty list, which names
+                        # Checked before the level, or an all-missing variable would
+                        # report "Available levels: " with an empty list, which names
                         # the symptom rather than the problem.
                         if (all(is.na(var_data))) {
                             private$.errors <- c(private$.errors,
                                 sprintf("Variable '%s' contains only missing values. Please select a different variable with valid data.", var_value))
                             return(FALSE)
                         }
-                        if (!var_true_value %in% levels(as.factor(var_data))) {
+                        if (!private$.levelUnset(var_true_value) &&
+                            !var_true_value %in% levels(as.factor(var_data))) {
                             available_levels <- paste(levels(as.factor(var_data)), collapse=", ")
                             private$.errors <- c(private$.errors,
                                 sprintf("Selected 'true' level '%s' not found in Variable '%s'. Available levels: %s", var_true_value, var_value, available_levels))

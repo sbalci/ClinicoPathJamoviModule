@@ -29,7 +29,9 @@
 #' When showNomogram is enabled, the function generates:
 #' \itemize{
 #'   \item Prediction nomogram based on the fitted logistic model
-#'   \item Diagnostic metrics (sensitivity, specificity, likelihood ratios)
+#'   \item Diagnostic metrics (sensitivity, specificity, likelihood ratios) for the
+#'     chosen \code{predictorLevel}; with \code{predictorLevel = NULL} they wait for
+#'     that choice and the model and nomogram still run
 #'   \item Contingency table analysis
 #'   \item User guidance for interpretation
 #' }
@@ -1061,6 +1063,33 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         }
                     }
 
+                    # The positive predictor level is never inferred from level
+                    # names or order: a wrong guess swaps sensitivity with
+                    # 1 - specificity. An empty box (allowNone sends NULL) leaves
+                    # the diagnostic metrics waiting; the model and nomogram run.
+                    predictor_level <- self$options$predictorLevel
+                    if (diagnostics_ok &&
+                        (is.null(predictor_level) || length(predictor_level) != 1 ||
+                         is.na(predictor_level) || !nzchar(as.character(predictor_level)))) {
+                        level_counts <- table(diagnostic_data[[diagnostic_predictor]])
+                        pending_msg <- .fmt(
+                            .("Diagnostic metrics are waiting for the Predictor Positive Level. Choose which level of '{variable}' is the positive test result. Observed levels: {levels}. The logistic model, odds ratios, forest plot and nomogram are not affected."),
+                            variable = diagnostic_predictor_original_name,
+                            levels = paste(sprintf("%s (n = %d)", names(level_counts), as.integer(level_counts)), collapse = ", "))
+                        # The LevelSelector is bound to the Diagnostic Predictor
+                        # box, so it lists no levels until that box is filled.
+                        if (is.null(self$options$diagnosticPredictor)) {
+                            pending_msg <- paste(pending_msg, .fmt(
+                                .("To choose a level, first put '{variable}' in the Diagnostic Predictor box."),
+                                variable = diagnostic_predictor_original_name))
+                        }
+                        private$.addNotice(jmvcore::NoticeType$INFO, pending_msg)
+                        self$results$diagnosticMetrics$setContent(paste0(
+                            "<p>", htmltools::htmlEscape(pending_msg), "</p>"
+                        ))
+                        diagnostics_ok <- FALSE
+                    }
+
                     if (diagnostics_ok) {
                         # Calculate likelihood ratios with support for specified predictor level
                         lr_results <- private$.calculateLikelihoodRatios(
@@ -1419,8 +1448,9 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             positive_outcome_idx <- which(outcome_levels == positive_outcome_level)
             outcome_determination_method <- .("User-specified")
             
-            # Determine positive predictor level
-            if (!is.null(user_positive_predictor) &&
+            # Positive predictor level: always the user's choice. .run() leaves
+            # the metrics waiting when it is unset and never calls this then.
+            if (length(user_positive_predictor) != 1 ||
                 !(user_positive_predictor %in% predictor_levels)) {
                 return(list(
                     error = TRUE,
@@ -1432,45 +1462,19 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 ))
             }
 
-            if (!is.null(user_positive_predictor)) {
-                positive_predictor_level <- user_positive_predictor
-                predictor_determination_method <- .("User-specified")
-            } else {
-                # Fallback to automatic detection if not specified or not found
-                detection_result <- private$.detectPositiveLevels(predictor_levels)
-                positive_predictor_level <- detection_result$level
-                predictor_determination_method <- detection_result$method
-            }
+            positive_predictor_level <- user_positive_predictor
+            predictor_determination_method <- .("User-specified")
             positive_predictor_idx <- which(predictor_levels == positive_predictor_level)
 
-            # Create messaging for predictor level determination
-            if (!is.null(user_positive_predictor)) {
-                 predictor_level_warning <- paste0(
-                    "<div style='background-color: rgba(33, 163, 188, 0.21); border-left: 4px solid #0c5460; padding: 15px; margin: 10px 0; border-radius: 4px; color: inherit;'>",
-                    "<b>", .("Predictor Level Modeling:"), "</b><br>",
-                    .fmt(
-                        .("The level '{level}' is used as the positive/exposure category as specified."),
-                        level = htmltools::htmlEscape(positive_predictor_level)),
-                    "</div>"
-                )
-            } else {
-                predictor_level_warning <- paste0(
-                    "<div style='background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0; border-radius: 4px; color: inherit;'>",
-                    "<h4 style='margin-top: 0; color: inherit;'> ", .("Automatic Predictor Level Detection"), "</h4>",
-                    "<p><strong>", .fmt(
-                        .("The positive predictor level was automatically detected as: '{level}'"),
-                        level = htmltools::htmlEscape(positive_predictor_level)), "</strong></p>",
-                    "<p>", .fmt(
-                        .("Method: {method}"),
-                        method = htmltools::htmlEscape(predictor_determination_method)), "</p>",
-                    "<p style='color: inherit;'><strong>", .("Important:"), "</strong> ", .fmt(
-                        .("Please verify that '{level}' is the correct positive level. If this is wrong, diagnostic metrics will be inverted."),
-                        level = htmltools::htmlEscape(positive_predictor_level)), "</p>",
-                    "<p>", .("Use the 'Predictor Positive Level' option to set this manually."), "</p>",
-                    "</div>"
-                )
-            }
-            
+            predictor_level_warning <- paste0(
+                "<div style='background-color: rgba(33, 163, 188, 0.21); border-left: 4px solid #0c5460; padding: 15px; margin: 10px 0; border-radius: 4px; color: inherit;'>",
+                "<b>", .("Predictor Level Modeling:"), "</b><br>",
+                .fmt(
+                    .("The level '{level}' is used as the positive/exposure category as specified."),
+                    level = htmltools::htmlEscape(positive_predictor_level)),
+                "</div>"
+            )
+
             # Calculate 2x2 table components
             tp <- cont_table[positive_predictor_idx, positive_outcome_idx]
             fp <- cont_table[positive_predictor_idx, -positive_outcome_idx]
@@ -2248,47 +2252,6 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             ))
         }
 
-
-        # Helper function for configurable positive level detection
-        ,
-        .detectPositiveLevels = function(levels, language = "auto") {
-            # Configure positive indicators by language
-            if (language == "auto") {
-                # Detect language from levels or use default
-                language <- if (any(grepl("[\u0131\u00fc\u011f\u015f\u00e7\u00f6\u0130\u00dc\u011e\u015e\u00c7\u00d6]", levels))) "tr" else "en"
-            }
-            
-            # Positive indicators by language
-            indicators <- switch(language,
-                "en" = c("Positive", "Yes", "Present", "Exposed", "High", "Abnormal", "1", "TRUE", "Bad", "Dead", "Event"),
-                "tr" = c("Pozitif", "Evet", "Mevcut", "Maruz", "Y\u00fcksek", "Anormal", "1", "DO\u011eRU", "K\u00f6t\u00fc", "\u00d6l\u00fc", "Olay", 
-                        "Positive", "Yes", "Present", "Exposed", "High", "Abnormal", "TRUE", "Bad", "Dead", "Event"), # Fallback to English
-                c("Positive", "Yes", "Present", "Exposed", "High", "Abnormal", "1", "TRUE", "Bad", "Dead", "Event") # Default
-            )
-            
-            # Try to find positive level
-            positive_matches <- levels[levels %in% indicators]
-            
-            if (length(positive_matches) == 1) {
-                return(list(
-                    level = positive_matches[1],
-                    method = .fmt(.("Automatic detection ({language})"), language = language)
-                ))
-            } else if (length(positive_matches) > 1) {
-                # Multiple matches - use first priority match
-                return(list(
-                    level = positive_matches[1],
-                    method = .fmt(.("Automatic detection - first match ({language})"), language = language)
-                ))
-            } else {
-                # No matches - fall back to the second FACTOR LEVEL (level order,
-                # which is not necessarily alphabetical).
-                return(list(
-                    level = levels[min(2, length(levels))],
-                    method = .("Default (second factor level)")
-                ))
-            }
-        }
 
         # Helper function to create plot data with original variable names
         ,

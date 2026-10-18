@@ -119,7 +119,7 @@ mixedcoxClass <- if (requireNamespace('jmvcore'))
       # Blank every model output (used when a run stops before a model is fitted)
       .clearModelOutputs = function() {
         self$results$modelSummary$setContent("")
-        self$results$fixedEffectsTable$deleteRows()
+        .deleteTableRows(self$results$fixedEffectsTable)
         self$results$randomEffectsSummary$setContent("")
         self$results$modelComparison$setContent("")
       },
@@ -556,7 +556,7 @@ mixedcoxClass <- if (requireNamespace('jmvcore'))
           # Fixed effects table
           if (opts$show_fixed_effects) {
             fixed_table <- self$results$fixedEffectsTable
-            fixed_table$deleteRows()
+            .deleteTableRows(fixed_table)
             fixed_effects <- model_results$fixed_effects
             
             for (i in seq_len(nrow(fixed_effects))) {

@@ -23,6 +23,9 @@
 		},
 		{
 			"path": "../dev.jamovi.org"
+		},
+		{
+			"path": "../Pj"
 		}
 	],
 	"settings": {}

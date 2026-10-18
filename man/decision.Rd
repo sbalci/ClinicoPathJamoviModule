@@ -51,13 +51,17 @@ disease-risk interpretation.}
 status.}
 
 \item{goldPositive}{The positive reference level; disease interpretation
-requires a disease standard.}
+requires a disease standard. It is never taken from the order of the
+levels: NULL leaves the analysis pending, listing the levels found. The
+argument has no default; pass the level.}
 
 \item{newtest}{The diagnostic test variable being evaluated for
 performance.}
 
 \item{testPositive}{The level representing a positive result for the test
-under evaluation.}
+under evaluation. It is never taken from the order of the levels: NULL
+leaves the analysis pending, listing the levels found. The argument has no
+default; pass the level.}
 
 \item{goldNegative}{The level indicating absence of disease in the gold
 standard variable. The compiler forbids a default on a Level option, so R

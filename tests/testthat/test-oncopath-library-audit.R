@@ -160,7 +160,7 @@ test_that("umbrella updater keeps the production OncoPath helper boundary minima
   expect_equal(helpers$errors, character(0))
   # swimmerplot needs only the follow-up estimator; the RECIST and IHC engines,
   # the survival formula and event-coding helpers must not leak into OncoPath.
-  allowed <- c("utils.R", "utils-followup.R", "swimmerplot-html.R")
+  allowed <- c("utils.R", "utils-followup.R", "utils-patient-ids.R", "swimmerplot-html.R")
   expect_equal(setdiff(helpers$files, allowed), character(0))
   if (length(parked) == 0) expect_setequal(helpers$files, allowed)
 

@@ -38,10 +38,7 @@ agreementintroClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Cl
       catalogue <- .agreementIntroCatalog()
       for (name in c("recommendations", "settings", "dataSummary", "columnSummary", "catalogue")) {
         table <- self$results[[name]]
-        table$deleteRows()
-        # jmvcore 2.7 keeps dynamic row names after deleteRows(). Clear that cache
-        # as well, including when a previously recommended route becomes unknown.
-        if (length(table$names)) table$.__enclos_env__$private$.rowNames <- character()
+        .deleteTableRows(table)
       }
       for (name in c("overview", "status", "preparation", "inspectionNotes", "examples",
                      "pitfalls", "glossary", "catalogueNotes"))

@@ -341,8 +341,10 @@ test_that("re-running with the table rows still in place does not duplicate them
   # Population Data table (neither is in its clearWith), and addRow() never
   # checks for an existing rowKey, so every such change doubled the table.
   d <- data.frame(age = rep(0:19, each = 2), gender = rep(c("Female", "Male"), 20))
+  # Explicit levels: NULL/NULL used to be read from the level names; since 2026-10-18 it is a
+  # waiting state that draws nothing (test-agepyramid-pending-gender-levels.R).
   o <- .ap_obj("agepyramidOptions")$new(age = "age", gender = "gender",
-                                        female = NULL, male = NULL, bin_width = 5)
+                                        female = "Female", male = "Male", bin_width = 5)
   a <- .ap_obj("agepyramidClass")$new(options = o, data = d)
   priv <- a$.__enclos_env__$private
   priv$.run()
@@ -406,7 +408,8 @@ test_that("pct_base = 'total' gives gender shares that sum to 100 across both co
 
 test_that("plot_values = 'percent' carries per-band percentages into both plot states and renders", {
   d <- data.frame(age = rep(0:19, each = 3), gender = rep(c("Female", "Male", "Male"), 20))
-  o <- .ap_obj("agepyramidOptions")$new(age = "age", gender = "gender", female = NULL, male = NULL,
+  # Explicit levels: NULL/NULL is now a waiting state, not a name-read (2026-10-18).
+  o <- .ap_obj("agepyramidOptions")$new(age = "age", gender = "gender", female = "Female", male = "Male",
                                         pct_base = "total", plot_values = "percent", enableGGCharts = TRUE)
   a <- .ap_obj("agepyramidClass")$new(options = o, data = d)
   priv <- a$.__enclos_env__$private
@@ -421,7 +424,7 @@ test_that("plot_values = 'percent' carries per-band percentages into both plot s
   grDevices::dev.off()
   expect_true(ok); expect_true(ok2)
   # within-gender base: each side sums to 100
-  o2 <- .ap_obj("agepyramidOptions")$new(age = "age", gender = "gender", female = NULL, male = NULL,
+  o2 <- .ap_obj("agepyramidOptions")$new(age = "age", gender = "gender", female = "Female", male = "Male",
                                          plot_values = "percent")
   a2 <- .ap_obj("agepyramidClass")$new(options = o2, data = d)
   a2$.__enclos_env__$private$.run()

@@ -13,8 +13,9 @@ description:
         dontrun: true
         usage: |
             # `female` and `male` are Level options: jamovi forbids a default on
-            # them, so they are REQUIRED arguments of this function. Pass NULL to
-            # have the levels read from their names.
+            # them, so they are REQUIRED arguments of this function. They are
+            # never read from the level names or order: NULL leaves the analysis
+            # waiting (except for a single-gender cohort, see `female`).
             agepyramid(
                 data = histopathology,
                 age = "Age",
@@ -61,37 +62,54 @@ options:
             a string naming the variable from `data` that contains the
             categorical values used for the report
             
+    # allowNone: without it the jamovi client pre-fills a Level option with the
+    # variable's first level (levels[0]), so BOTH selectors started on the same
+    # level and every new analysis opened on "Female and Male levels must be
+    # different". Empty is a waiting state; the levels are never guessed.
     - name: female
       title: Female level
       type: Level
       variable: (gender)
+      allowNone: true
       description:
           R: >
             a string naming the level of `gender` that identifies female
-            subjects. This argument has no default (jamovi does not allow one on
-            a level option), so a call from R must always supply it; pass NULL to
-            let the analysis read the level names itself, which it reports in a
-            note above the results.
+            subjects. It must be chosen: it is never read from the level names
+            or their order. The argument has no default (jamovi does not allow
+            one on a level option), so a call from R must supply it. NULL leaves
+            the analysis waiting, with the levels found and their counts listed
+            and nothing drawn, unless `male` is set and `gender` has no other
+            observed level: that single-gender cohort is drawn on the male side
+            only.
           jamovi: >
             The level of the gender variable that identifies female subjects.
-            Leave both level selectors empty to have them read from the level
-            names; the assignment used is then stated above the results.
+            It must be chosen: it is never read from the level names or their
+            order. While it is empty the levels found are listed and nothing is
+            drawn, unless Male level is set and the data hold no other level,
+            in which case the male-only cohort is drawn.
 
+    # allowNone: as `female`.
     - name: male
       title: Male level
       type: Level
       variable: (gender)
+      allowNone: true
       description:
           R: >
             a string naming the level of `gender` that identifies male subjects.
-            This argument has no default (jamovi does not allow one on a level
-            option), so a call from R must always supply it; pass NULL to let the
-            analysis read the level names itself, which it reports in a note
-            above the results.
+            It must be chosen: it is never read from the level names or their
+            order. The argument has no default (jamovi does not allow one on a
+            level option), so a call from R must supply it. NULL leaves the
+            analysis waiting, with the levels found and their counts listed and
+            nothing drawn, unless `female` is set and `gender` has no other
+            observed level: that single-gender cohort is drawn on the female
+            side only.
           jamovi: >
             The level of the gender variable that identifies male subjects.
-            Leave both level selectors empty to have them read from the level
-            names; the assignment used is then stated above the results.
+            It must be chosen: it is never read from the level names or their
+            order. While it is empty the levels found are listed and nothing is
+            drawn, unless Female level is set and the data hold no other level,
+            in which case the female-only cohort is drawn.
 
     - name: age_groups
       title: Age group preset

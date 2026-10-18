@@ -51,7 +51,8 @@ outcomeorganizerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             private$..outcomeLevel <- jmvcore::OptionLevel$new(
                 "outcomeLevel",
                 outcomeLevel,
-                variable="(outcome)")
+                variable="(outcome)",
+                allowNone=TRUE)
             private$..recurrence <- jmvcore::OptionVariable$new(
                 "recurrence",
                 recurrence,
@@ -64,7 +65,8 @@ outcomeorganizerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             private$..recurrenceLevel <- jmvcore::OptionLevel$new(
                 "recurrenceLevel",
                 recurrenceLevel,
-                variable="(recurrence)")
+                variable="(recurrence)",
+                allowNone=TRUE)
             private$..patientID <- jmvcore::OptionVariable$new(
                 "patientID",
                 patientID,
@@ -600,11 +602,16 @@ outcomeorganizerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' @param outcome The primary outcome variable to be recoded for survival
 #'   analysis (e.g., vital status).
 #' @param outcomeLevel The level of the outcome variable that represents the
-#'   event of interest (e.g., "Death", "Relapse").
+#'   event of interest (e.g., "Death", "Relapse"). Required for a factor
+#'   outcome, and never taken from the order of the levels: without it the
+#'   analysis stops and lists the levels. A numeric 0/1 outcome is read as 1 =
+#'   event.
 #' @param recurrence Variable indicating disease recurrence or progression
 #'   (for RFS/PFS/DFS analyses).
 #' @param recurrenceLevel The level indicating recurrence or progression has
-#'   occurred.
+#'   occurred. Required when a recurrence/progression variable is used, and
+#'   never taken from the order of the levels: without it the analysis stops and
+#'   asks for it.
 #' @param patientID Patient identifier for handling multiple records or
 #'   applying event hierarchies.
 #' @param followupTime Optional follow-up time. Supplying it lets

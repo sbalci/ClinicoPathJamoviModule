@@ -38,20 +38,29 @@ decisioncombine(
 status.}
 
 \item{goldPositive}{The level indicating presence of disease in the gold
-standard.}
+standard. It is never taken from the order of the levels: NULL leaves the
+analysis pending, listing the levels found. The argument has no default;
+pass the level.}
 
 \item{test1}{The first diagnostic test variable.}
 
-\item{test1Positive}{The level representing a positive result for Test 1.}
+\item{test1Positive}{The level representing a positive result for Test 1.
+It is never taken from the order of the levels: NULL leaves the analysis
+pending, listing the levels found. The argument has no default; pass the
+level.}
 
 \item{test2}{The second diagnostic test variable for combination analysis.}
 
-\item{test2Positive}{The level representing a positive result for Test 2.}
+\item{test2Positive}{The level representing a positive result for Test 2.
+Pass NULL when Test 2 is not selected; with Test 2 selected, NULL leaves
+the analysis pending.}
 
 \item{test3}{The third diagnostic test variable for 3-way combination
 analysis.}
 
-\item{test3Positive}{The level representing a positive result for Test 3.}
+\item{test3Positive}{The level representing a positive result for Test 3.
+Pass NULL when Test 3 is not selected; with Test 3 selected, NULL leaves
+the analysis pending.}
 
 \item{showIndividual}{Boolean to show individual test performance tables.}
 

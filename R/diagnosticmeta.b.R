@@ -447,6 +447,19 @@ diagnosticmetaClass <- R6::R6Class(
             # Store original row count for validation
             original_n <- nrow(meta_data)
 
+            # Infinity is not a missing count and would produce NaN in the
+            # whole-number check below. Reject it before any count arithmetic.
+            count_vars <- c(tp = tp_var, fp = fp_var, fn = fn_var, tn = tn_var)
+            infinite <- is.infinite(as.matrix(meta_data[, names(count_vars)]))
+            if (any(infinite)) {
+                bad_vars <- unname(count_vars[colSums(infinite) > 0])
+                bad_rows <- which(rowSums(infinite) > 0)
+                jmvcore::reject("{}", code = "nonfinite_counts", msg = sprintf(
+                    .("Infinite diagnostic counts in variable(s) %s, analysis row(s) %s. Enter finite whole-number counts or mark unavailable values as missing."),
+                    paste(bad_vars, collapse = ", "),
+                    paste(utils::head(bad_rows, 10), collapse = ", ")))
+            }
+
             # Exclude unusable studies and SAY SO.
             #
             # A single missing cell anywhere previously aborted the entire
