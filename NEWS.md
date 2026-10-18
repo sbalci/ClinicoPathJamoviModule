@@ -1,5 +1,186 @@
 # ClinicoPath News
 
+## Releases cut from this tree — meddecide 1.0.9 and OncoPath 1.0.9 (2026-10-17)
+
+The "Unreleased" sections below for the analyses these two modules ship (meddecide: `agreement`,
+`cotest`, `decision`, `decisioncalculator`, `decisioncombine`, `decisioncompare`, `decisioncurve`,
+`enhancedROC`, the three `kappaSize*`, `lassologistic`, `nogoldstandard`, `psychopdaROC`,
+`sequentialtests`; OncoPath: `diagnosticmeta`, `ihcheterogeneity`, `swimmerplot`, `waterfall`) are
+released in them. The user-facing summaries are in each module's NEWS.md, which now also cover
+jjstatsplot, jsurvival and ClinicoPathDescriptives up to 1.0.82.03 (including their 1.0.81
+releases).
+
+## Unreleased — `waterfall` (Treatment Response: Patient-Level Burden): pre-baseline scans, invalid measurements and supplied categories (module 1.0.81.01, analysis 1.0.9)
+
+- **A scan dated before baseline no longer counts as the nadir.** With a time variable, rows with a
+  negative time are now ignored when progression is judged. A pre-baseline scan smaller than the
+  baseline used to serve as the nadir, so ordinary on-study shrinkage could read as progression and
+  cut the best response short.
+- **A patient with a negative raw measurement stays out of every result.** Such a patient was already
+  shown as "Unknown" in the waterfall. Their rows are now also removed from the spider plot, and a
+  response category supplied for them no longer makes them evaluable.
+- **A supplied response category is applied before the evaluability checks.** A patient with only a
+  baseline scan who is coded PD (clinical progression, new lesions, death before the first follow-up
+  scan) is counted as evaluable PD. The "Not response-evaluable" warning no longer lists them as
+  "Unknown" first. The small-sample warning, the excluded-patients notice and the "no evaluable
+  patients" check now count the same CR/PR/SD/PD patients as the response rates.
+- **No stale "Unknown" row.** When a re-run leaves no patient Unknown, the summary table drops the
+  Unknown row and its footnote from the earlier run.
+- **Saved analyses:** results change on re-running only for data with pre-baseline scans, negative raw
+  measurements, or supplied categories for baseline-only patients.
+
+## Unreleased — `diagnosticmeta` (Diagnostic Test Meta-Analysis for Pathology): the meta-regression names the right reference level (module 1.0.81.01, analysis 1.0.9)
+
+- **The reference level of a factor covariate is its first level, not the alphabetically first.** The
+  meta-regression note says which level each coefficient is compared with. For a factor with levels
+  Manual, Automated, the row "Automated" was said to contrast against 'Automated'; the note now names
+  'Manual'. The coefficients themselves are unchanged.
+- **The predictive-values footnote rounds.** It now prints the pooled sensitivity and specificity to
+  one decimal, as in "(85.3%)", instead of an unrounded number.
+
+## Unreleased — `ihcheterogeneity` (IHC Heterogeneity Analysis): no reference-calibration advice without a reference (module 1.0.81.01, analysis 1.0.9)
+
+- **"The regions are offset in opposite directions, so each needs its own calibration" now appears
+  only when a reference measurement is selected.** Without a reference there is nothing to calibrate
+  against, but the sentence was still added to the interpretation.
+
+## Unreleased — `kappaSizeFixedN` (Lowest Expected Kappa for a Fixed Sample Size): the bound is solved exactly and allows for re-estimated proportions (module 1.0.81.01, analysis 1.0.9)
+
+- **The bound is solved, not searched (validation 2026-10-16).** kappaSize walks down from kappa0 in
+  steps of 0.001 and stops once the chi-square passes its critical value by 0.001. The bound is now the
+  exact root of the same goodness-of-fit equation, rounded down for display (three decimals, or two
+  significant digits below 0.001), so the figure shown never overstates it. At the defaults it is 0.419;
+  kappaSize gives 0.418. kappaSize's own figure now appears only in the optional Summary, with a line
+  explaining any difference.
+- **The verdicts at exactly 0 and 0.40 are right.** The walk landed on 0 and 0.40 as values a hair
+  below them. Kappa0 0.20, a prevalence of 0.5 and 68 subjects got the red "cannot demonstrate
+  agreement" block; the bound is 0.00053, so chance-level agreement is excluded. The defaults with 83
+  subjects got the amber "under 0.40" block; the bound is 0.400.
+- **With 3 or more raters, or 3-5 categories, the bound allows for re-estimated proportions.** As in
+  kappaSizeCI, the bound shown is the lower of two: the published calculation, which holds the category
+  proportions at their anticipated values, and the bound when the analysis re-estimates them by maximum
+  likelihood at each kappa. Only the second interval keeps its stated coverage in these designs; in
+  simulation the plug-in interval covered about 0.92 instead of 0.95. A binary outcome with two raters
+  is unchanged.
+  - Kappa0 0.60, prevalence 0.30, 60 subjects: 3 raters 0.443 (was 0.445), 4 raters 0.459 (was
+    0.464), 6 raters 0.474 (was 0.480); 2 raters still 0.389.
+  - Rotondi & Donner's 171-subject, 3-category example: 0.338 instead of 0.340.
+  - The Study Explanation gives both figures whenever they differ at the precision shown.
+- **Designs that kappaSize's walk took outside the model now get an answer.** Prevalence 0.02, two
+  raters, kappa0 0.01, 11 subjects, alpha 0.001: kappaSize returns -23.78, which the analysis refused
+  as not converged. The exact bound is -0.020.
+- **New warnings.**
+  - Red "Too few expected subjects in the rarest category", when each rater is expected to place fewer
+    than one subject in it. With a rare category and 3 or more raters the model allows almost no
+    agreement below zero, so the bound stayed positive however few the subjects. In 117 of 180 binary
+    designs with fewer than two expected positive subjects the panel had said these subjects "can
+    therefore show that agreement exceeds chance".
+  - Amber "This design cannot support a reliability claim", when the bound is positive but below 0.40
+    (no better than fair agreement on the Landis and Koch scale). It names what binds: when kappa0 is
+    0.40 or below, no sample size, rater count or alpha can lift the bound past 0.40. Just above 0.40
+    it checks whether the largest design the analysis allows (1,000,000 subjects, 6 raters, alpha
+    0.20) could. With sparse cells it no longer claims that agreement exceeds chance.
+  - Amber "Rare category" when a category is under 5% (worded as in kappaSizeCI), and "Small sample"
+    below 25 subjects.
+- **The "Sparse categories" box judges the cells of the test.** For a binary outcome with 3 or more
+  raters the disagreement cells are now pooled, as in the published 1-df test and in the sibling
+  analyses. The binary remedy no longer suggests relaxing the significance level, which removed the
+  sparsity in 2 of 103 sparse designs. Small expected counts print as "below 0.0001" rather than in
+  scientific notation, and a count just under 5 no longer prints as "5".
+- **Layout.**
+  - The Notes at the top hold only the warnings. The result reads, for example, "A total of 100
+    subjects can produce an expected one-sided 95% lower limit for kappa of 0.419".
+  - A Methodology panel at the foot always shows the caveats: the figure is a planning expectation
+    (about half of such studies observe less agreement), and it is for the goodness-of-fit interval,
+    not the Wald, Fisher-z or bootstrap intervals agreement software usually reports.
+  - A new "Additional Output" box holds "Methodology and study explanation" and "kappaSize package
+    summary", both off by default.
+  - The Methodology names the three model papers. For a binary outcome with 3 or more raters it adds
+    that the beta-binomial model never gave a lower bound than the one shown in the designs checked,
+    and usually a higher one (by up to about 0.10), so the figure shown is the more cautious.
+- **Labels.** The menu title is "Lowest Expected Kappa for a Fixed Sample Size" (was "Lowest Expected
+  Value for a fixed sample size"). The alpha box sits under "Significance Level", the proportions box
+  is labelled, and numbers of subjects are grouped by thousands.
+- **Speed and safety.**
+  - kappaSize's own search now runs only for the Summary, and stops after 5 seconds. An extremely rare
+    category could hold the analysis: a prevalence of 0.0001 takes about two million steps, and
+    0.00000001 an estimated day or more.
+  - The R syntax pane escapes text values and leaves out option names the analysis does not have, so a
+    crafted value in a shared .omv cannot add code to the copied R call.
+  - From R, a number of raters other than 2-6, or a fractional N, is now refused.
+- **Saved analyses:** an `.omv` saved earlier shows the old bound until it is re-run. After re-running,
+  the Study Explanation and the kappaSize Summary stay hidden until their boxes under Additional Output
+  are ticked.
+
+## Unreleased — `kappaSizePower` (Power Approach for the Number of Subjects Required): simulated power for binary designs, stable sample sizes, rewritten method notes (module 1.0.81.01, analysis 1.0.9)
+
+- **Binary outcome: the published sample size is checked by simulation (independent review
+  2026-10-15).** The published formula, which kappaSize implements, treats the expected proportions
+  as known and rests on a large-sample approximation. For a binary outcome the analysis now simulates
+  4,000 studies at the sample size shown, each analysed with the recommended test: the goodness-of-fit
+  test on the pooled cells, with the prevalence estimated by maximum likelihood at kappa0. The random
+  seed (20261015) is shown. When the simulated power falls more than 0.03 short of the stated power, a
+  "Simulated power below the stated power" note says so and gives the number of subjects that reaches
+  the target in simulation.
+  - Example: 6 raters, a 5% finding, kappa0 0.40 against kappa1 0.60, power 0.80. The formula gives
+    316 subjects. Simulated, they reach a power of about 0.59, and about 572 subjects reach 0.80.
+  - The bold line then names both figures: "316 subjects by the published formula and about 572 by
+    simulating the recommended test". The Study Explanation says the same.
+  - With 3-5 categories nothing is simulated. An "Expected proportions treated as known" note flags
+    designs where the loss of power is likely to be large, and asks for a simulation of the intended
+    analysis.
+  - Neither check runs below 10 subjects.
+- **Sample sizes that kappaSize got wrong (validation 2026-10-09).** With 5 or 6 raters and the
+  common category typed first, kappaSize's cell polynomials cancel to zero. "0.9999, 0.0001" with 5
+  raters reported 0 subjects where the design needs 181,129, and other designs stopped with an R
+  error. The sample size is now computed from a stable form of the same cells, so the order of the
+  categories no longer matters. kappaSize's search tolerance could also leave a large N one subject
+  off. Otherwise the published-formula N is unchanged.
+- **The "Sparse categories" box judges the cells of the test.** For a binary outcome with 3 or more
+  raters, the test pools every split call into one disagreement cell, and the box now does too. Six
+  raters and a 5% finding had been flagged on an unpooled cell of 0.0003, though the smallest pooled
+  count is 6.3. Counts are taken at the sample size shown, not the unrounded one.
+- **New "Rare outcome category" warning.** It fires when the rarest category is expected in fewer than
+  five subjects at the required sample size, a case the sparse-cell rule can miss. Example: five
+  categories with one at 2%, two raters, kappa0 0.80 against 0.90: N = 176, and the rare category is
+  expected in about 3.5 subjects. kappaSize's own cell-count line is now kept once in the result pane
+  instead of being removed.
+- **Methodology rewritten against the source papers.**
+  - It names the three sources: Donner and Eliasziw (two raters, binary), Altaye, Donner and Klar
+    (binary, more raters) and Altaye, Donner and Eliasziw (3-5 categories). All three are cited.
+  - Kappa here is the intraclass kappa (Scott's pi for two raters, Fleiss' kappa for more), which
+    assumes no rater bias.
+  - N is for the papers' 1-df goodness-of-fit test, over the all-agree cells plus one pooled
+    disagreement cell. A chi-square over every count of positive calls has more than one degree of
+    freedom; read on one, it rejects a true kappa0 too often.
+  - Estimate the prevalence by maximum likelihood with kappa held at kappa0. With two raters and a rare
+    finding, the published plug-in test rejected a true kappa0 at a rate of 0.055-0.066 at the 0.05
+    level, the maximum-likelihood version at 0.043-0.052.
+  - For a binary outcome with 3 or more raters, N depends on the model of rater dependence. Another
+    model with the same kappa (such as the beta-binomial) can need a markedly different N, and the
+    goodness-of-fit test can then reject a true kappa0 far more often than stated.
+  - The power achieved can differ from the stated power in either direction.
+- **Warnings reworded.**
+  - "Very small sample size" no longer calls the figure a lower bound. Exact enumeration of two-rater
+    designs under 10 subjects found it too high.
+  - "Small kappa difference" no longer fires when the gap is exactly 0.05. The value 0.45 - 0.40 is
+    stored as 0.0499999..., so it fired for 6 of 10 such typed pairs.
+  - Expected counts print down to 0.0001 instead of "below 0.01", and a count of 4.97 no longer prints
+    as "5" beside "below 5".
+- **Layout and labels.**
+  - The bold "Required sample size" line has its own box between the warnings and the Methodology.
+    It had been the last of up to 15 method sentences. With two raters it reads "each rated by both
+    raters".
+  - The kappa boxes are "Null kappa (kappa0)" and "Alternative kappa (kappa1)", and the proportions box
+    is labelled. The two kappaSize panes are titled "Result by the published formula (kappaSize)" and
+    "Summary by the published formula (kappaSize)".
+  - Power prints with two decimals (0.80, not 0.8). A round 100,000 no longer prints as 1e+05.
+- **Input and syntax.** A narrow no-break space is read as a separator. The decimal-comma message no
+  longer fires for a typo such as "1.2, 0.8". The R syntax pane escapes the proportions text, so a
+  crafted value in a shared .omv cannot add code to the copied R call.
+- **Saved analyses:** an `.omv` saved earlier shows the old notes, without the simulated sample size,
+  until it is re-run.
+
 ## Unreleased — `kappaSizeCI` (Confidence Interval Approach for the Number of Subjects Required): validation and independent-review fixes (module 1.0.81.01, analysis 1.0.83)
 
 - **Sample sizes change for most designs with 3 or more raters or 3-5 categories (independent review
@@ -33,7 +214,35 @@
 - **Interface (release check 2026-10-15).** The two drop-downs are labelled (Outcome levels, Raters), and the
   significance level is labelled Alpha: the old label said "0-1", but the option accepts 0.001-0.20. Labels now
   match kappaSizePower and kappaSizeFixedN.
-- **Saved analyses:** an `.omv` saved earlier shows the old n until it is re-run.
+- **Follow-up review (2026-10-16).**
+  - **Shorter Notes, optional detail.** A new "Additional Output" box holds "Methodology and study
+    explanation" and "kappaSize package summary", both off by default. The sample size, the warnings
+    and the main caveats are always shown; the Notes had run to about 480 words on every run.
+  - **The answer comes first.** "Required sample size: 118 subjects, each rated by both raters." now
+    has its own box right after any warnings, instead of sitting below the method text.
+  - **New caveat, always shown.** The n is planned for the model-based goodness-of-fit interval. It
+    does not establish the requested precision for the Wald, Fisher-z or bootstrap intervals that
+    agreement software usually reports for Cohen's or Fleiss' kappa.
+  - **New "Rare category" note** when a category is expected in under 5% of ratings. A prevalence of
+    0.02 with two raters needs 855 subjects and raises no other warning, yet each rater is expected to
+    call only about 17 of them positive. The note says that kappa depends strongly on prevalence (Byrt,
+    Bishop and Carlin) and what to report beside it.
+  - **Faster.** kappaSize's own search now runs only for the Summary pane, or when the closed form
+    cannot judge the design. A design needing 90,407 subjects took 10 seconds per run for a figure that
+    was then discarded.
+  - **Clearer input messages.** Percentages ("20%, 80%" or "20, 80") are named as such. A leading
+    separator ("; 0.2 0.8") is accepted. The typo "1.2, 0.8" is no longer told to use a decimal point.
+    A narrow no-break space is read as a separator.
+  - **Numbers in prose.** No more scientific notation such as "1e-04", or "3.84146e-05" in the Study
+    Explanation for any n above about 38,000. "1 of 4 cells are below 5" is reworded, and a count of
+    4.97 no longer prints as "5".
+  - **Labels.** "Lower confidence limit (kappaL)" and "Upper confidence limit (kappaU)"; the Alpha box
+    sits under "Significance Level".
+  - **Syntax pane.** The proportions text is escaped, so a crafted value in a shared .omv cannot add
+    code to the copied R call. From R, `props` may also be given as a vector such as `c(0.2, 0.8)`.
+- **Saved analyses:** an `.omv` saved earlier shows the old n until it is re-run. After re-running, the
+  Study Explanation and the kappaSize Summary stay hidden until their boxes under Additional Output are
+  ticked.
 
 ## Unreleased — `decisioncurve` (Decision Curve Analysis): validation and independent-review fixes (module 1.0.81.01, analysis 1.0.83)
 
@@ -157,6 +366,254 @@
   - The Clinical Interpretation panel is now opt-in, under Tables & Outputs → "Clinical
     interpretation". The Analysis Summary, which states the data requirements, is still always
     shown. R calls: `showInterpretation = TRUE`.
+- **Names with "<" or brackets display correctly (security review 2026-10-14).** A model or
+  clinical-rule name with "<" before a letter lost everything from the "<" in table cells and column
+  titles ("Risk<High>" showed as "Risk"); a space is now inserted after the "<". In the notes, a name
+  with square brackets cut the note off at the bracket ("Model [v2]" left only "Model"); brackets there
+  now show as parentheses.
+- **The pairwise comparison says what it averages.** The Exploratory Pairwise Model Comparison columns
+  are now "Mean NB Difference (grid points)", "Median NB Difference (grid points)" and "p (Holm,
+  grid-point mean difference)", and a note explains that every evaluated threshold gets equal weight.
+- **Smaller text changes.** "Wide Threshold Range", "Narrow Range" and "Narrow Probability Range" no
+  longer fire for a range of exactly 70 or 5 percentage points, which round-off had pushed over the
+  limit. The relative-utility plot caption gives its formula, and the interval footnotes say coverage
+  is approximate.
+
+## Unreleased — `classicalSurvivalPower` (Classical Survival Power Analysis (Intermediate)): exact Lachin-Foulkes power, sample sizes rounded up (module 1.0.81.01, analysis 0.0.3)
+
+- **Lachin-Foulkes power for a given sample size is calculated, not estimated.** The figure labelled
+  "Power (Estimated)" came from a rule of thumb that scaled the type II error by the ratio of required
+  to entered patients, and stopped at 99%. It is now solved from the Lachin-Foulkes formula. The
+  default design with 50 patients has a power of 50.3%, not 72.1%.
+- **Required patients and events are rounded up, not to the nearest whole number.** The default design
+  needs just over 139 patients, and 139 falls short of 90% power. The result now shows 140, with the
+  power reached ("Power with 140 patients: 90.1%"). Schoenfeld events are rounded the same way (161.07
+  events give 162, power 90.2%). With unequal allocation each arm is rounded up and shown: a 2:1
+  design reads "161 patients (107 treatment, 54 control)".
+- **The power curve uses the same calculation as the result.** The Lachin-Foulkes curve plots exact
+  power. The Schoenfeld curve plots power against the number of events; it had assumed that half the
+  patients have an event. The design point sits on the curve, and a reversed or unreadable custom range
+  is corrected with a note. Both plots now appear after export, resizing or reopening a file.
+- **Designs that cannot be computed stop with a specific message**, in both modes: equal hazards, a
+  study shorter than its accrual period, exponential entry with gamma 0, and gamma equal to a hazard
+  plus the dropout rate.
+- **Wording.** A hazard ratio above 1 is described as an increase in hazard (for example "HR = 1.5
+  represents a 50% increase in hazard") instead of a negative reduction. Large counts print in full.
+- **Saved analyses:** the "Statistical Power" box (`power`) is removed. It never affected the results:
+  power always came from "Type II Error Rate (β)", now titled "Type II Error Rate (β = 1 - power)". The
+  analysis remains in the draft menu.
+
+## Unreleased — `mixedcox` (Mixed-Effects Cox Regression): the model is fitted and its table filled; options without output removed (module 1.0.81.01, analysis 0.0.1)
+
+- **The analysis now fits its model.** The way the formula was checked always failed on the
+  random-effect term, so earlier versions stopped with a model-fitting error before any result
+  appeared.
+- **The Fixed Effects Coefficients table is filled.** Its rows were added in a way that left every
+  cell empty. Each term now shows the coefficient, standard error, z, p, hazard ratio and a new 95% CI
+  for the hazard ratio, labelled with your variable names (for example "sex: female"). An ordinal
+  predictor compares each level with the first level instead of using polynomial contrasts.
+- **The clustering measure is corrected and renamed.** "Calculate Intracluster Correlation" is now
+  "Show Approximate Latent-Scale Variance Fraction": σ² / (σ² + π²/6), using the residual variance of
+  a proportional-hazards model on the log-hazard scale rather than the logistic π²/3. Nested models
+  give two fractions; a model with a random slope gives it at slope variable = 0, or not at all.
+- **Model comparison.** The likelihood-ratio statistic is truncated at 0. With a single variance the
+  p-value allows for testing at the boundary (half the χ²(1) tail). Models with several variance
+  components show no p-value, with the reason.
+- **Random slopes and data checks.** "Random Slope Variable" accepts numeric variables only and is also
+  added to the fixed effects; nested clustering needs a random intercept. With dates, a blank date
+  drops its row (counted) instead of stopping the analysis, and a date that does not match the chosen
+  layout stops it with examples. Negative times are excluded and counted, and the 5-cluster minimum is
+  checked after incomplete rows are removed.
+- **Options that produced no output are removed.** The plots were empty placeholders and several
+  tables were never filled. Gone: Time Type in Output, Correlation Structure, Optimization Method,
+  Likelihood Ratio Test (the test is under Show Model Comparison), Test Random Effects Significance,
+  Residual Analysis, Influence Diagnostics, Predict Random Effects, the three plots and Number of
+  Clusters to Plot, Estimate Variance Components, Confidence Intervals (now always shown), Bootstrap
+  Variance Estimation, Bootstrap Samples, Show Cluster Summary, Show Natural Language Summaries and
+  Show Analysis Explanations.
+- **Saved analyses:** the removed settings are ignored when an older file opens, and R calls must drop
+  those arguments. A factor saved in Random Slope Variable must be replaced by a numeric variable. The
+  analysis remains in the draft menu.
+
+## Unreleased — `decisioncalculator` (Medical Decision Calculator): large-table crash, corrected negative-test probability, interval and workload fixes (module 1.0.81.01, analysis 1.0.9)
+
+- **The analysis no longer fails in jamovi for tables of about 430 subjects or more.** jamovi passes
+  whole numbers to R as integers, and one calculation multiplied the four table margins in integer
+  arithmetic, which overflows from about 430 balanced subjects. The run stopped with "missing value
+  where TRUE/FALSE needed", so a 500-case study (TP 180, FN 20, FP 30, TN 270) gave no result. Runs
+  from R syntax were not affected.
+- **The Measures table now shows the probability of a reference-positive outcome after a negative test
+  (1 - NPV).** The old negative-test column repeated the NPV. The two post-test columns are labelled
+  "(Positive Test)" and "(Negative Test)"; the second matches the nomogram's Post(-).
+- **A test that is never positive (or never negative) no longer gets a likelihood ratio from the group
+  sizes.** At TP 0, FP 0, FN 10, TN 100 the zero-cell correction produced an LR+ of 9.18, and a
+  nomogram saying a positive result raised the probability. These cells are now blank with a footnote,
+  and the nomogram is left out with the reason.
+- **Confidence intervals.**
+  - With a zero cell, the LR+, LR- and DOR intervals use the same 0.5-corrected counts as the
+    estimates above them. A side with no finite limit is blank and footnoted.
+  - Youden's index uses the Agresti-Caffo interval; the previous "95%" interval covered about 99.7%.
+  - The number needed to diagnose is never negative and always lies inside its interval.
+  - Balanced accuracy and F1 are no longer interval rows (their limits read "NaN").
+  - Each interval table states its method, and that every count is treated as one independent
+    patient.
+- **An inverted table is flagged even with the nomogram off.** When sensitivity + specificity is below
+  1, a strong warning appears if the whole 95% interval of Youden's index is below 0; otherwise an
+  information note suggests checking for swapped cells.
+- **Nomogram.** A test with an LR+ of exactly 1 is drawn and described as leaving the probability
+  unchanged, instead of being refused as inverted. Small probabilities keep their digits: at a
+  prevalence of 0.01% the text reads "from 0.01% to 0.03%", not "0.0%". A post-test probability between
+  99.45% and 99.5% is no longer labelled "100%" (the same plot is used by cotest and decision).
+- **Illustrative cut-off comparison.** The recommendation compares the Youden index intervals, the
+  quantity it ranks on; before, a scenario with accuracy 0.595 could be called clearly better than one
+  with 0.941. Scenarios must have the same numbers of reference positives and negatives (120/100 and
+  110/110 used to pass as one cohort). A row better on both sensitivity and specificity is flagged as
+  not another threshold of the same marker. One invalid scenario no longer blanks the others.
+- **Deployment workload.** A mistyped prevalence list (for example "1%,5%") gives an error for that
+  table only, instead of removing every table. Prevalence, PPV and NPV show as percentages. The default
+  unit label is now "patient"; it changes no calculation.
+- **Smaller fixes.** A supplied prevalence below 5% or above 95% gets an information note rather than a
+  strong warning. Empty cells are blank with a footnote instead of "NaN". Labels such as "<LOD" are
+  displayed, and names containing quotes export valid R syntax.
+- **Saved analyses:** an `.omv` saved earlier shows the old negative-test column until it is re-run.
+
+## Unreleased — `sequentialtests` (Sequential Testing Analysis): entry checks, test-order and number-display fixes (module 1.0.81.01, analysis 1.0.9)
+
+- **An out-of-range entry is no longer silently replaced.** Typing 80 for an 80% sensitivity was
+  changed to 0.99 (and a prevalence above 0.999 to 0.999), and the analysis ran on it without a
+  message. jamovi now stops with a range error; enter proportions (0.80).
+- **The test-order warning is replaced.** Both serial strategies give the same combined sensitivity,
+  specificity, PPV and NPV in either order. The old warning implied otherwise, and it fired on the
+  order that needs fewer second tests (98 against 365 per 1,000 with the default tests swapped). An
+  information note now appears only when swapping would save second tests, and gives both numbers.
+- **Number Needed to Screen.** Parallel testing could show one more than serial-negative testing for
+  the same accuracy (3 against 2 at sensitivities 0.20/0.75, prevalence 62.5%). Its note now says it
+  counts people entering the pathway per true positive found, not people screened per death prevented.
+- **No value strictly between 0 and 100% is shown as 100.0% or 0.0%.** Sentences and plot labels add
+  decimals (a combined specificity of 0.9995 reads 99.95%). Table cells that jamovi rounds to 100.0% get
+  a footnote with the actual value. The formulas panel no longer prints "1e-04" or "PPV = 1".
+- **Clearer tables.** Each test's PPV and NPV are labelled as values for that test used alone: with the
+  defaults, the confirmatory test's 81.6% is not the 93.4% of the serial pathway. The flow table's last
+  row reads "After Combined Strategy". A cost table whose unit costs are both 0 says so.
+- **Notices.** Similar test names give a warning rather than a strong warning, and one-letter names
+  such as "A" and "B" are no longer called similar. The low-prevalence warning says "more than 15
+  percentage points" instead of "tens". An empty test name falls back to "Test 1"/"Test 2" instead of
+  stopping the analysis.
+- **Plots and interface.** Long names such as "Immunohistochemistry" stay inside the flow-diagram
+  boxes; schematic plots show no axes or grid under any jamovi theme; the probability axis stops at 100%
+  (the HIV example ran to 117%). Unit costs moved into a collapsed "Cost Analysis" box, active only when
+  cost analysis is ticked.
+
+## Unreleased — module-wide: tables emptied on a re-run, and two draft analyses that never showed results (module 1.0.81.01)
+
+- **A table that held rows and is then emptied no longer breaks the analysis.** jamovi's table
+  clearing left the old row names behind. A table emptied on a re-run (an early stop, a section
+  switched off) could then fail with "invalid 'row.names' length", or with "subscript out of bounds".
+  Every analysis now clears its tables in a way that also resets the names (269 places in 70 analyses).
+- **`timeupdatedsurvival` (Time-Updated Survival Estimates, draft menu) shows its results.** Clearing
+  its placeholder row threw an error, so every fitted model showed only an error footnote. Behind that,
+  the fitted model was stored under the name of the results tree and replaced it.
+- **`decisiongraph` (Decision Tree Graph, draft menu)** stored its strategy results under the same name
+  and so wiped its own results tree at the start of every run.
+
+## Unreleased — `cotest` (Co-Testing Analysis): entry checks, interpretation text and display fixes (module 1.0.81.01, analysis 1.0.9)
+
+- **An out-of-range entry is no longer silently replaced.** Typing 80 for an 80% sensitivity was
+  changed to 0.99 without a message. jamovi now stops with a range error.
+- **The copy-ready summary gives the co-testing rule's own result.** It leads with the probability
+  after a positive result on either test, then both positive and both negative. At the defaults
+  both-positive is 89.1%, but either-positive, the result the parallel rule acts on, is 42.5%; only the
+  first used to be given. Entered values print as typed (0.925 as 92.5%), and default dependence values
+  are flagged as defaults, not estimates.
+- **Every row is described on the same scale.** The interpretation panel reads each row's combined
+  likelihood ratio with the Jaeschke et al. (1994) rule of thumb, labelled as a guide. The old wording
+  judged rises against the prevalence and could call a rise from 92% to 99.9% "minimal change".
+- **Overstated text corrected.** A test with sensitivity + specificity below 1 is flagged as below
+  chance (most likely entered the wrong way round). Prevalence warnings no longer say the result is
+  "driven mainly by the prevalence". Unsourced "typical ranges" and fixed-percentage dependence claims
+  were removed. Notices use the test names you entered.
+- **Dependence inputs are labelled "Correlation (phi)".** The help explains converting a published
+  covariance, and says that kappa is a different statistic.
+- **Display.** A result combination the dependence makes impossible is footnoted as not estimable
+  instead of showing "NaN". A worked example whose numbers are relabelled with your own test names
+  raises a warning. Names such as "HPV <LOD" display in full.
+
+## Unreleased — `survival` (Survival Analysis) and `singlearm` (Single Arm Survival): all event types at selected times in competing-risk analyses (module 1.0.81.01, analysis 1.0.9)
+
+- **New table: observed-time cumulative incidence and follow-up support.** In a competing-risk
+  analysis, a new table gives, at each cut-point time, the probability of being event-free and the
+  cumulative incidence of the event of interest and of the competing event(s), with 95% confidence
+  intervals (Aalen-Johansen estimates, which add up to one). `survival` shows one block per group;
+  `singlearm` reports the whole cohort. Two new checkboxes, "All event types at selected times" and
+  "Follow-up support counts", sit in a collapsed "Observed-time competing risks" box and are on by
+  default.
+- **Follow-up support.** The table also shows the number at risk and the cumulative numbers of events
+  and censorings at each time. A time beyond a group's longest follow-up is left out, and the group is
+  named in a note, instead of being extrapolated.
+- **Risk table under the competing-risk plot (`singlearm`).** "Risk table" now also prints the numbers
+  at risk beneath the cumulative incidence plot.
+- Both analyses are in the testing menu while these changes are reviewed.
+- **Saved analyses:** a competing-risk analysis saved earlier shows the new table when recalculated,
+  because both new options start switched on.
+
+## Unreleased — `nogoldstandard` (Analysis Without Gold Standard): latent models re-estimated, unreliable estimates left blank, pooled categories reported (module 1.0.81.01, analysis 1.0.9)
+
+- **Penalized EM estimates can change (2026-10-03).** The method now starts from several points and
+  refines the best solution numerically, maximizing the likelihood with Beta(2,1) penalties on
+  sensitivity and specificity. It used to run one EM pass from one start for at most 100 iterations
+  and clip every estimate to 0.1%-99.9%. Latent class fits are now refined and checked the same way.
+- **Unreliable latent estimates are blank.** When the fit does not converge or the data do not identify
+  the parameters, the prevalence, sensitivities, specificities and their intervals are left blank with
+  a strong warning ("Latent parameters not estimable", "Weak identification of latent parameters"). A
+  non-converged fit used to show numbers together with a warning not to report them.
+- **Stricter bootstrap intervals.** Resamples without a converged, identifiable fit are discarded, an
+  interval with fewer than 20 usable estimates is left blank ("Insufficient bootstrap estimates"), and
+  a warning says bootstrap coverage is approximate. Intervals can be wider than before.
+- **Three tests.** The model-fit table now shows G-squared and Chi-squared, with a note that zero
+  residual degrees of freedom do not make them chi-squared tests; they used to be left out.
+- **Latent estimates are withheld when the two classes cannot be told apart.** If both fitted classes
+  have the same average probability of a positive result, neither can be called the high-positive
+  class. Latent class analysis used to pick one anyway. It now leaves the estimates and their intervals
+  blank, with the strong warning "Class orientation is ambiguous"; observed agreement and fit
+  diagnostics are still shown.
+- **Tests with more than two categories are flagged.** Every category other than the chosen positive
+  level is counted as negative, including equivocal or indeterminate results. The warning "Test
+  categories collapsed" now says so; the numbers are unchanged.
+- **Display.** The Test Agreement Matrix keeps its colour gradient under a jamovi theme with a colour
+  palette, and rows of the pairwise tables stay separate when test names contain "vs" or an underscore.
+- **Saved analyses:** recomputing a saved latent class or penalized-EM analysis can give different
+  estimates, or blank cells.
+
+## Unreleased — draft survival models (`curemodels`, `intervalsurvival`, `illnessdeath`, `flexmultistate`, `flexparametric`, `flexrstpm2`): fitted results replace placeholders (module 1.0.81.01, analysis 1.0.83)
+
+All six were rewritten. Several of their outputs had been fixed numbers, random numbers or silent
+approximations rather than estimates; those are gone. All six remain drafts, available only in the
+ClinicoPath draft menus.
+
+- **Cure Models for Long-term Survivors (`curemodels`).** The mixture model's cure fraction was the
+  model's probability of eventually having the event, at the reference covariate profile. Cure
+  probabilities are now its complement, averaged over the analysed cohort by default. Event, censoring
+  and competing-event values and the endpoint are now chosen explicitly. "Cure Threshold Time" is now
+  "Late follow-up assessment time", and new tables show follow-up support, observed probabilities and
+  fit diagnostics.
+- **Interval-Censored Survival Analysis (`intervalsurvival`).** Each interval was replaced by its
+  midpoint before an ordinary Cox or AFT fit, and some survival probabilities were a fixed 0.5. The
+  Turnbull estimator, a proportional-hazards model or a parametric model is now fitted to the intervals
+  themselves.
+- **Illness-Death Multi-State Models (`illnessdeath`).** Cross-validation scores were random numbers.
+  Each transition now gets its own Cox model with subject-clustered standard errors, and state
+  occupation probabilities are Aalen-Johansen estimates.
+- **Flexible Multi-State Survival Models (`flexmultistate`).** Transition probabilities came from a
+  fixed placeholder formula. A parametric model is now fitted to each transition; a subject ID and an
+  entry time are required, and the "custom" model type was removed.
+- **Flexible Parametric Survival Models (Enhanced) (`flexparametric`).** A spline fit that failed was
+  replaced by a Weibull model with only an R warning. The requested spline is now fitted as chosen, and
+  a failure is reported. Hazard ratios are shown only for proportional-hazards spline coefficients.
+- **Comprehensive Flexible Parametric Survival Models (`flexrstpm2`).** "Bootstrap validation" added
+  random noise to the original estimates, and some hazard and model-comparison output used fixed
+  values. Royston-Parmar models are now fitted, with real bootstrap refits.
+- **Saved analyses:** analyses saved with the earlier drafts give different results when recalculated,
+  and some wait for the newly required inputs.
 
 ## Unreleased — rare-disease AI validation and workload
 
@@ -225,6 +682,21 @@
   through outcome filtering and patient summaries; loss of those codes could
   produce incorrect metrics or stop fixed-rate analysis in the desktop app.
   ROC AUC, confidence-interval defaults and cutoff-selection defaults are unchanged.
+
+- In module 1.0.81.01, `psychopdaROC` analysis 1.0.91 tests each marker's power against 0.5 on its
+  own. With two or more markers, "Statistical power (AUC vs. 0.5)" used to scale the standard error by
+  √(2(1 − r)), where r was the "ROC correlation" setting, so adding markers changed a marker's power
+  and required N. At the default r = 0.5 the factor was 1, so default results are unchanged. The ROC
+  correlation box is gone (an R argument is accepted and ignored), "Statistical power analysis" is now
+  "Statistical power (AUC vs. 0.5)", and "Expected AUC Difference" is now "Target AUC minus 0.5". **Intensive options now wait for Run:** ticking DeLong comparison, bootstrap
+  intervals, IDI, NRI, prior-weighted bootstrap, clinical utility, power, effect sizes, partial AUC,
+  all observed cutpoints, bootstrap or LOESS cutpoint methods or ROC smoothing no longer starts the
+  computation; click the always-visible "Run selected analyses" button. Datasets with more than 10,000
+  marker values (rows × markers) also wait for Run. "Analysis Status" says when the results shown are
+  from the previous run. "Run manually" is now "Run all analyses manually", and R calls pass
+  `run = TRUE` (copied syntax includes it). With "Prior prevalence", a PPV/NPV note says the values are
+  adjusted to the target prevalence, and the prevalence plot reads "Target prevalence" instead of
+  "Sample prevalence".
 
 - `enhancedROC` analysis 1.0.85 resolves the independent review of 2026-10-11. Changes a user can
   see in the numbers: AUC-PR is now the interpolated precision-recall area (Davis & Goadrich 2006;
@@ -441,6 +913,50 @@
   output, paired-t planning, and comparator-aware precision labels. Unsupported
   McNemar planning now explains that discordant-pair assumptions are required.
 
+## Unreleased — `agreement` (Interrater Reliability): bootstrap intervals for specific agreement (module 1.0.81.01, analysis 1.0.9)
+
+- **Specific agreement can use a bootstrap interval.** A new "Specific agreement interval method"
+  offers "Exploratory paired case/cluster bootstrap" beside "Approximate Wilson (legacy)", which stays
+  the default, so existing numbers do not change. The bootstrap resamples whole cases with the
+  analysis's bootstrap sample count, confidence level and seed, and reports percentile limits.
+- **Patient or cluster ID.** An optional "Patient/cluster ID for specific agreement" makes the
+  bootstrap resample whole patients instead of single specimens. Every row needs an ID, and an ID
+  requires the bootstrap method.
+- **Blank when not trustworthy.** If any bootstrap draw is undefined or all draws are equal, the limits
+  are left blank and the reason is shown. A note says the intervals are exploratory: in simulation they
+  covered less than the stated level even with 60 clusters.
+- **More columns.** The Specific Agreement table shows Complete cases, Sampling units, the attempted,
+  valid and undefined draws, and the CI method or status. The interval columns read "CI Lower" and
+  "CI Upper", because the level follows the chosen confidence level.
+
+## Unreleased — `pathagreement` (Pathology Interrater Reliability): reader-study workflow at a clinical cutoff (module 1.0.81.01, analysis 1.0.9)
+
+- **New "Reader workflow".** Besides "Standard agreement" (the default, unchanged), it offers "Binary
+  reader diagnostics", "Ordinal clinical cutoff" and "Numeric clinical cutoff". Calls, ordinal grades
+  or numeric scores become positive/negative calls at a prespecified cutoff, and reader tables replace
+  the standard agreement output.
+- **Readers against a reference.** Each reader gets sensitivity, specificity and balanced accuracy with
+  exact binomial intervals. Indeterminate results are excluded, never counted as negative.
+- **Agreement at the cutoff.** Counts, observed agreement, kappa and positive/negative specific
+  agreement between readers, a list of cases with different clinical calls (up to 50 by default), and
+  kappa on the original ordinal scores.
+- **Patients with several specimens.** With a patient or cluster ID, "Joint bootstrap intervals" (off
+  by default) resample whole patients; the intervals are labelled exploratory.
+- **Optional extras, off by default:** an exploratory kappa-balanced score and reproducible R code.
+- **New example dataset** `ihc_reader_reproducibility`: three fictional readers scoring 180 specimens
+  from 90 patients.
+- The analysis is in the testing menu.
+
+## Unreleased — `cohenskappa` (Cohen's Kappa Agreement): weighted kappa showed the unweighted value (module 1.0.81.01, analysis 1.0.83)
+
+- **Weighted kappa is now weighted.** "Weighted Kappa (Linear)" and "Weighted Kappa (Quadratic)"
+  reported the unweighted kappa, with its standard error and z. They now use linear and quadratic
+  weights.
+- **Weighted kappa needs an ordered scale.** Both raters must be ordinal variables with the same levels
+  in the same order; otherwise a weighted choice stops with a message, and "All Methods" reports only
+  unweighted kappa, with a note.
+- The analysis is in the draft menu.
+
 ## Unreleased — `decisioncompare` integration repairs (module 1.0.81.01, analysis 1.0.84)
 
 - Align the analysis source version with the generated runtime version, preserving the
@@ -612,6 +1128,29 @@ Table numbers change only where noted below; the text around them changes more.
   - Haldane (1956) and Anscombe (1956) for the 0.5 correction.
 
   The module-wide knitr and ggplot2 citations now show their current title, authors and year.
+
+## Unreleased — `hullplot` (Hull Plot): concave hulls without extra packages (module 1.0.81.01, analysis 1.0.81)
+
+- **Hulls are always concave.** Hulls are drawn by ggforce 0.5.0 or later, which computes concave hulls
+  itself, so the concaveman and V8 packages are no longer needed.
+- **No convex fallback.** Where V8 and concaveman could not both be loaded, the plot used to draw convex
+  hulls, ignore "Hull Concavity" and "Hull Boundary Expansion", and show a "Concave hulls unavailable"
+  notice. Both settings now always take effect.
+
+## Unreleased — option panels: controls that could not be switched (module 1.0.81.01)
+
+- **Two checkboxes could not be ticked.** "Descending order" in Arc Diagram and "Value labels
+  (flerlage)" in Segmented Total Bar Charts depended on conditions written in a form jamovi cannot
+  read, so they stayed off. They now become available when "Node order" is not None and when the
+  Flerlage plot type is chosen.
+- **Settings grey out when they do not apply.** For the same reason, dependent settings in Advanced
+  Ridge Plot, Segmented Total Bar Charts, LASSO Logistic Regression, Sequential Testing Analysis and
+  Outlier Detection did not follow the choice that controls them. They now do.
+- **Histogram options respond again.** An error while the histogram options panel was set up stopped
+  the controls after the confidence level from reacting to the settings they depend on.
+- **Hints after input boxes are shown.** Hints written in parentheses, such as "(months)", were never
+  displayed; they now appear without the parentheses. This affects analyses in the draft and testing
+  menus only.
 
 ## Unreleased — `decisioncombine` (Combine Medical Decision Tests) review fixes: single-test rules, inversion guard, notices (module 1.0.81.01, analysis 1.0.84)
 
@@ -1308,6 +1847,20 @@ of those cells were previously bare English and untranslated in every locale.
 - **`singlearm`:** the generic failure message now names the failing stage ("An error occurred
   during data_processing.") instead of swallowing it ("An error occurred during ."). `context` is a
   real argument of `jmvcore::format` and was consuming the value rather than substituting it.
+- **Six messages showed a placeholder instead of a value (same sweep, 2026-09-24).** A placeholder
+  name containing an underscore is never filled in, so these printed the placeholder itself. They now
+  give the value:
+  - `survivalcont`: the note under the cut-off table (the variable and its cut-off), and the error for
+    numeric date columns (the largest value found);
+  - `dataquality`: the scope sentence of Little's MCAR test (the numbers of numeric and non-numeric
+    variables);
+  - `outcomeorganizer`: the few-events warning (events and non-missing outcomes);
+  - `oddsratio`: the Firth penalized-AIC line in Model Metrics (the number of parameters; the AIC
+    itself was right);
+  - `pathagreement`: the opening sentence of the Krippendorff's alpha bootstrap footnote.
+- **`waterfall`:** the Time-to-Response & Duration of Response table keeps its three rows instead of
+  being rebuilt on every run. Without a Time Variable it now says that one is required, instead of
+  appearing empty, and notes from an earlier run are removed once they no longer apply.
 - **`agreement`:** plot error messages, the Krippendorff footnote and the cluster-homogeneity
   conclusion were bare English and are now translatable.
 - **`agreement` (`/check-function --profile release`, then an adversarial review of that pass):**
@@ -1425,6 +1978,93 @@ module says about all three.
   on categorical ratings.
 - Notes no longer persist from one run into the next, so a failed run cannot show the previous
   run's numbers.
+
+## Unreleased — library audit follow-ups across meddecide and OncoPath analyses (module 1.0.81.01)
+
+Changes made on 2026-09-23 while answering the jamovi library reviews. Later sections build on several
+of them.
+
+- **`agreement`: Finn's coefficient takes the number of categories from the rating scale, and the
+  value can change sign.** The number of categories sets the chance baseline, and it came only from
+  "Number of Rating Categories (Finn)", default 3. On a binary scale left at the default the analysis
+  reported +0.400, "Fair agreement", where the correct value is -0.600, worse than chance. For Nominal
+  or Ordinal raters it now comes from the declared levels, with a note when the option disagreed; the
+  option is used only for numeric ratings. Raters that declare conflicting level orders are refused,
+  and continuous measurements no longer get a coefficient.
+- **`agreement`: one rule decides whether a rating is a category code or a measurement.** A numeric
+  rating counts as a measurement when it has a non-integer value or more than 20 distinct values.
+  Numeric codes such as 0/1 now get specific agreement, the heatmap, rater profiles, agreement by
+  subgroup, the clusterings and nominal iota, which were refused in the same run that printed Cohen's
+  kappa. One measurement among categorical raters now stops kappa with a note naming it, instead of a
+  near-zero kappa that treated each measured value as a category.
+- **`agreement`: weighted kappa for three or more raters is no longer replaced by unweighted Fleiss'
+  kappa.** With weights chosen, the row reads "Fleiss' kappa not computed (weights requested)", and a
+  note points to the alternatives.
+- **`agreement`: an undefined kappa is explained.** When every rating fell in one category, two-rater
+  kappa showed "NaN". Kappa, z and p are now blank, with a note that this is not a failed analysis.
+- **`agreement`: with three or more raters, Agreement % is the unanimity rate, and a note says so.**
+  On Fleiss' six-rater data that is 16.67%, against a mean pairwise agreement of 55.56%.
+- **`agreement`: "Rater bias test" is now the "Directional discordance test (ordinal, 2 raters)".** It
+  asks whether one rater is more often the higher scorer when the two disagree. It had been described
+  as a test of marginal homogeneity, which it is not: opposing shifts cancel, and one table gave p = 1
+  where Stuart-Maxwell gives p = 9.4e-14. It needs two Ordinal raters with the same levels, and the df
+  column shows 1.
+- **`agreement`: Bland-Altman and TDI labels say what is computed.** "Confidence Level for LoA" is now
+  "Coverage for limits of agreement". "Proportional bias test" is now "Difference-mean trend
+  (exploratory)", with a note that unequal precision alone produces a slope (two unbiased methods with
+  error SDs 1 and 4 were flagged in 50 of 50 simulations). The TDI table is "Empirical Total Deviation
+  Index (TDI)", its verdicts read "Observed criterion met / inconclusive / not met", and "Coverage
+  Probability" is "Empirical coverage target (percent)".
+- **`decisioncurve`: ticking one option no longer moves another option's bootstrap numbers.** All
+  resampling drew from one stream, so ticking "Bootstrap confidence intervals" changed the comparison
+  tables' p-values. Each consumer now has its own stream derived from the seed; the same seed still
+  reproduces a run, but bootstrap results differ from earlier versions. "Exploratory Pairwise Model
+  Comparison" is no longer capped at 1,000 replications. The "Test method (bootstrap only)" control,
+  which had one choice, is removed; R calls must drop `comparisonMethod =`.
+- **`enhancedROC`: sensitivity and specificity intervals follow the confidence level.** They were
+  always 95% beside an AUC interval at the chosen level; the column titles now give the level. The
+  class-imbalance warning always appears when imbalance is found (its checkbox, now "Explain the
+  imbalance warning in full", only adds detail). Fewer than 10 events in a class is an error rather
+  than a strong warning. Multi-class output drops the "Hand-Till" label and reads "One-vs-One
+  Pairwise", with the range of pair AUCs.
+- **`waterfall`: the Percentage column of Response Categories shows percentages.** Its display format
+  was not recognised, so it printed proportions. Opening the analysis no longer shows a red "Variables
+  required" error, and a data-processing failure uses jamovi's own error state.
+- **`diagnosticmeta`: predictive values come from your pooled estimates.** The interpretation guide
+  gave PPV and NPV for a fixed 90% sensitivity and 80% specificity. A new "Predictive Values by
+  Prevalence" table computes them from the pooled estimates at 5%, 10%, 20% and 50% prevalence, and
+  the likelihood-ratio guide is now a "Likelihood Ratios for Clinical Decision-Making" table. A
+  "Meta-regression power caution" warning appears with fewer than 10 studies per covariate parameter,
+  and with fewer than 10 studies the Deeks funnel line is labelled "low statistical power, descriptive
+  only".
+- **`lassologistic`: Path Inclusion Proportion agrees with the coefficient table.** With standardized
+  predictors it judged a coefficient non-zero on the wrong scale. A score that runs backwards now gets
+  "Scoring System Runs Backwards", quoting its real sensitivity and specificity; the old note claimed
+  1.000 and 0.000 even when the table showed 0.400 and 1.000.
+- **`decisioncalculator`: a failure in the interval tables no longer wipes the rest.** If the
+  intervals could not be computed, the summary, about, assumptions and glossary panels disappeared and
+  the Fagan nomogram came up blank. Now only the interval tables are blank, with a notice. A negative
+  count gets the analysis's own notice instead of jamovi's range error.
+- **`decisioncompare`: no "not significant" verdict for a comparison that never ran.** When no pair of
+  tests could be compared, the summary, recommendations and report text said the comparison "did not
+  reveal a statistically significant difference". They now say no comparison could be computed.
+- **`decisioncombine`: a reversed positive level is checked on every run.** "Positive Levels May Be
+  Inverted" and "No Rule Performs Better Than Chance" ran only when the candidate-rule ranking (off by
+  default) was ticked.
+- **`psychopdaROC`: "Analysis Level" is now "Guidance Level", and its guidance is shown.** Its text,
+  including the Basic level's warning that a cut-point found on the same data is optimistic, was
+  computed and then discarded. The prior-weighting table's intervals read "95% Interval (weighted
+  AUC)", with a note that they bracket the weighted AUC, not the AUC itself (with prior precision 20 and
+  100 cases, 83% as wide as the AUC's bootstrap interval). Unticking and re-ticking "DeLong Test Details" no longer duplicates its rows.
+- **`sequentialtests`: the probability plot says when its end point is not the tabled figure.** With
+  20% prevalence and both tests at 60%/70%, serial-positive testing plots 12.50% where the table's
+  1 - NPV is 14.95%; a caption now gives both, and the retested subgroup (22.2%).
+- **`nogoldstandard`:** latent-class bootstrap intervals carry a note that they are likely too narrow,
+  because each resample starts from the full-sample solution.
+- **`decision`:** footnotes in the 95% confidence-interval tables no longer gain a copy on every
+  re-run, and they disappear when "Explanatory footnotes" is unticked.
+- **`ihcheterogeneity`:** the Notices panel is hidden when empty, and the Clinical Interpretation panel
+  until a regional measurement is selected.
 
 ## Unreleased — plot themes and palettes (module 1.0.81.01)
 

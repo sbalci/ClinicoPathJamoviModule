@@ -663,12 +663,12 @@ test_that("ORR/DCR use the RECIST-evaluable denominator with matching CIs and di
 test_that("an unparseable Date Format is named, not blamed on end < start", {
     d <- data.frame(id = c("D1", "D2"), sd = c("2020-01-01", "2020-02-01"),
                     ed = c("2020-07-01", "2020-08-01"), stringsAsFactors = FALSE)
-    r <- suppressWarnings(
-        ClinicoPath::swimmerplot(data = d, patientID = "id", startTime = "sd",
-                                 endTime = "ed", timeType = "datetime",
-                                 dateFormat = "dmy"))
-    expect_match(paste(r$notices$content, collapse = ""),
-                 "could be parsed as dates with the selected Date Format")
+    expect_error(
+        suppressWarnings(
+            ClinicoPath::swimmerplot(data = d, patientID = "id", startTime = "sd",
+                                     endTime = "ed", timeType = "datetime",
+                                     dateFormat = "dmy")),
+        "could be parsed as dates with the selected Date Format", fixed = TRUE)
 })
 
 test_that("glossary and about populate even with an incomplete selection", {

@@ -2264,12 +2264,15 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             private$.noticeList <- list()
             private$.censor_coding <- NULL
             private$.renderNotices()
+            self$results$plot$setState(NULL)
 
             # `instructions` has no clearWith rule covering every trigger, so an
             # earlier run's guidance would otherwise linger. Severity messages no
             # longer live here or in a second Html item - they all go through
             # .addNotice(), which the .noticeList reset above already clears.
-            self$results$instructions$setContent('')
+            # A nonempty blank HTML payload also replaces cached client content.
+            # An empty string left the previous guidance visible after recovery.
+            self$results$instructions$setContent('<div></div>')
 
             # Clear every repopulated output too. Each .update*() starts with its
             # own deleteRows(), but those all run AFTER the four early returns
@@ -2279,8 +2282,8 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             for (tbl in c("personTimeTable", "milestoneTable", "eventMarkerTable",
                           "groupComparisonTest", "timelineData", "summaryData"))
                 .deleteTableRows(self$results[[tbl]])
-            self$results$interpretation$setContent('')
-            self$results$copyReadyReport$setContent('')
+            self$results$interpretation$setContent('<div></div>')
+            self$results$copyReadyReport$setContent('<div></div>')
 
             # summary keeps its five scaffolded rows (setRow rejects a missing key)
             # but must not keep their values, nor any response row from last time.
@@ -2340,84 +2343,74 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 return()
             }
 
-            # Validate and process data with comprehensive error handling
+            # Fatal validation must reach jamovi's analysis error state.
+            # Keep it outside the cleanup handler for downstream computations.
+            validation_result <- private$.validateAndProcessData()
+
+            # Check for data type mismatch (Date/Time selected but numeric data)
+            if (isTRUE(validation_result$data_type_mismatch)) {
+                # Retain detailed guidance alongside jamovi's analysis error.
+                # Escape user-derived example values before HTML interpolation
+                safe_examples <- if (!is.null(validation_result$examples)) {
+                    htmltools::htmlEscape(as.character(validation_result$examples))
+                } else {
+                    character(0)
+                }
+                # Detailed HTML guidance (body in R/swimmerplot-html.R)
+                mismatch_guidance <- swimmerplot_mismatch_guidance_html(self, safe_examples)
+                self$results$instructions$setContent(mismatch_guidance)
+                jmvcore::reject(
+                    .("Date/Time input type was selected but the time variables contain numeric values. Switch Time Input Type to Raw Values (or correct the data) and re-run."),
+                    code = "time_type_mismatch")
+            }
+
+            # Dates on a numeric timeline cannot produce a valid analysis.
+            if (isTRUE(validation_result$date_detected)) {
+                # Escape user-derived format / example strings before HTML interpolation
+                safe_format <- htmltools::htmlEscape(as.character(validation_result$format %||% ""))
+                safe_examples_date <- if (!is.null(validation_result$examples)) {
+                    htmltools::htmlEscape(as.character(validation_result$examples))
+                } else {
+                    character(0)
+                }
+                # (body in R/swimmerplot-html.R)
+                date_guidance <- swimmerplot_date_guidance_html(self, safe_format, safe_examples_date)
+                self$results$instructions$setContent(date_guidance)
+                # The analysis stops here. Without this the only notice on
+                # the page was "Time units", and every summary value came
+                # out NA with nothing saying why.
+                jmvcore::reject(sprintf(
+                    .("The start/end variables look like calendar dates (%s), but Time Input Type is set to Raw Values, so no timeline could be built. Switch Time Input Type to Date/Time and choose the matching Date Format."),
+                    as.character(validation_result$format %||% "")),
+                    code = "dates_on_raw_timeline")
+            }
+
+            # Check for validation errors
+            if (isTRUE(validation_result$error)) {
+                error_msg <- paste0(
+                    "<div style='color: red; padding: 15px; border: 1px solid red; border-radius: 5px; margin: 10px;'>",
+                    "<h4>", .("Data Validation Error"), "</h4>",
+                    .fmt(
+                        .("<p><strong>Error:</strong> {message}</p>"),
+                        message = htmltools::htmlEscape(
+                            as.character(validation_result$message)
+                        )
+                    ),
+                    "<p><strong>", .("Please check:"), "</strong></p>",
+                    "<ul>",
+                    "<li>", .("All required variables are selected"), "</li>",
+                    "<li>", .("Data contains valid values"), "</li>",
+                    "<li>", .("End times are greater than or equal to start times"), "</li>",
+                    "<li>", .("Check for negative follow-up times or unrealistic durations"), "</li>",
+                    "</ul>",
+                    "</div>"
+                )
+                self$results$instructions$setContent(error_msg)
+                jmvcore::reject("{}", msg = as.character(validation_result$message),
+                                code = "invalid_timeline")
+            }
+
             tryCatch({
-                validation_result <- private$.validateAndProcessData()
-
-                # Check for data type mismatch (Date/Time selected but numeric data)
-                if (isTRUE(validation_result$data_type_mismatch)) {
-                    # Notice rendered via HTML guidance panel and ERROR notice
-                    # Escape user-derived example values before HTML interpolation
-                    safe_examples <- if (!is.null(validation_result$examples)) {
-                        htmltools::htmlEscape(as.character(validation_result$examples))
-                    } else {
-                        character(0)
-                    }
-                    # Detailed HTML guidance (body in R/swimmerplot-html.R)
-                    mismatch_guidance <- swimmerplot_mismatch_guidance_html(self, safe_examples)
-                    self$results$instructions$setContent(mismatch_guidance)
-                    # Also surface via the ERROR-notice channel for consistent,
-                    # machine-readable error reporting.
-                    private$.addNotice('ERROR', .("Data type mismatch"),
-                                       .("Date/Time input type was selected but the time variables contain numeric values. Switch Time Input Type to Raw Values (or correct the data) and re-run."))
-                    return()  # Stop here, don't process further
-                }
-
-                # Check if dates were detected (not an error, just guidance needed)
-                if (isTRUE(validation_result$date_detected)) {
-                    # Escape user-derived format / example strings before HTML interpolation
-                    safe_format <- htmltools::htmlEscape(as.character(validation_result$format %||% ""))
-                    safe_examples_date <- if (!is.null(validation_result$examples)) {
-                        htmltools::htmlEscape(as.character(validation_result$examples))
-                    } else {
-                        character(0)
-                    }
-                    # (body in R/swimmerplot-html.R)
-                    date_guidance <- swimmerplot_date_guidance_html(self, safe_format, safe_examples_date)
-                    self$results$instructions$setContent(date_guidance)
-                    # The analysis stops here. Without this the only notice on
-                    # the page was "Time units", and every summary value came
-                    # out NA with nothing saying why.
-                    private$.addNotice("ERROR", .("Dates found on a raw numeric timeline"), sprintf(
-                        .("The start/end variables look like calendar dates (%s), but Time Input Type is set to Raw Values, so no timeline could be built. Switch Time Input Type to Date/Time and choose the matching Date Format."),
-                        as.character(validation_result$format %||% "")))
-                    private$.renderNotices()
-                    return()  # Stop here, don't process further
-                }
-
-                # Check for validation errors
-                if (isTRUE(validation_result$error)) {
-                    error_msg <- paste0(
-                        "<div style='color: red; padding: 15px; border: 1px solid red; border-radius: 5px; margin: 10px;'>",
-                        "<h4>", .("Data Validation Error"), "</h4>",
-                        .fmt(
-                            .("<p><strong>Error:</strong> {message}</p>"),
-                            message = htmltools::htmlEscape(
-                                as.character(validation_result$message)
-                            )
-                        ),
-                        "<p><strong>", .("Please check:"), "</strong></p>",
-                        "<ul>",
-                        "<li>", .("All required variables are selected"), "</li>",
-                        "<li>", .("Data contains valid values"), "</li>",
-                        "<li>", .("End times are greater than or equal to start times"), "</li>",
-                        "<li>", .("Check for negative follow-up times or unrealistic durations"), "</li>",
-                        "</ul>",
-                        "</div>"
-                    )
-                    self$results$instructions$setContent(error_msg)
-                    # library-audit 2026-09-22 OncoPath [MEDIUM] DEFERRED: this is the same
-                    #   fatal-via-banner shape as waterfall's processing failure, which now calls
-                    #   jmvcore::reject(). It cannot here: .run() wraps this whole block in a
-                    #   catch-all tryCatch(error=) at the "Validate and process data" step, and that
-                    #   handler does not re-raise, so a reject() condition would be swallowed and the
-                    #   analysis would report success (guide sections 16 and 25). Revisit when that
-                    #   catch-all is narrowed to the third-party calls that need it.
-                    private$.addNotice('ERROR', .("Data validation error"),
-                                       as.character(validation_result$message))
-                    return()
-                }
-
                 # Extract patient data and show warnings if present
                 patient_data <- if ("data" %in% names(validation_result)) validation_result$data else validation_result
                 
@@ -2586,9 +2579,10 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 for (tbl in c("personTimeTable", "milestoneTable", "eventMarkerTable",
                               "groupComparisonTest", "timelineData", "summaryData"))
                     try(.deleteTableRows(self$results[[tbl]]), silent = TRUE)
-                try(self$results$interpretation$setContent(''), silent = TRUE)
-                try(self$results$copyReadyReport$setContent(''), silent = TRUE)
+                try(self$results$interpretation$setContent('<div></div>'), silent = TRUE)
+                try(self$results$copyReadyReport$setContent('<div></div>'), silent = TRUE)
                 try(private$.resetSummaryTable(), silent = TRUE)
+                try(self$results$plot$setState(NULL), silent = TRUE)
 
                 error_msg <- paste(
                     "<div style='color: red; padding: 10px; border: 1px solid red; border-radius: 5px;'>",
@@ -2607,11 +2601,10 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     "</div>"
                 )
                 self$results$instructions$setContent(error_msg)
-                # Surface the failure via the ERROR-notice channel. NOT re-raised:
-                # stop(e) put jamovi into its raw error state, which duplicated
-                # and undermined the tailored guidance just written above.
-                private$.addNotice('ERROR', .("Error in Swimmer Plot Analysis"),
-                                   as.character(e$message))
+                # Preserve the original condition so jamovi records the failure.
+                # The instructions retain the detailed guidance without a second
+                # ERROR notice duplicating jamovi's analysis-level message.
+                stop(e)
             })
         },
         

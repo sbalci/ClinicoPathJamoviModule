@@ -136,19 +136,19 @@ test_that("swimmerplot handles grouping variable", {
 })
 
 test_that("swimmerplot handles different time types", {
-  time_types <- c("raw", "datetime")
-
-  for (time_type in time_types) {
-    result <- swimmerplot(
-      data = swimmerplot_test,
-      patientID = "PatientID",
-      startTime = "StartTime",
-      endTime = "EndTime",
-      timeType = time_type
-    )
-
-    expect_s3_class(result, "swimmerplotResults")
-  }
+  result <- swimmerplot(
+    data = swimmerplot_test, patientID = "PatientID",
+    startTime = "StartTime", endTime = "EndTime", timeType = "raw"
+  )
+  expect_s3_class(result, "swimmerplotResults")
+  expect_error(
+    swimmerplot(
+      data = swimmerplot_test, patientID = "PatientID",
+      startTime = "StartTime", endTime = "EndTime", timeType = "datetime"
+    ),
+    "Date/Time input type was selected but the time variables contain numeric values",
+    fixed = TRUE
+  )
 })
 
 test_that("swimmerplot handles different time units", {
@@ -173,11 +173,15 @@ test_that("swimmerplot handles different date formats", {
   date_formats <- c("ymd", "mdy", "dmy")
 
   for (fmt in date_formats) {
+    date_data <- swimmerplot_dates
+    format_string <- switch(fmt, ymd = "%Y-%m-%d", mdy = "%m/%d/%Y", dmy = "%d/%m/%Y")
+    date_data$StartDate <- format(date_data$EnrollmentDate, format_string)
+    date_data$EndDate <- format(date_data$LastVisitDate, format_string)
     result <- swimmerplot(
-      data = swimmerplot_dates,
+      data = date_data,
       patientID = "PatientID",
-      startTime = "StartTime",
-      endTime = "EndTime",
+      startTime = "StartDate",
+      endTime = "EndDate",
       timeType = "datetime",
       dateFormat = fmt
     )

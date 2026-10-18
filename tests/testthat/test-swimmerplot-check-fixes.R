@@ -751,9 +751,12 @@ test_that("a parsing failure names the cause, not a downstream symptom", {
   raw_msg <- function(st, en) {
     d <- data.frame(id = paste0("P", 1:4), start = st, end = en,
                     stringsAsFactors = FALSE)
-    sw_strip(suppressWarnings(ClinicoPath::swimmerplot(
-      data = d, patientID = "id", startTime = "start",
-      endTime = "end"))$instructions$content)
+    o <- ClinicoPath:::swimmerplotOptions$new(
+      patientID = "id", startTime = "start", endTime = "end")
+    analysis <- ClinicoPath:::swimmerplotClass$new(options = o, data = d)
+    suppressWarnings(analysis$run(noThrow = TRUE))
+    expect_true(analysis$errored)
+    sw_strip(analysis$results$instructions$content)
   }
   m <- raw_msg(sprintf("%d/5/2023", 1:4), sprintf("%d/9/2023", 1:4))
   expect_match(m, "None of the start/end values are numbers")
@@ -784,9 +787,10 @@ test_that("a parsing failure names the cause, not a downstream symptom", {
   # dates on a raw timeline stop the analysis - and now say so
   d5 <- data.frame(id = paste0("P", 1:4), start = sprintf("2023-%02d-01", 1:4),
                    end = sprintf("2023-%02d-01", 6:9), stringsAsFactors = FALSE)
-  n5 <- sw_strip(suppressWarnings(ClinicoPath::swimmerplot(
-    data = d5, patientID = "id", startTime = "start", endTime = "end"))$notices$content)
-  expect_match(n5, "Dates found on a raw numeric timeline")
+  expect_error(
+    suppressWarnings(ClinicoPath::swimmerplot(
+      data = d5, patientID = "id", startTime = "start", endTime = "end")),
+    "The start/end variables look like calendar dates", fixed = TRUE)
 })
 
 
@@ -1094,11 +1098,12 @@ test_that("an aborted run does not leave the previous run's tables behind", {
   bad <- d; bad$end <- -1
   an$.__enclos_env__$private$.resetSummaryTable()
   an2 <- ClinicoPath:::swimmerplotClass$new(options = o, data = bad)
-  an2$run()
+  an2$run(noThrow = TRUE)
+  expect_true(an2$errored)
   expect_equal(an2$results$personTimeTable$rowCount, 0)
   expect_equal(an2$results$timelineData$rowCount, 0)
   expect_equal(an2$results$groupComparisonTest$rowCount, 0)
-  expect_equal(nchar(paste(an2$results$copyReadyReport$content, collapse = "")), 0)
+  expect_identical(trimws(sw_strip(an2$results$copyReadyReport$content)), "")
   # the five scaffolded summary rows survive (setRow needs them) but hold no values
   expect_equal(an2$results$summary$rowCount, 5)
   expect_true(all(is.na(an2$results$summary$asDF$value)))
