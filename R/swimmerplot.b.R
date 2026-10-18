@@ -735,6 +735,20 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             }
 
             patient_data <- patient_data[valid_rows, ]
+
+            # Group is a patient-level attribute for the ORR/DCR comparisons.
+            # Do not choose a group by file order when treatment episodes differ.
+            if ("patient_group" %in% names(patient_data)) {
+                groups <- split(as.character(patient_data$patient_group),
+                                patient_data$patient_id)
+                conflicts <- vapply(groups, function(x)
+                    length(unique(x[!is.na(x)])) > 1L, logical(1))
+                if (any(conflicts)) {
+                    return(list(error = TRUE, message = sprintf(
+                        .("%d patient(s) have conflicting non-missing group values. Group comparisons require one fixed group per patient. Select a patient-level grouping variable or remove the grouping selection; episode-specific groups cannot define independent patient groups."),
+                        sum(conflicts))))
+                }
+            }
             
             # Perform clinical validation
             validation_result <- private$.validateClinicalData(patient_data)

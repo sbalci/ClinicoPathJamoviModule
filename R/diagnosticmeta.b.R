@@ -1229,21 +1229,21 @@ diagnosticmetaClass <- R6::R6Class(
                 estimate = pooled_plr,
                 ci_lower = lr_ci$plr[1],
                 ci_upper = lr_ci$plr[2],
-                p_value = NA_real_
+                p_value = NULL
             ))
 
             bivariate_table$setRow(rowKey = "nlr", values = list(
                 estimate = pooled_nlr,
                 ci_lower = lr_ci$nlr[1],
                 ci_upper = lr_ci$nlr[2],
-                p_value = NA_real_
+                p_value = NULL
             ))
 
             bivariate_table$setRow(rowKey = "dor", values = list(
                 estimate = pooled_dor,
                 ci_lower = lr_ci$dor[1],
                 ci_upper = lr_ci$dor[2],
-                p_value = NA_real_
+                p_value = NULL
             ))
 
             bivariate_table$setNote("method", sprintf(.("Reitsma bivariate model, %s estimation."),
@@ -1262,8 +1262,8 @@ diagnosticmetaClass <- R6::R6Class(
                 # Blank the rows scaffolded in .init() rather than deleting them.
                 for (blank_key in c("theta", "taus_sq", "auc"))
                     hsroc_table$setRow(rowKey = blank_key, values = list(
-                        estimate = NA_real_, std_error = NA_real_,
-                        z_value = NA_real_, p_value = NA_real_))
+                        estimate = NULL, std_error = NULL,
+                        z_value = NULL, p_value = NULL))
 
                 # Validate input data
                 if (is.null(meta_data) || nrow(meta_data) == 0) {
@@ -1505,9 +1505,9 @@ diagnosticmetaClass <- R6::R6Class(
                         phm_set(rowKey = param_name, values = list(
                             parameter = display_name,
                             estimate = estimate,
-                            std_error = std_error,
-                            z_value = z_value,
-                            p_value = p_value
+                            std_error = if (is.finite(std_error)) std_error else NULL,
+                            z_value = if (is.finite(z_value)) z_value else NULL,
+                            p_value = if (is.finite(p_value)) p_value else NULL
                         ))
                     }
 
@@ -1521,9 +1521,9 @@ diagnosticmetaClass <- R6::R6Class(
                         hsroc_table$setRow(rowKey = "auc", values = list(
                             parameter = .("Area under the SROC curve (AUC = 1/(1 + theta))"),
                             estimate = auc_val,
-                            std_error = if (is.finite(theta_se)) theta_se / (1 + theta_val)^2 else NA_real_,
-                            z_value = NA_real_,
-                            p_value = NA_real_
+                            std_error = if (is.finite(theta_se)) theta_se / (1 + theta_val)^2 else NULL,
+                            z_value = NULL,
+                            p_value = NULL
                         ))
                         if (auc_val < 0.5) {
                             # theta > 1 puts the Lehmann-family curve below the
@@ -1847,7 +1847,13 @@ diagnosticmetaClass <- R6::R6Class(
                         return(NULL)
                     }
 
-                    if (is.factor(data$covariate)) {
+                    if (is.factor(data$covariate) &&
+                        any(!levels(data$covariate) %in% as.character(data$covariate))) {
+                        if (!is.null(attr(data$covariate, "contrasts"))) {
+                            metareg_table$setNote(paste0("contrasts_reset_", key), sprintf(
+                                .("%s: unused factor levels were dropped. Explicit factor contrasts were regenerated using the session contrast settings for the retained levels; the fitted coding is reported below."),
+                                measure))
+                        }
                         data$covariate <- droplevels(data$covariate)
                     }
 
@@ -1878,7 +1884,7 @@ diagnosticmetaClass <- R6::R6Class(
                             measure, nrow(data), n_param, resid_df))
                     }
 
-                    tryCatch(
+                    model <- tryCatch(
                         metafor::rma(
                             yi = data[[effect]],
                             vi = data[[variance]],
@@ -1910,6 +1916,12 @@ diagnosticmetaClass <- R6::R6Class(
                             NULL
                         }
                     )
+                    # Keep the actual design coding for THIS fitted margin. The
+                    # two margins can retain different levels after exclusions.
+                    if (!is.null(model)) {
+                        model$oncopath_covariate <- data$covariate
+                    }
+                    model
                 }
 
                 sens_metareg <- fit_meta_regression(
@@ -2007,7 +2019,7 @@ diagnosticmetaClass <- R6::R6Class(
                             length(beta_names) >= j &&
                             !is.na(beta_names[j]) &&
                             nzchar(beta_names[j])) {
-                            sub("^covariate", paste0(covariate_var, " "), beta_names[j])
+                            paste0(covariate_var, " ", substring(beta_names[j], nchar("covariate") + 1L))
                         } else {
                             safe_covariate_label
                         }
@@ -2035,21 +2047,44 @@ diagnosticmetaClass <- R6::R6Class(
                 # label, so "Intercept 95.26" read like a percentage. For a
                 # categorical covariate the reference level was never named, so
                 # a row labelled "grade MRI  -0.037" had no stated comparator.
-                cov_levels_note <- if (is.factor(analysis_data$covariate) ||
-                                       is.character(analysis_data$covariate)) {
-                    lv <- if (is.factor(analysis_data$covariate)) {
-                        levels(droplevels(analysis_data$covariate))
-                    } else {
-                        sort(unique(stats::na.omit(as.character(analysis_data$covariate))))
+                describe_coding <- function(model, measure) {
+                    if (is.null(model)) return(NULL)
+                    cv <- model$oncopath_covariate
+                    if (!is.factor(cv) && !is.character(cv)) {
+                        return(sprintf(
+                            .("%s: the coefficient is the change per one-unit increase in %s; the intercept is the logit at zero."),
+                            measure, covariate_var))
                     }
-                    sprintf(.("Each coefficient contrasts that level of %s against the reference level '%s'."),
-                            covariate_var, lv[1])
-                } else {
-                    sprintf(.("The coefficient is the change per one-unit increase in %s."), covariate_var)
+                    lv <- if (is.factor(cv)) levels(cv) else sort(unique(cv))
+                    # X is the fitted design, including any ordered or custom
+                    # contrasts. A reference exists only for treatment coding.
+                    coding <- model$X[match(lv, as.character(cv)), -1, drop = FALSE]
+                    zero <- which(rowSums(abs(coding)) < 1e-10)
+                    treatment <- length(zero) == 1L &&
+                        ncol(coding) == length(lv) - 1L &&
+                        all(abs(coding - round(coding)) < 1e-10) &&
+                        all(coding >= 0 & coding <= 1) &&
+                        all(rowSums(coding[-zero, , drop = FALSE]) == 1) &&
+                        all(colSums(coding) == 1)
+                    if (treatment) {
+                        return(sprintf(
+                            .("%s: each coefficient contrasts that level of %s against the reference level '%s'; the intercept is the logit at that reference level."),
+                            measure, covariate_var, lv[zero]))
+                    }
+                    columns <- vapply(seq_len(ncol(coding)), function(j) {
+                        paste0(colnames(coding)[j], ": ",
+                            paste(paste0(lv, "=", format(signif(coding[, j], 6),
+                                                       trim = TRUE)), collapse = ", "))
+                    }, character(1))
+                    sprintf(
+                        .("%s: %s uses contrast coding, not level-versus-reference coefficients. The intercept is the fitted logit when all contrast columns are zero. Fitted design columns (level=coding): %s."),
+                        measure, covariate_var, paste(columns, collapse = "; "))
                 }
                 metareg_table$setNote("scale", paste(
-                    .("Estimates, standard errors and confidence intervals are on the LOGIT scale, not the percentage scale used by the pooled results above: a coefficient of 0 means no association, and the intercept is the logit of the measure at the covariate's reference point, not a sensitivity or specificity."),
-                    cov_levels_note))
+                    .("Estimates, standard errors and confidence intervals are on the LOGIT scale, not the percentage scale used by the pooled results above: a coefficient of 0 means no association."),
+                    paste(c(describe_coding(sens_metareg, .("Sensitivity")),
+                            describe_coding(spec_metareg, .("Specificity"))),
+                          collapse = " ")))
 
                 omnibus_txt <- c(describe_omnibus(sens_metareg, .("sensitivity")),
                                  describe_omnibus(spec_metareg, .("specificity")))

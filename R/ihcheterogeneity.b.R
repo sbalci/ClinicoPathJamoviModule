@@ -9,6 +9,14 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
     "ihcheterogeneityClass",
     inherit = ihcheterogeneityBase,
     private = list(
+        # Numeric NA is serialized as NaN by this jmvcore build. At the table
+        # boundary, preserve named entries but encode unavailable cells as NULL.
+        .tableValues = function(values) {
+            lapply(values, function(value) {
+                if (is.numeric(value) && length(value) == 1L && is.na(value))
+                    NULL else value
+            })
+        },
         # Minimum sizes, the materiality margin and the CV floor, in one place.
         .CLINICAL_CONSTANTS = list(
             # Cases for the analysis, pairs for a correlation, complete cases for
@@ -565,7 +573,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             )
             for (r in 1:4)
                 self$results$variancetable$addRow(
-                    rowKey = r, values = list(component = variance_components[r]))
+                    rowKey = r, values = private$.tableValues(list(component = variance_components[r])))
 
             private$.syncOutputVisibility()
         },
@@ -999,17 +1007,17 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 if (any(valid)) {
                     r <- mean(ref_corr[valid])
                     mean_ref_ci <- private$.spearmanCI(r, min(ref_n[valid]))
-                    repro_table$addRow(rowKey = 1, values = list(
+                    repro_table$addRow(rowKey = 1, values = private$.tableValues(list(
                         metric = .("Mean Regional-Reference Correlation"),
                         value = r, ci_lower = mean_ref_ci[1], ci_upper = mean_ref_ci[2],
-                        interpretation = private$.corrGrade(r, correlation_threshold)))
+                        interpretation = private$.corrGrade(r, correlation_threshold))))
                     if (sum(valid) > 1) {
                         for (j in which(valid)) {
                             cij <- ref_ci[[j]]
-                            repro_table$addRow(rowKey = 100 + j, values = list(
+                            repro_table$addRow(rowKey = 100 + j, values = private$.tableValues(list(
                                 metric = sprintf(.("Spearman correlation: %s vs reference"), region_names[j]),
                                 value = ref_corr[[j]], ci_lower = cij[1], ci_upper = cij[2],
-                                interpretation = private$.corrGrade(ref_corr[[j]], correlation_threshold)))
+                                interpretation = private$.corrGrade(ref_corr[[j]], correlation_threshold))))
                         }
                     }
                     repro_table$setNote("corr_ci", if (sum(valid) > 1)
@@ -1017,10 +1025,10 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                       else
                         .("Correlation CIs use the Fisher z transformation with the Spearman variance of Bonett & Wright (2000). Coverage falls below 95% when r is above about 0.97."))
                 } else {
-                    repro_table$addRow(rowKey = 1, values = list(
+                    repro_table$addRow(rowKey = 1, values = private$.tableValues(list(
                         metric = .("Mean Regional-Reference Correlation"),
                         value = NA_real_, ci_lower = NA_real_, ci_upper = NA_real_,
-                        interpretation = .("Not estimable - see note")))
+                        interpretation = .("Not estimable - see note"))))
                 }
             }
 
@@ -1031,25 +1039,25 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             private$.icc_info <- icc
             if (!is.null(icc$result)) {
                 a <- icc$result$agreement
-                repro_table$addRow(rowKey = 2, values = list(
+                repro_table$addRow(rowKey = 2, values = private$.tableValues(list(
                     metric = .("ICC(2,1) - absolute agreement"),
                     value = a$value, ci_lower = a$lower, ci_upper = a$upper,
                     interpretation = switch(private$.iccBand(a$value),
                         excellent = .("Excellent reliability"), good = .("Good reliability"),
-                        moderate = .("Moderate reliability"), poor = .("Poor reliability"))))
+                        moderate = .("Moderate reliability"), poor = .("Poor reliability")))))
                 # The consistency form beside it: the two differ exactly when there
                 # is a systematic offset between measurements.
                 cons <- icc$result$consistency
-                repro_table$addRow(rowKey = 21, values = list(
+                repro_table$addRow(rowKey = 21, values = private$.tableValues(list(
                     metric = .("ICC(3,1) - consistency (bias-blind)"),
                     value = cons$value, ci_lower = cons$lower, ci_upper = cons$upper,
-                    interpretation = .("Ignores systematic offset; compare with absolute agreement above")))
+                    interpretation = .("Ignores systematic offset; compare with absolute agreement above"))))
                 repro_table$setNote("icc_bands", .("Reliability bands follow Koo & Li (2016): below 0.50 poor, 0.50 to 0.75 moderate, 0.75 to 0.90 good, above 0.90 excellent. Judge the band from the 95% CI as well as from the point estimate."))
             } else {
-                repro_table$addRow(rowKey = 2, values = list(
+                repro_table$addRow(rowKey = 2, values = private$.tableValues(list(
                     metric = .("ICC(2,1) - absolute agreement"),
                     value = NA_real_, ci_lower = NA_real_, ci_upper = NA_real_,
-                    interpretation = .("Not estimable - see note")))
+                    interpretation = .("Not estimable - see note"))))
                 repro_table$setNote("icc_not_estimable", icc$reason)
                 private$.addNotice("WARNING", .("ICC not estimable"), icc$reason)
             }
@@ -1063,10 +1071,10 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             # user threshold as row 1 (fixed 0.80/0.60 used to keep the
             # correlation_threshold option out of the inter-regional table).
             if (!is.na(mean_inter_biopsy)) {
-                repro_table$addRow(rowKey = 3, values = list(
+                repro_table$addRow(rowKey = 3, values = private$.tableValues(list(
                     metric = .("Mean Inter-Regional Correlation"),
                     value = mean_inter_biopsy, ci_lower = NA_real_, ci_upper = NA_real_,
-                    interpretation = private$.corrGrade(mean_inter_biopsy, correlation_threshold)))
+                    interpretation = private$.corrGrade(mean_inter_biopsy, correlation_threshold))))
             }
 
             # Rows 4/5: mean and median per-case CV (shared helper, so the table
@@ -1078,15 +1086,15 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             cv_grade <- function(x) if (is.na(x)) .("Not estimable") else
                 if (x <= cv_threshold / 2) .("Low variability") else
                 if (x <= cv_threshold) .("Moderate variability") else .("High variability")
-            repro_table$addRow(rowKey = 4, values = list(
+            repro_table$addRow(rowKey = 4, values = private$.tableValues(list(
                 metric = if (has_reference) .("Within-case CV (%) - region vs reference")
                          else .("Within-case CV (%) - between regions"),
                 value = within_cv, ci_lower = NA_real_, ci_upper = NA_real_,
-                interpretation = cv_grade(within_cv)))
-            repro_table$addRow(rowKey = 5, values = list(
+                interpretation = cv_grade(within_cv))))
+            repro_table$addRow(rowKey = 5, values = private$.tableValues(list(
                 metric = .("Median per-case CV (%)"),
                 value = median_cv, ci_lower = NA_real_, ci_upper = NA_real_,
-                interpretation = if (is.na(median_cv)) .("Not estimable") else .("Descriptive, robust to a few extreme cases; not graded")))
+                interpretation = if (is.na(median_cv)) .("Not estimable") else .("Descriptive, robust to a few extreme cases; not graded"))))
 
             n_floor <- sum(status %in% c("floor", "floor_identical"))
             cv_note <- .("Per-case CV = SD / mean of that case's measurements. The within-case CV is their root mean square, which unlike their plain average does not fall when a case has fewer measurements; the median is descriptive and not graded.")
@@ -1241,7 +1249,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
 
             for (i in seq_along(rows)) {
                 r <- rows[[i]]
-                bias_table$addRow(rowKey = i, values = list(
+                bias_table$addRow(rowKey = i, values = private$.tableValues(list(
                     comparison = if (r$pooled) .("Mean of all regions vs reference")
                                  else if (identical(r$comparator, "reference")) sprintf(.("%s vs reference"), r$name)
                                  else if (identical(r$comparator, "others")) sprintf(.("%s vs mean of the other regions"), r$name)
@@ -1256,7 +1264,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                     effect_size = r$g,
                     slope = if (is.null(r$prop)) NA_real_ else r$prop$slope,
                     slope_p = if (is.null(r$prop)) NA_real_ else r$prop$p,
-                    clinical_impact = private$.impactText(r, judged = !reference_constant)))
+                    clinical_impact = private$.impactText(r, judged = !reference_constant))))
             }
 
             if (m > 1) {
@@ -1369,7 +1377,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 if (has_reference) .("Method Variance") else .("Regional Method Variance"),
                 .("Total Variance"))
             for (r in 1:4)
-                variance_table$addRow(rowKey = r, values = list(component = components[r]))
+                variance_table$addRow(rowKey = r, values = private$.tableValues(list(component = components[r])))
 
             info <- private$.icc_info
             if (is.null(info)) info <- private$.calculateICC(whole_section, biopsy_data)
@@ -1380,10 +1388,10 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             insufficient <- function(msg) {
                 variance_table$setNote("vc", msg)
                 for (r in 1:4) {
-                    variance_table$setRow(rowKey = r, values = list(
+                    variance_table$setRow(rowKey = r, values = private$.tableValues(list(
                         variance = NA_real_, percentage = NA_real_,
                         contribution = .("Not estimable")
-                    ))
+                    )))
                 }
             }
 
@@ -1443,21 +1451,21 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             method_pct <- pct(var_method)
             private$.vc_shares <- c(case = case_pct, within = error_pct, method = method_pct)
 
-            variance_table$setRow(rowKey = 1L, values = list(
+            variance_table$setRow(rowKey = 1L, values = private$.tableValues(list(
                 component = .("Between-Case Variance"),
                 variance = var_case,
                 percentage = case_pct,
                 contribution = ifelse(!is.na(case_pct) && case_pct >= 60, .("Major contributor"),
                                      ifelse(!is.na(case_pct) && case_pct >= 30, .("Moderate contributor"), .("Minor contributor")))
-            ))
-            variance_table$setRow(rowKey = 2L, values = list(
+            )))
+            variance_table$setRow(rowKey = 2L, values = private$.tableValues(list(
                 component = .("Within-Case Variance (Sampling)"),
                 variance = var_error,
                 percentage = error_pct,
                 contribution = ifelse(!is.na(error_pct) && error_pct >= 30, .("High sampling variability"),
                                      ifelse(!is.na(error_pct) && error_pct >= 15, .("Moderate sampling variability"), .("Low sampling variability")))
-            ))
-            variance_table$setRow(rowKey = 3L, values = list(
+            )))
+            variance_table$setRow(rowKey = 3L, values = private$.tableValues(list(
                 component = if (has_reference) .("Method Variance") else .("Regional Method Variance"),
                 variance = var_method,
                 percentage = method_pct,
@@ -1466,13 +1474,13 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 # differences" sat beside a NOT ADEQUATE verdict).
                 contribution = ifelse(!is.na(method_pct) && method_pct >= 20, .("Large share of total variance"),
                                      ifelse(!is.na(method_pct) && method_pct >= 10, .("Moderate share of total variance"), .("Small share of total variance")))
-            ))
-            variance_table$setRow(rowKey = 4L, values = list(
+            )))
+            variance_table$setRow(rowKey = 4L, values = private$.tableValues(list(
                 component = .("Total Variance"),
                 variance = total_variance,
                 percentage = 100,
                 contribution = .("Sum of all variance components")
-            ))
+            )))
         },
 
         # Under the balanced normal consistency model, MS_case / MS_error is
@@ -1536,12 +1544,12 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 plans[[3]] <- list(rho = observed, label = .("Observed ICC(3,1), consistency"))
             for (i in seq_along(plans)) {
                 rho <- plans[[i]]$rho
-                table$addRow(rowKey = i, values = list(
+                table$addRow(rowKey = i, values = private$.tableValues(list(
                     scenario = plans[[i]]$label,
                     planning_icc = rho,
                     width_current = private$.iccExpectedWidth(n, k, rho),
                     n_w20 = private$.iccPrecisionN(k, rho, 0.20),
-                    n_w10 = private$.iccPrecisionN(k, rho, 0.10)))
+                    n_w10 = private$.iccPrecisionN(k, rho, 0.10))))
             }
             note <- sprintf(
                 .("Planning for the consistency ICC, ICC(3,1), with k = %d measurements per case and a 95%% confidence interval; this analysis has %d complete cases. Bonett (2002) provides the starting approximation, refined here by numerical integration of the exact F-interval width under a balanced normal ANOVA model. The required size is the smallest number of cases, at least 5, whose expected interval width meets the target. Some studies will obtain wider intervals: this is expected-width planning, not an assurance calculation or a hypothesis test. Systematic offsets affect the absolute-agreement ICC(2,1), whose precision needs separate planning."),
@@ -1622,13 +1630,13 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                     if (region_cv <= cv_thr / 2) .("Low") else
                     if (region_cv <= cv_thr) .("Moderate") else .("High")
 
-                spatial_table$addRow(rowKey = i, values = list(
+                spatial_table$addRow(rowKey = i, values = private$.tableValues(list(
                     region = region,
                     n_cases = as.integer(sum(mask)),
                     mean_value = region_mean,
                     cv_percent = region_cv,
                     heterogeneity_level = heterogeneity_level
-                ))
+                )))
             }
             spatial_table$setNote("cv_bands", sprintf(
                 .("Heterogeneity level grades the within-case CV (root mean square over the compartment's cases) against your %1$s%% threshold: Low at or below %2$s%%, Moderate up to %1$s%%, High above it."),
@@ -2807,16 +2815,16 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                                 collapse = "; ")
                         }
                     }
-                    comp_table$addRow(rowKey = row_key, values = list(
+                    comp_table$addRow(rowKey = row_key, values = private$.tableValues(list(
                         metric = .("ICC(2,1) - absolute agreement"), compartment = region,
                         value = a$value, ci_lower = a$lower, ci_upper = a$upper,
-                        comparison = comparison))
+                        comparison = comparison)))
                     row_key <- row_key + 1
                 } else {
-                    comp_table$addRow(rowKey = row_key, values = list(
+                    comp_table$addRow(rowKey = row_key, values = private$.tableValues(list(
                         metric = .("ICC(2,1) - absolute agreement"), compartment = region,
                         value = NA_real_, ci_lower = NA_real_, ci_upper = NA_real_,
-                        comparison = .("Not estimable - see note")))
+                        comparison = .("Not estimable - see note"))))
                     row_key <- row_key + 1
                 }
 
@@ -2845,10 +2853,10 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                             if (length(lower)) sprintf(.("Lower CV band than %s"), paste(lower, collapse = ", "))),
                             collapse = "; ")
                     }
-                    comp_table$addRow(rowKey = row_key, values = list(
+                    comp_table$addRow(rowKey = row_key, values = private$.tableValues(list(
                         metric = .("Within-case CV (%)"), compartment = region,
                         value = st$cv, ci_lower = NA_real_, ci_upper = NA_real_,
-                        comparison = comparison))
+                        comparison = comparison)))
                     row_key <- row_key + 1
                 }
 
@@ -2868,10 +2876,10 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                     } else {
                         sprintf(.("%+.1f%% of the reference mean (other compartments: %+.1f%%)"), b$rel, mean(other_rel))
                     }
-                    comp_table$addRow(rowKey = row_key, values = list(
+                    comp_table$addRow(rowKey = row_key, values = private$.tableValues(list(
                         metric = .("Mean Bias (mean of regions - reference)"), compartment = region,
                         value = b$mean_diff, ci_lower = b$ci[1], ci_upper = b$ci[2],
-                        comparison = comparison))
+                        comparison = comparison)))
                     row_key <- row_key + 1
                 }
             }
@@ -2920,14 +2928,14 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
 
             row_key <- 1
             add_failed <- function(label, e) {
-                test_table$addRow(rowKey = row_key, values = list(
+                test_table$addRow(rowKey = row_key, values = private$.tableValues(list(
                     test_type = label, statistic = NA_real_, df1 = NA_integer_, df2 = NA_integer_, p_value = NA_real_,
-                    interpretation = sprintf(.("Could not compute: %s"), conditionMessage(e))))
+                    interpretation = sprintf(.("Could not compute: %s"), conditionMessage(e)))))
             }
             add_tied <- function(label, text) {
-                test_table$addRow(rowKey = row_key, values = list(
+                test_table$addRow(rowKey = row_key, values = private$.tableValues(list(
                     test_type = label, statistic = NA_real_, df1 = NA_integer_, df2 = NA_integer_, p_value = NA_real_,
-                    interpretation = text))
+                    interpretation = text)))
             }
 
             # 1. Is one compartment more heterogeneous than another? Kruskal-Wallis
@@ -2942,13 +2950,13 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 # reach if() below and abort the whole analysis.
                 if (inherits(res, "error")) add_failed(label, res) else if (!is.finite(res$p.value))
                     add_tied(label, .("All per-case CVs are identical, so no test is possible.")) else
-                    test_table$addRow(rowKey = row_key, values = list(
+                    test_table$addRow(rowKey = row_key, values = private$.tableValues(list(
                         test_type = label, statistic = unname(res$statistic),
                         df1 = as.integer(res$parameter), df2 = NA_integer_, p_value = res$p.value,
                         interpretation = if (res$p.value < 0.05)
                             .("Per-case CV differs between compartments: at least one compartment is more heterogeneous than another")
                         else
-                            .("No difference in per-case CV between compartments was detected; this does not establish that they are equally heterogeneous")))
+                            .("No difference in per-case CV between compartments was detected; this does not establish that they are equally heterogeneous"))))
                 row_key <- row_key + 1
             }
 
@@ -2972,13 +2980,13 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                     add_tied(label, .("All per-case CVs are equally spread within compartments, so no test is possible.")) else
                 if (inherits(res, "error")) add_failed(label, res) else {
                     p <- res[["Pr(>F)"]][1]
-                    test_table$addRow(rowKey = row_key, values = list(
+                    test_table$addRow(rowKey = row_key, values = private$.tableValues(list(
                         test_type = label, statistic = res[["F value"]][1],
                         df1 = as.integer(res[["Df"]][1]), df2 = as.integer(res[["Df"]][2]), p_value = p,
                         interpretation = if (is.finite(p) && p < 0.05)
                             .("The spread of per-case CVs differs between compartments (unequal variance of heterogeneity); this does not by itself mean one compartment is more heterogeneous on average")
                         else
-                            .("No difference in the spread of per-case CVs between compartments was detected; this does not establish that they are the same")))
+                            .("No difference in the spread of per-case CVs between compartments was detected; this does not establish that they are the same"))))
                 }
                 row_key <- row_key + 1
             }
@@ -2989,13 +2997,13 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 res <- tryCatch(stats::kruskal.test(mean_values, factor(mean_groups)), error = function(e) e)
                 if (inherits(res, "error")) add_failed(label, res) else if (!is.finite(res$p.value))
                     add_tied(label, .("All per-case means are identical, so no test is possible.")) else
-                    test_table$addRow(rowKey = row_key, values = list(
+                    test_table$addRow(rowKey = row_key, values = private$.tableValues(list(
                         test_type = label, statistic = unname(res$statistic),
                         df1 = as.integer(res$parameter), df2 = NA_integer_, p_value = res$p.value,
                         interpretation = if (res$p.value < 0.05)
                             .("Significant difference in per-case mean biomarker levels across compartments")
                         else
-                            .("No significant difference in per-case mean biomarker levels detected across compartments; this does not establish that the distributions are the same")))
+                            .("No significant difference in per-case mean biomarker levels detected across compartments; this does not establish that the distributions are the same"))))
                 row_key <- row_key + 1
             }
 

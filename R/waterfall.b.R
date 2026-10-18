@@ -1208,32 +1208,21 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         if (inputType == "raw") {
           if (has_time) {
-            # Percent change from each patient's time = 0 measurement.
-            baseline_df <- df %>%
-              dplyr::filter(!!rlang::sym(timeVar) == 0) %>%
-              dplyr::select(!!rlang::sym(patientID), baseline = !!rlang::sym(responseVar))
-
-            processed_df <- df %>%
-              dplyr::left_join(baseline_df, by = patientID) %>%
-              dplyr::group_by(!!rlang::sym(patientID)) %>%
-              dplyr::arrange(!!rlang::sym(timeVar)) %>%
-              dplyr::mutate(
-                baseline = jmvcore::toNumeric(baseline),
-                response = ifelse(!is.na(baseline) & baseline != 0,
-                                  ((!!rlang::sym(responseVar) - baseline) / baseline) * 100,
-                                  NA_real_)
-              ) %>%
-              dplyr::ungroup()
+            # Match on patient identity without joining helper columns into
+            # user data. Common names such as baseline/response remain valid.
+            baseline_rows <- which(df[[timeVar]] == 0 & !is.na(df[[timeVar]]))
+            baseline_values <- df[[responseVar]][baseline_rows]
+            baseline_ids <- df[[patientID]][baseline_rows]
+            baseline <- baseline_values[match(df[[patientID]], baseline_ids)]
           } else {
-            # Validation requires a time variable for raw input; kept for direct calls.
-            processed_df <- df %>%
-              dplyr::group_by(!!rlang::sym(patientID)) %>%
-              dplyr::mutate(
-                baseline = dplyr::first(!!rlang::sym(responseVar)),
-                response = ((!!rlang::sym(responseVar) - baseline) / baseline) * 100
-              ) %>%
-              dplyr::ungroup()
+            # Validation requires time for raw input; retain the direct-call path.
+            baseline <- df[[responseVar]][match(df[[patientID]], df[[patientID]])]
           }
+          response <- ifelse(!is.na(baseline) & baseline != 0,
+                             ((df[[responseVar]] - baseline) / baseline) * 100,
+                             NA_real_)
+          processed_df <- df
+          processed_df$response <- response
 
           if (nrow(processed_df) == 0) {
             return(list(
